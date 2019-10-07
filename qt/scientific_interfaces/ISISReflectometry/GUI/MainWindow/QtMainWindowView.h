@@ -65,6 +65,8 @@ public slots:
   void onNewBatchRequested(bool);
   void onLoadBatchRequested(bool);
   void onSaveBatchRequested(bool);
+  void onShowOptionsRequested(bool);
+  void onShowSlitCalculatorRequested(bool);
 
 private:
   /// Initializes the interface

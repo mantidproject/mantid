@@ -461,25 +461,31 @@ class SANSMoveSANS2D(SANSMove):
 
     @staticmethod
     def _move_monitor_n(workspace, move_info, monitor_spectrum_number):
-        if move_info.monitor_n_offset != 0.0:
+        # Only monitor 4 can be moved for SANS2D
+        assert(monitor_spectrum_number == 4)
+        monitor_offset = move_info.monitor_4_offset
+
+        if monitor_offset != 0.0:
             monitor_spectrum_number_as_string = str(monitor_spectrum_number)
+
             monitor_n_name = move_info.monitor_names[monitor_spectrum_number_as_string]
-            instrument = workspace.getInstrument()
-            monitor_n = instrument.getComponentByName(monitor_n_name)
+
+            comp_info = workspace.componentInfo()
+            monitor_n = comp_info.indexOfAny(monitor_n_name)
 
             # Get position of monitor n
-            monitor_position = monitor_n.getPos()
-            z_position_monitor = monitor_position.getZ()
+            monitor_position = comp_info.position(monitor_n)
 
             # The location is relative to the rear-detector, get this position
             lab_detector = move_info.detectors[DetectorType.to_string(DetectorType.LAB)]
             detector_name = lab_detector.detector_name
-            lab_detector_component = instrument.getComponentByName(detector_name)
-            detector_position = lab_detector_component.getPos()
-            z_position_detector = detector_position.getZ()
+            lab_detector_index = comp_info.indexOfAny(detector_name)
+            detector_position =  comp_info.position(lab_detector_index)
 
-            monitor_n_offset = move_info.monitor_n_offset
-            z_new = z_position_detector + monitor_n_offset
+            z_position_detector = detector_position.getZ()
+            z_position_monitor = monitor_position.getZ()
+
+            z_new = z_position_detector + monitor_offset
             z_move = z_new - z_position_monitor
             offset = {CanonicalCoordinates.Z: z_move}
 
@@ -689,27 +695,37 @@ class SANSMoveZOOM(SANSMove):
         move_low_angle_bank_for_SANS2D_and_ZOOM(move_info, workspace, coordinates, use_rear_det_z=False)
 
     @staticmethod
-    def _move_monitor_n(workspace, move_info, monitor_spectrum_number):
-        monitor_offset = move_info.monitor_n_offset
-        if monitor_offset != 0.0:
-            monitor_spectrum_number_as_string = str(monitor_spectrum_number)
-            monitor_n_name = move_info.monitor_names[monitor_spectrum_number_as_string]
-            instrument = workspace.getInstrument()
-            monitor_n = instrument.getComponentByName(monitor_n_name)
+    def _move_monitor_n(workspace, move_info):
+        """
+        Moves n monitors in the workspace
+        :param workspace: The associated workspace
+        :param move_info: A move info object containing this instruments details
+        :return: None
+        """
+        monitor_offset_dict = { 4 : move_info.monitor_4_offset,
+                                5 : move_info.monitor_5_offset }
+
+        comp_info = workspace.componentInfo()
+
+        for monitor_spec_num, offset in monitor_offset_dict.items():
+            if offset == 0.0:
+                continue
+
+            monitor_n_name = move_info.monitor_names[str(monitor_spec_num)]
+            monitor_index = comp_info.indexOfAny(monitor_n_name)
 
             # Get position of monitor n
-            monitor_position = monitor_n.getPos()
+            monitor_position = comp_info.position(monitor_index)
             z_position_monitor = monitor_position.getZ()
 
             # The location is relative to the rear-detector, get this position
             lab_detector = move_info.detectors[DetectorType.to_string(DetectorType.LAB)]
             detector_name = lab_detector.detector_name
-            lab_detector_component = instrument.getComponentByName(detector_name)
-            detector_position = lab_detector_component.getPos()
+            lab_detector_index = comp_info.indexOfAny(detector_name)
+            detector_position = comp_info.position(lab_detector_index)
             z_position_detector = detector_position.getZ()
 
-            monitor_n_offset = monitor_offset
-            z_new = z_position_detector + monitor_n_offset
+            z_new = z_position_detector + offset
             z_move = z_new - z_position_monitor
             offset = {CanonicalCoordinates.Z: z_move}
 
@@ -728,9 +744,8 @@ class SANSMoveZOOM(SANSMove):
         # Move the sample holder
         move_sample_holder(workspace, move_info.sample_offset, move_info.sample_offset_direction)
 
-        # Move the monitor
-        monitor_spectrum = 5  # Only M5 can be moved for ZOOM
-        self._move_monitor_n(workspace, move_info, monitor_spectrum_number=monitor_spectrum)
+        # Move the monitors
+        self._move_monitor_n(workspace, move_info)
 
     def do_move_with_elementary_displacement(self, move_info, workspace, coordinates, component):
         # For ZOOM we only have to coordinates

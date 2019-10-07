@@ -21,7 +21,7 @@ Improved
 
 
 Data Analysis Interface
-------------------------
+-----------------------
 
 Improvements
 ############

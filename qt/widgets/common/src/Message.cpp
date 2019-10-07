@@ -56,5 +56,15 @@ Message::Message(const char *text, Priority priority, QString scriptPath)
 Message::Message(const Message &msg)
     : QObject(), m_text(msg.text()), m_priority(msg.priority()),
       m_scriptPath(msg.scriptPath()) {}
+
+/**
+ * Construct a message from another object through assignment
+ */
+Message &Message::operator=(const Message &msg) {
+  m_text = msg.text();
+  m_priority = msg.priority();
+  m_scriptPath = msg.scriptPath();
+  return *this;
+}
 } // namespace MantidWidgets
 } // namespace MantidQt
