@@ -170,7 +170,9 @@ def _generate_grouped_ts_pdf(focused_ws, q_lims, cal_file_name):
     binning = [group_bin_min, group_bin_width, group_bin_max]
     focused_data = mantid.Rebin(InputWorkspace=focused_ws, Params=binning)
     focused_data_combined = mantid.ConjoinSpectra(InputWorkspaces=focused_data)
-    mantid.MatchSpectra(InputWorkspace=focused_data_combined, OutputWorkspace=focused_data_combined, ReferenceSpectrum=1)
+    mantid.MatchSpectra(InputWorkspace=focused_data_combined,
+                        OutputWorkspace=focused_data_combined,
+                        ReferenceSpectrum=1)
     if type(q_lims) == str:
         q_min = []
         q_max = []
