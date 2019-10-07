@@ -40,7 +40,7 @@ using namespace Mantid::API;
 class MANTIDQT_INDIRECT_DLL FunctionTemplateBrowser : public QWidget {
   Q_OBJECT
 public:
-  FunctionTemplateBrowser(QWidget *parent = nullptr);
+  FunctionTemplateBrowser(QWidget *parent);
   void init();
 
   virtual void setFunction(const QString &funStr) = 0;
@@ -98,7 +98,7 @@ protected:
   QtTreePropertyBrowser *m_browser;
 
   /// Precision of doubles in m_doubleManager
-  int m_decimals;
+  const int m_decimals;
 };
 
 } // namespace IDA

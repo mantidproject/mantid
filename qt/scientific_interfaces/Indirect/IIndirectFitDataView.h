@@ -22,8 +22,8 @@ class MANTIDQT_INDIRECT_DLL IIndirectFitDataView : public QTabWidget {
   Q_OBJECT
 
 public:
-  IIndirectFitDataView(QWidget *parent = nullptr) : QTabWidget(parent){};
-  virtual ~IIndirectFitDataView(){};
+  IIndirectFitDataView(QWidget *parent) : QTabWidget(parent){};
+  virtual ~IIndirectFitDataView() = default;
 
   virtual QTableWidget *getDataTable() const = 0;
   virtual bool isMultipleDataTabSelected() const = 0;
@@ -55,8 +55,8 @@ public:
 
 public slots:
   virtual void displayWarning(std::string const &warning) = 0;
-  virtual void setStartX(double) = 0;
-  virtual void setEndX(double) = 0;
+  virtual void setStartX(double startX) = 0;
+  virtual void setEndX(double endX) = 0;
 
 signals:
   void sampleLoaded(QString const & /*_t1*/);
