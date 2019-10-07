@@ -139,12 +139,17 @@ def _generate_grouped_ts_pdf(focused_ws, q_lims, cal_file_name):
             group_bin_width = bin_width
         else:
             group_bin_min = min(group_bin_min, bin_min)
-            group_bin_max = min(group_bin_max, bin_max)
+            group_bin_max = max(group_bin_max, bin_max)
             group_bin_width = min(group_bin_width, bin_width)
         fit_spectra = mantid.FitIncidentSpectrum(InputWorkspace=focused_ws.getItem(i),
                                                  BinningForFit=binning,
                                                  BinningForCalc=binning,
                                                  FitSpectrumWith="GaussConvCubicSpline")
+        # find the flattest part of the fit spectra for background subtraction
+        lambda_prime = fit_spectra.dataY(1)
+        n_bg = int(lambda_prime.size*0.05)
+        idx = np.argpartition(np.absolute(lambda_prime), n_bg)
+        background = np.mean(fit_spectra.dataY(0)[idx[:n_bg]])
         placzek_self_scattering = mantid.CalculatePlaczekSelfScattering(InputWorkspace=fit_spectra)
         cal_workspace = mantid.LoadCalFile(InputWorkspace=placzek_self_scattering,
                                            CalFileName=cal_file_name,
@@ -155,7 +160,7 @@ def _generate_grouped_ts_pdf(focused_ws, q_lims, cal_file_name):
         for spec_index in range(placzek_self_scattering.getNumberHistograms()):
             if cal_workspace.dataY(spec_index)[0] == i + 1:
                 if focused_correction is None:
-                    focused_correction = placzek_self_scattering.dataY(spec_index)
+                    focused_correction = placzek_self_scattering.dataY(spec_index) + background
                 else:
                     focused_correction = np.add(focused_correction, placzek_self_scattering.dataY(spec_index))
         focused_correction_ws = mantid.CreateWorkspace(DataX=placzek_self_scattering.dataX(0),
@@ -172,7 +177,7 @@ def _generate_grouped_ts_pdf(focused_ws, q_lims, cal_file_name):
     focused_data_combined = mantid.ConjoinSpectra(InputWorkspaces=focused_data)
     mantid.MatchSpectra(InputWorkspace=focused_data_combined,
                         OutputWorkspace=focused_data_combined,
-                        ReferenceSpectrum=1)
+                        ReferenceSpectrum=5)
     if type(q_lims) == str:
         q_min = []
         q_max = []
