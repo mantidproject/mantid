@@ -15,6 +15,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
+#include "MantidQtWidgets/Common/ISlitCalculator.h"
 #include "MantidQtWidgets/Common/QtJSONUtils.h"
 #include "Reduction/Batch.h"
 
@@ -26,6 +27,7 @@ namespace ISISReflectometry {
 
 using Mantid::API::AlgorithmManager;
 using Mantid::API::MatrixWorkspace_sptr;
+using MantidWidgets::ISlitCalculator;
 
 // unnamed namespace
 namespace {
@@ -36,15 +38,17 @@ Mantid::Kernel::Logger g_log("Reflectometry GUI");
  * @param view :: [input] The view we are managing
  * @param messageHandler :: Interface to a class that displays messages to
  * the user
+ * @param slitCalculator :: Interface to the Slit Calculator dialog
  * @param batchPresenterFactory :: [input] A factory to create the batches
  * we will manage
  */
 MainWindowPresenter::MainWindowPresenter(
     IMainWindowView *view, IMessageHandler *messageHandler,
+    std::unique_ptr<ISlitCalculator> slitCalculator,
     std::unique_ptr<IBatchPresenterFactory> batchPresenterFactory)
-    : m_view(view), m_messageHandler(messageHandler),
-      m_batchPresenterFactory(std::move(batchPresenterFactory)),
-      m_instrument() {
+    : m_view(view), m_messageHandler(messageHandler), m_instrument(),
+      m_slitCalculator(std::move(slitCalculator)),
+      m_batchPresenterFactory(std::move(batchPresenterFactory)) {
   view->subscribe(this);
   for (auto *batchView : m_view->batches())
     addNewBatch(batchView);
@@ -75,6 +79,16 @@ void MainWindowPresenter::notifyCloseBatchRequested(int batchIndex) {
     m_batchPresenters.erase(m_batchPresenters.begin() + batchIndex);
     m_view->removeBatch(batchIndex);
   }
+}
+
+void MainWindowPresenter::notifyShowOptionsRequested() {
+  // TODO Show the options dialog when it is implemented
+}
+
+void MainWindowPresenter::notifyShowSlitCalculatorRequested() {
+  m_slitCalculator->setCurrentInstrumentName(instrumentName());
+  m_slitCalculator->processInstrumentHasBeenChanged();
+  m_slitCalculator->show();
 }
 
 void MainWindowPresenter::notifyAnyBatchAutoreductionResumed() {
@@ -224,8 +238,13 @@ void MainWindowPresenter::updateInstrument(const std::string &instrumentName) {
   MatrixWorkspace_sptr instWorkspace = loadAlg->getProperty("OutputWorkspace");
   m_instrument = instWorkspace->getInstrument();
 
+  // Notify child presenters
   for (auto &batchPresenter : m_batchPresenters)
     batchPresenter->notifyInstrumentChanged(instrumentName);
+
+  // Notify the slit calculator
+  m_slitCalculator->setCurrentInstrumentName(instrumentName);
+  m_slitCalculator->processInstrumentHasBeenChanged();
 }
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

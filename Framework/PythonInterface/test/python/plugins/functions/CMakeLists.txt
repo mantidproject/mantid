@@ -6,17 +6,25 @@ set(TEST_PY_FILES
     CombGaussLorentzKTTest.py
     DSFinterp1DFitTest.py
     EISFDiffSphereTest.py
-    FmuFTest.py
     EISFDiffCylinderTest.py
     EISFDiffSphereAlkylTest.py
     Example1DFunctionTest.py
     ExamplePeakFunctionTest.py
+    FmuFTest.py
+    HighTFMuoniumTest.py
+    MeierTest.py
     MsdGaussTest.py
     MsdPetersTest.py
     MsdYiTest.py
     MuHTest.py
+    RFresonanceTest.py
+    SilverBaselineTest.py
+    SpinGlassTest.py
+    StandardSCTest.py
+    StaticLorentzianKTTest.py
     StretchedExpFTTest.py
     TeixeiraWaterTest.py
+    TFMuoniumTest.py
     TriangleOscTest.py
     ZFMuoniumTest.py)
 

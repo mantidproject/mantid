@@ -9,6 +9,7 @@ import unittest
 import six
 
 from Muon.GUI.FrequencyDomainAnalysis.frequency_context import MaxEnt, FFT, FrequencyContext, FREQUENCY_EXTENSIONS
+from mantid.simpleapi import CreateWorkspace, AnalysisDataService
 
 if sys.version_info.major < 2:
     from unittest import mock
@@ -28,10 +29,10 @@ PHASEQUAD_NAME_RE = "FFT; Re MUSR62261; PhaseQuad FD MUSR62260; PhaseTable FD; t
 
 class MuonFreqContextTest(unittest.TestCase):
     def setUp(self):
+        self.ws_freq = "MUSR62260_raw_data FD; MaxEnt"
+        CreateWorkspace([0], [0], OutputWorkspace=self.ws_freq)
         self.context = FrequencyContext()
         run = "62260"
-        self.ws_freq = mock.MagicMock()
-        self.ws_freq.name.return_value = "MUSR62260_raw_data FD; MaxEnt"
         self.context.add_maxEnt(run, self.ws_freq)
         self.context.add_FFT(ws_freq_name=FFT_NAME_RE_2, Re_run="62260",Re= "fwd", Im_run="", Im="",phasequad=False)
         self.context.add_FFT(ws_freq_name=FFT_NAME_RE_MOD, Re_run="62260",Re= "fwd", Im_run="", Im="",phasequad=False)
@@ -40,9 +41,9 @@ class MuonFreqContextTest(unittest.TestCase):
         self.assertEquals(self.context.window_title, "Frequency Domain Analysis")
  
     def test_add_maxEnt(self):
-        self.assertEquals(list(self.context._maxEnt_freq.keys()),["MUSR62260_raw_data FD; MaxEnt"] )
+        self.assertEquals(list(self.context._maxEnt_freq.keys()),['MUSR62260_raw_data FD; MaxEnt'] )
         self.assertEquals(self.context._maxEnt_freq["MUSR62260_raw_data FD; MaxEnt"].run, "62260" )
-        self.assertEquals(self.context._maxEnt_freq["MUSR62260_raw_data FD; MaxEnt"].ws_freq, self.ws_freq )
+        self.assertEquals(self.context._maxEnt_freq["MUSR62260_raw_data FD; MaxEnt"].ws_freq.name(), self.ws_freq)
 
     def test_maxEnt_freq(self):
         self.assertEquals(self.context.maxEnt_freq, ["MUSR62260_raw_data FD; MaxEnt"])

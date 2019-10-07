@@ -143,7 +143,8 @@ class FigureInteraction(object):
     def on_leave(self, event):
         """When leaving the axis or canvas, restore cursor to default one and stop moving the markers"""
         QApplication.restoreOverrideCursor()
-        self.stop_markers(event.xdata, event.ydata)
+        if event:
+            self.stop_markers(event.xdata, event.ydata)
 
     def stop_markers(self, x_pos, y_pos):
         """
@@ -467,7 +468,7 @@ class FigureInteraction(object):
 
     def motion_event(self, event):
         """ Move the marker if the mouse is moving and in range """
-        if self.toolbar_manager.is_tool_active():
+        if self.toolbar_manager.is_tool_active() or event is None:
             return
 
         x = event.xdata

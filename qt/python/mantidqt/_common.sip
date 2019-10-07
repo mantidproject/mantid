@@ -427,7 +427,7 @@ public:
     double endX() const;
     void setEndX(double end);
     void setXRange(double start, double end);
-    QVector<double> getXRange();
+    QVector<double> getXRange() throw(std::invalid_argument);
     QString getXColumnName() const;
     QString getYColumnName() const;
     QString getErrColumnName() const;

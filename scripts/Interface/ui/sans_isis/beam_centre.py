@@ -54,7 +54,7 @@ class BeamCentre(QtWidgets.QWidget, Ui_BeamCentre):
         self.Q_to.hide()
 
     def _setup_log_widget(self):
-        self.log_widget = messagedisplay.MessageDisplay(self.groupBox_2)
+        self.log_widget = messagedisplay.MessageDisplay(parent=self.groupBox_2)
         self.log_widget.setMinimumSize(QtCore.QSize(491, 371))
         self.log_widget.setObjectName(_fromUtf8("log_widget"))
         self.gridLayout.addWidget(self.log_widget, 0, 1, 4, 1)
