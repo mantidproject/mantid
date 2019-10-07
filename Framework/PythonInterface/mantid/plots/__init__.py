@@ -78,8 +78,13 @@ class _WorkspaceArtists(object):
     from a workspace. It allows for removal and replacement of said artists
 
     """
-    def __init__(self, artists, data_replace_cb, is_normalized, workspace_name=None,
-                 spec_num=None, is_spec=True):
+    def __init__(self,
+                 artists,
+                 data_replace_cb,
+                 is_normalized,
+                 workspace_name=None,
+                 spec_num=None,
+                 is_spec=True):
         """
         Initialize an instance
         :param artists: A reference to a list of artists "attached" to a workspace
@@ -157,8 +162,7 @@ class _WorkspaceArtists(object):
         :param plot_kwargs: Key word args to pass to plotting function
         """
         if plot_kwargs:
-            new_artists = self._data_replace_cb(self._artists, workspace,
-                                                plot_kwargs)
+            new_artists = self._data_replace_cb(self._artists, workspace, plot_kwargs)
         else:
             new_artists = self._data_replace_cb(self._artists, workspace)
         self._set_artists(new_artists)
@@ -247,11 +251,9 @@ class MantidAxes(Axes):
             ignore_artists = []
         prop_cycler = ax._get_lines.prop_cycler  # tracks line color cycle
         artists = ax.get_children()
-        mantid_axes = ax.figure.add_subplot(111, projection='mantid',
-                                            label='mantid')
+        mantid_axes = ax.figure.add_subplot(111, projection='mantid', label='mantid')
         for artist in artists:
-            if not any(isinstance(artist, artist_type) for artist_type in
-                       ignore_artists):
+            if not any(isinstance(artist, artist_type) for artist_type in ignore_artists):
                 try:
                     mantid_axes.add_artist_correctly(artist)
                 except NotImplementedError:
@@ -314,8 +316,13 @@ class MantidAxes(Axes):
                     if artist == ws_artist:
                         return ws_artists.is_normalized
 
-    def track_workspace_artist(self, workspace, artists, data_replace_cb=None,
-                               spec_num=None, is_normalized=None, is_spec=True):
+    def track_workspace_artist(self,
+                               workspace,
+                               artists,
+                               data_replace_cb=None,
+                               spec_num=None,
+                               is_normalized=None,
+                               is_spec=True):
         """
         Add the given workspace's name to the list of workspaces
         displayed on this Axes instance
@@ -333,13 +340,14 @@ class MantidAxes(Axes):
         name = workspace.name()
         if name:
             if data_replace_cb is None:
+
                 def data_replace_cb(_, __):
                     logger.warning("Updating data on this plot type is not yet supported")
+
             artist_info = self.tracked_workspaces.setdefault(name, [])
 
-            artist_info.append(_WorkspaceArtists(artists, data_replace_cb,
-                                                 is_normalized, name,
-                                                 spec_num, is_spec))
+            artist_info.append(
+                _WorkspaceArtists(artists, data_replace_cb, is_normalized, name, spec_num, is_spec))
             self.check_axes_distribution_consistency()
         return artists
 
@@ -357,8 +365,7 @@ class MantidAxes(Axes):
         if len(tracked_ws_distributions) > 0:
             num_normalized = sum(tracked_ws_distributions)
             if not (num_normalized == 0 or num_normalized == len(tracked_ws_distributions)):
-                logger.warning("You are overlaying distribution and "
-                               "non-distribution data!")
+                logger.warning("You are overlaying distribution and " "non-distribution data!")
 
     def artists_workspace_has_errors(self, artist):
         """Check if the given artist's workspace has errors"""
@@ -485,8 +492,8 @@ class MantidAxes(Axes):
         upper_xlim, upper_ylim = self.dataLim.get_points()[1]
         for container in self.containers:
             if isinstance(container, ErrorbarContainer) and (
-                    (visible_only and not helperfunctions.errorbars_hidden(container)) or
-                    not visible_only):
+                (visible_only and not helperfunctions.errorbars_hidden(container))
+                    or not visible_only):
                 min_x, max_x, min_y, max_y = helperfunctions.get_errorbar_bounds(container)
                 lower_xlim = min(lower_xlim, min_x) if min_x else lower_xlim
                 upper_xlim = max(upper_xlim, max_x) if max_x else upper_xlim
@@ -503,12 +510,11 @@ class MantidAxes(Axes):
         Checks the known artist containers to see if anything exists within them
         :return: True if no artists exist, false otherwise
         """
-
         def _empty(container):
             return len(container) == 0
 
-        return (_empty(axes.lines) and _empty(axes.images) and
-                _empty(axes.collections) and _empty(axes.containers))
+        return (_empty(axes.lines) and _empty(axes.images) and _empty(axes.collections)
+                and _empty(axes.containers))
 
     def twinx(self):
         """
@@ -597,11 +603,9 @@ class MantidAxes(Axes):
             def _data_update(artists, workspace, new_kwargs=None):
                 # It's only possible to plot 1 line at a time from a workspace
                 if new_kwargs:
-                    x, y, _, __ = plotfunctions._plot_impl(self, workspace, args,
-                                                           new_kwargs)
+                    x, y, _, __ = plotfunctions._plot_impl(self, workspace, args, new_kwargs)
                 else:
-                    x, y, _, __ = plotfunctions._plot_impl(self, workspace, args,
-                                                           kwargs)
+                    x, y, _, __ = plotfunctions._plot_impl(self, workspace, args, kwargs)
                 artists[0].set_data(x, y)
                 self.relim()
                 if autoscale_on_update:
@@ -610,8 +614,7 @@ class MantidAxes(Axes):
 
             workspace = args[0]
             spec_num = self.get_spec_number_or_bin(workspace, kwargs)
-            normalize_by_bin_width, kwargs = get_normalize_by_bin_width(
-                workspace, self, **kwargs)
+            normalize_by_bin_width, kwargs = get_normalize_by_bin_width(workspace, self, **kwargs)
             is_normalized = normalize_by_bin_width or workspace.isDistribution()
 
             # If we are making the first plot on an axes object
@@ -621,9 +624,10 @@ class MantidAxes(Axes):
                 # Otherwise set autoscale to autoscale_on_update.
                 self.set_autoscaley_on(autoscale_on_update)
 
-            artist = self.track_workspace_artist(
-                workspace, plotfunctions.plot(self, *args, **kwargs),
-                _data_update, spec_num, is_normalized, MantidAxes.is_axis_of_type(SPEC_AXIS, kwargs))
+            artist = self.track_workspace_artist(workspace,
+                                                 plotfunctions.plot(self, *args, **kwargs),
+                                                 _data_update, spec_num, is_normalized,
+                                                 MantidAxes.is_axis_of_type(SPEC_AXIS, kwargs))
             return artist
         else:
             return Axes.plot(self, *args, **kwargs)
@@ -696,11 +700,9 @@ class MantidAxes(Axes):
                     pass
                 # this gets pushed back onto the containers list
                 if new_kwargs:
-                    container_new = plotfunctions.errorbar(self, workspace,
-                                                           **new_kwargs)
+                    container_new = plotfunctions.errorbar(self, workspace, **new_kwargs)
                 else:
-                    container_new = plotfunctions.errorbar(self, workspace,
-                                                           **kwargs)
+                    container_new = plotfunctions.errorbar(self, workspace, **kwargs)
                 self.containers.insert(orig_idx, container_new)
                 self.containers.pop()
 
@@ -725,15 +727,15 @@ class MantidAxes(Axes):
 
             workspace = args[0]
             spec_num = self.get_spec_number_or_bin(workspace, kwargs)
-            is_normalized, kwargs = get_normalize_by_bin_width(workspace, self,
-                                                               **kwargs)
+            is_normalized, kwargs = get_normalize_by_bin_width(workspace, self, **kwargs)
 
             if self.lines:
                 self.set_autoscaley_on(autoscale_on_update)
 
-            artist = self.track_workspace_artist(
-                workspace, plotfunctions.errorbar(self, *args, **kwargs),
-                _data_update, spec_num, is_normalized, MantidAxes.is_axis_of_type(SPEC_AXIS, kwargs))
+            artist = self.track_workspace_artist(workspace,
+                                                 plotfunctions.errorbar(self, *args, **kwargs),
+                                                 _data_update, spec_num, is_normalized,
+                                                 MantidAxes.is_axis_of_type(SPEC_AXIS, kwargs))
             return artist
         else:
             return Axes.errorbar(self, *args, **kwargs)
@@ -828,13 +830,12 @@ class MantidAxes(Axes):
             logger.debug('using plotfunctions')
 
             def _update_data(artists, workspace):
-                return self._redraw_colorplot(plotfunctions.imshow,
-                                              artists, workspace, **kwargs)
+                return self._redraw_colorplot(plotfunctions.imshow, artists, workspace, **kwargs)
 
             workspace = args[0]
             return self.track_workspace_artist(workspace,
-                                               plotfunctions.imshow(self, *args, **kwargs),
-                                               _update_data)
+                                               plotfunctions.imshow(self, *args,
+                                                                    **kwargs), _update_data)
         else:
             return Axes.imshow(self, *args, **kwargs)
 
@@ -852,10 +853,9 @@ class MantidAxes(Axes):
 
             def _update_data(artists, workspace, new_kwargs=None):
                 if new_kwargs:
-                    return self._redraw_colorplot(plotfunctions_func,
-                                                  artists, workspace, **new_kwargs)
-                return self._redraw_colorplot(plotfunctions_func,
-                                              artists, workspace, **kwargs)
+                    return self._redraw_colorplot(plotfunctions_func, artists, workspace,
+                                                  **new_kwargs)
+                return self._redraw_colorplot(plotfunctions_func, artists, workspace, **kwargs)
 
             workspace = args[0]
             # We return the last mesh so the return type is a single artist like the standard Axes
@@ -869,8 +869,7 @@ class MantidAxes(Axes):
         else:
             return getattr(Axes, name)(self, *args, **kwargs)
 
-    def _redraw_colorplot(self, colorfunc, artists_orig, workspace,
-                          **kwargs):
+    def _redraw_colorplot(self, colorfunc, artists_orig, workspace, **kwargs):
         """
         Redraw a pcolor* or imshow type plot bsaed on a new workspace
         :param colorfunc: The Axes function to use to draw the new artist
@@ -1071,7 +1070,8 @@ class MantidAxes(Axes):
         """
         for index, creation_arg in enumerate(self.creation_args):  # type: int, dict
             if workspace_name == creation_arg["workspaces"]:
-                if creation_arg.get("wkspIndex", -1) == workspace_index or creation_arg.get("specNum", -1) == spec_num:
+                if creation_arg.get("wkspIndex", -1) == workspace_index or creation_arg.get(
+                        "specNum", -1) == spec_num:
                     del self.creation_args[index]
                     return
         raise ValueError("Curve does not have existing creation args")
