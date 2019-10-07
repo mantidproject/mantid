@@ -30,7 +30,7 @@
     from mantid.simpleapi import FunctionWrapper
     import matplotlib.pyplot as plt
     import numpy as np
-    x = np.arange(0.1,16,0.1)
+    x = np.logspace(-2, 4, num = 1000)
     y = FunctionWrapper("RedfieldCutoff")
     fig, ax=plt.subplots()
     ax.plot(x, y(x))
