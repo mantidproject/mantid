@@ -10,11 +10,13 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Crystal/ReflectionCondition.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/ListValidator.h"
 
 #include <boost/math/special_functions/round.hpp>
 
@@ -41,6 +43,7 @@ const std::string KMIN{"Kmin"};
 const std::string KMAX{"Kmax"};
 const std::string LMIN{"Lmin"};
 const std::string LMAX{"Lmax"};
+const std::string REFLECTION_COND{"ReflectionCondition"};
 const std::string FRACPEAKS{"FracPeaks"};
 } // namespace PropertyNames
 
@@ -228,7 +231,10 @@ DECLARE_ALGORITHM(PredictFractionalPeaks)
 /// Initialise the properties
 void PredictFractionalPeaks::init() {
   using API::WorkspaceProperty;
+  using Geometry::getAllReflectionConditions;
   using Kernel::Direction;
+  using Kernel::StringListValidator;
+
   declareProperty(
       std::make_unique<WorkspaceProperty<PeaksWorkspace_sptr::element_type>>(
           PropertyNames::PEAKS, "", Direction::Input),
@@ -258,6 +264,18 @@ void PredictFractionalPeaks::init() {
                   "Minimum L value to use during search", Direction::Input);
   declareProperty(PropertyNames::LMAX, 8.0,
                   "Maximum L value to use during search", Direction::Input);
+
+  const auto &reflectionConditions = getAllReflectionConditions();
+  std::vector<std::string> propOptions;
+  propOptions.reserve(reflectionConditions.size() + 1);
+  propOptions.emplace_back("");
+  std::transform(reflectionConditions.cbegin(), reflectionConditions.cend(),
+                 std::back_inserter(propOptions),
+                 [](const auto &condition) { return condition->getName(); });
+  declareProperty(PropertyNames::REFLECTION_COND, "",
+                  boost::make_shared<StringListValidator>(propOptions),
+                  "Which reflection condition applies to this crystal, "
+                  "reducing the number of expected HKL peaks?");
 
   setPropertySettings(
       PropertyNames::HMIN,
