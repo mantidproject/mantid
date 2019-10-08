@@ -29,6 +29,9 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
 
     toolitems = (
         ('Home', 'Reset original view', 'mdi.home', 'home', None),
+        ('Back', 'Back to previous view', 'mdi.arrow-left', 'back', None),
+        ('Forward', 'Forward to next view', 'mdi.arrow-right', 'forward', None),
+        (None, None, None, None, None),
         ('Pan', 'Pan axes with left mouse, zoom with right', 'mdi.arrow-all', 'pan', False),
         ('Zoom', 'Zoom to rectangle', 'mdi.magnify', 'zoom', False),
         (None, None, None, None, None),
