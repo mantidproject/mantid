@@ -15,6 +15,7 @@ from mantid.kernel import (Direction, StringListValidator, PropertyManagerProper
 
 from mantid.api import (ParallelDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
                         WorkspaceUnitValidator)
+from sans.algorithm_detail.crop_helper import get_component_name
 
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 from sans.common.enums import (RangeStepType, DetectorType)
@@ -190,10 +191,13 @@ class SANSCreateWavelengthAndPixelAdjustment(ParallelDataProcessorAlgorithm):
             instrument_alg.execute()
 
             # Crop to the required detector
-            crop_name = "SANSCrop"
+            crop_name = "CropToComponent"
+            component_to_crop = DetectorType.from_string(component)
+            component_to_crop = get_component_name(output_workspace, component_to_crop)
             crop_options = {"InputWorkspace": output_workspace,
                             "OutputWorkspace": EMPTY_NAME,
-                            "Component": component}
+                            "ComponentNames": component_to_crop}
+
             crop_alg = create_unmanaged_algorithm(crop_name, **crop_options)
             crop_alg.execute()
             pixel_adjustment_workspace = crop_alg.getProperty("OutputWorkspace").value

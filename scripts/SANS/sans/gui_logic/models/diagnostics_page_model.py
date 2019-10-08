@@ -8,6 +8,7 @@ from mantid import AnalysisDataService
 from mantid.api import AlgorithmPropertyWithValue
 from mantid.simpleapi import SumSpectra, ConvertAxesToRealSpace
 from sans.algorithm_detail.batch_execution import provide_loaded_data, create_unmanaged_algorithm, add_to_group
+from sans.algorithm_detail.crop_helper import get_component_name
 from sans.common.constants import EMPTY_NAME
 from sans.common.enums import IntegralEnum, DetectorType, SANSDataType
 from sans.common.file_information import get_instrument_paths_for_sans_file
@@ -83,13 +84,18 @@ def load_workspace(state):
 
 
 def crop_workspace(component, workspace):
-    crop_name = "SANSCrop"
+    crop_name = "CropToComponent"
+    component_to_crop = DetectorType.from_string(component)
+    component_to_crop = get_component_name(workspace, component_to_crop)
     crop_options = {"InputWorkspace": workspace,
                     "OutputWorkspace": EMPTY_NAME,
-                    "Component": component}
+                    "ComponentNames": component_to_crop}
+
     crop_alg = create_unmanaged_algorithm(crop_name, **crop_options)
     crop_alg.execute()
-    return crop_alg.getProperty("OutputWorkspace").value
+    output_workspace = crop_alg.getProperty("OutputWorkspace").value
+
+    return output_workspace
 
 
 def run_algorithm(input_workspace, range, integral, output_workspace, x_dim, y_dim):

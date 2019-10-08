@@ -841,7 +841,7 @@ The dedicated work-flow algorithms for the SANS reduction are:
 - :ref:`SANSConvertToWavelength <algm-SANSConvertToWavelength>`
 - :ref:`SANSConvertToWavelengthAndRebin <algm-SANSConvertToWavelengthAndRebin>`
 - :ref:`SANSCreateWavelengthAndPixelAdjustment <algm-SANSCreateWavelengthAndPixelAdjustment>`
-- :ref:`SANSCrop <algm-SANSCrop>`
+- :ref:`CropToComponent <algm-CropToComponent>`
 - :ref:`SANSLoad <algm-SANSLoad>`
 - *SANSMaskWorkspace*
 - *SANSMove*
@@ -974,15 +974,10 @@ The sub-steps of the algorithm are:
 2. Create the pixel-adjustment workspace. The sub-states are:
 
    a. Load the pixel-adjustment file using :ref:`LoadRKH <algm-LoadRKH>`
-   b. Crop the pixel-adjustment workspace to the desired detector using :ref:`SANSCrop <algm-SANSCrop>`
+   b. Crop the pixel-adjustment workspace to the desired detector
+      using :ref:`CropToComponent <algm-CropToComponent>`
 
 3. Set the pixel-adjustment and wavelength-adjustment workspaces on the output of the algorithm
-
-*SANSCrop*
-------------
-
-The :ref:`SANSCrop <algm-SANSCrop>` algorithm crops the input workspace to a specified component using
-:ref:`CropToComponent <algm-CropToComponent>`.
 
 *SANSLoad*
 ------------
@@ -1248,7 +1243,7 @@ inner core of the orchestration mechanism. The inputs to this algorithm are
 The sub-steps of this algorithm are:
 
 1. Get the cropped input *ScatterWorkspace*. The cropping is defined by the selected detector type.
-   The underlying algorithm is :ref:`SANSCrop <algm-SANSCrop>`.
+   The underlying algorithm is :ref:`CropToComponent <algm-CropToComponent>`.
 2. Create an event slice of the input workspace using :ref:`SANSSliceEvent <algm-SANSSliceEvent>`.
    Note that event slicing is only applied to event-mode workspaces and only when it has been
    specified by the user. During this step the scatter workspace is sliced and the associated
