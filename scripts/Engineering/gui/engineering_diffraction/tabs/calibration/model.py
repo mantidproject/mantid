@@ -24,6 +24,9 @@ INTEGRATED_WORKSPACE_NAME = "engggui_vanadium_integration"
 OUT_FILES_ROOT_DIR = path.join(path.expanduser("~"), "Engineering_Mantid")
 CALIBRATION_DIR = path.join(OUT_FILES_ROOT_DIR, "Calibration", "")
 
+NORTH_BANK_TEMPLATE_FILE = "template_ENGINX_241391_236516_North_bank.prm"
+SOUTH_BANK_TEMPLATE_FILE = "template_ENGINX_241391_236516_South_bank.prm"
+
 
 class CalibrationModel(object):
     def create_new_calibration(self,
@@ -204,7 +207,7 @@ class CalibrationModel(object):
         write_ENGINX_GSAS_iparam_file(file_path, [difc[0]], [tzero[0]],
                                       ceria_run=ceria_no,
                                       vanadium_run=vanadium_no,
-                                      template_file="template_ENGINX_241391_236516_North_bank.prm",
+                                      template_file=NORTH_BANK_TEMPLATE_FILE,
                                       bank_names=["North"])
         # South Bank
         file_path = calibration_dir + self._generate_output_file_name(
@@ -212,7 +215,7 @@ class CalibrationModel(object):
         write_ENGINX_GSAS_iparam_file(file_path, [difc[1]], [tzero[1]],
                                       ceria_run=ceria_no,
                                       vanadium_run=vanadium_no,
-                                      template_file="template_ENGINX_241391_236516_South_bank.prm",
+                                      template_file=SOUTH_BANK_TEMPLATE_FILE,
                                       bank_names=["South"])
 
     @staticmethod
