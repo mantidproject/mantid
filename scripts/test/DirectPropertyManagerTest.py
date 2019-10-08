@@ -440,7 +440,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         propman.log_changed_values()
 
-    def test_set_defailts_from_instrument(self) :
+    def test_set_defaults_from_instrument(self) :
         ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=100)
 
         SetInstrumentParameter(ws,ParameterName="TestParam1",Value="3.5",ParameterType="Number")
@@ -478,7 +478,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertTrue('TestParam2' in changes)
         self.assertTrue('TestParam3' in changes)
 
-    def test_set_complex_defailts_from_instrument(self) :
+    def test_set_complex_defaults_from_instrument(self) :
         ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10)
 
         SetInstrumentParameter(ws,ParameterName="Param1",Value="BaseParam1:BaseParam2",ParameterType="String")
@@ -1228,8 +1228,56 @@ class DirectPropertyManagerTest(unittest.TestCase):
         for valExp,valReal in zip(exp_rez,rez):
             self.assertAlmostEqual(valExp,valReal)
 
+    def test_abs_corr_info(self):
+        propman = self.prop_man
+
+        defaults = propman.abs_corr_info
+        self.assertTrue(defaults['is_fast'])
+        # the algorithm sets up the properties but does not verifis if the prperties
+        # are acceptable by the corrections algorithm
+        propman.abs_corr_info = "{is_mc: True, NumberOfWavelengthPoints: 200; MaxScatterPtAttempts=20 SparseInstrument=True}"
+
+        propss = propman.abs_corr_info
+        self.assertTrue(propss['is_mc'])
+        self.assertEqual(propss['NumberOfWavelengthPoints'],200)
+        self.assertEqual(propss['MaxScatterPtAttempts'],20)
+        self.assertEqual(propss['SparseInstrument'],True)
+
+        # Properties acceptable by MoneCarloAbsorption algorithm
+        propman.abs_corr_info = {'is_mc':True,'NumberOfWavelengthPoints':20,'EventsPerPoint':'200','SeedValue':31090,\
+            'Interpolation':'CSpline','SparseInstrument':'True','NumberOfDetectorRows':20,'NumberOfDetectorColumns':'10',\
+            'MaxScatterPtAttempts':200}
+
+        propss = propman.abs_corr_info
+        self.assertTrue(propss['is_mc'])
+        self.assertTrue(propss['SparseInstrument'])
+        self.assertEqual(propss['Interpolation'],'CSpline')
+
+        str_val = str(propman.abs_corr_info)
+
+        propman.abs_corr_info = str_val
+
+        rec_prop = propman.abs_corr_info
+
+        self.assertDictEqual(propss,rec_prop)
+        # Properties acceptable by AbsorptionCorrection algorithm
+        ac_properties = {'ScatterFrom':'Sample','NumberOfWavelengthPoints':10,'ExpMethod':'FastApprox',\
+        'EMode':'Direct','EFixed':10,'ElementSize':2}
+        ac_properties['is_fast'] = True
+        propman.abs_corr_info = str(ac_properties)
+
+        rec_prop = propman.abs_corr_info
+        self.assertDictEqual(ac_properties,rec_prop)
+
+        propman.abs_corr_info = None
+        rec_prop = propman.abs_corr_info
+        self.assertDictEqual(rec_prop,{'is_fast':True})
+
+
+
+
 
 if __name__ == "__main__":
-    #tester = DirectPropertyManagerTest('test_average_accuracy')
+    #tester = DirectPropertyManagerTest('test_abs_corr_info')
     #tester.run()
     unittest.main()

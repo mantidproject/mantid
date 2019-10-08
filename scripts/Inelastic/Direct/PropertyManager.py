@@ -255,6 +255,8 @@ class PropertyManager(NonIDF_Properties):
     motor_log_names= MotorLogName()
     motor_offset   = MotorOffset()
     psi = RotationAngle(motor_log_names,motor_offset)
+    # Properties responsible for the Absorption Corrections
+    abs_corr_info = AbsCorrInfo()
 #----------------------------------------------------------------------------------------------------------------
 
     def getChangedProperties(self):

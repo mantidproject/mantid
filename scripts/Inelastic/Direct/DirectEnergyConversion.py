@@ -1930,10 +1930,10 @@ class DirectEnergyConversion(object):
     #
     def do_preprocessing(self,reducer,ws):
         """ stub for custom preprocessing function"""
-        pass
+        return ws
     def do_postprocessing(self,reducer,ws):
         """ stub for custom postprocessing function"""
-        pass
+        return ws
 
 
 def get_failed_spectra_list_from_masks(masked_wksp,prop_man):
