@@ -100,7 +100,7 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent,
           Mantid::Kernel::ConfigService::Instance().getString(
               "defaultsave.directory"))),
       mViewChanged(false), m_blocked(false),
-      m_instrumentDisplayContextMenuOn(false) {
+      m_instrumentDisplayContextMenuOn(false),m_stateOfTabs(std::vector<std::pair<std::string, bool>>{}) {
   setFocusPolicy(Qt::StrongFocus);
   QVBoxLayout *mainLayout = new QVBoxLayout(this);
   QSplitter *controlPanelLayout = new QSplitter(Qt::Horizontal);
@@ -1202,17 +1202,14 @@ void InstrumentWidget::createTabs(QSettings &settings) {
   connect(m_renderTab, SIGNAL(setAutoscaling(bool)), this,
           SLOT(setColorMapAutoscaling(bool)));
   connect(m_renderTab, SIGNAL(rescaleColorMap()), this, SLOT(setupColorMap()));
-  mControlsTab->addTab(m_renderTab, QString("Render"));
   m_renderTab->loadSettings(settings);
 
   // Pick controls
   m_pickTab = new InstrumentWidgetPickTab(this);
-  mControlsTab->addTab(m_pickTab, QString("Pick"));
   m_pickTab->loadSettings(settings);
 
   // Mask controls
   m_maskTab = new InstrumentWidgetMaskTab(this);
-  mControlsTab->addTab(m_maskTab, QString("Draw"));
   connect(m_maskTab, SIGNAL(executeAlgorithm(const QString &, const QString &)),
           this, SLOT(executeAlgorithm(const QString &, const QString &)));
   connect(m_xIntegration, SIGNAL(changed(double, double)), m_maskTab,
@@ -1221,15 +1218,75 @@ void InstrumentWidget::createTabs(QSettings &settings) {
 
   // Instrument tree controls
   m_treeTab = new InstrumentWidgetTreeTab(this);
-  mControlsTab->addTab(m_treeTab, QString("Instrument"));
   m_treeTab->loadSettings(settings);
 
   connect(mControlsTab, SIGNAL(currentChanged(int)), this,
           SLOT(tabChanged(int)));
-
+  m_stateOfTabs.push_back(std::make_pair(std::string("Render"), true));
+  m_stateOfTabs.push_back(std::make_pair(std::string("Pick"), true));
+  m_stateOfTabs.push_back(std::make_pair(std::string("Draw"), true));
+  m_stateOfTabs.push_back(std::make_pair(std::string("Instrument"), true));
+  addSelectedTabs();
   m_tabs << m_renderTab << m_pickTab << m_maskTab << m_treeTab;
 }
 
+/**
+* Adds the tabs that are currently selected to the GUI
+*/
+void InstrumentWidget::addSelectedTabs() {
+  for (std::pair<std::string, bool> tab : m_stateOfTabs) {
+
+    if (tab.first == "Render" && tab.second) {
+      mControlsTab->addTab(m_renderTab, QString("Render"));
+    }
+    if (tab.first == "Pick" && tab.second) {
+      mControlsTab->addTab(m_pickTab, QString("Pick"));
+    }
+    if (tab.first == "Draw" && tab.second) {
+      mControlsTab->addTab(m_maskTab, QString("Draw"));
+    }
+    if (tab.first == "Instrument" && tab.second) {
+      mControlsTab->addTab(m_treeTab, QString("Instrument"));
+    }
+  }
+}
+/**
+ * Removes tab from the GUI
+ * param tabName: name of the tab to remove
+ */
+void InstrumentWidget::removeTab(const std::string &tabName) {
+
+  int index = 0;
+  for (auto name = m_stateOfTabs.begin(); name != m_stateOfTabs.end(); name++) {
+    if (name->first == tabName && name->second) {
+      mControlsTab->removeTab(index);
+      name->second = false;
+      return;
+    } else {
+      if (name->second) {
+        index++;
+      }
+    }
+  }
+}
+/**
+ * Adds tab back into the GUI
+ * param tabName: name of the tab to remove
+ */
+void InstrumentWidget::addTab(const std::string &tabName) {
+
+  for (auto name = m_stateOfTabs.begin(); name != m_stateOfTabs.end(); name++) {
+    if (name->first == tabName) {
+      name->second = true;
+    }
+	// remove everything
+    if (name->second) {
+      mControlsTab->removeTab(0);
+    }
+  }
+  // add the selected tabs back into the GUI
+  addSelectedTabs();
+}
 /**
  * Return a name for a group in QSettings to store InstrumentWidget
  * configuration.

@@ -31,12 +31,19 @@ private slots:
 
 private:
   void loadAndAnalysis(const std::string &run);
-
+  void initInstrument();
+  bool extractTubeConditon(std::map<std::string, bool> tabBools);
+  bool averageTubeConditon(std::map<std::string, bool> tabBools);
+  void extractSingleTube();
+  void averageTube();
   ALFView_view *m_view;
   ALFView_model *m_model;
   int m_currentRun;
   std::string m_currentFile;
   VoidObserver *m_loadRunObserver;
+  int m_numberOfTubesInAverage;
+  VoidObserver *m_extractSingleTubeObserver;
+  VoidObserver *m_averageTubeObserver;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

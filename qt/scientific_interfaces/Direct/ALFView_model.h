@@ -20,9 +20,13 @@ public:
   void transformData();
   void rename();
   void remove();
+  std::string dataFileName();
   int currentRun();
   bool isErrorCode(const int run);
   std::string getInstrument();
+  void storeSingleTube(const std::string &name);
+  void averageTube(const int &oldTotalNumber, const std::string &name);
+  bool hasTubeBeenExtracted(const std::string &name);
 };
 
 } // namespace CustomInterfaces

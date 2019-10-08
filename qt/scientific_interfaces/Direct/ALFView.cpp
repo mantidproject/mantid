@@ -18,7 +18,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-// DECLARE_SUBWINDOW(ALFView)
+DECLARE_SUBWINDOW(ALFView)
 
 /// static logger
 Mantid::Kernel::Logger g_log("ALFView");

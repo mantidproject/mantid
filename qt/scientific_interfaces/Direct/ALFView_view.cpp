@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALFView_view.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h"
 
 #include <QMessageBox>
 #include <QSizePolicy>
@@ -16,10 +17,38 @@ namespace CustomInterfaces {
 
 ALFView_view::ALFView_view(const std::string &instrument, QWidget *parent)
     : QSplitter(Qt::Vertical, parent), m_loadRunObservable(nullptr),
-      m_files(nullptr), m_instrument(QString::fromStdString(instrument)) {
+      m_files(nullptr), m_instrument(QString::fromStdString(instrument)),
+      m_extractSingleTubeObservable(nullptr), m_averageTubeObservable(nullptr),
+      m_instrumentWidget(nullptr), m_extractAction(nullptr), m_averageAction (nullptr){
   auto loadWidget = generateLoadWidget();
-
   this->addWidget(loadWidget);
+}
+
+void ALFView_view::setUpInstrument(
+    std::string fileName,
+    std::function<bool(std::map<std::string, bool>)> &extractBinder,
+    std::function<bool(std::map<std::string, bool>)> &averageBinder) {
+
+  m_extractSingleTubeObservable = new Observable();
+  m_averageTubeObservable = new Observable();
+
+  m_instrumentWidget = new MantidWidgets::InstrumentWidget("ALFData");
+  m_instrumentWidget->removeTab("Instrument");
+  m_instrumentWidget->removeTab("Draw");
+  this->addWidget(m_instrumentWidget);
+
+  // set up extract single tube
+  m_extractAction = new QAction("Extract Single Tube", this);
+  connect(m_extractAction, SIGNAL(triggered()), this,
+          SLOT(extractSingleTube())),
+      m_instrumentWidget->getPickTab()->addToContextMenu(m_extractAction,
+                                         extractBinder);
+
+  // set up add to average
+  m_averageAction = new QAction("Add Tube To Average", this);
+  connect(m_averageAction, SIGNAL(triggered()), this, SLOT(averageTube())),
+      m_instrumentWidget->getPickTab()->addToContextMenu(m_averageAction,
+                                         averageBinder);
 }
 
 QWidget *ALFView_view::generateLoadWidget() {
@@ -69,9 +98,20 @@ void ALFView_view::fileLoaded() {
 void ALFView_view::warningBox(const std::string &message) {
   warningBox(QString::fromStdString(message));
 }
+
 void ALFView_view::warningBox(const QString &message) {
   QMessageBox::warning(this, m_instrument + " view", message);
 }
 
+void ALFView_view::extractSingleTube() {
+  m_instrumentWidget->getPickTab()->savePlotToWorkspace();
+
+  m_extractSingleTubeObservable->notify();
+}
+
+void ALFView_view::averageTube() {
+  m_instrumentWidget->getPickTab()->savePlotToWorkspace();
+  m_averageTubeObservable->notify();
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

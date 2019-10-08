@@ -32,9 +32,20 @@ public:
     m_loadRunObservable->attach(listener);
   };
   void warningBox(const std::string &message);
-
+  void observeExtractSingleTube(Observer *listner) {
+    m_extractSingleTubeObservable->attach(listner);
+  }
+  void observeAverageTube(Observer *listner) {
+    m_averageTubeObservable->attach(listner);
+  }
+  void setUpInstrument(
+      const std::string fileName,
+      std::function<bool(std::map<std::string, bool>)> &extractBinder,
+      std::function<bool(std::map<std::string, bool>)> &averageBinder);
 public slots:
   void fileLoaded();
+void extractSingleTube();
+void averageTube();
 
 private:
   QWidget *generateLoadWidget();
@@ -43,6 +54,12 @@ private:
   Observable *m_loadRunObservable;
   API::MWRunFiles *m_files;
   QString m_instrument;
+
+  Observable *m_extractSingleTubeObservable;
+  Observable *m_averageTubeObservable;
+  MantidWidgets::InstrumentWidget *m_instrumentWidget;
+  QAction *m_extractAction;
+  QAction *m_averageAction;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
