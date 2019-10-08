@@ -114,8 +114,7 @@ void CrystalStructure::setReflectionConditionFromSpaceGroup(
     centering = "Robv";
   }
 
-  std::vector<ReflectionCondition_sptr> reflectionConditions =
-      getAllReflectionConditions();
+  const auto &reflectionConditions = getAllReflectionConditions();
   for (auto &reflectionCondition : reflectionConditions) {
     if (reflectionCondition->getSymbol() == centering) {
       m_centering = reflectionCondition;
