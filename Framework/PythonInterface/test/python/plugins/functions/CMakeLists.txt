@@ -25,6 +25,10 @@ set(TEST_PY_FILES
     StaticLorentzianKTTest.py
     StretchedExpFTTest.py
     StretchedKTTest.py
+    SCgapAnisoSwaveTest.py
+    SCgapDwaveTest.py
+    SCgapPwaveTest.py
+    ScgapSwaveTest.py
     TeixeiraWaterTest.py
     TFMuoniumTest.py
     TriangleOscTest.py
