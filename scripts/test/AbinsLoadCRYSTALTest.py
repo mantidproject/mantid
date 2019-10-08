@@ -17,7 +17,7 @@ class AbinsLoadCRYSTALTest(unittest.TestCase, AbinsModules.GeneralLoadAbInitioTe
 
         #  *************************** USE CASES ********************************************
     # ===================================================================================
-    # | Use cases: Gamma point calculation for CRYSTAL                                    |
+    # | Use cases: Gamma point calculation for CRYSTAL                                  |
     # ===================================================================================
     _gamma_crystal = "crystalB3LYP_LoadCRYSTAL"
     _set_crystal = "crystal_set_key_LoadCRYSTAL"
@@ -28,7 +28,12 @@ class AbinsLoadCRYSTALTest(unittest.TestCase, AbinsModules.GeneralLoadAbInitioTe
     _molecule = "toluene_molecule_LoadCRYSTAL"
 
     # ===================================================================================
-    # | Use cases: Phonon dispersion calculation for CRYSTAL                                     |
+    # | Use case: Molecular calculation with CRYSTAL17                                  |
+    # ===================================================================================
+    _molecule17 = "toluene_molecule_LoadCRYSTAL17"
+
+    # ===================================================================================
+    # | Use cases: Phonon dispersion calculation for CRYSTAL                            |
     # ===================================================================================
     _phonon_dispersion_v1 = "mgo-GX_LoadCRYSTAL"
     _phonon_dispersion_v2 = "MgO-222-DISP_LoadCRYSTAL"
@@ -39,6 +44,9 @@ class AbinsLoadCRYSTALTest(unittest.TestCase, AbinsModules.GeneralLoadAbInitioTe
 
     def test_molecule(self):
         self.check(name=self._molecule, loader=AbinsModules.LoadCRYSTAL)
+
+    def test_molecule17(self):
+        self.check(name=self._molecule17, loader=AbinsModules.LoadCRYSTAL)
 
     def test_phonon_dispersion_crystal(self):
         self.check(name=self._phonon_dispersion_v1, loader=AbinsModules.LoadCRYSTAL)
