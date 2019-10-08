@@ -20,6 +20,7 @@ import mantid.simpleapi as mantid
 from mantid import api
 
 import Direct.ReductionHelpers as prop_helpers
+from Direct.AbsorptionShapes import anAbsorptionShape
 import collections
 
 
@@ -1648,9 +1649,9 @@ class RotationAngle(PropDescriptor):
 
 class AbsCorrInfo(PropDescriptor):
     """ Class responsible for providing additional values for
-        absorption correction algorithms.
+        absorption corrections algorithms.
 
-        The values may consist of the algorithm selector currently
+        The values should contain of the algorithm selector currently
         is_fast:True for AbsorptionCorrection algorithms family
         or 
         is_mc:True for MonteCarloAbsorption correction algorithms family
@@ -1658,23 +1659,26 @@ class AbsCorrInfo(PropDescriptor):
         accompanied by the dictionary of all non-sample related properties
         accepted by these algorithms.
 
+        If this key is missing, the class assumes that AbsorptionCorrection
+        algorithm (is_fast:true) is selected. 
+
         The value for the property can be provided as dictionary or as
-        string representation of this dictionery.
-        The whole old contents of the previous dictionary is removed
-        on assignment of the new values
+        string representation of this dictionary.
+        The whole contents of the previous dictionary is removed
+        on assignment of the new dictionary.
     """
-    # The set of properties acceptable by MonteCarloAbsorption algorithm
+    # The set of properties acceptable by MonteCarloAbsorption algorithm:
     _MC_corrections_accepts={'NumberOfWavelengthPoints':lambda x: float(x),\
                              'EventsPerPoint':lambda x : float(x),'SeedValue':lambda x : float(x),\
         'Interpolation':lambda x : list_checker(x,('Linear','CSpline'),'MonteCarloAbsorptions "Interpolation"'),\
         'SparseInstrument':lambda x : bool(x),'NumberOfDetectorRows':lambda x: float(x),\
         'NumberOfDetectorColumns':lambda x: float(x),'MaxScatterPtAttempts':lambda x: float(x)}
-    # The set of properties acceptable by AbsorptionCorrection algorithm
+    # The set of properties acceptable by AbsorptionCorrection algorithm:
     _Fast_corrections_accepts = {\
         'ScatterFrom':lambda x : list_checker(x,('Sample', 'Container', 'Environment'),'AbsorptionCorrections "ScatterFrom"'),\
         'NumberOfWavelengthPoints':lambda x: float(x),\
         'ExpMethod':lambda x : list_checker(x,('Normal', 'FastApprox'),'AbsorptionCorrections "ExpMethod"'),\
-        'EMode':lambda x: list_checker(x,('Direct', 'Indirect', 'Elastic'),'AbsorptionCorrections "Emode"'),\
+        'EMode':lambda x: list_checker(x,('Direct', 'Indirect', 'Elastic'),'AbsorptionCorrections "EMode"'),\
         'EFixed':lambda x: float(x),'ElementSize':lambda x: float(x)}
 
     def __init__(self):
@@ -1735,10 +1739,10 @@ class AbsCorrInfo(PropDescriptor):
             acceptable_prop = AbsCorrInfo._MC_corrections_accepts
 
         for key,val in val_dict.iteritems():
-            normalizer = acceptable_prop.get(key,None)
-            if normalizer is None:
+            check_normalizer = acceptable_prop.get(key,None)
+            if check_normalizer is None:
                 raise(KeyError,'The key {0} is not acceptable key for {1} algorithm'.format(key,algo_name))
-            val_dict[key] = normalizer(val)
+            val_dict[key] = check_normalizer(val)
         # Store new dictionary in the property
         self._alg_prop = val_dict
 
@@ -1752,11 +1756,44 @@ class AbsCorrInfo(PropDescriptor):
         alg_prop = self.__get__(self,AbsCorrInfo)
         return str(alg_prop)
 
-def list_checker(val,list_in,mess_base):
-    """ Check the property defined has value from the list specified as the second input
+class AbsorptionShapesContainer(PropDescriptor):
+    """ Class to keep AbsorptionShape classes,
+        responsible for making absorption corrections
+        for the absorption on correspondent shapes.
 
-        if it does not, raise ValueError with the mess_base as the main part and the
-        list of properties as the description
+        NOT IMPLEMENTED: should also handle conversion 
+        from a shape to its text representaton and v.v.
+        (using AbsorptionShape appropriate classes)
+
+    """
+    def __init__(self):
+        self._theShapeHolder = None
+
+    #
+    def __get__(self, instance, owner=None):
+        if instance is None:
+            return self
+
+        return self._theShapeHolder
+
+    def __set__(self, instance, value):
+        if value is None:
+            self._theShapeHolder = None
+            return
+        if isinstance(value,str):
+            raise RuntimeError('This functionality is Not yet implemented')
+        elif isinstance(value,anAbsorptionShape):
+            self._theShapeHolder = value
+        else:
+            raise ValueError('The property can accept only strings and the childrens of the class anAbsorptionShape')
+
+def list_checker(val,list_in,mess_base):
+    """ Helper function to check the value val (first input) belongs to the 
+        set, specified as the second input.
+
+        If this is not true, raise ValueError indicating what property is wrong.
+        To do indication, mess_base should contain the string, referring to 
+        the invalid property.
     """
     if val in list_in:
         return val

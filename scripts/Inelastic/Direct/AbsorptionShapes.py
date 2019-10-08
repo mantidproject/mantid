@@ -196,6 +196,8 @@ class anAbsorptionShape(object):
         """
         adsrbtn_correctios = MonteCarloAbsorption(correction_base_ws,**kwarg)
         return adsrbtn_correctios
+    def str(self):
+        raise RuntimeError('This option is not yet implemented')
 
 
 class Cylinder(anAbsorptionShape):

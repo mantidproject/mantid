@@ -14,6 +14,7 @@ import numpy as np
 import sys
 import copy
 from Direct.PropertyManager import PropertyManager
+from Direct.AbsorptionShapes import *
 
 
 #-----------------------------------------------------------------------------------------------------------------------------------------
@@ -1273,11 +1274,20 @@ class DirectPropertyManagerTest(unittest.TestCase):
         rec_prop = propman.abs_corr_info
         self.assertDictEqual(rec_prop,{'is_fast':True})
 
+        self.assertRaises(KeyError,PropertyManager.abs_corr_info.__set__,propman.abs_corr_info,[1,2,3])
+        self.assertRaises(KeyError,PropertyManager.abs_corr_info.__set__,propman.abs_corr_info,{'TheKeyNotRecognizedByAlgorithm':10})
+    #
+    def test_abs_shapes_container(self):
+        propman = self.prop_man
 
+        cyl = Cylinder(['Al',0.1],[10,1])
+        propman.correct_absorption_on = cyl
 
+        got = propman.correct_absorption_on
+        self.assertEqual(got,cyl)
 
 
 if __name__ == "__main__":
-    #tester = DirectPropertyManagerTest('test_abs_corr_info')
+    #tester = DirectPropertyManagerTest('test_abs_shapes_container')
     #tester.run()
     unittest.main()

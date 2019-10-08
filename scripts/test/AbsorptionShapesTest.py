@@ -90,6 +90,6 @@ class AdsorbtionShapesTest(unittest.TestCase):
 
 
 if __name__=="__main__":
-    unittest.main()
     #ast = AdsorbtionShapesTest('test_adsrp_cylinder')
     #ast.test_adsrp_cylinder()
+    unittest.main()
