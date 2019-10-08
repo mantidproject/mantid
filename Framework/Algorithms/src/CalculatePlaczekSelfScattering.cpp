@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CalculatePlaczekSelfScattering.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -12,6 +13,7 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Atom.h"
 #include "MantidKernel/Material.h"
+#include "MantidKernel/Unit.h"
 
 #include <utility>
 
@@ -164,11 +166,12 @@ void CalculatePlaczekSelfScattering::exec() {
       }
     }
   }
+  std::string unit = inWS->getAxis(0)->unit()->unitID();
   Mantid::API::Algorithm_sptr childAlg =
       createChildAlgorithm("CreateWorkspace");
   childAlg->setProperty("DataX", xLambdas);
   childAlg->setProperty("DataY", placzekCorrection);
-  childAlg->setProperty("UnitX", "Wavelength");
+  childAlg->setProperty("UnitX", unit);
   childAlg->setProperty("NSpec", nSpec);
   childAlg->setProperty("ParentWorkspace", inWS);
   childAlg->setProperty("Distribution", true);

@@ -58,7 +58,8 @@ class Polaris(AbstractInst):
                                                   focus_file_path=focus_file_path,
                                                   merge_banks=self._inst_settings.merge_banks,
                                                   q_lims=q_lims,
-                                                  cal_file_name=cal_file_name)
+                                                  cal_file_name=cal_file_name,
+                                                  sample_details=self._sample_details)
         return pdf_output
 
     def set_sample_details(self, **kwargs):
