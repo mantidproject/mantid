@@ -19,6 +19,7 @@ from mantidqt.icons import get_icon
 class WorkbenchNavigationToolbar(NavigationToolbar2QT):
 
     home_clicked = QtCore.Signal()
+    sig_display_all_triggered = QtCore.Signal()
     sig_grid_toggle_triggered = QtCore.Signal()
     sig_active_triggered = QtCore.Signal()
     sig_hold_triggered = QtCore.Signal()
@@ -34,6 +35,8 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         (None, None, None, None, None),
         ('Pan', 'Pan axes with left mouse, zoom with right', 'mdi.arrow-all', 'pan', False),
         ('Zoom', 'Zoom to rectangle', 'mdi.magnify', 'zoom', False),
+        ('Display All', 'Set zoom to display all', 'mdi.arrow-expand-all', 'display_all_clicked',
+         None),
         (None, None, None, None, None),
         ('Grid', 'Toggle grid on/off', 'mdi.grid', 'toggle_grid', False),
         ('Save', 'Save the figure', 'mdi.content-save', 'save_figure', None),
@@ -41,8 +44,8 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         (None, None, None, None, None),
         ('Customize', 'Configure plot options', 'mdi.settings', 'launch_plot_options', None),
         (None, None, None, None, None),
-        ('Create Script', 'Generate a script that will recreate figure', 'mdi.script-text-outline',
-         'generate_plot_script', None),
+        ('Create Script', 'Generate a script that will recreate the current figure',
+         'mdi.script-text-outline', 'generate_plot_script', None),
         (None, None, None, None, None),
         ('Fit', 'Toggle fit browser on/off', None, 'toggle_fit', False),
     )
@@ -96,6 +99,10 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         # Adjust icon size or they are too small in PyQt5 by default
         dpi_ratio = QtWidgets.QApplication.instance().desktop().physicalDpiX() / 100
         self.setIconSize(QtCore.QSize(24 * dpi_ratio, 24 * dpi_ratio))
+
+    def display_all_clicked(self):
+        self.sig_display_all_triggered.emit()
+        self.push_current()
 
     def launch_plot_options(self):
         self.sig_plot_options_triggered.emit()
