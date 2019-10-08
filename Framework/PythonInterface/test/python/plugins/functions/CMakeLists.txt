@@ -23,6 +23,7 @@ set(TEST_PY_FILES
     StandardSCTest.py
     StaticLorentzianKTTest.py
     StretchedExpFTTest.py
+    StretchedKTTest.py
     TeixeiraWaterTest.py
     TriangleOscTest.py
     TFMuoniumTest.py)
