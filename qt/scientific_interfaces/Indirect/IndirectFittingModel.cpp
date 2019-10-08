@@ -253,7 +253,7 @@ void cleanTemporaries(const std::string &base,
                          IDAWorkspaceIndex /*unused*/) {
     cleanTemporaries(base + "_" + std::to_string(index.value));
   };
-  fitData->applyEnumeratedSpectra(clean);
+  fitData->applyEnumeratedSpectraNew(clean);
 }
 
 void cleanTemporaries(const std::string &algorithmName,

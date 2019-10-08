@@ -138,7 +138,7 @@ public:
 
   template <typename F>
   WorkspaceIndex
-  applyEnumeratedSpectra(F &&functor,
+  applyEnumeratedSpectraNew(F &&functor,
                          WorkspaceIndex start = WorkspaceIndex{0}) const {
     return ApplyEnumeratedSpectraNew<F>(std::forward<F>(functor),
                                         start)(m_spectra);
