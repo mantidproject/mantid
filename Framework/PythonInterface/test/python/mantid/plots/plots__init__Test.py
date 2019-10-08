@@ -364,6 +364,15 @@ class Plots__init__Test(unittest.TestCase):
         ws_artist = self.ax.tracked_workspaces['out_ws'][0]
         self.assertEqual(3, ws_artist.spec_num)
 
+    def test_that_plotting_ws_without_spec_num_adds_default_spec_num_to_creation_args(self):
+        ws_name = "ws-with-one-spec"
+        ws = CreateWorkspace(DataX=[10, 20],
+                             DataY=[10, 5000],
+                             DataE=[1, 1],
+                             OutputWorkspace=ws_name)
+        self.ax.plot(ws)
+        self.assertEqual(1, self.ax.creation_args[0]['specNum'])
+
     def _run_check_axes_distribution_consistency(self, normalization_states):
         mock_tracked_workspaces = {
             'ws': [

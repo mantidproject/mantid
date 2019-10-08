@@ -65,6 +65,9 @@ def plot_decorator(func):
             # Fill out kwargs with the values of args
             kwargs["workspaces"] = args[0].name()
             kwargs["function"] = func.__name__
+
+            if 'wkspIndex' not in kwargs and 'specNum' not in kwargs:
+                kwargs['specNum'] = MantidAxes.get_spec_number_or_bin(args[0], kwargs)
             if "cmap" in kwargs and isinstance(kwargs["cmap"], Colormap):
                 kwargs["cmap"] = kwargs["cmap"].name
             self.creation_args.append(kwargs)
@@ -282,9 +285,9 @@ class MantidAxes(Axes):
             if MantidAxes.is_axis_of_type(BIN_AXIS, kwargs):
                 return kwargs['wkspIndex']
             # If wanting to plot a spectrum
-            else:
+            elif MantidAxes.is_axis_of_type(SPEC_AXIS, kwargs):
                 return MantidAxes.get_spec_num_from_wksp_index(workspace, kwargs['wkspIndex'])
-        elif workspace.getNumberHistograms() == 1:
+        elif getattr(workspace, 'getNumberHistograms', lambda: -1)() == 1:
             # If the workspace has one histogram, just plot that
             kwargs['wkspIndex'] = 0
             if MantidAxes.is_axis_of_type(BIN_AXIS, kwargs):
@@ -365,7 +368,7 @@ class MantidAxes(Axes):
         if len(tracked_ws_distributions) > 0:
             num_normalized = sum(tracked_ws_distributions)
             if not (num_normalized == 0 or num_normalized == len(tracked_ws_distributions)):
-                logger.warning("You are overlaying distribution and " "non-distribution data!")
+                logger.warning("You are overlaying distribution and non-distribution data!")
 
     def artists_workspace_has_errors(self, artist):
         """Check if the given artist's workspace has errors"""
