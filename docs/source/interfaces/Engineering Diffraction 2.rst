@@ -10,7 +10,7 @@ Interface Overview
 ------------------
 
 This custom interface will integrate several tasks related to engineering
-diffraction. In its current state it provides functionality for createing
+diffraction. In its current state it provides functionality for creating
 new calibration files. This interface is under active development.
 
 General Options

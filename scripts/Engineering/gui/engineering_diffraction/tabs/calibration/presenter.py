@@ -41,8 +41,8 @@ class CalibrationPresenter(object):
         self.worker = AsyncTask(self.model.create_new_calibration, (vanadium_path, calib_path),
                                 {"plot_output": plot_output, "instrument": self.instrument, "rb_num": rb_num},
                                 error_cb=self._on_error, finished_cb=self.enable_calibrate_buttons)
-        self.worker.start()
         self.disable_calibrate_buttons()
+        self.worker.start()
 
     def set_instrument_override(self, instrument):
         if instrument == 0:

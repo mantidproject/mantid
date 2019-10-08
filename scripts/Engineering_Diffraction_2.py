@@ -10,8 +10,6 @@ from Engineering.gui.engineering_diffraction.engineering_diffraction import Engi
 from qtpy import QtCore
 
 
-Name = "Engineering_Diffraction"
-
 if 'engineering_diffraction' in globals():
     eng_diff = globals()['engineering_diffraction']
     if not eng_diff.isHidden():

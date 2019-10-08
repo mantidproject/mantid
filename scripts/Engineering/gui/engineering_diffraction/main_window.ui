@@ -116,6 +116,13 @@
    </layout>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>lineEdit_RBNumber</tabstop>
+  <tabstop>comboBox_instrument</tabstop>
+  <tabstop>tab_main</tabstop>
+  <tabstop>pushButton_help</tabstop>
+  <tabstop>pushButton_close</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
