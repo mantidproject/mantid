@@ -1045,22 +1045,6 @@ double IndexingUtils::Optimize_6dUB(DblMatrix &UB, DblMatrix &ModUB,
     throw std::runtime_error("Optimize_UB(): The optimized UB is not valid");
   }
 
-  // ModHKL values must be in the range -0.5 < q <= 0.5, they are equivalent so
-  // this will force a unique solution. First get ModHKL from UB and ModUB where
-  // ModUB=UB*ModHKL
-  auto UBinv = UB;
-  UBinv.Invert();
-  auto modHKL = UBinv * ModUB;
-  // Loop over values in the ModHKL and set to correct range
-  for (size_t row = 0; row < 3; row++) {
-    for (size_t col = 0; col < 3; col++) {
-      // set modHKL componets to the range -0.5 < q < 0.5
-      modHKL[row][col] = fmod(fmod(modHKL[row][col] + 0.5, 1.) - 1., 1.) + 0.5;
-    }
-  }
-  // calculate new ModUB from ModHKL and UB
-  ModUB = UB * modHKL;
-
   return sum_sq_error;
 }
 
