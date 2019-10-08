@@ -32,16 +32,15 @@ public:
     m_loadRunObservable->attach(listener);
   };
   void warningBox(const std::string &message);
-  void observeExtractSingleTube(Observer *listner) {
-    m_extractSingleTubeObservable->attach(listner);
-  }
-  void observeAverageTube(Observer *listner) {
-    m_averageTubeObservable->attach(listner);
-  }
+  void observeExtractSingleTube(Observer *listner);
+  void observeAverageTube(Observer *listner);
+  
   void setUpInstrument(
       const std::string fileName,
-      std::function<bool(std::map<std::string, bool>)> &extractBinder,
-      std::function<bool(std::map<std::string, bool>)> &averageBinder);
+      std::vector<std::function<bool(std::map<std::string, bool>)>> &binders);
+
+  void addObserver(std::tuple<std::string, Observer *> &listener);
+
 public slots:
   void fileLoaded();
 void extractSingleTube();

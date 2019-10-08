@@ -12,6 +12,7 @@
 #include "ALFView_view.h"
 #include "DllConfig.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
+#include "MantidQtWidgets/Common/ObserverPattern.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -25,6 +26,8 @@ public:
   ~ALFView() {
     delete m_presenter;
     delete m_model;
+    delete m_extractSingleTubeObserver;
+    delete m_averageTubeObserver;
   };
   static std::string name() { return "ALF View"; }
   static QString categoryInfo() { return "Direct"; }
@@ -33,9 +36,21 @@ protected:
   void initLayout() override;
 
 private:
+
+typedef std::pair < std::string,
+      std::vector<std::function<bool(std::map<std::string, bool>)>>>
+          instrumentSetUp;
+  typedef std::vector<std::tuple<std::string, Observer *>>
+      instrumentObserverOptions;
+
+  std::pair<instrumentSetUp, instrumentObserverOptions> initInstrument();
+
   ALFView_view *m_view;
   ALFView_model *m_model;
   ALFView_presenter *m_presenter;
+  VoidObserver *m_extractSingleTubeObserver;
+  VoidObserver *m_averageTubeObserver;
+
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

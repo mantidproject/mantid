@@ -19,15 +19,15 @@ ALFView_view::ALFView_view(const std::string &instrument, QWidget *parent)
     : QSplitter(Qt::Vertical, parent), m_loadRunObservable(nullptr),
       m_files(nullptr), m_instrument(QString::fromStdString(instrument)),
       m_extractSingleTubeObservable(nullptr), m_averageTubeObservable(nullptr),
-      m_instrumentWidget(nullptr), m_extractAction(nullptr), m_averageAction (nullptr){
+      m_instrumentWidget(nullptr), m_extractAction(nullptr),
+      m_averageAction(nullptr) {
   auto loadWidget = generateLoadWidget();
   this->addWidget(loadWidget);
 }
 
 void ALFView_view::setUpInstrument(
     std::string fileName,
-    std::function<bool(std::map<std::string, bool>)> &extractBinder,
-    std::function<bool(std::map<std::string, bool>)> &averageBinder) {
+    std::vector<std::function<bool(std::map<std::string, bool>)>> &binders) {
 
   m_extractSingleTubeObservable = new Observable();
   m_averageTubeObservable = new Observable();
@@ -42,13 +42,13 @@ void ALFView_view::setUpInstrument(
   connect(m_extractAction, SIGNAL(triggered()), this,
           SLOT(extractSingleTube())),
       m_instrumentWidget->getPickTab()->addToContextMenu(m_extractAction,
-                                         extractBinder);
+                                                         binders[0]);
 
   // set up add to average
   m_averageAction = new QAction("Add Tube To Average", this);
   connect(m_averageAction, SIGNAL(triggered()), this, SLOT(averageTube())),
       m_instrumentWidget->getPickTab()->addToContextMenu(m_averageAction,
-                                         averageBinder);
+                                                         binders[1]);
 }
 
 QWidget *ALFView_view::generateLoadWidget() {
@@ -112,6 +112,21 @@ void ALFView_view::extractSingleTube() {
 void ALFView_view::averageTube() {
   m_instrumentWidget->getPickTab()->savePlotToWorkspace();
   m_averageTubeObservable->notify();
+}
+
+void ALFView_view::observeExtractSingleTube(Observer *listner) {
+  m_extractSingleTubeObservable->attach(listner);
+}
+void ALFView_view::observeAverageTube(Observer *listner) {
+  m_averageTubeObservable->attach(listner);
+}
+
+void ALFView_view::addObserver(std::tuple<std::string, Observer *> &listener) {
+  if (std::get<0>(listener) == "singleTube") {
+    observeExtractSingleTube(std::get<1>(listener));
+  } else if (std::get<0>(listener) == "averageTube") {
+    observeAverageTube(std::get<1>(listener));
+  }
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -7,7 +7,7 @@
 #ifndef MANTIDQT_CUSTOMINTERFACES_ALFVIEWPRESENTER_H_
 #define MANTIDQT_CUSTOMINTERFACES_ALFVIEWPRESENTER_H_
 
-#include "ALFView_model.h"
+#include "BaseInstrumentModel.h"
 #include "ALFView_view.h"
 #include "DllConfig.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
@@ -22,28 +22,30 @@ class MANTIDQT_DIRECT_DLL ALFView_presenter : public QObject {
   Q_OBJECT
 
 public:
-  ALFView_presenter(ALFView_view *view, ALFView_model *model);
+  ALFView_presenter(ALFView_view *view, BaseInstrumentModel *model);
   ~ALFView_presenter() { delete m_loadRunObserver; };
-  void initLayout();
+
+  typedef std::pair<std::string,
+                     std::vector<std::function<bool(std::map<std::string, bool>)>>>
+      instrumentSetUp;
+  typedef std::vector<std::tuple<std::string, Observer *>>
+      instrumentObserverOptions;
+
+  void initLayout(std::pair<instrumentSetUp, instrumentObserverOptions> *setUp = nullptr);
 
 private slots:
   void loadRunNumber();
 
 private:
   void loadAndAnalysis(const std::string &run);
-  void initInstrument();
-  bool extractTubeConditon(std::map<std::string, bool> tabBools);
-  bool averageTubeConditon(std::map<std::string, bool> tabBools);
-  void extractSingleTube();
-  void averageTube();
+  void initInstrument(std::pair<instrumentSetUp, instrumentObserverOptions> *setUp);
+
   ALFView_view *m_view;
-  ALFView_model *m_model;
+  BaseInstrumentModel *m_model;
   int m_currentRun;
   std::string m_currentFile;
   VoidObserver *m_loadRunObserver;
-  int m_numberOfTubesInAverage;
-  VoidObserver *m_extractSingleTubeObserver;
-  VoidObserver *m_averageTubeObserver;
+
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

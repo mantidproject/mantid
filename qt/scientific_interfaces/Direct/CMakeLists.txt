@@ -2,7 +2,8 @@ set(SRC_FILES
     ALFView.cpp
     ALFView_view.cpp
     ALFView_presenter.cpp
-    ALFView_model.cpp)
+    ALFView_model.cpp
+	BaseInstrumentModel.cpp)
 
 set(MOC_FILES
     ALFView.h

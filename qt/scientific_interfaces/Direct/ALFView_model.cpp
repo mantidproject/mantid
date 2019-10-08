@@ -19,10 +19,6 @@
 #include <utility>
 
 namespace {
-const std::string TMPNAME = "ALF_tmp";
-const std::string INSTRUMENTNAME = "ALF";
-const std::string WSNAME = "ALFData";
-const int ERRORCODE = -999;
 const std::string EXTRACTEDWS = "extractedTubes_";
 const std::string CURVES = "Curves";
 } // namespace
@@ -31,14 +27,13 @@ using namespace Mantid::API;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-void ALFView_model::loadEmptyInstrument() {
-  auto alg =
-      Mantid::API::AlgorithmManager::Instance().create("LoadEmptyInstrument");
-  alg->initialize();
-  alg->setProperty("OutputWorkspace", WSNAME);
-  alg->setProperty("InstrumentName", INSTRUMENTNAME);
-  alg->execute();
+ALFView_model::ALFView_model()
+    : m_numberOfTubesInAverage(0) {
+  setTmpName("ALF_tmp");
+  setInstrumentName("ALF");
+  setWSName("ALFData");
 }
+
 /*
  * Loads data for use in ALFView
  * Loads data, normalise to current and then converts to d spacing
@@ -49,10 +44,10 @@ std::pair<int, std::string> ALFView_model::loadData(const std::string &name) {
   auto alg = AlgorithmManager::Instance().create("Load");
   alg->initialize();
   alg->setProperty("Filename", name);
-  alg->setProperty("OutputWorkspace", TMPNAME); // write to tmp ws
+  alg->setProperty("OutputWorkspace", getTmpName()); // write to tmp ws
   alg->execute();
   auto ws =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(TMPNAME);
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(getTmpName());
   int runNumber = ws->getRunNumber();
   std::string message = "success";
   auto bools = isDataValid();
@@ -61,7 +56,7 @@ std::pair<int, std::string> ALFView_model::loadData(const std::string &name) {
 
   } else {
     // reset to the previous data
-    message = "Not the corrct instrument, expected " + INSTRUMENTNAME;
+    message = "Not the corrct instrument, expected " + getInstrumentName();
     remove();
   }
   if (bools["IsValidInstrument"] && !bools["IsItDSpace"]) {
@@ -76,11 +71,11 @@ std::pair<int, std::string> ALFView_model::loadData(const std::string &name) {
  */
 std::map<std::string, bool> ALFView_model::isDataValid() {
   auto ws =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(TMPNAME);
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(getTmpName());
   bool isItALF = false;
   bool isItDSpace = false;
 
-  if (ws->getInstrument()->getName() == INSTRUMENTNAME) {
+  if (ws->getInstrument()->getName() == getInstrumentName()) {
     isItALF = true;
   }
   auto axis = ws->getAxis(0);
@@ -96,43 +91,20 @@ std::map<std::string, bool> ALFView_model::isDataValid() {
  * If already d-space does nothing.
  */
 void ALFView_model::transformData() {
+  const std::string wsName = getWSName();
   auto normAlg = AlgorithmManager::Instance().create("NormaliseByCurrent");
   normAlg->initialize();
-  normAlg->setProperty("InputWorkspace", WSNAME);
-  normAlg->setProperty("OutputWorkspace", WSNAME);
+  normAlg->setProperty("InputWorkspace", wsName);
+  normAlg->setProperty("OutputWorkspace", wsName);
   normAlg->execute();
 
   auto dSpacingAlg = AlgorithmManager::Instance().create("ConvertUnits");
   dSpacingAlg->initialize();
-  dSpacingAlg->setProperty("InputWorkspace", WSNAME);
+  dSpacingAlg->setProperty("InputWorkspace", wsName);
   dSpacingAlg->setProperty("Target", "dSpacing");
-  dSpacingAlg->setProperty("OutputWorkspace", WSNAME);
+  dSpacingAlg->setProperty("OutputWorkspace", wsName);
   dSpacingAlg->execute();
 }
-
-void ALFView_model::rename() {
-  AnalysisDataService::Instance().rename(TMPNAME, WSNAME);
-}
-void ALFView_model::remove() {
-  AnalysisDataService::Instance().remove(TMPNAME);
-}
-
-std::string ALFView_model::dataFileName() { return WSNAME; }
-
-int ALFView_model::currentRun() {
-  try {
-
-    auto ws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(WSNAME);
-    return ws->getRunNumber();
-  } catch (...) {
-    return ERRORCODE;
-  }
-}
-
-bool ALFView_model::isErrorCode(const int run) { return (run == ERRORCODE); }
-
-std::string ALFView_model::getInstrument() { return INSTRUMENTNAME; }
 
 void ALFView_model::storeSingleTube(const std::string &name) {
   auto alg = AlgorithmManager::Instance().create("ScaleX");
@@ -151,12 +123,13 @@ void ALFView_model::storeSingleTube(const std::string &name) {
   AnalysisDataService::Instance().remove(CURVES);
 }
 
-void ALFView_model::averageTube(const int &oldTotalNumber,
-                                const std::string &name) {
+void ALFView_model::averageTube() {
+  const std::string name = getInstrumentName() + std::to_string(getCurrentRun());
+  const int oldTotalNumber = m_numberOfTubesInAverage;
   // multiply up current average
   auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       EXTRACTEDWS + name);
-  ws->mutableY(0) * double(oldTotalNumber);
+  ws*=double(oldTotalNumber);
 
   // get the data to add
   storeSingleTube(name);
@@ -180,11 +153,45 @@ void ALFView_model::averageTube(const int &oldTotalNumber,
                                                                    name);
   ws->mutableY(0) /= (double(oldTotalNumber) + 1.0);
   AnalysisDataService::Instance().addOrReplace(EXTRACTEDWS + name, ws);
+  m_numberOfTubesInAverage++;
 }
 
 bool ALFView_model::hasTubeBeenExtracted(const std::string &name) {
   return AnalysisDataService::Instance().doesExist(EXTRACTEDWS + name);
 }
+
+bool ALFView_model::extractTubeConditon(
+    std::map<std::string, bool> tabBools) {
+  try {
+
+    bool ifCurve = (tabBools.find("plotStroed")->second ||
+                    tabBools.find("hasCurve")->second);
+    return (tabBools.find("isTube")->second && ifCurve);
+  } catch (...) {
+    return false;
+  }
+}
+
+bool ALFView_model::averageTubeConditon(
+    std::map<std::string, bool> tabBools) {
+  try {
+
+    bool ifCurve = (tabBools.find("plotStroed")->second ||
+                    tabBools.find("hasCurve")->second);
+    return (m_numberOfTubesInAverage > 0 && tabBools.find("isTube")->second &&
+            ifCurve &&
+            hasTubeBeenExtracted(getInstrumentName() +
+                                 std::to_string(getCurrentRun())));
+  } catch (...) {
+    return false;
+  }
+}
+void ALFView_model::extractSingleTube() {
+  storeSingleTube(getInstrumentName() + std::to_string(getCurrentRun()));
+  m_numberOfTubesInAverage = 1;
+}
+
+
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
