@@ -295,10 +295,25 @@ void PredictFractionalPeaks::init() {
 
 std::map<std::string, std::string> PredictFractionalPeaks::validateInputs() {
   std::map<std::string, std::string> helpMessages;
-  PeaksWorkspace_sptr peaks = getProperty(PropertyNames::PEAKS);
-  if (peaks->getNumberPeaks() <= 0) {
+  const PeaksWorkspace_sptr peaks = getProperty(PropertyNames::PEAKS);
+  if (peaks && peaks->getNumberPeaks() <= 0) {
     helpMessages[PropertyNames::PEAKS] = "Input workspace has no peaks.";
   }
+
+  auto validateRange = [&helpMessages, this](const std::string &minName,
+                                             const std::string &maxName) {
+    const double min{getProperty(minName)}, max{getProperty(maxName)};
+    if (max < min) {
+      const std::string helpMsg = "Inconsistent " + minName + "/" + maxName +
+                                  ": " + maxName + " < " + minName;
+      helpMessages[minName] = helpMsg;
+      helpMessages[maxName] = helpMsg;
+    }
+  };
+  validateRange(PropertyNames::HMIN, PropertyNames::HMAX);
+  validateRange(PropertyNames::KMIN, PropertyNames::KMAX);
+  validateRange(PropertyNames::LMIN, PropertyNames::LMAX);
+
   return helpMessages;
 }
 

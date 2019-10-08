@@ -164,7 +164,34 @@ public:
     TS_ASSERT(valueIter != helpMsgs.cend())
   }
 
+  void test_inconsistent_H_range_gives_validation_error() {
+    doInvalidRangeTest("H");
+  }
+
+  void test_inconsistent_K_range_gives_validation_error() {
+    doInvalidRangeTest("K");
+  }
+
+  void test_inconsistent_L_range_gives_validation_error() {
+    doInvalidRangeTest("L");
+  }
+
 private:
+  void doInvalidRangeTest(const std::string &dimension) {
+    PredictFractionalPeaks alg;
+    alg.initialize();
+    const std::string minName{dimension + "min"}, maxName{dimension + "max"};
+    alg.setProperty(minName, 8.0);
+    alg.setProperty(maxName, -8.0);
+
+    auto helpMsgs = alg.validateInputs();
+
+    const auto minError = helpMsgs.find(minName);
+    TS_ASSERT(minError != helpMsgs.cend())
+    const auto maxError = helpMsgs.find(maxName);
+    TS_ASSERT(maxError != helpMsgs.cend())
+  }
+
   PeaksWorkspace_sptr m_indexedPeaks;
 };
 
