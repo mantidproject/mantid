@@ -868,18 +868,25 @@ void LoadMuonNexus1::addGoodFrames(DataObjects::Workspace2D_sptr localWorkspace,
         // If this is the first period
         // localWorkspace will not contain goodfrm
         run.addProperty("goodfrm", dataVals[0]);
+        if (run.getProperty("goodfrm")->value() == "0") {
+          run.removeLogData("goodfrm");
+          run.addProperty("goodfrm", 100);
+				}
 
       } else {
         // If period > 0, we need to remove
         // previous goodfrm log value
         run.removeLogData("goodfrm");
         run.addProperty("goodfrm", dataVals[period]);
+        if (run.getProperty("goodfrm")->value() == "0") {
+          run.removeLogData("goodfrm");
+          run.addProperty("goodfrm", 100);
+        }
       }
     } catch (::NeXus::Exception &) {
       g_log.warning("Could not read /run/instrument/beam/frames_period_daq");
     }
   } // else
-
   handle.close();
 }
 
