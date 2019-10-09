@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -10,16 +10,17 @@ from Engineering.gui.engineering_diffraction.engineering_diffraction import Engi
 from qtpy import QtCore
 
 
+# Check if the interface is loaded and if so show it while maintaining its state.
 if 'engineering_diffraction' in globals():
-    eng_diff = globals()['engineering_diffraction']
-    if not eng_diff.isHidden():
-        eng_diff.setWindowState(
-            eng_diff.windowState(
-            ) & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)
-        eng_diff.activateWindow()
+    engineering_diffraction = globals()['engineering_diffraction']
+    # Restore a minimised window.
+    if not engineering_diffraction.isHidden():
+        engineering_diffraction.setWindowState(engineering_diffraction.windowState() & ~QtCore.Qt.WindowMinimized
+                                               | QtCore.Qt.WindowActive)
+        engineering_diffraction.activateWindow()
     else:
-        eng_diff = EngineeringDiffractionGui()
-        eng_diff.show()
-else:
-    eng_diff = EngineeringDiffractionGui()
-    eng_diff.show()
+        engineering_diffraction = EngineeringDiffractionGui()
+        engineering_diffraction.show()
+else:  # Reload GUI if not currently loaded.
+    engineering_diffraction = EngineeringDiffractionGui()
+    engineering_diffraction.show()
