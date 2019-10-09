@@ -38,7 +38,8 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly,
       m_sliceViewer(new QAction("Show Slice Viewer", this)),
       m_showInstrument(new QAction("Show Instrument", this)),
       m_showData(new QAction("Show Data", this)),
-      m_showAlgorithmHistory(new QAction("Show History", this)) {
+      m_showAlgorithmHistory(new QAction("Show History", this)),
+      m_showDetectors(new QAction("Show Detectors", this)) {
 
   // Replace the double click action on the MantidTreeWidget
   m_tree->m_doubleClickAction = [&](QString wsName) {
@@ -65,6 +66,8 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly,
           SIGNAL(treeSelectionChanged()));
   connect(m_showAlgorithmHistory, SIGNAL(triggered()), this,
           SLOT(onShowAlgorithmHistoryClicked()));
+  connect(m_showDetectors, SIGNAL(triggered()), this,
+          SLOT(onShowDetectorsClicked()));
 }
 
 WorkspaceTreeWidgetSimple::~WorkspaceTreeWidgetSimple() {}
@@ -114,6 +117,7 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
           !matrixWS->getInstrument()->getName().empty());
       menu->addAction(m_sampleLogs);
       menu->addAction(m_sliceViewer);
+      menu->addAction(m_showDetectors);
     } else if (boost::dynamic_pointer_cast<ITableWorkspace>(workspace)) {
       menu->addAction(m_showData);
       menu->addAction(m_showAlgorithmHistory);
@@ -173,6 +177,10 @@ void WorkspaceTreeWidgetSimple::onShowDataClicked() {
 
 void WorkspaceTreeWidgetSimple::onShowAlgorithmHistoryClicked() {
   emit showAlgorithmHistoryClicked(getSelectedWorkspaceNamesAsQList());
+}
+
+void WorkspaceTreeWidgetSimple::onShowDetectorsClicked() {
+  emit showDetectorsClicked(getSelectedWorkspaceNamesAsQList());
 }
 
 } // namespace MantidWidgets

@@ -16,6 +16,7 @@ from qtpy.QtWidgets import QMessageBox, QVBoxLayout
 from mantid.api import AnalysisDataService, WorkspaceGroup
 from mantid.kernel import logger
 from mantidqt.plotting.functions import can_overplot, pcolormesh, plot, plot_from_names
+from mantid.simpleapi import CreateDetectorTable
 from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
 from mantidqt.widgets.samplelogs.presenter import SampleLogs
 from mantidqt.widgets.sliceviewer.presenter import SliceViewer
@@ -55,6 +56,7 @@ class WorkspaceWidget(PluginWidget):
         self.workspacewidget.showDataClicked.connect(self._do_show_data)
         self.workspacewidget.showInstrumentClicked.connect(self._do_show_instrument)
         self.workspacewidget.showAlgorithmHistoryClicked.connect(self._do_show_algorithm_history)
+        self.workspacewidget.showDetectorsClicked.connect(self._do_show_detectors)
 
         self.workspacewidget.workspaceDoubleClicked.connect(self._action_double_click_workspace)
 
@@ -180,6 +182,10 @@ class WorkspaceWidget(PluginWidget):
                     logger.warning("Could not open history of '{}'. "
                                    "".format(name))
                     logger.warning("{}: {}".format(type(exception).__name__, exception))
+
+    def _do_show_detectors(self, names):
+        for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
+            CreateDetectorTable(InputWorkspace=ws)
 
     def _action_double_click_workspace(self, name):
         try:
