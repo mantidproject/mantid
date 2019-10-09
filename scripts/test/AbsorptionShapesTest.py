@@ -10,7 +10,7 @@ from mantid.simpleapi import *
 from mantid import api
 import unittest
 import numpy as np
-from AbsorptionShapes import (anAbsorptionShape,Cylinder)
+from AbsorptionShapes import (anAbsorptionShape,Cylinder,Plate)
 
 class AdsorbtionShapesTest(unittest.TestCase):
     def __init__(self, methodName):
@@ -58,23 +58,57 @@ class AdsorbtionShapesTest(unittest.TestCase):
 
     def test_adsrp_cylinder(self):
         ash = Cylinder('V',[10,2])
-        res = ash.cylinder_shape
+        res = ash.shape
         self.assertEqual(res['Height'],10)
         self.assertEqual(res['Radius'],2)
 
-        ash.cylinder_shape = [5,1,[0,1,0],[0.,0.,-0.5]]
-        res = ash.cylinder_shape;
+        ash.shape = [5,1,[0,1,0],[0.,0.,-0.5]]
+        res = ash.shape;
         self.assertEqual(res['Height'],5)
         self.assertEqual(res['Radius'],1)
         self.assertEqual(res['Axis'],[0,1,0])
         self.assertEqual(res['Center'],[0,0,-0.5])
 
-        ash.cylinder_shape = {'Height':50,'Radius':10,'Axis':[1,1,0],'Center':[0.,0.,0.]}
-        res = ash.cylinder_shape;
+        ash.shape = {'Height':50,'Radius':10,'Axis':[1,1,0],'Center':[0.,0.,0.]}
+        res = ash.shape;
         self.assertEqual(res['Height'],50)
         self.assertEqual(res['Radius'],10)
         self.assertEqual(res['Axis'],[1,1,0])
         self.assertEqual(res['Center'],[0,0,0])
+
+        test_ws = CreateSampleWorkspace()
+        test_ws = ConvertUnits(test_ws,'DeltaE',Emode='Direct',EFixed=2000)
+        cor_ws,corrections = ash.correct_absorption(test_ws)
+        n_bins = corrections.blocksize()
+        corr_ranges = [n_bins,corrections.readY(0)[0],corrections.readY(0)[n_bins-1]]
+        np.testing.assert_almost_equal(corr_ranges,[97,0.0006,0],4)
+        mccor_ws,mc_corr = ash.correct_absorption(test_ws,is_mc=True,NumberOfWavelengthPoints=20)
+        n_bins = mc_corr.blocksize()
+        mccorr_ranges = [n_bins,mc_corr.readY(0)[0],mc_corr.readY(0)[n_bins-1]]
+        np.testing.assert_almost_equal(mccorr_ranges ,[97,0.0042,0.0001],4)
+
+    def test_adsrp_Plate(self):
+        ash = FlatPlate('V',[10,2,0.1])
+        res = ash.shape
+        self.assertEqual(res['Height'],10)
+        self.assertEqual(res['Width'],2)
+        self.assertEqual(res['Thick'],0.1)
+
+        ash.shape = [5,1,0.2,[0,1,0],10]
+        res = ash.shape;
+        self.assertEqual(res['Height'],5)
+        self.assertEqual(res['Width'],1)
+        self.assertEqual(res['Thick'],0.2)
+        self.assertEqual(res['Center'],[0,1,0])
+        self.assertEqual(res['Angle'],10)
+
+        ash.shape = {'Height':50,'Width':10,'Thick':2,'Center':[0.,0.,0.],'Angle':20}
+        res = ash.shape;
+        self.assertEqual(res['Height'],50)
+        self.assertEqual(res['Width'],10)
+        self.assertEqual(res['Thick'],2)
+        self.assertEqual(res['Center'],[0,0,0])
+        self.assertEqual(res['Angle'],20)
 
         test_ws = CreateSampleWorkspace()
         test_ws = ConvertUnits(test_ws,'DeltaE',Emode='Direct',EFixed=2000)
