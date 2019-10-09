@@ -76,13 +76,14 @@ class FitIncidentSpectrum(PythonAlgorithm):
         self._binning_for_calc = self.getProperty('BinningForCalc').value
         self._binning_for_fit = self.getProperty('BinningForFit').value
         self._fit_spectrum_with = self.getProperty('FitSpectrumWith').value
-        if self._binning_for_calc.size == 0:
-            x = self._input_ws.readX(0)
-            self._binning_for_calc = [i for i in [min(x), x[1] - x[0], max(x) + x[1] - x[0]]]
 
     def PyExec(self):
         self._setup()
-        x = np.arange(self._binning_for_calc[0], self._binning_for_calc[2], self._binning_for_calc[1])
+        if self._binning_for_calc.size == 0:
+            x = np.array(self._input_ws.readX(self._incident_index))
+            self._binning_for_calc = [i for i in [min(x), x[1] - x[0], max(x) + x[1] - x[0]]]
+        else:
+            x = np.arange(self._binning_for_calc[0], self._binning_for_calc[2], self._binning_for_calc[1])
         if self._binning_for_fit.size == 0:
             x_fit = np.array(self._input_ws.readX(self._incident_index))
             y_fit = np.array(self._input_ws.readY(self._incident_index))
@@ -100,7 +101,7 @@ class FitIncidentSpectrum(PythonAlgorithm):
 
         if self._fit_spectrum_with == 'CubicSpline':
             # Fit using cubic spline
-            fit, fit_prime = self.fit_cubic_spline(x_fit, y_fit, x, s=1e7)
+            fit, fit_prime = self.fit_cubic_spline(x_fit, y_fit, x[:-1], s=1e7)
         elif self._fit_spectrum_with == 'CubicSplineViaMantid':
             # Fit using cubic spline via Mantid
             fit, fit_prime = self.fit_cubic_spline_via_mantid_spline_smoothing(
@@ -111,7 +112,7 @@ class FitIncidentSpectrum(PythonAlgorithm):
                 MaxNumberOfBreaks=0)
         elif self._fit_spectrum_with == 'GaussConvCubicSpline':
             # Fit using Gauss conv cubic spline
-            fit, fit_prime = self.fit_cubic_spline_with_gauss_conv(x_fit, y_fit, x, sigma=0.5)
+            fit, fit_prime = self.fit_cubic_spline_with_gauss_conv(x_fit, y_fit, x[:-1], sigma=0.5)
 
         # Create output workspace
         unit = self._input_ws.getAxis(0).getUnit().unitID()

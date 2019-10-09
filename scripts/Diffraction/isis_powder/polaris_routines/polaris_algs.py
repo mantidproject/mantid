@@ -93,7 +93,7 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None,
                                                 Filter=True)
         pdf_output = mantid.RebinToWorkspace(WorkspaceToRebin=pdf_output, WorkspaceToMatch=pdf_output[4],
                                              PreserveEvents=True)
-    common.remove_intermediate_workspace(focused_ws)
+    common.remove_intermediate_workspace('focused_ws')
     return pdf_output
 
 
@@ -124,41 +124,39 @@ def _obtain_focused_run(run_number, focus_file_path):
 
 
 def _generate_grouped_ts_pdf(run_number, focused_ws, q_lims, cal_file_name, sample_details):
+    focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, Target="MomentumTransfer", EMode='Elastic')
+    min_x = np.inf
+    max_x = -np.inf
+    num_x = -np.inf
+    for ws in focused_ws:
+        x_data = ws.dataX(0)
+        min_x = min(np.min(x_data), min_x)
+        max_x = max(np.max(x_data), max_x)
+        num_x = max(x_data.size, num_x)
+    binning = [min_x, (max_x-min_x)/num_x, max_x]
+    focused_ws = mantid.Rebin(InputWorkspace=focused_ws, Params=binning)
+    focused_data_combined = mantid.ConjoinSpectra(InputWorkspaces=focused_ws)
+    mantid.ConvertFromDistribution(Workspace=focused_data_combined)
     raw_ws = mantid.LoadRaw(Filename='POL'+str(run_number))
     mantid.SetSample(InputWorkspace=raw_ws,
                      Geometry=common.generate_sample_geometry(sample_details),
                      Material=common.generate_sample_material(sample_details))
-    fit_spectra = mantid.FitIncidentSpectrum(InputWorkspace=raw_ws,
-                                             SpectrumIndex=11,
-                                             FitSpectrumWith="GaussConvCubicSpline")
-    placzek_self_scattering = mantid.CalculatePlaczekSelfScattering(InputWorkspace=fit_spectra)
-    cal_workspace = mantid.LoadCalFile(InputWorkspace=placzek_self_scattering,
-                                       CalFileName=cal_file_name,
-                                       Workspacename='cal_workspace',
-                                       MakeOffsetsWorkspace=False,
-                                       MakeMaskWorkspace=False)
-    for i in range(focused_ws.getNumberOfEntries()):
-        focused_correction = None
-        axis = focused_ws.getItem(i).getAxis(0)
-        unit = axis.getUnit().unitID()
-        for spec_index in range(placzek_self_scattering.getNumberHistograms()):
-            if cal_workspace.dataY(spec_index)[0] == i + 1:
-                if focused_correction is None:
-                    focused_correction = placzek_self_scattering.dataY(spec_index)
-                #else:
-                    #focused_correction = np.add(focused_correction, placzek_self_scattering.dataY(spec_index))
-        focused_correction_ws = mantid.CreateWorkspace(DataX=placzek_self_scattering.dataX(0),
-                                                       DataY=focused_correction,
-                                                       Distribution=True,
-                                                       UnitX=unit)
-        mantid.RebinToWorkspace(WorkspaceToRebin=focused_correction_ws,
-                                WorkspaceToMatch=focused_ws.getItem(i),
-                                OutputWorkspace=focused_correction_ws)
-        mantid.Subtract(LHSWorkspace=focused_ws.getItem(i),
-                        RHSWorkspace=focused_correction_ws,
-                        OutputWorkspace=focused_ws.getItem(i))
-    focused_data_combined = mantid.ConjoinSpectra(InputWorkspaces=focused_ws)
-    focused_data_combined = mantid.ConvertUnits(InputWorkspace=focused_data_combined, Target="MomentumTransfer")
+
+    monitor = mantid.ExtractSpectra(InputWorkspace=raw_ws, WorkspaceIndexList=[11])
+
+    fit_spectra = mantid.FitIncidentSpectrum(InputWorkspace=monitor, FitSpectrumWith="GaussConvCubicSpline")
+    placzek = mantid.CalculatePlaczekSelfScattering(InputWorkspace=raw_ws, IncidentSpecta=fit_spectra)
+    mantid.ConvertFromDistribution(Workspace=placzek)
+    placzek = mantid.AlignDetectors(InputWorkspace=placzek, CalibrationFile=cal_file_name)
+    placzek = mantid.DiffractionFocussing(InputWorkspace=placzek, GroupingFileName=cal_file_name)
+    placzek = mantid.ConvertUnits(InputWorkspace=placzek, Target="MomentumTransfer", EMode='Elastic')
+    mantid.RebinToWorkspace(WorkspaceToRebin=placzek,
+                            WorkspaceToMatch=focused_data_combined,
+                            OutputWorkspace=placzek)
+    mantid.Subtract(LHSWorkspace=focused_data_combined,
+                    RHSWorkspace=placzek,
+                    OutputWorkspace=focused_data_combined)
+
     mantid.MatchSpectra(InputWorkspace=focused_data_combined,
                         OutputWorkspace=focused_data_combined,
                         ReferenceSpectrum=5)
@@ -190,17 +188,14 @@ def _generate_grouped_ts_pdf(run_number, focused_ws, q_lims, cal_file_name, samp
                                          Params=[min(q_min), bin_width, max(q_max)])
     focused_data_combined = mantid.SumSpectra(InputWorkspace=focused_data_combined,
                                               WeightedSum=True,
-                                             MultiplyBySpectra=False)
+                                              MultiplyBySpectra=False)
     pdf_output = mantid.PDFFourierTransform(Inputworkspace=focused_data_combined,
                                             InputSofQType="S(Q)",
                                             PDFType="G(r)",
                                             Filter=True)
 
-    #common.remove_intermediate_workspace(cal_workspace)
-    #common.remove_intermediate_workspace(fit_spectra)
-    #common.remove_intermediate_workspace(focused_correction_ws)
-    #common.remove_intermediate_workspace(placzek_self_scattering)
-    #common.remove_intermediate_workspace(raw_ws)
+    common.remove_intermediate_workspace(fit_spectra)
+    common.remove_intermediate_workspace(monitor)
     return pdf_output
 
 
