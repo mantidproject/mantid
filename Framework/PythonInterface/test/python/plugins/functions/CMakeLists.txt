@@ -34,7 +34,11 @@ set(TEST_PY_FILES
     TeixeiraWaterTest.py
     TFMuoniumTest.py
     TriangleOscTest.py
-    ZFMuoniumTest.py)
+    ZFMuoniumTest.py
+    TFMuoniumTest.py
+    ZFdipoleTest.py
+    ZFprotonDipoleTest.py
+    ZFelectronDipoleTest.py)
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
 
