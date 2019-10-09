@@ -13,8 +13,6 @@ from mantid.api import (AlgorithmManager, Algorithm)
 import random
 
 
-
-
 class anAbsorptionShape(object):
     """ The parent class for all shapes, used to perform various absorption corrections
     in direct inelastic analysis.
@@ -184,15 +182,14 @@ class anAbsorptionShape(object):
         return adsrbtn_correctios
 
 
-
-
     def mc_abs_corrections(self,correction_base_ws,kwarg={}):
         """ Method to correct adsorption on a shape using Mont-Carlo integration
         Inputs:
          ws     -- workspace to correct. Should be in the units of wavelength
         **kwarg -- dictionary of the additional keyword arguments to provide as input for
                 the absorption corrections algorithm
-                These arguments should not be related to the sample as the sample should already be defined.
+                These arguments should not be related to the sample as the sample should 
+                already be defined.
         Returns: 
             workspace with absorption corrections.
         """
@@ -202,7 +199,10 @@ class anAbsorptionShape(object):
         raise RuntimeError('This option is not yet implemented')
     #
     def _set_shape_property(self,value,shape_name,mandatory_prop_list,opt_prop_list,opt_val_list):
-        """ General function to build shape property"""
+        """ General function to build shape property for various absorption corrections algorithms
+            taking it from various forms of users input and converting it into standard shape
+            dictionary.
+        """
         if value is None:
             return {}
         n_elements = len(value)
@@ -242,7 +242,7 @@ class anAbsorptionShape(object):
         return shape_dict
 
 
-
+##---------------------------------------------------------------------------------------------------
 class Cylinder(anAbsorptionShape):
     """Define the absorbing cylinder and calculate absorption corrections for this cylinder
     
@@ -283,7 +283,7 @@ class Cylinder(anAbsorptionShape):
     @shape.setter
     def shape(self,value):
         shape_dict = self._set_shape_property(value,'Cylinder',['Height','Radius'],\
-            ['Axis','Center'],[[0,1,0],[0,0,0]])
+            ['Axis','Center'],[[0.,1.,0.],[0.,0.,0.]])
 
         self._ShapeDescription = shape_dict
     #
@@ -292,12 +292,12 @@ class Cylinder(anAbsorptionShape):
         """
         adsrbtn_correctios = CylinderAbsorption(correction_base_ws,**kwarg)
         return adsrbtn_correctios
-
+##---------------------------------------------------------------------------------------------------
 class FlatPlate(anAbsorptionShape):
-    """Define the absorbing plate and calculate absorption corrections from this cylinder
+    """Define the absorbing plate and calculate absorption corrections from this plate
     
     Usage:
-    abs = Plate(SampleMaterial,PlateParameters)
+    abs = FlatPlate(SampleMaterial,PlateParameters)
     The SampleMaterial is the list or dictionary as described on anAbsorptionShape class
 
     and
@@ -316,11 +316,11 @@ class FlatPlate(anAbsorptionShape):
     the vertical axis of the instrument's reference frame.
 
     e.g.:
-    abs = Plate(['Al',0.1],[10,2,0.2,[1,0,0],5])
+    abs = FlatPlate(['Al',0.1],[10,2,0.2,[1,0,0],5])
     b) The diary: 
     PlateParameters = {Height:Height_value,Width:Width_value,Thickness:Thickness_value etc}
     e.g:
-    abs = Plate(['Al',0.1],['Height':10,'Width':4,'Thickness':2,'Angle':30)
+    abs = FlatPlate(['Al',0.1],['Height':10,'Width':4,'Thickness':2,'Angle':30)
 
     Usage of the defined Plate class instance:
     Correct absorption on the defined plate using AbsorptionCorrections algorithm:
@@ -340,14 +340,104 @@ class FlatPlate(anAbsorptionShape):
     @shape.setter
     def shape(self,value):
         shape_dict = self._set_shape_property(value,'FlatPlate',['Height','Width','Thick'],\
-            ['Center','Angle'],[[0,0,0],0])
+            ['Center','Angle'],[[0.,0.,0.],0.])
         self._ShapeDescription = shape_dict
 
     #
     def fast_abs_corrections(self,correction_base_ws,kwarg={}):
         """ Method to calculate absorption corrections quickly using fast (integration) method
         """
-        adsrbtn_correctios = FlatPlateAbsorption(correction_base_ws,**kwarg)
+        kw = kwarg.copy()
+        prop_dict = {'Height':'SampleHeight','Width':'SampleWidth','Thick':'SampleThickness'}
+        for key,val in prop_dict.items():
+            kw[val] = self._ShapeDescription[key]
+        adsrbtn_correctios = FlatPlateAbsorption(correction_base_ws,**kw)
+        return adsrbtn_correctios
+##---------------------------------------------------------------------------------------------------
+class HollowCylinder(anAbsorptionShape):
+    """Define the Hollow absorbing cylinder and calculate absorption corrections for this cylinder
+    
+    Usage:
+    abs = HollowCylinder(SampleMaterial,CylinderParameters)
+    The SampleMaterial is the list or dictionary as described on anAbsorptionShape class 
+
+    and
+
+    CylinderParameters can have the form:
+
+    a) The list consisting of 3 to 5 members.:
+    CylinderParameters = [Height,InnerRadus,OuterRadus,[[Axis],[Center]] 
+    where Height, InnerRadus and OuterRadus are the cylinder height and radiuses in cm and 
+    Axis, if present is the direction of the cylinder wrt to the beam direction [0,0,1]
+    e.g.:
+    abs = HollowCylinder(['Al',0.1],[10,2,4,[0,1,0],[0,0,0]])
+    b) The diary: 
+    CylinderParameters = {'Height':Height_value,'InnerRadus':value1,
+    'OuterRadus':value2,[Axis:axisValue],[Center:TheSampleCentre]} 
+    e.g:
+    abs = HollowCylinder(['Al',0.1],[Height:10,InnerRadus:2,OuterRadus:2,Axis:[1,0,0]])
+
+    Usage of the defined HollowCylinder class instance:
+    Correct absorption on the cylinder using CylinderAbsorption algorithm:
+    ws = abs.correct_adsorption(ws) % it is default
+
+    Correct absorption on the defined cylinder using Monte-Carlo Absorption algorithm:
+    ws = ads.correct_adsorption(ws,{is_mc:True,AdditionalMonte-Carlo Absorption parameters});
+    """
+    def __init__(self,Material=None,CylinderParams=None):
+
+        anAbsorptionShape.__init__(self,Material)
+        self.shape = CylinderParams
+
+    @property
+    def shape(self):
+        return self._ShapeDescription
+    @shape.setter
+    def shape(self,value):
+        shape_dict = self._set_shape_property(value,'HollowCylinder',\
+            ['Height','InnerRadius','OuterRadius'],\
+            ['Axis','Center'],[[0.,1.,0.],[0.,0.,0.]])
+
+        self._ShapeDescription = shape_dict
+    #
+    def _add_xml_hollow_cylinder(self,ws):
+        # xml shape is normaly defined in meters
+        sample_xml_template = """<hollow-cylinder id="HOLL_CYL">
+            <centre-of-bottom-base x="{0}" y="{1}" z="{2}" />
+            <axis x="{3}" y="{4}" z="{5}" />
+            <inner-radius val="{6}" />
+            <outer-radius val="{7}" />
+            <height val="{8}" />
+         </hollow-cylinder>"""""
+        shape_dic = self._ShapeDescription
+        Cenr = [c*0.01 for c in shape_dic['Center']]
+        Axis = shape_dic['Axis']
+        sample_shape = sample_xml_template.format(Cenr[0],Cenr[1],Cenr[2],\
+                                                  Axis[0],Axis[1],Axis[2],\
+                                                  0.01*shape_dic['InnerRadius'],\
+                                                  0.01*shape_dic['OuterRadius'],0.01*shape_dic['Height'])
+        CreateSampleShape(ws,sample_shape)
+
+    #
+    def fast_abs_corrections(self,correction_base_ws,kwarg={}):
+        """ Method to calculate absorption corrections quickly using fast (integration) method
+        """
+        self._add_xml_hollow_cylinder(correction_base_ws)
+        adsrbtn_correctios = AbsorptionCorrection(correction_base_ws,**kwarg)
+        return adsrbtn_correctios
+    #
+    def mc_abs_corrections(self,correction_base_ws,kwarg={}):
+        """ Method to correct adsorption on a shape using Mont-Carlo integration
+        Inputs:
+         ws     -- workspace to correct. Should be in the units of wavelength
+        **kwarg -- dictionary of the additional keyword arguments to provide as input for
+                the absorption corrections algorithm
+                These arguments should not be related to the sample as the sample should already be defined.
+        Returns: 
+            workspace with absorption corrections.
+        """
+        self._add_xml_hollow_cylinder(correction_base_ws)
+        adsrbtn_correctios = MonteCarloAbsorption(correction_base_ws,**kwarg)
         return adsrbtn_correctios
 
 

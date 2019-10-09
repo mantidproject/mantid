@@ -10,7 +10,7 @@ from mantid.simpleapi import *
 from mantid import api
 import unittest
 import numpy as np
-from AbsorptionShapes import (anAbsorptionShape,Cylinder,Plate)
+from AbsorptionShapes import (anAbsorptionShape,Cylinder,FlatPlate,HollowCylinder)
 
 class AdsorbtionShapesTest(unittest.TestCase):
     def __init__(self, methodName):
@@ -69,23 +69,23 @@ class AdsorbtionShapesTest(unittest.TestCase):
         self.assertEqual(res['Axis'],[0,1,0])
         self.assertEqual(res['Center'],[0,0,-0.5])
 
-        ash.shape = {'Height':50,'Radius':10,'Axis':[1,1,0],'Center':[0.,0.,0.]}
+        ash.shape = {'Height':5,'Radius':2,'Axis':[1,0,0],'Center':[0.,0.,0.]}
         res = ash.shape;
-        self.assertEqual(res['Height'],50)
-        self.assertEqual(res['Radius'],10)
-        self.assertEqual(res['Axis'],[1,1,0])
+        self.assertEqual(res['Height'],5)
+        self.assertEqual(res['Radius'],2)
+        self.assertEqual(res['Axis'],[1,0,0])
         self.assertEqual(res['Center'],[0,0,0])
 
-        test_ws = CreateSampleWorkspace()
+        test_ws = CreateSampleWorkspace(NumBanks=1,BankPixelWidth=1)
         test_ws = ConvertUnits(test_ws,'DeltaE',Emode='Direct',EFixed=2000)
         cor_ws,corrections = ash.correct_absorption(test_ws)
         n_bins = corrections.blocksize()
         corr_ranges = [n_bins,corrections.readY(0)[0],corrections.readY(0)[n_bins-1]]
-        np.testing.assert_almost_equal(corr_ranges,[97,0.0006,0],4)
+        np.testing.assert_almost_equal(corr_ranges,[97,0.2258,0],4)
         mccor_ws,mc_corr = ash.correct_absorption(test_ws,is_mc=True,NumberOfWavelengthPoints=20)
         n_bins = mc_corr.blocksize()
         mccorr_ranges = [n_bins,mc_corr.readY(0)[0],mc_corr.readY(0)[n_bins-1]]
-        np.testing.assert_almost_equal(mccorr_ranges ,[97,0.0042,0.0001],4)
+        np.testing.assert_almost_equal(mccorr_ranges ,[97,0.2657,0.0271],4)
 
     def test_adsrp_Plate(self):
         ash = FlatPlate('V',[10,2,0.1])
@@ -102,25 +102,61 @@ class AdsorbtionShapesTest(unittest.TestCase):
         self.assertEqual(res['Center'],[0,1,0])
         self.assertEqual(res['Angle'],10)
 
-        ash.shape = {'Height':50,'Width':10,'Thick':2,'Center':[0.,0.,0.],'Angle':20}
+        ash.shape = {'Height':5,'Width':1,'Thick':2,'Center':[0.,0.,0.],'Angle':20}
         res = ash.shape;
-        self.assertEqual(res['Height'],50)
-        self.assertEqual(res['Width'],10)
+        self.assertEqual(res['Height'],5)
+        self.assertEqual(res['Width'],1)
         self.assertEqual(res['Thick'],2)
         self.assertEqual(res['Center'],[0,0,0])
         self.assertEqual(res['Angle'],20)
 
-        test_ws = CreateSampleWorkspace()
+        test_ws = CreateSampleWorkspace(NumBanks=1,BankPixelWidth=1)
         test_ws = ConvertUnits(test_ws,'DeltaE',Emode='Direct',EFixed=2000)
-        cor_ws,corrections = ash.correct_absorption(test_ws)
+        cor_ws,corrections = ash.correct_absorption(test_ws,ElementSize=5)
         n_bins = corrections.blocksize()
         corr_ranges = [n_bins,corrections.readY(0)[0],corrections.readY(0)[n_bins-1]]
-        np.testing.assert_almost_equal(corr_ranges,[97,0.0006,0],4)
+        np.testing.assert_almost_equal(corr_ranges,[97,0.4504,0.0009],4)
         mccor_ws,mc_corr = ash.correct_absorption(test_ws,is_mc=True,NumberOfWavelengthPoints=20)
         n_bins = mc_corr.blocksize()
         mccorr_ranges = [n_bins,mc_corr.readY(0)[0],mc_corr.readY(0)[n_bins-1]]
-        np.testing.assert_almost_equal(mccorr_ranges ,[97,0.0042,0.0001],4)
+        np.testing.assert_almost_equal(mccorr_ranges ,[97,0.5253,0.1296],4)
 
+
+    def test_adsrp_hollow_cylinder(self):
+        ash = HollowCylinder('V',[10,2,4])
+        res = ash.shape
+        self.assertEqual(res['Height'],10)
+        self.assertEqual(res['InnerRadius'],2)
+        self.assertEqual(res['OuterRadius'],4)
+
+        ash.shape = [5,1,2,[1,0,0],[0,0,0]]
+        res = ash.shape;
+        self.assertEqual(res['Height'],5)
+        self.assertEqual(res['InnerRadius'],1)
+        self.assertEqual(res['OuterRadius'],2)
+        self.assertEqual(res['Axis'],[1,0,0])
+        self.assertEqual(res['Center'],[0,0,0])
+
+
+        ash.shape = {'Height':5,'InnerRadius':0.01,'OuterRadius':2,'Center':[0.,0.,0.],'Axis':[0,1,0]}
+        res = ash.shape;
+        self.assertEqual(res['Height'],5)
+        self.assertEqual(res['InnerRadius'],0.01)
+        self.assertEqual(res['OuterRadius'],2)
+        self.assertEqual(res['Axis'],[0,1,0])
+        self.assertEqual(res['Center'],[0,0,0])
+
+
+        test_ws =  CreateSampleWorkspace(NumBanks=1,BankPixelWidth=1)
+        test_ws = ConvertUnits(test_ws,'DeltaE',Emode='Direct',EFixed=2000)
+        cor_ws,corrections = ash.correct_absorption(test_ws,ElementSize=5)
+        n_bins = corrections.blocksize()
+        corr_ranges = [n_bins,corrections.readY(0)[0],corrections.readY(0)[n_bins-1]]
+        np.testing.assert_almost_equal(corr_ranges,[97,0.2984,0.0002],4)
+        mccor_ws,mc_corr = ash.correct_absorption(test_ws,is_mc=True,NumberOfWavelengthPoints=20)
+        n_bins = mc_corr.blocksize()
+        mccorr_ranges = [n_bins,mc_corr.readY(0)[0],mc_corr.readY(0)[n_bins-1]]
+        np.testing.assert_almost_equal(mccorr_ranges ,[97,0.2657,0.0303],4)
 
 
 if __name__=="__main__":
