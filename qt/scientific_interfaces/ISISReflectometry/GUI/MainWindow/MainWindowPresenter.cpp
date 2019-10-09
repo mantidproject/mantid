@@ -15,6 +15,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
+#include "MantidQtWidgets/Common/IOptionsDialog.h"
 #include "MantidQtWidgets/Common/ISlitCalculator.h"
 #include "MantidQtWidgets/Common/QtJSONUtils.h"
 #include "Reduction/Batch.h"
@@ -28,6 +29,7 @@ namespace ISISReflectometry {
 using Mantid::API::AlgorithmManager;
 using Mantid::API::MatrixWorkspace_sptr;
 using MantidWidgets::ISlitCalculator;
+using MantidWidgets::IOptionsDialog;
 
 // unnamed namespace
 namespace {
@@ -45,9 +47,11 @@ Mantid::Kernel::Logger g_log("Reflectometry GUI");
 MainWindowPresenter::MainWindowPresenter(
     IMainWindowView *view, IMessageHandler *messageHandler,
     std::unique_ptr<ISlitCalculator> slitCalculator,
+    std::unique_ptr<IOptionsDialog> optionsDialog,
     std::unique_ptr<IBatchPresenterFactory> batchPresenterFactory)
     : m_view(view), m_messageHandler(messageHandler), m_instrument(),
       m_slitCalculator(std::move(slitCalculator)),
+      m_optionsDialog(std::move(optionsDialog)),
       m_batchPresenterFactory(std::move(batchPresenterFactory)) {
   view->subscribe(this);
   for (auto *batchView : m_view->batches())
@@ -82,7 +86,7 @@ void MainWindowPresenter::notifyCloseBatchRequested(int batchIndex) {
 }
 
 void MainWindowPresenter::notifyShowOptionsRequested() {
-  // TODO Show the options dialog when it is implemented
+  m_optionsDialog->show();
 }
 
 void MainWindowPresenter::notifyShowSlitCalculatorRequested() {
