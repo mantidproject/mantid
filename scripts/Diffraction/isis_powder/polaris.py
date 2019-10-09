@@ -57,9 +57,7 @@ class Polaris(AbstractInst):
         pdf_output = polaris_algs.generate_ts_pdf(run_number=self._inst_settings.run_number,
                                                   focus_file_path=focus_file_path,
                                                   merge_banks=self._inst_settings.merge_banks,
-                                                  q_lims=q_lims,
-                                                  cal_file_name=cal_file_name,
-                                                  sample_details=self._sample_details)
+                                                  q_lims=q_lims)
         return pdf_output
 
     def set_sample_details(self, **kwargs):

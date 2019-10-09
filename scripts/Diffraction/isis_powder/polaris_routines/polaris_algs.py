@@ -145,10 +145,12 @@ def _generate_grouped_ts_pdf(focused_ws, q_lims):
         try:
             with open(q_lims, 'r') as f:
                 line_list = [line.rstrip('\n') for line in f]
-                for line in line_list[:-1]:
+                for line in line_list[1:]:
                     value_list = line.split()
                     q_min.append(value_list[2])
                     q_max.append(value_list[3])
+            q_min = np.array(q_min)
+            q_max = np.array(q_max)
         except IOError:
             raise RuntimeError("q_lims is not valid")
     elif type(q_lims) == list or type(q_lims) == np.ndarray:
