@@ -8,7 +8,7 @@ Introduction
 ------------
 
 The purpose of this document is to explain the link between theoretical and experimental :math:`S(\mathbf{Q}, \omega)` and to
-describe in general how theoretical S is calculated from from *ab initio* data by plugins in Mantid.
+describe in general how the theoretical :math:`S` is calculated from from *ab initio* data by plugins in Mantid.
 
 During an inelastic neutron scattering experiment, a sample is exposed to neutron flux and a response is recorded in the form of dynamical structure factor, :math:`S(\mathbf{Q}, \omega)`.
 In principle, one obtains a vibrational spectrum which can be quite difficult to analyse; in crystalline materials this
@@ -20,7 +20,7 @@ In order to better understand experimental outputs, one can compare with results
     :align: center
 
 The usual workfow for calculating phonon spectra within DFT is presented in the figure above. First, one defines an
-initial guess for the structure in interest.
+initial guess for the structure of interest.
 The initial guess should be as close as possible to an experimental structure, and is usually derived from elastic X-ray and/or neutron scattering measurements.
 Then the structure parameters are locally optimised within DFT, finding the nearest structure that minimises the DFT energy.
 At this point, there should be no effective force on the atoms.
@@ -43,7 +43,7 @@ Powder
 .. image:: ../images/s_powder_scheme.png
     :align: center
 
-In DFT studies of solid materials, one usually applies periodic boundary conditions representing an infinite single crystal.
+In DFT studies of solid materials, one usually applies periodic boundary conditions to represent an infinite single crystal.
 In order to compare such calculations with experiments in which the sample is in the form of powder, one has to perform
 powder averaging.
 Usually a semi-empirical model is applied [#Howard1983]_:sup:`,` [#Howard1983b]_:
@@ -58,7 +58,7 @@ where :math:`B` and :math:`A` are tensors created from atomic displacements in t
 
 with
 
-:math:`Q` -- momentum transfer which occurs during neutron scattering. In principle, momentum transfer :math:`\mathbf{Q}` is a vector but, due to powder averaging S depends only on the length of :math:`\mathbf{Q}`.
+:math:`Q` -- momentum transfer due to neutron scattering.  The momentum transfer :math:`\mathbf{Q}` is a technically a vector. However, the powder averaging of :math: `S` allows it to be represented as a scalar.
 
 :math:`\alpha^j_{\omega_i}` -- semi-empirical parameter calculated as: :math:`\alpha^j_{\omega_i} = \frac{1}{5} \left \lbrace Tr A^j  + \frac{2 B^j_{\omega_i}: A^j}{Tr B^j_{\omega_i}} \right\rbrace`
 
