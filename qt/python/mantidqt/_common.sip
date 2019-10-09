@@ -884,17 +884,18 @@ class MWRunFiles : QWidget
 public:
     MWRunFiles(QWidget *parent = nullptr);
 
-    void setLabelText(const QString &text);
-    void setLabelMinWidth(const int);
-    void liveButtonSetChecked(bool);
-    bool liveButtonIsChecked();
     QString getText();
     QString getFirstFilename() const;
+    void isForRunFiles(bool /*mode*/);
     bool isSearching() const;
     bool isValid();
-    void setUserInput(const QVariant &);
-    void setText(const QString&);
+    void liveButtonSetChecked(bool);
+    bool liveButtonIsChecked();
     void setInstrumentOverride(const QString &instName);
+    void setLabelText(const QString &text);
+    void setLabelMinWidth(const int);
+    void setText(const QString&);
+    void setUserInput(const QVariant &);
 
 signals:
     void fileTextChanged(const QString & /*_t1*/);
