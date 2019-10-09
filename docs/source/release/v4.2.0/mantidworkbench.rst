@@ -53,5 +53,6 @@ Bugfixes
 - Fixes an issue where changing the curve properties in the figure options menu would reset the plot's axes scales.
 - Fixed an issue with fitting where the difference would be plotted even if the Plot Difference option in the fit property browser was not enabled.
 - Fixed an issue where the plot legend would no longer be movable after removing a plot guess.
+- An error is no longer raised when attempting to open plot options, or the fitting tab, on a figure containing a line plotted using a script without a spectrum number being specified.
 
 :ref:`Release 4.2.0 <v4.2.0>`

@@ -220,11 +220,6 @@ def _get_wksp_index_and_spec_num(workspace, axis, **kwargs):
     spectrum_number = kwargs.pop('specNum', None)
     workspace_index = kwargs.pop('wkspIndex', None)
 
-    # don't worry if there is only one spectrum
-    if workspace.getNumberHistograms() == 1:
-        spectrum_number = None
-        workspace_index = 0
-
     # error check input parameters
     if (spectrum_number is not None) and (workspace_index is not None):
         raise RuntimeError('Must specify only specNum or wkspIndex')
