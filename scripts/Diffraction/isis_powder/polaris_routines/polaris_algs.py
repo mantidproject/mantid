@@ -147,8 +147,8 @@ def _generate_grouped_ts_pdf(focused_ws, q_lims):
                 line_list = [line.rstrip('\n') for line in f]
                 for line in line_list[1:]:
                     value_list = line.split()
-                    q_min.append(value_list[2])
-                    q_max.append(value_list[3])
+                    q_min.append(float(value_list[2]))
+                    q_max.append(float(value_list[3]))
             q_min = np.array(q_min)
             q_max = np.array(q_max)
         except IOError:
@@ -161,7 +161,9 @@ def _generate_grouped_ts_pdf(focused_ws, q_lims):
     bin_width = np.inf
     for i in range(q_min.size):
         pdf_x_array = focused_data_combined.readX(i)
-        q_min[i] = pdf_x_array[np.amin(np.where(pdf_x_array >= q_min[i]))]
+        tmp1 = np.where(pdf_x_array >= q_min[i])
+        tmp2 = np.amin(tmp1)
+        q_min[i] = pdf_x_array[tmp2]
         q_max[i] = pdf_x_array[np.amax(np.where(pdf_x_array <= q_max[i]))]
         bin_width = min(pdf_x_array[1] - pdf_x_array[0], bin_width)
     focused_data_combined = mantid.CropWorkspaceRagged(InputWorkspace=focused_data_combined, XMin=q_min, XMax=q_max)
