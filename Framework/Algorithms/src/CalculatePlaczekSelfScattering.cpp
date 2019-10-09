@@ -7,8 +7,8 @@
 #include "MantidAlgorithms/CalculatePlaczekSelfScattering.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Sample.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/Atom.h"
@@ -132,10 +132,10 @@ void CalculatePlaczekSelfScattering::exec() {
   MantidVec placzekCorrection;
   size_t nReserve = 0;
   const API::SpectrumInfo specInfo = inWS->spectrumInfo();
-  for (size_t detIndex = 0; detIndex < specInfo.size(); detIndex++) {
-    if (!specInfo.isMonitor(detIndex)) {
-      if (!specInfo.l2(detIndex) == 0) {
-      nReserve += 1;
+  for (size_t specIndex = 0; specIndex < specInfo.size(); specIndex++) {
+    if (!specInfo.isMonitor(specIndex)) {
+      if (!specInfo.l2(specIndex) == 0) {
+        nReserve += 1;
       }
     }
   }
