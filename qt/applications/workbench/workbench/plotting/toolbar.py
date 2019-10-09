@@ -29,14 +29,12 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
     sig_generate_plot_script_clipboard_triggered = QtCore.Signal()
 
     toolitems = (
-        ('Home', 'Reset original view', 'mdi.home', 'home', None),
+        ('Home', 'Reset original view', 'mdi.home', 'home_button_clicked', None),
         ('Back', 'Back to previous view', 'mdi.arrow-left', 'back', None),
         ('Forward', 'Forward to next view', 'mdi.arrow-right', 'forward', None),
         (None, None, None, None, None),
         ('Pan', 'Pan axes with left mouse, zoom with right', 'mdi.arrow-all', 'pan', False),
         ('Zoom', 'Zoom to rectangle', 'mdi.magnify', 'zoom', False),
-        ('Display All', 'Set zoom to display all', 'mdi.arrow-expand-all', 'display_all_clicked',
-         None),
         (None, None, None, None, None),
         ('Grid', 'Toggle grid on/off', 'mdi.grid', 'toggle_grid', False),
         ('Save', 'Save the figure', 'mdi.content-save', 'save_figure', None),
@@ -100,7 +98,12 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         dpi_ratio = QtWidgets.QApplication.instance().desktop().physicalDpiX() / 100
         self.setIconSize(QtCore.QSize(24 * dpi_ratio, 24 * dpi_ratio))
 
-    def display_all_clicked(self):
+    def home_button_clicked(self):
+        """
+        Here we override the default behaviour of Matplotlib's home
+        button. Instead of returning to the top of the zoom stack, we
+        zoom in/out to center the display on the figure's contents.
+        """
         self.sig_display_all_triggered.emit()
         self.push_current()
 
