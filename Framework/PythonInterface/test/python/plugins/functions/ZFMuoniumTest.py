@@ -30,8 +30,8 @@ class ZFMuoniumTest(unittest.TestCase):
 
 	def test_do_fit(self):
                 guess = dict(A0 = 0.25, FreqA = 0.35, FreqD = 0.25, FCut = 1.05,Phi = 0.0)
-		target = dict(A0 = 0.2, FreqA = 0.3, FreqD = 0.2, FCut = 1.0,Phi = 0.0)
-		do_a_fit(np.arange(0.1, 16, 0.2), 'ZFMuonium', guess , target, atol = 0.01)
+                target = dict(A0 = 0.2, FreqA = 0.3, FreqD = 0.2, FCut = 1.0,Phi = 0.0)
+                do_a_fit(np.arange(0.1, 16, 0.2), 'ZFMuonium', guess , target, atol = 0.01)
 
 if __name__ == '__main__':
 	unittest.main()
