@@ -136,15 +136,15 @@ public:
     TS_ASSERT_DELTA(peak0.getK(), -2.0, .0001)
     TS_ASSERT_DELTA(peak0.getL(), -1.8, .0001)
 
-    const auto &peak3 = fracPeaks->getPeak(3);
-    TS_ASSERT_DELTA(peak3.getH(), -1.0, .0001)
-    TS_ASSERT_DELTA(peak3.getK(), 1.0, .0001)
-    TS_ASSERT_DELTA(peak3.getL(), -0.8, .0001)
+    const auto &peak2 = fracPeaks->getPeak(2);
+    TS_ASSERT_DELTA(peak2.getH(), -0.5, .0001)
+    TS_ASSERT_DELTA(peak2.getK(), 0.0, .0001)
+    TS_ASSERT_DELTA(peak2.getL(), 0.2, .0001)
 
-    const auto &peak6 = fracPeaks->getPeak(6);
-    TS_ASSERT_DELTA(peak6.getH(), -0.5, .0001)
-    TS_ASSERT_DELTA(peak6.getK(), 0.0, .0001)
-    TS_ASSERT_DELTA(peak6.getL(), 0.2, .0001)
+    const auto &peak4 = fracPeaks->getPeak(4);
+    TS_ASSERT_DELTA(peak4.getH(), -1.0, .0001)
+    TS_ASSERT_DELTA(peak4.getK(), 1.0, .0001)
+    TS_ASSERT_DELTA(peak4.getL(), -0.8, .0001)
 
     const auto &peak8 = fracPeaks->getPeak(8);
     TS_ASSERT_DELTA(peak8.getH(), -1.5, .0001)

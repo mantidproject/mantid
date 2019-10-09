@@ -9,6 +9,8 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Crystal/BasicHKLFilters.h"
+#include "MantidGeometry/Crystal/HKLGenerator.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Crystal/ReflectionCondition.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
@@ -25,7 +27,9 @@ using Mantid::API::IPeaksWorkspace_sptr;
 using Mantid::API::Progress;
 using Mantid::DataObjects::PeaksWorkspace;
 using Mantid::DataObjects::PeaksWorkspace_sptr;
+using Mantid::Geometry::HKLGenerator;
 using Mantid::Geometry::Instrument_const_sptr;
+using Mantid::Geometry::ReflectionCondition_sptr;
 using Mantid::Kernel::DblMatrix;
 using Mantid::Kernel::V3D;
 
@@ -55,47 +59,36 @@ class PeaksInRangeStrategy {
 public:
   PeaksInRangeStrategy(V3D hklMin, V3D hklMax,
                        const PeaksWorkspace *const inputPeaks)
-      : m_hklMin{std::move(hklMin)}, m_hklMax{std::move(hklMax)},
-        m_inputPeaks{inputPeaks} {}
+      : m_hklGenerator(std::move(hklMin), std::move(hklMax)),
+        m_hklIterator(m_hklGenerator.begin()), m_inputPeaks(inputPeaks) {}
 
   Progress createProgressReporter(Algorithm *const alg) const noexcept {
-    const int nHKLCombinations = boost::math::iround(
-        (m_hklMax[0] - m_hklMin[0] + 1) * (m_hklMax[1] - m_hklMin[1] + 1) *
-        (m_hklMax[2] - m_hklMin[2] + 1));
-    return Progress(alg, 0.0, 1.0, nHKLCombinations);
+    return Progress(alg, 0.0, 1.0, m_hklGenerator.size());
   }
 
   void initialHKL(V3D *hkl, DblMatrix *gonioMatrix, int *runNumber) const
       noexcept {
-    *hkl = m_hklMin;
+    *hkl = *(m_hklGenerator.begin());
     *gonioMatrix = m_inputPeaks->run().getGoniometer().getR();
     *runNumber = m_inputPeaks->getPeak(0).getRunNumber();
   }
 
   /// Compute the next HKL value in the range
-  bool nextHKL(V3D *hkl, DblMatrix * /*gonioMatrix*/, int * /*runNumber*/) const
-      noexcept {
-    bool canContinue{true};
-
-    auto &currentHKL{*hkl};
-    currentHKL[0]++;
-    if (currentHKL[0] > m_hklMax[0]) {
-      currentHKL[0] = m_hklMin[0];
-      currentHKL[1]++;
-      if (currentHKL[1] > m_hklMax[1]) {
-        currentHKL[1] = m_hklMin[1];
-        currentHKL[2]++;
-        if (currentHKL[2] > m_hklMax[2])
-          canContinue = false;
-      }
-    }
-    return canContinue;
+  bool nextHKL(V3D *hkl, DblMatrix * /*gonioMatrix*/,
+               int * /*runNumber*/) noexcept {
+    ++m_hklIterator;
+    if (m_hklIterator != m_hklGenerator.end()) {
+      *hkl = *m_hklIterator;
+      return true;
+    } else
+      return false;
   }
 
 private:
-  V3D m_hklMin, m_hklMax;
+  HKLGenerator m_hklGenerator;
+  HKLGenerator::const_iterator m_hklIterator;
   const PeaksWorkspace *const m_inputPeaks;
-};
+}; // namespace
 
 /**
  * Defines a type to capture details required
@@ -120,8 +113,7 @@ public:
   }
 
   /// Compute the next HKL value in the range
-  bool nextHKL(V3D *hkl, DblMatrix *gonioMatrix, int *runNumber) const
-      noexcept {
+  bool nextHKL(V3D *hkl, DblMatrix *gonioMatrix, int *runNumber) noexcept {
     bool canContinue{true};
     m_currentPeak++;
     if (m_currentPeak < m_inputPeaks->getNumberPeaks()) {
@@ -138,7 +130,7 @@ public:
 
 private:
   const PeaksWorkspace *const m_inputPeaks;
-  mutable int m_currentPeak;
+  int m_currentPeak;
 };
 
 /**
@@ -157,7 +149,7 @@ IPeaksWorkspace_sptr
 predictPeaks(Algorithm *const alg, const std::vector<double> &hOffsets,
              const std::vector<double> &kOffsets,
              const std::vector<double> &lOffsets,
-             const PeaksWorkspace &inputPeaks, const SearchStrategy &strategy) {
+             const PeaksWorkspace &inputPeaks, SearchStrategy strategy) {
   using Mantid::API::WorkspaceFactory;
   auto outPeaks = WorkspaceFactory::Instance().createPeaks();
   const auto instrument = inputPeaks.getInstrument();
@@ -274,36 +266,26 @@ void PredictFractionalPeaks::init() {
                  [](const auto &condition) { return condition->getName(); });
   declareProperty(PropertyNames::REFLECTION_COND, "",
                   boost::make_shared<StringListValidator>(propOptions),
-                  "Which reflection condition applies to this crystal, "
-                  "reducing the number of expected HKL peaks?");
+                  "If provided, generate a list of possible peaks from this "
+                  "reflection condition and use them to predict the fractional "
+                  "peaks. This option requires a range of HKL values and "
+                  "implies IncludeAllPeaksInRange=true");
 
-  setPropertySettings(
-      PropertyNames::HMIN,
-      std::make_unique<Kernel::EnabledWhenProperty>(
-          std::string("IncludeAllPeaksInRange"), Kernel::IS_EQUAL_TO, "1"));
+  // enable range properties if required
+  using Kernel::EnabledWhenProperty;
+  for (const auto &name :
+       {PropertyNames::HMIN, PropertyNames::HMAX, PropertyNames::KMIN,
+        PropertyNames::KMAX, PropertyNames::LMIN, PropertyNames::LMAX}) {
+    EnabledWhenProperty includeInRangeEqOne{PropertyNames::INCLUDEPEAKSINRANGE,
+                                            Kernel::IS_EQUAL_TO, "1"};
+    EnabledWhenProperty reflConditionNotEmpty{PropertyNames::REFLECTION_COND,
+                                              Kernel::IS_NOT_EQUAL_TO, ""};
+    setPropertySettings(name,
+                        std::make_unique<Kernel::EnabledWhenProperty>(
+                            std::move(includeInRangeEqOne),
+                            std::move(reflConditionNotEmpty), Kernel::OR));
+  }
 
-  setPropertySettings(
-      PropertyNames::HMAX,
-      std::make_unique<Kernel::EnabledWhenProperty>(
-          std::string("IncludeAllPeaksInRange"), Kernel::IS_EQUAL_TO, "1"));
-  setPropertySettings(
-      PropertyNames::KMIN,
-      std::make_unique<Kernel::EnabledWhenProperty>(
-          std::string("IncludeAllPeaksInRange"), Kernel::IS_EQUAL_TO, "1"));
-
-  setPropertySettings(
-      PropertyNames::KMAX,
-      std::make_unique<Kernel::EnabledWhenProperty>(
-          std::string("IncludeAllPeaksInRange"), Kernel::IS_EQUAL_TO, "1"));
-  setPropertySettings(
-      PropertyNames::KMAX,
-      std::make_unique<Kernel::EnabledWhenProperty>(
-          std::string("IncludeAllPeaksInRange"), Kernel::IS_EQUAL_TO, "1"));
-
-  setPropertySettings(
-      PropertyNames::LMAX,
-      std::make_unique<Kernel::EnabledWhenProperty>(
-          std::string("IncludeAllPeaksInRange"), Kernel::IS_EQUAL_TO, "1"));
   // Outputs
   declareProperty(
       std::make_unique<WorkspaceProperty<PeaksWorkspace_sptr::element_type>>(
@@ -347,6 +329,8 @@ void PredictFractionalPeaks::exec() {
   if (lOffsets.empty())
     lOffsets.push_back(0.0);
   const bool includePeaksInRange = getProperty("IncludeAllPeaksInRange");
+  const std::string reflectionConditionName =
+      getProperty(PropertyNames::REFLECTION_COND);
   const V3D hklMin{getProperty(PropertyNames::HMIN),
                    getProperty(PropertyNames::KMIN),
                    getProperty(PropertyNames::LMIN)};
@@ -355,7 +339,19 @@ void PredictFractionalPeaks::exec() {
                    getProperty(PropertyNames::LMAX)};
 
   IPeaksWorkspace_sptr outPeaks;
-  if (includePeaksInRange) {
+  if (includePeaksInRange || !reflectionConditionName.empty()) {
+    using Mantid::Geometry::getAllReflectionConditions;
+    const auto &allConditions = getAllReflectionConditions();
+
+    //    // init method restricts the list to what is available so this will
+    //    always
+    //    // find it
+    //    const auto found =
+    //        std::find_if(std::cbegin(allConditions), std::cend(allConditions),
+    //                     [&reflectionConditionName](const auto &condition) {
+    //                       return condition->getName() ==
+    //                       reflectionConditionName;
+    //                     });
     outPeaks =
         predictPeaks(this, hOffsets, kOffsets, lOffsets, *inputPeaks,
                      PeaksInRangeStrategy(hklMin, hklMax, inputPeaks.get()));
