@@ -1,6 +1,8 @@
 # Tests for Fit functions
 
 set(TEST_PY_FILES
+    AFM_LFTest.py
+    AFM_ZFTest.py
     AttributeTest.py
     BesselTest.py
     CombGaussLorentzKTTest.py
