@@ -134,6 +134,7 @@ set(
   src/Python/Sip.cpp
   src/Python/QHashToDict.cpp
 )
+    src/OptionsDialog.cpp
 
 set(
   QT5_MOC_FILES
@@ -293,6 +294,7 @@ set(QT5_UI_FILES
     inc/MantidQtWidgets/Common/ManageUserDirectories.ui
     inc/MantidQtWidgets/Common/MultifitSetupDialog.ui
     inc/MantidQtWidgets/Common/MWRunFiles.ui
+    inc/MantidQtWidgets/Common/OptionsDialog.ui
     inc/MantidQtWidgets/Common/pqHelpWindow.ui
     inc/MantidQtWidgets/Common/ProcessingAlgoWidget.ui
     inc/MantidQtWidgets/Common/RenameParDialog.ui
@@ -476,6 +478,8 @@ set(
   src/QtPropertyBrowser/StringEditorFactory.cpp
   src/QtPropertyBrowser/WorkspaceEditorFactory.cpp
 )
+    src/OptionsDialog.cpp
+    src/OptionsDialogPresenter.cpp
 
 set(
   MOC_FILES
@@ -701,6 +705,7 @@ set(
   inc/MantidQtWidgets/Common/MantidTreeWidgetItem.h
   inc/MantidQtWidgets/Common/MuonFitDataSelector.h
   inc/MantidQtWidgets/Common/MuonFunctionBrowser.h
+  inc/MantidQtWidgets/Common/OptionsDialogPresenter.h
   inc/MantidQtWidgets/Common/ProgressableView.h
   inc/MantidQtWidgets/Common/MockProgressableView.h
   inc/MantidQtWidgets/Common/ProgressPresenter.h
@@ -763,6 +768,7 @@ set(UI_FILES
     inc/MantidQtWidgets/Common/MultifitSetupDialog.ui
     inc/MantidQtWidgets/Common/MuonFitDataSelector.ui
     inc/MantidQtWidgets/Common/MWRunFiles.ui
+    inc/MantidQtWidgets/Common/OptionsDialog.ui
     inc/MantidQtWidgets/Common/ProcessingAlgoWidget.ui
     inc/MantidQtWidgets/Common/RenameParDialog.ui
     inc/MantidQtWidgets/Common/ScriptRepositoryView.ui
