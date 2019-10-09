@@ -184,8 +184,11 @@ class WorkspaceWidget(PluginWidget):
                     logger.warning("{}: {}".format(type(exception).__name__, exception))
 
     def _do_show_detectors(self, names):
+        detector_tables = []
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
-            CreateDetectorTable(InputWorkspace=ws)
+            detector_tables.append(CreateDetectorTable(InputWorkspace=ws))
+
+        self._do_show_data(detector_tables)
 
     def _action_double_click_workspace(self, name):
         try:

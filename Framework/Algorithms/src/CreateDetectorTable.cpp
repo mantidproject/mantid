@@ -9,7 +9,6 @@
 namespace Mantid {
 namespace Algorithm {
 
-
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
@@ -26,11 +25,13 @@ void CreateDetectorTable::init() {
                                                        Direction::Input),
                   "If left empty then all workspace indices are used.");
 
-  declareProperty("IncludeData", false, "Include the first value from each spectrum.");
+  declareProperty("IncludeData", false,
+                  "Include the first value from each spectrum.");
 
   declareProperty(
       std::make_unique<WorkspaceProperty<TableWorkspace>>(
-          "DetectorTableWorkspace", "", Direction::Output, PropertyMode::Optional),
+          "DetectorTableWorkspace", "", Direction::Output,
+          PropertyMode::Optional),
       "The name of the outputted detector table workspace, if left empty then "
       "the input workspace name + \"-Detectors\" is used.");
 }
@@ -53,7 +54,8 @@ void CreateDetectorTable::exec() {
   }
 
   if (getPropertyValue("DetectorTableWorkspace") == "") {
-    setPropertyValue("DetectorTableWorkspace", inputWS->getName() + "-Detectors");
+    setPropertyValue("DetectorTableWorkspace",
+                     inputWS->getName() + "-Detectors");
   }
 
   setProperty("DetectorTableWorkspace", detectorTable);
@@ -235,16 +237,18 @@ ITableWorkspace_sptr CreateDetectorTable::createDetectorTableWorkspace(
                 << isMonitorDisplay; // monitor
     } catch (...) {
       // spectrumNo=-1, detID=0
-      colValues << -1 << 0;
+      colValues << -1 << "0";
       // Y/E
       if (include_data) {
         colValues << dataY0 << dataE0; // data
       }
-      colValues << 0.0 << 0.0 // rt
-                << 0.0        // efixed
-                << 0.0        // rtp
-                << "n/a";     // monitor
-    }                         // End catch for no spectrum
+      colValues << 0.0 << 0.0; // rt
+      if (calcQ) {
+        colValues << 0.0; // efixed
+      }
+      colValues << 0.0    // rtp
+                << "n/a"; // monitor
+    }                     // End catch for no spectrum
   }
 
   return t;

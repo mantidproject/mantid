@@ -35,10 +35,11 @@ public:
   /// Algorithm's version
   int version() const override { return 1; }
   /// Algorithm's category for identification
-  const std::string category() const override { return "UserDefined"; } // TODO
+  const std::string category() const override { return "Utility\\Workspaces"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "Create a table showing detector information for the given workspace and optionally the data for that detector";
+    return "Create a table showing detector information for the given "
+           "workspace and optionally the data for that detector";
   }
 
   API::ITableWorkspace_sptr CreateDetectorTable::createDetectorTableWorkspace(

@@ -19,6 +19,7 @@ User Interface
 New
 ###
 - Added a 'Generate Recovery Script' button to Workbench under the File menu bar, it generates a script that is essentially what project recovery uses. However it is only the script and does not include the workspace clean up and other features Project Recovery offers.
+- There is now an algorithm to create a table workspace showing detector information for a given workspace, and a "Show Detectors" option when you right-click a workspace which executes this algorithm.
 
 Improvements
 ############
