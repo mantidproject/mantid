@@ -7,7 +7,6 @@
 #  This file is part of the mantid package
 from __future__ import absolute_import
 
-
 from matplotlib import cm
 from matplotlib.container import ErrorbarContainer
 
@@ -61,3 +60,52 @@ def get_autoscale_limits(ax, axis):
     if not ax._tight:
         locator = getattr(ax, '{}axis'.format(axis)).get_major_locator()
         return locator.view_limits(axis_min, axis_max)
+
+
+def zoom_axis(ax, coord, x_or_y, factor):
+    """
+    Zoom in around the value 'coord' along the given axis.
+
+    :param matplotlib.axes.Axes ax: The Axes object to zoom in on
+    :param float coord: The value in the axis to zoom around
+    :param str x_or_y: The axis to zoom along ('x' or 'y')
+    :param float factor: The factor by which to zoom in, a factor less than 1 zooms out
+    """
+    if x_or_y.lower() not in ['x', 'y']:
+        raise ValueError("Can only zoom on axis 'x' or 'y'. Found '{}'."
+                         "".format(x_or_y))
+    get_lims = getattr(ax, "get_{}lim".format(x_or_y.lower()))
+    set_lims = getattr(ax, "set_{}lim".format(x_or_y.lower()))
+
+    ax_min, ax_max = get_lims()
+    dist_to_min = coord - ax_min
+    dist_to_max = ax_max - coord
+    dist_ratio = dist_to_max/dist_to_min
+
+    new_dist_to_min = (dist_to_max - dist_to_min)/(dist_ratio - 1)/factor
+    new_dist_to_max = new_dist_to_min + (dist_to_max - dist_to_min)/factor
+
+    new_ax_min = coord - new_dist_to_min
+    new_ax_max = coord + new_dist_to_max
+
+    set_lims((new_ax_min, new_ax_max))
+    return new_ax_min, new_ax_max
+
+
+def zoom(ax, x, y, factor):
+    """
+    Zoom in around point (x, y) in Axes ax, i.e. point (x, y) maintains
+    its position on the axes during the zoom.
+
+    The range of each axis is scaled by 'factor', axis limits are then
+    adjusted such that the ratio of distances between the point (x, y)
+    and the edge of the each axis is constant. This keeps the point
+    (x, y) in the same position within the axes' view.
+
+    :param matplotlib.axes.Axes ax: The Axes object to zoom in on
+    :param float x: The x coordinate to center the zoom around
+    :param float y: The y coordinate to center the zoom around
+    :param float factor: The factor by which to zoom in, a factor less
+        than 1 zooms out
+    """
+    return zoom_axis(ax, x, 'x', factor), zoom_axis(ax, y, 'y', factor)

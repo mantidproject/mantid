@@ -22,6 +22,7 @@ from qtpy.QtWidgets import QActionGroup, QMenu, QApplication
 # third party imports
 from mantid.api import AnalysisDataService as ads
 from mantid.plots import MantidAxes
+from mantid.plots.utility import zoom
 from mantid.py3compat import iteritems
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.plotting.markers import SingleMarker
@@ -70,6 +71,7 @@ class FigureInteraction(object):
         self._cids.append(canvas.mpl_connect('resize_event', self.mpl_redraw_annotations))
         self._cids.append(canvas.mpl_connect('figure_leave_event', self.on_leave))
         self._cids.append(canvas.mpl_connect('axis_leave_event', self.on_leave))
+        self._cids.append(canvas.mpl_connect('scroll_event', self.on_scroll))
 
         self.canvas = canvas
         self.toolbar_manager = ToolbarStateManager(self.canvas.toolbar)
@@ -94,6 +96,17 @@ class FigureInteraction(object):
             self.canvas.mpl_disconnect(id)
 
     # ------------------------ Handlers --------------------
+    def on_scroll(self, event):
+        """Respond to scroll events: zoom in/out"""
+        if not getattr(event, 'inaxes', None):
+            return
+        zoom_factor = 1.05 + abs(event.step)/6
+        if event.button == 'up':  # zoom in
+            zoom(event.inaxes, event.xdata, event.ydata, factor=zoom_factor)
+        elif event.button == 'down':  # zoom out
+            zoom(event.inaxes, event.xdata, event.ydata, factor=1/zoom_factor)
+        event.canvas.draw()
+
     def on_mouse_button_press(self, event):
         """Respond to a MouseEvent where a button was pressed"""
         # local variables to avoid constant self lookup
