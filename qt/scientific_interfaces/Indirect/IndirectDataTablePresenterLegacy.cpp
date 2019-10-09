@@ -17,7 +17,7 @@
 
 namespace {
 using MantidQt::CustomInterfaces::IDA::DiscontinuousSpectra;
-using MantidQt::CustomInterfaces::IDA::Spectra;
+using MantidQt::CustomInterfaces::IDA::SpectraLegacy;
 
 namespace Regexes {
 const QString EMPTY = "^$";
@@ -84,13 +84,13 @@ pairsToString(const std::vector<std::pair<std::size_t, std::size_t>> &pairs) {
   return boost::algorithm::join(pairStrings, ",");
 }
 
-boost::optional<Spectra>
+boost::optional<SpectraLegacy>
 pairsToSpectra(const std::vector<std::pair<std::size_t, std::size_t>> &pairs) {
   if (pairs.empty())
     return boost::none;
   else if (pairs.size() == 1)
-    return boost::optional<Spectra>(pairs[0]);
-  return boost::optional<Spectra>(
+    return boost::optional<SpectraLegacy>(pairs[0]);
+  return boost::optional<SpectraLegacy>(
       DiscontinuousSpectra<std::size_t>(pairsToString(pairs)));
 }
 
@@ -196,14 +196,14 @@ std::size_t IndirectDataTablePresenterLegacy::getDataIndex(int row) const {
   return m_dataTable->item(row, 0)->data(Qt::UserRole).toULongLong();
 }
 
-boost::optional<Spectra>
+boost::optional<SpectraLegacy>
 IndirectDataTablePresenterLegacy::getSpectra(std::size_t dataIndex) const {
   if (m_dataPositions.size() > dataIndex)
     return getSpectra(m_dataPositions[dataIndex], getNextPosition(dataIndex));
   return boost::none;
 }
 
-boost::optional<Spectra>
+boost::optional<SpectraLegacy>
 IndirectDataTablePresenterLegacy::getSpectra(int start, int end) const {
   std::vector<std::pair<std::size_t, std::size_t>> spectraPairs;
   while (start < end) {

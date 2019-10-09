@@ -51,7 +51,7 @@ public:
   virtual bool hasWorkspace(std::string const &workspaceName) const;
   virtual Mantid::API::MatrixWorkspace_sptr
   getWorkspace(std::size_t index) const;
-  Spectra getSpectra(std::size_t index) const;
+  SpectraLegacy getSpectra(std::size_t index) const;
   virtual std::pair<double, double> getFittingRange(std::size_t dataIndex,
                                                     std::size_t spectrum) const;
   virtual std::string getExcludeRegion(std::size_t dataIndex,
@@ -75,8 +75,8 @@ public:
 
   void setFittingData(PrivateFittingDataLegacy &&fittingData);
   void setSpectra(const std::string &spectra, std::size_t dataIndex);
-  void setSpectra(Spectra &&spectra, std::size_t dataIndex);
-  void setSpectra(const Spectra &spectra, std::size_t dataIndex);
+  void setSpectra(SpectraLegacy &&spectra, std::size_t dataIndex);
+  void setSpectra(const SpectraLegacy &spectra, std::size_t dataIndex);
   virtual void setStartX(double startX, std::size_t dataIndex,
                          std::size_t spectrum);
   virtual void setEndX(double endX, std::size_t dataIndex,
@@ -87,9 +87,9 @@ public:
   virtual void addWorkspace(const std::string &workspaceName);
   void addWorkspace(const std::string &workspaceName,
                     const std::string &spectra);
-  void addWorkspace(const std::string &workspaceName, const Spectra &spectra);
+  void addWorkspace(const std::string &workspaceName, const SpectraLegacy &spectra);
   virtual void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
-                            const Spectra &spectra);
+                            const SpectraLegacy &spectra);
   virtual void removeWorkspace(std::size_t index);
   virtual PrivateFittingDataLegacy clearWorkspaces();
   void setFittingMode(FittingModeLegacy mode);
@@ -139,7 +139,7 @@ protected:
                                         std::size_t index,
                                         std::size_t spectrum) const;
   void addNewWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
-                       const Spectra &spectra);
+                       const SpectraLegacy &spectra);
   void removeFittingData(std::size_t index);
 
 private:

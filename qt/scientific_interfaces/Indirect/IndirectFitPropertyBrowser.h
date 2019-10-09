@@ -60,9 +60,9 @@ public:
   QString selectedFitType() const;
   void setConvolveMembers(bool convolveMembers);
   void setFitEnabled(bool enable);
-  void setCurrentDataset(SpectrumRowIndex i);
-  SpectrumRowIndex currentDataset() const;
-  void updateFunctionBrowserData(SpectrumRowIndex nData,
+  void setCurrentDataset(TableRowIndex i);
+  TableRowIndex currentDataset() const;
+  void updateFunctionBrowserData(TableRowIndex nData,
                                  const QStringList &datasetNames);
   void updatePlotGuess(MatrixWorkspace_const_sptr sampleWorkspace);
   void setErrorsEnabled(bool enabled);
@@ -73,7 +73,7 @@ public:
 public slots:
   void fit();
   void sequentialFit();
-  void setModelResolution(std::string const &name, DatasetIndex const &index);
+  void setModelResolution(std::string const &name, TableDatasetIndex const &index);
 
 protected slots:
   void clear();

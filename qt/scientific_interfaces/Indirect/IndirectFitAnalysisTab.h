@@ -40,9 +40,9 @@ public:
   void setSpectrumSelectionView(IndirectSpectrumSelectionView *view);
   void setOutputOptionsView(IIndirectFitOutputOptionsView *view);
   void setFitPropertyBrowser(IndirectFitPropertyBrowser *browser);
-  DatasetIndex getSelectedDataIndex() const;
+  TableDatasetIndex getSelectedDataIndex() const;
   WorkspaceIndex getSelectedSpectrum() const;
-  bool isRangeCurrentlySelected(DatasetIndex dataIndex,
+  bool isRangeCurrentlySelected(TableDatasetIndex dataIndex,
                                 WorkspaceIndex spectrum) const;
 
   virtual std::string tabName() const = 0;
@@ -85,11 +85,11 @@ protected slots:
   void setDataTableStartX(double startX);
   void setDataTableEndX(double endX);
   void setDataTableExclude(const std::string &exclude);
-  void tableStartXChanged(double startX, DatasetIndex dataIndex,
+  void tableStartXChanged(double startX, TableDatasetIndex dataIndex,
                           WorkspaceIndex spectrum);
-  void tableEndXChanged(double endX, DatasetIndex dataIndex,
+  void tableEndXChanged(double endX, TableDatasetIndex dataIndex,
                         WorkspaceIndex spectrum);
-  void tableExcludeChanged(const std::string &exclude, DatasetIndex dataIndex,
+  void tableExcludeChanged(const std::string &exclude, TableDatasetIndex dataIndex,
                            WorkspaceIndex spectrum);
   void startXChanged(double startX);
   void endXChanged(double endX);
@@ -97,7 +97,7 @@ protected slots:
   void updateSingleFitOutput(bool error);
   void fitAlgorithmComplete(bool error);
   void singleFit();
-  void singleFit(DatasetIndex dataIndex, WorkspaceIndex spectrum);
+  void singleFit(TableDatasetIndex dataIndex, WorkspaceIndex spectrum);
   void executeFit();
   void updateParameterValues();
   void updateParameterValues(
@@ -108,14 +108,14 @@ protected slots:
 
 private slots:
   void plotSelectedSpectra();
-  void respondToChangeOfSpectraRange(DatasetIndex);
+  void respondToChangeOfSpectraRange(TableDatasetIndex);
   void respondToSingleResolutionLoaded();
   void respondToDataChanged();
   void respondToSingleDataViewSelected();
   void respondToMultipleDataViewSelected();
   void respondToDataAdded();
   void respondToDataRemoved();
-  void respondToSelectedFitDataChanged(DatasetIndex);
+  void respondToSelectedFitDataChanged(TableDatasetIndex);
   void respondToNoFitDataSelected();
   void respondToPlotSpectrumChanged(WorkspaceIndex);
   void respondToFwhmChanged(double);
@@ -123,7 +123,6 @@ private slots:
   void respondToFunctionChanged();
 
 private:
-  /// Overidden by child class.
   void setup() override;
   void loadSettings(const QSettings &settings) override;
   bool validate() override;

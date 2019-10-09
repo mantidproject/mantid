@@ -33,13 +33,13 @@ public:
   UserInputValidator &validate(UserInputValidator &validator);
 
 signals:
-  void spectraChanged(DatasetIndex /*_t1*/);
+  void spectraChanged(TableDatasetIndex /*_t1*/);
   void maskChanged(std::string const & /*_t1*/);
   void invalidSpectraString(QString const &errorMessage);
   void invalidMaskBinsString(QString const &errorMessage);
 
 public slots:
-  void setActiveModelIndex(DatasetIndex index);
+  void setActiveModelIndex(TableDatasetIndex index);
   void setActiveIndexToZero();
   void updateSpectra();
   void displayBinMask();
@@ -57,7 +57,7 @@ private slots:
 
 private:
   void setSpectraRange(WorkspaceIndex minimum, WorkspaceIndex maximum);
-  void setModelSpectra(SpectraNew const &spectra);
+  void setModelSpectra(Spectra const &spectra);
 
   UserInputValidator validateSpectraString();
   UserInputValidator &validateSpectraString(UserInputValidator &validator);
@@ -65,7 +65,7 @@ private:
 
   IndirectFittingModel *m_model;
   std::unique_ptr<IndirectSpectrumSelectionView> m_view;
-  DatasetIndex m_activeIndex;
+  TableDatasetIndex m_activeIndex;
   WorkspaceIndex m_maskIndex;
   std::string m_spectraError;
 };

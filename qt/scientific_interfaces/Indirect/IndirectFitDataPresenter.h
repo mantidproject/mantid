@@ -44,13 +44,13 @@ public:
   void setMultiInputResolutionWSSuffixes();
   void setMultiInputResolutionFBSuffixes();
 
-  void setStartX(double startX, DatasetIndex dataIndex,
+  void setStartX(double startX, TableDatasetIndex dataIndex,
                  WorkspaceIndex spectrumIndex);
-  void setStartX(double startX, DatasetIndex dataIndex);
-  void setEndX(double endX, DatasetIndex dataIndex,
+  void setStartX(double startX, TableDatasetIndex dataIndex);
+  void setEndX(double endX, TableDatasetIndex dataIndex,
                WorkspaceIndex spectrumIndex);
-  void setEndX(double endX, DatasetIndex dataIndex);
-  void setExclude(const std::string &exclude, DatasetIndex dataIndex,
+  void setEndX(double endX, TableDatasetIndex dataIndex);
+  void setExclude(const std::string &exclude, TableDatasetIndex dataIndex,
                   WorkspaceIndex spectrumIndex);
 
   void loadSettings(const QSettings &settings);
@@ -62,7 +62,7 @@ public:
   getDataForParameterEstimation(EstimationDataSelector selector) const;
 
 public slots:
-  void updateSpectraInTable(DatasetIndex dataIndex);
+  void updateSpectraInTable(TableDatasetIndex dataIndex);
 
 protected slots:
   void setModelWorkspace(const QString &name);
@@ -77,11 +77,11 @@ signals:
   void dataAdded();
   void dataRemoved();
   void dataChanged();
-  void startXChanged(double, DatasetIndex, WorkspaceIndex);
+  void startXChanged(double, TableDatasetIndex, WorkspaceIndex);
   void startXChanged(double);
-  void endXChanged(double, DatasetIndex, WorkspaceIndex);
+  void endXChanged(double, TableDatasetIndex, WorkspaceIndex);
   void endXChanged(double);
-  void excludeRegionChanged(const std::string &, DatasetIndex, WorkspaceIndex);
+  void excludeRegionChanged(const std::string &, TableDatasetIndex, WorkspaceIndex);
   void multipleDataViewSelected();
   void singleDataViewSelected();
   void requestedAddWorkspaceDialog();
@@ -102,7 +102,7 @@ private slots:
 private:
   virtual std::unique_ptr<IAddWorkspaceDialog>
   getAddWorkspaceDialog(QWidget *parent) const;
-  void updateDataInTable(DatasetIndex dataIndex);
+  void updateDataInTable(TableDatasetIndex dataIndex);
   void selectReplacedWorkspace(const QString &workspaceName);
 
   virtual void setMultiInputResolutionFBSuffixes(IAddWorkspaceDialog *dialog);

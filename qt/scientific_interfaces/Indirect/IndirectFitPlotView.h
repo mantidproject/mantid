@@ -25,9 +25,9 @@ public:
   virtual ~IndirectFitPlotView() override;
 
   WorkspaceIndex getSelectedSpectrum() const override;
-  SpectrumRowIndex getSelectedSpectrumIndex() const override;
-  DatasetIndex getSelectedDataIndex() const override;
-  DatasetIndex dataSelectionSize() const override;
+  TableRowIndex getSelectedSpectrumIndex() const override;
+  TableDatasetIndex getSelectedDataIndex() const override;
+  TableDatasetIndex dataSelectionSize() const override;
   bool isPlotGuessChecked() const override;
 
   void hideMultipleDataSelection() override;
@@ -44,7 +44,7 @@ public:
   void setPlotSpectrum(WorkspaceIndex spectrum) override;
   void appendToDataSelection(const std::string &dataName) override;
   void setNameInDataSelection(const std::string &dataName,
-                              DatasetIndex index) override;
+                              TableDatasetIndex index) override;
   void clearDataSelection() override;
 
   void plotInTopPreview(const QString &name,

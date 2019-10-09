@@ -16,7 +16,7 @@
 #include <QRegExpValidator>
 
 namespace {
-using MantidQt::CustomInterfaces::IDA::SpectraNew;
+using MantidQt::CustomInterfaces::IDA::Spectra;
 using MantidQt::CustomInterfaces::IDA::WorkspaceIndex;
 
 namespace Regexes {
@@ -84,13 +84,13 @@ std::string pairsToString(
   return boost::algorithm::join(pairStrings, ",");
 }
 
-boost::optional<SpectraNew> pairsToSpectra(
+boost::optional<Spectra> pairsToSpectra(
     const std::vector<std::pair<WorkspaceIndex, WorkspaceIndex>> &pairs) {
   if (pairs.empty())
     return boost::none;
   else if (pairs.size() == 1)
-    return SpectraNew(pairs[0].first, pairs[0].second);
-  return SpectraNew(pairsToString(pairs));
+    return Spectra(pairs[0].first, pairs[0].second);
+  return Spectra(pairsToString(pairs));
 }
 
 QVariant getVariant(std::size_t i) {
@@ -143,90 +143,92 @@ int IndirectDataTablePresenter::endXColumn() const { return 3; }
 
 int IndirectDataTablePresenter::excludeColumn() const { return 4; }
 
-double IndirectDataTablePresenter::startX(SpectrumRowIndex row) const {
+double IndirectDataTablePresenter::startX(TableRowIndex row) const {
   return getDouble(row, startXColumn());
 }
 
-double IndirectDataTablePresenter::endX(SpectrumRowIndex row) const {
+double IndirectDataTablePresenter::endX(TableRowIndex row) const {
   return getDouble(row, endXColumn());
 }
 
 std::string
-IndirectDataTablePresenter::getExcludeString(SpectrumRowIndex row) const {
+IndirectDataTablePresenter::getExcludeString(TableRowIndex row) const {
   return getString(row, excludeColumn());
 }
 
 std::string
-IndirectDataTablePresenter::getWorkspaceName(SpectrumRowIndex row) const {
+IndirectDataTablePresenter::getWorkspaceName(TableRowIndex row) const {
   return getString(row, 0);
 }
 
 WorkspaceIndex
-IndirectDataTablePresenter::getWorkspaceIndex(SpectrumRowIndex row) const {
+IndirectDataTablePresenter::getWorkspaceIndex(TableRowIndex row) const {
   const auto item = m_dataTable->item(row.value, workspaceIndexColumn());
   return WorkspaceIndex{static_cast<int>(item->text().toULongLong())};
 }
 
-double IndirectDataTablePresenter::getDouble(SpectrumRowIndex row,
+double IndirectDataTablePresenter::getDouble(TableRowIndex row,
                                              int column) const {
   return getText(row, column).toDouble();
 }
 
-std::string IndirectDataTablePresenter::getString(SpectrumRowIndex row,
+std::string IndirectDataTablePresenter::getString(TableRowIndex row,
                                                   int column) const {
   return getText(row, column).toStdString();
 }
 
-QString IndirectDataTablePresenter::getText(SpectrumRowIndex row,
+QString IndirectDataTablePresenter::getText(TableRowIndex row,
                                             int column) const {
   return m_dataTable->item(row.value, column)->text();
 }
 
-SpectrumRowIndex
-IndirectDataTablePresenter::getNextPosition(DatasetIndex index) const {
-  if (m_dataPositions.size() > index + DatasetIndex{1})
-    return m_dataPositions[index + DatasetIndex{1}];
-  return SpectrumRowIndex{m_dataTable->rowCount()};
+TableRowIndex
+IndirectDataTablePresenter::getNextPosition(TableDatasetIndex index) const {
+  if (m_dataPositions.size() > index + TableDatasetIndex{1})
+    return m_dataPositions[index + TableDatasetIndex{1}];
+  return TableRowIndex{m_dataTable->rowCount()};
 }
 
-SpectrumRowIndex
-IndirectDataTablePresenter::getFirstRow(DatasetIndex dataIndex) const {
+TableRowIndex
+IndirectDataTablePresenter::getFirstRow(TableDatasetIndex dataIndex) const {
   if (m_dataPositions.size() > dataIndex)
     return m_dataPositions[dataIndex];
-  return SpectrumRowIndex{-1};
+  return TableRowIndex{-1};
 }
 
-DatasetIndex
-IndirectDataTablePresenter::getDataIndex(SpectrumRowIndex row) const {
-  return DatasetIndex{
+TableDatasetIndex
+IndirectDataTablePresenter::getDataIndex(TableRowIndex row) const {
+  return TableDatasetIndex{
       m_dataTable->item(row.value, 0)->data(Qt::UserRole).toInt()};
 }
 
-boost::optional<SpectraNew>
-IndirectDataTablePresenter::getSpectra(DatasetIndex dataIndex) const {
+boost::optional<Spectra>
+IndirectDataTablePresenter::getSpectra(TableDatasetIndex dataIndex) const {
   if (m_dataPositions.size() > dataIndex)
     return getSpectra(m_dataPositions[dataIndex], getNextPosition(dataIndex));
   return boost::none;
 }
 
-boost::optional<SpectraNew>
-IndirectDataTablePresenter::getSpectra(SpectrumRowIndex start,
-                                       SpectrumRowIndex end) const {
+boost::optional<Spectra>
+IndirectDataTablePresenter::getSpectra(TableRowIndex start,
+                                       TableRowIndex end) const {
   std::vector<std::pair<WorkspaceIndex, WorkspaceIndex>> spectraPairs;
   while (start < end) {
     WorkspaceIndex minimum = getWorkspaceIndex(start);
     WorkspaceIndex maximum = minimum;
-
-    while (++start < end &&
-           getWorkspaceIndex(start) == maximum + WorkspaceIndex{1})
+    start++;
+    while (start < end &&
+           getWorkspaceIndex(start) == maximum + WorkspaceIndex{1}){
       ++maximum;
+      start++;
+           }
     spectraPairs.emplace_back(minimum, maximum);
   }
   return pairsToSpectra(spectraPairs);
 }
 
-boost::optional<SpectrumRowIndex>
-IndirectDataTablePresenter::getRowIndex(DatasetIndex dataIndex,
+boost::optional<TableRowIndex>
+IndirectDataTablePresenter::getRowIndex(TableDatasetIndex dataIndex,
                                         WorkspaceIndex spectrumIndex) const {
   if (!m_dataPositions.empty()) {
     const auto position = m_model->getDomainIndex(dataIndex, spectrumIndex);
@@ -237,14 +239,14 @@ IndirectDataTablePresenter::getRowIndex(DatasetIndex dataIndex,
 }
 
 void IndirectDataTablePresenter::setStartX(double startX,
-                                           DatasetIndex dataIndex,
+                                           TableDatasetIndex dataIndex,
                                            WorkspaceIndex spectrumIndex) {
   if (auto const row = getRowIndex(dataIndex, spectrumIndex))
     setStartX(startX, *row);
 }
 
 void IndirectDataTablePresenter::setStartX(double startX,
-                                           DatasetIndex dataIndex) {
+                                           TableDatasetIndex dataIndex) {
   if (auto const spectra = getSpectra(dataIndex)) {
     for (auto const spectrumIndex : *spectra) {
       if (auto const row = getRowIndex(dataIndex, spectrumIndex))
@@ -254,7 +256,7 @@ void IndirectDataTablePresenter::setStartX(double startX,
 }
 
 void IndirectDataTablePresenter::setStartX(double startX,
-                                           SpectrumRowIndex index) {
+                                           TableRowIndex index) {
   MantidQt::API::SignalBlocker blocker(m_dataTable);
   m_dataTable->item(index.value, startXColumn())->setText(makeNumber(startX));
 }
@@ -263,13 +265,13 @@ void IndirectDataTablePresenter::setStartX(double startX) {
   setColumnValues(startXColumn(), makeNumber(startX));
 }
 
-void IndirectDataTablePresenter::setEndX(double endX, DatasetIndex dataIndex,
+void IndirectDataTablePresenter::setEndX(double endX, TableDatasetIndex dataIndex,
                                          WorkspaceIndex spectrumIndex) {
   if (auto const row = getRowIndex(dataIndex, spectrumIndex))
     setEndX(endX, *row);
 }
 
-void IndirectDataTablePresenter::setEndX(double endX, DatasetIndex dataIndex) {
+void IndirectDataTablePresenter::setEndX(double endX, TableDatasetIndex dataIndex) {
   if (auto const spectra = getSpectra(dataIndex)) {
     for (auto const spectrumIndex : *spectra) {
       if (auto const row = getRowIndex(dataIndex, spectrumIndex))
@@ -278,7 +280,7 @@ void IndirectDataTablePresenter::setEndX(double endX, DatasetIndex dataIndex) {
   }
 }
 
-void IndirectDataTablePresenter::setEndX(double endX, SpectrumRowIndex index) {
+void IndirectDataTablePresenter::setEndX(double endX, TableRowIndex index) {
   MantidQt::API::SignalBlocker blocker(m_dataTable);
   m_dataTable->item(index.value, endXColumn())->setText(makeNumber(endX));
 }
@@ -288,7 +290,7 @@ void IndirectDataTablePresenter::setEndX(double endX) {
 }
 
 void IndirectDataTablePresenter::setExclude(const std::string &exclude,
-                                            DatasetIndex dataIndex,
+                                            TableDatasetIndex dataIndex,
                                             WorkspaceIndex spectrumIndex) {
   auto const row = getRowIndex(dataIndex, spectrumIndex);
   if (FittingMode::SEQUENTIAL == m_model->getFittingMode() || !row)
@@ -298,7 +300,7 @@ void IndirectDataTablePresenter::setExclude(const std::string &exclude,
 }
 
 void IndirectDataTablePresenter::setExcludeRegion(const std::string &exclude,
-                                                  SpectrumRowIndex index) {
+                                                  TableRowIndex index) {
   MantidQt::API::SignalBlocker blocker(m_dataTable);
   if (FittingMode::SEQUENTIAL == m_model->getFittingMode())
     setExcludeRegion(exclude);
@@ -315,16 +317,16 @@ void IndirectDataTablePresenter::setExcludeRegion(const QString &exclude) {
   setColumnValues(excludeColumn(), exclude);
 }
 
-void IndirectDataTablePresenter::addData(DatasetIndex index) {
+void IndirectDataTablePresenter::addData(TableDatasetIndex index) {
   if (m_dataPositions.size() > index)
     updateData(index);
   else
     addNewData(index);
 }
 
-void IndirectDataTablePresenter::addNewData(DatasetIndex index) {
+void IndirectDataTablePresenter::addNewData(TableDatasetIndex index) {
   MantidQt::API::SignalBlocker blocker(m_dataTable);
-  const auto start = SpectrumRowIndex{m_dataTable->rowCount()};
+  const auto start = TableRowIndex{m_dataTable->rowCount()};
 
   const auto addRow = [&](WorkspaceIndex spectrum) {
     addTableEntry(index, spectrum);
@@ -335,14 +337,14 @@ void IndirectDataTablePresenter::addNewData(DatasetIndex index) {
     m_dataPositions.emplace_back(start);
 }
 
-void IndirectDataTablePresenter::updateData(DatasetIndex index) {
+void IndirectDataTablePresenter::updateData(TableDatasetIndex index) {
   if (m_dataPositions.size() > index)
     updateExistingData(index);
   else
     addNewData(index);
 }
 
-void IndirectDataTablePresenter::updateExistingData(DatasetIndex index) {
+void IndirectDataTablePresenter::updateExistingData(TableDatasetIndex index) {
   MantidQt::API::SignalBlocker blocker(m_dataTable);
   auto position = m_dataPositions[index];
   const auto nextPosition = getNextPosition(index);
@@ -359,22 +361,22 @@ void IndirectDataTablePresenter::updateExistingData(DatasetIndex index) {
   collapseData(position, nextPosition, initialSize, index);
 }
 
-void IndirectDataTablePresenter::collapseData(SpectrumRowIndex from,
-                                              SpectrumRowIndex to,
-                                              SpectrumRowIndex initialSize,
-                                              DatasetIndex dataIndex) {
+void IndirectDataTablePresenter::collapseData(TableRowIndex from,
+                                              TableRowIndex to,
+                                              TableRowIndex initialSize,
+                                              TableDatasetIndex dataIndex) {
   const auto shift = from - to;
-  if (shift != SpectrumRowIndex{0}) {
+  if (shift != TableRowIndex{0}) {
     for (auto i = from; i < to; ++i)
       removeTableEntry(from);
 
-    if (initialSize + shift == SpectrumRowIndex{0} &&
+    if (initialSize + shift == TableRowIndex{0} &&
         m_dataPositions.size() > dataIndex) {
       m_dataPositions.remove(dataIndex);
       shiftDataPositions(shift, dataIndex, m_dataPositions.size());
       updateDataPositionsInCells(dataIndex, m_dataPositions.size());
     } else
-      shiftDataPositions(shift, dataIndex + DatasetIndex{1},
+      shiftDataPositions(shift, dataIndex + TableDatasetIndex{1},
                          m_dataPositions.size());
   }
 }
@@ -387,20 +389,20 @@ void IndirectDataTablePresenter::removeSelectedData() {
   auto &modifiedIndices = modifiedIndicesAndCount.first;
 
   for (auto i = 0u; i < modifiedIndices.size(); ++i)
-    shiftDataPositions(-modifiedCount[i], modifiedIndices[i] + DatasetIndex{1},
+    shiftDataPositions(-modifiedCount[i], modifiedIndices[i] + TableDatasetIndex{1},
                        m_dataPositions.size());
 
   if (!modifiedIndices.empty()) {
     updateFromRemovedIndices(modifiedIndices);
-    updateDataPositionsInCells(modifiedIndices.back() > DatasetIndex{0}
-                                   ? modifiedIndices.back() - DatasetIndex{1}
-                                   : DatasetIndex{0},
+    updateDataPositionsInCells(modifiedIndices.back() > TableDatasetIndex{0}
+                                   ? modifiedIndices.back() - TableDatasetIndex{1}
+                                   : TableDatasetIndex{0},
                                m_dataPositions.size());
   }
 }
 
 void IndirectDataTablePresenter::updateFromRemovedIndices(
-    const std::vector<DatasetIndex> &indices) {
+    const std::vector<TableDatasetIndex> &indices) {
   for (const auto &index : indices) {
     const auto existingSpectra = getSpectra(index);
     if (existingSpectra)
@@ -411,21 +413,21 @@ void IndirectDataTablePresenter::updateFromRemovedIndices(
       m_dataPositions.remove(index);
 
       if (m_model->numberOfWorkspaces() ==
-          originalNumberOfWorkspaces - DatasetIndex{2})
+          originalNumberOfWorkspaces - TableDatasetIndex{2})
         m_dataPositions.remove(index);
     }
   }
 }
 
-std::pair<std::vector<DatasetIndex>, std::vector<SpectrumRowIndex>>
+std::pair<std::vector<TableDatasetIndex>, std::vector<TableRowIndex>>
 IndirectDataTablePresenter::removeTableRows(QModelIndexList &selectedRows) {
-  std::vector<DatasetIndex> modifiedIndices;
-  std::vector<SpectrumRowIndex> modifiedCount;
-  SpectrumRowIndex previous{-1};
+  std::vector<TableDatasetIndex> modifiedIndices;
+  std::vector<TableRowIndex> modifiedCount;
+  TableRowIndex previous{-1};
 
   qSort(selectedRows);
   for (auto i = selectedRows.count() - 1; i >= 0; --i) {
-    const auto current = SpectrumRowIndex{selectedRows[i].row()};
+    const auto current = TableRowIndex{selectedRows[i].row()};
     if (current != previous) {
       auto modifiedIndex = removeTableEntry(current);
 
@@ -433,7 +435,7 @@ IndirectDataTablePresenter::removeTableRows(QModelIndexList &selectedRows) {
         ++modifiedCount.back();
       else {
         modifiedIndices.emplace_back(modifiedIndex);
-        modifiedCount.emplace_back(SpectrumRowIndex{1});
+        modifiedCount.emplace_back(TableRowIndex{1});
       }
       previous = current;
     }
@@ -442,7 +444,7 @@ IndirectDataTablePresenter::removeTableRows(QModelIndexList &selectedRows) {
 }
 
 void IndirectDataTablePresenter::setModelFittingRange(int irow, int column) {
-  SpectrumRowIndex row{irow};
+  TableRowIndex row{irow};
   const auto workspaceIndex = getWorkspaceIndex(row);
   const auto dataIndex = getDataIndex(row);
 
@@ -456,19 +458,19 @@ void IndirectDataTablePresenter::setModelFittingRange(int irow, int column) {
 }
 
 void IndirectDataTablePresenter::setModelStartXAndEmit(
-    double startX, DatasetIndex dataIndex, WorkspaceIndex workspaceIndex) {
+    double startX, TableDatasetIndex dataIndex, WorkspaceIndex workspaceIndex) {
   m_model->setStartX(startX, dataIndex, workspaceIndex);
   emit startXChanged(startX, dataIndex, workspaceIndex);
 }
 
 void IndirectDataTablePresenter::setModelEndXAndEmit(
-    double endX, DatasetIndex dataIndex, WorkspaceIndex workspaceIndex) {
+    double endX, TableDatasetIndex dataIndex, WorkspaceIndex workspaceIndex) {
   m_model->setEndX(endX, dataIndex, workspaceIndex);
   emit endXChanged(endX, dataIndex, workspaceIndex);
 }
 
 void IndirectDataTablePresenter::setModelExcludeAndEmit(
-    const std::string &exclude, DatasetIndex dataIndex,
+    const std::string &exclude, TableDatasetIndex dataIndex,
     WorkspaceIndex workspaceIndex) {
   m_model->setExcludeRegion(exclude, dataIndex, workspaceIndex);
   emit excludeRegionChanged(exclude, dataIndex, workspaceIndex);
@@ -483,7 +485,7 @@ void IndirectDataTablePresenter::setGlobalFittingRange(bool global) {
 
 void IndirectDataTablePresenter::updateAllFittingRangeFrom(int irow,
                                                            int column) {
-  SpectrumRowIndex row{irow};
+  TableRowIndex row{irow};
   MantidQt::API::SignalBlocker blocker(m_dataTable);
   if (startXColumn() == column)
     setStartX(getDouble(row, column));
@@ -496,11 +498,11 @@ void IndirectDataTablePresenter::updateAllFittingRangeFrom(int irow,
 void IndirectDataTablePresenter::enableGlobalFittingRange() {
   MantidQt::API::SignalBlocker blocker(m_dataTable);
   const auto range =
-      m_model->getFittingRange(DatasetIndex{0}, WorkspaceIndex{0});
+      m_model->getFittingRange(TableDatasetIndex{0}, WorkspaceIndex{0});
   setStartX(range.first);
   setEndX(range.second);
   setExcludeRegion(
-      m_model->getExcludeRegion(DatasetIndex{0}, WorkspaceIndex{0}));
+      m_model->getExcludeRegion(TableDatasetIndex{0}, WorkspaceIndex{0}));
   connect(m_dataTable, SIGNAL(cellChanged(int, int)), this,
           SLOT(updateAllFittingRangeFrom(int, int)));
 }
@@ -539,17 +541,17 @@ void IndirectDataTablePresenter::setHorizontalHeaders(
   header->setResizeMode(0, QHeaderView::Stretch);
 }
 
-void IndirectDataTablePresenter::addTableEntry(DatasetIndex dataIndex,
+void IndirectDataTablePresenter::addTableEntry(TableDatasetIndex dataIndex,
                                                WorkspaceIndex spectrum) {
-  const auto row = SpectrumRowIndex{m_dataTable->rowCount()};
+  const auto row = TableRowIndex{m_dataTable->rowCount()};
   addTableEntry(dataIndex, spectrum, row);
   m_dataTable->item(row.value, 0)
       ->setData(Qt::UserRole, getVariant(dataIndex.value));
 }
 
-void IndirectDataTablePresenter::addTableEntry(DatasetIndex dataIndex,
+void IndirectDataTablePresenter::addTableEntry(TableDatasetIndex dataIndex,
                                                WorkspaceIndex spectrum,
-                                               SpectrumRowIndex row) {
+                                               TableRowIndex row) {
   m_dataTable->insertRow(row.value);
 
   const auto &name = m_model->getWorkspace(dataIndex)->getName();
@@ -576,13 +578,13 @@ void IndirectDataTablePresenter::addTableEntry(DatasetIndex dataIndex,
 }
 
 void IndirectDataTablePresenter::setCell(std::unique_ptr<QTableWidgetItem> cell,
-                                         SpectrumRowIndex row, int column) {
+                                         TableRowIndex row, int column) {
   m_dataTable->setItem(row.value, column, cell.release());
 }
 
-void IndirectDataTablePresenter::updateTableEntry(DatasetIndex dataIndex,
+void IndirectDataTablePresenter::updateTableEntry(TableDatasetIndex dataIndex,
                                                   WorkspaceIndex spectrum,
-                                                  SpectrumRowIndex row) {
+                                                  TableRowIndex row) {
   const auto &name = m_model->getWorkspace(dataIndex)->getName();
   setCellText(QString::fromStdString(name), row, 0);
   setCellText(QString::number(spectrum.value), row, workspaceIndexColumn());
@@ -596,26 +598,26 @@ void IndirectDataTablePresenter::updateTableEntry(DatasetIndex dataIndex,
 }
 
 void IndirectDataTablePresenter::setCellText(const QString &text,
-                                             SpectrumRowIndex row, int column) {
+                                             TableRowIndex row, int column) {
   m_dataTable->item(row.value, column)->setText(text);
 }
 
-DatasetIndex
-IndirectDataTablePresenter::removeTableEntry(SpectrumRowIndex row) {
+TableDatasetIndex
+IndirectDataTablePresenter::removeTableEntry(TableRowIndex row) {
   const auto dataIndex = m_dataTable->item(row.value, 0)->data(Qt::UserRole);
   m_dataTable->removeRow(row.value);
-  return DatasetIndex{dataIndex.toInt()};
+  return TableDatasetIndex{dataIndex.toInt()};
 }
 
-void IndirectDataTablePresenter::shiftDataPositions(SpectrumRowIndex shift,
-                                                    DatasetIndex from,
-                                                    DatasetIndex to) {
+void IndirectDataTablePresenter::shiftDataPositions(TableRowIndex shift,
+                                                    TableDatasetIndex from,
+                                                    TableDatasetIndex to) {
   for (auto i = from; i < to; ++i)
     m_dataPositions[i] += shift;
 }
 
-void IndirectDataTablePresenter::updateDataPositionsInCells(DatasetIndex from,
-                                                            DatasetIndex to) {
+void IndirectDataTablePresenter::updateDataPositionsInCells(TableDatasetIndex from,
+                                                            TableDatasetIndex to) {
   for (auto i = from; i < to; ++i) {
     const auto nextPosition = getNextPosition(i);
     for (auto row = m_dataPositions[i]; row < nextPosition; ++row)

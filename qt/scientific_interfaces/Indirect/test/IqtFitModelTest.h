@@ -68,11 +68,11 @@ public:
   }
 
   void test_that_the_model_is_instantiated_and_can_hold_a_workspace() {
-    SpectraNew const spectra = SpectraNew("0-1");
+    Spectra const spectra = Spectra("0-1");
 
     m_model->addWorkspace(m_workspace, spectra);
 
-    TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), DatasetIndex{1});
+    TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), TableDatasetIndex{1});
   }
 
   void test_that_getSpectrumDependentAttributes_will_return_an_empty_vector() {

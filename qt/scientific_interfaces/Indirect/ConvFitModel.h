@@ -31,7 +31,7 @@ public:
   void setTemperature(const boost::optional<double> &temperature);
 
   void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
-                    const Spectra &spectra) override;
+                    const SpectraLegacy &spectra) override;
   void removeWorkspace(std::size_t index) override;
   void setResolution(const std::string &name, std::size_t index);
   void setResolution(Mantid::API::MatrixWorkspace_sptr resolution,

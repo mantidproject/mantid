@@ -65,7 +65,7 @@ public:
       DataForParameterEstimationCollection &&data) = 0;
   virtual void setBackgroundA0(double value) = 0;
   virtual void setResolution(std::string const &name,
-                             DatasetIndex const &index) = 0;
+                             TableDatasetIndex const &index) = 0;
 
 signals:
   void functionStructureChanged();

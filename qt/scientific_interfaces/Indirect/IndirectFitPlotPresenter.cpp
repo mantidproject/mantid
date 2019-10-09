@@ -10,14 +10,14 @@
 
 namespace {
 using MantidQt::CustomInterfaces::IDA::IIndirectFitPlotView;
-using MantidQt::CustomInterfaces::IDA::SpectraNew;
+using MantidQt::CustomInterfaces::IDA::Spectra;
 using MantidQt::CustomInterfaces::IDA::WorkspaceIndex;
 
 struct UpdateAvailableSpectra : public boost::static_visitor<> {
 public:
   explicit UpdateAvailableSpectra(IIndirectFitPlotView *view) : m_view(view) {}
 
-  void operator()(const SpectraNew &spectra) {
+  void operator()(const Spectra &spectra) {
     if (spectra.isContinuous()) {
       auto const minmax = spectra.getMinMax();
       m_view->setAvailableSpectra(minmax.first, minmax.second);
@@ -43,18 +43,18 @@ IndirectFitPlotPresenter::IndirectFitPlotPresenter(IndirectFittingModel *model,
     : m_model(new IndirectFitPlotModel(model)), m_view(view),
       m_plotGuessInSeparateWindow(false),
       m_plotter(std::make_unique<IndirectPlotter>(pythonRunner)) {
-  connect(m_view, SIGNAL(selectedFitDataChanged(DatasetIndex)), this,
-          SLOT(setActiveIndex(DatasetIndex)));
-  connect(m_view, SIGNAL(selectedFitDataChanged(DatasetIndex)), this,
+  connect(m_view, SIGNAL(selectedFitDataChanged(TableDatasetIndex)), this,
+          SLOT(setActiveIndex(TableDatasetIndex)));
+  connect(m_view, SIGNAL(selectedFitDataChanged(TableDatasetIndex)), this,
           SLOT(updateAvailableSpectra()));
-  connect(m_view, SIGNAL(selectedFitDataChanged(DatasetIndex)), this,
+  connect(m_view, SIGNAL(selectedFitDataChanged(TableDatasetIndex)), this,
           SLOT(updatePlots()));
-  connect(m_view, SIGNAL(selectedFitDataChanged(DatasetIndex)), this,
+  connect(m_view, SIGNAL(selectedFitDataChanged(TableDatasetIndex)), this,
           SLOT(updateFitRangeSelector()));
-  connect(m_view, SIGNAL(selectedFitDataChanged(DatasetIndex)), this,
+  connect(m_view, SIGNAL(selectedFitDataChanged(TableDatasetIndex)), this,
           SLOT(updateGuess()));
-  connect(m_view, SIGNAL(selectedFitDataChanged(DatasetIndex)), this,
-          SIGNAL(selectedFitDataChanged(DatasetIndex)));
+  connect(m_view, SIGNAL(selectedFitDataChanged(TableDatasetIndex)), this,
+          SIGNAL(selectedFitDataChanged(TableDatasetIndex)));
 
   connect(m_view, SIGNAL(plotSpectrumChanged(WorkspaceIndex)), this,
           SLOT(setActiveSpectrum(WorkspaceIndex)));
@@ -102,7 +102,7 @@ IndirectFitPlotPresenter::IndirectFitPlotPresenter(IndirectFittingModel *model,
   updateAvailableSpectra();
 }
 
-DatasetIndex IndirectFitPlotPresenter::getSelectedDataIndex() const {
+TableDatasetIndex IndirectFitPlotPresenter::getSelectedDataIndex() const {
   return m_model->getActiveDataIndex();
 }
 
@@ -110,21 +110,21 @@ WorkspaceIndex IndirectFitPlotPresenter::getSelectedSpectrum() const {
   return m_model->getActiveSpectrum();
 }
 
-SpectrumRowIndex IndirectFitPlotPresenter::getSelectedSpectrumIndex() const {
+TableRowIndex IndirectFitPlotPresenter::getSelectedSpectrumIndex() const {
   return m_view->getSelectedSpectrumIndex();
 }
 
-SpectrumRowIndex IndirectFitPlotPresenter::getSelectedDomainIndex() const {
+TableRowIndex IndirectFitPlotPresenter::getSelectedDomainIndex() const {
   return m_model->getActiveDomainIndex();
 }
 
 bool IndirectFitPlotPresenter::isCurrentlySelected(
-    DatasetIndex dataIndex, WorkspaceIndex spectrum) const {
+    TableDatasetIndex dataIndex, WorkspaceIndex spectrum) const {
   return getSelectedDataIndex() == dataIndex &&
          getSelectedSpectrum() == spectrum;
 }
 
-void IndirectFitPlotPresenter::setActiveIndex(DatasetIndex index) {
+void IndirectFitPlotPresenter::setActiveIndex(TableDatasetIndex index) {
   m_model->setActiveIndex(index);
 }
 
@@ -200,7 +200,7 @@ void IndirectFitPlotPresenter::appendLastDataToSelection() {
   const auto workspaceCount = m_model->numberOfWorkspaces();
   if (m_view->dataSelectionSize() == workspaceCount)
     m_view->setNameInDataSelection(m_model->getLastFitDataName(),
-                                   workspaceCount - DatasetIndex{1});
+                                   workspaceCount - TableDatasetIndex{1});
   else
     m_view->appendToDataSelection(m_model->getLastFitDataName());
 }
@@ -213,9 +213,9 @@ void IndirectFitPlotPresenter::updateSelectedDataName() {
 void IndirectFitPlotPresenter::updateDataSelection() {
   MantidQt::API::SignalBlocker blocker(m_view);
   m_view->clearDataSelection();
-  for (DatasetIndex i{0}; i < m_model->numberOfWorkspaces(); ++i)
+  for (TableDatasetIndex i{0}; i < m_model->numberOfWorkspaces(); ++i)
     m_view->appendToDataSelection(m_model->getFitDataName(i));
-  setActiveIndex(DatasetIndex{0});
+  setActiveIndex(TableDatasetIndex{0});
   updateAvailableSpectra();
   emitSelectedFitDataChanged();
 }

@@ -90,7 +90,7 @@ private:
  * A variant is used, such that faster operations can be employed when using
  * a continuous range.
  */
-using Spectra = boost::variant<DiscontinuousSpectra<std::size_t>,
+using SpectraLegacy = boost::variant<DiscontinuousSpectra<std::size_t>,
                                std::pair<std::size_t, std::size_t>>;
 
 template <typename F> struct ApplySpectra : boost::static_visitor<> {
@@ -144,7 +144,7 @@ private:
 class MANTIDQT_INDIRECT_DLL IndirectFitDataLegacy {
 public:
   IndirectFitDataLegacy(Mantid::API::MatrixWorkspace_sptr workspace,
-                        const Spectra &spectra);
+                        const SpectraLegacy &spectra);
 
   std::string displayName(const std::string &formatString,
                           const std::string &rangeDelimiter) const;
@@ -153,7 +153,7 @@ public:
   std::string getBasename() const;
 
   Mantid::API::MatrixWorkspace_sptr workspace() const;
-  const Spectra &spectra() const;
+  const SpectraLegacy &spectra() const;
   std::size_t getSpectrum(std::size_t index) const;
   std::size_t numberOfSpectra() const;
   bool zeroSpectra() const;
@@ -174,18 +174,18 @@ public:
   }
 
   void setSpectra(std::string const &spectra);
-  void setSpectra(Spectra &&spectra);
-  void setSpectra(Spectra const &spectra);
+  void setSpectra(SpectraLegacy &&spectra);
+  void setSpectra(SpectraLegacy const &spectra);
   void setStartX(double const &startX, std::size_t const &index);
   void setEndX(double const &endX, std::size_t const &spectrum);
   void setExcludeRegionString(std::string const &excludeRegion,
                               std::size_t const &spectrum);
 
 private:
-  void validateSpectra(Spectra const &spectra);
+  void validateSpectra(SpectraLegacy const &spectra);
 
   Mantid::API::MatrixWorkspace_sptr m_workspace;
-  Spectra m_spectra;
+  SpectraLegacy m_spectra;
   std::unordered_map<std::size_t, std::string> m_excludeRegions;
   std::unordered_map<std::size_t, std::pair<double, double>> m_ranges;
 };

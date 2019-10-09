@@ -55,7 +55,7 @@ findAxisLabels(MatrixWorkspace const *workspace, Predicate const &predicate) {
   return std::make_pair(std::vector<std::string>(), std::vector<std::size_t>());
 }
 
-Spectra createSpectra(std::size_t spectrum) {
+SpectraLegacy createSpectra(std::size_t spectrum) {
   return std::make_pair(spectrum, spectrum);
 }
 
@@ -213,7 +213,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 void JumpFitModel::addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
-                                const Spectra & /*spectra*/) {
+                                const SpectraLegacy & /*spectra*/) {
   const auto name = getHWHMName(workspace->getName());
   const auto parameters = addJumpFitParameters(workspace.get(), name);
 

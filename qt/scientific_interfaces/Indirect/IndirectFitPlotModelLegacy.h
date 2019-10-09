@@ -28,7 +28,7 @@ public:
   Mantid::API::MatrixWorkspace_sptr getWorkspace() const;
   Mantid::API::MatrixWorkspace_sptr getResultWorkspace() const;
   Mantid::API::MatrixWorkspace_sptr getGuessWorkspace() const;
-  Spectra getSpectra() const;
+  SpectraLegacy getSpectra() const;
 
   Mantid::API::MatrixWorkspace_sptr
   appendGuessToInput(Mantid::API::MatrixWorkspace_sptr guessWorkspace) const;

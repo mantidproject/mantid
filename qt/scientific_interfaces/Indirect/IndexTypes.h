@@ -4,6 +4,10 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
+// 
+// This file contains the implimentation of type safe indices for use
+// in the indirect interface code.
+// TODO merge this to use the generic index framework from IndexType.h 
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_INDEXTYPE_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_INDEXTYPE_H_
 
@@ -15,6 +19,10 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
+/** A struct to impliment strongly typed integers, without implicit conversion.
+ * Currently operations and comparitors are only defined between instances of the
+ * same type.
+*/
 template <int Class> struct IndexType {
   using IntImplementationType = int;
   IntImplementationType value = 0;
@@ -47,11 +55,18 @@ template <int Class> struct IndexType {
   }
 }; // namespace IDA
 
-using SpectrumRowIndex = IndexType<0>;
+// Used to index table rows in the GUI
+using TableRowIndex = IndexType<0>;
+// Used to index spectra in workspaces
 using WorkspaceIndex = IndexType<1>;
-using GroupIndex = IndexType<2>;
-using DatasetIndex = IndexType<3>;
+// Used to index worspaces in workspace groups
+using WorkspaceGroupIndex = IndexType<2>;
+// Used to index 
+using TableDatasetIndex = IndexType<3>;
 
+/** A class which wraps a vector so that you supply not only the value
+ * type but also the expected index type.
+*/
 template <class CollectionIndexType, class CollectionValueType>
 class IndexCollectionType {
 public:
@@ -115,8 +130,8 @@ operator<<(std::ostream &out,
   return out;
 }
 
-Q_DECLARE_METATYPE(MantidQt::CustomInterfaces::IDA::SpectrumRowIndex)
+Q_DECLARE_METATYPE(MantidQt::CustomInterfaces::IDA::TableRowIndex)
 Q_DECLARE_METATYPE(MantidQt::CustomInterfaces::IDA::WorkspaceIndex)
-Q_DECLARE_METATYPE(MantidQt::CustomInterfaces::IDA::GroupIndex)
+Q_DECLARE_METATYPE(MantidQt::CustomInterfaces::IDA::WorkspaceGroupIndex)
 
 #endif /* MANTIDQTCUSTOMINTERFACESIDA_INDEXTYPE_H_ */

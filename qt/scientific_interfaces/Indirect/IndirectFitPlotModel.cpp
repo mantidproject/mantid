@@ -128,7 +128,7 @@ IndirectFitPlotModel::~IndirectFitPlotModel() {
   deleteExternalGuessWorkspace();
 }
 
-void IndirectFitPlotModel::setActiveIndex(DatasetIndex index) {
+void IndirectFitPlotModel::setActiveIndex(TableDatasetIndex index) {
   m_activeIndex = index;
 }
 
@@ -166,7 +166,7 @@ MatrixWorkspace_sptr IndirectFitPlotModel::getWorkspace() const {
   return m_fittingModel->getWorkspace(m_activeIndex);
 }
 
-SpectraNew IndirectFitPlotModel::getSpectra() const {
+Spectra IndirectFitPlotModel::getSpectra() const {
   return m_fittingModel->getSpectra(m_activeIndex);
 }
 
@@ -184,7 +184,7 @@ std::pair<double, double> IndirectFitPlotModel::getResultRange() const {
   return {xValues.front(), xValues.back()};
 }
 
-DatasetIndex IndirectFitPlotModel::getActiveDataIndex() const {
+TableDatasetIndex IndirectFitPlotModel::getActiveDataIndex() const {
   return m_activeIndex;
 }
 
@@ -192,15 +192,15 @@ WorkspaceIndex IndirectFitPlotModel::getActiveSpectrum() const {
   return m_activeSpectrum;
 }
 
-DatasetIndex IndirectFitPlotModel::numberOfWorkspaces() const {
+TableDatasetIndex IndirectFitPlotModel::numberOfWorkspaces() const {
   return m_fittingModel->numberOfWorkspaces();
 }
 
-SpectrumRowIndex IndirectFitPlotModel::getActiveDomainIndex() const {
-  SpectrumRowIndex index{0};
-  for (DatasetIndex iws{0}; iws < numberOfWorkspaces(); ++iws) {
+TableRowIndex IndirectFitPlotModel::getActiveDomainIndex() const {
+  TableRowIndex index{0};
+  for (TableDatasetIndex iws{0}; iws < numberOfWorkspaces(); ++iws) {
     if (iws < m_activeIndex) {
-      index += SpectrumRowIndex{m_fittingModel->getNumberOfSpectra(iws)};
+      index += TableRowIndex{m_fittingModel->getNumberOfSpectra(iws)};
     } else {
       auto const spectra = m_fittingModel->getSpectra(iws);
       try {
@@ -215,7 +215,7 @@ SpectrumRowIndex IndirectFitPlotModel::getActiveDomainIndex() const {
   return index;
 }
 
-std::string IndirectFitPlotModel::getFitDataName(DatasetIndex index) const {
+std::string IndirectFitPlotModel::getFitDataName(TableDatasetIndex index) const {
   if (m_fittingModel->getWorkspace(index))
     return m_fittingModel->createDisplayName("%1% (%2%)", "-", index);
   return "";
@@ -228,7 +228,7 @@ std::string IndirectFitPlotModel::getFitDataName() const {
 std::string IndirectFitPlotModel::getLastFitDataName() const {
   auto const workspaceCount = m_fittingModel->numberOfWorkspaces();
   if (workspaceCount.value > 0)
-    return getFitDataName(workspaceCount - DatasetIndex{1});
+    return getFitDataName(workspaceCount - TableDatasetIndex{1});
   return "";
 }
 

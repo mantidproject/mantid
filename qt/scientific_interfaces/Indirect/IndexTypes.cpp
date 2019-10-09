@@ -12,9 +12,9 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-int SpectrumRoqIndexId = qRegisterMetaType<SpectrumRowIndex>();
+int SpectrumRoqIndexId = qRegisterMetaType<TableRowIndex>();
 int WorkspaceIndexId = qRegisterMetaType<WorkspaceIndex>();
-int GrouppIndexId = qRegisterMetaType<GroupIndex>();
+int GrouppIndexId = qRegisterMetaType<WorkspaceGroupIndex>();
 
 } // namespace IDA
 } // namespace CustomInterfaces

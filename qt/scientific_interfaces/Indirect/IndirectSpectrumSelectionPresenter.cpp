@@ -23,7 +23,7 @@ using namespace Mantid::Kernel::Strings;
 struct SetViewSpectra {
   explicit SetViewSpectra(IndirectSpectrumSelectionView *view) : m_view(view) {}
 
-  void operator()(const SpectraNew &spectra) const {
+  void operator()(const Spectra &spectra) const {
     if (spectra.isContinuous()) {
       m_view->displaySpectra(spectra.getMinMax());
     } else {
@@ -168,7 +168,7 @@ void IndirectSpectrumSelectionPresenter::initSpectraSelectionWidget(int index) {
 }
 
 void IndirectSpectrumSelectionPresenter::setActiveIndexToZero() {
-  setActiveModelIndex(DatasetIndex{0});
+  setActiveModelIndex(TableDatasetIndex{0});
 }
 
 void IndirectSpectrumSelectionPresenter::updateSpectra() {
@@ -185,7 +185,7 @@ void IndirectSpectrumSelectionPresenter::updateSpectra() {
 }
 
 void IndirectSpectrumSelectionPresenter::setActiveModelIndex(
-    DatasetIndex index) {
+    TableDatasetIndex index) {
   m_activeIndex = index;
   updateSpectra();
 }
@@ -196,7 +196,7 @@ void IndirectSpectrumSelectionPresenter::setSpectraRange(
 }
 
 void IndirectSpectrumSelectionPresenter::setModelSpectra(
-    SpectraNew const &spectra) {
+    Spectra const &spectra) {
   try {
     m_model->setSpectra(spectra, m_activeIndex);
     m_spectraError.clear();
@@ -211,13 +211,13 @@ void IndirectSpectrumSelectionPresenter::setModelSpectra(
 
 void IndirectSpectrumSelectionPresenter::updateSpectraList(
     std::string const &spectraList) {
-  setModelSpectra(SpectraNew(createSpectraString(spectraList)));
+  setModelSpectra(Spectra(createSpectraString(spectraList)));
   emit spectraChanged(m_activeIndex);
 }
 
 void IndirectSpectrumSelectionPresenter::updateSpectraRange(
     WorkspaceIndex minimum, WorkspaceIndex maximum) {
-  setModelSpectra(SpectraNew(minimum, maximum));
+  setModelSpectra(Spectra(minimum, maximum));
   emit spectraChanged(m_activeIndex);
 }
 

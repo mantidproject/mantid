@@ -86,8 +86,8 @@ private:
   QString getText(int row, int column) const;
   int getNextPosition(std::size_t index) const;
   std::size_t getDataIndex(int row) const;
-  boost::optional<Spectra> getSpectra(std::size_t dataIndex) const;
-  boost::optional<Spectra> getSpectra(int start, int end) const;
+  boost::optional<SpectraLegacy> getSpectra(std::size_t dataIndex) const;
+  boost::optional<SpectraLegacy> getSpectra(int start, int end) const;
   boost::optional<int> getRowIndex(std::size_t dataIndex,
                                    int spectrumIndex) const;
 

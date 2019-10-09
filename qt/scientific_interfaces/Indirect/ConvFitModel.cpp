@@ -547,7 +547,7 @@ void ConvFitModel::setTemperature(const boost::optional<double> &temperature) {
 }
 
 void ConvFitModel::addWorkspace(MatrixWorkspace_sptr workspace,
-                                const Spectra &spectra) {
+                                const SpectraLegacy &spectra) {
   IndirectFittingModelLegacy::addWorkspace(workspace, spectra);
 
   const auto dataSize = numberOfWorkspaces();

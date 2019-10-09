@@ -230,8 +230,8 @@ public:
   test_that_getSpectra_returns_the_same_spectra_range_which_was_provided_as_input() {
     auto const model = getFitPlotModel();
 
-    Spectra const spectra = std::make_pair(0u, 9u);
-    Spectra const storedSpectra = model.getSpectra();
+    SpectraLegacy const spectra = std::make_pair(0u, 9u);
+    SpectraLegacy const storedSpectra = model.getSpectra();
 
     TS_ASSERT(boost::apply_visitor(AreSpectraEqual(), storedSpectra, spectra));
   }

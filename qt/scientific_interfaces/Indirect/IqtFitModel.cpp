@@ -219,22 +219,22 @@ IAlgorithm_sptr IqtFitModel::simultaneousFitAlgorithm() const {
 std::string IqtFitModel::sequentialFitOutputName() const {
   if (isMultiFit())
     return "MultiIqtFit_" + m_fitType + "_Results";
-  auto const fitString = getFitString(getWorkspace(DatasetIndex{0}));
+  auto const fitString = getFitString(getWorkspace(TableDatasetIndex{0}));
   return createOutputName("%1%" + fitString + "_" + m_fitType + "_s%2%", "_to_",
-                          DatasetIndex{0});
+                          TableDatasetIndex{0});
 }
 
 std::string IqtFitModel::simultaneousFitOutputName() const {
   if (isMultiFit())
     return "MultiSimultaneousIqtFit_" + m_fitType + "_Results";
-  auto const fitString = getFitString(getWorkspace(DatasetIndex{0}));
+  auto const fitString = getFitString(getWorkspace(TableDatasetIndex{0}));
   return createOutputName("%1%" + fitString + "_mult" + m_fitType + "_s%2%",
-                          "_to_", DatasetIndex{0});
+                          "_to_", TableDatasetIndex{0});
 }
 
-std::string IqtFitModel::singleFitOutputName(DatasetIndex index,
+std::string IqtFitModel::singleFitOutputName(TableDatasetIndex index,
                                              WorkspaceIndex spectrum) const {
-  auto const fitString = getFitString(getWorkspace(DatasetIndex{0}));
+  auto const fitString = getFitString(getWorkspace(TableDatasetIndex{0}));
   return createSingleFitOutputName(
       "%1%" + fitString + "_" + m_fitType + "_s%2%_Results", index, spectrum);
 }
@@ -251,7 +251,7 @@ void IqtFitModel::setFitFunction(
 }
 
 std::unordered_map<std::string, ParameterValueNew>
-IqtFitModel::createDefaultParameters(DatasetIndex index) const {
+IqtFitModel::createDefaultParameters(TableDatasetIndex index) const {
   std::unordered_map<std::string, ParameterValueNew> parameters;
   parameters["Height"] =
       ParameterValueNew(computeHeightApproximation(getFittingFunction()));
@@ -270,7 +270,7 @@ IqtFitModel::createFunctionWithGlobalBeta(IFunction_sptr function) const {
   boost::shared_ptr<MultiDomainFunction> multiDomainFunction(
       new MultiDomainFunction);
   const auto functionString = function->asString();
-  for (auto i = DatasetIndex{0}; i < numberOfWorkspaces(); ++i) {
+  for (auto i = TableDatasetIndex{0}; i < numberOfWorkspaces(); ++i) {
     auto addDomains = [&](WorkspaceIndex /*unused*/) {
       const auto index = multiDomainFunction->nFunctions();
       multiDomainFunction->addFunction(createFunction(functionString));

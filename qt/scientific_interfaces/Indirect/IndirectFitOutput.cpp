@@ -226,9 +226,9 @@ typename Map::mapped_type &findOrCreateDefaultInMap(Map &map, const Key &key) {
   return map[key] = typename Map::mapped_type();
 }
 
-SpectrumRowIndex numberOfSpectraIn(const FitDataIteratorNew &fitDataBegin,
+TableRowIndex numberOfSpectraIn(const FitDataIteratorNew &fitDataBegin,
                                    const FitDataIteratorNew &fitDataEnd) {
-  SpectrumRowIndex spectra{0};
+  TableRowIndex spectra{0};
   for (auto it = fitDataBegin; it < fitDataEnd; ++it)
     spectra += (*it)->numberOfSpectra();
   return spectra;
@@ -344,7 +344,7 @@ void IndirectFitOutput::addOutput(WorkspaceGroup_sptr resultGroup,
   TableRowExtractor extractRowFromTable(parameterTable);
   m_parameters[fitData][spectrum] = extractRowFromTable(WorkspaceIndex{0});
   m_outputResultLocations[fitData][spectrum] =
-      ResultLocationNew(resultGroup, GroupIndex{0});
+      ResultLocationNew(resultGroup, WorkspaceGroupIndex{0});
   renameResult(resultWorkspace, fitData);
   m_resultWorkspace = resultWorkspace;
   m_resultGroup = resultGroup;
@@ -375,9 +375,9 @@ void IndirectFitOutput::updateParameters(ITableWorkspace_sptr parameterTable,
 void IndirectFitOutput::updateFitResultsFromUnstructured(
     WorkspaceGroup_sptr resultGroup, const FitDataIteratorNew &fitDataBegin,
     const FitDataIteratorNew &fitDataEnd) {
-  std::unordered_map<MatrixWorkspace *, std::map<WorkspaceIndex, GroupIndex>>
+  std::unordered_map<MatrixWorkspace *, std::map<WorkspaceIndex, WorkspaceGroupIndex>>
       resultIndices;
-  GroupIndex index{0};
+  WorkspaceGroupIndex index{0};
   for (auto fitData = fitDataBegin; fitData < fitDataEnd; ++fitData) {
     auto &fitResults = m_outputResultLocations[fitData->get()];
     auto ws = (*fitData)->workspace().get();
@@ -399,7 +399,7 @@ void IndirectFitOutput::updateFitResultsFromUnstructured(
 void IndirectFitOutput::updateFitResultsFromStructured(
     WorkspaceGroup_sptr resultGroup, const FitDataIteratorNew &fitDataBegin,
     const FitDataIteratorNew &fitDataEnd) {
-  GroupIndex index;
+  WorkspaceGroupIndex index;
   for (auto fitData = fitDataBegin; fitData < fitDataEnd; ++fitData) {
     auto &fitResults = m_outputResultLocations[fitData->get()];
     for (const auto &spectrum : (**fitData).spectra()) {

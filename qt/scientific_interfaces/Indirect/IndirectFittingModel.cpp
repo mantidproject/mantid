@@ -334,7 +334,7 @@ bool IndirectFittingModel::hasWorkspace(
 }
 
 MatrixWorkspace_sptr
-IndirectFittingModel::getWorkspace(DatasetIndex index) const {
+IndirectFittingModel::getWorkspace(TableDatasetIndex index) const {
   if (index < m_fittingData.size())
     return m_fittingData[index]->workspace();
   return nullptr;
@@ -348,14 +348,14 @@ std::vector<std::string> IndirectFittingModel::getWorkspaceNames() const {
   return names;
 }
 
-SpectraNew IndirectFittingModel::getSpectra(DatasetIndex index) const {
+Spectra IndirectFittingModel::getSpectra(TableDatasetIndex index) const {
   if (index < m_fittingData.size())
     return m_fittingData[index]->spectra();
-  return SpectraNew("");
+  return Spectra("");
 }
 
 std::pair<double, double>
-IndirectFittingModel::getFittingRange(DatasetIndex dataIndex,
+IndirectFittingModel::getFittingRange(TableDatasetIndex dataIndex,
                                       WorkspaceIndex spectrum) const {
   if (dataIndex < m_fittingData.size() &&
       !m_fittingData[dataIndex]->zeroSpectra()) {
@@ -365,7 +365,7 @@ IndirectFittingModel::getFittingRange(DatasetIndex dataIndex,
 }
 
 std::string
-IndirectFittingModel::getExcludeRegion(DatasetIndex dataIndex,
+IndirectFittingModel::getExcludeRegion(TableDatasetIndex dataIndex,
                                        WorkspaceIndex spectrum) const {
   if (dataIndex < m_fittingData.size() &&
       !m_fittingData[dataIndex]->zeroSpectra()) {
@@ -377,7 +377,7 @@ IndirectFittingModel::getExcludeRegion(DatasetIndex dataIndex,
 std::string
 IndirectFittingModel::createDisplayName(const std::string &formatString,
                                         const std::string &rangeDelimiter,
-                                        DatasetIndex dataIndex) const {
+                                        TableDatasetIndex dataIndex) const {
   if (m_fittingData.size() > dataIndex)
     return m_fittingData[dataIndex]->displayName(formatString, rangeDelimiter);
   else
@@ -388,7 +388,7 @@ IndirectFittingModel::createDisplayName(const std::string &formatString,
 std::string
 IndirectFittingModel::createOutputName(const std::string &formatString,
                                        const std::string &rangeDelimiter,
-                                       DatasetIndex dataIndex) const {
+                                       TableDatasetIndex dataIndex) const {
   return createDisplayName(formatString, rangeDelimiter, dataIndex) +
          "_Results";
 }
@@ -397,7 +397,7 @@ bool IndirectFittingModel::isMultiFit() const {
   return numberOfWorkspaces().value > 1;
 }
 
-bool IndirectFittingModel::isPreviouslyFit(DatasetIndex dataIndex,
+bool IndirectFittingModel::isPreviouslyFit(TableDatasetIndex dataIndex,
                                            WorkspaceIndex spectrum) const {
   if (!m_previousModelSelected || !m_fitOutput ||
       m_fittingData.size() <= dataIndex)
@@ -417,12 +417,12 @@ boost::optional<std::string> IndirectFittingModel::isInvalidFunction() const {
   return boost::none;
 }
 
-DatasetIndex IndirectFittingModel::numberOfWorkspaces() const {
-  return DatasetIndex{m_fittingData.size()};
+TableDatasetIndex IndirectFittingModel::numberOfWorkspaces() const {
+  return TableDatasetIndex{m_fittingData.size()};
 }
 
-SpectrumRowIndex
-IndirectFittingModel::getNumberOfSpectra(DatasetIndex index) const {
+TableRowIndex
+IndirectFittingModel::getNumberOfSpectra(TableDatasetIndex index) const {
   if (index < m_fittingData.size())
     return m_fittingData[index]->numberOfSpectra();
   else
@@ -431,18 +431,18 @@ IndirectFittingModel::getNumberOfSpectra(DatasetIndex index) const {
         "index provided is too large.");
 }
 
-SpectrumRowIndex IndirectFittingModel::getNumberOfDomains() const {
-  SpectrumRowIndex sum{0};
+TableRowIndex IndirectFittingModel::getNumberOfDomains() const {
+  TableRowIndex sum{0};
   for (auto i = m_fittingData.zero(); i < m_fittingData.size(); ++i) {
     sum += m_fittingData[i]->numberOfSpectra();
   }
   return sum;
 }
 
-SpectrumRowIndex
-IndirectFittingModel::getDomainIndex(DatasetIndex dataIndex,
+TableRowIndex
+IndirectFittingModel::getDomainIndex(TableDatasetIndex dataIndex,
                                      WorkspaceIndex spectrum) const {
-  SpectrumRowIndex index{0};
+  TableRowIndex index{0};
   for (auto iws = m_fittingData.zero(); iws < m_fittingData.size(); ++iws) {
     if (iws < dataIndex) {
       index += getNumberOfSpectra(iws);
@@ -476,52 +476,52 @@ void IndirectFittingModel::setFittingData(PrivateFittingData &&fittingData) {
 }
 
 void IndirectFittingModel::setSpectra(const std::string &spectra,
-                                      DatasetIndex dataIndex) {
-  setSpectra(SpectraNew(spectra), dataIndex);
+                                      TableDatasetIndex dataIndex) {
+  setSpectra(Spectra(spectra), dataIndex);
 }
 
-void IndirectFittingModel::setSpectra(SpectraNew &&spectra,
-                                      DatasetIndex dataIndex) {
+void IndirectFittingModel::setSpectra(Spectra &&spectra,
+                                      TableDatasetIndex dataIndex) {
   if (m_fittingData.empty())
     return;
-  m_fittingData[dataIndex]->setSpectra(std::forward<SpectraNew>(spectra));
+  m_fittingData[dataIndex]->setSpectra(std::forward<Spectra>(spectra));
 }
 
-void IndirectFittingModel::setSpectra(const SpectraNew &spectra,
-                                      DatasetIndex dataIndex) {
+void IndirectFittingModel::setSpectra(const Spectra &spectra,
+                                      TableDatasetIndex dataIndex) {
   if (m_fittingData.empty())
     return;
   m_fittingData[dataIndex]->setSpectra(spectra);
 }
 
-void IndirectFittingModel::setStartX(double startX, DatasetIndex dataIndex,
+void IndirectFittingModel::setStartX(double startX, TableDatasetIndex dataIndex,
                                      WorkspaceIndex spectrum) {
   if (m_fittingData.empty())
     return;
   m_fittingData[dataIndex]->setStartX(startX, spectrum);
 }
 
-void IndirectFittingModel::setStartX(double startX, DatasetIndex dataIndex) {
+void IndirectFittingModel::setStartX(double startX, TableDatasetIndex dataIndex) {
   if (m_fittingData.empty())
     return;
   m_fittingData[dataIndex]->setStartX(startX);
 }
 
-void IndirectFittingModel::setEndX(double endX, DatasetIndex dataIndex,
+void IndirectFittingModel::setEndX(double endX, TableDatasetIndex dataIndex,
                                    WorkspaceIndex spectrum) {
   if (m_fittingData.empty())
     return;
   m_fittingData[dataIndex]->setEndX(endX, spectrum);
 }
 
-void IndirectFittingModel::setEndX(double endX, DatasetIndex dataIndex) {
+void IndirectFittingModel::setEndX(double endX, TableDatasetIndex dataIndex) {
   if (m_fittingData.empty())
     return;
   m_fittingData[dataIndex]->setEndX(endX);
 }
 
 void IndirectFittingModel::setExcludeRegion(const std::string &exclude,
-                                            DatasetIndex dataIndex,
+                                            TableDatasetIndex dataIndex,
                                             WorkspaceIndex spectrum) {
   if (m_fittingData.empty())
     return;
@@ -532,7 +532,7 @@ void IndirectFittingModel::addWorkspace(const std::string &workspaceName) {
   auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       workspaceName);
   addWorkspace(
-      ws, SpectraNew(
+      ws, Spectra(
               WorkspaceIndex{0},
               WorkspaceIndex{static_cast<int>(ws->getNumberHistograms()) - 1}));
 }
@@ -545,18 +545,18 @@ void IndirectFittingModel::addWorkspace(const std::string &workspaceName,
   if (workspaceName.empty() || !doesExistInADS(workspaceName))
     throw std::runtime_error("A valid sample file needs to be selected.");
 
-  addWorkspace(workspaceName, SpectraNew(spectra));
+  addWorkspace(workspaceName, Spectra(spectra));
 }
 
 void IndirectFittingModel::addWorkspace(const std::string &workspaceName,
-                                        const SpectraNew &spectra) {
+                                        const Spectra &spectra) {
   auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       workspaceName);
   addWorkspace(ws, spectra);
 }
 
 void IndirectFittingModel::addWorkspace(MatrixWorkspace_sptr workspace,
-                                        const SpectraNew &spectra) {
+                                        const Spectra &spectra) {
   if (!m_fittingData.empty() &&
       equivalentWorkspaces(workspace, m_fittingData.back()->workspace()))
     m_fittingData.back()->combine(IndirectFitData(workspace, spectra));
@@ -565,14 +565,14 @@ void IndirectFittingModel::addWorkspace(MatrixWorkspace_sptr workspace,
 }
 
 void IndirectFittingModel::addNewWorkspace(MatrixWorkspace_sptr workspace,
-                                           const SpectraNew &spectra) {
+                                           const Spectra &spectra) {
   m_fittingData.emplace_back(new IndirectFitData(workspace, spectra));
   m_defaultParameters.emplace_back(
       createDefaultParameters(m_fittingData.last()));
 }
 
 void IndirectFittingModel::removeWorkspaceFromFittingData(
-    DatasetIndex const &index) {
+    TableDatasetIndex const &index) {
   if (m_fittingData.size() > index)
     removeFittingData(index);
   else
@@ -580,21 +580,21 @@ void IndirectFittingModel::removeWorkspaceFromFittingData(
                              "the workspace index provided is too large.");
 }
 
-void IndirectFittingModel::removeWorkspace(DatasetIndex index) {
+void IndirectFittingModel::removeWorkspace(TableDatasetIndex index) {
   removeWorkspaceFromFittingData(index);
 
   if (index > m_fittingData.zero() && m_fittingData.size() > index) {
-    const auto previousWS = m_fittingData[index - DatasetIndex{1}]->workspace();
+    const auto previousWS = m_fittingData[index - TableDatasetIndex{1}]->workspace();
     const auto subsequentWS = m_fittingData[index]->workspace();
 
     if (equivalentWorkspaces(previousWS, subsequentWS)) {
-      m_fittingData[index - DatasetIndex{1}]->combine(*m_fittingData[index]);
+      m_fittingData[index - TableDatasetIndex{1}]->combine(*m_fittingData[index]);
       m_fittingData.remove(index);
     }
   }
 }
 
-void IndirectFittingModel::removeFittingData(DatasetIndex index) {
+void IndirectFittingModel::removeFittingData(TableDatasetIndex index) {
   if (m_fitOutput)
     m_fitOutput->removeOutput(m_fittingData[index].get());
   m_fittingData.remove(index);
@@ -618,7 +618,7 @@ void IndirectFittingModel::setFitFunction(MultiDomainFunction_sptr function) {
 
 void IndirectFittingModel::setDefaultParameterValue(const std::string &name,
                                                     double value,
-                                                    DatasetIndex dataIndex) {
+                                                    TableDatasetIndex dataIndex) {
   if (m_defaultParameters.size() > dataIndex)
     m_defaultParameters[dataIndex][name] = ParameterValueNew(value);
 }
@@ -639,7 +639,7 @@ void IndirectFittingModel::addOutput(IAlgorithm_sptr fitAlgorithm,
 }
 
 void IndirectFittingModel::addSingleFitOutput(IAlgorithm_sptr fitAlgorithm,
-                                              DatasetIndex index) {
+                                              TableDatasetIndex index) {
   auto group = getOutputGroup(fitAlgorithm);
   auto parameters = getOutputParameters(fitAlgorithm);
   auto result = getOutputResult(fitAlgorithm);
@@ -719,7 +719,7 @@ FittingMode IndirectFittingModel::getFittingMode() const {
 }
 
 std::unordered_map<std::string, ParameterValueNew>
-IndirectFittingModel::getParameterValues(DatasetIndex index,
+IndirectFittingModel::getParameterValues(TableDatasetIndex index,
                                          WorkspaceIndex spectrum) const {
   if (m_fittingData.size() > index) {
     const auto parameters = getFitParameters(index, spectrum);
@@ -733,7 +733,7 @@ IndirectFittingModel::getParameterValues(DatasetIndex index,
 }
 
 std::unordered_map<std::string, ParameterValueNew>
-IndirectFittingModel::getFitParameters(DatasetIndex index,
+IndirectFittingModel::getFitParameters(TableDatasetIndex index,
                                        WorkspaceIndex spectrum) const {
   if (m_fitOutput)
     return m_fitOutput->getParameters(m_fittingData[index].get(), spectrum);
@@ -741,7 +741,7 @@ IndirectFittingModel::getFitParameters(DatasetIndex index,
 }
 
 std::unordered_map<std::string, ParameterValueNew>
-IndirectFittingModel::getDefaultParameters(DatasetIndex index) const {
+IndirectFittingModel::getDefaultParameters(TableDatasetIndex index) const {
   if (index < m_defaultParameters.size())
     return mapKeys(m_defaultParameters[index], mapDefaultParameterNames());
   return std::unordered_map<std::string, ParameterValueNew>();
@@ -755,7 +755,7 @@ IndirectFittingModel::mapDefaultParameterNames() const {
 }
 
 std::unordered_map<std::string, ParameterValueNew>
-IndirectFittingModel::createDefaultParameters(DatasetIndex /*unused*/) const {
+IndirectFittingModel::createDefaultParameters(TableDatasetIndex /*unused*/) const {
   return std::unordered_map<std::string, ParameterValueNew>();
 }
 
@@ -766,7 +766,7 @@ std::string IndirectFittingModel::getResultXAxisUnit() const {
 std::string IndirectFittingModel::getResultLogName() const { return "axis-1"; }
 
 boost::optional<ResultLocationNew>
-IndirectFittingModel::getResultLocation(DatasetIndex index,
+IndirectFittingModel::getResultLocation(TableDatasetIndex index,
                                         WorkspaceIndex spectrum) const {
   if (/*m_previousModelSelected && */ m_fitOutput &&
       m_fittingData.size() > index)
@@ -807,7 +807,7 @@ IndirectFittingModel::getFittingAlgorithm(FittingMode mode) const {
 }
 
 IAlgorithm_sptr
-IndirectFittingModel::getSingleFit(DatasetIndex dataIndex,
+IndirectFittingModel::getSingleFit(TableDatasetIndex dataIndex,
                                    WorkspaceIndex spectrum) const {
   const auto &fitData = m_fittingData[dataIndex];
   const auto ws = fitData->workspace();
@@ -823,7 +823,7 @@ IndirectFittingModel::getSingleFit(DatasetIndex dataIndex,
 }
 
 Mantid::API::IFunction_sptr
-IndirectFittingModel::getSingleFunction(DatasetIndex dataIndex,
+IndirectFittingModel::getSingleFunction(TableDatasetIndex dataIndex,
                                         WorkspaceIndex spectrum) const {
   auto function = getFittingFunction();
   assert(function->getNumberDomains() == getNumberOfDomains().value);
@@ -863,7 +863,7 @@ IAlgorithm_sptr IndirectFittingModel::createSequentialFit(
   fitAlgorithm->setProperty("PassWSIndexToFunction", true);
   fitAlgorithm->setProperty("LogName", getResultLogName());
 
-  auto const firstWsIndex = initialFitData->getSpectrum(SpectrumRowIndex{0});
+  auto const firstWsIndex = initialFitData->getSpectrum(TableRowIndex{0});
   const auto range = initialFitData->getRange(firstWsIndex);
   fitAlgorithm->setProperty("StartX", range.first);
   fitAlgorithm->setProperty("EndX", range.second);
@@ -889,7 +889,7 @@ IAlgorithm_sptr IndirectFittingModel::createSimultaneousFitWithEqualRange(
   auto fitAlgorithm = simultaneousFitAlgorithm();
   addFitProperties(*fitAlgorithm, function, getResultXAxisUnit());
 
-  auto const dataIndex = DatasetIndex{0};
+  auto const dataIndex = TableDatasetIndex{0};
   auto const workspaceIndex = getSpectra(dataIndex).front();
   auto exclude =
       vectorFromStringNew<double>(getExcludeRegion(dataIndex, workspaceIndex));
@@ -902,7 +902,7 @@ IAlgorithm_sptr IndirectFittingModel::createSimultaneousFitWithEqualRange(
 
 std::string
 IndirectFittingModel::createSingleFitOutputName(const std::string &formatString,
-                                                DatasetIndex index,
+                                                TableDatasetIndex index,
                                                 WorkspaceIndex spectrum) const {
   if (m_fittingData.size() > index)
     return m_fittingData[index]->displayName(formatString, spectrum);
@@ -920,7 +920,7 @@ void IndirectFittingModel::cleanFailedRun(IAlgorithm_sptr fittingAlgorithm) {
 }
 
 void IndirectFittingModel::cleanFailedSingleRun(
-    IAlgorithm_sptr fittingAlgorithm, DatasetIndex index) {
+    IAlgorithm_sptr fittingAlgorithm, TableDatasetIndex index) {
   const auto base =
       "__" + fittingAlgorithm->name() + "_ws" + std::to_string(index.value + 1);
   removeFromADSIfExists(base);

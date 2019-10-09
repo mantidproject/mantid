@@ -305,7 +305,7 @@ void IndirectFitPropertyBrowser::setBackgroundA0(double value) {
   }
 }
 
-void IndirectFitPropertyBrowser::setCurrentDataset(SpectrumRowIndex i) {
+void IndirectFitPropertyBrowser::setCurrentDataset(TableRowIndex i) {
   if (m_functionBrowser->getNumberOfDatasets() == 0)
     return;
   if (isFullFunctionBrowserActive()) {
@@ -315,12 +315,12 @@ void IndirectFitPropertyBrowser::setCurrentDataset(SpectrumRowIndex i) {
   }
 }
 
-SpectrumRowIndex IndirectFitPropertyBrowser::currentDataset() const {
-  return SpectrumRowIndex{m_functionBrowser->getCurrentDataset()};
+TableRowIndex IndirectFitPropertyBrowser::currentDataset() const {
+  return TableRowIndex{m_functionBrowser->getCurrentDataset()};
 }
 
 void IndirectFitPropertyBrowser::updateFunctionBrowserData(
-    SpectrumRowIndex nData, const QStringList &datasetNames) {
+    TableRowIndex nData, const QStringList &datasetNames) {
   m_functionBrowser->setNumberOfDatasets(nData.value);
   m_functionBrowser->setDatasetNames(datasetNames);
   m_templateBrowser->setNumberOfDatasets(nData.value);
@@ -344,7 +344,7 @@ void IndirectFitPropertyBrowser::sequentialFit() {
 }
 
 void IndirectFitPropertyBrowser::setModelResolution(std::string const &name,
-                                                    DatasetIndex const &index) {
+                                                    TableDatasetIndex const &index) {
   if (isFullFunctionBrowserActive()) {
     showFullFunctionBrowser(false);
   }

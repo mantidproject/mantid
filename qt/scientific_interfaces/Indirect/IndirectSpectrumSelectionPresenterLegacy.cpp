@@ -192,7 +192,7 @@ void IndirectSpectrumSelectionPresenterLegacy::setSpectraRange(
 }
 
 void IndirectSpectrumSelectionPresenterLegacy::setModelSpectra(
-    Spectra const &spectra) {
+    SpectraLegacy const &spectra) {
   try {
     m_model->setSpectra(spectra, m_activeIndex);
     m_spectraError.clear();

@@ -54,19 +54,19 @@ WorkspaceIndex IndirectFitPlotView::getSelectedSpectrum() const {
   return WorkspaceIndex{0};
 }
 
-SpectrumRowIndex IndirectFitPlotView::getSelectedSpectrumIndex() const {
+TableRowIndex IndirectFitPlotView::getSelectedSpectrumIndex() const {
   if (m_plotForm->swPlotSpectrum->currentIndex() == 0)
-    return SpectrumRowIndex{m_plotForm->spPlotSpectrum->value() -
+    return TableRowIndex{m_plotForm->spPlotSpectrum->value() -
                             m_plotForm->spPlotSpectrum->minimum()};
-  return SpectrumRowIndex{m_plotForm->cbPlotSpectrum->currentIndex()};
+  return TableRowIndex{m_plotForm->cbPlotSpectrum->currentIndex()};
 }
 
-DatasetIndex IndirectFitPlotView::getSelectedDataIndex() const {
-  return DatasetIndex{m_plotForm->cbDataSelection->currentIndex()};
+TableDatasetIndex IndirectFitPlotView::getSelectedDataIndex() const {
+  return TableDatasetIndex{m_plotForm->cbDataSelection->currentIndex()};
 }
 
-DatasetIndex IndirectFitPlotView::dataSelectionSize() const {
-  return DatasetIndex{m_plotForm->cbDataSelection->count()};
+TableDatasetIndex IndirectFitPlotView::dataSelectionSize() const {
+  return TableDatasetIndex{m_plotForm->cbDataSelection->count()};
 }
 
 bool IndirectFitPlotView::isPlotGuessChecked() const {
@@ -143,7 +143,7 @@ void IndirectFitPlotView::appendToDataSelection(const std::string &dataName) {
 }
 
 void IndirectFitPlotView::setNameInDataSelection(const std::string &dataName,
-                                                 DatasetIndex index) {
+                                                 TableDatasetIndex index) {
   m_plotForm->cbDataSelection->setItemText(index.value,
                                            QString::fromStdString(dataName));
 }
@@ -275,7 +275,7 @@ void IndirectFitPlotView::displayMessage(const std::string &message) const {
 
 void IndirectFitPlotView::emitSelectedFitDataChanged(int index) {
   if (index >= 0)
-    emit selectedFitDataChanged(DatasetIndex{index});
+    emit selectedFitDataChanged(TableDatasetIndex{index});
 }
 
 void IndirectFitPlotView::emitPlotSpectrumChanged(int spectrum) {
@@ -283,7 +283,10 @@ void IndirectFitPlotView::emitPlotSpectrumChanged(int spectrum) {
 }
 
 void IndirectFitPlotView::emitPlotSpectrumChanged(const QString &spectrum) {
-  emit plotSpectrumChanged(WorkspaceIndex{spectrum.toInt()});
+  bool successState{false};
+  int spectrumInt = spectrum.toInt(&successState);
+  if(successState)
+    emit plotSpectrumChanged(WorkspaceIndex{spectrumInt});
 }
 
 void IndirectFitPlotView::emitPlotGuessChanged(int doPlotGuess) {

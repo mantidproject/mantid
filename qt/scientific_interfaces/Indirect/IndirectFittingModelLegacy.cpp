@@ -363,7 +363,7 @@ std::vector<std::string> IndirectFittingModelLegacy::getWorkspaceNames() const {
   return names;
 }
 
-Spectra IndirectFittingModelLegacy::getSpectra(std::size_t index) const {
+SpectraLegacy IndirectFittingModelLegacy::getSpectra(std::size_t index) const {
   if (index < m_fittingData.size())
     return m_fittingData[index]->spectra();
   return DiscontinuousSpectra<std::size_t>("");
@@ -479,12 +479,12 @@ void IndirectFittingModelLegacy::setSpectra(const std::string &spectra,
   setSpectra(DiscontinuousSpectra<std::size_t>(spectra), dataIndex);
 }
 
-void IndirectFittingModelLegacy::setSpectra(Spectra &&spectra,
+void IndirectFittingModelLegacy::setSpectra(SpectraLegacy &&spectra,
                                             std::size_t dataIndex) {
-  m_fittingData[dataIndex]->setSpectra(std::forward<Spectra>(spectra));
+  m_fittingData[dataIndex]->setSpectra(std::forward<SpectraLegacy>(spectra));
 }
 
-void IndirectFittingModelLegacy::setSpectra(const Spectra &spectra,
+void IndirectFittingModelLegacy::setSpectra(const SpectraLegacy &spectra,
                                             std::size_t dataIndex) {
   m_fittingData[dataIndex]->setSpectra(spectra);
 }
@@ -533,14 +533,14 @@ void IndirectFittingModelLegacy::addWorkspace(const std::string &workspaceName,
 }
 
 void IndirectFittingModelLegacy::addWorkspace(const std::string &workspaceName,
-                                              const Spectra &spectra) {
+                                              const SpectraLegacy &spectra) {
   auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       workspaceName);
   addWorkspace(ws, spectra);
 }
 
 void IndirectFittingModelLegacy::addWorkspace(MatrixWorkspace_sptr workspace,
-                                              const Spectra &spectra) {
+                                              const SpectraLegacy &spectra) {
   if (!m_fittingData.empty() &&
       equivalentWorkspaces(workspace, m_fittingData.back()->workspace()))
     m_fittingData.back()->combine(IndirectFitDataLegacy(workspace, spectra));
@@ -549,7 +549,7 @@ void IndirectFittingModelLegacy::addWorkspace(MatrixWorkspace_sptr workspace,
 }
 
 void IndirectFittingModelLegacy::addNewWorkspace(MatrixWorkspace_sptr workspace,
-                                                 const Spectra &spectra) {
+                                                 const SpectraLegacy &spectra) {
   m_fittingData.emplace_back(new IndirectFitDataLegacy(workspace, spectra));
   m_defaultParameters.emplace_back(
       createDefaultParameters(m_fittingData.size() - 1));

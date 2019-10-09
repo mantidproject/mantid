@@ -153,8 +153,8 @@ std::string createSpectraString(std::string string) {
   return constructSpectraString(spectras);
 }
 
-struct CombineSpectra : boost::static_visitor<Spectra> {
-  Spectra
+struct CombineSpectra : boost::static_visitor<SpectraLegacy> {
+  SpectraLegacy
   operator()(const std::pair<std::size_t, std::size_t> &spectra1,
              const std::pair<std::size_t, std::size_t> &spectra2) const {
     if (spectra1.second + 1 == spectra2.first)
@@ -167,7 +167,7 @@ struct CombineSpectra : boost::static_visitor<Spectra> {
     }
   }
 
-  Spectra operator()(const Spectra &spectra1, const Spectra &spectra2) const {
+  SpectraLegacy operator()(const SpectraLegacy &spectra1, const SpectraLegacy &spectra2) const {
     return DiscontinuousSpectra<std::size_t>(createSpectraString(
         boost::apply_visitor(SpectraToString(), spectra1) + "," +
         boost::apply_visitor(SpectraToString(), spectra2)));
@@ -273,7 +273,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 IndirectFitDataLegacy::IndirectFitDataLegacy(MatrixWorkspace_sptr workspace,
-                                             const Spectra &spectra)
+                                             const SpectraLegacy &spectra)
     : m_workspace(workspace), m_spectra(DiscontinuousSpectra<std::size_t>("")) {
   setSpectra(spectra);
 }
@@ -312,7 +312,7 @@ Mantid::API::MatrixWorkspace_sptr IndirectFitDataLegacy::workspace() const {
   return m_workspace;
 }
 
-const Spectra &IndirectFitDataLegacy::spectra() const { return m_spectra; }
+const SpectraLegacy &IndirectFitDataLegacy::spectra() const { return m_spectra; }
 
 std::size_t IndirectFitDataLegacy::getSpectrum(std::size_t index) const {
   return boost::apply_visitor(GetSpectrum(index), m_spectra);
@@ -351,7 +351,7 @@ IndirectFitDataLegacy::excludeRegionsVector(std::size_t spectrum) const {
 
 void IndirectFitDataLegacy::setSpectra(std::string const &spectra) {
   try {
-    const Spectra spec =
+    const SpectraLegacy spec =
         DiscontinuousSpectra<std::size_t>(createSpectraString(spectra));
     setSpectra(spec);
   } catch (std::exception &ex) {
@@ -360,25 +360,25 @@ void IndirectFitDataLegacy::setSpectra(std::string const &spectra) {
   }
 }
 
-void IndirectFitDataLegacy::setSpectra(Spectra &&spectra) {
+void IndirectFitDataLegacy::setSpectra(SpectraLegacy &&spectra) {
   validateSpectra(spectra);
   m_spectra = std::move(spectra);
 }
 
-void IndirectFitDataLegacy::setSpectra(Spectra const &spectra) {
+void IndirectFitDataLegacy::setSpectra(SpectraLegacy const &spectra) {
   validateSpectra(spectra);
   m_spectra = spectra;
 }
 
-void IndirectFitDataLegacy::validateSpectra(Spectra const &spectra) {
+void IndirectFitDataLegacy::validateSpectra(SpectraLegacy const &spectra) {
   const auto visitor =
       SpectraOutOfRange<std::size_t>(0, workspace()->getNumberHistograms() - 1);
   auto notInRange = boost::apply_visitor(visitor, spectra);
   if (!notInRange.empty()) {
     if (notInRange.size() > 5)
-      throw std::runtime_error("Spectra out of range: " +
+      throw std::runtime_error("SpectraLegacy out of range: " +
                                join(subvector(notInRange, 0, 5), ",") + "...");
-    throw std::runtime_error("Spectra out of range: " + join(notInRange, ","));
+    throw std::runtime_error("SpectraLegacy out of range: " + join(notInRange, ","));
   }
 }
 

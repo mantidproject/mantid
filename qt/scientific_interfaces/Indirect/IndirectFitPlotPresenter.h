@@ -27,11 +27,11 @@ public:
                            IIndirectFitPlotView *view,
                            IPyRunner *pythonRunner = nullptr);
 
-  DatasetIndex getSelectedDataIndex() const;
+  TableDatasetIndex getSelectedDataIndex() const;
   WorkspaceIndex getSelectedSpectrum() const;
-  SpectrumRowIndex getSelectedSpectrumIndex() const;
-  SpectrumRowIndex getSelectedDomainIndex() const;
-  bool isCurrentlySelected(DatasetIndex dataIndex,
+  TableRowIndex getSelectedSpectrumIndex() const;
+  TableRowIndex getSelectedDomainIndex() const;
+  bool isCurrentlySelected(TableDatasetIndex dataIndex,
                            WorkspaceIndex spectrum) const;
 
   void setFitSingleSpectrumIsFitting(bool fitting);
@@ -55,10 +55,10 @@ public slots:
   void disablePlotGuessInSeparateWindow();
 
 signals:
-  void selectedFitDataChanged(DatasetIndex /*_t1*/);
+  void selectedFitDataChanged(TableDatasetIndex /*_t1*/);
   void noFitDataSelected();
   void plotSpectrumChanged(WorkspaceIndex /*_t1*/);
-  void fitSingleSpectrum(DatasetIndex /*_t1*/, WorkspaceIndex /*_t2*/);
+  void fitSingleSpectrum(TableDatasetIndex /*_t1*/, WorkspaceIndex /*_t2*/);
   void startXChanged(double /*_t1*/);
   void endXChanged(double /*_t1*/);
   void fwhmChanged(double /*_t1*/);
@@ -70,7 +70,7 @@ private slots:
   void setModelEndX(double value);
   void setModelHWHM(double minimum, double maximum);
   void setModelBackground(double background);
-  void setActiveIndex(DatasetIndex index);
+  void setActiveIndex(TableDatasetIndex index);
   void setActiveSpectrum(WorkspaceIndex spectrum);
   void setHWHMMaximum(double minimum);
   void setHWHMMinimum(double maximum);

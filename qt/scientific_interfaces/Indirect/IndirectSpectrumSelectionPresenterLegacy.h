@@ -57,7 +57,7 @@ private slots:
 
 private:
   void setSpectraRange(std::size_t minimum, std::size_t maximum);
-  void setModelSpectra(Spectra const &spectra);
+  void setModelSpectra(SpectraLegacy const &spectra);
 
   UserInputValidator validateSpectraString();
   UserInputValidator &validateSpectraString(UserInputValidator &validator);

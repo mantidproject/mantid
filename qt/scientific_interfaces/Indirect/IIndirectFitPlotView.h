@@ -26,9 +26,9 @@ public:
   virtual ~IIndirectFitPlotView(){};
 
   virtual WorkspaceIndex getSelectedSpectrum() const = 0;
-  virtual SpectrumRowIndex getSelectedSpectrumIndex() const = 0;
-  virtual DatasetIndex getSelectedDataIndex() const = 0;
-  virtual DatasetIndex dataSelectionSize() const = 0;
+  virtual TableRowIndex getSelectedSpectrumIndex() const = 0;
+  virtual TableDatasetIndex getSelectedDataIndex() const = 0;
+  virtual TableDatasetIndex dataSelectionSize() const = 0;
   virtual bool isPlotGuessChecked() const = 0;
 
   virtual void hideMultipleDataSelection() = 0;
@@ -45,7 +45,7 @@ public:
   virtual void setPlotSpectrum(WorkspaceIndex spectrum) = 0;
   virtual void appendToDataSelection(const std::string &dataName) = 0;
   virtual void setNameInDataSelection(const std::string &dataName,
-                                      DatasetIndex index) = 0;
+                                      TableDatasetIndex index) = 0;
   virtual void clearDataSelection() = 0;
 
   virtual void plotInTopPreview(const QString &name,
@@ -87,7 +87,7 @@ public slots:
   virtual void setHWHMMinimum(double maximum) = 0;
 
 signals:
-  void selectedFitDataChanged(DatasetIndex /*_t1*/);
+  void selectedFitDataChanged(TableDatasetIndex /*_t1*/);
   void plotCurrentPreview();
   void plotSpectrumChanged(WorkspaceIndex /*_t1*/);
   void plotGuessChanged(bool /*_t1*/);

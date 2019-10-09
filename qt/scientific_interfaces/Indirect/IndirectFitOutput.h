@@ -31,10 +31,10 @@ struct ParameterValueNew {
 
 struct ResultLocationNew {
   ResultLocationNew() = default;
-  ResultLocationNew(Mantid::API::WorkspaceGroup_sptr group, GroupIndex i)
+  ResultLocationNew(Mantid::API::WorkspaceGroup_sptr group, WorkspaceGroupIndex i)
       : result(group), index(i) {}
   boost::weak_ptr<Mantid::API::WorkspaceGroup> result;
-  GroupIndex index = GroupIndex{0};
+  WorkspaceGroupIndex index = WorkspaceGroupIndex{0};
 };
 
 using ParameterValuesNew =
