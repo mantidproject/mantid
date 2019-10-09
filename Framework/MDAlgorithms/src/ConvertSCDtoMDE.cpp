@@ -5,7 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "MantidMDAlgorithms/ConvertWANDSCDtoMDE.h"
+#include "MantidMDAlgorithms/ConvertSCDtoMDE.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
@@ -34,30 +34,30 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(ConvertWANDSCDtoMDE)
+DECLARE_ALGORITHM(ConvertSCDtoMDE)
 
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string ConvertWANDSCDtoMDE::name() const {
-  return "ConvertWANDSCDtoMDE";
+const std::string ConvertSCDtoMDE::name() const {
+  return "ConvertSCDtoMDE";
 }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int ConvertWANDSCDtoMDE::version() const { return 1; }
+int ConvertSCDtoMDE::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string ConvertWANDSCDtoMDE::category() const {
+const std::string ConvertSCDtoMDE::category() const {
   return "MDAlgorithm\\Creation";
 }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string ConvertWANDSCDtoMDE::summary() const {
+const std::string ConvertSCDtoMDE::summary() const {
   return "Convert from the detector vs scan index MDHistoWorkspace into a "
          "MDEventWorkspace with units in Q_sample.";
 }
 
-std::map<std::string, std::string> ConvertWANDSCDtoMDE::validateInputs() {
+std::map<std::string, std::string> ConvertSCDtoMDE::validateInputs() {
   std::map<std::string, std::string> result;
 
   std::vector<double> minVals = this->getProperty("MinValues");
@@ -96,7 +96,7 @@ std::map<std::string, std::string> ConvertWANDSCDtoMDE::validateInputs() {
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
-void ConvertWANDSCDtoMDE::init() {
+void ConvertSCDtoMDE::init() {
 
   // Box controller properties. These are the defaults
   this->initBoxControllerProps("5" /*SplitInto*/, 1000 /*SplitThreshold*/,
@@ -129,7 +129,7 @@ void ConvertWANDSCDtoMDE::init() {
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
-void ConvertWANDSCDtoMDE::exec() {
+void ConvertSCDtoMDE::exec() {
   double wavelength = this->getProperty("wavelength");
   if (wavelength == Mantid::EMPTY_DBL()) {
     throw std::invalid_argument("wavelength not entered!");

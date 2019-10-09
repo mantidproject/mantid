@@ -9,21 +9,22 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidMDAlgorithms/ConvertWANDSCDtoMDE.h"
+#include "MantidMDAlgorithms/ConvertSCDtoMDE.h"
+#include "TestHelpers/WorkspaceCreationHelpers.h"
 
-using Mantid::MDAlgorithms::ConvertWANDSCDtoMDE;
+using Mantid::MDAlgorithms::ConvertSCDtoMDE;
 
-class ConvertWANDSCDtoMDETest : public CxxTest::TestSuite {
+class ConvertSCDtoMDETest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ConvertWANDSCDtoMDETest *createSuite() { return new ConvertWANDSCDtoMDETest(); }
-  static void destroySuite( ConvertWANDSCDtoMDETest *suite ) { delete suite; }
+  static ConvertSCDtoMDETest *createSuite() { return new ConvertSCDtoMDETest(); }
+  static void destroySuite( ConvertSCDtoMDETest *suite ) { delete suite; }
 
 
   void test_Init()
   {
-    ConvertWANDSCDtoMDE alg;
+    ConvertSCDtoMDE alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
   }
@@ -33,7 +34,7 @@ public:
     // Create test input if necessary
     MatrixWorkspace_sptr inputWS = //-- Fill in appropriate code. Consider using TestHelpers/WorkspaceCreationHelpers.h --
 
-    ConvertWANDSCDtoMDE alg;
+    ConvertSCDtoMDE alg;
     // Don't put output in ADS by default
     alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )

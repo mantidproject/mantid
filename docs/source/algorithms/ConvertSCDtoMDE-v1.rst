@@ -20,23 +20,23 @@ Usage
     autotestdata\UsageData and the following tag unindented
     .. include:: ../usagedata-note.txt
 
-**Example - ConvertWANDSCDtoMDE**
+**Example - ConvertSCDtoMDE**
 
-.. testcode:: ConvertWANDSCDtoMDEExample
+.. testcode:: ConvertSCDtoMDEExample
 
    # Create a host workspace
    ws = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
    or
    ws = CreateSampleWorkspace()
 
-   wsOut = ConvertWANDSCDtoMDE()
+   wsOut = ConvertSCDtoMDE()
 
    # Print the result
    print "The output workspace has %%i spectra" %% wsOut.getNumberHistograms()
 
 Output:
 
-.. testoutput:: ConvertWANDSCDtoMDEExample
+.. testoutput:: ConvertSCDtoMDEExample
 
   The output workspace has ?? spectra
 
