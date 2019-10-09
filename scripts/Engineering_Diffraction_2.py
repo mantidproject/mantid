@@ -12,7 +12,6 @@ from qtpy import QtCore
 
 # Check if the interface is loaded and if so show it while maintaining its state.
 if 'engineering_diffraction' in globals():
-    engineering_diffraction = globals()['engineering_diffraction']
     # Restore a minimised window.
     if not engineering_diffraction.isHidden():
         engineering_diffraction.setWindowState(engineering_diffraction.windowState() & ~QtCore.Qt.WindowMinimized
