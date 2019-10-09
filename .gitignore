@@ -189,3 +189,6 @@ Third_Party/
 win64/
 dbg/
 rel/
+
+# Custom Project Configs
+.pre-commit-config.yaml

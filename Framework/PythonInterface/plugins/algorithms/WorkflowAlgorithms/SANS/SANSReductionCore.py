@@ -85,7 +85,7 @@ class SANSReductionCore(SANSReductionCoreBase):
         # 5. Apply masking (pixel masking and time masking)
         # --------------------------------------------------------------------------------------------------------------
         progress.report("Masking ...")
-        workspace = self._mask(state_serialized, workspace, component_as_string)
+        workspace = self._mask(state=state, workspace=workspace, component=component_as_string)
 
         # --------------------------------------------------------------------------------------------------------------
         # 6. Convert to Wavelength
