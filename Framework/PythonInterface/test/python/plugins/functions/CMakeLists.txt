@@ -14,6 +14,8 @@ set(TEST_PY_FILES
     Example1DFunctionTest.py
     ExamplePeakFunctionTest.py
     FmuFTest.py
+    GauBroadGauKTTest.py
+    GaussBesselTest.py
     HighTFMuoniumTest.py
     MeierTest.py
     ModOscTest.py
