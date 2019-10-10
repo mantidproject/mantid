@@ -15,6 +15,9 @@
 #include <memory>
 
 namespace MantidQt {
+namespace MantidWidgets {
+class ISlitCalculator;
+}
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
@@ -34,6 +37,7 @@ public:
   /// Constructor
   MainWindowPresenter(
       IMainWindowView *view, IMessageHandler *messageHandler,
+      std::unique_ptr<MantidWidgets::ISlitCalculator> slitCalculator,
       std::unique_ptr<IBatchPresenterFactory> batchPresenterFactory);
   ~MainWindowPresenter();
   MainWindowPresenter(MainWindowPresenter const &) = delete;
@@ -60,15 +64,18 @@ public:
   void notifyCloseBatchRequested(int batchIndex) override;
   void notifySaveBatchRequested(int batchIndex) override;
   void notifyLoadBatchRequested(int batchIndex) override;
+  void notifyShowOptionsRequested() override;
+  void notifyShowSlitCalculatorRequested() override;
 
 protected:
   IMainWindowView *m_view;
   IMessageHandler *m_messageHandler;
   std::vector<std::unique_ptr<IBatchPresenter>> m_batchPresenters;
-  std::unique_ptr<IBatchPresenterFactory> m_batchPresenterFactory;
+  Mantid::Geometry::Instrument_const_sptr m_instrument;
 
 private:
-  Mantid::Geometry::Instrument_const_sptr m_instrument;
+  std::unique_ptr<MantidWidgets::ISlitCalculator> m_slitCalculator;
+  std::unique_ptr<IBatchPresenterFactory> m_batchPresenterFactory;
 
   void showHelp();
   void addNewBatch(IBatchView *batchView);

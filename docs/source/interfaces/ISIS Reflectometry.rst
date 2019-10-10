@@ -200,13 +200,28 @@ batch to reduce runs in that batch's processing table.
 Menu Bar
 ~~~~~~~~
 
-The main menu currently just contains options for managing batches via the
-**Batch** menu:
+Batch Menu
+^^^^^^^^^^
+
+The **Batch** menu contains options for managing the Batch tabs:
 
 +------------------+----------------------------------------------------------+
 | Action           | Effect                                                   |
 +==================+==========================================================+
 | New              | Add a new Batch tab                                      |
+| Load             | Load settings for the current Batch tab from a file      |
+| Save             | Save settings for the current Batch to a file            |
++------------------+----------------------------------------------------------+
+
+Tools Menu
+^^^^^^^^^^
+
+The **Tools** menu provides access to options and utilities:
+
++------------------+----------------------------------------------------------+
+| Action           | Effect                                                   |
++==================+==========================================================+
+| Slit Calculator  | Tool for calculating approximate slit widths             |
 +------------------+----------------------------------------------------------+
 
 Runs Tab

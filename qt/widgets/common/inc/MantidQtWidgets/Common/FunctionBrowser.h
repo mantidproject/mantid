@@ -10,6 +10,7 @@
 #include "DllOption.h"
 
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/IFunctionBrowser.h"
 
 #include <QMap>
@@ -67,7 +68,7 @@ public:
   /// Update the function parameter value
   void setParameter(const QString &paramName, double value);
   /// Update the function parameter error
-  void setParamError(const QString &paramName, double error);
+  void setParameterError(const QString &paramName, double error);
   /// Get a value of a parameter
   double getParameter(const QString &paramName) const;
   /// Update parameter values in the browser to match those of a function.
@@ -79,7 +80,7 @@ public:
   QStringList getLocalParameters() const;
   /// Get the number of datasets
   int getNumberOfDatasets() const override;
-  /// Get list of dataset names
+  /// Get the names of datasets
   QStringList getDatasetNames() const override;
   /// Get value of a local parameter
   double getLocalParameterValue(const QString &parName, int i) const override;
@@ -105,6 +106,9 @@ public:
   IFunction_sptr getGlobalFunction() override;
   /// Update parameter values in the browser to match those of a function.
   void updateMultiDatasetParameters(const IFunction &fun) override;
+  /// Update parameter values in the browser to match those in a table
+  /// workspace.
+  void updateMultiDatasetParameters(const ITableWorkspace &paramTable) override;
   /// Get the index of the current dataset.
   int getCurrentDataset() const override;
   /// Resize the browser's columns
@@ -113,6 +117,8 @@ public:
   void setErrorsEnabled(bool enabled) override;
   /// Clear all errors
   void clearErrors() override;
+  /// Set a parameter that is responsible for the background level
+  void setBackgroundA0(double value);
 
 signals:
   void parameterChanged(const QString &funcIndex, const QString &paramName);

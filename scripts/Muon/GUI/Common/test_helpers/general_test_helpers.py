@@ -13,7 +13,9 @@ from Muon.GUI.Common.muon_group import MuonGroup
 
 def create_workspace_wrapper_stub_object(name):
     workspace = CreateWorkspace([0], [0])
-    return MuonWorkspaceWrapper(workspace, name)
+    wrapped_workspace = MuonWorkspaceWrapper(workspace)
+    wrapped_workspace.show(name)
+    return wrapped_workspace
 
 
 def create_group_populated_by_two_workspace():
