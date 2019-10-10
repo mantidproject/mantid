@@ -62,12 +62,14 @@ void CreateDetectorTable::exec() {
 }
 
 /**
- * Create the instrument detector table from a MatrixWorkspace
+ * Create the instrument detector table workspace from a MatrixWorkspace
  * @param wsName :: The name of the workspace
  * @param ws :: A pointer to a MatrixWorkspace
  * @param indices :: Limit the table to these workspace indices
  * @param include_data :: If true then first value from the each spectrum is
  * displayed
+ *
+ * @return A pointer to the table workspace of detector information
  */
 ITableWorkspace_sptr CreateDetectorTable::createDetectorTableWorkspace(
     const std::string &wsName, const MatrixWorkspace_sptr &ws,
@@ -137,7 +139,7 @@ ITableWorkspace_sptr CreateDetectorTable::createDetectorTableWorkspace(
       ws->getInstrument()->getReferenceFrame()->pointingAlongBeam();
   const auto sampleDist = sample->getPos()[beamAxisIndex];
   bool signedThetaParamRetrieved{false},
-      showSignedTwoTheta{false}; // If true,  signedVersion of the two theta
+      showSignedTwoTheta{false}; // If true, signedVersion of the two theta
                                  // value should be displayed
 
   for (int row = 0; row < nrows; ++row) {
@@ -254,6 +256,15 @@ ITableWorkspace_sptr CreateDetectorTable::createDetectorTableWorkspace(
   return t;
 }
 
+/**
+ * Converts a set of ints to a string with each element separated by a
+ * comma. If there are more than 10 elements, the format "a,b...(n more)...y,z"
+ * is used.
+ *
+ * @param elements :: The set of elements to be converted
+ *
+ * @return The truncated list as a string
+ */
 std::string
 CreateDetectorTable::createTruncatedList(const std::set<int> &elements) {
   std::string truncated{""};

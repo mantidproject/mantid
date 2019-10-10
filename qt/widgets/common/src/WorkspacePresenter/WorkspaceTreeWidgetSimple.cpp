@@ -11,6 +11,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -121,6 +122,9 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
     } else if (boost::dynamic_pointer_cast<ITableWorkspace>(workspace)) {
       menu->addAction(m_showData);
       menu->addAction(m_showAlgorithmHistory);
+      if (boost::dynamic_pointer_cast<IPeaksWorkspace>(workspace)) {
+        menu->addAction(m_showDetectors);
+      }
     } else if (boost::dynamic_pointer_cast<IMDWorkspace>(workspace)) {
       menu->addAction(m_showAlgorithmHistory);
       menu->addAction(m_sampleLogs);

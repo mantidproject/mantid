@@ -42,18 +42,20 @@ public:
            "workspace and optionally the data for that detector";
   }
 
-  API::ITableWorkspace_sptr CreateDetectorTable::createDetectorTableWorkspace(
-      const std::string &wsName, const API::MatrixWorkspace_sptr &ws,
-      const std::vector<int> &indices, bool include_data);
-
-  std::string
-  CreateDetectorTable::createTruncatedList(const std::set<int> &elements);
-
 private:
   /// Initialisation code
   void init() override;
   /// Execution code
   void exec() override;
+
+  /// Creates table workspace of detector information from a given workspace
+  API::ITableWorkspace_sptr CreateDetectorTable::createDetectorTableWorkspace(
+      const std::string &wsName, const API::MatrixWorkspace_sptr &ws,
+      const std::vector<int> &indices, bool include_data);
+
+  /// Converts a list to a string, shortened if necessary
+  std::string
+  CreateDetectorTable::createTruncatedList(const std::set<int> &elements);
 };
 
 } // namespace Algorithm
