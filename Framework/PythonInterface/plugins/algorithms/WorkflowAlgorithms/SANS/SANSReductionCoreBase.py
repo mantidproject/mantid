@@ -11,6 +11,7 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator)
 from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode, IEventWorkspace)
+from sans.algorithm_detail.ConvertToQ import ConvertToQ
 
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 from sans.common.constants import EMPTY_NAME
@@ -217,7 +218,7 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
 
         return workspace
 
-    def _convert_to_q(self, state_serialized, workspace, wavelength_adjustment_workspace, pixel_adjustment_workspace,
+    def _convert_to_q(self, state, workspace, wavelength_adjustment_workspace, pixel_adjustment_workspace,
                       wavelength_and_pixel_adjustment_workspace):
         """
         A conversion to momentum transfer is performed in this step.
@@ -231,24 +232,17 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
         @param wavelength_and_pixel_adjustment_workspace: the wavelength and pixel adjustment workspace.
         @return: a reduced workspace
         """
-        convert_name = "SANSConvertToQ"
-        convert_options = {"InputWorkspace": workspace,
-                           "OutputWorkspace": EMPTY_NAME,
-                           "SANSState": state_serialized,
-                           "OutputParts": True}
-        if wavelength_adjustment_workspace:
-            convert_options.update({"InputWorkspaceWavelengthAdjustment": wavelength_adjustment_workspace})
-        if pixel_adjustment_workspace:
-            convert_options.update({"InputWorkspacePixelAdjustment": pixel_adjustment_workspace})
-        if wavelength_and_pixel_adjustment_workspace:
-            convert_options.update({"InputWorkspaceWavelengthAndPixelAdjustment":
-                                    wavelength_and_pixel_adjustment_workspace})
-        convert_alg = create_child_algorithm(self, convert_name, **convert_options)
-        convert_alg.execute()
-        data_workspace = convert_alg.getProperty("OutputWorkspace").value
-        sum_of_counts = convert_alg.getProperty("SumOfCounts").value
-        sum_of_norms = convert_alg.getProperty("SumOfNormFactors").value
-        return data_workspace, sum_of_counts, sum_of_norms
+        alg = ConvertToQ(state_convert_to_q=state.convert_to_q,
+                         wavelength_adj_workspace=wavelength_adjustment_workspace,
+                         pixel_adj_workspace=pixel_adjustment_workspace,
+                         wavelength_and_pixel_adj_workspace=wavelength_and_pixel_adjustment_workspace)
+        output_dict = alg.convert_workspace(workspace=workspace, output_summed_parts=True)
+
+        output_workspace = output_dict["output"]
+        sum_of_counts = output_dict["counts_summed"]
+        sum_of_norms = output_dict["norm_summed"]
+
+        return output_workspace, sum_of_counts, sum_of_norms
 
     def _get_state(self):
         state_property_manager = self.getProperty("SANSState").value

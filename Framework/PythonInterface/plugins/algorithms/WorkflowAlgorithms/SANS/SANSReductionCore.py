@@ -94,7 +94,8 @@ class SANSReductionCore(SANSReductionCoreBase):
         workspace = self._convert_to_wavelength(state_serialized, workspace)
         # Convert and rebin the dummy workspace to get correct bin flags
         if use_dummy_workspace:
-            dummy_mask_workspace = mask_bins(state.mask, dummy_mask_workspace, DetectorType.from_string(component_as_string))
+            dummy_mask_workspace = mask_bins(state.mask, dummy_mask_workspace,
+                                             DetectorType.from_string(component_as_string))
             dummy_mask_workspace = self._convert_to_wavelength(state_serialized, dummy_mask_workspace)
 
         # --------------------------------------------------------------------------------------------------------------
@@ -130,11 +131,12 @@ class SANSReductionCore(SANSReductionCoreBase):
         # 10. Convert to Q
         # -----------------------------------------------------------
         progress.report("Converting to q ...")
-        workspace, sum_of_counts, sum_of_norms = self._convert_to_q(state_serialized,
-                                                                    workspace,
-                                                                    wavelength_adjustment_workspace,
-                                                                    pixel_adjustment_workspace,
-                                                                    wavelength_and_pixel_adjustment_workspace)
+        workspace, sum_of_counts, sum_of_norms = \
+            self._convert_to_q(state=state,
+                               workspace=workspace,
+                               wavelength_adjustment_workspace=wavelength_adjustment_workspace,
+                               pixel_adjustment_workspace=pixel_adjustment_workspace,
+                               wavelength_and_pixel_adjustment_workspace=wavelength_and_pixel_adjustment_workspace)
         progress.report("Completed SANSReductionCore ...")
 
         # ------------------------------------------------------------

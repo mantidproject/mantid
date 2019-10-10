@@ -2,6 +2,7 @@
 
 set(TEST_PY_FILES
     calculate_transmission_helper_test.py
+    convert_to_q_test.py
     crop_helper_test.py
     merge_reductions_test.py
     move_workspaces_test.py

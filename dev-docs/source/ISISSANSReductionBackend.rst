@@ -837,7 +837,7 @@ avoid large scripts sizes.
 The dedicated work-flow algorithms for the SANS reduction are:
 
 - :ref:`SANSCalculateTransmission <algm-SANSCalculateTransmission>`
-- :ref:`SANSConvertToQ <algm-SANSConvertToQ>`
+- :ref:`Q1D <algm-Q1D>` or :ref:`Qxy <algm-Qxy>`
 - :ref:`SANSConvertToWavelength <algm-SANSConvertToWavelength>`
 - :ref:`SANSConvertToWavelengthAndRebin <algm-SANSConvertToWavelengthAndRebin>`
 - :ref:`SANSCreateWavelengthAndPixelAdjustment <algm-SANSCreateWavelengthAndPixelAdjustment>`
@@ -904,12 +904,8 @@ The algorithm performs the following steps:
 6. Set the fitted and unfitted workspaces on the output of the algorithm.
 
 
-*SANSConvertToQ*
-------------------
-
-The :ref:`SANSConvertToQ <algm-SANSConvertToQ>` algorithm is the most essential algorithm in the reduction chain.
-It coordinates the final conversion from wavelength units to momentum transfer units.
-
+Conversion to Q
+----------------
 If a 1D reduction has been selected then the algorithm will perform the follow sub-steps:
 
 1. Calculate the momentum transfer resolution workspace using :ref:`TOFSANSResolutionByPixel <algm-TOFSANSResolutionByPixel>` (if applicable)
@@ -959,7 +955,7 @@ The :ref:`SANSCreateWavelengthAndPixelAdjustment <algm-SANSCreateWavelengthAndPi
 algorithm combines the output of the :ref:`SANSCalculateTransmission <algm-SANSCalculateTransmission>`
 algorithm, the output of the :ref:`SANSNormalizeToMonitor <algm-SANSNormalizeToMonitor>` algorithm
 and flood and direct files to produce the correction workspaces which are required
-for :ref:`SANSConvertToQ <algm-SANSConvertToQ>`.
+for converting to Q
 
 The sub-steps of the algorithm are:
 

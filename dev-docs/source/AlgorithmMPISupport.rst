@@ -603,7 +603,6 @@ RenameWorkspace                        all
 ReplaceSpecialValues                   all                     see ``UnaryOperation``
 RotateInstrumentComponent              all
 SANSCalculateTransmission              MasterOnly, Identical
-SANSConvertToQ                         all
 SANSConvertToWavelength                all
 SANSConvertToWavelengthAndRebin        all
 SANSCreateAdjustmentWorkspaces         all

@@ -129,11 +129,12 @@ class SANSReductionCoreEventSlice(SANSReductionCoreBase):
         # 5. Convert to Q
         # -----------------------------------------------------------
         progress.report("Converting to q ...")
-        workspace, sum_of_counts, sum_of_norms = self._convert_to_q(state_serialized,
-                                                                    workspace,
-                                                                    wavelength_adjustment_workspace,
-                                                                    pixel_adjustment_workspace,
-                                                                    wavelength_and_pixel_adjustment_workspace)
+        workspace, sum_of_counts, sum_of_norms = \
+            self._convert_to_q(state=state,
+                               workspace=workspace,
+                               wavelength_adjustment_workspace=wavelength_adjustment_workspace,
+                               pixel_adjustment_workspace=pixel_adjustment_workspace,
+                               wavelength_and_pixel_adjustment_workspace=wavelength_and_pixel_adjustment_workspace)
 
         progress.report("Completed SANSReductionCoreEventSlice...")
 
