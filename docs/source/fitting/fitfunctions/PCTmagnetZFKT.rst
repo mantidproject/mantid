@@ -1,17 +1,18 @@
-.. _func-PCRmagnet:
+.. _func-PCRmagnetZFKT:
 
-=========
-PCRmagnet
-=========
+=============
+PCRmagnetZFKT
+=============
 
-.. index:: PCRmagnet
+.. index:: PCRmagnetZFKT
 
 Description
 -----------
 
-ZF signal from PCR ordered magnet
+ZF signal from PCR ordered magnet with Kubo Toyabe field contribution
 
-.. math:: A(t)=A_0\left(\frac{1}{3}+\frac{2}{3}e^{-(\sigma\omega t')^2/2}\cos(\omega t)\right)
+.. math:: A(t)=A_0 \left(\frac13+\frac23e^{-(\Delta t')^2/2}\left(\cos(\Delta t)-\frac{\Delta^2}{\omega} t\sin(\omega t)\right)\right)\\
+
 
 where,
 
@@ -21,7 +22,7 @@ where,
 
 :math:`A_0` is the amplitude, 
 
-:math:`\sigma` (MHz) is the relaxation rate,
+:math:`\Delta` (MHz) is the relaxation rate,
 
 H0 (G) is the local magnetic field,
 
@@ -35,7 +36,7 @@ and :math:`T_\text{off}` (microsecs) is the time offset.
    import matplotlib.pyplot as plt
    import numpy as np
    x = np.arange(0.1,16,0.1)
-   y = FunctionWrapper("PCRmagnet")
+   y = FunctionWrapper("PCRmagnetZFKT")
    fig, ax=plt.subplots()
    ax.plot(x, y(x))
    ax.set_xlabel('t($\mu$s)')

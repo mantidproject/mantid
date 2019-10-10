@@ -21,6 +21,7 @@ set(TEST_PY_FILES
     MsdYiTest.py
     MuHTest.py
     PCRmagnetTest.py
+    PCRmagnetZFKTTest.py
     PCRmagnetRedfieldTest.py
     PCRmagnetfnormTest.py
     RFresonanceTest.py

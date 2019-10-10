@@ -27,9 +27,7 @@ H0 (G) is the local magnetic field,
 
 :math:`g_\mu` is the gyromagnetic ratio of muons,
 
-:math:`T_\text{off}` (microsecs) is the time offset,
-
-and :math:`B_\text{D}` (G) is the dipolar field.
+and :math:`T_\text{off}` (microsecs) is the time offset.
 
 .. plot::
 	
