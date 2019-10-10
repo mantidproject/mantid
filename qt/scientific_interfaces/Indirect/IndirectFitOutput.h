@@ -43,7 +43,7 @@ using ParameterValuesNew =
 
 using ResultLocationsNew = std::map<WorkspaceIndex, ResultLocationNew>;
 
-using FitDataIteratorNew =
+using FitDataIterator =
     std::vector<std::unique_ptr<IndirectFitData>>::const_iterator;
 
 /*
@@ -55,8 +55,8 @@ public:
   IndirectFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
                     Mantid::API::ITableWorkspace_sptr parameterTable,
                     Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-                    const FitDataIteratorNew &fitDataBegin,
-                    const FitDataIteratorNew &fitDataEnd);
+                    const FitDataIterator &fitDataBegin,
+                    const FitDataIterator &fitDataEnd);
 
   IndirectFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
                     Mantid::API::ITableWorkspace_sptr parameterTable,
@@ -78,8 +78,8 @@ public:
 
   void mapParameterNames(
       const std::unordered_map<std::string, std::string> &parameterNameChanges,
-      const FitDataIteratorNew &fitDataBegin,
-      const FitDataIteratorNew &fitDataEnd);
+      const FitDataIterator &fitDataBegin,
+      const FitDataIterator &fitDataEnd);
   void mapParameterNames(
       const std::unordered_map<std::string, std::string> &parameterNameChanges,
       IndirectFitData const *fitData);
@@ -90,8 +90,8 @@ public:
   void addOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
                  Mantid::API::ITableWorkspace_sptr parameterTable,
                  Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-                 const FitDataIteratorNew &fitDataBegin,
-                 const FitDataIteratorNew &fitDataEnd);
+                 const FitDataIterator &fitDataBegin,
+                 const FitDataIterator &fitDataEnd);
   void addOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
                  Mantid::API::ITableWorkspace_sptr parameterTable,
                  Mantid::API::WorkspaceGroup_sptr resultWorkspace,
@@ -101,19 +101,19 @@ public:
 
 private:
   void updateFitResults(Mantid::API::WorkspaceGroup_sptr resultGroup,
-                        const FitDataIteratorNew &fitDataBegin,
-                        const FitDataIteratorNew &fitDataEnd);
+                        const FitDataIterator &fitDataBegin,
+                        const FitDataIterator &fitDataEnd);
   void updateParameters(Mantid::API::ITableWorkspace_sptr parameterTable,
-                        const FitDataIteratorNew &fitDataBegin,
-                        const FitDataIteratorNew &fitDataEnd);
+                        const FitDataIterator &fitDataBegin,
+                        const FitDataIterator &fitDataEnd);
   void
   updateFitResultsFromUnstructured(Mantid::API::WorkspaceGroup_sptr resultGroup,
-                                   const FitDataIteratorNew &fitDataBegin,
-                                   const FitDataIteratorNew &fitDataEnd);
+                                   const FitDataIterator &fitDataBegin,
+                                   const FitDataIterator &fitDataEnd);
   void
   updateFitResultsFromStructured(Mantid::API::WorkspaceGroup_sptr resultGroup,
-                                 const FitDataIteratorNew &fitDataBegin,
-                                 const FitDataIteratorNew &fitDataEnd);
+                                 const FitDataIterator &fitDataBegin,
+                                 const FitDataIterator &fitDataEnd);
 
   boost::weak_ptr<Mantid::API::WorkspaceGroup> m_resultGroup;
   boost::weak_ptr<Mantid::API::WorkspaceGroup> m_resultWorkspace;

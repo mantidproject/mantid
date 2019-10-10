@@ -628,8 +628,8 @@ void IndirectFittingModel::addOutput(IAlgorithm_sptr fitAlgorithm) {
 }
 
 void IndirectFittingModel::addOutput(IAlgorithm_sptr fitAlgorithm,
-                                     const FitDataIteratorNew &fitDataBegin,
-                                     const FitDataIteratorNew &fitDataEnd) {
+                                     const FitDataIterator &fitDataBegin,
+                                     const FitDataIterator &fitDataEnd) {
   auto group = getOutputGroup(fitAlgorithm);
   auto parameters = getOutputParameters(fitAlgorithm);
   auto result = getOutputResult(fitAlgorithm);
@@ -653,8 +653,8 @@ void IndirectFittingModel::addSingleFitOutput(IAlgorithm_sptr fitAlgorithm,
 void IndirectFittingModel::addOutput(WorkspaceGroup_sptr resultGroup,
                                      ITableWorkspace_sptr parameterTable,
                                      WorkspaceGroup_sptr resultWorkspace,
-                                     const FitDataIteratorNew &fitDataBegin,
-                                     const FitDataIteratorNew &fitDataEnd) {
+                                     const FitDataIterator &fitDataBegin,
+                                     const FitDataIterator &fitDataEnd) {
   if (m_previousModelSelected && m_fitOutput)
     addOutput(m_fitOutput.get(), resultGroup, parameterTable, resultWorkspace,
               fitDataBegin, fitDataEnd);
@@ -681,8 +681,8 @@ void IndirectFittingModel::addOutput(WorkspaceGroup_sptr resultGroup,
 
 IndirectFitOutput IndirectFittingModel::createFitOutput(
     WorkspaceGroup_sptr resultGroup, ITableWorkspace_sptr parameterTable,
-    WorkspaceGroup_sptr resultWorkspace, const FitDataIteratorNew &fitDataBegin,
-    const FitDataIteratorNew &fitDataEnd) const {
+    WorkspaceGroup_sptr resultWorkspace, const FitDataIterator &fitDataBegin,
+    const FitDataIterator &fitDataEnd) const {
   return IndirectFitOutput(resultGroup, parameterTable, resultWorkspace,
                            fitDataBegin, fitDataEnd);
 }
@@ -699,8 +699,8 @@ IndirectFitOutput IndirectFittingModel::createFitOutput(
 void IndirectFittingModel::addOutput(
     IndirectFitOutput *fitOutput, WorkspaceGroup_sptr resultGroup,
     ITableWorkspace_sptr parameterTable, WorkspaceGroup_sptr resultWorkspace,
-    const FitDataIteratorNew &fitDataBegin,
-    const FitDataIteratorNew &fitDataEnd) const {
+    const FitDataIterator &fitDataBegin,
+    const FitDataIterator &fitDataEnd) const {
   fitOutput->addOutput(resultGroup, parameterTable, resultWorkspace,
                        fitDataBegin, fitDataEnd);
 }

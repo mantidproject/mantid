@@ -611,8 +611,8 @@ void IndirectFittingModelLegacy::addOutput(IAlgorithm_sptr fitAlgorithm) {
 }
 
 void IndirectFittingModelLegacy::addOutput(IAlgorithm_sptr fitAlgorithm,
-                                           const FitDataIterator &fitDataBegin,
-                                           const FitDataIterator &fitDataEnd) {
+                                           const FitDataIteratorLegacy &fitDataBegin,
+                                           const FitDataIteratorLegacy &fitDataEnd) {
   auto group = getOutputGroup(fitAlgorithm);
   auto parameters = getOutputParameters(fitAlgorithm);
   auto result = getOutputResult(fitAlgorithm);
@@ -636,8 +636,8 @@ void IndirectFittingModelLegacy::addSingleFitOutput(
 void IndirectFittingModelLegacy::addOutput(WorkspaceGroup_sptr resultGroup,
                                            ITableWorkspace_sptr parameterTable,
                                            WorkspaceGroup_sptr resultWorkspace,
-                                           const FitDataIterator &fitDataBegin,
-                                           const FitDataIterator &fitDataEnd) {
+                                           const FitDataIteratorLegacy &fitDataBegin,
+                                           const FitDataIteratorLegacy &fitDataEnd) {
   if (m_previousModelSelected && m_fitOutput)
     addOutput(m_fitOutput.get(), resultGroup, parameterTable, resultWorkspace,
               fitDataBegin, fitDataEnd);
@@ -664,8 +664,8 @@ void IndirectFittingModelLegacy::addOutput(WorkspaceGroup_sptr resultGroup,
 
 IndirectFitOutputLegacy IndirectFittingModelLegacy::createFitOutput(
     WorkspaceGroup_sptr resultGroup, ITableWorkspace_sptr parameterTable,
-    WorkspaceGroup_sptr resultWorkspace, const FitDataIterator &fitDataBegin,
-    const FitDataIterator &fitDataEnd) const {
+    WorkspaceGroup_sptr resultWorkspace, const FitDataIteratorLegacy &fitDataBegin,
+    const FitDataIteratorLegacy &fitDataEnd) const {
   return IndirectFitOutputLegacy(resultGroup, parameterTable, resultWorkspace,
                                  fitDataBegin, fitDataEnd);
 }
@@ -682,8 +682,8 @@ IndirectFitOutputLegacy IndirectFittingModelLegacy::createFitOutput(
 void IndirectFittingModelLegacy::addOutput(
     IndirectFitOutputLegacy *fitOutput, WorkspaceGroup_sptr resultGroup,
     ITableWorkspace_sptr parameterTable, WorkspaceGroup_sptr resultWorkspace,
-    const FitDataIterator &fitDataBegin,
-    const FitDataIterator &fitDataEnd) const {
+    const FitDataIteratorLegacy &fitDataBegin,
+    const FitDataIteratorLegacy &fitDataEnd) const {
   fitOutput->addOutput(resultGroup, parameterTable, resultWorkspace,
                        fitDataBegin, fitDataEnd);
 }

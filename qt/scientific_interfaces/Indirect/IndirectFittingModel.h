@@ -185,8 +185,8 @@ private:
   createFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
                   Mantid::API::ITableWorkspace_sptr parameterTable,
                   Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-                  const FitDataIteratorNew &fitDataBegin,
-                  const FitDataIteratorNew &fitDataEnd) const;
+                  const FitDataIterator &fitDataBegin,
+                  const FitDataIterator &fitDataEnd) const;
   virtual IndirectFitOutput
   createFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
                   Mantid::API::ITableWorkspace_sptr parameterTable,
@@ -194,13 +194,13 @@ private:
                   IndirectFitData *fitData, WorkspaceIndex spectrum) const;
 
   void addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm,
-                 const FitDataIteratorNew &fitDataBegin,
-                 const FitDataIteratorNew &fitDataEnd);
+                 const FitDataIterator &fitDataBegin,
+                 const FitDataIterator &fitDataEnd);
   void addOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
                  Mantid::API::ITableWorkspace_sptr parameterTable,
                  Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-                 const FitDataIteratorNew &fitDataBegin,
-                 const FitDataIteratorNew &fitDataEnd);
+                 const FitDataIterator &fitDataBegin,
+                 const FitDataIterator &fitDataEnd);
   void addOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
                  Mantid::API::ITableWorkspace_sptr parameterTable,
                  Mantid::API::WorkspaceGroup_sptr resultWorkspace,
@@ -210,8 +210,8 @@ private:
                          Mantid::API::WorkspaceGroup_sptr resultGroup,
                          Mantid::API::ITableWorkspace_sptr parameterTable,
                          Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-                         const FitDataIteratorNew &fitDataBegin,
-                         const FitDataIteratorNew &fitDataEnd) const;
+                         const FitDataIterator &fitDataBegin,
+                         const FitDataIterator &fitDataEnd) const;
   virtual void addOutput(IndirectFitOutput *fitOutput,
                          Mantid::API::WorkspaceGroup_sptr resultGroup,
                          Mantid::API::ITableWorkspace_sptr parameterTable,

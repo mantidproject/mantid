@@ -57,8 +57,8 @@ private:
   createFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
                   Mantid::API::ITableWorkspace_sptr parameterTable,
                   Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-                  const FitDataIterator &fitDataBegin,
-                  const FitDataIterator &fitDataEnd) const override;
+                  const FitDataIteratorLegacy &fitDataBegin,
+                  const FitDataIteratorLegacy &fitDataEnd) const override;
   IndirectFitOutputLegacy
   createFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
                   Mantid::API::ITableWorkspace_sptr parameterTable,
@@ -70,8 +70,8 @@ private:
                  Mantid::API::WorkspaceGroup_sptr resultGroup,
                  Mantid::API::ITableWorkspace_sptr parameterTable,
                  Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-                 const FitDataIterator &fitDataBegin,
-                 const FitDataIterator &fitDataEnd) const override;
+                 const FitDataIteratorLegacy &fitDataBegin,
+                 const FitDataIteratorLegacy &fitDataEnd) const override;
   void addOutput(IndirectFitOutputLegacy *fitOutput,
                  Mantid::API::WorkspaceGroup_sptr resultGroup,
                  Mantid::API::ITableWorkspace_sptr parameterTable,
