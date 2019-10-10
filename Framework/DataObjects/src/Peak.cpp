@@ -699,15 +699,14 @@ bool Peak::findDetector(const Mantid::Kernel::V3D &beam,
         V3D gapDir;
         gapDir[i] = gap;
         V3D beam1 = beam + gapDir;
-        tracer.traceFromSample(beam1);
+        tracer.traceFromSample(normalize(beam1));
         IDetector_const_sptr det1 = tracer.getDetectorResult();
         V3D beam2 = beam - gapDir;
-        tracer.traceFromSample(beam2);
+        tracer.traceFromSample(normalize(beam2));
         IDetector_const_sptr det2 = tracer.getDetectorResult();
         if (det1 && det2) {
           // Set the detector ID to one of the neighboring pixels
           this->setDetectorID(static_cast<int>(det1->getID()));
-          ;
           detPos = det1->getPos();
           found = true;
           break;
