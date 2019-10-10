@@ -13,6 +13,7 @@ import copy
 
 from mantid.kernel import Logger
 from mantid.api import (AnalysisDataService)
+from sans.algorithm_detail.mask_sans_workspace import mask_workspace
 from ui.sans_isis.masking_table import MaskingTable
 from sans.common.enums import DetectorType
 from sans.common.constants import EMPTY_NAME
@@ -34,7 +35,7 @@ masking_information = namedtuple("masking_information", "first, second, third")
 
 def load_and_mask_workspace(state, workspace_name):
     workspace_to_mask = load_workspace(state, workspace_name)
-    return mask_workspace(state, workspace_to_mask)
+    return run_mask_workspace(state, workspace_to_mask)
 
 
 def load_workspace(state, workspace_name):
@@ -49,9 +50,7 @@ def load_workspace(state, workspace_name):
     return workspace
 
 
-def mask_workspace(state, workspace_to_mask):
-    serialized_state = state.property_manager
-    masking_algorithm = create_masking_algorithm(serialized_state, workspace_to_mask)
+def run_mask_workspace(state, workspace_to_mask):
     mask_info = state.mask
 
     detectors = [DetectorType.to_string(DetectorType.LAB), DetectorType.to_string(DetectorType.HAB)] \
@@ -59,10 +58,9 @@ def mask_workspace(state, workspace_to_mask):
                 [DetectorType.to_string(DetectorType.LAB)]  # noqa
 
     for detector in detectors:
-        masking_algorithm.setProperty("Component", detector)
-        masking_algorithm.execute()
+        mask_workspace(component_as_string=detector, workspace=workspace_to_mask, state=state)
 
-    return masking_algorithm.getProperty("Workspace").value
+    return workspace_to_mask
 
 
 def prepare_to_load_scatter_sample_only(state):
@@ -108,13 +106,6 @@ def perform_move(state, workspace):
 
 def store_in_ads_as_hidden(workspace_name, workspace):
     AnalysisDataService.addOrReplace(workspace_name, workspace)
-
-
-def create_masking_algorithm(serialized_state, workspace_to_mask):
-    mask_name = "SANSMaskWorkspace"
-    mask_options = {"SANSState": serialized_state,
-                    "Workspace": workspace_to_mask}
-    return create_unmanaged_algorithm(mask_name, **mask_options)
 
 
 def create_load_algorithm(serialized_state):

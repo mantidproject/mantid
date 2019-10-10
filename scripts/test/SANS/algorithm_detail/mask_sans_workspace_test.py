@@ -48,7 +48,7 @@ def elements_in_range(range_start, range_stop, collection):
 # -----------------------------------------------
 # Tests for the SANSLoad algorithm
 # -----------------------------------------------
-class SANSMaskWorkspaceTest(unittest.TestCase):
+class MaskSansWorkspaceTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         sans2d_mask_ws = LoadEmptyInstrument(InstrumentName="SANS2D")
