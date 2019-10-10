@@ -9,18 +9,14 @@ from __future__ import (absolute_import, division, print_function)
 from Engineering.gui.engineering_diffraction.engineering_diffraction import EngineeringDiffractionGui
 from qtpy import QtCore
 
+# If the GUI has not been created yet, make a new one.
+if 'engineering_gui' not in globals():
+    engineering_gui = EngineeringDiffractionGui()
 
-# Check if the interface is loaded and if so show it while maintaining its state.
-if 'engineering_diffraction' in globals():
-    engineering_diffraction = globals()['engineering_diffraction']
-    # Restore a minimised window.
-    if not engineering_diffraction.isHidden():
-        engineering_diffraction.setWindowState(engineering_diffraction.windowState() & ~QtCore.Qt.WindowMinimized
-                                               | QtCore.Qt.WindowActive)
-        engineering_diffraction.activateWindow()
-    else:
-        engineering_diffraction = EngineeringDiffractionGui()
-        engineering_diffraction.show()
-else:  # Reload GUI if not currently loaded.
-    engineering_diffraction = EngineeringDiffractionGui()
-    engineering_diffraction.show()
+# Restore minimised and hidden windows without recreating the GUI.
+if engineering_gui.isHidden():  # noqa
+    engineering_gui.show()
+else:
+    engineering_gui.setWindowState(engineering_gui.windowState() & ~QtCore.Qt.WindowMinimized
+                                   | QtCore.Qt.WindowActive)
+    engineering_gui.activateWindow()
