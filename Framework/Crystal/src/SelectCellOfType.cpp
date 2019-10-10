@@ -12,6 +12,7 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Crystal/ScalarUtils.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/ArrayProperty.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -68,6 +69,10 @@ void SelectCellOfType::init() {
 
   this->declareProperty("AllowPermutations", true,
                         "Allow permutations of conventional cells");
+
+  this->declareProperty(std::make_unique<ArrayProperty<double>>(
+                            "TransformationMatrix", Direction::Output ),
+                        "The transformation matrix");
 }
 
 /** Execute the algorithm.
@@ -106,6 +111,7 @@ void SelectCellOfType::exec() {
 
   DblMatrix T = info.GetHKL_Tran();
   g_log.notice() << "Transformation Matrix =  " << T.str() << '\n';
+  this->setProperty("TransformationMatrix", T.getVector());
 
   if (apply) {
     std::vector<double> sigabc(6);
