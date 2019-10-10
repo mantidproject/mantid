@@ -9,8 +9,8 @@
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Crystal/ScalarUtils.h"
-#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -49,7 +49,7 @@ void SelectCellWithForm::init() {
   this->declareProperty("AllowPermutations", true,
                         "Allow permutations of conventional cells");
   this->declareProperty(std::make_unique<ArrayProperty<double>>(
-                            "TransformationMatrix", Direction::Output ),
+                            "TransformationMatrix", Direction::Output),
                         "The transformation matrix");
 }
 

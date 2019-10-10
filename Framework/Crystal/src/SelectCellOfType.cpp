@@ -11,8 +11,8 @@
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Crystal/ScalarUtils.h"
-#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ListValidator.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -71,7 +71,7 @@ void SelectCellOfType::init() {
                         "Allow permutations of conventional cells");
 
   this->declareProperty(std::make_unique<ArrayProperty<double>>(
-                            "TransformationMatrix", Direction::Output ),
+                            "TransformationMatrix", Direction::Output),
                         "The transformation matrix");
 }
 
