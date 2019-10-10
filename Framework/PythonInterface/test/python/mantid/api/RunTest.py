@@ -7,6 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
+import copy
 from testhelpers import run_algorithm
 from mantid.geometry import Goniometer
 from mantid.kernel import DateAndTime
@@ -127,6 +128,22 @@ class RunTest(unittest.TestCase):
             runendstr, "2008-12-18T17:59:40 "
         )  # The space at the end is to get around an IPython bug (#8351)
         self.assertTrue(isinstance(runend, DateAndTime))
+
+    def do_test_copyable(self, copy_op):
+        original = self._expt_ws.run()
+        # make copy
+        cp = copy_op(original)
+        # Check identity different
+        self.assertNotEqual(id(original), id(cp))
+        # Simple tests that cp is equal to original
+        self.assertEqual(original.startTime(), cp.startTime())
+        self.assertEqual(original.endTime(), cp.endTime())
+
+    def test_shallow_copyable(self):
+        self.do_test_copyable(copy.copy)
+
+    def test_deep_copyable(self):
+        self.do_test_copyable(copy.deepcopy)
 
 
 if __name__ == '__main__':
