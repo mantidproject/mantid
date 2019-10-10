@@ -17,6 +17,7 @@ set(TEST_PY_FILES
     GauBroadGauKTTest.py
     GaussBesselTest.py
     HighTFMuoniumTest.py
+    LowTFMuoniumTest.py
     MeierTest.py
     ModOscTest.py
     MsdGaussTest.py
