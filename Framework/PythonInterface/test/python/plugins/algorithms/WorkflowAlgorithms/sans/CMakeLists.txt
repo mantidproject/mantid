@@ -3,7 +3,7 @@
 set(TEST_PY_FILES
     SANSCalculateTransmissionTest.py
     SANSConvertToQTest.py
-    SANSConvertToWavelengthTest.py
+    SANSConvertToWavelengthAndRebinTest.py
     SANSCreateAdjustmentWorkspacesTest.py
     SANSCreateWavelengthAndPixelAdjustmentTest.py
     SANSNormalizeToMonitorTest.py

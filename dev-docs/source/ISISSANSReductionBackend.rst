@@ -838,7 +838,6 @@ The dedicated work-flow algorithms for the SANS reduction are:
 
 - :ref:`SANSCalculateTransmission <algm-SANSCalculateTransmission>`
 - :ref:`SANSConvertToQ <algm-SANSConvertToQ>`
-- :ref:`SANSConvertToWavelength <algm-SANSConvertToWavelength>`
 - :ref:`SANSConvertToWavelengthAndRebin <algm-SANSConvertToWavelengthAndRebin>`
 - :ref:`SANSCreateWavelengthAndPixelAdjustment <algm-SANSCreateWavelengthAndPixelAdjustment>`
 - :ref:`SANSCrop <algm-SANSCrop>`
@@ -929,16 +928,6 @@ If a 2D reduction has been selected then the algorithm will perform the followin
 2. Execute :ref:`Qxy <algm-Qxy>`
 3. Get reduced workspace, the sum-of-counts workspace and the sum-of-norm workspaces
    and set on the output of the algorithm
-
-
-*SANSConvertToWavelength*
-----------------------------
-
-The :ref:`SANSConvertToWavelength <algm-SANSConvertToWavelength>` algorithm acts as a wrapper around
-:ref:`SANSConvertToWavelengthAndRebin <algm-SANSConvertToWavelengthAndRebin>`.
-Unlike :ref:`SANSConvertToWavelengthAndRebin <algm-SANSConvertToWavelengthAndRebin>`
-it takes a *SANSState* object as its input. This algorithm is used for the
-wavelength conversion of the scatter workspace.
 
 
 *SANSConvertToWavelengthAndRebin*
@@ -1247,7 +1236,7 @@ The sub-steps of this algorithm are:
    only the general masks and the masks for the selected component are applied.
    Note that all steps up until now were performed in the time-of-flight domain.
 6. Convert the data from the time-of-flight to the wavelength domain using
-   :ref:`SANSConvertToWavelength <algm-SANSConvertToWavelength>`.
+   :ref:`SANSConvertToWavelengthAndRebin <algm-SANSConvertToWavelengthAndRebin>`.
 7. Scale the data set using :ref:`Multiply <algm-Multiply>`. This will multiply the data set
    with the absolute scale and divide :ref:`Divide <algm-Divide>` by the sample volume.
 8. This step creates the adjustment workspaces using :ref:`SANSCreateAdjustmentWorkspaces <algm-SANSCreateAdjustmentWorkspaces>`.

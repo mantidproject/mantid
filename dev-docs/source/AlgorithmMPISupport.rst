@@ -604,7 +604,6 @@ ReplaceSpecialValues                   all                     see ``UnaryOperat
 RotateInstrumentComponent              all
 SANSCalculateTransmission              MasterOnly, Identical
 SANSConvertToQ                         all
-SANSConvertToWavelength                all
 SANSConvertToWavelengthAndRebin        all
 SANSCreateAdjustmentWorkspaces         all
 SANSCreateWavelengthAndPixelAdjustment MasterOnly, Identical

@@ -16,7 +16,7 @@ from sans.algorithm_detail.scale_sans_workspace import scale_workspace
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import (create_child_algorithm, append_to_sans_file_tag)
-from sans.common.enums import (DetectorType, DataType)
+from sans.common.enums import (DetectorType, DataType, RangeStepType, RebinType)
 
 
 class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
@@ -143,13 +143,20 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
         mask_alg.execute()
         return mask_alg.getProperty("Workspace").value
 
-    def _convert_to_wavelength(self, state_serialized, workspace):
-        wavelength_name = "SANSConvertToWavelength"
-        wavelength_options = {"SANSState": state_serialized,
-                              "InputWorkspace": workspace}
+    def _convert_to_wavelength(self, state, workspace):
+        wavelength_state = state.wavelength
+
+        wavelength_name = "SANSConvertToWavelengthAndRebin"
+        wavelength_options = {"InputWorkspace": workspace,
+                              "OutputWorkspace": EMPTY_NAME,
+                              "WavelengthLow": wavelength_state.wavelength_low[0],
+                              "WavelengthHigh": wavelength_state.wavelength_high[0],
+                              "WavelengthStep": wavelength_state.wavelength_step,
+                              "WavelengthStepType": RangeStepType.to_string(
+                                  wavelength_state.wavelength_step_type),
+                              "RebinMode": RebinType.to_string(wavelength_state.rebin_type)}
+
         wavelength_alg = create_child_algorithm(self, wavelength_name, **wavelength_options)
-        wavelength_alg.setPropertyValue("OutputWorkspace", EMPTY_NAME)
-        wavelength_alg.setProperty("OutputWorkspace", workspace)
         wavelength_alg.execute()
         return wavelength_alg.getProperty("OutputWorkspace").value
 
