@@ -90,10 +90,10 @@ class FigureInteraction(object):
 
     def disconnect(self):
         """
-        Disconnects all registered event handers
+        Disconnects all registered event handlers
         """
-        for id in self._cids:
-            self.canvas.mpl_disconnect(id)
+        for cid in self._cids:
+            self.canvas.mpl_disconnect(cid)
 
     # ------------------------ Handlers --------------------
     def on_scroll(self, event):
@@ -154,10 +154,17 @@ class FigureInteraction(object):
             self.stop_markers(x_pos, y_pos)
 
     def on_leave(self, event):
-        """When leaving the axis or canvas, restore cursor to default one and stop moving the markers"""
+        """
+        When leaving the axis or canvas, restore cursor to default one
+        and stop moving the markers
+        """
         QApplication.restoreOverrideCursor()
         if event:
             self.stop_markers(event.xdata, event.ydata)
+
+    def set_all_markers_visible(self, visible):
+        for marker in self.markers:
+            marker.set_visible(visible)
 
     def stop_markers(self, x_pos, y_pos):
         """

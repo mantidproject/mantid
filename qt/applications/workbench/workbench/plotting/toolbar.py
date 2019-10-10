@@ -29,7 +29,7 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
     sig_generate_plot_script_clipboard_triggered = QtCore.Signal()
 
     toolitems = (
-        ('Home', 'Reset original view', 'mdi.home', 'home_button_clicked', None),
+        ('Home', 'Reset original view', 'mdi.home', 'on_home_clicked', None),
         ('Back', 'Back to previous view', 'mdi.arrow-left', 'back', None),
         ('Forward', 'Forward to next view', 'mdi.arrow-right', 'forward', None),
         (None, None, None, None, None),
@@ -98,15 +98,6 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         dpi_ratio = QtWidgets.QApplication.instance().desktop().physicalDpiX() / 100
         self.setIconSize(QtCore.QSize(24 * dpi_ratio, 24 * dpi_ratio))
 
-    def home_button_clicked(self):
-        """
-        Here we override the default behaviour of Matplotlib's home
-        button. Instead of returning to the top of the zoom stack, we
-        zoom in/out to center the display on the figure's contents.
-        """
-        self.sig_display_all_triggered.emit()
-        self.push_current()
-
     def launch_plot_options(self):
         self.sig_plot_options_triggered.emit()
 
@@ -140,8 +131,9 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
     def contextMenuEvent(self, event):
         pass
 
-    def on_home_clicked(self, _):
+    def on_home_clicked(self):
         self.home_clicked.emit()
+        self.push_current()
 
 
 class ToolbarStateManager(object):

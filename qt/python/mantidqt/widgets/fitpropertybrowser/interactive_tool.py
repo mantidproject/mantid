@@ -76,6 +76,11 @@ class FitInteractiveTool(QObject):
         # The mouse state machine that handles responses to the mouse events.
         self.mouse_state = StateMachine(self)
 
+    def set_visible(self, visible):
+        self.fit_range.set_visible(visible)
+        for marker in self.peak_markers:
+            marker.set_visible(visible)
+
     def disconnect(self):
         """
         Disconnect the tool from everything
