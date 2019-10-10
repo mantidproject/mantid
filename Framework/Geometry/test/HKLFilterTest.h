@@ -192,7 +192,7 @@ public:
   }
   GNU_DIAG_OFF_SUGGEST_OVERRIDE
 private:
-  class MockHKLFilter : public HKLFilter {
+  class MockHKLFilter final : public HKLFilter {
   public:
     MOCK_CONST_METHOD0(getDescription, std::string());
     MOCK_CONST_METHOD1(isAllowed, bool(const V3D &));
