@@ -10,7 +10,11 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import funcinspect
 from mantid.simpleapi import *
 from mantid.api import (AlgorithmManager, Algorithm)
+
 import random
+import types
+import ast
+import collections
 
 
 class anAbsorptionShape(object):
@@ -55,6 +59,10 @@ class anAbsorptionShape(object):
     material's number density
     """
 
+    # The list of the shapes defined in the module and used as the basis of the
+    # absorption shapes factory
+    _Defined_Shapes = {}
+
     def __init__(self,MaterialValue=None):
         # environment according to existing definitions of the environment
         self._Environment = {}
@@ -66,9 +74,13 @@ class anAbsorptionShape(object):
 
         # the workspace used for testing correct properties settings
         rhash = random.randint(1,100000)
-        self._testWorkspace = CreateSampleWorkspace(OutputWorkspace='_adsShape_' + str(rhash))
+        self._testWorkspace = CreateSampleWorkspace(OutputWorkspace='_adsShape_' + str(rhash),\
+            NumBanks=1,BankPixelWidth=1)
         if MaterialValue is not None:
             self.material = MaterialValue
+        # If true, SetSample algorithm can set-up this shape
+        self._CanSetSample = True
+
     #
     def __del__(self):
         DeleteWorkspace(self._testWorkspace)
@@ -141,8 +153,10 @@ class anAbsorptionShape(object):
         correction_base_ws = ConvertUnits(ws,'Wavelength',EMode='Direct')
         Mater_properties = self._Material
         SetSampleMaterial(correction_base_ws,**Mater_properties)
-        shape_description = self._ShapeDescription
-        SetSample(correction_base_ws,Geometry=shape_description)
+
+        if self._CanSetSample:
+            shape_description = self._ShapeDescription
+            SetSample(correction_base_ws,Geometry=shape_description)
 
         mc_corrections = corr_properties.pop('is_mc', False)
         fast_corrections = corr_properties.pop('is_fast',False)
@@ -181,7 +195,7 @@ class anAbsorptionShape(object):
         adsrbtn_correctios = AbsorptionCorrection(correction_base_ws,**kwarg)
         return adsrbtn_correctios
 
-
+    #
     def mc_abs_corrections(self,correction_base_ws,kwarg={}):
         """ Method to correct adsorption on a shape using Mont-Carlo integration
         Inputs:
@@ -195,23 +209,55 @@ class anAbsorptionShape(object):
         """
         adsrbtn_correctios = MonteCarloAbsorption(correction_base_ws,**kwarg)
         return adsrbtn_correctios
-    def str(self):
-        raise RuntimeError('This option is not yet implemented')
     #
-    def _set_shape_property(self,value,shape_name,mandatory_prop_list,opt_prop_list,opt_val_list):
-        """ General function to build shape property for various absorption corrections algorithms
-            taking it from various forms of users input and converting it into standard shape
+    def str(self):
+        """ Convert an absorption shape into a string representation"""
+        return str(self._ShapeDescription) + '!' + str(self._Material)
+    #
+    @staticmethod
+    def from_str(str_val):
+        """ Retrieve absorption shape from a string representation
+
+        Implements shapes factory, so evry new shape class should be subscribed to it
+        """
+        if len(anAbsorptionShape._Defined_Shapes) == 0:
+            anAbsorptionShape._Defined_Shapes = \
+                {'Cylinder':Cylinder(),'FlatPlate':FlatPlate(),\
+                'HollowCylinder':HollowCylinder(),'Sphere':Sphere()}
+
+        if not isinstance(str_val,str):
+            raise ValueError('The input of the "from_str" function should be a string representing a diary'\
+                ', actually it is: {0}'.format(type(str_val)))
+        str_list = str_val.split('!')
+        shape_par = ast.literal_eval(str_list[0])
+        mater_par = ast.literal_eval(str_list[1])
+
+        the_shape_id = shape_par.pop('Shape',None)
+        if the_shape_id is None:
+            raise ValueError('The input of the "from_str" function = {0} but does not contain the '\
+                'Shape description e.g. the Key Shape:ShapeName'.format(str_val))
+        theShape = anAbsorptionShape._Defined_Shapes[the_shape_id]
+        theShape.material = mater_par
+        theShape.shape = shape_par
+        return theShape
+
+    #
+    def _set_list_property(self,value,shape_name,mandatory_prop_list,opt_prop_list,opt_val_list):
+        """ General function to build list property for various absorption corrections algorithms
+            taking it from various forms of users input and converting it into standard key-value
             dictionary.
         """
-        if value is None:
+        if value is None or not value:
             return {}
+        if not isinstance(value, collections.Iterable):
+            value = [value]
         n_elements = len(value)
         if n_elements < len(mandatory_prop_list):
             raise TypeError('*** {0} shape parameter needes at least {1} imput parameters namely: {2}'\
                             .format(shape_name,len(mandatory_prop_list),mandatory_prop_list))
 
         shape_dict = {'Shape':shape_name}
-        all_prop = mandatory_prop_list+opt_prop_list
+        all_prop = mandatory_prop_list + opt_prop_list
         if isinstance(value,(list,tuple)):
             for i in range(0,n_elements):
                 val = value[i]
@@ -222,7 +268,9 @@ class anAbsorptionShape(object):
                 shape_dict[all_prop[i]] = val
         elif isinstance(value,dict):
             for key,val in value.iteritems():
-                if not isinstance(val,(list,tuple)):
+                if isinstance(val,(list,tuple)):
+                    val = map(lambda x: float(x),val)
+                else:
                     val = float(val)
                 shape_dict[key] = val
         else:
@@ -233,11 +281,11 @@ class anAbsorptionShape(object):
         #
         for ik in range(0,len(opt_prop_list)):
             if not opt_prop_list[ik] in shape_dict:
-                shape_dict[opt_prop_list[ik]] = opt_val_list[ik]
-
-        # Test if the material property are recognized by SetSampleMaterial
-        # algorithm.
-        SetSample(self._testWorkspace,Geometry=shape_dict)
+                opt_val = opt_val_list[ik]
+                if opt_val is types.FunctionType:
+                    shape_dict[opt_prop_list[ik]] = opt_val(shape_dict)
+                else:
+                    shape_dict[opt_prop_list[ik]] = opt_val
 
         return shape_dict
 
@@ -282,10 +330,15 @@ class Cylinder(anAbsorptionShape):
         return self._ShapeDescription
     @shape.setter
     def shape(self,value):
-        shape_dict = self._set_shape_property(value,'Cylinder',['Height','Radius'],\
-            ['Axis','Center'],[[0.,1.,0.],[0.,0.,0.]])
+        shape_dict = self._set_list_property(value,'Cylinder',['Height','Radius'],\
+            ['Axis','Center'],[[0.,1.,0.],[0,0,0]])
 
         self._ShapeDescription = shape_dict
+
+        if len(shape_dict) != 0:
+            # Test if the shape property is recognized by CreateSampleShape
+            # algorithm.
+            SetSample(self._testWorkspace,Geometry=shape_dict)
     #
     def fast_abs_corrections(self,correction_base_ws,kwarg={}):
         """ Method to calculate absorption corrections quickly using fast (integration) method
@@ -339,9 +392,15 @@ class FlatPlate(anAbsorptionShape):
         return self._ShapeDescription
     @shape.setter
     def shape(self,value):
-        shape_dict = self._set_shape_property(value,'FlatPlate',['Height','Width','Thick'],\
+        shape_dict = self._set_list_property(value,'FlatPlate',['Height','Width','Thick'],\
             ['Center','Angle'],[[0.,0.,0.],0.])
+
         self._ShapeDescription = shape_dict
+
+        if len(shape_dict) != 0:
+            # Test if the shape property is recognized by CreateSampleShape
+            # algorithm.
+            SetSample(self._testWorkspace,Geometry=shape_dict)
 
     #
     def fast_abs_corrections(self,correction_base_ws,kwarg={}):
@@ -388,17 +447,25 @@ class HollowCylinder(anAbsorptionShape):
 
         anAbsorptionShape.__init__(self,Material)
         self.shape = CylinderParams
+        self._CanSetSample = False
 
     @property
     def shape(self):
         return self._ShapeDescription
     @shape.setter
     def shape(self,value):
-        shape_dict = self._set_shape_property(value,'HollowCylinder',\
+        shape_dict = self._set_list_property(value,'HollowCylinder',\
             ['Height','InnerRadius','OuterRadius'],\
             ['Axis','Center'],[[0.,1.,0.],[0.,0.,0.]])
 
+
         self._ShapeDescription = shape_dict
+
+        if len(shape_dict) != 0:
+            # Test if the shape property is recognized by CreateSampleShape
+            # algorithm.
+            self._add_xml_hollow_cylinder(self._testWorkspace)
+
     #
     def _add_xml_hollow_cylinder(self,ws):
         # xml shape is normaly defined in meters
@@ -410,12 +477,12 @@ class HollowCylinder(anAbsorptionShape):
             <height val="{8}" />
          </hollow-cylinder>"""""
         shape_dic = self._ShapeDescription
-        Cenr = [c*0.01 for c in shape_dic['Center']]
+        Cenr = [c * 0.01 for c in shape_dic['Center']]
         Axis = shape_dic['Axis']
         sample_shape = sample_xml_template.format(Cenr[0],Cenr[1],Cenr[2],\
                                                   Axis[0],Axis[1],Axis[2],\
-                                                  0.01*shape_dic['InnerRadius'],\
-                                                  0.01*shape_dic['OuterRadius'],0.01*shape_dic['Height'])
+                                                  0.01 * shape_dic['InnerRadius'],\
+                                                  0.01 * shape_dic['OuterRadius'],0.01 * shape_dic['Height'])
         CreateSampleShape(ws,sample_shape)
 
     #
@@ -427,7 +494,7 @@ class HollowCylinder(anAbsorptionShape):
         return adsrbtn_correctios
     #
     def mc_abs_corrections(self,correction_base_ws,kwarg={}):
-        """ Method to correct adsorption on a shape using Mont-Carlo integration
+        """ Method to correct adsorption on a shape using Monte-Carlo integration
         Inputs:
          ws     -- workspace to correct. Should be in the units of wavelength
         **kwarg -- dictionary of the additional keyword arguments to provide as input for
@@ -439,8 +506,98 @@ class HollowCylinder(anAbsorptionShape):
         self._add_xml_hollow_cylinder(correction_base_ws)
         adsrbtn_correctios = MonteCarloAbsorption(correction_base_ws,**kwarg)
         return adsrbtn_correctios
+##---------------------------------------------------------------------------------------------------
+class Sphere(anAbsorptionShape):
+    """Define the absorbing sphere and calculate absorption corrections from this sphere
+    
+    Usage:
+    abs = Sphere(SampleMaterial,SphereParameters)
+    The SampleMaterial is the list or dictionary as described on anAbsorptionShape class
 
+    and
 
-#-----------------------------------------------------------------
+    SphereParameters can have the form:
+
+    a) The list consisting of 1 to 2 members e.g.:
+    SphereParameters = [Radius,[Center]]
+    where Radius is the sphere radius in cm,
+    the Center, if present, a list of three values indicating the [X,Y,Z] position of the center.
+    The reference frame of the defined instrument is used to set the coordinate system
+    for the shape.
+
+    e.g.:
+    abs = Sphere(['Al',0.1],[10,[1,0,0]])
+    b) The diary: 
+    SphereParameters = {Radius:value,Centre:[1,1,1] etc}
+    e.g:
+    abs = Sphere(['Al',0.1],['Radius':10)
+
+    Usage of the defined Sphere class instance:
+
+    Correct absorption on the defined Sphere using AbsorptionCorrections algorithm:
+    ws = abs.correct_adsorption(ws)
+
+    Correct absorption on the defined Sphere using Monte-Carlo Absorption algorithm:
+    ws = ads.correct_adsorption(ws,{'is_mc':True,AdditionalMonte-Carlo Absorption parameters});
+    """
+    def __init__(self,Material=None,SphereParams=None):
+
+        anAbsorptionShape.__init__(self,Material)
+        self.shape = SphereParams
+        self._CanSetSample = False
+
+    @property
+    def shape(self):
+        return self._ShapeDescription
+    @shape.setter
+    def shape(self,value):
+        shape_dict = self._set_list_property(value,'Sphere',['Radius'],\
+            ['Center'],[[0.,0.,0.]])
+
+        self._ShapeDescription = shape_dict
+        if len(shape_dict) != 0:
+            # Test if the shape property is recognized by CreateSampleShape
+            # algorithm.
+            self._add_xml_sphere(self._testWorkspace)
+
+    def _add_xml_sphere(self,ws):
+        # xml shape is normaly defined in meters
+        sample_xml_template = """<sphere id="WHOLE_SPHERE">
+            <centre x="{0}" y="{1}" z="{2}" />
+            <radius val="{3}" />
+         </sphere>"""""
+        shape_dic = self._ShapeDescription
+        Cenr = [c * 0.01 for c in shape_dic['Center']]
+        sample_shape = sample_xml_template.format(Cenr[0],Cenr[1],Cenr[2],\
+                                                  0.01 * shape_dic['Radius'])
+        CreateSampleShape(ws,sample_shape)
+
+    #
+    def fast_abs_corrections(self,correction_base_ws,kwarg={}):
+        """ Method to calculate absorption corrections quickly using fast (integration) method
+        """
+        if len(kwarg) ==0:
+            adsrbtn_correctios = SphericalAbsorption(correction_base_ws,SphericalSampleRadius=self._ShapeDescription['Radius'])
+        else:
+            self._add_xml_sphere(correction_base_ws)
+            adsrbtn_correctios = AbsorptionCorrection(correction_base_ws,**kwarg)
+        return adsrbtn_correctios
+    #
+    def mc_abs_corrections(self,correction_base_ws,kwarg={}):
+        """ Method to correct adsorption on a shape using Monte-Carlo integration
+        Inputs:
+         ws     -- workspace to correct. Should be in the units of wavelength
+        **kwarg -- dictionary of the additional keyword arguments to provide as input for
+                the absorption corrections algorithm
+                These arguments should not be related to the sample as the sample should already be defined.
+        Returns: 
+            workspace with absorption corrections.
+        """
+        self._add_xml_sphere(correction_base_ws)
+        adsrbtn_correctios = MonteCarloAbsorption(correction_base_ws,**kwarg)
+        return adsrbtn_correctios
+
+##---------------------------------------------------------------------------------------------------
+
 if __name__ == "__main__":
     pass

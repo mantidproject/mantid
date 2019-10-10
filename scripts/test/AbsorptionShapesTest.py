@@ -10,7 +10,7 @@ from mantid.simpleapi import *
 from mantid import api
 import unittest
 import numpy as np
-from AbsorptionShapes import (anAbsorptionShape,Cylinder,FlatPlate,HollowCylinder)
+from AbsorptionShapes import (anAbsorptionShape,Cylinder,FlatPlate,HollowCylinder,Sphere)
 
 class AdsorbtionShapesTest(unittest.TestCase):
     def __init__(self, methodName):
@@ -157,6 +157,60 @@ class AdsorbtionShapesTest(unittest.TestCase):
         n_bins = mc_corr.blocksize()
         mccorr_ranges = [n_bins,mc_corr.readY(0)[0],mc_corr.readY(0)[n_bins-1]]
         np.testing.assert_almost_equal(mccorr_ranges ,[97,0.2657,0.0303],4)
+    #
+    def test_string_conversion(self):
+        """ check if shape conversion to string representation works"""
+        ash = HollowCylinder('V',[10,2,4])
+        ash_str = ash.str()
+        ash_rec = anAbsorptionShape.from_str(ash_str)
+
+        self.assertTrue(isinstance(ash_rec,HollowCylinder))
+        self.assertDictEqual(ash.material,ash_rec.material)
+        self.assertDictEqual(ash.shape,ash_rec.shape)
+
+        ash = Sphere(['Al',10],10)
+        ash_str = ash.str()
+        ash_rec = anAbsorptionShape.from_str(ash_str)
+
+        self.assertTrue(isinstance(ash_rec,Sphere))
+        self.assertDictEqual(ash.material,ash_rec.material)
+        self.assertDictEqual(ash.shape,ash_rec.shape)
+
+    #
+    def test_adsrp_sphere(self):
+        ash = Sphere('Al',10)
+        res = ash.shape
+        self.assertEqual(res['Radius'],10)
+
+        ash.shape = [5,[1,0,0]]
+        res = ash.shape;
+        self.assertEqual(res['Radius'],5)
+        self.assertEqual(res['Center'],[1,0,0])
+
+
+        ash.shape = {'Radius':3,'Center':[0.,0.,0.]}
+        res = ash.shape;
+        self.assertEqual(res['Radius'],3)
+        self.assertEqual(res['Center'],[0,0,0])
+
+
+        test_ws =  CreateSampleWorkspace(NumBanks=1,BankPixelWidth=1)
+        test_ws = ConvertUnits(test_ws,'DeltaE',Emode='Direct',EFixed=2000)
+        cor_ws,corrections = ash.correct_absorption(test_ws,ElementSize=6)
+        n_bins = corrections.blocksize()
+        corr_ranges = [n_bins,corrections.readY(0)[0],corrections.readY(0)[n_bins-1]]
+        np.testing.assert_almost_equal(corr_ranges,[97,0.6704,0.4097],4)
+
+        cor_ws,corrections = ash.correct_absorption(test_ws)
+        n_bins = corrections.blocksize()
+        corr_ranges = [n_bins,corrections.readY(0)[0],corrections.readY(0)[n_bins-1]]
+        np.testing.assert_almost_equal(corr_ranges,[97,0.6420,0.3997],4)
+ 
+        mccor_ws,mc_corr = ash.correct_absorption(test_ws,is_mc=True,NumberOfWavelengthPoints=20)
+        n_bins = mc_corr.blocksize()
+        mccorr_ranges = [n_bins,mc_corr.readY(0)[0],mc_corr.readY(0)[n_bins-1]]
+        np.testing.assert_almost_equal(mccorr_ranges ,[97,0.6645,0.5098],4)
+
 
 
 if __name__=="__main__":

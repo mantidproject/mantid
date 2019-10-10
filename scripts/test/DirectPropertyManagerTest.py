@@ -1236,7 +1236,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertTrue(defaults['is_fast'])
         # the algorithm sets up the properties but does not verifis if the prperties
         # are acceptable by the corrections algorithm
-        propman.abs_corr_info = "{is_mc: True, NumberOfWavelengthPoints: 200; MaxScatterPtAttempts=20 SparseInstrument=True}"
+        propman.abs_corr_info = "{is_mc: True, NumberOfWavelengthPoints: 200; MaxScatterPtAttempts=20, SparseInstrument=True}"
 
         propss = propman.abs_corr_info
         self.assertTrue(propss['is_mc'])
