@@ -54,8 +54,9 @@ IndirectFitPropertyBrowser::IndirectFitPropertyBrowser(QWidget *parent)
 }
 
 void IndirectFitPropertyBrowser::initFunctionBrowser() {
-  // this object is added as a child to the stacked widget m_templateBrowser which is a child
-  // of this class so the lifetime of this pointer is handled by Qt
+  // this object is added as a child to the stacked widget m_templateBrowser
+  // which is a child of this class so the lifetime of this pointer is handled
+  // by Qt
   m_functionBrowser = new FunctionBrowser(nullptr, true);
   m_functionBrowser->setObjectName("functionBrowser");
   // Process internally
@@ -79,8 +80,9 @@ void IndirectFitPropertyBrowser::initFunctionBrowser() {
 }
 
 void IndirectFitPropertyBrowser::initFitOptionsBrowser() {
-  // this object is added as a child to the stacked widget m_templateBrowser which is a child
-  // of this class so the lifetime of this pointer is handled by Qt
+  // this object is added as a child to the stacked widget m_templateBrowser
+  // which is a child of this class so the lifetime of this pointer is handled
+  // by Qt
   m_fitOptionsBrowser = new FitOptionsBrowser(
       nullptr, FitOptionsBrowser::SimultaneousAndSequential);
   m_fitOptionsBrowser->setObjectName("fitOptionsBrowser");

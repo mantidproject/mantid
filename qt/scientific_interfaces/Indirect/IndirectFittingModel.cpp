@@ -343,7 +343,8 @@ IndirectFittingModel::getWorkspace(TableDatasetIndex index) const {
 std::vector<std::string> IndirectFittingModel::getWorkspaceNames() const {
   std::vector<std::string> names;
   names.reserve(m_fittingData.size().value);
-  for (TableDatasetIndex i = m_fittingData.zero(); i < m_fittingData.size(); ++i)
+  for (TableDatasetIndex i = m_fittingData.zero(); i < m_fittingData.size();
+       ++i)
     names.emplace_back(m_fittingData[i]->workspace()->getName());
   return names;
 }
@@ -433,7 +434,8 @@ IndirectFittingModel::getNumberOfSpectra(TableDatasetIndex index) const {
 
 TableRowIndex IndirectFittingModel::getNumberOfDomains() const {
   TableRowIndex sum{0};
-  for (TableDatasetIndex i = m_fittingData.zero(); i < m_fittingData.size(); ++i) {
+  for (TableDatasetIndex i = m_fittingData.zero(); i < m_fittingData.size();
+       ++i) {
     sum += m_fittingData[i]->numberOfSpectra();
   }
   return sum;
