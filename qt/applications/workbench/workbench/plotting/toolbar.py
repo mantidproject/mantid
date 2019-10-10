@@ -171,3 +171,6 @@ class ToolbarStateManager(object):
 
     def home_button_connect(self, slot):
         self._toolbar.home_clicked.connect(slot)
+
+    def emit_home_clicked(self):
+        self._toolbar.home_clicked.emit()

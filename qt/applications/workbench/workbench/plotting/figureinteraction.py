@@ -79,7 +79,6 @@ class FigureInteraction(object):
         self.fit_browser = fig_manager.fit_browser
         self.errors_manager = FigureErrorsManager(self.canvas)
         self.markers = []
-        self.vertical_markers = []
         self.valid_lines = VALID_LINE_STYLE
         self.valid_colors = VALID_COLORS
         self.default_marker_name = 'marker'
@@ -140,6 +139,9 @@ class FigureInteraction(object):
                 self._show_axis_editor(event)
             elif len(marker_selected) == 1:
                 self._edit_marker(marker_selected[0])
+        elif (self.toolbar_manager.is_zoom_active()
+              and event.button == canvas.buttond.get(Qt.MiddleButton)):
+            self.toolbar_manager.emit_home_clicked()
 
     def on_mouse_button_release(self, event):
         """ Stop moving the markers when the mouse button is released """
