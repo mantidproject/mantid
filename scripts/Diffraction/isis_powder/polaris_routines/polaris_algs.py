@@ -64,22 +64,19 @@ def get_run_details(run_number_string, inst_settings, is_vanadium_run):
 
 def save_unsplined_vanadium(vanadium_ws, output_path):
     converted_workspaces = []
-    if vanadium_ws.id() != "Workspace2D":
-        for ws_index in range(vanadium_ws.getNumberOfEntries()):
-            ws = vanadium_ws.getItem(ws_index)
-            previous_units = ws.getAxis(0).getUnit().unitID()
+    for ws_index in range(vanadium_ws.getNumberOfEntries()):
+        ws = vanadium_ws.getItem(ws_index)
+        previous_units = ws.getAxis(0).getUnit().unitID()
 
-            if previous_units != WORKSPACE_UNITS.tof:
-                ws = mantid.ConvertUnits(InputWorkspace=ws, Target=WORKSPACE_UNITS.tof)
+        if previous_units != WORKSPACE_UNITS.tof:
+            ws = mantid.ConvertUnits(InputWorkspace=ws, Target=WORKSPACE_UNITS.tof)
 
-            ws = mantid.RenameWorkspace(InputWorkspace=ws, OutputWorkspace="van_bank_{}".format(ws_index + 1))
-            converted_workspaces.append(ws)
+        ws = mantid.RenameWorkspace(InputWorkspace=ws, OutputWorkspace="van_bank_{}".format(ws_index + 1))
+        converted_workspaces.append(ws)
 
-        converted_group = mantid.GroupWorkspaces(",".join(ws.name() for ws in converted_workspaces))
-        mantid.SaveNexus(InputWorkspace=converted_group, Filename=output_path, Append=False)
-        mantid.DeleteWorkspace(converted_group)
-    else:
-        mantid.SaveNexus(InputWorkspace=vanadium_ws, Filename=output_path, Append=False)
+    converted_group = mantid.GroupWorkspaces(",".join(ws.name() for ws in converted_workspaces))
+    mantid.SaveNexus(InputWorkspace=converted_group, Filename=output_path, Append=False)
+    mantid.DeleteWorkspace(converted_group)
 
 
 def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None):

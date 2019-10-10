@@ -45,7 +45,7 @@ class FitIncidentSpectrum(PythonAlgorithm):
             doc='Output workspace containing the fit and it\'s first derivative.')
 
         self.declareProperty(
-            name='SpectrumIndex',
+            name='WorkspaceIndex',
             defaultValue=0,
             doc='Workspace index of the spectra to be fitted (Defaults to the first index.)')
 
@@ -72,7 +72,7 @@ class FitIncidentSpectrum(PythonAlgorithm):
     def _setup(self):
         self._input_ws = self.getProperty('InputWorkspace').value
         self._output_ws = self.getProperty('OutputWorkspace').valueAsStr
-        self._incident_index = self.getProperty('SpectrumIndex').value
+        self._incident_index = self.getProperty('WorkspaceIndex').value
         self._binning_for_calc = self.getProperty('BinningForCalc').value
         self._binning_for_fit = self.getProperty('BinningForFit').value
         self._fit_spectrum_with = self.getProperty('FitSpectrumWith').value
@@ -96,12 +96,13 @@ class FitIncidentSpectrum(PythonAlgorithm):
             x_fit = np.array(rebinned.readX(self._incident_index))
             y_fit = np.array(rebinned.readY(self._incident_index))
 
+        x_bin_centers = [(x[i+1]+x[i])/2.0 for i in range(x.size-1)]
         if len(x_fit) != len(y_fit):
-            x_fit = x_fit[:-1]
+            x_fit = [(x_fit[i+1]+x_fit[i])/2.0 for i in range(x_fit.size-1)]
 
         if self._fit_spectrum_with == 'CubicSpline':
             # Fit using cubic spline
-            fit, fit_prime = self.fit_cubic_spline(x_fit, y_fit, x[:-1], s=1e7)
+            fit, fit_prime = self.fit_cubic_spline(x_fit, y_fit, x_bin_centers, s=1e7)
         elif self._fit_spectrum_with == 'CubicSplineViaMantid':
             # Fit using cubic spline via Mantid
             fit, fit_prime = self.fit_cubic_spline_via_mantid_spline_smoothing(
@@ -112,7 +113,7 @@ class FitIncidentSpectrum(PythonAlgorithm):
                 MaxNumberOfBreaks=0)
         elif self._fit_spectrum_with == 'GaussConvCubicSpline':
             # Fit using Gauss conv cubic spline
-            fit, fit_prime = self.fit_cubic_spline_with_gauss_conv(x_fit, y_fit, x[:-1], sigma=0.5)
+            fit, fit_prime = self.fit_cubic_spline_with_gauss_conv(x_fit, y_fit, x_bin_centers, sigma=0.5)
 
         # Create output workspace
         unit = self._input_ws.getAxis(0).getUnit().unitID()
