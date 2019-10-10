@@ -57,7 +57,7 @@ WorkspaceIndex IndirectFitPlotView::getSelectedSpectrum() const {
 TableRowIndex IndirectFitPlotView::getSelectedSpectrumIndex() const {
   if (m_plotForm->swPlotSpectrum->currentIndex() == 0)
     return TableRowIndex{m_plotForm->spPlotSpectrum->value() -
-                            m_plotForm->spPlotSpectrum->minimum()};
+                         m_plotForm->spPlotSpectrum->minimum()};
   return TableRowIndex{m_plotForm->cbPlotSpectrum->currentIndex()};
 }
 
@@ -285,7 +285,7 @@ void IndirectFitPlotView::emitPlotSpectrumChanged(int spectrum) {
 void IndirectFitPlotView::emitPlotSpectrumChanged(const QString &spectrum) {
   bool successState{false};
   int spectrumInt = spectrum.toInt(&successState);
-  if(successState)
+  if (successState)
     emit plotSpectrumChanged(WorkspaceIndex{spectrumInt});
 }
 

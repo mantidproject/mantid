@@ -31,15 +31,15 @@ struct ParameterValue {
 
 struct ResultLocationNew {
   ResultLocationNew() = default;
-  ResultLocationNew(Mantid::API::WorkspaceGroup_sptr group, WorkspaceGroupIndex i)
+  ResultLocationNew(Mantid::API::WorkspaceGroup_sptr group,
+                    WorkspaceGroupIndex i)
       : result(group), index(i) {}
   boost::weak_ptr<Mantid::API::WorkspaceGroup> result;
   WorkspaceGroupIndex index = WorkspaceGroupIndex{0};
 };
 
 using ParameterValuesNew =
-    std::map<WorkspaceIndex,
-             std::unordered_map<std::string, ParameterValue>>;
+    std::map<WorkspaceIndex, std::unordered_map<std::string, ParameterValue>>;
 
 using ResultLocationsNew = std::map<WorkspaceIndex, ResultLocationNew>;
 
@@ -78,8 +78,7 @@ public:
 
   void mapParameterNames(
       const std::unordered_map<std::string, std::string> &parameterNameChanges,
-      const FitDataIterator &fitDataBegin,
-      const FitDataIterator &fitDataEnd);
+      const FitDataIterator &fitDataBegin, const FitDataIterator &fitDataEnd);
   void mapParameterNames(
       const std::unordered_map<std::string, std::string> &parameterNameChanges,
       IndirectFitData const *fitData);

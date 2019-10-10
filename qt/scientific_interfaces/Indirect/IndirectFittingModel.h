@@ -70,13 +70,14 @@ public:
                                const std::string &rangeDelimiter,
                                TableDatasetIndex dataIndex) const;
   virtual bool isMultiFit() const;
-  bool isPreviouslyFit(TableDatasetIndex dataIndex, WorkspaceIndex spectrum) const;
+  bool isPreviouslyFit(TableDatasetIndex dataIndex,
+                       WorkspaceIndex spectrum) const;
   virtual boost::optional<std::string> isInvalidFunction() const;
   virtual TableDatasetIndex numberOfWorkspaces() const;
   TableRowIndex getNumberOfSpectra(TableDatasetIndex index) const;
   TableRowIndex getNumberOfDomains() const;
   virtual TableRowIndex getDomainIndex(TableDatasetIndex dataIndex,
-                                          WorkspaceIndex spectrum) const;
+                                       WorkspaceIndex spectrum) const;
   std::vector<std::string> getFitParameterNames() const;
   virtual Mantid::API::MultiDomainFunction_sptr getFittingFunction() const;
 
@@ -99,8 +100,7 @@ public:
   virtual void addWorkspace(const std::string &workspaceName);
   void addWorkspace(const std::string &workspaceName,
                     const std::string &spectra);
-  void addWorkspace(const std::string &workspaceName,
-                    const Spectra &spectra);
+  void addWorkspace(const std::string &workspaceName, const Spectra &spectra);
   virtual void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
                             const Spectra &spectra);
   virtual void removeWorkspace(TableDatasetIndex index);
@@ -118,7 +118,8 @@ public:
 
   FittingMode getFittingMode() const;
   std::unordered_map<std::string, ParameterValue>
-  getParameterValues(TableDatasetIndex dataIndex, WorkspaceIndex spectrum) const;
+  getParameterValues(TableDatasetIndex dataIndex,
+                     WorkspaceIndex spectrum) const;
   std::unordered_map<std::string, ParameterValue>
   getFitParameters(TableDatasetIndex dataIndex, WorkspaceIndex spectrum) const;
   std::unordered_map<std::string, ParameterValue>

@@ -657,10 +657,12 @@ void ConvFitModel::addSampleLogs() {
   }
 }
 
-IndirectFitOutputLegacy ConvFitModel::createFitOutput(
-    WorkspaceGroup_sptr resultGroup, ITableWorkspace_sptr parameterTable,
-    WorkspaceGroup_sptr resultWorkspace, const FitDataIteratorLegacy &fitDataBegin,
-    const FitDataIteratorLegacy &fitDataEnd) const {
+IndirectFitOutputLegacy
+ConvFitModel::createFitOutput(WorkspaceGroup_sptr resultGroup,
+                              ITableWorkspace_sptr parameterTable,
+                              WorkspaceGroup_sptr resultWorkspace,
+                              const FitDataIteratorLegacy &fitDataBegin,
+                              const FitDataIteratorLegacy &fitDataEnd) const {
   auto output = IndirectFitOutputLegacy(
       resultGroup, parameterTable, resultWorkspace, fitDataBegin, fitDataEnd);
   output.mapParameterNames(m_parameterNameChanges, fitDataBegin, fitDataEnd);

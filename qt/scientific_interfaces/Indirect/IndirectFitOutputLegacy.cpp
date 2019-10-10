@@ -34,7 +34,8 @@ struct TableRowExtractor {
 
     for (auto i = 1u; i < m_chiIndex; i += 2) {
       const auto &columnName = m_columns[i];
-      parameters[columnName] = ParameterValueLegacy(row.Double(i), row.Double(i + 1));
+      parameters[columnName] =
+          ParameterValueLegacy(row.Double(i), row.Double(i + 1));
     }
     return parameters;
   }
@@ -264,7 +265,8 @@ namespace IDA {
 
 IndirectFitOutputLegacy::IndirectFitOutputLegacy(
     WorkspaceGroup_sptr resultGroup, ITableWorkspace_sptr parameterTable,
-    WorkspaceGroup_sptr resultWorkspace, const FitDataIteratorLegacy &fitDataBegin,
+    WorkspaceGroup_sptr resultWorkspace,
+    const FitDataIteratorLegacy &fitDataBegin,
     const FitDataIteratorLegacy &fitDataEnd)
     : m_resultGroup(resultGroup), m_resultWorkspace(resultWorkspace),
       m_parameters(), m_outputResultLocations() {
@@ -292,8 +294,8 @@ std::unordered_map<std::string, ParameterValueLegacy>
 IndirectFitOutputLegacy::getParameters(IndirectFitDataLegacy const *fitData,
                                        std::size_t spectrum) const {
   return getValueOr(m_parameters,
-                    std::unordered_map<std::string, ParameterValueLegacy>(), fitData,
-                    spectrum);
+                    std::unordered_map<std::string, ParameterValueLegacy>(),
+                    fitData, spectrum);
 }
 
 boost::optional<ResultLocation>
@@ -322,7 +324,8 @@ WorkspaceGroup_sptr IndirectFitOutputLegacy::getLastResultGroup() const {
 
 void IndirectFitOutputLegacy::mapParameterNames(
     const std::unordered_map<std::string, std::string> &parameterNameChanges,
-    const FitDataIteratorLegacy &fitDataBegin, const FitDataIteratorLegacy &fitDataEnd) {
+    const FitDataIteratorLegacy &fitDataBegin,
+    const FitDataIteratorLegacy &fitDataEnd) {
   for (auto it = fitDataBegin; it < fitDataEnd; ++it)
     mapParameterNames(parameterNameChanges, it->get());
 }
@@ -345,11 +348,11 @@ void IndirectFitOutputLegacy::mapParameterNames(
   parameters = mapKeys(parameters, parameterNameChanges);
 }
 
-void IndirectFitOutputLegacy::addOutput(WorkspaceGroup_sptr resultGroup,
-                                        ITableWorkspace_sptr parameterTable,
-                                        WorkspaceGroup_sptr resultWorkspace,
-                                        const FitDataIteratorLegacy &fitDataBegin,
-                                        const FitDataIteratorLegacy &fitDataEnd) {
+void IndirectFitOutputLegacy::addOutput(
+    WorkspaceGroup_sptr resultGroup, ITableWorkspace_sptr parameterTable,
+    WorkspaceGroup_sptr resultWorkspace,
+    const FitDataIteratorLegacy &fitDataBegin,
+    const FitDataIteratorLegacy &fitDataEnd) {
   updateParameters(parameterTable, fitDataBegin, fitDataEnd);
   updateFitResults(resultGroup, fitDataBegin, fitDataEnd);
   renameResult(resultWorkspace, fitDataBegin, fitDataEnd);
@@ -386,7 +389,8 @@ void IndirectFitOutputLegacy::updateFitResults(
 }
 
 void IndirectFitOutputLegacy::updateParameters(
-    ITableWorkspace_sptr parameterTable, const FitDataIteratorLegacy &fitDataBegin,
+    ITableWorkspace_sptr parameterTable,
+    const FitDataIteratorLegacy &fitDataBegin,
     const FitDataIteratorLegacy &fitDataEnd) {
   extractParametersFromTable(parameterTable, fitDataBegin, fitDataEnd,
                              m_parameters);

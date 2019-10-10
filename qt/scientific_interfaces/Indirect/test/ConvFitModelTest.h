@@ -202,7 +202,8 @@ public:
 
 private:
   template <typename Workspace, typename... Workspaces>
-  void addWorkspacesToModel(SpectraLegacy const &spectra, Workspace const &workspace,
+  void addWorkspacesToModel(SpectraLegacy const &spectra,
+                            Workspace const &workspace,
                             Workspaces const &... workspaces) {
     m_model->addWorkspace(workspace, spectra);
     addWorkspacesToModel(spectra, workspaces...);

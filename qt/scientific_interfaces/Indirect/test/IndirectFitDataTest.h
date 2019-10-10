@@ -25,7 +25,8 @@ namespace {
 std::unique_ptr<IndirectFitDataLegacy>
 getIndirectFitData(int const &numberOfSpectra) {
   auto const workspace = createWorkspace(numberOfSpectra);
-  SpectraLegacy const spec = std::make_pair(0u, workspace->getNumberHistograms() - 1);
+  SpectraLegacy const spec =
+      std::make_pair(0u, workspace->getNumberHistograms() - 1);
   IndirectFitDataLegacy data(workspace, spec);
   return std::make_unique<IndirectFitDataLegacy>(data);
 }

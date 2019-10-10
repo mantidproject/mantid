@@ -89,7 +89,8 @@ protected slots:
                           WorkspaceIndex spectrum);
   void tableEndXChanged(double endX, TableDatasetIndex dataIndex,
                         WorkspaceIndex spectrum);
-  void tableExcludeChanged(const std::string &exclude, TableDatasetIndex dataIndex,
+  void tableExcludeChanged(const std::string &exclude,
+                           TableDatasetIndex dataIndex,
                            WorkspaceIndex spectrum);
   void startXChanged(double startX);
   void endXChanged(double endX);

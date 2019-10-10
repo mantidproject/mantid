@@ -35,8 +35,7 @@ struct TableRowExtractor {
 
     for (auto i = 1u; i < m_chiIndex; i += 2) {
       const auto &columnName = m_columns[i];
-      parameters[columnName] =
-          ParameterValue(row.Double(i), row.Double(i + 1));
+      parameters[columnName] = ParameterValue(row.Double(i), row.Double(i + 1));
     }
     return parameters;
   }
@@ -227,7 +226,7 @@ typename Map::mapped_type &findOrCreateDefaultInMap(Map &map, const Key &key) {
 }
 
 TableRowIndex numberOfSpectraIn(const FitDataIterator &fitDataBegin,
-                                   const FitDataIterator &fitDataEnd) {
+                                const FitDataIterator &fitDataEnd) {
   TableRowIndex spectra{0};
   for (auto it = fitDataBegin; it < fitDataEnd; ++it)
     spectra += (*it)->numberOfSpectra();
@@ -271,8 +270,8 @@ std::unordered_map<std::string, ParameterValue>
 IndirectFitOutput::getParameters(IndirectFitData const *fitData,
                                  WorkspaceIndex spectrum) const {
   return getValueOr(m_parameters,
-                    std::unordered_map<std::string, ParameterValue>(),
-                    fitData, spectrum);
+                    std::unordered_map<std::string, ParameterValue>(), fitData,
+                    spectrum);
 }
 
 boost::optional<ResultLocationNew>
@@ -300,8 +299,7 @@ WorkspaceGroup_sptr IndirectFitOutput::getLastResultGroup() const {
 
 void IndirectFitOutput::mapParameterNames(
     const std::unordered_map<std::string, std::string> &parameterNameChanges,
-    const FitDataIterator &fitDataBegin,
-    const FitDataIterator &fitDataEnd) {
+    const FitDataIterator &fitDataBegin, const FitDataIterator &fitDataEnd) {
   for (auto it = fitDataBegin; it < fitDataEnd; ++it)
     mapParameterNames(parameterNameChanges, it->get());
 }
@@ -375,7 +373,8 @@ void IndirectFitOutput::updateParameters(ITableWorkspace_sptr parameterTable,
 void IndirectFitOutput::updateFitResultsFromUnstructured(
     WorkspaceGroup_sptr resultGroup, const FitDataIterator &fitDataBegin,
     const FitDataIterator &fitDataEnd) {
-  std::unordered_map<MatrixWorkspace *, std::map<WorkspaceIndex, WorkspaceGroupIndex>>
+  std::unordered_map<MatrixWorkspace *,
+                     std::map<WorkspaceIndex, WorkspaceGroupIndex>>
       resultIndices;
   WorkspaceGroupIndex index{0};
   for (auto fitData = fitDataBegin; fitData < fitDataEnd; ++fitData) {

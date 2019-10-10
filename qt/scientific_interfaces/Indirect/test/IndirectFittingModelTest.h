@@ -556,7 +556,8 @@ public:
   test_that_setSpectra_will_set_the_spectra_to_the_provided_inputSpectra() {
     auto model = createModelWithSingleWorkspace("WorkspaceName", 10);
 
-    SpectraLegacy const inputSpectra = DiscontinuousSpectra<std::size_t>("2,4,6-8");
+    SpectraLegacy const inputSpectra =
+        DiscontinuousSpectra<std::size_t>("2,4,6-8");
     model->setSpectra(inputSpectra, 0);
     SpectraLegacy const spectra = model->getSpectra(0);
 

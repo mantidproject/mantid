@@ -218,10 +218,10 @@ IndirectDataTablePresenter::getSpectra(TableRowIndex start,
     WorkspaceIndex maximum = minimum;
     start++;
     while (start < end &&
-           getWorkspaceIndex(start) == maximum + WorkspaceIndex{1}){
+           getWorkspaceIndex(start) == maximum + WorkspaceIndex{1}) {
       ++maximum;
       start++;
-           }
+    }
     spectraPairs.emplace_back(minimum, maximum);
   }
   return pairsToSpectra(spectraPairs);
@@ -255,8 +255,7 @@ void IndirectDataTablePresenter::setStartX(double startX,
   }
 }
 
-void IndirectDataTablePresenter::setStartX(double startX,
-                                           TableRowIndex index) {
+void IndirectDataTablePresenter::setStartX(double startX, TableRowIndex index) {
   MantidQt::API::SignalBlocker blocker(m_dataTable);
   m_dataTable->item(index.value, startXColumn())->setText(makeNumber(startX));
 }
@@ -265,13 +264,15 @@ void IndirectDataTablePresenter::setStartX(double startX) {
   setColumnValues(startXColumn(), makeNumber(startX));
 }
 
-void IndirectDataTablePresenter::setEndX(double endX, TableDatasetIndex dataIndex,
+void IndirectDataTablePresenter::setEndX(double endX,
+                                         TableDatasetIndex dataIndex,
                                          WorkspaceIndex spectrumIndex) {
   if (auto const row = getRowIndex(dataIndex, spectrumIndex))
     setEndX(endX, *row);
 }
 
-void IndirectDataTablePresenter::setEndX(double endX, TableDatasetIndex dataIndex) {
+void IndirectDataTablePresenter::setEndX(double endX,
+                                         TableDatasetIndex dataIndex) {
   if (auto const spectra = getSpectra(dataIndex)) {
     for (auto const spectrumIndex : *spectra) {
       if (auto const row = getRowIndex(dataIndex, spectrumIndex))
@@ -389,13 +390,15 @@ void IndirectDataTablePresenter::removeSelectedData() {
   auto &modifiedIndices = modifiedIndicesAndCount.first;
 
   for (auto i = 0u; i < modifiedIndices.size(); ++i)
-    shiftDataPositions(-modifiedCount[i], modifiedIndices[i] + TableDatasetIndex{1},
+    shiftDataPositions(-modifiedCount[i],
+                       modifiedIndices[i] + TableDatasetIndex{1},
                        m_dataPositions.size());
 
   if (!modifiedIndices.empty()) {
     updateFromRemovedIndices(modifiedIndices);
     updateDataPositionsInCells(modifiedIndices.back() > TableDatasetIndex{0}
-                                   ? modifiedIndices.back() - TableDatasetIndex{1}
+                                   ? modifiedIndices.back() -
+                                         TableDatasetIndex{1}
                                    : TableDatasetIndex{0},
                                m_dataPositions.size());
   }
@@ -616,8 +619,8 @@ void IndirectDataTablePresenter::shiftDataPositions(TableRowIndex shift,
     m_dataPositions[i] += shift;
 }
 
-void IndirectDataTablePresenter::updateDataPositionsInCells(TableDatasetIndex from,
-                                                            TableDatasetIndex to) {
+void IndirectDataTablePresenter::updateDataPositionsInCells(
+    TableDatasetIndex from, TableDatasetIndex to) {
   for (auto i = from; i < to; ++i) {
     const auto nextPosition = getNextPosition(i);
     for (auto row = m_dataPositions[i]; row < nextPosition; ++row)

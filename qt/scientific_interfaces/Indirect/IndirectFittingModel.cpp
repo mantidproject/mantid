@@ -501,7 +501,8 @@ void IndirectFittingModel::setStartX(double startX, TableDatasetIndex dataIndex,
   m_fittingData[dataIndex]->setStartX(startX, spectrum);
 }
 
-void IndirectFittingModel::setStartX(double startX, TableDatasetIndex dataIndex) {
+void IndirectFittingModel::setStartX(double startX,
+                                     TableDatasetIndex dataIndex) {
   if (m_fittingData.empty())
     return;
   m_fittingData[dataIndex]->setStartX(startX);
@@ -532,8 +533,8 @@ void IndirectFittingModel::addWorkspace(const std::string &workspaceName) {
   auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       workspaceName);
   addWorkspace(
-      ws, Spectra(
-              WorkspaceIndex{0},
+      ws,
+      Spectra(WorkspaceIndex{0},
               WorkspaceIndex{static_cast<int>(ws->getNumberHistograms()) - 1}));
 }
 
@@ -584,11 +585,13 @@ void IndirectFittingModel::removeWorkspace(TableDatasetIndex index) {
   removeWorkspaceFromFittingData(index);
 
   if (index > m_fittingData.zero() && m_fittingData.size() > index) {
-    const auto previousWS = m_fittingData[index - TableDatasetIndex{1}]->workspace();
+    const auto previousWS =
+        m_fittingData[index - TableDatasetIndex{1}]->workspace();
     const auto subsequentWS = m_fittingData[index]->workspace();
 
     if (equivalentWorkspaces(previousWS, subsequentWS)) {
-      m_fittingData[index - TableDatasetIndex{1}]->combine(*m_fittingData[index]);
+      m_fittingData[index - TableDatasetIndex{1}]->combine(
+          *m_fittingData[index]);
       m_fittingData.remove(index);
     }
   }
@@ -616,9 +619,8 @@ void IndirectFittingModel::setFitFunction(MultiDomainFunction_sptr function) {
   m_previousModelSelected = isPreviousModelSelected();
 }
 
-void IndirectFittingModel::setDefaultParameterValue(const std::string &name,
-                                                    double value,
-                                                    TableDatasetIndex dataIndex) {
+void IndirectFittingModel::setDefaultParameterValue(
+    const std::string &name, double value, TableDatasetIndex dataIndex) {
   if (m_defaultParameters.size() > dataIndex)
     m_defaultParameters[dataIndex][name] = ParameterValue(value);
 }
@@ -696,11 +698,12 @@ IndirectFitOutput IndirectFittingModel::createFitOutput(
                            fitData, spectrum);
 }
 
-void IndirectFittingModel::addOutput(
-    IndirectFitOutput *fitOutput, WorkspaceGroup_sptr resultGroup,
-    ITableWorkspace_sptr parameterTable, WorkspaceGroup_sptr resultWorkspace,
-    const FitDataIterator &fitDataBegin,
-    const FitDataIterator &fitDataEnd) const {
+void IndirectFittingModel::addOutput(IndirectFitOutput *fitOutput,
+                                     WorkspaceGroup_sptr resultGroup,
+                                     ITableWorkspace_sptr parameterTable,
+                                     WorkspaceGroup_sptr resultWorkspace,
+                                     const FitDataIterator &fitDataBegin,
+                                     const FitDataIterator &fitDataEnd) const {
   fitOutput->addOutput(resultGroup, parameterTable, resultWorkspace,
                        fitDataBegin, fitDataEnd);
 }
@@ -755,7 +758,8 @@ IndirectFittingModel::mapDefaultParameterNames() const {
 }
 
 std::unordered_map<std::string, ParameterValue>
-IndirectFittingModel::createDefaultParameters(TableDatasetIndex /*unused*/) const {
+IndirectFittingModel::createDefaultParameters(
+    TableDatasetIndex /*unused*/) const {
   return std::unordered_map<std::string, ParameterValue>();
 }
 

@@ -4,10 +4,10 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-// 
+//
 // This file contains the implimentation of type safe indices for use
 // in the indirect interface code.
-// TODO merge this to use the generic index framework from IndexType.h 
+// TODO merge this to use the generic index framework from IndexType.h
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_INDEXTYPE_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_INDEXTYPE_H_
 
@@ -20,9 +20,9 @@ namespace CustomInterfaces {
 namespace IDA {
 
 /** A struct to impliment strongly typed integers, without implicit conversion.
- * Currently operations and comparitors are only defined between instances of the
- * same type.
-*/
+ * Currently operations and comparitors are only defined between instances of
+ * the same type.
+ */
 template <int Class> struct IndexType {
   using IntImplementationType = int;
   IntImplementationType value = 0;
@@ -61,12 +61,12 @@ using TableRowIndex = IndexType<0>;
 using WorkspaceIndex = IndexType<1>;
 // Used to index worspaces in workspace groups
 using WorkspaceGroupIndex = IndexType<2>;
-// Used to index 
+// Used to index
 using TableDatasetIndex = IndexType<3>;
 
 /** A class which wraps a vector so that you supply not only the value
  * type but also the expected index type.
-*/
+ */
 template <class CollectionIndexType, class CollectionValueType>
 class IndexCollectionType {
 public:

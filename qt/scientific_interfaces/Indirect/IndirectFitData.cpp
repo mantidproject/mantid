@@ -363,10 +363,12 @@ void IndirectFitData::validateSpectra(Spectra const &spectra) {
   }
   if (!notInRange.empty()) {
     if (notInRange.size() > 5)
-      throw std::runtime_error("Spectra out of range: " +
-                               join(std::vector<int>(notInRange.begin(), notInRange.begin()+ 5), ",") + "...");
-    throw std::runtime_error("Spectra out of range: " +
-                             join(notInRange, ","));
+      throw std::runtime_error(
+          "Spectra out of range: " +
+          join(std::vector<int>(notInRange.begin(), notInRange.begin() + 5),
+               ",") +
+          "...");
+    throw std::runtime_error("Spectra out of range: " + join(notInRange, ","));
   }
 }
 

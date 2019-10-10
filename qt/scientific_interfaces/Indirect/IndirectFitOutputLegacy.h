@@ -80,7 +80,8 @@ public:
 
   void mapParameterNames(
       const std::unordered_map<std::string, std::string> &parameterNameChanges,
-      const FitDataIteratorLegacy &fitDataBegin, const FitDataIteratorLegacy &fitDataEnd);
+      const FitDataIteratorLegacy &fitDataBegin,
+      const FitDataIteratorLegacy &fitDataEnd);
   void mapParameterNames(
       const std::unordered_map<std::string, std::string> &parameterNameChanges,
       IndirectFitDataLegacy const *fitData);

@@ -81,7 +81,8 @@ signals:
   void startXChanged(double);
   void endXChanged(double, TableDatasetIndex, WorkspaceIndex);
   void endXChanged(double);
-  void excludeRegionChanged(const std::string &, TableDatasetIndex, WorkspaceIndex);
+  void excludeRegionChanged(const std::string &, TableDatasetIndex,
+                            WorkspaceIndex);
   void multipleDataViewSelected();
   void singleDataViewSelected();
   void requestedAddWorkspaceDialog();

@@ -13,13 +13,13 @@
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidKernel/PropertyWithValue.h"
 
-#include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
-#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/ButtonEditorFactory.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/CompositeEditorFactory.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleDialogEditor.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
 
 #include <QMessageBox>
 #include <QSettings>

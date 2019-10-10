@@ -51,8 +51,8 @@ signals:
                      WorkspaceIndex /*_t3*/);
   void endXChanged(double /*_t1*/, TableDatasetIndex /*_t2*/,
                    WorkspaceIndex /*_t3*/);
-  void excludeRegionChanged(const std::string & /*_t1*/, TableDatasetIndex /*_t2*/,
-                            WorkspaceIndex /*_t3*/);
+  void excludeRegionChanged(const std::string & /*_t1*/,
+                            TableDatasetIndex /*_t2*/, WorkspaceIndex /*_t3*/);
 
 public slots:
   void addData(TableDatasetIndex index);
@@ -74,12 +74,12 @@ protected:
   TableRowIndex getFirstRow(TableDatasetIndex dataIndex) const;
   std::string getString(TableRowIndex row, int column) const;
 
-  virtual void addTableEntry(TableDatasetIndex dataIndex, WorkspaceIndex spectrum,
-                             TableRowIndex row);
+  virtual void addTableEntry(TableDatasetIndex dataIndex,
+                             WorkspaceIndex spectrum, TableRowIndex row);
   void setCell(std::unique_ptr<QTableWidgetItem> cell, TableRowIndex row,
                int column);
-  virtual void updateTableEntry(TableDatasetIndex dataIndex, WorkspaceIndex spectrum,
-                                TableRowIndex row);
+  virtual void updateTableEntry(TableDatasetIndex dataIndex,
+                                WorkspaceIndex spectrum, TableRowIndex row);
   void setCellText(const QString &text, TableRowIndex row, int column);
 
 private:
@@ -98,7 +98,7 @@ private:
   TableDatasetIndex getDataIndex(TableRowIndex row) const;
   boost::optional<Spectra> getSpectra(TableDatasetIndex dataIndex) const;
   boost::optional<Spectra> getSpectra(TableRowIndex start,
-                                         TableRowIndex end) const;
+                                      TableRowIndex end) const;
   boost::optional<TableRowIndex>
   getRowIndex(TableDatasetIndex dataIndex, WorkspaceIndex spectrumIndex) const;
 

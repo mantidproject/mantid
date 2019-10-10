@@ -215,7 +215,8 @@ TableRowIndex IndirectFitPlotModel::getActiveDomainIndex() const {
   return index;
 }
 
-std::string IndirectFitPlotModel::getFitDataName(TableDatasetIndex index) const {
+std::string
+IndirectFitPlotModel::getFitDataName(TableDatasetIndex index) const {
   if (m_fittingModel->getWorkspace(index))
     return m_fittingModel->createDisplayName("%1% (%2%)", "-", index);
   return "";

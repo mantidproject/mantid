@@ -53,7 +53,8 @@ IndirectFitDataPresenter::IndirectFitDataPresenter(
           SIGNAL(endXChanged(double)));
 
   connect(m_tablePresenter.get(),
-          SIGNAL(startXChanged(double, TableDatasetIndex, WorkspaceIndex)), this,
+          SIGNAL(startXChanged(double, TableDatasetIndex, WorkspaceIndex)),
+          this,
           SIGNAL(startXChanged(double, TableDatasetIndex, WorkspaceIndex)));
   connect(m_tablePresenter.get(),
           SIGNAL(endXChanged(double, TableDatasetIndex, WorkspaceIndex)), this,
@@ -121,7 +122,8 @@ void IndirectFitDataPresenter::setMultiInputResolutionWSSuffixes(
     IAddWorkspaceDialog *dialog) {
   UNUSED_ARG(dialog);
 }
-void IndirectFitDataPresenter::setStartX(double startX, TableDatasetIndex dataIndex,
+void IndirectFitDataPresenter::setStartX(double startX,
+                                         TableDatasetIndex dataIndex,
                                          WorkspaceIndex spectrumIndex) {
   m_tablePresenter->setStartX(startX, dataIndex, spectrumIndex);
   m_view->setStartX(startX);
@@ -139,7 +141,8 @@ void IndirectFitDataPresenter::setEndX(double endX, TableDatasetIndex dataIndex,
   m_view->setEndX(endX);
 }
 
-void IndirectFitDataPresenter::setEndX(double endX, TableDatasetIndex dataIndex) {
+void IndirectFitDataPresenter::setEndX(double endX,
+                                       TableDatasetIndex dataIndex) {
   m_tablePresenter->setEndX(endX, dataIndex);
   m_view->setEndX(endX);
 }
@@ -162,7 +165,8 @@ void IndirectFitDataPresenter::setModelFromMultipleData() {
   emit dataChanged();
 }
 
-void IndirectFitDataPresenter::updateSpectraInTable(TableDatasetIndex dataIndex) {
+void IndirectFitDataPresenter::updateSpectraInTable(
+    TableDatasetIndex dataIndex) {
   if (m_view->isMultipleDataTabSelected())
     m_tablePresenter->updateData(dataIndex);
 }
@@ -248,7 +252,8 @@ void IndirectFitDataPresenter::closeDialog() {
 void IndirectFitDataPresenter::addData(IAddWorkspaceDialog const *dialog) {
   try {
     addDataToModel(dialog);
-    m_tablePresenter->addData(m_model->numberOfWorkspaces() - TableDatasetIndex{1});
+    m_tablePresenter->addData(m_model->numberOfWorkspaces() -
+                              TableDatasetIndex{1});
     emit dataAdded();
     emit dataChanged();
   } catch (const std::runtime_error &ex) {

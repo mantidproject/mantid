@@ -167,7 +167,8 @@ struct CombineSpectra : boost::static_visitor<SpectraLegacy> {
     }
   }
 
-  SpectraLegacy operator()(const SpectraLegacy &spectra1, const SpectraLegacy &spectra2) const {
+  SpectraLegacy operator()(const SpectraLegacy &spectra1,
+                           const SpectraLegacy &spectra2) const {
     return DiscontinuousSpectra<std::size_t>(createSpectraString(
         boost::apply_visitor(SpectraToString(), spectra1) + "," +
         boost::apply_visitor(SpectraToString(), spectra2)));
@@ -312,7 +313,9 @@ Mantid::API::MatrixWorkspace_sptr IndirectFitDataLegacy::workspace() const {
   return m_workspace;
 }
 
-const SpectraLegacy &IndirectFitDataLegacy::spectra() const { return m_spectra; }
+const SpectraLegacy &IndirectFitDataLegacy::spectra() const {
+  return m_spectra;
+}
 
 std::size_t IndirectFitDataLegacy::getSpectrum(std::size_t index) const {
   return boost::apply_visitor(GetSpectrum(index), m_spectra);
@@ -378,7 +381,8 @@ void IndirectFitDataLegacy::validateSpectra(SpectraLegacy const &spectra) {
     if (notInRange.size() > 5)
       throw std::runtime_error("SpectraLegacy out of range: " +
                                join(subvector(notInRange, 0, 5), ",") + "...");
-    throw std::runtime_error("SpectraLegacy out of range: " + join(notInRange, ","));
+    throw std::runtime_error("SpectraLegacy out of range: " +
+                             join(notInRange, ","));
   }
 }
 
