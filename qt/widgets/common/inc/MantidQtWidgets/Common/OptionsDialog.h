@@ -11,7 +11,9 @@
 
 #include "DllOption.h"
 #include "ui_OptionsDialog.h"
+#include <map>
 #include <QDialog>
+#include <QVariant>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -25,18 +27,16 @@ class EXPORT_OPT_MANTIDQT_COMMON OptionsDialog : public QDialog,
 public:
   OptionsDialog(QWidget *parent);
   ~OptionsDialog() override;
+  void getOptions(std::map<QString, QVariant> &options) override;
+  void setOptions(std::map<QString, QVariant> &options) override;
   void show() override;
 
 protected:
   void initLayout();
   void initBindings();
-protected slots:
-  void saveOptions();
-  void loadOptions();
 
 private:
   Ui::OptionsDialog m_ui;
-  OptionsDialogPresenter *m_presenter;
   // maps option names to widget names
   std::map<QString, QString> m_bindings;
 

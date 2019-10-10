@@ -9,13 +9,12 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+
 /** Constructor */
-OptionsDialog::OptionsDialog(QWidget *parent, OptionsDialogPresenter *presenter)
-    : m_presenter(presenter) {
+OptionsDialog::OptionsDialog(QWidget *parent) {
   Q_UNUSED(parent);
   initLayout();
   initBindings();
-  loadOptions();
 }
 
 /** Destructor */
@@ -42,13 +41,11 @@ void OptionsDialog::initBindings() {
   }
 }
 
-/** This slot saves the currently configured options to the presenter */
-void OptionsDialog::saveOptions() {
-  std::map<QString, QVariant> options = m_presenter->options();
-
+/** This sets the ui to match the presenter's options */
+void OptionsDialog::getOptions(std::map<QString, QVariant> & options) {
   // Iterate through all our bound widgets, pushing their value into the options
   // map
-  for (auto &binding : m_bindings) {
+  for (const auto &binding : m_bindings) {
     QString widgetName = binding.second;
     if (widgetName.isEmpty())
       continue;
@@ -65,15 +62,10 @@ void OptionsDialog::saveOptions() {
       continue;
     }
   }
-
-  // Update the presenter's options
-  m_presenter->setOptions(options);
 }
 
-/** This slot sets the ui to match the presenter's options */
-void OptionsDialog::loadOptions() {
-  std::map<QString, QVariant> options = m_presenter->options();
-
+/** This saves the currently configured options to the presenter */
+void OptionsDialog::setOptions(std::map<QString, QVariant> &options) {
   // Set the values from the options
   for (auto &option : options) {
     QString widgetName = m_bindings[option.first];

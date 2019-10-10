@@ -8,14 +8,20 @@
 #define MANTID_MANTIDWIDGETS_IOPTIONSDIALOG_H
 
 #include "DllOption.h"
+#include <map>
+#include <QVariant>
 
 namespace MantidQt {
 namespace MantidWidgets {
+
 class EXPORT_OPT_MANTIDQT_COMMON IOptionsDialog {
 public:
   virtual ~IOptionsDialog() = default;
+  virtual void getOptions(std::map<QString, QVariant> &options) = 0;
+  virtual void setOptions(std::map<QString, QVariant> &options) = 0;
   virtual void show() = 0;
 };
+
 } // namespace MantidWidgets
 } // namespace MantidQt
 
