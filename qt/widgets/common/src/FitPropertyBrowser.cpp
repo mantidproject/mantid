@@ -44,6 +44,7 @@
 #include <QClipboard>
 #include <QGridLayout>
 #include <QInputDialog>
+#include <QListWidget>
 #include <QMenu>
 #include <QMessageBox>
 #include <QPushButton>
@@ -494,6 +495,13 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   layout->addWidget(m_browser);
   m_browser->setObjectName("tree_browser");
 
+  m_workspaceLabel = new QLabel("Workspaces");
+  layout->addWidget(m_workspaceLabel);
+  m_wsListWidget = new QListWidget();
+  layout->addWidget(m_wsListWidget);
+  m_workspaceLabel->hide();
+  m_wsListWidget->hide();
+
   setWidget(w);
 
   m_browser->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -503,6 +511,9 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
           SLOT(currentItemChanged(QtBrowserItem *)));
   connect(this, SIGNAL(multifitFinished()), this,
           SLOT(processMultiBGResults()));
+
+  connect(m_wsListWidget, SIGNAL(itemDoubleClicked(QListWidgetItem *)), this,
+          SLOT(workspaceDoubleClicked(QListWidgetItem *)));
 
   createCompositeFunction();
 
@@ -526,6 +537,37 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   m_changeSlotsEnabled = true;
 
   populateFunctionNames();
+}
+
+// TODO documentation
+void FitPropertyBrowser::addFitResultWorkspacesToTableWidget() {
+  m_workspaceLabel->show();
+  m_wsListWidget->show();
+
+  auto name = outputName();
+  auto normName = name + "_NormalisedCovarianceMatrix";
+  if (AnalysisDataService::Instance().doesExist(normName)) {
+    new QListWidgetItem(QString::fromStdString(normName), m_wsListWidget);
+  }
+  auto paramName = name + "_Parameters";
+  if (AnalysisDataService::Instance().doesExist(paramName)) {
+    new QListWidgetItem(QString::fromStdString(paramName), m_wsListWidget);
+  }
+  auto wsName = name + "_Workspace";
+  if (AnalysisDataService::Instance().doesExist(name + "_Workspace")) {
+    new QListWidgetItem(QString::fromStdString(wsName), m_wsListWidget);
+  }
+
+  auto noOfItems = m_wsListWidget->count();
+  auto height = m_wsListWidget->sizeHintForRow(0) * (noOfItems + 1) +
+                2 * m_wsListWidget->frameWidth();
+  m_wsListWidget->setFixedHeight(height);
+}
+
+// TODO documentation
+void FitPropertyBrowser::workspaceDoubleClicked(QListWidgetItem *item) {
+  auto wsName = item->text();
+  emit workspaceClicked(wsName);
 }
 
 /**
@@ -1854,6 +1896,13 @@ void FitPropertyBrowser::postDeleteHandle(const std::string &wsName) {
   }
 
   m_enumManager->blockSignals(initialSignalsBlocked);
+
+  for (auto i = 0; i < m_wsListWidget->count(); ++i) {
+    auto item = m_wsListWidget->item(i);
+    if (item->text().toStdString() == wsName) {
+      m_wsListWidget->takeItem(m_wsListWidget->row(item));
+    }
+  }
 }
 
 /** Check if the workspace can be used in the fit. The accepted types are

@@ -15,6 +15,8 @@ from mantid import logger
 from mantid.api import AlgorithmManager, AnalysisDataService, ITableWorkspace
 from mantidqt.utils.qt import import_qt
 from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
+from mantidqt.widgets.workspacedisplay.matrix.presenter import MatrixWorkspaceDisplay
+from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
 
 from .interactive_tool import FitInteractiveTool
 
@@ -62,6 +64,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.functionChanged.connect(self.function_changed_slot, Qt.QueuedConnection)
         # Update whether data needs to be normalised when a button on the Fit menu is clicked
         self.getFitMenu().aboutToShow.connect(self._set_normalise_data_from_workspace_artist)
+        self.workspaceClicked.connect(self.display_workspace)
 
     def _add_spectra(self, spectra):
         """
@@ -363,6 +366,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         else:
             plot([ws], wksp_indices=[1], fig=self.canvas.figure, overplot=True)
 
+        self.addFitResultWorkspacesToTableWidget()
         # Add properties back to the lines
         new_lines = self.get_lines()
         for new_line, old_line in zip(new_lines, original_lines):
@@ -481,3 +485,14 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
                 self.setPeakHeightOf(prefix, h)
                 self.setPeakFwhmOf(prefix, w)
         self.update_guess()
+
+    @Slot(str)
+    def display_workspace(self, name):
+        if AnalysisDataService.doesExist(name):
+            ws = AnalysisDataService.retrieve(name)
+            if isinstance(ws, MatrixWorkspace):
+                presenter = MatrixWorkspaceDisplay(ws)
+                presenter.show_view()
+            elif isinstance(ws, ITableWorkspace):
+                presenter = TableWorkspaceDisplay(ws)
+                presenter.show_view()
