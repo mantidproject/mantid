@@ -13,7 +13,6 @@ from qtpy.QtCore import Qt, Signal, Slot
 
 from mantid import logger
 from mantid.api import AlgorithmManager, AnalysisDataService, ITableWorkspace
-from mantid.simpleapi import mtd
 from mantidqt.utils.qt import import_qt
 from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
 
@@ -224,7 +223,8 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         """
 
         if self.fit_result_ws_name:
-            self.get_axes().remove_workspace_artists(mtd[self.fit_result_ws_name])
+            ws = AnalysisDataService.retrieve(self.fit_result_ws_name)
+            self.get_axes().remove_workspace_artists(ws)
         self.update_legend()
 
     def get_lines(self):
@@ -350,7 +350,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         axes = self.get_axes()
         props = LegendProperties.from_legend(axes.legend_)
 
-        ws = mtd[name]
+        ws = AnalysisDataService.retrieve(name)
 
         # Keep local copy of the original lines
         original_lines = self.get_lines()
