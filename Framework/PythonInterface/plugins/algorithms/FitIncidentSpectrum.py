@@ -96,10 +96,9 @@ class FitIncidentSpectrum(PythonAlgorithm):
             x_fit = np.array(rebinned.readX(self._incident_index))
             y_fit = np.array(rebinned.readY(self._incident_index))
 
-        x_bin_centers = [(x[i+1]+x[i])/2.0 for i in range(x.size-1)]
+        x_bin_centers = 0.5*(x[:-1] + x[1:])
         if len(x_fit) != len(y_fit):
-            x_fit = [(x_fit[i+1]+x_fit[i])/2.0 for i in range(x_fit.size-1)]
-
+            x_fit = 0.5*(x_fit[:-1] + x_fit[1:])
         if self._fit_spectrum_with == 'CubicSpline':
             # Fit using cubic spline
             fit, fit_prime = self.fit_cubic_spline(x_fit, y_fit, x_bin_centers, s=1e7)
@@ -114,20 +113,19 @@ class FitIncidentSpectrum(PythonAlgorithm):
         elif self._fit_spectrum_with == 'GaussConvCubicSpline':
             # Fit using Gauss conv cubic spline
             fit, fit_prime = self.fit_cubic_spline_with_gauss_conv(x_fit, y_fit, x_bin_centers, sigma=0.5)
-
         # Create output workspace
         unit = self._input_ws.getAxis(0).getUnit().unitID()
         output_workspace = CreateWorkspace(
             DataX=x,
             DataY=np.append(fit, fit_prime),
-            UnitX=unit,
+            #UnitX=unit,
             NSpec=2,
             Distribution=False,
-            ParentWorkspace=self._input_ws,
+            #ParentWorkspace=self._input_ws,
             StoreInADS=False)
         self.setProperty("OutputWorkspace", output_workspace)
 
-    def fit_cubic_spline_with_gauss_conv(self, x_fit, y_fit, x, n_gouss=39, sigma=3):
+    def fit_cubic_spline_with_gauss_conv(self, x_fit, y_fit, x, n_gouss=39, sigma=3.0):
         # Fit with Cubic Spline using a Gaussian Convolution to get weights
         def moving_average(y, n=n_gouss, sig=sigma):
             b = signal.gaussian(n, sig)
@@ -138,7 +136,6 @@ class FitIncidentSpectrum(PythonAlgorithm):
         avg, var = moving_average(y_fit)
         spline_fit = interpolate.UnivariateSpline(x_fit, y_fit, w=1. / np.sqrt(var))
         fit = spline_fit(x)
-
         if self._scipy_not_old:
             spline_fit_prime = spline_fit.derivative()
             fit_prime = spline_fit_prime(x)
