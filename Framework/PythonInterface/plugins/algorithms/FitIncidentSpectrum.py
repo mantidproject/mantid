@@ -118,10 +118,10 @@ class FitIncidentSpectrum(PythonAlgorithm):
         output_workspace = CreateWorkspace(
             DataX=x,
             DataY=np.append(fit, fit_prime),
-            #UnitX=unit,
+            UnitX=unit,
             NSpec=2,
             Distribution=False,
-            #ParentWorkspace=self._input_ws,
+            ParentWorkspace=self._input_ws,
             StoreInADS=False)
         self.setProperty("OutputWorkspace", output_workspace)
 
