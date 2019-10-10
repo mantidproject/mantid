@@ -190,7 +190,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
                 self.generate_plot_script_clipboard)
             self.toolbar.sig_generate_plot_script_file_triggered.connect(
                 self.generate_plot_script_file)
-            self.toolbar.home_clicked.connect(self.set_figure_zoom_to_display_all)
+            self.toolbar.sig_home_clicked.connect(self.set_figure_zoom_to_display_all)
             self.toolbar.setFloatable(False)
             tbs_height = self.toolbar.sizeHint().height()
         else:

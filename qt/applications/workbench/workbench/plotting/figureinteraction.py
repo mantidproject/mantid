@@ -97,6 +97,7 @@ class FigureInteraction(object):
     # ------------------------ Handlers --------------------
     def on_scroll(self, event):
         """Respond to scroll events: zoom in/out"""
+        self.canvas.toolbar.push_current()
         if not getattr(event, 'inaxes', None):
             return
         zoom_factor = 1.05 + abs(event.step)/6
@@ -141,7 +142,7 @@ class FigureInteraction(object):
                 self._edit_marker(marker_selected[0])
         elif (self.toolbar_manager.is_zoom_active()
               and event.button == canvas.buttond.get(Qt.MiddleButton)):
-            self.toolbar_manager.emit_home_clicked()
+            self.toolbar_manager.emit_sig_home_clicked()
 
     def on_mouse_button_release(self, event):
         """ Stop moving the markers when the mouse button is released """

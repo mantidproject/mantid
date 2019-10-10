@@ -18,7 +18,7 @@ from mantidqt.icons import get_icon
 
 class WorkbenchNavigationToolbar(NavigationToolbar2QT):
 
-    home_clicked = QtCore.Signal()
+    sig_home_clicked = QtCore.Signal()
     sig_display_all_triggered = QtCore.Signal()
     sig_grid_toggle_triggered = QtCore.Signal()
     sig_active_triggered = QtCore.Signal()
@@ -29,7 +29,7 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
     sig_generate_plot_script_clipboard_triggered = QtCore.Signal()
 
     toolitems = (
-        ('Home', 'Reset original view', 'mdi.home', 'on_home_clicked', None),
+        ('Home', 'Center display on contents', 'mdi.home', 'on_home_clicked', None),
         ('Back', 'Back to previous view', 'mdi.arrow-left', 'back', None),
         ('Forward', 'Forward to next view', 'mdi.arrow-right', 'forward', None),
         (None, None, None, None, None),
@@ -132,8 +132,7 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         pass
 
     def on_home_clicked(self):
-        self.home_clicked.emit()
-        self.push_current()
+        self.sig_home_clicked.emit()
 
 
 class ToolbarStateManager(object):
@@ -170,7 +169,7 @@ class ToolbarStateManager(object):
             fit_action.setChecked(True)
 
     def home_button_connect(self, slot):
-        self._toolbar.home_clicked.connect(slot)
+        self._toolbar.sig_home_clicked.connect(slot)
 
-    def emit_home_clicked(self):
-        self._toolbar.home_clicked.emit()
+    def emit_sig_home_clicked(self):
+        self._toolbar.sig_home_clicked.emit()
