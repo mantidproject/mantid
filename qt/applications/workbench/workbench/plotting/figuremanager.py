@@ -384,17 +384,9 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         # Re-limiting on the markers will keep expanding the view. Temporarily
         # hiding the markers excludes them from the ax.relim call
         if axes:
-            self._fig_interaction.set_all_markers_visible(False)
-            if self.fit_browser and self.fit_browser.tool:
-                self.fit_browser.tool.set_visible(False)
-            try:
-                for ax in axes:
-                    ax.relim(visible_only=True)
-                    ax.autoscale()
-            finally:
-                self._fig_interaction.set_all_markers_visible(True)
-                if self.fit_browser and self.fit_browser.tool:
-                    self.fit_browser.tool.set_visible(True)
+            for ax in axes:
+                ax.relim(visible_only=True)
+                ax.autoscale()
             self.canvas.draw()
 
 

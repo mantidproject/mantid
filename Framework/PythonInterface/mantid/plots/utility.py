@@ -7,6 +7,8 @@
 #  This file is part of the mantid package
 from __future__ import absolute_import
 
+from contextlib import contextmanager
+
 from matplotlib import cm
 from matplotlib.container import ErrorbarContainer
 
@@ -21,6 +23,24 @@ class MantidAxType(Enum):
 
     BIN = 0
     SPECTRUM = 1
+
+
+@contextmanager
+def artists_hidden(artists):
+    """Context manager that hides matplotlib artists."""
+    hidden = []
+    for artist in artists:
+        try:
+            if artist.get_visible():
+                hidden.append(artist)
+                artist.set_visible(False)
+        except AttributeError:
+            pass
+    try:
+        yield
+    finally:
+        for artist in hidden:
+            artist.set_visible(True)
 
 
 def find_errorbar_container(line, containers):
