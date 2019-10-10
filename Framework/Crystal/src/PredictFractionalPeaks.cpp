@@ -50,6 +50,7 @@ const std::string KMAX{"Kmax"};
 const std::string LMIN{"Lmin"};
 const std::string LMAX{"Lmax"};
 const std::string REFLECTION_COND{"ReflectionCondition"};
+const std::string ON_DETECTOR{"RequirePeaksOnDetector"};
 const std::string FRACPEAKS{"FracPeaks"};
 } // namespace PropertyNames
 
@@ -156,7 +157,10 @@ private:
  * @param hOffsets Offsets to apply to HKL in H direction
  * @param kOffsets Offsets to apply to HKL in K direction
  * @param lOffsets Offsets to apply to HKL in L direction
- * @param strategy An object defining wgere to start the search and how to
+ * @param requirePeaksOnDetector If true the peaks is required to hit a detector
+ * @param inputPeaks A peaks workspace used to created new peaks. Defines the
+ * instrument and metadata for the search
+ * @param strategy An object defining were to start the search and how to
  * advance to the next HKL
  * @return A new PeaksWorkspace containing the predicted fractional peaks
  */
@@ -165,6 +169,7 @@ IPeaksWorkspace_sptr
 predictPeaks(Algorithm *const alg, const std::vector<double> &hOffsets,
              const std::vector<double> &kOffsets,
              const std::vector<double> &lOffsets,
+             const bool requirePeaksOnDetector,
              const PeaksWorkspace &inputPeaks, SearchStrategy strategy) {
   using Mantid::API::WorkspaceFactory;
   auto outPeaks = WorkspaceFactory::Instance().createPeaks();
@@ -196,28 +201,28 @@ predictPeaks(Algorithm *const alg, const std::vector<double> &hOffsets,
           using Mantid::Geometry::IPeak;
           std::unique_ptr<IPeak> peak;
           try {
-            peak = inputPeaks.createPeak(qSample, 1);
+            peak = inputPeaks.createPeak(qSample);
           } catch (std::invalid_argument &) {
             continue;
           }
 
           peak->setGoniometerMatrix(gonioMatrix);
-          if (peak->findDetector(tracer)) {
-            PeakHash savedPeak{runNumber,
-                               boost::math::iround(1000.0 * candidateHKL[0]),
-                               boost::math::iround(1000.0 * candidateHKL[1]),
-                               boost::math::iround(1000.0 * candidateHKL[2])};
-            auto it = find(alreadyDonePeaks.begin(), alreadyDonePeaks.end(),
-                           savedPeak);
-            if (it == alreadyDonePeaks.end())
-              alreadyDonePeaks.push_back(savedPeak);
-            else
-              continue;
+          if (requirePeaksOnDetector && peak->getDetectorID() < 0)
+            continue;
+          PeakHash savedPeak{runNumber,
+                             boost::math::iround(1000.0 * candidateHKL[0]),
+                             boost::math::iround(1000.0 * candidateHKL[1]),
+                             boost::math::iround(1000.0 * candidateHKL[2])};
+          auto it =
+              find(alreadyDonePeaks.begin(), alreadyDonePeaks.end(), savedPeak);
+          if (it == alreadyDonePeaks.end())
+            alreadyDonePeaks.emplace_back(std::move(savedPeak));
+          else
+            continue;
 
-            peak->setHKL(candidateHKL);
-            peak->setRunNumber(runNumber);
-            outPeaks->addPeak(*peak);
-          }
+          peak->setHKL(candidateHKL);
+          peak->setRunNumber(runNumber);
+          outPeaks->addPeak(*peak);
         }
       }
     }
@@ -227,7 +232,7 @@ predictPeaks(Algorithm *const alg, const std::vector<double> &hOffsets,
   }
 
   return outPeaks;
-}
+} // namespace
 
 } // namespace
 
@@ -286,6 +291,11 @@ void PredictFractionalPeaks::init() {
                   "reflection condition and use them to predict the fractional "
                   "peaks. This option requires a range of HKL values and "
                   "implies IncludeAllPeaksInRange=true");
+
+  declareProperty(PropertyNames::ON_DETECTOR, true,
+                  "If true then the predicted peaks are required to hit a "
+                  "detector pixel. Default=true",
+                  Direction::Input);
 
   // enable range properties if required
   using Kernel::EnabledWhenProperty;
@@ -373,12 +383,12 @@ void PredictFractionalPeaks::exec() {
       filter = std::make_unique<HKLFilterNone>();
     }
     outPeaks = predictPeaks(
-        this, hOffsets, kOffsets, lOffsets, *inputPeaks,
+        this, hOffsets, kOffsets, lOffsets, requirePeakOnDetector, *inputPeaks,
         PeaksInRangeStrategy(hklMin, hklMax, filter.get(), inputPeaks.get()));
 
   } else {
     outPeaks =
-        predictPeaks(this, hOffsets, kOffsets, lOffsets,
+        predictPeaks(this, hOffsets, kOffsets, lOffsets, requirePeakOnDetector,
                      *inputPeaks, PeaksFromIndexedStrategy(inputPeaks.get()));
   }
   setProperty(PropertyNames::FRACPEAKS, outPeaks);
