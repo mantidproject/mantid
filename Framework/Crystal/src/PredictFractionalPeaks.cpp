@@ -27,6 +27,8 @@ using Mantid::API::IPeaksWorkspace_sptr;
 using Mantid::API::Progress;
 using Mantid::DataObjects::PeaksWorkspace;
 using Mantid::DataObjects::PeaksWorkspace_sptr;
+using Mantid::Geometry::HKLFilter;
+using Mantid::Geometry::HKLFilter_uptr;
 using Mantid::Geometry::HKLGenerator;
 using Mantid::Geometry::Instrument_const_sptr;
 using Mantid::Geometry::ReflectionCondition_sptr;
@@ -57,10 +59,20 @@ const std::string FRACPEAKS{"FracPeaks"};
  */
 class PeaksInRangeStrategy {
 public:
-  PeaksInRangeStrategy(V3D hklMin, V3D hklMax,
+  /**
+   * @param hklMin Minimum for HKL range
+   * @param hklMax Maximum for HKL range
+   * @param filter An optional filter to throw away some HKL values
+   * @param inputPeaks A peaks workspace used to pull the goniometer and run
+   * number.
+   */
+  PeaksInRangeStrategy(V3D hklMin, V3D hklMax, HKLFilter *filter,
                        const PeaksWorkspace *const inputPeaks)
       : m_hklGenerator(std::move(hklMin), std::move(hklMax)),
-        m_hklIterator(m_hklGenerator.begin()), m_inputPeaks(inputPeaks) {}
+        m_hklIterator(m_hklGenerator.begin()), m_hklFilter(filter),
+        m_inputPeaks(inputPeaks) {
+    assert(filter);
+  }
 
   Progress createProgressReporter(Algorithm *const alg) const noexcept {
     return Progress(alg, 0.0, 1.0, m_hklGenerator.size());
@@ -74,12 +86,15 @@ public:
   }
 
   /// Compute the next HKL value in the range
-  bool nextHKL(V3D *hkl, DblMatrix * /*gonioMatrix*/,
-               int * /*runNumber*/) noexcept {
+  bool nextHKL(V3D *hkl, DblMatrix *gonioMatrix, int *runNumber) noexcept {
     ++m_hklIterator;
     if (m_hklIterator != m_hklGenerator.end()) {
-      *hkl = *m_hklIterator;
-      return true;
+      if (!m_hklFilter->isAllowed(*m_hklIterator)) {
+        return nextHKL(hkl, gonioMatrix, runNumber);
+      } else {
+        *hkl = *m_hklIterator;
+        return true;
+      }
     } else
       return false;
   }
@@ -87,6 +102,7 @@ public:
 private:
   HKLGenerator m_hklGenerator;
   HKLGenerator::const_iterator m_hklIterator;
+  HKLFilter *m_hklFilter;
   const PeaksWorkspace *const m_inputPeaks;
 }; // namespace
 
@@ -329,36 +345,41 @@ void PredictFractionalPeaks::exec() {
   if (lOffsets.empty())
     lOffsets.push_back(0.0);
   const bool includePeaksInRange = getProperty("IncludeAllPeaksInRange");
-  const std::string reflectionConditionName =
-      getProperty(PropertyNames::REFLECTION_COND);
   const V3D hklMin{getProperty(PropertyNames::HMIN),
                    getProperty(PropertyNames::KMIN),
                    getProperty(PropertyNames::LMIN)};
   const V3D hklMax{getProperty(PropertyNames::HMAX),
                    getProperty(PropertyNames::KMAX),
                    getProperty(PropertyNames::LMAX)};
+  const std::string reflectionConditionName =
+      getProperty(PropertyNames::REFLECTION_COND);
+  const bool requirePeakOnDetector = getProperty(PropertyNames::ON_DETECTOR);
 
   IPeaksWorkspace_sptr outPeaks;
   if (includePeaksInRange || !reflectionConditionName.empty()) {
     using Mantid::Geometry::getAllReflectionConditions;
     const auto &allConditions = getAllReflectionConditions();
-
-    //    // init method restricts the list to what is available so this will
-    //    always
-    //    // find it
-    //    const auto found =
-    //        std::find_if(std::cbegin(allConditions), std::cend(allConditions),
-    //                     [&reflectionConditionName](const auto &condition) {
-    //                       return condition->getName() ==
-    //                       reflectionConditionName;
-    //                     });
-    outPeaks =
-        predictPeaks(this, hOffsets, kOffsets, lOffsets, *inputPeaks,
-                     PeaksInRangeStrategy(hklMin, hklMax, inputPeaks.get()));
+    const auto found =
+        std::find_if(std::cbegin(allConditions), std::cend(allConditions),
+                     [&reflectionConditionName](const auto &condition) {
+                       return condition->getName() == reflectionConditionName;
+                     });
+    using Geometry::HKLFilterCentering;
+    HKLFilter_uptr filter;
+    if (found != std::cend(allConditions)) {
+      filter = std::make_unique<HKLFilterCentering>(*found);
+    } else {
+      using Mantid::Geometry::HKLFilterNone;
+      filter = std::make_unique<HKLFilterNone>();
+    }
+    outPeaks = predictPeaks(
+        this, hOffsets, kOffsets, lOffsets, *inputPeaks,
+        PeaksInRangeStrategy(hklMin, hklMax, filter.get(), inputPeaks.get()));
 
   } else {
-    outPeaks = predictPeaks(this, hOffsets, kOffsets, lOffsets, *inputPeaks,
-                            PeaksFromIndexedStrategy(inputPeaks.get()));
+    outPeaks =
+        predictPeaks(this, hOffsets, kOffsets, lOffsets,
+                     *inputPeaks, PeaksFromIndexedStrategy(inputPeaks.get()));
   }
   setProperty(PropertyNames::FRACPEAKS, outPeaks);
 }

@@ -67,7 +67,7 @@ bool HKLFilterAnd::isAllowed(const Kernel::V3D &hkl) const noexcept {
 }
 
 /// Returns a description of the HKLFilterOr.
-std::string HKLFilterOr::getDescription() const noexcept{
+std::string HKLFilterOr::getDescription() const noexcept {
   return "(" + m_lhs->getDescription() + " | " + m_rhs->getDescription() + ")";
 }
 

@@ -89,7 +89,7 @@ std::vector<std::string> getAllReflectionConditionSymbols() {
 ReflectionCondition_sptr getReflectionConditionWhere(
     const std::function<bool(const ReflectionCondition_sptr &)> &fn,
     const std::string &hint) {
-  const auto & conditions = getAllReflectionConditions();
+  const auto &conditions = getAllReflectionConditions();
 
   auto it = std::find_if(conditions.cbegin(), conditions.cend(), fn);
 
