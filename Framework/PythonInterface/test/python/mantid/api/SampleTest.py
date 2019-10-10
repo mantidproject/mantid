@@ -12,6 +12,7 @@ from mantid.simpleapi import SetSampleMaterial
 from mantid.geometry import CrystalStructure
 from mantid.geometry import CSGObject
 from numpy import pi
+import copy
 
 class SampleTest(unittest.TestCase):
 
@@ -87,6 +88,37 @@ class SampleTest(unittest.TestCase):
         shape = sample.getShape()
         xml = shape.getShapeXML()
         self.assertEqual(type(xml), str)
+
+    def do_test_copyable(self, copy_op):
+        ws = CreateWorkspace(DataX=[1], DataY=[1], StoreInADS=False)
+        original = self._ws.sample()
+        width = 1.0
+        height = 2.0
+        thickness = 3.0
+        original.setThickness(thickness)
+        original.setHeight(height)
+        original.setWidth(width)
+        # make copy
+        cp = copy_op(original)
+        # Check identity different
+        self.assertNotEqual(id(original), id(cp))
+        # Simple tests that cp is equal to original
+        self.assertEqual(original.getHeight(), cp.getHeight())
+        self.assertEqual(original.getWidth(), cp.getWidth())
+        self.assertEqual(original.getThickness(), cp.getThickness())
+        # Check really did succeed and is not tied in any way to original
+        del ws
+        del original
+        self.assertTrue(id(cp) > 0)
+        self.assertEqual(height, cp.getHeight())
+        self.assertEqual(width, cp.getWidth())
+        self.assertEqual(thickness, cp.getThickness())
+
+    def test_shallow_copyable(self):
+        self.do_test_copyable(copy.copy)
+
+    def test_deep_copyable(self):
+        self.do_test_copyable(copy.deepcopy)
 
 
 

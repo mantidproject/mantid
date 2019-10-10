@@ -15,14 +15,52 @@
 #include <boost/python/copy_const_reference.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
+#include <boost/python/dict.hpp>
+#include <boost/python/import.hpp>
+#include <boost/python/manage_new_object.hpp>
+
 using Mantid::API::Sample;
 using Mantid::Geometry::OrientedLattice;
 using Mantid::Kernel::Material; // NOLINT
 using namespace boost::python;
+namespace bp = boost::python;
 
 GET_POINTER_SPECIALIZATION(Material)
 GET_POINTER_SPECIALIZATION(OrientedLattice)
 GET_POINTER_SPECIALIZATION(Sample)
+
+template <typename T> inline PyObject *managingPyObject(T *p) {
+  return typename bp::manage_new_object::apply<T *>::type()(p);
+}
+
+template <class Copyable>
+boost::python::object generic__copy__(const bp::object &copyable) {
+  Copyable *newCopyable(new Copyable(bp::extract<const Copyable &>(copyable)));
+  bp::object result(bp::detail::new_reference(managingPyObject(newCopyable)));
+
+  bp::extract<bp::dict>(result.attr("__dict__"))().update(
+      copyable.attr("__dict__"));
+
+  return result;
+}
+
+template <class Copyable>
+bp::object generic__deepcopy__(const bp::object &copyable, bp::dict &memo) {
+  bp::object copyMod = bp::import("copy");
+  bp::object deepcopy = copyMod.attr("deepcopy");
+
+  Copyable *newCopyable(new Copyable(bp::extract<const Copyable &>(copyable)));
+  bp::object result(bp::detail::new_reference(managingPyObject(newCopyable)));
+
+  // HACK: copyableId shall be the same as the result of id(copyable)
+  auto copyableId = (std::ptrdiff_t)(copyable.ptr());
+  memo[copyableId] = result;
+
+  bp::extract<bp::dict>(result.attr("__dict__"))().update(
+      deepcopy(bp::extract<bp::dict>(copyable.attr("__dict__"))(), memo));
+
+  return result;
+}
 
 void export_Sample() {
   register_ptr_to_python<Sample *>();
@@ -81,5 +119,7 @@ void export_Sample() {
       .def("__len__", &Sample::size, arg("self"),
            "Gets the number of samples in this collection")
       .def("__getitem__", &Sample::operator[],(arg("self"), arg("index")),
-           return_internal_reference<>());
+           return_internal_reference<>())
+      .def("__copy__", &generic__copy__<Sample>)
+      .def("__deepcopy__", &generic__deepcopy__<Sample>);
 }
