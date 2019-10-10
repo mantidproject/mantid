@@ -620,7 +620,7 @@ void IndirectFittingModel::setDefaultParameterValue(const std::string &name,
                                                     double value,
                                                     TableDatasetIndex dataIndex) {
   if (m_defaultParameters.size() > dataIndex)
-    m_defaultParameters[dataIndex][name] = ParameterValueNew(value);
+    m_defaultParameters[dataIndex][name] = ParameterValue(value);
 }
 
 void IndirectFittingModel::addOutput(IAlgorithm_sptr fitAlgorithm) {
@@ -718,7 +718,7 @@ FittingMode IndirectFittingModel::getFittingMode() const {
   return m_fittingMode;
 }
 
-std::unordered_map<std::string, ParameterValueNew>
+std::unordered_map<std::string, ParameterValue>
 IndirectFittingModel::getParameterValues(TableDatasetIndex index,
                                          WorkspaceIndex spectrum) const {
   if (m_fittingData.size() > index) {
@@ -729,22 +729,22 @@ IndirectFittingModel::getParameterValues(TableDatasetIndex index,
       return getDefaultParameters(index);
     return combine(getDefaultParameters(index), parameters);
   }
-  return std::unordered_map<std::string, ParameterValueNew>();
+  return std::unordered_map<std::string, ParameterValue>();
 }
 
-std::unordered_map<std::string, ParameterValueNew>
+std::unordered_map<std::string, ParameterValue>
 IndirectFittingModel::getFitParameters(TableDatasetIndex index,
                                        WorkspaceIndex spectrum) const {
   if (m_fitOutput)
     return m_fitOutput->getParameters(m_fittingData[index].get(), spectrum);
-  return std::unordered_map<std::string, ParameterValueNew>();
+  return std::unordered_map<std::string, ParameterValue>();
 }
 
-std::unordered_map<std::string, ParameterValueNew>
+std::unordered_map<std::string, ParameterValue>
 IndirectFittingModel::getDefaultParameters(TableDatasetIndex index) const {
   if (index < m_defaultParameters.size())
     return mapKeys(m_defaultParameters[index], mapDefaultParameterNames());
-  return std::unordered_map<std::string, ParameterValueNew>();
+  return std::unordered_map<std::string, ParameterValue>();
 }
 
 std::unordered_map<std::string, std::string>
@@ -754,9 +754,9 @@ IndirectFittingModel::mapDefaultParameterNames() const {
   return std::unordered_map<std::string, std::string>();
 }
 
-std::unordered_map<std::string, ParameterValueNew>
+std::unordered_map<std::string, ParameterValue>
 IndirectFittingModel::createDefaultParameters(TableDatasetIndex /*unused*/) const {
-  return std::unordered_map<std::string, ParameterValueNew>();
+  return std::unordered_map<std::string, ParameterValue>();
 }
 
 std::string IndirectFittingModel::getResultXAxisUnit() const {

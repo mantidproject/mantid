@@ -190,7 +190,7 @@ protected slots:
                 std::vector<std::string> const &attributeNames);
   void updateParameterValues();
   void updateParameterValues(
-      const std::unordered_map<std::string, ParameterValue> &parameters);
+      const std::unordered_map<std::string, ParameterValueLegacy> &parameters);
   void updateFitBrowserParameterValues();
 
   void updateResultOptions();

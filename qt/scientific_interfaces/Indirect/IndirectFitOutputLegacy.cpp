@@ -27,14 +27,14 @@ struct TableRowExtractor {
                  m_columns.begin();
   }
 
-  std::unordered_map<std::string, ParameterValue>
+  std::unordered_map<std::string, ParameterValueLegacy>
   operator()(std::size_t index) {
     TableRow row = m_table->getRow(index);
-    std::unordered_map<std::string, ParameterValue> parameters;
+    std::unordered_map<std::string, ParameterValueLegacy> parameters;
 
     for (auto i = 1u; i < m_chiIndex; i += 2) {
       const auto &columnName = m_columns[i];
-      parameters[columnName] = ParameterValue(row.Double(i), row.Double(i + 1));
+      parameters[columnName] = ParameterValueLegacy(row.Double(i), row.Double(i + 1));
     }
     return parameters;
   }
@@ -288,11 +288,11 @@ bool IndirectFitOutputLegacy::isSpectrumFit(
          values->second.find(spectrum) != values->second.end();
 }
 
-std::unordered_map<std::string, ParameterValue>
+std::unordered_map<std::string, ParameterValueLegacy>
 IndirectFitOutputLegacy::getParameters(IndirectFitDataLegacy const *fitData,
                                        std::size_t spectrum) const {
   return getValueOr(m_parameters,
-                    std::unordered_map<std::string, ParameterValue>(), fitData,
+                    std::unordered_map<std::string, ParameterValueLegacy>(), fitData,
                     spectrum);
 }
 

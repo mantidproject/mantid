@@ -250,18 +250,18 @@ void IqtFitModel::setFitFunction(
     constrainIntensities(function);
 }
 
-std::unordered_map<std::string, ParameterValueNew>
+std::unordered_map<std::string, ParameterValue>
 IqtFitModel::createDefaultParameters(TableDatasetIndex index) const {
-  std::unordered_map<std::string, ParameterValueNew> parameters;
+  std::unordered_map<std::string, ParameterValue> parameters;
   parameters["Height"] =
-      ParameterValueNew(computeHeightApproximation(getFittingFunction()));
+      ParameterValue(computeHeightApproximation(getFittingFunction()));
 
   const auto inputWs = getWorkspace(index);
   const auto tau = inputWs ? computeTauApproximation(inputWs) : 0.0;
 
-  parameters["Lifetime"] = ParameterValueNew(tau);
-  parameters["Stretching"] = ParameterValueNew(1.0);
-  parameters["A0"] = ParameterValueNew(0.0);
+  parameters["Lifetime"] = ParameterValue(tau);
+  parameters["Stretching"] = ParameterValue(1.0);
+  parameters["A0"] = ParameterValue(0.0);
   return parameters;
 }
 

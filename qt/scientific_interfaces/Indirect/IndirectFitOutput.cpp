@@ -28,15 +28,15 @@ struct TableRowExtractor {
                  m_columns.begin();
   }
 
-  std::unordered_map<std::string, ParameterValueNew>
+  std::unordered_map<std::string, ParameterValue>
   operator()(IDAWorkspaceIndex index) {
     TableRow row = m_table->getRow(index.value);
-    std::unordered_map<std::string, ParameterValueNew> parameters;
+    std::unordered_map<std::string, ParameterValue> parameters;
 
     for (auto i = 1u; i < m_chiIndex; i += 2) {
       const auto &columnName = m_columns[i];
       parameters[columnName] =
-          ParameterValueNew(row.Double(i), row.Double(i + 1));
+          ParameterValue(row.Double(i), row.Double(i + 1));
     }
     return parameters;
   }
@@ -267,11 +267,11 @@ bool IndirectFitOutput::isSpectrumFit(IndirectFitData const *fitData,
          values->second.find(spectrum) != values->second.end();
 }
 
-std::unordered_map<std::string, ParameterValueNew>
+std::unordered_map<std::string, ParameterValue>
 IndirectFitOutput::getParameters(IndirectFitData const *fitData,
                                  WorkspaceIndex spectrum) const {
   return getValueOr(m_parameters,
-                    std::unordered_map<std::string, ParameterValueNew>(),
+                    std::unordered_map<std::string, ParameterValue>(),
                     fitData, spectrum);
 }
 

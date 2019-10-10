@@ -603,7 +603,7 @@ void IndirectFittingModelLegacy::setFitFunction(IFunction_sptr function) {
 void IndirectFittingModelLegacy::setDefaultParameterValue(
     const std::string &name, double value, std::size_t dataIndex) {
   if (m_defaultParameters.size() > dataIndex)
-    m_defaultParameters[dataIndex][name] = ParameterValue(value);
+    m_defaultParameters[dataIndex][name] = ParameterValueLegacy(value);
 }
 
 void IndirectFittingModelLegacy::addOutput(IAlgorithm_sptr fitAlgorithm) {
@@ -702,7 +702,7 @@ FittingModeLegacy IndirectFittingModelLegacy::getFittingMode() const {
   return m_fittingMode;
 }
 
-std::unordered_map<std::string, ParameterValue>
+std::unordered_map<std::string, ParameterValueLegacy>
 IndirectFittingModelLegacy::getParameterValues(std::size_t index,
                                                std::size_t spectrum) const {
   if (m_fittingData.size() > index) {
@@ -713,22 +713,22 @@ IndirectFittingModelLegacy::getParameterValues(std::size_t index,
       return getDefaultParameters(index);
     return combine(getDefaultParameters(index), parameters);
   }
-  return std::unordered_map<std::string, ParameterValue>();
+  return std::unordered_map<std::string, ParameterValueLegacy>();
 }
 
-std::unordered_map<std::string, ParameterValue>
+std::unordered_map<std::string, ParameterValueLegacy>
 IndirectFittingModelLegacy::getFitParameters(std::size_t index,
                                              std::size_t spectrum) const {
   if (m_fitOutput)
     return m_fitOutput->getParameters(m_fittingData[index].get(), spectrum);
-  return std::unordered_map<std::string, ParameterValue>();
+  return std::unordered_map<std::string, ParameterValueLegacy>();
 }
 
-std::unordered_map<std::string, ParameterValue>
+std::unordered_map<std::string, ParameterValueLegacy>
 IndirectFittingModelLegacy::getDefaultParameters(std::size_t index) const {
   if (index < m_defaultParameters.size())
     return mapKeys(m_defaultParameters[index], mapDefaultParameterNames());
-  return std::unordered_map<std::string, ParameterValue>();
+  return std::unordered_map<std::string, ParameterValueLegacy>();
 }
 
 std::unordered_map<std::string, std::string>
@@ -738,10 +738,10 @@ IndirectFittingModelLegacy::mapDefaultParameterNames() const {
   return std::unordered_map<std::string, std::string>();
 }
 
-std::unordered_map<std::string, ParameterValue>
+std::unordered_map<std::string, ParameterValueLegacy>
 IndirectFittingModelLegacy::createDefaultParameters(
     std::size_t /*unused*/) const {
-  return std::unordered_map<std::string, ParameterValue>();
+  return std::unordered_map<std::string, ParameterValueLegacy>();
 }
 
 std::string IndirectFittingModelLegacy::getResultXAxisUnit() const {

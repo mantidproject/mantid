@@ -609,24 +609,24 @@ void ConvFitModel::setFitTypeString(const std::string &fitType) {
   m_fitType = fitType;
 }
 
-std::unordered_map<std::string, ParameterValue>
+std::unordered_map<std::string, ParameterValueLegacy>
 ConvFitModel::createDefaultParameters(std::size_t index) const {
-  std::unordered_map<std::string, ParameterValue> defaultValues;
-  defaultValues["PeakCentre"] = ParameterValue(0.0);
-  defaultValues["Centre"] = ParameterValue(0.0);
+  std::unordered_map<std::string, ParameterValueLegacy> defaultValues;
+  defaultValues["PeakCentre"] = ParameterValueLegacy(0.0);
+  defaultValues["Centre"] = ParameterValueLegacy(0.0);
   // Reset all parameters to default of 1
-  defaultValues["Amplitude"] = ParameterValue(1.0);
-  defaultValues["beta"] = ParameterValue(1.0);
-  defaultValues["Decay"] = ParameterValue(1.0);
-  defaultValues["Diffusion"] = ParameterValue(1.0);
-  defaultValues["Height"] = ParameterValue(1.0);
-  defaultValues["Intensity"] = ParameterValue(1.0);
-  defaultValues["Radius"] = ParameterValue(1.0);
-  defaultValues["Tau"] = ParameterValue(1.0);
+  defaultValues["Amplitude"] = ParameterValueLegacy(1.0);
+  defaultValues["beta"] = ParameterValueLegacy(1.0);
+  defaultValues["Decay"] = ParameterValueLegacy(1.0);
+  defaultValues["Diffusion"] = ParameterValueLegacy(1.0);
+  defaultValues["Height"] = ParameterValueLegacy(1.0);
+  defaultValues["Intensity"] = ParameterValueLegacy(1.0);
+  defaultValues["Radius"] = ParameterValueLegacy(1.0);
+  defaultValues["Tau"] = ParameterValueLegacy(1.0);
 
   auto resolution = getInstrumentResolution(index);
   if (resolution)
-    defaultValues["FWHM"] = ParameterValue(*resolution);
+    defaultValues["FWHM"] = ParameterValueLegacy(*resolution);
   return defaultValues;
 }
 

@@ -30,7 +30,7 @@ private:
   std::string simultaneousFitOutputName() const override;
   std::string singleFitOutputName(TableDatasetIndex index,
                                   WorkspaceIndex spectrum) const override;
-  std::unordered_map<std::string, ParameterValueNew>
+  std::unordered_map<std::string, ParameterValue>
   createDefaultParameters(TableDatasetIndex index) const override;
   Mantid::API::MultiDomainFunction_sptr
   createFunctionWithGlobalBeta(Mantid::API::IFunction_sptr function) const;

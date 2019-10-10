@@ -48,7 +48,7 @@ private:
   std::string singleFitOutputName(std::size_t index,
                                   std::size_t spectrum) const override;
   Mantid::API::CompositeFunction_sptr getMultiDomainFunction() const override;
-  std::unordered_map<std::string, ParameterValue>
+  std::unordered_map<std::string, ParameterValueLegacy>
   createDefaultParameters(std::size_t index) const override;
   std::unordered_map<std::string, std::string>
   mapDefaultParameterNames() const override;

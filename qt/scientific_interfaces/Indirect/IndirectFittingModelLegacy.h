@@ -104,11 +104,11 @@ public:
   void applySpectra(std::size_t index, const F &functor) const;
 
   FittingModeLegacy getFittingMode() const;
-  std::unordered_map<std::string, ParameterValue>
+  std::unordered_map<std::string, ParameterValueLegacy>
   getParameterValues(std::size_t dataIndex, std::size_t spectrum) const;
-  std::unordered_map<std::string, ParameterValue>
+  std::unordered_map<std::string, ParameterValueLegacy>
   getFitParameters(std::size_t dataIndex, std::size_t spectrum) const;
-  std::unordered_map<std::string, ParameterValue>
+  std::unordered_map<std::string, ParameterValueLegacy>
   getDefaultParameters(std::size_t dataIndex) const;
   boost::optional<ResultLocation> getResultLocation(std::size_t dataIndex,
                                                     std::size_t spectrum) const;
@@ -157,7 +157,7 @@ private:
   virtual std::string simultaneousFitOutputName() const = 0;
   virtual std::string singleFitOutputName(std::size_t index,
                                           std::size_t spectrum) const = 0;
-  virtual std::unordered_map<std::string, ParameterValue>
+  virtual std::unordered_map<std::string, ParameterValueLegacy>
   createDefaultParameters(std::size_t index) const;
 
   virtual std::string getResultXAxisUnit() const;
@@ -207,7 +207,7 @@ private:
   std::vector<std::unique_ptr<IndirectFitDataLegacy>> m_fittingData;
   Mantid::API::IFunction_sptr m_activeFunction;
   Mantid::API::IFunction_sptr m_fitFunction;
-  std::vector<std::unordered_map<std::string, ParameterValue>>
+  std::vector<std::unordered_map<std::string, ParameterValueLegacy>>
       m_defaultParameters;
   bool m_previousModelSelected;
   FittingModeLegacy m_fittingMode;

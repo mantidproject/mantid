@@ -21,10 +21,10 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-struct ParameterValue {
-  ParameterValue() : value(0) {}
-  explicit ParameterValue(double val) : value(val) {}
-  ParameterValue(double val, double err) : value(val), error(err) {}
+struct ParameterValueLegacy {
+  ParameterValueLegacy() : value(0) {}
+  explicit ParameterValueLegacy(double val) : value(val) {}
+  ParameterValueLegacy(double val, double err) : value(val), error(err) {}
   double value;
   boost::optional<double> error;
 };
@@ -39,7 +39,7 @@ struct ResultLocation {
 
 using ParameterValues =
     std::unordered_map<std::size_t,
-                       std::unordered_map<std::string, ParameterValue>>;
+                       std::unordered_map<std::string, ParameterValueLegacy>>;
 
 using ResultLocations = std::unordered_map<std::size_t, ResultLocation>;
 
@@ -67,7 +67,7 @@ public:
   bool isSpectrumFit(IndirectFitDataLegacy const *fitData,
                      std::size_t spectrum) const;
 
-  std::unordered_map<std::string, ParameterValue>
+  std::unordered_map<std::string, ParameterValueLegacy>
   getParameters(IndirectFitDataLegacy const *fitData,
                 std::size_t spectrum) const;
 

@@ -31,7 +31,7 @@ using IndirectFitDataCollectionType =
     IndexCollectionType<TableDatasetIndex, std::unique_ptr<IndirectFitData>>;
 using DefaultParametersType =
     IndexCollectionType<TableDatasetIndex,
-                        std::unordered_map<std::string, ParameterValueNew>>;
+                        std::unordered_map<std::string, ParameterValue>>;
 
 struct PrivateFittingData {
   friend class IndirectFittingModel;
@@ -117,11 +117,11 @@ public:
   void applySpectra(TableDatasetIndex index, const F &functor) const;
 
   FittingMode getFittingMode() const;
-  std::unordered_map<std::string, ParameterValueNew>
+  std::unordered_map<std::string, ParameterValue>
   getParameterValues(TableDatasetIndex dataIndex, WorkspaceIndex spectrum) const;
-  std::unordered_map<std::string, ParameterValueNew>
+  std::unordered_map<std::string, ParameterValue>
   getFitParameters(TableDatasetIndex dataIndex, WorkspaceIndex spectrum) const;
-  std::unordered_map<std::string, ParameterValueNew>
+  std::unordered_map<std::string, ParameterValue>
   getDefaultParameters(TableDatasetIndex dataIndex) const;
   boost::optional<ResultLocationNew>
   getResultLocation(TableDatasetIndex dataIndex, WorkspaceIndex spectrum) const;
@@ -173,7 +173,7 @@ private:
   virtual std::string simultaneousFitOutputName() const = 0;
   virtual std::string singleFitOutputName(TableDatasetIndex index,
                                           WorkspaceIndex spectrum) const = 0;
-  virtual std::unordered_map<std::string, ParameterValueNew>
+  virtual std::unordered_map<std::string, ParameterValue>
   createDefaultParameters(TableDatasetIndex index) const;
 
   virtual std::string getResultXAxisUnit() const;

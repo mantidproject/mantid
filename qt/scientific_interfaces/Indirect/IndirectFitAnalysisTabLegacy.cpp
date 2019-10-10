@@ -38,7 +38,7 @@ WorkspaceGroup_sptr getADSGroupWorkspace(std::string const &workspaceName) {
 
 void updateParameters(
     IFunction_sptr function,
-    std::unordered_map<std::string, ParameterValue> const &parameters) {
+    std::unordered_map<std::string, ParameterValueLegacy> const &parameters) {
   for (auto i = 0u; i < function->nParams(); ++i) {
     auto const value = parameters.find(function->parameterName(i));
     if (value != parameters.end()) {
@@ -863,7 +863,7 @@ void IndirectFitAnalysisTabLegacy::updateParameterValues() {
  * @param parameters  The parameter values to update the browser with.
  */
 void IndirectFitAnalysisTabLegacy::updateParameterValues(
-    const std::unordered_map<std::string, ParameterValue> &parameters) {
+    const std::unordered_map<std::string, ParameterValueLegacy> &parameters) {
   try {
     auto fitFunction = m_fitPropertyBrowser->getFittingFunction();
     updateParameters(fitFunction, parameters);
