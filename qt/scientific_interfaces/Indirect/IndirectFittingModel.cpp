@@ -253,7 +253,7 @@ void cleanTemporaries(const std::string &base,
                          IDAWorkspaceIndex /*unused*/) {
     cleanTemporaries(base + "_" + std::to_string(index.value));
   };
-  fitData->applyEnumeratedSpectraNew(clean);
+  fitData->applyEnumeratedSpectra(clean);
 }
 
 void cleanTemporaries(const std::string &algorithmName,
@@ -892,7 +892,7 @@ IAlgorithm_sptr IndirectFittingModel::createSimultaneousFitWithEqualRange(
   auto const dataIndex = TableDatasetIndex{0};
   auto const workspaceIndex = getSpectra(dataIndex).front();
   auto exclude =
-      vectorFromStringNew<double>(getExcludeRegion(dataIndex, workspaceIndex));
+      vectorFromString<double>(getExcludeRegion(dataIndex, workspaceIndex));
   addInputDataToSimultaneousFit(fitAlgorithm, m_fittingData,
                                 getFittingRange(dataIndex, workspaceIndex),
                                 exclude);

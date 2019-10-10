@@ -221,7 +221,7 @@ void IndirectSpectrumSelectionPresenterLegacy::updateSpectraRange(
 void IndirectSpectrumSelectionPresenterLegacy::setMaskSpectraList(
     std::string const &spectra) {
   if (m_spectraError.empty())
-    m_view->setMaskSpectraList(vectorFromString<std::size_t>(spectra));
+    m_view->setMaskSpectraList(vectorFromStringLegacy<std::size_t>(spectra));
   else
     m_view->setMaskSpectraList({});
 }

@@ -224,7 +224,7 @@ void IndirectSpectrumSelectionPresenter::updateSpectraRange(
 void IndirectSpectrumSelectionPresenter::setMaskSpectraList(
     std::string const &spectra) {
   if (m_spectraError.empty()) {
-    auto const intVec = vectorFromStringNew<int>(spectra);
+    auto const intVec = vectorFromString<int>(spectra);
     std::vector<WorkspaceIndex> vec(intVec.size());
     std::transform(intVec.begin(), intVec.end(), vec.begin(),
                    [](int i) { return WorkspaceIndex{i}; });

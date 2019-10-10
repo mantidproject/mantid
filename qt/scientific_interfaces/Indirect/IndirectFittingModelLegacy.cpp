@@ -253,7 +253,7 @@ void cleanTemporaries(const std::string &base,
   const auto clean = [&](std::size_t index, std::size_t /*unused*/) {
     cleanTemporaries(base + "_" + std::to_string(index));
   };
-  fitData->applyEnumeratedSpectra(clean);
+  fitData->applyEnumeratedSpectraLegacy(clean);
 }
 
 void cleanTemporaries(
@@ -857,7 +857,7 @@ IAlgorithm_sptr IndirectFittingModelLegacy::createSimultaneousFitWithEqualRange(
   auto fitAlgorithm = simultaneousFitAlgorithm();
   addFitProperties(*fitAlgorithm, function, getResultXAxisUnit());
 
-  auto exclude = vectorFromString<double>(getExcludeRegion(0, 0));
+  auto exclude = vectorFromStringLegacy<double>(getExcludeRegion(0, 0));
   addInputDataToSimultaneousFit(fitAlgorithm, m_fittingData,
                                 getFittingRange(0, 0), exclude);
   fitAlgorithm->setProperty("OutputWorkspace", simultaneousFitOutputName());

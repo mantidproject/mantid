@@ -99,7 +99,7 @@ void setFunctionParameters(IFunction_sptr function, const std::string &category,
 void setFunctionParameters(MultiDomainFunction_sptr function,
                            const std::string &category,
                            const std::string &parameterName, double value) {
-  for (auto i = 0u; i < function->nFunctions(); ++i)
+  for (size_t i = 0u; i < function->nFunctions(); ++i)
     setFunctionParameters(function->getFunction(i), category, parameterName,
                           value);
 }

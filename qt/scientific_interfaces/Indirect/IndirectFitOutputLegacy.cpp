@@ -58,7 +58,7 @@ void applyEnumeratedData(F &&functor, const FitDataIteratorLegacy &fitDataBegin,
                          const FitDataIteratorLegacy &fitDataEnd) {
   std::size_t start = 0;
   for (auto it = fitDataBegin; it < fitDataEnd; ++it)
-    start = (*it)->applyEnumeratedSpectra(functor(it->get()), start);
+    start = (*it)->applyEnumeratedSpectraLegacy(functor(it->get()), start);
 }
 
 template <typename F>

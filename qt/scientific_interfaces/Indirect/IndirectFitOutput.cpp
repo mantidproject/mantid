@@ -60,7 +60,7 @@ void applyEnumeratedData(F &&functor, const FitDataIterator &fitDataBegin,
                          const FitDataIterator &fitDataEnd) {
   IDAWorkspaceIndex start{0};
   for (auto it = fitDataBegin; it < fitDataEnd; ++it)
-    start = (*it)->applyEnumeratedSpectraNew(functor(it->get()), start);
+    start = (*it)->applyEnumeratedSpectra(functor(it->get()), start);
 }
 
 template <typename F>

@@ -65,8 +65,8 @@ private:
   bool m_isContinuous;
 };
 
-template <typename F> struct ApplySpectraNew {
-  explicit ApplySpectraNew(F &&functor) : m_functor(std::forward<F>(functor)) {}
+template <typename F> struct ApplySpectra {
+  explicit ApplySpectra(F &&functor) : m_functor(std::forward<F>(functor)) {}
 
   void operator()(const Spectra &spectra) const {
     for (const auto &spectrum : spectra)
@@ -77,8 +77,8 @@ private:
   F m_functor;
 };
 
-template <typename F> struct ApplyEnumeratedSpectraNew {
-  ApplyEnumeratedSpectraNew(F &&functor,
+template <typename F> struct ApplyEnumeratedSpectra {
+  ApplyEnumeratedSpectra(F &&functor,
                             WorkspaceIndex start = WorkspaceIndex{0})
       : m_start(start), m_functor(std::forward<F>(functor)) {}
 
@@ -95,7 +95,7 @@ private:
 };
 
 template <class T>
-std::vector<T> vectorFromStringNew(const std::string &listString) {
+std::vector<T> vectorFromString(const std::string &listString) {
   try {
     return Mantid::Kernel::ArrayProperty<T>("vector", listString);
   } catch (const std::runtime_error &) {
@@ -131,14 +131,14 @@ public:
   std::vector<double> excludeRegionsVector(WorkspaceIndex spectrum) const;
 
   template <typename F> void applySpectra(F &&functor) const {
-    ApplySpectraNew<F>(std::forward<F>(functor))(m_spectra);
+    ApplySpectra<F>(std::forward<F>(functor))(m_spectra);
   }
 
   template <typename F>
   WorkspaceIndex
-  applyEnumeratedSpectraNew(F &&functor,
+  applyEnumeratedSpectra(F &&functor,
                          WorkspaceIndex start = WorkspaceIndex{0}) const {
-    return ApplyEnumeratedSpectraNew<F>(std::forward<F>(functor),
+    return ApplyEnumeratedSpectra<F>(std::forward<F>(functor),
                                         start)(m_spectra);
   }
 

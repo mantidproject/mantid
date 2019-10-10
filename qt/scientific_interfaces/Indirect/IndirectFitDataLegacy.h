@@ -23,7 +23,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 template <typename T>
-std::vector<T> vectorFromString(const std::string &listString) {
+std::vector<T> vectorFromStringLegacy(const std::string &listString) {
   try {
     return Mantid::Kernel::ArrayProperty<T>("vector", listString);
   } catch (const std::runtime_error &) {
@@ -40,7 +40,7 @@ std::vector<T> vectorFromString(const std::string &listString) {
 template <typename T> class DiscontinuousSpectra {
 public:
   explicit DiscontinuousSpectra(const std::string &str)
-      : m_str(str), m_vec(vectorFromString<T>(str)) {
+      : m_str(str), m_vec(vectorFromStringLegacy<T>(str)) {
     m_str.erase(std::remove_if(m_str.begin(), m_str.end(),
                                static_cast<int (*)(int)>(std::isspace)),
                 m_str.end());
@@ -93,8 +93,8 @@ private:
 using SpectraLegacy = boost::variant<DiscontinuousSpectra<std::size_t>,
                                std::pair<std::size_t, std::size_t>>;
 
-template <typename F> struct ApplySpectra : boost::static_visitor<> {
-  explicit ApplySpectra(F &&functor) : m_functor(std::forward<F>(functor)) {}
+template <typename F> struct ApplySpectraLegacy : boost::static_visitor<> {
+  explicit ApplySpectraLegacy(F &&functor) : m_functor(std::forward<F>(functor)) {}
 
   void operator()(const std::pair<std::size_t, std::size_t> &spectra) const {
     for (auto spectrum = spectra.first; spectrum <= spectra.second; ++spectrum)
@@ -111,8 +111,8 @@ private:
 };
 
 template <typename F>
-struct ApplyEnumeratedSpectra : boost::static_visitor<std::size_t> {
-  ApplyEnumeratedSpectra(F &&functor, std::size_t start = 0)
+struct ApplyEnumeratedSpectraLegacy : boost::static_visitor<std::size_t> {
+  ApplyEnumeratedSpectraLegacy(F &&functor, std::size_t start = 0)
       : m_start(start), m_functor(std::forward<F>(functor)) {}
 
   std::size_t
@@ -164,13 +164,13 @@ public:
   std::vector<double> excludeRegionsVector(std::size_t spectrum) const;
 
   template <typename F> void applySpectra(F &&functor) const {
-    boost::apply_visitor(ApplySpectra<F>(std::forward<F>(functor)), m_spectra);
+    boost::apply_visitor(ApplySpectraLegacy<F>(std::forward<F>(functor)), m_spectra);
   }
 
   template <typename F>
-  std::size_t applyEnumeratedSpectra(F &&functor, std::size_t start = 0) const {
+  std::size_t applyEnumeratedSpectraLegacy(F &&functor, std::size_t start = 0) const {
     return boost::apply_visitor(
-        ApplyEnumeratedSpectra<F>(std::forward<F>(functor), start), m_spectra);
+        ApplyEnumeratedSpectraLegacy<F>(std::forward<F>(functor), start), m_spectra);
   }
 
   void setSpectra(std::string const &spectra);

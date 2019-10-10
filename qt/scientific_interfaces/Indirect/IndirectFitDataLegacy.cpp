@@ -346,7 +346,7 @@ IndirectFitDataLegacy::getExcludeRegion(std::size_t spectrum) const {
 
 std::vector<double>
 IndirectFitDataLegacy::excludeRegionsVector(std::size_t spectrum) const {
-  return vectorFromString<double>(getExcludeRegion(spectrum));
+  return vectorFromStringLegacy<double>(getExcludeRegion(spectrum));
 }
 
 void IndirectFitDataLegacy::setSpectra(std::string const &spectra) {

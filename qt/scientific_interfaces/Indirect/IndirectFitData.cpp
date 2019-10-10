@@ -141,7 +141,7 @@ std::string createExcludeRegionString(std::string regionString) {
 
 std::vector<MantidQt::CustomInterfaces::IDA::WorkspaceIndex>
 workspaceIndexVectorFromString(const std::string &listString) {
-  auto const intVec = vectorFromStringNew<int>(listString);
+  auto const intVec = vectorFromString<int>(listString);
   std::vector<MantidQt::CustomInterfaces::IDA::WorkspaceIndex> output;
   for (auto const i : intVec) {
     output.push_back(MantidQt::CustomInterfaces::IDA::WorkspaceIndex{i});
@@ -331,7 +331,7 @@ std::string IndirectFitData::getExcludeRegion(WorkspaceIndex spectrum) const {
 
 std::vector<double>
 IndirectFitData::excludeRegionsVector(WorkspaceIndex spectrum) const {
-  return vectorFromStringNew<double>(getExcludeRegion(spectrum));
+  return vectorFromString<double>(getExcludeRegion(spectrum));
 }
 
 void IndirectFitData::setSpectra(std::string const &spectra) {
