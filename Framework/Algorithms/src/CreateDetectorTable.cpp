@@ -14,7 +14,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(CreateDetectorTable);
+DECLARE_ALGORITHM(CreateDetectorTable)
 
 void CreateDetectorTable::init() {
   declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
