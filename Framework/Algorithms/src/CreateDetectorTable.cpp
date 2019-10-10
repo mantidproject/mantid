@@ -45,8 +45,7 @@ void CreateDetectorTable::exec() {
   // Standard MatrixWorkspace
   auto matrix = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS);
   if (matrix) {
-    detectorTable = createDetectorTableWorkspace(inputWS->getName(), matrix,
-                                                 indices, include_data);
+    detectorTable = createDetectorTableWorkspace(matrix, indices, include_data);
   }
   auto peaks = boost::dynamic_pointer_cast<IPeaksWorkspace>(inputWS);
   if (peaks) {
@@ -63,7 +62,6 @@ void CreateDetectorTable::exec() {
 
 /**
  * Create the instrument detector table workspace from a MatrixWorkspace
- * @param wsName :: The name of the workspace
  * @param ws :: A pointer to a MatrixWorkspace
  * @param indices :: Limit the table to these workspace indices
  * @param include_data :: If true then first value from the each spectrum is
@@ -72,8 +70,8 @@ void CreateDetectorTable::exec() {
  * @return A pointer to the table workspace of detector information
  */
 ITableWorkspace_sptr CreateDetectorTable::createDetectorTableWorkspace(
-    const std::string &wsName, const MatrixWorkspace_sptr &ws,
-    const std::vector<int> &indices, bool include_data) {
+    const MatrixWorkspace_sptr &ws, const std::vector<int> &indices,
+    bool include_data) {
   using namespace Mantid::Geometry;
 
   IComponent_const_sptr sample = ws->getInstrument()->getSample();
