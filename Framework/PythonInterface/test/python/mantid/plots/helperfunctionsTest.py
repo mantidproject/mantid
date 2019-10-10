@@ -189,7 +189,7 @@ class HelperFunctionsTest(unittest.TestCase):
         index, dist, kwargs = funcs.get_wksp_index_dist_and_label(self.ws2d_histo, specNum=2)
         self.assertEqual(index, 1)
         self.assertTrue(dist)
-        self.assertEqual(kwargs['label'], 'ws2d_histo: spec 2')
+        self.assertEqual(kwargs['label'], 'ws2d_histo: 6')
         # get info from default spectrum in the 1d case
         index, dist, kwargs = funcs.get_wksp_index_dist_and_label(self.ws1d_point, wkspIndex=0)
         self.assertEqual(index, 0)
@@ -203,6 +203,14 @@ class HelperFunctionsTest(unittest.TestCase):
         ws.getAxis(1).setLabel(0, "test")
         index, dist, kwargs = funcs.get_wksp_index_dist_and_label(ws, specNum=1)
         self.assertEqual(kwargs['label'], 'ws: test')
+
+    def test_legend_uses_label_if_first_axis_is_numeric_axis(self):
+        ws = CreateWorkspace([1], [1], NSpec=1)
+        axis = mantid.api.NumericAxis.create(1)
+        ws.replaceAxis(1, axis)
+        ws.getAxis(1).setValue(0, 50)
+        index, dist, kwargs = funcs.get_wksp_index_dist_and_label(ws, specNum=1)
+        self.assertEqual(kwargs['label'], 'ws: 50')
 
     def test_get_axes_labels(self):
         axs = funcs.get_axes_labels(self.ws2d_histo)
