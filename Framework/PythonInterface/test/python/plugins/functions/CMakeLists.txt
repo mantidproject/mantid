@@ -16,6 +16,7 @@ set(TEST_PY_FILES
     FmuFTest.py
     HighTFMuoniumTest.py
     MeierTest.py
+    ModOscTest.py
     MsdGaussTest.py
     MsdPetersTest.py
     MsdYiTest.py
