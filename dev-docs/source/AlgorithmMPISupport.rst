@@ -615,7 +615,6 @@ SANSMaskWorkspace                      all
 SANSMove                               all
 SANSNormalizeToMonitor                 MasterOnly, Identical
 SANSReductionCore                      all
-SANSScale                              all
 SANSSingleReduction                    all
 SANSSliceEvent                         all
 SANSStitch                             MasterOnly, Identical

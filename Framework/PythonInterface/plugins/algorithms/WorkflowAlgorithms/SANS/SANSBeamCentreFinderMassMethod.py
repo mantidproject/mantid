@@ -11,6 +11,7 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress, IEventWorkspace)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator)
+from sans.algorithm_detail.scale_sans_workspace import scale_workspace
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_child_algorithm, append_to_sans_file_tag
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
@@ -250,14 +251,10 @@ class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
         wavelength_alg.execute()
         return wavelength_alg.getProperty("OutputWorkspace").value
 
-    def _scale(self, state_serialized, workspace):
-        scale_name = "SANSScale"
-        scale_options = {"SANSState": state_serialized,
-                         "InputWorkspace": workspace,
-                         "OutputWorkspace": EMPTY_NAME}
-        scale_alg = create_child_algorithm(self, scale_name, **scale_options)
-        scale_alg.execute()
-        return scale_alg.getProperty("OutputWorkspace").value
+    def _scale(self, state, workspace):
+        instrument = state.data.instrument
+        output_ws = scale_workspace(workspace=workspace, instrument=instrument, state_scale=state.scale)
+        return output_ws
 
     def _convert_to_histogram(self, workspace):
         if isinstance(workspace, IEventWorkspace):

@@ -847,7 +847,8 @@ The dedicated work-flow algorithms for the SANS reduction are:
 - *SANSMove*
 - *SANSNormalizeToMonitor*
 - *SANSSave*
-- *SANSScale*
+- :ref:`Multiply <algm-Multiply>` (by Absolute Scale)
+- :ref:`Divide <algm-Divide>` (by Sample Volume)
 - *SANSSliceEvent*
 
 Note that the vast majority of the these algorithms takes a *SANSState* object as
@@ -1127,26 +1128,6 @@ Zero-error inflation is useful for data points where the error is 0. When perfor
 any form of regression of this the zero-valued error will fix the model at this point.
 If we inflate the error at this point then it does not contribute to the regression.
 
-*SANSScale*
--------------
-
-The :ref:`SANSScale <algm-SANSScale>` algorithm scales a SANS workspace according to the settings
-in the state object. The scaling includes division by the volume of the sample and
-multiplication by an absolute scale.
-
-The sub-steps of this algorithm are:
-
-1. Multiply by the absolute scale. The sub-steps are:
-
-   a. If a scale is specified, multiply the scale by 100, else set the scale to 100
-   b. If the instrument is LOQ divide by :math:`\pi`
-   c. Multiply the scatter workspace by the scale using :ref:`Multiply <algm-Multiply>` (and :ref:`CreateSingleValuedWorkspace <algm-CreateSingleValuedWorkspace>`)
-
-2. Divide by the sample volume. The sub-steps are:
-
-   a. Calculate the sample volume based either on the user settings or the sample information from the file.
-   b. Divide by the scatter workspace by the sample volume using :ref:`Divide <algm-Divide>` (and :ref:`CreateSingleValuedWorkspace <algm-CreateSingleValuedWorkspace>`)
-
 
 *SANSSliceEvent*
 ------------------
@@ -1267,8 +1248,8 @@ The sub-steps of this algorithm are:
    Note that all steps up until now were performed in the time-of-flight domain.
 6. Convert the data from the time-of-flight to the wavelength domain using
    :ref:`SANSConvertToWavelength <algm-SANSConvertToWavelength>`.
-7. Scale the data set using :ref:`SANSScale <algm-SANSScale>`. This will multiply the data set
-   with the absolute scale and divide by the sample volume.
+7. Scale the data set using :ref:`Multiply <algm-Multiply>`. This will multiply the data set
+   with the absolute scale and divide :ref:`Divide <algm-Divide>` by the sample volume.
 8. This step creates the adjustment workspaces using :ref:`SANSCreateAdjustmentWorkspaces <algm-SANSCreateAdjustmentWorkspaces>`.
    This uses the input *TransmissionWorkspace* and *DirectWorkspace* workspaces. Note that
    the instruments referenced in the workspace are moved using :ref:`SANSMove <algm-SANSMove>` before they are used by the adjustment

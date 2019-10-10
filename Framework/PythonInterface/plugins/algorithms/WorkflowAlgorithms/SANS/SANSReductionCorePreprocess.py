@@ -106,7 +106,7 @@ class SANSReductionCorePreprocess(SANSReductionCoreBase):
         # 6. Multiply by volume and absolute scale
         # --------------------------------------------------------------------------------------------------------------
         progress.report("Multiplying by volume and absolute scale ...")
-        workspace = self._scale(state_serialized, workspace)
+        workspace = self._scale(state=state, workspace=workspace)
 
         progress.report("Completed SANSReductionCorePreprocess ...")
 
