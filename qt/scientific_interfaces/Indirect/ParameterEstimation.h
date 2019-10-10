@@ -7,7 +7,6 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_PARAMETERESTIMATION_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_PARAMETERESTIMATION_H_
 
-//#include "IndexTypes.h"
 #include "MantidKernel/cow_ptr.h"
 #include <functional>
 #include <vector>

@@ -95,8 +95,6 @@ std::string IqtFit::fitTypeString() const {
 }
 
 void IqtFit::setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
-  // fitAlgorithm->setProperty("ExtractMembers",
-  //                          boolSettingValue("ExtractMembers"));
   IndirectFitAnalysisTab::setupFit(fitAlgorithm);
 }
 
