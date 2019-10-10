@@ -65,7 +65,7 @@ class FitPropertyBrowserTest(unittest.TestCase):
 
         manager_mock = Mock()
         manager_mock.canvas = canvas
-        observer = FigureManagerADSObserver(manager=manager_mock)
+        _ = FigureManagerADSObserver(manager=manager_mock)
 
         for plot_diff in [True, False]:
             # create fake fit output results
