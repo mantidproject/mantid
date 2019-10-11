@@ -1258,7 +1258,7 @@ The sub-steps of this algorithm are:
    :ref:`SANSConvertToWavelength <algm-SANSConvertToWavelength>`.
 7. Scale the data set using :ref:`SANSScale <algm-SANSScale>`. This will multiply the data set
    with the absolute scale and divide by the sample volume.
-8. This step creates the adjustment workspaces using :ref:`SANSCreateAdjustmentWorkspaces <algm-SANSCreateAdjustmentWorkspaces>`.
+8. This step creates the adjustment workspaces by *Create SANS Adjustment Workspaces*.
    This uses the input *TransmissionWorkspace* and *DirectWorkspace* workspaces. Note that
    the instrument's components are moved and rotated before they are used by the adjustment
    algorithm. The outputs are a wavelength-adjustment workspace, a pixel-adjustment workspace and a wavelength-and-pixel adjustment

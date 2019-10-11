@@ -109,7 +109,7 @@ class SANSReductionCoreEventSlice(SANSReductionCoreBase):
         progress.report("Creating adjustment workspaces ...")
         wavelength_adjustment_workspace, pixel_adjustment_workspace, wavelength_and_pixel_adjustment_workspace, \
             calculated_transmission_workspace, unfitted_transmission_workspace = \
-            self._adjustment(state_serialized, workspace, monitor_workspace, component_as_string, data_type_as_string)
+            self._adjustment(state, workspace, monitor_workspace, component_as_string, data_type_as_string)
 
         # ------------------------------------------------------------
         # 3. Convert event workspaces to histogram workspaces

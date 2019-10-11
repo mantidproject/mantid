@@ -605,7 +605,6 @@ RotateInstrumentComponent              all
 SANSConvertToQ                         all
 SANSConvertToWavelength                all
 SANSConvertToWavelengthAndRebin        all
-SANSCreateAdjustmentWorkspaces         all
 SANSCreateWavelengthAndPixelAdjustment MasterOnly, Identical
 SANSCrop                               all
 SANSFitShiftScale                      MasterOnly, Identical

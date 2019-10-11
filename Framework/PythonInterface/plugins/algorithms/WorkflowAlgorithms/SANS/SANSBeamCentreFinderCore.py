@@ -13,6 +13,7 @@ from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, Algorit
                         IEventWorkspace)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator)
 from sans.algorithm_detail.MoveSansInstrumentComponent import MoveSansInstrumentComponent, MoveTypes
+from sans.algorithm_detail.CreateSANSAdjustmentWorkspaces import CreateSANSAdjustmentWorkspaces
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_child_algorithm, append_to_sans_file_tag
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
@@ -76,8 +77,8 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         self.declareProperty("Centre1", 0.0, direction=Direction.Input)
         self.declareProperty("Centre2", 0.0, direction=Direction.Input)
 
-        self.declareProperty("RMax", 0.26, direction= Direction.Input)
-        self.declareProperty("RMin", 0.06, direction= Direction.Input)
+        self.declareProperty("RMax", 0.26, direction=Direction.Input)
+        self.declareProperty("RMin", 0.06, direction=Direction.Input)
 
         # ----------
         # OUTPUT
@@ -113,7 +114,7 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         state.mask.use_mask_phi_mirror = True
 
         # Set compatibility mode
-        #state.compatibility.use_compatibility_mode = self.getProperty('CompatibilityMode').value
+        # state.compatibility.use_compatibility_mode = self.getProperty('CompatibilityMode').value
 
         # Set test centre
         state.move.detectors[DetectorType.to_string(DetectorType.LAB)].sample_centre_pos1 = \
@@ -224,7 +225,7 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         data_type_as_string = self.getProperty("DataType").value
         progress.report("Creating adjustment workspaces ...")
         wavelength_adjustment_workspace, pixel_adjustment_workspace, wavelength_and_pixel_adjustment_workspace = \
-            self._adjustment(state_serialized, scatter_data, monitor_scatter_date, component_as_string,
+            self._adjustment(state, scatter_data, monitor_scatter_date, component_as_string,
                              data_type_as_string)
 
         # ------------------------------------------------------------
@@ -333,38 +334,26 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         scale_alg.execute()
         return scale_alg.getProperty("OutputWorkspace").value
 
-    def _adjustment(self, state_serialized, workspace, monitor_workspace, component_as_string, data_type):
+    def _adjustment(self, state, workspace, monitor_workspace, component_as_string, data_type):
         transmission_workspace = self._get_transmission_workspace()
         direct_workspace = self._get_direct_workspace()
 
-        state = self._get_state()
-
-        adjustment_name = "SANSCreateAdjustmentWorkspaces"
-        adjustment_options = {"SANSState": state_serialized,
-                              "Component": component_as_string,
-                              "DataType": data_type,
-                              "MonitorWorkspace": monitor_workspace,
-                              "SampleData": workspace,
-                              "OutputWorkspaceWavelengthAdjustment": EMPTY_NAME,
-                              "OutputWorkspacePixelAdjustment": EMPTY_NAME,
-                              "OutputWorkspaceWavelengthAndPixelAdjustment": EMPTY_NAME}
         if transmission_workspace:
             transmission_workspace = self._move(state=state, workspace=transmission_workspace,
                                                 component=component_as_string, is_transmission=True)
-            adjustment_options.update({"TransmissionWorkspace": transmission_workspace})
 
         if direct_workspace:
             direct_workspace = self._move(state=state, workspace=direct_workspace,
                                           component=component_as_string, is_transmission=True)
-            adjustment_options.update({"DirectWorkspace": direct_workspace})
 
-        adjustment_alg = create_child_algorithm(self, adjustment_name, **adjustment_options)
-        adjustment_alg.execute()
+        alg = CreateSANSAdjustmentWorkspaces(data_type=data_type, state=state, component=component_as_string)
+        returned_dict = alg.create_sans_adjustment_workspaces(direct_ws=direct_workspace, monitor_ws=monitor_workspace,
+                                                              sample_data=workspace,
+                                                              transmission_ws=transmission_workspace)
+        wavelength_adjustment = returned_dict["wavelength_adj"]
+        pixel_adjustment = returned_dict["pixel_adj"]
+        wavelength_and_pixel_adjustment = returned_dict["wavelength_pixel_adj"]
 
-        wavelength_adjustment = adjustment_alg.getProperty("OutputWorkspaceWavelengthAdjustment").value
-        pixel_adjustment = adjustment_alg.getProperty("OutputWorkspacePixelAdjustment").value
-        wavelength_and_pixel_adjustment = adjustment_alg.getProperty(
-                                           "OutputWorkspaceWavelengthAndPixelAdjustment").value
         return wavelength_adjustment, pixel_adjustment, wavelength_and_pixel_adjustment
 
     def _convert_to_histogram(self, workspace):

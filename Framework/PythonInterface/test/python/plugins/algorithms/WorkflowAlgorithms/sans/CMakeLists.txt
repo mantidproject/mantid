@@ -3,7 +3,6 @@
 set(TEST_PY_FILES
     SANSConvertToQTest.py
     SANSConvertToWavelengthTest.py
-    SANSCreateAdjustmentWorkspacesTest.py
     SANSCreateWavelengthAndPixelAdjustmentTest.py
     SANSScaleTest.py
     SANSSliceEventTest.py)

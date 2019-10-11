@@ -5,20 +5,21 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
+
+import numpy as np
+import os
 import unittest
+
 from mantid.api import FrameworkManager
 from mantid.kernel import config
-
-import os
-import numpy as np
-from sans.test_helper.test_director import TestDirector
-from sans.state.wavelength_and_pixel_adjustment import get_wavelength_and_pixel_adjustment_builder
-from sans.common.enums import (RebinType, RangeStepType, DetectorType)
-from sans.common.general_functions import (create_unmanaged_algorithm)
 from sans.common.constants import EMPTY_NAME
+from sans.common.enums import (RangeStepType, DetectorType)
+from sans.common.general_functions import (create_unmanaged_algorithm)
+from sans.state.wavelength_and_pixel_adjustment import get_wavelength_and_pixel_adjustment_builder
+from sans.test_helper.test_director import TestDirector
 
 
-class SANSCalculateTransmissionTest(unittest.TestCase):
+class SANSCreateWavelengthAndPixelAdjustmentTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -49,7 +50,7 @@ class SANSCalculateTransmissionTest(unittest.TestCase):
     @staticmethod
     def _remove_test_file(file_name):
         if os.path.exists(file_name):
-           os.remove(file_name)
+            os.remove(file_name)
 
     @staticmethod
     def _get_state(lab_pixel_file=None, hab_pixel_file=None, lab_wavelength_file=None, hab_wavelength_file=None,
@@ -119,15 +120,15 @@ class SANSCalculateTransmissionTest(unittest.TestCase):
         # Arrange
         data_trans = [3., 4., 5., 7., 3.]
         data_norm = [9., 3., 8., 3., 1.]
-        transmission_workspace = SANSCalculateTransmissionTest._get_workspace(data_trans)
-        norm_workspace = SANSCalculateTransmissionTest._get_workspace(data_norm)
+        transmission_workspace = SANSCreateWavelengthAndPixelAdjustmentTest._get_workspace(data_trans)
+        norm_workspace = SANSCreateWavelengthAndPixelAdjustmentTest._get_workspace(data_norm)
 
-        state = SANSCalculateTransmissionTest._get_state(wavelength_low=1., wavelength_high=11., wavelength_step=2.,
-                                                         wavelength_step_type=RangeStepType.Lin)
+        state = SANSCreateWavelengthAndPixelAdjustmentTest._get_state(wavelength_low=1., wavelength_high=11., wavelength_step=2.,
+                                                                      wavelength_step_type=RangeStepType.Lin)
 
         # Act
-        wavelength_adjustment, pixel_adjustment = SANSCalculateTransmissionTest._run_test(transmission_workspace,
-                                                                                          norm_workspace, state, True)
+        wavelength_adjustment, pixel_adjustment = SANSCreateWavelengthAndPixelAdjustmentTest._run_test(transmission_workspace,
+                                                                                                       norm_workspace, state, True)
         # Assert
         self.assertEqual(pixel_adjustment, None)
         self.assertEqual(wavelength_adjustment.getNumberHistograms(),  1)
@@ -142,18 +143,18 @@ class SANSCalculateTransmissionTest(unittest.TestCase):
         data_trans = [3., 4., 5., 7., 3.]
         data_norm = [9., 3., 8., 3., 1.]
         expected_direct_file_workspace = [0.5, 0.5, 0.5, 0.5, 0.5]
-        transmission_workspace = SANSCalculateTransmissionTest._get_workspace(data_trans)
-        norm_workspace = SANSCalculateTransmissionTest._get_workspace(data_norm)
+        transmission_workspace = SANSCreateWavelengthAndPixelAdjustmentTest._get_workspace(data_trans)
+        norm_workspace = SANSCreateWavelengthAndPixelAdjustmentTest._get_workspace(data_norm)
 
         direct_file_name = "DIRECT_test.txt"
-        direct_file_name = SANSCalculateTransmissionTest._create_test_wavelength_adjustment_file(direct_file_name)
+        direct_file_name = SANSCreateWavelengthAndPixelAdjustmentTest._create_test_wavelength_adjustment_file(direct_file_name)
 
-        state = SANSCalculateTransmissionTest._get_state(hab_wavelength_file=direct_file_name,
-                                                         wavelength_low=1., wavelength_high=11., wavelength_step=2.,
-                                                         wavelength_step_type=RangeStepType.Lin)
+        state = SANSCreateWavelengthAndPixelAdjustmentTest._get_state(hab_wavelength_file=direct_file_name,
+                                                                      wavelength_low=1., wavelength_high=11., wavelength_step=2.,
+                                                                      wavelength_step_type=RangeStepType.Lin)
         # Act
-        wavelength_adjustment, pixel_adjustment = SANSCalculateTransmissionTest._run_test(transmission_workspace,
-                                                                                          norm_workspace, state, False)
+        wavelength_adjustment, pixel_adjustment = SANSCreateWavelengthAndPixelAdjustmentTest._run_test(transmission_workspace,
+                                                                                                       norm_workspace, state, False)
         # Assert
         self.assertEqual(pixel_adjustment, None)
         self.assertEqual(wavelength_adjustment.getNumberHistograms(),  1)
@@ -163,7 +164,7 @@ class SANSCalculateTransmissionTest(unittest.TestCase):
             self.assertEqual(e1,  e2)
 
         # Clean up
-        SANSCalculateTransmissionTest._remove_test_file(direct_file_name)
+        SANSCreateWavelengthAndPixelAdjustmentTest._remove_test_file(direct_file_name)
 
 
 if __name__ == '__main__':
