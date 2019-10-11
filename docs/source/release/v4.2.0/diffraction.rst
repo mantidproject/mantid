@@ -21,6 +21,7 @@ Improvements
 - Geometry definition for LLB 5C1
 - :ref:`SNAPReduce <algm-SNAPReduce-v1>` has an additional parameter ``MaxChunkSize`` for customizing the chunking behavior
 - :ref:`LorentzCorrection <algm-LorentzCorrection-v1>` has an additional option for single crystal (default) or powder operation
+- The create_total_scattering_pdf method in Polaris scripts now supports merging banks with a weighted mean.
 
 Bug Fixes
 #########
