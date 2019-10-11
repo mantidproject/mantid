@@ -20,6 +20,34 @@ else:  # noqa
 
 from mantidqt.widgets.codeeditor.editor import CodeEditor
 
+ArgSpec = namedtuple("ArgSpec", "args varargs keywords defaults")
+
+
+def get_builtin_argspec(builtin):
+    """
+    Get the call tips for a builtin function from its docstring
+    :param builtin builtin: The builtin to generate call tips for
+    :return inspect.ArgSpec: The ArgSpec of the builtin. If no function
+        description is available in the docstring return None
+    """
+    doc_string = builtin.__doc__
+    if not doc_string:
+        return None
+    func_descriptor = doc_string.split('\n')[0].strip()
+    if re.search(builtin.__name__ + "\([\[\*a-zA-Z_].*\)", func_descriptor):
+        args_string = func_descriptor[func_descriptor.find('(') + 1:func_descriptor.rfind(')')]
+        all_args_list = args_string.split(', ')
+        args = []
+        defaults = []
+        for arg in all_args_list:
+            if '=' in arg:
+                args.append(arg.split('=')[0].strip())
+                defaults.append(arg.split('=')[1].strip())
+            else:
+                args.append(arg)
+        arg_spec = ArgSpec(args, None, None, defaults)
+        return arg_spec
+
 
 def get_function_spec(func):
     """
@@ -34,11 +62,15 @@ def get_function_spec(func):
         argspec = getfullargspec(func)
     except TypeError:
         try:
-            ArgSpec = namedtuple("ArgSpec", "args varargs keywords defaults")
             args_obj = inspect.getargs(func.__code__)
             argspec = ArgSpec(args_obj.args, args_obj.varargs, args_obj.varkw, defaults=None)
         except (TypeError, AttributeError, ValueError):
-            return ''
+            if inspect.isbuiltin(func):
+                argspec = get_builtin_argspec(func)
+                if not argspec:
+                    return ''
+            else:
+                return ''
     # mantid algorithm functions have varargs set not args
     args = argspec[0]
     if args:
@@ -73,8 +105,7 @@ def get_function_spec(func):
         return ''
 
     if defs is None:
-        call_tip = ', '.join(args)
-        call_tip = '(' + call_tip + ')'
+        call_tip = "({})".format(', '.join(args))
     else:
         # The defaults list contains the default values for the last n arguments
         diff = len(args) - len(defs)

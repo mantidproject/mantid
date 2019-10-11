@@ -15,7 +15,8 @@ import numpy as np  # noqa
 
 from mantid.simpleapi import Rebin  # noqa  # needed so sys.modules can pick up Rebin
 from mantid.py3compat.mock import Mock
-from mantidqt.widgets.codeeditor.completion import CodeCompleter, get_function_spec
+from mantidqt.widgets.codeeditor.completion import (CodeCompleter, get_function_spec,
+                                                    get_builtin_argspec)
 from testhelpers import assertRaisesNothing
 
 
@@ -75,6 +76,11 @@ class CodeCompletionTest(unittest.TestCase):
             pass
 
         self.assertEqual("(args, [**kwargs])", get_function_spec(my_new_function))
+
+    def test_get_builtin_argspec_generates_argspec_for_numpy_builtin(self):
+        argspec = get_builtin_argspec(np.zeros)
+        self.assertIn("shape, dtype, order", ', '.join(argspec.args))
+        self.assertIn("float, 'C'", ', '.join(argspec.defaults))
 
 
 if __name__ == '__main__':
