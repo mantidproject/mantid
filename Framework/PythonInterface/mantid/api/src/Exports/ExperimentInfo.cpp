@@ -18,7 +18,6 @@
 #include "MantidPythonInterface/core/Policies/RemoveConst.h"
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
-#include <boost/python/copy_non_const_reference.hpp>
 #include <boost/python/list.hpp>
 #include <boost/python/overloads.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
@@ -78,12 +77,12 @@ void export_ExperimentInfo() {
       .staticmethod("getInstrumentFilename")
 
       .def("sample", &ExperimentInfo::sample,
-           return_value_policy<copy_const_reference>(), args("self"),
+           return_value_policy<reference_existing_object>(), args("self"),
            "Return the :class:`~mantid.api.Sample` object. This cannot be "
            "modified, use mutableSample to modify.")
 
       .def("mutableSample", &ExperimentInfo::mutableSample,
-           return_value_policy<copy_non_const_reference>(), args("self"),
+           return_value_policy<reference_existing_object>(), args("self"),
            "Return a modifiable :class:`~mantid.api.Sample` object.")
 
       .def("run", &ExperimentInfo::run,

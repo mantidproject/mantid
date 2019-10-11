@@ -29,7 +29,7 @@ void export_Sample() {
   register_ptr_to_python<Sample *>();
   register_ptr_to_python<boost::shared_ptr<Sample>>();
 
-  class_<Sample>("Sample", no_init)
+  class_<Sample, boost::noncopyable>("Sample", no_init)
       .def("getName", &Sample::getName,
            return_value_policy<copy_const_reference>(), arg("self"),
            "Returns the string name of the sample")
