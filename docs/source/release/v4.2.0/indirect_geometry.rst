@@ -20,6 +20,16 @@ Improved
 :ref:`Release 4.2.0 <v4.2.0>`
 
 
+Algorithms
+----------
+
+Improvements
+############
+
+- :ref:`IndirectQuickRun <algm-IndirectQuickRun>` and :ref:`IndirectSampleChanger <algm-IndirectSampleChanger>` have been
+  extended to allow them to perform a Width Fit. This utilizes the new algorithm :ref:`IndirectTwoPeakFit <algm-IndirectTwoPeakFit>`.
+
+
 Data Analysis Interface
 -----------------------
 
