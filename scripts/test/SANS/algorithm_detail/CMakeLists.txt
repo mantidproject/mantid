@@ -7,6 +7,7 @@ set(TEST_PY_FILES
     merge_reductions_test.py
     move_workspaces_test.py
     normalize_to_sans_monitor_test.py
+    MoveSansInstrumentComponentTest.py
     q_resolution_calculator_test.py
     scale_helper_test.py
     strip_end_nans_test.py

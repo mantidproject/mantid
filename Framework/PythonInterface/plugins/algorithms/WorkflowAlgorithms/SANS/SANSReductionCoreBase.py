@@ -11,6 +11,7 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator)
 from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode, IEventWorkspace)
+from sans.algorithm_detail.MoveSansInstrumentComponent import MoveSansInstrumentComponent, MoveTypes
 
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 from sans.common.constants import EMPTY_NAME
@@ -113,25 +114,18 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
         slice_event_factor = slice_alg.getProperty("SliceEventFactor").value
         return workspace, monitor_workspace, slice_event_factor
 
-    def _move(self, state_serialized, workspace, component, is_transmission=False):
+    def _move(self, state, workspace, component, is_transmission=False):
         # First we set the workspace to zero, since it might have been moved around by the user in the ADS
         # Second we use the initial move to bring the workspace into the correct position
-        move_name = "SANSMove"
-        move_options = {"SANSState": state_serialized,
-                        "Workspace": workspace,
-                        "MoveType": "SetToZero",
-                        "Component": ""}
-        move_alg = create_child_algorithm(self, move_name, **move_options)
-        move_alg.execute()
-        workspace = move_alg.getProperty("Workspace").value
+        reset_alg = MoveSansInstrumentComponent(move_type=MoveTypes.RESET_POSITION)
+        reset_alg.move_component(component_name="", move_info=state.move,
+                                 workspace=workspace)
 
-        # Do the initial move
-        move_alg.setProperty("MoveType", "InitialMove")
-        move_alg.setProperty("Component", component)
-        move_alg.setProperty("Workspace", workspace)
-        move_alg.setProperty("IsTransmissionWorkspace", is_transmission)
-        move_alg.execute()
-        return move_alg.getProperty("Workspace").value
+        move_alg = MoveSansInstrumentComponent(move_type=MoveTypes.INITIAL_MOVE)
+        move_alg.move_component(component_name=component, move_info=state.move,
+                                workspace=workspace, is_transmission_workspace=is_transmission)
+
+        return workspace
 
     def _mask(self, state_serialized, workspace, component):
         mask_name = "SANSMaskWorkspace"
@@ -174,13 +168,17 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
                               "OutputWorkspaceWavelengthAdjustment": EMPTY_NAME,
                               "OutputWorkspacePixelAdjustment": EMPTY_NAME,
                               "OutputWorkspaceWavelengthAndPixelAdjustment": EMPTY_NAME}
+
+        state = self._get_state()
+
         if transmission_workspace:
-            transmission_workspace = self._move(state_serialized, transmission_workspace, component_as_string,
-                                                is_transmission=True)
+            transmission_workspace = self._move(state=state, workspace=transmission_workspace,
+                                                component=component_as_string, is_transmission=True)
             adjustment_options.update({"TransmissionWorkspace": transmission_workspace})
 
         if direct_workspace:
-            direct_workspace = self._move(state_serialized, direct_workspace, component_as_string, is_transmission=True)
+            direct_workspace = self._move(state=state, workspace=direct_workspace, component=component_as_string,
+                                          is_transmission=True)
             adjustment_options.update({"DirectWorkspace": direct_workspace})
 
         adjustment_alg = create_child_algorithm(self, adjustment_name, **adjustment_options)

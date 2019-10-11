@@ -13,6 +13,7 @@ import copy
 
 from mantid.kernel import Logger
 from mantid.api import (AnalysisDataService)
+from sans.algorithm_detail.MoveSansInstrumentComponent import MoveSansInstrumentComponent, MoveTypes
 from ui.sans_isis.masking_table import MaskingTable
 from sans.common.enums import DetectorType
 from sans.common.constants import EMPTY_NAME
@@ -88,22 +89,13 @@ def perform_load(serialized_state):
 
 
 def perform_move(state, workspace):
-    serialized_state = state.property_manager
-    move_name = "SANSMove"
+    move_info = state.move
 
-    zero_options = {"SANSState": serialized_state,
-                    "Workspace": workspace,
-                    "MoveType": "SetToZero",
-                    "Component": ""}
-    zero_alg = create_unmanaged_algorithm(move_name, **zero_options)
-    zero_alg.execute()
-    workspace = zero_alg.getProperty("Workspace").value
+    reset_alg = MoveSansInstrumentComponent(move_type=MoveTypes.RESET_POSITION)
+    reset_alg.move_component(move_info=move_info, component_name='', workspace=workspace)
 
-    move_options = {"SANSState": serialized_state,
-                    "Workspace": workspace,
-                    "MoveType": "InitialMove"}
-    move_alg = create_unmanaged_algorithm(move_name, **move_options)
-    move_alg.execute()
+    move_alg = MoveSansInstrumentComponent(move_type=MoveTypes.INITIAL_MOVE)
+    move_alg.move_component(component_name=None, move_info=move_info, workspace=workspace)
 
 
 def store_in_ads_as_hidden(workspace_name, workspace):
