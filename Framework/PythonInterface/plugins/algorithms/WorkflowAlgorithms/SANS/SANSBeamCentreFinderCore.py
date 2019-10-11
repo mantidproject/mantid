@@ -346,7 +346,8 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
             direct_workspace = self._move(state=state, workspace=direct_workspace,
                                           component=component_as_string, is_transmission=True)
 
-        alg = CreateSANSAdjustmentWorkspaces(data_type=data_type, state=state, component=component_as_string)
+        alg = CreateSANSAdjustmentWorkspaces(state_adjustment=state.adjustment,
+                                             data_type=data_type, component=component_as_string)
         returned_dict = alg.create_sans_adjustment_workspaces(direct_ws=direct_workspace, monitor_ws=monitor_workspace,
                                                               sample_data=workspace,
                                                               transmission_ws=transmission_workspace)

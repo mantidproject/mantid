@@ -83,7 +83,8 @@ class CreateSANSAdjustmentWorkspacesTest(unittest.TestCase):
         data_type = DataType.to_string(DataType.Sample) if is_sample else DataType.to_string(DataType.Can)
         component = DetectorType.to_string(DetectorType.LAB) if is_lab else DetectorType.to_string(DetectorType.HAB)
 
-        alg = CreateSANSAdjustmentWorkspaces(state=state, component=component, data_type=data_type)
+        alg = CreateSANSAdjustmentWorkspaces(state_adjustment=state.adjustment,
+                                             component=component, data_type=data_type)
         returned = alg.create_sans_adjustment_workspaces(direct_ws=direct_data,
                                                          monitor_ws=sample_monitor_data,
                                                          transmission_ws=transmission_data,

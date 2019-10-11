@@ -840,7 +840,7 @@ The dedicated work-flow algorithms for the SANS reduction are:
 - :ref:`SANSConvertToQ <algm-SANSConvertToQ>`
 - :ref:`SANSConvertToWavelength <algm-SANSConvertToWavelength>`
 - :ref:`SANSConvertToWavelengthAndRebin <algm-SANSConvertToWavelengthAndRebin>`
-- :ref:`SANSCreateWavelengthAndPixelAdjustment <algm-SANSCreateWavelengthAndPixelAdjustment>`
+- *Create SANS Wavelength Pixel Adjustment*
 - :ref:`SANSCrop <algm-SANSCrop>`
 - :ref:`SANSLoad <algm-SANSLoad>`
 - *SANSMaskWorkspace*
@@ -948,11 +948,10 @@ The algorithm performs the following steps:
 2. Performs a rebin operation using either :ref:`Rebin <algm-Rebin>` or :ref:`InterpolatingRebin <algm-InterpolatingRebin>`
 
 
-*SANSCreateWavelengthAndPixelAdjustment*
+*Create SANS Wavelength and Pixel Adjustment*
 -------------------------------------------
 
-The :ref:`SANSCreateWavelengthAndPixelAdjustment <algm-SANSCreateWavelengthAndPixelAdjustment>`
-algorithm combines the output of the *Calculate SANS Transmission* step,
+This step combines the output of the *Calculate SANS Transmission* step,
 the output of the *Normalize To SANS Monitor*,
 and flood and direct files to produce the correction workspaces which are required
 for :ref:`SANSConvertToQ <algm-SANSConvertToQ>`.

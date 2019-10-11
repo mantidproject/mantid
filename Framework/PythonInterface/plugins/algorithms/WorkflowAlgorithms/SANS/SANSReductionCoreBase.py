@@ -168,7 +168,8 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
             direct_workspace = self._move(state=state, workspace=direct_workspace, component=component_as_string,
                                           is_transmission=True)
 
-        alg = CreateSANSAdjustmentWorkspaces(data_type=data_type, state=state, component=component_as_string)
+        alg = CreateSANSAdjustmentWorkspaces(state_adjustment=state.adjustment,
+                                             component=component_as_string, data_type=data_type)
         returned_dict = alg.create_sans_adjustment_workspaces(direct_ws=direct_workspace, monitor_ws=monitor_workspace,
                                                               sample_data=workspace,
                                                               transmission_ws=transmission_workspace)

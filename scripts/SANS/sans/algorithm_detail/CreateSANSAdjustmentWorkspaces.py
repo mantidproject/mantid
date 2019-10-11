@@ -5,23 +5,24 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
-""" SANSCreateAdjustmentWorkspaces algorithm creates workspaces for pixel adjustment
-    , wavelength adjustment and pixel-and-wavelength adjustment workspaces.
+""" CreateSANSAdjustmentWorkspaces algorithm creates workspaces for pixel adjustment,
+    wavelength adjustment and pixel-and-wavelength adjustment workspaces.
 """
 
 from __future__ import (absolute_import, division, print_function)
 
 from sans.algorithm_detail.CalculateSANSTransmission import CalculateSANSTransmission
+from sans.algorithm_detail.CreateSANSWavelengthPixelAdjustment import CreateSANSWavelengthPixelAdjustment
 from sans.algorithm_detail.NormalizeToSANSMonitor import NormalizeToSANSMonitor
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_unmanaged_algorithm
 
 
-class CreateSANSAdjustmentWorkspaces(object, ):
-    def __init__(self, state, component, data_type, slice_event_factor=1.0):
+class CreateSANSAdjustmentWorkspaces(object):
+    def __init__(self, state_adjustment, component, data_type, slice_event_factor=1.0):
         """
         Calculates wavelength adjustment, pixel adjustment workspaces and wavelength-and-pixel adjustment workspaces.
-        :param state: The SANS State object
+        :param state: The SANS State -> Adjustment object
         :param component: The component of the instrument which is currently being investigated.
                           Allowed values: ['HAB', 'LAB']
         :param data_type: The component of the instrument which is to be reduced.
@@ -32,7 +33,7 @@ class CreateSANSAdjustmentWorkspaces(object, ):
         self._component = component
         self._data_type = data_type
         self._slice_event_factor = slice_event_factor
-        self._state = state
+        self._state = state_adjustment
 
     def create_sans_adjustment_workspaces(self, transmission_ws, direct_ws, monitor_ws, sample_data):
         """
@@ -49,8 +50,6 @@ class CreateSANSAdjustmentWorkspaces(object, ):
                  calculated_trans_ws : The calculated transmission workspace
                  unfitted_trans_ws : The unfitted transmission workspace
         """
-        # Read the state
-
         # --------------------------------------
         # Get the monitor normalization workspace
         # --------------------------------------
@@ -90,31 +89,22 @@ class CreateSANSAdjustmentWorkspaces(object, ):
                                                         calculated_transmission_workspace):
         component = self._component
 
-        # TODO change this to use update CreateWavelengthAndPixelAdj
-        # TODO Do NOT Merge till this is done
+        state_adjust = self._state.wavelength_and_pixel_adjustment
 
-        wave_pixel_adjustment_name = "SANSCreateWavelengthAndPixelAdjustment"
-        serialized_state = self._state.property_manager
-        wave_pixel_adjustment_options = {"SANSState": serialized_state,
-                                         "NormalizeToMonitorWorkspace": monitor_normalization_workspace,
-                                         "OutputWorkspaceWavelengthAdjustment": EMPTY_NAME,
-                                         "OutputWorkspacePixelAdjustment": EMPTY_NAME,
-                                         "Component": component}
-        if calculated_transmission_workspace:
-            wave_pixel_adjustment_options.update({"TransmissionWorkspace": calculated_transmission_workspace})
-        wave_pixel_adjustment_alg = create_unmanaged_algorithm(wave_pixel_adjustment_name,
-                                                               **wave_pixel_adjustment_options)
+        alg = CreateSANSWavelengthPixelAdjustment(component=component,
+                                                  state_adjustment_wavelength_and_pixel=state_adjust)
 
-        wave_pixel_adjustment_alg.execute()
-        wavelength_out = wave_pixel_adjustment_alg.getProperty("OutputWorkspaceWavelengthAdjustment").value
-        pixel_out = wave_pixel_adjustment_alg.getProperty("OutputWorkspacePixelAdjustment").value
+        wavelength_out, pixel_out = \
+            alg.create_sans_wavelength_and_pixel_adjustment(monitor_norm_ws=monitor_normalization_workspace,
+                                                            transmission_ws=calculated_transmission_workspace)
+
         return wavelength_out, pixel_out
 
     def _get_monitor_normalization_workspace(self, monitor_ws):
         state = self._state
         scale_factor = self._slice_event_factor
 
-        alg = NormalizeToSANSMonitor(state_adjustment_normalize_to_monitor=state.adjustment.normalize_to_monitor)
+        alg = NormalizeToSANSMonitor(state_adjustment_normalize_to_monitor=state.normalize_to_monitor)
         ws = alg.normalize_to_monitor(workspace=monitor_ws, scale_factor=scale_factor)
 
         return ws
@@ -130,7 +120,7 @@ class CreateSANSAdjustmentWorkspaces(object, ):
 
         if transmission_ws and direct_ws:
             data_type = self._data_type
-            calc_trans_state = self._state.adjustment.calculate_transmission
+            calc_trans_state = self._state.calculate_transmission
             alg = CalculateSANSTransmission(data_type_str=data_type,
                                             state_adjustment_calculate_transmission=calc_trans_state)
 
@@ -139,7 +129,7 @@ class CreateSANSAdjustmentWorkspaces(object, ):
         return fitted_data, unfitted_data
 
     def _get_wide_angle_correction_workspace(self, sample_data, calculated_transmission_workspace):
-        wide_angle_correction = self._state.adjustment.wide_angle_correction
+        wide_angle_correction = self._state.wide_angle_correction
 
         workspace = None
         if wide_angle_correction and sample_data and calculated_transmission_workspace:
