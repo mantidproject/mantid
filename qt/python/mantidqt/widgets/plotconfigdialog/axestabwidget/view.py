@@ -55,10 +55,10 @@ class AxesTabWidgetView(QWidget):
 
     # X-Axis getters
     def get_xlower_limit(self):
-        return self.xlower_limit_line_edit.text()
+        return float(self.xlower_limit_line_edit.text())
 
     def get_xupper_limit(self):
-        return self.xupper_limit_line_edit.text()
+        return float(self.xupper_limit_line_edit.text())
 
     def get_xlabel(self):
         return self.xlabel_line_edit.text()
@@ -68,10 +68,10 @@ class AxesTabWidgetView(QWidget):
 
     # Y-Axis getters
     def get_ylower_limit(self):
-        return self.ylower_limit_line_edit.text()
+        return float(self.ylower_limit_line_edit.text())
 
     def get_yupper_limit(self):
-        return self.yupper_limit_line_edit.text()
+        return float(self.yupper_limit_line_edit.text())
 
     def get_ylabel(self):
         return self.ylabel_line_edit.text()
