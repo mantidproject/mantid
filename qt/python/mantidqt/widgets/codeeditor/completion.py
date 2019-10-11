@@ -5,6 +5,25 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
+"""
+There was some time spent looking into using jedi for the completions.
+jedi performs static analysis on code, which aims to provide completions
+from modules and objects without needing to run any code. Because of
+this, jedi needed to be updated almost every time the cursor position
+was changed. This reduced the script editors performance especially when
+analyzing large modules like numpy (not to an unusable level, but it was
+noticeable).
+
+Further, jedi could not statically pick-up many of the simpleapi
+algorithms, which are defined dynamically, so we had to provide these
+ourselves anyway. jedi also caused workbench to crash when launching
+through PyCharm's debugger using Python 2 (it ran fine when launched
+normally - I think the cause was something to do with the debugging
+process interfering with jedi's subprocess).
+
+For these reasons it was agreed jedi would be dropped, possibly
+revisiting when we move to Python 3.
+"""
 
 from __future__ import (absolute_import, unicode_literals)
 
@@ -165,7 +184,7 @@ def generate_call_tips(definitions, prepend_module_name=None):
     return call_tips
 
 
-class CodeCompleter:
+class CodeCompleter(object):
     """
     This class generates autocompletions for Workbench's script editor.
     It generates autocompletions from environment globals. These completions
