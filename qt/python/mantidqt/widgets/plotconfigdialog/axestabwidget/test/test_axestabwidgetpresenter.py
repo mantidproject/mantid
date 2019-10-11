@@ -41,6 +41,10 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
 
     def _generate_presenter(self):
         mock_view = mock.Mock(get_selected_ax_name=lambda: "My Axes: (0, 0)")
+        mock_view.get_xlower_limit.return_value = 0
+        mock_view.get_xupper_limit.return_value = 5
+        mock_view.get_ylower_limit.return_value = 0
+        mock_view.get_yupper_limit.return_value = 5
         return Presenter(self.fig, view=mock_view)
 
     def test_generate_ax_name_returns_correct_name(self):
@@ -142,6 +146,10 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
                          ax.get_ylim()[1], self.x_label, self.y_label,
                          self.x_scale, self.y_scale]
         with mock.patch.object(presenter, 'view', new_view_mock):
+            new_view_mock.get_xlower_limit.return_value = 0
+            new_view_mock.get_xupper_limit.return_value = 5
+            new_view_mock.get_ylower_limit.return_value = 0
+            new_view_mock.get_yupper_limit.return_value = 5
             presenter.update_view()
             for setter, value in zip(setters, expected_vals):
                 getattr(new_view_mock, setter).assert_called_once_with(value)

@@ -37,13 +37,8 @@ class AxProperties(dict):
     def from_view(cls, view):
         props = dict()
         props['title'] = view.get_title()
-
-        try:
-            props['xlim'] = (float(view.get_xlower_limit()), float(view.get_xupper_limit()))
-            props['ylim'] = (float(view.get_ylower_limit()), float(view.get_yupper_limit()))
-        except TypeError:
-            props['xlim'] = (view.get_xlower_limit(), view.get_xupper_limit())
-            props['ylim'] = (view.get_ylower_limit(), view.get_yupper_limit())
+        props['xlim'] = (float(view.get_xlower_limit()), float(view.get_xupper_limit()))
+        props['ylim'] = (float(view.get_ylower_limit()), float(view.get_yupper_limit()))
         props['xlabel'] = view.get_xlabel()
         props['xscale'] = view.get_xscale()
         props['ylabel'] = view.get_ylabel()
