@@ -140,12 +140,29 @@ class FigureInteraction(object):
                 self._show_axis_editor(event)
             elif len(marker_selected) == 1:
                 self._edit_marker(marker_selected[0])
-        elif (self.toolbar_manager.is_zoom_active()
-              and event.button == canvas.buttond.get(Qt.MiddleButton)):
-            self.toolbar_manager.emit_sig_home_clicked()
+        elif event.button == canvas.buttond.get(Qt.MiddleButton):
+            if self.toolbar_manager.is_zoom_active():
+                self.toolbar_manager.emit_sig_home_clicked()
+            # Activate pan on middle button press
+            elif not self.toolbar_manager.is_tool_active():
+                if event.inaxes and event.inaxes.can_pan():
+                    event.button = 1
+                    try:
+                        self.canvas.toolbar.press_pan(event)
+                    finally:
+                        event.button = 3
 
     def on_mouse_button_release(self, event):
         """ Stop moving the markers when the mouse button is released """
+        # Release pan on middle button release
+        if event.button == self.canvas.buttond.get(Qt.MiddleButton):
+            if not self.toolbar_manager.is_tool_active():
+                event.button = 1
+                try:
+                    self.canvas.toolbar.release_pan(event)
+                finally:
+                    event.button = 3
+
         if self.toolbar_manager.is_tool_active():
             for marker in self.markers:
                 marker.add_all_annotations()
