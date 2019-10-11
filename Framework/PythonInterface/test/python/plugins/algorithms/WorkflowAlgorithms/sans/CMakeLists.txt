@@ -1,7 +1,6 @@
 # Tests for ISIS SANS
 
 set(TEST_PY_FILES
-    SANSCalculateTransmissionTest.py
     SANSConvertToQTest.py
     SANSConvertToWavelengthTest.py
     SANSCreateAdjustmentWorkspacesTest.py

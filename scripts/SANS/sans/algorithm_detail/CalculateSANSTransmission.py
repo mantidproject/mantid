@@ -1,78 +1,52 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-# pylint: disable=invalid-name
-
-""" SANSCalculateTransmission algorithm calculates the transmission correction of a SANS workspace."""
 from __future__ import (absolute_import, division, print_function)
-from mantid.kernel import (Direction, StringListValidator, PropertyManagerProperty)
-from mantid.api import (ParallelDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode)
-from sans.common.constants import EMPTY_NAME
-from sans.common.general_functions import create_unmanaged_algorithm
-from sans.common.enums import (RangeStepType, RebinType, FitType, DataType)
-from sans.state.state_base import create_deserialized_sans_state_from_property_manager
+
 from sans.algorithm_detail.calculate_transmission_helper import (get_detector_id_for_spectrum_number,
                                                                  get_workspace_indices_for_monitors,
                                                                  apply_flat_background_correction_to_monitors,
                                                                  apply_flat_background_correction_to_detectors,
                                                                  get_region_of_interest)
+from sans.common.constants import EMPTY_NAME
+from sans.common.enums import (RangeStepType, RebinType, FitType, DataType)
+from sans.common.general_functions import create_unmanaged_algorithm
 
 
-class SANSCalculateTransmission(ParallelDataProcessorAlgorithm):
-    def category(self):
-        return 'SANS\\Adjust'
+class CalculateSANSTransmission(object):
+    def __init__(self, state_adjustment_calculate_transmission, data_type_str):
+        """
+        Calculates the transmission for a SANS reduction.
+        :param data_type_str:  	The component of the instrument which is to be reduced. Allowed values: ['Sample', 'Can']
+        """
+        self._state = state_adjustment_calculate_transmission
+        self._data_type_str = data_type_str
 
-    def summary(self):
-        return 'Calculates the transmission for a SANS reduction.'
-
-    def PyInit(self):
-        # State
-        self.declareProperty(PropertyManagerProperty('SANSState'),
-                             doc='A property manager which fulfills the SANSState contract.')
-
-        # Input workspace in TOF
-        self.declareProperty(MatrixWorkspaceProperty("TransmissionWorkspace", '',
-                                                     optional=PropertyMode.Mandatory, direction=Direction.Input),
-                             doc='The transmission workspace in time-of-flight units.')
-        self.declareProperty(MatrixWorkspaceProperty("DirectWorkspace", '',
-                                                     optional=PropertyMode.Mandatory, direction=Direction.Input),
-                             doc='The direct workspace in time-of-flight units.')
-        allowed_data = StringListValidator([DataType.to_string(DataType.Sample),
-                                            DataType.to_string(DataType.Can)])
-        self.declareProperty("DataType", DataType.to_string(DataType.Sample),
-                             validator=allowed_data, direction=Direction.Input,
-                             doc="The component of the instrument which is to be reduced.")
-
-        # Output workspace
-        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", '', direction=Direction.Output),
-                             doc='A calculated transmission workspace in units of wavelength.')
-        self.declareProperty(MatrixWorkspaceProperty("UnfittedData", '', direction=Direction.Output),
-                             doc='An unfitted data in units of wavelength.')
-
-    def PyExec(self):
-        # Read the state
-        state_property_manager = self.getProperty("SANSState").value
-        state = create_deserialized_sans_state_from_property_manager(state_property_manager)
-        calculate_transmission_state = state.adjustment.calculate_transmission
+    def calculate_transmission(self, transmission_ws, direct_ws):
+        """
+        Calculates the transmission for a SANS reduction.
+        :param transmission_ws: The transmission workspace in time-of-flight units.
+        :param direct_ws: The direct workspace in time-of-flight units.
+        :return: Tuple of: Output Workspace and Unfitted Data - Both in wavelength
+        """
+        calculate_transmission_state = self._state
         # The calculation of the transmission has the following steps:
         # 1. Get all spectrum numbers which take part in the transmission calculation
         # 2. Clean up the transmission and direct workspaces, ie peak prompt correction, flat background calculation,
         #    wavelength conversion and rebinning of the data.
         # 3. Run the CalculateTransmission algorithm
-        transmission_workspace = self.getProperty("TransmissionWorkspace").value
-        direct_workspace = self.getProperty("DirectWorkspace").value
         incident_monitor_spectrum_number = calculate_transmission_state.incident_monitor
         if incident_monitor_spectrum_number is None:
             incident_monitor_spectrum_number = calculate_transmission_state.default_incident_monitor
 
         # 1. Get relevant spectra
-        detector_id_incident_monitor = get_detector_id_for_spectrum_number(transmission_workspace,
+        detector_id_incident_monitor = get_detector_id_for_spectrum_number(transmission_ws,
                                                                            incident_monitor_spectrum_number)
         detector_ids_roi, detector_id_transmission_monitor, detector_id_default_transmission_monitor = \
-            self._get_detector_ids_for_transmission_calculation(transmission_workspace, calculate_transmission_state)
+            self._get_detector_ids_for_transmission_calculation(transmission_ws, calculate_transmission_state)
         all_detector_ids = [detector_id_incident_monitor]
 
         if len(detector_ids_roi) > 0:
@@ -85,24 +59,24 @@ class SANSCalculateTransmission(ParallelDataProcessorAlgorithm):
             raise RuntimeError("SANSCalculateTransmission: No region of interest or transmission monitor selected.")
 
         # 2. Clean transmission data
-        data_type_string = self.getProperty("DataType").value
-        data_type = DataType.from_string(data_type_string)
-        transmission_workspace = self._get_corrected_wavelength_workspace(transmission_workspace, all_detector_ids,
-                                                                          calculate_transmission_state)
-        direct_workspace = self._get_corrected_wavelength_workspace(direct_workspace, all_detector_ids,
-                                                                    calculate_transmission_state)
+
+        transmission_ws = self._get_corrected_wavelength_workspace(transmission_ws, all_detector_ids,
+                                                                   calculate_transmission_state)
+        direct_ws = self._get_corrected_wavelength_workspace(direct_ws, all_detector_ids,
+                                                             calculate_transmission_state)
+
+        data_type = DataType.from_string(self._data_type_str)
 
         # 3. Fit
         output_workspace, unfitted_transmission_workspace = \
-            self._perform_fit(transmission_workspace, direct_workspace, detector_ids_roi,
+            self._perform_fit(transmission_ws, direct_ws, detector_ids_roi,
                               detector_id_transmission_monitor, detector_id_default_transmission_monitor,
                               detector_id_incident_monitor, calculate_transmission_state, data_type)
 
-        self.setProperty("OutputWorkspace", output_workspace)
-        if unfitted_transmission_workspace:
-            self.setProperty("UnfittedData", unfitted_transmission_workspace)
+        return output_workspace, unfitted_transmission_workspace
 
-    def _perform_fit(self, transmission_workspace, direct_workspace,
+    @staticmethod
+    def _perform_fit(transmission_workspace, direct_workspace,
                      transmission_roi_detector_ids, transmission_monitor_detector_id,
                      transmission_monitor_detector_id_default, incident_monitor_detector_id,
                      calculate_transmission_state, data_type):
@@ -183,7 +157,8 @@ class SANSCalculateTransmission(ParallelDataProcessorAlgorithm):
             output_workspace = fitted_transmission_workspace
         return output_workspace, unfitted_transmission_workspace
 
-    def _get_detector_ids_for_transmission_calculation(self, transmission_workspace, calculate_transmission_state):
+    @staticmethod
+    def _get_detector_ids_for_transmission_calculation(transmission_workspace, calculate_transmission_state):
         """
         Get the detector ids which participate in the transmission calculation.
 
@@ -287,11 +262,10 @@ class SANSCalculateTransmission(ParallelDataProcessorAlgorithm):
             wavelength_low = calculate_transmission_state.wavelength_full_range_low
             wavelength_high = calculate_transmission_state.wavelength_full_range_high
         else:
-            data_type_string = self.getProperty("DataType").value
-            fit_state = calculate_transmission_state.fit[data_type_string]
-            wavelength_low = fit_state.wavelength_low if fit_state.wavelength_low\
+            fit_state = calculate_transmission_state.fit[self._data_type_str]
+            wavelength_low = fit_state.wavelength_low if fit_state.wavelength_low \
                 else calculate_transmission_state.wavelength_low[0]
-            wavelength_high = fit_state.wavelength_high if fit_state.wavelength_high\
+            wavelength_high = fit_state.wavelength_high if fit_state.wavelength_high \
                 else calculate_transmission_state.wavelength_high[0]
 
         wavelength_step = calculate_transmission_state.wavelength_step
@@ -311,7 +285,8 @@ class SANSCalculateTransmission(ParallelDataProcessorAlgorithm):
         convert_alg.execute()
         return convert_alg.getProperty("OutputWorkspace").value
 
-    def _perform_prompt_peak_correction(self, workspace, prompt_peak_correction_min, prompt_peak_correction_max,
+    @staticmethod
+    def _perform_prompt_peak_correction(workspace, prompt_peak_correction_min, prompt_peak_correction_max,
                                         prompt_peak_correction_enabled):
         """
         Prompt peak correction is performed if it is explicitly set by the user.
@@ -325,7 +300,7 @@ class SANSCalculateTransmission(ParallelDataProcessorAlgorithm):
         # We perform only a prompt peak correction if the start and stop values of the bins we want to remove,
         # were explicitly set. Some instruments require it, others don't.
         if prompt_peak_correction_enabled and prompt_peak_correction_min is not None and \
-                        prompt_peak_correction_max is not None:  # noqa
+                prompt_peak_correction_max is not None:  # noqa
             remove_name = "RemoveBins"
             remove_options = {"InputWorkspace": workspace,
                               "XMin": prompt_peak_correction_min,
@@ -337,46 +312,3 @@ class SANSCalculateTransmission(ParallelDataProcessorAlgorithm):
             remove_alg.execute()
             workspace = remove_alg.getProperty("OutputWorkspace").value
         return workspace
-
-    def validateInputs(self):
-        errors = dict()
-        # Check that the input can be converted into the right state object
-        state_property_manager = self.getProperty("SANSState").value
-        try:
-            state = create_deserialized_sans_state_from_property_manager(state_property_manager)
-            state.property_manager = state_property_manager
-            state.validate()
-        except ValueError as err:
-            errors.update({"SANSCalculateTransmission": str(err)})
-            state = None
-
-        if state is not None:
-            transmission_workspace = self.getProperty("TransmissionWorkspace").value
-            calculate_transmission_state = state.adjustment.calculate_transmission
-            try:
-                incident_monitor = calculate_transmission_state.incident_monitor
-                if incident_monitor is None:
-                    incident_monitor = calculate_transmission_state.default_incident_monitor
-                transmission_workspace.getIndexFromSpectrumNumber(incident_monitor)
-            except RuntimeError:
-                errors.update({"IncidentMonitorSpectrumNumber": "The spectrum number for the incident monitor spectrum "
-                                                                "does not seem to exist for the transmission"
-                                                                " workspace."})
-
-        if state is not None:
-            calculate_transmission_state = state.adjustment.calculate_transmission
-            fit = calculate_transmission_state.fit
-            data_type_string = self.getProperty("DataType").value
-            data_type = DataType.from_string(data_type_string)
-            sample = fit[DataType.to_string(DataType.Sample)]
-            can = fit[DataType.to_string(DataType.Can)]
-            if data_type is DataType.Sample and sample.fit_type is None:
-                errors.update({"DataType": "There does not seem to be a fit type set for the selected data type"})
-            if data_type is DataType.Can and can.fit_type is None:
-                errors.update({"DataType": "There does not seem to be a fit type set for the selected data type"})
-
-        return errors
-
-
-# Register algorithm with Mantid
-AlgorithmFactory.subscribe(SANSCalculateTransmission)
