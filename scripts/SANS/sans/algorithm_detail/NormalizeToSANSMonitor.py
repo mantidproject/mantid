@@ -9,53 +9,24 @@
 """ SANSNormalizeToMonitor algorithm calculates the normalization to the monitor."""
 
 from __future__ import (absolute_import, division, print_function)
-from mantid.kernel import (Direction, FloatBoundedValidator, PropertyManagerProperty)
-from mantid.api import (ParallelDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode)
+
 from sans.common.constants import EMPTY_NAME
-from sans.common.general_functions import create_unmanaged_algorithm
 from sans.common.enums import RebinType, RangeStepType
-from sans.state.state_base import create_deserialized_sans_state_from_property_manager
+from sans.common.general_functions import create_unmanaged_algorithm
 
 
-class SANSNormalizeToMonitor(ParallelDataProcessorAlgorithm):
-    def category(self):
-        return 'SANS\\Adjust'
+class NormalizeToSANSMonitor(object):
+    def __init__(self, state_adjustment_normalize_to_monitor):
+        self._state = state_adjustment_normalize_to_monitor
 
-    def summary(self):
-        return 'Calculates a monitor normalization workspace for a SANS reduction.'
-
-    def PyInit(self):
-        # State
-        self.declareProperty(PropertyManagerProperty('SANSState'),
-                             doc='A property manager which fulfills the SANSState contract.')
-
-        # Input workspace in TOF
-        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", '',
-                                                     optional=PropertyMode.Mandatory, direction=Direction.Input),
-                             doc='The monitor workspace in time-of-flight units.')
-
-        # A scale factor which could come from event workspace slicing. If the actual data workspace was sliced,
-        # then one needs to scale the monitor measurement proportionally. This input is intended for this matter
-        self.declareProperty('ScaleFactor', defaultValue=1.0, direction=Direction.Input,
-                             validator=FloatBoundedValidator(0.0),
-                             doc='Optional scale factor for the input workspace.')
-
-        # Output workspace
-        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", '', direction=Direction.Output),
-                             doc='A monitor normalization workspace in units of wavelength.')
-
-    def PyExec(self):
-        # Read the state
-        state_property_manager = self.getProperty("SANSState").value
-        state = create_deserialized_sans_state_from_property_manager(state_property_manager)
-        normalize_to_monitor_state = state.adjustment.normalize_to_monitor
+    def normalize_to_monitor(self, workspace, scale_factor=1.0):
+        normalize_to_monitor_state = self._state
 
         # 1. Extract the spectrum of the incident monitor
         incident_monitor_spectrum_number = normalize_to_monitor_state.incident_monitor
-        workspace = self._extract_monitor(incident_monitor_spectrum_number)
+        workspace = self._extract_monitor(workspace=workspace, spectrum_number=incident_monitor_spectrum_number)
 
         # 2. Multiply the workspace by the specified scaling factor.
-        scale_factor = self.getProperty("ScaleFactor").value
         if scale_factor != 1.0:
             workspace = self._scale(workspace, scale_factor)
 
@@ -68,9 +39,10 @@ class SANSNormalizeToMonitor(ParallelDataProcessorAlgorithm):
         # 5. Convert to wavelength with the specified bin settings.
         workspace = self._convert_to_wavelength(workspace, normalize_to_monitor_state)
 
-        self.setProperty("OutputWorkspace", workspace)
+        return workspace
 
-    def _scale(self, workspace, factor):
+    @staticmethod
+    def _scale(workspace, factor):
         """
         The incident monitor is scaled by a factor.
 
@@ -90,16 +62,16 @@ class SANSNormalizeToMonitor(ParallelDataProcessorAlgorithm):
         scale_alg.execute()
         return scale_alg.getProperty("OutputWorkspace").value
 
-    def _extract_monitor(self, spectrum_number):
+    @staticmethod
+    def _extract_monitor(workspace, spectrum_number):
         """
         The extracts a single spectrum from the input workspace.
 
         We are only interested in the incident monitor here.
+        :param workspace: The workspace to extract from
         :param spectrum_number: the spectrum number of the incident beam monitor.
         :return: a workspace which only contains the incident beam spectrum.
         """
-        workspace = self.getProperty("InputWorkspace").value
-
         workspace_index = workspace.getIndexFromSpectrumNumber(spectrum_number)
         extract_name = "ExtractSingleSpectrum"
         extract_options = {"InputWorkspace": workspace,
@@ -109,7 +81,8 @@ class SANSNormalizeToMonitor(ParallelDataProcessorAlgorithm):
         extract_alg.execute()
         return extract_alg.getProperty("OutputWorkspace").value
 
-    def _perform_prompt_peak_correction(self, workspace, normalize_to_monitor_state):
+    @staticmethod
+    def _perform_prompt_peak_correction(workspace, normalize_to_monitor_state):
         """
         Performs a prompt peak correction.
 
@@ -139,7 +112,8 @@ class SANSNormalizeToMonitor(ParallelDataProcessorAlgorithm):
             workspace = remove_alg.getProperty("OutputWorkspace").value
         return workspace
 
-    def _perform_flat_background_correction(self, workspace, normalize_to_monitor_state):
+    @staticmethod
+    def _perform_flat_background_correction(workspace, normalize_to_monitor_state):
         """
         Removes an offset from the monitor data.
 
@@ -178,7 +152,8 @@ class SANSNormalizeToMonitor(ParallelDataProcessorAlgorithm):
             workspace = flat_alg.getProperty("OutputWorkspace").value
         return workspace
 
-    def _convert_to_wavelength(self, workspace, normalize_to_monitor_state):
+    @staticmethod
+    def _convert_to_wavelength(workspace, normalize_to_monitor_state):
         """
         Converts the workspace from time-of-flight units to wavelength units
 
@@ -204,19 +179,3 @@ class SANSNormalizeToMonitor(ParallelDataProcessorAlgorithm):
         convert_alg.setProperty("OutputWorkspace", workspace)
         convert_alg.execute()
         return convert_alg.getProperty("OutputWorkspace").value
-
-    def validateInputs(self):
-        errors = dict()
-        # Check that the input can be converted into the right state object
-        state_property_manager = self.getProperty("SANSState").value
-        try:
-            state = create_deserialized_sans_state_from_property_manager(state_property_manager)
-            state.property_manager = state_property_manager
-            state.validate()
-        except ValueError as err:
-            errors.update({"SANSNormalizeToMonitor": str(err)})
-        return errors
-
-
-# Register algorithm with Mantid
-AlgorithmFactory.subscribe(SANSNormalizeToMonitor)

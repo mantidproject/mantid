@@ -14,6 +14,7 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator, CompositeValidator)
 from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
                         WorkspaceUnitValidator)
+from sans.algorithm_detail.NormalizeToSANSMonitor import NormalizeToSANSMonitor
 
 from sans.common.constants import EMPTY_NAME
 from sans.common.enums import (DataType, DetectorType)
@@ -163,7 +164,7 @@ class SANSCreateAdjustmentWorkspaces(DistributedDataProcessorAlgorithm):
 
     def _get_monitor_normalization_workspace(self, state):
         """
-        Gets the monitor normalization workspace via the SANSNormalizeToMonitor algorithm
+        Gets the monitor normalization workspace via the NormalizeToSansMonitor algorithm
 
         :param state: a SANSState object.
         :return: the normalization workspace.
@@ -171,15 +172,9 @@ class SANSCreateAdjustmentWorkspaces(DistributedDataProcessorAlgorithm):
         monitor_workspace = self.getProperty("MonitorWorkspace").value
         scale_factor = self.getProperty("SliceEventFactor").value
 
-        normalize_name = "SANSNormalizeToMonitor"
-        serialized_state = state.property_manager
-        normalize_option = {"InputWorkspace": monitor_workspace,
-                            "OutputWorkspace": EMPTY_NAME,
-                            "SANSState": serialized_state,
-                            "ScaleFactor": scale_factor}
-        normalize_alg = create_unmanaged_algorithm(normalize_name, **normalize_option)
-        normalize_alg.execute()
-        ws = normalize_alg.getProperty("OutputWorkspace").value
+        alg = NormalizeToSANSMonitor(state_adjustment_normalize_to_monitor=state.adjustment.normalize_to_monitor)
+        ws = alg.normalize_to_monitor(workspace=monitor_workspace, scale_factor=scale_factor)
+
         return ws
 
     def _get_calculated_transmission_workspace(self, state):

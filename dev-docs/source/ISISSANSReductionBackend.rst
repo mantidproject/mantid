@@ -845,7 +845,7 @@ The dedicated work-flow algorithms for the SANS reduction are:
 - :ref:`SANSLoad <algm-SANSLoad>`
 - *SANSMaskWorkspace*
 - *SANSMove*
-- *SANSNormalizeToMonitor*
+- *Normalize To Monitor*
 - *SANSSave*
 - *SANSScale*
 - *SANSSliceEvent*
@@ -957,7 +957,7 @@ The algorithm performs the following steps:
 
 The :ref:`SANSCreateWavelengthAndPixelAdjustment <algm-SANSCreateWavelengthAndPixelAdjustment>`
 algorithm combines the output of the :ref:`SANSCalculateTransmission <algm-SANSCalculateTransmission>`
-algorithm, the output of the :ref:`SANSNormalizeToMonitor <algm-SANSNormalizeToMonitor>` algorithm
+algorithm, the output of the *Normalize To SANS Monitor*
 and flood and direct files to produce the correction workspaces which are required
 for :ref:`SANSConvertToQ <algm-SANSConvertToQ>`.
 
@@ -1095,16 +1095,15 @@ this is achieved by a combination of translations and rotations using
 :ref:`RotateInstrumentComponent <algm-RotateInstrumentComponent>`.
 
 
-*SANSNormalizeToMonitor*
+*Normalize To SANS Monitor*
 --------------------------
 
-The :ref:`SANSNormalizeToMonitor <algm-SANSNormalizeToMonitor>` algorithm
-provides a monitor normalization workspace for subsequent wavelength correction
-in :ref:`algm-Q1D` or :ref:`algm-Qxy`. The settings of the algorithm are
-provided by the state object. The user can provide a *ScaleFactor* which is
+This step provides a monitor normalization workspace for subsequent 
+wavelength correction in :ref:`algm-Q1D` or :ref:`algm-Qxy`. 
+The user can provide a *ScaleFactor* which is
 normally obtained during event slicing.
 
-The sub-steps of this algorithm are:
+The sub-steps of this step are:
 
 1. Get the incident monitor spectrum number and the scale factor
 2. Extract the monitor spectrum using :ref:`ExtractSingleSpectrum <algm-ExtractSingleSpectrum>` into a monitor workspace

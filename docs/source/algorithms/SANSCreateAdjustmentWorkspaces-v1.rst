@@ -34,7 +34,7 @@ The elements are:
 |                                 |           | :ref:`algm-SANSCalculateTransmission`             |           |        |
 +---------------------------------+-----------+---------------------------------------------------+-----------+--------+
 | normalize_to_monitor            | sub state | State used in                                     | Yes       | None   |
-|                                 |           | :ref:`algm-SANSNormalizeToMonitor`                |           |        |
+|                                 |           | *Normalize To SANS Monitors step*                 |           |        |
 +---------------------------------+-----------+---------------------------------------------------+-----------+--------+
 | wavelength_and_pixel_adjustment | sub state | State used in                                     | Yes       | None   |
 |                                 |           | :ref:`algm-SANSCreateWavelengthAndPixelAdjustment`|           |        |

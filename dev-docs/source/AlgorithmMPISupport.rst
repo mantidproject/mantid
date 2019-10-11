@@ -613,7 +613,6 @@ SANSFitShiftScale                      MasterOnly, Identical
 SANSLoad                               MasterOnly, Identical   child algorithms may actually be run with ``ExecutionMode::Distributed`` if that is their default
 SANSMaskWorkspace                      all
 SANSMove                               all
-SANSNormalizeToMonitor                 MasterOnly, Identical
 SANSReductionCore                      all
 SANSScale                              all
 SANSSingleReduction                    all
