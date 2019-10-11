@@ -249,6 +249,29 @@ class ReductionWrapper(object):
           User expected to overload this method within class instantiation """
         return None
 
+    def evaluate_abs_corrections(self,test_ws,spectra_to_correct):
+        """ Evaluate absorption corrections from the """
+        red_ws = ExtractSpectra(test_ws,WorkspaceIndexList=spectra_to_correct)
+        n_spectra = test_ws.getNumberHistograms()
+        
+        prop_man = self.reducer.prop_man
+        abs_shape = prop_man.correct_absorption_on
+        start_time = time.time()
+        ws,corrections = abs_shape.correct_absorption(red_ws,prop_man.abs_corr_info)
+        end_time = time.time()
+        estimated_time = (end_time-start_time)*n_spectra/len(spectra_to_correct)
+        prop_man.log(\
+            "**************************************************************************************************",'notice')
+        prop_man.log(\
+            "*** Estimated time to run absorption corrections on the final workspace {0}sec/NumberOfProcessors".\
+            format(estimated_time),'notice')
+        prop_man.log(\
+            "**************************************************************************************************",'notice')
+
+        return (corrections,estimated_time)
+
+
+
 #pylint: disable=too-many-branches
     def build_or_validate_result(self,Error=1.e-6,ToleranceRelErr=True):
         """ Method validates results of the reduction against reference file or workspace.
@@ -732,6 +755,7 @@ def iliad(reduce):
             # the function does not return None, pylint is wrong
             #pylint: disable=W1111
                 rez = RenameWorkspace(InputWorkspace=rez, OutputWorkspace=out_ws_name)
+                PropertyManager.sample_run.synchronize_ws(rez)
 
         return rez
 

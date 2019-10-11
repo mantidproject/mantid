@@ -1668,11 +1668,11 @@ class AbsCorrInfo(PropDescriptor):
         on assignment of the new dictionary.
     """
     # The set of properties acceptable by MonteCarloAbsorption algorithm:
-    _MC_corrections_accepts={'NumberOfWavelengthPoints':lambda x: float(x),\
-                             'EventsPerPoint':lambda x : float(x),'SeedValue':lambda x : float(x),\
+    _MC_corrections_accepts={'NumberOfWavelengthPoints':lambda x: int(x),\
+                             'EventsPerPoint':lambda x : int(x),'SeedValue':lambda x : int(x),\
         'Interpolation':lambda x : list_checker(x,('Linear','CSpline'),'MonteCarloAbsorptions "Interpolation"'),\
-        'SparseInstrument':lambda x : bool(x),'NumberOfDetectorRows':lambda x: float(x),\
-        'NumberOfDetectorColumns':lambda x: float(x),'MaxScatterPtAttempts':lambda x: float(x)}
+        'SparseInstrument':lambda x : bool(x),'NumberOfDetectorRows':lambda x: int(x),\
+        'NumberOfDetectorColumns':lambda x: int(x),'MaxScatterPtAttempts':lambda x: int(x)}
     # The set of properties acceptable by AbsorptionCorrection algorithm:
     _Fast_corrections_accepts = {\
         'ScatterFrom':lambda x : list_checker(x,('Sample', 'Container', 'Environment'),'AbsorptionCorrections "ScatterFrom"'),\

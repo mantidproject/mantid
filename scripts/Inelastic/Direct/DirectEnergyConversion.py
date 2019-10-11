@@ -572,6 +572,7 @@ class DirectEnergyConversion(object):
                         RenameWorkspace(InputWorkspace=results_name,OutputWorkspace=out_ws_name)
                         results_name = out_ws_name
                         result = mtd[results_name]
+                        PropertyManager.sample_run.synchronize_ws(result)
                     else:
                         result = deltaE_ws_sample
             else: # delete workspace if no output is requested
