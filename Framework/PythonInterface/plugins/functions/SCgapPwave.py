@@ -12,7 +12,7 @@ from scipy.constants import k
 from scipy.integrate import nquad
 
 
-class SCGapPwave(IFunction1D):
+class SCgapPwave(IFunction1D):
 
     def category(self):
         return "Muon"
@@ -45,4 +45,4 @@ class SCGapPwave(IFunction1D):
         return 1 - np.array(Integral)
 
 
-FunctionFactory.subscribe(SCGapPwave)
+FunctionFactory.subscribe(SCgapPwave)
