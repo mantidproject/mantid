@@ -12,7 +12,7 @@ import numpy as np
 from MsdTestHelper import (is_registered, check_output, do_a_fit)
 
 
-class LowTFMuonium(unittest.TestCase):
+class LowTFMuoniumTest(unittest.TestCase):
 
     def test_function_has_been_registered(self):
         status, msg = is_registered("LowTFMuonium")
