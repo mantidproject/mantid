@@ -153,7 +153,7 @@ void export_Run() {
   register_ptr_to_python<Run *>();
 
   // Run class
-  class_<Run, boost::noncopyable>("Run", no_init)
+  class_<Run, boost::noncopyable>("Run")
       .def("getProtonCharge", &Run::getProtonCharge, arg("self"),
            "Return the total good proton charge for the run")
 
