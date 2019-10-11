@@ -86,8 +86,9 @@ def async_wrapper(orig_run_code, shell_instance):
         :returns: An AsyncTaskResult object
         """
         # Different target arguments depending on IPython's version
-        if 'result' in getfullargspec(orig_run_code).args:
-            if 'async_' in getfullargspec(orig_run_code).kwonlyargs:
+        function_parameters = getfullargspec(orig_run_code)
+        if 'result' in function_parameters.args:
+            if hasattr(function_parameters, 'kwonlyargs') and 'async_' in function_parameters.kwonlyargs:
                 return orig_run_code(code_obj, result, async_=async_)  # return coroutine to be awaited
             else:
                 task = BlockingAsyncTaskWithCallback(target=orig_run_code, args=(code_obj, result),

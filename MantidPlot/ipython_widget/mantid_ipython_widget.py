@@ -54,8 +54,9 @@ def our_run_code(self, code_obj, result=None, async_=False):
         False : Always, as it doesn't seem to matter.
     """
     # Different target arguments depending on IPython's version
-    if 'result' in getfullargspec(self.ipython_run_code).args:
-        if 'async_' in getfullargspec(self.ipython_run_code).kwonlyargs:
+    function_parameters = getfullargspec(self.ipython_run_code)
+    if 'result' in function_parameters.args:
+        if hasattr(function_parameters, 'kwonlyargs') and 'async_' in function_parameters.kwonlyargs:
             return self.ipython_run_code(code_obj, result, async_=async_)  # return coroutine to be awaited
         else:
             t = threading.Thread(target=self.ipython_run_code, args=(code_obj, result))
