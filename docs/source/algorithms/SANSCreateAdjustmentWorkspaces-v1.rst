@@ -31,7 +31,7 @@ The elements are:
 | Entry                           | Type      | Description                                       | Mandatory | Default|
 +=================================+===========+===================================================+===========+========+
 | calculate_transmission          | sub state | State used in                                     | Yes       | None   |
-|                                 |           | :ref:`algm-SANSCalculateTransmission`             |           |        |
+|                                 |           | the *Calculate SANS Transmission* step            |           |        |
 +---------------------------------+-----------+---------------------------------------------------+-----------+--------+
 | normalize_to_monitor            | sub state | State used in                                     | Yes       | None   |
 |                                 |           | *Normalize To SANS Monitors step*                 |           |        |

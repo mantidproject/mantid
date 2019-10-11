@@ -15,6 +15,7 @@ from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidat
 from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
                         WorkspaceUnitValidator)
 from sans.algorithm_detail.NormalizeToSANSMonitor import NormalizeToSANSMonitor
+from sans.algorithm_detail.CalculateSANSTransmission import CalculateSANSTransmission
 
 from sans.common.constants import EMPTY_NAME
 from sans.common.enums import (DataType, DetectorType)
@@ -190,18 +191,13 @@ class SANSCreateAdjustmentWorkspaces(DistributedDataProcessorAlgorithm):
         direct_workspace = self.getProperty("DirectWorkspace").value
         if transmission_workspace and direct_workspace:
             data_type = self.getProperty("DataType").value
-            transmission_name = "SANSCalculateTransmission"
-            serialized_state = state.property_manager
-            transmission_options = {"TransmissionWorkspace": transmission_workspace,
-                                    "DirectWorkspace": direct_workspace,
-                                    "SANSState": serialized_state,
-                                    "DataType": data_type,
-                                    "OutputWorkspace": EMPTY_NAME,
-                                    "UnfittedData": EMPTY_NAME}
-            transmission_alg = create_unmanaged_algorithm(transmission_name, **transmission_options)
-            transmission_alg.execute()
-            fitted_data = transmission_alg.getProperty("OutputWorkspace").value
-            unfitted_data = transmission_alg.getProperty("UnfittedData").value
+
+            alg = CalculateSANSTransmission(
+                data_type_str=data_type,
+                state_adjustment_calculate_transmission=state.adjustment.calculate_transmission)
+
+            fitted_data, unfitted_data = alg.calculate_transmission(direct_ws=direct_workspace,
+                                                                    transmission_ws=transmission_workspace)
         else:
             fitted_data = None
             unfitted_data = None
