@@ -20,7 +20,7 @@ import mantid.simpleapi as mantid
 from mantid import api
 
 import Direct.ReductionHelpers as prop_helpers
-from Direct.AbsorptionShapes import anAbsorptionShape
+from Direct.AbsorptionShapes import *
 import collections
 
 
@@ -1745,16 +1745,17 @@ class AbsCorrInfo(PropDescriptor):
             val_dict[key] = check_normalizer(val)
         # Store new dictionary in the property
         self._alg_prop = val_dict
+    def __str__(self):
+        alg_prop = self.__get__(self,AbsCorrInfo)
+        return str(alg_prop)
+
+
 
     def _algo_selector(self,algo_key,key_val):
         if algo_key == 'is_fast':
             self._is_fast = bool(key_val)
         elif algo_key == 'is_mc':
             self._is_fast = not bool(key_val)
-
-    def str(self):
-        alg_prop = self.__get__(self,AbsCorrInfo)
-        return str(alg_prop)
 
 class AbsorptionShapesContainer(PropDescriptor):
     """ Class to keep AbsorptionShape classes,
@@ -1781,11 +1782,16 @@ class AbsorptionShapesContainer(PropDescriptor):
             self._theShapeHolder = None
             return
         if isinstance(value,str):
-            raise RuntimeError('This functionality is Not yet implemented')
+            self._theShapeHolder = anAbsorptionShape.from_str(value)
         elif isinstance(value,anAbsorptionShape):
             self._theShapeHolder = value
         else:
             raise ValueError('The property can accept only strings and the childrens of the class anAbsorptionShape')
+    def __str__(self):
+        if self._theShapeHolder is None:
+            return 'None'
+        else:
+            return self._theShapeHolder.str()
 
 def list_checker(val,list_in,mess_base):
     """ Helper function to check the value val (first input) belongs to the 

@@ -11,6 +11,7 @@ from mantid.kernel import funcinspect
 from mantid.simpleapi import *
 from mantid.api import (AlgorithmManager, Algorithm)
 
+
 import random
 import types
 import ast
@@ -84,6 +85,11 @@ class anAbsorptionShape(object):
     #
     def __del__(self):
         DeleteWorkspace(self._testWorkspace)
+    #
+    def __str__(self):
+        """ Convert an absorption shape into a string representation"""
+        return str(self._ShapeDescription) + '!' + str(self._Material)
+
     #
     @property
     def material(self):
@@ -210,9 +216,6 @@ class anAbsorptionShape(object):
         adsrbtn_correctios = MonteCarloAbsorption(correction_base_ws,**kwarg)
         return adsrbtn_correctios
     #
-    def str(self):
-        """ Convert an absorption shape into a string representation"""
-        return str(self._ShapeDescription) + '!' + str(self._Material)
     #
     @staticmethod
     def from_str(str_val):

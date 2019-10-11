@@ -161,7 +161,7 @@ class AdsorbtionShapesTest(unittest.TestCase):
     def test_string_conversion(self):
         """ check if shape conversion to string representation works"""
         ash = HollowCylinder('V',[10,2,4])
-        ash_str = ash.str()
+        ash_str = str(ash)
         ash_rec = anAbsorptionShape.from_str(ash_str)
 
         self.assertTrue(isinstance(ash_rec,HollowCylinder))
@@ -169,7 +169,7 @@ class AdsorbtionShapesTest(unittest.TestCase):
         self.assertDictEqual(ash.shape,ash_rec.shape)
 
         ash = Sphere(['Al',10],10)
-        ash_str = ash.str()
+        ash_str = str(ash)
         ash_rec = anAbsorptionShape.from_str(ash_str)
 
         self.assertTrue(isinstance(ash_rec,Sphere))

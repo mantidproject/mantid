@@ -1286,6 +1286,22 @@ class DirectPropertyManagerTest(unittest.TestCase):
         got = propman.correct_absorption_on
         self.assertEqual(got,cyl)
 
+        str_rep_cyl = str(propman.correct_absorption_on)
+        is_in = 'Shape' in str_rep_cyl
+        self.assertTrue(is_in)
+        is_in = 'Cylinder' in str_rep_cyl
+        self.assertTrue(is_in)
+
+        propman.correct_absorption_on = str_rep_cyl
+
+        got = propman.correct_absorption_on
+
+        self.assertTrue(isinstance(got,Cylinder))
+        self.assertEqual(got.material,cyl.material)
+        self.assertEqual(got.shape,cyl.shape)
+
+
+
 
 if __name__ == "__main__":
     #tester = DirectPropertyManagerTest('test_abs_shapes_container')
