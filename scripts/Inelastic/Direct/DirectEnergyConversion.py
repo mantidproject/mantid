@@ -525,8 +525,6 @@ class DirectEnergyConversion(object):
                 PropertyManager.sample_run.synchronize_ws(ws_to_preprocess)
             except AttributeError:
                 pass
-
-
             #---------------
             #
             #Run the conversion first on the sample
@@ -549,7 +547,7 @@ class DirectEnergyConversion(object):
                 pass # no absolute units corrections
             # ensure that the sample_run name is intact with the sample workspace
             PropertyManager.sample_run.synchronize_ws(deltaE_ws_sample)
-            if not prop_man.correct_absorption_on is None:
+            if not prop_man.correct_absorption_on is None: # noqa E714
                 abs_shape = prop_man.correct_absorption_on
                 deltaE_ws_sample = abs_shape.correct_absorption(deltaE_ws_sample,prop_man.abs_corr_info)
             #
@@ -1920,6 +1918,7 @@ class DirectEnergyConversion(object):
         low,upp = self.wb_integr_range
         white_tag = 'NormBy:{0}_IntergatedIn:{1:0>10.2f}:{2:0>10.2f}'.format(self.normalise_method,low,upp)
         return white_tag
+
     #
     def _clear_old_results(self):
         """Remove workspaces, processed earlier and not used any more"""
@@ -1928,10 +1927,12 @@ class DirectEnergyConversion(object):
             if ws_name in mtd:
                 DeleteWorkspace(ws_name)
         object.__setattr__(self,'_old_runs_list',[])
+
     #
     def do_preprocessing(self,reducer,ws):
         """ stub for custom preprocessing function"""
         return ws
+
     def do_postprocessing(self,reducer,ws):
         """ stub for custom postprocessing function"""
         return ws

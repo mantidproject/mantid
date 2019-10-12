@@ -265,16 +265,14 @@ class ReductionWrapper(object):
         ws,corrections = abs_shape.correct_absorption(red_ws,prop_man.abs_corr_info)
         end_time = time.time()
         estimated_time = (end_time-start_time)*n_spectra/decrement
-        prop_man.log(\
+        prop_man.log(
             "**************************************************************************************************",'notice')
-        prop_man.log(\
-            "*** Estimated time to run absorption corrections on the final workspace is: {0:.1f}sec".\
+        prop_man.log(
+            "*** Estimated time to run absorption corrections on the final workspace is: {0:.1f}sec".
             format(estimated_time),'notice')
-        prop_man.log(\
+        prop_man.log(
             "**************************************************************************************************",'notice')
         return (corrections,estimated_time)
-
-
 
 #pylint: disable=too-many-branches
     def build_or_validate_result(self,Error=1.e-6,ToleranceRelErr=True):
@@ -764,6 +762,7 @@ def iliad(reduce):
         return rez
 
     return iliad_wrapper
+
 #
 def custom_operation(custom_fun):
     DirectEnergyConversion.__setattr__()
@@ -771,7 +770,7 @@ def custom_operation(custom_fun):
             # execute decorated function
             ws = custom_fun(*args)
             #print "in decorator: ",properties
-            host = args[0]
+            #host = args[0]
             return ws
 
     return custom_fun_wrapper

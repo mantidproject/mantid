@@ -1647,20 +1647,21 @@ class RotationAngle(PropDescriptor):
         return ['motor_log_names', 'motor_offset']
 # end RotationAngle
 
+
 class AbsCorrInfo(PropDescriptor):
     """ Class responsible for providing additional values for
         absorption corrections algorithms.
 
         The values should contain of the algorithm selector currently
         is_fast:True for AbsorptionCorrection algorithms family
-        or 
+        or
         is_mc:True for MonteCarloAbsorption correction algorithms family
 
         accompanied by the dictionary of all non-sample related properties
         accepted by these algorithms.
 
         If this key is missing, the class assumes that AbsorptionCorrection
-        algorithm (is_fast:true) is selected. 
+        algorithm (is_fast:true) is selected.
 
         The value for the property can be provided as dictionary or as
         string representation of this dictionary.
@@ -1668,22 +1669,24 @@ class AbsCorrInfo(PropDescriptor):
         on assignment of the new dictionary.
     """
     # The set of properties acceptable by MonteCarloAbsorption algorithm:
-    _MC_corrections_accepts={'NumberOfWavelengthPoints':lambda x: int(x),\
-                             'EventsPerPoint':lambda x : int(x),'SeedValue':lambda x : int(x),\
-        'Interpolation':lambda x : list_checker(x,('Linear','CSpline'),'MonteCarloAbsorptions "Interpolation"'),\
-        'SparseInstrument':lambda x : bool(x),'NumberOfDetectorRows':lambda x: int(x),\
+    _MC_corrections_accepts = {
+        'NumberOfWavelengthPoints':lambda x: int(x),
+        'EventsPerPoint':lambda x : int(x),
+        'SeedValue':lambda x : int(x),
+        'Interpolation':lambda x : list_checker(x,('Linear','CSpline'),'MonteCarloAbsorptions "Interpolation"'),
+        'SparseInstrument':lambda x : bool(x),'NumberOfDetectorRows':lambda x: int(x),
         'NumberOfDetectorColumns':lambda x: int(x),'MaxScatterPtAttempts':lambda x: int(x)}
     # The set of properties acceptable by AbsorptionCorrection algorithm:
-    _Fast_corrections_accepts = {\
-        'ScatterFrom':lambda x : list_checker(x,('Sample', 'Container', 'Environment'),'AbsorptionCorrections "ScatterFrom"'),\
-        'NumberOfWavelengthPoints':lambda x: float(x),\
-        'ExpMethod':lambda x : list_checker(x,('Normal', 'FastApprox'),'AbsorptionCorrections "ExpMethod"'),\
-        'EMode':lambda x: list_checker(x,('Direct', 'Indirect', 'Elastic'),'AbsorptionCorrections "EMode"'),\
+    _Fast_corrections_accepts = {
+        'ScatterFrom':lambda x : list_checker(x,('Sample', 'Container', 'Environment'),'AbsorptionCorrections "ScatterFrom"'),
+        'NumberOfWavelengthPoints':lambda x: float(x),
+        'ExpMethod':lambda x : list_checker(x,('Normal', 'FastApprox'),'AbsorptionCorrections "ExpMethod"'),
+        'EMode':lambda x: list_checker(x,('Direct', 'Indirect', 'Elastic'),'AbsorptionCorrections "EMode"'),
         'EFixed':lambda x: float(x),'ElementSize':lambda x: float(x)}
 
     def __init__(self):
         self._alg_prop = {}
-        # check if 
+        # Use Monte-Carlo corrections by default
         self._is_fast  = False
 
     def __get__(self, instance, owner=None):
@@ -1722,15 +1725,17 @@ class AbsCorrInfo(PropDescriptor):
         elif isinstance(value, dict):
             val_dict = value
             is_mc = val_dict.pop('is_mc',None)
-            if not is_mc is None:
+            if not is_mc:
                 self._algo_selector('is_mc',is_mc)
             is_fast=val_dict.pop('is_fast',None)
-            if not is_fast is None:
+            if not is_fast:
                 self._algo_selector('is_fast',is_fast)
 
         else:
-            raise(KeyError,'AbsCorrInfo accepts only a dictionary '\
-                'with AbsorptionCorrections algorithm properties or string representation of such dictionary')
+            raise(KeyError,\
+                'AbsCorrInfo accepts only a dictionary '
+                'with AbsorptionCorrections algorithm properties '
+                'or string representation of such dictionary')
 
         if self._is_fast:
             algo_name = 'AdsorptionCorrection'
@@ -1746,11 +1751,10 @@ class AbsCorrInfo(PropDescriptor):
             val_dict[key] = check_normalizer(val)
         # Store new dictionary in the property
         self._alg_prop = val_dict
+
     def __str__(self):
         alg_prop = self.__get__(self,AbsCorrInfo)
         return str(alg_prop)
-
-
 
     def _algo_selector(self,algo_key,key_val):
         if algo_key == 'is_fast':
@@ -1758,12 +1762,13 @@ class AbsCorrInfo(PropDescriptor):
         elif algo_key == 'is_mc':
             self._is_fast = not bool(key_val)
 
+
 class AbsorptionShapesContainer(PropDescriptor):
     """ Class to keep AbsorptionShape classes,
         responsible for making absorption corrections
         for the absorption on correspondent shapes.
 
-        NOT IMPLEMENTED: should also handle conversion 
+        NOT IMPLEMENTED: should also handle conversion
         from a shape to its text representaton and v.v.
         (using AbsorptionShape appropriate classes)
 
@@ -1787,25 +1792,28 @@ class AbsorptionShapesContainer(PropDescriptor):
         elif isinstance(value,anAbsorptionShape):
             self._theShapeHolder = value
         else:
-            raise ValueError('The property can accept only strings and the childrens of the class anAbsorptionShape')
+            raise ValueError('The property accepts only anAbsorptionShape type classes or their string representation')
+
     def __str__(self):
         if self._theShapeHolder is None:
             return 'None'
         else:
             return self._theShapeHolder.str()
 
+
 def list_checker(val,list_in,mess_base):
-    """ Helper function to check the value val (first input) belongs to the 
+    """ Helper function to check the value val (first input) belongs to the
         set, specified as the second input.
 
         If this is not true, raise ValueError indicating what property is wrong.
-        To do indication, mess_base should contain the string, referring to 
+        To do indication, mess_base should contain the string, referring to
         the invalid property.
     """
     if val in list_in:
         return val
     else:
-        raise(ValueError,'{0} property can only have values from the set of: {1}'\
+        raise(ValueError,\
+            '{0} property can only have values from the set of: {1}'\
             .format(mess_base,str(list_in)))
 
 # -----------------------------------------------------------------------------------------

@@ -70,6 +70,7 @@ class ComplexProperty(object):
         return len(self._other_prop)
 #end ComplexProperty
 
+
 def findFile(fileName):
     """ Simple search within Mantid data search directories for
         a file which is not a run file
@@ -272,6 +273,7 @@ def gen_getter(keyval_dict,key):
     #end
 #end
 
+
 def gen_setter(keyval_dict,key,val):
     """ function sets value to dictionary with substitution
 
@@ -404,6 +406,7 @@ def parse_run_file_name(run_string):
     return (filepath,filenum,fext)
 #
 
+
 def process_prop_list(workspace,logName="CombinedSpectraIDList"):
     """Method process log, which describes list of spectra, attached to
        the workspace
@@ -418,4 +421,3 @@ def process_prop_list(workspace,logName="CombinedSpectraIDList"):
     else:
         spec_list = []
     return spec_list
-
