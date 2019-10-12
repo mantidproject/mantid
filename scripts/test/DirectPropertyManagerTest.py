@@ -1233,7 +1233,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         propman = self.prop_man
 
         defaults = propman.abs_corr_info
-        self.assertTrue(defaults['is_fast'])
+        self.assertTrue(defaults['is_mc'])
         # the algorithm sets up the properties but does not verifis if the prperties
         # are acceptable by the corrections algorithm
         propman.abs_corr_info = "{is_mc: True, NumberOfWavelengthPoints: 200; MaxScatterPtAttempts=20, SparseInstrument=True}"
@@ -1272,7 +1272,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         propman.abs_corr_info = None
         rec_prop = propman.abs_corr_info
-        self.assertDictEqual(rec_prop,{'is_fast':True})
+        self.assertDictEqual(rec_prop,{'is_mc':True})
 
         self.assertRaises(KeyError,PropertyManager.abs_corr_info.__set__,propman.abs_corr_info,[1,2,3])
         self.assertRaises(KeyError,PropertyManager.abs_corr_info.__set__,propman.abs_corr_info,{'TheKeyNotRecognizedByAlgorithm':10})

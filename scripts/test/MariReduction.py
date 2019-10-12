@@ -56,7 +56,7 @@ class ReduceMARI(ReductionWrapper):
       # on sample or sample container during the experiment.
       # 1) Define the sample material and sample shape:
 	  #
-	  #prop['correct_absorption_on'] = Cylinder(['Al',10],{'Height':10,'Radius':2})
+      #prop['correct_absorption_on'] = Cylinder(['Fe'],{'Height':10,'Radius':2})
 	  #
       #  The shapes currently available are:
       #  Cylinder, FlatPlate, HollowCylinder and Sphere
@@ -236,16 +236,10 @@ class ReduceMARI(ReductionWrapper):
         # The units are in cm
         propman.correct_absorption_on = Cylinder('Fe',[10,2]) # Will be taken from def_advanced_properties
         #                                prop['correct_absorption_on'] =  if not defined here
-        #Select Absorption Correction method and its parameters. 
-        # Try NumericalIntegration with the step 0.1 of the characteristic size of the sample
-        # for faster integration (in mm). Increase to improve accuracy. 
-        propman.abs_corr_info = {'is_fast':True,'ElementSize':10} #(Will be taken from def_advanced_properties
-        #                                 prop['abs_corr_info']=  if not defined here
-        # See AdsorptionCorrection algorithm for the whole set of the algorithm properties (Sphere has own algorithm)
         #
-        # Alternatively, try Monte_carlo integration. Take sparse energy points and a few integration attempts
+        # Use Monte-carlo intergration.  Take sparse energy points and a few integration attempts
         # to increase initial speed. Increase these numbers to achieve better accuracy.
-        propman.abs_corr_info = {'is_mc':True,'NumberOfWavelengthPoints':30,'EventsPerPoint':300}
+        propman.abs_corr_info = {'EventsPerPoint':3000}#,'NumberOfWavelengthPoints':30}
         # See MonteCarloAbsorption for all possible properties description and possibility to define 
         # a sparse instrument for speed.
         #
@@ -329,4 +323,4 @@ if __name__ == "__main__" or __name__ == "__builtin__":
 ###### Run reduction on all files provided as parameters ######
      rd.run_reduction()
 
-     corr = rd.eval_absorption_corrections()
+#     corr = rd.eval_absorption_corrections()

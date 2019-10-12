@@ -1684,7 +1684,7 @@ class AbsCorrInfo(PropDescriptor):
     def __init__(self):
         self._alg_prop = {}
         # check if 
-        self._is_fast  = True
+        self._is_fast  = False
 
     def __get__(self, instance, owner=None):
         if instance is None:
@@ -1699,7 +1699,8 @@ class AbsCorrInfo(PropDescriptor):
     def __set__(self, instance, value):
         if value is None or len(value) == 0:
             # Clear all previous values and set up the defaults
-            self._alg_prop = {'is_fast':True}
+            self._alg_prop = {'is_mc':True}
+            self._is_fast  = False
             return
         val_dict =  {}
         if isinstance(value, str):

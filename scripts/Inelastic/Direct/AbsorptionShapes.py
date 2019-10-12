@@ -167,8 +167,9 @@ class anAbsorptionShape(object):
         mc_corrections = corr_properties.pop('is_mc', False)
         fast_corrections = corr_properties.pop('is_fast',False)
         if  not (mc_corrections or fast_corrections):
-            fast_corrections = True
+            fast_corrections = False
         if fast_corrections: 
+            raise RuntimeError('Analytical absorption corrections are not currently implemented in Direct mode')
             abs_corrections = self._fast_abs_corrections(correction_base_ws,corr_properties)
         else:
             abs_corrections = self._mc_abs_corrections(correction_base_ws,corr_properties)
@@ -349,7 +350,7 @@ class Cylinder(anAbsorptionShape):
         """ Method to correct adsorption on a shape using fast (Numerical Integration) method
         """
         kw = kwarg.copy()
-        elem_size = kw.pop('ElementSize',None)
+        elem_size = kw.pop('NumberOfSlices',None)
         if not elem_size is None:
             shape_dic = self.shape
             n_slices = int(shape_dic['Height']/elem_size)
@@ -360,7 +361,8 @@ class Cylinder(anAbsorptionShape):
                 n_annul = 1
             kw['NumberOfSlices'] = n_slices
             kw['NumberOfAnnuli'] = n_annul
-        adsrbtn_correctios = CylinderAbsorption(correction_base_ws,**kw)
+        kw['Emode'] = 'Direct'
+        adsrbtn_correctios = AbsorptionCorrection(correction_base_ws,**kw)
         return adsrbtn_correctios
 ##---------------------------------------------------------------------------------------------------
 class FlatPlate(anAbsorptionShape):
@@ -427,6 +429,7 @@ class FlatPlate(anAbsorptionShape):
         prop_dict = {'Height':'SampleHeight','Width':'SampleWidth','Thick':'SampleThickness'}
         for key,val in prop_dict.items():
             kw[val] = self._ShapeDescription[key]
+        kw['Emode'] = 'Direct'
         adsrbtn_correctios = FlatPlateAbsorption(correction_base_ws,**kw)
         return adsrbtn_correctios
 ##---------------------------------------------------------------------------------------------------
