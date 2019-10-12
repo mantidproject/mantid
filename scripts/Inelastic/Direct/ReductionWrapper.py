@@ -251,23 +251,27 @@ class ReductionWrapper(object):
 
     def evaluate_abs_corrections(self,test_ws,spectra_to_correct):
         """ Evaluate absorption corrections from the """
-        red_ws = ExtractSpectra(test_ws,WorkspaceIndexList=spectra_to_correct)
+
         n_spectra = test_ws.getNumberHistograms()
+        decrement = len(spectra_to_correct)
+        if decrement>0:
+            red_ws = ExtractSpectra(test_ws,WorkspaceIndexList=spectra_to_correct)
+        else:
+            decrement = n_spectra
         
         prop_man = self.reducer.prop_man
         abs_shape = prop_man.correct_absorption_on
         start_time = time.time()
         ws,corrections = abs_shape.correct_absorption(red_ws,prop_man.abs_corr_info)
         end_time = time.time()
-        estimated_time = (end_time-start_time)*n_spectra/len(spectra_to_correct)
+        estimated_time = (end_time-start_time)*n_spectra/decrement
         prop_man.log(\
             "**************************************************************************************************",'notice')
         prop_man.log(\
-            "*** Estimated time to run absorption corrections on the final workspace {0}sec/NumberOfProcessors".\
+            "*** Estimated time to run absorption corrections on the final workspace is: {0:.1f}sec".\
             format(estimated_time),'notice')
         prop_man.log(\
             "**************************************************************************************************",'notice')
-
         return (corrections,estimated_time)
 
 

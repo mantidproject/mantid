@@ -11,7 +11,6 @@ from mantid.kernel import funcinspect
 from mantid.simpleapi import *
 from mantid.api import (AlgorithmManager, Algorithm)
 
-
 import random
 import types
 import ast
@@ -54,7 +53,7 @@ class anAbsorptionShape(object):
     anShape.material = {'ChemicalFormula':'Br'} (change existing ChemicalFormula)
 
     Note: 
-    Adding dictionary appends or modifies existing properties, but adding a list, clears up all properties, previously 
+    Adding dictionary appends or modifies existing properties, but adding a list, clears up all properties, previously
     set-up on class. 
     The list can contain up two members where first corresponds to the ChemicalFormula and the second one -- to the
     material's number density
@@ -76,7 +75,8 @@ class anAbsorptionShape(object):
         # the workspace used for testing correct properties settings
         rhash = random.randint(1,100000)
         self._testWorkspace = CreateSampleWorkspace(OutputWorkspace='_adsShape_' + str(rhash),\
-            NumBanks=1,BankPixelWidth=1)
+                NumBanks=1,BankPixelWidth=1)
+
         if MaterialValue is not None:
             self.material = MaterialValue
         # If true, SetSample algorithm can set-up this shape
@@ -169,25 +169,27 @@ class anAbsorptionShape(object):
         if  not (mc_corrections or fast_corrections):
             fast_corrections = True
         if fast_corrections: 
-            corrections = self.fast_abs_corrections(correction_base_ws,corr_properties)
+            abs_corrections = self._fast_abs_corrections(correction_base_ws,corr_properties)
         else:
-            corrections = self.mc_abs_corrections(correction_base_ws,corr_properties)
+            abs_corrections = self._mc_abs_corrections(correction_base_ws,corr_properties)
 
-        corrections = ConvertUnits(corrections,'DeltaE',EMode='Direct')
-        ws = ws / corrections
+        abs_corrections = ConvertUnits(abs_corrections,'DeltaE',EMode='Direct')
+        ws = ws / abs_corrections
 
+        DeleteWorkspace(correction_base_ws)
         if ws.name() != var_names[0]:
             RenameWorkspace(ws,var_names[0])
         if n_outputs == 1:
-            DeleteWorkspace(corrections)
+            #DeleteWorkspace(abs_corrections)
             return ws
         elif n_outputs == 2:
-            if corrections.name() != var_names[1]:
-                RenameWorkspace(corrections,var_names[1])
-            return (ws,corrections)
+            if abs_corrections.name() != var_names[1]:
+                RenameWorkspace(abs_corrections,var_names[1])
+            return (ws,abs_corrections)
 
-    def fast_abs_corrections(self,correction_base_ws,kwarg={}):
-        """ Method to correct adsorption on a shape using fast (analytical) method if such method is available
+    def _fast_abs_corrections(self,correction_base_ws,kwarg={}):
+        """ Method to correct adsorption on a shape using fast (Numerical Integration) method
+            if such method is available for the shape
         
         Not available on arbitrary shapes
         Inputs:
@@ -202,7 +204,7 @@ class anAbsorptionShape(object):
         return adsrbtn_correctios
 
     #
-    def mc_abs_corrections(self,correction_base_ws,kwarg={}):
+    def _mc_abs_corrections(self,correction_base_ws,kwarg={}):
         """ Method to correct adsorption on a shape using Mont-Carlo integration
         Inputs:
          ws     -- workspace to correct. Should be in the units of wavelength
@@ -343,10 +345,22 @@ class Cylinder(anAbsorptionShape):
             # algorithm.
             SetSample(self._testWorkspace,Geometry=shape_dict)
     #
-    def fast_abs_corrections(self,correction_base_ws,kwarg={}):
-        """ Method to calculate absorption corrections quickly using fast (integration) method
+    def _fast_abs_corrections(self,correction_base_ws,kwarg={}):
+        """ Method to correct adsorption on a shape using fast (Numerical Integration) method
         """
-        adsrbtn_correctios = CylinderAbsorption(correction_base_ws,**kwarg)
+        kw = kwarg.copy()
+        elem_size = kw.pop('ElementSize',None)
+        if not elem_size is None:
+            shape_dic = self.shape
+            n_slices = int(shape_dic['Height']/elem_size)
+            if n_slices <1:
+                n_slices = 1
+            n_annul  = int(shape_dic['Radius']*2*3.1415/elem_size)
+            if n_annul < 1:
+                n_annul = 1
+            kw['NumberOfSlices'] = n_slices
+            kw['NumberOfAnnuli'] = n_annul
+        adsrbtn_correctios = CylinderAbsorption(correction_base_ws,**kw)
         return adsrbtn_correctios
 ##---------------------------------------------------------------------------------------------------
 class FlatPlate(anAbsorptionShape):
@@ -406,8 +420,8 @@ class FlatPlate(anAbsorptionShape):
             SetSample(self._testWorkspace,Geometry=shape_dict)
 
     #
-    def fast_abs_corrections(self,correction_base_ws,kwarg={}):
-        """ Method to calculate absorption corrections quickly using fast (integration) method
+    def _fast_abs_corrections(self,correction_base_ws,kwarg={}):
+        """ Method to correct adsorption on the FlatPlate using fast (Numerical Integration) method
         """
         kw = kwarg.copy()
         prop_dict = {'Height':'SampleHeight','Width':'SampleWidth','Thick':'SampleThickness'}
@@ -489,15 +503,15 @@ class HollowCylinder(anAbsorptionShape):
         CreateSampleShape(ws,sample_shape)
 
     #
-    def fast_abs_corrections(self,correction_base_ws,kwarg={}):
-        """ Method to calculate absorption corrections quickly using fast (integration) method
+    def _fast_abs_corrections(self,correction_base_ws,kwarg={}):
+        """ Method to correct adsorption on the HollowCylinder using fast (Numerical Integration) method
         """
         self._add_xml_hollow_cylinder(correction_base_ws)
         adsrbtn_correctios = AbsorptionCorrection(correction_base_ws,**kwarg)
         return adsrbtn_correctios
     #
-    def mc_abs_corrections(self,correction_base_ws,kwarg={}):
-        """ Method to correct adsorption on a shape using Monte-Carlo integration
+    def _mc_abs_corrections(self,correction_base_ws,kwarg={}):
+        """ Method to correct adsorption on the HollowCylinder using Monte-Carlo integration
         Inputs:
          ws     -- workspace to correct. Should be in the units of wavelength
         **kwarg -- dictionary of the additional keyword arguments to provide as input for
@@ -576,18 +590,22 @@ class Sphere(anAbsorptionShape):
         CreateSampleShape(ws,sample_shape)
 
     #
-    def fast_abs_corrections(self,correction_base_ws,kwarg={}):
-        """ Method to calculate absorption corrections quickly using fast (integration) method
+    def _fast_abs_corrections(self,correction_base_ws,kwarg={}):
+        """ Method to correct adsorption on the Sphere using fast (Numerical Integration) method
+            (Analytical integration) method.
+            If the method is invoked without parameters, optimized SphericalAbsorption algorithm is
+            deployed to calculate corrections. If there are some parameters, more general
+            AbsorptionCorrections method is invoked with the parameters provided.
         """
-        if len(kwarg) ==0:
+        if len(kwarg) == 0:
             adsrbtn_correctios = SphericalAbsorption(correction_base_ws,SphericalSampleRadius=self._ShapeDescription['Radius'])
         else:
             self._add_xml_sphere(correction_base_ws)
             adsrbtn_correctios = AbsorptionCorrection(correction_base_ws,**kwarg)
         return adsrbtn_correctios
     #
-    def mc_abs_corrections(self,correction_base_ws,kwarg={}):
-        """ Method to correct adsorption on a shape using Monte-Carlo integration
+    def _mc_abs_corrections(self,correction_base_ws,kwarg={}):
+        """ Method to correct adsorption on the Sphere using Monte-Carlo integration
         Inputs:
          ws     -- workspace to correct. Should be in the units of wavelength
         **kwarg -- dictionary of the additional keyword arguments to provide as input for
@@ -601,6 +619,5 @@ class Sphere(anAbsorptionShape):
         return adsrbtn_correctios
 
 ##---------------------------------------------------------------------------------------------------
-
 if __name__ == "__main__":
     pass
