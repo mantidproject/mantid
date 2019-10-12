@@ -361,7 +361,7 @@ class DirectEnergyConversion(object):
 #pylint: disable=too-many-branches
 #pylint: disable=too-many-locals
 #pylint: disable=W0621
-
+# flake8: noqa 
     def convert_to_energy(self,wb_run=None,sample_run=None,ei_guess=None,rebin=None,map_file=None,
                           monovan_run=None,wb_for_monovan_run=None,**kwargs):
         """ One step conversion of run into workspace containing information about energy transfer
