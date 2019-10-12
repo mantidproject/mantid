@@ -364,7 +364,7 @@ class Cylinder(anAbsorptionShape):
         """
         kw = kwarg.copy()
         elem_size = kw.pop('NumberOfSlices',None)
-        if not elem_size is None: # noqa
+        if elem_size is not None:
             shape_dic = self.shape
             n_slices = int(shape_dic['Height']/elem_size)
             if n_slices <1:
@@ -464,14 +464,14 @@ class HollowCylinder(anAbsorptionShape):
     CylinderParameters can have the form:
 
     a) The list consisting of 3 to 5 members.:
-    CylinderParameters = [Height,InnerRadus,OuterRadus,[[Axis],[Center]] 
+    CylinderParameters = [Height,InnerRadus,OuterRadus,[[Axis],[Center]]
     where Height, InnerRadus and OuterRadus are the cylinder height and radiuses in cm and
     Axis, if present is the direction of the cylinder wrt to the beam direction [0,0,1]
     e.g.:
     abs = HollowCylinder(['Al',0.1],[10,2,4,[0,1,0],[0,0,0]])
-    b) The diary: 
+    b) The diary:
     CylinderParameters = {'Height':Height_value,'InnerRadus':value1,
-    'OuterRadus':value2,[Axis:axisValue],[Center:TheSampleCentre]} 
+    'OuterRadus':value2,[Axis:axisValue],[Center:TheSampleCentre]}
     e.g:
     abs = HollowCylinder(['Al',0.1],[Height:10,InnerRadus:2,OuterRadus:2,Axis:[1,0,0]])
 
@@ -542,7 +542,7 @@ class HollowCylinder(anAbsorptionShape):
         **kwarg -- dictionary of the additional keyword arguments to provide as input for
                 the absorption corrections algorithm
                 These arguments should not be related to the sample as the sample should already be defined.
-        Returns: 
+        Returns:
             workspace with absorption corrections.
         """
         self._add_xml_hollow_cylinder(correction_base_ws)
@@ -571,7 +571,7 @@ class Sphere(anAbsorptionShape):
 
     e.g.:
     abs = Sphere(['Al',0.1],[10,[1,0,0]])
-    b) The diary: 
+    b) The diary:
     SphereParameters = {Radius:value,Centre:[1,1,1] etc}
     e.g:
     abs = Sphere(['Al',0.1],['Radius':10)
@@ -645,7 +645,7 @@ class Sphere(anAbsorptionShape):
         **kwarg -- dictionary of the additional keyword arguments to provide as input for
                 the absorption corrections algorithm
                 These arguments should not be related to the sample as the sample should already be defined.
-        Returns: 
+        Returns:
             workspace with absorption corrections.
         """
         self._add_xml_sphere(correction_base_ws)

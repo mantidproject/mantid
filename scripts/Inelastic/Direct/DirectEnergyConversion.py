@@ -547,7 +547,7 @@ class DirectEnergyConversion(object):
                 pass # no absolute units corrections
             # ensure that the sample_run name is intact with the sample workspace
             PropertyManager.sample_run.synchronize_ws(deltaE_ws_sample)
-            if not prop_man.correct_absorption_on is None:  # noqa
+            if prop_man.correct_absorption_on is not None:
                 abs_shape = prop_man.correct_absorption_on
                 deltaE_ws_sample = abs_shape.correct_absorption(deltaE_ws_sample,prop_man.abs_corr_info)
             #
