@@ -11,6 +11,10 @@ try:
     import reduce_vars as web_var
 except:
     web_var = None
+try:
+    import mantidplot as mpl
+except: 
+    mpl = None
 
 
 class ReduceMAPS(ReductionWrapper):
@@ -77,9 +81,8 @@ class ReduceMAPS(ReductionWrapper):
         DirectEnergyConversion.__setattr__(self.reducer,'do_preprocessing',Mt)
         Mt = MethodType(self.do_postprocessing, self.reducer,DirectEnergyConversion)
         DirectEnergyConversion.__setattr__(self.reducer,'do_postprocessing',Mt)
-		
     #
-      #
+    
     def do_preprocessing(self,reducer,ws):
         """ Custom function, applied to each run or every workspace, the run is divided to
             in multirep mode
@@ -96,7 +99,8 @@ class ReduceMAPS(ReductionWrapper):
             Must return pointer to the preprocessed workspace
         """
         return ws
-      #
+    #
+
     def do_postprocessing(self,reducer,ws):
         """ Custom function, applied to each reduced run or every reduced workspace, 
             the run is divided into, in multirep mode.
@@ -144,7 +148,65 @@ class ReduceMAPS(ReductionWrapper):
         #return lambda : custom_name(self.reducer.prop_man)
         # use this method to use standard file name generating function
         return None
+    #
 
+    def eval_absorption_corrections(self,test_ws=None):
+        """ The method to evaluate the speed and efficiency of the absorption corrections procedure,
+            before applying your corrections to the whole workspace and all sample runs.
+
+            The absorption correction procedure invoked with excessive accuracy can run for too
+            long providing no real improvements in accuracy. This is why it is recommended to
+            run this procedure evaluating absorption on selected detectors and
+            deploy the corrections to the whole runs only after achieving satisfactory accuracy
+            and execution time.
+
+            The procedure evaluate and prints the expected time to run the absorption corrections
+            on the whole run.
+
+            Input:
+            If provided, the pointer or the name of the workspace available in analysis data service.
+            If it is not, the workspace is taken from PropertyManager.sample_run property
+
+            Usage:
+            Reduce single run and uncomment this method in the __main__ area to evaluate
+            adsorption corrections.
+
+            Change adsorption corrections parameters below to achieve best speed and
+            acceptable accuracy
+        """
+
+        # Gain access to the property manager:
+        propman =  rd.reducer.prop_man
+        # Set up Sample as one of:
+        # 1) Cylinder([Chem_formula],[Height,Radius])
+        # 2) FlatPlate([Chem_formula],[Height,Width,Thick])
+        # 3) HollowCylinder([Chem_formula],[Height,InnerRadius,OuterRadius]) 
+        # 4) Sphere([[Chem_formula],Radius)
+        # The units are in cm
+        propman.correct_absorption_on = Cylinder('Fe',[10,2]) # Will be taken from def_advanced_properties
+        #                                prop['correct_absorption_on'] =  if not defined here
+        #
+        # Use Monte-Carlo integration.  Take sparse energy points and a few integration attempts
+        # to increase initial speed. Increase these numbers to achieve better accuracy.
+        propman.abs_corr_info = {'EventsPerPoint':3000}#,'NumberOfWavelengthPoints':30}
+        # See MonteCarloAbsorption for all possible properties description and possibility to define 
+        # a sparse instrument for speed.
+        #
+        # Gain access to the workspace. The workspace should contain Ei log, containing incident energy
+        # (or be reduced)
+        if test_ws is None:
+            test_ws = PropertyManager.sample_run.get_workspace()
+        # Define spectra list to test absorption on
+        check_spectra = [1,200]
+        # Evaluate corrections on the selected spectra of the workspace and the time to obtain 
+        # the corrections on the whole workspace.
+        corrections,time_to_correct_abs = self.evaluate_abs_corrections(test_ws,check_spectra)
+        # When accuracy and speed of the corrections is satisfactory, copy chosen abs_corr_info
+        # properties from above to the advanced_porperties area to run in reduction.
+        if not mpl is None:
+            mpl.plotSpectrum(corrections,range(0,len(check_spectra)))
+        #
+        return corrections
 
 #----------------------------------------------------------------------------------------------------------------------
 if __name__ == "__main__":
@@ -195,10 +257,5 @@ if __name__ == "__main__":
     # usual way to go is to reduce workspace and save it internally
     rd.run_reduction()
 
-
-#### Validate reduction result against known result, obtained earlier  ###
-    #rez,mess=rd.validate_result()
-    #if not rez:
-    #   raise RuntimeError("validation failed with error: {0}".format(mess))
-    #else:
-    #   print "ALL Fine"
+###### Test absorption corrections to find optimal settings for corrections algorithm
+#     corr = rd.eval_absorption_corrections()

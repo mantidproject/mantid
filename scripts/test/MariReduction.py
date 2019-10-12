@@ -134,6 +134,7 @@ class ReduceMARI(ReductionWrapper):
       """
       return WS
       #
+
     def do_preprocessing(self,reducer,ws):
         """ Custom function, applied to each run or every workspace, the run is divided to
             in multirep mode
@@ -151,6 +152,7 @@ class ReduceMARI(ReductionWrapper):
         """
         return ws
       #
+
     def do_postprocessing(self,reducer,ws):
         """ Custom function, applied to each reduced run or every reduced workspace,
             the run is divided into, in multirep mode.
@@ -200,6 +202,7 @@ class ReduceMARI(ReductionWrapper):
         #return lambda : custom_name(self.reducer.prop_man)
         # Uncomment this to use standard file name generating function
         return None
+
     #
     def eval_absorption_corrections(self,test_ws=None):
         """ The method to evaluate the speed and efficiency of the absorption corrections procedure,
@@ -237,7 +240,7 @@ class ReduceMARI(ReductionWrapper):
         propman.correct_absorption_on = Cylinder('Fe',[10,2]) # Will be taken from def_advanced_properties
         #                                prop['correct_absorption_on'] =  if not defined here
         #
-        # Use Monte-carlo intergration.  Take sparse energy points and a few integration attempts
+        # Use Monte-Carlo integration.  Take sparse energy points and a few integration attempts
         # to increase initial speed. Increase these numbers to achieve better accuracy.
         propman.abs_corr_info = {'EventsPerPoint':3000}#,'NumberOfWavelengthPoints':30}
         # See MonteCarloAbsorption for all possible properties description and possibility to define 
@@ -323,4 +326,5 @@ if __name__ == "__main__" or __name__ == "__builtin__":
 ###### Run reduction on all files provided as parameters ######
      rd.run_reduction()
 
+###### Test absorption corrections to find optimal settings for corrections algorithm
 #     corr = rd.eval_absorption_corrections()

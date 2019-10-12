@@ -13,6 +13,10 @@ try:
     import reduce_vars as web_var
 except:
     web_var = None
+try:
+    import mantidplot as mpl
+except: 
+    mpl = None
 
 
 class ReduceMARIFromFile(ReductionWrapper):
@@ -83,7 +87,8 @@ class ReduceMARIFromFile(ReductionWrapper):
         #return lambda : custom_name(self.reducer.prop_man)
         # use this method to use standard file name generating function
         return None
-      #
+    #
+
     def do_preprocessing(self,reducer,ws):
         """ Custom function, applied to each run or every workspace, the run is divided to
             in multirep mode
@@ -100,7 +105,8 @@ class ReduceMARIFromFile(ReductionWrapper):
             Must return pointer to the preprocessed workspace
         """
         return ws
-      #
+    #
+
     def do_postprocessing(self,reducer,ws):
         """ Custom function, applied to each reduced run or every reduced workspace, 
             the run is divided into, in multirep mode.
@@ -122,7 +128,6 @@ class ReduceMARIFromFile(ReductionWrapper):
             (E.g. if you decide to convert workspace units to wavelength, you can not save result as nxspe)
         """
         return ws
-		
 
     def __init__(self,web_var_val=None):
         """ sets properties defaults for the instrument with Name"""
@@ -201,7 +206,8 @@ class ReduceMARIFromWorkspace(ReductionWrapper):
         ws = ReductionWrapper.reduce(self,input_file,output_directory)
      #SaveNexus(ws,Filename = 'MARNewReduction.nxs')
         return ws
-      #
+    #
+
     def do_preprocessing(self,reducer,ws):
         """ Custom function, applied to each run or every workspace, the run is divided to
             in multirep mode
@@ -218,7 +224,8 @@ class ReduceMARIFromWorkspace(ReductionWrapper):
             Must return pointer to the preprocessed workspace
         """
         return ws
-      #
+    #
+
     def do_postprocessing(self,reducer,ws):
         """ Custom function, applied to each reduced run or every reduced workspace, 
             the run is divided into, in multirep mode.
@@ -240,7 +247,6 @@ class ReduceMARIFromWorkspace(ReductionWrapper):
             (E.g. if you decide to convert workspace units to wavelength, you can not save result as nxspe)
         """
         return ws
-		
 
     def __init__(self,web_var_val=None):
         """ sets properties defaults for the instrument with Name"""
@@ -248,7 +254,7 @@ class ReduceMARIFromWorkspace(ReductionWrapper):
         Mt = MethodType(self.do_preprocessing, self.reducer,DirectEnergyConversion)
         DirectEnergyConversion.__setattr__(self.reducer,'do_preprocessing',Mt)
         Mt = MethodType(self.do_postprocessing, self.reducer,DirectEnergyConversion)
-        DirectEnergyConversion.__setattr__(self.reducer,'do_postprocessing',Mt)		
+        DirectEnergyConversion.__setattr__(self.reducer,'do_postprocessing',Mt)
 #----------------------------------------------------------------------------------------------------------------------
 
 
@@ -300,7 +306,8 @@ class ReduceMARIMon2Norm(ReductionWrapper):
         outWS = ReductionWrapper.reduce(self,input_file,output_directory)
      #SaveNexus(ws,Filename = 'MARNewReduction.nxs')
         return outWS
-      #
+    #
+
     def do_preprocessing(self,reducer,ws):
         """ Custom function, applied to each run or every workspace, the run is divided to
             in multirep mode
@@ -317,7 +324,8 @@ class ReduceMARIMon2Norm(ReductionWrapper):
             Must return pointer to the preprocessed workspace
         """
         return ws
-      #
+    #
+
     def do_postprocessing(self,reducer,ws):
         """ Custom function, applied to each reduced run or every reduced workspace, 
             the run is divided into, in multirep mode.
@@ -339,7 +347,6 @@ class ReduceMARIMon2Norm(ReductionWrapper):
             (E.g. if you decide to convert workspace units to wavelength, you can not save result as nxspe)
         """
         return ws
-		
 
     def __init__(self,web_var_val=None):
         """ sets properties defaults for the instrument with Name"""
@@ -347,7 +354,7 @@ class ReduceMARIMon2Norm(ReductionWrapper):
         Mt = MethodType(self.do_preprocessing, self.reducer,DirectEnergyConversion)
         DirectEnergyConversion.__setattr__(self.reducer,'do_preprocessing',Mt)
         Mt = MethodType(self.do_postprocessing, self.reducer,DirectEnergyConversion)
-        DirectEnergyConversion.__setattr__(self.reducer,'do_postprocessing',Mt)		
+        DirectEnergyConversion.__setattr__(self.reducer,'do_postprocessing',Mt)
 #----------------------------------------------------------------------------------------------------------------------
 
 
@@ -392,7 +399,8 @@ class MARIReductionSum(ReductionWrapper):
         ws = ReductionWrapper.reduce(self,input_file,output_directory)
      #SaveNexus(ws,Filename = 'MARNewReduction.nxs')
         return ws
-      #
+    #
+
     def do_preprocessing(self,reducer,ws):
         """ Custom function, applied to each run or every workspace, the run is divided to
             in multirep mode
@@ -409,7 +417,8 @@ class MARIReductionSum(ReductionWrapper):
             Must return pointer to the preprocessed workspace
         """
         return ws
-      #
+    #
+
     def do_postprocessing(self,reducer,ws):
         """ Custom function, applied to each reduced run or every reduced workspace, 
             the run is divided into, in multirep mode.
@@ -431,7 +440,6 @@ class MARIReductionSum(ReductionWrapper):
             (E.g. if you decide to convert workspace units to wavelength, you can not save result as nxspe)
         """
         return ws
-		
 
     def __init__(self,web_var_val=None):
         """ sets properties defaults for the instrument with Name"""
@@ -440,7 +448,6 @@ class MARIReductionSum(ReductionWrapper):
         DirectEnergyConversion.__setattr__(self.reducer,'do_preprocessing',Mt)
         Mt = MethodType(self.do_postprocessing, self.reducer,DirectEnergyConversion)
         DirectEnergyConversion.__setattr__(self.reducer,'do_postprocessing',Mt)
-		
 #----------------------------------------------------------------------------------------------------------------------
 
 
@@ -494,7 +501,8 @@ class ReduceMARIMonitorsSeparate(ReductionWrapper):
         outWS = ReductionWrapper.reduce(self,input_file,output_directory)
      #SaveNexus(outWS,Filename = 'MARNewReduction.nxs')
         return outWS
-      #
+    #
+
     def do_preprocessing(self,reducer,ws):
         """ Custom function, applied to each run or every workspace, the run is divided to
             in multirep mode
@@ -511,7 +519,8 @@ class ReduceMARIMonitorsSeparate(ReductionWrapper):
             Must return pointer to the preprocessed workspace
         """
         return ws
-      #
+    #
+
     def do_postprocessing(self,reducer,ws):
         """ Custom function, applied to each reduced run or every reduced workspace, 
             the run is divided into, in multirep mode.
@@ -533,7 +542,6 @@ class ReduceMARIMonitorsSeparate(ReductionWrapper):
             (E.g. if you decide to convert workspace units to wavelength, you can not save result as nxspe)
         """
         return ws
-		
 
     def __init__(self,web_var_val=None):
         """ sets properties defaults for the instrument with Name"""
@@ -542,7 +550,6 @@ class ReduceMARIMonitorsSeparate(ReductionWrapper):
         DirectEnergyConversion.__setattr__(self.reducer,'do_preprocessing',Mt)
         Mt = MethodType(self.do_postprocessing, self.reducer,DirectEnergyConversion)
         DirectEnergyConversion.__setattr__(self.reducer,'do_postprocessing',Mt)
-		
 
 
 class ReduceMARIAutoEi(ReductionWrapper):
@@ -624,7 +631,8 @@ class ReduceMARIAutoEi(ReductionWrapper):
         #return lambda : custom_name(self.reducer.prop_man)
         # use this method to use standard file name generating function
         return None
-      #
+    #
+
     def do_preprocessing(self,reducer,ws):
         """ Custom function, applied to each run or every workspace, the run is divided to
             in multirep mode
@@ -641,7 +649,8 @@ class ReduceMARIAutoEi(ReductionWrapper):
             Must return pointer to the preprocessed workspace
         """
         return ws
-      #
+    #
+
     def do_postprocessing(self,reducer,ws):
         """ Custom function, applied to each reduced run or every reduced workspace, 
             the run is divided into, in multirep mode.
@@ -664,7 +673,64 @@ class ReduceMARIAutoEi(ReductionWrapper):
         """
         return ws
 
-		
+    def eval_absorption_corrections(self,test_ws=None):
+        """ The method to evaluate the speed and efficiency of the absorption corrections procedure,
+            before applying your corrections to the whole workspace and all sample runs.
+
+            The absorption correction procedure invoked with excessive accuracy can run for too
+            long providing no real improvements in accuracy. This is why it is recommended to
+            run this procedure evaluating absorption on selected detectors and
+            deploy the corrections to the whole runs only after achieving satisfactory accuracy
+            and execution time.
+
+            The procedure evaluate and prints the expected time to run the absorption corrections
+            on the whole run.
+
+            Input:
+            If provided, the pointer or the name of the workspace available in analysis data service.
+            If it is not, the workspace is taken from PropertyManager.sample_run property
+
+            Usage:
+            Reduce single run and uncomment this method in the __main__ area to evaluate
+            adsorption corrections.
+
+            Change adsorption corrections parameters below to achieve best speed and
+            acceptable accuracy
+        """
+
+        # Gain access to the property manager:
+        propman =  rd.reducer.prop_man
+        # Set up Sample as one of:
+        # 1) Cylinder([Chem_formula],[Height,Radius])
+        # 2) FlatPlate([Chem_formula],[Height,Width,Thick])
+        # 3) HollowCylinder([Chem_formula],[Height,InnerRadius,OuterRadius]) 
+        # 4) Sphere([[Chem_formula],Radius)
+        # The units are in cm
+        propman.correct_absorption_on = Cylinder('Fe',[10,2]) # Will be taken from def_advanced_properties
+        #                                prop['correct_absorption_on'] =  if not defined here
+        #
+        # Use Monte-Carlo integration.  Take sparse energy points and a few integration attempts
+        # to increase initial speed. Increase these numbers to achieve better accuracy.
+        propman.abs_corr_info = {'EventsPerPoint':3000}#,'NumberOfWavelengthPoints':30}
+        # See MonteCarloAbsorption for all possible properties description and possibility to define 
+        # a sparse instrument for speed.
+        #
+        # Gain access to the workspace. The workspace should contain Ei log, containing incident energy
+        # (or be reduced)
+        if test_ws is None:
+            test_ws = PropertyManager.sample_run.get_workspace()
+        # Define spectra list to test absorption on
+        check_spectra = [1,200]
+        # Evaluate corrections on the selected spectra of the workspace and the time to obtain 
+        # the corrections on the whole workspace.
+        corrections,time_to_correct_abs = self.evaluate_abs_corrections(test_ws,check_spectra)
+        # When accuracy and speed of the corrections is satisfactory, copy chosen abs_corr_info
+        # properties from above to the advanced_porperties area to run in reduction.
+        if not mpl is None:
+            mpl.plotSpectrum(corrections,range(0,len(check_spectra)))
+        #
+        return corrections
+
     def __init__(self,web_var_val=None):
         """ sets properties defaults for the instrument with Name"""
         ReductionWrapper.__init__(self,'MAR',web_var_val)
@@ -672,7 +738,6 @@ class ReduceMARIAutoEi(ReductionWrapper):
         DirectEnergyConversion.__setattr__(self.reducer,'do_preprocessing',Mt)
         Mt = MethodType(self.do_postprocessing, self.reducer,DirectEnergyConversion)
         DirectEnergyConversion.__setattr__(self.reducer,'do_postprocessing',Mt)
-		
 #-------------------------------------------------------------------------------------------------#
 
 
@@ -706,19 +771,6 @@ if __name__ == "__main__":
     #  search path checking after time specified below.
     rd.wait_for_file = 0  # waiting time interval
 
-### Define a run number to validate reduction against future changes    #############
-    # Take a run number with good reduced results and build validation run
-    # for this result. Then place the validation run together with the reduction script.
-    # Next time, the script will run reduction and compare the reduction results against
-    # the results obtained earlier.
-    #rd.validate_run_number = 21968  # Enabling this property disables normal reduction
-    # and forces reduction to reduce run specified here and compares results against
-    # validation file, processed earlier or calculate this file if run for the first time.
-    #This would ensure that reduction script have not changed,
-    #allow to identify reason of changes if it was and would allow to recover the script,
-    #used to produce initial reduction if changes are unacceptable.
-
-
 ####get reduction parameters from properties above, override what you want locally ###
    # and run reduction.  Overriding would have form:
    # rd.reducer.property_name (from the dictionary above) = new value e.g.
@@ -735,3 +787,6 @@ if __name__ == "__main__":
     #red_ws = rd.run_reduction()
     # usual way to go is to reduce workspace and save it internally
     rd.run_reduction()
+
+###### Test absorption corrections to find optimal settings for corrections algorithm
+#     corr = rd.eval_absorption_corrections()
