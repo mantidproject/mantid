@@ -1732,10 +1732,10 @@ class AbsCorrInfo(PropDescriptor):
                 self._algo_selector('is_fast',is_fast)
 
         else:
-            raise(KeyError,\
-                'AbsCorrInfo accepts only a dictionary '
-                'with AbsorptionCorrections algorithm properties '
-                'or string representation of such dictionary')
+            raise(KeyError,
+                'AbsCorrInfo accepts only a dictionary '  # noqa
+                'with AbsorptionCorrections algorithm properties '  # noqa
+                'or string representation of such dictionary')  # noqa
 
         if self._is_fast:
             algo_name = 'AdsorptionCorrection'
@@ -1812,9 +1812,9 @@ def list_checker(val,list_in,mess_base):
     if val in list_in:
         return val
     else:
-        raise(ValueError,\
-            '{0} property can only have values from the set of: {1}'\
-            .format(mess_base,str(list_in)))
+        raise(ValueError,
+            '{0} property can only have values from the set of: {1}'  # noqa
+            .format(mess_base,str(list_in)))  # noqa
 
 # -----------------------------------------------------------------------------------------
 # END Descriptors for PropertyManager itself

@@ -258,7 +258,7 @@ class ReductionWrapper(object):
             red_ws = ExtractSpectra(test_ws,WorkspaceIndexList=spectra_to_correct)
         else:
             decrement = n_spectra
-        
+
         prop_man = self.reducer.prop_man
         abs_shape = prop_man.correct_absorption_on
         start_time = time.time()
@@ -762,10 +762,12 @@ def iliad(reduce):
         return rez
 
     return iliad_wrapper
-
 #
+
+
 def custom_operation(custom_fun):
     DirectEnergyConversion.__setattr__()
+
     def custom_fun_wrapper(*args):
             # execute decorated function
             ws = custom_fun(*args)

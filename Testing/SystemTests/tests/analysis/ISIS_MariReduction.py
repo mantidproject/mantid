@@ -15,7 +15,7 @@ except:
     web_var = None
 try:
     import mantidplot as mpl
-except: 
+except:
     mpl = None
 
 
@@ -95,7 +95,7 @@ class ReduceMARIFromFile(ReductionWrapper):
             Applied after diagnostics but before any further reduction is invoked.
             Inputs:
             self    -- initialized instance of the instrument reduction class
-            reducer -- initialized instance of the reducer 
+            reducer -- initialized instance of the reducer
                        (DirectEnergyConversion class initialized for specific reduction)
             ws         the workspace, describing the run or partial run in multirep mode
                        to preprocess
@@ -108,13 +108,13 @@ class ReduceMARIFromFile(ReductionWrapper):
     #
 
     def do_postprocessing(self,reducer,ws):
-        """ Custom function, applied to each reduced run or every reduced workspace, 
+        """ Custom function, applied to each reduced run or every reduced workspace,
             the run is divided into, in multirep mode.
             Applied after reduction is completed but before saving the result.
 
             Inputs:
             self    -- initialized instance of the instrument reduction class
-            reducer -- initialized instance of the reducer 
+            reducer -- initialized instance of the reducer
                        (DirectEnergyConversion class initialized for specific reduction)
             ws         the workspace, describing the run or partial run in multirep mode
                        after reduction to postprocess
@@ -214,7 +214,7 @@ class ReduceMARIFromWorkspace(ReductionWrapper):
             Applied after diagnostics but before any further reduction is invoked.
             Inputs:
             self    -- initialized instance of the instrument reduction class
-            reducer -- initialized instance of the reducer 
+            reducer -- initialized instance of the reducer
                        (DirectEnergyConversion class initialized for specific reduction)
             ws         the workspace, describing the run or partial run in multirep mode
                        to preprocess
@@ -227,13 +227,13 @@ class ReduceMARIFromWorkspace(ReductionWrapper):
     #
 
     def do_postprocessing(self,reducer,ws):
-        """ Custom function, applied to each reduced run or every reduced workspace, 
+        """ Custom function, applied to each reduced run or every reduced workspace,
             the run is divided into, in multirep mode.
             Applied after reduction is completed but before saving the result.
 
             Inputs:
             self    -- initialized instance of the instrument reduction class
-            reducer -- initialized instance of the reducer 
+            reducer -- initialized instance of the reducer
                        (DirectEnergyConversion class initialized for specific reduction)
             ws         the workspace, describing the run or partial run in multirep mode
                        after reduction to postprocess
@@ -314,7 +314,7 @@ class ReduceMARIMon2Norm(ReductionWrapper):
             Applied after diagnostics but before any further reduction is invoked.
             Inputs:
             self    -- initialized instance of the instrument reduction class
-            reducer -- initialized instance of the reducer 
+            reducer -- initialized instance of the reducer
                        (DirectEnergyConversion class initialized for specific reduction)
             ws         the workspace, describing the run or partial run in multirep mode
                        to preprocess
@@ -327,13 +327,13 @@ class ReduceMARIMon2Norm(ReductionWrapper):
     #
 
     def do_postprocessing(self,reducer,ws):
-        """ Custom function, applied to each reduced run or every reduced workspace, 
+        """ Custom function, applied to each reduced run or every reduced workspace,
             the run is divided into, in multirep mode.
             Applied after reduction is completed but before saving the result.
 
             Inputs:
             self    -- initialized instance of the instrument reduction class
-            reducer -- initialized instance of the reducer 
+            reducer -- initialized instance of the reducer
                        (DirectEnergyConversion class initialized for specific reduction)
             ws         the workspace, describing the run or partial run in multirep mode
                        after reduction to postprocess
@@ -726,7 +726,7 @@ class ReduceMARIAutoEi(ReductionWrapper):
         corrections,time_to_correct_abs = self.evaluate_abs_corrections(test_ws,check_spectra)
         # When accuracy and speed of the corrections is satisfactory, copy chosen abs_corr_info
         # properties from above to the advanced_porperties area to run in reduction.
-        if not mpl is None:
+        if mpl:
             mpl.plotSpectrum(corrections,range(0,len(check_spectra)))
         #
         return corrections

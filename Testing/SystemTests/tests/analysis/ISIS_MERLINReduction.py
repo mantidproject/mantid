@@ -13,9 +13,8 @@ except:
     web_var = None
 try:
     import mantidplot as mpl
-except: 
+except:
     mpl = None
-
 
 
 class ReduceMERLIN(ReductionWrapper):
@@ -68,7 +67,7 @@ class ReduceMERLIN(ReductionWrapper):
             Applied after diagnostics but before any further reduction is invoked.
             Inputs:
             self    -- initialized instance of the instrument reduction class
-            reducer -- initialized instance of the reducer 
+            reducer -- initialized instance of the reducer
                        (DirectEnergyConversion class initialized for specific reduction)
             ws         the workspace, describing the run or partial run in multirep mode
                        to preprocess
@@ -81,13 +80,13 @@ class ReduceMERLIN(ReductionWrapper):
     #
 
     def do_postprocessing(self,reducer,ws):
-        """ Custom function, applied to each reduced run or every reduced workspace, 
+        """ Custom function, applied to each reduced run or every reduced workspace,
             the run is divided into, in multirep mode.
             Applied after reduction is completed but before saving the result.
 
             Inputs:
             self    -- initialized instance of the instrument reduction class
-            reducer -- initialized instance of the reducer 
+            reducer -- initialized instance of the reducer
                        (DirectEnergyConversion class initialized for specific reduction)
             ws         the workspace, describing the run or partial run in multirep mode
                        after reduction to postprocess
@@ -133,7 +132,7 @@ class ReduceMERLIN(ReductionWrapper):
         # Set up Sample as one of:
         # 1) Cylinder([Chem_formula],[Height,Radius])
         # 2) FlatPlate([Chem_formula],[Height,Width,Thick])
-        # 3) HollowCylinder([Chem_formula],[Height,InnerRadius,OuterRadius]) 
+        # 3) HollowCylinder([Chem_formula],[Height,InnerRadius,OuterRadius])
         # 4) Sphere([[Chem_formula],Radius)
         # The units are in cm
         propman.correct_absorption_on = Cylinder('Fe',[10,2]) # Will be taken from def_advanced_properties
@@ -142,7 +141,7 @@ class ReduceMERLIN(ReductionWrapper):
         # Use Monte-Carlo integration.  Take sparse energy points and a few integration attempts
         # to increase initial speed. Increase these numbers to achieve better accuracy.
         propman.abs_corr_info = {'EventsPerPoint':3000}#,'NumberOfWavelengthPoints':30}
-        # See MonteCarloAbsorption for all possible properties description and possibility to define 
+        # See MonteCarloAbsorption for all possible properties description and possibility to define
         # a sparse instrument for speed.
         #
         # Gain access to the workspace. The workspace should contain Ei log, containing incident energy
@@ -151,12 +150,12 @@ class ReduceMERLIN(ReductionWrapper):
             test_ws = PropertyManager.sample_run.get_workspace()
         # Define spectra list to test absorption on
         check_spectra = [1,200]
-        # Evaluate corrections on the selected spectra of the workspace and the time to obtain 
+        # Evaluate corrections on the selected spectra of the workspace and the time to obtain
         # the corrections on the whole workspace.
         corrections,time_to_correct_abs = self.evaluate_abs_corrections(test_ws,check_spectra)
         # When accuracy and speed of the corrections is satisfactory, copy chosen abs_corr_info
         # properties from above to the advanced_porperties area to run in reduction.
-        if not mpl is None:
+        if mpl:
             mpl.plotSpectrum(corrections,range(0,len(check_spectra)))
         #
         return corrections

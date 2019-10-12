@@ -21,7 +21,7 @@ class anAbsorptionShape(object):
     in direct inelastic analysis.
 
     Contains material and environment properties necessary for absorption corrections calculations,
-    as recognized by SetSampleMaterial algorithm. 
+    as recognized by SetSampleMaterial algorithm.
 
     See SetSampleMaterial for full list of properties available to set.
 
@@ -51,9 +51,9 @@ class anAbsorptionShape(object):
     or
     anShape.material = {'ChemicalFormula':'Br'} (change existing ChemicalFormula)
 
-    Note: 
+    Note:
     Adding dictionary appends or modifies existing properties, but adding a list, clears up all properties, previously
-    set-up on class. 
+    set-up on class.
     The list can contain up two members where first corresponds to the ChemicalFormula and the second one -- to the
     material's number density
     """
@@ -109,7 +109,7 @@ class anAbsorptionShape(object):
             elif len(value) == 1:
                 self._Material = {'ChemicalFormula':value[0]}
             else:
-                raise TypeError(\
+                raise TypeError(
                     '*** If material is defined by list or tuple,'
                     ' it may consist of 1 or 2 members,'
                     ' defining the material formula and the material number density')
@@ -117,7 +117,7 @@ class anAbsorptionShape(object):
             for key,val in value.iteritems():
                 self._Material[key] = val
         else:
-            raise TypeError(\
+            raise TypeError(
                 '*** Material accepts only list or tuple containing up to 2 values'
                 ' corresponding to material formula and material number density'
                 ' or dictionary with keys, recognized by SetSampleMaterial algorithm')
@@ -174,7 +174,7 @@ class anAbsorptionShape(object):
         fast_corrections = corr_properties.pop('is_fast',False)
         if  not (mc_corrections or fast_corrections):
             fast_corrections = False
-        if fast_corrections: 
+        if fast_corrections:
             raise RuntimeError('Analytical absorption corrections are not currently implemented in Direct mode')
             abs_corrections = self._fast_abs_corrections(correction_base_ws,corr_properties)
         else:
@@ -197,7 +197,7 @@ class anAbsorptionShape(object):
     def _fast_abs_corrections(self,correction_base_ws,kwarg={}):
         """ Method to correct adsorption on a shape using fast (Numerical Integration) method
             if such method is available for the shape
-        
+
         Not available on arbitrary shapes
         Inputs:
          ws     -- workspace to correct. Should be in the units of wavelength
@@ -319,12 +319,12 @@ class Cylinder(anAbsorptionShape):
     CylinderParameters can have the form:
 
     a) The list consisting of 2 to 4 members.:
-    CylinderParameters = [Height,Radus,[[Axis],[Center]] 
+    CylinderParameters = [Height,Radus,[[Axis],[Center]]
     where Height, Radus are the cylinder height and radius in cm and
     Axis, if present is the direction of the cylinder wrt to the beam direction [0,0,1]
     e.g.:
     abs = Cylinder(['Al',0.1],[10,2,[1,0,0],[0,0,0]])
-    b) The diary: 
+    b) The diary:
     CylinderParameters = {Height:Height_value,Radus:Radius_value,[Axis:axisValue],[Center:TheSampleCentre]}
     e.g:
     abs = Cylinder(['Al',0.1],[Height:10,Radius:2,Axis:[1,0,0]])
@@ -348,8 +348,8 @@ class Cylinder(anAbsorptionShape):
     @shape.setter
     def shape(self,value):
         shape_dict = self._set_list_property(value,
-             'Cylinder',['Height','Radius'],
-            ['Axis','Center'],[[0.,1.,0.],[0,0,0]])  # noqa: E127
+             'Cylinder',['Height','Radius'],         # noqa
+            ['Axis','Center'],[[0.,1.,0.],[0,0,0]])  # noqa
 
         self._ShapeDescription = shape_dict
 
@@ -364,7 +364,7 @@ class Cylinder(anAbsorptionShape):
         """
         kw = kwarg.copy()
         elem_size = kw.pop('NumberOfSlices',None)
-        if not elem_size is None: # noqa: E714
+        if not elem_size is None: # noqa
             shape_dic = self.shape
             n_slices = int(shape_dic['Height']/elem_size)
             if n_slices <1:
@@ -404,7 +404,7 @@ class FlatPlate(anAbsorptionShape):
 
     e.g.:
     abs = FlatPlate(['Al',0.1],[10,2,0.2,[1,0,0],5])
-    b) The diary: 
+    b) The diary:
     PlateParameters = {Height:Height_value,Width:Width_value,Thickness:Thickness_value etc}
     e.g:
     abs = FlatPlate(['Al',0.1],['Height':10,'Width':4,'Thickness':2,'Angle':30)
@@ -454,10 +454,10 @@ class FlatPlate(anAbsorptionShape):
 ##---------------------------------------------------------------------------------------------------
 class HollowCylinder(anAbsorptionShape):
     """Define the Hollow absorbing cylinder and calculate absorption corrections for this cylinder
-    
+
     Usage:
     abs = HollowCylinder(SampleMaterial,CylinderParameters)
-    The SampleMaterial is the list or dictionary as described on anAbsorptionShape class 
+    The SampleMaterial is the list or dictionary as described on anAbsorptionShape class
 
     and
 
@@ -465,7 +465,7 @@ class HollowCylinder(anAbsorptionShape):
 
     a) The list consisting of 3 to 5 members.:
     CylinderParameters = [Height,InnerRadus,OuterRadus,[[Axis],[Center]] 
-    where Height, InnerRadus and OuterRadus are the cylinder height and radiuses in cm and 
+    where Height, InnerRadus and OuterRadus are the cylinder height and radiuses in cm and
     Axis, if present is the direction of the cylinder wrt to the beam direction [0,0,1]
     e.g.:
     abs = HollowCylinder(['Al',0.1],[10,2,4,[0,1,0],[0,0,0]])
@@ -494,9 +494,10 @@ class HollowCylinder(anAbsorptionShape):
 
     @shape.setter
     def shape(self,value):
-        shape_dict = self._set_list_property(value,'HollowCylinder',
+        shape_dict = self._set_list_property(value,
+            'HollowCylinder',
             ['Height','InnerRadius','OuterRadius'],
-            ['Axis','Center'],[[0.,1.,0.],[0.,0.,0.]])
+            ['Axis','Center'],[[0.,1.,0.],[0.,0.,0.]])  # noqa: E127
         #
         self._ShapeDescription = shape_dict
         if len(shape_dict) != 0:
@@ -552,7 +553,7 @@ class HollowCylinder(anAbsorptionShape):
 ##---------------------------------------------------------------------------------------------------
 class Sphere(anAbsorptionShape):
     """Define the absorbing sphere and calculate absorption corrections from this sphere
-    
+
     Usage:
     abs = Sphere(SampleMaterial,SphereParameters)
     The SampleMaterial is the list or dictionary as described on anAbsorptionShape class
@@ -597,8 +598,9 @@ class Sphere(anAbsorptionShape):
     #
     @shape.setter
     def shape(self,value):
-        shape_dict = self._set_list_property(value,'Sphere',['Radius'],
-            ['Center'],[[0.,0.,0.]])
+        shape_dict = self._set_list_property(value,
+            'Sphere',['Radius'],
+            ['Center'],[[0.,0.,0.]])  # noqa: E127
 
         self._ShapeDescription = shape_dict
         if len(shape_dict) != 0:
@@ -628,7 +630,7 @@ class Sphere(anAbsorptionShape):
             AbsorptionCorrections method is invoked with the parameters provided.
         """
         if len(kwarg) == 0:
-            adsrbtn_correctios = SphericalAbsorption(\
+            adsrbtn_correctios = SphericalAbsorption(
                 correction_base_ws,SphericalSampleRadius=self._ShapeDescription['Radius'])
         else:
             self._add_xml_sphere(correction_base_ws)
