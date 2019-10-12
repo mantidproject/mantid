@@ -10,7 +10,7 @@ from mantid.simpleapi import *
 from mantid import api
 import unittest
 import numpy as np
-from AbsorptionShapes import (anAbsorptionShape,Cylinder,FlatPlate,HollowCylinder,Sphere)
+from Direct.AbsorptionShapes import (anAbsorptionShape,Cylinder,FlatPlate,HollowCylinder,Sphere)
 
 class AdsorbtionShapesTest(unittest.TestCase):
     def __init__(self, methodName):
