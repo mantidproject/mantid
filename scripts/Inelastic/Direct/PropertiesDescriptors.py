@@ -338,8 +338,8 @@ class IncidentEnergy(PropDescriptor):
         for ei in guessEi:
             try:
                 ei_ref, _, _, _ = GetEi(InputWorkspace=monitor_ws,
-                                               Monitor1Spec=ei_mon_spec[0], Monitor2Spec=ei_mon_spec[1],
-                                               EnergyEstimate=ei)
+                                        Monitor1Spec=ei_mon_spec[0], Monitor2Spec=ei_mon_spec[1],
+                                        EnergyEstimate=ei)
                 fin_ei.append(ei_ref)
             # pylint: disable=bare-except
             except:
