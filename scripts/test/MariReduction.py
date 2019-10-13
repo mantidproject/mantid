@@ -16,7 +16,7 @@ except:
     web_var = None
 try:
     import mantidplot as mpl
-except: 
+except:
     mpl = None
 
 
@@ -29,13 +29,13 @@ class ReduceMARI(ReductionWrapper):
 
        """ Define main properties used in reduction """
        prop = {}
-       prop['sample_run'] = 21461
-       prop['wb_run'] = 21334
-       prop['incident_energy'] = 50
-       prop['energy_bins'] = [-10,0.1,49]
+       prop['sample_run'] = 11001
+       prop['wb_run'] = 11060
+       prop['incident_energy'] = 12
+       prop['energy_bins'] = [-11,0.05,11]
 
       # Absolute units reduction properties.
-       prop['monovan_run'] = None
+       prop['monovan_run'] = 11015
        prop['sample_mass'] = 10
        prop['sample_rmm'] = 435.96
        return prop
@@ -47,44 +47,44 @@ class ReduceMARI(ReductionWrapper):
            main properties override advanced properties.
       """
       prop = {}
-      prop['map_file'] = "mari_res2013.map"
-      prop['monovan_mapfile'] = "mari_res2013.map"
-      prop['hard_mask_file'] = "mari_mask2016_1.msk"
-      prop['det_cal_file'] = None #21334
+      prop['map_file'] = "mari_res.map"
+      prop['monovan_mapfile'] = "mari_res.map"
+      prop['hard_mask_file'] = "mar11015.msk"
+      prop['det_cal_file'] = 11060
       prop['save_format'] = ''
       # Uncomment two following properties to correct for absorption
       # on sample or sample container during the experiment.
       # 1) Define the sample material and sample shape:
-	  #
+      #
       #prop['correct_absorption_on'] = Cylinder(['Fe'],{'Height':10,'Radius':2})
-	  #
+      #
       #  The shapes currently available are:
       #  Cylinder, FlatPlate, HollowCylinder and Sphere
       # Each class accepts two parameters, namely dictionary or list describing
       # sample material, as accepted by SetSampleMaterial algorithm
       # and Shape parameters as accepted by SetSample algorithm.
-	  
-	  # Go to iPython window, type from AbsorptionShapes import * and type
-      # help(Cylinder),     
+
+      # Go to iPython window, type from AbsorptionShapes import * and type
+      # help(Cylinder),
       # help(Sphere) or help(anAbsorptionShape) to learn more about different
       # ways of setting the material and shape parameters:
       ##----------------------------
       # 2) Provide additional parameters defining speed and accuracy of the
       #    absorption corrections algorithm in abs_corr_info dictionary.
-	  #
-	  #prop['abs_corr_info'] = {'is_mc':True}
-	  #
-	  #Two generic algorithms are currently available to
+      #
+      #prop['abs_corr_info'] = {'is_mc':True}
+      #
+      #Two generic algorithms are currently available to
       #    correct for absorption:
       # a) AbsorptionCorrections (invoked by 'is_fast':True key of
       #    abs_corr_info property and by default).
       # and
       # b) MonteCarloAbsorption (invoked by 'is_mc':True key of abs_corr_info
       #    property)
-	  
+
       # All other properties, to be provided in the input dictionary of this
       # property are the non-sample related properties of the
-	  # correspondent correction algorithm.
+      # correspondent correction algorithm.
       #
       # Test the speed and the accuracy of the selected algorithm
       # reducing all your data by running eval_absorption_corrections method below.
@@ -102,7 +102,7 @@ class ReduceMARI(ReductionWrapper):
       """
         Define custom preprocessing procedure, to be applied to the whole
         run, obtained from the instrument before diagnostics is applied
-      1) Get access to the pointer to the input workspace 
+      1) Get access to the pointer to the input workspace
          (the workspace will be loaded  and calibrated at this point if it has not been done yet)
           using sample_run property class:
       run_ws = PropertyManager.sample_run.get_worksapce()
@@ -141,7 +141,7 @@ class ReduceMARI(ReductionWrapper):
             Applied after diagnostics but before any further reduction is invoked.
             Inputs:
             self    -- initialized instance of the instrument reduction class
-            reducer -- initialized instance of the reducer 
+            reducer -- initialized instance of the reducer
                        (DirectEnergyConversion class initialized for specific reduction)
             ws         the workspace, describing the run or partial run in multirep mode
                        to preprocess
@@ -160,7 +160,7 @@ class ReduceMARI(ReductionWrapper):
 
             Inputs:
             self    -- initialized instance of the instrument reduction class
-            reducer -- initialized instance of the reducer 
+            reducer -- initialized instance of the reducer
                        (DirectEnergyConversion class initialized for specific reduction)
             ws         the workspace, describing the run or partial run in multirep mode
                        after reduction to postprocess
@@ -234,7 +234,7 @@ class ReduceMARI(ReductionWrapper):
         # Set up Sample as one of:
         # 1) Cylinder([Chem_formula],[Height,Radius])
         # 2) FlatPlate([Chem_formula],[Height,Width,Thick])
-        # 3) HollowCylinder([Chem_formula],[Height,InnerRadius,OuterRadius]) 
+        # 3) HollowCylinder([Chem_formula],[Height,InnerRadius,OuterRadius])
         # 4) Sphere([[Chem_formula],Radius)
         # The units are in cm
         propman.correct_absorption_on = Cylinder('Fe',[10,2]) # Will be taken from def_advanced_properties
@@ -243,7 +243,7 @@ class ReduceMARI(ReductionWrapper):
         # Use Monte-Carlo integration.  Take sparse energy points and a few integration attempts
         # to increase initial speed. Increase these numbers to achieve better accuracy.
         propman.abs_corr_info = {'EventsPerPoint':3000}#,'NumberOfWavelengthPoints':30}
-        # See MonteCarloAbsorption for all possible properties description and possibility to define 
+        # See MonteCarloAbsorption for all possible properties description and possibility to define
         # a sparse instrument for speed.
         #
         # Gain access to the workspace. The workspace should contain Ei log, containing incident energy
@@ -252,7 +252,7 @@ class ReduceMARI(ReductionWrapper):
             test_ws = PropertyManager.sample_run.get_workspace()
         # Define spectra list to test absorption on
         check_spectra = [1,200]
-        # Evaluate corrections on the selected spectra of the workspace and the time to obtain 
+        # Evaluate corrections on the selected spectra of the workspace and the time to obtain
         # the corrections on the whole workspace.
         corrections,time_to_correct_abs = self.evaluate_abs_corrections(test_ws,check_spectra)
         # When accuracy and speed of the corrections is satisfactory, copy chosen abs_corr_info
@@ -291,17 +291,14 @@ if __name__ == "__main__" or __name__ == "__builtin__":
 #-------------------------------------------------------------------------------------------------#
 # SECTION USED TO RUN REDUCTION FROM MANTID SCRIPT WINDOW #
 #-------------------------------------------------------------------------------------------------#
-##### Here one sets up folders where to find input data and where to save
-##### results
+##### Here one sets up folders where to find input data and where to save results             #####
     # It can be done here or from Mantid GUI
     # Folder where map files are located:
      #map_mask_dir = 'd:/Data/MantidSystemTests/Data'
     # folder where input data can be found
      #data_dir = 'd:/Data/Mantid_Testing/14_11_27'
      # auxiliary folder with results
-     #ref_data_dir =     #ref_data_dir =
-     #'d:/Data/MantidSystemTests/SystemTests/AnalysisTests/ReferenceResults'
-     #'d:/Data/MantidSystemTests/SystemTests/AnalysisTests/ReferenceResults'
+     #ref_data_dir = 'd:/Data/MantidSystemTests/SystemTests/AnalysisTests/ReferenceResults'
      # Set input path to
      #config.setDataSearchDirs('{0};{1};{2}'.format(data_dir,map_mask_dir,ref_data_dir))
      # use appendDataSearch directory to add to existing data search path
@@ -309,8 +306,7 @@ if __name__ == "__main__" or __name__ == "__builtin__":
      # folder to save resulting spe/nxspe files.
      #config['defaultsave.directory'] = data_dir
 
-###### Initialize reduction class above and set up reduction properties.
-######  Note no parameters ######
+###### Initialize reduction class above and set up reduction properties. Note no parameters  ######
      rd = ReduceMARI()
      # set up advanced and main properties
      rd.def_advanced_properties()
@@ -323,8 +319,8 @@ if __name__ == "__main__" or __name__ == "__builtin__":
 
      # Web-like reduction over sequence of files
      #rd.reduce()
-###### Run reduction on all files provided as parameters ######
+###### Run reduction on all files provided as parameters                                      ######
      rd.run_reduction()
 
-###### Test absorption corrections to find optimal settings for corrections algorithm
+###### Test absorption corrections to find optimal settings for corrections algorithm         ######
 #     corr = rd.eval_absorption_corrections()
