@@ -337,7 +337,7 @@ class IncidentEnergy(PropDescriptor):
         fin_ei = []
         for ei in guessEi:
             try:
-                ei_ref, _, _, _ = mantid.GetEi(InputWorkspace=monitor_ws,
+                ei_ref, _, _, _ = GetEi(InputWorkspace=monitor_ws,
                                                Monitor1Spec=ei_mon_spec[0], Monitor2Spec=ei_mon_spec[1],
                                                EnergyEstimate=ei)
                 fin_ei.append(ei_ref)
@@ -353,7 +353,7 @@ class IncidentEnergy(PropDescriptor):
         self._num_energies = len(fin_ei)
         self._cur_iter_en = 0
         # Clear dataservice from unnecessary workspace
-        mantid.DeleteWorkspace(guess_ei_ws)
+        DeleteWorkspace(guess_ei_ws)
 
     def validate(self, instance, owner=None):
         #
