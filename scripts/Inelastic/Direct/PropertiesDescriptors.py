@@ -330,7 +330,7 @@ class IncidentEnergy(PropDescriptor):
         self._autoEiCalculated = False
         if ei_mon_spec is None:
             ei_mon_spec = instance.ei_mon_spectra
-        guess_ei_ws = mantid.GetAllEi(Workspace=monitor_ws, Monitor1SpecID=ei_mon_spec[0],
+        guess_ei_ws = GetAllEi(Workspace=monitor_ws, Monitor1SpecID=ei_mon_spec[0],
                                       Monitor2SpecID=ei_mon_spec[1])
         guessEi = guess_ei_ws.readX(0)
         fin_ei = []
