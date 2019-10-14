@@ -566,11 +566,9 @@ class DirectEnergyConversion(object):
                 if self._multirep_mode:
                     result.append(deltaE_ws_sample)
                 else:
-                    if results_name != out_ws_name:
-                        RenameWorkspace(InputWorkspace=results_name,OutputWorkspace=out_ws_name)
-                        results_name = out_ws_name
-                        result = mtd[results_name]
-                        PropertyManager.sample_run.synchronize_ws(result)
+                    if results_name != out_ws_name: # This actually returns deltaE_ws_sample.name()
+                        # to the state, defined in ADS. Intentionally skip renaming here.
+                        result = PropertyManager.sample_run.synchronize_ws(deltaE_ws_sample)
                     else:
                         result = deltaE_ws_sample
             else: # delete workspace if no output is requested

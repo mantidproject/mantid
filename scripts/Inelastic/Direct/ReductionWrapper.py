@@ -754,10 +754,10 @@ def iliad(reduce):
             if isinstance(rez, list):
               # multirep run, just return as it is
                 return rez
-            if not(rez is None) and out_ws_name and rez.name() != out_ws_name:
+            if rez is not None and out_ws_name and rez.name() != out_ws_name:
             # the function does not return None, pylint is wrong
             #pylint: disable=W1111
-                rez = RenameWorkspace(InputWorkspace=rez, OutputWorkspace=out_ws_name)
+                rez = PropertyManager.sample_run.synchronize_ws(rez,out_ws_name)
         return rez
 
     return iliad_wrapper
