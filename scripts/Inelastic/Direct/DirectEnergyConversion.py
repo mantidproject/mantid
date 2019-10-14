@@ -1930,11 +1930,11 @@ class DirectEnergyConversion(object):
 
     #
     def do_preprocessing(self,ws,*argi):
-        """ stub for custom preprocessing function"""
+        """ stub for custom preprocessing function. Should be redefined in the reduction script."""
         return ws
 
     def do_postprocessing(self,ws,*argi):
-        """ stub for custom postprocessing function"""
+        """ stub for custom postprocessing function. Should be redefined in the reduction script."""
         return ws
 
 

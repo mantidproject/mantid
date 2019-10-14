@@ -186,7 +186,7 @@ class AdsorbtionShapesTest(unittest.TestCase):
         rad = res['Radius']
         self.assertEqual(rad,5)
         cen = res['Center']
-        self.assertEqualcen(cen,[1,0,0])
+        self.assertEqual(cen,[1,0,0])
 
 
         ash.shape = {'Radius':3,'Center':[0.,0.,0.]}
