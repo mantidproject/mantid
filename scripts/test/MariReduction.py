@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 """ Sample MARI reduction scrip used in testing ReductionWrapper """
 import os
-from types import MethodType
 from Direct.AbsorptionShapes import *
 
 from Direct.ReductionWrapper import *

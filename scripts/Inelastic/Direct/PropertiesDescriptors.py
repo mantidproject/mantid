@@ -1745,7 +1745,7 @@ class AbsCorrInfo(PropDescriptor):
             algo_name = 'MonteCarloAbsorption'
             acceptable_prop = AbsCorrInfo._MC_corrections_accepts
 
-        for key,val in val_dict.iteritems():
+        for key,val in val_dict.items():
             check_normalizer = acceptable_prop.get(key,None)
             if check_normalizer is None:
                 raise(KeyError,'The key {0} is not acceptable key for {1} algorithm'.format(key,algo_name))

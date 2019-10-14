@@ -13,6 +13,7 @@ from mantid.kernel import funcinspect
 from Direct.PropertyManager import PropertyManager
 # this import is used by children
 from Direct.DirectEnergyConversion import DirectEnergyConversion
+from types import MethodType
 import os
 import re
 import time

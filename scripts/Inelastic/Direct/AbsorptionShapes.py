@@ -114,7 +114,7 @@ class anAbsorptionShape(object):
                     ' it may consist of 1 or 2 members,'
                     ' defining the material formula and the material number density')
         elif isinstance(value,dict):
-            for key,val in value.iteritems():
+            for key,val in value.items():
                 self._Material[key] = val
         else:
             raise TypeError(
