@@ -9,6 +9,7 @@
 #include "MantidGeometry/Crystal/CrystalStructure.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/Material.h"
+#include "MantidPythonInterface/core/Copyable.h"
 #include "MantidPythonInterface/core/GetPointer.h"
 
 #include <boost/python/class.hpp>
@@ -28,7 +29,7 @@ void export_Sample() {
   register_ptr_to_python<Sample *>();
   register_ptr_to_python<boost::shared_ptr<Sample>>();
 
-  class_<Sample, boost::noncopyable>("Sample", no_init)
+  class_<Sample, boost::noncopyable>("Sample")
       .def("getName", &Sample::getName,
            return_value_policy<copy_const_reference>(), arg("self"),
            "Returns the string name of the sample")
@@ -81,5 +82,8 @@ void export_Sample() {
       .def("__len__", &Sample::size, arg("self"),
            "Gets the number of samples in this collection")
       .def("__getitem__", &Sample::operator[],(arg("self"), arg("index")),
-           return_internal_reference<>());
+           return_internal_reference<>())
+      .def("__copy__", &Mantid::PythonInterface::generic__copy__<Sample>)
+      .def("__deepcopy__",
+           &Mantid::PythonInterface::generic__deepcopy__<Sample>);
 }
