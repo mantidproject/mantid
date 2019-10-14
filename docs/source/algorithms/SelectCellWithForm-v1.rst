@@ -17,6 +17,9 @@ selected cell will just be displayed. If the apply flag is set, the
 :ref:`UB matrix <Lattice>` associated with the sample in the PeaksWorkspace
 will be updated to a :ref:`UB matrix <Lattice>` corresponding to the selected
 cell AND the peaks will be re-indexed using the new :ref:`UB matrix <Lattice>`.
+The output transformation matrix :math:`M` will change :math:`UB` to :math:`UBM^{-1}`
+and map each :math:`(HKL)` vector to :math:`M(HKL)`. It can be further
+used by the :ref:`TransformHKL <algm-TransformHKL>` algorithm.
 NOTE: The possible conventional cells, together with the corresponding errors
 in the cell scalars can be seen by running the
 :ref:`ShowPossibleCells <algm-ShowPossibleCells>` algorithm, provided the
