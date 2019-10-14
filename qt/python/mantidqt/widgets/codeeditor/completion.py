@@ -27,6 +27,7 @@ revisiting when we move to Python 3.
 
 from __future__ import (absolute_import, unicode_literals)
 
+import ast
 import inspect
 import re
 import sys
@@ -148,8 +149,8 @@ def generate_call_tips(definitions, prepend_module_name=None):
 
     :param dict definitions: Dictionary with names of python objects as keys and
         the objects themselves as values
-    :param str prepend_module_name: Prepend the name of the module to the call tips
-        default is None
+    :param prepend_module_name: bool, None, or str. Prepend the name of the module to the call tips
+        default is None, if string given that string will act as the module name
     :returns list: A list of call tips
     """
     if not isinstance(definitions, dict):
@@ -158,6 +159,8 @@ def generate_call_tips(definitions, prepend_module_name=None):
     for name, py_object in definitions.items():
         if name.startswith('_'):
             continue
+        if prepend_module_name is True:
+            prepend_module_name = py_object.__module__
         if inspect.isfunction(py_object) or inspect.isbuiltin(py_object):
             if not prepend_module_name:
                 call_tips.append(name + get_function_spec(py_object))
@@ -184,6 +187,17 @@ def generate_call_tips(definitions, prepend_module_name=None):
     return call_tips
 
 
+def get_line_number_from_index(string, index):
+    return string[:index].count('\n')
+
+
+def get_module_import_alias(import_name, text):
+    for node in ast.walk(ast.parse(text)):
+        if isinstance(node, ast.alias) and node.name == import_name:
+            return node.asname
+    return import_name
+
+
 class CodeCompleter(object):
     """
     This class generates autocompletions for Workbench's script editor.
@@ -198,12 +212,12 @@ class CodeCompleter(object):
         self._completions_dict = dict()
         if "from mantid.simpleapi import *" in self.editor.text():
             self._add_to_completions(self._get_module_call_tips('mantid.simpleapi'))
-        if re.search("import .*numpy( |,|$)", self.editor.text()):
+        if re.search("^#{0}import .*numpy( |,|$)", self.editor.text(), re.MULTILINE):
             self._add_to_completions(self._get_module_call_tips('numpy'))
-        if re.search("import .*pyplot( |,|$)", self.editor.text()):
+        if re.search("^#{0}import .*pyplot( |,|$)", self.editor.text(), re.MULTILINE):
             self._add_to_completions(self._get_module_call_tips('matplotlib.pyplot'))
 
-        self.editor.enableAutoCompletion(CodeEditor.AcsAll)
+        self.editor.enableAutoCompletion(CodeEditor.AcsAPIs)
         self.editor.updateCompletionAPI(self.completions)
 
     @property
@@ -211,7 +225,7 @@ class CodeCompleter(object):
         return list(self._completions_dict.keys())
 
     def _get_completions_from_globals(self):
-        return generate_call_tips(self.env_globals)
+        return generate_call_tips(self.env_globals, prepend_module_name=True)
 
     def _add_to_completions(self, completions):
         for completion in completions:
@@ -232,4 +246,5 @@ class CodeCompleter(object):
             module = sys.modules[module]
         except KeyError:
             return []
-        return generate_call_tips(module.__dict__, module.__name__)
+        module_name = get_module_import_alias(module.__name__, self.editor.text())
+        return generate_call_tips(module.__dict__, module_name)

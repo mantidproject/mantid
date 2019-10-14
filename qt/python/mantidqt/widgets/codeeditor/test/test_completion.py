@@ -16,7 +16,7 @@ import numpy as np  # noqa
 from mantid.simpleapi import Rebin  # noqa  # needed so sys.modules can pick up Rebin
 from mantid.py3compat.mock import Mock
 from mantidqt.widgets.codeeditor.completion import (CodeCompleter, get_function_spec,
-                                                    get_builtin_argspec)
+                                                    get_builtin_argspec, get_module_import_alias)
 from testhelpers import assertRaisesNothing
 
 
@@ -46,11 +46,11 @@ class CodeCompletionTest(unittest.TestCase):
 
     def test_numpy_call_tips_generated_if_numpy_imported_in_script(self):
         self._run_check_call_tip_generated("import numpy as np\n# My code",
-                                           "numpy\.asarray\(a, \[dtype\], .*\)")
+                                           "np\.asarray\(a, \[dtype\], .*\)")
 
     def test_pyplot_call_tips_generated_if_imported_in_script(self):
         self._run_check_call_tip_generated("import matplotlib.pyplot as plt\n# My code",
-                                           "matplotlib.pyplot\.figure\(\[num\], .*\)")
+                                           "plt\.figure\(\[num\], .*\)")
 
     def test_simple_api_call_tips_not_generated_on_construction_if_api_import_not_in_script(self):
         self._run_check_call_tip_not_generated("import numpy as np\n# My code", "Rebin")
@@ -81,6 +81,25 @@ class CodeCompletionTest(unittest.TestCase):
         argspec = get_builtin_argspec(np.zeros)
         self.assertIn("shape, dtype, order", ', '.join(argspec.args))
         self.assertIn("float, 'C'", ', '.join(argspec.defaults))
+
+    def test_get_module_import_alias_finds_import_aliases(self):
+        script = ("import numpy as np\n"
+                  "from keyword import kwlist as key_word_list\n"
+                  "import matplotlib.pyplot as plt\n"
+                  "import mymodule.some_func as func, something as _smthing\n"
+                  "# import commented.module as not_imported\n"
+                  "import thing as _thing # import kwlist2 as kew_word_list2")
+        aliases = {
+            'numpy': 'np',
+            'kwlist': 'key_word_list',
+            'matplotlib.pyplot': 'plt',
+            'mymodule.some_func': 'func',
+            'something': '_smthing',
+            'commented.module': 'commented.module',
+            'kwlist2': 'kwlist2'  # alias is commented out so expect alias to not be assigned
+        }
+        for import_name, alias in aliases.items():
+            self.assertEqual(alias, get_module_import_alias(import_name, script))
 
 
 if __name__ == '__main__':
