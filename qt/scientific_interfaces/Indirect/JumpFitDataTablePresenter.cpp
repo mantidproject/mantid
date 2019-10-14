@@ -31,7 +31,11 @@ JumpFitDataTablePresenter::JumpFitDataTablePresenter(JumpFitModel *model,
     : IndirectDataTablePresenter(model, dataTable, jumpFitHeaders()),
       m_jumpFitModel(model) {
   auto header = dataTable->horizontalHeader();
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   header->setResizeMode(1, QHeaderView::Stretch);
+#elif QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+  header->setSectionResizeMode(1, QHeaderView::Stretch);
+#endif
 }
 
 int JumpFitDataTablePresenter::workspaceIndexColumn() const { return 2; }

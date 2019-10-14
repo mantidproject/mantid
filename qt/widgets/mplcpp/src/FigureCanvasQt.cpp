@@ -109,6 +109,15 @@ void FigureCanvasQt::installEventFilterToMplCanvas(QObject *filter) {
 }
 
 /**
+ * Sets how tight_layout is called when drawing. ("pad", "w_pad", "h_pad",
+ * "rect", etc.)
+ * @param args A hash of parameters to pass to set_tight_layout
+ */
+void FigureCanvasQt::setTightLayout(QHash<QString, QVariant> const &args) {
+  m_figure.setTightLayout(args);
+}
+
+/**
  * @param pos A point in Qt screen coordinates from, for example, a mouse click
  * @return A QPointF defining the position in data coordinates
  */

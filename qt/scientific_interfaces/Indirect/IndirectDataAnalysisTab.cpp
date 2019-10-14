@@ -15,8 +15,6 @@
 
 #include <QSettings>
 #include <QString>
-#include <qwt_plot.h>
-#include <qwt_plot_curve.h>
 
 using namespace Mantid::API;
 
@@ -377,13 +375,12 @@ void IndirectDataAnalysisTab::updatePlotRange(
     const QString &rangeName, MantidQt::MantidWidgets::PreviewPlot *previewPlot,
     const QString &startRangePropName, const QString &endRangePropName) {
 
-  if (inputWorkspace()) {
+  if (auto const workspace = inputWorkspace()) {
     try {
-      const QPair<double, double> curveRange =
-          previewPlot->getCurveRange("Sample");
+      auto const xRange = getXRangeFromWorkspace(workspace);
       auto rangeSelector = previewPlot->getRangeSelector(rangeName);
       setPlotPropertyRange(rangeSelector, m_properties[startRangePropName],
-                           m_properties[endRangePropName], curveRange);
+                           m_properties[endRangePropName], xRange);
     } catch (std::exception &exc) {
       showMessageBox(exc.what());
     }

@@ -119,21 +119,29 @@ void IndirectPlotOptionsView::emitSelectedIndicesChanged() {
 
 void IndirectPlotOptionsView::emitSelectedIndicesChanged(
     QString const &spectra) {
-  if (spectra.isEmpty())
+  QString nonConstCopy = spectra;
+  if (spectra.isEmpty()) {
     emit selectedIndicesChanged(spectra.toStdString());
+  }
 }
 
 void IndirectPlotOptionsView::emitPlotSpectraClicked() {
+  emitSelectedIndicesChanged();
   emit plotSpectraClicked();
 }
 
-void IndirectPlotOptionsView::emitPlotBinsClicked() { emit plotBinsClicked(); }
+void IndirectPlotOptionsView::emitPlotBinsClicked() {
+  emitSelectedIndicesChanged();
+  emit plotBinsClicked();
+}
 
 void IndirectPlotOptionsView::emitPlotContourClicked() {
+  emitSelectedIndicesChanged();
   emit plotContourClicked();
 }
 
 void IndirectPlotOptionsView::emitPlotTiledClicked() {
+  emitSelectedIndicesChanged();
   emit plotTiledClicked();
 }
 
