@@ -98,7 +98,7 @@ class Plots__init__Test(unittest.TestCase):
         line_ws2d_histo_spec_3 = self.ax.plot(self.ws2d_histo, specNum=3, linewidth=6)[0]
         self.assertEqual(2, len(self.ax.lines))
 
-        self.ax.remove_artists_if(lambda artist: artist.get_label() == 'ws2d_histo: spec 2')
+        self.ax.remove_artists_if(lambda artist: artist.get_label() == 'ws2d_histo: 6')
         self.assertEqual(1, len(self.ax.lines))
         self.assertTrue(line_ws2d_histo_spec_2 not in self.ax.lines)
         self.assertTrue(line_ws2d_histo_spec_3 in self.ax.lines)
@@ -109,7 +109,7 @@ class Plots__init__Test(unittest.TestCase):
         self.assertEqual(2, len(self.ax.lines))
 
         is_empty = self.ax.remove_artists_if(
-            lambda artist: artist.get_label() in ['ws2d_histo: spec 2', 'ws2d_histo: spec 3'])
+            lambda artist: artist.get_label() in ['ws2d_histo: 6', 'ws2d_histo: 8'])
         self.assertEqual(0, len(self.ax.lines))
         self.assertTrue(line_ws2d_histo_spec_2 not in self.ax.lines)
         self.assertTrue(line_ws2d_histo_spec_3 not in self.ax.lines)
@@ -121,7 +121,7 @@ class Plots__init__Test(unittest.TestCase):
         line_ws2d_histo_spec_3 = self.ax.plot(self.ws2d_histo, specNum=3, linewidth=6)[0]
         self.assertEqual(2, len(self.ax.lines))
 
-        self.ax.remove_artists_if(lambda artist: artist.get_label() == 'ws2d_histo: spec 2')
+        self.ax.remove_artists_if(lambda artist: artist.get_label() == 'ws2d_histo: 6')
         self.assertEqual(1, len(self.ax.lines))
         self.assertTrue(line_ws2d_histo_spec_2 not in self.ax.lines)
         self.assertTrue(line_ws2d_histo_spec_3 in self.ax.lines)
@@ -147,7 +147,7 @@ class Plots__init__Test(unittest.TestCase):
         self.assertEqual(3, len(self.ax.lines))
 
         is_empty = self.ax.remove_artists_if(
-            lambda artist: artist.get_label() in ['ws2d_histo: spec 2', 'second_ws: spec 5'])
+            lambda artist: artist.get_label() in ['ws2d_histo: 6', 'second_ws: spec 5'])
         self.assertEqual(1, len(self.ax.lines))
         self.assertTrue(line_ws2d_histo_spec_2 not in self.ax.lines)
         self.assertTrue(line_ws2d_histo_spec_3 in self.ax.lines)
