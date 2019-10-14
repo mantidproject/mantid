@@ -12,7 +12,7 @@ from __future__ import (print_function, absolute_import, unicode_literals)
 from qtpy.QtCore import Qt, Signal, Slot
 
 from mantid import logger
-from mantid.api import AlgorithmManager, AnalysisDataService, ITableWorkspace
+from mantid.api import AlgorithmManager, AnalysisDataService, ITableWorkspace, MatrixWorkspace
 from mantidqt.utils.qt import import_qt
 from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
 from mantidqt.widgets.workspacedisplay.matrix.presenter import MatrixWorkspaceDisplay

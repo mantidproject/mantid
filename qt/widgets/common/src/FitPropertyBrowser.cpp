@@ -495,12 +495,12 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   layout->addWidget(m_browser);
   m_browser->setObjectName("tree_browser");
 
-   m_workspaceLabel = new QLabel("Workspaces");
-   layout->addWidget(m_workspaceLabel);
-   m_wsListWidget = new QListWidget();
-   layout->addWidget(m_wsListWidget);
-   m_workspaceLabel->hide();
-   m_wsListWidget->hide();
+  m_workspaceLabel = new QLabel("Workspaces");
+  layout->addWidget(m_workspaceLabel);
+  m_wsListWidget = new QListWidget();
+  layout->addWidget(m_wsListWidget);
+  m_workspaceLabel->hide();
+  m_wsListWidget->hide();
 
   setWidget(w);
 
@@ -541,36 +541,31 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
 
 // Adds the fit result workspaces to the qlistwidget in the browser
 void FitPropertyBrowser::addFitResultWorkspacesToTableWidget() {
-  m_workspaceLabel->show();
-  m_wsListWidget->show();
-
   auto name = outputName();
-  auto normName = name + "_NormalisedCovarianceMatrix";
-  auto foundItems = m_wsListWidget->findItems(QString::fromStdString(normName),
-                                              Qt::MatchExactly);
-  if (AnalysisDataService::Instance().doesExist(normName) &&
-      foundItems.size() == 0) {
-    new QListWidgetItem(QString::fromStdString(normName), m_wsListWidget);
-  }
-  auto paramName = name + "_Parameters";
-  foundItems = m_wsListWidget->findItems(QString::fromStdString(paramName),
-                                         Qt::MatchExactly);
-  if (AnalysisDataService::Instance().doesExist(paramName) &&
-      foundItems.size() == 0) {
-    new QListWidgetItem(QString::fromStdString(paramName), m_wsListWidget);
-  }
-  auto wsName = name + "_Workspace";
-  foundItems = m_wsListWidget->findItems(QString::fromStdString(wsName),
-                                         Qt::MatchExactly);
-  if (AnalysisDataService::Instance().doesExist(name + "_Workspace") &&
-      foundItems.size() == 0) {
-    new QListWidgetItem(QString::fromStdString(wsName), m_wsListWidget);
+  std::vector<std::string> workspaceNames;
+  workspaceNames.reserve(3);
+  workspaceNames.push_back(name + "_NormalisedCovarianceMatrix");
+  workspaceNames.push_back(name + "_Parameters");
+  workspaceNames.push_back(name + "_Workspace");
+
+  for (const auto &name : workspaceNames) {
+    // check if already in the list
+    auto foundInList = m_wsListWidget->findItems(QString::fromStdString(name),
+                                                 Qt::MatchExactly);
+    if (foundInList.size() == 0 &&
+        AnalysisDataService::Instance().doesExist(name)) {
+      new QListWidgetItem(QString::fromStdString(name), m_wsListWidget);
+    }
   }
 
   auto noOfItems = m_wsListWidget->count();
-  auto height = m_wsListWidget->sizeHintForRow(0) * (noOfItems + 1) +
-                2 * m_wsListWidget->frameWidth();
-  m_wsListWidget->setFixedHeight(height);
+  if (noOfItems != 0) {
+    auto height = m_wsListWidget->sizeHintForRow(0) * (noOfItems + 1) +
+                  2 * m_wsListWidget->frameWidth();
+    m_wsListWidget->setMaximumHeight(height);
+    m_workspaceLabel->show();
+    m_wsListWidget->show();
+  }
 }
 
 void FitPropertyBrowser::workspaceDoubleClicked(QListWidgetItem *item) {
@@ -1738,7 +1733,7 @@ FitPropertyBrowser::getFunctionAtIndex(std::size_t const &index) const {
 }
 
 void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm *alg) {
-  // Emit a signal to show that the fitting has completed. (workspaceName that
+  // Emit a signal to show that the fitting has completed. (workspaceNames that
   // the fit has been done against is sent as a parameter)
   QString name(QString::fromStdString(alg->getProperty("InputWorkspace")));
   if (name.contains('_')) // Must be fitting to raw data, need to group under
@@ -3149,7 +3144,7 @@ void FitPropertyBrowser::processMultiBGResults() {
     // Mantid::API::MatrixWorkspace_sptr mws =
     // fun->createCalculatedWorkspace(fun->getMatrixWorkspace(),wi);
     // worspaceNames[i] =
-    // workspaceName()+"_"+QString::number(wi).toStdString()+"_Workspace";
+    // workspaceNames()+"_"+QString::number(wi).toStdString()+"_Workspace";
     // Mantid::API::AnalysisDataService::Instance().addOrReplace(worspaceNames[i],mws);
   }
 

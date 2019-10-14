@@ -16,13 +16,11 @@ from mantid.api import AnalysisDataService, WorkspaceFactory
 from mantid.py3compat.mock import MagicMock, Mock, patch
 from mantidqt.plotting.functions import plot
 from mantidqt.utils.qt.testing import start_qapplication
-
 from mantidqt.widgets.fitpropertybrowser.fitpropertybrowser import FitPropertyBrowser
 from mantidqt.widgets.workspacedisplay.matrix.presenter import MatrixWorkspaceDisplay
 from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
 from testhelpers import assertRaisesNothing
 from workbench.plotting.figuremanager import FigureManagerADSObserver
-
 
 @start_qapplication
 class FitPropertyBrowserTest(unittest.TestCase):
@@ -120,7 +118,7 @@ class FitPropertyBrowserTest(unittest.TestCase):
         self.assertEqual(name + "_Parameters", workspaceList.item(1).text())
         self.assertEqual(name + "_Workspace", workspaceList.item(2).text())
 
-    def test_fit_result_workspaces_in_browser_are_viewed_when_clicked(self):
+    def test_fit_result_matrix_workspace_in_browser_is_viewed_when_clicked(self):
         name = "ws"
         fig, canvas = self._create_and_plot_matrix_workspace(name)
         property_browser = self._create_widget(canvas=canvas)
@@ -139,7 +137,7 @@ class FitPropertyBrowserTest(unittest.TestCase):
         property_browser.workspaceClicked.emit(item)
         self.assertTrue(1, MatrixWorkspaceDisplay.show_view.call_count)
 
-    def test_table_workspaces_in_browser_are_viewed_when_clicked(self):
+    def test_fit_parameter_table_workspaces_in_browser_is_viewed_when_clicked(self):
         name = "ws"
         fig, canvas = self._create_and_plot_matrix_workspace(name)
         property_browser = self._create_widget(canvas=canvas)
@@ -159,6 +157,25 @@ class FitPropertyBrowserTest(unittest.TestCase):
         item = wsList.item(0).text()
         property_browser.workspaceClicked.emit(item)
         self.assertTrue(1, TableWorkspaceDisplay.show_view.call_count)
+
+    def test_workspaces_removed_from_workspace_list_if_deleted(self):
+        name = "ws"
+        fig, canvas_mock = self._create_and_plot_matrix_workspace(name)
+        property_browser = self._create_widget(canvas=canvas_mock)
+        property_browser.setOutputName(name)
+
+        # create fake fit output results
+        matrixWorkspace = WorkspaceFactory.Instance().create("Workspace2D", NVectors=3, YLength=5, XLength=5)
+        AnalysisDataService.Instance().addOrReplace(name + "_Workspace", matrixWorkspace)
+        tableWorkspace = WorkspaceFactory.createTable()
+        AnalysisDataService.Instance().addOrReplace(name + "_Parameters", tableWorkspace)
+
+        property_browser.fitting_done_slot(name + "_Workspace")
+        AnalysisDataService.Instance().remove(name + "_Parameters")
+
+        wsList = property_browser.getWorkspaceList()
+
+        self.assertTrue(1, len(wsList))
 
     # Private helper functions
     def _create_widget(self, canvas=MagicMock(), toolbar_manager=Mock()):
