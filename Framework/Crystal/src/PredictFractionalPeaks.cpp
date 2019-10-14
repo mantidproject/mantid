@@ -194,14 +194,14 @@ predictPeaks(Algorithm *const alg, const std::vector<double> &hOffsets,
           const V3D candidateHKL(currentHKL[0] + hOffset,
                                  currentHKL[1] + kOffset,
                                  currentHKL[2] + lOffset);
-          const V3D qSample = (gonioMatrix * UB * candidateHKL) * 2 * M_PI;
-          if (qSample[2] <= 0)
+          const V3D qLab = (gonioMatrix * UB * candidateHKL) * 2 * M_PI;
+          if (qLab[2] <= 0)
             continue;
 
           using Mantid::Geometry::IPeak;
           std::unique_ptr<IPeak> peak;
           try {
-            peak = inputPeaks.createPeak(qSample);
+            peak = inputPeaks.createPeak(qLab);
           } catch (std::invalid_argument &) {
             continue;
           }
