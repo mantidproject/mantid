@@ -24,7 +24,7 @@
 #include "MantidKernel/UnitConversion.h"
 
 namespace Mantid {
-namespace Algorithm {
+namespace Algorithms {
 
 class CreateDetectorTable : public Mantid::API::Algorithm {
 public:

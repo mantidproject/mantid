@@ -7,7 +7,7 @@
 #include "MantidAlgorithms/CreateDetectorTable.h"
 
 namespace Mantid {
-namespace Algorithm {
+namespace Algorithms {
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
