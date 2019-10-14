@@ -31,6 +31,7 @@ import ast
 import inspect
 import re
 import sys
+from keyword import kwlist as python_keywords
 from collections import namedtuple
 from six import PY2
 if PY2:  # noqa
@@ -216,6 +217,7 @@ class CodeCompleter(object):
             self._add_to_completions(self._get_module_call_tips('numpy'))
         if re.search("^#{0}import .*pyplot( |,|$)", self.editor.text(), re.MULTILINE):
             self._add_to_completions(self._get_module_call_tips('matplotlib.pyplot'))
+        self._add_to_completions(python_keywords)
 
         self.editor.enableAutoCompletion(CodeEditor.AcsAPIs)
         self.editor.updateCompletionAPI(self.completions)
