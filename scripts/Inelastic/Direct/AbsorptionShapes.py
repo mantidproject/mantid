@@ -84,8 +84,8 @@ class anAbsorptionShape(object):
     #
     def __del__(self):
         DeleteWorkspace(self._testWorkspace)
-
     #
+
     def __str__(self):
         """ Convert an absorption shape into a string representation"""
         return str(self._ShapeDescription) + '!' + str(self._Material)
@@ -277,7 +277,7 @@ class anAbsorptionShape(object):
             for i in range(0,n_elements):
                 val = value[i]
                 if isinstance(val,(list,tuple)):
-                    val = map(lambda x: float(x),val)
+                    val = [float(x) for x in val]
                 else:
                     val = float(val)
                 shape_dict[all_prop[i]] = val
