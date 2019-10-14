@@ -1733,10 +1733,10 @@ class AbsCorrInfo(PropDescriptor):
                 self._algo_selector('is_fast',is_fast)
 
         else:
-            raise(KeyError,
+            raise(KeyError(
                 'AbsCorrInfo accepts only a dictionary '  # noqa
                 'with AbsorptionCorrections algorithm properties '  # noqa
-                'or string representation of such dictionary')  # noqa
+                'or string representation of such dictionary'))  # noqa
 
         if self._is_fast:
             algo_name = 'AdsorptionCorrection'
@@ -1748,7 +1748,7 @@ class AbsCorrInfo(PropDescriptor):
         for key,val in val_dict.items():
             check_normalizer = acceptable_prop.get(key,None)
             if check_normalizer is None:
-                raise(KeyError,'The key {0} is not acceptable key for {1} algorithm'.format(key,algo_name))
+                raise KeyError('The key {0} is not acceptable key for {1} algorithm'.format(key,algo_name))
             val_dict[key] = check_normalizer(val)
         # Store new dictionary in the property
         self._alg_prop = val_dict
@@ -1813,7 +1813,7 @@ def list_checker(val,list_in,mess_base):
     if val in list_in:
         return val
     else:
-        raise(ValueError,
+        raise ValueError(
             '{0} property can only have values from the set of: {1}'  # noqa
             .format(mess_base,str(list_in)))  # noqa
 
