@@ -175,7 +175,7 @@ class anAbsorptionShape(object):
         if  not (mc_corrections or fast_corrections):
             fast_corrections = False
         if fast_corrections:
-            raise RuntimeError('Analytical absorption corrections are not currently implemented in Direct mode')
+            #raise RuntimeError('Analytical absorption corrections are not currently implemented in Direct mode')
             abs_corrections = self._fast_abs_corrections(correction_base_ws,corr_properties)
         else:
             abs_corrections = self._mc_abs_corrections(correction_base_ws,corr_properties)
