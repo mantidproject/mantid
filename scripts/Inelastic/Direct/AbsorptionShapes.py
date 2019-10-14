@@ -349,7 +349,7 @@ class Cylinder(anAbsorptionShape):
     def shape(self,value):
         shape_dict = self._set_list_property(value,
              'Cylinder',['Height','Radius'],         # noqa
-            ['Axis','Center'],[[0.,1.,0.],[0,0,0]])  # noqa
+            ['Axis','Center'],[[0.,1.,0.],[0.,0.,0.]])  # noqa
 
         self._ShapeDescription = shape_dict
 

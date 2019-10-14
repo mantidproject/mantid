@@ -132,9 +132,9 @@ class ReduceMARIFromFile(ReductionWrapper):
     def __init__(self,web_var_val=None):
         """ sets properties defaults for the instrument with Name"""
         ReductionWrapper.__init__(self,'MAR',web_var_val)
-        Mt = MethodType(self.do_preprocessing, self.reducer,DirectEnergyConversion)
+        Mt = MethodType(self.do_preprocessing, self.reducer)
         DirectEnergyConversion.__setattr__(self.reducer,'do_preprocessing',Mt)
-        Mt = MethodType(self.do_postprocessing, self.reducer,DirectEnergyConversion)
+        Mt = MethodType(self.do_postprocessing, self.reducer)
         DirectEnergyConversion.__setattr__(self.reducer,'do_postprocessing',Mt)
 #-------------------------------------------------------------------------------------------------#
 #-------------------------------------------------------------------------------------------------#
@@ -251,9 +251,9 @@ class ReduceMARIFromWorkspace(ReductionWrapper):
     def __init__(self,web_var_val=None):
         """ sets properties defaults for the instrument with Name"""
         ReductionWrapper.__init__(self,'MAR',web_var_val)
-        Mt = MethodType(self.do_preprocessing, self.reducer,DirectEnergyConversion)
+        Mt = MethodType(self.do_preprocessing, self.reducer)
         DirectEnergyConversion.__setattr__(self.reducer,'do_preprocessing',Mt)
-        Mt = MethodType(self.do_postprocessing, self.reducer,DirectEnergyConversion)
+        Mt = MethodType(self.do_postprocessing, self.reducer)
         DirectEnergyConversion.__setattr__(self.reducer,'do_postprocessing',Mt)
 #----------------------------------------------------------------------------------------------------------------------
 
@@ -351,9 +351,9 @@ class ReduceMARIMon2Norm(ReductionWrapper):
     def __init__(self,web_var_val=None):
         """ sets properties defaults for the instrument with Name"""
         ReductionWrapper.__init__(self,'MAR',web_var_val)
-        Mt = MethodType(self.do_preprocessing, self.reducer,DirectEnergyConversion)
+        Mt = MethodType(self.do_preprocessing, self.reducer)
         DirectEnergyConversion.__setattr__(self.reducer,'do_preprocessing',Mt)
-        Mt = MethodType(self.do_postprocessing, self.reducer,DirectEnergyConversion)
+        Mt = MethodType(self.do_postprocessing, self.reducer)
         DirectEnergyConversion.__setattr__(self.reducer,'do_postprocessing',Mt)
 #----------------------------------------------------------------------------------------------------------------------
 
@@ -444,9 +444,9 @@ class MARIReductionSum(ReductionWrapper):
     def __init__(self,web_var_val=None):
         """ sets properties defaults for the instrument with Name"""
         ReductionWrapper.__init__(self,'MAR',web_var_val)
-        Mt = MethodType(self.do_preprocessing, self.reducer,DirectEnergyConversion)
+        Mt = MethodType(self.do_preprocessing, self.reducer)
         DirectEnergyConversion.__setattr__(self.reducer,'do_preprocessing',Mt)
-        Mt = MethodType(self.do_postprocessing, self.reducer,DirectEnergyConversion)
+        Mt = MethodType(self.do_postprocessing, self.reducer)
         DirectEnergyConversion.__setattr__(self.reducer,'do_postprocessing',Mt)
 #----------------------------------------------------------------------------------------------------------------------
 
@@ -546,9 +546,9 @@ class ReduceMARIMonitorsSeparate(ReductionWrapper):
     def __init__(self,web_var_val=None):
         """ sets properties defaults for the instrument with Name"""
         ReductionWrapper.__init__(self,'MAR',web_var_val)
-        Mt = MethodType(self.do_preprocessing, self.reducer,DirectEnergyConversion)
+        Mt = MethodType(self.do_preprocessing, self.reducer)
         DirectEnergyConversion.__setattr__(self.reducer,'do_preprocessing',Mt)
-        Mt = MethodType(self.do_postprocessing, self.reducer,DirectEnergyConversion)
+        Mt = MethodType(self.do_postprocessing, self.reducer)
         DirectEnergyConversion.__setattr__(self.reducer,'do_postprocessing',Mt)
 
 
@@ -734,9 +734,9 @@ class ReduceMARIAutoEi(ReductionWrapper):
     def __init__(self,web_var_val=None):
         """ sets properties defaults for the instrument with Name"""
         ReductionWrapper.__init__(self,'MAR',web_var_val)
-        Mt = MethodType(self.do_preprocessing, self.reducer,DirectEnergyConversion)
+        Mt = MethodType(self.do_preprocessing, self.reducer)
         DirectEnergyConversion.__setattr__(self.reducer,'do_preprocessing',Mt)
-        Mt = MethodType(self.do_postprocessing, self.reducer,DirectEnergyConversion)
+        Mt = MethodType(self.do_postprocessing, self.reducer)
         DirectEnergyConversion.__setattr__(self.reducer,'do_postprocessing',Mt)
 #-------------------------------------------------------------------------------------------------#
 

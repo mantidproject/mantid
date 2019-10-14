@@ -226,9 +226,9 @@ class ReduceLET_MultiRep2015(ReductionWrapper):
     def __init__(self,web_var=None):
         """Sets properties defaults for the instrument with Name"""
         ReductionWrapper.__init__(self,'LET',web_var)
-        Mt = MethodType(self.do_preprocessing, self.reducer,DirectEnergyConversion)
+        Mt = MethodType(self.do_preprocessing, self.reducer)
         DirectEnergyConversion.__setattr__(self.reducer,'do_preprocessing',Mt)
-        Mt = MethodType(self.do_postprocessing, self.reducer,DirectEnergyConversion)
+        Mt = MethodType(self.do_postprocessing, self.reducer)
         DirectEnergyConversion.__setattr__(self.reducer,'do_postprocessing',Mt)
     #
 
