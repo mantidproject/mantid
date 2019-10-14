@@ -495,12 +495,12 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   layout->addWidget(m_browser);
   m_browser->setObjectName("tree_browser");
 
-  m_workspaceLabel = new QLabel("Workspaces");
-  layout->addWidget(m_workspaceLabel);
-  m_wsListWidget = new QListWidget();
-  layout->addWidget(m_wsListWidget);
-  m_workspaceLabel->hide();
-  m_wsListWidget->hide();
+   m_workspaceLabel = new QLabel("Workspaces");
+   layout->addWidget(m_workspaceLabel);
+   m_wsListWidget = new QListWidget();
+   layout->addWidget(m_wsListWidget);
+   m_workspaceLabel->hide();
+   m_wsListWidget->hide();
 
   setWidget(w);
 
@@ -539,22 +539,31 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   populateFunctionNames();
 }
 
-// TODO documentation
+// Adds the fit result workspaces to the qlistwidget in the browser
 void FitPropertyBrowser::addFitResultWorkspacesToTableWidget() {
   m_workspaceLabel->show();
   m_wsListWidget->show();
 
   auto name = outputName();
   auto normName = name + "_NormalisedCovarianceMatrix";
-  if (AnalysisDataService::Instance().doesExist(normName)) {
+  auto foundItems = m_wsListWidget->findItems(QString::fromStdString(normName),
+                                              Qt::MatchExactly);
+  if (AnalysisDataService::Instance().doesExist(normName) &&
+      foundItems.size() == 0) {
     new QListWidgetItem(QString::fromStdString(normName), m_wsListWidget);
   }
   auto paramName = name + "_Parameters";
-  if (AnalysisDataService::Instance().doesExist(paramName)) {
+  foundItems = m_wsListWidget->findItems(QString::fromStdString(paramName),
+                                         Qt::MatchExactly);
+  if (AnalysisDataService::Instance().doesExist(paramName) &&
+      foundItems.size() == 0) {
     new QListWidgetItem(QString::fromStdString(paramName), m_wsListWidget);
   }
   auto wsName = name + "_Workspace";
-  if (AnalysisDataService::Instance().doesExist(name + "_Workspace")) {
+  foundItems = m_wsListWidget->findItems(QString::fromStdString(wsName),
+                                         Qt::MatchExactly);
+  if (AnalysisDataService::Instance().doesExist(name + "_Workspace") &&
+      foundItems.size() == 0) {
     new QListWidgetItem(QString::fromStdString(wsName), m_wsListWidget);
   }
 
@@ -564,7 +573,6 @@ void FitPropertyBrowser::addFitResultWorkspacesToTableWidget() {
   m_wsListWidget->setFixedHeight(height);
 }
 
-// TODO documentation
 void FitPropertyBrowser::workspaceDoubleClicked(QListWidgetItem *item) {
   auto wsName = item->text();
   emit workspaceClicked(wsName);
@@ -1839,6 +1847,7 @@ void FitPropertyBrowser::hideEvent(QHideEvent *e) {
 void FitPropertyBrowser::setADSObserveEnabled(bool enabled) {
   observeAdd(enabled);
   observePostDelete(enabled);
+  observeRename(enabled);
 }
 
 /// workspace was added
@@ -1901,6 +1910,30 @@ void FitPropertyBrowser::postDeleteHandle(const std::string &wsName) {
     auto item = m_wsListWidget->item(i);
     if (item->text().toStdString() == wsName) {
       m_wsListWidget->takeItem(m_wsListWidget->row(item));
+    }
+  }
+
+  if (m_wsListWidget->count() == 0) {
+    m_wsListWidget->hide();
+    m_workspaceLabel->hide();
+  }
+}
+
+void FitPropertyBrowser::renameHandle(const std::string &oldName,
+                                      const std::string &newName) {
+  int i = m_workspaceNames.indexOf(QString(oldName.c_str()));
+  if (i >= 0) {
+    m_workspaceNames.replace(i, QString::fromStdString(newName));
+    m_enumManager->setEnumNames(m_workspace, m_workspaceNames);
+  }
+  workspaceChange(QString::fromStdString(newName));
+
+  for (auto i = 0; i < m_wsListWidget->count(); ++i) {
+    auto item = m_wsListWidget->item(i);
+    if (item->text().toStdString() == oldName) {
+      m_wsListWidget->takeItem(m_wsListWidget->row(item));
+      m_wsListWidget->insertItem(m_wsListWidget->row(item),
+                                 QString::fromStdString(newName));
     }
   }
 }

@@ -60,6 +60,7 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
         self.observeClear(True)
         self.observeDelete(True)
         self.observeReplace(True)
+        self.observeRename(True)
 
     @_catch_exceptions
     def clearHandle(self):
@@ -123,6 +124,22 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
         if redraw:
             self.canvas.draw_idle()
 
+    @_catch_exceptions
+    def renameHandle(self, oldName, newName):
+        """
+        Called when the ADS has renamed a workspace.
+        If this workspace is attached to this figure then the figure name is updated
+        :param oldName: The old name of the workspace.
+        :param newName: The new name of the workspace
+        """
+        for ax in self.canvas.figure.axes:
+            if isinstance(ax, MantidAxes):
+                try:  # matrix workspaces
+                    for ws_name, artists in ax.tracked_workspaces.items():
+                        if ws_name == oldName:
+                            ax.tracked_workspaces[newName] = ax.tracked_workspaces.pop(oldName)
+                except:  # table workspaces
+                    ax.wsName = newName
 
 class FigureManagerWorkbench(FigureManagerBase, QObject):
     """

@@ -436,11 +436,11 @@ public:
     QStringList getWorkspaceNames();
     void fit();
     void addAllowedSpectra(const QString &wsName, const QList<int> &wsIndices);
-	void addAllowedTableWorkspace(const QString &wsName);
+    void addAllowedTableWorkspace(const QString &wsName);
     void setTextPlotGuess(const QString);
     bool plotDiff() const;
     void addFitResultWorkspacesToTableWidget();
-	void setWorkspaceName(const QString &wsName);
+    void setWorkspaceName(const QString &wsName);
 
     SIP_PYOBJECT defaultPeakType();
 %MethodCode
@@ -464,7 +464,7 @@ public:
     void setPeakFwhmOf(QString, double);
     void normaliseData(bool on);
     QMenu *getFitMenu() const;
-	QListWidget* getWorkspaceList() const;
+    QListWidget* getWorkspaceList() const;
 
     SIP_PYOBJECT workspaceName() const;
 %MethodCode
@@ -493,7 +493,7 @@ signals:
     void algorithmFinished(const QString &);
     void removeFitCurves();
     void plotGuess();
-	void workspaceClicked(const QString);
+    void workspaceClicked(const QString);
 
 };
 

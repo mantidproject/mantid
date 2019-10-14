@@ -265,6 +265,8 @@ public:
   void setADSObserveEnabled(bool enabled);
 
   void postDeleteHandle(const std::string &wsName) override;
+  void renameHandle(const std::string &oldName,
+                    const std::string &newName) override;
   void addHandle(const std::string &wsName,
                  const boost::shared_ptr<Mantid::API::Workspace> ws) override;
 
@@ -287,7 +289,7 @@ public:
   /// menu.
   QListWidget *getWorkspaceList() const { return m_wsListWidget; }
 
-  /// TODO
+  /// Adds the fit result workspaces to the QListWidget in the browser
   void addFitResultWorkspacesToTableWidget();
 
   // Methods intended for testing only
