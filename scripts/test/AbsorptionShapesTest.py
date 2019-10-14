@@ -183,14 +183,18 @@ class AdsorbtionShapesTest(unittest.TestCase):
 
         ash.shape = [5,[1,0,0]]
         res = ash.shape;
-        self.assertEqual(res['Radius'],5)
-        self.assertEqual(res['Center'],[1,0,0])
+        rad = res['Radius']
+        self.assertEqual(rad,5)
+        cen = res['Center']
+        self.assertEqualcen(cen,[1,0,0])
 
 
         ash.shape = {'Radius':3,'Center':[0.,0.,0.]}
         res = ash.shape;
-        self.assertEqual(res['Radius'],3)
-        self.assertEqual(res['Center'],[0,0,0])
+        rad = res['Radius']
+        self.assertEqual(rad,3)
+        cen = res['Center']
+        self.assertEqual(cen,[0,0,0])
 
 
         test_ws =  CreateSampleWorkspace(NumBanks=1,BankPixelWidth=1)

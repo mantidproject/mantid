@@ -282,7 +282,7 @@ class anAbsorptionShape(object):
                     val = float(val)
                 shape_dict[all_prop[i]] = val
         elif isinstance(value,dict):
-            for key,val in value.iteritems():
+            for key,val in value.items():
                 if isinstance(val,(list,tuple)):
                     val = map(lambda x: float(x),val)
                 else:

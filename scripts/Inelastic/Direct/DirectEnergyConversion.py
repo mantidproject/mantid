@@ -1929,11 +1929,11 @@ class DirectEnergyConversion(object):
         object.__setattr__(self,'_old_runs_list',[])
 
     #
-    def do_preprocessing(self,ws):
+    def do_preprocessing(self,ws,*argi):
         """ stub for custom preprocessing function"""
         return ws
 
-    def do_postprocessing(self,ws):
+    def do_postprocessing(self,ws,*argi):
         """ stub for custom postprocessing function"""
         return ws
 
