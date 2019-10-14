@@ -24,7 +24,7 @@ public:
   OptionsDialogPresenter(OptionsDialog *view);
   ~OptionsDialogPresenter() = default;
 
-private slots:
+private: //slots
   void loadOptions();
   void saveOptions();
 

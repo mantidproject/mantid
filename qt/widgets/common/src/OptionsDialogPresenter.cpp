@@ -16,9 +16,7 @@ namespace MantidWidgets {
  * @param view :: a handle to a view for this presenter
  */
 OptionsDialogPresenter::OptionsDialogPresenter(OptionsDialog *view)
-    : m_view(view){
-  
-}
+    : m_view(view){}
 
 /* Loads the settings saved by the user */
 void OptionsDialogPresenter::loadSettings(std::map<QString, QVariant>& options) {

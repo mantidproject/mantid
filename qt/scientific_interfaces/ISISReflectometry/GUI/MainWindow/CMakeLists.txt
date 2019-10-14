@@ -7,8 +7,7 @@ set(MAINWINDOW_INC_FILES
     IMainWindowPresenter.h
     IMainWindowView.h
     MainWindowPresenter.h
-    QtMainWindowView.h
-    MainWindowWidget.ui)
+    QtMainWindowView.h)
 
 set(MAINWINDOW_MOC_FILES QtMainWindowView.h)
 

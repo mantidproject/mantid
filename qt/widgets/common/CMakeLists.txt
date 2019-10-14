@@ -135,6 +135,81 @@ set(
   src/Python/QHashToDict.cpp
 )
     src/OptionsDialog.cpp
+    src/OptionsDialogPresenter.cpp
+    src/OptionsPropertyWidget.cpp
+    src/ParseKeyValueString.cpp
+    src/pixmaps.cpp
+    src/PluginLibraries.cpp
+    src/pqHelpWindow.cxx
+    src/ProcessingAlgoWidget.cpp
+    src/ProgressableView.cpp
+    src/PropertyHandler.cpp
+    src/PropertyWidget.cpp
+    src/PropertyWidgetFactory.cpp
+    src/PythonRunner.cpp
+    src/QtSignalChannel.cpp
+    src/QtJSONUtils.cpp
+    src/RenameParDialog.cpp
+    src/ScriptEditor.cpp
+    src/SequentialFitDialog.cpp
+    src/SelectFunctionDialog.cpp
+    src/SelectWorkspacesDialog.cpp
+    src/SlitCalculator.cpp
+    src/TextPropertyWidget.cpp
+    src/TSVSerialiser.cpp
+    src/UserFunctionDialog.cpp
+    src/UserInputValidator.cpp
+    src/UserSubWindow.cpp
+    src/UserSubWindowFactory.cpp
+    src/VatesViewerInterface.cpp
+    src/WidgetScrollbarDecorator.cpp
+    src/WorkspaceIcons.cpp
+    src/WorkspaceObserver.cpp
+    src/WorkspacePresenter/ADSAdapter.cpp
+    src/WorkspacePresenter/WorkspacePresenter.cpp
+    src/WorkspacePresenter/WorkspaceTreeWidget.cpp
+    src/WorkspacePresenter/WorkspaceTreeWidgetSimple.cpp
+    src/WorkspaceSelector.cpp
+    src/AlgorithmProgress/AlgorithmProgressDialogPresenter.cpp
+    src/AlgorithmProgress/AlgorithmProgressDialogWidget.cpp
+    src/AlgorithmProgress/AlgorithmProgressModel.cpp
+    src/AlgorithmProgress/AlgorithmProgressPresenter.cpp
+    src/AlgorithmProgress/AlgorithmProgressPresenterBase.cpp
+    src/AlgorithmProgress/AlgorithmProgressWidget.cpp
+    src/Batch/RowLocation.cpp
+    src/Batch/RowLocationAdapter.cpp
+    src/Batch/RowPredicate.cpp
+    src/Batch/Row.cpp
+    src/Batch/Cell.cpp
+    src/Batch/CellStandardItem.cpp
+    src/Batch/ExtractSubtrees.cpp
+    src/Batch/FindSubtreeRoots.cpp
+    src/Batch/JobTreeView.cpp
+    src/Batch/JobTreeViewSignalAdapter.cpp
+    src/Batch/QtStandardItemTreeAdapter.cpp
+    src/Batch/FilteredTreeModel.cpp
+    src/Batch/QtBasicNavigation.cpp
+    src/Batch/QtTreeCursorNavigation.cpp
+    src/Batch/CellDelegate.cpp
+    src/Batch/BuildSubtreeItems.cpp
+    src/QtPropertyBrowser/DoubleDialogEditor.cpp
+    src/QtPropertyBrowser/DoubleEditorFactory.cpp
+    src/QtPropertyBrowser/FilenameDialogEditor.cpp
+    src/QtPropertyBrowser/FormulaDialogEditor.cpp
+    src/QtPropertyBrowser/ParameterPropertyManager.cpp
+    src/QtPropertyBrowser/qtbuttonpropertybrowser.cpp
+    src/QtPropertyBrowser/qteditorfactory.cpp
+    src/QtPropertyBrowser/qtgroupboxpropertybrowser.cpp
+    src/QtPropertyBrowser/qtpropertybrowser.cpp
+    src/QtPropertyBrowser/qtpropertybrowserutils.cpp
+    src/QtPropertyBrowser/qtpropertymanager.cpp
+    src/QtPropertyBrowser/qttreepropertybrowser.cpp
+    src/QtPropertyBrowser/qtvariantproperty.cpp
+    src/QtPropertyBrowser/StringDialogEditor.cpp
+    src/QtPropertyBrowser/StringEditorFactory.cpp
+    src/QtPropertyBrowser/WorkspaceEditorFactory.cpp
+    src/Python/Sip.cpp
+    src/Python/QHashToDict.cpp)
 
 set(
   QT5_MOC_FILES
@@ -179,6 +254,8 @@ set(
   inc/MantidQtWidgets/Common/MessageDisplay.h
   inc/MantidQtWidgets/Common/MultifitSetupDialog.h
   inc/MantidQtWidgets/Common/MWRunFiles.h
+  inc/MantidQtWidgets/Common/OptionsDialog.h
+  inc/MantidQtWidgets/Common/OptionsDialogPresenter.h
   inc/MantidQtWidgets/Common/OptionsPropertyWidget.h
   inc/MantidQtWidgets/Common/pqHelpWindow.h
   inc/MantidQtWidgets/Common/ProcessingAlgoWidget.h
@@ -251,6 +328,9 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/MantidDesktopServices.h
     inc/MantidQtWidgets/Common/MantidTreeWidgetItem.h
     inc/MantidQtWidgets/Common/MultifitSetupDialog.h
+    inc/MantidQtWidgets/Common/IOptionsDialog.h
+    inc/MantidQtWidgets/Common/OptionsDialog.h
+    inc/MantidQtWidgets/Common/OptionsDialogPresenter.h
     inc/MantidQtWidgets/Common/ParseKeyValueString.h
     inc/MantidQtWidgets/Common/pixmaps.h
     inc/MantidQtWidgets/Common/ProgressableView.h
@@ -554,6 +634,9 @@ set(
   inc/MantidQtWidgets/Common/MuonFitDataSelector.h
   inc/MantidQtWidgets/Common/MuonFitPropertyBrowser.h
   inc/MantidQtWidgets/Common/MuonFunctionBrowser.h
+  inc/MantidQtWidgets/Common/IOptionsDialog.h
+  inc/MantidQtWidgets/Common/OptionsDialog.h
+  inc/MantidQtWidgets/Common/OptionsDialogPresenter.h
   inc/MantidQtWidgets/Common/pqHelpWindow.h
   inc/MantidQtWidgets/Common/PropertyHandler.h
   inc/MantidQtWidgets/Common/ProcessingAlgoWidget.h
@@ -623,6 +706,9 @@ set(
   inc/MantidQtWidgets/Common/MdConstants.h
   inc/MantidQtWidgets/Common/MdSettings.h
   inc/MantidQtWidgets/Common/NonOrthogonal.h
+  inc/MantidQtWidgets/Common/IOptionsDialog.h
+  inc/MantidQtWidgets/Common/OptionsDialog.h
+  inc/MantidQtWidgets/Common/OptionsDialogPresenter.h
   inc/MantidQtWidgets/Common/pixmaps.h
   inc/MantidQtWidgets/Common/PlotAxis.h
   inc/MantidQtWidgets/Common/PluginLibraries.h
@@ -705,7 +791,6 @@ set(
   inc/MantidQtWidgets/Common/MantidTreeWidgetItem.h
   inc/MantidQtWidgets/Common/MuonFitDataSelector.h
   inc/MantidQtWidgets/Common/MuonFunctionBrowser.h
-  inc/MantidQtWidgets/Common/OptionsDialogPresenter.h
   inc/MantidQtWidgets/Common/ProgressableView.h
   inc/MantidQtWidgets/Common/MockProgressableView.h
   inc/MantidQtWidgets/Common/ProgressPresenter.h
