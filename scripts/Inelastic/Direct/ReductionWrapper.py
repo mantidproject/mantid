@@ -758,8 +758,6 @@ def iliad(reduce):
             # the function does not return None, pylint is wrong
             #pylint: disable=W1111
                 rez = RenameWorkspace(InputWorkspace=rez, OutputWorkspace=out_ws_name)
-                PropertyManager.sample_run.synchronize_ws(rez)
-
         return rez
 
     return iliad_wrapper
