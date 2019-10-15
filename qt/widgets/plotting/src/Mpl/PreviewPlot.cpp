@@ -135,6 +135,11 @@ void PreviewPlot::addSpectrum(const QString &lineName,
               plotKwargs);
   }
 
+  if (auto const xLabel = overrideAxisLabel(AxisID::XBottom))
+    setAxisLabel(AxisID::XBottom, xLabel.get());
+  if (auto const yLabel = overrideAxisLabel(AxisID::YLeft))
+    setAxisLabel(AxisID::YLeft, yLabel.get());
+
   regenerateLegend();
   axes.relim();
 
@@ -236,6 +241,56 @@ void PreviewPlot::setSelectorActive(bool active) { m_selectorActive = active; }
  * @return True if a selector is currently being moved on the preview plot.
  */
 bool PreviewPlot::selectorActive() const { return m_selectorActive; }
+
+/**
+ * Sets tight layout properties of the plot
+ * @param args A hash of tight layout properties ("pad", "w_pad", "h_pad",
+ * "rect")
+ */
+void PreviewPlot::setTightLayout(QHash<QString, QVariant> const &args) {
+  m_canvas->setTightLayout(args);
+}
+
+/**
+ * Sets an override label for an axis.
+ * @param axisID The axis ID (XBottom or YLeft).
+ * @param label The override label.
+ */
+void PreviewPlot::setOverrideAxisLabel(AxisID const &axisID,
+                                       char const *const label) {
+  m_axisLabels[axisID] = label;
+}
+
+/**
+ * Returns the override label.
+ * @param axisID The axis ID (XBottom or YLeft).
+ * @return True if the axis should display an axis label.
+ */
+boost::optional<char const *>
+PreviewPlot::overrideAxisLabel(AxisID const &axisID) {
+  auto const iter = m_axisLabels.find(axisID);
+  if (iter != m_axisLabels.end())
+    return iter.value();
+  return boost::none;
+}
+
+/**
+ * Sets the axis label on an axis.
+ * @param axisID The axis ID (XBottom or YLeft).
+ * @param label The label to place on a plots axis.
+ */
+void PreviewPlot::setAxisLabel(AxisID const &axisID, char const *const label) {
+  switch (axisID) {
+  case AxisID::XBottom:
+    m_canvas->gca().setXLabel(label);
+    return;
+  case AxisID::YLeft:
+    m_canvas->gca().setYLabel(label);
+    return;
+  }
+  throw std::runtime_error(
+      "Incorrect AxisID provided. Axis types are XBottom and YLeft");
+}
 
 /**
  * Set the range of the specified axis

@@ -449,11 +449,8 @@ class RunTabPresenter(PresenterCommon):
 
         self._table_model.add_multiple_table_entries(table_index_model_list=parsed_rows)
 
-    def _parse_row_for_table_model(self, row):
-        """
-        Adds a row to the table
-        """
-
+    @staticmethod
+    def _parse_row_for_table_model(row):
         def get_string_entry(_tag, _row):
             _element = ""
             if _tag in _row:
@@ -505,8 +502,10 @@ class RunTabPresenter(PresenterCommon):
         table_index_model = TableIndexModel(*row_entry)
         return table_index_model
 
-
     def _add_row_to_table_model(self, row, index):
+        """
+        Adds a row to the table
+        """
         table_index_model = self._parse_row_for_table_model(row=row)
         self._table_model.add_table_entry(index, table_index_model)
 

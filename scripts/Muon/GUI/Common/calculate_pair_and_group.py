@@ -9,33 +9,33 @@ from __future__ import (absolute_import, division, unicode_literals)
 import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
 
 
-def calculate_group_data(context, group_name, run, rebin):
+def calculate_group_data(context, group_name, run, rebin, workspace_name):
     processed_data = _run_pre_processing(context, run, rebin)
 
     params = _get_MuonGroupingCounts_parameters(context, group_name, run)
     params["InputWorkspace"] = processed_data
 
-    group_data = algorithm_utils.run_MuonGroupingCounts(params)
+    group_data = algorithm_utils.run_MuonGroupingCounts(params, workspace_name)
 
     return group_data
 
 
-def calculate_pair_data(context, pair_name, run, rebin):
+def calculate_pair_data(context, pair_name, run, rebin, workspace_name):
     processed_data = _run_pre_processing(context, run, rebin)
 
     params = _get_MuonPairingAsymmetry_parameters(context, pair_name, run)
     params["InputWorkspace"] = processed_data
-    pair_data = algorithm_utils.run_MuonPairingAsymmetry(params)
+    pair_data = algorithm_utils.run_MuonPairingAsymmetry(params, workspace_name)
 
     return pair_data
 
 
-def estimate_group_asymmetry_data(context, group_name, run, rebin):
+def estimate_group_asymmetry_data(context, group_name, run, rebin, workspace_name, unormalised_workspace_name):
     processed_data = _run_pre_processing(context, run, rebin)
 
     params = _get_MuonGroupingAsymmetry_parameters(context, group_name, run)
     params["InputWorkspace"] = processed_data
-    group_asymmetry, group_asymmetry_unnorm = algorithm_utils.run_MuonGroupingAsymmetry(params)
+    group_asymmetry, group_asymmetry_unnorm = algorithm_utils.run_MuonGroupingAsymmetry(params, workspace_name, unormalised_workspace_name)
 
     return group_asymmetry, group_asymmetry_unnorm
 

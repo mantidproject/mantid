@@ -19,9 +19,11 @@ set(TEST_PY_FILES
     MuHTest.py
     RFresonanceTest.py
     SilverBaselineTest.py
+    SpinGlassTest.py
     StandardSCTest.py
     StaticLorentzianKTTest.py
     StretchedExpFTTest.py
+    StretchedKTTest.py
     TeixeiraWaterTest.py
     TriangleOscTest.py
     TFMuoniumTest.py)

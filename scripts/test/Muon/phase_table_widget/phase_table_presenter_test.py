@@ -85,9 +85,9 @@ class PhaseTablePresenterTest(unittest.TestCase):
         mock_workspace_wrapper.return_value = workspace_wrapper
         mock_phase_table = mock.MagicMock()
 
-        self.presenter.add_phase_table_to_ADS('MUSR22222_period_1; PhaseTable', mock_phase_table)
+        self.presenter.add_phase_table_to_ADS('MUSR22222_period_1; PhaseTable')
 
-        mock_workspace_wrapper.assert_called_once_with(mock_phase_table, 'MUSR22222 MA/MUSR22222_period_1; PhaseTable')
+        mock_workspace_wrapper.assert_called_once_with('MUSR22222 MA/MUSR22222_period_1; PhaseTable')
         workspace_wrapper.show.assert_called_once_with()
 
     @mock.patch('Muon.GUI.Common.phase_table_widget.phase_table_presenter.run_CalMuonDetectorPhases')
@@ -103,7 +103,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.presenter.handle_calulate_phase_table_clicked()
         self.wait_for_thread(self.presenter.calculation_thread)
 
-        self.presenter.add_phase_table_to_ADS.assert_called_once_with('MUSR22222; PhaseTable_period_1; fwd; bwd', detector_table_mock)
+        self.presenter.add_phase_table_to_ADS.assert_called_once_with(detector_table_mock)
         self.assertTrue(self.view.isEnabled())
 
     @mock.patch('Muon.GUI.Common.phase_table_widget.phase_table_presenter.run_CalMuonDetectorPhases')
@@ -142,16 +142,6 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.assertEqual(parameters, {'InputWorkspace': 'MUSR22222_raw_data_period_1',
                                        'PhaseTable': 'created_phase_table'})
 
-    @mock.patch('Muon.GUI.Common.phase_table_widget.phase_table_presenter.MuonWorkspaceWrapper')
-    def test_add_phase_quad_to_ADS_does_so_in_correct_location_with_correct_name(self, mock_workspace_wrapper):
-        phase_quad = mock.MagicMock()
-
-        self.presenter.add_phase_quad_to_ADS('MUSR22222_PhaseQuad_phase_table_MUSR22222', 'MUSR22222 PhaseTable',
-                                             phase_quad)
-
-        mock_workspace_wrapper.assert_called_once_with(phase_quad, 'MUSR22222 MA/MUSR22222_PhaseQuad_phase_table_MUSR22222 MUSR22222 PhaseTable')
-        mock_workspace_wrapper.return_value.show.assert_called_once_with()
-
     @mock.patch('Muon.GUI.Common.phase_table_widget.phase_table_presenter.run_PhaseQuad')
     @mock.patch('Muon.GUI.Common.phase_table_widget.phase_table_presenter.mantid')
     def test_handle_calcuate_phase_quad_behaves_correctly_for_succesful_calculation(self, mantid_mock, run_algorithm_mock):
@@ -171,10 +161,9 @@ class PhaseTablePresenterTest(unittest.TestCase):
 
         self.assertTrue(self.view.isEnabled())
         run_algorithm_mock.assert_called_once_with({'PhaseTable': 'MUSR22222_period_1_phase_table',
-
-                                                    'InputWorkspace': 'MUSR22222_raw_data_period_1'}, alg_mock)
-        self.presenter.add_phase_quad_to_ADS.assert_called_once_with('MUSR22222_raw_data_period_1',
-                                                                     'MUSR22222_period_1_phase_table', phase_quad_mock)
+                                                    'InputWorkspace': 'MUSR22222_raw_data_period_1'}, alg_mock,
+                                                    'MUSR22222; PhaseQuad_period_1 MUSR22222_period_1_phase_table')
+        self.presenter.add_phase_quad_to_ADS.assert_called_once_with('MUSR22222_raw_data_period_1', phase_quad_mock)
 
     @mock.patch('Muon.GUI.Common.phase_table_widget.phase_table_presenter.run_PhaseQuad')
     def test_handle_phase_quad_calculation_behaves_correctly_on_error(self, run_algorithm_mock):
@@ -220,11 +209,10 @@ class PhaseTablePresenterTest(unittest.TestCase):
     @mock.patch('Muon.GUI.Common.phase_table_widget.phase_table_presenter.MuonWorkspaceWrapper')
     def test_add_fitting_info_to_ADS_adds_fitting_info_to_ADS_if_option_selected(self, workspace_wrapper_mock):
         self.view.output_fit_info_box.setCheckState(QtCore.Qt.Checked)
-        fit_information = mock.MagicMock()
 
-        self.presenter.add_fitting_info_to_ADS_if_required('MUSR22222_PhaseTable',fit_information)
+        self.presenter.add_fitting_info_to_ADS_if_required('MUSR22222_PhaseTable', 'MUSR22222_PhaseTable; fit_information')
 
-        workspace_wrapper_mock.assert_called_once_with(fit_information, 'MUSR22222 MA/MUSR22222 Phase Tab MA/MUSR22222_PhaseTable; fit_information')
+        workspace_wrapper_mock.assert_called_once_with('MUSR22222 MA/MUSR22222 Phase Tab MA/MUSR22222_PhaseTable; fit_information')
         workspace_wrapper_mock.return_value.show.assert_called_once_with()
 
 

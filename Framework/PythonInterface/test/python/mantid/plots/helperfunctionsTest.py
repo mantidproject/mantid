@@ -20,8 +20,9 @@ import mantid.plots.helperfunctions as funcs
 from mantid.py3compat.mock import Mock
 from mantid.kernel import config
 from mantid.plots.utility import MantidAxType
-from mantid.simpleapi import AddSampleLog, AddTimeSeriesLog, ConjoinWorkspaces, CreateMDHistoWorkspace, CreateSampleWorkspace, \
-    CreateSingleValuedWorkspace, CreateWorkspace, DeleteWorkspace
+from mantid.simpleapi import (AddSampleLog, AddTimeSeriesLog, ConjoinWorkspaces,
+                              CreateMDHistoWorkspace, CreateSampleWorkspace,
+                              CreateSingleValuedWorkspace, CreateWorkspace, DeleteWorkspace)
 
 
 def add_workspace_with_data(func):
@@ -31,7 +32,12 @@ def add_workspace_with_data(func):
         dataE = dataY
         dX = dataY
 
-        ws = CreateWorkspace(DataX=dataX, DataY=dataY, DataE=dataE, NSpec=4, UnitX="Wavelength", Dx=dX)
+        ws = CreateWorkspace(DataX=dataX,
+                             DataY=dataY,
+                             DataE=dataE,
+                             NSpec=4,
+                             UnitX="Wavelength",
+                             Dx=dX)
         return func(self, ws)
 
     return wrapper
@@ -43,16 +49,24 @@ def add_md_workspace_with_data(dimensions=2):
             if dimensions == 2:
                 S = range(0, 100)
                 ERR = range(0, 100)
-                mdws = CreateMDHistoWorkspace(Dimensionality=2, Extents='-3,3,-10,10', SignalInput=S, ErrorInput=ERR,
-                                              NumberOfBins='10,10', Names='Dim1,Dim2',
+                mdws = CreateMDHistoWorkspace(Dimensionality=2,
+                                              Extents='-3,3,-10,10',
+                                              SignalInput=S,
+                                              ErrorInput=ERR,
+                                              NumberOfBins='10,10',
+                                              Names='Dim1,Dim2',
                                               Units='MomentumTransfer,EnergyTransfer')
             else:
                 S = range(0, 1000)
                 ERR = range(0, 1000)
-                mdws = CreateMDHistoWorkspace(Dimensionality=3, Extents='-3,3,-10,10,-20,20', SignalInput=S,
-                                              ErrorInput=ERR,
-                                              NumberOfBins='10,10,10', Names='Dim1,Dim2,Dim3',
-                                              Units='MomentumTransfer,EnergyTransfer,EnergyTransfer')
+                mdws = CreateMDHistoWorkspace(
+                    Dimensionality=3,
+                    Extents='-3,3,-10,10,-20,20',
+                    SignalInput=S,
+                    ErrorInput=ERR,
+                    NumberOfBins='10,10,10',
+                    Names='Dim1,Dim2,Dim3',
+                    Units='MomentumTransfer,EnergyTransfer,EnergyTransfer')
             return func(self, mdws)
 
         return wrapper
@@ -61,31 +75,29 @@ def add_md_workspace_with_data(dimensions=2):
 
 
 class HelperFunctionsTest(unittest.TestCase):
-
+    
     @classmethod
     def setUpClass(cls):
         cls.g1da = config['graph1d.autodistribution']
         config['graph1d.autodistribution'] = 'On'
-        cls.ws2d_non_distribution = CreateWorkspace(
-            DataX=[10, 20, 30, 10, 20, 30],
-            DataY=[2, 3, 4, 5],
-            DataE=[1, 2, 3, 4],
-            NSpec=2,
-            Distribution=False,
-            UnitX='Wavelength',
-            YUnitLabel='Counts per microAmp.hour',
-            VerticalAxisUnit='DeltaE',
-            VerticalAxisValues=[4, 6, 8],
-            OutputWorkspace='ws2d_non_distribution')
-        cls.ws2d_distribution = CreateWorkspace(
-            DataX=[10, 20, 30, 10, 20, 30],
-            DataY=[2, 3, 4, 5, 6],
-            DataE=[1, 2, 3, 4, 6],
-            NSpec=1,
-            Distribution=True,
-            UnitX='Wavelength',
-            YUnitLabel='Counts per microAmp.hour',
-            OutputWorkspace='ws2d_distribution')
+        cls.ws2d_non_distribution = CreateWorkspace(DataX=[10, 20, 30, 10, 20, 30],
+                                                    DataY=[2, 3, 4, 5],
+                                                    DataE=[1, 2, 3, 4],
+                                                    NSpec=2,
+                                                    Distribution=False,
+                                                    UnitX='Wavelength',
+                                                    YUnitLabel='Counts per microAmp.hour',
+                                                    VerticalAxisUnit='DeltaE',
+                                                    VerticalAxisValues=[4, 6, 8],
+                                                    OutputWorkspace='ws2d_non_distribution')
+        cls.ws2d_distribution = CreateWorkspace(DataX=[10, 20, 30, 10, 20, 30],
+                                                DataY=[2, 3, 4, 5, 6],
+                                                DataE=[1, 2, 3, 4, 6],
+                                                NSpec=1,
+                                                Distribution=True,
+                                                UnitX='Wavelength',
+                                                YUnitLabel='Counts per microAmp.hour',
+                                                OutputWorkspace='ws2d_distribution')
         cls.ws2d_histo = CreateWorkspace(DataX=[10, 20, 30, 10, 20, 30],
                                          DataY=[2, 3, 4, 5],
                                          DataE=[1, 2, 3, 4],
@@ -177,9 +189,9 @@ class HelperFunctionsTest(unittest.TestCase):
         index, dist, kwargs = funcs.get_wksp_index_dist_and_label(self.ws2d_histo, specNum=2)
         self.assertEqual(index, 1)
         self.assertTrue(dist)
-        self.assertEqual(kwargs['label'], 'ws2d_histo: spec 2')
+        self.assertEqual(kwargs['label'], 'ws2d_histo: 6')
         # get info from default spectrum in the 1d case
-        index, dist, kwargs = funcs.get_wksp_index_dist_and_label(self.ws1d_point)
+        index, dist, kwargs = funcs.get_wksp_index_dist_and_label(self.ws1d_point, wkspIndex=0)
         self.assertEqual(index, 0)
         self.assertFalse(dist)
         self.assertEqual(kwargs['label'], 'ws1d_point: spec 1')
@@ -189,8 +201,16 @@ class HelperFunctionsTest(unittest.TestCase):
         axis = mantid.api.TextAxis.create(1)
         ws.replaceAxis(1, axis)
         ws.getAxis(1).setLabel(0, "test")
-        index, dist, kwargs = funcs.get_wksp_index_dist_and_label(ws)
+        index, dist, kwargs = funcs.get_wksp_index_dist_and_label(ws, specNum=1)
         self.assertEqual(kwargs['label'], 'ws: test')
+
+    def test_legend_uses_label_if_first_axis_is_numeric_axis(self):
+        ws = CreateWorkspace([1], [1], NSpec=1)
+        axis = mantid.api.NumericAxis.create(1)
+        ws.replaceAxis(1, axis)
+        ws.getAxis(1).setValue(0, 50)
+        index, dist, kwargs = funcs.get_wksp_index_dist_and_label(ws, specNum=1)
+        self.assertEqual(kwargs['label'], 'ws: 50')
 
     def test_get_axes_labels(self):
         axs = funcs.get_axes_labels(self.ws2d_histo)
@@ -234,18 +254,22 @@ class HelperFunctionsTest(unittest.TestCase):
         self.assertEqual(axs, ('Intensity', 'Dim1 ($\\AA^{-1}$)', 'Dim2 (EnergyTransfer)', ''))
 
     def test_get_axes_label_2d_MDWS_indices(self):
-        axs = funcs.get_axes_labels(self.ws_MD_2d, indices=(0,slice(None),0))
+        axs = funcs.get_axes_labels(self.ws_MD_2d, indices=(0, slice(None), 0))
         # should get the first two dimension labels only
         self.assertEqual(axs, ('Intensity', 'Dim2 (EnergyTransfer)', 'Dim1=-2.4; Dim3=0.0;'))
 
     def test_get_data_uneven_flag(self):
-        flag, kwargs = funcs.get_data_uneven_flag(self.ws2d_histo_rag, axisaligned=True, other_kwarg=1)
+        flag, kwargs = funcs.get_data_uneven_flag(self.ws2d_histo_rag,
+                                                  axisaligned=True,
+                                                  other_kwarg=1)
         self.assertTrue(flag)
         self.assertEqual(kwargs, {'other_kwarg': 1})
         flag, kwargs = funcs.get_data_uneven_flag(self.ws2d_histo_rag, other_kwarg=2)
         self.assertFalse(flag)
         self.assertEqual(kwargs, {'other_kwarg': 2})
-        flag, kwargs = funcs.get_data_uneven_flag(self.ws2d_histo_uneven, axisaligned=False, other_kwarg=3)
+        flag, kwargs = funcs.get_data_uneven_flag(self.ws2d_histo_uneven,
+                                                  axisaligned=False,
+                                                  other_kwarg=3)
         self.assertTrue(flag)
         self.assertEqual(kwargs, {'other_kwarg': 3})
 
@@ -274,39 +298,43 @@ class HelperFunctionsTest(unittest.TestCase):
         self.assertTrue(np.array_equal(dy, np.array([1, 2])))
         self.assertEqual(dx, None)
         # fail case - try to find spectrum out of range
-        self.assertRaises(RuntimeError, funcs.get_spectrum, self.ws2d_histo,
-                          10, True)
+        self.assertRaises(RuntimeError, funcs.get_spectrum, self.ws2d_histo, 10, True)
 
     def test_get_spectrum_non_distribution_workspace(self):
         # get data divided by bin width
-        x, y, dy, dx = funcs.get_spectrum(self.ws2d_non_distribution, 1,
+        x, y, dy, dx = funcs.get_spectrum(self.ws2d_non_distribution,
+                                          1,
                                           normalize_by_bin_width=True,
-                                          withDy=True, withDx=True)
+                                          withDy=True,
+                                          withDx=True)
         self.assertTrue(np.array_equal(x, np.array([15., 25.])))
         self.assertTrue(np.array_equal(y, np.array([0.4, 0.5])))
         self.assertTrue(np.array_equal(dy, np.array([0.3, 0.4])))
         self.assertEqual(dx, None)
         # get data not divided by bin width
-        x, y, dy, dx = funcs.get_spectrum(self.ws2d_non_distribution, 1,
+        x, y, dy, dx = funcs.get_spectrum(self.ws2d_non_distribution,
+                                          1,
                                           normalize_by_bin_width=False,
-                                          withDy=True, withDx=True)
+                                          withDy=True,
+                                          withDx=True)
         self.assertTrue(np.array_equal(x, np.array([15., 25.])))
         self.assertTrue(np.array_equal(y, np.array([4, 5])))
         self.assertTrue(np.array_equal(dy, np.array([3, 4])))
         self.assertEqual(dx, None)
         # fail case - try to find spectrum out of range
-        self.assertRaises(RuntimeError, funcs.get_spectrum,
-                          self.ws2d_non_distribution, 10, True)
+        self.assertRaises(RuntimeError, funcs.get_spectrum, self.ws2d_non_distribution, 10, True)
 
     def test_get_md_data2d_bin_bounds(self):
-        x, y, data = funcs.get_md_data2d_bin_bounds(self.ws_MD_2d, mantid.api.MDNormalization.NoNormalization)
+        x, y, data = funcs.get_md_data2d_bin_bounds(self.ws_MD_2d,
+                                                    mantid.api.MDNormalization.NoNormalization)
         # logger.error(str(coords))
         np.testing.assert_allclose(x, np.array([-3, -1.8, -0.6, 0.6, 1.8, 3]), atol=1e-10)
         np.testing.assert_allclose(y, np.array([-10, -6, -2, 2, 6, 10.]), atol=1e-10)
         np.testing.assert_allclose(data, np.arange(25).reshape(5, 5), atol=1e-10)
 
     def test_get_md_data2d_bin_centers(self):
-        x, y, data = funcs.get_md_data2d_bin_centers(self.ws_MD_2d, mantid.api.MDNormalization.NumEventsNormalization)
+        x, y, data = funcs.get_md_data2d_bin_centers(
+            self.ws_MD_2d, mantid.api.MDNormalization.NumEventsNormalization)
         np.testing.assert_allclose(x, np.array([-2.4, -1.2, 0, 1.2, 2.4]), atol=1e-10)
         np.testing.assert_allclose(y, np.array([-8, -4, 0, 4, 8]), atol=1e-10)
         np.testing.assert_allclose(data, np.arange(25).reshape(5, 5) * 0.1, atol=1e-10)
@@ -315,13 +343,15 @@ class HelperFunctionsTest(unittest.TestCase):
         """
         Same as the test above but should be the transpose
         """
-        x, y, data = funcs.get_md_data2d_bin_centers(self.ws_MD_2d, mantid.api.MDNormalization.NumEventsNormalization, transpose=True)
+        x, y, data = funcs.get_md_data2d_bin_centers(
+            self.ws_MD_2d, mantid.api.MDNormalization.NumEventsNormalization, transpose=True)
         np.testing.assert_allclose(x, np.array([-8, -4, 0, 4, 8]), atol=1e-10)
         np.testing.assert_allclose(y, np.array([-2.4, -1.2, 0, 1.2, 2.4]), atol=1e-10)
         np.testing.assert_allclose(data, np.arange(25).reshape(5, 5).T * 0.1, atol=1e-10)
 
     def test_get_md_data1d(self):
-        coords, data, err = funcs.get_md_data1d(self.ws_MD_1d, mantid.api.MDNormalization.NumEventsNormalization)
+        coords, data, err = funcs.get_md_data1d(self.ws_MD_1d,
+                                                mantid.api.MDNormalization.NumEventsNormalization)
         np.testing.assert_allclose(coords, np.array([-8, -4, 0, 4, 8]), atol=1e-10)
 
     def test_get_matrix_2d_data_rect(self):
@@ -331,12 +361,14 @@ class HelperFunctionsTest(unittest.TestCase):
         np.testing.assert_allclose(y, np.array([[1, 1, 1, 1], [2, 2, 2, 2], [3, 3, 3, 3]]))
         # mesh from aligned point data
         x, y, z = funcs.get_matrix_2d_data(self.ws2d_point, True, histogram2D=True)
-        np.testing.assert_allclose(x, np.array(
-            [[0.5, 1.5, 2.5, 3.5, 4.5], [0.5, 1.5, 2.5, 3.5, 4.5], [0.5, 1.5, 2.5, 3.5, 4.5],
-             [0.5, 1.5, 2.5, 3.5, 4.5]]))
-        np.testing.assert_allclose(y, np.array(
-            [[0.5, 0.5, 0.5, 0.5, 0.5], [1.5, 1.5, 1.5, 1.5, 1.5], [2.5, 2.5, 2.5, 2.5, 2.5],
-             [3.5, 3.5, 3.5, 3.5, 3.5]]))
+        np.testing.assert_allclose(
+            x,
+            np.array([[0.5, 1.5, 2.5, 3.5, 4.5], [0.5, 1.5, 2.5, 3.5, 4.5],
+                      [0.5, 1.5, 2.5, 3.5, 4.5], [0.5, 1.5, 2.5, 3.5, 4.5]]))
+        np.testing.assert_allclose(
+            y,
+            np.array([[0.5, 0.5, 0.5, 0.5, 0.5], [1.5, 1.5, 1.5, 1.5, 1.5],
+                      [2.5, 2.5, 2.5, 2.5, 2.5], [3.5, 3.5, 3.5, 3.5, 3.5]]))
         # contour from aligned histo data
         x, y, z = funcs.get_matrix_2d_data(self.ws2d_histo, True, histogram2D=False)
         np.testing.assert_allclose(x, np.array([[15, 25], [15, 25]]))
@@ -354,12 +386,14 @@ class HelperFunctionsTest(unittest.TestCase):
         np.testing.assert_allclose(x, np.array([[1, 1, 1, 1], [2, 2, 2, 2], [3, 3, 3, 3]]).T)
         # mesh from aligned point data
         x, y, z = funcs.get_matrix_2d_data(self.ws2d_point, True, histogram2D=True, transpose=True)
-        np.testing.assert_allclose(y, np.array(
-            [[0.5, 1.5, 2.5, 3.5, 4.5], [0.5, 1.5, 2.5, 3.5, 4.5], [0.5, 1.5, 2.5, 3.5, 4.5],
-             [0.5, 1.5, 2.5, 3.5, 4.5]]).T)
-        np.testing.assert_allclose(x, np.array(
-            [[0.5, 0.5, 0.5, 0.5, 0.5], [1.5, 1.5, 1.5, 1.5, 1.5], [2.5, 2.5, 2.5, 2.5, 2.5],
-             [3.5, 3.5, 3.5, 3.5, 3.5]]).T)
+        np.testing.assert_allclose(
+            y,
+            np.array([[0.5, 1.5, 2.5, 3.5, 4.5], [0.5, 1.5, 2.5, 3.5, 4.5],
+                      [0.5, 1.5, 2.5, 3.5, 4.5], [0.5, 1.5, 2.5, 3.5, 4.5]]).T)
+        np.testing.assert_allclose(
+            x,
+            np.array([[0.5, 0.5, 0.5, 0.5, 0.5], [1.5, 1.5, 1.5, 1.5, 1.5],
+                      [2.5, 2.5, 2.5, 2.5, 2.5], [3.5, 3.5, 3.5, 3.5, 3.5]]).T)
         # contour from aligned histo data
         x, y, z = funcs.get_matrix_2d_data(self.ws2d_histo, True, histogram2D=False, transpose=True)
         np.testing.assert_allclose(y, np.array([[15, 25], [15, 25]]).T)
@@ -380,12 +414,16 @@ class HelperFunctionsTest(unittest.TestCase):
         np.testing.assert_allclose(y, np.array([[6, 6, 6, 6], [8, 8, 8, 8]]))
         # mesh from ragged point data
         x, y, z = funcs.get_matrix_2d_data(self.ws2d_point_rag, True, histogram2D=True)
-        np.testing.assert_allclose(x, np.array([[0.5, 1.5, 2.5, 3.5, 4.5], [1, 3, 5, 7, 9], [1, 3, 5, 7, 9]]))
-        np.testing.assert_allclose(y, np.array(
-            [[0.5, 0.5, 0.5, 0.5, 0.5], [1.5, 1.5, 1.5, 1.5, 1.5], [2.5, 2.5, 2.5, 2.5, 2.5]]))
+        np.testing.assert_allclose(
+            x, np.array([[0.5, 1.5, 2.5, 3.5, 4.5], [1, 3, 5, 7, 9], [1, 3, 5, 7, 9]]))
+        np.testing.assert_allclose(
+            y,
+            np.array([[0.5, 0.5, 0.5, 0.5, 0.5], [1.5, 1.5, 1.5, 1.5, 1.5],
+                      [2.5, 2.5, 2.5, 2.5, 2.5]]))
         # mesh from ragged histo data
         x, y, z = funcs.get_matrix_2d_data(self.ws2d_histo_rag, True, histogram2D=True)
-        np.testing.assert_allclose(x, np.array([[1, 2, 3, 4, 5], [2, 4, 6, 8, 10], [2, 4, 6, 8, 10]]))
+        np.testing.assert_allclose(x, np.array([[1, 2, 3, 4, 5], [2, 4, 6, 8, 10], [2, 4, 6, 8,
+                                                                                    10]]))
         np.testing.assert_allclose(y, np.array([[5, 5, 5, 5, 5], [7, 7, 7, 7, 7], [9, 9, 9, 9, 9]]))
         # check that fails for uneven data
         self.assertRaises(ValueError, funcs.get_matrix_2d_data, self.ws2d_point_uneven, True)
@@ -397,7 +435,8 @@ class HelperFunctionsTest(unittest.TestCase):
         np.testing.assert_allclose(y, np.array([0.5, 1.5, 2.5]))
         # contour from ragged histo data
         x, y, z = funcs.get_matrix_2d_ragged(self.ws2d_histo_rag, True, histogram2D=False)
-        np.testing.assert_allclose(x, np.array([1.5, 2.4375, 3.375, 4.3125, 5.25, 6.1875, 7.125, 8.0625, 9.]))
+        np.testing.assert_allclose(
+            x, np.array([1.5, 2.4375, 3.375, 4.3125, 5.25, 6.1875, 7.125, 8.0625, 9.]))
         np.testing.assert_allclose(y, np.array([4., 6., 8., 10.]))
         # mesh from ragged point data
         x, y, z = funcs.get_matrix_2d_ragged(self.ws2d_point_rag, True, histogram2D=True)
@@ -405,8 +444,12 @@ class HelperFunctionsTest(unittest.TestCase):
         np.testing.assert_allclose(y, np.array([0.5, 1.5, 2.5]))
         # mesh from ragged histo data
         x, y, z = funcs.get_matrix_2d_ragged(self.ws2d_histo_rag, True, histogram2D=True)
-        np.testing.assert_allclose(x, np.array(
-            [1.03125, 1.96875, 2.90625, 3.84375, 4.78125, 5.71875, 6.65625, 7.59375, 8.53125, 9.46875]))
+        np.testing.assert_allclose(
+            x,
+            np.array([
+                1.03125, 1.96875, 2.90625, 3.84375, 4.78125, 5.71875, 6.65625, 7.59375, 8.53125,
+                9.46875
+            ]))
         np.testing.assert_allclose(y, np.array([4., 6, 8., 10.]))
         # check that fails for uneven data
         self.assertRaises(ValueError, funcs.get_matrix_2d_data, self.ws2d_point_uneven, True)
@@ -446,7 +489,9 @@ class HelperFunctionsTest(unittest.TestCase):
         np.testing.assert_allclose(z[1], np.array([1, 2, 3, 4]))
 
     def test_get_sample_logs_with_full_time(self):
-        x, y, FullTime, LogName, units, kwargs = funcs.get_sample_log(self.ws2d_histo, LogName='my_log', FullTime=True)
+        x, y, FullTime, LogName, units, kwargs = funcs.get_sample_log(self.ws2d_histo,
+                                                                      LogName='my_log',
+                                                                      FullTime=True)
         self.assertEqual(x[0], datetime.datetime(2010, 1, 1, 0, 0, 0))
         self.assertEqual(x[1], datetime.datetime(2010, 1, 1, 0, 30, 0))
         self.assertEqual(x[2], datetime.datetime(2010, 1, 1, 0, 50, 0))
@@ -457,11 +502,12 @@ class HelperFunctionsTest(unittest.TestCase):
         self.assertEqual(kwargs, {})
 
     def test_get_sample_logs_with_relative_time_and_no_start_time(self):
-        x, y, FullTime, LogName, units, kwargs = funcs.get_sample_log(self.ws2d_histo, LogName='my_log',
+        x, y, FullTime, LogName, units, kwargs = funcs.get_sample_log(self.ws2d_histo,
+                                                                      LogName='my_log',
                                                                       FullTime=False)
         self.assertEqual(x[0], 0)
-        self.assertEqual(x[1], 30*60)
-        self.assertEqual(x[2], 50*60)
+        self.assertEqual(x[1], 30 * 60)
+        self.assertEqual(x[2], 50 * 60)
         np.testing.assert_allclose(y, np.array([100, 15, 100.2]))
         self.assertFalse(FullTime)
         self.assertEqual(LogName, 'my_log')
@@ -471,7 +517,8 @@ class HelperFunctionsTest(unittest.TestCase):
     def test_get_sample_logs_with_relative_time_and_start_time_later_than_first_log(self):
         start_time = "2010-01-01T00:00:19"
         AddSampleLog(self.ws2d_histo, LogName='run_start', LogText=start_time)
-        x, y, FullTime, LogName, units, kwargs = funcs.get_sample_log(self.ws2d_histo, LogName='my_log',
+        x, y, FullTime, LogName, units, kwargs = funcs.get_sample_log(self.ws2d_histo,
+                                                                      LogName='my_log',
                                                                       FullTime=False)
         self.assertEqual(x[0], -19)
         self.assertEqual(x[1], 1781)
@@ -526,7 +573,8 @@ class HelperFunctionsTest(unittest.TestCase):
         """
         ws = CreateSampleWorkspace()
         axis = MantidAxType.SPECTRUM
-        res_workspace_index, res_spectrum_number, res_kwargs = funcs._get_wksp_index_and_spec_num(ws, axis, specNum=3)
+        res_workspace_index, res_spectrum_number, res_kwargs = funcs._get_wksp_index_and_spec_num(
+            ws, axis, specNum=3)
         self.assertEqual(2, res_workspace_index)
         self.assertEqual(3, res_spectrum_number)
 
@@ -538,31 +586,16 @@ class HelperFunctionsTest(unittest.TestCase):
         """
         ws = CreateSampleWorkspace()
         axis = MantidAxType.BIN
-        res_workspace_index, res_spectrum_number, res_kwargs = funcs._get_wksp_index_and_spec_num(ws, axis, specNum=3)
+        res_workspace_index, res_spectrum_number, res_kwargs = funcs._get_wksp_index_and_spec_num(
+            ws, axis, specNum=3)
         self.assertEqual(2, res_workspace_index)
         self.assertEqual(3, res_spectrum_number)
 
-    def test_get_wksp_index_and_spec_num_1_histogram_axis_spectrum(self):
-        """
-        Test getting the WorkspaceIndex and Spectrum Number for a Workspace with 1 histogram,
-        when traversing the SPECTRUM axis
-        """
+    def test_get_wksp_index_and_spec_num_throws_for_histo_with_one_bin_if_wkspIndex_and_specNum_not_set(
+            self):
         ws = CreateSingleValuedWorkspace()
         axis = MantidAxType.SPECTRUM
-        res_workspace_index, res_spectrum_number, res_kwargs = funcs._get_wksp_index_and_spec_num(ws, axis)
-        self.assertEqual(0, res_workspace_index)
-        self.assertEqual(0, res_spectrum_number)
-
-    def test_get_wksp_index_and_spec_num_1_histogram_axis_bin(self):
-        """
-        Test getting the WorkspaceIndex and Spectrum Number for a Workspace with 1 histogram,
-        when traversing the BIN axis
-        """
-        ws = CreateSingleValuedWorkspace()
-        axis = MantidAxType.BIN
-        res_workspace_index, res_spectrum_number, res_kwargs = funcs._get_wksp_index_and_spec_num(ws, axis)
-        self.assertEqual(0, res_workspace_index)
-        self.assertEqual(None, res_spectrum_number)
+        self.assertRaises(RuntimeError, funcs._get_wksp_index_and_spec_num, ws, axis)
 
     def test_get_wksp_index_and_spec_num_with_wkspIndex_axis_bin(self):
         """
@@ -572,7 +605,8 @@ class HelperFunctionsTest(unittest.TestCase):
         """
         ws = CreateSampleWorkspace()
         axis = MantidAxType.BIN
-        res_workspace_index, res_spectrum_number, res_kwargs = funcs._get_wksp_index_and_spec_num(ws, axis, wkspIndex=5)
+        res_workspace_index, res_spectrum_number, res_kwargs = funcs._get_wksp_index_and_spec_num(
+            ws, axis, wkspIndex=5)
         self.assertEqual(5, res_workspace_index)
         self.assertEqual(None, res_spectrum_number)
 
@@ -584,7 +618,8 @@ class HelperFunctionsTest(unittest.TestCase):
         """
         ws = CreateSampleWorkspace()
         axis = MantidAxType.SPECTRUM
-        res_workspace_index, res_spectrum_number, res_kwargs = funcs._get_wksp_index_and_spec_num(ws, axis, wkspIndex=5)
+        res_workspace_index, res_spectrum_number, res_kwargs = funcs._get_wksp_index_and_spec_num(
+            ws, axis, wkspIndex=5)
         self.assertEqual(5, res_workspace_index)
         self.assertEqual(6, res_spectrum_number)
 
@@ -596,7 +631,12 @@ class HelperFunctionsTest(unittest.TestCase):
         """
         ws = CreateSampleWorkspace()
         axis = MantidAxType.SPECTRUM  # doesn't matter for this test
-        self.assertRaises(RuntimeError, funcs._get_wksp_index_and_spec_num, ws, axis, wkspIndex=5, specNum=3)
+        self.assertRaises(RuntimeError,
+                          funcs._get_wksp_index_and_spec_num,
+                          ws,
+                          axis,
+                          wkspIndex=5,
+                          specNum=3)
 
     def test_get_wksp_index_and_spec_num_error_with_none(self):
         """
@@ -616,13 +656,15 @@ class HelperFunctionsTest(unittest.TestCase):
         """
         ws = CreateSampleWorkspace()
         axis = MantidAxType.BIN
-        res_workspace_index, res_distribution, res_kwargs = funcs.get_wksp_index_dist_and_label(ws, axis, wkspIndex=1)
+        res_workspace_index, res_distribution, res_kwargs = funcs.get_wksp_index_dist_and_label(
+            ws, axis, wkspIndex=1)
 
         self.assertEqual(1, res_workspace_index)
         self.assertEqual(False, res_distribution)
         self.assertEqual(res_kwargs['label'], 'ws: bin 1')
 
-        res_workspace_index, res_distribution, res_kwargs = funcs.get_wksp_index_dist_and_label(ws, axis, wkspIndex=0)
+        res_workspace_index, res_distribution, res_kwargs = funcs.get_wksp_index_dist_and_label(
+            ws, axis, wkspIndex=0)
 
         self.assertEqual(0, res_workspace_index)
         self.assertEqual(False, res_distribution)
@@ -666,7 +708,11 @@ class HelperFunctionsTest(unittest.TestCase):
 
     @add_workspace_with_data
     def test_get_spectrum_no_dy_dx(self, ws):
-        x, y, dy, dx = funcs.get_spectrum(ws, 3, normalize_by_bin_width=False, withDy=False, withDx=False)
+        x, y, dy, dx = funcs.get_spectrum(ws,
+                                          3,
+                                          normalize_by_bin_width=False,
+                                          withDy=False,
+                                          withDx=False)
         self.assertTrue(np.array_equal([13.5, 14.5, 15.5], x))
         self.assertTrue(np.array_equal([10.0, 11.0, 12.0], y))
         self.assertIsNone(dy)
@@ -674,7 +720,11 @@ class HelperFunctionsTest(unittest.TestCase):
 
     @add_workspace_with_data
     def test_get_spectrum_with_dy_dx(self, ws):
-        x, y, dy, dx = funcs.get_spectrum(ws, 3, normalize_by_bin_width=False, withDy=True, withDx=True)
+        x, y, dy, dx = funcs.get_spectrum(ws,
+                                          3,
+                                          normalize_by_bin_width=False,
+                                          withDy=True,
+                                          withDx=True)
 
         self.assertTrue(np.array_equal([13.5, 14.5, 15.5], x))
         self.assertTrue(np.array_equal([10.0, 11.0, 12.0], y))
@@ -701,40 +751,47 @@ class HelperFunctionsTest(unittest.TestCase):
 
     @add_md_workspace_with_data(dimensions=3)
     def test_get_md_data2d_bin_bounds_indices(self, mdws):
-        x, y, z = funcs.get_md_data2d_bin_bounds(mdws, False, (0,slice(None),slice(None)))
-        np.testing.assert_allclose(range(-10,12,2), x)
-        np.testing.assert_allclose(range(-20,24,4), y)
+        x, y, z = funcs.get_md_data2d_bin_bounds(mdws, False, (0, slice(None), slice(None)))
+        np.testing.assert_allclose(range(-10, 12, 2), x)
+        np.testing.assert_allclose(range(-20, 24, 4), y)
 
     @add_md_workspace_with_data(dimensions=3)
     def test_get_md_data2d_bin_bounds_indices2(self, mdws):
-        x, y, z = funcs.get_md_data2d_bin_bounds(mdws, False, (slice(None),0,slice(None)))
-        np.testing.assert_allclose(np.arange(-3,3.6,0.6), x, atol=1e-14)
-        np.testing.assert_allclose(range(-20,24,4), y)
+        x, y, z = funcs.get_md_data2d_bin_bounds(mdws, False, (slice(None), 0, slice(None)))
+        np.testing.assert_allclose(np.arange(-3, 3.6, 0.6), x, atol=1e-14)
+        np.testing.assert_allclose(range(-20, 24, 4), y)
 
     def test_pointToIndex(self):
-        d=self.ws_MD_2d.getDimension(0)
-        self.assertEqual(funcs.pointToIndex(d,-10), 0)
-        self.assertEqual(funcs.pointToIndex(d,-3), 0)
-        self.assertEqual(funcs.pointToIndex(d,0), 2)
-        self.assertEqual(funcs.pointToIndex(d,3), 4)
-        self.assertEqual(funcs.pointToIndex(d,10), 4)
+        d = self.ws_MD_2d.getDimension(0)
+        self.assertEqual(funcs.pointToIndex(d, -10), 0)
+        self.assertEqual(funcs.pointToIndex(d, -3), 0)
+        self.assertEqual(funcs.pointToIndex(d, 0), 2)
+        self.assertEqual(funcs.pointToIndex(d, 3), 4)
+        self.assertEqual(funcs.pointToIndex(d, 10), 4)
 
     def test_get_indices(self):
         indices, kwargs = funcs.get_indices(self.ws_MD_2d)
         self.assertIsNone(indices)
         self.assertNotIn('label', kwargs)
 
-        self.assertRaises(AssertionError, funcs.get_indices, self.ws_MD_2d, indices=(0,slice(None)))
-        self.assertRaises(AssertionError, funcs.get_indices, self.ws_MD_2d, slicepoint=(0,None))
-        self.assertRaises(ValueError, funcs.get_indices, self.ws_MD_2d, indices=(1,2), slicepoint=(3,4))
+        self.assertRaises(AssertionError,
+                          funcs.get_indices,
+                          self.ws_MD_2d,
+                          indices=(0, slice(None)))
+        self.assertRaises(AssertionError, funcs.get_indices, self.ws_MD_2d, slicepoint=(0, None))
+        self.assertRaises(ValueError,
+                          funcs.get_indices,
+                          self.ws_MD_2d,
+                          indices=(1, 2),
+                          slicepoint=(3, 4))
 
-        indices, kwargs = funcs.get_indices(self.ws_MD_2d,indices=(1,slice(None),slice(None)))
-        np.testing.assert_equal(indices, (1,slice(None),slice(None)))
+        indices, kwargs = funcs.get_indices(self.ws_MD_2d, indices=(1, slice(None), slice(None)))
+        np.testing.assert_equal(indices, (1, slice(None), slice(None)))
         self.assertIn('label', kwargs)
         self.assertEqual(kwargs['label'], 'ws_MD_2d: Dim1=-1.2')
 
-        indices, kwargs = funcs.get_indices(self.ws_MD_2d,slicepoint=(-1,None,None))
-        np.testing.assert_equal(indices, (1,slice(None),slice(None)))
+        indices, kwargs = funcs.get_indices(self.ws_MD_2d, slicepoint=(-1, None, None))
+        np.testing.assert_equal(indices, (1, slice(None), slice(None)))
         self.assertIn('label', kwargs)
         self.assertEqual(kwargs['label'], 'ws_MD_2d: Dim1=-1.2')
 

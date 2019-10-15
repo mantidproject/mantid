@@ -19,7 +19,6 @@
 #include "MantidKernel/Logger.h"
 #include <Poco/Notification.h>
 #include <Poco/NotificationCenter.h>
-
 #include <mutex>
 
 #ifdef _WIN32
@@ -321,14 +320,17 @@ public:
     if (targetNameIter != datamap.end()) {
       auto targetNameObject = targetNameIter->second;
       // As we are renaming the existing name turns into the new name
+      lock.unlock();
       notificationCenter.postNotification(new BeforeReplaceNotification(
           newName, targetNameObject, existingNameObject));
+      lock.lock();
     }
 
     datamap.erase(existingNameIter);
 
     if (targetNameIter != datamap.end()) {
       targetNameIter->second = std::move(existingNameObject);
+      lock.unlock();
       notificationCenter.postNotification(
           new AfterReplaceNotification(newName, targetNameIter->second));
     } else {
@@ -339,9 +341,10 @@ public:
             " add : Unable to insert Data Object : '" + newName + "'";
         g_log.error(error);
         throw std::runtime_error(error);
+      } else {
+        lock.unlock();
       }
     }
-    lock.unlock();
     g_log.debug("Data Object '" + oldName + "' renamed to '" + newName + "'");
     notificationCenter.postNotification(
         new RenameNotification(oldName, newName));

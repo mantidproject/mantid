@@ -220,7 +220,8 @@ class CurvesTabWidgetPresenter:
                 self.view.remove_select_axes_combo_box_selected_item()
                 if self.view.select_axes_combo_box.count() == 0:
                     self.close_tab()
-                    self.legend_tab.close_tab()
+                    if self.legend_tab:
+                        self.legend_tab.close_tab()
                     return True
 
     def set_new_curve_name_in_dict_and_combo_box(self, curve, new_label):

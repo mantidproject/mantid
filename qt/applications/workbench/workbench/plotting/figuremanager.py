@@ -103,7 +103,7 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
         if all(empty_axes):
             self.window.emit_close()
         else:
-            self.canvas.draw_idle()
+            self.canvas.draw()
 
     @_catch_exceptions
     def replaceHandle(self, _, workspace):
