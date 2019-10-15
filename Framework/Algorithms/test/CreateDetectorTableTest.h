@@ -11,6 +11,10 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include <cxxtest/TestSuite.h>
 
+using namespace Mantid::Algorithms;
+using namespace Mantid::API;
+using namespace Mantid::DataObjects;
+
 class CreateDetectorTableTest : public CxxTest::TestSuite {
 public:
   static CreateDetectorTableTest *createSuite() {
@@ -20,7 +24,7 @@ public:
   static void destroySuite(CreateDetectorTableTest *suite) { delete suite; }
 
   void testName() {
-    //Mantid::Algorithms::CreateDetectorTable alg;
+    CreateDetectorTable alg;
     //TS_ASSERT_EQUALS(alg.name(), "CreateDetectorTable");
   }
 
@@ -30,10 +34,6 @@ public:
   }
 
   void testInit() {
-    //using Mantid::Algorithms::CreateDetectorTable;
-    using Mantid::DataObjects::TableWorkspace;
-    using Mantid::API::WorkspaceProperty;
-
     /*CreateDetectorTable alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());

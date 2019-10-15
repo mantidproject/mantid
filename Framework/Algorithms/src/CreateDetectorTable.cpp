@@ -9,9 +9,9 @@
 namespace Mantid {
 namespace Algorithms {
 
-using namespace Mantid::API;
-using namespace Mantid::Kernel;
-using namespace Mantid::DataObjects;
+using namespace API;
+using namespace Kernel;
+using namespace DataObjects;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateDetectorTable)
@@ -286,5 +286,5 @@ CreateDetectorTable::createTruncatedList(const std::set<int> &elements) {
   return truncated;
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

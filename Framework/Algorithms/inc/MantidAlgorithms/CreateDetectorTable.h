@@ -26,10 +26,10 @@
 namespace Mantid {
 namespace Algorithms {
 
-class CreateDetectorTable : public Mantid::API::Algorithm {
+class CreateDetectorTable : public API::Algorithm {
 public:
   /// (Empty) Constructor
-  CreateDetectorTable() : Mantid::API::Algorithm() {}
+  CreateDetectorTable() : API::Algorithm() {}
   /// Algorithm's name
   const std::string name() const override { return "CreateDetectorTable"; }
   /// Algorithm's version
@@ -58,7 +58,7 @@ private:
   std::string createTruncatedList(const std::set<int> &elements);
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*CREATE_DETECTOR_TABLE_H_*/
