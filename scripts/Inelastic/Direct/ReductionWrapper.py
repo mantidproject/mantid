@@ -251,7 +251,22 @@ class ReductionWrapper(object):
         return None
 
     def evaluate_abs_corrections(self,test_ws,spectra_to_correct):
-        """ Evaluate absorption corrections from the """
+        """ Evaluate absorption corrections from the input workspace
+            Input:
+            test_ws -- the workspace to calculate corrections for.
+                       The corrections themselves should be defined by
+                       the following data reduction properties:
+                       propmen.correct_absorption_on = TheShapeOfTheSample -- define sample parameters
+                       propmen.abs_corr_info   = {} Dictionary with additional correction parameters
+                       (can be empty)
+             spectra_to_correct -- list of the spectra to correct absorption for.
+             If this list is empty, the corrections are calculated for the whole workspace,
+             which can cause problems for plotting.
+
+             Returns:
+             corrections -- the workspace containing the absorption corrections
+             for the spectra, specified in spectra_to_correct variable.
+        """
 
         n_spectra = test_ws.getNumberHistograms()
         decrement = len(spectra_to_correct)

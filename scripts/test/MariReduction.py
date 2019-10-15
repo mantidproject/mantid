@@ -75,11 +75,12 @@ class ReduceMARI(ReductionWrapper):
       #
       #Two generic algorithms are currently available to
       #    correct for absorption:
-      # a) AbsorptionCorrections (invoked by 'is_fast':True key of
-      #    abs_corr_info property and by default).
+      # a) MonteCarloAbsorption (invoked by 'is_mc':True key of abs_corr_info
+      #    property and by default)
       # and
-      # b) MonteCarloAbsorption (invoked by 'is_mc':True key of abs_corr_info
-      #    property)
+      # b) AbsorptionCorrections (invoked by 'is_fast':True key of
+      #    abs_corr_info property). This algorithm has number of optimizations
+      #    for the special shapes cases and need further scientific validations
 
       # All other properties, to be provided in the input dictionary of this
       # property are the non-sample related properties of the
@@ -249,15 +250,19 @@ class ReduceMARI(ReductionWrapper):
         # (or be reduced)
         if test_ws is None:
             test_ws = PropertyManager.sample_run.get_workspace()
-        # Define spectra list to test absorption on
+        # Define spectra list to test absorption on. Empty list will
+        # define absorption on the whole workspace.
         check_spectra = [1,200]
         # Evaluate corrections on the selected spectra of the workspace and the time to obtain
         # the corrections on the whole workspace.
         corrections,time_to_correct_abs = self.evaluate_abs_corrections(test_ws,check_spectra)
         # When accuracy and speed of the corrections is satisfactory, copy chosen abs_corr_info
         # properties from above to the advanced_porperties area to run in reduction.
-        if not mpl is None:
-            mpl.plotSpectrum(corrections,range(0,len(check_spectra)))
+        if mpl is not None:
+            n_spectra = len(check_spectra)
+            if n_spectra == 0:
+                n_specra = corrections.getNumberHistograms()
+            mpl.plotSpectrum(corrections,range(0,n_spectra))
         #
         return corrections
 
