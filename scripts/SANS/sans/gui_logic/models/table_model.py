@@ -73,7 +73,17 @@ class TableModel(object):
     def get_table_entry(self, index):
         return self._table_entries[index]
 
+    def add_multiple_table_entries(self, table_index_model_list):
+        for index, current_row in enumerate(table_index_model_list):
+            self._add_single_table_entry(row=index, table_index_model=current_row)
+
+        self.notify_subscribers()
+
     def add_table_entry(self, row, table_index_model):
+        self._add_single_table_entry(row=row, table_index_model=table_index_model)
+        self.notify_subscribers()
+
+    def _add_single_table_entry(self, row, table_index_model):
         table_index_model.id = self._id_count
         self._id_count += 1
         self._table_entries.insert(row, table_index_model)
@@ -83,7 +93,6 @@ class TableModel(object):
         # If we did not provide a sample thickness, get it from file information
         if table_index_model.sample_thickness == '':
             self.get_thickness_for_rows([row])
-        self.notify_subscribers()
 
     def append_table_entry(self, table_index_model):
         table_index_model.id = self._id_count

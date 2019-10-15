@@ -20,5 +20,7 @@ Improved
 
 - Option in :ref:`EQSANSCorrectFrame <algm-EQSANSCorrectFrame>` to correct TOF by path to individual pixel
 - New CG2 definition file
+- A bug causing large batch files (1000+ runs) to take minutes to load into the
+  ISIS SANS GUI has been fixed. Large batch files will now load within seconds.
 
 :ref:`Release 4.2.0 <v4.2.0>`
