@@ -37,8 +37,11 @@ getSampleSpeciesInfo(const API::MatrixWorkspace_const_sptr ws) {
     atomSpecies[element.atom->symbol] = atomMap;
     totalStoich += element.multiplicity;
   }
-  for (auto atom : atomSpecies) {
-    atom.second["concentration"] = atom.second["stoich"] / totalStoich;
+  std::map<std::string, std::map<std::string, double>>::iterator atom =
+      atomSpecies.begin();
+  while (atom != atomSpecies.end()) {
+    atom->second["concentration"] = atom->second["stoich"] / totalStoich;
+    atom++;
   }
   return atomSpecies;
 }
@@ -106,8 +109,8 @@ void CalculatePlaczekSelfScattering::exec() {
   // set detector law term (eps1)
   const double lambdaD = 1.44;
   std::vector<double> eps1;
-  for (size_t i = 0; i < xLambda.size(); i++) {
-    double xTerm = -xLambda[i] / lambdaD;
+  for (size_t i = 0; i < xLambda.size() - 1; i++) {
+    double xTerm = -(xLambda[i] + dx) / lambdaD;
     eps1.push_back(xTerm * exp(xTerm) / (1.0 - exp(xTerm)));
   }
   /* Placzek
@@ -133,37 +136,45 @@ void CalculatePlaczekSelfScattering::exec() {
   xLambdas.reserve(nReserve);
   placzekCorrection.reserve(nReserve);
 
-  int nSpec = 0;
-  for (size_t detIndex = 0; detIndex < detInfo.size(); detIndex++) {
-    if (!detInfo.isMonitor(detIndex)) {
-      const double pathLength = detInfo.l1() + detInfo.l2(detIndex);
-      const double f = detInfo.l1() / pathLength;
-      const double sinThetaBy2 = sin(detInfo.twoTheta(detIndex) / 2.0);
+  API::MatrixWorkspace_sptr outputWS =
+      DataObjects::create<API::HistoWorkspace>(*inWS);
+  // The algorithm computes the signal values at bin centres so they should
+  // be treated as a distribution
+  outputWS->setDistribution(true);
+  outputWS->setYUnit("");
+  outputWS->setYUnitLabel("Counts");
+  for (size_t specIndex = 0; specIndex < specInfo.size(); specIndex++) {
+    auto &y = outputWS->mutableY(specIndex);
+    auto &x = outputWS->mutableX(specIndex);
+    if (!specInfo.isMonitor(specIndex) && !specInfo.l2(specIndex) == 0) {
+      const double pathLength = specInfo.l1() + specInfo.l2(specIndex);
+      const double f = specInfo.l1() / pathLength;
+      const double sinThetaBy2 = sin(specInfo.twoTheta(specIndex) / 2.0);
+      Kernel::Units::Wavelength wavelength;
+      wavelength.initialize(specInfo.l1(), specInfo.l2(specIndex),
+                            specInfo.twoTheta(specIndex), 0, 1.0, 1.0);
       for (size_t xIndex = 0; xIndex < xLambda.size() - 1; xIndex++) {
         const double term1 = (f - 1.0) * phi1[xIndex];
-        const double term2 = f * eps1[xIndex];
-        const double term3 = f - 3;
+        const double term2 = -f * eps1[xIndex];
+        const double term3 = f - 3.0;
         const double inelasticPlaczekSelfCorrection =
-            2.0 * (term1 - term2 + term3) * sinThetaBy2 * sinThetaBy2 *
+            2.0 * (term1 + term2 + term3) * sinThetaBy2 * sinThetaBy2 *
             summationTerm;
-        xLambdas.push_back(xLambda[xIndex]);
-        placzekCorrection.push_back(inelasticPlaczekSelfCorrection);
+        x[xIndex] = wavelength.singleToTOF(xLambda[xIndex]);
+        y[xIndex] = inelasticPlaczekSelfCorrection;
       }
-      xLambdas.push_back(xLambda.back());
-      nSpec += 1;
+      x.back() = wavelength.singleToTOF(xLambda.back());
+    } else {
+      for (size_t xIndex = 0; xIndex < xLambda.size() - 1; xIndex++) {
+        x[xIndex] = xLambda[xIndex];
+        y[xIndex] = 0;
+      }
+      x.back() = xLambda.back();
     }
   }
-  Mantid::API::Algorithm_sptr childAlg =
-      createChildAlgorithm("CreateWorkspace");
-  childAlg->setProperty("DataX", xLambdas);
-  childAlg->setProperty("DataY", placzekCorrection);
-  childAlg->setProperty("UnitX", "Wavelength");
-  childAlg->setProperty("NSpec", nSpec);
-  childAlg->setProperty("ParentWorkspace", inWS);
-  childAlg->setProperty("Distribution", true);
-  childAlg->execute();
-  outWS = childAlg->getProperty("OutputWorkspace");
-  setProperty("OutputWorkspace", outWS);
+  auto incidentUnit = inWS->getAxis(0)->unit();
+  outputWS->getAxis(0)->unit() = incidentUnit;
+  setProperty("OutputWorkspace", outputWS);
 }
 
 } // namespace Algorithms
