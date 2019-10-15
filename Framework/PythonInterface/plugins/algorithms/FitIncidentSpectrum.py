@@ -89,16 +89,17 @@ class FitIncidentSpectrum(PythonAlgorithm):
             y_fit = np.array(self._input_ws.readY(self._incident_index))
         else:
             rebinned = Rebin(
-                self._input_ws,
+                InputWorkspace=self._input_ws,
                 Params=self._binning_for_fit,
-                PreserveEvents=True,
-                StoreInADS=False)
+                PreserveEvents=True)
             x_fit = np.array(rebinned.readX(self._incident_index))
             y_fit = np.array(rebinned.readY(self._incident_index))
 
+        rebin_norm = x.size/x_fit.size
         x_bin_centers = 0.5*(x[:-1] + x[1:])
         if len(x_fit) != len(y_fit):
             x_fit = 0.5*(x_fit[:-1] + x_fit[1:])
+
         if self._fit_spectrum_with == 'CubicSpline':
             # Fit using cubic spline
             fit, fit_prime = self.fit_cubic_spline(x_fit, y_fit, x_bin_centers, s=1e7)
@@ -113,11 +114,12 @@ class FitIncidentSpectrum(PythonAlgorithm):
         elif self._fit_spectrum_with == 'GaussConvCubicSpline':
             # Fit using Gauss conv cubic spline
             fit, fit_prime = self.fit_cubic_spline_with_gauss_conv(x_fit, y_fit, x_bin_centers, sigma=0.5)
+
         # Create output workspace
         unit = self._input_ws.getAxis(0).getUnit().unitID()
         output_workspace = CreateWorkspace(
             DataX=x,
-            DataY=np.append(fit, fit_prime),
+            DataY=np.append(fit, fit_prime)/rebin_norm,
             UnitX=unit,
             NSpec=2,
             Distribution=False,
