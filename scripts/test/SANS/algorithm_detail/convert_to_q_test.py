@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 
 from mantid.simpleapi import DeleteWorkspace
-from sans.algorithm_detail.ConvertToQ import ConvertToQ
+from sans.algorithm_detail.convert_to_q import convert_workspace
 from sans.common.enums import (SANSFacility, ReductionDimensionality, RangeStepType, SANSInstrument)
 from sans.common.general_functions import (create_unmanaged_algorithm)
 from sans.state.convert_to_q import get_convert_to_q_builder
@@ -80,8 +80,8 @@ class ConvertToQTest(unittest.TestCase):
         state = self._get_sample_state(q_min=1., q_max=2., q_step=0.1, q_step_type=RangeStepType.Lin)
 
         # Act
-        alg = ConvertToQ(state_convert_to_q=state.convert_to_q, wavelength_adj_workspace=adj_workspace)
-        output_dict = alg.convert_workspace(workspace=workspace, output_summed_parts=True)
+        output_dict = convert_workspace(workspace=workspace, output_summed_parts=True,
+                                        state_convert_to_q=state.convert_to_q, wavelength_adj_workspace=adj_workspace)
 
         output_workspace = output_dict["output"]
         sum_of_counts = output_dict["counts_summed"]
@@ -111,8 +111,8 @@ class ConvertToQTest(unittest.TestCase):
         state = self._get_sample_state(q_xy_max=2., q_xy_step=0.5, q_xy_step_type=RangeStepType.Lin,
                                        dim=ReductionDimensionality.TwoDim)
 
-        alg = ConvertToQ(state_convert_to_q=state.convert_to_q, wavelength_adj_workspace=adj_workspace)
-        output_dict = alg.convert_workspace(workspace=workspace, output_summed_parts=True)
+        output_dict = convert_workspace(workspace=workspace, output_summed_parts=True,
+                                        state_convert_to_q=state.convert_to_q, wavelength_adj_workspace=adj_workspace)
 
         output_workspace = output_dict["output"]
         sum_of_counts = output_dict["counts_summed"]

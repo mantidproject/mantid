@@ -11,7 +11,7 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator)
 from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode, IEventWorkspace)
-from sans.algorithm_detail.ConvertToQ import ConvertToQ
+from sans.algorithm_detail.convert_to_q import convert_workspace
 
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 from sans.common.constants import EMPTY_NAME
@@ -232,11 +232,11 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
         @param wavelength_and_pixel_adjustment_workspace: the wavelength and pixel adjustment workspace.
         @return: a reduced workspace
         """
-        alg = ConvertToQ(state_convert_to_q=state.convert_to_q,
-                         wavelength_adj_workspace=wavelength_adjustment_workspace,
-                         pixel_adj_workspace=pixel_adjustment_workspace,
-                         wavelength_and_pixel_adj_workspace=wavelength_and_pixel_adjustment_workspace)
-        output_dict = alg.convert_workspace(workspace=workspace, output_summed_parts=True)
+        output_dict = convert_workspace(workspace=workspace, state_convert_to_q=state.convert_to_q,
+                                        wavelength_adj_workspace=wavelength_adjustment_workspace,
+                                        pixel_adj_workspace=pixel_adjustment_workspace,
+                                        wavelength_and_pixel_adj_workspace=wavelength_and_pixel_adjustment_workspace,
+                                        output_summed_parts=True)
 
         output_workspace = output_dict["output"]
         sum_of_counts = output_dict["counts_summed"]
