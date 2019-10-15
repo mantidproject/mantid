@@ -9,6 +9,7 @@ endif(${Boost_VERSION} GREATER 104799 AND ${qt_version} VERSION_GREATER 4.7.3)
 
 # Now add the packages one-by-one, building up the dependencies as we go
 add_subdirectory(General)
+add_subdirectory(Direct)
 add_subdirectory(MultiDatasetFit)
 add_subdirectory(Muon)
 add_subdirectory(ISISSANS)
@@ -100,6 +101,7 @@ mtd_add_qt_tests(TARGET_NAME MantidQtScientificInterfacesTest
                    Qwt5
                  MTD_QT_LINK_LIBS
                    MantidScientificInterfacesGeneral
+                   MantidScientificInterfacesDirect
                    MantidScientificInterfacesMuon
                    MantidScientificInterfacesISISReflectometry
                    MantidScientificInterfacesEnggDiffraction

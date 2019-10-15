@@ -5,6 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
+import numpy as np
 
 import mantid.simpleapi as mantid
 
@@ -63,7 +64,6 @@ def get_run_details(run_number_string, inst_settings, is_vanadium_run):
 
 def save_unsplined_vanadium(vanadium_ws, output_path):
     converted_workspaces = []
-
     for ws_index in range(vanadium_ws.getNumberOfEntries()):
         ws = vanadium_ws.getItem(ws_index)
         previous_units = ws.getAxis(0).getUnit().unitID()
@@ -79,15 +79,18 @@ def save_unsplined_vanadium(vanadium_ws, output_path):
     mantid.DeleteWorkspace(converted_group)
 
 
-def generate_ts_pdf(run_number, focus_file_path, merge_banks=False):
+def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None):
     focused_ws = _obtain_focused_run(run_number, focus_file_path)
-    pdf_output = mantid.ConvertUnits(InputWorkspace=focused_ws.name(), Target="MomentumTransfer")
+
     if merge_banks:
-        raise RuntimeError("Merging banks is currently not supported")
-    pdf_output = mantid.PDFFourierTransform(Inputworkspace=pdf_output, InputSofQType="S(Q)", PDFType="G(r)",
-                                            Filter=True)
-    pdf_output = mantid.RebinToWorkspace(WorkspaceToRebin=pdf_output, WorkspaceToMatch=pdf_output[4],
-                                         PreserveEvents=True)
+        pdf_output = _generate_grouped_ts_pdf(focused_ws, q_lims)
+    else:
+        focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws.name(), Target="MomentumTransfer")
+        pdf_output = mantid.PDFFourierTransform(Inputworkspace=focused_ws, InputSofQType="S(Q)", PDFType="G(r)",
+                                                Filter=True)
+        pdf_output = mantid.RebinToWorkspace(WorkspaceToRebin=pdf_output, WorkspaceToMatch=pdf_output[4],
+                                             PreserveEvents=True)
+    common.remove_intermediate_workspace('focused_ws')
     return pdf_output
 
 
@@ -115,6 +118,62 @@ def _obtain_focused_run(run_number, focus_file_path):
                              "Please ensure a focused file has been produced and is located in the output directory."
                              % run_number)
     return focused_ws
+
+
+def _generate_grouped_ts_pdf(focused_ws, q_lims):
+    focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, Target="MomentumTransfer", EMode='Elastic')
+    min_x = np.inf
+    max_x = -np.inf
+    num_x = -np.inf
+    for ws in focused_ws:
+        x_data = ws.dataX(0)
+        min_x = min(np.min(x_data), min_x)
+        max_x = max(np.max(x_data), max_x)
+        num_x = max(x_data.size, num_x)
+    binning = [min_x, (max_x-min_x)/num_x, max_x]
+    focused_ws = mantid.Rebin(InputWorkspace=focused_ws, Params=binning)
+    focused_data_combined = mantid.ConjoinSpectra(InputWorkspaces=focused_ws)
+    mantid.MatchSpectra(InputWorkspace=focused_data_combined,
+                        OutputWorkspace=focused_data_combined,
+                        ReferenceSpectrum=5)
+    if type(q_lims) == str:
+        q_min = []
+        q_max = []
+        try:
+            with open(q_lims, 'r') as f:
+                line_list = [line.rstrip('\n') for line in f]
+                for line in line_list[1:]:
+                    value_list = line.split()
+                    q_min.append(float(value_list[2]))
+                    q_max.append(float(value_list[3]))
+            q_min = np.array(q_min)
+            q_max = np.array(q_max)
+        except IOError:
+            raise RuntimeError("q_lims is not valid")
+    elif type(q_lims) == list or type(q_lims) == np.ndarray:
+        q_min = q_lims[0, :]
+        q_max = q_lims[1, :]
+    else:
+        raise RuntimeError("q_lims is not valid")
+    bin_width = np.inf
+    for i in range(q_min.size):
+        pdf_x_array = focused_data_combined.readX(i)
+        tmp1 = np.where(pdf_x_array >= q_min[i])
+        tmp2 = np.amin(tmp1)
+        q_min[i] = pdf_x_array[tmp2]
+        q_max[i] = pdf_x_array[np.amax(np.where(pdf_x_array <= q_max[i]))]
+        bin_width = min(pdf_x_array[1] - pdf_x_array[0], bin_width)
+    focused_data_combined = mantid.CropWorkspaceRagged(InputWorkspace=focused_data_combined, XMin=q_min, XMax=q_max)
+    focused_data_combined = mantid.Rebin(InputWorkspace=focused_data_combined,
+                                         Params=[min(q_min), bin_width, max(q_max)])
+    focused_data_combined = mantid.SumSpectra(InputWorkspace=focused_data_combined,
+                                              WeightedSum=True,
+                                              MultiplyBySpectra=False)
+    pdf_output = mantid.PDFFourierTransform(Inputworkspace=focused_data_combined,
+                                            InputSofQType="S(Q)",
+                                            PDFType="G(r)",
+                                            Filter=True)
+    return pdf_output
 
 
 def _determine_chopper_mode(ws):

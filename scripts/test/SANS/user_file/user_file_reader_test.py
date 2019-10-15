@@ -71,7 +71,7 @@ class UserFileReaderTest(unittest.TestCase):
                            MaskId.clear_detector_mask: [True],
                            MaskId.clear_time_mask: [True],
                            LimitsId.radius: [range_entry(12, 15)],
-                           TransId.spec_shift: [-70.],
+                           TransId.spec_4_shift: [-70.],
                            PrintId.print_line: ["for changer"],
                            BackId.all_monitors: [range_entry(start=3500, stop=4500)],
                            FitId.monitor_times: [range_entry(start=1000, stop=2000)],

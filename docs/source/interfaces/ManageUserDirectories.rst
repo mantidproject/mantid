@@ -1,5 +1,8 @@
 .. _ManageUserDirectories:
 
+Manage User Directories
+=======================
+
 .. figure:: /images/MantidQtManageDirectories.jpg
    :alt: Manage User Directories Dialog
    :align: right

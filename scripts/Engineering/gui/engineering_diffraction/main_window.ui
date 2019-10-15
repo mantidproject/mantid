@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>EngDIffMainGUI</class>
+ <widget class="QMainWindow" name="EngDIffMainGUI">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>640</width>
+    <height>197</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Engineering Diffraction Analysis</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="1" column="0" colspan="2">
+     <widget class="QTabWidget" name="tab_main">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0" colspan="2">
+     <layout class="QHBoxLayout" name="topBar">
+      <item>
+       <widget class="QLabel" name="label_RBNumber">
+        <property name="text">
+         <string>RB Number:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="lineEdit_RBNumber"/>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>138</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Instrument:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="comboBox_instrument">
+        <item>
+         <property name="text">
+          <string>ENGINX</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>IMAT</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="4" column="0" colspan="2">
+     <layout class="QHBoxLayout" name="bottomBar">
+      <item>
+       <widget class="QPushButton" name="pushButton_help">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>25</width>
+          <height>25</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>?</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QStatusBar" name="statusbar">
+        <property name="sizeGripEnabled">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButton_close">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Close</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <tabstops>
+  <tabstop>lineEdit_RBNumber</tabstop>
+  <tabstop>comboBox_instrument</tabstop>
+  <tabstop>tab_main</tabstop>
+  <tabstop>pushButton_help</tabstop>
+  <tabstop>pushButton_close</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>pushButton_close</sender>
+   <signal>pressed()</signal>
+   <receiver>EngDIffMainGUI</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>589</x>
+     <y>174</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>319</x>
+     <y>98</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

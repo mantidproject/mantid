@@ -31,7 +31,11 @@ ConvFitDataTablePresenter::ConvFitDataTablePresenter(ConvFitModel *model,
     : IndirectDataTablePresenter(model, dataTable, convFitHeaders()),
       m_convFitModel(model) {
   auto header = dataTable->horizontalHeader();
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   header->setResizeMode(1, QHeaderView::Stretch);
+#elif QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+  header->setSectionResizeMode(1, QHeaderView::Stretch);
+#endif
 }
 
 int ConvFitDataTablePresenter::workspaceIndexColumn() const { return 2; }

@@ -48,14 +48,15 @@ class Polaris(AbstractInst):
                                              output_path=run_details.unsplined_vanadium_file_path)
         return vanadium_d
 
-    def create_total_scattering_pdf(self, **kwargs):
+    def create_total_scattering_pdf(self, q_lims=None, **kwargs):
         self._inst_settings.update_attributes(kwargs=kwargs)
         # Generate pdf
         run_details = self._get_run_details(self._inst_settings.run_number)
         focus_file_path = self._generate_out_file_paths(run_details)["nxs_filename"]
         pdf_output = polaris_algs.generate_ts_pdf(run_number=self._inst_settings.run_number,
                                                   focus_file_path=focus_file_path,
-                                                  merge_banks=self._inst_settings.merge_banks)
+                                                  merge_banks=self._inst_settings.merge_banks,
+                                                  q_lims=q_lims)
         return pdf_output
 
     def set_sample_details(self, **kwargs):

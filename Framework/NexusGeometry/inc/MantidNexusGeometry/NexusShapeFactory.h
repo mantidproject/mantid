@@ -47,7 +47,7 @@ createMesh(std::vector<uint32_t> &&triangularFaces,
 DLLExport std::unique_ptr<const Geometry::IObject>
 createFromOFFMesh(const std::vector<uint32_t> &faceIndices,
                   const std::vector<uint32_t> &windingOrder,
-                  const std::vector<float> &nexusVertices);
+                  const std::vector<double> &nexusVertices);
 
 DLLExport std::unique_ptr<const Geometry::IObject>
 createFromOFFMesh(const std::vector<uint32_t> &faceIndices,

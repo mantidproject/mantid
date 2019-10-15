@@ -643,8 +643,8 @@ class SingleMarker(QObject):
     """
         A marker used to mark out a vertical or horizontal line on a plot.
     """
-    def __init__(self, canvas, color, position, lower_bound, upper_bound, name=None, marker_type='XSingle',
-                 line_style='-', axis=None):
+    def __init__(self, canvas, color, position, lower_bound, upper_bound, marker_type='XSingle',
+                 line_style='-', name=None, axis=None):
         """
         Init the marker.
         :param canvas: The MPL canvas.
@@ -927,7 +927,6 @@ class SingleMarker(QObject):
         """
         marker_moving = self.marker.is_marker_moving()
         inside_bounds, new_position = self.is_inside_bounds(x, y)
-
         if marker_moving and inside_bounds:
             return self.marker.mouse_move(x, y)
         elif marker_moving:

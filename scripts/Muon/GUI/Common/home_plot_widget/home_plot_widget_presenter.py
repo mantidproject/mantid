@@ -137,12 +137,8 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         self._model.plotted_workspaces_inverse_binning = {workspace: self.context.group_pair_context.get_equivalent_group_pair(workspace)
                                                           for workspace in workspace_list
                                                           if self.context.group_pair_context.get_equivalent_group_pair(workspace)}
-        combined_ws_list = workspace_list + list(self._model.plotted_workspaces_inverse_binning.values())
-        # This is checking whether the latest fit performed contains a fit which matches any of the workspaces just plotted
-        # if it does then handle fit complete is also called to update the fit on the plot.
-        if self.context.fitting_context.fit_list and \
-                any([workspace in combined_ws_list
-                     for workspace in self.context.fitting_context.fit_list[-1].input_workspaces]):
+
+        if self.context.fitting_context.fit_list:
             self.handle_fit_completed()
 
         self.handle_plot_guess_changed()

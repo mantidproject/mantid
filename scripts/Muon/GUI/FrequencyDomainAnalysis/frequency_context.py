@@ -7,6 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 from re import findall
 from six import iteritems
+from mantid import AnalysisDataService
 
 
 class MaxEnt(object):
@@ -54,7 +55,7 @@ class FrequencyContext(object):
         return "Frequency Domain Analysis"
 
     def add_maxEnt(self, run, ws_freq):
-        self._maxEnt_freq[ws_freq.name()] = MaxEnt(run, ws_freq)
+        self._maxEnt_freq[ws_freq] = MaxEnt(run, AnalysisDataService.retrieve(ws_freq))
 
     @property
     def maxEnt_freq(self):

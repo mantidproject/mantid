@@ -8,15 +8,24 @@
 
 import unittest
 
+# third party imports
+import matplotlib
+matplotlib.use('AGG')  # noqa
+
 from mantid.api import AnalysisDataService, WorkspaceFactory
 from mantid.py3compat.mock import MagicMock, Mock, patch
+from mantidqt.plotting.functions import plot
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.widgets.fitpropertybrowser.fitpropertybrowser import FitPropertyBrowser
 from testhelpers import assertRaisesNothing
+from workbench.plotting.figuremanager import FigureManagerADSObserver
 
 
 @start_qapplication
 class FitPropertyBrowserTest(unittest.TestCase):
+
+    def tearDown(self):
+        AnalysisDataService.clear()
 
     def test_initialization_does_not_raise(self):
         assertRaisesNothing(self, self._create_widget)
@@ -50,9 +59,46 @@ class FitPropertyBrowserTest(unittest.TestCase):
 
         self.assertEqual(1, property_browser.get_axes().plot.call_count)
 
+    def test_fit_curves_removed_when_workspaces_deleted(self):
+        fig, canvas = self._create_and_plot_matrix_workspace(name="ws")
+        property_browser = self._create_widget(canvas=canvas)
+
+        manager_mock = Mock()
+        manager_mock.canvas = canvas
+        observer = FigureManagerADSObserver(manager=manager_mock) # noqa: F841
+
+        for plot_diff in [True, False]:
+            # create fake fit output results
+            matrixWorkspace = WorkspaceFactory.Instance().create("Workspace2D", NVectors=3, YLength=5, XLength=5)
+            tableWorkspace = WorkspaceFactory.createTable()
+            AnalysisDataService.Instance().addOrReplace("ws_Workspace", matrixWorkspace)
+            AnalysisDataService.Instance().addOrReplace("ws_Parameters", tableWorkspace)
+            AnalysisDataService.Instance().addOrReplace("ws_NormalisedCovarianceMatrix", tableWorkspace)
+
+            property_browser.plotDiff = Mock(return_value = plot_diff)
+            property_browser.fitting_done_slot("ws_Workspace")
+
+            if plot_diff:
+                self.assertEqual(3, len(fig.get_axes()[0].lines))
+            else:
+                self.assertEqual(2, len(fig.get_axes()[0].lines))
+
+            AnalysisDataService.Instance().remove("ws_Workspace")
+            AnalysisDataService.Instance().remove("ws_Parameters")
+            AnalysisDataService.Instance().remove("ws_NormalisedCovarianceMatrix")
+
+            self.assertEqual(1, len(fig.get_axes()[0].lines))
+
     # Private helper functions
     def _create_widget(self, canvas=MagicMock(), toolbar_manager=Mock()):
         return FitPropertyBrowser(canvas, toolbar_manager)
+
+    def _create_and_plot_matrix_workspace(self, name="workspace"):
+        ws = WorkspaceFactory.Instance().create("Workspace2D", NVectors=2, YLength=5, XLength=5)
+        AnalysisDataService.Instance().addOrReplace(name, ws)
+        fig = plot([ws], spectrum_nums=[1])
+        canvas = fig.canvas
+        return fig, canvas
 
 
 if __name__ == '__main__':

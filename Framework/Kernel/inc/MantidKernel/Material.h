@@ -13,6 +13,7 @@
 #include "MantidKernel/NeutronAtom.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include <boost/shared_ptr.hpp>
+#include <string>
 #include <vector>
 
 // Forward Declares

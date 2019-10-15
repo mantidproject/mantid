@@ -1930,8 +1930,15 @@ QVector<double> FitPropertyBrowser::getXRange() {
   if (tbl) {
     auto xColumnIndex = m_columnManager->value(m_xColumn);
     std::vector<double> xColumnData;
-    for (size_t i = 0; i < tbl->rowCount(); ++i) {
-      xColumnData.push_back(tbl->Double(i, xColumnIndex));
+    auto col = tbl->getColumn(xColumnIndex);
+    try {
+      for (size_t i = 0; i < tbl->rowCount(); ++i) {
+        xColumnData.push_back(col->toDouble(i));
+      }
+    } catch (std::invalid_argument &err) {
+      QMessageBox::critical(this, "Mantid - Error",
+                            "The X column is not a number");
+      throw std::invalid_argument(err);
     }
     std::sort(xColumnData.begin(), xColumnData.end());
     range.push_back(xColumnData.front());

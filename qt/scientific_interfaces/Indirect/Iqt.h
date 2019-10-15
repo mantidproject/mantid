@@ -38,9 +38,8 @@ private slots:
   void algorithmComplete(bool error);
   void plotInput();
   void plotInput(const QString &wsname);
-  void rsRangeChangedLazy(double min, double max);
-  void updateRS(QtProperty *prop, double val);
-  void updatePropertyValues(QtProperty *prop, double val);
+  void rangeChanged(double min, double max);
+  void updateRangeSelector(QtProperty *prop, double val);
   void updateDisplayedBinParameters();
   void runClicked();
   void saveClicked();

@@ -70,6 +70,7 @@ QString SingleSelector::selectTypeAsQString(const SelectType &type) const {
 void SingleSelector::resetBounds() {
   auto const axisRange = getAxisRange(m_type);
   m_singleMarker->setBounds(std::get<0>(axisRange), std::get<1>(axisRange));
+  emit resetScientificBounds();
 }
 
 void SingleSelector::setBounds(const std::pair<double, double> &bounds) {
