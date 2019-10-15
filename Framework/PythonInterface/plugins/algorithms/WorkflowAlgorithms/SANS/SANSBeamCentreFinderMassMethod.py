@@ -9,9 +9,10 @@
 """ Finds the beam centre for SANS"""
 
 from __future__ import (absolute_import, division, print_function)
-from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress, IEventWorkspace)
+from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress,
+                        IEventWorkspace)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator)
-from sans.algorithm_detail.MoveSansInstrumentComponent import MoveSansInstrumentComponent, MoveTypes
+from sans.algorithm_detail.move_sans_instrument_component import move_component, MoveTypes
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_child_algorithm, append_to_sans_file_tag
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
@@ -215,12 +216,11 @@ class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
     def _move(self, state, workspace, component, is_transmission=False):
         # First we set the workspace to zero, since it might have been moved around by the user in the ADS
         # Second we use the initial move to bring the workspace into the correct position
-        reset_alg = MoveSansInstrumentComponent(move_type=MoveTypes.RESET_POSITION)
-        reset_alg.move_component(move_info=state.move, component_name='', workspace=workspace)
+        move_component(move_info=state.move, component_name='',
+                       workspace=workspace, move_type=MoveTypes.RESET_POSITION)
 
-        move_alg = MoveSansInstrumentComponent(move_type=MoveTypes.INITIAL_MOVE)
-        move_alg.move_component(component_name=component, move_info=state.move, workspace=workspace,
-                                is_transmission_workspace=is_transmission)
+        move_component(component_name=component, move_info=state.move, workspace=workspace,
+                       is_transmission_workspace=is_transmission, move_type=MoveTypes.INITIAL_MOVE)
         return workspace
 
     def _mask(self, state_serialized, workspace, component):

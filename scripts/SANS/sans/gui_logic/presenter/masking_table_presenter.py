@@ -13,7 +13,7 @@ import copy
 
 from mantid.kernel import Logger
 from mantid.api import (AnalysisDataService)
-from sans.algorithm_detail.MoveSansInstrumentComponent import MoveSansInstrumentComponent, MoveTypes
+from sans.algorithm_detail.move_sans_instrument_component import move_component, MoveTypes
 from ui.sans_isis.masking_table import MaskingTable
 from sans.common.enums import DetectorType
 from sans.common.constants import EMPTY_NAME
@@ -90,12 +90,8 @@ def perform_load(serialized_state):
 
 def perform_move(state, workspace):
     move_info = state.move
-
-    reset_alg = MoveSansInstrumentComponent(move_type=MoveTypes.RESET_POSITION)
-    reset_alg.move_component(move_info=move_info, component_name='', workspace=workspace)
-
-    move_alg = MoveSansInstrumentComponent(move_type=MoveTypes.INITIAL_MOVE)
-    move_alg.move_component(component_name=None, move_info=move_info, workspace=workspace)
+    move_component(move_info=move_info, component_name='', workspace=workspace, move_type=MoveTypes.RESET_POSITION)
+    move_component(component_name=None, move_info=move_info, workspace=workspace, move_type=MoveTypes.INITIAL_MOVE)
 
 
 def store_in_ads_as_hidden(workspace_name, workspace):

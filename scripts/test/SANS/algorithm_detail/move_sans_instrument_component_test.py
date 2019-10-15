@@ -12,7 +12,7 @@ import unittest
 
 from mantid.kernel import (Quat, V3D)
 from mantid.simpleapi import AddSampleLog, LoadEmptyInstrument
-from sans.algorithm_detail.MoveSansInstrumentComponent import MoveSansInstrumentComponent, MoveTypes
+from sans.algorithm_detail.move_sans_instrument_component import move_component, MoveTypes
 from sans.algorithm_detail.move_workspaces import (create_mover, SANSMoveLOQ, SANSMoveSANS2D, SANSMoveLARMORNewStyle,
                                                    SANSMoveZOOM)
 from sans.common.enums import (SANSFacility, DetectorType, SANSInstrument)
@@ -78,9 +78,8 @@ def check_elementry_displacement_with_translation(instance, workspace, move_info
                                             position_before_move[2])
     expected_rotation = rotation_before_move
 
-    move_alg = MoveSansInstrumentComponent(move_type=MoveTypes.ELEMENTARY_DISPLACEMENT,
-                                           beam_coordinates=coordinates)
-    move_alg.move_component(component_name=component, move_info=move_info, workspace=workspace)
+    move_component(component_name=component, move_info=move_info, workspace=workspace,
+                   beam_coordinates=coordinates, move_type=MoveTypes.ELEMENTARY_DISPLACEMENT)
 
     compare_expected_position(instance, expected_position_elementary_move, expected_rotation,
                               component_key, move_info, workspace)
@@ -93,9 +92,8 @@ def check_that_sets_to_zero(instance, workspace, move_info, comp_name=None):
             _component_names.append(_name)
 
     # Reset the position to zero
-
-    move_alg = MoveSansInstrumentComponent(move_type=MoveTypes.RESET_POSITION)
-    move_alg.move_component(component_name=comp_name, move_info=move_info, workspace=workspace)
+    move_component(component_name=comp_name, move_info=move_info, workspace=workspace,
+                   move_type=MoveTypes.RESET_POSITION)
 
     # Get the components to compare
     if comp_name is None:
@@ -168,9 +166,8 @@ class LOQMoveTest(unittest.TestCase):
         move_info = _get_state_move_obj(SANSInstrument.LOQ, lab_x_translation_correction)
 
         # Initial move
-        move_type = MoveTypes.INITIAL_MOVE
-        move_alg = MoveSansInstrumentComponent(move_type, beam_coordinates=beam_coordinates)
-        move_alg.move_component(component_name=component, workspace=workspace, move_info=move_info)
+        move_component(component_name=component, workspace=workspace, move_info=move_info,
+                       move_type=MoveTypes.INITIAL_MOVE, beam_coordinates=beam_coordinates)
 
         center_position = move_info.center_position
         initial_z_position = 15.15
@@ -219,8 +216,8 @@ class SANS2DMoveTest(unittest.TestCase):
         move_type = MoveTypes.INITIAL_MOVE
         move_info = _get_state_move_obj(SANSInstrument.SANS2D, z_translation=lab_z_translation_correction)
 
-        move_alg = MoveSansInstrumentComponent(move_type, beam_coordinates=beam_coordinates)
-        move_alg.move_component(component_name=component, workspace=workspace, move_info=move_info)
+        move_component(component_name=component, workspace=workspace, move_info=move_info,
+                       move_type=MoveTypes.INITIAL_MOVE, beam_coordinates=beam_coordinates)
 
         # Assert for initial move for low angle bank
         # These values are on the workspace and in the sample logs,
@@ -276,8 +273,8 @@ class SANS2DMoveTest(unittest.TestCase):
 
         # The component input is not relevant for SANS2D's initial move. All detectors are moved
         component = "front-detector"
-        move_alg = MoveSansInstrumentComponent(move_type=MoveTypes.INITIAL_MOVE)
-        move_alg.move_component(component_name=component, move_info=move_info, workspace=workspace)
+        move_component(component_name=component, move_info=move_info, workspace=workspace,
+                       move_type=MoveTypes.INITIAL_MOVE)
 
         # These values are on the workspace and in the sample logs
         component_to_investigate = DetectorType.to_string(DetectorType.HAB)
@@ -308,8 +305,8 @@ class SANS2DMoveTest(unittest.TestCase):
 
         # The component input is not relevant for SANS2D's initial move. All detectors are moved
         component = None
-        move_alg = MoveSansInstrumentComponent(move_type=MoveTypes.INITIAL_MOVE)
-        move_alg.move_component(component_name=component, move_info=move_info, workspace=workspace)
+        move_component(component_name=component, move_info=move_info, workspace=workspace,
+                       move_type=MoveTypes.INITIAL_MOVE)
 
         # Assert for initial move for low angle bank
         # These values are on the workspace and in the sample logs,
@@ -342,9 +339,8 @@ class LARMORMoveTest(unittest.TestCase):
         component = None
         move_info = _get_state_move_obj(instrument=SANSInstrument.LARMOR,
                                         x_translation=lab_x_translation_correction)
-        move_alg = MoveSansInstrumentComponent(move_type=MoveTypes.INITIAL_MOVE,
-                                               beam_coordinates=beam_coordinates)
-        move_alg.move_component(component_name=component, workspace=workspace, move_info=move_info)
+        move_component(component_name=component, workspace=workspace, move_info=move_info,
+                       move_type=MoveTypes.INITIAL_MOVE, beam_coordinates=beam_coordinates)
 
         # Assert low angle bank for initial move
         # These values are on the workspace and in the sample logs
@@ -369,9 +365,8 @@ class ZOOMMoveTest(unittest.TestCase):
         move_info = _get_state_move_obj(SANSInstrument.ZOOM)
 
         # Initial move
-        move_type = MoveTypes.INITIAL_MOVE
-        move_alg = MoveSansInstrumentComponent(move_type, beam_coordinates=beam_coordinates)
-        move_alg.move_component(component_name=component, workspace=workspace, move_info=move_info)
+        move_component(component_name=component, workspace=workspace, move_info=move_info,
+                       move_type=MoveTypes.INITIAL_MOVE, beam_coordinates=beam_coordinates)
 
         initial_z_position = 20.77408
         expected_position = V3D(-beam_coordinates[0],

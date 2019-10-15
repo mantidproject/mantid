@@ -11,7 +11,7 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator)
 from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode, IEventWorkspace)
-from sans.algorithm_detail.MoveSansInstrumentComponent import MoveSansInstrumentComponent, MoveTypes
+from sans.algorithm_detail.move_sans_instrument_component import move_component, MoveTypes
 
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 from sans.common.constants import EMPTY_NAME
@@ -80,13 +80,15 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
                                                      direction=Direction.Output),
                              doc='The sum of the counts of the output workspace.')
 
-        self.declareProperty(MatrixWorkspaceProperty('CalculatedTransmissionWorkspace', '', optional=PropertyMode.Optional,
-                                                     direction=Direction.Output),
-                             doc='The calculated transmission workspace')
+        self.declareProperty(
+            MatrixWorkspaceProperty('CalculatedTransmissionWorkspace', '', optional=PropertyMode.Optional,
+                                    direction=Direction.Output),
+            doc='The calculated transmission workspace')
 
-        self.declareProperty(MatrixWorkspaceProperty('UnfittedTransmissionWorkspace', '', optional=PropertyMode.Optional,
-                                                     direction=Direction.Output),
-                             doc='The unfitted transmission workspace')
+        self.declareProperty(
+            MatrixWorkspaceProperty('UnfittedTransmissionWorkspace', '', optional=PropertyMode.Optional,
+                                    direction=Direction.Output),
+            doc='The unfitted transmission workspace')
 
     def _get_cropped_workspace(self, component):
         scatter_workspace = self.getProperty("ScatterWorkspace").value
@@ -117,13 +119,11 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
     def _move(self, state, workspace, component, is_transmission=False):
         # First we set the workspace to zero, since it might have been moved around by the user in the ADS
         # Second we use the initial move to bring the workspace into the correct position
-        reset_alg = MoveSansInstrumentComponent(move_type=MoveTypes.RESET_POSITION)
-        reset_alg.move_component(component_name="", move_info=state.move,
-                                 workspace=workspace)
+        move_component(component_name="", move_info=state.move, move_type=MoveTypes.RESET_POSITION,
+                       workspace=workspace)
 
-        move_alg = MoveSansInstrumentComponent(move_type=MoveTypes.INITIAL_MOVE)
-        move_alg.move_component(component_name=component, move_info=state.move,
-                                workspace=workspace, is_transmission_workspace=is_transmission)
+        move_component(component_name=component, move_info=state.move, move_type=MoveTypes.INITIAL_MOVE,
+                       workspace=workspace, is_transmission_workspace=is_transmission)
 
         return workspace
 
@@ -187,7 +187,7 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
         wavelength_adjustment = adjustment_alg.getProperty("OutputWorkspaceWavelengthAdjustment").value
         pixel_adjustment = adjustment_alg.getProperty("OutputWorkspacePixelAdjustment").value
         wavelength_and_pixel_adjustment = adjustment_alg.getProperty(
-                                           "OutputWorkspaceWavelengthAndPixelAdjustment").value
+            "OutputWorkspaceWavelengthAndPixelAdjustment").value
         calculated_transmission_workspace = adjustment_alg.getProperty("CalculatedTransmissionWorkspace").value
         unfitted_transmission_workspace = adjustment_alg.getProperty("UnfittedTransmissionWorkspace").value
         return wavelength_adjustment, pixel_adjustment, wavelength_and_pixel_adjustment, \
