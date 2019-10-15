@@ -11,7 +11,7 @@ from os import path, makedirs
 
 from mantid.api import AnalysisDataService as Ads
 from mantid.kernel import logger
-from mantid.simpleapi import Load, EnggVanadiumCorrections, EnggCalibrate, DeleteWorkspace, CloneWorkspace, \
+from mantid.simpleapi import Load, EnggCalibrate, DeleteWorkspace, CloneWorkspace, \
     CreateWorkspace, AppendSpectra, CreateEmptyTableWorkspace
 from mantidqt.plotting.functions import plot
 from Engineering.EnggUtils import write_ENGINX_GSAS_iparam_file

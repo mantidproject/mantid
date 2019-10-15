@@ -62,7 +62,9 @@ class VanadiumCorrectionsTest(unittest.TestCase):
     @patch(dir_path + ".vanadium_corrections.makedirs")
     def test_file_path_generation(self, makedirs):
         vanadium_run_number = "1234"
-        rmtree(path.join(path.expanduser("~"), "Engineering_Mantid"))
+        engineering_path = path.join(path.expanduser("~"), "Engineering_Mantid")
+        if path.exists(engineering_path):
+            rmtree(engineering_path)
         output = vanadium_corrections._generate_saved_workspace_file_paths(vanadium_run_number)
         self.assertEqual(output,
                          (path.join(path.expanduser("~"), "Engineering_Mantid", "Vanadium_Runs",
