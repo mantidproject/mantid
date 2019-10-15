@@ -851,7 +851,7 @@ The dedicated work-flow algorithms for the SANS reduction are:
 - *SANSScale*
 - *SANSSliceEvent*
 
-Note that algorithms prefixed with SANS takes a *SANSState* object as
+Note that algorithms prefixed with SANS take a *SANSState* object as
 an input.
 
 The individual algorithms are superficially discussed below.

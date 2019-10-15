@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -11,8 +11,13 @@ from sans.common.enums import DetectorType
 
 
 class MoveTypes(Enum):
+    # Get which move operation the user wants to perform on the workspace. This can be:
+    # Initial move: Suitable when a workspace has been freshly loaded.
     INITIAL_MOVE = 1
+    # Elementary displacement: Takes the degrees of freedom of the detector into account.
+    # This is normally used for beam center finding
     ELEMENTARY_DISPLACEMENT = 2
+    # Set to zero: Set the component to its IDF position
     RESET_POSITION = 3
 
 
@@ -34,12 +39,6 @@ class MoveSansInstrumentComponent(object):
         parsed_component_name = self._get_full_component_name(user_comp_name=component_name, move_info=move_info)
         # Get the selected component and the beam coordinates
         coordinates = self._get_coordinates(component_name=parsed_component_name, move_info=move_info)
-
-        # Get which move operation the user wants to perform on the workspace. This can be:
-        # 1. Initial move: Suitable when a workspace has been freshly loaded.
-        # 2. Elementary displacement: Takes the degrees of freedom of the detector into account. This is normally used
-        #    for beam center finding
-        # 3. Set to zero: Set the component to its zero position
 
         selected_move_type = self.move_type
 
@@ -93,6 +92,7 @@ class MoveSansInstrumentComponent(object):
         1. An actual component name for LAB or HAB
         2. Or the word HAB, LAB which will then select the actual component name, e.g. main-detector-bank
         :param move_info: a SANSStateMove object
+        :param user_comp_name: the name of the component as a string
         :return: the full name of the component or an empty string if it is not found.
         """
         selected_detector = MoveSansInstrumentComponent._get_detector_for_component(move_info, user_comp_name)
