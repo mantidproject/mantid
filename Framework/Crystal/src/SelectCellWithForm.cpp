@@ -9,6 +9,7 @@
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Crystal/ScalarUtils.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid {
@@ -47,6 +48,9 @@ void SelectCellWithForm::init() {
 
   this->declareProperty("AllowPermutations", true,
                         "Allow permutations of conventional cells");
+  this->declareProperty(std::make_unique<ArrayProperty<double>>(
+                            "TransformationMatrix", Direction::Output),
+                        "The transformation matrix");
 }
 
 Kernel::Matrix<double> SelectCellWithForm::DetermineErrors(
@@ -134,6 +138,7 @@ void SelectCellWithForm::exec() {
 
   DblMatrix T = info.GetHKL_Tran();
   g_log.notice() << "Transformation Matrix =  " << T.str() << '\n';
+  this->setProperty("TransformationMatrix", T.getVector());
 
   if (apply) {
     //----------------------------------- Try to optimize(LSQ) to find lattice
