@@ -101,11 +101,9 @@ ScriptEditor::ScriptEditor(QWidget *parent, QsciLexer *codelexer,
   setEolMode(EolUnix);
 #endif
 
-  // Adding zoom shortcuts
-  new QShortcut(QKeySequence::ZoomOut, this, SLOT(zoomOut()));
-  // QKeySequence::ZoomIn doesn't work for some reason.
-  new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Equal), this, SLOT(zoomIn()));
-  new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Plus), this, SLOT(zoomIn()));
+  // Remove the shortcut for zooming in because this is dealt with in
+  // keyPressEvent
+  clearKeyBinding("Ctrl++");
 
   // Syntax highlighting and code completion
   setLexer(codelexer);
@@ -292,6 +290,24 @@ void ScriptEditor::setText(int lineno, const QString &txt, int index) {
 void ScriptEditor::keyPressEvent(QKeyEvent *event) {
   // Avoids a bug in QScintilla
   forwardKeyPressToBase(event);
+
+  // The built-in shortcut Ctrl++ from QScintilla doesn't work for some reason
+  // Creating a new QShortcut makes Ctrl++ to zoom in on the IPython console
+  // stop working
+  // So here is where Ctrl++ is detected to zoom in
+  if (QApplication::keyboardModifiers() & Qt::ControlModifier &&
+      event->key() == Qt::Key_Plus) {
+    zoomIn();
+    emit textZoomedIn();
+
+    // Doing the shortcut in this way causes an '=' to be typed if the numpad is
+    // not used so it is then removed via a backspace
+    if (!(QApplication::keyboardModifiers() & Qt::KeypadModifier)) {
+      QKeyEvent *backspEvent =
+          new QKeyEvent(QEvent::KeyPress, Qt::Key_Backspace, Qt::NoModifier);
+      QsciScintilla::keyPressEvent(backspEvent);
+    }
+  }
 }
 
 /*
