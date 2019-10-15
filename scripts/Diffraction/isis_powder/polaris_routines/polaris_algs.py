@@ -133,33 +133,51 @@ def _generate_grouped_ts_pdf(run_number, focused_ws, q_lims, cal_file_name, samp
         min_x = min(np.min(x_data), min_x)
         max_x = max(np.max(x_data), max_x)
         num_x = max(x_data.size, num_x)
-    binning = [min_x, (max_x-min_x)/num_x, max_x]
+    width_x = (max_x-min_x)/num_x
+    binning = [min_x, width_x, max_x]
     focused_ws = mantid.Rebin(InputWorkspace=focused_ws, Params=binning)
     focused_data_combined = mantid.ConjoinSpectra(InputWorkspaces=focused_ws)
     mantid.ConvertFromDistribution(Workspace=focused_data_combined)
+
     raw_ws = mantid.LoadRaw(Filename='POL'+str(run_number))
     mantid.SetSample(InputWorkspace=raw_ws,
                      Geometry=common.generate_sample_geometry(sample_details),
                      Material=common.generate_sample_material(sample_details))
-
     monitor = mantid.ExtractSpectra(InputWorkspace=raw_ws, WorkspaceIndexList=[11])
-
-    fit_spectra = mantid.FitIncidentSpectrum(InputWorkspace=monitor, FitSpectrumWith="GaussConvCubicSpline")
+    monitor = mantid.ConvertUnits(InputWorkspace=monitor, Target="Wavelength")
+    x_data = monitor.dataX(0)
+    min_x = np.min(x_data)
+    max_x = np.max(x_data)
+    width_x = (max_x-min_x)/x_data.size
+    fit_spectra = mantid.FitIncidentSpectrum(InputWorkspace=monitor,
+                                             BinningForCalc=[min_x, 1*width_x, max_x],
+                                             BinningForFit=[min_x, 50*width_x, max_x],
+                                             FitSpectrumWith="GaussConvCubicSpline")
     placzek = mantid.CalculatePlaczekSelfScattering(InputWorkspace=raw_ws, IncidentSpecta=fit_spectra)
     mantid.ConvertFromDistribution(Workspace=placzek)
+    cal_workspace = mantid.LoadCalFile(InputWorkspace=placzek,
+                                       CalFileName=cal_file_name,
+                                       Workspacename='cal_workspace',
+                                       MakeOffsetsWorkspace=False,
+                                       MakeMaskWorkspace=False)
     placzek = mantid.AlignDetectors(InputWorkspace=placzek, CalibrationFile=cal_file_name)
-    placzek = mantid.DiffractionFocussing(InputWorkspace=placzek, GroupingFileName=cal_file_name)
+    placzek = mantid.DiffractionFocussing(InputWorkspace=placzek, GroupingFilename=cal_file_name)
+    n_pixel = np.zeros(placzek.getNumberHistograms())
+    for i in range(cal_workspace.getNumberHistograms()):
+        grouping = cal_workspace.dataY(i)
+        if grouping[0] > 0:
+            n_pixel[int(grouping[0]-1)] += 1
+    correction_ws = mantid.CreateWorkspace(DataY=n_pixel, DataX=[0, 1], NSpec=placzek.getNumberHistograms())
+    placzek = mantid.Divide(LHSWorkspace=placzek, RHSWorkspace=correction_ws)
     placzek = mantid.ConvertUnits(InputWorkspace=placzek, Target="MomentumTransfer", EMode='Elastic')
-    mantid.RebinToWorkspace(WorkspaceToRebin=placzek,
-                            WorkspaceToMatch=focused_data_combined,
-                            OutputWorkspace=placzek)
+    placzek = mantid.RebinToWorkspace(WorkspaceToRebin=placzek, WorkspaceToMatch=focused_data_combined)
     mantid.Subtract(LHSWorkspace=focused_data_combined,
                     RHSWorkspace=placzek,
                     OutputWorkspace=focused_data_combined)
 
     mantid.MatchSpectra(InputWorkspace=focused_data_combined,
                         OutputWorkspace=focused_data_combined,
-                        ReferenceSpectrum=5)
+                        ReferenceSpectrum=1)
     if type(q_lims) == str:
         q_min = []
         q_max = []
