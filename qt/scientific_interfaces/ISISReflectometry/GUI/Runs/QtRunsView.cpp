@@ -172,7 +172,6 @@ void QtRunsView::setStopMonitorButtonEnabled(bool enabled) {
  * @param enabled : Whether to enable or disable the spin box
  */
 void QtRunsView::setUpdateIntervalSpinBoxEnabled(bool enabled) {
-
   m_ui.spinBoxUpdateInterval->setEnabled(enabled);
 }
 
