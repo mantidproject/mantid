@@ -78,8 +78,10 @@ class SANSReductionCore(SANSReductionCoreBase):
         #    a user-specified value which can be obtained with the help of the beam centre finder.
         # ------------------------------------------------------------
         progress.report("Moving ...")
-        workspace = self._move(state_serialized, workspace, component_as_string)
-        monitor_workspace = self._move(state_serialized, monitor_workspace, component_as_string)
+
+        workspace = self._move(state=state, workspace=workspace, component=component_as_string)
+        monitor_workspace = self._move(state=state, workspace=monitor_workspace,
+                                       component=component_as_string)
 
         # --------------------------------------------------------------------------------------------------------------
         # 5. Apply masking (pixel masking and time masking)

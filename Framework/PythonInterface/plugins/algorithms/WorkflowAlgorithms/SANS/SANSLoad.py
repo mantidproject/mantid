@@ -10,12 +10,13 @@
 
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import (Direction, PropertyManagerProperty, FloatArrayProperty)
-from mantid.api import (ParallelDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress,
+from mantid.api import (ParallelDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
+                        Progress,
                         WorkspaceProperty)
+from sans.algorithm_detail.move_sans_instrument_component import move_component, MoveTypes
 
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 from sans.common.enums import SANSDataType
-from sans.common.general_functions import create_child_algorithm
 from sans.algorithm_detail.load_data import SANSLoadDataFactory
 
 
@@ -322,39 +323,21 @@ class SANSLoad(ParallelDataProcessorAlgorithm):
         self.setProperty(number_of_workspaces_name, counter)
 
     def _perform_initial_move(self, workspaces, state):
-        move_name = "SANSMove"
-        state_dict = state.property_manager
-
-        zero_options = {"SANSState": state_dict,
-                        "MoveType": "SetToZero",
-                        "Component": ""}
-        zero_alg = create_child_algorithm(self, move_name, **zero_options)
-
-        move_options = {"SANSState": state_dict,
-                        "MoveType": "InitialMove"}
-        move_alg = create_child_algorithm(self, move_name, **move_options)
+        # If beam centre was specified then use it
+        beam_coordinates = self.getProperty("BeamCoordinates").value
 
         # The workspaces are stored in a dict: workspace_names (sample_scatter, etc) : ListOfWorkspaces
         for key, workspace_list in workspaces.items():
-            if SANSDataType.to_string(key) in ("SampleTransmission", "CanTransmission", "CanDirect", "SampleDirect"):
-                is_trans = True
-            else:
-                is_trans = False
-            move_alg.setProperty("IsTransmissionWorkspace", is_trans)
+            is_trans = SANSDataType.to_string(key) in \
+                       ("SampleTransmission", "CanTransmission", "CanDirect", "SampleDirect")
+
             for workspace in workspace_list:
-                zero_alg.setProperty("Workspace", workspace)
-                zero_alg.execute()
-                zeroed_workspace = zero_alg.getProperty("Workspace").value
+                move_component(component_name="", move_info=state.move,
+                               workspace=workspace, move_type=MoveTypes.RESET_POSITION)
 
-                # If beam centre was specified then use it
-                beam_coordinates = self.getProperty("BeamCoordinates").value
-                if beam_coordinates:
-                    move_alg.setProperty("BeamCoordinates", beam_coordinates)
-
-                # ZOOM and LARMOR only have LAB, SANS2D and LOQ move both at once.
-                move_alg.setProperty("Component", "LAB")
-                move_alg.setProperty("Workspace", zeroed_workspace)
-                move_alg.execute()
+                move_component(component_name="LAB", move_info=state.move,
+                               beam_coordinates=beam_coordinates, move_type=MoveTypes.INITIAL_MOVE,
+                               workspace=workspace, is_transmission_workspace=is_trans)
 
     def _get_progress_for_file_loading(self, data):
         # Get the number of workspaces which are to be loaded
