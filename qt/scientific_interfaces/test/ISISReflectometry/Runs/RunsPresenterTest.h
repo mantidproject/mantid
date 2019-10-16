@@ -577,7 +577,7 @@ public:
   void testStartMonitorSetsAlgorithmProperties() {
     auto presenter = makePresenter();
     auto instrument = std::string("INTER");
-    auto updateInterval = std::string("20");
+    auto updateInterval = 20;
     expectGetLiveDataOptions(instrument, updateInterval);
     auto algRunner = expectGetAlgorithmRunner();
     presenter.notifyStartMonitor();
@@ -695,7 +695,7 @@ private:
 
   AlgorithmRuntimeProps defaultLiveMonitorAlgorithmOptions(
       const std::string &instrument = std::string("OFFSPEC"),
-      const std::string &updateInterval = std::string("15")) {
+      const int &updateInterval = 15) {
     return AlgorithmRuntimeProps{
         {"Instrument", instrument},
         {"OutputWorkspace", "IvsQ_binned_live"},
@@ -991,7 +991,7 @@ private:
         .WillRepeatedly(Return(instrument));
   }
 
-  void expectGetUpdateInterval(std::string const &updateInterval) {
+  void expectGetUpdateInterval(int const &updateInterval) {
     EXPECT_CALL(m_view, getLiveDataUpdateInterval())
         .Times(AtLeast(1))
         .WillRepeatedly(Return(updateInterval));
@@ -1000,7 +1000,7 @@ private:
   void expectGetLiveDataOptions(
       AlgorithmRuntimeProps options = AlgorithmRuntimeProps(),
       std::string const &instrument = std::string("OFFSPEC"),
-      std::string const &updateInterval = std::string("15")) {
+      int const &updateInterval = 15) {
     expectSearchInstrument(instrument);
     expectGetUpdateInterval(updateInterval);
     EXPECT_CALL(m_mainPresenter, rowProcessingProperties())
@@ -1009,7 +1009,7 @@ private:
   }
 
   void expectGetLiveDataOptions(std::string const &instrument,
-                                std::string const &updateInterval) {
+                                int const &updateInterval) {
     expectGetLiveDataOptions(AlgorithmRuntimeProps(), instrument,
                              updateInterval);
   }
