@@ -1661,8 +1661,8 @@ class AbsCorrInfo(PropDescriptor):
         accompanied by the dictionary of all non-sample related properties
         accepted by these algorithms.
 
-        If this key is missing, the class assumes that AbsorptionCorrection
-        algorithm (is_fast:true) is selected.
+        If this key is missing, the class assumes that MonteCarloAbsorption
+        algorithm (is_mc:True) is selected.
 
         The value for the property can be provided as dictionary or as
         string representation of this dictionary.
