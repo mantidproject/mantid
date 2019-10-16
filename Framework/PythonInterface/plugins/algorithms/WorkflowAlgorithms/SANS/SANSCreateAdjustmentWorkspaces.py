@@ -14,7 +14,7 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator, CompositeValidator)
 from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
                         WorkspaceUnitValidator)
-from sans.algorithm_detail.NormalizeToSANSMonitor import NormalizeToSANSMonitor
+from sans.algorithm_detail.normalize_to_sans_monitor import normalize_to_monitor
 
 from sans.common.constants import EMPTY_NAME
 from sans.common.enums import (DataType, DetectorType)
@@ -172,8 +172,8 @@ class SANSCreateAdjustmentWorkspaces(DistributedDataProcessorAlgorithm):
         monitor_workspace = self.getProperty("MonitorWorkspace").value
         scale_factor = self.getProperty("SliceEventFactor").value
 
-        alg = NormalizeToSANSMonitor(state_adjustment_normalize_to_monitor=state.adjustment.normalize_to_monitor)
-        ws = alg.normalize_to_monitor(workspace=monitor_workspace, scale_factor=scale_factor)
+        ws = normalize_to_monitor(workspace=monitor_workspace, scale_factor=scale_factor,
+                                  state_adjustment_normalize_to_monitor=state.adjustment.normalize_to_monitor)
 
         return ws
 
