@@ -86,9 +86,8 @@ class anAbsorptionShape(object):
        # Property describes if a shape axis direction have been changed.
         # Some instruments (e.g. MARI) have non-standart default axis directions
         self._axis_is_default=True
-
-
     #
+
     def __del__(self):
         DeleteWorkspace(self._testWorkspace)
     #
@@ -321,7 +320,7 @@ class anAbsorptionShape(object):
     #
 
     def _check_MARI_axis_(self,workspace):
-        """ method verifies, if default axis needs to be changed for MARI""" 
+        """ method verifies, if default axis needs to be changed for MARI"""
         if self._axis_is_default:
             instrument = workspace.getInstrument()
             instr_name = instrument.getName()
@@ -365,7 +364,7 @@ class Cylinder(anAbsorptionShape):
         anAbsorptionShape.__init__(self,Material)
         self.shape = CylinderParams
         self._shape_has_axis = True
- 
+
     @property
     def shape(self):
         return self._ShapeDescription
@@ -399,7 +398,7 @@ class Cylinder(anAbsorptionShape):
                 n_annul = 1
             kw['NumberOfSlices'] = n_slices
             kw['NumberOfAnnuli'] = n_annul
-        if not 'Emode' in kw:
+        if 'Emode' not in kw:
             kw['Emode'] = 'Direct'
         adsrbtn_correctios = AbsorptionCorrection(correction_base_ws,**kw)
         return adsrbtn_correctios
@@ -472,7 +471,7 @@ class FlatPlate(anAbsorptionShape):
         prop_dict = {'Height':'SampleHeight','Width':'SampleWidth','Thick':'SampleThickness'}
         for key,val in prop_dict.items():
             kw[val] = self._ShapeDescription[key]
-        if not 'Emode' in kw:
+        if 'Emode' not in kw:
             kw['Emode'] = 'Direct'
         adsrbtn_correctios = FlatPlateAbsorption(correction_base_ws,**kw)
         return adsrbtn_correctios
@@ -515,7 +514,7 @@ class HollowCylinder(anAbsorptionShape):
         self.shape = CylinderParams
         self._CanSetSample = False
         self._shape_has_axis = True
-
+    #
 
     @property
     def shape(self):
@@ -561,7 +560,7 @@ class HollowCylinder(anAbsorptionShape):
         """
         self._add_xml_hollow_cylinder(correction_base_ws)
 
-        if not 'Emode' in kwarg:
+        if 'Emode' not in kwarg:
             kwarg['Emode'] = 'Direct'
         adsrbtn_correctios = AbsorptionCorrection(correction_base_ws,**kwarg)
         return adsrbtn_correctios
@@ -662,7 +661,7 @@ class Sphere(anAbsorptionShape):
             AbsorptionCorrections method is invoked with the parameters provided.
         """
         kw = kwarg.copy()
-        if not 'Emode' in kwarg:
+        if 'Emode' not in kwarg:
             kw['Emode'] = 'Direct'
         if kw['Emode'].lower() == 'elastic':
             adsrbtn_correctios = SphericalAbsorption(
