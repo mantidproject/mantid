@@ -186,7 +186,10 @@ class WorkspaceWidget(PluginWidget):
     def _do_show_detectors(self, names):
         detector_tables = []
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
-            detector_tables.append(CreateDetectorTable(InputWorkspace=ws))
+            try:
+                detector_tables.append(CreateDetectorTable(InputWorkspace=ws))
+            except RuntimeError as e:
+                return
 
         self._do_show_data(detector_tables)
 

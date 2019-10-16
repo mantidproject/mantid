@@ -46,10 +46,15 @@ void CreateDetectorTable::exec() {
   auto matrix = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS);
   if (matrix) {
     detectorTable = createDetectorTableWorkspace(matrix, indices, include_data);
-  }
-  auto peaks = boost::dynamic_pointer_cast<IPeaksWorkspace>(inputWS);
-  if (peaks) {
-    detectorTable = peaks->createDetectorTable();
+
+    if (detectorTable == nullptr) {
+      throw std::runtime_error("The instrument has no sample.");
+    }
+  } else {
+    auto peaks = boost::dynamic_pointer_cast<IPeaksWorkspace>(inputWS);
+    if (peaks) {
+      detectorTable = peaks->createDetectorTable();
+    }
   }
 
   if (getPropertyValue("DetectorTableWorkspace") == "") {
@@ -280,7 +285,10 @@ CreateDetectorTable::createTruncatedList(const std::set<int> &elements) {
     for (; iter != itEnd; ++iter) {
       truncated += std::to_string(*iter) + ",";
     }
-    truncated.pop_back(); // Drop last comma
+
+    if (!truncated.empty()) {
+      truncated.pop_back(); // Drop last comma
+    }
   }
 
   return truncated;
