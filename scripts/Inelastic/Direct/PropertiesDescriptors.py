@@ -1725,12 +1725,12 @@ class AbsCorrInfo(PropDescriptor):
                 ik +=2
         elif isinstance(value, dict):
             val_dict = value
-            is_mc = val_dict.pop('is_mc',None)
-            if not is_mc:
-                self._algo_selector('is_mc',is_mc)
             is_fast=val_dict.pop('is_fast',None)
-            if not is_fast:
+            if is_fast is not None:
                 self._algo_selector('is_fast',is_fast)
+            is_mc = val_dict.pop('is_mc',None)
+            if is_mc is not None:
+                self._algo_selector('is_mc',is_mc)
 
         else:
             raise(KeyError(
