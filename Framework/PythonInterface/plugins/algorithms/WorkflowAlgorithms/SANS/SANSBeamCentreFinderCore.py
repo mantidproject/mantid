@@ -12,6 +12,7 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress,
                         IEventWorkspace)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator)
+from sans.algorithm_detail.move_sans_instrument_component import move_component, MoveTypes
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_child_algorithm, append_to_sans_file_tag
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
@@ -75,8 +76,8 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         self.declareProperty("Centre1", 0.0, direction=Direction.Input)
         self.declareProperty("Centre2", 0.0, direction=Direction.Input)
 
-        self.declareProperty("RMax", 0.26, direction= Direction.Input)
-        self.declareProperty("RMin", 0.06, direction= Direction.Input)
+        self.declareProperty("RMax", 0.26, direction=Direction.Input)
+        self.declareProperty("RMin", 0.06, direction=Direction.Input)
 
         # ----------
         # OUTPUT
@@ -112,7 +113,7 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         state.mask.use_mask_phi_mirror = True
 
         # Set compatibility mode
-        #state.compatibility.use_compatibility_mode = self.getProperty('CompatibilityMode').value
+        # state.compatibility.use_compatibility_mode = self.getProperty('CompatibilityMode').value
 
         # Set test centre
         state.move.detectors[DetectorType.to_string(DetectorType.LAB)].sample_centre_pos1 = \
@@ -189,8 +190,8 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         #    The detectors in the workspaces are set such that the beam centre is at (0,0). The position is
         #    a user-specified value which can be obtained with the help of the beam centre finder.
         # ------------------------------------------------------------
-        scatter_data = self._move(state_serialized, scatter_data, component_as_string)
-        monitor_scatter_date = self._move(state_serialized, monitor_scatter_date, component_as_string)
+        scatter_data = self._move(state=state, workspace=scatter_data, component=component_as_string)
+        monitor_scatter_date = self._move(state=state, workspace=monitor_scatter_date, component=component_as_string)
 
         # --------------------------------------------------------------------------------------------------------------
         # 5. Apply masking (pixel masking and time masking)
@@ -292,25 +293,14 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         slice_event_factor = slice_alg.getProperty("SliceEventFactor").value
         return workspace, monitor_workspace, slice_event_factor
 
-    def _move(self, state_serialized, workspace, component, is_transmission=False):
+    def _move(self, state, workspace, component, is_transmission=False):
         # First we set the workspace to zero, since it might have been moved around by the user in the ADS
         # Second we use the initial move to bring the workspace into the correct position
-        move_name = "SANSMove"
-        move_options = {"SANSState": state_serialized,
-                        "Workspace": workspace,
-                        "MoveType": "SetToZero",
-                        "Component": ""}
-        move_alg = create_child_algorithm(self, move_name, **move_options)
-        move_alg.execute()
-        workspace = move_alg.getProperty("Workspace").value
-
-        # Do the initial move
-        move_alg.setProperty("MoveType", "InitialMove")
-        move_alg.setProperty("Component", component)
-        move_alg.setProperty("Workspace", workspace)
-        move_alg.setProperty("IsTransmissionWorkspace", is_transmission)
-        move_alg.execute()
-        return move_alg.getProperty("Workspace").value
+        move_component(move_info=state.move, component_name='', move_type=MoveTypes.RESET_POSITION,
+                       workspace=workspace)
+        move_component(component_name=component, move_info=state.move, move_type=MoveTypes.INITIAL_MOVE,
+                       workspace=workspace, is_transmission_workspace=is_transmission)
+        return workspace
 
     def _mask(self, state_serialized, workspace, component):
         mask_name = "SANSMaskWorkspace"
@@ -344,6 +334,8 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         transmission_workspace = self._get_transmission_workspace()
         direct_workspace = self._get_direct_workspace()
 
+        state = self._get_state()
+
         adjustment_name = "SANSCreateAdjustmentWorkspaces"
         adjustment_options = {"SANSState": state_serialized,
                               "Component": component_as_string,
@@ -354,12 +346,13 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
                               "OutputWorkspacePixelAdjustment": EMPTY_NAME,
                               "OutputWorkspaceWavelengthAndPixelAdjustment": EMPTY_NAME}
         if transmission_workspace:
-            transmission_workspace = self._move(state_serialized, transmission_workspace, component_as_string,
-                                                is_transmission=True)
+            transmission_workspace = self._move(state=state, workspace=transmission_workspace,
+                                                component=component_as_string, is_transmission=True)
             adjustment_options.update({"TransmissionWorkspace": transmission_workspace})
 
         if direct_workspace:
-            direct_workspace = self._move(state_serialized, direct_workspace, component_as_string, is_transmission=True)
+            direct_workspace = self._move(state=state, workspace=direct_workspace,
+                                          component=component_as_string, is_transmission=True)
             adjustment_options.update({"DirectWorkspace": direct_workspace})
 
         adjustment_alg = create_child_algorithm(self, adjustment_name, **adjustment_options)
@@ -368,7 +361,7 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         wavelength_adjustment = adjustment_alg.getProperty("OutputWorkspaceWavelengthAdjustment").value
         pixel_adjustment = adjustment_alg.getProperty("OutputWorkspacePixelAdjustment").value
         wavelength_and_pixel_adjustment = adjustment_alg.getProperty(
-                                           "OutputWorkspaceWavelengthAndPixelAdjustment").value
+            "OutputWorkspaceWavelengthAndPixelAdjustment").value
         return wavelength_adjustment, pixel_adjustment, wavelength_and_pixel_adjustment
 
     def _convert_to_histogram(self, workspace):

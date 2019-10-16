@@ -11,6 +11,7 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator)
 from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode, IEventWorkspace)
+from sans.algorithm_detail.move_sans_instrument_component import move_component, MoveTypes
 
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 from sans.common.constants import EMPTY_NAME
@@ -79,13 +80,15 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
                                                      direction=Direction.Output),
                              doc='The sum of the counts of the output workspace.')
 
-        self.declareProperty(MatrixWorkspaceProperty('CalculatedTransmissionWorkspace', '', optional=PropertyMode.Optional,
-                                                     direction=Direction.Output),
-                             doc='The calculated transmission workspace')
+        self.declareProperty(
+            MatrixWorkspaceProperty('CalculatedTransmissionWorkspace', '', optional=PropertyMode.Optional,
+                                    direction=Direction.Output),
+            doc='The calculated transmission workspace')
 
-        self.declareProperty(MatrixWorkspaceProperty('UnfittedTransmissionWorkspace', '', optional=PropertyMode.Optional,
-                                                     direction=Direction.Output),
-                             doc='The unfitted transmission workspace')
+        self.declareProperty(
+            MatrixWorkspaceProperty('UnfittedTransmissionWorkspace', '', optional=PropertyMode.Optional,
+                                    direction=Direction.Output),
+            doc='The unfitted transmission workspace')
 
     def _get_cropped_workspace(self, component):
         scatter_workspace = self.getProperty("ScatterWorkspace").value
@@ -113,25 +116,16 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
         slice_event_factor = slice_alg.getProperty("SliceEventFactor").value
         return workspace, monitor_workspace, slice_event_factor
 
-    def _move(self, state_serialized, workspace, component, is_transmission=False):
+    def _move(self, state, workspace, component, is_transmission=False):
         # First we set the workspace to zero, since it might have been moved around by the user in the ADS
         # Second we use the initial move to bring the workspace into the correct position
-        move_name = "SANSMove"
-        move_options = {"SANSState": state_serialized,
-                        "Workspace": workspace,
-                        "MoveType": "SetToZero",
-                        "Component": ""}
-        move_alg = create_child_algorithm(self, move_name, **move_options)
-        move_alg.execute()
-        workspace = move_alg.getProperty("Workspace").value
+        move_component(component_name="", move_info=state.move, move_type=MoveTypes.RESET_POSITION,
+                       workspace=workspace)
 
-        # Do the initial move
-        move_alg.setProperty("MoveType", "InitialMove")
-        move_alg.setProperty("Component", component)
-        move_alg.setProperty("Workspace", workspace)
-        move_alg.setProperty("IsTransmissionWorkspace", is_transmission)
-        move_alg.execute()
-        return move_alg.getProperty("Workspace").value
+        move_component(component_name=component, move_info=state.move, move_type=MoveTypes.INITIAL_MOVE,
+                       workspace=workspace, is_transmission_workspace=is_transmission)
+
+        return workspace
 
     def _mask(self, state_serialized, workspace, component):
         mask_name = "SANSMaskWorkspace"
@@ -174,13 +168,17 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
                               "OutputWorkspaceWavelengthAdjustment": EMPTY_NAME,
                               "OutputWorkspacePixelAdjustment": EMPTY_NAME,
                               "OutputWorkspaceWavelengthAndPixelAdjustment": EMPTY_NAME}
+
+        state = self._get_state()
+
         if transmission_workspace:
-            transmission_workspace = self._move(state_serialized, transmission_workspace, component_as_string,
-                                                is_transmission=True)
+            transmission_workspace = self._move(state=state, workspace=transmission_workspace,
+                                                component=component_as_string, is_transmission=True)
             adjustment_options.update({"TransmissionWorkspace": transmission_workspace})
 
         if direct_workspace:
-            direct_workspace = self._move(state_serialized, direct_workspace, component_as_string, is_transmission=True)
+            direct_workspace = self._move(state=state, workspace=direct_workspace, component=component_as_string,
+                                          is_transmission=True)
             adjustment_options.update({"DirectWorkspace": direct_workspace})
 
         adjustment_alg = create_child_algorithm(self, adjustment_name, **adjustment_options)
@@ -189,7 +187,7 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
         wavelength_adjustment = adjustment_alg.getProperty("OutputWorkspaceWavelengthAdjustment").value
         pixel_adjustment = adjustment_alg.getProperty("OutputWorkspacePixelAdjustment").value
         wavelength_and_pixel_adjustment = adjustment_alg.getProperty(
-                                           "OutputWorkspaceWavelengthAndPixelAdjustment").value
+            "OutputWorkspaceWavelengthAndPixelAdjustment").value
         calculated_transmission_workspace = adjustment_alg.getProperty("CalculatedTransmissionWorkspace").value
         unfitted_transmission_workspace = adjustment_alg.getProperty("UnfittedTransmissionWorkspace").value
         return wavelength_adjustment, pixel_adjustment, wavelength_and_pixel_adjustment, \
