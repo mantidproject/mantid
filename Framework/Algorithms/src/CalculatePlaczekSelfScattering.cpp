@@ -107,10 +107,10 @@ void CalculatePlaczekSelfScattering::exec() {
     phi1.push_back((xLambda[i] + dx) * incidentPrime[i] / incident[i]);
   }
   // set detector law term (eps1)
-  const double lambdaD = 1.44;
   std::vector<double> eps1;
+  const double lambdaD = 1.44;
   for (size_t i = 0; i < xLambda.size() - 1; i++) {
-    double xTerm = -(xLambda[i] + dx) / lambdaD;
+    double xTerm = (xLambda[i] + dx) / lambdaD;
     eps1.push_back(xTerm * exp(xTerm) / (1.0 - exp(xTerm)));
   }
   /* Placzek
@@ -155,10 +155,9 @@ void CalculatePlaczekSelfScattering::exec() {
                             specInfo.twoTheta(specIndex), 0, 1.0, 1.0);
       for (size_t xIndex = 0; xIndex < xLambda.size() - 1; xIndex++) {
         const double term1 = (f - 1.0) * phi1[xIndex];
-        const double term2 = -f * eps1[xIndex];
-        const double term3 = f - 3.0;
+        const double term2 = f * (1.0 - eps1[xIndex]);
         const double inelasticPlaczekSelfCorrection =
-            2.0 * (term1 + term2 + term3) * sinThetaBy2 * sinThetaBy2 *
+            2.0 * (term1 + term2 - 3) * sinThetaBy2 * sinThetaBy2 *
             summationTerm;
         x[xIndex] = wavelength.singleToTOF(xLambda[xIndex]);
         y[xIndex] = inelasticPlaczekSelfCorrection;
