@@ -844,13 +844,14 @@ The dedicated work-flow algorithms for the SANS reduction are:
 - :ref:`CropToComponent <algm-CropToComponent>`
 - :ref:`SANSLoad <algm-SANSLoad>`
 - *SANSMaskWorkspace*
-- *SANSMove*
+- :ref:`MoveInstrumentComponent <algm-MoveInstrumentComponent>`
+- :ref:`RotateInstrumentComponent <algm-RotateInstrumentComponent>`
 - *SANSNormalizeToMonitor*
 - *SANSSave*
 - *SANSScale*
 - *SANSSliceEvent*
 
-Note that the vast majority of the these algorithms takes a *SANSState* object as
+Note that algorithms prefixed with SANS take a *SANSState* object as
 an input.
 
 The individual algorithms are superficially discussed below.
@@ -1072,22 +1073,16 @@ a particular masking instruction. The algorithm sub-steps are:
    :ref:`MaskDetectorsInShape <algm-MaskDetectorsInShape>`
 
 
-*SANSMove*
-------------
+*MoveInstrumentComponent* and *RotateInstrumentComponent*
+---------------------------------------------------------
 
-The :ref:`SANSMove <algm-SANSMove>` algorithm moves the instrument component
-of the SANS workspace according to the settings in
-the state object. Additionally the user can specify the beam centre.
+The :ref:`MoveInstrumentComponent <algm-MoveInstrumentComponent>`
+algorithm and :ref:`RotateInstrumentComponent <algm-RotateInstrumentComponent>`
+are used in one of three ways, depending on how the state
+of the script. It can be used to move an individual component, reset positions,
+or specify the beam centre.
 Note that if the beam centre is also specified in the state object, then the
-manual selection takes precedence. The way we perform a move is highly-instrument
-and in fact data-dependent. Currently the move mechanism is implemented for
-**SANS2D**, **LOQ**, **LARMOR** and **ZOOM**.
-
-The main purpose is to shift a freshly loaded data set into its default position.
-Note that each instrument has its own way of displacing the instrument. In general
-this is achieved by a combination of translations and rotations using
-:ref:`MoveInstrumentComponent <algm-MoveInstrumentComponent>` and
-:ref:`RotateInstrumentComponent <algm-RotateInstrumentComponent>`.
+manual selection takes precedence.
 
 
 *SANSNormalizeToMonitor*
@@ -1253,10 +1248,10 @@ The sub-steps of this algorithm are:
    either a custom binning or the monitor binning is applied using :ref:`Rebin <algm-Rebin>` or
    :ref:`RebinToWorkspace <algm-RebinToWorkspace>`, respectively.
 4. Both the data and the monitor workspace perform an initial move operation
-   using :ref:`SANSMove <algm-SANSMove>`. The algorithm is applied twice. The first time using
-   the *SetToZero* mode in case the algorithm had been loaded and moved already previously. This
-   resets the instrument position of the workspace to the positions of the base instrument. The second
-   time the move algorithm is operated in *InitialMove* mode.
+   using :ref:`MoveInstrumentComponent <algm-MoveInstrumentComponent>`.
+   The algorithm is applied twice. The first time using the *SetToZero* mode
+   to reset the components to known positions from the IDF. The second
+   time the components are moved and rotated to the requested positions.
 5. The data workspace is masked using :ref:`SANSMaskWorkspace <algm-SANSMaskWorkspace>`. Note that
    only the general masks and the masks for the selected component are applied.
    Note that all steps up until now were performed in the time-of-flight domain.
@@ -1266,7 +1261,7 @@ The sub-steps of this algorithm are:
    with the absolute scale and divide by the sample volume.
 8. This step creates the adjustment workspaces using :ref:`SANSCreateAdjustmentWorkspaces <algm-SANSCreateAdjustmentWorkspaces>`.
    This uses the input *TransmissionWorkspace* and *DirectWorkspace* workspaces. Note that
-   the instruments referenced in the workspace are moved using :ref:`SANSMove <algm-SANSMove>` before they are used by the adjustment
+   the instrument's components are moved and rotated before they are used by the adjustment
    algorithm. The outputs are a wavelength-adjustment workspace, a pixel-adjustment workspace and a wavelength-and-pixel adjustment
    workspace. Note that their creation is optional.
 9. Convert the data workspace into histogram-mode using :ref:`RebinToWorkspace <algm-RebinToWorkspace>`.

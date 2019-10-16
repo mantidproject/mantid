@@ -9,9 +9,11 @@
 """ Finds the beam centre for SANS"""
 
 from __future__ import (absolute_import, division, print_function)
-from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress, IEventWorkspace)
+from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress,
+                        IEventWorkspace)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator)
 from sans.algorithm_detail.crop_helper import get_component_name
+from sans.algorithm_detail.move_sans_instrument_component import move_component, MoveTypes
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_child_algorithm, append_to_sans_file_tag
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
@@ -147,7 +149,7 @@ class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
         #    The detectors in the workspaces are set such that the beam centre is at (0,0). The position is
         #    a user-specified value which can be obtained with the help of the beam centre finder.
         # ------------------------------------------------------------
-        scatter_data = self._move(state_serialized, scatter_data, component_as_string)
+        scatter_data = self._move(state=state, workspace=scatter_data, component=component_as_string)
 
         # --------------------------------------------------------------------------------------------------------------
         # 5. Apply masking (pixel masking and time masking)
@@ -219,25 +221,15 @@ class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
         slice_event_factor = slice_alg.getProperty("SliceEventFactor").value
         return workspace, monitor_workspace, slice_event_factor
 
-    def _move(self, state_serialized, workspace, component, is_transmission=False):
+    def _move(self, state, workspace, component, is_transmission=False):
         # First we set the workspace to zero, since it might have been moved around by the user in the ADS
         # Second we use the initial move to bring the workspace into the correct position
-        move_name = "SANSMove"
-        move_options = {"SANSState": state_serialized,
-                        "Workspace": workspace,
-                        "MoveType": "SetToZero",
-                        "Component": ""}
-        move_alg = create_child_algorithm(self, move_name, **move_options)
-        move_alg.execute()
-        workspace = move_alg.getProperty("Workspace").value
+        move_component(move_info=state.move, component_name='',
+                       workspace=workspace, move_type=MoveTypes.RESET_POSITION)
 
-        # Do the initial move
-        move_alg.setProperty("MoveType", "InitialMove")
-        move_alg.setProperty("Component", component)
-        move_alg.setProperty("Workspace", workspace)
-        move_alg.setProperty("IsTransmissionWorkspace", is_transmission)
-        move_alg.execute()
-        return move_alg.getProperty("Workspace").value
+        move_component(component_name=component, move_info=state.move, workspace=workspace,
+                       is_transmission_workspace=is_transmission, move_type=MoveTypes.INITIAL_MOVE)
+        return workspace
 
     def _mask(self, state_serialized, workspace, component):
         mask_name = "SANSMaskWorkspace"
