@@ -5,6 +5,7 @@ set(TEST_PY_FILES
     crop_helper_test.py
     merge_reductions_test.py
     move_workspaces_test.py
+    move_sans_instrument_component_test.py
     q_resolution_calculator_test.py
     scale_helper_test.py
     strip_end_nans_test.py
