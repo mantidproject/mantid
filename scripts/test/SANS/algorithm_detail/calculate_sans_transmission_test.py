@@ -10,7 +10,7 @@ import numpy as np
 import unittest
 
 from mantid.simpleapi import CloneWorkspace, DeleteWorkspace, Load, Rebin
-from sans.algorithm_detail.CalculateSANSTransmission import CalculateSANSTransmission
+from sans.algorithm_detail.calculate_sans_transmission import calculate_transmission
 from sans.common.enums import (RebinType, RangeStepType, FitType)
 from sans.state.calculate_transmission import get_calculate_transmission_builder
 from sans.test_helper.test_director import TestDirector
@@ -187,11 +187,11 @@ class CalculateSansTransmissionTest(unittest.TestCase):
     @staticmethod
     def _run_test(transmission_workspace, direct_workspace, state, is_sample=True):
         data_type = "Sample" if is_sample else "Can"
-        alg = CalculateSANSTransmission(state_adjustment_calculate_transmission=state.adjustment.calculate_transmission,
-                                        data_type_str=data_type)
 
-        workspace, unfitted = alg.calculate_transmission(transmission_ws=transmission_workspace,
-                                                         direct_ws=direct_workspace)
+        workspace, unfitted =\
+            calculate_transmission(transmission_ws=transmission_workspace,
+                                   direct_ws=direct_workspace, data_type_str=data_type,
+                                   state_adjustment_calculate_transmission=state.adjustment.calculate_transmission)
         return workspace, unfitted
 
     def _do_assert(self, transmission_workspace, direct_workspace, unfitted_workspace, fitted_workspace,

@@ -14,7 +14,7 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator, CompositeValidator)
 from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
                         WorkspaceUnitValidator)
-from sans.algorithm_detail.CalculateSANSTransmission import CalculateSANSTransmission
+from sans.algorithm_detail.calculate_sans_transmission import calculate_transmission
 
 from sans.common.constants import EMPTY_NAME
 from sans.common.enums import (DataType, DetectorType)
@@ -93,11 +93,11 @@ class SANSCreateAdjustmentWorkspaces(DistributedDataProcessorAlgorithm):
                              doc='The workspace for, both, wavelength- and pixel-based adjustments.')
 
         self.declareProperty(MatrixWorkspaceProperty('CalculatedTransmissionWorkspace', ''
-                                                     ,optional=PropertyMode.Optional, direction=Direction.Output),
+                                                     , optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The calculated transmission workspace')
 
         self.declareProperty(MatrixWorkspaceProperty('UnfittedTransmissionWorkspace', ''
-                                                     ,optional=PropertyMode.Optional, direction=Direction.Output),
+                                                     , optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The unfitted transmission workspace')
 
     def PyExec(self):
@@ -113,22 +113,23 @@ class SANSCreateAdjustmentWorkspaces(DistributedDataProcessorAlgorithm):
         # --------------------------------------
         # Get the calculated transmission
         # --------------------------------------
-        calculated_transmission_workspace, unfitted_transmission_workspace =\
+        calculated_transmission_workspace, unfitted_transmission_workspace = \
             self._get_calculated_transmission_workspace(state)
 
         # --------------------------------------
         # Get the wide angle correction workspace
         # --------------------------------------
         wave_length_and_pixel_adjustment_workspace = self._get_wide_angle_correction_workspace(state,
-                                                                   calculated_transmission_workspace)  # noqa
+                                                                                               calculated_transmission_workspace)  # noqa
 
         # --------------------------------------------
         # Get the full wavelength and pixel adjustment
         # --------------------------------------------
         wave_length_adjustment_workspace, \
         pixel_length_adjustment_workspace = self._get_wavelength_and_pixel_adjustment_workspaces(state,
-                                                                            monitor_normalization_workspace,  # noqa
-                                                                            calculated_transmission_workspace)  # noqa
+                                                                                                 monitor_normalization_workspace,
+                                                                                                 # noqa
+                                                                                                 calculated_transmission_workspace)  # noqa
 
         if wave_length_adjustment_workspace:
             self.setProperty("OutputWorkspaceWavelengthAdjustment", wave_length_adjustment_workspace)
@@ -197,12 +198,11 @@ class SANSCreateAdjustmentWorkspaces(DistributedDataProcessorAlgorithm):
         if transmission_workspace and direct_workspace:
             data_type = self.getProperty("DataType").value
 
-            alg = CalculateSANSTransmission(
-                data_type_str=data_type,
-                state_adjustment_calculate_transmission=state.adjustment.calculate_transmission)
+            fitted_data, unfitted_data = \
+                calculate_transmission(direct_ws=direct_workspace, data_type_str=data_type,
+                                       transmission_ws=transmission_workspace,
+                                       state_adjustment_calculate_transmission=state.adjustment.calculate_transmission)
 
-            fitted_data, unfitted_data = alg.calculate_transmission(direct_ws=direct_workspace,
-                                                                    transmission_ws=transmission_workspace)
         else:
             fitted_data = None
             unfitted_data = None
