@@ -169,9 +169,9 @@ class ReduceMAPS(ReductionWrapper):
 
             Usage:
             Reduce single run and uncomment this method in the __main__ area to evaluate
-            adsorption corrections.
+            absorption corrections.
 
-            Change adsorption corrections parameters below to achieve best speed and
+            Change absorption corrections parameters below to achieve best speed and
             acceptable accuracy
         """
 
