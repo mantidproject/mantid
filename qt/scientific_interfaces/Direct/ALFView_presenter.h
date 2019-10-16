@@ -8,6 +8,7 @@
 #define MANTIDQT_CUSTOMINTERFACES_ALFVIEWPRESENTER_H_
 
 #include "BaseInstrumentModel.h"
+#include "BaseInstrumentView.h"
 #include "ALFView_view.h"
 #include "DllConfig.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
@@ -22,7 +23,7 @@ class MANTIDQT_DIRECT_DLL ALFView_presenter : public QObject {
   Q_OBJECT
 
 public:
-  ALFView_presenter(ALFView_view *view, BaseInstrumentModel *model);
+  ALFView_presenter(BaseInstrumentView *view, BaseInstrumentModel *model);
   ~ALFView_presenter() { delete m_loadRunObserver; };
 
   typedef std::pair<std::string,
@@ -40,7 +41,7 @@ private:
   void loadAndAnalysis(const std::string &run);
   void initInstrument(std::pair<instrumentSetUp, instrumentObserverOptions> *setUp);
 
-  ALFView_view *m_view;
+  BaseInstrumentView *m_view;
   BaseInstrumentModel *m_model;
   int m_currentRun;
   std::string m_currentFile;

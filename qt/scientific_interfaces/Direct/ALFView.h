@@ -14,6 +14,10 @@
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
 
+#include "BaseInstrumentModel.h"
+#include "BaseInstrumentView.h"
+
+
 namespace MantidQt {
 namespace CustomInterfaces {
 /** ALFView : Custom interface for looking at ALF data
@@ -45,7 +49,7 @@ typedef std::pair < std::string,
 
   std::pair<instrumentSetUp, instrumentObserverOptions> initInstrument();
 
-  ALFView_view *m_view;
+  BaseInstrumentView *m_view;
   ALFView_model *m_model;
   ALFView_presenter *m_presenter;
   VoidObserver *m_extractSingleTubeObserver;

@@ -15,7 +15,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-ALFView_presenter::ALFView_presenter(ALFView_view *view,
+ALFView_presenter::ALFView_presenter(BaseInstrumentView *view,
                                      BaseInstrumentModel *model)
     : m_view(view), m_model(model), m_currentRun(0), m_currentFile(""),
       m_loadRunObserver(nullptr) {
@@ -31,6 +31,7 @@ void ALFView_presenter::initLayout(
       std::bind(&ALFView_presenter::loadRunNumber, this);
   m_loadRunObserver->setSlot(loadBinder);
   initInstrument(setUp);
+  m_view->setupInstrumentPlotFitSplitters();
 }
 
 void ALFView_presenter::loadAndAnalysis(const std::string &pathToRun) {

@@ -7,6 +7,9 @@
 #include "ALFView_model.h"
 #include "ALFView_presenter.h"
 
+#include "BaseInstrumentModel.h"
+#include "BaseInstrumentView.h"
+
 // will need these later
 #include "MantidQtWidgets/Common/FunctionBrowser.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
@@ -60,7 +63,8 @@ ALFView::initInstrument() {
 
   // set up the slots for the custom context menu
   std::vector<std::tuple<std::string, Observer *>> customInstrumentOptions;
-
+  std::vector<std::function<bool(std::map<std::string, bool>)>> binders;
+  
   // set up custom context menu conditions
   std::function<bool(std::map<std::string, bool>)> extractConditionBinder =
       std::bind(&ALFView_model::extractTubeConditon, m_model,
@@ -69,12 +73,12 @@ ALFView::initInstrument() {
       std::bind(&ALFView_model::averageTubeConditon, m_model,
                 std::placeholders::_1);
 
-  std::vector < std::function<bool(std::map<std::string, bool>)>> binders = {
-      extractConditionBinder, averageTubeConditonBinder};
-
+     binders.push_back(extractConditionBinder);
+	 binders.push_back(averageTubeConditonBinder);
+	 
   setUpContextConditions =
-      std::make_pair(m_model->dataFileName(),binders );
-
+      std::make_pair(m_model->dataFileName(),binders);
+  
 
   // set up single tube extract
   std::function<void()> extractSingleTubeBinder =

@@ -3,12 +3,14 @@ set(SRC_FILES
     ALFView_view.cpp
     ALFView_presenter.cpp
     ALFView_model.cpp
-	BaseInstrumentModel.cpp)
+	BaseInstrumentModel.cpp
+	BaseInstrumentView.cpp)
 
 set(MOC_FILES
     ALFView.h
     ALFView_view.h
-    ALFView_presenter.h)
+    ALFView_presenter.h
+	BaseInstrumentView.h)
 
 set(INC_FILES
     DllConfig.h)

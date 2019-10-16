@@ -11,6 +11,7 @@
 #include "MantidQtWidgets/Common/MWRunFiles.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
+#include "BaseInstrumentView.h"
 
 #include <QObject>
 #include <QSplitter>
@@ -20,43 +21,28 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class ALFView_view : public QSplitter {
+class ALFView_view : public BaseInstrumentView {
   Q_OBJECT
 
 public:
   explicit ALFView_view(const std::string &instrument,
                         QWidget *parent = nullptr);
-  std::string getFile();
-  void setRunQuietly(const std::string &runNumber);
-  void observeLoadRun(Observer *listener) {
-    m_loadRunObservable->attach(listener);
-  };
-  void warningBox(const std::string &message);
   void observeExtractSingleTube(Observer *listner);
   void observeAverageTube(Observer *listner);
   
   void setUpInstrument(
       const std::string fileName,
-      std::vector<std::function<bool(std::map<std::string, bool>)>> &binders);
+      std::vector<std::function<bool(std::map<std::string, bool>)>> &binders) override;
 
-  void addObserver(std::tuple<std::string, Observer *> &listener);
+  void addObserver(std::tuple<std::string, Observer *> &listener) override;
 
 public slots:
-  void fileLoaded();
 void extractSingleTube();
 void averageTube();
 
 private:
-  QWidget *generateLoadWidget();
-  void warningBox(const QString &message);
-
-  Observable *m_loadRunObservable;
-  API::MWRunFiles *m_files;
-  QString m_instrument;
-
   Observable *m_extractSingleTubeObservable;
   Observable *m_averageTubeObservable;
-  MantidWidgets::InstrumentWidget *m_instrumentWidget;
   QAction *m_extractAction;
   QAction *m_averageAction;
 };
