@@ -425,7 +425,6 @@
    <value val="None"/>
 </parameter>
 
-
 <parameter name="correct_absorption_on"  type="string">
   <value val="None"/>
   <description is="If defined, the property would initiate the run of the absorption corrections procedure, specific for the measured sample. 
@@ -437,13 +436,13 @@
   <value val="None"/>
   <description is="The property describes the type of the absorption corrections to run and, if necessary, 
   additional properties of the absorption algorithm to use. The acceptable types are:
-  is_mc:True (for Monte-Carlo corrections)
-  is_fast:True (for analytical corrections) This option is default option if no this kind of key is present.
-  The property sting may have a form:
+  is_mc:True (for Monte-Carlo corrections)  This option is default option if neither is_mc nor is_fast key is present.
+  is_fast:True (for numerical and, when possible, analytical corrections)
+  The property string may have a form:
   is_mc:True,NumberOfWavelengthPoints:50,EventsPerPoint:100 or any other non-sample related properties, accepted by Monte-Carlo corrections algorithm
   or
-  is_mc:True,ExpMethod:FastApprox,ElementSize:10 or any other non-sample related accepted by AbsorptionCorrection algorithm
-  if set up in python script, the info can be provided both as string above and as a python dictionary. 
+  is_fast:True,ExpMethod:FastApprox,ElementSize:10 or any other non-sample related accepted by AbsorptionCorrection algorithm
+  If set up in a Python script, the info can be provided both as a string above and as a Python dictionary. 
   "/>
 </parameter>
 
