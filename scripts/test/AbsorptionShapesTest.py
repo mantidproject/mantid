@@ -58,13 +58,16 @@ class AdsorbtionShapesTest(unittest.TestCase):
         res = ash.shape
         self.assertEqual(res['Height'],10)
         self.assertEqual(res['Radius'],2)
+        self.assertTrue(ash._axis_is_default)
 
         ash.shape = [5,1,[0,1,0],[0.,0.,-0.5]]
-        res = ash.shape;
+        res = ash.shape
         self.assertEqual(res['Height'],5)
         self.assertEqual(res['Radius'],1)
         self.assertEqual(res['Axis'],[0,1,0])
         self.assertEqual(res['Center'],[0,0,-0.5])
+        self.assertFalse(ash._axis_is_default)
+
 
         ash.shape = {'Height':5,'Radius':2,'Axis':[1,0,0],'Center':[0.,0.,0.]}
         res = ash.shape;
@@ -75,14 +78,33 @@ class AdsorbtionShapesTest(unittest.TestCase):
 
         test_ws = CreateSampleWorkspace(NumBanks=1,BankPixelWidth=1)
         test_ws = ConvertUnits(test_ws,'DeltaE',Emode='Direct',EFixed=2000)
-        #cor_ws,corrections = ash.correct_absorption(test_ws)
-        #n_bins = corrections.blocksize()
-        #corr_ranges = [n_bins,corrections.readY(0)[0],corrections.readY(0)[n_bins-1]]
-        #np.testing.assert_almost_equal(corr_ranges,[97,0.2258,0],4)
+        cor_ws,corrections = ash.correct_absorption(test_ws,is_fast=True)
+        n_bins = corrections.blocksize()
+        corr_ranges = [n_bins,corrections.readY(0)[0],corrections.readY(0)[n_bins-1]]
+        np.testing.assert_almost_equal(corr_ranges,[97,0.0,0.0],4)
         mccor_ws,mc_corr = ash.correct_absorption(test_ws,NumberOfWavelengthPoints=20)
         n_bins = mc_corr.blocksize()
         mccorr_ranges = [n_bins,mc_corr.readY(0)[0],mc_corr.readY(0)[n_bins-1]]
         np.testing.assert_almost_equal(mccorr_ranges ,[97,0.2657,0.0271],4)
+
+    def test_MARI_axis_cylinder(self):
+        """ Test that default axis for MARI is different"""
+        ash = Cylinder('Fe',[10,2])
+        res = ash.shape
+        self.assertEqual(res['Height'],10)
+        self.assertEqual(res['Radius'],2)
+        self.assertTrue(ash._axis_is_default)
+        test_ws = CreateSampleWorkspace(NumBanks=1,BankPixelWidth=1)
+        test_ws = ConvertUnits(test_ws,'DeltaE',Emode='Direct',EFixed=2000)
+        cor_ws,corrections = ash.correct_absorption(test_ws,is_fast=True)
+        res = ash.shape
+        self.assertEqual(res['Axis'],[0.,1.,0])
+
+        EditInstrumentGeometry (test_ws,[1],[0],InstrumentName='MARI')
+        cor_ws,corrections = ash.correct_absorption(test_ws,is_fast=True)
+        res = ash.shape
+        self.assertEqual(res['Axis'],[1.,0.,0])
+
 
     def test_adsrp_Plate(self):
         ash = FlatPlate('V',[10,2,0.1])
@@ -109,10 +131,11 @@ class AdsorbtionShapesTest(unittest.TestCase):
 
         test_ws = CreateSampleWorkspace(NumBanks=1,BankPixelWidth=1)
         test_ws = ConvertUnits(test_ws,'DeltaE',Emode='Direct',EFixed=2000)
-        #cor_ws,corrections = ash.correct_absorption(test_ws,ElementSize=5)
-        #n_bins = corrections.blocksize()
-        #corr_ranges = [n_bins,corrections.readY(0)[0],corrections.readY(0)[n_bins-1]]
-        #np.testing.assert_almost_equal(corr_ranges,[97,0.4504,0.0009],4)
+
+        cor_ws,corrections = ash.correct_absorption(test_ws,is_fast=True,ElementSize=5)
+        n_bins = corrections.blocksize()
+        corr_ranges = [n_bins,corrections.readY(0)[0],corrections.readY(0)[n_bins-1]]
+        np.testing.assert_almost_equal(corr_ranges,[97, 0., 0.],4)
 
         mccor_ws,mc_corr = ash.correct_absorption(test_ws,is_mc=True,NumberOfWavelengthPoints=20)
         n_bins = mc_corr.blocksize()
@@ -147,10 +170,10 @@ class AdsorbtionShapesTest(unittest.TestCase):
 
         test_ws =  CreateSampleWorkspace(NumBanks=1,BankPixelWidth=1)
         test_ws = ConvertUnits(test_ws,'DeltaE',Emode='Direct',EFixed=2000)
-        #cor_ws,corrections = ash.correct_absorption(test_ws,ElementSize=5)
-        #n_bins = corrections.blocksize()
-        #corr_ranges = [n_bins,corrections.readY(0)[0],corrections.readY(0)[n_bins-1]]
-        #np.testing.assert_almost_equal(corr_ranges,[97,0.2984,0.0002],4)
+        cor_ws,corrections = ash.correct_absorption(test_ws,is_fast=True,ElementSize=5)
+        n_bins = corrections.blocksize()
+        corr_ranges = [n_bins,corrections.readY(0)[0],corrections.readY(0)[n_bins-1]]
+        np.testing.assert_almost_equal(corr_ranges,[97,0.0,0.000],4)
 
         mccor_ws,mc_corr = ash.correct_absorption(test_ws,is_mc=True,NumberOfWavelengthPoints=20)
         n_bins = mc_corr.blocksize()
@@ -199,15 +222,15 @@ class AdsorbtionShapesTest(unittest.TestCase):
 
         test_ws =  CreateSampleWorkspace(NumBanks=1,BankPixelWidth=1)
         test_ws = ConvertUnits(test_ws,'DeltaE',Emode='Direct',EFixed=2000)
-        #cor_ws,corrections = ash.correct_absorption(test_ws,ElementSize=6)
-        #n_bins = corrections.blocksize()
-        #corr_ranges = [n_bins,corrections.readY(0)[0],corrections.readY(0)[n_bins-1]]
-        #np.testing.assert_almost_equal(corr_ranges,[97,0.6704,0.4097],4)
+        cor_ws,corrections = ash.correct_absorption(test_ws,is_fast=True,ElementSize=6)
+        n_bins = corrections.blocksize()
+        corr_ranges = [n_bins,corrections.readY(0)[0],corrections.readY(0)[n_bins-1]]
+        np.testing.assert_almost_equal(corr_ranges,[97,0.0,0.0],4)
 
-        ##cor_ws,corrections = ash.correct_absorption(test_ws)
-        #n_bins = corrections.blocksize()
-        #corr_ranges = [n_bins,corrections.readY(0)[0],corrections.readY(0)[n_bins-1]]
-        #np.testing.assert_almost_equal(corr_ranges,[97,0.6420,0.3997],4)
+        cor_ws,corrections = ash.correct_absorption(test_ws,is_fast=True)
+        n_bins = corrections.blocksize()
+        corr_ranges = [n_bins,corrections.readY(0)[0],corrections.readY(0)[n_bins-1]]
+        np.testing.assert_almost_equal(corr_ranges,[97,0.0,0.0],4)
  
         mccor_ws,mc_corr = ash.correct_absorption(test_ws,is_mc=True,NumberOfWavelengthPoints=20)
         n_bins = mc_corr.blocksize()

@@ -5,7 +5,6 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
-#pylind: disable=attribute-defined-outside-init
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import funcinspect
 from mantid.simpleapi import *
@@ -78,8 +77,16 @@ class anAbsorptionShape(object):
 
         if MaterialValue is not None:
             self.material = MaterialValue
-        # If true, SetSample algorithm can set-up this shape
+        # If true, SetSample algorithm can set-up this shape. If not, a generic
+        # CreateSampleShape algorithm should be used
         self._CanSetSample = True
+        # some shapes have axis, some does not. This to distinguish between them and
+        # make default axis specific to instrument
+        self._shape_has_axis = False
+       # Property describes if a shape axis direction have been changed.
+        # Some instruments (e.g. MARI) have non-standart default axis directions
+        self._axis_is_default=True
+
 
     #
     def __del__(self):
@@ -93,7 +100,7 @@ class anAbsorptionShape(object):
     #
     @property
     def material(self):
-        """ Contains the material, used in adsorbtion correction calculations"""
+        """ Contains the material, used in absorbtion correction calculations"""
         return self._Material
 
     @material.setter
@@ -142,7 +149,7 @@ class anAbsorptionShape(object):
 
         Returns:
         1) absorption-corrected workspace
-        2) if two output arguments are provided, second would be workspace with adsorbtion corrections coefficients
+        2) if two output arguments are provided, second would be workspace with absorption corrections coefficients
         """
         n_outputs,var_names = funcinspect.lhs_info('both')
 
@@ -166,14 +173,18 @@ class anAbsorptionShape(object):
         Mater_properties = self._Material
         SetSampleMaterial(correction_base_ws,**Mater_properties)
 
+        if self._shape_has_axis:
+            self._check_MARI_axis_(ws)
+
         if self._CanSetSample:
             shape_description = self._ShapeDescription
             SetSample(correction_base_ws,Geometry=shape_description)
 
         mc_corrections = corr_properties.pop('is_mc', False)
         fast_corrections = corr_properties.pop('is_fast',False)
-        if  not (mc_corrections or fast_corrections):
-            fast_corrections = False
+        if  not(mc_corrections or fast_corrections) or (mc_corrections and fast_corrections):
+            fast_corrections = False # Case when both keys are true or false reverts to default
+
         if fast_corrections:
             #raise RuntimeError('Analytical absorption corrections are not currently implemented in Direct mode')
             abs_corrections = self._fast_abs_corrections(correction_base_ws,corr_properties)
@@ -195,7 +206,7 @@ class anAbsorptionShape(object):
             return (ws,abs_corrections)
 
     def _fast_abs_corrections(self,correction_base_ws,kwarg={}):
-        """ Method to correct adsorption on a shape using fast (Numerical Integration) method
+        """ Method to correct absorption on a shape using fast (Numerical Integration) method
             if such method is available for the shape
 
         Not available on arbitrary shapes
@@ -212,7 +223,7 @@ class anAbsorptionShape(object):
 
     #
     def _mc_abs_corrections(self,correction_base_ws,kwarg={}):
-        """ Method to correct adsorption on a shape using Mont-Carlo integration
+        """ Method to correct absorption on a shape using Mont-Carlo integration
         Inputs:
          ws     -- workspace to correct. Should be in the units of wavelength
         **kwarg -- dictionary of the additional keyword arguments to provide as input for
@@ -230,7 +241,7 @@ class anAbsorptionShape(object):
     def from_str(str_val):
         """ Retrieve absorption shape from a string representation
 
-        Implements shapes factory, so evry new shape class should be subscribed to it
+        Implements shapes factory, so every new shape class should be subscribed to it
         """
         if len(anAbsorptionShape._Defined_Shapes) == 0:
             anAbsorptionShape._Defined_Shapes = \
@@ -262,6 +273,7 @@ class anAbsorptionShape(object):
             dictionary.
         """
         if value is None or not value:
+            self._axis_is_default = True
             return {}
         if not isinstance(value, collections.Iterable):
             value = [value]
@@ -295,6 +307,8 @@ class anAbsorptionShape(object):
                 ' as recognized by SetSample algorithm Geometry property'.
                 format( shape_name,len(mandatory_prop_list),len(all_prop),all_prop))
         #
+        if 'Axis' in shape_dict:
+            self._axis_is_default = False
         for ik in range(0,len(opt_prop_list)):
             if not opt_prop_list[ik] in shape_dict:
                 opt_val = opt_val_list[ik]
@@ -304,6 +318,16 @@ class anAbsorptionShape(object):
                     shape_dict[opt_prop_list[ik]] = opt_val
 
         return shape_dict
+    #
+
+    def _check_MARI_axis_(self,workspace):
+        """ method verifies, if default axis needs to be changed for MARI""" 
+        if self._axis_is_default:
+            instrument = workspace.getInstrument()
+            instr_name = instrument.getName()
+            short_n = instr_name[0:3]
+            if short_n.lower() == 'mar':
+                self._ShapeDescription['Axis'] = [1.,0.,0.]
 
 
 ##---------------------------------------------------------------------------------------------------
@@ -319,28 +343,29 @@ class Cylinder(anAbsorptionShape):
     CylinderParameters can have the form:
 
     a) The list consisting of 2 to 4 members.:
-    CylinderParameters = [Height,Radus,[[Axis],[Center]]
-    where Height, Radus are the cylinder height and radius in cm and
+    CylinderParameters = [Height,Radius,[[Axis],[Center]]
+    where Height, Radius are the cylinder height and radius in cm and
     Axis, if present is the direction of the cylinder wrt to the beam direction [0,0,1]
     e.g.:
     abs = Cylinder(['Al',0.1],[10,2,[1,0,0],[0,0,0]])
     b) The diary:
-    CylinderParameters = {Height:Height_value,Radus:Radius_value,[Axis:axisValue],[Center:TheSampleCentre]}
+    CylinderParameters = {Height:Height_value,Radius:Radius_value,[Axis:axisValue],[Center:TheSampleCentre]}
     e.g:
     abs = Cylinder(['Al',0.1],[Height:10,Radius:2,Axis:[1,0,0]])
 
     Usage of the defined Cylinder class instance:
     Correct absorption on the cylinder using CylinderAbsorption algorithm:
-    ws = abs.correct_adsorption(ws) % it is default
+    ws = abs.correct_absorption(ws) % it is default
 
     Correct absorption on the defined cylinder using Monte-Carlo Absorption algorithm:
-    ws = ads.correct_adsorption(ws,{is_mc:True,AdditionalMonte-Carlo Absorption parameters});
+    ws = ads.correct_absorption(ws,{is_mc:True,AdditionalMonte-Carlo Absorption parameters});
     """
     def __init__(self,Material=None,CylinderParams=None):
 
         anAbsorptionShape.__init__(self,Material)
         self.shape = CylinderParams
-
+        self._shape_has_axis = True
+ 
     @property
     def shape(self):
         return self._ShapeDescription
@@ -360,7 +385,7 @@ class Cylinder(anAbsorptionShape):
     #
 
     def _fast_abs_corrections(self,correction_base_ws,kwarg={}):
-        """ Method to correct adsorption on a shape using fast (Numerical Integration) method
+        """ Method to correct absorption on a shape using fast (Numerical Integration) method
         """
         kw = kwarg.copy()
         elem_size = kw.pop('NumberOfSlices',None)
@@ -369,12 +394,13 @@ class Cylinder(anAbsorptionShape):
             n_slices = int(shape_dic['Height']/elem_size)
             if n_slices <1:
                 n_slices = 1
-            n_annul  = int(shape_dic['Radius']*2*3.1415/elem_size)
+            n_annul  = int(shape_dic['Radius']*2*3.1415926/elem_size)
             if n_annul < 1:
                 n_annul = 1
             kw['NumberOfSlices'] = n_slices
             kw['NumberOfAnnuli'] = n_annul
-        kw['Emode'] = 'Direct'
+        if not 'Emode' in kw:
+            kw['Emode'] = 'Direct'
         adsrbtn_correctios = AbsorptionCorrection(correction_base_ws,**kw)
         return adsrbtn_correctios
 
@@ -392,7 +418,7 @@ class FlatPlate(anAbsorptionShape):
     PlateParameters can have the form:
 
     a) The list consisting of 3 to 5 members e.g.:
-    PlateParameters = [Height,Width,Thickness,[Center,[Angle]]]
+    PlateParameters = [Height,Width,Thickness,[Centre,[Angle]]]
     where Height,Width,Thickness are the plate sizes in cm,
     the Center, if present, a list of three values indicating the [X,Y,Z] position of the center.
     he reference frame of the defined instrument is used to set the coordinate system for the shape
@@ -411,10 +437,10 @@ class FlatPlate(anAbsorptionShape):
 
     Usage of the defined Plate class instance:
     Correct absorption on the defined plate using AbsorptionCorrections algorithm:
-    ws = abs.correct_adsorption(ws)
+    ws = abs.correct_absorption(ws,{'is_fast':True,Additiona FlatPlateAbsorption algorithm parameters})
 
     Correct absorption on the defined Plate using Monte-Carlo Absorption algorithm:
-    ws = ads.correct_adsorption(ws,{'is_mc':True,AdditionalMonte-Carlo Absorption parameters});
+    ws = ads.correct_absorption(ws,{'is_mc':True,AdditionalMonte-Carlo Absorption parameters});
     """
     def __init__(self,Material=None,PlateParams=None):
 
@@ -440,13 +466,14 @@ class FlatPlate(anAbsorptionShape):
 
     #
     def _fast_abs_corrections(self,correction_base_ws,kwarg={}):
-        """ Method to correct adsorption on the FlatPlate using fast (Numerical Integration) method
+        """ Method to correct absorption on the FlatPlate using fast (Numerical Integration) method
         """
         kw = kwarg.copy()
         prop_dict = {'Height':'SampleHeight','Width':'SampleWidth','Thick':'SampleThickness'}
         for key,val in prop_dict.items():
             kw[val] = self._ShapeDescription[key]
-        kw['Emode'] = 'Direct'
+        if not 'Emode' in kw:
+            kw['Emode'] = 'Direct'
         adsrbtn_correctios = FlatPlateAbsorption(correction_base_ws,**kw)
         return adsrbtn_correctios
 
@@ -465,8 +492,8 @@ class HollowCylinder(anAbsorptionShape):
 
     a) The list consisting of 3 to 5 members.:
     CylinderParameters = [Height,InnerRadus,OuterRadus,[[Axis],[Center]]
-    where Height, InnerRadus and OuterRadus are the cylinder height and radiuses in cm and
-    Axis, if present is the direction of the cylinder wrt to the beam direction [0,0,1]
+    where Height, InnerRadus and OuterRadus are the cylinder height and radius-es in cm and
+    Axis, if present is the direction of the cylinder wrt. to the beam direction [0,0,1]
     e.g.:
     abs = HollowCylinder(['Al',0.1],[10,2,4,[0,1,0],[0,0,0]])
     b) The diary:
@@ -477,16 +504,18 @@ class HollowCylinder(anAbsorptionShape):
 
     Usage of the defined HollowCylinder class instance:
     Correct absorption on the cylinder using CylinderAbsorption algorithm:
-    ws = abs.correct_adsorption(ws) % it is default
+    ws = abs.correct_absorption(ws) % it is default
 
     Correct absorption on the defined cylinder using Monte-Carlo Absorption algorithm:
-    ws = ads.correct_adsorption(ws,{is_mc:True,AdditionalMonte-Carlo Absorption parameters});
+    ws = ads.correct_absorption(ws,{is_mc:True,AdditionalMonte-Carlo Absorption parameters});
     """
     def __init__(self,Material=None,CylinderParams=None):
 
         anAbsorptionShape.__init__(self,Material)
         self.shape = CylinderParams
         self._CanSetSample = False
+        self._shape_has_axis = True
+
 
     @property
     def shape(self):
@@ -528,15 +557,18 @@ class HollowCylinder(anAbsorptionShape):
 
     #
     def _fast_abs_corrections(self,correction_base_ws,kwarg={}):
-        """ Method to correct adsorption on the HollowCylinder using fast (Numerical Integration) method
+        """ Method to correct absorption on the HollowCylinder using fast (Numerical Integration) method
         """
         self._add_xml_hollow_cylinder(correction_base_ws)
+
+        if not 'Emode' in kwarg:
+            kwarg['Emode'] = 'Direct'
         adsrbtn_correctios = AbsorptionCorrection(correction_base_ws,**kwarg)
         return adsrbtn_correctios
 
     #
     def _mc_abs_corrections(self,correction_base_ws,kwarg={}):
-        """ Method to correct adsorption on the HollowCylinder using Monte-Carlo integration
+        """ Method to correct absorption on the HollowCylinder using Monte-Carlo integration
         Inputs:
          ws     -- workspace to correct. Should be in the units of wavelength
         **kwarg -- dictionary of the additional keyword arguments to provide as input for
@@ -579,10 +611,10 @@ class Sphere(anAbsorptionShape):
     Usage of the defined Sphere class instance:
 
     Correct absorption on the defined Sphere using AbsorptionCorrections algorithm:
-    ws = abs.correct_adsorption(ws)
+    ws = abs.correct_absorption(ws)
 
     Correct absorption on the defined Sphere using Monte-Carlo Absorption algorithm:
-    ws = ads.correct_adsorption(ws,{'is_mc':True,AdditionalMonte-Carlo Absorption parameters});
+    ws = ads.correct_absorption(ws,{'is_mc':True,AdditionalMonte-Carlo Absorption parameters});
     """
     def __init__(self,Material=None,SphereParams=None):
 
@@ -623,23 +655,26 @@ class Sphere(anAbsorptionShape):
 
     #
     def _fast_abs_corrections(self,correction_base_ws,kwarg={}):
-        """ Method to correct adsorption on the Sphere using fast (Numerical Integration) method
+        """ Method to correct absorption on the Sphere using fast (Numerical Integration) method
             (Analytical integration) method.
             If the method is invoked without parameters, optimized SphericalAbsorption algorithm is
             deployed to calculate corrections. If there are some parameters, more general
             AbsorptionCorrections method is invoked with the parameters provided.
         """
-        if len(kwarg) == 0:
+        kw = kwarg.copy()
+        if not 'Emode' in kwarg:
+            kw['Emode'] = 'Direct'
+        if kw['Emode'].lower() == 'elastic':
             adsrbtn_correctios = SphericalAbsorption(
                 correction_base_ws,SphericalSampleRadius=self._ShapeDescription['Radius'])
         else:
             self._add_xml_sphere(correction_base_ws)
-            adsrbtn_correctios = AbsorptionCorrection(correction_base_ws,**kwarg)
+            adsrbtn_correctios = AbsorptionCorrection(correction_base_ws,**kw)
         return adsrbtn_correctios
     #
 
     def _mc_abs_corrections(self,correction_base_ws,kwarg={}):
-        """ Method to correct adsorption on the Sphere using Monte-Carlo integration
+        """ Method to correct absorption on the Sphere using Monte-Carlo integration
         Inputs:
          ws     -- workspace to correct. Should be in the units of wavelength
         **kwarg -- dictionary of the additional keyword arguments to provide as input for
