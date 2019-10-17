@@ -17,6 +17,7 @@
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/IOptionsDialog.h"
 #include "MantidQtWidgets/Common/ISlitCalculator.h"
+#include <MantidQtWidgets/Common/OptionsDialogPresenter.h>
 #include "MantidQtWidgets/Common/QtJSONUtils.h"
 #include "Reduction/Batch.h"
 
@@ -30,6 +31,7 @@ using Mantid::API::AlgorithmManager;
 using Mantid::API::MatrixWorkspace_sptr;
 using MantidWidgets::ISlitCalculator;
 using MantidWidgets::IOptionsDialog;
+using MantidWidgets::OptionsDialogPresenter;
 
 // unnamed namespace
 namespace {
@@ -41,17 +43,19 @@ Mantid::Kernel::Logger g_log("Reflectometry GUI");
  * @param messageHandler :: Interface to a class that displays messages to
  * the user
  * @param slitCalculator :: Interface to the Slit Calculator dialog
+ * @param optionsDialog :: Interface to the Options dialog
  * @param batchPresenterFactory :: [input] A factory to create the batches
  * we will manage
  */
 MainWindowPresenter::MainWindowPresenter(
     IMainWindowView *view, IMessageHandler *messageHandler,
     std::unique_ptr<ISlitCalculator> slitCalculator,
-    std::unique_ptr<IOptionsDialog> optionsDialog,
+    IOptionsDialog *optionsDialog,
     std::unique_ptr<IBatchPresenterFactory> batchPresenterFactory)
     : m_view(view), m_messageHandler(messageHandler), m_instrument(),
       m_slitCalculator(std::move(slitCalculator)),
-      m_optionsDialog(std::move(optionsDialog)),
+      m_optionsDialogPresenter(
+          new OptionsDialogPresenter(optionsDialog)),
       m_batchPresenterFactory(std::move(batchPresenterFactory)) {
   view->subscribe(this);
   for (auto *batchView : m_view->batches())
@@ -86,7 +90,7 @@ void MainWindowPresenter::notifyCloseBatchRequested(int batchIndex) {
 }
 
 void MainWindowPresenter::notifyShowOptionsRequested() {
-  m_optionsDialog->show();
+  m_optionsDialogPresenter->showView();
 }
 
 void MainWindowPresenter::notifyShowSlitCalculatorRequested() {

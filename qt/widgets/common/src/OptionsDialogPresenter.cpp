@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidQtWidgets/Common/OptionsDialogPresenter.h"
+#include "MantidQtWidgets/Common/IOptionsDialog.h"
 #include <QSettings>
 
 namespace MantidQt {
@@ -14,8 +15,9 @@ namespace MantidWidgets {
 /**
  * Construct a new presenter with the given view
  * @param view :: a handle to a view for this presenter
+ * @param model :: a handle to a model for this presenter
  */
-OptionsDialogPresenter::OptionsDialogPresenter(OptionsDialog *view)
+OptionsDialogPresenter::OptionsDialogPresenter(IOptionsDialog *view)
     : m_view(view){}
 
 /* Loads the settings saved by the user */
@@ -61,6 +63,9 @@ void OptionsDialogPresenter::applyDefaultOptions(
   options["RoundPrecision"] = 3;
 }
 
+void OptionsDialogPresenter::onLoadOptions() { loadOptions(); }
+void OptionsDialogPresenter::onSaveOptions() { saveOptions(); }
+
 /** Loads the options used into the view */
 void
 OptionsDialogPresenter::loadOptions() {
@@ -71,8 +76,13 @@ OptionsDialogPresenter::loadOptions() {
 /** Saves the options selected in the view */
 void OptionsDialogPresenter::saveOptions() {
   m_view->getOptions(m_options);
+
+  // TODO Update model
+
   saveSettings(m_options);  
 }
+
+void OptionsDialogPresenter::showView() { m_view->show(); }
 
 } // namespace MantidWidgets
 } // namespace MantidQt

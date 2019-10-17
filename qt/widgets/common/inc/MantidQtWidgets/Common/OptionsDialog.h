@@ -30,6 +30,11 @@ public:
   void getOptions(std::map<QString, QVariant> &options) override;
   void setOptions(std::map<QString, QVariant> &options) override;
   void show() override;
+  void subscribe(OptionsDialogSubscriber *notifyee) override;
+
+public slots:
+  void notifyLoadOptions();
+  void notifySaveOptions();
 
 protected:
   void initLayout();
@@ -37,9 +42,10 @@ protected:
 
 private:
   Ui::OptionsDialog m_ui;
+  // subscribe updates from view
+  OptionsDialogSubscriber *m_notifyee;
   // maps option names to widget names
   std::map<QString, QString> m_bindings;
-
 };
 
 } // namespace MantidWidgets

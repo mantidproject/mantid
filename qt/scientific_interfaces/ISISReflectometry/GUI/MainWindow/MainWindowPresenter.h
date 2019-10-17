@@ -18,6 +18,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 class ISlitCalculator;
 class IOptionsDialog;
+class OptionsDialogPresenter;
 }
 namespace CustomInterfaces {
 namespace ISISReflectometry {
@@ -39,7 +40,7 @@ public:
   MainWindowPresenter(
       IMainWindowView *view, IMessageHandler *messageHandler,
       std::unique_ptr<MantidWidgets::ISlitCalculator> slitCalculator,
-      std::unique_ptr<MantidWidgets::IOptionsDialog> optionsDialog,
+      MantidWidgets::IOptionsDialog *optionsDialog,
       std::unique_ptr<IBatchPresenterFactory> batchPresenterFactory);
   ~MainWindowPresenter();
   MainWindowPresenter(MainWindowPresenter const &) = delete;
@@ -77,7 +78,8 @@ protected:
 
 private:
   std::unique_ptr<MantidWidgets::ISlitCalculator> m_slitCalculator;
-  std::unique_ptr<MantidWidgets::IOptionsDialog> m_optionsDialog;
+  std::unique_ptr<MantidWidgets::OptionsDialogPresenter>
+      m_optionsDialogPresenter;
   std::unique_ptr<IBatchPresenterFactory> m_batchPresenterFactory;
 
   void showHelp();

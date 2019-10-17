@@ -14,12 +14,19 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
+class EXPORT_OPT_MANTIDQT_COMMON OptionsDialogSubscriber {
+public:
+  virtual void onLoadOptions() = 0;
+  virtual void onSaveOptions() = 0;
+};
+
 class EXPORT_OPT_MANTIDQT_COMMON IOptionsDialog {
 public:
   virtual ~IOptionsDialog() = default;
   virtual void getOptions(std::map<QString, QVariant> &options) = 0;
   virtual void setOptions(std::map<QString, QVariant> &options) = 0;
   virtual void show() = 0;
+  virtual void subscribe(OptionsDialogSubscriber *notifyee) = 0;
 };
 
 } // namespace MantidWidgets

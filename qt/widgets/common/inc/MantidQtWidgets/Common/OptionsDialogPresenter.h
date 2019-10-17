@@ -8,6 +8,7 @@
 #define MANTIDQT_MANTIDWIDGETS_OPTIONSDIALOGPRESENTER_H
 
 #include "MantidQtWidgets/Common/OptionsDialog.h"
+#include "MantidQtWidgets/Common/OptionsDialogModel.h"
 
 #include "DllOption.h"
 
@@ -19,17 +20,20 @@ namespace MantidWidgets {
 /**
 Implements a presenter for the options dialog.
 */
-class OptionsDialogPresenter {
+class EXPORT_OPT_MANTIDQT_COMMON OptionsDialogPresenter
+    : public OptionsDialogSubscriber {
 public:
-  OptionsDialogPresenter(OptionsDialog *view);
+  OptionsDialogPresenter(IOptionsDialog *view);
   ~OptionsDialogPresenter() = default;
 
-private: //slots
-  void loadOptions();
-  void saveOptions();
+  void onLoadOptions() override;
+  void onSaveOptions() override;
+  void showView();
 
 private:
   // Settings
+  void loadOptions();
+  void saveOptions();
   void loadSettings(std::map<QString, QVariant> &options);
   void saveSettings(const std::map<QString, QVariant> &options);
   void initOptions();
@@ -37,8 +41,9 @@ private:
 
 private:
   // Handle to the view for this presenter
-  OptionsDialog *m_view;
-
+  IOptionsDialog *m_view;
+  // Handle to the model for this presenter
+  OptionsDialogModel m_model;
   // stores the user options for the presenter
   std::map<QString, QVariant> m_options;
 };

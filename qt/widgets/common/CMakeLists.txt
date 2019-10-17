@@ -135,6 +135,7 @@ set(
   src/Python/QHashToDict.cpp
 )
     src/OptionsDialog.cpp
+    src/OptionsDialogModel.cpp
     src/OptionsDialogPresenter.cpp
     src/OptionsPropertyWidget.cpp
     src/ParseKeyValueString.cpp
@@ -254,7 +255,9 @@ set(
   inc/MantidQtWidgets/Common/MessageDisplay.h
   inc/MantidQtWidgets/Common/MultifitSetupDialog.h
   inc/MantidQtWidgets/Common/MWRunFiles.h
+  inc/MantidQtWidgets/Common/IOptionsDialog.h
   inc/MantidQtWidgets/Common/OptionsDialog.h
+  inc/MantidQtWidgets/Common/OptionsDialogModel.h
   inc/MantidQtWidgets/Common/OptionsDialogPresenter.h
   inc/MantidQtWidgets/Common/OptionsPropertyWidget.h
   inc/MantidQtWidgets/Common/pqHelpWindow.h
@@ -330,6 +333,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/MultifitSetupDialog.h
     inc/MantidQtWidgets/Common/IOptionsDialog.h
     inc/MantidQtWidgets/Common/OptionsDialog.h
+    inc/MantidQtWidgets/Common/OptionsDialogModel.h
     inc/MantidQtWidgets/Common/OptionsDialogPresenter.h
     inc/MantidQtWidgets/Common/ParseKeyValueString.h
     inc/MantidQtWidgets/Common/pixmaps.h
@@ -559,6 +563,7 @@ set(
   src/QtPropertyBrowser/WorkspaceEditorFactory.cpp
 )
     src/OptionsDialog.cpp
+    src/OptionsDialogModel.cpp
     src/OptionsDialogPresenter.cpp
 
 set(
@@ -636,6 +641,7 @@ set(
   inc/MantidQtWidgets/Common/MuonFunctionBrowser.h
   inc/MantidQtWidgets/Common/IOptionsDialog.h
   inc/MantidQtWidgets/Common/OptionsDialog.h
+  inc/MantidQtWidgets/Common/OptionsDialogModel.h
   inc/MantidQtWidgets/Common/OptionsDialogPresenter.h
   inc/MantidQtWidgets/Common/pqHelpWindow.h
   inc/MantidQtWidgets/Common/PropertyHandler.h
@@ -708,6 +714,7 @@ set(
   inc/MantidQtWidgets/Common/NonOrthogonal.h
   inc/MantidQtWidgets/Common/IOptionsDialog.h
   inc/MantidQtWidgets/Common/OptionsDialog.h
+  inc/MantidQtWidgets/Common/OptionsDialogModel.h
   inc/MantidQtWidgets/Common/OptionsDialogPresenter.h
   inc/MantidQtWidgets/Common/pixmaps.h
   inc/MantidQtWidgets/Common/PlotAxis.h

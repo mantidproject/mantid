@@ -1,10 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/OptionsDialog.h"
+#include "MantidQtWidgets/Common/OptionsDialogModel.h"
+#include "MantidQtWidgets/Common/OptionsDialogPresenter.h"
 #include <QPushButton>
 
 namespace MantidQt {
@@ -15,6 +17,7 @@ OptionsDialog::OptionsDialog(QWidget *parent) {
   Q_UNUSED(parent);
   initLayout();
   initBindings();
+  notifyLoadOptions();
 }
 
 /** Destructor */
@@ -24,7 +27,7 @@ OptionsDialog::~OptionsDialog() {}
 void OptionsDialog::initLayout() {
   m_ui.setupUi(this);
   connect(m_ui.buttonBox->button(QDialogButtonBox::Ok), SIGNAL(clicked()), this,
-          SLOT(saveOptions()));
+          SLOT(notifySaveOptions()));
 }
 
 /** Bind options to their widgets */
@@ -85,6 +88,13 @@ void OptionsDialog::setOptions(std::map<QString, QVariant> &options) {
     }
   }
 }
+
+void OptionsDialog::subscribe(OptionsDialogSubscriber *notifyee) {
+  m_notifyee = notifyee;
+}
+
+void OptionsDialog::notifyLoadOptions() { m_notifyee->onLoadOptions(); }
+void OptionsDialog::notifySaveOptions() { m_notifyee->onSaveOptions(); }
 
 void OptionsDialog::show() { QDialog::show(); }
 
