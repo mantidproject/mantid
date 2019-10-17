@@ -836,7 +836,7 @@ avoid large scripts sizes.
 
 The dedicated work-flow algorithms for the SANS reduction are:
 
-- :ref:`SANSCalculateTransmission <algm-SANSCalculateTransmission>`
+- *Calculate SANS Transmission*
 - :ref:`Q1D <algm-Q1D>` or :ref:`Qxy <algm-Qxy>`
 - :ref:`SANSConvertToWavelength <algm-SANSConvertToWavelength>`
 - :ref:`SANSConvertToWavelengthAndRebin <algm-SANSConvertToWavelengthAndRebin>`
@@ -860,14 +860,9 @@ There are two further algorithms which coordinate these algorithms, they are *SA
 *SANSSingleReduction* which are discussed further down.
 
 
-*SANSCalculateTransmission*
+*Calculate SANS Transmission*
 ------------------------------
-
-The :ref:`SANSCalculateTransmission <algm-SANSCalculateTransmission>` algorithm is one of the more complex algorithms
-in the reduction chain with many sub-steps and a wide variety of parameters which
-can be set by the users.
-
-The algorithm performs the following steps:
+The following steps are performed:
 
 1. Select the incident monitor. If this is not explicitly set then the default value is taken.
 2. Select the transmission detector ids. The detector ids are chosen via the following preference:
@@ -953,7 +948,7 @@ The algorithm performs the following steps:
 -------------------------------------------
 
 The :ref:`SANSCreateWavelengthAndPixelAdjustment <algm-SANSCreateWavelengthAndPixelAdjustment>`
-algorithm combines the output of the :ref:`SANSCalculateTransmission <algm-SANSCalculateTransmission>`
+algorithm combines the output of the *Calculate SANS Transmission* step
 algorithm, the output of the :ref:`SANSNormalizeToMonitor <algm-SANSNormalizeToMonitor>` algorithm
 and flood and direct files to produce the correction workspaces which are required
 for converting to Q

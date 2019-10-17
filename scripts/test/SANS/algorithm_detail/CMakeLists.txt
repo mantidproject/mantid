@@ -1,6 +1,7 @@
 # Tests for SANS
 
 set(TEST_PY_FILES
+    calculate_sans_transmission_test.py
     calculate_transmission_helper_test.py
     convert_to_q_test.py
     crop_helper_test.py
