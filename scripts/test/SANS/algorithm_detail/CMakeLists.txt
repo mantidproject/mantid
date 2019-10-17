@@ -3,6 +3,7 @@
 set(TEST_PY_FILES
     calculate_transmission_helper_test.py
     crop_helper_test.py
+    mask_sans_workspace_test.py
     merge_reductions_test.py
     move_workspaces_test.py
     move_sans_instrument_component_test.py

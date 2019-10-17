@@ -843,7 +843,7 @@ The dedicated work-flow algorithms for the SANS reduction are:
 - :ref:`SANSCreateWavelengthAndPixelAdjustment <algm-SANSCreateWavelengthAndPixelAdjustment>`
 - :ref:`SANSCrop <algm-SANSCrop>`
 - :ref:`SANSLoad <algm-SANSLoad>`
-- *SANSMaskWorkspace*
+- *Workspace Masking*
 - :ref:`MoveInstrumentComponent <algm-MoveInstrumentComponent>`
 - :ref:`RotateInstrumentComponent <algm-RotateInstrumentComponent>`
 - *Normalize To Monitor*
@@ -1024,12 +1024,9 @@ The algorithm sub-steps are:
 5. For LOQ apply transmission corrections if applicable. This will apply a different
    instrument definition for transmission runs.
 
-*SANSMaskWorkspace*
+*Workspace Masking*
 ---------------------
-
-The :ref:`SANSMaskWorkspace <algm-SANSMaskWorkspace>` algorithm is responsible
-for masking detectors and time bins on the scatter workspaces. There are several
-types of masking which are currently supported:
+There are several types of masking which are currently supported:
 
 - Time/Bin masking.
 - Radius masking.
@@ -1252,12 +1249,15 @@ The sub-steps of this algorithm are:
    either a custom binning or the monitor binning is applied using :ref:`Rebin <algm-Rebin>` or
    :ref:`RebinToWorkspace <algm-RebinToWorkspace>`, respectively.
 4. Both the data and the monitor workspace perform an initial move operation
+   using :ref:`SANSMove <algm-SANSMove>`. The algorithm is applied twice. The first time using
+   the *SetToZero* mode in case the algorithm had been loaded and moved already previously. This
+   resets the instrument position of the workspace to the positions of the base instrument. The second
+   time the move algorithm is operated in *InitialMove* mode.
+5. The data workspace is masked using various modes. Note that
    using :ref:`MoveInstrumentComponent <algm-MoveInstrumentComponent>`.
    The algorithm is applied twice. The first time using the *SetToZero* mode
    to reset the components to known positions from the IDF. The second
    time the components are moved and rotated to the requested positions.
-5. The data workspace is masked using :ref:`SANSMaskWorkspace <algm-SANSMaskWorkspace>`. Note that
-   only the general masks and the masks for the selected component are applied.
    Note that all steps up until now were performed in the time-of-flight domain.
 6. Convert the data from the time-of-flight to the wavelength domain using
    :ref:`SANSConvertToWavelength <algm-SANSConvertToWavelength>`.

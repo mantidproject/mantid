@@ -342,7 +342,7 @@ class Masker(with_metaclass(ABCMeta, object)):
         super(Masker, self).__init__()
 
     @abstractmethod
-    def mask_workspace(self, mask_info, workspace_to_mask, detector_type, progress):
+    def mask_workspace(self, mask_info, workspace_to_mask, detector_type):
         pass
 
 
@@ -350,8 +350,7 @@ class NullMasker(Masker):
     def __init__(self):
         super(NullMasker, self).__init__()
 
-    def mask_workspace(self, mask_info, workspace_to_mask, detector_type, progress):
-        _ = mask_info  # noqa
+    def mask_workspace(self, mask_info, workspace_to_mask, detector_type):
         return workspace_to_mask
 
 
@@ -362,7 +361,7 @@ class MaskerISIS(Masker):
         self._instrument = instrument
         self._detector_names = detector_names
 
-    def mask_workspace(self, mask_info, workspace_to_mask, detector_type, progress):
+    def mask_workspace(self, mask_info, workspace_to_mask, detector_type):
         """
         Performs the different types of masks that are currently available for ISIS reductions.
 
@@ -373,27 +372,21 @@ class MaskerISIS(Masker):
         :return: a masked workspace.
         """
         # Perform bin masking
-        progress.report("Performing bin masking.")
         workspace_to_mask = mask_bins(mask_info, workspace_to_mask, detector_type)
 
         # Perform cylinder masking
-        progress.report("Performing cylinder masking.")
         workspace_to_mask = mask_cylinder(mask_info, workspace_to_mask)
 
         # Apply the xml mask files
-        progress.report("Applying mask files.")
         workspace_to_mask = mask_with_mask_files(mask_info, workspace_to_mask)
 
         # Mask spectrum list
-        progress.report("Applying spectrum masks.")
         workspace_to_mask = mask_spectra(mask_info, workspace_to_mask, self._spectra_block, detector_type)
 
         # Mask angle
-        progress.report("Applying angle mask.")
         workspace_to_mask = mask_angle(mask_info, workspace_to_mask)
 
         # Mask beam stop
-        progress.report("Masking beam stop.")
         return mask_beam_stop(mask_info, workspace_to_mask, self._instrument, self._detector_names)
 
 
