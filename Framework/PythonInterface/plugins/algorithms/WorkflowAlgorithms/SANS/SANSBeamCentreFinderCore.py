@@ -13,6 +13,7 @@ from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, Algorit
                         IEventWorkspace)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator)
 from sans.algorithm_detail.convert_to_q import convert_workspace
+from sans.algorithm_detail.crop_helper import get_component_name
 from sans.algorithm_detail.mask_sans_workspace import mask_workspace
 from sans.algorithm_detail.move_sans_instrument_component import move_component, MoveTypes
 from sans.common.constants import EMPTY_NAME
@@ -274,13 +275,20 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
 
     def _get_cropped_workspace(self, component):
         scatter_workspace = self.getProperty("ScatterWorkspace").value
-        crop_name = "SANSCrop"
+        alg_name = "CropToComponent"
+
+        component_to_crop = DetectorType.from_string(component)
+        component_to_crop = get_component_name(scatter_workspace, component_to_crop)
+
         crop_options = {"InputWorkspace": scatter_workspace,
                         "OutputWorkspace": EMPTY_NAME,
-                        "Component": component}
-        crop_alg = create_child_algorithm(self, crop_name, **crop_options)
+                        "ComponentNames": component_to_crop}
+
+        crop_alg = create_child_algorithm(self, alg_name, **crop_options)
         crop_alg.execute()
-        return crop_alg.getProperty("OutputWorkspace").value
+
+        output_workspace = crop_alg.getProperty("OutputWorkspace").value
+        return output_workspace
 
     def _slice(self, state_serialized, workspace, monitor_workspace, data_type_as_string):
         slice_name = "SANSSliceEvent"
