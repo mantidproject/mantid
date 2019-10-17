@@ -8,10 +8,11 @@ from mantid import AnalysisDataService
 from mantid.api import AlgorithmPropertyWithValue
 from mantid.simpleapi import SumSpectra, ConvertAxesToRealSpace
 from sans.algorithm_detail.batch_execution import provide_loaded_data, create_unmanaged_algorithm, add_to_group
+from sans.algorithm_detail.mask_sans_workspace import mask_workspace
 from sans.common.constants import EMPTY_NAME
 from sans.common.enums import IntegralEnum, DetectorType, SANSDataType
 from sans.common.file_information import get_instrument_paths_for_sans_file
-from sans.common.general_functions import create_child_algorithm, parse_diagnostic_settings
+from sans.common.general_functions import parse_diagnostic_settings
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
 from sans.gui_logic.plotting import get_plotting_module
 from sans.gui_logic.models.table_model import TableModel, TableIndexModel
@@ -133,14 +134,8 @@ def plot_graph(workspace):
 
 
 def apply_mask(state, workspace, component):
-    state_serialized = state.property_manager
-    mask_name = "SANSMaskWorkspace"
-    mask_options = {"SANSState": state_serialized,
-                    "Workspace": workspace,
-                    "Component": component}
-    mask_alg = create_child_algorithm('', mask_name, **mask_options)
-    mask_alg.execute()
-    return mask_alg.getProperty("Workspace").value
+    output_ws = mask_workspace(component_as_string=component, workspace=workspace, state=state)
+    return output_ws
 
 
 def get_detector_size_from_sans_file(state, detector):
