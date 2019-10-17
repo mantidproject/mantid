@@ -37,5 +37,8 @@ Multiple GUI usability fixes including:
   been reduced.
 - The check-boxes enabling extra table options, such as *Sample Geometry* have
   been moved alongside the table controls.
+- Clicking on a cell in the table and typing will automatically start editing
+  the cell without having to double click it.
+
 
 :ref:`Release 4.2.0 <v4.2.0>`

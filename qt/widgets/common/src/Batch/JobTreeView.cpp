@@ -16,6 +16,15 @@
 #include <QKeyEvent>
 #include <QStandardItemModel>
 #include <algorithm>
+
+namespace {
+QAbstractItemView::EditTriggers getEditTriggers() {
+  auto trigger =
+      QAbstractItemView::DoubleClicked | QAbstractItemView::EditKeyPressed;
+  return trigger;
+}
+} // namespace
+
 namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {
@@ -31,7 +40,7 @@ JobTreeView::JobTreeView(QStringList const &columnHeadings,
   setHeaderLabels(columnHeadings);
   setSelectionMode(QAbstractItemView::ExtendedSelection);
   // Ensure single / double click / tab all edits the current cell
-  setEditTriggers(QAbstractItemView::AllEditTriggers);
+  setEditTriggers(getEditTriggers());
   setItemDelegate(new CellDelegate(this, *this, m_filteredModel, m_mainModel));
   setContextMenuPolicy(Qt::ActionsContextMenu);
   enableFiltering();
@@ -524,45 +533,75 @@ void JobTreeView::enableFiltering() {
 }
 
 void JobTreeView::keyPressEvent(QKeyEvent *event) {
-  switch (event->key()) {
-  case Qt::Key_I:
-    if (event->modifiers() & Qt::ControlModifier) {
-      appendAndEditAtChildRowRequested();
-      break;
-    }
-  case Qt::Key_Return:
-  case Qt::Key_Enter: {
-    if (event->modifiers() & Qt::ShiftModifier) {
-      editAtRowAboveRequested();
-    } else {
-      appendAndEditAtRowBelowRequested();
-    }
-    break;
+  if (event->modifiers() & ~Qt::NoModifier) {
+    handleModifierKeyPress(event);
+    return;
   }
+
+  switch (event->key()) {
+  case Qt::Key_Return:
+  case Qt::Key_Enter:
+    appendAndEditAtRowBelowRequested();
+    break;
   case Qt::Key_Delete:
     removeSelectedRequested();
     break;
-  case Qt::Key_C: {
-    if (event->modifiers() & Qt::ControlModifier) {
-      copySelectedRequested();
-    }
-    break;
-  }
-  case Qt::Key_V: {
-    if (event->modifiers() & Qt::ControlModifier) {
-      pasteSelectedRequested();
-    }
-    break;
-  }
-  case Qt::Key_X: {
-    if (event->modifiers() & Qt::ControlModifier) {
-      cutSelectedRequested();
-    }
-    break;
-  }
   default:
-    QTreeView::keyPressEvent(event);
+    // Switch to the cell they have highlighted
+    auto model = fromFilteredModel(currentIndex());
+    editAt(model);
+
+    // Forward the key on so it appears they typed into it
+    auto row = rowLocation().atIndex((mapToMainModel(model)));
+    auto cell = cellAt(row, currentColumn());
+    const std::string enteredText = event->text().toStdString();
+    cell.setContentText(enteredText);
+    setCellAt(row, currentColumn(), cell);
   }
+}
+
+void JobTreeView::handleModifierKeyPress(QKeyEvent *event) {
+  assert(event->modifiers() & ~Qt::NoModifier);
+  const auto modifier = event->modifiers();
+
+  if (modifier & Qt::ControlModifier) {
+    switch (event->key()) {
+    case Qt::Key_C:
+      copySelectedRequested();
+      break;
+    case Qt::Key_I:
+      appendAndEditAtChildRowRequested();
+      break;
+    case Qt::Key_V:
+      pasteSelectedRequested();
+      break;
+    case Qt::Key_X:
+      cutSelectedRequested();
+      break;
+    default:
+      QTreeView::keyPressEvent(event);
+      break;
+    }
+
+    return;
+  }
+
+  // Handle Shift +
+  if (modifier & Qt::ShiftModifier) {
+    switch (event->key()) {
+    case Qt::Key_Enter:
+    case Qt::Key_Return:
+      editAtRowAboveRequested();
+      break;
+    default:
+      QTreeView::keyPressEvent(event);
+      break;
+    }
+    return;
+  }
+
+  // Unrecognised Modifier + key so forward up to Qt
+  QTreeView::keyPressEvent(event);
 }
 
 QModelIndexForMainModel
