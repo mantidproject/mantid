@@ -5,6 +5,18 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CreateDetectorTable.h"
+#include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/UnitConversion.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -137,6 +149,8 @@ ITableWorkspace_sptr CreateDetectorTable::createDetectorTableWorkspace(
     column->setPlotType(0);
   }
 
+  t->setRowCount(nrows);
+
   // Cache some frequently used values
   const auto beamAxisIndex =
       ws->getInstrument()->getReferenceFrame()->pointingAlongBeam();
@@ -145,8 +159,9 @@ ITableWorkspace_sptr CreateDetectorTable::createDetectorTableWorkspace(
       showSignedTwoTheta{false}; // If true, signedVersion of the two theta
                                  // value should be displayed
 
+  PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*ws))
   for (int row = 0; row < nrows; ++row) {
-    TableRow colValues = t->appendRow();
+    TableRow colValues = t->getRow(row);
     size_t wsIndex = indices.empty() ? static_cast<size_t>(row) : indices[row];
     colValues << static_cast<double>(wsIndex);
     const double dataY0{ws->y(wsIndex)[0]}, dataE0{ws->e(wsIndex)[0]};

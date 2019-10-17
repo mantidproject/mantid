@@ -17,6 +17,7 @@ from mantid.api import AnalysisDataService, WorkspaceGroup
 from mantid.kernel import logger
 from mantidqt.plotting.functions import can_overplot, pcolormesh, plot, plot_from_names
 from mantid.simpleapi import CreateDetectorTable
+from mantidqt.utils.asynchronous import AsyncTask
 from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
 from mantidqt.widgets.samplelogs.presenter import SampleLogs
 from mantidqt.widgets.sliceviewer.presenter import SliceViewer
@@ -184,14 +185,17 @@ class WorkspaceWidget(PluginWidget):
                     logger.warning("{}: {}".format(type(exception).__name__, exception))
 
     def _do_show_detectors(self, names):
-        detector_tables = []
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
             try:
-                detector_tables.append(CreateDetectorTable(InputWorkspace=ws))
+                # this needs fixing
+                self.worker = AsyncTask(self.create_detector_table_and_show, ws)
+                self.worker.start()
             except RuntimeError as e:
                 return
 
-        self._do_show_data(detector_tables)
+    def create_detector_table_and_show(self, ws):
+        detector_table = CreateDetectorTable(InputWorkspace=ws)
+        self._do_show_data(detector_table)
 
     def _action_double_click_workspace(self, name):
         try:

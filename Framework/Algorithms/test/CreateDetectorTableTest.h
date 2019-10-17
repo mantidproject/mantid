@@ -24,13 +24,13 @@ public:
   static void destroySuite(CreateDetectorTableTest *suite) { delete suite; }
 
   void testName() {
-    CreateDetectorTable alg;
+    //CreateDetectorTable alg;
     //TS_ASSERT_EQUALS(alg.name(), "CreateDetectorTable");
   }
 
   void testVersion() {
     //Mantid::Algorithms::CreateDetectorTable alg;
-    //TS_ASSERT_EQUALS(alg.version(), 1);
+    // TS_ASSERT_EQUALS(alg.version(), 1);
   }
 
   void testInit() {
@@ -47,7 +47,7 @@ public:
     TS_ASSERT_EQUALS(props[1]->name(), "WorkspaceIndices");
     TS_ASSERT(props[1]->isDefault());
 
-	TS_ASSERT_EQUALS(props[2]->name(), "IncludeData");
+        TS_ASSERT_EQUALS(props[2]->name(), "IncludeData");
     TS_ASSERT(props[2]->isDefault());
 
     TS_ASSERT_EQUALS(props[3]->name(), "DetectorTableWorkspace");
