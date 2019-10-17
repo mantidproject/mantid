@@ -57,7 +57,7 @@ SelectWorkspacesDialog::SelectWorkspacesDialog(
     const std::string &customButtonLabel)
     : QDialog(parent), m_wsList(nullptr), m_okButton(nullptr),
       m_customButton(nullptr) {
-  setWindowTitle("MantidPlot - Select workspace");
+  setWindowTitle("Mantid - Select workspace");
   m_wsList = new QListWidget(parent);
 
   Mantid::API::AnalysisDataServiceImpl &ADS =

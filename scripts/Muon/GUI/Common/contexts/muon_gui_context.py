@@ -26,7 +26,15 @@ class MuonGuiContext(dict):
 
     def update_and_send_signal(self, *args, **kwargs):
         updated_items = {k: kwargs[k] for k in kwargs if k in self and kwargs[k] != self[k] or k not in self}
-        if not updated_items and kwargs:
+        equal_entries = 0
+        for key, value in updated_items.items():
+            try:
+                if self[key].id() == value.id():
+                    equal_entries += 1
+            except (AttributeError, KeyError, RuntimeError):
+                pass
+
+        if (not updated_items and kwargs) or equal_entries == len(updated_items):
             return
 
         super(MuonGuiContext, self).update(*args, **kwargs)
@@ -53,3 +61,11 @@ class MuonGuiContext(dict):
             return '+'.join([str(period) for period in summed_periods]) + '-' + '-'.join([str(period) for period in subtracted_periods])
         else:
             return '+'.join([str(period) for period in summed_periods])
+
+    def remove_workspace_by_name(self, workspace_name):
+        try:
+            if self['DeadTimeTable'].name() == workspace_name:
+                self.pop('DeadTimeTable')
+                self['DeadTimeSource'] = 'FromFile'
+        except KeyError:
+            pass

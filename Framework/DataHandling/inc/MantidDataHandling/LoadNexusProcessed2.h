@@ -53,6 +53,7 @@ private:
   InstrumentLayout m_instrumentLayout = InstrumentLayout::Mantid;
   std::vector<Indexing::SpectrumNumber> m_spectrumNumbers;
   std::vector<Mantid::detid_t> m_detectorIds;
+  std::vector<int> m_detectorCounts;
 };
 
 } // namespace DataHandling

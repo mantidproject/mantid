@@ -60,10 +60,9 @@ class MuonFileUtilsTest(unittest.TestCase):
         filename = 'MUSR00022725.nsx'
 
         name = utils.load_dead_time_from_filename(filename)
-        dead_time_table = AnalysisDataService.retrieve(name)
+        dead_time_table = AnalysisDataService.retrieve('MUSR00022725.nsx_deadtime_table')
 
-        self.assertEqual(name, 'MUSR00022725_deadTimes')
-        self.assertTrue(AnalysisDataService.doesExist(name))
+        self.assertEqual(name, 'MUSR00022725.nsx_deadtime_table')
         self.assertTrue(isinstance(dead_time_table, ITableWorkspace))
 
     def test_load_workspace_from_filename_for_existing_file(self):

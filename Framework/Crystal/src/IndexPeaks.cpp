@@ -266,13 +266,12 @@ void IndexPeaks::exec() {
             miller_index_counter++;
 
             auto hkl = peak.getHKL();
-            bool suc_indexed = false;
+            bool peak_main_indexed{false}, peak_sat_indexed{false};
 
             if (IndexingUtils::ValidIndex(hkl, tolerance)) {
               peak.setIntHKL(hkl);
               peak.setIntMNP(V3D(0, 0, 0));
-              suc_indexed = true;
-              main_indexed++;
+              peak_main_indexed = true;
               main_error += hkl.hklError();
             } else if (!crossTerm) {
               if (ModDim > 0) {
@@ -284,8 +283,7 @@ void IndexPeaks::exec() {
                   if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
                     peak.setIntHKL(hkl1);
                     peak.setIntMNP(V3D(order, 0, 0));
-                    suc_indexed = true;
-                    sate_indexed++;
+                    peak_sat_indexed = true;
                     sate_error += hkl1.hklError();
                   }
                 }
@@ -299,8 +297,7 @@ void IndexPeaks::exec() {
                   if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
                     peak.setIntHKL(hkl1);
                     peak.setIntMNP(V3D(0, order, 0));
-                    suc_indexed = true;
-                    sate_indexed++;
+                    peak_sat_indexed = true;
                     sate_error += hkl1.hklError();
                   }
                 }
@@ -314,8 +311,7 @@ void IndexPeaks::exec() {
                   if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
                     peak.setIntHKL(hkl1);
                     peak.setIntMNP(V3D(0, 0, order));
-                    suc_indexed = true;
-                    sate_indexed++;
+                    peak_sat_indexed = true;
                     sate_error += hkl1.hklError();
                   }
                 }
@@ -330,8 +326,7 @@ void IndexPeaks::exec() {
                   if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
                     peak.setIntHKL(hkl1);
                     peak.setIntMNP(V3D(order, 0, 0));
-                    suc_indexed = true;
-                    sate_indexed++;
+                    peak_sat_indexed = true;
                     sate_error += hkl1.hklError();
                   }
                 }
@@ -346,8 +341,7 @@ void IndexPeaks::exec() {
                     if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
                       peak.setIntHKL(hkl1);
                       peak.setIntMNP(V3D(m, n, 0));
-                      suc_indexed = true;
-                      sate_indexed++;
+                      peak_sat_indexed = true;
                       sate_error += hkl1.hklError();
                     }
                   }
@@ -363,14 +357,20 @@ void IndexPeaks::exec() {
                       if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
                         peak.setIntHKL(hkl1);
                         peak.setIntMNP(V3D(m, n, p));
-                        suc_indexed = true;
-                        sate_indexed++;
+                        peak_sat_indexed = true;
                         sate_error += hkl1.hklError();
                       }
                     }
               }
             }
-            if (!suc_indexed) {
+            if (peak_main_indexed) {
+              main_indexed++;
+              peak.setIntHKL(V3D(0, 0, 0));
+              peak.setIntMNP(V3D(0, 0, 0));
+            } else if (peak_sat_indexed)
+              sate_indexed++;
+            else {
+              peak.setHKL(V3D(0, 0, 0));
               peak.setIntHKL(V3D(0, 0, 0));
               peak.setIntMNP(V3D(0, 0, 0));
             }

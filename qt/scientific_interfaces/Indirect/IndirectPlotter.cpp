@@ -26,6 +26,10 @@ using namespace Mantid::API;
 
 namespace {
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+auto constexpr ERROR_CAPSIZE = 3;
+#endif
+
 template <typename BeginIter, typename Iterable>
 void removeFromIterable(BeginIter const &beginIter, Iterable &iterable) {
   iterable.erase(beginIter, iterable.end());
@@ -171,7 +175,7 @@ workbenchPlot(QStringList const &workspaceNames,
   if (kwargs)
     plotKwargs = kwargs.get();
   if (errorBars)
-    plotKwargs["capsize"] = 3;
+    plotKwargs["capsize"] = ERROR_CAPSIZE;
 
   using MantidQt::Widgets::MplCpp::plot;
   return plot(workspaceNames, boost::none, indices, figure, plotKwargs,
@@ -309,14 +313,18 @@ void IndirectPlotter::plotContour(std::string const &workspaceName) {
 void IndirectPlotter::plotTiled(std::string const &workspaceName,
                                 std::string const &workspaceIndices) {
   if (validate(workspaceName, workspaceIndices, MantidAxis::Spectrum)) {
+    auto const errorBars = IndirectSettingsHelper::externalPlotErrorBars();
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+    UNUSED_ARG(errorBars);
     runPythonCode(createPlotTiledString(
         workspaceName, createIndicesVector<std::size_t>(workspaceIndices)));
 #else
-    UNUSED_ARG(workspaceName);
-    UNUSED_ARG(workspaceIndices);
-    std::runtime_error(
-        "Tiled plotting for the Workbench has not been implemented.");
+    QHash<QString, QVariant> plotKwargs;
+    if (errorBars)
+      plotKwargs["capsize"] = ERROR_CAPSIZE;
+    plot(QStringList(QString::fromStdString(workspaceName)), boost::none,
+         createIndicesVector<int>(workspaceIndices), boost::none, plotKwargs,
+         boost::none, "Tiled Plot: " + workspaceName, errorBars, false, true);
 #endif
   }
 }

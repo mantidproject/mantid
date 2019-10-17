@@ -18,9 +18,6 @@
 
 #include <QMenu>
 
-#include <qwt_plot.h>
-#include <qwt_plot_curve.h>
-
 #include <boost/algorithm/string/predicate.hpp>
 
 using namespace Mantid::API;

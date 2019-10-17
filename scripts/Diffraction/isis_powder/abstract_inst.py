@@ -337,10 +337,7 @@ class AbstractInst(object):
             return [self._generate_inst_filename(run, file_ext) for run in run_number]
         else:
             # Individual entry
-            runfile = self._inst_prefix + str(run_number)
-            if file_ext is not None:
-                runfile += file_ext
-            return runfile
+            return self._inst_prefix + str(run_number) + file_ext
 
     def _add_formatting_options(self, format_options):
         """

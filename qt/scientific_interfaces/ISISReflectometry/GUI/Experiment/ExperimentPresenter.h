@@ -63,11 +63,11 @@ public:
   void notifyRemovePerAngleDefaultsRequested(int index) override;
   void notifyPerAngleDefaultsChanged(int row, int column) override;
 
-  void reductionPaused() override;
-  void reductionResumed() override;
-  void autoreductionPaused() override;
-  void autoreductionResumed() override;
-  void instrumentChanged(std::string const &instrumentName) override;
+  void notifyReductionPaused() override;
+  void notifyReductionResumed() override;
+  void notifyAutoreductionPaused() override;
+  void notifyAutoreductionResumed() override;
+  void notifyInstrumentChanged(std::string const &instrumentName) override;
   void restoreDefaults() override;
 
 protected:

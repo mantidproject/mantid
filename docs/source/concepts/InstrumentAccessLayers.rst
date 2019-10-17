@@ -10,7 +10,7 @@ Instrument Access via SpectrumInfo, DetectorInfo, ComponentInfo
 Introduction
 ------------
 
-There are three layers to access instrument information, :py:obj:`~mantid.api.SpectrumInfo`, :py:obj:`~mantid.geometry.DetectorInfo`, and :py:obj:`~mantid.geometry.DetectorInfo`, which are introduced to Mantid as part of Instrument 2.0. These classes  store all commonly accessed information about spectra and detectors, components, and the relationships between them. Masking, monitor flags, L1, L2, 2-theta and position are stored as part of :py:obj:`~mantid.geometry.DetectorInfo`. In addition, :py:obj:`~mantid.geometry.ComponentInfo` provides the API to tree and shape related operations historically performed by :ref:`Instrument` type.
+There are three layers to access instrument information, :py:obj:`~mantid.api.SpectrumInfo`, :py:obj:`~mantid.geometry.DetectorInfo`, and :py:obj:`~mantid.geometry.ComponentInfo`, which are introduced to Mantid as part of Instrument 2.0. These classes  store all commonly accessed information about spectra and detectors, components, and the relationships between them. Masking, monitor flags, L1, L2, 2-theta and position are stored as part of :py:obj:`~mantid.geometry.DetectorInfo`. In addition, :py:obj:`~mantid.geometry.ComponentInfo` provides the API to tree and shape related operations historically performed by :ref:`Instrument` type.
 
 A spectrum corresponds to (a group of) one or more detectors. Most algorithms work with spectra and thus :py:obj:`~mantid.api.SpectrumInfo` would be used. Some algorithms work on a lower level (with individual detectors) and thus :py:obj:`~mantid.geometry.DetectorInfo` would be used.
 

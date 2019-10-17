@@ -16,15 +16,25 @@ SANS Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+New
+###
+- Support for shifting both monitor 4 and 5 on Zoom including a new setting in the 
+  ISIS SANS GUI. A new user file command has also been added to
+  perform monitor shifts without changing the selected transmission spectrum.
+
 Improved
 ########
 
 - Option in :ref:`EQSANSCorrectFrame <algm-EQSANSCorrectFrame>` to correct
   TOF by path to individual pixel.
 - New CG2 definition file.
+- Option in :ref:`EQSANSCorrectFrame <algm-EQSANSCorrectFrame-v1>` to correct TOF by path to individual pixel
+- New CG2 definition file
+- A bug causing large batch files (1000+ runs) to take minutes to load into the
+  ISIS SANS GUI has been fixed. Large batch files will now load within seconds.
+- :ref:`ApplyTransmissionCorrection <algm-ApplyTransmissionCorrection-v1>` now can be supplied any transmission workspace that is supported by :ref:`Divide <algm-Divide-v1>` .
 
-Multiple GUI usability fixes including:
-
+Multiple ISIS SANS GUI usability fixes including:
 - Run numbers can be edited with a single click rather than double or
   triple clicks
 - Wavelength ranges such as *1,2,4,5* are now accepted. This example would
@@ -39,6 +49,5 @@ Multiple GUI usability fixes including:
   been moved alongside the table controls.
 - Clicking on a cell in the table and typing will automatically start editing
   the cell without having to double click it.
-
 
 :ref:`Release 4.2.0 <v4.2.0>`

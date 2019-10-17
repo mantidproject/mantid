@@ -4,12 +4,6 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-/*
- * PredictFractionalPeaks.cpp
- *
- *  Created on: Dec 5, 2012
- *      Author: ruth
- */
 #include "MantidCrystal/PredictFractionalPeaks.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -22,12 +16,12 @@
 
 #include <boost/math/special_functions/round.hpp>
 
-namespace Mantid {
-using namespace Mantid::DataObjects;
 using namespace Mantid::API;
-using namespace std;
+using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+
+namespace Mantid {
 namespace Crystal {
 
 DECLARE_ALGORITHM(PredictFractionalPeaks)
@@ -45,13 +39,13 @@ void PredictFractionalPeaks::init() {
                                                           Direction::Output),
       "Workspace of Peaks with peaks with fractional h,k, and/or l values");
   declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
-                      string("HOffset"), "-0.5,0.0,0.5"),
+                      std::string("HOffset"), "-0.5,0.0,0.5"),
                   "Offset in the h direction");
-  declareProperty(
-      std::make_unique<Kernel::ArrayProperty<double>>(string("KOffset"), "0"),
-      "Offset in the h direction");
   declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
-                      string("LOffset"), "-0.5,0.5"),
+                      std::string("KOffset"), "0"),
+                  "Offset in the h direction");
+  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
+                      std::string("LOffset"), "-0.5,0.5"),
                   "Offset in the h direction");
 
   declareProperty("IncludeAllPeaksInRange", false,
@@ -76,57 +70,48 @@ void PredictFractionalPeaks::init() {
                                                               Direction::Input),
                   "Maximum L value to use");
 
-  setPropertySettings(
-      "Hmin", std::make_unique<Kernel::EnabledWhenProperty>(
-                  string("IncludeAllPeaksInRange"), Kernel::IS_EQUAL_TO, "1"));
+  setPropertySettings("Hmin", std::make_unique<Kernel::EnabledWhenProperty>(
+                                  std::string("IncludeAllPeaksInRange"),
+                                  Kernel::IS_EQUAL_TO, "1"));
 
-  setPropertySettings(
-      "Hmax", std::make_unique<Kernel::EnabledWhenProperty>(
-                  string("IncludeAllPeaksInRange"), Kernel::IS_EQUAL_TO, "1"));
-  setPropertySettings(
-      "Kmin", std::make_unique<Kernel::EnabledWhenProperty>(
-                  string("IncludeAllPeaksInRange"), Kernel::IS_EQUAL_TO, "1"));
+  setPropertySettings("Hmax", std::make_unique<Kernel::EnabledWhenProperty>(
+                                  std::string("IncludeAllPeaksInRange"),
+                                  Kernel::IS_EQUAL_TO, "1"));
+  setPropertySettings("Kmin", std::make_unique<Kernel::EnabledWhenProperty>(
+                                  std::string("IncludeAllPeaksInRange"),
+                                  Kernel::IS_EQUAL_TO, "1"));
 
-  setPropertySettings(
-      "Kmax", std::make_unique<Kernel::EnabledWhenProperty>(
-                  string("IncludeAllPeaksInRange"), Kernel::IS_EQUAL_TO, "1"));
-  setPropertySettings(
-      "Lmin", std::make_unique<Kernel::EnabledWhenProperty>(
-                  string("IncludeAllPeaksInRange"), Kernel::IS_EQUAL_TO, "1"));
+  setPropertySettings("Kmax", std::make_unique<Kernel::EnabledWhenProperty>(
+                                  std::string("IncludeAllPeaksInRange"),
+                                  Kernel::IS_EQUAL_TO, "1"));
+  setPropertySettings("Lmin", std::make_unique<Kernel::EnabledWhenProperty>(
+                                  std::string("IncludeAllPeaksInRange"),
+                                  Kernel::IS_EQUAL_TO, "1"));
 
-  setPropertySettings(
-      "Lmax", std::make_unique<Kernel::EnabledWhenProperty>(
-                  string("IncludeAllPeaksInRange"), Kernel::IS_EQUAL_TO, "1"));
+  setPropertySettings("Lmax", std::make_unique<Kernel::EnabledWhenProperty>(
+                                  std::string("IncludeAllPeaksInRange"),
+                                  Kernel::IS_EQUAL_TO, "1"));
 }
 
 /// Run the algorithm
 void PredictFractionalPeaks::exec() {
   PeaksWorkspace_sptr Peaks = getProperty("Peaks");
-  if (!Peaks)
-    throw std::invalid_argument(
-        "Input workspace is not a PeaksWorkspace. Type=" + Peaks->id());
-
-  vector<double> hOffsets = getProperty("HOffset");
-  vector<double> kOffsets = getProperty("KOffset");
-  vector<double> lOffsets = getProperty("LOffset");
+  if (Peaks->getNumberPeaks() <= 0) {
+    g_log.error() << "There are no peaks in the input PeaksWorkspace\n";
+  }
+  std::vector<double> hOffsets = getProperty("HOffset");
+  std::vector<double> kOffsets = getProperty("KOffset");
+  std::vector<double> lOffsets = getProperty("LOffset");
   if (hOffsets.empty())
     hOffsets.push_back(0.0);
   if (kOffsets.empty())
     kOffsets.push_back(0.0);
   if (lOffsets.empty())
     lOffsets.push_back(0.0);
-
   bool includePeaksInRange = getProperty("IncludeAllPeaksInRange");
 
-  if (Peaks->getNumberPeaks() <= 0) {
-    g_log.error() << "There are No peaks in the input PeaksWorkspace\n";
-    return;
-  }
-
   API::Sample samp = Peaks->sample();
-
   Geometry::OrientedLattice &ol = samp.getOrientedLattice();
-
   Geometry::Instrument_const_sptr Instr = Peaks->getInstrument();
 
   auto OutPeaks = boost::dynamic_pointer_cast<IPeaksWorkspace>(
@@ -150,9 +135,9 @@ void PredictFractionalPeaks::exec() {
   if (includePeaksInRange) {
     N = boost::math::iround((Hmax - Hmin + 1) * (Kmax - Kmin + 1) *
                             (Lmax - Lmin + 1));
-    N = max<int>(100, N);
+    N = std::max<int>(100, N);
   }
-  IPeak &peak0 = Peaks->getPeak(0);
+  auto &peak0 = Peaks->getPeak(0);
   auto RunNumber = peak0.getRunNumber();
   Gon = peak0.getGoniometerMatrix();
   Progress prog(this, 0.0, 1.0, N);
@@ -168,7 +153,7 @@ void PredictFractionalPeaks::exec() {
   }
 
   const Kernel::DblMatrix &UB = ol.getUB();
-  vector<vector<int>> AlreadyDonePeaks;
+  std::vector<std::vector<int>> AlreadyDonePeaks;
   bool done = false;
   int ErrPos = 1; // Used to determine position in code of a throw
   Geometry::InstrumentRayTracer tracer(Peaks->getInstrument());
@@ -199,10 +184,10 @@ void PredictFractionalPeaks::exec() {
 
             if (Qs[2] > 0 && peak->findDetector(tracer)) {
               ErrPos = 2;
-              vector<int> SavPk{RunNumber,
-                                boost::math::iround(1000.0 * hkl1[0]),
-                                boost::math::iround(1000.0 * hkl1[1]),
-                                boost::math::iround(1000.0 * hkl1[2])};
+              std::vector<int> SavPk{RunNumber,
+                                     boost::math::iround(1000.0 * hkl1[0]),
+                                     boost::math::iround(1000.0 * hkl1[1]),
+                                     boost::math::iround(1000.0 * hkl1[2])};
 
               // TODO keep list sorted so searching is faster?
               auto it =

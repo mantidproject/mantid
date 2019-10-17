@@ -7,6 +7,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidPythonInterface/core/Copyable.h"
 #include "MantidPythonInterface/core/GetPointer.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
 
@@ -152,7 +153,7 @@ void export_Run() {
   register_ptr_to_python<Run *>();
 
   // Run class
-  class_<Run, boost::noncopyable>("Run", no_init)
+  class_<Run, boost::noncopyable>("Run")
       .def("getProtonCharge", &Run::getProtonCharge, arg("self"),
            "Return the total good proton charge for the run")
 
@@ -236,6 +237,6 @@ void export_Run() {
            return_value_policy<return_by_value>())
       .def("__setitem__", &addOrReplaceProperty,
            (arg("self"), arg("name"), arg("value")))
-
-      ;
+      .def("__copy__", &Mantid::PythonInterface::generic__copy__<Run>)
+      .def("__deepcopy__", &Mantid::PythonInterface::generic__deepcopy__<Run>);
 }

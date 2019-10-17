@@ -72,6 +72,14 @@ def image_in_figure(fig):
     return False
 
 
+def legend_in_figure(fig):
+    """Return True if there's a legend in the Figure object"""
+    for ax in fig.get_axes():
+        if ax.get_legend() or ax.legend_:
+            return True
+    return False
+
+
 def curve_in_ax(ax):
     """Return True if there is an ErrobarContainer or Line2D in axes"""
     if line_in_ax(ax) or errorbars_in_ax(ax):

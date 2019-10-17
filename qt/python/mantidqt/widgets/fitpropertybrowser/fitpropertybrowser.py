@@ -12,9 +12,9 @@ from __future__ import (print_function, absolute_import, unicode_literals)
 from qtpy.QtCore import Qt, Signal, Slot
 
 from mantid import logger
-from mantid.api import AlgorithmManager, AnalysisDataService
-from mantid.simpleapi import mtd
+from mantid.api import AlgorithmManager, AnalysisDataService, ITableWorkspace
 from mantidqt.utils.qt import import_qt
+from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
 
 from .interactive_tool import FitInteractiveTool
 
@@ -45,8 +45,8 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.toolbar_manager = toolbar_manager
         # The peak editing tool
         self.tool = None
-        # Pyplot lines for the fit result curves
-        self.fit_result_lines = []
+        # The name of the fit result workspace
+        self.fit_result_ws_name = ""
         # Pyplot line for the guess curve
         self.guess_line = None
         # Map the indices of the markers in the peak editing tool to the peak function prefixes (in the form f0.f1...)
@@ -87,6 +87,17 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
                 pass
         return allowed_spectra
 
+    def _get_table_workspace(self):
+        """
+        Get the name of the table workspace if it exists
+        """
+        for ax in self.canvas.figure.get_axes():
+            try:
+                return ax.wsName
+            except AttributeError:  # only table workspaces have wsName
+                pass
+        return None
+
     def _get_selected_workspace_artist(self):
         ws_artists_list = self.get_axes().tracked_workspaces[self.workspaceName()]
         for ws_artists in ws_artists_list:
@@ -98,6 +109,9 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         Set if the data should be normalised before fitting using the
         normalisation state of the active workspace artist.
         """
+        if AnalysisDataService.doesExist(self.workspaceName()) \
+                and isinstance(AnalysisDataService.retrieve(self.workspaceName()), ITableWorkspace):
+            return
         ws_artist = self._get_selected_workspace_artist()
         self.normaliseData(ws_artist.is_normalized)
 
@@ -113,14 +127,19 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         Override the base class method. Initialise the peak editing tool.
         """
         allowed_spectra = self._get_allowed_spectra()
+        table = self._get_table_workspace()
+
         if allowed_spectra:
             self._add_spectra(allowed_spectra)
+        elif table:
+            self.addAllowedTableWorkspace(table)
         else:
             self.toolbar_manager.toggle_fit_button_checked()
             logger.warning("Cannot open fitting tool: No valid workspaces to "
                            "fit to.")
             return
 
+        super(FitPropertyBrowser, self).show()
         self.tool = FitInteractiveTool(self.canvas, self.toolbar_manager,
                                        current_peak_type=self.defaultPeakType())
         self.tool.fit_range_changed.connect(self.set_fit_range)
@@ -130,7 +149,6 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.tool.peak_type_changed.connect(self.setDefaultPeakType)
         self.tool.add_background_requested.connect(self.add_function_slot)
         self.tool.add_other_requested.connect(self.add_function_slot)
-        super(FitPropertyBrowser, self).show()
 
         self.set_fit_bounds(self.get_fit_bounds())
         self.set_fit_range(self.tool.fit_range.get_range())
@@ -149,13 +167,13 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
 
     def get_workspace_x_range(self, workspace):
         """
-        Gets the x limits of a matrix workspace
+        Gets the x limits of a workspace
         :param workspace: The workspace to get the limits from
         """
         try:
-            x_data = workspace.dataX(self.workspaceIndex())
-            return [x_data[0], x_data[-1]]
-        except RuntimeError or IndexError:
+            x_data = self.getXRange()
+            return x_data
+        except (RuntimeError, IndexError, ValueError):
             return None
 
     def set_fit_bounds(self, fit_bounds):
@@ -171,7 +189,8 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         Sets the range to fit in the FitPropertyBrowser
         :param fit_range: The new fit range
         """
-        self.setXRange(fit_range[0], fit_range[1])
+        if fit_range is not None:
+            self.setXRange(fit_range[0], fit_range[1])
 
     def hide(self):
         """
@@ -203,13 +222,10 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         """
         Delete the fit curves.
         """
-        for lin in self.fit_result_lines:
-            try:
-                lin.remove()
-            except ValueError:
-                # workspace replacement could invalidate these references
-                pass
-        self.fit_result_lines = []
+
+        if self.fit_result_ws_name:
+            ws = AnalysisDataService.retrieve(self.fit_result_ws_name)
+            self.get_axes().remove_workspace_artists(ws)
         self.update_legend()
 
     def get_lines(self):
@@ -230,7 +246,8 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         """
         axes = self.get_axes()
         if axes.legend_ is not None:
-            axes.legend().draggable()
+            props = LegendProperties.from_legend(axes.legend_)
+            LegendProperties.create_legend(props, axes)
 
     def plot_guess(self):
         """
@@ -244,13 +261,20 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         startX = self.startX()
         endX = self.endX()
         out_ws_name = '{}_guess'.format(ws_name)
+        workspace = AnalysisDataService.retrieve(ws_name)
         try:
             alg = AlgorithmManager.createUnmanaged('EvaluateFunction')
             alg.setChild(True)
             alg.initialize()
             alg.setProperty('Function', fun)
             alg.setProperty('InputWorkspace', ws_name)
-            alg.setProperty('WorkspaceIndex', ws_index)
+            if isinstance(workspace, ITableWorkspace):
+                alg.setProperty('XColumn', self.getXColumnName())
+                alg.setProperty('YColumn', self.getYColumnName())
+                if self.getErrColumnName():
+                    alg.setProperty('ErrColumn', self.getErrColumnName())
+            else:
+                alg.setProperty('WorkspaceIndex', ws_index)
             alg.setProperty('StartX', startX)
             alg.setProperty('EndX', endX)
             alg.setProperty('OutputWorkspace', out_ws_name)
@@ -259,11 +283,15 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
             return
 
         out_ws = alg.getProperty('OutputWorkspace').value
+
         # Setting distribution=True prevents the guess being normalised
         self.guess_line = self.get_axes().plot(out_ws, wkspIndex=1,
                                                label=out_ws_name,
                                                distribution=True,
                                                update_axes_labels=False)[0]
+
+        self.get_axes().legend().draggable()
+
         if self.guess_line:
             self.setTextPlotGuess('Remove Guess')
         self.canvas.draw()
@@ -318,7 +346,12 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         :param name: The name of Fit's output workspace.
         """
         from mantidqt.plotting.functions import plot
-        ws = mtd[name]
+
+        self.fit_result_ws_name = name
+        axes = self.get_axes()
+        props = LegendProperties.from_legend(axes.legend_)
+
+        ws = AnalysisDataService.retrieve(name)
 
         # Keep local copy of the original lines
         original_lines = self.get_lines()
@@ -330,18 +363,15 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         else:
             plot([ws], wksp_indices=[1], fig=self.canvas.figure, overplot=True)
 
-        name += ':'
-        for lin in self.get_lines():
-            if lin.get_label().startswith(name):
-                self.fit_result_lines.append(lin)
-
         # Add properties back to the lines
         new_lines = self.get_lines()
         for new_line, old_line in zip(new_lines, original_lines):
             new_line.update_from(old_line)
 
+        handles, labels = axes.get_legend_handles_labels()
+
         # Now update the legend to make sure it changes to the old properties
-        self.get_axes().legend().draggable()
+        LegendProperties.create_legend(props, axes)
 
     @Slot(int, float, float, float)
     def peak_added_slot(self, peak_id, centre, height, fwhm):

@@ -12,17 +12,14 @@
 
 namespace Mantid {
 namespace Crystal {
-/** CreatFractionalPeaks : Algorithm to create a PeaksWorkspace with peaks
-   corresponding
-    to fractional h,k,and l values.
 
-    @author Ruth Mikkelson
-    @date   2012-12-05
-  */
+/**
+ *
+ */
 class DLLExport PredictFractionalPeaks : public API::Algorithm {
 public:
   /// Algorithm's name for identification
-  const std::string name() const override { return "PredictFractionalPeaks"; };
+  const std::string name() const override { return "PredictFractionalPeaks"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "The offsets can be from hkl values in a range of hkl values or "

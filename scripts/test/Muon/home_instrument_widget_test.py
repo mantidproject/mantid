@@ -284,7 +284,7 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
 
         self.assertEqual(self.view.dead_time_selector.currentIndex(), DEADTIME_WORKSPACE)
         self.view.warning_popup.assert_not_called()
-        self.assertEqual(self.view.dead_time_file_selector.currentText(), 'MUSR00015196_deadTimes')
+        self.assertEqual(self.view.dead_time_file_selector.currentText(), 'MUSR00015196.nxs_deadtime_table_1')
         self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, {'DeadTimeTable': mock.ANY})
 
     def test_validate_variable_rebin_string_allows_single_number(self):

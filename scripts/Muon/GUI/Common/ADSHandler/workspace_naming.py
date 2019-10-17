@@ -8,16 +8,24 @@ from __future__ import (absolute_import, division, print_function)
 import re
 
 
-group_str =  "; Group; "
+group_str = "; Group; "
 pair_str = "; Pair Asym; "
 phaseQuad_str = '; PhaseQuad'
 
 
-def get_raw_data_workspace_name(context, run, period='1'):
-    if context.data_context.is_multi_period():
-        return context.data_context._base_run_name(run) + "_raw_data" + "_period_" + period + context.workspace_suffix
+def get_raw_data_workspace_name(instrument, run, multi_period, period='1', workspace_suffix=' MA'):
+    if multi_period:
+        return _base_run_name(instrument, run) + "_raw_data" + "_period_" + period + workspace_suffix
     else:
-        return context.data_context._base_run_name(run) + "_raw_data"  + context.workspace_suffix
+        return _base_run_name(instrument, run) + "_raw_data"  + workspace_suffix
+
+
+def get_deadtime_data_workspace_name(instrument, run, workspace_suffix=' MA'):
+    return _base_run_name(instrument, run) + "_deadtime"  + workspace_suffix
+
+
+def _base_run_name(instrument, run=None):
+    return str(instrument) + run
 
 
 def get_group_data_workspace_name(context, group_name, run, rebin):

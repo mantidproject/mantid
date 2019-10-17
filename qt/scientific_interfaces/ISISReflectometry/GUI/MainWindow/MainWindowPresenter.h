@@ -11,9 +11,13 @@
 #include "GUI/Batch/IBatchPresenter.h"
 #include "IMainWindowPresenter.h"
 #include "IMainWindowView.h"
+#include "MantidGeometry/Instrument.h"
 #include <memory>
 
 namespace MantidQt {
+namespace MantidWidgets {
+class ISlitCalculator;
+}
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
@@ -33,6 +37,7 @@ public:
   /// Constructor
   MainWindowPresenter(
       IMainWindowView *view, IMessageHandler *messageHandler,
+      std::unique_ptr<MantidWidgets::ISlitCalculator> slitCalculator,
       std::unique_ptr<IBatchPresenterFactory> batchPresenterFactory);
   ~MainWindowPresenter();
   MainWindowPresenter(MainWindowPresenter const &) = delete;
@@ -43,10 +48,15 @@ public:
   // IMainWindowPresenter overrides
   bool isAnyBatchProcessing() const override;
   bool isAnyBatchAutoreducing() const override;
-  void notifyAutoreductionResumed() override;
-  void notifyAutoreductionPaused() override;
-  void reductionResumed() override;
-  void reductionPaused() override;
+  void notifyAnyBatchAutoreductionResumed() override;
+  void notifyAnyBatchAutoreductionPaused() override;
+  void notifyAnyBatchReductionResumed() override;
+  void notifyAnyBatchReductionPaused() override;
+  void
+  notifyChangeInstrumentRequested(std::string const &instrumentName) override;
+  void notifyUpdateInstrumentRequested() override;
+  Mantid::Geometry::Instrument_const_sptr instrument() const override;
+  std::string instrumentName() const override;
 
   // MainWindowSubscriber overrides
   void notifyHelpPressed() override;
@@ -54,16 +64,26 @@ public:
   void notifyCloseBatchRequested(int batchIndex) override;
   void notifySaveBatchRequested(int batchIndex) override;
   void notifyLoadBatchRequested(int batchIndex) override;
+  void notifyShowOptionsRequested() override;
+  void notifyShowSlitCalculatorRequested() override;
 
 protected:
   IMainWindowView *m_view;
   IMessageHandler *m_messageHandler;
   std::vector<std::unique_ptr<IBatchPresenter>> m_batchPresenters;
-  std::unique_ptr<IBatchPresenterFactory> m_batchPresenterFactory;
+  Mantid::Geometry::Instrument_const_sptr m_instrument;
 
 private:
+  std::unique_ptr<MantidWidgets::ISlitCalculator> m_slitCalculator;
+  std::unique_ptr<IBatchPresenterFactory> m_batchPresenterFactory;
+
   void showHelp();
   void addNewBatch(IBatchView *batchView);
+  void initNewBatch(IBatchPresenter *batchPresenter,
+                    std::string const &instrument);
+  void changeInstrument(std::string const &instrumentName);
+  void updateInstrument(const std::string &instrumentName);
+
   void disableSaveAndLoadBatch();
   void enableSaveAndLoadBatch();
 

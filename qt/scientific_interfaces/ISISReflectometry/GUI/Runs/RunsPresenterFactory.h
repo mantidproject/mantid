@@ -23,24 +23,22 @@ public:
   RunsPresenterFactory( // cppcheck-suppress passedByValue
       RunsTablePresenterFactory runsTablePresenterFactory,
       double thetaTolerance, std::vector<std::string> instruments,
-      int defaultInstrumentIndex, IMessageHandler *messageHandler)
+      IMessageHandler *messageHandler)
       : m_runsTablePresenterFactory(std::move(runsTablePresenterFactory)),
         m_thetaTolerance(std::move(thetaTolerance)),
         m_instruments(std::move(instruments)),
-        m_defaultInstrumentIndex(std::move(defaultInstrumentIndex)),
         m_messageHandler(messageHandler) {}
 
   std::unique_ptr<IRunsPresenter> make(IRunsView *view) {
     return std::make_unique<RunsPresenter>(
         view, view, m_runsTablePresenterFactory, m_thetaTolerance,
-        m_instruments, m_defaultInstrumentIndex, m_messageHandler);
+        m_instruments, m_messageHandler);
   }
 
 private:
   RunsTablePresenterFactory m_runsTablePresenterFactory;
   double m_thetaTolerance;
   std::vector<std::string> m_instruments;
-  int m_defaultInstrumentIndex;
   IMessageHandler *m_messageHandler;
 };
 } // namespace ISISReflectometry

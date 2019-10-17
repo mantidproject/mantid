@@ -26,6 +26,7 @@ set(
 set(
   INC_FILES
   inc/MantidPythonInterface/core/CallMethod.h
+  inc/MantidPythonInterface/core/Copyable.h
   inc/MantidPythonInterface/core/DataServiceExporter.h
   inc/MantidPythonInterface/core/DllConfig.h
   inc/MantidPythonInterface/core/ErrorHandling.h

@@ -571,9 +571,9 @@ class ISISPowderMockInst(object):
         return ISISPowderMockRunDetails(file_ext=self._file_ext)
 
     @staticmethod
-    def _generate_input_file_name(run_number):
+    def _generate_input_file_name(run_number, file_ext=""):
         # Mantid will automatically convert this into either POL or POLARIS
-        return "POL" + str(run_number)
+        return "POL" + str(run_number) + file_ext
 
     @staticmethod
     def _normalise_ws_current(ws_to_correct, **_):

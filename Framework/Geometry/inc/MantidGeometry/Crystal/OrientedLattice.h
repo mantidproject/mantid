@@ -42,7 +42,7 @@ public:
   // Access private variables
   const Kernel::DblMatrix &getU() const;
   const Kernel::DblMatrix &getUB() const;
-  Kernel::DblMatrix &getModUB();
+  const Kernel::DblMatrix &getModUB() const;
   void setU(const Kernel::DblMatrix &newU, const bool force = true);
   void setUB(const Kernel::DblMatrix &newUB);
   void setModUB(const Kernel::DblMatrix &newModUB);

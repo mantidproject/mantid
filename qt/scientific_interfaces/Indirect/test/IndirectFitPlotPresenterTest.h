@@ -81,6 +81,8 @@ public:
   void emitBackgroundChanged(double value) { emit backgroundChanged(value); }
 
   /// Public methods
+  MOCK_METHOD1(watchADS, void(bool watch));
+
   MOCK_CONST_METHOD0(getSelectedSpectrum, std::size_t());
   MOCK_CONST_METHOD0(getSelectedSpectrumIndex, int());
   MOCK_CONST_METHOD0(getSelectedDataIndex, int());
@@ -138,7 +140,7 @@ public:
   /// Public Slots
   MOCK_METHOD0(clearTopPreview, void());
   MOCK_METHOD0(clearBottomPreview, void());
-  MOCK_METHOD0(clear, void());
+  MOCK_METHOD0(clearPreviews, void());
 
   MOCK_METHOD2(setHWHMRange, void(double minimum, double maximum));
   MOCK_METHOD1(setHWHMMinimum, void(double minimum));
@@ -298,8 +300,6 @@ public:
         .WillByDefault(Return(m_ads->retrieveWorkspace("WorkspaceName")));
 
     EXPECT_CALL(*m_fittingModel, getWorkspace(index)).Times(3);
-    EXPECT_CALL(*m_view, removeFromBottomPreview(QString("Difference")))
-        .Times(1);
 
     m_view->emitSelectedFitDataChanged(index);
   }
@@ -311,7 +311,7 @@ public:
         .WillByDefault(Return(nullptr));
 
     EXPECT_CALL(*m_fittingModel, getWorkspace(index)).Times(2);
-    EXPECT_CALL(*m_view, clear()).Times(1);
+    EXPECT_CALL(*m_view, clearPreviews()).Times(1);
 
     m_view->emitSelectedFitDataChanged(index);
   }
@@ -324,37 +324,10 @@ public:
         .WillByDefault(Return(range));
 
     EXPECT_CALL(*m_fittingModel, getFittingRange(index, 0))
-        .Times(2)
+        .Times(1)
         .WillRepeatedly(Return(range));
-    EXPECT_CALL(*m_view, setFitRangeMinimum(1.0)).Times(2);
-    EXPECT_CALL(*m_view, setFitRangeMaximum(2.0)).Times(2);
-
-    m_view->emitSelectedFitDataChanged(index);
-  }
-
-  void
-  test_that_the_selectedFitDataChanged_signal_will_enable_PlotGuess_when_there_is_a_fit_function_and_workspace() {
-    std::size_t const index(0);
-    std::string const workspaceName("WorkspaceName");
-    auto const fitFunction = getFunctionWithWorkspaceName(workspaceName);
-
-    ON_CALL(*m_fittingModel, getFittingFunction())
-        .WillByDefault(Return(fitFunction));
-    ON_CALL(*m_fittingModel, getWorkspace(index))
-        .WillByDefault(Return(m_ads->retrieveWorkspace(workspaceName)));
-
-    EXPECT_CALL(*m_view, enablePlotGuess(true)).Times(1);
-
-    m_view->emitSelectedFitDataChanged(index);
-  }
-
-  void
-  test_that_the_selectedFitDataChanged_signal_will_disable_the_guess_plot_when_there_is_no_fit_function() {
-    std::size_t const index(0);
-    ON_CALL(*m_fittingModel, getWorkspace(index))
-        .WillByDefault(Return(m_ads->retrieveWorkspace("WorkspaceName")));
-
-    EXPECT_CALL(*m_view, enablePlotGuess(false)).Times(1);
+    EXPECT_CALL(*m_view, setFitRangeMinimum(1.0)).Times(1);
+    EXPECT_CALL(*m_view, setFitRangeMaximum(2.0)).Times(1);
 
     m_view->emitSelectedFitDataChanged(index);
   }
@@ -371,8 +344,7 @@ public:
         .WillByDefault(Return(m_ads->retrieveWorkspace("WorkspaceName")));
 
     EXPECT_CALL(*m_fittingModel, getWorkspace(index)).Times(2);
-    EXPECT_CALL(*m_view, removeFromBottomPreview(QString("Difference")))
-        .Times(1);
+    EXPECT_CALL(*m_view, clearPreviews()).Times(1);
 
     m_view->emitPlotSpectrumChanged(index);
   }
@@ -384,7 +356,7 @@ public:
         .WillByDefault(Return(nullptr));
 
     EXPECT_CALL(*m_fittingModel, getWorkspace(index)).Times(1);
-    EXPECT_CALL(*m_view, clear()).Times(1);
+    EXPECT_CALL(*m_view, clearPreviews()).Times(1);
 
     m_view->emitPlotSpectrumChanged(index);
   }
@@ -397,10 +369,10 @@ public:
         .WillByDefault(Return(range));
 
     EXPECT_CALL(*m_fittingModel, getFittingRange(index, 0))
-        .Times(2)
-        .WillRepeatedly(Return(range));
-    EXPECT_CALL(*m_view, setFitRangeMinimum(1.0)).Times(2);
-    EXPECT_CALL(*m_view, setFitRangeMaximum(2.0)).Times(2);
+        .Times(1)
+        .WillOnce(Return(range));
+    EXPECT_CALL(*m_view, setFitRangeMinimum(1.0)).Times(1);
+    EXPECT_CALL(*m_view, setFitRangeMaximum(2.0)).Times(1);
 
     m_view->emitPlotSpectrumChanged(index);
   }
@@ -434,18 +406,18 @@ public:
     ON_CALL(*m_fittingModel, getWorkspace(index))
         .WillByDefault(Return(m_ads->retrieveWorkspace(workspaceName)));
 
-    EXPECT_CALL(*m_view, removeFromTopPreview(QString("Guess"))).Times(0);
+    EXPECT_CALL(*m_view, clearPreviews()).Times(0);
 
     m_view->emitPlotGuessChanged(true);
   }
 
   void
-  test_that_the_plotGuessChanged_signal_will_clear_the_guess_plot_when_passed_false() {
+  test_that_the_plotGuessChanged_signal_will_clear_the_plot_when_passed_false() {
     std::size_t const index(0);
     ON_CALL(*m_fittingModel, getWorkspace(index))
         .WillByDefault(Return(m_ads->retrieveWorkspace("WorkspaceName")));
 
-    EXPECT_CALL(*m_view, removeFromTopPreview(QString("Guess"))).Times(1);
+    EXPECT_CALL(*m_view, clearPreviews()).Times(1);
 
     m_view->emitPlotGuessChanged(false);
   }
