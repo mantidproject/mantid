@@ -13,6 +13,7 @@ from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, Algorit
                         IEventWorkspace)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator)
 from sans.algorithm_detail.crop_helper import get_component_name
+from sans.algorithm_detail.mask_sans_workspace import mask_workspace
 from sans.algorithm_detail.move_sans_instrument_component import move_component, MoveTypes
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_child_algorithm, append_to_sans_file_tag
@@ -155,7 +156,7 @@ class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
         # 5. Apply masking (pixel masking and time masking)
         # --------------------------------------------------------------------------------------------------------------
         progress.report("Masking ...")
-        scatter_data = self._mask(state_serialized, scatter_data, component_as_string)
+        scatter_data = self._mask(state=state, workspace=scatter_data, component=component_as_string)
 
         # --------------------------------------------------------------------------------------------------------------
         # 6. Convert to Wavelength
@@ -231,14 +232,9 @@ class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
                        is_transmission_workspace=is_transmission, move_type=MoveTypes.INITIAL_MOVE)
         return workspace
 
-    def _mask(self, state_serialized, workspace, component):
-        mask_name = "SANSMaskWorkspace"
-        mask_options = {"SANSState": state_serialized,
-                        "Workspace": workspace,
-                        "Component": component}
-        mask_alg = create_child_algorithm(self, mask_name, **mask_options)
-        mask_alg.execute()
-        return mask_alg.getProperty("Workspace").value
+    def _mask(self, state, workspace, component):
+        output_ws = mask_workspace(component_as_string=component, workspace=workspace, state=state)
+        return output_ws
 
     def _convert_to_wavelength(self, state_serialized, workspace):
         wavelength_name = "SANSConvertToWavelength"
