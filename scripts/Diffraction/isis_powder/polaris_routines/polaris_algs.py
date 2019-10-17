@@ -151,16 +151,14 @@ def _generate_grouped_ts_pdf(run_number, focused_ws, q_lims, cal_file_name, samp
     width_x = (max_x-min_x)/x_data.size
     fit_spectra = mantid.FitIncidentSpectrum(InputWorkspace=monitor,
                                              BinningForCalc=[min_x, 1*width_x, max_x],
-                                             BinningForFit=[min_x, 1*width_x, max_x],
+                                             BinningForFit=[min_x, 10*width_x, max_x],
                                              FitSpectrumWith="CubicSpline")
     placzek = mantid.CalculatePlaczekSelfScattering(InputWorkspace=raw_ws, IncidentSpecta=fit_spectra)
-    mantid.ConvertFromDistribution(Workspace=placzek)
     cal_workspace = mantid.LoadCalFile(InputWorkspace=placzek,
                                        CalFileName=cal_file_name,
                                        Workspacename='cal_workspace',
                                        MakeOffsetsWorkspace=False,
                                        MakeMaskWorkspace=False)
-    placzek = mantid.AlignDetectors(InputWorkspace=placzek, CalibrationFile=cal_file_name)
     placzek = mantid.DiffractionFocussing(InputWorkspace=placzek, GroupingFilename=cal_file_name)
     n_pixel = np.zeros(placzek.getNumberHistograms())
     for i in range(cal_workspace.getNumberHistograms()):
@@ -169,8 +167,10 @@ def _generate_grouped_ts_pdf(run_number, focused_ws, q_lims, cal_file_name, samp
             n_pixel[int(grouping[0]-1)] += 1
     correction_ws = mantid.CreateWorkspace(DataY=n_pixel, DataX=[0, 1], NSpec=placzek.getNumberHistograms())
     placzek = mantid.Divide(LHSWorkspace=placzek, RHSWorkspace=correction_ws)
+    mantid.ConvertToDistribution(Workspace=placzek)
     placzek = mantid.ConvertUnits(InputWorkspace=placzek, Target="MomentumTransfer", EMode='Elastic')
     placzek = mantid.RebinToWorkspace(WorkspaceToRebin=placzek, WorkspaceToMatch=focused_data_combined)
+    mantid.ConvertFromDistribution(Workspace=placzek)
     mantid.Subtract(LHSWorkspace=focused_data_combined,
                     RHSWorkspace=placzek,
                     OutputWorkspace=focused_data_combined)
@@ -197,10 +197,10 @@ def _generate_grouped_ts_pdf(run_number, focused_ws, q_lims, cal_file_name, samp
         q_min[i] = pdf_x_array[np.amin(np.where(pdf_x_array >= q_min[i]))]
         q_max[i] = pdf_x_array[np.amax(np.where(pdf_x_array <= q_max[i]))]
         bin_width = min(pdf_x_array[1] - pdf_x_array[0], bin_width)
-    focused_data_combined = mantid.CropWorkspaceRagged(InputWorkspace=focused_data_combined, XMin=q_min, XMax=q_max)
     mantid.MatchSpectra(InputWorkspace=focused_data_combined,
                         OutputWorkspace=focused_data_combined,
                         ReferenceSpectrum=1)
+    focused_data_combined = mantid.CropWorkspaceRagged(InputWorkspace=focused_data_combined, XMin=q_min, XMax=q_max)
     focused_data_combined = mantid.Rebin(InputWorkspace=focused_data_combined,
                                          Params=[min(q_min), bin_width, max(q_max)])
     focused_data_combined = mantid.SumSpectra(InputWorkspace=focused_data_combined,
