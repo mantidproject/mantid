@@ -98,7 +98,7 @@ class SANSCreateWavelengthAndPixelAdjustment(ParallelDataProcessorAlgorithm):
         The participating workspaces are:
         1. A workspace loaded from a calibration file
         2.. The workspace resulting from the monitor normalization
-        3. The workspace resulting from the transmission calculation (using SANSCalculateTransmission) if applicable
+        3. The workspace resulting from the transmission calculation (using CalculateSANSTransmission) if applicable
 
         :param wavelength_adjustment_file: the file path to the wavelength adjustment file
         :param transmission_workspace: the calculated transmission workspace (which can be None)
