@@ -33,6 +33,7 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         self.calibration_presenter = None
         self.set_on_help_clicked(self.open_help_window)
 
+        # Setup Tabs
         self.setup_calibration()
 
     def setup_calibration(self):
