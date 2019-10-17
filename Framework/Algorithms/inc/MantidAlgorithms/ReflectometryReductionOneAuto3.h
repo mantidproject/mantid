@@ -45,20 +45,15 @@ private:
   };
 
   struct RebinParams {
-    RebinParams(const double qMin, const bool qMinIsDefault, const double qMax,
-                const bool qMaxIsDefault, const boost::optional<double> qStep)
-        : m_qMin(qMin), m_qMinIsDefault(qMinIsDefault), m_qMax(qMax),
-          m_qMaxIsDefault(qMaxIsDefault), m_qStep(qStep){};
+    double qMin;
+    bool qMinIsDefault;
+    double qMax;
+    bool qMaxIsDefault;
+    boost::optional<double> qStep;
 
-    double m_qMin;
-    bool m_qMinIsDefault;
-    double m_qMax;
-    bool m_qMaxIsDefault;
-    boost::optional<double> m_qStep;
-
-    bool hasQStep() const { return m_qStep.is_initialized(); }
+    bool hasQStep() const { return qStep.is_initialized(); }
     std::vector<double> asVector() const {
-      return std::vector<double>{m_qMin, *m_qStep, m_qMax};
+      return std::vector<double>{qMin, *qStep, qMax};
     }
   };
 

@@ -418,7 +418,7 @@ void ReflectometryReductionOneAuto3::exec() {
   MatrixWorkspace_sptr IvsQ = alg->getProperty("OutputWorkspace");
   const auto params = getRebinParams(IvsQ, theta);
   auto IvsQC = IvsQ;
-  if (!(params.m_qMinIsDefault && params.m_qMaxIsDefault))
+  if (!(params.qMinIsDefault && params.qMaxIsDefault))
     IvsQC = cropQ(IvsQ, params);
   setProperty("OutputWorkspace", IvsQC);
 
@@ -441,10 +441,10 @@ void ReflectometryReductionOneAuto3::exec() {
 
   // Set other properties so they can be updated in the Reflectometry interface
   setProperty("ThetaIn", theta);
-  setProperty("MomentumTransferMin", params.m_qMin);
-  setProperty("MomentumTransferMax", params.m_qMax);
+  setProperty("MomentumTransferMin", params.qMin);
+  setProperty("MomentumTransferMax", params.qMax);
   if (params.hasQStep())
-    setProperty("MomentumTransferStep", -(*params.m_qStep));
+    setProperty("MomentumTransferStep", -(*params.qStep));
   if (getPointerToProperty("ScaleFactor")->isDefault())
     setProperty("ScaleFactor", 1.0);
 }
@@ -627,8 +627,8 @@ auto ReflectometryReductionOneAuto3::getRebinParams(
                                          inputWS->x(0).front(), qMinIsDefault);
   auto const qMax = getPropertyOrDefault("MomentumTransferMax",
                                          inputWS->x(0).back(), qMaxIsDefault);
-  return RebinParams(qMin, qMinIsDefault, qMax, qMaxIsDefault,
-                     getQStep(inputWS, theta));
+  return RebinParams{qMin, qMinIsDefault, qMax, qMaxIsDefault,
+                     getQStep(inputWS, theta)};
 }
 
 /** Get the binning step the final output workspace in Q
@@ -710,10 +710,10 @@ ReflectometryReductionOneAuto3::cropQ(MatrixWorkspace_sptr inputWS,
   algCrop->initialize();
   algCrop->setProperty("InputWorkspace", inputWS);
   algCrop->setProperty("OutputWorkspace", inputWS);
-  if (!(params.m_qMinIsDefault))
-    algCrop->setProperty("XMin", params.m_qMin);
-  if (!(params.m_qMaxIsDefault))
-    algCrop->setProperty("XMax", params.m_qMax);
+  if (!(params.qMinIsDefault))
+    algCrop->setProperty("XMin", params.qMin);
+  if (!(params.qMaxIsDefault))
+    algCrop->setProperty("XMax", params.qMax);
   algCrop->execute();
   MatrixWorkspace_sptr IvsQ = algCrop->getProperty("OutputWorkspace");
   return IvsQ;
