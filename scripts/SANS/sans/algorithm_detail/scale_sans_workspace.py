@@ -81,9 +81,9 @@ def _get_volume(scale_info):
     # Now we calculate the volume
     if shape is SampleShape.Cylinder:
         # Volume = circle area * height
-        # Factor of four comes from radius = width/2
         volume = height * math.pi
-        volume *= math.pow(width, 2) / 4.0
+        radius = width / 2.0
+        volume *= math.pow(radius, 2)
     elif shape is SampleShape.FlatPlate:
         # Flat plate sample
         volume = width * height * thickness
