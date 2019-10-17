@@ -602,13 +602,11 @@ RemovePromptPulse                      all
 RenameWorkspace                        all
 ReplaceSpecialValues                   all                     see ``UnaryOperation``
 RotateInstrumentComponent              all
-SANSCalculateTransmission              MasterOnly, Identical
 SANSConvertToQ                         all
 SANSConvertToWavelength                all
 SANSConvertToWavelengthAndRebin        all
 SANSCreateAdjustmentWorkspaces         all
 SANSCreateWavelengthAndPixelAdjustment MasterOnly, Identical
-SANSCrop                               all
 SANSFitShiftScale                      MasterOnly, Identical
 SANSLoad                               MasterOnly, Identical   child algorithms may actually be run with ``ExecutionMode::Distributed`` if that is their default
 SANSReductionCore                      all

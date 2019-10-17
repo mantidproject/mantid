@@ -836,12 +836,12 @@ avoid large scripts sizes.
 
 The dedicated work-flow algorithms for the SANS reduction are:
 
-- :ref:`SANSCalculateTransmission <algm-SANSCalculateTransmission>`
+- *Calculate SANS Transmission*
 - :ref:`SANSConvertToQ <algm-SANSConvertToQ>`
 - :ref:`SANSConvertToWavelength <algm-SANSConvertToWavelength>`
 - :ref:`SANSConvertToWavelengthAndRebin <algm-SANSConvertToWavelengthAndRebin>`
 - :ref:`SANSCreateWavelengthAndPixelAdjustment <algm-SANSCreateWavelengthAndPixelAdjustment>`
-- :ref:`SANSCrop <algm-SANSCrop>`
+- :ref:`CropToComponent <algm-CropToComponent>`
 - :ref:`SANSLoad <algm-SANSLoad>`
 - *Workspace Masking*
 - :ref:`MoveInstrumentComponent <algm-MoveInstrumentComponent>`
@@ -860,14 +860,9 @@ There are two further algorithms which coordinate these algorithms, they are *SA
 *SANSSingleReduction* which are discussed further down.
 
 
-*SANSCalculateTransmission*
+*Calculate SANS Transmission*
 ------------------------------
-
-The :ref:`SANSCalculateTransmission <algm-SANSCalculateTransmission>` algorithm is one of the more complex algorithms
-in the reduction chain with many sub-steps and a wide variety of parameters which
-can be set by the users.
-
-The algorithm performs the following steps:
+The following steps are performed:
 
 1. Select the incident monitor. If this is not explicitly set then the default value is taken.
 2. Select the transmission detector ids. The detector ids are chosen via the following preference:
@@ -957,8 +952,9 @@ The algorithm performs the following steps:
 -------------------------------------------
 
 The :ref:`SANSCreateWavelengthAndPixelAdjustment <algm-SANSCreateWavelengthAndPixelAdjustment>`
-algorithm combines the output of the :ref:`SANSCalculateTransmission <algm-SANSCalculateTransmission>`
-algorithm, the output of the *Normalize To SANS Monitor*
+
+algorithm combines the output of the *Calculate SANS Transmission* step, 
+the output of the *Normalize To SANS Monitor*
 and flood and direct files to produce the correction workspaces which are required
 for :ref:`SANSConvertToQ <algm-SANSConvertToQ>`.
 
@@ -975,15 +971,10 @@ The sub-steps of the algorithm are:
 2. Create the pixel-adjustment workspace. The sub-states are:
 
    a. Load the pixel-adjustment file using :ref:`LoadRKH <algm-LoadRKH>`
-   b. Crop the pixel-adjustment workspace to the desired detector using :ref:`SANSCrop <algm-SANSCrop>`
+   b. Crop the pixel-adjustment workspace to the desired detector
+      using :ref:`CropToComponent <algm-CropToComponent>`
 
 3. Set the pixel-adjustment and wavelength-adjustment workspaces on the output of the algorithm
-
-*SANSCrop*
-------------
-
-The :ref:`SANSCrop <algm-SANSCrop>` algorithm crops the input workspace to a specified component using
-:ref:`CropToComponent <algm-CropToComponent>`.
 
 *SANSLoad*
 ------------
@@ -1239,7 +1230,7 @@ inner core of the orchestration mechanism. The inputs to this algorithm are
 The sub-steps of this algorithm are:
 
 1. Get the cropped input *ScatterWorkspace*. The cropping is defined by the selected detector type.
-   The underlying algorithm is :ref:`SANSCrop <algm-SANSCrop>`.
+   The underlying algorithm is :ref:`CropToComponent <algm-CropToComponent>`.
 2. Create an event slice of the input workspace using :ref:`SANSSliceEvent <algm-SANSSliceEvent>`.
    Note that event slicing is only applied to event-mode workspaces and only when it has been
    specified by the user. During this step the scatter workspace is sliced and the associated
