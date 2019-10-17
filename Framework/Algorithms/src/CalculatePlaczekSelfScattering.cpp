@@ -110,7 +110,7 @@ void CalculatePlaczekSelfScattering::exec() {
   std::vector<double> eps1;
   const double lambdaD = 1.44;
   for (size_t i = 0; i < xLambda.size() - 1; i++) {
-    double xTerm = (xLambda[i] + dx) / lambdaD;
+    double xTerm = -(xLambda[i] + dx) / lambdaD;
     eps1.push_back(xTerm * exp(xTerm) / (1.0 - exp(xTerm)));
   }
   /* Placzek
@@ -160,7 +160,7 @@ void CalculatePlaczekSelfScattering::exec() {
             2.0 * (term1 + term2 - 3) * sinThetaBy2 * sinThetaBy2 *
             summationTerm;
         x[xIndex] = wavelength.singleToTOF(xLambda[xIndex]);
-        y[xIndex] = inelasticPlaczekSelfCorrection;
+        y[xIndex] = 1 + inelasticPlaczekSelfCorrection;
       }
       x.back() = wavelength.singleToTOF(xLambda.back());
     } else {
@@ -173,6 +173,7 @@ void CalculatePlaczekSelfScattering::exec() {
   }
   auto incidentUnit = inWS->getAxis(0)->unit();
   outputWS->getAxis(0)->unit() = incidentUnit;
+  outputWS->setDistribution(FALSE);
   setProperty("OutputWorkspace", outputWS);
 }
 
