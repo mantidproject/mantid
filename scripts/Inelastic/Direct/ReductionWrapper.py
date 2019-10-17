@@ -13,10 +13,12 @@ from mantid.kernel import funcinspect
 from Direct.PropertyManager import PropertyManager
 # this import is used by children
 from Direct.DirectEnergyConversion import DirectEnergyConversion
+from types import MethodType # noqa
 import os
 import re
 import time
 from six import iteritems
+
 try:
     import h5py
     h5py_installed = True
@@ -247,6 +249,46 @@ class ReductionWrapper(object):
         """ define custom name of output files if standard one is not satisfactory
           User expected to overload this method within class instantiation """
         return None
+
+    def evaluate_abs_corrections(self,test_ws,spectra_to_correct):
+        """ Evaluate absorption corrections from the input workspace
+            Input:
+            test_ws -- the workspace to calculate corrections for.
+                       The corrections themselves should be defined by
+                       the following data reduction properties:
+                       propmen.correct_absorption_on = TheShapeOfTheSample -- define sample parameters
+                       propmen.abs_corr_info   = {} Dictionary with additional correction parameters
+                       (can be empty)
+             spectra_to_correct -- list of the spectra to correct absorption for.
+             If this list is empty, the corrections are calculated for the whole workspace,
+             which can cause problems for plotting.
+
+             Returns:
+             corrections -- the workspace containing the absorption corrections
+             for the spectra, specified in spectra_to_correct variable.
+        """
+
+        n_spectra = test_ws.getNumberHistograms()
+        decrement = len(spectra_to_correct)
+        if decrement>0:
+            red_ws = ExtractSpectra(test_ws,WorkspaceIndexList=spectra_to_correct)
+        else:
+            decrement = n_spectra
+
+        prop_man = self.reducer.prop_man
+        abs_shape = prop_man.correct_absorption_on
+        start_time = time.time()
+        ws,corrections = abs_shape.correct_absorption(red_ws,prop_man.abs_corr_info)
+        end_time = time.time()
+        estimated_time = (end_time-start_time)*n_spectra/decrement
+        prop_man.log(
+            "**************************************************************************************************",'notice')
+        prop_man.log(
+            "*** Estimated time to run absorption corrections on the final workspace is: {0:.1f}sec".
+            format(estimated_time),'notice')
+        prop_man.log(
+            "**************************************************************************************************",'notice')
+        return (corrections,estimated_time)
 
 #pylint: disable=too-many-branches
     def build_or_validate_result(self,Error=1.e-6,ToleranceRelErr=True):
@@ -675,8 +717,8 @@ def iliad(reduce):
         #seq = inspect.stack()
         # output workspace name.
         try:
-            _,r = funcinspect.lhs_info('both')
-            out_ws_name = r[0]
+            name = funcinspect.lhs_info('names')
+            out_ws_name = name[0]
 # no-exception-type(s) specified. Who knows what exception this internal procedure rises...
 #pylint: disable=W0702
         except:
@@ -727,14 +769,27 @@ def iliad(reduce):
             if isinstance(rez, list):
               # multirep run, just return as it is
                 return rez
-            if not(rez is None) and out_ws_name and rez.name() != out_ws_name:
+            if rez is not None and out_ws_name and rez.name() != out_ws_name:
             # the function does not return None, pylint is wrong
             #pylint: disable=W1111
-                rez = RenameWorkspace(InputWorkspace=rez, OutputWorkspace=out_ws_name)
-
+                rez = PropertyManager.sample_run.synchronize_ws(rez,out_ws_name)
         return rez
 
     return iliad_wrapper
+#
+
+
+def custom_operation(custom_fun):
+    DirectEnergyConversion.__setattr__()
+
+    def custom_fun_wrapper(*args):
+            # execute decorated function
+            ws = custom_fun(*args)
+            #print "in decorator: ",properties
+            #host = args[0]
+            return ws
+
+    return custom_fun_wrapper
 
 
 if __name__ == "__main__":
