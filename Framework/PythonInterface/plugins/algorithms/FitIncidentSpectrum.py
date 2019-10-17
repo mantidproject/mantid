@@ -44,6 +44,11 @@ class FitIncidentSpectrum(PythonAlgorithm):
                                     direction=Direction.Output),
             doc='Output workspace containing the fit and it\'s first derivative.')
 
+        self.declareProperty(
+            name='WorkspaceIndex',
+            defaultValue=0,
+            doc='Workspace index of the spectra to be fitted (Defaults to the first index.)')
+
         self.declareProperty(FloatArrayProperty(name="BinningForCalc",
                                                 validator=RebinParamsValidator(AllowEmpty=True),
                                                 direction=Direction.Input),
@@ -67,36 +72,36 @@ class FitIncidentSpectrum(PythonAlgorithm):
     def _setup(self):
         self._input_ws = self.getProperty('InputWorkspace').value
         self._output_ws = self.getProperty('OutputWorkspace').valueAsStr
+        self._incident_index = self.getProperty('WorkspaceIndex').value
+        self._binning_for_calc = self.getProperty('BinningForCalc').value
         self._binning_for_fit = self.getProperty('BinningForFit').value
         self._fit_spectrum_with = self.getProperty('FitSpectrumWith').value
-        self._binning_for_calc = self.getProperty('BinningForCalc').value
-        if not self._binning_for_calc.all():
-            x = self._input_ws.readX(0)
-            self._binning_for_calc = [str(i) for i in [min(x), x[1] - x[0], max(x) + x[1] - x[0]]]
 
     def PyExec(self):
         self._setup()
-
-        x = np.arange(self._binning_for_calc[0], self._binning_for_calc[2], self._binning_for_calc[1])
-        incident_index = 0
+        if self._binning_for_calc.size == 0:
+            x = np.array(self._input_ws.readX(self._incident_index))
+            self._binning_for_calc = [i for i in [min(x), x[1] - x[0], max(x) + x[1] - x[0]]]
+        else:
+            x = np.arange(self._binning_for_calc[0], self._binning_for_calc[2], self._binning_for_calc[1])
         if self._binning_for_fit.size == 0:
-            x_fit = np.array(self._input_ws.readX(incident_index))
-            y_fit = np.array(self._input_ws.readY(incident_index))
+            x_fit = np.array(self._input_ws.readX(self._incident_index))
+            y_fit = np.array(self._input_ws.readY(self._incident_index))
         else:
             rebinned = Rebin(
                 self._input_ws,
                 Params=self._binning_for_fit,
                 PreserveEvents=True,
                 StoreInADS=False)
-            x_fit = np.array(rebinned.readX(incident_index))
-            y_fit = np.array(rebinned.readY(incident_index))
+            x_fit = np.array(rebinned.readX(self._incident_index))
+            y_fit = np.array(rebinned.readY(self._incident_index))
 
+        x_bin_centers = 0.5*(x[:-1] + x[1:])
         if len(x_fit) != len(y_fit):
-            x_fit = x_fit[:-1]
-
+            x_fit = 0.5*(x_fit[:-1] + x_fit[1:])
         if self._fit_spectrum_with == 'CubicSpline':
             # Fit using cubic spline
-            fit, fit_prime = self.fit_cubic_spline(x_fit, y_fit, x, s=1e7)
+            fit, fit_prime = self.fit_cubic_spline(x_fit, y_fit, x_bin_centers, s=1e7)
         elif self._fit_spectrum_with == 'CubicSplineViaMantid':
             # Fit using cubic spline via Mantid
             fit, fit_prime = self.fit_cubic_spline_via_mantid_spline_smoothing(
@@ -107,20 +112,20 @@ class FitIncidentSpectrum(PythonAlgorithm):
                 MaxNumberOfBreaks=0)
         elif self._fit_spectrum_with == 'GaussConvCubicSpline':
             # Fit using Gauss conv cubic spline
-            fit, fit_prime = self.fit_cubic_spline_with_gauss_conv(x_fit, y_fit, x, sigma=0.5)
-
+            fit, fit_prime = self.fit_cubic_spline_with_gauss_conv(x_fit, y_fit, x_bin_centers, sigma=0.5)
         # Create output workspace
+        unit = self._input_ws.getAxis(0).getUnit().unitID()
         output_workspace = CreateWorkspace(
             DataX=x,
             DataY=np.append(fit, fit_prime),
-            UnitX='Wavelength',
+            UnitX=unit,
             NSpec=2,
             Distribution=False,
             ParentWorkspace=self._input_ws,
             StoreInADS=False)
         self.setProperty("OutputWorkspace", output_workspace)
 
-    def fit_cubic_spline_with_gauss_conv(self, x_fit, y_fit, x, n_gouss=39, sigma=3):
+    def fit_cubic_spline_with_gauss_conv(self, x_fit, y_fit, x, n_gouss=39, sigma=3.0):
         # Fit with Cubic Spline using a Gaussian Convolution to get weights
         def moving_average(y, n=n_gouss, sig=sigma):
             b = signal.gaussian(n, sig)
@@ -131,7 +136,6 @@ class FitIncidentSpectrum(PythonAlgorithm):
         avg, var = moving_average(y_fit)
         spline_fit = interpolate.UnivariateSpline(x_fit, y_fit, w=1. / np.sqrt(var))
         fit = spline_fit(x)
-
         if self._scipy_not_old:
             spline_fit_prime = spline_fit.derivative()
             fit_prime = spline_fit_prime(x)

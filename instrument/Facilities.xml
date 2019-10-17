@@ -903,6 +903,11 @@
 <facility name="HZB" FileExtensions=".nxs">
    <timezone>Europe/Berlin</timezone>
 
+  <instrument name="NEAT">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>TOF Direct Geometry Spectroscopy</technique>
+  </instrument>
+
   <instrument name="EXED">
     <technique>TOF Direct Geometry Spectroscopy</technique>
     <technique>Single Crystal Diffraction</technique>

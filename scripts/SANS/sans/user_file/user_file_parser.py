@@ -1281,6 +1281,8 @@ class TransParser(UserFileComponentParser):
     """
     Type = "TRANS"
 
+    mon_shift_pattern = "SHIFT"
+
     def __init__(self):
         super(TransParser, self).__init__()
         # General
@@ -1328,6 +1330,8 @@ class TransParser(UserFileComponentParser):
             output = self._extract_trans_spec(setting)
         elif self._is_trans_spec_shift(setting):
             output = self._extract_trans_spec_shift(setting)
+        elif self._is_mon_shift(setting):
+            output = self._extract_mon_shift(setting)
         elif self._is_radius(setting):
             output = self._extract_radius(setting)
         elif self._is_roi(setting):
@@ -1349,6 +1353,15 @@ class TransParser(UserFileComponentParser):
     def _is_trans_spec(self, line):
         return does_pattern_match(self._trans_spec_pattern, line)
 
+    def _is_mon_shift(self, line):
+        upper_line = line.upper().strip()
+        if self.mon_shift_pattern not in upper_line:
+            return False
+
+        # Check there are no other chars such as transpec
+        stripped_line = upper_line.replace(self.mon_shift_pattern, '')
+        return not any(c.isalpha() for c in stripped_line)
+
     def _is_trans_spec_shift(self, line):
         return does_pattern_match(self._trans_spec_shift_pattern, line)
 
@@ -1366,6 +1379,24 @@ class TransParser(UserFileComponentParser):
 
     def _is_can_workspace(self, line):
         return does_pattern_match(self._can_workspace_pattern, line)
+
+    def _extract_mon_shift(self, line):
+        converted = line.upper().strip().replace(self.mon_shift_pattern, '').replace('=', '')
+        # We should have some form of 'x y'
+        assert(c.isDigit() for c in converted.replace(' ', ''))
+        split_vars = [i for i in converted.split(' ') if i.strip() != '']
+
+        if len(split_vars) != 2:
+            raise RuntimeError("The line TRANS/{0} contains incorrect parameters", line)
+
+        dist, monitor = int(split_vars[0]), int(split_vars[1])
+
+        if monitor == 4:
+            return {TransId.spec_4_shift: dist}
+        elif monitor == 5:
+            return {TransId.spec_5_shift: dist}
+        else:
+            raise RuntimeError("The monitor {0} cannot be shifted".format(monitor))
 
     def _extract_trans_spec(self, line):
         trans_spec_string = re.sub(self._trans_spec, "", line)
@@ -1386,7 +1417,14 @@ class TransParser(UserFileComponentParser):
         trans_spec_shift_string = re.sub(self._shift, "", trans_spec_shift_string)
         trans_spec_shift_string = re.sub(" ", "", trans_spec_shift_string)
         trans_spec_shift = convert_string_to_float(trans_spec_shift_string)
-        return {TransId.spec_shift: trans_spec_shift, TransId.spec: trans_spec}
+
+        # Pair up the monitor and shift amount
+        if trans_spec == 4:
+            return {TransId.spec_4_shift: trans_spec_shift, TransId.spec: trans_spec}
+        elif trans_spec == 5:
+            return {TransId.spec_5_shift: trans_spec_shift, TransId.spec: trans_spec}
+        else:
+            raise RuntimeError("Monitor {0} cannot be shifted".format(trans_spec))
 
     def _extract_radius(self, line):
         radius_string = re.sub(self._radius, "", line)

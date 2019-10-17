@@ -260,7 +260,7 @@ class LoadRunWidgetPresenter(object):
             if self._load_multiple_runs and self._multiple_file_mode == "Co-Add":
                 run_list_to_add = [run for run in self.run_list if self._model.get_data(run=[run])]
                 run_list = [[run for run in self.run_list if self._model.get_data(run=[run])]]
-                load_utils.combine_loaded_runs(self._model, run_list_to_add)
+                load_utils.combine_loaded_runs(self._model, run_list_to_add, delete_added=True)
                 self._model.current_runs = run_list
 
             self.update_view_from_model(run_list)

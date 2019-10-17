@@ -427,7 +427,7 @@ public:
     double endX() const;
     void setEndX(double end);
     void setXRange(double start, double end);
-    QVector<double> getXRange();
+    QVector<double> getXRange() throw(std::invalid_argument);
     QString getXColumnName() const;
     QString getYColumnName() const;
     QString getErrColumnName() const;
@@ -849,4 +849,36 @@ public:
     QTreeWidget *treeWidget() const;
     QWidget *getParamWidget(const QString &paramName) const;
     double getParameter(const QString &paramName) const;
+};
+
+// ---------------------------------
+// MWRunFiles
+// ---------------------------------
+class MWRunFiles : QWidget
+{
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/MWRunFiles.h"
+%End
+public:
+    MWRunFiles(QWidget *parent = nullptr);
+
+    void setLabelText(const QString &text);
+    void setLabelMinWidth(const int);
+    void liveButtonSetChecked(bool);
+    bool liveButtonIsChecked();
+    QString getText();
+    QString getFirstFilename() const;
+    bool isSearching() const;
+    bool isValid();
+    void setUserInput(const QVariant &);
+    void setText(const QString&);
+    void setInstrumentOverride(const QString &instName);
+
+signals:
+    void fileTextChanged(const QString & /*_t1*/);
+    void fileEditingFinished();
+    void fileFindingFinished();
+    void liveButtonPressed(bool);
+    void findingFiles();
+    void filesFound();
 };

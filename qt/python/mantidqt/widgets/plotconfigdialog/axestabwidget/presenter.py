@@ -41,15 +41,19 @@ class AxesTabWidgetPresenter:
     def apply_properties(self):
         """Update the axes with the user inputted properties"""
         ax = self.get_selected_ax()
-        new_props = self.view.get_properties()
-        self.set_ax_title(ax, new_props.title)
-        ax.set_xlim(new_props.xlim)
-        ax.set_xlabel(new_props.xlabel)
-        ax.set_xscale(new_props.xscale)
-        ax.set_ylim(new_props.ylim)
-        ax.set_ylabel(new_props.ylabel)
-        ax.set_yscale(new_props.yscale)
-        self.update_view()
+        try:
+            new_props = self.view.get_properties()
+        except ValueError as e:
+            self.view.error_occurred(str(e))
+        else:
+            self.set_ax_title(ax, new_props.title)
+            ax.set_xlim(new_props.xlim)
+            ax.set_xlabel(new_props.xlabel)
+            ax.set_xscale(new_props.xscale)
+            ax.set_ylim(new_props.ylim)
+            ax.set_ylabel(new_props.ylabel)
+            ax.set_yscale(new_props.yscale)
+            self.update_view()
 
     def get_selected_ax(self):
         """Get Axes object of selected axes"""

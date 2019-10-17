@@ -83,7 +83,7 @@ public:
 
 private:
   /// Calculate size and starting iterator in the X array
-  std::pair<size_t, size_t> getXInterval() const;
+  std::pair<size_t, size_t> getXInterval(std::vector<double> XData) const;
   /// Set all parameters
   void setParameters() const;
   /// Set the names of the X, Y and Error columns
