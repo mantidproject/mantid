@@ -91,7 +91,8 @@ class FitIncidentSpectrum(PythonAlgorithm):
             rebinned = Rebin(
                 InputWorkspace=self._input_ws,
                 Params=self._binning_for_fit,
-                PreserveEvents=True)
+                PreserveEvents=True,
+                StoreInADS=False)
             x_fit = np.array(rebinned.readX(self._incident_index))
             y_fit = np.array(rebinned.readY(self._incident_index))
         rebin_norm = x.size/x_fit.size
