@@ -76,5 +76,11 @@ void ALFView_view::addObserver(std::tuple<std::string, Observer *> &listener) {
     observeAverageTube(std::get<1>(listener));
   }
 }
+
+void ALFView_view::addSpectrum(std::string wsName) {
+  m_plot->addSpectrum("Extracrted Data", wsName.c_str(), 0, Qt::black);
+  }
+
+
 } // namespace CustomInterfaces
 } // namespace MantidQt

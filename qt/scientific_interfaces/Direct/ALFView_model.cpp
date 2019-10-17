@@ -122,6 +122,11 @@ void ALFView_model::storeSingleTube(const std::string &name) {
 
   AnalysisDataService::Instance().remove(CURVES);
 }
+std::string ALFView_model::WSName() {
+  const std::string name =
+      getInstrumentName() + std::to_string(getCurrentRun());
+  return EXTRACTEDWS + name;
+}
 
 void ALFView_model::averageTube() {
   const std::string name = getInstrumentName() + std::to_string(getCurrentRun());

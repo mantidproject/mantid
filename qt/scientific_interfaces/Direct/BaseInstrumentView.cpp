@@ -10,8 +10,8 @@
 #include <QMessageBox>
 #include <QSizePolicy>
 #include <QSpacerItem>
-#include <QVBoxLayout>
 #include <QSplitter>
+#include <QVBoxLayout>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -19,10 +19,10 @@ namespace CustomInterfaces {
 BaseInstrumentView::BaseInstrumentView(const std::string &instrument,
                                        QWidget *parent)
     : QSplitter(Qt::Vertical, parent), m_plot(nullptr), m_fitBrowser(nullptr),
-      m_start(nullptr), m_end(nullptr),
-      m_loadRunObservable(nullptr), m_files(nullptr),
-      m_instrument(QString::fromStdString(instrument)),
-      m_instrumentWidget(nullptr), m_fitPlotLayout(nullptr), m_fitButton(nullptr) {
+      m_start(nullptr), m_end(nullptr), m_loadRunObservable(nullptr),
+      m_files(nullptr), m_instrument(QString::fromStdString(instrument)),
+      m_instrumentWidget(nullptr), m_fitPlotLayout(nullptr),
+      m_fitButton(nullptr),m_fitObservable(nullptr) {
   auto loadWidget = generateLoadWidget();
   this->addWidget(loadWidget);
 }
@@ -59,24 +59,28 @@ QWidget *BaseInstrumentView::generateLoadWidget() {
 }
 
 void BaseInstrumentView::setupPlotFitSplitter() {
- m_fitPlotLayout = new QSplitter(Qt::Vertical);
+  m_fitPlotLayout = new QSplitter(Qt::Vertical);
 
   m_plot = new MantidWidgets::PreviewPlot();
   m_plot->setCanvasColour(Qt::white);
   m_fitPlotLayout->addWidget(m_plot);
 
+  m_fitPlotLayout->addWidget(createFitPane());
+}
+
+QWidget *BaseInstrumentView::createFitPane() {
   auto fitPane = new QWidget();
   auto fitPaneLayout = new QVBoxLayout(fitPane);
 
   auto fitButtons = new QWidget();
   auto layout = new QHBoxLayout(fitButtons);
   m_fitButton = new QPushButton("Fit");
-
+  m_fitObservable = new Observable();
+  connect(m_fitButton, SIGNAL(clicked()), this, SLOT(doFit()));
 
   layout->addWidget(m_fitButton);
   layout->addItem(
       new QSpacerItem(80, 0, QSizePolicy::Expanding, QSizePolicy::Fixed));
-
 
   fitPaneLayout->addWidget(fitButtons);
 
@@ -96,48 +100,54 @@ void BaseInstrumentView::setupPlotFitSplitter() {
   rangeLayout->addWidget(end);
   rangeLayout->addWidget(m_end);
   fitPaneLayout->addWidget(range);
-
-  m_fitPlotLayout->addWidget(fitPane);
+  return fitPane;
 }
-void BaseInstrumentView::setupInstrumentPlotFitSplitters() {
+  void BaseInstrumentView::setupInstrumentPlotFitSplitters() {
 
-  setupPlotFitSplitter();
-  QSplitter *split =
-      new QSplitter(Qt::Horizontal);
-  split->addWidget(m_instrumentWidget);
-  split->addWidget(m_fitPlotLayout);
-  this->addWidget(split);
-}
-
-std::string BaseInstrumentView::getFile() {
-  auto name = m_files->getFilenames();
-  if (name.size() > 0)
-    return name[0].toStdString();
-  return "";
-}
-
-void BaseInstrumentView::setRunQuietly(const std::string &runNumber) {
-  m_files->setText(QString::fromStdString(runNumber));
-}
-
-void BaseInstrumentView::fileLoaded() {
-  if (m_files->getText().isEmpty())
-    return;
-
-  if (!m_files->isValid()) {
-    warningBox(m_files->getFileProblem());
-    return;
+    setupPlotFitSplitter();
+    QSplitter *split = new QSplitter(Qt::Horizontal);
+    split->addWidget(m_instrumentWidget);
+    split->addWidget(m_fitPlotLayout);
+    this->addWidget(split);
   }
-  m_loadRunObservable->notify();
-}
 
-void BaseInstrumentView::warningBox(const std::string &message) {
-  warningBox(QString::fromStdString(message));
-}
+  std::string BaseInstrumentView::getFile() {
+    auto name = m_files->getFilenames();
+    if (name.size() > 0)
+      return name[0].toStdString();
+    return "";
+  }
 
-void BaseInstrumentView::warningBox(const QString &message) {
-  QMessageBox::warning(this, m_instrument + " view", message);
-}
+  void BaseInstrumentView::setRunQuietly(const std::string &runNumber) {
+    m_files->setText(QString::fromStdString(runNumber));
+  }
+
+  void BaseInstrumentView::fileLoaded() {
+    if (m_files->getText().isEmpty())
+      return;
+
+    if (!m_files->isValid()) {
+      warningBox(m_files->getFileProblem());
+      return;
+    }
+    m_loadRunObservable->notify();
+  }
+ 
+  void BaseInstrumentView::doFit() {
+    auto function = m_fitBrowser->getFunction();
+    if (function->nFunctions() == 0) {
+      return;
+	}
+    m_fitObservable->notify();
+  }
+
+  void BaseInstrumentView::warningBox(const std::string &message) {
+    warningBox(QString::fromStdString(message));
+  }
+
+  void BaseInstrumentView::warningBox(const QString &message) {
+    QMessageBox::warning(this, m_instrument + " view", message);
+  }
 
 } // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace CustomInterfaces

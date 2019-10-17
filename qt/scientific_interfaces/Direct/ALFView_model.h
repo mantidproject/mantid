@@ -31,7 +31,7 @@ public:
   bool extractTubeConditon(std::map<std::string, bool> tabBools);
   bool averageTubeConditon(std::map<std::string, bool> tabBools);
   void extractSingleTube();
-
+  std::string WSName();
 private:
   int m_numberOfTubesInAverage;
   int m_currentRun;

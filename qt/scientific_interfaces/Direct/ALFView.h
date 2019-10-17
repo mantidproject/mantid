@@ -48,8 +48,10 @@ typedef std::pair < std::string,
       instrumentObserverOptions;
 
   std::pair<instrumentSetUp, instrumentObserverOptions> initInstrument();
+  void extractSingleTube();
+  void averageTube();
 
-  BaseInstrumentView *m_view;
+  ALFView_view *m_view;
   ALFView_model *m_model;
   ALFView_presenter *m_presenter;
   VoidObserver *m_extractSingleTubeObserver;

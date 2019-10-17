@@ -46,7 +46,7 @@ void ALFView::initLayout() {
 }
 
 typedef std::pair<std::string,
-                   std::vector<std::function<bool(std::map<std::string, bool>)>>>
+                  std::vector<std::function<bool(std::map<std::string, bool>)>>>
     instrumentSetUp;
 typedef std::vector<std::tuple<std::string, Observer *>>
     instrumentObserverOptions;
@@ -64,7 +64,7 @@ ALFView::initInstrument() {
   // set up the slots for the custom context menu
   std::vector<std::tuple<std::string, Observer *>> customInstrumentOptions;
   std::vector<std::function<bool(std::map<std::string, bool>)>> binders;
-  
+
   // set up custom context menu conditions
   std::function<bool(std::map<std::string, bool>)> extractConditionBinder =
       std::bind(&ALFView_model::extractTubeConditon, m_model,
@@ -73,16 +73,14 @@ ALFView::initInstrument() {
       std::bind(&ALFView_model::averageTubeConditon, m_model,
                 std::placeholders::_1);
 
-     binders.push_back(extractConditionBinder);
-	 binders.push_back(averageTubeConditonBinder);
-	 
-  setUpContextConditions =
-      std::make_pair(m_model->dataFileName(),binders);
-  
+  binders.push_back(extractConditionBinder);
+  binders.push_back(averageTubeConditonBinder);
+
+  setUpContextConditions = std::make_pair(m_model->dataFileName(), binders);
 
   // set up single tube extract
   std::function<void()> extractSingleTubeBinder =
-      std::bind(&ALFView_model::extractSingleTube, m_model); // binder for slot
+      std::bind(&ALFView::extractSingleTube, this); // binder for slot
   m_extractSingleTubeObserver->setSlot(
       extractSingleTubeBinder); // add slot to observer
   std::tuple<std::string, Observer *> tmp = std::make_tuple(
@@ -91,14 +89,23 @@ ALFView::initInstrument() {
 
   // set up average tube
   std::function<void()> averageTubeBinder =
-      std::bind(&ALFView_model::averageTube, m_model);
+      std::bind(&ALFView::averageTube, this);
   m_averageTubeObserver->setSlot(averageTubeBinder);
   tmp = std::make_tuple("averageTube", m_averageTubeObserver);
   customInstrumentOptions.push_back(tmp);
-  
+
   return std::make_pair(setUpContextConditions, customInstrumentOptions);
-  
-  }
+}
+
+void ALFView::extractSingleTube() {
+  m_model->extractSingleTube();
+  m_view->addSpectrum(m_model->WSName());
+}
+
+void ALFView::averageTube() { 
+	m_model->averageTube(); 
+    m_view->addSpectrum(m_model->WSName());
+}
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

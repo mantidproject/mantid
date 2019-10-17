@@ -50,6 +50,7 @@ public:
 
 public slots:
   void fileLoaded();
+  void doFit();
 
 protected:
   MantidWidgets::PreviewPlot *m_plot;
@@ -60,12 +61,14 @@ private:
   QWidget *generateLoadWidget();
   void warningBox(const QString &message);
   void setupPlotFitSplitter();
+  QWidget *createFitPane();
   Observable *m_loadRunObservable;
   API::MWRunFiles *m_files;
   QString m_instrument;
   MantidWidgets::InstrumentWidget *m_instrumentWidget;
   QSplitter *m_fitPlotLayout;
   QPushButton *m_fitButton;
+  Observable *m_fitObservable;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

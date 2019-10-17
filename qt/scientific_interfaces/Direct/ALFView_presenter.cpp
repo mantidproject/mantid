@@ -31,7 +31,10 @@ void ALFView_presenter::initLayout(
       std::bind(&ALFView_presenter::loadRunNumber, this);
   m_loadRunObserver->setSlot(loadBinder);
   initInstrument(setUp);
+
   m_view->setupInstrumentPlotFitSplitters();
+
+
 }
 
 void ALFView_presenter::loadAndAnalysis(const std::string &pathToRun) {

@@ -35,6 +35,7 @@ public:
       std::vector<std::function<bool(std::map<std::string, bool>)>> &binders) override;
 
   void addObserver(std::tuple<std::string, Observer *> &listener) override;
+  void addSpectrum(std::string wsName);
 
 public slots:
 void extractSingleTube();
