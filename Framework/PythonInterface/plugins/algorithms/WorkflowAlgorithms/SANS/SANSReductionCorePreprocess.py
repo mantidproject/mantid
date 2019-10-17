@@ -48,7 +48,6 @@ class SANSReductionCorePreprocess(SANSReductionCoreBase):
     def PyExec(self):
         # Get the input
         state = self._get_state()
-        state_serialized = state.property_manager
         component_as_string = self.getProperty("Component").value
         progress = self._get_progress()
 
