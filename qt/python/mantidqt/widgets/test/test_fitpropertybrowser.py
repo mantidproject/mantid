@@ -22,6 +22,7 @@ from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisp
 from testhelpers import assertRaisesNothing
 from workbench.plotting.figuremanager import FigureManagerADSObserver
 
+
 @start_qapplication
 class FitPropertyBrowserTest(unittest.TestCase):
 

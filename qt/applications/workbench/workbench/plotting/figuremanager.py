@@ -141,6 +141,7 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
                 except:  # table workspaces
                     ax.wsName = newName
 
+
 class FigureManagerWorkbench(FigureManagerBase, QObject):
     """
     Attributes
