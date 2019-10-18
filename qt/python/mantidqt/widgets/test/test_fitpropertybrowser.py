@@ -22,6 +22,7 @@ from workbench.plotting.figuremanager import FigureManagerADSObserver
 
 from qtpy import PYQT5
 
+
 @start_qapplication
 class FitPropertyBrowserTest(unittest.TestCase):
 
