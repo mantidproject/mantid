@@ -11,16 +11,14 @@ from mantid.simpleapi import CreateWorkspace
 from mantid.simpleapi import SetSampleMaterial
 from mantid.geometry import CrystalStructure
 from mantid.geometry import CSGObject
+from mantid.api import Sample
 from numpy import pi
+import copy
 
 class SampleTest(unittest.TestCase):
 
-    def setUp(self):
-        self._ws = CreateWorkspace(DataX=[1,2,3,4,5], DataY=[1,2,3,4,5], OutputWorkspace="dummy")
-
     def test_geometry_getters_and_setters(self):
-        sample = self._ws.sample()
-
+        sample = Sample()
         sample.setThickness(12.5)
         self.assertEqual(sample.getThickness(), 12.5)
         sample.setHeight(10.2)
@@ -29,7 +27,7 @@ class SampleTest(unittest.TestCase):
         self.assertEqual(sample.getWidth(), 5.9)
 
     def test_crystal_structure_handling(self):
-        sample = self._ws.sample()
+        sample = Sample()
 
         self.assertEqual(sample.hasCrystalStructure(), False)
         self.assertRaises(RuntimeError, sample.getCrystalStructure)
@@ -56,8 +54,10 @@ class SampleTest(unittest.TestCase):
         self.assertRaises(RuntimeError, sample.getCrystalStructure)
 
     def test_material(self):
-        SetSampleMaterial(self._ws,"Al2 O3",SampleMassDensity=4)
-        material = self._ws.sample().getMaterial()
+        ws = CreateWorkspace(DataX=[1], DataY=[1], StoreInADS=False)
+        sample = ws.sample()
+        SetSampleMaterial(ws,"Al2 O3",SampleMassDensity=4, StoreInADS=False)
+        material = sample.getMaterial()
 
         self.assertAlmostEqual(material.numberDensity, 0.1181, places=4)
         self.assertAlmostEqual(material.relativeMolecularMass(), 101.961, places=3)
@@ -79,14 +79,43 @@ class SampleTest(unittest.TestCase):
         self.assertAlmostEquals(material.cohScatterXSection(), xs, places=4)
 
     def test_get_shape(self):
-        sample = self._ws.sample()
+        sample = Sample()
         self.assertEqual(type(sample.getShape()), CSGObject)
 
     def test_get_shape_xml(self):
-        sample = self._ws.sample()
+        sample = Sample()
         shape = sample.getShape()
         xml = shape.getShapeXML()
         self.assertEqual(type(xml), str)
+
+    def do_test_copyable(self, copy_op):
+        original = Sample() 
+        width = 1.0
+        height = 2.0
+        thickness = 3.0
+        original.setThickness(thickness)
+        original.setHeight(height)
+        original.setWidth(width)
+        # make copy
+        cp = copy_op(original)
+        # Check identity different
+        self.assertNotEqual(id(original), id(cp))
+        # Simple tests that cp is equal to original
+        self.assertEqual(original.getHeight(), cp.getHeight())
+        self.assertEqual(original.getWidth(), cp.getWidth())
+        self.assertEqual(original.getThickness(), cp.getThickness())
+        # Check really did succeed and is not tied in any way to original
+        del original
+        self.assertTrue(id(cp) > 0)
+        self.assertEqual(height, cp.getHeight())
+        self.assertEqual(width, cp.getWidth())
+        self.assertEqual(thickness, cp.getThickness())
+
+    def test_shallow_copyable(self):
+        self.do_test_copyable(copy.copy)
+
+    def test_deep_copyable(self):
+        self.do_test_copyable(copy.deepcopy)
 
 
 

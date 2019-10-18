@@ -12,7 +12,7 @@ import mantid.simpleapi
 from sans.algorithm_detail.move_workspaces import SANSMoveZOOM, SANSMoveSANS2D
 from sans.common.enums import SANSFacility, SANSInstrument, DetectorType
 from sans.state.data import get_data_builder
-from sans.state.move import StateMoveZOOM, get_move_builder
+from sans.state.move import get_move_builder
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
@@ -30,7 +30,8 @@ def get_monitor_pos(ws, monitor_spectrum_no, move_info):
     return monitor_z_pos
 
 
-def calculate_new_pos(ws, move_info, offset):
+def calculate_new_pos_rel_to_rear(ws, move_info, offset):
+    # Calculates the new position relative to the rear detector offset
     rear_detector_z = get_rear_detector_pos(move_info=move_info, ws=ws)
     expected_pos = rear_detector_z + offset
     return expected_pos
@@ -46,7 +47,7 @@ def get_rear_detector_pos(move_info, ws):
     return detector_position
 
 
-class MoveSansMonitor(unittest.TestCase):
+class MoveSans2DMonitor(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         sans_ws = mantid.simpleapi.LoadEmptyInstrument(InstrumentName="SANS2D")
@@ -102,7 +103,7 @@ class MoveSansMonitor(unittest.TestCase):
 
         z_pos_mon_4_after = get_monitor_pos(ws=workspace, monitor_spectrum_no=4, move_info=move_info)
 
-        self.assertAlmostEqual(calculate_new_pos(ws=workspace, move_info=move_info, offset=mon_4_dist),
+        self.assertAlmostEqual(calculate_new_pos_rel_to_rear(ws=workspace, move_info=move_info, offset=mon_4_dist),
                                z_pos_mon_4_after)
 
     def test_not_moving_monitors(self):
@@ -187,12 +188,12 @@ class MoveZoomMonitors(unittest.TestCase):
         zoom_class.move_initial(move_info=move_info, workspace=workspace, coordinates=coordinates,
                                 component=component, is_transmission_workspace=is_transmission_workspace)
 
+        # Monitor 4 shifts relative to itself rather than the rear detector on ZOOM
         z_pos_mon_4_after = get_monitor_pos(ws=workspace, monitor_spectrum_no=4, move_info=move_info)
         z_pos_mon_5_after = get_monitor_pos(ws=workspace, monitor_spectrum_no=5, move_info=move_info)
 
-        self.assertAlmostEqual(calculate_new_pos(ws=workspace, move_info=move_info, offset=mon_4_dist),
-                               z_pos_mon_4_after)
-        self.assertAlmostEqual(calculate_new_pos(ws=workspace, move_info=move_info, offset=mon_5_dist),
+        self.assertAlmostEqual(z_pos_mon_4_before + mon_4_dist, z_pos_mon_4_after)
+        self.assertAlmostEqual(calculate_new_pos_rel_to_rear(ws=workspace, move_info=move_info, offset=mon_5_dist),
                                z_pos_mon_5_after)
 
     def test_moving_only_monitor_4(self):
@@ -217,11 +218,11 @@ class MoveZoomMonitors(unittest.TestCase):
         zoom_class.move_initial(move_info=move_info, workspace=workspace, coordinates=coordinates,
                                 component=component, is_transmission_workspace=is_transmission_workspace)
 
+        # Monitor 4 shifts relative to itself rather than the rear detector on ZOOM
         z_pos_mon_4_after = get_monitor_pos(ws=workspace, monitor_spectrum_no=4, move_info=move_info)
         z_pos_mon_5_after = get_monitor_pos(ws=workspace, monitor_spectrum_no=5, move_info=move_info)
 
-        self.assertAlmostEqual(calculate_new_pos(ws=workspace, move_info=move_info, offset=mon_4_dist),
-                               z_pos_mon_4_after)
+        self.assertAlmostEqual(z_pos_mon_4_before + mon_4_dist, z_pos_mon_4_after)
         self.assertAlmostEqual(z_pos_mon_5_before, z_pos_mon_5_after)
 
     def test_moving_only_monitor_5(self):
@@ -250,7 +251,7 @@ class MoveZoomMonitors(unittest.TestCase):
         z_pos_mon_5_after = get_monitor_pos(ws=workspace, monitor_spectrum_no=5, move_info=move_info)
 
         self.assertAlmostEqual(z_pos_mon_4_before, z_pos_mon_4_after)
-        self.assertAlmostEqual(calculate_new_pos(ws=workspace, move_info=move_info, offset=mon_5_dist),
+        self.assertAlmostEqual(calculate_new_pos_rel_to_rear(ws=workspace, move_info=move_info, offset=mon_5_dist),
                                z_pos_mon_5_after)
 
 

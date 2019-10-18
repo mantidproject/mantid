@@ -41,7 +41,7 @@ class MuonContextWithFrequencyTest(unittest.TestCase):
                                   instrument='EMU')
         self.data_context.current_runs = [[self.run_number]]
         self.data_context.update_current_data()
-        self.group_pair_context.reset_group_and_pairs_to_default(self.load_result['OutputWorkspace'][0]._workspace,
+        self.group_pair_context.reset_group_and_pairs_to_default(self.load_result['OutputWorkspace'][0].workspace,
                                                                  'EMU', '')
 
     def tearDown(self):
@@ -52,9 +52,9 @@ class MuonContextWithFrequencyTest(unittest.TestCase):
         self.context.show_all_groups()
         self.context.calculate_all_pairs()
         self.context.show_all_pairs()
-        workspace = CreateWorkspace([0], [0], StoreInADS=False)
+        CreateWorkspace([0], [0], OutputWorkspace='EMU19489; PhaseQuad; PhaseTable EMU19489')
         self.context.phase_context.add_phase_quad(
-            MuonWorkspaceWrapper(workspace, 'EMU19489; PhaseQuad; PhaseTable EMU19489'))
+            MuonWorkspaceWrapper('EMU19489; PhaseQuad; PhaseTable EMU19489'), '19489')
 
     def test_window(self):
         self.assertEquals("Frequency Domain Analysis", self.context.window_title)

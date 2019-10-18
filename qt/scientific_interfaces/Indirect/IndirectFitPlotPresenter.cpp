@@ -8,6 +8,8 @@
 
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
+#include <QTimer>
+
 namespace {
 using MantidQt::CustomInterfaces::IDA::DiscontinuousSpectra;
 using MantidQt::CustomInterfaces::IDA::IIndirectFitPlotView;
@@ -48,18 +50,12 @@ IndirectFitPlotPresenter::IndirectFitPlotPresenter(IndirectFittingModel *model,
   connect(m_view, SIGNAL(selectedFitDataChanged(std::size_t)), this,
           SLOT(updatePlots()));
   connect(m_view, SIGNAL(selectedFitDataChanged(std::size_t)), this,
-          SLOT(updateFitRangeSelector()));
-  connect(m_view, SIGNAL(selectedFitDataChanged(std::size_t)), this,
-          SLOT(updateGuess()));
-  connect(m_view, SIGNAL(selectedFitDataChanged(std::size_t)), this,
           SIGNAL(selectedFitDataChanged(std::size_t)));
 
   connect(m_view, SIGNAL(plotSpectrumChanged(std::size_t)), this,
           SLOT(setActiveSpectrum(std::size_t)));
   connect(m_view, SIGNAL(plotSpectrumChanged(std::size_t)), this,
           SLOT(updatePlots()));
-  connect(m_view, SIGNAL(plotSpectrumChanged(std::size_t)), this,
-          SLOT(updateFitRangeSelector()));
   connect(m_view, SIGNAL(plotSpectrumChanged(std::size_t)), this,
           SIGNAL(plotSpectrumChanged(std::size_t)));
 
@@ -69,8 +65,7 @@ IndirectFitPlotPresenter::IndirectFitPlotPresenter(IndirectFittingModel *model,
   connect(m_view, SIGNAL(fitSelectedSpectrum()), this,
           SLOT(emitFitSingleSpectrum()));
 
-  connect(m_view, SIGNAL(plotGuessChanged(bool)), this,
-          SLOT(updateGuess(bool)));
+  connect(m_view, SIGNAL(plotGuessChanged(bool)), this, SLOT(plotGuess(bool)));
 
   connect(m_view, SIGNAL(startXChanged(double)), this,
           SLOT(setModelStartX(double)));
@@ -99,6 +94,8 @@ IndirectFitPlotPresenter::IndirectFitPlotPresenter(IndirectFittingModel *model,
   updateRangeSelectors();
   updateAvailableSpectra();
 }
+
+void IndirectFitPlotPresenter::watchADS(bool watch) { m_view->watchADS(watch); }
 
 std::size_t IndirectFitPlotPresenter::getSelectedDataIndex() const {
   return m_model->getActiveDataIndex();
@@ -162,7 +159,6 @@ void IndirectFitPlotPresenter::updatePlotSpectrum(int spectrum) {
   m_view->setPlotSpectrum(spectrum);
   setActiveSpectrum(static_cast<std::size_t>(spectrum));
   updatePlots();
-  updateFitRangeSelector();
 }
 
 void IndirectFitPlotPresenter::updateRangeSelectors() {
@@ -244,43 +240,41 @@ void IndirectFitPlotPresenter::setFitSingleSpectrumEnabled(bool enable) {
 }
 
 void IndirectFitPlotPresenter::updatePlots() {
-  const auto resultWs = m_model->getResultWorkspace();
-  if (resultWs)
-    plotResult(resultWs);
-  else
-    plotInput();
+  m_view->clearPreviews();
+
+  plotLines();
+
   updateRangeSelectors();
   updateFitRangeSelector();
 }
 
-void IndirectFitPlotPresenter::plotInput() {
-  const auto ws = m_model->getWorkspace();
-  if (ws) {
-    clearFit();
-    clearDifference();
-    plotInput(ws, m_model->getActiveSpectrum());
+void IndirectFitPlotPresenter::plotLines() {
+  if (auto const resultWorkspace = m_model->getResultWorkspace()) {
+    plotFit(resultWorkspace);
+    updatePlotRange(m_model->getResultRange());
+  } else if (auto const inputWorkspace = m_model->getWorkspace()) {
+    plotInput(inputWorkspace);
     updatePlotRange(m_model->getWorkspaceRange());
-  } else
-    m_view->clear();
+  }
 }
 
-void IndirectFitPlotPresenter::plotResult(MatrixWorkspace_sptr result) {
-  plotInput(result, 0);
-  plotFit(result, 1);
-  plotDifference(result, 2);
-  updatePlotRange(m_model->getResultRange());
-}
-
-void IndirectFitPlotPresenter::updatePlotRange(
-    const std::pair<double, double> &range) {
-  MantidQt::API::SignalBlocker blocker(m_view);
-  m_view->setFitRange(range.first, range.second);
-  m_view->setHWHMRange(range.first, range.second);
+void IndirectFitPlotPresenter::plotInput(MatrixWorkspace_sptr workspace) {
+  plotInput(workspace, m_model->getActiveSpectrum());
+  if (auto doGuess = m_view->isPlotGuessChecked())
+    plotGuess(doGuess);
 }
 
 void IndirectFitPlotPresenter::plotInput(MatrixWorkspace_sptr workspace,
                                          std::size_t spectrum) {
   m_view->plotInTopPreview("Sample", workspace, spectrum, Qt::black);
+}
+
+void IndirectFitPlotPresenter::plotFit(MatrixWorkspace_sptr workspace) {
+  plotInput(workspace, 0);
+  if (auto doGuess = m_view->isPlotGuessChecked())
+    plotGuess(doGuess);
+  plotFit(workspace, 1);
+  plotDifference(workspace, 2);
 }
 
 void IndirectFitPlotPresenter::plotFit(MatrixWorkspace_sptr workspace,
@@ -293,16 +287,11 @@ void IndirectFitPlotPresenter::plotDifference(MatrixWorkspace_sptr workspace,
   m_view->plotInBottomPreview("Difference", workspace, spectrum, Qt::blue);
 }
 
-void IndirectFitPlotPresenter::clearInput() {
-  m_view->removeFromTopPreview("Sample");
-}
-
-void IndirectFitPlotPresenter::clearFit() {
-  m_view->removeFromTopPreview("Fit");
-}
-
-void IndirectFitPlotPresenter::clearDifference() {
-  m_view->removeFromBottomPreview("Difference");
+void IndirectFitPlotPresenter::updatePlotRange(
+    const std::pair<double, double> &range) {
+  MantidQt::API::SignalBlocker blocker(m_view);
+  m_view->setFitRange(range.first, range.second);
+  m_view->setHWHMRange(range.first, range.second);
 }
 
 void IndirectFitPlotPresenter::updateFitRangeSelector() {
@@ -322,7 +311,7 @@ void IndirectFitPlotPresenter::plotCurrentPreview() {
 void IndirectFitPlotPresenter::updateGuess() {
   if (m_model->canCalculateGuess()) {
     m_view->enablePlotGuess(true);
-    updateGuess(m_view->isPlotGuessChecked());
+    plotGuess(m_view->isPlotGuessChecked());
   } else {
     m_view->enablePlotGuess(false);
     clearGuess();
@@ -336,7 +325,7 @@ void IndirectFitPlotPresenter::updateGuessAvailability() {
     m_view->enablePlotGuess(false);
 }
 
-void IndirectFitPlotPresenter::updateGuess(bool doPlotGuess) {
+void IndirectFitPlotPresenter::plotGuess(bool doPlotGuess) {
   if (doPlotGuess) {
     const auto guessWorkspace = m_model->getGuessWorkspace();
     if (guessWorkspace->x(0).size() >= 2) {
@@ -361,9 +350,7 @@ void IndirectFitPlotPresenter::plotGuessInSeparateWindow(
       [this, workspace]() { m_model->appendGuessToInput(workspace); });
 }
 
-void IndirectFitPlotPresenter::clearGuess() {
-  m_view->removeFromTopPreview("Guess");
-}
+void IndirectFitPlotPresenter::clearGuess() { updatePlots(); }
 
 void IndirectFitPlotPresenter::updateHWHMSelector() {
   const auto hwhm = m_model->getFirstHWHM();

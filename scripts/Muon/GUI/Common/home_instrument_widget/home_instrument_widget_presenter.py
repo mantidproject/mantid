@@ -74,6 +74,12 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
             self._view.set_time_zero(time_zero)
 
         self._view.set_instrument(self._model._data.instrument)
+
+        if self._model._context.gui_context['DeadTimeSource'] == 'FromFile':
+            self._view.set_dead_time_selection(DEADTIME_DATA_FILE)
+        elif self._model._context.gui_context['DeadTimeSource'] == 'FromADs':
+            self._view.set_dead_time_selection(DEADTIME_WORKSPACE)
+
         self.handle_user_selects_dead_time_from_data()
 
     def clear_view(self):
@@ -204,7 +210,7 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
             self._view.dead_time_label_3.setVisible(True)
         elif index == DEADTIME_WORKSPACE:
             self._view.dead_time_label_3.hide()
-            self._model.set_user_dead_time_from_ADS()
+            self._model.set_user_dead_time_from_ADS(self._view.dead_time_file_selector.currentText())
         else:
             self._model.set_dead_time_to_none()
 

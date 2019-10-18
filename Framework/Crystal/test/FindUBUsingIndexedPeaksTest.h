@@ -137,41 +137,6 @@ public:
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove("peaks");
   }
-  void test_mod2() {
-    // this test check that the ModHKL vectors are the correct ranges
-    // -0.5<q<=0.5
-    LoadIsawPeaks alg1;
-    TS_ASSERT_THROWS_NOTHING(alg1.initialize())
-    TS_ASSERT(alg1.isInitialized())
-    alg1.setPropertyValue("Filename", "Modulated2.peaks");
-    alg1.setPropertyValue("OutputWorkspace", "peaks");
-
-    TS_ASSERT(alg1.execute());
-    TS_ASSERT(alg1.isExecuted());
-
-    PeaksWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = boost::dynamic_pointer_cast<PeaksWorkspace>(
-            AnalysisDataService::Instance().retrieve("peaks")));
-    TS_ASSERT(ws);
-    if (!ws)
-      return;
-
-    OrientedLattice latt = ws->mutableSample().getOrientedLattice();
-
-    double correct_modHKL[] = {-0.37658208, -0.00133659, 0.,
-                               -0.00140254, 0.3747229,   0.,
-                               0.00176291,  0.00042566,  0.};
-
-    auto modHKL = latt.getModHKL().getVector();
-
-    for (size_t i = 0; i < 9; i++) {
-      TS_ASSERT_DELTA(correct_modHKL[i], modHKL[i], 5e-4);
-    }
-
-    // Remove workspace from the data service.
-    AnalysisDataService::Instance().remove("peaks");
-  }
 };
 
 #endif /* MANTID_CRYSTAL_FIND_UB_USING_INDEXED_PEAKS_TEST_H_ */
