@@ -837,19 +837,19 @@ avoid large scripts sizes.
 The dedicated work-flow algorithms for the SANS reduction are:
 
 - *Calculate SANS Transmission*
-- :ref:`Q1D <algm-Q1D>` or :ref:`Qxy <algm-Qxy>`
-- :ref:`SANSConvertToWavelengthAndRebin <algm-SANSConvertToWavelengthAndRebin>`
 - *Create SANS Wavelength Pixel Adjustment*
 - :ref:`CropToComponent <algm-CropToComponent>`
-- :ref:`SANSLoad <algm-SANSLoad>`
-- *Workspace Masking*
-- :ref:`MoveInstrumentComponent <algm-MoveInstrumentComponent>`
-- :ref:`RotateInstrumentComponent <algm-RotateInstrumentComponent>`
-- *Normalize To Monitor*
-- *SANSSave*
-- :ref:`Multiply <algm-Multiply>` (by Absolute Scale)
 - :ref:`Divide <algm-Divide>` (by Sample Volume)
+- :ref:`Multiply <algm-Multiply>` (by Absolute Scale)
+- :ref:`MoveInstrumentComponent <algm-MoveInstrumentComponent>`
+- *Normalize To SANS Monitor*
+- :ref:`Q1D <algm-Q1D>` or :ref:`Qxy <algm-Qxy>`
+- :ref:`RotateInstrumentComponent <algm-RotateInstrumentComponent>`
+- :ref:`SANSConvertToWavelengthAndRebin <algm-SANSConvertToWavelengthAndRebin>`
+- :ref:`SANSLoad <algm-SANSLoad>`
+- *SANSSave*
 - *SANSSliceEvent*
+- *Workspace Masking*
 
 Note that algorithms prefixed with SANS take a *SANSState* object as
 an input.

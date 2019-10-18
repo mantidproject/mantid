@@ -105,7 +105,7 @@ class CreateSANSAdjustmentWorkspaces(object):
 
         ws = normalize_to_monitor(
             state_adjustment_normalize_to_monitor=self._state.normalize_to_monitor,
-                workspace=monitor_ws, scale_factor=scale_factor)
+            workspace=monitor_ws, scale_factor=scale_factor)
 
         return ws
 
