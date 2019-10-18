@@ -608,7 +608,6 @@ SANSFitShiftScale                      MasterOnly, Identical
 SANSLoad                               MasterOnly, Identical   child algorithms may actually be run with ``ExecutionMode::Distributed`` if that is their default
 SANSReductionCore                      all
 SANSSingleReduction                    all
-SANSSliceEvent                         all
 SANSStitch                             MasterOnly, Identical
 SaveFocusedXYE                         MasterOnly
 SaveGSS                                MasterOnly

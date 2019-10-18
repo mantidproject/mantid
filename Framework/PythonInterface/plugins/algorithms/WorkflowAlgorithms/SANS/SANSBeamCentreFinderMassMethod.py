@@ -16,6 +16,7 @@ from sans.algorithm_detail.scale_sans_workspace import scale_workspace
 from sans.algorithm_detail.crop_helper import get_component_name
 from sans.algorithm_detail.mask_sans_workspace import mask_workspace
 from sans.algorithm_detail.move_sans_instrument_component import move_component, MoveTypes
+from sans.algorithm_detail.slice_sans_event import slice_sans_event
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_child_algorithm, append_to_sans_file_tag
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
@@ -83,8 +84,6 @@ class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
         state.move.detectors[component_as_string].sample_centre_pos2 = self.getProperty(
             "Centre2").value
 
-        state_serialized = state.property_manager
-
         progress = self._get_progress()
 
         # --------------------------------------------------------------------------------------------------------------
@@ -108,7 +107,7 @@ class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
         # --------------------------------------------------------------------------------------------------------------
         progress.report("Event slicing ...")
         monitor_scatter_date = self._get_monitor_workspace()
-        scatter_data, monitor_scatter_date, slice_event_factor = self._slice(state_serialized, scatter_data,
+        scatter_data, monitor_scatter_date, slice_event_factor = self._slice(state, scatter_data,
                                                                              monitor_scatter_date,
                                                                              'Sample')
 
@@ -207,20 +206,13 @@ class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
         output_workspace = crop_alg.getProperty("OutputWorkspace").value
         return output_workspace
 
-    def _slice(self, state_serialized, workspace, monitor_workspace, data_type_as_string):
-        slice_name = "SANSSliceEvent"
-        slice_options = {"SANSState": state_serialized,
-                         "InputWorkspace": workspace,
-                         "InputWorkspaceMonitor": monitor_workspace,
-                         "OutputWorkspace": EMPTY_NAME,
-                         "OutputWorkspaceMonitor": "dummy2",
-                         "DataType": data_type_as_string}
-        slice_alg = create_child_algorithm(self, slice_name, **slice_options)
-        slice_alg.execute()
+    def _slice(self, state, workspace, monitor_workspace, data_type_as_string):
+        returned = slice_sans_event(state_slice=state.slice, input_ws=workspace,
+                                    input_ws_monitor=monitor_workspace, data_type_str=data_type_as_string)
 
-        workspace = slice_alg.getProperty("OutputWorkspace").value
-        monitor_workspace = slice_alg.getProperty("OutputWorkspaceMonitor").value
-        slice_event_factor = slice_alg.getProperty("SliceEventFactor").value
+        workspace = returned["OutputWorkspace"]
+        monitor_workspace = returned["OutputWorkspaceMonitor"]
+        slice_event_factor = returned["SliceEventFactor"]
         return workspace, monitor_workspace, slice_event_factor
 
     def _move(self, state, workspace, component, is_transmission=False):

@@ -43,7 +43,7 @@ def _scale(workspace, factor):
     The incident monitor is scaled by a factor.
 
     When we work with sliced event data, then we need to slice the monitor data set accordingly. The monitor
-    needs to be scaled by the slice factor which one gets when operating SANSSliceEvent. If this was not performed,
+    needs to be scaled by the slice factor which one gets when operating slice_sans_event. If this was not performed,
     then we would be comparing the full monitor data with only parts of the detector data.
     :param workspace: the workspace to scale.
     :param factor: the scaling factor.
