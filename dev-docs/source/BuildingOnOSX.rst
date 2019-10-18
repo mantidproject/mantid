@@ -39,6 +39,7 @@ In order to be able to 'tap' the ``mantidproject/mantid`` 'tap' we need to have 
    brew tap cartr/qt4
    brew tap-pin cartr/qt4
    brew cask install xquartz
+   brew cask install mactex
 
 1. Reset brew formula repo back to before Python 2 removal for required packages
 
