@@ -12,13 +12,14 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress,
                         IEventWorkspace)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator)
+from sans.algorithm_detail.scale_sans_workspace import scale_workspace
 from sans.algorithm_detail.crop_helper import get_component_name
 from sans.algorithm_detail.mask_sans_workspace import mask_workspace
 from sans.algorithm_detail.move_sans_instrument_component import move_component, MoveTypes
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_child_algorithm, append_to_sans_file_tag
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
-from sans.common.enums import (DetectorType)
+from sans.common.enums import (DetectorType, RangeStepType, RebinType)
 
 
 class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
@@ -162,7 +163,7 @@ class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
         # 6. Convert to Wavelength
         # --------------------------------------------------------------------------------------------------------------
         progress.report("Converting to wavelength ...")
-        scatter_data = self._convert_to_wavelength(state_serialized, scatter_data)
+        scatter_data = self._convert_to_wavelength(state=state, workspace=scatter_data)
 
         centre1 = self.getProperty("Centre1").value
         centre2 = self.getProperty("Centre2").value
@@ -236,24 +237,27 @@ class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
         output_ws = mask_workspace(component_as_string=component, workspace=workspace, state=state)
         return output_ws
 
-    def _convert_to_wavelength(self, state_serialized, workspace):
-        wavelength_name = "SANSConvertToWavelength"
-        wavelength_options = {"SANSState": state_serialized,
-                              "InputWorkspace": workspace}
+    def _convert_to_wavelength(self, state, workspace):
+        wavelength_state = state.wavelength
+
+        wavelength_name = "SANSConvertToWavelengthAndRebin"
+        wavelength_options = {"InputWorkspace": workspace,
+                              "OutputWorkspace": EMPTY_NAME,
+                              "WavelengthLow": wavelength_state.wavelength_low[0],
+                              "WavelengthHigh": wavelength_state.wavelength_high[0],
+                              "WavelengthStep": wavelength_state.wavelength_step,
+                              "WavelengthStepType": RangeStepType.to_string(
+                                  wavelength_state.wavelength_step_type),
+                              "RebinMode": RebinType.to_string(wavelength_state.rebin_type)}
+
         wavelength_alg = create_child_algorithm(self, wavelength_name, **wavelength_options)
-        wavelength_alg.setPropertyValue("OutputWorkspace", EMPTY_NAME)
-        wavelength_alg.setProperty("OutputWorkspace", workspace)
         wavelength_alg.execute()
         return wavelength_alg.getProperty("OutputWorkspace").value
 
-    def _scale(self, state_serialized, workspace):
-        scale_name = "SANSScale"
-        scale_options = {"SANSState": state_serialized,
-                         "InputWorkspace": workspace,
-                         "OutputWorkspace": EMPTY_NAME}
-        scale_alg = create_child_algorithm(self, scale_name, **scale_options)
-        scale_alg.execute()
-        return scale_alg.getProperty("OutputWorkspace").value
+    def _scale(self, state, workspace):
+        instrument = state.data.instrument
+        output_ws = scale_workspace(workspace=workspace, instrument=instrument, state_scale=state.scale)
+        return output_ws
 
     def _convert_to_histogram(self, workspace):
         if isinstance(workspace, IEventWorkspace):

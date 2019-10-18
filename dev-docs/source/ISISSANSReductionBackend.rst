@@ -838,7 +838,6 @@ The dedicated work-flow algorithms for the SANS reduction are:
 
 - *Calculate SANS Transmission*
 - :ref:`Q1D <algm-Q1D>` or :ref:`Qxy <algm-Qxy>`
-- :ref:`SANSConvertToWavelength <algm-SANSConvertToWavelength>`
 - :ref:`SANSConvertToWavelengthAndRebin <algm-SANSConvertToWavelengthAndRebin>`
 - :ref:`SANSCreateWavelengthAndPixelAdjustment <algm-SANSCreateWavelengthAndPixelAdjustment>`
 - :ref:`CropToComponent <algm-CropToComponent>`
@@ -846,9 +845,10 @@ The dedicated work-flow algorithms for the SANS reduction are:
 - *Workspace Masking*
 - :ref:`MoveInstrumentComponent <algm-MoveInstrumentComponent>`
 - :ref:`RotateInstrumentComponent <algm-RotateInstrumentComponent>`
-- *SANSNormalizeToMonitor*
+- *Normalize To Monitor*
 - *SANSSave*
-- *SANSScale*
+- :ref:`Multiply <algm-Multiply>` (by Absolute Scale)
+- :ref:`Divide <algm-Divide>` (by Sample Volume)
 - *SANSSliceEvent*
 
 Note that algorithms prefixed with SANS take a *SANSState* object as
@@ -922,16 +922,6 @@ If a 2D reduction has been selected then the algorithm will perform the followin
    and set on the output of the algorithm
 
 
-*SANSConvertToWavelength*
-----------------------------
-
-The :ref:`SANSConvertToWavelength <algm-SANSConvertToWavelength>` algorithm acts as a wrapper around
-:ref:`SANSConvertToWavelengthAndRebin <algm-SANSConvertToWavelengthAndRebin>`.
-Unlike :ref:`SANSConvertToWavelengthAndRebin <algm-SANSConvertToWavelengthAndRebin>`
-it takes a *SANSState* object as its input. This algorithm is used for the
-wavelength conversion of the scatter workspace.
-
-
 *SANSConvertToWavelengthAndRebin*
 -----------------------------------
 
@@ -948,8 +938,9 @@ The algorithm performs the following steps:
 -------------------------------------------
 
 The :ref:`SANSCreateWavelengthAndPixelAdjustment <algm-SANSCreateWavelengthAndPixelAdjustment>`
-algorithm combines the output of the *Calculate SANS Transmission* step
-algorithm, the output of the :ref:`SANSNormalizeToMonitor <algm-SANSNormalizeToMonitor>` algorithm
+
+algorithm combines the output of the *Calculate SANS Transmission* step, 
+the output of the *Normalize To SANS Monitor*
 and flood and direct files to produce the correction workspaces which are required
 for converting to Q
 
@@ -1073,16 +1064,15 @@ Note that if the beam centre is also specified in the state object, then the
 manual selection takes precedence.
 
 
-*SANSNormalizeToMonitor*
+*Normalize To SANS Monitor*
 --------------------------
 
-The :ref:`SANSNormalizeToMonitor <algm-SANSNormalizeToMonitor>` algorithm
-provides a monitor normalization workspace for subsequent wavelength correction
-in :ref:`algm-Q1D` or :ref:`algm-Qxy`. The settings of the algorithm are
-provided by the state object. The user can provide a *ScaleFactor* which is
+This step provides a monitor normalization workspace for subsequent 
+wavelength correction in :ref:`algm-Q1D` or :ref:`algm-Qxy`. 
+The user can provide a *ScaleFactor* which is
 normally obtained during event slicing.
 
-The sub-steps of this algorithm are:
+The sub-steps of this step are:
 
 1. Get the incident monitor spectrum number and the scale factor
 2. Extract the monitor spectrum using :ref:`ExtractSingleSpectrum <algm-ExtractSingleSpectrum>` into a monitor workspace
@@ -1104,26 +1094,6 @@ The :ref:`SANSSave <algm-SANSSave>`  algorithm performs two steps:
 Zero-error inflation is useful for data points where the error is 0. When performing
 any form of regression of this the zero-valued error will fix the model at this point.
 If we inflate the error at this point then it does not contribute to the regression.
-
-*SANSScale*
--------------
-
-The :ref:`SANSScale <algm-SANSScale>` algorithm scales a SANS workspace according to the settings
-in the state object. The scaling includes division by the volume of the sample and
-multiplication by an absolute scale.
-
-The sub-steps of this algorithm are:
-
-1. Multiply by the absolute scale. The sub-steps are:
-
-   a. If a scale is specified, multiply the scale by 100, else set the scale to 100
-   b. If the instrument is LOQ divide by :math:`\pi`
-   c. Multiply the scatter workspace by the scale using :ref:`Multiply <algm-Multiply>` (and :ref:`CreateSingleValuedWorkspace <algm-CreateSingleValuedWorkspace>`)
-
-2. Divide by the sample volume. The sub-steps are:
-
-   a. Calculate the sample volume based either on the user settings or the sample information from the file.
-   b. Divide by the scatter workspace by the sample volume using :ref:`Divide <algm-Divide>` (and :ref:`CreateSingleValuedWorkspace <algm-CreateSingleValuedWorkspace>`)
 
 
 *SANSSliceEvent*
@@ -1247,9 +1217,9 @@ The sub-steps of this algorithm are:
    time the components are moved and rotated to the requested positions.
    Note that all steps up until now were performed in the time-of-flight domain.
 6. Convert the data from the time-of-flight to the wavelength domain using
-   :ref:`SANSConvertToWavelength <algm-SANSConvertToWavelength>`.
-7. Scale the data set using :ref:`SANSScale <algm-SANSScale>`. This will multiply the data set
-   with the absolute scale and divide by the sample volume.
+   :ref:`SANSConvertToWavelengthAndRebin <algm-SANSConvertToWavelengthAndRebin>`.
+7. Scale the data set using :ref:`Multiply <algm-Multiply>`. This will multiply the data set
+   with the absolute scale and divide :ref:`Divide <algm-Divide>` by the sample volume.
 8. This step creates the adjustment workspaces using :ref:`SANSCreateAdjustmentWorkspaces <algm-SANSCreateAdjustmentWorkspaces>`.
    This uses the input *TransmissionWorkspace* and *DirectWorkspace* workspaces. Note that
    the instrument's components are moved and rotated before they are used by the adjustment
