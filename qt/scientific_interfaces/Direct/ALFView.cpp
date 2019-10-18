@@ -6,10 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALFView_model.h"
 #include "ALFView_presenter.h"
+#include "PlotFitAnalysisPaneView.h"
+#include "PlotFitAnalysisPaneModel.h"
 
 #include "BaseInstrumentModel.h"
 #include "BaseInstrumentView.h"
-
 // will need these later
 #include "MantidQtWidgets/Common/FunctionBrowser.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
@@ -30,10 +31,16 @@ Mantid::Kernel::Logger g_log("ALFView");
 
 ALFView::ALFView(QWidget *parent)
     : UserSubWindow(parent), m_view(nullptr), m_presenter(nullptr),
+      m_analysisPane(nullptr),
       m_extractSingleTubeObserver(nullptr), m_averageTubeObserver(nullptr) {
   m_model = new ALFView_model();
   m_view = new ALFView_view(m_model->getInstrument(), this);
-  m_presenter = new ALFView_presenter(m_view, m_model);
+  auto analysisView = new PlotFitAnalysisPaneView(-15.0, 15.0, m_view);
+  auto analysisModel = new PlotFitAnalysisPaneModel();
+  m_analysisPane = new PlotFitAnalysisPanePresenter(analysisView, analysisModel);
+
+  m_presenter =
+      new ALFView_presenter(m_view, m_model, m_analysisPane);
 }
 
 void ALFView::initLayout() {
@@ -99,12 +106,12 @@ ALFView::initInstrument() {
 
 void ALFView::extractSingleTube() {
   m_model->extractSingleTube();
-  m_view->addSpectrum(m_model->WSName());
+  m_analysisPane->addSpectrum(m_model->WSName());
 }
 
 void ALFView::averageTube() { 
 	m_model->averageTube(); 
-    m_view->addSpectrum(m_model->WSName());
+    m_analysisPane->addSpectrum(m_model->WSName());
 }
 
 } // namespace CustomInterfaces

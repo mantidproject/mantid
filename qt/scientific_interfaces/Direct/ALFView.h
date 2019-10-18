@@ -14,8 +14,8 @@
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
 
-#include "BaseInstrumentModel.h"
-#include "BaseInstrumentView.h"
+#include "PlotFitAnalysisPanePresenter.h"
+#include "PlotFitAnalysisPaneView.h"
 
 
 namespace MantidQt {
@@ -54,6 +54,7 @@ typedef std::pair < std::string,
   ALFView_view *m_view;
   ALFView_model *m_model;
   ALFView_presenter *m_presenter;
+  PlotFitAnalysisPanePresenter *m_analysisPane;
   VoidObserver *m_extractSingleTubeObserver;
   VoidObserver *m_averageTubeObserver;
 

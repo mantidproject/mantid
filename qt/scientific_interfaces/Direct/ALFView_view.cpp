@@ -16,10 +16,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 ALFView_view::ALFView_view(const std::string &instrument, QWidget *parent)
-    : BaseInstrumentView(instrument, parent), m_extractSingleTubeObservable(nullptr), m_averageTubeObservable(nullptr),
-      m_extractAction(nullptr),
-      m_averageAction(nullptr) {
-}
+    : BaseInstrumentView(instrument, parent),m_extractSingleTubeObservable(nullptr), m_averageTubeObservable(nullptr),
+      m_extractAction(nullptr), m_averageAction(nullptr), m_analysisPane(nullptr) {}
 
 void ALFView_view::setUpInstrument(
     std::string fileName,
@@ -77,9 +75,16 @@ void ALFView_view::addObserver(std::tuple<std::string, Observer *> &listener) {
   }
 }
 
+void ALFView_view::setupAnalysisPane(PlotFitAnalysisPaneView *analysis) {
+	// keep a copy here so we can use a custom class
+  m_analysisPane = analysis;
+  // just adds it to the view
+  BaseInstrumentView::setupInstrumentAnalysisSplitters(analysis);
+}
+
 void ALFView_view::addSpectrum(std::string wsName) {
-  m_plot->addSpectrum("Extracrted Data", wsName.c_str(), 0, Qt::black);
-  }
+  m_analysisPane->addSpectrum(wsName);
+ }
 
 
 } // namespace CustomInterfaces

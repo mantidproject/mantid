@@ -46,29 +46,18 @@ public:
                   std::vector<std::function<bool(std::map<std::string, bool>)>>
                       &instrument);
   virtual void addObserver(std::tuple<std::string, Observer *> &listener){};
-  void setupInstrumentPlotFitSplitters();
+  void setupInstrumentAnalysisSplitters(QWidget *analysis);
 
 public slots:
   void fileLoaded();
-  void doFit();
-
-protected:
-  MantidWidgets::PreviewPlot *m_plot;
-  MantidWidgets::FunctionBrowser *m_fitBrowser;
-  QLineEdit *m_start, *m_end;
 
 private:
   QWidget *generateLoadWidget();
   void warningBox(const QString &message);
-  void setupPlotFitSplitter();
-  QWidget *createFitPane();
   Observable *m_loadRunObservable;
   API::MWRunFiles *m_files;
   QString m_instrument;
   MantidWidgets::InstrumentWidget *m_instrumentWidget;
-  QSplitter *m_fitPlotLayout;
-  QPushButton *m_fitButton;
-  Observable *m_fitObservable;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

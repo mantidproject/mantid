@@ -7,7 +7,9 @@
 #include "ALFView_presenter.h"
 #include "ALFView_view.h"
 
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FileFinder.h"
+#include "MantidAPI/FunctionFactory.h"
 
 #include <functional>
 #include <tuple>
@@ -15,72 +17,30 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-ALFView_presenter::ALFView_presenter(BaseInstrumentView *view,
-                                     BaseInstrumentModel *model)
-    : m_view(view), m_model(model), m_currentRun(0), m_currentFile(""),
-      m_loadRunObserver(nullptr) {
-  m_loadRunObserver = new VoidObserver();
-  m_model->loadEmptyInstrument();
+ALFView_presenter::ALFView_presenter(ALFView_view *view,
+                                     BaseInstrumentModel *model,
+                                     PlotFitAnalysisPanePresenter *analysisPane)
+    : BaseInstrumentPresenter(view, model, analysisPane->getView()), m_view(view),
+      m_model(model), m_analysisPane(analysisPane) {
 }
 
-void ALFView_presenter::initLayout(
-    std::pair<instrumentSetUp, instrumentObserverOptions> *setUp) {
-  // connect to new run
-  m_view->observeLoadRun(m_loadRunObserver);
-  std::function<void()> loadBinder =
-      std::bind(&ALFView_presenter::loadRunNumber, this);
-  m_loadRunObserver->setSlot(loadBinder);
-  initInstrument(setUp);
+void ALFView_presenter::setUpInstrumentAnalysisSplitter() {
+  auto composite = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(
+      Mantid::API::FunctionFactory::Instance().createFunction(
+          "CompositeFunction"));
+  auto func = Mantid::API::FunctionFactory::Instance().createInitialized(
+      "name = FlatBackground");
+  composite->addFunction(func);
+  func = Mantid::API::FunctionFactory::Instance().createInitialized(
+      "name = Gaussian, Height = 3000, Sigma= 1.0");
+  composite->addFunction(func);
 
-  m_view->setupInstrumentPlotFitSplitters();
-
-
+  m_analysisPane->addFunction(composite);
+  m_view->setupAnalysisPane(m_analysisPane->getView());
 }
-
-void ALFView_presenter::loadAndAnalysis(const std::string &pathToRun) {
-  try {
-    auto loadedResult = m_model->loadData(pathToRun);
-
-    if (loadedResult.second == "success") {
-      m_currentRun = loadedResult.first;
-      m_currentFile = pathToRun;
-    } else {
-      // reset to the previous data
-      m_view->warningBox(loadedResult.second);
-    }
-    // make displayed run number be in sinc
-    m_view->setRunQuietly(std::to_string(m_currentRun));
-    m_model->setCurrentRun(m_currentRun);
-  } catch (...) {
-    m_view->setRunQuietly(std::to_string(m_currentRun));
-    m_model->setCurrentRun(m_currentRun);
-  }
-}
-
-void ALFView_presenter::loadRunNumber() {
-  auto pathToRun = m_view->getFile();
-  if (pathToRun == "" || m_currentFile == pathToRun) {
-    return;
-  }
-  loadAndAnalysis(pathToRun);
-}
-
-// All of the below are specific to ALF
-
-void ALFView_presenter::initInstrument(
-    std::pair<instrumentSetUp, instrumentObserverOptions> *setUp) {
-  if (!setUp) {
-    return;
-  }
-  // set up instrument
-  auto instrumentSetUp = setUp->first;
-
-  m_view->setUpInstrument(instrumentSetUp.first, instrumentSetUp.second);
-
-  auto customContextMenu = setUp->second;
-  for (auto options : customContextMenu) {
-    m_view->addObserver(options);
-  }
+// want to pass the presenter not the view...
+void ALFView_presenter::loadSideEffects() {
+  m_analysisPane->clearCurrentWS();
 }
 
 } // namespace CustomInterfaces

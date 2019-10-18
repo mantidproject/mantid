@@ -8,7 +8,10 @@
 #define MANTIDQT_CUSTOMINTERFACES_ALFVIEWPRESENTER_H_
 
 #include "BaseInstrumentModel.h"
+#include "BaseInstrumentPresenter.h"
 #include "BaseInstrumentView.h"
+#include "PlotFitAnalysisPanePresenter.h"
+
 #include "ALFView_view.h"
 #include "DllConfig.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
@@ -19,34 +22,23 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_DIRECT_DLL ALFView_presenter : public QObject {
+class MANTIDQT_DIRECT_DLL ALFView_presenter : public BaseInstrumentPresenter {
   Q_OBJECT
 
 public:
-  ALFView_presenter(BaseInstrumentView *view, BaseInstrumentModel *model);
-  ~ALFView_presenter() { delete m_loadRunObserver; };
+  ALFView_presenter(ALFView_view *view, BaseInstrumentModel *model,
+                    PlotFitAnalysisPanePresenter *analysisPane);
+  ~ALFView_presenter(){};
 
-  typedef std::pair<std::string,
-                     std::vector<std::function<bool(std::map<std::string, bool>)>>>
-      instrumentSetUp;
-  typedef std::vector<std::tuple<std::string, Observer *>>
-      instrumentObserverOptions;
-
-  void initLayout(std::pair<instrumentSetUp, instrumentObserverOptions> *setUp = nullptr);
-
-private slots:
-  void loadRunNumber();
+protected:
+  void loadSideEffects() override;
 
 private:
-  void loadAndAnalysis(const std::string &run);
-  void initInstrument(std::pair<instrumentSetUp, instrumentObserverOptions> *setUp);
+  void setUpInstrumentAnalysisSplitter() override;
 
-  BaseInstrumentView *m_view;
+  ALFView_view *m_view;
   BaseInstrumentModel *m_model;
-  int m_currentRun;
-  std::string m_currentFile;
-  VoidObserver *m_loadRunObserver;
-
+  PlotFitAnalysisPanePresenter *m_analysisPane;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

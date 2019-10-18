@@ -12,6 +12,7 @@
 #include "MantidQtWidgets/Common/ObserverPattern.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 #include "BaseInstrumentView.h"
+#include "PlotFitAnalysisPaneView.h"
 
 #include <QObject>
 #include <QSplitter>
@@ -36,6 +37,7 @@ public:
 
   void addObserver(std::tuple<std::string, Observer *> &listener) override;
   void addSpectrum(std::string wsName);
+  void setupAnalysisPane(PlotFitAnalysisPaneView *analysis);
 
 public slots:
 void extractSingleTube();
@@ -46,6 +48,7 @@ private:
   Observable *m_averageTubeObservable;
   QAction *m_extractAction;
   QAction *m_averageAction;
+  PlotFitAnalysisPaneView *m_analysisPane;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
