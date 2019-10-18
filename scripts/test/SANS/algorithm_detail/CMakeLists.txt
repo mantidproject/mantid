@@ -9,7 +9,7 @@ set(TEST_PY_FILES
     move_workspaces_test.py
     move_sans_instrument_component_test.py
     q_resolution_calculator_test.py
-    scale_helper_test.py
+    scale_sans_workspace_test.py
     strip_end_nans_test.py
     centre_finder_new_test.py
     batch_execution_test.py)
