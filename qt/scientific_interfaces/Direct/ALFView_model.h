@@ -8,6 +8,8 @@
 #define MANTIDQT_CUSTOMINTERFACES_ALFVIEWMODEL_H_
 
 #include "BaseInstrumentModel.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/CompositeFunction.h"
 
 #include <map>
 #include <string>
@@ -32,6 +34,8 @@ public:
   bool averageTubeConditon(std::map<std::string, bool> tabBools);
   void extractSingleTube();
   std::string WSName();
+  Mantid::API::CompositeFunction_sptr getDefaultFunction();
+
 private:
   int m_numberOfTubesInAverage;
   int m_currentRun;

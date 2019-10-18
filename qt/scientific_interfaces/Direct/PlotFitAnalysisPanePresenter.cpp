@@ -30,15 +30,13 @@ PlotFitAnalysisPanePresenter::PlotFitAnalysisPanePresenter(
 
 void PlotFitAnalysisPanePresenter::doFit() {
   auto func = m_view->getFunction();
-  auto d = func->nParams();
   if (m_currentName != "" && func->nParams() != 0) {
     try {
       func = m_model->doFit(m_currentName, m_view->getRange(), func);
       m_view->updateFunction(func);
-    } catch (std::exception &error) {
+    } catch (...) {
           m_view->fitWarning(
           "Fit failed");
-
 	}
     m_view->addFitSpectrum(m_currentName + "_fits_Workspace");
   } else {

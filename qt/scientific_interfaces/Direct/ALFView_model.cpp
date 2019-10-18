@@ -27,8 +27,7 @@ using namespace Mantid::API;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-ALFView_model::ALFView_model()
-    : m_numberOfTubesInAverage(0) {
+ALFView_model::ALFView_model() : m_numberOfTubesInAverage(0), m_currentRun(0) {
   setTmpName("ALF_tmp");
   setInstrumentName("ALF");
   setWSName("ALFData");
@@ -196,7 +195,21 @@ void ALFView_model::extractSingleTube() {
   m_numberOfTubesInAverage = 1;
 }
 
+CompositeFunction_sptr ALFView_model::getDefaultFunction() {
 
+  CompositeFunction_sptr composite =
+      boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(
+      Mantid::API::FunctionFactory::Instance().createFunction(
+          "CompositeFunction"));
+  
+  auto func = Mantid::API::FunctionFactory::Instance().createInitialized(
+      "name = FlatBackground");
+  composite->addFunction(func);
+  func = Mantid::API::FunctionFactory::Instance().createInitialized(
+      "name = Gaussian, Height = 3., Sigma= 1.0");
+  composite->addFunction(func);
+  return composite;
+}
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

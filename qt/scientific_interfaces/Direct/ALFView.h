@@ -29,9 +29,6 @@ public:
   ALFView(QWidget *parent = nullptr);
   ~ALFView() {
     delete m_presenter;
-    delete m_model;
-    delete m_extractSingleTubeObserver;
-    delete m_averageTubeObserver;
   };
   static std::string name() { return "ALF View"; }
   static QString categoryInfo() { return "Direct"; }
@@ -40,23 +37,11 @@ protected:
   void initLayout() override;
 
 private:
-
-typedef std::pair < std::string,
-      std::vector<std::function<bool(std::map<std::string, bool>)>>>
-          instrumentSetUp;
-  typedef std::vector<std::tuple<std::string, Observer *>>
-      instrumentObserverOptions;
-
-  std::pair<instrumentSetUp, instrumentObserverOptions> initInstrument();
-  void extractSingleTube();
-  void averageTube();
-
   ALFView_view *m_view;
   ALFView_model *m_model;
   ALFView_presenter *m_presenter;
   PlotFitAnalysisPanePresenter *m_analysisPane;
-  VoidObserver *m_extractSingleTubeObserver;
-  VoidObserver *m_averageTubeObserver;
+
 
 };
 } // namespace CustomInterfaces

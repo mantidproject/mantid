@@ -22,7 +22,10 @@ class PlotFitAnalysisPanePresenter : public QObject {
 public:
   PlotFitAnalysisPanePresenter(PlotFitAnalysisPaneView *m_view,
                                PlotFitAnalysisPaneModel *m_model);
-  ~PlotFitAnalysisPanePresenter(){};
+  ~PlotFitAnalysisPanePresenter() {
+    delete m_model;
+    delete m_fitObserver;
+  };
   PlotFitAnalysisPaneView *getView() { return m_view; };
   std::string getCurrentWS(){return m_currentName;};
   void clearCurrentWS() { m_currentName = ""; };

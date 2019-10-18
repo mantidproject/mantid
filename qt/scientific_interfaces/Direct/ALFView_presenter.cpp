@@ -6,10 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALFView_presenter.h"
 #include "ALFView_view.h"
+#include "ALFView_model.h"
 
-#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FileFinder.h"
-#include "MantidAPI/FunctionFactory.h"
+
 
 #include <functional>
 #include <tuple>
@@ -17,30 +17,87 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-ALFView_presenter::ALFView_presenter(ALFView_view *view,
-                                     BaseInstrumentModel *model,
+ALFView_presenter::ALFView_presenter(ALFView_view *view, ALFView_model *model,
                                      PlotFitAnalysisPanePresenter *analysisPane)
-    : BaseInstrumentPresenter(view, model, analysisPane->getView()), m_view(view),
-      m_model(model), m_analysisPane(analysisPane) {
+    : BaseInstrumentPresenter(view, model, analysisPane->getView()), m_view(view), m_model(model), m_analysisPane(analysisPane),
+      m_extractSingleTubeObserver(nullptr), m_averageTubeObserver(nullptr) {
+
+  m_extractSingleTubeObserver = new VoidObserver();
+  m_averageTubeObserver = new VoidObserver();
+  auto setUp = initInstrument();
+
+  initLayout(&setUp);
 }
 
 void ALFView_presenter::setUpInstrumentAnalysisSplitter() {
-  auto composite = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(
-      Mantid::API::FunctionFactory::Instance().createFunction(
-          "CompositeFunction"));
-  auto func = Mantid::API::FunctionFactory::Instance().createInitialized(
-      "name = FlatBackground");
-  composite->addFunction(func);
-  func = Mantid::API::FunctionFactory::Instance().createInitialized(
-      "name = Gaussian, Height = 3000, Sigma= 1.0");
-  composite->addFunction(func);
-
+  CompositeFunction_sptr composite = m_model->getDefaultFunction();
   m_analysisPane->addFunction(composite);
   m_view->setupAnalysisPane(m_analysisPane->getView());
 }
-// want to pass the presenter not the view...
 void ALFView_presenter::loadSideEffects() {
   m_analysisPane->clearCurrentWS();
+}
+
+typedef std::pair<std::string,
+                  std::vector<std::function<bool(std::map<std::string, bool>)>>>
+    instrumentSetUp;
+typedef std::vector<std::tuple<std::string, Observer *>>
+    instrumentObserverOptions;
+
+/**
+* This creates the custom instrument widget
+* @return <instrumentSetUp,
+    instrumentObserverOptions> : a pair of the
+*/
+std::pair<instrumentSetUp, instrumentObserverOptions>
+ALFView_presenter::initInstrument() {
+
+  instrumentSetUp setUpContextConditions;
+
+  // set up the slots for the custom context menu
+  std::vector<std::tuple<std::string, Observer *>> customInstrumentOptions;
+  std::vector<std::function<bool(std::map<std::string, bool>)>> binders;
+
+  // set up custom context menu conditions
+  std::function<bool(std::map<std::string, bool>)> extractConditionBinder =
+      std::bind(&ALFView_model::extractTubeConditon, m_model,
+                std::placeholders::_1);
+  std::function<bool(std::map<std::string, bool>)> averageTubeConditonBinder =
+      std::bind(&ALFView_model::averageTubeConditon, m_model,
+                std::placeholders::_1);
+
+  binders.push_back(extractConditionBinder);
+  binders.push_back(averageTubeConditonBinder);
+
+  setUpContextConditions = std::make_pair(m_model->dataFileName(), binders);
+
+  // set up single tube extract
+  std::function<void()> extractSingleTubeBinder =
+      std::bind(&ALFView_presenter::extractSingleTube, this); // binder for slot
+  m_extractSingleTubeObserver->setSlot(
+      extractSingleTubeBinder); // add slot to observer
+  std::tuple<std::string, Observer *> tmp = std::make_tuple(
+      "singleTube", m_extractSingleTubeObserver); // store observer for later
+  customInstrumentOptions.push_back(tmp);
+
+  // set up average tube
+  std::function<void()> averageTubeBinder =
+      std::bind(&ALFView_presenter::averageTube, this);
+  m_averageTubeObserver->setSlot(averageTubeBinder);
+  tmp = std::make_tuple("averageTube", m_averageTubeObserver);
+  customInstrumentOptions.push_back(tmp);
+
+  return std::make_pair(setUpContextConditions, customInstrumentOptions);
+}
+
+void ALFView_presenter::extractSingleTube() {
+  m_model->extractSingleTube();
+  m_analysisPane->addSpectrum(m_model->WSName());
+}
+
+void ALFView_presenter::averageTube() {
+  m_model->averageTube();
+  m_analysisPane->addSpectrum(m_model->WSName());
 }
 
 } // namespace CustomInterfaces
