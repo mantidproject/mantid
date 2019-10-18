@@ -79,11 +79,11 @@ def save_unsplined_vanadium(vanadium_ws, output_path):
     mantid.DeleteWorkspace(converted_group)
 
 
-def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None):
+def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None, cal_file_name=None, sample_details=None):
     focused_ws = _obtain_focused_run(run_number, focus_file_path)
 
     if merge_banks:
-        pdf_output = _generate_grouped_ts_pdf(focused_ws, q_lims)
+        pdf_output = _generate_grouped_ts_pdf(run_number, focused_ws, q_lims, cal_file_name, sample_details)
     else:
         focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws.name(), Target="MomentumTransfer")
         pdf_output = mantid.PDFFourierTransform(Inputworkspace=focused_ws, InputSofQType="S(Q)", PDFType="G(r)",
@@ -120,7 +120,7 @@ def _obtain_focused_run(run_number, focus_file_path):
     return focused_ws
 
 
-def _generate_grouped_ts_pdf(focused_ws, q_lims):
+def _generate_grouped_ts_pdf(run_number, focused_ws, q_lims, cal_file_name, sample_details):
     focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, Target="MomentumTransfer", EMode='Elastic')
     min_x = np.inf
     max_x = -np.inf
@@ -134,7 +134,6 @@ def _generate_grouped_ts_pdf(focused_ws, q_lims):
     binning = [min_x, width_x, max_x]
     focused_ws = mantid.Rebin(InputWorkspace=focused_ws, Params=binning)
     focused_data_combined = mantid.ConjoinSpectra(InputWorkspaces=focused_ws)
-    mantid.ConvertFromDistribution(Workspace=focused_data_combined)
 
     raw_ws = mantid.LoadRaw(Filename='POL'+str(run_number))
     mantid.SetSample(InputWorkspace=raw_ws,
@@ -167,7 +166,6 @@ def _generate_grouped_ts_pdf(focused_ws, q_lims):
     mantid.ConvertToDistribution(Workspace=placzek)
     placzek = mantid.ConvertUnits(InputWorkspace=placzek, Target="MomentumTransfer", EMode='Elastic')
     placzek = mantid.RebinToWorkspace(WorkspaceToRebin=placzek, WorkspaceToMatch=focused_data_combined)
-    mantid.ConvertFromDistribution(Workspace=placzek)
     mantid.Subtract(LHSWorkspace=focused_data_combined,
                     RHSWorkspace=placzek,
                     OutputWorkspace=focused_data_combined)

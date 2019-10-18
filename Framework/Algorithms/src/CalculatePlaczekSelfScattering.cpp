@@ -5,13 +5,15 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CalculatePlaczekSelfScattering.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Atom.h"
 #include "MantidKernel/Material.h"
+#include "MantidKernel/Unit.h"
 
 #include <utility>
 
@@ -52,8 +54,12 @@ void CalculatePlaczekSelfScattering::init() {
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           "InputWorkspace", "", Kernel::Direction::Input),
-      "Workspace of fitted incident spectrum with it's first derivative. "
-      "Workspace must have instument and sample data.");
+      "Raw diffraction data workspace for associated correction to be "
+      "calculated for. Workspace must have instument and sample data.");
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "IncidentSpecta", "", Kernel::Direction::Input),
+      "Workspace of fitted incident spectrum with it's first derivative.");
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           "OutputWorkspace", "", Kernel::Direction::Output),
@@ -66,8 +72,8 @@ std::map<std::string, std::string>
 CalculatePlaczekSelfScattering::validateInputs() {
   std::map<std::string, std::string> issues;
   const API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
-  const Geometry::DetectorInfo detInfo = inWS->detectorInfo();
-  if (detInfo.size() == 0) {
+  const API::SpectrumInfo specInfo = inWS->spectrumInfo();
+  if (specInfo.size() == 0) {
     issues["InputWorkspace"] =
         "Input workspace does not have detector information";
   }
@@ -84,6 +90,7 @@ CalculatePlaczekSelfScattering::validateInputs() {
  */
 void CalculatePlaczekSelfScattering::exec() {
   const API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
+  const API::MatrixWorkspace_sptr incidentWS = getProperty("IncidentSpecta");
   API::MatrixWorkspace_sptr outWS = getProperty("OutputWorkspace");
   constexpr double factor =
       1.0 / 1.66053906660e-27; // atomic mass unit-kilogram relationship
@@ -98,9 +105,9 @@ void CalculatePlaczekSelfScattering::exec() {
                      neutronMass / atom.second["mass"];
   }
   // get incident spectrum and 1st derivative
-  const MantidVec xLambda = inWS->readX(0);
-  const MantidVec incident = inWS->readY(0);
-  const MantidVec incidentPrime = inWS->readY(1);
+  const MantidVec xLambda = incidentWS->readX(0);
+  const MantidVec incident = incidentWS->readY(0);
+  const MantidVec incidentPrime = incidentWS->readY(1);
   double dx = (xLambda[1] - xLambda[0]) / 2.0;
   std::vector<double> phi1;
   for (size_t i = 0; i < xLambda.size() - 1; i++) {
@@ -127,15 +134,16 @@ void CalculatePlaczekSelfScattering::exec() {
   MantidVec xLambdas;
   MantidVec placzekCorrection;
   size_t nReserve = 0;
-  const Geometry::DetectorInfo detInfo = inWS->detectorInfo();
-  for (size_t detIndex = 0; detIndex < detInfo.size(); detIndex++) {
-    if (!detInfo.isMonitor(detIndex)) {
-      nReserve += 1;
+  const API::SpectrumInfo specInfo = inWS->spectrumInfo();
+  for (size_t detIndex = 0; detIndex < specInfo.size(); detIndex++) {
+    if (!specInfo.isMonitor(detIndex)) {
+      if (!specInfo.l2(detIndex) == 0) {
+        nReserve += 1;
+      }
     }
   }
   xLambdas.reserve(nReserve);
   placzekCorrection.reserve(nReserve);
-
   API::MatrixWorkspace_sptr outputWS =
       DataObjects::create<API::HistoWorkspace>(*inWS);
   // The algorithm computes the signal values at bin centres so they should
