@@ -15,12 +15,20 @@ class CalibrationPresenter(object):
     def __init__(self, model, view):
         self.model = model
         self.view = view
-        self.view.set_on_calibrate_clicked(self.on_calibrate_clicked)
         self.worker = None
+
+        self.current_calibration = {"vanadium_path": None, "ceria_path": None}
+        self.pending_calibration = {"vanadium_path": None, "ceria_path": None}
+
+        # Connect view signals to local functions.
+        self.view.set_on_calibrate_clicked(self.on_calibrate_clicked)
+
+        # Main Window State Variables
         self.instrument = "ENGINX"
         self.rb_num = None
 
     def on_calibrate_clicked(self):
+        # Do nothing if run numbers are invalid or view is searching.
         if not self.validate_run_numbers():
             return
         if self.view.is_searching():
@@ -38,11 +46,24 @@ class CalibrationPresenter(object):
         :param plot_output: Whether to plot the output.
         :param rb_num: The current RB number set in the GUI.
         """
-        self.worker = AsyncTask(self.model.create_new_calibration, (vanadium_path, calib_path),
-                                {"plot_output": plot_output, "instrument": self.instrument, "rb_num": rb_num},
-                                error_cb=self._on_error, finished_cb=self.enable_calibrate_buttons)
+        self.worker = AsyncTask(self.model.create_new_calibration, (vanadium_path, calib_path), {
+            "plot_output": plot_output,
+            "instrument": self.instrument,
+            "rb_num": rb_num
+        },
+                                error_cb=self._on_error,
+                                finished_cb=self.enable_calibrate_buttons,
+                                success_cb=self.set_current_calibration)
+        self.pending_calibration["vanadium_path"] = vanadium_path
+        self.pending_calibration["ceria_path"] = calib_path
         self.disable_calibrate_buttons()
         self.worker.start()
+
+    def set_current_calibration(self, success_info):
+        logger.information("Thread executed in " + str(success_info.elapsed_time) + " seconds.")
+        self.current_calibration = self.pending_calibration
+        self.pending_calibration = {"vanadium_path": None, "ceria_path": None}
+        self.enable_calibrate_buttons()
 
     def set_instrument_override(self, instrument):
         if instrument == 0:
