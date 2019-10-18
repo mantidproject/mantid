@@ -11,7 +11,8 @@ Description
 
 This algorithm provides a wavelength-adjustment workspace and a pixel-adjustment workspace which are used in :ref:`algm-Q1D` or  :ref:`algm-Qxy`.
 The wavelength-adjustment workspace is created by combining the transmission workspace obtained
-from the *Calculate SANS Transmission* step, the monitor normalization workspace obtained from :ref:`algm-SANSNormalizeToMonitor` and
+from the *Calculate SANS Transmission* step, the monitor normalization workspace 
+obtained from the *Normalize To SANS Monitor* step and
 efficiency correction files which are provided by the state object. The pixel-adjustment settings are also obtained
 from the state object.
 

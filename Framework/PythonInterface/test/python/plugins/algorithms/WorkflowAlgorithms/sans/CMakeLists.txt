@@ -5,7 +5,6 @@ set(TEST_PY_FILES
     SANSConvertToWavelengthAndRebinTest.py
     SANSCreateAdjustmentWorkspacesTest.py
     SANSCreateWavelengthAndPixelAdjustmentTest.py
-    SANSNormalizeToMonitorTest.py
     SANSSliceEventTest.py)
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})

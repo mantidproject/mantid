@@ -845,7 +845,7 @@ The dedicated work-flow algorithms for the SANS reduction are:
 - *Workspace Masking*
 - :ref:`MoveInstrumentComponent <algm-MoveInstrumentComponent>`
 - :ref:`RotateInstrumentComponent <algm-RotateInstrumentComponent>`
-- *SANSNormalizeToMonitor*
+- *Normalize To Monitor*
 - *SANSSave*
 - :ref:`Multiply <algm-Multiply>` (by Absolute Scale)
 - :ref:`Divide <algm-Divide>` (by Sample Volume)
@@ -942,8 +942,9 @@ The algorithm performs the following steps:
 -------------------------------------------
 
 The :ref:`SANSCreateWavelengthAndPixelAdjustment <algm-SANSCreateWavelengthAndPixelAdjustment>`
-algorithm combines the output of the *Calculate SANS Transmission* step
-algorithm, the output of the :ref:`SANSNormalizeToMonitor <algm-SANSNormalizeToMonitor>` algorithm
+
+algorithm combines the output of the *Calculate SANS Transmission* step, 
+the output of the *Normalize To SANS Monitor*
 and flood and direct files to produce the correction workspaces which are required
 for :ref:`SANSConvertToQ <algm-SANSConvertToQ>`.
 
@@ -1067,16 +1068,15 @@ Note that if the beam centre is also specified in the state object, then the
 manual selection takes precedence.
 
 
-*SANSNormalizeToMonitor*
+*Normalize To SANS Monitor*
 --------------------------
 
-The :ref:`SANSNormalizeToMonitor <algm-SANSNormalizeToMonitor>` algorithm
-provides a monitor normalization workspace for subsequent wavelength correction
-in :ref:`algm-Q1D` or :ref:`algm-Qxy`. The settings of the algorithm are
-provided by the state object. The user can provide a *ScaleFactor* which is
+This step provides a monitor normalization workspace for subsequent 
+wavelength correction in :ref:`algm-Q1D` or :ref:`algm-Qxy`. 
+The user can provide a *ScaleFactor* which is
 normally obtained during event slicing.
 
-The sub-steps of this algorithm are:
+The sub-steps of this step are:
 
 1. Get the incident monitor spectrum number and the scale factor
 2. Extract the monitor spectrum using :ref:`ExtractSingleSpectrum <algm-ExtractSingleSpectrum>` into a monitor workspace
