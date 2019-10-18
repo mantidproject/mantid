@@ -8,13 +8,11 @@
 System Test for ISIS Reflectometry reduction
 Adapted from scripts provided by Max Skoda.
 """
-from __future__ import (print_function)
+from ISISReflectometryWorkflowBase import *
 import systemtesting
-from mantid.simpleapi import *
-from mantid import ConfigService
 
 
-class INTERReductionTest(systemtesting.MantidSystemTest):
+class INTERReductionTest(systemtesting.MantidSystemTest, ISISReflectometryWorkflowBase):
     '''
     Mantid Test Script for INTER:
 
@@ -24,17 +22,15 @@ class INTERReductionTest(systemtesting.MantidSystemTest):
     3. Scripted fitting of reduced data for NRW
     4. Linear detector reduction
     '''
-    # Note: you may find the regenerate functions useful.
 
-    event_run_numbers = [45222]
     run_numbers = [45222, 45223, 45224, 44984, 44985, 44990, 44991]
-    first_transmission_run_names = ['45226', '44988', '44986']
-    second_transmission_run_names = ['45227', '44989', '44987']
+    event_run_numbers = [45222]
+    first_transmission_runs = ['45226', '44988', '44986']
+    second_transmission_runs = ['45227', '44989', '44987']
     transmission_workspace_names = ['TRANS', 'TRANS_SM', 'TRANS_NoSM']
-    runs_file = 'INTERReductionTestRuns.nxs'
-    runs_workspace = 'Runs'
-    reference_result_file = 'INTERReductionResult.nxs'
-    result_workspace = 'Result'
+    input_workspaces_file = 'INTERReductionTestRuns.nxs'
+    reference_file = 'INTERReductionResult.nxs'
+
     expected_fit_params={
         'Name': ['Theta', 'ScaleFactor', 'AirSLD', 'BulkSLD', 'Roughness', 'BackGround', 'Resolution',
                  'SLD_Layer0', 'd_Layer0', 'Rough_Layer0', 'Cost function value'],
@@ -52,111 +48,29 @@ class INTERReductionTest(systemtesting.MantidSystemTest):
         self.tolerance = 1e-6
 
     def requiredFiles(self):
-        return [self.reference_result_file, self.runs_file]
+        return [self.reference_file, self.input_workspaces_file]
 
     def validate(self):
-        return (self.result_workspace, self.reference_result_file)
+        return (self.result_workspace_name, self.reference_file)
 
     def runTest(self):
-        setupInstrument()
-        Load(self.runs_file, OutputWorkspace=self.runs_workspace)
-        workspaces_to_exclude_from_result = AnalysisDataService.Instance().getObjectNames()
-        createTransmissionWorkspaces(self.first_transmission_run_names,
-                                     self.second_transmission_run_names,
+        self.setupTest()
+        stitchTransmissionWorkspaces(self.first_transmission_runs,
+                                     self.second_transmission_runs,
                                      self.transmission_workspace_names)
-
         testEventDataTimeSlicing(self.event_run_numbers)
         testReductionOfThreeAngleFringedSolidLiquidExample([45222, 45223, 45224])
         testReductionOfTwoAngleAirLiquidExample([44984, 44985])
         testFittingOfReducedData(44990, 44991, self.expected_fit_params, self.expected_fit_covariance)
-
-        removeWorkspaces(workspaces_to_exclude_from_result)
-        GroupWorkspaces(InputWorkspaces=AnalysisDataService.Instance().getObjectNames(),
-                        OutputWorkspace=self.result_workspace)
-        mtd[self.result_workspace].sortByName()
-
-    @staticmethod
-    def regenerateRunsFile():
-        setupInstrument()
-        regenerateRunsFile(INTERReductionTest.first_transmission_run_names +
-                           INTERReductionTest.second_transmission_run_names,
-                           INTERReductionTest.run_numbers,
-                           INTERReductionTest.event_run_numbers)
+        self.finaliseResults()
 
     @staticmethod
     def regenerateReferenceFileByReducing():
         setupInstrument()
         test = INTERReductionTest()
         test.runTest()
-        SaveNexus(InputWorkspace=INTERReductionTest.result_workspace,
-                  Filename=INTERReductionTest.reference_result_file)
-
-    @staticmethod
-    def regenerateReferenceFileFromDirectory(reference_file_directory):
-        setupInstrument()
-        regenerateReferenceFile(reference_file_directory, INTERReductionTest.reference_result_file)
-
-
-def setupInstrument():
-    configI = ConfigService.Instance()
-    configI.setString("default.instrument", "INTER")
-    configI.setString("default.facility", "ISIS")
-
-
-def removeWorkspaces(to_remove):
-    for workspace_name in to_remove:
-        AnalysisDataService.Instance().remove(workspace_name)
-
-
-def workspaceName(file_path):
-    return os.path.splitext(os.path.basename(file_path))[0]
-
-
-def regenerateReferenceFile(reference_file_directory, output_filename):
-    '''Generate the reference file from a given folder of output workspaces'''
-    files = os.listdir(reference_file_directory)
-    workspace_names = []
-    for file in files:
-        workspace_name = WorkspaceName(file)
-        Load(file, OutputWorkspace=workspace_name)
-        workspace_names.append(workspace_name)
-
-    output_workspace_name = 'Output'
-    GroupWorkspaces(InputWorkspaces=workspace_names, OutputWorkspace=output_workspace_name)
-    mtd[output_workspace_name].sortByName()
-    SaveNexus(InputWorkspace=output_workspace_name, Filename=output_filename)
-
-
-def regenerateRunsFile(transmission_run_names, run_numbers, event_run_numbers):
-    '''Generate the test input file from a range of run numbers and transmission runs.'''
-    # Load transmission runs
-    for run in transmission_run_names:
-        Load('{}.raw'.format(run), OutputWorkspace=run)
-    # Load raw run files
-    run_names = [str(run_number)+'.raw' for run_number in run_numbers]
-    for run_name in run_names:
-        Load(run_name, OutputWorkspace=run_name)
-    # Load event workspaces
-    event_run_names = [str(event_run_number) for event_run_number in event_run_numbers]
-    for event_run_name in event_run_names:
-        LoadEventNexus(event_run_name, OutputWorkspace=event_run_name, LoadMonitors=True)
-    event_monitor_names = [str(run_number)+'_monitors' for run_number in event_run_numbers]
-    # Group and save
-    GroupWorkspaces(InputWorkspaces=run_names + transmission_run_names + event_run_names +
-                    event_monitor_names,
-                    OutputWorkspace='Input')
-    SaveNexus(InputWorkspace='Input', Filename='INTERReductionTestRuns.nxs')
-
-
-def createTransmissionWorkspaces(runs1, runs2, output_names):
-    '''Create a transmission workspace for each pair of input runs with the given output names'''
-    for run1, run2, name in zip(runs1, runs2, output_names):
-        CreateTransmissionWorkspaceAuto(
-            FirstTransmissionRun=run1,
-            SecondTransmissionRun=run2,
-            OutputWorkspace=name,
-            StartOverlap=10,
-            EndOverlap=12)
+        SaveNexus(InputWorkspace=INTERReductionTest.reference_workspace_name,
+                  Filename=INTERReductionTest.reference_file)
 
 
 def eventRef(run_number, angle, start=0, stop=0, DB='TRANS'):
@@ -199,14 +113,6 @@ def eventRef(run_number, angle, start=0, stop=0, DB='TRANS'):
     DeleteWorkspace(slice_name+'_ref')
     DeleteWorkspace('mon_slice')
     DeleteWorkspace('mon_rebin')
-
-
-def stitchedWorkspaceName(run1_number, run2_number):
-    '''Gets the name of the stitched workspace based on the two input workspace names'''
-    run1_name=str(run1_number)
-    run2_name=str(run2_number)
-    run2_short_name=run2_name[-2:]
-    return run1_name+'_'+run2_short_name
 
 
 def quickRef(run_numbers=[], trans_workspace_names=[], angles=[]):
@@ -299,7 +205,7 @@ def compareFitResults(results_dict, reference_dict, tolerance):
                                    "messages for details")
 
 
-def generateTimeSlices(run_number):
+def sliceAndReduceRun(run_number):
     '''Generate 60 second time slices of the given run, and perform reflectometry
     reduction on each slice'''
     for slice_index in range(5):
@@ -310,7 +216,7 @@ def generateTimeSlices(run_number):
 
 def testEventDataTimeSlicing(event_run_numbers):
     for run_number in event_run_numbers:
-        generateTimeSlices(run_number)
+        sliceAndReduceRun(run_number)
 
 
 def testReductionOfThreeAngleFringedSolidLiquidExample(run_numbers):
@@ -337,11 +243,3 @@ def testFittingOfReducedData(run1_number, run2_number, expected_fit_params, expe
     print('run ', str(run1_number))
     stitched_name=stitchedWorkspaceName(run1_number, run2_number)
     twoAngleFit(stitched_name, scalefactor, expected_fit_params, expected_fit_covariance)
-
-
-# If you want to re-run the test and save the result as a reference...
-#   INTERReductionTest.regenerateReferenceFileByReducing()
-
-# or
-# If you have workspaces in a folder to use as a reference...
-#   INTERReductionTest.regenerateReferenceFileFromDirectory("Path/To/Folder")

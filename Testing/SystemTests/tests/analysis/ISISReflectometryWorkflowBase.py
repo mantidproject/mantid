@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -9,55 +9,42 @@ System Test for ISIS Reflectometry reduction
 Adapted from scripts provided by Max Skoda.
 """
 from __future__ import (print_function)
-import systemtesting
 from mantid.simpleapi import *
 from mantid import ConfigService
 
 
-class ISISReflectometryWorkflowBase(systemtesting.MantidSystemTest):
-    ''' 
+class ISISReflectometryWorkflowBase():
+    '''
     Base class for testing the ISIS Reflectometry workflow algorithms
-    
+
     You may find the regenerate functions useful:
     - If you want to re-run the test and save the result as a reference...
-        INTERReductionWithSlicingTest.regenerateReferenceFileByReducing()
+        <TESTSUITE>.regenerateReferenceFileByReducing()
     - If you have workspaces in a folder to use as a reference...
-        INTERReductionWithSlicingTest.regenerateReferenceFileFromDirectory("Path/To/Folder")
+        <TESTSUITE>.regenerateReferenceFileFromDirectory("Path/To/Folder")
+    where <TESTSUITE> is the derived test class name.
     '''
 
-    # Default investigation used for generating run titles
-    investigation_id = 1710262
-
     # Derived class should set these run numbers up as required
-    event_run_numbers = None
+    investigation_id = None
     run_numbers = None
-    first_transmission_run = None
-    second_transmission_run = None
-    transmission_workspace_name = None
-    input_runs_file = None
+    event_run_numbers = None
+    first_transmission_runs = None
+    second_transmission_runs = None
+    input_workspaces_file = None
     reference_file = None
 
     # Default names for input and output workspace groups
     input_runs_workspace_name = 'Runs'
-    reference_workspace_name = 'Result'
-
-    def __init__(self):
-        super(ISISReflectometryWorkflowBase, self).__init__()
-        self.tolerance = 1e-6
-
-    def requiredFiles(self):
-        return [self.reference_file, self.input_runs_file]
-
-    def validate(self):
-        return (self.reference_workspace_name, self.reference_file)
+    result_workspace_name = 'Result'
 
     def setupTest(self):
         '''Set up the instrument and any required workspaces ready for
         the start of the test'''
         setupInstrument()
 
-        if self.input_runs_file is not None:
-            Load(self.input_runs_file, OutputWorkspace=self.input_runs_workspace_name)
+        if self.input_workspaces_file is not None:
+            Load(self.input_workspaces_file, OutputWorkspace=self.input_runs_workspace_name)
 
         self.workspaces_to_exclude_from_result = AnalysisDataService.Instance().getObjectNames()
 
@@ -66,32 +53,20 @@ class ISISReflectometryWorkflowBase(systemtesting.MantidSystemTest):
         result ready for comparison with the reference'''
         removeWorkspaces(self.workspaces_to_exclude_from_result)
         GroupWorkspaces(InputWorkspaces=AnalysisDataService.Instance().getObjectNames(),
-                        OutputWorkspace=self.reference_workspace_name)
-        mtd[self.reference_workspace_name].sortByName()
+                        OutputWorkspace=self.result_workspace_name)
+        mtd[self.result_workspace_name].sortByName()
 
-    @staticmethod
     def regenerateRunsFile():
         setupInstrument()
-        regenerateRunsFile(INTERReductionWithSlicingTest.first_transmission_run_name +
-                           INTERReductionWithSlicingTest.second_transmission_run_name,
-                           INTERReductionWithSlicingTest.run_numbers)
+        regenerateRunsFile(self.first_transmission_runs + self.second_transmission_runs,
+                           self.run_numbers, self.input_run_file)
 
-    @staticmethod
-    def regenerateReferenceFileByReducing():
-        setupInstrument()
-        test = INTERReductionWithSlicingTest()
-        test.runTest()
-        SaveNexus(InputWorkspace=INTERReductionWithSlicingTest.reference_workspace_name,
-                  Filename=INTERReductionWithSlicingTest.reference_file)
-
-    @staticmethod
     def regenerateReferenceFileFromDirectory(reference_file_directory):
         setupInstrument()
-        regenerateReferenceFile(reference_file_directory, INTERReductionWithSlicingTest.reference_file)
+        regenerateReferenceFile(reference_file_directory, self.reference_file)
 
-    @staticmethod
     def regenerateRunTitles():
-        RegenerateRunTitles(ISISReflectometryAutoreductionTest.investigation_id)
+        RegenerateRunTitles(self.investigation_id)
 
 
 def setupInstrument():
@@ -109,6 +84,14 @@ def workspaceName(file_path):
     return os.path.splitext(os.path.basename(file_path))[0]
 
 
+def stitchedWorkspaceName(run1_number, run2_number):
+    '''Gets the name of the stitched workspace based on the two input workspace names'''
+    run1_name=str(run1_number)
+    run2_name=str(run2_number)
+    run2_short_name=run2_name[-2:]
+    return run1_name+'_'+run2_short_name
+
+
 def transmissionWorkspaceName(run):
     return "TRANS_{}".format(run)
 
@@ -117,7 +100,7 @@ def stitchedTransmissionWorkspaceName(run_number_1, run_number_2):
     return 'TRANS_{}_{}'.format(run_number_1, run_number_2)
 
 
-def stitchTransmissionWorkspaces(runs1, runs2, output_names):
+def stitchTransmissionWorkspaces(runs1, runs2, output_names, scaleRHSWorkspace=True):
     '''Create a transmission workspace for each pair of input runs with the given output names'''
     for run1, run2, name in zip(runs1, runs2, output_names):
         CreateTransmissionWorkspaceAuto(
@@ -125,29 +108,30 @@ def stitchTransmissionWorkspaces(runs1, runs2, output_names):
             SecondTransmissionRun=run2,
             OutputWorkspace=name,
             StartOverlap=10,
-            EndOverlap=12)
-        # Delete debug workspaces
-        DeleteWorkspace('TRANS_LAM_'+run1)
-        DeleteWorkspace('TRANS_LAM_'+run2)
+            EndOverlap=12,
+            ScaleRHSWorkspace=scaleRHSWorkspace)
 
 
 def reduceRun(run_number, angle, first_transmission_runs = [], second_transmission_runs = [],
-              time_interval = None):
+              time_interval = None, suffix = '_IvsQ', debug = False):
     ''' Perform reflectometry reduction on the run'''
     run_name=str(run_number)
+    if time_interval is not None:
+        do_slicing = True
+    else:
+        do_slicing = False
     # Reduce this run
-    ReflectometryISISLoadAndProcess(InputRunList=run_name,
-                                    FirstTransmissionRunList=first_transmission_runs.join(),
-                                    SecondTransmissionRunList=second_transmission_runs.join(),
-                                    SliceWorkspace=True, TimeInterval=time_interval,
-                                    OutputWorkspaceBinned=run_name + '_ref_binned',
-                                    OutputWorkspace=run_name + '_ref',
-                                    OutputWorkspaceWavelength=run_name + '_lam',
-                                    Debug=True)
+    ReflectometryISISLoadAndProcess(InputRunList=run_name, Debug=debug,
+                                    ProcessingInstructions='4',
+                                    StartOverlap=10, EndOverlap=12,
+                                    FirstTransmissionRunList=','.join(first_transmission_runs),
+                                    SecondTransmissionRunList=','.join(second_transmission_runs),
+                                    SliceWorkspace=do_slicing, TimeInterval=time_interval,
+                                    OutputWorkspaceBinned=run_name + suffix + '_binned',
+                                    OutputWorkspace=run_name + suffix,
+                                    OutputWorkspaceWavelength=run_name + '_lam')
     # Delete interim workspaces
-    DeleteWorkspace(run_name + '_ref')
     DeleteWorkspace(run_name + '_lam')
-    DeleteWorkspace(run_name + '_sliced')
 
 
 def regenerateReferenceFile(reference_file_directory, output_filename):
@@ -165,15 +149,18 @@ def regenerateReferenceFile(reference_file_directory, output_filename):
     SaveNexus(InputWorkspace=output_workspace_name, Filename=output_filename)
 
 
-def regenerateRunsFile(transmission_run_names, run_numbers, event_run_numbers):
+def regenerateRunsFile(transmission_run_names, run_numbers, event_run_numbers,
+                       input_workspaces_file):
     '''Generate the test input file from a range of run numbers and transmission runs.'''
     # Load transmission runs
     for run in transmission_run_names:
         Load('{}.raw'.format(run), OutputWorkspace=run)
     # Load raw run files
-    run_names = [str(run_number)+'.raw' for run_number in run_numbers]
-    for run_name in run_names:
-        Load(run_name, OutputWorkspace=run_name)
+    run_names = [str(run_number) for run_number in run_range]
+    file_names = ["{}.raw".format(run_name) for run_name in run_names]
+
+    for run_name, file_name in zip(run_names, file_names):
+        Load(file_name, OutputWorkspace=run_name)
     # Load event workspaces
     event_run_names = [str(event_run_number) for event_run_number in event_run_numbers]
     for event_run_name in event_run_names:
@@ -183,9 +170,9 @@ def regenerateRunsFile(transmission_run_names, run_numbers, event_run_numbers):
     GroupWorkspaces(InputWorkspaces=run_names + transmission_run_names + event_run_names +
                     event_monitor_names,
                     OutputWorkspace='Input')
-    SaveNexus(InputWorkspace='Input', Filename='INTERReductionTestRuns.nxs')
+    SaveNexus(InputWorkspace='Input', Filename=input_workspaces_file)
 
-    
+
 def RegenerateRunTitles(investigation_id):
     """Uses the old reflectometry gui python modules to generate the runs table from ICAT.
     A local copy of the table generated is stored in run_titles below.
