@@ -197,9 +197,9 @@ def _generate_grouped_ts_pdf(run_number, focused_ws, q_lims, cal_file_name, samp
         q_min[i] = pdf_x_array[np.amin(np.where(pdf_x_array >= q_min[i]))]
         q_max[i] = pdf_x_array[np.amax(np.where(pdf_x_array <= q_max[i]))]
         bin_width = min(pdf_x_array[1] - pdf_x_array[0], bin_width)
-    #mantid.MatchSpectra(InputWorkspace=focused_data_combined,
-    #                    OutputWorkspace=focused_data_combined,
-    #                    ReferenceSpectrum=1)
+    mantid.MatchSpectra(InputWorkspace=focused_data_combined,
+                        OutputWorkspace=focused_data_combined,
+                        ReferenceSpectrum=5)
     focused_data_combined = mantid.CropWorkspaceRagged(InputWorkspace=focused_data_combined, XMin=q_min, XMax=q_max)
     focused_data_combined = mantid.Rebin(InputWorkspace=focused_data_combined,
                                          Params=[min(q_min), bin_width, max(q_max)])
@@ -207,7 +207,7 @@ def _generate_grouped_ts_pdf(run_number, focused_ws, q_lims, cal_file_name, samp
                                               WeightedSum=True,
                                               MultiplyBySpectra=False)
     pdf_output = mantid.PDFFourierTransform(Inputworkspace=focused_data_combined,
-                                            InputSofQType="S(Q)",
+                                            InputSofQType="S(Q)-1",
                                             PDFType="G(r)",
                                             Filter=True)
 
