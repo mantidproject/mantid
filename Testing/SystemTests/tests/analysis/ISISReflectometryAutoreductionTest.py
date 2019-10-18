@@ -111,8 +111,8 @@ def RegenerateReferenceFile(reference_file_directory, output_filename):
 
 
 def RegenerateRunsFile(transmission_run_names, run_range):
-    "This is used to generate the test input file from a range of run numbers"
-    "and transmission runs."
+    """This is used to generate the test input file from a range of run numbers
+    and transmission runs."""
     from mantid.simpleapi import (Load, GroupWorkspaces)
 
     for run in transmission_run_names:
@@ -129,9 +129,9 @@ def RegenerateRunsFile(transmission_run_names, run_range):
 
 
 def RegenerateRunTitles(investigation_id):
-    "Uses the old reflectometry gui python modules to generate the runs table from ICAT."
-    "A local copy of the table generated is stored in run_titles below."
-    "You may be able to use this script to update it."
+    """Uses the old reflectometry gui python modules to generate the runs table from ICAT.
+    A local copy of the table generated is stored in run_titles below.
+    You may be able to use this script to update it."""
     # self.listMain.clear()
 
     # Use ICAT for a journal search based on the RB number
@@ -290,27 +290,27 @@ def AutoReduce(transRun=[], runRange=[], oldList=[]):
 
             if float(angle) > 0.0:
                 ws = str(runno)
-                # w1 = mtd[runno + '.raw']
-                # spectra = w1.getRun().getLogData('nspectra').value
                 if not mtd.doesExist(runno + '_IvsQ'):
                     th = angle
                     if len(transRun) > 1 and angle > 2.25:
                         wq, wq_binned = \
-                            ReflectometryReductionOneAuto(
-                                InputWorkspace=ws,
-                                FirstTransmissionRun=transRun[1],
+                            ReflectometryISISLoadAndProcess(
+                                InputRunList=ws,
+                                FirstTransmissionRunList=transRun[1],
                                 thetaIn=angle,
+                                StartOverlap=10,
+                                EndOverlap=12,
                                 OutputWorkspace=runno + '_IvsQ',
-                                OutputWorkspaceWavelength=runno + '_IvsLam',
                                 OutputWorkspaceBinned=runno + '_IvsQ_binned')
                     else:
                         wq, wqbinned = \
-                            ReflectometryReductionOneAuto(
-                                InputWorkspace=ws,
-                                FirstTransmissionRun=transRun[0],
+                            ReflectometryISISLoadAndProcess(
+                                InputRunList=ws,
+                                FirstTransmissionRunList=transRun[0],
                                 thetaIn=angle,
+                                StartOverlap=10,
+                                EndOverlap=12,
                                 OutputWorkspace=runno + '_IvsQ',
-                                OutputWorkspaceWavelength=runno + '_IvsLam',
                                 OutputWorkspaceBinned=runno + '_IvsQ_binned')
                 else:
                     wq = mtd[runno + '_IvsQ']

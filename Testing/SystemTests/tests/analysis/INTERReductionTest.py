@@ -189,10 +189,10 @@ def eventRef(run_number, angle, start=0, stop=0, DB='TRANS'):
     AppendSpectra(InputWorkspace1='mon_rebin', InputWorkspace2=slice_name,
                   OutputWorkspace=slice_name, MergeLogs=False)
     # Reduce this slice
-    ReflectometryReductionOneAuto(InputWorkspace=slice_name, FirstTransmissionRun=DB,
-                                  OutputWorkspaceBinned=slice_name+'_ref_binned',
-                                  OutputWorkspace=slice_name+'_ref',
-                                  OutputWorkspaceWavelength=slice_name+'_lam', Debug=True)
+    ReflectometryISISLoadAndProcess(InputRunList=slice_name, FirstTransmissionRunList=DB,
+                                    OutputWorkspaceBinned=slice_name+'_ref_binned',
+                                    OutputWorkspace=slice_name+'_ref',
+                                    OutputWorkspaceWavelength=slice_name+'_lam', Debug=True)
     # Delete interim workspaces
     DeleteWorkspace(slice_name+'_lam')
     DeleteWorkspace(slice_name)
@@ -216,12 +216,12 @@ def quickRef(run_numbers=[], trans_workspace_names=[], angles=[]):
     for run_index in range(len(run_numbers)):
         # Set up the reduction properties
         run_name=str(run_numbers[run_index])
-        properties = {'InputWorkspace': run_name+'.raw',
-                      'FirstTransmissionRun': str(trans_workspace_names[run_index]),
+        properties = {'InputRunList': run_name+'.raw',
+                      'FirstTransmissionRunList': str(trans_workspace_names[run_index]),
                       'OutputWorkspaceBinned': run_name+'_IvsQ_binned',
                       'OutputWorkspace': run_name+'_IvsQ',
                       'OutputWorkspaceWavelength': run_name+'_IvsLam',
-                      'Debug':True}
+                      'Debug': True}
         # Set ThetaIn if the angles are given
         if angles:
             theta=angles[run_index]
@@ -230,7 +230,7 @@ def quickRef(run_numbers=[], trans_workspace_names=[], angles=[]):
             if theta == 0.8:
                 properties['WavelengthMin']=2.6
         # Do the reduction
-        ReflectometryReductionOneAuto(**properties)
+        ReflectometryISISLoadAndProcess(**properties)
         reduced_runs=reduced_runs+run_name+'_IvsQ_binned'
         if run_index < len(run_numbers)-1:
             reduced_runs=reduced_runs+','
