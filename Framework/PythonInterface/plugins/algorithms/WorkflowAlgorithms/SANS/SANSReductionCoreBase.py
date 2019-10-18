@@ -9,8 +9,11 @@
 """A base class to share functionality between SANSReductionCore algorithms."""
 
 from __future__ import (absolute_import, division, print_function)
+
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator)
 from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode, IEventWorkspace)
+
+from sans.algorithm_detail.CreateSANSAdjustmentWorkspaces import CreateSANSAdjustmentWorkspaces
 from sans.algorithm_detail.convert_to_q import convert_workspace
 from sans.algorithm_detail.scale_sans_workspace import scale_workspace
 from sans.algorithm_detail.crop_helper import get_component_name
@@ -164,41 +167,30 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
 
         return output_ws
 
-    def _adjustment(self, state_serialized, workspace, monitor_workspace, component_as_string, data_type):
+    def _adjustment(self, state, workspace, monitor_workspace, component_as_string, data_type):
         transmission_workspace = self._get_transmission_workspace()
         direct_workspace = self._get_direct_workspace()
-
-        adjustment_name = "SANSCreateAdjustmentWorkspaces"
-        adjustment_options = {"SANSState": state_serialized,
-                              "Component": component_as_string,
-                              "DataType": data_type,
-                              "MonitorWorkspace": monitor_workspace,
-                              "SampleData": workspace,
-                              "OutputWorkspaceWavelengthAdjustment": EMPTY_NAME,
-                              "OutputWorkspacePixelAdjustment": EMPTY_NAME,
-                              "OutputWorkspaceWavelengthAndPixelAdjustment": EMPTY_NAME}
-
-        state = self._get_state()
 
         if transmission_workspace:
             transmission_workspace = self._move(state=state, workspace=transmission_workspace,
                                                 component=component_as_string, is_transmission=True)
-            adjustment_options.update({"TransmissionWorkspace": transmission_workspace})
 
         if direct_workspace:
             direct_workspace = self._move(state=state, workspace=direct_workspace, component=component_as_string,
                                           is_transmission=True)
-            adjustment_options.update({"DirectWorkspace": direct_workspace})
 
-        adjustment_alg = create_child_algorithm(self, adjustment_name, **adjustment_options)
-        adjustment_alg.execute()
+        alg = CreateSANSAdjustmentWorkspaces(state_adjustment=state.adjustment,
+                                             component=component_as_string, data_type=data_type)
+        returned_dict = alg.create_sans_adjustment_workspaces(direct_ws=direct_workspace, monitor_ws=monitor_workspace,
+                                                              sample_data=workspace,
+                                                              transmission_ws=transmission_workspace)
 
-        wavelength_adjustment = adjustment_alg.getProperty("OutputWorkspaceWavelengthAdjustment").value
-        pixel_adjustment = adjustment_alg.getProperty("OutputWorkspacePixelAdjustment").value
-        wavelength_and_pixel_adjustment = adjustment_alg.getProperty(
-            "OutputWorkspaceWavelengthAndPixelAdjustment").value
-        calculated_transmission_workspace = adjustment_alg.getProperty("CalculatedTransmissionWorkspace").value
-        unfitted_transmission_workspace = adjustment_alg.getProperty("UnfittedTransmissionWorkspace").value
+        wavelength_adjustment = returned_dict["wavelength_adj"]
+        pixel_adjustment = returned_dict["pixel_adj"]
+        wavelength_and_pixel_adjustment = returned_dict["wavelength_pixel_adj"]
+        calculated_transmission_workspace = returned_dict["calculated_trans_ws"]
+        unfitted_transmission_workspace = returned_dict["unfitted_trans_ws"]
+
         return wavelength_adjustment, pixel_adjustment, wavelength_and_pixel_adjustment, \
             calculated_transmission_workspace, unfitted_transmission_workspace
 

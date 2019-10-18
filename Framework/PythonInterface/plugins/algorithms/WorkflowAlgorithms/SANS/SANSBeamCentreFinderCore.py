@@ -12,6 +12,8 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress,
                         IEventWorkspace)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator)
+
+from sans.algorithm_detail.CreateSANSAdjustmentWorkspaces import CreateSANSAdjustmentWorkspaces
 from sans.algorithm_detail.convert_to_q import convert_workspace
 from sans.algorithm_detail.scale_sans_workspace import scale_workspace
 from sans.algorithm_detail.crop_helper import get_component_name
@@ -228,7 +230,7 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         data_type_as_string = self.getProperty("DataType").value
         progress.report("Creating adjustment workspaces ...")
         wavelength_adjustment_workspace, pixel_adjustment_workspace, wavelength_and_pixel_adjustment_workspace = \
-            self._adjustment(state_serialized, scatter_data, monitor_scatter_date, component_as_string,
+            self._adjustment(state, scatter_data, monitor_scatter_date, component_as_string,
                              data_type_as_string)
 
         # ------------------------------------------------------------
@@ -343,38 +345,27 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
 
         return output_ws
 
-    def _adjustment(self, state_serialized, workspace, monitor_workspace, component_as_string, data_type):
+    def _adjustment(self, state, workspace, monitor_workspace, component_as_string, data_type):
         transmission_workspace = self._get_transmission_workspace()
         direct_workspace = self._get_direct_workspace()
 
-        state = self._get_state()
-
-        adjustment_name = "SANSCreateAdjustmentWorkspaces"
-        adjustment_options = {"SANSState": state_serialized,
-                              "Component": component_as_string,
-                              "DataType": data_type,
-                              "MonitorWorkspace": monitor_workspace,
-                              "SampleData": workspace,
-                              "OutputWorkspaceWavelengthAdjustment": EMPTY_NAME,
-                              "OutputWorkspacePixelAdjustment": EMPTY_NAME,
-                              "OutputWorkspaceWavelengthAndPixelAdjustment": EMPTY_NAME}
         if transmission_workspace:
             transmission_workspace = self._move(state=state, workspace=transmission_workspace,
                                                 component=component_as_string, is_transmission=True)
-            adjustment_options.update({"TransmissionWorkspace": transmission_workspace})
 
         if direct_workspace:
             direct_workspace = self._move(state=state, workspace=direct_workspace,
                                           component=component_as_string, is_transmission=True)
-            adjustment_options.update({"DirectWorkspace": direct_workspace})
 
-        adjustment_alg = create_child_algorithm(self, adjustment_name, **adjustment_options)
-        adjustment_alg.execute()
+        alg = CreateSANSAdjustmentWorkspaces(state_adjustment=state.adjustment,
+                                             data_type=data_type, component=component_as_string)
+        returned_dict = alg.create_sans_adjustment_workspaces(direct_ws=direct_workspace, monitor_ws=monitor_workspace,
+                                                              sample_data=workspace,
+                                                              transmission_ws=transmission_workspace)
+        wavelength_adjustment = returned_dict["wavelength_adj"]
+        pixel_adjustment = returned_dict["pixel_adj"]
+        wavelength_and_pixel_adjustment = returned_dict["wavelength_pixel_adj"]
 
-        wavelength_adjustment = adjustment_alg.getProperty("OutputWorkspaceWavelengthAdjustment").value
-        pixel_adjustment = adjustment_alg.getProperty("OutputWorkspacePixelAdjustment").value
-        wavelength_and_pixel_adjustment = adjustment_alg.getProperty(
-            "OutputWorkspaceWavelengthAndPixelAdjustment").value
         return wavelength_adjustment, pixel_adjustment, wavelength_and_pixel_adjustment
 
     def _convert_to_histogram(self, workspace):

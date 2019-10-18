@@ -837,19 +837,19 @@ avoid large scripts sizes.
 The dedicated work-flow algorithms for the SANS reduction are:
 
 - *Calculate SANS Transmission*
-- :ref:`Q1D <algm-Q1D>` or :ref:`Qxy <algm-Qxy>`
-- :ref:`SANSConvertToWavelengthAndRebin <algm-SANSConvertToWavelengthAndRebin>`
-- :ref:`SANSCreateWavelengthAndPixelAdjustment <algm-SANSCreateWavelengthAndPixelAdjustment>`
+- *Create SANS Wavelength Pixel Adjustment*
 - :ref:`CropToComponent <algm-CropToComponent>`
-- :ref:`SANSLoad <algm-SANSLoad>`
-- *Workspace Masking*
-- :ref:`MoveInstrumentComponent <algm-MoveInstrumentComponent>`
-- :ref:`RotateInstrumentComponent <algm-RotateInstrumentComponent>`
-- *Normalize To Monitor*
-- *SANSSave*
-- :ref:`Multiply <algm-Multiply>` (by Absolute Scale)
 - :ref:`Divide <algm-Divide>` (by Sample Volume)
+- :ref:`Multiply <algm-Multiply>` (by Absolute Scale)
+- :ref:`MoveInstrumentComponent <algm-MoveInstrumentComponent>`
+- *Normalize To SANS Monitor*
+- :ref:`Q1D <algm-Q1D>` or :ref:`Qxy <algm-Qxy>`
+- :ref:`RotateInstrumentComponent <algm-RotateInstrumentComponent>`
+- :ref:`SANSConvertToWavelengthAndRebin <algm-SANSConvertToWavelengthAndRebin>`
+- :ref:`SANSLoad <algm-SANSLoad>`
+- *SANSSave*
 - *SANSSliceEvent*
+- *Workspace Masking*
 
 Note that algorithms prefixed with SANS take a *SANSState* object as
 an input.
@@ -934,15 +934,13 @@ The algorithm performs the following steps:
 2. Performs a rebin operation using either :ref:`Rebin <algm-Rebin>` or :ref:`InterpolatingRebin <algm-InterpolatingRebin>`
 
 
-*SANSCreateWavelengthAndPixelAdjustment*
+*Create SANS Wavelength and Pixel Adjustment*
 -------------------------------------------
 
-The :ref:`SANSCreateWavelengthAndPixelAdjustment <algm-SANSCreateWavelengthAndPixelAdjustment>`
-
-algorithm combines the output of the *Calculate SANS Transmission* step, 
-the output of the *Normalize To SANS Monitor*
-and flood and direct files to produce the correction workspaces which are required
-for converting to Q
+This step combines the output of the *Calculate SANS Transmission* step,
+the output of the *Normalize To SANS Monitor*,
+and flood and direct files to produce the correction workspaces which
+are required for converting to Q.
 
 The sub-steps of the algorithm are:
 
@@ -1217,10 +1215,10 @@ The sub-steps of this algorithm are:
    time the components are moved and rotated to the requested positions.
    Note that all steps up until now were performed in the time-of-flight domain.
 6. Convert the data from the time-of-flight to the wavelength domain using
-   :ref:`SANSConvertToWavelengthAndRebin <algm-SANSConvertToWavelengthAndRebin>`.
+   :ref:`SANSConvertToWavelength <algm-SANSConvertToWavelength>`.
 7. Scale the data set using :ref:`Multiply <algm-Multiply>`. This will multiply the data set
    with the absolute scale and divide :ref:`Divide <algm-Divide>` by the sample volume.
-8. This step creates the adjustment workspaces using :ref:`SANSCreateAdjustmentWorkspaces <algm-SANSCreateAdjustmentWorkspaces>`.
+8. This step creates the adjustment workspaces by *Create SANS Adjustment Workspaces*.
    This uses the input *TransmissionWorkspace* and *DirectWorkspace* workspaces. Note that
    the instrument's components are moved and rotated before they are used by the adjustment
    algorithm. The outputs are a wavelength-adjustment workspace, a pixel-adjustment workspace and a wavelength-and-pixel adjustment

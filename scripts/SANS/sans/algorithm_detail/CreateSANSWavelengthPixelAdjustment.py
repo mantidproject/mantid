@@ -1,82 +1,52 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-# pylint: disable=invalid-name
 
-""" SANSCreateWavelengthAndPixelAdjustment algorithm creates workspaces for pixel adjustment
+""" CreateSANSWavelengthPixelAdjustment class creates workspaces for pixel adjustment
     and wavelength adjustment.
 """
 
 from __future__ import (absolute_import, division, print_function)
-from mantid.kernel import (Direction, StringListValidator, PropertyManagerProperty, CompositeValidator)
 
-from mantid.api import (ParallelDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
-                        WorkspaceUnitValidator)
 from sans.algorithm_detail.crop_helper import get_component_name
-
-from sans.state.state_base import create_deserialized_sans_state_from_property_manager
-from sans.common.enums import (RangeStepType, DetectorType)
 from sans.common.constants import EMPTY_NAME
+from sans.common.enums import (DetectorType)
+from sans.common.enums import (RangeStepType)
 from sans.common.general_functions import create_unmanaged_algorithm
 
 
-class SANSCreateWavelengthAndPixelAdjustment(ParallelDataProcessorAlgorithm):
-    def category(self):
-        return 'SANS\\Adjust'
+class CreateSANSWavelengthPixelAdjustment(object):
+    def __init__(self, state_adjustment_wavelength_and_pixel, component):
+        """
+        :param state_adjustment_wavelength_and_pixel: The state.adjustment.wavelength_and_pixel state
+        :param component: The component of the instrument which is currently being investigated.
+                          Allowed values: ['HAB', 'LAB']
+        """
+        self._component = component
+        self._state = state_adjustment_wavelength_and_pixel
 
-    def summary(self):
-        return 'Calculates wavelength adjustment and pixel adjustment workspaces.'
+    def create_sans_wavelength_and_pixel_adjustment(self, transmission_ws, monitor_norm_ws):
+        """
+        Calculates wavelength adjustment and pixel adjustment workspaces.
+        :param transmission_ws: The calculated transmission workspace in wavelength units.
+        :param monitor_norm_ws: The monitor normalization workspace in wavelength units.
+        :return: A tuple containing: Wavelength Adjustment workspace and Pixel Adjustment workspace
+        """
 
-    def PyInit(self):
-        # State
-        self.declareProperty(PropertyManagerProperty('SANSState'),
-                             doc='A property manager which fulfills the SANSState contract.')
-        # Input workspaces
-        workspace_validator = CompositeValidator()
-        workspace_validator.add(WorkspaceUnitValidator("Wavelength"))
-
-        self.declareProperty(MatrixWorkspaceProperty("TransmissionWorkspace", '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Input,
-                                                     validator=workspace_validator),
-                             doc='The calculated transmission workspace in wavelength units.')
-        self.declareProperty(MatrixWorkspaceProperty("NormalizeToMonitorWorkspace", '',
-                                                     optional=PropertyMode.Mandatory, direction=Direction.Input,
-                                                     validator=workspace_validator),
-                             doc='The monitor normalization workspace in wavelength units.')
-        allowed_detector_types = StringListValidator([DetectorType.to_string(DetectorType.HAB),
-                                                      DetectorType.to_string(DetectorType.LAB)])
-        self.declareProperty("Component", DetectorType.to_string(DetectorType.LAB),
-                             validator=allowed_detector_types, direction=Direction.Input,
-                             doc="The component of the instrument which is currently being investigated.")
-
-        # Output workspace
-        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspaceWavelengthAdjustment", '',
-                                                     direction=Direction.Output),
-                             doc='A wavelength adjustment output workspace.')
-        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspacePixelAdjustment", '',
-                                                     direction=Direction.Output),
-                             doc='A pixel adjustment output workspace.')
-
-    def PyExec(self):
         # Read the state
-        state_property_manager = self.getProperty("SANSState").value
-        state = create_deserialized_sans_state_from_property_manager(state_property_manager)
-        wavelength_and_pixel_adjustment_state = state.adjustment.wavelength_and_pixel_adjustment
+        wavelength_and_pixel_adjustment_state = self._state
 
         # Get the wavelength adjustment workspace
-        transmission_workspace = self.getProperty("TransmissionWorkspace").value
-        monitor_normalization_workspace = self.getProperty("NormalizeToMonitorWorkspace").value
-
-        component = self.getProperty("Component").value
-        wavelength_adjustment_file = wavelength_and_pixel_adjustment_state.adjustment_files[component].wavelength_adjustment_file
+        component = self._component
+        adj_file = wavelength_and_pixel_adjustment_state.adjustment_files[component].wavelength_adjustment_file
 
         rebin_string = self._get_rebin_string(wavelength_and_pixel_adjustment_state)
-        wavelength_adjustment_workspace = self._get_wavelength_adjustment_workspace(wavelength_adjustment_file,
-                                                                                    transmission_workspace,
-                                                                                    monitor_normalization_workspace,
+        wavelength_adjustment_workspace = self._get_wavelength_adjustment_workspace(adj_file,
+                                                                                    transmission_ws,
+                                                                                    monitor_norm_ws,
                                                                                     rebin_string)
 
         # Get the pixel adjustment workspace
@@ -84,11 +54,7 @@ class SANSCreateWavelengthAndPixelAdjustment(ParallelDataProcessorAlgorithm):
         idf_path = wavelength_and_pixel_adjustment_state.idf_path
         pixel_adjustment_workspace = self._get_pixel_adjustment_workspace(pixel_adjustment_file, component, idf_path)
 
-        # Set the output
-        if wavelength_adjustment_workspace:
-            self.setProperty("OutputWorkspaceWavelengthAdjustment", wavelength_adjustment_workspace)
-        if pixel_adjustment_workspace:
-            self.setProperty("OutputWorkspacePixelAdjustment", pixel_adjustment_workspace)
+        return wavelength_adjustment_workspace, pixel_adjustment_workspace
 
     def _get_wavelength_adjustment_workspace(self, wavelength_adjustment_file, transmission_workspace,
                                              monitor_normalization_workspace, rebin_string):
@@ -143,7 +109,8 @@ class SANSCreateWavelengthAndPixelAdjustment(ParallelDataProcessorAlgorithm):
                 wavelength_adjustment_workspace = multiply_alg.getProperty("OutputWorkspace").value
         return wavelength_adjustment_workspace
 
-    def _load_wavelength_correction_file(self, file_name):
+    @staticmethod
+    def _load_wavelength_correction_file(file_name):
         correction_workspace = None
         if file_name:
             load_name = "LoadRKH"
@@ -164,7 +131,8 @@ class SANSCreateWavelengthAndPixelAdjustment(ParallelDataProcessorAlgorithm):
             correction_workspace = output_workspace
         return correction_workspace
 
-    def _get_pixel_adjustment_workspace(self, pixel_adjustment_file, component, idf_path):
+    @staticmethod
+    def _get_pixel_adjustment_workspace(pixel_adjustment_file, component, idf_path):
         """
         This get the pixel-by-pixel adjustment of the workspace
 
@@ -205,7 +173,8 @@ class SANSCreateWavelengthAndPixelAdjustment(ParallelDataProcessorAlgorithm):
             pixel_adjustment_workspace = None
         return pixel_adjustment_workspace
 
-    def _get_rebin_string(self, wavelength_and_pixel_adjustment_state):
+    @staticmethod
+    def _get_rebin_string(wavelength_and_pixel_adjustment_state):
         wavelength_low = wavelength_and_pixel_adjustment_state.wavelength_low[0]
         wavelength_high = wavelength_and_pixel_adjustment_state.wavelength_high[0]
         wavelength_step = wavelength_and_pixel_adjustment_state.wavelength_step
@@ -215,27 +184,3 @@ class SANSCreateWavelengthAndPixelAdjustment(ParallelDataProcessorAlgorithm):
         # Create a rebin string from the wavelength information
         wavelength_step *= wavelength_step_type
         return str(wavelength_low) + "," + str(wavelength_step) + "," + str(wavelength_high)
-
-    def validateInputs(self):
-        errors = dict()
-        # Check that the input can be converted into the right state object
-        state_property_manager = self.getProperty("SANSState").value
-        try:
-            state = create_deserialized_sans_state_from_property_manager(state_property_manager)
-            state.validate()
-        except ValueError as err:
-            errors.update({"SANSCreateWavelengthAndPixelAdjustment": str(err)})
-
-        # The transmission and the normalize to monitor workspace must have exactly one histogram present
-        transmission_workspace = self.getProperty("TransmissionWorkspace").value
-        normalize_to_monitor = self.getProperty("NormalizeToMonitorWorkspace").value
-        if transmission_workspace and transmission_workspace.getNumberHistograms() != 1:
-            errors.update({"TransmissionWorkspace": "The transmission workspace can have only one histogram."})
-        if normalize_to_monitor.getNumberHistograms() != 1:
-            errors.update({"NormalizeToMonitorWorkspace": "The monitor normalization workspace can have"
-                                                          " only one histogram."})
-        return errors
-
-
-# Register algorithm with Mantid
-AlgorithmFactory.subscribe(SANSCreateWavelengthAndPixelAdjustment)

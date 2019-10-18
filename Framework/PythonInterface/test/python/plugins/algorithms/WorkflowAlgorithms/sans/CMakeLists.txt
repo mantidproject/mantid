@@ -1,8 +1,7 @@
 # Tests for ISIS SANS
 
 set(TEST_PY_FILES
-    SANSCreateAdjustmentWorkspacesTest.py
-    SANSCreateWavelengthAndPixelAdjustmentTest.py
+    SANSConvertToWavelengthAndRebinTest.py
     SANSSliceEventTest.py)
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
