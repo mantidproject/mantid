@@ -398,7 +398,7 @@ def write_ENGINX_GSAS_iparam_file(output_file, difc, tzero, bank_names=None, cer
         bank_names = ["North", "South"]
 
     with open(template_file) as tf:
-        temp_lines = tf.readlines()
+        output_lines = tf.readlines()
 
     def replace_patterns(line, patterns, replacements):
         """
@@ -414,7 +414,6 @@ def write_ENGINX_GSAS_iparam_file(output_file, difc, tzero, bank_names=None, cer
     # need to replace two types of lines/patterns:
     # - instrument constants/parameters (ICONS)
     # - instrument calibration comment with run numbers (CALIB)
-    output_lines = []
     for b_idx, _bank_name in enumerate(bank_names):
         patterns = ["INS  %d ICONS" % (b_idx + 1),  # bank calibration parameters: DIFC, DIFA, TZERO
                     "INS    CALIB",  # calibration run numbers (Vanadium and Ceria)
@@ -429,7 +428,7 @@ def write_ENGINX_GSAS_iparam_file(output_file, difc, tzero, bank_names=None, cer
                         ("INS    INCBM  ob+mon_{0}_North_and_South_banks.his".
                          format(ceria_run)).ljust(80) + '\n']
 
-        output_lines = [replace_patterns(line, patterns, replacements) for line in temp_lines]
+        output_lines = [replace_patterns(line, patterns, replacements) for line in output_lines]
 
     with open(output_file, 'w') as of:
         of.writelines(output_lines)

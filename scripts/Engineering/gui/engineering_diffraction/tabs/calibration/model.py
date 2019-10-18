@@ -12,7 +12,7 @@ from os import path, makedirs
 from mantid.api import AnalysisDataService as Ads
 from mantid.kernel import logger
 from mantid.simpleapi import Load, EnggVanadiumCorrections, EnggCalibrate, DeleteWorkspace, CloneWorkspace, \
-    CreateWorkspace, AppendSpectra
+    CreateWorkspace, AppendSpectra, CreateEmptyTableWorkspace
 from mantidqt.plotting.functions import plot
 from Engineering.EnggUtils import write_ENGINX_GSAS_iparam_file
 
@@ -20,6 +20,7 @@ from Engineering.EnggUtils import write_ENGINX_GSAS_iparam_file
 VANADIUM_INPUT_WORKSPACE_NAME = "engggui_vanadium_ws"
 CURVES_WORKSPACE_NAME = "engggui_vanadium_curves"
 INTEGRATED_WORKSPACE_NAME = "engggui_vanadium_integration"
+CALIB_PARAMS_WORKSPACE_NAME = "engggui_calibration_banks_parameters"
 
 OUT_FILES_ROOT_DIR = path.join(path.expanduser("~"), "Engineering_Mantid")
 CALIBRATION_DIR = path.join(OUT_FILES_ROOT_DIR, "Calibration", "")
@@ -57,12 +58,36 @@ class CalibrationModel(object):
         difc = [output[0].DIFC, output[1].DIFC]
         tzero = [output[0].TZERO, output[1].TZERO]
 
+        params_table = []
+        for i in range(2):
+            params_table.append([i, difc[i], 0.0, tzero[i]])
+        self.update_calibration_params_table(params_table)
+
         self.create_output_files(CALIBRATION_DIR, difc, tzero, ceria_path, vanadium_path,
                                  instrument)
         if rb_num:
             user_calib_dir = path.join(OUT_FILES_ROOT_DIR, "User", rb_num, "Calibration", "")
             self.create_output_files(user_calib_dir, difc, tzero, ceria_path, vanadium_path,
                                      instrument)
+
+    @staticmethod
+    def update_calibration_params_table(params_table):
+        if len(params_table) == 0:
+            return
+
+        # Create blank or clear existing params table.
+        if Ads.doesExist(CALIB_PARAMS_WORKSPACE_NAME):
+            workspace = Ads.retrieve(CALIB_PARAMS_WORKSPACE_NAME)
+            workspace.setRowCount(0)
+        else:
+            workspace = CreateEmptyTableWorkspace(OutputWorkspace=CALIB_PARAMS_WORKSPACE_NAME)
+            workspace.addColumn("int", "bankid")
+            workspace.addColumn("double", "difc")
+            workspace.addColumn("double", "difa")
+            workspace.addColumn("double", "tzero")
+
+        for row in params_table:
+            workspace.addRow(row)
 
     @staticmethod
     def _plot_vanadium_curves():
