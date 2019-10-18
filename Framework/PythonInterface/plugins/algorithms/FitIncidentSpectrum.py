@@ -97,7 +97,7 @@ class FitIncidentSpectrum(PythonAlgorithm):
             y_fit = np.array(rebinned.readY(self._incident_index))
 
         rebin_norm = x.size/x_fit.size
-        x_bin_centers = 0.5*(x[:-1] + x[1:])
+        x_bin_centers = 0.5 * (x[:-1] + x[1:])
         if len(x_fit) != len(y_fit):
             x_fit = 0.5*(x_fit[:-1] + x_fit[1:])
 

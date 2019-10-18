@@ -224,7 +224,6 @@ def _calculate_self_scattering_correction(run_number, cal_file_name, sample_deta
     mantid.ConvertToDistribution(Workspace=self_scattering_correction)
     self_scattering_correction = mantid.ConvertUnits(InputWorkspace=self_scattering_correction,
                                                      Target="MomentumTransfer", EMode='Elastic')
-
     common.remove_intermediate_workspace('cal_workspace_group')
     common.remove_intermediate_workspace(correction_ws)
     common.remove_intermediate_workspace(fit_spectra)
