@@ -37,6 +37,7 @@ Improvements
 - It is now possible to fit table workspaces in the fit browser and in a script.
 - It is now possible to input axis limits in the figure options using scientific notation.
 - The sub-tabs in the Curves tab in plot options now contain an "Apply to All" button which copies the properties of the current curve to all other curves in the plot.
+- The auto-complete in Workbench's script editor has been improved.
 
 Bugfixes
 ########
