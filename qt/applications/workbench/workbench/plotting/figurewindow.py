@@ -16,11 +16,12 @@ import weakref
 # 3rdparty imports
 from qtpy.QtCore import QEvent, Qt, Signal, Slot
 from qtpy.QtGui import QIcon
-from qtpy.QtWidgets import QMainWindow
+from qtpy.QtWidgets import QApplication, QMainWindow
 
 # local imports
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.widgets.observers.observing_view import ObservingView
+from workbench.app import MAIN_WINDOW_OBJECT_NAME
 
 
 class FigureWindow(QMainWindow, ObservingView):
@@ -38,6 +39,7 @@ class FigureWindow(QMainWindow, ObservingView):
         self.setAttribute(Qt.WA_DeleteOnClose, True)
         self.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
 
+        QApplication.instance().focusWindowChanged.connect(self._on_focusWindowChanged)
         self.close_signal.connect(self._run_close)
         self.setAcceptDrops(True)
 
@@ -118,3 +120,11 @@ class FigureWindow(QMainWindow, ObservingView):
         else:
             plot_from_names(names, errors=(fig_type == FigureType.Errorbar),
                             overplot=ax, fig=fig)
+
+    def _on_focusWindowChanged(self, window):
+        """
+        The figure window should always remain on top of the main
+        Workbench window.
+        """
+        if window and MAIN_WINDOW_OBJECT_NAME + 'Window' == window.objectName():
+            self.raise_()
