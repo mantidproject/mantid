@@ -5,20 +5,18 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-public-methods, invalid-name, too-many-arguments
-
-import unittest
-import systemtesting
 import os
+import tempfile
+import unittest
 
-import mantid
-from mantid.api import AlgorithmManager
-
+from mantid.simpleapi import CloneWorkspace, DeleteWorkspace, Load, LoadEmptyInstrument, SANSLoad
+from sans.algorithm_detail.mask_sans_workspace import mask_workspace
 from sans.common.enums import SANSFacility
-from sans.test_helper.test_director import TestDirector
+from sans.common.file_information import SANSFileInformationFactory
 from sans.state.data import get_data_builder
 from sans.state.mask import get_mask_builder
 from sans.state.move import get_move_builder
-from sans.common.file_information import SANSFileInformationFactory
+from sans.test_helper.test_director import TestDirector
 
 
 def get_masked_spectrum_numbers(workspace):
@@ -50,37 +48,32 @@ def elements_in_range(range_start, range_stop, collection):
 # -----------------------------------------------
 # Tests for the SANSLoad algorithm
 # -----------------------------------------------
-class SANSMaskWorkspaceTest(unittest.TestCase):
-    def _load_workspace(self, state):
-        load_alg = AlgorithmManager.createUnmanaged("SANSLoad")
-        load_alg.setChild(True)
-        load_alg.initialize()
+class MaskSansWorkspaceTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        sans2d_mask_ws = LoadEmptyInstrument(InstrumentName="SANS2D")
+        loq_empty = LoadEmptyInstrument(InstrumentName="LOQ")
 
-        state_dict = state.property_manager
-        load_alg.setProperty("SANSState", state_dict)
-        load_alg.setProperty("PublishToCache", False)
-        load_alg.setProperty("UseCached", False)
-        load_alg.setProperty("SampleScatterWorkspace", "dummy")
-        load_alg.setProperty("SampleScatterMonitorWorkspace", "dummy")
+        cls._sans_original = sans2d_mask_ws
+        cls._loq_original = loq_empty
 
-        # Act
-        load_alg.execute()
-        self.assertTrue(load_alg.isExecuted())
-        return load_alg.getProperty("SampleScatterWorkspace").value
+    def setUp(self):
+        cloned_sans = CloneWorkspace(self._sans_original)
+        cloned_loq = CloneWorkspace(self._loq_original)
+        self._sans_data = cloned_sans
+        self._loq_empty = cloned_loq
 
-    def _run_mask(self, state, workspace, component):
-        mask_alg = AlgorithmManager.createUnmanaged("SANSMaskWorkspace")
-        mask_alg.setChild(True)
-        mask_alg.initialize()
+    def tearDown(self):
+        DeleteWorkspace(self._sans_data)
+        DeleteWorkspace(self._loq_empty)
 
-        state_dict = state.property_manager
-        mask_alg.setProperty("SANSState", state_dict)
-        mask_alg.setProperty("Workspace", workspace)
-        mask_alg.setProperty("Component", component)
+        self._sans_data = None
+        self._loq_empty = None
 
-        mask_alg.execute()
-        self.assertTrue(mask_alg.isExecuted())
-        return mask_alg.getProperty("Workspace").value
+    @classmethod
+    def tearDownClass(cls):
+        DeleteWorkspace(cls._sans_original)
+        DeleteWorkspace(cls._loq_original)
 
     def _do_assert(self, workspace, expected_spectra):
         # Remove duplicate masks from expected
@@ -102,13 +95,19 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
         for expected, actual in zip(sorted(expected_spectra), sorted(non_masked_spectra)):
             self.assertEqual(expected,  actual)
 
-    def test_that_spectra_masking_is_applied(self):
-        # Arrange
+    @staticmethod
+    def _build_data_info():
+        ws_name = "SANS2D00028827"
+
         file_information_factory = SANSFileInformationFactory()
-        file_information = file_information_factory.create_sans_file_information("SANS2D00028827")
+        file_information = file_information_factory.create_sans_file_information(ws_name)
         data_builder = get_data_builder(SANSFacility.ISIS, file_information)
-        data_builder.set_sample_scatter("SANS2D00028827")
+        data_builder.set_sample_scatter(ws_name)
         data_info = data_builder.build()
+        return data_info
+
+    def test_that_spectra_masking_is_applied(self):
+        data_info = self._build_data_info()
 
         mask_builder = get_mask_builder(data_info)
 
@@ -169,21 +168,14 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
         test_director.set_states(data_state=data_info, mask_state=mask_info)
         state = test_director.construct()
 
-        workspace = self._load_workspace(state)
-
         # Act
-        workspace = self._run_mask(state, workspace, "LAB")
+        workspace = mask_workspace(state=state, component_as_string="LAB", workspace=self._sans_data)
 
         # Assert
         self._do_assert(workspace, expected_spectra)
 
     def test_that_block_masking_is_applied(self):
-        # Arrange
-        file_information_factory = SANSFileInformationFactory()
-        file_information = file_information_factory.create_sans_file_information("SANS2D00028827")
-        data_builder = get_data_builder(SANSFacility.ISIS, file_information)
-        data_builder.set_sample_scatter("SANS2D00028827")
-        data_info = data_builder.build()
+        data_info = self._build_data_info()
 
         mask_builder = get_mask_builder(data_info)
 
@@ -213,30 +205,21 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
         test_director.set_states(data_state=data_info, mask_state=mask_info)
         state = test_director.construct()
 
-        workspace = self._load_workspace(state)
+        workspace = self._sans_data
 
         # Act
-        workspace = self._run_mask(state, workspace, "LAB")
+        mask_workspace(state=state, component_as_string='LAB', workspace=workspace)
 
         # Assert
         self._do_assert(workspace, expected_spectra)
 
     def test_that_cross_block_masking_is_applied(self):
-        # Arrange
-        file_information_factory = SANSFileInformationFactory()
-        file_information = file_information_factory.create_sans_file_information("SANS2D00028827")
-        data_builder = get_data_builder(SANSFacility.ISIS, file_information)
-        data_builder.set_sample_scatter("SANS2D00028827")
-        data_info = data_builder.build()
+        data_info = self._build_data_info()
 
         mask_builder = get_mask_builder(data_info)
 
-        # Expected_spectra
         expected_spectra = []
 
-        # Block
-        # Detector-specific cross block
-        # The block will be evaluated for SANS2D on the LAB as:
         block_cross_horizontal = [12, 17]
         block_cross_vertical = [49, 67]
         for h, v in zip(block_cross_horizontal, block_cross_vertical):
@@ -250,17 +233,16 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
         test_director.set_states(data_state=data_info, mask_state=mask_info)
         state = test_director.construct()
 
-        workspace = self._load_workspace(state)
-
-        # Act
-        workspace = self._run_mask(state, workspace, "LAB")
+        workspace = self._sans_data
+        workspace = mask_workspace(state=state, component_as_string='LAB', workspace=workspace)
 
         # Assert
         self._do_assert(workspace, expected_spectra)
 
     def test_that_mask_files_are_applied(self):
         def create_shape_xml_file(xml_string):
-            f_name = os.path.join(mantid.config.getString('defaultsave.directory'), 'sample_mask_file.xml')
+            temp_dir = tempfile.gettempdir()
+            f_name = os.path.join(temp_dir, 'sample_mask_file.xml')
             if os.path.exists(f_name):
                 os.remove(f_name)
             with open(f_name, 'w') as f:
@@ -279,11 +261,7 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
         file_name = create_shape_xml_file(shape_xml)
 
         # Arrange
-        file_information_factory = SANSFileInformationFactory()
-        file_information = file_information_factory.create_sans_file_information("SANS2D00028827")
-        data_builder = get_data_builder(SANSFacility.ISIS, file_information)
-        data_builder.set_sample_scatter("SANS2D00028827")
-        data_info = data_builder.build()
+        data_info = self._build_data_info()
         mask_builder = get_mask_builder(data_info)
 
         # Mask file
@@ -296,10 +274,10 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
         test_director.set_states(data_state=data_info, mask_state=mask_info)
         state = test_director.construct()
 
-        workspace = self._load_workspace(state)
+        workspace = self._sans_data
 
         # Act
-        workspace = self._run_mask(state, workspace, "LAB")
+        workspace = mask_workspace(state=state, component_as_string='LAB', workspace=workspace)
 
         # Assert
         self._do_assert(workspace, expected_spectra)
@@ -309,12 +287,7 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
             os.remove(file_name)
 
     def test_that_general_time_masking_is_applied(self):
-        # Arrange
-        file_information_factory = SANSFileInformationFactory()
-        file_information = file_information_factory.create_sans_file_information("SANS2D00028827")
-        data_builder = get_data_builder(SANSFacility.ISIS, file_information)
-        data_builder.set_sample_scatter("SANS2D00028827")
-        data_info = data_builder.build()
+        data_info = self._build_data_info()
         mask_builder = get_mask_builder(data_info)
 
         # Expected_spectra
@@ -333,13 +306,13 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
         test_director.set_states(data_state=data_info, mask_state=mask_info)
         state = test_director.construct()
 
-        workspace = self._load_workspace(state)
+        workspace = Load("SANS2D00028827")
 
         tof_spectra_10_original = workspace.getSpectrum(10).getTofs()
         tof_spectra_11_original = workspace.getSpectrum(11).getTofs()
 
         # Act
-        workspace = self._run_mask(state, workspace, "LAB")
+        workspace = mask_workspace(state=state, workspace=workspace, component_as_string="LAB")
 
         # Assert
         # Confirm that everything in the ranges 30000-35000  and 67000-75000 is removed from the event list
@@ -357,12 +330,7 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
             self.assertFalse(any(elements_in_range(start, stop, tof_spectra_11_masked)))
 
     def test_that_detector_specific_time_masking_is_applied(self):
-        # Arrange
-        file_information_factory = SANSFileInformationFactory()
-        file_information = file_information_factory.create_sans_file_information("SANS2D00028827")
-        data_builder = get_data_builder(SANSFacility.ISIS, file_information)
-        data_builder.set_sample_scatter("SANS2D00028827")
-        data_info = data_builder.build()
+        data_info = self._build_data_info()
         mask_builder = get_mask_builder(data_info)
 
         # Expected_spectra
@@ -378,13 +346,13 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
         test_director.set_states(data_state=data_info, mask_state=mask_info)
         state = test_director.construct()
 
-        workspace = self._load_workspace(state)
+        workspace = Load("SANS2D00028827")
 
         # Is part of LAB
         tof_spectra_23813_original = workspace.getSpectrum(23813).getTofs()
 
         # Act
-        workspace = self._run_mask(state, workspace, "LAB")
+        workspace = mask_workspace(state=state, component_as_string='LAB', workspace=workspace)
 
         # Assert
         # Confirm that everything in the ranges 27000-45000  and 58000-61000 is removed from the event list
@@ -441,21 +409,19 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
         test_director.set_states(data_state=data_info, mask_state=mask_info)
         state = test_director.construct()
 
-        workspace = self._load_workspace(state)
+        returned_data = SANSLoad(SANSState=state.property_manager, SampleScatterWorkspace="mask_sans_ws",
+                                 SampleScatterMonitorWorkspace="dummy")
+        workspace = returned_data[0]
+        DeleteWorkspace(returned_data[1])
 
         # Act
-        workspace = self._run_mask(state, workspace, "LAB")
+        workspace = mask_workspace(state=state, component_as_string="LAB", workspace=workspace)
 
         # Assert
         self._do_assert_non_masked(workspace, expected_spectra)
 
     def test_that_beam_stop_masking_is_applied(self):
-        # Arrange
-        file_information_factory = SANSFileInformationFactory()
-        file_information = file_information_factory.create_sans_file_information("SANS2D00028827")
-        data_builder = get_data_builder(SANSFacility.ISIS, file_information)
-        data_builder.set_sample_scatter("SANS2D00028827")
-        data_info = data_builder.build()
+        data_info = self._build_data_info()
         mask_builder = get_mask_builder(data_info)
 
         beam_stop_arm_width = .01
@@ -479,10 +445,8 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
         test_director.set_states(data_state=data_info, mask_state=mask_info)
         state = test_director.construct()
 
-        workspace = self._load_workspace(state)
-
-        # Act
-        workspace = self._run_mask(state, workspace, "LAB")
+        workspace = self._sans_data
+        workspace = mask_workspace(state=state, component_as_string="LAB", workspace=workspace)
 
         # Assert
         self._do_assert(workspace, expected_spectra)
@@ -521,21 +485,17 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
         test_director.set_states(data_state=data_info, mask_state=mask_info, move_state=move_info)
         state = test_director.construct()
 
-        workspace = self._load_workspace(state)
+        workspace = self._loq_empty
 
         # Act
-        workspace = self._run_mask(state, workspace, "LAB")
+        workspace = mask_workspace(state=state, component_as_string='LAB', workspace=workspace)
 
         # Assert
         self._do_assert(workspace, expected_spectra)
 
     def test_that_cylinder_masking_is_applied(self):
         # Arrange
-        file_information_factory = SANSFileInformationFactory()
-        file_information = file_information_factory.create_sans_file_information("SANS2D00028827")
-        data_builder = get_data_builder(SANSFacility.ISIS, file_information)
-        data_builder.set_sample_scatter("SANS2D00028827")
-        data_info = data_builder.build()
+        data_info = self._build_data_info()
         mask_builder = get_mask_builder(data_info)
 
         # Radius Mask
@@ -554,33 +514,13 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
         test_director.set_states(data_state=data_info, mask_state=mask_info)
         state = test_director.construct()
 
-        workspace = self._load_workspace(state)
+        workspace = self._sans_data
 
         # Act
-        workspace = self._run_mask(state, workspace, "LAB")
+        workspace = mask_workspace(state=state, component_as_string='LAB', workspace=workspace)
 
         # Assert
         self._do_assert(workspace, expected_spectra)
-
-
-class SANSMaskWorkspaceRunnerTest(systemtesting.MantidSystemTest):
-    def __init__(self):
-        systemtesting.MantidSystemTest.__init__(self)
-        self._success = False
-
-    def runTest(self):
-        suite = unittest.TestSuite()
-        suite.addTest(unittest.makeSuite(SANSMaskWorkspaceTest, 'test'))
-        runner = unittest.TextTestRunner()
-        res = runner.run(suite)
-        if res.wasSuccessful():
-            self._success = True
-
-    def requiredMemoryMB(self):
-        return 2000
-
-    def validate(self):
-        return self._success
 
 
 if __name__ == '__main__':

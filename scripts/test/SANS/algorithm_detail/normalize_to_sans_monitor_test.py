@@ -10,7 +10,7 @@ import unittest
 
 from mantid.api import AnalysisDataService
 from mantid.simpleapi import CreateSampleWorkspace, Rebin
-from sans.algorithm_detail.NormalizeToSANSMonitor import NormalizeToSANSMonitor
+from sans.algorithm_detail.normalize_to_sans_monitor import normalize_to_monitor
 from sans.common.enums import (RebinType, RangeStepType)
 from sans.state.normalize_to_monitor import get_normalize_to_monitor_builder
 from sans.test_helper.test_director import TestDirector
@@ -113,8 +113,8 @@ class SANSNormalizeToMonitorTest(unittest.TestCase):
 
     @staticmethod
     def _run_test(workspace, state, scale=1.0):
-        alg = NormalizeToSANSMonitor(state_adjustment_normalize_to_monitor=state.adjustment.normalize_to_monitor)
-        output_ws = alg.normalize_to_monitor(workspace=workspace, scale_factor=scale)
+        output_ws = normalize_to_monitor(workspace=workspace, scale_factor=scale,
+                                         state_adjustment_normalize_to_monitor=state.adjustment.normalize_to_monitor)
         return output_ws
 
     def _do_assert(self, workspace, expected_monitor_spectrum, expected_lambda, expected_signal):

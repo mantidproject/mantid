@@ -11,9 +11,9 @@
 
 from __future__ import (absolute_import, division, print_function)
 
-from sans.algorithm_detail.CalculateSANSTransmission import CalculateSANSTransmission
+from sans.algorithm_detail.calculate_sans_transmission import calculate_transmission
 from sans.algorithm_detail.CreateSANSWavelengthPixelAdjustment import CreateSANSWavelengthPixelAdjustment
-from sans.algorithm_detail.NormalizeToSANSMonitor import NormalizeToSANSMonitor
+from sans.algorithm_detail.normalize_to_sans_monitor import normalize_to_monitor
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_unmanaged_algorithm
 
@@ -101,11 +101,11 @@ class CreateSANSAdjustmentWorkspaces(object):
         return wavelength_out, pixel_out
 
     def _get_monitor_normalization_workspace(self, monitor_ws):
-        state = self._state
         scale_factor = self._slice_event_factor
 
-        alg = NormalizeToSANSMonitor(state_adjustment_normalize_to_monitor=state.normalize_to_monitor)
-        ws = alg.normalize_to_monitor(workspace=monitor_ws, scale_factor=scale_factor)
+        ws = normalize_to_monitor(
+            state_adjustment_normalize_to_monitor=self._state.normalize_to_monitor,
+                workspace=monitor_ws, scale_factor=scale_factor)
 
         return ws
 
@@ -121,11 +121,10 @@ class CreateSANSAdjustmentWorkspaces(object):
         if transmission_ws and direct_ws:
             data_type = self._data_type
             calc_trans_state = self._state.calculate_transmission
-            alg = CalculateSANSTransmission(data_type_str=data_type,
-                                            state_adjustment_calculate_transmission=calc_trans_state)
 
-            fitted_data, unfitted_data = alg.calculate_transmission(transmission_ws=transmission_ws,
-                                                                    direct_ws=direct_ws)
+            fitted_data, unfitted_data = calculate_transmission(
+                data_type_str=data_type, state_adjustment_calculate_transmission=calc_trans_state,
+                transmission_ws=transmission_ws, direct_ws=direct_ws)
         return fitted_data, unfitted_data
 
     def _get_wide_angle_correction_workspace(self, sample_data, calculated_transmission_workspace):

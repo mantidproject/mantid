@@ -10,9 +10,10 @@
 
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import (Direction, PropertyManagerProperty, FloatArrayProperty)
-from mantid.api import (ParallelDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress,
+from mantid.api import (ParallelDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
+                        Progress,
                         WorkspaceProperty)
-from sans.algorithm_detail.MoveSansInstrumentComponent import MoveSansInstrumentComponent, MoveTypes
+from sans.algorithm_detail.move_sans_instrument_component import move_component, MoveTypes
 
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 from sans.common.enums import SANSDataType
@@ -322,12 +323,8 @@ class SANSLoad(ParallelDataProcessorAlgorithm):
         self.setProperty(number_of_workspaces_name, counter)
 
     def _perform_initial_move(self, workspaces, state):
-        reset_alg = MoveSansInstrumentComponent(move_type=MoveTypes.RESET_POSITION)
-
         # If beam centre was specified then use it
         beam_coordinates = self.getProperty("BeamCoordinates").value
-        initial_move_alg = MoveSansInstrumentComponent(move_type=MoveTypes.INITIAL_MOVE,
-                                                       beam_coordinates=beam_coordinates)
 
         # The workspaces are stored in a dict: workspace_names (sample_scatter, etc) : ListOfWorkspaces
         for key, workspace_list in workspaces.items():
@@ -335,9 +332,12 @@ class SANSLoad(ParallelDataProcessorAlgorithm):
                        ("SampleTransmission", "CanTransmission", "CanDirect", "SampleDirect")
 
             for workspace in workspace_list:
-                reset_alg.move_component(component_name="", move_info=state.move, workspace=workspace)
-                initial_move_alg.move_component(component_name="LAB", move_info=state.move,
-                                                workspace=workspace, is_transmission_workspace=is_trans)
+                move_component(component_name="", move_info=state.move,
+                               workspace=workspace, move_type=MoveTypes.RESET_POSITION)
+
+                move_component(component_name="LAB", move_info=state.move,
+                               beam_coordinates=beam_coordinates, move_type=MoveTypes.INITIAL_MOVE,
+                               workspace=workspace, is_transmission_workspace=is_trans)
 
     def _get_progress_for_file_loading(self, data):
         # Get the number of workspaces which are to be loaded
