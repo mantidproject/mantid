@@ -17,11 +17,10 @@ from mantid.py3compat.mock import MagicMock, Mock, patch
 from mantidqt.plotting.functions import plot
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.widgets.fitpropertybrowser.fitpropertybrowser import FitPropertyBrowser
-from mantidqt.widgets.workspacedisplay.matrix.presenter import MatrixWorkspaceDisplay
-from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
 from testhelpers import assertRaisesNothing
 from workbench.plotting.figuremanager import FigureManagerADSObserver
 
+from qtpy import PYQT5
 
 @start_qapplication
 class FitPropertyBrowserTest(unittest.TestCase):
@@ -120,6 +119,11 @@ class FitPropertyBrowserTest(unittest.TestCase):
         self.assertEqual(name + "_Workspace", workspaceList.item(2).text())
 
     def test_fit_result_matrix_workspace_in_browser_is_viewed_when_clicked(self):
+        if not PYQT5:
+            self.skipTest("MatrixWorkspaceDisplay and TableWorkspaceDisplay cannot be "
+                          "imported in qt4 so the test fails with an error.")
+        from mantidqt.widgets.workspacedisplay.matrix.presenter import MatrixWorkspaceDisplay
+
         name = "ws"
         fig, canvas = self._create_and_plot_matrix_workspace(name)
         property_browser = self._create_widget(canvas=canvas)
@@ -139,6 +143,11 @@ class FitPropertyBrowserTest(unittest.TestCase):
         self.assertTrue(1, MatrixWorkspaceDisplay.show_view.call_count)
 
     def test_fit_parameter_table_workspaces_in_browser_is_viewed_when_clicked(self):
+        if not PYQT5:
+            self.skipTest("MatrixWorkspaceDisplay and TableWorkspaceDisplay cannot be "
+                          "imported in qt4 so the test fails with an error.")
+        from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
+
         name = "ws"
         fig, canvas = self._create_and_plot_matrix_workspace(name)
         property_browser = self._create_widget(canvas=canvas)
@@ -159,7 +168,7 @@ class FitPropertyBrowserTest(unittest.TestCase):
         property_browser.workspaceClicked.emit(item)
         self.assertTrue(1, TableWorkspaceDisplay.show_view.call_count)
 
-    def test_workspaces_removed_from_workspace_list_if_deleted(self):
+    def test_workspaces_removed_from_workspace_list_widget_if_deleted_from_ADS(self):
         name = "ws"
         fig, canvas_mock = self._create_and_plot_matrix_workspace(name)
         property_browser = self._create_widget(canvas=canvas_mock)

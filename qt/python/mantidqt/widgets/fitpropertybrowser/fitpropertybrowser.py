@@ -15,8 +15,6 @@ from mantid import logger
 from mantid.api import AlgorithmManager, AnalysisDataService, ITableWorkspace, MatrixWorkspace
 from mantidqt.utils.qt import import_qt
 from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
-from mantidqt.widgets.workspacedisplay.matrix.presenter import MatrixWorkspaceDisplay
-from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
 
 from .interactive_tool import FitInteractiveTool
 
@@ -488,6 +486,8 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
 
     @Slot(str)
     def display_workspace(self, name):
+        from mantidqt.widgets.workspacedisplay.matrix.presenter import MatrixWorkspaceDisplay
+        from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
         if AnalysisDataService.doesExist(name):
             ws = AnalysisDataService.retrieve(name)
             if isinstance(ws, MatrixWorkspace):

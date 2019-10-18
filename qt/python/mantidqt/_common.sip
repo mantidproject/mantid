@@ -493,7 +493,7 @@ signals:
     void algorithmFinished(const QString &);
     void removeFitCurves();
     void plotGuess();
-    void workspaceClicked(const QString);
+    void workspaceClicked(const QString &);
 
 };
 
