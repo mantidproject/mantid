@@ -19,6 +19,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include <boost/math/special_functions/round.hpp>
 
@@ -209,10 +210,12 @@ predictPeaks(Algorithm *const alg, const std::vector<double> &hOffsets,
           peak->setGoniometerMatrix(gonioMatrix);
           if (requirePeaksOnDetector && peak->getDetectorID() < 0)
             continue;
+          GNU_DIAG_OFF("missing-braces")
           PeakHash savedPeak{runNumber,
                              boost::math::iround(1000.0 * candidateHKL[0]),
                              boost::math::iround(1000.0 * candidateHKL[1]),
                              boost::math::iround(1000.0 * candidateHKL[2])};
+          GNU_DIAG_ON("missing-braces")
           auto it =
               find(alreadyDonePeaks.begin(), alreadyDonePeaks.end(), savedPeak);
           if (it == alreadyDonePeaks.end())
