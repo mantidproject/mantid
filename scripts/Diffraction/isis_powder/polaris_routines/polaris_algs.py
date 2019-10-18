@@ -81,16 +81,31 @@ def save_unsplined_vanadium(vanadium_ws, output_path):
 
 def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None, cal_file_name=None, sample_details=None):
     focused_ws = _obtain_focused_run(run_number, focus_file_path)
+    focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, Target="MomentumTransfer", EMode='Elastic')
+    self_scattering_correction = _calculate_self_scattering_correction(run_number, cal_file_name, sample_details)
+
+    ws_group_list = []
+    for i in range(self_scattering_correction.getNumberHistograms()):
+        ws_name = 'correction_' + str(i)
+        mantid.ExtractSpectra(InputWorkspace=self_scattering_correction, OutputWorkspace=ws_name, StartWorkspaceIndex=i,
+                              EndWorkspaceIndex=i)
+        ws_group_list.append(ws_name)
+    self_scattering_correction = mantid.GroupWorkspaces(InputWorkspaces=ws_group_list)
+    self_scattering_correction = mantid.RebinToWorkspace(WorkspaceToRebin=self_scattering_correction,
+                                                         WorkspaceToMatch=focused_ws)
+    mantid.Subtract(LHSWorkspace=focused_ws, RHSWorkspace=self_scattering_correction,
+                    OutputWorkspace=focused_ws)
 
     if merge_banks:
-        pdf_output = _generate_grouped_ts_pdf(run_number, focused_ws, q_lims, cal_file_name, sample_details)
-    else:
-        focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws.name(), Target="MomentumTransfer")
-        pdf_output = mantid.PDFFourierTransform(Inputworkspace=focused_ws, InputSofQType="S(Q)", PDFType="G(r)",
+        merged_ws = _merge_workspace_with_limits(focused_ws, q_lims)
+        pdf_output = mantid.PDFFourierTransform(Inputworkspace=merged_ws, InputSofQType="S(Q)-1", PDFType="G(r)",
                                                 Filter=True)
+    else:
+        pdf_output = mantid.PDFFourierTransform(Inputworkspace=focused_ws, InputSofQType="S(Q)-1",
+                                                PDFType="G(r)", Filter=True)
         pdf_output = mantid.RebinToWorkspace(WorkspaceToRebin=pdf_output, WorkspaceToMatch=pdf_output[4],
                                              PreserveEvents=True)
-    common.remove_intermediate_workspace('focused_ws')
+    common.remove_intermediate_workspace('self_scattering_correction')
     return pdf_output
 
 
@@ -120,8 +135,7 @@ def _obtain_focused_run(run_number, focus_file_path):
     return focused_ws
 
 
-def _generate_grouped_ts_pdf(run_number, focused_ws, q_lims, cal_file_name, sample_details):
-    focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, Target="MomentumTransfer", EMode='Elastic')
+def _merge_workspace_with_limits(focused_ws, q_lims):
     min_x = np.inf
     max_x = -np.inf
     num_x = -np.inf
@@ -133,42 +147,8 @@ def _generate_grouped_ts_pdf(run_number, focused_ws, q_lims, cal_file_name, samp
     width_x = (max_x-min_x)/num_x
     binning = [min_x, width_x, max_x]
     focused_ws = mantid.Rebin(InputWorkspace=focused_ws, Params=binning)
-    focused_data_combined = mantid.ConjoinSpectra(InputWorkspaces=focused_ws)
+    focused_ws_conjoined = mantid.ConjoinSpectra(InputWorkspaces=focused_ws)
 
-    raw_ws = mantid.LoadRaw(Filename='POL'+str(run_number))
-    mantid.SetSample(InputWorkspace=raw_ws,
-                     Geometry=common.generate_sample_geometry(sample_details),
-                     Material=common.generate_sample_material(sample_details))
-    monitor = mantid.ExtractSpectra(InputWorkspace=raw_ws, WorkspaceIndexList=[11])
-    monitor = mantid.ConvertUnits(InputWorkspace=monitor, Target="Wavelength")
-    x_data = monitor.dataX(0)
-    min_x = np.min(x_data)
-    max_x = np.max(x_data)
-    width_x = (max_x-min_x)/x_data.size
-    fit_spectra = mantid.FitIncidentSpectrum(InputWorkspace=monitor,
-                                             BinningForCalc=[min_x, 1*width_x, max_x],
-                                             BinningForFit=[min_x, 10*width_x, max_x],
-                                             FitSpectrumWith="CubicSpline")
-    placzek = mantid.CalculatePlaczekSelfScattering(InputWorkspace=raw_ws, IncidentSpecta=fit_spectra)
-    cal_workspace = mantid.LoadCalFile(InputWorkspace=placzek,
-                                       CalFileName=cal_file_name,
-                                       Workspacename='cal_workspace',
-                                       MakeOffsetsWorkspace=False,
-                                       MakeMaskWorkspace=False)
-    placzek = mantid.DiffractionFocussing(InputWorkspace=placzek, GroupingFilename=cal_file_name)
-    n_pixel = np.zeros(placzek.getNumberHistograms())
-    for i in range(cal_workspace.getNumberHistograms()):
-        grouping = cal_workspace.dataY(i)
-        if grouping[0] > 0:
-            n_pixel[int(grouping[0]-1)] += 1
-    correction_ws = mantid.CreateWorkspace(DataY=n_pixel, DataX=[0, 1], NSpec=placzek.getNumberHistograms())
-    placzek = mantid.Divide(LHSWorkspace=placzek, RHSWorkspace=correction_ws)
-    mantid.ConvertToDistribution(Workspace=placzek)
-    placzek = mantid.ConvertUnits(InputWorkspace=placzek, Target="MomentumTransfer", EMode='Elastic')
-    placzek = mantid.RebinToWorkspace(WorkspaceToRebin=placzek, WorkspaceToMatch=focused_data_combined)
-    mantid.Subtract(LHSWorkspace=focused_data_combined,
-                    RHSWorkspace=placzek,
-                    OutputWorkspace=focused_data_combined)
     if type(q_lims) == str:
         q_min = []
         q_max = []
@@ -190,32 +170,67 @@ def _generate_grouped_ts_pdf(run_number, focused_ws, q_lims, cal_file_name, samp
         raise RuntimeError("q_lims is not valid")
     bin_width = np.inf
     for i in range(q_min.size):
-        pdf_x_array = focused_data_combined.readX(i)
+        pdf_x_array = focused_ws_conjoined.readX(i)
         tmp1 = np.where(pdf_x_array >= q_min[i])
         tmp2 = np.amin(tmp1)
         q_min[i] = pdf_x_array[tmp2]
         q_max[i] = pdf_x_array[np.amax(np.where(pdf_x_array <= q_max[i]))]
         bin_width = min(pdf_x_array[1] - pdf_x_array[0], bin_width)
-    mantid.MatchSpectra(InputWorkspace=focused_data_combined,
-                        OutputWorkspace=focused_data_combined,
+    mantid.MatchSpectra(InputWorkspace=focused_ws_conjoined,
+                        OutputWorkspace=focused_ws_conjoined,
                         ReferenceSpectrum=5)
-    focused_data_combined = mantid.CropWorkspaceRagged(InputWorkspace=focused_data_combined, XMin=q_min, XMax=q_max)
+    focused_data_combined = mantid.CropWorkspaceRagged(InputWorkspace=focused_ws_conjoined, XMin=q_min, XMax=q_max)
     focused_data_combined = mantid.Rebin(InputWorkspace=focused_data_combined,
                                          Params=[min(q_min), bin_width, max(q_max)])
     focused_data_combined = mantid.SumSpectra(InputWorkspace=focused_data_combined,
                                               WeightedSum=True,
                                               MultiplyBySpectra=False)
-    pdf_output = mantid.PDFFourierTransform(Inputworkspace=focused_data_combined,
-                                            InputSofQType="S(Q)-1",
-                                            PDFType="G(r)",
-                                            Filter=True)
+    common.remove_intermediate_workspace(focused_ws_conjoined)
+    return focused_data_combined
+
+
+def _calculate_self_scattering_correction(run_number, cal_file_name, sample_details):
+    raw_ws = mantid.LoadRaw(Filename='POL' + str(run_number))
+    mantid.SetSample(InputWorkspace=raw_ws,
+                     Geometry=common.generate_sample_geometry(sample_details),
+                     Material=common.generate_sample_material(sample_details))
+    monitor = mantid.ExtractSpectra(InputWorkspace=raw_ws, WorkspaceIndexList=[11])
+    monitor = mantid.ConvertUnits(InputWorkspace=monitor, Target="Wavelength")
+    x_data = monitor.dataX(0)
+    min_x = np.min(x_data)
+    max_x = np.max(x_data)
+    width_x = (max_x - min_x) / x_data.size
+    fit_spectra = mantid.FitIncidentSpectrum(InputWorkspace=monitor,
+                                             BinningForCalc=[min_x, 1 * width_x, max_x],
+                                             BinningForFit=[min_x, 10 * width_x, max_x],
+                                             FitSpectrumWith="CubicSpline")
+    self_scattering_correction = mantid.CalculatePlaczekSelfScattering(InputWorkspace=raw_ws,
+                                                                       IncidentSpecta=fit_spectra)
+    cal_workspace = mantid.LoadCalFile(InputWorkspace=self_scattering_correction,
+                                       CalFileName=cal_file_name,
+                                       Workspacename='cal_workspace',
+                                       MakeOffsetsWorkspace=False,
+                                       MakeMaskWorkspace=False)
+    self_scattering_correction = mantid.DiffractionFocussing(InputWorkspace=self_scattering_correction,
+                                                             GroupingFilename=cal_file_name)
+    n_pixel = np.zeros(self_scattering_correction.getNumberHistograms())
+    for i in range(cal_workspace.getNumberHistograms()):
+        grouping = cal_workspace.dataY(i)
+        if grouping[0] > 0:
+            n_pixel[int(grouping[0] - 1)] += 1
+    correction_ws = mantid.CreateWorkspace(DataY=n_pixel, DataX=[0, 1],
+                                           NSpec=self_scattering_correction.getNumberHistograms())
+    self_scattering_correction = mantid.Divide(LHSWorkspace=self_scattering_correction, RHSWorkspace=correction_ws)
+    mantid.ConvertToDistribution(Workspace=self_scattering_correction)
+    self_scattering_correction = mantid.ConvertUnits(InputWorkspace=self_scattering_correction,
+                                                     Target="MomentumTransfer", EMode='Elastic')
+
     common.remove_intermediate_workspace('cal_workspace_group')
     common.remove_intermediate_workspace(correction_ws)
     common.remove_intermediate_workspace(fit_spectra)
     common.remove_intermediate_workspace(monitor)
-    common.remove_intermediate_workspace(placzek)
     common.remove_intermediate_workspace(raw_ws)
-    return pdf_output
+    return self_scattering_correction
 
 
 def _determine_chopper_mode(ws):
