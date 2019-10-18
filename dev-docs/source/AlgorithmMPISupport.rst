@@ -602,7 +602,6 @@ RemovePromptPulse                      all
 RenameWorkspace                        all
 ReplaceSpecialValues                   all                     see ``UnaryOperation``
 RotateInstrumentComponent              all
-SANSConvertToQ                         all
 SANSConvertToWavelengthAndRebin        all
 SANSCreateAdjustmentWorkspaces         all
 SANSCreateWavelengthAndPixelAdjustment MasterOnly, Identical

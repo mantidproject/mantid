@@ -12,6 +12,7 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress,
                         IEventWorkspace)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator)
+from sans.algorithm_detail.convert_to_q import convert_workspace
 from sans.algorithm_detail.scale_sans_workspace import scale_workspace
 from sans.algorithm_detail.crop_helper import get_component_name
 from sans.algorithm_detail.mask_sans_workspace import mask_workspace
@@ -248,11 +249,14 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
             xml_string = quadrant_xml(centre, r_min, r_max, quadrant)
             quadrant_scatter_data = self._get_cloned_workspace(scatter_data)
             self._mask_quadrants(quadrant_scatter_data, xml_string)
-            quadrant_scatter_data, sum_of_counts, sum_of_norms = self._convert_to_q(state_serialized,
-                                                                                    quadrant_scatter_data,
-                                                                                    wavelength_adjustment_workspace,
-                                                                                    pixel_adjustment_workspace,
-                                                                                    wavelength_and_pixel_adjustment_workspace)
+
+            quadrant_scatter_data, sum_of_counts, sum_of_norms = \
+                self._convert_to_q(state=state,
+                                   workspace=quadrant_scatter_data,
+                                   wavelength_adjustment_workspace=wavelength_adjustment_workspace,
+                                   pixel_adjustment_workspace=pixel_adjustment_workspace,
+                                   wavelength_and_pixel_adjustment_workspace=wavelength_and_pixel_adjustment_workspace)
+
             quadrant_scatter_reduced.update({quadrant: quadrant_scatter_data})
 
         # # ------------------------------------------------------------
@@ -387,7 +391,7 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
 
         return workspace
 
-    def _convert_to_q(self, state_serialized, workspace, wavelength_adjustment_workspace, pixel_adjustment_workspace,
+    def _convert_to_q(self, state, workspace, wavelength_adjustment_workspace, pixel_adjustment_workspace,
                       wavelength_and_pixel_adjustment_workspace):
         """
         A conversion to momentum transfer is performed in this step.
@@ -401,24 +405,17 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         @param wavelength_and_pixel_adjustment_workspace: the wavelength and pixel adjustment workspace.
         @return: a reduced workspace
         """
-        convert_name = "SANSConvertToQ"
-        convert_options = {"InputWorkspace": workspace,
-                           "OutputWorkspace": EMPTY_NAME,
-                           "SANSState": state_serialized,
-                           "OutputParts": True}
-        if wavelength_adjustment_workspace:
-            convert_options.update({"InputWorkspaceWavelengthAdjustment": wavelength_adjustment_workspace})
-        if pixel_adjustment_workspace:
-            convert_options.update({"InputWorkspacePixelAdjustment": pixel_adjustment_workspace})
-        if wavelength_and_pixel_adjustment_workspace:
-            convert_options.update({"InputWorkspaceWavelengthAndPixelAdjustment":
-                                    wavelength_and_pixel_adjustment_workspace})
-        convert_alg = create_child_algorithm(self, convert_name, **convert_options)
-        convert_alg.execute()
-        data_workspace = convert_alg.getProperty("OutputWorkspace").value
-        sum_of_counts = convert_alg.getProperty("SumOfCounts").value
-        sum_of_norms = convert_alg.getProperty("SumOfNormFactors").value
-        return data_workspace, sum_of_counts, sum_of_norms
+        output_dict = convert_workspace(workspace=workspace, state_convert_to_q=state.convert_to_q,
+                                        wavelength_adj_workspace=wavelength_adjustment_workspace,
+                                        pixel_adj_workspace=pixel_adjustment_workspace,
+                                        wavelength_and_pixel_adj_workspace=wavelength_and_pixel_adjustment_workspace,
+                                        output_summed_parts=True)
+
+        output_workspace = output_dict["output"]
+        sum_of_counts = output_dict["counts_summed"]
+        sum_of_norms = output_dict["norm_summed"]
+
+        return output_workspace, sum_of_counts, sum_of_norms
 
     def validateInputs(self):
         errors = dict()

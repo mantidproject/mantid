@@ -1,8 +1,6 @@
 # Tests for ISIS SANS
 
 set(TEST_PY_FILES
-    SANSConvertToQTest.py
-    SANSConvertToWavelengthAndRebinTest.py
     SANSCreateAdjustmentWorkspacesTest.py
     SANSCreateWavelengthAndPixelAdjustmentTest.py
     SANSSliceEventTest.py)
