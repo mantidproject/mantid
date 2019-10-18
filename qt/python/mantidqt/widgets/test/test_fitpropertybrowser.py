@@ -14,6 +14,7 @@ matplotlib.use('AGG')  # noqa
 
 from mantid.api import AnalysisDataService, WorkspaceFactory
 from mantid.py3compat.mock import MagicMock, Mock, patch
+from mantid.simpleapi import CreateSampleWorkspace
 from mantidqt.plotting.functions import plot
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.widgets.fitpropertybrowser.fitpropertybrowser import FitPropertyBrowser
@@ -88,6 +89,22 @@ class FitPropertyBrowserTest(unittest.TestCase):
             AnalysisDataService.Instance().remove("ws_NormalisedCovarianceMatrix")
 
             self.assertEqual(1, len(fig.get_axes()[0].lines))
+
+    def test_plot_limits_are_not_changed_when_plotting_fit_lines(self):
+        fig, canvas = self._create_and_plot_matrix_workspace()
+        ax_limits = fig.get_axes()[0].axis()
+        widget = self._create_widget(canvas=canvas)
+        fit_ws_name = "fit_ws"
+        CreateSampleWorkspace(OutputWorkspace=fit_ws_name)
+        widget.fitting_done_slot(fit_ws_name)
+        self.assertEqual(ax_limits, fig.get_axes()[0].axis())
+
+    def test_plot_limits_are_not_changed_when_plotting_guess(self):
+        fig, canvas = self._create_and_plot_matrix_workspace()
+        ax_limits = fig.get_axes()[0].axis()
+        widget = self._create_widget(canvas=canvas)
+        widget.plot_guess()
+        self.assertEqual(ax_limits, fig.get_axes()[0].axis())
 
     # Private helper functions
     def _create_widget(self, canvas=MagicMock(), toolbar_manager=Mock()):

@@ -237,6 +237,8 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
     def get_axes(self):
         """
         Get the pyplot's Axes object.
+
+        :rtype: matplotlib.axes.Axes
         """
         return self.canvas.figure.get_axes()[0]
 
@@ -284,13 +286,14 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
 
         out_ws = alg.getProperty('OutputWorkspace').value
 
+        ax = self.get_axes()
         # Setting distribution=True prevents the guess being normalised
-        self.guess_line = self.get_axes().plot(out_ws, wkspIndex=1,
-                                               label=out_ws_name,
-                                               distribution=True,
-                                               update_axes_labels=False)[0]
-
-        self.get_axes().legend().draggable()
+        self.guess_line = ax.plot(out_ws, wkspIndex=1,
+                                  label=out_ws_name,
+                                  distribution=True,
+                                  update_axes_labels=False,
+                                  autoscale_on_update=False)[0]
+        ax.legend().draggable()
 
         if self.guess_line:
             self.setTextPlotGuess('Remove Guess')
@@ -345,11 +348,9 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         This is called after Fit finishes to update the fit curves.
         :param name: The name of Fit's output workspace.
         """
-        from mantidqt.plotting.functions import plot
-
         self.fit_result_ws_name = name
-        axes = self.get_axes()
-        props = LegendProperties.from_legend(axes.legend_)
+        ax = self.get_axes()
+        props = LegendProperties.from_legend(ax.legend_)
 
         ws = AnalysisDataService.retrieve(name)
 
@@ -358,20 +359,18 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
 
         self.clear_fit_result_lines()
 
+        ax.plot(ws, wkspIndex=1, autoscale_on_update=False)
         if self.plotDiff():
-            plot([ws], wksp_indices=[1, 2], fig=self.canvas.figure, overplot=True)
-        else:
-            plot([ws], wksp_indices=[1], fig=self.canvas.figure, overplot=True)
+            ax.plot(ws, wkspIndex=2, autoscale_on_update=False)
 
         # Add properties back to the lines
         new_lines = self.get_lines()
         for new_line, old_line in zip(new_lines, original_lines):
             new_line.update_from(old_line)
 
-        handles, labels = axes.get_legend_handles_labels()
-
         # Now update the legend to make sure it changes to the old properties
-        LegendProperties.create_legend(props, axes)
+        LegendProperties.create_legend(props, ax)
+        ax.figure.canvas.draw()
 
     @Slot(int, float, float, float)
     def peak_added_slot(self, peak_id, centre, height, fwhm):
