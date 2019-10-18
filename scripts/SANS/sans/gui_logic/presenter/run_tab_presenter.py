@@ -431,8 +431,8 @@ class RunTabPresenter(PresenterCommon):
 
             # 3. Populate the table
             self._table_model.clear_table_entries()
-            for index, row in enumerate(parsed_rows):
-                self._add_row_to_table_model(row, index)
+
+            self._add_multiple_rows_to_table_model(rows=parsed_rows)
             self._table_model.remove_table_entries([len(parsed_rows)])
         except RuntimeError as e:
             if batch_file_directory:
@@ -442,11 +442,15 @@ class RunTabPresenter(PresenterCommon):
             self.sans_logger.error("Loading of the batch file failed. {}".format(str(e)))
             self.display_warning_box('Warning', 'Loading of the batch file failed', str(e))
 
-    def _add_row_to_table_model(self, row, index):
-        """
-        Adds a row to the table
-        """
+    def _add_multiple_rows_to_table_model(self, rows):
+        parsed_rows = []
+        for row in rows:
+            parsed_rows.append(self._parse_row_for_table_model(row=row))
 
+        self._table_model.add_multiple_table_entries(table_index_model_list=parsed_rows)
+
+    @staticmethod
+    def _parse_row_for_table_model(row):
         def get_string_entry(_tag, _row):
             _element = ""
             if _tag in _row:
@@ -496,7 +500,13 @@ class RunTabPresenter(PresenterCommon):
                      sample_thickness, sample_height, sample_width]
 
         table_index_model = TableIndexModel(*row_entry)
+        return table_index_model
 
+    def _add_row_to_table_model(self, row, index):
+        """
+        Adds a row to the table
+        """
+        table_index_model = self._parse_row_for_table_model(row=row)
         self._table_model.add_table_entry(index, table_index_model)
 
     def on_update_rows(self):
@@ -505,6 +515,7 @@ class RunTabPresenter(PresenterCommon):
     def update_view_from_table_model(self):
         self._view.clear_table()
         self._view.hide_period_columns()
+
         for row_index, row in enumerate(self._table_model._table_entries):
             row_entry = [str(x) for x in row.to_list()]
             self._view.add_row(row_entry)

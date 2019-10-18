@@ -40,6 +40,7 @@ Improvements
 ############
 
 - :ref:`SaveHKL <algm-SaveHKL>` now saves the tbar and transmission values for shapes and materials provided by :ref:`SetSample <algm-SetSample>`.
+- :ref:`SelectCellOfType <algm-SelectCellOfType>` and :ref:`SelectCellWithForm <algm-SelectCellWithForm>` now return the transformation matrix
 
 
 Bug Fixes

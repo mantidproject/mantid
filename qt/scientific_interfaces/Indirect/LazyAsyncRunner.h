@@ -11,6 +11,10 @@
 
 #include <QtCore>
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include <QtConcurrent>
+#endif
+
 #include <boost/optional.hpp>
 
 /**

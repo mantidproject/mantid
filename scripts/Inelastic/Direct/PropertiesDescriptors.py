@@ -13,12 +13,14 @@ from __future__ import (absolute_import, division, print_function)
 import os
 import numpy as np
 import math
+import re
 from collections import Iterable
 
 import mantid.simpleapi as mantid
 from mantid import api
 
 import Direct.ReductionHelpers as prop_helpers
+from Direct.AbsorptionShapes import *
 import collections
 
 
@@ -328,15 +330,16 @@ class IncidentEnergy(PropDescriptor):
         self._autoEiCalculated = False
         if ei_mon_spec is None:
             ei_mon_spec = instance.ei_mon_spectra
-        guess_ei_ws = mantid.GetAllEi(Workspace=monitor_ws, Monitor1SpecID=ei_mon_spec[0],
-                                      Monitor2SpecID=ei_mon_spec[1])
+        guess_ei_ws = GetAllEi(
+            Workspace=monitor_ws, Monitor1SpecID=ei_mon_spec[0],
+            Monitor2SpecID=ei_mon_spec[1])
         guessEi = guess_ei_ws.readX(0)
         fin_ei = []
         for ei in guessEi:
             try:
-                ei_ref, _, _, _ = mantid.GetEi(InputWorkspace=monitor_ws,
-                                               Monitor1Spec=ei_mon_spec[0], Monitor2Spec=ei_mon_spec[1],
-                                               EnergyEstimate=ei)
+                ei_ref, _, _, _ = GetEi(InputWorkspace=monitor_ws,
+                                        Monitor1Spec=ei_mon_spec[0], Monitor2Spec=ei_mon_spec[1],
+                                        EnergyEstimate=ei)
                 fin_ei.append(ei_ref)
             # pylint: disable=bare-except
             except:
@@ -350,7 +353,7 @@ class IncidentEnergy(PropDescriptor):
         self._num_energies = len(fin_ei)
         self._cur_iter_en = 0
         # Clear dataservice from unnecessary workspace
-        mantid.DeleteWorkspace(guess_ei_ws)
+        DeleteWorkspace(guess_ei_ws)
 
     def validate(self, instance, owner=None):
         #
@@ -368,8 +371,6 @@ class IncidentEnergy(PropDescriptor):
                 return (False, 2, "Incident energy have to be positive number or list of positive numbers.\n"
                                   "Got single negative incident energy {0} ".format(inc_en))
         return (True, 0, '')
-
-
 # end IncidentEnergy
 # -----------------------------------------------------------------------------------------
 
@@ -480,10 +481,7 @@ class EnergyBins(PropDescriptor):
             if not owner.incident_energy.autoEi_mode() and ebin[2] > ei:
                 return (False, 2, 'Max rebin range {0:f} exceeds incident energy {1:f}'.format(ebin[2], ei))
         return (True, 0, '')
-
-
 # -----------------------------------------------------------------------------------------
-
 # end EnergyBins
 # -----------------------------------------------------------------------------------------
 
@@ -548,8 +546,6 @@ class SaveFileName(PropDescriptor):
 
     def set_custom_print(self, routine):
         self._custom_print = routine
-
-
 # end SaveFileName
 # -----------------------------------------------------------------------------------------
 
@@ -574,8 +570,6 @@ class InstrumentDependentProp(PropDescriptor):
 
     def __set__(self, instance, values):
         raise AttributeError("Property {0} can not be assigned. It defined by instrument".format(self._prop_name))
-
-
 # end InstrumentDependentProp
 # -----------------------------------------------------------------------------------------
 
@@ -590,8 +584,6 @@ class VanadiumRMM(PropDescriptor):
 
     def __set__(self, instance, value):
         raise AttributeError("Can not change vanadium rmm")
-
-
 # end VanadiumRMM
 # -----------------------------------------------------------------------------------------
 # END Descriptors for NonIDF_Properties class
@@ -695,8 +687,6 @@ class mon2NormalizationEnergyRange(PropDescriptor):
                 return (False, 2, message)
 
         return result
-
-
 # -----------------------------------------------------------------------------------------
 
 
@@ -838,8 +828,6 @@ class DetCalFile(PropDescriptor):
             pass
         self._det_cal_file = file_name
         return (True, file_name)
-
-
 # end DetCalFile
 # -----------------------------------------------------------------------------------------
 
@@ -884,8 +872,6 @@ class MapMaskFile(PropDescriptor):
         else:
             self._file_name = file_name
             return (True, file_name)
-
-
 # end MapMaskFile
 
 # -----------------------------------------------------------------------------------------
@@ -980,8 +966,6 @@ class HardMaskOnly(prop_helpers.ComplexProperty):
         # pylint: disable=bare-except
         except:
             pass
-
-
 # end HardMaskOnly
 # -----------------------------------------------------------------------------------------
 
@@ -1079,8 +1063,6 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
             return False, 1, 'monovan integration is suspiciously wide: [{0}:{1}]. ' \
                              'This may be incorrect'.format(the_range[0], the_range[1])
         return True, 0, ''
-
-
 # end MonovanIntegrationRange
 
 
@@ -1238,8 +1220,6 @@ class SpectraToMonitorsList(PropDescriptor):
             else:
                 result = [int(spectra_list)]
         return result
-
-
 # end SpectraToMonitorsList
 
 # -----------------------------------------------------------------------------------------
@@ -1308,8 +1288,6 @@ class SaveFormat(PropDescriptor):
             return (False, 1, 'No internal save format is defined. Results may be lost')
         else:
             return (True, 0, '')
-
-
 # end SaveFormat
 
 # -----------------------------------------------------------------------------------------
@@ -1358,8 +1336,6 @@ class DiagSpectra(PropDescriptor):
             return bank_spectra
         else:
             raise ValueError("Spectra For diagnostics can be a string inthe form (num1,num2);(num3,num4) etc. or None")
-
-
 # end class DiagSpectra
 
 # -----------------------------------------------------------------------------------------
@@ -1407,8 +1383,6 @@ class BackbgroundTestRange(PropDescriptor):
             return False, 1, ' Background test range is TOF range, its max value looks suspiciously big={0}'.format(
                    test_range[1])
         return True, 0, ''
-
-
 # end BackbgroundTestRange
 
 # -----------------------------------------------------------------------------------------
@@ -1446,8 +1420,6 @@ class MultirepTOFSpectraList(PropDescriptor):
         else:
             rez = [int(value)]
         self._spectra_list = rez
-
-
 # end MultirepTOFSpectraList
 
 
@@ -1529,8 +1501,6 @@ class MonoCorrectionFactor(PropDescriptor):
         if self._cor_factor <= 0:
             return (False, 2, 'Mono-correction factor has to be positive if specified: {0}'.format(self._cor_factor))
         return (True, 0, '')
-
-
 # end MonoCorrectionFactor
 
 
@@ -1561,8 +1531,6 @@ class MotorLogName(PropDescriptor):
         else:
             val_list = [str(value)]
         self._log_names = val_list
-
-
 # end MotorLogName
 
 
@@ -1587,8 +1555,6 @@ class MotorOffset(PropDescriptor):
             self._offset = None
         else:
             self._offset = float(value)
-
-
 # end MotorOffset
 
 
@@ -1680,9 +1646,176 @@ class RotationAngle(PropDescriptor):
 
     def dependencies(self):
         return ['motor_log_names', 'motor_offset']
-
 # end RotationAngle
 
+
+class AbsCorrInfo(PropDescriptor):
+    """ Class responsible for providing additional values for
+        absorption corrections algorithms.
+
+        The values should contain of the algorithm selector currently
+        is_fast:True for AbsorptionCorrection algorithms family
+        or
+        is_mc:True for MonteCarloAbsorption correction algorithms family
+
+        accompanied by the dictionary of all non-sample related properties
+        accepted by these algorithms.
+
+        If this key is missing, the class assumes that MonteCarloAbsorption
+        algorithm (is_mc:True) is selected.
+
+        The value for the property can be provided as dictionary or as
+        string representation of this dictionary.
+        The whole contents of the previous dictionary is removed
+        on assignment of the new dictionary.
+    """
+    # The set of properties acceptable by MonteCarloAbsorption algorithm:
+    _MC_corrections_accepts = {
+        'NumberOfWavelengthPoints':lambda x: int(x),
+        'EventsPerPoint':lambda x : int(x),
+        'SeedValue':lambda x : int(x),
+        'Interpolation':lambda x : list_checker(x,('Linear','CSpline'),'MonteCarloAbsorptions "Interpolation"'),
+        'SparseInstrument':lambda x : bool(x),'NumberOfDetectorRows':lambda x: int(x),
+        'NumberOfDetectorColumns':lambda x: int(x),'MaxScatterPtAttempts':lambda x: int(x)}
+    # The set of properties acceptable by AbsorptionCorrection algorithm:
+    _Fast_corrections_accepts = {
+        'ScatterFrom':lambda x : list_checker(x,('Sample', 'Container', 'Environment'),'AbsorptionCorrections "ScatterFrom"'),
+        'NumberOfWavelengthPoints':lambda x: float(x),
+        'ExpMethod':lambda x : list_checker(x,('Normal', 'FastApprox'),'AbsorptionCorrections "ExpMethod"'),
+        'EMode':lambda x: list_checker(x,('Direct', 'Indirect', 'Elastic'),'AbsorptionCorrections "EMode"'),
+        'EFixed':lambda x: float(x),'ElementSize':lambda x: float(x)}
+
+    def __init__(self):
+        self._alg_prop = {}
+        # Use Monte-Carlo corrections by default
+        self._is_fast  = False
+
+    def __get__(self, instance, owner=None):
+        if instance is None:
+            return self
+        alg_prop = self._alg_prop
+        if self._is_fast:
+            alg_prop['is_fast'] = True
+        else:
+            alg_prop['is_mc'] = True
+        return alg_prop
+
+    def __set__(self, instance, value):
+        if value is None or len(value) == 0:
+            # Clear all previous values and set up the defaults
+            self._alg_prop = {'is_mc':True}
+            self._is_fast  = False
+            return
+        val_dict =  {}
+        if isinstance(value, str):
+            val = re.sub('[{}\[\]"=:;,\']', ' ', value)
+            val_list = re.split('\s+',val)
+            ik = 0
+            while ik < len(val_list):
+                key = val_list[ik]
+                if len(key)==0:
+                    ik+=1
+                    continue
+                val = val_list[ik+1]
+                if key in ('is_fast','is_mc'):
+                    self._algo_selector(key,val)
+                    ik +=2
+                    continue
+                val_dict[key] = val
+                ik +=2
+        elif isinstance(value, dict):
+            val_dict = value
+            is_fast=val_dict.pop('is_fast',None)
+            if is_fast is not None:
+                self._algo_selector('is_fast',is_fast)
+            is_mc = val_dict.pop('is_mc',None)
+            if is_mc is not None:
+                self._algo_selector('is_mc',is_mc)
+
+        else:
+            raise(KeyError(
+                'AbsCorrInfo accepts only a dictionary '  # noqa
+                'with AbsorptionCorrections algorithm properties '  # noqa
+                'or string representation of such dictionary'))  # noqa
+
+        if self._is_fast:
+            algo_name = 'AdsorptionCorrection'
+            acceptable_prop = AbsCorrInfo._Fast_corrections_accepts
+        else:
+            algo_name = 'MonteCarloAbsorption'
+            acceptable_prop = AbsCorrInfo._MC_corrections_accepts
+
+        for key,val in val_dict.items():
+            check_normalizer = acceptable_prop.get(key,None)
+            if check_normalizer is None:
+                raise KeyError('The key {0} is not acceptable key for {1} algorithm'.format(key,algo_name))
+            val_dict[key] = check_normalizer(val)
+        # Store new dictionary in the property
+        self._alg_prop = val_dict
+
+    def __str__(self):
+        alg_prop = self.__get__(self,AbsCorrInfo)
+        return str(alg_prop)
+
+    def _algo_selector(self,algo_key,key_val):
+        if algo_key == 'is_fast':
+            self._is_fast = bool(key_val)
+        elif algo_key == 'is_mc':
+            self._is_fast = not bool(key_val)
+
+
+class AbsorptionShapesContainer(PropDescriptor):
+    """ Class to keep AbsorptionShape classes,
+        responsible for making absorption corrections
+        for the absorption on correspondent shapes.
+
+        NOT IMPLEMENTED: should also handle conversion
+        from a shape to its text representaton and v.v.
+        (using AbsorptionShape appropriate classes)
+
+    """
+    def __init__(self):
+        self._theShapeHolder = None
+
+    #
+    def __get__(self, instance, owner=None):
+        if instance is None:
+            return self
+
+        return self._theShapeHolder
+
+    def __set__(self, instance, value):
+        if value is None:
+            self._theShapeHolder = None
+            return
+        if isinstance(value,str):
+            self._theShapeHolder = anAbsorptionShape.from_str(value)
+        elif isinstance(value,anAbsorptionShape):
+            self._theShapeHolder = value
+        else:
+            raise ValueError('The property accepts only anAbsorptionShape type classes or their string representation')
+
+    def __str__(self):
+        if self._theShapeHolder is None:
+            return 'None'
+        else:
+            return self._theShapeHolder.str()
+
+
+def list_checker(val,list_in,mess_base):
+    """ Helper function to check the value val (first input) belongs to the
+        set, specified as the second input.
+
+        If this is not true, raise ValueError indicating what property is wrong.
+        To do indication, mess_base should contain the string, referring to
+        the invalid property.
+    """
+    if val in list_in:
+        return val
+    else:
+        raise ValueError(
+            '{0} property can only have values from the set of: {1}'  # noqa
+            .format(mess_base,str(list_in)))  # noqa
 
 # -----------------------------------------------------------------------------------------
 # END Descriptors for PropertyManager itself

@@ -425,6 +425,26 @@
    <value val="None"/>
 </parameter>
 
+<parameter name="correct_absorption_on"  type="string">
+  <value val="None"/>
+  <description is="If defined, the property would initiate the run of the absorption corrections procedure, specific for the measured sample. 
+  The corrections themselves are controlled by one of the absorption shapes classes, defined for Direct inelastic reduction. 
+  These shapes are Cylinder, Plate, HollowCylinder and other defined in the AbsorptionShapes module within the direct inelastic 
+  reduction scripts folder"/>
+</parameter>
+<parameter name="abs_corr_info"  type="string">
+  <value val="None"/>
+  <description is="The property describes the type of the absorption corrections to run and, if necessary, 
+  additional properties of the absorption algorithm to use. The acceptable types are:
+  is_mc:True (for Monte-Carlo corrections) This option is default option if neither is_mc nor is_fast key is present.
+  is_fast:True (for numerical and, when possible, analytical corrections)
+  The property string may have a form:
+  is_mc:True,NumberOfWavelengthPoints:50,EventsPerPoint:100 or any other non-sample related properties, accepted by Monte-Carlo corrections algorithm
+  or
+  is_fast:True,ExpMethod:FastApprox,ElementSize:10 or any other non-sample related accepted by AbsorptionCorrection algorithm
+  If set up in a Python script, the info can be provided both as a string above and as a Python dictionary. 
+  "/>
+</parameter>
 
 <!-- List of the words which can be used as a command line arguments to define reducer keywords
      the form is reducer_keword1=synonim1=synonim2=synonim3;reducer_keword1=synonim1a, so, 

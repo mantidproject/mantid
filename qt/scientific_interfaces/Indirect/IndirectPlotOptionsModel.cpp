@@ -10,6 +10,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Strings.h"
+#include <iostream>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel::Strings;
@@ -35,9 +36,13 @@ std::vector<std::string> splitStringBy(std::string const &str,
 
 std::string getIndicesRange(std::string const &str) {
   auto const bounds = splitStringBy(str, "-");
-  return std::stoull(bounds[0]) > std::stoull(bounds[1])
-             ? bounds[1] + "-" + bounds[0]
-             : str;
+  if (std::stoull(bounds[0]) > std::stoull(bounds[1])) {
+    return bounds[1] + "-" + bounds[0];
+  } else if (std::stoull(bounds[0]) < std::stoull(bounds[1])) {
+    return str;
+  } else {
+    return bounds[0];
+  }
 }
 
 std::string rearrangeIndicesSubString(std::string const &str) {
@@ -237,6 +242,7 @@ void IndirectPlotOptionsModel::plotContour() {
 void IndirectPlotOptionsModel::plotTiled() {
   auto const workspaceName = workspace();
   auto const indicesString = indices();
+  std::cout << "indices string is " << indicesString.get() << std::endl;
   if (workspaceName && indicesString)
     m_plotter->plotTiled(workspaceName.get(), indicesString.get());
 }
