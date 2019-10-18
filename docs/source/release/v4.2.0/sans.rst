@@ -28,13 +28,17 @@ Improved
 - Option in :ref:`EQSANSCorrectFrame <algm-EQSANSCorrectFrame>` to correct
   TOF by path to individual pixel.
 - New CG2 definition file.
-- Option in :ref:`EQSANSCorrectFrame <algm-EQSANSCorrectFrame-v1>` to correct TOF by path to individual pixel
+- Option in :ref:`EQSANSCorrectFrame <algm-EQSANSCorrectFrame-v1>` to correct
+  TOF by path to individual pixel
 - New CG2 definition file
 - A bug causing large batch files (1000+ runs) to take minutes to load into the
   ISIS SANS GUI has been fixed. Large batch files will now load within seconds.
-- :ref:`ApplyTransmissionCorrection <algm-ApplyTransmissionCorrection-v1>` now can be supplied any transmission workspace that is supported by :ref:`Divide <algm-Divide-v1>` .
+- :ref:`ApplyTransmissionCorrection <algm-ApplyTransmissionCorrection-v1>` now
+  can be supplied any transmission workspace that is supported
+  by :ref:`Divide <algm-Divide-v1>` .
 
 Multiple ISIS SANS GUI usability fixes including:
+
 - Run numbers can be edited with a single click rather than double or
   triple clicks
 - Wavelength ranges such as *1,2,4,5* are now accepted. This example would
