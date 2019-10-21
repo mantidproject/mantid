@@ -11,13 +11,13 @@ from __future__ import (absolute_import, unicode_literals)
 
 import matplotlib.pyplot
 from functools import partial
-from qtpy.QtWidgets import QMessageBox, QVBoxLayout
+from qtpy.QtWidgets import QApplication, QMessageBox, QVBoxLayout
 
 from mantid.api import AnalysisDataService, WorkspaceGroup
 from mantid.kernel import logger
 from mantidqt.plotting.functions import can_overplot, pcolormesh, plot, plot_from_names
 from mantid.simpleapi import CreateDetectorTable
-from mantidqt.utils.asynchronous import AsyncTask
+from mantidqt.utils.asynchronous import AsyncTask, BlockingAsyncTaskWithCallback
 from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
 from mantidqt.widgets.samplelogs.presenter import SampleLogs
 from mantidqt.widgets.sliceviewer.presenter import SliceViewer
@@ -185,17 +185,19 @@ class WorkspaceWidget(PluginWidget):
                     logger.warning("{}: {}".format(type(exception).__name__, exception))
 
     def _do_show_detectors(self, names):
+        task = BlockingAsyncTaskWithCallback(self._run_create_detector_table, [names],
+                                             blocking_cb=QApplication.processEvents)
+        task.start()
+
+        self._do_show_data(map(lambda x: x + "-Detectors", names))
+
+    def _run_create_detector_table(self, names):
+        detector_tables = []
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
             try:
-                # this needs fixing
-                self.worker = AsyncTask(self.create_detector_table_and_show, ws)
-                self.worker.start()
+                detector_tables.append(CreateDetectorTable(InputWorkspace=ws))
             except RuntimeError as e:
                 return
-
-    def create_detector_table_and_show(self, ws):
-        detector_table = CreateDetectorTable(InputWorkspace=ws)
-        self._do_show_data(detector_table)
 
     def _action_double_click_workspace(self, name):
         try:

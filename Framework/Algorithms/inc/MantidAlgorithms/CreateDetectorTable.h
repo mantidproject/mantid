@@ -14,7 +14,7 @@
 namespace Mantid {
 namespace Algorithms {
 
-class CreateDetectorTable : public API::Algorithm {
+class DLLExport CreateDetectorTable : public API::Algorithm {
 public:
   /// (Empty) Constructor
   CreateDetectorTable() : API::Algorithm() {}

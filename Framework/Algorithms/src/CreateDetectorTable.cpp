@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CreateDetectorTable.h"
+#include "MantidAPI/EnabledWhenWorkspaceIsType.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -18,13 +19,12 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/UnitConversion.h"
 
+using namespace Mantid::API;
+using namespace Mantid::Kernel;
+using namespace Mantid::DataObjects;
+
 namespace Mantid {
 namespace Algorithms {
-
-using namespace API;
-using namespace Kernel;
-using namespace DataObjects;
-
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateDetectorTable)
 
@@ -36,9 +36,18 @@ void CreateDetectorTable::init() {
   declareProperty(std::make_unique<ArrayProperty<int>>("WorkspaceIndices",
                                                        Direction::Input),
                   "If left empty then all workspace indices are used.");
+  setPropertySettings(
+      "WorkspaceIndices",
+      std::make_unique<EnabledWhenWorkspaceIsType<MatrixWorkspace>>(
+          "InputWorkspace", true));
+
 
   declareProperty("IncludeData", false,
                   "Include the first value from each spectrum.");
+  setPropertySettings(
+      "IncludeData",
+      std::make_unique<EnabledWhenWorkspaceIsType<MatrixWorkspace>>(
+          "InputWorkspace", true));
 
   declareProperty(
       std::make_unique<WorkspaceProperty<TableWorkspace>>(
@@ -67,6 +76,11 @@ void CreateDetectorTable::exec() {
     if (peaks) {
       detectorTable = peaks->createDetectorTable();
     }
+  }
+
+  if (detectorTable == nullptr) {
+    throw std::runtime_error(
+        "Detector table can only be created for matrix and peaks workspaces.");
   }
 
   if (getPropertyValue("DetectorTableWorkspace") == "") {
@@ -255,7 +269,7 @@ ITableWorkspace_sptr CreateDetectorTable::createDetectorTableWorkspace(
 
       colValues << phi               // rtp
                 << isMonitorDisplay; // monitor
-    } catch (...) {
+    } catch (std::exception) {
       // spectrumNo=-1, detID=0
       colValues << -1 << "0";
       // Y/E
