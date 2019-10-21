@@ -228,9 +228,15 @@ def _get_wksp_index_and_spec_num(workspace, axis, **kwargs):
 
     # convert the spectrum number to a workspace index and vice versa
     if spectrum_number is not None:
-        workspace_index = workspace.getIndexFromSpectrumNumber(int(spectrum_number))
+        try:
+            workspace_index = workspace.getIndexFromSpectrumNumber(int(spectrum_number))
+        except RuntimeError:
+            raise RuntimeError('Spectrum Number {0} not found'.format(spectrum_number))
     elif axis == MantidAxType.SPECTRUM:  # Only get a spectrum number if we're traversing the spectra
-        spectrum_number = workspace.getSpectrum(workspace_index).getSpectrumNo()
+        try:
+            spectrum_number = workspace.getSpectrum(workspace_index).getSpectrumNo()
+        except RuntimeError:
+            raise RuntimeError('Workspace index {0} not found'.format(workspace_index))
 
     return workspace_index, spectrum_number, kwargs
 

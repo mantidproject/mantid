@@ -605,11 +605,29 @@ class MantidAxes(Axes):
 
             def _data_update(artists, workspace, new_kwargs=None):
                 # It's only possible to plot 1 line at a time from a workspace
-                if new_kwargs:
-                    x, y, _, __ = plotfunctions._plot_impl(self, workspace, args, new_kwargs)
-                else:
-                    x, y, _, __ = plotfunctions._plot_impl(self, workspace, args, kwargs)
-                artists[0].set_data(x, y)
+                try:
+                    if new_kwargs:
+                        x, y, _, __ = plotfunctions._plot_impl(self, workspace, args, new_kwargs)
+                    else:
+                        x, y, _, __ = plotfunctions._plot_impl(self, workspace, args, kwargs)
+                    artists[0].set_data(x, y)
+                except RuntimeError as ex:
+                    logger.information('Curve not plotted: {0}'.format(ex.args[0]))
+
+                    # remove the curve using similar to logic that in _WorkspaceArtists._remove
+                    container_orig = artists[0]
+                    container_orig.remove()
+                    # The container does not remove itself from the containers list
+                    # but protect this just in case matplotlib starts doing this
+                    try:
+                        self.containers.remove(container_orig)
+                    except ValueError:
+                        pass
+
+                    # also remove the curve from the legend
+                    if (not self.is_empty(self)) and self.legend_ is not None:
+                        self.legend().draggable()
+
                 self.relim()
                 if autoscale_on_update:
                     self.autoscale()
