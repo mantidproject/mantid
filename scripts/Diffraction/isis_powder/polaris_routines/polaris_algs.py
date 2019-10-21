@@ -177,6 +177,7 @@ def _merge_workspace_with_limits(focused_ws, q_lims):
         q_min[i] = pdf_x_array[tmp2]
         q_max[i] = pdf_x_array[np.amax(np.where(pdf_x_array <= q_max[i]))]
         bin_width = min(pdf_x_array[1] - pdf_x_array[0], bin_width)
+    # TODO what is the best spectra to use to match in any case, how can we always pick the correct one
     mantid.MatchSpectra(InputWorkspace=focused_ws_conjoined,
                         OutputWorkspace=focused_ws_conjoined,
                         ReferenceSpectrum=5)
@@ -195,6 +196,7 @@ def _calculate_self_scattering_correction(run_number, cal_file_name, sample_deta
     mantid.SetSample(InputWorkspace=raw_ws,
                      Geometry=common.generate_sample_geometry(sample_details),
                      Material=common.generate_sample_material(sample_details))
+    # TODO find way to automaticaly select best monitor for incident spectrum
     monitor = mantid.ExtractSpectra(InputWorkspace=raw_ws, WorkspaceIndexList=[11])
     monitor = mantid.ConvertUnits(InputWorkspace=monitor, Target="Wavelength")
     x_data = monitor.dataX(0)
