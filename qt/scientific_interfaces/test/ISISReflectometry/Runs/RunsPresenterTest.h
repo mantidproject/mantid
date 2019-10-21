@@ -696,12 +696,13 @@ private:
   AlgorithmRuntimeProps defaultLiveMonitorAlgorithmOptions(
       const std::string &instrument = std::string("OFFSPEC"),
       const int &updateInterval = 15) {
+    const std::string updateIntervalString = std::to_string(updateInterval);
     return AlgorithmRuntimeProps{
         {"Instrument", instrument},
         {"OutputWorkspace", "IvsQ_binned_live"},
         {"AccumulationWorkspace", "TOF_live"},
         {"AccumulationMethod", "Replace"},
-        {"UpdateEvery", updateInterval},
+        {"UpdateEvery", updateIntervalString},
         {"PostProcessingAlgorithm", "ReflectometryReductionOneLiveData"},
         {"RunTransitionBehavior", "Restart"},
     };
@@ -1009,7 +1010,7 @@ private:
   }
 
   void expectGetLiveDataOptions(std::string const &instrument,
-                                int const &updateInterval) {
+                                const int &updateInterval) {
     expectGetLiveDataOptions(AlgorithmRuntimeProps(), instrument,
                              updateInterval);
   }
@@ -1033,8 +1034,9 @@ private:
       AlgorithmRuntimeProps const &expected,
       boost::shared_ptr<NiceMock<MockAlgorithmRunner>> &algRunner) {
     auto alg = algRunner->algorithm();
-    for (auto const &kvp : expected)
+    for (auto const &kvp : expected) {
       TS_ASSERT_EQUALS(alg->getPropertyValue(kvp.first), kvp.second);
+    }
   }
 
   void assertPostProcessingPropertiesContainOptions(
