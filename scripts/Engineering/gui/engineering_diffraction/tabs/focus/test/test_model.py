@@ -8,9 +8,11 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
+from os import path
 
 from mantid.py3compat.mock import patch
 from Engineering.gui.engineering_diffraction.tabs.focus import model
+from Engineering.gui.engineering_diffraction.tabs.common import path_handling
 
 file_path = "Engineering.gui.engineering_diffraction.tabs.focus.model"
 
@@ -37,10 +39,11 @@ class FocusModelTest(unittest.TestCase):
         self.model.focus_run("305761", ["1", "2"], False, "ENGINX", "0", blank_calibration)
         self.assertEqual(fetch_van.call_count, 0)
 
+    @patch(file_path + ".FocusModel.save_focused_output_files_as_nexus")
     @patch(file_path + ".FocusModel._run_focus")
     @patch(file_path + ".FocusModel._load_focus_sample_run")
     @patch(file_path + ".vanadium_corrections.fetch_correction_workspaces")
-    def test_focus_run_for_each_bank(self, fetch_van, load_focus, run_focus):
+    def test_focus_run_for_each_bank(self, fetch_van, load_focus, run_focus, output):
         fetch_van.return_value = ("mocked_integ", "mocked_curves")
         banks = ["1", "2"]
         load_focus.return_value = "mocked_sample"
@@ -51,11 +54,12 @@ class FocusModelTest(unittest.TestCase):
                                      model.FOCUSED_OUTPUT_WORKSPACE_NAME + banks[-1],
                                      "mocked_integ", "mocked_curves", banks[-1])
 
+    @patch(file_path + ".FocusModel.save_focused_output_files_as_nexus")
     @patch(file_path + ".FocusModel._plot_focused_workspace")
     @patch(file_path + ".FocusModel._run_focus")
     @patch(file_path + ".FocusModel._load_focus_sample_run")
     @patch(file_path + ".vanadium_corrections.fetch_correction_workspaces")
-    def test_focus_plotted_when_checked(self, fetch_van, load_focus, run_focus, plot_focus):
+    def test_focus_plotted_when_checked(self, fetch_van, load_focus, run_focus, plot_focus, output):
         fetch_van.return_value = ("mocked_integ", "mocked_curves")
         banks = ["1", "2"]
         load_focus.return_value = "mocked_sample"
@@ -63,14 +67,34 @@ class FocusModelTest(unittest.TestCase):
         self.model.focus_run("305761", banks, True, "ENGINX", "0", self.current_calibration)
         self.assertEqual(len(banks), plot_focus.call_count)
 
+    @patch(file_path + ".FocusModel.save_focused_output_files_as_nexus")
     @patch(file_path + ".FocusModel._plot_focused_workspace")
     @patch(file_path + ".FocusModel._run_focus")
     @patch(file_path + ".FocusModel._load_focus_sample_run")
     @patch(file_path + ".vanadium_corrections.fetch_correction_workspaces")
-    def test_focus_not_plotted_when_not_checked(self, fetch_van, load_focus, run_focus, plot_focus):
+    def test_focus_not_plotted_when_not_checked(self, fetch_van, load_focus, run_focus, plot_focus,
+                                                output):
         fetch_van.return_value = ("mocked_integ", "mocked_curves")
         banks = ["1", "2"]
         load_focus.return_value = "mocked_sample"
 
         self.model.focus_run("305761", banks, False, "ENGINX", "0", self.current_calibration)
         self.assertEqual(0, plot_focus.call_count)
+
+    @patch(file_path + ".SaveNexus")
+    def test_save_output_files_nexus_with_no_RB_number(self, save):
+        mocked_workspace = "mocked-workspace"
+        output_file = path.join(path_handling.OUT_FILES_ROOT_DIR, "Focus",
+                                "ENGINX_123_bank_North.nxs")
+        self.model.save_focused_output_files_as_nexus("ENGINX", "Path/To/ENGINX000123.whatever",
+                                                      "North", mocked_workspace, None)
+
+        self.assertEqual(1, save.call_count)
+        save.assert_called_with(mocked_workspace, output_file)
+
+    @patch(file_path + ".SaveNexus")
+    def test_save_output_files_nexus_with_no_RB_number(self, save):
+        self.model.save_focused_output_files_as_nexus("ENGINX", "Path/To/ENGINX000123.whatever",
+                                                      "North", "mocked-workspace",
+                                                      "An Experiment Number")
+        self.assertEqual(2, save.call_count)
