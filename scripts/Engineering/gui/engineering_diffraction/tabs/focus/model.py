@@ -8,7 +8,8 @@
 from __future__ import (absolute_import, division, print_function)
 
 from Engineering.gui.engineering_diffraction.tabs.common import vanadium_corrections
-from mantid.simpleapi import EnggFocus, Load, logger
+from mantid.simpleapi import EnggFocus, Load, logger, AnalysisDataService as Ads
+from mantidqt.plotting.functions import plot
 
 SAMPLE_RUN_WORKSPACE_NAME = "engggui_focusing_input_ws"
 FOCUSED_OUTPUT_WORKSPACE_NAME = "engggui_focusing_output_ws_bank_"
@@ -25,6 +26,8 @@ class FocusModel(object):
         for name in banks:
             output_workspace_name = FOCUSED_OUTPUT_WORKSPACE_NAME + str(name)
             self._run_focus(sample_workspace, output_workspace_name, integration_workspace, curves_workspace, name)
+            if plot_output:
+                self._plot_focused_workspace(output_workspace_name)
 
     @staticmethod
     def _run_focus(input_workspace, output_workspace, vanadium_integration_ws,
@@ -50,3 +53,8 @@ class FocusModel(object):
                 "Error while loading sample data for focusing. Could not load the sample with filename: "
                 + sample_path + ". Error Description: " + str(e))
             raise RuntimeError
+
+    @staticmethod
+    def _plot_focused_workspace(focused):
+        focused_wsp = Ads.retrieve(focused)
+        plot([focused_wsp], wksp_indices=[0])
