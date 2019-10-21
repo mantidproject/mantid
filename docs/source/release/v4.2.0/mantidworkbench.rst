@@ -61,5 +61,6 @@ Bugfixes
 - The fitting curves in the plot are now deleted when the fit results workspaces are deleted.
 - An error is no longer raised when attempting to open plot options, or the fitting tab, on a figure containing a line plotted using a script without a spectrum number being specified.
 - Tabs in the script editor no longer change order when Workbench is closed and reopened.
+- Plots are no longer zoomed out along their y-axis when you perform a fit or do a plot guess.
 
 :ref:`Release 4.2.0 <v4.2.0>`
