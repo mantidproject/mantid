@@ -43,7 +43,7 @@ getSampleSpeciesInfo(const API::MatrixWorkspace_const_sptr ws) {
       atomSpecies.begin();
   while (atom != atomSpecies.end()) {
     atom->second["concentration"] = atom->second["stoich"] / totalStoich;
-    atom++;
+    ++atom;
   }
   return atomSpecies;
 }
