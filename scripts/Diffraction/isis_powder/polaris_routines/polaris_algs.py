@@ -88,8 +88,8 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None,
     ws_group_list = []
     for i in range(self_scattering_correction.getNumberHistograms()):
         ws_name = 'correction_' + str(i)
-        mantid.ExtractSpectra(InputWorkspace=self_scattering_correction, OutputWorkspace=ws_name, StartWorkspaceIndex=i,
-                              EndWorkspaceIndex=i)
+        mantid.ExtractSpectra(InputWorkspace=self_scattering_correction, OutputWorkspace=ws_name,
+                              WorkspaceIndexList=[i])
         ws_group_list.append(ws_name)
     self_scattering_correction = mantid.GroupWorkspaces(InputWorkspaces=ws_group_list)
     self_scattering_correction = mantid.RebinToWorkspace(WorkspaceToRebin=self_scattering_correction,
@@ -196,8 +196,18 @@ def _calculate_self_scattering_correction(run_number, cal_file_name, sample_deta
     mantid.SetSample(InputWorkspace=raw_ws,
                      Geometry=common.generate_sample_geometry(sample_details),
                      Material=common.generate_sample_material(sample_details))
-    # TODO find way to automaticaly select best monitor for incident spectrum
-    monitor = mantid.ExtractSpectra(InputWorkspace=raw_ws, WorkspaceIndexList=[11])
+    # find the closest monitor to the sample for incident spectrum
+    raw_spec_info = raw_ws.spectrumInfo()
+    incident_index = None
+    for i in range(raw_spec_info.size()):
+        if raw_spec_info.isMonitor(i):
+            l2 = raw_spec_info.position(i)[2]
+            if not incident_index:
+                incident_index = i
+            else:
+                if raw_spec_info.position(incident_index)[2] < l2 < 0:
+                    incident_index = i
+    monitor = mantid.ExtractSpectra(InputWorkspace=raw_ws, WorkspaceIndexList=[incident_index])
     monitor = mantid.ConvertUnits(InputWorkspace=monitor, Target="Wavelength")
     x_data = monitor.dataX(0)
     min_x = np.min(x_data)
