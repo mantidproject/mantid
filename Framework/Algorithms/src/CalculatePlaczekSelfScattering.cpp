@@ -181,7 +181,7 @@ void CalculatePlaczekSelfScattering::exec() {
   }
   auto incidentUnit = inWS->getAxis(0)->unit();
   outputWS->getAxis(0)->unit() = incidentUnit;
-  outputWS->setDistribution(FALSE);
+  outputWS->setDistribution(false);
   setProperty("OutputWorkspace", outputWS);
 }
 
