@@ -11,6 +11,7 @@
 from __future__ import absolute_import
 
 # std imports
+import platform
 import weakref
 
 # 3rdparty imports
@@ -39,7 +40,18 @@ class FigureWindow(QMainWindow, ObservingView):
         self.setAttribute(Qt.WA_DeleteOnClose, True)
         self.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
 
-        QApplication.instance().focusWindowChanged.connect(self._on_focusWindowChanged)
+        # On Windows, setting the Workbench's main window as this window's
+        # parent always keeps this window on top, but still allows minimization.
+        # On Ubuntu the child is NOT kept above the parent, hence we use the
+        # focusWindowChanged event to bring this window back to the top when
+        # the main window gets focus. This does cause a slight flicker effect
+        # as the window is hidden and quickly brought back to the front. Using
+        # the parent-child method at least avoids this flicker on Windows.
+        if platform.system() == "Windows":
+            from workbench.utils.windowfinder import get_main_window_widget
+            self.setParent(get_main_window_widget(), Qt.Window)
+        else:
+            QApplication.instance().focusWindowChanged.connect(self._on_focusWindowChanged)
         self.close_signal.connect(self._run_close)
         self.setAcceptDrops(True)
 
