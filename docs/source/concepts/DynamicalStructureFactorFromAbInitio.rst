@@ -87,14 +87,14 @@ with
 
 The formula above is valid for *first-order quantum events*, i.e. transitions :math:`0 \rightarrow 1` for each phonon. (We neglect events that transfer energy *to* the scattered neutron.)
 In order to reconstruct the full spectrum one has to also consider higher-order quantum events.
-For second-order quantum events one should
+For second-order quantum events one should not only
 consider transitions :math:`0 \rightarrow 2`, but also simultaneous transitions :math:`0 \rightarrow 1`, :math:`0 \rightarrow 1'` for different phonons.
 Within the harmonic approximation all second-order transitions form the following set: :math:`\lbrace \omega_1 +
 \omega_1, \omega_1 + \omega_2, \omega_1 + \omega_3, \ldots, \omega_p + \omega_p \rbrace`.
 The cardinality of this set is :math:`p^2`, where :math:`p` is a number of fundamentals.
 In practice one can reduce this number by taking into consideration a realistic energy window
 and neglecting those :math:`\omega_{ij}=\omega_i + \omega_j` for which :math:`S(Q, \omega_i)` is negligible.
-Within the harmonic approximation each phonon is treated as independent harmonic quantum oscillator.  The formula for :math:`S(Q, \omega_{ik})` is as follows [#Mitchell]_:
+Within the harmonic approximation phonons are treated as independent harmonic quantum oscillators.  The formula for :math:`S(Q, \omega_{ik})` is as follows [#Mitchell]_:
 
 :math:`S^j(Q, \omega_{ik}) = \frac{Q^4}{15  C}\left( TrB^j_{\omega_i}TrB^j_{\omega_k} + B^j_{\omega_i}:B^j_{\omega_k} + B^j_{\omega_k}:B^j_{\omega_i} \right) exp\left(-Q^2 \beta^j coth^2\left(\frac{\hbar \omega_{ik}}{2 k_B T} \right) \right)\sigma^j`
 
@@ -138,7 +138,7 @@ where:
 
 with :math:`A`, :math:`B`, :math:`C` as constants.
 
-Moreover, in case of TOSCA and TOSCA-like instruments length of momentum transfer depends on frequency (*indirect geometry spectrometer*).
+Moreover, in case of TOSCA and TOSCA-like instruments, the length of momentum transfer depends on frequency (*indirect geometry spectrometer*).
 The formula for :math:`Q^2` is as follows:
 
 :math:`Q^2(\omega)=k^2_i(\omega) + k^2_f - 2  \sqrt{k^2_i(\omega)  k^2_f} cos(\theta)`
