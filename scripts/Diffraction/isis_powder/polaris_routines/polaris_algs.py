@@ -163,12 +163,12 @@ def _merge_workspace_with_limits(focused_ws, q_lims):
             q_min = np.array(q_min)
             q_max = np.array(q_max)
         except IOError:
-            raise RuntimeError("q_lims is not valid")
+            raise RuntimeError("q_lims directory is not valid")
     elif type(q_lims) == list or type(q_lims) == np.ndarray:
         q_min = q_lims[0, :]
         q_max = q_lims[1, :]
     else:
-        raise RuntimeError("q_lims is not valid")
+        raise RuntimeError("q_lims type is not valid")
     bin_width = np.inf
     for i in range(q_min.size):
         pdf_x_array = focused_ws_conjoined.readX(i)

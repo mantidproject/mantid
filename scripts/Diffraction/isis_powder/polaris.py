@@ -49,6 +49,8 @@ class Polaris(AbstractInst):
         return vanadium_d
 
     def create_total_scattering_pdf(self, **kwargs):
+        if not 'q_lims' in kwargs:
+            kwargs['q_lims'] = None
         self._inst_settings.update_attributes(kwargs=kwargs)
         # Generate pdf
         run_details = self._get_run_details(self._inst_settings.run_number)
