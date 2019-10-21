@@ -13,7 +13,6 @@ from mantidqt.utils.asynchronous import AsyncTask
 from mantid.simpleapi import logger
 
 
-# noinspection PyArgumentList
 class FocusPresenter(object):
     def __init__(self, model, view):
         self.model = model

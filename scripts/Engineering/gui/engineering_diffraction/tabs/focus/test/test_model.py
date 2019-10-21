@@ -44,8 +44,33 @@ class FocusModelTest(unittest.TestCase):
         fetch_van.return_value = ("mocked_integ", "mocked_curves")
         banks = ["1", "2"]
         load_focus.return_value = "mocked_sample"
+
         self.model.focus_run("305761", banks, False, "ENGINX", "0", self.current_calibration)
         self.assertEqual(len(banks), run_focus.call_count)
         run_focus.assert_called_with("mocked_sample",
                                      model.FOCUSED_OUTPUT_WORKSPACE_NAME + banks[-1],
                                      "mocked_integ", "mocked_curves", banks[-1])
+
+    @patch(file_path + ".FocusModel._plot_focused_workspace")
+    @patch(file_path + ".FocusModel._run_focus")
+    @patch(file_path + ".FocusModel._load_focus_sample_run")
+    @patch(file_path + ".vanadium_corrections.fetch_correction_workspaces")
+    def test_focus_plotted_when_checked(self, fetch_van, load_focus, run_focus, plot_focus):
+        fetch_van.return_value = ("mocked_integ", "mocked_curves")
+        banks = ["1", "2"]
+        load_focus.return_value = "mocked_sample"
+
+        self.model.focus_run("305761", banks, True, "ENGINX", "0", self.current_calibration)
+        self.assertEqual(len(banks), plot_focus.call_count)
+
+    @patch(file_path + ".FocusModel._plot_focused_workspace")
+    @patch(file_path + ".FocusModel._run_focus")
+    @patch(file_path + ".FocusModel._load_focus_sample_run")
+    @patch(file_path + ".vanadium_corrections.fetch_correction_workspaces")
+    def test_focus_not_plotted_when_not_checked(self, fetch_van, load_focus, run_focus, plot_focus):
+        fetch_van.return_value = ("mocked_integ", "mocked_curves")
+        banks = ["1", "2"]
+        load_focus.return_value = "mocked_sample"
+
+        self.model.focus_run("305761", banks, False, "ENGINX", "0", self.current_calibration)
+        self.assertEqual(0, plot_focus.call_count)

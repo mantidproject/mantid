@@ -102,9 +102,16 @@ class CalibrationPresenterTest(unittest.TestCase):
         result = self.presenter.validate_run_numbers()
         self.assertTrue(result)
 
-    def test_set_instrument_override(self):
-        instrument = "TEST"
+    def test_set_instrument_override_ENGINX(self):
+        instrument = 0
         self.presenter.set_instrument_override(instrument)
 
-        self.view.set_instrument_override.assert_called_with(instrument)
-        self.assertEqual(self.presenter.instrument, instrument)
+        self.view.set_instrument_override.assert_called_with("ENGINX")
+        self.assertEqual(self.presenter.instrument, "ENGINX")
+
+    def test_set_instrument_override_IMAT(self):
+        instrument = 1
+        self.presenter.set_instrument_override(instrument)
+
+        self.view.set_instrument_override.assert_called_with("IMAT")
+        self.assertEqual(self.presenter.instrument, "IMAT")
