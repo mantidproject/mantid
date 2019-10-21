@@ -41,7 +41,6 @@ void CreateDetectorTable::init() {
       std::make_unique<EnabledWhenWorkspaceIsType<MatrixWorkspace>>(
           "InputWorkspace", true));
 
-
   declareProperty("IncludeData", false,
                   "Include the first value from each spectrum.");
   setPropertySettings(
