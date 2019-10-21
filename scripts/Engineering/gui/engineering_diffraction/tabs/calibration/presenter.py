@@ -9,6 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantidqt.utils.asynchronous import AsyncTask
 from mantid.simpleapi import logger
+from mantidqt.utils.observer_pattern import Observable
 
 
 class CalibrationPresenter(object):
@@ -16,6 +17,7 @@ class CalibrationPresenter(object):
         self.model = model
         self.view = view
         self.worker = None
+        self.calibration_notifier = self.CalibrationNotifier(self)
 
         self.current_calibration = {"vanadium_path": None, "ceria_path": None}
         self.pending_calibration = {"vanadium_path": None, "ceria_path": None}
@@ -62,6 +64,7 @@ class CalibrationPresenter(object):
     def set_current_calibration(self, success_info):
         logger.information("Thread executed in " + str(success_info.elapsed_time) + " seconds.")
         self.current_calibration = self.pending_calibration
+        self.calibration_notifier.notify_subscribers(self.current_calibration)
         self.pending_calibration = {"vanadium_path": None, "ceria_path": None}
         self.enable_calibrate_buttons()
 
@@ -95,3 +98,14 @@ class CalibrationPresenter(object):
     def _on_error(self, failure_info):
         logger.warning(str(failure_info))
         self.enable_calibrate_buttons()
+
+    # -----------------------
+    # Observers / Observables
+    # -----------------------
+    class CalibrationNotifier(Observable):
+        def __init__(self, outer):
+            Observable.__init__(self)
+            self.outer = outer
+
+        def notify_subscribers(self, *args, **kwargs):
+            Observable.notify_subscribers(self, *args)

@@ -10,6 +10,7 @@ from __future__ import (absolute_import, division, print_function)
 from qtpy.QtWidgets import QMessageBox
 
 from mantidqt.utils.asynchronous import AsyncTask
+from mantidqt.utils.observer_pattern import Observer
 from mantid.simpleapi import logger
 
 
@@ -18,12 +19,13 @@ class FocusPresenter(object):
         self.model = model
         self.view = view
         self.worker = None
+        self.calibration_observer = self.CalibrationObserver(self)
 
         # Connect view signals to local methods.
         self.view.set_on_focus_clicked(self.on_focus_clicked)
 
         # Variables from other GUI tabs.
-        self.current_calibration = {"vanadium_path": "307521", "ceria_path": None}  # TODO: USE OBSERVER PATTERN
+        self.current_calibration = {"vanadium_path": None, "ceria_path": None}
         self.instrument = "ENGINX"
         self.rb_num = None
 
@@ -90,3 +92,17 @@ class FocusPresenter(object):
         if self.view.get_south_bank():
             banks.append("South")
         return banks
+
+    def update_calibration(self, calibration):
+        self.current_calibration = calibration
+
+    # -----------------------
+    # Observers / Observables
+    # -----------------------
+    class CalibrationObserver(Observer):
+        def __init__(self, outer):
+            Observer.__init__(self)
+            self.outer = outer
+
+        def update(self, observable, calibration):
+            self.outer.update_calibration(calibration)
