@@ -32,13 +32,6 @@ class FitPropertyBrowserTest(unittest.TestCase):
     def test_initialization_does_not_raise(self):
         assertRaisesNothing(self, self._create_widget)
 
-    def test_property_browser_does_a_fit(self):
-        fig, canvas = self._create_and_plot_matrix_workspace()
-        property_browser = self._create_widget(canvas=canvas)
-        property_browser.setWorkspaceName("workspace")
-        property_browser.addFunction('name=FlatBackground')
-        assertRaisesNothing(self, self._press_fit_button, property_browser)
-
     @patch('mantidqt.widgets.fitpropertybrowser.fitpropertybrowser.FitPropertyBrowser.normaliseData')
     def test_normalise_data_set_on_fit_menu_shown(self, normaliseData_mock):
         for normalised in [True, False]:
@@ -141,7 +134,7 @@ class FitPropertyBrowserTest(unittest.TestCase):
         MatrixWorkspaceDisplay.show_view = Mock()
         item = wsList.item(0).text()
         property_browser.workspaceClicked.emit(item)
-        self.assertTrue(1, MatrixWorkspaceDisplay.show_view.call_count)
+        self.assertEqual(1, MatrixWorkspaceDisplay.show_view.call_count)
 
     def test_fit_parameter_table_workspaces_in_browser_is_viewed_when_clicked(self):
         if not PYQT5:
@@ -167,7 +160,7 @@ class FitPropertyBrowserTest(unittest.TestCase):
         # click on table workspace
         item = wsList.item(0).text()
         property_browser.workspaceClicked.emit(item)
-        self.assertTrue(1, TableWorkspaceDisplay.show_view.call_count)
+        self.assertEqual(1, TableWorkspaceDisplay.show_view.call_count)
 
     def test_workspaces_removed_from_workspace_list_widget_if_deleted_from_ADS(self):
         name = "ws"
@@ -183,10 +176,10 @@ class FitPropertyBrowserTest(unittest.TestCase):
 
         property_browser.fitting_done_slot(name + "_Workspace")
         AnalysisDataService.Instance().remove(name + "_Parameters")
+        property_browser.postDeleteHandle(name + "_Parameters")
 
         wsList = property_browser.getWorkspaceList()
-
-        self.assertTrue(1, len(wsList))
+        self.assertEqual(1, len(wsList))
 
     # Private helper functions
     def _create_widget(self, canvas=MagicMock(), toolbar_manager=Mock()):
@@ -198,11 +191,6 @@ class FitPropertyBrowserTest(unittest.TestCase):
         fig = plot([ws], spectrum_nums=[1])
         canvas = fig.canvas
         return fig, canvas
-
-    def _press_fit_button(self, property_browser):
-        for action in property_browser.getFitMenu().actions():
-            if action.text() == "Fit":
-                action.trigger()
 
 
 if __name__ == '__main__':

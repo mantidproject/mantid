@@ -441,6 +441,7 @@ public:
     bool plotDiff() const;
     void addFitResultWorkspacesToTableWidget();
     void setWorkspaceName(const QString &wsName);
+    void postDeleteHandle(const std::string &wsName);
 
     SIP_PYOBJECT defaultPeakType();
 %MethodCode
