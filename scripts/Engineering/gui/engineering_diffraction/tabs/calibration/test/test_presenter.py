@@ -11,7 +11,7 @@ import unittest
 
 from mantid.py3compat.mock import patch
 from mantid.py3compat import mock
-from Engineering.gui.engineering_diffraction.tabs.calibration import view, model, presenter
+from Engineering.gui.engineering_diffraction.tabs.calibration import model, view, presenter
 
 tab_path = 'Engineering.gui.engineering_diffraction.tabs.calibration'
 
