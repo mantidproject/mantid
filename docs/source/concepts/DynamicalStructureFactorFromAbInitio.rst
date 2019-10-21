@@ -27,7 +27,7 @@ At this point, there should be no effective force on the atoms.
 For this "relaxed" structure the dynamical matrix is calculated, either by finite displacements or perturbation theory.
 The dynamical matrix is related to the Hessian (the second derivative of system Hamiltonian with respect to atomic displacements) by a Fourier transform;
 the eigenvectors obtained from diagonalisation of this matrix are atomic displacements
-and the eigenvalues are squared frequencies of vibrations.
+and the eigenvalues are the frequencies of the vibrations squared.
 These vibrational *modes* are related to the *fundamental* vibrational excitations of the system,
 and using this displacement and frequency information one can calculate theoretical :math:`S(\mathbf{Q}, \omega)`.
 In Abins :math:`S(\mathbf{Q}, \omega)` is calculated for each atom separately.
