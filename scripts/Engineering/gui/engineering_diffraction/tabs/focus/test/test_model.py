@@ -90,10 +90,10 @@ class FocusModelTest(unittest.TestCase):
                                                       "North", mocked_workspace, None)
 
         self.assertEqual(1, save.call_count)
-        save.assert_called_with(mocked_workspace, output_file)
+        save.assert_called_with(Filename=output_file, InputWorkspace=mocked_workspace)
 
     @patch(file_path + ".SaveNexus")
-    def test_save_output_files_nexus_with_no_RB_number(self, save):
+    def test_save_output_files_nexus_with_RB_number(self, save):
         self.model.save_focused_output_files_as_nexus("ENGINX", "Path/To/ENGINX000123.whatever",
                                                       "North", "mocked-workspace",
                                                       "An Experiment Number")
