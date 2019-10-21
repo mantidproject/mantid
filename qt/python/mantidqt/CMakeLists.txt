@@ -38,6 +38,7 @@ if(ENABLE_MANTIDPLOT)
                        ${CMAKE_CURRENT_LIST_DIR}
                        ${COMMON_SIP_DIR}
                        ${PYTHON_INCLUDE_PATH}
+                       ${SIP_INCLUDE_DIR}
                        ${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/inc
                      LINK_LIBS
                        ${common_link_libs}
@@ -70,6 +71,7 @@ if(ENABLE_WORKBENCH)
                        ${CMAKE_CURRENT_LIST_DIR}
                        ${COMMON_SIP_DIR}
                        ${PYTHON_INCLUDE_PATH}
+                       ${SIP_INCLUDE_DIR}
                        ${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/inc
                      LINK_LIBS
                        MantidQtWidgetsCommonQt5

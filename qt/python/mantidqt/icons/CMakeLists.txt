@@ -14,6 +14,7 @@ if(ENABLE_MANTIDPLOT)
                      INCLUDE_DIRS
                       ${COMMON_SIP_DIR}
                       ${PYTHON_INCLUDE_PATH}
+                      ${SIP_INCLUDE_DIR}
                       ${ICONS_INC_DIR}
                       ${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/inc
                      LINK_LIBS
@@ -41,6 +42,7 @@ if(ENABLE_WORKBENCH)
                      INCLUDE_DIRS
                       ${COMMON_SIP_DIR}
                       ${PYTHON_INCLUDE_PATH}
+                      ${SIP_INCLUDE_DIR}
                       ${ICONS_INC_DIR}
                       ${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/inc
                      LINK_LIBS

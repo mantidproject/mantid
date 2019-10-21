@@ -802,7 +802,8 @@ add_executable(MantidPlot
                ${IPYTHON_INSTALL_FILES})
 
 target_include_directories(MantidPlot
-                           PRIVATE src
+                           PRIVATE ${SIP_INCLUDE_DIR}
+			           src
                                    src/lib/include
                                    src/lib/3rdparty/qtcolorpicker/src
                                    ../qt/widgets/common/inc
