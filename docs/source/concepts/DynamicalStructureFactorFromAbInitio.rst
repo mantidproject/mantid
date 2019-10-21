@@ -1,6 +1,6 @@
 .. _DynamicalStructureFactorFromAbInitio:
 
-Ab-initio calculation of dynamical structure factor (S)
+Ab initio calculation of dynamical structure factor (S)
 =======================================================
 
 
@@ -11,7 +11,7 @@ The purpose of this document is to explain the link between theoretical and expe
 describe in general how the theoretical :math:`S` is calculated from from *ab initio* data by plugins in Mantid.
 
 During an inelastic neutron scattering experiment, a sample is exposed to neutron flux and a response is recorded in the form of dynamical structure factor, :math:`S(\mathbf{Q}, \omega)`.
-In principle, one obtains a vibrational spectrum which can be quite difficult to analyse; in crystalline materials this
+In principle, one obtains a vibrational spectrum that can be quite difficult to analyse; in crystalline materials this is
 related to the wavevector-dependent *phonon* spectrum.
 In order to better understand experimental outputs, one can compare with results from modelling.
 *Ab initio* calculations, especially within density-functional theory (DFT) [#Kohn1964]_, have proven quite successful in predicting vibrational spectra.
@@ -25,13 +25,13 @@ The initial guess should be as close as possible to an experimental structure, a
 Then the structure parameters are locally optimised within DFT, finding the nearest structure that minimises the DFT energy.
 At this point, there should be no effective force on the atoms.
 For this "relaxed" structure the dynamical matrix is calculated, either by finite displacements or perturbation theory.
-The dynamical matrix is related to the Hessian (the second derivative of system Hamiltonian with respect to atomic displacements) by a Fourier transform;
+The dynamical matrix is related to the Hessian (the second derivative of the system Hamiltonian with respect to atomic displacements) by a Fourier transform:
 the eigenvectors obtained from diagonalisation of this matrix are atomic displacements
-and the eigenvalues are the frequencies of the vibrations squared.
-These vibrational *modes* are related to the *fundamental* vibrational excitations of the system,
-and using this displacement and frequency information one can calculate theoretical :math:`S(\mathbf{Q}, \omega)`.
-In Abins :math:`S(\mathbf{Q}, \omega)` is calculated for each atom separately.
-The total S is then obtained as a sum over all partial atomic contributions.
+and the eigenvalues are the squared frequencies of the corresponding movements.
+These vibrational *modes* are related to the *fundamental* vibrational excitations of the system;
+using this displacement and frequency information one can calculate theoretical :math:`S(\mathbf{Q}, \omega)`.
+In Abins this is calculated for each atom separately,
+then the total spectrum is obtained as a sum over all atomic contributions.
 
 
 Working equations
@@ -43,12 +43,12 @@ Powder
 .. image:: ../images/s_powder_scheme.png
     :align: center
 
-In DFT studies of solid materials, one usually applies periodic boundary conditions to represent an infinite single crystal.
-In order to compare such calculations with experiments in which the sample is in the form of powder, one has to perform
-powder averaging.
+In DFT studies of solid materials, the simulation region is generally a finite unit cell with periodic boundary conditions.
+This models an infinite perfect crystal;
+in order to compare such calculations with powder experiments, orientational averaging should be considered.
 Usually a semi-empirical model is applied [#Howard1983]_:sup:`,` [#Howard1983b]_:
 
-:math:`S^j (\mathbf{Q},\omega_i) = S^j (Q,\omega_i) = \frac{Q^2 TrB_{\omega_i}}{3} exp\left(-Q^2 \alpha^j_{\omega_i} coth^2\left(\frac{\hbar \omega_i}{2 k_B T}\right)  \right)\sigma^j`
+:math:`S^j (\mathbf{Q},\omega_i) = S^j (Q,\omega_i) = \frac{Q^2 \mathrm{Tr}B_{\omega_i}}{3} exp\left(-Q^2 \alpha^j_{\omega_i} coth^2\left(\frac{\hbar \omega_i}{2 k_B T}\right)  \right)\sigma^j`
 
 where :math:`B` and :math:`A` are tensors created from atomic displacements in the following way:
 
@@ -60,9 +60,9 @@ with
 
 :math:`Q` -- momentum transfer due to neutron scattering.  The momentum transfer :math:`\mathbf{Q}` is a technically a vector. However, the powder averaging of :math: `S` allows it to be represented as a scalar.
 
-:math:`\alpha^j_{\omega_i}` -- semi-empirical parameter calculated as: :math:`\alpha^j_{\omega_i} = \frac{1}{5} \left \lbrace Tr A^j  + \frac{2 B^j_{\omega_i}: A^j}{Tr B^j_{\omega_i}} \right\rbrace`
+:math:`\alpha^j_{\omega_i}` -- semi-empirical parameter calculated as: :math:`\alpha^j_{\omega_i} = \frac{1}{5} \left \lbrace \mathrm{Tr} A^j  + \frac{2 B^j_{\omega_i}: A^j}{\mathrm{Tr} B^j_{\omega_i}} \right\rbrace`
 
-:math:`Tr` -- trace operation
+:math:`\mathrm{Tr}` -- trace operation
 
 :math:`:` --  tensor contraction operation
 
@@ -93,10 +93,10 @@ Within the harmonic approximation all second-order transitions form the followin
 \omega_1, \omega_1 + \omega_2, \omega_1 + \omega_3, \ldots, \omega_p + \omega_p \rbrace`.
 The cardinality of this set is :math:`p^2`, where :math:`p` is a number of fundamentals.
 In practice one can reduce this number by taking into consideration a realistic energy window
-and neglecting those :math:`\omega_{ij}=\omega_i + \omega_j` for which :math:`S(Q, \omega_i)` is negligible.
-Within the harmonic approximation phonons are treated as independent harmonic quantum oscillators.  The formula for :math:`S(Q, \omega_{ik})` is as follows [#Mitchell]_:
+and neglecting those :math:`\omega_{ij}=\omega_i + \omega_j` for which :math:`S(Q, \omega_i)` or :math:`S(Q, \omega_j)` is negligible.
+Within the harmonic approximation each phonon is treated as independent harmonic quantum oscillator.  The formula for :math:`S(Q, \omega_{ik})` is as follows [#Mitchell]_:
 
-:math:`S^j(Q, \omega_{ik}) = \frac{Q^4}{15  C}\left( TrB^j_{\omega_i}TrB^j_{\omega_k} + B^j_{\omega_i}:B^j_{\omega_k} + B^j_{\omega_k}:B^j_{\omega_i} \right) exp\left(-Q^2 \beta^j coth^2\left(\frac{\hbar \omega_{ik}}{2 k_B T} \right) \right)\sigma^j`
+:math:`S^j(Q, \omega_{ik}) = \frac{Q^4}{15  C}\left( \mathrm{Tr}B^j_{\omega_i}\mathrm{Tr}B^j_{\omega_k} + B^j_{\omega_i}:B^j_{\omega_k} + B^j_{\omega_k}:B^j_{\omega_i} \right) exp\left(-Q^2 \beta^j coth^2\left(\frac{\hbar \omega_{ik}}{2 k_B T} \right) \right)\sigma^j`
 
 where
 
@@ -106,15 +106,16 @@ where
 
 Similarly, one can define the contribution for the third quantum order events (:math:`0 \rightarrow 3`, simultaneous  :math:`0 \rightarrow 1`, :math:`0 \rightarrow 1'`, :math:`0 \rightarrow 1''` for different oscillators, etc.) [#Mitchell]_:
 
-:math:`S^j(Q, \omega_{ikl}) = \frac{9Q^6}{543}\left( TrB^j_{\omega_i} TrB^j_{\omega_k} TrB^j_{\omega_l}  \right)  exp\left(-Q^2 \beta^j coth^2\left(\frac{\hbar \omega_{ikl}}{2 k_B T}\right) \right)\sigma^j`.
+:math:`S^j(Q, \omega_{ikl}) = \frac{9Q^6}{543}\left( \mathrm{Tr}B^j_{\omega_i} \mathrm{Tr}B^j_{\omega_k} \mathrm{Tr}B^j_{\omega_l}  \right)  exp\left(-Q^2 \beta^j coth^2\left(\frac{\hbar \omega_{ikl}}{2 k_B T}\right) \right)\sigma^j`.
 
 Usually in order to reconstruct the experimental spectrum it is sufficient to include contributions up to the fourth order (:math:`0 \rightarrow 4` , simultaneous :math:`0 \rightarrow 1`, :math:`0 \rightarrow 1'`, :math:`0 \rightarrow 1''`, :math:`0 \rightarrow 1'''` for different oscillators, etc.)
 
-:math:`S^j(Q, \omega_{iklm}) = \frac{27Q^8}{9850}\left( TrB^j_{\omega_i} TrB^j_{\omega_k} TrB^j_{\omega_l}TrB^j_{\omega_m}  \right) exp\left(-Q^2 \beta^j coth^2\left(\frac{\hbar \omega_{iklm}}{2 k_B T}\right) \right)\sigma^j`. [#Mitchell]_
+:math:`S^j(Q, \omega_{iklm}) = \frac{27Q^8}{9850}\left( \mathrm{Tr}B^j_{\omega_i} \mathrm{Tr}B^j_{\omega_k} \mathrm{Tr}B^j_{\omega_l}\mathrm{Tr}B^j_{\omega_m}  \right) exp\left(-Q^2 \beta^j coth^2\left(\frac{\hbar \omega_{iklm}}{2 k_B T}\right) \right)\sigma^j`. [#Mitchell]_
 
-In the same way as for the second quantum order events, one can reduce the number of energy transitions by imposing the appropriate energy window and neglecting small S.
+In the same way as for the second quantum order events, one can reduce the number of energy transitions by imposing the appropriate energy window and neglecting small :math:`S`.
 
-After evaluating the above equations one obtains the discrete S for each quantum order and for each atom: :math:`S_{discrete}`. In order to compare these functions with an experimental spectrum one has to convolve them with experimental resolution
+After evaluating the above equations one obtains the discrete :math:`S` for each quantum order and for each atom: :math:`S_\mathrm{discrete}`.
+In order to compare these functions with an experimental spectrum one has to convolve them with experimental resolution
 
 :math:`S_\mathrm{theory}^{nj}(Q, \omega) = S_\mathrm{discrete}^{nj}(Q, \omega) * f(\omega)`
 
@@ -126,7 +127,7 @@ where:
 
 :math:`f(\omega)` -- is a resolution function
 
-:math:`S_\mathrm{theory}` -- is *theoretical S* to be compared with experimental results.
+:math:`S_\mathrm{theory}` -- is *theoretical* :math:`S` to be compared with experimental results.
 
 For `TOSCA <http://www.isis.stfc.ac.uk/instruments/tosca/tosca4715.html>`_  and TOSCA-like instruments :math:`f(\omega)` has the following form:
 
@@ -158,7 +159,7 @@ with
 Current implementation
 ----------------------
 
-Calculation of theoretical S from ab-initio results is implemented in :ref:`Abins <algm-Abins>`. At the moment Abins supports phonon outputs from the
+Calculation of theoretical :math:`S` from *ab initio* results is implemented in :ref:`Abins <algm-Abins>`. At the moment Abins supports phonon outputs from the
 `CASTEP <http://www.castep.org/>`_, `CRYSTAL <http://www.crystal.unito.it/index.php>`_, Gaussian and DMOL3 *ab initio* codes.
 The Gamma-point frequencies are used and phonon bands are assumed to be flat throughout the Brillouin zone; this assumption is primarily applicable for incoherent scattering in molecular crystals.
 Instrument parameters are included for
