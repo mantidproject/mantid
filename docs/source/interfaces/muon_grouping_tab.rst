@@ -20,6 +20,8 @@ Grouping Table
 
 **Plus and Minus** Add or remove groups
 
+**Context Menu Pair Selection** Right clicking over the grouping table when two groups are selected allows a pair to be created.
+
 **Group Asymmetry Range** Controls the range to use when estimating the group asymmetry. The values are used as ``StartX`` and ``EndX`` in :ref:`EstimateMuonAsymmetryFromCounts <algm-EstimateMuonAsymmetryFromCounts>`. By default this range is the first good data and end time value from the file
 but may be overridden here if required.
 
