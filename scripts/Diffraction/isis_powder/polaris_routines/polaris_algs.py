@@ -192,7 +192,7 @@ def _merge_workspace_with_limits(focused_ws, q_lims):
 
 
 def _calculate_self_scattering_correction(run_number, cal_file_name, sample_details):
-    raw_ws = mantid.LoadRaw(Filename='POL' + str(run_number))
+    raw_ws = mantid.Load(Filename='POLARIS'+str(run_number)+'.nxs')
     mantid.SetSample(InputWorkspace=raw_ws,
                      Geometry=common.generate_sample_geometry(sample_details),
                      Material=common.generate_sample_material(sample_details))
