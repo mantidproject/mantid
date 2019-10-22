@@ -129,3 +129,7 @@ class FocusPresenterTest(unittest.TestCase):
 
         self.presenter.validate(banks)
         create_error.assert_called_with("Please select at least one bank.")
+
+
+if __name__ == '__main__':
+    unittest.main()

@@ -72,3 +72,7 @@ class VanadiumCorrectionsTest(unittest.TestCase):
                           path.join(path.expanduser("~"), "Engineering_Mantid", "Vanadium_Runs",
                                     "1234_precalculated_vanadium_run_bank_curves.nxs")))
         self.assertEqual(1, makedirs.call_count)
+
+
+if __name__ == '__main__':
+    unittest.main()

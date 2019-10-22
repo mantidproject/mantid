@@ -115,3 +115,7 @@ class CalibrationPresenterTest(unittest.TestCase):
 
         self.view.set_instrument_override.assert_called_with("IMAT")
         self.assertEqual(self.presenter.instrument, "IMAT")
+
+
+if __name__ == '__main__':
+    unittest.main()

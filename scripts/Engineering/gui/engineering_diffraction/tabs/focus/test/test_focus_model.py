@@ -98,3 +98,7 @@ class FocusModelTest(unittest.TestCase):
                                                       "North", "mocked-workspace",
                                                       "An Experiment Number")
         self.assertEqual(2, save.call_count)
+
+
+if __name__ == '__main__':
+    unittest.main()
