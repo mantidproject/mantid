@@ -71,9 +71,9 @@
         "EXCLUDE_FROM_ALL"
       ]
     },
-    "mtd_add_qt_test_executable": {
+    "mtd_add_qt_tests": {
       "kwargs": {
-        "TEST_NAME": 1,
+        "TARGET_NAME": 1,
         "QT_VERSION": 1,
         "SRC": "+",
         "INCLUDE_DIRS": "+",
