@@ -506,13 +506,13 @@ if(GCC_COMPILER_VERSION AND GCC_COMPILER_VERSION VERSION_LESS "4.5")
   target_link_libraries(Kernel LINK_PRIVATE stdc++)
 endif()
 target_link_libraries(Kernel
-                      LINK_PUBLIC
+                      PUBLIC
                       ${NEXUS_LIBRARIES}
                       Eigen3::Eigen
                       ${JSONCPP_LIBRARIES}
                       ${TBB_LIBRARIES}
                       ${TBB_MALLOC_LIBRARIES}
-                      LINK_PRIVATE
+                      PRIVATE
                       ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${GSL_LIBRARIES}
                       ${MANTIDLIBS}

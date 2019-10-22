@@ -894,6 +894,7 @@ mtd_add_qt_library(
     inc
     ../../../Framework/PythonInterface/core/inc
     ${PYTHON_INCLUDE_PATH}
+  SYSTEM_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
   LINK_LIBS
     ${TARGET_LIBRARIES}
     ${Boost_LIBRARIES}
