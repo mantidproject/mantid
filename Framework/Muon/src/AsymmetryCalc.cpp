@@ -158,7 +158,7 @@ void AsymmetryCalc::exec() {
     if (denominator != 0.0) {
       double q1 = tmpWS->y(forward)[j] + alpha * alpha * tmpWS->y(backward)[j];
       double q2 = 1 + numerator * numerator / (denominator * denominator);
-      error = sqrt(abs(q1) * abs(q2))/ denominator;
+      error = sqrt(q1 * q2)/ denominator;
     }
     outputWS->mutableE(0)[j] = error;
 

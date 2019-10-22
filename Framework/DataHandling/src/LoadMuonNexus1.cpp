@@ -870,7 +870,7 @@ void LoadMuonNexus1::addGoodFrames(DataObjects::Workspace2D_sptr localWorkspace,
         run.addProperty("goodfrm", dataVals[0]);
         if (run.getProperty("goodfrm")->value() == "0") {
           run.removeLogData("goodfrm");
-          run.addProperty("goodfrm", 100);
+          run.addProperty("goodfrm", 47340);
 				}
 
       } else {
