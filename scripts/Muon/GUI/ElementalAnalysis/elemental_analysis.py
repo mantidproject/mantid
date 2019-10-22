@@ -39,6 +39,7 @@ from Muon.GUI.Common import message_box
 import mantid.simpleapi as mantid
 
 offset = 0.9
+type_index = {"Delayed": 1, "Prompt": 2, "Total": 3}
 
 
 def is_string(value):
@@ -177,7 +178,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             self.plot_window.closeEvent(event)
         super(ElementalAnalysisGui, self).closeEvent(event)
 
-# general functions
+    # general functions
 
     def _gen_label(self, name, x_value_in, element=None):
         if element is None:
@@ -303,14 +304,16 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
     # detectors
     def add_detector_to_plot(self, detector, name):
         self.plotting.add_subplot(detector)
-        for ws in mantid.mtd[name]:
-            ws.setYUnit('Counts')
-            if self.lines.total.isChecked() and 'Total' in ws.getName():
-                self.plotting.plot(detector, ws.getName(), color=self.BLUE)
-            if self.lines.prompt.isChecked() and 'Prompt' in ws.getName():
-                self.plotting.plot(detector, ws.getName(), color=self.ORANGE)
-            if self.lines.delayed.isChecked() and 'Delayed' in ws.getName():
-                self.plotting.plot(detector, ws.getName(), color=self.GREEN)
+        ws = mantid.mtd[name]
+        ws.setYUnit('Counts')
+        # find correct detector number from the workspace group run
+        if self.lines.total.isChecked():
+            self.plotting.plot(detector, ws.getName(), spec_num=type_index["Total"], color=self.BLUE)
+        if self.lines.prompt.isChecked():
+            self.plotting.plot(detector, ws.getName(), spec_num=type_index["Prompt"],color=self.ORANGE)
+        if self.lines.delayed.isChecked():
+            self.plotting.plot(detector, ws.getName(), spec_num=type_index["Delayed"], color=self.GREEN)
+
         # add current selection of lines
         for element in self.ptable.selection:
             self.add_peak_data(element.symbol, detector)
@@ -438,9 +441,9 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         else:
             color = self.GREEN
         for subplot in self.plotting.get_subplots():
-            for ws in mantid.mtd['{}; Detector {}'.format(run, subplot[-1])]:
-                if _type in ws.getName():
-                    self.plotting.plot(subplot, ws.getName(), color=color)
+            name = '{}; Detector {}'.format(run, subplot[-1])
+            ws = mantid.mtd[name]
+            self.plotting.plot(subplot, ws.getName(), spec_num=type_index[_type], color=color)
 
     def remove_line_type(self, run, _type):
         if self.plot_window is None:
@@ -449,18 +452,18 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
 
         # Remove the correct line type on all open subplots
         for subplot in self.plotting.get_subplots():
-            for ws in mantid.mtd['{}; Detector {}'.format(run, subplot[-1])]:
-                if _type in ws.getName():
-                    self.plotting.remove_line(subplot, ws.getName())
+            name = '{}; Detector {}'.format(run, subplot[-1])
+            ws = mantid.mtd[name]
+            self.plotting.remove_line(subplot, ws.getName(), spec=type_index[_type])
 
         # If no line type is selected do not allow plotting
         self.uncheck_detectors_if_no_line_plotted()
 
     def uncheck_detectors_if_no_line_plotted(self):
         if not any([
-                self.lines.total.isChecked(),
-                self.lines.prompt.isChecked(),
-                self.lines.delayed.isChecked()
+            self.lines.total.isChecked(),
+            self.lines.prompt.isChecked(),
+            self.lines.delayed.isChecked()
         ]):
             for detector in self.detectors.detectors:
                 detector.setEnabled(False)
