@@ -136,8 +136,8 @@ void CalculatePlaczekSelfScattering::exec() {
   size_t nReserve = 0;
   const API::SpectrumInfo specInfo = inWS->spectrumInfo();
   for (size_t detIndex = 0; detIndex < specInfo.size(); detIndex++) {
-    if (!specInfo.isMonitor(detIndex)) {
-      if (!specInfo.l2(detIndex) == 0) {
+    if (!(specInfo.isMonitor(detIndex))) {
+      if (!specInfo.l2(detIndex) == 0.0) {
         nReserve += 1;
       }
     }
@@ -154,7 +154,7 @@ void CalculatePlaczekSelfScattering::exec() {
   for (size_t specIndex = 0; specIndex < specInfo.size(); specIndex++) {
     auto &y = outputWS->mutableY(specIndex);
     auto &x = outputWS->mutableX(specIndex);
-    if (!specInfo.isMonitor(specIndex) && !specInfo.l2(specIndex) == 0) {
+    if (!specInfo.isMonitor(specIndex) && !(specInfo.l2(specIndex) == 0.0)) {
       const double pathLength = specInfo.l1() + specInfo.l2(specIndex);
       const double f = specInfo.l1() / pathLength;
       const double sinThetaBy2 = sin(specInfo.twoTheta(specIndex) / 2.0);
