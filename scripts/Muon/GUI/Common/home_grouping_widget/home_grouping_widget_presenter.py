@@ -7,7 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from Muon.GUI.Common.home_tab.home_tab_presenter import HomeTabSubWidget
-from Muon.GUI.Common.observer_pattern import Observable, GenericObservable
+from mantidqt.utils.observer_pattern import Observable, GenericObservable
 from Muon.GUI.Common.utilities.run_string_utils import run_string_to_list
 
 
