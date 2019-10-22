@@ -71,11 +71,12 @@ class DirectILLApplySelfShielding(DataProcessorAlgorithm):
         progress.report('Loading inputs')
         mainWS = self._inputWS()
 
-        progress.report('Applying self shielding corrections')
-        mainWS, applied = self._applyCorrections(mainWS)
-
+        # First subtract the background, then apply the absorption correction to sample
         progress.report('Subtracting EC')
         mainWS, subtracted = self._subtractEC(mainWS)
+
+        progress.report('Applying self shielding corrections')
+        mainWS, applied = self._applyCorrections(mainWS)
 
         if not applied and not subtracted:
             mainWS = self._cloneOnly(mainWS)
