@@ -24,6 +24,7 @@ class FocusPresenterTest(unittest.TestCase):
 
     @patch(tab_path + ".presenter.FocusPresenter.start_focus_worker")
     def test_worker_started_with_correct_params(self, worker):
+        self.presenter.current_calibration = {"vanadium_path": "Fake/Path", "ceria_path": "Fake/Path"}
         self.view.get_focus_filename.return_value = "305738"
         self.view.get_north_bank.return_value = False
         self.view.get_south_bank.return_value = True
@@ -33,24 +34,10 @@ class FocusPresenterTest(unittest.TestCase):
         self.presenter.on_focus_clicked()
         worker.assert_called_with("305738", ["South"], True, None)
 
+    @patch(tab_path + ".presenter.FocusPresenter.validate")
     @patch(tab_path + ".presenter.FocusPresenter.start_focus_worker")
-    def test_worker_not_started_while_searching(self, worker):
-        self.view.get_focus_filename.return_value = "305738"
-        self.view.get_north_bank.return_value = False
-        self.view.get_south_bank.return_value = True
-        self.view.get_plot_output.return_value = True
-        self.view.is_searching.return_value = True
-
-        self.presenter.on_focus_clicked()
-        worker.assert_not_called()
-
-    @patch(tab_path + ".presenter.FocusPresenter.start_focus_worker")
-    def test_worker_not_started_when_no_banks_selected(self, worker):
-        self.view.get_focus_filename.return_value = "305738"
-        self.view.get_north_bank.return_value = False
-        self.view.get_south_bank.return_value = False
-        self.view.get_plot_output.return_value = True
-        self.view.is_searching.return_value = True
+    def test_worker_not_started_validate_fails(self, worker, valid):
+        valid.return_value = False
 
         self.presenter.on_focus_clicked()
         worker.assert_not_called()

@@ -46,9 +46,11 @@ class CalibrationModelTest(unittest.TestCase):
     @patch(class_path + '.create_output_files')
     @patch(class_path + '.load_ceria')
     @patch(class_path + '.run_calibration')
-    def test_fetch_vanadium_is_called(self, calibrate_alg, load_ceria, output_files, update_table):
+    @patch(file_path + '.vanadium_corrections.fetch_correction_workspaces')
+    def test_fetch_vanadium_is_called(self, van_corr, calibrate_alg, load_ceria, output_files, update_table):
+        van_corr.return_value = ("mocked_integration", "mocked_curves")
         self.model.create_new_calibration(VANADIUM_NUMBER, CERIUM_NUMBER, False, "ENGINX")
-        self.assertEqual(calibrate_alg.call_count, 1)
+        self.assertEqual(van_corr.call_count, 1)
 
     @patch(class_path + '.update_calibration_params_table')
     @patch(class_path + '.create_output_files')
