@@ -137,7 +137,7 @@ void CalculatePlaczekSelfScattering::exec() {
   const API::SpectrumInfo specInfo = inWS->spectrumInfo();
   for (size_t detIndex = 0; detIndex < specInfo.size(); detIndex++) {
     if (!(specInfo.isMonitor(detIndex))) {
-      if (!specInfo.l2(detIndex) == 0.0) {
+      if (!(specInfo.l2(detIndex) == 0.0)) {
         nReserve += 1;
       }
     }
