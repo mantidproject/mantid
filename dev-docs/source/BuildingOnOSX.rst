@@ -64,8 +64,25 @@ In order to be able to 'tap' the ``mantidproject/mantid`` 'tap' we need to have 
    brew pin libmxml
    brew pin sip
    brew pin pyqt
-   
-1. Check that `which python` returns a Python in `/usr/local` and not system Python.
+
+1. Unlink ``qt@4`` from ``/usr/local`` to avoid cross talk with Qt5
+
+   brew unlink qt@4
+
+1. Link ``qt.conf`` to Qt4 installation to override builtin ``/usr/local`` links
+
+.. code-block:: sh
+
+   ln -s /usr/local/Homebrew/Library/Taps/mantidproject/homebrew-mantid/qt.conf /usr/local/opt/qt@4/bin/qt.conf
+
+1. Link ``qt-webkit`` to ``qt@4`` to CMake can find it
+
+.. code-block:: sh
+
+   ln -s /usr/local/opt/qt-webkit@2.3/include/QtWebKit /usr/local/opt/qt@4/include/QtWebKit
+   ln -s /usr/local/opt/qt-webkit@2.3/lib/QtWebKit.framework /usr/local/opt/qt@4/lib/QtWebKit.framework
+
+1. Check that ``which python`` returns a Python in ``/usr/local`` and not system Python.
 
 1. Install python requirements
 
