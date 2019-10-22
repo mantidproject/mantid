@@ -60,6 +60,11 @@ PeakPickerTool::PeakPickerTool(
   } else {
     return;
   }
+
+    // Show the fitPropertyBrowser if it isn't already. This sets the WorkspaceIndex to 0
+  if (showFitPropertyBrowser)
+    m_fitPropertyBrowser->show();
+
   m_fitPropertyBrowser->normaliseData(m_shouldBeNormalised);
   m_fitPropertyBrowser->getHandler()->removeAllPlots();
   m_fitPropertyBrowser->setWorkspaceName(m_wsName);
@@ -100,9 +105,6 @@ PeakPickerTool::PeakPickerTool(
   connect(m_fitPropertyBrowser, SIGNAL(destroyed()), graph,
           SLOT(disableTools()));
 
-  // Show the fitPropertyBrowser if it isn't already.
-  if (showFitPropertyBrowser)
-    m_fitPropertyBrowser->show();
   connect(this, SIGNAL(isOn(bool)), m_fitPropertyBrowser,
           SLOT(setPeakToolOn(bool)));
   emit isOn(true);
