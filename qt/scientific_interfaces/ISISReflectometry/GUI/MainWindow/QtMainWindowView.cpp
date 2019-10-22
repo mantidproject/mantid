@@ -33,6 +33,8 @@ DECLARE_SUBWINDOW_AND_CODERS(QtMainWindowView, Encoder, Decoder,
 QtMainWindowView::QtMainWindowView(QWidget *parent)
     : UserSubWindow(parent), m_notifyee(nullptr), m_batchIndex(1) {}
 
+QtMainWindowView::~QtMainWindowView() = default;
+
 IBatchView *QtMainWindowView::newBatch() {
   auto *newTab = new QtBatchView(this);
   m_ui.mainTabs->addTab(newTab,

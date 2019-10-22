@@ -38,6 +38,11 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL QtMainWindowView
   Q_OBJECT
 public:
   explicit QtMainWindowView(QWidget *parent = nullptr);
+  ~QtMainWindowView();
+  QtMainWindowView(QtMainWindowView const &) = delete;
+  QtMainWindowView(QtMainWindowView &&) = delete;
+  QtMainWindowView &operator=(QtMainWindowView const &) = delete;
+  QtMainWindowView &operator=(QtMainWindowView &&) = delete;
 
   void subscribe(MainWindowSubscriber *notifyee) override;
 
