@@ -220,45 +220,13 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
       ${MACOS_CODENAME}
   )
 
-  # if(NOT SITEPACKAGES_PATH)
-  #   set(SITEPACKAGES_PATH /usr/local/lib/python${PY_VER}/site-packages)
-  # endif(NOT SITEPACKAGES_PATH)
-  # execute_process(
-  #   COMMAND
-  #     readlink
-  #     ${SITEPACKAGES_PATH}/sip.so
-  #   OUTPUT_VARIABLE SITEPACKAGES_SYMLINK_sipso
-  # )
-  # string(
-  #   FIND
-  #     "${SITEPACKAGES_SYMLINK_sipso}"
-  #     "sip.so"
-  #     STOPPOS
-  # )
-  # string(
-  #   SUBSTRING
-  #     "${SITEPACKAGES_SYMLINK_sipso}"
-  #     0
-  #     ${STOPPOS}
-  #     SITEPACKAGES_SYMLINK
-  # )
-  # set(SITEPACKAGES ${SITEPACKAGES_PATH}/${SITEPACKAGES_SYMLINK})
-  # string(
-  #   REGEX
-  #   REPLACE
-  #     "/$"
-  #     ""
-  #     SITEPACKAGES
-  #     "${SITEPACKAGES}"
-  # )
-
   if(ENABLE_MANTIDPLOT)
     set(INBUNDLE MantidPlot.app/Contents/)
     # Copy the launcher script to the correct location
     configure_file(
       ${CMAKE_MODULE_PATH}/Packaging/osx/Mantid_osx_launcher.in
       ${CMAKE_BINARY_DIR}/bin/MantidPlot.app/Contents/MacOS/Mantid_osx_launcher
-      COPYONLY
+      @ONLY
     )
 
     # We know exactly where this has to be on Darwin, but separate whether we
@@ -280,63 +248,6 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
     # These cannot be mixed with our other plugins. Further sub-directories
     # based on the Qt version will also be created by the installation targets
     set(PVPLUGINS_SUBDIR paraview)
-
-    # # Assume we are using homebrew for now Follow symlinks so cmake copies the
-    # # file PYQT4_PATH, SITEPACKAGES_PATH, OPENSSL_ROOT_DIR may be defined
-    # # externally (cmake -D) it would be good do not overwrite them (important
-    # # for the compilation with macports)
-    # if(NOT PYQT4_PATH)
-    #   set(PYQT4_PATH /usr/local/lib/python${PY_VER}/site-packages/PyQt4)
-    # endif(NOT PYQT4_PATH)
-    # execute_process(
-    #   COMMAND
-    #     readlink
-    #     ${PYQT4_PATH}/Qt.so
-    #   OUTPUT_VARIABLE PYQT4_SYMLINK_Qtso
-    # )
-    # string(
-    #   FIND
-    #     "${PYQT4_SYMLINK_Qtso}"
-    #     "Qt.so"
-    #     STOPPOS
-    # )
-    # string(
-    #   SUBSTRING
-    #     "${PYQT4_SYMLINK_Qtso}"
-    #     0
-    #     ${STOPPOS}
-    #     PYQT4_SYMLINK
-    # )
-    # set(PYQT4_PYTHONPATH ${PYQT4_PATH}/${PYQT4_SYMLINK})
-    # string(
-    #   REGEX
-    #   REPLACE
-    #     "/$"
-    #     ""
-    #     PYQT4_PYTHONPATH
-    #     "${PYQT4_PYTHONPATH}"
-    # )
-
-    # install(PROGRAMS ${SITEPACKAGES}/sip.so DESTINATION ${BIN_DIR})
-    # # Explicitly specify which PyQt libraries we want because just taking the
-    # # whole directory will swell the install kit unnecessarily.
-    # install(
-    #   FILES
-    #     ${PYQT4_PYTHONPATH}/Qt.so
-    #     ${PYQT4_PYTHONPATH}/QtCore.so
-    #     ${PYQT4_PYTHONPATH}/QtGui.so
-    #     ${PYQT4_PYTHONPATH}/QtOpenGL.so
-    #     ${PYQT4_PYTHONPATH}/QtSql.so
-    #     ${PYQT4_PYTHONPATH}/QtSvg.so
-    #     ${PYQT4_PYTHONPATH}/QtXml.so
-    #     ${PYQT4_PYTHONPATH}/__init__.py
-    #   DESTINATION ${BIN_DIR}/PyQt4
-    # )
-    # # Newer PyQt versions have a new internal library that we need to take
-    # if(EXISTS ${PYQT4_PYTHONPATH}/_qt.so)
-    #   install(FILES ${PYQT4_PYTHONPATH}/_qt.so DESTINATION ${BIN_DIR}/PyQt4)
-    # endif()
-    # install(DIRECTORY ${PYQT4_PYTHONPATH}/uic DESTINATION ${BIN_DIR}/PyQt4)
 
     install(
       FILES ${CMAKE_SOURCE_DIR}/images/MantidPlot.icns
@@ -386,70 +297,15 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
     set(WORKBENCH_LIB_DIR ${WORKBENCH_BUNDLE}MacOS)
     set(WORKBENCH_PLUGINS_DIR ${WORKBENCH_BUNDLE}PlugIns)
 
-    # if(NOT PYQT5_PATH)
-    #   set(PYQT5_PATH /usr/local/lib/python${PY_VER}/site-packages/PyQt5)
-    # endif(NOT PYQT5_PATH)
-    # execute_process(
-    #   COMMAND
-    #     readlink
-    #     ${PYQT5_PATH}/Qt.so
-    #   OUTPUT_VARIABLE PYQT5_SYMLINK_Qtso
-    # )
-    # string(
-    #   FIND
-    #     "${PYQT5_SYMLINK_Qtso}"
-    #     "Qt.so"
-    #     STOPPOS
-    # )
-    # string(
-    #   SUBSTRING
-    #     "${PYQT5_SYMLINK_Qtso}"
-    #     0
-    #     ${STOPPOS}
-    #     PYQT5_SYMLINK
-    # )
-    # set(PYQT5_PYTHONPATH ${PYQT5_PATH}/${PYQT5_SYMLINK})
-    # string(
-    #   REGEX
-    #   REPLACE
-    #     "/$"
-    #     ""
-    #     PYQT5_PYTHONPATH
-    #     "${PYQT5_PYTHONPATH}"
-    # )
-
-    # install(PROGRAMS ${SITEPACKAGES}/sip.so DESTINATION ${WORKBENCH_BIN_DIR})
-    # # Explicitly specify which PyQt libraries we want because just taking the
-    # # whole directory will swell the install kit unnecessarily.
-    # install(
-    #   FILES
-    #     ${PYQT5_PYTHONPATH}/Qt.so
-    #     ${PYQT5_PYTHONPATH}/QtCore.so
-    #     ${PYQT5_PYTHONPATH}/QtGui.so
-    #     ${PYQT5_PYTHONPATH}/QtOpenGL.so
-    #     ${PYQT5_PYTHONPATH}/QtSql.so
-    #     ${PYQT5_PYTHONPATH}/QtSvg.so
-    #     ${PYQT5_PYTHONPATH}/QtXml.so
-    #     ${PYQT5_PYTHONPATH}/QtWidgets.so
-    #     ${PYQT5_PYTHONPATH}/QtPrintSupport.so
-    #     ${PYQT5_PYTHONPATH}/__init__.py
-    #   DESTINATION ${WORKBENCH_BIN_DIR}/PyQt5
-    # )
-    # # Newer PyQt versions have a new internal library that we need to take
-    # if(EXISTS ${PYQT5_PYTHONPATH}/_qt.so)
-    #   install(
-    #     FILES ${PYQT5_PYTHONPATH}/_qt.so
-    #     DESTINATION ${WORKBENCH_BIN_DIR}/PyQt5
-    #   )
-    # endif()
-    # install(
-    #   DIRECTORY ${PYQT5_PYTHONPATH}/uic
-    #   DESTINATION ${WORKBENCH_BIN_DIR}/PyQt5
-    # )
-
     # Add launcher application for a Mantid Workbench
+    configure_file(
+      ${CMAKE_MODULE_PATH}/Packaging/osx/MantidWorkbench_osx_launcher.in
+      ${CMAKE_BINARY_DIR}/MantidWorkbench_osx_launcher.install
+      @ONLY
+    )
+
     install(
-      PROGRAMS ${CMAKE_MODULE_PATH}/Packaging/osx/MantidWorkbench_osx_launcher
+      PROGRAMS ${CMAKE_BINARY_DIR}/MantidWorkbench_osx_launcher.install
       DESTINATION MantidWorkbench.app/Contents/MacOS/
       RENAME MantidWorkbench
     )

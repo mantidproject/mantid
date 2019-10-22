@@ -137,7 +137,7 @@ target_link_libraries(PythonAPIModule
                               Kernel
                               HistogramData
                               Geometry
-                              ${PYTHON_LIBRARIES}			      
+                              ${PYTHON_LIBRARIES}
                               ${POCO_LIBRARIES}
                               ${Boost_LIBRARIES})
 
