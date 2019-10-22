@@ -173,12 +173,12 @@ public:
   MatrixWorkspace_sptr WS;
   CreateDetectorTable alg;
 
-  void setUp() {
+  void setUp() override {
     WS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10000,
                                                                       1000);
   }
 
-  void tearDown() {
+  void tearDown() override {
     AnalysisDataService::Instance().remove(WS->getName() + "-Detectors");
   }
 
