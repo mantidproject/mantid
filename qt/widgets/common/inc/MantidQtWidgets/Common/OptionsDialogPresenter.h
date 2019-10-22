@@ -25,7 +25,7 @@ class EXPORT_OPT_MANTIDQT_COMMON OptionsDialogPresenter
 public:
   OptionsDialogPresenter(IOptionsDialog *view);
   ~OptionsDialogPresenter() = default;
-
+  
   void loadOptions() override;
   void saveOptions() override;
   void showView();

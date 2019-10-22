@@ -25,7 +25,7 @@ OptionsDialogPresenter::OptionsDialogPresenter(IOptionsDialog *view)
 /* Loads the settings saved by the user */
 void OptionsDialogPresenter::loadSettings(std::map<QString, QVariant>& options) {
   QSettings settings;
-  const QString settingsGroupName = "Mantid/MantidWidgets/ISISReflectometryUI";
+  const QString settingsGroupName = "ISISReflectometryUI";
   settings.beginGroup(settingsGroupName);
   QStringList keys = settings.childKeys();
   for (auto &key : keys)
@@ -37,7 +37,7 @@ void OptionsDialogPresenter::loadSettings(std::map<QString, QVariant>& options) 
 void OptionsDialogPresenter::saveSettings(
     const std::map<QString, QVariant> &options) {
   QSettings settings;
-  const QString settingsGroupName = "Mantid/MantidWidgets/ISISReflectometryUI";
+  const QString settingsGroupName = "ISISReflectometryUI";
   settings.beginGroup(settingsGroupName);
   QStringList keys = settings.childKeys();
   for (const auto &option : options)

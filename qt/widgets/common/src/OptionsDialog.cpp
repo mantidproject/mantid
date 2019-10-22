@@ -7,6 +7,7 @@
 #include "MantidQtWidgets/Common/OptionsDialog.h"
 #include "MantidQtWidgets/Common/OptionsDialogModel.h"
 #include "MantidQtWidgets/Common/OptionsDialogPresenter.h"
+#include <QCloseEvent>
 #include <QPushButton>
 
 namespace MantidQt {
@@ -17,7 +18,6 @@ OptionsDialog::OptionsDialog(QWidget *parent) {
   Q_UNUSED(parent);
   initLayout();
   initBindings();
-  notifyLoadOptions();
 }
 
 /** Destructor */
@@ -28,6 +28,8 @@ void OptionsDialog::initLayout() {
   m_ui.setupUi(this);
   connect(m_ui.buttonBox->button(QDialogButtonBox::Ok), SIGNAL(clicked()), this,
           SLOT(notifySaveOptions()));
+  connect(m_ui.buttonBox->button(QDialogButtonBox::Cancel), SIGNAL(clicked()), this,
+          SLOT(notifyLoadOptions()));
 }
 
 /** Bind options to their widgets */
@@ -91,12 +93,18 @@ void OptionsDialog::setOptions(std::map<QString, QVariant> &options) {
 
 void OptionsDialog::subscribe(OptionsDialogSubscriber *notifyee) {
   m_notifyee = notifyee;
+  notifyLoadOptions();
 }
 
 void OptionsDialog::notifyLoadOptions() { m_notifyee->loadOptions(); }
 void OptionsDialog::notifySaveOptions() { m_notifyee->saveOptions(); }
 
-void OptionsDialog::show() { QDialog::show(); }
+void OptionsDialog::closeEvent(QCloseEvent *event) {
+  notifyLoadOptions();
+  QDialog::reject();
+}
+
+void OptionsDialog::show() { QDialog::exec(); }
 
 } // namespace MantidWidgets
 } // namespace MantidQt

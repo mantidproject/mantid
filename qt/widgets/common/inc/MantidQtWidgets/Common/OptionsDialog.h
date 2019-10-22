@@ -35,8 +35,9 @@ public:
 public slots:
   void notifyLoadOptions();
   void notifySaveOptions();
+  void closeEvent(QCloseEvent *event) override;
 
-protected:
+private:
   void initLayout();
   void initBindings();
 
