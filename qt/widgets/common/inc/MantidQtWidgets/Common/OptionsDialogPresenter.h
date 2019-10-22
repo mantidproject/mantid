@@ -26,14 +26,12 @@ public:
   OptionsDialogPresenter(IOptionsDialog *view);
   ~OptionsDialogPresenter() = default;
 
-  void onLoadOptions() override;
-  void onSaveOptions() override;
+  void loadOptions() override;
+  void saveOptions() override;
   void showView();
 
 private:
   // Settings
-  void loadOptions();
-  void saveOptions();
   void loadSettings(std::map<QString, QVariant> &options);
   void saveSettings(const std::map<QString, QVariant> &options);
   void initOptions();

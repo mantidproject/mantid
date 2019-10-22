@@ -16,8 +16,8 @@ namespace MantidWidgets {
 
 class EXPORT_OPT_MANTIDQT_COMMON OptionsDialogSubscriber {
 public:
-  virtual void onLoadOptions() = 0;
-  virtual void onSaveOptions() = 0;
+  virtual void loadOptions() = 0;
+  virtual void saveOptions() = 0;
 };
 
 class EXPORT_OPT_MANTIDQT_COMMON IOptionsDialog {

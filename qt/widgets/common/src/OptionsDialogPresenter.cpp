@@ -18,7 +18,9 @@ namespace MantidWidgets {
  * @param model :: a handle to a model for this presenter
  */
 OptionsDialogPresenter::OptionsDialogPresenter(IOptionsDialog *view)
-    : m_view(view){}
+    : m_view(view) {
+  m_view->subscribe(this);
+}
 
 /* Loads the settings saved by the user */
 void OptionsDialogPresenter::loadSettings(std::map<QString, QVariant>& options) {
@@ -62,9 +64,6 @@ void OptionsDialogPresenter::applyDefaultOptions(
   options["Round"] = false;
   options["RoundPrecision"] = 3;
 }
-
-void OptionsDialogPresenter::onLoadOptions() { loadOptions(); }
-void OptionsDialogPresenter::onSaveOptions() { saveOptions(); }
 
 /** Loads the options used into the view */
 void

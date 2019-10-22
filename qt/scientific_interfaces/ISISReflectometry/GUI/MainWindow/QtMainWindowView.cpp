@@ -105,9 +105,10 @@ void QtMainWindowView::initLayout() {
 
   // Create the presenter
   auto slitCalculator = std::make_unique<SlitCalculator>(this);
-  auto m_optionsDialog = std::make_unique<OptionsDialog>(this);
+  m_optionsDialog = std::make_unique<OptionsDialog>(this);
+  OptionsDialog *optionsDialog = m_optionsDialog.get();
   m_presenter = std::make_unique<MainWindowPresenter>(
-      this, messageHandler, std::move(slitCalculator), m_optionsDialog.get(),
+      this, messageHandler, std::move(slitCalculator), optionsDialog,
       std::move(makeBatchPresenter));
 
   m_notifyee->notifyNewBatchRequested();

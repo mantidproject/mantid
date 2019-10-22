@@ -93,8 +93,8 @@ void OptionsDialog::subscribe(OptionsDialogSubscriber *notifyee) {
   m_notifyee = notifyee;
 }
 
-void OptionsDialog::notifyLoadOptions() { m_notifyee->onLoadOptions(); }
-void OptionsDialog::notifySaveOptions() { m_notifyee->onSaveOptions(); }
+void OptionsDialog::notifyLoadOptions() { m_notifyee->loadOptions(); }
+void OptionsDialog::notifySaveOptions() { m_notifyee->saveOptions(); }
 
 void OptionsDialog::show() { QDialog::show(); }
 
