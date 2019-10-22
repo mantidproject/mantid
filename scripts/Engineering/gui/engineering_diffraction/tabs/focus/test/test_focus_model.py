@@ -39,7 +39,7 @@ class FocusModelTest(unittest.TestCase):
         self.model.focus_run("305761", ["1", "2"], False, "ENGINX", "0", blank_calibration)
         self.assertEqual(fetch_van.call_count, 0)
 
-    @patch(file_path + ".FocusModel.save_focused_output_files_as_nexus")
+    @patch(file_path + ".FocusModel._save_focused_output_files_as_nexus")
     @patch(file_path + ".FocusModel._run_focus")
     @patch(file_path + ".FocusModel._load_focus_sample_run")
     @patch(file_path + ".vanadium_corrections.fetch_correction_workspaces")
@@ -54,7 +54,7 @@ class FocusModelTest(unittest.TestCase):
                                      model.FOCUSED_OUTPUT_WORKSPACE_NAME + banks[-1],
                                      "mocked_integ", "mocked_curves", banks[-1])
 
-    @patch(file_path + ".FocusModel.save_focused_output_files_as_nexus")
+    @patch(file_path + ".FocusModel._save_focused_output_files_as_nexus")
     @patch(file_path + ".FocusModel._plot_focused_workspace")
     @patch(file_path + ".FocusModel._run_focus")
     @patch(file_path + ".FocusModel._load_focus_sample_run")
@@ -67,7 +67,7 @@ class FocusModelTest(unittest.TestCase):
         self.model.focus_run("305761", banks, True, "ENGINX", "0", self.current_calibration)
         self.assertEqual(len(banks), plot_focus.call_count)
 
-    @patch(file_path + ".FocusModel.save_focused_output_files_as_nexus")
+    @patch(file_path + ".FocusModel._save_focused_output_files_as_nexus")
     @patch(file_path + ".FocusModel._plot_focused_workspace")
     @patch(file_path + ".FocusModel._run_focus")
     @patch(file_path + ".FocusModel._load_focus_sample_run")
@@ -86,17 +86,17 @@ class FocusModelTest(unittest.TestCase):
         mocked_workspace = "mocked-workspace"
         output_file = path.join(path_handling.OUT_FILES_ROOT_DIR, "Focus",
                                 "ENGINX_123_bank_North.nxs")
-        self.model.save_focused_output_files_as_nexus("ENGINX", "Path/To/ENGINX000123.whatever",
-                                                      "North", mocked_workspace, None)
+        self.model._save_focused_output_files_as_nexus("ENGINX", "Path/To/ENGINX000123.whatever",
+                                                       "North", mocked_workspace, None)
 
         self.assertEqual(1, save.call_count)
         save.assert_called_with(Filename=output_file, InputWorkspace=mocked_workspace)
 
     @patch(file_path + ".SaveNexus")
     def test_save_output_files_nexus_with_RB_number(self, save):
-        self.model.save_focused_output_files_as_nexus("ENGINX", "Path/To/ENGINX000123.whatever",
-                                                      "North", "mocked-workspace",
-                                                      "An Experiment Number")
+        self.model._save_focused_output_files_as_nexus("ENGINX", "Path/To/ENGINX000123.whatever",
+                                                       "North", "mocked-workspace",
+                                                       "An Experiment Number")
         self.assertEqual(2, save.call_count)
 
 

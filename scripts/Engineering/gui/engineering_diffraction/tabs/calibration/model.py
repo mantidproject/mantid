@@ -18,7 +18,6 @@ from Engineering.EnggUtils import write_ENGINX_GSAS_iparam_file
 from Engineering.gui.engineering_diffraction.tabs.common import vanadium_corrections
 from Engineering.gui.engineering_diffraction.tabs.common import path_handling
 
-
 VANADIUM_INPUT_WORKSPACE_NAME = "engggui_vanadium_ws"
 CURVES_WORKSPACE_NAME = "engggui_vanadium_curves"
 INTEGRATED_WORKSPACE_NAME = "engggui_vanadium_integration"
@@ -45,7 +44,8 @@ class CalibrationModel(object):
         :param instrument: The instrument the data relates to.
         :param rb_num: The RB number for file creation.
         """
-        van_integration, van_curves = vanadium_corrections.fetch_correction_workspaces(vanadium_path, instrument)
+        van_integration, van_curves = vanadium_corrections.fetch_correction_workspaces(
+            vanadium_path, instrument)
         ceria_workspace = self.load_ceria(ceria_path)
         output = self.run_calibration(ceria_workspace, van_integration, van_curves)
         if plot_output:
@@ -65,7 +65,8 @@ class CalibrationModel(object):
         self.create_output_files(CALIBRATION_DIR, difc, tzero, ceria_path, vanadium_path,
                                  instrument)
         if rb_num:
-            user_calib_dir = path.join(path_handling.OUT_FILES_ROOT_DIR, "User", rb_num, "Calibration", "")
+            user_calib_dir = path.join(path_handling.OUT_FILES_ROOT_DIR, "User", rb_num,
+                                       "Calibration", "")
             self.create_output_files(user_calib_dir, difc, tzero, ceria_path, vanadium_path,
                                      instrument)
 
@@ -109,7 +110,7 @@ class CalibrationModel(object):
     @staticmethod
     def _plot_difc_zero(difc, tzero):
         for i in range(1, 3):
-            bank_ws = Ads.retrieve(CalibrationModel._generate_table_workspace_name(i-1))
+            bank_ws = Ads.retrieve(CalibrationModel._generate_table_workspace_name(i - 1))
 
             x_val = []
             y_val = []

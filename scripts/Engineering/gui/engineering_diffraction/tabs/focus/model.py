@@ -19,6 +19,15 @@ FOCUSED_OUTPUT_WORKSPACE_NAME = "engggui_focusing_output_ws_bank_"
 
 class FocusModel(object):
     def focus_run(self, sample_path, banks, plot_output, instrument, rb_number, current_calib):
+        """
+        Focus some data using the current calibration.
+        :param sample_path: The path to the data to be focused.
+        :param banks: The banks that should be focused.
+        :param plot_output: True if the output should be plotted.
+        :param instrument: The instrument that the data came from.
+        :param rb_number: The experiment number, used to create directories. Can be None
+        :param current_calib: The current calibration loaded in the calibration tab.
+        """
         vanadium_path = current_calib["vanadium_path"]
         if vanadium_path is None:
             return
@@ -33,8 +42,8 @@ class FocusModel(object):
             if plot_output:
                 self._plot_focused_workspace(output_workspace_name)
             # Save the output to the file system.
-            self.save_focused_output_files_as_nexus(instrument, sample_path, name,
-                                                    output_workspace_name, rb_number)
+            self._save_focused_output_files_as_nexus(instrument, sample_path, name,
+                                                     output_workspace_name, rb_number)
 
     @staticmethod
     def _run_focus(input_workspace, output_workspace, vanadium_integration_ws, vanadium_curves_ws,
@@ -66,19 +75,28 @@ class FocusModel(object):
         focused_wsp = Ads.retrieve(focused)
         plot([focused_wsp], wksp_indices=[0])
 
-    def save_focused_output_files_as_nexus(self, instrument, sample_path, bank, sample_workspace,
-                                           rb_number):
+    def _save_focused_output_files_as_nexus(self, instrument, sample_path, bank, sample_workspace,
+                                            rb_number):
+        """
+        Save a focused workspace to the file system. Saves a separate copy to a User directory if an rb number has been
+        set.
+        :param instrument: The instrument the data is from.
+        :param sample_path: The path to the data file that was focused.
+        :param bank: The name of the bank being saved.
+        :param sample_workspace: The name of the workspace to be saved.
+        :param rb_number: Usually an experiment id, defines the name of the user directory.
+        """
         nexus_output_path = path.join(
             path_handling.OUT_FILES_ROOT_DIR, "Focus",
-            self.generate_output_file_name(instrument, sample_path, bank, ".nxs"))
+            self._generate_output_file_name(instrument, sample_path, bank, ".nxs"))
         SaveNexus(InputWorkspace=sample_workspace, Filename=nexus_output_path)
         if rb_number is not None:
             nexus_output_path = path.join(
                 path_handling.OUT_FILES_ROOT_DIR, "User", rb_number, "Focus",
-                self.generate_output_file_name(instrument, sample_path, bank, ".nxs"))
+                self._generate_output_file_name(instrument, sample_path, bank, ".nxs"))
             SaveNexus(InputWorkspace=sample_workspace, Filename=nexus_output_path)
 
     @staticmethod
-    def generate_output_file_name(instrument, sample_path, bank, suffix):
+    def _generate_output_file_name(instrument, sample_path, bank, suffix):
         run_no = path_handling.get_run_number_from_path(sample_path, instrument)
         return instrument + "_" + run_no + "_bank_" + bank + suffix
