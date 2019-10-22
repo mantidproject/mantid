@@ -8,7 +8,6 @@
 from __future__ import (absolute_import, division, print_function)
 
 from os import path
-from os import makedirs
 
 from Engineering.gui.engineering_diffraction.tabs.common import vanadium_corrections, path_handling
 from mantid.simpleapi import EnggFocus, Load, logger, AnalysisDataService as Ads, SaveNexus
