@@ -100,13 +100,8 @@ def zoom_axis(ax, coord, x_or_y, factor):
     ax_min, ax_max = get_lims()
     dist_to_min = coord - ax_min
     dist_to_max = ax_max - coord
-    dist_ratio = dist_to_max/dist_to_min
-
-    new_dist_to_min = (dist_to_max - dist_to_min)/(dist_ratio - 1)/factor
-    new_dist_to_max = new_dist_to_min + (dist_to_max - dist_to_min)/factor
-
-    new_ax_min = coord - new_dist_to_min
-    new_ax_max = coord + new_dist_to_max
+    new_ax_min = coord - dist_to_min/factor
+    new_ax_max = coord + dist_to_max/factor
 
     set_lims((new_ax_min, new_ax_max))
     return new_ax_min, new_ax_max
