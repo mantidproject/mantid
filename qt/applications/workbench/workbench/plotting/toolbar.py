@@ -19,7 +19,6 @@ from mantidqt.icons import get_icon
 class WorkbenchNavigationToolbar(NavigationToolbar2QT):
 
     sig_home_clicked = QtCore.Signal()
-    sig_display_all_triggered = QtCore.Signal()
     sig_grid_toggle_triggered = QtCore.Signal()
     sig_active_triggered = QtCore.Signal()
     sig_hold_triggered = QtCore.Signal()
@@ -76,8 +75,6 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
                     a.setChecked(checked)
                 if tooltip_text is not None:
                     a.setToolTip(tooltip_text)
-                if text == 'Home':
-                    a.triggered.connect(self.on_home_clicked)
 
         self.buttons = {}
         # Add the x,y location widget at the right side of the toolbar
@@ -133,6 +130,7 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
 
     def on_home_clicked(self):
         self.sig_home_clicked.emit()
+        self.push_current()
 
 
 class ToolbarStateManager(object):

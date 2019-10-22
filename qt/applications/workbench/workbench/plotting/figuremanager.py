@@ -381,8 +381,6 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
     def set_figure_zoom_to_display_all(self):
         axes = self.canvas.figure.get_axes()
-        # Re-limiting on the markers will keep expanding the view. Temporarily
-        # hiding the markers excludes them from the ax.relim call
         if axes:
             for ax in axes:
                 ax.relim(visible_only=True)
