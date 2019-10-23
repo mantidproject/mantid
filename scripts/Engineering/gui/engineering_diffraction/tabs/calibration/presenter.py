@@ -24,6 +24,7 @@ class CalibrationPresenter(object):
 
         # Connect view signals to local functions.
         self.view.set_on_calibrate_clicked(self.on_calibrate_clicked)
+        self.view.set_enable_controls_connection(self.set_calibrate_controls_enabled)
 
         # Main Window State Variables
         self.instrument = "ENGINX"
@@ -54,11 +55,10 @@ class CalibrationPresenter(object):
             "rb_num": rb_num
         },
                                 error_cb=self._on_error,
-                                finished_cb=self.enable_calibrate_buttons,
                                 success_cb=self.set_current_calibration)
         self.pending_calibration["vanadium_path"] = vanadium_path
         self.pending_calibration["ceria_path"] = calib_path
-        self.disable_calibrate_buttons()
+        self.set_calibrate_controls_enabled(False)
         self.worker.start()
 
     def set_current_calibration(self, success_info):
@@ -66,7 +66,7 @@ class CalibrationPresenter(object):
         self.current_calibration = self.pending_calibration
         self.calibration_notifier.notify_subscribers(self.current_calibration)
         self.pending_calibration = {"vanadium_path": None, "ceria_path": None}
-        self.enable_calibrate_buttons()
+        self.emit_enable_button_signal()
 
     def set_instrument_override(self, instrument):
         if instrument == 0:
@@ -87,17 +87,16 @@ class CalibrationPresenter(object):
         else:
             return False
 
-    def disable_calibrate_buttons(self):
-        self.view.set_calibrate_button_enabled(False)
-        self.view.set_check_plot_output_enabled(False)
+    def emit_enable_button_signal(self):
+        self.view.sig_enable_controls.emit(True)
 
-    def enable_calibrate_buttons(self):
-        self.view.set_calibrate_button_enabled(True)
-        self.view.set_check_plot_output_enabled(True)
+    def set_calibrate_controls_enabled(self, enabled):
+        self.view.set_calibrate_button_enabled(enabled)
+        self.view.set_check_plot_output_enabled(enabled)
 
     def _on_error(self, failure_info):
         logger.warning(str(failure_info))
-        self.enable_calibrate_buttons()
+        self.emit_enable_button_signal()
 
     # -----------------------
     # Observers / Observables

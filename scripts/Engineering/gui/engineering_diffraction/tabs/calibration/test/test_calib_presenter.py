@@ -55,31 +55,31 @@ class CalibrationPresenterTest(unittest.TestCase):
         worker_method.assert_not_called()
 
     def test_controls_disabled_disables_both(self):
-        self.presenter.disable_calibrate_buttons()
+        self.presenter.set_calibrate_controls_enabled(False)
 
         self.view.set_calibrate_button_enabled.assert_called_with(False)
         self.view.set_check_plot_output_enabled.assert_called_with(False)
 
     def test_controls_enabled_enables_both(self):
-        self.presenter.disable_calibrate_buttons()
+        self.presenter.set_calibrate_controls_enabled(False)
 
         self.view.set_calibrate_button_enabled.assert_called_with(False)
         self.view.set_check_plot_output_enabled.assert_called_with(False)
 
-        self.presenter.enable_calibrate_buttons()
+        self.presenter.set_calibrate_controls_enabled(True)
 
         self.view.set_calibrate_button_enabled.assert_called_with(True)
         self.view.set_check_plot_output_enabled.assert_called_with(True)
 
+    @patch(tab_path + ".presenter.CalibrationPresenter.emit_enable_button_signal")
     @patch(tab_path + ".presenter.logger.warning")
-    def test_on_error_posts_to_logger_and_enables_controls(self, logger):
+    def test_on_error_posts_to_logger_and_enables_controls(self, logger, emit):
         fail_info = 2024278
 
         self.presenter._on_error(fail_info)
 
         logger.assert_called_with(str(fail_info))
-        self.view.set_calibrate_button_enabled.assert_called_with(True)
-        self.view.set_check_plot_output_enabled.assert_called_with(True)
+        self.assertEqual(emit.call_count, 1)
 
     def test_validation_of_run_numbers(self):
         self.view.get_calib_valid.return_value = False

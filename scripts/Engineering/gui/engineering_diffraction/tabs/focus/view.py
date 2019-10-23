@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from __future__ import (absolute_import, division, print_function)
-from qtpy import QtWidgets
+from qtpy import QtWidgets, QtCore
 
 from mantidqt.utils.qt import load_ui
 
@@ -14,6 +14,8 @@ Ui_focus, _ = load_ui(__file__, "focus_tab.ui")
 
 
 class FocusView(QtWidgets.QWidget, Ui_focus):
+    sig_enable_controls = QtCore.Signal(bool)
+
     def __init__(self, parent=None, instrument="ENGINX"):
         super(FocusView, self).__init__(parent)
         self.setupUi(self)
@@ -23,6 +25,9 @@ class FocusView(QtWidgets.QWidget, Ui_focus):
 
     def set_on_focus_clicked(self, slot):
         self.button_focus.clicked.connect(slot)
+
+    def set_enable_controls_connection(self, slot):
+        self.sig_enable_controls.connect(slot)
 
     def set_instrument_override(self, instrument):
         self.finder_focus.setInstrumentOverride(instrument)

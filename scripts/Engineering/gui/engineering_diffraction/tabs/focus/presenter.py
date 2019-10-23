@@ -23,6 +23,7 @@ class FocusPresenter(object):
 
         # Connect view signals to local methods.
         self.view.set_on_focus_clicked(self.on_focus_clicked)
+        self.view.set_enable_controls_connection(self.set_focus_controls_enabled)
 
         # Variables from other GUI tabs.
         self.current_calibration = {"vanadium_path": None, "ceria_path": None}
@@ -48,8 +49,8 @@ class FocusPresenter(object):
             self.model.focus_run,
             (focus_path, banks, plot_output, self.instrument, rb_num, self.current_calibration),
             error_cb=self._on_worker_error,
-            finished_cb=self._enable_focus_controls)
-        self._disable_focus_controls()
+            finished_cb=self.emit_enable_button_signal)
+        self.set_focus_controls_enabled(False)
         self.worker.start()
 
     def set_instrument_override(self, instrument):
@@ -89,15 +90,11 @@ class FocusPresenter(object):
 
     def _on_worker_error(self, failure_info):
         logger.warning(str(failure_info))
-        self._enable_focus_controls()
+        self.emit_enable_button_signal()
 
-    def _enable_focus_controls(self):
-        self.view.set_focus_button_enabled(True)
-        self.view.set_plot_output_enabled(True)
-
-    def _disable_focus_controls(self):
-        self.view.set_focus_button_enabled(False)
-        self.view.set_plot_output_enabled(False)
+    def set_focus_controls_enabled(self, enabled):
+        self.view.set_focus_button_enabled(enabled)
+        self.view.set_plot_output_enabled(enabled)
 
     def _get_banks(self):
         banks = []
@@ -106,6 +103,9 @@ class FocusPresenter(object):
         if self.view.get_south_bank():
             banks.append("South")
         return banks
+
+    def emit_enable_button_signal(self):
+        self.view.sig_enable_controls.emit(True)
 
     def update_calibration(self, calibration):
         """
