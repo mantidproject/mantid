@@ -113,24 +113,24 @@ const std::string ReflectometryReductionOneAuto3::summary() const {
  *
  * @return :: void
  */
-void ReflectometryReductionOneAuto3::getTransRun(
+void ReflectometryReductionOneAuto3::getTransmissionRun(
     std::map<std::string, std::string> &results,
-    WorkspaceGroup_sptr &workspaceGroup, const std::string &transRun) {
-  const std::string str = getPropertyValue(transRun);
+    WorkspaceGroup_sptr &workspaceGroup, const std::string &transmissionRun) {
+  const std::string str = getPropertyValue(transmissionRun);
   if (!str.empty()) {
-    auto transGroup =
+    auto transmissionGroup =
         AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(str);
     // If it is not a group, we don't need to validate its size
-    if (!transGroup)
+    if (!transmissionGroup)
       return;
 
     const bool polarizationCorrections = getProperty("PolarizationAnalysis");
 
-    if (workspaceGroup->size() != transGroup->size() &&
+    if (workspaceGroup->size() != transmissionGroup->size() &&
         !polarizationCorrections) {
       // If they are not the same size then we cannot associate a transmission
       // group member with every input group member.
-      results[transRun] = transRun + " group must be the "
+      results[transmissionRun] = transmissionRun + " group must be the "
                                      "same size as the InputWorkspace group "
                                      "when polarization analysis is false.";
     }
@@ -155,8 +155,8 @@ ReflectometryReductionOneAuto3::validateInputs() {
     return results;
 
   // First and second transmission runs
-  getTransRun(results, group, "FirstTransmissionRun");
-  getTransRun(results, group, "SecondTransmissionRun");
+  getTransmissionRun(results, group, "FirstTransmissionRun");
+  getTransmissionRun(results, group, "SecondTransmissionRun");
 
   return results;
 }

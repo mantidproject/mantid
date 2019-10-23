@@ -104,9 +104,9 @@ private:
   WorkspaceNames getOutputNamesForGroups(const std::string &inputName,
                                          const std::string &runNumber,
                                          const size_t wsGroupNumber);
-  void getTransRun(std::map<std::string, std::string> &results,
-                   WorkspaceGroup_sptr &workspaceGroup,
-                   const std::string &transRun);
+  void getTransmissionRun(std::map<std::string, std::string> &results,
+                          WorkspaceGroup_sptr &workspaceGroup,
+                          const std::string &transmissionRun);
 };
 
 } // namespace Algorithms
