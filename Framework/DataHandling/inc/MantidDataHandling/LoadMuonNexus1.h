@@ -93,7 +93,8 @@ private:
                     int64_t period);
   void addGoodFrames(DataObjects::Workspace2D_sptr localWorkspace,
                      int64_t period, int nperiods);
-
+	///Returns the current date and time
+  Mantid::Types::Core::DateAndTime currentDateAndTime() const;
   /// Loads dead time table for the detector
   void loadDeadTimes(Mantid::NeXus::NXRoot &root);
 

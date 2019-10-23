@@ -47,7 +47,7 @@
 using Mantid::Types::Core::DateAndTime;
 namespace {
 const std::string GOODFRM = "goodfrm";
-double estimateGoodFrames(Mantid::Types::Core::DateAndTime start_time, Mantid::Types::Core::DateAndTime current_time) {
+int estimateGoodFrames(Mantid::Types::Core::DateAndTime start_time, Mantid::Types::Core::DateAndTime current_time) {
   Mantid::Types::Core::time_duration freq =
       DateAndTime::durationFromSeconds(40);
   //DateAndTime::durationFromSeconds(40)
@@ -878,7 +878,7 @@ void LoadMuonNexus1::addGoodFrames(DataObjects::Workspace2D_sptr localWorkspace,
       auto &run = localWorkspace->mutableRun();
       auto temp = run.getLogData();
       auto start_time = DateAndTime(run.getProperty("run_start")->value());
-      auto current_time = DateAndTime::getCurrentTime();
+      auto current_time = currentDateAndTime();
       if (period == 0) {
         // If this is the first period
         // localWorkspace will not contain goodfrm
@@ -903,8 +903,13 @@ void LoadMuonNexus1::addGoodFrames(DataObjects::Workspace2D_sptr localWorkspace,
   } // else
   handle.close();
 }
-
-/**
+/*
+* @return the current date and time
+*/
+DateAndTime LoadMuonNexus1::currentDateAndTime() const {
+  return DateAndTime::getCurrentTime();
+}
+    /**
  * Return the confidence with with this algorithm can load the file
  * @param descriptor A descriptor for the file
  * @returns An integer specifying the confidence level. 0 indicates it will not
@@ -949,6 +954,7 @@ int LoadMuonNexus1::confidence(Kernel::NexusDescriptor &descriptor) const {
   }
   return 0;
 }
+
 
 } // namespace DataHandling
 } // namespace Mantid
