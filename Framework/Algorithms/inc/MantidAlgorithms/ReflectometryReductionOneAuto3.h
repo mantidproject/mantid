@@ -53,7 +53,7 @@ private:
 
     bool hasQStep() const { return qStep.is_initialized(); }
     std::vector<double> asVector() const {
-      return std::vector<double>{qMin, *qStep, qMax};
+      return {qMin, *qStep, qMax};
     }
   };
 
