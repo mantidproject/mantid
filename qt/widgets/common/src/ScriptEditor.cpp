@@ -614,4 +614,6 @@ void ScriptEditor::replaceAll(const QString &searchString,
   this->endUndoAction();
 }
 
-int ScriptEditor::getZoom() const { return static_cast<int>(SendScintilla(SCI_GETZOOM)); }
+int ScriptEditor::getZoom() const {
+  return static_cast<int>(SendScintilla(SCI_GETZOOM));
+}
