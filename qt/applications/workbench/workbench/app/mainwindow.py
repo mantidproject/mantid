@@ -161,7 +161,7 @@ class MainWindow(QMainWindow):
         self.algorithm_selector = None
         self.plot_selector = None
         self.interface_manager = None
-        self.scriptrepository = None
+        self.script_repository = None
         self.widgets = []
 
         # Widget layout map: required for use in Qt.connection
@@ -614,9 +614,10 @@ class MainWindow(QMainWindow):
         manageuserdirectories.ManageUserDirectories.openManageUserDirectories()
 
     def open_script_repository(self):
-        self.scriptrepository = ScriptRepositoryView(self)
-        self.scriptrepository.loadScript.connect(self.editor.open_file_in_new_tab)
-        self.scriptrepository.show()
+        self.script_repository = ScriptRepositoryView(self)
+        self.script_repository.loadScript.connect(self.editor.open_file_in_new_tab)
+        self.script_repository.setAttribute(Qt.WA_DeleteOnClose, True)
+        self.script_repository.show()
 
     def open_settings_window(self):
         settings = SettingsPresenter(self)
