@@ -52,9 +52,7 @@ private:
     boost::optional<double> qStep;
 
     bool hasQStep() const { return qStep.is_initialized(); }
-    std::vector<double> asVector() const {
-      return {qMin, *qStep, qMax};
-    }
+    std::vector<double> asVector() const { return {qMin, *qStep, qMax}; }
   };
 
   void init() override;

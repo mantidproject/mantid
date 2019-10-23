@@ -130,9 +130,10 @@ void ReflectometryReductionOneAuto3::getTransmissionRun(
         !polarizationCorrections) {
       // If they are not the same size then we cannot associate a transmission
       // group member with every input group member.
-      results[transmissionRun] = transmissionRun + " group must be the "
-                                     "same size as the InputWorkspace group "
-                                     "when polarization analysis is false.";
+      results[transmissionRun] = transmissionRun +
+                                 " group must be the "
+                                 "same size as the InputWorkspace group "
+                                 "when polarization analysis is false.";
     }
   }
 }
