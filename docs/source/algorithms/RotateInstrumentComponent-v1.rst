@@ -177,32 +177,35 @@ Example 3: Rotating a single detector
 
   # Take element by element difference of the solid angles
   diff = sa2 - sa1
-  # control linewidth of printed array to ensure it matches on different versions
-  pp_opts_orig = np.get_printoptions()
-  np.set_printoptions(linewidth=64)
-  print(diff)
-  np.set_printoptions(**pp_opts_orig)
-  print('The non-zero difference {:.13f} is due to detector {}'.format(diff[32], ws.getDetector(32).getID()))
+  # numpy.set_printoptions is not stable across versions.
+  # manually print array to ensure consistent display for tests
+  diff = diff.reshape(8, 8)
+  diff_as_str = ''
+  for row in range(8):
+      for col in range(8):
+          diff_as_str += '{: .5f} '.format(diff[row][col])
+      diff_as_str += '\n'
+  print(diff_as_str)
+  print('The non-zero difference {:.13f} is due to detector {}'.format(diff[4][0], ws.getDetector(32).getID()))
 
 Output
 ^^^^^^
 
 .. testoutput:: ExDet
+   :options: +NORMALIZE_WHITESPACE
 
-  [0.0888151,-0.108221,-0.145]
-  [0.0888151,-0.108221,-0.145]
-  [ 0.          0.          0.          0.          0.          0.
-    0.          0.          0.          0.          0.          0.
-    0.          0.          0.          0.          0.          0.
-    0.          0.          0.          0.          0.          0.
-    0.          0.          0.          0.          0.          0.
-    0.          0.         -0.04645313  0.          0.          0.
-    0.          0.          0.          0.          0.          0.
-    0.          0.          0.          0.          0.          0.
-    0.          0.          0.          0.          0.          0.
-    0.          0.          0.          0.          0.          0.
-    0.          0.          0.          0.        ]
-  The non-zero difference -0.0464531276188 is due to detector 33
+    [0.0888151,-0.108221,-0.145]
+    [0.0888151,-0.108221,-0.145]
+     0.00000  0.00000  0.00000  0.00000  0.00000  0.00000  0.00000  0.00000
+     0.00000  0.00000  0.00000  0.00000  0.00000  0.00000  0.00000  0.00000
+     0.00000  0.00000  0.00000  0.00000  0.00000  0.00000  0.00000  0.00000
+     0.00000  0.00000  0.00000  0.00000  0.00000  0.00000  0.00000  0.00000
+    -0.04645  0.00000  0.00000  0.00000  0.00000  0.00000  0.00000  0.00000
+     0.00000  0.00000  0.00000  0.00000  0.00000  0.00000  0.00000  0.00000
+     0.00000  0.00000  0.00000  0.00000  0.00000  0.00000  0.00000  0.00000
+     0.00000  0.00000  0.00000  0.00000  0.00000  0.00000  0.00000  0.00000
+
+    The non-zero difference -0.0464531276188 is due to detector 33
 
 .. categories::
 
