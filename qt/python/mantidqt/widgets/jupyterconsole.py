@@ -15,6 +15,7 @@ import types
 # 3rd party imports
 # qtpy must be the first import here as it makes the selection of the PyQt backend
 # by preferring PyQt5 as we would like
+from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QApplication
 try:
     # Later versions of Qtconsole are part of Jupyter
@@ -63,6 +64,9 @@ class InProcessJupyterConsole(RichJupyterWidget):
         self.kernel_manager = kernel_manager
         self.kernel_client = kernel_client
 
+    def keyPressEvent(self, event):
+        if QApplication.keyboardModifiers() & Qt.ControlModifier and (event.key() == Qt.Key_Equal):
+            self.change_font_size(1)
 
 def async_wrapper(orig_run_code, shell_instance):
     """

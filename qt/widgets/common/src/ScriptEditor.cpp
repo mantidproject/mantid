@@ -296,7 +296,7 @@ void ScriptEditor::keyPressEvent(QKeyEvent *event) {
   // stop working
   // So here is where Ctrl++ is detected to zoom in
   if (QApplication::keyboardModifiers() & Qt::ControlModifier &&
-      event->key() == Qt::Key_Plus) {
+      (event->key() == Qt::Key_Plus || event->key() == Qt::Key_Equal)) {
     zoomIn();
     emit textZoomedIn();
 
@@ -306,7 +306,15 @@ void ScriptEditor::keyPressEvent(QKeyEvent *event) {
       QKeyEvent *backspEvent =
           new QKeyEvent(QEvent::KeyPress, Qt::Key_Backspace, Qt::NoModifier);
       QsciScintilla::keyPressEvent(backspEvent);
+      setModified(false);
     }
+  }
+
+  // There is a built in Ctrl+- shortcut for zooming out, but a signal is
+  // emitted here to tell the other editor tabs to also zoom out
+  if (QApplication::keyboardModifiers() & Qt::ControlModifier &&
+      (event->key() == Qt::Key_Minus)) {
+    emit textZoomedOut();
   }
 }
 
@@ -614,3 +622,5 @@ void ScriptEditor::replaceAll(const QString &searchString,
   }
   this->endUndoAction();
 }
+
+int ScriptEditor::getZoom() const { return SendScintilla(SCI_GETZOOM); }
