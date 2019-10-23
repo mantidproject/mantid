@@ -76,7 +76,7 @@ region.
 Change Font Size
 ^^^^^^^^^^^^^^^^
 The keyboard shortcuts :code:`Ctrl++` and :code:`Ctrl+-` can be used to increase
-and decrease the size of the font in the in the script window respectively. This
+and decrease the size of the font in the script window respectively. This
 can also be done by holding down :code:`Ctrl` and using the mouse wheel. The change
 in font size will occur across all tabs, including any new tabs opened, and will be
 retained when Workbench is closed and re-opened.
