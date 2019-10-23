@@ -3,6 +3,9 @@ setlocal enableextensions enabledelayedexpansion
 
 set KEY_NAME="HKCR\Applications\pycharm.exe\shell\open\command"
 
+reg query %KEY_NAME% 2> nul
+if %ERRORLEVEL% NEQ 0 set KEY_NAME="HKCR\Applications\pycharm64.exe\shell\open\command"
+
 FOR /F "usebackq tokens=2*" %%A IN (`REG QUERY %KEY_NAME% `) DO (
     set ValueType=%%A
     set ValueValue=%%B
