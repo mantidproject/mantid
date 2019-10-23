@@ -53,6 +53,7 @@ public:
   virtual int getName() const = 0;
 
   virtual int interceptSurface(Geometry::Track &) const = 0;
+  virtual double distance(const Geometry::Track &) const = 0;
   // Solid angle
   virtual double solidAngle(const Kernel::V3D &observer) const = 0;
   // Solid angle with a scaling of the object
