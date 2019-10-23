@@ -624,6 +624,9 @@ class MantidAxes(Axes):
                     except ValueError:
                         pass
 
+                    # blank out list that will be returned
+                    artists = []
+
                     # also remove the curve from the legend
                     if (not self.is_empty(self)) and self.legend_ is not None:
                         self.legend().draggable()
