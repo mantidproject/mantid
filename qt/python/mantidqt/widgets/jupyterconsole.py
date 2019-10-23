@@ -68,6 +68,7 @@ class InProcessJupyterConsole(RichJupyterWidget):
         if QApplication.keyboardModifiers() & Qt.ControlModifier and (event.key() == Qt.Key_Equal):
             self.change_font_size(1)
 
+
 def async_wrapper(orig_run_code, shell_instance):
     """
     Return a new method that wraps the original and runs it asynchronously
