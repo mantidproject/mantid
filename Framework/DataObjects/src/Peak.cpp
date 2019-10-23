@@ -9,6 +9,7 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
+#include "MantidGeometry/Surfaces/LineIntersectVisit.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Strings.h"
@@ -629,12 +630,11 @@ V3D Peak::getVirtualDetectorPosition(const V3D &detectorDir) const {
   if (!component) {
     return detectorDir; // the best idea we have is just the direction
   }
-
   const auto object =
       boost::dynamic_pointer_cast<const ObjComponent>(component);
-  Geometry::Track track(samplePos, detectorDir);
-  object->shape()->interceptSurface(track);
-  return track.back().exitPoint;
+  const auto distance =
+      object->shape()->distance(Geometry::Track(samplePos, detectorDir));
+  return detectorDir * distance;
 }
 
 /** After creating a peak using the Q in the lab frame,

@@ -262,7 +262,7 @@ int MeshObject2D::interceptSurface(Geometry::Track &ut) const {
 
 /**
  * Compute the distance to the first point of intersection with the mesh
- * @param track Track defining start/direction
+ * @param ut Track defining start/direction
  * @return The distance to the object
  * @throws std::runtime_error if no intersection was found
  */

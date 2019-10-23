@@ -203,7 +203,8 @@ predictPeaks(Algorithm *const alg, const std::vector<double> &hOffsets,
           std::unique_ptr<IPeak> peak;
           try {
             peak = inputPeaks.createPeak(qLab);
-          } catch (std::invalid_argument &) {
+          } catch (...) {
+            // If we can't create a valid peak we have no choice but to skip it
             continue;
           }
 
