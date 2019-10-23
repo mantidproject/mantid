@@ -820,7 +820,7 @@ related to a RepoItem
 
    @param folder: relative path inside the repository for the folder.
    @param parents Reference to the list of parents
-   @return Pointer to the RepoItem related to the given folder.
+   @return Pointer to the RepoItem related to the given folder.  
 
 **/
 RepoModel::RepoItem *RepoModel::getParent(const QString &folder,

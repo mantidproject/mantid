@@ -20,6 +20,7 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockScriptRepositoryImpl : public ScriptRepository {
 public:
+	// need to mock out download and install 
   MockScriptRepositoryImpl() { addFakeFiles(); }
   MOCK_METHOD1(download, void(const std::string &));
   MOCK_METHOD1(install, void(const std::string &));
@@ -36,6 +37,7 @@ public:
     ScriptInfo info;
     info.auto_update = std::get<1>(testFiles[path]);
     info.directory = std::get<2>(testFiles[path]);
+    info.author = "Joe Bloggs";
     return info;
   }
 
@@ -52,7 +54,7 @@ public:
   bool MockScriptRepositoryImpl::isValid() override { return true; }
 
   std::vector<std::string> MockScriptRepositoryImpl::listFiles() override {
-    return fileNames;
+    return filePaths;
   }
 
   SCRIPTSTATUS fileStatus(const std::string &file_path) {
@@ -63,22 +65,25 @@ private:
   // contains fake file entries: path, status, autoupdate, directory
   std::map<std::string, std::tuple<SCRIPTSTATUS, bool, bool>> testFiles;
 
-  std::vector<std::string> fileNames = {"TofConv",         "README.txt",
-                                        "reflectometry",   "Quick.py",
-                                        "TofConverter.py", "otherFile.py"};
+  std::vector<std::string> filePaths = {"Repo",
+                                        "Repo/README.txt",
+                                        "Repo/TofConverter.py",
+                                        "Repo/reflectometry",
+                                        "Repo/reflectometry/Reduction.py",
+                                        "Repo/reflectometry/script.py"};
   void addFakeFiles() {
     testFiles.insert(
-        fileType(fileNames[0], std::make_tuple(BOTH_UNCHANGED, false, false)));
+        fileType(filePaths[0], std::make_tuple(LOCAL_ONLY, false, true)));
     testFiles.insert(
-        fileType(fileNames[1], std::make_tuple(REMOTE_ONLY, false, false)));
+        fileType(filePaths[1], std::make_tuple(BOTH_UNCHANGED, false, false)));
     testFiles.insert(
-        fileType(fileNames[2], std::make_tuple(LOCAL_ONLY, false, true)));
+        fileType(filePaths[2], std::make_tuple(REMOTE_ONLY, false, false)));
     testFiles.insert(
-        fileType(fileNames[3], std::make_tuple(REMOTE_CHANGED, true, false)));
+        fileType(filePaths[3], std::make_tuple(BOTH_CHANGED, false, true)));
     testFiles.insert(
-        fileType(fileNames[4], std::make_tuple(LOCAL_CHANGED, true, false)));
+        fileType(filePaths[4], std::make_tuple(REMOTE_CHANGED, true, false)));
     testFiles.insert(
-        fileType(fileNames[5], std::make_tuple(BOTH_CHANGED, false, true)));
+        fileType(filePaths[5], std::make_tuple(LOCAL_CHANGED, true, false)));
   }
 };
 
