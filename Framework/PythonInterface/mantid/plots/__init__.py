@@ -169,6 +169,7 @@ class _WorkspaceArtists(object):
         else:
             new_artists = self._data_replace_cb(self._artists, workspace)
         self._set_artists(new_artists)
+        return len(self._artists) == 0
 
     def _set_artists(self, artists):
         """Ensure the stored artists is an iterable"""
@@ -463,8 +464,15 @@ class MantidAxes(Axes):
         except KeyError:
             return False
 
+        is_empty_list = []
         for workspace_artist in artist_info:
-            workspace_artist.replace_data(workspace)
+            empty = workspace_artist.replace_data(workspace)
+            is_empty_list.append(empty)
+
+        for index, empty in reversed(list(enumerate(is_empty_list))):
+            if empty:
+                artist_info.pop(index)
+
         return True
 
     def replot_artist(self, artist, errorbars=False, **kwargs):
