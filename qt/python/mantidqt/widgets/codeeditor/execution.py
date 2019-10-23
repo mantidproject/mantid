@@ -7,8 +7,10 @@
 #  This file is part of the mantidqt package
 #
 #
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals
 
+import __future__
+import ast
 import os
 
 from qtpy.QtCore import QObject, Signal
@@ -21,6 +23,40 @@ from mantidqt.widgets.codeeditor.inputsplitter import InputSplitter
 EMPTY_FILENAME_ID = '<string>'
 FILE_ATTR = '__file__'
 COMPILE_MODE = 'exec'
+
+
+def _get_imported_from_future(code_str):
+    """
+    Parse the given code and return a list of names that are imported
+    from __future__.
+    :param code_str: The code to parse
+    :return list: List of names that are imported from __future__
+    """
+    future_imports = []
+    for node in ast.walk(ast.parse(code_str)):
+        if isinstance(node, ast.ImportFrom):
+            if node.module == '__future__':
+                future_imports.extend([import_alias.name for import_alias in node.names])
+    return future_imports
+
+
+def get_future_import_compiler_flags(code_str):
+    """
+    Get the compiler flags that can be passed to `compile` that
+    correspond to the __future__ imports inside the given code.
+
+    :param code_str: The code being executed, containing __future__ imports
+    :return int: The 'bitwise or' union of compiler flags
+    """
+    flags = 0
+    for f_import_str in _get_imported_from_future(code_str):
+        try:
+            future_import = getattr(__future__, f_import_str)
+            flags |= future_import.compiler_flag
+        except AttributeError:
+            # Just pass and let the ImportError be raised on script execution
+            pass
+    return flags
 
 
 class PythonCodeExecution(QObject):
@@ -90,7 +126,8 @@ class PythonCodeExecution(QObject):
             self.globals_ns[FILE_ATTR] = filename
         else:
             filename = EMPTY_FILENAME_ID
-        compile(code_str, filename, mode=COMPILE_MODE, dont_inherit=True)
+        flags = get_future_import_compiler_flags(code_str)
+        compile(code_str, filename, mode=COMPILE_MODE, dont_inherit=True, flags=flags)
 
         with AddedToSysPath([os.path.dirname(filename)]):
             sig_progress = self.sig_exec_progress
@@ -98,7 +135,7 @@ class PythonCodeExecution(QObject):
                 sig_progress.emit(block.lineno)
                 # compile so we can set the filename
                 code_obj = compile(block.code_str, filename, mode=COMPILE_MODE,
-                                   dont_inherit=True)
+                                   dont_inherit=True, flags=flags)
                 exec (code_obj, self.globals_ns, self.globals_ns)
 
     def reset_context(self):
