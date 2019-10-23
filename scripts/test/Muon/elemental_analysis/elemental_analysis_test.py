@@ -17,11 +17,12 @@ from qtpy.QtGui import QCloseEvent
 
 import matplotlib
 from Muon.GUI.ElementalAnalysis.elemental_analysis import ElementalAnalysisGui
+from Muon.GUI.ElementalAnalysis.elemental_analysis import type_index
 from Muon.GUI.ElementalAnalysis.elemental_analysis import gen_name
 from MultiPlotting.multi_plotting_widget import MultiPlotWindow
 from MultiPlotting.multi_plotting_widget import MultiPlotWidget
 from MultiPlotting.label import Label
-type_index = {"Delayed": 1, "Prompt": 2, "Total": 3}
+
 
 
 @start_qapplication
@@ -304,9 +305,6 @@ class ElementalAnalysisTest(unittest.TestCase):
         self.gui.lines.prompt.isChecked.return_value = False
         self.gui.lines.delayed.isChecked.return_value = True
         mock_mantid.mtd['name1'].getName.return_value = 'Detector 1'
-        # mock_mantid.mtd['name1'][1].getName.return_value = 'ws with Delayed'
-        # mock_mantid.mtd['name1'][2].getName.return_value = 'ws with Prompt'
-
         self.gui.add_detector_to_plot('GE1', 'name1')
         self.assertEqual(self.gui.plotting.add_subplot.call_count, 1)
         self.assertEqual(self.gui.plotting.plot.call_count, 2)

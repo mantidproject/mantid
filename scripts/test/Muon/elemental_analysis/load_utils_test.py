@@ -70,12 +70,7 @@ class LoadUtilsTest(unittest.TestCase):
         for out, arg in iteritems(tests):
             self.assertEqual(lutils.hyphenise(arg), out)
 
-    # originally test_group_by detectors would:
-    # generate and output and workspaces
-    # generate 1-4 detectors
-    # for each detector generate a w
 
-    # test merge_workspaces
     def test_merge_workspaces(self):
         expected_output, workspaces = [], []
         detectors = range(1, 5)

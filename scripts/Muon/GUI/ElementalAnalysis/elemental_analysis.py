@@ -39,6 +39,7 @@ from Muon.GUI.Common import message_box
 import mantid.simpleapi as mantid
 
 offset = 0.9
+# Dictionary to map data type into associated spectrum number within the workspace
 type_index = {"Delayed": 1, "Prompt": 2, "Total": 3}
 
 
