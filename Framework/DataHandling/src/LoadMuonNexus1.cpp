@@ -29,6 +29,7 @@
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidNexus/MuonNexusReader.h"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidKernel/DateAndTime.h"
 // clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
@@ -43,6 +44,17 @@
 #include <cmath>
 #include <limits>
 
+using Mantid::Types::Core::DateAndTime;
+namespace {
+const std::string GOODFRM = "goodfrm";
+double estimateGoodFrames(Mantid::Types::Core::DateAndTime start_time, Mantid::Types::Core::DateAndTime current_time) {
+  Mantid::Types::Core::time_duration freq =
+      DateAndTime::durationFromSeconds(40);
+  //DateAndTime::durationFromSeconds(40)
+  auto duration = DateAndTime::secondsFromDuration(current_time - start_time);
+  return DateAndTime::secondsFromDuration(freq) * duration;
+}
+} // namespace
 namespace Mantid {
 namespace DataHandling {
 using namespace DataObjects;
@@ -864,23 +876,25 @@ void LoadMuonNexus1::addGoodFrames(DataObjects::Workspace2D_sptr localWorkspace,
       handle.getData(dataVals.get());
 
       auto &run = localWorkspace->mutableRun();
+      auto temp = run.getLogData();
+      auto start_time = DateAndTime(run.getProperty("run_start")->value());
+      auto current_time = DateAndTime::getCurrentTime();
       if (period == 0) {
         // If this is the first period
         // localWorkspace will not contain goodfrm
-        run.addProperty("goodfrm", dataVals[0]);
-        if (run.getProperty("goodfrm")->value() == "0") {
-          run.removeLogData("goodfrm");
-          run.addProperty("goodfrm", 47340);
-				}
-
+        run.addProperty(GOODFRM, dataVals[0]);
+        if (run.getProperty(GOODFRM)->value() == "0") {
+          run.removeLogData(GOODFRM);
+          run.addProperty(GOODFRM, estimateGoodFrames(start_time, current_time));
+        }
       } else {
         // If period > 0, we need to remove
         // previous goodfrm log value
-        run.removeLogData("goodfrm");
-        run.addProperty("goodfrm", dataVals[period]);
-        if (run.getProperty("goodfrm")->value() == "0") {
-          run.removeLogData("goodfrm");
-          run.addProperty("goodfrm", 100);
+        run.removeLogData(GOODFRM);
+        run.addProperty(GOODFRM, dataVals[period]);
+        if (run.getProperty(GOODFRM)->value() == "0") {
+          run.removeLogData(GOODFRM);
+          run.addProperty(GOODFRM, estimateGoodFrames(start_time, current_time));
         }
       }
     } catch (::NeXus::Exception &) {
