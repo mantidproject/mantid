@@ -498,9 +498,9 @@ set(
   inc/MantidQtWidgets/Common/PythonRunner.h
   inc/MantidQtWidgets/Common/QScienceSpinBox.h
   inc/MantidQtWidgets/Common/QtSignalChannel.h
-  inc/MantidQtWidgets/Common/ScriptRepositoryView.h
   inc/MantidQtWidgets/Common/RepoTreeView.h
   inc/MantidQtWidgets/Common/RepoModel.h
+  inc/MantidQtWidgets/Common/ScriptRepositoryView.h
   inc/MantidQtWidgets/Common/SyncedCheckboxes.h
   inc/MantidQtWidgets/Common/TextPropertyWidget.h
   inc/MantidQtWidgets/Common/UserSubWindow.h
@@ -931,7 +931,6 @@ set(TEST_FILES
     test/ProjectSaveModelTest.h
     test/ProjectSavePresenterTest.h
     test/RepoModelTest.h
-    test/ScriptRepositoryViewTest.h
     test/SelectionNotificationServiceTest.h
     test/SignalBlockerTest.h
     test/TrackedActionTest.h
@@ -968,7 +967,6 @@ mtd_add_qt_tests(
     ../../../Framework/TestHelpers/inc
     ../../../Framework/DataObjects/inc
     ../../../Framework/Crystal/inc
-    ../../../Framework/ScriptRepository/inc
 
   TEST_HELPER_SRCS
     ../../../Framework/TestHelpers/src/TearDownWorld.cpp
@@ -994,7 +992,6 @@ set(
   test/InterfaceManagerTest.h
   test/QtJSONUtilsTest.h
   test/RepoModelTest.h
-  test/ScriptRepositoryViewTest.h
   test/Batch/BuildSubtreeItemsTest.h
   test/Batch/ExtractSubtreesTest.h
   test/Batch/FindSubtreeRootsTest.h
@@ -1022,7 +1019,6 @@ mtd_add_qt_tests(
     ../../../Framework/TestHelpers/inc
     ../../../Framework/DataObjects/inc
     ../../../Framework/Crystal/inc
-    ../../../Framework/ScriptRepository/inc
     ${GMOCK_INCLUDE_DIR}
   TEST_HELPER_SRCS
     ../../../Framework/TestHelpers/src/TearDownWorld.cpp

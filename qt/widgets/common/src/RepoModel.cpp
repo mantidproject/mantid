@@ -198,7 +198,7 @@ RepoModel::~RepoModel() { delete rootItem; }
    ScriptRepository
    entries. Currently, an entry may be found on the following states:
      - LOCAL_ONLY: The file only exists locally.
-     - REMTOE_ONLY: The file has not been downloaded.
+     - REMOTE_ONLY: The file has not been downloaded.
      - REMOTE_CHANGED: A new version of the file is available.
      - LOCAL_CHANGED: The file has been changed from the original one.
      - BOTH_CHANGED: Locally and remotelly changed.
@@ -330,7 +330,6 @@ QVariant RepoModel::data(const QModelIndex &index, int role) const {
           else
             return Icons::getIcon("mdi.file-question", "black", 1.2);
         }
-
 #endif
       }
     } // end decorationRole
@@ -749,8 +748,8 @@ int RepoModel::rowCount(const QModelIndex &parent) const {
 }
 
 /** Return the number of columns defined for the given index.
- * But, for all the index, the number of columns will be always 3.
- * (path, status, autoupdate)
+ * But, for all the index, the number of columns will be always 4.
+ * (path, status, autoupdate, delete)
  *
  * @return 4.
  */
