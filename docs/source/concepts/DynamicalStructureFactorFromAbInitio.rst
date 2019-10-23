@@ -23,7 +23,7 @@ The usual workfow for calculating phonon spectra within DFT is presented in the 
 initial guess for the structure of interest.
 The initial guess should be as close as possible to an experimental structure, and is usually derived from elastic X-ray and/or neutron scattering measurements.
 Then the structure parameters are locally optimised within DFT, finding the nearest structure that minimises the DFT energy.
-At this point, there should be no effective force on the atoms.
+At this point, there should be no net force on the atoms.
 For this "relaxed" structure the dynamical matrix is calculated, either by finite displacements or perturbation theory.
 The dynamical matrix is related to the Hessian (the second derivative of the system Hamiltonian with respect to atomic displacements) by a Fourier transform:
 the eigenvectors obtained from diagonalisation of this matrix are atomic displacements
@@ -85,7 +85,8 @@ with
 :math:`\sigma_j` -- cross-section for :math:`j`-th atom
 
 
-The formula above is valid for *first-order quantum events*, i.e. transitions :math:`0 \rightarrow 1` for each phonon. (We neglect events that transfer energy *to* the scattered neutron.)
+The formula above covers the *first-order quantum events* -- specifically the transitions :math:`0 \rightarrow 1` for each phonon.
+The :math:`1 \rightarrow 0` events (i.e. energy *to* the scattered neutron) would be infrequent at experimental conditions and are neglected.
 In order to reconstruct the full spectrum one has to also consider higher-order quantum events.
 For second-order quantum events one should not only
 consider transitions :math:`0 \rightarrow 2`, but also simultaneous transitions :math:`0 \rightarrow 1`, :math:`0 \rightarrow 1'` for different phonons.
