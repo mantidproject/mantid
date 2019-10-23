@@ -288,9 +288,6 @@ void ScriptEditor::setText(int lineno, const QString &txt, int index) {
  * @param event A pointer to the QKeyPressEvent object
  */
 void ScriptEditor::keyPressEvent(QKeyEvent *event) {
-  // Avoids a bug in QScintilla
-  forwardKeyPressToBase(event);
-
   // The built-in shortcut Ctrl++ from QScintilla doesn't work for some reason
   // Creating a new QShortcut makes Ctrl++ to zoom in on the IPython console
   // stop working
@@ -299,15 +296,9 @@ void ScriptEditor::keyPressEvent(QKeyEvent *event) {
       (event->key() == Qt::Key_Plus || event->key() == Qt::Key_Equal)) {
     zoomIn();
     emit textZoomedIn();
-
-    // Doing the shortcut in this way causes an '=' to be typed if the numpad is
-    // not used so it is then removed via a backspace
-    if (!(QApplication::keyboardModifiers() & Qt::KeypadModifier)) {
-      QKeyEvent *backspEvent =
-          new QKeyEvent(QEvent::KeyPress, Qt::Key_Backspace, Qt::NoModifier);
-      QsciScintilla::keyPressEvent(backspEvent);
-      setModified(false);
-    }
+  } else {
+    // Avoids a bug in QScintilla
+    forwardKeyPressToBase(event);
   }
 
   // There is a built in Ctrl+- shortcut for zooming out, but a signal is
@@ -623,4 +614,4 @@ void ScriptEditor::replaceAll(const QString &searchString,
   this->endUndoAction();
 }
 
-int ScriptEditor::getZoom() const { return SendScintilla(SCI_GETZOOM); }
+long ScriptEditor::getZoom() const { return SendScintilla(SCI_GETZOOM); }

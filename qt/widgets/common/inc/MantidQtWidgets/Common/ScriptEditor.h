@@ -109,7 +109,7 @@ public:
                   bool forward = true);
 
   /// Get the current zoom factor
-  int getZoom() const;
+  long getZoom() const;
 
 public slots:
   /// Save the script, opening a dialog
