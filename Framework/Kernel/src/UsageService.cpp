@@ -15,8 +15,13 @@
 #include "MantidKernel/ParaViewVersion.h"
 
 #include <Poco/ActiveResult.h>
+#include <Poco/String.h>
 
 #include <json/json.h>
+
+namespace {
+constexpr auto SEPARATOR = "->";
+}
 
 namespace Mantid {
 namespace Kernel {
@@ -27,7 +32,8 @@ Kernel::Logger g_log("UsageServiceImpl");
 //----------------------------------------------------------------------------------------------
 /** FeatureUsage
  */
-FeatureUsage::FeatureUsage(const std::string &type, const std::string &name,
+FeatureUsage::FeatureUsage(const FeatureType &type,
+                           const std::vector<std::string> &name,
                            const bool internal)
     : type(type), name(name), internal(internal) {}
 
@@ -51,11 +57,40 @@ bool FeatureUsage::operator<(const FeatureUsage &r) const {
   return false;
 }
 
+/// Convert the stored feature type enum to a string
+std::string FeatureUsage::featureTypeToString() const {
+
+  switch (type) {
+  case FeatureType::Algorithm:
+    return "Algorithm";
+  case FeatureType::Feature:
+    return "Feature";
+  case FeatureType::Interface:
+    return "Interface";
+  }
+  return "Unknown";
+}
+
+/// Convert the stored vector of strings to a string eg Class1->Method1
+std::string FeatureUsage::nameToString() const {
+
+  std::string result = "";
+
+  for (std::string i : name) {
+    result = result + Poco::trim(i) + SEPARATOR;
+  }
+  size_t returnLength = result.length() - std::string(SEPARATOR).length();
+  if (returnLength > 0) {
+    result = result.substr(0, returnLength);
+  }
+  return result;
+}
+
 ::Json::Value FeatureUsage::asJson() const {
   ::Json::Value retVal;
 
-  retVal["type"] = type;
-  retVal["name"] = name;
+  retVal["type"] = featureTypeToString();
+  retVal["name"] = nameToString();
   retVal["internal"] = internal;
 
   return retVal;
@@ -106,9 +141,9 @@ void UsageServiceImpl::registerStartup() {
 
 /** registerFeatureUsage
  */
-void UsageServiceImpl::registerFeatureUsage(const std::string &type,
-                                            const std::string &name,
-                                            const bool internal) {
+void UsageServiceImpl::registerFeatureUsage(
+    const FeatureType &type, const std::vector<std::string> &name,
+    const bool internal) {
   if (isEnabled()) {
     std::lock_guard<std::mutex> _lock(m_mutex);
     m_FeatureQueue.push(FeatureUsage(type, name, internal));

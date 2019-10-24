@@ -352,8 +352,8 @@ ViewBase *MdViewerWidget::createAndSetMainViewWidget(QWidget *container,
   view->setColorScaleLock(&m_colorScaleLock);
 
   using Mantid::Kernel::UsageService;
-  UsageService::Instance().registerFeatureUsage("Interface", featureName,
-                                                false);
+  UsageService::Instance().registerFeatureUsage(
+      Mantid::Kernel::FeatureType::Interface, {featureName}, false);
   return view;
 }
 

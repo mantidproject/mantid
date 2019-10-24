@@ -86,12 +86,18 @@ public:
     TestableUsageService usageService;
     usageService.setInterval(10000);
     usageService.setEnabled(true);
-    usageService.registerFeatureUsage("Algorithm", "MyAlg.v1", true);
-    usageService.registerFeatureUsage("Interface", "MyAlg.v1", true);
-    for (size_t i = 0; i < 10000; i++) {
-      usageService.registerFeatureUsage("Algorithm", "MyLoopAlg.v1", false);
-    }
-    usageService.registerFeatureUsage("Algorithm", "MyLoopAlg.v1", true);
+    usageService.registerFeatureUsage(Mantid::Kernel::FeatureType::Algorithm,
+                                      {"MyAlg.v1"}, true);
+    usageService.registerFeatureUsage(Mantid::Kernel::FeatureType::Interface,
+                                      {"MyAlg.v1"}, true);
+    /*for (size_t i = 0; i < 10000; i++) {
+      usageService.registerFeatureUsage(Mantid::Kernel::FeatureType::Algorithm,
+                                        {"MyLoopAlg.v1"}, false);
+    }*/
+    usageService.registerFeatureUsage(Mantid::Kernel::FeatureType::Algorithm,
+                                      {"MyLoopAlg.v1"}, true);
+    usageService.registerFeatureUsage(Mantid::Kernel::FeatureType::Algorithm,
+                                      {"MyAlg.v1", "Method1"}, true);
 
     std::string message = usageService.generateFeatureUsageMessage();
 
@@ -127,6 +133,9 @@ public:
       if (type == "Algorithm" && name == "MyLoopAlg.v1" && internal == true &&
           count == 1)
         correct = true;
+      if (type == "Algorithm" && name == "MyAlg.v1->Method1" &&
+          internal == true && count == 1)
+        correct = true;
       TSM_ASSERT("Usage record was not as expected", correct)
     }
   }
@@ -136,7 +145,8 @@ public:
     usageService.setInterval(10000);
     usageService.setEnabled(true);
     for (size_t i = 0; i < 10; i++) {
-      usageService.registerFeatureUsage("Algorithm", "MyLoopAlg.v1", false);
+      usageService.registerFeatureUsage(Mantid::Kernel::FeatureType::Algorithm,
+                                        {"MyLoopAlg.v1"}, false);
     }
     // this should empty the feature usage list
     usageService.flush();
@@ -149,7 +159,8 @@ public:
     usageService.setInterval(10000);
     usageService.setEnabled(true);
     for (size_t i = 0; i < 10; i++) {
-      usageService.registerFeatureUsage("Algorithm", "MyLoopAlg.v1", false);
+      usageService.registerFeatureUsage(Mantid::Kernel::FeatureType::Algorithm,
+                                        {"MyLoopAlg.v1"}, false);
     }
     // this should empty the feature usage list
     usageService.shutdown();

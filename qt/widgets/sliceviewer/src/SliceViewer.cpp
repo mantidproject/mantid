@@ -210,7 +210,7 @@ SliceViewer::SliceViewer(QWidget *parent)
   m_rescaler = new QwtPlotRescaler(m_plot->canvas());
 
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Interface", "SliceViewer", false);
+      FeatureType::Interface, {"SliceViewer"}, false);
 }
 
 void SliceViewer::updateAspectRatios() {

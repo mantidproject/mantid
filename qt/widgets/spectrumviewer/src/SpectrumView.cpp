@@ -56,7 +56,7 @@ SpectrumView::SpectrumView(QWidget *parent)
   observePreDelete();
   observeADSClear();
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Interface", "SpectrumView", false);
+      Mantid::Kernel::FeatureType::Interface, {"SpectrumView"}, false);
 
 #ifdef Q_OS_MAC
   // Work around to ensure that floating windows remain on top of the main

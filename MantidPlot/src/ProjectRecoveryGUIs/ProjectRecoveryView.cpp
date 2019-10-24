@@ -21,7 +21,7 @@ ProjectRecoveryView::ProjectRecoveryView(QWidget *parent,
   // Set the table information
   addDataToTable();
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Interface", "ProjectRecoveryWindow", true);
+      Mantid::Kernel::FeatureType::Interface, {"ProjectRecoveryWindow"}, true);
 }
 
 void ProjectRecoveryView::addDataToTable() {
@@ -34,28 +34,32 @@ void ProjectRecoveryView::onClickLastCheckpoint() {
   // Recover last checkpoint
   m_presenter->recoverLast();
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "ProjectRecoveryWindow->RecoverLastCheckpoint", false);
+      Mantid::Kernel::FeatureType::Feature,
+      {"ProjectRecoveryWindow", "RecoverLastCheckpoint"}, false);
 }
 
 void ProjectRecoveryView::onClickOpenLastInScriptWindow() {
   // Open checkpoint in script window
   m_presenter->openLastInEditor();
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "ProjectRecoveryWindow->OpenInScriptWindow", false);
+      Mantid::Kernel::FeatureType::Feature,
+      {"ProjectRecoveryWindow", "OpenInScriptWindow"}, false);
 }
 
 void ProjectRecoveryView::onClickStartMantidNormally() {
   // Start save and close this, clear checkpoint that was offered for load
   m_presenter->startMantidNormally();
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "ProjectRecoveryWindow->StartMantidNormally", false);
+      Mantid::Kernel::FeatureType::Feature,
+      {"ProjectRecoveryWindow", "StartMantidNormally"}, false);
 }
 
 void ProjectRecoveryView::reject() {
   // Do the same as startMantidNormally
   m_presenter->startMantidNormally();
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "ProjectRecoveryWindow->StartMantidNormally", false);
+      Mantid::Kernel::FeatureType::Feature,
+      {"ProjectRecoveryWindow", "StartMantidNormally"}, false);
 }
 
 void ProjectRecoveryView::updateProgressBar(int newValue, bool err) {

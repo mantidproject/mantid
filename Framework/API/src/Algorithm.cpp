@@ -1756,10 +1756,12 @@ void Algorithm::reportCompleted(const double &duration,
  */
 void Algorithm::registerFeatureUsage() const {
   if (UsageService::Instance().isEnabled()) {
+    std::vector<std::string> featureName;
     std::ostringstream oss;
     oss << this->name() << ".v" << this->version();
-    UsageService::Instance().registerFeatureUsage("Algorithm", oss.str(),
-                                                  isChild());
+    featureName.push_back(oss.str());
+    UsageService::Instance().registerFeatureUsage(FeatureType::Algorithm,
+                                                  featureName, isChild());
   }
 }
 

@@ -42,7 +42,7 @@ TrackedAction::TrackedAction(const QIcon &icon, const QString &text,
 /** Sets the tracking name for this action
  *   @param name the tracking name for this action
  **/
-void TrackedAction::setTrackingName(const std::string &name) {
+void TrackedAction::setTrackingName(const std::vector<std::string> &name) {
   m_trackingName = name;
 }
 
@@ -51,7 +51,7 @@ void TrackedAction::setTrackingName(const std::string &name) {
  *   generateTrackingName
  *   @returns The tracking name for this action
  **/
-std::string TrackedAction::getTrackingName() const {
+std::vector<std::string> TrackedAction::getTrackingName() const {
   if (m_trackingName.empty()) {
     m_trackingName = generateTrackingName();
   }
@@ -79,9 +79,9 @@ void TrackedAction::setupTracking() {
 /** Creates a tracking name from the action text
  *   @returns A generated name using ApplicationName->ActionText
  **/
-std::string TrackedAction::generateTrackingName() const {
-  return QCoreApplication::applicationName().toStdString() + "->" +
-         QAction::text().remove("&").remove(" ").toStdString();
+std::vector<std::string> TrackedAction::generateTrackingName() const {
+  return {QCoreApplication::applicationName().toStdString(),
+          QAction::text().remove("&").remove(" ").toStdString()};
 }
 
 /** Registers the feature usage if usage is enabled
@@ -91,16 +91,16 @@ void TrackedAction::trackActivation(const bool checked) {
   UNUSED_ARG(checked);
   if (m_isTracking) {
     // do tracking
-    registerUsage(getTrackingName());
+    registerUsage({getTrackingName()});
   }
 }
 
 /** Registers the feature usage with the usage service
  *   @param name The name to use when registering usage
  **/
-void TrackedAction::registerUsage(const std::string &name) {
-  Mantid::Kernel::UsageService::Instance().registerFeatureUsage("Feature", name,
-                                                                false);
+void TrackedAction::registerUsage(const std::vector<std::string> &name) {
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      Mantid::Kernel::FeatureType::Feature, name, false);
 }
 } // namespace MantidWidgets
 } // namespace MantidQt

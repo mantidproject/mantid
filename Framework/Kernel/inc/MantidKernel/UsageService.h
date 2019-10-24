@@ -22,6 +22,11 @@
 namespace Mantid {
 namespace Kernel {
 
+/** An enum specifying the 3 possible features types that can be logged in the
+    usage service
+*/
+enum class FeatureType { Algorithm, Interface, Feature };
+
 /** UsageReporter : The Usage reporter is responsible for collating, and sending
   all usage data.
   This  centralizes all the logic covering Usage Reporting including:
@@ -36,15 +41,19 @@ namespace Kernel {
 class FeatureUsage {
 public:
   /// Constructor
-  FeatureUsage(const std::string &type, const std::string &name,
+  FeatureUsage(const FeatureType &type, const std::vector<std::string> &name,
                const bool internal);
   bool operator<(const FeatureUsage &r) const;
 
   ::Json::Value asJson() const;
 
-  std::string type;
-  std::string name;
+  FeatureType type;
+  std::vector<std::string> name;
   bool internal;
+
+protected:
+  std::string featureTypeToString() const;
+  std::string nameToString() const;
 };
 
 class MANTID_KERNEL_DLL UsageServiceImpl {
@@ -57,8 +66,12 @@ public:
   void setInterval(const uint32_t seconds = 60);
   /// Registers the Startup of Mantid
   void registerStartup();
-  /// Registers the use of a feature in mantid
-  void registerFeatureUsage(const std::string &type, const std::string &name,
+  /// Registers the use of a feature in mantid. Just support a version using
+  /// vector for now rather than additionally providing a version that takes a
+  /// single string. This will prevent any old style usage with name="a->b"
+  /// sneaking through
+  void registerFeatureUsage(const FeatureType &type,
+                            const std::vector<std::string> &name,
                             const bool internal);
 
   /// Returns true if usage reporting is enabled
