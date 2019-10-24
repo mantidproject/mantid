@@ -56,7 +56,7 @@ class MultiPythonFileInterpreter(QWidget):
         self.setLayout(layout)
         layout.setContentsMargins(0, 0, 0, 0)
 
-        self.zoom_level = None
+        self.zoom_level = 0
 
         # add a single editor by default
         self.append_new_editor()
@@ -121,12 +121,9 @@ class MultiPythonFileInterpreter(QWidget):
             # as these is used.
             current_zoom = self._tabs.widget(0).editor.getZoom()
         else:
-            if self.zoom_level is None:
-                # Default zoom level
-                current_zoom = 0.5
-            else:
-                # Zoom level of last closed tab
-                current_zoom = self.zoom_level
+            # Otherwise the zoom level of the last tab closed is used
+            # Or the default (0) if this is the very first tab
+            current_zoom = self.zoom_level
 
         interpreter = PythonFileInterpreter(font, content, filename=filename,
                                             parent=self)
