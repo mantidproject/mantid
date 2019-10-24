@@ -46,16 +46,13 @@ public:
     return 1;
   }
 
-  const std::string &
-  MockScriptRepositoryImpl::description(const std::string &path) override {
+  const std::string &description(const std::string &path) override {
     return path;
   }
 
-  bool MockScriptRepositoryImpl::isValid() override { return true; }
+  bool isValid() override { return true; }
 
-  std::vector<std::string> MockScriptRepositoryImpl::listFiles() override {
-    return filePaths;
-  }
+  std::vector<std::string> listFiles() override { return filePaths; }
 
   SCRIPTSTATUS fileStatus(const std::string &file_path) {
     return std::get<0>(testFiles[file_path]);
