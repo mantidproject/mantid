@@ -80,7 +80,5 @@ bool BaseInstrumentModel::isErrorCode(const int run) {
   return (run == ERRORCODE);
 }
 
-std::string BaseInstrumentModel::getInstrument() { return m_instrumentName; }
-
 } // namespace CustomInterfaces
 } // namespace MantidQt

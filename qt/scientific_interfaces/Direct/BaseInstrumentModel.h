@@ -27,17 +27,9 @@ public:
   std::string dataFileName();
   int currentRun();
   bool isErrorCode(const int run);
-  std::string getInstrument();
+  const std::string getInstrument() { return m_instrumentName; };
 
-  void setTmpName(const std::string &name) { m_tmpName = name; };
-  void setInstrumentName(const std::string &name) { m_instrumentName = name; };
-  void setWSName(const std::string &name) { m_wsName = name; };
-  const std::string getTmpName() { return m_tmpName; };
-  const std::string getInstrumentName() { return m_instrumentName; };
-  const std::string getWSName() { return m_wsName; };
-
-
-private:
+protected:
   int m_currentRun;
   std::string m_tmpName;
   std::string m_instrumentName;

@@ -28,9 +28,9 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 ALFView_model::ALFView_model() : m_numberOfTubesInAverage(0), m_currentRun(0) {
-  setTmpName("ALF_tmp");
-  setInstrumentName("ALF");
-  setWSName("ALFData");
+  m_tmpName = "ALF_tmp";
+  m_instrumentName = "ALF";
+  m_wsName = "ALFData";
 }
 
 /*
@@ -43,19 +43,19 @@ std::pair<int, std::string> ALFView_model::loadData(const std::string &name) {
   auto alg = AlgorithmManager::Instance().create("Load");
   alg->initialize();
   alg->setProperty("Filename", name);
-  alg->setProperty("OutputWorkspace", getTmpName()); // write to tmp ws
+  alg->setProperty("OutputWorkspace", m_tmpName); // write to tmp ws
   alg->execute();
   auto ws =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(getTmpName());
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_tmpName);
   int runNumber = ws->getRunNumber();
   std::string message = "success";
   auto bools = isDataValid();
   if (bools["IsValidInstrument"]) {
     rename();
-
+    m_numberOfTubesInAverage = 0;
   } else {
     // reset to the previous data
-    message = "Not the corrct instrument, expected " + getInstrumentName();
+    message = "Not the corrct instrument, expected " + m_instrumentName;
     remove();
   }
   if (bools["IsValidInstrument"] && !bools["IsItDSpace"]) {
@@ -70,11 +70,11 @@ std::pair<int, std::string> ALFView_model::loadData(const std::string &name) {
  */
 std::map<std::string, bool> ALFView_model::isDataValid() {
   auto ws =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(getTmpName());
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_tmpName);
   bool isItALF = false;
   bool isItDSpace = false;
 
-  if (ws->getInstrument()->getName() == getInstrumentName()) {
+  if (ws->getInstrument()->getName() == m_instrumentName) {
     isItALF = true;
   }
   auto axis = ws->getAxis(0);
@@ -90,18 +90,17 @@ std::map<std::string, bool> ALFView_model::isDataValid() {
  * If already d-space does nothing.
  */
 void ALFView_model::transformData() {
-  const std::string wsName = getWSName();
   auto normAlg = AlgorithmManager::Instance().create("NormaliseByCurrent");
   normAlg->initialize();
-  normAlg->setProperty("InputWorkspace", wsName);
-  normAlg->setProperty("OutputWorkspace", wsName);
+  normAlg->setProperty("InputWorkspace", m_wsName);
+  normAlg->setProperty("OutputWorkspace", m_wsName);
   normAlg->execute();
 
   auto dSpacingAlg = AlgorithmManager::Instance().create("ConvertUnits");
   dSpacingAlg->initialize();
-  dSpacingAlg->setProperty("InputWorkspace", wsName);
+  dSpacingAlg->setProperty("InputWorkspace", m_wsName);
   dSpacingAlg->setProperty("Target", "dSpacing");
-  dSpacingAlg->setProperty("OutputWorkspace", wsName);
+  dSpacingAlg->setProperty("OutputWorkspace", m_wsName);
   dSpacingAlg->execute();
 }
 
@@ -123,12 +122,12 @@ void ALFView_model::storeSingleTube(const std::string &name) {
 }
 std::string ALFView_model::WSName() {
   const std::string name =
-      getInstrumentName() + std::to_string(getCurrentRun());
+      m_instrumentName + std::to_string(getCurrentRun());
   return EXTRACTEDWS + name;
 }
 
 void ALFView_model::averageTube() {
-  const std::string name = getInstrumentName() + std::to_string(getCurrentRun());
+  const std::string name = m_instrumentName + std::to_string(getCurrentRun());
   const int oldTotalNumber = m_numberOfTubesInAverage;
   // multiply up current average
   auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
@@ -184,14 +183,14 @@ bool ALFView_model::averageTubeConditon(
                     tabBools.find("hasCurve")->second);
     return (m_numberOfTubesInAverage > 0 && tabBools.find("isTube")->second &&
             ifCurve &&
-            hasTubeBeenExtracted(getInstrumentName() +
+            hasTubeBeenExtracted(m_instrumentName +
                                  std::to_string(getCurrentRun())));
   } catch (...) {
     return false;
   }
 }
 void ALFView_model::extractSingleTube() {
-  storeSingleTube(getInstrumentName() + std::to_string(getCurrentRun()));
+  storeSingleTube(m_instrumentName + std::to_string(getCurrentRun()));
   m_numberOfTubesInAverage = 1;
 }
 
