@@ -73,6 +73,7 @@ class FigureInteractionTest(unittest.TestCase):
             call('resize_event', interactor.mpl_redraw_annotations),
             call('figure_leave_event', interactor.on_leave),
             call('axis_leave_event', interactor.on_leave),
+            call('scroll_event', interactor.on_scroll)
         ]
         fig_manager.canvas.mpl_connect.assert_has_calls(expected_call)
         self.assertEqual(len(expected_call), fig_manager.canvas.mpl_connect.call_count)

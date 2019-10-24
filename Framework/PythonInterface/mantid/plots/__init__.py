@@ -52,6 +52,7 @@ from mantid.kernel import logger
 from mantid.plots import helperfunctions, plotfunctions, plotfunctions3D
 from mantid.plots.helperfunctions import get_normalize_by_bin_width
 from mantid.plots.scales import PowerScale, SquareScale
+from mantid.plots.utility import artists_hidden
 
 BIN_AXIS = 0
 SPEC_AXIS = 1
@@ -210,6 +211,7 @@ class MantidAxes(Axes):
         super(MantidAxes, self).__init__(*args, **kwargs)
         self.tracked_workspaces = dict()
         self.creation_args = []
+        self.interactive_markers = []
 
     def add_artist_correctly(self, artist):
         """
@@ -490,22 +492,25 @@ class MantidAxes(Axes):
         return new_artist
 
     def relim(self, visible_only=True):
-        Axes.relim(self, visible_only)  # relim on any non-errorbar objects
-        lower_xlim, lower_ylim = self.dataLim.get_points()[0]
-        upper_xlim, upper_ylim = self.dataLim.get_points()[1]
-        for container in self.containers:
-            if isinstance(container, ErrorbarContainer) and (
-                (visible_only and not helperfunctions.errorbars_hidden(container))
-                    or not visible_only):
-                min_x, max_x, min_y, max_y = helperfunctions.get_errorbar_bounds(container)
-                lower_xlim = min(lower_xlim, min_x) if min_x else lower_xlim
-                upper_xlim = max(upper_xlim, max_x) if max_x else upper_xlim
-                lower_ylim = min(lower_ylim, min_y) if min_y else lower_ylim
-                upper_ylim = max(upper_ylim, max_y) if max_y else upper_ylim
+        # Hiding the markers during the the relim ensures they are not factored
+        # in (assuming that visible_only is True)
+        with artists_hidden(self.interactive_markers):
+            Axes.relim(self, visible_only)  # relim on any non-errorbar objects
+            lower_xlim, lower_ylim = self.dataLim.get_points()[0]
+            upper_xlim, upper_ylim = self.dataLim.get_points()[1]
+            for container in self.containers:
+                if isinstance(container, ErrorbarContainer) and (
+                    (visible_only and not helperfunctions.errorbars_hidden(container))
+                        or not visible_only):
+                    min_x, max_x, min_y, max_y = helperfunctions.get_errorbar_bounds(container)
+                    lower_xlim = min(lower_xlim, min_x) if min_x else lower_xlim
+                    upper_xlim = max(upper_xlim, max_x) if max_x else upper_xlim
+                    lower_ylim = min(lower_ylim, min_y) if min_y else lower_ylim
+                    upper_ylim = max(upper_ylim, max_y) if max_y else upper_ylim
 
-        xys = [[lower_xlim, lower_ylim], [upper_xlim, upper_ylim]]
-        # update_datalim will update limits with union of current lims and xys
-        self.update_datalim(xys)
+            xys = [[lower_xlim, lower_ylim], [upper_xlim, upper_ylim]]
+            # update_datalim will update limits with union of current lims and xys
+            self.update_datalim(xys)
 
     @staticmethod
     def is_empty(axes):
