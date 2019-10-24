@@ -886,6 +886,8 @@ void LoadMuonNexus1::addGoodFrames(DataObjects::Workspace2D_sptr localWorkspace,
         if (run.getProperty(GOODFRM)->value() == "0") {
           run.removeLogData(GOODFRM);
           run.addProperty(GOODFRM, estimateGoodFrames(start_time, current_time));
+          g_log.warning("The number of good frames is an estimate");
+
         }
       } else {
         // If period > 0, we need to remove
@@ -895,6 +897,7 @@ void LoadMuonNexus1::addGoodFrames(DataObjects::Workspace2D_sptr localWorkspace,
         if (run.getProperty(GOODFRM)->value() == "0") {
           run.removeLogData(GOODFRM);
           run.addProperty(GOODFRM, estimateGoodFrames(start_time, current_time));
+          g_log.warning("The number of good frames is an estimate");
         }
       }
     } catch (::NeXus::Exception &) {
