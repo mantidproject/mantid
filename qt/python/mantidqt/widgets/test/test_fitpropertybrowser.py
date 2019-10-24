@@ -55,6 +55,7 @@ class FitPropertyBrowserTest(unittest.TestCase):
         property_browser.workspaceName = Mock(return_value=name)
         property_browser.startX = Mock(return_value=0.15)
         property_browser.endX = Mock(return_value=0.95)
+        property_browser.get_axes().get_legend = Mock(return_value=None)
         property_browser.plot_guess()
 
         self.assertEqual(1, property_browser.get_axes().plot.call_count)
