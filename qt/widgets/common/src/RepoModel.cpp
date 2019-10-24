@@ -165,8 +165,8 @@ RepoModel::RepoModel(QObject *parent) : QAbstractItemModel(parent) {
   repo_path = QString::fromStdString(config.getString("ScriptLocalRepository"));
   rootItem = new RepoItem("/");
   using Mantid::API::ScriptRepository;
-  using Mantid::API::ScriptRepository_sptr;
   using Mantid::API::ScriptRepositoryFactory;
+  using Mantid::API::ScriptRepository_sptr;
   repo_ptr = ScriptRepositoryFactory::Instance().create("ScriptRepositoryImpl");
   connect(&download_watcher, SIGNAL(finished()), this,
           SLOT(downloadFinished()));
@@ -820,7 +820,7 @@ related to a RepoItem
 
    @param folder: relative path inside the repository for the folder.
    @param parents Reference to the list of parents
-   @return Pointer to the RepoItem related to the given folder.  
+   @return Pointer to the RepoItem related to the given folder.
 
 **/
 RepoModel::RepoItem *RepoModel::getParent(const QString &folder,

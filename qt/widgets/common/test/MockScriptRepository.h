@@ -20,7 +20,7 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockScriptRepositoryImpl : public ScriptRepository {
 public:
-	// need to mock out download and install 
+  // need to mock out download and install
   MockScriptRepositoryImpl() { addFakeFiles(); }
   MOCK_METHOD1(download, void(const std::string &));
   MOCK_METHOD1(install, void(const std::string &));
