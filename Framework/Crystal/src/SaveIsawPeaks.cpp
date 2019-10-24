@@ -15,6 +15,8 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Utils.h"
 #include <Poco/File.h>
@@ -186,8 +188,21 @@ void SaveIsawPeaks::exec() {
   } else {
     out.open(filename.c_str());
 
-    out << "Version: 2.0  Facility: SNS ";
-    out << " Instrument: " << inst->getName() << "  Date: ";
+    const auto instrumentName = inst->getName();
+    std::string facilityName;
+    try {
+      facilityName = ConfigService::Instance()
+                         .getInstrument(instrumentName)
+                         .facility()
+                         .name();
+    } catch (Exception::NotFoundError &) {
+      g_log.warning() << "Instrument " << instrumentName
+                      << " not found at any defined facility. Setting facility "
+                         "name to Unknown\n";
+      facilityName = "Unknown";
+    }
+    out << "Version: 2.0  Facility: " << facilityName;
+    out << "  Instrument: " << instrumentName << "  Date: ";
 
     // TODO: The experiment date might be more useful than the instrument date.
     // For now, this allows the proper instrument to be loaded back after
@@ -213,8 +228,7 @@ void SaveIsawPeaks::exec() {
     }
     out << T0 << '\n';
 
-    // ============================== Save .detcal info
-    // =========================================
+    //  Save .detcal info
     if (true) {
       out << "4 DETNUM  NROWS  NCOLS   WIDTH   HEIGHT   DEPTH   DETD   CenterX "
              "  CenterY   CenterZ    BaseX    BaseY    BaseZ      UpX      UpY "
@@ -301,9 +315,8 @@ void SaveIsawPeaks::exec() {
   double qSign = -1.0;
   if (ws->getConvention() == "Crystallography")
     qSign = 1.0;
-  // ============================== Save all Peaks
-  // =========================================
 
+  // Save all Peaks
   // Go in order of run numbers
   int sequenceNumber = appendPeakNumb;
   runMap_t::iterator runMap_it;
