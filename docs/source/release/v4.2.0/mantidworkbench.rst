@@ -38,6 +38,10 @@ Improvements
 - The keyboard shortcuts Ctrl++ and Ctrl+- can now be used to increase/decrease the font size in the script editor.
 - It is now possible to input axis limits in the figure options using scientific notation.
 - The sub-tabs in the Curves tab in plot options now contain an "Apply to All" button which copies the properties of the current curve to all other curves in the plot.
+- The auto-complete in Workbench's script editor has been improved.
+- There are now forward and back buttons on figures to go back and forward through figure zoom states.
+- The home button on figures now always centres the figure's contents.
+- You can now zoom in/out on figures by scrolling and pan figures using the middle mouse button.
 
 Bugfixes
 ########
@@ -57,5 +61,6 @@ Bugfixes
 - Fixed an issue where the plot legend would no longer be movable after removing a plot guess.
 - The fitting curves in the plot are now deleted when the fit results workspaces are deleted.
 - An error is no longer raised when attempting to open plot options, or the fitting tab, on a figure containing a line plotted using a script without a spectrum number being specified.
+- Tabs in the script editor no longer change order when Workbench is closed and reopened.
 
 :ref:`Release 4.2.0 <v4.2.0>`

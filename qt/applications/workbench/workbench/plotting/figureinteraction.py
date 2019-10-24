@@ -22,6 +22,7 @@ from qtpy.QtWidgets import QActionGroup, QMenu, QApplication
 # third party imports
 from mantid.api import AnalysisDataService as ads
 from mantid.plots import MantidAxes
+from mantid.plots.utility import zoom
 from mantid.py3compat import iteritems
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.plotting.markers import SingleMarker
@@ -70,6 +71,7 @@ class FigureInteraction(object):
         self._cids.append(canvas.mpl_connect('resize_event', self.mpl_redraw_annotations))
         self._cids.append(canvas.mpl_connect('figure_leave_event', self.on_leave))
         self._cids.append(canvas.mpl_connect('axis_leave_event', self.on_leave))
+        self._cids.append(canvas.mpl_connect('scroll_event', self.on_scroll))
 
         self.canvas = canvas
         self.toolbar_manager = ToolbarStateManager(self.canvas.toolbar)
@@ -77,7 +79,6 @@ class FigureInteraction(object):
         self.fit_browser = fig_manager.fit_browser
         self.errors_manager = FigureErrorsManager(self.canvas)
         self.markers = []
-        self.vertical_markers = []
         self.valid_lines = VALID_LINE_STYLE
         self.valid_colors = VALID_COLORS
         self.default_marker_name = 'marker'
@@ -88,12 +89,24 @@ class FigureInteraction(object):
 
     def disconnect(self):
         """
-        Disconnects all registered event handers
+        Disconnects all registered event handlers
         """
-        for id in self._cids:
-            self.canvas.mpl_disconnect(id)
+        for cid in self._cids:
+            self.canvas.mpl_disconnect(cid)
 
     # ------------------------ Handlers --------------------
+    def on_scroll(self, event):
+        """Respond to scroll events: zoom in/out"""
+        self.canvas.toolbar.push_current()
+        if not getattr(event, 'inaxes', None):
+            return
+        zoom_factor = 1.05 + abs(event.step)/6
+        if event.button == 'up':  # zoom in
+            zoom(event.inaxes, event.xdata, event.ydata, factor=zoom_factor)
+        elif event.button == 'down':  # zoom out
+            zoom(event.inaxes, event.xdata, event.ydata, factor=1/zoom_factor)
+        event.canvas.draw()
+
     def on_mouse_button_press(self, event):
         """Respond to a MouseEvent where a button was pressed"""
         # local variables to avoid constant self lookup
@@ -127,9 +140,29 @@ class FigureInteraction(object):
                 self._show_axis_editor(event)
             elif len(marker_selected) == 1:
                 self._edit_marker(marker_selected[0])
+        elif event.button == canvas.buttond.get(Qt.MiddleButton):
+            if self.toolbar_manager.is_zoom_active():
+                self.toolbar_manager.emit_sig_home_clicked()
+            # Activate pan on middle button press
+            elif not self.toolbar_manager.is_tool_active():
+                if event.inaxes and event.inaxes.can_pan():
+                    event.button = 1
+                    try:
+                        self.canvas.toolbar.press_pan(event)
+                    finally:
+                        event.button = 3
 
     def on_mouse_button_release(self, event):
         """ Stop moving the markers when the mouse button is released """
+        # Release pan on middle button release
+        if event.button == self.canvas.buttond.get(Qt.MiddleButton):
+            if not self.toolbar_manager.is_tool_active():
+                event.button = 1
+                try:
+                    self.canvas.toolbar.release_pan(event)
+                finally:
+                    event.button = 3
+
         if self.toolbar_manager.is_tool_active():
             for marker in self.markers:
                 marker.add_all_annotations()
@@ -141,10 +174,17 @@ class FigureInteraction(object):
             self.stop_markers(x_pos, y_pos)
 
     def on_leave(self, event):
-        """When leaving the axis or canvas, restore cursor to default one and stop moving the markers"""
+        """
+        When leaving the axis or canvas, restore cursor to default one
+        and stop moving the markers
+        """
         QApplication.restoreOverrideCursor()
         if event:
             self.stop_markers(event.xdata, event.ydata)
+
+    def set_all_markers_visible(self, visible):
+        for marker in self.markers:
+            marker.set_visible(visible)
 
     def stop_markers(self, x_pos, y_pos):
         """

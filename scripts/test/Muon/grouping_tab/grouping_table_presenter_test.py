@@ -13,7 +13,7 @@ from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import Groupi
 from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_presenter import GroupingTablePresenter
 from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_view import GroupingTableView
 from Muon.GUI.Common.muon_group import MuonGroup
-from Muon.GUI.Common.observer_pattern import Observer
+from mantidqt.utils.observer_pattern import Observer
 
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 

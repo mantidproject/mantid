@@ -30,9 +30,7 @@ Usage
 	import os
 
 	ws = CreateSampleWorkspace()
-	compInfo = ws.componentInfo()
-	detInfo = ws.detectorInfo()
-	file_name  = "example_save_Nexus_geometry_1.nxs"
+	file_name  = "example_save_nexus_geometry.nxs"
 	path = os.path.join(os.path.expanduser("~"), file_name)
 
 	SaveNexusGeometry(ws, path)
@@ -58,45 +56,6 @@ Output:
           pass
 
     removeFiles([file_name])
-
-
-**Example - basic example using SaveNexusGeometry, with specific H5 root group**
-
-.. testcode:: SaveNexusGeometryExampleOption
-
-	import os
-
-	ws = CreateSampleWorkspace()
-	compInfo = ws.componentInfo()
-	detInfo = ws.detectorInfo()
-	file_name  = "example_save_Nexus_geometry_2.hdf5"
-	path = os.path.join(os.path.expanduser("~"), file_name)
-
-	SaveNexusGeometry(ws, path)
-	print(os.path.isfile(path))
-
-
-
-Output:
-
-.. testoutput:: SaveNexusGeometryExampleOption
-	
-	True
-
-.. testcleanup:: SaveNexusGeometryExampleOption
-
-    import os
-    def removeFiles(files):
-      for ws in files:
-        try:
-          path = os.path.join(os.path.expanduser("~"), ws)
-          os.remove(path)
-        except:
-          pass
-
-    removeFiles([file_name])
-
-
 
 .. categories::
 

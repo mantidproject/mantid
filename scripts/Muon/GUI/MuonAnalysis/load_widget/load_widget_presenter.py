@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from Muon.GUI.Common.observer_pattern import Observer, Observable, GenericObserver
+from mantidqt.utils.observer_pattern import Observer, Observable, GenericObserver
 
 CO_ADD = 'Co-Add'
 SIMULTANEOUS = 'Simultaneous'

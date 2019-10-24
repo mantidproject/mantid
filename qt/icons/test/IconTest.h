@@ -9,31 +9,9 @@
 
 #include "MantidQtIcons/Icon.h"
 
-#include <QApplication>
 #include <cxxtest/TestSuite.h>
 
 using namespace MantidQt::Icons;
-
-/// This QApplication object is required to construct the view
-class QApplicationHolder : CxxTest::GlobalFixture {
-public:
-  bool setUpWorld() override {
-    int argc(0);
-    char **argv = {};
-    m_app = new QApplication(argc, argv);
-    return true;
-  }
-
-  bool tearDownWorld() override {
-    delete m_app;
-    return true;
-  }
-
-private:
-  QApplication *m_app;
-};
-
-static QApplicationHolder MAIN_QAPPLICATION;
 
 class IconTest : public CxxTest::TestSuite {
 public:

@@ -7,7 +7,7 @@
 from __future__ import (absolute_import, division, unicode_literals)
 
 from Muon.GUI.Common.fitting_tab_widget.workspace_selector_view import WorkspaceSelectorView
-from Muon.GUI.Common.observer_pattern import GenericObserver, GenericObserverWithArgPassing
+from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
 from Muon.GUI.Common import thread_model
 from Muon.GUI.Common.ADSHandler.workspace_naming import get_group_or_pair_from_name

@@ -16,7 +16,7 @@ from Muon.GUI.Common.ADSHandler.workspace_naming import get_fft_workspace_name, 
     get_group_or_pair_from_name
 import re
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
-from Muon.GUI.Common.observer_pattern import GenericObservable
+from mantidqt.utils.observer_pattern import GenericObservable
 from Muon.GUI.FrequencyDomainAnalysis.frequency_context import FREQUENCY_EXTENSIONS
 
 

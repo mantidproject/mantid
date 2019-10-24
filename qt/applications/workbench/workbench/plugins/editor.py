@@ -131,8 +131,11 @@ class MultiFileEditor(PluginWidget):
         self.editors.current_editor().editor.zoomTo(int(zoom_level))
 
     def writeSettings(self, settings):
-        settings.set(TAB_SETTINGS_KEY, set(self.tabs_open_on_closing))
         settings.set(ZOOM_LEVEL_KEY, self.editors_zoom_level)
+        
+        no_duplicates = []
+        [no_duplicates.append(x) for x in self.tabs_open_on_closing if x not in no_duplicates]
+        settings.set(TAB_SETTINGS_KEY, no_duplicates)
 
     def register_plugin(self):
         self.main.add_dockwidget(self)

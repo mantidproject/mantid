@@ -56,7 +56,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "testWS"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName", destinationFile));
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("H5Path", "algorithm_test_data"));
+        alg.setPropertyValue("EntryName", "algorithm_test_data"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
