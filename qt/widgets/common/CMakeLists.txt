@@ -713,6 +713,7 @@ set(
   inc/MantidQtWidgets/Common/MdSettings.h
   inc/MantidQtWidgets/Common/NonOrthogonal.h
   inc/MantidQtWidgets/Common/IOptionsDialog.h
+  inc/MantidQtWidgets/Common/MockOptionsDialog.h
   inc/MantidQtWidgets/Common/OptionsDialog.h
   inc/MantidQtWidgets/Common/OptionsDialogModel.h
   inc/MantidQtWidgets/Common/OptionsDialogPresenter.h
