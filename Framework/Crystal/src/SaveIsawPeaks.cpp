@@ -125,7 +125,7 @@ void SaveIsawPeaks::exec() {
     // Take out the "bank" part of the bank name and convert to an int
     if (bankPart == "bank")
       bankName = bankName.substr(4, bankName.size() - 4);
-    else if (bankPart == "WISH")
+    else if (bankPart == "WISHpanel")
       bankName = bankName.substr(9, bankName.size() - 9);
     Strings::convert(bankName, bank);
 
