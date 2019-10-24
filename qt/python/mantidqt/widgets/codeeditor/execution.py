@@ -127,6 +127,8 @@ class PythonCodeExecution(QObject):
         else:
             filename = EMPTY_FILENAME_ID
         flags = get_future_import_compiler_flags(code_str)
+        # This line checks the whole code string for syntax errors, so that no
+        # code blocks are executed if the script has invalid syntax.
         compile(code_str, filename, mode=COMPILE_MODE, dont_inherit=True, flags=flags)
 
         with AddedToSysPath([os.path.dirname(filename)]):
