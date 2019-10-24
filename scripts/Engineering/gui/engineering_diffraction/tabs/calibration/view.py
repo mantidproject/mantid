@@ -26,6 +26,10 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
         self.finder_vanadium.setLabelText("Vanadium #")
         self.finder_vanadium.setInstrumentOverride(instrument)
 
+        self.finder_path.setLabelText("Path")
+        self.finder_path.isForRunFiles(False)
+        self.finder_path.setReadOnly(True)
+
     def set_on_text_changed(self, slot):
         self.finder_vanadium.fileTextChanged.connect(slot)
         self.finder_calib.fileTextChanged.connect(slot)
@@ -36,6 +40,12 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
 
     def set_on_calibrate_clicked(self, slot):
         self.button_calibrate.clicked.connect(slot)
+
+    def set_on_radio_new_toggled(self, slot):
+        self.radio_newCalib.toggled.connect(slot)
+
+    def set_on_radio_existing_toggled(self, slot):
+        self.radio_loadCalib.toggled.connect(slot)
 
     def set_enable_controls_connection(self, slot):
         self.sig_enable_controls.connect(slot)
@@ -61,6 +71,12 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
 
     def get_calib_valid(self):
         return self.finder_calib.isValid()
+
+    def get_path_filename(self):
+        return self.finder_path.getFirstFilename()
+
+    def get_path_valid(self):
+        return self.finder_path.isValid()
 
     def get_plot_output(self):
         return self.check_plotOutput.isChecked()

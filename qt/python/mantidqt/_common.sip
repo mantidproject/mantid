@@ -896,6 +896,7 @@ public:
     void setLabelMinWidth(const int);
     void setText(const QString&);
     void setUserInput(const QVariant &);
+    void setReadOnly(bool readOnly);
 
 signals:
     void fileTextChanged(const QString & /*_t1*/);

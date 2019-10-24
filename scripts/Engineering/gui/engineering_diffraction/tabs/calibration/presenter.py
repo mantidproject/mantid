@@ -7,6 +7,9 @@
 # pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
 
+
+from qtpy.QtWidgets import QMessageBox
+
 from Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT
 from mantidqt.utils.asynchronous import AsyncTask
 from mantid.simpleapi import logger
@@ -26,21 +29,30 @@ class CalibrationPresenter(object):
         # Connect view signals to local functions.
         self.view.set_on_calibrate_clicked(self.on_calibrate_clicked)
         self.view.set_enable_controls_connection(self.set_calibrate_controls_enabled)
+        self.view.set_on_radio_new_toggled(self.set_create_new_enabled)
+        self.view.set_on_radio_existing_toggled(self.set_load_existing_enabled)
 
         # Main Window State Variables
         self.instrument = "ENGINX"
         self.rb_num = None
 
     def on_calibrate_clicked(self):
-        # Do nothing if run numbers are invalid or view is searching.
-        if not self.validate_run_numbers():
-            return
-        if self.view.is_searching():
-            return
-        vanadium_no = self.view.get_vanadium_filename()
-        calib_no = self.view.get_calib_filename()
         plot_output = self.view.get_plot_output()
-        self.start_calibration_worker(vanadium_no, calib_no, plot_output, self.rb_num)
+        if self.view.radio_newCalib.isChecked():
+            # Do nothing if run numbers are invalid or view is searching.
+            if not self.validate_run_numbers():
+                if self.view.is_searching():
+                    self._create_error_message("Mantid is searching for the file. Please wait.")
+                return
+            vanadium_no = self.view.get_vanadium_filename()
+            calib_no = self.view.get_calib_filename()
+            self.start_calibration_worker(vanadium_no, calib_no, plot_output, self.rb_num)
+        elif self.view.radio_loadCalib.isChecked():
+            if not self.validate_path():
+                return
+            filename = self.view.get_path_filename()
+            instrument, vanadium_no, calib_no = self.model.load_existing_gsas_parameters(filename)
+            self.start_calibration_worker(vanadium_no, calib_no, plot_output, self.rb_num)
 
     def start_calibration_worker(self, vanadium_path, calib_path, plot_output, rb_num):
         """
@@ -61,6 +73,9 @@ class CalibrationPresenter(object):
         self.pending_calibration["ceria_path"] = calib_path
         self.set_calibrate_controls_enabled(False)
         self.worker.start()
+
+    def _create_error_message(self, message):
+        QMessageBox.warning(self.view, "Engineering Diffraction - Error", str(message))
 
     def set_current_calibration(self, success_info):
         logger.information("Thread executed in " + str(success_info.elapsed_time) + " seconds.")
@@ -83,6 +98,9 @@ class CalibrationPresenter(object):
         else:
             return False
 
+    def validate_path(self):
+        return self.view.get_path_valid()
+
     def emit_enable_button_signal(self):
         self.view.sig_enable_controls.emit(True)
 
@@ -93,6 +111,13 @@ class CalibrationPresenter(object):
     def _on_error(self, failure_info):
         logger.warning(str(failure_info))
         self.emit_enable_button_signal()
+
+    def set_create_new_enabled(self, enabled):
+        self.view.finder_vanadium.setReadOnly(not enabled)
+        self.view.finder_calib.setReadOnly(not enabled)
+
+    def set_load_existing_enabled(self, enabled):
+        self.view.finder_path.setReadOnly(not enabled)
 
     # -----------------------
     # Observers / Observables
