@@ -80,7 +80,7 @@ public:
     using namespace Mantid::DataObjects;
 
     PeaksWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::createPeaksWorkspace();
+        WorkspaceCreationHelper::createPeaksWorkspace(2);
 
     // Name of the output workspace.
     std::string outWSName("FilterPeaksTest_OutputWS");

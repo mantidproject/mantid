@@ -43,6 +43,10 @@ using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
 namespace {
+
+/// A shift to add/subtract to a point to test if it is an entry/exit point
+constexpr double VALID_INTERCEPT_POINT_SHIFT{2.5e-05};
+
 /**
  * Find the solid angle of a triangle defined by vectors a,b,c from point
  *"observer"
@@ -1094,16 +1098,15 @@ int CSGObject::procString(const std::string &Line) {
 
 /**
  * Given a track, fill the track with valid section
- * @param UT :: Initial track
+ * @param track :: Initial track
  * @return Number of segments added
  */
-int CSGObject::interceptSurface(Geometry::Track &UT) const {
-  int originalCount = UT.count(); // Number of intersections original track
+int CSGObject::interceptSurface(Geometry::Track &track) const {
+  int originalCount = track.count(); // Number of intersections original track
   // Loop over all the surfaces.
-  LineIntersectVisit LI(UT.startPoint(), UT.direction());
-  std::vector<const Surface *>::const_iterator vc;
-  for (vc = m_SurList.begin(); vc != m_SurList.end(); ++vc) {
-    (*vc)->acceptVisitor(LI);
+  LineIntersectVisit LI(track.startPoint(), track.direction());
+  for (auto &surface : m_SurList) {
+    surface->acceptVisitor(LI);
   }
   const auto &IPoints(LI.getPoints());
   const auto &dPoints(LI.getDistance());
@@ -1114,14 +1117,37 @@ int CSGObject::interceptSurface(Geometry::Track &UT) const {
     if (*ditr > 0.0) // only interested in forward going points
     {
       // Is the point and enterance/exit Point
-      const TrackDirection flag = calcValidType(*iitr, UT.direction());
+      const TrackDirection flag = calcValidType(*iitr, track.direction());
       if (flag != TrackDirection::INVALID)
-        UT.addPoint(flag, *iitr, *this);
+        track.addPoint(flag, *iitr, *this);
     }
   }
-  UT.buildLink();
+  track.buildLink();
   // Return number of track segments added
-  return (UT.count() - originalCount);
+  return (track.count() - originalCount);
+}
+
+/**
+ * Compute the distance to the first point of intersection with the surface
+ * @param track Track defining start/direction
+ * @return The distance to the object
+ * @throws std::runtime_error if no intersection was found
+ */
+double CSGObject::distance(const Geometry::Track &track) const {
+  LineIntersectVisit LI(track.startPoint(), track.direction());
+  for (auto &surface : m_SurList) {
+    surface->acceptVisitor(LI);
+  }
+  const auto &distances(LI.getDistance());
+  if (!distances.empty()) {
+    return std::abs(
+        *std::min_element(std::begin(distances), std::end(distances)));
+  } else {
+    std::ostringstream os;
+    os << "Unable to find intersection with object with track starting at "
+       << track.startPoint() << " in direction " << track.direction() << "\n";
+    throw std::runtime_error(os.str());
+  }
 }
 
 /**
@@ -1134,11 +1160,9 @@ int CSGObject::interceptSurface(Geometry::Track &UT) const {
  */
 TrackDirection CSGObject::calcValidType(const Kernel::V3D &point,
                                         const Kernel::V3D &uVec) const {
-  const Kernel::V3D shift(uVec * Kernel::Tolerance * 25.0);
-  const Kernel::V3D testA(point - shift);
-  const Kernel::V3D testB(point + shift);
-  const int flagA = isValid(testA);
-  const int flagB = isValid(testB);
+  const Kernel::V3D shift(uVec * VALID_INTERCEPT_POINT_SHIFT);
+  const int flagA = isValid(point - shift);
+  const int flagB = isValid(point + shift);
   if (!(flagA ^ flagB))
     return Geometry::TrackDirection::INVALID;
   return (flagA) ? Geometry::TrackDirection::LEAVING

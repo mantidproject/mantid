@@ -129,7 +129,8 @@ public:
   void write(std::ostream &) const; ///< MCNPX output
 
   // INTERSECTION
-  int interceptSurface(Geometry::Track &) const override;
+  int interceptSurface(Geometry::Track &track) const override;
+  double distance(const Track &track) const override;
 
   // Solid angle - uses triangleSolidAngle unless many (>30000) triangles
   double solidAngle(const Kernel::V3D &observer) const override;

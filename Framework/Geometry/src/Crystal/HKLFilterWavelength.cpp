@@ -21,7 +21,7 @@ HKLFilterWavelength::HKLFilterWavelength(const Kernel::DblMatrix &ub,
 }
 
 /// Returns a description for the filter.
-std::string HKLFilterWavelength::getDescription() const {
+std::string HKLFilterWavelength::getDescription() const noexcept {
   std::ostringstream strm;
   strm << "(" << m_lambdaMin << " <= lambda <= " << m_lambdaMax << ")";
 
@@ -29,7 +29,7 @@ std::string HKLFilterWavelength::getDescription() const {
 }
 
 /// Returns true if lambda of the reflection is within the limits.
-bool HKLFilterWavelength::isAllowed(const Kernel::V3D &hkl) const {
+bool HKLFilterWavelength::isAllowed(const Kernel::V3D &hkl) const noexcept {
   V3D q = m_ub * hkl;
   double lambda = (2.0 * q.Z()) / (q.norm2());
 
