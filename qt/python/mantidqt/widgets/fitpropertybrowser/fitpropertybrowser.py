@@ -262,6 +262,11 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         endX = self.endX()
         out_ws_name = '{}_guess'.format(ws_name)
         workspace = AnalysisDataService.retrieve(ws_name)
+        legend = self.get_axes().get_legend()
+
+        if legend:
+            legend_props = LegendProperties.from_legend(legend)
+
         try:
             alg = AlgorithmManager.createUnmanaged('EvaluateFunction')
             alg.setChild(True)
@@ -290,7 +295,8 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
                                                distribution=True,
                                                update_axes_labels=False)[0]
 
-        self.get_axes().legend().draggable()
+        if legend:
+            LegendProperties.create_legend(legend_props, self.get_axes())
 
         if self.guess_line:
             self.setTextPlotGuess('Remove Guess')
@@ -349,7 +355,10 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
 
         self.fit_result_ws_name = name
         axes = self.get_axes()
-        props = LegendProperties.from_legend(axes.legend_)
+
+        plot_has_legend = bool(axes.legend_)
+        if plot_has_legend:
+            props = LegendProperties.from_legend(axes.legend_)
 
         ws = AnalysisDataService.retrieve(name)
 
@@ -368,10 +377,14 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         for new_line, old_line in zip(new_lines, original_lines):
             new_line.update_from(old_line)
 
-        handles, labels = axes.get_legend_handles_labels()
+        if plot_has_legend:
+            handles, labels = axes.get_legend_handles_labels()
 
-        # Now update the legend to make sure it changes to the old properties
-        LegendProperties.create_legend(props, axes)
+            # Now update the legend to make sure it changes to the old properties
+            LegendProperties.create_legend(props, axes)
+        else:
+            # Remove the legend that was created if the plot didn't have one previously
+            axes.get_legend().remove()
 
     @Slot(int, float, float, float)
     def peak_added_slot(self, peak_id, centre, height, fwhm):
