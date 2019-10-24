@@ -238,10 +238,9 @@ void SaveIsawPeaks::exec() {
       std::ostringstream mess;
       if (bankPart == "bank")
         mess << "bank" << bank;
-      else if (bankPart == "WISH" && bank < 10)
-        mess << "WISHpanel0" << bank;
-      else if (bankPart == "WISH")
-        mess << "WISHpanel" << bank;
+      else if (bankPart == "WISHpanel") {
+        mess << "WISHpanel" << std::setfill('0') << std::setw(2) << bank;
+      }
 
       std::string bankName = mess.str();
       // Retrieve it
