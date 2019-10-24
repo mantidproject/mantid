@@ -33,21 +33,19 @@ public:
     delete m_analysisPane;
     delete m_model;};
 
+  void addInstrument() override;
+
 protected:
   void loadSideEffects() override;
+
+  std::pair<instrumentSetUp, instrumentObserverOptions>
+  setupALFInstrument();
 
 private:
 
   void setUpInstrumentAnalysisSplitter() override;
 
-  typedef std::pair<
-      std::string,
-      std::vector<std::function<bool(std::map<std::string, bool>)>>>
-      instrumentSetUp;
-  typedef std::vector<std::tuple<std::string, Observer *>>
-      instrumentObserverOptions;
 
-  std::pair<instrumentSetUp, instrumentObserverOptions> initInstrument();
   void extractSingleTube();
   void averageTube();
 

@@ -15,10 +15,10 @@
 #include "MantidQtWidgets/Plotting/PreviewPlot.h"
 
 #include <QObject>
+#include <QPushButton>
 #include <QSplitter>
 #include <QString>
 #include <string>
-#include <QPushButton>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -47,17 +47,24 @@ public:
                       &instrument);
   virtual void addObserver(std::tuple<std::string, Observer *> &listener){};
   void setupInstrumentAnalysisSplitters(QWidget *analysis);
-
+  void setupHelp();
 public slots:
   void fileLoaded();
+  void openHelp();
+
+protected:
+  std::string m_helpPage;
 
 private:
+
   QWidget *generateLoadWidget();
   void warningBox(const QString &message);
   Observable *m_loadRunObservable;
   API::MWRunFiles *m_files;
   QString m_instrument;
   MantidWidgets::InstrumentWidget *m_instrumentWidget;
+  QPushButton *m_help;
+ 
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

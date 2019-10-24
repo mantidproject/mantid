@@ -157,6 +157,7 @@ public:
   std::string saveToProject() const;
   void removeTab(const std::string &tabName);
   void addTab(const std::string &tabName);
+  void hideHelp();
   InstrumentWidgetPickTab *getPickTab() { return m_pickTab; };
 
 signals:
@@ -336,6 +337,8 @@ private:
   void loadTabs(const std::string &lines) const;
   /// Save tabs on the widget to a string
   std::string saveTabs() const;
+
+  QPushButton *m_help;
 };
 
 } // namespace MantidWidgets

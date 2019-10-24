@@ -14,12 +14,18 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-BaseInstrumentPresenter::BaseInstrumentPresenter(
-    BaseInstrumentView *view, BaseInstrumentModel *model, QWidget *analysisPaneView)
-    : m_view(view), m_model(model),m_analysisPaneView(analysisPaneView), m_currentRun(0), m_currentFile(""),
-      m_loadRunObserver(nullptr) {
+BaseInstrumentPresenter::BaseInstrumentPresenter(BaseInstrumentView *view,
+                                                 BaseInstrumentModel *model,
+                                                 QWidget *analysisPaneView)
+    : m_view(view), m_model(model), m_analysisPaneView(analysisPaneView),
+      m_currentRun(0), m_currentFile(""), m_loadRunObserver(nullptr) {
   m_loadRunObserver = new VoidObserver();
   m_model->loadEmptyInstrument();
+}
+
+void BaseInstrumentPresenter::addInstrument() {
+  auto setUp = setupInstrument();
+  initLayout(&setUp);
 }
 
 void BaseInstrumentPresenter::initLayout(
@@ -31,6 +37,7 @@ void BaseInstrumentPresenter::initLayout(
   m_loadRunObserver->setSlot(loadBinder);
   initInstrument(setUp);
   setUpInstrumentAnalysisSplitter();
+  m_view->setupHelp();
 }
 
 void BaseInstrumentPresenter::setUpInstrumentAnalysisSplitter() {
@@ -82,6 +89,25 @@ void BaseInstrumentPresenter::initInstrument(
   for (auto options : customContextMenu) {
     m_view->addObserver(options);
   }
+}
+
+typedef std::pair<std::string,
+                  std::vector<std::function<bool(std::map<std::string, bool>)>>>
+    instrumentSetUp;
+typedef std::vector<std::tuple<std::string, Observer *>>
+    instrumentObserverOptions;
+std::pair<instrumentSetUp, instrumentObserverOptions>
+
+BaseInstrumentPresenter::setupInstrument() {
+  instrumentSetUp setUpContextConditions;
+
+  // set up the slots for the custom context menu
+  std::vector<std::tuple<std::string, Observer *>> customInstrumentOptions;
+  std::vector<std::function<bool(std::map<std::string, bool>)>> binders;
+
+  setUpContextConditions = std::make_pair(m_model->dataFileName(), binders);
+
+  return std::make_pair(setUpContextConditions, customInstrumentOptions);
 }
 
 } // namespace CustomInterfaces

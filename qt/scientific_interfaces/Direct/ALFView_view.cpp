@@ -17,7 +17,10 @@ namespace CustomInterfaces {
 
 ALFView_view::ALFView_view(const std::string &instrument, QWidget *parent)
     : BaseInstrumentView(instrument, parent),m_extractSingleTubeObservable(nullptr), m_averageTubeObservable(nullptr),
-      m_extractAction(nullptr), m_averageAction(nullptr), m_analysisPane(nullptr) {}
+      m_extractAction(nullptr), m_averageAction(nullptr),
+      m_analysisPane(nullptr) {
+  m_helpPage = "ALF View";
+}
 
 void ALFView_view::setUpInstrument(
     std::string fileName,
@@ -29,7 +32,7 @@ void ALFView_view::setUpInstrument(
   auto instrumentWidget = new MantidWidgets::InstrumentWidget("ALFData");
   instrumentWidget->removeTab("Instrument");
   instrumentWidget->removeTab("Draw");
-
+  instrumentWidget->hideHelp();
 
   // set up extract single tube
   m_extractAction = new QAction("Extract Single Tube", this);

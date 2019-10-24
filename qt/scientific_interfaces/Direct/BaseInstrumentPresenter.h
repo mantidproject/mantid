@@ -36,6 +36,8 @@ public:
       instrumentObserverOptions;
 
   void initLayout(std::pair<instrumentSetUp, instrumentObserverOptions> *setUp = nullptr);
+  virtual void addInstrument();
+
 protected:
 	virtual void loadSideEffects(){};
 
@@ -47,6 +49,8 @@ private:
   void loadAndAnalysis(const std::string &run);
   void initInstrument(std::pair<instrumentSetUp, instrumentObserverOptions> *setUp);
   virtual void setUpInstrumentAnalysisSplitter();
+  std::pair<instrumentSetUp, instrumentObserverOptions>
+  setupInstrument();
 
   BaseInstrumentView *m_view;
   BaseInstrumentModel *m_model;

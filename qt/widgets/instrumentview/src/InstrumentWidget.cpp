@@ -100,7 +100,7 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent,
           Mantid::Kernel::ConfigService::Instance().getString(
               "defaultsave.directory"))),
       mViewChanged(false), m_blocked(false),
-      m_instrumentDisplayContextMenuOn(false),m_stateOfTabs(std::vector<std::pair<std::string, bool>>{}) {
+      m_instrumentDisplayContextMenuOn(false),m_stateOfTabs(std::vector<std::pair<std::string, bool>>{}),m_help(nullptr) {
   setFocusPolicy(Qt::StrongFocus);
   QVBoxLayout *mainLayout = new QVBoxLayout(this);
   QSplitter *controlPanelLayout = new QSplitter(Qt::Horizontal);
@@ -139,12 +139,12 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent,
   QHBoxLayout *infoLayout = new QHBoxLayout();
   mInteractionInfo = new QLabel();
   infoLayout->addWidget(mInteractionInfo);
-  QPushButton *helpButton = new QPushButton("?");
-  helpButton->setMaximumWidth(25);
-  connect(helpButton, SIGNAL(clicked()), this, SLOT(helpClicked()));
-  infoLayout->addWidget(helpButton);
+  m_help = new QPushButton("?");
+  m_help->setMaximumWidth(25);
+  connect(m_help, SIGNAL(clicked()), this, SLOT(helpClicked()));
+  infoLayout->addWidget(m_help);
   infoLayout->setStretchFactor(mInteractionInfo, 1);
-  infoLayout->setStretchFactor(helpButton, 0);
+  infoLayout->setStretchFactor(m_help, 0);
   mainLayout->addLayout(infoLayout);
 
   QSettings settings;
@@ -213,6 +213,8 @@ InstrumentWidget::~InstrumentWidget() {
     saveSettings();
   }
 }
+
+void InstrumentWidget::hideHelp() { m_help->setVisible(false); }
 
 QString InstrumentWidget::getWorkspaceName() const { return m_workspaceName; }
 

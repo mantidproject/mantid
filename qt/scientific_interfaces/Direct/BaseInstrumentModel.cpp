@@ -11,6 +11,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Unit.h"
 
 #include <utility>
@@ -24,8 +25,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 BaseInstrumentModel::BaseInstrumentModel()
-    : m_currentRun(0), m_tmpName("tmp"), m_instrumentName("EMU"),
-      m_wsName("data") {}
+    : m_currentRun(0), m_tmpName("tmp"), m_instrumentName("MUSR"),
+      m_wsName("testData") {}
 
 void BaseInstrumentModel::loadEmptyInstrument() {
   auto alg =
@@ -46,39 +47,41 @@ BaseInstrumentModel::loadData(const std::string &name) {
   auto alg = AlgorithmManager::Instance().create("Load");
   alg->initialize();
   alg->setProperty("Filename", name);
-  alg->setProperty("OutputWorkspace", m_tmpName); // write to tmp ws
+  alg->setProperty("OutputWorkspace", m_wsName); // write to tmp ws
   alg->execute();
   auto ws =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_tmpName);
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_wsName);
   int runNumber = ws->getRunNumber();
-  std::string message = "success";
-  rename();
-  return std::make_pair(runNumber, message);
-}
 
-void BaseInstrumentModel::rename() {
-  AnalysisDataService::Instance().rename(m_tmpName, m_wsName);
-}
-void BaseInstrumentModel::remove() {
-  AnalysisDataService::Instance().remove(m_tmpName);
-}
 
-std::string BaseInstrumentModel::dataFileName() { return m_wsName; }
+      std::string message = "success";
+     
+      return std::make_pair(runNumber, message);
+    }
 
-int BaseInstrumentModel::currentRun() {
-  try {
+    void BaseInstrumentModel::rename() {
+      AnalysisDataService::Instance().rename(m_tmpName, m_wsName);
+    }
+    void BaseInstrumentModel::remove() {
+      AnalysisDataService::Instance().remove(m_tmpName);
+    }
 
-    auto ws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_wsName);
-    return ws->getRunNumber();
-  } catch (...) {
-    return ERRORCODE;
-  }
-}
+    std::string BaseInstrumentModel::dataFileName() { return m_wsName; }
 
-bool BaseInstrumentModel::isErrorCode(const int run) {
-  return (run == ERRORCODE);
-}
+    int BaseInstrumentModel::currentRun() {
+      try {
 
-} // namespace CustomInterfaces
+        auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            m_wsName);
+        return ws->getRunNumber();
+      } catch (...) {
+        return ERRORCODE;
+      }
+    }
+
+    bool BaseInstrumentModel::isErrorCode(const int run) {
+      return (run == ERRORCODE);
+    }
+
+  } // namespace CustomInterfaces
 } // namespace MantidQt

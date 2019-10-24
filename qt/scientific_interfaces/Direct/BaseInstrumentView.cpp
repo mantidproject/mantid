@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "BaseInstrumentView.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h"
+#include "MantidQtWidgets/Common/HelpWindow.h"
 
 #include <QMessageBox>
 #include <QSizePolicy>
@@ -18,9 +19,9 @@ namespace CustomInterfaces {
 
 BaseInstrumentView::BaseInstrumentView(const std::string &instrument,
                                        QWidget *parent)
-    : QSplitter(Qt::Vertical, parent), m_loadRunObservable(nullptr),
+    : QSplitter(Qt::Vertical, parent),m_helpPage(""), m_loadRunObservable(nullptr),
       m_files(nullptr), m_instrument(QString::fromStdString(instrument)),
-      m_instrumentWidget(nullptr){
+      m_instrumentWidget(nullptr),m_help(nullptr){
   auto loadWidget = generateLoadWidget();
   this->addWidget(loadWidget);
 }
@@ -30,8 +31,10 @@ void MantidQt::CustomInterfaces::BaseInstrumentView::setUpInstrument(
     std::vector<std::function<bool(std::map<std::string, bool>)>> &instrument) {
 
   (void)instrument;
-  m_instrumentWidget =
+  auto instrumentWidget =
       new MantidWidgets::InstrumentWidget(QString::fromStdString(fileName));
+  instrumentWidget->hideHelp();
+  setInstrumentWidget(instrumentWidget);
 }
 
 QWidget *BaseInstrumentView::generateLoadWidget() {
@@ -56,11 +59,32 @@ QWidget *BaseInstrumentView::generateLoadWidget() {
   return loadWidget;
 }
 
-  void BaseInstrumentView::setupInstrumentAnalysisSplitters(QWidget *analysisPane) {
-    QSplitter *split = new QSplitter(Qt::Horizontal);
-    split->addWidget(m_instrumentWidget);
-    split->addWidget(analysisPane);
-    this->addWidget(split);
+  void BaseInstrumentView::setupInstrumentAnalysisSplitters(
+    QWidget *analysisPane) {
+  QSplitter *split = new QSplitter(Qt::Horizontal);
+  split->addWidget(m_instrumentWidget);
+  split->addWidget(analysisPane);
+  this->addWidget(split);
+}
+
+void BaseInstrumentView::setupHelp(){
+  QWidget *helpWidget = new QWidget();
+    m_help = new QPushButton("?");
+    m_help->setMaximumWidth(25);
+    auto helpLayout = new QHBoxLayout(helpWidget);
+    helpLayout->addItem(
+      new QSpacerItem(1000, 20, QSizePolicy::Expanding, QSizePolicy::Expanding));
+    helpLayout->addWidget(m_help);
+    this->addWidget(helpWidget);
+    connect(m_help, SIGNAL(clicked()), this, SLOT(openHelp()));
+  }
+
+  void BaseInstrumentView::openHelp() {
+    if (m_helpPage == "") {
+      return;
+	}
+    MantidQt::API::HelpWindow::showCustomInterface(nullptr,
+                                                   QString::fromStdString(m_helpPage));
   }
 
   std::string BaseInstrumentView::getFile() {

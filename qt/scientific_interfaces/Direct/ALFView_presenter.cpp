@@ -21,11 +21,12 @@ ALFView_presenter::ALFView_presenter(ALFView_view *view, ALFView_model *model,
                                      PlotFitAnalysisPanePresenter *analysisPane)
     : BaseInstrumentPresenter(view, model, analysisPane->getView()), m_view(view), m_model(model), m_analysisPane(analysisPane),
       m_extractSingleTubeObserver(nullptr), m_averageTubeObserver(nullptr) {
+  addInstrument();
 
-  m_extractSingleTubeObserver = new VoidObserver();
-  m_averageTubeObserver = new VoidObserver();
-  auto setUp = initInstrument();
+}
 
+void ALFView_presenter::addInstrument() {
+  auto setUp = setupALFInstrument();
   initLayout(&setUp);
 }
 
@@ -34,6 +35,7 @@ void ALFView_presenter::setUpInstrumentAnalysisSplitter() {
   m_analysisPane->addFunction(composite);
   m_view->setupAnalysisPane(m_analysisPane->getView());
 }
+
 void ALFView_presenter::loadSideEffects() {
   m_analysisPane->clearCurrentWS();
 }
@@ -50,7 +52,10 @@ typedef std::vector<std::tuple<std::string, Observer *>>
     instrumentObserverOptions> : a pair of the
 */
 std::pair<instrumentSetUp, instrumentObserverOptions>
-ALFView_presenter::initInstrument() {
+ALFView_presenter::setupALFInstrument() {
+
+  m_extractSingleTubeObserver = new VoidObserver();
+  m_averageTubeObserver = new VoidObserver();
 
   instrumentSetUp setUpContextConditions;
 
