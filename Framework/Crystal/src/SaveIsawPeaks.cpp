@@ -313,18 +313,16 @@ void SaveIsawPeaks::exec() {
   // Save all Peaks
   // Go in order of run numbers
   int sequenceNumber = appendPeakNumb;
-  runMap_t::iterator runMap_it;
-  for (runMap_it = runMap.begin(); runMap_it != runMap.end(); ++runMap_it) {
+  for (const auto &runBankMap : runMap) {
     // Start of a new run
-    int run = runMap_it->first;
-    bankMap_t &bankMap = runMap_it->second;
+    const int run = runBankMap.first;
+    const auto &bankMap = runBankMap.second;
 
     bankMap_t::iterator bankMap_it;
-    for (bankMap_it = bankMap.begin(); bankMap_it != bankMap.end();
-         ++bankMap_it) {
+    for (const auto &bankIDs : bankMap) {
       // Start of a new bank.
-      int bank = bankMap_it->first;
-      std::vector<size_t> &ids = bankMap_it->second;
+      const int bank = bankIDs.first;
+      const auto &ids = bankIDs.second;
 
       if (!ids.empty()) {
         // Write the bank header
