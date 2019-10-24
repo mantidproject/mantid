@@ -229,85 +229,80 @@ void SaveIsawPeaks::exec() {
     out << T0 << '\n';
 
     //  Save .detcal info
-    if (true) {
-      out << "4 DETNUM  NROWS  NCOLS   WIDTH   HEIGHT   DEPTH   DETD   CenterX "
-             "  CenterY   CenterZ    BaseX    BaseY    BaseZ      UpX      UpY "
-             "     UpZ\n";
-      // Here would save each detector...
-      for (const auto bank : uniqueBanks) {
-        // Build up the bank name
-        std::ostringstream mess;
-        if (bankPart == "bank")
-          mess << "bank" << bank;
-        else if (bankPart == "WISH" && bank < 10)
-          mess << "WISHpanel0" << bank;
-        else if (bankPart == "WISH")
-          mess << "WISHpanel" << bank;
+    out << "4 DETNUM  NROWS  NCOLS   WIDTH   HEIGHT   DEPTH   DETD   CenterX "
+           "  CenterY   CenterZ    BaseX    BaseY    BaseZ      UpX      UpY "
+           "     UpZ\n";
+    // Here would save each detector...
+    for (const auto bank : uniqueBanks) {
+      // Build up the bank name
+      std::ostringstream mess;
+      if (bankPart == "bank")
+        mess << "bank" << bank;
+      else if (bankPart == "WISH" && bank < 10)
+        mess << "WISHpanel0" << bank;
+      else if (bankPart == "WISH")
+        mess << "WISHpanel" << bank;
 
-        std::string bankName = mess.str();
-        // Retrieve it
-        boost::shared_ptr<const IComponent> det =
-            inst->getComponentByName(bankName);
-        if (inst->getName() ==
-            "CORELLI") // for Corelli with sixteenpack under bank
-        {
-          std::vector<Geometry::IComponent_const_sptr> children;
-          boost::shared_ptr<const Geometry::ICompAssembly> asmb =
-              boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
-                  inst->getComponentByName(bankName));
-          asmb->getChildren(children, false);
-          det = children[0];
-        }
-        if (det) {
-          // Center of the detector
-          V3D center = det->getPos();
-
-          // Distance to center of detector
-          double detd = (center - inst->getSample()->getPos()).norm();
-          int NCOLS, NROWS;
-          double xsize, ysize;
-          sizeBanks(bankName, NCOLS, NROWS, xsize, ysize);
-          // Base unit vector (along the horizontal, X axis)
-          int midX = NCOLS / 2;
-          int midY = NROWS / 2;
-          V3D base = findPixelPos(bankName, midX + 1, midY) -
-                     findPixelPos(bankName, midX, midY);
-          base.normalize();
-
-          // Up unit vector (along the vertical, Y axis)
-          V3D up = findPixelPos(bankName, midX, midY + 1) -
-                   findPixelPos(bankName, midX, midY);
-          up.normalize();
-
-          // Write the line
-          out << "5 " << std::setw(6) << std::right << bank << " "
-              << std::setw(6) << std::right << NROWS << " " << std::setw(6)
-              << std::right << NCOLS << " " << std::setw(7) << std::right
-              << std::fixed << std::setprecision(4) << 100.0 * xsize << " "
-              << std::setw(7) << std::right << std::fixed
-              << std::setprecision(4) << 100.0 * ysize << " "
-              << "  0.2000 " << std::setw(6) << std::right << std::fixed
-              << std::setprecision(2) << 100.0 * detd << " " << std::setw(9)
-              << std::right << std::fixed << std::setprecision(4)
-              << 100.0 * center.X() << " " << std::setw(9) << std::right
-              << std::fixed << std::setprecision(4) << 100.0 * center.Y() << " "
-              << std::setw(9) << std::right << std::fixed
-              << std::setprecision(4) << 100.0 * center.Z() << " "
-              << std::setw(8) << std::right << std::fixed
-              << std::setprecision(5) << base.X() << " " << std::setw(8)
-              << std::right << std::fixed << std::setprecision(5) << base.Y()
-              << " " << std::setw(8) << std::right << std::fixed
-              << std::setprecision(5) << base.Z() << " " << std::setw(8)
-              << std::right << std::fixed << std::setprecision(5) << up.X()
-              << " " << std::setw(8) << std::right << std::fixed
-              << std::setprecision(5) << up.Y() << " " << std::setw(8)
-              << std::right << std::fixed << std::setprecision(5) << up.Z()
-              << " \n";
-
-        } else
-          g_log.warning() << "Information about detector module " << bankName
-                          << " not found and recognised\n";
+      std::string bankName = mess.str();
+      // Retrieve it
+      boost::shared_ptr<const IComponent> det =
+          inst->getComponentByName(bankName);
+      if (inst->getName() ==
+          "CORELLI") // for Corelli with sixteenpack under bank
+      {
+        std::vector<Geometry::IComponent_const_sptr> children;
+        auto asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
+            inst->getComponentByName(bankName));
+        asmb->getChildren(children, false);
+        det = children[0];
       }
+      if (det) {
+        // Center of the detector
+        V3D center = det->getPos();
+
+        // Distance to center of detector
+        double detd = (center - inst->getSample()->getPos()).norm();
+        int NCOLS, NROWS;
+        double xsize, ysize;
+        sizeBanks(bankName, NCOLS, NROWS, xsize, ysize);
+        // Base unit vector (along the horizontal, X axis)
+        int midX = NCOLS / 2;
+        int midY = NROWS / 2;
+        V3D base = findPixelPos(bankName, midX + 1, midY) -
+                   findPixelPos(bankName, midX, midY);
+        base.normalize();
+
+        // Up unit vector (along the vertical, Y axis)
+        V3D up = findPixelPos(bankName, midX, midY + 1) -
+                 findPixelPos(bankName, midX, midY);
+        up.normalize();
+
+        // Write the line
+        out << "5 " << std::setw(6) << std::right << bank << " " << std::setw(6)
+            << std::right << NROWS << " " << std::setw(6) << std::right << NCOLS
+            << " " << std::setw(7) << std::right << std::fixed
+            << std::setprecision(4) << 100.0 * xsize << " " << std::setw(7)
+            << std::right << std::fixed << std::setprecision(4) << 100.0 * ysize
+            << " "
+            << "  0.2000 " << std::setw(6) << std::right << std::fixed
+            << std::setprecision(2) << 100.0 * detd << " " << std::setw(9)
+            << std::right << std::fixed << std::setprecision(4)
+            << 100.0 * center.X() << " " << std::setw(9) << std::right
+            << std::fixed << std::setprecision(4) << 100.0 * center.Y() << " "
+            << std::setw(9) << std::right << std::fixed << std::setprecision(4)
+            << 100.0 * center.Z() << " " << std::setw(8) << std::right
+            << std::fixed << std::setprecision(5) << base.X() << " "
+            << std::setw(8) << std::right << std::fixed << std::setprecision(5)
+            << base.Y() << " " << std::setw(8) << std::right << std::fixed
+            << std::setprecision(5) << base.Z() << " " << std::setw(8)
+            << std::right << std::fixed << std::setprecision(5) << up.X() << " "
+            << std::setw(8) << std::right << std::fixed << std::setprecision(5)
+            << up.Y() << " " << std::setw(8) << std::right << std::fixed
+            << std::setprecision(5) << up.Z() << " \n";
+
+      } else
+        g_log.warning() << "Information about detector module " << bankName
+                        << " not found and recognised\n";
     }
   }
   // HKL's are flipped by -1 because of the internal Q convention
