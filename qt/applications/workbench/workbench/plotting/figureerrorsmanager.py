@@ -94,6 +94,8 @@ class FigureErrorsManager(object):
         # get legend properties
         if ax.legend_:
             legend_props = LegendProperties.from_legend(ax.legend_)
+        else:
+            legend_props = None
 
         # get all curve properties
         curve_props = CurveProperties.from_curve(curve)
