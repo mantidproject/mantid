@@ -107,6 +107,26 @@ class FigureErrorsManagerTest(unittest.TestCase):
         # they are just invisible
         self.assertFalse(self.ax.containers[0][2][0].get_visible())
 
+    @plot_things(make_them_errors=True)
+    def test_hide_all_errors_retains_legend_properties(self):
+        # create a legend with a title
+        self.ax.legend(title="Test")
+
+        self.errors_manager._toggle_all_errors(self.ax, make_visible=False)
+
+        # check that the legend still has a title
+        self.assertEqual(self.ax.get_legend().get_title().get_text(), "Test")
+
+    @plot_things(make_them_errors=False)
+    def test_show_all_errors_retains_legend_properties(self):
+        # create a legend with a title
+        self.ax.legend(title="Test")
+
+        self.errors_manager._toggle_all_errors(self.ax, make_visible=True)
+
+        # check that the legend still has a title
+        self.assertEqual(self.ax.get_legend().get_title().get_text(), "Test")
+
 
 @start_qapplication
 class ScriptedPlotFigureErrorsManagerTest(unittest.TestCase):
