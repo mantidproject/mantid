@@ -8,7 +8,7 @@ from __future__ import (absolute_import, division, unicode_literals)
 
 from mantid.kernel import UsageService
 
+
 def ReportInterfaceStartup(name):
     #interface startup
     UsageService.registerFeatureUsage("Interface", name, False)
-

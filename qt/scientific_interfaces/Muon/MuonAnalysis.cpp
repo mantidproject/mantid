@@ -147,7 +147,8 @@ MuonAnalysis::MuonAnalysis(QWidget *parent)
                                               // instruments later
                    {"MUSR", "HIFI", "EMU", "ARGUS", "CHRONUS"}),
       m_deadTimeIndex(-1), m_useDeadTime(true) {
-  arn;
+      g_log.warning(
+      "This interface is deprecated, please use Muon Analysis instead");
 }
 
 /**
