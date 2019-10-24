@@ -190,6 +190,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
                 self.generate_plot_script_clipboard)
             self.toolbar.sig_generate_plot_script_file_triggered.connect(
                 self.generate_plot_script_file)
+            self.toolbar.sig_home_clicked.connect(self.set_figure_zoom_to_display_all)
             self.toolbar.setFloatable(False)
             tbs_height = self.toolbar.sizeHint().height()
         else:
@@ -377,6 +378,14 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         for i, toolbar_action in enumerate(self.toolbar.actions()):
             if toolbar_action == action:
                 self.toolbar.actions()[i+1].setVisible(enabled)
+
+    def set_figure_zoom_to_display_all(self):
+        axes = self.canvas.figure.get_axes()
+        if axes:
+            for ax in axes:
+                ax.relim(visible_only=True)
+                ax.autoscale()
+            self.canvas.draw()
 
 
 # -----------------------------------------------------------------------------

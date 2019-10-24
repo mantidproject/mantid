@@ -86,7 +86,7 @@ LoadISISNexus2::LoadISISNexus2()
       m_load_selected_spectra(false), m_wsInd2specNum_map(), m_spec2det_map(),
       m_entrynumber(0), m_tof_data(), m_proton_charge(0.), m_spec(),
       m_spec_end(nullptr), m_monitors(), m_logCreator(), m_progress(),
-      m_cppFile() {}
+      m_nexusFile() {}
 
 /**
  * Return the confidence criteria for this algorithm can load the file
@@ -169,7 +169,7 @@ void LoadISISNexus2::exec() {
   NXRoot root(m_filename);
 
   // "Open" the same file but with the C++ interface
-  m_cppFile.reset(new ::NeXus::File(root.m_fileID));
+  m_nexusFile.reset(new ::NeXus::File(root.m_fileID));
 
   // Open the raw data group 'raw_data_1'
   NXEntry entry = root.openEntry("raw_data_1");
@@ -282,8 +282,8 @@ void LoadISISNexus2::exec() {
   }
 
   // Load logs and sample information
-  m_cppFile->openPath(entry.path());
-  local_workspace->loadSampleAndLogInfoNexus(m_cppFile.get());
+  m_nexusFile->openPath(entry.path());
+  local_workspace->loadSampleAndLogInfoNexus(m_nexusFile.get());
 
   // Load logs and sample information further information... See maintenance
   // ticket #8697
