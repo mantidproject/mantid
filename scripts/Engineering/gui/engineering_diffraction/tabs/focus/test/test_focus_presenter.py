@@ -67,22 +67,25 @@ class FocusPresenterTest(unittest.TestCase):
         logger.assert_called_with(str(fail_info))
         self.assertEqual(emit.call_count, 1)
 
-    def test_get_banks(self):
+    def test_get_both_banks(self):
         self.view.get_north_bank.return_value = True
         self.view.get_south_bank.return_value = True
 
         self.assertEqual(["North", "South"], self.presenter._get_banks())
 
+    def test_get_north_bank(self):
         self.view.get_north_bank.return_value = True
         self.view.get_south_bank.return_value = False
 
         self.assertEqual(["North"], self.presenter._get_banks())
 
+    def test_get_south_bank(self):
         self.view.get_north_bank.return_value = False
         self.view.get_south_bank.return_value = True
 
         self.assertEqual(["South"], self.presenter._get_banks())
 
+    def test_getting_no_banks(self):
         self.view.get_north_bank.return_value = False
         self.view.get_south_bank.return_value = False
 

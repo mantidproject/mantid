@@ -7,6 +7,7 @@
 # pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
 
+from Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT
 from mantidqt.utils.asynchronous import AsyncTask
 from mantid.simpleapi import logger
 from mantidqt.utils.observer_pattern import Observable
@@ -69,12 +70,7 @@ class CalibrationPresenter(object):
         self.emit_enable_button_signal()
 
     def set_instrument_override(self, instrument):
-        if instrument == 0:
-            instrument = "ENGINX"
-        elif instrument == 1:
-            instrument = "IMAT"
-        else:
-            raise ValueError("Invalid instrument index")
+        instrument = INSTRUMENT_DICT[instrument]
         self.view.set_instrument_override(instrument)
         self.instrument = instrument
 

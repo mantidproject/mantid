@@ -61,11 +61,6 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.view.set_check_plot_output_enabled.assert_called_with(False)
 
     def test_controls_enabled_enables_both(self):
-        self.presenter.set_calibrate_controls_enabled(False)
-
-        self.view.set_calibrate_button_enabled.assert_called_with(False)
-        self.view.set_check_plot_output_enabled.assert_called_with(False)
-
         self.presenter.set_calibrate_controls_enabled(True)
 
         self.view.set_calibrate_button_enabled.assert_called_with(True)

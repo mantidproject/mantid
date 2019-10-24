@@ -9,6 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from qtpy.QtWidgets import QMessageBox
 
+from Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT
 from mantidqt.utils.asynchronous import AsyncTask
 from mantidqt.utils.observer_pattern import Observer
 from mantid.simpleapi import logger
@@ -54,12 +55,7 @@ class FocusPresenter(object):
         self.worker.start()
 
     def set_instrument_override(self, instrument):
-        if instrument == 0:
-            instrument = "ENGINX"
-        elif instrument == 1:
-            instrument = "IMAT"
-        else:
-            raise ValueError("Invalid instrument index")
+        instrument = INSTRUMENT_DICT[instrument]
         self.view.set_instrument_override(instrument)
         self.instrument = instrument
 
