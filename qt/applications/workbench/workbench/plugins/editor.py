@@ -132,7 +132,7 @@ class MultiFileEditor(PluginWidget):
 
     def writeSettings(self, settings):
         settings.set(ZOOM_LEVEL_KEY, self.editors_zoom_level)
-        
+
         no_duplicates = []
         [no_duplicates.append(x) for x in self.tabs_open_on_closing if x not in no_duplicates]
         settings.set(TAB_SETTINGS_KEY, no_duplicates)
