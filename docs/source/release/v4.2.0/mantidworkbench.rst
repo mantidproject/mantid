@@ -41,6 +41,7 @@ Improvements
 - There are now forward and back buttons on figures to go back and forward through figure zoom states.
 - The home button on figures now always centres the figure's contents.
 - You can now zoom in/out on figures by scrolling and pan figures using the middle mouse button.
+- The keyboard shortcut Ctrl+D now aborts a running script.
 
 Bugfixes
 ########
