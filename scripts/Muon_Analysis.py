@@ -8,9 +8,10 @@
 from __future__ import (absolute_import, division, print_function)
 from Muon.GUI.MuonAnalysis.muon_analysis_2 import MuonAnalysisGui
 from qtpy import QtCore
+from Muon.GUI.Common.usage_report import register_GUI
 
 
-Name = "Muon_Analysis_2"
+Name = "Muon_Analysis"
 
 if 'muon_analysis' in globals():
     muon_analysis = globals()['muon_analysis']
@@ -21,9 +22,11 @@ if 'muon_analysis' in globals():
         muon_analysis.activateWindow()
     else:
         muon_analysis = MuonAnalysisGui()
+        register_GUI(Name)
         muon_analysis.resize(700, 700)
         muon_analysis.show()
 else:
     muon_analysis = MuonAnalysisGui()
+    register_GUI(Name)
     muon_analysis.resize(700, 700)
     muon_analysis.show()
