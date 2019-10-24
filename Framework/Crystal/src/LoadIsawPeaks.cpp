@@ -106,10 +106,8 @@ void LoadIsawPeaks::init() {
 /** Execute the algorithm.
  */
 void LoadIsawPeaks::exec() {
-  // Create the workspace
+  //  the workspace
   PeaksWorkspace_sptr ws(new PeaksWorkspace());
-  std::string outputwsName = getPropertyValue("OutputWorkspace");
-  AnalysisDataService::Instance().addOrReplace(outputwsName, ws);
 
   // This loads (appends) the peaks
   this->appendFile(ws, getPropertyValue("Filename"));
