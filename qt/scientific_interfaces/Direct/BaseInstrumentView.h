@@ -42,7 +42,7 @@ public:
     return m_instrumentWidget;
   };
   virtual void
-  setUpInstrument(const std::string fileName,
+  setUpInstrument(const std::string &fileName,
                   std::vector<std::function<bool(std::map<std::string, bool>)>>
                       &instrument);
   virtual void addObserver(std::tuple<std::string, Observer *> &listener){};

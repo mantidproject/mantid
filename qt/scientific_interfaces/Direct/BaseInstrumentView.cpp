@@ -28,7 +28,7 @@ BaseInstrumentView::BaseInstrumentView(const std::string &instrument,
 }
 
 void MantidQt::CustomInterfaces::BaseInstrumentView::setUpInstrument(
-    const std::string fileName,
+    const std::string &fileName,
     std::vector<std::function<bool(std::map<std::string, bool>)>> &instrument) {
 
   (void)instrument;

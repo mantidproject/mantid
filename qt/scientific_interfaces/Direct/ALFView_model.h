@@ -36,7 +36,6 @@ public:
 
 private:
   int m_numberOfTubesInAverage;
-  int m_currentRun;
 };
 
 } // namespace CustomInterfaces

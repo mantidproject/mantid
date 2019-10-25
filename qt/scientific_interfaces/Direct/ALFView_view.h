@@ -32,7 +32,7 @@ public:
   void observeAverageTube(Observer *listner);
 
   void
-  setUpInstrument(const std::string fileName,
+  setUpInstrument(const std::string &fileName,
                   std::vector<std::function<bool(std::map<std::string, bool>)>>
                       &binders) override;
 

@@ -24,7 +24,7 @@ ALFView_view::ALFView_view(const std::string &instrument, QWidget *parent)
 }
 
 void ALFView_view::setUpInstrument(
-    std::string fileName,
+    std::string &fileName,
     std::vector<std::function<bool(std::map<std::string, bool>)>> &binders) {
 
   m_extractSingleTubeObservable = new Observable();
