@@ -1,3 +1,4 @@
+# encoding: utf-8
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
@@ -18,8 +19,10 @@ import unittest
 from qtpy.QtCore import QCoreApplication, QObject
 
 # local imports
+from mantid.py3compat import StringIO
+from mantid.py3compat.mock import patch
 from mantidqt.utils.qt.testing import start_qapplication
-from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
+from mantidqt.widgets.codeeditor.execution import PythonCodeExecution, _get_imported_from_future
 
 
 class Receiver(QObject):
@@ -105,6 +108,36 @@ class PythonCodeExecutionTest(unittest.TestCase):
         executor = PythonCodeExecution()
         executor.execute(code, filename=test_filename)
         self.assertNotIn('/path/to/script/called', sys.path)
+
+    def test_get_imported_from_future_gets_imports_and_ignores_comments(self):
+        code = ("from __future__ import division, print_function\n"
+                "# from __future__ import unicode_literals\n")
+        f_imports = _get_imported_from_future(code)
+        self.assertEqual(['division', 'print_function'], f_imports)
+
+    def test_future_division_active_when_running_script_with_future_import(self):
+        global_var = "one_half"
+        code = ("from __future__ import division\n"
+                "{} = 1/2\n".format(global_var))
+        executor = PythonCodeExecution()
+        executor.execute(code)
+        self.assertAlmostEqual(0.50, executor.globals_ns[global_var])
+
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_future_print_function_active_in_scripts_if_imported(self, mock_stdout):
+        code = ("from __future__ import division, print_function\n"
+                "print('This', 'should', 'have', 'no', 'brackets')\n")
+        executor = PythonCodeExecution()
+        executor.execute(code)
+        self.assertEqual("This should have no brackets\n", mock_stdout.getvalue())
+
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_scripts_can_print_unicode_if_unicode_literals_imported(self, mock_stdout):
+        code = ("from __future__ import unicode_literals\n"
+                "print('£')\n")
+        executor = PythonCodeExecution()
+        executor.execute(code)
+        self.assertEqual("£\n", mock_stdout.getvalue())
 
     # ---------------------------------------------------------------------------
     # Error execution tests

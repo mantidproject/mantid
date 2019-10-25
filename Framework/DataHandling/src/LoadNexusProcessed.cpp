@@ -181,10 +181,10 @@ bool isMultiPeriodFile(int nWorkspaceEntries, Workspace_sptr sampleWS,
 LoadNexusProcessed::LoadNexusProcessed()
     : m_shared_bins(false), m_xbins(0), m_axis1vals(), m_list(false),
       m_interval(false), m_spec_min(0), m_spec_max(Mantid::EMPTY_INT()),
-      m_spec_list(), m_filtered_spec_idxs(), m_cppFile(nullptr) {}
+      m_spec_list(), m_filtered_spec_idxs(), m_nexusFile(nullptr) {}
 
 /// Delete NexusFileIO in destructor
-LoadNexusProcessed::~LoadNexusProcessed() { delete m_cppFile; }
+LoadNexusProcessed::~LoadNexusProcessed() { delete m_nexusFile; }
 
 /**
  * Return the confidence with with this algorithm can load the file
@@ -352,16 +352,16 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(
 
   // We always start one layer too deep
   // go from /workspace_{n}/{something} -> /workspace_{n}
-  m_cppFile->closeGroup();
+  m_nexusFile->closeGroup();
 
   // Now move to the correct period group
   // /workspace_{n} -> /workspace_{n+1}
-  m_cppFile->closeGroup();
-  m_cppFile->openGroup(entryName, "NXentry");
+  m_nexusFile->closeGroup();
+  m_nexusFile->openGroup(entryName, "NXentry");
 
   try {
     // This loads logs, sample, and instrument.
-    periodWorkspace->loadSampleAndLogInfoNexus(m_cppFile);
+    periodWorkspace->loadSampleAndLogInfoNexus(m_nexusFile);
   } catch (std::exception &e) {
     g_log.information("Error loading Instrument section of nxs file");
     g_log.information(e.what());
@@ -396,7 +396,7 @@ void LoadNexusProcessed::exec() {
     NXRoot root(filename);
 
     // "Open" the same file but with the C++ interface
-    m_cppFile = new ::NeXus::File(root.m_fileID);
+    m_nexusFile = new ::NeXus::File(root.m_fileID);
 
     // Find out how many first level entries there are
     // Cast down to int as another property later on is an int
@@ -1021,7 +1021,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
   std::string parameterStr;
   // Hop to the right point /mantid_workspace_1
   try {
-    m_cppFile->openPath(entry.path()); // This is
+    m_nexusFile->openPath(entry.path()); // This is
   } catch (std::runtime_error &re) {
     throw std::runtime_error("Error while opening a path in a Peaks entry in a "
                              "Nexus processed file. "
@@ -1031,7 +1031,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
   }
   try {
     // This loads logs, sample, and instrument.
-    peakWS->loadExperimentInfoNexus(getPropertyValue("Filename"), m_cppFile,
+    peakWS->loadExperimentInfoNexus(getPropertyValue("Filename"), m_nexusFile,
                                     parameterStr);
     // Populate the instrument parameters in this workspace
     peakWS->readParameterMap(parameterStr);
@@ -1044,7 +1044,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
   // value
   const std::string peaksWSName = "peaks_workspace";
   try {
-    m_cppFile->openGroup(peaksWSName, "NXentry");
+    m_nexusFile->openGroup(peaksWSName, "NXentry");
   } catch (std::runtime_error &re) {
     throw std::runtime_error(
         "Error while opening a peaks workspace in a Nexus processed file. "
@@ -1053,7 +1053,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
   }
   try {
     uint32_t loadCoord(0);
-    m_cppFile->readData("coordinate_system", loadCoord);
+    m_nexusFile->readData("coordinate_system", loadCoord);
     peakWS->setCoordinateSystem(
         static_cast<Kernel::SpecialCoordinateSystem>(loadCoord));
   } catch (::NeXus::Exception &) {
@@ -1072,12 +1072,12 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
 
   std::string m_QConvention = "Inelastic";
   try {
-    m_cppFile->getAttr("QConvention", m_QConvention);
+    m_nexusFile->getAttr("QConvention", m_QConvention);
   } catch (std::exception &) {
   }
 
   // peaks_workspace
-  m_cppFile->closeGroup();
+  m_nexusFile->closeGroup();
 
   // Change convention of loaded file to that in Preferen
   double qSign = 1.0;
@@ -1596,11 +1596,11 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root,
            "Reading the sample details...");
 
   // Hop to the right point
-  m_cppFile->openPath(mtd_entry.path());
+  m_nexusFile->openPath(mtd_entry.path());
   try {
     // This loads logs, sample, and instrument.
     local_workspace->loadExperimentInfoNexus(
-        getPropertyValue("Filename"), m_cppFile,
+        getPropertyValue("Filename"), m_nexusFile,
         parameterStr); // REQUIRED PER PERIOD
 
     // Parameter map parsing only if instrument loaded OK.
@@ -1628,11 +1628,11 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root,
 
   progress(progressStart + 0.15 * progressRange,
            "Reading the workspace history...");
-  m_cppFile->openPath(mtd_entry.path());
+  m_nexusFile->openPath(mtd_entry.path());
   try {
     bool load_history = getProperty("LoadHistory");
     if (load_history)
-      local_workspace->history().loadNexus(m_cppFile);
+      local_workspace->history().loadNexus(m_nexusFile);
   } catch (std::out_of_range &) {
     g_log.warning() << "Error in the workspaces algorithm list, its processing "
                        "history is incomplete\n";

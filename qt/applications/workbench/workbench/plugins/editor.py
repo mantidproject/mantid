@@ -126,7 +126,9 @@ class MultiFileEditor(PluginWidget):
         self.restore_session_tabs(prev_session_tabs)
 
     def writeSettings(self, settings):
-        settings.set(TAB_SETTINGS_KEY, set(self.tabs_open_on_closing))
+        no_duplicates = []
+        [no_duplicates.append(x) for x in self.tabs_open_on_closing if x not in no_duplicates]
+        settings.set(TAB_SETTINGS_KEY, no_duplicates)
 
     def register_plugin(self):
         self.main.add_dockwidget(self)

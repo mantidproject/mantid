@@ -73,6 +73,7 @@ class FigureInteractionTest(unittest.TestCase):
             call('resize_event', interactor.mpl_redraw_annotations),
             call('figure_leave_event', interactor.on_leave),
             call('axis_leave_event', interactor.on_leave),
+            call('scroll_event', interactor.on_scroll)
         ]
         fig_manager.canvas.mpl_connect.assert_has_calls(expected_call)
         self.assertEqual(len(expected_call), fig_manager.canvas.mpl_connect.call_count)
@@ -166,7 +167,15 @@ class FigureInteractionTest(unittest.TestCase):
         self._test_toggle_normalization(errorbars_on=True, plot_kwargs={'distribution': True})
 
     def test_correct_yunit_label_when_overplotting_after_normaliztion_toggle(self):
-        fig = plot([self.ws], spectrum_nums=[1], errors=True,
+        # The earlier version of Matplotlib on RHEL throws an error when performing the second
+        # plot in this test, if the lines have errorbars. The error occurred when it attempted
+        # to draw an interactive legend. Plotting without errors still fulfills the purpose of this
+        # test, so turn them off for old Matplotlib versions.
+        errors = True
+        if int(matplotlib.__version__[0]) < 2:
+            errors = False
+
+        fig = plot([self.ws], spectrum_nums=[1], errors=errors,
                    plot_kwargs={'distribution': True})
         mock_canvas = MagicMock(figure=fig)
         fig_manager_mock = MagicMock(canvas=mock_canvas)
@@ -175,7 +184,7 @@ class FigureInteractionTest(unittest.TestCase):
         ax = fig.axes[0]
         fig_interactor._toggle_normalization(ax)
         self.assertEqual("Counts ($\AA$)$^{-1}$", ax.get_ylabel())
-        plot([self.ws1], spectrum_nums=[1], errors=True, overplot=True, fig=fig)
+        plot([self.ws1], spectrum_nums=[1], errors=errors, overplot=True, fig=fig)
         self.assertEqual("Counts ($\AA$)$^{-1}$", ax.get_ylabel())
 
     def test_normalization_toggle_with_no_autoscale_on_update_no_errors(self):

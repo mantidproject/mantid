@@ -8,7 +8,7 @@ from __future__ import (absolute_import, division)
 
 from qtpy.QtCore import QMetaObject, QObject, Slot
 
-from Muon.GUI.Common.observer_pattern import GenericObserver
+from mantidqt.utils.observer_pattern import GenericObserver
 
 
 # Ordinarily this does not need to be a QObject but it is required to use some QMetaObject.invokeMethod

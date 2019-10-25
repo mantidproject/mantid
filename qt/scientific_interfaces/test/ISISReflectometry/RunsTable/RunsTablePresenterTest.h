@@ -20,6 +20,7 @@
 #include <gtest/gtest.h>
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
+using MantidQt::MantidWidgets::Batch::Cell;
 using testing::AtLeast;
 using testing::Mock;
 using testing::NiceMock;
@@ -38,9 +39,7 @@ public:
 
   RunsTablePresenterTest() : m_jobs(), m_view() {
     jobsViewIs(m_jobs, m_view);
-    ON_CALL(m_jobs, cellsAt(_))
-        .WillByDefault(Return(std::vector<MantidQt::MantidWidgets::Batch::Cell>(
-            8, MantidQt::MantidWidgets::Batch::Cell(""))));
+    ON_CALL(m_jobs, cellsAt(_)).WillByDefault(Return(emptyCellsArray()));
   }
 
   bool verifyAndClearExpectations() {
@@ -55,6 +54,12 @@ public:
       std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const
           &locations) {
     ON_CALL(mockJobs, selectedRowLocations()).WillByDefault(Return(locations));
+  }
+
+  void
+  selectedColumnIs(MantidQt::MantidWidgets::Batch::MockJobTreeView &mockJobs,
+                   int columnIndex) {
+    ON_CALL(mockJobs, currentColumn()).WillByDefault(Return(columnIndex));
   }
 
   ReductionJobs const &jobsFromPresenter(RunsTablePresenter &presenter) {
@@ -72,15 +77,43 @@ public:
   }
 
   RunsTablePresenter makePresenter(IRunsTableView &view, ReductionJobs jobs) {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-    Plotter plotter(nullptr);
-#else
-    Plotter plotter;
-#endif
     auto presenter =
-        RunsTablePresenter(&view, {}, 0.01, std::move(jobs), plotter);
+        RunsTablePresenter(&view, {}, 0.01, std::move(jobs), m_plotter);
     presenter.acceptMainPresenter(&m_mainPresenter);
     return presenter;
+  }
+
+  Group &getGroup(RunsTablePresenter &presenter, int groupIndex) {
+    auto &reductionJobs = presenter.mutableRunsTable().mutableReductionJobs();
+    auto &group = reductionJobs.mutableGroups()[groupIndex];
+    return group;
+  }
+
+  Row *getRow(RunsTablePresenter &presenter, int groupIndex, int rowIndex) {
+    auto &reductionJobs = presenter.mutableRunsTable().mutableReductionJobs();
+    auto *row = &reductionJobs.mutableGroups()[groupIndex]
+                     .mutableRows()[rowIndex]
+                     .get();
+    return row;
+  }
+
+  Row *getRow(RunsTablePresenter &presenter,
+              MantidQt::MantidWidgets::Batch::RowLocation const &location) {
+    return getRow(presenter, location.path()[0], location.path()[1]);
+  }
+
+  std::vector<Cell> emptyCellsArray() {
+    return std::vector<MantidQt::MantidWidgets::Batch::Cell>(
+        9, MantidQt::MantidWidgets::Batch::Cell(""));
+  }
+
+  std::vector<Cell> cellsArray(std::string const &run = "12345",
+                               std::string const &theta = "0.5",
+                               std::string const &trans1 = "",
+                               std::string const &trans2 = "") {
+    return std::vector<Cell>{Cell(run),    Cell(theta), Cell(trans1),
+                             Cell(trans2), Cell(""),    Cell(""),
+                             Cell(""),     Cell(""),    Cell("")};
   }
 
   void expectIsProcessing() {
@@ -99,5 +132,6 @@ protected:
   NiceMock<MantidQt::MantidWidgets::Batch::MockJobTreeView> m_jobs;
   NiceMock<MockRunsTableView> m_view;
   NiceMock<MockRunsPresenter> m_mainPresenter;
+  NiceMock<MockPlotter> m_plotter;
 };
 #endif // MANTID_CUSTOMINTERFACES_REFLRUNSTABLEPRESENTERTEST_H_

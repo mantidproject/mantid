@@ -34,6 +34,8 @@ public:
 
   /// Algorithm's category for identification
   const std::string category() const override { return "Crystal\\Peaks"; }
+  /// Return any errors in cross-property validation
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   /// Initialise the properties

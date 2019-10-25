@@ -52,6 +52,7 @@ set(TEST_FILES
     test/ISISReflectometry/Reduction/ParseReflectometryStringsTest.h
     test/ISISReflectometry/Reduction/ReductionJobsMergeTest.h
     test/ISISReflectometry/Reduction/ValidatePerThetaDefaultsTest.h
+    test/ISISReflectometry/RunsTable/RunsTablePresenterDisplayTest.h
     test/ISISReflectometry/RunsTable/RunsTablePresenterGroupDeletionTest.h
     test/ISISReflectometry/RunsTable/RunsTablePresenterGroupInsertionTest.h
     test/ISISReflectometry/RunsTable/RunsTablePresenterRowInsertionTest.h
@@ -69,6 +70,7 @@ set(TEST_FILES
     test/ISISReflectometry/MainWindow/MainWindowPresenterTest.h
     test/ISISReflectometry/Runs/SearchResultTest.h
     test/ISISReflectometry/Save/SavePresenterTest.h
+    test/ISISReflectometry/Common/ClipboardTest.h
     test/ISISReflectometry/Common/PlotterTestQt4.h
     test/ISISReflectometry/Common/DecoderTest.h
     test/ISISReflectometry/Common/EncoderTest.h
@@ -122,6 +124,7 @@ set(QT5_TEST_FILES
     test/ISISReflectometry/Reduction/ParseReflectometryStringsTest.h
     test/ISISReflectometry/Reduction/ReductionJobsMergeTest.h
     test/ISISReflectometry/Reduction/ValidatePerThetaDefaultsTest.h
+    test/ISISReflectometry/RunsTable/RunsTablePresenterDisplayTest.h
     test/ISISReflectometry/RunsTable/RunsTablePresenterGroupDeletionTest.h
     test/ISISReflectometry/RunsTable/RunsTablePresenterGroupInsertionTest.h
     test/ISISReflectometry/RunsTable/RunsTablePresenterRowInsertionTest.h

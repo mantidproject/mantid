@@ -11,7 +11,7 @@ from mantid.api import AnalysisDataService as ads, WorkspaceFactory
 from mantid.kernel import FloatTimeSeriesProperty
 from mantid.py3compat import Enum
 
-from Muon.GUI.Common.observer_pattern import GenericObserver
+from mantidqt.utils.observer_pattern import GenericObserver
 
 # Constants
 DEFAULT_TABLE_NAME = 'ResultsTable'
