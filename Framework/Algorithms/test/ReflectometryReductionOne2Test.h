@@ -839,6 +839,31 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
+  void test_transmission_output_is_stored_when_one_transmission_input() {
+    ReflectometryReductionOne2 alg;
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "2", m_multiDetectorWS,
+                                         false);
+    runAlgorithmLam(alg);
+
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_LAM_1234"));
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_transmission_output_is_stored_when_two_transmission_inputs() {
+    ReflectometryReductionOne2 alg;
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "2", m_multiDetectorWS,
+                                         true);
+    runAlgorithmLam(alg);
+
+    // stitched output is stored
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_LAM_1234_1234"));
+    // interim outputs are not
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist("TRANS_LAM_1234"));
+
+    AnalysisDataService::Instance().clear();
+  }
+
 private:
   // Do standard algorithm setup
   void setupAlgorithm(ReflectometryReductionOne2 &alg,
