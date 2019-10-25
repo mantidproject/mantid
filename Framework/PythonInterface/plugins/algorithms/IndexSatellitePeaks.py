@@ -8,9 +8,8 @@ import numpy as np
 from scipy.spatial import KDTree
 import fractional_indexing as indexing
 
-from mantid.kernel import Direction
-from mantid.api import (IPeaksWorkspaceProperty,
-                        ITableWorkspaceProperty, PythonAlgorithm, AlgorithmFactory)
+from mantid.kernel import Direction, V3D
+from mantid.api import (IPeaksWorkspaceProperty, PythonAlgorithm, AlgorithmFactory)
 import mantid.simpleapi as api
 
 
@@ -40,7 +39,7 @@ class IndexSatellitePeaks(PythonAlgorithm):
                              doc="Positions of satellite peaks with fractional \
                              HKL coordinates")
 
-        self.declareProperty(ITableWorkspaceProperty(name="OutputWorkspace",
+        self.declareProperty(IPeaksWorkspaceProperty(name="OutputWorkspace",
                                                      defaultValue="",
                                                      direction=Direction.Output),
                              doc="The indexed satellite peaks. This will be a  \
@@ -100,56 +99,25 @@ class IndexSatellitePeaks(PythonAlgorithm):
             distance, index = peak_map.query(q, k=1)
             hklm[i, 3:] = indices[index]
 
-        indexed = self.create_indexed_workspace(satellites, ndim, hklm)
+        indexed = self.create_indexed_peaksworkspace(satellites, hklm)
         self.setProperty("OutputWorkspace", indexed)
 
-    def create_indexed_workspace(self, fractional_peaks, ndim, hklm):
-        """Create a TableWorkepace that contains indexed peak data.
-
-        This produces a TableWorkepace that looks like a PeaksWorkspace but
-        with the additional index columns included. In future releases support
-        for indexing should be added to the PeaksWorkspace data type itself.
+    def create_indexed_peaksworkspace(self, fractional_peaks, hklm):
+        """Create a PeaksWorkspace that contains indexed peak data.
 
         :param fractional_peaks: the peaks workspace containing peaks with
             fractional HKL values.
-        :param ndim: the number of additional indexing columns to add.
-        :param hklm: the new higher dimensional miller indicies to add.
-        :returns: a table workspace with the indexed peak data
+        :param hklm: the new higher dimensional miller indices to add.
+        :returns: a peaks workspace with the indexed peak data
         """
-        # Create table with the number of columns we need
-        types = ['int', 'long64', 'double', 'double', 'double', 'double',  'double', 'double',
-                 'double', 'double', 'double', 'float', 'str', 'float', 'float', 'V3D', 'V3D']
-        name = self.getPropertyValue("OutputWorkspace")
-        indexed = api.CreateEmptyTableWorkspace(name)
-        names = fractional_peaks.getColumnNames()
-
-        # Insert the extra columns for the addtional indicies
-        for i in range(ndim - 3):
-            names.insert(5 + i, 'm{}'.format(i + 1))
-            types.insert(5 + i, 'double')
-
-        names = np.array(names)
-        types = np.array(types)
-
-        # Create columns in the table workspace
-        for name, column_type in zip(names, types):
-            indexed.addColumn(column_type, name)
-
-        # Copy all columns from original workspace, ignoring HKLs
-        column_data = []
-        idx = np.arange(0, names.size)
-        hkl_mask = (idx < 2) | (idx > 4 + (ndim - 3))
-        for name in names[hkl_mask]:
-            column_data.append(fractional_peaks.column(name))
-
-        # Insert the addtional HKL columns into the data
-        for i, col in enumerate(hklm.T.tolist()):
-            column_data.insert(i + 2, col)
-
-        # Insert the columns into the table workspace
-        for i in range(fractional_peaks.rowCount()):
-            row = [column_data[j][i] for j in range(indexed.columnCount())]
-            indexed.addRow(row)
+        # pad to 6 columns so we can assume a (hkl) (mnp) layout
+        hklm = np.pad(hklm, pad_width=(0, 6 - hklm.shape[1]), mode='constant',
+                      constant_values=0)
+        indexed = api.CloneWorkspace(fractional_peaks, StoreInADS=False)
+        for row, peak in enumerate(indexed):
+            row_indices = hklm[row]
+            peak.setHKL(*row_indices[:3])
+            peak.setIntMNP(V3D(*row_indices[3:]))
 
         return indexed
 
