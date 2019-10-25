@@ -129,7 +129,9 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
       menu->addAction(m_showAlgorithmHistory);
       menu->addAction(m_sampleLogs);
       menu->addAction(m_sliceViewer);
-    }
+    } else if (boost::dynamic_pointer_cast<WorkspaceGroup>(workspace)) {
+      menu->addAction(m_showDetectors);
+	}
 
     menu->addSeparator();
     menu->addAction(m_rename);
