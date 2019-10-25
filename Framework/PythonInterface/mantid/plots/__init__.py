@@ -623,14 +623,7 @@ class MantidAxes(Axes):
                     logger.information('Curve not plotted: {0}'.format(ex.args[0]))
 
                     # remove the curve using similar to logic that in _WorkspaceArtists._remove
-                    container_orig = artists[0]
-                    container_orig.remove()
-                    # The container does not remove itself from the containers list
-                    # but protect this just in case matplotlib starts doing this
-                    try:
-                        self.containers.remove(container_orig)
-                    except ValueError:
-                        pass
+                    artists[0].remove()
 
                     # blank out list that will be returned
                     artists = []

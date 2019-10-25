@@ -121,7 +121,7 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
                 continue
             redraw = redraw | redraw_this
         if redraw:
-            self.canvas.draw_idle()
+            self.canvas.draw()
 
 
 class FigureManagerWorkbench(FigureManagerBase, QObject):
