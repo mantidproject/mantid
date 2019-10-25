@@ -72,9 +72,10 @@ void BaseInstrumentView::setupHelp(){
     m_help = new QPushButton("?");
     m_help->setMaximumWidth(25);
     auto helpLayout = new QHBoxLayout(helpWidget);
+    helpLayout->addWidget(m_help);
+
     helpLayout->addItem(
       new QSpacerItem(1000, 20, QSizePolicy::Expanding, QSizePolicy::Expanding));
-    helpLayout->addWidget(m_help);
     this->addWidget(helpWidget);
     connect(m_help, SIGNAL(clicked()), this, SLOT(openHelp()));
   }
