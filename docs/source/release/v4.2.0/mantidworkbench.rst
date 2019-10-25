@@ -62,6 +62,7 @@ Bugfixes
 - Fixed an issue where the plot legend would no longer be movable after removing a plot guess.
 - The fitting curves in the plot are now deleted when the fit results workspaces are deleted.
 - An error is no longer raised when attempting to open plot options, or the fitting tab, on a figure containing a line plotted using a script without a spectrum number being specified.
+- Sequential fit now updates parameters in fit browser and plots them
 - Imports from the __future__ module now have the expected effect in scripts. E.g. after importing ``print_function``, ``print("A", "B")`` will output "``A B``" instead of "``('A', 'B')``".
 - Tabs in the script editor no longer change order when Workbench is closed and reopened.
 - Fixes an issue where subscribing a new algorithm duplicates the list of algorithms in the algorithm selector widget.
