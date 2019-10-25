@@ -11,7 +11,7 @@ import unittest
 
 from mantid.py3compat.mock import patch
 from mantid.py3compat import mock
-from Engineering.gui.engineering_diffraction.tabs.calibration import view, model, presenter
+from Engineering.gui.engineering_diffraction.tabs.calibration import model, view, presenter
 
 tab_path = 'Engineering.gui.engineering_diffraction.tabs.calibration'
 
@@ -55,31 +55,26 @@ class CalibrationPresenterTest(unittest.TestCase):
         worker_method.assert_not_called()
 
     def test_controls_disabled_disables_both(self):
-        self.presenter.disable_calibrate_buttons()
+        self.presenter.set_calibrate_controls_enabled(False)
 
         self.view.set_calibrate_button_enabled.assert_called_with(False)
         self.view.set_check_plot_output_enabled.assert_called_with(False)
 
     def test_controls_enabled_enables_both(self):
-        self.presenter.disable_calibrate_buttons()
-
-        self.view.set_calibrate_button_enabled.assert_called_with(False)
-        self.view.set_check_plot_output_enabled.assert_called_with(False)
-
-        self.presenter.enable_calibrate_buttons()
+        self.presenter.set_calibrate_controls_enabled(True)
 
         self.view.set_calibrate_button_enabled.assert_called_with(True)
         self.view.set_check_plot_output_enabled.assert_called_with(True)
 
+    @patch(tab_path + ".presenter.CalibrationPresenter.emit_enable_button_signal")
     @patch(tab_path + ".presenter.logger.warning")
-    def test_on_error_posts_to_logger_and_enables_controls(self, logger):
+    def test_on_error_posts_to_logger_and_enables_controls(self, logger, emit):
         fail_info = 2024278
 
         self.presenter._on_error(fail_info)
 
         logger.assert_called_with(str(fail_info))
-        self.view.set_calibrate_button_enabled.assert_called_with(True)
-        self.view.set_check_plot_output_enabled.assert_called_with(True)
+        self.assertEqual(emit.call_count, 1)
 
     def test_validation_of_run_numbers(self):
         self.view.get_calib_valid.return_value = False
@@ -102,9 +97,20 @@ class CalibrationPresenterTest(unittest.TestCase):
         result = self.presenter.validate_run_numbers()
         self.assertTrue(result)
 
-    def test_set_instrument_override(self):
-        instrument = "TEST"
+    def test_set_instrument_override_ENGINX(self):
+        instrument = 0
         self.presenter.set_instrument_override(instrument)
 
-        self.view.set_instrument_override.assert_called_with(instrument)
-        self.assertEqual(self.presenter.instrument, instrument)
+        self.view.set_instrument_override.assert_called_with("ENGINX")
+        self.assertEqual(self.presenter.instrument, "ENGINX")
+
+    def test_set_instrument_override_IMAT(self):
+        instrument = 1
+        self.presenter.set_instrument_override(instrument)
+
+        self.view.set_instrument_override.assert_called_with("IMAT")
+        self.assertEqual(self.presenter.instrument, "IMAT")
+
+
+if __name__ == '__main__':
+    unittest.main()
