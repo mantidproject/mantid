@@ -218,6 +218,10 @@ void CreateTransmissionWorkspace2::getRunNumbers() {
  */
 void CreateTransmissionWorkspace2::storeTransitionRun(int which,
                                                       MatrixWorkspace_sptr ws) {
+  bool const isDebug = getProperty("Debug");
+  if (!isDebug)
+    return;
+
   if (which < 1 || which > 2) {
     throw std::logic_error("There are only two runs: 1 and 2.");
   }
@@ -235,8 +239,7 @@ void CreateTransmissionWorkspace2::storeTransitionRun(int which,
  */
 void CreateTransmissionWorkspace2::storeOutputWorkspace(
     API::MatrixWorkspace_sptr ws) {
-  bool const isDebug = getProperty("Debug");
-  if (isDefault("OutputWorkspace") && (!isChild() || isDebug)) {
+  if (isDefault("OutputWorkspace")) {
     std::string name = TRANS_LAM_PREFIX;
     if (!m_firstTransmissionRunNumber.empty()) {
       name.append(m_firstTransmissionRunNumber);
@@ -247,11 +250,7 @@ void CreateTransmissionWorkspace2::storeOutputWorkspace(
       name.append("_");
       name.append(m_secondTransmissionRunNumber);
     }
-    if (!isChild()) {
-      setPropertyValue("OutputWorkspace", name);
-    } else {
-      AnalysisDataService::Instance().addOrReplace(name, ws);
-    }
+    setPropertyValue("OutputWorkspace", name);
   }
   setProperty("OutputWorkspace", ws);
 }
