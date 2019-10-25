@@ -640,7 +640,12 @@ class MantidAxes(Axes):
                     if (not self.is_empty(self)) and self.legend_ is not None:
                         self.legend().draggable()
 
-                if new_kwargs and new_kwargs.pop('autoscale_on_update', self.get_autoscale_on()):
+                if new_kwargs:
+                    _autoscale = new_kwargs.pop("autoscale_on_update", self.get_autoscale_on())
+                else:
+                    _autoscale = self.get_autoscale_on()
+
+                if _autoscale:
                     self.relim()
                     self.autoscale()
                 return artists
