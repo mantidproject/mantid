@@ -140,8 +140,11 @@ target_link_libraries(LiveData LINK_PRIVATE ${PRIVATE_LINK_LIBRARIES})
 # Add the unit tests directory
 add_subdirectory(test)
 
-# Installation settings
+# Auto-generate exports header
+target_include_directories(LiveData PUBLIC ${CMAKE_BINARY_DIR}/Framework/LiveData)
+generate_mantid_export_header(LiveData)
 
+# Installation settings
 mtd_install_targets(TARGETS
                     LiveData
                     INSTALL_DIRS
