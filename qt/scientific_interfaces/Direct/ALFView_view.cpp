@@ -30,7 +30,8 @@ void ALFView_view::setUpInstrument(
   m_extractSingleTubeObservable = new Observable();
   m_averageTubeObservable = new Observable();
 
-  auto instrumentWidget = new MantidWidgets::InstrumentWidget(QString::fromStdString(fileName));
+  auto instrumentWidget =
+      new MantidWidgets::InstrumentWidget(QString::fromStdString(fileName));
   instrumentWidget->removeTab("Instrument");
   instrumentWidget->removeTab("Draw");
   instrumentWidget->hideHelp();
