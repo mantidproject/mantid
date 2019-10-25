@@ -26,6 +26,11 @@ Improved
 - Batch names will now have a unique number assigned to it, and there will no longer be multiple batches of the same name.
 - The Instrument is now synchronised across all Batch tabs.
 
+Bug fixes
+#########
+
+- A bug has been fixed where the interface could sometimes not be closed after a failed attempt at starting Autoprocessing.
+  
 Algorithms
 ----------
 
