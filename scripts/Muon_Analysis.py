@@ -22,11 +22,11 @@ if 'muon_analysis' in globals():
         muon_analysis.activateWindow()
     else:
         muon_analysis = MuonAnalysisGui()
-        ReportInterfaceStartup(Name)
+        report_interface_startup(Name)
         muon_analysis.resize(700, 700)
         muon_analysis.show()
 else:
     muon_analysis = MuonAnalysisGui()
-    ReportInterfaceStartup(Name)
+    report_interface_startup(Name)
     muon_analysis.resize(700, 700)
     muon_analysis.show()

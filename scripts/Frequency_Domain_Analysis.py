@@ -22,11 +22,11 @@ if 'muon_freq' in globals():
         muon_freq.activateWindow()
     else:
         muon_freq = FrequencyAnalysisGui()
-        ReportInterfaceStartup(Name)
+        report_interface_startup(Name)
         muon_freq.resize(700, 700)
         muon_freq.show()
 else:
     muon_freq = FrequencyAnalysisGui()
-    ReportInterfaceStartup(Name)
+    report_interface_startup(Name)
     muon_freq.resize(700, 700)
     muon_freq.show()

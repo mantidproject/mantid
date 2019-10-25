@@ -22,11 +22,11 @@ if 'Elemental_Analysis' in globals():
         Elemental_Analysis.activateWindow()
     else:
         Elemental_Analysis = ElementalAnalysisGui()
-        ReportInterfaceStartup(Name)
+        report_interface_startup(Name)
         Elemental_Analysis.resize(700, 700)
         Elemental_Analysis.show()
 else:
     Elemental_Analysis = ElementalAnalysisGui()
-    ReportInterfaceStartup(Name)
+    report_interface_startup(Name)
     Elemental_Analysis.resize(700, 700)
     Elemental_Analysis.show()
