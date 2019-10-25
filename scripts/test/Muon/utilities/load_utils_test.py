@@ -78,10 +78,13 @@ class MuonFileUtilsTest(unittest.TestCase):
 
     def test_load_workspace_from_filename_for_file_path(self):
         mock_alg = mock.MagicMock()
-        filename = 'test'+os.sep 'MUSR00022725.nsx'
+        filename = 'PSI'+os.sep + 'run_1529_templs0.mon'
+        inputs = {
+              "DeadTimeTable": "__notUsed",
+              "DetectorGroupingTable": "__notUsed"}
 
-        alg, _ = utils.create_load_algorithm(filename,{})
-        self.assertEqual(alg.getProperty("Filename"), filename)
+        alg, _ = utils.create_load_algorithm(filename,inputs)
+        self.assertTrue(filename in alg.getProperty("Filename").value)
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)
