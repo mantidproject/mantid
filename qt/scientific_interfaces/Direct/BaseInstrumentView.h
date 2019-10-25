@@ -45,7 +45,9 @@ public:
   setUpInstrument(const std::string &fileName,
                   std::vector<std::function<bool(std::map<std::string, bool>)>>
                       &instrument);
-  virtual void addObserver(std::tuple<std::string, Observer *> &listener){};
+  virtual void addObserver(std::tuple<std::string, Observer *> &listener) {
+    void(*listener);
+  };
   void setupInstrumentAnalysisSplitters(QWidget *analysis);
   void setupHelp();
 public slots:

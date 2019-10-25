@@ -21,7 +21,7 @@ class ALFView_model : public BaseInstrumentModel {
 
 public:
   ALFView_model();
-  ~ALFView_model(){};
+  virtual ~ALFView_model(){};
   std::pair<int, std::string> loadData(const std::string &name) override;
   std::map<std::string, bool> isDataValid();
   void transformData();

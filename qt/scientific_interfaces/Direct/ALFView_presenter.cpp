@@ -94,12 +94,14 @@ ALFView_presenter::setupALFInstrument() {
 
 void ALFView_presenter::extractSingleTube() {
   m_model->extractSingleTube();
-  m_analysisPane->addSpectrum(m_model->WSName());
+  const std::string WSName = m_model->WSName();
+  m_analysisPane->addSpectrum(WSName);
 }
 
 void ALFView_presenter::averageTube() {
   m_model->averageTube();
-  m_analysisPane->addSpectrum(m_model->WSName());
+  const std::string WSName = m_model->WSName();
+  m_analysisPane->addSpectrum(WSName);
 }
 
 } // namespace CustomInterfaces

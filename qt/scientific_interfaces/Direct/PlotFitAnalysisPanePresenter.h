@@ -30,7 +30,7 @@ public:
   std::string getCurrentWS() { return m_currentName; };
   void clearCurrentWS() { m_currentName = ""; };
   void doFit();
-  void addSpectrum(std::string &wsName);
+  void addSpectrum(const std::string &wsName);
   void addFunction(Mantid::API::IFunction_sptr func);
 
 private:

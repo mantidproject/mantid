@@ -49,7 +49,7 @@ void PlotFitAnalysisPanePresenter::addFunction(
   m_view->addFunction(func);
 }
 
-void PlotFitAnalysisPanePresenter::addSpectrum(std::string &wsName) {
+void PlotFitAnalysisPanePresenter::addSpectrum(const std::string &wsName) {
   m_currentName = wsName;
   m_view->addSpectrum(wsName);
 }

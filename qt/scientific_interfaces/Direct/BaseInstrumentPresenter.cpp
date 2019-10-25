@@ -17,8 +17,8 @@ namespace CustomInterfaces {
 BaseInstrumentPresenter::BaseInstrumentPresenter(BaseInstrumentView *view,
                                                  BaseInstrumentModel *model,
                                                  QWidget *analysisPaneView)
-    : m_view(view), m_model(model), m_analysisPaneView(analysisPaneView),
-      m_currentRun(0), m_currentFile(""), m_loadRunObserver(nullptr) {
+    : m_view(view), m_model(model),
+	m_currentRun(0), m_currentFile(""), m_loadRunObserver(nullptr), m_analysisPaneView(analysisPaneView) {
   m_loadRunObserver = new VoidObserver();
   m_model->loadEmptyInstrument();
 }
