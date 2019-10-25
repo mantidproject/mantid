@@ -59,8 +59,11 @@ target_link_libraries(Beamline
 # Add the unit tests directory
 add_subdirectory(test)
 
-# Installation settings
+# Auto-generate exports header
+target_include_directories(Beamline PUBLIC ${CMAKE_BINARY_DIR}/Framework/Beamline)
+generate_mantid_export_header(Beamline)
 
+# Installation settings
 mtd_install_targets(TARGETS
                     Beamline
                     INSTALL_DIRS
