@@ -57,8 +57,7 @@ void export_UsageService() {
   enum_<Mantid::Kernel::FeatureType>("FeatureType")
       .value("Algorithm", Mantid::Kernel::FeatureType::Algorithm)
       .value("Interface", Mantid::Kernel::FeatureType::Interface)
-      .value("Feature", Mantid::Kernel::FeatureType::Feature)
-      .export_values();
+      .value("Feature", Mantid::Kernel::FeatureType::Feature);
 
   class_<UsageServiceImpl, boost::noncopyable>("UsageServiceImpl", no_init)
       .def("flush", &UsageServiceImpl::flush, arg("self"),
