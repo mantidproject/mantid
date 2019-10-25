@@ -61,7 +61,8 @@ PeakPickerTool::PeakPickerTool(
     return;
   }
 
-    // Show the fitPropertyBrowser if it isn't already. This sets the WorkspaceIndex to 0
+  // Show the fitPropertyBrowser if it isn't already. This sets the
+  // WorkspaceIndex to 0
   if (showFitPropertyBrowser)
     m_fitPropertyBrowser->show();
 
