@@ -620,6 +620,8 @@ class MantidAxes(Axes):
                         x, y, _, __ = plotfunctions._plot_impl(self, workspace, args, kwargs)
                     artists[0].set_data(x, y)
                 except RuntimeError as ex:
+                    # if curve couldn't be plotted then remove it - can happen if the workspace doesn't contain the
+                    # spectrum any more following execution of an algorithm
                     logger.information('Curve not plotted: {0}'.format(ex.args[0]))
 
                     # remove the curve using similar to logic that in _WorkspaceArtists._remove
@@ -724,29 +726,36 @@ class MantidAxes(Axes):
                 except ValueError:
                     pass
                 # this gets pushed back onto the containers list
-                if new_kwargs:
-                    container_new = plotfunctions.errorbar(self, workspace, **new_kwargs)
-                else:
-                    container_new = plotfunctions.errorbar(self, workspace, **kwargs)
-                self.containers.insert(orig_idx, container_new)
-                self.containers.pop()
+                try:
+                    if new_kwargs:
+                        container_new = plotfunctions.errorbar(self, workspace, **new_kwargs)
+                    else:
+                        container_new = plotfunctions.errorbar(self, workspace, **kwargs)
 
-                # Update joining line
-                if container_new[0] and container_orig[0]:
-                    container_new[0].update_from(container_orig[0])
-                # Update caps
-                for orig_caps, new_caps in zip(container_orig[1], container_new[1]):
-                    new_caps.update_from(orig_caps)
-                # Update bars
-                for orig_bars, new_bars in zip(container_orig[2], container_new[2]):
-                    new_bars.update_from(orig_bars)
+                    self.containers.insert(orig_idx, container_new)
+                    self.containers.pop()
+                    # Update joining line
+                    if container_new[0] and container_orig[0]:
+                        container_new[0].update_from(container_orig[0])
+                    # Update caps
+                    for orig_caps, new_caps in zip(container_orig[1], container_new[1]):
+                        new_caps.update_from(orig_caps)
+                    # Update bars
+                    for orig_bars, new_bars in zip(container_orig[2], container_new[2]):
+                        new_bars.update_from(orig_bars)
+                    # Re-plotting in the config dialog will assign this attr
+                    if hasattr(container_orig, 'errorevery'):
+                        setattr(container_new, 'errorevery', container_orig.errorevery)
 
-                # Re-plotting in the config dialog will assign this attr
-                if hasattr(container_orig, 'errorevery'):
-                    setattr(container_new, 'errorevery', container_orig.errorevery)
+                    # ax.relim does not support collections...
+                    self._update_line_limits(container_new[0])
+                except RuntimeError as ex:
+                    logger.information('Error bar not plotted: {0}'.format(ex.args[0]))
+                    container_new = []
+                    # also remove the curve from the legend
+                    if (not self.is_empty(self)) and self.legend_ is not None:
+                        self.legend().draggable()
 
-                # ax.relim does not support collections...
-                self._update_line_limits(container_new[0])
                 self.set_autoscaley_on(True)
                 return container_new
 
