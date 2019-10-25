@@ -2086,7 +2086,7 @@ void FitPropertyBrowser::clearBrowser() {
 
 /// Set the parameters to the fit outcome
 void FitPropertyBrowser::getFitResults() {
-	std::string wsName = outputName() + "_Parameters";
+  std::string wsName = outputName() + "_Parameters";
   if (Mantid::API::AnalysisDataService::Instance().doesExist(wsName)) {
     Mantid::API::ITableWorkspace_sptr ws =
         boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(

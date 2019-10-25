@@ -11,9 +11,9 @@
 //   Includes
 //----------------------------
 
+#include "DllOption.h"
 #include "MantidAPI/AlgorithmObserver.h"
 #include "ui_SequentialFitDialog.h"
-#include "DllOption.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -92,8 +92,8 @@ private:
   /// Called when the fit is finished
   void finishHandle(const Mantid::API::IAlgorithm *alg) override;
 
-	/// Set the parameters to the fit outcome
-	void getFitResults();
+  /// Set the parameters to the fit outcome
+  void getFitResults();
 
   /// set spectrum value for workspace/file in row row
   void setSpectrum(int row, int spec);
@@ -116,8 +116,8 @@ private:
 
   QString name(int row) const;
 
-	// name of the output wokrspace
-	std::string m_outputName;
+  // name of the output wokrspace
+  std::string m_outputName;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
