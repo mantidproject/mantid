@@ -115,9 +115,9 @@ void CalculatePlaczekSelfScattering::exec() {
   }
   // set detector law term (eps1)
   std::vector<double> eps1;
-  const double lambdaD = 1.44;
+  constexpr double LAMBDA_D = 1.44;
   for (size_t i = 0; i < xLambda.size() - 1; i++) {
-    double xTerm = -(xLambda[i] + dx) / lambdaD;
+    double xTerm = -(xLambda[i] + dx) / LAMBDA_D;
     eps1.push_back(xTerm * exp(xTerm) / (1.0 - exp(xTerm)));
   }
   /* Placzek
@@ -136,10 +136,8 @@ void CalculatePlaczekSelfScattering::exec() {
   size_t nReserve = 0;
   const API::SpectrumInfo specInfo = inWS->spectrumInfo();
   for (size_t detIndex = 0; detIndex < specInfo.size(); detIndex++) {
-    if (!(specInfo.isMonitor(detIndex))) {
-      if (!(specInfo.l2(detIndex) == 0.0)) {
-        nReserve += 1;
-      }
+    if (!(specInfo.isMonitor(detIndex)) && !(specInfo.l2(detIndex) == 0.0)) {
+      nReserve += 1;
     }
   }
   xLambdas.reserve(nReserve);

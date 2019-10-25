@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-
+import os
 
 from isis_powder.routines import absorb_corrections, common, instrument_settings
 from isis_powder.abstract_inst import AbstractInst
@@ -55,7 +55,7 @@ class Polaris(AbstractInst):
         # Generate pdf
         run_details = self._get_run_details(self._inst_settings.run_number)
         focus_file_path = self._generate_out_file_paths(run_details)["nxs_filename"]
-        cal_file_name = self._inst_settings.calibration_dir + '/' + self._inst_settings.grouping_file_name
+        cal_file_name = os.path.join(self._inst_settings.calibration_dir, self._inst_settings.grouping_file_name)
         pdf_output = polaris_algs.generate_ts_pdf(run_number=self._inst_settings.run_number,
                                                   focus_file_path=focus_file_path,
                                                   merge_banks=self._inst_settings.merge_banks,
