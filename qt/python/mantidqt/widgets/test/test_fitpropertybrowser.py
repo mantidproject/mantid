@@ -8,12 +8,12 @@
 
 import unittest
 
-# third party imports
 import matplotlib
 matplotlib.use('AGG')  # noqa
 
 from mantid.api import AnalysisDataService, WorkspaceFactory
 from mantid.py3compat.mock import MagicMock, Mock, patch
+from mantid.simpleapi import CreateSampleWorkspace
 from mantidqt.plotting.functions import plot
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.widgets.fitpropertybrowser.fitpropertybrowser import FitPropertyBrowser
@@ -23,14 +23,14 @@ from workbench.plotting.figuremanager import FigureManagerADSObserver
 
 @start_qapplication
 class FitPropertyBrowserTest(unittest.TestCase):
-
     def tearDown(self):
         AnalysisDataService.clear()
 
     def test_initialization_does_not_raise(self):
         assertRaisesNothing(self, self._create_widget)
 
-    @patch('mantidqt.widgets.fitpropertybrowser.fitpropertybrowser.FitPropertyBrowser.normaliseData')
+    @patch('mantidqt.widgets.fitpropertybrowser.fitpropertybrowser.FitPropertyBrowser.normaliseData'
+           )
     def test_normalise_data_set_on_fit_menu_shown(self, normaliseData_mock):
         for normalised in [True, False]:
             ws_artist_mock = Mock(is_normalized=normalised, workspace_index=0)
@@ -46,8 +46,8 @@ class FitPropertyBrowserTest(unittest.TestCase):
         table = WorkspaceFactory.createTable()
         table.addColumn('double', 'X', 1)
         table.addColumn('double', 'Y', 2)
-        for i in range(1,10):
-            table.addRow([0.1*i, 5])
+        for i in range(1, 10):
+            table.addRow([0.1 * i, 5])
         name = "table_name"
         AnalysisDataService.Instance().addOrReplace(name, table)
         property_browser = self._create_widget()
@@ -65,17 +65,21 @@ class FitPropertyBrowserTest(unittest.TestCase):
 
         manager_mock = Mock()
         manager_mock.canvas = canvas
-        observer = FigureManagerADSObserver(manager=manager_mock) # noqa: F841
+        observer = FigureManagerADSObserver(manager=manager_mock)  # noqa: F841
 
         for plot_diff in [True, False]:
             # create fake fit output results
-            matrixWorkspace = WorkspaceFactory.Instance().create("Workspace2D", NVectors=3, YLength=5, XLength=5)
+            matrixWorkspace = WorkspaceFactory.Instance().create("Workspace2D",
+                                                                 NVectors=3,
+                                                                 YLength=5,
+                                                                 XLength=5)
             tableWorkspace = WorkspaceFactory.createTable()
             AnalysisDataService.Instance().addOrReplace("ws_Workspace", matrixWorkspace)
             AnalysisDataService.Instance().addOrReplace("ws_Parameters", tableWorkspace)
-            AnalysisDataService.Instance().addOrReplace("ws_NormalisedCovarianceMatrix", tableWorkspace)
+            AnalysisDataService.Instance().addOrReplace("ws_NormalisedCovarianceMatrix",
+                                                        tableWorkspace)
 
-            property_browser.plotDiff = Mock(return_value = plot_diff)
+            property_browser.plotDiff = Mock(return_value=plot_diff)
             property_browser.fitting_done_slot("ws_Workspace")
 
             if plot_diff:
@@ -88,6 +92,22 @@ class FitPropertyBrowserTest(unittest.TestCase):
             AnalysisDataService.Instance().remove("ws_NormalisedCovarianceMatrix")
 
             self.assertEqual(1, len(fig.get_axes()[0].lines))
+
+    def test_plot_limits_are_not_changed_when_plotting_fit_lines(self):
+        fig, canvas = self._create_and_plot_matrix_workspace()
+        ax_limits = fig.get_axes()[0].axis()
+        widget = self._create_widget(canvas=canvas)
+        fit_ws_name = "fit_ws"
+        CreateSampleWorkspace(OutputWorkspace=fit_ws_name)
+        widget.fitting_done_slot(fit_ws_name)
+        self.assertEqual(ax_limits, fig.get_axes()[0].axis())
+
+    def test_plot_limits_are_not_changed_when_plotting_guess(self):
+        fig, canvas = self._create_and_plot_matrix_workspace()
+        ax_limits = fig.get_axes()[0].axis()
+        widget = self._create_widget(canvas=canvas)
+        widget.plot_guess()
+        self.assertEqual(ax_limits, fig.get_axes()[0].axis())
 
     # Private helper functions
     def _create_widget(self, canvas=MagicMock(), toolbar_manager=Mock()):

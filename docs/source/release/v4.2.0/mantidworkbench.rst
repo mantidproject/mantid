@@ -63,5 +63,6 @@ Bugfixes
 - An error is no longer raised when attempting to open plot options, or the fitting tab, on a figure containing a line plotted using a script without a spectrum number being specified.
 - Imports from the __future__ module now have the expected effect in scripts. E.g. after importing ``print_function``, ``print("A", "B")`` will output "``A B``" instead of "``('A', 'B')``".
 - Tabs in the script editor no longer change order when Workbench is closed and reopened.
+- Plots are no longer zoomed out along their y-axis when you perform a fit or do a plot guess.
 
 :ref:`Release 4.2.0 <v4.2.0>`
