@@ -8,12 +8,15 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidQtWidgets/Common/FitPropertyBrowser.h"
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
+#include "MantidQtWidgets/Common/PropertyHandler.h"
 #include "MantidQtWidgets/Common/SelectWorkspacesDialog.h"
 
 #include <Poco/ActiveResult.h>
@@ -311,6 +314,11 @@ void SequentialFitDialog::accept() {
     funStr = (m_fitBrowser->m_compositeFunction->getFunction(0))->asString();
   }
 
+  m_outputName = m_fitBrowser->outputName();
+  if (m_fitBrowser->workspaceName() == m_outputName) {
+    m_outputName += "_res";
+  }
+
   Mantid::API::IAlgorithm_sptr alg =
       Mantid::API::AlgorithmManager::Instance().create("PlotPeakByLogValue");
   alg->initialize();
@@ -318,7 +326,7 @@ void SequentialFitDialog::accept() {
   alg->setProperty("WorkspaceIndex", m_fitBrowser->workspaceIndex());
   alg->setProperty("StartX", m_fitBrowser->startX());
   alg->setProperty("EndX", m_fitBrowser->endX());
-  alg->setPropertyValue("OutputWorkspace", m_fitBrowser->outputName());
+  alg->setPropertyValue("OutputWorkspace", m_outputName);
   alg->setPropertyValue("Function", funStr);
   alg->setProperty("CreateOutput", ui.ckCreateOutput->isChecked());
   alg->setProperty("OutputCompositeMembers",
@@ -364,7 +372,62 @@ void SequentialFitDialog::functionChanged() { populateParameters(); }
 
 void SequentialFitDialog::finishHandle(
     const Mantid::API::IAlgorithm * /*alg*/) {
+  getFitResults();
   emit needShowPlot(&ui, m_fitBrowser);
+  m_fitBrowser->sequentialFitFinished();
+}
+
+/// Set the parameters to the fit outcome.
+/// if more than one entry in the gui the parameters used are first entry with
+/// same name as fit property browser if one entry will try and use row that
+/// corresponds to ws index in fit browser, if not found defaults to first row.
+void SequentialFitDialog::getFitResults() {
+  auto wsName = m_outputName;
+  if (Mantid::API::AnalysisDataService::Instance().doesExist(wsName)) {
+    Mantid::API::ITableWorkspace_sptr ws =
+        boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+            Mantid::API::AnalysisDataService::Instance().retrieve(wsName));
+
+    // first column is ws name or axis no
+    // the columns after are pairs of parameter values and errors
+    // the last column is chi-squared
+
+    auto columnNames = ws->getColumnNames();
+
+    int rowNo = 0;
+    if (rowCount() > 1) {
+      // contains ws names
+      auto firstColumn = ws->getColumn(0);
+      for (auto i = 0; i < ws->rowCount(); ++i) {
+        if (firstColumn->cell<std::string>(i) == m_fitBrowser->workspaceName())
+          rowNo = i;
+      }
+    } else {
+      // contains log names or axis-1
+      auto index = m_fitBrowser->workspaceIndex();
+      if (index < ws->rowCount()) {
+        rowNo = m_fitBrowser->workspaceIndex();
+      }
+    }
+
+    Mantid::API::TableRow row = ws->getRow(rowNo);
+    for (int col = 1; col < columnNames.size() - 1; col += 2) {
+      auto value = row.Double(col);
+      auto error = row.Double(col + 1.0);
+      auto name = columnNames[col];
+      // In case of a single function Fit doesn't create a CompositeFunction
+      if (m_fitBrowser->count() == 1) {
+        name.insert(0, "f0.");
+      }
+      size_t paramIndex =
+          m_fitBrowser->compositeFunction()->parameterIndex(name);
+
+      m_fitBrowser->compositeFunction()->setParameter(paramIndex, value);
+      m_fitBrowser->compositeFunction()->setError(paramIndex, error);
+    }
+    m_fitBrowser->updateParameters();
+    m_fitBrowser->getHandler()->updateErrors();
+  }
 }
 
 void SequentialFitDialog::helpClicked() {

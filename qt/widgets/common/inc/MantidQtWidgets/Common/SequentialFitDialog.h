@@ -13,9 +13,11 @@
 
 #include "MantidAPI/AlgorithmObserver.h"
 #include "ui_SequentialFitDialog.h"
+#include "DllOption.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
+class PropertyHandler;
 class FitPropertyBrowser;
 /**
     This is a dialog for doing sequential fit.
@@ -24,8 +26,9 @@ class FitPropertyBrowser;
     @author Roman Tolchenov, Tessella plc
     @date 4/06/2010
 */
-class SequentialFitDialog : public QDialog,
-                            public Mantid::API::AlgorithmObserver {
+class EXPORT_OPT_MANTIDQT_COMMON SequentialFitDialog
+    : public QDialog,
+      public Mantid::API::AlgorithmObserver {
   Q_OBJECT
 
 public:
@@ -50,6 +53,11 @@ signals:
   void needShowPlot(Ui::SequentialFitDialog * /*_t1*/,
                     MantidQt::MantidWidgets::FitPropertyBrowser * /*_t2*/);
 
+public slots:
+
+  /// Start the fit and close dialog
+  void accept() override;
+
 private slots:
 
   /// Add a workspace to the data list
@@ -60,9 +68,6 @@ private slots:
   void removeItem();
   /// Actions in response to change of function
   void functionChanged();
-
-  /// Start the fit and close dialog
-  void accept() override;
 
   /// Show the result plot
   // void showPlot();
@@ -87,6 +92,9 @@ private:
   /// Called when the fit is finished
   void finishHandle(const Mantid::API::IAlgorithm *alg) override;
 
+	/// Set the parameters to the fit outcome
+	void getFitResults();
+
   /// set spectrum value for workspace/file in row row
   void setSpectrum(int row, int spec);
 
@@ -107,6 +115,9 @@ private:
   int defaultSpectrum() const;
 
   QString name(int row) const;
+
+	// name of the output wokrspace
+	std::string m_outputName;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

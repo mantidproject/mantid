@@ -439,6 +439,7 @@ public:
 	void addAllowedTableWorkspace(const QString &wsName);
     void setTextPlotGuess(const QString);
     bool plotDiff() const;
+    std::string outputName() const;
 
     SIP_PYOBJECT defaultPeakType();
 %MethodCode
@@ -490,7 +491,7 @@ signals:
     void algorithmFinished(const QString &);
     void removeFitCurves();
     void plotGuess();
-
+    void sequentialFitDone() const;
 };
 
 // ---------------------------------

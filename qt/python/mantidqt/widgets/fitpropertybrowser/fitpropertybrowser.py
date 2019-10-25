@@ -47,6 +47,8 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.fit_result_ws_name = ""
         # Pyplot line for the guess curve
         self.guess_line = None
+        # Pyplot line for the sequential fit curve
+        self.sequential_fit_line = None
         # Map the indices of the markers in the peak editing tool to the peak function prefixes
         # (in the form f0.f1...)
         self.peak_ids = {}
@@ -61,6 +63,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.functionChanged.connect(self.function_changed_slot, Qt.QueuedConnection)
         # Update whether data needs to be normalised when a button on the Fit menu is clicked
         self.getFitMenu().aboutToShow.connect(self._set_normalise_data_from_workspace_artist)
+        self.sequentialFitDone.connect(self._sequential_fit_done_slot)
 
     def _add_spectra(self, spectra):
         """
@@ -135,7 +138,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
             self.addAllowedTableWorkspace(table)
         else:
             self.toolbar_manager.toggle_fit_button_checked()
-            logger.warning("Cannot open fitting tool: No valid workspaces to " "fit to.")
+            logger.warning("Cannot open fitting tool: No valid workspaces to fit to.")
             return
 
         super(FitPropertyBrowser, self).show()
@@ -222,10 +225,14 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         """
         Delete the fit curves.
         """
+        for line in self.get_lines():
+            if line.get_label() == self.sequential_fit_line:
+                line.remove()
 
         if self.fit_result_ws_name:
             ws = AnalysisDataService.retrieve(self.fit_result_ws_name)
             self.get_axes().remove_workspace_artists(ws)
+            self.fit_result_ws_name = ""
         self.update_legend()
 
     def get_lines(self):
@@ -259,37 +266,18 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         ws_name = self.workspaceName()
         if fun == '' or ws_name == '':
             return
-        ws_index = self.workspaceIndex()
-        startX = self.startX()
-        endX = self.endX()
         out_ws_name = '{}_guess'.format(ws_name)
-        workspace = AnalysisDataService.retrieve(ws_name)
+
         legend = self.get_axes().get_legend()
 
         if legend:
             legend_props = LegendProperties.from_legend(legend)
 
+        
         try:
-            alg = AlgorithmManager.createUnmanaged('EvaluateFunction')
-            alg.setChild(True)
-            alg.initialize()
-            alg.setProperty('Function', fun)
-            alg.setProperty('InputWorkspace', ws_name)
-            if isinstance(workspace, ITableWorkspace):
-                alg.setProperty('XColumn', self.getXColumnName())
-                alg.setProperty('YColumn', self.getYColumnName())
-                if self.getErrColumnName():
-                    alg.setProperty('ErrColumn', self.getErrColumnName())
-            else:
-                alg.setProperty('WorkspaceIndex', ws_index)
-            alg.setProperty('StartX', startX)
-            alg.setProperty('EndX', endX)
-            alg.setProperty('OutputWorkspace', out_ws_name)
-            alg.execute()
+            out_ws = self.evaluate_function(ws_name, fun, out_ws_name)
         except RuntimeError:
             return
-
-        out_ws = alg.getProperty('OutputWorkspace').value
 
         ax = self.get_axes()
 
@@ -308,6 +296,30 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
             self.setTextPlotGuess('Remove Guess')
 
         self.canvas.draw()
+
+    def evaluate_function(self, ws_name, fun, out_ws_name):
+        ws_index = self.workspaceIndex()
+        startX = self.startX()
+        endX = self.endX()
+        workspace = AnalysisDataService.retrieve(ws_name)
+        alg = AlgorithmManager.createUnmanaged('EvaluateFunction')
+        alg.setChild(True)
+        alg.initialize()
+        alg.setProperty('Function', fun)
+        alg.setProperty('InputWorkspace', ws_name)
+        if isinstance(workspace, ITableWorkspace):
+            alg.setProperty('XColumn', self.getXColumnName())
+            alg.setProperty('YColumn', self.getYColumnName())
+            if self.getErrColumnName():
+                alg.setProperty('ErrColumn', self.getErrColumnName())
+        else:
+            alg.setProperty('WorkspaceIndex', ws_index)
+        alg.setProperty('StartX', startX)
+        alg.setProperty('EndX', endX)
+        alg.setProperty('OutputWorkspace', out_ws_name)
+        alg.execute()
+
+        return alg.getProperty('OutputWorkspace').value
 
     def remove_guess(self):
         """
@@ -344,35 +356,20 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
                                   other_names=self.registeredOthers())
         return menu
 
-    @Slot()
-    def clear_fit_result_lines_slot(self):
-        """
-        Clear the fit lines.
-        """
-        self.clear_fit_result_lines()
-        if self.tool is not None:
-            self.canvas.draw()
+    def do_plot(self, ws, plot_diff = False, plot_kwargs = {}):
+        from mantidqt.plotting.functions import plot
 
-    @Slot(str)
-    def fitting_done_slot(self, name):
-        """
-        This is called after Fit finishes to update the fit curves.
-        :param name: The name of Fit's output workspace.
-        """
-        self.fit_result_ws_name = name
 
-        ax = self.get_axes()
+	ax = self.get_axes()
 
         plot_has_legend = bool(ax.legend_)
         if plot_has_legend:
             props = LegendProperties.from_legend(ax.legend_)
 
-        ws = AnalysisDataService.retrieve(name)
+        self.clear_fit_result_lines()
 
         # Keep local copy of the original lines
         original_lines = self.get_lines()
-
-        self.clear_fit_result_lines()
 
         ax.plot(ws, wkspIndex=1, autoscale_on_update=False)
         if self.plotDiff():
@@ -388,6 +385,41 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
             LegendProperties.create_legend(props, ax)
 
         ax.figure.canvas.draw()
+
+
+    @Slot()
+    def clear_fit_result_lines_slot(self):
+        """
+        Clear the fit lines.
+        """
+        self.clear_fit_result_lines()
+        if self.tool is not None:
+            self.canvas.draw()
+
+    @Slot(str)
+    def fitting_done_slot(self, name):
+        """
+        This is called after Fit finishes to update the fit curves.
+        :param name: The name of Fit's output workspace.
+        """
+
+        ws = AnalysisDataService.retrieve(name)
+        self.do_plot(ws, plot_diff=self.plotDiff())
+        self.fit_result_ws_name = name
+
+    @Slot()
+    def _sequential_fit_done_slot(self):
+        fun = self.getFittingFunction()
+        ws_name = self.workspaceName()
+        out_ws_name = self.outputName() + "_res"
+
+        try:
+            out_ws = self.evaluate_function(ws_name, fun, out_ws_name)
+        except RuntimeError:
+            return
+
+        self.do_plot(out_ws, plot_diff=False, plot_kwargs={'label': out_ws_name})
+        self.sequential_fit_line = out_ws_name
 
     @Slot(int, float, float, float)
     def peak_added_slot(self, peak_id, centre, height, fwhm):
