@@ -378,9 +378,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
             new_line.update_from(old_line)
 
         if plot_has_legend:
-            handles, labels = axes.get_legend_handles_labels()
-
-            # Now update the legend to make sure it changes to the old properties
+            # Update the legend to make sure it changes to the old properties
             LegendProperties.create_legend(props, axes)
         else:
             # Remove the legend that was created if the plot didn't have one previously
