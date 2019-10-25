@@ -39,6 +39,8 @@ Single Crystal Diffraction
 Improvements
 ############
 
+- :ref:`PredictFractionalPeaks <algm-PredictFractionalPeaks>` now has the option to specify a reflection condition to restrict the number of peaks predicted,
+  along with the option to not require a predicted peak to hit a detector.
 - :ref:`SaveHKL <algm-SaveHKL>` now saves the tbar and transmission values for shapes and materials provided by :ref:`SetSample <algm-SetSample>`.
 - :ref:`SelectCellOfType <algm-SelectCellOfType>` and :ref:`SelectCellWithForm <algm-SelectCellWithForm>` now return the transformation matrix
 

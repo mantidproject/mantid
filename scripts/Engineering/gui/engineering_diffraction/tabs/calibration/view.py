@@ -4,9 +4,9 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-# pylint: disable=invalid-name
+
 from __future__ import (absolute_import, division, print_function)
-from qtpy import QtWidgets
+from qtpy import QtWidgets, QtCore
 
 from mantidqt.utils.qt import load_ui
 
@@ -14,6 +14,8 @@ Ui_calib, _ = load_ui(__file__, "calibration_tab.ui")
 
 
 class CalibrationView(QtWidgets.QWidget, Ui_calib):
+    sig_enable_controls = QtCore.Signal(bool)
+
     def __init__(self, parent=None, instrument="ENGINX"):
         super(CalibrationView, self).__init__(parent)
         self.setupUi(self)
@@ -34,6 +36,9 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
 
     def set_on_calibrate_clicked(self, slot):
         self.button_calibrate.clicked.connect(slot)
+
+    def set_enable_controls_connection(self, slot):
+        self.sig_enable_controls.connect(slot)
 
     def set_calibrate_button_enabled(self, enabled):
         self.button_calibrate.setEnabled(enabled)

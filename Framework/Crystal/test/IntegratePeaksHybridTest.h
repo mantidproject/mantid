@@ -105,7 +105,7 @@ public:
   }
 
   void test_input_md_workspace_mandatory() {
-    auto peaksws = WorkspaceCreationHelper::createPeaksWorkspace();
+    auto peaksws = WorkspaceCreationHelper::createPeaksWorkspace(2);
 
     IntegratePeaksHybrid alg;
     alg.setRethrows(true);
@@ -119,7 +119,7 @@ public:
   }
 
   void test_outer_radius_mandatory() {
-    auto peaksws = WorkspaceCreationHelper::createPeaksWorkspace();
+    auto peaksws = WorkspaceCreationHelper::createPeaksWorkspace(2);
 
     IMDEventWorkspace_sptr mdws = boost::static_pointer_cast<IMDEventWorkspace>(
         MDEventsTestHelper::makeMDEW<3>(10, 0, 10));
@@ -136,7 +136,7 @@ public:
   }
 
   void test_throw_if_special_coordinates_unknown() {
-    auto peaksws = WorkspaceCreationHelper::createPeaksWorkspace();
+    auto peaksws = WorkspaceCreationHelper::createPeaksWorkspace(2);
     IMDEventWorkspace_sptr mdws = boost::static_pointer_cast<IMDEventWorkspace>(
         MDEventsTestHelper::makeMDEW<3>(10, 0, 10));
 

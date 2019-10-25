@@ -232,13 +232,13 @@ bool MeshObject2D::isOnSide(const Kernel::V3D &point) const {
  * @return Number of segments added
  */
 int MeshObject2D::interceptSurface(Geometry::Track &ut) const {
-
-  int originalCount = ut.count(); // Number of intersections original track
+  const int originalCount =
+      ut.count(); // Number of intersections original track
 
   const auto &norm = m_planeParameters.normal;
-  auto t = -(ut.startPoint().scalar_prod(norm) +
-             m_planeParameters.p0.scalar_prod(norm)) /
-           ut.direction().scalar_prod(norm);
+  const auto t = -(ut.startPoint().scalar_prod(norm) +
+                   m_planeParameters.p0.scalar_prod(norm)) /
+                 ut.direction().scalar_prod(norm);
 
   // Intersects infinite plane. No point evaluating individual segements if this
   // fails
@@ -258,6 +258,38 @@ int MeshObject2D::interceptSurface(Geometry::Track &ut) const {
   }
 
   return ut.count() - originalCount;
+}
+
+/**
+ * Compute the distance to the first point of intersection with the mesh
+ * @param ut Track defining start/direction
+ * @return The distance to the object
+ * @throws std::runtime_error if no intersection was found
+ */
+double MeshObject2D::distance(const Track &ut) const {
+  const auto &norm = m_planeParameters.normal;
+  const auto t = -(ut.startPoint().scalar_prod(norm) +
+                   m_planeParameters.p0.scalar_prod(norm)) /
+                 ut.direction().scalar_prod(norm);
+
+  // Intersects infinite plane. No point evaluating individual segements if this
+  // fails
+  if (t >= 0) {
+    Kernel::V3D intersection;
+    TrackDirection entryExit;
+    for (size_t i = 0; i < m_vertices.size(); i += 3) {
+      if (MeshObjectCommon::rayIntersectsTriangle(
+              ut.startPoint(), ut.direction(), m_vertices[i], m_vertices[i + 1],
+              m_vertices[i + 2], intersection, entryExit)) {
+        // All vertices on plane. So only one triangle intersection possible
+        return intersection.distance(ut.startPoint());
+      }
+    }
+  }
+  std::ostringstream os;
+  os << "Unable to find intersection with object with track starting at "
+     << ut.startPoint() << " in direction " << ut.direction() << "\n";
+  throw std::runtime_error(os.str());
 }
 
 MeshObject2D *MeshObject2D::clone() const {

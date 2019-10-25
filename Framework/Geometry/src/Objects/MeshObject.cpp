@@ -143,7 +143,6 @@ bool MeshObject::isOnSide(const Kernel::V3D &point) const {
  * @return Number of segments added
  */
 int MeshObject::interceptSurface(Geometry::Track &UT) const {
-
   int originalCount = UT.count(); // Number of intersections original track
   BoundingBox bb = getBoundingBox();
   if (!bb.doesLineIntersect(UT)) {
@@ -165,6 +164,28 @@ int MeshObject::interceptSurface(Geometry::Track &UT) const {
   UT.buildLink();
 
   return UT.count() - originalCount;
+}
+
+/**
+ * Compute the distance to the first point of intersection with the surface
+ * @param track Track defining start/direction
+ * @return The distance to the object
+ * @throws std::runtime_error if no intersection was found
+ */
+double MeshObject::distance(const Track &track) const {
+  Kernel::V3D vertex1, vertex2, vertex3, intersection;
+  TrackDirection unused;
+  for (size_t i = 0; getTriangle(i, vertex1, vertex2, vertex3); ++i) {
+    if (MeshObjectCommon::rayIntersectsTriangle(
+            track.startPoint(), track.direction(), vertex1, vertex2, vertex3,
+            intersection, unused)) {
+      return track.startPoint().distance(intersection);
+    }
+  }
+  std::ostringstream os;
+  os << "Unable to find intersection with object with track starting at "
+     << track.startPoint() << " in direction " << track.direction() << "\n";
+  throw std::runtime_error(os.str());
 }
 
 /**
