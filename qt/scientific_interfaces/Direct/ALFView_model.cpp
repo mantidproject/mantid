@@ -27,10 +27,11 @@ using namespace Mantid::API;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-ALFView_model::ALFView_model() : m_numberOfTubesInAverage(0), m_currentRun(0) {
+ALFView_model::ALFView_model() : m_numberOfTubesInAverage(0) {
   m_tmpName = "ALF_tmp";
   m_instrumentName = "ALF";
   m_wsName = "ALFData";
+  m_currentRun = 0;
 }
 
 /*
