@@ -64,5 +64,6 @@ Bugfixes
 - Imports from the __future__ module now have the expected effect in scripts. E.g. after importing ``print_function``, ``print("A", "B")`` will output "``A B``" instead of "``('A', 'B')``".
 - Tabs in the script editor no longer change order when Workbench is closed and reopened.
 - Plots are no longer zoomed out along their y-axis when you perform a fit or do a plot guess.
+- You can now save scripts that contain unicode characters.
 
 :ref:`Release 4.2.0 <v4.2.0>`
