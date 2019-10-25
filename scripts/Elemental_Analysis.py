@@ -8,7 +8,7 @@ from __future__ import absolute_import, print_function
 
 from qtpy import QtCore
 from Muon.GUI.ElementalAnalysis.elemental_analysis import ElementalAnalysisGui
-from Muon.GUI.Common.usage_report import ReportInterfaceStartup
+from Muon.GUI.Common.usage_report import report_interface_startup
 
 
 Name = "Elemental_Analysis"

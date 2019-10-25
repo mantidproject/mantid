@@ -8,7 +8,7 @@
 from __future__ import (absolute_import, division, print_function)
 from Muon.GUI.FrequencyDomainAnalysis.frequency_domain_analysis_2 import FrequencyAnalysisGui
 from qtpy import QtCore
-from Muon.GUI.Common.usage_report import ReportInterfaceStartup
+from Muon.GUI.Common.usage_report import report_interface_startup
 
 
 Name = "Frequency_Domain_Analysis_2"

@@ -8,7 +8,7 @@
 from __future__ import (absolute_import, division, print_function)
 from Muon.GUI.MuonAnalysis.muon_analysis_2 import MuonAnalysisGui
 from qtpy import QtCore
-from Muon.GUI.Common.usage_report import ReportInterfaceStartup
+from Muon.GUI.Common.usage_report import report_interface_startup
 
 
 Name = "Muon_Analysis_2"
