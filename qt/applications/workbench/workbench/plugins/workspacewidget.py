@@ -185,19 +185,21 @@ class WorkspaceWidget(PluginWidget):
                     logger.warning("{}: {}".format(type(exception).__name__, exception))
 
     def _do_show_detectors(self, names):
-        task = BlockingAsyncTaskWithCallback(self._run_create_detector_table, [names],
-                                             blocking_cb=QApplication.processEvents)
-        task.start()
-
-        self._do_show_data(map(lambda x: x + "-Detectors", names))
-
-    def _run_create_detector_table(self, names):
-        detector_tables = []
+        successful_workspaces = []
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
             try:
-                detector_tables.append(CreateDetectorTable(InputWorkspace=ws))
+                task = BlockingAsyncTaskWithCallback(self._run_create_detector_table, [ws],
+                                                     blocking_cb=QApplication.processEvents)
+                task.start()
             except RuntimeError:
-                return
+                continue
+            else:
+                successful_workspaces.append(ws.getName())
+
+        self._do_show_data(map(lambda x: x + "-Detectors", successful_workspaces))
+
+    def _run_create_detector_table(self, ws):
+        CreateDetectorTable(InputWorkspace=ws)
 
     def _action_double_click_workspace(self, name):
         try:

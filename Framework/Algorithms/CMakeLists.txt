@@ -783,7 +783,7 @@ set(TEST_FILES
     CorrectTOFAxisTest.h
     CorrectToFileTest.h
     CreateCalFileByNamesTest.h
-     CreateDetectorTableTest.h
+    CreateDetectorTableTest.h
     CreateDummyCalFileTest.h
     CreateEPPTest.h
     CreateFlatEventWorkspaceTest.h
