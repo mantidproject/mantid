@@ -228,7 +228,10 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
         Populate the GUI elements with the data that comes from Presenter.
         :param data: a list of algorithm descriptors.
         """
-        self.search_box.addItems(data[0])
+        self.tree.clear()
+        for alg in data[0]:
+            if self.search_box.findText(alg) == -1:
+                self.search_box.addItem(alg)
         self.search_box.setCurrentIndex(-1)
         item_list = []
         self._add_tree_items(item_list, data[1])
