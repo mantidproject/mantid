@@ -24,8 +24,6 @@ QtSaveView::QtSaveView(QWidget *parent) : QWidget(parent), m_notifyee(nullptr) {
 
 void QtSaveView::subscribe(SaveViewSubscriber *notifyee) {
   m_notifyee = notifyee;
-  populateListOfWorkspaces();
-  suggestSaveDir();
 }
 
 /** Destructor
@@ -255,10 +253,6 @@ void QtSaveView::saveWorkspaces() const {
       "Feature", "ISIS Reflectometry->SaveTab->SaveWorkspaces", false);
   m_notifyee->notifySaveSelectedWorkspaces();
 }
-
-/** Suggest a save directory
- */
-void QtSaveView::suggestSaveDir() const { m_notifyee->notifySuggestSaveDir(); }
 
 void QtSaveView::error(const std::string &title, const std::string &prompt) {
   QMessageBox::critical(this, QString::fromStdString(title),
