@@ -10,6 +10,7 @@ import unittest
 
 from mantid import simpleapi, ConfigService
 from mantid.api import AnalysisDataService, ITableWorkspace
+from mantid.py3compat import mock
 
 
 def create_simple_workspace(data_x, data_y, run_number=0):
@@ -76,14 +77,11 @@ class MuonFileUtilsTest(unittest.TestCase):
         self.assertEqual(run, 22725)
 
     def test_load_workspace_from_filename_for_file_path(self):
+        mock_alg = mock.MagicMock()
         filename = 'test'+os.sep 'MUSR00022725.nsx'
-        load_result, run, filename, _ = utils.load_workspace_from_filename(filename)
 
-        self.assertEqual(load_result['DeadTimeTable'], None)
-        self.assertEqual(load_result['FirstGoodData'], 0.11)
-        self.assertEqual(load_result['MainFieldDirection'], 'Transverse')
-        self.assertAlmostEqual(load_result['TimeZero'], 0.55000, 5)
-        self.assertEqual(run, 22725)
+        alg, _ = utils.create_load_algorithm(filename,{})
+        self.assertEqual(alg.getProperty("Filename"), filename)
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)
