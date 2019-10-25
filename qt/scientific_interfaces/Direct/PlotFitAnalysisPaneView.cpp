@@ -10,21 +10,20 @@
 
 #include <QLabel>
 #include <QMessageBox>
+#include <QRegExpValidator>
 #include <QSizePolicy>
 #include <QSpacerItem>
 #include <QSplitter>
 #include <QVBoxLayout>
-#include <QRegExpValidator>
 namespace MantidQt {
 namespace CustomInterfaces {
 
 PlotFitAnalysisPaneView::PlotFitAnalysisPaneView(const double &start,
                                                  const double &end,
                                                  QWidget *parent)
-    : QWidget(parent), m_plot(nullptr), m_fitBrowser(nullptr),
-      m_start(nullptr), m_end(nullptr), m_fitButton(nullptr),
-      m_fitObservable(nullptr) {
-  setupPlotFitSplitter(start,end);
+    : QWidget(parent), m_plot(nullptr), m_fitBrowser(nullptr), m_start(nullptr),
+      m_end(nullptr), m_fitButton(nullptr), m_fitObservable(nullptr) {
+  setupPlotFitSplitter(start, end);
 }
 
 void PlotFitAnalysisPaneView::setupPlotFitSplitter(const double &start,
@@ -36,7 +35,7 @@ void PlotFitAnalysisPaneView::setupPlotFitSplitter(const double &start,
   m_plot->setCanvasColour(Qt::white);
   splitter->addWidget(m_plot);
 
-  splitter->addWidget(createFitPane(start,end));
+  splitter->addWidget(createFitPane(start, end));
 
   layout->addWidget(splitter);
 }
@@ -83,8 +82,8 @@ QWidget *PlotFitAnalysisPaneView::createFitPane(const double &start,
 void PlotFitAnalysisPaneView::doFit() {
   auto function = m_fitBrowser->getFunction();
   if (function) {
-   m_fitObservable->notify();
-}
+    m_fitObservable->notify();
+  }
 }
 
 void PlotFitAnalysisPaneView::addSpectrum(std::string wsName) {
@@ -101,13 +100,12 @@ std::pair<double, double> PlotFitAnalysisPaneView::getRange() {
 }
 
 Mantid::API::IFunction_sptr PlotFitAnalysisPaneView::getFunction() {
- return m_fitBrowser->getFunction();
+  return m_fitBrowser->getFunction();
 }
 
 void PlotFitAnalysisPaneView::updateFunction(Mantid::API::IFunction_sptr func) {
   m_fitBrowser->updateMultiDatasetParameters(*func);
 }
-
 
 void PlotFitAnalysisPaneView::addFunction(Mantid::API::IFunction_sptr func) {
   m_fitBrowser->setFunction(func);

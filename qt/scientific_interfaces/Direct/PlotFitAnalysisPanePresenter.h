@@ -7,8 +7,8 @@
 #ifndef MANTIDQT_CUSTOMINTERFACES_PLOTFITANALYSISPANEPRESENTER_H_
 #define MANTIDQT_CUSTOMINTERFACES_PLOTFITANALYSISPANEPRESENTER_H_
 
-#include "PlotFitAnalysisPaneView.h"
 #include "PlotFitAnalysisPaneModel.h"
+#include "PlotFitAnalysisPaneView.h"
 
 #include "MantidQtWidgets/Common/ObserverPattern.h"
 #include <string>
@@ -27,7 +27,7 @@ public:
     delete m_fitObserver;
   };
   PlotFitAnalysisPaneView *getView() { return m_view; };
-  std::string getCurrentWS(){return m_currentName;};
+  std::string getCurrentWS() { return m_currentName; };
   void clearCurrentWS() { m_currentName = ""; };
   void doFit();
   void addSpectrum(std::string &wsName);

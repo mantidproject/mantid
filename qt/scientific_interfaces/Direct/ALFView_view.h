@@ -7,11 +7,11 @@
 #ifndef MANTIDQT_CUSTOMINTERFACES_ALFVIEW_VIEW_H_
 #define MANTIDQT_CUSTOMINTERFACES_ALFVIEW_VIEW_H_
 
+#include "BaseInstrumentView.h"
 #include "DllConfig.h"
 #include "MantidQtWidgets/Common/MWRunFiles.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
-#include "BaseInstrumentView.h"
 #include "PlotFitAnalysisPaneView.h"
 
 #include <QObject>
@@ -30,18 +30,19 @@ public:
                         QWidget *parent = nullptr);
   void observeExtractSingleTube(Observer *listner);
   void observeAverageTube(Observer *listner);
-  
-  void setUpInstrument(
-      const std::string fileName,
-      std::vector<std::function<bool(std::map<std::string, bool>)>> &binders) override;
+
+  void
+  setUpInstrument(const std::string fileName,
+                  std::vector<std::function<bool(std::map<std::string, bool>)>>
+                      &binders) override;
 
   void addObserver(std::tuple<std::string, Observer *> &listener) override;
   void addSpectrum(std::string wsName);
   void setupAnalysisPane(PlotFitAnalysisPaneView *analysis);
 
 public slots:
-void extractSingleTube();
-void averageTube();
+  void extractSingleTube();
+  void averageTube();
 
 private:
   Observable *m_extractSingleTubeObservable;

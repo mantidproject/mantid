@@ -121,8 +121,7 @@ void ALFView_model::storeSingleTube(const std::string &name) {
   AnalysisDataService::Instance().remove(CURVES);
 }
 std::string ALFView_model::WSName() {
-  const std::string name =
-      m_instrumentName + std::to_string(getCurrentRun());
+  const std::string name = m_instrumentName + std::to_string(getCurrentRun());
   return EXTRACTEDWS + name;
 }
 
@@ -132,7 +131,7 @@ void ALFView_model::averageTube() {
   // multiply up current average
   auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       EXTRACTEDWS + name);
-  ws*=double(oldTotalNumber);
+  ws *= double(oldTotalNumber);
 
   // get the data to add
   storeSingleTube(name);
@@ -163,8 +162,7 @@ bool ALFView_model::hasTubeBeenExtracted(const std::string &name) {
   return AnalysisDataService::Instance().doesExist(EXTRACTEDWS + name);
 }
 
-bool ALFView_model::extractTubeConditon(
-    std::map<std::string, bool> tabBools) {
+bool ALFView_model::extractTubeConditon(std::map<std::string, bool> tabBools) {
   try {
 
     bool ifCurve = (tabBools.find("plotStroed")->second ||
@@ -175,8 +173,7 @@ bool ALFView_model::extractTubeConditon(
   }
 }
 
-bool ALFView_model::averageTubeConditon(
-    std::map<std::string, bool> tabBools) {
+bool ALFView_model::averageTubeConditon(std::map<std::string, bool> tabBools) {
   try {
 
     bool ifCurve = (tabBools.find("plotStroed")->second ||
@@ -198,9 +195,9 @@ CompositeFunction_sptr ALFView_model::getDefaultFunction() {
 
   CompositeFunction_sptr composite =
       boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(
-      Mantid::API::FunctionFactory::Instance().createFunction(
-          "CompositeFunction"));
-  
+          Mantid::API::FunctionFactory::Instance().createFunction(
+              "CompositeFunction"));
+
   auto func = Mantid::API::FunctionFactory::Instance().createInitialized(
       "name = FlatBackground");
   composite->addFunction(func);

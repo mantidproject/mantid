@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALFView_model.h"
 #include "ALFView_presenter.h"
-#include "PlotFitAnalysisPaneView.h"
 #include "PlotFitAnalysisPaneModel.h"
+#include "PlotFitAnalysisPaneView.h"
 
 #include "BaseInstrumentModel.h"
 #include "BaseInstrumentView.h"
@@ -36,13 +36,12 @@ ALFView::ALFView(QWidget *parent)
   m_view = new ALFView_view(m_model->getInstrument(), this);
   auto analysisView = new PlotFitAnalysisPaneView(-15.0, 15.0, m_view);
   auto analysisModel = new PlotFitAnalysisPaneModel();
-  m_analysisPane = new PlotFitAnalysisPanePresenter(analysisView, analysisModel);
+  m_analysisPane =
+      new PlotFitAnalysisPanePresenter(analysisView, analysisModel);
 
-  m_presenter =
-      new ALFView_presenter(m_view, m_model, m_analysisPane);
+  m_presenter = new ALFView_presenter(m_view, m_model, m_analysisPane);
 }
 void ALFView::initLayout() { this->setCentralWidget(m_view); }
-
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

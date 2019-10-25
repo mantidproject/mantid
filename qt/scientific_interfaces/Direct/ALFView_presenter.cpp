@@ -5,11 +5,10 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALFView_presenter.h"
-#include "ALFView_view.h"
 #include "ALFView_model.h"
+#include "ALFView_view.h"
 
 #include "MantidAPI/FileFinder.h"
-
 
 #include <functional>
 #include <tuple>
@@ -19,10 +18,10 @@ namespace CustomInterfaces {
 
 ALFView_presenter::ALFView_presenter(ALFView_view *view, ALFView_model *model,
                                      PlotFitAnalysisPanePresenter *analysisPane)
-    : BaseInstrumentPresenter(view, model, analysisPane->getView()), m_view(view), m_model(model), m_analysisPane(analysisPane),
+    : BaseInstrumentPresenter(view, model, analysisPane->getView()),
+      m_view(view), m_model(model), m_analysisPane(analysisPane),
       m_extractSingleTubeObserver(nullptr), m_averageTubeObserver(nullptr) {
   addInstrument();
-
 }
 
 void ALFView_presenter::addInstrument() {
@@ -36,9 +35,7 @@ void ALFView_presenter::setUpInstrumentAnalysisSplitter() {
   m_view->setupAnalysisPane(m_analysisPane->getView());
 }
 
-void ALFView_presenter::loadSideEffects() {
-  m_analysisPane->clearCurrentWS();
-}
+void ALFView_presenter::loadSideEffects() { m_analysisPane->clearCurrentWS(); }
 
 typedef std::pair<std::string,
                   std::vector<std::function<bool(std::map<std::string, bool>)>>>

@@ -30,7 +30,9 @@ public:
   explicit PlotFitAnalysisPaneView(const double &start, const double &end,
                                    QWidget *parent = nullptr);
 
-  void observeFitButton(Observer *listener) { m_fitObservable->attach(listener); };
+  void observeFitButton(Observer *listener) {
+    m_fitObservable->attach(listener);
+  };
   std::pair<double, double> getRange();
   Mantid::API::IFunction_sptr getFunction();
   void addSpectrum(std::string wsName);

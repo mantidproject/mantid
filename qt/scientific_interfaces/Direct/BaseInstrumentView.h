@@ -56,7 +56,6 @@ protected:
   std::string m_helpPage;
 
 private:
-
   QWidget *generateLoadWidget();
   void warningBox(const QString &message);
   Observable *m_loadRunObservable;
@@ -64,7 +63,6 @@ private:
   QString m_instrument;
   MantidWidgets::InstrumentWidget *m_instrumentWidget;
   QPushButton *m_help;
- 
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

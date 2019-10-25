@@ -100,7 +100,9 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent,
           Mantid::Kernel::ConfigService::Instance().getString(
               "defaultsave.directory"))),
       mViewChanged(false), m_blocked(false),
-      m_instrumentDisplayContextMenuOn(false),m_stateOfTabs(std::vector<std::pair<std::string, bool>>{}),m_help(nullptr) {
+      m_instrumentDisplayContextMenuOn(false),
+      m_stateOfTabs(std::vector<std::pair<std::string, bool>>{}),
+      m_help(nullptr) {
   setFocusPolicy(Qt::StrongFocus);
   QVBoxLayout *mainLayout = new QVBoxLayout(this);
   QSplitter *controlPanelLayout = new QSplitter(Qt::Horizontal);
@@ -1233,8 +1235,8 @@ void InstrumentWidget::createTabs(QSettings &settings) {
 }
 
 /**
-* Adds the tabs that are currently selected to the GUI
-*/
+ * Adds the tabs that are currently selected to the GUI
+ */
 void InstrumentWidget::addSelectedTabs() {
   for (std::pair<std::string, bool> tab : m_stateOfTabs) {
 
@@ -1281,7 +1283,7 @@ void InstrumentWidget::addTab(const std::string &tabName) {
     if (name->first == tabName) {
       name->second = true;
     }
-	// remove everything
+    // remove everything
     if (name->second) {
       mControlsTab->removeTab(0);
     }

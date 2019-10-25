@@ -10,8 +10,8 @@
 #include "BaseInstrumentPresenter.h"
 #include "PlotFitAnalysisPanePresenter.h"
 
-#include "ALFView_view.h"
 #include "ALFView_model.h"
+#include "ALFView_view.h"
 #include "DllConfig.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
@@ -31,20 +31,18 @@ public:
     delete m_extractSingleTubeObserver;
     delete m_averageTubeObserver;
     delete m_analysisPane;
-    delete m_model;};
+    delete m_model;
+  };
 
   void addInstrument() override;
 
 protected:
   void loadSideEffects() override;
 
-  std::pair<instrumentSetUp, instrumentObserverOptions>
-  setupALFInstrument();
+  std::pair<instrumentSetUp, instrumentObserverOptions> setupALFInstrument();
 
 private:
-
   void setUpInstrumentAnalysisSplitter() override;
-
 
   void extractSingleTube();
   void averageTube();

@@ -29,28 +29,29 @@ public:
                           QWidget *analysisView);
   ~BaseInstrumentPresenter() { delete m_loadRunObserver; };
 
-  typedef std::pair<std::string,
-                     std::vector<std::function<bool(std::map<std::string, bool>)>>>
+  typedef std::pair<
+      std::string,
+      std::vector<std::function<bool(std::map<std::string, bool>)>>>
       instrumentSetUp;
   typedef std::vector<std::tuple<std::string, Observer *>>
       instrumentObserverOptions;
 
-  void initLayout(std::pair<instrumentSetUp, instrumentObserverOptions> *setUp = nullptr);
+  void initLayout(
+      std::pair<instrumentSetUp, instrumentObserverOptions> *setUp = nullptr);
   virtual void addInstrument();
 
 protected:
-	virtual void loadSideEffects(){};
+  virtual void loadSideEffects(){};
 
-private slots
-      :
+private slots:
   void loadRunNumber();
 
 private:
   void loadAndAnalysis(const std::string &run);
-  void initInstrument(std::pair<instrumentSetUp, instrumentObserverOptions> *setUp);
+  void
+  initInstrument(std::pair<instrumentSetUp, instrumentObserverOptions> *setUp);
   virtual void setUpInstrumentAnalysisSplitter();
-  std::pair<instrumentSetUp, instrumentObserverOptions>
-  setupInstrument();
+  std::pair<instrumentSetUp, instrumentObserverOptions> setupInstrument();
 
   BaseInstrumentView *m_view;
   BaseInstrumentModel *m_model;
@@ -58,7 +59,6 @@ private:
   std::string m_currentFile;
   VoidObserver *m_loadRunObserver;
   QWidget *m_analysisPaneView;
-
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

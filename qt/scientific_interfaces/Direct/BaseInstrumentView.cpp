@@ -5,8 +5,8 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "BaseInstrumentView.h"
-#include "MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h"
 
 #include <QMessageBox>
 #include <QSizePolicy>
@@ -19,9 +19,10 @@ namespace CustomInterfaces {
 
 BaseInstrumentView::BaseInstrumentView(const std::string &instrument,
                                        QWidget *parent)
-    : QSplitter(Qt::Vertical, parent),m_helpPage(""), m_loadRunObservable(nullptr),
-      m_files(nullptr), m_instrument(QString::fromStdString(instrument)),
-      m_instrumentWidget(nullptr),m_help(nullptr){
+    : QSplitter(Qt::Vertical, parent), m_helpPage(""),
+      m_loadRunObservable(nullptr), m_files(nullptr),
+      m_instrument(QString::fromStdString(instrument)),
+      m_instrumentWidget(nullptr), m_help(nullptr) {
   auto loadWidget = generateLoadWidget();
   this->addWidget(loadWidget);
 }
@@ -59,7 +60,7 @@ QWidget *BaseInstrumentView::generateLoadWidget() {
   return loadWidget;
 }
 
-  void BaseInstrumentView::setupInstrumentAnalysisSplitters(
+void BaseInstrumentView::setupInstrumentAnalysisSplitters(
     QWidget *analysisPane) {
   QSplitter *split = new QSplitter(Qt::Horizontal);
   split->addWidget(m_instrumentWidget);
@@ -67,56 +68,56 @@ QWidget *BaseInstrumentView::generateLoadWidget() {
   this->addWidget(split);
 }
 
-void BaseInstrumentView::setupHelp(){
+void BaseInstrumentView::setupHelp() {
   QWidget *helpWidget = new QWidget();
-    m_help = new QPushButton("?");
-    m_help->setMaximumWidth(25);
-    auto helpLayout = new QHBoxLayout(helpWidget);
-    helpLayout->addWidget(m_help);
+  m_help = new QPushButton("?");
+  m_help->setMaximumWidth(25);
+  auto helpLayout = new QHBoxLayout(helpWidget);
+  helpLayout->addWidget(m_help);
 
-    helpLayout->addItem(
-      new QSpacerItem(1000, 20, QSizePolicy::Expanding, QSizePolicy::Expanding));
-    this->addWidget(helpWidget);
-    connect(m_help, SIGNAL(clicked()), this, SLOT(openHelp()));
+  helpLayout->addItem(new QSpacerItem(1000, 20, QSizePolicy::Expanding,
+                                      QSizePolicy::Expanding));
+  this->addWidget(helpWidget);
+  connect(m_help, SIGNAL(clicked()), this, SLOT(openHelp()));
+}
+
+void BaseInstrumentView::openHelp() {
+  if (m_helpPage == "") {
+    return;
   }
+  MantidQt::API::HelpWindow::showCustomInterface(
+      nullptr, QString::fromStdString(m_helpPage));
+}
 
-  void BaseInstrumentView::openHelp() {
-    if (m_helpPage == "") {
-      return;
-	}
-    MantidQt::API::HelpWindow::showCustomInterface(nullptr,
-                                                   QString::fromStdString(m_helpPage));
+std::string BaseInstrumentView::getFile() {
+  auto name = m_files->getFilenames();
+  if (name.size() > 0)
+    return name[0].toStdString();
+  return "";
+}
+
+void BaseInstrumentView::setRunQuietly(const std::string &runNumber) {
+  m_files->setText(QString::fromStdString(runNumber));
+}
+
+void BaseInstrumentView::fileLoaded() {
+  if (m_files->getText().isEmpty())
+    return;
+
+  if (!m_files->isValid()) {
+    warningBox(m_files->getFileProblem());
+    return;
   }
+  m_loadRunObservable->notify();
+}
 
-  std::string BaseInstrumentView::getFile() {
-    auto name = m_files->getFilenames();
-    if (name.size() > 0)
-      return name[0].toStdString();
-    return "";
-  }
+void BaseInstrumentView::warningBox(const std::string &message) {
+  warningBox(QString::fromStdString(message));
+}
 
-  void BaseInstrumentView::setRunQuietly(const std::string &runNumber) {
-    m_files->setText(QString::fromStdString(runNumber));
-  }
-
-  void BaseInstrumentView::fileLoaded() {
-    if (m_files->getText().isEmpty())
-      return;
-
-    if (!m_files->isValid()) {
-      warningBox(m_files->getFileProblem());
-      return;
-    }
-    m_loadRunObservable->notify();
-  }
-
- void BaseInstrumentView::warningBox(const std::string &message) {
-    warningBox(QString::fromStdString(message));
-  }
-
-  void BaseInstrumentView::warningBox(const QString &message) {
-    QMessageBox::warning(this, m_instrument + " view", message);
-  }
+void BaseInstrumentView::warningBox(const QString &message) {
+  QMessageBox::warning(this, m_instrument + " view", message);
+}
 
 } // namespace CustomInterfaces
-} // namespace CustomInterfaces
+} // namespace MantidQt

@@ -19,7 +19,7 @@ namespace CustomInterfaces {
 
 PlotFitAnalysisPanePresenter::PlotFitAnalysisPanePresenter(
     PlotFitAnalysisPaneView *view, PlotFitAnalysisPaneModel *model)
-    : m_fitObserver(nullptr), m_view(view), m_model(model),m_currentName("") {
+    : m_fitObserver(nullptr), m_view(view), m_model(model), m_currentName("") {
 
   m_fitObserver = new VoidObserver();
   m_view->observeFitButton(m_fitObserver);
@@ -35,17 +35,17 @@ void PlotFitAnalysisPanePresenter::doFit() {
       func = m_model->doFit(m_currentName, m_view->getRange(), func);
       m_view->updateFunction(func);
     } catch (...) {
-          m_view->fitWarning(
-          "Fit failed");
-	}
+      m_view->fitWarning("Fit failed");
+    }
     m_view->addFitSpectrum(m_currentName + "_fits_Workspace");
   } else {
-    m_view->fitWarning("Need to have extracted a data and selected a function to fit");
+    m_view->fitWarning(
+        "Need to have extracted a data and selected a function to fit");
   }
 }
 
 void PlotFitAnalysisPanePresenter::addFunction(
-	Mantid::API::IFunction_sptr func) {
+    Mantid::API::IFunction_sptr func) {
   m_view->addFunction(func);
 }
 
@@ -53,7 +53,6 @@ void PlotFitAnalysisPanePresenter::addSpectrum(std::string &wsName) {
   m_currentName = wsName;
   m_view->addSpectrum(wsName);
 }
-
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

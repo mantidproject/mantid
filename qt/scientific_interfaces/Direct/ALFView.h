@@ -11,12 +11,11 @@
 #include "ALFView_presenter.h"
 #include "ALFView_view.h"
 #include "DllConfig.h"
-#include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
 
 #include "PlotFitAnalysisPanePresenter.h"
 #include "PlotFitAnalysisPaneView.h"
-
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -27,9 +26,7 @@ class MANTIDQT_DIRECT_DLL ALFView : public API::UserSubWindow {
 
 public:
   ALFView(QWidget *parent = nullptr);
-  ~ALFView() {
-    delete m_presenter;
-  };
+  ~ALFView() { delete m_presenter; };
   static std::string name() { return "ALF View"; }
   static QString categoryInfo() { return "Direct"; }
 
@@ -41,8 +38,6 @@ private:
   ALFView_model *m_model;
   ALFView_presenter *m_presenter;
   PlotFitAnalysisPanePresenter *m_analysisPane;
-
-
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

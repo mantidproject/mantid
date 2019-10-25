@@ -14,7 +14,6 @@ namespace CustomInterfaces {
 
 class BaseInstrumentModel {
 
-
 public:
   BaseInstrumentModel();
   ~BaseInstrumentModel(){};

@@ -16,7 +16,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 ALFView_view::ALFView_view(const std::string &instrument, QWidget *parent)
-    : BaseInstrumentView(instrument, parent),m_extractSingleTubeObservable(nullptr), m_averageTubeObservable(nullptr),
+    : BaseInstrumentView(instrument, parent),
+      m_extractSingleTubeObservable(nullptr), m_averageTubeObservable(nullptr),
       m_extractAction(nullptr), m_averageAction(nullptr),
       m_analysisPane(nullptr) {
   m_helpPage = "ALF View";
@@ -28,7 +29,7 @@ void ALFView_view::setUpInstrument(
 
   m_extractSingleTubeObservable = new Observable();
   m_averageTubeObservable = new Observable();
-  
+
   auto instrumentWidget = new MantidWidgets::InstrumentWidget("ALFData");
   instrumentWidget->removeTab("Instrument");
   instrumentWidget->removeTab("Draw");
@@ -39,13 +40,13 @@ void ALFView_view::setUpInstrument(
   connect(m_extractAction, SIGNAL(triggered()), this,
           SLOT(extractSingleTube())),
       instrumentWidget->getPickTab()->addToContextMenu(m_extractAction,
-                                                         binders[0]);
+                                                       binders[0]);
 
   // set up add to average
   m_averageAction = new QAction("Add Tube To Average", this);
   connect(m_averageAction, SIGNAL(triggered()), this, SLOT(averageTube())),
       instrumentWidget->getPickTab()->addToContextMenu(m_averageAction,
-                                                         binders[1]);
+                                                       binders[1]);
 
   setInstrumentWidget(instrumentWidget);
 }
@@ -79,7 +80,7 @@ void ALFView_view::addObserver(std::tuple<std::string, Observer *> &listener) {
 }
 
 void ALFView_view::setupAnalysisPane(PlotFitAnalysisPaneView *analysis) {
-	// keep a copy here so we can use a custom class
+  // keep a copy here so we can use a custom class
   m_analysisPane = analysis;
   // just adds it to the view
   BaseInstrumentView::setupInstrumentAnalysisSplitters(analysis);
@@ -87,8 +88,7 @@ void ALFView_view::setupAnalysisPane(PlotFitAnalysisPaneView *analysis) {
 
 void ALFView_view::addSpectrum(std::string wsName) {
   m_analysisPane->addSpectrum(wsName);
- }
-
+}
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
