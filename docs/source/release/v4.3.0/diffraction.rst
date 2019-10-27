@@ -36,6 +36,9 @@ Single Crystal Diffraction
 - :ref:`PredictFractionalPeaks <algm-PredictFractionalPeaks-v1>` now accepts the same set of modulation vector properties as :ref:`IndexPeaks <algm-IndexPeaks-v1>`.
 - New algorithm :ref:`ConvertHFIRSCDtoMDE <algm-ConvertHFIRSCDtoMDE-v1>` for converting HFIR single crystal data (from WAND and DEMAND) into MDEventWorkspace in units Q_sample.
 - ``IndexPeaksWithsatellites`` has been deleted as it had been deprecated and superseded by :ref:`IndexPeaks <algm-IndexPeaks-v1>`.
+- :ref:`SaveReflections <algm-SaveReflections>` now has the option to save peaks to separate files based on their associated modulation vectors
+  when using the Jana format.
+
 
 Imaging
 -------
