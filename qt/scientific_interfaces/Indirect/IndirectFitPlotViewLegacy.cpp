@@ -4,7 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IndirectFitPlotView.h"
+#include "IndirectFitPlotViewLegacy.h"
 
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
@@ -34,8 +34,8 @@ namespace IDA {
 
 using namespace MantidWidgets;
 
-IndirectFitPlotViewLegacy::IndirectFitPlotView(QWidget *parent)
-    : IIndirectFitPlotView(parent), m_plotForm(new Ui::IndirectFitPreviewPlot) {
+IndirectFitPlotViewLegacy::IndirectFitPlotViewLegacy(QWidget *parent)
+    : IIndirectFitPlotViewLegacy(parent), m_plotForm(new Ui::IndirectFitPreviewPlot) {
   m_plotForm->setupUi(this);
 
   connect(m_plotForm->cbDataSelection, SIGNAL(currentIndexChanged(int)), this,
@@ -128,7 +128,7 @@ void IndirectFitPlotViewLegacy::setPlotSizePolicy(
   plot->setSizePolicy(sizePolicy);
 }
 
-IndirectFitPlotViewLegacy::~IndirectFitPlotView() {
+IndirectFitPlotViewLegacy::~IndirectFitPlotViewLegacy() {
   m_topPlot.reset();
   m_bottomPlot.reset();
   m_splitter.reset();

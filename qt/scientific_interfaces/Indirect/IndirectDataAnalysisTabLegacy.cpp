@@ -4,7 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IndirectDataAnalysisTab.h"
+#include "IndirectDataAnalysisTabLegacy.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionDomain1D.h"
@@ -15,8 +15,6 @@
 
 #include <QSettings>
 #include <QString>
-#include <qwt_plot.h>
-#include <qwt_plot_curve.h>
 
 using namespace Mantid::API;
 
@@ -28,7 +26,7 @@ namespace IDA {
  *
  * @param parent :: the parent widget (an IndirectDataAnalysis object).
  */
-IndirectDataAnalysisTab::IndirectDataAnalysisTab(QWidget *parent)
+IndirectDataAnalysisTabLegacy::IndirectDataAnalysisTabLegacy(QWidget *parent)
     : IndirectTab(parent), m_dblEdFac(nullptr), m_blnEdFac(nullptr),
       m_parent(nullptr), m_inputWorkspace(), m_previewPlotWorkspace(),
       m_selectedSpectrum(0), m_minSpectrum(0), m_maxSpectrum(0) {
@@ -39,17 +37,17 @@ IndirectDataAnalysisTab::IndirectDataAnalysisTab(QWidget *parent)
   m_blnEdFac = new QtCheckBoxFactory(this);
 }
 
-void IndirectDataAnalysisTab::setOutputPlotOptionsPresenter(
+void IndirectDataAnalysisTabLegacy::setOutputPlotOptionsPresenter(
     std::unique_ptr<IndirectPlotOptionsPresenter> presenter) {
   m_plotOptionsPresenter = std::move(presenter);
 }
 
-void IndirectDataAnalysisTab::setOutputPlotOptionsWorkspaces(
+void IndirectDataAnalysisTabLegacy::setOutputPlotOptionsWorkspaces(
     std::vector<std::string> const &outputWorkspaces) {
   m_plotOptionsPresenter->setWorkspaces(outputWorkspaces);
 }
 
-void IndirectDataAnalysisTab::clearOutputPlotOptionsWorkspaces() {
+void IndirectDataAnalysisTabLegacy::clearOutputPlotOptionsWorkspaces() {
   m_plotOptionsPresenter->clearWorkspaces();
 }
 
@@ -60,7 +58,7 @@ void IndirectDataAnalysisTab::clearOutputPlotOptionsWorkspaces() {
  *
  * @param settings :: the QSettings object from which to load
  */
-void IndirectDataAnalysisTab::loadTabSettings(const QSettings &settings) {
+void IndirectDataAnalysisTabLegacy::loadTabSettings(const QSettings &settings) {
   loadSettings(settings);
 }
 
@@ -69,26 +67,26 @@ void IndirectDataAnalysisTab::loadTabSettings(const QSettings &settings) {
  *
  * @param filter :: true if you want to allow filtering
  */
-void IndirectDataAnalysisTab::filterInputData(bool filter) {
+void IndirectDataAnalysisTabLegacy::filterInputData(bool filter) {
   setFileExtensionsByName(filter);
 }
 
 /**
  * Sets the active browser workspace when the tab is changed
  */
-void IndirectDataAnalysisTab::setActiveWorkspace() { setBrowserWorkspace(); }
+void IndirectDataAnalysisTabLegacy::setActiveWorkspace() { setBrowserWorkspace(); }
 
 /**
  * Slot that can be called when a user edits an input.
  */
-void IndirectDataAnalysisTab::inputChanged() { validate(); }
+void IndirectDataAnalysisTabLegacy::inputChanged() { validate(); }
 
 /**
  * Retrieves the input workspace to be used in data analysis.
  *
  * @return  The input workspace to be used in data analysis.
  */
-MatrixWorkspace_sptr IndirectDataAnalysisTab::inputWorkspace() const {
+MatrixWorkspace_sptr IndirectDataAnalysisTabLegacy::inputWorkspace() const {
   return m_inputWorkspace;
 }
 
@@ -97,7 +95,7 @@ MatrixWorkspace_sptr IndirectDataAnalysisTab::inputWorkspace() const {
  *
  * @param inputWorkspace  The workspace to set.
  */
-void IndirectDataAnalysisTab::setInputWorkspace(
+void IndirectDataAnalysisTabLegacy::setInputWorkspace(
     MatrixWorkspace_sptr inputWorkspace) {
   m_inputWorkspace = inputWorkspace;
 }
@@ -109,7 +107,7 @@ void IndirectDataAnalysisTab::setInputWorkspace(
  * @return  The workspace containing the data to be displayed in
  *          the preview plot.
  */
-MatrixWorkspace_sptr IndirectDataAnalysisTab::previewPlotWorkspace() {
+MatrixWorkspace_sptr IndirectDataAnalysisTabLegacy::previewPlotWorkspace() {
   return m_previewPlotWorkspace.lock();
 }
 
@@ -119,7 +117,7 @@ MatrixWorkspace_sptr IndirectDataAnalysisTab::previewPlotWorkspace() {
  *
  * @param previewPlotWorkspace The workspace to set.
  */
-void IndirectDataAnalysisTab::setPreviewPlotWorkspace(
+void IndirectDataAnalysisTabLegacy::setPreviewPlotWorkspace(
     MatrixWorkspace_sptr previewPlotWorkspace) {
   m_previewPlotWorkspace = previewPlotWorkspace;
 }
@@ -129,7 +127,7 @@ void IndirectDataAnalysisTab::setPreviewPlotWorkspace(
  *
  * @return  The selected spectrum.
  */
-int IndirectDataAnalysisTab::selectedSpectrum() const {
+int IndirectDataAnalysisTabLegacy::selectedSpectrum() const {
   return m_selectedSpectrum;
 }
 
@@ -138,7 +136,7 @@ int IndirectDataAnalysisTab::selectedSpectrum() const {
  *
  * @param spectrum  The spectrum to set.
  */
-void IndirectDataAnalysisTab::setSelectedSpectrum(int spectrum) {
+void IndirectDataAnalysisTabLegacy::setSelectedSpectrum(int spectrum) {
   m_selectedSpectrum = spectrum;
 }
 
@@ -147,14 +145,14 @@ void IndirectDataAnalysisTab::setSelectedSpectrum(int spectrum) {
  *
  * @return  The selected minimum spectrum.
  */
-int IndirectDataAnalysisTab::minimumSpectrum() const { return m_minSpectrum; }
+int IndirectDataAnalysisTabLegacy::minimumSpectrum() const { return m_minSpectrum; }
 
 /**
  * Sets the selected spectrum.
  *
  * @param spectrum  The spectrum to set.
  */
-void IndirectDataAnalysisTab::setMinimumSpectrum(int spectrum) {
+void IndirectDataAnalysisTabLegacy::setMinimumSpectrum(int spectrum) {
   m_minSpectrum = spectrum;
 }
 
@@ -163,14 +161,14 @@ void IndirectDataAnalysisTab::setMinimumSpectrum(int spectrum) {
  *
  * @return  The selected maximum spectrum.
  */
-int IndirectDataAnalysisTab::maximumSpectrum() const { return m_maxSpectrum; }
+int IndirectDataAnalysisTabLegacy::maximumSpectrum() const { return m_maxSpectrum; }
 
 /**
  * Sets the selected maximum spectrum.
  *
  * @param spectrum  The spectrum to set.
  */
-void IndirectDataAnalysisTab::setMaximumSpectrum(int spectrum) {
+void IndirectDataAnalysisTabLegacy::setMaximumSpectrum(int spectrum) {
   m_maxSpectrum = spectrum;
 }
 
@@ -178,7 +176,7 @@ void IndirectDataAnalysisTab::setMaximumSpectrum(int spectrum) {
  * Plots the current preview workspace, if none is set, plots
  * the selected spectrum of the current input workspace.
  */
-void IndirectDataAnalysisTab::plotCurrentPreview() {
+void IndirectDataAnalysisTabLegacy::plotCurrentPreview() {
   auto previewWs = previewPlotWorkspace();
   auto inputWs = inputWorkspace();
   auto index = boost::numeric_cast<size_t>(m_selectedSpectrum);
@@ -204,7 +202,7 @@ void IndirectDataAnalysisTab::plotCurrentPreview() {
  * @param previewPlot The preview plot widget in which to plot the input
  *                    input workspace.
  */
-void IndirectDataAnalysisTab::plotInput(
+void IndirectDataAnalysisTabLegacy::plotInput(
     MantidQt::MantidWidgets::PreviewPlot *previewPlot) {
   previewPlot->clear();
   auto inputWS = inputWorkspace();
@@ -221,7 +219,7 @@ void IndirectDataAnalysisTab::plotInput(
  * @param fitPreviewPlot    The fit preview plot.
  * @param diffPreviewPlot   The difference preview plot.
  */
-void IndirectDataAnalysisTab::clearAndPlotInput(
+void IndirectDataAnalysisTabLegacy::clearAndPlotInput(
     MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
     MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
   m_previewPlotWorkspace.reset();
@@ -240,7 +238,7 @@ void IndirectDataAnalysisTab::clearAndPlotInput(
  * @param fitPreviewPlot    The fit preview plot.
  * @param diffPreviewPlot   The difference preview plot.
  */
-void IndirectDataAnalysisTab::updatePlot(
+void IndirectDataAnalysisTabLegacy::updatePlot(
     const std::string &outputWSName, size_t index,
     MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
     MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
@@ -268,7 +266,7 @@ void IndirectDataAnalysisTab::updatePlot(
  * @param fitPreviewPlot    The fit preview plot.
  * @param diffPreviewPlot   The difference preview plot.
  */
-void IndirectDataAnalysisTab::updatePlot(
+void IndirectDataAnalysisTabLegacy::updatePlot(
     WorkspaceGroup_sptr outputWS, size_t index,
     MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
     MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
@@ -291,7 +289,7 @@ void IndirectDataAnalysisTab::updatePlot(
  * @param fitPreviewPlot    The fit preview plot.
  * @param diffPreviewPlot   The difference preview plot.
  */
-void IndirectDataAnalysisTab::updatePlot(
+void IndirectDataAnalysisTabLegacy::updatePlot(
     const std::string &workspaceName,
     MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
     MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
@@ -324,7 +322,7 @@ void IndirectDataAnalysisTab::updatePlot(
  * @param fitPreviewPlot    The fit preview plot.
  * @param diffPreviewPlot   The difference preview plot.
  */
-void IndirectDataAnalysisTab::updatePlot(
+void IndirectDataAnalysisTabLegacy::updatePlot(
     WorkspaceGroup_sptr outputWS,
     MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
     MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
@@ -345,7 +343,7 @@ void IndirectDataAnalysisTab::updatePlot(
  * @param fitPreviewPlot    The fit preview plot.
  * @param diffPreviewPlot   The difference preview plot.
  */
-void IndirectDataAnalysisTab::updatePlot(
+void IndirectDataAnalysisTabLegacy::updatePlot(
     MatrixWorkspace_sptr outputWS,
     MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
     MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
@@ -373,17 +371,16 @@ void IndirectDataAnalysisTab::updatePlot(
  * @parma endRangePropName    The name of the property specifying the end
  *                            value for the range.
  */
-void IndirectDataAnalysisTab::updatePlotRange(
+void IndirectDataAnalysisTabLegacy::updatePlotRange(
     const QString &rangeName, MantidQt::MantidWidgets::PreviewPlot *previewPlot,
     const QString &startRangePropName, const QString &endRangePropName) {
 
-  if (inputWorkspace()) {
+  if (auto const workspace = inputWorkspace()) {
     try {
-      const QPair<double, double> curveRange =
-          previewPlot->getCurveRange("Sample");
+      auto const xRange = getXRangeFromWorkspace(workspace);
       auto rangeSelector = previewPlot->getRangeSelector(rangeName);
       setPlotPropertyRange(rangeSelector, m_properties[startRangePropName],
-                           m_properties[endRangePropName], curveRange);
+                           m_properties[endRangePropName], xRange);
     } catch (std::exception &exc) {
       showMessageBox(exc.what());
     }

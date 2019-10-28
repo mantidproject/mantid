@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_IDATAB_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_IDATAB_H_
+#ifndef MANTIDQTCUSTOMINTERFACESIDA_IDATABLEGACY_H_
+#define MANTIDQTCUSTOMINTERFACESIDA_IDATABLEGACY_H_
 
 #include "IndirectDataAnalysis.h"
 #include "IndirectPlotOptionsPresenter.h"
@@ -53,12 +53,12 @@ class RangeSelector;
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
-class DLLExport IndirectDataAnalysisTab : public IndirectTab {
+class DLLExport IndirectDataAnalysisTabLegacy : public IndirectTab {
   Q_OBJECT
 
 public:
   /// Constructor
-  IndirectDataAnalysisTab(QWidget *parent = nullptr);
+  IndirectDataAnalysisTabLegacy(QWidget *parent = nullptr);
 
   /// Set the presenter for the output plotting options
   void setOutputPlotOptionsPresenter(
