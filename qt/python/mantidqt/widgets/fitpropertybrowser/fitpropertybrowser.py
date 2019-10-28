@@ -269,11 +269,9 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         out_ws_name = '{}_guess'.format(ws_name)
 
         legend = self.get_axes().get_legend()
-
         if legend:
             legend_props = LegendProperties.from_legend(legend)
 
-        
         try:
             out_ws = self.evaluate_function(ws_name, fun, out_ws_name)
         except RuntimeError:
@@ -357,9 +355,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         return menu
 
     def do_plot(self, ws, plot_diff = False, **plot_kwargs):
-
-
-	ax = self.get_axes()
+        ax = self.get_axes()
 
         plot_has_legend = bool(ax.legend_)
         if plot_has_legend:

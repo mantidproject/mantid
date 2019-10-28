@@ -383,50 +383,53 @@ void SequentialFitDialog::finishHandle(
 /// corresponds to ws index in fit browser, if not found defaults to first row.
 void SequentialFitDialog::getFitResults() {
   auto wsName = m_outputName;
-  if (Mantid::API::AnalysisDataService::Instance().doesExist(wsName)) {
-    Mantid::API::ITableWorkspace_sptr ws =
-        boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(wsName));
-
-    // first column is ws name or axis no
-    // the columns after are pairs of parameter values and errors
-    // the last column is chi-squared
-
-    auto columnNames = ws->getColumnNames();
-
-    int rowNo = 0;
-    if (rowCount() > 1) {
-      // contains ws names
-      auto firstColumn = ws->getColumn(0);
-      for (size_t i = 0; i < ws->rowCount(); ++i) {
-        if (firstColumn->cell<std::string>(i) == m_fitBrowser->workspaceName())
-          rowNo = static_cast<int>(i);
-      }
-    } else {
-      // contains log names or axis-1
-      if (m_fitBrowser->workspaceIndex() < ws->rowCount()) {
-        rowNo = m_fitBrowser->workspaceIndex();
-      }
-    }
-
-    Mantid::API::TableRow row = ws->getRow(rowNo);
-    for (size_t col = 1; col < columnNames.size() - 1; col += 2) {
-      auto value = row.Double(col);
-      auto error = row.Double(col + 1);
-      auto name = columnNames[col];
-      // In case of a single function Fit doesn't create a CompositeFunction
-      if (m_fitBrowser->count() == 1) {
-        name.insert(0, "f0.");
-      }
-      size_t paramIndex =
-          m_fitBrowser->compositeFunction()->parameterIndex(name);
-
-      m_fitBrowser->compositeFunction()->setParameter(paramIndex, value);
-      m_fitBrowser->compositeFunction()->setError(paramIndex, error);
-    }
-    m_fitBrowser->updateParameters();
-    m_fitBrowser->getHandler()->updateErrors();
+  if (!Mantid::API::AnalysisDataService::Instance().doesExist(wsName)) {
+    return;
   }
+  Mantid::API::ITableWorkspace_sptr ws =
+      boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+          Mantid::API::AnalysisDataService::Instance().retrieve(wsName));
+  if (!ws) {
+    return;
+  }
+  auto columnNames = ws->getColumnNames();
+
+  size_t rowNo = 0;
+  if (rowCount() > 1) {
+    // first column contains ws names
+    auto firstColumn = ws->getColumn(0);
+    for (size_t i = 0; i < ws->rowCount(); ++i) {
+      if (firstColumn->cell<std::string>(i) == m_fitBrowser->workspaceName())
+        rowNo = i;
+      break;
+    }
+  } else {
+    // first column contains log names or axis-1
+    size_t index = m_fitBrowser->workspaceIndex();
+    if (index < ws->rowCount()) {
+      rowNo = index;
+    }
+  }
+
+  Mantid::API::TableRow row = ws->getRow(rowNo);
+  // results parameter table contains parameter value followed by its error so
+  // increment by 2 for each value. Ignore first and last column in row as they
+  // contain name and chi-squared
+  for (size_t col = 1; col < columnNames.size() - 1; col += 2) {
+    auto value = row.Double(col);
+    auto error = row.Double(col + 1);
+    auto name = columnNames[col];
+    // In case of a single function Fit doesn't create a CompositeFunction
+    if (m_fitBrowser->count() == 1) {
+      name.insert(0, "f0.");
+    }
+    size_t paramIndex = m_fitBrowser->compositeFunction()->parameterIndex(name);
+
+    m_fitBrowser->compositeFunction()->setParameter(paramIndex, value);
+    m_fitBrowser->compositeFunction()->setError(paramIndex, error);
+  }
+  m_fitBrowser->updateParameters();
+  m_fitBrowser->getHandler()->updateErrors();
 }
 
 void SequentialFitDialog::helpClicked() {
