@@ -54,5 +54,6 @@ Bug Fixes
 ---------
 * ref:`LoadNexusMonitors <algm-LoadNexusMonitors>` bug fix for user provided top-level NXentry name.
 * ref:`LoadInstrument <algm-LoadInstrument>` correctly handles IDF files which use all lowercase naming.
+* Fix `LoadMD <algm-LoadMD>` handling for when parameter map is missing
 
 :ref:`Release 4.2.0 <v4.2.0>`

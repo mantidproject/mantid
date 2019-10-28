@@ -461,7 +461,11 @@ void MDBoxFlatTree::loadExperimentInfos(
         // Get the sample, logs, instrument
         ei->loadExperimentInfoNexus(filename, file, parameterStr);
         // Now do the parameter map
-        ei->readParameterMap(parameterStr);
+        if (parameterStr.empty()) {
+          ei->populateInstrumentParameters();
+        } else {
+          ei->readParameterMap(parameterStr);
+        }
         // And add it to the mutliple experiment info.
         mei->addExperimentInfo(ei);
       } catch (std::exception &e) {
