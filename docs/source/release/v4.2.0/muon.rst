@@ -16,7 +16,6 @@ Improvements
 Removed
   * Removed the creation of a group of groups from the elemental analysis GUI. The elemental analysis gui will now create a workspace for each detector, with each workspace containing three spectra corresponding to Total, Delayed and Prompt data
   
-  
 #######
 
 
