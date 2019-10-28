@@ -17,7 +17,7 @@ from qtpy.QtGui import QCloseEvent
 
 import matplotlib
 from Muon.GUI.ElementalAnalysis.elemental_analysis import ElementalAnalysisGui
-from Muon.GUI.ElementalAnalysis.elemental_analysis import type_index
+from Muon.GUI.ElementalAnalysis.LoadWidget.load_utils import spectrum_index
 from Muon.GUI.ElementalAnalysis.elemental_analysis import gen_name
 from MultiPlotting.multi_plotting_widget import MultiPlotWindow
 from MultiPlotting.multi_plotting_widget import MultiPlotWidget
@@ -560,8 +560,8 @@ class ElementalAnalysisTest(unittest.TestCase):
         mock_mantid.mtd['2695; Detector 1'].getName.return_value = '2695; Detector 1'
         mock_mantid.mtd['2695; Detector 2'].getName.return_value = '2695; Detector 2'
         expected_calls = [
-            mock.call('1', '2695; Detector 1', color='C0',spec_num=type_index['Total']),
-            mock.call('2', '2695; Detector 2', color='C0',spec_num=type_index['Total'])
+            mock.call('1', '2695; Detector 1', color='C0',spec_num=spectrum_index['Total']),
+            mock.call('2', '2695; Detector 2', color='C0',spec_num=spectrum_index['Total'])
         ]
         self.gui.add_line_by_type(2695, 'Total')
 
@@ -587,8 +587,8 @@ class ElementalAnalysisTest(unittest.TestCase):
         }
         mock_mantid.mtd['2695; Detector 1'].getName.return_value = '2695; Detector 1'
         mock_mantid.mtd['2695; Detector 2'].getName.return_value = '2695; Detector 2'
-        expected_calls = [mock.call('1', '2695; Detector 1', spec=type_index['Total']),
-                          mock.call('2', '2695; Detector 2', spec=type_index['Total'])]
+        expected_calls = [mock.call('1', '2695; Detector 1', spec=spectrum_index['Total']),
+                          mock.call('2', '2695; Detector 2', spec=spectrum_index['Total'])]
         self.gui.remove_line_type(2695, 'Total')
 
         self.assertEqual(1, self.gui.plotting.get_subplots.call_count)

@@ -14,6 +14,7 @@ from mantid import config
 import mantid.simpleapi as mantid
 
 type_keys = {"10": "Prompt", "20": "Delayed", "99": "Total"}
+spectrum_index = {"Delayed": 1, "Prompt": 2, "Total": 3}
 
 
 class LModel(object):
@@ -85,8 +86,13 @@ def merge_workspaces(run, workspaces):
     # merge each workspace list in dectors into a single workspace
     for detector, workspace_list in iteritems(detectors):
         if workspace_list:
-            # sort workspace list
-            workspace_list = sorted(workspace_list)
+            # sort workspace list according to type_index
+            sorted_workspace_list = [None] * len(workspace_list)
+            # sort workspace list according to type_index
+            for workspace in workspace_list:
+                data_type = workspace.rsplit("_")[1]
+                sorted_workspace_list[spectrum_index[data_type] - 1] = workspace
+            workspace_list = sorted_workspace_list
             # create merged workspace
             merged_ws = create_merged_workspace(workspace_list)
             # add merged ws to ADS
@@ -106,15 +112,13 @@ def create_merged_workspace(workspace_list):
         # get max number of bins and max X range
         num_workspaces = len(workspace_list)
         max_num_bins = 0
-        max_x = 0.0
         for i in range(0, num_workspaces):
             ws = mantid.mtd[workspace_list[i]]
             max_num_bins = max(ws.blocksize(), max_num_bins)
-            max_x = max(np.max(ws.readX(0)), max_x)
 
         # create single ws for the merged data, use original ws as a template
         merged_ws = mantid.WorkspaceFactory.create(mantid.mtd[workspace_list[0]], NVectors=num_workspaces,
-                                                   XLength=max_num_bins , YLength=max_num_bins)
+                                                   XLength=max_num_bins, YLength=max_num_bins)
 
         # create a merged workspace based on every entry from workspace list
         for i in range(0, num_workspaces):
@@ -123,13 +127,15 @@ def create_merged_workspace(workspace_list):
             # check if histogram data, and convert if necessary
             if ws.isHistogramData():
                 ws = mantid.ConvertToPointData(InputWorkspace=ws.name(), OutputWorkspace=ws.name())
-
+            # find max x val
+            max_x = np.max(ws.readX(0))
             # get current number of bins
             num_bins = ws.blocksize()
             # pad bins
-            X_padded = np.full(max_num_bins, max_x + 1.00)
+            X_padded = np.empty(max_num_bins)
+            X_padded.fill(max_x)
             X_padded[:num_bins] = ws.readX(0)
-            Y_padded = np.full(max_num_bins, 0.00)
+            Y_padded = np.zeros(max_num_bins)
             Y_padded[:num_bins] = ws.readY(0)
             E_padded = np.zeros(max_num_bins)
             E_padded[:num_bins] = ws.readE(0)
