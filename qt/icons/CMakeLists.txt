@@ -68,7 +68,9 @@ set(
 mtd_add_qt_tests(
   TARGET_NAME MantidQtIconsTest
   SRC ${QT5_TEST_FILES}
-  INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/inc
+  INCLUDE_DIRS
+    ${CMAKE_CURRENT_SOURCE_DIR}/inc
+    ${CMAKE_CURRENT_SOURCE_DIR}/../widgets/common/inc
   LINK_LIBS
     ${TARGET_LIBRARIES}
     ${Boost_LIBRARIES}
@@ -77,7 +79,3 @@ mtd_add_qt_tests(
   MTD_QT_LINK_LIBS MantidQtIcons
   PARENT_DEPENDENCIES GUITests
 )
-
-# Allow code to find the testing headers but don't link to the library
-target_include_directories(MantidQtIconsTestQt4 PRIVATE ../widgets/common/inc)
-target_include_directories(MantidQtIconsTestQt5 PRIVATE ../widgets/common/inc)
