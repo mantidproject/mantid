@@ -115,9 +115,9 @@ void CalculatePlaczekSelfScattering::exec() {
   }
   // set detector law term (eps1)
   std::vector<double> eps1;
-  constexpr double LAMBDA_D = 1.44;
+  constexpr auto LambdaD = 1.44;
   for (size_t i = 0; i < xLambda.size() - 1; i++) {
-    double xTerm = -(xLambda[i] + dx) / LAMBDA_D;
+    auto xTerm = -(xLambda[i] + dx) / LambdaD;
     eps1.push_back(xTerm * exp(xTerm) / (1.0 - exp(xTerm)));
   }
   /* Placzek
