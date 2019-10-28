@@ -228,8 +228,8 @@ private:
   /// used only when loading data into event_workspace
   std::vector<int> m_filtered_spec_idxs;
 
-  // C++ interface to the NXS file
-  ::NeXus::File *m_cppFile;
+  // Handle to the NeXus file
+  ::NeXus::File *m_nexusFile;
 };
 /// to sort the algorithmhistory vector
 bool UDlesserExecCount(Mantid::NeXus::NXClassInfo elem1,

@@ -25,6 +25,7 @@ Improved
 - The polarization correction inputs have been simplified to a single checkbox which when ticked will apply polarization corrections based on properties in the instrument parameters file.
 - Batch names will now have a unique number assigned to it, and there will no longer be multiple batches of the same name.
 - The Instrument is now synchronised across all Batch tabs.
+- Live data monitoring update intervals can now be user-specified.
 
 Algorithms
 ----------

@@ -60,7 +60,7 @@ class MuonAnalysis : public MantidQt::API::UserSubWindow {
 
 public:
   /// Name of the interface
-  static std::string name() { return "Muon Analysis"; }
+  static std::string name() { return "Muon Analysis old"; }
   // This interface's categories.
   static QString categoryInfo() { return "Muon"; }
 

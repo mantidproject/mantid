@@ -162,7 +162,7 @@ void WorkspaceBuilder::createPeak(const HKLPeakDescriptor &descriptor) {
   const auto sigmas = std::get<2>(descriptor);
 
   // Create the peak and add it to the peaks ws
-  const auto peak = std::unique_ptr<Peak>(m_peaksWorkspace->createPeakHKL(hkl));
+  const auto peak = m_peaksWorkspace->createPeakHKL(hkl);
   m_peaksWorkspace->addPeak(*peak);
 
   // Get detector ID and TOF position of peak

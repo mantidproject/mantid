@@ -43,6 +43,36 @@ def artists_hidden(artists):
             artist.set_visible(True)
 
 
+@contextmanager
+def autoscale_on_update(ax, state, axis='both'):
+    """
+    Context manager to temporarily change value of autoscale_on_update
+
+    :param matplotlib.axes.Axes ax: The axes to disable autoscale on
+    :param bool state: True turns auto-scaling on, False off
+    :param str axis: {'both', 'x', 'y'} The axis to set the scaling on
+    """
+    original_state = ax.get_autoscale_on()
+    try:
+        if axis == 'both':
+            original_state = ax.get_autoscale_on()
+            ax.set_autoscale_on(state)
+        elif axis == 'x':
+            original_state = ax.get_autoscalex_on()
+            ax.set_autoscalex_on(state)
+        elif axis == 'y':
+            original_state = ax.get_autoscaley_on()
+            ax.set_autoscaley_on(state)
+        yield
+    finally:
+        if axis == 'both':
+            ax.set_autoscale_on(original_state)
+        elif axis == 'x':
+            ax.set_autoscalex_on(original_state)
+        elif axis == 'y':
+            ax.set_autoscaley_on(original_state)
+
+
 def find_errorbar_container(line, containers):
     """
     Finds the ErrorbarContainer associated with the plot line.

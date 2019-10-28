@@ -29,22 +29,28 @@ namespace {
 
 /// Create a peak via it's HKL value from a list or numpy array
 IPeak *createPeakHKL(IPeaksWorkspace &self, const object &data) {
-  return self.createPeakHKL(
+  auto peak = self.createPeakHKL(
       Mantid::PythonInterface::Converters::PyObjectToV3D(data)());
+  // Python will manage it
+  return peak.release();
 }
 
 /// Create a peak via it's QLab value from a list or numpy array
 IPeak *createPeakQLab(IPeaksWorkspace &self, const object &data) {
-  return self.createPeak(
+  auto peak = self.createPeak(
       Mantid::PythonInterface::Converters::PyObjectToV3D(data)(), boost::none);
+  // Python will manage it
+  return peak.release();
 }
 
 /// Create a peak via it's QLab value from a list or numpy array
 IPeak *createPeakQLabWithDistance(IPeaksWorkspace &self, const object &data,
                                   double detectorDistance) {
-  return self.createPeak(
+  auto peak = self.createPeak(
       Mantid::PythonInterface::Converters::PyObjectToV3D(data)(),
       detectorDistance);
+  // Python will manage the object
+  return peak.release();
 }
 /// Create a peak via it's QLab value from a list or numpy array
 void addPeak(IPeaksWorkspace &self, const IPeak &peak) { self.addPeak(peak); }
