@@ -43,6 +43,7 @@ Improvements
   along with the option to not require a predicted peak to hit a detector.
 - :ref:`SaveHKL <algm-SaveHKL>` now saves the tbar and transmission values for shapes and materials provided by :ref:`SetSample <algm-SetSample>`.
 - :ref:`SelectCellOfType <algm-SelectCellOfType>` and :ref:`SelectCellWithForm <algm-SelectCellWithForm>` now return the transformation matrix
+- Bugs in :ref:`LoadIsawPeaks <algm-LoadIsawPeaks>` and :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` for WISH have been fixed.
 
 
 Bug Fixes
