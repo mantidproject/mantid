@@ -45,7 +45,6 @@ public:
   void notifyFilterWorkspaceList() override;
   void notifyPopulateParametersList() override;
   void notifySaveSelectedWorkspaces() override;
-  void notifySuggestSaveDir() override;
   void notifyAutosaveDisabled() override;
   void notifyAutosaveEnabled() override;
   void notifySavePathChanged() override;
