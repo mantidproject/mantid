@@ -39,7 +39,6 @@ JobTreeView::JobTreeView(QStringList const &columnHeadings,
   setModel(&m_mainModel);
   setHeaderLabels(columnHeadings);
   setSelectionMode(QAbstractItemView::ExtendedSelection);
-  // Ensure single / double click / tab all edits the current cell
   setEditTriggers(getEditTriggers());
   setItemDelegate(new CellDelegate(this, *this, m_filteredModel, m_mainModel));
   setContextMenuPolicy(Qt::ActionsContextMenu);
@@ -533,7 +532,9 @@ void JobTreeView::enableFiltering() {
 }
 
 void JobTreeView::keyPressEvent(QKeyEvent *event) {
-  if (event->modifiers() & ~Qt::NoModifier) {
+  switch (event->modifiers()) {
+  case Qt::ControlModifier:
+  case Qt::ShiftModifier:
     handleModifierKeyPress(event);
     return;
   }
@@ -542,23 +543,34 @@ void JobTreeView::keyPressEvent(QKeyEvent *event) {
   case Qt::Key_Return:
   case Qt::Key_Enter:
     appendAndEditAtRowBelowRequested();
-    break;
+    return;
   case Qt::Key_Delete:
     removeSelectedRequested();
-    break;
-  default:
-    // Switch to the cell they have highlighted
-    auto model = fromFilteredModel(currentIndex());
-    editAt(model);
-
-    // Forward the key on so it appears they typed into it
-    auto row = rowLocation().atIndex((mapToMainModel(model)));
-    auto cell = cellAt(row, currentColumn());
-    const std::string enteredText = event->text().toStdString();
-    cell.setContentText(enteredText);
-    setCellAt(row, currentColumn(), cell);
+    return;
   }
-}
+
+  std::string userText = event->text().toStdString();
+  // Strip out any special chars or control chars
+  userText.erase(std::remove_if(userText.begin(), userText.end(),
+                                [](char c) { return !std::isalnum(c); }),
+                 userText.end());
+
+  if (userText.size() == 0) {
+    // We have a special key such as Page-Up, don't try to handle it
+    QTreeView::keyPressEvent(event);
+    return;
+  }
+
+  // Switch into the cell they have highlighted
+  auto model = fromFilteredModel(currentIndex());
+  editAt(model);
+
+  // Forward the key on so it appears they typed into it
+  auto row = rowLocation().atIndex((mapToMainModel(model)));
+  auto cell = cellAt(row, currentColumn());
+  cell.setContentText(userText);
+  setCellAt(row, currentColumn(), cell);
+} // namespace Batch
 
 void JobTreeView::handleModifierKeyPress(QKeyEvent *event) {
   assert(event->modifiers() & ~Qt::NoModifier);
