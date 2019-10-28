@@ -386,9 +386,6 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         if plot_has_legend:
             # Update the legend to make sure it changes to the old properties
             LegendProperties.create_legend(props, ax)
-        else:
-            # Remove the legend that was created if the plot didn't have one previously
-            ax.get_legend().remove()
 
         ax.figure.canvas.draw()
 
