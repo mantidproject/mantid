@@ -25,7 +25,7 @@ public:
   IIndirectFitPlotViewLegacy(QWidget *parent = nullptr)
       : API::MantidWidget(parent){};
   virtual ~IIndirectFitPlotViewLegacy(){};
-
+  virtual void watchADS(bool watch) = 0;
   virtual std::size_t getSelectedSpectrum() const = 0;
   virtual int getSelectedSpectrumIndex() const = 0;
   virtual int getSelectedDataIndex() const = 0;
@@ -82,7 +82,7 @@ public:
 public slots:
   virtual void clearTopPreview() = 0;
   virtual void clearBottomPreview() = 0;
-  virtual void clear() = 0;
+  virtual void clearPreviews() = 0;
   virtual void setHWHMRange(double minimum, double maximum) = 0;
   virtual void setHWHMMaximum(double minimum) = 0;
   virtual void setHWHMMinimum(double maximum) = 0;
