@@ -292,20 +292,21 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         out_ws = alg.getProperty('OutputWorkspace').value
 
         ax = self.get_axes()
+
         # Setting distribution=True prevents the guess being normalised
-        
         self.guess_line = ax.plot(out_ws,
                                   wkspIndex=1,
                                   label=out_ws_name,
                                   distribution=True,
                                   update_axes_labels=False,
                                   autoscale_on_update=False)[0]
-        
+
         if legend:
-            LegendProperties.create_legend(legend_props, self.get_axes())
+            LegendProperties.create_legend(legend_props, ax)
 
         if self.guess_line:
             self.setTextPlotGuess('Remove Guess')
+
         self.canvas.draw()
 
     def remove_guess(self):
@@ -360,11 +361,11 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         """
         self.fit_result_ws_name = name
 
-        axes = self.get_axes()
+        ax = self.get_axes()
 
-        plot_has_legend = bool(axes.legend_)
+        plot_has_legend = bool(ax.legend_)
         if plot_has_legend:
-            props = LegendProperties.from_legend(axes.legend_)
+            props = LegendProperties.from_legend(ax.legend_)
 
         ws = AnalysisDataService.retrieve(name)
 
@@ -384,10 +385,10 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
 
         if plot_has_legend:
             # Update the legend to make sure it changes to the old properties
-            LegendProperties.create_legend(props, axes)
+            LegendProperties.create_legend(props, ax)
         else:
             # Remove the legend that was created if the plot didn't have one previously
-            axes.get_legend().remove()
+            ax.get_legend().remove()
 
         ax.figure.canvas.draw()
 
