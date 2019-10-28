@@ -15,6 +15,7 @@ from qtpy.QtWidgets import QMenu
 from mantid.plots import MantidAxes
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import curve_has_errors, CurveProperties
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.presenter import CurvesTabWidgetPresenter
+from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
 
 
 class FigureErrorsManager(object):
@@ -90,6 +91,12 @@ class FigureErrorsManager(object):
 
     @staticmethod
     def toggle_error_bars_for(ax, curve, make_visible=None):
+        # get legend properties
+        if ax.legend_:
+            legend_props = LegendProperties.from_legend(ax.legend_)
+        else:
+            legend_props = None
+
         # get all curve properties
         curve_props = CurveProperties.from_curve(curve)
         # and remove the ones that matplotlib doesn't recognise
@@ -103,7 +110,7 @@ class FigureErrorsManager(object):
         curve_props.hide_errors = not curve_props.hide_errors if make_visible is None else not make_visible
 
         CurvesTabWidgetPresenter.toggle_errors(new_curve, curve_props)
-        CurvesTabWidgetPresenter.update_limits_and_legend(ax)
+        CurvesTabWidgetPresenter.update_limits_and_legend(ax, legend_props)
 
     def _update_plot_after(self, func, *args, **kwargs):
         """

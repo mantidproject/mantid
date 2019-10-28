@@ -25,6 +25,8 @@ public:
   IIndirectFitPlotView(QWidget *parent = nullptr) : API::MantidWidget(parent){};
   virtual ~IIndirectFitPlotView(){};
 
+  virtual void watchADS(bool watch) = 0;
+
   virtual WorkspaceIndex getSelectedSpectrum() const = 0;
   virtual TableRowIndex getSelectedSpectrumIndex() const = 0;
   virtual TableDatasetIndex getSelectedDataIndex() const = 0;
@@ -81,7 +83,7 @@ public:
 public slots:
   virtual void clearTopPreview() = 0;
   virtual void clearBottomPreview() = 0;
-  virtual void clear() = 0;
+  virtual void clearPreviews() = 0;
   virtual void setHWHMRange(double minimum, double maximum) = 0;
   virtual void setHWHMMaximum(double minimum) = 0;
   virtual void setHWHMMinimum(double maximum) = 0;

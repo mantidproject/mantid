@@ -13,18 +13,15 @@ from qtpy.QtCore import Qt, Signal, Slot
 
 from mantid import logger
 from mantid.api import AlgorithmManager, AnalysisDataService, ITableWorkspace
-from mantid.simpleapi import mtd
 from mantidqt.utils.qt import import_qt
 from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
 
 from .interactive_tool import FitInteractiveTool
 
-
 BaseBrowser = import_qt('.._common', 'mantidqt.widgets', 'FitPropertyBrowser')
 
 
 class FitPropertyBrowserBase(BaseBrowser):
-
     def __init__(self, parent=None):
         super(FitPropertyBrowserBase, self).__init__(parent)
         self.init()
@@ -46,11 +43,12 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.toolbar_manager = toolbar_manager
         # The peak editing tool
         self.tool = None
-        # Pyplot lines for the fit result curves
-        self.fit_result_lines = []
+        # The name of the fit result workspace
+        self.fit_result_ws_name = ""
         # Pyplot line for the guess curve
         self.guess_line = None
-        # Map the indices of the markers in the peak editing tool to the peak function prefixes (in the form f0.f1...)
+        # Map the indices of the markers in the peak editing tool to the peak function prefixes
+        # (in the form f0.f1...)
         self.peak_ids = {}
         self._connect_signals()
 
@@ -118,7 +116,8 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
 
     def closeEvent(self, event):
         """
-        Emit self.closing signal used by figure manager to put the menu buttons in correct states
+        Emit self.closing signal used by figure manager to put the menu buttons
+        in correct states
         """
         self.closing.emit()
         BaseBrowser.closeEvent(self, event)
@@ -136,12 +135,12 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
             self.addAllowedTableWorkspace(table)
         else:
             self.toolbar_manager.toggle_fit_button_checked()
-            logger.warning("Cannot open fitting tool: No valid workspaces to "
-                           "fit to.")
+            logger.warning("Cannot open fitting tool: No valid workspaces to " "fit to.")
             return
 
         super(FitPropertyBrowser, self).show()
-        self.tool = FitInteractiveTool(self.canvas, self.toolbar_manager,
+        self.tool = FitInteractiveTool(self.canvas,
+                                       self.toolbar_manager,
                                        current_peak_type=self.defaultPeakType())
         self.tool.fit_range_changed.connect(self.set_fit_range)
         self.tool.peak_added.connect(self.peak_added_slot)
@@ -223,13 +222,10 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         """
         Delete the fit curves.
         """
-        for lin in self.fit_result_lines:
-            try:
-                lin.remove()
-            except ValueError:
-                # workspace replacement could invalidate these references
-                pass
-        self.fit_result_lines = []
+
+        if self.fit_result_ws_name:
+            ws = AnalysisDataService.retrieve(self.fit_result_ws_name)
+            self.get_axes().remove_workspace_artists(ws)
         self.update_legend()
 
     def get_lines(self):
@@ -241,6 +237,8 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
     def get_axes(self):
         """
         Get the pyplot's Axes object.
+
+        :rtype: matplotlib.axes.Axes
         """
         return self.canvas.figure.get_axes()[0]
 
@@ -288,13 +286,15 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
 
         out_ws = alg.getProperty('OutputWorkspace').value
 
+        ax = self.get_axes()
         # Setting distribution=True prevents the guess being normalised
-        self.guess_line = self.get_axes().plot(out_ws, wkspIndex=1,
-                                               label=out_ws_name,
-                                               distribution=True,
-                                               update_axes_labels=False)[0]
-
-        self.get_axes().legend().draggable()
+        self.guess_line = ax.plot(out_ws,
+                                  wkspIndex=1,
+                                  label=out_ws_name,
+                                  distribution=True,
+                                  update_axes_labels=False,
+                                  autoscale_on_update=False)[0]
+        ax.legend().draggable()
 
         if self.guess_line:
             self.setTextPlotGuess('Remove Guess')
@@ -328,7 +328,8 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         :return: The menu passed to us
         """
         if self.tool is not None:
-            self.tool.add_to_menu(menu, peak_names=self.registeredPeaks(),
+            self.tool.add_to_menu(menu,
+                                  peak_names=self.registeredPeaks(),
                                   current_peak_type=self.defaultPeakType(),
                                   background_names=self.registeredBackgrounds(),
                                   other_names=self.registeredOthers())
@@ -349,37 +350,29 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         This is called after Fit finishes to update the fit curves.
         :param name: The name of Fit's output workspace.
         """
-        from mantidqt.plotting.functions import plot
+        self.fit_result_ws_name = name
+        ax = self.get_axes()
+        props = LegendProperties.from_legend(ax.legend_)
 
-        axes = self.get_axes()
-        props = LegendProperties.from_legend(axes.legend_)
-
-        ws = mtd[name]
+        ws = AnalysisDataService.retrieve(name)
 
         # Keep local copy of the original lines
         original_lines = self.get_lines()
 
         self.clear_fit_result_lines()
 
+        ax.plot(ws, wkspIndex=1, autoscale_on_update=False)
         if self.plotDiff():
-            plot([ws], wksp_indices=[1, 2], fig=self.canvas.figure, overplot=True)
-        else:
-            plot([ws], wksp_indices=[1], fig=self.canvas.figure, overplot=True)
-
-        name += ':'
-        for lin in self.get_lines():
-            if lin.get_label().startswith(name):
-                self.fit_result_lines.append(lin)
+            ax.plot(ws, wkspIndex=2, autoscale_on_update=False)
 
         # Add properties back to the lines
         new_lines = self.get_lines()
         for new_line, old_line in zip(new_lines, original_lines):
             new_line.update_from(old_line)
 
-        handles, labels = axes.get_legend_handles_labels()
-
         # Now update the legend to make sure it changes to the old properties
-        LegendProperties.create_legend(props, axes)
+        LegendProperties.create_legend(props, ax)
+        ax.figure.canvas.draw()
 
     @Slot(int, float, float, float)
     def peak_added_slot(self, peak_id, centre, height, fwhm):
@@ -424,14 +417,14 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
     @Slot(str)
     def peak_changed_slot(self, fun):
         """
-        Update the peak marker in the peak editing tool after peak's parameters change in the browser.
+        Update the peak marker in the peak editing tool after peak's parameters
+        change in the browser.
         :param fun: A prefix of the function that changed.
         """
         for peak_id, prefix in self.peak_ids.items():
             if prefix == fun:
                 self.tool.update_peak(peak_id, self.getPeakCentreOf(prefix),
-                                      self.getPeakHeightOf(prefix),
-                                      self.getPeakFwhmOf(prefix))
+                                      self.getPeakHeightOf(prefix), self.getPeakFwhmOf(prefix))
         self.update_guess()
 
     @Slot(str)
@@ -455,13 +448,14 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
     @Slot()
     def function_changed_slot(self):
         """
-        Update the peak editing tool after function structure has changed in the browser: functions added
-        and/or removed.
+        Update the peak editing tool after function structure has changed in
+        the browser: functions added and/or removed.
         """
         peaks_to_add = []
         peaks = {v: k for k, v in self.peak_ids.items()}
         for prefix in self.getPeakPrefixes():
-            c, h, w = self.getPeakCentreOf(prefix), self.getPeakHeightOf(prefix), self.getPeakFwhmOf(prefix)
+            c, h, w = self.getPeakCentreOf(prefix), self.getPeakHeightOf(
+                prefix), self.getPeakFwhmOf(prefix)
             if prefix in peaks:
                 self.tool.update_peak(peaks[prefix], c, h, w)
                 del peaks[prefix]
@@ -482,7 +476,8 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
                     need_update_markers = True
                     break
         if need_update_markers:
-            peak_ids, peak_updates = self.tool.update_peak_markers(self.peak_ids.keys(), peaks_to_add)
+            peak_ids, peak_updates = self.tool.update_peak_markers(self.peak_ids.keys(),
+                                                                   peaks_to_add)
             self.peak_ids.update(peak_ids)
             for prefix, c, h, w in peak_updates:
                 self.setPeakCentreOf(prefix, c)

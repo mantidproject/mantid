@@ -11,17 +11,13 @@ from mantidqt.utils.qt.testing import start_qapplication
 
 # need to write tests for new GUI
 
-from Muon.GUI.Common.utilities import load_utils
-from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_presenter_new
 from Muon.GUI.FrequencyDomainAnalysis.FFT.fft_widget_new import FFTWidget
-from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_presenter_new
 from Muon.GUI.FrequencyDomainAnalysis.MaxEnt.maxent_widget_new import MaxEntWidget
 from Muon.GUI.FrequencyDomainAnalysis.Transform import transform_view
 from Muon.GUI.FrequencyDomainAnalysis.Transform import transform_widget
 from Muon.GUI.FrequencyDomainAnalysis.TransformSelection import transform_selection_view
 from Muon.GUI.FrequencyDomainAnalysis.TransformSelection import transform_selection_widget
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
-from Muon.GUI.Common.observer_pattern import GenericObservable
 
 
 # pass the call not the object to widget

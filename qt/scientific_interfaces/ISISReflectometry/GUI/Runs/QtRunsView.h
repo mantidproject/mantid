@@ -61,6 +61,7 @@ public:
   void setSearchButtonEnabled(bool enabled) override;
   void setStartMonitorButtonEnabled(bool enabled) override;
   void setStopMonitorButtonEnabled(bool enabled) override;
+  void setUpdateIntervalSpinBoxEnabled(bool enabled) override;
 
   // Set the status of the progress bar
   void setProgressRange(int min, int max) override;
@@ -73,6 +74,7 @@ public:
   std::string getSearchInstrument() const override;
   void setSearchInstrument(std::string const &instrumentName) override;
   std::string getSearchString() const override;
+  int getLiveDataUpdateInterval() const override;
 
   boost::shared_ptr<MantidQt::API::AlgorithmRunner>
   getAlgorithmRunner() const override;

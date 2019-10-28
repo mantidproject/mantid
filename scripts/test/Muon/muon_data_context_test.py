@@ -18,13 +18,9 @@ from Muon.GUI.Common.utilities.load_utils import load_workspace_from_filename
 
 @start_qapplication
 class MuonDataContextTest(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super(MuonDataContextTest, cls).setUpClass()
-        cls.filepath = FileFinder.findRuns('EMU00019489.nxs')[0]
-        cls.load_result, cls.run_number, cls.filename, _ = load_workspace_from_filename(cls.filepath)
-
     def setUp(self):
+        self.filepath = FileFinder.findRuns('EMU00019489.nxs')[0]
+        self.load_result, self.run_number, self.filename, _ = load_workspace_from_filename(self.filepath)
         self.loaded_data = MuonLoadData()
         self.context = MuonDataContext(load_data=self.loaded_data)
         self.context.instrument = 'EMU'

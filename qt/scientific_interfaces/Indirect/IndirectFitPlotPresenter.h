@@ -22,11 +22,14 @@ namespace IDA {
 
 class MANTIDQT_INDIRECT_DLL IndirectFitPlotPresenter : public QObject {
   Q_OBJECT
+
 public:
   IndirectFitPlotPresenter(IndirectFittingModel *model,
                            IIndirectFitPlotView *view,
                            IPyRunner *pythonRunner = nullptr);
 
+  void watchADS(bool watch);
+  
   TableDatasetIndex getSelectedDataIndex() const;
   WorkspaceIndex getSelectedSpectrum() const;
   TableRowIndex getSelectedSpectrumIndex() const;
@@ -74,7 +77,7 @@ private slots:
   void setActiveSpectrum(WorkspaceIndex spectrum);
   void setHWHMMaximum(double minimum);
   void setHWHMMinimum(double maximum);
-  void updateGuess(bool doPlotGuess);
+  void plotGuess(bool doPlotGuess);
   void updateFitRangeSelector();
   void plotCurrentPreview();
   void emitFitSingleSpectrum();
@@ -83,8 +86,10 @@ private slots:
 private:
   void disableAllDataSelection();
   void enableAllDataSelection();
+  void plotInput(Mantid::API::MatrixWorkspace_sptr workspace);
   void plotInput(Mantid::API::MatrixWorkspace_sptr workspace,
                  WorkspaceIndex spectrum);
+  void plotFit(Mantid::API::MatrixWorkspace_sptr workspace);
   void plotFit(Mantid::API::MatrixWorkspace_sptr workspace,
                WorkspaceIndex spectrum);
   void plotDifference(Mantid::API::MatrixWorkspace_sptr workspace,
@@ -94,8 +99,7 @@ private:
   void clearDifference();
   void plotGuess(Mantid::API::MatrixWorkspace_sptr workspace);
   void plotGuessInSeparateWindow(Mantid::API::MatrixWorkspace_sptr workspace);
-  void plotInput();
-  void plotResult(Mantid::API::MatrixWorkspace_sptr workspace);
+  void plotLines();
   void updatePlotRange(const std::pair<double, double> &range);
   void clearGuess();
   void updateHWHMSelector();

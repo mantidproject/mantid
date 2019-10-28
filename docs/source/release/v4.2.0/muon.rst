@@ -46,6 +46,9 @@ Muon Analysis 2 and Frequency Domain Analysis
 - The FFT tab now uses the group pair selection to make a guess at the users selection for workspaces.
 - Can now plot FFT's of PhaseQuad data.
 - No longer produces an error if using multiple runs and the user plots all the FFT results when no imaginary data was used.
+- Muon Analysis (new) and Frequency Domain Analysis (new) work with project recovery. 
+- The original Muon Analysis GUI has been renamed Muon Analysis old and has been deprecated. 
+- The new Muon Analysis has been renamed Muon Analysis.
 
 Algorithms
 ----------

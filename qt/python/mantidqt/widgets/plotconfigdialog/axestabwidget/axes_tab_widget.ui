@@ -133,21 +133,8 @@
      <property name="bottomMargin">
       <number>4</number>
      </property>
-     <item row="1" column="1">
-      <spacer name="horizontalSpacer_2">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeType">
-        <enum>QSizePolicy::Fixed</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>58</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
+     <item row="1" column="2">
+      <widget class="QLineEdit" name="xlower_limit_line_edit"/>
      </item>
      <item row="2" column="0">
       <widget class="QLabel" name="x_right_limit_label">
@@ -221,25 +208,6 @@
        </property>
       </spacer>
      </item>
-     <item row="1" column="2">
-      <widget class="QDoubleSpinBox" name="xlower_limit_spin_box">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="decimals">
-        <number>4</number>
-       </property>
-       <property name="minimum">
-        <double>-100000000000.000000000000000</double>
-       </property>
-       <property name="maximum">
-        <double>100000000000.000000000000000</double>
-       </property>
-      </widget>
-     </item>
      <item row="3" column="1">
       <spacer name="horizontalSpacer_4">
        <property name="orientation">
@@ -298,31 +266,21 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="2">
-      <widget class="QDoubleSpinBox" name="xupper_limit_spin_box">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
+     <item row="1" column="1">
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
        </property>
-       <property name="decimals">
-        <number>4</number>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
        </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="x_left_limit_label">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>58</width>
+         <height>20</height>
+        </size>
        </property>
-       <property name="text">
-        <string>Lower Limit</string>
-       </property>
-      </widget>
+      </spacer>
      </item>
      <item row="2" column="1">
       <spacer name="horizontalSpacer_3">
@@ -339,6 +297,22 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="x_left_limit_label">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Lower Limit</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="2">
+      <widget class="QLineEdit" name="xupper_limit_line_edit"/>
      </item>
     </layout>
    </item>
@@ -464,19 +438,6 @@
        </item>
       </widget>
      </item>
-     <item row="2" column="2">
-      <widget class="QDoubleSpinBox" name="yupper_limit_spin_box">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="decimals">
-        <number>4</number>
-       </property>
-      </widget>
-     </item>
      <item row="4" column="1">
       <spacer name="horizontalSpacer_9">
        <property name="orientation">
@@ -522,19 +483,6 @@
        </property>
       </spacer>
      </item>
-     <item row="1" column="2">
-      <widget class="QDoubleSpinBox" name="ylower_limit_spin_box">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="decimals">
-        <number>4</number>
-       </property>
-      </widget>
-     </item>
      <item row="1" column="1">
       <spacer name="horizontalSpacer_10">
        <property name="orientation">
@@ -550,6 +498,12 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item row="1" column="2">
+      <widget class="QLineEdit" name="ylower_limit_line_edit"/>
+     </item>
+     <item row="2" column="2">
+      <widget class="QLineEdit" name="yupper_limit_line_edit"/>
      </item>
     </layout>
    </item>
@@ -571,12 +525,8 @@
  <tabstops>
   <tabstop>select_axes_combo_box</tabstop>
   <tabstop>axes_title_line_edit</tabstop>
-  <tabstop>xlower_limit_spin_box</tabstop>
-  <tabstop>xupper_limit_spin_box</tabstop>
   <tabstop>xlabel_line_edit</tabstop>
   <tabstop>xscale_combo_box</tabstop>
-  <tabstop>ylower_limit_spin_box</tabstop>
-  <tabstop>yupper_limit_spin_box</tabstop>
   <tabstop>ylabel_line_edit</tabstop>
   <tabstop>yscale_combo_box</tabstop>
  </tabstops>

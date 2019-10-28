@@ -24,6 +24,7 @@ IndirectDataAnalysis::IndirectDataAnalysis(QWidget *parent)
       m_valDbl(nullptr),
       m_changeObserver(*this, &IndirectDataAnalysis::handleDirectoryChange) {
   m_uiForm.setupUi(this);
+  m_uiForm.pbSettings->setIcon(IndirectSettings::icon());
 
   // Allows us to get a handle on a tab using an enum, for example
   // "m_tabs[ELWIN]".

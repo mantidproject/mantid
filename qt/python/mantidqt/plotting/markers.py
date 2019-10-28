@@ -55,6 +55,7 @@ class HorizontalMarker(QObject):
                                linestyle=line_style,
                                animated=True)
         self.axis.add_patch(self.patch)
+        self.axis.interactive_markers.append(self.patch)
         self.is_moving = False
         self.move_cursor = move_cursor
 
@@ -86,6 +87,9 @@ class HorizontalMarker(QObject):
         vertices[0] = x0, self.y
         vertices[1] = x1, self.y
         self.axis.draw_artist(self.patch)
+
+    def set_visible(self, visible):
+        self.patch.set_visible(visible)
 
     def set_color(self, color):
         """
@@ -225,6 +229,7 @@ class VerticalMarker(QObject):
         self.patch = PathPatch(path, facecolor='None', edgecolor=color, picker=picker_width,
                                linewidth=line_width, linestyle=line_style, animated=True)
         self.axis.add_patch(self.patch)
+        self.axis.interactive_markers.append(self.patch)
         self.is_moving = False
         self.move_cursor = move_cursor
 
@@ -256,6 +261,9 @@ class VerticalMarker(QObject):
         vertices[0] = self.x, y0
         vertices[1] = self.x, y1
         self.axis.draw_artist(self.patch)
+
+    def set_visible(self, visible):
+        self.patch.set_visible(visible)
 
     def set_color(self, color):
         """
@@ -638,13 +646,18 @@ class PeakMarker(QObject):
         self.left_width.remove()
         self.right_width.remove()
 
+    def set_visible(self, visible):
+        self.centre_marker.set_visible(visible)
+        self.left_width.set_visible(visible)
+        self.right_width.set_visible(visible)
+
 
 class SingleMarker(QObject):
     """
         A marker used to mark out a vertical or horizontal line on a plot.
     """
-    def __init__(self, canvas, color, position, lower_bound, upper_bound, name=None, marker_type='XSingle',
-                 line_style='-', axis=None):
+    def __init__(self, canvas, color, position, lower_bound, upper_bound, marker_type='XSingle',
+                 line_style='-', name=None, axis=None):
         """
         Init the marker.
         :param canvas: The MPL canvas.
@@ -927,7 +940,6 @@ class SingleMarker(QObject):
         """
         marker_moving = self.marker.is_marker_moving()
         inside_bounds, new_position = self.is_inside_bounds(x, y)
-
         if marker_moving and inside_bounds:
             return self.marker.mouse_move(x, y)
         elif marker_moving:
@@ -969,6 +981,9 @@ class SingleMarker(QObject):
         """
         self.marker.set_move_cursor(cursor, x_pos, y_pos)
 
+    def set_visible(self, visible):
+        self.marker.patch.set_visible(visible)
+
 
 class RangeMarker(QObject):
     """
@@ -993,6 +1008,10 @@ class RangeMarker(QObject):
         single_marker_type = 'XSingle' if self.range_type == 'XMinMax' else 'YSingle'
         self.min_marker = SingleMarker(canvas, color, minimum, minimum, maximum, single_marker_type, line_style=line_style)
         self.max_marker = SingleMarker(canvas, color, maximum, minimum, maximum, single_marker_type, line_style=line_style)
+
+    def set_visible(self, visible):
+        self.min_marker.set_visible(visible)
+        self.max_marker.set_visible(visible)
 
     def redraw(self):
         """

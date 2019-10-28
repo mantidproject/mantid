@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/MplCpp/Figure.h"
 #include "MantidPythonInterface/core/CallMethod.h"
+#include "MantidQtWidgets/Common/Python/QHashToDict.h"
 #include "MantidQtWidgets/MplCpp/ColorConverter.h"
 
 using Mantid::PythonInterface::GlobalInterpreterLock;
@@ -70,6 +71,15 @@ void Figure::setFaceColor(const QColor color) {
  */
 void Figure::setFaceColor(const char *color) {
   callMethodNoCheck<void, const char *>(pyobj(), "set_facecolor", color);
+}
+
+/**
+ * Sets how tight_layout is called when drawing. ("pad", "w_pad", "h_pad",
+ * "rect", etc.)
+ * @param args A hash of parameters to pass to set_tight_layout
+ */
+void Figure::setTightLayout(QHash<QString, QVariant> const &args) {
+  pyobj().attr("set_tight_layout")(Python::qHashToDict(args));
 }
 
 /**

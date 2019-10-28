@@ -741,7 +741,8 @@ public:
   void test_contentsDifferent_same() {
     ConcretePeaksPresenterBuilder builder = createStandardBuild();
     // Set a common peaks workspace.
-    builder.withPeaksWorkspace(WorkspaceCreationHelper::createPeaksWorkspace());
+    builder.withPeaksWorkspace(
+        WorkspaceCreationHelper::createPeaksWorkspace(2));
 
     ConcretePeaksPresenter_sptr a = builder.create();
     ConcretePeaksPresenter_sptr b = builder.create();
@@ -753,9 +754,9 @@ public:
   }
 
   void test_contentsDifferent_mixed() {
-    auto a = WorkspaceCreationHelper::createPeaksWorkspace();
-    auto b = WorkspaceCreationHelper::createPeaksWorkspace();
-    auto c = WorkspaceCreationHelper::createPeaksWorkspace();
+    auto a = WorkspaceCreationHelper::createPeaksWorkspace(2);
+    auto b = WorkspaceCreationHelper::createPeaksWorkspace(2);
+    auto c = WorkspaceCreationHelper::createPeaksWorkspace(2);
 
     // We are creating another comparison peaks presenter, which will deliver a
     // set of peaks workspaces.

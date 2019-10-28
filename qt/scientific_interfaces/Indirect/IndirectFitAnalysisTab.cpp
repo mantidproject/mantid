@@ -684,7 +684,7 @@ void IndirectFitAnalysisTab::respondToChangeOfSpectraRange(
 void IndirectFitAnalysisTab::respondToSingleResolutionLoaded() {
   setModelFitFunction();
   m_plotPresenter->updatePlots();
-  m_plotPresenter->updateGuess();
+  m_plotPresenter->updateGuessAvailability();
 }
 
 void IndirectFitAnalysisTab::respondToDataChanged() {
@@ -693,7 +693,7 @@ void IndirectFitAnalysisTab::respondToDataChanged() {
   m_spectrumPresenter->updateSpectra();
   m_plotPresenter->updateAvailableSpectra();
   m_plotPresenter->updatePlots();
-  m_plotPresenter->updateGuess();
+  m_plotPresenter->updateGuessAvailability();
   updateParameterEstimationData();
 }
 
@@ -747,7 +747,7 @@ void IndirectFitAnalysisTab::respondToBackgroundChanged(double value) {
 void IndirectFitAnalysisTab::respondToFunctionChanged() {
   setModelFitFunction();
   m_plotPresenter->updatePlots();
-  m_plotPresenter->updateGuess();
+  m_plotPresenter->updateGuessAvailability();
 }
 
 } // namespace IDA

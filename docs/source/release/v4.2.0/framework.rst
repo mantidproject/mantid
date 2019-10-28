@@ -40,6 +40,7 @@ Live Data
 
 Python
 ------
+* IPython widget command executor has been updated to cope with changes to IPython >= 7.1
 
 API
 ---

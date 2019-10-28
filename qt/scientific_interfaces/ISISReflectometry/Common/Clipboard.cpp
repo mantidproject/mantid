@@ -156,6 +156,9 @@ Clipboard::mutableSubtreeRoots() {
 }
 
 bool containsGroups(Clipboard const &clipboard) {
+  if (!clipboard.isInitialized())
+    throw std::runtime_error("Attempted to access invalid value in clipboard");
+
   return containsGroups(clipboard.subtreeRoots());
 }
 } // namespace ISISReflectometry

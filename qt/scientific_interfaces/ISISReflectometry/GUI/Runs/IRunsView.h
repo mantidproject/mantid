@@ -89,15 +89,17 @@ public:
   virtual void setInstrumentComboEnabled(bool enabled) = 0;
   virtual void setSearchTextEntryEnabled(bool enabled) = 0;
   virtual void setSearchButtonEnabled(bool enabled) = 0;
+  virtual void setSearchInstrument(std::string const &instrumentName) = 0;
   virtual void setStartMonitorButtonEnabled(bool enabled) = 0;
   virtual void setStopMonitorButtonEnabled(bool enabled) = 0;
+  virtual void setUpdateIntervalSpinBoxEnabled(bool enabled) = 0;
 
   // Accessor methods
   virtual std::set<int> getSelectedSearchRows() const = 0;
   virtual std::set<int> getAllSearchRows() const = 0;
   virtual std::string getSearchInstrument() const = 0;
-  virtual void setSearchInstrument(std::string const &instrumentName) = 0;
   virtual std::string getSearchString() const = 0;
+  virtual int getLiveDataUpdateInterval() const = 0;
 
   virtual boost::shared_ptr<MantidQt::API::AlgorithmRunner>
   getAlgorithmRunner() const = 0;

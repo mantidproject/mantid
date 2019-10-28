@@ -7,7 +7,6 @@
 #ifndef MANTIDQT_API_MANTIDCONTOURPREVIEWPLOTTEST_H_
 #define MANTIDQT_API_MANTIDCONTOURPREVIEWPLOTTEST_H_
 
-#include <cxxtest/GlobalFixture.h>
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/MatrixWorkspace.h"
@@ -26,27 +25,6 @@ MatrixWorkspace_sptr createMatrixWorkspace(int numberOfHistograms,
 }
 
 } // namespace
-
-/// This QApplication object is required in order to construct the widget
-class QApplicationHolder : CxxTest::GlobalFixture {
-public:
-  bool setUpWorld() override {
-    int argc(0);
-    char **argv = {};
-    m_app = new QApplication(argc, argv);
-    return true;
-  }
-
-  bool tearDownWorld() override {
-    delete m_app;
-    return true;
-  }
-
-private:
-  QApplication *m_app;
-};
-
-static QApplicationHolder MAIN_QAPPLICATION;
 
 /// Unit tests for ContourPreviewPlot
 class ContourPreviewPlotTest : public CxxTest::TestSuite {

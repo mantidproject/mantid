@@ -289,19 +289,25 @@ MatrixWorkspace_sptr IndirectFitPlotModel::getResultWorkspace() const {
 }
 
 MatrixWorkspace_sptr IndirectFitPlotModel::getGuessWorkspace() const {
-  const auto range = getRange();
+  const auto range = getGuessRange();
   return createGuessWorkspace(
       getWorkspace(),
       m_fittingModel->getSingleFunction(m_activeIndex, m_activeSpectrum),
-      m_activeSpectrum.value, range.first, range.second);
+      range.first, range.second);
 }
 
 MatrixWorkspace_sptr IndirectFitPlotModel::appendGuessToInput(
     MatrixWorkspace_sptr guessWorkspace) const {
-  const auto range = getRange();
+  const auto range = getGuessRange();
   return createInputAndGuessWorkspace(getWorkspace(), guessWorkspace,
                                       m_activeSpectrum.value, range.first,
                                       range.second);
+}
+
+std::pair<double, double> IndirectFitPlotModel::getGuessRange() const {
+  if (getResultWorkspace())
+    return getResultRange();
+  return getRange();
 }
 
 MatrixWorkspace_sptr IndirectFitPlotModel::createInputAndGuessWorkspace(
@@ -325,19 +331,26 @@ MatrixWorkspace_sptr IndirectFitPlotModel::createInputAndGuessWorkspace(
   return inputAndGuess;
 }
 
-MatrixWorkspace_sptr IndirectFitPlotModel::createGuessWorkspace(
-    MatrixWorkspace_sptr inputWorkspace, IFunction_const_sptr func,
-    int workspaceIndex, double startX, double endX) const {
-  auto croppedWS = cropWorkspace(inputWorkspace, startX, endX, workspaceIndex,
-                                 workspaceIndex);
-  const auto dataY = computeOutput(func, croppedWS->points(0).rawData());
-
-  if (dataY.empty())
-    return WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
-
-  auto createWs = createWorkspaceAlgorithm(1, croppedWS->dataX(0), dataY);
-  createWs->execute();
-  return createWs->getProperty("OutputWorkspace");
+MatrixWorkspace_sptr
+IndirectFitPlotModel::createGuessWorkspace(MatrixWorkspace_sptr inputWorkspace,
+                                           IFunction_const_sptr func,
+                                           double startX, double endX) const {
+  IAlgorithm_sptr createWsAlg =
+      AlgorithmManager::Instance().create("EvaluateFunction");
+  createWsAlg->initialize();
+  createWsAlg->setChild(true);
+  createWsAlg->setLogging(false);
+  createWsAlg->setProperty("Function", func->asString());
+  createWsAlg->setProperty("InputWorkspace", inputWorkspace);
+  createWsAlg->setProperty("OutputWorkspace", "__QENSGuess");
+  createWsAlg->setProperty("StartX", startX);
+  createWsAlg->setProperty("EndX", endX);
+  createWsAlg->execute();
+  Workspace_sptr outputWorkspace = createWsAlg->getProperty("OutputWorkspace");
+  return extractSpectra(
+      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+          outputWorkspace),
+      1, 1, startX, endX);
 }
 
 std::vector<double>

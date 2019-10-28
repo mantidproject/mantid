@@ -4,6 +4,7 @@ set(TEST_PY_FILES
     AttributeTest.py
     BesselTest.py
     CombGaussLorentzKTTest.py
+    DampedBesselTest.py
     DSFinterp1DFitTest.py
     EISFDiffSphereTest.py
     EISFDiffCylinderTest.py
@@ -23,9 +24,11 @@ set(TEST_PY_FILES
     StandardSCTest.py
     StaticLorentzianKTTest.py
     StretchedExpFTTest.py
+    StretchedKTTest.py
     TeixeiraWaterTest.py
+    TFMuoniumTest.py
     TriangleOscTest.py
-    TFMuoniumTest.py)
+    ZFMuoniumTest.py)
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
 
