@@ -110,8 +110,11 @@ target_link_libraries(Muon
 # Add the unit tests directory
 add_subdirectory(test)
 
-# Installation settings
+# Auto-generate exports header
+target_include_directories(Muon PUBLIC ${CMAKE_BINARY_DIR}/Framework/Muon)
+generate_mantid_export_header(Muon)
 
+# Installation settings
 mtd_install_targets(TARGETS
                     Muon
                     INSTALL_DIRS
