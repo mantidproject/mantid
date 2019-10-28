@@ -46,6 +46,7 @@ Improvements
 - :ref:`IndexPeaks <algm-IndexPeaks>` now has options to enter modulation vectors and additional information required for satellite peak indexing. As
   a result :ref:`IndexPeaksWithSatellites <algm-IndexPeaksWithSatellites>` has been deprecated and will be removed in a future release.
 - Bugs in :ref:`LoadIsawPeaks <algm-LoadIsawPeaks>` and :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` for WISH have been fixed.
+- Added IDF for DEMAND (HB3A upgrade)
 
 
 Bug Fixes
