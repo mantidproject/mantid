@@ -17,7 +17,7 @@ from Muon.GUI.Common.utilities.muon_file_utils import allowed_instruments
 
 from mantid.simpleapi import GroupWorkspaces
 from mantid.kernel import ConfigService
-from Muon.GUI.Common.observer_pattern import Observable
+from mantidqt.utils.observer_pattern import Observable
 
 
 def construct_empty_group(group_names, group_index=0):

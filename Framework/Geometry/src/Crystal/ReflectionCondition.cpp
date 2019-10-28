@@ -5,41 +5,52 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/ReflectionCondition.h"
-#include "MantidKernel/System.h"
 #include <algorithm>
 #include <iterator>
+
+#include <boost/make_shared.hpp>
 
 namespace Mantid {
 namespace Geometry {
 
+// General template definition for RegisterConditions
+template <typename... Args> struct RegisterConditions;
+
+// Specialisation for recursive case
+template <typename R, typename... Args> struct RegisterConditions<R, Args...> {
+  static void run(ReflectionConditions &container) {
+    container.emplace_back(boost::make_shared<R>());
+    RegisterConditions<Args...>::run(container);
+  }
+};
+
+// Specialisation to end recursion
+template <> struct RegisterConditions<> {
+  static void run(ReflectionConditions &) {}
+};
+
 /** @return a vector with all possible ReflectionCondition objects */
-std::vector<ReflectionCondition_sptr> getAllReflectionConditions() {
-  std::vector<ReflectionCondition_sptr> out;
-  out.push_back(ReflectionCondition_sptr(new ReflectionConditionPrimitive()));
-  out.push_back(
-      ReflectionCondition_sptr(new ReflectionConditionCFaceCentred()));
-  out.push_back(
-      ReflectionCondition_sptr(new ReflectionConditionAFaceCentred()));
-  out.push_back(
-      ReflectionCondition_sptr(new ReflectionConditionBFaceCentred()));
-  out.push_back(ReflectionCondition_sptr(new ReflectionConditionBodyCentred()));
-  out.push_back(
-      ReflectionCondition_sptr(new ReflectionConditionAllFaceCentred()));
-  out.push_back(
-      ReflectionCondition_sptr(new ReflectionConditionRhombohedrallyObverse()));
-  out.push_back(
-      ReflectionCondition_sptr(new ReflectionConditionRhombohedrallyReverse()));
-  out.push_back(
-      ReflectionCondition_sptr(new ReflectionConditionHexagonallyReverse()));
-  return out;
+const ReflectionConditions &getAllReflectionConditions() {
+  static ReflectionConditions conditions;
+  if (conditions.empty()) {
+    RegisterConditions<
+        ReflectionConditionPrimitive, ReflectionConditionCFaceCentred,
+        ReflectionConditionAFaceCentred, ReflectionConditionBFaceCentred,
+        ReflectionConditionBodyCentred, ReflectionConditionAllFaceCentred,
+        ReflectionConditionRhombohedrallyObverse,
+        ReflectionConditionRhombohedrallyReverse,
+        ReflectionConditionHexagonallyReverse>::run(conditions);
+  }
+  return conditions;
 }
 
 /// Helper function that transforms all ReflectionConditions to strings.
 std::vector<std::string> transformReflectionConditions(
     const std::function<std::string(const ReflectionCondition_sptr &)> &fn) {
-  auto conditions = getAllReflectionConditions();
+  const auto &conditions = getAllReflectionConditions();
 
   std::vector<std::string> names;
+  names.reserve(conditions.size());
   std::transform(conditions.cbegin(), conditions.cend(),
                  std::back_inserter(names), fn);
 
@@ -78,7 +89,7 @@ std::vector<std::string> getAllReflectionConditionSymbols() {
 ReflectionCondition_sptr getReflectionConditionWhere(
     const std::function<bool(const ReflectionCondition_sptr &)> &fn,
     const std::string &hint) {
-  auto conditions = getAllReflectionConditions();
+  const auto &conditions = getAllReflectionConditions();
 
   auto it = std::find_if(conditions.cbegin(), conditions.cend(), fn);
 

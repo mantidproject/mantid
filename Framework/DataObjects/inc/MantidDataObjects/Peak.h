@@ -127,7 +127,7 @@ public:
       const Mantid::Kernel::V3D &QSampleFrame,
       boost::optional<double> detectorDistance = boost::none) override;
   void
-  setQLabFrame(const Mantid::Kernel::V3D &QLabFrame,
+  setQLabFrame(const Mantid::Kernel::V3D &qLab,
                boost::optional<double> detectorDistance = boost::none) override;
 
   void setWavelength(double wavelength) override;

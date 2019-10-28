@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, unicode_literals)
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 from Muon.GUI.Common import thread_model
 from Muon.GUI.Common.utilities.algorithm_utils import run_CalMuonDetectorPhases, run_PhaseQuad
-from Muon.GUI.Common.observer_pattern import Observer, Observable
+from mantidqt.utils.observer_pattern import Observer, Observable
 import re
 from Muon.GUI.Common.ADSHandler.workspace_naming import get_phase_table_workspace_name, \
     get_phase_table_workspace_group_name, \

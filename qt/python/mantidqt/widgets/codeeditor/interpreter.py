@@ -7,6 +7,7 @@
 #  This file is part of the mantidqt package
 from __future__ import (absolute_import, unicode_literals)
 
+import io
 import os.path
 import sys
 import traceback
@@ -94,7 +95,7 @@ class EditorIO(object):
             self.editor.setFileName(filename)
 
         try:
-            with open(filename, 'w') as f:
+            with io.open(filename, 'w', encoding='utf8') as f:
                 f.write(self.editor.text())
             self.editor.setModified(False)
         except IOError as exc:

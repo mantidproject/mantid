@@ -1330,6 +1330,18 @@ createPeaksWorkspace(const int numPeaks, const bool createOrientedLattice) {
   return peaksWS;
 }
 
+Mantid::DataObjects::PeaksWorkspace_sptr
+createPeaksWorkspace(const int numPeaks,
+                     const Mantid::Kernel::DblMatrix &ubMat) {
+  if (ubMat.numRows() != 3 || ubMat.numCols() != 3) {
+    throw std::invalid_argument("UB matrix is not 3x3");
+  }
+
+  auto peaksWS = createPeaksWorkspace(numPeaks, true);
+  peaksWS->mutableSample().getOrientedLattice().setUB(ubMat);
+  return peaksWS;
+}
+
 /** helper method to create preprocessed detector's table workspace */
 boost::shared_ptr<DataObjects::TableWorkspace>
 createTableWorkspace(const API::MatrixWorkspace_const_sptr &inputWS) {

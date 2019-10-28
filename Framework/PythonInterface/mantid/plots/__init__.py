@@ -50,8 +50,10 @@ except ImportError:
 from mantid.api import AnalysisDataService as ads
 from mantid.kernel import logger
 from mantid.plots import helperfunctions, plotfunctions, plotfunctions3D
+from mantid.plots.utility import autoscale_on_update
 from mantid.plots.helperfunctions import get_normalize_by_bin_width
 from mantid.plots.scales import PowerScale, SquareScale
+from mantid.plots.utility import artists_hidden
 
 BIN_AXIS = 0
 SPEC_AXIS = 1
@@ -210,6 +212,7 @@ class MantidAxes(Axes):
         super(MantidAxes, self).__init__(*args, **kwargs)
         self.tracked_workspaces = dict()
         self.creation_args = []
+        self.interactive_markers = []
 
     def add_artist_correctly(self, artist):
         """
@@ -490,22 +493,25 @@ class MantidAxes(Axes):
         return new_artist
 
     def relim(self, visible_only=True):
-        Axes.relim(self, visible_only)  # relim on any non-errorbar objects
-        lower_xlim, lower_ylim = self.dataLim.get_points()[0]
-        upper_xlim, upper_ylim = self.dataLim.get_points()[1]
-        for container in self.containers:
-            if isinstance(container, ErrorbarContainer) and (
-                (visible_only and not helperfunctions.errorbars_hidden(container))
-                    or not visible_only):
-                min_x, max_x, min_y, max_y = helperfunctions.get_errorbar_bounds(container)
-                lower_xlim = min(lower_xlim, min_x) if min_x else lower_xlim
-                upper_xlim = max(upper_xlim, max_x) if max_x else upper_xlim
-                lower_ylim = min(lower_ylim, min_y) if min_y else lower_ylim
-                upper_ylim = max(upper_ylim, max_y) if max_y else upper_ylim
+        # Hiding the markers during the the relim ensures they are not factored
+        # in (assuming that visible_only is True)
+        with artists_hidden(self.interactive_markers):
+            Axes.relim(self, visible_only)  # relim on any non-errorbar objects
+            lower_xlim, lower_ylim = self.dataLim.get_points()[0]
+            upper_xlim, upper_ylim = self.dataLim.get_points()[1]
+            for container in self.containers:
+                if isinstance(container, ErrorbarContainer) and (
+                    (visible_only and not helperfunctions.errorbars_hidden(container))
+                        or not visible_only):
+                    min_x, max_x, min_y, max_y = helperfunctions.get_errorbar_bounds(container)
+                    lower_xlim = min(lower_xlim, min_x) if min_x else lower_xlim
+                    upper_xlim = max(upper_xlim, max_x) if max_x else upper_xlim
+                    lower_ylim = min(lower_ylim, min_y) if min_y else lower_ylim
+                    upper_ylim = max(upper_ylim, max_y) if max_y else upper_ylim
 
-        xys = [[lower_xlim, lower_ylim], [upper_xlim, upper_ylim]]
-        # update_datalim will update limits with union of current lims and xys
-        self.update_datalim(xys)
+            xys = [[lower_xlim, lower_ylim], [upper_xlim, upper_ylim]]
+            # update_datalim will update limits with union of current lims and xys
+            self.update_datalim(xys)
 
     @staticmethod
     def is_empty(axes):
@@ -601,7 +607,7 @@ class MantidAxes(Axes):
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
 
-            autoscale_on_update = kwargs.pop("autoscale_on_update", True)
+            autoscale = kwargs.pop("autoscale_on_update", self.get_autoscale_on())
 
             def _data_update(artists, workspace, new_kwargs=None):
                 # It's only possible to plot 1 line at a time from a workspace
@@ -610,8 +616,8 @@ class MantidAxes(Axes):
                 else:
                     x, y, _, __ = plotfunctions._plot_impl(self, workspace, args, kwargs)
                 artists[0].set_data(x, y)
-                self.relim()
-                if autoscale_on_update:
+                if new_kwargs and new_kwargs.pop('autoscale_on_update', self.get_autoscale_on()):
+                    self.relim()
                     self.autoscale()
                 return artists
 
@@ -627,10 +633,11 @@ class MantidAxes(Axes):
                 # Otherwise set autoscale to autoscale_on_update.
                 self.set_autoscaley_on(autoscale_on_update)
 
-            artist = self.track_workspace_artist(workspace,
-                                                 plotfunctions.plot(self, *args, **kwargs),
-                                                 _data_update, spec_num, is_normalized,
-                                                 MantidAxes.is_axis_of_type(SPEC_AXIS, kwargs))
+            with autoscale_on_update(self, autoscale):
+                artist = self.track_workspace_artist(workspace,
+                                                     plotfunctions.plot(self, *args, **kwargs),
+                                                     _data_update, spec_num, is_normalized,
+                                                     MantidAxes.is_axis_of_type(SPEC_AXIS, kwargs))
             return artist
         else:
             return Axes.plot(self, *args, **kwargs)
@@ -683,12 +690,13 @@ class MantidAxes(Axes):
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
 
-            autoscale_on_update = kwargs.pop("autoscale_on_update", True)
+            autoscale = kwargs.pop("autoscale_on_update", self.get_autoscale_on())
 
             def _data_update(artists, workspace, new_kwargs=None):
-                if self.lines:
-                    self.set_autoscaley_on(autoscale_on_update)
-
+                if new_kwargs:
+                    _autoscale = new_kwargs.pop("autoscale_on_update", self.get_autoscale_on())
+                else:
+                    _autoscale = self.get_autoscale_on()
                 # errorbar with workspaces can only return a single container
                 container_orig = artists[0]
                 # It is not possible to simply reset the error bars so
@@ -701,11 +709,12 @@ class MantidAxes(Axes):
                     self.containers.remove(container_orig)
                 except ValueError:
                     pass
-                # this gets pushed back onto the containers list
-                if new_kwargs:
-                    container_new = plotfunctions.errorbar(self, workspace, **new_kwargs)
-                else:
-                    container_new = plotfunctions.errorbar(self, workspace, **kwargs)
+                with autoscale_on_update(self, _autoscale):
+                    # this gets pushed back onto the containers list
+                    if new_kwargs:
+                        container_new = plotfunctions.errorbar(self, workspace, **new_kwargs)
+                    else:
+                        container_new = plotfunctions.errorbar(self, workspace, **kwargs)
                 self.containers.insert(orig_idx, container_new)
                 self.containers.pop()
 
@@ -723,9 +732,6 @@ class MantidAxes(Axes):
                 if hasattr(container_orig, 'errorevery'):
                     setattr(container_new, 'errorevery', container_orig.errorevery)
 
-                # ax.relim does not support collections...
-                self._update_line_limits(container_new[0])
-                self.set_autoscaley_on(True)
                 return container_new
 
             workspace = args[0]
@@ -735,10 +741,11 @@ class MantidAxes(Axes):
             if self.lines:
                 self.set_autoscaley_on(autoscale_on_update)
 
-            artist = self.track_workspace_artist(workspace,
-                                                 plotfunctions.errorbar(self, *args, **kwargs),
-                                                 _data_update, spec_num, is_normalized,
-                                                 MantidAxes.is_axis_of_type(SPEC_AXIS, kwargs))
+            with autoscale_on_update(self, autoscale):
+                artist = self.track_workspace_artist(workspace,
+                                                     plotfunctions.errorbar(self, *args, **kwargs),
+                                                     _data_update, spec_num, is_normalized,
+                                                     MantidAxes.is_axis_of_type(SPEC_AXIS, kwargs))
             return artist
         else:
             return Axes.errorbar(self, *args, **kwargs)

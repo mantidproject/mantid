@@ -10,7 +10,7 @@ import re
 
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.utilities.run_string_utils import valid_name_regex, valid_alpha_regex
-from Muon.GUI.Common.observer_pattern import Observable
+from mantidqt.utils.observer_pattern import Observable
 
 pair_columns = ['pair_name', 'group_1', 'group_2', 'alpha']
 

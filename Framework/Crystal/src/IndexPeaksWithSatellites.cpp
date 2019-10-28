@@ -126,10 +126,8 @@ void IndexPeaksWithSatellites::exec() {
     return;
   }
 
-  API::Sample sample = ws->mutableSample();
-
-  OrientedLattice o_lattice = sample.getOrientedLattice();
-
+  auto &sample = ws->mutableSample();
+  auto &o_lattice = sample.getOrientedLattice();
   if (getProperty("GetModVectorsFromUB")) {
     offsets1 = o_lattice.getModVec(0);
     offsets2 = o_lattice.getModVec(1);
@@ -146,7 +144,6 @@ void IndexPeaksWithSatellites::exec() {
   }
 
   const Matrix<double> &UB = o_lattice.getUB();
-
   if (!IndexingUtils::CheckUB(UB)) {
     throw std::runtime_error(
         "ERROR: The stored UB is not a valid orientation matrix");

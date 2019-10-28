@@ -168,6 +168,14 @@ void QtRunsView::setStopMonitorButtonEnabled(bool enabled) {
 }
 
 /**
+ * Sets the update interval enabled or disabled
+ * @param enabled : Whether to enable or disable the spin box
+ */
+void QtRunsView::setUpdateIntervalSpinBoxEnabled(bool enabled) {
+  m_ui.spinBoxUpdateInterval->setEnabled(enabled);
+}
+
+/**
 Set the list of available instruments to search for and updates the list of
 available instruments in the table view
 @param instruments : The list of instruments available
@@ -331,6 +339,14 @@ Get the string the user wants to search for.
 */
 std::string QtRunsView::getSearchString() const {
   return m_ui.textSearch->text().toStdString();
+}
+
+/**
+Get the live data update interval value given by the user.
+@returns The live data update interval
+*/
+int QtRunsView::getLiveDataUpdateInterval() const {
+  return m_ui.spinBoxUpdateInterval->value();
 }
 
 void QtRunsView::on_buttonMonitor_clicked() { startMonitor(); }
