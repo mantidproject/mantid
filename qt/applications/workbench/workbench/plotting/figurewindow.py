@@ -21,8 +21,10 @@ from qtpy.QtWidgets import QMainWindow
 # local imports
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.widgets.observers.observing_view import ObservingView
+from workbench.utils import on_top_of_main_window
 
 
+@on_top_of_main_window
 class FigureWindow(QMainWindow, ObservingView):
     """A MainWindow that will hold plots"""
     activated = Signal()
@@ -38,7 +40,6 @@ class FigureWindow(QMainWindow, ObservingView):
         self.setAttribute(Qt.WA_DeleteOnClose, True)
         self.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
 
-        self.close_signal.connect(self._run_close)
         self.setAcceptDrops(True)
 
     @Slot()

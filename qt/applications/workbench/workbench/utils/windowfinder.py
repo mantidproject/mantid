@@ -9,8 +9,20 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 from qtpy.QtWidgets import QApplication
 
-from workbench.plotting.globalfiguremanager import GlobalFigureManager
 from mantidqt.project.encoderfactory import EncoderFactory
+from workbench.app import MAIN_WINDOW_OBJECT_NAME
+from workbench.plotting.globalfiguremanager import GlobalFigureManager
+
+
+def get_main_window_widget():
+    """
+    Return the Workbench's MainWindow widget. If the widget cannot be found
+    return None.
+    :return workbench.app.mainwindow.MainWindow: Workbench's main window
+    """
+    for widget in QApplication.instance().topLevelWidgets():
+        if widget.objectName() == MAIN_WINDOW_OBJECT_NAME:
+            return widget
 
 
 def find_plot_windows():

@@ -42,6 +42,7 @@ Improvements
 - The home button on figures now always centres the figure's contents.
 - You can now zoom in/out on figures by scrolling and pan figures using the middle mouse button.
 - The keyboard shortcut Ctrl+D now aborts a running script.
+- Plot windows now stay on top of Workbench's main window, so you can easily drag and drop workspaces onto existing figures.
 
 Bugfixes
 ########
