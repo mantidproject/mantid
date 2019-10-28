@@ -65,5 +65,6 @@ Bugfixes
 - Tabs in the script editor no longer change order when Workbench is closed and reopened.
 - Fixes an issue where subscribing a new algorithm duplicates the list of algorithms in the algorithm selector widget.
 - Plots are no longer zoomed out along their y-axis when you perform a fit or do a plot guess.
+- You can now save scripts that contain unicode characters.
 
 :ref:`Release 4.2.0 <v4.2.0>`
