@@ -78,7 +78,7 @@ class MuonFileUtilsTest(unittest.TestCase):
 
     def test_load_workspace_from_filename_for_file_path(self):
         mock_alg = mock.MagicMock()
-        filename = 'PSI'+os.sep + 'run_1529_templs0.mon'
+        filename = 'PSI'+ os.sep + 'run_1529_templs0.mon'
         inputs = {
               "DeadTimeTable": "__notUsed",
               "DetectorGroupingTable": "__notUsed"}
