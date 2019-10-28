@@ -9,6 +9,11 @@ Framework Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+Packaging
+---------
+* The macOS bundle now requires macOS High Sierra (10.13) as a minimum.
+
+
 Concepts
 --------
 

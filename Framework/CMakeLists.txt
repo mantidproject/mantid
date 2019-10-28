@@ -165,7 +165,7 @@ add_custom_target(Framework DEPENDS ${FRAMEWORK_LIBS})
 # Create instrument directory
 foreach(_bundle ${BUNDLES})
   install(DIRECTORY ../instrument/
-          DESTINATION ${_bundle}instrument
+          DESTINATION ${_bundle}/instrument
           PATTERN "*UNIT_TESTING*"
           EXCLUDE
           PATTERN ".gitignore"
@@ -175,7 +175,7 @@ foreach(_bundle ${BUNDLES})
     if(CMAKE_SIZEOF_VOID_P EQUAL 8) # Recommended way of detecting 64- vs 32-bit
                                     # build Excludes .so files & _win32 binaries
       install(DIRECTORY ../scripts/
-              DESTINATION ${_bundle}scripts
+              DESTINATION ${_bundle}/scripts
               PATTERN "*.pyc"
               EXCLUDE
               PATTERN ".svn"

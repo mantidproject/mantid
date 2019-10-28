@@ -109,7 +109,7 @@ add_library(LiveData ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties(LiveData PROPERTIES OUTPUT_NAME MantidLiveData)
 
-if(OSX_VERSION VERSION_GREATER 10.8)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(LiveData
                         PROPERTIES INSTALL_RPATH
                                    "@loader_path/../Contents/MacOS")

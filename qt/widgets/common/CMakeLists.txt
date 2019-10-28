@@ -869,7 +869,7 @@ mtd_add_qt_library(
   INSTALL_DIR ${LIB_DIR}
   OSX_INSTALL_RPATH
     @loader_path/../MacOS
-    @loader_path/../Libraries
+    @loader_path/../Frameworks
   LINUX_INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}"
 )
 
@@ -894,6 +894,7 @@ mtd_add_qt_library(
     inc
     ../../../Framework/PythonInterface/core/inc
     ${PYTHON_INCLUDE_PATH}
+  SYSTEM_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
   LINK_LIBS
     ${TARGET_LIBRARIES}
     ${Boost_LIBRARIES}
@@ -908,7 +909,7 @@ mtd_add_qt_library(
   INSTALL_DIR ${WORKBENCH_LIB_DIR}
   OSX_INSTALL_RPATH
     @loader_path/../MacOS
-    @loader_path/../Libraries
+    @loader_path/../Frameworks
   LINUX_INSTALL_RPATH "\$ORIGIN/../${WORKBENCH_LIB_DIR}"
 )
 
@@ -957,8 +958,10 @@ set(
   test/WorkspacePresenter/WorkspacePresenterTest.h
 )
 
-set(CXXTEST_EXTRA_HEADER_INCLUDE
-    ${CMAKE_CURRENT_LIST_DIR}/test/WidgetsCommonTestInitialization.h)
+set(
+  CXXTEST_EXTRA_HEADER_INCLUDE
+  ${CMAKE_CURRENT_LIST_DIR}/test/WidgetsCommonTestInitialization.h
+)
 
 mtd_add_qt_tests(
   TARGET_NAME MantidQtWidgetsCommonTest

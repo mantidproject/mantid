@@ -66,7 +66,8 @@ mtd_add_qt_library(
     ${UI_FILES}
     PRECOMPILED
     inc/MantidQtWidgets/Plugins/AlgorithmDialogs/PrecompiledHeader.h
-  SYSTEM_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+  SYSTEM_INCLUDE_DIRS
+    ${Boost_INCLUDE_DIRS}
   LINK_LIBS
     ${TCMALLOC_LIBRARIES_LINKTIME}
     ${CORE_MANTIDLIBS}
@@ -89,7 +90,7 @@ mtd_add_qt_library(
   NOMOC ${INC_FILES}
   UI
     ${UI_FILES}
-    PRECOMPILED
+  PRECOMPILED
     inc/MantidQtWidgets/Plugins/AlgorithmDialogs/PrecompiledHeader.h
   LINK_LIBS
     ${TCMALLOC_LIBRARIES_LINKTIME}
