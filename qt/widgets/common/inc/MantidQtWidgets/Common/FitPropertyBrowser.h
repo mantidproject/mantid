@@ -300,7 +300,7 @@ public:
 
   // Emits a signal for when the sequential fit has finished
 
-  void FitPropertyBrowser::sequentialFitFinished() { emit sequentialFitDone(); }
+  void sequentialFitFinished() { emit sequentialFitDone(); }
 
 public slots:
   virtual void fit();

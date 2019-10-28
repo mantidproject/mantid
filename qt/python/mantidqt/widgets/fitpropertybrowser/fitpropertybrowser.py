@@ -356,8 +356,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
                                   other_names=self.registeredOthers())
         return menu
 
-    def do_plot(self, ws, plot_diff = False, plot_kwargs = {}):
-        from mantidqt.plotting.functions import plot
+    def do_plot(self, ws, plot_diff = False, **plot_kwargs):
 
 
 	ax = self.get_axes()
@@ -371,9 +370,9 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         # Keep local copy of the original lines
         original_lines = self.get_lines()
 
-        ax.plot(ws, wkspIndex=1, autoscale_on_update=False)
-        if self.plotDiff():
-            ax.plot(ws, wkspIndex=2, autoscale_on_update=False)
+        ax.plot(ws, wkspIndex=1, autoscale_on_update=False, **plot_kwargs)
+        if plot_diff:
+            ax.plot(ws, wkspIndex=2, autoscale_on_update=False, **plot_kwargs)
 
         # Add properties back to the lines
         new_lines = self.get_lines()
@@ -385,7 +384,6 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
             LegendProperties.create_legend(props, ax)
 
         ax.figure.canvas.draw()
-
 
     @Slot()
     def clear_fit_result_lines_slot(self):
@@ -418,7 +416,8 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         except RuntimeError:
             return
 
-        self.do_plot(out_ws, plot_diff=False, plot_kwargs={'label': out_ws_name})
+        plot_kwargs = {'label': out_ws_name}
+        self.do_plot(out_ws, plot_diff=False, **plot_kwargs)
         self.sequential_fit_line = out_ws_name
 
     @Slot(int, float, float, float)

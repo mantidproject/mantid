@@ -398,22 +398,21 @@ void SequentialFitDialog::getFitResults() {
     if (rowCount() > 1) {
       // contains ws names
       auto firstColumn = ws->getColumn(0);
-      for (auto i = 0; i < ws->rowCount(); ++i) {
+      for (size_t i = 0; i < ws->rowCount(); ++i) {
         if (firstColumn->cell<std::string>(i) == m_fitBrowser->workspaceName())
-          rowNo = i;
+          rowNo = static_cast<int>(i);
       }
     } else {
       // contains log names or axis-1
-      auto index = m_fitBrowser->workspaceIndex();
-      if (index < ws->rowCount()) {
+      if (m_fitBrowser->workspaceIndex() < ws->rowCount()) {
         rowNo = m_fitBrowser->workspaceIndex();
       }
     }
 
     Mantid::API::TableRow row = ws->getRow(rowNo);
-    for (int col = 1; col < columnNames.size() - 1; col += 2) {
+    for (size_t col = 1; col < columnNames.size() - 1; col += 2) {
       auto value = row.Double(col);
-      auto error = row.Double(col + 1.0);
+      auto error = row.Double(col + 1);
       auto name = columnNames[col];
       // In case of a single function Fit doesn't create a CompositeFunction
       if (m_fitBrowser->count() == 1) {
