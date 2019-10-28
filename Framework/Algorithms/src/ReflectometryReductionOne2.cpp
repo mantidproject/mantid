@@ -544,8 +544,9 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
     // might be better to make it an output property but currently users always
     // accept the default name so are unlikely to use it)
     auto transmissionWSName = alg->getPropertyValue("OutputWorkspace");
-    AnalysisDataService::Instance().addOrReplace(transmissionWSName,
-                                                 transmissionWS);
+    if (!transmissionWSName.empty())
+      AnalysisDataService::Instance().addOrReplace(transmissionWSName,
+                                                   transmissionWS);
   }
 
   // Rebin the transmission run to be the same as the input.
