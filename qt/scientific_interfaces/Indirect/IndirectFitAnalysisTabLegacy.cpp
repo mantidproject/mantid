@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitAnalysisTabLegacy.h"
 #include "ui_ConvFit.h"
-// #include "ui_IqtFit.h"
+#include "ui_IqtFit.h"
 #include "ui_JumpFit.h"
 #include "ui_MSDFit.h"
 
@@ -65,8 +65,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-IndirectFitAnalysisTabLegacy::IndirectFitAnalysisTabLegacy(
-    IndirectFittingModelLegacy *model, QWidget *parent)
+IndirectFitAnalysisTabLegacy::IndirectFitAnalysisTabLegacy(IndirectFittingModelLegacy *model,
+                                               QWidget *parent)
     : IndirectDataAnalysisTab(parent), m_fittingModel(model) {}
 
 void IndirectFitAnalysisTabLegacy::setup() {
@@ -158,12 +158,12 @@ void IndirectFitAnalysisTabLegacy::connectDataAndPlotPresenters() {
   connect(m_dataPresenter.get(), SIGNAL(dataChanged()), m_plotPresenter.get(),
           SLOT(updatePlots()));
   connect(m_dataPresenter.get(), SIGNAL(dataChanged()), m_plotPresenter.get(),
-          SLOT(updateGuess()));
+          SLOT(updateGuessAvailability()));
 
   connect(m_dataPresenter.get(), SIGNAL(singleResolutionLoaded()),
           m_plotPresenter.get(), SLOT(updatePlots()));
   connect(m_dataPresenter.get(), SIGNAL(singleResolutionLoaded()),
-          m_plotPresenter.get(), SLOT(updateGuess()));
+          m_plotPresenter.get(), SLOT(updateGuessAvailability()));
 
   connect(m_plotPresenter.get(), SIGNAL(startXChanged(double)), this,
           SLOT(setDataTableStartX(double)));
@@ -234,12 +234,12 @@ void IndirectFitAnalysisTabLegacy::connectFitBrowserAndPlotPresenter() {
           m_plotPresenter.get(), SLOT(updateRangeSelectors()));
   connect(m_fitPropertyBrowser,
           SIGNAL(parameterChanged(const Mantid::API::IFunction *)),
-          m_plotPresenter.get(), SLOT(updateGuess()));
+          m_plotPresenter.get(), SLOT(updateGuessAvailability()));
 
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()),
           m_plotPresenter.get(), SLOT(updatePlots()));
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()),
-          m_plotPresenter.get(), SLOT(updateGuess()));
+          m_plotPresenter.get(), SLOT(updateGuessAvailability()));
 
   connect(m_fitPropertyBrowser, SIGNAL(plotGuess()), m_plotPresenter.get(),
           SLOT(enablePlotGuessInSeparateWindow()));
@@ -272,17 +272,15 @@ void IndirectFitAnalysisTabLegacy::setFitDataPresenter(
   m_dataPresenter = std::move(presenter);
 }
 
-void IndirectFitAnalysisTabLegacy::setPlotView(
-    IIndirectFitPlotViewLegacy *view) {
+void IndirectFitAnalysisTabLegacy::setPlotView(IIndirectFitPlotViewLegacy *view) {
   m_plotPresenter = std::make_unique<IndirectFitPlotPresenterLegacy>(
       m_fittingModel.get(), view, this);
 }
 
 void IndirectFitAnalysisTabLegacy::setSpectrumSelectionView(
     IndirectSpectrumSelectionViewLegacy *view) {
-  m_spectrumPresenter =
-      std::make_unique<IndirectSpectrumSelectionPresenterLegacy>(
-          m_fittingModel.get(), view);
+  m_spectrumPresenter = std::make_unique<IndirectSpectrumSelectionPresenterLegacy>(
+      m_fittingModel.get(), view);
 }
 
 void IndirectFitAnalysisTabLegacy::setOutputOptionsView(
@@ -295,6 +293,9 @@ void IndirectFitAnalysisTabLegacy::setFitPropertyBrowser(
     MantidWidgets::IndirectFitPropertyBrowserLegacy *browser) {
   browser->init();
   m_fitPropertyBrowser = browser;
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+  m_fitPropertyBrowser->setFeatures(QDockWidget::NoDockWidgetFeatures);
+#endif
 }
 
 void IndirectFitAnalysisTabLegacy::loadSettings(const QSettings &settings) {
@@ -309,7 +310,7 @@ void IndirectFitAnalysisTabLegacy::setFileExtensionsByName(bool filter) {
 }
 
 void IndirectFitAnalysisTabLegacy::setSampleSuffixes(std::string const &tab,
-                                                     bool filter) {
+                                               bool filter) {
   QStringList const noSuffixes{""};
   setSampleWSSuffixes(filter ? getSampleWSSuffixes(tab) : noSuffixes);
   setSampleFBSuffixes(filter ? getSampleFBSuffixes(tab) : getExtensions(tab));
@@ -318,7 +319,7 @@ void IndirectFitAnalysisTabLegacy::setSampleSuffixes(std::string const &tab,
 }
 
 void IndirectFitAnalysisTabLegacy::setResolutionSuffixes(std::string const &tab,
-                                                         bool filter) {
+                                                   bool filter) {
   QStringList const noSuffixes{""};
   setResolutionWSSuffixes(filter ? getResolutionWSSuffixes(tab) : noSuffixes);
   setResolutionFBSuffixes(filter ? getResolutionFBSuffixes(tab)
@@ -327,13 +328,11 @@ void IndirectFitAnalysisTabLegacy::setResolutionSuffixes(std::string const &tab,
   m_dataPresenter->setMultiInputResolutionFBSuffixes();
 }
 
-void IndirectFitAnalysisTabLegacy::setSampleWSSuffixes(
-    const QStringList &suffices) {
+void IndirectFitAnalysisTabLegacy::setSampleWSSuffixes(const QStringList &suffices) {
   m_dataPresenter->setSampleWSSuffices(suffices);
 }
 
-void IndirectFitAnalysisTabLegacy::setSampleFBSuffixes(
-    const QStringList &suffices) {
+void IndirectFitAnalysisTabLegacy::setSampleFBSuffixes(const QStringList &suffices) {
   m_dataPresenter->setSampleFBSuffices(suffices);
 }
 
@@ -421,8 +420,7 @@ void IndirectFitAnalysisTabLegacy::setDataTableEndX(double endX) {
                            m_plotPresenter->getSelectedSpectrumIndex());
 }
 
-void IndirectFitAnalysisTabLegacy::setDataTableExclude(
-    const std::string &exclude) {
+void IndirectFitAnalysisTabLegacy::setDataTableExclude(const std::string &exclude) {
   m_dataPresenter->setExclude(exclude, m_plotPresenter->getSelectedDataIndex(),
                               m_plotPresenter->getSelectedSpectrumIndex());
 }
@@ -457,8 +455,7 @@ void IndirectFitAnalysisTabLegacy::setBrowserWorkspace(std::size_t dataIndex) {
   m_fitPropertyBrowser->setWorkspaceName(QString::fromStdString(name));
 }
 
-void IndirectFitAnalysisTabLegacy::setBrowserWorkspaceIndex(
-    std::size_t spectrum) {
+void IndirectFitAnalysisTabLegacy::setBrowserWorkspaceIndex(std::size_t spectrum) {
   setBrowserWorkspaceIndex(boost::numeric_cast<int>(spectrum));
 }
 
@@ -467,8 +464,8 @@ void IndirectFitAnalysisTabLegacy::setBrowserWorkspaceIndex(int spectrum) {
 }
 
 void IndirectFitAnalysisTabLegacy::tableStartXChanged(double startX,
-                                                      std::size_t dataIndex,
-                                                      std::size_t spectrum) {
+                                                std::size_t dataIndex,
+                                                std::size_t spectrum) {
   if (isRangeCurrentlySelected(dataIndex, spectrum)) {
     m_plotPresenter->setStartX(startX);
     setBrowserStartX(startX);
@@ -476,17 +473,17 @@ void IndirectFitAnalysisTabLegacy::tableStartXChanged(double startX,
 }
 
 void IndirectFitAnalysisTabLegacy::tableEndXChanged(double endX,
-                                                    std::size_t dataIndex,
-                                                    std::size_t spectrum) {
+                                              std::size_t dataIndex,
+                                              std::size_t spectrum) {
   if (isRangeCurrentlySelected(dataIndex, spectrum)) {
     m_plotPresenter->setEndX(endX);
     setBrowserEndX(endX);
   }
 }
 
-void IndirectFitAnalysisTabLegacy::tableExcludeChanged(
-    const std::string & /*unused*/, std::size_t dataIndex,
-    std::size_t spectrum) {
+void IndirectFitAnalysisTabLegacy::tableExcludeChanged(const std::string & /*unused*/,
+                                                 std::size_t dataIndex,
+                                                 std::size_t spectrum) {
   if (isRangeCurrentlySelected(dataIndex, spectrum))
     m_spectrumPresenter->displayBinMask();
 }
@@ -514,8 +511,8 @@ void IndirectFitAnalysisTabLegacy::updateTies() {
  * @param settingName The name of the custom setting.
  * @param enabled     True if custom setting should be enabled, false otherwise.
  */
-void IndirectFitAnalysisTabLegacy::setCustomSettingEnabled(
-    const QString &customName, bool enabled) {
+void IndirectFitAnalysisTabLegacy::setCustomSettingEnabled(const QString &customName,
+                                                     bool enabled) {
   m_fitPropertyBrowser->setCustomSettingEnabled(customName, enabled);
 }
 
@@ -527,9 +524,9 @@ void IndirectFitAnalysisTabLegacy::setCustomSettingEnabled(
  * @param parameterName The name of the parameter to set.
  * @param value         The value to set.
  */
-void IndirectFitAnalysisTabLegacy::setParameterValue(
-    const std::string &functionName, const std::string &parameterName,
-    double value) {
+void IndirectFitAnalysisTabLegacy::setParameterValue(const std::string &functionName,
+                                               const std::string &parameterName,
+                                               double value) {
   m_fitPropertyBrowser->setParameterValue(functionName, parameterName, value);
 }
 
@@ -538,8 +535,7 @@ void IndirectFitAnalysisTabLegacy::setParameterValue(
  *
  * @param function  The name of the default peak function to set.
  */
-void IndirectFitAnalysisTabLegacy::setDefaultPeakType(
-    const std::string &function) {
+void IndirectFitAnalysisTabLegacy::setDefaultPeakType(const std::string &function) {
   m_fitPropertyBrowser->setDefaultPeakType(function);
 }
 
@@ -612,8 +608,7 @@ void IndirectFitAnalysisTabLegacy::setBackgroundOptions(
  * @param settingKey  The key of the boolean setting whose value to retrieve.
  * @return            The value of the boolean setting with the specified key.
  */
-bool IndirectFitAnalysisTabLegacy::boolSettingValue(
-    const QString &settingKey) const {
+bool IndirectFitAnalysisTabLegacy::boolSettingValue(const QString &settingKey) const {
   return m_fitPropertyBrowser->boolSettingValue(settingKey);
 }
 
@@ -624,8 +619,8 @@ bool IndirectFitAnalysisTabLegacy::boolSettingValue(
  * @param settingKey  The key of the custom boolean setting.
  * @param value       The value to set the boolean custom setting to.
  */
-void IndirectFitAnalysisTabLegacy::setCustomBoolSetting(
-    const QString &settingKey, bool value) {
+void IndirectFitAnalysisTabLegacy::setCustomBoolSetting(const QString &settingKey,
+                                                  bool value) {
   m_fitPropertyBrowser->setCustomBoolSetting(settingKey, value);
 }
 
@@ -633,8 +628,7 @@ void IndirectFitAnalysisTabLegacy::setCustomBoolSetting(
  * @param settingKey  The key of the integer setting whose value to retrieve.
  * @return            The value of the integer setting with the specified key.
  */
-int IndirectFitAnalysisTabLegacy::intSettingValue(
-    const QString &settingKey) const {
+int IndirectFitAnalysisTabLegacy::intSettingValue(const QString &settingKey) const {
   return m_fitPropertyBrowser->intSettingValue(settingKey);
 }
 
@@ -642,8 +636,8 @@ int IndirectFitAnalysisTabLegacy::intSettingValue(
  * @param settingKey  The key of the double setting whose value to retrieve.
  * @return            The value of the double setting with the specified key.
  */
-double IndirectFitAnalysisTabLegacy::doubleSettingValue(
-    const QString &settingKey) const {
+double
+IndirectFitAnalysisTabLegacy::doubleSettingValue(const QString &settingKey) const {
   return m_fitPropertyBrowser->doubleSettingValue(settingKey);
 }
 
@@ -651,8 +645,8 @@ double IndirectFitAnalysisTabLegacy::doubleSettingValue(
  * @param settingKey  The key of the enum setting whose value to retrieve.
  * @return            The value of the enum setting with the specified key.
  */
-QString IndirectFitAnalysisTabLegacy::enumSettingValue(
-    const QString &settingKey) const {
+QString
+IndirectFitAnalysisTabLegacy::enumSettingValue(const QString &settingKey) const {
   return m_fitPropertyBrowser->enumSettingValue(settingKey);
 }
 
@@ -663,8 +657,9 @@ QString IndirectFitAnalysisTabLegacy::enumSettingValue(
  * @param settingName   The display name of the boolean setting to add.
  * @param defaultValue  The default value of the boolean setting.
  */
-void IndirectFitAnalysisTabLegacy::addBoolCustomSetting(
-    const QString &settingKey, const QString &settingName, bool defaultValue) {
+void IndirectFitAnalysisTabLegacy::addBoolCustomSetting(const QString &settingKey,
+                                                  const QString &settingName,
+                                                  bool defaultValue) {
   m_fitPropertyBrowser->addBoolCustomSetting(settingKey, settingName,
                                              defaultValue);
 }
@@ -676,9 +671,9 @@ void IndirectFitAnalysisTabLegacy::addBoolCustomSetting(
  * @param settingName   The display name of the double setting to add.
  * @param defaultValue  The default value of the double setting.
  */
-void IndirectFitAnalysisTabLegacy::addDoubleCustomSetting(
-    const QString &settingKey, const QString &settingName,
-    double defaultValue) {
+void IndirectFitAnalysisTabLegacy::addDoubleCustomSetting(const QString &settingKey,
+                                                    const QString &settingName,
+                                                    double defaultValue) {
   m_fitPropertyBrowser->addDoubleCustomSetting(settingKey, settingName,
                                                defaultValue);
 }
@@ -690,8 +685,9 @@ void IndirectFitAnalysisTabLegacy::addDoubleCustomSetting(
  * @param settingName   The display name of the integer setting to add.
  * @param defaultValue  The default value of the integer setting.
  */
-void IndirectFitAnalysisTabLegacy::addIntCustomSetting(
-    const QString &settingKey, const QString &settingName, int defaultValue) {
+void IndirectFitAnalysisTabLegacy::addIntCustomSetting(const QString &settingKey,
+                                                 const QString &settingName,
+                                                 int defaultValue) {
   m_fitPropertyBrowser->addIntCustomSetting(settingKey, settingName,
                                             defaultValue);
 }
@@ -703,9 +699,9 @@ void IndirectFitAnalysisTabLegacy::addIntCustomSetting(
  * @param settingName   The display name of the enum setting to add.
  * @param defaultValue  The default value of the enum setting.
  */
-void IndirectFitAnalysisTabLegacy::addEnumCustomSetting(
-    const QString &settingKey, const QString &settingName,
-    const QStringList &options) {
+void IndirectFitAnalysisTabLegacy::addEnumCustomSetting(const QString &settingKey,
+                                                  const QString &settingName,
+                                                  const QStringList &options) {
   m_fitPropertyBrowser->addEnumCustomSetting(settingKey, settingName, options);
 }
 
@@ -768,6 +764,7 @@ void IndirectFitAnalysisTabLegacy::updateSingleFitOutput(bool error) {
  */
 void IndirectFitAnalysisTabLegacy::fitAlgorithmComplete(bool error) {
   setRunIsRunning(false);
+  m_plotPresenter->watchADS(true);
   m_plotPresenter->setFitSingleSpectrumIsFitting(false);
   enableFitButtons(true);
   enableOutputOptions(!error);
@@ -777,7 +774,7 @@ void IndirectFitAnalysisTabLegacy::fitAlgorithmComplete(bool error) {
 
   connect(m_fitPropertyBrowser,
           SIGNAL(parameterChanged(const Mantid::API::IFunction *)),
-          m_plotPresenter.get(), SLOT(updateGuess()));
+          m_plotPresenter.get(), SLOT(updateGuessAvailability()));
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(fitAlgorithmComplete(bool)));
 }
@@ -920,8 +917,8 @@ void IndirectFitAnalysisTabLegacy::plotSelectedSpectra(
  * @index :: the index in the workspace
  * @errorBars :: true if you want error bars to be plotted
  */
-void IndirectFitAnalysisTabLegacy::plotSpectrum(
-    std::string const &workspaceName, std::size_t const &index) {
+void IndirectFitAnalysisTabLegacy::plotSpectrum(std::string const &workspaceName,
+                                          std::size_t const &index) {
   m_plotter->plotSpectra(workspaceName, std::to_string(index));
 }
 
@@ -942,8 +939,7 @@ WorkspaceGroup_sptr IndirectFitAnalysisTabLegacy::getResultWorkspace() const {
 /**
  * Gets the names of the Fit Parameters
  */
-std::vector<std::string>
-IndirectFitAnalysisTabLegacy::getFitParameterNames() const {
+std::vector<std::string> IndirectFitAnalysisTabLegacy::getFitParameterNames() const {
   return m_fittingModel->getFitParameterNames();
 }
 
@@ -955,8 +951,9 @@ void IndirectFitAnalysisTabLegacy::singleFit() {
 }
 
 void IndirectFitAnalysisTabLegacy::singleFit(std::size_t dataIndex,
-                                             std::size_t spectrum) {
+                                       std::size_t spectrum) {
   if (validate()) {
+    m_plotPresenter->watchADS(false);
     m_plotPresenter->setFitSingleSpectrumIsFitting(true);
     enableFitButtons(false);
     enableOutputOptions(false);
@@ -970,6 +967,7 @@ void IndirectFitAnalysisTabLegacy::singleFit(std::size_t dataIndex,
  */
 void IndirectFitAnalysisTabLegacy::executeFit() {
   if (validate()) {
+    m_plotPresenter->watchADS(false);
     setRunIsRunning(true);
     enableFitButtons(false);
     enableOutputOptions(false);
@@ -1039,8 +1037,7 @@ void IndirectFitAnalysisTabLegacy::enableOutputOptions(bool enable) {
  * current run
  * @param workspaceName :: the name of the PDF workspace if it exists
  */
-void IndirectFitAnalysisTabLegacy::setPDFWorkspace(
-    std::string const &workspaceName) {
+void IndirectFitAnalysisTabLegacy::setPDFWorkspace(std::string const &workspaceName) {
   auto const fabMinimizer = m_fitPropertyBrowser->minimizer() == "FABADA";
   auto const enablePDFOptions = doesExistInADS(workspaceName) && fabMinimizer;
 
@@ -1084,8 +1081,7 @@ void IndirectFitAnalysisTabLegacy::setAlgorithmProperties(
  *
  * @param fitAlgorithm      The fit algorithm to run.
  */
-void IndirectFitAnalysisTabLegacy::runFitAlgorithm(
-    IAlgorithm_sptr fitAlgorithm) {
+void IndirectFitAnalysisTabLegacy::runFitAlgorithm(IAlgorithm_sptr fitAlgorithm) {
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(updateFitOutput(bool)));
   setupFit(fitAlgorithm);
@@ -1102,7 +1098,7 @@ void IndirectFitAnalysisTabLegacy::runSingleFit(IAlgorithm_sptr fitAlgorithm) {
 void IndirectFitAnalysisTabLegacy::setupFit(IAlgorithm_sptr fitAlgorithm) {
   disconnect(m_fitPropertyBrowser,
              SIGNAL(parameterChanged(const Mantid::API::IFunction *)),
-             m_plotPresenter.get(), SLOT(updateGuess()));
+             m_plotPresenter.get(), SLOT(updateGuessAvailability()));
 
   setAlgorithmProperties(fitAlgorithm);
 

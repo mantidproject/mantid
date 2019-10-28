@@ -323,6 +323,7 @@ set(
   ConvFitModel.cpp
   DensityOfStates.cpp
   Elwin.cpp
+  FunctionTemplateBrowser.cpp
   ILLEnergyTransfer.cpp
   ISISCalibration.cpp
   ISISDiagnostics.cpp
@@ -336,21 +337,32 @@ set(
   IndirectDataReduction.cpp
   IndirectDataReductionTab.cpp
   IndirectDataTablePresenter.cpp
+  IndirectDataTablePresenterLegacy.cpp
   IndirectDataValidationHelper.cpp
   IndirectDiffractionReduction.cpp
   IndirectEditResultsDialog.cpp
   IndirectFitAnalysisTab.cpp
+  IndirectFitAnalysisTabLegacy.cpp
   IndirectFitData.cpp
+  IndirectFitDataLegacy.cpp
   IndirectFitDataPresenter.cpp
+  IndirectFitDataPresenterLegacy.cpp
   IndirectFitDataView.cpp
+  IndirectFitDataViewLegacy.cpp
   IndirectFitOutput.cpp
+  IndirectFitOutputLegacy.cpp
   IndirectFitOutputOptionsModel.cpp
   IndirectFitOutputOptionsPresenter.cpp
   IndirectFitOutputOptionsView.cpp
+  IndirectFitPropertyBrowser.cpp
   IndirectFitPlotModel.cpp
+  IndirectFitPlotModelLegacy.cpp
   IndirectFitPlotPresenter.cpp
+  IndirectFitPlotPresenterLegacy.cpp
   IndirectFitPlotView.cpp
+  IndirectFitPlotViewLegacy.cpp
   IndirectFittingModel.cpp
+  IndirectFittingModelLegacy.cpp
   IndirectInstrumentConfig.cpp
   IndirectInterface.cpp
   IndirectLoadILL.cpp
@@ -369,7 +381,9 @@ set(
   IndirectSimulation.cpp
   IndirectSimulationTab.cpp
   IndirectSpectrumSelectionPresenter.cpp
+  IndirectSpectrumSelectionPresenterLegacy.cpp
   IndirectSpectrumSelectionView.cpp
+  IndirectSpectrumSelectionViewLegacy.cpp
   IndirectSqw.cpp
   IndirectSymmetrise.cpp
   IndirectTab.cpp
@@ -380,6 +394,9 @@ set(
   Iqt.cpp
   IqtFit.cpp
   IqtFitModel.cpp
+  IndirectFunctionBrowser/IqtFunctionModel.cpp
+  IndirectFunctionBrowser/IqtTemplateBrowser.cpp
+  IndirectFunctionBrowser/IqtTemplatePresenter.cpp
   JumpFit.cpp
   JumpFitAddWorkspaceDialog.cpp
   JumpFitDataPresenter.cpp
@@ -405,14 +422,17 @@ set(
   CorrectionsTab.h
   DensityOfStates.h
   Elwin.h
+  FunctionTemplateBrowser.h
   ILLEnergyTransfer.h
   ISISCalibration.h
   ISISDiagnostics.h
   ISISEnergyTransfer.h
   IAddWorkspaceDialog.h
   IIndirectFitDataView.h
+  IIndirectFitDataViewLegacy.h
   IIndirectFitOutputOptionsView.h
   IIndirectFitPlotView.h
+  IIndirectFitPlotViewLegacy.h
   IIndirectSettingsView.h
   IndirectAddWorkspaceDialog.h
   IndirectBayes.h
@@ -423,15 +443,22 @@ set(
   IndirectDataReduction.h
   IndirectDataReductionTab.h
   IndirectDataTablePresenter.h
+  IndirectDataTablePresenterLegacy.h
   IndirectDiffractionReduction.h
   IndirectEditResultsDialog.h
   IndirectFitAnalysisTab.h
+  IndirectFitAnalysisTabLegacy.h
   IndirectFitDataPresenter.h
+  IndirectFitDataPresenterLegacy.h
   IndirectFitDataView.h
+  IndirectFitDataViewLegacy.h
   IndirectFitOutputOptionsPresenter.h
   IndirectFitOutputOptionsView.h
+  IndirectFitPropertyBrowser.h
   IndirectFitPlotPresenter.h
+  IndirectFitPlotPresenterLegacy.h
   IndirectFitPlotView.h
+  IndirectFitPlotViewLegacy.h
   IndirectInstrumentConfig.h
   IndirectInterface.h
   IndirectLoadILL.h
@@ -447,7 +474,9 @@ set(
   IndirectSimulation.h
   IndirectSimulationTab.h
   IndirectSpectrumSelectionPresenter.h
+  IndirectSpectrumSelectionPresenterLegacy.h
   IndirectSpectrumSelectionView.h
+  IndirectSpectrumSelectionViewLegacy.h
   IndirectSqw.h
   IndirectSymmetrise.h
   IndirectTab.h
@@ -456,6 +485,8 @@ set(
   IndirectTransmission.h
   IndirectTransmissionCalc.h
   IqtFit.h
+  IndirectFunctionBrowser/IqtTemplateBrowser.h
+  IndirectFunctionBrowser/IqtTemplatePresenter.h
   Iqt.h
   JumpFitAddWorkspaceDialog.h
   JumpFitDataPresenter.h
@@ -473,11 +504,16 @@ set(
   ConvFitModel.h
   IndirectDataValidationHelper.h
   IndirectFitData.h
+  IndirectFitDataLegacy.h
   IndirectFitOutput.h
+  IndirectFitOutputLegacy.h
   IndirectFitOutputOptionsModel.h
   IndirectFitPlotModel.h
+  IndirectFitPlotModelLegacy.h
   IndirectFitPlotPresenter.h
+  IndirectFitPlotPresenterLegacy.h
   IndirectFittingModel.h
+  IndirectFittingModelLegacy.h
   IndirectPlotOptionsModel.h
   IndirectSettingsHelper.h
   IPythonRunner.h

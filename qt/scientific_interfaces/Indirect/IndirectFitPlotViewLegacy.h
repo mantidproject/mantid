@@ -27,9 +27,9 @@ namespace IDA {
 
 // Used for painting an Icon onto the handle of the splitter on workbench
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-class SplitterHandle : public QSplitterHandle {
+class SplitterHandleLegacy : public QSplitterHandle {
 public:
-  SplitterHandle(QIcon icon, Qt::Orientation orientation,
+  SplitterHandleLegacy(QIcon icon, Qt::Orientation orientation,
                  QSplitter *parent = nullptr)
       : QSplitterHandle(orientation, parent), m_icon(icon) {}
 
@@ -45,13 +45,13 @@ private:
   QIcon m_icon;
 };
 
-class Splitter : public QSplitter {
+class SplitterLegacy : public QSplitter {
 public:
-  Splitter(QIcon icon, QWidget *parent = nullptr)
+  SplitterLegacy(QIcon icon, QWidget *parent = nullptr)
       : QSplitter(parent), m_icon(icon) {}
 
   QSplitterHandle *createHandle() override {
-    return new SplitterHandle(m_icon, Qt::Vertical, this);
+    return new SplitterHandleLegacy(m_icon, Qt::Vertical, this);
   }
 
 private:
@@ -59,14 +59,15 @@ private:
 };
 #endif
 
-class MANTIDQT_INDIRECT_DLL IndirectFitPlotViewLegacy
-    : public IIndirectFitPlotViewLegacy {
+class MANTIDQT_INDIRECT_DLL IndirectFitPlotViewLegacy : public IIndirectFitPlotViewLegacy {
   Q_OBJECT
 
 public:
   IndirectFitPlotViewLegacy(QWidget *parent = nullptr);
   virtual ~IndirectFitPlotViewLegacy() override;
+
   void watchADS(bool watch) override;
+
   std::size_t getSelectedSpectrum() const override;
   int getSelectedSpectrumIndex() const override;
   int getSelectedDataIndex() const override;
@@ -128,6 +129,7 @@ public slots:
 
 private slots:
   void setBackgroundBounds();
+
   void emitDelayedPlotSpectrumChanged();
   void emitPlotSpectrumChanged();
   void emitPlotSpectrumChanged(const QString &spectrum);
@@ -146,6 +148,7 @@ private:
   void setPlotSizePolicy(MantidQt::MantidWidgets::PreviewPlot *plot,
                          unsigned char horizontalStretch,
                          unsigned char verticalStretch) const;
+
   std::string getSpectrumText() const;
 
   void addFitRangeSelector();
