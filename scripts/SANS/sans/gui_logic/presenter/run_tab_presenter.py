@@ -580,6 +580,7 @@ class RunTabPresenter(PresenterCommon):
         """
         Processes a list of rows. Any errors cause the row to be coloured red.
         """
+        self._table_model.get_thickness_for_rows(rows=rows)
         error_msg = ""
         try:
             # Trip up early if output modes are invalid
@@ -694,6 +695,9 @@ class RunTabPresenter(PresenterCommon):
 
     def on_load_clicked(self):
         error_msg = "\n\n"
+
+        self._table_model.get_thickness_for_rows()
+
         try:
             self._view.disable_buttons()
             self._processing = True

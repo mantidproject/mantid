@@ -39,8 +39,11 @@ Improved
 
 Multiple ISIS SANS GUI usability fixes including:
 
-- Run numbers can be edited with a single click rather than double or
-  triple clicks
+- Clicking on a cell in the table and typing will automatically start editing
+  the cell without having to double click it.
+- Sample thickness is set when a user presses load or process selected,
+  this resolves problems with a run not being found and having to re-enter
+  each number individually.
 - Wavelength ranges such as *1,2,4,5* are now accepted. This example would
   convert into 1-2, 2-4, 4-5.
 - *Open Mask File* and *Open Batch File* will remember their previously
@@ -51,7 +54,5 @@ Multiple ISIS SANS GUI usability fixes including:
   been reduced.
 - The check-boxes enabling extra table options, such as *Sample Geometry* have
   been moved alongside the table controls.
-- Clicking on a cell in the table and typing will automatically start editing
-  the cell without having to double click it.
 
 :ref:`Release 4.2.0 <v4.2.0>`

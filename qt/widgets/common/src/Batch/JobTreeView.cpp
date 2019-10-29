@@ -561,16 +561,28 @@ void JobTreeView::keyPressEvent(QKeyEvent *event) {
     return;
   }
 
-  // Switch into the cell they have highlighted
   auto model = fromFilteredModel(currentIndex());
-  editAt(model);
 
   // Forward the key on so it appears they typed into it
   auto row = rowLocation().atIndex((mapToMainModel(model)));
   auto cell = cellAt(row, currentColumn());
+
+  if (!cell.isEditable()) {
+    // If we attempt to insert text into an uneditable cell we will throw
+    return;
+  }
+
   cell.setContentText(userText);
   setCellAt(row, currentColumn(), cell);
-} // namespace Batch
+
+  m_notifyee->notifyCellTextChanged(row, currentColumn(), "", userText);
+
+  // Switch into the cell they have highlighted
+  // TODO This should be above the notification however in the SANS GUI
+  // we currently lose track of the cursor position when notifying text changed
+  // This causes the cursor to pre-select the text they just entered in row 1
+  editAt(model);
+}
 
 void JobTreeView::handleModifierKeyPress(QKeyEvent *event) {
   assert(event->modifiers() & ~Qt::NoModifier);
