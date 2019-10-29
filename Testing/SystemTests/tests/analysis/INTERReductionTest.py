@@ -157,9 +157,6 @@ def createTransmissionWorkspaces(runs1, runs2, output_names):
             OutputWorkspace=name,
             StartOverlap=10,
             EndOverlap=12)
-        # Delete debug workspaces
-        DeleteWorkspace('TRANS_LAM_'+run1)
-        DeleteWorkspace('TRANS_LAM_'+run2)
 
 
 def eventRef(run_number, angle, start=0, stop=0, DB='TRANS'):
