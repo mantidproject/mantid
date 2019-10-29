@@ -500,13 +500,13 @@ class SPowderSemiEmpiricalCalculator(object):
                                                      b_tensor=self._b_tensors[atom],
                                                      b_trace=self._b_traces[atom])
 
-            rebined_freq, rebined_spectrum = self._rebin_data_opt(array_x=local_freq, array_y=value_dft)
+            rebinned_freq, rebinned_spectrum = self._rebin_data_opt(array_x=local_freq, array_y=value_dft)
 
-            freq, broad_spectrum = self._instrument.convolve_with_resolution_function(frequencies=rebined_freq,
-                                                                                      s_dft=rebined_spectrum)
+            freq, broad_spectrum = self._instrument.convolve_with_resolution_function(frequencies=rebinned_freq,
+                                                                                      s_dft=rebinned_spectrum)
 
-            rebined_broad_spectrum = self._rebin_data_full(array_x=freq, array_y=broad_spectrum)
-            rebined_broad_spectrum = self._fix_empty_array(array_y=rebined_broad_spectrum)
+            rebinned_broad_spectrum = self._rebin_data_full(array_x=freq, array_y=broad_spectrum)
+            rebinned_broad_spectrum = self._fix_empty_array(array_y=rebinned_broad_spectrum)
 
             local_freq, local_coeff = self._calculate_s_over_threshold(s=value_dft,
                                                                        freq=local_freq,
@@ -515,13 +515,13 @@ class SPowderSemiEmpiricalCalculator(object):
                                                                        order=order)
 
         else:
-            rebined_broad_spectrum = self._fix_empty_array()
+            rebinned_broad_spectrum = self._fix_empty_array()
 
         # multiply by k-point weight and scaling constant
         # factor = self._weight / self._bin_width
         factor = self._weight
-        rebined_broad_spectrum = rebined_broad_spectrum * factor
-        return local_freq, local_coeff, rebined_broad_spectrum
+        rebinned_broad_spectrum = rebinned_broad_spectrum * factor
+        return local_freq, local_coeff, rebinned_broad_spectrum
 
     # noinspection PyUnusedLocal
     def _calculate_order_one(self, q2=None, frequencies=None, indices=None, a_tensor=None, a_trace=None,
@@ -644,10 +644,10 @@ class SPowderSemiEmpiricalCalculator(object):
 
     def _rebin_data_full(self, array_x=None, array_y=None):
         """
-        Rebins S data so that all quantum events have the same x-axis. The size of rebined data is equal to _bins.size.
+        Rebins S data so that all quantum events have the same x-axis. The size of rebinned data is equal to _bins.size.
         :param array_x: numpy array with frequencies
         :param array_y: numpy array with S
-        :returns: rebined frequencies
+        :returns: rebinned frequencies
         """
         indices = array_x != self._bins[-1]
         array_x = array_x[indices]
@@ -657,10 +657,10 @@ class SPowderSemiEmpiricalCalculator(object):
 
     def _rebin_data_opt(self, array_x=None, array_y=None):
         """
-        Rebins S data in optimised way: the size of rebined data may be smaller then _bins.size.
+        Rebins S data in optimised way: the size of rebinned data may be smaller then _bins.size.
         :param array_x: numpy array with frequencies
         :param array_y: numpy array with S
-        :returns: rebined frequencies, rebined S
+        :returns: rebinned frequencies, rebinned S
         """
         if self._bins.size > array_x.size:
             return array_x, array_y
