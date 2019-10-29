@@ -21,7 +21,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from qtpy.QtCore import QObject, Qt
 from qtpy.QtWidgets import QApplication, QLabel, QFileDialog
 
-from mantid.api import AnalysisDataServiceObserver
+from mantid.api import AnalysisDataService, AnalysisDataServiceObserver, ITableWorkspace, MatrixWorkspace
 from mantid.kernel import logger
 from mantid.plots import MantidAxes
 from mantid.py3compat import text_type
@@ -134,11 +134,12 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
         """
         for ax in self.canvas.figure.axes:
             if isinstance(ax, MantidAxes):
-                try:  # matrix workspaces
+                ws = AnalysisDataService.retrieve(newName)
+                if isinstance(ws, MatrixWorkspace):
                     for ws_name, artists in ax.tracked_workspaces.items():
                         if ws_name == oldName:
                             ax.tracked_workspaces[newName] = ax.tracked_workspaces.pop(oldName)
-                except:  # table workspaces
+                elif isinstance(ws, ITableWorkspace):
                     ax.wsName = newName
 
 
@@ -208,7 +209,6 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
                 self.generate_plot_script_clipboard)
             self.toolbar.sig_generate_plot_script_file_triggered.connect(
                 self.generate_plot_script_file)
-            self.toolbar.sig_home_clicked.connect(self.set_figure_zoom_to_display_all)
             self.toolbar.setFloatable(False)
             tbs_height = self.toolbar.sizeHint().height()
         else:
@@ -396,14 +396,6 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         for i, toolbar_action in enumerate(self.toolbar.actions()):
             if toolbar_action == action:
                 self.toolbar.actions()[i+1].setVisible(enabled)
-
-    def set_figure_zoom_to_display_all(self):
-        axes = self.canvas.figure.get_axes()
-        if axes:
-            for ax in axes:
-                ax.relim(visible_only=True)
-                ax.autoscale()
-            self.canvas.draw()
 
 
 # -----------------------------------------------------------------------------
