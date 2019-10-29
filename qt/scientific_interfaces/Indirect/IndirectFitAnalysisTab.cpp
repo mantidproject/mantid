@@ -748,6 +748,7 @@ void IndirectFitAnalysisTab::respondToFunctionChanged() {
   setModelFitFunction();
   m_plotPresenter->updatePlots();
   m_plotPresenter->updateGuessAvailability();
+  emit functionChanged();
 }
 
 } // namespace IDA

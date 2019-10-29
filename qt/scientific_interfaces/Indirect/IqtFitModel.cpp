@@ -220,7 +220,7 @@ std::string IqtFitModel::sequentialFitOutputName() const {
   if (isMultiFit())
     return "MultiIqtFit_" + m_fitType + "_Results";
   auto const fitString = getFitString(getWorkspace(TableDatasetIndex{0}));
-  return createOutputName("%1%" + fitString + "_" + m_fitType + "_s%2%", "_to_",
+  return createOutputName("%1%" + fitString + "_seq" + m_fitType + "_s%2%", "_to_",
                           TableDatasetIndex{0});
 }
 
@@ -228,7 +228,7 @@ std::string IqtFitModel::simultaneousFitOutputName() const {
   if (isMultiFit())
     return "MultiSimultaneousIqtFit_" + m_fitType + "_Results";
   auto const fitString = getFitString(getWorkspace(TableDatasetIndex{0}));
-  return createOutputName("%1%" + fitString + "_mult" + m_fitType + "_s%2%",
+  return createOutputName("%1%" + fitString + "_sim" + m_fitType + "_s%2%",
                           "_to_", TableDatasetIndex{0});
 }
 
