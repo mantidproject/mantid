@@ -121,6 +121,7 @@ void ALFView_model::storeSingleTube(const std::string &name) {
 
   AnalysisDataService::Instance().remove(CURVES);
 }
+
 std::string ALFView_model::WSName() {
   std::string name = m_instrumentName + std::to_string(getCurrentRun());
   return EXTRACTEDWS + name;
@@ -166,7 +167,7 @@ bool ALFView_model::hasTubeBeenExtracted(const std::string &name) {
 bool ALFView_model::extractTubeConditon(std::map<std::string, bool> tabBools) {
   try {
 
-    bool ifCurve = (tabBools.find("plotStroed")->second ||
+    bool ifCurve = (tabBools.find("plotStored")->second ||
                     tabBools.find("hasCurve")->second);
     return (tabBools.find("isTube")->second && ifCurve);
   } catch (...) {
@@ -177,7 +178,7 @@ bool ALFView_model::extractTubeConditon(std::map<std::string, bool> tabBools) {
 bool ALFView_model::averageTubeConditon(std::map<std::string, bool> tabBools) {
   try {
 
-    bool ifCurve = (tabBools.find("plotStroed")->second ||
+    bool ifCurve = (tabBools.find("plotStored")->second ||
                     tabBools.find("hasCurve")->second);
     return (m_numberOfTubesInAverage > 0 && tabBools.find("isTube")->second &&
             ifCurve &&

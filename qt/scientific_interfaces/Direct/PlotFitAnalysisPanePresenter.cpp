@@ -56,3 +56,4 @@ void PlotFitAnalysisPanePresenter::addSpectrum(const std::string &wsName) {
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
+

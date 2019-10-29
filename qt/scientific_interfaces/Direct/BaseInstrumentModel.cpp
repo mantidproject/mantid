@@ -47,7 +47,7 @@ BaseInstrumentModel::loadData(const std::string &name) {
   auto alg = AlgorithmManager::Instance().create("Load");
   alg->initialize();
   alg->setProperty("Filename", name);
-  alg->setProperty("OutputWorkspace", m_wsName); // write to tmp ws
+  alg->setProperty("OutputWorkspace", m_wsName);
   alg->execute();
   auto ws =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_wsName);

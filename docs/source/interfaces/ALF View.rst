@@ -19,13 +19,13 @@ accessed from the main menu of MantidPlot, in *Interfaces → Direct → ALF vie
 Loading
 -------
 
-The loading section is used to load a single data set, this can be achieved by either typing the run number or browsing to the file of interest.
+The loading section is used to load a single data set. This can be achieved by either typing the run number or browsing to the file of interest.
 
 Instrument View
 ---------------
 
 There is a custom version of the `Instrument View <http://www.mantidproject.org/MantidPlot:_Instrument_View>`__, which only contains the render and pick tabs. 
-In the pick tab select the `select whole tube` option. Left clicking on the instrument will create a menu, which will have an additional option `Export Tube`. 
+In the pick tab chose the :code:`select whole tube` option. Left clicking on the instrument will create a menu, which will have an additional option :code:`Export Tube`. 
 This option will export the currently selected data to the mini-plot on the right hand side of the GUI. 
 Once a tube has been exported another option will appear in the left click menu called `Add Tube To Average`. 
 This option will create an average of all the tubes that have been exported.

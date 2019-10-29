@@ -661,7 +661,7 @@ bool InstrumentWidgetPickTab::addToDisplayContextMenu(QMenu &context) const {
     res = true;
   }
   std::map<std::string, bool> tabBools = {};
-  tabBools.insert(std::make_pair("plotStroed", m_plot->hasStored()));
+  tabBools.insert(std::make_pair("plotStored", m_plot->hasStored()));
   tabBools.insert(std::make_pair("hasCurve", m_plot->hasCurve()));
   tabBools.insert(std::make_pair("isTube", m_tube->isChecked()));
   for (auto actionPair : m_addedActions) {

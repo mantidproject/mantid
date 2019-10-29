@@ -121,3 +121,4 @@ void BaseInstrumentView::warningBox(const QString &message) {
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
+

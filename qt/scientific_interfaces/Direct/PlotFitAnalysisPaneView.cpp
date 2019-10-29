@@ -87,7 +87,7 @@ void PlotFitAnalysisPaneView::doFit() {
 }
 
 void PlotFitAnalysisPaneView::addSpectrum(std::string wsName) {
-  m_plot->addSpectrum("Extracrted Data", wsName.c_str(), 0, Qt::black);
+  m_plot->addSpectrum("Extracted Data", wsName.c_str(), 0, Qt::black);
 }
 void PlotFitAnalysisPaneView::addFitSpectrum(std::string wsName) {
   m_plot->addSpectrum("Fitted Data", wsName.c_str(), 1, Qt::red);
@@ -117,3 +117,4 @@ void PlotFitAnalysisPaneView::fitWarning(const std::string &message) {
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
+

@@ -46,7 +46,7 @@ typedef std::vector<std::tuple<std::string, Observer *>>
 /**
 * This creates the custom instrument widget
 * @return <instrumentSetUp,
-    instrumentObserverOptions> : a pair of the
+    instrumentObserverOptions> : a pair of the conditions and observers
 */
 std::pair<instrumentSetUp, instrumentObserverOptions>
 ALFView_presenter::setupALFInstrument() {
