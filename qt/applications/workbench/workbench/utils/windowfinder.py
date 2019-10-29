@@ -39,7 +39,7 @@ def find_window(object_name, cls=None):
                 return window
         elif window.objectName() == object_name:
             return window
-        
+
 
 def find_plot_windows():
     """
