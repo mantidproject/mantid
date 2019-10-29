@@ -98,11 +98,10 @@ echo "CheckMantidVersion.OnStartup = 0" >> $userprops
 default_save_directory=${WORKSPACE}/build/Testing/SystemTests/scripts/
 find ${default_save_directory} -name "*-mismatch*" -delete
 
-# Run
-NTHREADS=${BUILD_THREADS:?}
-MAXTHREADS=12
-if [ ${NTHREADS} -gt ${MAXTHREADS} ]; then
-  NTHREADS=${MAXTHREADS}
-fi
+# Run. Use SYSTEST_NPROCS over BUILD_THREADS if defined
+BUILD_THREADS=${BUILD_THREADS:-1}
+SYSTEST_NPROCS=${SYSTEST_NPROCS:-$BUILD_THREADS}
+echo "Running system tests with ${SYSTEST_NPROCS} cores."
+
 PKGDIR=${WORKSPACE}/build
-${X11_RUNNER} "${X11_RUNNER_ARGS}" python $WORKSPACE/Testing/SystemTests/scripts/InstallerTests.py -o -d $PKGDIR -j ${NTHREADS} $EXTRA_ARGS
+${X11_RUNNER} "${X11_RUNNER_ARGS}" python $WORKSPACE/Testing/SystemTests/scripts/InstallerTests.py -o -d $PKGDIR -j ${SYSTEST_NPROCS} $EXTRA_ARGS
