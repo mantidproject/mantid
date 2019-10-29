@@ -31,7 +31,6 @@ class SANSReductionCore(SANSReductionCoreBase):
     def PyExec(self):
         # Get the input
         state = self._get_state()
-        state_serialized = state.property_manager
         component_as_string = self.getProperty("Component").value
         progress = self._get_progress()
 
@@ -57,7 +56,7 @@ class SANSReductionCore(SANSReductionCoreBase):
         progress.report("Event slicing ...")
         data_type_as_string = self.getProperty("DataType").value
         monitor_workspace = self._get_monitor_workspace()
-        workspace, monitor_workspace, slice_event_factor = self._slice(state_serialized, workspace, monitor_workspace,
+        workspace, monitor_workspace, slice_event_factor = self._slice(state, workspace, monitor_workspace,
                                                                        data_type_as_string)
 
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

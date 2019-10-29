@@ -848,7 +848,7 @@ The dedicated work-flow algorithms for the SANS reduction are:
 - :ref:`SANSConvertToWavelengthAndRebin <algm-SANSConvertToWavelengthAndRebin>`
 - :ref:`SANSLoad <algm-SANSLoad>`
 - *SANSSave*
-- *SANSSliceEvent*
+- *Slice SANS Event*
 - *Workspace Masking*
 
 Note that algorithms prefixed with SANS take a *SANSState* object as
@@ -1094,10 +1094,10 @@ any form of regression of this the zero-valued error will fix the model at this 
 If we inflate the error at this point then it does not contribute to the regression.
 
 
-*SANSSliceEvent*
+*Slice SANS Event*
 ------------------
 
-The :ref:`SANSSliceEvent <algm-SANSSliceEvent>` algorithm creates a sliced workspaces from an event-based
+This step creates a sliced workspace from an event-based
 SANS input workspace according to the settings in the state object. The algorithm
 will extract a slice based on a start and end time which are set in the state
 object. In addition, the data type, i.e. if the slice is to be taken from a sample
@@ -1195,7 +1195,7 @@ The sub-steps of this algorithm are:
 
 1. Get the cropped input *ScatterWorkspace*. The cropping is defined by the selected detector type.
    The underlying algorithm is :ref:`CropToComponent <algm-CropToComponent>`.
-2. Create an event slice of the input workspace using :ref:`SANSSliceEvent <algm-SANSSliceEvent>`.
+2. Create an event slice of the input workspace.
    Note that event slicing is only applied to event-mode workspaces and only when it has been
    specified by the user. During this step the scatter workspace is sliced and the associated
    monitor workspace is scaled. The scaling factor is the ratio of the charge of the sliced data set
