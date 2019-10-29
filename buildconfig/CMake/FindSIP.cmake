@@ -54,8 +54,12 @@ ELSE(SIP_VERSION)
   ENDIF(sip_config)
 
   # Check that it really exists
-  FIND_PATH( SIP_INCLUDE_DIR sip.h PATHS ${SIP_INCLUDE_DIRECTORY} )
-
+  if(${CMAKE_SYSTEM} MATCHES "Darwin" AND IS_SYMLINK ${SIP_INCLUDE_DIRECTORY}/sip.h)
+    get_filename_component(_sip_h "${SIP_INCLUDE_DIRECTORY}/sip.h" REALPATH BASE_DIR)
+    get_filename_component(SIP_INCLUDE_DIRECTORY "${_sip_h}" DIRECTORY)
+  endif()
+  find_path(SIP_INCLUDE_DIR sip.h PATHS ${SIP_INCLUDE_DIRECTORY} NO_DEFAULT_PATH)
+  
   include ( FindPackageHandleStandardArgs )
   find_package_handle_standard_args( SIP DEFAULT_MSG SIP_VERSION_STR SIP_INCLUDE_DIR SIP_EXECUTABLE )
 

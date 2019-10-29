@@ -213,18 +213,20 @@ class IndirectILLReductionFWS(PythonAlgorithm):
 
         return files
 
-    def _ifws_peak_bins(self, ws):
+    @staticmethod
+    def _ifws_peak_bins(ws):
         '''
-        Gives the bin indices of the first and last peaks (of spectra 0) in the IFWS
+        Gives the bin indices of the first and last peaks of monitors from the sample logs
         @param ws :: input workspace
-        return    :: [xmin,xmax]
+        return    :: [imin,imax]
         '''
 
-        y = mtd[ws].readY(0)
-        size = len(y)
-        mid = int(size / 2)
-        imin = np.nanargmax(y[0:mid])
-        imax = np.nanargmax(y[mid:size]) + mid
+        run = mtd[ws].getRun()
+        if not run.hasProperty('MonitorLeftPeak') or not run.hasProperty('MonitorRightPeak'):
+            raise RuntimeError('Unable to retrieve the monitor peak information from the sample logs.')
+        else:
+            imin = run.getLogData('MonitorLeftPeak').value
+            imax = run.getLogData('MonitorRightPeak').value
         return imin, imax
 
     def _ifws_integrate(self, wsgroup):
@@ -256,7 +258,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
         if mtd[groupws].getNumberOfEntries() == 2:  # two wings, sum
             left = mtd[groupws].getItem(0).name()
             right = mtd[groupws].getItem(1).name()
-            sum = '__sum_'+groupws
+            left_right_sum = '__sum_'+groupws
 
             left_monitor = mtd[left].getRun().getLogData('MonitorIntegral').value
             right_monitor = mtd[right].getRun().getLogData('MonitorIntegral').value
@@ -271,12 +273,12 @@ class IndirectILLReductionFWS(PythonAlgorithm):
                 self.log().notice('Zero monitor integral has been found in one (or both) wings;'
                                   ' left: {0}, right: {1}'.format(left_monitor, right_monitor))
 
-            Plus(LHSWorkspace=left, RHSWorkspace=right, OutputWorkspace=sum)
+            Plus(LHSWorkspace=left, RHSWorkspace=right, OutputWorkspace=left_right_sum)
 
             DeleteWorkspace(left)
             DeleteWorkspace(right)
 
-            RenameWorkspace(InputWorkspace=sum, OutputWorkspace=groupws)
+            RenameWorkspace(InputWorkspace=left_right_sum, OutputWorkspace=groupws)
 
         else:
             RenameWorkspace(InputWorkspace=mtd[groupws].getItem(0), OutputWorkspace=groupws)
@@ -425,8 +427,8 @@ class IndirectILLReductionFWS(PythonAlgorithm):
                     axis = mtd[ws].readX(0)
                     start = axis[0]
                     end = axis[-1]
-                    range = end-start
-                    params = [start, range, end]
+                    integration_range = end-start
+                    params = [start, integration_range, end]
                     Rebin(InputWorkspace=ws, OutputWorkspace=ws, Params=params)
 
     def _interpolate(self, label, reference):
@@ -450,8 +452,8 @@ class IndirectILLReductionFWS(PythonAlgorithm):
                 if mtd[ws].blocksize() > 1:
                     SplineInterpolation(WorkspaceToInterpolate=ws,
                                         WorkspaceToMatch=ref,
+                                        Linear2Points=True,
                                         OutputWorkspace=ws)
-                    # TODO: add Linear2Point=True when ready
 
     def _subtract_background(self, background, reference):
         '''

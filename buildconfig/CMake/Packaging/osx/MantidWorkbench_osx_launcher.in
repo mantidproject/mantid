@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+INSTALLDIR=$(cd "$(dirname "$0")"; pwd)
+PLUGIN_DIR=$INSTALLDIR/../PlugIns
+# Python is embedded in the bundle
+PYTHONHOME=$INSTALLDIR/../Frameworks/Python.framework/Versions/@PYTHON_VERSION_MAJOR@.@PYTHON_VERSION_MINOR@
+
+# On first launch of quarantined apps launchd passes a command line parameter of the form -psn_0_XXXXXX
+# to the application. We discard this otherwise workbench's argparse will choke on it.
+# https://stackoverflow.com/questions/10242115/os-x-strange-psn-command-line-parameter-when-launched-from-finder
+if [[ "${1}" == -psn_* ]]; then
+  shift 1
+fi
+
+# It was observed on Qt >= 5.12 that the QtWebEngineProcess would fail to load the icudtl.dat resources
+# from the .app bundle due to chromium sandboxing restrictions: dtrace shows EPERM error when accessing
+# the file.
+env PYTHONHOME=${PYTHONHOME} \
+  env PYTHONPATH=${INSTALLDIR}:${PYTHONPATH} \
+  env QT_PLUGIN_PATH=$PLUGIN_DIR \
+  env QTWEBENGINE_DISABLE_SANDBOX=1 \
+  ${PYTHONHOME}/bin/python ${INSTALLDIR}/workbench-script $*
+
+if [ $? -ne 0 ]; then
+  env PYTHONHOME=${PYTHONHOME} $PYTHONHOME/bin/python $INSTALLDIR/../scripts/ErrorReporter/error_dialog_app.py \
+    --exitcode=$? --directory=$INSTALLDIR --qtdir=$PLUGIN_DIR --application=workbench
+fi

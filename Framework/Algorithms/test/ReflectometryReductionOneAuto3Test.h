@@ -1556,6 +1556,35 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
+  void
+  test_output_workspace_is_given_informative_name_if_input_has_correct_form() {
+    std::string const groupName = "TOF_1234_sliced";
+    prepareInputGroup(groupName, "", 2);
+    ADS.rename("TOF_1234_sliced_1", "TOF_1234_sliced_first");
+    ADS.rename("TOF_1234_sliced_2", "TOF_1234_sliced_second");
+
+    ReflectometryReductionOneAuto3 alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", groupName);
+    alg.setProperty("ThetaIn", 10.0);
+    alg.setProperty("WavelengthMin", 1.0);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("CorrectionAlgorithm", "None");
+    alg.setProperty("ProcessingInstructions", "2");
+    alg.setProperty("MomentumTransferStep", 0.04);
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+    TS_ASSERT_EQUALS(ADS.doesExist("IvsQ_1234_sliced_first"), true);
+    TS_ASSERT_EQUALS(ADS.doesExist("IvsQ_1234_sliced_second"), true);
+    TS_ASSERT_EQUALS(ADS.doesExist("IvsQ_binned_1234_sliced_first"), true);
+    TS_ASSERT_EQUALS(ADS.doesExist("IvsQ_binned_1234_sliced_second"), true);
+    TS_ASSERT_EQUALS(ADS.doesExist("IvsLam_1234_sliced_first"), true);
+    TS_ASSERT_EQUALS(ADS.doesExist("IvsLam_1234_sliced_second"), true);
+
+    ADS.clear();
+  }
+
 private:
   MatrixWorkspace_sptr
   createFloodWorkspace(Mantid::Geometry::Instrument_const_sptr instrument,

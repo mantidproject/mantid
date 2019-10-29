@@ -48,6 +48,21 @@ public:
     verifyAndClear();
   }
 
+  void testSetWorkspaceListOnConstruction() {
+    auto workspaceNames = createWorkspaces();
+    expectSetWorkspaceListFromADS(workspaceNames);
+    auto presenter = makePresenter();
+    verifyAndClear();
+  }
+
+  void testSetDefaultSavePathOnConstruction() {
+    auto const path = Mantid::Kernel::ConfigService::Instance().getString(
+        "defaultsave.directory");
+    EXPECT_CALL(m_view, setSavePath(path)).Times(1);
+    auto presenter = makePresenter();
+    verifyAndClear();
+  }
+
   void testNotifyPopulateWorkspaceList() {
     auto presenter = makePresenter();
     auto workspaceNames = createWorkspaces();
@@ -171,15 +186,6 @@ public:
         .WillOnce(Return(emptyWorkspaceList));
     EXPECT_CALL(m_view, noWorkspacesSelected()).Times(1);
     presenter.notifySaveSelectedWorkspaces();
-    verifyAndClear();
-  }
-
-  void testNotifySuggestSaveDir() {
-    auto presenter = makePresenter();
-    auto const path = Mantid::Kernel::ConfigService::Instance().getString(
-        "defaultsave.directory");
-    EXPECT_CALL(m_view, setSavePath(path)).Times(1);
-    presenter.notifySuggestSaveDir();
     verifyAndClear();
   }
 

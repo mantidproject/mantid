@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtEventView.h"
 #include "EventPresenter.h"
+#include "MantidKernel/UsageService.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -191,28 +192,45 @@ void QtEventView::enableSliceTypeSelection() {
 }
 
 void QtEventView::onToggleUniform(bool isChecked) {
-  if (isChecked)
+  if (isChecked) {
+    Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+        "Feature", "ISIS Reflectometry->EventTab->EnableUniformSlicing", false);
     m_notifyee->notifySliceTypeChanged(SliceType::Uniform);
+  }
 }
 
 void QtEventView::onToggleUniformEven(bool isChecked) {
-  if (isChecked)
+  if (isChecked) {
+    Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+        "Feature", "ISIS Reflectometry->EventTab->EnableUniformEvenSlicing",
+        false);
     m_notifyee->notifySliceTypeChanged(SliceType::UniformEven);
+  }
 }
 
 void QtEventView::onToggleCustom(bool isChecked) {
-  if (isChecked)
+  if (isChecked) {
+    Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+        "Feature", "ISIS Reflectometry->EventTab->EnableCustomSlicing", false);
     m_notifyee->notifySliceTypeChanged(SliceType::Custom);
+  }
 }
 
 void QtEventView::onToggleLogValue(bool isChecked) {
-  if (isChecked)
+  if (isChecked) {
+    Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+        "Feature", "ISIS Reflectometry->EventTab->EnableLogValueSlicing",
+        false);
     m_notifyee->notifySliceTypeChanged(SliceType::LogValue);
+  }
 }
 
 void QtEventView::onToggleDisabledSlicing(bool isChecked) {
-  if (isChecked)
+  if (isChecked) {
+    Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+        "Feature", "ISIS Reflectometry->EventTab->DisableSlicing", false);
     m_notifyee->notifySliceTypeChanged(SliceType::None);
+  }
 }
 
 } // namespace ISISReflectometry

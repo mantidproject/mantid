@@ -117,7 +117,7 @@ public:
     // Name of the output workspace.
     std::string outWSName("SortPeaksWorkspaceTest_OutputWS");
 
-    PeaksWorkspace_sptr inWS = WorkspaceCreationHelper::createPeaksWorkspace();
+    PeaksWorkspace_sptr inWS = WorkspaceCreationHelper::createPeaksWorkspace(2);
 
     SortPeaksWorkspace alg;
     alg.setRethrows(true);
@@ -135,7 +135,7 @@ public:
     // Name of the output workspace.
     std::string outWSName("SortPeaksWorkspaceTest_OutputWS");
 
-    PeaksWorkspace_sptr inWS = WorkspaceCreationHelper::createPeaksWorkspace();
+    PeaksWorkspace_sptr inWS = WorkspaceCreationHelper::createPeaksWorkspace(2);
 
     SortPeaksWorkspace alg;
     alg.setRethrows(true);
@@ -152,7 +152,7 @@ public:
     const std::string columnOfInterestName = "h";
 
     // Create a peaks workspace and add some peaks with unordered H values.
-    PeaksWorkspace_sptr inWS = WorkspaceCreationHelper::createPeaksWorkspace();
+    PeaksWorkspace_sptr inWS = WorkspaceCreationHelper::createPeaksWorkspace(2);
     Peak peak1;
     peak1.setH(1);
     Peak peak2;
@@ -170,7 +170,7 @@ public:
     const std::string columnOfInterestName = "h";
 
     // Create a peaks workspace and add some peaks with unordered H values.
-    PeaksWorkspace_sptr inWS = WorkspaceCreationHelper::createPeaksWorkspace();
+    PeaksWorkspace_sptr inWS = WorkspaceCreationHelper::createPeaksWorkspace(2);
     Peak peak1;
     peak1.setH(0);
     Peak peak2;
@@ -186,7 +186,7 @@ public:
   }
 
   void test_modify_workspace_in_place() {
-    PeaksWorkspace_sptr inWS = WorkspaceCreationHelper::createPeaksWorkspace();
+    PeaksWorkspace_sptr inWS = WorkspaceCreationHelper::createPeaksWorkspace(2);
 
     SortPeaksWorkspace alg;
     alg.setChild(true);

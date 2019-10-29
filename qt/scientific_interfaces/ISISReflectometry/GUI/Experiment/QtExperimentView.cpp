@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtExperimentView.h"
+#include "MantidKernel/UsageService.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
 #include <QMessageBox>
@@ -52,6 +53,9 @@ QtExperimentView::QtExperimentView(
 }
 
 void QtExperimentView::onRemovePerThetaDefaultsRequested() {
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Feature", "ISIS Reflectometry->ExperimentTab->RemovePerThetaDefaultsRow",
+      false);
   auto index = m_ui.optionsTable->currentIndex();
   if (index.isValid()) {
     m_notifyee->notifyRemovePerAngleDefaultsRequested(index.row());
@@ -283,6 +287,8 @@ void QtExperimentView::disconnectExperimentSettingsWidgets() {
 }
 
 void QtExperimentView::onRestoreDefaultsRequested() {
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Feature", "ISIS Reflectometry->ExperimentTab->RestoreDefaults", false);
   m_notifyee->notifyRestoreDefaultsRequested();
 }
 
@@ -442,6 +448,9 @@ void QtExperimentView::onPerAngleDefaultsChanged(int row, int column) {
 
 /** Add a new row to the transmission runs table **/
 void QtExperimentView::onNewPerThetaDefaultsRowRequested() {
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Feature", "ISIS Reflectometry->ExperimentTab->AddPerThetaDefaultsRow",
+      false);
   m_notifyee->notifyNewPerAngleDefaultsRequested();
 }
 

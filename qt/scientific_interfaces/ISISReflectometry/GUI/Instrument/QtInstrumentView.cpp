@@ -5,6 +5,8 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtInstrumentView.h"
+#include "MantidKernel/UsageService.h"
+
 #include <QMessageBox>
 #include <QScrollBar>
 #include <boost/algorithm/string/join.hpp>
@@ -109,6 +111,8 @@ void QtInstrumentView::onSettingsChanged() {
 }
 
 void QtInstrumentView::onRestoreDefaultsRequested() {
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Feature", "ISIS Reflectometry->InstrumentTab->RestoreDefaults", false);
   m_notifyee->notifyRestoreDefaultsRequested();
 }
 

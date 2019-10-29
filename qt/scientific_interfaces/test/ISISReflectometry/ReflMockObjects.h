@@ -12,6 +12,7 @@
 #include "GUI/Batch/IBatchPresenter.h"
 #include "GUI/Batch/IBatchPresenterFactory.h"
 #include "GUI/Common/IMessageHandler.h"
+#include "GUI/Common/IPlotter.h"
 #include "GUI/Common/IPythonRunner.h"
 #include "GUI/Event/IEventPresenter.h"
 #include "GUI/Experiment/IExperimentPresenter.h"
@@ -238,6 +239,11 @@ public:
 class MockPythonRunner : public IPythonRunner {
 public:
   MOCK_METHOD1(runPythonAlgorithm, std::string(const std::string &));
+};
+
+class MockPlotter : public IPlotter {
+public:
+  MOCK_CONST_METHOD1(reflectometryPlot, void(const std::vector<std::string> &));
 };
 
 /**** Saver ****/

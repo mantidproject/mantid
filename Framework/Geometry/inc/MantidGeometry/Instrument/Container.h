@@ -57,6 +57,9 @@ public:
   int interceptSurface(Geometry::Track &t) const override {
     return m_shape->interceptSurface(t);
   }
+  double distance(const Geometry::Track &t) const override {
+    return m_shape->distance(t);
+  }
   double solidAngle(const Kernel::V3D &observer) const override {
     return m_shape->solidAngle(observer);
   }

@@ -44,29 +44,15 @@ private:
     std::string iVsLam;
   };
 
-  class RebinParams {
-  public:
-    RebinParams(const double qMin, const bool qMinIsDefault, const double qMax,
-                const bool qMaxIsDefault, const boost::optional<double> qStep)
-        : m_qMin(qMin), m_qMinIsDefault(qMinIsDefault), m_qMax(qMax),
-          m_qMaxIsDefault(qMaxIsDefault), m_qStep(qStep){};
+  struct RebinParams {
+    double qMin;
+    bool qMinIsDefault;
+    double qMax;
+    bool qMaxIsDefault;
+    boost::optional<double> qStep;
 
-    double qMin() const { return m_qMin; };
-    bool qMinIsDefault() const { return m_qMinIsDefault; }
-    double qMax() const { return m_qMax; };
-    bool qMaxIsDefault() const { return m_qMaxIsDefault; }
-    double qStep() const { return *m_qStep; };
-    bool hasQStep() const { return m_qStep.is_initialized(); }
-    std::vector<double> asVector() const {
-      return std::vector<double>{qMin(), qStep(), qMax()};
-    };
-
-  private:
-    double m_qMin;
-    bool m_qMinIsDefault;
-    double m_qMax;
-    bool m_qMaxIsDefault;
-    boost::optional<double> m_qStep;
+    bool hasQStep() const { return qStep.is_initialized(); }
+    std::vector<double> asVector() const { return {qMin, *qStep, qMax}; }
   };
 
   void init() override;
@@ -91,10 +77,10 @@ private:
   /// Rebin and scale a workspace in Q
   Mantid::API::MatrixWorkspace_sptr
   rebinAndScale(Mantid::API::MatrixWorkspace_sptr inputWS,
-                RebinParams const &params);
+                const RebinParams &params);
   /// Crop a workspace in Q
   MatrixWorkspace_sptr cropQ(MatrixWorkspace_sptr inputWS,
-                             RebinParams const &params);
+                             const RebinParams &params);
   /// Populate algorithmic correction properties
   void populateAlgorithmicCorrectionProperties(
       Mantid::API::IAlgorithm_sptr alg,
@@ -102,20 +88,23 @@ private:
   /// Get a polarization efficiencies workspace.
   std::tuple<API::MatrixWorkspace_sptr, std::string, std::string>
   getPolarizationEfficiencies();
-  void applyPolarizationCorrection(std::string const &outputIvsLam);
+  void applyPolarizationCorrection(const std::string &outputIvsLam);
   API::MatrixWorkspace_sptr getFloodWorkspace();
-  void applyFloodCorrection(API::MatrixWorkspace_sptr const &flood,
+  void applyFloodCorrection(const API::MatrixWorkspace_sptr &flood,
                             const std::string &propertyName);
   void applyFloodCorrections();
   double getPropertyOrDefault(const std::string &propertyName,
                               const double defaultValue, bool &isDefault);
-  void setOutputWorkspaces(WorkspaceNames const &outputGroupNames,
+  void setOutputWorkspaces(const WorkspaceNames &outputGroupNames,
                            std::vector<std::string> &IvsLamGroup,
                            std::vector<std::string> &IvsQBinnedGroup,
                            std::vector<std::string> &IvsQGroup);
   WorkspaceNames getOutputNamesForGroups(const std::string &inputName,
                                          const std::string &runNumber,
                                          const size_t wsGroupNumber);
+  void getTransmissionRun(std::map<std::string, std::string> &results,
+                          WorkspaceGroup_sptr &workspaceGroup,
+                          const std::string &transmissionRun);
 };
 
 } // namespace Algorithms

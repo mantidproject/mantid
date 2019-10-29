@@ -16,6 +16,7 @@ Improved
 - :ref:`LoadILLIndirect <algm-LoadILLIndirect>` is extended to support also the configurations with the first tube angle at 33.1 degrees.
 - :ref:`IndirectILLEnergyTransfer <algm-IndirectILLEnergyTransfer>` now offers the possibility to enable or disable the detector grouping both for Doppler and BATS modes. By default the pixels will be grouped tube by tube as before.
 - :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>` now checks input properties are valid.
+- :ref:`IndirectILLReductionFWS <algm-IndirectILLReductionFWS>` will now integrate the inelastic peaks correctly, based on the peak positions in the monitor spectrum.
 
 
 Algorithms
