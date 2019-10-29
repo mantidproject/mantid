@@ -365,6 +365,8 @@ class MainWindow(QMainWindow):
         self.interface_executor.execute(open(filename).read(), filename)
 
     def launch_custom_cpp_gui(self, interface_name):
+        """Create a new interface window if one does not already exist,
+        else show existing window"""
         window = find_window(interface_name, QMainWindow)
         if window is None:
             interface = self.interface_manager.createSubWindow(interface_name)
