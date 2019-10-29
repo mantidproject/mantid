@@ -34,8 +34,12 @@ def find_window(object_name, cls=None):
     """
     windows = QApplication.topLevelWidgets()
     for window in windows:
-        if window.objectName() == object_name and isinstance(window, cls):
+        if cls is not None:
+            if window.objectName() == object_name and isinstance(window, cls):
+                return window
+        elif window.objectName() == object_name:
             return window
+        
 
 def find_plot_windows():
     """
