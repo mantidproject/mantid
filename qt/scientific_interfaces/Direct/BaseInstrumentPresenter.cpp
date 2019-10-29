@@ -112,4 +112,3 @@ BaseInstrumentPresenter::setupInstrument() {
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
-

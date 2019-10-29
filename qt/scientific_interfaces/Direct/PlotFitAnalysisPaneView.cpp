@@ -117,4 +117,3 @@ void PlotFitAnalysisPaneView::fitWarning(const std::string &message) {
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
