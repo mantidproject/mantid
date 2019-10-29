@@ -474,11 +474,56 @@ public:
         !AnalysisDataService::Instance().doesExist("TRANS_LAM_1234_4321"));
   }
 
+  void test_first_trans_run_not_stored_if_name_not_found() {
+    CreateTransmissionWorkspace2 alg;
+    setup_test_to_check_stored_runs_with_2_inputs(alg, false, true);
+    alg.setProperty("Debug", true);
+    alg.execute();
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist("TRANS_LAM_1234"));
+    check_stored_lambda_workspace("TRANS_LAM_4321");
+  }
+
+  void test_second_trans_run_not_stored_if_name_not_found() {
+    CreateTransmissionWorkspace2 alg;
+    setup_test_to_check_stored_runs_with_2_inputs(alg, true, false);
+    alg.setProperty("Debug", true);
+    alg.execute();
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist("TRANS_LAM_4321"));
+    check_stored_lambda_workspace("TRANS_LAM_1234");
+  }
+
+  void test_stitched_trans_run_not_stored_if_first_name_not_found() {
+    CreateTransmissionWorkspace2 alg;
+    setup_test_to_check_stored_runs_with_2_inputs(alg, false, true);
+    alg.execute();
+    TS_ASSERT(
+        !AnalysisDataService::Instance().doesExist("TRANS_LAM_1234_4321"));
+  }
+
+  void test_stitched_trans_run_not_stored_if_second_name_not_found() {
+    CreateTransmissionWorkspace2 alg;
+    setup_test_to_check_stored_runs_with_2_inputs(alg, true, false);
+    alg.execute();
+    TS_ASSERT(
+        !AnalysisDataService::Instance().doesExist("TRANS_LAM_1234_4321"));
+  }
+
+  void test_output_workspace_is_still_returned_even_if_name_not_found() {
+    CreateTransmissionWorkspace2 alg;
+    setup_test_to_check_stored_runs_with_2_inputs(alg, false, true);
+    alg.execute();
+    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outWS);
+    check_lambda_workspace(outWS);
+  }
+
 private:
-  void setup_test_to_check_stored_runs(CreateTransmissionWorkspace2 &alg) {
+  void setup_test_to_check_stored_runs(CreateTransmissionWorkspace2 &alg,
+                                       bool hasRunNumber = true) {
     AnalysisDataService::Instance().clear();
     auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
-    inputWS->mutableRun().addProperty<std::string>("run_number", "1234");
+    if (hasRunNumber)
+      inputWS->mutableRun().addProperty<std::string>("run_number", "1234");
 
     alg.initialize();
     alg.setProperty("FirstTransmissionRun", inputWS);
@@ -488,10 +533,12 @@ private:
   }
 
   void setup_test_to_check_stored_runs_with_2_inputs(
-      CreateTransmissionWorkspace2 &alg) {
-    setup_test_to_check_stored_runs(alg);
+      CreateTransmissionWorkspace2 &alg, bool firstHasRunNumber = true,
+      bool secondHasRunNumber = true) {
+    setup_test_to_check_stored_runs(alg, firstHasRunNumber);
     auto inputWS2 = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
-    inputWS2->mutableRun().addProperty<std::string>("run_number", "4321");
+    if (secondHasRunNumber)
+      inputWS2->mutableRun().addProperty<std::string>("run_number", "4321");
     alg.setProperty("SecondTransmissionRun", inputWS2);
   }
 
