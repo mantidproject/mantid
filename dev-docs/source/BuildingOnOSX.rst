@@ -72,6 +72,8 @@ In order to be able to 'tap' the ``mantidproject/mantid`` 'tap' we need to have 
 
 9. Unlink ``qt@4`` from ``/usr/local`` to avoid cross talk with Qt5 and ensure the webkit can be found when not linked
 
+.. code-block:: sh
+
    brew unlink qt@4
    ln -s /usr/local/Homebrew/Library/Taps/mantidproject/homebrew-mantid/qt.conf /usr/local/opt/qt@4/bin/qt.conf
    ln -s /usr/local/opt/qt-webkit@2.3/include/QtWebKit /usr/local/opt/qt@4/include/QtWebKit
