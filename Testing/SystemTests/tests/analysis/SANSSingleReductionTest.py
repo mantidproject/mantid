@@ -8,7 +8,6 @@
 
 from __future__ import (absolute_import, division, print_function)
 
-import time
 import systemtesting
 import unittest
 
@@ -434,7 +433,6 @@ class SANSSingleReduction2Test(SingleReductionTest):
 
         # Act
         output_settings = {"OutputWorkspaceHAB": EMPTY_NAME}
-        start_time = time.time()
         single_reduction_v2_alg = self._run_single_reduction(state, sample_scatter=sample,
                                                              sample_transmission=transmission_workspace,
                                                              sample_direct=direct_workspace,
@@ -447,7 +445,6 @@ class SANSSingleReduction2Test(SingleReductionTest):
                                                              event_slice_optimisation=True,
                                                              save_can=True,
                                                              use_optimizations=True)
-        version_2_execution_time = time.time() - start_time
 
         # Check output workspaces
         output_workspace = single_reduction_v2_alg.getProperty("OutputWorkspaceHAB").value
@@ -472,7 +469,6 @@ class SANSSingleReduction2Test(SingleReductionTest):
         user_file_director.set_slice_event_builder_end_time([300.00])
         state = user_file_director.construct()
 
-        start_time = time.time()
         single_reduction_alg_first_slice = self._run_single_reduction(state, sample_scatter=sample,
                                                                       sample_transmission=transmission_workspace,
                                                                       sample_direct=direct_workspace,
@@ -484,14 +480,12 @@ class SANSSingleReduction2Test(SingleReductionTest):
                                                                       output_settings=output_settings,
                                                                       event_slice_optimisation=False,
                                                                       save_can=True)
-        first_slice_execution_time = time.time() - start_time
 
         # Run the second event slice
         user_file_director.set_slice_event_builder_start_time([300.00])
         user_file_director.set_slice_event_builder_end_time([600.00])
         state = user_file_director.construct()
 
-        start_time = time.time()
         single_reduction_alg_second_slice = self._run_single_reduction(state, sample_scatter=sample,
                                                                        sample_transmission=transmission_workspace,
                                                                        sample_direct=direct_workspace,
@@ -503,13 +497,6 @@ class SANSSingleReduction2Test(SingleReductionTest):
                                                                        output_settings=output_settings,
                                                                        event_slice_optimisation=False,
                                                                        save_can=True)
-        version_1_execution_time = time.time() - start_time + first_slice_execution_time
-
-        # Check that running version 2 once is quicker than running version 1 twice (once for each slice)
-        # version 2 has been significantly quicker that multiple runs are not necessary to ensure this test
-        # does not sporadically fail. However, this check could be removed if this changes.
-        self.assertLess(version_2_execution_time, version_1_execution_time)
-
         # Now compare output workspaces from the two versions
         # Output HAB workspace
         event_slice_output_workspace = single_reduction_v2_alg.getProperty("OutputWorkspaceHAB").value
@@ -571,7 +558,6 @@ class SANSSingleReduction2Test(SingleReductionTest):
 
         # Act
         output_settings = {"OutputWorkspaceLAB": EMPTY_NAME}
-        start_time = time.time()
         single_reduction_v2_alg = self._run_single_reduction(state, sample_scatter=sample,
                                                              sample_transmission=transmission_workspace,
                                                              sample_direct=direct_workspace,
@@ -584,7 +570,6 @@ class SANSSingleReduction2Test(SingleReductionTest):
                                                              event_slice_optimisation=True,
                                                              save_can=True,
                                                              use_optimizations=True)
-        version_2_execution_time = time.time() - start_time
 
         # Check output workspaces
         output_workspace = single_reduction_v2_alg.getProperty("OutputWorkspaceLAB").value
@@ -608,7 +593,6 @@ class SANSSingleReduction2Test(SingleReductionTest):
         user_file_director.set_slice_event_builder_end_time([300.00])
         state = user_file_director.construct()
 
-        start_time = time.time()
         single_reduction_alg_first_slice = self._run_single_reduction(state, sample_scatter=sample,
                                                                       sample_transmission=transmission_workspace,
                                                                       sample_direct=direct_workspace,
@@ -620,14 +604,12 @@ class SANSSingleReduction2Test(SingleReductionTest):
                                                                       output_settings=output_settings,
                                                                       event_slice_optimisation=False,
                                                                       save_can=True)
-        first_slice_execution_time = time.time() - start_time
 
         # Run the second event slice
         user_file_director.set_slice_event_builder_start_time([300.00])
         user_file_director.set_slice_event_builder_end_time([600.00])
         state = user_file_director.construct()
 
-        start_time = time.time()
         single_reduction_alg_second_slice = self._run_single_reduction(state, sample_scatter=sample,
                                                                        sample_transmission=transmission_workspace,
                                                                        sample_direct=direct_workspace,
@@ -639,13 +621,6 @@ class SANSSingleReduction2Test(SingleReductionTest):
                                                                        output_settings=output_settings,
                                                                        event_slice_optimisation=False,
                                                                        save_can=True)
-        version_1_execution_time = time.time() - start_time + first_slice_execution_time
-
-        # Check that running version 2 once is quicker than running version 1 twice (once for each slice)
-        # version 2 has been significantly quicker that multiple runs are not necessary to ensure this test
-        # does not sporadically fail. However, this check could be removed if this changes.
-        self.assertLess(version_2_execution_time, version_1_execution_time)
-
         # Now compare output workspaces from the two versions
         # Output LAB workspace
         event_slice_output_workspace = single_reduction_v2_alg.getProperty("OutputWorkspaceLAB").value

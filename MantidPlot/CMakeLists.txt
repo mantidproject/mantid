@@ -802,7 +802,8 @@ add_executable(MantidPlot
                ${IPYTHON_INSTALL_FILES})
 
 target_include_directories(MantidPlot
-                           PRIVATE src
+                           PRIVATE ${SIP_INCLUDE_DIR}
+			           src
                                    src/lib/include
                                    src/lib/3rdparty/qtcolorpicker/src
                                    ../qt/widgets/common/inc
@@ -859,10 +860,10 @@ endif()
 # Plugin dependencies
 add_dependencies(MantidPlot mantidqtpython CompilePyUI)
 
-if(OSX_VERSION VERSION_GREATER 10.8)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(
     MantidPlot
-    PROPERTIES INSTALL_RPATH "@executable_path;@executable_path/../Libraries")
+    PROPERTIES INSTALL_RPATH "@executable_path;@executable_path/../Frameworks")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   if(MAKE_VATES)
     set_target_properties(
@@ -882,22 +883,9 @@ set_target_properties(MantidPlot PROPERTIES FOLDER "Qt4")
 #
 # Custom Info.plist file for OS X
 #
-if(APPLE)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set(MAC_BUNDLE_EXECUTABLE Mantid_osx_launcher)
-  # Setting the CFBundleIdentifer attribute on OS X 10.6 (SL) and before causes
-  # problems with trying to install the package on the same machine as it was
-  # built. It tries to relocate the package to the build directory because the
-  # bundle identifiers match. Mountain Lion requires the attribute to avoid
-  # crashes when accessing certain system dialogs from Qt. The ideal would be to
-  # pass the --no-relocate option to packagemaker but we can't control that so
-  # only set the identifier for 10.7 and above
-  #
-  # This can disappear when if/when we move to a drag-n-drop package.
-  if(OSX_VERSION VERSION_GREATER 10.7 OR OSX_VERSION VERSION_EQUAL 10.7)
-    set(MAC_BUNDLE_IDENTIFIER "org.mantidproject.MantidPlot")
-  else()
-    set(MAC_BUNDLE_IDENTIFIER "")
-  endif()
+  set(MAC_BUNDLE_IDENTIFIER "org.mantidproject.MantidPlot")
   set(MAC_BUNDLE_ICON MantidPlot.icns)
   set(MAC_BUNDLE_NAME MantidPlot)
   configure_file(
@@ -1006,24 +994,22 @@ install(FILES ${CONFIG_RESET_SCRIPT} DESTINATION ${BIN_DIR})
 
 # file make_package.rb contains hard-coded path to the libraries this causes
 # fail of the installation with macports therefore MACPORTS option is introduced
-if(APPLE)
-  if(OSX_VERSION VERSION_LESS 10.9)
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/FixBundle.cmake.in
-                   ${CMAKE_CURRENT_BINARY_DIR}/FixBundle.cmake @ONLY)
-
-    install(SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/FixBundle.cmake)
-  elseif(MACPORTS)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  if(MACPORTS)
     install(FILES package_python_macports.py DESTINATION MantidPlot.app/)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/FixMacportsBundle.cmake.in
                    ${CMAKE_CURRENT_BINARY_DIR}/FixMacportsBundle.cmake @ONLY)
     install(SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/FixMacportsBundle.cmake)
   else()
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/make_package.rb.in
-                   ${CMAKE_CURRENT_BINARY_DIR}/make_package.rb @ONLY)
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/make_package.rb
-            DESTINATION MantidPlot.app/)
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/FixMavericksBundle.cmake.in
-                   ${CMAKE_CURRENT_BINARY_DIR}/FixMavericksBundle.cmake @ONLY)
-    install(SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/FixMavericksBundle.cmake)
+    install (CODE "
+      execute_process(COMMAND ${CMAKE_SOURCE_DIR}/installers/MacInstaller/make_package.rb
+                              \${CMAKE_INSTALL_PREFIX}/MantidPlot.app ${PYTHON_EXECUTABLE} ${ParaView_DIR}
+                      RESULT_VARIABLE install_name_tool_result OUTPUT_VARIABLE _out ERROR_VARIABLE _out COMMAND_ECHO STDOUT)
+      if(NOT install_name_tool_result EQUAL 0)
+        message(\"\${_out}\")
+        message(FATAL_ERROR \"Package script failed!!!\n\")
+      endif()
+  ")
+
   endif()
 endif()

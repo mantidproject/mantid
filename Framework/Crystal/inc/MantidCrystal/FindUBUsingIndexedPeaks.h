@@ -49,7 +49,7 @@ private:
   void exec() override;
   void logLattice(Geometry::OrientedLattice &o_lattice, int &ModDim);
   int getModulationDimension(Kernel::V3D &mnp);
-  bool isPeakIndexed(DataObjects::Peak &peak);
+  bool isPeakIndexed(const DataObjects::Peak &peak);
 };
 
 } // namespace Crystal

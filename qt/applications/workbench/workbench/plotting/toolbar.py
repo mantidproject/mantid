@@ -18,7 +18,7 @@ from mantidqt.icons import get_icon
 
 class WorkbenchNavigationToolbar(NavigationToolbar2QT):
 
-    home_clicked = QtCore.Signal()
+    sig_home_clicked = QtCore.Signal()
     sig_grid_toggle_triggered = QtCore.Signal()
     sig_active_triggered = QtCore.Signal()
     sig_hold_triggered = QtCore.Signal()
@@ -28,7 +28,10 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
     sig_generate_plot_script_clipboard_triggered = QtCore.Signal()
 
     toolitems = (
-        ('Home', 'Reset original view', 'mdi.home', 'home', None),
+        ('Home', 'Center display on contents', 'mdi.home', 'on_home_clicked', None),
+        ('Back', 'Back to previous view', 'mdi.arrow-left', 'back', None),
+        ('Forward', 'Forward to next view', 'mdi.arrow-right', 'forward', None),
+        (None, None, None, None, None),
         ('Pan', 'Pan axes with left mouse, zoom with right', 'mdi.arrow-all', 'pan', False),
         ('Zoom', 'Zoom to rectangle', 'mdi.magnify', 'zoom', False),
         (None, None, None, None, None),
@@ -38,8 +41,8 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         (None, None, None, None, None),
         ('Customize', 'Configure plot options', 'mdi.settings', 'launch_plot_options', None),
         (None, None, None, None, None),
-        ('Create Script', 'Generate a script that will recreate figure', 'mdi.script-text-outline',
-         'generate_plot_script', None),
+        ('Create Script', 'Generate a script that will recreate the current figure',
+         'mdi.script-text-outline', 'generate_plot_script', None),
         (None, None, None, None, None),
         ('Fit', 'Toggle fit browser on/off', None, 'toggle_fit', False),
     )
@@ -72,8 +75,6 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
                     a.setChecked(checked)
                 if tooltip_text is not None:
                     a.setToolTip(tooltip_text)
-                if text == 'Home':
-                    a.triggered.connect(self.on_home_clicked)
 
         self.buttons = {}
         # Add the x,y location widget at the right side of the toolbar
@@ -127,8 +128,9 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
     def contextMenuEvent(self, event):
         pass
 
-    def on_home_clicked(self, _):
-        self.home_clicked.emit()
+    def on_home_clicked(self):
+        self.sig_home_clicked.emit()
+        self.push_current()
 
 
 class ToolbarStateManager(object):
@@ -165,4 +167,7 @@ class ToolbarStateManager(object):
             fit_action.setChecked(True)
 
     def home_button_connect(self, slot):
-        self._toolbar.home_clicked.connect(slot)
+        self._toolbar.sig_home_clicked.connect(slot)
+
+    def emit_sig_home_clicked(self):
+        self._toolbar.sig_home_clicked.emit()

@@ -175,9 +175,10 @@ public:
 
 /// Shared pointer to a ReflectionCondition
 using ReflectionCondition_sptr = boost::shared_ptr<ReflectionCondition>;
+/// A collection of reflections
+using ReflectionConditions = std::vector<ReflectionCondition_sptr>;
 
-MANTID_GEOMETRY_DLL std::vector<ReflectionCondition_sptr>
-getAllReflectionConditions();
+MANTID_GEOMETRY_DLL const ReflectionConditions &getAllReflectionConditions();
 MANTID_GEOMETRY_DLL std::vector<std::string> getAllReflectionConditionNames();
 MANTID_GEOMETRY_DLL std::vector<std::string> getAllReflectionConditionSymbols();
 MANTID_GEOMETRY_DLL ReflectionCondition_sptr

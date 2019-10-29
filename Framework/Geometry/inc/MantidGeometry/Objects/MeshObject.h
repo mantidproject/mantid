@@ -87,6 +87,7 @@ public:
 
   // INTERSECTION
   int interceptSurface(Geometry::Track &) const override;
+  double distance(const Track &track) const override;
 
   // Solid angle - uses triangleSolidAngle unless many (>30000) triangles
   double solidAngle(const Kernel::V3D &observer) const override;

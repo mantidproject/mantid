@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1211</width>
-    <height>832</height>
+    <height>857</height>
    </rect>
   </property>
   <property name="acceptDrops">
@@ -95,7 +95,7 @@ QGroupBox::title {
       <item>
        <widget class="QStackedWidget" name="main_stacked_widget">
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="run_page">
          <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -648,7 +648,7 @@ QGroupBox::title {
           <item>
            <widget class="QTabWidget" name="settings_tab_widget">
             <property name="currentIndex">
-             <number>0</number>
+             <number>2</number>
             </property>
             <widget class="QWidget" name="general_tab">
              <attribute name="title">
@@ -1124,147 +1124,7 @@ QGroupBox::title {
                      <string>Transmission</string>
                     </property>
                     <layout class="QGridLayout" name="gridLayout_9">
-                     <item row="7" column="3">
-                      <widget class="QPushButton" name="transmission_mask_files_push_button">
-                       <property name="text">
-                        <string>Browse</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="7" column="2">
-                      <widget class="QLineEdit" name="transmission_mask_files_line_edit">
-                       <property name="toolTip">
-                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A comma-separated list of MASK files which define areas on the bank which are excluded from the transmission calculation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="6" column="2">
-                      <widget class="QLineEdit" name="transmission_roi_files_line_edit">
-                       <property name="toolTip">
-                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A comma-separated list of ROI files which define areas on the bank which contribute to the transmission calculation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="5" column="2">
-                      <widget class="QLineEdit" name="transmission_radius_line_edit">
-                       <property name="toolTip">
-                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A radius that defines a circle which includes all pixels on the bank which contribute to the transmission calculation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="7" column="0">
-                      <widget class="QLabel" name="transmission_mask_files_label">
-                       <property name="toolTip">
-                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A comma-separated list of MASK files which define areas on the bank which are excluded from the transmission calculation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                       </property>
-                       <property name="text">
-                        <string>Mask Files</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="1" column="2">
-                      <widget class="QComboBox" name="transmission_target_combo_box">
-                       <item>
-                        <property name="text">
-                         <string>Transmission monitor</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>Region of interest on bank</string>
-                        </property>
-                       </item>
-                      </widget>
-                     </item>
-                     <item row="6" column="0">
-                      <widget class="QLabel" name="transmission_roi_files_label">
-                       <property name="toolTip">
-                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A comma-separated list of ROI files which define areas on the bank which contribute to the transmission calculation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                       </property>
-                       <property name="text">
-                        <string>ROI Files</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="6" column="3">
-                      <widget class="QPushButton" name="transmission_roi_files_push_button">
-                       <property name="text">
-                        <string>Browse</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="5" column="0">
-                      <widget class="QLabel" name="transmission_radius_label">
-                       <property name="toolTip">
-                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A radius that defines a circle which includes all pixels on the bank which contribute to the transmission calculation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                       </property>
-                       <property name="text">
-                        <string>Radius[mm]</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="1" column="0">
-                      <widget class="QLabel" name="transmission_target_label">
-                       <property name="text">
-                        <string>Transmission target</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="0" column="0">
-                      <widget class="QLabel" name="transmission_incident_monitor_target">
-                       <property name="toolTip">
-                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Spectrum number of the incident monitor which is used for transmission calculation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                       </property>
-                       <property name="text">
-                        <string>Incident monitor</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="0" column="3">
-                      <widget class="QCheckBox" name="transmission_interpolating_rebin_check_box">
-                       <property name="toolTip">
-                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Selects the type of rebin which is to be used during transmission calculation. If this is checked then a interpolating rebin operation is performed, else a standard rebin operation is used.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                       </property>
-                       <property name="text">
-                        <string>Use interpolating rebin</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="4" column="2">
-                      <widget class="QLineEdit" name="transmission_mn_shift_line_edit">
-                       <property name="toolTip">
-                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Distance between beamstop monitor and detector.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="0" column="2">
-                      <widget class="QLineEdit" name="transmission_line_edit">
-                       <property name="toolTip">
-                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Spectrum number of the incident monitor which is used for transmission calculation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="4" column="0">
-                      <widget class="QLabel" name="transmission_mn_shift_label">
-                       <property name="toolTip">
-                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;An option shift of the M4 monitor.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                       </property>
-                       <property name="text">
-                        <string>Monitor Shift [mm]</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="3" column="0">
-                      <widget class="QLabel" name="transmission_monitor_label">
-                       <property name="toolTip">
-                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Spectrum number of the transmission monitor which is used for transmission calculation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                       </property>
-                       <property name="text">
-                        <string>Transmission monitor</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="8" column="0" colspan="4">
+                     <item row="10" column="1" colspan="3">
                       <widget class="QGroupBox" name="fit_combo_box">
                        <property name="toolTip">
                         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fit options for the transmission calculation. These can be either set for both the Sample and the Can run or separately.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -1479,8 +1339,165 @@ QGroupBox::title {
                        </layout>
                       </widget>
                      </item>
-                     <item row="3" column="2">
+                     <item row="5" column="1">
+                      <widget class="QLabel" name="transmission_mn_4_shift_label">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;An option shift of the M4 monitor.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                       <property name="text">
+                        <string>Monitor 4 Shift [mm]</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="8" column="2">
+                      <widget class="QLineEdit" name="transmission_roi_files_line_edit">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A comma-separated list of ROI files which define areas on the bank which contribute to the transmission calculation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="6" column="1">
+                      <widget class="QLabel" name="transmission_mn_5_shift_label">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;An option shift of the M5 monitor.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                       <property name="text">
+                        <string>Monitor 5 Shift [mm]</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="7" column="1">
+                      <widget class="QLabel" name="transmission_radius_label">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A radius that defines a circle which includes all pixels on the bank which contribute to the transmission calculation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                       <property name="text">
+                        <string>Radius[mm]</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="8" column="3">
+                      <widget class="QPushButton" name="transmission_roi_files_push_button">
+                       <property name="text">
+                        <string>Browse</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="4" column="2">
                       <widget class="QLineEdit" name="transmission_monitor_line_edit"/>
+                     </item>
+                     <item row="3" column="2">
+                      <widget class="QComboBox" name="transmission_target_combo_box">
+                       <item>
+                        <property name="text">
+                         <string>Transmission monitor</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>Region of interest on bank</string>
+                        </property>
+                       </item>
+                      </widget>
+                     </item>
+                     <item row="9" column="2">
+                      <widget class="QLineEdit" name="transmission_mask_files_line_edit">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A comma-separated list of MASK files which define areas on the bank which are excluded from the transmission calculation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="7" column="2">
+                      <widget class="QLineEdit" name="transmission_radius_line_edit">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A radius that defines a circle which includes all pixels on the bank which contribute to the transmission calculation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="9" column="3">
+                      <widget class="QPushButton" name="transmission_mask_files_push_button">
+                       <property name="text">
+                        <string>Browse</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="2" column="3">
+                      <widget class="QCheckBox" name="transmission_interpolating_rebin_check_box">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Selects the type of rebin which is to be used during transmission calculation. If this is checked then a interpolating rebin operation is performed, else a standard rebin operation is used.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                       <property name="text">
+                        <string>Use interpolating rebin</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="4" column="1">
+                      <widget class="QLabel" name="transmission_monitor_label">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Spectrum number of the transmission monitor which is used for transmission calculation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                       <property name="text">
+                        <string>Transmission monitor</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="5" column="2">
+                      <widget class="QLineEdit" name="transmission_mn_4_shift_line_edit">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Distance between beamstop monitor and detector.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="9" column="1">
+                      <widget class="QLabel" name="transmission_mask_files_label">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A comma-separated list of MASK files which define areas on the bank which are excluded from the transmission calculation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                       <property name="text">
+                        <string>Mask Files</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="2" column="2">
+                      <widget class="QLineEdit" name="transmission_line_edit">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Spectrum number of the incident monitor which is used for transmission calculation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="3" column="1">
+                      <widget class="QLabel" name="transmission_target_label">
+                       <property name="text">
+                        <string>Transmission target</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="8" column="1">
+                      <widget class="QLabel" name="transmission_roi_files_label">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A comma-separated list of ROI files which define areas on the bank which contribute to the transmission calculation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                       <property name="text">
+                        <string>ROI Files</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="6" column="2">
+                      <widget class="QLineEdit" name="transmission_mn_5_shift_line_edit">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Distance between beamstop monitor and detector.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="2" column="1">
+                      <widget class="QLabel" name="transmission_incident_monitor_target">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Spectrum number of the incident monitor which is used for transmission calculation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                       <property name="text">
+                        <string>Incident monitor</string>
+                       </property>
+                      </widget>
                      </item>
                     </layout>
                    </widget>
@@ -2341,7 +2358,7 @@ QGroupBox::title {
   <tabstop>transmission_interpolating_rebin_check_box</tabstop>
   <tabstop>transmission_target_combo_box</tabstop>
   <tabstop>transmission_monitor_line_edit</tabstop>
-  <tabstop>transmission_mn_shift_line_edit</tabstop>
+  <tabstop>transmission_mn_4_shift_line_edit</tabstop>
   <tabstop>transmission_radius_line_edit</tabstop>
   <tabstop>transmission_roi_files_line_edit</tabstop>
   <tabstop>transmission_mask_files_line_edit</tabstop>

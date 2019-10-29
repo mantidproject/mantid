@@ -1,0 +1,167 @@
+<?xml version='1.0' encoding='ASCII'?>
+<instrument xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.mantidproject.org/IDF/1.0" last-modified="2019-09-26 14:43:00.375183" name="HB3A" valid-from="2018-10-20 23:59:59" valid-to="3018-10-20 23:59:59" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd">
+  <!--Created by Wenduo Zhou-->
+  <!--SOURCE-->
+  <component type="moderator">
+    <location z="-2.0"/>
+  </component>
+  <type is="Source" name="moderator"/>
+  <!--SAMPLE-->
+  <component type="sample-position">
+    <location x="0.0" y="0.0" z="0.0"/>
+  </component>
+  <type is="SamplePos" name="sample-position"/>
+  <!--PANEL Lower-->
+  <component type="arm1">
+    <location name="bank1">
+      <parameter name="p-position">
+        <value val="0.0"/>
+      </parameter>
+      <parameter name="r-position">
+        <value val="0.0"/>
+      </parameter>
+      <parameter name="roty">
+        <logfile eq="value+0.0" id="2theta"/>
+      </parameter>
+      <parameter name="t-position">
+        <value val="0.0"/>
+      </parameter>
+    </location>
+  </component>
+  <type name="arm1">
+    <component type="panel1">
+      <location>
+        <parameter name="rotx">
+          <logfile eq="value+0.0" id="cal::rotx1"/>
+        </parameter>
+        <parameter name="roty">
+          <logfile eq="value+0.0" id="cal::roty1"/>
+        </parameter>
+        <parameter name="rotz">
+          <logfile eq="value+0.0" id="cal::rotz1"/>
+        </parameter>
+        <parameter name="z">
+          <logfile eq="value+0.375" id="cal::diffz1"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+  <type name="panel1">
+    <component type="shiftpanel" idfillbyfirst="x" idstart="1" idstepbyrow="512" >
+      <location>
+        <parameter name="x">
+          <logfile eq="value" id="cal::diffx1"/>
+        </parameter>
+        <parameter name="y">
+          <logfile eq="-0.12+value" id="cal::diffy1"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+  <!--PANEL Middle-->
+  <component type="arm2">
+    <location name="bank2">
+      <parameter name="p-position">
+        <value val="0.0"/>
+      </parameter>
+      <parameter name="r-position">
+        <value val="0.0"/>
+      </parameter>
+      <parameter name="roty">
+        <logfile eq="value+0.0" id="2theta"/>
+      </parameter>
+      <parameter name="t-position">
+        <value val="0.0"/>
+      </parameter>
+    </location>
+  </component>
+  <type name="arm2">
+    <component type="panel2">
+      <location>
+        <parameter name="rotx">
+          <logfile eq="value+0.0" id="cal::rotx2"/>
+        </parameter>
+        <parameter name="roty">
+          <logfile eq="value+0.0" id="cal::roty2"/>
+        </parameter>
+        <parameter name="rotz">
+          <logfile eq="value+0.0" id="cal::rotz2"/>
+        </parameter>
+        <parameter name="z">
+          <logfile eq="value+0.375" id="cal::diffz2"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+  <type name="panel2">
+    <component type="shiftpanel" idfillbyfirst="x" idstart="262145" idstepbyrow="512" >
+      <location>
+        <parameter name="x">
+          <logfile eq="value" id="cal::diffx2"/>
+        </parameter>
+        <parameter name="y">
+          <logfile eq="0+value" id="cal::diffy2"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+  <!--PANEL Upper-->
+  <component type="arm3">
+    <location name="bank3">
+      <parameter name="p-position">
+        <value val="0.0"/>
+      </parameter>
+      <parameter name="r-position">
+        <value val="0.0"/>
+      </parameter>
+      <parameter name="roty">
+        <logfile eq="value+0.0" id="2theta"/>
+      </parameter>
+      <parameter name="t-position">
+        <value val="0.0"/>
+      </parameter>
+    </location>
+  </component>
+  <type name="arm3">
+    <component type="panel3">
+      <location>
+        <parameter name="rotx">
+          <logfile eq="value+0.0" id="cal::rotx3"/>
+        </parameter>
+        <parameter name="roty">
+          <logfile eq="value+0.0" id="cal::roty3"/>
+        </parameter>
+        <parameter name="rotz">
+          <logfile eq="value+0.0" id="cal::rotz3"/>
+        </parameter>
+        <parameter name="z">
+          <logfile eq="value+0.375" id="cal::diffz3"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+  <type name="panel3">
+    <component type="shiftpanel" idfillbyfirst="x" idstart="524289" idstepbyrow="512">
+      <location>
+        <parameter name="x">
+          <logfile eq="value" id="cal::diffx3"/>
+        </parameter>
+        <parameter name="y">
+          <logfile eq="0.12+value" id="cal::diffy3"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+  <type is="rectangular_detector" name="shiftpanel" type="pixel"
+	xpixels="512" xstart="0.05788671875" xstep="-0.0002265625"
+	ypixels="512" ystart="-0.05788671875" ystep="0.0002265625"/>
+  <type is="detector" name="pixel">
+    <cuboid id="pixel-shape">
+      <left-front-bottom-point x="0.00011328125" y="-0.00011328125" z="0"/>
+      <left-front-top-point x="0.00011328125" y="0.00011328125" z="0"/>
+      <left-back-bottom-point x="0.00011328125" y="-0.00011328125" z="-0.0001"/>
+      <right-front-bottom-point x="-0.00011328125" y="-0.00011328125" z="0"/>
+    </cuboid>
+    <algebra val="pixel-shape"/>
+  </type>
+</instrument>

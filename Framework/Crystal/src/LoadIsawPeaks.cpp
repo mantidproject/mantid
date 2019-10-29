@@ -106,10 +106,8 @@ void LoadIsawPeaks::init() {
 /** Execute the algorithm.
  */
 void LoadIsawPeaks::exec() {
-  // Create the workspace
+  //  the workspace
   PeaksWorkspace_sptr ws(new PeaksWorkspace());
-  std::string outputwsName = getPropertyValue("OutputWorkspace");
-  AnalysisDataService::Instance().addOrReplace(outputwsName, ws);
 
   // This loads (appends) the peaks
   this->appendFile(ws, getPropertyValue("Filename"));
@@ -242,6 +240,7 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
       Algorithm_sptr alg = createChildAlgorithm("MaskBTP");
       alg->setProperty<Workspace_sptr>("Workspace", outWS);
       alg->setProperty("Bank", maskBanks);
+      alg->setProperty("Instrument", instr->getName());
       if (!alg->execute())
         throw std::runtime_error(
             "MaskDetectors Child Algorithm has not executed successfully");

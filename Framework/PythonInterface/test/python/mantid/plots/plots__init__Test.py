@@ -7,8 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import matplotlib
-
-matplotlib.use('AGG')
+matplotlib.use('AGG')  # noqa
 import matplotlib.pyplot as plt
 from matplotlib.container import ErrorbarContainer
 import numpy as np
@@ -17,14 +16,15 @@ import unittest
 from mantid.kernel import config
 from mantid.plots.plotfunctions import get_colorplot_extents
 from mantid.py3compat.mock import Mock, patch
-from mantid.simpleapi import (CreateWorkspace, CreateSampleWorkspace, DeleteWorkspace)
+from mantid.simpleapi import (CreateWorkspace, CreateSampleWorkspace, DeleteWorkspace,
+                              RemoveSpectra, AnalysisDataService as ADS)
+from mantidqt.plotting.markers import SingleMarker
 
 
 class Plots__init__Test(unittest.TestCase):
     '''
     Just test if mantid projection works
     '''
-
     @classmethod
     def setUpClass(cls):
         cls.ws2d_histo = CreateWorkspace(DataX=[10, 20, 30, 10, 20, 30, 10, 20, 30],
@@ -55,7 +55,7 @@ class Plots__init__Test(unittest.TestCase):
 
     def test_errorbar_plots(self):
         self.ax.errorbar(self.ws2d_histo, specNum=2, linewidth=6)
-        self.ax.errorbar(np.arange(10), np.arange(10), 0.1 * np.ones((10,)), fmt='bo-')
+        self.ax.errorbar(np.arange(10), np.arange(10), 0.1 * np.ones((10, )), fmt='bo-')
 
     def test_imshow(self):
         self.ax.imshow(self.ws2d_histo)
@@ -93,12 +93,13 @@ class Plots__init__Test(unittest.TestCase):
         self.assertTrue(line_second_ws in self.ax.lines)
         DeleteWorkspace(second_ws)
 
-    def test_remove_workspace_artist_with_predicate_removes_only_lines_from_specified_workspace_which_return_true(self):
+    def test_remove_workspace_artist_with_predicate_removes_only_lines_from_specified_workspace_which_return_true(
+            self):
         line_ws2d_histo_spec_2 = self.ax.plot(self.ws2d_histo, specNum=2, linewidth=6)[0]
         line_ws2d_histo_spec_3 = self.ax.plot(self.ws2d_histo, specNum=3, linewidth=6)[0]
         self.assertEqual(2, len(self.ax.lines))
 
-        self.ax.remove_artists_if(lambda artist: artist.get_label() == 'ws2d_histo: spec 2')
+        self.ax.remove_artists_if(lambda artist: artist.get_label() == 'ws2d_histo: 6')
         self.assertEqual(1, len(self.ax.lines))
         self.assertTrue(line_ws2d_histo_spec_2 not in self.ax.lines)
         self.assertTrue(line_ws2d_histo_spec_3 in self.ax.lines)
@@ -109,7 +110,7 @@ class Plots__init__Test(unittest.TestCase):
         self.assertEqual(2, len(self.ax.lines))
 
         is_empty = self.ax.remove_artists_if(
-            lambda artist: artist.get_label() in ['ws2d_histo: spec 2', 'ws2d_histo: spec 3'])
+            lambda artist: artist.get_label() in ['ws2d_histo: 6', 'ws2d_histo: 8'])
         self.assertEqual(0, len(self.ax.lines))
         self.assertTrue(line_ws2d_histo_spec_2 not in self.ax.lines)
         self.assertTrue(line_ws2d_histo_spec_3 not in self.ax.lines)
@@ -121,11 +122,12 @@ class Plots__init__Test(unittest.TestCase):
         line_ws2d_histo_spec_3 = self.ax.plot(self.ws2d_histo, specNum=3, linewidth=6)[0]
         self.assertEqual(2, len(self.ax.lines))
 
-        self.ax.remove_artists_if(lambda artist: artist.get_label() == 'ws2d_histo: spec 2')
+        self.ax.remove_artists_if(lambda artist: artist.get_label() == 'ws2d_histo: 6')
         self.assertEqual(1, len(self.ax.lines))
         self.assertTrue(line_ws2d_histo_spec_2 not in self.ax.lines)
         self.assertTrue(line_ws2d_histo_spec_3 in self.ax.lines)
-        self.assertEqual(self.ax.tracked_workspaces[self.ws2d_histo.name()][0]._artists, [line_ws2d_histo_spec_3])
+        self.assertEqual(self.ax.tracked_workspaces[self.ws2d_histo.name()][0]._artists,
+                         [line_ws2d_histo_spec_3])
 
     def test_remove_if_removes_untracked_artists(self):
         line = self.ax.plot([0], [0])[0]
@@ -146,7 +148,7 @@ class Plots__init__Test(unittest.TestCase):
         self.assertEqual(3, len(self.ax.lines))
 
         is_empty = self.ax.remove_artists_if(
-            lambda artist: artist.get_label() in ['ws2d_histo: spec 2', 'second_ws: spec 5'])
+            lambda artist: artist.get_label() in ['ws2d_histo: 6', 'second_ws: spec 5'])
         self.assertEqual(1, len(self.ax.lines))
         self.assertTrue(line_ws2d_histo_spec_2 not in self.ax.lines)
         self.assertTrue(line_ws2d_histo_spec_3 in self.ax.lines)
@@ -201,7 +203,8 @@ class Plots__init__Test(unittest.TestCase):
         im_data = CreateWorkspace(DataX=[20, 30, 40, 20, 30, 40, 20, 30, 40],
                                   DataY=[3, 4, 5, 3, 4, 5],
                                   DataE=[.1, .2, .3, .4, .1, .1],
-                                  NSpec=3, VerticalAxisValues=[2, 3, 4],
+                                  NSpec=3,
+                                  VerticalAxisValues=[2, 3, 4],
                                   VerticalAxisUnit='DeltaE')
         self.ax.replace_workspace_artists(im_data)
         self.assertEqual(1, len(artists))
@@ -275,100 +278,137 @@ class Plots__init__Test(unittest.TestCase):
 
         self.ax.plot(non_dist_ws, specNum=1)
         auto_dist = (config['graph1d.autodistribution'] == 'On')
-        self.assertEqual(auto_dist, self.ax.tracked_workspaces[
-            non_dist_ws.name()][0].is_normalized)
+        self.assertEqual(auto_dist, self.ax.tracked_workspaces[non_dist_ws.name()][0].is_normalized)
         del self.ax.tracked_workspaces[non_dist_ws.name()]
 
     def test_check_axes_distribution_consistency_mixed_normalization(self):
-        mock_logger = self._run_check_axes_distribution_consistency(
-            [True, False, True])
+        mock_logger = self._run_check_axes_distribution_consistency([True, False, True])
         mock_logger.assert_called_once_with("You are overlaying distribution and "
                                             "non-distribution data!")
 
     def test_check_axes_distribution_consistency_all_normalized(self):
-        mock_logger = self._run_check_axes_distribution_consistency(
-            [True, True, True])
+        mock_logger = self._run_check_axes_distribution_consistency([True, True, True])
         self.assertEqual(0, mock_logger.call_count)
 
     def test_check_axes_distribution_consistency_all_non_normalized(self):
-        mock_logger = self._run_check_axes_distribution_consistency(
-            [False, False, False])
+        mock_logger = self._run_check_axes_distribution_consistency([False, False, False])
         self.assertEqual(0, mock_logger.call_count)
 
     def test_that_autoscaling_can_be_turned_off_when_data_changes(self):
         """We should be able to plot a workspace without having it
         autoscale if the workspace changes
         """
-        ws = CreateWorkspace(DataX=[10, 20],
-                             DataY=[10, 20],
-                             OutputWorkspace="ws")
+        ws = CreateWorkspace(DataX=[10, 20], DataY=[10, 20], OutputWorkspace="ws")
         self.ax.plot(ws, autoscale_on_update=False)
-        CreateWorkspace(DataX=[10, 20],
-                        DataY=[10, 5000],
-                        OutputWorkspace="ws")
+        CreateWorkspace(DataX=[10, 20], DataY=[10, 5000], OutputWorkspace="ws")
         self.assertLess(self.ax.get_ylim()[1], 5000)
 
     def test_that_autoscaling_can_be_turned_off_when_plotting_multiple_workspaces(self):
         """We should be able to plot a new workspace without having the plot scale to it"""
-        ws = CreateWorkspace(DataX=[10, 20],
-                             DataY=[10, 20])
+        ws = CreateWorkspace(DataX=[10, 20], DataY=[10, 20])
         self.ax.plot(ws)
-        ws2 = CreateWorkspace(DataX=[10, 20],
-                              DataY=[10, 5000])
+        ws2 = CreateWorkspace(DataX=[10, 20], DataY=[10, 5000])
         self.ax.plot(ws2, autoscale_on_update=False)
         self.assertLess(self.ax.get_ylim()[1], 5000)
 
     def test_that_plot_autoscales_by_default(self):
-        ws = CreateWorkspace(DataX=[10, 20],
-                             DataY=[10, 20],
-                             OutputWorkspace="ws")
+        ws = CreateWorkspace(DataX=[10, 20], DataY=[10, 20], OutputWorkspace="ws")
         self.ax.plot(ws)
-        ws2 = CreateWorkspace(DataX=[10, 20],
-                              DataY=[10, 5000],
-                              OutputWorkspace="ws2")
+        ws2 = CreateWorkspace(DataX=[10, 20], DataY=[10, 5000], OutputWorkspace="ws2")
         self.ax.plot(ws2)
         self.assertGreaterEqual(self.ax.get_ylim()[1], 5000)
 
     def test_that_errorbar_autoscales_by_default(self):
-        ws = CreateWorkspace(DataX=[10, 20],
-                             DataY=[10, 20],
-                             DataE=[1, 1],
-                             OutputWorkspace="ws")
+        ws = CreateWorkspace(DataX=[10, 20], DataY=[10, 20], DataE=[1, 1], OutputWorkspace="ws")
         self.ax.errorbar(ws)
-        ws2 = CreateWorkspace(DataX=[10, 20],
-                              DataY=[10, 5000],
-                              DataE=[1, 1],
-                              OutputWorkspace="ws2")
+        ws2 = CreateWorkspace(DataX=[10, 20], DataY=[10, 5000], DataE=[1, 1], OutputWorkspace="ws2")
         self.ax.errorbar(ws2)
         self.assertGreaterEqual(self.ax.get_ylim()[1], 5000)
 
     def test_that_errorbar_autoscaling_can_be_turned_off_when_plotting_multiple_workspaces(self):
-        ws = CreateWorkspace(DataX=[10, 20],
-                             DataY=[10, 20])
+        ws = CreateWorkspace(DataX=[10, 20], DataY=[10, 20])
         self.ax.errorbar(ws)
-        ws2 = CreateWorkspace(DataX=[10, 20],
-                              DataY=[10, 5000])
+        ws2 = CreateWorkspace(DataX=[10, 20], DataY=[10, 5000])
         self.ax.errorbar(ws2, autoscale_on_update=False)
         self.assertLess(self.ax.get_ylim()[1], 5000)
 
     def test_that_errorbar_autoscaling_can_be_turned_off(self):
-        ws = CreateWorkspace(DataX=[10, 20],
-                             DataY=[10, 20],
-                             DataE=[1, 2],
-                             OutputWorkspace="ws")
+        ws = CreateWorkspace(DataX=[10, 20], DataY=[10, 20], DataE=[1, 2], OutputWorkspace="ws")
         self.ax.errorbar(ws)
-        ws2 = CreateWorkspace(DataX=[10, 20],
-                              DataY=[10, 5000],
-                              DataE=[1, 1],
-                              OutputWorkspace="ws2")
+        ws2 = CreateWorkspace(DataX=[10, 20], DataY=[10, 5000], DataE=[1, 1], OutputWorkspace="ws2")
         self.ax.errorbar(ws2, autoscale_on_update=False)
         self.assertLess(self.ax.get_ylim()[1], 5000)
 
+    def test_that_plotting_ws_without_giving_spec_num_sets_spec_num_if_ws_has_1_histogram(self):
+        ws_name = "ws-with-one-spec"
+        ws = CreateWorkspace(DataX=[10, 20],
+                             DataY=[10, 5000],
+                             DataE=[1, 1],
+                             OutputWorkspace=ws_name)
+        self.ax.plot(ws)
+        ws_artist = self.ax.tracked_workspaces[ws_name][0]
+        self.assertEqual(1, ws_artist.spec_num)
+
+    def test_that_plotting_ws_without_giving_spec_num_raises_if_ws_has_more_than_1_histogram(self):
+        self.assertRaises(RuntimeError, self.ax.plot, self.ws2d_histo)
+
+    def test_that_plotting_ws_without_giving_spec_num_sets_correct_spec_num_after_spectra_removed(
+            self):
+        CreateWorkspace(DataX=[10, 20, 30],
+                        DataY=[10, 20, 30],
+                        DataE=[1, 1, 1],
+                        NSpec=3,
+                        OutputWorkspace="ws-with-3-spec")
+        RemoveSpectra("ws-with-3-spec", [0, 1], OutputWorkspace='out_ws')
+        out_ws = ADS.retrieve('out_ws')
+        self.ax.plot(out_ws)
+        ws_artist = self.ax.tracked_workspaces['out_ws'][0]
+        self.assertEqual(3, ws_artist.spec_num)
+
+    def test_that_plotting_ws_without_spec_num_adds_default_spec_num_to_creation_args(self):
+        ws_name = "ws-with-one-spec"
+        ws = CreateWorkspace(DataX=[10, 20],
+                             DataY=[10, 5000],
+                             DataE=[1, 1],
+                             OutputWorkspace=ws_name)
+        self.ax.plot(ws)
+        self.assertEqual(1, self.ax.creation_args[0]['specNum'])
+
+    def test_that_relim_ignores_interactive_markers(self):
+        """
+        When calling .relim the content limits of the axes is calculated
+        and a margin added. When the axes is resized the interactive
+        markers re-calculate their limits to be the new axes limits,
+        i.e. the original limits plus the margin. This mean repeatedly
+        calling relim and autoscale will zoom out on the axes.
+
+        This test makes sure this isn't happening and that the markers
+        are ignored when calling .relim in this case.
+        """
+        fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+        ax.plot([0, 1], [0, 1])
+        y_min, y_max = ax.get_ylim()
+        SingleMarker(
+            fig.canvas,
+            'g',
+            0.5,
+            y_min,
+            y_max,
+            marker_type='XSingle',
+            axis=ax
+        )
+        ax.relim()
+        ax.autoscale()
+        np.testing.assert_almost_equal((y_min, y_max), ax.get_ylim())
+
     def _run_check_axes_distribution_consistency(self, normalization_states):
         mock_tracked_workspaces = {
-            'ws': [Mock(is_normalized=normalization_states[0]),
-                   Mock(is_normalized=normalization_states[1])],
-            'ws1': [Mock(is_normalized=normalization_states[2])]}
+            'ws': [
+                Mock(is_normalized=normalization_states[0]),
+                Mock(is_normalized=normalization_states[1])
+            ],
+            'ws1': [Mock(is_normalized=normalization_states[2])]
+        }
         with patch('mantid.kernel.logger.warning', Mock()) as mock_logger:
             with patch.object(self.ax, 'tracked_workspaces', mock_tracked_workspaces):
                 self.ax.check_axes_distribution_consistency()

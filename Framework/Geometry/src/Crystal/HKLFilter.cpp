@@ -21,7 +21,7 @@ namespace Geometry {
  *
  * @return Function object with filter function for V3D.s
  */
-std::function<bool(const Kernel::V3D &)> HKLFilter::fn() const {
+std::function<bool(const Kernel::V3D &)> HKLFilter::fn() const noexcept {
   return std::bind(&HKLFilter::isAllowed, this, std::placeholders::_1);
 }
 
@@ -36,12 +36,12 @@ HKLFilterUnaryLogicOperation::HKLFilterUnaryLogicOperation(
 }
 
 /// Returns a description of the HKLFilterNot.
-std::string HKLFilterNot::getDescription() const {
+std::string HKLFilterNot::getDescription() const noexcept {
   return "!" + m_operand->getDescription();
 }
 
 /// Returns true if the wrapped filter returns false and false otherwise.
-bool HKLFilterNot::isAllowed(const Kernel::V3D &hkl) const {
+bool HKLFilterNot::isAllowed(const Kernel::V3D &hkl) const noexcept {
   return !(m_operand->isAllowed(hkl));
 }
 
@@ -57,22 +57,22 @@ HKLFilterBinaryLogicOperation::HKLFilterBinaryLogicOperation(
 }
 
 /// Returns a description of the HKLFilterAnd.
-std::string HKLFilterAnd::getDescription() const {
+std::string HKLFilterAnd::getDescription() const noexcept {
   return "(" + m_lhs->getDescription() + " & " + m_rhs->getDescription() + ")";
 }
 
 /// Returns true if both wrapped filters return true.
-bool HKLFilterAnd::isAllowed(const Kernel::V3D &hkl) const {
+bool HKLFilterAnd::isAllowed(const Kernel::V3D &hkl) const noexcept {
   return m_lhs->isAllowed(hkl) && m_rhs->isAllowed(hkl);
 }
 
 /// Returns a description of the HKLFilterOr.
-std::string HKLFilterOr::getDescription() const {
+std::string HKLFilterOr::getDescription() const noexcept {
   return "(" + m_lhs->getDescription() + " | " + m_rhs->getDescription() + ")";
 }
 
 /// Returns true if either of the wrapped filters returns true.
-bool HKLFilterOr::isAllowed(const Kernel::V3D &hkl) const {
+bool HKLFilterOr::isAllowed(const Kernel::V3D &hkl) const noexcept {
   return m_lhs->isAllowed(hkl) || m_rhs->isAllowed(hkl);
 }
 

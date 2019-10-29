@@ -10,6 +10,8 @@
 #include "MantidIndexing/DllConfig.h"
 #include "MantidIndexing/IndexType.h"
 
+#include <cstdint>
+
 namespace Mantid {
 namespace Indexing {
 

@@ -119,9 +119,9 @@ set_target_properties(HistogramData
                                  COMPILE_DEFINITIONS
                                  IN_MANTID_HISTOGRAMDATA)
 
-if(OSX_VERSION VERSION_GREATER 10.8)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(HistogramData
-                        PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+                        PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set_target_properties(HistogramData
                         PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")

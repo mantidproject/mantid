@@ -21,8 +21,10 @@ from qtpy.QtWidgets import QMainWindow
 # local imports
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.widgets.observers.observing_view import ObservingView
+from workbench.utils import on_top_of_main_window
 
 
+@on_top_of_main_window
 class FigureWindow(QMainWindow, ObservingView):
     """A MainWindow that will hold plots"""
     activated = Signal()
@@ -38,7 +40,6 @@ class FigureWindow(QMainWindow, ObservingView):
         self.setAttribute(Qt.WA_DeleteOnClose, True)
         self.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
 
-        self.close_signal.connect(self._run_close)
         self.setAcceptDrops(True)
 
     @Slot()
@@ -86,8 +87,18 @@ class FigureWindow(QMainWindow, ObservingView):
         from matplotlib.backend_bases import LocationEvent
         workspace_names = event.mimeData().text().split('\n')
 
-        # This creates a matplotlib LocationEvent so that the axis in which the drop event occurred can be calculated
-        x, y = self._canvas.mouseEventCoords(event.pos())
+        # This creates a matplotlib LocationEvent so that the axis in which the
+        # drop event occurred can be calculated
+        try:
+            x, y = self._canvas.mouseEventCoords(event.pos())
+        except AttributeError:  # matplotlib v1.5 does not have mouseEventCoords
+            try:
+                dpi_ratio = self._canvas.devicePixelRatio() or 1
+            except AttributeError:
+                dpi_ratio = 1
+            x = dpi_ratio*event.pos().x()
+            y = dpi_ratio*self._canvas.figure.bbox.height/dpi_ratio - event.pos().y()
+
         location_event = LocationEvent('AxesGetterEvent', self._canvas, x, y)
         ax = location_event.inaxes if location_event.inaxes else self._canvas.figure.axes[0]
 

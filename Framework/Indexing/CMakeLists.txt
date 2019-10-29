@@ -11,7 +11,6 @@ set(SRC_FILES
 set(INC_FILES
     inc/MantidIndexing/Conversion.h
     inc/MantidIndexing/DetectorID.h
-    inc/MantidIndexing/DllConfig.h
     inc/MantidIndexing/Extract.h
     inc/MantidIndexing/GlobalSpectrumIndex.h
     inc/MantidIndexing/Group.h
@@ -67,9 +66,9 @@ set_target_properties(Indexing
                                  COMPILE_DEFINITIONS
                                  IN_MANTID_INDEXING)
 
-if(OSX_VERSION VERSION_GREATER 10.8)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(Indexing
-                        PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+                        PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set_target_properties(Indexing
                         PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
@@ -96,8 +95,11 @@ endif()
 # Add the unit tests directory
 add_subdirectory(test)
 
-# Installation settings
+# Auto-generate exports header
+target_include_directories(Indexing PUBLIC ${CMAKE_BINARY_DIR}/Framework/Indexing)
+generate_mantid_export_header(Indexing)
 
+# Installation settings
 mtd_install_targets(TARGETS
                     Indexing
                     INSTALL_DIRS

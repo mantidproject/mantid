@@ -9,79 +9,13 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidKernel/WarningSuppressions.h"
-#include "MantidPythonInterface/core/NDArray.h"
-#include "MantidPythonInterface/core/VersionCompat.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetEncoder.h"
 
-#include <QApplication>
 #include <cxxtest/TestSuite.h>
 
 using namespace MantidQt::MantidWidgets;
 using namespace Mantid::API;
-
-/**
- * PythonInterpreter
- *
- * Uses setUpWorld/tearDownWorld to initialize & finalize
- * Python
- */
-class PythonInterpreter : CxxTest::GlobalFixture {
-public:
-  bool setUpWorld() override {
-    Py_Initialize();
-    PyEval_InitThreads();
-    Mantid::PythonInterface::importNumpy();
-    return Py_IsInitialized();
-  }
-
-  bool tearDown() override {
-    // Some test methods may leave the Python error handler with an error
-    // set that confuse other tests when the executable is run as a whole
-    // Clear the errors after each suite method is run
-    PyErr_Clear();
-    return CxxTest::GlobalFixture::tearDown();
-  }
-
-  bool tearDownWorld() override {
-    Py_Finalize();
-    return true;
-  }
-};
-
-static PythonInterpreter PYTHON_INTERPRETER;
-
-/**
- * QApplication
- *
- * Uses setUpWorld/tearDownWorld to initialize & finalize
- * QApplication object
- */
-class QApplicationHolder : CxxTest::GlobalFixture {
-public:
-  bool setUpWorld() override {
-    m_app = new QApplication(m_argc, m_argv);
-
-    qRegisterMetaType<std::string>("StdString");
-    qRegisterMetaType<Mantid::API::Workspace_sptr>("Workspace");
-
-    return true;
-  }
-
-  bool tearDownWorld() override {
-    delete m_app;
-    return true;
-  }
-
-  int m_argc = 1;
-  GNU_DIAG_OFF("pedantic")
-  char *m_argv[1] = {"InstrumentWidgetTest"};
-  GNU_DIAG_ON("pedantic")
-  QApplication *m_app;
-};
-
-static QApplicationHolder MAIN_QAPPLICATION;
 
 class InstrumentWidgetEncoderTest : public CxxTest::TestSuite {
 public:

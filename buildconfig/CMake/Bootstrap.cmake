@@ -81,5 +81,10 @@ if( MSVC )
   set ( BOOST_LIBRARYDIR "${CMAKE_LIBRARY_PATH}" )
   set ( Boost_NO_SYSTEM_PATHS TRUE )
 else()
+  if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    # Homebrew adds qt4 here and we require it to be unlinked
+    # from /usr/local to avoid qt4/qt5 cross talk
+    list(APPEND CMAKE_PREFIX_PATH /usr/local/opt/qt@4)
+  endif()
   find_package ( Git )
 endif()

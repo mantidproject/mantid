@@ -29,6 +29,8 @@ public:
   virtual void notifyCloseBatchRequested(int) = 0;
   virtual void notifySaveBatchRequested(int) = 0;
   virtual void notifyLoadBatchRequested(int) = 0;
+  virtual void notifyShowOptionsRequested() = 0;
+  virtual void notifyShowSlitCalculatorRequested() = 0;
   virtual ~MainWindowSubscriber() = default;
 };
 

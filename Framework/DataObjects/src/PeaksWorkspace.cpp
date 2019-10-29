@@ -185,9 +185,9 @@ void PeaksWorkspace::removePeaks(std::vector<int> badPeaks) {
  */
 void PeaksWorkspace::addPeak(const Geometry::IPeak &ipeak) {
   if (dynamic_cast<const Peak *>(&ipeak)) {
-    peaks.push_back((const Peak &)ipeak);
+    peaks.emplace_back((const Peak &)ipeak);
   } else {
-    peaks.push_back(Peak(ipeak));
+    peaks.emplace_back(Peak(ipeak));
   }
 }
 
@@ -206,7 +206,7 @@ void PeaksWorkspace::addPeak(const V3D &position,
 /** Add a peak to the list
  * @param peak :: Peak object to add (move) into this.
  */
-void PeaksWorkspace::addPeak(Peak &&peak) { peaks.push_back(peak); }
+void PeaksWorkspace::addPeak(Peak &&peak) { peaks.emplace_back(peak); }
 
 //---------------------------------------------------------------------------------------------
 /** Return a reference to the Peak
@@ -241,17 +241,14 @@ const Peak &PeaksWorkspace::getPeak(const int peakNum) const {
  * detector. You do NOT need to explicitly provide this distance.
  * @return a pointer to a new Peak object.
  */
-Geometry::IPeak *
+std::unique_ptr<Geometry::IPeak>
 PeaksWorkspace::createPeak(const Kernel::V3D &QLabFrame,
                            boost::optional<double> detectorDistance) const {
-  Geometry::Goniometer goniometer = this->run().getGoniometer();
-
   // create a peak using the qLab frame
-  auto peak = new Peak(this->getInstrument(), QLabFrame, detectorDistance);
-
+  std::unique_ptr<IPeak> peak = std::make_unique<Peak>(
+      this->getInstrument(), QLabFrame, detectorDistance);
   // Set the goniometer
-  peak->setGoniometerMatrix(goniometer.getR());
-
+  peak->setGoniometerMatrix(this->run().getGoniometer().getR());
   // Take the run number from this
   peak->setRunNumber(this->getRunNumber());
 
@@ -269,11 +266,11 @@ std::unique_ptr<Geometry::IPeak>
 PeaksWorkspace::createPeak(const Kernel::V3D &position,
                            const Kernel::SpecialCoordinateSystem &frame) const {
   if (frame == Mantid::Kernel::HKL) {
-    return std::unique_ptr<Geometry::IPeak>(createPeakHKL(position));
+    return createPeakHKL(position);
   } else if (frame == Mantid::Kernel::QLab) {
-    return std::unique_ptr<Geometry::IPeak>(createPeak(position));
+    return createPeak(position);
   } else {
-    return std::unique_ptr<Geometry::IPeak>(createPeakQSample(position));
+    return createPeakQSample(position);
   }
 }
 
@@ -284,7 +281,8 @@ PeaksWorkspace::createPeak(const Kernel::V3D &position,
  * detector. You do NOT need to explicitly provide this distance.
  * @return a pointer to a new Peak object.
  */
-Peak *PeaksWorkspace::createPeakQSample(const V3D &position) const {
+std::unique_ptr<IPeak>
+PeaksWorkspace::createPeakQSample(const V3D &position) const {
   // Create a peak from QSampleFrame
 
   Geometry::Goniometer goniometer;
@@ -312,7 +310,8 @@ Peak *PeaksWorkspace::createPeakQSample(const V3D &position) const {
     goniometer = run().getGoniometer();
   }
   // create a peak using the qLab frame
-  auto peak = new Peak(getInstrument(), position, goniometer.getR());
+  std::unique_ptr<IPeak> peak =
+      std::make_unique<Peak>(getInstrument(), position, goniometer.getR());
   // Take the run number from this
   peak->setRunNumber(getRunNumber());
   return peak;
@@ -410,9 +409,7 @@ PeaksWorkspace::peakInfo(const Kernel::V3D &qFrame, bool labCoords) const {
   }
 
   try {
-
-    Geometry::IPeak *peak = createPeak(Qlab);
-
+    auto peak = createPeak(Qlab);
     if (sample().hasOrientedLattice()) {
 
       peak->setGoniometerMatrix(Gon);
@@ -505,30 +502,26 @@ PeaksWorkspace::peakInfo(const Kernel::V3D &qFrame, bool labCoords) const {
  * @param HKL : reciprocal lattice vector coefficients
  * @return Fully formed peak.
  */
-Peak *PeaksWorkspace::createPeakHKL(const V3D &HKL) const {
+std::unique_ptr<IPeak> PeaksWorkspace::createPeakHKL(const V3D &HKL) const {
   /*
    The following allows us to add peaks where we have a single UB to work from.
    */
-
-  Geometry::OrientedLattice lattice = this->sample().getOrientedLattice();
-  Geometry::Goniometer goniometer = this->run().getGoniometer();
+  const auto &lattice = this->sample().getOrientedLattice();
+  const auto &goniometer = this->run().getGoniometer();
 
   // Calculate qLab from q HKL. As per Busing and Levy 1967, q_lab_frame = 2pi *
   // Goniometer * UB * HKL
-  V3D qLabFrame = goniometer.getR() * lattice.getUB() * HKL * 2 * M_PI;
+  const V3D qLabFrame = goniometer.getR() * lattice.getUB() * HKL * 2 * M_PI;
 
   // create a peak using the qLab frame
-  auto peak =
-      new Peak(this->getInstrument(),
-               qLabFrame); // This should calculate the detector positions too.
-
+  // This should calculate the detector positions too
+  std::unique_ptr<IPeak> peak =
+      std::make_unique<Peak>(this->getInstrument(), qLabFrame);
   // We need to set HKL separately to keep things consistent.
   peak->setHKL(HKL[0], HKL[1], HKL[2]);
   peak->setIntHKL(peak->getHKL());
-
   // Set the goniometer
   peak->setGoniometerMatrix(goniometer.getR());
-
   // Take the run number from this
   peak->setRunNumber(this->getRunNumber());
 

@@ -15,7 +15,7 @@ from qtpy.QtWidgets import QWidget
 from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_model import InstrumentWidgetModel
 from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_presenter import InstrumentWidgetPresenter
 from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_view import InstrumentWidgetView
-from Muon.GUI.Common.observer_pattern import Observer
+from mantidqt.utils.observer_pattern import Observer
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_view import DEADTIME_DATA_FILE,\
     DEADTIME_WORKSPACE, DEADTIME_OTHER_FILE, DEADTIME_NONE
@@ -284,7 +284,7 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
 
         self.assertEqual(self.view.dead_time_selector.currentIndex(), DEADTIME_WORKSPACE)
         self.view.warning_popup.assert_not_called()
-        self.assertEqual(self.view.dead_time_file_selector.currentText(), 'MUSR00015196_deadTimes')
+        self.assertEqual(self.view.dead_time_file_selector.currentText(), 'MUSR00015196.nxs_deadtime_table_1')
         self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, {'DeadTimeTable': mock.ANY})
 
     def test_validate_variable_rebin_string_allows_single_number(self):

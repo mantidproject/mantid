@@ -109,7 +109,8 @@ class CodeEditorTabWidget(QTabWidget):
                                        shortcut_context=Qt.ApplicationShortcut,
                                        shortcut_visible_in_context_menu=True)
 
-        abort_action = create_action(self, "Abort", on_triggered=parent.abort_current)
+        abort_action = create_action(self, "Abort", on_triggered=parent.abort_current, shortcut="Ctrl+D",
+                                     shortcut_context=Qt.ApplicationShortcut, shortcut_visible_in_context_menu=True)
 
         # menu action to toggle the find/replace dialog
         toggle_find_replace = create_action(self, 'Find/Replace...', on_triggered=parent.toggle_find_replace_dialog,

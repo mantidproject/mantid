@@ -16,9 +16,6 @@
 
 #include <QFileInfo>
 
-#include <qwt_plot.h>
-#include <qwt_plot_curve.h>
-
 using namespace Mantid::API;
 
 namespace {

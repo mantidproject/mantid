@@ -61,7 +61,9 @@
  * but are required for documentation purposes.
  * This is a macro to silence compiler warnings about the subject
  */
+#ifndef UNUSED_ARG
 #define UNUSED_ARG(x) (void)x;
+#endif
 
 /**
  * A Macro to mark a function as deprecated.

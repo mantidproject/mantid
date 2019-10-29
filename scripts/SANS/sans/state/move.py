@@ -9,13 +9,14 @@
 """State for moving workspaces."""
 
 from __future__ import (absolute_import, division, print_function)
-import json
-import copy
 
-from sans.state.state_base import (StateBase, FloatParameter, DictParameter, ClassTypeParameter,
-                                   StringWithNoneParameter, rename_descriptor_names)
+import copy
+import json
+
 from sans.common.enums import (Coordinates, CanonicalCoordinates, SANSInstrument, DetectorType)
 from sans.state.automatic_setters import automatic_setters
+from sans.state.state_base import (StateBase, FloatParameter, DictParameter, ClassTypeParameter,
+                                   StringWithNoneParameter, rename_descriptor_names)
 from sans.state.state_functions import (validation_message, set_detector_names, set_monitor_names)
 
 
@@ -96,13 +97,13 @@ class StateMove(StateBase):
         self.sample_offset_direction = CanonicalCoordinates.Z
 
     def validate(self):
-        # No validation of the descriptors on this level, let potential exceptions from detectors "bubble" up
-        for key in self.detectors:
-            self.detectors[key].validate()
-
         # If the detectors are empty, then we raise
         if not self.detectors:
             raise ValueError("No detectors have been set.")
+
+        # No validation of the descriptors on this level, let potential exceptions from detectors "bubble" up
+        for key in self.detectors:
+            self.detectors[key].validate()
 
 
 @rename_descriptor_names
@@ -142,7 +143,7 @@ class StateMoveSANS2D(StateMove):
     lab_detector_x = FloatParameter()
     lab_detector_z = FloatParameter()
 
-    monitor_n_offset = FloatParameter()
+    monitor_4_offset = FloatParameter()
 
     def __init__(self):
         super(StateMoveSANS2D, self).__init__()
@@ -161,8 +162,7 @@ class StateMoveSANS2D(StateMove):
 
         # Set the monitor names
         self.monitor_names = {}
-
-        self.monitor_n_offset = 0.0
+        self.monitor_4_offset = 0.0
 
         # Setup the detectors
         self.detectors = {DetectorType.to_string(DetectorType.LAB): StateMoveDetector(),
@@ -194,8 +194,10 @@ class StateMoveLARMOR(StateMove):
 
 @rename_descriptor_names
 class StateMoveZOOM(StateMove):
+
     lab_detector_default_sd_m = FloatParameter()
-    monitor_n_offset = FloatParameter()
+    monitor_4_offset = FloatParameter()
+    monitor_5_offset = FloatParameter()
 
     def __init__(self):
         super(StateMoveZOOM, self).__init__()
@@ -203,7 +205,9 @@ class StateMoveZOOM(StateMove):
 
         # Set the monitor names
         self.monitor_names = {}
-        self.monitor_n_offset = 0.0
+
+        self.monitor_4_offset = 0.0
+        self.monitor_5_offset = 0.0
 
         # Setup the detectors
         self.detectors = {DetectorType.to_string(DetectorType.LAB): StateMoveDetector()}

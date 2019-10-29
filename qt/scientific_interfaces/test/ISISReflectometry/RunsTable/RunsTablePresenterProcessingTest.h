@@ -111,7 +111,7 @@ public:
     verifyAndClearExpectations();
   }
 
-  void testNotifyInstrumentChanged() {
+  void testNotifyChangeInstrumentRequested() {
     auto presenter = makePresenter(m_view, ReductionJobs());
     auto const instrument = std::string("test_instrument");
     EXPECT_CALL(m_view, getInstrumentName())
@@ -120,6 +120,33 @@ public:
     EXPECT_CALL(m_mainPresenter, notifyChangeInstrumentRequested(instrument))
         .Times(1);
     presenter.notifyChangeInstrumentRequested();
+    verifyAndClearExpectations();
+  }
+
+  void testNotifyInstrumentChanged() {
+    auto presenter = makePresenter(m_view, ReductionJobs());
+    auto const instrument = std::string("test_instrument");
+    EXPECT_CALL(m_view, setInstrumentName(instrument)).Times(1);
+    presenter.notifyInstrumentChanged(instrument);
+    verifyAndClearExpectations();
+  }
+
+  void testSettingsChangedResetsStateInModel() {
+    auto presenter = makePresenter(m_view, oneGroupWithARowModel());
+    // Set success=true
+    getGroup(presenter, 0).setSuccess();
+    getRow(presenter, 0, 0)->setSuccess();
+    presenter.settingsChanged();
+    // Check success state is reset
+    TS_ASSERT_EQUALS(getGroup(presenter, 0).success(), false);
+    TS_ASSERT_EQUALS(getRow(presenter, 0, 0)->success(), false);
+  }
+
+  void testSettingsChangedResetsStateInView() {
+    auto presenter = makePresenter(m_view, oneGroupWithARowModel());
+    expectGroupStateCleared();
+    expectRowStateCleared();
+    presenter.settingsChanged();
     verifyAndClearExpectations();
   }
 
@@ -240,8 +267,9 @@ private:
   static constexpr const char *FAILURE = "#accbff"; // pale blue
 
   std::vector<Cell> rowCells(const char *colour) {
-    auto cells = std::vector<Cell>{Cell(""), Cell(""), Cell(""), Cell(""),
-                                   Cell(""), Cell(""), Cell(""), Cell("")};
+    auto cells =
+        std::vector<Cell>{Cell(""), Cell(""), Cell(""), Cell(""), Cell(""),
+                          Cell(""), Cell(""), Cell(""), Cell("")};
     for (auto &cell : cells)
       cell.setBackgroundColor(colour);
     return cells;
@@ -255,20 +283,6 @@ private:
     for (auto &cell : cells)
       cell.setBackgroundColor(colour);
     return cells;
-  }
-
-  Group &getGroup(RunsTablePresenter &presenter, int groupIndex) {
-    auto &reductionJobs = presenter.mutableRunsTable().mutableReductionJobs();
-    auto &group = reductionJobs.mutableGroups()[groupIndex];
-    return group;
-  }
-
-  Row *getRow(RunsTablePresenter &presenter, int groupIndex, int rowIndex) {
-    auto &reductionJobs = presenter.mutableRunsTable().mutableReductionJobs();
-    auto *row = &reductionJobs.mutableGroups()[groupIndex]
-                     .mutableRows()[rowIndex]
-                     .get();
-    return row;
   }
 
   void expectGroupStateCleared() {

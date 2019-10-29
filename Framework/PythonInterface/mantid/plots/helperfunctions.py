@@ -188,7 +188,7 @@ def get_wksp_index_dist_and_label(workspace, axis=MantidAxType.SPECTRUM, **kwarg
     if 'label' not in kwargs:
         ws_name = workspace.name()
         if axis == MantidAxType.SPECTRUM:
-            if workspace.getAxis(1).isText():
+            if workspace.getAxis(1).isText() or workspace.getAxis(1).isNumeric():
                 kwargs['label'] = '{0}: {1}'.format(ws_name, workspace.getAxis(1).label(workspace_index))
             else:
                 if ws_name:
@@ -219,11 +219,6 @@ def _get_wksp_index_and_spec_num(workspace, axis, **kwargs):
     """
     spectrum_number = kwargs.pop('specNum', None)
     workspace_index = kwargs.pop('wkspIndex', None)
-
-    # don't worry if there is only one spectrum
-    if workspace.getNumberHistograms() == 1:
-        spectrum_number = None
-        workspace_index = 0
 
     # error check input parameters
     if (spectrum_number is not None) and (workspace_index is not None):

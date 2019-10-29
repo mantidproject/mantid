@@ -33,11 +33,10 @@ void addFakeEllipsoid(const V3D &peakHKL, const int &totalNPixels,
                       EventWorkspace_sptr &eventWS,
                       PeaksWorkspace_sptr &peaksWS) {
   // Create the peak and add it to the peaks ws
-  Peak *peak = peaksWS->createPeakHKL(peakHKL);
+  auto peak = peaksWS->createPeakHKL(peakHKL);
   peaksWS->addPeak(*peak);
   const int detectorId = peak->getDetectorID();
   const double tofExact = peak->getTOF();
-  delete peak;
 
   EventList &el = eventWS->getSpectrum(detectorId - totalNPixels);
 

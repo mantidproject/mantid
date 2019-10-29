@@ -14,6 +14,7 @@ set(TEST_PY_FILES
     AbinsLoadDMOL3Test.py
     AbinsLoadGAUSSIANTest.py
     AbinsPowderDataTest.py
+    AbsorptionShapesTest.py 	
     ConvertToWavelengthTest.py
     CrystalFieldMultiSiteTest.py
     CrystalFieldTest.py

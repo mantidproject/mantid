@@ -742,7 +742,7 @@ class RunDescriptor(PropDescriptor):
         return self._build_ws_name()
 #--------------------------------------------------------------------------------------------------------------------
 
-    def synchronize_ws(self,workspace=None):
+    def synchronize_ws(self,workspace=None,new_ws_name = None):
         """Synchronize workspace name (after workspace may have changed due to algorithm)
            with internal run holder name. Accounts for the situation when
 
@@ -753,8 +753,10 @@ class RunDescriptor(PropDescriptor):
         """
         if not workspace:
             workspace = mtd[self._ws_name]
-
-        new_name = self._build_ws_name()
+        if new_ws_name:
+            new_name = new_ws_name
+        else:
+            new_name = self._build_ws_name()
         old_name = workspace.name()
         if new_name != old_name:
             # Compatibility with old test code comes here:
@@ -767,6 +769,8 @@ class RunDescriptor(PropDescriptor):
                     workspace.setMonitorWorkspace(mon_ws)
             RenameWorkspace(InputWorkspace=old_name,OutputWorkspace=new_name,RenameMonitors=True)
         self._ws_name = new_name
+
+        return mtd[new_name]
 #--------------------------------------------------------------------------------------------------------------------
 
     @staticmethod

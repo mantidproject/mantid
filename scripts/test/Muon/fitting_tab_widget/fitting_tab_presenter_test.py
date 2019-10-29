@@ -525,8 +525,7 @@ class FittingTabPresenterTest(unittest.TestCase):
 
         self.view.function_browser.setParameter('A', 1.5)
 
-        self.assertEqual([str(item) for item in self.presenter._fit_function],
-                         ['name=GausOsc,A=1.5,Sigma=0.2,Frequency=0.1,Phi=0'] + ['name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0'] * 2)
+        self.assertEqual(str(self.view.fit_object), 'name=GausOsc,A=1.5,Sigma=0.2,Frequency=0.1,Phi=0')
 
     def test_handle_display_workspace_changed_updates_displayed_single_function(self):
         self.presenter.selected_data = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
@@ -656,13 +655,13 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.context.get_names_of_workspaces_to_fit = mock.Mock(return_value="test")
         self.presenter._get_selected_groups_and_pairs = mock.Mock(return_value = ["fwd","bwd"])
         self.presenter.clear_and_reset_gui_state = mock.Mock()
-        self.presenter._check_data_exists = mock.Mock(return_value="test")
+        self.presenter._check_data_exists = mock.Mock(return_value=["test"])
         output = self.presenter.update_selected_time_workspace_guess()
 
-        self.context.get_names_of_workspaces_to_fit.assert_any_call(runs="All", group_and_pair="bwd",phasequad= True, rebin=False)
-        self.context.get_names_of_workspaces_to_fit.assert_any_call(runs="All", group_and_pair="fwd",phasequad= True, rebin=False)
+        self.context.get_names_of_workspaces_to_fit.assert_any_call(runs="All", group_and_pair="bwd",phasequad=False, rebin=False)
+        self.context.get_names_of_workspaces_to_fit.assert_any_call(runs="All", group_and_pair="fwd",phasequad=False, rebin=False)
         self.assertEquals(self.presenter.context.get_names_of_workspaces_to_fit.call_count,2)
-        self.assertEquals(self.presenter.selected_data, "test")
+        self.assertEquals(self.presenter.selected_data, ["test"])
 
     def test_handle_plot_guess_changed_calls_correct_function(self):
         self.presenter.get_parameters_for_single_fit = mock.Mock(return_value={})

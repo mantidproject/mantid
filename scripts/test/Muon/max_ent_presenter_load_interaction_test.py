@@ -20,7 +20,7 @@ from Muon.GUI.Common.utilities import load_utils
 from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_model
 from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_presenter_new
 from Muon.GUI.Common.test_helpers.general_test_helpers import create_workspace_wrapper_stub_object
-from mantid.api import Workspace
+from mantid.simpleapi import CreateWorkspace
 
 
 def retrieve_combobox_info(combo_box):
@@ -102,12 +102,11 @@ class MaxEntPresenterTest(unittest.TestCase):
                                                    ['MUSR22222_phase_table', 'MUSR33333_phase_table',
                                                     'EMU22222_phase_table']]
         self.presenter.update_phase_table_options()
-        maxent_workspace = mock.MagicMock(spec=Workspace)
+        maxent_workspace = CreateWorkspace([0], [0])
 
-        self.presenter.add_maxent_workspace_to_ADS('MUSR22725_MaxEnt', maxent_workspace, mock.MagicMock())
+        self.presenter.add_maxent_workspace_to_ADS('MUSR22725_MaxEnt', 'maxent_workspace', mock.MagicMock())
 
-        workspace_wrapper_mock.assert_called_once_with(maxent_workspace,
-                                                       'MUSR22725 Maxent MA/MUSR22725_MaxEnt; MaxEnt')
+        workspace_wrapper_mock.assert_called_once_with('MUSR22725 Maxent MA/MUSR22725_MaxEnt; MaxEnt')
         workspace_wrapper_mock.return_value.show.assert_called_once_with()
 
     def test_get_output_options_defaults_returns_correctly(self):

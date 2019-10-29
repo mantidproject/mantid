@@ -44,6 +44,10 @@ extractBeamline(const Mantid::Geometry::Instrument &instrument) {
   return {std::move(std::get<0>(beamline)), std::move(std::get<1>(beamline))};
 }
 
+std::string instrument_path(const std::string &local_name) {
+  return Kernel::ConfigService::Instance().getFullPath(
+      local_name, true, Poco::Glob::GLOB_DEFAULT);
+}
 } // namespace
 class NexusGeometryParserTest : public CxxTest::TestSuite {
 public:
@@ -55,14 +59,12 @@ public:
   static void destroySuite(NexusGeometryParserTest *suite) { delete suite; }
 
   std::unique_ptr<const Mantid::Geometry::Instrument> makeTestInstrument() {
-    H5std_string nexusFilename = "unit_testing/SMALLFAKE_example_geometry.hdf5";
-    const auto fullpath = Kernel::ConfigService::Instance().getFullPath(
-        nexusFilename, true, Poco::Glob::GLOB_DEFAULT);
+    const auto fullpath =
+        instrument_path("unit_testing/SMALLFAKE_example_geometry.hdf5");
 
     return NexusGeometryParser::createInstrument(
         fullpath, std::make_unique<MockLogger>());
   }
-
   void test_basic_instrument_information() {
     auto instrument = makeTestInstrument();
     auto beamline = extractBeamline(*instrument);
@@ -151,7 +153,6 @@ public:
     affine = Eigen::Translation3d(magnitude * unitVectorTranslation) * affine;
     /*
       Affine should be for rotation around Y, and translated my U.M
-
       cos(theta)    0    -sin(theta)    U.M.x
       0             1    0               U.M.y
       sin(theta)    0    cos(theta)      U.M.z
@@ -207,6 +208,115 @@ public:
     TS_ASSERT_DELTA(shapeBB.yMax() - shapeBB.yMin(), 2.0, 1e-9);
     TS_ASSERT_DELTA(shapeBB.zMax() - shapeBB.zMin(), 2.0, 1e-9);
   }
+  void test_pixel_shape_as_mesh() {
+
+    auto instrument = NexusGeometryParser::createInstrument(
+        instrument_path("unit_testing/DETGEOM_example_1.nxs"),
+        std::make_unique<testing::NiceMock<MockLogger>>());
+    auto beamline = extractBeamline(*instrument);
+    auto &compInfo = *beamline.first;
+    auto &detInfo = *beamline.second;
+    TS_ASSERT_EQUALS(detInfo.size(), 4);
+    auto &shape1 = compInfo.shape(0);
+    auto &shape2 = compInfo.shape(1);
+    auto *shape1Mesh =
+        dynamic_cast<const Geometry::MeshObject2D *>(&shape1); // Test detectors
+    auto *shape2Mesh = dynamic_cast<const Geometry::MeshObject2D *>(&shape2);
+    ETS_ASSERT(shape1Mesh);
+    ETS_ASSERT(shape2Mesh);
+    TS_ASSERT_EQUALS(shape1Mesh, shape2Mesh); // pixel shape - all identical.
+    TSM_ASSERT_EQUALS("Same objects, same address", &shape1,
+                      &shape2); // Shapes are shared when identical
+    TS_ASSERT_EQUALS(shape1Mesh->numberOfTriangles(), 2);
+    TS_ASSERT_EQUALS(shape1Mesh->numberOfVertices(), 4);
+  }
+  void test_pixel_shape_as_cylinders() {
+    auto instrument = NexusGeometryParser::createInstrument(
+        instrument_path("unit_testing/DETGEOM_example_2.nxs"),
+        std::make_unique<testing::NiceMock<MockLogger>>());
+    auto beamline = extractBeamline(*instrument);
+    auto &compInfo = *beamline.first;
+    auto &detInfo = *beamline.second;
+    TS_ASSERT_EQUALS(detInfo.size(), 4);
+
+    auto &shape1 = compInfo.shape(0);
+    auto &shape2 = compInfo.shape(1);
+
+    TSM_ASSERT_EQUALS("Same objects, same address", &shape1,
+                      &shape2); // Shapes are shared when identical
+    auto *shape1Cylinder =
+        dynamic_cast<const Geometry::CSGObject *>(&shape1); // Test detectors
+    auto *shape2Cylinder = dynamic_cast<const Geometry::CSGObject *>(&shape2);
+
+    ETS_ASSERT(shape1Cylinder);
+    ETS_ASSERT(shape2Cylinder);
+    TS_ASSERT_EQUALS(shape1Cylinder->shapeInfo().radius(), 0.25);
+    TS_ASSERT_EQUALS(shape1Cylinder->shapeInfo().height(), 0.5);
+    TS_ASSERT_EQUALS(shape1Cylinder->shapeInfo().radius(),
+                     shape2Cylinder->shapeInfo().radius());
+    TS_ASSERT_EQUALS(shape1Cylinder->shapeInfo().height(),
+                     shape2Cylinder->shapeInfo().height());
+  }
+  void test_detector_shape_as_mesh() {
+    auto instrument = NexusGeometryParser::createInstrument(
+        instrument_path("unit_testing/DETGEOM_example_3.nxs"),
+        std::make_unique<testing::NiceMock<MockLogger>>());
+    auto beamline = extractBeamline(*instrument);
+    auto &compInfo = *beamline.first;
+    auto &detInfo = *beamline.second;
+    TS_ASSERT_EQUALS(detInfo.size(), 4);
+    auto &shape1 = compInfo.shape(0);
+    auto &shape2 = compInfo.shape(1);
+    TSM_ASSERT_DIFFERS("Different objects, different addresses", &shape1,
+                       &shape2); // Shapes are not shared
+    auto *shape1Mesh =
+        dynamic_cast<const Geometry::MeshObject2D *>(&shape1); // Test detectors
+    auto *shape2Mesh = dynamic_cast<const Geometry::MeshObject2D *>(&shape2);
+    TS_ASSERT(shape1Mesh);
+    TS_ASSERT(shape2Mesh);
+    TS_ASSERT_EQUALS(shape1Mesh->numberOfTriangles(), 1);
+    TS_ASSERT_EQUALS(shape1Mesh->numberOfVertices(), 3);
+    TS_ASSERT_EQUALS(shape2Mesh->numberOfTriangles(), 1);
+    TS_ASSERT_EQUALS(shape2Mesh->numberOfVertices(), 3);
+  }
+  void test_detector_shape_as_cylinders() {
+    auto instrument = NexusGeometryParser::createInstrument(
+        instrument_path("unit_testing/DETGEOM_example_4.nxs"),
+        std::make_unique<testing::NiceMock<MockLogger>>());
+    auto beamline = extractBeamline(*instrument);
+    auto &compInfo = *beamline.first;
+    auto &detInfo = *beamline.second;
+
+    ETS_ASSERT_EQUALS(detInfo.size(), 3);
+
+    TS_ASSERT(Kernel::toVector3d(compInfo.relativePosition(0))
+                  .isApprox(Eigen::Vector3d(0.0, -0.4 / 2, 0.0)));
+
+    auto &shape1 = compInfo.shape(0);
+    auto &shape2 = compInfo.shape(1);
+    auto &shape3 = compInfo.shape(2);
+
+    TSM_ASSERT_DIFFERS("Different objects, different addresses", &shape1,
+                       &shape2); // Shapes are not shared
+    TSM_ASSERT_DIFFERS("Different objects, different addresses", &shape1,
+                       &shape3); // Shapes are not shared
+    const auto *shape1Cylinder =
+        dynamic_cast<const Geometry::CSGObject *>(&shape1);
+    const auto *shape2Cylinder =
+        dynamic_cast<const Geometry::CSGObject *>(&shape2);
+    const auto *shape3Cylinder =
+        dynamic_cast<const Geometry::CSGObject *>(&shape3);
+
+    ETS_ASSERT(shape1Cylinder);
+    ETS_ASSERT(shape2Cylinder);
+    ETS_ASSERT(shape3Cylinder);
+    TS_ASSERT_EQUALS(shape1Cylinder->shapeInfo().radius(), 0.5);
+    TS_ASSERT_EQUALS(shape2Cylinder->shapeInfo().radius(), 0.5);
+    TS_ASSERT_EQUALS(shape3Cylinder->shapeInfo().radius(), 0.5);
+    TS_ASSERT_EQUALS(shape1Cylinder->shapeInfo().height(), 0.4);
+    TS_ASSERT_EQUALS(shape2Cylinder->shapeInfo().height(), 0.3); // 0.3
+    TS_ASSERT_EQUALS(shape3Cylinder->shapeInfo().height(), 0.2); // 0.5- 0.3
+  }
 };
 
 class NexusGeometryParserTestPerformance : public CxxTest::TestSuite {
@@ -218,12 +328,10 @@ public:
   }
 
   NexusGeometryParserTestPerformance() {
-    m_wishHDF5DefinitionPath = Kernel::ConfigService::Instance().getFullPath(
-        "WISH_Definition_10Panels.hdf5", true, Poco::Glob::GLOB_DEFAULT);
-    m_sans2dHDF5DefinitionPath = Kernel::ConfigService::Instance().getFullPath(
-        "SANS2D_Definition_Tubes.hdf5", true, Poco::Glob::GLOB_DEFAULT);
-    m_lokiHDF5DefinitionPath = Kernel::ConfigService::Instance().getFullPath(
-        "LOKI_Definition.hdf5", true, Poco::Glob::GLOB_DEFAULT);
+    m_wishHDF5DefinitionPath = instrument_path("WISH_Definition_10Panels.hdf5");
+    m_sans2dHDF5DefinitionPath =
+        instrument_path("SANS2D_Definition_Tubes.hdf5");
+    m_lokiHDF5DefinitionPath = instrument_path("LOKI_Definition.hdf5");
   }
   static void destroySuite(NexusGeometryParserTestPerformance *suite) {
     delete suite;

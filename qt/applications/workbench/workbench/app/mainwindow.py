@@ -23,6 +23,7 @@ from mantid.api import FrameworkManagerImpl
 from mantid.kernel import (ConfigService, UsageService, logger, version_str as mantid_version_str)
 from mantid.py3compat import setswitchinterval
 from mantid.utils import is_required_version
+from workbench.app import MAIN_WINDOW_OBJECT_NAME, MAIN_WINDOW_TITLE
 from workbench.plugins.exception_handler import exception_logger
 from workbench.widgets.settings.presenter import SettingsPresenter
 
@@ -148,8 +149,8 @@ class MainWindow(QMainWindow):
         QMainWindow.__init__(self)
 
         # -- instance attributes --
-        self.setWindowTitle("Mantid Workbench")
-        self.setObjectName("Mantid Workbench")
+        self.setWindowTitle(MAIN_WINDOW_TITLE)
+        self.setObjectName(MAIN_WINDOW_OBJECT_NAME)
 
         # widgets
         self.messagedisplay = None

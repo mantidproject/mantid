@@ -577,10 +577,12 @@ public:
   void testStartMonitorSetsAlgorithmProperties() {
     auto presenter = makePresenter();
     auto instrument = std::string("INTER");
-    expectGetLiveDataOptions(instrument);
+    auto updateInterval = 20;
+    expectGetLiveDataOptions(instrument, updateInterval);
     auto algRunner = expectGetAlgorithmRunner();
     presenter.notifyStartMonitor();
-    auto expected = defaultLiveMonitorAlgorithmOptions(instrument);
+    auto expected =
+        defaultLiveMonitorAlgorithmOptions(instrument, updateInterval);
     assertAlgorithmPropertiesContainOptions(expected, algRunner);
     verifyAndClear();
   }
@@ -691,14 +693,16 @@ private:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_jobs));
   }
 
-  AlgorithmRuntimeProps
-  defaultLiveMonitorAlgorithmOptions(const std::string &instrument) {
+  AlgorithmRuntimeProps defaultLiveMonitorAlgorithmOptions(
+      const std::string &instrument = std::string("OFFSPEC"),
+      const int &updateInterval = 15) {
+    const std::string updateIntervalString = std::to_string(updateInterval);
     return AlgorithmRuntimeProps{
         {"Instrument", instrument},
         {"OutputWorkspace", "IvsQ_binned_live"},
         {"AccumulationWorkspace", "TOF_live"},
         {"AccumulationMethod", "Replace"},
-        {"UpdateEvery", "20"},
+        {"UpdateEvery", updateIntervalString},
         {"PostProcessingAlgorithm", "ReflectometryReductionOneLiveData"},
         {"RunTransitionBehavior", "Restart"},
     };
@@ -721,16 +725,19 @@ private:
   void expectUpdateViewWhenMonitorStarting() {
     EXPECT_CALL(m_view, setStartMonitorButtonEnabled(false));
     EXPECT_CALL(m_view, setStopMonitorButtonEnabled(false));
+    EXPECT_CALL(m_view, setUpdateIntervalSpinBoxEnabled(false));
   }
 
   void expectUpdateViewWhenMonitorStarted() {
     EXPECT_CALL(m_view, setStartMonitorButtonEnabled(false));
     EXPECT_CALL(m_view, setStopMonitorButtonEnabled(true));
+    EXPECT_CALL(m_view, setUpdateIntervalSpinBoxEnabled(false));
   }
 
   void expectUpdateViewWhenMonitorStopped() {
     EXPECT_CALL(m_view, setStartMonitorButtonEnabled(true));
     EXPECT_CALL(m_view, setStopMonitorButtonEnabled(false));
+    EXPECT_CALL(m_view, setUpdateIntervalSpinBoxEnabled(true));
   }
 
   void expectStopAutoreduction() {
@@ -980,20 +987,32 @@ private:
   }
 
   void expectSearchInstrument(std::string const &instrument) {
-    ON_CALL(m_view, getSearchInstrument()).WillByDefault(Return(instrument));
+    EXPECT_CALL(m_view, getSearchInstrument())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(instrument));
+  }
+
+  void expectGetUpdateInterval(int const &updateInterval) {
+    EXPECT_CALL(m_view, getLiveDataUpdateInterval())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(updateInterval));
   }
 
   void expectGetLiveDataOptions(
       AlgorithmRuntimeProps options = AlgorithmRuntimeProps(),
-      std::string const &instrument = std::string("OFFSPEC")) {
+      std::string const &instrument = std::string("OFFSPEC"),
+      int const &updateInterval = 15) {
     expectSearchInstrument(instrument);
+    expectGetUpdateInterval(updateInterval);
     EXPECT_CALL(m_mainPresenter, rowProcessingProperties())
         .Times(1)
         .WillOnce(Return(options));
   }
 
-  void expectGetLiveDataOptions(std::string const &instrument) {
-    expectGetLiveDataOptions(AlgorithmRuntimeProps(), instrument);
+  void expectGetLiveDataOptions(std::string const &instrument,
+                                const int &updateInterval) {
+    expectGetLiveDataOptions(AlgorithmRuntimeProps(), instrument,
+                             updateInterval);
   }
 
   boost::shared_ptr<NiceMock<MockAlgorithmRunner>> expectGetAlgorithmRunner() {
@@ -1015,8 +1034,9 @@ private:
       AlgorithmRuntimeProps const &expected,
       boost::shared_ptr<NiceMock<MockAlgorithmRunner>> &algRunner) {
     auto alg = algRunner->algorithm();
-    for (auto const &kvp : expected)
+    for (auto const &kvp : expected) {
       TS_ASSERT_EQUALS(alg->getPropertyValue(kvp.first), kvp.second);
+    }
   }
 
   void assertPostProcessingPropertiesContainOptions(
