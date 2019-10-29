@@ -594,7 +594,7 @@ set(
   ${ExternalData_BINARY_ROOT}/Testing/Data/UnitTest;${ExternalData_BINARY_ROOT}/Testing/Data/DocTest;${MANTID_ROOT}/instrument
   )
 set(COLORMAPS_FOLDER ${MANTID_ROOT}/installers/colormaps/)
-set(MANTIDPUBLISHER "https://upload.mantidproject.org/scriptrepository?debug=1")
+set(MANTIDPUBLISHER "https://upload.mantidproject.org/scriptrepository")
 set(HTML_ROOT ${DOCS_BUILDDIR}/html)
 
 # For an mpi-enabled build, do not log to file, format console output (which
