@@ -78,30 +78,33 @@ class SANSReductionCore(SANSReductionCoreBase):
         #    a user-specified value which can be obtained with the help of the beam centre finder.
         # ------------------------------------------------------------
         progress.report("Moving ...")
-        workspace = self._move(state_serialized, workspace, component_as_string)
-        monitor_workspace = self._move(state_serialized, monitor_workspace, component_as_string)
+
+        workspace = self._move(state=state, workspace=workspace, component=component_as_string)
+        monitor_workspace = self._move(state=state, workspace=monitor_workspace,
+                                       component=component_as_string)
 
         # --------------------------------------------------------------------------------------------------------------
         # 5. Apply masking (pixel masking and time masking)
         # --------------------------------------------------------------------------------------------------------------
         progress.report("Masking ...")
-        workspace = self._mask(state_serialized, workspace, component_as_string)
+        workspace = self._mask(state=state, workspace=workspace, component=component_as_string)
 
         # --------------------------------------------------------------------------------------------------------------
         # 6. Convert to Wavelength
         # --------------------------------------------------------------------------------------------------------------
         progress.report("Converting to wavelength ...")
-        workspace = self._convert_to_wavelength(state_serialized, workspace)
+        workspace = self._convert_to_wavelength(state=state, workspace=workspace)
         # Convert and rebin the dummy workspace to get correct bin flags
         if use_dummy_workspace:
-            dummy_mask_workspace = mask_bins(state.mask, dummy_mask_workspace, DetectorType.from_string(component_as_string))
-            dummy_mask_workspace = self._convert_to_wavelength(state_serialized, dummy_mask_workspace)
+            dummy_mask_workspace = mask_bins(state.mask, dummy_mask_workspace,
+                                             DetectorType.from_string(component_as_string))
+            dummy_mask_workspace = self._convert_to_wavelength(state=state, workspace=dummy_mask_workspace)
 
         # --------------------------------------------------------------------------------------------------------------
         # 7. Multiply by volume and absolute scale
         # --------------------------------------------------------------------------------------------------------------
         progress.report("Multiplying by volume and absolute scale ...")
-        workspace = self._scale(state_serialized, workspace)
+        workspace = self._scale(state=state, workspace=workspace)
 
         # --------------------------------------------------------------------------------------------------------------
         # 8. Create adjustment workspaces, those are
@@ -116,7 +119,7 @@ class SANSReductionCore(SANSReductionCoreBase):
         progress.report("Creating adjustment workspaces ...")
         wavelength_adjustment_workspace, pixel_adjustment_workspace, wavelength_and_pixel_adjustment_workspace, \
             calculated_transmission_workspace, unfitted_transmission_workspace = \
-            self._adjustment(state_serialized, workspace, monitor_workspace, component_as_string, data_type_as_string)
+            self._adjustment(state, workspace, monitor_workspace, component_as_string, data_type_as_string)
 
         # ----------------------------------------------------------------
         # 9. Convert event workspaces to histogram workspaces, and re-mask
@@ -130,11 +133,12 @@ class SANSReductionCore(SANSReductionCoreBase):
         # 10. Convert to Q
         # -----------------------------------------------------------
         progress.report("Converting to q ...")
-        workspace, sum_of_counts, sum_of_norms = self._convert_to_q(state_serialized,
-                                                                    workspace,
-                                                                    wavelength_adjustment_workspace,
-                                                                    pixel_adjustment_workspace,
-                                                                    wavelength_and_pixel_adjustment_workspace)
+        workspace, sum_of_counts, sum_of_norms = \
+            self._convert_to_q(state=state,
+                               workspace=workspace,
+                               wavelength_adjustment_workspace=wavelength_adjustment_workspace,
+                               pixel_adjustment_workspace=pixel_adjustment_workspace,
+                               wavelength_and_pixel_adjustment_workspace=wavelength_and_pixel_adjustment_workspace)
         progress.report("Completed SANSReductionCore ...")
 
         # ------------------------------------------------------------

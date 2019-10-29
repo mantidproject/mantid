@@ -24,4 +24,22 @@ Improved
   ISIS SANS GUI has been fixed. Large batch files will now load within seconds.
 - :ref:`ApplyTransmissionCorrection <algm-ApplyTransmissionCorrection-v1>` now can be supplied any transmission workspace that is supported by :ref:`Divide <algm-Divide-v1>` .
 
+- Multiple SANS Workflow Algorithms were converted into internal scripts.
+  This removes the need for passing SANSState objects in unrolled histories.
+  Additionally, it speeds up the reduction of each run by 30%.
+
+Removed
+#######
+
+The following SANS Workflow algorithms were removed:
+- SANSCalculateTransmission
+- SANSCreateAdjustment
+- SANSCrop
+- SANSConvertToQ
+- SANSConvertToWavelength
+- SANSMaskWorkspace
+- SANSMove
+- SANSNormalizeToMonitor
+- SANSScale
+
 :ref:`Release 4.2.0 <v4.2.0>`

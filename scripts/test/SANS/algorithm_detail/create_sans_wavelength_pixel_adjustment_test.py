@@ -1,28 +1,25 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 from __future__ import (absolute_import, division, print_function)
-import unittest
-from mantid.api import FrameworkManager
-from mantid.kernel import config
 
-import os
 import numpy as np
-from sans.test_helper.test_director import TestDirector
+import os
+import unittest
+
+from mantid.kernel import config
+from mantid.simpleapi import CreateSampleWorkspace
+from sans.algorithm_detail.CreateSANSWavelengthPixelAdjustment import CreateSANSWavelengthPixelAdjustment
+from sans.common.enums import (RangeStepType, DetectorType)
 from sans.state.wavelength_and_pixel_adjustment import get_wavelength_and_pixel_adjustment_builder
-from sans.common.enums import (RebinType, RangeStepType, DetectorType)
-from sans.common.general_functions import (create_unmanaged_algorithm)
-from sans.common.constants import EMPTY_NAME
+from sans.test_helper.test_director import TestDirector
 
 
-class SANSCalculateTransmissionTest(unittest.TestCase):
-
-    @classmethod
-    def setUpClass(cls):
-        FrameworkManager.Instance()
+class CreateSANSWavelengthPixelAdjustmentTest(unittest.TestCase):
 
     @staticmethod
     def _create_test_wavelength_adjustment_file(file_name):
@@ -49,7 +46,7 @@ class SANSCalculateTransmissionTest(unittest.TestCase):
     @staticmethod
     def _remove_test_file(file_name):
         if os.path.exists(file_name):
-           os.remove(file_name)
+            os.remove(file_name)
 
     @staticmethod
     def _get_state(lab_pixel_file=None, hab_pixel_file=None, lab_wavelength_file=None, hab_wavelength_file=None,
@@ -77,21 +74,15 @@ class SANSCalculateTransmissionTest(unittest.TestCase):
             wavelength_and_pixel_builder.set_wavelength_step(wavelength_step)
         wavelength_and_pixel_state = wavelength_and_pixel_builder.build()
         state.adjustment.wavelength_and_pixel_adjustment = wavelength_and_pixel_state
-        return state.property_manager
+        return state
 
     @staticmethod
     def _get_workspace(data):
-        create_name = "CreateSampleWorkspace"
-        create_options = {"NumBanks": 1,
-                          "BankPixelWidth": 1,
-                          "XMin": 1,
-                          "XMax": 11,
-                          "BinWidth": 2,
-                          "XUnit": "Wavelength",
-                          "OutputWorkspace": EMPTY_NAME}
-        create_alg = create_unmanaged_algorithm(create_name, **create_options)
-        create_alg.execute()
-        workspace = create_alg.getProperty("OutputWorkspace").value
+
+        workspace = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=1,
+                                          XMin=1, XMax=11, BinWidth=2,
+                                          XUnit="Wavelength", StoreInADS=False)
+
         data_y = workspace.dataY(0)
         for index in range(len(data_y)):
             data_y[index] = data[index]
@@ -99,42 +90,40 @@ class SANSCalculateTransmissionTest(unittest.TestCase):
 
     @staticmethod
     def _run_test(transmission_workspace, norm_workspace, state, is_lab=True):
-        adjust_name = "SANSCreateWavelengthAndPixelAdjustment"
-        adjust_options = {"TransmissionWorkspace": transmission_workspace,
-                          "NormalizeToMonitorWorkspace": norm_workspace,
-                          "SANSState": state,
-                          "OutputWorkspaceWavelengthAdjustment": "out_wavelength",
-                          "OutputWorkspacePixelAdjustment": "out_pixels"}
-        if is_lab:
-            adjust_options.update({"Component": DetectorType.to_string(DetectorType.LAB)})
-        else:
-            adjust_options.update({"Component": DetectorType.to_string(DetectorType.HAB)})
-        adjust_alg = create_unmanaged_algorithm(adjust_name, **adjust_options)
-        adjust_alg.execute()
-        wavelength_adjustment = adjust_alg.getProperty("OutputWorkspaceWavelengthAdjustment").value
-        pixel_adjustment = adjust_alg.getProperty("OutputWorkspacePixelAdjustment").value
+        state_to_send = state.adjustment.wavelength_and_pixel_adjustment
+
+        component = DetectorType.to_string(DetectorType.LAB) if is_lab else DetectorType.to_string(DetectorType.HAB)
+
+        alg = CreateSANSWavelengthPixelAdjustment(state_adjustment_wavelength_and_pixel=state_to_send,
+                                                  component=component)
+
+        wavelength_adjustment, pixel_adjustment = alg.create_sans_wavelength_and_pixel_adjustment(
+            transmission_ws=transmission_workspace, monitor_norm_ws=norm_workspace)
+
         return wavelength_adjustment, pixel_adjustment
 
     def test_that_gets_wavelength_workspace_when_no_files_are_specified(self):
         # Arrange
         data_trans = [3., 4., 5., 7., 3.]
         data_norm = [9., 3., 8., 3., 1.]
-        transmission_workspace = SANSCalculateTransmissionTest._get_workspace(data_trans)
-        norm_workspace = SANSCalculateTransmissionTest._get_workspace(data_norm)
+        transmission_workspace = CreateSANSWavelengthPixelAdjustmentTest._get_workspace(data_trans)
+        norm_workspace = CreateSANSWavelengthPixelAdjustmentTest._get_workspace(data_norm)
 
-        state = SANSCalculateTransmissionTest._get_state(wavelength_low=1., wavelength_high=11., wavelength_step=2.,
-                                                         wavelength_step_type=RangeStepType.Lin)
+        state = self._get_state(wavelength_low=1., wavelength_high=11.,
+                                wavelength_step=2.,
+                                wavelength_step_type=RangeStepType.Lin)
 
         # Act
-        wavelength_adjustment, pixel_adjustment = SANSCalculateTransmissionTest._run_test(transmission_workspace,
-                                                                                          norm_workspace, state, True)
+        wavelength_adjustment, pixel_adjustment = self._run_test(transmission_workspace,
+                                                                 norm_workspace, state,
+                                                                 True)
         # Assert
         self.assertEqual(pixel_adjustment, None)
-        self.assertEqual(wavelength_adjustment.getNumberHistograms(),  1)
-        expected = np.array(data_trans)*np.array(data_norm)
+        self.assertEqual(wavelength_adjustment.getNumberHistograms(), 1)
+        expected = np.array(data_trans) * np.array(data_norm)
         data_y = wavelength_adjustment.dataY(0)
         for e1, e2, in zip(expected, data_y):
-            self.assertEqual(e1,  e2)
+            self.assertEqual(e1, e2)
 
     def test_that_gets_adjustment_workspace_if_files_are_specified(self):
         # Arrange
@@ -142,28 +131,32 @@ class SANSCalculateTransmissionTest(unittest.TestCase):
         data_trans = [3., 4., 5., 7., 3.]
         data_norm = [9., 3., 8., 3., 1.]
         expected_direct_file_workspace = [0.5, 0.5, 0.5, 0.5, 0.5]
-        transmission_workspace = SANSCalculateTransmissionTest._get_workspace(data_trans)
-        norm_workspace = SANSCalculateTransmissionTest._get_workspace(data_norm)
+        transmission_workspace = CreateSANSWavelengthPixelAdjustmentTest._get_workspace(data_trans)
+        norm_workspace = CreateSANSWavelengthPixelAdjustmentTest._get_workspace(data_norm)
 
         direct_file_name = "DIRECT_test.txt"
-        direct_file_name = SANSCalculateTransmissionTest._create_test_wavelength_adjustment_file(direct_file_name)
+        direct_file_name = CreateSANSWavelengthPixelAdjustmentTest._create_test_wavelength_adjustment_file(
+            direct_file_name)
 
-        state = SANSCalculateTransmissionTest._get_state(hab_wavelength_file=direct_file_name,
-                                                         wavelength_low=1., wavelength_high=11., wavelength_step=2.,
-                                                         wavelength_step_type=RangeStepType.Lin)
+        state = CreateSANSWavelengthPixelAdjustmentTest._get_state(hab_wavelength_file=direct_file_name,
+                                                                   wavelength_low=1., wavelength_high=11.,
+                                                                   wavelength_step=2.,
+                                                                   wavelength_step_type=RangeStepType.Lin)
         # Act
-        wavelength_adjustment, pixel_adjustment = SANSCalculateTransmissionTest._run_test(transmission_workspace,
-                                                                                          norm_workspace, state, False)
+        wavelength_adjustment, pixel_adjustment = CreateSANSWavelengthPixelAdjustmentTest._run_test(
+            transmission_workspace,
+            norm_workspace, state,
+            False)
         # Assert
         self.assertEqual(pixel_adjustment, None)
-        self.assertEqual(wavelength_adjustment.getNumberHistograms(),  1)
-        expected = np.array(data_trans)*np.array(data_norm)*np.array(expected_direct_file_workspace)
+        self.assertEqual(wavelength_adjustment.getNumberHistograms(), 1)
+        expected = np.array(data_trans) * np.array(data_norm) * np.array(expected_direct_file_workspace)
         data_y = wavelength_adjustment.dataY(0)
         for e1, e2, in zip(expected, data_y):
-            self.assertEqual(e1,  e2)
+            self.assertEqual(e1, e2)
 
         # Clean up
-        SANSCalculateTransmissionTest._remove_test_file(direct_file_name)
+        CreateSANSWavelengthPixelAdjustmentTest._remove_test_file(direct_file_name)
 
 
 if __name__ == '__main__':
