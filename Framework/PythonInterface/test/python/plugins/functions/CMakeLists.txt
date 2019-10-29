@@ -40,7 +40,7 @@ set(TEST_PY_FILES
     SCgapAnisoSwaveTest.py
     SCgapDwaveTest.py
     SCgapPwaveTest.py
-    ScgapSwaveTest.py
+    SCgapSwaveTest.py
     TeixeiraWaterTest.py
     TFMuoniumTest.py
     TriangleOscTest.py
