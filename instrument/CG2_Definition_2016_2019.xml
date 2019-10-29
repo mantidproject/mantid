@@ -4,7 +4,7 @@
 	    last-modified="2019-08-22 14:48:55.282715"
 	    name="CG2"
 	    valid-from="2016-04-22 00:00:00"
-	    valid-to="2100-12-31 23:59:59"
+	    valid-to="2019-09-30 23:59:59"
  xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd">
   <!--Created by Jose Borregero, borreguerojm@ornl.gov-->
   <defaults>
