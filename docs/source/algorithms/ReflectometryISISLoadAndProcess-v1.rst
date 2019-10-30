@@ -78,7 +78,7 @@ Output:
 
 .. testoutput:: ExSumTransmissionRuns
 
-	Workspaces in the ADS after reduction: ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF', 'TOF_13460', 'TRANS_13463', 'TRANS_13463+13464', 'TRANS_13464']
+	Workspaces in the ADS after reduction: ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF', 'TOF_13460', 'TRANS_13463', 'TRANS_13463+13464', 'TRANS_13464', 'TRANS_LAM_13463+13464']
 
 **Example: Two separate transmission run inputs**
 
@@ -94,7 +94,7 @@ Output:
 
 .. testoutput:: ExCombineTransmissionRuns
 
-   Workspaces in the ADS after reduction: ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF', 'TOF_13460', 'TRANS_13463', 'TRANS_13464', 'TRANS_LAM_13463', 'TRANS_LAM_13464']
+   Workspaces in the ADS after reduction: ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF', 'TOF_13460', 'TRANS_13463', 'TRANS_13464', 'TRANS_LAM_13463_13464']
 
 **Example: Slice input run**
 

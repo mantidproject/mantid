@@ -198,18 +198,28 @@ MatrixWorkspace_sptr CreateTransmissionWorkspace2::normalizeDetectorsByMonitors(
  * in class variables.
  */
 void CreateTransmissionWorkspace2::getRunNumbers() {
-  MatrixWorkspace_sptr firstTransWS = getProperty("FirstTransmissionRun");
-  auto const &run = firstTransWS->run();
-  if (run.hasProperty("run_number")) {
-    m_firstTransmissionRunNumber =
-        run.getPropertyValueAsType<std::string>("run_number");
-  }
+  m_firstTransmissionRunNumber = getRunNumber("FirstTransmissionRun");
+  m_secondTransmissionRunNumber = getRunNumber("SecondTransmissionRun");
+}
 
-  MatrixWorkspace_sptr secondTransWS = getProperty("SecondTransmissionRun");
-  if (secondTransWS && secondTransWS->run().hasProperty("run_number")) {
-    m_secondTransmissionRunNumber =
-        secondTransWS->run().getPropertyValueAsType<std::string>("run_number");
+/** Get the run number for a given workspace. Also sets the m_missingRunNumber
+ * flag if a required run number could not be found.
+ * @returns : the run number as a string, or an empty string if it was not
+ * fouind
+ */
+std::string
+CreateTransmissionWorkspace2::getRunNumber(std::string const &propertyName) {
+  auto runNumber = std::string();
+  MatrixWorkspace_sptr transWS = getProperty(propertyName);
+  if (transWS) {
+    auto const &run = transWS->run();
+    if (run.hasProperty("run_number")) {
+      runNumber = run.getPropertyValueAsType<std::string>("run_number");
+    } else {
+      m_missingRunNumber = true;
+    }
   }
+  return runNumber;
 }
 
 /** Store a transition run in ADS
@@ -218,6 +228,10 @@ void CreateTransmissionWorkspace2::getRunNumbers() {
  */
 void CreateTransmissionWorkspace2::storeTransitionRun(int which,
                                                       MatrixWorkspace_sptr ws) {
+  bool const isDebug = getProperty("Debug");
+  if (!isDebug)
+    return;
+
   if (which < 1 || which > 2) {
     throw std::logic_error("There are only two runs: 1 and 2.");
   }
@@ -235,23 +249,19 @@ void CreateTransmissionWorkspace2::storeTransitionRun(int which,
  */
 void CreateTransmissionWorkspace2::storeOutputWorkspace(
     API::MatrixWorkspace_sptr ws) {
-  bool const isDebug = getProperty("Debug");
-  if (isDefault("OutputWorkspace") && (!isChild() || isDebug)) {
+  // If the output name is not set, attempt to set a sensible
+  // default based on the run number. If a required run number
+  // is missing, then there's not much we can do so leave it empty.
+  if (isDefault("OutputWorkspace") && !m_missingRunNumber) {
     std::string name = TRANS_LAM_PREFIX;
     if (!m_firstTransmissionRunNumber.empty()) {
       name.append(m_firstTransmissionRunNumber);
-    } else {
-      return;
     }
     if (!m_secondTransmissionRunNumber.empty()) {
       name.append("_");
       name.append(m_secondTransmissionRunNumber);
     }
-    if (!isChild()) {
-      setPropertyValue("OutputWorkspace", name);
-    } else {
-      AnalysisDataService::Instance().addOrReplace(name, ws);
-    }
+    setPropertyValue("OutputWorkspace", name);
   }
   setProperty("OutputWorkspace", ws);
 }
