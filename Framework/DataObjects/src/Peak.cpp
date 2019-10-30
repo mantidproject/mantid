@@ -16,7 +16,6 @@
 #include "MantidKernel/System.h"
 
 #include "boost/make_shared.hpp"
-#include <boost/math/special_functions/round.hpp>
 
 #include <algorithm>
 #include <cctype>
@@ -36,9 +35,8 @@ Peak::Peak()
       m_sigmaIntensity(0), m_binCount(0), m_initialEnergy(0.),
       m_finalEnergy(0.), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
-      m_row(-1), m_col(-1), m_orig_H(0), m_orig_K(0), m_orig_L(0),
-      m_peakNumber(0), m_IntHKL(V3D(0, 0, 0)), m_IntMNP(V3D(0, 0, 0)),
-      m_peakShape(boost::make_shared<NoShape>()) {
+      m_row(-1), m_col(-1), m_peakNumber(0), m_intHKL(V3D(0, 0, 0)),
+      m_intMNP(V3D(0, 0, 0)), m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
 }
 
@@ -58,8 +56,7 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst,
     : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
       m_binCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
-      m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakNumber(0),
-      m_IntHKL(V3D(0, 0, 0)), m_IntMNP(V3D(0, 0, 0)),
+      m_peakNumber(0), m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
       m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
@@ -86,8 +83,7 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst,
     : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
       m_binCount(0), m_GoniometerMatrix(goniometer),
       m_InverseGoniometerMatrix(goniometer), m_runNumber(0), m_monitorCount(0),
-      m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakNumber(0),
-      m_IntHKL(V3D(0, 0, 0)), m_IntMNP(V3D(0, 0, 0)),
+      m_peakNumber(0), m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
       m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
@@ -110,8 +106,7 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
     : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
       m_binCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
-      m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakNumber(0),
-      m_IntHKL(V3D(0, 0, 0)), m_IntMNP(V3D(0, 0, 0)),
+      m_peakNumber(0), m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
       m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
@@ -133,8 +128,7 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
     : m_H(HKL[0]), m_K(HKL[1]), m_L(HKL[2]), m_intensity(0),
       m_sigmaIntensity(0), m_binCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
-      m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakNumber(0),
-      m_IntHKL(V3D(0, 0, 0)), m_IntMNP(V3D(0, 0, 0)),
+      m_peakNumber(0), m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
       m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
@@ -158,8 +152,7 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
     : m_H(HKL[0]), m_K(HKL[1]), m_L(HKL[2]), m_intensity(0),
       m_sigmaIntensity(0), m_binCount(0), m_GoniometerMatrix(goniometer),
       m_InverseGoniometerMatrix(goniometer), m_runNumber(0), m_monitorCount(0),
-      m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakNumber(0),
-      m_IntHKL(V3D(0, 0, 0)), m_IntMNP(V3D(0, 0, 0)),
+      m_peakNumber(0), m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
       m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
@@ -182,8 +175,7 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, double scattering,
     : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
       m_binCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
-      m_row(-1), m_col(-1), m_orig_H(0), m_orig_K(0), m_orig_L(0),
-      m_IntHKL(V3D(0, 0, 0)), m_IntMNP(V3D(0, 0, 0)),
+      m_row(-1), m_col(-1), m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
       m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
@@ -211,11 +203,9 @@ Peak::Peak(const Peak &other)
       m_runNumber(other.m_runNumber), m_monitorCount(other.m_monitorCount),
       m_row(other.m_row), m_col(other.m_col), sourcePos(other.sourcePos),
       samplePos(other.samplePos), detPos(other.detPos),
-      m_orig_H(other.m_orig_H), m_orig_K(other.m_orig_K),
-      m_orig_L(other.m_orig_L), m_peakNumber(other.m_peakNumber),
-      m_IntHKL(other.m_IntHKL), m_IntMNP(other.m_IntMNP),
-      m_detIDs(other.m_detIDs), m_peakShape(other.m_peakShape->clone()),
-      convention(other.convention) {}
+      m_peakNumber(other.m_peakNumber), m_intHKL(other.m_intHKL),
+      m_intMNP(other.m_intMNP), m_detIDs(other.m_detIDs),
+      m_peakShape(other.m_peakShape->clone()), convention(other.convention) {}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor making a Peak from IPeak interface
@@ -234,9 +224,9 @@ Peak::Peak(const Geometry::IPeak &ipeak)
       m_InverseGoniometerMatrix(ipeak.getGoniometerMatrix()),
       m_runNumber(ipeak.getRunNumber()),
       m_monitorCount(ipeak.getMonitorCount()), m_row(ipeak.getRow()),
-      m_col(ipeak.getCol()), m_orig_H(0.), m_orig_K(0.), m_orig_L(0.),
-      m_peakNumber(ipeak.getPeakNumber()), m_IntHKL(ipeak.getIntHKL()),
-      m_IntMNP(ipeak.getIntMNP()), m_peakShape(boost::make_shared<NoShape>()) {
+      m_col(ipeak.getCol()), m_peakNumber(ipeak.getPeakNumber()),
+      m_intHKL(ipeak.getIntHKL()), m_intMNP(ipeak.getIntMNP()),
+      m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
     throw std::invalid_argument(
@@ -760,8 +750,18 @@ double Peak::getL() const { return m_L; }
 /** Return the HKL vector */
 Mantid::Kernel::V3D Peak::getHKL() const { return V3D(m_H, m_K, m_L); }
 
+/** Return True if the peak has been indexed */
+bool Peak::isIndexed() const {
+  if (m_H == 0. && m_K == 0. && m_L == 0.)
+    return false;
+  return true;
+}
+
 /** Return the int HKL vector */
-Mantid::Kernel::V3D Peak::getIntHKL() const { return m_IntHKL; }
+Mantid::Kernel::V3D Peak::getIntHKL() const { return m_intHKL; }
+
+/** Return the int MNP vector */
+V3D Peak::getIntMNP() const { return m_intMNP; }
 
 //----------------------------------------------------------------------------------------------
 /** Set the H index of this peak
@@ -784,23 +784,9 @@ void Peak::setBankName(std::string m_bankName) {
 
 /** Set all three H,K,L indices of the peak */
 void Peak::setHKL(double H, double K, double L) {
-  if (m_orig_H == 0 && m_orig_K == 0 && m_orig_L == 0) {
-    m_orig_H = m_H;
-    m_orig_K = m_K;
-    m_orig_L = m_L;
-  }
   m_H = H;
   m_K = K;
   m_L = L;
-}
-
-/** Reset all three H,K,L indices of the peak to values before setHKL */
-void Peak::resetHKL() {
-  if (m_orig_H == 0 && m_orig_K == 0 && m_orig_L == 0)
-    return;
-  m_H = m_orig_H;
-  m_K = m_orig_K;
-  m_L = m_orig_L;
 }
 
 /** Set all HKL
@@ -808,11 +794,6 @@ void Peak::resetHKL() {
  * @param HKL :: vector with x,y,z -> h,k,l
  */
 void Peak::setHKL(const Mantid::Kernel::V3D &HKL) {
-  if (m_orig_H == 0 && m_orig_K == 0 && m_orig_L == 0) {
-    m_orig_H = m_H;
-    m_orig_K = m_K;
-    m_orig_L = m_L;
-  }
   m_H = HKL.X();
   m_K = HKL.Y();
   m_L = HKL.Z();
@@ -822,9 +803,15 @@ void Peak::setHKL(const Mantid::Kernel::V3D &HKL) {
  *
  * @param HKL :: vector with integer x,y,z -> h,k,l
  */
-void Peak::setIntHKL(V3D HKL) {
-  m_IntHKL = V3D(boost::math::iround(HKL[0]), boost::math::iround(HKL[1]),
-                 boost::math::iround(HKL[2]));
+void Peak::setIntHKL(const V3D &HKL) {
+  m_intHKL = V3D(std::round(HKL[0]), std::round(HKL[1]), std::round(HKL[2]));
+}
+
+/** Sets the modulated peak structure number
+ * @param MNP :: modulated peak structure value
+ */
+void Peak::setIntMNP(const V3D &MNP) {
+  m_intMNP = V3D(std::round(MNP[0]), std::round(MNP[1]), std::round(MNP[2]));
 }
 
 /** Set sample position
@@ -938,11 +925,6 @@ int Peak::getCol() const { return m_col; }
 int Peak::getPeakNumber() const { return m_peakNumber; }
 
 // -------------------------------------------------------------------------------------
-/**Returns the unique peak number
- * Returns -1 if it could not find it. */
-V3D Peak::getIntMNP() const { return m_IntMNP; }
-
-// -------------------------------------------------------------------------------------
 /** For RectangularDetectors only, sets the row (y) of the pixel of the
  * detector.
  * @param m_row :: row value   */
@@ -959,14 +941,6 @@ void Peak::setCol(int m_col) { this->m_col = m_col; }
  * @param m_peakNumber :: unique peak number value   */
 void Peak::setPeakNumber(int m_peakNumber) {
   this->m_peakNumber = m_peakNumber;
-}
-
-// -------------------------------------------------------------------------------------
-/** Sets the modulated peak structure number
- * @param MNP :: modulated peak structure value   */
-void Peak::setIntMNP(V3D MNP) {
-  m_IntMNP = V3D(boost::math::iround(MNP[0]), boost::math::iround(MNP[1]),
-                 boost::math::iround(MNP[2]));
 }
 
 // -------------------------------------------------------------------------------------
@@ -1082,12 +1056,9 @@ Peak &Peak::operator=(const Peak &other) {
     sourcePos = other.sourcePos;
     samplePos = other.samplePos;
     detPos = other.detPos;
-    m_orig_H = other.m_orig_H;
-    m_orig_K = other.m_orig_K;
-    m_orig_L = other.m_orig_L;
     m_detIDs = other.m_detIDs;
-    m_IntHKL = other.m_IntHKL;
-    m_IntMNP = other.m_IntMNP;
+    m_intHKL = other.m_intHKL;
+    m_intMNP = other.m_intMNP;
     convention = other.convention;
     m_peakShape.reset(other.m_peakShape->clone());
   }

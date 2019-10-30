@@ -161,7 +161,7 @@ class ProjectRecoverySaverTest(unittest.TestCase):
     def test_start_recovery_thread_if_thread_on_is_false(self):
         self.pr_saver._timer_thread = mock.MagicMock()
         self.pr_saver.thread_on = False
-        self.pr_saver.recovery_enabled = True
+        self.pr_saver.pr.recovery_enabled = True
 
         self.pr_saver.start_recovery_thread()
 

@@ -28,6 +28,7 @@ attr_mapping = [
     ParamMapEntry(ext_name="mode", int_name="mode", enum_class=POLARIS_CHOPPER_MODES,
                   optional=True),
     ParamMapEntry(ext_name="multiple_scattering", int_name="multiple_scattering", optional=True),
+    ParamMapEntry(ext_name="q_lims", int_name="q_lims"),
     ParamMapEntry(ext_name="raw_data_cropping_values", int_name="raw_data_crop_values"),
     ParamMapEntry(ext_name="run_number", int_name="run_number"),
     ParamMapEntry(ext_name="sample_empty", int_name="sample_empty", optional=True),

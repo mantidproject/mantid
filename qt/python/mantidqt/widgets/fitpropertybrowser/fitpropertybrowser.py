@@ -264,6 +264,11 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         endX = self.endX()
         out_ws_name = '{}_guess'.format(ws_name)
         workspace = AnalysisDataService.retrieve(ws_name)
+        legend = self.get_axes().get_legend()
+
+        if legend:
+            legend_props = LegendProperties.from_legend(legend)
+
         try:
             alg = AlgorithmManager.createUnmanaged('EvaluateFunction')
             alg.setChild(True)
@@ -287,6 +292,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         out_ws = alg.getProperty('OutputWorkspace').value
 
         ax = self.get_axes()
+
         # Setting distribution=True prevents the guess being normalised
         self.guess_line = ax.plot(out_ws,
                                   wkspIndex=1,
@@ -294,10 +300,13 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
                                   distribution=True,
                                   update_axes_labels=False,
                                   autoscale_on_update=False)[0]
-        ax.legend().draggable()
+
+        if legend:
+            LegendProperties.create_legend(legend_props, ax)
 
         if self.guess_line:
             self.setTextPlotGuess('Remove Guess')
+
         self.canvas.draw()
 
     def remove_guess(self):
@@ -351,8 +360,12 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         :param name: The name of Fit's output workspace.
         """
         self.fit_result_ws_name = name
+
         ax = self.get_axes()
-        props = LegendProperties.from_legend(ax.legend_)
+
+        plot_has_legend = bool(ax.legend_)
+        if plot_has_legend:
+            props = LegendProperties.from_legend(ax.legend_)
 
         ws = AnalysisDataService.retrieve(name)
 
@@ -370,8 +383,10 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         for new_line, old_line in zip(new_lines, original_lines):
             new_line.update_from(old_line)
 
-        # Now update the legend to make sure it changes to the old properties
-        LegendProperties.create_legend(props, ax)
+        if plot_has_legend:
+            # Update the legend to make sure it changes to the old properties
+            LegendProperties.create_legend(props, ax)
+
         ax.figure.canvas.draw()
 
     @Slot(int, float, float, float)

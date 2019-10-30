@@ -27,6 +27,11 @@ Improved
 - The Instrument is now synchronised across all Batch tabs.
 - Live data monitoring update intervals can now be user-specified.
 
+Bug fixes
+#########
+
+- A bug has been fixed where the interface could sometimes not be closed after a failed attempt at starting Autoprocessing.
+  
 Algorithms
 ----------
 
@@ -45,5 +50,6 @@ The following bugs have been fixed since the last release:
 
 - The pause button is now disabled upon opening the interface and becomes enabled when a process starts.
 - Ensure that the TOF group cannot contain non-TOF workspaces or nested groups (nested groups are not supported so are now flattened into a single group instead).
+- An issue has been fixed where the incorrect transmission workspaces were being output when debug is on/off.
 
 :ref:`Release 4.2.0 <v4.2.0>`

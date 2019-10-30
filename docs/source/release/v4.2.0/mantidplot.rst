@@ -17,5 +17,6 @@ Bugfixes
 - Fixes an issue where the Load dialog would not resize correctly after clicking Run.
 - Useless help buttons removed from multiple dialogs.
 - Sample Transmission Calculator no longer accepts negative wavelength values.
+- Dragging and dropping workspaces onto the spectrum viewer no longer causes a crash
 
 :ref:`Release 4.2.0 <v4.2.0>`

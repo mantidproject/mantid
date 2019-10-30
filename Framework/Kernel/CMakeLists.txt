@@ -490,8 +490,8 @@ target_include_directories(Kernel SYSTEM
                            PRIVATE ${NEXUS_INCLUDE_DIR} ${GSL_INCLUDE_DIR}
                                    ${OPENSSL_INCLUDE_DIR} ${SPAN_INCLUDE_DIR})
 
-if(OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties(Kernel PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  set_target_properties(Kernel PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set_target_properties(Kernel
                         PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
@@ -506,13 +506,13 @@ if(GCC_COMPILER_VERSION AND GCC_COMPILER_VERSION VERSION_LESS "4.5")
   target_link_libraries(Kernel LINK_PRIVATE stdc++)
 endif()
 target_link_libraries(Kernel
-                      LINK_PUBLIC
+                      PUBLIC
                       ${NEXUS_LIBRARIES}
                       Eigen3::Eigen
                       ${JSONCPP_LIBRARIES}
                       ${TBB_LIBRARIES}
                       ${TBB_MALLOC_LIBRARIES}
-                      LINK_PRIVATE
+                      PRIVATE
                       ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${GSL_LIBRARIES}
                       ${MANTIDLIBS}
@@ -633,11 +633,7 @@ mtd_install_targets(TARGETS Kernel INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
 
 # Create the properties file for the installer
 set(MANTID_ROOT_BUILD ${MANTID_ROOT})
-if(APPLE AND ENABLE_MANTIDPLOT)
-  set(MANTID_ROOT ../..)
-else()
-  set(MANTID_ROOT ..)
-endif()
+set(MANTID_ROOT ..)
 
 # Log to file for installed packages but not mpi
 if(MPI_BUILD OR MPI_EXPERIMENTAL)

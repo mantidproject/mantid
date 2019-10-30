@@ -12,10 +12,18 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress,
                         IEventWorkspace)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator)
+
+from sans.algorithm_detail.CreateSANSAdjustmentWorkspaces import CreateSANSAdjustmentWorkspaces
+from sans.algorithm_detail.convert_to_q import convert_workspace
+from sans.algorithm_detail.scale_sans_workspace import scale_workspace
+from sans.algorithm_detail.crop_helper import get_component_name
+from sans.algorithm_detail.mask_sans_workspace import mask_workspace
+from sans.algorithm_detail.move_sans_instrument_component import move_component, MoveTypes
+from sans.algorithm_detail.slice_sans_event import slice_sans_event
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_child_algorithm, append_to_sans_file_tag
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
-from sans.common.enums import (DetectorType, DataType, MaskingQuadrant)
+from sans.common.enums import (DetectorType, DataType, MaskingQuadrant, RangeStepType, RebinType)
 from sans.algorithm_detail.xml_shapes import quadrant_xml
 
 
@@ -75,8 +83,8 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         self.declareProperty("Centre1", 0.0, direction=Direction.Input)
         self.declareProperty("Centre2", 0.0, direction=Direction.Input)
 
-        self.declareProperty("RMax", 0.26, direction= Direction.Input)
-        self.declareProperty("RMin", 0.06, direction= Direction.Input)
+        self.declareProperty("RMax", 0.26, direction=Direction.Input)
+        self.declareProperty("RMin", 0.06, direction=Direction.Input)
 
         # ----------
         # OUTPUT
@@ -112,15 +120,13 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         state.mask.use_mask_phi_mirror = True
 
         # Set compatibility mode
-        #state.compatibility.use_compatibility_mode = self.getProperty('CompatibilityMode').value
+        # state.compatibility.use_compatibility_mode = self.getProperty('CompatibilityMode').value
 
         # Set test centre
         state.move.detectors[DetectorType.to_string(DetectorType.LAB)].sample_centre_pos1 = \
             self.getProperty("Centre1").value
         state.move.detectors[DetectorType.to_string(DetectorType.LAB)].sample_centre_pos2 = \
             self.getProperty("Centre2").value
-
-        state_serialized = state.property_manager
 
         component_as_string = self.getProperty("Component").value
         progress = self._get_progress()
@@ -147,7 +153,7 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         progress.report("Event slicing ...")
         data_type_as_string = self.getProperty("DataType").value
         monitor_scatter_date = self._get_monitor_workspace()
-        scatter_data, monitor_scatter_date, slice_event_factor = self._slice(state_serialized, scatter_data,
+        scatter_data, monitor_scatter_date, slice_event_factor = self._slice(state, scatter_data,
                                                                              monitor_scatter_date, data_type_as_string)
 
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -189,26 +195,26 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         #    The detectors in the workspaces are set such that the beam centre is at (0,0). The position is
         #    a user-specified value which can be obtained with the help of the beam centre finder.
         # ------------------------------------------------------------
-        scatter_data = self._move(state_serialized, scatter_data, component_as_string)
-        monitor_scatter_date = self._move(state_serialized, monitor_scatter_date, component_as_string)
+        scatter_data = self._move(state=state, workspace=scatter_data, component=component_as_string)
+        monitor_scatter_date = self._move(state=state, workspace=monitor_scatter_date, component=component_as_string)
 
         # --------------------------------------------------------------------------------------------------------------
         # 5. Apply masking (pixel masking and time masking)
         # --------------------------------------------------------------------------------------------------------------
         progress.report("Masking ...")
-        scatter_data = self._mask(state_serialized, scatter_data, component_as_string)
+        scatter_data = self._mask(state=state, workspace=scatter_data, component=component_as_string)
 
         # --------------------------------------------------------------------------------------------------------------
         # 6. Convert to Wavelength
         # --------------------------------------------------------------------------------------------------------------
         progress.report("Converting to wavelength ...")
-        scatter_data = self._convert_to_wavelength(state_serialized, scatter_data)
+        scatter_data = self._convert_to_wavelength(state=state, workspace=scatter_data)
 
         # --------------------------------------------------------------------------------------------------------------
         # 7. Multiply by volume and absolute scale
         # --------------------------------------------------------------------------------------------------------------
         progress.report("Multiplying by volume and absolute scale ...")
-        scatter_data = self._scale(state_serialized, scatter_data)
+        scatter_data = self._scale(state=state, workspace=scatter_data)
 
         # --------------------------------------------------------------------------------------------------------------
         # 8. Create adjustment workspaces, those are
@@ -223,7 +229,7 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         data_type_as_string = self.getProperty("DataType").value
         progress.report("Creating adjustment workspaces ...")
         wavelength_adjustment_workspace, pixel_adjustment_workspace, wavelength_and_pixel_adjustment_workspace = \
-            self._adjustment(state_serialized, scatter_data, monitor_scatter_date, component_as_string,
+            self._adjustment(state, scatter_data, monitor_scatter_date, component_as_string,
                              data_type_as_string)
 
         # ------------------------------------------------------------
@@ -244,11 +250,14 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
             xml_string = quadrant_xml(centre, r_min, r_max, quadrant)
             quadrant_scatter_data = self._get_cloned_workspace(scatter_data)
             self._mask_quadrants(quadrant_scatter_data, xml_string)
-            quadrant_scatter_data, sum_of_counts, sum_of_norms = self._convert_to_q(state_serialized,
-                                                                                    quadrant_scatter_data,
-                                                                                    wavelength_adjustment_workspace,
-                                                                                    pixel_adjustment_workspace,
-                                                                                    wavelength_and_pixel_adjustment_workspace)
+
+            quadrant_scatter_data, sum_of_counts, sum_of_norms = \
+                self._convert_to_q(state=state,
+                                   workspace=quadrant_scatter_data,
+                                   wavelength_adjustment_workspace=wavelength_adjustment_workspace,
+                                   pixel_adjustment_workspace=pixel_adjustment_workspace,
+                                   wavelength_and_pixel_adjustment_workspace=wavelength_and_pixel_adjustment_workspace)
+
             quadrant_scatter_reduced.update({quadrant: quadrant_scatter_data})
 
         # # ------------------------------------------------------------
@@ -268,107 +277,87 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
 
     def _get_cropped_workspace(self, component):
         scatter_workspace = self.getProperty("ScatterWorkspace").value
-        crop_name = "SANSCrop"
+        alg_name = "CropToComponent"
+
+        component_to_crop = DetectorType.from_string(component)
+        component_to_crop = get_component_name(scatter_workspace, component_to_crop)
+
         crop_options = {"InputWorkspace": scatter_workspace,
                         "OutputWorkspace": EMPTY_NAME,
-                        "Component": component}
-        crop_alg = create_child_algorithm(self, crop_name, **crop_options)
+                        "ComponentNames": component_to_crop}
+
+        crop_alg = create_child_algorithm(self, alg_name, **crop_options)
         crop_alg.execute()
-        return crop_alg.getProperty("OutputWorkspace").value
 
-    def _slice(self, state_serialized, workspace, monitor_workspace, data_type_as_string):
-        slice_name = "SANSSliceEvent"
-        slice_options = {"SANSState": state_serialized,
-                         "InputWorkspace": workspace,
-                         "InputWorkspaceMonitor": monitor_workspace,
-                         "OutputWorkspace": EMPTY_NAME,
-                         "OutputWorkspaceMonitor": "dummy2",
-                         "DataType": data_type_as_string}
-        slice_alg = create_child_algorithm(self, slice_name, **slice_options)
-        slice_alg.execute()
+        output_workspace = crop_alg.getProperty("OutputWorkspace").value
+        return output_workspace
 
-        workspace = slice_alg.getProperty("OutputWorkspace").value
-        monitor_workspace = slice_alg.getProperty("OutputWorkspaceMonitor").value
-        slice_event_factor = slice_alg.getProperty("SliceEventFactor").value
+    def _slice(self, state, workspace, monitor_workspace, data_type_as_string):
+        returned = slice_sans_event(state_slice=state.slice, input_ws=workspace,
+                                    input_ws_monitor=monitor_workspace, data_type_str=data_type_as_string)
+
+        workspace = returned["OutputWorkspace"]
+        monitor_workspace = returned["OutputWorkspaceMonitor"]
+        slice_event_factor = returned["SliceEventFactor"]
         return workspace, monitor_workspace, slice_event_factor
 
-    def _move(self, state_serialized, workspace, component, is_transmission=False):
+    def _move(self, state, workspace, component, is_transmission=False):
         # First we set the workspace to zero, since it might have been moved around by the user in the ADS
         # Second we use the initial move to bring the workspace into the correct position
-        move_name = "SANSMove"
-        move_options = {"SANSState": state_serialized,
-                        "Workspace": workspace,
-                        "MoveType": "SetToZero",
-                        "Component": ""}
-        move_alg = create_child_algorithm(self, move_name, **move_options)
-        move_alg.execute()
-        workspace = move_alg.getProperty("Workspace").value
+        move_component(move_info=state.move, component_name='', move_type=MoveTypes.RESET_POSITION,
+                       workspace=workspace)
+        move_component(component_name=component, move_info=state.move, move_type=MoveTypes.INITIAL_MOVE,
+                       workspace=workspace, is_transmission_workspace=is_transmission)
+        return workspace
 
-        # Do the initial move
-        move_alg.setProperty("MoveType", "InitialMove")
-        move_alg.setProperty("Component", component)
-        move_alg.setProperty("Workspace", workspace)
-        move_alg.setProperty("IsTransmissionWorkspace", is_transmission)
-        move_alg.execute()
-        return move_alg.getProperty("Workspace").value
+    def _mask(self, state, workspace, component):
+        output_ws = mask_workspace(component_as_string=component, workspace=workspace, state=state)
+        return output_ws
 
-    def _mask(self, state_serialized, workspace, component):
-        mask_name = "SANSMaskWorkspace"
-        mask_options = {"SANSState": state_serialized,
-                        "Workspace": workspace,
-                        "Component": component}
-        mask_alg = create_child_algorithm(self, mask_name, **mask_options)
-        mask_alg.execute()
-        return mask_alg.getProperty("Workspace").value
+    def _convert_to_wavelength(self, state, workspace):
+        wavelength_state = state.wavelength
 
-    def _convert_to_wavelength(self, state_serialized, workspace):
-        wavelength_name = "SANSConvertToWavelength"
-        wavelength_options = {"SANSState": state_serialized,
-                              "InputWorkspace": workspace}
+        wavelength_name = "SANSConvertToWavelengthAndRebin"
+        wavelength_options = {"InputWorkspace": workspace,
+                              "OutputWorkspace": EMPTY_NAME,
+                              "WavelengthLow": wavelength_state.wavelength_low[0],
+                              "WavelengthHigh": wavelength_state.wavelength_high[0],
+                              "WavelengthStep": wavelength_state.wavelength_step,
+                              "WavelengthStepType": RangeStepType.to_string(
+                                  wavelength_state.wavelength_step_type),
+                              "RebinMode": RebinType.to_string(wavelength_state.rebin_type)}
+
         wavelength_alg = create_child_algorithm(self, wavelength_name, **wavelength_options)
-        wavelength_alg.setPropertyValue("OutputWorkspace", EMPTY_NAME)
-        wavelength_alg.setProperty("OutputWorkspace", workspace)
         wavelength_alg.execute()
         return wavelength_alg.getProperty("OutputWorkspace").value
 
-    def _scale(self, state_serialized, workspace):
-        scale_name = "SANSScale"
-        scale_options = {"SANSState": state_serialized,
-                         "InputWorkspace": workspace,
-                         "OutputWorkspace": EMPTY_NAME}
-        scale_alg = create_child_algorithm(self, scale_name, **scale_options)
-        scale_alg.execute()
-        return scale_alg.getProperty("OutputWorkspace").value
+    def _scale(self, state, workspace):
+        instrument = state.data.instrument
+        output_ws = scale_workspace(workspace=workspace, instrument=instrument, state_scale=state.scale)
 
-    def _adjustment(self, state_serialized, workspace, monitor_workspace, component_as_string, data_type):
+        return output_ws
+
+    def _adjustment(self, state, workspace, monitor_workspace, component_as_string, data_type):
         transmission_workspace = self._get_transmission_workspace()
         direct_workspace = self._get_direct_workspace()
 
-        adjustment_name = "SANSCreateAdjustmentWorkspaces"
-        adjustment_options = {"SANSState": state_serialized,
-                              "Component": component_as_string,
-                              "DataType": data_type,
-                              "MonitorWorkspace": monitor_workspace,
-                              "SampleData": workspace,
-                              "OutputWorkspaceWavelengthAdjustment": EMPTY_NAME,
-                              "OutputWorkspacePixelAdjustment": EMPTY_NAME,
-                              "OutputWorkspaceWavelengthAndPixelAdjustment": EMPTY_NAME}
         if transmission_workspace:
-            transmission_workspace = self._move(state_serialized, transmission_workspace, component_as_string,
-                                                is_transmission=True)
-            adjustment_options.update({"TransmissionWorkspace": transmission_workspace})
+            transmission_workspace = self._move(state=state, workspace=transmission_workspace,
+                                                component=component_as_string, is_transmission=True)
 
         if direct_workspace:
-            direct_workspace = self._move(state_serialized, direct_workspace, component_as_string, is_transmission=True)
-            adjustment_options.update({"DirectWorkspace": direct_workspace})
+            direct_workspace = self._move(state=state, workspace=direct_workspace,
+                                          component=component_as_string, is_transmission=True)
 
-        adjustment_alg = create_child_algorithm(self, adjustment_name, **adjustment_options)
-        adjustment_alg.execute()
+        alg = CreateSANSAdjustmentWorkspaces(state_adjustment=state.adjustment,
+                                             data_type=data_type, component=component_as_string)
+        returned_dict = alg.create_sans_adjustment_workspaces(direct_ws=direct_workspace, monitor_ws=monitor_workspace,
+                                                              sample_data=workspace,
+                                                              transmission_ws=transmission_workspace)
+        wavelength_adjustment = returned_dict["wavelength_adj"]
+        pixel_adjustment = returned_dict["pixel_adj"]
+        wavelength_and_pixel_adjustment = returned_dict["wavelength_pixel_adj"]
 
-        wavelength_adjustment = adjustment_alg.getProperty("OutputWorkspaceWavelengthAdjustment").value
-        pixel_adjustment = adjustment_alg.getProperty("OutputWorkspacePixelAdjustment").value
-        wavelength_and_pixel_adjustment = adjustment_alg.getProperty(
-                                           "OutputWorkspaceWavelengthAndPixelAdjustment").value
         return wavelength_adjustment, pixel_adjustment, wavelength_and_pixel_adjustment
 
     def _convert_to_histogram(self, workspace):
@@ -385,7 +374,7 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
 
         return workspace
 
-    def _convert_to_q(self, state_serialized, workspace, wavelength_adjustment_workspace, pixel_adjustment_workspace,
+    def _convert_to_q(self, state, workspace, wavelength_adjustment_workspace, pixel_adjustment_workspace,
                       wavelength_and_pixel_adjustment_workspace):
         """
         A conversion to momentum transfer is performed in this step.
@@ -399,24 +388,17 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         @param wavelength_and_pixel_adjustment_workspace: the wavelength and pixel adjustment workspace.
         @return: a reduced workspace
         """
-        convert_name = "SANSConvertToQ"
-        convert_options = {"InputWorkspace": workspace,
-                           "OutputWorkspace": EMPTY_NAME,
-                           "SANSState": state_serialized,
-                           "OutputParts": True}
-        if wavelength_adjustment_workspace:
-            convert_options.update({"InputWorkspaceWavelengthAdjustment": wavelength_adjustment_workspace})
-        if pixel_adjustment_workspace:
-            convert_options.update({"InputWorkspacePixelAdjustment": pixel_adjustment_workspace})
-        if wavelength_and_pixel_adjustment_workspace:
-            convert_options.update({"InputWorkspaceWavelengthAndPixelAdjustment":
-                                    wavelength_and_pixel_adjustment_workspace})
-        convert_alg = create_child_algorithm(self, convert_name, **convert_options)
-        convert_alg.execute()
-        data_workspace = convert_alg.getProperty("OutputWorkspace").value
-        sum_of_counts = convert_alg.getProperty("SumOfCounts").value
-        sum_of_norms = convert_alg.getProperty("SumOfNormFactors").value
-        return data_workspace, sum_of_counts, sum_of_norms
+        output_dict = convert_workspace(workspace=workspace, state_convert_to_q=state.convert_to_q,
+                                        wavelength_adj_workspace=wavelength_adjustment_workspace,
+                                        pixel_adj_workspace=pixel_adjustment_workspace,
+                                        wavelength_and_pixel_adj_workspace=wavelength_and_pixel_adjustment_workspace,
+                                        output_summed_parts=True)
+
+        output_workspace = output_dict["output"]
+        sum_of_counts = output_dict["counts_summed"]
+        sum_of_norms = output_dict["norm_summed"]
+
+        return output_workspace, sum_of_counts, sum_of_norms
 
     def validateInputs(self):
         errors = dict()

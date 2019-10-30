@@ -609,7 +609,7 @@ set_target_properties(DataHandling
                                  COMPILE_DEFINITIONS
                                  "IN_MANTID_DATAHANDLING")
 
-if(OSX_VERSION VERSION_GREATER 10.8)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(DataHandling
                         PROPERTIES INSTALL_RPATH
                                    "@loader_path/../Contents/MacOS")

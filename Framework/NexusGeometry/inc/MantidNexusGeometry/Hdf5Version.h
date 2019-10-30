@@ -9,6 +9,8 @@
 
 #include "MantidNexusGeometry/DllConfig.h"
 
+#include <cstdint>
+
 namespace Mantid {
 namespace NexusGeometry {
 namespace Hdf5Version {

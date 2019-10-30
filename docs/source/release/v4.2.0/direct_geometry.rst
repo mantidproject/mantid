@@ -13,5 +13,6 @@ Direct Geometry Changes
 * Added the ``CHESS`` and ``ZEEMANS`` instruments  in the ``Facilities.xml`` to SNS for the second target station
 * Added CHESS IDF
 * Modified :ref:`MaskBTP <algm-MaskBTP-v1>`, Q/E Coverage and DGSPlanner for CHESS
+* Added the :ref:`ALF View <ALF_View-ref>` GUI for aligning samples.
 
 :ref:`Release 4.2.0 <v4.2.0>`

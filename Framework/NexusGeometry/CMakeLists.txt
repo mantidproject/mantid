@@ -13,7 +13,6 @@ set(SRC_FILES
 
 set(INC_FILES
     inc/MantidNexusGeometry/AbstractLogger.h
-    inc/MantidNexusGeometry/DllConfig.h
     inc/MantidNexusGeometry/H5ForwardCompatibility.h
     inc/MantidNexusGeometry/Hdf5Version.h
     inc/MantidNexusGeometry/InstrumentBuilder.h
@@ -54,9 +53,9 @@ set_target_properties(NexusGeometry
                                  COMPILE_DEFINITIONS
                                  IN_MANTID_NEXUS_GEOMETRY)
 
-if(OSX_VERSION VERSION_GREATER 10.8)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(NexusGeometry
-                        PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+                        PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
 endif()
 
 # Include HDF5 libraries
@@ -73,6 +72,10 @@ target_link_libraries(NexusGeometry
 
 # Add the unit tests directory
 add_subdirectory(test)
+
+# Auto-generate exports header
+target_include_directories(NexusGeometry PUBLIC ${CMAKE_BINARY_DIR}/Framework/NexusGeometry)
+generate_mantid_export_header(NexusGeometry)
 
 mtd_install_targets(TARGETS
                     NexusGeometry

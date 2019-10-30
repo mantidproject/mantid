@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
+import numpy as np
 import os
 import systemtesting
 import shutil
@@ -156,6 +157,7 @@ class TotalScatteringTest(systemtesting.MantidSystemTest):
     pdf_output = None
 
     def runTest(self):
+        setup_mantid_paths()
         # Load Focused ws
         mantid.LoadNexus(Filename=total_scattering_input_file, OutputWorkspace='98533-Results-TOF-Grp')
         self.pdf_output = run_total_scattering('98533', False)
@@ -164,19 +166,38 @@ class TotalScatteringTest(systemtesting.MantidSystemTest):
         # Whilst total scattering is in development, the validation will avoid using reference files as they will have
         # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.9 Angstrom will be checked.
         # After rebin this is at X index 37
-        expected_peak_values = [0.0002294,
-                                0.0606328,
-                                0.2007917,
-                                0.1436630,
-                                0.9823244]
+        expected_peak_values = [-0.0003396,
+                                0.0454474,
+                                0.1756082,
+                                0.2763138,
+                                0.7222359]
         for index, ws in enumerate(self.pdf_output):
             self.assertAlmostEqual(ws.dataY(0)[37], expected_peak_values[index], places=3)
 
 
-def run_total_scattering(run_number, merge_banks):
+class TotalScatteringMergedTest(systemtesting.MantidSystemTest):
+
+    pdf_output = None
+
+    def runTest(self):
+        setup_mantid_paths()
+        # Load Focused ws
+        mantid.LoadNexus(Filename=total_scattering_input_file, OutputWorkspace='98533-Results-TOF-Grp')
+        q_lims = np.array([2.5, 3, 4, 6, 7, 3.5, 5, 7, 11, 40]).reshape((2, 5))
+        self.pdf_output = run_total_scattering('98533', True, q_lims=q_lims)
+
+    def validate(self):
+        # Whilst total scattering is in development, the validation will avoid using reference files as they will have
+        # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.9 Angstrom will be checked.
+        # After rebin this is at X index 37
+        self.assertAlmostEqual(self.pdf_output.dataY(0)[37], 0.8055205, places=3)
+
+
+def run_total_scattering(run_number, merge_banks, q_lims=None):
     pdf_inst_obj = setup_inst_object(mode="PDF")
     return pdf_inst_obj.create_total_scattering_pdf(run_number=run_number,
-                                                    merge_banks=merge_banks)
+                                                    merge_banks=merge_banks,
+                                                    q_lims=q_lims)
 
 
 def _gen_required_files():

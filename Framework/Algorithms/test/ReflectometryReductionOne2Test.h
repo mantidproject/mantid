@@ -48,9 +48,13 @@ public:
     // A multi detector ws
     m_multiDetectorWS =
         create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
+    m_multiDetectorWS->mutableRun().addProperty<std::string>("run_number",
+                                                             "1234");
     // A transmission ws with different spectrum numbers to the run
     m_transmissionWS =
         create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
+    m_transmissionWS->mutableRun().addProperty<std::string>("run_number",
+                                                            "4321");
     m_transmissionWS->getSpectrum(0).setSpectrumNo(2);
     m_transmissionWS->getSpectrum(1).setSpectrumNo(3);
     m_transmissionWS->getSpectrum(2).setSpectrumNo(4);
@@ -776,6 +780,7 @@ public:
   void test_debug_false_no_OutputWorkspace() {
     ReflectometryReductionOne2 alg;
     auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
+    inputWS->mutableRun().removeProperty("run_number");
     setYValuesToWorkspace(*inputWS);
 
     alg.initialize();
@@ -796,6 +801,7 @@ public:
   void test_debug_true_default_OutputWorkspace_no_run_number() {
     ReflectometryReductionOne2 alg;
     auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
+    inputWS->mutableRun().removeProperty("run_number");
     setYValuesToWorkspace(*inputWS);
 
     alg.initialize();
@@ -816,7 +822,6 @@ public:
   void test_debug_true_default_OutputWorkspace_with_run_number() {
     ReflectometryReductionOne2 alg;
     auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
-    inputWS->mutableRun().addProperty<std::string>("run_number", "1234");
     setYValuesToWorkspace(*inputWS);
 
     alg.initialize();
@@ -830,6 +835,31 @@ public:
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_1234"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_1234"));
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_transmission_output_is_stored_when_one_transmission_input() {
+    ReflectometryReductionOne2 alg;
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "2", m_multiDetectorWS,
+                                         false);
+    runAlgorithmLam(alg);
+
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_LAM_1234"));
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_transmission_output_is_stored_when_two_transmission_inputs() {
+    ReflectometryReductionOne2 alg;
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "2", m_multiDetectorWS,
+                                         true);
+    runAlgorithmLam(alg);
+
+    // stitched output is stored
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_LAM_1234_1234"));
+    // interim outputs are not
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist("TRANS_LAM_1234"));
 
     AnalysisDataService::Instance().clear();
   }

@@ -103,6 +103,12 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
         res = IndirectILLEnergyTransfer(**args)
         self._check_workspace_group(res, 1, 18, 1121)
 
+    def test_psd_tubes_only(self):
+        args = {'Run': self._runs['one_wing_QENS'],
+                'DiscardSingleDetectors': True}
+        res = IndirectILLEnergyTransfer(**args)
+        self._check_workspace_group(res, 1, 16, 1024)
+
     def _check_workspace_group(self, wsgroup, nentries, nspectra, nbins):
 
         self.assertTrue(isinstance(wsgroup, WorkspaceGroup))

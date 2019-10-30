@@ -22,6 +22,7 @@ Improvements
 - :ref:`SNAPReduce <algm-SNAPReduce-v1>` has an additional parameter ``MaxChunkSize`` for customizing the chunking behavior
 - :ref:`LorentzCorrection <algm-LorentzCorrection-v1>` has an additional option for single crystal (default) or powder operation
 - The create_total_scattering_pdf method in Polaris scripts now supports merging banks with a weighted mean.
+- The create_total_scattering_pdf method in Polaris scripts now applies the Placzek self scattering correction from :ref:CalculatePlaczekSelfScattering <algm-CalculatePlaczekSelfScattering>.
 
 Bug Fixes
 #########
@@ -43,13 +44,17 @@ Improvements
   along with the option to not require a predicted peak to hit a detector.
 - :ref:`SaveHKL <algm-SaveHKL>` now saves the tbar and transmission values for shapes and materials provided by :ref:`SetSample <algm-SetSample>`.
 - :ref:`SelectCellOfType <algm-SelectCellOfType>` and :ref:`SelectCellWithForm <algm-SelectCellWithForm>` now return the transformation matrix
+- :ref:`IndexPeaks <algm-IndexPeaks>` now has options to enter modulation vectors and additional information required for satellite peak indexing. As
+  a result :ref:`IndexPeaksWithSatellites <algm-IndexPeaksWithSatellites>` has been deprecated and will be removed in a future release.
+- Bugs in :ref:`LoadIsawPeaks <algm-LoadIsawPeaks>` and :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` for WISH have been fixed.
+- Added IDF for DEMAND (HB3A upgrade)
 
 
 Bug Fixes
 #########
 
-- :ref:`IndexPeaksWithSatellites <algm-IndexPeaksWithSatellites>` & :ref:`IndexPeaks <algm-IndexPeaks>` have been fixed
-  so that they correctly report the number of main & satellite reflections that have been indexed. Also, if a satellite
+- :ref:`IndexPeaks <algm-IndexPeaks>` has been fixed
+  so that it correctly reports the number of main & satellite reflections that have been indexed. Also, if a satellite
   peak cannot be indexed its HKL is reset to 000 rather than accidentally setting it to the HKL of the main reflection.
 
 Imaging

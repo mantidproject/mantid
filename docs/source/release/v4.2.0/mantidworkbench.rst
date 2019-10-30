@@ -19,6 +19,7 @@ User Interface
 New
 ###
 - Added a 'Generate Recovery Script' button to Workbench under the File menu bar, it generates a script that is essentially what project recovery uses. However it is only the script and does not include the workspace clean up and other features Project Recovery offers.
+- The script repository is now in workbench .
 
 Improvements
 ############
@@ -42,6 +43,7 @@ Improvements
 - The home button on figures now always centres the figure's contents.
 - You can now zoom in/out on figures by scrolling and pan figures using the middle mouse button.
 - The keyboard shortcut Ctrl+D now aborts a running script.
+- Plot windows now stay on top of Workbench's main window, so you can easily drag and drop workspaces onto existing figures.
 
 Bugfixes
 ########

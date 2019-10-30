@@ -21,10 +21,6 @@ namespace Mantid {
 namespace VATES {
 class DLLExport TimeStepToTimeStep : std::unary_function<int, int> {
 private:
-  double m_timeRange;
-
-  size_t m_nIntervalSteps;
-
   TimeStepToTimeStep(double timeMin, double timeMax, size_t intervalStep);
 
 public:
@@ -32,7 +28,7 @@ public:
   static TimeStepToTimeStep construct(double timeMin, double timeMax,
                                       size_t nIntervalSteps);
 
-  TimeStepToTimeStep();
+  TimeStepToTimeStep() = default;
 
   size_t operator()(double timeStep) const;
 };

@@ -57,7 +57,7 @@ Output
 .. testoutput::
    :options: +ELLIPSIS
 
-   Version: 2.0  Facility: SNS  Instrument: basic_rect  Date: 1990-01-01T00:00:01
+   Version: 2.0  Facility: Unknown  Instrument: basic_rect  Date: 1990-01-01T00:00:01
    6         L1    T0_SHIFT
    7  1000.0000       0.000
    4 DETNUM  NROWS  NCOLS   WIDTH   HEIGHT   DEPTH   DETD   CenterX   CenterY   CenterZ    BaseX    BaseY    BaseZ      UpX      UpY      UpZ

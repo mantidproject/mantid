@@ -494,6 +494,20 @@ public:
     TS_ASSERT_DELTA(new_list[4].norm(), 9.93006, 1e-4);
   }
 
+  void test_RoundHKL() {
+    V3D hkl(-1.234, 0.345, 7.5765);
+    IndexingUtils::RoundHKL(hkl);
+    TS_ASSERT_EQUALS(V3D(-1, 0, 8), hkl)
+  }
+
+  void test_RoundHKLs() {
+    std::vector<V3D> hkls{V3D(-1.234, 0.345, 7.5765),
+                          V3D(3.5345, -1.346, 0.2347)};
+    IndexingUtils::RoundHKLs(hkls);
+    TS_ASSERT_EQUALS(V3D(-1, 0, 8), hkls[0])
+    TS_ASSERT_EQUALS(V3D(4, -1, 0), hkls[1])
+  }
+
   void test_ValidIndex() {
     V3D hkl(0, 0, 0);
     TS_ASSERT_EQUALS(IndexingUtils::ValidIndex(hkl, 0.1), false);
@@ -621,6 +635,34 @@ public:
       diff = (indices[i] - miller_indices[i]).norm();
       TS_ASSERT_DELTA(diff, 0, 0.1);
     }
+  }
+
+  void test_CalculateMillerIndicesSingleQ_for_Valid_Index() {
+    const auto q_vectors = getNatroliteQs();
+    const auto indices = getNatroliteIndices();
+    auto UB = getNatroliteUB();
+    UB.Invert();
+
+    const double tolerance = 0.1;
+    V3D miller_indices;
+
+    const bool success = IndexingUtils::CalculateMillerIndices(
+        UB, q_vectors[0], tolerance, miller_indices);
+    TS_ASSERT(success);
+    const auto diff = (indices[0] - miller_indices).norm();
+    TS_ASSERT_DELTA(diff, 0, 0.1);
+  }
+
+  void test_CalculateMillerIndicesSingleQ_No_Tolerance() {
+    const auto q_vectors = getNatroliteQs();
+    const auto indices = getNatroliteIndices();
+    auto UB = getNatroliteUB();
+    UB.Invert();
+
+    const V3D millerIndices =
+        IndexingUtils::CalculateMillerIndices(UB, q_vectors[0]);
+    const auto diff = (indices[0] - millerIndices).norm();
+    TS_ASSERT_DELTA(diff, 0, 0.1);
   }
 
   void test_GetIndexedPeaks_1D() {

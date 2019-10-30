@@ -11,6 +11,7 @@
 #include "MantidAPI/ILiveListener.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/System.h"
+#include "MantidLiveData/DllConfig.h"
 
 namespace Mantid {
 namespace LiveData {
@@ -23,7 +24,7 @@ namespace LiveData {
 
   @date 2012-02-16
 */
-class DLLExport LiveDataAlgorithm : public API::Algorithm {
+class MANTID_LIVEDATA_DLL LiveDataAlgorithm : public API::Algorithm {
 public:
   const std::string category() const override;
 

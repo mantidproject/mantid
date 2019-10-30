@@ -288,7 +288,8 @@ void IndirectFitPropertyBrowser::setConvolveMembers(bool convolveMembers) {}
  * Clears the functions in this indirect fit property browser.
  */
 void IndirectFitPropertyBrowser::clear() {
-  // FitPropertyBrowser::clear();
+  m_functionBrowser->clear();
+  m_templateBrowser->clear();
 }
 
 /**
@@ -296,12 +297,7 @@ void IndirectFitPropertyBrowser::clear() {
  * @param sampleWorkspace :: The workspace loaded as sample
  */
 void IndirectFitPropertyBrowser::updatePlotGuess(
-    MatrixWorkspace_const_sptr sampleWorkspace) {
-  // if (sampleWorkspace && compositeFunction()->nFunctions() > 0)
-  //  setPeakToolOn(true);
-  // else
-  //  setPeakToolOn(false);
-}
+    MatrixWorkspace_const_sptr sampleWorkspace) {}
 
 void IndirectFitPropertyBrowser::setErrorsEnabled(bool enabled) {
   m_functionBrowser->setErrorsEnabled(enabled);
@@ -343,9 +339,7 @@ void IndirectFitPropertyBrowser::updateFunctionBrowserData(
   m_templateBrowser->setDatasetNames(datasetNames);
 }
 
-void IndirectFitPropertyBrowser::setFitEnabled(bool enable) {
-  // FitPropertyBrowser::setFitEnabled(enable);
-}
+void IndirectFitPropertyBrowser::setFitEnabled(bool enable) {}
 
 /**
  * Schedules a fit.
