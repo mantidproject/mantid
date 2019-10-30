@@ -7,6 +7,7 @@
 #ifndef CREATE_DETECTOR_TABLE_H_
 #define CREATE_DETECTOR_TABLE_H_
 
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/EnabledWhenWorkspaceIsType.h"
 #include "MantidAPI/ExperimentInfo.h"
@@ -27,7 +28,7 @@
 namespace Mantid {
 namespace Algorithms {
 
-class DLLExport CreateDetectorTable : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CreateDetectorTable : public API::Algorithm {
 public:
   /// (Empty) Constructor
   CreateDetectorTable() : API::Algorithm() {}
@@ -54,23 +55,23 @@ private:
 API::ITableWorkspace_sptr
 createDetectorTableWorkspace(const API::MatrixWorkspace_sptr &ws,
                              const std::vector<int> &indices,
-                             const bool &include_data, Kernel::Logger &logger);
+                             const bool includeData, Kernel::Logger &logger);
 
 /// Converts a list to a string, shortened if necessary
 std::string createTruncatedList(const std::set<int> &elements);
 
 void populateTable(Mantid::API::ITableWorkspace_sptr &t,
                    const Mantid::API::MatrixWorkspace_sptr &ws,
-                   const int &nrows, const std::vector<int> &indices,
+                   const int nrows, const std::vector<int> &indices,
                    const Mantid::API::SpectrumInfo &spectrumInfo,
-                   bool &signedThetaParamRetrieved, bool &showSignedTwoTheta,
+                   bool signedThetaParamRetrieved, bool showSignedTwoTheta,
                    const Mantid::Geometry::PointingAlong &beamAxisIndex,
-                   const double &sampleDist, const bool &isScanning,
-                   const bool &include_data, const bool &calcQ,
+                   const double sampleDist, const bool isScanning,
+                   const bool include_data, const bool calcQ,
                    Kernel::Logger &logger);
 std::vector<std::pair<std::string, std::string>>
-createColumns(const bool &isScanning, const bool &include_data,
-              const bool &calcQ);
+createColumns(const bool isScanning, const bool includeData,
+              const bool calcQ);
 
 } // namespace Algorithms
 } // namespace Mantid
