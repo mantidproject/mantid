@@ -14,6 +14,8 @@ it is recommended they read :ref:`Engineering_Diffraction-ref` instead which is 
 
 The files used in the following examples are found within System test files within 
 `<MantidBuildDir>/ExternalData/Testing/Data/SystemTest` after building the *SystemTestData* target.
+Runs can also be loaded from the archive, however different run numbers will be needed as older runs may
+be deleted.
 
 Overview
 ^^^^^^^^
@@ -39,9 +41,9 @@ If a vanadium calibration has never been run the `Current calibration` will be e
 a calibration has been run these fields will retain their values for future runs of the program. 
 The following files can be used for the calibration run.
 
-- *Vanadium#*: ENGINX00236516.nxs
+- *Vanadium#*: ENGINX00236516.nxs / 307521 for archive
 
-- *Calibration#*: ENGINX00241391.nxs
+- *Calibration#*: ENGINX00241391.nxs / 305738 for archive
 
 Once the calibration has completed if the calibration was successful plotting the spectra of the
 newly created workspaces will produce images similar to below:
@@ -78,8 +80,8 @@ If the data is captured in event mode (i.e.. Event workspaces) it will first
 need :ref:`preProcessing-Engineering_Diffraction_test-ref` .
 
 A .nxs file containing histogram data needs to be selected for example *ENGINX00193749.nxs*
-this can have all banks summed, specific spectra and list or use a detector grouping to create
-a texture. 
+/ 305761 on archive. This can have all banks summed, specific spectra and list or use a
+detector grouping to create a texture.
 
 Once the focus run has finished it will save a focused .nxs file in 
 
@@ -121,7 +123,7 @@ workspace with TOF as the X axis.
 If the multi-period data with pulse times is captured `Multi-period data` should be used instead
 with the delta in time on every step of the X axis entered. 
 
-For testing purposes with regular time binning testing should be done using a .s0 file such as 299735.s08,
+For testing purposes with regular time binning testing should be done using 305761 on archive,
 multi-period data should instead use a run from 285643-285701 which are event workspaces.
 
 Fitting
