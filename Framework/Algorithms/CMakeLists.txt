@@ -76,6 +76,7 @@ set(SRC_FILES
     src/CorrectTOFAxis.cpp
     src/CorrectToFile.cpp
     src/CreateCalFileByNames.cpp
+    src/CreateDetectorTable.cpp
     src/CreateDummyCalFile.cpp
     src/CreateEPP.cpp
     src/CreateFlatEventWorkspace.cpp
@@ -420,6 +421,7 @@ set(INC_FILES
     inc/MantidAlgorithms/CorrectTOFAxis.h
     inc/MantidAlgorithms/CorrectToFile.h
     inc/MantidAlgorithms/CreateCalFileByNames.h
+    inc/MantidAlgorithms/CreateDetectorTable.h
     inc/MantidAlgorithms/CreateDummyCalFile.h
     inc/MantidAlgorithms/CreateEPP.h
     inc/MantidAlgorithms/CreateFlatEventWorkspace.h
@@ -781,6 +783,7 @@ set(TEST_FILES
     CorrectTOFAxisTest.h
     CorrectToFileTest.h
     CreateCalFileByNamesTest.h
+    CreateDetectorTableTest.h
     CreateDummyCalFileTest.h
     CreateEPPTest.h
     CreateFlatEventWorkspaceTest.h
