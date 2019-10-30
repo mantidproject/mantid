@@ -19,8 +19,9 @@
 
 namespace {
 QAbstractItemView::EditTriggers getEditTriggers() {
-  auto trigger =
-      QAbstractItemView::DoubleClicked | QAbstractItemView::EditKeyPressed;
+  auto trigger = QAbstractItemView::DoubleClicked |
+                 QAbstractItemView::EditKeyPressed |
+                 QAbstractItemView::AnyKeyPressed;
   return trigger;
 }
 } // namespace
@@ -532,104 +533,45 @@ void JobTreeView::enableFiltering() {
 }
 
 void JobTreeView::keyPressEvent(QKeyEvent *event) {
-  std::string userText = event->text().toStdString();
-  // Strip out any special chars or control chars
-  userText.erase(std::remove_if(userText.begin(), userText.end(),
-                                [](char c) { return !std::isalnum(c); }),
-                 userText.end());
-
-  // We have to be careful a shift plus char is upper-case so if there is text
-  // fall through to text handling below
-  bool isShiftCommand =
-      (event->modifiers() & Qt::ShiftModifier) && userText.size() == 0;
-  bool isCtrlCommand = event->modifiers() & Qt::ControlModifier;
-
-  if (isCtrlCommand || isShiftCommand) {
-    handleModifierKeyPress(event);
-    return;
-  }
-
   switch (event->key()) {
+  case Qt::Key_I:
+    if (event->modifiers() & Qt::ControlModifier) {
+      appendAndEditAtChildRowRequested();
+    }
+    break;
   case Qt::Key_Return:
-  case Qt::Key_Enter:
-    appendAndEditAtRowBelowRequested();
-    return;
+  case Qt::Key_Enter: {
+    if (event->modifiers() & Qt::ShiftModifier) {
+      editAtRowAboveRequested();
+    } else {
+      appendAndEditAtRowBelowRequested();
+    }
+    break;
+  }
   case Qt::Key_Delete:
     removeSelectedRequested();
-    return;
-  }
-
-  if (userText.size() == 0) {
-    // We have a special key such as Page-Up, don't try to handle it
-    QTreeView::keyPressEvent(event);
-    return;
-  }
-
-  auto model = fromFilteredModel(currentIndex());
-
-  // Forward the key on so it appears they typed into it
-  auto row = rowLocation().atIndex((mapToMainModel(model)));
-  auto cell = cellAt(row, currentColumn());
-
-  if (!cell.isEditable()) {
-    // If we attempt to insert text into an uneditable cell we will throw
-    return;
-  }
-
-  cell.setContentText(userText);
-  setCellAt(row, currentColumn(), cell);
-
-  m_notifyee->notifyCellTextChanged(row, currentColumn(), "", userText);
-
-  // Switch into the cell they have highlighted
-  // TODO This should be above the notification however in the SANS GUI
-  // we currently lose track of the cursor position when notifying text changed
-  // This causes the cursor to pre-select the text they just entered in row 1
-  editAt(model);
-}
-
-void JobTreeView::handleModifierKeyPress(QKeyEvent *event) {
-  assert(event->modifiers() & ~Qt::NoModifier);
-  const auto modifier = event->modifiers();
-
-  if (modifier & Qt::ControlModifier) {
-    switch (event->key()) {
-    case Qt::Key_C:
+    break;
+  case Qt::Key_C: {
+    if (event->modifiers() & Qt::ControlModifier) {
       copySelectedRequested();
-      break;
-    case Qt::Key_I:
-      appendAndEditAtChildRowRequested();
-      break;
-    case Qt::Key_V:
+    }
+    break;
+  }
+  case Qt::Key_V: {
+    if (event->modifiers() & Qt::ControlModifier) {
       pasteSelectedRequested();
-      break;
-    case Qt::Key_X:
+    }
+    break;
+  }
+  case Qt::Key_X: {
+    if (event->modifiers() & Qt::ControlModifier) {
       cutSelectedRequested();
-      break;
-    default:
-      QTreeView::keyPressEvent(event);
-      break;
     }
-
-    return;
+    break;
   }
-
-  // Handle Shift +
-  if (modifier & Qt::ShiftModifier) {
-    switch (event->key()) {
-    case Qt::Key_Enter:
-    case Qt::Key_Return:
-      editAtRowAboveRequested();
-      break;
-    default:
-      QTreeView::keyPressEvent(event);
-      break;
-    }
-    return;
+  default:
+    QTreeView::keyPressEvent(event);
   }
-
-  // Unrecognised Modifier + key so forward up to Qt
-  QTreeView::keyPressEvent(event);
 }
 
 QModelIndexForMainModel

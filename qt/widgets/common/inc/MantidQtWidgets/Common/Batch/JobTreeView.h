@@ -129,8 +129,6 @@ private:
 
   bool indexesAreOnSameRow(QModelIndex const &a, QModelIndex const &b) const;
 
-  void handleModifierKeyPress(QKeyEvent *event);
-
   QModelIndexForMainModel
   mapToMainModel(QModelIndexForFilteredModel const &filteredModelIndex) const;
   QModelIndexForFilteredModel
