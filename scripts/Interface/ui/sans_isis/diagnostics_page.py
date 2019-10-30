@@ -8,9 +8,10 @@ from __future__ import (absolute_import, division, print_function)
 
 from abc import ABCMeta, abstractmethod
 from qtpy import QtCore, QtWidgets
-from six import with_metaclass
 
 from mantidqt.utils.qt import load_ui
+from six import with_metaclass
+
 from sans.gui_logic.gui_common import (load_file, GENERIC_SETTINGS)
 
 try:

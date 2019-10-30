@@ -12,17 +12,19 @@ from __future__ import (absolute_import, division, print_function)
 
 from abc import ABCMeta, abstractmethod
 from inspect import isclass
-from qtpy.QtWidgets import (QListWidgetItem, QMessageBox, QFileDialog, QMainWindow)  # noqa
-from qtpy.QtCore import (QRegExp, QSettings)  # noqa
-from qtpy.QtGui import (QDoubleValidator, QIcon, QIntValidator, QRegExpValidator)  # noqa
-from six import with_metaclass
+from qtpy import PYQT4
+from qtpy.QtCore import QRegExp
+from qtpy.QtGui import (QDoubleValidator, QIntValidator, QRegExpValidator)
+from qtpy.QtWidgets import (QListWidgetItem, QMessageBox, QFileDialog, QMainWindow)
 
-from reduction_gui.reduction.scripter import execute_script
-from mantid.kernel import (Logger)
 from mantidqt import icons
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt import load_ui
 from mantidqt.widgets import jobtreeview, manageuserdirectories
+from six import with_metaclass
+
+from mantid.kernel import (Logger, UsageService)
+from reduction_gui.reduction.scripter import execute_script
 from sans.common.enums import (BinningType, ReductionDimensionality, OutputMode, SaveType, SANSInstrument,
                                RangeStepType, ReductionMode, FitType)
 from sans.common.file_information import SANSFileInformationFactory
@@ -31,17 +33,16 @@ from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection,
                                        get_string_for_gui_from_reduction_mode, GENERIC_SETTINGS,
                                        load_file, load_property, set_setting,
                                        get_instrument_from_gui_selection)
-from sans.gui_logic.models.run_summation import RunSummation
-from sans.gui_logic.models.run_selection import RunSelection
 from sans.gui_logic.models.run_finder import SummableRunFinder
+from sans.gui_logic.models.run_selection import RunSelection
+from sans.gui_logic.models.run_summation import RunSummation
 from sans.gui_logic.models.summation_settings import SummationSettings
 from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter
 from sans.gui_logic.presenter.run_selector_presenter import RunSelectorPresenter
 from sans.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
-from ui.sans_isis.work_handler import WorkHandler
 from ui.sans_isis.SANSSaveOtherWindow import SANSSaveOtherDialog
+from ui.sans_isis.work_handler import WorkHandler
 
-from qtpy import PYQT4
 if PYQT4:
     IN_MANTIDPLOT = False
     try:
@@ -248,6 +249,9 @@ class SANSDataProcessorGui(QMainWindow,
         self._attach_validators()
 
         self._setup_progress_bar()
+
+        # At a later date we can drop new once we confirm the old GUI is not using "ISIS SANS"
+        UsageService.registerFeatureUsage("Interface", "ISIS SANS (new)", False)
 
     def _setup_progress_bar(self):
         self.batch_progress_bar.setMinimum(0)
@@ -486,18 +490,22 @@ class SANSDataProcessorGui(QMainWindow,
         """
         Process runs
         """
+        UsageService.registerFeatureUsage("Feature", "ISIS SANS->Process Selected", False)
         self._call_settings_listeners(lambda listener: listener.on_process_selected_clicked())
 
     def _process_all_clicked(self):
         """
         Process All button clicked
         """
+        UsageService.registerFeatureUsage("Feature", "ISIS SANS->Process All", False)
         self._call_settings_listeners(lambda listener: listener.on_process_all_clicked())
 
     def _load_clicked(self):
+        UsageService.registerFeatureUsage("Feature", "ISIS SANS->Load", False)
         self._call_settings_listeners(lambda listener: listener.on_load_clicked())
 
     def _export_table_clicked(self):
+        UsageService.registerFeatureUsage("Feature", "ISIS SANS->Export Table", False)
         self._call_settings_listeners(lambda listener: listener.on_export_table_clicked())
 
     def _processing_finished(self):
@@ -534,18 +542,23 @@ class SANSDataProcessorGui(QMainWindow,
 
     def _remove_rows_requested_from_button(self):
         rows = self.get_selected_rows()
+        UsageService.registerFeatureUsage("Feature", "ISIS SANS->Rows removed button", False)
         self._call_settings_listeners(lambda listener: listener.on_rows_removed(rows))
 
     def _copy_rows_requested(self):
+        UsageService.registerFeatureUsage("Feature", "ISIS SANS->Copy rows button", False)
         self._call_settings_listeners(lambda listener: listener.on_copy_rows_requested())
 
     def _erase_rows(self):
+        UsageService.registerFeatureUsage("Feature", "ISIS SANS->Erase rows button", False)
         self._call_settings_listeners(lambda listener: listener.on_erase_rows())
 
     def _cut_rows(self):
+        UsageService.registerFeatureUsage("Feature", "ISIS SANS->Cut rows button", False)
         self._call_settings_listeners(lambda listener: listener.on_cut_rows())
 
     def _paste_rows_requested(self):
+        UsageService.registerFeatureUsage("Feature", "ISIS SANS->Paste rows button", False)
         self._call_settings_listeners(lambda listener: listener.on_paste_rows_requested())
 
     def _instrument_changed(self):
@@ -557,7 +570,8 @@ class SANSDataProcessorGui(QMainWindow,
     def _on_save_other_button_pressed(self):
         self._call_settings_listeners(lambda listener: listener.on_save_other())
 
-    def _on_help_button_clicked(self):
+    @staticmethod
+    def _on_help_button_clicked():
         if PYQT4:
             proxies.showCustomInterfaceHelp('ISIS SANS v2')
         else:
@@ -581,6 +595,7 @@ class SANSDataProcessorGui(QMainWindow,
 
     def _on_save_can_clicked(self, value):
         self.save_can_checkBox.setChecked(value)
+        UsageService.registerFeatureUsage("Feature", "ISIS SANS->Save Can Toggled", False)
         set_setting(self.__generic_settings, self.__save_can_key, value)
 
     def _on_reduction_dimensionality_changed(self, is_1d):
@@ -652,6 +667,7 @@ class SANSDataProcessorGui(QMainWindow,
         """
         Load the batch file
         """
+        UsageService.registerFeatureUsage("Feature", "ISIS SANS->Loaded Batch File", False)
         load_file(self.batch_line_edit, "*.*", self.__generic_settings, self.__batch_file_key,
                   self.get_batch_file_path)
         self._call_settings_listeners(lambda listener: listener.on_batch_file_load())
@@ -914,10 +930,12 @@ class SANSDataProcessorGui(QMainWindow,
         self._call_settings_listeners(lambda listener: listener.on_mask_file_add())
 
     def _on_multi_period_selection(self):
+        UsageService.registerFeatureUsage("Feature", "ISIS SANS->Multiple Period Toggled", False)
         self._call_settings_listeners(
             lambda listener: listener.on_multi_period_selection(self.is_multi_period_view()))
 
     def _on_sample_geometry_selection(self):
+        UsageService.registerFeatureUsage("Feature", "ISIS SANS->Sample Geometry Toggled", False)
         self._call_settings_listeners(lambda listener: listener.on_sample_geometry_selection(self.is_sample_geometry()))
 
     def _on_manage_directories(self):
