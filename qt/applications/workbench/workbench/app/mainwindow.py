@@ -56,6 +56,7 @@ from mantidqt.utils.qt import (add_actions, create_action, plugins,
                                widget_updates_disabled)  # noqa
 from mantidqt.project.project import Project  # noqa
 from mantidqt.usersubwindowfactory import UserSubWindowFactory  # noqa
+from mantidqt.usersubwindow import UserSubWindow  # noqa
 
 # Pre-application setup
 plugins.setup_library_paths()
@@ -367,7 +368,7 @@ class MainWindow(QMainWindow):
     def launch_custom_cpp_gui(self, interface_name):
         """Create a new interface window if one does not already exist,
         else show existing window"""
-        window = find_window(interface_name, QMainWindow)
+        window = find_window(interface_name, UserSubWindow)
         if window is None:
             interface = self.interface_manager.createSubWindow(interface_name)
             interface.setObjectName(interface_name)
