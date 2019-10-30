@@ -60,8 +60,8 @@ class ISISPowderCommonTest(unittest.TestCase):
             bank_list.append(mantid.CreateSampleWorkspace(OutputWorkspace=out_name, XMin=0, XMax=1100, BinWidth=1))
 
         # Check a list of WS and single cropping value is detected
-        with assertRaisesRegex(self, ValueError, "The cropping values were not in a list type"):
-            common.crop_banks_using_crop_list(bank_list=bank_list, crop_values_list=cropping_value)
+        with assertRaisesRegex(self, ValueError, "The cropping values were not in a list or tuple type"):
+            common.crop_banks_using_crop_list(bank_list=bank_list, crop_values_list=1000)
 
         # Check a list of cropping values and a single workspace is detected
         with assertRaisesRegex(self, RuntimeError, "Attempting to use list based cropping"):
@@ -80,6 +80,39 @@ class ISISPowderCommonTest(unittest.TestCase):
         # Check we can crop a whole list
         cropped_ws_list = common.crop_banks_using_crop_list(bank_list=bank_list[1:],
                                                             crop_values_list=cropping_value_list[1:])
+        for ws in cropped_ws_list[1:]:
+            self.assertEqual(ws.blocksize(), expected_number_of_bins)
+            mantid.DeleteWorkspace(Workspace=ws)
+
+    def test_crop_banks_using_a_single_fractional_cropping_value(self):
+        bank_list = []
+        cropping_value = (0.05, 0.95)  # Crop to 0-1000 microseconds for unit tests
+        x_min = 500
+        x_max = 1000
+
+        expected_number_of_bins = x_max * cropping_value[-1] - x_min * (1+cropping_value[0])
+
+        for i in range(0, 3):
+            out_name = "crop_banks_in_tof-" + str(i)
+            bank_list.append(mantid.CreateSampleWorkspace(OutputWorkspace=out_name, XMin=x_min, XMax=x_max, BinWidth=1))
+
+        # Check a list of WS and non list or tuple
+        with assertRaisesRegex(self, ValueError, "The cropping values were not in a list or tuple type"):
+            common.crop_banks_using_crop_list(bank_list=bank_list, crop_values_list=1000)
+
+        # Check a cropping value and a single workspace is detected
+        with assertRaisesRegex(self, RuntimeError, "Attempting to use list based cropping"):
+            common.crop_banks_using_crop_list(bank_list=bank_list[0], crop_values_list=cropping_value)
+
+        # Check we can crop a single workspace from the list
+        cropped_single_ws_list = common.crop_banks_using_crop_list(bank_list=[bank_list[0]],
+                                                                   crop_values_list=cropping_value)
+        self.assertEqual(cropped_single_ws_list[0].blocksize(), expected_number_of_bins)
+        mantid.DeleteWorkspace(Workspace=cropped_single_ws_list[0])
+
+        # Check we can crop a whole list
+        cropped_ws_list = common.crop_banks_using_crop_list(bank_list=bank_list[1:],
+                                                            crop_values_list=cropping_value)
         for ws in cropped_ws_list[1:]:
             self.assertEqual(ws.blocksize(), expected_number_of_bins)
             mantid.DeleteWorkspace(Workspace=ws)
@@ -104,6 +137,42 @@ class ISISPowderCommonTest(unittest.TestCase):
         for ws in cropped_ws_list:
             self.assertEqual(ws.blocksize(), expected_number_of_bins)
             mantid.DeleteWorkspace(ws)
+
+    def test_crop_in_tof_by_fraction(self):
+        ws_list = []
+        x_min = 0.2
+        x_max = 0.8  # Crop 20% from the front and back.
+        expected_number_of_bins = 600 * x_max - 100 * (1 + x_min)
+
+        for i in range(0, 3):
+            out_name = "crop_banks_in_tof-" + str(i)
+            ws_list.append(mantid.CreateSampleWorkspace(OutputWorkspace=out_name, XMin=100, XMax=600, BinWidth=1))
+
+        # Crop a single workspace in TOF
+        tof_single_ws = common.crop_in_tof(ws_to_crop=ws_list[0], x_min=x_min, x_max=x_max)
+        self.assertEqual(tof_single_ws.blocksize(), expected_number_of_bins)
+        mantid.DeleteWorkspace(tof_single_ws)
+
+        # Crop a list of workspaces in TOF
+        cropped_ws_list = common.crop_in_tof(ws_to_crop=ws_list[1:], x_min=x_min, x_max=x_max)
+        for ws in cropped_ws_list:
+            self.assertEqual(ws.blocksize(), expected_number_of_bins)
+            mantid.DeleteWorkspace(ws)
+
+    def test_crop_in_tof_by_fraction_fails_when_max_less_than_min(self):
+        ws_list = []
+        x_min = 0.8
+        x_max = 0.799999  # Crop 20% from the front and back.
+
+        for i in range(0, 3):
+            out_name = "crop_banks_in_tof-" + str(i)
+            ws_list.append(mantid.CreateSampleWorkspace(OutputWorkspace=out_name, XMin=100, XMax=600, BinWidth=1))
+
+        # Crop a single workspace in TOF
+        self.assertRaises(ValueError, common.crop_in_tof, ws_to_crop=ws_list[0], x_min=x_min, x_max=x_max)
+
+        # Crop a list of workspaces in TOF
+        self.assertRaises(ValueError, common.crop_in_tof, ws_to_crop=ws_list[1:], x_min=x_min, x_max=x_max)
 
     def test_crop_in_tof_coverts_units(self):
         # Checks that crop_in_tof converts to TOF before cropping
