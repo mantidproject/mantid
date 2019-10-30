@@ -1013,8 +1013,9 @@ class RunTabPresenter(PresenterCommon):
         states, errors = self.get_states(row_index=[row_index], file_lookup=file_lookup,
                                          suppress_warnings=suppress_warnings)
         if states is None:
-            self.sans_logger.warning(
-                "There does not seem to be data for a row {}.".format(row_index))
+            if not suppress_warnings:
+                self.sans_logger.warning(
+                    "There does not seem to be data for a row {}.".format(row_index))
             return None
 
         if row_index in states:

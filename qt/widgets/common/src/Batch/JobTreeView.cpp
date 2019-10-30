@@ -532,9 +532,19 @@ void JobTreeView::enableFiltering() {
 }
 
 void JobTreeView::keyPressEvent(QKeyEvent *event) {
-  switch (event->modifiers()) {
-  case Qt::ControlModifier:
-  case Qt::ShiftModifier:
+  std::string userText = event->text().toStdString();
+  // Strip out any special chars or control chars
+  userText.erase(std::remove_if(userText.begin(), userText.end(),
+                                [](char c) { return !std::isalnum(c); }),
+                 userText.end());
+
+  // We have to be careful a shift plus char is upper-case so if there is text
+  // fall through to text handling below
+  bool isShiftCommand =
+      (event->modifiers() & Qt::ShiftModifier) && userText.size() == 0;
+  bool isCtrlCommand = event->modifiers() & Qt::ControlModifier;
+
+  if (isCtrlCommand || isShiftCommand) {
     handleModifierKeyPress(event);
     return;
   }
@@ -548,12 +558,6 @@ void JobTreeView::keyPressEvent(QKeyEvent *event) {
     removeSelectedRequested();
     return;
   }
-
-  std::string userText = event->text().toStdString();
-  // Strip out any special chars or control chars
-  userText.erase(std::remove_if(userText.begin(), userText.end(),
-                                [](char c) { return !std::isalnum(c); }),
-                 userText.end());
 
   if (userText.size() == 0) {
     // We have a special key such as Page-Up, don't try to handle it
