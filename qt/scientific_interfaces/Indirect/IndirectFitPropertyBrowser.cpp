@@ -97,7 +97,19 @@ MultiDomainFunction_sptr IndirectFitPropertyBrowser::getGlobalFunction() const {
   auto fun = isFullFunctionBrowserActive()
                  ? m_functionBrowser->getGlobalFunction()
                  : m_templateBrowser->getGlobalFunction();
-  return boost::dynamic_pointer_cast<MultiDomainFunction>(fun);
+  if (auto temp = boost::dynamic_pointer_cast<MultiDomainFunction>(fun)){
+    return temp;
+  }
+  else if(fun) {
+    MultiDomainFunction_sptr multiFunction = boost::make_shared<MultiDomainFunction>();
+    multiFunction->addFunction(fun);
+    multiFunction->setDomainIndex(0, 0);
+    return multiFunction;
+  }
+  else{
+    return nullptr;
+  }
+  
 }
 
 IFunction_sptr IndirectFitPropertyBrowser::getSingleFunction() const {
