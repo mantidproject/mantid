@@ -17,7 +17,7 @@ Editor Tabbing
 
 .. image:: ../images/Workbench/Editor/EditorWidgetTabOptions.png
 
-Click the **+** button to open a new tab, or if you wish to open an existing
+Click the **+** button to open a new tab (or use the :code:`Ctrl+N` keyboard shortcut), or if you wish to open an existing
 script in a new tab, go to "File" -> "Open Script" (or use the :code:`Ctrl+O`
 keyboard shortcut). When opening the Workbench any script window tabs that were
 open last time it was closed will be restored.
@@ -72,6 +72,14 @@ avoid any problems with the Python interpreter an option is provided to convert
 all tabs to spaces or all groups of 4 consecutive spaces to tabs. If some text
 within a script is selected, these options will only apply within the selected
 region.
+
+Change Font Size
+^^^^^^^^^^^^^^^^
+The keyboard shortcuts :code:`Ctrl++` and :code:`Ctrl+-` can be used to increase
+and decrease the size of the font in the script window respectively. This
+can also be done by holding down :code:`Ctrl` and using the mouse wheel. The change
+in font size will occur across all tabs, including any new tabs opened, and will be
+retained when Workbench is closed and re-opened.
 
 Default Imports
 ---------------

@@ -152,6 +152,7 @@ public:
   sipRes = sipBuildResult(nullptr, "(iiii)", lineFrom, indexFrom,
                           lineTo, indexTo);
 %End
+  int getZoom() const;
   bool hasSelectedText() const;
   bool isModified() const;
   bool isReadOnly() const;
@@ -187,10 +188,13 @@ public:
 
 public slots:
   void updateProgressMarker(int lineno, bool error);
+  void zoomTo(int level);
 
 signals:
   void fileNameChanged(const QString &fileName);
   void modificationChanged(bool m);
+  void textZoomedIn();
+  void textZoomedOut();
 
 private:
   ScriptEditor(const ScriptEditor&);
