@@ -35,4 +35,3 @@ class WindowFinderTest(unittest.TestCase):
         interface_name = 'ISIS Reflectometry'
         window = find_window(interface_name, QMainWindow)
         self.assertIsNone(window, "Found a widget when none expected")
-        
