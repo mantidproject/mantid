@@ -8,8 +8,21 @@
 #define CREATE_DETECTOR_TABLE_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/EnabledWhenWorkspaceIsType.h"
+#include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/UnitConversion.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -35,16 +48,29 @@ private:
   void init() override;
   /// Execution code
   void exec() override;
-
-  /// Creates table workspace of detector information from a given workspace
-  API::ITableWorkspace_sptr
-  createDetectorTableWorkspace(const API::MatrixWorkspace_sptr &ws,
-                               const std::vector<int> &indices,
-                               bool include_data);
-
-  /// Converts a list to a string, shortened if necessary
-  std::string createTruncatedList(const std::set<int> &elements);
 };
+
+/// Creates table workspace of detector information from a given workspace
+API::ITableWorkspace_sptr
+createDetectorTableWorkspace(const API::MatrixWorkspace_sptr &ws,
+                             const std::vector<int> &indices,
+                             const bool &include_data, Kernel::Logger &logger);
+
+/// Converts a list to a string, shortened if necessary
+std::string createTruncatedList(const std::set<int> &elements);
+
+void populateTable(Mantid::API::ITableWorkspace_sptr &t,
+                   const Mantid::API::MatrixWorkspace_sptr &ws,
+                   const int &nrows, const std::vector<int> &indices,
+                   const Mantid::API::SpectrumInfo &spectrumInfo,
+                   bool &signedThetaParamRetrieved, bool &showSignedTwoTheta,
+                   const Mantid::Geometry::PointingAlong &beamAxisIndex,
+                   const double &sampleDist, const bool &isScanning,
+                   const bool &include_data, const bool &calcQ,
+                   Kernel::Logger &logger);
+std::vector<std::pair<std::string, std::string>>
+createColumns(const bool &isScanning, const bool &include_data,
+              const bool &calcQ);
 
 } // namespace Algorithms
 } // namespace Mantid
