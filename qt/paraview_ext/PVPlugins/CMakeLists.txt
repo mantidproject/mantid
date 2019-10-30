@@ -56,5 +56,10 @@ add_custom_target(copy_nonorthogonal_plugin
                   DEPENDS ${_plugin_library_output}/qt4/${_plugin_filename})
 add_dependencies(MantidParaViewMDEWSourceSMPlugin copy_nonorthogonal_plugin)
 
-install(FILES ${_pv_library_output_dir}/${_plugin_filename} ${SYSTEM_PACKAGE_TARGET}
-        DESTINATION ${PLUGINS_DIR}/${PVPLUGINS_SUBDIR}/qt4)
+if(CMAKE_GENERATOR MATCHES "Visual Studio")
+  install(FILES ${_pv_library_output_dir}/$<CONFIG>/${_plugin_filename}
+          DESTINATION ${PLUGINS_DIR}/${PVPLUGINS_SUBDIR}/qt4)
+else()
+  install(FILES ${_pv_library_output_dir}/${_plugin_filename}
+          DESTINATION ${PLUGINS_DIR}/${PVPLUGINS_SUBDIR}/qt4)
+endif()
