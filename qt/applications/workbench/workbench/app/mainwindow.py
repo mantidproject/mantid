@@ -368,10 +368,11 @@ class MainWindow(QMainWindow):
     def launch_custom_cpp_gui(self, interface_name):
         """Create a new interface window if one does not already exist,
         else show existing window"""
-        window = find_window(interface_name, UserSubWindow)
+        object_name = 'custom-cpp-interface-' + interface_name
+        window = find_window(object_name, UserSubWindow)
         if window is None:
             interface = self.interface_manager.createSubWindow(interface_name)
-            interface.setObjectName(interface_name)
+            interface.setObjectName(object_name)
             interface.setAttribute(Qt.WA_DeleteOnClose, True)
             interface.show()
         else:
