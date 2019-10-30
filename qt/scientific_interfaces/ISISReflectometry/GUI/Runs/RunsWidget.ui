@@ -2,14 +2,6 @@
 <ui version="4.0">
  <class>RunsWidget</class>
  <widget class="QWidget" name="RunsWidget">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>995</width>
-    <height>541</height>
-   </rect>
-  </property>
   <property name="windowTitle">
    <string>RunsTab</string>
   </property>
@@ -50,7 +42,7 @@
       <property name="title">
        <string>Search Runs</string>
       </property>
-      <layout class="QVBoxLayout" name="layoutSearchPane" stretch="2,2,0,1">
+      <layout class="QVBoxLayout" name="layoutSearchPane" stretch="0,1,0,0">
        <property name="spacing">
         <number>1</number>
        </property>
@@ -345,9 +337,6 @@
             </item>
             <item>
              <widget class="QSpinBox" name="spinBoxUpdateInterval">
-              <property name="suffix">
-               <string>s</string>
-              </property>
               <property name="sizePolicy">
                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -368,6 +357,9 @@
               </property>
               <property name="wrapping">
                <bool>false</bool>
+              </property>
+              <property name="suffix">
+               <string>s</string>
               </property>
               <property name="minimum">
                <number>1</number>
