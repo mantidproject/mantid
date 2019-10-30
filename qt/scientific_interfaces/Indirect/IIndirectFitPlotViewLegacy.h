@@ -17,11 +17,13 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INDIRECT_DLL IIndirectFitPlotViewLegacy : public API::MantidWidget {
+class MANTIDQT_INDIRECT_DLL IIndirectFitPlotViewLegacy
+    : public API::MantidWidget {
   Q_OBJECT
 
 public:
-  IIndirectFitPlotViewLegacy(QWidget *parent = nullptr) : API::MantidWidget(parent){};
+  IIndirectFitPlotViewLegacy(QWidget *parent = nullptr)
+      : API::MantidWidget(parent){};
   virtual ~IIndirectFitPlotViewLegacy(){};
 
   virtual void watchADS(bool watch) = 0;

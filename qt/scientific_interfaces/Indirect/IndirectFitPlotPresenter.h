@@ -29,7 +29,7 @@ public:
                            IPyRunner *pythonRunner = nullptr);
 
   void watchADS(bool watch);
-  
+
   TableDatasetIndex getSelectedDataIndex() const;
   WorkspaceIndex getSelectedSpectrum() const;
   TableRowIndex getSelectedSpectrumIndex() const;

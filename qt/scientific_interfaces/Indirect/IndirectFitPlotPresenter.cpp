@@ -267,7 +267,7 @@ void IndirectFitPlotPresenter::plotLines() {
   } else if (auto const inputWorkspace = m_model->getWorkspace()) {
     plotInput(inputWorkspace);
     updatePlotRange(m_model->getWorkspaceRange());
-  } 
+  }
 }
 
 // void IndirectFitPlotPresenter::plotResult(MatrixWorkspace_sptr result) {

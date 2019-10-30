@@ -24,8 +24,8 @@ class MANTIDQT_INDIRECT_DLL IndirectFitPlotPresenterLegacy : public QObject {
 
 public:
   IndirectFitPlotPresenterLegacy(IndirectFittingModelLegacy *model,
-                           IIndirectFitPlotViewLegacy *view,
-                           IPyRunner *pythonRunner = nullptr);
+                                 IIndirectFitPlotViewLegacy *view,
+                                 IPyRunner *pythonRunner = nullptr);
 
   void watchADS(bool watch);
 

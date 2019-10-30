@@ -388,8 +388,8 @@ void IndirectFitPlotView::emitDelayedPlotSpectrumChanged() {
 }
 
 void IndirectFitPlotView::emitPlotSpectrumChanged() {
-  emit plotSpectrumChanged(
-      WorkspaceIndex{boost::numeric_cast<std::size_t>(m_plotForm->spPlotSpectrum->value())});
+  emit plotSpectrumChanged(WorkspaceIndex{
+      boost::numeric_cast<std::size_t>(m_plotForm->spPlotSpectrum->value())});
 }
 
 void IndirectFitPlotView::emitPlotSpectrumChanged(const QString &spectrum) {

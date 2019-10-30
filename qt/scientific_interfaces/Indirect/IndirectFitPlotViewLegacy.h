@@ -30,7 +30,7 @@ namespace IDA {
 class SplitterHandleLegacy : public QSplitterHandle {
 public:
   SplitterHandleLegacy(QIcon icon, Qt::Orientation orientation,
-                 QSplitter *parent = nullptr)
+                       QSplitter *parent = nullptr)
       : QSplitterHandle(orientation, parent), m_icon(icon) {}
 
   void paintEvent(QPaintEvent *e) override {
@@ -59,7 +59,8 @@ private:
 };
 #endif
 
-class MANTIDQT_INDIRECT_DLL IndirectFitPlotViewLegacy : public IIndirectFitPlotViewLegacy {
+class MANTIDQT_INDIRECT_DLL IndirectFitPlotViewLegacy
+    : public IIndirectFitPlotViewLegacy {
   Q_OBJECT
 
 public:

@@ -171,7 +171,8 @@ double IndirectDataTablePresenterLegacy::getDouble(int row, int column) const {
   return getText(row, column).toDouble();
 }
 
-std::string IndirectDataTablePresenterLegacy::getString(int row, int column) const {
+std::string IndirectDataTablePresenterLegacy::getString(int row,
+                                                        int column) const {
   return getText(row, column).toStdString();
 }
 
@@ -202,8 +203,8 @@ IndirectDataTablePresenterLegacy::getSpectra(std::size_t dataIndex) const {
   return boost::none;
 }
 
-boost::optional<SpectraLegacy> IndirectDataTablePresenterLegacy::getSpectra(int start,
-                                                                int end) const {
+boost::optional<SpectraLegacy>
+IndirectDataTablePresenterLegacy::getSpectra(int start, int end) const {
   std::vector<std::pair<std::size_t, std::size_t>> spectraPairs;
   while (start < end) {
     std::size_t minimum = getWorkspaceIndex(start);
@@ -218,23 +219,25 @@ boost::optional<SpectraLegacy> IndirectDataTablePresenterLegacy::getSpectra(int 
 
 boost::optional<int>
 IndirectDataTablePresenterLegacy::getRowIndex(std::size_t dataIndex,
-                                        int spectrumIndex) const {
+                                              int spectrumIndex) const {
   const auto position = m_dataPositions[dataIndex] + spectrumIndex;
   if (getNextPosition(dataIndex) > position)
     return position;
   return boost::none;
 }
 
-void IndirectDataTablePresenterLegacy::setStartX(double startX, std::size_t dataIndex,
-                                           int spectrumIndex) {
+void IndirectDataTablePresenterLegacy::setStartX(double startX,
+                                                 std::size_t dataIndex,
+                                                 int spectrumIndex) {
   if (FittingModeLegacy::SEQUENTIAL == m_model->getFittingMode())
     setStartX(startX);
   else if (auto row = getRowIndex(dataIndex, spectrumIndex))
     setStartX(startX, *row);
 }
 
-void IndirectDataTablePresenterLegacy::setEndX(double endX, std::size_t dataIndex,
-                                         int spectrumIndex) {
+void IndirectDataTablePresenterLegacy::setEndX(double endX,
+                                               std::size_t dataIndex,
+                                               int spectrumIndex) {
   if (FittingModeLegacy::SEQUENTIAL == m_model->getFittingMode())
     setEndX(endX);
   else if (auto row = getRowIndex(dataIndex, spectrumIndex))
@@ -242,8 +245,8 @@ void IndirectDataTablePresenterLegacy::setEndX(double endX, std::size_t dataInde
 }
 
 void IndirectDataTablePresenterLegacy::setExclude(const std::string &exclude,
-                                            std::size_t dataIndex,
-                                            int spectrumIndex) {
+                                                  std::size_t dataIndex,
+                                                  int spectrumIndex) {
   if (FittingModeLegacy::SEQUENTIAL == m_model->getFittingMode())
     setExcludeRegion(exclude);
   else if (auto row = getRowIndex(dataIndex, spectrumIndex))
@@ -294,8 +297,9 @@ void IndirectDataTablePresenterLegacy::updateExistingData(std::size_t index) {
   collapseData(position, nextPosition, initialSize, index);
 }
 
-void IndirectDataTablePresenterLegacy::collapseData(int from, int to, int initialSize,
-                                              std::size_t dataIndex) {
+void IndirectDataTablePresenterLegacy::collapseData(int from, int to,
+                                                    int initialSize,
+                                                    std::size_t dataIndex) {
   const auto shift = from - to;
   if (shift != 0) {
     for (auto i = from; i < to; ++i)
@@ -347,7 +351,8 @@ void IndirectDataTablePresenterLegacy::updateFromRemovedIndices(
 }
 
 std::pair<std::vector<std::size_t>, std::vector<std::size_t>>
-IndirectDataTablePresenterLegacy::removeTableRows(QModelIndexList &selectedRows) {
+IndirectDataTablePresenterLegacy::removeTableRows(
+    QModelIndexList &selectedRows) {
   std::vector<std::size_t> modifiedIndices;
   std::vector<std::size_t> modifiedCount;
   int previous = -1;
@@ -370,7 +375,8 @@ IndirectDataTablePresenterLegacy::removeTableRows(QModelIndexList &selectedRows)
   return {modifiedIndices, modifiedCount};
 }
 
-void IndirectDataTablePresenterLegacy::setModelFittingRange(int row, int column) {
+void IndirectDataTablePresenterLegacy::setModelFittingRange(int row,
+                                                            int column) {
   const auto workspaceIndex = getWorkspaceIndex(row);
   const auto dataIndex = getDataIndex(row);
 
@@ -409,7 +415,7 @@ void IndirectDataTablePresenterLegacy::setGlobalFittingRange(bool global) {
 }
 
 void IndirectDataTablePresenterLegacy::updateAllFittingRangeFrom(int row,
-                                                           int column) {
+                                                                 int column) {
   MantidQt::API::SignalBlocker blocker(m_dataTable);
   if (startXColumn() == column)
     setStartX(getDouble(row, column));
@@ -463,8 +469,8 @@ void IndirectDataTablePresenterLegacy::setEndX(double endX, int index) {
     m_dataTable->item(index, endXColumn())->setText(makeNumber(endX));
 }
 
-void IndirectDataTablePresenterLegacy::setExcludeRegion(const std::string &exclude,
-                                                  int index) {
+void IndirectDataTablePresenterLegacy::setExcludeRegion(
+    const std::string &exclude, int index) {
   MantidQt::API::SignalBlocker blocker(m_dataTable);
   if (FittingModeLegacy::SEQUENTIAL == m_model->getFittingMode())
     setExcludeRegion(exclude);
@@ -481,16 +487,18 @@ void IndirectDataTablePresenterLegacy::setEndX(double endX) {
   setColumnValues(endXColumn(), makeNumber(endX));
 }
 
-void IndirectDataTablePresenterLegacy::setExcludeRegion(const std::string &exclude) {
+void IndirectDataTablePresenterLegacy::setExcludeRegion(
+    const std::string &exclude) {
   setExcludeRegion(QString::fromStdString(exclude));
 }
 
-void IndirectDataTablePresenterLegacy::setExcludeRegion(const QString &exclude) {
+void IndirectDataTablePresenterLegacy::setExcludeRegion(
+    const QString &exclude) {
   setColumnValues(excludeColumn(), exclude);
 }
 
 void IndirectDataTablePresenterLegacy::setColumnValues(int column,
-                                                 const QString &value) {
+                                                       const QString &value) {
   MantidQt::API::SignalBlocker blocker(m_dataTable);
   for (int i = 0; i < m_dataTable->rowCount(); ++i)
     m_dataTable->item(i, column)->setText(value);
@@ -510,14 +518,15 @@ void IndirectDataTablePresenterLegacy::setHorizontalHeaders(
 }
 
 void IndirectDataTablePresenterLegacy::addTableEntry(std::size_t dataIndex,
-                                               std::size_t spectrum) {
+                                                     std::size_t spectrum) {
   const auto row = m_dataTable->rowCount();
   addTableEntry(dataIndex, spectrum, row);
   m_dataTable->item(row, 0)->setData(Qt::UserRole, getVariant(dataIndex));
 }
 
 void IndirectDataTablePresenterLegacy::addTableEntry(std::size_t dataIndex,
-                                               std::size_t spectrum, int row) {
+                                                     std::size_t spectrum,
+                                                     int row) {
   m_dataTable->insertRow(row);
 
   const auto &name = m_model->getWorkspace(dataIndex)->getName();
@@ -543,14 +552,14 @@ void IndirectDataTablePresenterLegacy::addTableEntry(std::size_t dataIndex,
   setCell(std::move(cell), row, excludeColumn());
 }
 
-void IndirectDataTablePresenterLegacy::setCell(std::unique_ptr<QTableWidgetItem> cell,
-                                         int row, int column) {
+void IndirectDataTablePresenterLegacy::setCell(
+    std::unique_ptr<QTableWidgetItem> cell, int row, int column) {
   m_dataTable->setItem(row, column, cell.release());
 }
 
 void IndirectDataTablePresenterLegacy::updateTableEntry(std::size_t dataIndex,
-                                                  std::size_t spectrum,
-                                                  int row) {
+                                                        std::size_t spectrum,
+                                                        int row) {
   const auto &name = m_model->getWorkspace(dataIndex)->getName();
   setCellText(QString::fromStdString(name), row, 0);
   setCellText(QString::number(spectrum), row, workspaceIndexColumn());
@@ -564,7 +573,7 @@ void IndirectDataTablePresenterLegacy::updateTableEntry(std::size_t dataIndex,
 }
 
 void IndirectDataTablePresenterLegacy::setCellText(const QString &text, int row,
-                                             int column) {
+                                                   int column) {
   m_dataTable->item(row, column)->setText(text);
 }
 
@@ -574,14 +583,15 @@ std::size_t IndirectDataTablePresenterLegacy::removeTableEntry(int row) {
   return dataIndex.toULongLong();
 }
 
-void IndirectDataTablePresenterLegacy::shiftDataPositions(int shift, std::size_t from,
-                                                    std::size_t to) {
+void IndirectDataTablePresenterLegacy::shiftDataPositions(int shift,
+                                                          std::size_t from,
+                                                          std::size_t to) {
   for (auto i = from; i < to; ++i)
     m_dataPositions[i] += shift;
 }
 
-void IndirectDataTablePresenterLegacy::updateDataPositionsInCells(std::size_t from,
-                                                            std::size_t to) {
+void IndirectDataTablePresenterLegacy::updateDataPositionsInCells(
+    std::size_t from, std::size_t to) {
   for (auto i = from; i < to; ++i) {
     const auto nextPosition = getNextPosition(i);
     for (auto row = m_dataPositions[i]; row < nextPosition; ++row)

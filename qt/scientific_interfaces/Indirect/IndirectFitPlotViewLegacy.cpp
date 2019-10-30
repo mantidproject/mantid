@@ -35,7 +35,8 @@ namespace IDA {
 using namespace MantidWidgets;
 
 IndirectFitPlotViewLegacy::IndirectFitPlotViewLegacy(QWidget *parent)
-    : IIndirectFitPlotViewLegacy(parent), m_plotForm(new Ui::IndirectFitPreviewPlot) {
+    : IIndirectFitPlotViewLegacy(parent),
+      m_plotForm(new Ui::IndirectFitPreviewPlot) {
   m_plotForm->setupUi(this);
 
   connect(m_plotForm->cbDataSelection, SIGNAL(currentIndexChanged(int)), this,
@@ -100,10 +101,9 @@ PreviewPlot *IndirectFitPlotViewLegacy::createBottomPlot() {
   return createPlot(m_bottomPlot.get(), QSize(0, 75), 0, 6);
 }
 
-PreviewPlot *
-IndirectFitPlotViewLegacy::createPlot(PreviewPlot *plot, QSize const &minimumSize,
-                                unsigned char horizontalStretch,
-                                unsigned char verticalStretch) const {
+PreviewPlot *IndirectFitPlotViewLegacy::createPlot(
+    PreviewPlot *plot, QSize const &minimumSize,
+    unsigned char horizontalStretch, unsigned char verticalStretch) const {
   setPlotSizePolicy(plot, horizontalStretch, verticalStretch);
 
   plot->setMinimumSize(minimumSize);
@@ -179,7 +179,7 @@ void IndirectFitPlotViewLegacy::showMultipleDataSelection() {
 }
 
 void IndirectFitPlotViewLegacy::setAvailableSpectra(std::size_t minimum,
-                                              std::size_t maximum) {
+                                                    std::size_t maximum) {
   m_plotForm->swPlotSpectrum->setCurrentIndex(0);
   m_plotForm->spPlotSpectrum->setMinimum(boost::numeric_cast<int>(minimum));
   m_plotForm->spPlotSpectrum->setMaximum(boost::numeric_cast<int>(maximum));
@@ -232,13 +232,14 @@ void IndirectFitPlotViewLegacy::setFitRangeMaximum(double maximum) {
   selector->setMaximum(maximum);
 }
 
-void IndirectFitPlotViewLegacy::appendToDataSelection(const std::string &dataName) {
+void IndirectFitPlotViewLegacy::appendToDataSelection(
+    const std::string &dataName) {
   MantidQt::API::SignalBlocker blocker(m_plotForm->cbDataSelection);
   m_plotForm->cbDataSelection->addItem(QString::fromStdString(dataName));
 }
 
-void IndirectFitPlotViewLegacy::setNameInDataSelection(const std::string &dataName,
-                                                 std::size_t index) {
+void IndirectFitPlotViewLegacy::setNameInDataSelection(
+    const std::string &dataName, std::size_t index) {
   m_plotForm->cbDataSelection->setItemText(boost::numeric_cast<int>(index),
                                            QString::fromStdString(dataName));
 }
@@ -369,7 +370,8 @@ void IndirectFitPlotViewLegacy::setHWHMRangeVisible(bool visible) {
   m_topPlot->getRangeSelector("HWHM")->setVisible(visible);
 }
 
-void IndirectFitPlotViewLegacy::displayMessage(const std::string &message) const {
+void IndirectFitPlotViewLegacy::displayMessage(
+    const std::string &message) const {
   QMessageBox::information(parentWidget(), "MantidPlot - Warning",
                            QString::fromStdString(message));
 }
@@ -390,7 +392,8 @@ void IndirectFitPlotViewLegacy::emitPlotSpectrumChanged() {
       boost::numeric_cast<std::size_t>(m_plotForm->spPlotSpectrum->value()));
 }
 
-void IndirectFitPlotViewLegacy::emitPlotSpectrumChanged(const QString &spectrum) {
+void IndirectFitPlotViewLegacy::emitPlotSpectrumChanged(
+    const QString &spectrum) {
   emit plotSpectrumChanged(spectrum.toULongLong());
 }
 

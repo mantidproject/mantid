@@ -74,7 +74,9 @@ void IndirectDataAnalysisTabLegacy::filterInputData(bool filter) {
 /**
  * Sets the active browser workspace when the tab is changed
  */
-void IndirectDataAnalysisTabLegacy::setActiveWorkspace() { setBrowserWorkspace(); }
+void IndirectDataAnalysisTabLegacy::setActiveWorkspace() {
+  setBrowserWorkspace();
+}
 
 /**
  * Slot that can be called when a user edits an input.
@@ -145,7 +147,9 @@ void IndirectDataAnalysisTabLegacy::setSelectedSpectrum(int spectrum) {
  *
  * @return  The selected minimum spectrum.
  */
-int IndirectDataAnalysisTabLegacy::minimumSpectrum() const { return m_minSpectrum; }
+int IndirectDataAnalysisTabLegacy::minimumSpectrum() const {
+  return m_minSpectrum;
+}
 
 /**
  * Sets the selected spectrum.
@@ -161,7 +165,9 @@ void IndirectDataAnalysisTabLegacy::setMinimumSpectrum(int spectrum) {
  *
  * @return  The selected maximum spectrum.
  */
-int IndirectDataAnalysisTabLegacy::maximumSpectrum() const { return m_maxSpectrum; }
+int IndirectDataAnalysisTabLegacy::maximumSpectrum() const {
+  return m_maxSpectrum;
+}
 
 /**
  * Sets the selected maximum spectrum.
