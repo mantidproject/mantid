@@ -26,7 +26,6 @@
 #include <QSettings>
 #include <QVBoxLayout>
 
-#include <iostream>
 #include <limits>
 
 namespace MantidQt {
@@ -267,9 +266,7 @@ void IqtTemplateBrowser::enumChanged(QtProperty *prop) {
 }
 
 void IqtTemplateBrowser::globalChanged(QtProperty *prop, const QString &name,
-                                       bool on) {
-  std::cerr << "Global " << name.toStdString() << ' ' << on << std::endl;
-}
+                                       bool on) {}
 
 void IqtTemplateBrowser::parameterChanged(QtProperty *prop) {
   auto isGlobal = m_parameterManager->isGlobal(prop);
@@ -345,9 +342,7 @@ void IqtTemplateBrowser::setBackgroundA0(double value) {
   m_presenter.setBackgroundA0(value);
 }
 
-void IqtTemplateBrowser::popupMenu(const QPoint &) {
-  std::cerr << "Popup" << std::endl;
-}
+void IqtTemplateBrowser::popupMenu(const QPoint &) {}
 
 double IqtTemplateBrowser::getParameterPropertyValue(QtProperty *prop) const {
   return prop ? m_parameterManager->value(prop) : 0.0;

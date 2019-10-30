@@ -31,8 +31,6 @@
 #include <QStackedWidget>
 #include <QVBoxLayout>
 
-#include <iostream>
-
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 

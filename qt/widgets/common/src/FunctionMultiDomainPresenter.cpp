@@ -17,7 +17,6 @@
 #include <QClipboard>
 #include <QMessageBox>
 #include <QWidget>
-#include <iostream>
 
 namespace MantidQt {
 namespace MantidWidgets {

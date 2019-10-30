@@ -9,7 +9,6 @@
 #include "MantidQtWidgets/Common/EditLocalParameterDialog.h"
 
 #include <cmath>
-#include <iostream>
 
 namespace MantidQt {
 namespace CustomInterfaces {
