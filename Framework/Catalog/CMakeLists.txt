@@ -4,7 +4,6 @@ set(SRC_FILES
 	src/OAuth.cpp)
 
 set(INC_FILES
-    inc/MantidCatalog/DllConfig.h
     inc/MantidCatalog/Exception.h
     inc/MantidCatalog/ONCat.h
     inc/MantidCatalog/ONCatEntity.h
@@ -64,8 +63,11 @@ target_link_libraries(Catalog
 # Add the unit tests directory
 add_subdirectory(test)
 
-# Installation settings
+# Auto-generate exports header
+target_include_directories(Catalog PUBLIC ${CMAKE_BINARY_DIR}/Framework/Catalog)
+generate_mantid_export_header(Catalog)
 
+# Installation settings
 mtd_install_targets(TARGETS
                     Catalog
                     INSTALL_DIRS

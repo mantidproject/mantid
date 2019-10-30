@@ -170,12 +170,12 @@ Handles attempt to close main window
 * @param event : [input] The close event
 */
 void QtMainWindowView::closeEvent(QCloseEvent *event) {
-  // Close only if reduction has been paused
-  if (!m_presenter->isAnyBatchProcessing() ||
+  // Don't close if anything is running
+  if (m_presenter->isAnyBatchProcessing() ||
       m_presenter->isAnyBatchAutoreducing()) {
-    event->accept();
-  } else {
     event->ignore();
+  } else {
+    event->accept();
   }
 }
 

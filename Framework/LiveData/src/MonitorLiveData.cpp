@@ -11,7 +11,6 @@
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/WriteLock.h"
 #include "MantidLiveData/LoadLiveData.h"
 
