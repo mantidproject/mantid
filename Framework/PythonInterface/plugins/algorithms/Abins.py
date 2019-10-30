@@ -939,10 +939,15 @@ class Abins(PythonAlgorithm):
         # AbinsModules.AbinsParameters.sampling['min_wavenumber']
         # AbinsModules.AbinsParameters.sampling['max_wavenumber']
         # with bin width AbinsModules.AbinsParameters.sampling['bin_width']
-        step = self._bin_width
-        start = AbinsParameters.sampling['min_wavenumber'] + step / 2.0
-        stop = AbinsParameters.sampling['max_wavenumber'] + step / 2.0
-        self._bins = np.arange(start=start, stop=stop, step=step, dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
-
+        if AbinsParameters.sampling['broadening_scheme'] == 'legacy':
+            step = self._bin_width
+            start = AbinsParameters.sampling['min_wavenumber'] + step / 2.0
+            stop = AbinsParameters.sampling['max_wavenumber'] + step / 2.0
+            self._bins = np.arange(start=start, stop=stop, step=step, dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
+        else:
+            step = self._bin_width
+            start = AbinsParameters.sampling['min_wavenumber']
+            stop = AbinsParameters.sampling['max_wavenumber'] + step
+            self._bins = np.arange(start=start, stop=stop, step=step, dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
 
 AlgorithmFactory.subscribe(Abins)

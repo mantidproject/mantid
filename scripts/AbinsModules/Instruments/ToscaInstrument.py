@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
+import numpy as np
 from .Instrument import Instrument
 from AbinsModules import AbinsParameters
 from AbinsModules import AbinsConstants
@@ -45,12 +46,30 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
         result = k2_i + k2_f - 2 * (k2_i * k2_f) ** 0.5 * tosca_params['cos_scattering_angle']
         return result
 
-    def convolve_with_resolution_function(self, frequencies=None, s_dft=None):
+    def get_sigma(self, frequencies):
+        """Frequency-dependent broadening width from empirical fit"""
+        a = AbinsParameters.instruments['TOSCA']['a']
+        b = AbinsParameters.instruments['TOSCA']['b']
+        c = AbinsParameters.instruments['TOSCA']['c']
+        sigma = a * frequencies ** 2 + b * frequencies + c
+        return sigma
+
+    def convolve_with_resolution_function(self, frequencies=None, bins=None, s_dft=None, prebin='auto'):
         """
         Convolves discrete DFT spectrum with the  resolution function for the TOSCA instrument (and TOSCA-like).
         :param frequencies:   DFT frequencies for which resolution function should be calculated (frequencies in cm^-1)
+        :param bins: Evenly-spaced frequency bin values for the output spectrum.
+        :type bins: 1D array-like
         :param s_dft:  discrete S calculated directly from DFT
+        :param prebin:
+            Bin the data before convolution. This greatly reduces the workload for large sets of frequencies, but loses
+            a little precision. If set to 'auto', a choice is made based on the relative numbers of frequencies and
+            sampling bins. For 'legacy' broadening this step is desregarded and implemented elsewhere.
+        :type prebin: str or bool
+
+        :returns: (points_freq, broadened_spectrum)
         """
+
         if AbinsParameters.sampling['pkt_per_peak'] == 1:
 
             points_freq = frequencies
@@ -58,18 +77,34 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
 
         else:
 
-            # freq_num: number of transition energies for the given quantum order event
-            # sigma[freq_num]
+            scheme = AbinsParameters.sampling['broadening_scheme']
+            if scheme == 'legacy':
+                pkt_per_peak = AbinsParameters.sampling['pkt_per_peak']
+                sigma = self.get_sigma(frequencies)
+                points_freq, broadened_spectrum = self._convolve_with_resolution_function_legacy(frequencies=frequencies,
+                                                                                                 s_dft=s_dft,
+                                                                                                 sigma=sigma,
+                                                                                                 pkt_per_peak=pkt_per_peak,
+                                                                                                 gaussian=self._gaussian)
+            else:
+                if prebin == 'auto':
+                    if bins.size < frequencies.size:
+                        prebin = True
+                    else:
+                        prebin = False
+                if prebin is True:
+                    s_dft, _ = np.histogram(frequencies, bins=bins, weights=s_dft, density=False)
+                    frequencies = (bins[1:] + bins[:-1]) / 2
+                elif prebin is False:
+                    pass
+                else:
+                    raise ValueError('"prebin" option must be True, False or "auto"')
 
-            a = AbinsParameters.instruments['TOSCA']['a']
-            b = AbinsParameters.instruments['TOSCA']['b']
-            c = AbinsParameters.instruments['TOSCA']['c']
-            sigma = a * frequencies ** 2 + b * frequencies + c
+                sigma = self.get_sigma(frequencies)
 
-            pkt_per_peak = AbinsParameters.sampling['pkt_per_peak']
-            points_freq, broadened_spectrum = self._convolve_with_resolution_function_helper(frequencies=frequencies,
-                                                                                             s_dft=s_dft,
-                                                                                             sigma=sigma,
-                                                                                             pkt_per_peak=pkt_per_peak,
-                                                                                             gaussian=self._gaussian)
+                points_freq, broadened_spectrum = self._broaden_spectrum(frequencies=frequencies,
+                                                                         s_dft=s_dft,
+                                                                         bins=bins,
+                                                                         sigma=sigma,
+                                                                         scheme=scheme)
         return points_freq, broadened_spectrum

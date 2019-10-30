@@ -107,13 +107,22 @@ class SPowderSemiEmpiricalCalculator(object):
                                  AbinsModules.AbinsConstants.QUANTUM_ORDER_THREE: self._calculate_order_three,
                                  AbinsModules.AbinsConstants.QUANTUM_ORDER_FOUR: self._calculate_order_four}
 
-        step = bin_width
-        self._bin_width = bin_width
-        start = AbinsParameters.sampling['min_wavenumber'] + step
-        stop = AbinsParameters.sampling['max_wavenumber'] + step
-        self._bins = np.arange(start=start, stop=stop, step=step, dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
-        self._freq_size = self._bins.size - 1
-        self._frequencies = self._bins[:-1]
+        if AbinsParameters.sampling['broadening_scheme'] == 'legacy':
+            step = bin_width
+            self._bin_width = bin_width
+            start = AbinsParameters.sampling['min_wavenumber'] + step
+            stop = AbinsParameters.sampling['max_wavenumber'] + step
+            self._bins = np.arange(start=start, stop=stop, step=step, dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
+            self._freq_size = self._bins.size - 1
+            self._frequencies = self._bins[:-1]
+        else:
+            self._bin_width = bin_width  # This is only here to store in s_data. Is that necessary/useful?
+            self._bins = np.arange(start=AbinsParameters.sampling['min_wavenumber'],
+                                   stop=AbinsParameters.sampling['max_wavenumber'] + bin_width,
+                                   step=bin_width,
+                                   dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
+            self._frequencies = self._bins[:-1] + (bin_width / 2)
+            self._freq_size = self._bins.size - 1
 
         # set initial threshold for s for each atom
         self._num_atoms = len(self._abins_data.get_atoms_data().extract())
@@ -500,13 +509,18 @@ class SPowderSemiEmpiricalCalculator(object):
                                                      b_tensor=self._b_tensors[atom],
                                                      b_trace=self._b_traces[atom])
 
-            rebinned_freq, rebinned_spectrum = self._rebin_data_opt(array_x=local_freq, array_y=value_dft)
+            if AbinsParameters.sampling['broadening_scheme'] == 'legacy':
+                ### Here we preserve the exact sequence of resampling events for the legacy broadening implementation
+                ### In newer implementations this should be self-contained.
+                rebinned_freq, rebinned_spectrum = self._rebin_data_opt(array_x=local_freq, array_y=value_dft)
 
-            freq, broad_spectrum = self._instrument.convolve_with_resolution_function(frequencies=rebinned_freq,
-                                                                                      s_dft=rebinned_spectrum)
+                freq, broad_spectrum = self._instrument.convolve_with_resolution_function(frequencies=rebinned_freq,
+                                                                                          s_dft=rebinned_spectrum)
 
-            rebinned_broad_spectrum = self._rebin_data_full(array_x=freq, array_y=broad_spectrum)
-            rebinned_broad_spectrum = self._fix_empty_array(array_y=rebinned_broad_spectrum)
+                rebinned_broad_spectrum = self._rebin_data_full(array_x=freq, array_y=broad_spectrum)
+                rebinned_broad_spectrum = self._fix_empty_array(array_y=rebinned_broad_spectrum)
+            else:
+                _, rebinned_broad_spectrum = self._instrument.convolve_with_resolution_function(frequencies=local_freq, bins=self._bins, s_dft=value_dft)
 
             local_freq, local_coeff = self._calculate_s_over_threshold(s=value_dft,
                                                                        freq=local_freq,

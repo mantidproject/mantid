@@ -53,18 +53,22 @@ class SData(AbinsModules.GeneralData):
                         raise ValueError("Numpy array was expected.")
 
             elif "frequencies" == item:
-
                 step = self._bin_width
                 bins = np.arange(start=AbinsModules.AbinsParameters.sampling['min_wavenumber'],
                                  stop=AbinsModules.AbinsParameters.sampling['max_wavenumber'] + step,
                                  step=step,
                                  dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
 
-                if not np.array_equal(items[item], bins[AbinsModules.AbinsConstants.FIRST_BIN_INDEX:-1]):
-                    raise ValueError("Invalid frequencies.")
+                if AbinsModules.AbinsParameters.sampling['broadening_scheme'] == 'legacy':
+                    if not np.array_equal(items[item], bins[AbinsModules.AbinsConstants.FIRST_BIN_INDEX:-1]):
+                        raise ValueError("Invalid frequencies.")
+
+                else:
+                    freq_points = bins[:-1] + (step / 2)
+                    if not np.array_equal(items[item], freq_points):
+                        raise ValueError("Invalid frequencies, these should correspond to the mid points of the resampled bins.")
 
             else:
-
                 raise ValueError("Invalid keyword " + item)
 
         self._data = items

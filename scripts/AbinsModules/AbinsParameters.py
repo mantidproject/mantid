@@ -50,7 +50,8 @@ sampling = {
     'min_wavenumber': 0.0,  # minimal wavenumber in cm^-1 taken into account while creating workspaces (exclusive)
     'frequencies_threshold': 0.0,  # minimum included frequency
     's_relative_threshold': 0.01,  # low cutoff for S intensity (fraction of maximum S)
-    's_absolute_threshold': 10e-8  # low cutoff for S intentisty (absolute value)
+    's_absolute_threshold': 10e-8,  # low cutoff for S intensity (absolute value)
+    'broadening_scheme': 'legacy',
     }
 
 # Parameters related to performance optimisation that do NOT impact calculation results
