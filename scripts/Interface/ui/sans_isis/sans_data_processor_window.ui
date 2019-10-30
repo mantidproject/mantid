@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1211</width>
-    <height>857</height>
+    <width>1400</width>
+    <height>845</height>
    </rect>
   </property>
   <property name="acceptDrops">
@@ -32,9 +32,9 @@ QGroupBox::title {
 }</string>
   </property>
   <widget class="QWidget" name="widgetMainRow">
-   <layout class="QFormLayout" name="formLayout">
+   <layout class="QGridLayout" name="gridLayout_4">
     <item row="0" column="0">
-     <layout class="QHBoxLayout" name="main_layout">
+     <layout class="QHBoxLayout" name="main_layout" stretch="0,1">
       <item>
        <layout class="QVBoxLayout" name="tab_choice_layout">
         <item>
@@ -644,7 +644,7 @@ QGroupBox::title {
          </layout>
         </widget>
         <widget class="QWidget" name="settings_page">
-         <layout class="QHBoxLayout" name="horizontalLayout">
+         <layout class="QVBoxLayout" name="verticalLayout">
           <item>
            <widget class="QTabWidget" name="settings_tab_widget">
             <property name="currentIndex">
@@ -1138,6 +1138,16 @@ QGroupBox::title {
                      <string>Transmission</string>
                     </property>
                     <layout class="QGridLayout" name="gridLayout_9">
+                     <item row="5" column="1">
+                      <widget class="QLabel" name="transmission_mn_4_shift_label">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;An option shift of the M4 monitor.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                       <property name="text">
+                        <string>Monitor 4 Shift [mm]</string>
+                       </property>
+                      </widget>
+                     </item>
                      <item row="10" column="1" colspan="3">
                       <widget class="QGroupBox" name="fit_combo_box">
                        <property name="toolTip">
@@ -1153,6 +1163,13 @@ QGroupBox::title {
                         <bool>false</bool>
                        </property>
                        <layout class="QGridLayout" name="gridLayout_22">
+                        <item row="0" column="3">
+                         <widget class="QLabel" name="fit_fit_type_label">
+                          <property name="text">
+                           <string>Fit type</string>
+                          </property>
+                         </widget>
+                        </item>
                         <item row="1" column="0">
                          <widget class="QComboBox" name="fit_selection_combo_box">
                           <property name="toolTip">
@@ -1174,13 +1191,6 @@ QGroupBox::title {
                          <widget class="QComboBox" name="fit_can_fit_type_combo_box">
                           <property name="toolTip">
                            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If fitting should be used, then this allows for the selection of the fit type.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                          </property>
-                         </widget>
-                        </item>
-                        <item row="0" column="3">
-                         <widget class="QLabel" name="fit_fit_type_label">
-                          <property name="text">
-                           <string>Fit type</string>
                           </property>
                          </widget>
                         </item>
@@ -1351,16 +1361,6 @@ QGroupBox::title {
                          </widget>
                         </item>
                        </layout>
-                      </widget>
-                     </item>
-                     <item row="5" column="1">
-                      <widget class="QLabel" name="transmission_mn_4_shift_label">
-                       <property name="toolTip">
-                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;An option shift of the M4 monitor.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                       </property>
-                       <property name="text">
-                        <string>Monitor 4 Shift [mm]</string>
-                       </property>
                       </widget>
                      </item>
                      <item row="8" column="2">
