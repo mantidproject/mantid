@@ -261,7 +261,7 @@ def create_load_algorithm(filename, property_dictionary):
     alg.initialize()
     alg.setAlwaysStoreInADS(True)
     alg.setProperty("OutputWorkspace", output_filename)
-    alg.setProperty("Filename", output_filename)
+    alg.setProperty("Filename", filename)
     return alg, psi_data
 
 
