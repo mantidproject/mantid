@@ -29,13 +29,13 @@ Algorithms
 * A new Poisson cost function has been added to :ref:`CalculateCostFunction <algm-CalculateCostFunction>`.
 * New algorithm :ref:`SaveNexusESS <algm-SaveNexusESS>` to save data and nexus geometry to a single processed file.
 * Version upgrade :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>` to allow loading of both existing Mantid format Processed Nexus files and those produced via :ref:`SaveNexusESS <algm-SaveNexusESS>`.
+* In :ref:`SaveAscii <algm-SaveAscii>` it is now possible to save out also the values of the spectrum axis.
 * :ref:`IndexPeaks <algm-IndexPeaks>` now has options to enter modulation vectors and additional information required for satellite peak indexing. As
   a result :ref:`IndexPeaksWithSatellites <algm-IndexPeaksWithSatellites>` has been deprecated and will be removed in a future release.
 
 Instrument Definition Files
 ---------------------------
 * A definition file for the NEAT instrument at HZB as been added along with an entry in the facilities file.
-
 
 Data Objects
 ------------

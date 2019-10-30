@@ -107,6 +107,7 @@ private:
   std::vector<DataObjects::Histogram1D> m_spectra;
   std::unique_ptr<DataObjects::Histogram1D> m_curSpectra;
   std::vector<double> m_curDx;
+  std::vector<double> m_spectrumAxis;
 };
 
 } // namespace DataHandling
