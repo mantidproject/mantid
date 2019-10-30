@@ -46,7 +46,7 @@ class Instrument(object):
         :param gaussian: gaussian-like function used to broaden peaks
         :returns: frequencies for which peaks have been broadened, corresponding S
         """
-        fwhm = AbinsModules.AbinsParameters.fwhm
+        fwhm = AbinsModules.AbinsParameters.instruments['fwhm']
 
         # freq_num: number of transition energies for the given quantum order event
         # start[freq_num]
@@ -98,7 +98,8 @@ class Instrument(object):
         """
         two_sigma = 2.0 * sigma
         sigma_factor = two_sigma * sigma
-        norm = AbinsModules.AbinsParameters.pkt_per_peak / (AbinsModules.AbinsParameters.fwhm * two_sigma)
+        norm = (AbinsModules.AbinsParameters.sampling['pkt_per_peak']
+                / (AbinsModules.AbinsParameters.instruments['fwhm'] * two_sigma))
         return np.exp(-(points - center) ** 2 / sigma_factor) / (np.sqrt(sigma_factor * np.pi) * norm)
 
     def __str__(self):

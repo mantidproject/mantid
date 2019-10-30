@@ -26,6 +26,7 @@ from mantid.api import WorkspaceFactory, AnalysisDataService
 from mantid.simpleapi import CloneWorkspace, GroupWorkspaces, SaveAscii, Load, Scale
 from mantid.kernel import logger, StringListValidator, Direction, StringArrayProperty, Atom
 import AbinsModules
+from AbinsModules import AbinsParameters
 
 
 # noinspection PyPep8Naming,PyMethodMayBeStatic
@@ -102,7 +103,10 @@ class Abins(PythonAlgorithm):
 
         self.declareProperty(StringArrayProperty("Atoms", Direction.Input),
                              doc="List of atoms to use to calculate partial S."
-                                 "If left blank, workspaces with S for all types of atoms will be calculated.")
+                                 "If left blank, workspaces with S for all types of atoms will be calculated. "
+                                 "Element symbols will be interpreted as a sum of all atoms of that element in the "
+                                 "cell. 'atomN' or 'atom_N' (where N is a positive integer) will be interpreted as "
+                                 "individual atoms, indexing from 1 following the order of the input data.")
 
         self.declareProperty(name="SumContributions", defaultValue=False,
                              doc="Sum the partial dynamical structure factors into a single workspace.")
@@ -658,12 +662,12 @@ class Abins(PythonAlgorithm):
         :param message_end: closing part of the error message.
         """
         # check fwhm
-        fwhm = AbinsModules.AbinsParameters.fwhm
+        fwhm = AbinsParameters.instruments['fwhm']
         if not (isinstance(fwhm, float) and 0.0 < fwhm < 10.0):
             raise RuntimeError("Invalid value of fwhm" + message_end)
 
         # check delta_width
-        delta_width = AbinsModules.AbinsParameters.delta_width
+        delta_width = AbinsParameters.instruments['TwoDMap']['delta_width']
         if not (isinstance(delta_width, float) and 0.0 < delta_width < 1.0):
             raise RuntimeError("Invalid value of delta_width" + message_end)
 
@@ -674,25 +678,26 @@ class Abins(PythonAlgorithm):
         """
 
         # TOSCA final energy in cm^-1
-        final_energy = AbinsModules.AbinsParameters.tosca_final_neutron_energy
+        tosca_parameters = AbinsParameters.instruments['TOSCA']
+        final_energy = tosca_parameters['final_neutron_energy']
         if not (isinstance(final_energy, float) and final_energy > 0.0):
             raise RuntimeError("Invalid value of final_neutron_energy for TOSCA" + message_end)
 
-        angle = AbinsModules.AbinsParameters.tosca_cos_scattering_angle
+        angle = tosca_parameters['cos_scattering_angle']
         if not isinstance(angle, float):
             raise RuntimeError("Invalid value of cosines scattering angle for TOSCA" + message_end)
 
-        resolution_const_a = AbinsModules.AbinsParameters.tosca_a
+        resolution_const_a = tosca_parameters['a']
         if not isinstance(resolution_const_a, float):
             raise RuntimeError("Invalid value of constant A for TOSCA (used by the resolution TOSCA function)"
                                + message_end)
 
-        resolution_const_b = AbinsModules.AbinsParameters.tosca_b
+        resolution_const_b = tosca_parameters['b']
         if not isinstance(resolution_const_b, float):
             raise RuntimeError("Invalid value of constant B for TOSCA (used by the resolution TOSCA function)"
                                + message_end)
 
-        resolution_const_c = AbinsModules.AbinsParameters.tosca_c
+        resolution_const_c = tosca_parameters['c']
         if not isinstance(resolution_const_c, float):
             raise RuntimeError("Invalid value of constant C for TOSCA (used by the resolution TOSCA function)"
                                + message_end)
@@ -703,25 +708,25 @@ class Abins(PythonAlgorithm):
         :param message_end: closing part of the error message.
         """
         folder_names = []
-        ab_initio_group = AbinsModules.AbinsParameters.ab_initio_group
+        ab_initio_group = AbinsParameters.hdf_groups['ab_initio_data']
         if not isinstance(ab_initio_group, str) or ab_initio_group == "":
             raise RuntimeError("Invalid name for folder in which the ab initio data should be stored.")
         folder_names.append(ab_initio_group)
 
-        powder_data_group = AbinsModules.AbinsParameters.powder_data_group
+        powder_data_group = AbinsParameters.hdf_groups['powder_data']
         if not isinstance(powder_data_group, str) or powder_data_group == "":
             raise RuntimeError("Invalid value of powder_data_group" + message_end)
         elif powder_data_group in folder_names:
             raise RuntimeError("Name for powder_data_group  already used by as name of another folder.")
         folder_names.append(powder_data_group)
 
-        crystal_data_group = AbinsModules.AbinsParameters.crystal_data_group
+        crystal_data_group = AbinsParameters.hdf_groups['crystal_data']
         if not isinstance(crystal_data_group, str) or crystal_data_group == "":
             raise RuntimeError("Invalid value of crystal_data_group" + message_end)
         elif crystal_data_group in folder_names:
             raise RuntimeError("Name for crystal_data_group already used as a name of another folder.")
 
-        s_data_group = AbinsModules.AbinsParameters.s_data_group
+        s_data_group = AbinsModules.AbinsParameters.hdf_groups['s_data']
         if not isinstance(s_data_group, str) or s_data_group == "":
             raise RuntimeError("Invalid value of s_data_group" + message_end)
         elif s_data_group in folder_names:
@@ -732,15 +737,15 @@ class Abins(PythonAlgorithm):
         Checks rebinning parameters.
         :param message_end: closing part of the error message.
         """
-        pkt_per_peak = AbinsModules.AbinsParameters.pkt_per_peak
+        pkt_per_peak = AbinsParameters.sampling['pkt_per_peak']
         if not (isinstance(pkt_per_peak, six.integer_types) and 1 <= pkt_per_peak <= 1000):
             raise RuntimeError("Invalid value of pkt_per_peak" + message_end)
 
-        min_wavenumber = AbinsModules.AbinsParameters.min_wavenumber
+        min_wavenumber = AbinsParameters.sampling['min_wavenumber']
         if not (isinstance(min_wavenumber, float) and min_wavenumber >= 0.0):
             raise RuntimeError("Invalid value of min_wavenumber" + message_end)
 
-        max_wavenumber = AbinsModules.AbinsParameters.max_wavenumber
+        max_wavenumber = AbinsParameters.sampling['max_wavenumber']
         if not (isinstance(max_wavenumber, float) and max_wavenumber > 0.0):
             raise RuntimeError("Invalid number of max_wavenumber" + message_end)
 
@@ -752,16 +757,16 @@ class Abins(PythonAlgorithm):
         Checks threshold for frequencies.
         :param message_end: closing part of the error message.
         """
-        freq_threshold = AbinsModules.AbinsParameters.frequencies_threshold
+        freq_threshold = AbinsParameters.sampling['frequencies_threshold']
         if not (isinstance(freq_threshold, float) and freq_threshold >= 0.0):
             raise RuntimeError("Invalid value of frequencies_threshold" + message_end)
 
         # check s threshold
-        s_absolute_threshold = AbinsModules.AbinsParameters.s_absolute_threshold
+        s_absolute_threshold = AbinsParameters.sampling['s_absolute_threshold']
         if not (isinstance(s_absolute_threshold, float) and s_absolute_threshold > 0.0):
             raise RuntimeError("Invalid value of s_absolute_threshold" + message_end)
 
-        s_relative_threshold = AbinsModules.AbinsParameters.s_relative_threshold
+        s_relative_threshold = AbinsParameters.sampling['s_relative_threshold']
         if not (isinstance(s_relative_threshold, float) and s_relative_threshold > 0.0):
             raise RuntimeError("Invalid value of s_relative_threshold" + message_end)
 
@@ -770,7 +775,7 @@ class Abins(PythonAlgorithm):
         Check optimal size of chunk
         :param message_end: closing part of the error message.
         """
-        optimal_size = AbinsModules.AbinsParameters.optimal_size
+        optimal_size = AbinsParameters.performance['optimal_size']
         if not (isinstance(optimal_size, six.integer_types) and optimal_size > 0):
             raise RuntimeError("Invalid value of optimal_size" + message_end)
 
@@ -780,7 +785,7 @@ class Abins(PythonAlgorithm):
         :param message_end: closing part of the error message.
         """
         if PATHOS_FOUND:
-            threads = AbinsModules.AbinsParameters.threads
+            threads = AbinsModules.AbinsParameters.performance['threads']
             if not (isinstance(threads, six.integer_types) and 1 <= threads <= mp.cpu_count()):
                 raise RuntimeError("Invalid number of threads for parallelisation over atoms" + message_end)
 
@@ -931,12 +936,12 @@ class Abins(PythonAlgorithm):
         self._calc_partial = (len(self._atoms) > 0)
 
         # user defined interval is exclusive with respect to
-        # AbinsModules.AbinsParameters.min_wavenumber
-        # AbinsModules.AbinsParameters.max_wavenumber
-        # with bin width AbinsModules.AbinsParameters.bin_width
+        # AbinsModules.AbinsParameters.sampling['min_wavenumber']
+        # AbinsModules.AbinsParameters.sampling['max_wavenumber']
+        # with bin width AbinsModules.AbinsParameters.sampling['bin_width']
         step = self._bin_width
-        start = AbinsModules.AbinsParameters.min_wavenumber + step / 2.0
-        stop = AbinsModules.AbinsParameters.max_wavenumber + step / 2.0
+        start = AbinsParameters.sampling['min_wavenumber'] + step / 2.0
+        stop = AbinsParameters.sampling['max_wavenumber'] + step / 2.0
         self._bins = np.arange(start=start, stop=stop, step=step, dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
 
 
