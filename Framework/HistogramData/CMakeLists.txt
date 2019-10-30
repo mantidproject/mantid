@@ -140,8 +140,11 @@ target_link_libraries(HistogramData
 # Add the unit tests directory
 add_subdirectory(test)
 
-# Installation settings
+# Auto-generate exports header
+target_include_directories(HistogramData PUBLIC ${CMAKE_BINARY_DIR}/Framework/HistogramData)
+generate_mantid_export_header(HistogramData)
 
+# Installation settings
 mtd_install_targets(TARGETS
                     HistogramData
                     INSTALL_DIRS
