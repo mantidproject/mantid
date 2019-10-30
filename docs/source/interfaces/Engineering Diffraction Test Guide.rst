@@ -14,7 +14,7 @@ it is recommended they read :ref:`Engineering_Diffraction-ref` instead which is 
 
 The files used in the following examples are found within System test files within 
 `<MantidBuildDir>/ExternalData/Testing/Data/SystemTest` after building the *SystemTestData* target.
-Runs can also be loaded from the archive, however differen run numbers will be needed as older runs may
+Runs can also be loaded from the archive, however different run numbers will be needed as older runs may
 be deleted.
 
 Overview
@@ -80,7 +80,7 @@ If the data is captured in event mode (i.e.. Event workspaces) it will first
 need :ref:`preProcessing-Engineering_Diffraction_test-ref` .
 
 A .nxs file containing histogram data needs to be selected for example *ENGINX00193749.nxs*
-/ 305761 on archive this can have all banks summed, specific spectra and list or use a
+/ 305761 on archive. This can have all banks summed, specific spectra and list or use a
 detector grouping to create a texture.
 
 Once the focus run has finished it will save a focused .nxs file in 
