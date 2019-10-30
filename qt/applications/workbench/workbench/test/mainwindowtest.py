@@ -14,8 +14,9 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import unittest
 
-from mantid.py3compat.mock import Mock, patch
+from mantid.py3compat.mock import patch
 from workbench.app.mainwindow import MainWindow
+
 
 class MainWindowTest(unittest.TestCase):
     @classmethod

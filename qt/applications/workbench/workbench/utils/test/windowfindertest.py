@@ -31,8 +31,8 @@ class WindowFinderTest(unittest.TestCase):
         window = find_window(interface_name, QMainWindow)
         self.assertIs(top_level_widget, window, "Window found was not the widget supplied")
 
-
     def test_find_window_returns_none_if_no_widget_exists(self):
         interface_name = 'ISIS Reflectometry'
         window = find_window(interface_name, QMainWindow)
         self.assertIsNone(window, "Found a widget when none expected")
+        
