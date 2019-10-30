@@ -154,8 +154,7 @@ createDetectorTableWorkspace(const MatrixWorkspace_sptr &ws,
 }
 
 std::vector<std::pair<std::string, std::string>>
-createColumns(const bool isScanning, const bool includeData,
-              const bool calcQ) {
+createColumns(const bool isScanning, const bool includeData, const bool calcQ) {
   std::vector<std::pair<std::string, std::string>> colNames;
   colNames.push_back(std::make_pair("double", "Index"));
   colNames.push_back(std::make_pair("int", "Spectrum No"));

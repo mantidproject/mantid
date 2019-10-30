@@ -7,7 +7,6 @@
 #ifndef CREATE_DETECTOR_TABLE_H_
 #define CREATE_DETECTOR_TABLE_H_
 
-#include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/EnabledWhenWorkspaceIsType.h"
 #include "MantidAPI/ExperimentInfo.h"
@@ -17,6 +16,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
@@ -61,8 +61,8 @@ createDetectorTableWorkspace(const API::MatrixWorkspace_sptr &ws,
 std::string createTruncatedList(const std::set<int> &elements);
 
 void populateTable(Mantid::API::ITableWorkspace_sptr &t,
-                   const Mantid::API::MatrixWorkspace_sptr &ws,
-                   const int nrows, const std::vector<int> &indices,
+                   const Mantid::API::MatrixWorkspace_sptr &ws, const int nrows,
+                   const std::vector<int> &indices,
                    const Mantid::API::SpectrumInfo &spectrumInfo,
                    bool signedThetaParamRetrieved, bool showSignedTwoTheta,
                    const Mantid::Geometry::PointingAlong &beamAxisIndex,
@@ -70,8 +70,7 @@ void populateTable(Mantid::API::ITableWorkspace_sptr &t,
                    const bool include_data, const bool calcQ,
                    Kernel::Logger &logger);
 std::vector<std::pair<std::string, std::string>>
-createColumns(const bool isScanning, const bool includeData,
-              const bool calcQ);
+createColumns(const bool isScanning, const bool includeData, const bool calcQ);
 
 } // namespace Algorithms
 } // namespace Mantid
