@@ -27,13 +27,10 @@ private:
   double m_timeMin;
   // Maximum time
   double m_timeMax;
-  // Minimum time range - maximum time range.
-  double m_timeRange;
   // Used for internal linear calculations.
   double m_c;
   // Used for internal linear calculations.
   double m_fraction;
-  size_t m_nIntervalSteps;
   bool m_runnable;
 
   /// Constructor only accessible via 'construct' static member function.

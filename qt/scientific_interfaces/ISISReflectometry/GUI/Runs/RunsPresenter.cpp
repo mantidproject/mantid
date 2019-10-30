@@ -447,11 +447,12 @@ IAlgorithm_sptr RunsPresenter::setupLiveDataMonitorAlgorithm() {
   alg->setLogging(false);
   auto const instrument = m_view->getSearchInstrument();
   auto const inputWorkspace = "TOF_live";
+  auto const updateInterval = m_view->getLiveDataUpdateInterval();
   alg->setProperty("Instrument", instrument);
   alg->setProperty("OutputWorkspace", "IvsQ_binned_live");
   alg->setProperty("AccumulationWorkspace", inputWorkspace);
   alg->setProperty("AccumulationMethod", "Replace");
-  alg->setProperty("UpdateEvery", "20");
+  alg->setProperty("UpdateEvery", static_cast<double>(updateInterval));
   alg->setProperty("PostProcessingAlgorithm", liveDataReductionAlgorithm());
   alg->setProperty("PostProcessingProperties",
                    liveDataReductionOptions(inputWorkspace, instrument));
@@ -470,16 +471,19 @@ IAlgorithm_sptr RunsPresenter::setupLiveDataMonitorAlgorithm() {
 void RunsPresenter::updateViewWhenMonitorStarting() {
   m_view->setStartMonitorButtonEnabled(false);
   m_view->setStopMonitorButtonEnabled(false);
+  m_view->setUpdateIntervalSpinBoxEnabled(false);
 }
 
 void RunsPresenter::updateViewWhenMonitorStarted() {
   m_view->setStartMonitorButtonEnabled(false);
   m_view->setStopMonitorButtonEnabled(true);
+  m_view->setUpdateIntervalSpinBoxEnabled(false);
 }
 
 void RunsPresenter::updateViewWhenMonitorStopped() {
   m_view->setStartMonitorButtonEnabled(true);
   m_view->setStopMonitorButtonEnabled(false);
+  m_view->setUpdateIntervalSpinBoxEnabled(true);
 }
 
 /** Start live data monitoring

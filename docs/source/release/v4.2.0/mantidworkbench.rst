@@ -19,6 +19,8 @@ User Interface
 New
 ###
 - Added a 'Generate Recovery Script' button to Workbench under the File menu bar, it generates a script that is essentially what project recovery uses. However it is only the script and does not include the workspace clean up and other features Project Recovery offers.
+- There is now an algorithm to create a table workspace showing detector information for a given workspace, and a "Show Detectors" option when you right-click a workspace which executes this algorithm.
+- The script repository is now in workbench .
 
 Improvements
 ############
@@ -35,8 +37,16 @@ Improvements
 - There is now a button on the plot window's toolbar to generate a script that will re-create the current figure.
 - There is now a "Filter by" menu in the message display's context menu, allowing you to filter output by script.
 - It is now possible to fit table workspaces in the fit browser and in a script.
+- The keyboard shortcuts Ctrl++ and Ctrl+- can now be used to increase/decrease the font size in the script editor.
 - It is now possible to input axis limits in the figure options using scientific notation.
 - The sub-tabs in the Curves tab in plot options now contain an "Apply to All" button which copies the properties of the current curve to all other curves in the plot.
+- The fit result workspaces are now accessible from the fitting interface.
+- The auto-complete in Workbench's script editor has been improved.
+- There are now forward and back buttons on figures to go back and forward through figure zoom states.
+- The home button on figures now always centres the figure's contents.
+- You can now zoom in/out on figures by scrolling and pan figures using the middle mouse button.
+- The keyboard shortcut Ctrl+D now aborts a running script.
+- Plot windows now stay on top of Workbench's main window, so you can easily drag and drop workspaces onto existing figures.
 
 Bugfixes
 ########
@@ -56,5 +66,10 @@ Bugfixes
 - Fixed an issue where the plot legend would no longer be movable after removing a plot guess.
 - The fitting curves in the plot are now deleted when the fit results workspaces are deleted.
 - An error is no longer raised when attempting to open plot options, or the fitting tab, on a figure containing a line plotted using a script without a spectrum number being specified.
+- Imports from the __future__ module now have the expected effect in scripts. E.g. after importing ``print_function``, ``print("A", "B")`` will output "``A B``" instead of "``('A', 'B')``".
+- Tabs in the script editor no longer change order when Workbench is closed and reopened.
+- Fixes an issue where subscribing a new algorithm duplicates the list of algorithms in the algorithm selector widget.
+- Plots are no longer zoomed out along their y-axis when you perform a fit or do a plot guess.
+- You can now save scripts that contain unicode characters.
 
 :ref:`Release 4.2.0 <v4.2.0>`

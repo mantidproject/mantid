@@ -102,7 +102,6 @@ void BatchJobRunner::notifyReductionPaused() {
 
 void BatchJobRunner::notifyAutoreductionResumed() {
   m_isAutoreducing = true;
-  m_isProcessing = true;
   m_reprocessFailed = true;
   m_processAll = true;
   m_batch.resetSkippedItems();

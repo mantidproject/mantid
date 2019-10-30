@@ -324,7 +324,7 @@ def convert_instrument_and_detector_type_to_bank_name(instrument, detector_type)
     elif instrument is SANSInstrument.ZOOM:
         bank_name = "rear-detector"
     else:
-        raise RuntimeError("SANSCrop: The instrument {0} is currently not supported.".format(instrument))
+        raise RuntimeError("Cropping Component: The instrument {0} is currently not supported.".format(instrument))
     return bank_name
 
 

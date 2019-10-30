@@ -108,6 +108,9 @@ public:
                   bool caseSensitive, bool matchWords, bool wrap,
                   bool forward = true);
 
+  /// Get the current zoom factor
+  int getZoom() const;
+
 public slots:
   /// Save the script, opening a dialog
   void saveAs();

@@ -1069,7 +1069,8 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   std::list<size_t> saved_indices;
   // Looping from highest to lowest component index is critical
   for (size_t index = compInfo.root() - 1; index >= detInfo.size(); --index) {
-    if (Geometry::ComponentInfoBankHelpers::isSaveableBank(compInfo, index)) {
+    if (Geometry::ComponentInfoBankHelpers::isSaveableBank(compInfo, detInfo,
+                                                           index)) {
       if (isDesiredNXDetector(index, saved_indices, compInfo)) {
         if (reporter != nullptr)
           reporter->report();
@@ -1162,7 +1163,8 @@ void saveInstrument(const Mantid::API::MatrixWorkspace &ws,
   std::list<size_t> saved_indices;
   // Looping from highest to lowest component index is critical
   for (size_t index = compInfo.root() - 1; index >= detInfo.size(); --index) {
-    if (Geometry::ComponentInfoBankHelpers::isSaveableBank(compInfo, index)) {
+    if (Geometry::ComponentInfoBankHelpers::isSaveableBank(compInfo, detInfo,
+                                                           index)) {
 
       if (isDesiredNXDetector(index, saved_indices, compInfo)) {
         // Make spectra detector mappings that can be used

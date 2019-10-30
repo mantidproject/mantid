@@ -8,7 +8,7 @@
 #define MANTID_LIVEDATA_STARTLIVEDATA_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidLiveData/DllConfig.h"
 #include "MantidLiveData/LiveDataAlgorithm.h"
 
 namespace Mantid {
@@ -28,7 +28,7 @@ namespace LiveData {
 
   @date 2012-02-16
 */
-class DLLExport StartLiveData : public LiveDataAlgorithm {
+class MANTID_LIVEDATA_DLL StartLiveData : public LiveDataAlgorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

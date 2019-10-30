@@ -8,8 +8,6 @@
 #define MANTID_GEOMETRY_REFLECTIONCONDITIONTEST_H_
 
 #include "MantidGeometry/Crystal/ReflectionCondition.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
 #include <unordered_set>
 
@@ -21,7 +19,7 @@ public:
                size_t count) {
     for (size_t i = 0; i < count; i++) {
       bool v = rc.isAllowed(h[i], k[i], l[i]);
-      TS_ASSERT_EQUALS((valid[i] == 1), v);
+      TS_ASSERT_EQUALS((valid[i] == 1), v)
     }
   }
 
@@ -44,11 +42,11 @@ public:
   }
 
   void test_getAllReflectionConditions() {
-    std::vector<ReflectionCondition_sptr> refs = getAllReflectionConditions();
-    TS_ASSERT_EQUALS(refs.size(), 9);
-    TS_ASSERT(refs[0]);
-    TS_ASSERT_EQUALS(refs[0]->getName(), "Primitive");
-    TS_ASSERT(refs[8]);
+    const auto &refs = getAllReflectionConditions();
+    TS_ASSERT_EQUALS(refs.size(), 9)
+    TS_ASSERT(refs[0])
+    TS_ASSERT_EQUALS(refs[0]->getName(), "Primitive")
+    TS_ASSERT(refs[8])
   }
 
   void test_ReflectionConditionSymbols() {
@@ -63,23 +61,23 @@ public:
     centeringSymbols.insert("Rrev");
     centeringSymbols.insert("H");
 
-    std::vector<ReflectionCondition_sptr> refs = getAllReflectionConditions();
+    const auto &refs = getAllReflectionConditions();
     for (auto &ref : refs) {
       TSM_ASSERT_DIFFERS(ref->getSymbol(),
                          centeringSymbols.find(ref->getSymbol()),
-                         centeringSymbols.end());
+                         centeringSymbols.end())
       centeringSymbols.erase(ref->getSymbol());
     }
 
     // All centering symbols are present if the set is empty.
-    TS_ASSERT_EQUALS(centeringSymbols.size(), 0);
+    TS_ASSERT_EQUALS(centeringSymbols.size(), 0)
   }
 
   void test_getReflectionConditionNames() {
     auto conditions = getAllReflectionConditions();
     auto names = getAllReflectionConditionNames();
 
-    TS_ASSERT_EQUALS(conditions.size(), names.size());
+    TS_ASSERT_EQUALS(conditions.size(), names.size())
 
     // there should not be any duplicates in the names
     std::unordered_set<std::string> nameSet(names.begin(), names.end());
@@ -91,7 +89,7 @@ public:
     auto conditions = getAllReflectionConditions();
     auto symbols = getAllReflectionConditionSymbols();
 
-    TS_ASSERT_EQUALS(conditions.size(), symbols.size());
+    TS_ASSERT_EQUALS(conditions.size(), symbols.size())
 
     // there should not be any duplicates in the names
     std::unordered_set<std::string> symbolSet(symbols.begin(), symbols.end());
@@ -104,11 +102,11 @@ public:
 
     for (auto name : names) {
       TSM_ASSERT_THROWS_NOTHING("Problem with ReflectionCondition: " + name,
-                                getReflectionConditionByName(name));
+                                getReflectionConditionByName(name))
     }
 
     TS_ASSERT_THROWS(getReflectionConditionByName("invalid"),
-                     const std::invalid_argument &);
+                     const std::invalid_argument &)
   }
 
   void test_getReflectionConditionBySymbol() {
@@ -116,11 +114,11 @@ public:
 
     for (auto symbol : symbols) {
       TSM_ASSERT_THROWS_NOTHING("Problem with ReflectionCondition: " + symbol,
-                                getReflectionConditionBySymbol(symbol));
+                                getReflectionConditionBySymbol(symbol))
     }
 
     TS_ASSERT_THROWS(getReflectionConditionBySymbol("Q"),
-                     const std::invalid_argument &);
+                     const std::invalid_argument &)
   }
 };
 

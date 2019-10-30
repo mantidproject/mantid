@@ -55,8 +55,8 @@ class SData(AbinsModules.GeneralData):
             elif "frequencies" == item:
 
                 step = self._bin_width
-                bins = np.arange(start=AbinsModules.AbinsParameters.min_wavenumber,
-                                 stop=AbinsModules.AbinsParameters.max_wavenumber + step,
+                bins = np.arange(start=AbinsModules.AbinsParameters.sampling['min_wavenumber'],
+                                 stop=AbinsModules.AbinsParameters.sampling['max_wavenumber'] + step,
                                  step=step,
                                  dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
 

@@ -40,12 +40,8 @@ void FindUBUsingIndexedPeaks::init() {
  */
 void FindUBUsingIndexedPeaks::exec() {
   PeaksWorkspace_sptr ws = getProperty("PeaksWorkspace");
-  if (!ws) {
-    throw std::runtime_error("Could not read the peaks workspace");
-  }
-
-  std::vector<Peak> peaks = ws->getPeaks();
-  size_t n_peaks = ws->getNumberPeaks();
+  const auto &peaks = ws->getPeaks();
+  const size_t n_peaks = ws->getNumberPeaks();
 
   std::vector<V3D> q_vectors;
   std::vector<V3D> hkl_vectors;
@@ -64,10 +60,9 @@ void FindUBUsingIndexedPeaks::exec() {
 
   size_t indexed_count = 0;
   std::unordered_set<int> run_numbers;
-  for (Peak peak : peaks) {
-
+  for (const Peak &peak : peaks) {
     run_numbers.insert(peak.getRunNumber());
-    V3D hkl(peak.getIntHKL()); // ##### KEEP
+    V3D hkl(peak.getIntHKL());
     V3D mnp(peak.getIntMNP());
     int maxOrder = mnp.maxCoeff();
     if (maxOrder > MaxOrder)
@@ -113,7 +108,7 @@ void FindUBUsingIndexedPeaks::exec() {
   {                    // from the full list of peaks, and
     q_vectors.clear(); // save the UB in the sample
     q_vectors.reserve(n_peaks);
-    for (auto &peak : peaks) {
+    for (const auto &peak : peaks) {
       q_vectors.push_back(peak.getQSampleFrame());
     }
 
@@ -143,9 +138,9 @@ void FindUBUsingIndexedPeaks::exec() {
         run_mnp_vectors.reserve(run_indexed);
         run_fhkl_vectors.reserve(run_indexed);
 
-        for (Peak peak : peaks) {
+        for (const Peak &peak : peaks) {
           if (peak.getRunNumber() == run) {
-            V3D hkl(peak.getIntHKL()); // ##### KEEP
+            V3D hkl(peak.getIntHKL());
             V3D mnp(peak.getIntMNP());
             if (isPeakIndexed(peak)) {
               run_q_vectors.push_back(peak.getQSampleFrame());
@@ -230,9 +225,9 @@ void FindUBUsingIndexedPeaks::logLattice(OrientedLattice &o_lattice,
                    << " error: " << o_lattice.getVecErr(i) << "\n";
   }
 }
-bool FindUBUsingIndexedPeaks::isPeakIndexed(Peak &peak) {
-  V3D hkl(peak.getIntHKL()); // ##### KEEP
-  V3D mnp(peak.getIntMNP());
+bool FindUBUsingIndexedPeaks::isPeakIndexed(const Peak &peak) {
+  const V3D hkl(peak.getIntHKL());
+  const V3D mnp(peak.getIntMNP());
   return (IndexingUtils::ValidIndex(hkl, 1.0) ||
           IndexingUtils::ValidIndex(mnp, 1.0));
 }

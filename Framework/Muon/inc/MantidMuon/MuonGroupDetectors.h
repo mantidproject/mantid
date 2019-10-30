@@ -8,7 +8,7 @@
 #define MANTID_ALGORITHMS_MUONGROUPDETECTORS_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidMuon/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -16,7 +16,7 @@ namespace Algorithms {
 /** MuonGroupDetectors : applies detector grouping to a workspace. (Muon
   version)
 */
-class DLLExport MuonGroupDetectors : public API::Algorithm {
+class MANTID_MUON_DLL MuonGroupDetectors : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

@@ -27,14 +27,14 @@ TimeToTimeStep TimeToTimeStep::construct(double timeMin, double timeMax,
 */
 TimeToTimeStep::TimeToTimeStep(double timeMin, double timeMax,
                                size_t nIntervalSteps)
-    : m_timeMin(timeMin), m_timeMax(timeMax), m_timeRange(timeMax - timeMin),
-      m_nIntervalSteps(nIntervalSteps), m_runnable(true) {
-  if (m_timeRange <= 0) {
+    : m_timeMin(timeMin), m_timeMax(timeMax), m_runnable(true) {
+  const double timeRange{timeMax - timeMin};
+  if (timeRange <= 0) {
     throw std::runtime_error(
         "Range must be positive. timeMax should be > timeMin");
   }
   // This fraction is convenient to pre-calculate.
-  m_fraction = (1 / m_timeRange) * static_cast<double>(m_nIntervalSteps);
+  m_fraction = (1 / timeRange) * static_cast<double>(nIntervalSteps);
   // The offset is scoped for the functor lifetime.
   m_c = -1 * m_fraction * m_timeMin;
 }
@@ -43,8 +43,8 @@ TimeToTimeStep::TimeToTimeStep(double timeMin, double timeMax,
   Default constructor.
 */
 TimeToTimeStep::TimeToTimeStep()
-    : m_timeMin(0.0), m_timeMax(0.0), m_timeRange(0.0), m_c(0.0),
-      m_fraction(0.0), m_nIntervalSteps(0), m_runnable(false) {}
+    : m_timeMin(0.0), m_timeMax(0.0), m_c(0.0), m_fraction(0.0),
+      m_runnable(false) {}
 
 /**
   Overloaded funtion operator.

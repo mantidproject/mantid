@@ -37,11 +37,7 @@ set(_pth_dirs .
 
 set(_pth_list_dev)
 set(_pth_list_install)
-if(APPLE)
-  set(_scripts_rel_path "../../scripts")
-else()
-  set(_scripts_rel_path "../scripts")
-endif()
+set(_scripts_rel_path "../scripts")
 
 foreach(_dir ${_pth_dirs})
   list(APPEND _pth_list_dev "${CMAKE_SOURCE_DIR}/scripts/${_dir}")

@@ -1,9 +1,16 @@
-set(SRC_FILES src/CharIconPainter.cpp src/CharIconEngine.cpp src/Icon.cpp)
+set(
+  SRC_FILES
+  src/CharIconPainter.cpp
+  src/CharIconEngine.cpp
+  src/Icon.cpp
+)
 
-set(INC_FILES
-    inc/MantidQtIcons/CharIconPainter.h
-    inc/MantidQtIcons/CharIconEngine.h
-    inc/MantidQtIcons/Icon.h)
+set(
+  INC_FILES
+  inc/MantidQtIcons/CharIconPainter.h
+  inc/MantidQtIcons/CharIconEngine.h
+  inc/MantidQtIcons/Icon.h
+)
 
 if(ENABLE_MANTIDPLOT)
   find_package(Qt4 COMPONENTS QtScript REQUIRED)
@@ -26,7 +33,7 @@ if(ENABLE_MANTIDPLOT)
                         ${LIB_DIR}
                       OSX_INSTALL_RPATH
                         @loader_path/../MacOS
-                        @loader_path/../Libraries
+                        @loader_path/../Frameworks
                       LINUX_INSTALL_RPATH
                         "\$ORIGIN/../${LIB_DIR}")
 endif()
@@ -50,23 +57,29 @@ if(ENABLE_WORKBENCH)
                         ${WORKBENCH_LIB_DIR}
                       OSX_INSTALL_RPATH
                         @loader_path/../MacOS
-                        @loader_path/../Libraries
+                        @loader_path/../Frameworks
                       LINUX_INSTALL_RPATH
                         "\$ORIGIN/../${WORKBENCH_LIB_DIR}")
 endif()
 
 set(QT5_TEST_FILES test/IconTest.h)
 
-mtd_add_qt_tests (TARGET_NAME MantidQtIconsTest
-                  SRC ${QT5_TEST_FILES}
-                  INCLUDE_DIRS
-                    ${CMAKE_CURRENT_SOURCE_DIR}/inc
-                  LINK_LIBS
-                    ${TARGET_LIBRARIES}
-                    ${Boost_LIBRARIES}
-                    ${GMOCK_LIBRARIES}
-                    ${GTEST_LIBRARIES}
-                  MTD_QT_LINK_LIBS
-                    MantidQtIcons
-                  PARENT_DEPENDENCIES
-                    GUITests)
+set(
+  CXXTEST_EXTRA_HEADER_INCLUDE
+  "${CMAKE_CURRENT_LIST_DIR}/test/IconsTestInitialization.h"
+)
+
+mtd_add_qt_tests(
+  TARGET_NAME MantidQtIconsTest
+  SRC ${QT5_TEST_FILES}
+  INCLUDE_DIRS
+    ${CMAKE_CURRENT_SOURCE_DIR}/inc
+    ${CMAKE_CURRENT_SOURCE_DIR}/../widgets/common/inc
+  LINK_LIBS
+    ${TARGET_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${GMOCK_LIBRARIES}
+    ${GTEST_LIBRARIES}
+  MTD_QT_LINK_LIBS MantidQtIcons
+  PARENT_DEPENDENCIES GUITests
+)

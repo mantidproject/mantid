@@ -109,7 +109,7 @@ add_library(LiveData ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties(LiveData PROPERTIES OUTPUT_NAME MantidLiveData)
 
-if(OSX_VERSION VERSION_GREATER 10.8)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(LiveData
                         PROPERTIES INSTALL_RPATH
                                    "@loader_path/../Contents/MacOS")
@@ -140,8 +140,11 @@ target_link_libraries(LiveData LINK_PRIVATE ${PRIVATE_LINK_LIBRARIES})
 # Add the unit tests directory
 add_subdirectory(test)
 
-# Installation settings
+# Auto-generate exports header
+target_include_directories(LiveData PUBLIC ${CMAKE_BINARY_DIR}/Framework/LiveData)
+generate_mantid_export_header(LiveData)
 
+# Installation settings
 mtd_install_targets(TARGETS
                     LiveData
                     INSTALL_DIRS

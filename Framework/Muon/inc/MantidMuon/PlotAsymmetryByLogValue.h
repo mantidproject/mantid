@@ -12,6 +12,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidMuon/DllConfig.h"
 
 namespace Mantid {
 //----------------------------------------------------------------------
@@ -42,7 +43,7 @@ Required Properties:
 @author
 @date 11/07/2008
 */
-class DLLExport PlotAsymmetryByLogValue : public API::Algorithm {
+class MANTID_MUON_DLL PlotAsymmetryByLogValue : public API::Algorithm {
 public:
   /// Default constructor
   PlotAsymmetryByLogValue();

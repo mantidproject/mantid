@@ -21,7 +21,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from qtpy.QtCore import QObject, Qt
 from qtpy.QtWidgets import QApplication, QLabel, QFileDialog
 
-from mantid.api import AnalysisDataServiceObserver
+from mantid.api import AnalysisDataService, AnalysisDataServiceObserver, ITableWorkspace, MatrixWorkspace
 from mantid.kernel import logger
 from mantid.plots import MantidAxes
 from mantid.py3compat import text_type
@@ -60,6 +60,7 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
         self.observeClear(True)
         self.observeDelete(True)
         self.observeReplace(True)
+        self.observeRename(True)
 
     @_catch_exceptions
     def clearHandle(self):
@@ -122,6 +123,24 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
             redraw = redraw | redraw_this
         if redraw:
             self.canvas.draw_idle()
+
+    @_catch_exceptions
+    def renameHandle(self, oldName, newName):
+        """
+        Called when the ADS has renamed a workspace.
+        If this workspace is attached to this figure then the figure name is updated
+        :param oldName: The old name of the workspace.
+        :param newName: The new name of the workspace
+        """
+        for ax in self.canvas.figure.axes:
+            if isinstance(ax, MantidAxes):
+                ws = AnalysisDataService.retrieve(newName)
+                if isinstance(ws, MatrixWorkspace):
+                    for ws_name, artists in ax.tracked_workspaces.items():
+                        if ws_name == oldName:
+                            ax.tracked_workspaces[newName] = ax.tracked_workspaces.pop(oldName)
+                elif isinstance(ws, ITableWorkspace):
+                    ax.wsName = newName
 
 
 class FigureManagerWorkbench(FigureManagerBase, QObject):

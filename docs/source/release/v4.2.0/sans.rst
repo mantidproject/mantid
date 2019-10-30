@@ -21,6 +21,8 @@ New
 - Support for shifting both monitor 4 and 5 on Zoom including a new setting in the 
   ISIS SANS GUI. A new user file command has also been added to
   perform monitor shifts without changing the selected transmission spectrum.
+- New :ref:`HFIRSANS2Wavelength <algm-HFIRSANS2Wavelength-v1>` algorithm to "convert" CG2 event files
+  to histograms in wavelength.
 
 Improved
 ########
@@ -54,5 +56,24 @@ Multiple ISIS SANS GUI usability fixes including:
   been reduced.
 - The check-boxes enabling extra table options, such as *Sample Geometry* have
   been moved alongside the table controls.
+
+- Multiple SANS Workflow Algorithms were converted into internal scripts.
+  This removes the need for passing SANSState objects in unrolled histories.
+  Additionally, it speeds up the reduction of each run by ~35%.
+
+Removed
+#######
+
+The following SANS Workflow algorithms were removed:
+- SANSCalculateTransmission
+- SANSCreateAdjustment
+- SANSCrop
+- SANSConvertToQ
+- SANSConvertToWavelength
+- SANSMaskWorkspace
+- SANSMove
+- SANSNormalizeToMonitor
+- SANSScale
+- SANSSliceEvent
 
 :ref:`Release 4.2.0 <v4.2.0>`

@@ -67,13 +67,15 @@ class MANTID_GEOMETRY_DLL HKLFilter {
 public:
   virtual ~HKLFilter() = default;
 
-  std::function<bool(const Kernel::V3D &)> fn() const;
+  std::function<bool(const Kernel::V3D &)> fn() const noexcept;
 
   virtual std::string getDescription() const = 0;
   virtual bool isAllowed(const Kernel::V3D &hkl) const = 0;
 };
 
+using HKLFilter_uptr = std::unique_ptr<HKLFilter>;
 using HKLFilter_const_sptr = boost::shared_ptr<const HKLFilter>;
+using HKLFilter_sptr = boost::shared_ptr<HKLFilter>;
 
 /// Base class for unary logic operations for HKLFilter.
 class MANTID_GEOMETRY_DLL HKLFilterUnaryLogicOperation : public HKLFilter {
@@ -81,22 +83,23 @@ public:
   HKLFilterUnaryLogicOperation(const HKLFilter_const_sptr &filter);
 
   /// Returns the operand of the function.
-  const HKLFilter_const_sptr &getOperand() const { return m_operand; }
+  const HKLFilter_const_sptr &getOperand() const noexcept { return m_operand; }
 
 protected:
   HKLFilter_const_sptr m_operand;
 };
 
 /// Logical "Not"-operation for HKLFilter.
-class MANTID_GEOMETRY_DLL HKLFilterNot : public HKLFilterUnaryLogicOperation {
+class MANTID_GEOMETRY_DLL HKLFilterNot final
+    : public HKLFilterUnaryLogicOperation {
 public:
   /// Constructor, calls base class constructor, throws exception if filter is a
   /// null pointer.
   HKLFilterNot(const HKLFilter_const_sptr &filter)
       : HKLFilterUnaryLogicOperation(filter) {}
 
-  std::string getDescription() const override;
-  bool isAllowed(const Kernel::V3D &hkl) const override;
+  std::string getDescription() const noexcept override;
+  bool isAllowed(const Kernel::V3D &hkl) const noexcept override;
 };
 
 /// Base class for binary logic operations for HKLFilter.
@@ -106,10 +109,10 @@ public:
                                 const HKLFilter_const_sptr &rhs);
 
   /// Returns the left-hand side operand of the operation.
-  const HKLFilter_const_sptr &getLHS() const { return m_lhs; }
+  const HKLFilter_const_sptr &getLHS() const noexcept { return m_lhs; }
 
   /// Returns the right-hand side operand of the operation.
-  const HKLFilter_const_sptr &getRHS() const { return m_rhs; }
+  const HKLFilter_const_sptr &getRHS() const noexcept { return m_rhs; }
 
 protected:
   HKLFilter_const_sptr m_lhs;
@@ -117,27 +120,29 @@ protected:
 };
 
 /// Logical "And"-operation for HKLFilter.
-class MANTID_GEOMETRY_DLL HKLFilterAnd : public HKLFilterBinaryLogicOperation {
+class MANTID_GEOMETRY_DLL HKLFilterAnd final
+    : public HKLFilterBinaryLogicOperation {
 public:
   /// Constructor, calls base class constructor, throws exception if either of
   /// the operands is null.
   HKLFilterAnd(const HKLFilter_const_sptr &lhs, const HKLFilter_const_sptr &rhs)
       : HKLFilterBinaryLogicOperation(lhs, rhs) {}
 
-  std::string getDescription() const override;
-  bool isAllowed(const Kernel::V3D &hkl) const override;
+  std::string getDescription() const noexcept override;
+  bool isAllowed(const Kernel::V3D &hkl) const noexcept override;
 };
 
 /// Logical "Or"-operation for HKLFilter.
-class MANTID_GEOMETRY_DLL HKLFilterOr : public HKLFilterBinaryLogicOperation {
+class MANTID_GEOMETRY_DLL HKLFilterOr final
+    : public HKLFilterBinaryLogicOperation {
 public:
   /// Constructor, calls base class constructor, throws exception if either of
   /// the operands is null.
   HKLFilterOr(const HKLFilter_const_sptr &lhs, const HKLFilter_const_sptr &rhs)
       : HKLFilterBinaryLogicOperation(lhs, rhs) {}
 
-  std::string getDescription() const override;
-  bool isAllowed(const Kernel::V3D &hkl) const override;
+  std::string getDescription() const noexcept override;
+  bool isAllowed(const Kernel::V3D &hkl) const noexcept override;
 };
 
 MANTID_GEOMETRY_DLL const HKLFilter_const_sptr

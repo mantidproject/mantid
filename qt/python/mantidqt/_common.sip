@@ -152,6 +152,7 @@ public:
   sipRes = sipBuildResult(nullptr, "(iiii)", lineFrom, indexFrom,
                           lineTo, indexTo);
 %End
+  int getZoom() const;
   bool hasSelectedText() const;
   bool isModified() const;
   bool isReadOnly() const;
@@ -187,10 +188,13 @@ public:
 
 public slots:
   void updateProgressMarker(int lineno, bool error);
+  void zoomTo(int level);
 
 signals:
   void fileNameChanged(const QString &fileName);
   void modificationChanged(bool m);
+  void textZoomedIn();
+  void textZoomedOut();
 
 private:
   ScriptEditor(const ScriptEditor&);
@@ -402,6 +406,18 @@ public:
 };
 
 // ---------------------------------
+// Script Repository
+// ---------------------------------
+
+class ScriptRepositoryView : QDialog {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/ScriptRepositoryView.h"
+%End
+public:
+    ScriptRepositoryView(QWidget *parent = nullptr);
+};
+
+// ---------------------------------
 // Fit Property Browser
 // ---------------------------------
 class FitPropertyBrowser : public QDockWidget {
@@ -436,9 +452,12 @@ public:
     QStringList getWorkspaceNames();
     void fit();
     void addAllowedSpectra(const QString &wsName, const QList<int> &wsIndices);
-	void addAllowedTableWorkspace(const QString &wsName);
+    void addAllowedTableWorkspace(const QString &wsName);
     void setTextPlotGuess(const QString);
     bool plotDiff() const;
+    void addFitResultWorkspacesToTableWidget();
+    void setWorkspaceName(const QString &wsName);
+    void postDeleteHandle(const std::string &wsName);
 
     SIP_PYOBJECT defaultPeakType();
 %MethodCode
@@ -462,6 +481,7 @@ public:
     void setPeakFwhmOf(QString, double);
     void normaliseData(bool on);
     QMenu *getFitMenu() const;
+    QListWidget* getWorkspaceList() const;
 
     SIP_PYOBJECT workspaceName() const;
 %MethodCode
@@ -490,6 +510,7 @@ signals:
     void algorithmFinished(const QString &);
     void removeFitCurves();
     void plotGuess();
+    void workspaceClicked(const QString &);
 
 };
 

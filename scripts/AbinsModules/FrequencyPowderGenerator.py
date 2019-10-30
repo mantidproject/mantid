@@ -107,6 +107,6 @@ class FrequencyPowderGenerator(object):
             coeff = coeff.T
 
             # extract energies within valid energy window
-            valid_indices = energies < AbinsModules.AbinsParameters.max_wavenumber
+            valid_indices = energies < AbinsModules.AbinsParameters.sampling['max_wavenumber']
 
             return energies[valid_indices], coeff[valid_indices]

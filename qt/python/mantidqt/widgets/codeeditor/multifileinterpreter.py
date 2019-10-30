@@ -56,6 +56,8 @@ class MultiPythonFileInterpreter(QWidget):
         self.setLayout(layout)
         layout.setContentsMargins(0, 0, 0, 0)
 
+        self.zoom_level = 0
+
         # add a single editor by default
         self.append_new_editor()
 
@@ -93,7 +95,7 @@ class MultiPythonFileInterpreter(QWidget):
     def tab_filepaths(self):
         file_paths = []
         for idx in range(self.editor_count):
-            file_path = self._tabs.widget(idx).filename
+            file_path = self.editor_at(idx).filename
             if file_path:
                 file_paths.append(file_path)
         return file_paths
@@ -114,14 +116,28 @@ class MultiPythonFileInterpreter(QWidget):
         if font is None:
             font = self.default_font
 
+        if self.editor_count > 0:
+            # If there are other tabs open the same zoom level
+            # as these is used.
+            current_zoom = self._tabs.widget(0).editor.getZoom()
+        else:
+            # Otherwise the zoom level of the last tab closed is used
+            # Or the default (0) if this is the very first tab
+            current_zoom = self.zoom_level
+
         interpreter = PythonFileInterpreter(font, content, filename=filename,
                                             parent=self)
+
+        interpreter.editor.zoomTo(current_zoom)
+
         if self.whitespace_visible:
             interpreter.set_whitespace_visible()
 
         # monitor future modifications
         interpreter.sig_editor_modified.connect(self.mark_current_tab_modified)
         interpreter.sig_filename_modified.connect(self.on_filename_modified)
+        interpreter.editor.textZoomedIn.connect(self.zoom_in_all_tabs)
+        interpreter.editor.textZoomedOut.connect(self.zoom_out_all_tabs)
 
         tab_title, tab_tooltip = self._tab_title_and_tooltip(filename)
         tab_idx = self._tabs.addTab(interpreter, tab_title)
@@ -165,7 +181,13 @@ class MultiPythonFileInterpreter(QWidget):
         # are being prompted to save
         self._tabs.setCurrentIndex(idx)
         if self.current_editor().confirm_close():
-            widget = self._tabs.widget(idx)
+
+            # If the last editor tab is being closed, its zoom level
+            # is saved for the new tab which opens automatically.
+            if self.editor_count == 1:
+                self.zoom_level = self.current_editor().editor.getZoom()
+
+            widget = self.editor_at(idx)
             # note: this does not close the widget, that is why we manually close it
             self._tabs.removeTab(idx)
             widget.close()
@@ -326,3 +348,21 @@ class MultiPythonFileInterpreter(QWidget):
             for idx in range(self.editor_count):
                 self.editor_at(idx).set_whitespace_visible()
             self.whitespace_visible = True
+
+    def zoom_in_all_tabs(self):
+        current_tab_index = self._tabs.currentIndex()
+
+        for i in range(self.editor_count):
+            if i == current_tab_index:
+                continue
+
+            self.editor_at(i).editor.zoomIn()
+
+    def zoom_out_all_tabs(self):
+        current_tab_index = self._tabs.currentIndex()
+
+        for i in range(self.editor_count):
+            if i == current_tab_index:
+                continue
+
+            self.editor_at(i).editor.zoomOut()

@@ -81,7 +81,7 @@ public:
   }
 
   void test_input_md_workspace_mandatory() {
-    auto peaksws = WorkspaceCreationHelper::createPeaksWorkspace();
+    auto peaksws = WorkspaceCreationHelper::createPeaksWorkspace(2);
 
     IntegratePeaksUsingClusters alg;
     alg.setRethrows(true);
@@ -95,7 +95,7 @@ public:
   }
 
   void test_throw_if_special_coordinates_unknown() {
-    auto peaksws = WorkspaceCreationHelper::createPeaksWorkspace();
+    auto peaksws = WorkspaceCreationHelper::createPeaksWorkspace(2);
     IMDHistoWorkspace_sptr mdws =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1);
 

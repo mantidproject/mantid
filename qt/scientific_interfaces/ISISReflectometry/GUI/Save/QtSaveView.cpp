@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtSaveView.h"
+#include "MantidKernel/UsageService.h"
 
 #include <QFileDialog>
 #include <QMessageBox>
@@ -23,8 +24,6 @@ QtSaveView::QtSaveView(QWidget *parent) : QWidget(parent), m_notifyee(nullptr) {
 
 void QtSaveView::subscribe(SaveViewSubscriber *notifyee) {
   m_notifyee = notifyee;
-  populateListOfWorkspaces();
-  suggestSaveDir();
 }
 
 /** Destructor
@@ -61,13 +60,22 @@ void QtSaveView::browseToSaveDirectory() {
   }
 }
 
-void QtSaveView::onSavePathChanged() { m_notifyee->notifySavePathChanged(); }
+void QtSaveView::onSavePathChanged() {
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Feature", "ISIS Reflectometry->SaveTab->SavePathChanged", false);
+  m_notifyee->notifySavePathChanged();
+}
 
 void QtSaveView::onAutosaveChanged(int state) {
-  if (state == Qt::CheckState::Checked)
+  if (state == Qt::CheckState::Checked) {
+    Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+        "Feature", "ISIS Reflectometry->SaveTab->EnableAutosave", false);
     m_notifyee->notifyAutosaveEnabled();
-  else
+  } else {
+    Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+        "Feature", "ISIS Reflectometry->SaveTab->DisableAutosave", false);
     m_notifyee->notifyAutosaveDisabled();
+  }
 }
 
 void QtSaveView::disableAutosaveControls() {
@@ -219,6 +227,8 @@ void QtSaveView::setParametersList(const std::vector<std::string> &logs) const {
 /** Populate the 'List of workspaces' widget
  */
 void QtSaveView::populateListOfWorkspaces() const {
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Feature", "ISIS Reflectometry->SaveTab->PopulateWorkspaces", false);
   m_notifyee->notifyPopulateWorkspaceList();
 }
 
@@ -231,18 +241,18 @@ void QtSaveView::filterWorkspaceList() const {
 /** Request for the parameters of a workspace
  */
 void QtSaveView::requestWorkspaceParams() const {
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Feature", "ISIS Reflectometry->SaveTab->PopulateParameters", false);
   m_notifyee->notifyPopulateParametersList();
 }
 
 /** Save selected workspaces
  */
 void QtSaveView::saveWorkspaces() const {
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Feature", "ISIS Reflectometry->SaveTab->SaveWorkspaces", false);
   m_notifyee->notifySaveSelectedWorkspaces();
 }
-
-/** Suggest a save directory
- */
-void QtSaveView::suggestSaveDir() const { m_notifyee->notifySuggestSaveDir(); }
 
 void QtSaveView::error(const std::string &title, const std::string &prompt) {
   QMessageBox::critical(this, QString::fromStdString(title),

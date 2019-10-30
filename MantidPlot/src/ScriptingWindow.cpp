@@ -778,19 +778,13 @@ void ScriptingWindow::initWindowMenuActions() {
   // geometry state
   connect(m_hide, SIGNAL(triggered()), this, SIGNAL(hideMe()));
 
-  m_zoomIn = new QAction(("&Increase font size"), this);
-  // Setting two shortcuts makes it work for both the plus on the keypad and one
-  // above an =
-  // Despite the Qt docs advertising the use of QKeySequence::ZoomIn as the
-  // solution to this,
-  // it doesn't seem to work for me
-  m_zoomIn->setShortcut(Qt::SHIFT + Qt::CTRL + Qt::Key_Equal);
-  m_zoomIn->setShortcut(Qt::CTRL + Qt::Key_Plus);
+  // The keyboard shortcuts are set in ScriptEditor.cpp so they are manually
+  // added to the menu text here.
+  m_zoomIn = new QAction(("&Increase font size\tCtrl++"), this);
   connect(m_zoomIn, SIGNAL(triggered()), m_manager, SLOT(zoomIn()));
   connect(m_zoomIn, SIGNAL(triggered()), m_manager, SLOT(trackZoomIn()));
 
-  m_zoomOut = new QAction(("&Decrease font size"), this);
-  m_zoomOut->setShortcut(QKeySequence::ZoomOut);
+  m_zoomOut = new QAction(("&Decrease font size\tCtrl+-"), this);
   connect(m_zoomOut, SIGNAL(triggered()), m_manager, SLOT(zoomOut()));
   connect(m_zoomOut, SIGNAL(triggered()), m_manager, SLOT(trackZoomOut()));
 

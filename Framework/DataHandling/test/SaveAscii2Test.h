@@ -234,6 +234,41 @@ public:
     AnalysisDataService::Instance().remove(m_name);
   }
 
+  void test_spectrum_axis_values() {
+    MatrixWorkspace_sptr wsToSave;
+    writeInelasticWS(wsToSave);
+
+    SaveAscii2 save;
+    std::string filename = initSaveAscii2(save);
+
+    TS_ASSERT_THROWS_NOTHING(save.setProperty("WriteSpectrumAxisValue", true));
+    TS_ASSERT_THROWS_NOTHING(save.execute());
+
+    // has the algorithm written a file to disk?
+    TS_ASSERT(Poco::File(filename).exists());
+
+    // Now make some checks on the content of the file
+    std::ifstream in(filename.c_str());
+    double axisVal;
+    std::string header1, header2, header3, separator, comment;
+
+    // Test that the first few column headers, separator and first two bins are
+    // as expected
+    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >>
+        axisVal;
+
+    TS_ASSERT_EQUALS(comment, "#");
+    TS_ASSERT_EQUALS(separator, ",");
+    TS_ASSERT_EQUALS(header1, "X");
+    TS_ASSERT_EQUALS(header2, "Y");
+    TS_ASSERT_EQUALS(header3, "E");
+    TS_ASSERT_EQUALS(axisVal, 1.);
+    in.close();
+
+    Poco::File(filename).remove();
+    AnalysisDataService::Instance().remove(m_name);
+  }
+
   void test_Spectrum_Number_and_spec_ID_does_not_print_spec_num_twice() {
     MatrixWorkspace_sptr wsToSave;
     writeInelasticWS(wsToSave);

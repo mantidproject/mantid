@@ -40,6 +40,7 @@ import numpy as np
 ACCEPTED_FILE_EXTENSIONS = ['.py', '.pyw']
 # QSettings key for session tabs
 TAB_SETTINGS_KEY = "Editors/SessionTabs"
+ZOOM_LEVEL_KEY = "Editors/ZoomLevel"
 
 
 class MultiFileEditor(PluginWidget):
@@ -63,6 +64,7 @@ class MultiFileEditor(PluginWidget):
 
         # attributes
         self.tabs_open_on_closing = None
+        self.editors_zoom_level = None
 
     def load_settings_from_config(self, config):
         self.editors.load_settings_from_config(config)
@@ -94,6 +96,7 @@ class MultiFileEditor(PluginWidget):
         :return: True if editors can be closed, false if cancelled
         """
         self.tabs_open_on_closing = self.editors.tab_filepaths
+        self.editors_zoom_level = self.editors.current_editor().editor.getZoom()
         return self.editors.close_all()
 
     def dragEnterEvent(self, event):
@@ -121,12 +124,18 @@ class MultiFileEditor(PluginWidget):
     def readSettings(self, settings):
         try:
             prev_session_tabs = settings.get(TAB_SETTINGS_KEY)
+            zoom_level = settings.get(ZOOM_LEVEL_KEY)
         except KeyError:
             return
         self.restore_session_tabs(prev_session_tabs)
+        self.editors.current_editor().editor.zoomTo(int(zoom_level))
 
     def writeSettings(self, settings):
-        settings.set(TAB_SETTINGS_KEY, set(self.tabs_open_on_closing))
+        settings.set(ZOOM_LEVEL_KEY, self.editors_zoom_level)
+
+        no_duplicates = []
+        [no_duplicates.append(x) for x in self.tabs_open_on_closing if x not in no_duplicates]
+        settings.set(TAB_SETTINGS_KEY, no_duplicates)
 
     def register_plugin(self):
         self.main.add_dockwidget(self)

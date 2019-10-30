@@ -72,9 +72,10 @@ set(TEST_FILES
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorlines.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorutils.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgenerator.py
+    workbench/plotting/test/test_figureerrorsmanager.py
     workbench/plotting/test/test_figureinteraction.py
     workbench/plotting/test/test_figuremanager.py
-    workbench/plotting/test/test_figureerrorsmanager.py
+    workbench/plotting/test/test_figurewindow.py
     workbench/plotting/test/test_globalfiguremanager.py
     workbench/plugins/test/test_editor.py
     workbench/plugins/test/test_exception_handler.py
@@ -102,31 +103,24 @@ pyunittest_add_test (${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 # Install MantidWorkbench for OSX
-if( APPLE )
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set ( MAC_BUNDLE_EXECUTABLE MantidWorkbench )
-  if (OSX_VERSION VERSION_GREATER 10.7 OR OSX_VERSION VERSION_EQUAL 10.7)
-    set ( MAC_BUNDLE_IDENTIFIER "org.mantidproject.MantidWorkbench" )
-  else()
-    set ( MAC_BUNDLE_IDENTIFIER "" )
-  endif()
+  set ( MAC_BUNDLE_IDENTIFIER "org.mantidproject.MantidWorkbench" )
   set ( MAC_BUNDLE_ICON MantidWorkbench.icns )
   set ( MAC_BUNDLE_NAME MantidWorkbench )
   configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/../../../installers/MacInstaller/Info.plist.in
                    ${CMAKE_CURRENT_BINARY_DIR}/Info.plist
                    @ONLY )
 
-  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/make_package.rb.in
-      ${CMAKE_CURRENT_BINARY_DIR}/make_package.rb
-      @ONLY )
-  install (FILES ${CMAKE_CURRENT_BINARY_DIR}/make_package.rb DESTINATION MantidWorkbench.app/ )
-  install (FILES ${CMAKE_CURRENT_BINARY_DIR}/Info.plist DESTINATION MantidWorkbench.app/Contents/ )
-  install (CODE "
-      set (bundle \${CMAKE_INSTALL_PREFIX}/MantidWorkbench.app)
-      execute_process(COMMAND chmod +x ./make_package.rb WORKING_DIRECTORY \${bundle})
-      execute_process(COMMAND ./make_package.rb WORKING_DIRECTORY \${bundle} RESULT_VARIABLE install_name_tool_result)
-      if(NOT install_name_tool_result EQUAL 0)
-        message(FATAL_ERROR \"Package script failed!!!\n\")
-      endif()
-  ")
+install (FILES ${CMAKE_CURRENT_BINARY_DIR}/Info.plist DESTINATION MantidWorkbench.app/Contents/ )
+install (CODE "
+    execute_process(COMMAND ${CMAKE_SOURCE_DIR}/installers/MacInstaller/make_package.rb
+                            \${CMAKE_INSTALL_PREFIX}/MantidWorkbench.app ${PYTHON_EXECUTABLE} ${ParaView_DIR}
+                    RESULT_VARIABLE install_name_tool_result OUTPUT_VARIABLE _out ERROR_VARIABLE _out COMMAND_ECHO STDOUT)
+    if(NOT install_name_tool_result EQUAL 0)
+      message(\"\${_out}\")
+      message(FATAL_ERROR \"Package script failed!!!\n\")
+    endif()
+")
 
 endif()

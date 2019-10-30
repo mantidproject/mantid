@@ -117,7 +117,7 @@ class FocusTest(systemtesting.MantidSystemTest):
             assert_output_file_exists(output_dat_dir, tof_filename)
             # looks like TOF data
             self.assertTrue(
-                9800 < first_x_value(os.path.join(output_dat_dir, tof_filename)) < 10500,
+                9700 < first_x_value(os.path.join(output_dat_dir, tof_filename)) < 10500,
                 msg="First TOF value={}".format(
                     first_x_value(os.path.join(output_dat_dir, tof_filename))))
 

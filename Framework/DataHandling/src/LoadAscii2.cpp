@@ -7,6 +7,7 @@
 #include "MantidDataHandling/LoadAscii2.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -170,7 +171,21 @@ void LoadAscii2::parseLine(const std::string &line,
             "and the start of another. Also check for spectra IDs with no "
             "associated bins.");
       }
-      m_curSpectra->setSpectrumNo(boost::lexical_cast<int>(*(columns.begin())));
+      const std::string singleNumber = columns.front();
+      try {
+        m_curSpectra->setSpectrumNo(boost::lexical_cast<int>(singleNumber));
+      } catch (boost::bad_lexical_cast &) {
+        // the single column number is not the spectrum ID, maybe it is the
+        // spectrum axis value
+        try {
+          m_spectrumAxis.emplace_back(
+              boost::lexical_cast<double>(singleNumber));
+        } catch (boost::bad_lexical_cast &) {
+          throw std::runtime_error("Unable to read as spectrum ID (int) nor as "
+                                   "spectrum axis value (double)" +
+                                   singleNumber);
+        }
+      }
     } else {
       inconsistantIDCheck();
 
@@ -226,6 +241,10 @@ void LoadAscii2::writeToWorkspace(API::MatrixWorkspace_sptr &localWorkspace,
     } else {
       localWorkspace->getSpectrum(i).setSpectrumNo(static_cast<specnum_t>(i) +
                                                    1);
+    }
+    if (!m_spectrumAxis.empty()) {
+      localWorkspace->replaceAxis(
+          1, std::make_unique<NumericAxis>(m_spectrumAxis));
     }
   }
 }

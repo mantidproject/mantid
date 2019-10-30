@@ -62,5 +62,6 @@ mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesDynamicPDF
                      ${PLUGINS_DIR}
                    OSX_INSTALL_RPATH
                      @loader_path/../../Contents/MacOS
+                     @loader_path/../../Contents/Frameworks
                    LINUX_INSTALL_RPATH
                      "\$ORIGIN/../../${LIB_DIR}")

@@ -84,6 +84,25 @@ class IndirectILLReductionFWS(unittest.TestCase):
 
         self.assertEquals(mtd['out_red'].getItem(0).readX(0)[0], 90)
 
+    def test_ifws_monitor_peaks(self):
+
+        args = {'Run': '170304',
+                'OutputWorkspace': 'out'}
+
+        alg_test = run_algorithm('IndirectILLReductionFWS', **args)
+
+        self.assertTrue(alg_test.isExecuted(), "IndirectILLReductionFWS not executed")
+
+        self._check_workspace_group(mtd['out_red'], 1, 18, 1)
+
+        run = mtd['out_red'].getItem(0).getRun()
+
+        self.assertTrue(run.hasProperty('MonitorLeftPeak'))
+        self.assertTrue(run.hasProperty('MonitorRightPeak'))
+
+        self.assertEquals(run.getLogData('MonitorLeftPeak').value, 2)
+        self.assertEquals(run.getLogData('MonitorRightPeak').value, 508)
+
     def _check_workspace_group(self, wsgroup, nentries, nspectra, nbins):
 
         self.assertTrue(isinstance(wsgroup, WorkspaceGroup),

@@ -2100,6 +2100,16 @@ void IndexingUtils::DiscardDuplicates(std::vector<V3D> &new_list,
 }
 
 /**
+  Round all of the components of the V3D to the nearest integer.
+  @param hkl V3D object whose components will be rounded.
+*/
+void IndexingUtils::RoundHKL(Mantid::Kernel::V3D &hkl) {
+  for (size_t i = 0; i < 3; i++) {
+    hkl[i] = std::round(hkl[i]);
+  }
+}
+
+/**
   Round all of the components of all vectors to the nearest integer.  This
   is useful when the vectors in the list represent Miller indices.  Since
   the PeaksWorkspace records the Miller indices as sets of three doubles,
@@ -2110,9 +2120,7 @@ void IndexingUtils::DiscardDuplicates(std::vector<V3D> &new_list,
  */
 void IndexingUtils::RoundHKLs(std::vector<V3D> &hkl_list) {
   for (auto &entry : hkl_list) {
-    for (size_t i = 0; i < 3; i++) {
-      entry[i] = std::round(entry[i]);
-    }
+    RoundHKL(entry);
   }
 }
 
@@ -2412,20 +2420,14 @@ int IndexingUtils::CalculateMillerIndices(const DblMatrix &UB,
   miller_indices.reserve(q_vectors.size());
 
   int count = 0;
-  double h_error, k_error, l_error;
   ave_error = 0.0;
-  V3D hkl;
   for (const auto &q_vector : q_vectors) {
-    hkl = UB_inverse * q_vector / (2.0 * M_PI);
-    if (ValidIndex(hkl, tolerance)) {
+    V3D hkl;
+    if (CalculateMillerIndices(UB_inverse, q_vector, tolerance, hkl)) {
       count++;
-      miller_indices.emplace_back(hkl);
-      h_error = std::abs(std::round(hkl[0]) - hkl[0]);
-      k_error = std::abs(std::round(hkl[1]) - hkl[1]);
-      l_error = std::abs(std::round(hkl[2]) - hkl[2]);
-      ave_error += h_error + k_error + l_error;
-    } else
-      miller_indices.emplace_back(0, 0, 0);
+      ave_error += hkl.hklError();
+    }
+    miller_indices.emplace_back(std::move(hkl));
   }
 
   if (count > 0) {
@@ -2433,6 +2435,54 @@ int IndexingUtils::CalculateMillerIndices(const DblMatrix &UB,
   }
 
   return count;
+}
+
+/**
+  Calculate the Miller Indices for the specified Q vector, using the
+  inverse of the specified UB matrix. If the peak could not be indexed it is
+  set to (0,0,0)
+
+  @param inverseUB A 3x3 matrix of doubles holding the inverse UB matrix.
+                   The matrix is not checked for validity
+  @param q_vector  std::vector of V3D objects that contains the list of
+                   q_vectors that are to be indexed.
+  @param tolerance The maximum allowed distance between each component
+                   of UB^(-1)*Q and the nearest integer value, required to
+                   to count the peak as indexed by UB.
+  @param miller_indices This vector returns a list of Miller Indices, with
+                        one entry for each given Q vector.
+
+  @return True if the peak was index, false otherwise
+
+ */
+
+bool IndexingUtils::CalculateMillerIndices(const DblMatrix &inverseUB,
+                                           const V3D &q_vector,
+                                           double tolerance,
+                                           V3D &miller_indices) {
+  miller_indices = CalculateMillerIndices(inverseUB, q_vector);
+  if (ValidIndex(miller_indices, tolerance)) {
+    return true;
+  } else {
+    miller_indices = V3D(0, 0, 0);
+    return false;
+  }
+}
+
+/**
+  Calculate the Miller Indices for the specified Q vector, using the
+  inverse of the specified UB matrix.
+
+  @param inverseUB A 3x3 matrix of doubles holding the inverse UB matrix.
+                   The matrix is not checked for validity
+  @param q_vector V3D object containing Q vector in sample frame
+
+  @return The indexes of the given peak. They have not been tested for validity
+
+ */
+V3D IndexingUtils::CalculateMillerIndices(const DblMatrix &inverseUB,
+                                          const V3D &q_vector) {
+  return inverseUB * q_vector / (2.0 * M_PI);
 }
 
 /**
@@ -2507,7 +2557,8 @@ int IndexingUtils::GetIndexedPeaks_1D(const V3D &direction,
   to the unit cell edges, then the resulting indices will be proper Miller
   indices for the peaks.  This method is similar to GetIndexedPeaks_1D, but
   checks three directions simultaneously and requires that the peak lies
-  on all three families of planes simultaneously and does NOT index as (0,0,0).
+  on all three families of planes simultaneously and does NOT index as
+  (0,0,0).
 
   @param direction_1         Direction vector in the direction of the normal
                              vector for the first family of parallel planes.
@@ -2778,16 +2829,15 @@ std::vector<V3D> IndexingUtils::MakeCircleDirections(int n_steps,
   plane_spacing.  The direction is chosen from the specified direction_list.
 
   @param  best_direction      This will be set to the direction that minimizes
-                              the sum squared distances of projections of peaks
-                              from integer multiples of the specified plane
-                              spacing.
+                              the sum squared distances of projections of
+  peaks from integer multiples of the specified plane spacing.
   @param  q_vectors           List of peak positions, specified according to
                               the convention that |q| = 1/d.  (i.e. Q/2PI)
   @param  direction_list      List of possible directions for plane normals.
                               Initially, this will be a long list of possible
                               directions from MakeHemisphereDirections().
-  @param  plane_spacing       The required spacing between planes in reciprocal
-                              space.
+  @param  plane_spacing       The required spacing between planes in
+  reciprocal space.
   @param  required_tolerance  The maximum deviation of the component of a
                               peak Qxyz in the direction of the best_direction
                               vector for that peak to count as being indexed.
@@ -2855,7 +2905,8 @@ int IndexingUtils::SelectDirection(V3D &best_direction,
  *  @param UB           A non-singular matrix representing an orientation
  *                      matrix.
  *  @param lattice_par  std::vector of doubles that will contain the lattice
- *                      parameters and cell volume as it's first seven entries.
+ *                      parameters and cell volume as it's first seven
+ * entries.
  *  @return true if the lattice_par vector was filled with the lattice
  *          parameters and false if the matrix could not be inverted.
  */

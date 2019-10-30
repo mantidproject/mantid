@@ -93,8 +93,6 @@ public slots:
   void requestWorkspaceParams() const;
   /// Save selected workspaces
   void saveWorkspaces() const;
-  /// Suggest a save directory
-  void suggestSaveDir() const;
   void browseToSaveDirectory();
 
   void onSavePathChanged();

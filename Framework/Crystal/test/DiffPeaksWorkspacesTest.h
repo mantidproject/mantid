@@ -44,7 +44,7 @@ public:
     using namespace Mantid::API;
     using namespace Mantid::DataObjects;
 
-    PeaksWorkspace_sptr inWS = WorkspaceCreationHelper::createPeaksWorkspace();
+    PeaksWorkspace_sptr inWS = WorkspaceCreationHelper::createPeaksWorkspace(2);
 
     // Name of the output workspace.
     std::string outWSName("CombinePeaksWorkspacesTest_OutputWS");
@@ -76,7 +76,8 @@ public:
     using namespace Mantid::API;
     using namespace Mantid::DataObjects;
 
-    PeaksWorkspace_sptr lhsWS = WorkspaceCreationHelper::createPeaksWorkspace();
+    PeaksWorkspace_sptr lhsWS =
+        WorkspaceCreationHelper::createPeaksWorkspace(2);
     PeaksWorkspace_sptr rhsWS =
         WorkspaceCreationHelper::createPeaksWorkspace(6);
 
@@ -109,8 +110,10 @@ public:
     using namespace Mantid::API;
     using namespace Mantid::DataObjects;
 
-    PeaksWorkspace_sptr lhsWS = WorkspaceCreationHelper::createPeaksWorkspace();
-    PeaksWorkspace_sptr rhsWS = WorkspaceCreationHelper::createPeaksWorkspace();
+    PeaksWorkspace_sptr lhsWS =
+        WorkspaceCreationHelper::createPeaksWorkspace(2);
+    PeaksWorkspace_sptr rhsWS =
+        WorkspaceCreationHelper::createPeaksWorkspace(2);
 
     // Shift the rhs peaks in Q
     auto &rhsPeaks = rhsWS->getPeaks();
