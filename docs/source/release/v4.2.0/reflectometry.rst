@@ -27,6 +27,11 @@ Improved
 - The Instrument is now synchronised across all Batch tabs.
 - Live data monitoring update intervals can now be user-specified.
 
+Bug fixes
+#########
+
+- A bug has been fixed where the interface could sometimes not be closed after a failed attempt at starting Autoprocessing.
+  
 Algorithms
 ----------
 

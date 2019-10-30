@@ -49,7 +49,7 @@ public:
   void testAutoreductionResumed() {
     auto jobRunner = makeJobRunner();
     jobRunner.notifyAutoreductionResumed();
-    TS_ASSERT_EQUALS(jobRunner.isProcessing(), true);
+    TS_ASSERT_EQUALS(jobRunner.isProcessing(), false);
     TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), true);
     TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, true);
     TS_ASSERT_EQUALS(jobRunner.m_processAll, true);
