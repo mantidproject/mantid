@@ -449,7 +449,18 @@ def parse_diagnostic_settings(string_to_parse):
 # ----------------------------------------------------------------------------------------------------------------------
 #  Functions for bins, ranges and slices
 # ----------------------------------------------------------------------------------------------------------------------
-def parse_event_slice_setting(string_to_parse):
+class EventSliceParser(object):
+    number = r'(\d+(?:\.\d+)?(?:[eE][+-]\d+)?)'  # float without sign
+    simple_slice_pattern = re.compile("\\s*" + number + "\\s*" r'-' + "\\s*" + number + "\\s*")
+    slice_range_pattern = re.compile("\\s*" + number + "\\s*" + r':' + "\\s*" + number + "\\s*"
+                                     + r':' + "\\s*" + number)
+    full_range_pattern = re.compile("\\s*" + "(<|>)" + "\\s*" + number + "\\s*")
+
+    range_marker = re.compile("[><]")
+
+    def __init__(self, input_line):
+        self.user_input = input_line
+
     """
     Create a list of boundaries from a string defining the slices.
     Valid syntax is:
@@ -465,9 +476,62 @@ def parse_event_slice_setting(string_to_parse):
 
     It does not accept negative values.
     """
-    def _does_match(compiled_regex, line):
-        return compiled_regex.match(line) is not None
 
+    @staticmethod
+    def float_range(start, stop, step):
+        while start < stop:
+            yield start
+            start += step
+
+    def parse_user_input_range(self):
+        if not self.user_input:
+            return None
+
+        # If it's a simple comma separated string of pairs skip regex
+        if self._is_comma_separated_range():
+            return self._parse_comma_separated_range()
+
+        slice_settings = self.user_input.split(',')
+        all_ranges = []
+        for slice_setting in slice_settings:
+            slice_setting = slice_setting.replace(' ', '')
+            # We can have three scenarios
+            # 1. Simple Slice:     X-Y
+            # 2. Slice range :     X:Y:Z
+            # 3. Slice full range: >X or <X
+            if self._does_match(self.simple_slice_pattern, slice_setting):
+                all_ranges.append(self._extract_simple_slice(slice_setting))
+            elif self._does_match(self.slice_range_pattern, slice_setting):
+                all_ranges.extend(self._extract_slice_range(slice_setting))
+            elif self._does_match(self.full_range_pattern, slice_setting):
+                all_ranges.append(self._extract_full_range(slice_setting, self.range_marker))
+            else:
+                raise ValueError("The provided event slice configuration {0} cannot be parsed because "
+                                 "of {1}".format(slice_settings, slice_setting))
+        return all_ranges
+
+    @staticmethod
+    def _does_match(compiled_regex, section_to_parse):
+        return compiled_regex.match(section_to_parse) is not None
+
+    def _is_comma_separated_range(self):
+        stripped_line = self.user_input.replace(' ', '')
+        if ',' not in stripped_line:
+            return False
+
+        split_line = stripped_line.split(',')
+        for character in split_line:
+            if len(character) > 1 or len(character) == 0:
+                # We likely have something like 1,2- or 1,
+                return False
+            elif not character.isdigit():
+                raise ValueError("The character {0} is not a digit.".format(character))
+
+        # Forward on result
+        self.user_input = split_line
+        return True
+
+    @staticmethod
     def _extract_simple_slice(line):
         start, stop = line.split("-")
         start = float(start)
@@ -477,11 +541,7 @@ def parse_event_slice_setting(string_to_parse):
                              "value {1}. Make sure that this is not the case.")
         return [start, stop]
 
-    def float_range(start, stop, step):
-        while start < stop:
-            yield start
-            start += step
-
+    @staticmethod
     def _extract_slice_range(line):
         split_line = line.split(":")
         start = float(split_line[0])
@@ -491,7 +551,7 @@ def parse_event_slice_setting(string_to_parse):
             raise ValueError("Parsing event slices. It appears that the start value {0} is larger than the stop "
                              "value {1}. Make sure that this is not the case.")
 
-        elements = list(float_range(start, stop, step))
+        elements = list(EventSliceParser.float_range(start, stop, step))
         # We are missing the last element
         elements.append(stop)
 
@@ -499,6 +559,7 @@ def parse_event_slice_setting(string_to_parse):
         ranges = list(zip(elements[:-1], elements[1:]))
         return [[e1, e2] for e1, e2 in ranges]
 
+    @staticmethod
     def _extract_full_range(line, range_marker_pattern):
         is_lower_bound = ">" in line
         line = re.sub(range_marker_pattern, "", line)
@@ -508,36 +569,20 @@ def parse_event_slice_setting(string_to_parse):
         else:
             return [-1., value]
 
-    # Check if the input actually exists.
-    if not string_to_parse:
-        return None
+    def _parse_comma_separated_range(self):
+        assert(isinstance(self.user_input, list))
+        output_list = []
+        for i, j in zip(self.user_input, self.user_input[1:]):
+            output_list.append([float(i), float(j)])
 
-    number = r'(\d+(?:\.\d+)?(?:[eE][+-]\d+)?)'  # float without sign
-    simple_slice_pattern = re.compile("\\s*" + number + "\\s*" r'-' + "\\s*" + number + "\\s*")
-    slice_range_pattern = re.compile("\\s*" + number + "\\s*" + r':' + "\\s*" + number + "\\s*"
-                                     + r':' + "\\s*" + number)
-    full_range_pattern = re.compile("\\s*" + "(<|>)" + "\\s*" + number + "\\s*")
+        return output_list
 
-    range_marker = re.compile("[><]")
 
-    slice_settings = string_to_parse.split(',')
-    all_ranges = []
-    for slice_setting in slice_settings:
-        slice_setting = slice_setting.replace(' ', '')
-        # We can have three scenarios
-        # 1. Simple Slice:     X-Y
-        # 2. Slice range :     X:Y:Z
-        # 3. Slice full range: >X or <X
-        if _does_match(simple_slice_pattern, slice_setting):
-            all_ranges.append(_extract_simple_slice(slice_setting))
-        elif _does_match(slice_range_pattern, slice_setting):
-            all_ranges.extend(_extract_slice_range(slice_setting))
-        elif _does_match(full_range_pattern, slice_setting):
-            all_ranges.append(_extract_full_range(slice_setting, range_marker))
-        else:
-            raise ValueError("The provided event slice configuration {0} cannot be parsed because "
-                             "of {1}".format(slice_settings, slice_setting))
-    return all_ranges
+def parse_event_slice_setting(string_to_parse):
+    # Shim to avoid having to adjust all the call sights, whilst
+    # encapsulating the extra complexity
+    parser = EventSliceParser(string_to_parse)
+    return parser.parse_user_input_range()
 
 
 def get_ranges_from_event_slice_setting(string_to_parse):

@@ -606,7 +606,7 @@ class SANSDataProcessorGui(QMainWindow,
         Load the user file
         """
         # Load the user file
-        load_file(self.user_file_line_edit, "*.*", self.__generic_settings, self.__path_key,
+        load_file(self.user_file_line_edit, "*.txt", self.__generic_settings, self.__path_key,
                   self.get_user_file_path)
 
         # Set full user file path for default loading
@@ -667,6 +667,7 @@ class SANSDataProcessorGui(QMainWindow,
         """
         Load the batch file
         """
+
         UsageService.registerFeatureUsage("Feature", "ISIS SANS->Loaded Batch File", False)
         load_file(self.batch_line_edit, "*.*", self.__generic_settings, self.__batch_file_key,
                   self.get_batch_file_path)

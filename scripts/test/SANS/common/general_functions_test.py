@@ -21,7 +21,7 @@ from sans.common.general_functions import (quaternion_to_angle_and_axis, create_
                                            convert_instrument_and_detector_type_to_bank_name,
                                            convert_bank_name_to_detector_type_isis,
                                            get_facility, parse_diagnostic_settings, get_transmission_output_name,
-                                           get_output_name)
+                                           get_output_name, parse_event_slice_setting)
 from sans.state.data import StateData
 from sans.test_helper.test_director import TestDirector
 
@@ -562,6 +562,50 @@ class SANSFunctionsTest(unittest.TestCase):
         alg_manager_mock.reset_mock()
         create_managed_non_child_algorithm("TestAlg", **{"test_val": 5})
         alg_manager_mock.create.assert_called_once_with("TestAlg")
+
+
+class SANSEventSliceParsing(unittest.TestCase):
+    def test_simple_range(self):
+        input_range = "10-20"
+        expected = [[10.0, 20.0]]
+        returned = parse_event_slice_setting(input_range)
+        self.assertEqual(returned, expected)
+
+    def test_multiple_simple_ranges(self):
+        input_range = "10-20, 20-30, 40-45"
+        expected = [[10.0, 20.0], [20.0, 30.0], [40.0, 45.0]]
+        returned = parse_event_slice_setting(input_range)
+        self.assertEqual(returned, expected)
+
+    def test_unbounded_range(self):
+        input_range = "10-20 , >25"
+        expected = [[10.0, 20.0], [25.0, -1]]
+        returned = parse_event_slice_setting(input_range)
+        self.assertEqual(returned, expected)
+
+    def test_bounded_start(self):
+        input_range = "< 15, 20-21"
+        expected = [[-1, 15.0], [20.0, 21.0]]
+        returned = parse_event_slice_setting(input_range)
+        self.assertEqual(returned, expected)
+
+    def test_steps_range(self):
+        input_range = "20:2:26"
+        expected = [[20.0, 22.0], [22.0, 24.0], [24.0, 26.0]]
+        returned = parse_event_slice_setting(input_range)
+        self.assertEqual(returned, expected)
+
+    def test_comma_separated_steps(self):
+        input_range = "1,2, 3, 5, 7"
+        expected = [[1.0, 2.0], [2.0, 3.0], [3.0, 5.0], [5.0, 7.0]]
+        returned = parse_event_slice_setting(input_range)
+        self.assertEqual(returned, expected)
+
+    def test_comma_bad_input_rejected(self):
+        input_range = "1,2,a,3"
+        with self.assertRaises(ValueError):
+            parse_event_slice_setting(input_range)
+
 
 if __name__ == '__main__':
     unittest.main()
