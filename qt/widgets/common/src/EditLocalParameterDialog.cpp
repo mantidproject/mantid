@@ -37,7 +37,7 @@ EditLocalParameterDialog::EditLocalParameterDialog(
     QWidget *parent, const QString &parName, const QStringList &wsNames,
     QList<double> values, QList<bool> fixes, QStringList ties,
     QStringList constraints)
-    : QDialog(parent), m_parName(parName), m_values(values), m_fixes(fixes),
+    : MantidDialog(parent), m_parName(parName), m_values(values), m_fixes(fixes),
       m_ties(ties), m_constraints(constraints) {
   assert(values.size() == wsNames.size());
   assert(fixes.size() == wsNames.size());

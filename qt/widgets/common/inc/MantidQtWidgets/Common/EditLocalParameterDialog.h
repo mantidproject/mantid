@@ -9,6 +9,7 @@
 
 #include "DllOption.h"
 #include "MantidQtWidgets/Common/LogValueFinder.h"
+#include "MantidQtWidgets/Common/MantidDialog.h"
 #include "ui_EditLocalParameterDialog.h"
 #include <QDialog>
 #include <memory>
@@ -23,7 +24,7 @@ class FunctionMultiDomainPresenter;
  * Parameters can be set individually or all to the same value.
  * They also can be fixed and unfixed.
  */
-class EXPORT_OPT_MANTIDQT_COMMON EditLocalParameterDialog : public QDialog {
+class EXPORT_OPT_MANTIDQT_COMMON EditLocalParameterDialog : public MantidQt::API::MantidDialog {
   Q_OBJECT
 public:
   EditLocalParameterDialog(QWidget *parent, const QString &parName,
