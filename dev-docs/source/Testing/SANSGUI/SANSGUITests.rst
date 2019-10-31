@@ -20,13 +20,18 @@ Data reduction
 --------------
 
 #. Open ``Interfaces`` > ``SANS`` > ``SANS v2``
-#. Choose ``Load User File``; from the ISIS sample data in the ``loqdemo`` folder, choose ``Maskfile.txt``
-#. Choose ``Load Batch File``; from the ISIS sample data in the `loqdemo` folder, choose ``batch_mode_reduction.csv``
+#. Choose ``Load User File``; from the ISIS sample data in the ``loqdemo``
+   folder, choose ``Maskfile.txt``
+#. Choose ``Load Batch File``; from the ISIS sample data in the `loqdemo`
+   folder, choose ``batch_mode_reduction.csv``
 #. In the ``Runs`` tab:
-    - Check that the ``Insert``, ``Delete``, ``Copy``, ``Paste``, ``Cut`` and ``Erase`` icons work as expected on table rows
-    - Create multiple rows in the table with different data e.g. one row with an output name, one row without
+    - Check that the ``Insert``, ``Delete``, ``Copy``, ``Paste``, ``Cut`` and
+      ``Erase`` icons work as expected on table rows
+    - Create multiple rows in the table with different data e.g. one row with
+      an output name, one row without
     - Click the ``Export Table`` button and save the table as a csv file
-    - Click ``Load Batch file`` and select the newly saved table. All columns up to ``Output Name`` should have been saved and loaded
+    - Click ``Load Batch file`` and select the newly saved table. All columns
+      up to ``Output Name`` should have been saved and loaded
     - Re-load the original batch file
 #. In the ``Settings`` tab:
     - Go to ``Mask``
@@ -39,13 +44,16 @@ Data reduction
     - Click ``Display Mask``
     - This should give an instrument view where only angles 0-45 are unmasked
     - Change the settings back to -90 - 90 and reselect ``use mirror sector``
-    - In ``General, Scale, Event Slice, Sample`` sub-tab, set the `Reduction Mode`` to ``All``
+    - In ``General, Scale, Event Slice, Sample`` sub-tab, set the
+      ``Reduction Mode`` to ``All``
 #. In the ``Runs`` tab
     - Click ``Process All``
     - After some seconds the rows should turn green
-    - In the Main window there should be a series of new workspaces; 4 group workspaces and 4 2D workspaces
+    - In the Main window there should be a series of new workspaces;
+      4 group workspaces and 4 2D workspaces
     - Change the first column of the first row to 74045; click process selected
-    - The row should turn blue; hovering over the row should give an error message
+    - The row should turn blue; hovering over the row should give an
+      error message
     - Change the first column of the first row back to 74044
     - Change the ``Reduction`` button to 2D
     - Check the ``Plot Results`` box
@@ -58,13 +66,15 @@ Data reduction
     - 6 additional columns should appear in the table
     - Delete all rows and re-load the batch file as previously
 #. In the ``Settings`` tab
-    - In the ``General, Scale, Event Slice, Sample`` sub-tab, set ``Reduction Mode`` to ``Merged``
+    - In the ``General, Scale, Event Slice, Sample`` sub-tab, set
+      ``Reduction Mode`` to ``Merged``
     - Return to the ``Runs`` tab
     - Ensure ``Plot results`` is checked
     - Click ``Process All``
     - This should result in a plot with three lines
 #. In the ``Beam centre`` tab
-    - Both the ``Update main-detector`` and ``Update Hab`` checkboxes should be checked and enabled
+    - Both the ``Update main-detector`` and ``Update Hab`` checkboxes
+      should be checked and enabled
     - Click Run
     - A plot should appear after some seconds, with 4 lines
     - The 4 lines should gradually get closer together
@@ -73,7 +83,8 @@ Data reduction
         - Enter ``74044, 74019`` in the top line
         - Click ``Add`` at the side
         - Enter ``LOQ74044-add`` as Output file
-        - Click ``Select Save Directory`` and select a directory in your managed paths
+        - Click ``Select Save Directory`` and select a directory in your
+          managed paths
         - Click ``Sum`` at the bottom
         - Go back to the ``Runs`` tab
         - Remove all rows
@@ -88,5 +99,7 @@ Data reduction
     - Check the ``Apply Mask`` boxes and click the buttons again
     - They should produce new, slightly different plots
 #. In the ``Runs`` tab
-    - Check that all table, process, and load buttons have clear tooltips by hovering over them
-    - Check that ``Zero Error Free`, ``Use Optimizations``, and ``Plot Results`` have clear tooltips
+    - Check that all table, process, and load buttons have clear tooltips by
+      hovering over them
+    - Check that ``Zero Error Free`, ``Use Optimizations``, and
+      ``Plot Results`` have clear tooltips
