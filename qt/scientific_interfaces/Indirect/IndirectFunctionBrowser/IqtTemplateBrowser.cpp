@@ -265,8 +265,7 @@ void IqtTemplateBrowser::enumChanged(QtProperty *prop) {
   }
 }
 
-void IqtTemplateBrowser::globalChanged(QtProperty *prop, const QString &name,
-                                       bool on) {}
+void IqtTemplateBrowser::globalChanged(QtProperty *, const QString &, bool) {}
 
 void IqtTemplateBrowser::parameterChanged(QtProperty *prop) {
   auto isGlobal = m_parameterManager->isGlobal(prop);

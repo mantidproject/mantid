@@ -41,15 +41,6 @@ IFunction_sptr getFirstInCategory(IFunction_sptr function,
   return nullptr;
 }
 
-boost::optional<std::size_t> getFirstParameter(IFunction_sptr function,
-                                               const std::string &shortName) {
-  for (auto i = 0u; i < function->nParams(); ++i) {
-    if (boost::algorithm::ends_with(function->parameterName(i), shortName))
-      return i;
-  }
-  return boost::none;
-}
-
 std::vector<std::string> getParameters(IFunction_sptr function,
                                        const std::string &shortParameterName) {
   std::vector<std::string> parameters;
@@ -59,21 +50,6 @@ std::vector<std::string> getParameters(IFunction_sptr function,
       parameters.push_back(longName);
   }
   return parameters;
-}
-
-bool containsNOrMore(IFunction_sptr function,
-                     const std::vector<std::string> &values, std::size_t n) {
-  const auto names = function->getParameterNames();
-  if (names.empty())
-    return values.empty() || n == 0;
-
-  std::size_t count = 0;
-  std::size_t index = 0;
-  do {
-    for (const auto &value : values)
-      count += boost::algorithm::ends_with(names[index], value) ? 1 : 0;
-  } while (count < n && ++index < names.size());
-  return count >= n;
 }
 
 bool constrainIntensities(IFunction_sptr function) {
