@@ -22,7 +22,7 @@ RecoveryFailureView::RecoveryFailureView(QWidget *parent,
   // Set the table information
   addDataToTable();
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      Mantid::Kernel::FeatureType::Interface, {"ProjectRecoveryFailureWindow"},
+      Mantid::Kernel::FeatureType::Interface, "ProjectRecoveryFailureWindow",
       true);
 }
 

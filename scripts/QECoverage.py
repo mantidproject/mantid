@@ -214,7 +214,7 @@ class QECoverageGUI(QtWidgets.QWidget):
         self.qt_url = 'qthelp://org.sphinx.mantidproject.' + version + '/doc/interfaces/QE Coverage.html'
         self.external_url = 'http://docs.mantidproject.org/nightly/interfaces/QE Coverage.html'
         #register startup
-        mantid.UsageService.registerFeatureUsage(mantid.FeatureType.Interface,["QECoverage"],False)
+        mantid.UsageService.registerFeatureUsage(mantid.FeatureType.Interface,"QECoverage",False)
 
     def onHelp(self):
         show_interface_help(self.mantidplot_name,

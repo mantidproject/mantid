@@ -87,15 +87,15 @@ public:
     usageService.setInterval(10000);
     usageService.setEnabled(true);
     usageService.registerFeatureUsage(Mantid::Kernel::FeatureType::Algorithm,
-                                      {"MyAlg.v1"}, true);
+                                      "MyAlg.v1", true);
     usageService.registerFeatureUsage(Mantid::Kernel::FeatureType::Interface,
-                                      {"MyAlg.v1"}, true);
-    /*for (size_t i = 0; i < 10000; i++) {
+                                      "MyAlg.v1", true);
+    for (size_t i = 0; i < 10000; i++) {
       usageService.registerFeatureUsage(Mantid::Kernel::FeatureType::Algorithm,
-                                        {"MyLoopAlg.v1"}, false);
-    }*/
+                                        "MyLoopAlg.v1", false);
+    }
     usageService.registerFeatureUsage(Mantid::Kernel::FeatureType::Algorithm,
-                                      {"MyLoopAlg.v1"}, true);
+                                      "MyLoopAlg.v1", true);
     usageService.registerFeatureUsage(Mantid::Kernel::FeatureType::Algorithm,
                                       {"MyAlg.v1", "Method1"}, true);
 

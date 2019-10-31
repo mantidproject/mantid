@@ -353,7 +353,7 @@ ViewBase *MdViewerWidget::createAndSetMainViewWidget(QWidget *container,
 
   using Mantid::Kernel::UsageService;
   UsageService::Instance().registerFeatureUsage(
-      Mantid::Kernel::FeatureType::Interface, {featureName}, false);
+      Mantid::Kernel::FeatureType::Interface, featureName, false);
   return view;
 }
 

@@ -211,7 +211,7 @@ class CWSCDReductionControl(object):
         self._curr_2theta_fwhm_func = None
 
         # register startup
-        mantid.UsageService.registerFeatureUsage(mantid.FeatureType.Interface, ["4-Circle Reduction"], False)
+        mantid.UsageService.registerFeatureUsage(mantid.FeatureType.Interface, "4-Circle Reduction", False)
 
         # debug mode
         self._debugPrintMode = True

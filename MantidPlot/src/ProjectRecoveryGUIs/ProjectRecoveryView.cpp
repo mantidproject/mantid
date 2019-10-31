@@ -21,7 +21,7 @@ ProjectRecoveryView::ProjectRecoveryView(QWidget *parent,
   // Set the table information
   addDataToTable();
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      Mantid::Kernel::FeatureType::Interface, {"ProjectRecoveryWindow"}, true);
+      Mantid::Kernel::FeatureType::Interface, "ProjectRecoveryWindow", true);
 }
 
 void ProjectRecoveryView::addDataToTable() {

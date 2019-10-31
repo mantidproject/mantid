@@ -91,7 +91,7 @@ void TrackedAction::trackActivation(const bool checked) {
   UNUSED_ARG(checked);
   if (m_isTracking) {
     // do tracking
-    registerUsage({getTrackingName()});
+    registerUsage(getTrackingName());
   }
 }
 
@@ -102,5 +102,6 @@ void TrackedAction::registerUsage(const std::vector<std::string> &name) {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
       Mantid::Kernel::FeatureType::Feature, name, false);
 }
+
 } // namespace MantidWidgets
 } // namespace MantidQt

@@ -413,7 +413,7 @@ class BaseReductionScripter(object):
             config = ConfigService.Instance()
             #register startup
             if HAS_MANTID:
-                UsageService.registerFeatureUsage(FeatureType.Interface, ["Reduction_gui:{0:.5}-{1:.10}".format(facility, name)], False)
+                UsageService.registerFeatureUsage(FeatureType.Interface, "Reduction_gui:{0:.5}-{1:.10}".format(facility, name), False)
             try:
                 head, _tail = os.path.split(config.getUserFilename())
                 if os.path.isdir(head):

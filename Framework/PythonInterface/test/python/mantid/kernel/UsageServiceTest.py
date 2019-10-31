@@ -43,9 +43,10 @@ class UsageServiceTest(unittest.TestCase):
     def test_registerFeatureUsage(self):
         UsageService.setEnabled(False)
         #this will do nothing as it is disabled
-        UsageService.registerFeatureUsage(FeatureType.Algorithm, ["testv1"], True)
+        UsageService.registerFeatureUsage(FeatureType.Algorithm, "testv1", True)
         UsageService.setEnabled(True)
-        UsageService.registerFeatureUsage(FeatureType.Algorithm, ["testv1"], True)
+        UsageService.registerFeatureUsage(FeatureType.Algorithm, "testv1", True)
+        UsageService.registerFeatureUsage(FeatureType.Algorithm, ["testv1","level2feature"], True)
 
 
     def test_Flush(self):

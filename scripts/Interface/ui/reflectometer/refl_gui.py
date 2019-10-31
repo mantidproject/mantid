@@ -144,7 +144,7 @@ We recommend you use ISIS Reflectometry instead, If this is not possible contact
 
         del settings
         # register startup
-        UsageService.registerFeatureUsage(FeatureType.Interface, ["ISIS Reflectomety"], False)
+        UsageService.registerFeatureUsage(FeatureType.Interface, "ISIS Reflectomety", False)
 
     def __del__(self):
         """

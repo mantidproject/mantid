@@ -41,19 +41,18 @@ enum class FeatureType { Algorithm, Interface, Feature };
 class FeatureUsage {
 public:
   /// Constructor
-  FeatureUsage(const FeatureType &type, const std::vector<std::string> &name,
+  FeatureUsage(const FeatureType &type, const std::string &name,
                const bool internal);
   bool operator<(const FeatureUsage &r) const;
 
   ::Json::Value asJson() const;
 
   FeatureType type;
-  std::vector<std::string> name;
+  std::string name;
   bool internal;
 
 protected:
   std::string featureTypeToString() const;
-  std::string nameToString() const;
 };
 
 class MANTID_KERNEL_DLL UsageServiceImpl {
@@ -66,12 +65,21 @@ public:
   void setInterval(const uint32_t seconds = 60);
   /// Registers the Startup of Mantid
   void registerStartup();
-  /// Registers the use of a feature in mantid. Just support a version using
-  /// vector for now rather than additionally providing a version that takes a
-  /// single string. This will prevent any old style usage with name="a->b"
-  /// sneaking through
+  /// registerFeatureUsage registers the use of a feature in mantid.
+  /// Provide three overloads:
+  /// Version that takes vector of strings if want to register
+  /// usage of a particular class/method combination
   void registerFeatureUsage(const FeatureType &type,
-                            const std::vector<std::string> &name,
+                            std::vector<std::string> name, const bool internal);
+  /// Version that takes a string if just registering usage of a class
+  void registerFeatureUsage(const FeatureType &type, std::string name,
+                            const bool internal);
+  /// Version that accepts an initializer list. This is required because
+  /// {"abc","def"} is both a valid constructor for std::string and an
+  /// initializer list so without this it's not clear which overload is being
+  /// called
+  void registerFeatureUsage(const FeatureType &type,
+                            std::initializer_list<const char *> name,
                             const bool internal);
 
   /// Returns true if usage reporting is enabled

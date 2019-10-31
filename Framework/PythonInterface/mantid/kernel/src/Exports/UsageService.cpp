@@ -47,8 +47,12 @@ void registerFeatureUsage(UsageServiceImpl &self,
                           const Mantid::Kernel::FeatureType &type,
                           const object &paths, const bool internal) {
   ExtractStdString singleString(paths);
-  self.registerFeatureUsage(type, PySequenceToVector<std::string>(paths)(),
-                            internal);
+  if (singleString.check()) {
+    self.registerFeatureUsage(type, singleString(), internal);
+  } else {
+    self.registerFeatureUsage(type, PySequenceToVector<std::string>(paths)(),
+                              internal);
+  }
 }
 
 } // namespace

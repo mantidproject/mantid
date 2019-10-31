@@ -16,6 +16,10 @@
 
 #include <Poco/ActiveResult.h>
 #include <Poco/String.h>
+#include <algorithm>
+#include <boost/algorithm/string/join.hpp>
+#include <boost/algorithm/string/trim.hpp>
+#include <boost/bind.hpp>
 
 #include <json/json.h>
 
@@ -32,8 +36,7 @@ Kernel::Logger g_log("UsageServiceImpl");
 //----------------------------------------------------------------------------------------------
 /** FeatureUsage
  */
-FeatureUsage::FeatureUsage(const FeatureType &type,
-                           const std::vector<std::string> &name,
+FeatureUsage::FeatureUsage(const FeatureType &type, const std::string &name,
                            const bool internal)
     : type(type), name(name), internal(internal) {}
 
@@ -71,26 +74,11 @@ std::string FeatureUsage::featureTypeToString() const {
   return "Unknown";
 }
 
-/// Convert the stored vector of strings to a string eg Class1->Method1
-std::string FeatureUsage::nameToString() const {
-
-  std::string result = "";
-
-  for (std::string i : name) {
-    result = result + Poco::trim(i) + SEPARATOR;
-  }
-  size_t returnLength = result.length() - std::string(SEPARATOR).length();
-  if (returnLength > 0) {
-    result = result.substr(0, returnLength);
-  }
-  return result;
-}
-
 ::Json::Value FeatureUsage::asJson() const {
   ::Json::Value retVal;
 
   retVal["type"] = featureTypeToString();
-  retVal["name"] = nameToString();
+  retVal["name"] = name;
   retVal["internal"] = internal;
 
   return retVal;
@@ -141,13 +129,39 @@ void UsageServiceImpl::registerStartup() {
 
 /** registerFeatureUsage
  */
-void UsageServiceImpl::registerFeatureUsage(
-    const FeatureType &type, const std::vector<std::string> &name,
-    const bool internal) {
+void UsageServiceImpl::registerFeatureUsage(const FeatureType &type,
+                                            std::vector<std::string> name,
+                                            const bool internal) {
   if (isEnabled()) {
     std::lock_guard<std::mutex> _lock(m_mutex);
+
+    using boost::algorithm::trim;
+    std::for_each(std::begin(name), std::end(name),
+                  boost::bind(&trim<std::string>, _1, std::locale()));
+
+    using boost::algorithm::join;
+    std::string strName = join(name, SEPARATOR);
+
+    m_FeatureQueue.push(FeatureUsage(type, strName, internal));
+  }
+}
+
+void UsageServiceImpl::registerFeatureUsage(const FeatureType &type,
+                                            std::string name,
+                                            const bool internal) {
+  if (isEnabled()) {
+    std::lock_guard<std::mutex> _lock(m_mutex);
+
+    boost::algorithm::trim(name);
     m_FeatureQueue.push(FeatureUsage(type, name, internal));
   }
+}
+
+void UsageServiceImpl::registerFeatureUsage(
+    const FeatureType &type, std::initializer_list<const char *> name,
+    const bool internal) {
+  registerFeatureUsage(type, std::vector<std::string>(name.begin(), name.end()),
+                       internal);
 }
 
 bool UsageServiceImpl::isEnabled() const { return m_isEnabled; }

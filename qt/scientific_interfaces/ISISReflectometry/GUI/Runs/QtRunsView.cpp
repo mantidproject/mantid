@@ -238,7 +238,8 @@ This slot notifies the presenter that the "search" button has been pressed
 */
 void QtRunsView::on_actionSearch_triggered() {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "ISIS Reflectometry->RunsTab->Search", false);
+      Mantid::Kernel::FeatureType::Feature,
+      {"ISIS Reflectometry", "RunsTab", "Search"}, false);
   m_notifyee->notifySearch();
 }
 
@@ -248,7 +249,8 @@ This slot conducts a search operation before notifying the presenter that the
 */
 void QtRunsView::on_actionAutoreduce_triggered() {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "ISIS Reflectometry->RunsTab->StartAutoprocessing", false);
+      Mantid::Kernel::FeatureType::Feature,
+      {"ISIS Reflectometry", "RunsTab", "StartAutoprocessing"}, false);
   m_notifyee->notifyResumeAutoreductionRequested();
 }
 
@@ -258,7 +260,8 @@ This slot conducts a search operation before notifying the presenter that the
 */
 void QtRunsView::on_actionAutoreducePause_triggered() {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "ISIS Reflectometry->RunsTab->PauseAutoprocessing", false);
+      Mantid::Kernel::FeatureType::Feature,
+      {"ISIS Reflectometry", "RunsTab", "PauseAutoprocessing"}, false);
   m_notifyee->notifyPauseAutoreductionRequested();
 }
 
@@ -267,7 +270,8 @@ This slot notifies the presenter that the "transfer" button has been pressed
 */
 void QtRunsView::on_actionTransfer_triggered() {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "ISIS Reflectometry->RunsTab->Transfer", false);
+      Mantid::Kernel::FeatureType::Feature,
+      {"ISIS Reflectometry", "RunsTab", "Transfer"}, false);
   m_notifyee->notifyTransfer();
 }
 
@@ -277,7 +281,8 @@ This slot is triggered when the user right clicks on the search results table
 */
 void QtRunsView::onShowSearchContextMenuRequested(const QPoint &pos) {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "ISIS Reflectometry->RunsTab->ShowSearchContextMenu", false);
+      Mantid::Kernel::FeatureType::Feature,
+      {"ISIS Reflectometry", "RunsTab", "ShowSearchContextMenu"}, false);
   if (!m_ui.tableSearchResults->indexAt(pos).isValid())
     return;
 
@@ -294,7 +299,8 @@ void QtRunsView::onShowSearchContextMenuRequested(const QPoint &pos) {
 void QtRunsView::onInstrumentChanged(int index) {
   UNUSED_ARG(index);
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "ISIS Reflectometry->RunsTab->InstrumentChanged", false);
+      Mantid::Kernel::FeatureType::Feature,
+      {"ISIS Reflectometry", "RunsTab", "InstrumentChanged"}, false);
   m_ui.textSearch->clear();
   m_notifyee->notifyChangeInstrumentRequested();
 }
@@ -368,13 +374,15 @@ int QtRunsView::getLiveDataUpdateInterval() const {
 
 void QtRunsView::on_buttonMonitor_clicked() {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "ISIS Reflectometry->RunsTab->StartMonitor", false);
+      Mantid::Kernel::FeatureType::Feature,
+      {"ISIS Reflectometry", "RunsTab", "StartMonitor"}, false);
   startMonitor();
 }
 
 void QtRunsView::on_buttonStopMonitor_clicked() {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "ISIS Reflectometry->RunsTab->StopMonitor", false);
+      Mantid::Kernel::FeatureType::Feature,
+      {"ISIS Reflectometry", "RunsTab", "StopMonitor"}, false);
   stopMonitor();
 }
 
