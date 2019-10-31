@@ -34,6 +34,7 @@ Improvements
 
 - Improve the handling of :ref:`LoadPSIMuonBin<algm-LoadPSIMuonBin-v1>` where a poor date is provided.
 - In TF asymmetry mode now rescales the fit to match the rescaled data.
+- Adding a pair by right clicking now allows a name to be specified.
 
 Interfaces
 ----------
