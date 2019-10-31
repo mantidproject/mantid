@@ -399,10 +399,10 @@ void SequentialFitDialog::getFitResults() {
     // first column contains ws names
     auto firstColumn = ws->getColumn(0);
     for (size_t i = 0; i < ws->rowCount(); ++i) {
-			if (firstColumn->cell<std::string>(i) == m_fitBrowser->workspaceName()) {
-				rowNo = i;
-				break;
-			}
+      if (firstColumn->cell<std::string>(i) == m_fitBrowser->workspaceName()) {
+        rowNo = i;
+        break;
+      }
     }
   } else {
     // first column contains log names or axis-1
