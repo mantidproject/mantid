@@ -25,6 +25,7 @@ from mantid.py3compat import setswitchinterval
 from mantid.utils import is_required_version
 from workbench.app import MAIN_WINDOW_OBJECT_NAME, MAIN_WINDOW_TITLE
 from workbench.plugins.exception_handler import exception_logger
+from workbench.utils.windowfinder import find_window
 from workbench.widgets.settings.presenter import SettingsPresenter
 
 # -----------------------------------------------------------------------------
@@ -56,6 +57,7 @@ from mantidqt.utils.qt import (add_actions, create_action, plugins,
                                widget_updates_disabled)  # noqa
 from mantidqt.project.project import Project  # noqa
 from mantidqt.usersubwindowfactory import UserSubWindowFactory  # noqa
+from mantidqt.usersubwindow import UserSubWindow  # noqa
 
 # Pre-application setup
 plugins.setup_library_paths()
@@ -370,9 +372,17 @@ class MainWindow(QMainWindow):
         self.interface_executor.execute(open(filename).read(), filename)
 
     def launch_custom_cpp_gui(self, interface_name):
-        interface = self.interface_manager.createSubWindow(interface_name)
-        interface.setAttribute(Qt.WA_DeleteOnClose, True)
-        interface.show()
+        """Create a new interface window if one does not already exist,
+        else show existing window"""
+        object_name = 'custom-cpp-interface-' + interface_name
+        window = find_window(object_name, UserSubWindow)
+        if window is None:
+            interface = self.interface_manager.createSubWindow(interface_name)
+            interface.setObjectName(object_name)
+            interface.setAttribute(Qt.WA_DeleteOnClose, True)
+            interface.show()
+        else:
+            window.raise_()
 
     def populate_interfaces_menu(self):
         """Populate then Interfaces menu with all Python and C++ interfaces"""

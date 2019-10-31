@@ -47,6 +47,7 @@ Improvements
 - You can now zoom in/out on figures by scrolling and pan figures using the middle mouse button.
 - The keyboard shortcut Ctrl+D now aborts a running script.
 - Plot windows now stay on top of Workbench's main window, so you can easily drag and drop workspaces onto existing figures.
+- Opening more than one instance of an interface is now disallowed, as was the case in MantidPlot.
 
 Bugfixes
 ########

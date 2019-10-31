@@ -25,6 +25,22 @@ def get_main_window_widget():
             return widget
 
 
+def find_window(object_name, cls=None):
+    """
+    Finds the currently open window
+    :param list: object name as a unicode list
+    :param cls: class type
+    :return QWidget: window or None
+    """
+    windows = QApplication.topLevelWidgets()
+    for window in windows:
+        if cls is not None:
+            if window.objectName() == object_name and isinstance(window, cls):
+                return window
+        elif window.objectName() == object_name:
+            return window
+
+
 def find_plot_windows():
     """
     Finds the currently open plot windows and returns them in a dict
