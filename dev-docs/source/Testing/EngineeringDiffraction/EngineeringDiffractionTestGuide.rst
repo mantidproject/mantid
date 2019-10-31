@@ -48,9 +48,9 @@ The following files can be used for the calibration run.
 Once the calibration has completed if the calibration was successful plotting the spectra of the
 newly created workspaces will produce images similar to below:
 
-.. image:: ../images/EnggDiffExpectedVanCurve.png
+.. image:: ../../images/EnggDiffExpectedVanCurve.png
     :width: 300px
-.. image:: ../images/EnggDiffExpectedLinear.png
+.. image:: ../../images/EnggDiffExpectedLinear.png
     :width: 300px
 
 If the plot is incorrect check you haven't swapped the run numbers and they are both correct. 
@@ -94,7 +94,7 @@ The saved focused .nxs filename will be of the format
 
 Plotting the focused workspace should look similar to the image below:
 
-.. image:: ../images/EnggDiffExampleFocusOutput.png
+.. image:: ../../images/EnggDiffExampleFocusOutput.png
     :width: 300px
     
 Negative Testing Ideas
@@ -136,7 +136,7 @@ After the fitting has run if it managed to fit any peaks it should look similar 
 if there are no peaks and the display looks "corrupted" check the calibration was completed
 correctly:
 
-.. image:: ../images/EnggDiffExampleFitOutput.png
+.. image:: ../../images/EnggDiffExampleFitOutput.png
     :width: 500px
 
 The banks available to plot are selected with the `Plot Bank` selector and then fit is clicked.
@@ -170,7 +170,7 @@ NeXuS file (obtained from
 
 After a fit has run, the plot should look something like below:
 
-.. image:: ../images/EnggDiffExampleGSASOutput.png
+.. image:: ../../images/EnggDiffExampleGSASOutput.png
 
 If that fit output (the red line) is flat, or just follows the
 background of the data, the fit was not unsuccessful. Make sure you're
@@ -219,5 +219,3 @@ Settings
     Allows the user to specify the output directory of their own focused runs
     it defaults to `C:\\EnginX_Mantid\\Focus` or `~/EnginX_Mantid/Focus` but can be changed to 
     suit the users needs.
-
-.. categories:: Interfaces Diffraction
