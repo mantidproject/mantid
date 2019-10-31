@@ -11,11 +11,10 @@ Error Reporter test
 
 *Preparation*
 
--  Ensure that `Report usage data` is checked in the First Time Setup screen
--  Files ``SANS2D00005512.nxs``; availabe in ``/Testing/Data/SystemTest/SANS2D``, get this by building the `SystemTestData` target. It should be in in ``ExternalData/Testing/Data/SystemTest/SANS2D/``
--  Make sure the location of these files is included in your search
-   directories. Full instructions :ref:`are available online <mantid:getting started>`.
-- These tests should be run with someone who has access to the error reports database. Please contact Keith Butler when you are going to run these tests.
+- Ensure that `Report usage data` is checked in the First Time Setup screen
+- Below you will be asked to produce a hard crash (by running the `Segfault` Algorithm) or a soft crash (bring up an error report pop-up without also closing Mantid, by Loading ``Training_Exercise3a_SNS.nxs`` available from the `Training Course Data <https://sourceforge.net/projects/mantid/files/Sample%20Data/TrainingCourseData.zip/download>`__ and running the `NormaliseToMonitor` Algorithm. `If one or both of these methods to crash Mantid no longer works, then ask other developers for a suitable method and update these instructions.
+- Make sure the location of this file is included in your search directories. Full instructions :ref:`are available online <mantid:getting started>`.
+- These tests should be run with someone who has access to the error reports database. Please contact Daniel Murphy when you are going to run these tests.
 
 **Time required 10 - 20  minutes**
 
@@ -45,9 +44,8 @@ Error Reporter test
 
 3. Open MantidPlot
 
-- Load the file `SANS2D00005512.nxs`
-- Click on the new workspace group, this should give a list of workspaces
-- Right-click one of the workspaces and select `Sample Logs` 
+- Load the file `Training_Exercise3a_SNS.nxs`
+- Run the `NormaliseToMonitor` algorithm
 - This should cause an error box saying Mantid has thrown an unexpected exception
 - Make sure the hyperlink to the privacy policy works
 - Enter some text in the `Name` box; make sure the `Share non-identifiable information` button gets greyed out
@@ -61,9 +59,8 @@ Error Reporter test
 
 4. Open MantidPlot
 
-- Load the file `SANS2D00005512.nxs`
-- Click on the new workspace group, this should give a list of workspaces
-- Right-click one of the workspaces and select `Sample Logs` 
+- Load the file `Training_Exercise3a_SNS.nxs`
+- Run the `NormaliseToMonitor` algorithm
 - This should cause an error box saying Mantid has thrown an unexpected exception
 - Make sure the `Continue` radio button is checked
 - Click the `Share non-identifiable information` box
@@ -74,9 +71,8 @@ Error Reporter test
 
 5. Open MantidPlot
 
-- Load the file `SANS2D00005512.nxs`
-- Click on the new workspace group, this should give a list of workspaces
-- Right-click one of the workspaces and select `Sample Logs` 
+- Load the file `Training_Exercise3a_SNS.nxs`
+- Run the `NormaliseToMonitor` algorithm
 - This should cause an error box saying Mantid has thrown an unexpected exception
 - Make sure the hyperlink to the privacy policy works
 - Enter some text in the `Name` box; make sure the `Share non-identifiable information` button gets greyed out
@@ -90,9 +86,8 @@ Error Reporter test
 
 6. Open MantidPlot
 
-- Load the file `SANS2D00005512.nxs`
-- Click on the new workspace group, this should give a list of workspaces
-- Right-click one of the workspaces and select `Sample Logs` 
+- Load the file `Training_Exercise3a_SNS.nxs`
+- Run the `NormaliseToMonitor` algorithm
 - This should cause an error box saying Mantid has thrown an unexpected exception
 - Make sure the hyperlink to the privacy policy works
 - Enter some text in the `Name` box; make sure the `Share non-identifiable information` button gets greyed out
