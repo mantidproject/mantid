@@ -118,14 +118,7 @@ void FunctionMultiDomainPresenter::updateParameters(const IFunction &fun) {
 void FunctionMultiDomainPresenter::updateMultiDatasetParameters(
     const IFunction &fun) {
   m_model->updateMultiDatasetParameters(fun);
-  auto currentFun = m_model->getCurrentFunction();
-  const auto paramNames = currentFun->getParameterNames();
-  for (const auto &parameter : paramNames) {
-    const QString qName = QString::fromStdString(parameter);
-    m_view->setParameter(qName, currentFun->getParameter(parameter));
-    const size_t index = currentFun->parameterIndex(parameter);
-    m_view->setParameterError(qName, currentFun->getError(index));
-  }
+  updateViewFromModel();
 }
 
 void FunctionMultiDomainPresenter::clearErrors() { m_view->clearErrors(); }
@@ -159,18 +152,7 @@ void FunctionMultiDomainPresenter::setCurrentDataset(int index) {
   if (!m_model->hasFunction())
     return;
   m_model->setCurrentDomainIndex(index);
-  for (auto const name : m_model->getParameterNames()) {
-    auto const value = m_model->getParameter(name);
-    m_view->setParameter(name, value);
-    m_view->setParameterError(name, m_model->getParameterError(name));
-    if (m_model->isLocalParameterFixed(name, index)) {
-      m_view->setParameterTie(name, QString::number(value));
-    } else {
-      m_view->setParameterTie(name, m_model->getLocalParameterTie(name, index));
-    }
-    m_view->setParameterConstraint(
-        name, m_model->getLocalParameterConstraint(name, index));
-  }
+  updateViewFromModel();
 }
 
 void FunctionMultiDomainPresenter::removeDatasets(QList<int> indices) {
@@ -409,6 +391,22 @@ void FunctionMultiDomainPresenter::editLocalParameterFinish(int result) {
     }
   }
   m_editLocalParameterDialog = nullptr;
+}
+
+void FunctionMultiDomainPresenter::updateViewFromModel(){
+  const auto index = m_model->currentDomainIndex();
+  for (auto const name : m_model->getParameterNames()) {
+    auto const value = m_model->getParameter(name);
+    m_view->setParameter(name, value);
+    m_view->setParameterError(name, m_model->getParameterError(name));
+    if (m_model->isLocalParameterFixed(name, index)) {
+      m_view->setParameterTie(name, QString::number(value));
+    } else {
+      m_view->setParameterTie(name, m_model->getLocalParameterTie(name, index));
+    }
+    m_view->setParameterConstraint(
+        name, m_model->getLocalParameterConstraint(name, index));
+  }
 }
 
 } // namespace MantidWidgets

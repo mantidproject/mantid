@@ -50,6 +50,7 @@ public:
   void updateMultiDatasetParameters(const ITableWorkspace &paramTable);
   void updateParameters(const IFunction &fun);
   void setCurrentDataset(int i);
+  int getCurrentDataset();
   void setDatasetNames(const QStringList &names);
   void setViewParameterDescriptions();
   void setErrorsEnabled(bool enabled);

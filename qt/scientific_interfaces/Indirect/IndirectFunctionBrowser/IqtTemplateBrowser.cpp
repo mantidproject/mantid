@@ -297,6 +297,10 @@ void IqtTemplateBrowser::setCurrentDataset(int i) {
   m_presenter.setCurrentDataset(i);
 }
 
+int IqtTemplateBrowser::getCurrentDataset() {
+  return m_presenter.getCurrentDataset();
+}
+
 void IqtTemplateBrowser::updateParameterNames(
     const QMap<int, QString> &parameterNames) {
   m_actualParameterNames.clear();

@@ -61,6 +61,7 @@ public:
   void updateMultiDatasetParameters(const ITableWorkspace &paramTable) override;
   void updateParameters(const IFunction &fun) override;
   void setCurrentDataset(int i) override;
+  int getCurrentDataset() override;
   void updateParameterNames(const QMap<int, QString> &parameterNames) override;
   void updateParameterDescriptions(
       const QMap<int, std::string> &parameterNames); // override;
