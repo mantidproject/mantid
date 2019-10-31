@@ -660,7 +660,7 @@ class MantidAxes(Axes):
             # Therefore we need to autoscale regardless of autoscale_on_update.
             if self.lines:
                 # Otherwise set autoscale to autoscale_on_update.
-                self.set_autoscaley_on(autoscale_on_update)
+                self.set_autoscaley_on(autoscale)
 
             with autoscale_on_update(self, autoscale):
                 artist = self.track_workspace_artist(workspace,
@@ -778,7 +778,7 @@ class MantidAxes(Axes):
             is_normalized, kwargs = get_normalize_by_bin_width(workspace, self, **kwargs)
 
             if self.lines:
-                self.set_autoscaley_on(autoscale_on_update)
+                self.set_autoscaley_on(autoscale)
 
             with autoscale_on_update(self, autoscale):
                 artist = self.track_workspace_artist(workspace,
