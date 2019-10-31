@@ -70,7 +70,6 @@ class LoadUtilsTest(unittest.TestCase):
         for out, arg in iteritems(tests):
             self.assertEqual(lutils.hyphenise(arg), out)
 
-
     def test_merge_workspaces(self):
         expected_output, workspaces = [], []
         detectors = range(1, 5)
@@ -87,7 +86,6 @@ class LoadUtilsTest(unittest.TestCase):
     def test_create_merged_workspace(self):
         workspace_list = []
         num_workspaces = 5
-        spectra_to_test = 2
         workspace_names = []
         num_bins = 100
         X_data = np.linspace(0, 400, num_bins)
@@ -113,9 +111,10 @@ class LoadUtilsTest(unittest.TestCase):
         self.assertEqual(merged_ws.getNumberHistograms(), num_workspaces)
         self.assertEqual(merged_ws.blocksize(), num_bins)
         # check that data has been copied over correctly into the new merged workspace
-        self.assertTrue(np.array_equal(merged_ws.readX(spectra_to_test), X_data))
-        self.assertTrue(np.array_equal(merged_ws.readY(spectra_to_test), Yfunc(X_data, spectra_to_test)))
-        self.assertTrue(np.array_equal(merged_ws.readE(spectra_to_test), Efunc(X_data, spectra_to_test)))
+        for i in range(0, num_workspaces):
+            self.assertTrue(np.array_equal(merged_ws.readX(i), X_data))
+            self.assertTrue(np.array_equal(merged_ws.readY(i), Yfunc(X_data, i)))
+            self.assertTrue(np.array_equal(merged_ws.readE(i), Efunc(X_data, i)))
 
     def test_flatten_run_data(self):
         test_workspaces = [mantid.CreateSampleWorkspace(OutputWorkspace=name) for name in self.test_ws_names]

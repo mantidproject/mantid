@@ -144,6 +144,8 @@ def create_merged_workspace(workspace_list):
             merged_ws.setX(i, X_padded)
             merged_ws.setY(i, Y_padded)
             merged_ws.setE(i, E_padded)
+
+            # remove workspace from ADS
             mantid.AnalysisDataService.remove(ws.getName())
 
         return merged_ws
