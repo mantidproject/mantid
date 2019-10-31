@@ -50,7 +50,7 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
         self.handle_loaded_time_zero_checkState_change()
         self.handle_loaded_first_good_data_checkState_change()
         self.handle_loaded_last_good_data_checkState_change()
-        #self.handle_user_selects_dead_time_from_data()
+        self.handle_user_selects_dead_time_from_data()
 
     def show(self):
         self._view.show()

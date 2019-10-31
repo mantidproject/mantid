@@ -132,6 +132,7 @@ class InstrumentWidgetModel(object):
             self._context.gui_context.update_and_send_signal(DeadTimeTable=None)
             return
         dtc = api.AnalysisDataService.retrieve(str(name))
+        self._context.gui_context.update_and_send_non_calculation_signal(DeadTimeSource='FromADS')
         self._context.gui_context.update_and_send_signal(DeadTimeTable=dtc)
 
     def validate_variable_rebin_string(self, variable_rebin_string):
