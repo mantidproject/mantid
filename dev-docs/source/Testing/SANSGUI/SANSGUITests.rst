@@ -51,7 +51,8 @@ Data reduction
     - After some seconds the rows should turn green
     - In the Main window there should be a series of new workspaces;
       4 group workspaces and 4 2D workspaces
-    - Change the first column of the first row to 74045; click process selected
+    - Change the first column of the first row to 74045;
+      click ``Process Selected``
     - The row should turn blue; hovering over the row should give an
       error message
     - Change the first column of the first row back to 74044
@@ -62,8 +63,8 @@ Data reduction
     - Change ``Reduction`` back to 1D
     - Click ``Process All``
     - In the plot you should end up with multiple lines plotted
-    - Check the ``Multi-period`` box
-    - 6 additional columns should appear in the table
+    - Check the ``Multi-period`` box, 6 additional columns should appear
+      in the table
     - Delete all rows and re-load the batch file as previously
 #. In the ``Settings`` tab
     - In the ``General, Scale, Event Slice, Sample`` sub-tab, set
