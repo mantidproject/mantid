@@ -214,7 +214,7 @@ QString IndirectFitPropertyBrowser::getSingleFunctionStr() const {
   return QString::fromStdString(getSingleFunction()->asString());
 }
 
-std::string IndirectFitPropertyBrowser::minimizer(bool withProperties) const {
+std::string IndirectFitPropertyBrowser::minimizer(bool) const {
   return m_fitOptionsBrowser->getProperty("Minimizer").toStdString();
 }
 
@@ -280,7 +280,7 @@ QString IndirectFitPropertyBrowser::selectedFitType() const {
  *
  * @param convolveMembers If true, members are to be convolved.
  */
-void IndirectFitPropertyBrowser::setConvolveMembers(bool convolveMembers) {}
+void IndirectFitPropertyBrowser::setConvolveMembers(bool) {}
 
 /**
  * Clears the functions in this indirect fit property browser.
@@ -294,8 +294,7 @@ void IndirectFitPropertyBrowser::clear() {
  * Updates the plot guess feature in this indirect fit property browser.
  * @param sampleWorkspace :: The workspace loaded as sample
  */
-void IndirectFitPropertyBrowser::updatePlotGuess(
-    MatrixWorkspace_const_sptr sampleWorkspace) {}
+void IndirectFitPropertyBrowser::updatePlotGuess(MatrixWorkspace_const_sptr) {}
 
 void IndirectFitPropertyBrowser::setErrorsEnabled(bool enabled) {
   m_functionBrowser->setErrorsEnabled(enabled);
@@ -337,7 +336,7 @@ void IndirectFitPropertyBrowser::updateFunctionBrowserData(
   m_templateBrowser->setDatasetNames(datasetNames);
 }
 
-void IndirectFitPropertyBrowser::setFitEnabled(bool enable) {}
+void IndirectFitPropertyBrowser::setFitEnabled(bool) {}
 
 /**
  * Schedules a fit.

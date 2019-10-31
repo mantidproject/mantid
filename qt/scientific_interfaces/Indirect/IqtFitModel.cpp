@@ -97,17 +97,6 @@ bool constrainIntensities(IFunction_sptr function) {
   return true;
 }
 
-bool unconstrainIntensities(IFunction_sptr function) {
-  const auto index = getFirstParameter(function, "Height");
-  if (index)
-    return function->removeTie(*index);
-  return false;
-}
-
-bool hasConstrainableIntensities(IFunction_sptr function) {
-  return containsNOrMore(function, {"Height", "A0"}, 2);
-}
-
 double computeTauApproximation(MatrixWorkspace_sptr workspace) {
   const auto &x = workspace->x(0);
   const auto &y = workspace->y(0);

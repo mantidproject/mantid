@@ -23,27 +23,6 @@ using namespace Mantid::API;
 using namespace Mantid::IndirectFitDataCreationHelper;
 using namespace MantidQt::CustomInterfaces::IDA;
 
-namespace {
-
-MultiDomainFunction_sptr getFunction(bool multipleIntensities) {
-  std::string const functionString =
-      multipleIntensities
-          ? "composite=CompositeFunction,$domains=i;name=ExpDecay,Height=1,"
-            "Lifetime=1;name=ExpDecay,Height=1,"
-            "Lifetime=0.0247558;name=FlatBackground,A0=0"
-          : "composite=CompositeFunction,$domains=i;name=LinearBackground,A0=0,"
-            "A1=0,ties=(A0=0.000000,A1=0.0);"
-            "(composite=Convolution,FixResolution=true,NumDeriv=true;"
-            "name=Resolution,Workspace=Name,WorkspaceIndex=0;((composite="
-            "ProductFunction,NumDeriv=false;name=Lorentzian,Amplitude=1,"
-            "PeakCentre=0,FWHM=0.0175)))";
-  auto fun = FunctionFactory::Instance().createInitialized(
-      "composite=MultiDomainFunction;" + functionString + ";" + functionString);
-  return boost::dynamic_pointer_cast<MultiDomainFunction>(fun);
-}
-
-} // namespace
-
 class IqtFitModelTest : public CxxTest::TestSuite {
 public:
   /// WorkflowAlgorithms do not appear in the FrameworkManager without this line
