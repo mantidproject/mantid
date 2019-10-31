@@ -28,7 +28,7 @@ class FitPropertyBrowser;
     @date 4/06/2010
 */
 class EXPORT_OPT_MANTIDQT_COMMON SequentialFitDialog
-    : public MantidDialog,
+    : public MantidQt::API::MantidDialog,
       public Mantid::API::AlgorithmObserver {
   Q_OBJECT
 
