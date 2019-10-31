@@ -196,10 +196,11 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
         dead_time_data = mock.MagicMock()
         dead_time_data.toDict.return_value = {'dead-time': [0.001, 0.002, 0.003]}
         self.presenter._model.get_dead_time_table_from_data = mock.MagicMock(return_value=dead_time_data)
+        self.presenter.handle_dead_time_unselected()
         self.presenter.handle_user_selects_dead_time_from_data()
 
         self.assertEqual(self.view.dead_time_label_3.text(), 'From 0.001 to 0.003 (ave. 0.002)')
-        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, {'DeadTimeSource': 'FromFile'})
+        self.gui_variable_observer.update.assert_called_with(self.gui_context.gui_variables_notifier, {'DeadTimeSource': 'FromFile'})
 
     @mock.patch(
         'Muon.GUI.Common.home_instrument_widget.home_instrument_widget_presenter.load_utils.get_table_workspace_names_from_ADS')
