@@ -24,7 +24,8 @@ class FunctionMultiDomainPresenter;
  * Parameters can be set individually or all to the same value.
  * They also can be fixed and unfixed.
  */
-class EXPORT_OPT_MANTIDQT_COMMON EditLocalParameterDialog : public MantidQt::API::MantidDialog {
+class EXPORT_OPT_MANTIDQT_COMMON EditLocalParameterDialog
+    : public MantidQt::API::MantidDialog {
   Q_OBJECT
 public:
   EditLocalParameterDialog(QWidget *parent, const QString &parName,
