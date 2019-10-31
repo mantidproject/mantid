@@ -16,13 +16,23 @@ SANS Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+Caveats
+#######
+- Attempting to load or process data in the SANS GUI will initially inform
+  the user that their file is not found. Pressing load or process again will
+  correctly load or process data if the user directories is setup.
+
+  This is a side-effect of the SANS usability improvements, specifically the
+  one that avoids users having to re-enter their run number when the row turns
+  blue. It will be resolved for the next release.
+
 New
 ###
-- Support for shifting both monitor 4 and 5 on Zoom including a new setting in the 
-  ISIS SANS GUI. A new user file command has also been added to
+- Support for shifting both monitor 4 and 5 on Zoom including a new setting in
+  the ISIS SANS GUI. A new user file command has also been added to
   perform monitor shifts without changing the selected transmission spectrum.
-- New :ref:`HFIRSANS2Wavelength <algm-HFIRSANS2Wavelength-v1>` algorithm to "convert" CG2 event files
-  to histograms in wavelength.
+- New :ref:`HFIRSANS2Wavelength <algm-HFIRSANS2Wavelength-v1>` algorithm to
+  "convert" CG2 event files to histograms in wavelength.
 
 Improved
 ########
@@ -41,6 +51,10 @@ Improved
 
 Multiple ISIS SANS GUI usability fixes including:
 
+- Numbers do not need to be re-entered if a file is not found, additionally
+  Mantid will not attempt to find data until Load or Process is selected, so
+  users can setup their data directories beforehand. However, this
+  comes with the caveat above.
 - Clicking on a cell in the table and typing will automatically start editing
   the cell without having to double click it.
 - Sample thickness is set when a user presses load or process selected,
