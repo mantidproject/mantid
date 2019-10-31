@@ -40,7 +40,7 @@ namespace MantidWidgets {
 /// @param mantidui Its purpose is to provide the slot showSequentialPlot
 SequentialFitDialog::SequentialFitDialog(FitPropertyBrowser *fitBrowser,
                                          QObject *mantidui)
-    : QDialog(fitBrowser), m_fitBrowser(fitBrowser) {
+    : MantidDialog(fitBrowser), m_fitBrowser(fitBrowser) {
   ui.setupUi(this);
 
   connect(ui.btnAddFile, SIGNAL(clicked()), this, SLOT(addFile()));
@@ -399,9 +399,10 @@ void SequentialFitDialog::getFitResults() {
     // first column contains ws names
     auto firstColumn = ws->getColumn(0);
     for (size_t i = 0; i < ws->rowCount(); ++i) {
-      if (firstColumn->cell<std::string>(i) == m_fitBrowser->workspaceName())
-        rowNo = i;
-      break;
+			if (firstColumn->cell<std::string>(i) == m_fitBrowser->workspaceName()) {
+				rowNo = i;
+				break;
+			}
     }
   } else {
     // first column contains log names or axis-1

@@ -13,6 +13,7 @@
 
 #include "DllOption.h"
 #include "MantidAPI/AlgorithmObserver.h"
+#include "MantidQtWidgets/Common/MantidDialog.h"
 #include "ui_SequentialFitDialog.h"
 
 namespace MantidQt {
@@ -27,7 +28,7 @@ class FitPropertyBrowser;
     @date 4/06/2010
 */
 class EXPORT_OPT_MANTIDQT_COMMON SequentialFitDialog
-    : public QDialog,
+    : public MantidDialog,
       public Mantid::API::AlgorithmObserver {
   Q_OBJECT
 
