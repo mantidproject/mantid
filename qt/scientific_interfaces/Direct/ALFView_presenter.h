@@ -7,6 +7,9 @@
 #ifndef MANTIDQT_CUSTOMINTERFACES_ALFVIEWPRESENTER_H_
 #define MANTIDQT_CUSTOMINTERFACES_ALFVIEWPRESENTER_H_
 
+#include "BaseInstrumentPresenter.h"
+#include "PlotFitAnalysisPanePresenter.h"
+
 #include "ALFView_model.h"
 #include "ALFView_view.h"
 #include "DllConfig.h"
@@ -18,25 +21,37 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_DIRECT_DLL ALFView_presenter : public QObject {
+class MANTIDQT_DIRECT_DLL ALFView_presenter : public BaseInstrumentPresenter {
   Q_OBJECT
 
 public:
-  ALFView_presenter(ALFView_view *view, ALFView_model *model);
-  ~ALFView_presenter() { delete m_loadRunObserver; };
-  void initLayout();
+  ALFView_presenter(ALFView_view *view, ALFView_model *model,
+                    PlotFitAnalysisPanePresenter *analysisPane);
+  ~ALFView_presenter() {
+    delete m_extractSingleTubeObserver;
+    delete m_averageTubeObserver;
+    delete m_analysisPane;
+    delete m_model;
+  };
 
-private slots:
-  void loadRunNumber();
+  void addInstrument() override;
+
+protected:
+  void loadSideEffects() override;
+
+  std::pair<instrumentSetUp, instrumentObserverOptions> setupALFInstrument();
 
 private:
-  void loadAndAnalysis(const std::string &run);
+  void setUpInstrumentAnalysisSplitter() override;
+
+  void extractSingleTube();
+  void averageTube();
 
   ALFView_view *m_view;
   ALFView_model *m_model;
-  int m_currentRun;
-  std::string m_currentFile;
-  VoidObserver *m_loadRunObserver;
+  PlotFitAnalysisPanePresenter *m_analysisPane;
+  VoidObserver *m_extractSingleTubeObserver;
+  VoidObserver *m_averageTubeObserver;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

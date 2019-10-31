@@ -22,12 +22,15 @@ Improvements
 - :ref:`SNAPReduce <algm-SNAPReduce-v1>` has an additional parameter ``MaxChunkSize`` for customizing the chunking behavior
 - :ref:`LorentzCorrection <algm-LorentzCorrection-v1>` has an additional option for single crystal (default) or powder operation
 - The create_total_scattering_pdf method in Polaris scripts now supports merging banks with a weighted mean.
+- The create_total_scattering_pdf method in Polaris scripts now applies the Placzek self scattering correction from :ref:CalculatePlaczekSelfScattering <algm-CalculatePlaczekSelfScattering>.
+- Cropping limits can now be set as a fraction of the data limits for ISIS Powder focusing as well as absolute values. 
 
 Bug Fixes
 #########
 
 - The values used to mask the prompt pulse on HRPD have been fixed.
 - :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles-v1>` will reload the instrument if logs are skipped
+- Fixed issue with :ref:`WANDPowderReduction <algm-WANDPowderReduction-v1>` handling of event workspaces
 - Fixed issues with OptimizeLatticeForCellType, SelectCellOfType, SelectCellWithForm and TransformHKL when using modulated structures.
 
 Engineering Diffraction
@@ -46,6 +49,7 @@ Improvements
 - :ref:`IndexPeaks <algm-IndexPeaks>` now has options to enter modulation vectors and additional information required for satellite peak indexing. As
   a result :ref:`IndexPeaksWithSatellites <algm-IndexPeaksWithSatellites>` has been deprecated and will be removed in a future release.
 - Bugs in :ref:`LoadIsawPeaks <algm-LoadIsawPeaks>` and :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` for WISH have been fixed.
+- Added IDF for DEMAND (HB3A upgrade)
 
 
 Bug Fixes

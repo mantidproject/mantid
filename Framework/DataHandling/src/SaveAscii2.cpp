@@ -4,13 +4,13 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include <fstream>
-#include <set>
 
+#include "MantidDataHandling/SaveAscii2.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidDataHandling/SaveAscii2.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -22,6 +22,8 @@
 
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
+#include <fstream>
+#include <set>
 
 namespace Mantid {
 namespace DataHandling {
@@ -34,7 +36,8 @@ using namespace API;
 /// Empty constructor
 SaveAscii2::SaveAscii2()
     : m_separatorIndex(), m_nBins(0), m_sep(), m_writeDX(false),
-      m_writeID(false), m_isCommonBins(false), m_ws() {}
+      m_writeID(false), m_isCommonBins(false), m_writeSpectrumAxisValue(false),
+      m_ws() {}
 
 /// Initialisation method.
 void SaveAscii2::init() {
@@ -71,7 +74,8 @@ void SaveAscii2::init() {
   declareProperty("WriteSpectrumID", true,
                   "If false, the spectrum No will not be written for "
                   "single-spectrum workspaces. "
-                  "It is always written for workspaces with multiple spectra.");
+                  "It is always written for workspaces with multiple spectra, "
+                  "unless spectrum axis value is written.");
 
   declareProperty("CommentIndicator", "#",
                   "Character(s) to put in front of comment lines.");
@@ -118,6 +122,9 @@ void SaveAscii2::init() {
   declareProperty(
       "RaggedWorkspace", true,
       "If true, ensure that more than one xspectra is used. "); // in testing
+
+  declareProperty("WriteSpectrumAxisValue", false,
+                  "Write the spectrum axis value if requested");
 }
 
 /**
@@ -160,6 +167,17 @@ void SaveAscii2::exec() {
   const int spec_max = getProperty("WorkspaceIndexMax");
   const bool writeHeader = getProperty("ColumnHeader");
   const bool appendToFile = getProperty("AppendToFile");
+  m_writeSpectrumAxisValue = getProperty("WriteSpectrumAxisValue");
+
+  if (m_writeSpectrumAxisValue) {
+    auto spectrumAxis = m_ws->getAxis(1);
+    if (dynamic_cast<BinEdgeAxis *>(spectrumAxis)) {
+      m_axisProxy =
+          std::make_unique<AxisHelper::BinEdgeAxisProxy>(spectrumAxis);
+    } else {
+      m_axisProxy = std::make_unique<AxisHelper::AxisProxy>(spectrumAxis);
+    }
+  }
 
   // Check whether we need to write the fourth column
   m_writeDX = getProperty("WriteXError");
@@ -290,15 +308,18 @@ void SaveAscii2::exec() {
  */
 void SaveAscii2::writeSpectrum(const int &wsIndex, std::ofstream &file) {
 
-  for (auto iter = m_metaData.begin(); iter != m_metaData.end(); ++iter) {
-    auto value = m_metaDataMap[*iter][wsIndex];
-    file << value;
-    if (iter != m_metaData.end() - 1) {
-      file << " " << m_sep << " ";
+  if (m_writeSpectrumAxisValue) {
+    file << m_axisProxy->getCentre(wsIndex) << '\n';
+  } else {
+    for (auto iter = m_metaData.begin(); iter != m_metaData.end(); ++iter) {
+      auto value = m_metaDataMap[*iter][wsIndex];
+      file << value;
+      if (iter != m_metaData.end() - 1) {
+        file << " " << m_sep << " ";
+      }
     }
+    file << '\n';
   }
-  file << '\n';
-
   auto pointDeltas = m_ws->pointStandardDeviations(0);
   auto points0 = m_ws->points(0);
   auto pointsSpec = m_ws->points(wsIndex);

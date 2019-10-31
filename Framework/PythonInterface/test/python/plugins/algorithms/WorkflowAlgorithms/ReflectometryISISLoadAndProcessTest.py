@@ -187,7 +187,8 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args = self._default_options
         args['InputRunList'] = '13460'
         args['FirstTransmissionRunList'] = '13463'
-        outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF_13460', 'TRANS_13463', 'TOF']
+        outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF_13460', 'TRANS_13463',
+                   'TRANS_LAM_13463', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(AnalysisDataService.retrieve('IvsQ_binned_13460'), history)
@@ -201,7 +202,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         # Expect IvsQ outputs from the reduction, and intermediate LAM outputs from
         # creating the stitched transmission run
         outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF_13460', 'TRANS_13463', 'TRANS_13464',
-                   'TRANS_LAM_13463', 'TRANS_LAM_13464', 'TOF']
+                   'TRANS_LAM_13463_13464', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['LoadNexus', 'LoadNexus', 'ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(AnalysisDataService.retrieve('IvsQ_binned_13460'), history)
@@ -217,7 +218,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         # Expect IvsQ outputs from the reduction, and initermediate LAM outputs from
         # creating the stitched transmission run
         outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF_13460', '13463', '13464',
-                   'TRANS_LAM_13463', 'TRANS_LAM_13464', 'TOF']
+                   'TRANS_LAM_13463_13464', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(AnalysisDataService.retrieve('IvsQ_binned_13460'), history)
@@ -233,7 +234,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         # Expect IvsQ outputs from the reduction, and initermediate LAM outputs from
         # creating the stitched transmission run
         outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF_13460', 'TRANS_13463', 'TRANS_13464',
-                   'TEST_13463', 'TEST_13464', 'TRANS_LAM_13463', 'TRANS_LAM_13464', 'TOF']
+                   'TEST_13463', 'TEST_13464', 'TRANS_LAM_13463_13464', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['LoadNexus', 'LoadNexus', 'ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(AnalysisDataService.retrieve('IvsQ_binned_13460'), history)
@@ -247,7 +248,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args['FirstTransmissionRunList'] = 'TEST_13463'
         args['SecondTransmissionRunList'] = 'TEST_13464'
         outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF_13460', 'TEST_13463', 'TEST_13464',
-                   'TRANS_LAM_13463', 'TRANS_LAM_13464', 'TOF']
+                   'TRANS_LAM_13463_13464', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(AnalysisDataService.retrieve('IvsQ_binned_13460'), history)
@@ -262,7 +263,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args['SecondTransmissionRunList'] = '13464'
         # The intermediate LAM workspaces are output by the algorithm that combines the runs
         outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF_13460', 'TRANS_13463', 'TRANS_13464',
-                   'TRANS_LAM_13463', 'TRANS_LAM_13464', 'TOF']
+                   'TRANS_LAM_13463_13464', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(AnalysisDataService.retrieve('IvsQ_binned_13460'), history)
@@ -292,7 +293,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args['InputRunList'] = '13460'
         args['FirstTransmissionRunList'] = '13463, 13464'
         outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF_13460', 'TRANS_13463', 'TRANS_13464',
-                   'TRANS_13463+13464', 'TOF']
+                   'TRANS_13463+13464', 'TRANS_LAM_13463+13464', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['MergeRuns', 'ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(AnalysisDataService.retrieve('IvsQ_binned_13460'), history)

@@ -8,10 +8,12 @@ from mantid import AnalysisDataService
 from mantid.api import AlgorithmPropertyWithValue
 from mantid.simpleapi import SumSpectra, ConvertAxesToRealSpace
 from sans.algorithm_detail.batch_execution import provide_loaded_data, create_unmanaged_algorithm, add_to_group
+from sans.algorithm_detail.crop_helper import get_component_name
+from sans.algorithm_detail.mask_sans_workspace import mask_workspace
 from sans.common.constants import EMPTY_NAME
 from sans.common.enums import IntegralEnum, DetectorType, SANSDataType
 from sans.common.file_information import get_instrument_paths_for_sans_file
-from sans.common.general_functions import create_child_algorithm, parse_diagnostic_settings
+from sans.common.general_functions import parse_diagnostic_settings
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
 from sans.gui_logic.plotting import get_plotting_module
 from sans.gui_logic.models.table_model import TableModel, TableIndexModel
@@ -83,13 +85,18 @@ def load_workspace(state):
 
 
 def crop_workspace(component, workspace):
-    crop_name = "SANSCrop"
+    crop_name = "CropToComponent"
+    component_to_crop = DetectorType.from_string(component)
+    component_to_crop = get_component_name(workspace, component_to_crop)
     crop_options = {"InputWorkspace": workspace,
                     "OutputWorkspace": EMPTY_NAME,
-                    "Component": component}
+                    "ComponentNames": component_to_crop}
+
     crop_alg = create_unmanaged_algorithm(crop_name, **crop_options)
     crop_alg.execute()
-    return crop_alg.getProperty("OutputWorkspace").value
+    output_workspace = crop_alg.getProperty("OutputWorkspace").value
+
+    return output_workspace
 
 
 def run_algorithm(input_workspace, range, integral, output_workspace, x_dim, y_dim):
@@ -133,14 +140,8 @@ def plot_graph(workspace):
 
 
 def apply_mask(state, workspace, component):
-    state_serialized = state.property_manager
-    mask_name = "SANSMaskWorkspace"
-    mask_options = {"SANSState": state_serialized,
-                    "Workspace": workspace,
-                    "Component": component}
-    mask_alg = create_child_algorithm('', mask_name, **mask_options)
-    mask_alg.execute()
-    return mask_alg.getProperty("Workspace").value
+    output_ws = mask_workspace(component_as_string=component, workspace=workspace, state=state)
+    return output_ws
 
 
 def get_detector_size_from_sans_file(state, detector):

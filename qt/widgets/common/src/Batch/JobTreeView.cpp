@@ -16,6 +16,16 @@
 #include <QKeyEvent>
 #include <QStandardItemModel>
 #include <algorithm>
+
+namespace {
+QAbstractItemView::EditTriggers getEditTriggers() {
+  auto trigger = QAbstractItemView::DoubleClicked |
+                 QAbstractItemView::EditKeyPressed |
+                 QAbstractItemView::AnyKeyPressed;
+  return trigger;
+}
+} // namespace
+
 namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {
@@ -30,6 +40,7 @@ JobTreeView::JobTreeView(QStringList const &columnHeadings,
   setModel(&m_mainModel);
   setHeaderLabels(columnHeadings);
   setSelectionMode(QAbstractItemView::ExtendedSelection);
+  setEditTriggers(getEditTriggers());
   setItemDelegate(new CellDelegate(this, *this, m_filteredModel, m_mainModel));
   setContextMenuPolicy(Qt::ActionsContextMenu);
   enableFiltering();
@@ -526,8 +537,8 @@ void JobTreeView::keyPressEvent(QKeyEvent *event) {
   case Qt::Key_I:
     if (event->modifiers() & Qt::ControlModifier) {
       appendAndEditAtChildRowRequested();
-      break;
     }
+    break;
   case Qt::Key_Return:
   case Qt::Key_Enter: {
     if (event->modifiers() & Qt::ShiftModifier) {

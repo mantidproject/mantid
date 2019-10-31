@@ -22,7 +22,7 @@ Interfaces
 ==========
 
 MantidPlot provides a range of different interfaces that are still in the process of being implemented in Workbench. As of
-Mantid 4.1, the interfaces available through Workbench are:
+Mantid 4.2, the interfaces available through Workbench are:
 
 * Diffraction
 
@@ -42,7 +42,11 @@ Mantid 4.1, the interfaces available through Workbench are:
 
 * Indirect
 
+  - Bayes
+
   - Correction
+
+  - Data Analysis
 
   - Data Reduction
 

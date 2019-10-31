@@ -32,14 +32,6 @@ class ILLIndirectReductionQENSTest(systemtesting.MantidSystemTest):
         config['default.instrument'] = self.instrument
         config['datasearch.directories'] = self.datadirs
 
-    def requiredFiles(self):
-
-        return ["136553.nxs","136554.nxs",  # calibration vanadium files
-                "136555.nxs","136556.nxs",  # alignment vanadium files
-                "136599.nxs","136600.nxs",  # background (empty can)
-                "136558.nxs","136559.nxs",  # sample
-                "140721.nxs","140722.nxs"]  # pathological case with 0 monitor channels
-
     def test_unmirror_0_1_2_3(self):
 
         args = {'Run' : '136553.nxs',
@@ -121,6 +113,30 @@ class ILLIndirectReductionQENSTest(systemtesting.MantidSystemTest):
 
         self.assertTrue(result[0], "Unmirror 6 should be the same as 7 if "
                                    "the same run is also defined as alignment run")
+
+    def test_unmirror_7_same_reference(self):
+
+        # there was a bug in MatchPeaks with InputWorkspace2 and center peaks ON
+        # in the case where the fitting was failing because of a too narrow peak
+        # this tests the fix with the data where there are too narrow peaks to fit
+        args = {'AlignmentRun': '251554',
+                'UnmirrorOption': 7,
+                'ManualPSDIntegrationRange': '44,90'}
+
+        args['Run'] = '251530'
+        args['OutputWorkspace'] = '50K'
+        IndirectILLReductionQENS(**args)
+        args['Run'] = '251548'
+        args['OutputWorkspace'] = '200K'
+        IndirectILLReductionQENS(**args)
+
+        # 2 workspaces are aligned with the same vanadium, so they must have the same
+        # amount of masked bins in the beginning and in the end of the spectra
+        m1 = mtd['50K_red'].getItem(0).maskedBinIndices(0)
+        m2 = mtd['200K_red'].getItem(0).maskedBinIndices(0)
+        self.assertEquals(len(m1), len(m2))
+        for i in range(len(m1)):
+            self.assertEquals(m1[i], m2[i])
 
     def runTest(self):
 

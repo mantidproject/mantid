@@ -7,7 +7,7 @@ Author:
     Krzysztof Dymkowski
 
 Contributors:
-   Sanghamitra Mukhopadhyay, Elliot Oram, Leonardo Bernasconi, Leandro Liborio
+   Sanghamitra Mukhopadhyay, Elliot Oram, Leonardo Bernasconi, Leandro Liborio, Adam Jackson
 
 .. summary::
 
@@ -22,22 +22,29 @@ Abins is a plugin for Mantid which allows scientists to compare experimental and
 scattering spectra (INS).
 
 Abins requires a file with the ab-initio phonon data to perform INS analysis. Currently output data from CASTEP
-(.phonon) and CRYSTAL (.out) DFT programs can be used to perform analysis. Optionally a user can provide an experimental
-file with measured dynamical structure factor S in order to directly compare theoretical and experimental spectra. A
-user can produce one dimensional INS spectrum which can be compared against TOSCA and TOSCA-like instruments.
+(.phonon), CRYSTAL (.out), GAUSSIAN (.log) or DMOL3 (.outmol) DFT programs can be used to perform analysis.
+Optionally, a user can provide an experimental file with measured dynamical structure factor S in order to directly
+compare theoretical and experimental spectra.
+A user can produce one dimensional INS spectrum which can be compared against TOSCA and TOSCA-like instruments;
+Abins uses a semi-empirical powder averaging model to account for q- and energy-dependent phenomena in this system.
+The user-input temperature value is included in a Debye-Waller term, recreating the intensity fall-off with increasing
+wavelength.
 
-After successfully performed analysis a user obtains a group workspace which stores theoretical and optionally
-experimental spectra. Currently a user can produce theoretical spectrum for the given type of atom (for example for
-benzene  two types of atoms: C, H) and for each quantum event (up to fourth order). A user can produce a total
-theoretical spectrum for the given atom which is a sum over all considered quantum events for that atom. A user can
-also produce a total spectrum for the whole considered system. Dynamical structure factor S is calculated for
-all atoms in the system. If needed  a user can also include in a simulation elevated temperature.
+After successfully-performed analysis a user obtains a Mantid Workspace Group which stores theoretical spectra (and,
+optionally, experimental data).
+Currently a user can produce theoretical spectra for given atoms (e.g. 'atom_1', the first atom listed in the input
+data) or types of atom (for example for benzene two element symbols: C, H) and for each quantum event (up to fourth
+order).
+Total theoretical spectra can also be generated, summing over all considered quantum events for that atom or element.
+The user can also produce a total spectrum for the whole considered system.
+The dynamical structure factor S is calculated for all atoms in the system and results are cached, so if no settings
+have been changed then subsequent runs of Abins can quickly create more Mantid Workspaces without re-calculating any
+spectra.
 
-A description about the implemented working equations can be found :ref:`here <DynamicalStructureFactorFromAbInitio>`.
+More information about the implemented working equations can be found :ref:`here <DynamicalStructureFactorFromAbInitio>`.
 
-Abins is in constant development and suggestions
-how to make it better are very welcome. For any suggestions of enhancements please contact
-Dr. Sanghamitra Mukhopadhyay (sanghamitra.mukhopadhyay@stfc.ac.uk).
+Abins is in constant development and suggestions for improvements are very welcome. For any such contributions please
+contact Dr. Sanghamitra Mukhopadhyay (sanghamitra.mukhopadhyay@stfc.ac.uk).
 
 If Abins is used as part of your data analysis routines, please cite the relevant reference [1]_.
 

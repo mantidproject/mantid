@@ -132,6 +132,7 @@ class TableModelTest(unittest.TestCase):
         table_index_model = TableIndexModel("", "", "", "", "", "",
                                             "", "", "", "", "", "", sample_thickness=sample_thickness)
         table_model.add_table_entry(2, table_index_model)
+        table_model.get_thickness_for_rows()
         row_entry = table_model.get_table_entry(0)
         self.assertEqual(row_entry.sample_thickness, sample_thickness)
 

@@ -360,6 +360,8 @@ private:
       rowLength = static_cast<int>(xValues.size());
     else if (!yEmpty)
       rowLength = static_cast<int>(yValues.size());
+    else if (!zEmpty)
+      rowLength = static_cast<int>(zValues.size());
     // Need at least 2 dimensions to define points
     else
       return offsetData;

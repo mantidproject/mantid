@@ -7,59 +7,63 @@
 import math
 """
 Parameters for instruments and Abins
+
+These values are somewhat 'global' across Abins. In previous versions it was
+recommended that they could be changed by editing the AbinsParameters.py file.
+This is still possible, but in general it is recommended to edit the
+value dictionaries through the Python API if possible. e.g.::
+
+    from AbinsModules import AbinsParameters
+    AbinsParameters.instruments['TOSCA']['final_neutron_energy'] = 24.0
 """
 
 # Instruments constants  #############################
-# These parameters can be changed by a user if necessary
+instruments = {
+    'fwhm': 3.0,  # approximate value for the full width at half maximum for Gaussian experimental resolutions
+    'TwoDMap': {
+        'delta_width': 0.1,  # width of narrow Gaussian which approximates Dirac delta
+        },
+    'TOSCA': {
+        #    TOSCA parameters for calculating Q^2
+        'final_neutron_energy': 32.0,  # Final energy on the crystal analyser in cm-1
+        'cos_scattering_angle': math.cos(2.356),  # Angle of the crystal analyser radians
+        # TOSCA parameters for resolution function
+        # sigma = tosca_a * omega * omega + tosca_b * omega + tosca_c
+        # where sigma is width of Gaussian function
+        'a': 0.0000001,
+        'b': 0.005,
+        'c': 2.5,}
+    }
 
-fwhm = 3.0  # approximate value for the full width at half maximum for Gaussian experimental resolutions
+# Names of groups in HDF5 cache/output file ################
+hdf_groups = {
+    'ab_initio_data': 'ABData',  # AbinsData (i.e. input from phonon calculation)
+    'powder_data': 'Powder',  # PowderData
+    'crystal_data': 'SingleCrystal',  # SingleCrystalData
+    's_data': 'S'  # dynamical structure factor
+    }
 
-# TwoDMap instrument
-delta_width = 0.1  # width of narrow Gaussian which approximates Dirac delta
+# Parameters related to sampling density and numerical cutoffs ##########################
+sampling = {
+    'pkt_per_peak': 50,  # number of points for each peak broadened by the experimental resolution
+    'max_wavenumber': 4100.0,  # maximum wavenumber in cm^-1 taken into account while creating workspaces (exclusive)
+    'min_wavenumber': 0.0,  # minimal wavenumber in cm^-1 taken into account while creating workspaces (exclusive)
+    'frequencies_threshold': 0.0,  # minimum included frequency
+    's_relative_threshold': 0.01,  # low cutoff for S intensity (fraction of maximum S)
+    's_absolute_threshold': 10e-8  # low cutoff for S intentisty (absolute value)
+    }
 
-# TOSCA instrument
-#    TOSCA parameters for calculating Q^2
-tosca_final_neutron_energy = 32.0  # Final energy on the crystal analyser in cm-1
-tosca_cos_scattering_angle = math.cos(2.356)  # Angle of the crystal analyser radians
+# Parameters related to performance optimisation that do NOT impact calculation results
+performance = {
+    'optimal_size': 5000000,  # this is used to create optimal size of chunk energies for which S is calculated
+    'threads': 3  # number of threads used in parallel calculations
+    }
 
-# TOSCA parameters for resolution function
-# sigma = tosca_a * omega * omega + tosca_b * omega + tosca_c
-# where sigma is width of Gaussian function
-tosca_a = 0.0000001
-tosca_b = 0.005
-tosca_c = 2.5
+all_parameters = {'instruments': instruments,
+                  'hdf_groups': hdf_groups,
+                  'sampling': sampling,
+                  'performance': performance}
 
-# Instruments constants end ##########################
-
-
-# Abins internal parameters ##########################
-# Parameters which can be changed by a user if necessary
-
-# name of the group in the hdf file in which extracted  data from DFT phonon calculations are stored
-ab_initio_group = "ABData"
-
-powder_data_group = "Powder"  # name of the group where PowderData is stored
-
-crystal_data_group = "SingleCrystal"  # name of the group where SingleCrystalData is stored
-
-s_data_group = "S"  # name of the group where dynamical factor is stored
-
-pkt_per_peak = 50  # number of points for each peak broadened by the experimental resolution
-max_wavenumber = 4100.0  # maximum wavenumber in cm^-1 taken into account while creating workspaces (exclusive)
-min_wavenumber = 0.0  # minimal wavenumber in cm^-1 taken into account while creating workspaces (exclusive)
-
-# frequencies below this value are treated as acoustic or as translations/rotations and are neglected.
-frequencies_threshold = 0.0
-
-# threshold expressed as a fraction of max S intensity below which S values are treated as zero
-s_relative_threshold = 0.01
-
-# values of S below that value are considered to be zero (to be use in case threshold calculated from
-# s_relative_threshold is larger than s_absolute_threshold)
-s_absolute_threshold = 10e-8
-
-optimal_size = 5000000  # this is used to create optimal size of chunk energies for which S is calculated
-# Actual chunk of energies < optimal_size
-
-threads = 3  # number of threads used in parallel calculations
-# Abins internal parameters end ###########################
+non_performance_parameters = {'instruments': instruments,
+                              'hdf_groups': hdf_groups,
+                              'sampling': sampling}

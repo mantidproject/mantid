@@ -67,34 +67,8 @@ generateIncidentSpectrumPrime(const Mantid::HistogramData::HistogramX &lambda,
   return amplitude;
 }
 
-// generate spectrum with detector info
-MatrixWorkspace_sptr generateIncidentSpectrumWithDetectorData() {
-  const double xStart = 0.2;
-  const double xEnd = 4.0;
-  const double xInc = 0.01;
-  Algorithm_sptr alg =
-      AlgorithmManager::Instance().createUnmanaged("CreateSampleWorkspace");
-  alg->initialize();
-  alg->setProperty("OutputWorkspace", "incident_spectrum_ws");
-  alg->setProperty("XMin", xStart);
-  alg->setProperty("XMax", xEnd);
-  alg->setProperty("BinWidth", xInc);
-  alg->setProperty("BankPixelWidth", 1);
-  alg->execute();
-  // get the output workspace from ADS
-  MatrixWorkspace_sptr outWs =
-      Mantid::API::AnalysisDataService::Instance()
-          .retrieveWS<Mantid::API::MatrixWorkspace>("incident_spectrum_ws");
-  Mantid::HistogramData::HistogramX x = outWs->x(0);
-  std::vector<double> y = generateIncidentSpectrum(x);
-  outWs->setCounts(0, y);
-  std::vector<double> yPrime = generateIncidentSpectrumPrime(x);
-  outWs->setCounts(1, yPrime);
-  return outWs;
-}
-
 // generate spectrum without detector info
-MatrixWorkspace_sptr generateIncidentSpectrumWithoutDetectorData() {
+MatrixWorkspace_sptr generateIncidentSpectrum() {
   const double xStart = 0.2;
   const double xEnd = 4.0;
   const double xInc = 0.01;
@@ -125,15 +99,15 @@ MatrixWorkspace_sptr generateIncidentSpectrumWithoutDetectorData() {
 }
 
 // Add sample to workspace
-MatrixWorkspace_sptr addSampleMaterialToWorkspace(MatrixWorkspace_sptr inWs) {
+void addSampleMaterialToWorkspace() {
   Algorithm_sptr alg =
       AlgorithmManager::Instance().createUnmanaged("SetSampleMaterial");
   alg->initialize();
-  alg->setProperty("InputWorkspace", "incident_spectrum_ws");
-  alg->setProperty("ChemicalFormula", "(Li7)2-C-H4-N-Cl6");
+  alg->setProperty("InputWorkspace", "InputWorkspace");
+  alg->setProperty("ChemicalFormula", "Si");
   alg->setProperty("SampleNumberDensity", 0.1);
   alg->execute();
-  return (inWs);
+  return;
 }
 
 class CalculatePlaczekSelfScatteringTest : public CxxTest::TestSuite {
@@ -157,29 +131,44 @@ public:
   }
 
   void testCalculatePlaczekSelfScatteringExecutes() {
-    MatrixWorkspace_sptr ws = generateIncidentSpectrumWithDetectorData();
-    ws = addSampleMaterialToWorkspace(ws);
+    MatrixWorkspace_sptr IncidentSpecta = generateIncidentSpectrum();
     auto alg = makeAlgorithm();
-    alg->setProperty("InputWorkspace", "incident_spectrum_ws");
+    Mantid::DataObjects::Workspace2D_sptr InputWorkspace =
+        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
+            5, 100, 380);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace("InputWorkspace",
+                                                              InputWorkspace);
+    addSampleMaterialToWorkspace();
+    alg->setProperty("IncidentSpecta", IncidentSpecta);
+    alg->setProperty("InputWorkspace", "InputWorkspace");
     alg->setProperty("OutputWorkspace", "correction_ws");
     TS_ASSERT_THROWS_NOTHING(alg->execute());
   }
 
   void testCalculatePlaczekSelfScatteringDoesNotRunWithNoDetectors() {
-    MatrixWorkspace_sptr ws = generateIncidentSpectrumWithoutDetectorData();
-    ws = addSampleMaterialToWorkspace(ws);
-
+    MatrixWorkspace_sptr IncidentSpecta = generateIncidentSpectrum();
+    Mantid::DataObjects::Workspace2D_sptr InputWorkspace =
+        WorkspaceCreationHelper::create2DWorkspace(30, 381);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace("InputWorkspace",
+                                                              InputWorkspace);
+    addSampleMaterialToWorkspace();
     auto alg = makeAlgorithm();
-    alg->setProperty("InputWorkspace", "incident_spectrum_ws");
+    alg->setProperty("IncidentSpecta", IncidentSpecta);
+    alg->setProperty("InputWorkspace", InputWorkspace);
     alg->setProperty("OutputWorkspace", "correction_ws");
     TS_ASSERT_THROWS(alg->execute(), std::runtime_error)
   }
 
   void testCalculatePlaczekSelfScatteringDoesNotRunWithNoSample() {
-    MatrixWorkspace_sptr ws = generateIncidentSpectrumWithDetectorData();
-
+    MatrixWorkspace_sptr IncidentSpecta = generateIncidentSpectrum();
+    Mantid::DataObjects::Workspace2D_sptr InputWorkspace =
+        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
+            5, 100, 380);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace("InputWorkspace",
+                                                              InputWorkspace);
     auto alg = makeAlgorithm();
-    alg->setProperty("InputWorkspace", "incident_spectrum_ws");
+    alg->setProperty("IncidentSpecta", IncidentSpecta);
+    alg->setProperty("InputWorkspace", InputWorkspace);
     alg->setProperty("OutputWorkspace", "correction_ws");
     TS_ASSERT_THROWS(alg->execute(), std::runtime_error)
   }

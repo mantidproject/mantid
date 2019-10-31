@@ -7,6 +7,7 @@
 #ifndef MANTID_API_REPOMODEL_H_
 #define MANTID_API_REPOMODEL_H_
 #include "MantidAPI/ScriptRepository.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include <QAbstractItemModel>
 #include <QDialog>
 #include <QFutureWatcher>
@@ -16,7 +17,6 @@
 #include <QStringList>
 #include <QVariant>
 #include <QWidget>
-#include <QtConcurrentRun>
 
 class QLineEdit;
 class QCheckBox;
@@ -73,7 +73,7 @@ const QString DELETABLEENTRY = "deletable";
   and the assignment
    will be make private to ensure this.
 */
-class RepoModel : public QAbstractItemModel {
+class EXPORT_OPT_MANTIDQT_COMMON RepoModel : public QAbstractItemModel {
   Q_OBJECT
 
   /** A nested class to help RepoModel to implement the QAbstractItemModel.
@@ -181,7 +181,7 @@ public:
   QModelIndex parent(const QModelIndex &index) const override;
   //// provide the number of the rows
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-  /// provide the nubmer of the coluns
+  /// provide the number of the columns
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   /// change data
   bool setData(const QModelIndex &index, const QVariant &value,

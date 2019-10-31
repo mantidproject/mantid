@@ -38,14 +38,17 @@ class ParameterPropertyManager;
 class QtProperty;
 class QtBrowserItem;
 
-class QPushButton;
+class QAction;
+class QComboBox;
 class QLabel;
 class QLineEdit;
-class QComboBox;
-class QSignalMapper;
+class QListWidget;
+class QListWidgetItem;
 class QMenu;
-class QAction;
+class QPushButton;
+class QSignalMapper;
 class QTreeWidget;
+class QVBoxLayout;
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -262,6 +265,8 @@ public:
   void setADSObserveEnabled(bool enabled);
 
   void postDeleteHandle(const std::string &wsName) override;
+  void renameHandle(const std::string &oldName,
+                    const std::string &newName) override;
   void addHandle(const std::string &wsName,
                  const boost::shared_ptr<Mantid::API::Workspace> ws) override;
 
@@ -279,6 +284,13 @@ public:
   /// Return the Fit menu. This gives Python access to events emitted by this
   /// menu.
   QMenu *getFitMenu() const { return m_fitMenu; }
+
+  /// Return the Fit menu. This gives Python access to events emitted by this
+  /// menu.
+  QListWidget *getWorkspaceList() const { return m_wsListWidget; }
+
+  /// Adds the fit result workspaces to the QListWidget in the browser
+  void addFitResultWorkspacesToTableWidget();
 
   // Methods intended for testing only
 
@@ -314,6 +326,7 @@ public slots:
   void executeDisplayMenu(const QString & /*item*/);
   void executeSetupMenu(const QString & /*item*/);
   void executeSetupManageMenu(const QString & /*item*/);
+  void workspaceDoubleClicked(QListWidgetItem *item);
 
 signals:
   void currentChanged() const;
@@ -353,6 +366,8 @@ signals:
   void fitUndone();
   void functionLoaded(const QString & /*_t1*/);
   void fitResultsChanged(const QString &status);
+  void workspaceClicked(const QString &wsName);
+  void itemDoubleClicked(QListWidgetItem *item);
 
 protected slots:
   /// Get the registered function names
@@ -617,6 +632,10 @@ private:
   QDialog *m_fitSelector;
   // The tree widget containing the fit functions.
   QTreeWidget *m_fitTree;
+
+  //
+  QListWidget *m_wsListWidget;
+  QLabel *m_workspaceLabel;
 
   /// String property managers for special case attributes such as Filename or
   /// Formula

@@ -34,6 +34,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
     _peak_range = []
     _runs = None
     _spectrum_axis = None
+    _discard_sds = None
 
     def category(self):
         return "Workflow\\MIDAS;Workflow\\Inelastic;Inelastic\\Indirect;Inelastic\\Reduction;ILL\\Indirect"
@@ -138,6 +139,9 @@ class IndirectILLReductionQENS(PythonAlgorithm):
                              validator=StringListValidator(['SpectrumNumber', '2Theta', 'Q', 'Q2']),
                              doc='The spectrum axis conversion target.')
 
+        self.declareProperty(name='DiscardSingleDetectors', defaultValue=False,
+                             doc='Whether to discard the spectra of single detectors.')
+
     def validateInputs(self):
 
         issues = dict()
@@ -174,7 +178,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         self._back_calib_scaling = self.getProperty('CalibrationBackgroundScalingFactor').value
         self._peak_range = self.getProperty('CalibrationPeakRange').value
         self._spectrum_axis = self.getPropertyValue('SpectrumAxis')
-
+        self._discard_sds = self.getProperty('DiscardSingleDetectors').value
         self._red_ws = self.getPropertyValue('OutputWorkspace')
 
         suffix = ''
@@ -196,6 +200,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         self._common_args['ManualPSDIntegrationRange'] = self.getProperty('ManualPSDIntegrationRange').value
         self._common_args['CropDeadMonitorChannels'] = self.getProperty('CropDeadMonitorChannels').value
         self._common_args['SpectrumAxis'] = self._spectrum_axis
+        self._common_args['DiscardSingleDetectors'] = self._discard_sds
 
         if self._sum_all_runs is True:
             self.log().notice('All the sample runs will be summed')

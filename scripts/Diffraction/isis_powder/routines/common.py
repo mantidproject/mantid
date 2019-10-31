@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 from six import PY2, iterkeys
+import collections
 import warnings
 
 import mantid.kernel as kernel
@@ -75,28 +76,34 @@ def crop_banks_using_crop_list(bank_list, crop_values_list):
     Crops each bank by the specified tuple values from a list of tuples in TOF. The number
     of tuples must match the number of banks to crop. A list of [(100,200), (150,250)] would crop
     bank 1 to the values 100, 200 and bank 2 to 150 and 250 in TOF.
+    Alternatively, if the list is just a tuple or list containing cropping parameters, all of the
+    banks are cropped using those parameters.
     :param bank_list: The list of workspaces each containing one bank of data to crop
     :param crop_values_list: The cropping values to apply to each bank
     :return: A list of cropped workspaces
     """
-    if not isinstance(crop_values_list, list):
-        raise ValueError("The cropping values were not in a list type")
+    if not isinstance(crop_values_list, collections.Sequence):
+        raise ValueError("The cropping values were not in a list or tuple type")
     elif not isinstance(bank_list, list):
         # This error is probably internal as we control the bank lists
         raise RuntimeError("Attempting to use list based cropping on a single workspace not in a list")
 
-    num_banks = len(bank_list)
-    num_crop_vals = len(crop_values_list)
-
-    # Finally check the number of elements are equal
-    if num_banks != num_crop_vals:
-        raise RuntimeError("The number of TOF cropping values does not match the number of banks for this instrument.\n"
-                           "{} cropping windows were supplied for {} banks".format(num_crop_vals, num_banks))
-
     output_list = []
-    for spectra, cropping_values in zip(bank_list, crop_values_list):
-        output_list.append(crop_in_tof(ws_to_crop=spectra, x_min=cropping_values[0], x_max=cropping_values[-1]))
+    if not isinstance(crop_values_list[0], collections.Sequence):  # All banks use the same cropping parameters.
+        for spectra in bank_list:
+            output_list.append(crop_in_tof(ws_to_crop=spectra, x_min=crop_values_list[0], x_max=crop_values_list[-1]))
+    else:  # Each bank has its own cropping parameters.
+        num_banks = len(bank_list)
+        num_crop_vals = len(crop_values_list)
 
+        # Finally check the number of elements are equal
+        if num_banks != num_crop_vals:
+            raise RuntimeError("The number of TOF cropping values does not match the number of banks for this "
+                               "instrument.\n "
+                               "{} cropping windows were supplied for {} banks".format(num_crop_vals, num_banks))
+
+        for spectra, cropping_values in zip(bank_list, crop_values_list):
+            output_list.append(crop_in_tof(ws_to_crop=spectra, x_min=cropping_values[0], x_max=cropping_values[-1]))
     return output_list
 
 
@@ -551,6 +558,12 @@ def _crop_single_ws_in_tof(ws_to_rebin, x_max, x_min):
     previous_units = ws_to_rebin.getAxis(0).getUnit().unitID()
     if previous_units != "TOF":
         ws_to_rebin = mantid.ConvertUnits(InputWorkspace=ws_to_rebin, Target="TOF", OutputWorkspace=ws_to_rebin)
+    if x_min > x_max:
+        raise ValueError("XMin is larger than XMax. (" + str(x_min) + " > " + str(x_max) + ")")
+    if x_max <= 1 and x_min <= 1:  # If <= 1, cropping by fractions, not absolutes
+        x_axis = ws_to_rebin.dataX(0)
+        x_min = x_axis[0] * (1 + x_min)
+        x_max = x_axis[-1] * x_max
     cropped_ws = mantid.CropWorkspace(InputWorkspace=ws_to_rebin, OutputWorkspace=ws_to_rebin,
                                       XMin=x_min, XMax=x_max)
     if previous_units != "TOF":

@@ -3,7 +3,6 @@
 # of .sip definitions
 include ( QtTargetFunctions )
 
-
 # brief: Add a module target to generate Python bindings
 # for a set of sip sources. The sources list should be a list of filenames
 # without a path. The .sip module is generated in the CMAKE_CURRENT_BINARY_DIR
@@ -14,6 +13,8 @@ include ( QtTargetFunctions )
 #                      in the .sip files. These are set as dependencies on
 #                      the target.
 # keyword: INCLUDE_DIRS A list of additional target_include_directories
+# keyword: SYSTEM_INCLUDE_DIRS A list of additional target_include_directories
+#                              that should be marked as system headers
 # keyword: LINK_LIBS A list of additional target_link_libraries
 # keyword: PYQT_VERSION A single value indicating the version of PyQt
 #                       to compile against
@@ -30,7 +31,8 @@ function ( mtd_add_sip_module )
   set ( options )
   set ( oneValueArgs MODULE_NAME TARGET_NAME MODULE_OUTPUT_DIR
                      PYQT_VERSION FOLDER )
-  set ( multiValueArgs SIP_SRCS HEADER_DEPS INCLUDE_DIRS LINK_LIBS INSTALL_DIR OSX_INSTALL_RPATH LINUX_INSTALL_RPATH )
+  set ( multiValueArgs SIP_SRCS HEADER_DEPS SYSTEM_INCLUDE_DIRS INCLUDE_DIRS LINK_LIBS INSTALL_DIR
+                       OSX_INSTALL_RPATH LINUX_INSTALL_RPATH )
   cmake_parse_arguments ( PARSED "${options}" "${oneValueArgs}"
                          "${multiValueArgs}" ${ARGN} )
 
@@ -79,15 +81,9 @@ function ( mtd_add_sip_module )
   )
 
   add_library ( ${PARSED_TARGET_NAME} MODULE ${_sip_generated_cpp} ${_sip_include_deps} )
-  if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" )
-    prune_usr_local_include ( ${PARSED_LINK_LIBS} )
-    if ( NOT (SIP_INCLUDE_DIR STREQUAL /usr/local/include) )
-      target_include_directories ( ${PARSED_TARGET_NAME} SYSTEM PRIVATE ${SIP_INCLUDE_DIR} )
-    endif ()
-  else()
-    target_include_directories ( ${PARSED_TARGET_NAME} SYSTEM PRIVATE ${SIP_INCLUDE_DIR} )
-  endif ()
+  target_include_directories ( ${PARSED_TARGET_NAME} SYSTEM PRIVATE ${SIP_INCLUDE_DIR} )
   target_include_directories ( ${PARSED_TARGET_NAME} PRIVATE ${PARSED_INCLUDE_DIRS} )
+  target_include_directories ( ${PARSED_TARGET_NAME} SYSTEM PRIVATE ${PARSED_SYSTEM_INCLUDE_DIRS} )
   target_link_libraries ( ${PARSED_TARGET_NAME} PRIVATE ${PARSED_LINK_LIBS} )
 
   # Set all required properties on the target
@@ -100,7 +96,7 @@ function ( mtd_add_sip_module )
       LIBRARY_OUTPUT_DIRECTORY ${PARSED_MODULE_OUTPUT_DIR} )
   endif ()
 
-  if (OSX_VERSION VERSION_GREATER 10.8)
+  if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     if (PARSED_OSX_INSTALL_RPATH)
       set_target_properties ( ${PARSED_TARGET_NAME} PROPERTIES INSTALL_RPATH  "${PARSED_OSX_INSTALL_RPATH}" )
     endif()

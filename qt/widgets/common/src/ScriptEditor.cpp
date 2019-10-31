@@ -101,6 +101,10 @@ ScriptEditor::ScriptEditor(QWidget *parent, QsciLexer *codelexer,
   setEolMode(EolUnix);
 #endif
 
+  // Remove the shortcut for zooming in because this is dealt with in
+  // keyPressEvent
+  clearKeyBinding("Ctrl++");
+
   // Syntax highlighting and code completion
   setLexer(codelexer);
   readSettings();
@@ -284,8 +288,25 @@ void ScriptEditor::setText(int lineno, const QString &txt, int index) {
  * @param event A pointer to the QKeyPressEvent object
  */
 void ScriptEditor::keyPressEvent(QKeyEvent *event) {
-  // Avoids a bug in QScintilla
-  forwardKeyPressToBase(event);
+  // The built-in shortcut Ctrl++ from QScintilla doesn't work for some reason
+  // Creating a new QShortcut makes Ctrl++ to zoom in on the IPython console
+  // stop working
+  // So here is where Ctrl++ is detected to zoom in
+  if (QApplication::keyboardModifiers() & Qt::ControlModifier &&
+      (event->key() == Qt::Key_Plus || event->key() == Qt::Key_Equal)) {
+    zoomIn();
+    emit textZoomedIn();
+  } else {
+    // Avoids a bug in QScintilla
+    forwardKeyPressToBase(event);
+  }
+
+  // There is a built in Ctrl+- shortcut for zooming out, but a signal is
+  // emitted here to tell the other editor tabs to also zoom out
+  if (QApplication::keyboardModifiers() & Qt::ControlModifier &&
+      (event->key() == Qt::Key_Minus)) {
+    emit textZoomedOut();
+  }
 }
 
 /*
@@ -591,4 +612,8 @@ void ScriptEditor::replaceAll(const QString &searchString,
     }
   }
   this->endUndoAction();
+}
+
+int ScriptEditor::getZoom() const {
+  return static_cast<int>(SendScintilla(SCI_GETZOOM));
 }

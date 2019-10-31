@@ -39,13 +39,19 @@ private:
   normalizeDetectorsByMonitors(API::MatrixWorkspace_sptr IvsTOF);
   /// Get the run numbers of the input workspaces
   void getRunNumbers();
+  /// Get the run number of a given workspace
+  std::string getRunNumber(std::string const &propertyName);
   /// Store a transition run in ADS
   void storeTransitionRun(int which, API::MatrixWorkspace_sptr ws);
   /// Store the stitched transition workspace run in ADS
   void storeOutputWorkspace(API::MatrixWorkspace_sptr ws);
 
+  /// Run numbers for the first/second transmission run
   std::string m_firstTransmissionRunNumber;
   std::string m_secondTransmissionRunNumber;
+  /// Flag to indicate that one or both transmission workspace
+  /// does not have a run number set
+  bool m_missingRunNumber{false};
 };
 
 } // namespace Algorithms
