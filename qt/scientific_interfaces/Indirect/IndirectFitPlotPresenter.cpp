@@ -270,13 +270,6 @@ void IndirectFitPlotPresenter::plotLines() {
   }
 }
 
-// void IndirectFitPlotPresenter::plotResult(MatrixWorkspace_sptr result) {
-//   plotInput(result, WorkspaceIndex{0});
-//   plotFit(result, WorkspaceIndex{1});
-//   plotDifference(result, WorkspaceIndex{2});
-//   updatePlotRange(m_model->getResultRange());
-// }
-
 void IndirectFitPlotPresenter::plotInput(MatrixWorkspace_sptr workspace) {
   plotInput(workspace, m_model->getActiveSpectrum());
   if (auto doGuess = m_view->isPlotGuessChecked())

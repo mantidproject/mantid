@@ -774,8 +774,7 @@ std::string IndirectFittingModel::getResultLogName() const { return "axis-1"; }
 boost::optional<ResultLocationNew>
 IndirectFittingModel::getResultLocation(TableDatasetIndex index,
                                         WorkspaceIndex spectrum) const {
-  if (/*m_previousModelSelected && */ m_fitOutput &&
-      m_fittingData.size() > index)
+  if (m_fitOutput && m_fittingData.size() > index)
     return m_fitOutput->getResultLocation(m_fittingData[index].get(), spectrum);
   return boost::none;
 }
