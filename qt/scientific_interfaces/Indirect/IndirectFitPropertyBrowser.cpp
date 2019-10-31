@@ -133,7 +133,8 @@ void IndirectFitPropertyBrowser::syncFullBrowserWithTemplate() {
         *m_templateBrowser->getGlobalFunction());
     m_functionBrowser->setGlobalParameters(
         m_templateBrowser->getGlobalParameters());
-    m_functionBrowser->setCurrentDataset(m_templateBrowser->getCurrentDataset());
+    m_functionBrowser->setCurrentDataset(
+        m_templateBrowser->getCurrentDataset());
   }
 }
 
@@ -144,7 +145,8 @@ void IndirectFitPropertyBrowser::syncTemplateBrowserWithFull() {
     m_templateBrowser->updateMultiDatasetParameters(*fun);
     m_templateBrowser->setGlobalParameters(
         m_functionBrowser->getGlobalParameters());
-    m_templateBrowser->setCurrentDataset(m_functionBrowser->getCurrentDataset());
+    m_templateBrowser->setCurrentDataset(
+        m_functionBrowser->getCurrentDataset());
   }
 }
 

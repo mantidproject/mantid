@@ -393,7 +393,7 @@ void FunctionMultiDomainPresenter::editLocalParameterFinish(int result) {
   m_editLocalParameterDialog = nullptr;
 }
 
-void FunctionMultiDomainPresenter::updateViewFromModel(){
+void FunctionMultiDomainPresenter::updateViewFromModel() {
   const auto index = m_model->currentDomainIndex();
   for (auto const name : m_model->getParameterNames()) {
     auto const value = m_model->getParameter(name);

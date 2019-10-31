@@ -177,7 +177,7 @@ void IqtTemplatePresenter::setCurrentDataset(int i) {
   updateViewParameters();
 }
 
-int IqtTemplatePresenter::getCurrentDataset(){
+int IqtTemplatePresenter::getCurrentDataset() {
   return m_model.currentDomainIndex();
 }
 
