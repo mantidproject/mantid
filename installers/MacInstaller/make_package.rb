@@ -412,25 +412,6 @@ def deploy_framework(dependency, library, _library_orig, destination)
     make_writable(dependency_target)
     set_id(dependency_target, "@rpath/#{basename}")
     fixup_binary(dependency_target, dependency, destination)
-
-    # resources
-    src_resources = dependency.parent + 'Resources'
-    if src_resources.exist?
-      execute("cp -r #{src_resources} #{dependency_target_dir}")
-    end
-
-    # helpers
-    src_helpers = dependency.parent + 'Helpers'
-    if src_helpers.exist?
-      execute("cp -r #{src_helpers} #{dependency_target_dir}")
-      Dir[dependency_target_dir + 'Helpers/**/MacOS/*'].each do |binary|
-        binary = Pathname.new(binary)
-        make_writable(binary)
-        set_id(dependency_target, "@rpath/#{binary.basename}")
-        fixup_binary(binary, binary, destination)
-      end
-    end
-
     # symlinks
     bundle_framework_root = dependency_target_dir.parent.parent
     version = dependency_target.parent.basename
@@ -438,9 +419,31 @@ def deploy_framework(dependency, library, _library_orig, destination)
       FileUtils.ln_s "#{version}", 'Current'
     end
     Dir.chdir(bundle_framework_root) do
-      FileUtils.ln_s 'Versions/Current/Resources', 'Resources'
-      FileUtils.ln_s 'Versions/Current/Helpers', 'Helpers'
       FileUtils.ln_s "Versions/Current/#{basename}", "#{basename}"
+    end
+
+    # resources
+    src_resources = dependency.parent + 'Resources'
+    if src_resources.exist?
+      execute("cp -r #{src_resources} #{dependency_target_dir}")
+      Dir.chdir(bundle_framework_root) do
+        FileUtils.ln_s 'Versions/Current/Resources', 'Resources'
+      end
+    end
+
+    # helpers
+    src_helpers = dependency.parent + 'Helpers'
+    if src_helpers.exist?
+      execute("cp -r #{src_helpers} #{dependency_target_dir}")
+      Dir.chdir(bundle_framework_root) do
+        FileUtils.ln_s 'Versions/Current/Helpers', 'Helpers'
+      end
+      Dir[dependency_target_dir + 'Helpers/**/MacOS/*'].each do |binary|
+        binary = Pathname.new(binary)
+        make_writable(binary)
+        set_id(dependency_target, "@rpath/#{binary.basename}")
+        fixup_binary(binary, binary, destination)
+      end
     end
   end
 
