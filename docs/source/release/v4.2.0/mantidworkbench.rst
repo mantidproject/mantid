@@ -72,5 +72,6 @@ Bugfixes
 - Fixes an issue where subscribing a new algorithm duplicates the list of algorithms in the algorithm selector widget.
 - Plots are no longer zoomed out along their y-axis when you perform a fit or do a plot guess.
 - You can now save scripts that contain unicode characters.
+- A crash no longer occurs when the GenerateEventsFilter algorithm fails in the Filter Events Interface
 
 :ref:`Release 4.2.0 <v4.2.0>`
