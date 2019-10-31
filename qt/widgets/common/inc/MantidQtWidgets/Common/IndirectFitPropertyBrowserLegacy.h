@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef INDIRECTFITPROPERTYBROWSER_H_
-#define INDIRECTFITPROPERTYBROWSER_H_
+#ifndef INDIRECTFITPROPERTYBROWSERLEGACY_H_
+#define INDIRECTFITPROPERTYBROWSERLEGACY_H_
 
 #include "MantidQtWidgets/Common/FitPropertyBrowser.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
@@ -19,14 +19,14 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-class EXPORT_OPT_MANTIDQT_COMMON IndirectFitPropertyBrowser
+class EXPORT_OPT_MANTIDQT_COMMON IndirectFitPropertyBrowserLegacy
     : public FitPropertyBrowser {
   Q_OBJECT
 
 public:
   /// Constructor.
-  IndirectFitPropertyBrowser(QWidget *parent = nullptr,
-                             QObject *mantidui = nullptr);
+  IndirectFitPropertyBrowserLegacy(QWidget *parent = nullptr,
+                                   QObject *mantidui = nullptr);
   /// Initialise the layout.
   void init() override;
 

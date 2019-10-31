@@ -13,12 +13,16 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-JumpFitDataPresenter::JumpFitDataPresenter(
-    JumpFitModel *model, IIndirectFitDataView *view, QComboBox *cbParameterType,
-    QComboBox *cbParameter, QLabel *lbParameterType, QLabel *lbParameter)
-    : IndirectFitDataPresenter(model, view,
-                               std::make_unique<JumpFitDataTablePresenter>(
-                                   model, view->getDataTable())),
+JumpFitDataPresenter::JumpFitDataPresenter(JumpFitModel *model,
+                                           IIndirectFitDataViewLegacy *view,
+                                           QComboBox *cbParameterType,
+                                           QComboBox *cbParameter,
+                                           QLabel *lbParameterType,
+                                           QLabel *lbParameter)
+    : IndirectFitDataPresenterLegacy(
+          model, view,
+          std::make_unique<JumpFitDataTablePresenter>(model,
+                                                      view->getDataTable())),
       m_activeParameterType("Width"), m_dataIndex(0),
       m_cbParameterType(cbParameterType), m_cbParameter(cbParameter),
       m_lbParameterType(lbParameterType), m_lbParameter(lbParameter),
@@ -161,7 +165,7 @@ JumpFitDataPresenter::getParameterTypes(std::size_t dataIndex) const {
   return types;
 }
 
-void JumpFitDataPresenter::addWorkspace(IndirectFittingModel *model,
+void JumpFitDataPresenter::addWorkspace(IndirectFittingModelLegacy *model,
                                         const std::string &name) {
   if (model->numberOfWorkspaces() > m_dataIndex)
     model->removeWorkspace(m_dataIndex);
@@ -196,7 +200,7 @@ void JumpFitDataPresenter::setModelSpectrum(int index) {
 void JumpFitDataPresenter::closeDialog() {
   if (m_jumpModel->numberOfWorkspaces() > m_dataIndex)
     m_jumpModel->removeWorkspace(m_dataIndex);
-  IndirectFitDataPresenter::closeDialog();
+  IndirectFitDataPresenterLegacy::closeDialog();
 }
 
 std::unique_ptr<IAddWorkspaceDialog>

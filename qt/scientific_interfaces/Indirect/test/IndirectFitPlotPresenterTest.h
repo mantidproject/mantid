@@ -10,9 +10,9 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "IIndirectFitPlotView.h"
-#include "IndirectFitPlotPresenter.h"
-#include "IndirectFittingModel.h"
+#include "IIndirectFitPlotViewLegacy.h"
+#include "IndirectFitPlotPresenterLegacy.h"
+#include "IndirectFittingModelLegacy.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
@@ -49,7 +49,7 @@ IFunction_sptr getFunctionWithWorkspaceName(std::string const &workspaceName) {
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 /// Mock object to mock the view
-class MockIndirectFitPlotView : public IIndirectFitPlotView {
+class MockIndirectFitPlotView : public IIndirectFitPlotViewLegacy {
 public:
   /// Signals
   void emitSelectedFitDataChanged(std::size_t index) {
@@ -147,7 +147,7 @@ public:
   MOCK_METHOD1(setHWHMMaximum, void(double maximum));
 };
 
-class MockIndirectFittingModel : public IndirectFittingModel {
+class MockIndirectFittingModel : public IndirectFittingModelLegacy {
 public:
   /// Public methods
   MOCK_CONST_METHOD1(getWorkspace, MatrixWorkspace_sptr(std::size_t index));
@@ -202,12 +202,13 @@ public:
   }
 
   void setUp() override {
-    /// Note that the IndirectFitPlotModel could not be mocked as the Presenter
-    /// takes an IndirectFittingModel. This means the IndirectFittingModel is
-    /// mocked instead - which is a good substitute anyway
+    /// Note that the IndirectFitPlotModelLegacy could not be mocked as the
+    /// Presenter takes an IndirectFittingModelLegacy. This means the
+    /// IndirectFittingModelLegacy is mocked instead - which is a good
+    /// substitute anyway
     m_view = std::make_unique<NiceMock<MockIndirectFitPlotView>>();
     m_fittingModel = std::make_unique<NiceMock<MockIndirectFittingModel>>();
-    m_presenter = std::make_unique<IndirectFitPlotPresenter>(
+    m_presenter = std::make_unique<IndirectFitPlotPresenterLegacy>(
         std::move(m_fittingModel.get()), std::move(m_view.get()));
 
     SetUpADSWithWorkspace m_ads("WorkspaceName", createWorkspace(10));
@@ -603,7 +604,7 @@ public:
 private:
   std::unique_ptr<MockIndirectFitPlotView> m_view;
   std::unique_ptr<MockIndirectFittingModel> m_fittingModel;
-  std::unique_ptr<IndirectFitPlotPresenter> m_presenter;
+  std::unique_ptr<IndirectFitPlotPresenterLegacy> m_presenter;
 
   SetUpADSWithWorkspace *m_ads;
 };
