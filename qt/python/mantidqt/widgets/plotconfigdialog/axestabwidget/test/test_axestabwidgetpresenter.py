@@ -145,3 +145,18 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
             presenter.update_view()
             for setter, value in zip(setters, expected_vals):
                 getattr(new_view_mock, setter).assert_called_once_with(value)
+
+    def test_apply_properties_correctly_handles_negative_axis_when_changing_to_log_scale(self):
+        presenter = self._generate_presenter()
+        ax = self.fig.get_axes()[0]
+        ax_properties = AxProperties.from_ax_object(ax)
+        ax_properties.xscale = 'log'
+        ax_properties.xlim = (-10, 10)
+        ax_properties.yscale = 'log'
+        ax_properties.ylim = (-10, 10)
+        presenter.view.get_properties.return_value = ax_properties
+
+        presenter.apply_properties()
+
+        self.assertEqual(ax.get_xlim(), (0.01, 10))
+        self.assertEqual(ax.get_ylim(), (0.01, 10))
