@@ -17,7 +17,7 @@ The output of each function is a workspace containing a single bin where:
 This workspace can be summed with other masked workspaces to accumulate
 masking and also passed to MaskDetectors to match masking there.
 """
-from __future__ import (absolute_import, division, print_function)
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 from six import string_types
 from mantid.simpleapi import *
 from mantid.kernel.funcinspect import lhs_info

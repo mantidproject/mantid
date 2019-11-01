@@ -7,7 +7,7 @@
 #pylint: disable=too-many-lines
 #pylint: disable=invalid-name
 #pylind: disable=attribute-defined-outside-init
-from __future__ import (absolute_import, division, print_function)
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 from mantid.simpleapi import *
 from mantid.kernel import funcinspect
 from mantid import geometry,api

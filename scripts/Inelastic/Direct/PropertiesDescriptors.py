@@ -9,7 +9,7 @@
 """ File contains collection of Descriptors used to define complex
     properties in NonIDF_Properties and PropertyManager classes
 """
-from __future__ import (absolute_import, division, print_function)
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 import os
 import numpy as np
 import math
@@ -210,7 +210,7 @@ class IncidentEnergy(PropDescriptor):
                         value = value.replace('[', '').replace(']', '').strip()
                     else:
                         energy_list = False
-                    en_list = str.split(value, ',')
+                    en_list = value.split(',')
                     if len(en_list) > 1:
                         rez = []
                         for en_str in en_list:
@@ -1365,7 +1365,7 @@ class BackbgroundTestRange(PropDescriptor):
             self._background_test_range = None
             return
         if isinstance(value, string_types):
-            value = str.split(value, ',')
+            value = value.split(',')
         if len(value) != 2:
             raise ValueError("background test range can be only a 2 element list of floats")
         self._background_test_range = (float(value[0]), float(value[1]))
@@ -1410,7 +1410,7 @@ class MultirepTOFSpectraList(PropDescriptor):
             self._spectra_list = None
             return
         if isinstance(value, string_types):
-            value = str.split(value, ',')
+            value = value.split(',')
             self.__set__(instance, value)
             return
         if isinstance(value, list):

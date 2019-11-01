@@ -8,7 +8,7 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 
 #pylint: disable=invalid-name
-from __future__ import (absolute_import, division, print_function)
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 from Direct.NonIDF_Properties import *
 
 from collections import OrderedDict, Iterable
