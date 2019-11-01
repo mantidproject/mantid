@@ -37,6 +37,7 @@ BUNDLED_PY_MODULES = [
   'markupsafe',
   'matplotlib',
   'mistune.py',
+  'mock',
   'mpl_toolkits',
   'numpy',
   'pathlib2',
