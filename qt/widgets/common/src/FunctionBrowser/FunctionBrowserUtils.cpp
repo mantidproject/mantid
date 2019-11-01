@@ -73,28 +73,25 @@ splitConstraintString(const QString &constraint) {
   if (expr.name() != "==") {
     return error;
   }
+  double temp;
   if (expr.size() == 3) { // lower < param < upper
-    try {
-      // check that the first and third terms are numbers
-      boost::lexical_cast<double>(expr[0].str());
-      boost::lexical_cast<double>(expr[2].str());
-      if (expr[1].operator_name() == "<" && expr[2].operator_name() == "<") {
-        lowerBoundStr = QString::fromStdString(expr[0].str());
-        upperBoundStr = QString::fromStdString(expr[2].str());
-      } else { // assume that the operators are ">"
-        lowerBoundStr = QString::fromStdString(expr[2].str());
-        upperBoundStr = QString::fromStdString(expr[0].str());
-      }
-      paramName = QString::fromStdString(expr[1].str());
-    } catch (...) { // error in constraint
+    // check that the first and third terms are numbers
+    if (!boost::conversion::try_lexical_convert(expr[0].str(), temp) ||
+        !boost::conversion::try_lexical_convert(expr[2].str(), temp)) {
       return error;
     }
+    if (expr[1].operator_name() == "<" && expr[2].operator_name() == "<") {
+      lowerBoundStr = QString::fromStdString(expr[0].str());
+      upperBoundStr = QString::fromStdString(expr[2].str());
+    } else { // assume that the operators are ">"
+      lowerBoundStr = QString::fromStdString(expr[2].str());
+      upperBoundStr = QString::fromStdString(expr[0].str());
+    }
+    paramName = QString::fromStdString(expr[1].str());
   } else if (expr.size() == 2) { // lower < param or param > lower etc
     size_t paramPos = 0;
-    try // find position of the parameter name in expression
-    {
-      boost::lexical_cast<double>(expr[1].name());
-    } catch (...) {
+    // find position of the parameter name in expression
+    if (!boost::conversion::try_lexical_convert(expr[1].name(), temp)) {
       paramPos = 1;
     }
     std::string op = expr[1].operator_name();
@@ -106,11 +103,10 @@ splitConstraintString(const QString &constraint) {
       }
       paramName = QString::fromStdString(expr[0].str());
     } else { // parameter is second
-      try {
-        boost::lexical_cast<double>(expr[0].name());
-      } catch (...) { // error - neither terms are numbers
-        return error;
+      if (!boost::conversion::try_lexical_convert(expr[0].name(), temp)) {
+        return error; // error - neither terms are numbers
       }
+
       if (op == "<") { // number < param
         lowerBoundStr = QString::fromStdString(expr[0].str());
       } else { // number > param
