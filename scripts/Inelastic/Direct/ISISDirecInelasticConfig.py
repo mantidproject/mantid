@@ -15,7 +15,7 @@ import copy
 from datetime import date
 import time
 from xml.dom import minidom
-from six import iteritems
+from six import iteritems, string_types
 
 # the list of instruments this configuration is applicable to
 INELASTIC_INSTRUMENTS = ['MAPS', 'LET', 'MERLIN', 'MARI', 'HET']
@@ -265,7 +265,7 @@ class UserProperties(object):
 
         if isinstance(cycle, int):
             cycle = convert_cycle_int(cycle)
-        if isinstance(cycle, str):
+        if isinstance(cycle, string_types):
             if len(cycle) == 11:
                 last_letter = cycle[-1]
                 if not last_letter.upper() in {'A','B','C','D','E'}:
@@ -289,7 +289,7 @@ class UserProperties(object):
                                        "but it is {0}".format(cycle))
         if isinstance(rb_folder_or_id, int):
             rb_folder_or_id = "RB{0:07}".format(rb_folder_or_id)
-        if not isinstance(rb_folder_or_id, str):
+        if not isinstance(rb_folder_or_id, string_types):
             raise RuntimeError("RB Folder {0} should be a string".format(rb_folder_or_id))
         else:
             f_path, rbf = os.path.split(rb_folder_or_id)
@@ -317,7 +317,7 @@ class UserProperties(object):
                                "ISIS inelastic instruments".format(instrument))
 
     def validate_date(self, start_date):
-        if isinstance(start_date, str):
+        if isinstance(start_date, string_types):
             # the date of express -- let's make it long in the past
             if start_date.lower() == 'none':
                 start_date = '19800101'

@@ -18,7 +18,7 @@ import math
 import time
 import numpy as np
 import collections
-from six import iteritems
+from six import iteritems, string_types
 from six.moves import range
 
 import Direct.CommonFunctions  as common
@@ -1344,7 +1344,7 @@ class DirectEnergyConversion(object):
             self._spectra_masks=None
         elif isinstance(value,api.Workspace):
             self._spectra_masks = value.name()
-        elif isinstance(value,str):
+        elif isinstance(value, string_types):
             if value in mtd:
                 self._spectra_masks = value
             else:
