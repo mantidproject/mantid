@@ -936,11 +936,7 @@ class HardMaskOnly(prop_helpers.ComplexProperty):
         return prop_helpers.gen_getter(instance.__dict__, 'use_hard_mask_only')
 
     def __set__(self, instance, value):
-        if value is None:
-            use_hard_mask_only = False
-            instance.hard_mask_file = None
-            hard_mask_file = None
-        elif isinstance(value, bool) or isinstance(value, int):
+        if isinstance(value, bool) or isinstance(value, int):
             use_hard_mask_only = bool(value)
             hard_mask_file = instance.hard_mask_file
         elif isinstance(value, string_types):
@@ -952,7 +948,10 @@ class HardMaskOnly(prop_helpers.ComplexProperty):
                 instance.hard_mask_file = value
                 use_hard_mask_only = True
             hard_mask_file = instance.hard_mask_file
-        # end
+        else:
+            use_hard_mask_only = False
+            instance.hard_mask_file = None
+            hard_mask_file = None
 
         # if no hard mask file is there and use_hard_mask_only is True,
         # diagnostics should not run
