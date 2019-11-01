@@ -147,16 +147,27 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
                 getattr(new_view_mock, setter).assert_called_once_with(value)
 
     def test_apply_properties_correctly_handles_negative_axis_when_changing_to_log_scale(self):
-        presenter = self._generate_presenter()
-        ax = self.fig.get_axes()[0]
+        fig = figure()
+        ax = fig.add_subplot(111)
+        ax.plot([0, 1], [10, 12], 'rx')
+        ax.set_title("My Axes")
+        mock_view = mock.Mock(get_selected_ax_name=lambda: "My Axes: (0, 0)")
+        presenter = Presenter(fig, view=mock_view)
+
         ax_properties = AxProperties.from_ax_object(ax)
-        ax_properties.xscale = 'log'
-        ax_properties.xlim = (-10, 10)
-        ax_properties.yscale = 'log'
-        ax_properties.ylim = (-10, 10)
+        min_limit = -10
+        max_limit = 10
+        ax_properties.xscale = 'Log'
+        ax_properties.xlim = (min_limit, max_limit)
+        ax_properties.yscale = 'Log'
+        ax_properties.ylim = (min_limit, max_limit)
         presenter.view.get_properties.return_value = ax_properties
 
         presenter.apply_properties()
 
-        self.assertEqual(ax.get_xlim(), (0.01, 10))
-        self.assertEqual(ax.get_ylim(), (0.01, 10))
+        self.assertEqual(ax.get_xlim(), (0.01*max_limit, max_limit))
+        self.assertEqual(ax.get_ylim(), (0.01*max_limit, max_limit))
+
+
+if __name__ == '__main__':
+    unittest.main()
