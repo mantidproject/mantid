@@ -228,7 +228,10 @@ class ProjectTest(unittest.TestCase):
         self.project.interface_populating_function = mock.MagicMock(return_value="mocked_interfaces")
 
         self.project._save()
-        saver.assert_called_with(file_name=self.project.last_project_location, workspace_to_save=['newGroup', 'ws3'], plots_to_save="mocked_figs", interfaces_to_save="mocked_interfaces")
+        saver.assert_called_with(file_name=self.project.last_project_location,
+                                 workspace_to_save=['newGroup', 'ws3'],
+                                 plots_to_save="mocked_figs",
+                                 interfaces_to_save="mocked_interfaces")
 
 
 if __name__ == "__main__":
