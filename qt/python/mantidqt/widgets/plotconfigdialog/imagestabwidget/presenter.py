@@ -35,11 +35,14 @@ class ImagesTabWidgetPresenter:
         image = self.get_selected_image()
         self.set_selected_image_label(props.label)
         image.set_cmap(props.colormap)
-        if props.vmin == 0 and props.scale == "Logarithmic":
+        if props.vmin == 0:
             props.vmin += 1e-6  # Avoid 0 log scale error
         image.set_norm(SCALES[props.scale](vmin=props.vmin, vmax=props.vmax))
         if props.interpolation:
             image.set_interpolation(props.interpolation)
+
+        self.fig.gca().images[-1].colorbar.remove()
+        self.fig.colorbar(image)
 
     def get_selected_image(self):
         return self.image_names_dict[self.view.get_selected_image_name()]
