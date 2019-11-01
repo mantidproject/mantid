@@ -126,7 +126,7 @@ void saveJSONToFile(const QString &filename,
   jsonFile.write(jsonByteArray.append(jsonString));
 #else
   QJsonDocument jsonDocument(QJsonObject::fromVariantMap(map));
-  QFile jsonFile(filename);
+  QFile jsonFile(filename + ".json");
   jsonFile.open(QFile::WriteOnly);
   jsonFile.write(jsonDocument.toJson());
 #endif
