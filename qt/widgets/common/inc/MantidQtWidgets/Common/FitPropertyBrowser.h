@@ -310,6 +310,10 @@ public:
   double getPeakFwhmOf(const QString &prefix);
   QStringList getPeakPrefixes() const;
 
+  // Emits a signal for when the sequential fit has finished
+
+  void sequentialFitFinished() { emit sequentialFitDone(); }
+
 public slots:
   virtual void fit();
   virtual void sequentialFit();
@@ -331,6 +335,7 @@ signals:
   void workspaceIndexChanged(int index);
   void updatePlotSpectrum(int index);
   void workspaceNameChanged(const QString & /*_t1*/);
+  void sequentialFitDone() const;
 
   void wsChangePPAssign(const QString & /*_t1*/);
   void functionChanged();
