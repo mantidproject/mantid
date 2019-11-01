@@ -8,6 +8,7 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/Expression.h"
 #include <boost/lexical_cast.hpp>
+#include <boost/lexical_cast/try_lexical_convert.hpp>
 
 namespace MantidQt {
 namespace MantidWidgets {
