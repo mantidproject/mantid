@@ -12,7 +12,7 @@ import os
 
 from qtpy.QtWidgets import QApplication, QFileDialog, QMessageBox
 
-from mantid.api import AnalysisDataService, AnalysisDataServiceObserver
+from mantid.api import AnalysisDataService, AnalysisDataServiceObserver, WorkspaceGroup
 from mantid.kernel import ConfigService
 from mantidqt.io import open_a_file_dialog
 from mantidqt.project.projectloader import ProjectLoader
@@ -118,7 +118,7 @@ class Project(AnalysisDataServiceObserver):
     def _save(self):
         self.__is_saving = True
         try:
-            workspaces_to_save = AnalysisDataService.getObjectNames()
+            workspaces_to_save = self._get_workspace_names_to_save()
             # Calculate the size of the workspaces in the project.
             project_size = self._get_project_size(workspaces_to_save)
             warning_size = int(ConfigService.getString("projectSaving.warningSize"))
@@ -135,6 +135,21 @@ class Project(AnalysisDataServiceObserver):
                 self.__saved = True
         finally:
             self.__is_saving = False
+
+    @staticmethod
+    def _get_workspace_names_to_save():
+        """
+        Get a list of the names of top level workspaces (workspaces not in groups) by getting every workspace,
+        checking if the workspace is in a group, and removing it from the full list.
+        :return: A list of the top level workspaces in the ADS
+        """
+        workspace_names = AnalysisDataService.getObjectNames()
+        workspaces_in_ads = AnalysisDataService.retrieveWorkspaces(workspace_names)
+        group_workspaces = [workspace for workspace in workspaces_in_ads if isinstance(workspace, WorkspaceGroup)]
+        workspaces_in_groups_names = []
+        for group_ws in group_workspaces:
+            workspaces_in_groups_names.extend(group_ws.getNames())
+        return [name for name in workspace_names if name not in workspaces_in_groups_names]
 
     @staticmethod
     def inform_user_not_possible():
