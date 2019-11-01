@@ -200,10 +200,10 @@ void MainWindowPresenter::notifyLoadBatchRequested(int tabIndex) {
   try {
     map = MantidQt::API::loadJSONFromFile(filename);
   } catch (const std::runtime_error &e) {
-    QMessageBox msgBox;
-    msgBox.setText("Unable to load requested file. Please load a file of "
-                   "appropriate format saved from the GUI.");
-    msgBox.exec();
+    QMessageBox::warning(
+        nullptr, QString(),
+        QString("Unable to load requested file. Please load a file of "
+                "appropriate format saved from the GUI."));
   }
   IBatchPresenter *batchPresenter = m_batchPresenters[tabIndex].get();
   Decoder decoder;
