@@ -9,6 +9,7 @@
 
 #include "DllConfig.h"
 
+#include "IndexTypes.h"
 #include "IndirectFitPlotModel.h"
 #include "IndirectPlotter.h"
 
@@ -29,10 +30,12 @@ public:
 
   void watchADS(bool watch);
 
-  std::size_t getSelectedDataIndex() const;
-  std::size_t getSelectedSpectrum() const;
-  int getSelectedSpectrumIndex() const;
-  bool isCurrentlySelected(std::size_t dataIndex, std::size_t spectrum) const;
+  TableDatasetIndex getSelectedDataIndex() const;
+  WorkspaceIndex getSelectedSpectrum() const;
+  TableRowIndex getSelectedSpectrumIndex() const;
+  TableRowIndex getSelectedDomainIndex() const;
+  bool isCurrentlySelected(TableDatasetIndex dataIndex,
+                           WorkspaceIndex spectrum) const;
 
   void setFitSingleSpectrumIsFitting(bool fitting);
   void setFitSingleSpectrumEnabled(bool enable);
@@ -40,7 +43,7 @@ public:
 public slots:
   void setStartX(double /*startX*/);
   void setEndX(double /*endX*/);
-  void updatePlotSpectrum(int spectrum);
+  void updatePlotSpectrum(WorkspaceIndex spectrum);
   void hideMultipleDataSelection();
   void showMultipleDataSelection();
   void updateRangeSelectors();
@@ -55,10 +58,10 @@ public slots:
   void disablePlotGuessInSeparateWindow();
 
 signals:
-  void selectedFitDataChanged(std::size_t /*_t1*/);
+  void selectedFitDataChanged(TableDatasetIndex /*_t1*/);
   void noFitDataSelected();
-  void plotSpectrumChanged(std::size_t /*_t1*/);
-  void fitSingleSpectrum(std::size_t /*_t1*/, std::size_t /*_t2*/);
+  void plotSpectrumChanged(WorkspaceIndex /*_t1*/);
+  void fitSingleSpectrum(TableDatasetIndex /*_t1*/, WorkspaceIndex /*_t2*/);
   void startXChanged(double /*_t1*/);
   void endXChanged(double /*_t1*/);
   void fwhmChanged(double /*_t1*/);
@@ -70,8 +73,8 @@ private slots:
   void setModelEndX(double value);
   void setModelHWHM(double minimum, double maximum);
   void setModelBackground(double background);
-  void setActiveIndex(std::size_t index);
-  void setActiveSpectrum(std::size_t spectrum);
+  void setActiveIndex(TableDatasetIndex index);
+  void setActiveSpectrum(WorkspaceIndex spectrum);
   void setHWHMMaximum(double minimum);
   void setHWHMMinimum(double maximum);
   void plotGuess(bool doPlotGuess);
@@ -85,12 +88,15 @@ private:
   void enableAllDataSelection();
   void plotInput(Mantid::API::MatrixWorkspace_sptr workspace);
   void plotInput(Mantid::API::MatrixWorkspace_sptr workspace,
-                 std::size_t spectrum);
+                 WorkspaceIndex spectrum);
   void plotFit(Mantid::API::MatrixWorkspace_sptr workspace);
   void plotFit(Mantid::API::MatrixWorkspace_sptr workspace,
-               std::size_t spectrum);
+               WorkspaceIndex spectrum);
   void plotDifference(Mantid::API::MatrixWorkspace_sptr workspace,
-                      std::size_t spectrum);
+                      WorkspaceIndex spectrum);
+  void clearInput();
+  void clearFit();
+  void clearDifference();
   void plotGuess(Mantid::API::MatrixWorkspace_sptr workspace);
   void plotGuessInSeparateWindow(Mantid::API::MatrixWorkspace_sptr workspace);
   void plotLines();
@@ -101,7 +107,7 @@ private:
   void updateBackgroundSelector();
   void emitSelectedFitDataChanged();
 
-  void plotSpectrum(std::size_t spectrum) const;
+  void plotSpectrum(WorkspaceIndex spectrum) const;
 
   std::unique_ptr<IndirectFitPlotModel> m_model;
   IIndirectFitPlotView *m_view;

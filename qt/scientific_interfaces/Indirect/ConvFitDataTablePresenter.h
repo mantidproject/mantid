@@ -8,7 +8,7 @@
 #define MANTIDQTCUSTOMINTERFACES_CONVFITDATATABLEPRESENTER_H_
 
 #include "ConvFitModel.h"
-#include "IndirectDataTablePresenter.h"
+#include "IndirectDataTablePresenterLegacy.h"
 
 #include <QTableWidget>
 
@@ -22,7 +22,8 @@ namespace IDA {
 /**
   Presenter for a table of convolution fitting data.
 */
-class DLLExport ConvFitDataTablePresenter : public IndirectDataTablePresenter {
+class DLLExport ConvFitDataTablePresenter
+    : public IndirectDataTablePresenterLegacy {
   Q_OBJECT
 public:
   ConvFitDataTablePresenter(ConvFitModel *model, QTableWidget *dataTable);

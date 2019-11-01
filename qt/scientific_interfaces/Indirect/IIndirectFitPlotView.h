@@ -8,6 +8,7 @@
 #define MANTIDQTCUSTOMINTERFACESIDA_IINDIRECTFITPLOTVIEW_H_
 
 #include "DllConfig.h"
+#include "IndexTypes.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
 
@@ -26,36 +27,36 @@ public:
 
   virtual void watchADS(bool watch) = 0;
 
-  virtual std::size_t getSelectedSpectrum() const = 0;
-  virtual int getSelectedSpectrumIndex() const = 0;
-  virtual int getSelectedDataIndex() const = 0;
-  virtual std::size_t dataSelectionSize() const = 0;
+  virtual WorkspaceIndex getSelectedSpectrum() const = 0;
+  virtual TableRowIndex getSelectedSpectrumIndex() const = 0;
+  virtual TableDatasetIndex getSelectedDataIndex() const = 0;
+  virtual TableDatasetIndex dataSelectionSize() const = 0;
   virtual bool isPlotGuessChecked() const = 0;
 
   virtual void hideMultipleDataSelection() = 0;
   virtual void showMultipleDataSelection() = 0;
 
-  virtual void setAvailableSpectra(std::size_t minimum,
-                                   std::size_t maximum) = 0;
-  virtual void
-  setAvailableSpectra(const std::vector<std::size_t>::const_iterator &from,
-                      const std::vector<std::size_t>::const_iterator &to) = 0;
+  virtual void setAvailableSpectra(WorkspaceIndex minimum,
+                                   WorkspaceIndex maximum) = 0;
+  virtual void setAvailableSpectra(
+      const std::vector<WorkspaceIndex>::const_iterator &from,
+      const std::vector<WorkspaceIndex>::const_iterator &to) = 0;
 
   virtual void setMinimumSpectrum(int minimum) = 0;
   virtual void setMaximumSpectrum(int maximum) = 0;
-  virtual void setPlotSpectrum(int spectrum) = 0;
+  virtual void setPlotSpectrum(WorkspaceIndex spectrum) = 0;
   virtual void appendToDataSelection(const std::string &dataName) = 0;
   virtual void setNameInDataSelection(const std::string &dataName,
-                                      std::size_t index) = 0;
+                                      TableDatasetIndex index) = 0;
   virtual void clearDataSelection() = 0;
 
   virtual void plotInTopPreview(const QString &name,
                                 Mantid::API::MatrixWorkspace_sptr workspace,
-                                std::size_t spectrum,
+                                WorkspaceIndex spectrum,
                                 Qt::GlobalColor colour) = 0;
   virtual void plotInBottomPreview(const QString &name,
                                    Mantid::API::MatrixWorkspace_sptr workspace,
-                                   std::size_t spectrum,
+                                   WorkspaceIndex spectrum,
                                    Qt::GlobalColor colour) = 0;
 
   virtual void removeFromTopPreview(const QString &name) = 0;
@@ -88,9 +89,9 @@ public slots:
   virtual void setHWHMMinimum(double maximum) = 0;
 
 signals:
-  void selectedFitDataChanged(std::size_t /*_t1*/);
+  void selectedFitDataChanged(TableDatasetIndex /*_t1*/);
   void plotCurrentPreview();
-  void plotSpectrumChanged(std::size_t /*_t1*/);
+  void plotSpectrumChanged(WorkspaceIndex /*_t1*/);
   void plotGuessChanged(bool /*_t1*/);
   void fitSelectedSpectrum();
   void startXChanged(double /*_t1*/);

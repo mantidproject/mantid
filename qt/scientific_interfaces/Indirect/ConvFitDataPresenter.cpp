@@ -24,10 +24,11 @@ namespace CustomInterfaces {
 namespace IDA {
 
 ConvFitDataPresenter::ConvFitDataPresenter(ConvFitModel *model,
-                                           IIndirectFitDataView *view)
-    : IndirectFitDataPresenter(model, view,
-                               std::make_unique<ConvFitDataTablePresenter>(
-                                   model, view->getDataTable())),
+                                           IIndirectFitDataViewLegacy *view)
+    : IndirectFitDataPresenterLegacy(
+          model, view,
+          std::make_unique<ConvFitDataTablePresenter>(model,
+                                                      view->getDataTable())),
       m_convModel(model) {
   setResolutionHidden(false);
 
@@ -63,12 +64,12 @@ void ConvFitDataPresenter::addDataToModel(IAddWorkspaceDialog const *dialog) {
 }
 
 void ConvFitDataPresenter::addWorkspace(ConvFitAddWorkspaceDialog const *dialog,
-                                        IndirectFittingModel *model) {
+                                        IndirectFittingModelLegacy *model) {
   model->addWorkspace(dialog->workspaceName(), dialog->workspaceIndices());
 }
 
 void ConvFitDataPresenter::addModelData(const std::string &name) {
-  IndirectFitDataPresenter::addModelData(name);
+  IndirectFitDataPresenterLegacy::addModelData(name);
   const auto resolution = getView()->getSelectedResolution();
   if (!resolution.empty() && isWorkspaceLoaded(resolution))
     m_convModel->setResolution(resolution, 0);

@@ -963,17 +963,15 @@ class MainWindow(QMainWindow):
         fastLog = self.ui.checkBox_fastLog.isChecked()
 
         title = str(self.ui.lineEdit_title.text())
-
-        splitws, infows = api.GenerateEventsFilter(InputWorkspace=self._dataWS,
-                                                   UnitOfTime="Seconds",
-                                                   TitleOfSplitters=title,
-                                                   OutputWorkspace=splitwsname,
-                                                   LogName=samplelog,
-                                                   FastLog=fastLog,
-                                                   InformationWorkspace=splitinfowsname,
-                                                   **kwargs)
-
         try:
+            splitws, infows = api.GenerateEventsFilter(InputWorkspace=self._dataWS,
+                                                       UnitOfTime="Seconds",
+                                                       TitleOfSplitters=title,
+                                                       OutputWorkspace=splitwsname,
+                                                       LogName=samplelog,
+                                                       FastLog=fastLog,
+                                                       InformationWorkspace=splitinfowsname,
+                                                       **kwargs)
             self.splitWksp(splitws, infows)
         except RuntimeError as e:
             self._setErrorMsg("Splitting Failed!\n %s" % (str(e)))

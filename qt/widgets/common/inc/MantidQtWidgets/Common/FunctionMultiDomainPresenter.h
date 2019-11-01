@@ -91,6 +91,9 @@ private slots:
   void editLocalParameterFinish(int result);
 
 private:
+  void updateViewFromModel();
+
+private:
   IFunctionView *m_view;
   std::unique_ptr<FunctionModel> m_model;
   EditLocalParameterDialog *m_editLocalParameterDialog;

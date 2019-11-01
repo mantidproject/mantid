@@ -10,10 +10,10 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "IIndirectFitDataView.h"
-#include "IndirectDataTablePresenter.h"
-#include "IndirectFitDataPresenter.h"
-#include "IndirectFittingModel.h"
+#include "IIndirectFitDataViewLegacy.h"
+#include "IndirectDataTablePresenterLegacy.h"
+#include "IndirectFitDataPresenterLegacy.h"
+#include "IndirectFittingModelLegacy.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -57,7 +57,7 @@ private:
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 /// Mock object to mock the view
-class MockIIndirectFitDataView : public IIndirectFitDataView {
+class MockIIndirectFitDataView : public IIndirectFitDataViewLegacy {
 public:
   /// Signals
   void emitSampleLoaded(QString const &name) { emit sampleLoaded(name); }
@@ -94,9 +94,9 @@ public:
 };
 
 /// Mock object to mock the model
-class MockIndirectFitDataModel : public IndirectFittingModel {
+class MockIndirectFitDataModel : public IndirectFittingModelLegacy {
 public:
-  using IndirectFittingModel::addWorkspace;
+  using IndirectFittingModelLegacy::addWorkspace;
 
   /// Public Methods
   MOCK_CONST_METHOD1(hasWorkspace, bool(std::string const &workspaceName));
@@ -141,9 +141,9 @@ public:
     m_model = std::make_unique<NiceMock<MockIndirectFitDataModel>>();
     m_table = createEmptyTableWidget(5, 5);
 
-    m_dataTablePresenter = std::make_unique<IndirectDataTablePresenter>(
+    m_dataTablePresenter = std::make_unique<IndirectDataTablePresenterLegacy>(
         std::move(m_model.get()), std::move(m_table.get()));
-    m_presenter = std::make_unique<IndirectFitDataPresenter>(
+    m_presenter = std::make_unique<IndirectFitDataPresenterLegacy>(
         std::move(m_model.get()), std::move(m_view.get()),
         std::move(m_dataTablePresenter));
 
@@ -311,11 +311,11 @@ private:
   }
 
   std::unique_ptr<QTableWidget> m_table;
-  std::unique_ptr<IndirectDataTablePresenter> m_dataTablePresenter;
+  std::unique_ptr<IndirectDataTablePresenterLegacy> m_dataTablePresenter;
 
   std::unique_ptr<MockIIndirectFitDataView> m_view;
   std::unique_ptr<MockIndirectFitDataModel> m_model;
-  std::unique_ptr<IndirectFitDataPresenter> m_presenter;
+  std::unique_ptr<IndirectFitDataPresenterLegacy> m_presenter;
 
   SetUpADSWithWorkspace *m_ads;
 };

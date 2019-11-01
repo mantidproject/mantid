@@ -455,6 +455,7 @@ public:
     void addAllowedTableWorkspace(const QString &wsName);
     void setTextPlotGuess(const QString);
     bool plotDiff() const;
+    std::string outputName() const;
     void addFitResultWorkspacesToTableWidget();
     void setWorkspaceName(const QString &wsName);
     void postDeleteHandle(const std::string &wsName);
@@ -510,8 +511,8 @@ signals:
     void algorithmFinished(const QString &);
     void removeFitCurves();
     void plotGuess();
+    void sequentialFitDone() const;
     void workspaceClicked(const QString &);
-
 };
 
 // ---------------------------------
