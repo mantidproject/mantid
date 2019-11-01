@@ -20,6 +20,7 @@
 #include "Reduction/Batch.h"
 
 #include <QFileDialog>
+#include <QMessageBox>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -195,7 +196,15 @@ void MainWindowPresenter::notifyLoadBatchRequested(int tabIndex) {
   auto filename = QFileDialog::getOpenFileName();
   if (filename == "")
     return;
-  auto map = MantidQt::API::loadJSONFromFile(filename);
+  QMap<QString, QVariant> map;
+  try {
+    map = MantidQt::API::loadJSONFromFile(filename);
+  } catch (const std::runtime_error &e) {
+    QMessageBox msgBox;
+    msgBox.setText("Unable to load requested file. Please load a file of "
+                   "appropriate format saved from the GUI.");
+    msgBox.exec();
+  }
   IBatchPresenter *batchPresenter = m_batchPresenters[tabIndex].get();
   Decoder decoder;
   decoder.decodeBatch(batchPresenter, m_view, map);
