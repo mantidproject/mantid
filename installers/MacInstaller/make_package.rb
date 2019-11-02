@@ -26,6 +26,7 @@ BUNDLED_PY_MODULES = [
   'dateutil',
   'decorator.py',
   'enum',
+  'funcsigs',
   'h5py',
   'idna',
   'IPython',
