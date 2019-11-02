@@ -1708,7 +1708,7 @@ class AbsCorrInfo(PropDescriptor):
             return
         val_dict =  {}
         if isinstance(value, string_types):
-            val = re.sub('[{}\[\]"=:;,\']', ' ', value)
+            val = re.sub(' u ', ' ', re.sub('[{}\[\]"=:;,\']', ' ', value))
             val_list = re.split('\s+',val)
             ik = 0
             while ik < len(val_list):
