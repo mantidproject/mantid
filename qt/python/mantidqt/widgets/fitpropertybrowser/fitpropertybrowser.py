@@ -127,11 +127,6 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         """
         Override the base class method. Initialise the peak editing tool.
         """
-        if len(self.canvas.figure.get_axes()) > 1:
-            self.toolbar_manager.toggle_fit_button_checked()
-            logger.warning("Cannot fit tiled plots.")
-            return
-
         allowed_spectra = self._get_allowed_spectra()
         table = self._get_table_workspace()
 
