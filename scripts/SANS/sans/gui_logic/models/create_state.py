@@ -46,9 +46,10 @@ def create_states(state_model, table_model, instrument, facility, row_index=None
 
 def _create_row_state(row, table_model, state_model, facility, instrument, file_lookup,
                       gui_state_director, user_file):
+    sans_logger.information("Generating state for row {}".format(row))
+    state = None
+
     try:
-        sans_logger.information("Generating state for row {}".format(row))
-        state = None
 
         table_entry = table_model.get_table_entry(row)
         if not table_entry.file_information and file_lookup:
