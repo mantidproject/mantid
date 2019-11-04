@@ -48,7 +48,11 @@ set(TEST_PY_FILES
     TFMuoniumTest.py
     ZFdipoleTest.py
     ZFprotonDipoleTest.py
-    ZFelectronDipoleTest.py)
+    ZFelectronDipoleTest.py
+    ZFdipoleTest.py
+    ZFprotonDipoleTest.py
+    ZFelectronDipoleTest.py
+    ZFMuoniumTest.py)
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
 
