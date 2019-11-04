@@ -120,13 +120,25 @@ void saveJSONToFile(const QString &filename,
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   JSON JSON;
   auto jsonString = JSON.encode(map);
+  if (filename.find_last_of(".") == std::string::npos ||
+      (filename.find_last_of(".") != std::string::npos &&
+       filename.substr(filename.find_last_of(".") + 1) !=
+           std::string("json"))) {
+    filename.append(".json")
+  }
   QFile jsonFile(filename);
   jsonFile.open(QFile::WriteOnly);
   QByteArray jsonByteArray;
   jsonFile.write(jsonByteArray.append(jsonString));
 #else
   QJsonDocument jsonDocument(QJsonObject::fromVariantMap(map));
-  QFile jsonFile(filename + ".json");
+  if (filename.find_last_of(".") == std::string::npos ||
+      (filename.find_last_of(".") != std::string::npos &&
+       filename.substr(filename.find_last_of(".") + 1) !=
+           std::string("json"))) {
+    filename.append(".json")
+  }
+  QFile jsonFile(filename);
   jsonFile.open(QFile::WriteOnly);
   jsonFile.write(jsonDocument.toJson());
 #endif
