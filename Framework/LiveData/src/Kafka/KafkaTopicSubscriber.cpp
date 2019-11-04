@@ -21,7 +21,7 @@ using RdKafka::TopicMetadata;
 
 namespace {
 /// Timeout for message consume
-const int CONSUME_TIMEOUT_MS = 30000;
+const int CONSUME_TIMEOUT_MS = 300000;
 const std::string MAX_MESSAGE_SIZE = "200000000";
 // Receive buffer size must be at least MAX_MESSAGE_SIZE+512
 const std::string RECEIVE_BUFFER_SIZE = "200000512";
@@ -48,6 +48,8 @@ createGlobalConfiguration(const std::string &brokerAddr) {
   conf->set("enable.auto.commit", "false", errorMsg);
   conf->set("enable.auto.offset.store", "false", errorMsg);
   conf->set("api.version.request", "true", errorMsg);
+  conf->set("socket.timeout.ms", "300000", errorMsg);
+  conf->set("fetch.wait.max.ms", "300200", errorMsg);
   return conf;
 }
 } // namespace

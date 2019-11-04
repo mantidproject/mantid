@@ -550,7 +550,9 @@ void KafkaEventStreamDecoder::initLocalCaches(
   const auto instName = runStartData.instrumentName;
 
   DataObjects::EventWorkspace_sptr eventBuffer;
-  if (rawMsgBuffer.empty()) {
+  bool isInstrumentSet = false;
+  if (!jsonGeometry.empty()) {
+    g_log.notice() << "Loading json geometry..." << std::endl;
     /* Load the instrument to get the number of spectra :c */
     auto ws =
         API::WorkspaceFactory::Instance().create("EventWorkspace", 1, 2, 1);
@@ -566,6 +568,7 @@ void KafkaEventStreamDecoder::initLocalCaches(
     eventBuffer->getAxis(0)->unit() =
         Kernel::UnitFactory::Instance().create("TOF");
     eventBuffer->setYUnit("Counts");
+    isInstrumentSet = true;
   } else {
     /* Parse mapping from stream */
     auto spDetMsg = GetSpectraDetectorMapping(
@@ -588,7 +591,8 @@ void KafkaEventStreamDecoder::initLocalCaches(
   }
 
   // Load the instrument if possible but continue if we can't
-  if (!eventBuffer) {
+  if (!isInstrumentSet) {
+    g_log.notice() << "Loading instrument..." << std::endl; 
     if (!instName.empty()) {
       loadInstrument<DataObjects::EventWorkspace>(instName, eventBuffer,
                                                   jsonGeometry);
@@ -658,11 +662,11 @@ std::vector<size_t> computeGroupBoundaries(
 
     /* Advance the end boundary of the group until all events for a given
      * workspace index fall within a single group */
-    // while (groupBoundaries[group] + 1 < eventBuffer.size() &&
-    //       (eventBuffer[groupBoundaries[group]].wsIdx ==
-    //        eventBuffer[groupBoundaries[group] + 1].wsIdx)) {
-    //  ++groupBoundaries[group];
-    //}
+     while (groupBoundaries[group] + 1 < eventBuffer.size() &&
+           (eventBuffer[groupBoundaries[group]].wsIdx ==
+            eventBuffer[groupBoundaries[group] + 1].wsIdx)) {
+      ++groupBoundaries[group];
+    }
 
     /* Increment group end boundary (such that group is defined by [lower,
      * upper) boundaries) */
@@ -670,7 +674,7 @@ std::vector<size_t> computeGroupBoundaries(
 
     /* If we have already gotten through all events then exit early, leaving
      * some threads without events. */
-    if (groupBoundaries[group] == eventBuffer.size()) {
+    if (groupBoundaries[group] >= eventBuffer.size()) {
       break;
     }
   }

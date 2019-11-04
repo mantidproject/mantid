@@ -146,6 +146,7 @@ void InstrumentActor::setUpWorkspace(
   m_WkspBinMaxValue = -DBL_MAX;
   const auto &spectrumInfo = sharedWorkspace->spectrumInfo();
   m_detIndex2WsIndex.resize(componentInfo().size(), INVALID_INDEX);
+  //PARALLEL_FOR_NO_WSP_CHECK()
   for (size_t wi = 0; wi < spectrumInfo.size(); ++wi) {
     const auto &values = sharedWorkspace->x(wi);
     double xtest = values.front();
@@ -1064,6 +1065,7 @@ void InstrumentActor::setDataIntegrationRange(const double &xmin,
     const auto &spectrumInfo = workspace->spectrumInfo();
 
     // Ignore monitors if multiple detectors aren't grouped.
+    //PARALLEL_FOR_NO_WSP_CHECK()
     for (size_t i = 0; i < m_specIntegrs.size(); i++) {
       const auto &spectrumDefinition = spectrumInfo.spectrumDefinition(i);
       if (spectrumDefinition.size() == 1 &&

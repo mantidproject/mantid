@@ -419,7 +419,7 @@ void JSONGeometryParser::extractTransformations(
     Eigen::Quaterniond &orientation) {
   Eigen::Vector3d location(0, 0, 0);
   Eigen::Vector3d beamDirectionOffset(0, 0, 0);
-  Eigen::Vector3d orientationVector(0, 0, 0);
+  Eigen::Vector3d orientationVector(0, 0, 1);
   double angle = 0.0;
 
   auto &children = transformations[CHILDREN];
@@ -432,8 +432,9 @@ void JSONGeometryParser::extractTransformations(
     } else if (transformation[NAME] == "beam_direction_offset") {
       extractTransformationDataset(transformation, value, beamDirectionOffset);
       beamDirectionOffset *= value;
-    } else if (transformation[NAME] == "orientation")
+    } else if (transformation[NAME] == "orientation") {
       extractTransformationDataset(transformation, angle, orientationVector);
+    }
   }
   translation = location + beamDirectionOffset;
   orientation = Eigen::AngleAxisd(degreesToRadians(angle),
@@ -526,7 +527,7 @@ void JSONGeometryParser::extractMonitorContent() {
         extractMonitorEventStream(child, mon);
       else if (child[NAME] == "waveforms")
         extractMonitorWaveformStream(child, mon);
-      else if (child[NAME] == "transformations")
+      else if (validateNXAttribute(child[ATTRIBUTES], NX_TRANSFORMATIONS))
         extractTransformations(child, mon.translation, mon.orientation);
       else if (child[NAME] == SHAPE)
         extractShapeInformation(child, mon.cylinders, mon.faces, mon.vertices,

@@ -913,6 +913,7 @@
 	  <topic name="V20_motion" type="sample" />
 	  <topic name="V20_runInfo" type="run" />
 	  <topic name="denex_detector" type="event" />
+	  <topic name="monitor" type="monitor" />
     </livedata>
   </instrument>
 </facility>
@@ -920,7 +921,14 @@
 <!--  Test Facility to allow example usage of Live listeners against "Fake" instrument sources -->
 <facility name="TEST_LIVE" FileExtensions=".nxs,.raw">
   <timezone>UTC</timezone>
-
+  
+  <instrument name="LOKI">
+    <technique>SANS Test</technique>
+    <livedata>
+      <connection name="event" address="hinata:9092" listener="KafkaEventListener" />
+    </livedata>
+  </instrument>
+  
   <instrument name="ISIS_Histogram">
     <technique>Test Listener</technique>
     <livedata>
