@@ -404,7 +404,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             for ax in axes:
                 # We check for axes type below as a pseudo check for an axes being
                 # a colorbar. this is based on the same check in
-                # FigureManagerADSObserverdeleteHandle.deleteHandle.
+                # FigureManagerADSObserver.deleteHandle.
                 if type(ax) is not Axes:
                     ax.relim(visible_only=True)
                     ax.autoscale()
