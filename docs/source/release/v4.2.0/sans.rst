@@ -38,6 +38,8 @@ Improved
 - :ref:`ApplyTransmissionCorrection <algm-ApplyTransmissionCorrection-v1>` now
   can be supplied any transmission workspace that is supported
   by :ref:`Divide <algm-Divide-v1>` .
+- Fixed a bug where Mantid would crash when a user went to change their default
+  save directory if no instrument was selected.
 
 Multiple ISIS SANS GUI usability fixes including:
 

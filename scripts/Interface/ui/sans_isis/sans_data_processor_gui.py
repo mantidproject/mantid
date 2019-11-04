@@ -249,6 +249,7 @@ class SANSDataProcessorGui(QMainWindow,
         self._attach_validators()
 
         self._setup_progress_bar()
+        self._setup_add_runs_page()
 
         # At a later date we can drop new once we confirm the old GUI is not using "ISIS SANS"
         UsageService.registerFeatureUsage("Interface", "ISIS SANS (new)", False)
@@ -949,9 +950,6 @@ class SANSDataProcessorGui(QMainWindow,
         if instrument:
             reduction_mode_list = get_reduction_mode_strings_for_gui(instrument)
             self.set_reduction_modes(reduction_mode_list)
-
-            if instrument != SANSInstrument.NoInstrument:
-                self._setup_add_runs_page()
 
     def update_gui_combo_box(self, value, expected_type, combo_box):
         # There are three types of values that can be passed:
