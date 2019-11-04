@@ -278,7 +278,8 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
         # Hack to ensure the canvas is up to date
         self.canvas.draw_idle()
-        if figure_type(self.canvas.figure) not in [FigureType.Line, FigureType.Errorbar]:
+        if figure_type(self.canvas.figure) not in [FigureType.Line, FigureType.Errorbar] \
+                or self.toolbar is not None and len(self.canvas.figure.get_axes()) > 1:
             self._set_fit_enabled(False)
 
         # For plot-to-script button to show, we must have a MantidAxes with lines in it
