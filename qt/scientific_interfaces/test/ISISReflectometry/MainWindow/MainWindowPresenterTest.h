@@ -13,6 +13,7 @@
 #include "../ReflMockObjects.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidGeometry/Instrument_fwd.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/MockSlitCalculator.h"
 #include "MockMainWindowView.h"
 
@@ -47,6 +48,18 @@ public:
     m_batchViews.emplace_back(new MockBatchView);
     m_batchViews.emplace_back(new MockBatchView);
     ON_CALL(m_view, batches()).WillByDefault(Return(m_batchViews));
+  }
+
+  void setUp() override {
+    auto &config = Mantid::Kernel::ConfigService::Instance();
+    backup_facility = config.getString("default.facility");
+    backup_instrument = config.getString("default.instrument");
+  }
+
+  void tearDown() override {
+    auto &config = Mantid::Kernel::ConfigService::Instance();
+    config.setString("default.facility", backup_facility);
+    config.setString("default.instrument", backup_instrument);
   }
 
   void testPresenterSubscribesToView() {
@@ -282,6 +295,26 @@ public:
     verifyAndClear();
   }
 
+  void testUpdateInstrumentSetsFacilityInConfig() {
+    auto presenter = makePresenter();
+    auto const instrument = setupInstrument(presenter, "POLREF");
+    auto &config = Mantid::Kernel::ConfigService::Instance();
+    config.setString("default.facility", "OLD_FACILITY");
+    presenter.notifyUpdateInstrumentRequested();
+    TS_ASSERT_EQUALS(config.getString("default.facility"), "ISIS");
+    verifyAndClear();
+  }
+
+  void testUpdateInstrumentSetsInstrumentInConfig() {
+    auto presenter = makePresenter();
+    auto const instrument = setupInstrument(presenter, "POLREF");
+    auto &config = Mantid::Kernel::ConfigService::Instance();
+    config.setString("default.instrument", "OLD_INSTRUMENT");
+    presenter.notifyUpdateInstrumentRequested();
+    TS_ASSERT_EQUALS(config.getString("default.instrument"), instrument);
+    verifyAndClear();
+  }
+
 private:
   NiceMock<MockMainWindowView> m_view;
   NiceMock<MockMessageHandler> m_messageHandler;
@@ -428,6 +461,10 @@ private:
       TS_ASSERT_EQUALS(presenter.m_batchPresenters[index].get(),
                        m_batchPresenters[index]);
   }
+
+private:
+  std::string backup_facility;
+  std::string backup_instrument;
 };
 
 #endif // MANTID_CUSTOMINTERFACES_MAINWINDOWPRESENTERTEST_H_
