@@ -24,6 +24,7 @@ creation is outlined in :ref:`issue_tracking`.
    IndirectInelastic/IndirectInelasticAcceptanceTests
    ErrorReporter-ProjectRecovery/ErrorReporterTesting
    ErrorReporter-ProjectRecovery/ProjectRecoveryTesting
+   LiveData/LiveDataTests
    ReflectometryGUI/ReflectometryTests
    SANSGUI/SANSGUITests
    VSI/VSITesting

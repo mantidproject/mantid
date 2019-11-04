@@ -2892,9 +2892,6 @@ void FitPropertyBrowser::removeLogValue() {
 }
 
 void FitPropertyBrowser::sequentialFit() {
-  if (workspaceName() == outputName()) {
-    setOutputName(outputName() + "_res");
-  }
   SequentialFitDialog *dlg = new SequentialFitDialog(this, m_mantidui);
   std::string wsName = workspaceName();
   if (!wsName.empty() &&

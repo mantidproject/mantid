@@ -11,7 +11,7 @@ Release Notes
 
    */index
 
-
+* :doc:`v4.3.0 <v4.3.0/index>`
 * :doc:`v4.2.0 <v4.2.0/index>`
 * :doc:`v4.1.0 <v4.1.0/index>`
 * :doc:`v4.0.0 <v4.0.0/index>`
