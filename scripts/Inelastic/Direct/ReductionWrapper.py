@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
-from __future__ import (absolute_import, division, print_function)
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 from mantid.simpleapi import *
 from mantid import config,api
 from mantid.kernel import funcinspect
@@ -17,7 +17,7 @@ from types import MethodType # noqa
 import os
 import re
 import time
-from six import iteritems
+from six import iteritems, string_types
 
 try:
     import h5py
@@ -130,7 +130,7 @@ class ReductionWrapper(object):
         f.write("standard_vars = {\n")
         str_wrapper = '         '
         for key,val in iteritems(self._wvs.standard_vars):
-            if isinstance(val,str):
+            if isinstance(val, string_types):
                 row = "{0}\'{1}\':\'{2}\'".format(str_wrapper,key,val)
             else:
                 row = "{0}\'{1}\':{2}".format(str_wrapper,key,val)
@@ -140,7 +140,7 @@ class ReductionWrapper(object):
         #print advances variables
         str_wrapper = '         '
         for key,val in iteritems(self._wvs.advanced_vars):
-            if isinstance(val,str):
+            if isinstance(val, string_types):
                 row = "{0}\'{1}\':\'{2}\'".format(str_wrapper,key,val)
             else:
                 row = "{0}\'{1}\':{2}".format(str_wrapper,key,val)
@@ -312,7 +312,7 @@ class ReductionWrapper(object):
         # this row defines location of the validation file
         validation_file = self.validation_file_name()
         sample_run = self.validate_run_number
-        if isinstance(validation_file,str):
+        if isinstance(validation_file, string_types):
             path,name = os.path.split(validation_file)
             if name in mtd:
                 reference_ws = mtd[name]
@@ -735,7 +735,7 @@ def iliad(reduce):
             input_file = None
             output_directory = None
         # add input file folder to data search directory if file has it
-        if input_file and isinstance(input_file,str):
+        if input_file and isinstance(input_file, string_types):
             data_path = os.path.dirname(input_file)
             if len(data_path) > 0:
                 try:
@@ -763,7 +763,7 @@ def iliad(reduce):
 
         # prohibit returning workspace to web services.
         #pylint: disable=protected-access
-        if host._run_from_web and not isinstance(rez,str):
+        if host._run_from_web and not isinstance(rez, string_types):
             rez = ""
         else:
             if isinstance(rez, list):

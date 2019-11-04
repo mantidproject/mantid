@@ -9,12 +9,13 @@
 """ File contains collection of Descriptors used to define complex
     properties in NonIDF_Properties and PropertyManager classes
 """
-from __future__ import (absolute_import, division, print_function)
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 import os
 import numpy as np
 import math
 import re
 from collections import Iterable
+from six import string_types
 
 import mantid.simpleapi as mantid
 from mantid import api
@@ -189,7 +190,7 @@ class IncidentEnergy(PropDescriptor):
         """ Set up incident energy or range of energies in various formats
             or define autoEi"""
         if value is not None:
-            if isinstance(value, str):
+            if isinstance(value, string_types):
                 # Check autoEi
                 if value.lower() == 'auto':
                     self._use_autoEi = True
@@ -209,7 +210,7 @@ class IncidentEnergy(PropDescriptor):
                         value = value.replace('[', '').replace(']', '').strip()
                     else:
                         energy_list = False
-                    en_list = str.split(value, ',')
+                    en_list = value.split(',')
                     if len(en_list) > 1:
                         rez = []
                         for en_str in en_list:
@@ -404,7 +405,7 @@ class EnergyBins(PropDescriptor):
 
     def __set__(self, instance, values):
         if values is not None:
-            if isinstance(values, str):
+            if isinstance(values, string_types):
                 values = values.replace('[', '').replace(']', '').strip()
                 lst = values.split(',')
                 self.__set__(instance, lst)
@@ -621,7 +622,7 @@ class mon2NormalizationEnergyRange(PropDescriptor):
         """ set detector calibration file using various formats """
         if isinstance(val, list):
             self._relative_range = self._check_range(val, instance)
-        elif isinstance(val, str):
+        elif isinstance(val, string_types):
             val = self._parce_string2list(val)
             self.__set__(instance, val)
         else:
@@ -743,7 +744,7 @@ class DetCalFile(PropDescriptor):
             self._det_cal_file = val
             self._calibrated_by_run = False
             return
-        if isinstance(val, str):
+        if isinstance(val, string_types):
             if val in mantid.mtd:
                 val = mantid.mtd[val]
                 self._det_cal_file = val
@@ -797,7 +798,7 @@ class DetCalFile(PropDescriptor):
             return (True, 'Workspace {0} used for detectors calibration'.format(self._det_cal_file.name()))
 
         dcf_val = self._det_cal_file
-        if isinstance(dcf_val, str):  # it may be string representation of runN
+        if isinstance(dcf_val, string_types):  # it may be string representation of runN
             try:
                 dcf_val = int(dcf_val)
             except ValueError:
@@ -935,14 +936,10 @@ class HardMaskOnly(prop_helpers.ComplexProperty):
         return prop_helpers.gen_getter(instance.__dict__, 'use_hard_mask_only')
 
     def __set__(self, instance, value):
-        if value is None:
-            use_hard_mask_only = False
-            instance.hard_mask_file = None
-            hard_mask_file = None
-        elif isinstance(value, bool) or isinstance(value, int):
+        if isinstance(value, bool) or isinstance(value, int):
             use_hard_mask_only = bool(value)
             hard_mask_file = instance.hard_mask_file
-        elif isinstance(value, str):
+        elif isinstance(value, string_types):
             if value.lower() in ['true', 'yes']:
                 use_hard_mask_only = True
             elif value.lower() in ['false', 'no']:
@@ -951,7 +948,10 @@ class HardMaskOnly(prop_helpers.ComplexProperty):
                 instance.hard_mask_file = value
                 use_hard_mask_only = True
             hard_mask_file = instance.hard_mask_file
-        # end
+        else:
+            use_hard_mask_only = False
+            instance.hard_mask_file = None
+            hard_mask_file = None
 
         # if no hard mask file is there and use_hard_mask_only is True,
         # diagnostics should not run
@@ -1036,7 +1036,7 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
                 self._rel_range = False
                 self._other_prop = ['monovan_lo_value', 'monovan_hi_value']
 
-            if isinstance(value, str):
+            if isinstance(value, string_types):
                 values = value.split(',')
                 result = []
                 for val in values:
@@ -1104,7 +1104,7 @@ class EiMonSpectra(prop_helpers.ComplexProperty):
         else:
             tDict = instance.__dict__
 
-        if isinstance(value, str):
+        if isinstance(value, string_types):
             val = value.replace('[', '').replace(']', '').strip()
             if val.find(':') > -1:
                 val = val.split(':')
@@ -1150,7 +1150,7 @@ class EiMonSpectra(prop_helpers.ComplexProperty):
         properties and these properties are currently standard properties
         """
 
-        if isinstance(mon_range, str):
+        if isinstance(mon_range, string_types):
             mon_val = mon_range.split(',')
         else:
             mon_val = mon_range
@@ -1200,7 +1200,7 @@ class SpectraToMonitorsList(PropDescriptor):
         if spectra_list is None:
             return None
 
-        if isinstance(spectra_list, str):
+        if isinstance(spectra_list, string_types):
             if spectra_list.lower() is 'none':
                 result = None
             else:
@@ -1255,7 +1255,7 @@ class SaveFormat(PropDescriptor):
             return
 
         # check string
-        if isinstance(value, str):
+        if isinstance(value, string_types):
             value = value.strip('[]().')
             subformats = value.split(',')
             if len(subformats) > 1:
@@ -1319,7 +1319,7 @@ class DiagSpectra(PropDescriptor):
         """ process IDF description of the spectra string """
         if specta_sring is None:
             return None
-        if isinstance(specta_sring, str):
+        if isinstance(specta_sring, string_types):
             if specta_sring.lower() in ['none', 'no']:
                 return None
             else:
@@ -1364,8 +1364,8 @@ class BackbgroundTestRange(PropDescriptor):
         if value is None:
             self._background_test_range = None
             return
-        if isinstance(value, str):
-            value = str.split(value, ',')
+        if isinstance(value, string_types):
+            value = value.split(',')
         if len(value) != 2:
             raise ValueError("background test range can be only a 2 element list of floats")
         self._background_test_range = (float(value[0]), float(value[1]))
@@ -1409,8 +1409,8 @@ class MultirepTOFSpectraList(PropDescriptor):
         if value is None:
             self._spectra_list = None
             return
-        if isinstance(value, str):
-            value = str.split(value, ',')
+        if isinstance(value, string_types):
+            value = value.split(',')
             self.__set__(instance, value)
             return
         if isinstance(value, list):
@@ -1522,7 +1522,7 @@ class MotorLogName(PropDescriptor):
         return self._log_names
 
     def __set__(self, instance, value):
-        if isinstance(value, str):
+        if isinstance(value, string_types):
             val_list = value.split(';')
         elif isinstance(value, list):
             val_list = []
@@ -1590,7 +1590,7 @@ class RotationAngle(PropDescriptor):
         return self.read_psi_from_workspace(self._log_ws_name)
 
     def __set__(self, instance, value):
-        if isinstance(value, str):
+        if isinstance(value, string_types):
             if value in mantid.mtd:  ## its workspace
                 self._log_ws_name = value
                 self._own_psi_value = None
@@ -1615,7 +1615,7 @@ class RotationAngle(PropDescriptor):
         if working_ws is None:
             raise RuntimeError("No workspace provided. Can not read logs to identify psi")
         else:
-            if isinstance(external_ws, str):
+            if isinstance(external_ws, string_types):
                 working_ws = mantid.mtd[external_ws]
 
         value = None
@@ -1707,8 +1707,8 @@ class AbsCorrInfo(PropDescriptor):
             self._is_fast  = False
             return
         val_dict =  {}
-        if isinstance(value, str):
-            val = re.sub('[{}\[\]"=:;,\']', ' ', value)
+        if isinstance(value, string_types):
+            val = re.sub(' u ', ' ', re.sub('[{}\[\]"=:;,\']', ' ', value))
             val_list = re.split('\s+',val)
             ik = 0
             while ik < len(val_list):
@@ -1788,7 +1788,7 @@ class AbsorptionShapesContainer(PropDescriptor):
         if value is None:
             self._theShapeHolder = None
             return
-        if isinstance(value,str):
+        if isinstance(value, string_types):
             self._theShapeHolder = anAbsorptionShape.from_str(value)
         elif isinstance(value,anAbsorptionShape):
             self._theShapeHolder = value

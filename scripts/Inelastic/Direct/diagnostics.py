@@ -17,7 +17,8 @@ The output of each function is a workspace containing a single bin where:
 This workspace can be summed with other masked workspaces to accumulate
 masking and also passed to MaskDetectors to match masking there.
 """
-from __future__ import (absolute_import, division, print_function)
+from __future__ import (absolute_import, division, print_function, unicode_literals)
+from six import string_types
 from mantid.simpleapi import *
 from mantid.kernel.funcinspect import lhs_info
 import os
@@ -456,7 +457,7 @@ def get_failed_spectra_list(diag_workspace):
 
      diag_workspace  -  A workspace containing masking
     """
-    if isinstance(diag_workspace, str):
+    if isinstance(diag_workspace, string_types):
         diag_workspace = mtd[diag_workspace]
 
     failed_spectra = []
