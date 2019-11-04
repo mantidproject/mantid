@@ -20,7 +20,6 @@
 #include "Reduction/Batch.h"
 
 #include <QFileDialog>
-#include <QMessageBox>
 
 namespace MantidQt {
 namespace CustomInterfaces {
