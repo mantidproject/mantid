@@ -1403,10 +1403,8 @@ void processDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,
   std::string InstrName = instrument->getName();
   targWS->logs()->addProperty<std::string>("InstrumentName", InstrName, true);
   targWS->logs()->addProperty<bool>("FakeDetectors", false, true);
-  targWS->logs()->addProperty<double>("Ei", Ei, true); //"Incident energy for
-  // Direct or Analysis
-  // energy for indirect
-  // instrument");
+  // Incident energy for Direct or Analysis energy for indirect instrument;
+  targWS->logs()->addProperty<double>("Ei", Ei, true);
 
   // get access to the workspace memory
   auto &sp2detMap = targWS->getColVector<size_t>("spec2detMap");
