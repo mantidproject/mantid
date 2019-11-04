@@ -92,11 +92,11 @@ Full Change Listings
 
 For a full list of all issues addressed during this release please see the `GitHub milestone`_.
 
-.. _download page: http://download.mantidproject.org
+.. _download page: https://download.mantidproject.org
 
-.. _forum: http://forum.mantidproject.org
+.. _forum: https://forum.mantidproject.org
 
-.. _GitHub milestone: http://github.com/mantidproject/mantid/pulls?utf8=%E2%9C%93&q=is%3Apr+milestone%3A"Release {milestone}"+is%3Amerged
+.. _GitHub milestone: https://github.com/mantidproject/mantid/pulls?utf8=%E2%9C%93&q=is%3Apr+milestone%3A"Release {milestone}"+is%3Amerged
 
 .. _GitHub release page: https://github.com/mantidproject/mantid/releases/tag/v{version}
 ''',
@@ -236,7 +236,7 @@ TECH_CONTENTS = '''
    :local:
 '''
 
-MANTID_DOI = '`doi: 10.5286/SOFTWARE/MANTID{version_maj_min} <http://dx.doi.org/10.5286/SOFTWARE/MANTID{version_maj_min}>`_'
+MANTID_DOI = '`doi: 10.5286/SOFTWARE/MANTID{version_maj_min} <https://dx.doi.org/10.5286/SOFTWARE/MANTID{version_maj_min}>`_'
 
 
 def createTechniquePage(technique, body, components):
