@@ -13,6 +13,7 @@ from matplotlib import ticker
 from matplotlib.image import AxesImage
 
 from mantid import logger
+from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
 
 try:
     from matplotlib.colors import to_hex
@@ -113,8 +114,8 @@ class PlotsSaver(object):
         legend_dict = {}
         legend = ax.get_legend()
         if legend is not None:
-            legend_dict["visible"] = legend.get_visible()
             legend_dict["exists"] = True
+            legend_dict.update(LegendProperties.from_legend(legend))
         else:
             legend_dict["exists"] = False
         ax_dict["legend"] = legend_dict

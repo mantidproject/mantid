@@ -35,9 +35,13 @@ std::vector<std::string> splitStringBy(std::string const &str,
 
 std::string getIndicesRange(std::string const &str) {
   auto const bounds = splitStringBy(str, "-");
-  return std::stoull(bounds[0]) > std::stoull(bounds[1])
-             ? bounds[1] + "-" + bounds[0]
-             : str;
+  if (std::stoull(bounds[0]) > std::stoull(bounds[1])) {
+    return bounds[1] + "-" + bounds[0];
+  } else if (std::stoull(bounds[0]) < std::stoull(bounds[1])) {
+    return str;
+  } else {
+    return bounds[0];
+  }
 }
 
 std::string rearrangeIndicesSubString(std::string const &str) {

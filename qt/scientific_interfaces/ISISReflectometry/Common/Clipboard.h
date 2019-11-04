@@ -8,6 +8,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_CLIPBOARD_H_
 #define MANTID_CUSTOMINTERFACES_CLIPBOARD_H_
 
+#include "DllConfig.h"
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "MantidQtWidgets/Common/Batch/Subtree.h"
 #include "Reduction/Group.h"
@@ -16,7 +17,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-class Clipboard {
+class MANTIDQT_ISISREFLECTOMETRY_DLL Clipboard {
 public:
   struct Item {
     Item(MantidQt::MantidWidgets::Batch::RowLocation location,
@@ -67,7 +68,7 @@ private:
       MantidQt::MantidWidgets::Batch::Subtree const &subtree) const;
 };
 
-bool containsGroups(Clipboard const &clipboard);
+bool MANTIDQT_ISISREFLECTOMETRY_DLL containsGroups(Clipboard const &clipboard);
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

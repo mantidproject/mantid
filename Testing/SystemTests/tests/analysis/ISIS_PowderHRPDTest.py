@@ -61,7 +61,8 @@ class CreateVanadiumTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance = 0.05  # Required for difference in spline data between operating systems
-        return self.calibration_results.name(), "ISIS_Powder-HRPD-VanSplined_66031_hrpd_new_072_01_corr.cal.nxs"
+        return self.calibration_results.name(
+        ), "ISIS_Powder-HRPD-VanSplined_66031_hrpd_new_072_01_corr.cal.nxs"
 
     def cleanup(self):
         try:
@@ -86,10 +87,44 @@ class FocusTest(systemtesting.MantidSystemTest):
         self.focus_results = run_focus()
 
     def validate(self):
+        # check output files as expected
+        def generate_error_message(expected_file, output_dir):
+            return "Unable to find {} in {}.\nContents={}".format(expected_file, output_dir,
+                                                                  os.listdir(output_dir))
+
+        def assert_output_file_exists(directory, filename):
+            self.assertTrue(os.path.isfile(os.path.join(directory, filename)),
+                            msg=generate_error_message(filename, directory))
+
+        def first_x_value(filepath):
+            with open(filepath) as dat:
+                line = dat.readline().strip()
+                columns = line.split()
+                return float(columns[0])
+
+        user_output = os.path.join(output_dir, cycle_number, user_name)
+        assert_output_file_exists(user_output, 'hrpd66063.nxs')
+        assert_output_file_exists(user_output, 'hrpd66063.gss')
+        output_dat_dir = os.path.join(user_output, 'dat_files')
+        for bankno in range(1, 4):
+            d_filename = 'hrpd66063_b{}_D.dat'.format(bankno)
+            assert_output_file_exists(output_dat_dir, d_filename)
+            # looks like dSpacing data
+            self.assertTrue(0.20 < first_x_value(os.path.join(output_dat_dir, d_filename)) < 0.8,
+                            msg="First D value={}".format(
+                                first_x_value(os.path.join(output_dat_dir, d_filename))))
+            tof_filename = 'hrpd66063_b{}_TOF.dat'.format(bankno)
+            assert_output_file_exists(output_dat_dir, tof_filename)
+            # looks like TOF data
+            self.assertTrue(
+                9700 < first_x_value(os.path.join(output_dat_dir, tof_filename)) < 10500,
+                msg="First TOF value={}".format(
+                    first_x_value(os.path.join(output_dat_dir, tof_filename))))
+
         if platform.system() == "Darwin":  # OSX requires higher tolerance for splines
-            self.tolerance = 0.4
+            self.tolerance = 0.47
         else:
-            self.tolerance = 0.05
+            self.tolerance = 0.20
         return self.focus_results.name(), "HRPD66063_focused.nxs"
 
     def cleanup(self):
@@ -103,15 +138,19 @@ class FocusTest(systemtesting.MantidSystemTest):
 
 def _gen_required_files():
     required_run_numbers = gen_required_run_numbers()
-    input_files = [os.path.join(input_dir, (inst_name + number + ".raw")) for number in required_run_numbers]
+    input_files = [
+        os.path.join(input_dir, (inst_name + number + ".raw")) for number in required_run_numbers
+    ]
     input_files.append(calibration_map_path)
     return input_files
 
 
 def gen_required_run_numbers():
-    return ["66028",  # Sample empty
-            "66031",  # Vanadium
-            "66063"]  # Run to focus
+    return [
+        "66028",  # Sample empty
+        "66031",  # Vanadium
+        "66063"
+    ]  # Run to focus
 
 
 def run_vanadium_calibration():
@@ -124,7 +163,8 @@ def run_vanadium_calibration():
 
     # Check the spline looks good and was saved
     if not os.path.exists(spline_path):
-        raise RuntimeError("Could not find output spline at the following path: {}".format(spline_path))
+        raise RuntimeError(
+            "Could not find output spline at the following path: {}".format(spline_path))
     splined_ws = mantid.Load(Filename=spline_path)
 
     return splined_ws
@@ -146,14 +186,20 @@ def run_focus():
     sample.set_material(chemical_formula="Si")
     inst_object.set_sample_details(sample=sample)
 
-    return inst_object.focus(run_number=run_number, window="10-110", sample_empty=sample_empty,
-                             sample_empty_scale=sample_empty_scale, vanadium_normalisation=True,
-                             do_absorb_corrections=True, multiple_scattering=False)
+    return inst_object.focus(run_number=run_number,
+                             window="10-110",
+                             sample_empty=sample_empty,
+                             sample_empty_scale=sample_empty_scale,
+                             vanadium_normalisation=True,
+                             do_absorb_corrections=True,
+                             multiple_scattering=False)
 
 
 def setup_inst_object():
-    inst_obj = HRPD(user_name=user_name, calibration_mapping_file=calibration_map_path,
-                    calibration_directory=calibration_dir, output_directory=output_dir)
+    inst_obj = HRPD(user_name=user_name,
+                    calibration_mapping_file=calibration_map_path,
+                    calibration_directory=calibration_dir,
+                    output_directory=output_dir)
     return inst_obj
 
 

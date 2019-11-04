@@ -8,7 +8,7 @@ SANS Changes
 Interfaces
 ----------
 
-.. figure:: ../../images/sans_isis_v2_whole_gui.png
+.. figure:: ../../images/ISISSansInterface/runs_page.png
    :class: screenshot
    :align: right
    :width: 400 px

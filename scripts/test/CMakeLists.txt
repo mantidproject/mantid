@@ -14,6 +14,7 @@ set(TEST_PY_FILES
     AbinsLoadDMOL3Test.py
     AbinsLoadGAUSSIANTest.py
     AbinsPowderDataTest.py
+    AbsorptionShapesTest.py 	
     ConvertToWavelengthTest.py
     CrystalFieldMultiSiteTest.py
     CrystalFieldTest.py
@@ -60,7 +61,6 @@ unset(PYUNITTEST_QT_API)
 
 # Additional tests
 add_subdirectory(directtools)
-add_subdirectory(isis_powder)
 add_subdirectory(MultiPlotting)
 add_subdirectory(Muon)
 add_subdirectory(SANS)

@@ -394,6 +394,8 @@ void SaveNexusProcessed::exec() {
 
   // Perform the execution.
   doExec(inputWorkspace, nexusFile);
+
+  // nexusFile->closeNexusFile();
 }
 
 //-------------------------------------------------------------------------------------

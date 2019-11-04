@@ -22,6 +22,12 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
+/// Default constructor. Marks algorithm as deprecated.
+IndexPeaksWithSatellites::IndexPeaksWithSatellites()
+    : API::Algorithm(), API::DeprecatedAlgorithm() {
+  useAlgorithm("IndexPeaks");
+}
+
 /** Initialize the algorithm's properties.
  */
 void IndexPeaksWithSatellites::init() {
@@ -120,10 +126,8 @@ void IndexPeaksWithSatellites::exec() {
     return;
   }
 
-  API::Sample sample = ws->mutableSample();
-
-  OrientedLattice o_lattice = sample.getOrientedLattice();
-
+  auto &sample = ws->mutableSample();
+  auto &o_lattice = sample.getOrientedLattice();
   if (getProperty("GetModVectorsFromUB")) {
     offsets1 = o_lattice.getModVec(0);
     offsets2 = o_lattice.getModVec(1);
@@ -140,7 +144,6 @@ void IndexPeaksWithSatellites::exec() {
   }
 
   const Matrix<double> &UB = o_lattice.getUB();
-
   if (!IndexingUtils::CheckUB(UB)) {
     throw std::runtime_error(
         "ERROR: The stored UB is not a valid orientation matrix");
@@ -307,13 +310,12 @@ void IndexPeaksWithSatellites::exec() {
             hkl[0] = peaks[i].getH();
             hkl[1] = peaks[i].getK();
             hkl[2] = peaks[i].getL();
-            bool suc_indexed = false;
+            bool peak_main_indexed{false}, peak_sat_indexed{false};
 
             if (IndexingUtils::ValidIndex(hkl, tolerance)) {
               peaks[i].setIntHKL(hkl);
               peaks[i].setIntMNP(V3D(0, 0, 0));
-              suc_indexed = true;
-              main_indexed++;
+              peak_main_indexed = true;
               double h_error = fabs(round(hkl[0]) - hkl[0]);
               double k_error = fabs(round(hkl[1]) - hkl[1]);
               double l_error = fabs(round(hkl[2]) - hkl[2]);
@@ -330,8 +332,7 @@ void IndexPeaksWithSatellites::exec() {
                   if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
                     peaks[i].setIntHKL(hkl1);
                     peaks[i].setIntMNP(V3D(order, 0, 0));
-                    suc_indexed = true;
-                    sate_indexed++;
+                    peak_sat_indexed = true;
                     sate_error += hkl1.hklError();
                   }
                 }
@@ -347,8 +348,7 @@ void IndexPeaksWithSatellites::exec() {
                   if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
                     peaks[i].setIntHKL(hkl1);
                     peaks[i].setIntMNP(V3D(0, order, 0));
-                    suc_indexed = true;
-                    sate_indexed++;
+                    peak_sat_indexed = true;
                     sate_error += hkl1.hklError();
                   }
                 }
@@ -364,8 +364,7 @@ void IndexPeaksWithSatellites::exec() {
                   if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
                     peaks[i].setIntHKL(hkl1);
                     peaks[i].setIntMNP(V3D(0, 0, order));
-                    suc_indexed = true;
-                    sate_indexed++;
+                    peak_sat_indexed = true;
                     sate_error += hkl1.hklError();
                   }
                 }
@@ -382,8 +381,7 @@ void IndexPeaksWithSatellites::exec() {
                   if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
                     peaks[i].setIntHKL(hkl1);
                     peaks[i].setIntMNP(V3D(order, 0, 0));
-                    suc_indexed = true;
-                    sate_indexed++;
+                    peak_sat_indexed = true;
                     sate_error += hkl1.hklError();
                   }
                 }
@@ -400,8 +398,7 @@ void IndexPeaksWithSatellites::exec() {
                     if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
                       peaks[i].setIntHKL(hkl1);
                       peaks[i].setIntMNP(V3D(m, n, 0));
-                      suc_indexed = true;
-                      sate_indexed++;
+                      peak_sat_indexed = true;
                       sate_error += hkl1.hklError();
                     }
                   }
@@ -422,14 +419,20 @@ void IndexPeaksWithSatellites::exec() {
                       if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
                         peaks[i].setIntHKL(hkl1);
                         peaks[i].setIntMNP(V3D(m, n, p));
-                        suc_indexed = true;
-                        sate_indexed++;
+                        peak_sat_indexed = true;
                         sate_error += hkl1.hklError();
                       }
                     }
               }
             }
-            if (!suc_indexed) {
+            if (peak_main_indexed) {
+              main_indexed++;
+              peaks[i].setIntHKL(V3D(0, 0, 0));
+              peaks[i].setIntMNP(V3D(0, 0, 0));
+            } else if (peak_sat_indexed)
+              sate_indexed++;
+            else {
+              peaks[i].setHKL(V3D(0, 0, 0));
               peaks[i].setIntHKL(V3D(0, 0, 0));
               peaks[i].setIntMNP(V3D(0, 0, 0));
             }

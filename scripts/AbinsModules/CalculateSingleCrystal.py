@@ -27,7 +27,9 @@ class CalculateSingleCrystal(AbinsModules.IOmodule):
 
         super(CalculateSingleCrystal, self).__init__(
             input_filename=filename,
-            group_name=AbinsModules.AbinsParameters.crystal_data_group + "/" + "%sK" % self._temperature)
+            group_name="{group}/{t}K".format(
+                group=AbinsModules.AbinsParameters.hdf_groups['crystal_data'],
+                t=self._temperature))
 
     def _calculate_crystal(self):
 

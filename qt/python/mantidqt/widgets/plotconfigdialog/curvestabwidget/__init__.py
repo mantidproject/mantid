@@ -60,26 +60,6 @@ def curve_hidden(curve):
         return not curve.get_visible()
 
 
-def set_errorbars_hidden(container, hide):
-    """
-    Set the visibility on all lines in an ErrorbarContainer.
-
-    :param hide: Whether or not to hide the errors.
-    :type hide: bool
-    """
-    if not isinstance(container, ErrorbarContainer):
-        return
-
-    # hide gets inverted below, as matplotlib uses `visible`, which has the opposite logic:
-    # if hide is True, visible must be False, and vice-versa
-    if container[1]:
-        for caps in container[1]:
-            caps.set_visible(not hide)
-    if container[2]:
-        for bars in container[2]:
-            bars.set_visible(not hide)
-
-
 def remove_curve_from_ax(curve):
     """
     Remove a Line2D or ErrobarContainer from its Axes

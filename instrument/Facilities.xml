@@ -157,6 +157,14 @@
     </livedata>
   </instrument>
 
+  <instrument name="NGEM">
+    <technique>Neutron Diffraction</technique>
+    <zeropadding size="8"/>
+    <livedata>
+      <connection name="histo" address="NDXGEM:6789" listener="ISISHistoDataListener" />
+    </livedata>
+  </instrument>
+
   <instrument name="OSIRIS" shortname="OSI" beamline="N6">
     <zeropadding size="8" startRunNumber="99780" prefix="OSIRIS"/>
     <technique>Neutron Diffraction</technique>
@@ -419,19 +427,19 @@
       <technique>technique</technique>
    </instrument>
 
-   <instrument name="GPSANS">
+   <instrument name="GPSANS" shortname="CG2">
+      <technique>Small Angle Scattering</technique>
+   </instrument>
+
+   <instrument name="CG2" shortname="CG2">
+      <technique>Small Angle Scattering</technique>
+   </instrument>
+
+   <instrument name="BIOSANS"  shortname="CG3">
       <technique>Small Angle Scattering</technique>
    </instrument>
 
    <instrument name="HIRESSANS">
-      <technique>Small Angle Scattering</technique>
-   </instrument>
-
-   <instrument name="CG2">
-      <technique>Small Angle Scattering</technique>
-   </instrument>
-
-   <instrument name="BIOSANS">
       <technique>Small Angle Scattering</technique>
    </instrument>
 
@@ -593,6 +601,18 @@
 
    <instrument name="SWANS" shortname="SWANS" beamline="7">
       <technique>Small Wide Angle Scattering</technique>
+   </instrument>
+
+   <instrument name="ZEEMANS" beamline="998">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>TOF Indirect Geometry Spectroscopy</technique>
+    <technique>Neutron Diffraction</technique>
+   </instrument>
+
+   <instrument name="CHESS" beamline="999">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>TOF Direct Geometry Spectroscopy</technique>
+    <technique>Neutron Diffraction</technique>
    </instrument>
 
 </facility>
@@ -876,7 +896,7 @@
     <technique>Neutron Spectroscopy</technique>
     <technique>Inelastic Neutron Scattering</technique>
   </instrument>
-  
+
 </facility>
 
 <!-- HZB -->
@@ -890,6 +910,11 @@
 		<connection name="event" address="192.168.1.80:9092" listener="KafkaEventListener" />
 	</livedata>
    </instrument>
+
+  <instrument name="NEAT">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>TOF Direct Geometry Spectroscopy</technique>
+  </instrument>
 
   <instrument name="EXED">
     <technique>TOF Direct Geometry Spectroscopy</technique>

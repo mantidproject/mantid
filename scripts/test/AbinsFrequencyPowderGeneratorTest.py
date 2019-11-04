@@ -19,20 +19,21 @@ class AbinsFrequencyPowderGeneratorTest(unittest.TestCase):
 
     def setUp(self):
         self.simple_freq_generator = FrequencyPowderGenerator()
-        self.min_wavenumber = AbinsParameters.min_wavenumber
-        self.max_wavenumber = AbinsParameters.max_wavenumber
+        self.min_wavenumber = AbinsParameters.sampling['min_wavenumber']
+        self.max_wavenumber = AbinsParameters.sampling['max_wavenumber']
 
     def tearDown(self):
         # Restore default Parameters to avoid conflict with other tests
-        AbinsParameters.min_wavenumber = self.min_wavenumber
-        AbinsParameters.max_wavenumber = self.max_wavenumber
+        AbinsParameters.sampling['min_wavenumber'] = self.min_wavenumber
+        AbinsParameters.sampling['max_wavenumber'] = self.max_wavenumber
 
     def test_construct_freq_combinations(self):
 
         # reduce rebining parameters for this test
-        AbinsParameters.bin_width = 1.0
-        AbinsParameters.min_wavenumber = 0.0
-        AbinsParameters.max_wavenumber = 20.0
+        # AbinsParameters.bin_width = 1.0  # Doesn't seem to be used any more?
+        bin_width = 1.0
+        AbinsParameters.sampling['min_wavenumber'] = 0.0
+        AbinsParameters.sampling['max_wavenumber'] = 20.0
 
         f_array = np.asarray([1, 2])
         f_coeff = np.arange(2, dtype=AbinsConstants.INT_TYPE)
@@ -76,7 +77,7 @@ class AbinsFrequencyPowderGeneratorTest(unittest.TestCase):
                                                                    quantum_order=AbinsConstants.FIRST_OVERTONE)
 
         # use case: quantum order event 1 (fundamentals)
-        array = np.arange(AbinsParameters.bin_width, 10.0 * AbinsParameters.bin_width, AbinsParameters.bin_width)
+        array = np.arange(bin_width, 10.0 * bin_width, bin_width)
         array_coeff = np.arange(array.size, dtype=AbinsConstants.INT_TYPE)
         correct_coefficients = np.arange(array.size, dtype=AbinsConstants.INT_TYPE)
 
@@ -145,7 +146,7 @@ class AbinsFrequencyPowderGeneratorTest(unittest.TestCase):
         # sums all the frequency combinations and keeps the index combinations,
         # and filters out any entries with too-high combined frequency
 
-        AbinsParameters.max_wavenumber = 700.
+        AbinsParameters.sampling['max_wavenumber'] = 700.
         np.random.seed(1)
 
         rand_fundamentals = np.array(np.random.random(50), dtype=FLOAT_TYPE)
@@ -178,7 +179,7 @@ class AbinsFrequencyPowderGeneratorTest(unittest.TestCase):
 
         # Check the doubles have been screened for max frequency
         self.assertEqual(len(doubles), 2104)
-        self.assertLess(max(doubles), AbinsParameters.max_wavenumber)
+        self.assertLess(max(doubles), AbinsParameters.sampling['max_wavenumber'])
 
         # Check doubles are in the right places and the maths is just a sum
         self.assertTrue(np.any(fundamentals[0] * 2 == doubles))

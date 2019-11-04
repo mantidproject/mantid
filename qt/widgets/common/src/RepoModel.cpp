@@ -11,6 +11,7 @@
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
+#include "MantidQtIcons/Icon.h"
 #include <QIcon>
 #include <QPixmap>
 
@@ -197,7 +198,7 @@ RepoModel::~RepoModel() { delete rootItem; }
    ScriptRepository
    entries. Currently, an entry may be found on the following states:
      - LOCAL_ONLY: The file only exists locally.
-     - REMTOE_ONLY: The file has not been downloaded.
+     - REMOTE_ONLY: The file has not been downloaded.
      - REMOTE_CHANGED: A new version of the file is available.
      - LOCAL_CHANGED: The file has been changed from the original one.
      - BOTH_CHANGED: Locally and remotelly changed.
@@ -264,6 +265,7 @@ QVariant RepoModel::data(const QModelIndex &index, int role) const {
     if (role == Qt::DecorationRole) {
       if (index.column() == 0) {
         inf = repo_ptr->fileInfo(path.toStdString());
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
         if (inf.directory) {
           status = repo_ptr->fileStatus(path.toStdString());
           if (status == Mantid::API::REMOTE_ONLY)
@@ -300,6 +302,35 @@ QVariant RepoModel::data(const QModelIndex &index, int role) const {
           else
             return QIcon::fromTheme("unknown", QIcon(QPixmap(":/win/unknown")));
         }
+#else
+        if (inf.directory) {
+          status = repo_ptr->fileStatus(path.toStdString());
+          if (status == Mantid::API::REMOTE_ONLY) {
+            return Icons::getIcon("mdi.folder-network-outline", "black", 1.2);
+          } else
+            return Icons::getIcon("mdi.folder-open-outline", "black", 1.2);
+        } else {
+          int pos = QString(path).lastIndexOf('.');
+          if (pos < 0)
+            return Icons::getIcon("mdi.file-question", "black", 1.2);
+          if (path.contains("readme", Qt::CaseInsensitive))
+            return Icons::getIcon("mdi.file-document-outline", "black", 1.2);
+
+          QString extension = QString(path).remove(0, pos);
+          if (extension == ".py" || extension == ".PY")
+            return Icons::getIcon("mdi.language-python", "black", 1.2);
+          else if (extension == ".ui")
+            return Icons::getIcon("mdi.file-document-box-outline", "black",
+                                  1.2);
+          else if (extension == ".docx" || extension == ".doc" ||
+                   extension == ".odf")
+            return Icons::getIcon("mdi.file-outline", "black", 1.2);
+          else if (extension == ".pdf")
+            return Icons::getIcon("mdi.file-pdf-outline", "black", 1.2);
+          else
+            return Icons::getIcon("mdi.file-question", "black", 1.2);
+        }
+#endif
       }
     } // end decorationRole
 
@@ -717,8 +748,8 @@ int RepoModel::rowCount(const QModelIndex &parent) const {
 }
 
 /** Return the number of columns defined for the given index.
- * But, for all the index, the number of columns will be always 3.
- * (path, status, autoupdate)
+ * But, for all the index, the number of columns will be always 4.
+ * (path, status, autoupdate, delete)
  *
  * @return 4.
  */

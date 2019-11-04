@@ -26,6 +26,7 @@ set(
 set(
   INC_FILES
   inc/MantidPythonInterface/core/CallMethod.h
+  inc/MantidPythonInterface/core/Copyable.h
   inc/MantidPythonInterface/core/DataServiceExporter.h
   inc/MantidPythonInterface/core/DllConfig.h
   inc/MantidPythonInterface/core/ErrorHandling.h
@@ -106,7 +107,7 @@ set_property(
 )
 
 # rpath settings
-if(OSX_VERSION VERSION_GREATER 10.8)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(
     ${_target_name}
     PROPERTIES

@@ -29,7 +29,7 @@ public:
   MOCK_METHOD0(searchResults, ISearchModel const &());
   MOCK_METHOD0(mutableSearchResults, ISearchModel &());
 
-  MOCK_METHOD2(setInstrumentList, void(const std::vector<std::string> &, int));
+  MOCK_METHOD1(setInstrumentList, void(const std::vector<std::string> &));
   MOCK_METHOD1(updateMenuEnabledState, void(bool));
   MOCK_METHOD1(setAutoreduceButtonEnabled, void(bool));
   MOCK_METHOD1(setAutoreducePauseButtonEnabled, void(bool));
@@ -39,6 +39,7 @@ public:
   MOCK_METHOD1(setSearchButtonEnabled, void(bool));
   MOCK_METHOD1(setStartMonitorButtonEnabled, void(bool));
   MOCK_METHOD1(setStopMonitorButtonEnabled, void(bool));
+  MOCK_METHOD1(setUpdateIntervalSpinBoxEnabled, void(bool));
 
   MOCK_METHOD2(setProgressRange, void(int, int));
   MOCK_METHOD1(setProgress, void(int));
@@ -49,6 +50,7 @@ public:
   MOCK_CONST_METHOD0(getSearchInstrument, std::string());
   MOCK_METHOD1(setSearchInstrument, void(std::string const &));
   MOCK_CONST_METHOD0(getSearchString, std::string());
+  MOCK_CONST_METHOD0(getLiveDataUpdateInterval, int());
 
   MOCK_CONST_METHOD0(getAlgorithmRunner,
                      boost::shared_ptr<MantidQt::API::AlgorithmRunner>());

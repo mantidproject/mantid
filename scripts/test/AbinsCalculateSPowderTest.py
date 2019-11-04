@@ -24,10 +24,12 @@ class AbinsCalculateSPowderTest(unittest.TestCase):
     _si2 = "Si2-sc_CalculateSPowder"
 
     def setUp(self):
-        AbinsModules.AbinsParameters.atoms_threads = 1
+        self.default_threads = AbinsModules.AbinsParameters.performance['threads']
+        AbinsModules.AbinsParameters.performance['threads'] = 1
 
     def tearDown(self):
         AbinsModules.AbinsTestHelpers.remove_output_files(list_of_names=["CalculateSPowder"])
+        AbinsModules.AbinsParameters.performance['threads'] = self.default_threads
 
     #     test input
     def test_wrong_input(self):

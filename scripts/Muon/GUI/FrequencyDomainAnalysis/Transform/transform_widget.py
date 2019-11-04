@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 from Muon.GUI.FrequencyDomainAnalysis.Transform.transform_view import TransformView
 
 from Muon.GUI.FrequencyDomainAnalysis.TransformSelection.transform_selection_widget import TransformSelectionWidget
-from Muon.GUI.Common.observer_pattern import Observer, GenericObserver
+from mantidqt.utils.observer_pattern import Observer, GenericObserver
 
 from qtpy import QtWidgets
 

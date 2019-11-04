@@ -15,7 +15,7 @@ import mantid.simpleapi as mantid
 from Muon.GUI.Common import thread_model
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from Muon.GUI.Common.ADSHandler.workspace_naming import get_maxent_workspace_group_name, get_maxent_workspace_name
-from Muon.GUI.Common.observer_pattern import GenericObserver, GenericObservable
+from mantidqt.utils.observer_pattern import GenericObserver, GenericObservable
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 from Muon.GUI.Common.utilities.algorithm_utils import run_MuonMaxent
 
@@ -105,8 +105,9 @@ class MaxEntPresenter(object):
 
     def calculate_maxent(self, alg):
         maxent_parameters = self.get_parameters_for_maxent_calculation()
+        base_name = get_maxent_workspace_name(maxent_parameters['InputWorkspace'])
 
-        maxent_workspace = run_MuonMaxent(maxent_parameters, alg)
+        maxent_workspace = run_MuonMaxent(maxent_parameters, alg, base_name)
 
         self.add_maxent_workspace_to_ADS(maxent_parameters['InputWorkspace'], maxent_workspace, alg)
 
@@ -155,7 +156,7 @@ class MaxEntPresenter(object):
         base_name = get_maxent_workspace_name(input_workspace)
         directory = get_maxent_workspace_group_name(base_name, self.load.data_context.instrument, self.load.workspace_suffix)
 
-        muon_workspace_wrapper = MuonWorkspaceWrapper(maxent_workspace, directory + base_name)
+        muon_workspace_wrapper = MuonWorkspaceWrapper(directory + base_name)
         muon_workspace_wrapper.show()
 
         maxent_output_options = self.get_maxent_output_options()
@@ -175,8 +176,11 @@ class MaxEntPresenter(object):
     def add_optional_outputs_to_ADS(self, alg, output_options, base_name, directory):
         for key in output_options:
             if output_options[key]:
-                output = alg.getProperty(key).value
-                MuonWorkspaceWrapper(output, directory + base_name + optional_output_suffixes[key]).show()
+                output = alg.getProperty(key).valueAsStr
+                self.load.ads_observer.observeRename(False)
+                wrapped_workspace = MuonWorkspaceWrapper(output)
+                wrapped_workspace.show(directory + base_name + optional_output_suffixes[key])
+                self.load.ads_observer.observeRename(True)
 
     def update_view_from_model(self):
         self.getWorkspaceNames()

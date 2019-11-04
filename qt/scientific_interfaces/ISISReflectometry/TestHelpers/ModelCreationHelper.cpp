@@ -43,6 +43,22 @@ Row makeRow(std::string const &run, double theta) {
       ReductionWorkspaces({run}, TransmissionRunPair({"Trans A", "Trans B"})));
 }
 
+Row makeSimpleRow(std::string const &run, double theta) {
+  return Row({run}, theta, TransmissionRunPair(), RangeInQ(), boost::none,
+             ReductionOptionsMap(),
+             ReductionWorkspaces({run}, TransmissionRunPair()));
+}
+
+Row makeRow(std::string const &run, double theta, std::string const &trans1,
+            std::string const &trans2, boost::optional<double> qMin,
+            boost::optional<double> qMax, boost::optional<double> qStep,
+            boost::optional<double> scale,
+            ReductionOptionsMap const &optionsMap) {
+  return Row({run}, theta, TransmissionRunPair({trans1, trans2}),
+             RangeInQ(qMin, qMax, qStep), scale, optionsMap,
+             ReductionWorkspaces({run}, TransmissionRunPair({trans1, trans2})));
+}
+
 Row makeRow(std::vector<std::string> const &runs, double theta) {
   return Row(
       runs, theta, TransmissionRunPair({"Trans A", "Trans B"}), RangeInQ(),
@@ -213,6 +229,15 @@ ReductionJobs oneGroupWithTwoRowsModel() {
   return reductionJobs;
 }
 
+ReductionJobs oneGroupWithTwoSimpleRowsModel() {
+  auto reductionJobs = ReductionJobs();
+  auto group1 = Group("Test group 1");
+  group1.appendRow(makeSimpleRow("12345", 0.5));
+  group1.appendRow(makeSimpleRow("12346", 0.8));
+  reductionJobs.appendGroup(std::move(group1));
+  return reductionJobs;
+}
+
 ReductionJobs anotherGroupWithARowModel() {
   auto reductionJobs = ReductionJobs();
   auto group1 = Group("Test group 2");
@@ -269,6 +294,14 @@ ReductionJobs emptyReductionJobs() {
   auto reductionJobs = ReductionJobs();
   auto group1 = Group("Group1");
   group1.appendRow(makeRow());
+  reductionJobs.appendGroup(std::move(group1));
+
+  return reductionJobs;
+}
+
+ReductionJobs oneGroupWithTwoRowsWithOutputNamesModel() {
+  auto reductionJobs = ReductionJobs();
+  auto group1 = makeGroupWithTwoRows();
   reductionJobs.appendGroup(std::move(group1));
 
   return reductionJobs;

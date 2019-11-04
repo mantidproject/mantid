@@ -35,17 +35,16 @@ public:
   void acceptMainPresenter(IBatchPresenter *mainPresenter) override;
   void saveWorkspaces(std::vector<std::string> const &workspaceNames) override;
   bool shouldAutosave() const override;
-  void reductionPaused() override;
-  void reductionResumed() override;
-  void autoreductionPaused() override;
-  void autoreductionResumed() override;
+  void notifyReductionPaused() override;
+  void notifyReductionResumed() override;
+  void notifyAutoreductionPaused() override;
+  void notifyAutoreductionResumed() override;
 
   // SaveViewSubscriber overrides
   void notifyPopulateWorkspaceList() override;
   void notifyFilterWorkspaceList() override;
   void notifyPopulateParametersList() override;
   void notifySaveSelectedWorkspaces() override;
-  void notifySuggestSaveDir() override;
   void notifyAutosaveDisabled() override;
   void notifyAutosaveEnabled() override;
   void notifySavePathChanged() override;

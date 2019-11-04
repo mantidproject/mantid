@@ -14,7 +14,7 @@ from Muon.GUI.Common.muon_pair import MuonPair
 
 from mantid.api import WorkspaceGroup
 from mantid.kernel import ConfigServiceImpl
-from Muon.GUI.Common.observer_pattern import Observable
+from mantidqt.utils.observer_pattern import Observable
 
 
 def get_incremental_number_for_value_in_list(name, list_copy, current_number=1):

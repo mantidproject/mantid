@@ -7,7 +7,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_JUMPFITDATATABLEPRESENTER_H_
 #define MANTIDQTCUSTOMINTERFACES_JUMPFITDATATABLEPRESENTER_H_
 
-#include "IndirectDataTablePresenter.h"
+#include "IndirectDataTablePresenterLegacy.h"
 #include "JumpFitModel.h"
 
 #include <QTableWidget>
@@ -22,7 +22,8 @@ namespace IDA {
 /**
   Presenter for a table of data containing Widths/EISF.
 */
-class DLLExport JumpFitDataTablePresenter : public IndirectDataTablePresenter {
+class DLLExport JumpFitDataTablePresenter
+    : public IndirectDataTablePresenterLegacy {
   Q_OBJECT
 public:
   JumpFitDataTablePresenter(JumpFitModel *model, QTableWidget *dataTable);

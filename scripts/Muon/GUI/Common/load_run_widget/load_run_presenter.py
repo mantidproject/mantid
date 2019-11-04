@@ -13,7 +13,7 @@ import Muon.GUI.Common.utilities.run_string_utils as run_utils
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
 import Muon.GUI.Common.utilities.load_utils as load_utils
 from Muon.GUI.Common.utilities.run_string_utils import flatten_run_list
-from Muon.GUI.Common.observer_pattern import Observable
+from mantidqt.utils.observer_pattern import Observable
 
 
 class LoadRunWidgetPresenter(object):
@@ -260,7 +260,7 @@ class LoadRunWidgetPresenter(object):
             if self._load_multiple_runs and self._multiple_file_mode == "Co-Add":
                 run_list_to_add = [run for run in self.run_list if self._model.get_data(run=[run])]
                 run_list = [[run for run in self.run_list if self._model.get_data(run=[run])]]
-                load_utils.combine_loaded_runs(self._model, run_list_to_add)
+                load_utils.combine_loaded_runs(self._model, run_list_to_add, delete_added=True)
                 self._model.current_runs = run_list
 
             self.update_view_from_model(run_list)

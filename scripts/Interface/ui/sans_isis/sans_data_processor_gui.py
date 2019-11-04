@@ -12,17 +12,19 @@ from __future__ import (absolute_import, division, print_function)
 
 from abc import ABCMeta, abstractmethod
 from inspect import isclass
-from qtpy.QtWidgets import (QListWidgetItem, QMessageBox, QFileDialog, QMainWindow)  # noqa
-from qtpy.QtCore import (QRegExp, QSettings)  # noqa
-from qtpy.QtGui import (QDoubleValidator, QIcon, QIntValidator, QRegExpValidator)  # noqa
-from six import with_metaclass
+from qtpy import PYQT4
+from qtpy.QtCore import QRegExp
+from qtpy.QtGui import (QDoubleValidator, QIntValidator, QRegExpValidator)
+from qtpy.QtWidgets import (QListWidgetItem, QMessageBox, QFileDialog, QMainWindow)
 
-from reduction_gui.reduction.scripter import execute_script
-from mantid.kernel import (Logger)
 from mantidqt import icons
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt import load_ui
 from mantidqt.widgets import jobtreeview, manageuserdirectories
+from six import with_metaclass
+
+from mantid.kernel import (Logger, UsageService)
+from reduction_gui.reduction.scripter import execute_script
 from sans.common.enums import (BinningType, ReductionDimensionality, OutputMode, SaveType, SANSInstrument,
                                RangeStepType, ReductionMode, FitType)
 from sans.common.file_information import SANSFileInformationFactory
@@ -31,17 +33,16 @@ from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection,
                                        get_string_for_gui_from_reduction_mode, GENERIC_SETTINGS,
                                        load_file, load_property, set_setting,
                                        get_instrument_from_gui_selection)
-from sans.gui_logic.models.run_summation import RunSummation
-from sans.gui_logic.models.run_selection import RunSelection
 from sans.gui_logic.models.run_finder import SummableRunFinder
+from sans.gui_logic.models.run_selection import RunSelection
+from sans.gui_logic.models.run_summation import RunSummation
 from sans.gui_logic.models.summation_settings import SummationSettings
 from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter
 from sans.gui_logic.presenter.run_selector_presenter import RunSelectorPresenter
 from sans.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
-from ui.sans_isis.work_handler import WorkHandler
 from ui.sans_isis.SANSSaveOtherWindow import SANSSaveOtherDialog
+from ui.sans_isis.work_handler import WorkHandler
 
-from qtpy import PYQT4
 if PYQT4:
     IN_MANTIDPLOT = False
     try:
@@ -194,6 +195,7 @@ class SANSDataProcessorGui(QMainWindow,
         Initialise the interface
         """
         super(QMainWindow, self).__init__()
+
         self.setupUi(self)
 
         # Listeners allow us to to notify all presenters
@@ -210,6 +212,9 @@ class SANSDataProcessorGui(QMainWindow,
 
         # Logger
         self.gui_logger = Logger("SANS GUI LOGGER")
+
+        # Track if we need to refresh monitor 5 shift box when we update
+        self._has_monitor_5 = False
 
         # Instrument
         SANSDataProcessorGui.INSTRUMENTS = ",".join([SANSInstrument.to_string(item)
@@ -244,6 +249,9 @@ class SANSDataProcessorGui(QMainWindow,
         self._attach_validators()
 
         self._setup_progress_bar()
+
+        # At a later date we can drop new once we confirm the old GUI is not using "ISIS SANS"
+        UsageService.registerFeatureUsage("Interface", "ISIS SANS (new)", False)
 
     def _setup_progress_bar(self):
         self.batch_progress_bar.setMinimum(0)
@@ -482,18 +490,22 @@ class SANSDataProcessorGui(QMainWindow,
         """
         Process runs
         """
+        UsageService.registerFeatureUsage("Feature", "ISIS SANS->Process Selected", False)
         self._call_settings_listeners(lambda listener: listener.on_process_selected_clicked())
 
     def _process_all_clicked(self):
         """
         Process All button clicked
         """
+        UsageService.registerFeatureUsage("Feature", "ISIS SANS->Process All", False)
         self._call_settings_listeners(lambda listener: listener.on_process_all_clicked())
 
     def _load_clicked(self):
+        UsageService.registerFeatureUsage("Feature", "ISIS SANS->Load", False)
         self._call_settings_listeners(lambda listener: listener.on_load_clicked())
 
     def _export_table_clicked(self):
+        UsageService.registerFeatureUsage("Feature", "ISIS SANS->Export Table", False)
         self._call_settings_listeners(lambda listener: listener.on_export_table_clicked())
 
     def _processing_finished(self):
@@ -530,18 +542,23 @@ class SANSDataProcessorGui(QMainWindow,
 
     def _remove_rows_requested_from_button(self):
         rows = self.get_selected_rows()
+        UsageService.registerFeatureUsage("Feature", "ISIS SANS->Rows removed button", False)
         self._call_settings_listeners(lambda listener: listener.on_rows_removed(rows))
 
     def _copy_rows_requested(self):
+        UsageService.registerFeatureUsage("Feature", "ISIS SANS->Copy rows button", False)
         self._call_settings_listeners(lambda listener: listener.on_copy_rows_requested())
 
     def _erase_rows(self):
+        UsageService.registerFeatureUsage("Feature", "ISIS SANS->Erase rows button", False)
         self._call_settings_listeners(lambda listener: listener.on_erase_rows())
 
     def _cut_rows(self):
+        UsageService.registerFeatureUsage("Feature", "ISIS SANS->Cut rows button", False)
         self._call_settings_listeners(lambda listener: listener.on_cut_rows())
 
     def _paste_rows_requested(self):
+        UsageService.registerFeatureUsage("Feature", "ISIS SANS->Paste rows button", False)
         self._call_settings_listeners(lambda listener: listener.on_paste_rows_requested())
 
     def _instrument_changed(self):
@@ -553,7 +570,8 @@ class SANSDataProcessorGui(QMainWindow,
     def _on_save_other_button_pressed(self):
         self._call_settings_listeners(lambda listener: listener.on_save_other())
 
-    def _on_help_button_clicked(self):
+    @staticmethod
+    def _on_help_button_clicked():
         if PYQT4:
             proxies.showCustomInterfaceHelp('ISIS SANS v2')
         else:
@@ -577,6 +595,7 @@ class SANSDataProcessorGui(QMainWindow,
 
     def _on_save_can_clicked(self, value):
         self.save_can_checkBox.setChecked(value)
+        UsageService.registerFeatureUsage("Feature", "ISIS SANS->Save Can Toggled", False)
         set_setting(self.__generic_settings, self.__save_can_key, value)
 
     def _on_reduction_dimensionality_changed(self, is_1d):
@@ -587,7 +606,7 @@ class SANSDataProcessorGui(QMainWindow,
         Load the user file
         """
         # Load the user file
-        load_file(self.user_file_line_edit, "*.*", self.__generic_settings, self.__path_key,
+        load_file(self.user_file_line_edit, "*.txt", self.__generic_settings, self.__path_key,
                   self.get_user_file_path)
 
         # Set full user file path for default loading
@@ -648,6 +667,8 @@ class SANSDataProcessorGui(QMainWindow,
         """
         Load the batch file
         """
+
+        UsageService.registerFeatureUsage("Feature", "ISIS SANS->Loaded Batch File", False)
         load_file(self.batch_line_edit, "*.*", self.__generic_settings, self.__batch_file_key,
                   self.get_batch_file_path)
         self._call_settings_listeners(lambda listener: listener.on_batch_file_load())
@@ -660,6 +681,11 @@ class SANSDataProcessorGui(QMainWindow,
         self.manage_directories_button.setEnabled(False)
         self.load_button.setEnabled(False)
         self.export_table_button.setEnabled(False)
+
+    def set_monitor_5_enabled(self, new_state):
+        self._has_monitor_5 = new_state
+        self.transmission_mn_5_shift_label.setEnabled(new_state)
+        self.transmission_mn_5_shift_line_edit.setEnabled(new_state)
 
     def enable_buttons(self):
         self.process_selected_button.setEnabled(True)
@@ -854,8 +880,12 @@ class SANSDataProcessorGui(QMainWindow,
 
         self.transmission_monitor_label.setEnabled(use_monitor)
         self.transmission_monitor_line_edit.setEnabled(use_monitor)
-        self.transmission_mn_shift_label.setEnabled(use_monitor)
-        self.transmission_mn_shift_line_edit.setEnabled(use_monitor)
+        self.transmission_mn_4_shift_label.setEnabled(use_monitor)
+        self.transmission_mn_4_shift_line_edit.setEnabled(use_monitor)
+
+        if self._has_monitor_5:
+            self.transmission_mn_5_shift_label.setEnabled(use_monitor)
+            self.transmission_mn_5_shift_line_edit.setEnabled(use_monitor)
 
         self.transmission_radius_label.setEnabled(use_roi)
         self.transmission_radius_line_edit.setEnabled(use_roi)
@@ -891,7 +921,7 @@ class SANSDataProcessorGui(QMainWindow,
         return str(self.mask_file_input_line_edit.text())
 
     def show_directory_manager(self):
-        manageuserdirectories.ManageUserDirectories(self).exec_()
+        manageuserdirectories.ManageUserDirectories.openManageUserDirectories()
 
     def _on_load_mask_file(self):
         load_file(self.mask_file_input_line_edit, "*.*", self.__generic_settings,
@@ -901,10 +931,12 @@ class SANSDataProcessorGui(QMainWindow,
         self._call_settings_listeners(lambda listener: listener.on_mask_file_add())
 
     def _on_multi_period_selection(self):
+        UsageService.registerFeatureUsage("Feature", "ISIS SANS->Multiple Period Toggled", False)
         self._call_settings_listeners(
             lambda listener: listener.on_multi_period_selection(self.is_multi_period_view()))
 
     def _on_sample_geometry_selection(self):
+        UsageService.registerFeatureUsage("Feature", "ISIS SANS->Sample Geometry Toggled", False)
         self._call_settings_listeners(lambda listener: listener.on_sample_geometry_selection(self.is_sample_geometry()))
 
     def _on_manage_directories(self):
@@ -1437,13 +1469,22 @@ class SANSDataProcessorGui(QMainWindow,
         self.update_simple_line_edit_field(line_edit="transmission_monitor_line_edit", value=value)
 
     @property
-    def transmission_mn_shift(self):
-        return self.get_simple_line_edit_field(line_edit="transmission_mn_shift_line_edit",
+    def transmission_mn_4_shift(self):
+        return self.get_simple_line_edit_field(line_edit="transmission_mn_4_shift_line_edit",
                                                expected_type=float)
 
-    @transmission_mn_shift.setter
-    def transmission_mn_shift(self, value):
-        self.update_simple_line_edit_field(line_edit="transmission_mn_shift_line_edit", value=value)
+    @transmission_mn_4_shift.setter
+    def transmission_mn_4_shift(self, value):
+        self.update_simple_line_edit_field(line_edit="transmission_mn_4_shift_line_edit", value=value)
+
+    @property
+    def transmission_mn_5_shift(self):
+        return self.get_simple_line_edit_field(line_edit="transmission_mn_5_shift_line_edit",
+                                               expected_type=float)
+
+    @transmission_mn_5_shift.setter
+    def transmission_mn_5_shift(self, value):
+        self.update_simple_line_edit_field(line_edit="transmission_mn_5_shift_line_edit", value=value)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Transmission fit
@@ -1955,7 +1996,8 @@ class SANSDataProcessorGui(QMainWindow,
         self.transmission_line_edit.setValidator(positive_integer_validator)
         self.transmission_monitor_line_edit.setValidator(positive_integer_validator)
         self.transmission_radius_line_edit.setValidator(positive_double_validator)
-        self.transmission_mn_shift_line_edit.setValidator(double_validator)
+        self.transmission_mn_4_shift_line_edit.setValidator(double_validator)
+        self.transmission_mn_5_shift_line_edit.setValidator(double_validator)
 
         self.fit_sample_wavelength_min_line_edit.setValidator(positive_double_validator)
         self.fit_sample_wavelength_max_line_edit.setValidator(positive_double_validator)
@@ -2025,7 +2067,8 @@ class SANSDataProcessorGui(QMainWindow,
         self.transmission_interpolating_rebin_check_box.setChecked(False)
         self.transmission_target_combo_box.setCurrentIndex(0)
         self.transmission_monitor_line_edit.setText("")
-        self.transmission_mn_shift_line_edit.setText("")
+        self.transmission_mn_4_shift_line_edit.setText("")
+        self.transmission_mn_5_shift_line_edit.setText("")
         self.transmission_radius_line_edit.setText("")
         self.transmission_roi_files_line_edit.setText("")
         self.transmission_mask_files_line_edit.setText("")

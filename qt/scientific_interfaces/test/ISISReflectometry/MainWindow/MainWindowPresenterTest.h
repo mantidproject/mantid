@@ -12,6 +12,8 @@
 #include "../Batch/MockBatchView.h"
 #include "../ReflMockObjects.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidGeometry/Instrument_fwd.h"
+#include "MantidQtWidgets/Common/MockSlitCalculator.h"
 #include "MockMainWindowView.h"
 
 #include <cxxtest/TestSuite.h>
@@ -22,6 +24,7 @@ using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 using namespace MantidQt::CustomInterfaces::ISISReflectometry::
     ModelCreationHelper;
 using MantidQt::API::IConfiguredAlgorithm_sptr;
+using MantidQt::MantidWidgets::ISlitCalculator;
 using testing::AtLeast;
 using testing::Mock;
 using testing::NiceMock;
@@ -136,19 +139,58 @@ public:
     verifyAndClear();
   }
 
+  void testReductionResumedNotifiesAllBatchPresenters() {
+    auto presenter = makePresenter();
+    for (auto batchPresenter : m_batchPresenters)
+      EXPECT_CALL(*batchPresenter, notifyAnyBatchReductionResumed());
+    presenter.notifyAnyBatchReductionResumed();
+    verifyAndClear();
+  }
+
+  void testReductionPausedNotifiesAllBatchPresenters() {
+    auto presenter = makePresenter();
+    for (auto batchPresenter : m_batchPresenters)
+      EXPECT_CALL(*batchPresenter, notifyAnyBatchReductionPaused());
+    presenter.notifyAnyBatchReductionPaused();
+    verifyAndClear();
+  }
+
+  void testShowOptionsOpensDialog() {
+    auto presenter = makePresenter();
+    // TODO Add test when options dialog is impelemented
+    // EXPECT_CALL(*m_optionsDialog, show()).Times(1);
+    presenter.notifyShowOptionsRequested();
+    verifyAndClear();
+  }
+
+  void testShowSlitCalculatorSetsInstrument() {
+    auto presenter = makePresenter();
+    auto const instrument = setupInstrument(presenter, "TEST_INSTRUMENT");
+    expectSlitCalculatorInstrumentUpdated(instrument);
+    presenter.notifyShowSlitCalculatorRequested();
+    verifyAndClear();
+  }
+
+  void testShowSlitCalculatorOpensDialog() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_slitCalculator, show()).Times(1);
+    presenter.notifyShowSlitCalculatorRequested();
+    verifyAndClear();
+  }
+
   void testAutoreductionResumedNotifiesAllBatchPresenters() {
     auto presenter = makePresenter();
     for (auto batchPresenter : m_batchPresenters)
-      EXPECT_CALL(*batchPresenter, anyBatchAutoreductionResumed());
-    presenter.notifyAutoreductionResumed();
+      EXPECT_CALL(*batchPresenter, notifyAnyBatchAutoreductionResumed());
+    presenter.notifyAnyBatchAutoreductionResumed();
     verifyAndClear();
   }
 
   void testAutoreductionPausedNotifiesAllBatchPresenters() {
     auto presenter = makePresenter();
     for (auto batchPresenter : m_batchPresenters)
-      EXPECT_CALL(*batchPresenter, anyBatchAutoreductionPaused());
-    presenter.notifyAutoreductionPaused();
+      EXPECT_CALL(*batchPresenter, notifyAnyBatchAutoreductionPaused());
+    presenter.notifyAnyBatchAutoreductionPaused();
     verifyAndClear();
   }
 
@@ -188,12 +230,65 @@ public:
     verifyAndClear();
   }
 
+  void testChangeInstrumentRequestedUpdatesInstrumentInModel() {
+    auto presenter = makePresenter();
+    auto const instrument = std::string("POLREF");
+    presenter.notifyChangeInstrumentRequested(instrument);
+    TS_ASSERT_EQUALS(presenter.instrumentName(), instrument);
+    verifyAndClear();
+  }
+
+  void testChangeInstrumentRequestedUpdatesInstrumentInChildPresenters() {
+    auto presenter = makePresenter();
+    auto const instrument = std::string("POLREF");
+    EXPECT_CALL(*m_batchPresenters[0], notifyInstrumentChanged(instrument))
+        .Times(1);
+    EXPECT_CALL(*m_batchPresenters[1], notifyInstrumentChanged(instrument))
+        .Times(1);
+    presenter.notifyChangeInstrumentRequested(instrument);
+    verifyAndClear();
+  }
+
+  void testUpdateInstrumentUpdatesInstrumentInChildPresenters() {
+    auto presenter = makePresenter();
+    auto const instrument = setupInstrument(presenter, "POLREF");
+    EXPECT_CALL(*m_batchPresenters[0], notifyInstrumentChanged(instrument))
+        .Times(1);
+    EXPECT_CALL(*m_batchPresenters[1], notifyInstrumentChanged(instrument))
+        .Times(1);
+    presenter.notifyUpdateInstrumentRequested();
+    verifyAndClear();
+  }
+
+  void testUpdateInstrumentUpdatesInstrumentInSlitCalculator() {
+    auto presenter = makePresenter();
+    auto const instrument = setupInstrument(presenter, "POLREF");
+    expectSlitCalculatorInstrumentUpdated(instrument);
+    presenter.notifyUpdateInstrumentRequested();
+    verifyAndClear();
+  }
+
+  void testUpdateInstrumentDoesNotChangeInstrumentName() {
+    auto presenter = makePresenter();
+    auto const instrument = setupInstrument(presenter, "POLREF");
+    presenter.notifyUpdateInstrumentRequested();
+    TS_ASSERT_EQUALS(presenter.instrumentName(), instrument);
+    verifyAndClear();
+  }
+
+  void testUpdateInstrumentThrowsIfInstrumentNotSet() {
+    auto presenter = makePresenter();
+    TS_ASSERT_THROWS_ANYTHING(presenter.notifyUpdateInstrumentRequested());
+    verifyAndClear();
+  }
+
 private:
   NiceMock<MockMainWindowView> m_view;
   NiceMock<MockMessageHandler> m_messageHandler;
   std::vector<IBatchView *> m_batchViews;
   std::vector<NiceMock<MockBatchPresenter> *> m_batchPresenters;
   NiceMock<MockBatchPresenterFactory> *m_makeBatchPresenter;
+  NiceMock<MockSlitCalculator> *m_slitCalculator;
 
   class MainWindowPresenterFriend : public MainWindowPresenter {
     friend class MainWindowPresenterTest;
@@ -201,13 +296,15 @@ private:
   public:
     MainWindowPresenterFriend(
         IMainWindowView *view, IMessageHandler *messageHandler,
+        std::unique_ptr<ISlitCalculator> slitCalculator,
         std::unique_ptr<IBatchPresenterFactory> makeBatchPresenter)
-        : MainWindowPresenter(view, messageHandler,
+        : MainWindowPresenter(view, messageHandler, std::move(slitCalculator),
                               std::move(makeBatchPresenter)) {}
   };
 
   MainWindowPresenterFriend makePresenter() {
-    // Make the batch presenter factory
+    auto slitCalculator = std::make_unique<NiceMock<MockSlitCalculator>>();
+    m_slitCalculator = slitCalculator.get();
     auto makeBatchPresenter =
         std::make_unique<NiceMock<MockBatchPresenterFactory>>();
     m_makeBatchPresenter = makeBatchPresenter.get();
@@ -221,6 +318,7 @@ private:
     }
     // Make the presenter
     auto presenter = MainWindowPresenterFriend(&m_view, &m_messageHandler,
+                                               std::move(slitCalculator),
                                                std::move(makeBatchPresenter));
     return presenter;
   }
@@ -233,10 +331,19 @@ private:
     m_batchPresenters.clear();
   }
 
+  std::string setupInstrument(MainWindowPresenterFriend &presenter,
+                              std::string const &instrumentName) {
+    presenter.m_instrument =
+        boost::make_shared<Mantid::Geometry::Instrument>(instrumentName);
+    return presenter.instrumentName();
+  }
+
   void expectBatchAdded(MockBatchPresenter *batchPresenter) {
     EXPECT_CALL(*batchPresenter, acceptMainPresenter(_)).Times(1);
-    EXPECT_CALL(*batchPresenter, reductionPaused()).Times(1);
-    EXPECT_CALL(*batchPresenter, anyBatchAutoreductionPaused()).Times(1);
+    EXPECT_CALL(*batchPresenter, initInstrumentList()).Times(1);
+    EXPECT_CALL(*batchPresenter, notifyInstrumentChanged(_)).Times(1);
+    EXPECT_CALL(*batchPresenter, notifyReductionPaused()).Times(1);
+    EXPECT_CALL(*batchPresenter, notifyAnyBatchAutoreductionPaused()).Times(1);
   }
 
   void expectBatchCanBeClosed(int batchIndex) {
@@ -295,6 +402,12 @@ private:
                                  "autoprocessing is in progress",
                                  "Error"))
         .Times(1);
+  }
+
+  void expectSlitCalculatorInstrumentUpdated(std::string const &instrument) {
+    EXPECT_CALL(*m_slitCalculator, setCurrentInstrumentName(instrument))
+        .Times(1);
+    EXPECT_CALL(*m_slitCalculator, processInstrumentHasBeenChanged()).Times(1);
   }
 
   void assertFirstBatchWasRemovedFromModel(

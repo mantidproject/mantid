@@ -291,6 +291,7 @@ void Load::init() {
   exts.emplace_back(".sqw");
   exts.emplace_back(".fits");
   exts.emplace_back(".bin");
+  exts.emplace_back(".edb");
 
   declareProperty(
       std::make_unique<MultipleFileProperty>("Filename", exts),

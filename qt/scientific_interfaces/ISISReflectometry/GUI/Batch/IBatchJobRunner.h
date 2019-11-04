@@ -23,10 +23,10 @@ public:
   virtual bool isProcessing() const = 0;
   virtual bool isAutoreducing() const = 0;
   virtual int percentComplete() const = 0;
-  virtual void reductionResumed() = 0;
-  virtual void reductionPaused() = 0;
-  virtual void autoreductionResumed() = 0;
-  virtual void autoreductionPaused() = 0;
+  virtual void notifyReductionResumed() = 0;
+  virtual void notifyReductionPaused() = 0;
+  virtual void notifyAutoreductionResumed() = 0;
+  virtual void notifyAutoreductionPaused() = 0;
   virtual void setReprocessFailedItems(bool reprocessFailed) = 0;
   virtual Item const &
   algorithmStarted(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) = 0;

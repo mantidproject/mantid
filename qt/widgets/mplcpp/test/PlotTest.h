@@ -139,6 +139,23 @@ public:
     TS_ASSERT_THROWS_NOTHING(pcolormesh(workspaces));
   }
 
+  void testPlottingSubplotsWithWindowTitleWillNotThrow() {
+    const QStringList workspaces = {m_testws_name};
+    const std::vector<int> index = {1};
+    const std::string window_title = "window_title";
+
+    TS_ASSERT_THROWS_NOTHING(plot(workspaces, boost::none, index, boost::none,
+                                  boost::none, boost::none, window_title))
+  }
+
+  void testPlottingSubplotsWithErrorsWillNotThrow() {
+    const QStringList workspaces = {m_testws_name};
+    const std::vector<int> index = {1};
+
+    TS_ASSERT_THROWS_NOTHING(plot(workspaces, boost::none, index, boost::none,
+                                  boost::none, boost::none, boost::none, true))
+  }
+
 private:
   void createTestWorkspaceInADS(const std::string &name) {
     constexpr int nhist{2};

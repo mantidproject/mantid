@@ -387,8 +387,13 @@ void populateWsWithInitList(T &destination, size_t startingIndex,
 
 /// Create a simple peaks workspace containing the given number of peaks
 boost::shared_ptr<Mantid::DataObjects::PeaksWorkspace>
-createPeaksWorkspace(const int numPeaks = 2,
+createPeaksWorkspace(const int numPeaks,
                      const bool createOrientedLattice = false);
+/// Create a simple peaks workspace containing the given number of peaks and UB
+/// matrix
+boost::shared_ptr<Mantid::DataObjects::PeaksWorkspace>
+createPeaksWorkspace(const int numPeaks,
+                     const Mantid::Kernel::DblMatrix &ubMat);
 /**Build table workspace with preprocessed detectors for existing workspace with
  * instrument */
 boost::shared_ptr<Mantid::DataObjects::TableWorkspace>

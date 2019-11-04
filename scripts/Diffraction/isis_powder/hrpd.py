@@ -14,6 +14,10 @@ from isis_powder.hrpd_routines import hrpd_advanced_config, hrpd_algs, hrpd_para
 
 import mantid.simpleapi as mantid
 
+# A bug on the instrument when recording historic NeXus files (< 2015) caused
+# corrupted data. Use raw files for now until sufficient time has past and old
+# data is unlikely to be reanalysed.
+RAW_DATA_EXT = '.raw'
 
 # Constants
 PROMPT_PULSE_INTERVAL = 20000.0
@@ -32,12 +36,6 @@ class HRPD(AbstractInst):
                                    calibration_dir=self._inst_settings.calibration_dir,
                                    output_dir=self._inst_settings.output_dir,
                                    inst_prefix="HRPD")
-
-        # Cannot load older .nxs files into Mantid from HRPD
-        # because of a long-term bug which was not reported.
-        # Instead, ask Mantid to use .raw files in this case
-        if not self._inst_settings.file_extension:
-            self._inst_settings.file_extension = ".raw"
 
         self._cached_run_details = {}
         self._sample_details = None
@@ -107,6 +105,17 @@ class HRPD(AbstractInst):
         except ValueError:
             raise RuntimeError("Could not find " + os.path.join(path, name)+" please run create_vanadium with "
                                                                             "\"do_solid_angle_corrections=True\"")
+
+    def _generate_input_file_name(self, run_number, file_ext=""):
+        """
+        Generates a name which Mantid uses within Load to find the file.
+        :param run_number: The run number to convert into a valid format for Mantid
+        :param file_ext: An optional file extension to add to force a particular format
+        :return: A filename that will allow Mantid to find the correct run for that instrument.
+        """
+        if not file_ext:
+            file_ext = RAW_DATA_EXT
+        return self._generate_inst_filename(run_number=run_number, file_ext=file_ext)
 
     def _apply_absorb_corrections(self, run_details, ws_to_correct):
         if self._is_vanadium:

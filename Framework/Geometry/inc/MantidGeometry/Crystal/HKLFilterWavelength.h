@@ -23,13 +23,13 @@ namespace Geometry {
       @author Michael Wedel, ESS
       @date 23/10/2015
 */
-class MANTID_GEOMETRY_DLL HKLFilterWavelength : public HKLFilter {
+class MANTID_GEOMETRY_DLL HKLFilterWavelength final : public HKLFilter {
 public:
   HKLFilterWavelength(const Kernel::DblMatrix &ub, double lambdaMin,
                       double lambdaMax);
 
-  std::string getDescription() const override;
-  bool isAllowed(const Kernel::V3D &hkl) const override;
+  std::string getDescription() const noexcept override;
+  bool isAllowed(const Kernel::V3D &hkl) const noexcept override;
 
 protected:
   void checkProperLambdaRangeValues() const;

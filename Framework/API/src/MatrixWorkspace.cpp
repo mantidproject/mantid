@@ -364,8 +364,11 @@ void MatrixWorkspace::updateSpectraUsing(const SpectrumDetectorMapping &map) {
  * the same ID. If an empty instrument is set then a 1:1 map from 1->NHistograms
  * is created.
  * @param includeMonitors :: If false the monitors are not included
+ * @param specNumOffset :: Constant offset from detector ID used to derive
+ *                         spectrum number
  */
-void MatrixWorkspace::rebuildSpectraMapping(const bool includeMonitors) {
+void MatrixWorkspace::rebuildSpectraMapping(const bool includeMonitors,
+                                            const specnum_t specNumOffset) {
   if (sptr_instrument->nelements() == 0) {
     return;
   }
@@ -380,8 +383,7 @@ void MatrixWorkspace::rebuildSpectraMapping(const bool includeMonitors) {
          ++it) {
       // The detector ID
       const detid_t detId = *it;
-      // By default: Spectrum number = index +  1
-      const auto specNo = specnum_t(index + 1);
+      const auto specNo = specnum_t(index + specNumOffset);
 
       if (index < this->getNumberHistograms()) {
         auto &spec = getSpectrum(index);

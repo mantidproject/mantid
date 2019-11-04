@@ -8,22 +8,20 @@ from __future__ import (absolute_import, division, print_function)
 
 import os
 import mantid.simpleapi as mantid
-from mantid.api import WorkspaceGroup
+from mantid.api import WorkspaceGroup, AnalysisDataService
 from mantid.api import ITableWorkspace
-from mantid.simpleapi import mtd
+from mantid.simpleapi import mtd, UnGroupWorkspace, Plus, DeleteWorkspace, CloneWorkspace
 from mantid import api
 from mantid.kernel import ConfigServiceImpl
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
-import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
-import copy
 
 
 class LoadUtils(object):
     """
     A simple class for identifing the current run
     and it can return the name, run and instrument.
-    The current run is the same as the one in MonAnalysis
+    The current run is the same as the one in MuonAnalysis
     """
 
     def __init__(self, parent=None):
@@ -193,13 +191,8 @@ def load_dead_time_from_filename(filename):
 
     if dead_times is None:
         return ""
-    assert isinstance(dead_times, ITableWorkspace)
 
-    instrument = loaded_data["OutputWorkspace"][0].workspace.getInstrument().getName()
-    name = str(instrument) + file_utils.format_run_for_file(run) + "_deadTimes"
-    api.AnalysisDataService.Instance().addOrReplace(name, dead_times)
-
-    return name
+    return dead_times
 
 
 def load_workspace_from_filename(filename,
@@ -212,16 +205,24 @@ def load_workspace_from_filename(filename,
         alg, psi_data = create_load_algorithm(filename.split(os.sep)[-1], input_properties)
         alg.execute()
 
-    workspace = alg.getProperty("OutputWorkspace").value
+    workspace = AnalysisDataService.retrieve(alg.getProperty("OutputWorkspace").valueAsStr)
     if is_workspace_group(workspace):
         # handle multi-period data
         load_result = _get_algorithm_properties(alg, output_properties)
-        load_result["OutputWorkspace"] = [MuonWorkspaceWrapper(ws) for ws in load_result["OutputWorkspace"]]
+        load_result["OutputWorkspace"] = [MuonWorkspaceWrapper(ws) for ws in workspace.getNames()]
         run = get_run_from_multi_period_data(workspace)
         if not psi_data:
-            load_result["DataDeadTimeTable"] = copy.copy(load_result["DeadTimeTable"][0])
-            load_result["DeadTimeTable"] = None
+            load_result["DataDeadTimeTable"] = AnalysisDataService.retrieve(load_result["DeadTimeTable"]).getNames()[0]
+            for index, deadtime_table in enumerate(AnalysisDataService.retrieve(load_result["DeadTimeTable"]).getNames()):
+                if index == 0:
+                    load_result["DataDeadTimeTable"] = deadtime_table
+                else:
+                    DeleteWorkspace(Workspace=deadtime_table)
+
             load_result["FirstGoodData"] = round(load_result["FirstGoodData"] - load_result['TimeZero'], 2)
+            UnGroupWorkspace(load_result["DeadTimeTable"])
+            load_result["DeadTimeTable"] = None
+            UnGroupWorkspace(workspace.name())
         else:
             load_result["DataDeadTimeTable"] = None
             load_result["FirstGoodData"] = round(load_result["FirstGoodData"], 2)
@@ -238,8 +239,6 @@ def load_workspace_from_filename(filename,
             load_result["DataDeadTimeTable"] = None
             load_result["FirstGoodData"] = round(load_result["FirstGoodData"], 2)
 
-    filename = alg.getProperty("Filename").value
-
     return load_result, run, filename, psi_data
 
 
@@ -250,22 +249,26 @@ def empty_loaded_data():
 def create_load_algorithm(filename, property_dictionary):
     # Assume if .bin it is a PSI file
     psi_data = False
+    output_filename = os.path.basename(filename)
     if ".bin" in filename:
         alg = mantid.AlgorithmManager.create("LoadPSIMuonBin")
         psi_data = True
     else:
         alg = mantid.AlgorithmManager.create("LoadMuonNexus")
         alg.setProperties(property_dictionary)
+        alg.setProperty("DeadTimeTable", output_filename + '_deadtime_table')
 
     alg.initialize()
-    alg.setAlwaysStoreInADS(False)
-    alg.setProperty("OutputWorkspace", "__notUsed")
+    alg.setAlwaysStoreInADS(True)
+    alg.setProperty("OutputWorkspace", output_filename)
     alg.setProperty("Filename", filename)
     return alg, psi_data
 
 
 def _get_algorithm_properties(alg, property_dict):
-    return {key: alg.getProperty(key).value for key in alg.keys() if key in property_dict}
+    def _get_non_None_value(alg, key):
+        return alg.getProperty(key).value if alg.getProperty(key).value is not None else alg.getProperty(key).valueAsStr
+    return {key: _get_non_None_value(alg, key) for key in alg.keys() if key in property_dict}
 
 
 def get_table_workspace_names_from_ADS():
@@ -277,24 +280,27 @@ def get_table_workspace_names_from_ADS():
     return table_names
 
 
-def combine_loaded_runs(model, run_list):
+def combine_loaded_runs(model, run_list, delete_added=False):
     return_ws = model._loaded_data_store.get_data(run=[run_list[0]])["workspace"]
     running_total = []
 
     for index, workspace in enumerate(return_ws["OutputWorkspace"]):
-        running_total.append(workspace.workspace)
-
+        running_total_item = workspace.workspace.name() + 'CoAdd'
+        CloneWorkspace(InputWorkspace=workspace.workspace.name(), OutputWorkspace=running_total_item)
         for run in run_list[1:]:
             ws = model._loaded_data_store.get_data(run=[run])["workspace"]["OutputWorkspace"][index].workspace
-            running_total[index] = algorithm_utils.run_Plus({
-                "LHSWorkspace": running_total[index],
-                "RHSWorkspace": ws,
-                "AllowDifferentNumberSpectra": False}
-            )
+            Plus(LHSWorkspace=running_total_item, RHSWorkspace=ws, AllowDifferentNumberSpectra=False, OutputWorkspace=running_total_item)
 
-    return_ws["OutputWorkspace"] = [MuonWorkspaceWrapper(running_total_period) for running_total_period in running_total]
+        running_total.append(running_total_item)
+
+    return_ws_actual = {key: return_ws[key] for key in ['MainFieldDirection', 'TimeZero', 'FirstGoodData',
+                                                        'DeadTimeTable', 'DetectorGroupingTable']}
+    return_ws_actual["OutputWorkspace"] = [MuonWorkspaceWrapper(running_total_period) for running_total_period in
+                                           running_total]
+    return_ws_actual['DataDeadTimeTable'] = CloneWorkspace(InputWorkspace=return_ws['DataDeadTimeTable'],
+                                                           OutputWorkspace=return_ws['DataDeadTimeTable'] + 'CoAdd').name()
     model._loaded_data_store.remove_data(run=flatten_run_list(run_list), instrument=model._data_context.instrument)
-    model._loaded_data_store.add_data(run=flatten_run_list(run_list), workspace=return_ws,
+    model._loaded_data_store.add_data(run=flatten_run_list(run_list), workspace=return_ws_actual,
                                       filename="Co-added", instrument=model._data_context.instrument)
 
 

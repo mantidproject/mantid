@@ -374,6 +374,7 @@ void addRowFromDict(ITableWorkspace &self, const dict &rowItems) {
     self.removeRow(rowIndex);
     throw;
   }
+  self.modified();
 }
 
 /**
@@ -422,6 +423,7 @@ void addRowFromSequence(ITableWorkspace &self, const object &rowItems) {
       throw;
     }
   }
+  self.modified();
 }
 
 /**

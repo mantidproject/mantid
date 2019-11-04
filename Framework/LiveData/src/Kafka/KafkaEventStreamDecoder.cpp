@@ -544,7 +544,30 @@ void KafkaEventStreamDecoder::sampleDataFromMessage(const std::string &buffer) {
  */
 void KafkaEventStreamDecoder::initLocalCaches(
     const std::string &rawMsgBuffer, const RunStartStruct &runStartData) {
-  m_runId = runStartData.runId;
+    // Create buffer
+    eventBuffer = boost::static_pointer_cast<DataObjects::EventWorkspace>(
+        API::WorkspaceFactory::Instance().create("EventWorkspace", nspec, 2,
+                                                 1));
+    eventBuffer->setInstrument(ws->getInstrument());
+    /* Need a mapping with spectra numbers starting at zero */
+    eventBuffer->rebuildSpectraMapping(true, 0);
+    eventBuffer->getAxis(0)->unit() =
+        Kernel::UnitFactory::Instance().create("TOF");
+    eventBuffer->setYUnit("Counts");
+  } else {
+    /* Parse mapping from stream */
+    auto spDetMsg = GetSpectraDetectorMapping(
+        reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
+    auto nspec = static_cast<uint32_t>(spDetMsg->n_spectra());
+    auto nudet = spDetMsg->detector_id()->size();
+    if (nudet != nspec) {
+      std::ostringstream os;
+      os << "KafkaEventStreamDecoder::initLocalEventBuffer() - Invalid "
+            "spectra/detector mapping. Expected matched length arrays but "
+            "found nspec="
+         << nspec << ", ndet=" << nudet;
+      throw std::runtime_error(os.str());
+    }
 
   const auto jsonGeometry = runStartData.nexusStructure;
   const auto instName = runStartData.instrumentName;
@@ -658,7 +681,14 @@ std::vector<size_t> computeGroupBoundaries(
   /* Iterate over groups */
   for (size_t group = 1; group < numberOfGroups; ++group) {
     /* Calculate a reasonable end boundary for the group */
-    groupBoundaries[group] = groupBoundaries[group - 1] + eventsPerGroup - 1;
+    groupBoundaries[group] = std::min(
+        groupBoundaries[group - 1] + eventsPerGroup - 1, eventBuffer.size());
+
+    /* If we have already gotten through all events then exit early, leaving
+     * some threads without events. */
+    if (groupBoundaries[group] == eventBuffer.size()) {
+      break;
+    }
 
     /* Advance the end boundary of the group until all events for a given
      * workspace index fall within a single group */

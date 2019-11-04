@@ -28,6 +28,9 @@ class ILLIndirectEnergyTransferBATSTest(systemtesting.MantidSystemTest):
 
         self.tolerance = 1e-2
         self.tolerance_rel_err = True
+        # this fails the test every time a new instrument parameter is added
+        # parameters file evolves quite often, so this is not checked
+        self.disableChecking = ['Instrument']
 
     def tearDown(self):
         config['default.facility'] = self.facility

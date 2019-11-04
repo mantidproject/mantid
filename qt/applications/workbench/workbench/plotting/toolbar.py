@@ -8,30 +8,30 @@
 #
 #
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-# system imports
-
-# third-party library imports
 from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
-from mantidqt.icons import get_icon
 from qtpy import QtCore, QtGui, QtPrintSupport, QtWidgets
 
-# local package imports
+from mantidqt.icons import get_icon
 
 
 class WorkbenchNavigationToolbar(NavigationToolbar2QT):
 
-    home_clicked = QtCore.Signal()
+    sig_home_clicked = QtCore.Signal()
     sig_grid_toggle_triggered = QtCore.Signal()
     sig_active_triggered = QtCore.Signal()
     sig_hold_triggered = QtCore.Signal()
     sig_toggle_fit_triggered = QtCore.Signal()
     sig_plot_options_triggered = QtCore.Signal()
+    sig_generate_plot_script_file_triggered = QtCore.Signal()
+    sig_generate_plot_script_clipboard_triggered = QtCore.Signal()
 
     toolitems = (
-        ('Home', 'Reset original view', 'mdi.home', 'home', None),
+        ('Home', 'Center display on contents', 'mdi.home', 'on_home_clicked', None),
+        ('Back', 'Back to previous view', 'mdi.arrow-left', 'back', None),
+        ('Forward', 'Forward to next view', 'mdi.arrow-right', 'forward', None),
+        (None, None, None, None, None),
         ('Pan', 'Pan axes with left mouse, zoom with right', 'mdi.arrow-all', 'pan', False),
         ('Zoom', 'Zoom to rectangle', 'mdi.magnify', 'zoom', False),
         (None, None, None, None, None),
@@ -41,6 +41,9 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         (None, None, None, None, None),
         ('Customize', 'Configure plot options', 'mdi.settings', 'launch_plot_options', None),
         (None, None, None, None, None),
+        ('Create Script', 'Generate a script that will recreate the current figure',
+         'mdi.script-text-outline', 'generate_plot_script', None),
+        (None, None, None, None, None),
         ('Fit', 'Toggle fit browser on/off', None, 'toggle_fit', False),
     )
 
@@ -49,9 +52,21 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
             if text is None:
                 self.addSeparator()
             else:
-                if mdi_icon:
-                    a = self.addAction(get_icon(mdi_icon),
-                                       text, getattr(self, callback))
+                if text == 'Create Script':
+                    # Add a QMenu under the QToolButton for "Create Script"
+                    a = self.addAction(get_icon(mdi_icon), text, lambda: None)
+                    # This is the only way I could find of getting hold of the QToolButton object
+                    button = [child for child in self.children()
+                              if isinstance(child, QtWidgets.QToolButton)][-1]
+                    menu = QtWidgets.QMenu("Menu", parent=button)
+                    menu.addAction("Script to file",
+                                   self.sig_generate_plot_script_file_triggered.emit)
+                    menu.addAction("Script to clipboard",
+                                   self.sig_generate_plot_script_clipboard_triggered.emit)
+                    button.setMenu(menu)
+                    button.setPopupMode(QtWidgets.QToolButton.InstantPopup)
+                elif mdi_icon:
+                    a = self.addAction(get_icon(mdi_icon), text, getattr(self, callback))
                 else:
                     a = self.addAction(text, getattr(self, callback))
                 self._actions[callback] = a
@@ -60,8 +75,6 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
                     a.setChecked(checked)
                 if tooltip_text is not None:
                     a.setToolTip(tooltip_text)
-                if text == 'Home':
-                    a.triggered.connect(self.on_home_clicked)
 
         self.buttons = {}
         # Add the x,y location widget at the right side of the toolbar
@@ -69,11 +82,9 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         # will resize this label instead of the buttons.
         if self.coordinates:
             self.locLabel = QtWidgets.QLabel("", self)
-            self.locLabel.setAlignment(
-                    QtCore.Qt.AlignRight | QtCore.Qt.AlignTop)
+            self.locLabel.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignTop)
             self.locLabel.setSizePolicy(
-                QtWidgets.QSizePolicy(QtWidgets.Expanding,
-                                      QtWidgets.QSizePolicy.Ignored))
+                QtWidgets.QSizePolicy(QtWidgets.Expanding, QtWidgets.QSizePolicy.Ignored))
             labelAction = self.addWidget(self.locLabel)
             labelAction.setVisible(True)
 
@@ -81,8 +92,8 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         self.adj_window = None
 
         # Adjust icon size or they are too small in PyQt5 by default
-        dpi_ratio = QtWidgets.QApplication.instance().desktop().physicalDpiX()/100
-        self.setIconSize(QtCore.QSize(24*dpi_ratio, 24*dpi_ratio))
+        dpi_ratio = QtWidgets.QApplication.instance().desktop().physicalDpiX() / 100
+        self.setIconSize(QtCore.QSize(24 * dpi_ratio, 24 * dpi_ratio))
 
     def launch_plot_options(self):
         self.sig_plot_options_triggered.emit()
@@ -117,8 +128,9 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
     def contextMenuEvent(self, event):
         pass
 
-    def on_home_clicked(self, _):
-        self.home_clicked.emit()
+    def on_home_clicked(self):
+        self.sig_home_clicked.emit()
+        self.push_current()
 
 
 class ToolbarStateManager(object):
@@ -126,7 +138,6 @@ class ToolbarStateManager(object):
     An object that lets users check and manipulate the state of the toolbar
     whilst hiding any implementation details.
     """
-
     def __init__(self, toolbar):
         self._toolbar = toolbar
 
@@ -156,4 +167,7 @@ class ToolbarStateManager(object):
             fit_action.setChecked(True)
 
     def home_button_connect(self, slot):
-        self._toolbar.home_clicked.connect(slot)
+        self._toolbar.sig_home_clicked.connect(slot)
+
+    def emit_sig_home_clicked(self):
+        self._toolbar.sig_home_clicked.emit()

@@ -110,7 +110,7 @@ Requires: python3-mock
 Requires: boost-python3-devel
 %endif
 
-%if 0%{el7}
+%if 0%{?el7}
 Requires: boost-python36-devel
 Requires: python36-devel
 Requires: python36-h5py

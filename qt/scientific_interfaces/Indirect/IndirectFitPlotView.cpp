@@ -11,10 +11,28 @@
 #include <boost/numeric/conversion/cast.hpp>
 
 #include <QMessageBox>
+#include <QTimer>
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include "MantidQtIcons/Icon.h"
+
+namespace {
+
+QHash<QString, QVariant> tightLayoutKwargs() {
+  QHash<QString, QVariant> kwargs;
+  kwargs.insert("pad", 0);
+  return kwargs;
+}
+
+} // namespace
+
+#endif
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
+
+using namespace MantidWidgets;
 
 IndirectFitPlotView::IndirectFitPlotView(QWidget *parent)
     : IIndirectFitPlotView(parent), m_plotForm(new Ui::IndirectFitPreviewPlot) {
@@ -23,7 +41,8 @@ IndirectFitPlotView::IndirectFitPlotView(QWidget *parent)
   connect(m_plotForm->cbDataSelection, SIGNAL(currentIndexChanged(int)), this,
           SLOT(emitSelectedFitDataChanged(int)));
   connect(m_plotForm->spPlotSpectrum, SIGNAL(valueChanged(int)), this,
-          SLOT(emitPlotSpectrumChanged(int)));
+          SLOT(emitDelayedPlotSpectrumChanged()));
+
   connect(m_plotForm->cbPlotSpectrum,
           SIGNAL(currentIndexChanged(const QString &)), this,
           SLOT(emitPlotSpectrumChanged(const QString &)));
@@ -34,39 +53,117 @@ IndirectFitPlotView::IndirectFitPlotView(QWidget *parent)
   connect(m_plotForm->pbFitSingle, SIGNAL(clicked()), this,
           SIGNAL(fitSelectedSpectrum()));
 
+  // Create a Splitter and place two plots within the splitter layout
+  createSplitterWithPlots();
+
+  // Avoids squished plots for >qt5
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+  char const *const overrideLabel = "";
+  m_topPlot->setOverrideAxisLabel(AxisID::XBottom, overrideLabel);
+  m_bottomPlot->setOverrideAxisLabel(AxisID::YLeft, overrideLabel);
+  m_plotForm->dwMiniPlots->setFeatures(QDockWidget::NoDockWidgetFeatures);
+#endif
+
   m_plotForm->cbDataSelection->hide();
   addFitRangeSelector();
   addBackgroundRangeSelector();
   addHWHMRangeSelector();
 }
 
-IndirectFitPlotView::~IndirectFitPlotView() {}
+void IndirectFitPlotView::createSplitterWithPlots() {
+  createSplitter();
+  m_splitter->addWidget(createTopPlot());
+  m_splitter->addWidget(createBottomPlot());
+
+  m_plotForm->gridLayout->addWidget(m_splitter.get(), 0, 0, 1, 1);
+}
+
+void IndirectFitPlotView::createSplitter() {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+  auto const dragIcon = Icons::getIcon("mdi.dots-horizontal");
+  m_splitter = std::make_unique<Splitter>(dragIcon, m_plotForm->dwLayout);
+#else
+  m_splitter = std::make_unique<QSplitter>(m_plotForm->dwLayout);
+#endif
+  m_splitter->setOrientation(Qt::Vertical);
+  m_splitter->setStyleSheet(
+      "QSplitter::handle { background-color: transparent; }");
+}
+
+PreviewPlot *IndirectFitPlotView::createTopPlot() {
+  m_topPlot = std::make_unique<PreviewPlot>(m_splitter.get());
+  return createPlot(m_topPlot.get(), QSize(0, 125), 0, 10);
+}
+
+PreviewPlot *IndirectFitPlotView::createBottomPlot() {
+  m_bottomPlot = std::make_unique<PreviewPlot>(m_splitter.get());
+  return createPlot(m_bottomPlot.get(), QSize(0, 75), 0, 6);
+}
+
+PreviewPlot *
+IndirectFitPlotView::createPlot(PreviewPlot *plot, QSize const &minimumSize,
+                                unsigned char horizontalStretch,
+                                unsigned char verticalStretch) const {
+  setPlotSizePolicy(plot, horizontalStretch, verticalStretch);
+
+  plot->setMinimumSize(minimumSize);
+  plot->setProperty("showLegend", QVariant(true));
+  plot->setProperty("canvasColour", QVariant(QColor(255, 255, 255)));
+
+  // Avoids squished plots for >qt5
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+  plot->setTightLayout(tightLayoutKwargs());
+#endif
+
+  return plot;
+}
+
+void IndirectFitPlotView::setPlotSizePolicy(
+    PreviewPlot *plot, unsigned char horizontalStretch,
+    unsigned char verticalStretch) const {
+  QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+  sizePolicy.setHorizontalStretch(horizontalStretch);
+  sizePolicy.setVerticalStretch(verticalStretch);
+  sizePolicy.setHeightForWidth(plot->sizePolicy().hasHeightForWidth());
+  plot->setSizePolicy(sizePolicy);
+}
+
+IndirectFitPlotView::~IndirectFitPlotView() {
+  m_topPlot.reset();
+  m_bottomPlot.reset();
+  m_splitter.reset();
+}
+
+void IndirectFitPlotView::watchADS(bool watch) {
+  m_topPlot->watchADS(watch);
+  m_bottomPlot->watchADS(watch);
+}
 
 std::string IndirectFitPlotView::getSpectrumText() const {
   return m_plotForm->cbPlotSpectrum->currentText().toStdString();
 }
 
-std::size_t IndirectFitPlotView::getSelectedSpectrum() const {
+WorkspaceIndex IndirectFitPlotView::getSelectedSpectrum() const {
   if (m_plotForm->swPlotSpectrum->currentIndex() == 0)
-    return m_plotForm->spPlotSpectrum->value();
+    return WorkspaceIndex{m_plotForm->spPlotSpectrum->value()};
   else if (m_plotForm->cbPlotSpectrum->count() != 0)
-    return std::stoull(getSpectrumText());
-  return 0;
+    return WorkspaceIndex{std::stoi(getSpectrumText())};
+  return WorkspaceIndex{0};
 }
 
-int IndirectFitPlotView::getSelectedSpectrumIndex() const {
+TableRowIndex IndirectFitPlotView::getSelectedSpectrumIndex() const {
   if (m_plotForm->swPlotSpectrum->currentIndex() == 0)
-    return m_plotForm->spPlotSpectrum->value() -
-           m_plotForm->spPlotSpectrum->minimum();
-  return m_plotForm->cbPlotSpectrum->currentIndex();
+    return TableRowIndex{m_plotForm->spPlotSpectrum->value() -
+                         m_plotForm->spPlotSpectrum->minimum()};
+  return TableRowIndex{m_plotForm->cbPlotSpectrum->currentIndex()};
 }
 
-int IndirectFitPlotView::getSelectedDataIndex() const {
-  return m_plotForm->cbDataSelection->currentIndex();
+TableDatasetIndex IndirectFitPlotView::getSelectedDataIndex() const {
+  return TableDatasetIndex{m_plotForm->cbDataSelection->currentIndex()};
 }
 
-std::size_t IndirectFitPlotView::dataSelectionSize() const {
-  return boost::numeric_cast<std::size_t>(m_plotForm->cbDataSelection->count());
+TableDatasetIndex IndirectFitPlotView::dataSelectionSize() const {
+  return TableDatasetIndex{m_plotForm->cbDataSelection->count()};
 }
 
 bool IndirectFitPlotView::isPlotGuessChecked() const {
@@ -81,21 +178,23 @@ void IndirectFitPlotView::showMultipleDataSelection() {
   m_plotForm->cbDataSelection->show();
 }
 
-void IndirectFitPlotView::setAvailableSpectra(std::size_t minimum,
-                                              std::size_t maximum) {
+void IndirectFitPlotView::setAvailableSpectra(WorkspaceIndex minimum,
+                                              WorkspaceIndex maximum) {
   m_plotForm->swPlotSpectrum->setCurrentIndex(0);
-  m_plotForm->spPlotSpectrum->setMinimum(boost::numeric_cast<int>(minimum));
-  m_plotForm->spPlotSpectrum->setMaximum(boost::numeric_cast<int>(maximum));
+  m_plotForm->spPlotSpectrum->setMinimum(
+      boost::numeric_cast<int>(minimum.value));
+  m_plotForm->spPlotSpectrum->setMaximum(
+      boost::numeric_cast<int>(maximum.value));
 }
 
 void IndirectFitPlotView::setAvailableSpectra(
-    const std::vector<std::size_t>::const_iterator &from,
-    const std::vector<std::size_t>::const_iterator &to) {
+    const std::vector<WorkspaceIndex>::const_iterator &from,
+    const std::vector<WorkspaceIndex>::const_iterator &to) {
   m_plotForm->swPlotSpectrum->setCurrentIndex(1);
   m_plotForm->cbPlotSpectrum->clear();
 
   for (auto spectrum = from; spectrum < to; ++spectrum)
-    m_plotForm->cbPlotSpectrum->addItem(QString::number(*spectrum));
+    m_plotForm->cbPlotSpectrum->addItem(QString::number(spectrum->value));
 }
 
 void IndirectFitPlotView::setMinimumSpectrum(int minimum) {
@@ -106,31 +205,31 @@ void IndirectFitPlotView::setMaximumSpectrum(int maximum) {
   m_plotForm->spPlotSpectrum->setMaximum(maximum);
 }
 
-void IndirectFitPlotView::setPlotSpectrum(int spectrum) {
+void IndirectFitPlotView::setPlotSpectrum(WorkspaceIndex spectrum) {
   MantidQt::API::SignalBlocker blocker(m_plotForm->spPlotSpectrum);
-  m_plotForm->spPlotSpectrum->setValue(spectrum);
+  m_plotForm->spPlotSpectrum->setValue(spectrum.value);
 }
 
 void IndirectFitPlotView::setBackgroundLevel(double value) {
-  auto selector = m_plotForm->ppPlotTop->getRangeSelector("Background");
+  auto selector = m_topPlot->getSingleSelector("Background");
   MantidQt::API::SignalBlocker blocker(selector);
-  selector->setMinimum(value);
+  selector->setPosition(value);
 }
 
 void IndirectFitPlotView::setFitRange(double minimum, double maximum) {
-  auto selector = m_plotForm->ppPlotTop->getRangeSelector("FitRange");
+  auto selector = m_topPlot->getRangeSelector("FitRange");
   MantidQt::API::SignalBlocker blocker(selector);
   selector->setRange(minimum, maximum);
 }
 
 void IndirectFitPlotView::setFitRangeMinimum(double minimum) {
-  auto selector = m_plotForm->ppPlotTop->getRangeSelector("FitRange");
+  auto selector = m_topPlot->getRangeSelector("FitRange");
   MantidQt::API::SignalBlocker blocker(selector);
   selector->setMinimum(minimum);
 }
 
 void IndirectFitPlotView::setFitRangeMaximum(double maximum) {
-  auto selector = m_plotForm->ppPlotTop->getRangeSelector("FitRange");
+  auto selector = m_topPlot->getRangeSelector("FitRange");
   MantidQt::API::SignalBlocker blocker(selector);
   selector->setMaximum(maximum);
 }
@@ -141,8 +240,8 @@ void IndirectFitPlotView::appendToDataSelection(const std::string &dataName) {
 }
 
 void IndirectFitPlotView::setNameInDataSelection(const std::string &dataName,
-                                                 std::size_t index) {
-  m_plotForm->cbDataSelection->setItemText(boost::numeric_cast<int>(index),
+                                                 TableDatasetIndex index) {
+  m_plotForm->cbDataSelection->setItemText(index.value,
                                            QString::fromStdString(dataName));
 }
 
@@ -152,22 +251,22 @@ void IndirectFitPlotView::clearDataSelection() {
 
 void IndirectFitPlotView::plotInTopPreview(
     const QString &name, Mantid::API::MatrixWorkspace_sptr workspace,
-    std::size_t spectrum, Qt::GlobalColor colour) {
-  m_plotForm->ppPlotTop->addSpectrum(name, workspace, spectrum, colour);
+    WorkspaceIndex spectrum, Qt::GlobalColor colour) {
+  m_topPlot->addSpectrum(name, workspace, spectrum.value, colour);
 }
 
 void IndirectFitPlotView::plotInBottomPreview(
     const QString &name, Mantid::API::MatrixWorkspace_sptr workspace,
-    std::size_t spectrum, Qt::GlobalColor colour) {
-  m_plotForm->ppPlotBottom->addSpectrum(name, workspace, spectrum, colour);
+    WorkspaceIndex spectrum, Qt::GlobalColor colour) {
+  m_bottomPlot->addSpectrum(name, workspace, spectrum.value, colour);
 }
 
 void IndirectFitPlotView::removeFromTopPreview(const QString &name) {
-  m_plotForm->ppPlotTop->removeSpectrum(name);
+  m_topPlot->removeSpectrum(name);
 }
 
 void IndirectFitPlotView::removeFromBottomPreview(const QString &name) {
-  m_plotForm->ppPlotBottom->removeSpectrum(name);
+  m_bottomPlot->removeSpectrum(name);
 }
 
 void IndirectFitPlotView::enablePlotGuess(bool enable) {
@@ -183,7 +282,7 @@ void IndirectFitPlotView::enableSpectrumSelection(bool enable) {
 }
 
 void IndirectFitPlotView::enableFitRangeSelection(bool enable) {
-  m_plotForm->ppPlotTop->getRangeSelector("FitRange")->setVisible(enable);
+  m_topPlot->getRangeSelector("FitRange")->setVisible(enable);
 }
 
 void IndirectFitPlotView::setFitSingleSpectrumText(QString const &text) {
@@ -194,37 +293,35 @@ void IndirectFitPlotView::setFitSingleSpectrumEnabled(bool enable) {
   m_plotForm->pbFitSingle->setEnabled(enable);
 }
 
-void IndirectFitPlotView::clearTopPreview() { m_plotForm->ppPlotTop->clear(); }
+void IndirectFitPlotView::clearTopPreview() { m_topPlot->clear(); }
 
-void IndirectFitPlotView::clearBottomPreview() {
-  m_plotForm->ppPlotBottom->clear();
-}
+void IndirectFitPlotView::clearBottomPreview() { m_bottomPlot->clear(); }
 
-void IndirectFitPlotView::clear() {
+void IndirectFitPlotView::clearPreviews() {
   clearTopPreview();
   clearBottomPreview();
 }
 
 void IndirectFitPlotView::setHWHMRange(double minimum, double maximum) {
-  auto selector = m_plotForm->ppPlotTop->getRangeSelector("HWHM");
+  auto selector = m_topPlot->getRangeSelector("HWHM");
   MantidQt::API::SignalBlocker blocker(selector);
   selector->setRange(minimum, maximum);
 }
 
 void IndirectFitPlotView::setHWHMMaximum(double minimum) {
-  auto selector = m_plotForm->ppPlotTop->getRangeSelector("HWHM");
+  auto selector = m_topPlot->getRangeSelector("HWHM");
   MantidQt::API::SignalBlocker blocker(selector);
   selector->setMaximum(minimum);
 }
 
 void IndirectFitPlotView::setHWHMMinimum(double maximum) {
-  auto selector = m_plotForm->ppPlotTop->getRangeSelector("HWHM");
+  auto selector = m_topPlot->getRangeSelector("HWHM");
   MantidQt::API::SignalBlocker blocker(selector);
   selector->setMinimum(maximum);
 }
 
 void IndirectFitPlotView::addFitRangeSelector() {
-  auto fitRangeSelector = m_plotForm->ppPlotTop->addRangeSelector("FitRange");
+  auto fitRangeSelector = m_topPlot->addRangeSelector("FitRange");
 
   connect(fitRangeSelector, SIGNAL(minValueChanged(double)), this,
           SIGNAL(startXChanged(double)));
@@ -233,18 +330,27 @@ void IndirectFitPlotView::addFitRangeSelector() {
 }
 
 void IndirectFitPlotView::addBackgroundRangeSelector() {
-  auto backRangeSelector = m_plotForm->ppPlotTop->addRangeSelector(
-      "Background", MantidWidgets::RangeSelector::YSINGLE);
+  auto backRangeSelector =
+      m_topPlot->addSingleSelector("Background", SingleSelector::YSINGLE);
   backRangeSelector->setVisible(false);
   backRangeSelector->setColour(Qt::darkGreen);
-  backRangeSelector->setRange(0.0, 1.0);
+  backRangeSelector->setLowerBound(0.0);
 
-  connect(backRangeSelector, SIGNAL(minValueChanged(double)), this,
+  connect(backRangeSelector, SIGNAL(valueChanged(double)), this,
           SIGNAL(backgroundChanged(double)));
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+  connect(backRangeSelector, SIGNAL(resetScientificBounds()), this,
+          SLOT(setBackgroundBounds()));
+#endif
+}
+
+void IndirectFitPlotView::setBackgroundBounds() {
+  auto backRangeSelector = m_topPlot->getSingleSelector("Background");
+  backRangeSelector->setLowerBound(0.0);
 }
 
 void IndirectFitPlotView::addHWHMRangeSelector() {
-  auto hwhmRangeSelector = m_plotForm->ppPlotTop->addRangeSelector("HWHM");
+  auto hwhmRangeSelector = m_topPlot->addRangeSelector("HWHM");
   hwhmRangeSelector->setColour(Qt::red);
   hwhmRangeSelector->setRange(0.0, 0.0);
   hwhmRangeSelector->setVisible(false);
@@ -258,11 +364,11 @@ void IndirectFitPlotView::addHWHMRangeSelector() {
 }
 
 void IndirectFitPlotView::setBackgroundRangeVisible(bool visible) {
-  m_plotForm->ppPlotTop->getRangeSelector("Background")->setVisible(visible);
+  m_topPlot->getSingleSelector("Background")->setVisible(visible);
 }
 
 void IndirectFitPlotView::setHWHMRangeVisible(bool visible) {
-  m_plotForm->ppPlotTop->getRangeSelector("HWHM")->setVisible(visible);
+  m_topPlot->getRangeSelector("HWHM")->setVisible(visible);
 }
 
 void IndirectFitPlotView::displayMessage(const std::string &message) const {
@@ -272,15 +378,25 @@ void IndirectFitPlotView::displayMessage(const std::string &message) const {
 
 void IndirectFitPlotView::emitSelectedFitDataChanged(int index) {
   if (index >= 0)
-    emit selectedFitDataChanged(boost::numeric_cast<std::size_t>(index));
+    emit selectedFitDataChanged(TableDatasetIndex{index});
 }
 
-void IndirectFitPlotView::emitPlotSpectrumChanged(int spectrum) {
-  emit plotSpectrumChanged(boost::numeric_cast<std::size_t>(spectrum));
+// Required due to a bug in qt causing the valueChanged signal to be emitted
+// twice due to the long amount of time taken to complete the necessary actions
+void IndirectFitPlotView::emitDelayedPlotSpectrumChanged() {
+  QTimer::singleShot(150, this, SLOT(emitPlotSpectrumChanged()));
+}
+
+void IndirectFitPlotView::emitPlotSpectrumChanged() {
+  emit plotSpectrumChanged(WorkspaceIndex{
+      boost::numeric_cast<int>(m_plotForm->spPlotSpectrum->value())});
 }
 
 void IndirectFitPlotView::emitPlotSpectrumChanged(const QString &spectrum) {
-  emit plotSpectrumChanged(spectrum.toULongLong());
+  bool successState{false};
+  int spectrumInt = spectrum.toInt(&successState);
+  if (successState)
+    emit plotSpectrumChanged(WorkspaceIndex{spectrumInt});
 }
 
 void IndirectFitPlotView::emitPlotGuessChanged(int doPlotGuess) {

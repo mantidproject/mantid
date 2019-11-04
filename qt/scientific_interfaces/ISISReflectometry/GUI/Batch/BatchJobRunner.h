@@ -30,10 +30,10 @@ public:
   bool isAutoreducing() const override;
   int percentComplete() const override;
 
-  void reductionResumed() override;
-  void reductionPaused() override;
-  void autoreductionResumed() override;
-  void autoreductionPaused() override;
+  void notifyReductionResumed() override;
+  void notifyReductionPaused() override;
+  void notifyAutoreductionResumed() override;
+  void notifyAutoreductionPaused() override;
 
   void setReprocessFailedItems(bool reprocessFailed) override;
 

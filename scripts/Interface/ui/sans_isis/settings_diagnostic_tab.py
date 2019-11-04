@@ -19,6 +19,8 @@ from qtpy import QtWidgets
 from six import with_metaclass, PY3
 
 from mantidqt.utils.qt import load_ui
+
+from mantid import UsageService
 from sans.gui_logic.gui_common import (GENERIC_SETTINGS, JSON_SUFFIX, load_file)
 
 if PY3:
@@ -67,6 +69,8 @@ class SettingsDiagnosticTab(QtWidgets.QWidget, Ui_SettingsDiagnosticTab):
         # Q Settings
         self.__generic_settings = GENERIC_SETTINGS
         self.__save_location_path_key = "save_state_location"
+
+        UsageService.registerFeatureUsage("Feature", "ISIS SANS->Settings Diagnostics Tab", False)
 
     def add_listener(self, listener):
         if not isinstance(listener, SettingsDiagnosticTab.SettingsDiagnosticTabListener):

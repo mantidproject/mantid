@@ -10,6 +10,7 @@ from mantid import config
 import os
 import re
 from six.moves import range
+
 """
 Set of functions to assist with processing instrument parameters relevant to reduction.
 """
@@ -32,7 +33,8 @@ class ComplexProperty(object):
         rez = list()
         for key in self._other_prop:
             rez.append(spec_dict[key])
-        # process very important case of property dependent on two other properties. Make it tuple
+        # process very important case of property dependent on two other
+        # properties.  Make it tuple
         if len(rez) == 2:
             return (rez[0],rez[1])
         else:
@@ -48,13 +50,13 @@ class ComplexProperty(object):
             raise KeyError("Complex property values can be set equal to the same length values list")
 
         if isinstance(instance,dict):
-            spec_dict  = instance
+            spec_dict = instance
         else:
             spec_dict = instance.__dict__
 
         #changed_prop=[];
         for key,val in zip(self._other_prop,value):
-            spec_dict[key] =val
+            spec_dict[key] = val
                 #changed_prop.append(key);
         #return changed_prop;
 
@@ -119,7 +121,7 @@ def get_default_idf_param_list(pInstrument,synonims_list=None):
     for name in params:
         if synonims_list:
             if name in synonims_list:
-                key_name=synonims_list[name]
+                key_name = synonims_list[name]
             else:
                 key_name = name
         else:
@@ -149,7 +151,7 @@ def build_properties_dict(param_map,synonims,descr_list=[]) :
             final_name = str(synonims[name])
         else:
             final_name = str(name)
-        prelim_dict[final_name]=None
+        prelim_dict[final_name] = None
 
     param_keys = list(prelim_dict.keys())
     properties_dict = dict()
@@ -169,8 +171,8 @@ def build_properties_dict(param_map,synonims,descr_list=[]) :
             keys_candidates = val.split(":")
             n_keys = len(keys_candidates)
                #
-            if n_keys>1 : # this is the property we want to modify
-                result=list()
+            if n_keys > 1 : # this is the property we want to modify
+                result = list()
                 for key in keys_candidates :
                     if key in synonims:
                         rkey = str(synonims[key])
@@ -183,17 +185,17 @@ def build_properties_dict(param_map,synonims,descr_list=[]) :
                 if is_descriptor:
                     descr_dict[final_name] = result
                 else:
-                    properties_dict['_'+final_name]=ComplexProperty(result)
+                    properties_dict['_' + final_name] = ComplexProperty(result)
             else:
                 if is_descriptor:
                     descr_dict[final_name] = keys_candidates[0]
                 else:
-                    properties_dict[final_name] =keys_candidates[0]
+                    properties_dict[final_name] = keys_candidates[0]
         else:
             if is_descriptor:
                 descr_dict[final_name] = val
             else:
-                properties_dict[final_name]=val
+                properties_dict[final_name] = val
 
     return (properties_dict,descr_dict)
 
@@ -226,12 +228,13 @@ def build_subst_dictionary(synonims_list=None) :
         return synonims_list
     if not isinstance(synonims_list, str) :
         raise AttributeError("The synonyms field of Reducer object has to be special format string or the dictionary")
-        # we are in the right place and going to transform string into dictionary
+        # we are in the right place and going to transform string into
+        # dictionary
 
     subst_lines = synonims_list.split(";")
-    rez  = dict()
+    rez = dict()
     for lin in subst_lines :
-        lin=lin.strip()
+        lin = lin.strip()
         keys = lin.split("=")
         if len(keys) < 2 :
             raise AttributeError("The pairs in the synonyms fields have to have form key1=key2=key3 with at least two values present")
@@ -241,9 +244,9 @@ def build_subst_dictionary(synonims_list=None) :
         for i in range(1,len(keys)) :
             if len(keys[i]) == 0 :
                 raise AttributeError("The pairs in the synonyms fields have to have form key1=key2=key3 with at least two values present, "
-                                     "but the key"+str(i)+" is empty")
+                                     "but the key" + str(i) + " is empty")
             kkk = keys[i].strip()
-            rez[kkk]=keys[0].strip()
+            rez[kkk] = keys[0].strip()
 
     return rez
 
@@ -256,13 +259,13 @@ def gen_getter(keyval_dict,key):
         and gen_getter(keyval_dict,C) == [10,20];
     """
     if key not in keyval_dict:
-        name = '_'+key
+        name = '_' + key
         if name not in keyval_dict:
             raise KeyError('Property with name: {0} is not among the class properties '.format(key))
     else:
         name = key
 
-    a_val= keyval_dict[name]
+    a_val = keyval_dict[name]
     if isinstance(a_val,ComplexProperty):
         return a_val.__get__(keyval_dict)
     else:
@@ -282,7 +285,7 @@ def gen_setter(keyval_dict,key,val):
     """
 
     if key not in keyval_dict:
-        name = '_'+key
+        name = '_' + key
         if name not in keyval_dict:
             raise KeyError(' Property name: {0} is not defined'.format(key))
     else:
@@ -311,8 +314,8 @@ def check_instrument_name(old_name,new_name):
         return (None,None,None)
 
     # Instrument name might be a prefix, query Mantid for the full name
-    short_name=''
-    full_name=''
+    short_name = ''
+    full_name = ''
     try :
         instrument = config.getFacility().instrument(new_name)
         short_name = instrument.shortName()
@@ -327,13 +330,13 @@ def check_instrument_name(old_name,new_name):
                 instrument = facility.instrument(new_name)
                 short_name = instrument.shortName()
                 full_name = instrument.name()
-                if len(short_name)>0 :
+                if len(short_name) > 0 :
                     break
             except:
                 pass
         #config.setString('default.facility',old_facility)
-        if len(short_name)==0 :
-            raise KeyError(" Can not find/set-up the instrument: "+new_name+' in any supported facility')
+        if len(short_name) == 0 :
+            raise KeyError(" Can not find/set-up the instrument: " + new_name + ' in any supported facility')
 
     new_name = short_name
 
@@ -345,25 +348,25 @@ def parse_single_name(filename):
     """ Process single run name into """
     filepath,fname = os.path.split(filename)
     if ':' in fname:
-        fl,fr=fname.split(':')
-        path1,ind1,ext1=parse_single_name(fl)
-        path2,ind2,ext2=parse_single_name(fr)
-        if ind1>ind2:
+        fl,fr = fname.split(':')
+        path1,ind1,ext1 = parse_single_name(fl)
+        path2,ind2,ext2 = parse_single_name(fr)
+        if ind1 > ind2:
             raise ValueError('Invalid file number defined using colon : left run number '
                              '{0} has to be large then right {1}'.format(ind1,ind2))
-        number = list(range(ind1[0],ind2[0]+1))
-        if len(filepath)>0:
-            filepath=[filepath]*len(number)
+        number = list(range(ind1[0],ind2[0] + 1))
+        if len(filepath) > 0:
+            filepath = [filepath] * len(number)
         else:
-            filepath=path1*len(number)
-        if len(ext2[0])>0:
-            fext = ext2*len(number)
+            filepath = path1 * len(number)
+        if len(ext2[0]) > 0:
+            fext = ext2 * len(number)
         else:
-            fext = ext1*len(number)
+            fext = ext1 * len(number)
 
         return (filepath,number,fext)
 
-    fname,fext  = os.path.splitext(fname)
+    fname,fext = os.path.splitext(fname)
     fnumber = re.findall('\d+', fname)
     if len(fnumber) == 0:
         number = 0
@@ -379,17 +382,17 @@ def parse_run_file_name(run_string):
 
     runs = run_string.split(',')
     filepath = []
-    filenum  = []
-    fext     = []
-    anExt    = ''
+    filenum = []
+    fext = []
+    anExt = ''
     for run in runs:
         path,ind,ext1 = parse_single_name(run)
         filepath+=path
         filenum+=ind
         fext+=ext1
 
-    non_empty = [x for x in fext if len(x) >0]
-    if len(non_empty)>0:
+    non_empty = [x for x in fext if len(x) > 0]
+    if len(non_empty) > 0:
         anExt = non_empty[-1]
         for i,val in enumerate(fext):
             if len(val) == 0:
@@ -397,8 +400,8 @@ def parse_run_file_name(run_string):
 
     if len(filenum) == 1:
         filepath = filepath[0]
-        filenum  = filenum[0]
-        fext     = fext[0]
+        filenum = filenum[0]
+        fext = fext[0]
     # extensions should be either all the same or all defined
     return (filepath,filenum,fext)
 #

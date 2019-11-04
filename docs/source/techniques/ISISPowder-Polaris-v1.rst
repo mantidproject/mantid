@@ -168,7 +168,13 @@ The *create_total_scattering_pdf* method allows a user to create a Pair Distribu
 from focused POLARIS data, with a view performing further total scattering analysis.
 
 With no merging criteria specified, *merge_banks=False* a PDF will be generated for each bank within
-the focused_workspace.
+the focused_workspace. If run with *merge_banks=True* a PDF will be generated based on the wighted
+sum of the detector banks performed using supplied Q limits *q_lims=q_limits*, Q_limits can be in the
+form of a numpy array with shape (2, x) where x is the number rof detectors, or a string containing the
+directory of an appropriately formatted `.lim` file.
+
+This function applies the placzek self scattering correction from
+:ref:CalculatePlaczekSelfScattering <algm-CalculatePlaczekSelfScattering> before calculating the PDF
 
 This function requires the run_number you wish to analyse. The focused file for this run number must
 either be loaded in Mantid with the naming format given by the *focus* method:
@@ -649,6 +655,36 @@ On POLARIS this is set to the following:
 ..  code-block:: python
 
   vanadium_peaks_masking_file: "VanaPeaks.dat"
+
+.. _nxs_filename_polaris_isis-powder-diffraction-ref:
+
+nxs_filename
+^^^^^^^^^^^^
+A template for the filename of the generated NeXus file.
+
+.. _gss_filename_polaris_isis-powder-diffraction-ref:
+
+gss_filename
+^^^^^^^^^^^^
+A template for the filename of the generated GSAS file.
+
+.. _dat_files_directory_polaris_isis-powder-diffraction-ref:
+
+dat_files_directory
+^^^^^^^^^^^^^^^^^^^
+The subdirectory of the output directory where the .dat files are saved
+
+.. _tof_xye_filename_polaris_isis-powder-diffraction-ref:
+
+tof_xye_filename
+^^^^^^^^^^^^^^^^
+A template for the filename of the generated TOF XYE file.
+
+.. _dspacing_xye_filename_polaris_isis-powder-diffraction-ref:
+
+dspacing_xye_filename
+^^^^^^^^^^^^^^^^^^^^^
+A template for the filename of the generated dSpacing XYE file.
 
 .. _sample_empty_scale_polaris_isis-powder-diffraction-ref:
 

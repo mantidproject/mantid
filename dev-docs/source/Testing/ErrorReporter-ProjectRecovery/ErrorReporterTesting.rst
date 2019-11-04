@@ -14,8 +14,7 @@ Error Reporter test
 -  Ensure that `Report usage data` is checked in the First Time Setup screen
 -  Files ``SANS2D00005512.nxs``; availabe in ``/Testing/Data/SystemTest/SANS2D``, get this by building the `SystemTestData` target. It should be in in ``ExternalData/Testing/Data/SystemTest/SANS2D/``
 -  Make sure the location of these files is included in your search
-   directories. Full instructions `are available
-   online <http://www.mantidproject.org/MBC_Getting_set_up#MantidPlot_First-Time_Setup>`__.
+   directories. Full instructions :ref:`are available online <mantid:getting started>`.
 - These tests should be run with someone who has access to the error reports database. Please contact Keith Butler when you are going to run these tests.
 
 **Time required 10 - 20  minutes**

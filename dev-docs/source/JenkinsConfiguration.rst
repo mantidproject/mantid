@@ -116,24 +116,24 @@ Configure `automatic security updates <https://help.ubuntu.com/community/Automat
 Install ``gdebi-core`` package to allow installing ``.deb`` files.
 
 The ``builder`` account must be setup to be able to run ``gdebi`` non-interactively. Use ``visudo`` to add the following
-exception got ``builder``::
+exception for ``builder``::
 
     # Allow no password for gdebi
     builder       ALL=(ALL)NOPASSWD:/usr/bin/gdebi, /usr/bin/dpkg
     ## Disable tty requirement for gdebi and dpkg command
-    Defaults!/usr/bin/gdebi !requiretty
-    Defaults!/usr/bin/dpkg  !requiretty
+    Defaults!/usr/bin/gdebi     !requiretty
+    Defaults!/usr/bin/dpkg      !requiretty
 
 Red Hat
 ^^^^^^^
 
 The ``builder`` account must be setup to be able to run ``yum`` non-interactively. Use ``visudo`` to add the following
-exception got ``builder``::
+exception for ``builder``::
 
     ## Allow no password for yum
     builder       ALL = NOPASSWD: /usr/bin/yum,/bin/rpm
     ## Disable tty requirement for yum command
-    Defaults!/bin/rpm       !requiretty
+    Defaults!/bin/rpm           !requiretty
     Defaults!/usr/bin/yum       !requiretty
 
 Mac OS
@@ -142,16 +142,14 @@ Mac OS
 Enable `SSH ("Remote Login") and VNC ("Remote Management") <https://apple.stackexchange.com/a/73919>`__.  If you have
 connection issues from a non-OS X client then try adjusting your color depth settings (True Color 32bpp works on Remmina).
 
-Install ``cppcheck`` from brew.
-
-The ``builder`` account must be setup to be able to run ``gdebi`` non-interactively. Use ``visudo`` to add the following
-exception got ``builder``::
+The ``builder`` account must be setup to be able to cp packages non-interactively. Use ``visudo`` to add the following
+exception for ``builder``::
 
 
-    # Allow builder to install packages without a password
-    builder  ALL=(ALL)NOPASSWD:/usr/sbin/installer, /bin/rm
+    # Allow builder to copy packages without a password
+    builder  ALL=(ALL)NOPASSWD:/bin/cp, /bin/rm
     # Disable tty requirement
-    Defaults!/usr/sbin/installer    !requiretty
+    Defaults!/bin/cp        !requiretty
     Defaults!/bin/rm        !requiretty
 
 In order to run the MantidPlot tests, which require a connection to the windowing system, the user that is running the jenkins slave must

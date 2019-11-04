@@ -367,7 +367,7 @@ public:
     const auto params = makePeakParameters();
     auto ws = makeWorkspace(params);
     // Create the peak
-    Peak *peak = ws->createPeakHKL(params.hkl);
+    auto peak = ws->createPeakHKL(params.hkl);
 
     /*
      Now we check we have made a self - consistent peak
@@ -388,9 +388,6 @@ public:
                       params.detectorPosition, detector->getPos());
     TSM_ASSERT_EQUALS("Goniometer has not been set properly",
                       params.goniometer.getR(), peak->getGoniometerMatrix());
-
-    // Clean up.
-    delete peak;
   }
 
   void test_create_peak_with_position_hkl() {

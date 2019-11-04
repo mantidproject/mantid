@@ -7,43 +7,25 @@
 #ifndef SCRIPTREPOSITORYIMPLTEST_H_
 #define SCRIPTREPOSITORYIMPLTEST_H_
 
-#include "MantidScriptRepository/ScriptRepositoryImpl.h"
-#include <Poco/File.h>
-#include <Poco/Path.h>
-#include <cxxtest/TestSuite.h>
-// Visual Studion compains with the inclusion of Poco/FileStream
-// disabling this warning.
-#if defined(_WIN32) || defined(_WIN64)
-#pragma warning(push)
-#pragma warning(disable : 4250)
-#include <Poco/FileStream.h>
-#pragma warning(pop)
-#else
-#include <Poco/FileStream.h>
-#endif
 #include "MantidKernel/ConfigService.h"
+#include "MantidScriptRepository/ScriptRepositoryImpl.h"
 #include <Poco/DateTimeFormatter.h>
+#include <Poco/File.h>
+#include <Poco/FileStream.h>
+#include <Poco/Path.h>
 #include <Poco/TemporaryFile.h>
-#include <algorithm>
 #include <boost/algorithm/string.hpp>
+#include <cxxtest/TestSuite.h>
+
+#include <algorithm>
+
+using Mantid::API::ScriptRepoException;
+using Mantid::API::ScriptRepositoryImpl;
 using Mantid::Kernel::ConfigService;
 using Mantid::Kernel::ConfigServiceImpl;
 using Mantid::Types::Core::DateAndTime;
-using namespace std;
-using Mantid::API::ScriptRepoException;
-using Mantid::API::ScriptRepositoryImpl;
 
-const bool TEST_MANUALLY = false;
-
-/** To run this tests (LINUX):
-
-    make ScriptRepositoryTest
-
-    ctest -R ScriptRepositoryTest [-verbose]
-
- **/
-
-const std::string REPOSITORYJSON =
+constexpr auto REPOSITORYJSON =
     "{\n"
     "\"TofConv\":\n"
     "{\n"
@@ -76,10 +58,9 @@ const std::string REPOSITORYJSON =
     "}\n"
     "}\n";
 
-const std::string TOFCONV_README = "This is the content of TOFCONV_README";
-const std::string TOFCONV_CONVERTER = "print 'hello world'";
-
-const std::string webserverurl = "http://localhost";
+constexpr auto TOFCONV_README = "This is the content of TOFCONV_README";
+constexpr auto TOFCONV_CONVERTER = "print 'hello world'";
+constexpr auto WEBSERVER_URL = "https://localhost";
 
 /** The ScriptRepositoryTest aims to ensure and protect the logic and
 the interfaces described for ScriptRepository without requiring
@@ -140,7 +121,7 @@ public:
     // request to ping the site
     if (local_file_path.empty())
       return;
-    if (url_file.find("http://") == std::string::npos) {
+    if (url_file.find("https://") == std::string::npos) {
       throw ScriptRepoException("Invalid url to download");
     }
     Poco::FileStream _out(local_file_path);
@@ -243,7 +224,7 @@ public:
     backup_local_repository_path = config.getString("ScriptLocalRepository");
     local_rep = std::string(Poco::Path::current()).append("mytemprepository/");
     TS_ASSERT_THROWS_NOTHING(repo = std::make_unique<ScriptRepositoryImplLocal>(
-                                 local_rep, webserverurl));
+                                 local_rep, WEBSERVER_URL));
   }
 
   // ensure that the local files are free from the test created.
@@ -265,7 +246,7 @@ public:
    ******************/
   void test_doDownloadFile() {
     // ensure it can ping the remote url
-    TS_ASSERT_THROWS_NOTHING(repo->doDownloadFile(webserverurl, ""));
+    TS_ASSERT_THROWS_NOTHING(repo->doDownloadFile(WEBSERVER_URL, ""));
 
     // simulate the installation.
     Poco::File dir(local_rep);
@@ -276,7 +257,7 @@ public:
       std::string local_j_file =
           std::string(local_rep).append("/.repository.json");
       TS_ASSERT_THROWS_NOTHING(repo->doDownloadFile(
-          std::string(webserverurl).append("/repository.json"), local_j_file));
+          std::string(WEBSERVER_URL).append("/repository.json"), local_j_file));
     }
     {
       // ensure it can download TofConv/README.txt
@@ -285,7 +266,7 @@ public:
       Poco::File dir(std::string(local_rep).append("/TofConv"));
       dir.createDirectories();
       TS_ASSERT_THROWS_NOTHING(repo->doDownloadFile(
-          std::string(webserverurl).append("/TofConv/README.txt"),
+          std::string(WEBSERVER_URL).append("/TofConv/README.txt"),
           local_j_file));
       Poco::File f(local_j_file);
       TS_ASSERT(f.exists());
@@ -463,7 +444,7 @@ public:
    *************************************/
   void test_update() {
     TS_ASSERT_THROWS_NOTHING(repo->install(local_rep));
-    std::vector<string> list_of_files;
+    std::vector<std::string> list_of_files;
     TS_ASSERT_THROWS_NOTHING(list_of_files = repo->listFiles());
     TS_ASSERT(list_of_files.size() == 5);
 
@@ -494,7 +475,7 @@ public:
 
   void test_auto_update() {
     TS_ASSERT_THROWS_NOTHING(repo->install(local_rep));
-    std::vector<string> list_of_files;
+    std::vector<std::string> list_of_files;
     TS_ASSERT_THROWS_NOTHING(list_of_files = repo->listFiles());
     TS_ASSERT(list_of_files.size() == 5);
     std::string file_name = "TofConv/README.txt";
@@ -531,7 +512,7 @@ public:
 
   void test_auto_update_cascade() {
     TS_ASSERT_THROWS_NOTHING(repo->install(local_rep));
-    std::vector<string> list_of_files;
+    std::vector<std::string> list_of_files;
     TS_ASSERT_THROWS_NOTHING(list_of_files = repo->listFiles());
     TS_ASSERT(list_of_files.size() == 5);
     std::string folder_name = "TofConv";
@@ -581,7 +562,7 @@ public:
 
   void test_auto_update_cascade_remove_all_internal_files() {
     TS_ASSERT_THROWS_NOTHING(repo->install(local_rep));
-    std::vector<string> list_of_files;
+    std::vector<std::string> list_of_files;
     TS_ASSERT_THROWS_NOTHING(list_of_files = repo->listFiles());
     TS_ASSERT(list_of_files.size() == 5);
     std::string folder_name = "TofConv";
@@ -668,54 +649,30 @@ public:
     TS_ASSERT(repo->fileStatus(file_name) == Mantid::API::BOTH_UNCHANGED);
     TS_ASSERT(repo->fileStatus(dir_name) == Mantid::API::BOTH_UNCHANGED);
 
-    /**
-       We have to change the local file in order to verify if
-       it changes its local status.
+    // we will simulate the change of the file, by, changin the local.json
+    // file
 
-       unfortunatelly, the only way to see a local change, is giving some time,
-       at least
-       one seccond.
-
-       so, we will propose two versions, but for production, we will use the
-       fastest one.
-    */
-
-    if (TEST_MANUALLY) {
-#if defined(WIN32) || defined(WIN64)
-      Sleep(1000000);
-#else
-      sleep(1);
-#endif
-      Poco::FileStream _ap(
-          std::string(local_rep).append("/").append(file_name));
-      _ap << "Local change";
-      _ap.close();
-    } else {
-      // we will simulate the change of the file, by, changin the local.json
-      // file
-
-      Poco::FileStream ss(std::string(local_rep).append("/local.json"));
-      ss << "{\n"
-         << "\"TofConv/README.txt\":\n"
-         << "{\n"
-         << "\"downloaded_date\": \"2013-Mar-07 14:30:09\",\n"
-         << "\"downloaded_pubdate\": \"2012-Feb-13 10:02:50\"\n"
-         << "}\n"
-         << "}";
-      ss.close();
-      std::string localjson = string(local_rep).append("/.local.json");
-      Poco::File f(std::string(local_rep).append("/local.json"));
+    Poco::FileStream ss(std::string(local_rep).append("/local.json"));
+    ss << "{\n"
+       << "\"TofConv/README.txt\":\n"
+       << "{\n"
+       << "\"downloaded_date\": \"2013-Mar-07 14:30:09\",\n"
+       << "\"downloaded_pubdate\": \"2012-Feb-13 10:02:50\"\n"
+       << "}\n"
+       << "}";
+    ss.close();
+    std::string localjson = std::string(local_rep).append("/.local.json");
+    Poco::File f(std::string(local_rep).append("/local.json"));
 
 #if defined(_WIN32) || defined(_WIN64)
-      // set the .repository.json and .local.json hidden
-      SetFileAttributes(localjson.c_str(), FILE_ATTRIBUTE_NORMAL);
+    // set the .repository.json and .local.json hidden
+    SetFileAttributes(localjson.c_str(), FILE_ATTRIBUTE_NORMAL);
 #endif
-      f.moveTo(localjson);
+    f.moveTo(localjson);
 #if defined(_WIN32) || defined(_WIN64)
-      // set the .repository.json and .local.json hidden
-      SetFileAttributes(localjson.c_str(), FILE_ATTRIBUTE_HIDDEN);
+    // set the .repository.json and .local.json hidden
+    SetFileAttributes(localjson.c_str(), FILE_ATTRIBUTE_HIDDEN);
 #endif
-    }
 
     TS_ASSERT_THROWS_NOTHING(repo->listFiles());
 
@@ -798,54 +755,30 @@ public:
     // do download
     TS_ASSERT_THROWS_NOTHING(repo->download(file_name));
 
-    /**
-       We have to change the local file in order to verify if
-       it changes its local status.
+    // we will simulate the change of the file, by, changin the local.json
+    // file
 
-       unfortunatelly, the only way to see a local change, is giving some time,
-       at least
-       one seccond.
-
-       so, we will propose two versions, but for production, we will use the
-       fastest one.
-    */
-
-    if (TEST_MANUALLY) {
-#if defined(WIN32) || defined(WIN64)
-      Sleep(1000000);
-#else
-      sleep(1);
-#endif
-      Poco::FileStream _ap(
-          std::string(local_rep).append("/").append(file_name));
-      _ap << "Local change";
-      _ap.close();
-    } else {
-      // we will simulate the change of the file, by, changin the local.json
-      // file
-
-      Poco::FileStream ss(std::string(local_rep).append("/local.json"));
-      ss << "{\n"
-         << "\"TofConv/README.txt\":\n"
-         << "{\n"
-         << "\"downloaded_date\": \"2013-Mar-07 14:30:09\",\n"
-         << "\"downloaded_pubdate\": \"2012-Feb-13 10:02:50\"\n"
-         << "}\n"
-         << "}";
-      ss.close();
-      std::string localjson = string(local_rep).append("/.local.json");
-      Poco::File f(std::string(local_rep).append("/local.json"));
+    Poco::FileStream ss(std::string(local_rep).append("/local.json"));
+    ss << "{\n"
+       << "\"TofConv/README.txt\":\n"
+       << "{\n"
+       << "\"downloaded_date\": \"2013-Mar-07 14:30:09\",\n"
+       << "\"downloaded_pubdate\": \"2012-Feb-13 10:02:50\"\n"
+       << "}\n"
+       << "}";
+    ss.close();
+    std::string localjson = std::string(local_rep).append("/.local.json");
+    Poco::File f(std::string(local_rep).append("/local.json"));
 
 #if defined(_WIN32) || defined(_WIN64)
-      // set the .repository.json and .local.json hidden
-      SetFileAttributes(localjson.c_str(), FILE_ATTRIBUTE_NORMAL);
+    // set the .repository.json and .local.json hidden
+    SetFileAttributes(localjson.c_str(), FILE_ATTRIBUTE_NORMAL);
 #endif
-      f.moveTo(localjson);
+    f.moveTo(localjson);
 #if defined(_WIN32) || defined(_WIN64)
-      // set the .repository.json and .local.json hidden
-      SetFileAttributes(localjson.c_str(), FILE_ATTRIBUTE_HIDDEN);
+    // set the .repository.json and .local.json hidden
+    SetFileAttributes(localjson.c_str(), FILE_ATTRIBUTE_HIDDEN);
 #endif
-    }
 
     // now, we will simulate a new version of the file
     std::string original_time = "2012-Feb-13 10:02:50";
@@ -895,7 +828,7 @@ public:
     boost::replace_all(curr_python_direc, "\\", "/");
     boost::replace_all(direc, "\\", "/");
 
-    TS_ASSERT(curr_python_direc.find(direc) != string::npos);
+    TS_ASSERT(curr_python_direc.find(direc) != std::string::npos);
 
     config.setString("pythonscripts.directories", backup_python_directories);
     config.saveConfig(config.getUserFilename());

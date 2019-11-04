@@ -80,6 +80,19 @@ public:
   MessageDisplay(QWidget *parent = 0);
   MessageDisplay(const QFont &font, QWidget *parent = 0);
   void attachLoggingChannel(int logLevel = -1);
+  QPlainTextEdit *getTextEdit();
+  void filterMessages();
+  QMenu *generateContextMenu();
+  void filePathModified(const QString &oldPath, const QString &newPath);
+
+  bool showFrameworkOutput();
+  void setShowFrameworkOutput(const bool &show);
+  bool showAllScriptOutput();
+  void setShowAllScriptOutput(const bool &show);
+  bool showActiveScriptOutput();
+  void setShowActiveScriptOutput(const bool &show);
+  QString activeScript();
+  void setActiveScript(const QString &scriptPath);
 
   void appendFatal(const QString &text);
   void appendError(const QString &text);
@@ -87,6 +100,7 @@ public:
   void appendNotice(const QString &text);
   void appendInformation(const QString &text);
   void appendDebug(const QString &text);
+  void appendPython(const QString &text, const int &priority, const QString &fileName);
   void setSource(const QString &source);
 };
 
@@ -138,6 +152,7 @@ public:
   sipRes = sipBuildResult(nullptr, "(iiii)", lineFrom, indexFrom,
                           lineTo, indexTo);
 %End
+  int getZoom() const;
   bool hasSelectedText() const;
   bool isModified() const;
   bool isReadOnly() const;
@@ -173,10 +188,13 @@ public:
 
 public slots:
   void updateProgressMarker(int lineno, bool error);
+  void zoomTo(int level);
 
 signals:
   void fileNameChanged(const QString &fileName);
   void modificationChanged(bool m);
+  void textZoomedIn();
+  void textZoomedOut();
 
 private:
   ScriptEditor(const ScriptEditor&);
@@ -252,7 +270,7 @@ class BaseDecoder {
 %End
 public:
   virtual QWidget * decode(const QMap<QString, QVariant> &map,
-                          const std::string &directory) = 0;
+                           const std::string &directory) = 0;
   virtual QList<QString> tags() = 0;
 private:
   BaseDecoder();
@@ -384,8 +402,19 @@ class ManageUserDirectories : QDialog {
 %End
 public:
   ManageUserDirectories(QWidget *parent /TransferThis/ = nullptr);
-  static void openUserDirsDialog(QWidget *parent);
-  void setHelpButtonVisible(const bool &visible /TransferThis/ );
+  static void openManageUserDirectories();
+};
+
+// ---------------------------------
+// Script Repository
+// ---------------------------------
+
+class ScriptRepositoryView : QDialog {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/ScriptRepositoryView.h"
+%End
+public:
+    ScriptRepositoryView(QWidget *parent = nullptr);
 };
 
 // ---------------------------------
@@ -414,13 +443,22 @@ public:
     double endX() const;
     void setEndX(double end);
     void setXRange(double start, double end);
+    QVector<double> getXRange() throw(std::invalid_argument);
+    QString getXColumnName() const;
+    QString getYColumnName() const;
+    QString getErrColumnName() const;
     int workspaceIndex() const;
     void setWorkspaceIndex(int i);
     QStringList getWorkspaceNames();
     void fit();
     void addAllowedSpectra(const QString &wsName, const QList<int> &wsIndices);
+    void addAllowedTableWorkspace(const QString &wsName);
     void setTextPlotGuess(const QString);
     bool plotDiff() const;
+    std::string outputName() const;
+    void addFitResultWorkspacesToTableWidget();
+    void setWorkspaceName(const QString &wsName);
+    void postDeleteHandle(const std::string &wsName);
 
     SIP_PYOBJECT defaultPeakType();
 %MethodCode
@@ -444,6 +482,7 @@ public:
     void setPeakFwhmOf(QString, double);
     void normaliseData(bool on);
     QMenu *getFitMenu() const;
+    QListWidget* getWorkspaceList() const;
 
     SIP_PYOBJECT workspaceName() const;
 %MethodCode
@@ -472,7 +511,8 @@ signals:
     void algorithmFinished(const QString &);
     void removeFitCurves();
     void plotGuess();
-
+    void sequentialFitDone() const;
+    void workspaceClicked(const QString &);
 };
 
 // ---------------------------------
@@ -831,4 +871,36 @@ public:
     QTreeWidget *treeWidget() const;
     QWidget *getParamWidget(const QString &paramName) const;
     double getParameter(const QString &paramName) const;
+};
+
+// ---------------------------------
+// MWRunFiles
+// ---------------------------------
+class MWRunFiles : QWidget
+{
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/MWRunFiles.h"
+%End
+public:
+    MWRunFiles(QWidget *parent = nullptr);
+
+    void setLabelText(const QString &text);
+    void setLabelMinWidth(const int);
+    void liveButtonSetChecked(bool);
+    bool liveButtonIsChecked();
+    QString getText();
+    QString getFirstFilename() const;
+    bool isSearching() const;
+    bool isValid();
+    void setUserInput(const QVariant &);
+    void setText(const QString&);
+    void setInstrumentOverride(const QString &instName);
+
+signals:
+    void fileTextChanged(const QString & /*_t1*/);
+    void fileEditingFinished();
+    void fileFindingFinished();
+    void liveButtonPressed(bool);
+    void findingFiles();
+    void filesFound();
 };

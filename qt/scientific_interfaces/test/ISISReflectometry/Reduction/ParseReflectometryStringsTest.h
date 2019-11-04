@@ -140,6 +140,17 @@ public:
     TS_ASSERT(!result.is_initialized());
   }
 
+  void testParseScaleFactorRejectsZero() {
+    auto result = parseScaleFactor("0.0");
+    TS_ASSERT(!result.is_initialized());
+  }
+
+  void testParseScaleFactorNegative() {
+    auto result = parseScaleFactor("-1.0");
+    TS_ASSERT(result.get().is_initialized());
+    TS_ASSERT_EQUALS(result.get().get(), -1.0);
+  }
+
   void testParseQRange() {
     auto result = parseQRange("0.05", "0.16", "0.02");
     TS_ASSERT_EQUALS(result.which(), VALUE);

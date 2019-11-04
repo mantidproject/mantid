@@ -97,6 +97,11 @@ def create_mock_view(user_file_path, batch_file_path=None, row_user_file_path=""
     view.get_batch_file_path = mock.MagicMock(return_value=batch_file_path)
     view.get_number_of_rows = mock.MagicMock(return_value=2)
 
+    # Older unit test files which do not specify this will cause Mock to substitute
+    # the MagicMock object instead. This cannot be deep copied causing
+    # the unit tests to fail over. This only affects testing for force to None type to avoid
+    view.transmission_mn_5_shift = None
+
     # Add the settings diagnostic mock
     settings_diagnostic_tab = create_mock_settings_diagnostic_tab()
     view.settings_diagnostic_tab = settings_diagnostic_tab

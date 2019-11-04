@@ -17,7 +17,7 @@
 namespace Mantid {
 namespace CurveFitting {
 namespace CostFunctions {
-class CostFuncLeastSquares;
+class CostFuncFitting;
 } // namespace CostFunctions
 
 namespace FuncMinimisers {
@@ -43,8 +43,8 @@ public:
   double costFunctionVal() override;
 
 private:
-  /// Pointer to the cost function. Must be the least squares.
-  boost::shared_ptr<CostFunctions::CostFuncLeastSquares> m_leastSquares;
+  /// Pointer to the cost function.
+  boost::shared_ptr<CostFunctions::CostFuncFitting> m_costFunction;
   /// The tau parameter in the Levenberg-Marquardt method.
   double m_tau;
   /// The damping mu parameter in the Levenberg-Marquardt method.

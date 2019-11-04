@@ -26,6 +26,7 @@ class SNAPReduce(DataProcessorAlgorithm):
         if self.IPTS_dir is None:
             self.IPTS_dir = GetIPTS(Instrument='SNAP',
                                     RunNumber=str(run))
+
         return self.IPTS_dir
 
     def smooth(self, data, order):
@@ -187,6 +188,9 @@ class SNAPReduce(DataProcessorAlgorithm):
                              + "All detectors as one group, Groups (East,West for "
                              + "SNAP), Columns for SNAP, detector banks")
 
+        self.declareProperty("MaxChunkSize", 16.,
+                             "Specify maximum Gbytes of file to read in one chunk. Zero reads the whole file at once.")
+
         mode = ["Set-Up", "Production"]
         self.declareProperty("ProcessingMode", mode[1], StringListValidator(mode),
                              "Set-Up Mode is used for establishing correct parameters. Production "
@@ -335,9 +339,15 @@ class SNAPReduce(DataProcessorAlgorithm):
         else:  # other values are already held in normWS
             return normWS
 
-    def _save(self, saveDir, basename, outputWksp):
+    def _save(self, runnumber, basename, outputWksp):
         if not self.getProperty("SaveData").value:
             return
+
+        # determine where to save the data
+        saveDir = self.getPropertyValue("OutputDirectory").strip()
+        if len(saveDir) <= 0:
+            self.log().notice('Using default save location')
+            saveDir = os.path.join(self.get_IPTS_Local(runnumber), 'shared', 'data')
 
         self.log().notice('Writing to \'' + saveDir + '\'')
 
@@ -394,7 +404,7 @@ class SNAPReduce(DataProcessorAlgorithm):
             progEnd = progStart + .9 * progDelta
             # pass all of the work to the child algorithm
             AlignAndFocusPowderFromFiles(Filename=filename, OutputWorkspace=wkspname ,
-                                         MaxChunkSize=16,  # GiB
+                                         MaxChunkSize=self.chunkSize,
                                          UnfocussedWorkspace=unfocussed,  # can be empty string
                                          startProgress=progStart,
                                          endProgress=progEnd,
@@ -412,6 +422,7 @@ class SNAPReduce(DataProcessorAlgorithm):
         in_Runs = self.getProperty("RunNumbers").value
         progress = Progress(self, 0., .25, 3)
         finalUnits = self.getPropertyValue("FinalUnits")
+        self.chunkSize = self.getProperty('MaxChunkSize').value
 
         # default arguments for AlignAndFocusPowder
         self.alignAndFocusArgs = {'Tmin': 0,
@@ -487,7 +498,6 @@ class SNAPReduce(DataProcessorAlgorithm):
 
         for i, runnumber in enumerate(in_Runs):
             self.log().notice("processing run %s" % runnumber)
-            self.log().information(str(self.get_IPTS_Local(runnumber)))
 
             # put together output names
             new_Tag = Tag
@@ -556,12 +566,8 @@ class SNAPReduce(DataProcessorAlgorithm):
                         DeleteWorkspace(Workspace=redWS)
                         DeleteWorkspace(Workspace=normalizationWS)
 
-            # Save requested formats
-            saveDir = self.getPropertyValue("OutputDirectory").strip()
-            if len(saveDir) <= 0:
-                self.log().notice('Using default save location')
-                saveDir = os.path.join(self.get_IPTS_Local(runnumber), 'shared', 'data')
-            self._save(saveDir, basename, outputWksp)
+            # Save requested formats - function checks that saving is requested
+            self._save(runnumber, basename, outputWksp)
 
             # set workspace as an output so it gets history
             ConvertUnits(InputWorkspace=str(outputWksp), OutputWorkspace=str(outputWksp), Target=finalUnits,
