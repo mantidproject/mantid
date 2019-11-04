@@ -402,8 +402,12 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         axes = self.canvas.figure.get_axes()
         if axes:
             for ax in axes:
-                ax.relim(visible_only=True)
-                ax.autoscale()
+                # We check for axes type below as a pseudo check for an axes being
+                # a colorbar. this is based on the same check in
+                # FigureManagerADSObserverdeleteHandle.deleteHandle.
+                if type(ax) is not Axes:
+                    ax.relim(visible_only=True)
+                    ax.autoscale()
             self.canvas.draw()
 
 
