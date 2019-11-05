@@ -26,7 +26,7 @@ def create_states(state_model, table_model, instrument, facility, row_index=None
     :param user_file: the user file under which the data is reduced
     """
     number_of_rows = table_model.get_number_of_rows()
-    rows = [x for x in row_index if x < number_of_rows]
+    rows = [x for x in range(number_of_rows)]
 
     states = {}
     errors = {}

@@ -58,9 +58,10 @@ class BatchProcessRunner(QObject):
                                   output_graph, save_can=False):
         get_thickness_for_rows_func()
         # The above must finish before we can call get states
-        states, error_msg = get_states_func(row_index=rows)
-        if not states:
-            raise Exception("No states found")
+        states, errors = get_states_func(row_index=rows)
+
+        for row, error in errors.items():
+            self.row_failed_signal.emit(row, error)
 
         for key, state in states.items():
             try:
@@ -84,10 +85,6 @@ class BatchProcessRunner(QObject):
 
         for row, error in errors.items():
             self.row_failed_signal.emit(row, error)
-
-        if not states:
-            self.row_processed_signal.emit(None)
-            return
 
         for key, state in states.items():
             try:

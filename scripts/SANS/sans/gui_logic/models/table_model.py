@@ -162,14 +162,19 @@ class TableModel(object):
         """
         if not rows:
             rows = range(len(self._table_entries))
+
+        file_information_factory = SANSFileInformationFactory()
         for row in rows:
             entry = self._table_entries[row]
             if entry.is_empty():
                 continue
             entry.file_finding = True
 
-            file_information_factory = SANSFileInformationFactory()
-            file_info = file_information_factory.create_sans_file_information(entry.sample_scatter)
+            try:
+                file_info = file_information_factory.create_sans_file_information(entry.sample_scatter)
+            except RuntimeError:
+                continue
+
             self.update_thickness_from_file_information(id=entry.id, file_information=file_info)
 
     def failure_handler(self, id, error):
