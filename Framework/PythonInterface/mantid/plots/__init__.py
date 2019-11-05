@@ -655,13 +655,6 @@ class MantidAxes(Axes):
             normalize_by_bin_width, kwargs = get_normalize_by_bin_width(workspace, self, **kwargs)
             is_normalized = normalize_by_bin_width or workspace.isDistribution()
 
-            # If we are making the first plot on an axes object
-            # i.e. self.lines is empty, axes has default ylim values.
-            # Therefore we need to autoscale regardless of autoscale_on_update.
-            if self.lines:
-                # Otherwise set autoscale to autoscale_on_update.
-                self.set_autoscaley_on(autoscale)
-
             with autoscale_on_update(self, autoscale):
                 artist = self.track_workspace_artist(workspace,
                                                      plotfunctions.plot(self, *args, **kwargs),
@@ -776,9 +769,6 @@ class MantidAxes(Axes):
             workspace = args[0]
             spec_num = self.get_spec_number_or_bin(workspace, kwargs)
             is_normalized, kwargs = get_normalize_by_bin_width(workspace, self, **kwargs)
-
-            if self.lines:
-                self.set_autoscaley_on(autoscale)
 
             with autoscale_on_update(self, autoscale):
                 artist = self.track_workspace_artist(workspace,
