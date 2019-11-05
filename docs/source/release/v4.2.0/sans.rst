@@ -23,6 +23,7 @@ New
   perform monitor shifts without changing the selected transmission spectrum.
 - New :ref:`HFIRSANS2Wavelength <algm-HFIRSANS2Wavelength-v1>` algorithm to "convert" CG2 event files
   to histograms in wavelength.
+- New BIOSANS instrument definition file to accompany the data collection in event nexus new mode.
 
 Improved
 ########
