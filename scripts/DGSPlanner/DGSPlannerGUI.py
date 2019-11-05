@@ -129,7 +129,7 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         self.progress_canceled = False
 
         # register startup
-        mantid.UsageService.registerFeatureUsage(mantid.FeatureType.Interface, "DGSPlanner", False)
+        mantid.UsageService.registerFeatureUsage(mantid.kernel.FeatureType.Interface, "DGSPlanner", False)
 
     @QtCore.Slot(mantid.geometry.OrientedLattice)
     def updateUB(self, ol):
