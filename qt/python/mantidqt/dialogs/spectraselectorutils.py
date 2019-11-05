@@ -24,8 +24,8 @@ def get_spectra_selection(workspaces, parent_widget=None, show_colorfill_btn=Fal
     """
     SpectraSelectionDialog.raise_error_if_workspaces_not_compatible(workspaces)
     single_spectra_ws = [wksp.getNumberHistograms() for wksp in workspaces if wksp.getNumberHistograms() == 1]
-    if len(single_spectra_ws) > 0 and len(workspaces) == 1:
-        # At least 1 workspace contains only a single spectrum so this is all
+    if len(single_spectra_ws) == len(workspaces) > 0:
+        # All workspaces contains only a single spectrum so this is all
         # that is possible to plot for all of them
         selection = SpectraSelection(workspaces)
         selection.wksp_indices = [0]
