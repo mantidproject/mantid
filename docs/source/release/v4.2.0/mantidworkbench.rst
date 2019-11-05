@@ -48,6 +48,7 @@ Improvements
 - The keyboard shortcut Ctrl+D now aborts a running script.
 - Plot windows now stay on top of Workbench's main window, so you can easily drag and drop workspaces onto existing figures.
 - Opening more than one instance of an interface is now disallowed, as was the case in MantidPlot.
+- The X value headers on data display now shows values to 4 decimal places.
 
 Bugfixes
 ########
