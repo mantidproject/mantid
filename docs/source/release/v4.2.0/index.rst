@@ -4,7 +4,7 @@
 Mantid 4.2.0 Release Notes
 ===========================
 
-.. figure:: ../../images/ImageNotFound.png
+.. figure:: ../../images/Fish.jpeg
    :class: screenshot
    :width: 385px
    :align: right
@@ -16,7 +16,11 @@ Mantid 4.2.0 Release Notes
 
 We are proud to announce version 4.2.0 of Mantid.
 
-**TODO: Add paragraph summarizing big changes**
+**THIS IS THE LAST RELEASE THAT WILL SUPPORT Python 2**
+
+From v4.3 onwards Mantid will no longer support Python 3 and scripts run in Mantid will have to change to reflect this. `Time is Ticking <https://pythonclock.org/>`_!
+
+**TODO: Add paragrpah sumaarizing big changes**
 
 This is just one of many improvements in this release, so please take a
 look at the release notes, which are filled with details of the
