@@ -111,12 +111,18 @@ Requires: boost-python3-devel
 %endif
 
 %if 0%{?el7}
-Requires: boost-python36-devel
-Requires: python36-devel
-Requires: python36-h5py
+Requires: python36-setuptools
+Requires: python36-qt5-devel
 Requires: python36-numpy
+Requires: python36-scipy
+Requires: python36-sphinx
+Requires: python36-dateutil
+Requires: python36-h5py
 Requires: python36-PyYAML
-Requires: python36-qt-devel
+Requires: python36-mock
+Requires: python36-psutil
+Requires: python36-requests
+Requires: boost-python36-devel
 %endif
 
 BuildArch: noarch
@@ -143,6 +149,13 @@ required for Mantid development.
 
 * Tue Nov 5 2019 Martyn Gigg <martyn.gigg@stfc.ac.uk>
 - Switch to python{2,3}-qt5-devel
+- Add remaining python36 packages that exist.
+  Missing:
+    * python36-qt4
+    * python36-QtPy
+    * python36-sphinx-bootstrap-theme
+    * python36-matplotlib
+    * python36-ipython-gui
 
 * Thu Jun 27 2019 Peter Peterson <petersonpf@ornl.gov>
 - Added python3 dependencies for framework on rhel7
