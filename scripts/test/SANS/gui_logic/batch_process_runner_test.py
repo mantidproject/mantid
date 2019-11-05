@@ -150,7 +150,6 @@ class BatchProcessRunnerTest(unittest.TestCase):
         self.batch_process_runner.row_failed_signal.emit.assert_any_call(0, 'failure')
         self.batch_process_runner.row_failed_signal.emit.assert_any_call(1, 'failure')
         self.batch_process_runner.row_failed_signal.emit.assert_any_call(2, 'failure')
-        self.batch_process_runner.row_processed_signal.emit.assert_any_call(None)
 
 
 if __name__ == '__main__':

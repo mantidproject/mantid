@@ -555,19 +555,22 @@ class RunTabPresenter(PresenterCommon):
                 fig.show()
                 self.output_fig = fig
 
-    def _set_progress_bar_min_max(self, min, max):
+    def _set_progress_bar(self, current, number_steps):
         """
         The progress of the progress bar is given by min / max
-        :param min: Current value of the progress bar.
-        :param max: The value at which the progress bar is full
+        :param current: Current value of the progress bar.
+        :param number_steps: The value at which the progress bar is full
         """
-        setattr(self._view, 'progress_bar_value', min)
-        setattr(self._view, 'progress_bar_maximum', max)
+        setattr(self._view, 'progress_bar_value', current)
+        setattr(self._view, 'progress_bar_maximum', number_steps)
 
     def _process_rows(self, rows):
         """
         Processes a list of rows. Any errors cause the row to be coloured red.
         """
+
+        self._set_progress_bar(current=0, number_steps=len(rows))
+
         try:
             # Trip up early if output modes are invalid
             self._validate_output_modes()
@@ -683,6 +686,7 @@ class RunTabPresenter(PresenterCommon):
         for row in selected_rows:
             self._table_model.reset_row_state(row)
 
+        self._set_progress_bar(current=0, number_steps=len(selected_rows))
         selected_rows = self._table_model.get_non_empty_rows(selected_rows)
 
         try:
