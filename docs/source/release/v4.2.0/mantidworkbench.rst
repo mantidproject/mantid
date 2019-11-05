@@ -48,6 +48,7 @@ Improvements
 - The keyboard shortcut Ctrl+D now aborts a running script.
 - Plot windows now stay on top of Workbench's main window, so you can easily drag and drop workspaces onto existing figures.
 - Opening more than one instance of an interface is now disallowed, as was the case in MantidPlot.
+- The X value headers on data display now shows values to 4 decimal places.
 
 Bugfixes
 ########
@@ -74,5 +75,6 @@ Bugfixes
 - Plots are no longer zoomed out along their y-axis when you perform a fit or do a plot guess.
 - You can now save scripts that contain unicode characters.
 - A crash no longer occurs when the GenerateEventsFilter algorithm fails in the Filter Events Interface
+- Workspaces contained within groups are no longer duplicated when saving a project.
 
 :ref:`Release 4.2.0 <v4.2.0>`
