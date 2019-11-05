@@ -406,7 +406,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
                 # a colorbar. this is based on the same check in
                 # FigureManagerADSObserver.deleteHandle.
                 if type(ax) is not Axes:
-                    if ax.lines:  # Relim causes issues with colour plots, which have no lines. 
+                    if ax.lines:  # Relim causes issues with colour plots, which have no lines.
                         ax.relim()
                     ax.autoscale()
 
