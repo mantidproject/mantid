@@ -147,7 +147,7 @@ end
 # +destination+:: Destination directory for bundle
 # +host_python_exe+:: Executable of Python bundle to copy over
 # +bundled_packages+:: A list of packages that should be bundled
-# returns the root of the framework directory
+# returns the bundle site packages directory
 def deploy_python_framework(destination, host_python_exe,
                             bundled_packages)
   host_py_home = host_python_exe.realpath.parent.parent
@@ -202,25 +202,36 @@ def deploy_python_framework(destination, host_python_exe,
   bundle_site_packages = Pathname.new("#{bundle_py_home}/lib/python#{py_ver}/site-packages")
   FileUtils.rm bundle_site_packages
   FileUtils.mkdir bundle_site_packages
-  bundled_packages.each do |package|
-    package_dir = Pathname.new(package).dirname
-    if package_dir == Pathname.new('.')
-      destination = bundle_site_packages
-    else
-      destination = bundle_site_packages + package_dir
-      FileUtils.makedirs destination
-    end
-
-    # use cp rather than FileUtils as cp will automatically follow symlinks
-    execute("cp -r #{src_site_packages + package} #{destination}")
-  end
+  copy_selection_recursive(bundled_packages, src_site_packages,
+                           bundle_site_packages)
   make_writable(bundle_site_packages)
 
   # fix mpl_toolkit if it is missing __init__
   mpltoolkit_init =
     FileUtils.touch "#{bundle_site_packages}/mpl_toolkits/__init__.py"
 
-  bundle_python_framework
+  bundle_site_packages
+end
+
+# Copies, recursively, the selected list of packages from the
+# src to the destination. The destination must already exist
+# Params:
+# +packages+:: A list of items in src_dir to copy
+# +src_dir+:: Source directory containing above packages
+# +dest_dir+:: Destination directory
+def copy_selection_recursive(packages, src_dir, dest_dir)
+  packages.each do |package|
+    package_dir = Pathname.new(package).dirname
+    if package_dir == Pathname.new('.')
+      destination = dest_dir
+    else
+      destination = dest_dir + package_dir
+      FileUtils.makedirs destination
+    end
+
+    # use cp rather than FileUtils as cp will automatically follow symlinks
+    execute("cp -r #{src_dir + package} #{destination}")
+  end
 end
 
 # Install requested Qt plugins to bundle
@@ -580,8 +591,21 @@ end
 
 # We start with the assumption CMake has installed all required target libraries/executables
 # into the bundle and the main layout exists.
-deploy_python_framework(contents_frameworks, host_python_exe,
-                        bundled_packages)
+bundle_py_site_packages = deploy_python_framework(contents_frameworks, host_python_exe,
+                                                  bundled_packages)
+if $PARAVIEW_BUILD_DIR.start_with?('/')
+  pv_lib_dir = Pathname.new($PARAVIEW_BUILD_DIR) + 'lib'
+  # add bare VTK/ParaView so libraries
+  copy_selection_recursive(Dir[pv_lib_dir + '*Python.so'].map { |item| Pathname.new(item).basename },
+                           pv_lib_dir,
+                           bundle_py_site_packages)
+  # add ParaView python packages
+  pv_site_packages = pv_lib_dir + 'site-packages'
+  copy_selection_recursive(Dir[pv_site_packages + '*'].map { |item| Pathname.new(item).basename },
+                           pv_site_packages,
+                           bundle_py_site_packages)
+end
+
 install_qt_plugins(bundle_path, bundled_qt_plugins, host_qt_plugins_dir,
                    QT_PLUGINS_BLACKLIST)
 # We choose not to use macdeployqt as it uses @executable_path so we have to essentially
