@@ -4,9 +4,9 @@
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
- name="PEARL" valid-from   ="2012-05-14 23:59:59"
+ name="PEARL" valid-from   ="2012-05-15 23:59:59"
                        valid-to     ="2100-01-31 23:59:59"
-		       last-modified="2012-05-17 11:40:00">
+		       last-modified="2019-10-11 17:35:00">
 <!--<defaults>
   <length unit="meter" />
   <angle unit="degree" />
@@ -48,7 +48,7 @@
 
 <!--  source and sample-position components -->
 <component type="undulator">
-  <location z="-12.8" />
+  <location z="-12.75" />
 </component>
 
  <component type="nickel-holder">
@@ -71,7 +71,7 @@
 
 <!-- detector and monitor components -->
 
-<component type="monitors defined by matt" idlist="monitors id by matt">
+<component type="monitors defined by Chris" idlist="monitors id by Chris">
     <location> <facing val="none"/> </location>
   </component>
 
@@ -158,13 +158,13 @@
 </component>
 </type>
 
-<type name="monitors defined by matt">
-<component type="monitor" >
-  <location  r="1.68061" t="180" p="0" name="upstream_monitor_det1" />
-  <location  r="1.62917" t="180" p="0" name="upstream_monitor_det2" />
-  <location  r="0.73141" t="180" p="0" name="upstream_monitor_det3" />
-  <location  r="0.622146" t="0" p="0" name="down_monitor_det4" />
-  <location  r="5.105454" t="0" p="0" name="down_monitor_det5" />
+<type name="monitors defined by Chris">
+<component type="monitor" mark-as="monitor">
+  <location  r="1.62155697" t="180" p="0" name="upstream_monitor_det1" />
+  <location  r="1.56719915" t="180" p="0" name="upstream_monitor_det2" />
+  <location  r="0.74473986" t="180" p="0" name="upstream_monitor_det3" />
+  <location  r="0.68637495" t="0" p="0" name="down_monitor_det4" />
+  <location  r="5.21601636" t="0" p="0" name="down_monitor_det5" />
 </component>
 </type>
 <!--              LIST OF COMPONENT TYPES             -->
@@ -178,7 +178,7 @@
 </type>
 
 <!-- detector and monitor types -->
-<type name="monitor" is="monitor">
+<type name="monitor" is="detector">
   <properties/>
   <cylinder id="some-shape">
  <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
@@ -464,7 +464,7 @@
   <id start="13001" end="13120"/>
 </idlist>
 
-<idlist idname="monitors id by matt">
+<idlist idname="monitors id by Chris">
   <id start="1" end="5"/>
 </idlist>
 
@@ -486,7 +486,7 @@
   <id start="859" end="936"/>
 </idlist>
 
-<idlist idname="monitors id by matt">
+<idlist idname="monitors id by Chris">
   <id start="1" end="5"/>
 </idlist>
 -->
