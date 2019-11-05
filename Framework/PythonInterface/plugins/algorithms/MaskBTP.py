@@ -23,9 +23,10 @@ class MaskBTP(mantid.api.PythonAlgorithm):
 
     instname = None
     instrument = None
-    bankmin = defaultdict(lambda: 1, {'SEQUOIA':23, 'TOPAZ':10})  # default is one
-    bankmax = {'ARCS':115, 'BIOSANS':2, 'CG2':48, 'CHESS':163, 'CNCS':50, 'CORELLI':91, 'EQ-SANS':48, 'HYSPEC':20, 'MANDI':59,
-               'NOMAD':99, 'POWGEN':300, 'REF_M':1, 'SEQUOIA':150,'SNAP':64,'SXD':11,'TOPAZ':59,'WAND':8,'WISH':10}
+    bankmin = defaultdict(lambda: 1, {'SEQUOIA': 23, 'TOPAZ': 10})  # default is one
+    bankmax = {'ARCS': 115, 'BIOSANS': 88, 'CG2': 48, 'CHESS': 163, 'CNCS': 50, 'CORELLI': 91, 'EQ-SANS': 48,
+               'HYSPEC': 20, 'MANDI': 59, 'NOMAD': 99, 'POWGEN': 300, 'REF_M': 1, 'SEQUOIA': 150, 'SNAP': 64,
+               'SXD': 11, 'TOPAZ': 59, 'WAND': 8, 'WISH': 10}
 
     def category(self):
         """ Mantid required
@@ -152,8 +153,15 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         self.setProperty("MaskedDetectors", detlist)
 
     def _startsFrom(self):
-        '''Returns what the minimum tube/pixel index for the instrument'''
-        if self.instname in ['ARCS', 'BIOSANS', 'CG2', 'CHESS', 'CNCS', 'CORELLI', 'EQ-SANS', 'HYSPEC', 'NOMAD', 'SEQUOIA', 'WAND', 'WISH']:
+        r"""
+        Minimum tube or pixel index as specified in the instrument definition file.
+
+        Returns
+        -------
+        int
+        """
+        if self.instname in ['ARCS', 'BIOSANS', 'CG2', 'CHESS', 'CNCS', 'CORELLI', 'EQ-SANS', 'HYSPEC', 'NOMAD',
+                             'SEQUOIA', 'WAND', 'WISH']:
             return 1
         else:
             return 0
@@ -241,12 +249,13 @@ class MaskBTP(mantid.api.PythonAlgorithm):
             else:
                 return "detector{}".format(banknum)
         elif self.instname == 'BIOSANS':
-            if banknum == 1:
-                return 'detector1'
-            elif banknum == 2:
-                return 'wing_detector'
+            if '2019-10-01' in validFrom:
+                return "bank{}".format(banknum)
             else:
-                raise ValueError('Out of range index for BIOSANS instrument bank numbers: {}'.format(banknum))
+                if banknum == 1:
+                    return 'detector1'
+                elif banknum == 2:
+                    return 'wing_detector'
         else:
             return "bank" + str(banknum)
 
