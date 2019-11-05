@@ -11,17 +11,8 @@
 ###############################################################################
 SCRIPT_DIR=$(dirname "$0")
 XVFB_SERVER_NUM=101
+XVFB_ERROR_LOG_PREFIX=${WORKSPACE}/mantid-xvfb-error
 ULIMIT_CORE_ORIG=$(ulimit -c)
-
-if [ $(command -v xvfb-run) ]; then
-  X11_RUNNER="xvfb-run"
-  X11_RUNNER_ARGS1=--server-args="-screen 0 640x480x24"
-  X11_RUNNER_ARGS2=--server-num=${XVFB_SERVER_NUM}
-else
-  X11_RUNNER="eval"
-  X11_RUNNER_ARGS1=""
-  X11_RUNNER_ARGS2=""
-fi
 
 ###############################################################################
 # Functions
@@ -34,7 +25,15 @@ function onexit {
 }
 
 function run_with_xvfb {
-  ${X11_RUNNER} "${X11_RUNNER_ARGS1}" "${X11_RUNNER_ARGS2}" $@
+  if [ $(command -v xvfb-run) ]; then
+    # -e=--error-file. A bug in Xvfb on RHEL7 means --error-file
+    # produces an error: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=337703;msg=2
+    xvfb-run --server-args="-screen 0 640x480x24" \
+             --server-num=${XVFB_SERVER_NUM} \
+             -e ${XVFB_ERROR_LOG_PREFIX}-`date +%y-%m-%d-%H-%M`.xlog $@
+  else
+    eval $@
+  fi
 }
 
 
@@ -49,6 +48,9 @@ if [ $(command -v xvfb-run) ]; then
 
   # Remove Xvfb X server lock files
   rm -f /tmp/.X${XVFB_SERVER_NUM}-lock
+
+  # Remove any Xvfb error logs
+  rm -f ${XVFB_ERROR_LOG_PREFIX}*.xlog
 fi
 
 ###############################################################################
