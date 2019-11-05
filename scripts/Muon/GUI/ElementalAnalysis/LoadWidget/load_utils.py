@@ -8,13 +8,13 @@ from __future__ import (absolute_import, division, unicode_literals)
 
 import glob
 import os
-
+import numpy as np
 from six import iteritems
-
 from mantid import config
 import mantid.simpleapi as mantid
 
 type_keys = {"10": "Prompt", "20": "Delayed", "99": "Total"}
+spectrum_index = {"Delayed": 1, "Prompt": 2, "Total": 3}
 
 
 class LModel(object):
@@ -38,7 +38,7 @@ class LModel(object):
             for filename in to_load if get_filename(filename, self.run) is not None
         }
         self._load(workspaces)
-        self.loaded_runs[self.run] = group_by_detector(self.run, workspaces.values())
+        self.loaded_runs[self.run] = merge_workspaces(self.run, workspaces.values())
         self.last_loaded_runs.append(self.run)
         return self.loaded_runs[self.run]
 
@@ -68,28 +68,87 @@ def search_user_dirs(run):
     return files
 
 
-def group_by_detector(run, workspaces):
+# merge each detector workspace into one
+def merge_workspaces(run, workspaces):
     """ where workspaces is a tuple of form:
             (filepath, ws name)
     """
     d_string = "{}; Detector {}"
+    # detectors is a dictionary of {detector_name : [names_of_workspaces]}
     detectors = {d_string.format(run, x): [] for x in range(1, 5)}
+    # fill dictionary
     for workspace in workspaces:
         detector_number = get_detector_num_from_ws(workspace)
         detectors[d_string.format(run, detector_number)].append(workspace)
+    # initialise a group workspace
+    tmp = mantid.CreateSampleWorkspace()
+    overall_ws = mantid.GroupWorkspaces(tmp, OutputWorkspace=str(run))
+    # merge each workspace list in dectors into a single workspace
     for detector, workspace_list in iteritems(detectors):
-        mantid.GroupWorkspaces(workspace_list, OutputWorkspace=str(detector))
+        if workspace_list:
+            # sort workspace list according to type_index
+            sorted_workspace_list = [None] * len(workspace_list)
+            # sort workspace list according to type_index
+            for workspace in workspace_list:
+                data_type = workspace.rsplit("_")[1]
+                sorted_workspace_list[spectrum_index[data_type] - 1] = workspace
+            workspace_list = sorted_workspace_list
+            # create merged workspace
+            merged_ws = create_merged_workspace(workspace_list)
+            # add merged ws to ADS
+            mantid.mtd.add(detector, merged_ws)
+            overall_ws.add(detector)
+
+    mantid.AnalysisDataService.remove("tmp")
+    # return list of [run; Detector detectorNumber], in ascending order of detector number
     detector_list = sorted(list(detectors))
-    group_grouped_workspaces(run, detector_list)
     return detector_list
 
 
-def group_grouped_workspaces(name, workspaces):
-    tmp = mantid.CreateSampleWorkspace()
-    overall = mantid.GroupWorkspaces(tmp, OutputWorkspace=str(name))
-    for workspace in workspaces:
-        overall.add(workspace)
-    mantid.AnalysisDataService.remove("tmp")
+# creates merged workspace, based on workspaces from workspace list
+# returns a merged workspace in point data format.
+def create_merged_workspace(workspace_list):
+    if workspace_list:
+        # get max number of bins and max X range
+        num_workspaces = len(workspace_list)
+        max_num_bins = 0
+        for i in range(0, num_workspaces):
+            ws = mantid.mtd[workspace_list[i]]
+            max_num_bins = max(ws.blocksize(), max_num_bins)
+
+        # create single ws for the merged data, use original ws as a template
+        merged_ws = mantid.WorkspaceFactory.create(mantid.mtd[workspace_list[0]], NVectors=num_workspaces,
+                                                   XLength=max_num_bins, YLength=max_num_bins)
+
+        # create a merged workspace based on every entry from workspace list
+        for i in range(0, num_workspaces):
+            # load in ws
+            ws = mantid.mtd[workspace_list[i]]
+            # check if histogram data, and convert if necessary
+            if ws.isHistogramData():
+                ws = mantid.ConvertToPointData(InputWorkspace=ws.name(), OutputWorkspace=ws.name())
+            # find max x val
+            max_x = np.max(ws.readX(0))
+            # get current number of bins
+            num_bins = ws.blocksize()
+            # pad bins
+            X_padded = np.empty(max_num_bins)
+            X_padded.fill(max_x)
+            X_padded[:num_bins] = ws.readX(0)
+            Y_padded = np.zeros(max_num_bins)
+            Y_padded[:num_bins] = ws.readY(0)
+            E_padded = np.zeros(max_num_bins)
+            E_padded[:num_bins] = ws.readE(0)
+
+            # set row of merged workspace
+            merged_ws.setX(i, X_padded)
+            merged_ws.setY(i, Y_padded)
+            merged_ws.setE(i, E_padded)
+
+            # remove workspace from ADS
+            mantid.AnalysisDataService.remove(ws.getName())
+
+        return merged_ws
 
 
 def get_detector_num_from_ws(name):
