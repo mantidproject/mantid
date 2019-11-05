@@ -178,6 +178,9 @@ void IqtFunctionModel::setNumberOfExponentials(int n) {
   m_model.setFunctionString(buildFunctionString());
   m_model.setGlobalParameters(makeGlobalList());
   setCurrentValues(oldValues);
+  if (n > 0) {
+    estimateExpParameters(n);
+  }
 }
 
 int IqtFunctionModel::getNumberOfExponentials() const {
@@ -622,6 +625,37 @@ void IqtFunctionModel::estimateStretchExpParameters() {
     setLocalParameterValue(*heightName, i, height);
     setLocalParameterValue(*lifeTimeName, i, lifeTime);
     setLocalParameterValue(*stretchingName, i, 1.0);
+  }
+}
+
+void IqtFunctionModel::estimateExpParameters(int n) {
+  auto const heightName1 = getParameterName(ParamID::EXP1_HEIGHT);
+  auto const lifeTimeName1 = getParameterName(ParamID::EXP1_LIFETIME);
+  if (!heightName1 || !lifeTimeName1)
+    return;
+  assert(getNumberDomains() == m_estimationData.size());
+  // estimate first exp
+  for (auto i = 0; i < getNumberDomains(); ++i) {
+    auto const &x = m_estimationData[i].x;
+    auto const &y = m_estimationData[i].y;
+    // should subtract background if present (try subtracting last elemens)
+    auto lifeTime = (x[1] - x[0]) / (log(y[0]) - log(y[1]));
+    if (lifeTime <= 0)
+      lifeTime = 1.0;
+    auto const height = y[0] / exp(x[0] / lifeTime); // used to be y[0]*
+    setLocalParameterValue(*heightName1, i, height);
+    setLocalParameterValue(*lifeTimeName1, i, lifeTime);
+    if (n > 1) {
+      // initialise small additional exp with 20% of amplitude and double the
+      // lifetime if the lifetime is too short it will corellate with any
+      // constant background.
+      auto const heightName2 = getParameterName(ParamID::EXP2_HEIGHT);
+      auto const lifeTimeName2 = getParameterName(ParamID::EXP2_LIFETIME);
+      if (!heightName2 || !lifeTimeName2)
+        return;
+      setLocalParameterValue(*heightName2, i, 0.1 * height);
+      setLocalParameterValue(*lifeTimeName2, i, 2 * lifeTime);
+    }
   }
 }
 
