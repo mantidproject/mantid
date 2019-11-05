@@ -9,6 +9,8 @@
 #include <Poco/Exception.h>
 #include <algorithm>
 #include <cctype>
+#include <boost/algorithm/string.hpp>
+
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -25,6 +27,8 @@ std::string ALCLatestFileFinder::getMostRecentFile() const {
     // List all valid Nexus files in the directory
     Poco::Path path(m_firstRunFileName);
     std::vector<std::string> fileNames;
+    // if it found no valid files then return an error
+    // and retry disable the auto button
     try {
       // Directory iterator - check if we were passed a file or a directory
       Poco::DirectoryIterator iter(path.isDirectory() ? path : path.parent());
@@ -41,10 +45,17 @@ std::string ALCLatestFileFinder::getMostRecentFile() const {
       return path.toString();
     }
 
-    // Sort by run number
-    std::sort(fileNames.begin(), fileNames.end());
 
-    return fileNames.back();
+    if ( !fileNames.empty())
+    {
+      // Sort by run number
+      std::sort(fileNames.begin(), fileNames.end());
+      return fileNames.back();
+
+    }else{
+      // return empty string
+      return "";
+    }
   }
 }
 
@@ -60,7 +71,6 @@ bool ALCLatestFileFinder::isValid(const std::string &path) const {
   const Poco::Path filePath(path);
   const Poco::Path firstPath(m_firstRunFileName);
 
-  // Get the instrument and run number from "INST0001234"
   auto getInstrumentAndRun = [](const std::string &name) {
     // No muon instruments have numbers in their names
     size_t numPos = name.find_first_of("0123456789");
@@ -73,7 +83,6 @@ bool ALCLatestFileFinder::isValid(const std::string &path) const {
   };
 
   auto firstRunInstrument = getInstrumentAndRun(firstPath.getBaseName()).first;
-
   // 0. Must be a file
   if (filePath.isFile()) {
     // 1. Must be a NeXus file
@@ -82,7 +91,7 @@ bool ALCLatestFileFinder::isValid(const std::string &path) const {
       auto fileName = filePath.getBaseName();
       if (fileName.size() > 5) {
         auto fileSplit = getInstrumentAndRun(fileName);
-        if (fileSplit.first == firstRunInstrument) {
+        if (boost::iequals(fileSplit.first,firstRunInstrument)) {
           // 3. Must end in a number
           valid = std::all_of(fileSplit.second.begin(), fileSplit.second.end(),
                               ::isdigit);
