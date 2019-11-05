@@ -218,6 +218,21 @@ class ProjectTest(unittest.TestCase):
                 pass
         self.assertFalse(self.project.is_saving)
 
+    @mock.patch('mantidqt.project.project.ProjectSaver.save_project')
+    def test_workspace_groups_are_not_duplicated_when_saving(self, saver):
+        CreateSampleWorkspace(OutputWorkspace="ws1")
+        CreateSampleWorkspace(OutputWorkspace="ws2")
+        GroupWorkspaces(InputWorkspaces="ws1,ws2", OutputWorkspace="newGroup")
+        CreateSampleWorkspace(OutputWorkspace="ws3")
+        self.project.plot_gfm.figs = "mocked_figs"
+        self.project.interface_populating_function = mock.MagicMock(return_value="mocked_interfaces")
+
+        self.project._save()
+        saver.assert_called_with(file_name=self.project.last_project_location,
+                                 workspace_to_save=['newGroup', 'ws3'],
+                                 plots_to_save="mocked_figs",
+                                 interfaces_to_save="mocked_interfaces")
+
 
 if __name__ == "__main__":
     unittest.main()
