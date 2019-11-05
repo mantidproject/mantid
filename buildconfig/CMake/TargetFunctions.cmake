@@ -40,6 +40,9 @@ function (mtd_install_files)
      list(REMOVE_DUPLICATES PARSED_INSTALL_DIRS)
 
      foreach( _dir ${PARSED_INSTALL_DIRS})
+         # install (FILES ) only overwrites file if timestamp is different. Touch files here to always overwrite
+         # Wrap call to execute_process in install (CODE ) so it runs at package time and not build time
+         install ( CODE "execute_process(COMMAND \"${CMAKE_COMMAND}\" -E touch \"${PARSED_FILES}\")")
          install ( FILES ${PARSED_FILES} DESTINATION ${_dir} RENAME ${PARSED_RENAME} )
      endforeach ()
 endfunction()
