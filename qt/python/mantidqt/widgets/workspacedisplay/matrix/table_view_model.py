@@ -22,7 +22,7 @@ class MatrixWorkspaceTableViewModelType(Enum):
 
 
 class MatrixWorkspaceTableViewModel(QAbstractTableModel):
-    HORIZONTAL_HEADER_DISPLAY_STRING = u"{0}\n{1:0.1f}{2}"
+    HORIZONTAL_HEADER_DISPLAY_STRING = u"{0}\n{1:0.3f}{2}"
     HORIZONTAL_HEADER_TOOLTIP_STRING = u"index {0}\n{1} {2:0.1f}{3} (bin centre)"
 
     HORIZONTAL_HEADER_DISPLAY_STRING_FOR_X_VALUES = "{0}"
