@@ -555,7 +555,7 @@
   <!---->
   <!--COMPONENT: DOUBLE CURVED PANEL-->
   <!---->
-  <component type="double-curved-panel" idlist="curved_panel_ids" name="wing_detector_arm">
+  <component type="double-curved-panel" idlist="curved_panel_ids" name="wing_detector">
     <location x="0.0" y="0.0" z="0">
       <rot val="-22.18118506742357" axis-x="0" axis-y="1" axis-z="0"/>
       <parameter name="t-position">
