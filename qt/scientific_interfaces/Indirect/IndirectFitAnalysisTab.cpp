@@ -43,15 +43,15 @@ WorkspaceGroup_sptr getADSGroupWorkspace(std::string const &workspaceName) {
  * @return              The number of custom functions, with the specified name,
  *                      included in the selected model.
  */
-size_t
-getNumberOfSpecificFunctionContained(const std::string & functionName, IFunction_sptr compositeFunction) {
-  if(compositeFunction->nFunctions() == 0){
+size_t getNumberOfSpecificFunctionContained(const std::string &functionName,
+                                            IFunction_sptr compositeFunction) {
+  if (compositeFunction->nFunctions() == 0) {
     return compositeFunction->name() == functionName ? 1 : 0;
-  }
-  else{
+  } else {
     size_t count{0};
-    for(size_t i{0}; i<compositeFunction->nFunctions(); i++){
-      count += getNumberOfSpecificFunctionContained(functionName, compositeFunction->getFunction(i));
+    for (size_t i{0}; i < compositeFunction->nFunctions(); i++) {
+      count += getNumberOfSpecificFunctionContained(
+          functionName, compositeFunction->getFunction(i));
     }
     return count;
   }
@@ -254,10 +254,11 @@ QString IndirectFitAnalysisTab::selectedFitType() const {
  * @return              The number of custom functions, with the specified name,
  *                      included in the selected model.
  */
-size_t
-IndirectFitAnalysisTab::numberOfCustomFunctions(const std::string & functionName) const {
-  if(auto fittingFunction = m_fittingModel->getFittingFunction())
-    return getNumberOfSpecificFunctionContained(functionName, fittingFunction->getFunction(0));
+size_t IndirectFitAnalysisTab::numberOfCustomFunctions(
+    const std::string &functionName) const {
+  if (auto fittingFunction = m_fittingModel->getFittingFunction())
+    return getNumberOfSpecificFunctionContained(
+        functionName, fittingFunction->getFunction(0));
   else
     return 0;
 }
