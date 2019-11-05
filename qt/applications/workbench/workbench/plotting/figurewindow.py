@@ -11,7 +11,6 @@
 from __future__ import absolute_import
 
 # std imports
-import platform
 import weakref
 
 # 3rdparty imports
