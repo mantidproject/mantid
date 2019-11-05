@@ -130,10 +130,9 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
             for sp_set in ws_spectra[1:]:
                 plottable = plottable.intersection(sp_set)
         plottable = sorted(plottable)
-        try:
-            spec_min, spec_max = min(plottable), max(plottable)
-        except ValueError:
-            print('Error: Workspaces have no common spectra')
+        if len(plottable) == 0:
+            raise Exception('Error: Workspaces have no common spectra.')
+        spec_min, spec_max = min(plottable), max(plottable)
         self._ui.specNums.setPlaceholderText(PLACEHOLDER_FORMAT.format(spec_min, spec_max))
         self.spec_min, self.spec_max = spec_min, spec_max
 
