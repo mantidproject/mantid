@@ -36,6 +36,7 @@ Algorithms
 Instrument Definition Files
 ---------------------------
 * A definition file for the NEAT instrument at HZB as been added along with an entry in the facilities file.
+* The PEARL IDF has been updated with corrections to the instrument flight path and monitor distances.
 
 Data Objects
 ------------
