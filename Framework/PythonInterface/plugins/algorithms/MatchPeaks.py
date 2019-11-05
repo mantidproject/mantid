@@ -228,7 +228,8 @@ class MatchPeaks(PythonAlgorithm):
 
         return
 
-    def _get_peak_position(self, input_ws):
+    @staticmethod
+    def _get_peak_position(input_ws):
         """
         Gives bin of the peak of each spectrum in the input_ws
         @param input_ws  :: input workspace
@@ -245,25 +246,25 @@ class MatchPeaks(PythonAlgorithm):
             logger.error('Workspace not defined')
 
         # Mid bin number
-        mid_bin = int(mtd[self._input_ws].blocksize() / 2)
+        mid_bin = int(input_ws.blocksize() / 2)
         # Initialisation
-        peak_bin = np.ones(mtd[self._input_ws].getNumberHistograms()) * mid_bin
+        peak_bin = np.ones(input_ws.getNumberHistograms()) * mid_bin
         # Bin range: difference between mid bin and peak bin should be in this range
         tolerance = int(mid_bin / 2)
-        x_values = mtd[self._input_ws].readX(0)
+        x_values = input_ws.readX(0)
 
-        for i in range(mtd[self._input_ws].getNumberHistograms()):
+        for i in range(input_ws.getNumberHistograms()):
             fit = fit_table.row(i)
             # Bin number, where Y has its maximum
-            y_values = mtd[self._input_ws].readY(i)
+            y_values = input_ws.readY(i)
             max_pos = np.argmax(y_values)
             peak_plus_error = abs(fit["PeakCentreError"]) + abs(fit["PeakCentre"])
 
             if peak_plus_error > x_values[0] and peak_plus_error < x_values[-1]:
-                peak_plus_error_bin = mtd[self._input_ws].yIndexOfX(peak_plus_error)
+                peak_plus_error_bin = input_ws.yIndexOfX(peak_plus_error)
                 if abs(peak_plus_error_bin - mid_bin) < tolerance and fit["FitStatus"] == 'success':
                     # fit succeeded, and fitted peak is within acceptance range, take it
-                    peak_bin[i] = mtd[self._input_ws].yIndexOfX(fit["PeakCentre"])
+                    peak_bin[i] = input_ws.yIndexOfX(fit["PeakCentre"])
                     logger.debug('Fit successfull, peak inside tolerance')
                 elif abs(max_pos - mid_bin) < tolerance:
                     # fit not reliable, take the maximum if within acceptance

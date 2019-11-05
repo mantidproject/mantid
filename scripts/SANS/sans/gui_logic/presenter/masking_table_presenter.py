@@ -13,6 +13,8 @@ import copy
 
 from mantid.kernel import Logger
 from mantid.api import (AnalysisDataService)
+from sans.algorithm_detail.mask_sans_workspace import mask_workspace
+from sans.algorithm_detail.move_sans_instrument_component import move_component, MoveTypes
 from ui.sans_isis.masking_table import MaskingTable
 from sans.common.enums import DetectorType
 from sans.common.constants import EMPTY_NAME
@@ -34,7 +36,7 @@ masking_information = namedtuple("masking_information", "first, second, third")
 
 def load_and_mask_workspace(state, workspace_name):
     workspace_to_mask = load_workspace(state, workspace_name)
-    return mask_workspace(state, workspace_to_mask)
+    return run_mask_workspace(state, workspace_to_mask)
 
 
 def load_workspace(state, workspace_name):
@@ -49,9 +51,7 @@ def load_workspace(state, workspace_name):
     return workspace
 
 
-def mask_workspace(state, workspace_to_mask):
-    serialized_state = state.property_manager
-    masking_algorithm = create_masking_algorithm(serialized_state, workspace_to_mask)
+def run_mask_workspace(state, workspace_to_mask):
     mask_info = state.mask
 
     detectors = [DetectorType.to_string(DetectorType.LAB), DetectorType.to_string(DetectorType.HAB)] \
@@ -59,10 +59,9 @@ def mask_workspace(state, workspace_to_mask):
                 [DetectorType.to_string(DetectorType.LAB)]  # noqa
 
     for detector in detectors:
-        masking_algorithm.setProperty("Component", detector)
-        masking_algorithm.execute()
+        mask_workspace(component_as_string=detector, workspace=workspace_to_mask, state=state)
 
-    return masking_algorithm.getProperty("Workspace").value
+    return workspace_to_mask
 
 
 def prepare_to_load_scatter_sample_only(state):
@@ -88,33 +87,13 @@ def perform_load(serialized_state):
 
 
 def perform_move(state, workspace):
-    serialized_state = state.property_manager
-    move_name = "SANSMove"
-
-    zero_options = {"SANSState": serialized_state,
-                    "Workspace": workspace,
-                    "MoveType": "SetToZero",
-                    "Component": ""}
-    zero_alg = create_unmanaged_algorithm(move_name, **zero_options)
-    zero_alg.execute()
-    workspace = zero_alg.getProperty("Workspace").value
-
-    move_options = {"SANSState": serialized_state,
-                    "Workspace": workspace,
-                    "MoveType": "InitialMove"}
-    move_alg = create_unmanaged_algorithm(move_name, **move_options)
-    move_alg.execute()
+    move_info = state.move
+    move_component(move_info=move_info, component_name='', workspace=workspace, move_type=MoveTypes.RESET_POSITION)
+    move_component(component_name=None, move_info=move_info, workspace=workspace, move_type=MoveTypes.INITIAL_MOVE)
 
 
 def store_in_ads_as_hidden(workspace_name, workspace):
     AnalysisDataService.addOrReplace(workspace_name, workspace)
-
-
-def create_masking_algorithm(serialized_state, workspace_to_mask):
-    mask_name = "SANSMaskWorkspace"
-    mask_options = {"SANSState": serialized_state,
-                    "Workspace": workspace_to_mask}
-    return create_unmanaged_algorithm(mask_name, **mask_options)
 
 
 def create_load_algorithm(serialized_state):

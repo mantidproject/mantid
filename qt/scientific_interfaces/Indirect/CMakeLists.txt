@@ -13,23 +13,32 @@ set(
   ConvFitModel.cpp
   DensityOfStates.cpp
   Elwin.cpp
+  FunctionTemplateBrowser.cpp
   ILLEnergyTransfer.cpp
   ISISCalibration.cpp
   ISISDiagnostics.cpp
   ISISEnergyTransfer.cpp
+  IndexTypes.cpp
   IndirectAddWorkspaceDialog.cpp
   IndirectBayes.cpp
   IndirectBayesTab.cpp
   IndirectCorrections.cpp
   IndirectDataAnalysis.cpp
   IndirectDataAnalysisTab.cpp
+  IndirectDataAnalysisTab.cpp
   IndirectDataReduction.cpp
   IndirectDataReductionTab.cpp
+  IndirectDataTablePresenterLegacy.cpp
   IndirectDataTablePresenter.cpp
   IndirectDataValidationHelper.cpp
   IndirectDiffractionReduction.cpp
   IndirectEditResultsDialog.cpp
+  IndirectFitAnalysisTabLegacy.cpp
   IndirectFitAnalysisTab.cpp
+  IndirectFitDataLegacy.cpp
+  IndirectFitDataPresenterLegacy.cpp
+  IndirectFitDataViewLegacy.cpp
+  IndirectFitOutputLegacy.cpp
   IndirectFitData.cpp
   IndirectFitDataPresenter.cpp
   IndirectFitDataView.cpp
@@ -37,6 +46,10 @@ set(
   IndirectFitOutputOptionsModel.cpp
   IndirectFitOutputOptionsPresenter.cpp
   IndirectFitOutputOptionsView.cpp
+  IndirectFitPlotModelLegacy.cpp
+  IndirectFitPlotPresenterLegacy.cpp
+  IndirectFitPlotViewLegacy.cpp
+  IndirectFittingModelLegacy.cpp
   IndirectFitPlotModel.cpp
   IndirectFitPlotPresenter.cpp
   IndirectFitPlotView.cpp
@@ -58,6 +71,8 @@ set(
   IndirectSettingsView.cpp
   IndirectSimulation.cpp
   IndirectSimulationTab.cpp
+  IndirectSpectrumSelectionPresenterLegacy.cpp
+  IndirectSpectrumSelectionViewLegacy.cpp
   IndirectSpectrumSelectionPresenter.cpp
   IndirectSpectrumSelectionView.cpp
   IndirectSqw.cpp
@@ -70,6 +85,10 @@ set(
   Iqt.cpp
   IqtFit.cpp
   IqtFitModel.cpp
+  IndirectFitPropertyBrowser.cpp
+  IndirectFunctionBrowser/IqtFunctionModel.cpp
+  IndirectFunctionBrowser/IqtTemplateBrowser.cpp
+  IndirectFunctionBrowser/IqtTemplatePresenter.cpp
   JumpFit.cpp
   JumpFitAddWorkspaceDialog.cpp
   JumpFitDataPresenter.cpp
@@ -89,10 +108,16 @@ set(
   QT4_INC_FILES
   ConvFitModel.h
   DllConfig.h
+  IndexTypes.h
   IndirectDataValidationHelper.h
+  IndirectFitDataLegacy.h
+  IndirectFitOutputLegacy.h
   IndirectFitData.h
   IndirectFitOutput.h
   IndirectFitOutputOptionsModel.h
+  IndirectFitPlotModelLegacy.h
+  IndirectFitPlotPresenterLegacy.h
+  IndirectFittingModelLegacy.h
   IndirectFitPlotModel.h
   IndirectFitPlotPresenter.h
   IndirectFittingModel.h
@@ -103,6 +128,7 @@ set(
   IqtFitModel.h
   JumpFitModel.h
   MSDFitModel.h
+  ParameterEstimation.h
 )
 
 set(
@@ -118,9 +144,12 @@ set(
   CorrectionsTab.h
   DensityOfStates.h
   Elwin.h
+  FunctionTemplateBrowser.h
   IAddWorkspaceDialog.h
+  IIndirectFitDataViewLegacy.h
   IIndirectFitDataView.h
   IIndirectFitOutputOptionsView.h
+  IIndirectFitPlotViewLegacy.h
   IIndirectFitPlotView.h
   IIndirectSettingsView.h
   ILLEnergyTransfer.h
@@ -130,16 +159,23 @@ set(
   IndirectCorrections.h
   IndirectDataAnalysis.h
   IndirectDataAnalysisTab.h
+  IndirectDataAnalysisTab.h
   IndirectDataReduction.h
   IndirectDataReductionTab.h
+  IndirectDataTablePresenterLegacy.h
   IndirectDataTablePresenter.h
   IndirectDiffractionReduction.h
   IndirectEditResultsDialog.h
+  IndirectFitAnalysisTabLegacy.h
   IndirectFitAnalysisTab.h
+  IndirectFitDataPresenterLegacy.h
+  IndirectFitDataViewLegacy.h
   IndirectFitDataPresenter.h
   IndirectFitDataView.h
   IndirectFitOutputOptionsPresenter.h
   IndirectFitOutputOptionsView.h
+  IndirectFitPlotPresenterLegacy.h
+  IndirectFitPlotViewLegacy.h
   IndirectFitPlotPresenter.h
   IndirectFitPlotView.h
   IndirectInstrumentConfig.h
@@ -156,6 +192,8 @@ set(
   IndirectSettingsView.h
   IndirectSimulation.h
   IndirectSimulationTab.h
+  IndirectSpectrumSelectionPresenterLegacy.h
+  IndirectSpectrumSelectionViewLegacy.h
   IndirectSpectrumSelectionPresenter.h
   IndirectSpectrumSelectionView.h
   IndirectSqw.h
@@ -166,6 +204,9 @@ set(
   IndirectTransmissionCalc.h
   IndirectTransmission.h
   IqtFit.h
+  IndirectFunctionBrowser/IqtTemplateBrowser.h
+  IndirectFunctionBrowser/IqtTemplatePresenter.h
+  IndirectFitPropertyBrowser.h
   Iqt.h
   ISISCalibration.h
   ISISDiagnostics.h
@@ -199,6 +240,7 @@ set(
   IndirectDataReduction.ui
   IndirectDiffractionReduction.ui
   IndirectEditResultsDialog.ui
+  IndirectFitDataViewLegacy.ui
   IndirectFitDataView.ui
   IndirectFitOutputOptions.ui
   IndirectFitPreviewPlot.ui
@@ -262,6 +304,7 @@ mtd_add_qt_library(
   INSTALL_DIR_BASE ${PLUGINS_DIR}
   OSX_INSTALL_RPATH
     @loader_path/../../Contents/MacOS
+    @loader_path/../../Contents/Frameworks
     @loader_path/../../plugins/qt4
   LINUX_INSTALL_RPATH "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../plugins/qt4/"
 )
@@ -274,18 +317,53 @@ set(
   CalculatePaalmanPings.cpp
   ContainerSubtraction.cpp
   CorrectionsTab.cpp
+  ConvFit.cpp
+  ConvFitAddWorkspaceDialog.cpp
+  ConvFitDataPresenter.cpp
+  ConvFitDataTablePresenter.cpp
+  ConvFitModel.cpp
   DensityOfStates.cpp
+  Elwin.cpp
+  FunctionTemplateBrowser.cpp
   ILLEnergyTransfer.cpp
   ISISCalibration.cpp
   ISISDiagnostics.cpp
   ISISEnergyTransfer.cpp
+  IndirectAddWorkspaceDialog.cpp
   IndirectBayes.cpp
   IndirectBayesTab.cpp
   IndirectCorrections.cpp
+  IndirectDataAnalysis.cpp
+  IndirectDataAnalysisTab.cpp
   IndirectDataReduction.cpp
   IndirectDataReductionTab.cpp
+  IndirectDataTablePresenter.cpp
+  IndirectDataTablePresenterLegacy.cpp
   IndirectDataValidationHelper.cpp
   IndirectDiffractionReduction.cpp
+  IndirectEditResultsDialog.cpp
+  IndirectFitAnalysisTab.cpp
+  IndirectFitAnalysisTabLegacy.cpp
+  IndirectFitData.cpp
+  IndirectFitDataLegacy.cpp
+  IndirectFitDataPresenter.cpp
+  IndirectFitDataPresenterLegacy.cpp
+  IndirectFitDataView.cpp
+  IndirectFitDataViewLegacy.cpp
+  IndirectFitOutput.cpp
+  IndirectFitOutputLegacy.cpp
+  IndirectFitOutputOptionsModel.cpp
+  IndirectFitOutputOptionsPresenter.cpp
+  IndirectFitOutputOptionsView.cpp
+  IndirectFitPropertyBrowser.cpp
+  IndirectFitPlotModel.cpp
+  IndirectFitPlotModelLegacy.cpp
+  IndirectFitPlotPresenter.cpp
+  IndirectFitPlotPresenterLegacy.cpp
+  IndirectFitPlotView.cpp
+  IndirectFitPlotViewLegacy.cpp
+  IndirectFittingModel.cpp
+  IndirectFittingModelLegacy.cpp
   IndirectInstrumentConfig.cpp
   IndirectInterface.cpp
   IndirectLoadILL.cpp
@@ -303,6 +381,10 @@ set(
   IndirectSettingsView.cpp
   IndirectSimulation.cpp
   IndirectSimulationTab.cpp
+  IndirectSpectrumSelectionPresenter.cpp
+  IndirectSpectrumSelectionPresenterLegacy.cpp
+  IndirectSpectrumSelectionView.cpp
+  IndirectSpectrumSelectionViewLegacy.cpp
   IndirectSqw.cpp
   IndirectSymmetrise.cpp
   IndirectTab.cpp
@@ -310,6 +392,19 @@ set(
   IndirectToolsTab.cpp
   IndirectTransmission.cpp
   IndirectTransmissionCalc.cpp
+  Iqt.cpp
+  IqtFit.cpp
+  IqtFitModel.cpp
+  IndirectFunctionBrowser/IqtFunctionModel.cpp
+  IndirectFunctionBrowser/IqtTemplateBrowser.cpp
+  IndirectFunctionBrowser/IqtTemplatePresenter.cpp
+  JumpFit.cpp
+  JumpFitAddWorkspaceDialog.cpp
+  JumpFitDataPresenter.cpp
+  JumpFitDataTablePresenter.cpp
+  JumpFitModel.cpp
+  MSDFit.cpp
+  MSDFitModel.cpp
   Quasi.cpp
   ResNorm.cpp
   Stretch.cpp
@@ -321,19 +416,50 @@ set(
   ApplyAbsorptionCorrections.h
   CalculatePaalmanPings.h
   ContainerSubtraction.h
+  ConvFitAddWorkspaceDialog.h
+  ConvFitDataPresenter.h
+  ConvFitDataTablePresenter.h
+  ConvFit.h
   CorrectionsTab.h
   DensityOfStates.h
+  Elwin.h
+  FunctionTemplateBrowser.h
   ILLEnergyTransfer.h
   ISISCalibration.h
   ISISDiagnostics.h
   ISISEnergyTransfer.h
+  IAddWorkspaceDialog.h
+  IIndirectFitDataView.h
+  IIndirectFitDataViewLegacy.h
+  IIndirectFitOutputOptionsView.h
+  IIndirectFitPlotView.h
+  IIndirectFitPlotViewLegacy.h
   IIndirectSettingsView.h
+  IndirectAddWorkspaceDialog.h
   IndirectBayes.h
   IndirectBayesTab.h
   IndirectCorrections.h
+  IndirectDataAnalysis.h
+  IndirectDataAnalysisTab.h
   IndirectDataReduction.h
   IndirectDataReductionTab.h
+  IndirectDataTablePresenter.h
+  IndirectDataTablePresenterLegacy.h
   IndirectDiffractionReduction.h
+  IndirectEditResultsDialog.h
+  IndirectFitAnalysisTab.h
+  IndirectFitAnalysisTabLegacy.h
+  IndirectFitDataPresenter.h
+  IndirectFitDataPresenterLegacy.h
+  IndirectFitDataView.h
+  IndirectFitDataViewLegacy.h
+  IndirectFitOutputOptionsPresenter.h
+  IndirectFitOutputOptionsView.h
+  IndirectFitPropertyBrowser.h
+  IndirectFitPlotPresenter.h
+  IndirectFitPlotPresenterLegacy.h
+  IndirectFitPlotView.h
+  IndirectFitPlotViewLegacy.h
   IndirectInstrumentConfig.h
   IndirectInterface.h
   IndirectLoadILL.h
@@ -348,6 +474,10 @@ set(
   IndirectSettingsView.h
   IndirectSimulation.h
   IndirectSimulationTab.h
+  IndirectSpectrumSelectionPresenter.h
+  IndirectSpectrumSelectionPresenterLegacy.h
+  IndirectSpectrumSelectionView.h
+  IndirectSpectrumSelectionViewLegacy.h
   IndirectSqw.h
   IndirectSymmetrise.h
   IndirectTab.h
@@ -355,6 +485,16 @@ set(
   IndirectToolsTab.h
   IndirectTransmission.h
   IndirectTransmissionCalc.h
+  IqtFit.h
+  IndirectFunctionBrowser/IqtTemplateBrowser.h
+  IndirectFunctionBrowser/IqtTemplatePresenter.h
+  Iqt.h
+  JumpFitAddWorkspaceDialog.h
+  JumpFitDataPresenter.h
+  JumpFitDataTablePresenter.h
+  JumpFit.h
+  LazyAsyncRunner.h
+  MSDFit.h
   Quasi.h
   ResNorm.h
   Stretch.h
@@ -362,10 +502,25 @@ set(
 
 set(
   INC_FILES
+  ConvFitModel.h
   IndirectDataValidationHelper.h
+  IndirectFitData.h
+  IndirectFitDataLegacy.h
+  IndirectFitOutput.h
+  IndirectFitOutputLegacy.h
+  IndirectFitOutputOptionsModel.h
+  IndirectFitPlotModel.h
+  IndirectFitPlotModelLegacy.h
+  IndirectFitPlotPresenter.h
+  IndirectFitPlotPresenterLegacy.h
+  IndirectFittingModel.h
+  IndirectFittingModelLegacy.h
   IndirectPlotOptionsModel.h
   IndirectSettingsHelper.h
   IPythonRunner.h
+  IqtFitModel.h
+  JumpFitModel.h
+  MSDFitModel.h
 )
 
 set(
@@ -374,15 +529,24 @@ set(
   ApplyAbsorptionCorrections.ui
   CalculatePaalmanPings.ui
   ContainerSubtraction.ui
+  ConvFit.ui
+  ConvFitAddWorkspaceDialog.ui
   DensityOfStates.ui
+  Elwin.ui
   ILLEnergyTransfer.ui
   ISISCalibration.ui
   ISISDiagnostics.ui
   ISISEnergyTransfer.ui
+  IndirectAddWorkspaceDialog.ui
   IndirectBayes.ui
   IndirectCorrections.ui
+  IndirectDataAnalysis.ui
   IndirectDataReduction.ui
   IndirectDiffractionReduction.ui
+  IndirectEditResultsDialog.ui
+  IndirectFitDataView.ui
+  IndirectFitOutputOptions.ui
+  IndirectFitPreviewPlot.ui
   IndirectInstrumentConfig.ui
   IndirectInterfaceSettings.ui
   IndirectLoadILL.ui
@@ -392,20 +556,27 @@ set(
   IndirectSassena.ui
   IndirectSettings.ui
   IndirectSimulation.ui
+  IndirectSpectrumSelector.ui
   IndirectSqw.ui
   IndirectSymmetrise.ui
   IndirectTools.ui
   IndirectTransmission.ui
   IndirectTransmissionCalc.ui
+  Iqt.ui
+  IqtFit.ui
+  JumpFit.ui
+  JumpFitAddWorkspaceDialog.ui
+  MSDFit.ui
   Quasi.ui
   ResNorm.ui
   Stretch.ui
 )
 
 set(RES_FILES IndirectInterfaceResources.qrc)
-
-# XML is required to parse the settings file
-find_package(Qt5 COMPONENTS Xml REQUIRED)
+if(ENABLE_WORKBENCH)
+  # XML is required to parse the settings file
+  find_package(Qt5 COMPONENTS Concurrent Xml REQUIRED)
+endif()
 
 mtd_add_qt_library(
   TARGET_NAME MantidScientificInterfacesIndirect
@@ -427,6 +598,7 @@ mtd_add_qt_library(
     ${POCO_LIBRARIES}
     ${Boost_LIBRARIES}
     ${PYTHON_LIBRARIES}
+    Qt5::Concurrent
     Qt5::Xml
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
@@ -437,6 +609,7 @@ mtd_add_qt_library(
     ${WORKBENCH_PLUGINS_DIR}
   OSX_INSTALL_RPATH
     @loader_path/../../Contents/MacOS
+    @loader_path/../../Contents/Frameworks
     @loader_path/../../plugins/qt5
   LINUX_INSTALL_RPATH "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../plugins/qt5/"
 )

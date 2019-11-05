@@ -5,14 +5,15 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-import unittest
-import mantid
 
+import unittest
+
+from state_test_helper import assert_validate_error, assert_raises_nothing
+
+from sans.common.enums import (RebinType, RangeStepType, FitType, DataType, SANSFacility, SANSInstrument)
 from sans.state.calculate_transmission import (StateCalculateTransmission, StateCalculateTransmissionLOQ,
                                                get_calculate_transmission_builder)
 from sans.state.data import get_data_builder
-from sans.common.enums import (RebinType, RangeStepType, FitType, DataType, SANSFacility, SANSInstrument)
-from state_test_helper import assert_validate_error, assert_raises_nothing
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
@@ -286,6 +287,7 @@ class StateCalculateTransmissionBuilderTest(unittest.TestCase):
         self.assertEqual(state.fit[DataType.to_string(DataType.Can)].polynomial_order,  3)
         self.assertEqual(state.fit[DataType.to_string(DataType.Can)].wavelength_low,  10.)
         self.assertEqual(state.fit[DataType.to_string(DataType.Can)].wavelength_high,  20.)
+
 
 if __name__ == '__main__':
     unittest.main()

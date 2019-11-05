@@ -157,19 +157,12 @@ void ConvertAxisByFormula::exec() {
       p.DefineVar(variable->name, &(variable->value));
     }
     // set some constants
-    double pi = M_PI;
-    p.DefineVar("pi", &pi);
-    double h = PhysicalConstants::h;
-    p.DefineVar("h", &h);
-    double hBar = PhysicalConstants::h_bar;
-    p.DefineVar("h_bar", &hBar);
-    double g = PhysicalConstants::g;
-    p.DefineVar("g", &g);
-    double mN = PhysicalConstants::NeutronMass;
-    p.DefineVar("mN", &mN);
-    double mNAMU = PhysicalConstants::NeutronMassAMU;
-    p.DefineVar("mNAMU", &mNAMU);
-
+    p.DefineConst("pi", M_PI);
+    p.DefineConst("h", PhysicalConstants::h);
+    p.DefineConst("h_bar", PhysicalConstants::h_bar);
+    p.DefineConst("g", PhysicalConstants::g);
+    p.DefineConst("mN", PhysicalConstants::NeutronMass);
+    p.DefineConst("mNAMU", PhysicalConstants::NeutronMassAMU);
     p.SetExpr(formula);
   } catch (mu::Parser::exception_type &e) {
     std::stringstream ss;

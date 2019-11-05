@@ -93,7 +93,7 @@ public:
   Peak &getPeak(int peakNum) override;
   const Peak &getPeak(int peakNum) const override;
 
-  Geometry::IPeak *createPeak(
+  std::unique_ptr<Geometry::IPeak> createPeak(
       const Kernel::V3D &QLabFrame,
       boost::optional<double> detectorDistance = boost::none) const override;
 
@@ -104,7 +104,8 @@ public:
   std::vector<std::pair<std::string, std::string>>
   peakInfo(const Kernel::V3D &qFrame, bool labCoords) const override;
 
-  Peak *createPeakHKL(const Kernel::V3D &HKL) const override;
+  std::unique_ptr<Geometry::IPeak>
+  createPeakHKL(const Kernel::V3D &HKL) const override;
 
   int peakInfoNumber(const Kernel::V3D &qFrame, bool labCoords) const override;
 
@@ -186,7 +187,8 @@ private:
   /// Adds a new PeakColumn of the given type
   void addPeakColumn(const std::string &name);
   /// Create a peak from a QSample position
-  Peak *createPeakQSample(const Kernel::V3D &position) const;
+  std::unique_ptr<Geometry::IPeak>
+  createPeakQSample(const Kernel::V3D &position) const;
 
   // ====================================== ITableWorkspace Methods
   // ==================================

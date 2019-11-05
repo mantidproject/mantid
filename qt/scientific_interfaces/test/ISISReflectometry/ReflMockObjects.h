@@ -12,6 +12,7 @@
 #include "GUI/Batch/IBatchPresenter.h"
 #include "GUI/Batch/IBatchPresenterFactory.h"
 #include "GUI/Common/IMessageHandler.h"
+#include "GUI/Common/IPlotter.h"
 #include "GUI/Common/IPythonRunner.h"
 #include "GUI/Event/IEventPresenter.h"
 #include "GUI/Experiment/IExperimentPresenter.h"
@@ -55,20 +56,26 @@ public:
 class MockBatchPresenter : public IBatchPresenter {
 public:
   MOCK_METHOD1(acceptMainPresenter, void(IMainWindowPresenter *));
-  MOCK_METHOD0(notifyReductionResumed, void());
-  MOCK_METHOD0(notifyReductionPaused, void());
-  MOCK_METHOD0(notifyAutoreductionResumed, void());
-  MOCK_METHOD0(notifyAutoreductionPaused, void());
+  MOCK_METHOD0(initInstrumentList, void());
+  MOCK_METHOD0(notifyResumeReductionRequested, void());
+  MOCK_METHOD0(notifyPauseReductionRequested, void());
+  MOCK_METHOD0(notifyResumeAutoreductionRequested, void());
+  MOCK_METHOD0(notifyPauseAutoreductionRequested, void());
   MOCK_METHOD0(notifyAutoreductionCompleted, void());
-  MOCK_METHOD0(anyBatchAutoreductionResumed, void());
-  MOCK_METHOD0(anyBatchAutoreductionPaused, void());
-  MOCK_METHOD0(reductionPaused, void());
+  MOCK_METHOD0(notifyAnyBatchReductionResumed, void());
+  MOCK_METHOD0(notifyAnyBatchReductionPaused, void());
+  MOCK_METHOD0(notifyAnyBatchAutoreductionResumed, void());
+  MOCK_METHOD0(notifyAnyBatchAutoreductionPaused, void());
+  MOCK_METHOD0(notifyReductionPaused, void());
 
+  MOCK_METHOD1(notifyChangeInstrumentRequested, void(const std::string &));
   MOCK_METHOD1(notifyInstrumentChanged, void(const std::string &));
+  MOCK_METHOD0(notifyUpdateInstrumentRequested, void());
   MOCK_METHOD0(notifyRestoreDefaultsRequested, void());
   MOCK_METHOD0(notifySettingsChanged, void());
   MOCK_CONST_METHOD0(isProcessing, bool());
   MOCK_CONST_METHOD0(isAutoreducing, bool());
+  MOCK_CONST_METHOD0(isAnyBatchProcessing, bool());
   MOCK_CONST_METHOD0(isAnyBatchAutoreducing, bool());
   MOCK_CONST_METHOD0(percentComplete, int());
   MOCK_CONST_METHOD0(rowProcessingProperties, AlgorithmRuntimeProps());
@@ -80,25 +87,30 @@ public:
 class MockRunsPresenter : public IRunsPresenter {
 public:
   MOCK_METHOD1(acceptMainPresenter, void(IBatchPresenter *));
+  MOCK_METHOD0(initInstrumentList, void());
   MOCK_CONST_METHOD0(runsTable, RunsTable const &());
   MOCK_METHOD0(mutableRunsTable, RunsTable &());
-  MOCK_METHOD1(notifyInstrumentChanged, void(std::string const &));
-  MOCK_METHOD0(notifyReductionResumed, void());
-  MOCK_METHOD0(notifyReductionPaused, void());
+  MOCK_METHOD1(notifyChangeInstrumentRequested, void(std::string const &));
+  MOCK_METHOD0(notifyResumeReductionRequested, void());
+  MOCK_METHOD0(notifyPauseReductionRequested, void());
   MOCK_METHOD0(notifyRowStateChanged, void());
   MOCK_METHOD1(notifyRowStateChanged, void(boost::optional<Item const &>));
   MOCK_METHOD0(notifyRowOutputsChanged, void());
   MOCK_METHOD1(notifyRowOutputsChanged, void(boost::optional<Item const &>));
-  MOCK_METHOD0(reductionPaused, void());
-  MOCK_METHOD0(reductionResumed, void());
+  MOCK_METHOD0(notifyReductionPaused, void());
+  MOCK_METHOD0(notifyReductionResumed, void());
   MOCK_METHOD0(resumeAutoreduction, bool());
-  MOCK_METHOD0(autoreductionPaused, void());
-  MOCK_METHOD0(autoreductionResumed, void());
+  MOCK_METHOD0(notifyAutoreductionPaused, void());
+  MOCK_METHOD0(notifyAutoreductionResumed, void());
   MOCK_METHOD0(autoreductionCompleted, void());
-  MOCK_METHOD0(anyBatchAutoreductionPaused, void());
-  MOCK_METHOD0(anyBatchAutoreductionResumed, void());
-  MOCK_METHOD1(instrumentChanged, void(std::string const &));
+  MOCK_METHOD0(notifyAnyBatchReductionPaused, void());
+  MOCK_METHOD0(notifyAnyBatchReductionResumed, void());
+  MOCK_METHOD0(notifyAnyBatchAutoreductionPaused, void());
+  MOCK_METHOD0(notifyAnyBatchAutoreductionResumed, void());
+  MOCK_METHOD1(notifyInstrumentChanged, void(std::string const &));
   MOCK_METHOD0(settingsChanged, void());
+  MOCK_CONST_METHOD0(isAnyBatchProcessing, bool());
+  MOCK_CONST_METHOD0(isAnyBatchAutoreducing, bool());
   MOCK_CONST_METHOD0(isProcessing, bool());
   MOCK_CONST_METHOD0(isAutoreducing, bool());
   MOCK_CONST_METHOD0(percentComplete, int());
@@ -108,10 +120,10 @@ public:
 class MockEventPresenter : public IEventPresenter {
 public:
   MOCK_METHOD1(acceptMainPresenter, void(IBatchPresenter *));
-  MOCK_METHOD0(reductionPaused, void());
-  MOCK_METHOD0(reductionResumed, void());
-  MOCK_METHOD0(autoreductionPaused, void());
-  MOCK_METHOD0(autoreductionResumed, void());
+  MOCK_METHOD0(notifyReductionPaused, void());
+  MOCK_METHOD0(notifyReductionResumed, void());
+  MOCK_METHOD0(notifyAutoreductionPaused, void());
+  MOCK_METHOD0(notifyAutoreductionResumed, void());
   MOCK_CONST_METHOD0(slicing, Slicing &());
 };
 
@@ -119,11 +131,11 @@ class MockExperimentPresenter : public IExperimentPresenter {
 public:
   MOCK_METHOD1(acceptMainPresenter, void(IBatchPresenter *));
   MOCK_CONST_METHOD0(experiment, Experiment const &());
-  MOCK_METHOD0(reductionPaused, void());
-  MOCK_METHOD0(reductionResumed, void());
-  MOCK_METHOD0(autoreductionPaused, void());
-  MOCK_METHOD0(autoreductionResumed, void());
-  MOCK_METHOD1(instrumentChanged, void(std::string const &));
+  MOCK_METHOD0(notifyReductionPaused, void());
+  MOCK_METHOD0(notifyReductionResumed, void());
+  MOCK_METHOD0(notifyAutoreductionPaused, void());
+  MOCK_METHOD0(notifyAutoreductionResumed, void());
+  MOCK_METHOD1(notifyInstrumentChanged, void(std::string const &));
   MOCK_METHOD0(restoreDefaults, void());
 };
 
@@ -131,11 +143,11 @@ class MockInstrumentPresenter : public IInstrumentPresenter {
 public:
   MOCK_METHOD1(acceptMainPresenter, void(IBatchPresenter *));
   MOCK_CONST_METHOD0(instrument, Instrument const &());
-  MOCK_METHOD0(reductionPaused, void());
-  MOCK_METHOD0(reductionResumed, void());
-  MOCK_METHOD0(autoreductionPaused, void());
-  MOCK_METHOD0(autoreductionResumed, void());
-  MOCK_METHOD1(instrumentChanged, void(std::string const &));
+  MOCK_METHOD0(notifyReductionPaused, void());
+  MOCK_METHOD0(notifyReductionResumed, void());
+  MOCK_METHOD0(notifyAutoreductionPaused, void());
+  MOCK_METHOD0(notifyAutoreductionResumed, void());
+  MOCK_METHOD1(notifyInstrumentChanged, void(std::string const &));
   MOCK_METHOD0(restoreDefaults, void());
 };
 
@@ -144,10 +156,10 @@ public:
   MOCK_METHOD1(acceptMainPresenter, void(IBatchPresenter *));
   MOCK_METHOD1(saveWorkspaces, void(std::vector<std::string> const &));
   MOCK_CONST_METHOD0(shouldAutosave, bool());
-  MOCK_METHOD0(reductionPaused, void());
-  MOCK_METHOD0(reductionResumed, void());
-  MOCK_METHOD0(autoreductionPaused, void());
-  MOCK_METHOD0(autoreductionResumed, void());
+  MOCK_METHOD0(notifyReductionPaused, void());
+  MOCK_METHOD0(notifyReductionResumed, void());
+  MOCK_METHOD0(notifyAutoreductionPaused, void());
+  MOCK_METHOD0(notifyAutoreductionResumed, void());
 };
 
 /**** Progress ****/
@@ -229,6 +241,11 @@ public:
   MOCK_METHOD1(runPythonAlgorithm, std::string(const std::string &));
 };
 
+class MockPlotter : public IPlotter {
+public:
+  MOCK_CONST_METHOD1(reflectometryPlot, void(const std::vector<std::string> &));
+};
+
 /**** Saver ****/
 class MockAsciiSaver : public IAsciiSaver {
 public:
@@ -248,10 +265,10 @@ public:
   MOCK_CONST_METHOD0(isProcessing, bool());
   MOCK_CONST_METHOD0(isAutoreducing, bool());
   MOCK_CONST_METHOD0(percentComplete, int());
-  MOCK_METHOD0(reductionResumed, void());
-  MOCK_METHOD0(reductionPaused, void());
-  MOCK_METHOD0(autoreductionResumed, void());
-  MOCK_METHOD0(autoreductionPaused, void());
+  MOCK_METHOD0(notifyReductionResumed, void());
+  MOCK_METHOD0(notifyReductionPaused, void());
+  MOCK_METHOD0(notifyAutoreductionResumed, void());
+  MOCK_METHOD0(notifyAutoreductionPaused, void());
   MOCK_METHOD1(setReprocessFailedItems, void(bool));
   MOCK_METHOD1(algorithmStarted,
                Item const &(MantidQt::API::IConfiguredAlgorithm_sptr));

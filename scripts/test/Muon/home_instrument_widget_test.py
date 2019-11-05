@@ -7,15 +7,16 @@
 import unittest
 
 
-from mantid.api import FileFinder
+from mantid.api import FileFinder, AnalysisDataService
 from mantid.py3compat import mock
 from mantidqt.utils.qt.testing import start_qapplication
 from qtpy.QtWidgets import QWidget
+from mantid.simpleapi import LoadMuonNexus, CompareWorkspaces
 
 from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_model import InstrumentWidgetModel
 from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_presenter import InstrumentWidgetPresenter
 from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_view import InstrumentWidgetView
-from Muon.GUI.Common.observer_pattern import Observer
+from mantidqt.utils.observer_pattern import Observer
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_view import DEADTIME_DATA_FILE,\
     DEADTIME_WORKSPACE, DEADTIME_OTHER_FILE, DEADTIME_NONE
@@ -195,10 +196,11 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
         dead_time_data = mock.MagicMock()
         dead_time_data.toDict.return_value = {'dead-time': [0.001, 0.002, 0.003]}
         self.presenter._model.get_dead_time_table_from_data = mock.MagicMock(return_value=dead_time_data)
+        self.presenter.handle_dead_time_unselected()
         self.presenter.handle_user_selects_dead_time_from_data()
 
         self.assertEqual(self.view.dead_time_label_3.text(), 'From 0.001 to 0.003 (ave. 0.002)')
-        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, {'DeadTimeSource': 'FromFile'})
+        self.gui_variable_observer.update.assert_called_with(self.gui_context.gui_variables_notifier, {'DeadTimeSource': 'FromFile'})
 
     @mock.patch(
         'Muon.GUI.Common.home_instrument_widget.home_instrument_widget_presenter.load_utils.get_table_workspace_names_from_ADS')
@@ -284,7 +286,7 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
 
         self.assertEqual(self.view.dead_time_selector.currentIndex(), DEADTIME_WORKSPACE)
         self.view.warning_popup.assert_not_called()
-        self.assertEqual(self.view.dead_time_file_selector.currentText(), 'MUSR00015196_deadTimes')
+        self.assertEqual(self.view.dead_time_file_selector.currentText(), 'MUSR00015196.nxs_deadtime_table_1')
         self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, {'DeadTimeTable': mock.ANY})
 
     def test_validate_variable_rebin_string_allows_single_number(self):
@@ -327,6 +329,16 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
         result, message = self.model.validate_variable_rebin_string('1,-5,19')
 
         self.assertTrue(result)
+
+    def test_dead_time_workspace_specified_used_when_selecting_from_table_workspace(self):
+        LoadMuonNexus(Filename='MUSR00022725.nxs', OutputWorkspace='output_ws', DeadTimeTable='dead_time_table')
+        self.model.check_dead_time_file_selection = mock.MagicMock(return_value=True)
+
+        self.view.dead_time_selector.setCurrentIndex(1)
+        self.view.dead_time_file_selector.setCurrentIndex(1)
+
+        self.assertTrue(CompareWorkspaces(self.model._context.dead_time_table(62260),
+                                          AnalysisDataService.retrieve('dead_time_table')))
 
 
 if __name__ == '__main__':

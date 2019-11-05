@@ -16,9 +16,6 @@
 
 #include <QFileInfo>
 
-#include <qwt_plot.h>
-#include <qwt_plot_curve.h>
-
 using namespace Mantid::API;
 
 namespace {
@@ -29,12 +26,12 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 MSDFit::MSDFit(QWidget *parent)
-    : IndirectFitAnalysisTab(new MSDFitModel, parent),
+    : IndirectFitAnalysisTabLegacy(new MSDFitModel, parent),
       m_uiForm(new Ui::MSDFit) {
   m_uiForm->setupUi(parent);
 
   m_msdFittingModel = dynamic_cast<MSDFitModel *>(fittingModel());
-  setFitDataPresenter(std::make_unique<IndirectFitDataPresenter>(
+  setFitDataPresenter(std::make_unique<IndirectFitDataPresenterLegacy>(
       m_msdFittingModel, m_uiForm->fitDataView));
   setPlotView(m_uiForm->pvFitPlotView);
   setSpectrumSelectionView(m_uiForm->svSpectrumView);

@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITOUTPUT_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITOUTPUT_H_
+#ifndef MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITOUTPUTLEGACY_H_
+#define MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITOUTPUTLEGACY_H_
 
 #include "IndirectFitData.h"
 
@@ -29,19 +29,19 @@ struct ParameterValue {
   boost::optional<double> error;
 };
 
-struct ResultLocation {
-  ResultLocation() : result(), index(0) {}
-  ResultLocation(Mantid::API::WorkspaceGroup_sptr group, std::size_t i)
+struct ResultLocationNew {
+  ResultLocationNew() = default;
+  ResultLocationNew(Mantid::API::WorkspaceGroup_sptr group,
+                    WorkspaceGroupIndex i)
       : result(group), index(i) {}
   boost::weak_ptr<Mantid::API::WorkspaceGroup> result;
-  std::size_t index;
+  WorkspaceGroupIndex index = WorkspaceGroupIndex{0};
 };
 
-using ParameterValues =
-    std::unordered_map<std::size_t,
-                       std::unordered_map<std::string, ParameterValue>>;
+using ParameterValuesNew =
+    std::map<WorkspaceIndex, std::unordered_map<std::string, ParameterValue>>;
 
-using ResultLocations = std::unordered_map<std::size_t, ResultLocation>;
+using ResultLocationsNew = std::map<WorkspaceIndex, ResultLocationNew>;
 
 using FitDataIterator =
     std::vector<std::unique_ptr<IndirectFitData>>::const_iterator;
@@ -61,16 +61,17 @@ public:
   IndirectFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
                     Mantid::API::ITableWorkspace_sptr parameterTable,
                     Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-                    IndirectFitData const *fitData, std::size_t spectrum);
+                    IndirectFitData const *fitData, WorkspaceIndex spectrum);
 
   bool isSpectrumFit(IndirectFitData const *fitData,
-                     std::size_t spectrum) const;
+                     WorkspaceIndex spectrum) const;
 
   std::unordered_map<std::string, ParameterValue>
-  getParameters(IndirectFitData const *fitData, std::size_t spectrum) const;
+  getParameters(IndirectFitData const *fitData, WorkspaceIndex spectrum) const;
 
-  boost::optional<ResultLocation>
-  getResultLocation(IndirectFitData const *fitData, std::size_t spectrum) const;
+  boost::optional<ResultLocationNew>
+  getResultLocation(IndirectFitData const *fitData,
+                    WorkspaceIndex spectrum) const;
   std::vector<std::string> getResultParameterNames() const;
   Mantid::API::WorkspaceGroup_sptr getLastResultWorkspace() const;
   Mantid::API::WorkspaceGroup_sptr getLastResultGroup() const;
@@ -83,7 +84,7 @@ public:
       IndirectFitData const *fitData);
   void mapParameterNames(
       const std::unordered_map<std::string, std::string> &parameterNameChanges,
-      IndirectFitData const *fitData, std::size_t spectrum);
+      IndirectFitData const *fitData, WorkspaceIndex spectrum);
 
   void addOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
                  Mantid::API::ITableWorkspace_sptr parameterTable,
@@ -93,7 +94,7 @@ public:
   void addOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
                  Mantid::API::ITableWorkspace_sptr parameterTable,
                  Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-                 IndirectFitData const *fitData, std::size_t spectrum);
+                 IndirectFitData const *fitData, WorkspaceIndex spectrum);
 
   void removeOutput(IndirectFitData const *fitData);
 
@@ -115,8 +116,8 @@ private:
 
   boost::weak_ptr<Mantid::API::WorkspaceGroup> m_resultGroup;
   boost::weak_ptr<Mantid::API::WorkspaceGroup> m_resultWorkspace;
-  std::unordered_map<IndirectFitData const *, ParameterValues> m_parameters;
-  std::unordered_map<IndirectFitData const *, ResultLocations>
+  std::unordered_map<IndirectFitData const *, ParameterValuesNew> m_parameters;
+  std::unordered_map<IndirectFitData const *, ResultLocationsNew>
       m_outputResultLocations;
 };
 

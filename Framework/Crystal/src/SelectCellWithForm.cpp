@@ -9,6 +9,7 @@
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Crystal/ScalarUtils.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid {
@@ -47,6 +48,9 @@ void SelectCellWithForm::init() {
 
   this->declareProperty("AllowPermutations", true,
                         "Allow permutations of conventional cells");
+  this->declareProperty(std::make_unique<ArrayProperty<double>>(
+                            "TransformationMatrix", Direction::Output),
+                        "The transformation matrix");
 }
 
 Kernel::Matrix<double> SelectCellWithForm::DetermineErrors(
@@ -132,10 +136,9 @@ void SelectCellWithForm::exec() {
 
   g_log.notice(std::string(message));
 
-  Kernel::Matrix<double> T(UB);
-  T.Invert();
-  T = newUB * T;
+  DblMatrix T = info.GetHKL_Tran();
   g_log.notice() << "Transformation Matrix =  " << T.str() << '\n';
+  this->setProperty("TransformationMatrix", T.getVector());
 
   if (apply) {
     //----------------------------------- Try to optimize(LSQ) to find lattice
@@ -158,17 +161,27 @@ void SelectCellWithForm::exec() {
 
     int num_indexed = 0;
     double average_error = 0.0;
-    std::vector<V3D> miller_indices;
-    std::vector<V3D> q_vectors;
-    for (size_t i = 0; i < n_peaks; i++) {
-      q_vectors.push_back(peaks[i].getQSampleFrame());
-    }
 
-    num_indexed = IndexingUtils::CalculateMillerIndices(
-        newUB, q_vectors, tolerance, miller_indices, average_error);
+    if (o_lattice.getMaxOrder() == 0) {
+      std::vector<V3D> miller_indices;
+      std::vector<V3D> q_vectors;
+      for (size_t i = 0; i < n_peaks; i++) {
+        q_vectors.push_back(peaks[i].getQSampleFrame());
+      }
+      num_indexed = IndexingUtils::CalculateMillerIndices(
+          newUB, q_vectors, tolerance, miller_indices, average_error);
 
-    for (size_t i = 0; i < n_peaks; i++) {
-      peaks[i].setHKL(miller_indices[i]);
+      for (size_t i = 0; i < n_peaks; i++) {
+        peaks[i].setIntHKL(miller_indices[i]);
+        peaks[i].setHKL(miller_indices[i]);
+      }
+    } else {
+      num_indexed = static_cast<int>(num_indexed);
+      for (size_t i = 0; i < n_peaks; i++) {
+        average_error += (peaks[i].getHKL()).hklError();
+        peaks[i].setIntHKL(T * peaks[i].getIntHKL());
+        peaks[i].setHKL(T * peaks[i].getHKL());
+      }
     }
 
     // Tell the user what happened.

@@ -57,8 +57,10 @@ class FittingTabModelTest(unittest.TestCase):
         parameter_dict = {'Function': trial_function, 'InputWorkspace': workspace, 'Minimizer': 'Levenberg-Marquardt',
                           'StartX': 0.0, 'EndX': 100.0, 'EvaluationType': 'CentrePoint'}
 
-        output_workspace, parameter_table, fitting_function, fit_status, fit_chi_squared, covariance_matrix = self.model.do_single_fit_and_return_workspace_parameters_and_fit_function(
+        output_workspace, parameter_table_name, fitting_function, fit_status, fit_chi_squared, covariance_matrix = self.model.do_single_fit_and_return_workspace_parameters_and_fit_function(
             parameter_dict)
+
+        parameter_table = AnalysisDataService.retrieve(parameter_table_name)
 
         self.assertAlmostEqual(parameter_table.row(0)['Value'], 5.0)
         self.assertAlmostEqual(parameter_table.row(1)['Value'], 0.0)
@@ -69,14 +71,12 @@ class FittingTabModelTest(unittest.TestCase):
     def test_add_workspace_to_ADS_adds_workspace_to_ads_in_correct_group_structure(self):
         workspace = CreateWorkspace([0, 0], [0, 0])
         workspace_name = 'test_workspace_name'
-        workspace_directory = 'root/level one/level two/'
+        workspace_directory = 'root/'
 
         self.model.add_workspace_to_ADS(workspace, workspace_name, workspace_directory)
 
         self.assertTrue(AnalysisDataService.doesExist(workspace_name))
         self.assertTrue(AnalysisDataService.doesExist('root'))
-        self.assertTrue(AnalysisDataService.doesExist('level one'))
-        self.assertTrue(AnalysisDataService.doesExist('level two'))
 
     def test_create_multi_domain_fitted_workspace_name(self):
         input_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1'

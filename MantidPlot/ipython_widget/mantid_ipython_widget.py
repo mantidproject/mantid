@@ -7,11 +7,10 @@
 from __future__ import (absolute_import, division,
                         print_function)
 
-import inspect
 import threading
 import types
 import warnings
-
+from mantid.py3compat import getfullargspec
 from PyQt4 import QtGui
 
 # IPython monkey patches the  pygments.lexer.RegexLexer.get_tokens_unprocessed method
@@ -36,7 +35,8 @@ except ImportError:
     from IPython.qt.console.rich_ipython_widget import RichIPythonWidget
     from IPython.qt.inprocess import QtInProcessKernelManager
 
-def our_run_code(self, code_obj, result=None):
+
+def our_run_code(self, code_obj, result=None, async_=False):
     """ Method with which we replace the run_code method of IPython's InteractiveShell class.
         It calls the original method (renamed to ipython_run_code) on a separate thread
         so that we can avoid locking up the whole of MantidPlot while a command runs.
@@ -47,18 +47,21 @@ def our_run_code(self, code_obj, result=None):
           A compiled code object, to be executed
         result : ExecutionResult, optional
           An object to store exceptions that occur during execution.
+        async_ : Bool (Experimental))
+           Attempt to run top-level asynchronous code in a default loop.
         Returns
         -------
         False : Always, as it doesn't seem to matter.
     """
-
-    t = threading.Thread()
-    #ipython 3.0 introduces a third argument named result
-    nargs = len(inspect.getargspec(self.ipython_run_code).args)
-    if (nargs == 3):
-        t = threading.Thread(target=self.ipython_run_code, args=[code_obj,result])
+    # Different target arguments depending on IPython's version
+    function_parameters = getfullargspec(self.ipython_run_code)
+    if 'result' in function_parameters.args:
+        if hasattr(function_parameters, 'kwonlyargs') and 'async_' in function_parameters.kwonlyargs:
+            return self.ipython_run_code(code_obj, result, async_=async_)  # return coroutine to be awaited
+        else:
+            t = threading.Thread(target=self.ipython_run_code, args=(code_obj, result))
     else:
-        t = threading.Thread(target=self.ipython_run_code, args=[code_obj])
+        t = threading.Thread(target=self.ipython_run_code, args=(code_obj,))
     t.start()
     while t.is_alive():
         QtGui.QApplication.processEvents()
@@ -84,10 +87,10 @@ class MantidIPythonWidget(RichIPythonWidget):
 
         # Figure out the full path to the mantidplotrc.py file and then %run it
         from os import path
-        mantidplotpath = path.split(path.dirname(__file__))[0] # It's the directory above this one
+        mantidplotpath = path.split(path.dirname(__file__))[0]  # It's the directory above this one
         mantidplotrc = path.join(mantidplotpath, 'mantidplotrc.py')
         shell = kernel.shell
-        shell.run_line_magic('run',mantidplotrc)
+        shell.run_line_magic('run', mantidplotrc)
 
         # These 3 lines replace the run_code method of IPython's InteractiveShell class (of which the
         # shell variable is a derived instance) with our method defined above. The original method

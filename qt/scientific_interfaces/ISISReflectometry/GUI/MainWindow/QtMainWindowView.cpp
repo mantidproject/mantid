@@ -11,24 +11,17 @@
 #include "GUI/Common/Decoder.h"
 #include "GUI/Common/Encoder.h"
 #include "GUI/Common/Plotter.h"
+#include "MantidKernel/UsageService.h"
+#include "MantidQtWidgets/Common/SlitCalculator.h"
 #include <QMessageBox>
 #include <QToolButton>
 
 namespace MantidQt {
+
+using MantidWidgets::SlitCalculator;
+
 namespace CustomInterfaces {
 namespace ISISReflectometry {
-
-namespace {
-int getDefaultInstrumentIndex(std::vector<std::string> &instruments) {
-  auto instrumentName =
-      Mantid::Kernel::ConfigService::Instance().getString("default.instrument");
-  auto result = indexOfValue(instruments, instrumentName);
-  if (result)
-    return *result;
-  // If not found, use first instrument
-  return 0;
-}
-} // namespace
 
 // Do not change the last arguement as you will break backwards compatibility
 // with project save it should be the same as one of the tags in the decoder.
@@ -74,6 +67,8 @@ void QtMainWindowView::initLayout() {
           SLOT(onLoadBatchRequested(bool)));
   connect(m_ui.saveBatch, SIGNAL(triggered(bool)), this,
           SLOT(onSaveBatchRequested(bool)));
+  connect(m_ui.showSlitCalculator, SIGNAL(triggered(bool)), this,
+          SLOT(onShowSlitCalculatorRequested(bool)));
 
   auto instruments = std::vector<std::string>(
       {{"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"}});
@@ -87,11 +82,10 @@ void QtMainWindowView::initLayout() {
   auto makeRunsTablePresenter = RunsTablePresenterFactory(
       instruments, thetaTolerance, std::move(plotter));
 
-  auto defaultInstrumentIndex = getDefaultInstrumentIndex(instruments);
   auto messageHandler = this;
   auto makeRunsPresenter =
       RunsPresenterFactory(std::move(makeRunsTablePresenter), thetaTolerance,
-                           instruments, defaultInstrumentIndex, messageHandler);
+                           instruments, messageHandler);
 
   auto makeEventPresenter = EventPresenterFactory();
   auto makeSaveSettingsPresenter = SavePresenterFactory();
@@ -104,34 +98,60 @@ void QtMainWindowView::initLayout() {
       std::move(makeSaveSettingsPresenter));
 
   // Create the presenter
+  auto slitCalculator = std::make_unique<SlitCalculator>(this);
   m_presenter = std::make_unique<MainWindowPresenter>(
-      this, messageHandler, std::move(makeBatchPresenter));
+      this, messageHandler, std::move(slitCalculator),
+      std::move(makeBatchPresenter));
 
   m_notifyee->notifyNewBatchRequested();
   m_notifyee->notifyNewBatchRequested();
 }
 
 void QtMainWindowView::onTabCloseRequested(int tabIndex) {
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Feature", "ISIS Reflectometry->MainWindow->CloseBatch", false);
   m_notifyee->notifyCloseBatchRequested(tabIndex);
 }
 
 void QtMainWindowView::onNewBatchRequested(bool) {
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Feature", "ISIS Reflectometry->MainWindow->NewBatch", false);
   m_notifyee->notifyNewBatchRequested();
 }
 
 void QtMainWindowView::onLoadBatchRequested(bool) {
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Feature", "ISIS Reflectometry->MainWindow->LoadBatch", false);
   m_notifyee->notifyLoadBatchRequested(m_ui.mainTabs->currentIndex());
 }
 
 void QtMainWindowView::onSaveBatchRequested(bool) {
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Feature", "ISIS Reflectometry->MainWindow->SaveBatch", false);
   m_notifyee->notifySaveBatchRequested(m_ui.mainTabs->currentIndex());
+}
+
+void QtMainWindowView::onShowOptionsRequested(bool) {
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Feature", "ISIS Reflectometry->MainWindow->ShowOptions", false);
+  m_notifyee->notifyShowOptionsRequested();
+}
+
+void QtMainWindowView::onShowSlitCalculatorRequested(bool) {
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Feature", "ISIS Reflectometry->MainWindow->ShowSlitCalculator", false);
+  m_notifyee->notifyShowSlitCalculatorRequested();
 }
 
 void QtMainWindowView::subscribe(MainWindowSubscriber *notifyee) {
   m_notifyee = notifyee;
 }
 
-void QtMainWindowView::helpPressed() { m_notifyee->notifyHelpPressed(); }
+void QtMainWindowView::helpPressed() {
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Feature", "ISIS Reflectometry->MainWindow->ShowHelp", false);
+  m_notifyee->notifyHelpPressed();
+}
 
 /**
 Runs python code
@@ -150,12 +170,12 @@ Handles attempt to close main window
 * @param event : [input] The close event
 */
 void QtMainWindowView::closeEvent(QCloseEvent *event) {
-  // Close only if reduction has been paused
-  if (!m_presenter->isAnyBatchProcessing() ||
+  // Don't close if anything is running
+  if (m_presenter->isAnyBatchProcessing() ||
       m_presenter->isAnyBatchAutoreducing()) {
-    event->accept();
-  } else {
     event->ignore();
+  } else {
+    event->accept();
   }
 }
 

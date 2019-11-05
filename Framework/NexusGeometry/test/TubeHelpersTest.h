@@ -36,6 +36,10 @@ public:
     TS_ASSERT_EQUALS(tubes.size(), 2);
     TS_ASSERT(tubes[0].size() == tubes[1].size());
     TS_ASSERT_EQUALS(tubes[0].size(), 2);
+
+    auto notInTubes = TubeHelpers::notInTubes(tubes, detIds);
+    TSM_ASSERT_EQUALS("Should have no detectors outside tubes",
+                      notInTubes.size(), 0);
   }
 
   void test_NonColinearDetectorsDoNotProduceTubes() {
@@ -47,6 +51,10 @@ public:
     auto tubes = TubeHelpers::findAndSortTubes(*shape, pixels, detIds);
 
     TS_ASSERT_EQUALS(tubes.size(), 0)
+
+    auto notInTubes = TubeHelpers::notInTubes(tubes, detIds);
+    TS_ASSERT_EQUALS(notInTubes.size(), detIds.size());
+    TSM_ASSERT_EQUALS("Not in tubes should be all IDs", notInTubes, detIds);
   }
 
   void test_MixtureOfCoLinearAndNonCoLinearTubes() {
@@ -63,6 +71,14 @@ public:
     auto tubes = TubeHelpers::findAndSortTubes(*shape, pixels, detIds);
     TS_ASSERT_EQUALS(tubes.size(), 1);
     TS_ASSERT_EQUALS(tubes[0].size(), 2);
+
+    // Of 4 detectors, 2 are in tubes are 2 are not. One pixel is not colinear
+    // and tubes are not allowed to contain only 1 detector, so two detectors
+    // outside of tubes
+    auto notInTubes = TubeHelpers::notInTubes(tubes, detIds);
+    TS_ASSERT_EQUALS(notInTubes.size(), detIds.size() - 2);
+    TS_ASSERT_EQUALS(notInTubes[0], detIds[2]);
+    TS_ASSERT_EQUALS(notInTubes[1], detIds[3]);
   }
 };
 

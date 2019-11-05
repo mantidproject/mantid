@@ -22,8 +22,8 @@ class EXPORT_OPT_MANTIDQT_COMMON ManageUserDirectories
 public:
   ManageUserDirectories(QWidget *parent = nullptr);
   ~ManageUserDirectories() override;
-  static void openUserDirsDialog(QWidget *parent);
-  void setHelpButtonVisible(const bool &visible);
+  static void openManageUserDirectories();
+  void closeEvent(QCloseEvent *event) override;
 
 private:
   virtual void initLayout();

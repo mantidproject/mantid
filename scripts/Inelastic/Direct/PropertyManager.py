@@ -8,11 +8,11 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 
 #pylint: disable=invalid-name
-from __future__ import (absolute_import, division, print_function)
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 from Direct.NonIDF_Properties import *
 
 from collections import OrderedDict, Iterable
-from six import iteritems
+from six import iteritems, string_types
 from mantid.kernel import funcinspect
 
 
@@ -165,7 +165,7 @@ class PropertyManager(NonIDF_Properties):
         #end
 
         # replace common substitutions for string value
-        if isinstance(val, str) :
+        if isinstance(val, string_types):
             val1 = val.lower()
             if val1 == 'none' or len(val1) == 0:
                 val = None
@@ -255,6 +255,13 @@ class PropertyManager(NonIDF_Properties):
     motor_log_names= MotorLogName()
     motor_offset   = MotorOffset()
     psi = RotationAngle(motor_log_names,motor_offset)
+    # Properties responsible for the Absorption Corrections
+    # The property, containing information about additional properties of selected
+    # adsorption corrections algorithm
+    abs_corr_info = AbsCorrInfo()
+    # The property, containing the adsorption shapes class which would
+    # perform actual adsorption corrections on the selected shape
+    correct_absorption_on = AbsorptionShapesContainer()
 #----------------------------------------------------------------------------------------------------------------
 
     def getChangedProperties(self):

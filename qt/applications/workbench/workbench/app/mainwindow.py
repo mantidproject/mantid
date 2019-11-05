@@ -23,7 +23,9 @@ from mantid.api import FrameworkManagerImpl
 from mantid.kernel import (ConfigService, UsageService, logger, version_str as mantid_version_str)
 from mantid.py3compat import setswitchinterval
 from mantid.utils import is_required_version
+from workbench.app import MAIN_WINDOW_OBJECT_NAME, MAIN_WINDOW_TITLE
 from workbench.plugins.exception_handler import exception_logger
+from workbench.utils.windowfinder import find_window
 from workbench.widgets.settings.presenter import SettingsPresenter
 
 # -----------------------------------------------------------------------------
@@ -48,12 +50,14 @@ from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog,
                             QMainWindow, QSplashScreen)  # noqa
 from mantidqt.algorithminputhistory import AlgorithmInputHistory  # noqa
 from mantidqt.interfacemanager import InterfaceManager  # noqa
-from mantidqt.widgets.manageuserdirectories import ManageUserDirectories  # noqa
+from mantidqt.widgets import manageuserdirectories  # noqa
+from mantidqt.widgets.scriptrepository import ScriptRepositoryView  # noqa
 from mantidqt.widgets.codeeditor.execution import PythonCodeExecution  # noqa
 from mantidqt.utils.qt import (add_actions, create_action, plugins,
                                widget_updates_disabled)  # noqa
 from mantidqt.project.project import Project  # noqa
 from mantidqt.usersubwindowfactory import UserSubWindowFactory  # noqa
+from mantidqt.usersubwindow import UserSubWindow  # noqa
 
 # Pre-application setup
 plugins.setup_library_paths()
@@ -148,8 +152,8 @@ class MainWindow(QMainWindow):
         QMainWindow.__init__(self)
 
         # -- instance attributes --
-        self.setWindowTitle("Mantid Workbench")
-        self.setObjectName("Mantid Workbench")
+        self.setWindowTitle(MAIN_WINDOW_TITLE)
+        self.setObjectName(MAIN_WINDOW_OBJECT_NAME)
 
         # widgets
         self.messagedisplay = None
@@ -159,6 +163,7 @@ class MainWindow(QMainWindow):
         self.algorithm_selector = None
         self.plot_selector = None
         self.interface_manager = None
+        self.script_repository = None
         self.widgets = []
 
         # Widget layout map: required for use in Qt.connection
@@ -219,6 +224,9 @@ class MainWindow(QMainWindow):
         self.editor = MultiFileEditor(self)
         self.editor.register_plugin()
         self.widgets.append(self.editor)
+        self.editor.editors.sig_code_exec_start.connect(self.messagedisplay.script_executing)
+        self.editor.editors.sig_file_name_changed.connect(self.messagedisplay.file_name_modified)
+        self.editor.editors.sig_current_tab_changed.connect(self.messagedisplay.current_tab_changed)
 
         self.set_splash("Loading IPython console")
         from workbench.plugins.jupyterconsole import JupyterConsole
@@ -296,6 +304,9 @@ class MainWindow(QMainWindow):
         action_manage_directories = create_action(
             self, "Manage User Directories",
             on_triggered=self.open_manage_directories)
+        action_script_repository = create_action(
+            self, "Script Repository",
+            on_triggered=self.open_script_repository)
         action_settings = create_action(
             self, "Settings", on_triggered=self.open_settings_window)
         action_quit = create_action(
@@ -305,7 +316,8 @@ class MainWindow(QMainWindow):
                                   action_save_script, action_save_script_as,
                                   action_generate_ws_script, None, action_save_project,
                                   action_save_project_as, None, action_settings, None,
-                                  action_manage_directories, None, action_quit]
+                                  action_manage_directories, None, action_script_repository,
+                                  None, action_quit]
 
         # view menu
         action_restore_default = create_action(
@@ -360,9 +372,17 @@ class MainWindow(QMainWindow):
         self.interface_executor.execute(open(filename).read(), filename)
 
     def launch_custom_cpp_gui(self, interface_name):
-        interface = self.interface_manager.createSubWindow(interface_name)
-        interface.setAttribute(Qt.WA_DeleteOnClose, True)
-        interface.show()
+        """Create a new interface window if one does not already exist,
+        else show existing window"""
+        object_name = 'custom-cpp-interface-' + interface_name
+        window = find_window(object_name, UserSubWindow)
+        if window is None:
+            interface = self.interface_manager.createSubWindow(interface_name)
+            interface.setObjectName(object_name)
+            interface.setAttribute(Qt.WA_DeleteOnClose, True)
+            interface.show()
+        else:
+            window.raise_()
 
     def populate_interfaces_menu(self):
         """Populate then Interfaces menu with all Python and C++ interfaces"""
@@ -601,7 +621,13 @@ class MainWindow(QMainWindow):
         self.project.load()
 
     def open_manage_directories(self):
-        ManageUserDirectories(self).exec_()
+        manageuserdirectories.ManageUserDirectories.openManageUserDirectories()
+
+    def open_script_repository(self):
+        self.script_repository = ScriptRepositoryView(self)
+        self.script_repository.loadScript.connect(self.editor.open_file_in_new_tab)
+        self.script_repository.setAttribute(Qt.WA_DeleteOnClose, True)
+        self.script_repository.show()
 
     def open_settings_window(self):
         settings = SettingsPresenter(self)

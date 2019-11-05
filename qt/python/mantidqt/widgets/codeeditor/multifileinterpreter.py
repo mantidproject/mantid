@@ -13,7 +13,7 @@ from __future__ import (absolute_import, unicode_literals)
 import os.path as osp
 
 # 3rd party imports
-from qtpy.QtCore import Qt, Slot
+from qtpy.QtCore import Qt, Slot, Signal
 from qtpy.QtWidgets import QVBoxLayout, QWidget
 
 # local imports
@@ -25,16 +25,12 @@ NEW_TAB_TITLE = 'New'
 MODIFIED_MARKER = '*'
 
 
-def _tab_title_and_toolip(filename):
-    """Create labels for the tab title and tooltip from a filename"""
-    if filename is None:
-        return NEW_TAB_TITLE, NEW_TAB_TITLE
-    else:
-        return osp.basename(filename), filename
-
-
 class MultiPythonFileInterpreter(QWidget):
     """Provides a tabbed widget for editing multiple files"""
+
+    sig_code_exec_start = Signal(str)
+    sig_file_name_changed = Signal(str, str)
+    sig_current_tab_changed = Signal(str)
 
     def __init__(self, font=None, default_content=None, parent=None):
         """
@@ -55,15 +51,34 @@ class MultiPythonFileInterpreter(QWidget):
         # widget setup
         layout = QVBoxLayout(self)
         self._tabs = CodeEditorTabWidget(self)
+        self._tabs.currentChanged.connect(self._emit_current_tab_changed)
         layout.addWidget(self._tabs)
         self.setLayout(layout)
         layout.setContentsMargins(0, 0, 0, 0)
+
+        self.zoom_level = 0
 
         # add a single editor by default
         self.append_new_editor()
 
         # setting defaults
         self.confirm_on_save = True
+
+    def _tab_title_and_tooltip(self, filename):
+        """Create labels for the tab title and tooltip from a filename"""
+        if filename is None:
+            title = NEW_TAB_TITLE
+            i = 1
+            while title in self.tab_titles:
+                title = "{} ({})".format(NEW_TAB_TITLE, i)
+                i += 1
+            return title, title
+        else:
+            return osp.basename(filename), filename
+
+    @property
+    def tab_titles(self):
+        return [self._tabs.tabText(i).rstrip('*') for i in range(self.editor_count)]
 
     def closeEvent(self, event):
         self.deleteLater()
@@ -80,7 +95,7 @@ class MultiPythonFileInterpreter(QWidget):
     def tab_filepaths(self):
         file_paths = []
         for idx in range(self.editor_count):
-            file_path = self._tabs.widget(idx).filename
+            file_path = self.editor_at(idx).filename
             if file_path:
                 file_paths.append(file_path)
         return file_paths
@@ -101,16 +116,30 @@ class MultiPythonFileInterpreter(QWidget):
         if font is None:
             font = self.default_font
 
+        if self.editor_count > 0:
+            # If there are other tabs open the same zoom level
+            # as these is used.
+            current_zoom = self._tabs.widget(0).editor.getZoom()
+        else:
+            # Otherwise the zoom level of the last tab closed is used
+            # Or the default (0) if this is the very first tab
+            current_zoom = self.zoom_level
+
         interpreter = PythonFileInterpreter(font, content, filename=filename,
                                             parent=self)
+
+        interpreter.editor.zoomTo(current_zoom)
+
         if self.whitespace_visible:
             interpreter.set_whitespace_visible()
 
         # monitor future modifications
         interpreter.sig_editor_modified.connect(self.mark_current_tab_modified)
         interpreter.sig_filename_modified.connect(self.on_filename_modified)
+        interpreter.editor.textZoomedIn.connect(self.zoom_in_all_tabs)
+        interpreter.editor.textZoomedOut.connect(self.zoom_out_all_tabs)
 
-        tab_title, tab_tooltip = _tab_title_and_toolip(filename)
+        tab_title, tab_tooltip = self._tab_title_and_tooltip(filename)
         tab_idx = self._tabs.addTab(interpreter, tab_title)
         self._tabs.setTabToolTip(tab_idx, tab_tooltip)
         self._tabs.setCurrentIndex(tab_idx)
@@ -152,7 +181,13 @@ class MultiPythonFileInterpreter(QWidget):
         # are being prompted to save
         self._tabs.setCurrentIndex(idx)
         if self.current_editor().confirm_close():
-            widget = self._tabs.widget(idx)
+
+            # If the last editor tab is being closed, its zoom level
+            # is saved for the new tab which opens automatically.
+            if self.editor_count == 1:
+                self.zoom_level = self.current_editor().editor.getZoom()
+
+            widget = self.editor_at(idx)
             # note: this does not close the widget, that is why we manually close it
             self._tabs.removeTab(idx)
             widget.close()
@@ -171,11 +206,32 @@ class MultiPythonFileInterpreter(QWidget):
         """Return the editor at the given index. Must be in range"""
         return self._tabs.widget(idx)
 
+    def _emit_current_tab_changed(self, index):
+        if index == -1:
+            self.sig_current_tab_changed.emit("")
+        else:
+            self.sig_current_tab_changed.emit(self.current_tab_filename)
+
+    def _emit_code_exec_start(self):
+        """Emit signal that code execution has started"""
+        if not self.current_editor().filename:
+            filename = self._tabs.tabText(self._tabs.currentIndex()).rstrip('*')
+            self.sig_code_exec_start.emit(filename)
+        else:
+            self.sig_code_exec_start.emit(self.current_editor().filename)
+
+    @property
+    def current_tab_filename(self):
+        if not self.current_editor().filename:
+            return self._tabs.tabText(self._tabs.currentIndex()).rstrip('*')
+        return self.current_editor().filename
+
     def execute_current_async(self):
         """
         Execute content of the current file. If a selection is active
         then only this portion of code is executed, this is completed asynchronously
         """
+        self._emit_code_exec_start()
         return self.current_editor().execute_async()
 
     def execute_async(self):
@@ -184,13 +240,17 @@ class MultiPythonFileInterpreter(QWidget):
         Selection is ignored.
         This is completed asynchronously.
         """
+        self._emit_code_exec_start()
         return self.current_editor().execute_async(ignore_selection=True)
 
     @Slot()
     def execute_current_async_blocking(self):
-        """Execute content of the current file. If a selection is active
-            then only this portion of code is executed, completed asynchronously
-            which blocks calling thread. """
+        """
+        Execute content of the current file. If a selection is active
+        then only this portion of code is executed, completed asynchronously
+        which blocks calling thread.
+        """
+        self._emit_code_exec_start()
         self.current_editor().execute_async_blocking()
 
     def mark_current_tab_modified(self, modified):
@@ -215,7 +275,11 @@ class MultiPythonFileInterpreter(QWidget):
         self._tabs.setTabText(idx, title_new)
 
     def on_filename_modified(self, filename):
-        title, tooltip = _tab_title_and_toolip(filename)
+        old_filename = self._tabs.tabToolTip(self._tabs.currentIndex()).rstrip('*')
+        if not filename:
+            filename = self._tabs.tabText(self._tabs.currentIndex()).rstrip('*')
+        self.sig_file_name_changed.emit(old_filename, filename)
+        title, tooltip = self._tab_title_and_tooltip(filename)
         idx_cur = self._tabs.currentIndex()
         self._tabs.setTabText(idx_cur, title)
         self._tabs.setTabToolTip(idx_cur, tooltip)
@@ -255,10 +319,13 @@ class MultiPythonFileInterpreter(QWidget):
         self.current_editor().save(force_save=True)
 
     def save_current_file_as(self):
+        previous_filename = self.current_editor().filename
         saved, filename = self.current_editor().save_as()
         if saved:
             self.current_editor().close()
             self.open_file_in_new_tab(filename)
+            if previous_filename:
+                self.sig_file_name_changed.emit(previous_filename, filename)
 
     def spaces_to_tabs_current(self):
         self.current_editor().replace_spaces_with_tabs()
@@ -281,3 +348,21 @@ class MultiPythonFileInterpreter(QWidget):
             for idx in range(self.editor_count):
                 self.editor_at(idx).set_whitespace_visible()
             self.whitespace_visible = True
+
+    def zoom_in_all_tabs(self):
+        current_tab_index = self._tabs.currentIndex()
+
+        for i in range(self.editor_count):
+            if i == current_tab_index:
+                continue
+
+            self.editor_at(i).editor.zoomIn()
+
+    def zoom_out_all_tabs(self):
+        current_tab_index = self._tabs.currentIndex()
+
+        for i in range(self.editor_count):
+            if i == current_tab_index:
+                continue
+
+            self.editor_at(i).editor.zoomOut()

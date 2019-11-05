@@ -8,7 +8,7 @@ from __future__ import absolute_import
 
 from qtpy import QtWidgets, QtCore
 
-from mantidqt.widgets.manageuserdirectories import ManageUserDirectories
+from mantidqt.widgets import manageuserdirectories
 
 
 class LoadView(QtWidgets.QWidget):
@@ -36,7 +36,7 @@ class LoadView(QtWidgets.QWidget):
         self.setLayout(self.grid)
 
     def show_directory_manager(self):
-        ManageUserDirectories.openUserDirsDialog(self)
+        manageuserdirectories.ManageUserDirectories.openManageUserDirectories()
 
     def disable_buttons(self):
         self.spinbox.setEnabled(False)

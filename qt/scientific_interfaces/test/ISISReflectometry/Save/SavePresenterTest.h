@@ -48,6 +48,21 @@ public:
     verifyAndClear();
   }
 
+  void testSetWorkspaceListOnConstruction() {
+    auto workspaceNames = createWorkspaces();
+    expectSetWorkspaceListFromADS(workspaceNames);
+    auto presenter = makePresenter();
+    verifyAndClear();
+  }
+
+  void testSetDefaultSavePathOnConstruction() {
+    auto const path = Mantid::Kernel::ConfigService::Instance().getString(
+        "defaultsave.directory");
+    EXPECT_CALL(m_view, setSavePath(path)).Times(1);
+    auto presenter = makePresenter();
+    verifyAndClear();
+  }
+
   void testNotifyPopulateWorkspaceList() {
     auto presenter = makePresenter();
     auto workspaceNames = createWorkspaces();
@@ -174,15 +189,6 @@ public:
     verifyAndClear();
   }
 
-  void testNotifySuggestSaveDir() {
-    auto presenter = makePresenter();
-    auto const path = Mantid::Kernel::ConfigService::Instance().getString(
-        "defaultsave.directory");
-    EXPECT_CALL(m_view, setSavePath(path)).Times(1);
-    presenter.notifySuggestSaveDir();
-    verifyAndClear();
-  }
-
   void testNotifyAutosaveDisabled() {
     auto presenter = makePresenter();
     // There are no calls to the view
@@ -238,7 +244,7 @@ public:
     expectNotProcessingOrAutoreducing();
     EXPECT_CALL(m_view, enableAutosaveControls()).Times(1);
     EXPECT_CALL(m_view, enableFileFormatAndLocationControls()).Times(1);
-    presenter.reductionPaused();
+    presenter.notifyReductionPaused();
     verifyAndClear();
   }
 
@@ -247,7 +253,7 @@ public:
     enableAutosave(presenter);
     expectProcessing();
     EXPECT_CALL(m_view, disableAutosaveControls()).Times(1);
-    presenter.reductionResumed();
+    presenter.notifyReductionResumed();
     verifyAndClear();
   }
 
@@ -256,7 +262,7 @@ public:
     enableAutosave(presenter);
     expectProcessing();
     EXPECT_CALL(m_view, disableFileFormatAndLocationControls()).Times(1);
-    presenter.reductionResumed();
+    presenter.notifyReductionResumed();
     verifyAndClear();
   }
 
@@ -265,7 +271,7 @@ public:
     disableAutosave(presenter);
     expectProcessing();
     EXPECT_CALL(m_view, enableFileFormatAndLocationControls()).Times(1);
-    presenter.reductionResumed();
+    presenter.notifyReductionResumed();
     verifyAndClear();
   }
 
@@ -274,7 +280,7 @@ public:
     disableAutosave(presenter);
     expectProcessing();
     EXPECT_CALL(m_view, disableAutosaveControls()).Times(1);
-    presenter.reductionResumed();
+    presenter.notifyReductionResumed();
     verifyAndClear();
   }
 
@@ -283,7 +289,7 @@ public:
     enableAutosave(presenter);
     expectAutoreducing();
     EXPECT_CALL(m_view, disableAutosaveControls()).Times(1);
-    presenter.autoreductionResumed();
+    presenter.notifyAutoreductionResumed();
     verifyAndClear();
   }
 
@@ -292,7 +298,7 @@ public:
     enableAutosave(presenter);
     expectAutoreducing();
     EXPECT_CALL(m_view, disableFileFormatAndLocationControls()).Times(1);
-    presenter.autoreductionResumed();
+    presenter.notifyAutoreductionResumed();
     verifyAndClear();
   }
 
@@ -301,7 +307,7 @@ public:
     disableAutosave(presenter);
     expectAutoreducing();
     EXPECT_CALL(m_view, enableFileFormatAndLocationControls()).Times(1);
-    presenter.autoreductionResumed();
+    presenter.notifyAutoreductionResumed();
     verifyAndClear();
   }
 
@@ -310,7 +316,7 @@ public:
     disableAutosave(presenter);
     expectAutoreducing();
     EXPECT_CALL(m_view, disableAutosaveControls()).Times(1);
-    presenter.autoreductionResumed();
+    presenter.notifyAutoreductionResumed();
     verifyAndClear();
   }
 

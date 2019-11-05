@@ -409,6 +409,54 @@ public:
     TS_ASSERT_EQUALS(upper, groupBounds[8]);
   }
 
+  void test_Compute_Bounds_Multiple_Threads_Very_Inbalanced() {
+    const std::vector<Mantid::LiveData::KafkaEventStreamDecoder::BufferedEvent>
+        events = {/* 0 */
+                  {0, 0, 0},
+                  {0, 0, 0},
+                  {0, 0, 0},
+                  {0, 0, 0},
+                  {0, 0, 0},
+                  {0, 0, 0},
+                  {0, 0, 0},
+                  {0, 0, 0},
+                  {0, 0, 0},
+                  {0, 0, 0},
+                  {0, 0, 0},
+                  {0, 0, 0},
+                  {0, 0, 0},
+                  {0, 0, 0},
+
+                  /* 14 */
+                  {1, 0, 0},
+
+                  /* 15 */
+                  {2, 0, 0},
+
+                  /* 16 */
+                  {3, 0, 0},
+                  {3, 0, 0},
+
+                  /* 18 */
+                  {4, 0, 0}};
+
+    const auto groupBounds = computeGroupBoundaries(events, 8);
+    TS_ASSERT_EQUALS(9, groupBounds.size());
+
+    const auto upper = events.size();
+
+    /* Generated groups contain: 0  1,2  3  4 */
+    TS_ASSERT_EQUALS(0, groupBounds[0]);
+    TS_ASSERT_EQUALS(14, groupBounds[1]);
+    TS_ASSERT_EQUALS(16, groupBounds[2]);
+    TS_ASSERT_EQUALS(18, groupBounds[3]);
+    TS_ASSERT_EQUALS(upper, groupBounds[4]);
+    TS_ASSERT_EQUALS(upper, groupBounds[5]);
+    TS_ASSERT_EQUALS(upper, groupBounds[6]);
+    TS_ASSERT_EQUALS(upper, groupBounds[7]);
+    TS_ASSERT_EQUALS(upper, groupBounds[8]);
+  }
+
   void test_Compute_Bounds_Single_Thread() {
     const std::vector<Mantid::LiveData::KafkaEventStreamDecoder::BufferedEvent>
         events = {
@@ -435,24 +483,6 @@ public:
         .WillOnce(Return(new FakeExceptionThrowingStreamSubscriber))
         .WillOnce(Return(new FakeExceptionThrowingStreamSubscriber))
         .WillOnce(Return(new FakeExceptionThrowingStreamSubscriber));
-    auto decoder = createTestDecoder(mockBroker);
-    startCapturing(*decoder, 1);
-
-    TS_ASSERT_THROWS(decoder->extractData(), const std::runtime_error &);
-    TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
-    TS_ASSERT(!decoder->isCapturing());
-  }
-
-  void test_Empty_SpDet_Stream_Throws_Error_On_ExtractData() {
-    using namespace ::testing;
-    using namespace KafkaTesting;
-
-    auto mockBroker = std::make_shared<MockKafkaBroker>();
-    EXPECT_CALL(*mockBroker, subscribe_(_, _))
-        .Times(Exactly(3))
-        .WillOnce(Return(new FakeISISEventSubscriber(1)))
-        .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)))
-        .WillOnce(Return(new FakeEmptyStreamSubscriber));
     auto decoder = createTestDecoder(mockBroker);
     startCapturing(*decoder, 1);
 

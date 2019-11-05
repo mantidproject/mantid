@@ -1,28 +1,30 @@
 set(SRC_FILES
+    src/H5ForwardCompatibility.cpp
     src/Hdf5Version.cpp
     src/InstrumentBuilder.cpp
+    src/JSONGeometryParser.cpp
     src/JSONInstrumentBuilder.cpp
     src/NexusGeometryParser.cpp
     src/NexusGeometrySave.cpp
-    src/JSONGeometryParser.cpp
+    src/NexusGeometryUtilities.cpp
     src/NexusShapeFactory.cpp
     src/TubeBuilder.cpp
-    src/TubeHelpers.cpp
-	src/H5ForwardCompatibility.cpp)
+    src/TubeHelpers.cpp)
 
 set(INC_FILES
-    inc/MantidNexusGeometry/DllConfig.h
+    inc/MantidNexusGeometry/AbstractLogger.h
+    inc/MantidNexusGeometry/H5ForwardCompatibility.h
     inc/MantidNexusGeometry/Hdf5Version.h
     inc/MantidNexusGeometry/InstrumentBuilder.h
+    inc/MantidNexusGeometry/JSONGeometryParser.h
     inc/MantidNexusGeometry/JSONInstrumentBuilder.h
+    inc/MantidNexusGeometry/NexusGeometryDefinitions.h
     inc/MantidNexusGeometry/NexusGeometryParser.h
     inc/MantidNexusGeometry/NexusGeometrySave.h
-    inc/MantidNexusGeometry/JSONGeometryParser.h
+    inc/MantidNexusGeometry/NexusGeometryUtilities.h
     inc/MantidNexusGeometry/NexusShapeFactory.h
     inc/MantidNexusGeometry/TubeBuilder.h
-    inc/MantidNexusGeometry/TubeHelpers.h
-    inc/MantidNexusGeometry/NexusGeometryDefinitions.h
-	inc/MantidNexusGeometry/H5ForwardCompatibility.h)
+    inc/MantidNexusGeometry/TubeHelpers.h)
 
 set(TEST_FILES
     InstrumentBuilderTest.h
@@ -51,9 +53,9 @@ set_target_properties(NexusGeometry
                                  COMPILE_DEFINITIONS
                                  IN_MANTID_NEXUS_GEOMETRY)
 
-if(OSX_VERSION VERSION_GREATER 10.8)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(NexusGeometry
-                        PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+                        PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
 endif()
 
 # Include HDF5 libraries
@@ -70,6 +72,10 @@ target_link_libraries(NexusGeometry
 
 # Add the unit tests directory
 add_subdirectory(test)
+
+# Auto-generate exports header
+target_include_directories(NexusGeometry PUBLIC ${CMAKE_BINARY_DIR}/Framework/NexusGeometry)
+generate_mantid_export_header(NexusGeometry)
 
 mtd_install_targets(TARGETS
                     NexusGeometry

@@ -75,7 +75,7 @@ void SaveNexusGeometry::init() {
                       "Filename", "", API::FileProperty::OptionalSave),
                   "Full path to save destination file");
 
-  declareProperty("H5Path", "entry" /*default*/,
+  declareProperty("EntryName", "entry" /*default*/,
                   "(optional) Name of the H5 root group in which the "
                   "Instrument is to be saved. Default name: 'entry'.");
 }
@@ -86,14 +86,15 @@ void SaveNexusGeometry::init() {
 void SaveNexusGeometry::exec() {
   API::MatrixWorkspace_const_sptr workspace = getProperty("InputWorkspace");
   std::string destinationFile = getPropertyValue("FileName");
-  std::string rootFileName = getPropertyValue("H5Path");
+  std::string rootFileName = getPropertyValue("EntryName");
 
   auto ws = workspace.get();
   const auto &compInfo = ws->componentInfo();
   const auto &detInfo = ws->detectorInfo();
 
+  NexusGeometry::LogAdapter<Kernel::Logger> adapter(&g_log);
   Mantid::NexusGeometry::NexusGeometrySave::saveInstrument(
-      compInfo, detInfo, destinationFile, rootFileName);
+      compInfo, detInfo, destinationFile, rootFileName, adapter);
 }
 
 } // namespace DataHandling

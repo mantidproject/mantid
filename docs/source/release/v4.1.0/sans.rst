@@ -57,6 +57,7 @@ New
 - New IDF for ``EQ-SANS``
 - New algorithm :ref:`LoadHFIRSANS <algm-LoadHFIRSANS>` and speed improvements to :ref:`LoadSpice2D <algm-LoadSpice2D>`
 - New version of algorithm :ref:`CalculateEfficiency <algm-CalculateEfficiency-v2>`
+- New algorithm :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>` will perform the full SANS treatment for ILL instruments.
 
 Improved
 ########

@@ -6,12 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtRunsView.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidKernel/UsageService.h"
 #include "MantidQtIcons/Icon.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/FileDialogHandler.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/HintingLineEditFactory.h"
-#include "MantidQtWidgets/Common/SlitCalculator.h"
 #include <QMenu>
 #include <QMessageBox>
 
@@ -30,8 +30,7 @@ using namespace MantidQt::Icons;
 QtRunsView::QtRunsView(QWidget *parent, RunsTableViewFactory makeRunsTableView)
     : MantidWidget(parent), m_notifyee(nullptr), m_timerNotifyee(nullptr),
       m_searchNotifyee(nullptr), m_searchModel(),
-      m_calculator(new SlitCalculator(this)), m_tableView(makeRunsTableView()),
-      m_timer() {
+      m_tableView(makeRunsTableView()), m_timer() {
   initLayout();
   m_ui.tableSearchResults->setModel(&m_searchModel);
 }
@@ -170,18 +169,24 @@ void QtRunsView::setStopMonitorButtonEnabled(bool enabled) {
 }
 
 /**
+ * Sets the update interval enabled or disabled
+ * @param enabled : Whether to enable or disable the spin box
+ */
+void QtRunsView::setUpdateIntervalSpinBoxEnabled(bool enabled) {
+  m_ui.spinBoxUpdateInterval->setEnabled(enabled);
+}
+
+/**
 Set the list of available instruments to search for and updates the list of
 available instruments in the table view
 @param instruments : The list of instruments available
-@param defaultInstrumentIndex : The index of the instrument to have selected by
 default
 */
-void QtRunsView::setInstrumentList(const std::vector<std::string> &instruments,
-                                   int defaultInstrumentIndex) {
+void QtRunsView::setInstrumentList(
+    const std::vector<std::string> &instruments) {
   m_ui.comboSearchInstrument->clear();
   for (auto &&instrument : instruments)
     m_ui.comboSearchInstrument->addItem(QString::fromStdString(instrument));
-  m_ui.comboSearchInstrument->setCurrentIndex(defaultInstrumentIndex);
 }
 
 /**
@@ -231,14 +236,20 @@ void QtRunsView::onSearchComplete() {
 /**
 This slot notifies the presenter that the "search" button has been pressed
 */
-void QtRunsView::on_actionSearch_triggered() { m_notifyee->notifySearch(); }
+void QtRunsView::on_actionSearch_triggered() {
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Feature", "ISIS Reflectometry->RunsTab->Search", false);
+  m_notifyee->notifySearch();
+}
 
 /**
 This slot conducts a search operation before notifying the presenter that the
 "autoreduce" button has been pressed
 */
 void QtRunsView::on_actionAutoreduce_triggered() {
-  m_notifyee->notifyAutoreductionResumed();
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Feature", "ISIS Reflectometry->RunsTab->StartAutoprocessing", false);
+  m_notifyee->notifyResumeAutoreductionRequested();
 }
 
 /**
@@ -246,21 +257,18 @@ This slot conducts a search operation before notifying the presenter that the
 "pause autoreduce" button has been pressed
 */
 void QtRunsView::on_actionAutoreducePause_triggered() {
-  m_notifyee->notifyAutoreductionPaused();
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Feature", "ISIS Reflectometry->RunsTab->PauseAutoprocessing", false);
+  m_notifyee->notifyPauseAutoreductionRequested();
 }
 
 /**
 This slot notifies the presenter that the "transfer" button has been pressed
 */
-void QtRunsView::on_actionTransfer_triggered() { m_notifyee->notifyTransfer(); }
-
-/**
-This slot shows the slit calculator
-*/
-void QtRunsView::onShowSlitCalculatorRequested() {
-  m_calculator->setCurrentInstrumentName(
-      m_ui.comboSearchInstrument->currentText().toStdString());
-  m_calculator->show();
+void QtRunsView::on_actionTransfer_triggered() {
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Feature", "ISIS Reflectometry->RunsTab->Transfer", false);
+  m_notifyee->notifyTransfer();
 }
 
 /**
@@ -268,6 +276,8 @@ This slot is triggered when the user right clicks on the search results table
 @param pos : The position of the right click within the table
 */
 void QtRunsView::onShowSearchContextMenuRequested(const QPoint &pos) {
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Feature", "ISIS Reflectometry->RunsTab->ShowSearchContextMenu", false);
   if (!m_ui.tableSearchResults->indexAt(pos).isValid())
     return;
 
@@ -282,11 +292,11 @@ void QtRunsView::onShowSearchContextMenuRequested(const QPoint &pos) {
  * @param index : The index of the combo box
  */
 void QtRunsView::onInstrumentChanged(int index) {
+  UNUSED_ARG(index);
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Feature", "ISIS Reflectometry->RunsTab->InstrumentChanged", false);
   m_ui.textSearch->clear();
-  m_calculator->setCurrentInstrumentName(
-      m_ui.comboSearchInstrument->itemText(index).toStdString());
-  m_calculator->processInstrumentHasBeenChanged();
-  m_notifyee->notifyInstrumentChanged();
+  m_notifyee->notifyChangeInstrumentRequested();
 }
 
 /**
@@ -348,9 +358,25 @@ std::string QtRunsView::getSearchString() const {
   return m_ui.textSearch->text().toStdString();
 }
 
-void QtRunsView::on_buttonMonitor_clicked() { startMonitor(); }
+/**
+Get the live data update interval value given by the user.
+@returns The live data update interval
+*/
+int QtRunsView::getLiveDataUpdateInterval() const {
+  return m_ui.spinBoxUpdateInterval->value();
+}
 
-void QtRunsView::on_buttonStopMonitor_clicked() { stopMonitor(); }
+void QtRunsView::on_buttonMonitor_clicked() {
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Feature", "ISIS Reflectometry->RunsTab->StartMonitor", false);
+  startMonitor();
+}
+
+void QtRunsView::on_buttonStopMonitor_clicked() {
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Feature", "ISIS Reflectometry->RunsTab->StopMonitor", false);
+  stopMonitor();
+}
 
 /** Start live data monitoring
  */

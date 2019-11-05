@@ -73,16 +73,43 @@ public:
     TS_ASSERT(!isDetectorFixedInBank(componentInfo, componentInfo.root()));
   }
 
-  void test_isSaveableBank_false_for_tubes() {
+  void test_any_non_root_assembly_containing_detectors_considered_saveable() {
     // test instrument with detector tubes.
     auto instr = ComponentCreationHelper::createInstrumentWithPSDTubes(
         2 /*number of tubes*/, 2 /*pixels per tube*/);
     auto wrappers = InstrumentVisitor::makeWrappers(*instr);
     const auto &compInfo = (*wrappers.first);
+    const auto &detInfo = (*wrappers.second);
     const size_t tubeIdx = 5; // index of a tube in component info
 
     // assert isSaveableBank returns false
-    TS_ASSERT(!isSaveableBank(compInfo, tubeIdx));
+    TS_ASSERT(isSaveableBank(compInfo, detInfo, tubeIdx));
+  }
+
+  void test_monitors_in_bank_make_it_unsaveable() {
+    // Instrument which has NO monitors
+    auto instr = ComponentCreationHelper::createInstrumentWithPSDTubes(
+        2 /*number of tubes*/, 2 /*pixels per tube*/);
+    auto wrappers = InstrumentVisitor::makeWrappers(*instr);
+    {
+      const auto &compInfo = (*wrappers.first);
+      const auto &detInfo = (*wrappers.second);
+
+      // Root saveable as instrument has no monitors
+      TS_ASSERT(isSaveableBank(compInfo, detInfo, compInfo.root()));
+    }
+    // Instrument which has monitors
+    instr = ComponentCreationHelper::createMinimalInstrumentWithMonitor(
+        Mantid::Kernel::V3D{} /*monitor position, uninteresting*/,
+        Mantid::Kernel::Quat{} /*monitor rotation uninteresting*/);
+
+    wrappers = InstrumentVisitor::makeWrappers(*instr);
+    {
+      const auto &compInfo = (*wrappers.first);
+      const auto &detInfo = (*wrappers.second);
+      // In this case the root is NOT saveable due to monitors
+      TS_ASSERT(!isSaveableBank(compInfo, detInfo, compInfo.root()));
+    }
   }
 
   void test_isSaveableBank_false_for_detector() {
@@ -94,7 +121,8 @@ public:
     auto wrappers = InstrumentVisitor::makeWrappers(*instr);
     const auto &compInfo = (*wrappers.first);
 
-    TS_ASSERT(!isSaveableBank(compInfo, 0 /*index of detector*/));
+    const auto &detInfo = (*wrappers.second);
+    TS_ASSERT(!isSaveableBank(compInfo, detInfo, 0 /*index of detector*/));
   }
 
   void test_isSaveableBank_finds_rectangular() {
@@ -103,6 +131,7 @@ public:
         2 /*number of banks*/, 2 /*number of pixels*/);
     auto wrappers = InstrumentVisitor::makeWrappers(*instr);
     const auto &compInfo = (*wrappers.first);
+    const auto &detInfo = (*wrappers.second);
     // index of rectangular bank
     const size_t bankIdx = 13;
     // assert rectangular bank at bankIdx
@@ -110,7 +139,7 @@ public:
     TS_ASSERT(compInfo.componentType(bankIdx) ==
               Beamline::ComponentType::Rectangular);
     // assert isSaveableBank returns true
-    TS_ASSERT(isSaveableBank(compInfo, bankIdx))
+    TS_ASSERT(isSaveableBank(compInfo, detInfo, bankIdx))
   }
 
   void test_offsetFromAncestor_gets_expected_offset() {
@@ -174,6 +203,121 @@ public:
     size_t currentIndex = 1;  // proposed current index
     TS_ASSERT_THROWS(offsetFromAncestor(compInfo, ancestorIndex, currentIndex),
                      std::invalid_argument &);
+  }
+
+  void test_isAncestorOf_finds_ancestor() {
+
+    // NOTE: as defined in isAncestorOf, the root index is not included.
+
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(
+        1 /*number of banks*/, 2 /*pixels*/);
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
+
+    // instrument cache to be used with call offsetFromAncestor
+    const auto &compInfo = (*wrappers.first);
+
+    size_t bank = 6;                                 // index of bank
+    auto pixels = compInfo.detectorsInSubtree(bank); // 4 detectors of bank
+
+    // assert the pixels are the children of the bank
+    TS_ASSERT(isAncestorOf(compInfo, bank, pixels[0]));
+    TS_ASSERT(isAncestorOf(compInfo, bank, pixels[1]));
+    TS_ASSERT(isAncestorOf(compInfo, bank, pixels[2]));
+    TS_ASSERT(isAncestorOf(compInfo, bank, pixels[3]));
+  }
+
+  void
+  test_isAncestorOf_returns_false_with_child_or_sibling_proposed_as_ancestor() {
+
+    // clang-format off
+    /*
+
+                    structure as in test:
+
+                           root
+                            |
+              source ---- sample ---- bank (siblings)
+                                       |
+                         pixel---pixel---pixel---pixel
+    */
+    // clang-format on
+
+    // NOTE: as defined in isAncestorOf, the root index is not included.
+
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(
+        1 /*number of banks*/, 2 /*pixels*/);
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
+
+    // instrument cache to be used with call offsetFromAncestor
+    const auto &compInfo = (*wrappers.first);
+
+    size_t bank = 6;                                 // index of bank
+    auto pixels = compInfo.detectorsInSubtree(bank); // 4 detectors of bank
+
+    // children detectors proposed as ancestor of bank
+    for (const size_t i : pixels)
+      TS_ASSERT(!isAncestorOf(compInfo, i, bank));
+
+    // siblings proposed as ancestors of each other, but not selves.
+    for (const size_t i : pixels) {
+      for (const size_t j : pixels) {
+        if (i != j)
+          TS_ASSERT(!isAncestorOf(compInfo, i, j));
+      }
+    }
+  }
+
+  void test_isAncestorOf_is_true_for_self() {
+
+    // NOTE: as defined in isAncestorOf, the root index is not included.
+
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(
+        1 /*number of banks*/, 2 /*pixels*/);
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
+
+    // instrument cache to be used with call offsetFromAncestor
+    const auto &compInfo = (*wrappers.first);
+
+    auto pixels =
+        compInfo.detectorsInSubtree(6 /*index of bank*/); // 4 detectors of bank
+
+    for (const size_t i : pixels)
+      TS_ASSERT(isAncestorOf(compInfo, i, i));
+  }
+
+  void test_isAncestorOf_is_false_for_indirect_relative() {
+    // test isAncestorOf will return false for a component that is not in the
+    // direct lineage of the child when that component is proposed as ancestor.
+    // will propose source as ancestor of pixels. Expected result is false.
+
+    // clang-format off
+    /*
+
+                    structure as in test:
+
+                           root
+                            |
+              source ---- sample ---- bank (siblings)
+                                       |
+                         pixel---pixel---pixel---pixel
+    */
+    // clang-format on
+
+    // NOTE: as defined in isAncestorOf, the root index is not included.
+
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(
+        1 /*number of banks*/, 2 /*pixels*/);
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
+
+    // instrument cache to be used with call offsetFromAncestor
+    const auto &compInfo = (*wrappers.first);
+
+    auto pixels =
+        compInfo.detectorsInSubtree(6 /*index of bank*/); // 4 detectors of bank
+    auto source = compInfo.source();
+
+    for (const size_t i : pixels)
+      TS_ASSERT(!isAncestorOf(compInfo, source, i));
   }
 };
 

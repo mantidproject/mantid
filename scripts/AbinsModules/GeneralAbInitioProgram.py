@@ -30,7 +30,7 @@ class GeneralAbInitioProgram(object):
         self._sample_form = None
         self._ab_initio_program = None
         self._clerk = AbinsModules.IOmodule(input_filename=input_ab_initio_filename,
-                                            group_name=AbinsModules.AbinsParameters.ab_initio_group)
+                                            group_name=AbinsModules.AbinsParameters.hdf_groups['ab_initio_data'])
 
     def read_vibrational_or_phonon_data(self):
         """

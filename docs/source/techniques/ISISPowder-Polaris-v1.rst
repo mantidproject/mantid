@@ -168,7 +168,13 @@ The *create_total_scattering_pdf* method allows a user to create a Pair Distribu
 from focused POLARIS data, with a view performing further total scattering analysis.
 
 With no merging criteria specified, *merge_banks=False* a PDF will be generated for each bank within
-the focused_workspace.
+the focused_workspace. If run with *merge_banks=True* a PDF will be generated based on the wighted
+sum of the detector banks performed using supplied Q limits *q_lims=q_limits*, Q_limits can be in the
+form of a numpy array with shape (2, x) where x is the number rof detectors, or a string containing the
+directory of an appropriately formatted `.lim` file.
+
+This function applies the placzek self scattering correction from
+:ref:CalculatePlaczekSelfScattering <algm-CalculatePlaczekSelfScattering> before calculating the PDF
 
 This function requires the run_number you wish to analyse. The focused file for this run number must
 either be loaded in Mantid with the naming format given by the *focus* method:

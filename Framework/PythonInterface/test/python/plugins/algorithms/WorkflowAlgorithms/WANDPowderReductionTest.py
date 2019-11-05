@@ -154,6 +154,29 @@ class WANDPowderReductionTest(unittest.TestCase):
         self.assertAlmostEqual(y.max(), 20.72968357)
         self.assertAlmostEqual(x[0,y.argmax()], 45.008708196)
 
+    def test_event(self):
+        # check that the workflow runs with event workspaces as input, junk data
+
+        event_data = CreateSampleWorkspace(NumBanks=1,BinWidth=20000,PixelSpacing=0.1,BankPixelWidth=100,WorkspaceType='Event')
+        event_cal = CreateSampleWorkspace(NumBanks=1,BinWidth=20000,PixelSpacing=0.1,BankPixelWidth=100,WorkspaceType='Event',
+                                          Function='Flat background')
+        event_bkg = CreateSampleWorkspace(NumBanks=1,BinWidth=20000,PixelSpacing=0.1,BankPixelWidth=100,WorkspaceType='Event',
+                                          Function='Flat background')
+
+        pd_out=WANDPowderReduction(InputWorkspace=event_data,
+                                   CalibrationWorkspace=event_cal,
+                                   BackgroundWorkspace=event_bkg,
+                                   Target='Theta',
+                                   NumberBins=1000,
+                                   NormaliseBy='None')
+
+        x = pd_out.extractX()
+        y = pd_out.extractY()
+
+        self.assertAlmostEqual(x.min(), 0.03517355)
+        self.assertAlmostEqual(x.max(), 70.3119282)
+        self.assertAlmostEqual(y[0, 0], 0.)
+
 
 if __name__ == '__main__':
     unittest.main()

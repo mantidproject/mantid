@@ -7,25 +7,127 @@
 #ifndef MANTID_CRYSTAL_INDEX_PEAKS_TEST_H_
 #define MANTID_CRYSTAL_INDEX_PEAKS_TEST_H_
 
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Sample.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
-#include <cxxtest/TestSuite.h>
-
 #include "MantidCrystal/IndexPeaks.h"
-#include "MantidCrystal/LoadIsawUB.h"
-#include "MantidDataHandling/LoadNexusProcessed.h"
+#include "MantidCrystal/IndexPeaksWithSatellites.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-using namespace Mantid::Crystal;
-using namespace Mantid::API;
-using namespace Mantid::DataObjects;
-using Mantid::DataHandling::LoadNexusProcessed;
-using namespace Mantid::Kernel;
-using namespace Mantid::Geometry;
+#include <cxxtest/TestSuite.h>
+
+using Mantid::API::Workspace_sptr;
+using Mantid::Crystal::IndexPeaks;
+using Mantid::DataObjects::PeaksWorkspace_sptr;
+using Mantid::Geometry::IndexingUtils;
+using Mantid::Geometry::OrientedLattice;
+using Mantid::Kernel::V3D;
+
+namespace {
+// run number, det pos, q_sample
+using MinimalPeak = std::tuple<int, V3D>;
+template <int NPeaks> using MinimalPeaksList = std::array<MinimalPeak, NPeaks>;
+
+template <int NPeaks>
+PeaksWorkspace_sptr
+createPeaksWorkspace(const MinimalPeaksList<NPeaks> &testPeaksInfo,
+                     const std::vector<double> &ub, const int maxOrder = -1,
+                     const std::vector<V3D> &modVectors = std::vector<V3D>(),
+                     const bool crossTerms = false) {
+  auto peaksWS = WorkspaceCreationHelper::createPeaksWorkspace(NPeaks);
+  OrientedLattice lattice;
+  lattice.setUB(ub);
+  if (maxOrder > 0) {
+    lattice.setMaxOrder(maxOrder);
+    if (modVectors.empty() || modVectors.size() > 3)
+      throw std::runtime_error("Only <= 3 modulation vectors can be provided.");
+    auto modVecOrDefault = [&modVectors](const size_t index) {
+      if (index < modVectors.size())
+        return modVectors[index];
+      else
+        return V3D();
+    };
+    lattice.setModVec1(modVecOrDefault(0));
+    lattice.setModVec2(modVecOrDefault(1));
+    lattice.setModVec3(modVecOrDefault(2));
+    lattice.setCrossTerm(crossTerms);
+  }
+  peaksWS->mutableSample().setOrientedLattice(&lattice);
+
+  int peakCount{0};
+  for (const auto &testPeakInfo : testPeaksInfo) {
+    auto &wsPeak = peaksWS->getPeak(peakCount);
+    wsPeak.setRunNumber(std::get<0>(testPeakInfo));
+    wsPeak.setQSampleFrame(std::get<1>(testPeakInfo));
+    ++peakCount;
+  }
+
+  return peaksWS;
+}
+
+PeaksWorkspace_sptr createTestPeaksWorkspaceMainReflOnly() {
+  constexpr int npeaks{5};
+  const std::vector<double> ub = {-0.0122354, 0.00480056,  -0.0860404,
+                                  0.1165450,  0.00178145,  0.0045884,
+                                  0.0273738,  -0.08973560, 0.0252595};
+  // peaks from TOPAZ_3007.peaks: 0, 1, 2, 10, 42 with sign for Q swapped
+  // as we don't use the crystallographic convention
+  // clang-format off
+  GNU_DIAG_OFF("missing-braces")
+  // clang-format on
+  constexpr std::array<MinimalPeak, npeaks> testPeaksInfo = {
+      MinimalPeak{3008, V3D(-3.52961, 3.13589, 1.0899)},
+      MinimalPeak{3007, V3D(-2.42456, 2.29581, 1.71147)},
+      MinimalPeak{3007, V3D(-3.04393, 3.05739, 2.03727)},
+      MinimalPeak{3007, V3D(-4.02271, 2.4073, 1.62228)},
+      MinimalPeak{3008, V3D(-4.04552, 1.59916, 3.71776)}};
+  // clang-format off
+  GNU_DIAG_ON("missing-braces")
+  // clang-format on
+  return createPeaksWorkspace<npeaks>(testPeaksInfo, ub);
+}
+
+PeaksWorkspace_sptr createTestPeaksWorkspaceWithSatellites(
+    const int maxOrder = -1,
+    const std::vector<V3D> &modVectors = std::vector<V3D>(),
+    const bool crossTerms = false) {
+  constexpr int npeaks{5};
+  const std::vector<double> ub = {0.269,  -0.01, 0.033, 0.081, -0.191,
+                                  -0.039, 0.279, 0.347, -0.02};
+  // clang-format off
+  GNU_DIAG_OFF("missing-braces")
+  // clang-format on
+  constexpr std::array<MinimalPeak, npeaks> testPeaksInfo = {
+      MinimalPeak{1, V3D(-3.691, -0.694, 3.762)},     // main
+      MinimalPeak{2, V3D(-1.234, -0.225, 1.25212)},   // satellite
+      MinimalPeak{1, V3D(-3.824, 0.728, 1.711)},      // main
+      MinimalPeak{1, V3D(0.872, -0.1998, 2.7476)},    // satellite
+      MinimalPeak{2, V3D(-1.54093, 0.129343, 1.445)}, // satellite
+  };
+  // clang-format off
+  GNU_DIAG_ON("missing-braces")
+  // clang-format on
+  return createPeaksWorkspace<npeaks>(testPeaksInfo, ub, maxOrder, modVectors,
+                                      crossTerms);
+}
+
+std::unique_ptr<IndexPeaks>
+indexPeaks(PeaksWorkspace_sptr peaksWS,
+           const std::unordered_map<std::string, std::string> &arguments) {
+  auto alg = std::make_unique<IndexPeaks>();
+  alg->setChild(true);
+  alg->initialize();
+  alg->setProperty("PeaksWorkspace", peaksWS);
+  for (const auto &argument : arguments) {
+    alg->setPropertyValue(argument.first, argument.second);
+  }
+  alg->execute();
+  return alg;
+}
+
+} // namespace
 
 class IndexPeaksTest : public CxxTest::TestSuite {
 public:
@@ -35,143 +137,439 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  void test_exec() {
-    // Name of the output workspace.
-    std::string WSName("peaks");
-    LoadNexusProcessed loader;
-    TS_ASSERT_THROWS_NOTHING(loader.initialize());
-    TS_ASSERT(loader.isInitialized());
-    loader.setPropertyValue("Filename", "TOPAZ_3007.peaks.nxs");
-    loader.setPropertyValue("OutputWorkspace", WSName);
+  void test_empty_peaks_workspace_indexes_nothing() {
+    auto peaksWS = WorkspaceCreationHelper::createPeaksWorkspace(0);
+    OrientedLattice lattice;
+    peaksWS->mutableSample().setOrientedLattice(&lattice);
 
-    TS_ASSERT(loader.execute());
-    TS_ASSERT(loader.isExecuted());
-    PeaksWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = boost::dynamic_pointer_cast<PeaksWorkspace>(
-            AnalysisDataService::Instance().retrieve(WSName)));
-    TS_ASSERT(ws);
-    // clear all the peak indexes
-    std::vector<Peak> &peaks = ws->getPeaks();
-    size_t n_peaks = ws->getNumberPeaks();
-    for (size_t i = 0; i < n_peaks; i++) {
-      peaks[i].setHKL(V3D(0, 0, 0));
-    }
-    // now set a proper UB in the
-    // oriented lattice
-    V3D row_0(-0.0122354, 0.00480056, -0.0860404);
-    V3D row_1(0.1165450, 0.00178145, 0.0045884);
-    V3D row_2(0.0273738, -0.08973560, 0.0252595);
+    auto alg = indexPeaks(peaksWS, {{"Tolerance", "0.1"}});
 
-    Matrix<double> UB(3, 3, false);
-    UB.setRow(0, row_0);
-    UB.setRow(1, row_1);
-    UB.setRow(2, row_2);
+    TS_ASSERT(alg->isExecuted())
+    assertNumberPeaksIndexed(*alg, 0, 0, 0);
+  }
 
-    OrientedLattice o_lattice;
-    o_lattice.setUB(UB);
-    ws->mutableSample().setOrientedLattice(&o_lattice);
+  void test_no_commonUB_optimizes_UB_per_run_for_no_satellites() {
+    const auto ws = createTestPeaksWorkspaceMainReflOnly();
 
-    // index the peaks with the new UB
-    IndexPeaks alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeaksWorkspace", WSName));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Tolerance", "0.1"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("RoundHKLs", false));
-    TS_ASSERT_THROWS_NOTHING(alg.execute(););
-    TS_ASSERT(alg.isExecuted());
-
-    double tolerance = alg.getProperty("Tolerance");
-
-    // Check that the peaks were all indexed
-    for (size_t i = 0; i < n_peaks; i++) {
-      TS_ASSERT(IndexingUtils::ValidIndex(peaks[i].getHKL(), tolerance));
-    }
+    auto alg = indexPeaks(
+        ws,
+        {{"Tolerance", "0.1"}, {"RoundHKLs", "1"}, {"CommonUBForAll", "0"}});
 
     // Check the output properties
-    int numIndexed = alg.getProperty("NumIndexed");
-    TS_ASSERT_EQUALS(numIndexed, 43);
-
-    double averageError = alg.getProperty("AverageError");
-    TS_ASSERT_DELTA(averageError, 0.0097, 1e-3);
+    assertNumberPeaksIndexed(*alg, 5, 5, 0);
+    assertErrorsAsExpected(*alg, 0.00883, 0.00883, 0.);
 
     // spot check a few peaks for
     // fractional Miller indices
+    V3D peak_0_hkl(4, 1, 6);
+    V3D peak_1_hkl(3, -1, 4);
+    V3D peak_2_hkl(4, -1, 5);
+    V3D peak_3_hkl(3, -0, 7);
+    V3D peak_4_hkl(2, -4, 7);
 
-    V3D peak_0_hkl_d(-4.03065, -0.9885090, -6.01095); // first peak
-    V3D peak_1_hkl_d(-2.99276, 0.9955220, -4.00375);
-    V3D peak_2_hkl_d(-3.99311, 0.9856010, -5.00772);
-    V3D peak_10_hkl_d(-3.01107, -0.0155531, -7.01377);
-    V3D peak_42_hkl_d(-1.97065, 4.0283600, -6.97828); // last peak
+    const auto &peaks = ws->getPeaks();
+    V3D error = peak_0_hkl - peaks[0].getHKL();
+    TS_ASSERT_DELTA(error.norm(), 0.0, 2e-4)
 
+    error = peak_1_hkl - peaks[1].getHKL();
+    TS_ASSERT_DELTA(error.norm(), 0.0, 1e-4)
+
+    error = peak_2_hkl - peaks[2].getHKL();
+    TS_ASSERT_DELTA(error.norm(), 0.0, 1e-4)
+
+    error = peak_3_hkl - peaks[3].getHKL();
+    TS_ASSERT_DELTA(error.norm(), 0.0, 1e-4)
+
+    error = peak_4_hkl - peaks[4].getHKL();
+    TS_ASSERT_DELTA(error.norm(), 0.0, 2e-4)
+  }
+
+  void test_no_roundHKLS_leaves_peaks_as_found() {
+    const auto ws = createTestPeaksWorkspaceMainReflOnly();
+    auto alg = indexPeaks(ws, {{"Tolerance", "0.1"}, {"RoundHKLs", "0"}});
+
+    // Check the output properties
+    assertNumberPeaksIndexed(*alg, 5, 5, 0);
+    assertErrorsAsExpected(*alg, 0.0088322, 0.0088322, 0.);
+
+    // spot check a few peaks for
+    // fractional Miller indices
+    const V3D peak_0_hkl_d(4.03064, 0.988507, 6.01094); // first peak
+    const V3D peak_1_hkl_d(3, -1, 4);
+    const V3D peak_2_hkl_d(4, -1, 5);
+    const V3D peak_3_hkl_d(3, -0, 7);
+    const V3D peak_4_hkl_d(1.97067, -4.02836, 6.97828); // last peak
+
+    const auto &peaks = ws->getPeaks();
     V3D error = peak_0_hkl_d - peaks[0].getHKL();
-    TS_ASSERT_DELTA(error.norm(), 0.0, 2e-4);
+    TS_ASSERT_DELTA(error.norm(), 0.0, 2e-4)
 
     error = peak_1_hkl_d - peaks[1].getHKL();
-    TS_ASSERT_DELTA(error.norm(), 0.0, 1e-4);
+    TS_ASSERT_DELTA(error.norm(), 0.0, 1e-4)
 
     error = peak_2_hkl_d - peaks[2].getHKL();
-    TS_ASSERT_DELTA(error.norm(), 0.0, 1e-4);
+    TS_ASSERT_DELTA(error.norm(), 0.0, 1e-4)
 
-    error = peak_10_hkl_d - peaks[10].getHKL();
-    TS_ASSERT_DELTA(error.norm(), 0.0, 1e-4);
+    error = peak_3_hkl_d - peaks[3].getHKL();
+    TS_ASSERT_DELTA(error.norm(), 0.0, 1e-4)
 
-    error = peak_42_hkl_d - peaks[42].getHKL();
-    TS_ASSERT_DELTA(error.norm(), 0.0, 2e-4);
+    error = peak_4_hkl_d - peaks[4].getHKL();
+    TS_ASSERT_DELTA(error.norm(), 0.0, 2e-4)
+  }
 
-    // clear all the peak indexes then
-    // re-run the algorithm, rounding the HKLs
-    // this time, and again check a few peaks
-    for (size_t i = 0; i < n_peaks; i++) {
-      peaks[i].setHKL(V3D(0, 0, 0));
-    }
-
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeaksWorkspace", WSName));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Tolerance", "0.1"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("RoundHKLs", true));
-    TS_ASSERT_THROWS_NOTHING(alg.execute(););
-    TS_ASSERT(alg.isExecuted());
-
+  void test_roundHKLS_gives_integer_miller_indices() {
+    const auto ws = createTestPeaksWorkspaceMainReflOnly();
+    const auto mainToleranceAsStr = "0.1";
+    auto alg =
+        indexPeaks(ws, {{"Tolerance", mainToleranceAsStr}, {"RoundHKLs", "1"}});
     // Check that the peaks were all indexed
-    for (size_t i = 0; i < n_peaks; i++) {
-      TS_ASSERT(IndexingUtils::ValidIndex(peaks[i].getHKL(), tolerance));
+    const double mainTolerance{std::stod(mainToleranceAsStr)};
+    auto &peaks = ws->getPeaks();
+    for (const auto &peak : peaks) {
+      TS_ASSERT(IndexingUtils::ValidIndex(peak.getHKL(), mainTolerance))
     }
 
     // Check the output properties
-    numIndexed = alg.getProperty("NumIndexed");
-    TS_ASSERT_EQUALS(numIndexed, 43);
-
-    averageError = alg.getProperty("AverageError");
-    TS_ASSERT_DELTA(averageError, 0.0097, 1e-3);
+    assertNumberPeaksIndexed(*alg, 5, 5, 0);
+    assertErrorsAsExpected(*alg, 0.0088322, 0.0088322, 0.);
 
     // spot check a few peaks for
     // integer Miller indices
-    V3D peak_0_hkl(-4, -1, -6);
-    V3D peak_1_hkl(-3, 1, -4);
-    V3D peak_2_hkl(-4, 1, -5);
-    V3D peak_10_hkl(-3, 0, -7);
-    V3D peak_42_hkl(-2, 4, -7); // last peak
+    V3D peak_0_hkl(4, 1, 6);
+    V3D peak_1_hkl(3, -1, 4);
+    V3D peak_2_hkl(4, -1, 5);
+    V3D peak_3_hkl(3, 0, 7);
+    V3D peak_4_hkl(2, -4, 7); // last peak
 
-    error = peak_0_hkl - peaks[0].getHKL();
-    TS_ASSERT_DELTA(error.norm(), 0.0, 1e-10);
+    auto error = peak_0_hkl - peaks[0].getHKL();
+    TS_ASSERT_DELTA(error.norm(), 0.0, 1e-10)
 
     error = peak_1_hkl - peaks[1].getHKL();
-    TS_ASSERT_DELTA(error.norm(), 0.0, 1e-10);
+    TS_ASSERT_DELTA(error.norm(), 0.0, 1e-10)
 
     error = peak_2_hkl - peaks[2].getHKL();
-    TS_ASSERT_DELTA(error.norm(), 0.0, 1e-10);
+    TS_ASSERT_DELTA(error.norm(), 0.0, 1e-10)
 
-    error = peak_10_hkl - peaks[10].getHKL();
-    TS_ASSERT_DELTA(error.norm(), 0.0, 1e-10);
+    error = peak_3_hkl - peaks[3].getHKL();
+    TS_ASSERT_DELTA(error.norm(), 0.0, 1e-10)
 
-    error = peak_42_hkl - peaks[42].getHKL();
-    TS_ASSERT_DELTA(error.norm(), 0.0, 1e-10);
+    error = peak_4_hkl - peaks[4].getHKL();
+    TS_ASSERT_DELTA(error.norm(), 0.0, 1e-10)
+  }
 
-    // Remove workspace from the data service.
-    AnalysisDataService::Instance().remove(WSName);
+  void
+  test_zero_satellite_tol_only_indexes_main_refl_with_modvectors_from_ub() {
+    const auto peaksWS =
+        createTestPeaksWorkspaceWithSatellites(1, {V3D(0.333, -0.667, 0.333)});
+    const auto mainTolerance{"0.1"}, sateTolerance{"0."};
+
+    const auto alg =
+        indexPeaks(peaksWS, {{"Tolerance", mainTolerance},
+                             {"ToleranceForSatellite", sateTolerance}});
+
+    assertNumberPeaksIndexed(*alg, 2, 2, 0);
+    assertIndexesAsExpected(*peaksWS,
+                            {V3D(-1, 2, -9), V3D(0, 0, 0), V3D(-1, 1, -10),
+                             V3D(0, 0, 0), V3D(0, 0, 0)});
+  }
+
+  void test_zero_maxorder_on_ub_indexes_main_refl_only() {
+    const auto peaksWS =
+        createTestPeaksWorkspaceWithSatellites(0, std::vector<V3D>());
+    const auto mainTolerance{"0.1"}, sateTolerance{"1."};
+
+    const auto alg =
+        indexPeaks(peaksWS, {{"Tolerance", mainTolerance},
+                             {"ToleranceForSatellite", sateTolerance}});
+
+    assertNumberPeaksIndexed(*alg, 2, 2, 0);
+    assertIndexesAsExpected(*peaksWS,
+                            {V3D(-1, 2, -9), V3D(0, 0, 0), V3D(-1, 1, -10),
+                             V3D(0, 0, 0), V3D(0, 0, 0)});
+  }
+
+  void test_exec_with_common_ub_and_zero_mod_vectors_indexes_main_refl_only() {
+    const auto peaksWS =
+        createTestPeaksWorkspaceWithSatellites(0, std::vector<V3D>());
+    const auto sateTolerance{"1."};
+
+    const auto alg =
+        indexPeaks(peaksWS, {{"CommonUBForAll", "1"},
+                             {"ToleranceForSatellite", sateTolerance}});
+
+    assertNumberPeaksIndexed(*alg, 2, 2, 0);
+    assertIndexesAsExpected(*peaksWS,
+                            {V3D(-1, 2, -9), V3D(0, 0, 0), V3D(-1, 1, -10),
+                             V3D(0, 0, 0), V3D(0, 0, 0)});
+    assertErrorsAsExpected(*alg, 0.0140447, 0.0140447, 0.);
+  }
+
+  void
+  test_exec_with_common_ub_and_non_zero_mod_vectors_indexes_both_with_roundhkl() {
+    const auto peaksWS =
+        createTestPeaksWorkspaceWithSatellites(1, {V3D(0.333, -0.667, 0.333)});
+    const auto sateTolerance{"0.4"};
+
+    const auto alg =
+        indexPeaks(peaksWS, {{"CommonUBForAll", "1"},
+                             {"ToleranceForSatellite", sateTolerance}});
+
+    assertNumberPeaksIndexed(*alg, 5, 2, 3);
+    const std::vector<V3D> expectedHKL{V3D(-1, 2, -9), V3D(-0, 1, -3),
+                                       V3D(-1, 1, -10), V3D(1, 1, -1),
+                                       V3D(-0, 1, -5)};
+    const std::vector<V3D> expectedIntHKL{V3D(-1, 2, -9), V3D(-1, 1, -3),
+                                          V3D(-1, 1, -10), V3D(0, 1, -1),
+                                          V3D(-1, 1, -5)};
+
+    assertIndexesAsExpected(*peaksWS, expectedHKL, expectedIntHKL);
+    assertErrorsAsExpected(*alg, 0.1995736054, 0.0140447, 0.32325956);
+  }
+
+  void
+  test_exec_with_common_ub_and_non_zero_mod_vectors_indexes_both_no_roundhkl() {
+    const auto peaksWS =
+        createTestPeaksWorkspaceWithSatellites(1, {V3D(0.333, -0.667, 0.333)});
+    const auto sateTolerance{"0.4"};
+
+    const auto alg =
+        indexPeaks(peaksWS, {{"CommonUBForAll", "1"},
+                             {"ToleranceForSatellite", sateTolerance},
+                             {"RoundHKLs", "0"}});
+
+    assertNumberPeaksIndexed(*alg, 5, 2, 3);
+    const std::vector<V3D> expectedHKL{
+        V3D(-0.997659, 2.00538, -9.06112), V3D(-0.332659, 0.666681, -3.03773),
+        V3D(-0.998436, 1.01132, -9.99745), V3D(0.668401, 0.662732, -1.04211),
+        V3D(-0.333695, 0.671228, -4.50819)};
+    const std::vector<V3D> expectedIntHKL{V3D(-1, 2, -9), V3D(-1, 1, -3),
+                                          V3D(-1, 1, -10), V3D(0, 1, -1),
+                                          V3D(-1, 1, -5)};
+    assertIndexesAsExpected(*peaksWS, expectedHKL, expectedIntHKL);
+    assertErrorsAsExpected(*alg, 0.1995736054, 0.0140447, 0.3232596);
+  }
+
+  void
+  test_exec_no_common_ub_and_non_zero_mod_vectors_indexes_both_no_roundhkl() {
+    const auto peaksWS =
+        createTestPeaksWorkspaceWithSatellites(1, {V3D(0.333, -0.667, 0.333)});
+    const auto sateTolerance{"0.4"};
+
+    const auto alg =
+        indexPeaks(peaksWS, {{"CommonUBForAll", "0"},
+                             {"Tolerance", "0.15"},
+                             {"ToleranceForSatellite", sateTolerance},
+                             {"RoundHKLs", "0"}});
+
+    assertNumberPeaksIndexed(*alg, 5, 2, 3);
+    const std::vector<V3D> expectedHKL{
+        V3D(-0.997659, 2.00538, -9.06112), V3D(-0.332659, 0.666681, -3.03773),
+        V3D(-0.998436, 1.01132, -9.99745), V3D(0.668401, 0.662732, -1.04211),
+        V3D(-0.333695, 0.671228, -4.50819)};
+    const std::vector<V3D> expectedIntHKL{V3D(-1, 2, -9), V3D(-1, 1, -3),
+                                          V3D(-1, 1, -10), V3D(0, 1, -1),
+                                          V3D(-1, 1, -5)};
+    assertIndexesAsExpected(*peaksWS, expectedHKL, expectedIntHKL);
+    assertErrorsAsExpected(*alg, 0.1995736, 0.0140447, 0.323256);
+  }
+
+  void test_exec_with_three_mod_vectors_no_cross_terms() {
+    const auto peaksWS = createTestPeaksWorkspaceWithSatellites(
+        1,
+        {V3D(-0.1, 0.1, 0.1), V3D(0.1, 0.2, -0.3), V3D(0.333, 0.667, -0.333)});
+
+    const auto alg = indexPeaks(peaksWS, {{"CommonUBForAll", "0"},
+                                          {"ToleranceForSatellite", "0.4"},
+                                          {"RoundHKLs", "0"}});
+
+    assertNumberPeaksIndexed(*alg, 5, 2, 3);
+    const std::vector<V3D> expectedHKL{
+        V3D(-0.997659, 2.00538, -9.06112), V3D(-0.332659, 0.666681, -3.03773),
+        V3D(-0.998436, 1.01132, -9.99745), V3D(0.668401, 0.662732, -1.04211),
+        V3D(-0.333695, 0.671228, -4.50819)};
+    const std::vector<V3D> expectedIntHKL{V3D(-1, 2, -9), V3D(-1, -0, -3),
+                                          V3D(-1, 1, -10), V3D(0, -0, -1),
+                                          V3D(-1, 0, -4)};
+    assertIndexesAsExpected(*peaksWS, expectedHKL, expectedIntHKL);
+    assertErrorsAsExpected(*alg, 0.12383213164, 0.0140447, 0.1970237718);
+  }
+
+  void test_exec_with_three_mod_vectors_and_cross_terms_from_lattice() {
+    const auto peaksWS = createTestPeaksWorkspaceWithSatellites(
+        1,
+        {V3D(0.333, 0.667, -0.333), V3D(-0.333, 0.667, 0.333),
+         V3D(0.333, -0.667, 0.333)},
+        true);
+
+    const auto alg = indexPeaks(peaksWS, {{"CommonUBForAll", "0"},
+                                          {"ToleranceForSatellite", "0.2"},
+                                          {"RoundHKLs", "0"}});
+
+    assertThreeModVectorWithCross(*alg, *peaksWS);
+  }
+
+  void
+  test_exec_with_three_mod_vectors_and_cross_terms_from_alg_input_no_lattice_update() {
+    const auto peaksWS = createTestPeaksWorkspaceWithSatellites();
+
+    const auto alg =
+        indexPeaks(peaksWS, {{"CommonUBForAll", "0"},
+                             {"ToleranceForSatellite", "0.2"},
+                             {"RoundHKLs", "0"},
+                             {"MaxOrder", "1"},
+                             {"ModVector1", "0.333, 0.667, -0.333"},
+                             {"ModVector2", "-0.333, 0.667, 0.333"},
+                             {"ModVector3", "0.333, -0.667, 0.333"},
+                             {"CrossTerms", "1"}});
+
+    assertThreeModVectorWithCross(*alg, *peaksWS);
+    const auto &lattice = peaksWS->sample().getOrientedLattice();
+    TS_ASSERT_EQUALS(0, lattice.getMaxOrder())
+    TS_ASSERT_EQUALS(false, lattice.getCrossTerm())
+  }
+
+  void
+  test_exec_with_three_mod_vectors_and_cross_terms_from_alg_input_with_lattice_update() {
+    const auto peaksWS = createTestPeaksWorkspaceWithSatellites();
+
+    const auto alg =
+        indexPeaks(peaksWS, {{"CommonUBForAll", "0"},
+                             {"ToleranceForSatellite", "0.2"},
+                             {"RoundHKLs", "0"},
+                             {"MaxOrder", "1"},
+                             {"ModVector1", "0.333, 0.667, -0.333"},
+                             {"ModVector2", "-0.333, 0.667, 0.333"},
+                             {"ModVector3", "0.333, -0.667, 0.333"},
+                             {"CrossTerms", "1"},
+                             {"SaveModulationInfo", "1"}});
+
+    assertThreeModVectorWithCross(*alg, *peaksWS);
+    const auto &lattice = peaksWS->sample().getOrientedLattice();
+    TS_ASSERT_EQUALS(1, lattice.getMaxOrder())
+    TS_ASSERT_DELTA(V3D(0.333, 0.667, -0.333).norm(),
+                    lattice.getModVec(0).norm(), 1e-8)
+    TS_ASSERT_DELTA(V3D(-0.333, 0.667, 0.333).norm(),
+                    lattice.getModVec(0).norm(), 1e-8)
+    TS_ASSERT_DELTA(V3D(0.333, -0.667, 0.333).norm(),
+                    lattice.getModVec(0).norm(), 1e-8)
+    TS_ASSERT_EQUALS(true, lattice.getCrossTerm())
+  }
+
+  // --------------------------- Failure tests -----------------------------
+
+  void test_workspace_with_no_oriented_lattice_gives_validateInputs_error() {
+    const auto peaksWS = WorkspaceCreationHelper::createPeaksWorkspace(1);
+    IndexPeaks alg;
+    alg.initialize();
+    alg.setProperty("PeaksWorkspace", peaksWS);
+
+    auto helpMsgs = alg.validateInputs();
+
+    const auto valueIter = helpMsgs.find("PeaksWorkspace");
+    TS_ASSERT(valueIter != helpMsgs.cend())
+    if (valueIter != helpMsgs.cend()) {
+      const auto msg = valueIter->second;
+      TS_ASSERT(msg.find("OrientedLattice") != std::string::npos)
+    }
+  }
+
+  void test_negative_max_order_throws_error() {
+    IndexPeaks alg;
+    alg.initialize();
+
+    TS_ASSERT_THROWS(alg.setProperty("MaxOrder", -1), std::invalid_argument)
+  }
+
+  void test_modvector_with_list_length_not_three_throws() {
+    IndexPeaks alg;
+    alg.initialize();
+
+    for (const auto &propName : {"ModVector1", "ModVector2", "ModVector3"}) {
+      TS_ASSERT_THROWS(alg.setProperty(propName, "0"), std::invalid_argument)
+      TS_ASSERT_THROWS(alg.setProperty(propName, "0,0"), std::invalid_argument)
+      TS_ASSERT_THROWS(alg.setProperty(propName, "0,0,0,0"),
+                       std::invalid_argument)
+    }
+  }
+
+private:
+  void assertThreeModVectorWithCross(
+      const IndexPeaks &alg, const PeaksWorkspace_sptr::element_type &peaksWS) {
+    assertNumberPeaksIndexed(alg, 5, 2, 3);
+    const std::vector<V3D> expectedHKL{
+        V3D(-0.997659, 2.00538, -9.06112), V3D(-0.332659, 0.666681, -3.03773),
+        V3D(-0.998436, 1.01132, -9.99745), V3D(0.668401, 0.662732, -1.04211),
+        V3D(-0.333695, 0.671228, -4.50819)};
+    const std::vector<V3D> expectedIntHKL{V3D(-1, 2, -9), V3D(-1, 2, -3),
+                                          V3D(-1, 1, -10), V3D(0, 2, -1),
+                                          V3D(-0, 0, -5)};
+    assertIndexesAsExpected(peaksWS, expectedHKL, expectedIntHKL);
+    assertErrorsAsExpected(alg, 0.02236871, 0.0140447, 0.027918076);
+  }
+
+  // Check that all main indexed peaks match as expected
+  void assertIndexesAsExpected(const PeaksWorkspace_sptr::element_type &peaksWS,
+                               const std::vector<V3D> &expectedHKL) {
+    assert(static_cast<size_t>(peaksWS.getNumberPeaks()) == expectedHKL.size());
+    for (auto i = 0u; i < expectedHKL.size(); ++i) {
+      const auto &expectedIndex = expectedHKL[i];
+      TSM_ASSERT_DELTA("Unexpected index for HKL at index " + std::to_string(i),
+                       expectedIndex.norm(), peaksWS.getPeak(i).getHKL().norm(),
+                       1e-5)
+      const V3D expectedIntHKL{std::round(expectedIndex[0]),
+                               std::round(expectedIndex[1]),
+                               std::round(expectedIndex[2])};
+      TSM_ASSERT_EQUALS("Unexpected index "
+                        "for IntHKL at "
+                        "index " +
+                            std::to_string(i),
+                        expectedIntHKL, peaksWS.getPeak(i).getIntHKL())
+    }
+  }
+
+  // Check that all main/satellite indexed peaks match as expected
+  void assertIndexesAsExpected(const PeaksWorkspace_sptr::element_type &peaksWS,
+                               const std::vector<V3D> &expectedHKL,
+                               const std::vector<V3D> &expectedIntHKL) {
+    assert(static_cast<size_t>(peaksWS.getNumberPeaks()) == expectedHKL.size());
+    assert(expectedIntHKL.size() == expectedHKL.size());
+
+    for (auto i = 0u; i < expectedHKL.size(); ++i) {
+      TSM_ASSERT_DELTA("Unexpected index for HKL at index " + std::to_string(i),
+                       expectedHKL[i].norm(),
+                       peaksWS.getPeak(i).getHKL().norm(), 1e-5)
+      TSM_ASSERT_DELTA("Unexpected index "
+                       "for IntHKL at "
+                       "index " +
+                           std::to_string(i),
+                       expectedIntHKL[i].norm(),
+                       peaksWS.getPeak(i).getIntHKL().norm(), 1e-8)
+    }
+  }
+
+  void assertNumberPeaksIndexed(const IndexPeaks &alg,
+                                const int numIndexedExpected,
+                                const int mainNumIndexedExpected,
+                                const int sateNumIndexedExpected) {
+    TS_ASSERT_EQUALS(numIndexedExpected,
+                     static_cast<int>(alg.getProperty("NumIndexed")))
+    TS_ASSERT_EQUALS(mainNumIndexedExpected,
+                     static_cast<int>(alg.getProperty("MainNumIndexed")))
+    TS_ASSERT_EQUALS(sateNumIndexedExpected,
+                     static_cast<int>(alg.getProperty("SateNumIndexed")))
+  }
+
+  void assertErrorsAsExpected(const IndexPeaks &alg,
+                              const double expectedAverageError,
+                              const double expectedMainError,
+                              const double expectedSatError) {
+    TS_ASSERT_DELTA(expectedAverageError,
+                    static_cast<double>(alg.getProperty("AverageError")), 1e-5);
+    TS_ASSERT_DELTA(expectedMainError,
+                    static_cast<double>(alg.getProperty("MainError")), 1e-5);
+    TS_ASSERT_DELTA(expectedSatError,
+                    static_cast<double>(alg.getProperty("SatelliteError")),
+                    1e-5);
   }
 };
 

@@ -384,6 +384,24 @@ public:
     checkTrackIntercept(std::move(geom_obj), track, expectedResults);
   }
 
+  void testDistanceWithIntersectionReturnsResult() {
+    auto geom_obj = createCube(3);
+    V3D dir(0., 1., 0.);
+    dir.normalize();
+    Track track(V3D(0, 0, 0), dir);
+
+    TS_ASSERT_DELTA(3.0, geom_obj->distance(track), 1e-08)
+  }
+
+  void testDistanceWithoutIntersectionThrows() {
+    auto geom_obj = createCube(3);
+    V3D dir(-1., 0., 0.);
+    dir.normalize();
+    Track track(V3D(-10, 0, 0), dir);
+
+    TS_ASSERT_THROWS(geom_obj->distance(track), std::runtime_error)
+  }
+
   void testTrackTwoIsolatedCubes()
   /**
   Test a track going through two objects

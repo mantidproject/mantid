@@ -15,8 +15,6 @@
 
 #include <QSettings>
 #include <QString>
-#include <qwt_plot.h>
-#include <qwt_plot_curve.h>
 
 using namespace Mantid::API;
 
@@ -72,11 +70,6 @@ void IndirectDataAnalysisTab::loadTabSettings(const QSettings &settings) {
 void IndirectDataAnalysisTab::filterInputData(bool filter) {
   setFileExtensionsByName(filter);
 }
-
-/**
- * Sets the active browser workspace when the tab is changed
- */
-void IndirectDataAnalysisTab::setActiveWorkspace() { setBrowserWorkspace(); }
 
 /**
  * Slot that can be called when a user edits an input.
@@ -377,13 +370,12 @@ void IndirectDataAnalysisTab::updatePlotRange(
     const QString &rangeName, MantidQt::MantidWidgets::PreviewPlot *previewPlot,
     const QString &startRangePropName, const QString &endRangePropName) {
 
-  if (inputWorkspace()) {
+  if (auto const workspace = inputWorkspace()) {
     try {
-      const QPair<double, double> curveRange =
-          previewPlot->getCurveRange("Sample");
+      auto const xRange = getXRangeFromWorkspace(workspace);
       auto rangeSelector = previewPlot->getRangeSelector(rangeName);
       setPlotPropertyRange(rangeSelector, m_properties[startRangePropName],
-                           m_properties[endRangePropName], curveRange);
+                           m_properties[endRangePropName], xRange);
     } catch (std::exception &exc) {
       showMessageBox(exc.what());
     }

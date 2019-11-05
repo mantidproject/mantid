@@ -26,6 +26,7 @@ set(SRC_FILES
     src/CalculateEfficiency2.cpp
     src/CalculateFlatBackground.cpp
     src/CalculateIqt.cpp
+    src/CalculatePlaczekSelfScattering.cpp
     src/CalculatePolynomialBackground.cpp
     src/CalculateSlits.cpp
     src/CalculateTransmission.cpp
@@ -75,6 +76,7 @@ set(SRC_FILES
     src/CorrectTOFAxis.cpp
     src/CorrectToFile.cpp
     src/CreateCalFileByNames.cpp
+    src/CreateDetectorTable.cpp
     src/CreateDummyCalFile.cpp
     src/CreateEPP.cpp
     src/CreateFlatEventWorkspace.cpp
@@ -369,6 +371,7 @@ set(INC_FILES
     inc/MantidAlgorithms/CalculateEfficiency2.h
     inc/MantidAlgorithms/CalculateFlatBackground.h
     inc/MantidAlgorithms/CalculateIqt.h
+    inc/MantidAlgorithms/CalculatePlaczekSelfScattering.h
     inc/MantidAlgorithms/CalculatePolynomialBackground.h
     inc/MantidAlgorithms/CalculateSlits.h
     inc/MantidAlgorithms/CalculateTransmission.h
@@ -418,6 +421,7 @@ set(INC_FILES
     inc/MantidAlgorithms/CorrectTOFAxis.h
     inc/MantidAlgorithms/CorrectToFile.h
     inc/MantidAlgorithms/CreateCalFileByNames.h
+    inc/MantidAlgorithms/CreateDetectorTable.h
     inc/MantidAlgorithms/CreateDummyCalFile.h
     inc/MantidAlgorithms/CreateEPP.h
     inc/MantidAlgorithms/CreateFlatEventWorkspace.h
@@ -728,6 +732,7 @@ set(TEST_FILES
     CalculateEfficiency2Test.h
     CalculateFlatBackgroundTest.h
     CalculateIqtTest.h
+    CalculatePlaczekSelfScatteringTest.h
     CalculatePolynomialBackgroundTest.h
     CalculateSlitsTest.h
     CalculateTransmissionBeamSpreaderTest.h
@@ -778,6 +783,7 @@ set(TEST_FILES
     CorrectTOFAxisTest.h
     CorrectToFileTest.h
     CreateCalFileByNamesTest.h
+    CreateDetectorTableTest.h
     CreateDummyCalFileTest.h
     CreateEPPTest.h
     CreateFlatEventWorkspaceTest.h
@@ -1048,7 +1054,7 @@ set_target_properties(Algorithms
                                  COMPILE_DEFINITIONS
                                  "IN_MANTID_ALGORITHMS")
 
-if(OSX_VERSION VERSION_GREATER 10.8)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(Algorithms
                         PROPERTIES INSTALL_RPATH
                                    "@loader_path/../Contents/MacOS")

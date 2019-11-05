@@ -188,7 +188,7 @@ def get_wksp_index_dist_and_label(workspace, axis=MantidAxType.SPECTRUM, **kwarg
     if 'label' not in kwargs:
         ws_name = workspace.name()
         if axis == MantidAxType.SPECTRUM:
-            if workspace.getAxis(1).isText():
+            if workspace.getAxis(1).isText() or workspace.getAxis(1).isNumeric():
                 kwargs['label'] = '{0}: {1}'.format(ws_name, workspace.getAxis(1).label(workspace_index))
             else:
                 if ws_name:
@@ -219,11 +219,6 @@ def _get_wksp_index_and_spec_num(workspace, axis, **kwargs):
     """
     spectrum_number = kwargs.pop('specNum', None)
     workspace_index = kwargs.pop('wkspIndex', None)
-
-    # don't worry if there is only one spectrum
-    if workspace.getNumberHistograms() == 1:
-        spectrum_number = None
-        workspace_index = 0
 
     # error check input parameters
     if (spectrum_number is not None) and (workspace_index is not None):
@@ -323,6 +318,12 @@ def get_spectrum(workspace, wkspIndex, normalize_by_bin_width, withDy=False, wit
             if dy is not None:
                 dy = dy / (x[1:] - x[0:-1])
         x = points_from_boundaries(x)
+    try:
+        specInfo = workspace.spectrumInfo()
+        if specInfo.isMasked(wkspIndex):
+            y[:] = np.nan
+    except:
+        pass
     y = np.ma.masked_invalid(y)
     if dy is not None:
         dy = np.ma.masked_invalid(dy)
@@ -464,6 +465,14 @@ def get_matrix_2d_data(workspace, distribution, histogram2D=False, transpose=Fal
     y = workspace.getAxis(1).extractValues()
     z = workspace.extractY()
 
+    try:
+        specInfo = workspace.spectrumInfo()
+        for index in range(workspace.getNumberHistograms()):
+            if specInfo.isMasked(index):
+                z[index,:] = np.nan
+    except:
+        pass
+
     if workspace.isHistogramData():
         if not distribution:
             z /= x[:, 1:] - x[:, 0:-1]
@@ -515,6 +524,10 @@ def get_uneven_data(workspace, distribution):
     yvals = workspace.getAxis(1).extractValues()
     if len(yvals) == nhist:
         yvals = boundaries_from_points(yvals)
+    try:
+        specInfo = workspace.spectrumInfo()
+    except:
+        specInfo = None
     for index in range(nhist):
         xvals = workspace.readX(index)
         zvals = workspace.readY(index)
@@ -523,6 +536,8 @@ def get_uneven_data(workspace, distribution):
                 zvals = zvals/(xvals[1:] - xvals[0:-1])
         else:
             xvals = boundaries_from_points(xvals)
+        if specInfo and specInfo.hasDetectors(index) and specInfo.isMasked(index):
+            zvals[:] = np.nan
         zvals = np.ma.masked_invalid(zvals)
         z.append(zvals)
         x.append(xvals)
@@ -724,3 +739,20 @@ def errorbars_hidden(err_container):
         for line in lines:
             hidden = hidden and (not line.get_visible())
     return hidden
+
+
+def set_errorbars_hidden(container, hide):
+    """
+    Set the visibility on all lines in an ErrorbarContainer.
+
+    :param hide: Whether or not to hide the errors.
+    :type hide: bool
+    """
+    if not isinstance(container, ErrorbarContainer):
+        return
+    # hide gets inverted below, as matplotlib uses `visible`, which has the opposite logic:
+    # if hide is True, visible must be False, and vice-versa
+    for bar_lines in container[1:]:
+        if bar_lines:
+            for line in bar_lines:
+                line.set_visible(not hide)

@@ -209,7 +209,7 @@ public:
 
     EXPECT_CALL(m_view, enableAll()).Times(1);
     expectNotProcessingOrAutoreducing();
-    presenter.reductionPaused();
+    presenter.notifyReductionPaused();
 
     verifyAndClear();
   }
@@ -219,7 +219,7 @@ public:
 
     EXPECT_CALL(m_view, disableAll()).Times(1);
     expectProcessing();
-    presenter.reductionResumed();
+    presenter.notifyReductionResumed();
 
     verifyAndClear();
   }
@@ -229,7 +229,7 @@ public:
 
     EXPECT_CALL(m_view, enableAll()).Times(1);
     expectNotProcessingOrAutoreducing();
-    presenter.autoreductionPaused();
+    presenter.notifyAutoreductionPaused();
 
     verifyAndClear();
   }
@@ -239,7 +239,7 @@ public:
 
     EXPECT_CALL(m_view, disableAll()).Times(1);
     expectAutoreducing();
-    presenter.autoreductionResumed();
+    presenter.notifyAutoreductionResumed();
 
     verifyAndClear();
   }
@@ -253,17 +253,14 @@ public:
     verifyAndClear();
   }
 
-  void testRestoreDefaultsNotifiesMainPresenter() {
-    auto defaultOptions =
-        expectDefaults(ModelCreationHelper::makeEmptyInstrument());
-    auto presenter = makePresenter(std::move(defaultOptions));
-    EXPECT_CALL(m_mainPresenter, notifyRestoreDefaultsRequested())
-        .Times(AtLeast(1));
+  void testRestoreDefaultsUpdatesInstrument() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_mainPresenter, notifyUpdateInstrumentRequested()).Times(1);
     presenter.notifyRestoreDefaultsRequested();
     verifyAndClear();
   }
 
-  void testRestoreDefaultsUpdatesMonitorOptionsInView() {
+  void testInstrumentChangedUpdatesMonitorOptionsInView() {
     auto model = makeModelWithMonitorOptions(MonitorCorrections(
         2, true, RangeInLambda(17.0, 18.0), RangeInLambda(4.0, 10.0)));
     auto defaultOptions = expectDefaults(model);
@@ -274,16 +271,16 @@ public:
     EXPECT_CALL(m_view, setMonitorBackgroundMax(18.0)).Times(1);
     EXPECT_CALL(m_view, setMonitorIntegralMin(4.0)).Times(1);
     EXPECT_CALL(m_view, setMonitorIntegralMax(10.0)).Times(1);
-    presenter.notifyRestoreDefaultsRequested();
+    presenter.notifyInstrumentChanged("POLREF");
     verifyAndClear();
   }
 
-  void testRestoreDefaultsUpdatesMonitorOptionsInModel() {
+  void testInstrumentChangedUpdatesMonitorOptionsInModel() {
     auto model = makeModelWithMonitorOptions(MonitorCorrections(
         2, true, RangeInLambda(17.0, 18.0), RangeInLambda(4.0, 10.0)));
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
-    presenter.notifyRestoreDefaultsRequested();
+    presenter.notifyInstrumentChanged("POLREF");
     TS_ASSERT_EQUALS(presenter.instrument().monitorIndex(), 2);
     TS_ASSERT_EQUALS(presenter.instrument().integratedMonitors(), true);
     TS_ASSERT_EQUALS(presenter.instrument().monitorBackgroundRange(),
@@ -293,27 +290,27 @@ public:
     verifyAndClear();
   }
 
-  void testRestoreDefaultsUpdatesWavelengthRangeInView() {
+  void testInstrumentChangedUpdatesWavelengthRangeInView() {
     auto model = makeModelWithWavelengthRange(RangeInLambda(1.5, 17.0));
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
     EXPECT_CALL(m_view, setLambdaMin(1.5)).Times(1);
     EXPECT_CALL(m_view, setLambdaMax(17.0)).Times(1);
-    presenter.notifyRestoreDefaultsRequested();
+    presenter.notifyInstrumentChanged("POLREF");
     verifyAndClear();
   }
 
-  void testRestoreDefaultsUpdatesWavelengthRangeInModel() {
+  void testInstrumentChangedUpdatesWavelengthRangeInModel() {
     auto model = makeModelWithWavelengthRange(RangeInLambda(1.5, 17.0));
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
-    presenter.notifyRestoreDefaultsRequested();
+    presenter.notifyInstrumentChanged("POLREF");
     TS_ASSERT_EQUALS(presenter.instrument().wavelengthRange(),
                      RangeInLambda(1.5, 17.0));
     verifyAndClear();
   }
 
-  void testRestoreDefaultsUpdatesUpdatesDetectorOptionsInView() {
+  void testInstrumentChangedUpdatesUpdatesDetectorOptionsInView() {
     auto model = makeModelWithDetectorCorrections(
         DetectorCorrections(true, DetectorCorrectionType::RotateAroundSample));
     auto defaultOptions = expectDefaults(model);
@@ -321,16 +318,16 @@ public:
     EXPECT_CALL(m_view, setCorrectDetectors(true)).Times(1);
     EXPECT_CALL(m_view, setDetectorCorrectionType("RotateAroundSample"))
         .Times(1);
-    presenter.notifyRestoreDefaultsRequested();
+    presenter.notifyInstrumentChanged("POLREF");
     verifyAndClear();
   }
 
-  void testRestoreDefaultsUpdatesUpdatesDetectorOptionsInModel() {
+  void testInstrumentChangedUpdatesUpdatesDetectorOptionsInModel() {
     auto model = makeModelWithDetectorCorrections(
         DetectorCorrections(true, DetectorCorrectionType::RotateAroundSample));
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
-    presenter.notifyRestoreDefaultsRequested();
+    presenter.notifyInstrumentChanged("POLREF");
     auto const expected =
         DetectorCorrections(true, DetectorCorrectionType::RotateAroundSample);
     TS_ASSERT_EQUALS(presenter.instrument().detectorCorrections(), expected);

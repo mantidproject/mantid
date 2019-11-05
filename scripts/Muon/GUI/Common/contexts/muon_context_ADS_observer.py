@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, unicode_literals)
-from mantid.api import AnalysisDataServiceObserver
+from mantid.api import AnalysisDataServiceObserver, WorkspaceGroup
 from functools import wraps
 import sys
 
@@ -44,7 +44,8 @@ class MuonContextADSObserver(AnalysisDataServiceObserver):
         :param workspace_name: The name of the workspace
         :param workspace: not used
         """
-        self.delete_callback(workspace_name)
+        if not isinstance(workspace, WorkspaceGroup):
+            self.delete_callback(workspace_name)
 
     @_catch_exceptions
     def renameHandle(self, old_workspace_name, new_workspace_name):

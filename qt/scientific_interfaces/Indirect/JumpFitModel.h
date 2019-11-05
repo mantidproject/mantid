@@ -7,7 +7,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_JUMPFITMODEL_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_JUMPFITMODEL_H_
 
-#include "IndirectFittingModel.h"
+#include "IndirectFittingModelLegacy.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -20,12 +20,12 @@ struct JumpFitParameters {
   std::vector<std::size_t> eisfSpectra;
 };
 
-class DLLExport JumpFitModel : public IndirectFittingModel {
+class DLLExport JumpFitModel : public IndirectFittingModelLegacy {
 public:
-  using IndirectFittingModel::addWorkspace;
+  using IndirectFittingModelLegacy::addWorkspace;
 
   void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
-                    const Spectra & /*spectra*/) override;
+                    const SpectraLegacy & /*spectra*/) override;
   void removeWorkspace(std::size_t index) override;
   void setFitType(const std::string &fitType);
 

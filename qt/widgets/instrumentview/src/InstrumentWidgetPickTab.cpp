@@ -77,7 +77,10 @@ double getPhiOffset(const Mantid::Kernel::V3D &pos, const double offset) {
  */
 InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
     : InstrumentWidgetTab(instrWidget), m_freezePlot(false),
-      m_tubeXUnitsCache(0), m_plotTypeCache(0) {
+      m_tubeXUnitsCache(0), m_plotTypeCache(0),
+      m_addedActions(
+          std::vector<std::pair<
+              QAction *, std::function<bool(std::map<std::string, bool>)>>>{}) {
 
   // connect to InstrumentWindow signals
   connect(m_instrWidget, SIGNAL(integrationRangeChanged(double, double)), this,
@@ -636,7 +639,12 @@ void InstrumentWidgetPickTab::loadSettings(const QSettings &settings) {
   m_plotTypeCache =
       settings.value("PlotType", DetectorPlotController::Single).toInt();
 }
-
+void InstrumentWidgetPickTab::addToContextMenu(
+    QAction *action,
+    std::function<bool(std::map<std::string, bool>)> &actionCondition) {
+  auto pair = std::make_pair(action, actionCondition);
+  m_addedActions.push_back(pair);
+}
 /**
  * Fill in the context menu.
  * @param context :: A menu to fill.
@@ -651,6 +659,15 @@ bool InstrumentWidgetPickTab::addToDisplayContextMenu(QMenu &context) const {
   if (m_plot->hasStored() || m_plot->hasCurve()) {
     context.addAction(m_savePlotToWorkspace);
     res = true;
+  }
+  std::map<std::string, bool> tabBools = {};
+  tabBools.insert(std::make_pair("plotStored", m_plot->hasStored()));
+  tabBools.insert(std::make_pair("hasCurve", m_plot->hasCurve()));
+  tabBools.insert(std::make_pair("isTube", m_tube->isChecked()));
+  for (auto actionPair : m_addedActions) {
+    if (actionPair.second && actionPair.second(tabBools)) {
+      context.addAction(actionPair.first);
+    }
   }
   return res;
 }

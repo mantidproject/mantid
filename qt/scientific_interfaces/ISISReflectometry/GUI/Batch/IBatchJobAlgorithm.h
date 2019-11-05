@@ -23,6 +23,8 @@ class Item;
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL IBatchJobAlgorithm {
 public:
+  virtual ~IBatchJobAlgorithm() = default;
+
   virtual Item *item() = 0;
   virtual void updateItem() = 0;
 };

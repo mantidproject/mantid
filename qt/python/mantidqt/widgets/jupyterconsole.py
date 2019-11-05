@@ -15,6 +15,7 @@ import types
 # 3rd party imports
 # qtpy must be the first import here as it makes the selection of the PyQt backend
 # by preferring PyQt5 as we would like
+from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QApplication
 try:
     # Later versions of Qtconsole are part of Jupyter
@@ -63,6 +64,10 @@ class InProcessJupyterConsole(RichJupyterWidget):
         self.kernel_manager = kernel_manager
         self.kernel_client = kernel_client
 
+    def keyPressEvent(self, event):
+        if QApplication.keyboardModifiers() & Qt.ControlModifier and (event.key() == Qt.Key_Equal):
+            self.change_font_size(1)
+
 
 def async_wrapper(orig_run_code, shell_instance):
     """
@@ -71,17 +76,32 @@ def async_wrapper(orig_run_code, shell_instance):
     :param shell_instance: The shell instance associated with the orig_run_code
     :return: A new method that can be attached to shell_instance
     """
-    def async_run_code(self, code_obj, result=None):
+
+    def async_run_code(self, code_obj, result=None, async_=False):
         """A monkey-patched replacement for the InteractiveShell.run_code method.
         It runs the in a separate thread and calls QApplication.processEvents
-        periodically until the method finishes
+        periodically until the method finishes.
+
+        :param code_obj : code object
+          A compiled code object, to be executed
+        :param result : ExecutionResult, optional
+          An object to store exceptions that occur during execution.
+        :param async_ : Bool (Experimental))
+           Attempt to run top-level asynchronous code in a default loop.
+
+        :returns: An AsyncTaskResult object
         """
-        # ipython 3.0 introduces a third argument named result
-        if len(getfullargspec(orig_run_code).args) == 3:
-            args = (code_obj, result)
+        # Different target arguments depending on IPython's version
+        function_parameters = getfullargspec(orig_run_code)
+        if 'result' in function_parameters.args:
+            if hasattr(function_parameters, 'kwonlyargs') and 'async_' in function_parameters.kwonlyargs:
+                return orig_run_code(code_obj, result, async_=async_)  # return coroutine to be awaited
+            else:
+                task = BlockingAsyncTaskWithCallback(target=orig_run_code, args=(code_obj, result),
+                                                     blocking_cb=QApplication.processEvents)
         else:
-            args = (code_obj,)
-        task = BlockingAsyncTaskWithCallback(target=orig_run_code, args=args, blocking_cb=QApplication.processEvents)
+            task = BlockingAsyncTaskWithCallback(target=orig_run_code, args=(code_obj,),
+                                                 blocking_cb=QApplication.processEvents)
         return task.start()
 
     return types.MethodType(async_run_code, shell_instance)

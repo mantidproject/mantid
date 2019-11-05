@@ -261,12 +261,12 @@ bool SpectrumView::replaceExistingWorkspace(
 }
 
 void SpectrumView::dropEvent(QDropEvent *de) {
-  auto words = de->mimeData()->text().split('"');
-  auto ws =
-      Mantid::API::AnalysisDataService::Instance()
-          .retrieveWS<Mantid::API::MatrixWorkspace>(words[1].toStdString());
-
-  renderWorkspace(ws);
+  std::string workspaceName{de->mimeData()->text().toStdString()};
+  auto matrixWs = Mantid::API::AnalysisDataService::Instance()
+                      .retrieveWS<Mantid::API::MatrixWorkspace>(workspaceName);
+  if (matrixWs) {
+    renderWorkspace(matrixWs);
+  }
 }
 
 void SpectrumView::dragMoveEvent(QDragMoveEvent *de) {

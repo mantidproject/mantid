@@ -10,6 +10,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidMuon/DllConfig.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -17,7 +18,7 @@ using namespace Mantid::DataObjects;
 namespace Mantid {
 namespace Muon {
 
-class DLLExport MuonPreProcess : public API::Algorithm {
+class MANTID_MUON_DLL MuonPreProcess : public API::Algorithm {
 public:
   MuonPreProcess() : API::Algorithm() {}
   ~MuonPreProcess() {}

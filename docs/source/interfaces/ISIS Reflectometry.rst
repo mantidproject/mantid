@@ -200,13 +200,28 @@ batch to reduce runs in that batch's processing table.
 Menu Bar
 ~~~~~~~~
 
-The main menu currently just contains options for managing batches via the
-**Batch** menu:
+Batch Menu
+^^^^^^^^^^
+
+The **Batch** menu contains options for managing the Batch tabs:
 
 +------------------+----------------------------------------------------------+
 | Action           | Effect                                                   |
 +==================+==========================================================+
 | New              | Add a new Batch tab                                      |
+| Load             | Load settings for the current Batch tab from a file      |
+| Save             | Save settings for the current Batch to a file            |
++------------------+----------------------------------------------------------+
+
+Tools Menu
+^^^^^^^^^^
+
+The **Tools** menu provides access to options and utilities:
+
++------------------+----------------------------------------------------------+
+| Action           | Effect                                                   |
++==================+==========================================================+
+| Slit Calculator  | Tool for calculating approximate slit widths             |
 +------------------+----------------------------------------------------------+
 
 Runs Tab
@@ -585,9 +600,16 @@ this will cause unsaved changes to be lost.
 
 Live Data Monitoring
 ^^^^^^^^^^^^^^^^^^^^
+.. figure:: /images/ISISReflectometryInterface/live_data_section.png
+  :class: screenshot
+  :width: 800px
+  :align: center
+  :alt: The event handling tab
+
+  *The live data section*
 
 The *Live data* section on the *Runs* tab allows you to start a monitoring
-algorithm that will periodically load live data from the instrument and reduce
+algorithm that will periodically load live data from the instrument, given by the update interval spin box, and reduce
 it with :ref:`ReflectometryReductionOneAuto
 <algm-ReflectometryReductionOneAuto>`. It outputs two workspaces, `TOF_live`
 for the original data and `IvsQ_binned_live` for the reduced data.

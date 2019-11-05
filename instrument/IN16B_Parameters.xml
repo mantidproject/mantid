@@ -48,6 +48,9 @@
 <parameter name="Workflow.GroupingFile" type="string">
   <value val="IN16B_Grouping.xml" />
 </parameter>
+<parameter name="Workflow.GroupingFile.PSDOnly" type="string">
+  <value val="IN16B_Grouping_PSD_Only.xml" />
+</parameter>
 <parameter name="EquatorialGroupingFile" type="string">
   <value val="IN16B_Grouping_Equatorial.xml" />
 </parameter>

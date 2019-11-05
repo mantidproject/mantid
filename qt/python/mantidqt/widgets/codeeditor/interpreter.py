@@ -7,6 +7,7 @@
 #  This file is part of the mantidqt package
 from __future__ import (absolute_import, unicode_literals)
 
+import io
 import os.path
 import sys
 import traceback
@@ -17,6 +18,7 @@ from qtpy.QtWidgets import QFileDialog, QMessageBox, QStatusBar, QVBoxLayout, QW
 
 from mantidqt.io import open_a_file_dialog
 from mantidqt.widgets.codeeditor.codecommenter import CodeCommenter
+from mantidqt.widgets.codeeditor.completion import CodeCompleter
 from mantidqt.widgets.codeeditor.editor import CodeEditor
 from mantidqt.widgets.codeeditor.errorformatter import ErrorFormatter
 from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
@@ -93,7 +95,7 @@ class EditorIO(object):
             self.editor.setFileName(filename)
 
         try:
-            with open(filename, 'w') as f:
+            with io.open(filename, 'w', encoding='utf8') as f:
                 f.write(self.editor.text())
             self.editor.setModified(False)
         except IOError as exc:
@@ -136,6 +138,7 @@ class PythonFileInterpreter(QWidget):
 
         self._presenter = PythonFileInterpreterPresenter(self, PythonCodeExecution(content))
         self.code_commenter = CodeCommenter(self.editor)
+        self.code_completer = CodeCompleter(self.editor, self._presenter.model.globals_ns)
 
         self.editor.modificationChanged.connect(self.sig_editor_modified)
         self.editor.fileNameChanged.connect(self.sig_filename_modified)
@@ -146,6 +149,9 @@ class PythonFileInterpreter(QWidget):
         self._presenter.model.sig_exec_progress.connect(self.sig_progress)
         self._presenter.model.sig_exec_error.connect(self.sig_exec_error)
         self._presenter.model.sig_exec_success.connect(self.sig_exec_success)
+
+        # Re-populate the completion API after execution success
+        self._presenter.model.sig_exec_success.connect(self.code_completer.update_completion_api)
 
     def closeEvent(self, event):
         self.deleteLater()
@@ -255,8 +261,6 @@ class PythonFileInterpreter(QWidget):
         # Default content does not count as a modification
         editor.setModified(False)
 
-        editor.enableAutoCompletion(CodeEditor.AcsAll)
-
     def clear_key_binding(self, key_str):
         """Clear a keyboard shortcut bound to a Scintilla command"""
         self.editor.clearKeyBinding(key_str)
@@ -275,9 +279,6 @@ class PythonFileInterpreterPresenter(QObject):
         self._code_start_offset = 0
         self._is_executing = False
         self._error_formatter = ErrorFormatter()
-
-        # If startup code was executed then populate autocomplete
-        self.view.editor.updateCompletionAPI(self.model.generate_calltips())
 
         # connect signals
         self.model.sig_exec_success.connect(self._on_exec_success)
@@ -329,7 +330,6 @@ class PythonFileInterpreterPresenter(QObject):
         return code_str, line_from
 
     def _on_exec_success(self, task_result):
-        self.view.editor.updateCompletionAPI(self.model.generate_calltips())
         self._finish(success=True, task_result=task_result)
 
     def _on_exec_error(self, task_error):

@@ -48,7 +48,6 @@ class SANSReductionCorePreprocess(SANSReductionCoreBase):
     def PyExec(self):
         # Get the input
         state = self._get_state()
-        state_serialized = state.property_manager
         component_as_string = self.getProperty("Component").value
         progress = self._get_progress()
 
@@ -82,31 +81,31 @@ class SANSReductionCorePreprocess(SANSReductionCoreBase):
         #    a user-specified value which can be obtained with the help of the beam centre finder.
         # ------------------------------------------------------------
         progress.report("Moving ...")
-        workspace = self._move(state_serialized, workspace, component_as_string)
-        monitor_workspace = self._move(state_serialized, monitor_workspace, component_as_string)
+        workspace = self._move(state=state, workspace=workspace, component=component_as_string)
+        monitor_workspace = self._move(state=state, workspace=monitor_workspace, component=component_as_string)
 
         # --------------------------------------------------------------------------------------------------------------
         # 4. Apply masking (pixel masking and time masking)
         # --------------------------------------------------------------------------------------------------------------
         progress.report("Masking ...")
-        workspace = self._mask(state_serialized, workspace, component_as_string)
+        workspace = self._mask(state=state, workspace=workspace, component=component_as_string)
 
         # --------------------------------------------------------------------------------------------------------------
         # 5. Convert to Wavelength
         # --------------------------------------------------------------------------------------------------------------
         progress.report("Converting to wavelength ...")
-        workspace = self._convert_to_wavelength(state_serialized, workspace)
+        workspace = self._convert_to_wavelength(state=state, workspace=workspace)
         # Convert and rebin the dummy workspace to get correct bin flags
         if use_dummy_workspace:
             dummy_mask_workspace = mask_bins(state.mask, dummy_mask_workspace,
                                              DetectorType.from_string(component_as_string))
-            dummy_mask_workspace = self._convert_to_wavelength(state_serialized, dummy_mask_workspace)
+            dummy_mask_workspace = self._convert_to_wavelength(state=state, workspace=dummy_mask_workspace)
 
         # --------------------------------------------------------------------------------------------------------------
         # 6. Multiply by volume and absolute scale
         # --------------------------------------------------------------------------------------------------------------
         progress.report("Multiplying by volume and absolute scale ...")
-        workspace = self._scale(state_serialized, workspace)
+        workspace = self._scale(state=state, workspace=workspace)
 
         progress.report("Completed SANSReductionCorePreprocess ...")
 

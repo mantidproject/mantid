@@ -24,6 +24,7 @@ private slots:
   void newInputFiles();
   void newPreviewFileSelected(int index);
   void plotInput();
+  void handlePreviewSpectrumChanged();
   void twoRanges(QtProperty *prop, bool /*val*/);
   void minChanged(double val);
   void maxChanged(double val);

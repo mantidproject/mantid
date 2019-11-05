@@ -59,7 +59,7 @@ public:
     alg.initialize();
     TS_ASSERT(alg.isInitialized());
     alg.setProperty("InputWorkspace",
-                    WorkspaceCreationHelper::createPeaksWorkspace());
+                    WorkspaceCreationHelper::createPeaksWorkspace(2));
     alg.setPropertyValue("CoordinateFrame", "Q (lab frame)");
     alg.setPropertyValue("Vertex1", vertex1);
     alg.setPropertyValue("Vertex2", vertex2);
@@ -98,7 +98,7 @@ public:
     alg.initialize();
     TS_ASSERT(alg.isInitialized());
     alg.setProperty("InputWorkspace",
-                    WorkspaceCreationHelper::createPeaksWorkspace());
+                    WorkspaceCreationHelper::createPeaksWorkspace(2));
     alg.setPropertyValue("CoordinateFrame", "Q (lab frame)");
     alg.setPropertyValue("Vertex1", "0,0,0");
     alg.setPropertyValue("Vertex2", "0,1,0");
@@ -114,7 +114,7 @@ public:
     alg.initialize();
     TS_ASSERT(alg.isInitialized());
     alg.setProperty("InputWorkspace",
-                    WorkspaceCreationHelper::createPeaksWorkspace());
+                    WorkspaceCreationHelper::createPeaksWorkspace(2));
     alg.setPropertyValue("CoordinateFrame", "Q (lab frame)");
     alg.setPropertyValue("Vertex1", "0,0,0");
     alg.setPropertyValue("Vertex2", "0,1,0");
@@ -132,7 +132,7 @@ public:
     alg.initialize();
     TS_ASSERT(alg.isInitialized());
     alg.setProperty("InputWorkspace",
-                    WorkspaceCreationHelper::createPeaksWorkspace());
+                    WorkspaceCreationHelper::createPeaksWorkspace(2));
     alg.setPropertyValue("CoordinateFrame", "Q (lab frame)");
     alg.setPropertyValue("Vertex1", "0,0,0");
     alg.setPropertyValue("Vertex2", "0,1,0");

@@ -35,6 +35,15 @@ public:
   }
   static void destroySuite(BasicHKLFiltersTest *suite) { delete suite; }
 
+  void testHKLFilterNone() {
+    HKLFilterNone filter;
+
+    TS_ASSERT(filter.isAllowed(V3D(1, 2, 3)))
+    TS_ASSERT(filter.isAllowed(V3D(-1, -2, 3)))
+    TS_ASSERT(filter.isAllowed(V3D(-1, -2, -3)))
+    TS_ASSERT(filter.isAllowed(V3D(120380123, 4012983, -131233)))
+  }
+
   void testHKLFilterDRangeConstructors() {
     UnitCell cell(10., 10., 10.);
 

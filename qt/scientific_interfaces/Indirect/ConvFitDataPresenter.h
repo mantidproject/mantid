@@ -8,7 +8,7 @@
 #define MANTIDQTCUSTOMINTERFACESIDA_CONVFITDATAPRESENTER_H_
 
 #include "ConvFitModel.h"
-#include "IndirectFitDataPresenter.h"
+#include "IndirectFitDataPresenterLegacy.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -17,10 +17,10 @@ namespace IDA {
 class ConvFitAddWorkspaceDialog;
 
 class MANTIDQT_INDIRECT_DLL ConvFitDataPresenter
-    : public IndirectFitDataPresenter {
+    : public IndirectFitDataPresenterLegacy {
   Q_OBJECT
 public:
-  ConvFitDataPresenter(ConvFitModel *model, IIndirectFitDataView *view);
+  ConvFitDataPresenter(ConvFitModel *model, IIndirectFitDataViewLegacy *view);
 
 private slots:
   void setModelResolution(const QString &name);
@@ -34,7 +34,7 @@ private:
   std::unique_ptr<IAddWorkspaceDialog>
   getAddWorkspaceDialog(QWidget *parent) const override;
   void addWorkspace(ConvFitAddWorkspaceDialog const *dialog,
-                    IndirectFittingModel *model);
+                    IndirectFittingModelLegacy *model);
 
   void setMultiInputResolutionFBSuffixes(IAddWorkspaceDialog *dialog) override;
   void setMultiInputResolutionWSSuffixes(IAddWorkspaceDialog *dialog) override;

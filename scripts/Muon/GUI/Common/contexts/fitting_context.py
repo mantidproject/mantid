@@ -13,7 +13,7 @@ from mantid.api import AnalysisDataService
 from mantid.py3compat import iteritems, iterkeys, string_types
 import numpy as np
 
-from Muon.GUI.Common.observer_pattern import Observable
+from mantidqt.utils.observer_pattern import Observable
 
 # Magic values for names of columns in the fit parameter table
 NAME_COL = 'Name'

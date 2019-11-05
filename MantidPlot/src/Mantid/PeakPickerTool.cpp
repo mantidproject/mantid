@@ -60,6 +60,12 @@ PeakPickerTool::PeakPickerTool(
   } else {
     return;
   }
+
+  // Show the fitPropertyBrowser if it isn't already. This sets the
+  // WorkspaceIndex to 0
+  if (showFitPropertyBrowser)
+    m_fitPropertyBrowser->show();
+
   m_fitPropertyBrowser->normaliseData(m_shouldBeNormalised);
   m_fitPropertyBrowser->getHandler()->removeAllPlots();
   m_fitPropertyBrowser->setWorkspaceName(m_wsName);
@@ -100,9 +106,6 @@ PeakPickerTool::PeakPickerTool(
   connect(m_fitPropertyBrowser, SIGNAL(destroyed()), graph,
           SLOT(disableTools()));
 
-  // Show the fitPropertyBrowser if it isn't already.
-  if (showFitPropertyBrowser)
-    m_fitPropertyBrowser->show();
   connect(this, SIGNAL(isOn(bool)), m_fitPropertyBrowser,
           SLOT(setPeakToolOn(bool)));
   emit isOn(true);
@@ -147,15 +150,6 @@ PeakPickerTool::PeakPickerTool(
 
   connect(d_graph, SIGNAL(curveRemoved()), this, SLOT(curveRemoved()));
   connect(d_graph, SIGNAL(modifiedGraph()), this, SLOT(modifiedGraph()));
-
-  try { // if it's a MatrixWorkspace in the ADS
-    m_ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-        Mantid::API::AnalysisDataService::Instance().retrieve(
-            m_wsName.toStdString()));
-  } catch (...) { // or it can be a TableWorkspace
-    m_ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-        m_fitPropertyBrowser->createMatrixFromTableWorkspace());
-  }
 }
 
 PeakPickerTool::~PeakPickerTool() {

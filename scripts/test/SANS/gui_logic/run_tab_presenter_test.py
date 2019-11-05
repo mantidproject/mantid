@@ -132,7 +132,7 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertEqual(view.transmission_mask_files, "test4.xml")
         self.assertEqual(view.transmission_radius, 7.)
         self.assertEqual(view.transmission_monitor, 4)
-        self.assertEqual(view.transmission_mn_shift, -70)
+        self.assertEqual(view.transmission_mn_4_shift, -70)
         self.assertTrue(view.transmission_sample_use_fit)
         self.assertEqual(view.transmission_sample_fit_type, FitType.Logarithmic)
         self.assertEqual(view.transmission_sample_polynomial_order, 2)
@@ -200,7 +200,7 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertFalse(has_raised)
         self.os_patcher.start()
 
-    def do_test_that_loads_batch_file_and_places_it_into_table(self, use_multi_period):
+    def do_fixture_that_loads_batch_file_and_places_it_into_table(self, use_multi_period):
         # Arrange
         batch_file_path, user_file_path, presenter, view = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_2,
                                                                                               is_multi_period=use_multi_period)  # noqa
@@ -209,7 +209,7 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter.on_batch_file_load()
 
         # Assert
-        self.assertEqual(view.add_row.call_count, 8)
+        self.assertEqual(view.add_row.call_count, 6)
         if use_multi_period:
             expected_first_row = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '',
                                   '', 'test_file', '', '', '', '', '', '']
@@ -228,10 +228,10 @@ class RunTabPresenterTest(unittest.TestCase):
         self._remove_files(user_file_path=user_file_path, batch_file_path=batch_file_path)
 
     def test_that_loads_batch_file_and_places_it_into_table(self):
-        self.do_test_that_loads_batch_file_and_places_it_into_table(use_multi_period=True)
+        self.do_fixture_that_loads_batch_file_and_places_it_into_table(use_multi_period=True)
 
     def test_that_loads_batch_file_and_places_it_into_table_when_not_multi_period_enabled(self):
-        self.do_test_that_loads_batch_file_and_places_it_into_table(use_multi_period=False)
+        self.do_fixture_that_loads_batch_file_and_places_it_into_table(use_multi_period=False)
 
     def test_that_loads_batch_file_with_multi_period_settings(self):
         # Arrange
@@ -904,6 +904,7 @@ class RunTabPresenterTest(unittest.TestCase):
         
         presenter.set_view(view)
         presenter._table_model.reset_row_state = mock.MagicMock()
+        presenter._table_model.get_thickness_for_rows = mock.MagicMock()
         presenter._table_model.get_non_empty_rows = mock.MagicMock(side_effect=get_non_empty_row_mock)
 
         presenter.on_process_selected_clicked()
@@ -939,8 +940,9 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter._table_model.get_number_of_rows = mock.MagicMock(return_value=7)
         presenter.set_view(view)
         presenter._table_model.reset_row_state = mock.MagicMock()
+        presenter._table_model.get_thickness_for_rows = mock.MagicMock()
         presenter._table_model.get_non_empty_rows = mock.MagicMock(side_effect=get_non_empty_row_mock)
-        
+
         presenter.on_process_all_clicked()
         self.assertEqual(
             presenter._table_model.reset_row_state.call_count, 7,

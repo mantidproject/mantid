@@ -69,7 +69,9 @@ mtd_add_qt_library(
     MantidQtWidgetsCommon
     MantidQtIcons
   INSTALL_DIR_BASE ${PLUGINS_DIR}
-  OSX_INSTALL_RPATH @loader_path/../../Contents/MacOS
+  OSX_INSTALL_RPATH
+    @loader_path/../../Contents/MacOS
+    @loader_path/../../Contents/Frameworks
   LINUX_INSTALL_RPATH "\$ORIGIN/../../${LIB_DIR}"
 )
 
@@ -99,6 +101,7 @@ mtd_add_qt_library(
   INSTALL_DIR_BASE ${WORKBENCH_PLUGINS_DIR}
   OSX_INSTALL_RPATH
     @loader_path/../../Contents/MacOS
+    @loader_path/../../Contents/Frameworks
     @loader_path/../../plugins/qt5
   LINUX_INSTALL_RPATH "\$ORIGIN/../../${LIB_DIR}"
 )

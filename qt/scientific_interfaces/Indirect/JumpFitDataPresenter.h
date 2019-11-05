@@ -7,7 +7,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_JUMPFITDATAPRESENTER_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_JUMPFITDATAPRESENTER_H_
 
-#include "IndirectFitDataPresenter.h"
+#include "IndirectFitDataPresenterLegacy.h"
 #include "JumpFitAddWorkspaceDialog.h"
 #include "JumpFitModel.h"
 
@@ -19,10 +19,10 @@ namespace CustomInterfaces {
 namespace IDA {
 
 class MANTIDQT_INDIRECT_DLL JumpFitDataPresenter
-    : public IndirectFitDataPresenter {
+    : public IndirectFitDataPresenterLegacy {
   Q_OBJECT
 public:
-  JumpFitDataPresenter(JumpFitModel *model, IIndirectFitDataView *view,
+  JumpFitDataPresenter(JumpFitModel *model, IIndirectFitDataViewLegacy *view,
                        QComboBox *cbParameterType, QComboBox *cbParameter,
                        QLabel *lbParameterType, QLabel *lbParameter);
 
@@ -51,7 +51,7 @@ private:
   void updateParameterOptions(JumpFitAddWorkspaceDialog *dialog);
   void updateParameterTypes(JumpFitAddWorkspaceDialog *dialog);
   std::vector<std::string> getParameterTypes(std::size_t dataIndex) const;
-  void addWorkspace(IndirectFittingModel *model, const std::string &name);
+  void addWorkspace(IndirectFittingModelLegacy *model, const std::string &name);
   void setModelSpectrum(int index);
 
   void setMultiInputResolutionFBSuffixes(IAddWorkspaceDialog *dialog) override;

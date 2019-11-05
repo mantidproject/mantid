@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from Muon.GUI.Common.observer_pattern import Observer, Observable, GenericObservable, GenericObserver
+from mantidqt.utils.observer_pattern import Observer, Observable, GenericObservable, GenericObserver
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
 import Muon.GUI.Common.utilities.xml_utils as xml_utils
 import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
@@ -85,13 +85,12 @@ class GroupingTabPresenter(object):
             description_text = self.text_for_description()
         self._view.set_description_text(description_text)
 
-    def add_pair_from_grouping_table(self, group_name1, group_name2):
+    def add_pair_from_grouping_table(self, group_name1="", group_name2=""):
+
         """
         If user requests to add a pair from the grouping table.
         """
-        pair = self._model.construct_empty_pair_with_group_names(group_name1, group_name2)
-        self._model.add_pair(pair)
-        self.pairing_table_widget.update_view_from_model()
+        self.pairing_table_widget.handle_add_pair_button_clicked(group_name1, group_name2)
 
     def handle_guess_alpha(self, pair_name, group1_name, group2_name):
         """

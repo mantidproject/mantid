@@ -1,18 +1,34 @@
 # Tests for Fit functions
 
 set(TEST_PY_FILES
+    AttributeTest.py
+    BesselTest.py
+    CombGaussLorentzKTTest.py
+    DampedBesselTest.py
     DSFinterp1DFitTest.py
     EISFDiffSphereTest.py
     EISFDiffCylinderTest.py
     EISFDiffSphereAlkylTest.py
     Example1DFunctionTest.py
     ExamplePeakFunctionTest.py
-    StretchedExpFTTest.py
-    AttributeTest.py
+    FmuFTest.py
+    HighTFMuoniumTest.py
+    MeierTest.py
     MsdGaussTest.py
     MsdPetersTest.py
     MsdYiTest.py
-    TeixeiraWaterTest.py)
+    MuHTest.py
+    RFresonanceTest.py
+    SilverBaselineTest.py
+    SpinGlassTest.py
+    StandardSCTest.py
+    StaticLorentzianKTTest.py
+    StretchedExpFTTest.py
+    StretchedKTTest.py
+    TeixeiraWaterTest.py
+    TFMuoniumTest.py
+    TriangleOscTest.py
+    ZFMuoniumTest.py)
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
 

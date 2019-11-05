@@ -13,7 +13,7 @@ from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import Groupi
 from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_presenter import GroupingTablePresenter
 from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_view import GroupingTableView
 from Muon.GUI.Common.muon_group import MuonGroup
-from Muon.GUI.Common.observer_pattern import Observer
+from mantidqt.utils.observer_pattern import Observer
 
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 
@@ -321,7 +321,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.view.group_range_use_first_good_data.setChecked(True)
 
         self.assertFalse('GroupRangeMin' in self.gui_context)
-        self.assertEqual(self.gui_variable_observer.update.call_count, 2)
+        self.assertEqual(self.gui_variable_observer.update.call_count, 1)
 
     def test_enabling_range_max_editing_creates_context_variable(self):
         number = '1.12'
@@ -342,7 +342,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.view.group_range_use_last_data.setChecked(True)
 
         self.assertFalse('GroupRangeMax' in self.gui_context)
-        self.assertEqual(self.gui_variable_observer.update.call_count, 2)
+        self.assertEqual(self.gui_variable_observer.update.call_count, 1)
 
     def test_updating_range_min_to_be_greater_than_range_max_displays_warning_and_vice_versa(self):
         original_max = '1.12'
