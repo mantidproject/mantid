@@ -5,7 +5,7 @@
 %endif
 
 Name:           mantid-developer
-Version:        1.33
+Version:        1.34
 Release:        1%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
@@ -40,7 +40,7 @@ Requires: numpy
 Requires: OCE-devel
 Requires: poco-devel >= 1.4.6
 Requires: PyQt4-devel
-Requires: python-qt5-devel
+Requires: python2-qt5-devel
 Requires: python-QtPy
 Requires: python-requests
 Requires: python-devel
@@ -91,7 +91,7 @@ Requires: graphviz
 Requires: python3-setuptools
 Requires: python3-sip-devel
 Requires: python3-PyQt4-devel
-Requires: python-qt5-devel
+Requires: python3-qt5-devel
 Requires: python3-QtPy
 Requires: python3-numpy
 Requires: python3-scipy
@@ -116,6 +116,7 @@ Requires: python36-devel
 Requires: python36-h5py
 Requires: python36-numpy
 Requires: python36-PyYAML
+Requires: python36-qt-devel
 %endif
 
 BuildArch: noarch
@@ -139,6 +140,9 @@ required for Mantid development.
 %files
 
 %changelog
+
+* Tue Nov 5 2019 Martyn Gigg <martyn.gigg@stfc.ac.uk>
+- Switch to python{2,3}-qt5-devel
 
 * Thu Jun 27 2019 Peter Peterson <petersonpf@ornl.gov>
 - Added python3 dependencies for framework on rhel7
