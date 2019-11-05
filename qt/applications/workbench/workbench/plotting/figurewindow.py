@@ -40,13 +40,14 @@ class FigureWindow(QMainWindow, ObservingView):
         self.setAttribute(Qt.WA_DeleteOnClose, True)
         self.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
 
-        # On Windows, setting the Workbench's main window as this window's
-        # parent always keeps this window on top, but still allows minimization.
-        # On Ubuntu the child is NOT kept above the parent, hence we use the
-        # focusWindowChanged event to bring this window back to the top when
-        # the main window gets focus. This does cause a slight flicker effect
-        # as the window is hidden and quickly brought back to the front. Using
-        # the parent-child method at least avoids this flicker on Windows.
+        # We use the focusWindowChanged event to bring this window back to the
+        # top when the main window gets focus. This does cause a slight flicker
+        # effect as the window is hidden and quickly brought back to the front.
+
+        # Using the parent-child method was tried. This worked on windows but
+        # not on Ubuntu as the child is NOT kept above the parent.
+        # However this is not used for windows as whenever a plot was done by
+        # an interface it moved behind workbench.
 
         # Using the Qt.WindowStaysOnTopFlag was tried, however this caused the
         # window to stay on top of all other windows, including external
@@ -57,11 +58,7 @@ class FigureWindow(QMainWindow, ObservingView):
         # Using the Qt.Tool flag, and setting the main window as this window's
         # parent, keeps this window on top. However it does not allow the
         # window to be minimized.
-        if platform.system() == "Windows":
-            from workbench.utils.windowfinder import get_main_window_widget
-            self.setParent(get_main_window_widget(), Qt.Window)
-        else:
-            QApplication.instance().focusWindowChanged.connect(self._on_focusWindowChanged)
+        QApplication.instance().focusWindowChanged.connect(self._on_focusWindowChanged)
         self.close_signal.connect(self._run_close)
         self.setAcceptDrops(True)
 
