@@ -26,13 +26,15 @@ class TrackedActionTest : public CxxTest::TestSuite {
                           QObject *parent)
         : TrackedAction(icon, text, parent), m_lastName(){};
 
-    std::string getLastUsedName() const { return m_lastName; };
+    std::vector<std::string> getLastUsedName() const { return m_lastName; };
 
   protected:
-    void registerUsage(const std::string &name) override { m_lastName = name; };
+    void registerUsage(const std::vector<std::string> &name) override {
+      m_lastName = name;
+    };
 
   private:
-    std::string m_lastName;
+    std::vector<std::string> m_lastName;
   };
 
 public:
@@ -55,12 +57,18 @@ public:
     TestableTrackedAction action(QString::fromStdString("TestName"), &parent);
 
     std::string appNamePrefix =
-        QCoreApplication::applicationName().toStdString() + "->";
+        QCoreApplication::applicationName().toStdString();
 
-    TS_ASSERT_EQUALS(action.getTrackingName(),
-                     appNamePrefix + "TestName"); // default state
-    action.setTrackingName("TestName2");
-    TS_ASSERT_EQUALS(action.getTrackingName(), "TestName2"); // altered state
+    TS_ASSERT_EQUALS(action.getTrackingName().size(), 2);
+    TS_ASSERT_EQUALS(action.getTrackingName()[0],
+                     appNamePrefix);                           // default state
+    TS_ASSERT_EQUALS(action.getTrackingName()[1], "TestName"); // default state
+
+    action.setTrackingName({"TestName2"});
+
+    TS_ASSERT_EQUALS(action.getTrackingName().size(), 1);
+    TS_ASSERT_EQUALS(action.getTrackingName()[0],
+                     "TestName2"); // altered state
   }
 
   void testTrackingCallLogic() {
@@ -68,17 +76,19 @@ public:
     TestableTrackedAction action(QString::fromStdString("TestName"), &parent);
 
     // tracking should be on by default
-    TS_ASSERT_EQUALS(action.getIsTracking(), true); // default state
-    TS_ASSERT_EQUALS(action.getLastUsedName(), ""); // default state
+    TS_ASSERT_EQUALS(action.getIsTracking(), true);           // default state
+    TS_ASSERT_EQUALS(action.getLastUsedName().empty(), true); // default state
 
-    action.setTrackingName("ShouldTrack");
+    action.setTrackingName({"ShouldTrack"});
     action.trigger();
-    TS_ASSERT_EQUALS(action.getLastUsedName(),
+    TS_ASSERT_EQUALS(action.getLastUsedName().size(), 1);
+    TS_ASSERT_EQUALS(action.getLastUsedName()[0],
                      "ShouldTrack"); // tracking occurred state
     action.setIsTracking(false);
-    action.setTrackingName("ShouldNotTrack");
+    action.setTrackingName({"ShouldNotTrack"});
     action.trigger();
-    TS_ASSERT_DIFFERS(action.getLastUsedName(),
+    TS_ASSERT_EQUALS(action.getLastUsedName().size(), 1);
+    TS_ASSERT_DIFFERS(action.getLastUsedName()[0],
                       "ShouldNotTrack"); // Should not have tracked
   }
 };

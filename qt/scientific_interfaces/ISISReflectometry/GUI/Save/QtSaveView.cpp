@@ -62,18 +62,21 @@ void QtSaveView::browseToSaveDirectory() {
 
 void QtSaveView::onSavePathChanged() {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "ISIS Reflectometry->SaveTab->SavePathChanged", false);
+      Mantid::Kernel::FeatureType::Feature,
+      {"ISIS Reflectometry", "SaveTab", "SavePathChanged"}, false);
   m_notifyee->notifySavePathChanged();
 }
 
 void QtSaveView::onAutosaveChanged(int state) {
   if (state == Qt::CheckState::Checked) {
     Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-        "Feature", "ISIS Reflectometry->SaveTab->EnableAutosave", false);
+        Mantid::Kernel::FeatureType::Feature,
+        {"ISIS Reflectometry", "SaveTab", "EnableAutosave"}, false);
     m_notifyee->notifyAutosaveEnabled();
   } else {
     Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-        "Feature", "ISIS Reflectometry->SaveTab->DisableAutosave", false);
+        Mantid::Kernel::FeatureType::Feature,
+        {"ISIS Reflectometry", "SaveTab", "DisableAutosave"}, false);
     m_notifyee->notifyAutosaveDisabled();
   }
 }
@@ -228,7 +231,8 @@ void QtSaveView::setParametersList(const std::vector<std::string> &logs) const {
  */
 void QtSaveView::populateListOfWorkspaces() const {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "ISIS Reflectometry->SaveTab->PopulateWorkspaces", false);
+      Mantid::Kernel::FeatureType::Feature,
+      {"ISIS Reflectometry", "SaveTab", "PopulateWorkspaces"}, false);
   m_notifyee->notifyPopulateWorkspaceList();
 }
 
@@ -242,7 +246,8 @@ void QtSaveView::filterWorkspaceList() const {
  */
 void QtSaveView::requestWorkspaceParams() const {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "ISIS Reflectometry->SaveTab->PopulateParameters", false);
+      Mantid::Kernel::FeatureType::Feature,
+      {"ISIS Reflectometry", "SaveTab", "PopulateParameters"}, false);
   m_notifyee->notifyPopulateParametersList();
 }
 
@@ -250,7 +255,8 @@ void QtSaveView::requestWorkspaceParams() const {
  */
 void QtSaveView::saveWorkspaces() const {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "ISIS Reflectometry->SaveTab->SaveWorkspaces", false);
+      Mantid::Kernel::FeatureType::Feature,
+      {"ISIS Reflectometry", "SaveTab", "SaveWorkspaces"}, false);
   m_notifyee->notifySaveSelectedWorkspaces();
 }
 
