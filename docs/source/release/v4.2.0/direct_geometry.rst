@@ -14,9 +14,9 @@ Algorithms
 ##########
 
 - :ref:`DirectILLApplySelfShielding <algm-DirectILLApplySelfShielding>` will now first subtract the empty container background, then apply the self-shielding correction of the sample.
-- Modified :ref:`MaskBTP <algm-MaskBTP-v1>`to include CHESS
+- Modified :ref:`MaskBTP <algm-MaskBTP-v1>` to include CHESS
 
-.. figure:: ../../images/CHESS.png
+.. figure:: ../../images/CHESS.PNG
    :class: screenshot
    :width: 200px
    :align: right

@@ -35,7 +35,7 @@ Bug Fixes
    :width: 500px
    :align: right
 
-.. figure:: ../../images/IndexPeaks.png
+.. figure:: ../../images/IndexPeaks.PNG
    :class: screenshot
    :width: 500px
    :align: right   
@@ -63,6 +63,6 @@ Bug Fixes
   so that it correctly reports the number of main & satellite reflections that have been indexed. Also, if a satellite
   peak cannot be indexed its HKL is reset to 000 rather than accidentally setting it to the HKL of the main reflection.
 
-``*``See associated photos
+``*`` See associated photos ``*``
 
 :ref:`Release 4.2.0 <v4.2.0>`

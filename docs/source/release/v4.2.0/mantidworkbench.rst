@@ -109,6 +109,6 @@ Bugfixes
 - The button to "Remove" a curve in Figure Options is now the same size as the drop-down list of curves.
 - "MantidPlot" in window titles have been removed.
 
-``*``Bold: See associated image
+``*`` See associated image ``*``
 
 :ref:`Release 4.2.0 <v4.2.0>`
