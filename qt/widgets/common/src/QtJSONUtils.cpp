@@ -116,10 +116,11 @@ public:
 namespace MantidQt {
 namespace API {
 void saveJSONToFile(const QString &filename,
-                    const QMap<QString, QVariant> &map) {	
-auto filenameString = filename.toStdString();
-if (filenameString.find_last_of(".") == std::string::npos ||
-      filenameString.substr(filenameString.find_last_of(".") + 1) != std::string("json")) {
+                    const QMap<QString, QVariant> &map) {
+  auto filenameString = filename.toStdString();
+  if (filenameString.find_last_of(".") == std::string::npos ||
+      filenameString.substr(filenameString.find_last_of(".") + 1) !=
+          std::string("json")) {
     filename.append(".json")
   }
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
