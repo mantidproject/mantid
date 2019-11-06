@@ -597,24 +597,27 @@ class TransParserTest(unittest.TestCase):
                           "TRANS/ SHIFT=4000 5": {TransId.spec_5_shift: 4000},
                           "TRANS /SHIFT=4000 5": {TransId.spec_5_shift: 4000},
                           "TRANS/SHIFT=4000      5": {TransId.spec_5_shift: 4000},
+                          # An unrecognised monitor position (i.e. not 5) should be considered as 4
+                          # see source code for details
+                          "TRANS/SHIFT=1000 12": {TransId.spec_4_shift: 1000},
+                          "TRANS/SHIFT=4000 =12": {TransId.spec_4_shift: 4000},
+                          "TRANS/SHIFT=4000 =1": {TransId.spec_4_shift: 4000},
+                          "TRANS/SHIFT4000 120": {TransId.spec_4_shift: 4000},
+                          "TRANS/SHIFT 4000 999": {TransId.spec_4_shift: 4000},
                           }
 
-        invalid_settings = {"TRANS/SHIFT=1000 12": RuntimeError,
+        invalid_settings = {
                             "TRANS/SHIFT=4000 -1" : RuntimeError,
                             "TRANS/SHIFT+4000 -1": RuntimeError,
                             "TRANS/TRANSSHIFT=4000 -1": RuntimeError,
                             "TRANS/SHIFTAab=4000 -1": RuntimeError,
                             "TRANS/SHIF=4000 1": RuntimeError,
                             "TRANS/SHIFT4000": RuntimeError,
-                            "TRANS/SHIFT4000 1": RuntimeError,
-                            "TRANS/SHIFT 4000 1": RuntimeError,
                             "TRANS/SHIFT 1": RuntimeError,
                             "TRANS/SHIFT 4000": RuntimeError,
                             "TRANS/SHIFT=4000": RuntimeError,
                             "TRANS/SHIFT=4000 a": RuntimeError,
-                            "TRANS/SHIFT=4000 =12": RuntimeError,
-                            "TRANS/SHIFT=4000 =1": RuntimeError,
-        }
+                            }
 
         trans_parser = TransParser()
         do_test(trans_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
@@ -622,11 +625,11 @@ class TransParserTest(unittest.TestCase):
     def test_that_trans_spec_shift_is_parsed_correctly(self):
         valid_settings = {"TRANS/TRANSPEC=4/SHIFT=23": {TransId.spec_4_shift: 23, TransId.spec: 4},
                           "TRANS/TRANSPEC =4/ SHIFT = 23": {TransId.spec_4_shift: 23, TransId.spec: 4},
+                          "TRANS/TRANSPEC =900/ SHIFT = 23": {TransId.spec_4_shift: 23, TransId.spec: 900},
 
                           }
 
         invalid_settings = {
-                            "TRANS/TRANSPEC =6/ SHIFT = 23": RuntimeError,
                             "TRANS/TRANSPEC=4/SHIFT/23": RuntimeError,
                             "TRANS/TRANSPEC=4/SHIFT 23": RuntimeError,
                             "TRANS/TRANSPEC/SHIFT=23": RuntimeError,
