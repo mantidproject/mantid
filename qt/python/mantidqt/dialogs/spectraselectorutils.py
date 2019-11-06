@@ -25,14 +25,17 @@ def get_spectra_selection(workspaces, parent_widget=None, show_colorfill_btn=Fal
     SpectraSelectionDialog.raise_error_if_workspaces_not_compatible(workspaces)
     single_spectra_ws = [wksp.getNumberHistograms() for wksp in workspaces if wksp.getNumberHistograms() == 1]
 
-    ws_spectra = [{ws.getSpectrum(i).getSpectrumNo() for i in range(ws.getNumberHistograms())} for ws in workspaces]
-    plottable = ws_spectra[0]
-    # check if there are no common spectra in workspaces
-    if len(ws_spectra) > 1:
-        for sp_set in ws_spectra[1:]:
-            plottable = plottable.intersection(sp_set)
+    if len(workspaces) == len(single_spectra_ws):
+        plottable = []
+    else:
+        ws_spectra = [{ws.getSpectrum(i).getSpectrumNo() for i in range(ws.getNumberHistograms())} for ws in workspaces]
+        plottable = ws_spectra[0]
+        # check if there are no common spectra in workspaces
+        if len(ws_spectra) > 1:
+            for sp_set in ws_spectra[1:]:
+                plottable = plottable.intersection(sp_set)
 
-    if len(single_spectra_ws) > 0 and (len(workspaces) == 1 or len(plottable) == 0):
+    if len(single_spectra_ws) == len(workspaces) or len(plottable) == 0:
         # At least 1 workspace contains only a single spectrum and these are no
         # common spectra
         selection = SpectraSelection(workspaces)
