@@ -347,7 +347,7 @@ void JSONGeometryParser::validateAndRetrieveGeometry(
   m_name = extractInstrumentName(instrument);
 
   auto instrumentChildren = instrument[CHILDREN];
-  
+
   auto source = get(instrumentChildren, NX_SOURCE);
 
   if (source.isNull())
