@@ -17,7 +17,7 @@ Improvements
 User Interface
 --------------
 
-- *The Script Repository - Download from 'File > Script' Repository to a folder of your choice!*
+- ``*``The Script Repository - Download from 'File > Script' Repository to a folder of your choice!``*``
 - 'File > Generate Recovery Script', essentially generates a Project Recovery script. It does NOT include Workspace Clean-Up or other features of Project Recovery.
 - "Show Detectors" - Right-click a workspace and select "Show Detectors". This creates a table workspace with detector information relevant to the workspace.
 - Clearer icons in SliceViewer and Plot Toolbars.
@@ -32,7 +32,7 @@ User Interface
 
 .. figure:: ../../images/WB_Viewmessages.png
    :class: screenshot
-   :width: 400px
+   :width: 250px
    :align: right
 
 Scripting
@@ -43,7 +43,7 @@ Scripting
 	- Ctrl+N opens a new tab in the script editor.
 	- Ctrl+D aborts a running script
 - The auto-complete in Workbench's script editor has been improved.
-- "View" option, allowing you to filter Messages output by script - Right-click in the Messages Display and hover over "View" to see the options. 
+- ``*``"View" option, allowing you to filter Messages output by script - Right-click in the Messages Display and hover over "View" to see the options. ``*``
 
 .. figure:: ../../images/WB_Tiled.png
    :class: screenshot
@@ -63,18 +63,18 @@ Scripting
 Plotting
 --------
 
-- *Added basic Tiled plots.*
+- ``*``Added basic Tiled plots.``*``
 - Changing the Axes' scale, by Right-clicking on a figure with multiple plots, changes only the plot that was clicked on.
 - Spectrum Label included in Legend (instead of Spectrum Number) if provided
 - Plotting Dialog uses Spectrum Number by default.
 - Home Button on Plot Windows now always centres the figure's contents.
 - Forward and Back Arrows on Plot Windows to navigate Zoom levels.
-- *"Generate Script" Button on Plot Window to produce a script to re-create the current figure.*
+- ``*``"Generate Script" Button on Plot Window to produce a script to re-create the current figure.``*``
 - You can now zoom in/out on figures by scrolling and pan figures using the middle mouse button.
 - The X value headers on data display now shows values to 4 decimal places.
 - Plot Windows stay on top of Workbench's main window, so you can easily Drag and Drop workspaces onto existing figures.
 - Draggable horizontal and vertical markers can be inserted into plots.
-- *Colormap Icons - In a Plot Window open Figure Options (Gear Icon, under Images>Colormap shows Colormap Icons beside names.*
+- ``*``Colormap Icons - In a Plot Window open Figure Options (Gear Icon, under Images>Colormap shows Colormap Icons beside names.``*``
 - Hex Codes can be input into the Color Selectors in Figure Options.
 - Scientific Notation can be used to input Axis Limits in the Figure Options.
 - Sub-tabs in the Curves tab in Figure Options on plots now contain "Apply to All" buttons. It copies the current curve's properties to all others in the plot.
@@ -109,6 +109,6 @@ Bugfixes
 - The button to "Remove" a curve in Figure Options is now the same size as the drop-down list of curves.
 - "MantidPlot" in window titles have been removed.
 
-*See associated image
+``*``Bold: See associated image
 
 :ref:`Release 4.2.0 <v4.2.0>`

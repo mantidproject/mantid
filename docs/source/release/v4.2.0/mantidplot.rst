@@ -5,7 +5,7 @@ MantidPlot Changes
 .. contents:: Table of Contents
    :local:
 
-.. figure:: ../../images/MantidPlotMeme.jpeg
+.. figure:: ../../images/MantidPlotMeme.jpg
    :class: screenshot
    :width: 500px
    :align: right
