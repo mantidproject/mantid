@@ -76,5 +76,6 @@ Bugfixes
 - You can now save scripts that contain unicode characters.
 - A crash no longer occurs when the GenerateEventsFilter algorithm fails in the Filter Events Interface
 - Workspaces contained within groups are no longer duplicated when saving a project.
+- When showing the data table for a sqw workspace the vertical header now shows the bin center value and unit.
 
 :ref:`Release 4.2.0 <v4.2.0>`
