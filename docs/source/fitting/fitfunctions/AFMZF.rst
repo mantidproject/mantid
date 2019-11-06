@@ -1,10 +1,10 @@
-.. _func-AFM_ZF:
+.. _func-AFMZF:
 
 ======
-AFM_ZF
+AFMZF
 ======
 
-.. index:: AFM_ZF
+.. index:: AFMZF
 
 Description
 -----------
@@ -33,7 +33,7 @@ and :math:`\phi` is the phase.
    import matplotlib.pyplot as plt
    import numpy as np
    x = np.arange(0.1,16,0.1)
-   y = FunctionWrapper("AFM_ZF")
+   y = FunctionWrapper("AFMZF")
    fig, ax=plt.subplots()
    ax.plot(x, y(x))
    ax.set_xlabel('t($\mu$s)')

@@ -19,7 +19,7 @@ class PCRmagnetfnorm(IFunction1D):
 		self.declareParameter("A0", 0.2, 'Amplitude')
 		self.declareParameter("SigmaOverW", 0.1, 'Normalised relaxation rate')
 		self.declareParameter("H0", 3.0, 'Local magnetic field')
-		self.declareParameter("Toff", 0.1. 'Time offset')
+		self.declareParameter("Toff", 0.1, 'Time offset')
 
 	def function1D(self, x):
 		A0= self.getParameterValue("A0")
