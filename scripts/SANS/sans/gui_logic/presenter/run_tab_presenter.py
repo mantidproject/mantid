@@ -561,6 +561,7 @@ class RunTabPresenter(PresenterCommon):
         :param current: Current value of the progress bar.
         :param number_steps: The value at which the progress bar is full
         """
+        self.progress = current
         setattr(self._view, 'progress_bar_value', current)
         setattr(self._view, 'progress_bar_maximum', number_steps)
 

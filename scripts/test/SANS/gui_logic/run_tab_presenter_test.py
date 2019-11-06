@@ -863,6 +863,16 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertEqual(presenter.progress, 1)
         self.assertEqual(presenter._view.progress_bar_value, 1)
 
+    def test_that_update_progress_sets_correctly(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+        presenter.set_view(view)
+
+        presenter._set_progress_bar(current=100, number_steps=200)
+        self.assertEqual(presenter.progress, 100)
+        self.assertEqual(view.progress_bar_value, 100)
+        self.assertEqual(view.progress_bar_maximum, 200)
+
     def test_that_notify_progress_updates_state_and_tooltip_of_row(self):
         presenter = RunTabPresenter(SANSFacility.ISIS)
         view = mock.MagicMock()
