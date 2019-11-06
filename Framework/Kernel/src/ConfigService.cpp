@@ -1847,7 +1847,7 @@ void ConfigServiceImpl::updateFacilities(const std::string &fName) {
                                  " defines no facilities");
       }
 
-	  //if we got here we have suceeded and can exit the loop
+      // if we got here we have suceeded and can exit the loop
       success = true;
     } catch (std::runtime_error &ex) {
       // log this failure to load a file
