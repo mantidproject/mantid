@@ -1856,7 +1856,7 @@ void ConfigServiceImpl::updateFacilities(const std::string &fName) {
                     << "\nWill try to load another version";
       attemptIndex++;
       // move on to the next file index if available
-      if (attemptIndex = fileNames.size()) {
+      if (attemptIndex == fileNames.size()) {
         // Throw an exception as we have run out of files to try
         throw std::runtime_error(
             "No more Facilities.xml files can be found, Mantid will not be "
