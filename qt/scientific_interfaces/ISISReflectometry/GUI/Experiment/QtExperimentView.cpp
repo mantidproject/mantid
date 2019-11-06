@@ -54,7 +54,8 @@ QtExperimentView::QtExperimentView(
 
 void QtExperimentView::onRemovePerThetaDefaultsRequested() {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "ISIS Reflectometry->ExperimentTab->RemovePerThetaDefaultsRow",
+      Mantid::Kernel::FeatureType::Feature,
+      {"ISIS Reflectometry", "ExperimentTab", "RemovePerThetaDefaultsRow"},
       false);
   auto index = m_ui.optionsTable->currentIndex();
   if (index.isValid()) {
@@ -288,7 +289,8 @@ void QtExperimentView::disconnectExperimentSettingsWidgets() {
 
 void QtExperimentView::onRestoreDefaultsRequested() {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "ISIS Reflectometry->ExperimentTab->RestoreDefaults", false);
+      Mantid::Kernel::FeatureType::Feature,
+      {"ISIS Reflectometry", "ExperimentTab", "RestoreDefaults"}, false);
   m_notifyee->notifyRestoreDefaultsRequested();
 }
 
@@ -449,8 +451,8 @@ void QtExperimentView::onPerAngleDefaultsChanged(int row, int column) {
 /** Add a new row to the transmission runs table **/
 void QtExperimentView::onNewPerThetaDefaultsRowRequested() {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "ISIS Reflectometry->ExperimentTab->AddPerThetaDefaultsRow",
-      false);
+      Mantid::Kernel::FeatureType::Feature,
+      {"ISIS Reflectometry", "ExperimentTab", "AddPerThetaDefaultsRow"}, false);
   m_notifyee->notifyNewPerAngleDefaultsRequested();
 }
 

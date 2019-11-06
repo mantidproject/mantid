@@ -32,6 +32,7 @@ class HFIRSANS2Wavelength(PythonAlgorithm):
         try:
             wavelength = runObj['wavelength'].getStatistics().mean
             wavelength_spread = runObj['wavelength_spread'].getStatistics().mean
+            wavelength_spread *= wavelength
         except:
             raise ValueError("Could not read wavelength and wavelength_spread logs from the workspace")
         progress = Progress(self, 0.0, 1.0, 4)
