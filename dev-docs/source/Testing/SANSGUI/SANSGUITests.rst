@@ -104,3 +104,6 @@ Data reduction
       hovering over them
     - Check that ``Zero Error Free`, ``Use Optimizations``, and
       ``Plot Results`` have clear tooltips
+#. In all tabs
+    - Check the tooltips are still there by hovering over each box.
+      Users rely on the tooltips a lot and really do notice each missing one.
