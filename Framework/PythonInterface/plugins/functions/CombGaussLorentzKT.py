@@ -26,4 +26,5 @@ class CombGaussLorentzKT(IFunction1D):
         Sigma = self.getParameterValue("Sigma")
         return A0 * ((1./3.) + (2./3.) * (1.-(Sigma * x) ** 2 - Lambda * x) * np.exp(-0.5*(Sigma * x) ** 2-Lambda * x))
 
+
 FunctionFactory.subscribe(CombGaussLorentzKT)

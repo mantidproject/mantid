@@ -18,7 +18,8 @@ class TFMuonium(IFunction1D):
     def init(self):
         self.declareParameter("A0", 0.5, 'Amplitude')
         self.declareParameter("Field", 5, 'B-field (G)')
-        self.declareParameter("A", 600, 'Isotropic hyperfine coupling constant (MHz)')
+        self.declareParameter(
+            "A", 600, 'Isotropic hyperfine coupling constant (MHz)')
         self.declareParameter("Phi", 0.0, 'Phase')
 
     def function1D(self, x):
@@ -29,8 +30,8 @@ class TFMuonium(IFunction1D):
         gm = 0.01355342
         ge = 2.8024
         fcut = 10**32
-        chi =(gm + ge) * B / A
-        diff =(ge - gm) / (gm + ge)
+        chi = (gm + ge) * B / A
+        diff = (ge - gm) / (gm + ge)
         delta = chi / np.sqrt(1 + chi ** 2)
         E1 = A / 4 * (1 + 2 * diff * chi)
         E2 = A / 4 * (- 1 + 2 * np.sqrt(1 + chi ** 2))
@@ -49,5 +50,6 @@ class TFMuonium(IFunction1D):
         Term3 = (1 + delta) * a34 * np.cos(w34 * x + phi)
         Term4 = (1 - delta) * a23 * np.cos(w23 * x + phi)
         return A0 * 0.25 * (Term1 + Term2 + Term3 + Term4)
+
 
 FunctionFactory.subscribe(TFMuonium)

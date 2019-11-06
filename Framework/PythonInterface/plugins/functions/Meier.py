@@ -17,9 +17,12 @@ class Meier(IFunction1D):
 
     def init(self):
         self.declareParameter("A0", 0.5, 'Amplitude')
-        self.declareParameter("FreqD", 0.01, 'Frequency due to dipolar coupling (MHz)')
-        self.declareParameter("FreqQ", 0.05, 'Frequency due to quadrupole interaction of the nuclear spin (MHz)')
-        self.declareParameter("Spin", 3.5, 'J, Total angular momentum quanutm number')
+        self.declareParameter(
+            "FreqD", 0.01, 'Frequency due to dipolar coupling (MHz)')
+        self.declareParameter(
+            "FreqQ", 0.05, 'Frequency due to quadrupole interaction of the nuclear spin (MHz)')
+        self.declareParameter(
+            "Spin", 3.5, 'J, Total angular momentum quanutm number')
         self.declareParameter("Sigma", 0.2, 'Gaussian decay rate')
         self.declareParameter("Lambda", 0.1, 'Exponential decay rate')
 
@@ -44,7 +47,7 @@ class Meier(IFunction1D):
         cosSQalpha = []
         sinSQalpha = []
 
-        for i in range(0 , int(J2 + 2)):
+        for i in range(0, int(J2 + 2)):
             m = i - J
             q1 = (OmegaQ + OmegaD) * (2 * m - 1)
             q2 = OmegaD * np.sqrt(J * (J + 1) - m * (m - 1))
@@ -70,16 +73,22 @@ class Meier(IFunction1D):
         tz = 0
         tx = 0
         for i in range(1, int(J2) + 1):
-            tz = tz + cosSQ2alpha[i] + sinSQ2alpha[i] * np.cos((lamp[i] - lamm[i]) * x)
+            tz = tz + cosSQ2alpha[i] + sinSQ2alpha[i] * \
+                np.cos((lamp[i] - lamm[i]) * x)
         Pz = (1 + tz) / (2 * J + 1)
 
         for i in range(0, int(J2) + 1):
-            a = cosSQalpha[i+1] * sinSQalpha[i] * np.cos((lamp[i + 1] - lamp[i]) * x)
-            b = cosSQalpha[i+1] * cosSQalpha[i] * np.cos((lamp[i + 1] - lamm[i]) * x)
-            c = sinSQalpha[i+1] * sinSQalpha[i] * np.cos((lamm[i + 1] - lamp[i]) * x)
-            d = sinSQalpha[i+1] * cosSQalpha[i] * np.cos((lamm[i + 1] - lamm[i]) * x)
+            a = cosSQalpha[i+1] * sinSQalpha[i] * \
+                np.cos((lamp[i + 1] - lamp[i]) * x)
+            b = cosSQalpha[i+1] * cosSQalpha[i] * \
+                np.cos((lamp[i + 1] - lamm[i]) * x)
+            c = sinSQalpha[i+1] * sinSQalpha[i] * \
+                np.cos((lamm[i + 1] - lamp[i]) * x)
+            d = sinSQalpha[i+1] * cosSQalpha[i] * \
+                np.cos((lamm[i + 1] - lamm[i]) * x)
             tx = tx + a + b + c + d
         Px = tx / (2 * J + 1)
         return A0 * gau * Lor * (1./3.) * (2 * Px + Pz)
+
 
 FunctionFactory.subscribe(Meier)

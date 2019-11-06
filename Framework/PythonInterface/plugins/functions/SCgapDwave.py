@@ -35,13 +35,14 @@ class SCgapDwave(IFunction1D):
             a = 1.018
             c = 1.82
             return 1 / np.cosh(np.sqrt((Ec * E) ** 2 + (DeltaDwave * np.tanh(c * (a * (Tc / xx - 1)) ** 0.51)) ** 2) / (
-                        2 * kb * xx)) ** 2
+                2 * kb * xx)) ** 2
 
         for xx in x:
             if xx > Tc:
                 Integral.append(1)
             else:
-                Integral.append(nquad(Integrand, [[0, 1], [0, 1]])[0] * Ec / (2 * kb * xx))
+                Integral.append(nquad(Integrand, [[0, 1], [0, 1]])[
+                                0] * Ec / (2 * kb * xx))
 
         return 1 - np.array(Integral)
 

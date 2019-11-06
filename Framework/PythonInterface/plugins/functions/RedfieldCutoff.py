@@ -17,7 +17,8 @@ class RedfieldCutoff(IFunction1D):
     def init(self):
         self.declareParameter("A0", 1)
         self.declareParameter("Hloc", 0.1, "Local magnetic field (G)")
-        self.declareParameter("Tau", 0.1, "Correlation time of muon spins (microsec)")
+        self.declareParameter(
+            "Tau", 0.1, "Correlation time of muon spins (microsec)")
 
     def function1D(self, x):
         A0 = self.getParameterValue("A0")
@@ -25,5 +26,6 @@ class RedfieldCutoff(IFunction1D):
         tau = self.getParameterValue("Tau")
         gmu = 0.01355342
         return A0 * 2 * (gmu * Hloc) ** 2 * tau / (1 + (gmu * x * tau) ** 2)
+
 
 FunctionFactory.subscribe(RedfieldCutoff)

@@ -29,4 +29,5 @@ class ModOsc(IFunction1D):
         phi = self.getParameterValue("Phi")
         return A0 * np.cos(2 * np.pi * Freq * x + phi) * sp.j0(2 * np.pi * ModFreq * x + phi)
 
+
 FunctionFactory.subscribe(ModOsc)

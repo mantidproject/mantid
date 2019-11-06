@@ -17,7 +17,8 @@ class FmuF(IFunction1D):
 
     def init(self):
         self.declareParameter("A0", 0.5, 'Amplitude')
-        self.declareParameter("FreqD", 0.2, 'Dipolar interaction frequency (MHz)' )
+        self.declareParameter(
+            "FreqD", 0.2, 'Dipolar interaction frequency (MHz)')
         self.declareParameter("Lambda", 0.1, 'Exponential decay rate')
         self.declareParameter("Sigma", 0.2, 'Gaussian decay rate')
 
@@ -27,12 +28,15 @@ class FmuF(IFunction1D):
         Lambda = self.getParameterValue("Lambda")
         Sigma = self.getParameterValue("Sigma")
         OmegaD = FreqD * 2 * np.pi
-        Gauss = np.exp( - (Sigma * x) ** 2 / 2)
-        Lor = np.exp( - Lambda * x)
+        Gauss = np.exp(- (Sigma * x) ** 2 / 2)
+        Lor = np.exp(- Lambda * x)
         term1 = np.cos(np.sqrt(3) * OmegaD * x)
-        term2 = (1 - 1 / np.sqrt(3)) * np.cos(0.5 * (3 - np.sqrt(3)) * OmegaD * x)
-        term3 = (1 + 1 / np.sqrt(3)) * np.cos(0.5 * (3 + np.sqrt(3)) * OmegaD * x)
+        term2 = (1 - 1 / np.sqrt(3)) * \
+            np.cos(0.5 * (3 - np.sqrt(3)) * OmegaD * x)
+        term3 = (1 + 1 / np.sqrt(3)) * \
+            np.cos(0.5 * (3 + np.sqrt(3)) * OmegaD * x)
         G = (3 + term1 + term2 + term3) / 6
         return A0 * Gauss * Lor * G
+
 
 FunctionFactory.subscribe(FmuF)

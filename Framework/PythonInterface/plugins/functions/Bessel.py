@@ -27,4 +27,5 @@ class Bessel(IFunction1D):
         Nu = self.getParameterValue("Nu")
         return A0 * sp.j0(2 * np.pi * Nu * x + Phi)
 
+
 FunctionFactory.subscribe(Bessel)
