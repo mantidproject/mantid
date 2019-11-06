@@ -12,24 +12,25 @@ import numpy as np
 
 class MuMinusExpTF(IFunction1D):
 
-	def category(self):
-		return "Muon"
+    def category(self):
+        return "Muon"
 
-	def init(self):
-		self.declareParameter("A", 1)
-		self.declareParameter("Lambda", 0.1, 'Decay rate of oscillating term')
-		self.declareParameter("N0", 1)
-		self.declareParameter("Tau", 5.0)    
-		self.declareParameter("Phi", 0.3, 'Phase')
-		self.declareParameter("Nu", 0.2, 'Oscillating frequency (MHz)')
+    def init(self):
+        self.declareParameter("A", 1)
+        self.declareParameter("Lambda", 0.1, 'Decay rate of oscillating term')
+        self.declareParameter("N0", 1)
+        self.declareParameter("Tau", 5.0)
+        self.declareParameter("Phi", 0.3, 'Phase')
+        self.declareParameter("Nu", 0.2, 'Oscillating frequency (MHz)')
 
-	def function1D(self, x):
-		A = self.getParameterValue("A")
-		Lambda = self.getParameterValue("Lambda")
-		N0 = self.getParameterValue("N0")
-		tau = self.getParameterValue("Tau")
-		phi = self.getParameterValue("Phi")
-		nu = self.getParameterValue("Nu")
-		return N0 * np.exp(- x / tau) * (1 + A * np.exp(- Lambda * x) * np.cos(2 * np.pi * nu * x + phi))
+    def function1D(self, x):
+        A = self.getParameterValue("A")
+        Lambda = self.getParameterValue("Lambda")
+        N0 = self.getParameterValue("N0")
+        tau = self.getParameterValue("Tau")
+        phi = self.getParameterValue("Phi")
+        nu = self.getParameterValue("Nu")
+        return N0 * np.exp(- x / tau) * (1 + A * np.exp(- Lambda * x) * np.cos(2 * np.pi * nu * x + phi))
+
 
 FunctionFactory.subscribe(MuMinusExpTF)

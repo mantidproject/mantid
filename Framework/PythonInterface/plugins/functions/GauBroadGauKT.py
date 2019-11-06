@@ -31,4 +31,5 @@ class GauBroadGauKT(IFunction1D):
         term1 = (DeltaEff * x) ** 2 / denom
         return A0 * (1./3. + 2./3. * ((1 + R ** 2) / denom) ** 1.5 * (1 - term1) * np.exp(- term1 / 2))
 
+
 FunctionFactory.subscribe(GauBroadGauKT)

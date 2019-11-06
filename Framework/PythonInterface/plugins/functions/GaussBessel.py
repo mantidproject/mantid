@@ -19,7 +19,8 @@ class GaussBessel(IFunction1D):
     def init(self):
         self.declareParameter("A0", 0.2, 'Amplitude')
         self.declareParameter("Freq", 0.5, 'ZF Frequency (MHz)')
-        self.declareParameter("Sigma", 0.2, 'Gaussian relaxation for oscillatory component')
+        self.declareParameter(
+            "Sigma", 0.2, 'Gaussian relaxation for oscillatory component')
         self.declareParameter("Phi", 0.0, 'Phase (rad)')
 
     def function1D(self, x):

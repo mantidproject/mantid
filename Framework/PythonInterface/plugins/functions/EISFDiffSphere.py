@@ -4,7 +4,7 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init,invalid-name
+# pylint: disable=no-init,invalid-name
 """
 @author Jose Borreguero, ORNL
 @date December 05, 2017
@@ -81,8 +81,9 @@ class EISFDiffSphere(IFunction1D):
             z = radius * x
             j = j1(z)/z
             jacobian.set(i, 0, np.square(3 * j))
-            jacobian.set(i,1, amplitude * 2 * 9 * j * (j1d(z) - j) / radius)
+            jacobian.set(i, 1, amplitude * 2 * 9 * j * (j1d(z) - j) / radius)
             i += 1
+
 
 # Required to have Mantid recognise the new function
 FunctionFactory.subscribe(EISFDiffSphere)

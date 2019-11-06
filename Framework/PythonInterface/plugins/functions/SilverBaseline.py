@@ -16,10 +16,11 @@ class SilverBaseline(IFunction1D):
         return "Muon"
 
     def init(self):
-        self.declareParameter("A0",0.1)
+        self.declareParameter("A0", 0.1)
 
     def function1D(self, x):
         A0 = self.getParameterValue("A0")
         return A0*np.exp(-0.0015*x)
+
 
 FunctionFactory.subscribe(SilverBaseline)

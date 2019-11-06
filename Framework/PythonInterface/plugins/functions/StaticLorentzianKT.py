@@ -19,7 +19,8 @@ class StaticLorentzianKT(IFunction1D):
 
     def init(self):
         self.declareParameter("A0", 0.2)
-        self.declareParameter("A", 0.1, 'Half-width of half maximum of Lorentzian distribution (microsecs)')
+        self.declareParameter(
+            "A", 0.1, 'Half-width of half maximum of Lorentzian distribution (microsecs)')
         self.declareParameter("Field", 0.1, 'Longitudinal B-field (G)')
         self.addConstraints("Field >= 0")
 
@@ -32,17 +33,18 @@ class StaticLorentzianKT(IFunction1D):
         y = []
 
         def Lorfun(x, omega, A):
-            return  sp.j0(omega * x) * np.exp(- A * x)
+            return sp.j0(omega * x) * np.exp(- A * x)
 
-        if omega == 0 :
+        if omega == 0:
             LorKT = 1./3. + 2./3. * (1 - A * x) * np.exp(- A * x)
         else:
             q1 = A / omega * sp.j1(omega * x) * np.exp(- A * x)
             q2 = (A / omega) ** 2 * (sp.j0(omega * x) * np.exp(- A * x) - 1)
             for i in range(0, np.size(q1)):
-                y.append(quad(Lorfun, 0, x[i], args = (omega, A))[0])
+                y.append(quad(Lorfun, 0, x[i], args=(omega, A))[0])
             q3 = (1 + (A / omega) ** 2) * A * np.array(y)
             LorKT = 1 - q1 - q2 - q3
         return A0 * LorKT
+
 
 FunctionFactory.subscribe(StaticLorentzianKT)

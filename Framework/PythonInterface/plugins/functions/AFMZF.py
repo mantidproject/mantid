@@ -18,8 +18,10 @@ class AFMZF(IFunction1D):
     def init(self):
         self.declareParameter("A0", 0.2, 'Amplitude')
         self.declareParameter("Freq", 1, 'ZF Frequency (MHz)')
-        self.declareParameter("Angle", 50, 'Angle of internal field w.r.t. to applied field (degrees)')
-        self.declareParameter("Sigma", 0.2, 'Gaussian relaxation for oscillatory component')
+        self.declareParameter(
+            "Angle", 50, 'Angle of internal field w.r.t. to applied field (degrees)')
+        self.declareParameter(
+            "Sigma", 0.2, 'Gaussian relaxation for oscillatory component')
         self.declareParameter("Phi", 0.0, 'Phase (rad)')
         self.addConstraints("Sigma > 0")
         self.addConstraints("Freq > 0")

@@ -31,4 +31,5 @@ class RFresonance(IFunction1D):
         RelAmp = (B / Beff) ** 2
         return A0 * (1 + (np.cos(Beff * gmu * x) * np.exp(- (width * x) ** 2) - 1) * RelAmp)
 
+
 FunctionFactory.subscribe(RFresonance)

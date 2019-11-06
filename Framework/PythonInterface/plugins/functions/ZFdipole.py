@@ -29,7 +29,7 @@ class ZFdipole(IFunction1D):
         gmu = 2 * np.pi * 0.01355342
         Omega = gmu * BDip
         return A0 * (1. / 6) * (1 + np.exp(- LambdaTrans * x) * (
-                    np.cos(Omega * x) + 2 * np.cos(1.5 * Omega * x) + 2 * np.cos(0.5 * Omega * x)))
+            np.cos(Omega * x) + 2 * np.cos(1.5 * Omega * x) + 2 * np.cos(0.5 * Omega * x)))
 
 
 FunctionFactory.subscribe(ZFdipole)
