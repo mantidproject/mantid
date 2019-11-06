@@ -182,7 +182,10 @@ void MainWindowPresenter::showHelp() {
 }
 
 void MainWindowPresenter::notifySaveBatchRequested(int tabIndex) {
-  auto filename = QFileDialog::getSaveFileName();
+  const QString jsonFilter = QString("JSON (*.json)");
+  auto filename =
+      QFileDialog::getSaveFileName(nullptr, QString(), QString(), jsonFilter,
+                                   nullptr, QFileDialog::DontResolveSymlinks);
   if (filename == "")
     return;
   Encoder encoder;
@@ -192,7 +195,10 @@ void MainWindowPresenter::notifySaveBatchRequested(int tabIndex) {
 }
 
 void MainWindowPresenter::notifyLoadBatchRequested(int tabIndex) {
-  auto filename = QFileDialog::getOpenFileName();
+  const QString jsonFilter = QString("JSON (*.json)");
+  auto filename =
+      QFileDialog::getOpenFileName(nullptr, QString(), QString(), jsonFilter,
+                                   nullptr, QFileDialog::DontResolveSymlinks);
   if (filename == "")
     return;
   QMap<QString, QVariant> map;
