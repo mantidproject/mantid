@@ -39,7 +39,7 @@ inline void EndianCheck() {
 }
 
 template <typename T> FLATBUFFERS_CONSTEXPR size_t AlignOf() {
-// clang-format off
+  // clang-format off
   #ifdef _MSC_VER
     return __alignof(T);
   #else
@@ -344,7 +344,7 @@ struct String : public Vector<char> {
   const char *c_str() const { return reinterpret_cast<const char *>(Data()); }
   std::string str() const { return std::string(c_str(), Length()); }
 
-// clang-format off
+  // clang-format off
   #ifdef FLATBUFFERS_HAS_STRING_VIEW
   flatbuffers::string_view string_view() const {
     return flatbuffers::string_view(c_str(), Length());
@@ -490,7 +490,7 @@ public:
 
   size_t size() const { return size_; }
 
-// clang-format off
+  // clang-format off
   #if 0  // disabled for now due to the ordering of classes in this header
   template <class T>
   bool Verify() const {
@@ -1202,7 +1202,7 @@ public:
     return CreateString(str.c_str(), str.length());
   }
 
-// clang-format off
+  // clang-format off
   #ifdef FLATBUFFERS_HAS_STRING_VIEW
   /// @brief Store a string in the buffer, which can contain any binary data.
   /// @param[in] str A const string_view to copy in to the buffer.
@@ -1322,7 +1322,7 @@ public:
     // causing the wrong overload to be selected, remove it.
     AssertScalarT<T>();
     StartVector(len, sizeof(T));
-// clang-format off
+    // clang-format off
     #if FLATBUFFERS_LITTLEENDIAN
       PushBytes(reinterpret_cast<const uint8_t *>(v), len * sizeof(T));
     #else
@@ -1369,7 +1369,7 @@ public:
     return Offset<Vector<uint8_t>>(EndVector(v.size()));
   }
 
-// clang-format off
+  // clang-format off
   #ifndef FLATBUFFERS_CPP98_STL
   /// @brief Serialize values returned by a function into a FlatBuffer `vector`.
   /// This is a convenience function that takes care of iteration for you.
@@ -1450,7 +1450,7 @@ public:
     return CreateVectorOfStructs<T>(vv.data(), vv.size());
   }
 
-// clang-format off
+  // clang-format off
   #ifndef FLATBUFFERS_CPP98_STL
   /// @brief Serialize an array of structs into a FlatBuffer `vector`.
   /// @tparam T The data type of the struct array elements.
@@ -1854,7 +1854,7 @@ public:
 
   // Central location where any verification failures register.
   bool Check(bool ok) const {
-// clang-format off
+    // clang-format off
     #ifdef FLATBUFFERS_DEBUG_VERIFICATION_FAILURE
       FLATBUFFERS_ASSERT(ok);
     #endif
@@ -1868,7 +1868,7 @@ public:
 
   // Verify any range within the buffer.
   bool Verify(size_t elem, size_t elem_len) const {
-// clang-format off
+    // clang-format off
     #ifdef FLATBUFFERS_TRACK_VERIFIER_BUFFER_SIZE
       auto upper_bound = elem + elem_len;
       if (upper_bound_ < upper_bound)
@@ -1988,7 +1988,7 @@ public:
     // Call T::Verify, which must be in the generated code for this type.
     auto o = VerifyOffset(start);
     return o && reinterpret_cast<const T *>(buf_ + start + o)->Verify(*this)
-// clang-format off
+    // clang-format off
     #ifdef FLATBUFFERS_TRACK_VERIFIER_BUFFER_SIZE
            && GetComputedSize()
     #endif
@@ -2045,7 +2045,7 @@ public:
     return true;
   }
 
-// clang-format off
+  // clang-format off
   #ifdef FLATBUFFERS_TRACK_VERIFIER_BUFFER_SIZE
   // Returns the message size in bytes
   size_t GetComputedSize() const {
@@ -2064,7 +2064,7 @@ private:
   uoffset_t max_depth_;
   uoffset_t num_tables_;
   uoffset_t max_tables_;
-// clang-format off
+  // clang-format off
   #ifdef FLATBUFFERS_TRACK_VERIFIER_BUFFER_SIZE
     mutable size_t upper_bound_;
   #endif
