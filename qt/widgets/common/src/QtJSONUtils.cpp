@@ -116,24 +116,21 @@ public:
 namespace MantidQt {
 namespace API {
 void saveJSONToFile(const QString &filename,
-                    const QMap<QString, QVariant> &map) {
+                    const QMap<QString, QVariant> &map) {	
+auto filenameString = filename.toStdString();
+if (filenameString.find_last_of(".") == std::string::npos ||
+      filenameString.substr(filenameString.find_last_of(".") + 1) != std::string("json")) {
+    filename.append(".json")
+  }
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   JSON JSON;
   auto jsonString = JSON.encode(map);
-  if (filename.find_last_of(".") == std::string::npos ||
-      filename.substr(filename.find_last_of(".") + 1) != std::string("json")) {
-    filename.append(".json")
-  }
   QFile jsonFile(filename);
   jsonFile.open(QFile::WriteOnly);
   QByteArray jsonByteArray;
   jsonFile.write(jsonByteArray.append(jsonString));
 #else
   QJsonDocument jsonDocument(QJsonObject::fromVariantMap(map));
-  if (filename.find_last_of(".") == std::string::npos ||
-      filename.substr(filename.find_last_of(".") + 1) != std::string("json")) {
-    filename.append(".json")
-  }
   QFile jsonFile(filename);
   jsonFile.open(QFile::WriteOnly);
   jsonFile.write(jsonDocument.toJson());
