@@ -104,7 +104,7 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
                     bin_center = (float(self.ws.getAxis(axis_index).label(section)) +
                                   float(self.ws.getAxis(axis_index).label(section+1)))/2.0
                     unit = self.ws.getAxis(axis_index).getUnit().symbol().utf8()
-                    return self.VERTICAL_HEADER_DISPLAY_STRING_FOR_NUMERIC_AXIS.format(section, bin_center, unit)
+                    return self.VERTICAL_HEADER_TOOLTIP_STRING_FOR_NUMERIC_AXIS.format(section, bin_center, unit)
         else:
             raise NotImplementedError("What do we do here? Handle if the vertical axis does NOT exist")
 
