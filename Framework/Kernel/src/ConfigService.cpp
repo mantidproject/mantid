@@ -1813,8 +1813,8 @@ void ConfigServiceImpl::updateFacilities(const std::string &fName) {
   const auto fileNames = getFacilityFilenames(fName);
   size_t attemptIndex = 0;
   bool success = false;
-  std::string fileName = fileNames[attemptIndex];
   while ((!success) && (attemptIndex < fileNames.size())) {
+    std::string fileName = fileNames[attemptIndex];
     try {
       // Set up the DOM parser and parse xml file
       Poco::AutoPtr<Poco::XML::Document> pDoc;
@@ -1853,7 +1853,7 @@ void ConfigServiceImpl::updateFacilities(const std::string &fName) {
       // log this failure to load a file
       g_log.error() << "Failed to load the facilities.xml file at " << fileName
                     << "\nIt might be corrupt.  " << ex.what()
-                    << "\nWill try to load another version";
+                    << "\nWill try to load another version.\n";
       attemptIndex++;
       // move on to the next file index if available
       if (attemptIndex == fileNames.size()) {
