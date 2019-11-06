@@ -7,6 +7,8 @@
 
 #include "flatbuffers/flatbuffers.h"
 
+namespace HistoSchema {
+
 struct ArrayUInt;
 
 struct ArrayULong;
@@ -795,6 +797,7 @@ inline void FinishSizePrefixedEventHistogramBuffer(
     flatbuffers::FlatBufferBuilder &fbb,
     flatbuffers::Offset<EventHistogram> root) {
   fbb.FinishSizePrefixed(root, EventHistogramIdentifier());
+}
 }
 
 #endif  // FLATBUFFERS_GENERATED_HS00EVENTHISTOGRAM_H_

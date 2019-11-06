@@ -40,6 +40,8 @@ double numPopulateWorkspaceCalls = 0;
 double totalEventFromMessageDuration = 0;
 double numEventFromMessageCalls = 0;
 
+using namespace LogSchema;
+
 namespace {
 /// Logger
 Mantid::Kernel::Logger g_log("KafkaEventStreamDecoder");
@@ -544,6 +546,19 @@ void KafkaEventStreamDecoder::sampleDataFromMessage(const std::string &buffer) {
  */
 void KafkaEventStreamDecoder::initLocalCaches(
     const std::string &rawMsgBuffer, const RunStartStruct &runStartData) {
+  m_runId = runStartData.runId;
+
+  const auto jsonGeometry = runStartData.nexusStructure;
+  const auto instName = runStartData.instrumentName;
+
+  DataObjects::EventWorkspace_sptr eventBuffer;
+  if (rawMsgBuffer.empty()) {
+    /* Load the instrument to get the number of spectra :c */
+    auto ws =
+        API::WorkspaceFactory::Instance().create("EventWorkspace", 1, 2, 1);
+    loadInstrument<API::MatrixWorkspace>(instName, ws, jsonGeometry);
+    const auto nspec = ws->getInstrument()->getNumberDetectors();
+
     // Create buffer
     eventBuffer = boost::static_pointer_cast<DataObjects::EventWorkspace>(
         API::WorkspaceFactory::Instance().create("EventWorkspace", nspec, 2,
@@ -569,62 +584,22 @@ void KafkaEventStreamDecoder::initLocalCaches(
       throw std::runtime_error(os.str());
     }
 
-  const auto jsonGeometry = runStartData.nexusStructure;
-  const auto instName = runStartData.instrumentName;
-
-  DataObjects::EventWorkspace_sptr eventBuffer;
-  bool isInstrumentSet = false;
-  if (!jsonGeometry.empty()) {
-    g_log.notice() << "Loading json geometry..." << std::endl;
-    /* Load the instrument to get the number of spectra :c */
-    auto ws =
-        API::WorkspaceFactory::Instance().create("EventWorkspace", 1, 2, 1);
-    loadInstrument<API::MatrixWorkspace>(instName, ws, jsonGeometry);
-    const auto nspec = ws->getInstrument()->getNumberDetectors();
-
-    // Create buffer
-    eventBuffer = boost::static_pointer_cast<DataObjects::EventWorkspace>(
-        API::WorkspaceFactory::Instance().create("EventWorkspace", nspec, 2,
-                                                 1));
-    eventBuffer->setInstrument(ws->getInstrument());
-    eventBuffer->rebuildSpectraMapping();
-    eventBuffer->getAxis(0)->unit() =
-        Kernel::UnitFactory::Instance().create("TOF");
-    eventBuffer->setYUnit("Counts");
-    isInstrumentSet = true;
-  } else {
-    /* Parse mapping from stream */
-    auto spDetMsg = GetSpectraDetectorMapping(
-        reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
-    auto nspec = static_cast<uint32_t>(spDetMsg->n_spectra());
-    auto nudet = spDetMsg->detector_id()->size();
-    if (nudet != nspec) {
-      std::ostringstream os;
-      os << "KafkaEventStreamDecoder::initLocalEventBuffer() - Invalid "
-            "spectra/detector mapping. Expected matched length arrays but "
-            "found nspec="
-         << nspec << ", ndet=" << nudet;
-      throw std::runtime_error(os.str());
-    }
-
     // Create buffer
     eventBuffer = createBufferWorkspace<DataObjects::EventWorkspace>(
         "EventWorkspace", static_cast<size_t>(spDetMsg->n_spectra()),
         spDetMsg->spectrum()->data(), spDetMsg->detector_id()->data(), nudet);
-  }
 
-  // Load the instrument if possible but continue if we can't
-  if (!isInstrumentSet) {
-    g_log.notice() << "Loading instrument..." << std::endl; 
+    // Load the instrument if possible but continue if we can't
     if (!instName.empty()) {
       loadInstrument<DataObjects::EventWorkspace>(instName, eventBuffer,
                                                   jsonGeometry);
       if (rawMsgBuffer.empty()) {
         eventBuffer->rebuildSpectraMapping();
       }
-    } else
+    } else {
       g_log.warning(
           "Empty instrument name received. Continuing without instrument");
+    }
   }
 
   auto &mutableRun = eventBuffer->mutableRun();
@@ -645,8 +620,7 @@ void KafkaEventStreamDecoder::initLocalCaches(
       eventBuffer->getSpectrumToWorkspaceIndexVector(m_specToIdxOffset);
 
   // Buffers for each period
-  const size_t nperiods =
-      runStartData.nPeriods == 0 ? 1 : runStartData.nPeriods;
+  const size_t nperiods = runStartData.nPeriods;
   if (nperiods == 0) {
     throw std::runtime_error(
         "KafkaEventStreamDecoder - Message has n_periods==0. This is "
@@ -692,7 +666,7 @@ std::vector<size_t> computeGroupBoundaries(
 
     /* Advance the end boundary of the group until all events for a given
      * workspace index fall within a single group */
-     while (groupBoundaries[group] + 1 < eventBuffer.size() &&
+    while (groupBoundaries[group] + 1 < eventBuffer.size() &&
            (eventBuffer[groupBoundaries[group]].wsIdx ==
             eventBuffer[groupBoundaries[group] + 1].wsIdx)) {
       ++groupBoundaries[group];

@@ -39,6 +39,8 @@ Mantid::Kernel::Logger g_log("KafkaHistoStreamDecoder");
 const std::string HISTO_MESSAGE_ID = "hs00";
 } // namespace
 
+using namespace HistoSchema;
+
 namespace Mantid {
 namespace LiveData {
 

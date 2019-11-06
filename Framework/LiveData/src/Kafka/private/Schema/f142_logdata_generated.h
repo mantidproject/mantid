@@ -9,6 +9,7 @@
 
 #include "fwdi_forwarder_internal_generated.h"
 
+namespace LogSchema {
 struct Byte;
 
 struct UByte;
@@ -1808,6 +1809,7 @@ inline void FinishSizePrefixedLogDataBuffer(
     flatbuffers::FlatBufferBuilder &fbb,
     flatbuffers::Offset<LogData> root) {
   fbb.FinishSizePrefixed(root, LogDataIdentifier());
+}
 }
 
 #endif  // FLATBUFFERS_GENERATED_F142LOGDATA_H_
