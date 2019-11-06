@@ -15,7 +15,7 @@ class ZFprotonDipole(IFunction1D):
     def category(self):
         return "Muon"
 
-    def init(self):	
+    def init(self):
         self.declareParameter("A0", 0.5)
         self.declareParameter("Radius", 2, 'Radius (Angstrom)')
         self.declareParameter("LambdaTrans", 0.2, 'Lambda-Trans (MHz)')
@@ -34,6 +34,9 @@ class ZFprotonDipole(IFunction1D):
         else:
             B = 0
         Omega = gmu * B
-        return A0 * (1./6) * (1 + np.exp(- LambdaTrans * x) * np.cos(Omega * x) + 2 * np.cos(1.5 * Omega * x) + 2 * np.cos(0.5 * Omega * x))
+        return A0 * (1. / 6) * (
+                    1 + np.exp(- LambdaTrans * x) * np.cos(Omega * x) + 2 * np.cos(1.5 * Omega * x) + 2 * np.cos(
+                0.5 * Omega * x))
+
 
 FunctionFactory.subscribe(ZFprotonDipole)

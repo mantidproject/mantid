@@ -31,10 +31,11 @@ class SCgapPwave(IFunction1D):
         Integral = []
 
         def Integrand(E, phi):
-                DeltaPwave = Delta * np.cos(np.pi * phi / 2)
-                a = 1.018
-                c = 1.82
-                return  1 / np.cosh(np.sqrt((Ec * E) ** 2 + (DeltaPwave * np.tanh (c * (a * (Tc / xx - 1)) ** 0.51)) ** 2) / (2 * kb * xx)) ** 2
+            DeltaPwave = Delta * np.cos(np.pi * phi / 2)
+            a = 1.018
+            c = 1.82
+            return 1 / np.cosh(np.sqrt((Ec * E) ** 2 + (DeltaPwave * np.tanh(c * (a * (Tc / xx - 1)) ** 0.51)) ** 2) / (
+                        2 * kb * xx)) ** 2
 
         for xx in x:
             if xx > Tc:
