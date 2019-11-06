@@ -18,16 +18,9 @@ public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static TopicInfoTest *createSuite() { return new TopicInfoTest(); }
-  static void destroySuite( TopicInfoTest *suite ) { delete suite; }
+  static void destroySuite(TopicInfoTest *suite) { delete suite; }
 
-
-  void test_Something()
-  {
-    TS_FAIL( "You forgot to write a test!");
-  }
-
-
+  void test_Something() { TS_FAIL("You forgot to write a test!"); }
 };
-
 
 #endif /* MANTID_KERNEL_TOPICINFOTEST_H_ */

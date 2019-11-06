@@ -144,7 +144,7 @@ void IKafkaStreamDecoder::writeChopperTimestampsToWorkspaceLogs(
 
   if (buffer.empty())
     return;
- 
+
   std::lock_guard<std::mutex> workspaceLock(m_mutex);
 
   if (flatbuffers::BufferHasIdentifier(
