@@ -395,7 +395,7 @@ if(ENABLE_CPACK)
     endif()
     if(ENABLE_WORKBENCH)
       set(CPACK_RPM_PACKAGE_REQUIRES
-          "${CPACK_RPM_PACKAGE_REQUIRES},qt5-qtbase,python-qt5")
+          "${CPACK_RPM_PACKAGE_REQUIRES},qt5-qtbase,python2-qt5")
     endif()
 
     if("${UNIX_CODENAME}" MATCHES "Santiago") # RHEL6
