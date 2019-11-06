@@ -1811,7 +1811,7 @@ void ConfigServiceImpl::updateFacilities(const std::string &fName) {
   // Try to find the file. If it does not exist we will crash, and cannot read
   // the Facilities file
   const auto fileNames = getFacilityFilenames(fName);
-  int attemptIndex = 0;
+  size_t attemptIndex = 0;
   bool success = false;
   std::string fileName = fileNames[attemptIndex];
   while ((!success) && (attemptIndex < fileNames.size())) {
