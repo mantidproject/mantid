@@ -44,13 +44,8 @@ set(TEST_PY_FILES
     TeixeiraWaterTest.py
     TFMuoniumTest.py
     TriangleOscTest.py
-    ZFMuoniumTest.py
-    TFMuoniumTest.py
-    ZFdipoleTest.py
     ZFprotonDipoleTest.py
-    ZFelectronDipoleTest.py
     ZFdipoleTest.py
-    ZFprotonDipoleTest.py
     ZFelectronDipoleTest.py
     ZFMuoniumTest.py)
 
