@@ -35,6 +35,7 @@ Algorithms
 
 Instrument Definition Files
 ---------------------------
+* Mantid is now resilient to corrupted Facilities.xml files, which could sometimes happen occaisionally while downloading an updated file.  If Mantid finds a corrupt file it will now fall back to the originally installed file, an the corrupted one should be re-downloaded.
 * A definition file for the NEAT instrument at HZB as been added along with an entry in the facilities file.
 
 Data Objects
