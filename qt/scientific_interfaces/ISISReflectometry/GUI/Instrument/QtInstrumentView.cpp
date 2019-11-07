@@ -112,7 +112,8 @@ void QtInstrumentView::onSettingsChanged() {
 
 void QtInstrumentView::onRestoreDefaultsRequested() {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "ISIS Reflectometry->InstrumentTab->RestoreDefaults", false);
+      Mantid::Kernel::FeatureType::Feature,
+      {"ISIS Reflectometry", "InstrumentTab", "RestoreDefaults"}, false);
   m_notifyee->notifyRestoreDefaultsRequested();
 }
 

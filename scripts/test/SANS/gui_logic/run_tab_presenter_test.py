@@ -87,10 +87,6 @@ class RunTabPresenterTest(unittest.TestCase):
         self.addCleanup(self.os_patcher.stop)
         self.osMock = self.os_patcher.start()
 
-        self.thickness_patcher = mock.patch('sans.gui_logic.models.table_model.create_file_information')
-        self.addCleanup(self.thickness_patcher.stop)
-        self.thickness_patcher.start()
-
     def test_that_will_load_user_file(self):
         # Setup presenter and mock view
         user_file_path = create_user_file(sample_user_file)
@@ -867,6 +863,16 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertEqual(presenter.progress, 1)
         self.assertEqual(presenter._view.progress_bar_value, 1)
 
+    def test_that_update_progress_sets_correctly(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+        presenter.set_view(view)
+
+        presenter._set_progress_bar(current=100, number_steps=200)
+        self.assertEqual(presenter.progress, 100)
+        self.assertEqual(view.progress_bar_value, 100)
+        self.assertEqual(view.progress_bar_maximum, 200)
+
     def test_that_notify_progress_updates_state_and_tooltip_of_row(self):
         presenter = RunTabPresenter(SANSFacility.ISIS)
         view = mock.MagicMock()
@@ -901,6 +907,8 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter = RunTabPresenter(SANSFacility.ISIS)
         view = mock.MagicMock()
         view.get_selected_rows = mock.MagicMock(return_value=[0, 3, 4])
+        # Suppress plots
+        view.plot_results = False
         
         presenter.set_view(view)
         presenter._table_model.reset_row_state = mock.MagicMock()
@@ -936,6 +944,9 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter = RunTabPresenter(SANSFacility.ISIS)
         view = mock.MagicMock()
         view.get_selected_rows = mock.MagicMock(return_value=[0, 3, 4])
+
+        # Suppress plots
+        view.plot_results = False
         
         presenter._table_model.get_number_of_rows = mock.MagicMock(return_value=7)
         presenter.set_view(view)

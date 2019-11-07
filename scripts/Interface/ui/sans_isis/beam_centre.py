@@ -14,6 +14,7 @@ from mantidqt.utils.qt import load_ui
 from mantidqt.widgets import messagedisplay
 
 from mantid import UsageService
+from mantid.kernel import FeatureType
 from sans.gui_logic.gui_common import get_detector_from_gui_selection, \
      get_detector_strings_for_gui, get_string_for_gui_from_reduction_mode
 
@@ -57,7 +58,7 @@ class BeamCentre(QtWidgets.QWidget, Ui_BeamCentre):
 
         # At the moment we only track how many times this is opened, if it's popular
         # we can track individual feature usage at a later date
-        UsageService.registerFeatureUsage("Feature", "ISIS SANS->Beam Centre Tab", False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Beam Centre Tab"], False)
 
     def _setup_log_widget(self):
         self.log_widget = messagedisplay.MessageDisplay(parent=self.groupBox_2)

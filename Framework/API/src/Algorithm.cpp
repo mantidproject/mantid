@@ -1758,8 +1758,8 @@ void Algorithm::registerFeatureUsage() const {
   if (UsageService::Instance().isEnabled()) {
     std::ostringstream oss;
     oss << this->name() << ".v" << this->version();
-    UsageService::Instance().registerFeatureUsage("Algorithm", oss.str(),
-                                                  isChild());
+    UsageService::Instance().registerFeatureUsage(FeatureType::Algorithm,
+                                                  oss.str(), isChild());
   }
 }
 
