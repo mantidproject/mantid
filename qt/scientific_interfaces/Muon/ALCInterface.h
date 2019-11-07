@@ -36,6 +36,7 @@ class MANTIDQT_MUONINTERFACE_DLL ALCInterface : public API::UserSubWindow {
 public:
   ALCInterface(QWidget *parent = nullptr);
 
+  void closeEvent(QCloseEvent *event) override;
   static std::string name() { return "ALC"; }
   static QString categoryInfo() { return "Muon"; }
 

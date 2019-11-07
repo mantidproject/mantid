@@ -14,8 +14,6 @@ Improvements
   * Improved the speed of plotting during sequential fits.
 
 Removed
-  * Removed the creation of a group of groups from the elemental analysis GUI. The elemental analysis gui will now create a workspace for each detector, with each workspace containing three spectra corresponding to Total, Delayed and Prompt data
-  
 #######
 
 
@@ -54,6 +52,7 @@ Muon Analysis 2 and Frequency Domain Analysis
 - Muon Analysis (new) and Frequency Domain Analysis (new) work with project recovery. 
 - The original Muon Analysis GUI has been renamed Muon Analysis old and has been deprecated. 
 - The new Muon Analysis has been renamed Muon Analysis.
+- The ALC interface can now safely be closed while loading a set of runs. On an initial close request the algoirthm will be cancelled. The window then be closed.
 
 Algorithms
 ----------
