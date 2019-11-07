@@ -12,14 +12,12 @@ information regarding the custom output name and the information in the options 
 
 from __future__ import (absolute_import, division, print_function)
 
-import functools
 import os
 import re
 
 from sans.common.constants import ALL_PERIODS
 from sans.common.enums import RowState, SampleShape
 from sans.common.file_information import SANSFileInformationFactory
-from sans.gui_logic.presenter.create_file_information import create_file_information
 from ui.sans_isis.work_handler import WorkHandler
 
 
@@ -91,9 +89,6 @@ class TableModel(object):
         # Ensure state is created correctly if we have any values
         if table_index_model.sample_scatter:
             table_index_model.file_finding = False
-            create_file_information(table_index_model.sample_scatter, error_callback=lambda *args: None,
-                                    success_callback=lambda *args: None,
-                                    work_handler=self.work_handler, id=table_index_model.id)
 
     def append_table_entry(self, table_index_model):
         table_index_model.id = self._id_count
@@ -154,7 +149,6 @@ class TableModel(object):
     def reset_row_state(self, row):
         self._table_entries[row].update_attribute('row_state', RowState.Unprocessed)
         self._table_entries[row].update_attribute('tool_tip', '')
-        self.notify_subscribers()
 
     def set_row_to_error(self, row, tool_tip):
         self._table_entries[row].update_attribute('row_state', RowState.Error)
@@ -168,16 +162,20 @@ class TableModel(object):
         """
         if not rows:
             rows = range(len(self._table_entries))
+
+        file_information_factory = SANSFileInformationFactory()
         for row in rows:
             entry = self._table_entries[row]
             if entry.is_empty():
                 continue
             entry.file_finding = True
-            success_callback = functools.partial(self.update_thickness_from_file_information, entry.id)
 
-            error_callback = functools.partial(self.failure_handler, entry.id)
-            create_file_information(entry.sample_scatter, error_callback, success_callback,
-                                    self.work_handler, entry.id)
+            try:
+                file_info = file_information_factory.create_sans_file_information(entry.sample_scatter)
+            except RuntimeError:
+                continue
+
+            self.update_thickness_from_file_information(id=entry.id, file_information=file_info)
 
     def failure_handler(self, id, error):
         row = self.get_row_from_id(id)
