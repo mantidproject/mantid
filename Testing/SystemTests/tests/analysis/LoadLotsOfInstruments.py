@@ -16,6 +16,22 @@ EXPECTED_EXT = '.expected'
 
 
 class LoadLotsOfInstruments(systemtesting.MantidSystemTest):
+
+    @staticmethod
+    def _test_clones():
+        r"""Test latest definition files for certain sets of instrument names are actually the same
+        Example: we test that CG2_Definition.xml and GPSANS_Definition.xml have the same contents except for
+        strings 'CG2' and 'GPSANS'.
+        """
+        instrument_directory = config['instrumentDefinition.directory']
+        for file_type in ('_Definition.xml', '_Parameters.xml'):
+            for clone_set in (('CG2', 'GPSANS'), ('CG3', 'BIOSANS')):
+                original = clone_set[0]  # first item to which we compare the rest of the clones
+                original_file = open(os.path.join(instrument_directory, original + file_type)).read()
+                for clone in clone_set[1:]:
+                    clone_file = open(os.path.join(instrument_directory, clone + file_type)).read()
+                    assert original_file == clone_file.replace(clone, original)
+
     def __getDataFileList__(self):
         # get a list of directories to look in
         direc = config['instrumentDefinition.directory']
@@ -53,6 +69,7 @@ class LoadLotsOfInstruments(systemtesting.MantidSystemTest):
         del wksp
         return True
 
+
     def runTest(self):
         """Main entry point for the test suite"""
         files = self.__getDataFileList__()
@@ -84,3 +101,6 @@ class LoadLotsOfInstruments(systemtesting.MantidSystemTest):
         else:
             print("Successfully loaded %d files" % len(files))
         print(files)
+
+        # Additional custom tests
+        self._test_clones()
