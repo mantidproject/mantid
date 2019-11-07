@@ -1751,7 +1751,7 @@ ConfigServiceImpl::getFacilityFilenames(const std::string &fName) {
   if (!fName.empty()) {
     const Poco::File fileObj(fName);
     if (fileObj.exists()) {
-      returnPaths.push_back(fName);
+      returnPaths.emplace_back(fName);
       return returnPaths;
     }
   }
@@ -1782,7 +1782,7 @@ ConfigServiceImpl::getFacilityFilenames(const std::string &fName) {
     Poco::File fileObj(filename);
 
     if (fileObj.exists())
-      returnPaths.push_back(filename);
+      returnPaths.emplace_back(filename);
   }
 
   if (returnPaths.size() > 0) {
@@ -1814,7 +1814,7 @@ void ConfigServiceImpl::updateFacilities(const std::string &fName) {
   size_t attemptIndex = 0;
   bool success = false;
   while ((!success) && (attemptIndex < fileNames.size())) {
-    std::string fileName = fileNames[attemptIndex];
+    const auto& fileName = fileNames[attemptIndex];
     try {
       // Set up the DOM parser and parse xml file
       Poco::AutoPtr<Poco::XML::Document> pDoc;
@@ -1831,14 +1831,14 @@ void ConfigServiceImpl::updateFacilities(const std::string &fName) {
         throw std::runtime_error("No root element in Facilities.xml file");
       }
 
-      Poco::AutoPtr<Poco::XML::NodeList> pNL_facility =
+      const Poco::AutoPtr<Poco::XML::NodeList> pNL_facility =
           pRootElem->getElementsByTagName("facility");
-      size_t n = pNL_facility->length();
+      const size_t n = pNL_facility->length();
 
       for (unsigned long i = 0; i < n; ++i) {
-        auto *elem = dynamic_cast<Poco::XML::Element *>(pNL_facility->item(i));
+        const auto *elem = dynamic_cast<Poco::XML::Element *>(pNL_facility->item(i));
         if (elem) {
-          m_facilities.push_back(new FacilityInfo(elem));
+          m_facilities.emplace_back(new FacilityInfo(elem));
         }
       }
 
@@ -1857,7 +1857,7 @@ void ConfigServiceImpl::updateFacilities(const std::string &fName) {
       attemptIndex++;
       // move on to the next file index if available
       if (attemptIndex == fileNames.size()) {
-        std::string errorMessage =
+        const std::string errorMessage =
             "No more Facilities.xml files can be found, Mantid will not be "
             "able to start, Sorry.  Try reinstalling Mantid.";
         // This is one of the few times that both logging a messge and throwing
