@@ -49,6 +49,7 @@ Improvements
 - Plot windows now stay on top of Workbench's main window, so you can easily drag and drop workspaces onto existing figures.
 - Opening more than one instance of an interface is now disallowed, as was the case in MantidPlot.
 - The X value headers on data display now shows values to 4 decimal places.
+- If multiple plots of the same workspace are open, the fit property browser will change the default output name so any output workspaces are not overridden. 
 
 Bugfixes
 ########
