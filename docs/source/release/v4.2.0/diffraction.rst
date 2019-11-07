@@ -19,12 +19,13 @@ Improvements
 - The HRPD scripts now mask out the Bragg peaks from the Vanadium.
 - The file-naming scheme for ISIS powder is now controlled by a string template
 - The file-naming of output on HRPD as been updated to closely match old script outputs
+- The ISIS powder scripts for HRPD now integrate over the whole wavelength range by default when calculating the efficiency correction.
 - Geometry definition for LLB 5C1
 - :ref:`SNAPReduce <algm-SNAPReduce-v1>` has an additional parameter ``MaxChunkSize`` for customizing the chunking behavior
 - :ref:`LorentzCorrection <algm-LorentzCorrection-v1>` has an additional parameter ``Type`` for ``SingleCrystalTOF`` (default) or ``PowderTOF``
 - The create_total_scattering_pdf method in Polaris scripts now supports merging banks with a weighted mean.
 - The create_total_scattering_pdf method in Polaris scripts now applies the Placzek self scattering correction from :ref:`CalculatePlaczekSelfScattering <algm-CalculatePlaczekSelfScattering>`.
-- Cropping limits can now be set as a fraction of the data limits for ISIS Powder focusing as well as absolute values. 
+- Cropping limits can now be set as a fraction of the data limits for ISIS Powder focusing as well as absolute values.
 
 Bug Fixes
 ---------
@@ -37,7 +38,7 @@ Bug Fixes
 .. figure:: ../../images/IndexPeaks.PNG
    :class: screenshot
    :width: 250px
-   :align: right   
+   :align: right
 
 Single Crystal Diffraction
 ##########################
