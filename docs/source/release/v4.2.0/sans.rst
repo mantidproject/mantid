@@ -34,8 +34,6 @@ Improved
 - Option in :ref:`EQSANSCorrectFrame <algm-EQSANSCorrectFrame-v1>` to correct
   TOF by path to individual pixel
 - New CG2 definition file
-- A bug causing large batch files (1000+ runs) to take minutes to load into the
-  ISIS SANS GUI has been fixed. Large batch files will now load within seconds.
 - :ref:`ApplyTransmissionCorrection <algm-ApplyTransmissionCorrection-v1>` now
   can be supplied any transmission workspace that is supported
   by :ref:`Divide <algm-Divide-v1>` .
@@ -63,6 +61,16 @@ Multiple ISIS SANS GUI usability fixes including:
 - Multiple SANS Workflow Algorithms were converted into internal scripts.
   This removes the need for passing SANSState objects in unrolled histories.
   Additionally, it speeds up the reduction of each run by ~35%.
+
+Fixed
+#####
+- A bug causing large batch files (1000+ runs) to take minutes to load into the
+  ISIS SANS GUI has been fixed. Large batch files will now load within seconds.
+- Workspace names and output files use the run number from the table, rather
+  than the run number in the nxs file. If there is no run number it will
+  continue to use the run number from the nxs file, but emit a warning.
+
+
 
 Removed
 #######

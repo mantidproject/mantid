@@ -13,17 +13,17 @@ import os
 import h5py as h5
 from abc import (ABCMeta, abstractmethod)
 from mantid.api import FileFinder
-from mantid.kernel import (DateAndTime, ConfigService)
+from mantid.kernel import (DateAndTime, ConfigService, Logger)
 from mantid.api import (AlgorithmManager, ExperimentInfo)
 from sans.common.enums import (SANSInstrument, FileType, SampleShape)
 from sans.common.general_functions import (get_instrument, instrument_name_correction, get_facility)
 from six import with_metaclass
 
-
 # ----------------------------------------------------------------------------------------------------------------------
 # Constants
 # ----------------------------------------------------------------------------------------------------------------------
 # File extensions
+
 NXS_EXTENSION = "nxs"
 RAW_EXTENSION = "raw"
 RAW_EXTENSION_WITH_DOT = ".RAW"
@@ -33,7 +33,6 @@ ADDED_MONITOR_SUFFIX = "-add_monitors_added_event_data"
 ADD_FILE_SUFFIX = "-ADD.NXS"
 
 PARAMETERS_XML_SUFFIX = "_Parameters.xml"
-
 
 # Nexus key words
 RAW_DATA_1 = "raw_data_1"
@@ -98,7 +97,7 @@ def find_sans_file(file_name):
     :param file_name: a file name or a run number.
     :return: the full path.
     """
-    error_message = "Trying to find the SANS file {0}, but cannot find it. Make sure that "\
+    error_message = "Trying to find the SANS file {0}, but cannot find it. Make sure that " \
                     "the relevant paths are added and the correct instrument is selected."
     try:
         full_path = find_full_file_path(file_name)
@@ -109,7 +108,7 @@ def find_sans_file(file_name):
             #       Mantid instrument, then the FileFinder will search itself to death. This is a general Mantid issue.
             #       One way to handle this graceful would be a timeout option.
             file_name_as_bytes = str.encode(file_name)
-            assert(type(file_name_as_bytes) == bytes)
+            assert (type(file_name_as_bytes) == bytes)
             runs = FileFinder.findRuns(file_name_as_bytes)
             if runs:
                 full_path = runs[0]
@@ -183,6 +182,7 @@ def get_instrument_paths_for_sans_file(file_name=None, file_information=None):
     :param file_information: a file_information object. either this or the file_name has to be specified.
     :return: the IDF path and the IPF path
     """
+
     def get_file_location(path):
         return os.path.dirname(path)
 
@@ -373,10 +373,6 @@ def get_date_for_isis_nexus(file_name):
     return DateAndTime(value)
 
 
-def get_run_number_for_isis_nexus(file_name):
-    return int(get_top_level_nexus_entry(file_name, RUN_NUMBER))
-
-
 def get_event_mode_information(file_name):
     """
     Event mode files have a class with a "NXevent_data" type
@@ -437,20 +433,6 @@ def get_geometry_information_isis_nexus(file_name):
 # 3. Scenario 2: Added event data, ie files which were added and saved as event data.
 
 
-def get_date_and_run_number_added_nexus(file_name):
-    with h5.File(file_name, 'r') as h5_file:
-        keys = list(h5_file.keys())
-        first_entry = h5_file[keys[0]]
-        logs = first_entry["logs"]
-        # Start time
-        start_time = logs["start_time"]
-        start_time_value = DateAndTime(start_time["value"][0])
-        # Run number
-        run_number = logs["run_number"]
-        run_number_value = int(run_number["value"][0])
-    return start_time_value, run_number_value
-
-
 def get_added_nexus_information(file_name):  # noqa
     """
     Get information if is added data and the number of periods.
@@ -509,9 +491,9 @@ def get_added_nexus_information(file_name):  # noqa
         #    monitor data entry needs to have a "ADD_MONITORS_ADDED_EVENT_DATA" in the workspace name.
         # 3. Every data entry has matching monitor entry, e.g. random_name-add_added_event_data_4 needs
         #    random_name-add_monitors_added_event_data_4.s
-        if (has_same_number_of_entries(workspace_names, monitor_workspace_names) and
-            has_added_tag(workspace_names, monitor_workspace_names) and
-            entries_match(workspace_names, monitor_workspace_names)):  # noqa
+        if (has_same_number_of_entries(workspace_names, monitor_workspace_names)
+                and has_added_tag(workspace_names, monitor_workspace_names)
+                and entries_match(workspace_names, monitor_workspace_names)):
             is_added_file_event = True
             num_periods = len(workspace_names)
         else:
@@ -662,10 +644,6 @@ def get_instrument_name_for_raw(file_name):
     return instrument_name_correction(instrument_name)
 
 
-def get_run_number_for_raw(file_name):
-    return int(get_from_raw_header(file_name, 1))
-
-
 def get_number_of_periods_for_raw(file_name):
     return get_number_of_periods(get_raw_info, file_name)
 
@@ -746,12 +724,16 @@ def get_geometry_information_raw(file_name):
 # SANS file Information
 # ----------------------------------------------------------------------------------------------------------------------
 class SANSFileInformation(with_metaclass(ABCMeta, object)):
+    logger = Logger("SANS")
+
     def __init__(self, full_file_name):
         self._full_file_name = full_file_name
 
         # Idf and Ipf file path (will be loaded via lazy evaluation)
         self._idf_file_path = None
         self._ipf_file_path = None
+
+        self._run_number = self._init_run_number()
 
     @abstractmethod
     def get_file_name(self):
@@ -778,10 +760,6 @@ class SANSFileInformation(with_metaclass(ABCMeta, object)):
         pass
 
     @abstractmethod
-    def get_run_number(self):
-        pass
-
-    @abstractmethod
     def is_event_mode(self):
         pass
 
@@ -805,6 +783,38 @@ class SANSFileInformation(with_metaclass(ABCMeta, object)):
     def get_shape(self):
         pass
 
+    def get_run_number(self):
+        return self._run_number
+
+    @abstractmethod
+    def _get_run_number_from_file(self, file_name):
+        pass
+
+    def _init_run_number(self):
+        # We don't use the nexus tagged file name as some instruments will take a file with
+        # the "right structure" and transplant data from another in, then rename the recipient to the donor name
+
+        run_filename = self._full_file_name
+
+        if '.' in run_filename:
+            # Remove the extension so we don't accidentally get n0001 files confused
+            run_filename_list = self._full_file_name.split('.')
+            run_filename_list.remove(run_filename_list[-1])
+
+            run_filename = "".join(x for x in run_filename_list)
+
+        # This is pretty simplistic and does not handle cases of INST1234-001 which will produce run no. 1234001
+        # however, additional logic can be added if they suddenly change naming conventions
+        run_number = "".join(x for x in run_filename if x.isdigit())
+
+        if not run_number:
+            run_number = self._get_run_number_from_file(self._full_file_name)
+            self.logger.warning(
+                "Could not parse run number from filename, using the run number direct set in the file which is {0}"
+                .format(run_number))
+
+        return int(run_number)
+
     def get_idf_file_path(self):
         if self._idf_file_path is None:
             idf_path, ipf_path = get_instrument_paths_for_sans_file(file_information=self)
@@ -824,6 +834,54 @@ class SANSFileInformation(with_metaclass(ABCMeta, object)):
         return find_sans_file(file_name)
 
 
+class SANSFileInformationBlank(SANSFileInformation):
+    """
+    Blank SANS File information to avoid mocks being called in, in the future this should be removed
+    as we should not be creating blank information states
+    """
+    def __init__(self):
+        super(SANSFileInformationBlank, self).__init__(full_file_name="0")
+
+    def get_file_name(self):
+        raise NotImplementedError("Trying to use blank FileInformation")
+
+    def get_instrument(self):
+        raise NotImplementedError("Trying to use blank FileInformation")
+
+    def get_facility(self):
+        raise NotImplementedError("Trying to use blank FileInformation")
+
+    def get_date(self):
+        raise NotImplementedError("Trying to use blank FileInformation")
+
+    def get_number_of_periods(self):
+        raise NotImplementedError("Trying to use blank FileInformation")
+
+    def get_type(self):
+        raise NotImplementedError("Trying to use blank FileInformation")
+
+    def is_event_mode(self):
+        raise NotImplementedError("Trying to use blank FileInformation")
+
+    def is_added_data(self):
+        raise NotImplementedError("Trying to use blank FileInformation")
+
+    def get_height(self):
+        raise NotImplementedError("Trying to use blank FileInformation")
+
+    def get_width(self):
+        raise NotImplementedError("Trying to use blank FileInformation")
+
+    def get_thickness(self):
+        raise NotImplementedError("Trying to use blank FileInformation")
+
+    def get_shape(self):
+        raise NotImplementedError("Trying to use blank FileInformation")
+
+    def _get_run_number_from_file(self, file_name):
+        raise NotImplementedError("Trying to use blank FileInformation")
+
+
 class SANSFileInformationISISNexus(SANSFileInformation):
     def __init__(self, file_name):
         super(SANSFileInformationISISNexus, self).__init__(file_name)
@@ -839,9 +897,6 @@ class SANSFileInformationISISNexus(SANSFileInformation):
 
         # Setup number of periods
         self._number_of_periods = get_number_of_periods_for_isis_nexus(self._full_file_name)
-
-        # Setup run number
-        self._run_number = get_run_number_for_isis_nexus(self._full_file_name)
 
         # Setup event mode check
         self._is_event_mode = get_event_mode_information(self._full_file_name)
@@ -868,9 +923,6 @@ class SANSFileInformationISISNexus(SANSFileInformation):
     def get_number_of_periods(self):
         return self._number_of_periods
 
-    def get_run_number(self):
-        return self._run_number
-
     def get_type(self):
         return FileType.ISISNexus
 
@@ -892,6 +944,9 @@ class SANSFileInformationISISNexus(SANSFileInformation):
     def get_shape(self):
         return self._shape
 
+    def _get_run_number_from_file(self, file_name):
+        return int(get_top_level_nexus_entry(file_name, RUN_NUMBER))
+
 
 class SANSFileInformationISISAdded(SANSFileInformation):
     def __init__(self, file_name):
@@ -903,11 +958,9 @@ class SANSFileInformationISISAdded(SANSFileInformation):
         # Setup the facility
         self._facility = get_facility(self._instrument)
 
-        date, run_number = get_date_and_run_number_added_nexus(self._full_file_name)
-        self._date = date
-        self._run_number = run_number
+        self._date, self._nxs_tagged_run_no = self._get_date_and_run_number_added_nexus(self._full_file_name)
 
-        _,  number_of_periods, is_event = get_added_nexus_information(self._full_file_name)
+        _, number_of_periods, is_event = get_added_nexus_information(self._full_file_name)
         self._number_of_periods = number_of_periods
         self._is_event_mode = is_event
 
@@ -933,9 +986,6 @@ class SANSFileInformationISISAdded(SANSFileInformation):
     def get_number_of_periods(self):
         return self._number_of_periods
 
-    def get_run_number(self):
-        return self._run_number
-
     def get_type(self):
         return FileType.ISISNexusAdded
 
@@ -957,6 +1007,23 @@ class SANSFileInformationISISAdded(SANSFileInformation):
     def get_shape(self):
         return self._shape
 
+    def _get_run_number_from_file(self, file_name):
+        return self._nxs_tagged_run_no
+
+    @staticmethod
+    def _get_date_and_run_number_added_nexus(file_name):
+        with h5.File(file_name, 'r') as h5_file:
+            keys = list(h5_file.keys())
+            first_entry = h5_file[keys[0]]
+            logs = first_entry["logs"]
+            # Start time
+            start_time = logs["start_time"]
+            start_time_value = DateAndTime(start_time["value"][0])
+            # Run number
+            run_number = logs["run_number"]
+            run_number_value = int(run_number["value"][0])
+        return start_time_value, run_number_value
+
 
 class SANSFileInformationRaw(SANSFileInformation):
     def __init__(self, file_name):
@@ -973,9 +1040,6 @@ class SANSFileInformationRaw(SANSFileInformation):
 
         # Setup number of periods
         self._number_of_periods = get_number_of_periods_for_raw(self._full_file_name)
-
-        # Setup run number
-        self._run_number = get_run_number_for_raw(self._full_file_name)
 
         # Set geometry
         # Raw files don't have the sample information, so set to default
@@ -1000,9 +1064,6 @@ class SANSFileInformationRaw(SANSFileInformation):
     def get_number_of_periods(self):
         return self._number_of_periods
 
-    def get_run_number(self):
-        return self._run_number
-
     def get_type(self):
         return FileType.ISISRaw
 
@@ -1023,6 +1084,9 @@ class SANSFileInformationRaw(SANSFileInformation):
 
     def get_shape(self):
         return self._shape
+
+    def _get_run_number_from_file(self, file_name):
+        return int(get_from_raw_header(file_name, 1))
 
 
 class SANSFileInformationFactory(object):
