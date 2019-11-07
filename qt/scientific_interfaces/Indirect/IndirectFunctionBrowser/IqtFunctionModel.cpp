@@ -648,8 +648,8 @@ void IqtFunctionModel::estimateExpParameters() {
     setLocalParameterValue(*lifeTimeName1, i, lifeTime);
     if (m_numberOfExponentials > 1) {
       // arbitrarily initialise small additional exp with 10% of amplitude and
-	  // double the lifetime (if the lifetime is too short it will corelate
-	  // with any constant background.
+      // double the lifetime (if the lifetime is too short it will corelate
+      // with any constant background.
       setLocalParameterValue(*heightName2, i, 0.1 * height);
       setLocalParameterValue(*lifeTimeName2, i, 2 * lifeTime);
     }
