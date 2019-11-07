@@ -11,6 +11,7 @@ import unittest
 
 from mantid.api import WorkspaceFactory
 from mantid.py3compat import mock
+from mantid.simpleapi import ExtractSpectra
 from mantidqt.dialogs.spectraselectorutils import get_spectra_selection
 from mantidqt.utils.qt.testing import start_qapplication
 from qtpy.QtGui import QIcon
@@ -58,3 +59,17 @@ class SpectraSelectionUtilsTest(unittest.TestCase):
         dialog_mock.assert_not_called()
         self.assertEqual([0], selection.wksp_indices)
         self.assertEqual([self._single_spec_ws], selection.workspaces)
+
+    @mock.patch('mantidqt.dialogs.spectraselectorutils.SpectraSelectionDialog')
+    def test_get_spectra_selection_does_not_use_dialog_for_multiple__single_spectrum(self, dialog_mock):
+        spectra_1 = ExtractSpectra(InputWorkspace=self._multi_spec_ws, StartWorkspaceIndex=0, EndWorkspaceIndex=0)
+        spectra_2 = ExtractSpectra(InputWorkspace=self._multi_spec_ws, StartWorkspaceIndex=1, EndWorkspaceIndex=1)
+        selection = get_spectra_selection([spectra_1, spectra_2])
+
+        dialog_mock.assert_not_called()
+        self.assertEqual([0], selection.wksp_indices)
+        self.assertEqual([spectra_1, spectra_2], selection.workspaces)
+
+
+if __name__ == '__main__':
+    unittest.main()

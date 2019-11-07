@@ -18,7 +18,7 @@ class HFIRSANS2WavelengthTest(unittest.TestCase):
                              UnitX="TOF",
                              NSpec=2)
         AddSampleLog(ws, LogName='wavelength', LogText='6.5', LogType='Number Series')
-        AddSampleLog(ws, LogName='wavelength_spread', LogText='1.0', LogType='Number Series')
+        AddSampleLog(ws, LogName='wavelength_spread', LogText='0.1', LogType='Number Series')
 
     def tearDown(self):
         mtd.clear()
@@ -28,8 +28,8 @@ class HFIRSANS2WavelengthTest(unittest.TestCase):
         out = HFIRSANS2Wavelength(InputWorkspace="ws")
         self.assertTrue(out)
         self.assertEqual(out.blocksize(), 1)
-        self.assertEqual(out.readX(0)[0], 6)
-        self.assertEqual(out.readX(1)[1], 7)
+        self.assertEqual(out.readX(0)[0], 6.175)
+        self.assertEqual(out.readX(1)[1], 6.825)
         self.assertEqual(out.readY(0)[0], 24)
         self.assertAlmostEqual(out.readE(1)[0], 7.071067, 5)
         self.assertEqual(out.getAxis(0).getUnit().caption(), 'Wavelength')

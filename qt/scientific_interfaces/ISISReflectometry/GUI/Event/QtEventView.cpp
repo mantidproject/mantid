@@ -194,7 +194,8 @@ void QtEventView::enableSliceTypeSelection() {
 void QtEventView::onToggleUniform(bool isChecked) {
   if (isChecked) {
     Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-        "Feature", "ISIS Reflectometry->EventTab->EnableUniformSlicing", false);
+        Mantid::Kernel::FeatureType::Feature,
+        {"ISIS Reflectometry", "EventTab", "EnableUniformSlicing"}, false);
     m_notifyee->notifySliceTypeChanged(SliceType::Uniform);
   }
 }
@@ -202,8 +203,8 @@ void QtEventView::onToggleUniform(bool isChecked) {
 void QtEventView::onToggleUniformEven(bool isChecked) {
   if (isChecked) {
     Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-        "Feature", "ISIS Reflectometry->EventTab->EnableUniformEvenSlicing",
-        false);
+        Mantid::Kernel::FeatureType::Feature,
+        {"ISIS Reflectometry", "EventTab", "EnableUniformEvenSlicing"}, false);
     m_notifyee->notifySliceTypeChanged(SliceType::UniformEven);
   }
 }
@@ -211,7 +212,8 @@ void QtEventView::onToggleUniformEven(bool isChecked) {
 void QtEventView::onToggleCustom(bool isChecked) {
   if (isChecked) {
     Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-        "Feature", "ISIS Reflectometry->EventTab->EnableCustomSlicing", false);
+        Mantid::Kernel::FeatureType::Feature,
+        {"ISIS Reflectometry", "EventTab", "EnableCustomSlicing"}, false);
     m_notifyee->notifySliceTypeChanged(SliceType::Custom);
   }
 }
@@ -219,8 +221,8 @@ void QtEventView::onToggleCustom(bool isChecked) {
 void QtEventView::onToggleLogValue(bool isChecked) {
   if (isChecked) {
     Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-        "Feature", "ISIS Reflectometry->EventTab->EnableLogValueSlicing",
-        false);
+        Mantid::Kernel::FeatureType::Feature,
+        {"ISIS Reflectometry", "EventTab", "EnableLogValueSlicing"}, false);
     m_notifyee->notifySliceTypeChanged(SliceType::LogValue);
   }
 }
@@ -228,7 +230,8 @@ void QtEventView::onToggleLogValue(bool isChecked) {
 void QtEventView::onToggleDisabledSlicing(bool isChecked) {
   if (isChecked) {
     Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-        "Feature", "ISIS Reflectometry->EventTab->DisableSlicing", false);
+        Mantid::Kernel::FeatureType::Feature,
+        {"ISIS Reflectometry", "EventTab", "DisableSlicing"}, false);
     m_notifyee->notifySliceTypeChanged(SliceType::None);
   }
 }

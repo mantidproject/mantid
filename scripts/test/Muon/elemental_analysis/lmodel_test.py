@@ -26,14 +26,14 @@ class LModelTest(unittest.TestCase):
         mock_mantid.LoadAscii.assert_has_calls(call_list, any_order=True)
         self.assertEqual(mock_mantid.LoadAscii.call_count, 2)
 
-    @mock.patch('Muon.GUI.ElementalAnalysis.LoadWidget.load_utils.group_by_detector')
+    @mock.patch('Muon.GUI.ElementalAnalysis.LoadWidget.load_utils.merge_workspaces')
     @mock.patch('Muon.GUI.ElementalAnalysis.LoadWidget.load_utils.search_user_dirs')
-    def test_load_run_calls_search_user_dirs(self, mock_search_user_dirs, mock_group):
+    def test_load_run_calls_search_user_dirs(self, mock_search_user_dirs, mock_merged):
         self.model.run = 1234
         self.model.load_run()
 
         self.assertEqual(mock_search_user_dirs.call_count, 1)
-        self.assertEqual(mock_group.call_count, 1)
+        self.assertEqual(mock_merged.call_count, 1)
         mock_search_user_dirs.assert_called_with(1234)
 
     @mock.patch('Muon.GUI.ElementalAnalysis.LoadWidget.load_utils.search_user_dirs')
