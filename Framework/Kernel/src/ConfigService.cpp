@@ -1780,7 +1780,7 @@ ConfigServiceImpl::getFacilityFilenames(const std::string &fName) {
     p.append("Facilities.xml");
     std::string filename = p.toString();
     Poco::File fileObj(filename);
-    // stop when you find the first one
+
     if (fileObj.exists())
       returnPaths.push_back(filename);
   }
@@ -1857,10 +1857,14 @@ void ConfigServiceImpl::updateFacilities(const std::string &fName) {
       attemptIndex++;
       // move on to the next file index if available
       if (attemptIndex == fileNames.size()) {
-        // Throw an exception as we have run out of files to try
-        throw std::runtime_error(
+        std::string errorMessage =
             "No more Facilities.xml files can be found, Mantid will not be "
-            "able to start, Sorry.  Try reinstalling Mantid.");
+            "able to start, Sorry.  Try reinstalling Mantid.";
+		//This is one of the few times that both logging a messge and throwing might make sense
+		// as the error reporter tends to swallow the thrown message.
+        g_log.error() << errorMessage << "\n";
+        // Throw an exception as we have run out of files to try
+        throw std::runtime_error(errorMessage);
       }
     }
   }
