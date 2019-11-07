@@ -1814,7 +1814,7 @@ void ConfigServiceImpl::updateFacilities(const std::string &fName) {
   size_t attemptIndex = 0;
   bool success = false;
   while ((!success) && (attemptIndex < fileNames.size())) {
-    const auto& fileName = fileNames[attemptIndex];
+    const auto &fileName = fileNames[attemptIndex];
     try {
       // Set up the DOM parser and parse xml file
       Poco::AutoPtr<Poco::XML::Document> pDoc;
@@ -1836,7 +1836,8 @@ void ConfigServiceImpl::updateFacilities(const std::string &fName) {
       const size_t n = pNL_facility->length();
 
       for (unsigned long i = 0; i < n; ++i) {
-        const auto *elem = dynamic_cast<Poco::XML::Element *>(pNL_facility->item(i));
+        const auto *elem =
+            dynamic_cast<Poco::XML::Element *>(pNL_facility->item(i));
         if (elem) {
           m_facilities.emplace_back(new FacilityInfo(elem));
         }
