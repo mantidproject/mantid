@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument = "CG2" valid-from="2019-10-01 00:00:00">
+<parameter-file instrument = "CG2" valid-from="2011-08-18 11:50:59" valid-to="2019-09-30 23:59:59">
 
   <component-link name = "CG2">
 
