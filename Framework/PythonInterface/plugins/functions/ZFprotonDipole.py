@@ -35,8 +35,8 @@ class ZFprotonDipole(IFunction1D):
             B = 0
         Omega = gmu * B
         return A0 * (1. / 6) * (
-            1 + np.exp(- LambdaTrans * x) * np.cos(Omega * x) + 2 * np.cos(1.5 * Omega * x) + 2 * np.cos(
-                0.5 * Omega * x))
+            1 + np.exp(- LambdaTrans * x) *( np.cos(Omega * x) + 2 * np.cos(1.5 * Omega * x) + 2 * np.cos(
+                0.5 * Omega * x)))
 
 
 FunctionFactory.subscribe(ZFprotonDipole)

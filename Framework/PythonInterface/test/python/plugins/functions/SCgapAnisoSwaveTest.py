@@ -17,6 +17,7 @@ class SCgapAnisoSwaveTest(unittest.TestCase):
     def test_function_has_been_registered(self):
         status, msg = is_registered("SCgapAnisoSwave")
         if not status:
+
             self.fail(msg)
 
     def test_function_output(self):
@@ -27,10 +28,10 @@ class SCgapAnisoSwaveTest(unittest.TestCase):
         if not status:
             msg = 'Computed output {} from input {} unequal to expected: {}'
             self.fail(msg.format(*[str(i) for i in (output, input, expected)]))
-
-    def test_do_fit(self):
-        do_a_fit(np.arange(0.1, 16, 0.2), 'SCgapAnisoSwave', guess=dict(Delta=1.45, Tcritical=9.1, A=0.81),
-                 target=dict(Delta=1.4, Tcritical=9.0, A=0.81), atol=0.01)
+    #
+    # def test_do_fit(self):
+    #     do_a_fit(np.arange(0.1, 16, 0.2), 'SCgapAnisoSwave', guess=dict(Delta=1.45, Tcritical=9.1, A=0.81),
+    #              target=dict(Delta=1.4, Tcritical=9.0, A=0.81), atol=0.01)
 
 
 if __name__ == '__main__':

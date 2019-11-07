@@ -44,7 +44,7 @@ class SCgapAnisoSwave(IFunction1D):
             if xx > Tc:
                 Integral.append(1)
             else:
-                Integral.append(nquad(Integrand, [[0, 1], [0, 1]])[
+                Integral.append(nquad(Integrand, [[0, 1], [0, np.pi/2]])[
                                 0] * Ec / (2 * kb * xx))
 
         return 1 - np.array(Integral)
