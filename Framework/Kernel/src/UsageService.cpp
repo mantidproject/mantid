@@ -37,8 +37,9 @@ Kernel::Logger g_log("UsageServiceImpl");
 /** FeatureUsage
  */
 FeatureUsage::FeatureUsage(const FeatureType &type, std::string name,
-                           const bool internal)
-    : type(type), name(std::move(name)), internal(internal) {}
+                           const bool internal, std::string application)
+    : type(type), name(std::move(name)), internal(internal),
+      application(std::move(application)) {}
 
 // Better brute force.
 bool FeatureUsage::operator<(const FeatureUsage &r) const {
@@ -80,6 +81,7 @@ std::string FeatureUsage::featureTypeToString() const {
   retVal["type"] = featureTypeToString();
   retVal["name"] = name;
   retVal["internal"] = internal;
+  retVal["application"] = application;
 
   return retVal;
 }
@@ -136,7 +138,8 @@ void UsageServiceImpl::registerFeatureUsage(
     std::lock_guard<std::mutex> _lock(m_mutex);
 
     using boost::algorithm::join;
-    m_FeatureQueue.push(FeatureUsage(type, join(name, SEPARATOR), internal));
+    m_FeatureQueue.push(FeatureUsage(type, join(name, SEPARATOR), internal,
+                                     getApplicationName()));
   }
 }
 
@@ -145,8 +148,8 @@ void UsageServiceImpl::registerFeatureUsage(const FeatureType &type,
                                             const bool internal) {
   if (isEnabled()) {
     std::lock_guard<std::mutex> _lock(m_mutex);
-
-    m_FeatureQueue.push(FeatureUsage(type, name, internal));
+    m_FeatureQueue.push(
+        FeatureUsage(type, name, internal, getApplicationName()));
   }
 }
 
