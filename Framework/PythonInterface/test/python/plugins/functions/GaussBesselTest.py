@@ -30,7 +30,7 @@ class GaussBesselTest(unittest.TestCase):
             self.fail(msg.format(*[str(i) for i in (output, input, expected)]))
 
     def test_do_fit(self):
-        guess = dict(A0 = 0.25, Freq = 0.55, Sigma = 0.25, Phi = 0.0))
+        guess = dict(A0 = 0.25, Freq = 0.55, Sigma = 0.25, Phi = 0.0)
         target = dict(A0 = 0.2, Freq = 0.5, Sigma = 0.2, Phi = 0.0)
         do_a_fit(np.arange(0.1, 16, 0.2), 'GaussBessel', guess, target, atol = 0.01)
 
