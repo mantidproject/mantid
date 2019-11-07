@@ -222,7 +222,6 @@ class FitPropertyBrowserTest(unittest.TestCase):
             output_name.append(browser.outputName())
         self.assertNotEqual(output_name[0], output_name[1])
 
-
     # Private helper functions
     def _create_widget(self, canvas=MagicMock(), toolbar_manager=Mock()):
         return FitPropertyBrowser(canvas, toolbar_manager)
