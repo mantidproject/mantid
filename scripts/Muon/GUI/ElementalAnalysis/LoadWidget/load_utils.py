@@ -97,6 +97,7 @@ def merge_workspaces(run, workspaces):
             merged_ws = create_merged_workspace(workspace_list)
             # add merged ws to ADS
             mantid.mtd.add(detector, merged_ws)
+            mantid.ConvertToHistogram(InputWorkspace=detector, OutputWorkspace=detector)
             overall_ws.add(detector)
 
     mantid.AnalysisDataService.remove("tmp")
