@@ -213,25 +213,21 @@ void ALCDataLoadingPresenter::load(const std::string &lastFile) {
     assert(m_loadedData);
     // If subtract is not checked, only one spectrum,
     // else four spectra
-    if (m_view) {
-      if (!m_view->subtractIsChecked()) {
-        assert(m_loadedData->getNumberHistograms() == 1);
-      } else {
-        assert(m_loadedData->getNumberHistograms() == 4);
-      }
-      // Plot spectrum 0. It is either red period (if subtract is unchecked) or
-      // red - green (if subtract is checked)
-      m_view->setDataCurve(m_loadedData);
-
-      emit dataChanged();
+    if (!m_view->subtractIsChecked()) {
+      assert(m_loadedData->getNumberHistograms() == 1);
+    } else {
+      assert(m_loadedData->getNumberHistograms() == 4);
     }
+    // Plot spectrum 0. It is either red period (if subtract is unchecked) or
+    // red - green (if subtract is checked)
+    m_view->setDataCurve(m_loadedData);
+
+    emit dataChanged();
 
   } catch (std::exception &e) {
     m_view->displayError(e.what());
   }
-  if (m_view) {
-    m_view->enableAll();
-  }
+  m_view->enableAll();
   m_loadingData = false;
 }
 
