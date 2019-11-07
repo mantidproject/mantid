@@ -10,7 +10,6 @@ import unittest
 
 import matplotlib
 matplotlib.use('AGG')  # noqa
-import matplotlib.pyplot as plt
 
 from mantid.api import AnalysisDataService, WorkspaceFactory
 from mantid.py3compat.mock import MagicMock, Mock, patch
@@ -204,17 +203,18 @@ class FitPropertyBrowserTest(unittest.TestCase):
         widget.plot_guess()
         self.assertEqual(ax_limits, fig.get_axes()[0].axis())
 
-    def test_output_workspace_name_changes_if_more_than_one_plot_of_same_workspace(self):
+    @patch('matplotlib.pyplot.get_figlabels')
+    def test_output_workspace_name_changes_if_more_than_one_plot_of_same_workspace(self, figure_labels_mock):
         # create a workspace
         ws = WorkspaceFactory.Instance().create("Workspace2D", NVectors=2, YLength=5, XLength=5)
         AnalysisDataService.Instance().addOrReplace("workspace", ws)
         ws_window_names = ["workspace-1", "workspace-2"]
-        plt.get_figlabels = Mock(return_value = ws_window_names)
+        figure_labels_mock.return_value = ws_window_names
         output_name = []
         # plot it twice
         for i in [0, 1]:
             fig = plot([ws], spectrum_nums=[1])
-            fig.canvas.get_window_title = Mock(return_value = ws_window_names[i])
+            fig.canvas.get_window_title = Mock(return_value=ws_window_names[i])
             browser = self._create_widget(canvas=fig.canvas)
             # don't want the widget to actually show in test
             QDockWidget.show = Mock()
