@@ -53,6 +53,11 @@ class LegendTabWidgetView(QWidget):
     def get_transparency_spin_box_value(self):
         return self.transparency_spin_box.value()
 
+    def hide_transparency(self):
+        self.transparency_label.setHidden(True)
+        self.transparency_slider.setHidden(True)
+        self.transparency_spin_box.setHidden(True)
+
     def set_title(self, title):
         self.title_line_edit.setText(title)
 
@@ -130,3 +135,12 @@ class LegendTabWidgetView(QWidget):
         advanced_props = self.advanced_options.get_properties()
         props.update(advanced_props)
         return props
+
+    def hide_box_properties(self):
+        self.box_label.setHidden(True)
+        self.hide_box_check_box.setHidden(True)
+        self.background_color_label.setHidden(True)
+        self.background_color_selector_widget.setHidden(True)
+        self.edge_color_label.setHidden(True)
+        self.edge_color_selector_widget.setHidden(True)
+        self.hide_transparency()
