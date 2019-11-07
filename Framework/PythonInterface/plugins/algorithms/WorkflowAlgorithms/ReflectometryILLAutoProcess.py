@@ -108,7 +108,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
 
     def category(self):
         """Return the categories of the algrithm."""
-        return 'ILL\\Reflectometry;Workflow\\Reflectometry'
+        return 'ILL\\Reflectometry;ILL\\Auto;Workflow\\Reflectometry'
 
     def name(self):
         """Return the name of the algorithm."""
@@ -116,7 +116,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
 
     def summary(self):
         """Return a summary of the algorithm."""
-        return "Reduction of ILL reflectometry data."
+        return "Performs reduction of ILL reflectometry data, instruments D17 and FIGARO."
 
     def seeAlso(self):
         """Return a list of related algorithm names."""
@@ -142,7 +142,6 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         nonnegativeFloatArray.setLower(0.)
         stringArrayValidator = StringArrayLengthValidator()
         stringArrayValidator.setLengthMin(1)
-        listOrSingleNumber = ': provide either a list or a single value.'
 
         #======================== Main Properties ========================
         self.declareProperty(PropertyNames.POLARIZATION_OPTION,
@@ -283,7 +282,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 PropertyNames.THETA,
                 values=[Property.EMPTY_DBL]
             ),
-            doc='A user-defined angle theta in degree' + listOrSingleNumber
+            doc='A user-defined angle theta in degree'
         )
         self.declareProperty(
             StringArrayProperty(
@@ -352,7 +351,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 validator=nonnegativeInts,
             ),
             doc='Distance of flat background region towards smaller detector angles from the ' +
-                'foreground centre, in pixels' + listOrSingleNumber
+                'foreground centre, in pixels'
         )
         self.setPropertyGroup(PropertyNames.LOW_BKG_OFFSET_DIRECT, preProcessDirect)
         self.declareProperty(
@@ -362,7 +361,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 validator=nonnegativeInts,
             ),
             doc='Width of flat background region towards smaller detector angles from the ' +
-                'foreground centre, in pixels' + listOrSingleNumber
+                'foreground centre, in pixels'
         )
         self.setPropertyGroup(PropertyNames.LOW_BKG_WIDTH_DIRECT, preProcessDirect)
         self.declareProperty(
@@ -381,7 +380,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 validator=nonnegativeInts,
             ),
             doc='Distance of flat background region towards larger detector angles from the ' +
-                'foreground centre, in pixels' + listOrSingleNumber
+                'foreground centre, in pixels'
         )
         self.setPropertyGroup(PropertyNames.HIGH_BKG_OFFSET_DIRECT, preProcessDirect)
         self.declareProperty(
@@ -391,7 +390,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 validator=nonnegativeInts,
             ),
             doc='Width of flat background region towards larger detector angles from the ' +
-                'foreground centre, in pixels' + listOrSingleNumber
+                'foreground centre, in pixels'
         )
         self.setPropertyGroup(PropertyNames.HIGH_BKG_WIDTH_DIRECT, preProcessDirect)
         self.declareProperty(
@@ -400,7 +399,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 values=[0],
                 validator=nonnegativeInts,
             ),
-            doc='Start histogram index used for peak fitting' + listOrSingleNumber
+            doc='Start histogram index used for peak fitting'
         )
         self.setPropertyGroup(PropertyNames.START_WS_INDEX_DIRECT, preProcessDirect)
         self.declareProperty(
@@ -409,7 +408,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 values=[255],
                 validator=nonnegativeInts,
             ),
-            doc='Last histogram index used for peak fitting' + listOrSingleNumber
+            doc='Last histogram index used for peak fitting'
         )
         self.setPropertyGroup(PropertyNames.END_WS_INDEX_DIRECT, preProcessDirect)
         self.declareProperty(
@@ -774,12 +773,13 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             self._autoCleanup.protect(convertedToQName)
             progress.report()
 
-        try:
-            stitched = self._outWS + '_stitched'
-            Stitch1DMany(InputWorkspaces=to_group, OutputWorkspace=stitched)
-            to_group.append(stitched)
-        except RuntimeError as re:
-            self.log().warning('Unable to stitch automatically, consider stitching manually: ' + re.message)
+        if len(to_group) > 1:
+            try:
+                stitched = self._outWS + '_stitched'
+                Stitch1DMany(InputWorkspaces=to_group, OutputWorkspace=stitched)
+                to_group.append(stitched)
+            except RuntimeError as re:
+                self.log().warning('Unable to stitch automatically, consider stitching manually: ' + re.message)
 
         GroupWorkspaces(InputWorkspaces=to_group, OutputWorkspace=self._outWS)
         self.setProperty(Prop.OUTPUT_WS, self._outWS)

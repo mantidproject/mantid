@@ -2,33 +2,47 @@
 
 .. summary::
 
-.. relatedalgorithms::
-
-.. properties::
-
 Description
 -----------
 
-This is the reduction work-flow algorithm for the ILL reflectometers D17 and FIGARO.
-A various number of corresponding direct and reflected angles can be processed.
-Some input properties like the background indices accept either a single entry for all angles, i.e. number of reflected or direct beams, or an entry for each corresponding angle.
-Please note, however, that direct beam work-spaces for each angle are stored in the AnalysisDataService for efficient re-use of further reductions.
-The input runs must be NeXus files (file ending .nxs) and different angles will be comma separated while merging angles will be performed when giving a *+*.
+This algorithm executes the full data reduction for ILL reflectometers D17 and FIGARO in TOF mode (specular reflection).
+It supports the treatment of measurements at several angles together.
+It offers incoherent (sum along constant :math:`\lambda`) or coherent (sum along constant :math:`Q_{z}`) methods of peak summation.
+Treatment of polarized measurements is also provided.
 
-Limitations
------------
+Input
+-----
 
-The polarisation correction is foreseen but not exposed to be used (missing reflected beam inputs).
-The D17 incoherent reduction with Sample Angle option will most likely produce equivalent data to Cosmos.
-The D17 incoherent reduction with Detector Angle option may show a shift in Momentum Transfer.
-The D17 coherent reduction often produces equivalent data to Cosmos, but rarely a shift in Momentum Transfer can be observed and need still to be investigated.
-The detector angle option is more critical to use than the sample angle option.
-It likely happens that the reduced output work-space does not have the same number of points as the Cosmos reduction result.
-For FIGARO, a good agreement of the reduction could be observed, but not enough experiments were compared.
-Not all options of the Cosmos GUI are available. For example, a modification of variables taken from the NeXus file should be done via the available instrument control tools.
+The mandatory inputs are comma separated list of nexus files for direct and reflected beam measurements.
+`,` stands as the separator of different angle configurations.
+`+` (sum) or `-` (range sum) operations can be used to sum different files at the same instrument configuration.
+When summing, the metadata (e.g. acquisition time) will also be summed, so that the subsequent normalisation is handled correctly.
+There must be the same number of angle configurations both for direct and reflected beam inputs.
 
-Work-flow
----------
+Output
+------
+
+The output is a workspace group that contains the calculated reflectivity curves as a function of the momentum transfer.
+The output is point data and has the calculated Q resolution attributed to it.
+There is a separate output for each angle configuration.
+An automatically stitched result is also produced.
+Stitch in this case just takes the union of all the initial points without merging or removal, only scaling can be applied.
+The outputs can be readily saved by :ref:`SaveReflectometryAscii <algm-SaveReflectometryAscii>` algorithm for further analysis.
+
+BraggAngle
+----------
+
+If user specified :math:`\theta` angles are provided, they will be used.
+Otherwise `SampleAngle` or `DetectorAngle` (default) option is executed.
+
+Options
+-------
+
+Many options can be specified as a single value, which will be applied to all the angle configurations, or as a list of values.
+In the case of the latter, the list must be of the same size, as many different angle configurations there are.
+
+Workflow
+--------
 
 The processing of the direct and reflected beams are shown in the following diagrams.
 
@@ -52,23 +66,31 @@ Usage
    ws = ReflectometryILLAutoProcess(
        Run='ILL/D17/317370.nxs',
        DirectRun='ILL/D17/317369.nxs',
-       DirectLowAngleForegroundHalfWidth=foreground,
-       DirectHighAngleForegroundHalfWidth=foreground,
+       DirectLowAngleFrgHalfWidth=foreground,
+       DirectHighAngleFrgHalfWidth=foreground,
        DirectLowAngleBkgOffset=angleOffset,
        DirectLowAngleBkgWidth=angleWidth,
        DirectHighAngleBkgOffset=angleOffset,
        DirectHighAngleBkgWidth=angleWidth,
-       LowAngleForegroundHalfWidth=foreground,
-       HighAngleForegroundHalfWidth=foreground,
-       LowAngleBkgOffset=angleOffset,
-       LowAngleBkgWidth=angleWidth,
-       HighAngleBkgOffset=angleOffset,
-       HighAngleBkgWidth=angleWidth,
-       WavelengthLower=0.0,
-       WavelengthUpper=31.0
-   )
+       ReflLowAngleFrgHalfWidth=foreground,
+       ReflHighAngleFrgHalfWidth=foreground,
+       ReflLowAngleBkgOffset=angleOffset,
+       ReflLowAngleBkgWidth=angleWidth,
+       ReflHighAngleBkgOffset=angleOffset,
+       ReflHighAngleBkgWidth=angleWidth,
+       WavelengthLowerBound=3.5,
+       WavelengthUpperBound=25.
+    )
+
+    print('The R(Q) workspace has {0} points, from {1} to {2} inverse Angstrom'.format(ws.getItem(0).blocksize(), ws.getItem(0).readX(0)[0], ws.getItem(0).readX(0)[-1]))
 
 .. testoutput:: ReflectometryILLAutoProcess1
+
+    The R(Q) workspace has 688 points, from 0.00678002009846 to 0.0479086988309 inverse Angstrom
+
+.. relatedalgorithms::
+
+.. properties::
 
 .. categories::
 
