@@ -21,7 +21,7 @@
         <value val="0.0"/>
       </parameter>
       <parameter name="roty">
-        <logfile eq="value+0.0" id="2theta"/>
+        <logfile eq="-value+0.0" id="2theta"/>
       </parameter>
       <parameter name="t-position">
         <value val="0.0"/>
@@ -53,7 +53,7 @@
           <logfile eq="value" id="cal::diffx1"/>
         </parameter>
         <parameter name="y">
-          <logfile eq="-0.12+value" id="cal::diffy1"/>
+          <logfile eq="0.0+value" id="cal::diffy1"/>
         </parameter>
       </location>
     </component>
@@ -68,7 +68,7 @@
         <value val="0.0"/>
       </parameter>
       <parameter name="roty">
-        <logfile eq="value+0.0" id="2theta"/>
+        <logfile eq="-value+0.0" id="2theta"/>
       </parameter>
       <parameter name="t-position">
         <value val="0.0"/>
@@ -100,7 +100,7 @@
           <logfile eq="value" id="cal::diffx2"/>
         </parameter>
         <parameter name="y">
-          <logfile eq="0+value" id="cal::diffy2"/>
+          <logfile eq="0.12+value" id="cal::diffy2"/>
         </parameter>
       </location>
     </component>
@@ -115,7 +115,7 @@
         <value val="0.0"/>
       </parameter>
       <parameter name="roty">
-        <logfile eq="value+0.0" id="2theta"/>
+        <logfile eq="-value+0.0" id="2theta"/>
       </parameter>
       <parameter name="t-position">
         <value val="0.0"/>
@@ -147,7 +147,7 @@
           <logfile eq="value" id="cal::diffx3"/>
         </parameter>
         <parameter name="y">
-          <logfile eq="0.12+value" id="cal::diffy3"/>
+          <logfile eq="0.24+value" id="cal::diffy3"/>
         </parameter>
       </location>
     </component>
