@@ -4,7 +4,7 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init,invalid-name,too-few-public-methods
+# pylint: disable=no-init,invalid-name,too-few-public-methods
 from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.api import FrameworkManager
@@ -69,7 +69,6 @@ class LoadLotsOfInstruments(systemtesting.MantidSystemTest):
         del wksp
         return True
 
-
     def runTest(self):
         """Main entry point for the test suite"""
         files = self.__getDataFileList__()
@@ -81,7 +80,7 @@ class LoadLotsOfInstruments(systemtesting.MantidSystemTest):
                 if not self.__loadAndTest__(filename):
                     print("FAILED TO LOAD '%s'" % filename)
                     failed.append(filename)
-            #pylint: disable=broad-except
+            # pylint: disable=broad-except
             except Exception as e:
                 print("FAILED TO LOAD '%s' WITH ERROR:" % filename)
                 print(e)
