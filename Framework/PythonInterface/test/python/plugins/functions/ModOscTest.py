@@ -23,9 +23,7 @@ class ModOscTest(unittest.TestCase):
         input = [0.0, 4.0, 8.0, 12.0]
         expected = [0.2, -0.010992072048690453, -0.033772334691772904, 0.05215172592792562]
         tolerance = 1.0e-05
-        status, output = check_output("ModOsc", input, expected, tolerance, A=1.0, Lambda=0.1, N0=1.0, Tau=5.0, Phi=0.3,
-                                      Freq=0.2)
-
+        status, output = check_output("ModOsc", input, expected, tolerance, A0=1.0, Freq=0.1, ModFreq=0.2, Phi=0.3)
         if not status:
             msg = 'Computed output {} from input {} unequal to expected: {}'
             self.fail(msg.format(*[str(i) for i in (output, input, expected)]))
