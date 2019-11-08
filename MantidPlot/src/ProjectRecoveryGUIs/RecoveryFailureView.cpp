@@ -22,7 +22,8 @@ RecoveryFailureView::RecoveryFailureView(QWidget *parent,
   // Set the table information
   addDataToTable();
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Interface", "ProjectRecoveryFailureWindow", true);
+      Mantid::Kernel::FeatureType::Interface, "ProjectRecoveryFailureWindow",
+      true);
 }
 
 void RecoveryFailureView::addDataToTable() {
@@ -41,7 +42,8 @@ void RecoveryFailureView::onClickLastCheckpoint() {
   // Recover last checkpoint
   m_presenter->recoverLast();
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "ProjectRecoveryFailureWindow->RecoverLastCheckpoint", false);
+      Mantid::Kernel::FeatureType::Feature,
+      {"ProjectRecoveryFailureWindow", "RecoverLastCheckpoint"}, false);
 }
 
 void RecoveryFailureView::onClickSelectedCheckpoint() {
@@ -55,8 +57,8 @@ void RecoveryFailureView::onClickSelectedCheckpoint() {
     m_presenter->recoverSelectedCheckpoint(text);
   }
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "ProjectRecoveryFailureWindow->RecoverSelectedCheckpoint",
-      false);
+      Mantid::Kernel::FeatureType::Feature,
+      {"ProjectRecoveryFailureWindow", "RecoverSelectedCheckpoint"}, false);
 }
 
 void RecoveryFailureView::onClickOpenSelectedInScriptWindow() {
@@ -70,22 +72,24 @@ void RecoveryFailureView::onClickOpenSelectedInScriptWindow() {
     m_presenter->openSelectedInEditor(text);
   }
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "ProjectRecoveryFailureWindow->OpenSelectedInScriptWindow",
-      false);
+      Mantid::Kernel::FeatureType::Feature,
+      {"ProjectRecoveryFailureWindow", "OpenSelectedInScriptWindow"}, false);
 }
 
 void RecoveryFailureView::onClickStartMantidNormally() {
   // Start save and close this, clear checkpoint that was offered for load
   m_presenter->startMantidNormally();
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "ProjectRecoveryFailureWindow->StartMantidNormally", false);
+      Mantid::Kernel::FeatureType::Feature,
+      {"ProjectRecoveryFailureWindow", "StartMantidNormally"}, false);
 }
 
 void RecoveryFailureView::reject() {
   // Do nothing just absorb request
   m_presenter->startMantidNormally();
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "ProjectRecoveryFailureWindow->StartMantidNormally", false);
+      Mantid::Kernel::FeatureType::Feature,
+      {"ProjectRecoveryFailureWindow", "StartMantidNormally"}, false);
 }
 
 void RecoveryFailureView::updateProgressBar(const int newValue,

@@ -127,6 +127,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         BaseBrowser.closeEvent(self, event)
 
     def show(self):
+        import matplotlib.pyplot as plt
         """
         Override the base class method. Initialise the peak editing tool.
         """
@@ -159,6 +160,13 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
 
         self.setPeakToolOn(True)
         self.canvas.draw()
+
+        # change the output name if more than one plot of the same workspace
+        window_title = self.canvas.get_window_title()
+        workspace_name = window_title.rsplit('-', 1)[0]
+        for open_figures in plt.get_figlabels():
+            if open_figures != window_title and open_figures.rsplit('-', 1)[0] == workspace_name:
+                self.setOutputName(window_title)
 
     def get_fit_bounds(self):
         """

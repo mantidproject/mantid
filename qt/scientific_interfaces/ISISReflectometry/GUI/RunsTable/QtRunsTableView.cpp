@@ -87,7 +87,8 @@ void QtRunsTableView::onFilterChanged(QString const &filter) {
 void QtRunsTableView::onInstrumentChanged(int index) {
   UNUSED_ARG(index);
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "ISIS Reflectometry->RunsTable->InstrumentChanged", false);
+      Mantid::Kernel::FeatureType::Feature,
+      {"ISIS Reflectometry", "RunsTable", "InstrumentChanged"}, false);
   m_notifyee->notifyChangeInstrumentRequested();
 }
 
@@ -243,13 +244,15 @@ void QtRunsTableView::onCollapseAllGroupsPressed(bool) {
 
 void QtRunsTableView::onProcessPressed(bool) {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "ISIS Reflectometry->RunsTable->StartProcessing", false);
+      Mantid::Kernel::FeatureType::Feature,
+      {"ISIS Reflectometry", "RunsTable", "StartProcessing"}, false);
   m_notifyee->notifyResumeReductionRequested();
 }
 
 void QtRunsTableView::onPausePressed(bool) {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "ISIS Reflectometry->RunsTable->PauseProcessing", false);
+      Mantid::Kernel::FeatureType::Feature,
+      {"ISIS Reflectometry", "RunsTable", "PauseProcessing"}, false);
   m_notifyee->notifyPauseReductionRequested();
 }
 
@@ -283,13 +286,15 @@ void QtRunsTableView::onPastePressed(bool) {
 
 void QtRunsTableView::onPlotSelectedPressed(bool) {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "ISIS Reflectometry->RunsTable->PlotRows", false);
+      Mantid::Kernel::FeatureType::Feature,
+      {"ISIS Reflectometry", "RunsTable", "PlotRows"}, false);
   m_notifyee->notifyPlotSelectedPressed();
 }
 
 void QtRunsTableView::onPlotSelectedStitchedOutputPressed(bool) {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "ISIS Reflectometry->RunsTable->PlotGroups", false);
+      Mantid::Kernel::FeatureType::Feature,
+      {"ISIS Reflectometry", "RunsTable", "PlotGroups"}, false);
   m_notifyee->notifyPlotSelectedStitchedOutputPressed();
 }
 

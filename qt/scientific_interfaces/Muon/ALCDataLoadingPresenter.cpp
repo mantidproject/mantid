@@ -17,7 +17,6 @@
 
 #include <Poco/ActiveResult.h>
 #include <Poco/Path.h>
-
 #include <QApplication>
 #include <QDir>
 #include <QFileInfo>
@@ -31,7 +30,8 @@ using namespace MantidQt::API;
 namespace MantidQt {
 namespace CustomInterfaces {
 ALCDataLoadingPresenter::ALCDataLoadingPresenter(IALCDataLoadingView *view)
-    : m_view(view), m_directoryChanged(false), m_timerID(), m_numDetectors(0) {}
+    : m_view(view), m_directoryChanged(false), m_timerID(), m_numDetectors(0),
+      m_loadingData(false) {}
 
 void ALCDataLoadingPresenter::initialize() {
   m_view->initialize();
@@ -143,6 +143,7 @@ void ALCDataLoadingPresenter::changeWatchState(int state) {
  * @param lastFile :: [input] Last file in range (user-specified or auto)
  */
 void ALCDataLoadingPresenter::load(const std::string &lastFile) {
+  m_loadingData = true;
   m_view->disableAll();
   // Use Path.toString() to ensure both are in same (native) format
   Poco::Path firstRunPath(m_view->firstRun());
@@ -198,6 +199,8 @@ void ALCDataLoadingPresenter::load(const std::string &lastFile) {
 
     alg->setPropertyValue("OutputWorkspace", "__NotUsed");
 
+    // Set loading alg equal to alg
+    this->m_LoadingAlg = alg;
     // Execute async so we can show progress bar
     Poco::ActiveResult<bool> result(alg->executeAsync());
     while (!result.available()) {
@@ -208,14 +211,13 @@ void ALCDataLoadingPresenter::load(const std::string &lastFile) {
     }
 
     MatrixWorkspace_sptr tmp = alg->getProperty("OutputWorkspace");
-
     IAlgorithm_sptr sortAlg = AlgorithmManager::Instance().create("SortXAxis");
     sortAlg->setChild(true); // Don't want workspaces in the ADS
     sortAlg->setProperty("InputWorkspace", tmp);
     sortAlg->setProperty("Ordering", "Ascending");
     sortAlg->setProperty("OutputWorkspace", "__NotUsed__");
-
     sortAlg->execute();
+
     m_loadedData = sortAlg->getProperty("OutputWorkspace");
 
     // If errors are properly caught, shouldn't happen
@@ -227,7 +229,6 @@ void ALCDataLoadingPresenter::load(const std::string &lastFile) {
     } else {
       assert(m_loadedData->getNumberHistograms() == 4);
     }
-
     // Plot spectrum 0. It is either red period (if subtract is unchecked) or
     // red - green (if subtract is checked)
     m_view->setDataCurve(m_loadedData);
@@ -237,8 +238,8 @@ void ALCDataLoadingPresenter::load(const std::string &lastFile) {
   } catch (std::exception &e) {
     m_view->displayError(e.what());
   }
-
   m_view->enableAll();
+  m_loadingData = false;
 }
 
 void ALCDataLoadingPresenter::updateAvailableInfo() {
@@ -362,6 +363,14 @@ ALCDataLoadingPresenter::isCustomGroupingValid(const std::string &group,
   }
   return group;
 }
-
+/**
+ * If currently loading data
+ * @returns :: True if currently in load() method
+ */
+bool ALCDataLoadingPresenter::isLoading() const { return m_loadingData; }
+/**
+ * Cancels current loading algorithm
+ */
+void ALCDataLoadingPresenter::cancelLoading() const { m_LoadingAlg->cancel(); }
 } // namespace CustomInterfaces
 } // namespace MantidQt

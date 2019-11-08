@@ -8,7 +8,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import unittest
 
-from mantid.kernel import (UsageService, UsageServiceImpl)
+from mantid.kernel import (UsageService, UsageServiceImpl, FeatureType)
 
 
 class UsageServiceTest(unittest.TestCase):
@@ -43,7 +43,10 @@ class UsageServiceTest(unittest.TestCase):
     def test_registerFeatureUsage(self):
         UsageService.setEnabled(False)
         #this will do nothing as it is disabled
-        UsageService.registerFeatureUsage("Algorithm", "Test.v1", True)
+        UsageService.registerFeatureUsage(FeatureType.Algorithm, "testv1", True)
+        UsageService.setEnabled(True)
+        UsageService.registerFeatureUsage(FeatureType.Algorithm, "testv1", True)
+        UsageService.registerFeatureUsage(FeatureType.Algorithm, ["testv1","level2feature"], True)
 
 
     def test_Flush(self):
