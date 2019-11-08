@@ -16,7 +16,7 @@ We are proud to announce version 4.2.0 of Mantid.
 
 **THIS IS THE LAST RELEASE THAT WILL SUPPORT Python 2**
 
-From v4.3 onwards Mantid will no longer support Python 3 and scripts run in Mantid will have to change to reflect this. `Time is Ticking <https://pythonclock.org/>`_! 
+From v4.3 onwards Mantid will no longer support Python 2 and scripts run in Mantid will have to change to reflect this. `Time is Ticking <https://pythonclock.org/>`_! 
 NB. Mantid v4.3 will be released near the End of February 2020.
 
 *Interfaces, interfaces, interfaces*! Hard to say but Easy to use!
