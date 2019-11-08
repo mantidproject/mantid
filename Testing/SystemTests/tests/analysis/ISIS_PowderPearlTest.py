@@ -141,7 +141,7 @@ class FocusTest(systemtesting.MantidSystemTest):
         assert_output_file_exists(user_output, 'PRL98507_tt70_tof_xye-0.dat')
         assert_output_file_exists(user_output, 'PRL98507_tt70_d_xye-0.dat')
 
-        self.tolerance = 5e-9  # Required for difference in spline data between operating systems
+        self.tolerance = 1e-8  # Required for difference in spline data between operating systems
         return "PEARL98507_tt70-Results-D-Grp", "ISIS_Powder-PEARL00098507_tt70Atten.nxs"
 
     def cleanup(self):
@@ -193,7 +193,7 @@ class FocusLongThenShortTest(systemtesting.MantidSystemTest):
         assert_output_file_exists(user_output, 'PRL98507_tt70_long_tof_xye-0.dat')
         assert_output_file_exists(user_output, 'PRL98507_tt70_long_d_xye-0.dat')
 
-        self.tolerance = 5e-9  # Required for difference in spline data between operating systems
+        self.tolerance = 1e-8  # Required for difference in spline data between operating systems
         return "PEARL98507_tt70-Results-D-Grp", "ISIS_Powder-PEARL00098507_tt70Atten.nxs"
 
     def cleanup(self):

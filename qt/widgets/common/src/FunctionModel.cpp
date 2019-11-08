@@ -352,6 +352,12 @@ void FunctionModel::setLocalParameterTie(const QString &parName, int i,
 void FunctionModel::setLocalParameterConstraint(const QString &parName, int i,
                                                 const QString &constraint) {
   auto const parts = splitConstraintString(constraint);
+  if (constraint != "" && parts.second.first == "" &&
+      parts.second.second == "") {
+    g_log.error("Constraint " + parName.toStdString() + ": " +
+                constraint.toStdString() + " is not a valid constraint");
+    return;
+  }
   QString prefix, name;
   std::tie(prefix, name) = splitParameterName(parName);
   auto fun = getFunctionWithPrefix(prefix, getSingleFunction(i));

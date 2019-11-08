@@ -23,7 +23,7 @@ from mantidqt.utils.qt import load_ui
 from mantidqt.widgets import jobtreeview, manageuserdirectories
 from six import with_metaclass
 
-from mantid.kernel import (Logger, UsageService)
+from mantid.kernel import (Logger, UsageService, FeatureType)
 from reduction_gui.reduction.scripter import execute_script
 from sans.common.enums import (BinningType, ReductionDimensionality, OutputMode, SaveType, SANSInstrument,
                                RangeStepType, ReductionMode, FitType)
@@ -252,7 +252,7 @@ class SANSDataProcessorGui(QMainWindow,
         self._setup_add_runs_page()
 
         # At a later date we can drop new once we confirm the old GUI is not using "ISIS SANS"
-        UsageService.registerFeatureUsage("Interface", "ISIS SANS (new)", False)
+        UsageService.registerFeatureUsage(FeatureType.Interface, "ISIS SANS (new)", False)
 
     def _setup_progress_bar(self):
         self.batch_progress_bar.setMinimum(0)
@@ -491,22 +491,22 @@ class SANSDataProcessorGui(QMainWindow,
         """
         Process runs
         """
-        UsageService.registerFeatureUsage("Feature", "ISIS SANS->Process Selected", False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Process Selected"], False)
         self._call_settings_listeners(lambda listener: listener.on_process_selected_clicked())
 
     def _process_all_clicked(self):
         """
         Process All button clicked
         """
-        UsageService.registerFeatureUsage("Feature", "ISIS SANS->Process All", False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Process All"], False)
         self._call_settings_listeners(lambda listener: listener.on_process_all_clicked())
 
     def _load_clicked(self):
-        UsageService.registerFeatureUsage("Feature", "ISIS SANS->Load", False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Load"], False)
         self._call_settings_listeners(lambda listener: listener.on_load_clicked())
 
     def _export_table_clicked(self):
-        UsageService.registerFeatureUsage("Feature", "ISIS SANS->Export Table", False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Export Table"], False)
         self._call_settings_listeners(lambda listener: listener.on_export_table_clicked())
 
     def _processing_finished(self):
@@ -543,23 +543,23 @@ class SANSDataProcessorGui(QMainWindow,
 
     def _remove_rows_requested_from_button(self):
         rows = self.get_selected_rows()
-        UsageService.registerFeatureUsage("Feature", "ISIS SANS->Rows removed button", False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Rows removed button"], False)
         self._call_settings_listeners(lambda listener: listener.on_rows_removed(rows))
 
     def _copy_rows_requested(self):
-        UsageService.registerFeatureUsage("Feature", "ISIS SANS->Copy rows button", False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Copy rows button"], False)
         self._call_settings_listeners(lambda listener: listener.on_copy_rows_requested())
 
     def _erase_rows(self):
-        UsageService.registerFeatureUsage("Feature", "ISIS SANS->Erase rows button", False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Erase rows button"], False)
         self._call_settings_listeners(lambda listener: listener.on_erase_rows())
 
     def _cut_rows(self):
-        UsageService.registerFeatureUsage("Feature", "ISIS SANS->Cut rows button", False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Cut rows button"], False)
         self._call_settings_listeners(lambda listener: listener.on_cut_rows())
 
     def _paste_rows_requested(self):
-        UsageService.registerFeatureUsage("Feature", "ISIS SANS->Paste rows button", False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Paste rows button"], False)
         self._call_settings_listeners(lambda listener: listener.on_paste_rows_requested())
 
     def _instrument_changed(self):
@@ -596,7 +596,7 @@ class SANSDataProcessorGui(QMainWindow,
 
     def _on_save_can_clicked(self, value):
         self.save_can_checkBox.setChecked(value)
-        UsageService.registerFeatureUsage("Feature", "ISIS SANS->Save Can Toggled", False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Save Can Toggled"], False)
         set_setting(self.__generic_settings, self.__save_can_key, value)
 
     def _on_reduction_dimensionality_changed(self, is_1d):
@@ -669,7 +669,7 @@ class SANSDataProcessorGui(QMainWindow,
         Load the batch file
         """
 
-        UsageService.registerFeatureUsage("Feature", "ISIS SANS->Loaded Batch File", False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Loaded Batch File"], False)
         load_file(self.batch_line_edit, "*.*", self.__generic_settings, self.__batch_file_key,
                   self.get_batch_file_path)
         self._call_settings_listeners(lambda listener: listener.on_batch_file_load())
@@ -932,12 +932,12 @@ class SANSDataProcessorGui(QMainWindow,
         self._call_settings_listeners(lambda listener: listener.on_mask_file_add())
 
     def _on_multi_period_selection(self):
-        UsageService.registerFeatureUsage("Feature", "ISIS SANS->Multiple Period Toggled", False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Multiple Period Toggled"], False)
         self._call_settings_listeners(
             lambda listener: listener.on_multi_period_selection(self.is_multi_period_view()))
 
     def _on_sample_geometry_selection(self):
-        UsageService.registerFeatureUsage("Feature", "ISIS SANS->Sample Geometry Toggled", False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Sample Geometry Toggled"], False)
         self._call_settings_listeners(lambda listener: listener.on_sample_geometry_selection(self.is_sample_geometry()))
 
     def _on_manage_directories(self):
