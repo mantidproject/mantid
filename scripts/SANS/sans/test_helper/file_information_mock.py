@@ -63,4 +63,4 @@ class SANSFileInformationMock(SANSFileInformation):
         return self._shape
 
     def _get_run_number_from_file(self, file_name):
-        return "9876543210"
+        return "12345"
