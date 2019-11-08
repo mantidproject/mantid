@@ -7,12 +7,13 @@ MuSR Changes
 
 
 Improvements
-###############
+############
 
 - The speed of plotting during Sequential Fits.
 - Removed the creation of a group of groups from the Elemental Analysis GUI. It will now create a workspace for each detector, with each workspace containing three spectra corresponding to Total, Delayed and Prompt data.
 - Muon Analysis Interface>Fitting>Property>TF Asymmetry mode now rescales the fit to match the rescaled data.
 - Adding a pair by right clicking now allows a name to be specified.
+- The ALC interface can now safely be closed while loading a set of runs. On an initial close request the algoirthm will be cancelled. The window then be closed.
 
 Algorithms
 -------------
