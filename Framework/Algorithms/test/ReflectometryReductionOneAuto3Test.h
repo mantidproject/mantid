@@ -518,6 +518,121 @@ public:
     TS_ASSERT_DELTA(outQ->binEdges(0)[6], 1.3414, 0.0001);
   }
 
+  void test_IvsQ_values() {
+
+    ReflectometryReductionOneAuto3 alg;
+    setup_alg_on_workspace(alg, m_TOF, boost::none, "3");
+    alg.setProperty("WavelengthMin", 1.5);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.execute();
+    MatrixWorkspace_sptr outQ = alg.getProperty("OutputWorkspace");
+
+    TS_ASSERT_EQUALS(outQ->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(outQ->counts(0).size(), 14);
+    // Y values in outQ
+    TS_ASSERT_DELTA(outQ->counts(0)[0], 2.0000, 0.0001);
+    TS_ASSERT_DELTA(outQ->counts(0)[13], 2.0000, 0.0001);
+  }
+
+  void test_IvsQ_values_scaled() {
+
+    ReflectometryReductionOneAuto3 alg;
+    setup_alg_on_workspace(alg, m_TOF, boost::none, "3");
+    alg.setProperty("WavelengthMin", 1.5);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("ScaleFactor", 0.1);
+    alg.execute();
+    MatrixWorkspace_sptr outQ = alg.getProperty("OutputWorkspace");
+
+    TS_ASSERT_EQUALS(outQ->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(outQ->counts(0).size(), 14);
+    // Y values in outQ
+    TS_ASSERT_DELTA(outQ->counts(0)[0], 20.0000, 0.0001);
+    TS_ASSERT_DELTA(outQ->counts(0)[13], 20.0000, 0.0001);
+  }
+
+  void test_IvsQ_binned_values() {
+
+    ReflectometryReductionOneAuto3 alg;
+    setup_alg_on_workspace(alg, m_TOF, boost::none, "3");
+    alg.setProperty("WavelengthMin", 1.5);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("MomentumTransferMin", 0.0);
+    alg.setProperty("MomentumTransferMax", 7.0);
+    alg.setProperty("MomentumTransferStep", -1.0);
+    alg.execute();
+    MatrixWorkspace_sptr outQ = alg.getProperty("OutputWorkspaceBinned");
+
+    TS_ASSERT_EQUALS(outQ->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(outQ->counts(0).size(), 7);
+    // Y values in outQ
+    TS_ASSERT_DELTA(outQ->counts(0)[0], 21.1817, 0.0001);
+    TS_ASSERT_DELTA(outQ->counts(0)[1], 5.2910, 0.0001);
+    TS_ASSERT_DELTA(outQ->counts(0)[2], 1.5273, 0.0001);
+    TS_ASSERT_DELTA(outQ->counts(0)[3], 0.0000, 0.0001);
+    TS_ASSERT_DELTA(outQ->counts(0)[4], 0.0000, 0.0001);
+    TS_ASSERT_DELTA(outQ->counts(0)[5], 0.0000, 0.0001);
+    TS_ASSERT_DELTA(outQ->counts(0)[6], 0.0000, 0.0001);
+  }
+
+  void test_IvsQ_binned_values_scaled() {
+
+    ReflectometryReductionOneAuto3 alg;
+    setup_alg_on_workspace(alg, m_TOF, boost::none, "3");
+    alg.setProperty("WavelengthMin", 1.5);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("MomentumTransferMin", 0.0);
+    alg.setProperty("MomentumTransferMax", 7.0);
+    alg.setProperty("MomentumTransferStep", -1.0);
+    alg.setProperty("ScaleFactor", 0.1);
+    alg.execute();
+    MatrixWorkspace_sptr outQ = alg.getProperty("OutputWorkspaceBinned");
+
+    TS_ASSERT_EQUALS(outQ->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(outQ->counts(0).size(), 7);
+    // Y values in outQ
+    TS_ASSERT_DELTA(outQ->counts(0)[0], 211.8171, 0.0001);
+    TS_ASSERT_DELTA(outQ->counts(0)[1], 52.9097, 0.0001);
+    TS_ASSERT_DELTA(outQ->counts(0)[2], 15.2731, 0.0001);
+    TS_ASSERT_DELTA(outQ->counts(0)[3], 0.0000, 0.0001);
+    TS_ASSERT_DELTA(outQ->counts(0)[4], 0.0000, 0.0001);
+    TS_ASSERT_DELTA(outQ->counts(0)[5], 0.0000, 0.0001);
+    TS_ASSERT_DELTA(outQ->counts(0)[6], 0.0000, 0.0001);
+  }
+
+  void test_IvsLam_values() {
+
+    ReflectometryReductionOneAuto3 alg;
+    setup_alg_on_workspace(alg, m_TOF, boost::none, "3");
+    alg.setProperty("WavelengthMin", 1.5);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.execute();
+    MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
+
+    TS_ASSERT_EQUALS(outLam->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(outLam->counts(0).size(), 14);
+    // Y values in outLam
+    TS_ASSERT_DELTA(outLam->counts(0)[0], 2.0000, 0.0001);
+    TS_ASSERT_DELTA(outLam->counts(0)[13], 2.0000, 0.0001);
+  }
+
+  void test_IvsLam_values_are_not_scaled() {
+
+    ReflectometryReductionOneAuto3 alg;
+    setup_alg_on_workspace(alg, m_TOF, boost::none, "3");
+    alg.setProperty("WavelengthMin", 1.5);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("ScaleFactor", 0.1);
+    alg.execute();
+    MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
+
+    TS_ASSERT_EQUALS(outLam->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(outLam->counts(0).size(), 14);
+    // Y values in outLam
+    TS_ASSERT_DELTA(outLam->counts(0)[0], 2.0000, 0.0001);
+    TS_ASSERT_DELTA(outLam->counts(0)[13], 2.0000, 0.0001);
+  }
+
   void test_optional_outputs() {
     auto inter = loadRun("INTER00013460.nxs");
     const double theta = 0.7;
