@@ -87,7 +87,7 @@
                     <xs:element name="technique" maxOccurs="unbounded" type="xs:string"/>
                     <xs:element name="livedata">
                       <xs:complexType>
-                        <xs:choice>
+                        <xs:sequence>
                           <xs:element name="connection" minOccurs="1" maxOccurs="unbounded">
                             <xs:complexType>
                               <xs:attribute name="name" type="xs:string" use="required"/>
@@ -95,21 +95,13 @@
                               <xs:attribute name="listener" type="xs:string" use="required"/>
                             </xs:complexType>
                           </xs:element>
-						  <xs:element name="choppertopic" type="topicType" maxOccurs="unbounded" />
+						  <xs:element name="topic" minOccurs="0" maxOccurs="unbounded" >
 							<xs:complexType>
 								<xs:attribute name="name" type="xs:string" use="required" />
+								<xs:attribute name="type" type="xs:string" use="required" />
 							</xs:complexType>
-							<xs:simpleType name="topicType">
-							  <xs:restriction base="xs:string">
-								<xs:enumeration value="event" />
-								<xs:enumeration value="chopper" />
-								<xs:enumeration value="sample" />
-								<xs:enumeration value="run" />
-								<xs:enumeration value="monitor" />
-							  </xs:restriction>
-							</xs:simpleType>
 						  </xs:element>
-                        </xs:choice>
+                        </xs:sequence>
                         <xs:attribute name="default" type="xs:string" use="optional"/>
                       </xs:complexType>
                     </xs:element>
