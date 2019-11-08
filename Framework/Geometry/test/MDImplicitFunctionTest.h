@@ -86,8 +86,8 @@ public:
     TS_ASSERT(f.isPointContained(point));
 
     point.clear();
-    point.emplace_back(2.5);
-    point.emplace_back(3.5);
+    point.emplace_back(2.5f);
+    point.emplace_back(3.5f);
     TS_ASSERT(!f.isPointContained(point));
   }
 

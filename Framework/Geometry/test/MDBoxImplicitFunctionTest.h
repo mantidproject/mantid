@@ -278,27 +278,27 @@ class MDBoxImplicitFunctionTestPerformance : public CxxTest::TestSuite {
 public:
   MDBoxImplicitFunction get3DFunction() {
     std::vector<coord_t> min;
-    min.emplace_back(1.0);
-    min.emplace_back(2.0);
-    min.emplace_back(3.0);
+    min.emplace_back(1.0f);
+    min.emplace_back(2.0f);
+    min.emplace_back(3.0f);
     std::vector<coord_t> max;
-    max.emplace_back(2.0);
-    max.emplace_back(3.0);
-    max.emplace_back(4.0);
+    max.emplace_back(2.0f);
+    max.emplace_back(3.0f);
+    max.emplace_back(4.0f);
     return MDBoxImplicitFunction(min, max);
   }
 
   MDBoxImplicitFunction get4DFunction() {
     std::vector<coord_t> min;
-    min.emplace_back(1.0);
-    min.emplace_back(2.0);
-    min.emplace_back(3.0);
-    min.emplace_back(4.0);
+    min.emplace_back(1.0f);
+    min.emplace_back(2.0f);
+    min.emplace_back(3.0f);
+    min.emplace_back(4.0f);
     std::vector<coord_t> max;
-    max.emplace_back(2.0);
-    max.emplace_back(3.0);
-    max.emplace_back(4.0);
-    max.emplace_back(5.0);
+    max.emplace_back(2.0f);
+    max.emplace_back(3.0f);
+    max.emplace_back(4.0f);
+    max.emplace_back(5.0f);
     return MDBoxImplicitFunction(min, max);
   }
 
