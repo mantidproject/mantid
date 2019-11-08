@@ -377,7 +377,7 @@ class MainWindow(QMainWindow):
         object_name = 'custom-cpp-interface-' + interface_name
         window = find_window(object_name, UserSubWindow)
         if window is None:
-            interface = self.interface_manager.createSubWindow(interface_name)
+            interface = self.interface_manager.createSubWindow(interface_name,self)
             interface.setObjectName(object_name)
             interface.setAttribute(Qt.WA_DeleteOnClose, True)
             interface.show()

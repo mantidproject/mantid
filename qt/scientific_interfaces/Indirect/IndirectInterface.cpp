@@ -17,7 +17,7 @@ namespace CustomInterfaces {
 IndirectInterface::IndirectInterface(QWidget *parent)
     : UserSubWindow(parent),
       m_settings(dynamic_cast<IndirectSettings *>(
-          InterfaceManager().createSubWindow("Settings"))) {
+          InterfaceManager().createSubWindow("Settings", this))) {
 
   connect(m_settings.get(), SIGNAL(applySettings()), this,
           SLOT(applySettings()));
@@ -30,7 +30,7 @@ void IndirectInterface::help() {
 
 void IndirectInterface::settings() {
   m_settings->loadSettings();
-  m_settings->setWindowModality(Qt::ApplicationModal);
+  m_settings->setWindowModality(Qt::WindowModal);
   m_settings->show();
 }
 

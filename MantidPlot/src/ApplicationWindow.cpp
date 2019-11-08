@@ -15732,7 +15732,7 @@ void ApplicationWindow::performCustomAction(QAction *action) {
     usr_win->setAttribute(Qt::WA_DeleteOnClose, false);
     MantidQt::API::InterfaceManager interfaceManager;
     MantidQt::API::UserSubWindow *user_interface =
-        interfaceManager.createSubWindow(action_data, usr_win);
+        interfaceManager.createSubWindow(action_data, usr_win, false);
     if (user_interface) {
       setGeometry(usr_win, user_interface);
       connect(user_interface, SIGNAL(runAsPythonScript(const QString &, bool)),
