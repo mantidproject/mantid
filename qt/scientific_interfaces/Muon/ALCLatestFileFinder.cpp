@@ -8,9 +8,8 @@
 #include <Poco/DirectoryIterator.h>
 #include <Poco/Exception.h>
 #include <algorithm>
-#include <cctype>
 #include <boost/algorithm/string.hpp>
-
+#include <cctype>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -45,14 +44,11 @@ std::string ALCLatestFileFinder::getMostRecentFile() const {
       return path.toString();
     }
 
-
-    if ( !fileNames.empty())
-    {
+    if (!fileNames.empty()) {
       // Sort by run number
       std::sort(fileNames.begin(), fileNames.end());
       return fileNames.back();
-
-    }else{
+    } else {
       // return empty string
       return "";
     }
@@ -91,7 +87,7 @@ bool ALCLatestFileFinder::isValid(const std::string &path) const {
       auto fileName = filePath.getBaseName();
       if (fileName.size() > 5) {
         auto fileSplit = getInstrumentAndRun(fileName);
-        if (boost::iequals(fileSplit.first,firstRunInstrument)) {
+        if (boost::iequals(fileSplit.first, firstRunInstrument)) {
           // 3. Must end in a number
           valid = std::all_of(fileSplit.second.begin(), fileSplit.second.end(),
                               ::isdigit);
