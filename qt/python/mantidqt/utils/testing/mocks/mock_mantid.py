@@ -40,6 +40,7 @@ class MockMantidAxis:
 
         self.mock_unit = MockMantidUnit()
         self.getUnit = Mock(return_value=self.mock_unit)
+        self.isNumeric = Mock(return_value=False)
 
 
 class MockSpectrumInfo:
