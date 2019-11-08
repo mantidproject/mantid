@@ -28,6 +28,8 @@ Algorithms
 
 Instrument Definition Files
 ---------------------------
+
+* Mantid is now resilient to corrupted Facilities.xml files, which could sometimes happen occasionally while downloading an updated file.  If Mantid finds a corrupt file it will now fall back to the originally installed file, and the corrupted one should be re-downloaded.
 * A definition file for the NEAT instrument at HZB as been added along with an entry in the facilities file.
 * The PEARL IDF has been updated with corrections to the instrument flight path and monitor distances.
 
