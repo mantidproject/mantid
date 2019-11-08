@@ -8,7 +8,7 @@ Direct Geometry Changes
 Interfaces
 ##########
 
--Added the :ref:`ALF View <ALF_View-ref>` GUI for aligning samples.
+- Added the :ref:`ALF View <ALF_View-ref>` GUI for aligning samples on the ALF Instrument.
 
 Algorithms
 ##########
@@ -28,6 +28,5 @@ Instrument Updates
 - Added CHESS IDF.
 - Updated scripts QECoverage and DGSPlanner/InstrumentWidget for CHESS
 
- 
 
 :ref:`Release 4.2.0 <v4.2.0>`

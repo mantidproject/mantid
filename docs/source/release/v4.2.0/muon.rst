@@ -23,7 +23,7 @@ Algorithms
 
 .. figure:: ../../images/MuonAnalysis.PNG
    :class: screenshot
-   :width: 500px
+   :width: 800px
    :align: right
 
 Muon Analysis 2 and Frequency Domain Interfaces
@@ -35,7 +35,7 @@ Muon Analysis 2 and Frequency Domain Interfaces
 - Can now plot FFT's of PhaseQuad data.
 - Both interfaces work with Project Recovery. 
 - The original Muon Analysis GUI has been renamed "Muon Analysis Old" and has been deprecated. 
-- ``*`` The new Muon Analysis GUI has been renamed Muon Analysis. ``*``
+- \* **The new Muon Analysis GUI has been renamed Muon Analysis.** \*
 
 Bug Fixes
 #########
@@ -47,6 +47,6 @@ Bug Fixes
 - Fixed an issue where Muon Analysis 2 would crash if a polynomial background was used in combination with another fitting function.
 - Fixed an issue where changing the dead time to from table workspace or other file did not work and reverted back to from data file.
 
-``*`` See associated Image ``*``
+\* **See associated Image** \*
 
 :ref:`Release 4.2.0 <v4.2.0>`
