@@ -23,7 +23,7 @@ Workbench
 -------------
 
 - The Indirect Bayes GUI has been added to the Workbench.
-- ``*``**The Indirect Data Analysis GUI has been added to the Workbench**``*``
+- \* **The Indirect Data Analysis GUI has been added to the Workbench** \*
 
 Algorithms
 ----------
@@ -49,6 +49,6 @@ BugFixes
 
 - A bug has been fixed in :ref:`MatchPeaks <algm-MatchPeaks>` which was causing wrong alignment in :ref:`IndirectILLReductionQENS <algm-IndirectILLReductionQENS>` with unmirror option 7, when the peaks in the alignment run are too narrow to be fitted.
 
-``*`` See associated image ``*``
+\* **See associated Image** \*
 
 :ref:`Release 4.2.0 <v4.2.0>`

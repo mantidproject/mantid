@@ -2,13 +2,14 @@
 Framework Changes
 =================
 
-.. contents:: Table of Contents
-   :local:
-
 .. figure:: ../../images/UpdateOS.png
    :class: screenshot
    :width: 385px
    :align: right
+
+.. contents:: Table of Contents
+   :local:
+
 
 Packaging
 #########
@@ -51,6 +52,8 @@ Algorithms
 - :ref:`IndexPeaks <algm-IndexPeaks>` now has options to enter modulation vectors and additional information required for satellite peak indexing. As
   a result :ref:`IndexPeaksWithSatellites <algm-IndexPeaksWithSatellites>` has been deprecated and will be removed in a future release.
 - :ref:`MaskAngle <algm-MaskAngle>` has an additional option of ``Angle='InPlane'``
+- The custom dialog for :ref:`CreateSampleShape <algm-CreateSampleShape>`
+  has been removed. It will now fall back to the generic one.
 
 Live Data
 ---------
