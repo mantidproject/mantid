@@ -644,7 +644,7 @@ void ComponentInfo::merge(const ComponentInfo &other) {
       continue;
     auto &positions = m_positions.access();
     auto &rotations = m_rotations.access();
-    m_scanIntervals.push_back(other.m_scanIntervals[timeIndex]);
+    m_scanIntervals.emplace_back(other.m_scanIntervals[timeIndex]);
     const size_t indexStart = other.linearIndex({0, timeIndex});
     size_t indexEnd = indexStart + nonDetectorSize();
     positions.insert(positions.end(), other.m_positions->begin() + indexStart,

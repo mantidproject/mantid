@@ -542,7 +542,7 @@ MDHistoWorkspaceIterator::findNeighbourIndexesFaceTouching() const {
     if (neighbour_index < m_ws->getNPoints() &&
         Utils::isNeighbourOfSubject(m_nd, neighbour_index, m_index,
                                     m_indexMaker, m_indexMax, widths)) {
-      neighbourIndexes.push_back(neighbour_index);
+      neighbourIndexes.emplace_back(neighbour_index);
     }
   }
   return neighbourIndexes;
@@ -600,7 +600,7 @@ std::vector<int64_t> MDHistoWorkspaceIterator::createPermutations(
     for (int i = 0; i < widths[0]; ++i) {
       // for width = 3 : -1, 0, 1
       // for width = 5 : -2, -1, 0, 1, 2
-      permutationsVertexTouching.push_back(centreIndex - i);
+      permutationsVertexTouching.emplace_back(centreIndex - i);
     }
 
     // Figure out what possible indexes deltas to generate indexes that are next
@@ -612,9 +612,9 @@ std::vector<int64_t> MDHistoWorkspaceIterator::createPermutations(
       size_t nEntries = permutationsVertexTouching.size();
       for (int k = 1; k <= widths[j] / 2; ++k) {
         for (size_t m = 0; m < nEntries; m++) {
-          permutationsVertexTouching.push_back((offset * k) +
+          permutationsVertexTouching.emplace_back((offset * k) +
                                                permutationsVertexTouching[m]);
-          permutationsVertexTouching.push_back((offset * k * (-1)) +
+          permutationsVertexTouching.emplace_back((offset * k * (-1)) +
                                                permutationsVertexTouching[m]);
         }
       }
@@ -703,9 +703,9 @@ MDHistoWorkspaceIterator::findNeighbourIndexesByWidth1D(
   std::vector<int> widths;
   for (size_t dimension = 0; dimension < m_nd; ++dimension) {
     if (static_cast<int>(dimension) == width_dimension) {
-      widths.push_back(width);
+      widths.emplace_back(width);
     } else {
-      widths.push_back(1);
+      widths.emplace_back(1);
     }
   }
 

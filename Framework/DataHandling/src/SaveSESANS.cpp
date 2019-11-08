@@ -227,7 +227,7 @@ SaveSESANS::calculateError(const HistogramData::HistogramE &eValues,
 
   // Error is calculated as e / (y * wavelength^2)
   for (size_t i = 0; i < eValues.size(); i++) {
-    error.push_back(eValues[i] / (yValues[i] * wavelength[i] * wavelength[i]));
+    error.emplace_back(eValues[i] / (yValues[i] * wavelength[i] * wavelength[i]));
   }
   return error;
 }

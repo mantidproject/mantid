@@ -268,10 +268,10 @@ void SlicingAlgorithm::makeBasisVectorFromString(const std::string &str) {
       numBins);
 
   // Put both in the algo for future use
-  m_bases.push_back(basis);
-  m_binDimensions.push_back(std::move(out));
-  m_binningScaling.push_back(binningScaling);
-  m_transformScaling.push_back(transformScaling);
+  m_bases.emplace_back(basis);
+  m_binDimensions.emplace_back(std::move(out));
+  m_binningScaling.emplace_back(binningScaling);
+  m_transformScaling.emplace_back(transformScaling);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -302,8 +302,8 @@ void SlicingAlgorithm::processGeneralTransformProperties() {
   m_minExtents.clear();
   m_maxExtents.clear();
   for (size_t d = 0; d < m_outD; d++) {
-    m_minExtents.push_back(extents[d * 2]);
-    m_maxExtents.push_back(extents[d * 2 + 1]);
+    m_minExtents.emplace_back(extents[d * 2]);
+    m_maxExtents.emplace_back(extents[d * 2 + 1]);
   }
 
   m_numBins = this->getProperty("OutputBins");
@@ -519,12 +519,12 @@ void SlicingAlgorithm::makeAlignedDimensionFromString(const std::string &str) {
     // Copy the dimension name, ID and units
     IMDDimension_const_sptr inputDim = m_inWS->getDimension(dim_index);
     const auto &frame = inputDim->getMDFrame();
-    m_binDimensions.push_back(MDHistoDimension_sptr(
+    m_binDimensions.emplace_back(MDHistoDimension_sptr(
         new MDHistoDimension(inputDim->getName(), inputDim->getDimensionId(),
                              frame, min, max, numBins)));
 
     // Add the index from which we're binning to the vector
-    this->m_dimensionToBinFrom.push_back(dim_index);
+    this->m_dimensionToBinFrom.emplace_back(dim_index);
   }
 }
 //----------------------------------------------------------------------------------------------
@@ -582,7 +582,7 @@ void SlicingAlgorithm::createAlignedTransform() {
     // Create a unit basis vector that corresponds to this
     VMD basis(inD);
     basis[m_dimensionToBinFrom[d]] = 1.0;
-    m_bases.push_back(basis);
+    m_bases.emplace_back(basis);
   }
 
   // Transform for binning
@@ -783,7 +783,7 @@ SlicingAlgorithm::getGeneralImplicitFunction(const size_t *const chunkMin,
     o2 += (m_bases[d] * xMax);
 
     VMD thisBase = m_bases[d] * (xMax - xMin);
-    bases.push_back(thisBase);
+    bases.emplace_back(thisBase);
     if (d == 0)
       x = thisBase;
   }
@@ -819,13 +819,13 @@ SlicingAlgorithm::getGeneralImplicitFunction(const size_t *const chunkMin,
       // Create a list of vectors that excludes the "current" basis
       for (size_t baseIndex = 0; baseIndex < boxDim; ++baseIndex) {
         if (baseIndex != ignoreIndex)
-          vectors.push_back(bases[baseIndex]);
+          vectors.emplace_back(bases[baseIndex]);
       }
 
       // if we have fewer basis vectors than dimensions
       // create a normal for the final dimension
       if (boxDim == nd - 1)
-        vectors.push_back(VMD::getNormalVector(bases));
+        vectors.emplace_back(VMD::getNormalVector(bases));
 
       // Add two planes for each set of vectors
       func->addPlane(MDPlane(vectors, o1, insidePoint));
@@ -918,7 +918,7 @@ SlicingAlgorithm::getOldBasis(size_t dimension) const {
   for (size_t i = 0; i < dimension; ++i) {
     Mantid::Kernel::VMD basisVector(dimension);
     basisVector[i] = 1.0;
-    oldBasis.push_back(basisVector);
+    oldBasis.emplace_back(basisVector);
   }
   return oldBasis;
 }
@@ -947,7 +947,7 @@ std::vector<size_t> SlicingAlgorithm::getIndicesWithProjection(
   std::vector<size_t> indexWithProjection;
   for (size_t index = 0; index < oldBasis.size(); ++index) {
     if (isProjectingOnFrame(oldBasis[index], basisVector)) {
-      indexWithProjection.push_back(index);
+      indexWithProjection.emplace_back(index);
     }
   }
   return indexWithProjection;

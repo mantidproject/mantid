@@ -1246,11 +1246,11 @@ void MantidEV::showInfo(bool lab_coords, Mantid::Kernel::V3D q_point) {
     if (lab_coords) {
       std::pair<std::string, std::string> QlabStr(
           "Qlab", boost::lexical_cast<std::string>(q_point));
-      info.push_back(QlabStr);
+      info.emplace_back(QlabStr);
     } else {
       std::pair<std::string, std::string> QSampleStr(
           "QSample", boost::lexical_cast<std::string>(q_point));
-      info.push_back(QSampleStr);
+      info.emplace_back(QSampleStr);
     }
   } else // get the info from the peaks workspace
   {
@@ -1260,7 +1260,7 @@ void MantidEV::showInfo(bool lab_coords, Mantid::Kernel::V3D q_point) {
   double q_dist = (q_point - last_Q).norm();
   std::pair<std::string, std::string> Q_dist_str(
       "|Q2-Q1|", boost::lexical_cast<std::string>(q_dist));
-  info.push_back(Q_dist_str);
+  info.emplace_back(Q_dist_str);
 
   Mantid::Kernel::Matrix<double> UB(3, 3, false);
   if (worker->getUB(peaks_ws_name, lab_coords,
@@ -1275,7 +1275,7 @@ void MantidEV::showInfo(bool lab_coords, Mantid::Kernel::V3D q_point) {
     double hkl_dist = (hkl_2 - hkl_1).norm();
     std::pair<std::string, std::string> hkl_dist_str(
         "|hkl2-hkl1|", boost::lexical_cast<std::string>(hkl_dist));
-    info.push_back(hkl_dist_str);
+    info.emplace_back(hkl_dist_str);
   }
 
   last_Q = q_point;

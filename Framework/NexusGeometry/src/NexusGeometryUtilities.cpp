@@ -107,7 +107,7 @@ std::vector<H5::Group> findGroups(const H5::Group &parentGroup,
       auto childGroup = parentGroup.openGroup(childPath);
       // Iterate through attributes to find NX_class
       if (hasNXAttribute(childGroup, classType))
-        groups.push_back(childGroup);
+        groups.emplace_back(childGroup);
     }
   }
   return groups; // Empty

@@ -4767,7 +4767,7 @@ Spectrogram *Graph::plotSpectrogram(Spectrogram *d_spectrogram,
                           *d_plot->axisScaleDiv(QwtPlot::yRight));
 
   for (int i = 0; i < QwtPlot::axisCnt; i++) {
-    updatedaxis.push_back(0);
+    updatedaxis.emplace_back(0);
   }
 
   enableFixedAspectRatio(

@@ -81,22 +81,22 @@ public:
     // These points will be blocked by adding the second plane
     std::vector<coord_t> point;
     point.clear();
-    point.push_back(-1);
-    point.push_back(-2);
+    point.emplace_back(-1);
+    point.emplace_back(-2);
     TS_ASSERT(f.isPointContained(point));
 
     point.clear();
-    point.push_back(2.5);
-    point.push_back(3.5);
+    point.emplace_back(2.5);
+    point.emplace_back(3.5);
     TS_ASSERT(!f.isPointContained(point));
   }
 
   void add2DVertex(std::vector<std::vector<coord_t>> &vertexes, double x,
                    double y) {
     std::vector<coord_t> vertex;
-    vertex.push_back(static_cast<coord_t>(x));
-    vertex.push_back(static_cast<coord_t>(y));
-    vertexes.push_back(vertex);
+    vertex.emplace_back(static_cast<coord_t>(x));
+    vertex.emplace_back(static_cast<coord_t>(y));
+    vertexes.emplace_back(vertex);
   }
 
   /** Make the 4 points that define a square/rectangle

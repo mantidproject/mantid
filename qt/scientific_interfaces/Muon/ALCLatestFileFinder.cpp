@@ -31,7 +31,7 @@ std::string ALCLatestFileFinder::getMostRecentFile() const {
       Poco::DirectoryIterator end; // the end iterator
       while (iter != end) {
         if (isValid(iter->path())) {
-          fileNames.push_back(iter->path());
+          fileNames.emplace_back(iter->path());
         }
         ++iter;
       }

@@ -125,7 +125,7 @@ void StartLiveData::removeListenerProperties() {
   // Find properties tagged with the listener property group
   for (const auto &prop : getProperties()) {
     if (prop->getGroup() == listenerPropertyGroup) {
-      propertiesToRemove.push_back(prop->name());
+      propertiesToRemove.emplace_back(prop->name());
     }
   }
 

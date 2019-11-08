@@ -95,7 +95,7 @@ public:
                          "Intensity scaling factor for spectrum " + si);
       } catch (std::invalid_argument &) {
       }
-      m_IntensityScalingIdx.push_back(parameterIndex("IntensityScaling" + si));
+      m_IntensityScalingIdx.emplace_back(parameterIndex("IntensityScaling" + si));
     }
   }
 };
@@ -146,7 +146,7 @@ CrystalFieldFunction::createEquivalentFunctions() const {
     if (cfun) {
       cfun->checkFunction();
     }
-    funs.push_back(fun);
+    funs.emplace_back(fun);
   }
   return funs;
 }
@@ -408,7 +408,7 @@ void CrystalFieldFunction::buildAttributeNames() const {
                                controlAttributeNames.end(), name);
     if (iterFound != controlAttributeNames.end()) {
       controlAttributeNames.erase(iterFound);
-      m_attributeNames.push_back(name);
+      m_attributeNames.emplace_back(name);
     }
   };
   // Prepend a prefix to attribute names, ignore NumDeriv attribute.
@@ -418,7 +418,7 @@ void CrystalFieldFunction::buildAttributeNames() const {
       if (name == "NumDeriv")
         continue;
       name.insert(name.begin(), prefix.begin(), prefix.end());
-      m_attributeNames.push_back(name);
+      m_attributeNames.emplace_back(name);
     }
   };
   // These names must appear first and in this order in the output vector

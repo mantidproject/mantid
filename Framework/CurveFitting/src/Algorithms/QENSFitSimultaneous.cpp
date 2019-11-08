@@ -294,7 +294,7 @@ runParameterProcessingWithGrouping(IAlgorithm &processingAlgorithm,
                                     static_cast<int>(grouping[i + 1]) - 1);
     processingAlgorithm.setProperty("OutputWorkspace", "__Result");
     processingAlgorithm.execute();
-    results.push_back(processingAlgorithm.getProperty("OutputWorkspace"));
+    results.emplace_back(processingAlgorithm.getProperty("OutputWorkspace"));
   }
   return createGroup(results);
 }

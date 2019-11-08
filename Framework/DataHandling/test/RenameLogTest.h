@@ -113,8 +113,8 @@ private:
       Types::Core::DateAndTime time(t1_ns);
       p1->addValue(time, v1);
 
-      m_rawTimes.push_back(time);
-      m_rawValues.push_back(v1);
+      m_rawTimes.emplace_back(time);
+      m_rawValues.emplace_back(v1);
 
       t1_ns += dt_ns;
       v1 = -v1;

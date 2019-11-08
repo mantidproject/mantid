@@ -398,7 +398,7 @@ SimulationAggregator::SimulationAggregator(const size_t nruns) {
  */
 Simulation &SimulationAggregator::newSimulation(const size_t order,
                                                 const size_t ntimes) {
-  results.push_back(Simulation(order, ntimes));
+  results.emplace_back(Simulation(order, ntimes));
   return results.back();
 }
 

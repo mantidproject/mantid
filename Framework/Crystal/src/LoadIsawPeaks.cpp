@@ -199,7 +199,7 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
     // Save all bank numbers in header lines
     Strings::convert(getWord(in, false), bank);
     if (s == "5")
-      det.push_back(bank);
+      det.emplace_back(bank);
   }
   // Find bank numbers in instument that are not in header lines
   std::string maskBanks;

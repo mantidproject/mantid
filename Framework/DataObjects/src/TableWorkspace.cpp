@@ -83,7 +83,7 @@ API::Column_sptr TableWorkspace::addColumn(const std::string &type,
   }
   try {
     c = API::ColumnFactory::Instance().create(type);
-    m_columns.push_back(c);
+    m_columns.emplace_back(c);
     c->setName(name);
     resizeColumn(c.get(), rowCount());
   } catch (Kernel::Exception::NotFoundError &e) {
@@ -209,7 +209,7 @@ void TableWorkspace::addColumn(boost::shared_ptr<API::Column> column) {
     throw std::invalid_argument(ss.str());
   } else {
     modified();
-    m_columns.push_back(column);
+    m_columns.emplace_back(column);
   }
 }
 

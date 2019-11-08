@@ -267,7 +267,7 @@ RowData::addSlice(const QString &sliceSuffix,
     }
   }
   // Add to list of slices
-  m_slices.push_back(sliceData);
+  m_slices.emplace_back(sliceData);
 
   return sliceData;
 }

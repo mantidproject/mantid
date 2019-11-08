@@ -168,8 +168,8 @@ void FakeMD::addFakeUniformData(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   if (m_uniformParams.size() == 1) {
     if (randomEvents) {
       for (size_t d = 0; d < nd; ++d) {
-        m_uniformParams.push_back(ws->getDimension(d)->getMinimum());
-        m_uniformParams.push_back(ws->getDimension(d)->getMaximum());
+        m_uniformParams.emplace_back(ws->getDimension(d)->getMinimum());
+        m_uniformParams.emplace_back(ws->getDimension(d)->getMaximum());
       }
     } else // regular events
     {
@@ -188,12 +188,12 @@ void FakeMD::addFakeUniformData(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       double delta0 = std::pow(dV, 1. / double(nd));
       for (size_t d = 0; d < nd; ++d) {
         double min = ws->getDimension(d)->getMinimum();
-        m_uniformParams.push_back(min * (1 + FLT_EPSILON) - min + FLT_EPSILON);
+        m_uniformParams.emplace_back(min * (1 + FLT_EPSILON) - min + FLT_EPSILON);
         double extent = ws->getDimension(d)->getMaximum() - min;
         auto nStrides = size_t(extent / delta0);
         if (nStrides < 1)
           nStrides = 1;
-        m_uniformParams.push_back(extent / static_cast<double>(nStrides));
+        m_uniformParams.emplace_back(extent / static_cast<double>(nStrides));
       }
     }
   }

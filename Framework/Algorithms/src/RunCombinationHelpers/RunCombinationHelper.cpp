@@ -44,7 +44,7 @@ RunCombinationHelper::unWrapGroups(const std::vector<std::string> &inputs) {
       MatrixWorkspace_sptr matrixws =
           AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(input);
       if (matrixws)
-        outputs.push_back(matrixws->getName());
+        outputs.emplace_back(matrixws->getName());
       else
         throw(std::runtime_error(
             "The input " + input +
@@ -71,7 +71,7 @@ void RunCombinationHelper::setReferenceProperties(MatrixWorkspace_sptr ref) {
   if (m_numberSpectra) {
     m_hasDx.reserve(m_numberSpectra);
     for (unsigned int i = 0; i < m_numberSpectra; ++i)
-      m_hasDx.push_back(ref->hasDx(i));
+      m_hasDx.emplace_back(ref->hasDx(i));
   }
 }
 

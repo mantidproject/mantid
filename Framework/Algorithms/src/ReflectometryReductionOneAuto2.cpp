@@ -516,7 +516,7 @@ ReflectometryReductionOneAuto2::getDetectorNames(MatrixWorkspace_sptr inputWS) {
         auto parentType = parent->type();
         auto detectorName = (parentType == "Instrument") ? detector->getName()
                                                          : parent->getName();
-        detectors.push_back(detectorName);
+        detectors.emplace_back(detectorName);
       }
     }
   } catch (boost::bad_lexical_cast &) {
@@ -919,10 +919,10 @@ bool ReflectometryReductionOneAuto2::processGroups() {
     }
     alg->execute();
 
-    IvsQGroup.push_back(IvsQName);
-    IvsQBinnedGroup.push_back(IvsQBinnedName);
+    IvsQGroup.emplace_back(IvsQName);
+    IvsQBinnedGroup.emplace_back(IvsQBinnedName);
     if (AnalysisDataService::Instance().doesExist(IvsLamName)) {
-      IvsLamGroup.push_back(IvsLamName);
+      IvsLamGroup.emplace_back(IvsLamName);
     }
   }
 
@@ -992,10 +992,10 @@ bool ReflectometryReductionOneAuto2::processGroups() {
     alg->setProperty("OutputWorkspaceBinned", IvsQBinnedName);
     alg->setProperty("OutputWorkspaceWavelength", IvsLamName);
     alg->execute();
-    IvsQBinnedGroup.push_back(IvsQBinnedName);
-    IvsQGroup.push_back(IvsQName);
+    IvsQBinnedGroup.emplace_back(IvsQBinnedName);
+    IvsQGroup.emplace_back(IvsQName);
     if (AnalysisDataService::Instance().doesExist(IvsLamName)) {
-      IvsLamGroup.push_back(IvsLamName);
+      IvsLamGroup.emplace_back(IvsLamName);
     }
   }
 

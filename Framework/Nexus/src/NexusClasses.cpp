@@ -183,10 +183,10 @@ void NXClass::readAllInfo() {
           NXgetinfo(m_fileID, &data_info.rank, data_info.dims, &data_info.type);
       NXclosedata(m_fileID);
       data_info.nxname = info.nxname;
-      m_datasets->push_back(data_info);
+      m_datasets->emplace_back(data_info);
     } else if (info.nxclass.substr(0, 2) == "NX" ||
                info.nxclass.substr(0, 2) == "IX") {
-      m_groups->push_back(info);
+      m_groups->emplace_back(info);
     }
     // std::cerr<<'!'<<info.nxname<<'\n';
   }
@@ -358,7 +358,7 @@ std::vector<std::string> &NXNote::data() {
 
     std::string line;
     while (getline(istr, line)) {
-      m_data.push_back(line);
+      m_data.emplace_back(line);
     }
 
     m_data_ok = true;

@@ -135,7 +135,7 @@ void LoadMLZ::maskDetectors(NeXus::NXEntry &entry) {
     g_log.debug() << masked_detector;
     g_log.debug() << ", ";
     try {
-      indicesToMask.push_back(detInfo.indexOf(masked_detector));
+      indicesToMask.emplace_back(detInfo.indexOf(masked_detector));
     } catch (std::out_of_range &) {
       g_log.warning() << "Invalid detector ID " << masked_detector
                       << ". Found while running LoadMLZ\n";

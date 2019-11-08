@@ -163,7 +163,7 @@ PoldiFitPeaks2D::getNormalizedPeakCollections(
     PoldiPeakCollection_sptr integratedPeakCollection =
         getIntegratedPeakCollection(peakCollection);
 
-    normalizedPeakCollections.push_back(
+    normalizedPeakCollections.emplace_back(
         getNormalizedPeakCollection(integratedPeakCollection));
   }
 
@@ -326,7 +326,7 @@ std::vector<PoldiPeakCollection_sptr> PoldiFitPeaks2D::getCountPeakCollections(
       PoldiPeakCollection_sptr normalizedPeaks =
           getPeakCollectionFromFunction(localFunction);
 
-      countPeakCollections.push_back(getCountPeakCollection(normalizedPeaks));
+      countPeakCollections.emplace_back(getCountPeakCollection(normalizedPeaks));
     } catch (const std::invalid_argument &) {
       // not a Poldi2DFunction - skip (the background functions)
     }
@@ -675,7 +675,7 @@ PoldiFitPeaks2D::getUserSpecifiedTies(const IFunction_sptr &poldiFn) {
 
         for (auto &parameter : parameters) {
           if (boost::algorithm::ends_with(parameter, tieParameter)) {
-            matchedParameters.push_back(parameter);
+            matchedParameters.emplace_back(parameter);
           }
         }
 
@@ -692,7 +692,7 @@ PoldiFitPeaks2D::getUserSpecifiedTies(const IFunction_sptr &poldiFn) {
 
           for (auto par = matchedParameters.begin() + 1;
                par != matchedParameters.end(); ++par) {
-            tieComponents.push_back(*par + "=" + reference);
+            tieComponents.emplace_back(*par + "=" + reference);
           }
           break;
         }
@@ -1320,7 +1320,7 @@ void PoldiFitPeaks2D::exec() {
         try {
           ITableWorkspace_sptr cell =
               getRefinedCellParameters(poldi2DFunction->getFunction(i));
-          cells.push_back(cell);
+          cells.emplace_back(cell);
         } catch (const std::invalid_argument &) {
           // do nothing
         }

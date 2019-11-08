@@ -335,7 +335,7 @@ public:
 
     // format = startPoint, endPoint, total distance so far
     // forward only intercepts means that start point should be track origin
-    expectedResults.push_back(Link(V3D(-1, 1.5, 1),
+    expectedResults.emplace_back(Link(V3D(-1, 1.5, 1),
                                    V3D(sqrt(16 - 0.25) + 1, 1.5, 1.0),
                                    sqrt(15.75) + 2, *geom_obj));
 
@@ -348,7 +348,7 @@ public:
     Track track(V3D(0, -10, 0), V3D(0, 1, 0));
 
     // format = startPoint, endPoint, total distance so far
-    expectedResults.push_back(
+    expectedResults.emplace_back(
         Link(V3D(0, -4.1, 0), V3D(0, 4.1, 0), 14.1, *geom_obj));
 
     checkTrackIntercept(geom_obj, track, expectedResults);
@@ -360,7 +360,7 @@ public:
     Track track(V3D(-10, 0, 0), V3D(1, 0, 0));
 
     // format = startPoint, endPoint, total distance so far
-    expectedResults.push_back(
+    expectedResults.emplace_back(
         Link(V3D(-4.1, 0, 0), V3D(4.1, 0, 0), 14.1, *geom_obj));
     checkTrackIntercept(geom_obj, track, expectedResults);
   }
@@ -369,7 +369,7 @@ public:
     std::vector<Link> expectedResults;
     auto geom_obj = createCappedCylinder();
     // format = startPoint, endPoint, total distance so far
-    expectedResults.push_back(Link(V3D(0, -3, 0), V3D(0, 3, 0), 13, *geom_obj));
+    expectedResults.emplace_back(Link(V3D(0, -3, 0), V3D(0, 3, 0), 13, *geom_obj));
 
     Track track(V3D(0, -10, 0), V3D(0, 1, 0));
     checkTrackIntercept(geom_obj, track, expectedResults);
@@ -381,7 +381,7 @@ public:
     Track track(V3D(-10, 0, 0), V3D(1, 0, 0));
 
     // format = startPoint, endPoint, total distance so far
-    expectedResults.push_back(
+    expectedResults.emplace_back(
         Link(V3D(-3.2, 0, 0), V3D(1.2, 0, 0), 11.2, *geom_obj));
     checkTrackIntercept(geom_obj, track, expectedResults);
   }
@@ -466,8 +466,8 @@ public:
     TS_ASSERT(object2.interceptSurface(TL) != 0);
 
     std::vector<Link> expectedResults;
-    expectedResults.push_back(Link(V3D(-1, 0, 0), V3D(1, 0, 0), 6, object1));
-    expectedResults.push_back(
+    expectedResults.emplace_back(Link(V3D(-1, 0, 0), V3D(1, 0, 0), 6, object1));
+    expectedResults.emplace_back(
         Link(V3D(4.5, 0, 0), V3D(6.5, 0, 0), 11.5, object2));
     checkTrackIntercept(TL, expectedResults);
   }
@@ -497,8 +497,8 @@ public:
     TS_ASSERT(object2.interceptSurface(TL) != 0);
 
     std::vector<Link> expectedResults;
-    expectedResults.push_back(Link(V3D(-1, 0, 0), V3D(1, 0, 0), 6, object1));
-    expectedResults.push_back(
+    expectedResults.emplace_back(Link(V3D(-1, 0, 0), V3D(1, 0, 0), 6, object1));
+    expectedResults.emplace_back(
         Link(V3D(1, 0, 0), V3D(6.5, 0, 0), 11.5, object2));
 
     checkTrackIntercept(TL, expectedResults);
@@ -529,11 +529,11 @@ public:
     TS_ASSERT(object2.interceptSurface(TL) != 0);
 
     std::vector<Link> expectedResults;
-    expectedResults.push_back(
+    expectedResults.emplace_back(
         Link(V3D(-1, 0, 0), V3D(-0.8, 0, 0), 4.2, object1));
-    expectedResults.push_back(
+    expectedResults.emplace_back(
         Link(V3D(-0.8, 0, 0), V3D(0.8, 0, 0), 5.8, object1));
-    expectedResults.push_back(Link(V3D(0.8, 0, 0), V3D(1, 0, 0), 6, object2));
+    expectedResults.emplace_back(Link(V3D(0.8, 0, 0), V3D(1, 0, 0), 6, object2));
     checkTrackIntercept(TL, expectedResults);
   }
 
@@ -562,11 +562,11 @@ public:
     TS_ASSERT(object2.interceptSurface(TL) != 0);
 
     std::vector<Link> expectedResults;
-    expectedResults.push_back(
+    expectedResults.emplace_back(
         Link(V3D(-1, 0, 0), V3D(-0.4, 0, 0), 4.6, object1));
-    expectedResults.push_back(
+    expectedResults.emplace_back(
         Link(V3D(-0.4, 0, 0), V3D(0.2, 0, 0), 5.2, object1));
-    expectedResults.push_back(Link(V3D(0.2, 0, 0), V3D(1, 0, 0), 6, object2));
+    expectedResults.emplace_back(Link(V3D(0.2, 0, 0), V3D(1, 0, 0), 6, object2));
     checkTrackIntercept(TL, expectedResults);
   }
 
@@ -1404,29 +1404,29 @@ private:
     using SCompT = std::pair<int, std::string>;
     std::vector<SCompT> SurfLine;
     if (desired.find("60001") != std::string::npos)
-      SurfLine.push_back(SCompT(60001, "px -1"));
+      SurfLine.emplace_back(SCompT(60001, "px -1"));
     if (desired.find("60002") != std::string::npos)
-      SurfLine.push_back(SCompT(60002, "px 1"));
+      SurfLine.emplace_back(SCompT(60002, "px 1"));
     if (desired.find("60003") != std::string::npos)
-      SurfLine.push_back(SCompT(60003, "py -2"));
+      SurfLine.emplace_back(SCompT(60003, "py -2"));
     if (desired.find("60004") != std::string::npos)
-      SurfLine.push_back(SCompT(60004, "py 2"));
+      SurfLine.emplace_back(SCompT(60004, "py 2"));
     if (desired.find("60005") != std::string::npos)
-      SurfLine.push_back(SCompT(60005, "pz -3"));
+      SurfLine.emplace_back(SCompT(60005, "pz -3"));
     if (desired.find("60006") != std::string::npos)
-      SurfLine.push_back(SCompT(60006, "pz 3"));
+      SurfLine.emplace_back(SCompT(60006, "pz 3"));
 
     if (desired.find("80001") != std::string::npos)
-      SurfLine.push_back(SCompT(80001, "px 4.5"));
+      SurfLine.emplace_back(SCompT(80001, "px 4.5"));
     if (desired.find("80002") != std::string::npos)
-      SurfLine.push_back(SCompT(80002, "px 6.5"));
+      SurfLine.emplace_back(SCompT(80002, "px 6.5"));
 
     if (desired.find("71") != std::string::npos)
-      SurfLine.push_back(SCompT(71, "so 0.8"));
+      SurfLine.emplace_back(SCompT(71, "so 0.8"));
     if (desired.find("72") != std::string::npos)
-      SurfLine.push_back(SCompT(72, "s -0.7 0 0 0.3"));
+      SurfLine.emplace_back(SCompT(72, "s -0.7 0 0 0.3"));
     if (desired.find("73") != std::string::npos)
-      SurfLine.push_back(SCompT(73, "s 0.6 0 0 0.4"));
+      SurfLine.emplace_back(SCompT(73, "s 0.6 0 0 0.4"));
 
     // Note that the testObject now manages the "new Plane"
     for (const auto &vc : SurfLine) {

@@ -235,7 +235,7 @@ void LoadPreNexus::parseRuninfo(const string &runinfo, string &dataDir,
               while (pNode) {
                 if (pNode->nodeName() == "scattering") {
                   auto *element = static_cast<Poco::XML::Element *>(pNode);
-                  eventFilenames.push_back(element->getAttribute("name"));
+                  eventFilenames.emplace_back(element->getAttribute("name"));
                 }
                 pNode = pNode->nextSibling();
               }
@@ -280,14 +280,14 @@ void LoadPreNexus::runLoadNexusLogs(const string &runinfo,
 
   // put together a list of possible locations
   vector<string> possibilities;
-  possibilities.push_back(dataDir + shortName +
+  possibilities.emplace_back(dataDir + shortName +
                           "_event.nxs"); // next to runinfo
-  possibilities.push_back(dataDir + shortName + "_histo.nxs");
-  possibilities.push_back(dataDir + shortName + ".nxs");
-  possibilities.push_back(dataDir + "../NeXus/" + shortName +
+  possibilities.emplace_back(dataDir + shortName + "_histo.nxs");
+  possibilities.emplace_back(dataDir + shortName + ".nxs");
+  possibilities.emplace_back(dataDir + "../NeXus/" + shortName +
                           "_event.nxs"); // in NeXus directory
-  possibilities.push_back(dataDir + "../NeXus/" + shortName + "_histo.nxs");
-  possibilities.push_back(dataDir + "../NeXus/" + shortName + ".nxs");
+  possibilities.emplace_back(dataDir + "../NeXus/" + shortName + "_histo.nxs");
+  possibilities.emplace_back(dataDir + "../NeXus/" + shortName + ".nxs");
 
   // run the algorithm
   bool loadedLogs = false;

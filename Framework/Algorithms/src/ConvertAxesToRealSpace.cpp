@@ -306,7 +306,7 @@ void ConvertAxesToRealSpace::fillUnitMap(
     std::map<std::string, std::string> &unitMap, const std::string &caption,
     const std::string &unit) {
   unitMap.emplace(caption, unit);
-  orderedVector.push_back(caption);
+  orderedVector.emplace_back(caption);
 }
 
 } // namespace Algorithms

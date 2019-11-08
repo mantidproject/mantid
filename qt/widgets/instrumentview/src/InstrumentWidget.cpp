@@ -1226,10 +1226,10 @@ void InstrumentWidget::createTabs(QSettings &settings) {
 
   connect(mControlsTab, SIGNAL(currentChanged(int)), this,
           SLOT(tabChanged(int)));
-  m_stateOfTabs.push_back(std::make_pair(std::string("Render"), true));
-  m_stateOfTabs.push_back(std::make_pair(std::string("Pick"), true));
-  m_stateOfTabs.push_back(std::make_pair(std::string("Draw"), true));
-  m_stateOfTabs.push_back(std::make_pair(std::string("Instrument"), true));
+  m_stateOfTabs.emplace_back(std::make_pair(std::string("Render"), true));
+  m_stateOfTabs.emplace_back(std::make_pair(std::string("Pick"), true));
+  m_stateOfTabs.emplace_back(std::make_pair(std::string("Draw"), true));
+  m_stateOfTabs.emplace_back(std::make_pair(std::string("Instrument"), true));
   addSelectedTabs();
   m_tabs << m_renderTab << m_pickTab << m_maskTab << m_treeTab;
 }

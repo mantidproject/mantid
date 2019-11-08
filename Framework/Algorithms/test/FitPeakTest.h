@@ -170,13 +170,13 @@ public:
     parvalues.clear();
 
     parnames.emplace_back("Height");
-    parvalues.push_back(1.0);
+    parvalues.emplace_back(1.0);
 
     parnames.emplace_back("PeakCentre");
-    parvalues.push_back(0.5936);
+    parvalues.emplace_back(0.5936);
 
     parnames.emplace_back("Sigma");
-    parvalues.push_back(0.01);
+    parvalues.emplace_back(0.01);
 
     return;
   }
@@ -189,13 +189,13 @@ public:
     parvalues.clear();
 
     parnames.emplace_back("A0");
-    parvalues.push_back(1000.);
+    parvalues.emplace_back(1000.);
 
     parnames.emplace_back("A1");
-    parvalues.push_back(-10.);
+    parvalues.emplace_back(-10.);
 
     parnames.emplace_back("A2");
-    parvalues.push_back(0.01);
+    parvalues.emplace_back(0.01);
 
     return;
   }
@@ -404,10 +404,10 @@ public:
     parvalues.clear();
 
     parnames.emplace_back("A0");
-    parvalues.push_back(48000.);
+    parvalues.emplace_back(48000.);
 
     parnames.emplace_back("A1");
-    parvalues.push_back(-60010.);
+    parvalues.emplace_back(-60010.);
 
     return;
   }

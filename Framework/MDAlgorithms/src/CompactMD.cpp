@@ -42,7 +42,7 @@ createPBinStringVector(std::vector<Mantid::coord_t> minVector,
                    boost::lexical_cast<std::string>(
                        maxVector[iter] +
                        (inputWs->getDimension(iter)->getBinWidth() * 0.5));
-    pBinStrVector.push_back(pBinStr);
+    pBinStrVector.emplace_back(pBinStr);
   }
   return pBinStrVector;
 }
@@ -132,8 +132,8 @@ void CompactMD::exec() {
 
   // fill the min/max vectors with values per dimension.
   for (size_t index = 0; index < nDimensions; index++) {
-    minVector.push_back(input_ws->getDimension(index)->getMaximum());
-    maxVector.push_back(input_ws->getDimension(index)->getMinimum());
+    minVector.emplace_back(input_ws->getDimension(index)->getMaximum());
+    maxVector.emplace_back(input_ws->getDimension(index)->getMinimum());
   }
   // start our search for the first non-zero signal index.
   findFirstNonZeroMinMaxExtents(input_ws, minVector, maxVector);

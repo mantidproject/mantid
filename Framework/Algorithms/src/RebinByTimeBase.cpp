@@ -94,19 +94,19 @@ void RebinByTimeBase::exec() {
     const DateAndTime startTime = runStartTime + inParams[0];
     const DateAndTime endTime = runStartTime + inParams[2];
     // Rebinning params in nanoseconds.
-    rebinningParams.push_back(
+    rebinningParams.emplace_back(
         static_cast<double>(startTime.totalNanoseconds()));
     tStep = inParams[1] * nanoSecondsInASecond;
-    rebinningParams.push_back(tStep);
-    rebinningParams.push_back(static_cast<double>(endTime.totalNanoseconds()));
+    rebinningParams.emplace_back(tStep);
+    rebinningParams.emplace_back(static_cast<double>(endTime.totalNanoseconds()));
   } else if (inParams.size() == 1) {
     const uint64_t xmin = getMinX(inWS);
     const uint64_t xmax = getMaxX(inWS);
 
-    rebinningParams.push_back(static_cast<double>(xmin));
+    rebinningParams.emplace_back(static_cast<double>(xmin));
     tStep = inParams[0] * nanoSecondsInASecond;
-    rebinningParams.push_back(tStep);
-    rebinningParams.push_back(static_cast<double>(xmax));
+    rebinningParams.emplace_back(tStep);
+    rebinningParams.emplace_back(static_cast<double>(xmax));
   }
 
   // Validate the timestep.

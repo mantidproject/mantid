@@ -42,7 +42,7 @@ void updateWorkspaceProperties(AlgorithmRuntimeProps &properties,
   std::for_each(group.rows().cbegin(), group.rows().cend(),
                 [&workspaces](boost::optional<Row> const &row) -> void {
                   if (row)
-                    workspaces.push_back(row->reducedWorkspaceNames().iVsQ());
+                    workspaces.emplace_back(row->reducedWorkspaceNames().iVsQ());
                 });
   AlgorithmProperties::update("InputWorkspaces", workspaces, properties);
 

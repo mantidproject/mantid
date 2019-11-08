@@ -178,7 +178,7 @@ void GroupDetectors2::exec() {
   // the ungrouped list could be very big but might be none at all
   unGroupedInds.reserve(numInHists);
   for (size_t i = 0; i < numInHists; i++) {
-    unGroupedInds.push_back(i);
+    unGroupedInds.emplace_back(i);
   }
 
   getGroups(inputWS, unGroupedInds);
@@ -251,7 +251,7 @@ void GroupDetectors2::execEvent() {
   // the ungrouped list could be very big but might be none at all
   unGroupedInds.reserve(numInHists);
   for (size_t i = 0; i < numInHists; i++) {
-    unGroupedInds.push_back(i);
+    unGroupedInds.emplace_back(i);
   }
 
   // read in the input parameters to make that map, if KeepUngroupedSpectra was
@@ -588,7 +588,7 @@ void GroupDetectors2::processXMLFile(const std::string &fname,
       auto ind = detIdToWiMap.find(detid);
       if (ind != detIdToWiMap.end()) {
         size_t wsid = ind->second;
-        wsindexes.push_back(wsid);
+        wsindexes.emplace_back(wsid);
         if (unUsedSpec[wsid] != (USED)) {
           unUsedSpec[wsid] = (USED);
         }
@@ -614,7 +614,7 @@ void GroupDetectors2::processXMLFile(const std::string &fname,
       auto ind = specs2index.find(specNum);
       if (ind != specs2index.end()) {
         size_t wsid = ind->second;
-        wsindexes.push_back(wsid);
+        wsindexes.emplace_back(wsid);
         if (unUsedSpec[wsid] != (USED)) {
           unUsedSpec[wsid] = (USED);
         }
@@ -892,9 +892,9 @@ void GroupDetectors2::readSpectraIndexes(const std::string &line,
                                              // sets KeepUngroupedSpectra, as
                                              // well as to find duplicates
         unUsedSpec[ind->second] = USED;
-        output.push_back(ind->second);
+        output.emplace_back(ind->second);
       } else { // the spectra was already included in a group
-        output.push_back(ind->second);
+        output.emplace_back(ind->second);
       }
     }
   }
@@ -1178,7 +1178,7 @@ void GroupDetectors2::RangeHelper::getList(const std::string &line,
                                     "interpret range specification");
       }
       for (; readPostion != beforeHyphen.end(); ++readPostion) {
-        outList.push_back(boost::lexical_cast<size_t>(*readPostion));
+        outList.emplace_back(boost::lexical_cast<size_t>(*readPostion));
       }
       // this will be the start of a range if it was followed by a - i.e.
       // another token was captured
@@ -1207,7 +1207,7 @@ void GroupDetectors2::RangeHelper::getList(const std::string &line,
 
       // expand the range
       for (size_t j = rangeStart + 1; j < rangeEnd; j++) {
-        outList.push_back(j);
+        outList.emplace_back(j);
       }
 
       loop++;

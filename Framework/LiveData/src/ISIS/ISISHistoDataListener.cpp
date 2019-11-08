@@ -382,12 +382,12 @@ void ISISHistoDataListener::calculateIndicesForReading(
     int n = numberOfSpectra;
     while (n > 0) {
       if (n < maxNumberOfSpectra) {
-        index.push_back(spec);
-        count.push_back(n);
+        index.emplace_back(spec);
+        count.emplace_back(n);
         break;
       } else {
-        index.push_back(spec);
-        count.push_back(maxNumberOfSpectra);
+        index.emplace_back(spec);
+        count.emplace_back(maxNumberOfSpectra);
         n -= maxNumberOfSpectra;
         spec += maxNumberOfSpectra;
       }
@@ -401,15 +401,15 @@ void ISISHistoDataListener::calculateIndicesForReading(
       if (next - m_specList[i - 1] > 1 ||
           static_cast<int>(i - i0) >= maxNumberOfSpectra) {
         auto n = static_cast<int>(i - i0);
-        index.push_back(spec);
-        count.push_back(n);
+        index.emplace_back(spec);
+        count.emplace_back(n);
         i0 = i;
         spec = next;
       }
     }
     auto n = static_cast<int>(m_specList.size() - i0);
-    index.push_back(spec);
-    count.push_back(n);
+    index.emplace_back(spec);
+    count.emplace_back(n);
   }
 }
 
@@ -531,8 +531,8 @@ void ISISHistoDataListener::loadTimeRegimes() {
 
     // if it's first call of this method populate the member variables
     if (m_bins.size() == tr) {
-      m_numberOfBins.push_back(nbins);
-      m_numberOfSpectra.push_back(nspec);
+      m_numberOfBins.emplace_back(nbins);
+      m_numberOfSpectra.emplace_back(nspec);
       // buffer to read float values in
       std::vector<float> floatBuffer;
 

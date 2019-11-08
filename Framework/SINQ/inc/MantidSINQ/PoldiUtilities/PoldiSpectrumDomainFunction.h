@@ -58,8 +58,8 @@ struct MANTID_SINQ_DLL Poldi2DHelper {
     for (const double offset : offsets) {
       double dEquivalent = Conversions::TOFtoD(offset, distance, sinTheta);
       double rounded = floor(dEquivalent / deltaD + 0.5);
-      dOffsets.push_back(static_cast<int>(rounded));
-      dFractionalOffsets.push_back(dEquivalent - rounded * deltaD);
+      dOffsets.emplace_back(static_cast<int>(rounded));
+      dFractionalOffsets.emplace_back(dEquivalent - rounded * deltaD);
     }
   }
 
@@ -72,7 +72,7 @@ struct MANTID_SINQ_DLL Poldi2DHelper {
     current.reserve(dMaxN - dMinN);
 
     for (int i = dMinN; i <= dMaxN; ++i) {
-      current.push_back(static_cast<double>(i + 0.5) * deltaD);
+      current.emplace_back(static_cast<double>(i + 0.5) * deltaD);
     }
 
     domain = boost::make_shared<API::FunctionDomain1DVector>(current);
@@ -86,7 +86,7 @@ struct MANTID_SINQ_DLL Poldi2DHelper {
     if (domain && timeTransformer) {
       factors.reserve(domain->size());
       for (size_t i = 0; i < domain->size(); ++i) {
-        factors.push_back(
+        factors.emplace_back(
             timeTransformer->detectorElementIntensity((*domain)[i], index));
       }
     }

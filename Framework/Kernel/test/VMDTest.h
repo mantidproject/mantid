@@ -30,12 +30,12 @@ public:
     double v1[4] = {1, 2, 3, 4};
     TS_ASSERT_EQUALS(VMD(4, v1), VMD(1, 2, 3, 4));
     std::vector<double> v2;
-    v2.push_back(1);
-    v2.push_back(2);
+    v2.emplace_back(1);
+    v2.emplace_back(2);
     TS_ASSERT_EQUALS(VMD(v2), VMD(1, 2));
     std::vector<float> v3;
-    v3.push_back(1);
-    v3.push_back(2);
+    v3.emplace_back(1);
+    v3.emplace_back(2);
     TS_ASSERT_EQUALS(VMD(v3), VMD(1, 2));
     // Copy constructor
     VMD a(1, 2, 3, 4);
@@ -187,7 +187,7 @@ public:
 
   void test_getNormalVector_2D() {
     std::vector<VMD> vectors;
-    vectors.push_back(VMD(1.0, 1.0));
+    vectors.emplace_back(VMD(1.0, 1.0));
     VMD normal = VMD::getNormalVector(vectors);
     TS_ASSERT_EQUALS(normal, VMD(1., -1.) * sqrt(0.5));
   }
@@ -195,8 +195,8 @@ public:
   /// Define a plane along x=y axis vertical in Z
   void test_getNormalVector_3D() {
     std::vector<VMD> vectors;
-    vectors.push_back(VMD(1., 1., 0.));
-    vectors.push_back(VMD(0., 0., 1.));
+    vectors.emplace_back(VMD(1., 1., 0.));
+    vectors.emplace_back(VMD(0., 0., 1.));
     VMD normal = VMD::getNormalVector(vectors);
     TS_ASSERT_EQUALS(normal, VMD(1., -1., 0.) * sqrt(0.5));
   }
@@ -204,17 +204,17 @@ public:
   /// Bad vectors = they are collinear
   void test_getNormalVector_3D_collinear() {
     std::vector<VMD> vectors;
-    vectors.push_back(VMD(1., 1., 0.));
-    vectors.push_back(VMD(2., 2., 0.));
+    vectors.emplace_back(VMD(1., 1., 0.));
+    vectors.emplace_back(VMD(2., 2., 0.));
     TS_ASSERT_THROWS_ANYTHING(VMD normal = VMD::getNormalVector(vectors));
   }
 
   /// Define a plane along x=y axis vertical in Z and t
   void test_getNormalVector_4D() {
     std::vector<VMD> vectors;
-    vectors.push_back(VMD(1., 1., 0., 0.));
-    vectors.push_back(VMD(0., 0., 1., 0.));
-    vectors.push_back(VMD(0., 0., 0., 1.));
+    vectors.emplace_back(VMD(1., 1., 0., 0.));
+    vectors.emplace_back(VMD(0., 0., 1., 0.));
+    vectors.emplace_back(VMD(0., 0., 0., 1.));
     VMD normal = VMD::getNormalVector(vectors);
     TS_ASSERT_EQUALS(normal, VMD(1., -1., 0., 0.) * sqrt(0.5));
   }

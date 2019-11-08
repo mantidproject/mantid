@@ -97,7 +97,7 @@ std::vector<std::string> RenameParDialog::setOutput() const {
   std::vector<std::string> out;
   QAbstractItemModel *model = m_uiForm.tableWidget->model();
   for (int row = 0; row < m_uiForm.tableWidget->rowCount(); ++row) {
-    out.push_back(model->data(model->index(row, 1)).toString().toStdString());
+    out.emplace_back(model->data(model->index(row, 1)).toString().toStdString());
   }
   return out;
 }

@@ -113,9 +113,9 @@ void NexusTester::exec() {
   }
 
   std::vector<int64_t> dims;
-  dims.push_back(int64_t(chunkSize) * NumChunks);
+  dims.emplace_back(int64_t(chunkSize) * NumChunks);
   std::vector<int64_t> chunkDims;
-  chunkDims.push_back(int64_t(chunkSize));
+  chunkDims.emplace_back(int64_t(chunkSize));
 
   // Total size in BYTES
   double dataSizeMB =
@@ -132,7 +132,7 @@ void NexusTester::exec() {
     CPUTimer tim;
     for (int i = 0; i < NumChunks; i++) {
       std::vector<int64_t> startDims;
-      startDims.push_back(i * int64_t(chunkSize));
+      startDims.emplace_back(i * int64_t(chunkSize));
       file.putSlab(fakeData, startDims, chunkDims);
       prog.report();
     }
@@ -171,7 +171,7 @@ void NexusTester::exec() {
     for (int i = 0; i < NumChunks; i++) {
       file.openData("FakeData");
       std::vector<int64_t> startDims;
-      startDims.push_back(i * int64_t(chunkSize));
+      startDims.emplace_back(i * int64_t(chunkSize));
       file.getSlab(fakeData, startDims, chunkDims);
       prog.report();
       file.closeData();

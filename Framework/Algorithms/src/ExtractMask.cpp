@@ -63,12 +63,12 @@ void ExtractMask::exec() {
   for (size_t i = 0; i < detInfo.size(); ++i) {
     if ((inputWSIsSpecial && inputMaskWS->isMasked(detIds[i])) ||
         detInfo.isMasked(i)) {
-      detectorList.push_back(detIds[i]);
+      detectorList.emplace_back(detIds[i]);
     }
   }
 
   // Create a new workspace for the results, copy from the input to ensure
-  // that we copy over the instrument and current masking
+  // that we copy oemplace_backnstrument and current masking
   auto maskWS = boost::make_shared<DataObjects::MaskWorkspace>(inputWS);
   maskWS->setTitle(inputWS->getTitle());
 

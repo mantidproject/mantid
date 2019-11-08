@@ -166,7 +166,7 @@ void IntegrateEllipsoidsTwoStep::exec() {
       V3D miller_ind(static_cast<double>(boost::math::iround<double>(hkl[0])),
                      static_cast<double>(boost::math::iround<double>(hkl[1])),
                      static_cast<double>(boost::math::iround<double>(hkl[2])));
-      hkl_vectors.push_back(miller_ind);
+      hkl_vectors.emplace_back(miller_ind);
       indexed_count++;
     }
   }
@@ -235,12 +235,12 @@ void IntegrateEllipsoidsTwoStep::exec() {
       g_log.notice() << "Peak " << peak.getHKL() << " with Q = " << center
                      << " is a weak peak with signal to noise " << sig2noise
                      << "\n";
-      weakPeaks.push_back(result);
+      weakPeaks.emplace_back(result);
     } else {
       g_log.notice() << "Peak " << peak.getHKL() << " with Q = " << center
                      << " is a strong peak with signal to noise " << sig2noise
                      << "\n";
-      strongPeaks.push_back(result);
+      strongPeaks.emplace_back(result);
     }
   }
 
@@ -256,7 +256,7 @@ void IntegrateEllipsoidsTwoStep::exec() {
 
     IntegrationParameters params = makeIntegrationParameters(q);
     const auto result = integrator.integrateStrongPeak(params, q, inti, sigi);
-    shapeLibrary.push_back(result);
+    shapeLibrary.emplace_back(result);
 
     auto &peak = peak_ws->getPeak(index);
     peak.setIntensity(inti);
@@ -549,7 +549,7 @@ void IntegrateEllipsoidsTwoStep::calculateE1(
     V3D E1 = V3D(-std::sin(tt1) * std::cos(ph1), -std::sin(tt1) * std::sin(ph1),
                  1. - std::cos(tt1)); // end of trajectory
     E1 = E1 * (1. / E1.norm());       // normalize
-    E1Vec.push_back(E1);
+    E1Vec.emplace_back(E1);
   }
 }
 

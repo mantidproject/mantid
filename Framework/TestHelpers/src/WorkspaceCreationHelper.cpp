@@ -419,7 +419,7 @@ MatrixWorkspace_sptr create2DDetectorScanWorkspaceWithFullInstrument(
 
   std::vector<double> timeRanges;
   for (size_t i = 0; i < nTimeIndexes; ++i) {
-    timeRanges.push_back(double(i + firstInterval));
+    timeRanges.emplace_back(double(i + firstInterval));
   }
 
   builder.setTimeRanges(DateAndTime(int(startTime), 0), timeRanges);
@@ -1099,7 +1099,7 @@ createProcessedInelasticWS(const std::vector<double> &L2,
     std::vector<double> E_transfer;
     E_transfer.reserve(numBins);
     for (size_t i = 0; i <= numBins; i++) {
-      E_transfer.push_back(Emin + static_cast<double>(i) * dE);
+      E_transfer.emplace_back(Emin + static_cast<double>(i) * dE);
     }
     ws->mutableX(j) = std::move(E_transfer);
   }

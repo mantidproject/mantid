@@ -502,7 +502,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BeamMonitorPkt &pkt) {
         events += m_eventBuffer->run().getPropertyValueAsType<int>(monName);
       } else {
         // First time we've received this monitor.  Add it to our list
-        m_monitorLogs.push_back(monName);
+        m_monitorLogs.emplace_back(monName);
       }
 
       // Update the property value (overwriting the old value if there was one)
@@ -580,7 +580,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::GeometryPkt &pkt) {
           for (long unsigned k = 0; k < attrLength; k++) {
             Poco::XML::Node *attrNode = attr->item(k);
             if (attrNode->nodeName() == "id") {
-              m_requiredLogs.push_back(attrNode->nodeValue());
+              m_requiredLogs.emplace_back(attrNode->nodeValue());
             }
           }
         }

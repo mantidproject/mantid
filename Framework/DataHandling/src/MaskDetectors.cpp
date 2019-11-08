@@ -413,7 +413,7 @@ void MaskDetectors::execPeaks(PeaksWorkspace_sptr WS) {
   std::vector<size_t> indicesToMask;
   for (const auto &detID : detectorList) {
     try {
-      indicesToMask.push_back(detInfo.indexOf(detID));
+      indicesToMask.emplace_back(detInfo.indexOf(detID));
     } catch (std::out_of_range &) {
       g_log.warning() << "Invalid detector ID " << detID
                       << ". Found while running MaskDetectors\n";
@@ -436,7 +436,7 @@ void MaskDetectors::execPeaks(PeaksWorkspace_sptr WS) {
 
       for (size_t i = 0; i < maskDetInfo.size(); ++i)
         if (maskDetInfo.isMasked(i))
-          indicesToMask.push_back(i);
+          indicesToMask.emplace_back(i);
     }
   }
 
@@ -479,7 +479,7 @@ void MaskDetectors::fillIndexListFromSpectra(
     if (range_constrained && (ws_index < startIndex || ws_index > endIndex)) {
       continue;
     }
-    tmp_index.push_back(ws_index);
+    tmp_index.emplace_back(ws_index);
   }
 
   tmp_index.swap(indexList);
@@ -508,7 +508,7 @@ void MaskDetectors::appendToIndexListFromWS(
 
     for (size_t i = startIndex; i <= endIndex; ++i) {
       if (spectrumInfo.hasDetectors(i) && spectrumInfo.isMasked(i)) {
-        tmp_index.push_back(i);
+        tmp_index.emplace_back(i);
       }
     }
   } else {
@@ -517,7 +517,7 @@ void MaskDetectors::appendToIndexListFromWS(
     endIndex = sourceWS->getNumberHistograms();
     for (size_t i = 0; i < endIndex; ++i) {
       if (spectrumInfo.hasDetectors(i) && spectrumInfo.isMasked(i)) {
-        tmp_index.push_back(i);
+        tmp_index.emplace_back(i);
       }
     }
   }
@@ -550,7 +550,7 @@ void MaskDetectors::appendToDetectorListFromWS(
       const auto &spec = maskWs->getSpectrum(i);
       for (const auto &id : spec.getDetectorIDs()) {
         if (detMap.at(id) >= startIndex && detMap.at(id) <= endIndex)
-          detectorList.push_back(id);
+          detectorList.emplace_back(id);
       }
     }
   }
@@ -582,7 +582,7 @@ void MaskDetectors::appendToIndexListFromMaskWS(
     for (size_t i = startIndex; i <= endIndex; ++i) {
       if (maskedWorkspace->y(i)[0] > 0.5) {
         g_log.debug() << "Adding WorkspaceIndex " << i << " to mask.\n";
-        tmp_index.push_back(i);
+        tmp_index.emplace_back(i);
       }
     }
   } else {
@@ -592,7 +592,7 @@ void MaskDetectors::appendToIndexListFromMaskWS(
 
       if (maskedWorkspace->y(i)[0] > 0.5) {
         g_log.debug() << "Adding WorkspaceIndex " << i << " to mask.\n";
-        tmp_index.push_back(i);
+        tmp_index.emplace_back(i);
       }
     }
   }

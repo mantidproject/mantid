@@ -94,7 +94,7 @@ void ScanningWorkspaceBuilder::setTimeRanges(
   for (size_t i = 1; i < m_nTimeIndexes; ++i) {
     const auto newStartTime = timeRanges[i - 1].second;
     const auto endTime = newStartTime + durations[i];
-    timeRanges.push_back(
+    timeRanges.emplace_back(
         std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>(
             newStartTime, endTime));
   }

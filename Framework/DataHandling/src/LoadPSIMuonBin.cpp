@@ -393,16 +393,16 @@ void LoadPSIMuonBin::generateUnknownAxis() {
   // Create a x axis, assumption that m_histograms will all be the same size,
   // and that x will be 1 more in size than y
   for (auto xIndex = 0u; xIndex <= m_histograms[0].size(); ++xIndex) {
-    m_xAxis.push_back(static_cast<double>(xIndex) * m_header.histogramBinWidth);
+    m_xAxis.emplace_back(static_cast<double>(xIndex) * m_header.histogramBinWidth);
   }
 
   // Create Errors
   for (const auto &histogram : m_histograms) {
     std::vector<double> newEAxis;
     for (auto eIndex = 0u; eIndex < m_histograms[0].size(); ++eIndex) {
-      newEAxis.push_back(sqrt(histogram[eIndex]));
+      newEAxis.emplace_back(sqrt(histogram[eIndex]));
     }
-    m_eAxis.push_back(newEAxis);
+    m_eAxis.emplace_back(newEAxis);
   }
 }
 

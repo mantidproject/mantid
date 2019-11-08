@@ -27,7 +27,7 @@ IndexInfo scatter(const Indexing::IndexInfo &indexInfo) {
 
   std::vector<SpectrumNumber> spectrumNumbers;
   for (size_t i = 0; i < indexInfo.size(); ++i)
-    spectrumNumbers.push_back(indexInfo.spectrumNumber(i));
+    spectrumNumbers.emplace_back(indexInfo.spectrumNumber(i));
   IndexInfo scattered(spectrumNumbers, Parallel::StorageMode::Distributed,
                       indexInfo.communicator());
   const auto &globalSpectrumDefinitions = indexInfo.spectrumDefinitions();

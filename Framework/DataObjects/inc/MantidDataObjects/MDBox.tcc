@@ -205,11 +205,11 @@ TMDE(size_t MDBox)::getNumMDBoxes() const { return 1; }
 /// Fill a vector with all the boxes up to a certain depth
 TMDE(void MDBox)::getBoxes(std::vector<MDBoxBase<MDE, nd> *> &boxes,
                            size_t /*maxDepth*/, bool /*leafOnly*/) {
-  boxes.push_back(this);
+  boxes.emplace_back(this);
 }
 TMDE(void MDBox)::getBoxes(std::vector<API::IMDNode *> &boxes,
                            size_t /*maxDepth*/, bool /*leafOnly*/) {
-  boxes.push_back(this);
+  boxes.emplace_back(this);
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -217,12 +217,12 @@ TMDE(void MDBox)::getBoxes(std::vector<API::IMDNode *> &boxes,
 TMDE(void MDBox)::getBoxes(
     std::vector<MDBoxBase<MDE, nd> *> &boxes, size_t /*maxDepth*/,
     bool /*leafOnly*/, Mantid::Geometry::MDImplicitFunction * /*function*/) {
-  boxes.push_back(this);
+  boxes.emplace_back(this);
 }
 TMDE(void MDBox)::getBoxes(
     std::vector<API::IMDNode *> &boxes, size_t /*maxDepth*/, bool /*leafOnly*/,
     Mantid::Geometry::MDImplicitFunction * /*function*/) {
-  boxes.push_back(this);
+  boxes.emplace_back(this);
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -799,7 +799,7 @@ TMDE(void MDBox)::buildAndAddEvent(const signal_t Signal,
                                    const std::vector<coord_t> &point,
                                    uint16_t runIndex, uint32_t detectorId) {
   std::lock_guard<std::mutex> _lock(this->m_dataMutex);
-  this->data.push_back(IF<MDE, nd>::BUILD_EVENT(Signal, errorSq, &point[0],
+  this->data.emplace_back(IF<MDE, nd>::BUILD_EVENT(Signal, errorSq, &point[0],
                                                 runIndex, detectorId));
 }
 
@@ -819,7 +819,7 @@ TMDE(void MDBox)::buildAndAddEventUnsafe(const signal_t Signal,
                                          const std::vector<coord_t> &point,
                                          uint16_t runIndex,
                                          uint32_t detectorId) {
-  this->data.push_back(IF<MDE, nd>::BUILD_EVENT(Signal, errorSq, &point[0],
+  this->data.emplace_back(IF<MDE, nd>::BUILD_EVENT(Signal, errorSq, &point[0],
                                                 runIndex, detectorId));
 }
 
@@ -830,7 +830,7 @@ TMDE(void MDBox)::buildAndAddEventUnsafe(const signal_t Signal,
  * */
 TMDE(size_t MDBox)::addEvent(const MDE &Evnt) {
   std::lock_guard<std::mutex> _lock(this->m_dataMutex);
-  this->data.push_back(Evnt);
+  this->data.emplace_back(Evnt);
   return 1;
 }
 
@@ -843,7 +843,7 @@ TMDE(size_t MDBox)::addEvent(const MDE &Evnt) {
  * @return Always returns 1
  * */
 TMDE(size_t MDBox)::addEventUnsafe(const MDE &Evnt) {
-  this->data.push_back(Evnt);
+  this->data.emplace_back(Evnt);
   return 1;
 }
 

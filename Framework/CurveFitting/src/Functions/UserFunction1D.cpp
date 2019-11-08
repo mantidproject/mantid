@@ -35,7 +35,7 @@ double *UserFunction1D::AddVariable(const char *varName, void *palg) {
 
   if (std::string(varName) != "x") {
     alg.declareProperty(varName, 0.0);
-    alg.m_parameterNames.push_back(varName);
+    alg.m_parameterNames.emplace_back(varName);
   } else {
     alg.m_x_set = true;
     alg.m_x = 0.;

@@ -52,16 +52,16 @@ void UserStringParser::parse(const std::string &userString,
   std::string separators("-+:");
   // if input contains no separator string
   if (userString.find_first_of(separators) == std::string::npos) {
-    numbers.push_back(std::vector<unsigned int>(1, toUInt(userString)));
+    numbers.emplace_back(std::vector<unsigned int>(1, toUInt(userString)));
   } else if (Contains(userString, '-')) {
     std::vector<unsigned int> value = separateDelimiters(userString, "-:");
     if (!value.empty()) {
-      numbers.push_back(value);
+      numbers.emplace_back(value);
     }
   } else if (Contains(userString, '+')) {
     std::vector<unsigned int> value = separateDelimiters(userString, "+");
     if (!value.empty()) {
-      numbers.push_back(value);
+      numbers.emplace_back(value);
     }
   } else if (Contains(userString, ':')) {
     std::vector<std::vector<unsigned int>> colonseparated =
@@ -69,7 +69,7 @@ void UserStringParser::parse(const std::string &userString,
     std::vector<std::vector<unsigned int>>::const_iterator citr1;
     for (citr1 = colonseparated.begin(); citr1 != colonseparated.end();
          ++citr1) {
-      numbers.push_back((*citr1));
+      numbers.emplace_back((*citr1));
     }
   }
 }
@@ -107,7 +107,7 @@ UserStringParser::separateColon(const std::string &input) {
   std::vector<std::vector<unsigned int>> separatedValues;
   Tokenize(input, ":", startNum, endNum, step);
   for (unsigned int num = startNum; num <= endNum; num += step) {
-    separatedValues.push_back(std::vector<unsigned int>(1, num));
+    separatedValues.emplace_back(std::vector<unsigned int>(1, num));
   }
 
   return separatedValues;
@@ -129,7 +129,7 @@ UserStringParser::separateDelimiters(const std::string &input,
   Tokenize(input, delimiters, startNum, endNum, step);
 
   for (unsigned int num = startNum; num <= endNum; num += step) {
-    separatedValues.push_back(num);
+    separatedValues.emplace_back(num);
   }
   return separatedValues;
 }

@@ -323,7 +323,7 @@ void UnwrappedSurface::getSelectedDetectors(std::vector<size_t> &detIndices) {
   for (auto &udet : m_unwrappedDetectors) {
     if (udet.u >= uleft && udet.u <= uright && udet.v >= vbottom &&
         udet.v <= vtop) {
-      detIndices.push_back(udet.detIndex);
+      detIndices.emplace_back(udet.detIndex);
     }
   }
 }
@@ -335,7 +335,7 @@ void UnwrappedSurface::getMaskedDetectors(
     return;
   for (const auto &udet : m_unwrappedDetectors) {
     if (!udet.empty() && m_maskShapes.isMasked(udet.u, udet.v)) {
-      detIndices.push_back(udet.detIndex);
+      detIndices.emplace_back(udet.detIndex);
     }
   }
 }

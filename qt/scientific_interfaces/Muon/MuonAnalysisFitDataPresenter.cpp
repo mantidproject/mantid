@@ -395,7 +395,7 @@ std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
         const std::string wsName =
             overwrite ? MuonAnalysisHelper::generateWorkspaceName(params)
                       : getUniqueName(params);
-        workspaceNames.push_back(m_fitRawData ? wsName + RAW_DATA_SUFFIX
+        workspaceNames.emplace_back(m_fitRawData ? wsName + RAW_DATA_SUFFIX
                                               : wsName);
       }
     }

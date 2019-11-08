@@ -50,7 +50,7 @@ public:
     // Case: A constains B
     vecA.reserve(20);
     for (size_t i = 0; i < 20; ++i) {
-      vecA.push_back(static_cast<int>(i) + 5);
+      vecA.emplace_back(static_cast<int>(i) + 5);
     }
 
     vector<int> vecB{6, 10, 14, 18};
@@ -65,10 +65,10 @@ public:
     vecB.clear();
 
     for (int i = 0; i < 10; ++i)
-      vecA.push_back(i * 3);
+      vecA.emplace_back(i * 3);
 
     for (int i = 0; i < 10; ++i)
-      vecB.push_back(i + 10);
+      vecB.emplace_back(i + 10);
 
     vecC = alg.subtractVector(vecA, vecB);
 
@@ -79,14 +79,14 @@ public:
     vecB.clear();
 
     for (int i = 0; i < 10; ++i)
-      vecA.push_back(5 + i * 2);
+      vecA.emplace_back(5 + i * 2);
 
     for (int i = 0; i < 3; ++i)
-      vecB.push_back(i + 1);
+      vecB.emplace_back(i + 1);
     for (int i = 0; i < 10; ++i)
-      vecB.push_back(i + 10);
-    vecB.push_back(25);
-    vecB.push_back(30);
+      vecB.emplace_back(i + 10);
+    vecB.emplace_back(25);
+    vecB.emplace_back(30);
 
     vecC = alg.subtractVector(vecA, vecB);
 

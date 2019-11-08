@@ -251,7 +251,7 @@ void LoadDNSSCD::loadHuber(ITableWorkspace_sptr tws) {
   for (size_t i = 1; i < huber.size(); ++i) {
     for (auto &ds : old) {
       ds.huber = huber[i];
-      m_data.push_back(ds);
+      m_data.emplace_back(ds);
     }
   }
 }
@@ -886,18 +886,18 @@ void LoadDNSSCD::read_data(const std::string fname,
     boost::trim(line);
     const int cols = splitIntoColumns(columns, line);
     if (cols > 0) {
-      ds.detID.push_back(std::stoi(columns.front()));
+      ds.detID.emplace_back(std::stoi(columns.front()));
       columns.pop_front();
       std::vector<double> signal;
       std::transform(columns.begin(), columns.end(), std::back_inserter(signal),
                      [](const std::string &s) { return std::stod(s); });
-      ds.signal.push_back(signal);
+      ds.signal.emplace_back(signal);
     }
   }
   // DNS PA detector bank has only 24 detectors
   ds.detID.resize(24);
   ds.signal.resize(24);
-  m_data.push_back(ds);
+  m_data.emplace_back(ds);
 }
 
 } // namespace MDAlgorithms

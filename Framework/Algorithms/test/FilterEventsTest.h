@@ -1017,8 +1017,8 @@ public:
     filter.setProperty("OutputWorkspaceIndexedFrom1", true);
 
     std::vector<std::string> prop_vec;
-    prop_vec.push_back("LogB");
-    prop_vec.push_back("slow_int_log");
+    prop_vec.emplace_back("LogB");
+    prop_vec.emplace_back("slow_int_log");
     filter.setProperty("TimeSeriesPropertyLogs", prop_vec);
     filter.setProperty("ExcludeSpecifiedLogs", true);
 
@@ -1543,23 +1543,23 @@ public:
     std::vector<int64_t> time_vec;
     std::vector<int> index_vec;
 
-    time_vec.push_back(runstart_i64);
+    time_vec.emplace_back(runstart_i64);
 
     // Splitter 0: 0 ~ 3+ (first pulse)
     int64_t t1 = runstart_i64 + tofdt * 3 + tofdt / 2;
-    time_vec.push_back(t1);
-    index_vec.push_back(0);
+    time_vec.emplace_back(t1);
+    index_vec.emplace_back(0);
 
     // Splitter 1: 3+ ~ 9+ (second pulse)
     int64_t t2 = runstart_i64 + pulsedt + tofdt * 9 + tofdt / 2;
-    time_vec.push_back(t2);
-    index_vec.push_back(1);
+    time_vec.emplace_back(t2);
+    index_vec.emplace_back(1);
 
     // Splitter 2 and so on: from 3rd pulse, 0 ~ 6+
     for (size_t i = 2; i < 5; i++) {
       int64_t newT = runstart_i64 + i * pulsedt + 6 * tofdt + tofdt / 2;
-      time_vec.push_back(newT);
-      index_vec.push_back(2);
+      time_vec.emplace_back(newT);
+      index_vec.emplace_back(2);
     }
 
     // Create the workspace and set it

@@ -77,7 +77,7 @@ void QueryRemoteFile::exec() {
     resp["Files"].getValue(files);
     for (auto &file : files) {
       file.getValue(oneFile);
-      filenames.push_back(oneFile);
+      filenames.emplace_back(oneFile);
     }
 
     setProperty("FileNames", filenames);

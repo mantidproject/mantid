@@ -51,18 +51,18 @@ void AddSampleLog::init() {
   declareProperty("LogText", "", "The content of the log");
 
   std::vector<std::string> propOptions;
-  propOptions.push_back(stringLogOption);
-  propOptions.push_back(numberLogOption);
-  propOptions.push_back(numberSeriesLogOption);
+  propOptions.emplace_back(stringLogOption);
+  propOptions.emplace_back(numberLogOption);
+  propOptions.emplace_back(numberSeriesLogOption);
   declareProperty("LogType", stringLogOption,
                   boost::make_shared<StringListValidator>(propOptions),
                   "The type that the log data will be.");
   declareProperty("LogUnit", "", "The units of the log");
 
   std::vector<std::string> typeOptions;
-  typeOptions.push_back(intTypeOption);
-  typeOptions.push_back(doubleTypeOption);
-  typeOptions.push_back(autoTypeOption);
+  typeOptions.emplace_back(intTypeOption);
+  typeOptions.emplace_back(doubleTypeOption);
+  typeOptions.emplace_back(autoTypeOption);
   declareProperty("NumberType", autoTypeOption,
                   boost::make_shared<StringListValidator>(typeOptions),
                   "Force LogText to be interpreted as a number of type 'int' "
@@ -389,7 +389,7 @@ AddSampleLog::getTimes(API::MatrixWorkspace_const_sptr dataws,
       timedbl *= 1.E9;
     auto entry_i64 = static_cast<int64_t>(timedbl);
     Types::Core::DateAndTime entry(timeshift + entry_i64);
-    timevec.push_back(entry);
+    timevec.emplace_back(entry);
   }
 
   return timevec;
@@ -426,7 +426,7 @@ AddSampleLog::getDblValues(API::MatrixWorkspace_const_sptr dataws,
   std::vector<double> valuevec;
   size_t vecsize = dataws->readY(workspace_index).size();
   for (size_t i = 0; i < vecsize; ++i)
-    valuevec.push_back(dataws->readY(workspace_index)[i]);
+    valuevec.emplace_back(dataws->readY(workspace_index)[i]);
 
   return valuevec;
 }
@@ -444,7 +444,7 @@ AddSampleLog::getIntValues(API::MatrixWorkspace_const_sptr dataws,
   std::vector<int> valuevec;
   size_t vecsize = dataws->readY(workspace_index).size();
   for (size_t i = 0; i < vecsize; ++i)
-    valuevec.push_back(static_cast<int>(dataws->readY(workspace_index)[i]));
+    valuevec.emplace_back(static_cast<int>(dataws->readY(workspace_index)[i]));
 
   return valuevec;
 }

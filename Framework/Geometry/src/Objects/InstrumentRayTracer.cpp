@@ -131,7 +131,7 @@ void InstrumentRayTracer::fireRay(Track &testRay) const {
   std::deque<IComponent_const_sptr> nodeQueue;
 
   // Start at the root of the tree
-  nodeQueue.push_back(m_instrument);
+  nodeQueue.emplace_back(m_instrument);
 
   IComponent_const_sptr node;
   while (!nodeQueue.empty()) {

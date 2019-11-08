@@ -116,7 +116,7 @@ public:
     SaveableTesterWithFile::fakeFile = "";
     data.clear();
     for (size_t i = 0; i < num; i++)
-      data.push_back(
+      data.emplace_back(
           new SaveableTesterWithFile(uint64_t(2 * i), 2, char(i + 0x41)));
   }
 
@@ -261,7 +261,7 @@ public:
     std::vector<ISaveable *> bigData;
     bigData.reserve(bigNum);
     for (size_t i = 0; i < bigNum; i++)
-      bigData.push_back(new SaveableTesterWithFile(2 * i, 2, char(i + 0x41)));
+      bigData.emplace_back(new SaveableTesterWithFile(2 * i, 2, char(i + 0x41)));
 
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < int(bigNum); i++) {
@@ -788,7 +788,7 @@ public:
     dataSeek.clear();
     dataSeek.reserve(200);
     for (size_t i = 0; i < 200; i++)
-      dataSeek.push_back(new SaveableTesterWithSeek(i));
+      dataSeek.emplace_back(new SaveableTesterWithSeek(i));
   }
   void setUp() override { SaveableTesterWithSeek::fakeFile = ""; }
 

@@ -445,7 +445,7 @@ public:
       std::lock_guard<std::recursive_mutex> _lock(m_mutex);
       foundNames.reserve(datamap.size());
       for (const auto &item : datamap) {
-        foundNames.push_back(item.first);
+        foundNames.emplace_back(item.first);
       }
       // Lock released at end of scope here
     } else {
@@ -454,7 +454,7 @@ public:
       for (const auto &item : datamap) {
         if (!isHiddenDataServiceObject(item.first)) {
           // This item is not hidden add it
-          foundNames.push_back(item.first);
+          foundNames.emplace_back(item.first);
         }
       }
       // Lock released at end of scope here
@@ -484,7 +484,7 @@ public:
     objects.reserve(datamap.size());
     for (const auto &it : datamap) {
       if (showingHidden || !isHiddenDataServiceObject(it.first)) {
-        objects.push_back(it.second);
+        objects.emplace_back(it.second);
       }
     }
     return objects;

@@ -483,14 +483,14 @@ void ISISEnergyTransfer::run() {
   }
 
   std::vector<long> detectorRange;
-  detectorRange.push_back(m_uiForm.spSpectraMin->value());
-  detectorRange.push_back(m_uiForm.spSpectraMax->value());
+  detectorRange.emplace_back(m_uiForm.spSpectraMin->value());
+  detectorRange.emplace_back(m_uiForm.spSpectraMax->value());
   reductionAlg->setProperty("SpectraRange", detectorRange);
 
   if (m_uiForm.ckBackgroundRemoval->isChecked()) {
     std::vector<double> backgroundRange;
-    backgroundRange.push_back(m_uiForm.spBackgroundStart->value());
-    backgroundRange.push_back(m_uiForm.spBackgroundEnd->value());
+    backgroundRange.emplace_back(m_uiForm.spBackgroundStart->value());
+    backgroundRange.emplace_back(m_uiForm.spBackgroundEnd->value());
     reductionAlg->setProperty("BackgroundRange", backgroundRange);
   }
 
@@ -831,12 +831,12 @@ void ISISEnergyTransfer::plotRaw() {
 
   std::vector<specnum_t> detectorList;
   for (specnum_t i = detectorMin; i <= detectorMax; i++)
-    detectorList.push_back(i);
+    detectorList.emplace_back(i);
 
   if (m_uiForm.ckBackgroundRemoval->isChecked()) {
     std::vector<double> range;
-    range.push_back(m_uiForm.spBackgroundStart->value());
-    range.push_back(m_uiForm.spBackgroundEnd->value());
+    range.emplace_back(m_uiForm.spBackgroundStart->value());
+    range.emplace_back(m_uiForm.spBackgroundEnd->value());
 
     IAlgorithm_sptr calcBackAlg =
         AlgorithmManager::Instance().create("CalculateFlatBackground");

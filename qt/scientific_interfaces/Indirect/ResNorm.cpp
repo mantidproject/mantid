@@ -470,18 +470,18 @@ void ResNorm::plotCurrentPreview() {
   if (m_uiForm.ppPlot->hasCurve("Vanadium")) {
     plotWorkspaces.emplace_back(
         m_uiForm.dsVanadium->getCurrentDataName().toStdString());
-    plotIndices.push_back(m_previewSpec);
+    plotIndices.emplace_back(m_previewSpec);
   }
   if (m_uiForm.ppPlot->hasCurve("Resolution")) {
     plotWorkspaces.emplace_back(
         m_uiForm.dsResolution->getCurrentDataName().toStdString());
-    plotIndices.push_back(0);
+    plotIndices.emplace_back(0);
   }
   if (m_uiForm.ppPlot->hasCurve("Fit")) {
     std::string fitWsGroupName(m_pythonExportWsName + "_Fit_Workspaces");
 
     plotWorkspaces.emplace_back("__" + fitWsGroupName + "_scaled");
-    plotIndices.push_back(0);
+    plotIndices.emplace_back(0);
   }
   m_plotter->plotCorrespondingSpectra(plotWorkspaces, plotIndices);
 }

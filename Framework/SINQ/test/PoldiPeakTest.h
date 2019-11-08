@@ -139,9 +139,9 @@ public:
 
   void testSortingGreater() {
     std::vector<PoldiPeak_sptr> peaks;
-    peaks.push_back(PoldiPeak::create(1.0, 200.0));
-    peaks.push_back(PoldiPeak::create(2.0, 20.0));
-    peaks.push_back(PoldiPeak::create(3.0, 800.0));
+    peaks.emplace_back(PoldiPeak::create(1.0, 200.0));
+    peaks.emplace_back(PoldiPeak::create(2.0, 20.0));
+    peaks.emplace_back(PoldiPeak::create(3.0, 800.0));
 
     std::sort(
         peaks.begin(), peaks.end(),
@@ -160,9 +160,9 @@ public:
 
   void testSortingLess() {
     std::vector<PoldiPeak_sptr> peaks;
-    peaks.push_back(PoldiPeak::create(1.0, 200.0));
-    peaks.push_back(PoldiPeak::create(2.0, 20.0));
-    peaks.push_back(PoldiPeak::create(3.0, 800.0));
+    peaks.emplace_back(PoldiPeak::create(1.0, 200.0));
+    peaks.emplace_back(PoldiPeak::create(2.0, 20.0));
+    peaks.emplace_back(PoldiPeak::create(3.0, 800.0));
 
     std::sort(peaks.begin(), peaks.end(),
               boost::bind<bool>(&PoldiPeak::lessThan, _1, _2, &PoldiPeak::q));

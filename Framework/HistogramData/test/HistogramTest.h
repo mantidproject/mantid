@@ -1211,7 +1211,7 @@ public:
   HistogramTestPerformance() : xData(histSize, LinearGenerator(0, 2)) {
     BinEdges edges(histSize, LinearGenerator(0, 2));
     for (size_t i = 0; i < nHists; i++)
-      hists.push_back(Histogram(edges));
+      hists.emplace_back(Histogram(edges));
   }
 
   void test_copy_X() {

@@ -113,9 +113,9 @@ LoadTBL::findQuotePairs(std::string line,
       quoteTwo = line.find('"', quoteOne + 1);
       if (quoteTwo != std::string::npos) {
         std::vector<size_t> quotepair;
-        quotepair.push_back(quoteOne);
-        quotepair.push_back(quoteTwo);
-        quoteBounds.push_back(quotepair);
+        quotepair.emplace_back(quoteOne);
+        quotepair.emplace_back(quoteTwo);
+        quoteBounds.emplace_back(quotepair);
       }
     }
   }
@@ -154,24 +154,24 @@ void LoadTBL::csvParse(std::string line, std::vector<std::string> &cols,
       if (pairID < quoteBounds.size() && pos > quoteBounds.at(pairID).at(0)) {
         if (pos > quoteBounds.at(pairID).at(1)) {
           // use the quote indexes to get the substring
-          cols.push_back(line.substr(quoteBounds.at(pairID).at(0) + 1,
+          cols.emplace_back(line.substr(quoteBounds.at(pairID).at(0) + 1,
                                      quoteBounds.at(pairID).at(1) -
                                          (quoteBounds.at(pairID).at(0) + 1)));
           ++pairID;
         }
       } else {
         if (firstCell) {
-          cols.push_back(line.substr(0, pos));
+          cols.emplace_back(line.substr(0, pos));
           firstCell = false;
         } else {
           auto colVal = line.substr(lastComma + 1, pos - (lastComma + 1));
-          cols.push_back(line.substr(lastComma + 1, pos - (lastComma + 1)));
+          cols.emplace_back(line.substr(lastComma + 1, pos - (lastComma + 1)));
         }
       }
       lastComma = pos;
     } else {
       if (lastComma + 1 < line.length()) {
-        cols.push_back(line.substr(lastComma + 1));
+        cols.emplace_back(line.substr(lastComma + 1));
       } else {
         cols.emplace_back("");
       }

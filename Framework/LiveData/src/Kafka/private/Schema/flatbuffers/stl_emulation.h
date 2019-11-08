@@ -62,7 +62,7 @@ template <typename T> inline const T *vector_data(
 template <typename T, typename V>
 inline void vector_emplace_back(std::vector<T> *vector, V &&data) {
   #if defined(FLATBUFFERS_CPP98_STL)
-    vector->push_back(data);
+    vector->emplace_back(data);
   #else
     vector->emplace_back(std::forward<V>(data));
   #endif  // defined(FLATBUFFERS_CPP98_STL)

@@ -120,15 +120,15 @@ void ConvertAxisByFormula::exec() {
   std::vector<Variable_ptr> variables;
   variables.reserve(8);
   // axis value lookups
-  variables.push_back(boost::make_shared<Variable>("x", false));
-  variables.push_back(boost::make_shared<Variable>("X", false));
-  variables.push_back(boost::make_shared<Variable>("y", false));
-  variables.push_back(boost::make_shared<Variable>("Y", false));
+  variables.emplace_back(boost::make_shared<Variable>("x", false));
+  variables.emplace_back(boost::make_shared<Variable>("X", false));
+  variables.emplace_back(boost::make_shared<Variable>("y", false));
+  variables.emplace_back(boost::make_shared<Variable>("Y", false));
   // geometry lookups
-  variables.push_back(boost::make_shared<Variable>("twotheta", true));
-  variables.push_back(boost::make_shared<Variable>("signedtwotheta", true));
-  variables.push_back(boost::make_shared<Variable>("l1", true));
-  variables.push_back(boost::make_shared<Variable>("l2", true));
+  variables.emplace_back(boost::make_shared<Variable>("twotheta", true));
+  variables.emplace_back(boost::make_shared<Variable>("signedtwotheta", true));
+  variables.emplace_back(boost::make_shared<Variable>("l1", true));
+  variables.emplace_back(boost::make_shared<Variable>("l2", true));
 
   bool isGeometryRequired = false;
   for (auto variablesIter = variables.begin();

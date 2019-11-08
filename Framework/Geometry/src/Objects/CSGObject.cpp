@@ -615,7 +615,7 @@ int CSGObject::hasComplement() const {
  */
 int CSGObject::populate(const std::map<int, boost::shared_ptr<Surface>> &Smap) {
   std::deque<Rule *> Rst;
-  Rst.push_back(TopRule.get());
+  Rst.emplace_back(TopRule.get());
   while (!Rst.empty()) {
     Rule *T1 = Rst.front();
     Rst.pop_front();
@@ -637,9 +637,9 @@ int CSGObject::populate(const std::map<int, boost::shared_ptr<Surface>> &Smap) {
         Rule *TA = T1->leaf(0);
         Rule *TB = T1->leaf(1);
         if (TA)
-          Rst.push_back(TA);
+          Rst.emplace_back(TA);
         if (TB)
-          Rst.push_back(TB);
+          Rst.emplace_back(TB);
       }
     }
   }
@@ -852,7 +852,7 @@ int CSGObject::createSurfaceList(const int outFlag) {
     } else {
       const auto *SurX = dynamic_cast<const SurfPoint *>(tmpA);
       if (SurX) {
-        m_SurList.push_back(SurX->getKey());
+        m_SurList.emplace_back(SurX->getKey());
       }
     }
   }
@@ -925,7 +925,7 @@ void CSGObject::print() const {
   std::deque<Rule *> Rst;
   std::vector<int> Cells;
   int Rcount(0);
-  Rst.push_back(TopRule.get());
+  Rst.emplace_back(TopRule.get());
   Rule *TA, *TB; // Temp. for storage
 
   while (!Rst.empty()) {
@@ -935,14 +935,14 @@ void CSGObject::print() const {
       Rcount++;
       auto *KV = dynamic_cast<SurfPoint *>(T1);
       if (KV)
-        Cells.push_back(KV->getKeyN());
+        Cells.emplace_back(KV->getKeyN());
       else {
         TA = T1->leaf(0);
         TB = T1->leaf(1);
         if (TA)
-          Rst.push_back(TA);
+          Rst.emplace_back(TA);
         if (TB)
-          Rst.push_back(TB);
+          Rst.emplace_back(TB);
       }
     }
   }
@@ -1780,10 +1780,10 @@ void CSGObject::calcBoundingBoxByGeometry() {
     auto rbb = lbb + (rfb - lfb); // Right-Back-Bottom
     auto rbt = rbb + (rft - rfb); // Right-Back-Top
 
-    vectors.push_back(lbt);
-    vectors.push_back(rft);
-    vectors.push_back(rbb);
-    vectors.push_back(rbt);
+    vectors.emplace_back(lbt);
+    vectors.emplace_back(rft);
+    vectors.emplace_back(rbb);
+    vectors.emplace_back(rbt);
 
     // Unreasonable extents to be replaced by first loop cycle
     constexpr double huge = 1e10;

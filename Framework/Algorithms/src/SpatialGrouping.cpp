@@ -131,15 +131,15 @@ void SpatialGrouping::exec() {
     std::vector<int> group;
     m_included.insert(specNo);
     // Add the central spectrum
-    group.push_back(specNo);
+    group.emplace_back(specNo);
 
     // Add all the nearest neighbors
     std::map<specnum_t, Mantid::Kernel::V3D>::iterator nrsIt;
     for (nrsIt = nearest.begin(); nrsIt != nearest.end(); ++nrsIt) {
       m_included.insert(nrsIt->first);
-      group.push_back(nrsIt->first);
+      group.emplace_back(nrsIt->first);
     }
-    m_groups.push_back(group);
+    m_groups.emplace_back(group);
   }
 
   if (m_groups.empty()) {

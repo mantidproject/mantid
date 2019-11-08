@@ -240,7 +240,7 @@ void CostFuncFitting::reset() const {
   m_indexMap.clear();
   for (size_t i = 0; i < m_numberFunParams; ++i) {
     if (m_function->isActive(i)) {
-      m_indexMap.push_back(i);
+      m_indexMap.emplace_back(i);
     }
     API::IConstraint *c = m_function->getConstraint(i);
     if (c) {

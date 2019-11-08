@@ -68,8 +68,8 @@ ALFView_presenter::setupALFInstrument() {
       std::bind(&ALFView_model::averageTubeConditon, m_model,
                 std::placeholders::_1);
 
-  binders.push_back(extractConditionBinder);
-  binders.push_back(averageTubeConditonBinder);
+  binders.emplace_back(extractConditionBinder);
+  binders.emplace_back(averageTubeConditonBinder);
 
   setUpContextConditions = std::make_pair(m_model->dataFileName(), binders);
 
@@ -80,14 +80,14 @@ ALFView_presenter::setupALFInstrument() {
       extractSingleTubeBinder); // add slot to observer
   std::tuple<std::string, Observer *> tmp = std::make_tuple(
       "singleTube", m_extractSingleTubeObserver); // store observer for later
-  customInstrumentOptions.push_back(tmp);
+  customInstrumentOptions.emplace_back(tmp);
 
   // set up average tube
   std::function<void()> averageTubeBinder =
       std::bind(&ALFView_presenter::averageTube, this);
   m_averageTubeObserver->setSlot(averageTubeBinder);
   tmp = std::make_tuple("averageTube", m_averageTubeObserver);
-  customInstrumentOptions.push_back(tmp);
+  customInstrumentOptions.emplace_back(tmp);
 
   return std::make_pair(setUpContextConditions, customInstrumentOptions);
 }

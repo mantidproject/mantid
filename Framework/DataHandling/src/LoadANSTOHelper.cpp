@@ -172,7 +172,7 @@ void EventAssignerFixedWavelength::addEventImpl(size_t id, int64_t pulse,
                                                 double tof) {
   UNUSED_ARG(pulse);
   UNUSED_ARG(tof);
-  m_eventVectors[id]->push_back(m_wavelength);
+  m_eventVectors[id]->emplace_back(m_wavelength);
 }
 
 // FastReadOnlyFile
@@ -277,8 +277,8 @@ File::File(const std::string &path)
     fileInfo.Size = header.readFileSize();
 
     if (header.TypeFlag == TarTypeFlag_NormalFile) {
-      m_fileNames.push_back(fileName);
-      m_fileInfos.push_back(fileInfo);
+      m_fileNames.emplace_back(fileName);
+      m_fileInfos.emplace_back(fileInfo);
     }
 
     auto offset = static_cast<size_t>(fileInfo.Size % 512);

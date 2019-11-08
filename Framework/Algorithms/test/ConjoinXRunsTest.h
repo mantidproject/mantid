@@ -395,7 +395,7 @@ public:
           create2DWorkspace123(2000, 100, false, std::set<int64_t>(), true);
       std::string name = "ws" + std::to_string(i);
       storeWS(name, ws);
-      m_ws.push_back(name);
+      m_ws.emplace_back(name);
     }
     m_alg.initialize();
     m_alg.isChild();

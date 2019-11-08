@@ -474,10 +474,10 @@ public:
   void test_partial_spectra_loading() {
     std::string wsName = "test_partial_spectra_loading_SpectrumList";
     std::vector<int32_t> specList;
-    specList.push_back(13);
-    specList.push_back(16);
-    specList.push_back(21);
-    specList.push_back(28);
+    specList.emplace_back(13);
+    specList.emplace_back(16);
+    specList.emplace_back(21);
+    specList.emplace_back(28);
 
     // A) test SpectrumList
     LoadEventNexus ld;
@@ -535,7 +535,7 @@ public:
     const size_t sMin = 20;
     const size_t sMax = 22;
     specList.clear();
-    specList.push_back(17);
+    specList.emplace_back(17);
 
     LoadEventNexus ldLMM;
     ldLMM.initialize();
@@ -576,7 +576,7 @@ public:
     std::string wsName2 = "test_partial_spectra_loading_SpectrumListISIS2";
     std::string filename = "OFFSPEC00036416.nxs";
     std::vector<int32_t> specList;
-    specList.push_back(45);
+    specList.emplace_back(45);
 
     LoadEventNexus ld;
     ld.initialize();
@@ -975,7 +975,7 @@ public:
       }
       for (size_t index = 0; index < ws->getNumberHistograms(); ++index) {
         if (isFirstChildWorkspace) {
-          specids.push_back(ws->getSpectrum(index).getSpectrumNo());
+          specids.emplace_back(ws->getSpectrum(index).getSpectrumNo());
         } else {
           TSM_ASSERT_EQUALS(
               "The spectrNo should be the same for all child workspaces.",

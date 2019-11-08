@@ -118,7 +118,7 @@ SpectrumNumberTranslator::makeIndexSet(SpectrumNumber min,
   const auto begin = lower_bound(m_spectrumNumberToIndex, min);
   const auto end = upper_bound(m_spectrumNumberToIndex, max);
   for (auto it = begin; it != end; ++it)
-    indices.push_back(it->second);
+    indices.emplace_back(it->second);
   return SpectrumIndexSet(indices, m_spectrumNumberToIndex.size());
 }
 
@@ -150,7 +150,7 @@ SpectrumIndexSet SpectrumNumberTranslator::makeIndexSet(
   std::vector<size_t> indices;
   for (const auto &spectrumNumber : spectrumNumbers)
     if (m_spectrumNumberToPartition.at(spectrumNumber) == m_partition)
-      indices.push_back(find(m_spectrumNumberToIndex, spectrumNumber)->second);
+      indices.emplace_back(find(m_spectrumNumberToIndex, spectrumNumber)->second);
   return SpectrumIndexSet(indices, m_spectrumNumberToIndex.size());
 }
 
@@ -163,7 +163,7 @@ SpectrumIndexSet SpectrumNumberTranslator::makeIndexSet(
           "SpectrumIndexTranslator: specified index is out of range.");
     const auto it = find(m_globalToLocal, globalIndex);
     if (it != m_globalToLocal.end())
-      indices.push_back(it->second);
+      indices.emplace_back(it->second);
   }
   return SpectrumIndexSet(indices, m_globalToLocal.size());
 }

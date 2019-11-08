@@ -215,7 +215,7 @@ public:
       for (int y = 0; y < sizeInAxis; ++y) {
         for (int z = 0; z < sizeInAxis; ++z) {
           Mantid::Kernel::V3D peakOrigin(x, y, z);
-          m_peaks.push_back(boost::make_shared<
+          m_peaks.emplace_back(boost::make_shared<
                             MantidQt::SliceViewer::PeakRepresentationCross>(
               peakOrigin, maxZ, minZ));
         }

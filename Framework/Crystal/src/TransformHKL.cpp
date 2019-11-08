@@ -137,9 +137,9 @@ void TransformHKL::exec() {
     V3D hkl(peaks[i].getHKL());
     V3D ihkl(peaks[i].getIntHKL());
     peaks[i].setIntHKL(hkl_tran * ihkl);
-    miller_indices.push_back(hkl_tran * ihkl);
+    miller_indices.emplace_back(hkl_tran * ihkl);
     peaks[i].setHKL(hkl_tran * hkl);
-    q_vectors.push_back(peaks[i].getQSampleFrame());
+    q_vectors.emplace_back(peaks[i].getQSampleFrame());
     num_indexed++;
   }
 

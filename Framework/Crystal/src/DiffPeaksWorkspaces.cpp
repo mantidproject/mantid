@@ -94,7 +94,7 @@ void DiffPeaksWorkspaces::exec() {
       {
         // As soon as we find a match, remove it from the output and move onto
         // the next rhs peak
-        badPeaks.push_back(j);
+        badPeaks.emplace_back(j);
         break;
       }
     }

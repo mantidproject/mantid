@@ -78,12 +78,12 @@ void SaveZODS::exec() {
       if (ei->sample().hasOrientedLattice()) {
         std::vector<double> unitCell;
         const OrientedLattice &latt = ei->sample().getOrientedLattice();
-        unitCell.push_back(latt.a());
-        unitCell.push_back(latt.b());
-        unitCell.push_back(latt.c());
-        unitCell.push_back(latt.alpha());
-        unitCell.push_back(latt.beta());
-        unitCell.push_back(latt.gamma());
+        unitCell.emplace_back(latt.a());
+        unitCell.emplace_back(latt.b());
+        unitCell.emplace_back(latt.c());
+        unitCell.emplace_back(latt.alpha());
+        unitCell.emplace_back(latt.beta());
+        unitCell.emplace_back(latt.gamma());
 
         // Now write out the 6D vector
         std::vector<int> unit_cell_size(1, 6);
@@ -133,7 +133,7 @@ void SaveZODS::exec() {
     for (int j = 0; j < size_field[1]; j++)
       for (int k = 0; k < size_field[2]; k++) {
         int l = i + size_field[0] * j + size_field[0] * size_field[1] * k;
-        data.push_back(signal[l]);
+        data.emplace_back(signal[l]);
       }
 
   file->writeData("Data", data, size);
@@ -146,7 +146,7 @@ void SaveZODS::exec() {
     for (int j = 0; j < size_field[1]; j++)
       for (int k = 0; k < size_field[2]; k++) {
         int l = i + size_field[0] * j + size_field[0] * size_field[1] * k;
-        sigma.push_back(sqrt(errorSquared[l]));
+        sigma.emplace_back(sqrt(errorSquared[l]));
       }
   file->writeData("sigma", sigma, size);
 

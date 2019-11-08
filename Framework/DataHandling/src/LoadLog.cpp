@@ -374,7 +374,7 @@ bool LoadLog::LoadSNSText() {
     auto p = new TimeSeriesProperty<double>(names[i]);
     if (units.size() == numCols)
       p->setUnits(units[i]);
-    props.push_back(p);
+    props.emplace_back(p);
   }
   // Go back to start
   inLogFile.seekg(0);
@@ -506,7 +506,7 @@ bool LoadLog::SNSTextFormatColumns(const std::string &str,
     if (!Strings::convert<double>(str, val))
       return false;
     else
-      out.push_back(val);
+      out.emplace_back(val);
   }
   // Nothing failed = it is that format.
   return true;

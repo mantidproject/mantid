@@ -160,7 +160,7 @@ void MDGridBox<MDE, nd>::fillBoxShell(const size_t tot,
     }
     splitBox->setInverseVolume(
         ChildInverseVolume); // Set the cached inverse volume
-    m_Children.push_back(splitBox);
+    m_Children.emplace_back(splitBox);
 
     // Increment the indices, rolling back as needed
     indices[0]++;
@@ -206,11 +206,11 @@ TMDE(MDGridBox)::MDGridBox(const MDGridBox<MDE, nd> &other,
     if (otherMDBox) {
       auto newBox = new MDBox<MDE, nd>(*otherMDBox, otherBC);
       newBox->setParent(this);
-      m_Children.push_back(newBox);
+      m_Children.emplace_back(newBox);
     } else if (otherMDGridBox) {
       auto newBox = new MDGridBox<MDE, nd>(*otherMDGridBox, otherBC);
       newBox->setParent(this);
-      m_Children.push_back(newBox);
+      m_Children.emplace_back(newBox);
     } else {
       throw std::runtime_error(
           "MDGridBox::copy_ctor(): an unexpected child box type was found.");
@@ -335,7 +335,7 @@ TMDE(void MDGridBox)::setChildren(const std::vector<API::IMDNode *> &otherBoxes,
   auto it_end = otherBoxes.begin() + indexEnd;
   // Set the parent of each new child box.
   for (; it != it_end; it++) {
-    m_Children.push_back(dynamic_cast<MDBoxBase<MDE, nd> *>(*it));
+    m_Children.emplace_back(dynamic_cast<MDBoxBase<MDE, nd> *>(*it));
     m_Children.back()->setParent(this);
   }
   numBoxes = m_Children.size();
@@ -435,7 +435,7 @@ TMDE(void MDGridBox)::getBoxes(std::vector<API::IMDNode *> &outBoxes,
                                size_t maxDepth, bool leafOnly) {
   // Add this box, unless we only want the leaves
   if (!leafOnly)
-    outBoxes.push_back(this);
+    outBoxes.emplace_back(this);
 
   if (this->getDepth() < maxDepth) {
     for (API::IMDNode *child : m_Children) {
@@ -446,7 +446,7 @@ TMDE(void MDGridBox)::getBoxes(std::vector<API::IMDNode *> &outBoxes,
     // Oh, we reached the max depth and want only leaves.
     // ... so we consider this box to be a leaf too.
     if (leafOnly)
-      outBoxes.push_back(this);
+      outBoxes.emplace_back(this);
   }
 }
 
@@ -472,7 +472,7 @@ TMDE(void MDGridBox)::getBoxes(std::vector<API::IMDNode *> &outBoxes,
                                Mantid::Geometry::MDImplicitFunction *function) {
   // Add this box, unless we only want the leaves
   if (!leafOnly)
-    outBoxes.push_back(this);
+    outBoxes.emplace_back(this);
 
   if (this->getDepth() < maxDepth) {
     // OK, let's look for children that are either touching or completely
@@ -637,7 +637,7 @@ TMDE(void MDGridBox)::getBoxes(std::vector<API::IMDNode *> &outBoxes,
     // Oh, we reached the max depth and want only leaves.
     // ... so we consider this box to be a leaf too.
     if (leafOnly)
-      outBoxes.push_back(this);
+      outBoxes.emplace_back(this);
   }
 }
 //-----------------------------------------------------------------------------------------------

@@ -37,11 +37,11 @@ BinFinder::BinFinder(const std::vector<double> &binParams) {
     double max = binParams[i * 2 + 2];
     // Only the first bin needs the min boundary
     if (i == 0)
-      boundaries.push_back(min);
-    boundaries.push_back(max);
+      boundaries.emplace_back(min);
+    boundaries.emplace_back(max);
     // The step
     double step = binParams[i * 2 + 1];
-    stepSizes.push_back(step);
+    stepSizes.emplace_back(step);
     if (step == 0)
       throw std::invalid_argument("BinFinder: step size of 0.");
     if ((step < 0) && (min <= 0))
@@ -56,10 +56,10 @@ BinFinder::BinFinder(const std::vector<double> &binParams) {
     // Pre-do some calculations for log binning.
     if (step < 0) {
       double log_step = log1p(fabs(step));
-      logSteps.push_back(log_step);
+      logSteps.emplace_back(log_step);
       if (i == 0)
-        logBoundaries.push_back(log(min));
-      logBoundaries.push_back(log(max));
+        logBoundaries.emplace_back(log(min));
+      logBoundaries.emplace_back(log(max));
       // How many bins is that?
       numBins = static_cast<int>(ceil((log(max) - log(min)) / log_step));
 
@@ -76,10 +76,10 @@ BinFinder::BinFinder(const std::vector<double> &binParams) {
 
     } else {
       // Empty log values; these won't be used
-      logSteps.push_back(0);
+      logSteps.emplace_back(0);
       if (i == 0)
-        logBoundaries.push_back(0);
-      logBoundaries.push_back(0);
+        logBoundaries.emplace_back(0);
+      logBoundaries.emplace_back(0);
       //# of linear bins
       numBins = static_cast<int>(ceil((max - min) / step));
 
@@ -96,7 +96,7 @@ BinFinder::BinFinder(const std::vector<double> &binParams) {
     int startBinIndex = 0;
     if (i > 0)
       startBinIndex = this->endBinIndex[i - 1];
-    endBinIndex.push_back(numBins + startBinIndex);
+    endBinIndex.emplace_back(numBins + startBinIndex);
   }
   // How many binning regions?
   numRegions = static_cast<int>(stepSizes.size());

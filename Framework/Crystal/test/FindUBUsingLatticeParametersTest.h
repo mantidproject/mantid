@@ -148,7 +148,7 @@ public:
     /// get a UB (although perhaps not a very good one).
     std::vector<size_t> rows;
     for (size_t i = 3; i < m_ws->rowCount(); ++i) {
-      rows.push_back(i);
+      rows.emplace_back(i);
     }
 
     Mantid::DataHandling::DeleteTableRows removeRowAlg;

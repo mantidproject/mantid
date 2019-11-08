@@ -55,7 +55,7 @@ void DataController::addWorkspace() {
           Mantid::API::AnalysisDataService::Instance()
               .retrieveWS<Mantid::API::MatrixWorkspace>(wsName.toStdString());
       if (mws) {
-        matrixWorkspaces.push_back(mws);
+        matrixWorkspaces.emplace_back(mws);
       } else {
         auto grp =
             Mantid::API::AnalysisDataService::Instance()
@@ -66,7 +66,7 @@ void DataController::addWorkspace() {
             mws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
                 grp->getItem(i));
             if (mws) {
-              matrixWorkspaces.push_back(mws);
+              matrixWorkspaces.emplace_back(mws);
             }
           }
         }

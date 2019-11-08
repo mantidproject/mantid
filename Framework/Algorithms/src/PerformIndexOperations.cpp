@@ -199,8 +199,8 @@ public:
       Mantid::Kernel::Strings::convert<int>(arguments.front(), minIndex);
       Mantid::Kernel::Strings::convert<int>(arguments.back(), maxIndex);
       std::vector<int> indexes;
-      indexes.push_back(minIndex);
-      indexes.push_back(maxIndex);
+      indexes.emplace_back(minIndex);
+      indexes.emplace_back(maxIndex);
       command = new AdditionCommand(indexes);
     } else {
       command = new NullCommand;
@@ -307,7 +307,7 @@ VecCommands interpret(const std::string &processingInstructions) {
       if (commandSptr->isValid()) // Do not record invalid commands.
       {
         parserFound = true;
-        commands.push_back(commandSptr);
+        commands.emplace_back(commandSptr);
       }
     }
     if (!parserFound) {

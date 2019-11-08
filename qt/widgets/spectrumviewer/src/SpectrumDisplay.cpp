@@ -431,7 +431,7 @@ void SpectrumDisplay::setHGraph(double y, bool isFront) {
   yData.push_back(data[row * n_cols]);
   for (size_t col = 0; col < n_cols; col++) {
     double x_val = m_dataArray->xOfColumn(col);
-    xData.push_back(x_val);                    // mark data at col
+    xData.push_back(x_val);                       // mark data at col
     yData.push_back(data[row * n_cols + col]); // centers
   }
   xData.push_back(x_max); // end at x_max

@@ -83,7 +83,7 @@ public:
     std::vector<Workspace_sptr> list;
 
     for (int i = 15189; i <= 15193; ++i) {
-      list.push_back(createWs("MUSR", i));
+      list.emplace_back(createWs("MUSR", i));
     }
 
     std::string label = getRunLabel(list);
@@ -95,7 +95,7 @@ public:
     std::vector<Workspace_sptr> list;
 
     for (auto it = runNumbers.begin(); it != runNumbers.end(); ++it) {
-      list.push_back(createWs("EMU", *it));
+      list.emplace_back(createWs("EMU", *it));
     }
 
     std::string label = getRunLabel(list);
@@ -106,7 +106,7 @@ public:
     std::vector<int> runNumbers{1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14};
     std::vector<Workspace_sptr> list;
     for (auto it = runNumbers.begin(); it != runNumbers.end(); it++) {
-      list.push_back(createWs("EMU", *it));
+      list.emplace_back(createWs("EMU", *it));
     }
     std::string label = getRunLabel(list);
     TS_ASSERT_EQUALS(label, "EMU00000001-3, 5-6, 8, 10-4");
@@ -116,7 +116,7 @@ public:
     std::vector<int> runNumbers{5, 14, 8, 1, 11, 3, 10, 6, 13, 12, 2};
     std::vector<Workspace_sptr> list;
     for (auto it = runNumbers.begin(); it != runNumbers.end(); it++) {
-      list.push_back(createWs("EMU", *it));
+      list.emplace_back(createWs("EMU", *it));
     }
     std::string label = getRunLabel(list);
     TS_ASSERT_EQUALS(label, "EMU00000001-3, 5-6, 8, 10-4");

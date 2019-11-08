@@ -101,7 +101,7 @@ std::vector<std::string> XmlHandler::get_subnodes(const std::string &xpath) {
 
   while (pNode) {
     if (pNode->childNodes()->length() == 1) {
-      subnodes.push_back(pNode->nodeName());
+      subnodes.emplace_back(pNode->nodeName());
     }
     pNode = it.nextNode();
   }

@@ -298,8 +298,8 @@ void LoadMuonNexus1::exec() {
       }
       std::vector<int> specIDs, detecIDs;
       for (size_t i = 0; i < localWorkspace->getNumberHistograms(); i++) {
-        specIDs.push_back(localWorkspace->getSpectrum(i).getSpectrumNo());
-        detecIDs.push_back(localWorkspace->getSpectrum(i).getSpectrumNo());
+        specIDs.emplace_back(localWorkspace->getSpectrum(i).getSpectrumNo());
+        detecIDs.emplace_back(localWorkspace->getSpectrum(i).getSpectrumNo());
       }
       API::SpectrumDetectorMapping mapping(specIDs, detecIDs);
       localWorkspace->updateSpectraUsing(mapping);
@@ -477,7 +477,7 @@ LoadMuonNexus1::loadDetectorGrouping(NXRoot &root,
       // Start from 1 to N+1 to be consistent with
       // the case where spectra are specified
       for (int i = 1; i < m_numberOfSpectra + 1; i++)
-        specToLoad.push_back(i);
+        specToLoad.emplace_back(i);
     }
 
     if (numGroupingEntries < m_numberOfSpectra) {
@@ -525,7 +525,7 @@ LoadMuonNexus1::loadDetectorGrouping(NXRoot &root,
         // Multiple periods - same grouping for each
         specToLoad.clear();
         for (int i = 1; i < m_numberOfSpectra + 1; i++) {
-          specToLoad.push_back(i);
+          specToLoad.emplace_back(i);
         }
         for (const auto &spectrum : specToLoad) {
           grouping.emplace_back(groupingData[spectrum - 1]);
@@ -585,7 +585,7 @@ LoadMuonNexus1::loadDetectorGrouping(NXRoot &root,
       // Make sure it uses the right number of detectors
       std::ostringstream oss;
       oss << "1-" << m_numberOfSpectra;
-      dummyGrouping->groups.push_back(oss.str());
+      dummyGrouping->groups.emplace_back(oss.str());
       dummyGrouping->description = "Dummy grouping";
       dummyGrouping->groupNames.emplace_back("all");
     }
@@ -637,7 +637,7 @@ LoadMuonNexus1::createDetectorGroupingTable(std::vector<int> specToLoad,
   for (size_t i = 0; i < specToLoad.size(); i++) {
     // Add detector ID to the list of group detectors. Detector ID is always
     // spectra index + 1
-    groupingMap[grouping[i]].push_back(specToLoad[i]);
+    groupingMap[grouping[i]].emplace_back(specToLoad[i]);
   }
 
   for (auto &group : groupingMap) {

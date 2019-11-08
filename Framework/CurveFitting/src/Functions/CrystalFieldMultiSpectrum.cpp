@@ -77,7 +77,7 @@ public:
                          "Intensity scaling factor for spectrum " + si);
       } catch (std::invalid_argument &) {
       }
-      m_IntensityScalingIdx.push_back(parameterIndex("IntensityScaling" + si));
+      m_IntensityScalingIdx.emplace_back(parameterIndex("IntensityScaling" + si));
     }
   }
   /// Declare the Lambda parameter for susceptibility
@@ -137,7 +137,7 @@ CrystalFieldMultiSpectrum::createEquivalentFunctions() const {
   std::vector<IFunction_sptr> funs;
   auto &composite = dynamic_cast<CompositeFunction &>(*m_target);
   for (size_t i = 0; i < composite.nFunctions(); ++i) {
-    funs.push_back(composite.getFunction(i));
+    funs.emplace_back(composite.getFunction(i));
   }
   return funs;
 }
@@ -269,7 +269,7 @@ void CrystalFieldMultiSpectrum::buildTargetFunction() const {
   } else {
     m_physprops.clear();
     for (auto elem : physprops) {
-      m_physprops.push_back(static_cast<int>(elem));
+      m_physprops.emplace_back(static_cast<int>(elem));
     }
   }
   // Create the single-spectrum functions.

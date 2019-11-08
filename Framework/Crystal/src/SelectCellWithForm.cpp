@@ -66,7 +66,7 @@ Kernel::Matrix<double> SelectCellWithForm::DetermineErrors(
   q_vectors.reserve(npeaks);
   q_vectors0.reserve(npeaks);
   for (int i = 0; i < npeaks; i++)
-    q_vectors0.push_back(ws->getPeak(i).getQSampleFrame());
+    q_vectors0.emplace_back(ws->getPeak(i).getQSampleFrame());
 
   Kernel::Matrix<double> newUB1(3, 3);
   IndexingUtils::GetIndexedPeaks(UB, q_vectors0, tolerance, miller_ind,
@@ -166,7 +166,7 @@ void SelectCellWithForm::exec() {
       std::vector<V3D> miller_indices;
       std::vector<V3D> q_vectors;
       for (size_t i = 0; i < n_peaks; i++) {
-        q_vectors.push_back(peaks[i].getQSampleFrame());
+        q_vectors.emplace_back(peaks[i].getQSampleFrame());
       }
       num_indexed = IndexingUtils::CalculateMillerIndices(
           newUB, q_vectors, tolerance, miller_indices, average_error);

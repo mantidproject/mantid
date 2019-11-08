@@ -265,7 +265,7 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
 
   const auto &properties = ws->run().getProperties();
   for (auto property : properties) {
-    logs.push_back(property->name());
+    logs.emplace_back(property->name());
   }
   m_view->setAvailableLogs(logs);
 
@@ -275,7 +275,7 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
   for (size_t i = 0; i < numPeriods; i++) {
     std::stringstream buffer;
     buffer << i + 1;
-    periods.push_back(buffer.str());
+    periods.emplace_back(buffer.str());
   }
   m_view->setAvailablePeriods(periods);
 

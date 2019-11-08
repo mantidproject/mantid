@@ -142,7 +142,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
       if (i != mid_ind) {
         V3D shifted_vec(shifted_qs[i]);
         shifted_vec -= mid_vec;
-        sorted_qs.push_back(shifted_vec);
+        sorted_qs.emplace_back(shifted_vec);
       }
     }
   } else {
@@ -159,7 +159,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
   some_qs.reserve(q_vectors.size());
 
   for (size_t i = 0; i < num_initial; i++)
-    some_qs.push_back(sorted_qs[i]);
+    some_qs.emplace_back(sorted_qs[i]);
 
   ScanFor_UB(UB, some_qs, lattice, degrees_per_step, required_tolerance);
 
@@ -180,7 +180,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
       num_initial = sorted_qs.size();
 
     for (size_t i = some_qs.size(); i < num_initial; i++)
-      some_qs.push_back(sorted_qs[i]);
+      some_qs.emplace_back(sorted_qs[i]);
     for (int counter = 0; counter < iterations; counter++) {
       try {
         GetIndexedPeaks(UB, some_qs, required_tolerance, miller_ind, indexed_qs,
@@ -339,7 +339,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
       if (i != mid_ind) {
         V3D shifted_vec(shifted_qs[i]);
         shifted_vec -= mid_vec;
-        sorted_qs.push_back(shifted_vec);
+        sorted_qs.emplace_back(shifted_vec);
       }
     }
   } else {
@@ -356,7 +356,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
   some_qs.reserve(q_vectors.size());
 
   for (size_t i = 0; i < num_initial; i++)
-    some_qs.push_back(sorted_qs[i]);
+    some_qs.emplace_back(sorted_qs[i]);
   std::vector<V3D> directions;
   ScanFor_Directions(directions, some_qs, min_d, max_d, required_tolerance,
                      degrees_per_step);
@@ -390,7 +390,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
       num_initial = sorted_qs.size();
 
     for (size_t i = some_qs.size(); i < num_initial; i++)
-      some_qs.push_back(sorted_qs[i]);
+      some_qs.emplace_back(sorted_qs[i]);
 
     GetIndexedPeaks(UB, some_qs, required_tolerance, miller_ind, indexed_qs,
                     fit_error);
@@ -1290,9 +1290,9 @@ double IndexingUtils::ScanFor_UB(DblMatrix &UB,
         max_indexed = num_indexed;
       }
       if (num_indexed == max_indexed) {
-        selected_a_dirs.push_back(a_dir_temp);
-        selected_b_dirs.push_back(b_dir_temp);
-        selected_c_dirs.push_back(c_dir_temp);
+        selected_a_dirs.emplace_back(a_dir_temp);
+        selected_b_dirs.emplace_back(b_dir_temp);
+        selected_c_dirs.emplace_back(c_dir_temp);
       }
     }
   }
@@ -1452,7 +1452,7 @@ size_t IndexingUtils::ScanFor_Directions(std::vector<V3D> &directions,
         }
       }
       if (!duplicate) {
-        directions.push_back(current_dir);
+        directions.emplace_back(current_dir);
       }
     }
   }
@@ -1555,7 +1555,7 @@ size_t IndexingUtils::FFTScanFor_Directions(std::vector<V3D> &directions,
   std::vector<V3D> temp_dirs;
   for (size_t i = 0; i < max_fft_val.size(); i++) {
     if (max_fft_val[i] >= threshold) {
-      temp_dirs.push_back(full_list[i]);
+      temp_dirs.emplace_back(full_list[i]);
     }
   }
   // now scan through temp_dirs and use the
@@ -1576,7 +1576,7 @@ size_t IndexingUtils::FFTScanFor_Directions(std::vector<V3D> &directions,
       double d_val = 1 / q_val;
       if (d_val >= 0.8 * min_d && d_val <= 1.2 * max_d) {
         temp = temp_dir * d_val;
-        temp_dirs_2.push_back(temp);
+        temp_dirs_2.emplace_back(temp);
       }
     }
   }
@@ -1599,7 +1599,7 @@ size_t IndexingUtils::FFTScanFor_Directions(std::vector<V3D> &directions,
     current_dir = dir_num;
     num_indexed = NumberIndexed_1D(current_dir, q_vectors, required_tolerance);
     if (num_indexed >= 0.50 * max_indexed)
-      temp_dirs.push_back(current_dir);
+      temp_dirs.emplace_back(current_dir);
   }
   // refine directions and again find the
   // max number indexed, for the optimized
@@ -1634,7 +1634,7 @@ size_t IndexingUtils::FFTScanFor_Directions(std::vector<V3D> &directions,
     current_dir = temp_dir;
     double length = current_dir.norm();
     if (length >= 0.8 * min_d && length <= 1.2 * max_d)
-      temp_dirs_2.push_back(current_dir);
+      temp_dirs_2.emplace_back(current_dir);
   }
   // only keep directions that index at
   // least 75% of the max number of peaks
@@ -1643,7 +1643,7 @@ size_t IndexingUtils::FFTScanFor_Directions(std::vector<V3D> &directions,
     current_dir = dir_num;
     num_indexed = NumberIndexed_1D(current_dir, q_vectors, required_tolerance);
     if (num_indexed > max_indexed * 0.75)
-      temp_dirs.push_back(current_dir);
+      temp_dirs.emplace_back(current_dir);
   }
 
   std::sort(temp_dirs.begin(), temp_dirs.end(), V3D::compareMagnitude);
@@ -2048,7 +2048,7 @@ void IndexingUtils::DiscardDuplicates(std::vector<V3D> &new_list,
     if (current_length > 0) // skip any zero vectors
     {
       temp.clear();
-      temp.push_back(current_dir);
+      temp.emplace_back(current_dir);
       check_index = dir_num;
       new_dir = false;
       while (check_index < directions.size() && !new_dir) {
@@ -2062,7 +2062,7 @@ void IndexingUtils::DiscardDuplicates(std::vector<V3D> &new_list,
             if ((std::isnan)(angle))
               angle = 0;
             if ((angle < ang_tol) || (angle > (180.0 - ang_tol))) {
-              temp.push_back(next_dir);
+              temp.emplace_back(next_dir);
               directions[check_index] = zero_vec; // mark off this direction
             }                                     // since it was duplicate
 
@@ -2091,7 +2091,7 @@ void IndexingUtils::DiscardDuplicates(std::vector<V3D> &new_list,
 
       if (max_indexed > 0) // don't bother to add any direction
       {                    // that doesn't index anything
-        new_list.push_back(temp[max_i]);
+        new_list.emplace_back(temp[max_i]);
       }
     }
   }
@@ -2537,8 +2537,8 @@ int IndexingUtils::GetIndexedPeaks_1D(const V3D &direction,
     double error = fabs(proj_value - nearest_int);
     if (error < required_tolerance) {
       fit_error += error * error;
-      indexed_qs.push_back(q_vector);
-      index_vals.push_back(boost::numeric_cast<int>(nearest_int));
+      indexed_qs.emplace_back(q_vector);
+      index_vals.emplace_back(boost::numeric_cast<int>(nearest_int));
       num_indexed++;
     }
   }
@@ -2616,10 +2616,10 @@ int IndexingUtils::GetIndexedPeaks_3D(
 
       fit_error += h_error * h_error + k_error * k_error + l_error * l_error;
 
-      indexed_qs.push_back(q_vector);
+      indexed_qs.emplace_back(q_vector);
 
       V3D miller_ind(h_int, k_int, l_int);
-      miller_indices.push_back(miller_ind);
+      miller_indices.emplace_back(miller_ind);
 
       num_indexed++;
     }
@@ -2687,10 +2687,10 @@ int IndexingUtils::GetIndexedPeaks(const DblMatrix &UB,
         fit_error += error * error;
       }
 
-      indexed_qs.push_back(q_vector);
+      indexed_qs.emplace_back(q_vector);
 
       V3D miller_ind(round(hkl[0]), round(hkl[1]), round(hkl[2]));
-      miller_indices.push_back(miller_ind);
+      miller_indices.emplace_back(miller_ind);
 
       num_indexed++;
     }
@@ -2817,7 +2817,7 @@ std::vector<V3D> IndexingUtils::MakeCircleDirections(int n_steps,
     V3D vec(vector_at_angle);
     rotation_2.setAngleAxis(i * angle_step, axis);
     rotation_2.rotate(vec);
-    directions.push_back(vec);
+    directions.emplace_back(vec);
   }
 
   return directions;
@@ -2916,15 +2916,15 @@ bool IndexingUtils::GetLatticeParameters(const DblMatrix &UB,
   o_lattice.setUB(UB);
 
   lattice_par.clear();
-  lattice_par.push_back(o_lattice.a());
-  lattice_par.push_back(o_lattice.b());
-  lattice_par.push_back(o_lattice.c());
+  lattice_par.emplace_back(o_lattice.a());
+  lattice_par.emplace_back(o_lattice.b());
+  lattice_par.emplace_back(o_lattice.c());
 
-  lattice_par.push_back(o_lattice.alpha());
-  lattice_par.push_back(o_lattice.beta());
-  lattice_par.push_back(o_lattice.gamma());
+  lattice_par.emplace_back(o_lattice.alpha());
+  lattice_par.emplace_back(o_lattice.beta());
+  lattice_par.emplace_back(o_lattice.gamma());
 
-  lattice_par.push_back(o_lattice.volume()); // keep volume > 0 even if
+  lattice_par.emplace_back(o_lattice.volume()); // keep volume > 0 even if
                                              // cell is left handed
   return true;
 }

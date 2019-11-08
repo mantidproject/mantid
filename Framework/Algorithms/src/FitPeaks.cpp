@@ -441,7 +441,7 @@ std::map<std::string, std::string> FitPeaks::validateInputs() {
     // put the names in a vector
     std::vector<string> functionParameterNames;
     for (size_t i = 0; i < m_peakFunction->nParams(); ++i)
-      functionParameterNames.push_back(m_peakFunction->parameterName(i));
+      functionParameterNames.emplace_back(m_peakFunction->parameterName(i));
     // check that the supplied names are in the function
     // it is acceptable to be missing parameters
     bool failed = false;
@@ -880,7 +880,7 @@ void FitPeaks::convertParametersNameToIndex() {
   for (const auto &paramName : m_peakParamNames) {
     auto locator = parname_index_map.find(paramName);
     if (locator != parname_index_map.end())
-      m_initParamIndexes.push_back(locator->second);
+      m_initParamIndexes.emplace_back(locator->second);
     else {
       // a parameter name that is not defined in the peak profile function.  An
       // out-of-range index is thus set to this
@@ -888,7 +888,7 @@ void FitPeaks::convertParametersNameToIndex() {
                       << " is not an allowed parameter of peak "
                          "function "
                       << m_peakFunction->name() << "\n";
-      m_initParamIndexes.push_back(m_peakFunction->nParams() * 10);
+      m_initParamIndexes.emplace_back(m_peakFunction->nParams() * 10);
     }
   }
 
@@ -1965,7 +1965,7 @@ void FitPeaks::generateFittedParametersValueWorkspaces() {
   if (m_rawPeaksTable) {
     std::vector<std::string> peak_params = m_peakFunction->getParameterNames();
     for (const auto &peak_param : peak_params)
-      param_vec.push_back(peak_param);
+      param_vec.emplace_back(peak_param);
   } else {
     param_vec.emplace_back("centre");
     param_vec.emplace_back("width");
