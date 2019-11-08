@@ -31,6 +31,7 @@ public:
   virtual bool isMultipleDataTabSelected() const override;
   bool isResolutionHidden() const override;
   void setResolutionHidden(bool hide) override;
+  void setStartAndEndHidden(bool hidden) override;
   void disableMultipleDataTab() override;
 
   virtual std::string getSelectedSample() const override;
