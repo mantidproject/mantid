@@ -147,7 +147,7 @@ class SANSFileInformationTest(unittest.TestCase):
         self.assertEqual(expected, file_info.get_run_number())
 
     def test_run_number_without_ext(self):
-        filename = "INST12345"
+        filename = "INST2D12345"
         expected = 12345
 
         file_info = SANSFileInformationMock(file_name=filename)
@@ -156,6 +156,13 @@ class SANSFileInformationTest(unittest.TestCase):
     def test_run_number_with_n001_ext(self):
         filename = "INST2345.n001"
         expected = 2345
+
+        file_info = SANSFileInformationMock(file_name=filename)
+        self.assertEqual(expected, file_info.get_run_number())
+
+    def test_run_number_with_appendix(self):
+        filename = "INST2D101-001"
+        expected = 101
 
         file_info = SANSFileInformationMock(file_name=filename)
         self.assertEqual(expected, file_info.get_run_number())

@@ -11,6 +11,7 @@
 from __future__ import (absolute_import, division, print_function)
 import os
 import h5py as h5
+import re
 from abc import (ABCMeta, abstractmethod)
 from mantid.api import FileFinder
 from mantid.kernel import (DateAndTime, ConfigService, Logger)
@@ -794,18 +795,15 @@ class SANSFileInformation(with_metaclass(ABCMeta, object)):
         # We don't use the nexus tagged file name as some instruments will take a file with
         # the "right structure" and transplant data from another in, then rename the recipient to the donor name
 
-        run_filename = self._full_file_name
+        run_filename = os.path.basename(self._full_file_name)
 
-        if '.' in run_filename:
-            # Remove the extension so we don't accidentally get n0001 files confused
-            run_filename_list = self._full_file_name.split('.')
-            run_filename_list.remove(run_filename_list[-1])
+        # Split down all digits into separate groups
+        run_number_list = re.findall(r"\d+", run_filename)
+        # Filter out any single digit numbers, such as SANS-2-Dxxxx
+        run_number_list = [run_number for run_number in run_number_list if len(run_number) > 1]
 
-            run_filename = "".join(x for x in run_filename_list)
-
-        # This is pretty simplistic and does not handle cases of INST1234-001 which will produce run no. 1234001
-        # however, additional logic can be added if they suddenly change naming conventions
-        run_number = "".join(x for x in run_filename if x.isdigit())
+        # Assume run number is largest value in the list
+        run_number = max(run_number_list) if run_number_list else None
 
         if not run_number:
             run_number = self._get_run_number_from_file(self._full_file_name)
@@ -958,7 +956,7 @@ class SANSFileInformationISISAdded(SANSFileInformation):
         # Setup the facility
         self._facility = get_facility(self._instrument)
 
-        self._date, self._nxs_tagged_run_no = self._get_date_and_run_number_added_nexus(self._full_file_name)
+        self._date, _ = self._get_date_and_run_number_added_nexus(self._full_file_name)
 
         _, number_of_periods, is_event = get_added_nexus_information(self._full_file_name)
         self._number_of_periods = number_of_periods
@@ -1008,7 +1006,8 @@ class SANSFileInformationISISAdded(SANSFileInformation):
         return self._shape
 
     def _get_run_number_from_file(self, file_name):
-        return self._nxs_tagged_run_no
+        _, run_number = self._get_date_and_run_number_added_nexus(file_name)
+        return run_number
 
     @staticmethod
     def _get_date_and_run_number_added_nexus(file_name):
