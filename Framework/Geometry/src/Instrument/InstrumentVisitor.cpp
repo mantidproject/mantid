@@ -363,8 +363,8 @@ size_t InstrumentVisitor::registerDetector(const IDetector &detector) {
   clearLegacyParameters(m_pmap, detector);
 
   /* Note that positions and rotations for detectors are currently
-  NOT stored! These go into DetectorInfo at present. emplace_back works for other
-  Component types because Detectors are always come first in the resultant
+  NOT stored! These go into DetectorInfo at present. emplace_back works for
+  other Component types because Detectors are always come first in the resultant
   component list
   forming a contiguous block.
   */

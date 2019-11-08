@@ -336,8 +336,9 @@ int PDLoadCharacterizations::readFocusInfo(std::ifstream &file,
       break;
     } else if (splitted.size() >= 3) { // specid, L2, theta
       specIds.emplace_back(lexical_cast<int32_t>(splitted[0], filename, linenum,
-                                              "spectrum number"));
-      l2.emplace_back(lexical_cast<double>(splitted[1], filename, linenum, "l2"));
+                                                 "spectrum number"));
+      l2.emplace_back(
+          lexical_cast<double>(splitted[1], filename, linenum, "l2"));
       polar.emplace_back(
           lexical_cast<double>(splitted[2], filename, linenum, "polar"));
       if (splitted.size() >= 4 &&

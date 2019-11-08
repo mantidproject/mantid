@@ -77,7 +77,8 @@ public:
                          "Intensity scaling factor for spectrum " + si);
       } catch (std::invalid_argument &) {
       }
-      m_IntensityScalingIdx.emplace_back(parameterIndex("IntensityScaling" + si));
+      m_IntensityScalingIdx.emplace_back(
+          parameterIndex("IntensityScaling" + si));
     }
   }
   /// Declare the Lambda parameter for susceptibility

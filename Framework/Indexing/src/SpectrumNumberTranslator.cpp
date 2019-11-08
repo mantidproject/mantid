@@ -150,7 +150,8 @@ SpectrumIndexSet SpectrumNumberTranslator::makeIndexSet(
   std::vector<size_t> indices;
   for (const auto &spectrumNumber : spectrumNumbers)
     if (m_spectrumNumberToPartition.at(spectrumNumber) == m_partition)
-      indices.emplace_back(find(m_spectrumNumberToIndex, spectrumNumber)->second);
+      indices.emplace_back(
+          find(m_spectrumNumberToIndex, spectrumNumber)->second);
   return SpectrumIndexSet(indices, m_spectrumNumberToIndex.size());
 }
 

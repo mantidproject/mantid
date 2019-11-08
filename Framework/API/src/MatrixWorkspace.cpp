@@ -1676,7 +1676,7 @@ std::vector<std::unique_ptr<IMDIterator>> MatrixWorkspace::createIterators(
     if (end > numElements)
       end = numElements;
     out.emplace_back(std::make_unique<MatrixWorkspaceMDIterator>(this, function,
-                                                              begin, end));
+                                                                 begin, end));
   }
   return out;
 }

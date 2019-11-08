@@ -1182,7 +1182,8 @@ std::vector<double> TimeSeriesProperty<TYPE>::timesAsVectorSeconds() const {
 
   Types::Core::DateAndTime start = m_values[0].time();
   for (size_t i = 0; i < m_values.size(); i++) {
-    out.emplace_back(DateAndTime::secondsFromDuration(m_values[i].time() - start));
+    out.emplace_back(
+        DateAndTime::secondsFromDuration(m_values[i].time() - start));
   }
 
   return out;

@@ -209,9 +209,9 @@ string OPJFile::findObjectByIndex(int index) {
 void OPJFile::convertSpreadToExcel(int spread) {
   // add new Excel sheet
   EXCEL.emplace_back(excel(SPREADSHEET[spread].name, SPREADSHEET[spread].label,
-                        SPREADSHEET[spread].maxRows,
-                        SPREADSHEET[spread].bHidden,
-                        SPREADSHEET[spread].bLoose));
+                           SPREADSHEET[spread].maxRows,
+                           SPREADSHEET[spread].bHidden,
+                           SPREADSHEET[spread].bLoose));
   for (auto &i : SPREADSHEET[spread].column) {
     string name = i.name;
     int pos = static_cast<int>(name.find_last_of("@"));

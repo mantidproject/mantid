@@ -336,8 +336,8 @@ public:
     // format = startPoint, endPoint, total distance so far
     // forward only intercepts means that start point should be track origin
     expectedResults.emplace_back(Link(V3D(-1, 1.5, 1),
-                                   V3D(sqrt(16 - 0.25) + 1, 1.5, 1.0),
-                                   sqrt(15.75) + 2, *geom_obj));
+                                      V3D(sqrt(16 - 0.25) + 1, 1.5, 1.0),
+                                      sqrt(15.75) + 2, *geom_obj));
 
     checkTrackIntercept(geom_obj, track, expectedResults);
   }
@@ -369,7 +369,8 @@ public:
     std::vector<Link> expectedResults;
     auto geom_obj = createCappedCylinder();
     // format = startPoint, endPoint, total distance so far
-    expectedResults.emplace_back(Link(V3D(0, -3, 0), V3D(0, 3, 0), 13, *geom_obj));
+    expectedResults.emplace_back(
+        Link(V3D(0, -3, 0), V3D(0, 3, 0), 13, *geom_obj));
 
     Track track(V3D(0, -10, 0), V3D(0, 1, 0));
     checkTrackIntercept(geom_obj, track, expectedResults);
@@ -533,7 +534,8 @@ public:
         Link(V3D(-1, 0, 0), V3D(-0.8, 0, 0), 4.2, object1));
     expectedResults.emplace_back(
         Link(V3D(-0.8, 0, 0), V3D(0.8, 0, 0), 5.8, object1));
-    expectedResults.emplace_back(Link(V3D(0.8, 0, 0), V3D(1, 0, 0), 6, object2));
+    expectedResults.emplace_back(
+        Link(V3D(0.8, 0, 0), V3D(1, 0, 0), 6, object2));
     checkTrackIntercept(TL, expectedResults);
   }
 
@@ -566,7 +568,8 @@ public:
         Link(V3D(-1, 0, 0), V3D(-0.4, 0, 0), 4.6, object1));
     expectedResults.emplace_back(
         Link(V3D(-0.4, 0, 0), V3D(0.2, 0, 0), 5.2, object1));
-    expectedResults.emplace_back(Link(V3D(0.2, 0, 0), V3D(1, 0, 0), 6, object2));
+    expectedResults.emplace_back(
+        Link(V3D(0.2, 0, 0), V3D(1, 0, 0), 6, object2));
     checkTrackIntercept(TL, expectedResults);
   }
 

@@ -29,9 +29,9 @@ std::vector<std::string> CatalogSelector::getSelectedCatalogSessions() {
   for (int row = 0; row < m_uiForm.selectedCatalogs->count(); ++row) {
     if (m_uiForm.selectedCatalogs->item(row)->isSelected()) {
       selectedSessions.emplace_back(m_uiForm.selectedCatalogs->item(row)
-                                     ->data(Qt::UserRole)
-                                     .toString()
-                                     .toStdString());
+                                        ->data(Qt::UserRole)
+                                        .toString()
+                                        .toStdString());
     }
   }
   return selectedSessions;

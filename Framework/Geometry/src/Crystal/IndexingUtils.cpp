@@ -2925,7 +2925,7 @@ bool IndexingUtils::GetLatticeParameters(const DblMatrix &UB,
   lattice_par.emplace_back(o_lattice.gamma());
 
   lattice_par.emplace_back(o_lattice.volume()); // keep volume > 0 even if
-                                             // cell is left handed
+                                                // cell is left handed
   return true;
 }
 

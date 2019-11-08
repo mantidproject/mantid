@@ -238,7 +238,7 @@ TMDE(std::vector<coord_t> MDEventWorkspace)::estimateResolution() const {
     Geometry::IMDDimension_const_sptr dim = this->getDimension(d);
     // Calculate the bin size at the smallest split amount
     out.emplace_back((dim->getMaximum() - dim->getMinimum()) /
-                  static_cast<coord_t>(finestSplit));
+                     static_cast<coord_t>(finestSplit));
   }
   return out;
 }
@@ -278,7 +278,8 @@ TMDE(std::vector<std::unique_ptr<Mantid::API::IMDIterator>>
     size_t end = ((i + 1) * numElements) / numCores;
     if (end > numElements)
       end = numElements;
-    out.emplace_back(std::make_unique<MDBoxIterator<MDE, nd>>(boxes, begin, end));
+    out.emplace_back(
+        std::make_unique<MDBoxIterator<MDE, nd>>(boxes, begin, end));
   }
   return out;
 }

@@ -1146,7 +1146,7 @@ API::MatrixWorkspace_sptr PDCalibration::calculateResolutionTable() {
       const double pos = m_peakPositionTable->Double(rowIndex, peakIndex);
       if (std::isnormal(pos)) {
         resolution.emplace_back(m_peakWidthTable->Double(rowIndex, peakIndex) /
-                             pos);
+                                pos);
       }
     }
 

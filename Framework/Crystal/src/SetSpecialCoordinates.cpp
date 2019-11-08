@@ -43,7 +43,8 @@ const std::string SetSpecialCoordinates::HKLOption() {
  */
 SetSpecialCoordinates::SetSpecialCoordinates() {
   m_specialCoordinatesNames.emplace_back(SetSpecialCoordinates::QLabOption());
-  m_specialCoordinatesNames.emplace_back(SetSpecialCoordinates::QSampleOption());
+  m_specialCoordinatesNames.emplace_back(
+      SetSpecialCoordinates::QSampleOption());
   m_specialCoordinatesNames.emplace_back(SetSpecialCoordinates::HKLOption());
 
   m_specialCoordinatesMap.emplace(SetSpecialCoordinates::QLabOption(),

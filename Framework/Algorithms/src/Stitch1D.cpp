@@ -297,7 +297,8 @@ std::vector<double> Stitch1D::getRebinParams(MatrixWorkspace_const_sptr &lhsWS,
     if (inputParams.size() == 1) {
       std::vector<double> calculatedParams;
       calculatedParams.emplace_back(minLHSX);
-      calculatedParams.emplace_back(inputParams.front()); // Use the step supplied.
+      calculatedParams.emplace_back(
+          inputParams.front()); // Use the step supplied.
       calculatedParams.emplace_back(maxRHSX);
       result = calculatedParams;
     } else {

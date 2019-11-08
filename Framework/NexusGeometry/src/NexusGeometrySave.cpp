@@ -1075,8 +1075,9 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
         if (reporter != nullptr)
           reporter->report();
         writer.detector(instrument, compInfo, detIds, index);
-        saved_indices.emplace_back(index); // Now record the fact that children of
-                                        // this are not needed as NXdetectors
+        saved_indices.emplace_back(
+            index); // Now record the fact that children of
+                    // this are not needed as NXdetectors
       }
     }
   }
@@ -1175,8 +1176,9 @@ void saveInstrument(const Mantid::API::MatrixWorkspace &ws,
         if (reporter != nullptr)
           reporter->report();
         writer.detector(instrument, compInfo, detIds, index, mappings);
-        saved_indices.emplace_back(index); // Now record the fact that children of
-                                        // this are not needed as NXdetectors
+        saved_indices.emplace_back(
+            index); // Now record the fact that children of
+                    // this are not needed as NXdetectors
       }
     }
   }

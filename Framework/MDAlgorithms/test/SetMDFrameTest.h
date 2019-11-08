@@ -109,8 +109,10 @@ public:
     // Arrange
     const size_t numberOfDimensions = 2;
     std::vector<Mantid::Geometry::MDFrame_sptr> frames;
-    frames.emplace_back(std::make_shared<Mantid::Geometry::UnknownFrame>("test"));
-    frames.emplace_back(std::make_shared<Mantid::Geometry::UnknownFrame>("test"));
+    frames.emplace_back(
+        std::make_shared<Mantid::Geometry::UnknownFrame>("test"));
+    frames.emplace_back(
+        std::make_shared<Mantid::Geometry::UnknownFrame>("test"));
     auto inputWorkspace =
         Mantid::DataObjects::MDEventsTestHelper::makeMDEWWithIndividualFrames<
             numberOfDimensions>(5, -2, 2, frames, 3);

@@ -385,8 +385,10 @@ public:
     V3D samplePosition = V3D(0.0, 0.0, 0.0);
 
     std::vector<double> guideLogDetails;
-    guideLogDetails.emplace_back(guideCutoff - 10); // Guide 1 -- Is flipped here
-    guideLogDetails.emplace_back(guideCutoff + 10); // Guide 2 -- Is flipped here
+    guideLogDetails.emplace_back(guideCutoff -
+                                 10); // Guide 1 -- Is flipped here
+    guideLogDetails.emplace_back(guideCutoff +
+                                 10); // Guide 2 -- Is flipped here
     guideLogDetails.emplace_back(guideCutoff + 10); // Guide 3
     guideLogDetails.emplace_back(guideCutoff - 10); // Guide 4
     guideLogDetails.emplace_back(guideCutoff + 10); // Guide 5
@@ -418,10 +420,14 @@ public:
     V3D samplePosition = V3D(0.0, 0.0, 0.0);
 
     std::vector<double> guideLogDetails;
-    guideLogDetails.emplace_back(guideCutoff - 10); // Guide 1 -- Is flipped here
-    guideLogDetails.emplace_back(guideCutoff + 10); // Guide 2 -- Is flipped here
-    guideLogDetails.emplace_back(guideCutoff - 10); // Guide 3 -- Is flipped here
-    guideLogDetails.emplace_back(guideCutoff + 10); // Guide 4 -- Is flipped here
+    guideLogDetails.emplace_back(guideCutoff -
+                                 10); // Guide 1 -- Is flipped here
+    guideLogDetails.emplace_back(guideCutoff +
+                                 10); // Guide 2 -- Is flipped here
+    guideLogDetails.emplace_back(guideCutoff -
+                                 10); // Guide 3 -- Is flipped here
+    guideLogDetails.emplace_back(guideCutoff +
+                                 10); // Guide 4 -- Is flipped here
     guideLogDetails.emplace_back(guideCutoff + 10); // Guide 5
 
     auto testWorkspace = createTestWorkspace(

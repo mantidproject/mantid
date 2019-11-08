@@ -38,7 +38,7 @@ GeneralDomainCreator::GeneralDomainCreator(
     m_domainColumnNames.emplace_back("ArgumentColumn");
     for (size_t i = 1; i < nDomainColumns; ++i) {
       m_domainColumnNames.emplace_back(m_domainColumnNames.front() + "_" +
-                                    std::to_string(i));
+                                       std::to_string(i));
     }
   }
 

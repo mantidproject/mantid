@@ -72,8 +72,9 @@ void MagFormFactorCorrection::exec() {
       if (isHist || iax > 0) {
         int64_t nQ = QAxis->length() - 1;
         for (int64_t iQ = 0; iQ < nQ; iQ++) {
-          Qvals.emplace_back(0.5 * (QAxis->getValue(static_cast<size_t>(iQ)) +
-                                 QAxis->getValue(static_cast<size_t>(iQ + 1))));
+          Qvals.emplace_back(0.5 *
+                             (QAxis->getValue(static_cast<size_t>(iQ)) +
+                              QAxis->getValue(static_cast<size_t>(iQ + 1))));
         }
       } else {
         int64_t nQ = QAxis->length();

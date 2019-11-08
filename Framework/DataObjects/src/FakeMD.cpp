@@ -188,7 +188,8 @@ void FakeMD::addFakeUniformData(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       double delta0 = std::pow(dV, 1. / double(nd));
       for (size_t d = 0; d < nd; ++d) {
         double min = ws->getDimension(d)->getMinimum();
-        m_uniformParams.emplace_back(min * (1 + FLT_EPSILON) - min + FLT_EPSILON);
+        m_uniformParams.emplace_back(min * (1 + FLT_EPSILON) - min +
+                                     FLT_EPSILON);
         double extent = ws->getDimension(d)->getMaximum() - min;
         auto nStrides = size_t(extent / delta0);
         if (nStrides < 1)

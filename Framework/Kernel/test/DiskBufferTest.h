@@ -261,7 +261,8 @@ public:
     std::vector<ISaveable *> bigData;
     bigData.reserve(bigNum);
     for (size_t i = 0; i < bigNum; i++)
-      bigData.emplace_back(new SaveableTesterWithFile(2 * i, 2, char(i + 0x41)));
+      bigData.emplace_back(
+          new SaveableTesterWithFile(2 * i, 2, char(i + 0x41)));
 
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < int(bigNum); i++) {

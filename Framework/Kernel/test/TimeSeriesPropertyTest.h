@@ -634,7 +634,7 @@ public:
     // Test a filter that's fully within the range of both properties
     TimeSplitterType filter;
     filter.emplace_back(SplittingInterval(DateAndTime("2007-11-30T16:17:05"),
-                                       DateAndTime("2007-11-30T16:17:29")));
+                                          DateAndTime("2007-11-30T16:17:29")));
     TS_ASSERT_DELTA(dblLog->averageValueInFilter(filter), 7.308, 0.001);
     TS_ASSERT_DELTA(intLog->averageValueInFilter(filter), 2.167, 0.001);
 
@@ -656,7 +656,7 @@ public:
     filter[0] = SplittingInterval(DateAndTime("2007-11-30T16:17:05"),
                                   DateAndTime("2007-11-30T16:17:15"));
     filter.emplace_back(SplittingInterval(DateAndTime("2007-11-30T16:17:25"),
-                                       DateAndTime("2007-11-30T16:17:45")));
+                                          DateAndTime("2007-11-30T16:17:45")));
     TS_ASSERT_DELTA(dblLog->averageValueInFilter(filter), 9.123, 0.001);
     TS_ASSERT_DELTA(intLog->averageValueInFilter(filter), 3.167, 0.001);
 
@@ -1785,10 +1785,14 @@ public:
 
     if (tmap.size() == 4) {
       std::vector<Mantid::Types::Core::DateAndTime> times;
-      times.emplace_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:00"));
-      times.emplace_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
-      times.emplace_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:20"));
-      times.emplace_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:30"));
+      times.emplace_back(
+          Mantid::Types::Core::DateAndTime("2007-11-30T16:17:00"));
+      times.emplace_back(
+          Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
+      times.emplace_back(
+          Mantid::Types::Core::DateAndTime("2007-11-30T16:17:20"));
+      times.emplace_back(
+          Mantid::Types::Core::DateAndTime("2007-11-30T16:17:30"));
       std::vector<double> values;
       values.emplace_back(1.00);
       values.emplace_back(2.00);

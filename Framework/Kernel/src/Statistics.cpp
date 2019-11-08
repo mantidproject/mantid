@@ -147,7 +147,7 @@ std::vector<double> getWeightedZscore(const vector<TYPE> &data,
   }
   for (auto it = data.cbegin(); it != data.cend(); ++it) {
     Zscore.emplace_back(fabs((static_cast<double>(*it) - weightedMean) /
-                          std::sqrt(weightedVariance)));
+                             std::sqrt(weightedVariance)));
   }
   return Zscore;
 }

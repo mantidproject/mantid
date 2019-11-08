@@ -294,7 +294,7 @@ void MWView::spawnWellcomeWorkspace() {
       for (int j = 0; j < numberSpectra; j++) {
         dataX.emplace_back(j * 1.);
         dataY.emplace_back(intensity * (i * i + j * j) /
-                        (2 * numberSpectra * numberSpectra));
+                           (2 * numberSpectra * numberSpectra));
       }
     }
     auto createWsAlg =

@@ -612,10 +612,10 @@ std::vector<int64_t> MDHistoWorkspaceIterator::createPermutations(
       size_t nEntries = permutationsVertexTouching.size();
       for (int k = 1; k <= widths[j] / 2; ++k) {
         for (size_t m = 0; m < nEntries; m++) {
-          permutationsVertexTouching.emplace_back((offset * k) +
-                                               permutationsVertexTouching[m]);
-          permutationsVertexTouching.emplace_back((offset * k * (-1)) +
-                                               permutationsVertexTouching[m]);
+          permutationsVertexTouching.emplace_back(
+              (offset * k) + permutationsVertexTouching[m]);
+          permutationsVertexTouching.emplace_back(
+              (offset * k * (-1)) + permutationsVertexTouching[m]);
         }
       }
     }

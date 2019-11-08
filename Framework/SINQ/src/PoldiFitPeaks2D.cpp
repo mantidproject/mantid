@@ -326,7 +326,8 @@ std::vector<PoldiPeakCollection_sptr> PoldiFitPeaks2D::getCountPeakCollections(
       PoldiPeakCollection_sptr normalizedPeaks =
           getPeakCollectionFromFunction(localFunction);
 
-      countPeakCollections.emplace_back(getCountPeakCollection(normalizedPeaks));
+      countPeakCollections.emplace_back(
+          getCountPeakCollection(normalizedPeaks));
     } catch (const std::invalid_argument &) {
       // not a Poldi2DFunction - skip (the background functions)
     }

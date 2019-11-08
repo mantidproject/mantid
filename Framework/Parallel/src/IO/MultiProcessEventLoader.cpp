@@ -136,11 +136,13 @@ void MultiProcessEventLoader::load(
           i < m_numProcesses - 1 ? evPerPr * (i + 1) : numEvents;
       std::vector<std::string> processArgs;
 
-      processArgs.emplace_back(m_segmentNames[i]);           // segment name
-      processArgs.emplace_back(m_storageName);               // storage name
-      processArgs.emplace_back(std::to_string(i));           // proc id
-      processArgs.emplace_back(std::to_string(evPerPr * i)); // first event to load
-      processArgs.emplace_back(std::to_string(upperBound));  // upper bound to load
+      processArgs.emplace_back(m_segmentNames[i]); // segment name
+      processArgs.emplace_back(m_storageName);     // storage name
+      processArgs.emplace_back(std::to_string(i)); // proc id
+      processArgs.emplace_back(
+          std::to_string(evPerPr * i)); // first event to load
+      processArgs.emplace_back(
+          std::to_string(upperBound)); // upper bound to load
       processArgs.emplace_back(std::to_string(m_numPixels)); // pixel count
       processArgs.emplace_back(std::to_string(storageSize)); // memory size
       processArgs.emplace_back(filename);                    // nexus file name

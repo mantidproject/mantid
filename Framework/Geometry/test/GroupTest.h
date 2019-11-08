@@ -40,7 +40,8 @@ public:
 
   void testConstructor() {
     std::vector<SymmetryOperation> symOps;
-    symOps.emplace_back(SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
+    symOps.emplace_back(
+        SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
     symOps.emplace_back(
         SymmetryOperationFactory::Instance().createSymOp("-x,-y,-z"));
 
@@ -57,7 +58,8 @@ public:
 
   void testCopyConstructor() {
     std::vector<SymmetryOperation> symOps;
-    symOps.emplace_back(SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
+    symOps.emplace_back(
+        SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
     symOps.emplace_back(
         SymmetryOperationFactory::Instance().createSymOp("-x,-y,-z"));
 
@@ -71,7 +73,8 @@ public:
 
   void testAssignmentOperator() {
     std::vector<SymmetryOperation> symOps;
-    symOps.emplace_back(SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
+    symOps.emplace_back(
+        SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
     symOps.emplace_back(
         SymmetryOperationFactory::Instance().createSymOp("-x,-y,-z"));
 
@@ -94,7 +97,8 @@ public:
 
     // Making a group of two operations gives order 2
     std::vector<SymmetryOperation> symOps;
-    symOps.emplace_back(SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
+    symOps.emplace_back(
+        SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
     symOps.emplace_back(
         SymmetryOperationFactory::Instance().createSymOp("-x,-y,-z"));
 
@@ -116,7 +120,8 @@ public:
 
   void testComparison() {
     std::vector<SymmetryOperation> symOps;
-    symOps.emplace_back(SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
+    symOps.emplace_back(
+        SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
     symOps.emplace_back(
         SymmetryOperationFactory::Instance().createSymOp("-x,-y,-z"));
 

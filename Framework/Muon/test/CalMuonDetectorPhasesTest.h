@@ -151,10 +151,10 @@ private:
         double e = exp(-x / tau);
         X.emplace_back(x);
         Y.emplace_back(a *
-                        sin(w * x + static_cast<double>(s) * M_PI /
-                                        static_cast<double>(nspec)) *
-                        e +
-                    e);
+                           sin(w * x + static_cast<double>(s) * M_PI /
+                                           static_cast<double>(nspec)) *
+                           e +
+                       e);
         E.emplace_back(0.005);
       }
     }

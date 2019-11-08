@@ -68,8 +68,8 @@ public:
         containingAny.emplace_back(cluster);
       } else {
         containingNone.emplace_back(cluster); // Current iterated set contains
-                                           // NEITHER of these labels. It can
-                                           // therfore be ignored.
+                                              // NEITHER of these labels. It can
+                                              // therfore be ignored.
       }
     }
     // ------------ Process equivalent sets

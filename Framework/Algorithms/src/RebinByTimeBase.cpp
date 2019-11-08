@@ -98,7 +98,8 @@ void RebinByTimeBase::exec() {
         static_cast<double>(startTime.totalNanoseconds()));
     tStep = inParams[1] * nanoSecondsInASecond;
     rebinningParams.emplace_back(tStep);
-    rebinningParams.emplace_back(static_cast<double>(endTime.totalNanoseconds()));
+    rebinningParams.emplace_back(
+        static_cast<double>(endTime.totalNanoseconds()));
   } else if (inParams.size() == 1) {
     const uint64_t xmin = getMinX(inWS);
     const uint64_t xmax = getMaxX(inWS);

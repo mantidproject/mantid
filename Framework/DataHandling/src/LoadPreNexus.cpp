@@ -281,11 +281,11 @@ void LoadPreNexus::runLoadNexusLogs(const string &runinfo,
   // put together a list of possible locations
   vector<string> possibilities;
   possibilities.emplace_back(dataDir + shortName +
-                          "_event.nxs"); // next to runinfo
+                             "_event.nxs"); // next to runinfo
   possibilities.emplace_back(dataDir + shortName + "_histo.nxs");
   possibilities.emplace_back(dataDir + shortName + ".nxs");
   possibilities.emplace_back(dataDir + "../NeXus/" + shortName +
-                          "_event.nxs"); // in NeXus directory
+                             "_event.nxs"); // in NeXus directory
   possibilities.emplace_back(dataDir + "../NeXus/" + shortName + "_histo.nxs");
   possibilities.emplace_back(dataDir + "../NeXus/" + shortName + ".nxs");
 

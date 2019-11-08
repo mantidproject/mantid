@@ -83,8 +83,8 @@ PoldiPeakSearch::getNeighborSums(const HistogramY &correlationCounts) const {
   for (std::vector<size_t>::const_iterator index = validIndices.begin();
        index != validIndices.end(); ++index) {
     summedNeighborCounts.emplace_back(correlationCounts[(*index) - 1] +
-                                   correlationCounts[*index] +
-                                   correlationCounts[(*index) + 1]);
+                                      correlationCounts[*index] +
+                                      correlationCounts[(*index) + 1]);
   }
 
   return summedNeighborCounts;

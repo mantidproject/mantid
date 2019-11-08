@@ -387,7 +387,8 @@ void NexusFileIO::writeNumericTimeLog(
       t0 = time; // start time of log
       first = false;
     }
-    times.emplace_back(Types::Core::DateAndTime::secondsFromDuration(time - t0));
+    times.emplace_back(
+        Types::Core::DateAndTime::secondsFromDuration(time - t0));
   }
   // create log
   status = NXmakegroup(fileID, logName.c_str(), "NXlog");

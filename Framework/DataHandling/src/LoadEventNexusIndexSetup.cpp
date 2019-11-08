@@ -186,7 +186,8 @@ LoadEventNexusIndexSetup::filterIndexInfo(const IndexInfo &indexInfo) {
     const auto indices = indexInfo.makeIndexSet(
         static_cast<SpectrumNumber>(m_min), static_cast<SpectrumNumber>(m_max));
     for (const auto index : indices)
-      m_range.emplace_back(static_cast<int32_t>(indexInfo.spectrumNumber(index)));
+      m_range.emplace_back(
+          static_cast<int32_t>(indexInfo.spectrumNumber(index)));
   }
   // Check if SpectrumList was supplied (or filled via min/max above)
   if (!m_range.empty()) {

@@ -800,7 +800,7 @@ TMDE(void MDBox)::buildAndAddEvent(const signal_t Signal,
                                    uint16_t runIndex, uint32_t detectorId) {
   std::lock_guard<std::mutex> _lock(this->m_dataMutex);
   this->data.emplace_back(IF<MDE, nd>::BUILD_EVENT(Signal, errorSq, &point[0],
-                                                runIndex, detectorId));
+                                                   runIndex, detectorId));
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -820,7 +820,7 @@ TMDE(void MDBox)::buildAndAddEventUnsafe(const signal_t Signal,
                                          uint16_t runIndex,
                                          uint32_t detectorId) {
   this->data.emplace_back(IF<MDE, nd>::BUILD_EVENT(Signal, errorSq, &point[0],
-                                                runIndex, detectorId));
+                                                   runIndex, detectorId));
 }
 
 //-----------------------------------------------------------------------------------------------

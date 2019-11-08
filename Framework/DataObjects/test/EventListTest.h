@@ -1056,9 +1056,10 @@ public:
      */
     for (int time_at_sample = 100; time_at_sample < MAX_TOF;
          time_at_sample += BIN_DELTA) {
-      shared_x.emplace_back(time_at_sample * 1e3); // Have x-axis in nanoseconds.
-                                                // Tof values are stored as
-                                                // microseconds.
+      shared_x.emplace_back(time_at_sample *
+                            1e3); // Have x-axis in nanoseconds.
+                                  // Tof values are stored as
+                                  // microseconds.
     }
 
     el.setX(make_cow<HistogramX>(shared_x));
@@ -1849,9 +1850,11 @@ public:
     for (int i = 1; i < 10; i++) {
       // Reject the odd hundreds pulse times (100-199, 300-399, etc).
       if ((i % 2) == 0)
-        split.emplace_back(SplittingInterval(i * 1000000, (i + 1) * 1000000, i));
+        split.emplace_back(
+            SplittingInterval(i * 1000000, (i + 1) * 1000000, i));
       else
-        split.emplace_back(SplittingInterval(i * 1000000, (i + 1) * 1000000, -1));
+        split.emplace_back(
+            SplittingInterval(i * 1000000, (i + 1) * 1000000, -1));
     }
 
     // Do the splitting

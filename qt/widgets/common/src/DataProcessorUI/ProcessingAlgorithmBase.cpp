@@ -47,7 +47,8 @@ void ProcessingAlgorithmBase::countWsProperties() {
     if (prop->direction() == Mantid::Kernel::Direction::Input &&
         prop->type() == "str list") {
 
-      m_inputStrListProperties.emplace_back(QString::fromStdString(prop->name()));
+      m_inputStrListProperties.emplace_back(
+          QString::fromStdString(prop->name()));
     }
     if (prop->direction() == Mantid::Kernel::Direction::Output &&
         (prop->type() == "MatrixWorkspace" || prop->type() == "Workspace")) {

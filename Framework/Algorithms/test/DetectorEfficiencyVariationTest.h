@@ -141,7 +141,7 @@ public:
         // there is going to be a small difference between the workspaces that
         // will vary with histogram number
         forInputB.emplace_back(forInputA.back() *
-                            (1 + m_ramp * (j - (Nhist / 2))));
+                               (1 + m_ramp * (j - (Nhist / 2))));
       }
       // insert a particularly large value to pick up later
       m_LargeValue = 3.1;

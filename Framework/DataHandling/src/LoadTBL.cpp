@@ -154,9 +154,10 @@ void LoadTBL::csvParse(std::string line, std::vector<std::string> &cols,
       if (pairID < quoteBounds.size() && pos > quoteBounds.at(pairID).at(0)) {
         if (pos > quoteBounds.at(pairID).at(1)) {
           // use the quote indexes to get the substring
-          cols.emplace_back(line.substr(quoteBounds.at(pairID).at(0) + 1,
-                                     quoteBounds.at(pairID).at(1) -
-                                         (quoteBounds.at(pairID).at(0) + 1)));
+          cols.emplace_back(
+              line.substr(quoteBounds.at(pairID).at(0) + 1,
+                          quoteBounds.at(pairID).at(1) -
+                              (quoteBounds.at(pairID).at(0) + 1)));
           ++pairID;
         }
       } else {

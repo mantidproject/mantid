@@ -240,7 +240,8 @@ PoldiIndexKnownCompounds::getPeakCollections(
           "Can only construct PoldiPeakCollection from a TableWorkspace.");
     }
 
-    peakCollections.emplace_back(boost::make_shared<PoldiPeakCollection>(tableWs));
+    peakCollections.emplace_back(
+        boost::make_shared<PoldiPeakCollection>(tableWs));
   }
 
   return peakCollections;

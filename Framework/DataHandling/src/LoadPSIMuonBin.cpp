@@ -393,7 +393,8 @@ void LoadPSIMuonBin::generateUnknownAxis() {
   // Create a x axis, assumption that m_histograms will all be the same size,
   // and that x will be 1 more in size than y
   for (auto xIndex = 0u; xIndex <= m_histograms[0].size(); ++xIndex) {
-    m_xAxis.emplace_back(static_cast<double>(xIndex) * m_header.histogramBinWidth);
+    m_xAxis.emplace_back(static_cast<double>(xIndex) *
+                         m_header.histogramBinWidth);
   }
 
   // Create Errors
