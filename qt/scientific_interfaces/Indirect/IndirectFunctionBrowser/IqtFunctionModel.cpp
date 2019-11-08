@@ -631,10 +631,14 @@ void IqtFunctionModel::estimateStretchExpParameters() {
 void IqtFunctionModel::estimateExpParameters() {
   auto const heightName1 = getParameterName(ParamID::EXP1_HEIGHT);
   auto const lifeTimeName1 = getParameterName(ParamID::EXP1_LIFETIME);
-  if (!heightName1 || !lifeTimeName1)
-    return;
   auto const heightName2 = getParameterName(ParamID::EXP2_HEIGHT);
   auto const lifeTimeName2 = getParameterName(ParamID::EXP2_LIFETIME);
+  if (!heightName1 || !lifeTimeName1)
+    return;
+  if (m_numberOfExponentials > 1) {
+    if (!heightName2 || !lifeTimeName2)
+      return;
+  }
   assert(getNumberDomains() == m_estimationData.size());
   for (auto i = 0; i < getNumberDomains(); ++i) {
     // estimate first exp
@@ -648,7 +652,7 @@ void IqtFunctionModel::estimateExpParameters() {
     setLocalParameterValue(*lifeTimeName1, i, lifeTime);
     if (m_numberOfExponentials > 1) {
       // arbitrarily initialise small additional exp with 10% of amplitude and
-      // double the lifetime (if the lifetime is too short it will corelate
+      // double the lifetime (if the lifetime is too short it will correlate
       // with any constant background.
       setLocalParameterValue(*heightName2, i, 0.1 * height);
       setLocalParameterValue(*lifeTimeName2, i, 2 * lifeTime);
