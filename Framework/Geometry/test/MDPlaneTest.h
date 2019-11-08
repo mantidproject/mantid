@@ -211,20 +211,20 @@ public:
     MDPlane p1(2, normal1, point1);
     std::vector<coord_t> point;
     point.clear();
-    point.emplace_back(4.0);
-    point.emplace_back(12.0);
+    point.emplace_back(4.0f);
+    point.emplace_back(12.0f);
     TS_ASSERT(p1.isPointBounded(point));
 
     point.clear();
-    point.emplace_back(5.0);
-    point.emplace_back(-5.0);
+    point.emplace_back(5.0f);
+    point.emplace_back(-5.0f);
     TSM_ASSERT("Point should be found to be bounded by "
                "plane, it lies exactly on the plane",
                p1.isPointBounded(point));
 
     point.clear();
-    point.emplace_back(6.0);
-    point.emplace_back(-5.0);
+    point.emplace_back(6.0f);
+    point.emplace_back(-5.0f);
     TS_ASSERT(!p1.isPointBounded(point));
   }
 
@@ -235,15 +235,15 @@ public:
     MDPlane p1(2, normal1, point1);
     std::vector<coord_t> point;
     point.clear();
-    point.emplace_back(4.0);
-    point.emplace_back(12.0);
+    point.emplace_back(4.0f);
+    point.emplace_back(12.0f);
     TSM_ASSERT("Point should be found to be inside region bounded by plane",
                p1.isPointInside(point));
 
     // Point lies on the plane, not inside it
     point.clear();
-    point.emplace_back(5.0);
-    point.emplace_back(-5.0);
+    point.emplace_back(5.0f);
+    point.emplace_back(-5.0f);
     TSM_ASSERT("Point should not be found to be inside region bounded by "
                "plane, it lies exactly on the plane",
                !p1.isPointInside(point));

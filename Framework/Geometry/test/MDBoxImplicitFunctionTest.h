@@ -43,11 +43,11 @@ public:
   /** Make a box from 1,1 - 2,2 */
   void test_2D() {
     std::vector<coord_t> min;
-    min.emplace_back(1.0);
-    min.emplace_back(1.0);
+    min.emplace_back(1.0f);
+    min.emplace_back(1.0f);
     std::vector<coord_t> max;
-    max.emplace_back(2.0);
-    max.emplace_back(2.0);
+    max.emplace_back(2.0f);
+    max.emplace_back(2.0f);
     MDBoxImplicitFunction f(min, max);
     TS_ASSERT(try2Dpoint(f, 1.5, 1.5));
     TS_ASSERT(!try2Dpoint(f, 0.9, 1.5));
@@ -58,12 +58,12 @@ public:
 
   void test_volume() {
     std::vector<coord_t> min, max;
-    min.emplace_back(0);
-    min.emplace_back(0);
-    min.emplace_back(0);
-    max.emplace_back(1);
-    max.emplace_back(2);
-    max.emplace_back(3);
+    min.emplace_back(0.f);
+    min.emplace_back(0.f);
+    min.emplace_back(0.f);
+    max.emplace_back(1.f);
+    max.emplace_back(2.f);
+    max.emplace_back(3.f);
     MDBoxImplicitFunction box(min, max);
     TS_ASSERT_EQUALS(1 * 2 * 3, box.volume());
   }
