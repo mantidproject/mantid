@@ -26,11 +26,11 @@ public:
                                MDPlane test(normal, point));
     normal.emplace_back(1.234f);
     normal.emplace_back(4.56f);
-    point.emplace_back(0);
+    point.emplace_back(0.f);
     TSM_ASSERT_THROWS_ANYTHING(
         "Mismatched dimensions in normal/point are not allowed.",
         MDPlane test(normal, point));
-    point.emplace_back(0);
+    point.emplace_back(0.f);
     MDPlane p(normal, point);
     TS_ASSERT_EQUALS(p.getNumDims(), 2);
     TS_ASSERT_DELTA(p.getNormal()[0], 1.234, 1e-5);

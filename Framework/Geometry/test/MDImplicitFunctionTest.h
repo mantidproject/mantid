@@ -81,8 +81,8 @@ public:
     // These points will be blocked by adding the second plane
     std::vector<coord_t> point;
     point.clear();
-    point.emplace_back(-1);
-    point.emplace_back(-2);
+    point.emplace_back(-1.f);
+    point.emplace_back(-2.f);
     TS_ASSERT(f.isPointContained(point));
 
     point.clear();
