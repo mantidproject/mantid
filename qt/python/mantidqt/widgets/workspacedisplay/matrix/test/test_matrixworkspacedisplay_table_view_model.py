@@ -15,7 +15,7 @@ import qtpy
 from qtpy import QtCore
 from qtpy.QtCore import Qt
 
-from mantid.py3compat.mock import Mock, call
+from mantid.py3compat.mock import MagicMock, Mock, call
 from mantidqt.utils.testing.mocks.mock_mantid import AXIS_INDEX_FOR_HORIZONTAL, AXIS_INDEX_FOR_VERTICAL, MockMantidAxis, \
     MockMantidSymbol, MockMantidUnit, MockSpectrum, MockWorkspace
 from mantidqt.utils.testing.mocks.mock_qt import MockQModelIndex
@@ -364,7 +364,7 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
         mock_section = 0
         output = model.headerData(mock_section, Qt.Vertical, Qt.DisplayRole)
 
-        ws.getAxis.assert_called_once_with(AXIS_INDEX_FOR_VERTICAL)
+        ws.getAxis.assert_called_with(AXIS_INDEX_FOR_VERTICAL)
         ws.mock_axis.label.assert_called_once_with(mock_section)
 
         expected_output = MatrixWorkspaceTableViewModel.VERTICAL_HEADER_DISPLAY_STRING.format(mock_section,
@@ -384,6 +384,48 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
 
         expected_output = MatrixWorkspaceTableViewModel.VERTICAL_HEADER_TOOLTIP_STRING.format(mock_section,
                                                                                               MockSpectrum.SPECTRUM_NO)
+        self.assertEqual(expected_output, output)
+
+    def test_headerData_vertical_header_display_for_numeric_axis(self):
+        dummy_unit = 'unit'
+        bin_center = 0.5
+        ws = MockWorkspace()
+        mock_axis = Mock()
+        mock_axis.isNumeric.return_value = True
+        mock_axis.label = MagicMock(side_effect=lambda x: x)
+        mock_axis.getUnit().symbol().utf8.return_value = dummy_unit
+        ws.getAxis.return_value = mock_axis
+
+        model_type = MatrixWorkspaceTableViewModelType.y
+        model = MatrixWorkspaceTableViewModel(ws, model_type)
+        mock_section = 0
+        output = model.headerData(mock_section, Qt.Vertical, Qt.DisplayRole)
+
+        expected_output = MatrixWorkspaceTableViewModel.VERTICAL_HEADER_DISPLAY_STRING_FOR_NUMERIC_AXIS.format(
+            mock_section,
+            bin_center,
+            dummy_unit)
+        self.assertEqual(expected_output, output)
+
+    def test_headerData_vertical_header_tooltip_for_numeric_axis(self):
+        dummy_unit = 'unit'
+        bin_center = 0.5
+        ws = MockWorkspace()
+        mock_axis = Mock()
+        mock_axis.isNumeric.return_value = True
+        mock_axis.label = MagicMock(side_effect=lambda x: x)
+        mock_axis.getUnit().symbol().utf8.return_value = dummy_unit
+        ws.getAxis.return_value = mock_axis
+
+        model_type = MatrixWorkspaceTableViewModelType.y
+        model = MatrixWorkspaceTableViewModel(ws, model_type)
+        mock_section = 0
+        output = model.headerData(mock_section, Qt.Vertical, Qt.ToolTipRole)
+
+        expected_output = MatrixWorkspaceTableViewModel.VERTICAL_HEADER_TOOLTIP_STRING_FOR_NUMERIC_AXIS.format(
+            mock_section,
+            bin_center,
+            dummy_unit)
         self.assertEqual(expected_output, output)
 
     def test_headerData_horizontal_header_display_role_for_X_values(self):
