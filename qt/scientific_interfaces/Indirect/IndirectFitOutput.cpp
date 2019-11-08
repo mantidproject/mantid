@@ -217,6 +217,65 @@ void renameResult(WorkspaceGroup_sptr resultWorkspace,
     renameResultWithoutSpectra(resultWorkspace, fitDataBegin, fitDataEnd);
 }
 
+//std::vector<std::string> strsplit(const std::string &string_in,
+//                                  const std::string &delim) {
+//  std::vector<std::string> out;
+//  size_t last = 0;
+//  size_t next = 0;
+//  std::string token;
+//  while ((next = string_in.find(delim, last)) != std::string::npos) {
+//    out.push_back(string_in.substr(last, next - last));
+//    last = next + 1;
+//  }
+//  out.push_back(string_in.substr(last, std::string::npos));
+//  return out;
+//}
+//
+//std::vector<std::string> srange(const std::string &string_in) {
+//
+//  std::vector<std::string> limits = strsplit(string_in, "-");
+//  if (limits.size() == 1) {
+//    return limits;
+//  } else {
+//    std::vector<std::string> out;
+//    for (int i = boost::lexical_cast<int>(limits[0]);
+//         i != boost::lexical_cast<int>(limits[1]) + 1; ++i) {
+//      out.push_back(boost::lexical_cast<std::string>(i));
+//    }
+//    return out;
+//  }
+//}
+
+//void renameFitWorkspace(WorkspaceGroup_sptr resultGroup,
+//                        WorkspaceGroup_sptr resultWorkspace) {
+//  // rename the fit data workspaces using result workspace names
+//  std::size_t indexWS = 0; // index of fit workspace in resultGroup
+//  auto numel = static_cast<std::size_t>(resultWorkspace->size());
+//  for (std::size_t index = 0; index != numel; ++index) {
+//    auto ws = resultWorkspace->getItem(index);
+//    std::string name = ws->getName();
+//    // extract relevent parts of the name
+//    std::vector<std::string> nameParts = strsplit(name, "_iqt");
+//    std::string runstr = nameParts[0];
+//    std::size_t istart = nameParts[1].rfind("_s");
+//    std::size_t iend = nameParts[1].rfind("_R");
+//    std::string specstr = nameParts[1].substr(istart + 2, iend - 5);
+//    // get all spectra included in fit from that file
+//    std::vector<std::string> ranges = strsplit(specstr, "+");
+//    for (std::size_t irange = 0; irange != ranges.size(); irange++) {
+//      // specstr[irange] is a string that defines a range e.g "1-4"
+//      std::vector<std::string> spec = srange(ranges[irange]);
+//      // loop over spec and rename corresponding workspace
+//      for (std::size_t ispec = 0; ispec != spec.size(); ispec++) {
+//        std::string currentName = (resultGroup->getItem(indexWS))->getName();
+//        std::string newName = runstr + "_s" + spec[ispec] + "_Workspace";
+//        renameWorkspace(currentName, newName);
+//        ++indexWS;
+//      }
+//    }
+//  }
+//}
+
 template <typename Map, typename Key>
 typename Map::mapped_type &findOrCreateDefaultInMap(Map &map, const Key &key) {
   auto valueIt = map.find(key);
@@ -330,6 +389,7 @@ void IndirectFitOutput::addOutput(WorkspaceGroup_sptr resultGroup,
   updateParameters(parameterTable, fitDataBegin, fitDataEnd);
   updateFitResults(resultGroup, fitDataBegin, fitDataEnd);
   renameResult(resultWorkspace, fitDataBegin, fitDataEnd);
+  //renameFitWorkspace(resultGroup, resultWorkspace);
   m_resultWorkspace = resultWorkspace;
   m_resultGroup = resultGroup;
 }
