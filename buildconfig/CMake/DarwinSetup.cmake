@@ -162,9 +162,9 @@ if(NOT TARGET mantidpython)
   # Configure install script at the same time. Doing it later causes a warning
   # from ninja.
   if(MAKE_VATES)
+    # Python packages go into bundle Python site-packages
     set(
-      PARAVIEW_PYTHON_PATHS
-      ":\${SCRIPT_PATH}/../Libraries:\${SCRIPT_PATH}/../Python:\${SCRIPT_PATH}/../Python/vtk"
+      PARAVIEW_PYTHON_PATHS ""
     )
   else()
     set(PARAVIEW_PYTHON_PATHS "")

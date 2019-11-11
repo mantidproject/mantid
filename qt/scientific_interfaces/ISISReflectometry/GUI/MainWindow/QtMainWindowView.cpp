@@ -109,37 +109,43 @@ void QtMainWindowView::initLayout() {
 
 void QtMainWindowView::onTabCloseRequested(int tabIndex) {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "ISIS Reflectometry->MainWindow->CloseBatch", false);
+      Mantid::Kernel::FeatureType::Feature,
+      {"ISIS Reflectometry", "MainWindow", "CloseBatch"}, false);
   m_notifyee->notifyCloseBatchRequested(tabIndex);
 }
 
 void QtMainWindowView::onNewBatchRequested(bool) {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "ISIS Reflectometry->MainWindow->NewBatch", false);
+      Mantid::Kernel::FeatureType::Feature,
+      {"ISIS Reflectometry", "MainWindow", "NewBatch"}, false);
   m_notifyee->notifyNewBatchRequested();
 }
 
 void QtMainWindowView::onLoadBatchRequested(bool) {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "ISIS Reflectometry->MainWindow->LoadBatch", false);
+      Mantid::Kernel::FeatureType::Feature,
+      {"ISIS Reflectometry", "MainWindow", "LoadBatch"}, false);
   m_notifyee->notifyLoadBatchRequested(m_ui.mainTabs->currentIndex());
 }
 
 void QtMainWindowView::onSaveBatchRequested(bool) {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "ISIS Reflectometry->MainWindow->SaveBatch", false);
+      Mantid::Kernel::FeatureType::Feature,
+      {"ISIS Reflectometry", "MainWindow", "SaveBatch"}, false);
   m_notifyee->notifySaveBatchRequested(m_ui.mainTabs->currentIndex());
 }
 
 void QtMainWindowView::onShowOptionsRequested(bool) {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "ISIS Reflectometry->MainWindow->ShowOptions", false);
+      Mantid::Kernel::FeatureType::Feature,
+      {"ISIS Reflectometry", "MainWindow", "ShowOptions"}, false);
   m_notifyee->notifyShowOptionsRequested();
 }
 
 void QtMainWindowView::onShowSlitCalculatorRequested(bool) {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "ISIS Reflectometry->MainWindow->ShowSlitCalculator", false);
+      Mantid::Kernel::FeatureType::Feature,
+      {"ISIS Reflectometry", "MainWindow", "ShowSlitCalculator"}, false);
   m_notifyee->notifyShowSlitCalculatorRequested();
 }
 
@@ -149,7 +155,8 @@ void QtMainWindowView::subscribe(MainWindowSubscriber *notifyee) {
 
 void QtMainWindowView::helpPressed() {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "ISIS Reflectometry->MainWindow->ShowHelp", false);
+      Mantid::Kernel::FeatureType::Feature,
+      {"ISIS Reflectometry", "MainWindow", "ShowHelp"}, false);
   m_notifyee->notifyHelpPressed();
 }
 

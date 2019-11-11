@@ -151,7 +151,7 @@ LineViewer::LineViewer(QWidget *parent)
                    SLOT(onToggleLogYAxis()));
 
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "SliceViewer->LineViewer", false);
+      FeatureType::Feature, {"SliceViewer", "LineViewer"}, false);
 }
 
 LineViewer::~LineViewer() {}
