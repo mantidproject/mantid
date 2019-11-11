@@ -30,12 +30,12 @@ public:
     double v1[4] = {1, 2, 3, 4};
     TS_ASSERT_EQUALS(VMD(4, v1), VMD(1, 2, 3, 4));
     std::vector<double> v2;
-    v2.emplace_back(1);
-    v2.emplace_back(2);
+    v2.emplace_back(1.f);
+    v2.emplace_back(2.f);
     TS_ASSERT_EQUALS(VMD(v2), VMD(1, 2));
     std::vector<float> v3;
-    v3.emplace_back(1);
-    v3.emplace_back(2);
+    v3.emplace_back(1.f);
+    v3.emplace_back(2.f);
     TS_ASSERT_EQUALS(VMD(v3), VMD(1, 2));
     // Copy constructor
     VMD a(1, 2, 3, 4);
