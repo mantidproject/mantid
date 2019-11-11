@@ -49,7 +49,7 @@ Scripting
 
 |
 |
-|
+
 .. figure:: ../../images/WB_Tiled.png
    :class: screenshot
    :width: 900px
@@ -59,6 +59,7 @@ Scripting
 
 |
 |
+
 .. figure:: ../../images/WB_GenerateaScript.png
    :class: screenshot
    :width: 400px

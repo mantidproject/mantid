@@ -20,8 +20,7 @@ We are proud to announce version 4.2.0 of Mantid.
 | NB. Mantid v4.3 will be released near the End of February 2020.
 
 | *Interfaces, interfaces, interfaces*! Hard to say but Easy to use!
-| One of the major changes for this release is the new Direct :ref:`ALF View <ALF_View-ref>` GUI for aligning samples on the ALF Instrument. There have also been serious developments in the
-:doc:`Indirect <indirect_geometry>` Interfaces: 
+| One of the major changes for this release is the new Direct :ref:`ALF View <ALF_View-ref>` GUI for aligning samples on the ALF Instrument. There have also been serious developments in the :doc:`Indirect <indirect_geometry>` Interfaces: 
 | The Analysis and Bayes Interfaces have been introduced to Mantid Workbench and all interfaces will accept lists to plot multiple spectra. 
 | Generally usuability has been improved, from the cleaner :doc:`ISIS SANS <sans>` Interface or the multiple improvements in Workbench. The Script Repository has even been added into :doc:`Workbench <mantidworkbench>`!
 
