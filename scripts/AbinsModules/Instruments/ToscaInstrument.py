@@ -17,10 +17,13 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
     """
     Class for TOSCA and TOSCA-like instruments.
     """
+    parameters = AbinsParameters.instruments['TOSCA']
+
     def __init__(self, name):
         self._name = name
         super(ToscaInstrument, self).__init__()
 
+    @classmethod
     def calculate_q_powder(self, input_data=None):
         """Calculates squared Q vectors for TOSCA and TOSCA-like instruments.
 
@@ -39,18 +42,17 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
             constrained by conservation of mass/momentum and TOSCA geometry
         """
 
-        tosca_params = AbinsParameters.instruments['TOSCA']
-
-        k2_i = (input_data + tosca_params['final_neutron_energy']) * AbinsConstants.WAVENUMBER_TO_INVERSE_A
-        k2_f = tosca_params['final_neutron_energy'] * AbinsConstants.WAVENUMBER_TO_INVERSE_A
-        result = k2_i + k2_f - 2 * (k2_i * k2_f) ** 0.5 * tosca_params['cos_scattering_angle']
+        k2_i = (input_data + cls.parameters['final_neutron_energy']) * AbinsConstants.WAVENUMBER_TO_INVERSE_A
+        k2_f = cls.parameters['final_neutron_energy'] * AbinsConstants.WAVENUMBER_TO_INVERSE_A
+        result = k2_i + k2_f - 2 * (k2_i * k2_f) ** 0.5 * cls.parameters['cos_scattering_angle']
         return result
 
-    def get_sigma(self, frequencies):
+    @classmethod
+    def get_sigma(cls, frequencies):
         """Frequency-dependent broadening width from empirical fit"""
-        a = AbinsParameters.instruments['TOSCA']['a']
-        b = AbinsParameters.instruments['TOSCA']['b']
-        c = AbinsParameters.instruments['TOSCA']['c']
+        a = cls.parameters['a']
+        b = cls.parameters['b']
+        c = cls.parameters['c']
         sigma = a * frequencies ** 2 + b * frequencies + c
         return sigma
 
