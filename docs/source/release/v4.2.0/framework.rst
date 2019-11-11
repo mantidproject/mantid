@@ -2,13 +2,14 @@
 Framework Changes
 =================
 
-.. contents:: Table of Contents
-   :local:
-
 .. figure:: ../../images/UpdateOS.png
    :class: screenshot
    :width: 385px
    :align: right
+
+.. contents:: Table of Contents
+   :local:
+
 
 Packaging
 #########
@@ -28,6 +29,8 @@ Algorithms
 
 Instrument Definition Files
 ---------------------------
+
+* Mantid is now resilient to corrupted Facilities.xml files, which could sometimes happen occasionally while downloading an updated file.  If Mantid finds a corrupt file it will now fall back to the originally installed file, and the corrupted one should be re-downloaded.
 * A definition file for the NEAT instrument at HZB as been added along with an entry in the facilities file.
 * The PEARL IDF has been updated with corrections to the instrument flight path and monitor distances.
 
@@ -49,6 +52,8 @@ Algorithms
 - :ref:`IndexPeaks <algm-IndexPeaks>` now has options to enter modulation vectors and additional information required for satellite peak indexing. As
   a result :ref:`IndexPeaksWithSatellites <algm-IndexPeaksWithSatellites>` has been deprecated and will be removed in a future release.
 - :ref:`MaskAngle <algm-MaskAngle>` has an additional option of ``Angle='InPlane'``
+- The custom dialog for :ref:`CreateSampleShape <algm-CreateSampleShape>`
+  has been removed. It will now fall back to the generic one.
 
 Live Data
 ---------

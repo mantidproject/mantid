@@ -41,7 +41,8 @@ enum class FeatureType { Algorithm, Interface, Feature };
 class FeatureUsage {
 public:
   /// Constructor
-  FeatureUsage(const FeatureType &type, std::string name, const bool internal);
+  FeatureUsage(const FeatureType &type, std::string name, const bool internal,
+               std::string application);
   bool operator<(const FeatureUsage &r) const;
 
   ::Json::Value asJson() const;
@@ -49,6 +50,7 @@ public:
   FeatureType type;
   std::string name;
   bool internal;
+  std::string application;
 
 protected:
   std::string featureTypeToString() const;

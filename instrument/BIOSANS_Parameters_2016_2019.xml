@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument = "CG3"
-				valid-from="2019-10-01 00:00:00"
-				valid-to="2100-01-31 23:59:59">
+<parameter-file instrument = "BIOSANS"
+				valid-from="2016-04-27 00:00:00"
+				valid-to="2019-09-30 23:59:59">
 	
-	<component-link name = "CG3">
+	<component-link name = "BIOSANS">
 		
 		<parameter name="detector-name" type="string">
 			<value val="detector1"/>

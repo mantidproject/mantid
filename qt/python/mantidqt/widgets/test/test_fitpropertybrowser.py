@@ -21,6 +21,7 @@ from testhelpers import assertRaisesNothing
 from workbench.plotting.figuremanager import FigureManagerADSObserver
 
 from qtpy import PYQT5
+from qtpy.QtWidgets import QDockWidget
 
 
 @start_qapplication
@@ -201,6 +202,25 @@ class FitPropertyBrowserTest(unittest.TestCase):
         widget = self._create_widget(canvas=canvas)
         widget.plot_guess()
         self.assertEqual(ax_limits, fig.get_axes()[0].axis())
+
+    @patch('matplotlib.pyplot.get_figlabels')
+    def test_output_workspace_name_changes_if_more_than_one_plot_of_same_workspace(self, figure_labels_mock):
+        # create a workspace
+        ws = WorkspaceFactory.Instance().create("Workspace2D", NVectors=2, YLength=5, XLength=5)
+        AnalysisDataService.Instance().addOrReplace("workspace", ws)
+        ws_window_names = ["workspace-1", "workspace-2"]
+        figure_labels_mock.return_value = ws_window_names
+        output_name = []
+        # plot it twice
+        for i in [0, 1]:
+            fig = plot([ws], spectrum_nums=[1])
+            fig.canvas.get_window_title = Mock(return_value=ws_window_names[i])
+            browser = self._create_widget(canvas=fig.canvas)
+            # don't want the widget to actually show in test
+            QDockWidget.show = Mock()
+            browser.show()
+            output_name.append(browser.outputName())
+        self.assertNotEqual(output_name[0], output_name[1])
 
     # Private helper functions
     def _create_widget(self, canvas=MagicMock(), toolbar_manager=Mock()):
