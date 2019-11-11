@@ -25,17 +25,17 @@ class SCgapSwave(IFunction1D):
 
     def function1D(self, x):
         Ec = 15.0
-        Delta = self.getParameterValue("Delta")
+        Delta_0 = self.getParameterValue("Delta")
         Tc = self.getParameterValue("Tcritical")
         kb = k / (1.6 * 10 ** -22)
         Integral = []
 
         def Integrand(E):
-            DeltaSwave = Delta
+            DeltaSwave = Delta_0
             a = 1.018
             c = 1.82
-            Delta_t = DeltaSwave * np.tanh(c * (a * (Tc / xx - 1.00)) ** 0.51)
-            return 1 / np.cosh(np.sqrt((Ec * E) ** 2 + Delta_t ** 2) / (2 * kb * xx)) ** 2
+            Delta = DeltaSwave * np.tanh(c * (a*Tc / xx - 1.00) ** 0.51)
+            return 1.00 / np.cosh(np.sqrt((Ec * E) ** 2 + Delta ** 2) / (2 * kb * xx)) ** 2
 
         for xx in x:
             if xx > Tc:
@@ -43,7 +43,7 @@ class SCgapSwave(IFunction1D):
             else:
                 Integral.append(quad(Integrand, 0, 1)[0] * Ec / (2 * kb * xx))
 
-        return 1 - np.array(Integral)
+        return 1.00 - np.array(Integral)
 
 
 FunctionFactory.subscribe(SCgapSwave)
