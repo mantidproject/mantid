@@ -30,26 +30,39 @@ class BatchProcessRunner(QObject):
         self.notify_done(result)
 
     @Slot()
-    def on_error(self, error):
+    def on_error(self):
         self._worker = None
 
-    def process_states(self, states, use_optimizations, output_mode, plot_results, output_graph, save_can=False):
-        self._worker = Worker(self._process_states_on_thread, states, use_optimizations, output_mode, plot_results,
-                              output_graph, save_can)
+    def process_states(self, rows, get_states_func, get_thickness_for_rows_func, use_optimizations, output_mode, plot_results, output_graph,
+                       save_can=False):
+        self._worker = Worker(self._process_states_on_thread,
+                              get_thickness_for_rows_func=get_thickness_for_rows_func,
+                              rows=rows, get_states_func=get_states_func, use_optimizations=use_optimizations,
+                              output_mode=output_mode, plot_results=plot_results,
+                              output_graph=output_graph, save_can=save_can)
         self._worker.signals.finished.connect(self.on_finished)
         self._worker.signals.error.connect(self.on_error)
 
         QThreadPool.globalInstance().start(self._worker)
 
-    def load_workspaces(self, states):
-        self._worker = Worker(self._load_workspaces_on_thread, states)
+    def load_workspaces(self, selected_rows, get_states_func, get_thickness_for_rows_func):
+
+        self._worker = Worker(self._load_workspaces_on_thread, selected_rows,
+                              get_states_func, get_thickness_for_rows_func)
         self._worker.signals.finished.connect(self.on_finished)
         self._worker.signals.error.connect(self.on_error)
 
         QThreadPool.globalInstance().start(self._worker)
 
-    def _process_states_on_thread(self, states, use_optimizations, output_mode, plot_results, output_graph,
-                                  save_can=False):
+    def _process_states_on_thread(self, rows, get_states_func, get_thickness_for_rows_func, use_optimizations, output_mode, plot_results,
+                                  output_graph, save_can=False):
+        get_thickness_for_rows_func()
+        # The above must finish before we can call get states
+        states, errors = get_states_func(row_index=rows)
+
+        for row, error in errors.items():
+            self.row_failed_signal.emit(row, error)
+
         for key, state in states.items():
             try:
                 out_scale_factors, out_shift_factors = \
@@ -65,7 +78,14 @@ class BatchProcessRunner(QObject):
             except Exception as e:
                 self.row_failed_signal.emit(key, str(e))
 
-    def _load_workspaces_on_thread(self, states):
+    def _load_workspaces_on_thread(self, selected_rows, get_states_func, get_thickness_for_rows_func):
+        get_thickness_for_rows_func()
+        # The above must finish before we can call get states
+        states, errors = get_states_func(row_index=selected_rows)
+
+        for row, error in errors.items():
+            self.row_failed_signal.emit(row, error)
+
         for key, state in states.items():
             try:
                 load_workspaces_from_states(state)

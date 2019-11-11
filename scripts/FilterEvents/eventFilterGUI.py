@@ -198,7 +198,7 @@ class MainWindow(QMainWindow):
         self._defaultdir = os.getcwd()
 
         # register startup
-        mantid.UsageService.registerFeatureUsage("Interface", "EventFilter", False)
+        mantid.UsageService.registerFeatureUsage(mantid.kernel.FeatureType.Interface, "EventFilter", False)
 
     def on_mouseDownEvent(self, event):
         """ Respond to pick up a value with mouse down event

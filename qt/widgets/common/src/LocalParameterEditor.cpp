@@ -226,7 +226,7 @@ void LocalParameterEditor::removeAllTies() {
 }
 
 void LocalParameterEditor::setConstraint() {
-  auto constraint = setTieDialog(m_constraint);
+  auto constraint = setConstraintDialog(m_constraint);
   if (!constraint.isEmpty()) {
     m_constraint = constraint;
     emit setConstraint(m_index, m_constraint);
