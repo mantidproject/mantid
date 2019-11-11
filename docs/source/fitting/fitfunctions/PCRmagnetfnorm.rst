@@ -1,10 +1,10 @@
-.. _func-PCRmagnet:
+.. _func-PCRmagnetfnorm:
 
-=========
-PCRmagnet
-=========
+=================
+PCRmagnetfnorm
+=================
 
-.. index:: PCRmagnet
+.. index:: PCRmagnetfnorm
 
 Description
 -----------
@@ -19,7 +19,7 @@ where,
 
 :math:`t'&=t-t_\text{off}` ,
 
-:math:`A_0` is the amplitude, 
+:math:`A_0` is the amplitude,
 
 :math:`\sigma_\omega` (MHz) is the normalised relaxation rate,
 

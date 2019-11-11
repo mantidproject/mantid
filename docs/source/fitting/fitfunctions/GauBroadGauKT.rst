@@ -13,24 +13,28 @@ Gaussian-Broadened Gaussian Kubo-Toyabe relaxation function given by:
 
 .. math:: A(t)=A_0\left(\frac{1}{3}+\frac{2}{3}\left(\frac{1+R^2}{1+R^2+R^2\Delta^2_\text{eff}t^2}\right)^{\frac{3}{2}}\left(1- \frac{\Delta^2_\text{eff}t^2}{1+R^2+R^2\Delta^2_\text{eff}t^2}\right)exp\left(\frac{-\Delta^2_\text{eff}t^2}{2(1+R^2+R^2\Delta^2_\text{eff}t^2)}\right)\right)
 
-where
-
-.. math:: \Delta^2_\text{eff} = \Delta^2_0 + \omega^2,
+where :math:`R` and :math:`\Delta^2_\text{eff}` are defined by,
 
 .. math:: R = \frac{\omega}{\Delta_0},
 
-:math:`A_0`is the amplitude,
+.. math:: \Delta^2_\text{eff} = \Delta^2_0 + \omega^2,
 
-:math:`R` is the Broadening ratio,
+where,
 
-:math:`Delta_0` is the central width,
+:math:`A_0` is the amplitude,
+
+:math:`R` the Broadening ratio,
+
+:math:`\Delta_0` is the central width,
 
 :math:`\omega` is the rms width,
 
-and :math:`Delta_\text{eff}` is the effective width.
+and :math:`\Delta_{eff}` is the effective width.
+
+
 
 .. plot::
-	
+
    from mantid.simpleapi import FunctionWrapper
    import matplotlib.pyplot as plt
    import numpy as np
