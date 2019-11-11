@@ -70,6 +70,8 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
         :returns: (points_freq, broadened_spectrum)
         """
 
+        prebin_required_schemes = ['interpolate', 'conv_15']
+
         if AbinsParameters.sampling['pkt_per_peak'] == 1:
 
             points_freq = frequencies
@@ -90,13 +92,16 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
                 if prebin == 'auto':
                     if bins.size < frequencies.size:
                         prebin = True
+                    elif scheme in prebin_required_schemes:
+                        prebin = True
                     else:
                         prebin = False
                 if prebin is True:
                     s_dft, _ = np.histogram(frequencies, bins=bins, weights=s_dft, density=False)
                     frequencies = (bins[1:] + bins[:-1]) / 2
                 elif prebin is False:
-                    pass
+                    if scheme in prebin_required_schemes:
+                        raise ValueError('"prebin" should not be set to False when using "{}" broadening scheme'.format(scheme))
                 else:
                     raise ValueError('"prebin" option must be True, False or "auto"')
 

@@ -68,9 +68,9 @@ class Instrument(object):
         if (bins is None) or (s_dft is None) or (sigma is None):
             raise ValueError("Frequency bins, S data and broadening width must be provided.")
 
-        if scheme not in ('legacy_plus', 'gaussian', 'gaussian_trunc', 'gaussian_trunc_forloop'):
-            raise ValueError('Broadening scheme "{}" not supported for this instrument, please correct '
-                             'AbinsParameters.sampling["broadening_scheme"]'.format(scheme))
+        # if scheme not in ('legacy_plus', 'gaussian', 'gaussian_trunc', 'gaussian_trunc_forloop'):
+        #     raise ValueError('Broadening scheme "{}" not supported for this instrument, please correct '
+        #                      'AbinsParameters.sampling["broadening_scheme"]'.format(scheme))
 
         bins = np.asarray(bins)
         freq_points = (bins[1:] + bins[:-1]) / 2
@@ -192,14 +192,62 @@ class Instrument(object):
                                     points=freq_matrix,
                                     center=frequencies.reshape(nrows, 1))
 
-            # flattened_spectrum = np.ravel(s_dft.reshape(nrows, 1) * kernels)
-            # flattened_freq = np.ravel(freq_matrix)
-
             hist, bin_edges = np.histogram(np.ravel(freq_matrix),
                                            bins,
                                            weights=np.ravel(s_dft.reshape(nrows, 1) * kernels),
                                            density=False)
             return freq_points, hist
+
+        elif scheme == 'conv_15':
+            # Not a real scheme, just for testing. Convolve with a fixed sigma of 15.
+            from scipy.signal import convolve
+            sigma = 15
+            bin_width = bins[1] - bins[0]
+            hist, bin_edges = np.histogram(frequencies, bins=bins, weights=s_dft, density=False)
+            freq_range = 3 * sigma
+            kernel_npts_oneside = np.ceil(freq_range / bin_width)
+            kernel = cls._gaussian(sigma=15,
+                                   points=np.arange(-kernel_npts_oneside, kernel_npts_oneside + 1, 1) * bin_width,
+                                   center=0)
+            spectrum = convolve(hist, kernel, mode='same')
+            return freq_points, spectrum
+        elif scheme == 'interpolate':
+            from scipy.signal import convolve
+            # Use a log 2 base for now: get the range to cover
+            n_kernels = int(np.ceil(np.log2(max(sigma) / min(sigma)))) + 1
+            if n_kernels == 1:
+                sigma_samples = np.array([min(sigma)])
+            else:
+                sigma_samples = 2**np.arange(n_kernels + 1) * min(sigma)
+
+            # Get set of convolved spectra for interpolation
+            bin_width = bins[1] - bins[0]
+            hist, bin_edges = np.histogram(frequencies, bins=bins, weights=s_dft, density=False)
+            freq_range = 3 * max(sigma)
+            kernel_npts_oneside = np.ceil(freq_range / bin_width)
+            kernels = cls._gaussian(sigma=sigma_samples[:, np.newaxis],
+                                    points=np.arange(-kernel_npts_oneside, kernel_npts_oneside + 1, 1) * bin_width,
+                                    center=0)
+
+            spectra = np.array([convolve(hist, kernel, mode='same') for kernel in kernels])
+            
+            # Interpolate with parametrised relationship
+            sigma_locations = np.searchsorted(sigma, sigma_samples) # locations in full sigma of sampled values
+            spectrum = np.zeros_like(freq_points)
+            for sample_i, left_sigma_i, right_sigma_i in zip(range(len(sigma_samples)),
+                                                             sigma_locations[:-1],
+                                                             sigma_locations[1:]):
+                sigma_chunk = sigma[left_sigma_i:right_sigma_i]
+                if len(sigma_chunk) == 0:
+                    break   # This happens at the end of iteration; we get a repeat of the last position
+                
+                sigma_factors = sigma_chunk / sigma_chunk[0]
+                left_mix = np.polyval([-0.1873, 1.464, -4.079, 3.803], sigma_factors)
+                right_mix = np.polyval([0.2638, -1.968, 5.057, -3.353], sigma_factors)
+                spectrum[left_sigma_i:right_sigma_i] = (left_mix * spectra[sample_i, left_sigma_i:right_sigma_i]
+                                                        + right_mix * spectra[sample_i + 1, left_sigma_i:right_sigma_i])
+
+            return freq_points, spectrum
 
     @staticmethod
     def _convolve_with_resolution_function_legacy(frequencies=None, s_dft=None, sigma=None, pkt_per_peak=None,
