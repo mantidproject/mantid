@@ -28,7 +28,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class DLLExport IndirectFitAnalysisTab : public IndirectDataAnalysisTab {
+class MANTIDQT_INDIRECT_DLL IndirectFitAnalysisTab
+    : public IndirectDataAnalysisTab {
   Q_OBJECT
 
 public:
