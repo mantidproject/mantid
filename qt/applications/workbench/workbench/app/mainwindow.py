@@ -222,6 +222,7 @@ class MainWindow(QMainWindow):
         self.set_splash("Loading code editing widget")
         from workbench.plugins.editor import MultiFileEditor
         self.editor = MultiFileEditor(self)
+        self.messagedisplay.display.setActiveScript(self.editor.editors.current_tab_filename)
         self.editor.register_plugin()
         self.widgets.append(self.editor)
         self.editor.editors.sig_code_exec_start.connect(self.messagedisplay.script_executing)
