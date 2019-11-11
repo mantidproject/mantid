@@ -157,12 +157,11 @@ class LoadRunWidgetPresenter(object):
         new_run = max(self.run_list)
 
         try:
-             file_name = file_utils.file_path_for_instrument_and_run(self.get_current_instrument(), new_run)
-             FileFinder.findRuns(file_name)
-             self.load_runs([file_name])
+            file_name = file_utils.file_path_for_instrument_and_run(self.get_current_instrument(), new_run)
+            FileFinder.findRuns(file_name)
+            self.load_runs([file_name])
         except:
-             self._view.warning_popup("Requested run exceeds the current run for this instrument ")
-
+            self._view.warning_popup("Requested run exceeds the current run for this instrument ")
 
     def handle_decrement_run(self):
         decremented_run_list = self.get_decremented_run_list()
