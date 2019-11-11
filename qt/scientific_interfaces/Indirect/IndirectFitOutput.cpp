@@ -219,20 +219,15 @@ void renameResult(WorkspaceGroup_sptr resultWorkspace,
 
 std::vector<std::string> strsplit(const std::string &string_in,
                                   const std::string &delim) {
-  std::vector<std::string> out;
-  size_t last = 0;
-  size_t next = 0;
-  while ((next = string_in.find(delim, last)) != std::string::npos) {
-    out.push_back(string_in.substr(last, next - last));
-    last = next + 1;
-  }
-  out.push_back(string_in.substr(last, std::string::npos));
-  return out;
+  std::vector<std::string> split_vect;
+  iter_split(split_vect, string_in, boost::algorithm::first_finder(delim));
+  return split_vect;
 }
 
-std::vector<std::string> srange(const std::string &string_in) {
-
-  std::vector<std::string> limits = strsplit(string_in, "-");
+std::vector<std::string> srange(const std::string &string_range) {
+  // e.g. string_range = "0-2+4"
+  // output = "0", "1", "2", "4"
+  std::vector<std::string> limits = strsplit(string_range, "-");
   if (limits.size() == 1) {
     return limits;
   } else {
@@ -249,12 +244,12 @@ void renameFitWorkspace(WorkspaceGroup_sptr resultGroup,
                         WorkspaceGroup_sptr resultWorkspace) {
   // rename the fit data workspaces using result workspace names
   std::size_t indexWS = 0; // index of fit workspace in resultGroup
-  auto numel = static_cast<std::size_t>(resultWorkspace->size());
-  for (std::size_t index = 0; index != numel; ++index) {
-    auto ws = resultWorkspace->getItem(index);
-    std::string name = ws->getName();
+  const auto numRuns = static_cast<std::size_t>(resultWorkspace->size());
+  for (std::size_t index = 0; index != numRuns; ++index) {
+    const auto ws = resultWorkspace->getItem(index);
+    const auto name = ws->getName();
     // extract relevent parts of the name
-    std::vector<std::string> nameParts = strsplit(name, "_iqt");
+    const auto nameParts = strsplit(name, "_iqt");
     std::string runstr = nameParts[0];
     std::size_t istart = nameParts[1].rfind("_s");
     std::size_t iend = nameParts[1].rfind("_R");
@@ -263,7 +258,7 @@ void renameFitWorkspace(WorkspaceGroup_sptr resultGroup,
     std::vector<std::string> ranges = strsplit(specstr, "+");
     for (std::size_t irange = 0; irange != ranges.size(); irange++) {
       // specstr[irange] is a string that defines a range e.g "1-4"
-      std::vector<std::string> spec = srange(ranges[irange]);
+      const auto spec = srange(ranges[irange]);
       // loop over spec and rename corresponding workspace
       for (std::size_t ispec = 0; ispec != spec.size(); ispec++) {
         std::string currentName = (resultGroup->getItem(indexWS))->getName();
