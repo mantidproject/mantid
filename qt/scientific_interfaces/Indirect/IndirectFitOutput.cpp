@@ -259,7 +259,7 @@ void renameFitWorkspace(WorkspaceGroup_sptr resultGroup,
     std::string runstr = nameParts[0];
     std::size_t istart = nameParts[1].rfind("_s");
     std::size_t iend = nameParts[1].rfind("_R");
-    std::string specstr = nameParts[1].substr(istart + 2, iend - (istart+2));
+    std::string specstr = nameParts[1].substr(istart + 2, iend - (istart + 2));
     // get all spectra included in fit from that file
     std::vector<std::string> ranges = strsplit(specstr, "+");
     for (std::size_t irange = 0; irange != ranges.size(); irange++) {
