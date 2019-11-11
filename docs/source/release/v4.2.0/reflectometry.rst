@@ -9,6 +9,14 @@ Reflectometry Changes
 ISIS Reflectometry Interface
 ----------------------------
 
+.. figure:: ../../images/Reflectometry-GUI-release4.2.png
+   :class: screenshot
+   :width: 500px
+   :align: right
+   :alt: New features on the ISIS Reflectometry interface
+        
+   *New features on the ISIS Reflectometry interface*
+
 New
 ###
 
@@ -18,14 +26,6 @@ New
 - The **live data update interval** can now be configured on the interface.
 - The **Slit Calculator** dialog can now be accessed from the Tools menu.
 - The **polarization correction** inputs have been simplified to a single checkbox which when ticked will apply polarization corrections based on properties in the instrument parameters file.
-
-.. figure:: ../../images/Reflectometry-GUI-release4.2.png
-   :class: screenshot
-   :width: 500px
-   :align: right
-   :alt: New features on the ISIS Reflectometry interface
-        
-   *New features on the ISIS Reflectometry interface*
 
 Bug fixes
 #########
