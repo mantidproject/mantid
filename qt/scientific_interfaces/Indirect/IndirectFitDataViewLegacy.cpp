@@ -26,6 +26,7 @@ IndirectFitDataViewLegacy::IndirectFitDataViewLegacy(QWidget *parent)
   m_dataForm->setupUi(this);
   m_dataForm->dsResolution->hide();
   m_dataForm->lbResolution->hide();
+  m_dataForm->wgtStartEnd->hide();
 
   connect(m_dataForm->dsSample, SIGNAL(dataReady(const QString &)), this,
           SIGNAL(sampleLoaded(const QString &)));
@@ -175,6 +176,10 @@ void IndirectFitDataViewLegacy::emitViewSelected(int index) {
     emit singleDataViewSelected();
   else
     emit multipleDataViewSelected();
+}
+
+void IndirectFitDataViewLegacy::setStartAndEndHidden(bool hidden) {
+  m_dataForm->wgtStartEnd->setHidden(hidden);
 }
 
 } // namespace IDA

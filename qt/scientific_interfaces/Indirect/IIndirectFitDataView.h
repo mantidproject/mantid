@@ -29,6 +29,7 @@ public:
   virtual bool isMultipleDataTabSelected() const = 0;
   virtual bool isResolutionHidden() const = 0;
   virtual void setResolutionHidden(bool hide) = 0;
+  virtual void setStartAndEndHidden(bool hidden) = 0;
   virtual void disableMultipleDataTab() = 0;
 
   virtual std::string getSelectedSample() const = 0;
