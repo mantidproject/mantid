@@ -34,7 +34,7 @@ class LowTFMuonium(IFunction1D):
         d = (ge - gm) / (gm + ge)
         delta = k / np.sqrt(1 + k ** 2)
         E1 = A / 4 * (1 + 2 * d * k)
-        E2 = A / 4 * (- 1 + 2 * np.sqrt(1 + k ** 2))
+        E2 = A / 4 * (-1 + 2 * np.sqrt(1 + k ** 2))
         E3 = A / 4 * (1 - 2 * d * k)
         f12 = E1 - E2
         f23 = E2 - E3
