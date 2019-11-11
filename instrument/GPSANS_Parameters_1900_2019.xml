@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument = "CG3"
-				valid-from="2019-10-01 00:00:00"
-				valid-to="2100-01-31 23:59:59">
+<parameter-file instrument = "GPSANS" valid-from="1900-01-31 23:59:59" valid-to="2019-09-30 23:59:59">
 	
-	<component-link name = "CG3">
+	<component-link name = "GPSANS">
 		
 		<parameter name="detector-name" type="string">
 			<value val="detector1"/>
@@ -22,7 +20,7 @@
 		</parameter>
 		
 		<parameter name="number-of-y-pixels">
-			<value val="256"/>
+			<value val="192"/>
 		</parameter>
 		
 		<parameter name="number-of-monitors">
@@ -30,24 +28,21 @@
 		</parameter>
 		
 		<parameter name="x-pixel-size">
-			<value val="5.5"/>
+			<value val="5.1500000"/>
 		</parameter>
 		
 		<parameter name="y-pixel-size">
-			<value val="4.0"/>
+			<value val="5.1500000"/>
 		</parameter>
 		
 		<parameter name="detector-distance-offset">
-			<value val="837.9"/>
+			<value val="711.0"/>
 		</parameter>
 		
 		<!-- Aperture distances for 8 guides to 0 guides -->
 		<parameter name="aperture-distances" type="string">
-			<value val="2018.0, 3426.9, 5449.1, 7473.8, 9497.2, 11527.1, 13546.6, 15568.2, 17594.6"/>
-		</parameter>
-		
-		<parameter name="source-distance-offset">
-			<value val="-171.0"/>
+			<value val="1919.1, 3329.3, 5323.7, 7377.5, 9399.0, 11433.8, 13454.4, 15473.2, 17495.2"
+				/>
 		</parameter>
 		
 	</component-link>
