@@ -222,7 +222,6 @@ std::vector<std::string> strsplit(const std::string &string_in,
   std::vector<std::string> out;
   size_t last = 0;
   size_t next = 0;
-  std::string token;
   while ((next = string_in.find(delim, last)) != std::string::npos) {
     out.push_back(string_in.substr(last, next - last));
     last = next + 1;
