@@ -160,7 +160,7 @@ LineViewer::~LineViewer() {}
 /** With the workspace set, create the dimension text boxes */
 void LineViewer::createDimensionWidgets() {
   // Create all necessary widgets
-  if (m_startText.size() < int(m_ws->getNumDims())) {
+  if (m_startText.size() < m_ws->getNumDims()) {
     for (size_t d = m_startText.size(); d < m_ws->getNumDims(); d++) {
       QLabel *dimLabel = new QLabel(this);
       dimLabel->setAlignment(Qt::AlignHCenter);
@@ -246,10 +246,14 @@ void LineViewer::updateFreeDimensions() {
 //-----------------------------------------------------------------------------------------------
 /** Show the start/end/width points in the GUI */
 void LineViewer::updateStartEnd() {
-  for (int d = 0; d < int(m_ws->getNumDims()); d++) {
-    m_startText[d]->setText(QString::number(m_start[d]));
-    m_endText[d]->setText(QString::number(m_end[d]));
-    m_thicknessText[d]->setText(QString::number(m_thickness[d]));
+  const size_t ndims{m_ws->getNumDims()};
+  for (size_t d = 0; d < ndims; d++) {
+    if (d < m_start.getNumDims())
+      m_startText[d]->setText(QString::number(m_start[d]));
+    if (d < m_end.getNumDims())
+      m_endText[d]->setText(QString::number(m_end[d]));
+    if (d < m_thickness.getNumDims())
+      m_thicknessText[d]->setText(QString::number(m_thickness[d]));
   }
   ui.textPlaneWidth->setText(QString::number(m_planeWidth * 2.));
 
