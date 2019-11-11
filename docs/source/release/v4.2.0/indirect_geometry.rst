@@ -39,6 +39,7 @@ Improvements
   a list of spectra for plotting. For example, entering 0-2,4,6-8 and clicking **Plot Spectra**
   will plot the workspace indices 0, 1, 2, 4, 6, 7 and 8. The same can be done for **Plot Tiled**
   on the Iqt tab.
+- Intial parameters now estimated when user adds an expononential function in I(Q,t) Fit.
 
 
 Data Reduction Interface
