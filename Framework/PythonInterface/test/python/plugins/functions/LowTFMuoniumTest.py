@@ -21,7 +21,7 @@ class LowTFMuoniumTest(unittest.TestCase):
 
     def test_function_output(self):
         input = [0.0, 4.0, 8.0, 12.0]
-        expected = [0.2, -0.09058045157474043, 0.06664294215510295, -0.039161530013856694]
+        expected = [0.1, -0.09058045157474043, 0.06664294215510295, -0.039161530013856694]
         tolerance = 1.0e-05
         status, output = check_output("LowTFMuonium", input, expected, tolerance, A0=0.2, Field=0.1, A=1.5, Phi=0.0)
 

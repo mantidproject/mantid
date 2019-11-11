@@ -34,7 +34,8 @@ class SCgapSwave(IFunction1D):
             DeltaSwave = Delta
             a = 1.018
             c = 1.82
-            return 1 / np.cosh(np.sqrt((Ec * E) ** 2 + (DeltaSwave * np.tanh(c * (a * (Tc / xx - 1)) ** 0.51)) ** 2) / (2 * kb * xx)) ** 2
+            Delta_t = DeltaSwave * np.tanh(c * (a * (Tc / xx - 1.00)) ** 0.51)
+            return 1 / np.cosh(np.sqrt((Ec * E) ** 2 + Delta_t ** 2) / (2 * kb * xx)) ** 2
 
         for xx in x:
             if xx > Tc:
