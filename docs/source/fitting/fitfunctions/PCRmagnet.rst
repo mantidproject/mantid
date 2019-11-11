@@ -19,7 +19,7 @@ where,
 
 :math:`t'&=t-t_\text{off}` ,
 
-:math:`A_0` is the amplitude, 
+:math:`A_0` is the amplitude,
 
 :math:`\sigma` (MHz) is the relaxation rate,
 

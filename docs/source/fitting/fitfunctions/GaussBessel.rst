@@ -9,7 +9,8 @@ GaussBessel
 Description
 -----------
 
-Bessel function oscillation with Gaussian damp and :math:`\frac{1}{3}`component. Example: Spin Density Wave.
+Bessel function oscillation with Gaussian damp :math:`\frac{1}{3}` component.
+Example: Spin Density Wave.
 
 .. math:: A(t) = A_0\left(\frac{1}{3}+\frac{2}{3}J_0(\omega t + \phi)e^{-\frac{(\sigma t)^2}{2}}\right)
 
