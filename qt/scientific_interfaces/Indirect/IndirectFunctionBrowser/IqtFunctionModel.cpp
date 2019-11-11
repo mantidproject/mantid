@@ -611,7 +611,7 @@ void IqtFunctionModel::estimateStretchExpParameters() {
   auto const stretchingName = getParameterName(ParamID::STRETCH_STRETCHING);
   if (!heightName || !lifeTimeName || !stretchingName)
     return;
-  assert(getNumberDomains() == m_estimationData.size());
+  assert(getNumberDomains() == static_cast<int>(m_estimationData.size()));
   for (auto i = 0; i < getNumberDomains(); ++i) {
     auto const &x = m_estimationData[i].x;
     auto const &y = m_estimationData[i].y;
