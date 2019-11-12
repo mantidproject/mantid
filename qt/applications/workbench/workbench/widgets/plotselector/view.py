@@ -528,7 +528,7 @@ class PlotSelectorView(QWidget):
         :return: The sort type as a Column enum
         """
         column_number = self.table_widget.horizontalHeader().sortIndicatorSection()
-        return Column(column_number)
+        return Column[column_number]
 
     def set_sort_type(self, sort_type):
         """
