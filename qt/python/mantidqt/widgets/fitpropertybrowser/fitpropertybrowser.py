@@ -11,8 +11,11 @@ from __future__ import (print_function, absolute_import, unicode_literals)
 
 from qtpy.QtCore import Qt, Signal, Slot
 
+import matplotlib.pyplot
+
 from mantid import logger
 from mantid.api import AlgorithmManager, AnalysisDataService, ITableWorkspace, MatrixWorkspace
+from mantidqt.plotting.functions import plot
 from mantidqt.utils.qt import import_qt
 from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
 
@@ -544,8 +547,8 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         if AnalysisDataService.doesExist(name):
             ws = AnalysisDataService.retrieve(name)
             if isinstance(ws, MatrixWorkspace):
-                presenter = MatrixWorkspaceDisplay(ws)
+                presenter = MatrixWorkspaceDisplay(ws, plot=plot)
                 presenter.show_view()
             elif isinstance(ws, ITableWorkspace):
-                presenter = TableWorkspaceDisplay(ws)
+                presenter = TableWorkspaceDisplay(ws, plot=matplotlib.pyplot)
                 presenter.show_view()
