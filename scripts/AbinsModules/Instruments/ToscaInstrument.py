@@ -8,6 +8,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import numpy as np
 from .Instrument import Instrument
+from .Broadening import broaden_spectrum
 from AbinsModules import AbinsParameters
 from AbinsModules import AbinsConstants
 from AbinsModules.FrequencyPowderGenerator import FrequencyPowderGenerator
@@ -24,7 +25,7 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
         super(ToscaInstrument, self).__init__()
 
     @classmethod
-    def calculate_q_powder(self, input_data=None):
+    def calculate_q_powder(cls, input_data=None):
         """Calculates squared Q vectors for TOSCA and TOSCA-like instruments.
 
         By the cosine law Q^2 = k_f^2 + k_i^2 - 2 k_f k_i cos(theta)
@@ -82,36 +83,28 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
         else:
 
             scheme = AbinsParameters.sampling['broadening_scheme']
-            if scheme == 'legacy':
-                pkt_per_peak = AbinsParameters.sampling['pkt_per_peak']
-                sigma = self.get_sigma(frequencies)
-                points_freq, broadened_spectrum = self._convolve_with_resolution_function_legacy(frequencies=frequencies,
-                                                                                                 s_dft=s_dft,
-                                                                                                 sigma=sigma,
-                                                                                                 pkt_per_peak=pkt_per_peak,
-                                                                                                 gaussian=self._gaussian)
-            else:
-                if prebin == 'auto':
-                    if bins.size < frequencies.size:
-                        prebin = True
-                    elif scheme in prebin_required_schemes:
-                        prebin = True
-                    else:
-                        prebin = False
-                if prebin is True:
-                    s_dft, _ = np.histogram(frequencies, bins=bins, weights=s_dft, density=False)
-                    frequencies = (bins[1:] + bins[:-1]) / 2
-                elif prebin is False:
-                    if scheme in prebin_required_schemes:
-                        raise ValueError('"prebin" should not be set to False when using "{}" broadening scheme'.format(scheme))
+
+            if prebin == 'auto':
+                if bins.size < frequencies.size:
+                    prebin = True
+                elif scheme in prebin_required_schemes:
+                    prebin = True
                 else:
-                    raise ValueError('"prebin" option must be True, False or "auto"')
+                    prebin = False
+            if prebin is True:
+                s_dft, _ = np.histogram(frequencies, bins=bins, weights=s_dft, density=False)
+                frequencies = (bins[1:] + bins[:-1]) / 2
+            elif prebin is False:
+                if scheme in prebin_required_schemes:
+                    raise ValueError('"prebin" should not be set to False when using "{}" broadening scheme'.format(scheme))
+            else:
+                raise ValueError('"prebin" option must be True, False or "auto"')
 
-                sigma = self.get_sigma(frequencies)
+            sigma = self.get_sigma(frequencies)
 
-                points_freq, broadened_spectrum = self._broaden_spectrum(frequencies=frequencies,
-                                                                         s_dft=s_dft,
-                                                                         bins=bins,
-                                                                         sigma=sigma,
-                                                                         scheme=scheme)
+            points_freq, broadened_spectrum = broaden_spectrum(frequencies=frequencies,
+                                                               s_dft=s_dft,
+                                                               bins=bins,
+                                                               sigma=sigma,
+                                                               scheme=scheme)
         return points_freq, broadened_spectrum
