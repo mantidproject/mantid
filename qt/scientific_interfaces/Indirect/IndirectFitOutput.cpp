@@ -227,7 +227,7 @@ std::vector<std::string> strsplit(const std::string &string_in,
 std::vector<std::string> srange(const std::string &string_range) {
   // e.g. string_range = "0-2+4"
   // output = "0", "1", "2", "4"
-  std::vector<std::string> limits = strsplit(string_range, "-");
+  const auto limits = strsplit(string_range, "-");
   if (limits.size() == 1) {
     return limits;
   } else {
@@ -250,19 +250,19 @@ void renameFitWorkspace(WorkspaceGroup_sptr resultGroup,
     const auto name = ws->getName();
     // extract relevent parts of the name
     const auto nameParts = strsplit(name, "_iqt");
-    std::string runstr = nameParts[0];
-    std::size_t istart = nameParts[1].rfind("_s");
-    std::size_t iend = nameParts[1].rfind("_R");
-    std::string specstr = nameParts[1].substr(istart + 2, iend - (istart + 2));
+    const auto runstr = nameParts[0];
+    const auto istart = nameParts[1].rfind("_s");
+    const auto iend = nameParts[1].rfind("_R");
+    const auto specstr = nameParts[1].substr(istart + 2, iend - (istart + 2));
     // get all spectra included in fit from that file
-    std::vector<std::string> ranges = strsplit(specstr, "+");
+    const auto ranges = strsplit(specstr, "+");
     for (std::size_t irange = 0; irange != ranges.size(); irange++) {
       // specstr[irange] is a string that defines a range e.g "1-4"
       const auto spec = srange(ranges[irange]);
       // loop over spec and rename corresponding workspace
       for (std::size_t ispec = 0; ispec != spec.size(); ispec++) {
-        std::string currentName = (resultGroup->getItem(indexWS))->getName();
-        std::string newName = runstr + "_s" + spec[ispec] + "_Workspace";
+        const auto currentName = (resultGroup->getItem(indexWS))->getName();
+        const auto newName = runstr + "_s" + spec[ispec] + "_Workspace";
         renameWorkspace(currentName, newName);
         ++indexWS;
       }
