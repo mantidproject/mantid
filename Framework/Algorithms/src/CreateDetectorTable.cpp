@@ -90,16 +90,19 @@ std::map<std::string, std::string> CreateDetectorTable::validateInputs() {
   std::map<std::string, std::string> validationOutput;
 
   Workspace_sptr inputWS = getProperty("InputWorkspace");
-  const int numSpectra = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS)
-                             ->getNumberHistograms();
-  const std::vector<int> indices = getProperty("WorkspaceIndices");
+  const auto matrix = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS);
 
-  if (std::any_of(indices.cbegin(), indices.cend(),
-                  [numSpectra](const auto index) {
-                    return (index >= numSpectra) || (index < 0);
-                  })) {
-    validationOutput["WorkspaceIndices"] =
-        "One or more indices out of range of available spectra.";
+  if (matrix) {
+    const int numSpectra = matrix->getNumberHistograms();
+    const std::vector<int> indices = getProperty("WorkspaceIndices");
+
+    if (std::any_of(indices.cbegin(), indices.cend(),
+                    [numSpectra](const auto index) {
+                      return (index >= numSpectra) || (index < 0);
+                    })) {
+      validationOutput["WorkspaceIndices"] =
+          "One or more indices out of range of available spectra.";
+    }
   }
 
   return validationOutput;
