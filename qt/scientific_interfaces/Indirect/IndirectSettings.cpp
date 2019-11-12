@@ -71,7 +71,7 @@ void IndirectSettings::loadSettings() { m_presenter->loadSettings(); }
 
 void IndirectSettings::closeSettings() {
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-    getDockedOrFloatingWindow()->close();
+  getDockedOrFloatingWindow()->close();
 #else
   if (auto settingsWindow = window())
     settingsWindow->close();
@@ -80,7 +80,7 @@ void IndirectSettings::closeSettings() {
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 QWidget *IndirectSettings::getDockedOrFloatingWindow() {
-  QWidget * widget = this;
+  QWidget *widget = this;
   while (widget) {
     auto const className = std::string(widget->metaObject()->className());
     if (className == "DockedWindow" || widget->isWindow())
