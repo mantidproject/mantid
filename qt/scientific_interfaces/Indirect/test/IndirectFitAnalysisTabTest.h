@@ -7,28 +7,25 @@
 #ifndef MANTIDQT_INDIRECTFITANALYSISTABTEST_H_
 #define MANTIDQT_INDIRECTFITANALYSISTABTEST_H_
 
-#include "IndirectFitAnalysisTab.cpp"
+#include "IndirectFitAnalysisTab.h"
 #include "MantidAPI/FunctionFactory.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
+using namespace MantidQt::CustomInterfaces::IDA;
+
 class IndirectFitAnalysisTabTest : public CxxTest::TestSuite {
 public:
   /// Needed to make sure everything is initialized
-  IndirectFitAnalysisTabTest() {}
-
-  static IndirectFitAnalysisTabTest *createSuite() {
-    return new IndirectFitAnalysisTabTest();
-  }
-
-  static void destroySuite(IndirectFitAnalysisTabTest *suite) { delete suite; }
+  IndirectFitAnalysisTabTest() = default;
 
   void test_that_single_function_correctly_identified() {
     std::string functionName = "ExpDecay";
     auto fitFunction =
         Mantid::API::FunctionFactory::Instance().createFunction(functionName);
     auto occurances =
-        getNumberOfSpecificFunctionContained(functionName, fitFunction);
+        IndirectFitAnalysisTab::getNumberOfSpecificFunctionContained(
+            functionName, fitFunction.get());
     TS_ASSERT_EQUALS(occurances, 1);
   }
 
@@ -38,11 +35,24 @@ public:
         Mantid::API::FunctionFactory::Instance().createInitialized(
             functionName);
     auto occurances =
-        getNumberOfSpecificFunctionContained("ExpDecay", fitFunction);
+        IndirectFitAnalysisTab::getNumberOfSpecificFunctionContained(
+            "ExpDecay", fitFunction.get());
     auto stretchOccurances =
-        getNumberOfSpecificFunctionContained("StretchExp", fitFunction);
+        IndirectFitAnalysisTab::getNumberOfSpecificFunctionContained(
+            "StretchExp", fitFunction.get());
     TS_ASSERT_EQUALS(occurances, 1);
     TS_ASSERT_EQUALS(stretchOccurances, 1);
+  }
+
+  void test_that_no_matched_name_is_correct() {
+    std::string functionName = "name=ExpDecay;name=StretchExp";
+    auto fitFunction =
+        Mantid::API::FunctionFactory::Instance().createInitialized(
+            functionName);
+    auto occurances =
+        IndirectFitAnalysisTab::getNumberOfSpecificFunctionContained(
+            "NotHere", fitFunction.get());
+    TS_ASSERT_EQUALS(occurances, 0);
   }
 
   void test_that_multi_layer_composite_function_handled_correctly() {
@@ -53,8 +63,10 @@ public:
         Mantid::API::FunctionFactory::Instance().createInitialized(
             functionName);
     auto occurances =
-        getNumberOfSpecificFunctionContained("ExpDecay", fitFunction);
+        IndirectFitAnalysisTab::getNumberOfSpecificFunctionContained(
+            "ExpDecay", fitFunction.get());
     TS_ASSERT_EQUALS(occurances, 4);
   }
 };
-#endif
+
+#endif // MANTIDQT_INDIRECTFITANALYSISTABTEST_H_

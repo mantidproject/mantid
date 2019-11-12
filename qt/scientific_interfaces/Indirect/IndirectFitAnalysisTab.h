@@ -28,6 +28,9 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
+size_t getNumberOfSpecificFunctionContained(const std::string &functionName,
+                                            const IFunction *compositeFunction);
+
 class MANTIDQT_INDIRECT_DLL IndirectFitAnalysisTab
     : public IndirectDataAnalysisTab {
   Q_OBJECT
@@ -52,6 +55,10 @@ public:
   QString selectedFitType() const;
   size_t numberOfCustomFunctions(const std::string &functionName) const;
   void setConvolveMembers(bool convolveMembers);
+
+  static size_t
+  getNumberOfSpecificFunctionContained(const std::string &functionName,
+                                       const IFunction *compositeFunction);
 
 protected:
   IndirectFittingModel *fittingModel() const;
@@ -150,7 +157,7 @@ private:
   std::unique_ptr<IndirectFitPlotPresenter> m_plotPresenter;
   std::unique_ptr<IndirectSpectrumSelectionPresenter> m_spectrumPresenter;
   std::unique_ptr<IndirectFitOutputOptionsPresenter> m_outOptionsPresenter;
-  IndirectFitPropertyBrowser *m_fitPropertyBrowser;
+  IndirectFitPropertyBrowser *m_fitPropertyBrowser{nullptr};
   Mantid::API::IAlgorithm_sptr m_fittingAlgorithm;
 };
 

@@ -26,8 +26,6 @@ Mantid::Kernel::Logger g_log("IndirectFitAnalysisTab");
 using namespace Mantid::API;
 
 namespace {
-using namespace MantidQt::CustomInterfaces::IDA;
-
 bool doesExistInADS(std::string const &workspaceName) {
   return AnalysisDataService::Instance().doesExist(workspaceName);
 }
@@ -37,31 +35,36 @@ WorkspaceGroup_sptr getADSGroupWorkspace(std::string const &workspaceName) {
       workspaceName);
 }
 
+} // namespace
+
+namespace MantidQt {
+namespace CustomInterfaces {
+namespace IDA {
+
 /**
  * @param functionName  The name of the function.
  * @param compositeFunction  The function to search within.
  * @return              The number of custom functions, with the specified name,
  *                      included in the selected model.
  */
-size_t getNumberOfSpecificFunctionContained(const std::string &functionName,
-                                            IFunction_sptr compositeFunction) {
+size_t IndirectFitAnalysisTab::getNumberOfSpecificFunctionContained(
+    const std::string &functionName, const IFunction *compositeFunction) {
+  // Whilst this could be a free method it would require its own
+  // dll_export in the header, so it's easier to make it static
+  assert(compositeFunction);
+
   if (compositeFunction->nFunctions() == 0) {
     return compositeFunction->name() == functionName ? 1 : 0;
   } else {
     size_t count{0};
     for (size_t i{0}; i < compositeFunction->nFunctions(); i++) {
       count += getNumberOfSpecificFunctionContained(
-          functionName, compositeFunction->getFunction(i));
+          functionName, compositeFunction->getFunction(i).get());
     }
     return count;
   }
 }
 
-} // namespace
-
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
 IndirectFitAnalysisTab::IndirectFitAnalysisTab(IndirectFittingModel *model,
                                                QWidget *parent)
     : IndirectDataAnalysisTab(parent), m_fittingModel(model) {}
@@ -258,7 +261,7 @@ size_t IndirectFitAnalysisTab::numberOfCustomFunctions(
     const std::string &functionName) const {
   if (auto fittingFunction = m_fittingModel->getFittingFunction())
     return getNumberOfSpecificFunctionContained(
-        functionName, fittingFunction->getFunction(0));
+        functionName, fittingFunction->getFunction(0).get());
   else
     return 0;
 }
