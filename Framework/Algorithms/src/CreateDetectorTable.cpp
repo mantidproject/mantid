@@ -93,7 +93,7 @@ std::map<std::string, std::string> CreateDetectorTable::validateInputs() {
   const auto matrix = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS);
 
   if (matrix) {
-    const int numSpectra = matrix->getNumberHistograms();
+    const int numSpectra = static_cast<int>(matrix->getNumberHistograms());
     const std::vector<int> indices = getProperty("WorkspaceIndices");
 
     if (std::any_of(indices.cbegin(), indices.cend(),
