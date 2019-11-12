@@ -43,6 +43,7 @@ public:
     return "Create a table showing detector information for the given "
            "workspace and optionally the data for that detector";
   }
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   /// Initialisation code
