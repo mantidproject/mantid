@@ -34,11 +34,8 @@ from mantid.plots import helperfunctions, plotfunctions, plotfunctions3D
 from mantid.plots.utility import autoscale_on_update
 from mantid.plots.helperfunctions import get_normalize_by_bin_width
 from mantid.plots.scales import PowerScale, SquareScale
-from mantid.plots.utility import artists_hidden
+from mantid.plots.utility import artists_hidden, MantidAxType
 from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
-
-BIN_AXIS = 0
-SPEC_AXIS = 1
 
 
 def plot_decorator(func):
@@ -183,10 +180,6 @@ class MantidAxes(Axes):
     # Required by Axes base class
     name = 'mantid'
 
-    # Enumerators for plotting directions
-    HORIZONTAL = BIN = 0
-    VERTICAL = SPECTRUM = 1
-
     # Store information for any workspaces attached to this axes instance
     tracked_workspaces = None
 
@@ -255,7 +248,7 @@ class MantidAxes(Axes):
     def is_axis_of_type(axis_type, kwargs):
         if kwargs.get('axis', None) is not None:
             return kwargs.get('axis', None) == axis_type
-        return axis_type == SPEC_AXIS
+        return axis_type == MantidAxType.SPECTRUM
 
     @staticmethod
     def get_spec_num_from_wksp_index(workspace, wksp_index):
@@ -267,15 +260,15 @@ class MantidAxes(Axes):
             return kwargs['specNum']
         elif kwargs.get('wkspIndex', None) is not None:
             # If wanting to plot a bin
-            if MantidAxes.is_axis_of_type(BIN_AXIS, kwargs):
+            if MantidAxes.is_axis_of_type(MantidAxType.BIN, kwargs):
                 return kwargs['wkspIndex']
             # If wanting to plot a spectrum
-            elif MantidAxes.is_axis_of_type(SPEC_AXIS, kwargs):
+            elif MantidAxes.is_axis_of_type(MantidAxType.SPECTRUM, kwargs):
                 return MantidAxes.get_spec_num_from_wksp_index(workspace, kwargs['wkspIndex'])
         elif getattr(workspace, 'getNumberHistograms', lambda: -1)() == 1:
             # If the workspace has one histogram, just plot that
             kwargs['wkspIndex'] = 0
-            if MantidAxes.is_axis_of_type(BIN_AXIS, kwargs):
+            if MantidAxes.is_axis_of_type(MantidAxType.BIN, kwargs):
                 return kwargs['wkspIndex']
             return MantidAxes.get_spec_num_from_wksp_index(workspace, kwargs['wkspIndex'])
         else:
@@ -626,7 +619,7 @@ class MantidAxes(Axes):
                 artist = self.track_workspace_artist(workspace,
                                                      plotfunctions.plot(self, *args, **kwargs),
                                                      _data_update, spec_num, is_normalized,
-                                                     MantidAxes.is_axis_of_type(SPEC_AXIS, kwargs))
+                                                     MantidAxes.is_axis_of_type(MantidAxType.SPECTRUM, kwargs))
             return artist
         else:
             return Axes.plot(self, *args, **kwargs)
@@ -734,7 +727,7 @@ class MantidAxes(Axes):
                 artist = self.track_workspace_artist(workspace,
                                                      plotfunctions.errorbar(self, *args, **kwargs),
                                                      _data_update, spec_num, is_normalized,
-                                                     MantidAxes.is_axis_of_type(SPEC_AXIS, kwargs))
+                                                     MantidAxes.is_axis_of_type(MantidAxType.SPECTRUM, kwargs))
             return artist
         else:
             return Axes.errorbar(self, *args, **kwargs)
