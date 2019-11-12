@@ -55,7 +55,7 @@ class LegendTabWidgetPresenter:
         self.view.set_edge_color(legend_props.edge_color)
 
         # Converts alpha value (opacity value between 0 and 1) to transparency percentage.
-        if int(matplotlib.__version__[0]) > 2:
+        if int(matplotlib.__version__[0]) >= 2:
             transparency = 100-(legend_props.transparency*100)
             self.view.set_transparency_spin_box(transparency)
             self.view.set_transparency_slider(transparency)
