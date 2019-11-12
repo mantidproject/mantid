@@ -144,7 +144,8 @@ public:
 
   /**
    * Test that getMostRecentFile reader can read
-   * filenames where the detector
+   * filenames where the name of the detector
+   * is not given in the same case as the other files
    */
   void test_getMostRecentFileInsensativeToCaps() {
     const ScopedDirectory tmpDir("test_getMostRecentFile");
@@ -158,7 +159,7 @@ public:
 
   /**
    * Test that getMostRecentFile reader can handle
-   * any empty run directory
+   * an empty run directory
    * Previously this test would fail due to a segmentation fault
    */
   void test_getMostRecentFileHandlesEmptyDirectory() {
