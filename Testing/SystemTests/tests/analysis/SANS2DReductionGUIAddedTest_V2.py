@@ -51,7 +51,7 @@ class SANS2DAddedEventFilesWithOverlayTest_V2(systemtesting.MantidSystemTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         self.disableChecking.append('Instrument')
-        return '28827_rear_1D_1.75_16.5', 'SANS2DTUBES_AddedEventFilesWithOverlay.nxs'
+        return '28797_rear_1D_1.75_16.5', 'SANS2DTUBES_AddedEventFilesWithOverlay.nxs'
 
     def cleanup(self):
         # Delete all workspaces
@@ -95,7 +95,7 @@ class SANS2DAddedEventFilesWithOverlayAndTimeShiftTest_V2(systemtesting.MantidSy
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         self.disableChecking.append('Instrument')
-        return '28827_rear_1D_1.75_16.5', 'SANS2DTUBES_AddedEventFilesWithOverlayAndTimeShifts.nxs'
+        return '28797_rear_1D_1.75_16.5', 'SANS2DTUBES_AddedEventFilesWithOverlayAndTimeShifts.nxs'
 
     def cleanup(self):
         # Delete all workspaces
@@ -138,7 +138,7 @@ class SANS2DAddedEventFilesWithoutOverlayTest_V2(systemtesting.MantidSystemTest)
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         self.disableChecking.append('Instrument')
-        return '28827_rear_1D_1.75_16.5', 'SANS2DTUBES_AddedEventFilesWithoutOverlay.nxs'
+        return '28797_rear_1D_1.75_16.5', 'SANS2DTUBES_AddedEventFilesWithoutOverlay.nxs'
 
     def cleanup(self):
         # Delete all workspaces

@@ -54,9 +54,8 @@ Kernel::Logger logger("MDEventWorkspace");
 TMDE(MDEventWorkspace)::MDEventWorkspace(
     Mantid::API::MDNormalization preferredNormalization,
     Mantid::API::MDNormalization preferredNormalizationHisto)
-    : API::IMDEventWorkspace(), data(nullptr),
-      m_BoxController(new API::BoxController(nd)),
-      m_displayNormalization(preferredNormalization),
+    : API::IMDEventWorkspace(), m_BoxController(new API::BoxController(nd)),
+      data(), m_displayNormalization(preferredNormalization),
       m_displayNormalizationHisto(preferredNormalizationHisto),
       m_coordSystem(Kernel::None) {
   // First box is at depth 0, and has this default boxController
@@ -67,9 +66,8 @@ TMDE(MDEventWorkspace)::MDEventWorkspace(
 /** Copy constructor
  */
 TMDE(MDEventWorkspace)::MDEventWorkspace(const MDEventWorkspace<MDE, nd> &other)
-    : IMDEventWorkspace(other), data(nullptr),
-      m_BoxController(other.m_BoxController->clone()),
-      m_displayNormalization(other.m_displayNormalization),
+    : IMDEventWorkspace(other), m_BoxController(other.m_BoxController->clone()),
+      data(), m_displayNormalization(other.m_displayNormalization),
       m_displayNormalizationHisto(other.m_displayNormalizationHisto),
       m_coordSystem(other.m_coordSystem) {
 

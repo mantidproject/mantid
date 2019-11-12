@@ -25,12 +25,4 @@ See :doc:`mantidworkbench`.
 SliceViewer and Vates Simple Interface
 --------------------------------------
 
-Miscellaneous
--------------
-
-- Error Reporter text entry and information made more user friendly.
-- The custom dialog for :ref:`CreateSampleShape <algm-CreateSampleShape>`
-  has been removed. It will now fall back to the generic one.
-
-
-:ref:`Release 4.2.0 <v4.2.0>`
+:ref:`Release 4.3.0 <v4.3.0>`

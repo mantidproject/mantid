@@ -65,8 +65,8 @@ MDTransfModQ::getNMatrixDimensions(Kernel::DeltaEMode::Type mode,
 /**Convert single point of matrix workspace into reciprocal space and
 (optionally) modify signal and error
 as function of reciprocal space (e.g. Lorents corrections)
-@param x      -- the x-coordinate of matrix workspace. Often can be a time of
-flight though the unit conversion is available
+@param deltaEOrK0  -- In elastic the modulus of K0, in inelastic the energy
+  transfer
 @param Coord -- converted MD coordinates of the point x calculated for
 particular workspace position (detector)
 
@@ -77,14 +77,15 @@ No signal or error transformation is performed by this particular method.
 @return Coord -- the calculated coordinate of the point in the reciprocal space.
 
 */
-bool MDTransfModQ::calcMatrixCoord(const double &x, std::vector<coord_t> &Coord,
-                                   double &signal, double &ErrSq) const {
+bool MDTransfModQ::calcMatrixCoord(const double &deltaEOrK0,
+                                   std::vector<coord_t> &Coord, double &signal,
+                                   double &ErrSq) const {
   UNUSED_ARG(signal);
   UNUSED_ARG(ErrSq);
   if (m_Emode == Kernel::DeltaEMode::Elastic) {
-    return calcMatrixCoordElastic(x, Coord);
+    return calcMatrixCoordElastic(deltaEOrK0, Coord);
   } else {
-    return calcMatrixCoordInelastic(x, Coord);
+    return calcMatrixCoordInelastic(deltaEOrK0, Coord);
   }
 }
 
@@ -141,8 +142,8 @@ bool MDTransfModQ::calcYDepCoordinates(std::vector<coord_t> &Coord, size_t i) {
   // if input energy changes on each detector (efixed, indirect mode only), then
   // set up its value
   if (m_pEfixedArray) {
-    m_Ei = double(*(m_pEfixedArray + i));
-    m_Ki = sqrt(m_Ei / PhysicalConstants::E_mev_toNeutronWavenumberSq);
+    m_eFixed = double(*(m_pEfixedArray + i));
+    m_kFixed = sqrt(m_eFixed / PhysicalConstants::E_mev_toNeutronWavenumberSq);
   }
   // if spectra masked, this spectra should be excluded
   if (m_pDetMasks) {
@@ -156,7 +157,7 @@ bool MDTransfModQ::calcYDepCoordinates(std::vector<coord_t> &Coord, size_t i) {
 * Namely, it calculates module of Momentum transfer and the Energy
 * transfer and put them into initial positions (0 and 1) in the Coord vector
 *
-*@param     E_tr   input energy transfer
+*@param   deltaE input energy transfer
 *@param   &Coord  vector of MD coordinates with filled in momentum and energy
 transfer
 
@@ -166,22 +167,28 @@ the algorithm and false otherwise.
 * it also uses preprocessed detectors positions, which are calculated by
 PreprocessDetectors algorithm and set up by
 * calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i) method.    */
-bool MDTransfModQ::calcMatrixCoordInelastic(const double &E_tr,
+bool MDTransfModQ::calcMatrixCoordInelastic(const double &deltaE,
                                             std::vector<coord_t> &Coord) const {
-  if (E_tr < m_DimMin[1] || E_tr >= m_DimMax[1])
+  if (deltaE < m_DimMin[1] || deltaE >= m_DimMax[1])
     return false;
-  Coord[1] = static_cast<coord_t>(E_tr);
-  double k_tr;
-  // get module of the wavevector for scattered neutrons
+  Coord[1] = static_cast<coord_t>(deltaE);
+
+  // x,y,z refer to internal coordinate system where Z is the beam direction
+  double qx{0.0}, qy{0.0}, qz{0.0};
   if (this->m_Emode == Kernel::DeltaEMode::Direct) {
-    k_tr = sqrt((m_Ei - E_tr) / PhysicalConstants::E_mev_toNeutronWavenumberSq);
+    const double kFinal = sqrt((m_eFixed - deltaE) /
+                               PhysicalConstants::E_mev_toNeutronWavenumberSq);
+    qx = -m_ex * kFinal;
+    qy = -m_ey * kFinal;
+    qz = m_kFixed - m_ez * kFinal;
   } else {
-    k_tr = sqrt((m_Ei + E_tr) / PhysicalConstants::E_mev_toNeutronWavenumberSq);
+    const double kInitial = sqrt(
+        (m_eFixed + deltaE) / PhysicalConstants::E_mev_toNeutronWavenumberSq);
+    qx = -m_ex * m_kFixed;
+    qy = -m_ey * m_kFixed;
+    qz = kInitial - m_ez * m_kFixed;
   }
 
-  double qx = -m_ex * k_tr;
-  double qy = -m_ey * k_tr;
-  double qz = m_Ki - m_ez * k_tr;
   // transformation matrix has to be here for "Crystal AS Powder conversion
   // mode, further specialization possible if "powder" mode defined"
   double Qx = (m_RotMat[0] * qx + m_RotMat[1] * qy + m_RotMat[2] * qz);
@@ -249,7 +256,7 @@ std::vector<double> MDTransfModQ::getExtremumPoints(const double eMin,
   }
   case (Kernel::DeltaEMode::Direct):
   case (Kernel::DeltaEMode::Indirect): {
-    double ei = m_Ei;
+    double ei = m_eFixed;
     if (m_pEfixedArray)
       ei = double(*(m_pEfixedArray + det_num));
 
@@ -279,7 +286,6 @@ std::vector<double> MDTransfModQ::getExtremumPoints(const double eMin,
 void MDTransfModQ::initialize(const MDWSDescription &ConvParams) {
   //********** Generic part of initialization, common for elastic and inelastic
   // modes:
-  //   pHost      = &Conv;
   // get transformation matrix (needed for CrystalAsPoder mode)
   m_RotMat = ConvParams.getTransfMatrix();
   m_pEfixedArray = nullptr;
@@ -323,19 +329,19 @@ void MDTransfModQ::initialize(const MDWSDescription &ConvParams) {
     volatile auto Ei =
         ConvParams.m_PreprDetTable->getLogs()->getPropertyValueAsType<double>(
             "Ei");
-    m_Ei = Ei;
-    if (Ei !=
-        m_Ei) // Ei is NaN, try Efixed, but the value should be overridden later
+    m_eFixed = Ei;
+    if (Ei != m_eFixed) // Ei is NaN, try Efixed, but the value should be
+                        // overridden later
     {
       try {
-        m_Ei = ConvParams.m_PreprDetTable->getLogs()
-                   ->getPropertyValueAsType<double>("eFixed");
+        m_eFixed = ConvParams.m_PreprDetTable->getLogs()
+                       ->getPropertyValueAsType<double>("eFixed");
       } catch (...) {
       }
     }
 
     // the wave vector of incident neutrons;
-    m_Ki = sqrt(m_Ei / PhysicalConstants::E_mev_toNeutronWavenumberSq);
+    m_kFixed = sqrt(m_eFixed / PhysicalConstants::E_mev_toNeutronWavenumberSq);
     m_pEfixedArray = nullptr;
     if (m_Emode == static_cast<int>(Kernel::DeltaEMode::Indirect))
       m_pEfixedArray =
@@ -408,7 +414,8 @@ MDTransfModQ::MDTransfModQ()
     : m_ex(0), m_ey(0), m_ez(1), m_DetDirecton(nullptr), //,m_NMatrixDim(-1)
       m_NMatrixDim(0),                                   // uninitialized
       m_Emode(Kernel::DeltaEMode::Undefined),            // uninitialized
-      m_Ki(1.), m_Ei(1.), m_pEfixedArray(nullptr), m_pDetMasks(nullptr) {}
+      m_kFixed(1.), m_eFixed(1.), m_pEfixedArray(nullptr),
+      m_pDetMasks(nullptr) {}
 
 std::vector<std::string> MDTransfModQ::getEmodes() const {
   return Kernel::DeltaEMode::availableTypes();
