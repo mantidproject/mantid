@@ -35,6 +35,7 @@ from mantid.plots.utility import autoscale_on_update
 from mantid.plots.helperfunctions import get_normalize_by_bin_width
 from mantid.plots.scales import PowerScale, SquareScale
 from mantid.plots.utility import artists_hidden, MantidAxType
+from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
 
 
 def plot_decorator(func):
@@ -486,6 +487,13 @@ class MantidAxes(Axes):
             xys = [[lower_xlim, lower_ylim], [upper_xlim, upper_ylim]]
             # update_datalim will update limits with union of current lims and xys
             self.update_datalim(xys)
+
+    def make_legend(self):
+        if self.legend_ is None:
+            self.legend().draggable()
+        else:
+            props = LegendProperties.from_legend(self.legend_)
+            LegendProperties.create_legend(props, self)
 
     @staticmethod
     def is_empty(axes):
