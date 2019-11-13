@@ -34,7 +34,7 @@ SaveAscii::SaveAscii() : m_separatorIndex() {}
 /// Initialisation method.
 void SaveAscii::init() {
   declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "",
                                             Direction::Input),
       "The name of the workspace containing the data you want to save to a "
       "Ascii file.");
