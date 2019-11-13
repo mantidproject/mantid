@@ -154,19 +154,6 @@ class PythonCodeExecution(QObject):
                                    dont_inherit=True, flags=flags)
                 exec (code_obj, self.globals_ns, self.globals_ns)
 
-    def get_code_string_encoding(self, code_str):
-        """
-        Attempt to determine the encoding of the file. If the file contains non-ascii symbols,
-        detect_encoding will fail, so default to utf-8.
-        :param code_str: Code string to be run.
-        :return: The encoding to use on the strings.
-        """
-        try:
-            encoding = detect_encoding(StringIO(code_str).readline)[0]
-        except UnicodeEncodeError:
-            encoding = 'utf-8'
-        return encoding
-
     def reset_context(self):
         # create new context for execution
         self._globals_ns, self._namespace = {}, {}
