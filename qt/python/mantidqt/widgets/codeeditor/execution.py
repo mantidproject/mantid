@@ -13,7 +13,7 @@ import __future__
 import ast
 import os
 import re
-from cStringIO import StringIO
+from io import BytesIO
 from lib2to3.pgen2.tokenize import detect_encoding
 
 from qtpy.QtCore import QObject, Signal
@@ -37,7 +37,7 @@ def _get_imported_from_future(code_str):
     """
     future_imports = []
     try:
-        code_str = code_str.encode(detect_encoding(StringIO(code_str).readline)[0])
+        code_str = code_str.encode(detect_encoding(BytesIO(code_str.encode()).readline)[0])
     except UnicodeEncodeError:  # Script contains unicode symbol. Cannot run detect_encoding as it requires ascii.
         code_str = code_str.encode('utf-8')
     for node in ast.walk(ast.parse(code_str)):

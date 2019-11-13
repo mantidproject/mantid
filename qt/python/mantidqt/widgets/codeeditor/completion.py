@@ -35,7 +35,7 @@ from keyword import kwlist as python_keywords
 from collections import namedtuple
 
 from lib2to3.pgen2.tokenize import detect_encoding
-from cStringIO import StringIO
+from io import BytesIO
 from six import PY2, string_types
 
 if PY2:  # noqa
@@ -200,7 +200,7 @@ def get_line_number_from_index(string, index):
 
 def get_module_import_alias(import_name, text):
     try:
-        text = text.encode(detect_encoding(StringIO(text).readline)[0])
+        text = text.encode(detect_encoding(BytesIO(text.encode()).readline)[0])
     except UnicodeEncodeError:  # Script contains unicode symbol. Cannot run detect_encoding as it requires ascii.
         text = text.encode('utf-8')
     for node in ast.walk(ast.parse(text)):
