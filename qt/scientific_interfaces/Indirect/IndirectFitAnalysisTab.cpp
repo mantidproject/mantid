@@ -429,7 +429,9 @@ void IndirectFitAnalysisTab::updateFitBrowserParameterValues() {
       auto paramWs =
           AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
               paramWsName);
-      m_fitPropertyBrowser->updateMultiDatasetParameters(*paramWs);
+      auto rowCount = static_cast<int>(paramWs->rowCount());
+      if (TableRowIndex{rowCount} == m_fittingModel->getNumberOfDomains())
+        m_fitPropertyBrowser->updateMultiDatasetParameters(*paramWs);
     } else {
       IFunction_sptr fun = m_fittingAlgorithm->getProperty("Function");
       if (fun->getNumberDomains() > 1)
