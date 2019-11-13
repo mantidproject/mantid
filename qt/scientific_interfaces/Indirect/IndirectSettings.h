@@ -54,7 +54,7 @@ private:
 
   void connectIndirectInterface(QPointer<UserSubWindow> window);
 
-  QWidget *getDockedOrFloatingWindow() const;
+  QWidget *getDockedOrFloatingWindow();
 
   std::unique_ptr<IndirectSettingsPresenter> m_presenter;
   Ui::IndirectSettings m_uiForm;

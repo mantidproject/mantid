@@ -415,17 +415,16 @@ void ReflectometryReductionOneAuto3::exec() {
   alg->setProperty("InputWorkspace", inputWS);
   alg->execute();
 
-  // Set the unbinned output workspace in Q, cropped to the min/max q
+  // Set the unbinned output workspace in Q, scaled and cropped if necessary
   MatrixWorkspace_sptr IvsQ = alg->getProperty("OutputWorkspace");
+  IvsQ = scale(IvsQ);
   const auto params = getRebinParams(IvsQ, theta);
-  auto IvsQC = IvsQ;
-  if (!(params.qMinIsDefault && params.qMaxIsDefault))
-    IvsQC = cropQ(IvsQ, params);
+  auto IvsQC = cropQ(IvsQ, params);
   setProperty("OutputWorkspace", IvsQC);
 
   // Set the binned output workspace in Q
   if (params.hasQStep()) {
-    MatrixWorkspace_sptr IvsQB = rebinAndScale(IvsQ, params);
+    MatrixWorkspace_sptr IvsQB = rebin(IvsQ, params);
     setProperty("OutputWorkspaceBinned", IvsQB);
   } else {
     g_log.error("NRCalculateSlitResolution failed. Workspace in Q will not be "
@@ -669,7 +668,7 @@ ReflectometryReductionOneAuto3::getQStep(MatrixWorkspace_sptr inputWS,
   return qstep;
 }
 
-/** Rebin and scale a workspace in Q.
+/** Rebin a workspace in Q.
  *
  * @param inputWS :: the workspace in Q
  * @param params :: A vector containing the three rebin parameters (min, step
@@ -677,36 +676,55 @@ ReflectometryReductionOneAuto3::getQStep(MatrixWorkspace_sptr inputWS,
  * @return :: the output workspace
  */
 MatrixWorkspace_sptr
-ReflectometryReductionOneAuto3::rebinAndScale(MatrixWorkspace_sptr inputWS,
-                                              const RebinParams &params) {
-  // Rebin
+ReflectometryReductionOneAuto3::rebin(MatrixWorkspace_sptr inputWS,
+                                      const RebinParams &params) {
   IAlgorithm_sptr algRebin = createChildAlgorithm("Rebin");
   algRebin->initialize();
   algRebin->setProperty("InputWorkspace", inputWS);
   algRebin->setProperty("OutputWorkspace", inputWS);
   algRebin->setProperty("Params", params.asVector());
   algRebin->execute();
-  MatrixWorkspace_sptr IvsQ = algRebin->getProperty("OutputWorkspace");
-
-  // Scale (optional)
-  Property *scaleProp = getProperty("ScaleFactor");
-  if (!scaleProp->isDefault()) {
-    double scaleFactor = getProperty("ScaleFactor");
-    IAlgorithm_sptr algScale = createChildAlgorithm("Scale");
-    algScale->initialize();
-    algScale->setProperty("InputWorkspace", IvsQ);
-    algScale->setProperty("OutputWorkspace", IvsQ);
-    algScale->setProperty("Factor", 1.0 / scaleFactor);
-    algScale->execute();
-    IvsQ = algScale->getProperty("OutputWorkspace");
-  }
-
-  return IvsQ;
+  MatrixWorkspace_sptr binnedWS = algRebin->getProperty("OutputWorkspace");
+  return binnedWS;
 }
 
+/** Optionally scale a workspace.
+ *
+ * @param inputWS :: the workspace to scale
+ * @return :: the scaled workspace if the ScaleFactor was set or the
+ * unchanged input workspace otherwise.
+ */
+MatrixWorkspace_sptr
+ReflectometryReductionOneAuto3::scale(MatrixWorkspace_sptr inputWS) {
+  Property *scaleProp = getProperty("ScaleFactor");
+  if (scaleProp->isDefault())
+    return inputWS;
+
+  double scaleFactor = getProperty("ScaleFactor");
+  IAlgorithm_sptr algScale = createChildAlgorithm("Scale");
+  algScale->initialize();
+  algScale->setProperty("InputWorkspace", inputWS);
+  algScale->setProperty("OutputWorkspace", inputWS);
+  algScale->setProperty("Factor", 1.0 / scaleFactor);
+  algScale->execute();
+  MatrixWorkspace_sptr scaledWS = algScale->getProperty("OutputWorkspace");
+  return scaledWS;
+}
+
+/** Optionally crop a workspace in Q.
+ *
+ * @param inputWS :: the workspace to scale
+ * @param params :: A vector containing the three rebin parameters (min, step
+ * and max)
+ * @return :: the rebinned workspace if a min/max was set, or the unchanged
+ * input workspace otherwise.
+ */
 MatrixWorkspace_sptr
 ReflectometryReductionOneAuto3::cropQ(MatrixWorkspace_sptr inputWS,
                                       const RebinParams &params) {
+  if (params.qMinIsDefault && params.qMaxIsDefault)
+    return inputWS;
+
   IAlgorithm_sptr algCrop = createChildAlgorithm("CropWorkspace");
   algCrop->initialize();
   algCrop->setProperty("InputWorkspace", inputWS);
@@ -716,8 +734,8 @@ ReflectometryReductionOneAuto3::cropQ(MatrixWorkspace_sptr inputWS,
   if (!(params.qMaxIsDefault))
     algCrop->setProperty("XMax", params.qMax);
   algCrop->execute();
-  MatrixWorkspace_sptr IvsQ = algCrop->getProperty("OutputWorkspace");
-  return IvsQ;
+  MatrixWorkspace_sptr croppedWS = algCrop->getProperty("OutputWorkspace");
+  return croppedWS;
 }
 
 /**

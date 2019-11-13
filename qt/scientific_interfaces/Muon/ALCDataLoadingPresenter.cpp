@@ -60,6 +60,12 @@ void ALCDataLoadingPresenter::handleLoadRequested() {
     // and get the most recent file in the directory to be lastFile
     ALCLatestFileFinder finder(m_view->firstRun());
     lastFile = finder.getMostRecentFile();
+    // check it was able to find a lastFile
+    if (lastFile.empty()) {
+      m_view->displayError(
+          "Could not determine a valid list of files (check run directory)");
+      return;
+    }
     m_view->setCurrentAutoFile(lastFile);
   }
   // Now perform the load
@@ -88,7 +94,12 @@ void ALCDataLoadingPresenter::timerEvent(QTimerEvent *timeup) {
     // Most recent file in directory
     ALCLatestFileFinder finder(m_view->firstRun());
     std::string lastFile = finder.getMostRecentFile();
-    // Load file and update view
+    // check it was able to find a lastFile
+    if (lastFile.empty()) {
+      m_view->displayError(
+          "Could not determine a valid list of files (check run directory)");
+      return;
+    }
     load(lastFile);
     m_view->setCurrentAutoFile(lastFile);
     // Reset flag

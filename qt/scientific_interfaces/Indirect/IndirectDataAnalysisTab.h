@@ -53,7 +53,7 @@ class RangeSelector;
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
-class DLLExport IndirectDataAnalysisTab : public IndirectTab {
+class MANTIDQT_INDIRECT_DLL IndirectDataAnalysisTab : public IndirectTab {
   Q_OBJECT
 
 public:

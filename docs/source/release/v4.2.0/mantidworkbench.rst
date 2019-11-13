@@ -5,7 +5,7 @@ MantidWorkbench Changes
 
 .. figure:: ../../images/WB_Scriptrepo.png
    :class: screenshot
-   :width: 900px
+   :width: 750px
    :align: right
 
 .. contents:: Table of Contents
@@ -35,7 +35,7 @@ User Interface
 .. figure:: ../../images/WB_Viewmessages.png
    :class: screenshot
    :width: 250px
-   :align: left
+   :align: right
 
 Scripting
 ---------
@@ -47,13 +47,18 @@ Scripting
 - The auto-complete in Workbench's script editor has been improved.
 - \* **"View" option, allowing you to filter Messages output by script - Right-click in the Messages Display and hover over "View" to see the options.** \*
 
+|
+|
+
 .. figure:: ../../images/WB_Tiled.png
    :class: screenshot
-   :width: 1000px
+   :width: 900px
    :align: center
+        
+   *Tiled Plots in Workbench!!!*
 
-
-
+|
+|
 
 .. figure:: ../../images/WB_GenerateaScript.png
    :class: screenshot
@@ -79,7 +84,7 @@ Plotting
 - The X value headers on data display now shows values to 4 decimal places.
 - Plot Windows stay on top of Workbench's main window, so you can easily Drag and Drop workspaces onto existing figures.
 - Draggable horizontal and vertical markers can be inserted into plots.
-- \* **Colormap Icons - In a Plot Window open Figure Options (Gear Icon, under Images>Colormap shows Colormap Icons beside names.** \*
+- \* **Colormap Icons - In a Plot Window open Figure Options (Gear Icon), under Images>Colormap shows Colormap Icons beside names.** \*
 - Hex Codes can be input into the Color Selectors in Figure Options.
 - Scientific Notation can be used to input Axis Limits in the Figure Options.
 - Sub-tabs in the Curves tab in Figure Options on plots now contain "Apply to All" buttons. It copies the current curve's properties to all others in the plot.

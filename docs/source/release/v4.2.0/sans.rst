@@ -34,8 +34,7 @@ Improved
 Multiple ISIS SANS GUI Usability
 -----------------------------------
 
-- \* **The "visual noise" of the *General* and *Q, Wavelength* settings tabs has
-  been reduced.** \*
+- \* **The "visual noise" of the** *General* **and** *Q, Wavelength* **settings tabs has been reduced.** \*
 - Clicking on a cell in the table and typing will automatically start editing
   the cell without having to double click it.
 - Sample thickness is set when a user presses load or process selected,
@@ -60,6 +59,9 @@ Bug Fixes
   save directory if no instrument was selected.
 - A bug causing large batch files (1000+ runs) to take minutes to load into the
   ISIS SANS GUI has been fixed. Large batch files will now load within seconds.
+- Workspace names and output files use the run number from the table, rather
+  than the run number in the nxs file. If there is no run number it will
+  continue to use the run number from the nxs file, but emit a warning.
 
 Removed
 #######

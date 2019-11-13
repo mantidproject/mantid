@@ -222,6 +222,7 @@ class MainWindow(QMainWindow):
         self.set_splash("Loading code editing widget")
         from workbench.plugins.editor import MultiFileEditor
         self.editor = MultiFileEditor(self)
+        self.messagedisplay.display.setActiveScript(self.editor.editors.current_tab_filename)
         self.editor.register_plugin()
         self.widgets.append(self.editor)
         self.editor.editors.sig_code_exec_start.connect(self.messagedisplay.script_executing)
@@ -375,9 +376,9 @@ class MainWindow(QMainWindow):
         """Create a new interface window if one does not already exist,
         else show existing window"""
         object_name = 'custom-cpp-interface-' + interface_name
-        window = find_window(object_name, UserSubWindow)
+        window = find_window(object_name, QMainWindow)
         if window is None:
-            interface = self.interface_manager.createSubWindow(interface_name)
+            interface = self.interface_manager.createSubWindow(interface_name,self)
             interface.setObjectName(object_name)
             interface.setAttribute(Qt.WA_DeleteOnClose, True)
             interface.show()

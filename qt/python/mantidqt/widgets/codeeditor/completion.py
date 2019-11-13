@@ -33,7 +33,7 @@ import re
 import sys
 from keyword import kwlist as python_keywords
 from collections import namedtuple
-from six import PY2
+from six import PY2, string_types
 if PY2:  # noqa
     from inspect import getargspec as getfullargspec
 else:  # noqa
@@ -160,13 +160,15 @@ def generate_call_tips(definitions, prepend_module_name=None):
     for name, py_object in definitions.items():
         if name.startswith('_'):
             continue
-        if prepend_module_name is True:
-            prepend_module_name = py_object.__module__
+        if prepend_module_name is True and hasattr(py_object, '__module__'):
+            module_name = py_object.__module__
+        else:
+            module_name = prepend_module_name
         if inspect.isfunction(py_object) or inspect.isbuiltin(py_object):
-            if not prepend_module_name:
-                call_tips.append(name + get_function_spec(py_object))
+            if isinstance(module_name, string_types):
+                call_tips.append(module_name + '.' + name + get_function_spec(py_object))
             else:
-                call_tips.append(prepend_module_name + '.' + name + get_function_spec(py_object))
+                call_tips.append(name + get_function_spec(py_object))
             continue
         # Ignore modules or we get duplicates of methods/classes that are imported
         # in outer scopes, e.g. numpy.array and numpy.core.array
@@ -183,8 +185,8 @@ def generate_call_tips(definitions, prepend_module_name=None):
                 call_tip = name + '.' + attr + get_function_spec(f_attr)
             else:
                 call_tip = name + '.' + attr
-            if prepend_module_name:
-                call_tips.append(prepend_module_name + '.' + call_tip)
+            if isinstance(module_name, string_types):
+                call_tips.append(module_name + '.' + call_tip)
     return call_tips
 
 

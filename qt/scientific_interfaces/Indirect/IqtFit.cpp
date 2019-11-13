@@ -78,14 +78,14 @@ void IqtFit::fitFunctionChanged() {
 std::string IqtFit::fitTypeString() const {
   const auto numberOfExponential = numberOfCustomFunctions("ExpDecay");
   const auto numberOfStretched = numberOfCustomFunctions("StretchExp");
-
+  std::string functionType{""};
   if (numberOfExponential > 0)
-    return std::to_string(numberOfExponential) + "E";
+    functionType += std::to_string(numberOfExponential) + "E";
 
   if (numberOfStretched > 0)
-    return std::to_string(numberOfStretched) + "S";
+    functionType += std::to_string(numberOfStretched) + "S";
 
-  return "";
+  return functionType;
 }
 
 void IqtFit::setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
