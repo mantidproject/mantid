@@ -23,14 +23,21 @@ Usage
    ws_detectors = CreateDetectorTable(ws)
 
    # Print the first row of the table
-   print(ws_detectors.row(0))
+   first_row = ws_detectors.row(0)
+   print("Index: {0}, Spectrum No: {1}, Detector ID: {2}, R: {3}, Theta: {4}, Phi: {5}, Monitor: {6}".format(
+         first_row['Index'],
+         first_row['Spectrum No'],
+         first_row['Detector ID(s)'],
+         first_row['R'],
+         first_row['Theta'],
+         first_row['Phi'],
+         first_row['Monitor']))
 
 Output:
 
 .. testoutput:: CreateDetectorTableExample
 
-  {'Index': 0.0, 'Phi': 0.0, 'Monitor': 'no', 'Spectrum No': 1, 'R': 5.0, 'Detector ID(s)': '100', 'Theta': 0.0}
-
+   Index: 0.0, Spectrum No: 1, Detector ID: 100, R: 5.0, Theta: 0.0, Phi: 0.0, Monitor: no
 .. categories::
 
 .. sourcelink::
