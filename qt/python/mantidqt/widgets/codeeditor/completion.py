@@ -162,7 +162,10 @@ def generate_call_tips(definitions, prepend_module_name=None):
         return []
     call_tips = []
     for name, py_object in definitions.items():
-        if name.startswith('_') or isinstance(py_object, unicode):
+        if PY2:
+            if isinstance(py_object, unicode):
+                continue
+        if name.startswith('_'):
             continue
         if prepend_module_name is True and hasattr(py_object, '__module__'):
             module_name = py_object.__module__
