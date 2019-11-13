@@ -19,7 +19,7 @@ public:
 
     GausDecay fn;
     TS_ASSERT(fn.categories().size() == 1);
-    TS_ASSERT(fn.category() == "Muon");
+    TS_ASSERT(fn.category() == "Muon Generic");
   }
 
   void test_values() {
