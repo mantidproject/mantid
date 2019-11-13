@@ -163,7 +163,7 @@ def generate_call_tips(definitions, prepend_module_name=None):
         return []
     call_tips = []
     for name, py_object in definitions.items():
-        if name.startswith('_'):
+        if name.startswith('_') or isinstance(py_object, unicode):
             continue
         if prepend_module_name is True and hasattr(py_object, '__module__'):
             module_name = py_object.__module__
@@ -204,7 +204,6 @@ def get_module_import_alias(import_name, text):
         text = text.encode(detect_encoding(StringIO(text).readline)[0])
     except UnicodeEncodeError:  # Script contains unicode symbol. Cannot run detect_encoding as it requires ascii.
         text = text.encode('utf-8')
-        logger.notice('Using utf-8 encoding.')
     for node in ast.walk(ast.parse(text)):
         if isinstance(node, ast.alias) and node.name == import_name:
             return node.asname

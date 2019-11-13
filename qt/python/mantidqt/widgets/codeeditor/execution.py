@@ -12,6 +12,9 @@ from __future__ import absolute_import, unicode_literals
 import __future__
 import ast
 import os
+import re
+from cStringIO import StringIO
+from lib2to3.pgen2.tokenize import detect_encoding
 
 from qtpy.QtCore import QObject, Signal
 from qtpy.QtWidgets import QApplication
@@ -33,6 +36,10 @@ def _get_imported_from_future(code_str):
     :return list: List of names that are imported from __future__
     """
     future_imports = []
+    try:
+        code_str = code_str.encode(detect_encoding(StringIO(code_str).readline)[0])
+    except UnicodeEncodeError:  # Script contains unicode symbol. Cannot run detect_encoding as it requires ascii.
+        code_str = code_str.encode('utf-8')
     for node in ast.walk(ast.parse(code_str)):
         if isinstance(node, ast.ImportFrom):
             if node.module == '__future__':
@@ -129,7 +136,13 @@ class PythonCodeExecution(QObject):
         flags = get_future_import_compiler_flags(code_str)
         # This line checks the whole code string for syntax errors, so that no
         # code blocks are executed if the script has invalid syntax.
-        compile(code_str, filename, mode=COMPILE_MODE, dont_inherit=True, flags=flags)
+        try:
+            compile(code_str, filename, mode=COMPILE_MODE, dont_inherit=True, flags=flags)
+        except SyntaxError as e:  # Encoding declarations cause issues in compile calls. If found, remove them.
+            if "encoding declaration in Unicode string" in str(e):
+                code_str = re.sub("coding[=:]\s*([-\w.]+)", "", code_str, 1)
+            else:
+                raise e
 
         with AddedToSysPath([os.path.dirname(filename)]):
             sig_progress = self.sig_exec_progress
@@ -139,6 +152,19 @@ class PythonCodeExecution(QObject):
                 code_obj = compile(block.code_str, filename, mode=COMPILE_MODE,
                                    dont_inherit=True, flags=flags)
                 exec (code_obj, self.globals_ns, self.globals_ns)
+
+    def get_code_string_encoding(self, code_str):
+        """
+        Attempt to determine the encoding of the file. If the file contains non-ascii symbols,
+        detect_encoding will fail, so default to utf-8.
+        :param code_str: Code string to be run.
+        :return: The encoding to use on the strings.
+        """
+        try:
+            encoding = detect_encoding(StringIO(code_str).readline)[0]
+        except UnicodeEncodeError:
+            encoding = 'utf-8'
+        return encoding
 
     def reset_context(self):
         # create new context for execution
