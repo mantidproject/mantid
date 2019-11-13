@@ -315,9 +315,32 @@ public:
     verifyAndClear();
   }
 
+  void testSaveBatchSavesFile() {
+    auto presenter = makePresenter();
+    auto const filename = std::string("test.json");
+    EXPECT_CALL(m_messageHandler, askUserForFileName("JSON (*.json)"))
+        .Times(1)
+        .WillOnce(Return(filename));
+    EXPECT_CALL(m_fileHandler, saveJSONToFile(filename, _)).Times(1);
+    presenter.notifySaveBatchRequested(0);
+    verifyAndClear();
+  }
+
+  void testLoadBatchAsksUserForJsonFilename() {
+    auto presenter = makePresenter();
+    auto const filename = std::string("test.json");
+    EXPECT_CALL(m_messageHandler, askUserForFileName("JSON (*.json)"))
+        .Times(1)
+        .WillOnce(Return(filename));
+    EXPECT_CALL(m_fileHandler, loadJSONFromFile(filename)).Times(1);
+    presenter.notifyLoadBatchRequested(0);
+    verifyAndClear();
+  }
+
 private:
   NiceMock<MockMainWindowView> m_view;
   NiceMock<MockMessageHandler> m_messageHandler;
+  NiceMock<MockFileHandler> m_fileHandler;
   std::vector<IBatchView *> m_batchViews;
   std::vector<NiceMock<MockBatchPresenter> *> m_batchPresenters;
   NiceMock<MockBatchPresenterFactory> *m_makeBatchPresenter;
@@ -329,9 +352,11 @@ private:
   public:
     MainWindowPresenterFriend(
         IMainWindowView *view, IMessageHandler *messageHandler,
+        IFileHandler *fileHandler,
         std::unique_ptr<ISlitCalculator> slitCalculator,
         std::unique_ptr<IBatchPresenterFactory> makeBatchPresenter)
-        : MainWindowPresenter(view, messageHandler, std::move(slitCalculator),
+        : MainWindowPresenter(view, messageHandler, fileHandler,
+                              std::move(slitCalculator),
                               std::move(makeBatchPresenter)) {}
   };
 
@@ -350,15 +375,16 @@ private:
           .WillByDefault(Return(batchPresenter));
     }
     // Make the presenter
-    auto presenter = MainWindowPresenterFriend(&m_view, &m_messageHandler,
-                                               std::move(slitCalculator),
-                                               std::move(makeBatchPresenter));
+    auto presenter = MainWindowPresenterFriend(
+        &m_view, &m_messageHandler, &m_fileHandler, std::move(slitCalculator),
+        std::move(makeBatchPresenter));
     return presenter;
   }
 
   void verifyAndClear() {
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_messageHandler));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_fileHandler));
     for (auto batchPresenter : m_batchPresenters)
       TS_ASSERT(Mock::VerifyAndClearExpectations(batchPresenter));
     m_batchPresenters.clear();

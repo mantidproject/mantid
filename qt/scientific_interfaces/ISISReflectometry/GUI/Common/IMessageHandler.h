@@ -24,6 +24,7 @@ public:
                             const std::string &title) = 0;
   virtual bool askUserYesNo(const std::string &prompt,
                             const std::string &title) = 0;
+  virtual std::string askUserForFileName(std::string const &filter) = 0;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

@@ -23,6 +23,7 @@ namespace ISISReflectometry {
 
 class IBatchPresenterFactory;
 class IMainWindowView;
+class IFileHandler;
 class IMessageHandler;
 
 /** @class MainWindowPresenter
@@ -37,6 +38,7 @@ public:
   /// Constructor
   MainWindowPresenter(
       IMainWindowView *view, IMessageHandler *messageHandler,
+      IFileHandler *fileHandler,
       std::unique_ptr<MantidWidgets::ISlitCalculator> slitCalculator,
       std::unique_ptr<IBatchPresenterFactory> batchPresenterFactory);
   ~MainWindowPresenter();
@@ -70,6 +72,7 @@ public:
 protected:
   IMainWindowView *m_view;
   IMessageHandler *m_messageHandler;
+  IFileHandler *m_fileHandler;
   std::vector<std::unique_ptr<IBatchPresenter>> m_batchPresenters;
   Mantid::Geometry::Instrument_const_sptr m_instrument;
 
