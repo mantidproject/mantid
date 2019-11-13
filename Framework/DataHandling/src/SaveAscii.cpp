@@ -35,7 +35,7 @@ SaveAscii::SaveAscii() : m_separatorIndex() {}
 void SaveAscii::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "",
-                                            Direction::Input),
+                                                           Direction::Input),
       "The name of the workspace containing the data you want to save to a "
       "Ascii file.");
   const std::vector<std::string> asciiExts{".dat", ".txt", ".csv"};

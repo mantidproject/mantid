@@ -43,7 +43,7 @@ SaveAscii2::SaveAscii2()
 void SaveAscii2::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "",
-                                            Direction::Input),
+                                                           Direction::Input),
       "The name of the workspace containing the data you want to save to a "
       "Ascii file.");
 
