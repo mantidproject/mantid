@@ -4,28 +4,30 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_IFILEHANDLER_H
-#define MANTID_ISISREFLECTOMETRY_IFILEHANDLER_H
+#ifndef MANTID_ISISREFLECTOMETRY_IENCODER_H
+#define MANTID_ISISREFLECTOMETRY_IENCODER_H
 
 #include <QMap>
 #include <QString>
 #include <QVariant>
-#include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
-/** @class IFileHandler
 
-IFileHandler is an interface for saving/loading files
+class IMainWindowView;
+
+/** @class IEncoder
+
+IEncoder is an interface for encoding the contents of the reflectometry
+interface into a map
 */
-class IFileHandler {
+class IEncoder {
 public:
-  virtual ~IFileHandler(){};
-  virtual void saveJSONToFile(std::string const &filename,
-                              QMap<QString, QVariant> const &map) = 0;
-  virtual QMap<QString, QVariant>
-  loadJSONFromFile(std::string const &filename) = 0;
+  virtual ~IEncoder(){};
+  virtual QMap<QString, QVariant> encodeBatch(const IMainWindowView *mwv,
+                                              int batchIndex,
+                                              bool projectSave = false) = 0;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

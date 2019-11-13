@@ -103,7 +103,8 @@ void QtMainWindowView::initLayout() {
   // Create the presenter
   auto slitCalculator = std::make_unique<SlitCalculator>(this);
   m_presenter = std::make_unique<MainWindowPresenter>(
-      this, messageHandler, fileHandler, std::move(slitCalculator),
+      this, messageHandler, fileHandler, std::make_unique<Encoder>(),
+      std::make_unique<Decoder>(), std::move(slitCalculator),
       std::move(makeBatchPresenter));
 
   m_notifyee->notifyNewBatchRequested();
@@ -242,7 +243,6 @@ QMap<QString, QVariant>
 QtMainWindowView::loadJSONFromFile(std::string const &filename) {
   return MantidQt::API::loadJSONFromFile(QString::fromStdString(filename));
 }
-
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

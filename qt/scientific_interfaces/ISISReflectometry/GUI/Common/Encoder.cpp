@@ -24,8 +24,10 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
+
 BatchPresenter *Encoder::findBatchPresenter(const QtBatchView *gui,
-                                            const QtMainWindowView *mwv) {
+                                            const IMainWindowView *view) {
+  auto mwv = dynamic_cast<const QtMainWindowView *>(view);
   for (auto &ipresenter : mwv->m_presenter->m_batchPresenters) {
     auto presenter = dynamic_cast<BatchPresenter *>(ipresenter.get());
     if (presenter->m_view == gui) {
@@ -42,9 +44,10 @@ QMap<QString, QVariant> Encoder::encode(const QWidget *gui,
   QMap<QString, QVariant> map;
   map.insert(QString("tag"), QVariant(QString("ISIS Reflectometry")));
   QList<QVariant> batches;
-  for (const auto &batchView : mwv->m_batchViews) {
-    batches.append(QVariant(
-        encodeBatch(dynamic_cast<const QtBatchView *>(batchView), mwv, true)));
+  for (size_t batchIndex = 0; batchIndex < mwv->batches().size();
+       ++batchIndex) {
+    batches.append(
+        QVariant(encodeBatch(mwv, static_cast<int>(batchIndex), true)));
   }
   map.insert(QString("batches"), QVariant(batches));
   return map;
@@ -54,14 +57,10 @@ QList<QString> Encoder::tags() {
   return QList<QString>({QString("ISIS Reflectometry")});
 }
 
-QMap<QString, QVariant> Encoder::encodeBatch(const QtBatchView *gui,
-                                             const QtMainWindowView *mwv,
-                                             bool projectSave,
-                                             const BatchPresenter *presenter) {
-  auto batchPresenter = presenter;
-  if (!batchPresenter) {
-    batchPresenter = findBatchPresenter(gui, mwv);
-  }
+QMap<QString, QVariant> Encoder::encodeBatch(const IMainWindowView *mwv,
+                                             int batchIndex, bool projectSave) {
+  auto gui = dynamic_cast<const QtBatchView *>(mwv->batches()[batchIndex]);
+  auto batchPresenter = findBatchPresenter(gui, mwv);
   if (!batchPresenter) {
     throw std::runtime_error(
         "BatchPresenter could not be found during encode.");
@@ -84,15 +83,6 @@ QMap<QString, QVariant> Encoder::encodeBatch(const QtBatchView *gui,
              QVariant(encodeInstrument(gui->m_instrument.get())));
   map.insert(QString("saveView"), QVariant(encodeSave(gui->m_save.get())));
   return map;
-}
-
-QMap<QString, QVariant> Encoder::encodeBatch(const IBatchPresenter *presenter,
-                                             const IMainWindowView *mwv,
-                                             bool projectSave) {
-  auto batchPresenter = dynamic_cast<const BatchPresenter *>(presenter);
-  return encodeBatch(dynamic_cast<QtBatchView *>(batchPresenter->m_view),
-                     dynamic_cast<const QtMainWindowView *>(mwv), projectSave,
-                     batchPresenter);
 }
 
 QMap<QString, QVariant> Encoder::encodeRuns(const QtRunsView *gui,

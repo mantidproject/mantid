@@ -315,25 +315,35 @@ public:
     verifyAndClear();
   }
 
-  void testSaveBatchSavesFile() {
+  void testSaveBatch() {
     auto presenter = makePresenter();
     auto const filename = std::string("test.json");
+    auto const map = QMap<QString, QVariant>();
+    auto const batchIndex = 1;
     EXPECT_CALL(m_messageHandler, askUserForFileName("JSON (*.json)"))
         .Times(1)
         .WillOnce(Return(filename));
-    EXPECT_CALL(m_fileHandler, saveJSONToFile(filename, _)).Times(1);
-    presenter.notifySaveBatchRequested(0);
+    EXPECT_CALL(*m_encoder, encodeBatch(&m_view, batchIndex, false))
+        .Times(1)
+        .WillOnce(Return(map));
+    EXPECT_CALL(m_fileHandler, saveJSONToFile(filename, map)).Times(1);
+    presenter.notifySaveBatchRequested(batchIndex);
     verifyAndClear();
   }
 
-  void testLoadBatchAsksUserForJsonFilename() {
+  void testLoadBatch() {
     auto presenter = makePresenter();
     auto const filename = std::string("test.json");
+    auto const map = QMap<QString, QVariant>();
+    auto const batchIndex = 1;
     EXPECT_CALL(m_messageHandler, askUserForFileName("JSON (*.json)"))
         .Times(1)
         .WillOnce(Return(filename));
-    EXPECT_CALL(m_fileHandler, loadJSONFromFile(filename)).Times(1);
-    presenter.notifyLoadBatchRequested(0);
+    EXPECT_CALL(m_fileHandler, loadJSONFromFile(filename))
+        .Times(1)
+        .WillOnce(Return(map));
+    EXPECT_CALL(*m_decoder, decodeBatch(&m_view, batchIndex, map)).Times(1);
+    presenter.notifyLoadBatchRequested(batchIndex);
     verifyAndClear();
   }
 
@@ -341,6 +351,8 @@ private:
   NiceMock<MockMainWindowView> m_view;
   NiceMock<MockMessageHandler> m_messageHandler;
   NiceMock<MockFileHandler> m_fileHandler;
+  NiceMock<MockEncoder> *m_encoder;
+  NiceMock<MockDecoder> *m_decoder;
   std::vector<IBatchView *> m_batchViews;
   std::vector<NiceMock<MockBatchPresenter> *> m_batchPresenters;
   NiceMock<MockBatchPresenterFactory> *m_makeBatchPresenter;
@@ -352,15 +364,21 @@ private:
   public:
     MainWindowPresenterFriend(
         IMainWindowView *view, IMessageHandler *messageHandler,
-        IFileHandler *fileHandler,
+        IFileHandler *fileHandler, std::unique_ptr<IEncoder> encoder,
+        std::unique_ptr<IDecoder> decoder,
         std::unique_ptr<ISlitCalculator> slitCalculator,
         std::unique_ptr<IBatchPresenterFactory> makeBatchPresenter)
         : MainWindowPresenter(view, messageHandler, fileHandler,
+                              std::move(encoder), std::move(decoder),
                               std::move(slitCalculator),
                               std::move(makeBatchPresenter)) {}
   };
 
   MainWindowPresenterFriend makePresenter() {
+    auto encoder = std::make_unique<NiceMock<MockEncoder>>();
+    m_encoder = encoder.get();
+    auto decoder = std::make_unique<NiceMock<MockDecoder>>();
+    m_decoder = decoder.get();
     auto slitCalculator = std::make_unique<NiceMock<MockSlitCalculator>>();
     m_slitCalculator = slitCalculator.get();
     auto makeBatchPresenter =
@@ -376,7 +394,8 @@ private:
     }
     // Make the presenter
     auto presenter = MainWindowPresenterFriend(
-        &m_view, &m_messageHandler, &m_fileHandler, std::move(slitCalculator),
+        &m_view, &m_messageHandler, &m_fileHandler, std::move(encoder),
+        std::move(decoder), std::move(slitCalculator),
         std::move(makeBatchPresenter));
     return presenter;
   }
@@ -385,6 +404,8 @@ private:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_messageHandler));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_fileHandler));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_encoder));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_decoder));
     for (auto batchPresenter : m_batchPresenters)
       TS_ASSERT(Mock::VerifyAndClearExpectations(batchPresenter));
     m_batchPresenters.clear();

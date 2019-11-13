@@ -9,7 +9,7 @@
 
 #include "../../Common/DllConfig.h"
 #include "../../Reduction/ReductionOptionsMap.h"
-#include "../MainWindow/QtMainWindowView.h"
+#include "IDecoder.h"
 #include "MantidQtWidgets/Common/BaseDecoder.h"
 
 #include <QMap>
@@ -27,6 +27,7 @@ class ReductionJobs;
 class ReductionWorkspaces;
 class Row;
 class BatchPresenter;
+class IMainWindowView;
 class QtBatchView;
 class QtExperimentView;
 class QtInstrumentView;
@@ -42,20 +43,18 @@ class RangeInQ;
 class TransmissionRunPair;
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL Decoder
-    : public MantidQt::API::BaseDecoder {
+    : public MantidQt::API::BaseDecoder,
+      public IDecoder {
 public:
   QWidget *decode(const QMap<QString, QVariant> &map,
                   const std::string &directory) override;
   QList<QString> tags() override;
-  void decodeBatch(const QtBatchView *gui, const QtMainWindowView *mwv,
-                   const QMap<QString, QVariant> &map,
-                   const BatchPresenter *presenter = nullptr);
-  void decodeBatch(const IBatchPresenter *presenter, const IMainWindowView *mwv,
-                   const QMap<QString, QVariant> &map);
+  void decodeBatch(const IMainWindowView *mwv, int batchIndex,
+                   const QMap<QString, QVariant> &map) override;
 
 private:
   BatchPresenter *findBatchPresenter(const QtBatchView *gui,
-                                     const QtMainWindowView *mww);
+                                     const IMainWindowView *mww);
   void decodeExperiment(const QtExperimentView *gui,
                         const QMap<QString, QVariant> &map);
   void decodePerAngleDefaults(QTableWidget *tab,
