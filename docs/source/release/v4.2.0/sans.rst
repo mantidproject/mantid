@@ -34,8 +34,7 @@ Improved
 Multiple ISIS SANS GUI Usability
 -----------------------------------
 
-- \* **The "visual noise" of the *General* and *Q, Wavelength* settings tabs has
-  been reduced.** \*
+- \* **The "visual noise" of the** *General* **and** *Q, Wavelength* **settings tabs has been reduced.** \*
 - Clicking on a cell in the table and typing will automatically start editing
   the cell without having to double click it.
 - Sample thickness is set when a user presses load or process selected,

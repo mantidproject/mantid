@@ -80,6 +80,34 @@ void CreateDetectorTable::exec() {
   setProperty("DetectorTableWorkspace", detectorTable);
 }
 
+/*
+ * Validate the input parameters
+ * @returns map with keys corresponding to properties with errors and values
+ * containing the error messages.
+ */
+std::map<std::string, std::string> CreateDetectorTable::validateInputs() {
+  // create the map
+  std::map<std::string, std::string> validationOutput;
+
+  Workspace_sptr inputWS = getProperty("InputWorkspace");
+  const auto matrix = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS);
+
+  if (matrix) {
+    const int numSpectra = static_cast<int>(matrix->getNumberHistograms());
+    const std::vector<int> indices = getProperty("WorkspaceIndices");
+
+    if (std::any_of(indices.cbegin(), indices.cend(),
+                    [numSpectra](const auto index) {
+                      return (index >= numSpectra) || (index < 0);
+                    })) {
+      validationOutput["WorkspaceIndices"] =
+          "One or more indices out of range of available spectra.";
+    }
+  }
+
+  return validationOutput;
+}
+
 /**
  * Create the instrument detector table workspace from a MatrixWorkspace
  * @param ws :: A pointer to a MatrixWorkspace
