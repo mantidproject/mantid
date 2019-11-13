@@ -18,7 +18,7 @@ where,
 
 :math:`\omega=g_\mu H_0` ,
 
-:math:`t'&=t-t_\text{off}` ,
+:math:`t'=t-t_\text{off}` ,
 
 :math:`A_0` is the amplitude, 
 
@@ -28,7 +28,7 @@ H0 (G) is the local magnetic field,
 
 :math:`g_\mu` is the gyromagnetic ratio of muons,
 
-and :math:`T_\text{off}` (microsecs) is the time offset.
+and :math:`t_\text{off}` (microsecs) is the time offset.
 
 .. plot::
 	
