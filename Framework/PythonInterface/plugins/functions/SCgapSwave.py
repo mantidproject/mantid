@@ -15,7 +15,7 @@ from scipy.integrate import quad
 class SCgapSwave(IFunction1D):
 
     def category(self):
-        return "Muon"
+        return "Muon Specific"
 
     def init(self):
         self.declareParameter("Delta", 1.2, 'Gap Value')

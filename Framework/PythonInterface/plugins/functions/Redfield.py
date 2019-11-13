@@ -9,10 +9,10 @@
 from mantid.api import IFunction1D, FunctionFactory
 
 
-class RedfieldCutoff(IFunction1D):
+class Redfield(IFunction1D):
 
     def category(self):
-        return "Muon"
+        return "Muon Modelling"
 
     def init(self):
         self.declareParameter("A0", 1)
@@ -28,4 +28,4 @@ class RedfieldCutoff(IFunction1D):
         return A0 * 2 * (gmu * Hloc) ** 2 * tau / (1 + (gmu * x * tau) ** 2)
 
 
-FunctionFactory.subscribe(RedfieldCutoff)
+FunctionFactory.subscribe(Redfield)

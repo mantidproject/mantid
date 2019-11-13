@@ -15,7 +15,7 @@ from scipy.integrate import quad
 class StaticLorentzianKT(IFunction1D):
 
     def category(self):
-        return "Muon"
+        return "Muon Generic"
 
     def init(self):
         self.declareParameter("A0", 0.2)

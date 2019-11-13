@@ -13,7 +13,7 @@ import numpy as np
 class Meier(IFunction1D):
 
     def category(self):
-        return "Muon"
+        return "Muon Specific"
 
     def init(self):
         self.declareParameter("A0", 0.5, 'Amplitude')

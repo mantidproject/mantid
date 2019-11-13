@@ -31,7 +31,6 @@ set(TEST_PY_FILES
     PCRmagnetRedfieldTest.py
     PCRmagnetfnormTest.py
     RFresonanceTest.py
-    SilverBaselineTest.py
     SpinGlassTest.py
     StandardSCTest.py
     StaticLorentzianKTTest.py
@@ -39,7 +38,6 @@ set(TEST_PY_FILES
     StretchedKTTest.py
     TeixeiraWaterTest.py
     TFMuoniumTest.py
-    TriangleOscTest.py
     ZFprotonDipoleTest.py
     ZFdipoleTest.py
     ZFelectronDipoleTest.py

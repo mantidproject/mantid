@@ -14,7 +14,7 @@ from scipy import special as sp
 class Bessel(IFunction1D):
 
     def category(self):
-        return "Muon"
+        return "Muon Specific"
 
     def init(self):
         self.declareParameter("A0", 1, 'Amplitude')

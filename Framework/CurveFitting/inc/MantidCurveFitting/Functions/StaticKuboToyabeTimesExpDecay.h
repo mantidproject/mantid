@@ -28,7 +28,7 @@ class DLLExport StaticKuboToyabeTimesExpDecay : public API::ParamFunction,
 public:
   std::string name() const override { return "StaticKuboToyabeTimesExpDecay"; }
 
-  const std::string category() const override { return "Muon"; }
+  const std::string category() const override { return "Muon Generic"; }
 
 protected:
   void function1D(double *out, const double *xValues,

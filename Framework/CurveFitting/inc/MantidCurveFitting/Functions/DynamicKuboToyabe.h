@@ -34,7 +34,7 @@ public:
 
   /// overwrite base class methods
   std::string name() const override { return "DynamicKuboToyabe"; }
-  const std::string category() const override { return "Muon"; }
+  const std::string category() const override { return "Muon Generic"; }
 
   /// Returns the number of attributes associated with the function
   size_t nAttributes() const override { return 1; }

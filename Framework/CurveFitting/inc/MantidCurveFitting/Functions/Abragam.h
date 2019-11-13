@@ -34,7 +34,7 @@ public:
   std::string name() const override { return "Abragam"; }
 
   /// overwrite IFunction base class methods
-  const std::string category() const override { return "Muon"; }
+  const std::string category() const override { return "Muon Specific"; }
   void functionDeriv(const API::FunctionDomain &domain,
                      API::Jacobian &jacobian) override;
 

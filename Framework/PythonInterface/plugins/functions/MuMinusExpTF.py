@@ -13,7 +13,7 @@ import numpy as np
 class MuMinusExpTF(IFunction1D):
 
     def category(self):
-        return "Muon"
+        return "Muon Specific"
 
     def init(self):
         self.declareParameter("A", 1)
