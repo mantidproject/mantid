@@ -409,7 +409,7 @@ void SofQWNormalisedPolygon::exec() {
     Resetting the number of threads here to what is set in the config file is a
     temporary solution.
     */
-  PARALLEL_SET_MAX_THREADS_TO_CONFIG
+  FrameworkManager::Instance().setNumOMPThreadsToConfigValue();
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int64_t i = 0; i < static_cast<int64_t>(nHistos); ++i) {
     PARALLEL_START_INTERUPT_REGION

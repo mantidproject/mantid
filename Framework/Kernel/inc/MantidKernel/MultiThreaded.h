@@ -7,7 +7,6 @@
 #ifndef MANTID_KERNEL_MULTITHREADED_H_
 #define MANTID_KERNEL_MULTITHREADED_H_
 
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DataItem.h"
 
 #include <atomic>
@@ -205,13 +204,6 @@ void AtomicOp(std::atomic<T> &f, T d, BinaryOp op) {
  */
 #define PRAGMA_OMP(expression) PRAGMA(omp expression)
 
-#define PARALLEL_SET_MAX_THREADS_TO_CONFIG                                     \
-  auto maxCores = Kernel::ConfigService::Instance().getValue<int>(             \
-      "MultiThreaded.MaxCores");                                               \
-  if (maxCores.get_value_or(0) > 0) {                                          \
-    PARALLEL_SET_NUM_THREADS(maxCores.get());                                  \
-  }
-
 #else //_OPENMP
 
 /// Empty definitions - to enable set your complier to enable openMP
@@ -232,7 +224,6 @@ void AtomicOp(std::atomic<T> &f, T d, BinaryOp op) {
 #define PARALLEL_SECTIONS
 #define PARALLEL_SECTION
 #define PRAGMA_OMP(expression)
-#define PARALLEL_SET_MAX_THREADS_TO_CONFIG
 #endif //_OPENMP
 
 #endif // MANTID_KERNEL_MULTITHREADED_H_
