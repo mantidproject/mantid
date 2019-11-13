@@ -2,6 +2,11 @@
 Direct Geometry Changes
 =======================
 
+.. figure:: ../../images/ALFview.PNG
+   :class: screenshot
+   :width: 750px
+   :align: right
+
 .. contents:: Table of Contents
    :local:
 

@@ -24,7 +24,7 @@ Algorithms
 
 .. figure:: ../../images/MuonAnalysis.PNG
    :class: screenshot
-   :width: 800px
+   :width: 600px
    :align: right
 
 Muon Analysis 2 and Frequency Domain Interfaces

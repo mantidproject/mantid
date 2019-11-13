@@ -9,6 +9,14 @@ Reflectometry Changes
 ISIS Reflectometry Interface
 ----------------------------
 
+.. figure:: ../../images/Reflectometry-GUI-release4.2.png
+   :class: screenshot
+   :width: 500px
+   :align: right
+   :alt: New features on the ISIS Reflectometry interface
+        
+   *New features on the ISIS Reflectometry interface*
+
 New
 ###
 
@@ -19,14 +27,6 @@ New
 - The **Slit Calculator** dialog can now be accessed from the Tools menu.
 - **Polarization correction** inputs have been simplified to a single checkbox which, when ticked, will apply polarization corrections based on properties in the instrument parameters file.
 - **ScaleFactor** is now applied to the stitched output and individual ``IvsQ`` workspaces (previously, only the ``IvsQ_binned`` workspaces were scaled).
-
-.. figure:: ../../images/Reflectometry-GUI-release4.2.png
-   :class: screenshot
-   :width: 500px
-   :align: right
-   :alt: New features on the ISIS Reflectometry interface
-        
-   *New features on the ISIS Reflectometry interface*
 
 Bug fixes
 #########
