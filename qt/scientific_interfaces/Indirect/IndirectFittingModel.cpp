@@ -831,7 +831,8 @@ Mantid::API::IFunction_sptr
 IndirectFittingModel::getSingleFunction(TableDatasetIndex dataIndex,
                                         WorkspaceIndex spectrum) const {
   auto function = getFittingFunction();
-  assert(function->getNumberDomains() == getNumberOfDomains().value);
+  assert(function->getNumberDomains() ==
+         static_cast<size_t>(getNumberOfDomains().value));
   if (function->getNumberDomains() == 0) {
     throw std::runtime_error("Cannot set up a fit: is the function defined?");
   }
@@ -841,14 +842,16 @@ IndirectFittingModel::getSingleFunction(TableDatasetIndex dataIndex,
 Mantid::API::IAlgorithm_sptr
 IndirectFittingModel::sequentialFitAlgorithm() const {
   auto function = getFittingFunction();
-  assert(function->getNumberDomains() == getNumberOfDomains().value);
+  assert(function->getNumberDomains() ==
+         static_cast<size_t>(getNumberOfDomains().value));
   return AlgorithmManager::Instance().create("QENSFitSequential");
 }
 
 Mantid::API::IAlgorithm_sptr
 IndirectFittingModel::simultaneousFitAlgorithm() const {
   auto function = getFittingFunction();
-  assert(function->getNumberDomains() == getNumberOfDomains().value);
+  assert(function->getNumberDomains() ==
+         static_cast<size_t>(getNumberOfDomains().value));
   return AlgorithmManager::Instance().create("QENSFitSimultaneous");
 }
 

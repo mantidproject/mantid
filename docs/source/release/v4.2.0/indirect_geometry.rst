@@ -11,6 +11,7 @@ Improvements
 
 - Instrument definition is improved for IN16B to have the physical detector on the correct side of the beam axis, and different analyser focus for single detectors.
 - Able to choose a list of spectra for plotting for all Indirect Interfaces. For example, under Data Analysis>Elwin, entering 0-2,4,6-8 and clicking **Plot Spectra** will plot the workspace indices 0, 1, 2, 4, 6, 7 and 8. The same can be done for **Plot Tiled** on the Iqt tab. It is  also possible to produce a contour plot using **Plot Contour** on the Diffraction Interface.
+- Intial parameters now estimated when user adds an expononential function in I(Q,t) Fit.
 - The Plotting Options have also been made more consistent across the interface.
 
 .. figure:: ../../images/Indirect_Data_Analysis_IqtFit.PNG
@@ -23,7 +24,7 @@ Workbench
 -------------
 
 - The Indirect Bayes GUI has been added to the Workbench.
-- ``*``**The Indirect Data Analysis GUI has been added to the Workbench**``*``
+- \* **The Indirect Data Analysis GUI has been added to the Workbench** \*
 
 Algorithms
 ----------
@@ -49,6 +50,6 @@ BugFixes
 
 - A bug has been fixed in :ref:`MatchPeaks <algm-MatchPeaks>` which was causing wrong alignment in :ref:`IndirectILLReductionQENS <algm-IndirectILLReductionQENS>` with unmirror option 7, when the peaks in the alignment run are too narrow to be fitted.
 
-``*`` See associated image ``*``
+\* **See associated Image** \*
 
 :ref:`Release 4.2.0 <v4.2.0>`

@@ -7,12 +7,13 @@ MuSR Changes
 
 
 Improvements
-###############
+############
 
 - The speed of plotting during Sequential Fits.
 - Removed the creation of a group of groups from the Elemental Analysis GUI. It will now create a workspace for each detector, with each workspace containing three spectra corresponding to Total, Delayed and Prompt data.
 - Muon Analysis Interface>Fitting>Property>TF Asymmetry mode now rescales the fit to match the rescaled data.
 - Adding a pair by right clicking now allows a name to be specified.
+- The ALC interface can now safely be closed while loading a set of runs. On an initial close request the algoirthm will be cancelled. The window then be closed.
 
 Algorithms
 -------------
@@ -23,7 +24,7 @@ Algorithms
 
 .. figure:: ../../images/MuonAnalysis.PNG
    :class: screenshot
-   :width: 500px
+   :width: 800px
    :align: right
 
 Muon Analysis 2 and Frequency Domain Interfaces
@@ -35,7 +36,7 @@ Muon Analysis 2 and Frequency Domain Interfaces
 - Can now plot FFT's of PhaseQuad data.
 - Both interfaces work with Project Recovery. 
 - The original Muon Analysis GUI has been renamed "Muon Analysis Old" and has been deprecated. 
-- ``*`` The new Muon Analysis GUI has been renamed Muon Analysis. ``*``
+- \* **The new Muon Analysis GUI has been renamed Muon Analysis.** \*
 
 Bug Fixes
 #########
@@ -46,7 +47,8 @@ Bug Fixes
 - Fixed an issue where logs in TF asymmetry mode were not being propogated to the results tab.
 - Fixed an issue where Muon Analysis 2 would crash if a polynomial background was used in combination with another fitting function.
 - Fixed an issue where changing the dead time to from table workspace or other file did not work and reverted back to from data file.
+- Fixed an issue where the Auto button in the ALC interface would crash mantid if it failed to find a list of valid of files. It will now show an error if it fails to find a set of files.
 
-``*`` See associated Image ``*``
+\* **See associated Image** \*
 
 :ref:`Release 4.2.0 <v4.2.0>`

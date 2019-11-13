@@ -8,18 +8,13 @@ Direct Geometry Changes
 Interfaces
 ##########
 
--Added the :ref:`ALF View <ALF_View-ref>` GUI for aligning samples.
+- Added the :ref:`ALF View <ALF_View-ref>` GUI for aligning samples on the ALF Instrument.
 
 Algorithms
 ##########
 
 - :ref:`DirectILLApplySelfShielding <algm-DirectILLApplySelfShielding>` will now first subtract the empty container background, then apply the self-shielding correction of the sample.
 - Modified :ref:`MaskBTP <algm-MaskBTP-v1>` to include CHESS
-
-.. figure:: ../../images/CHESS.PNG
-   :class: screenshot
-   :width: 200px
-   :align: right
 
 Instrument Updates
 ##################
@@ -28,6 +23,5 @@ Instrument Updates
 - Added CHESS IDF.
 - Updated scripts QECoverage and DGSPlanner/InstrumentWidget for CHESS
 
- 
 
 :ref:`Release 4.2.0 <v4.2.0>`

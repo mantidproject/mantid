@@ -121,6 +121,7 @@ private:
   std::string buildStretchExpFunctionString() const;
   std::string buildBackgroundFunctionString() const;
   void estimateStretchExpParameters();
+  void estimateExpParameters();
   void addGlobal(const QString &parName);
   void removeGlobal(const QString &parName);
   QStringList makeGlobalList() const;

@@ -34,8 +34,9 @@ MDTransfQ3D::getNMatrixDimensions(Kernel::DeltaEMode::Type mode,
 
 /** Calculates 3D transformation of the variable coordinates and (if applicable)
   signal and error depending on 3D coordinates
-  * (e.g. Lorents corrections)
-  *@param x -- the transformed values
+  * (e.g. Lorentz corrections)
+  *@param deltaEOrK0 -- In elastic the modulus of K0, in inelastic the energy
+  transfer
   *@param Coord -- 3 or 4D coordinate of the resulting event
   *@param s -- the signal
   *@param err --the error
@@ -46,12 +47,13 @@ MDTransfQ3D::getNMatrixDimensions(Kernel::DeltaEMode::Type mode,
   @return s    -- Lorentz corrected signal
   @return err  -- Lorentz corrected error
 */
-bool MDTransfQ3D::calcMatrixCoord(const double &x, std::vector<coord_t> &Coord,
-                                  double &s, double &err) const {
+bool MDTransfQ3D::calcMatrixCoord(const double &deltaEOrK0,
+                                  std::vector<coord_t> &Coord, double &s,
+                                  double &err) const {
   if (m_Emode == Kernel::DeltaEMode::Elastic) {
-    return calcMatrixCoord3DElastic(x, Coord, s, err);
+    return calcMatrixCoord3DElastic(deltaEOrK0, Coord, s, err);
   } else {
-    return calcMatrixCoord3DInelastic(x, Coord);
+    return calcMatrixCoord3DInelastic(deltaEOrK0, Coord);
   }
 }
 
@@ -59,7 +61,7 @@ bool MDTransfQ3D::calcMatrixCoord(const double &x, std::vector<coord_t> &Coord,
 * Namely, it calculates module of Momentum transfer and the Energy
 * transfer and put them into initial positions (0 and 1) in the Coord vector
 *
-*@param     E_tr   input energy transfer
+*@param   deltaE   input energy transfer
 *@param   &Coord  vector of MD coordinates with filled in momentum and energy
 transfer
 
@@ -70,22 +72,26 @@ the algorithm and false otherwise.
 PreprocessDetectors algorithm and set up by
 * calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i) method.    */
 bool MDTransfQ3D::calcMatrixCoord3DInelastic(
-    const double &E_tr, std::vector<coord_t> &Coord) const {
-  Coord[3] = static_cast<coord_t>(E_tr);
+    const double &deltaE, std::vector<coord_t> &Coord) const {
+  Coord[3] = static_cast<coord_t>(deltaE);
   if (Coord[3] < m_DimMin[3] || Coord[3] >= m_DimMax[3])
     return false;
 
-  // get module of the wavevector for scattered neutrons
-  double k_tr;
+  // x,y,z refer to internal coordinate system where Z is the beam direction
+  double qx{0.0}, qy{0.0}, qz{0.0};
   if (m_Emode == Kernel::DeltaEMode::Direct) {
-    k_tr = sqrt((m_Ei - E_tr) / PhysicalConstants::E_mev_toNeutronWavenumberSq);
+    const double kFinal = sqrt((m_eFixed - deltaE) /
+                               PhysicalConstants::E_mev_toNeutronWavenumberSq);
+    qx = -m_ex * kFinal;
+    qy = -m_ey * kFinal;
+    qz = m_kFixed - m_ez * kFinal;
   } else {
-    k_tr = sqrt((m_Ei + E_tr) / PhysicalConstants::E_mev_toNeutronWavenumberSq);
+    qx = -m_ex * m_kFixed;
+    qy = -m_ey * m_kFixed;
+    const double kInitial = sqrt(
+        (m_eFixed + deltaE) / PhysicalConstants::E_mev_toNeutronWavenumberSq);
+    qz = kInitial - m_ez * m_kFixed;
   }
-
-  double qx = -m_ex * k_tr;
-  double qy = -m_ey * k_tr;
-  double qz = m_Ki - m_ez * k_tr;
 
   if (convention == "Crystallography") {
     qx = -qx;
@@ -214,8 +220,8 @@ bool MDTransfQ3D::calcYDepCoordinates(std::vector<coord_t> &Coord, size_t i) {
   // if input energy changes on each detector (efixed, indirect mode only), then
   // set up its value
   if (m_pEfixedArray) {
-    m_Ei = double(*(m_pEfixedArray + i));
-    m_Ki = sqrt(m_Ei / PhysicalConstants::E_mev_toNeutronWavenumberSq);
+    m_eFixed = double(*(m_pEfixedArray + i));
+    m_kFixed = sqrt(m_eFixed / PhysicalConstants::E_mev_toNeutronWavenumberSq);
   }
   // if masks are defined and detector masked -- no further calculations
   if (m_pDetMasks) {
@@ -256,11 +262,11 @@ void MDTransfQ3D::initialize(const MDWSDescription &ConvParams) {
   if (m_Emode == Kernel::DeltaEMode::Direct ||
       m_Emode == Kernel::DeltaEMode::Indirect) {
     // energy needed in inelastic case
-    m_Ei =
+    m_eFixed =
         ConvParams.m_PreprDetTable->getLogs()->getPropertyValueAsType<double>(
             "Ei");
     // the wave vector of incident neutrons;
-    m_Ki = sqrt(m_Ei / PhysicalConstants::E_mev_toNeutronWavenumberSq);
+    m_kFixed = sqrt(m_eFixed / PhysicalConstants::E_mev_toNeutronWavenumberSq);
 
     m_pEfixedArray = nullptr;
     if (m_Emode == static_cast<int>(Kernel::DeltaEMode::Indirect))

@@ -51,6 +51,7 @@ public:
   MOCK_CONST_METHOD0(isMultipleDataTabSelected, bool());
   MOCK_CONST_METHOD0(isResolutionHidden, bool());
   MOCK_METHOD1(setResolutionHidden, void(bool hide));
+  MOCK_METHOD1(setStartAndEndHidden, void(bool hidden));
   MOCK_METHOD0(disableMultipleDataTab, void());
 
   MOCK_CONST_METHOD0(getSelectedSample, std::string());
