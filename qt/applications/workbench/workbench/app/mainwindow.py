@@ -376,7 +376,7 @@ class MainWindow(QMainWindow):
         """Create a new interface window if one does not already exist,
         else show existing window"""
         object_name = 'custom-cpp-interface-' + interface_name
-        window = find_window(object_name, UserSubWindow)
+        window = find_window(object_name, QMainWindow)
         if window is None:
             interface = self.interface_manager.createSubWindow(interface_name,self)
             interface.setObjectName(object_name)
