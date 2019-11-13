@@ -9,7 +9,7 @@ Poisson Cost Function
 Description
 -----------
 
-The Poisson cost function is designed to be applied to data which has a Poisson distribution and a low number of counts.
+The Poisson cost function is designed to be applied to data, which has a low number of counts.
 It is used to measure the discrepancy between the observed and fitted value and this is minimised to find the
 best fit. Also known as the Poisson deviance or Poisson log-linear model, it uses the following function:
 
