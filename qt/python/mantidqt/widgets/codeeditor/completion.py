@@ -44,7 +44,6 @@ else:  # noqa
     from inspect import getfullargspec
 
 from mantidqt.widgets.codeeditor.editor import CodeEditor
-from mantid.simpleapi import logger
 
 ArgSpec = namedtuple("ArgSpec", "args varargs keywords defaults")
 
