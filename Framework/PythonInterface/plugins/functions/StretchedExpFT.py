@@ -49,10 +49,12 @@ class StretchedExpFT(IFunction1D):
             F(E) is normalized:
                 \int_{-infty}^{infty} dE F(E) = 1
         """
-        parms, de, energies, fourier = function1Dcommon(self, xvals, **optparms)
+        parms, de, energies, fourier = function1Dcommon(
+            self, xvals, **optparms)
         if parms is None:
-            return fourier  #return zeros if parameters not valid
-        transform = parms['Height'] * np.interp(xvals-parms['Centre'], energies, fourier)
+            return fourier  # return zeros if parameters not valid
+        transform = parms['Height'] * \
+            np.interp(xvals-parms['Centre'], energies, fourier)
         return transform
 
     @surrogate

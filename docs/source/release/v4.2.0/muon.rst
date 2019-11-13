@@ -24,7 +24,7 @@ Algorithms
 
 .. figure:: ../../images/MuonAnalysis.PNG
    :class: screenshot
-   :width: 800px
+   :width: 600px
    :align: right
 
 Muon Analysis 2 and Frequency Domain Interfaces
@@ -47,6 +47,7 @@ Bug Fixes
 - Fixed an issue where logs in TF asymmetry mode were not being propogated to the results tab.
 - Fixed an issue where Muon Analysis 2 would crash if a polynomial background was used in combination with another fitting function.
 - Fixed an issue where changing the dead time to from table workspace or other file did not work and reverted back to from data file.
+- Fixed an issue where the Auto button in the ALC interface would crash mantid if it failed to find a list of valid of files. It will now show an error if it fails to find a set of files.
 
 \* **See associated Image** \*
 

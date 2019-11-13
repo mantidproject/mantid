@@ -4,7 +4,7 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init,invalid-name
+# pylint: disable=no-init,invalid-name
 '''
 @author Mathieu Doucet, ORNL
 @date Oct 13, 2014
@@ -42,11 +42,11 @@ class GuinierPorod(IFunction1D):
         s = self.getParameterValue('Dimension')
         Rg = self.getParameterValue('Rg')
         m = self.getParameterValue('M')
-        if Rg<=0:
+        if Rg <= 0:
             return True
-        if m<s:
+        if m < s:
             return True
-        if s>3.0:
+        if s > 3.0:
             return True
         return False
 
@@ -63,9 +63,9 @@ class GuinierPorod(IFunction1D):
             return 0.0
         q1 = math.sqrt((m-s)*n/2.0)/Rg
         if qval < q1:
-            return math.pow(qval,-s)*math.exp((-qval*qval*Rg*Rg)/n)
+            return math.pow(qval, -s)*math.exp((-qval*qval*Rg*Rg)/n)
         else:
-            return math.pow(qval,-m)*math.pow(Rg,s-m)*math.exp((s-m)/2.0)*math.pow((m-s)*n/2.0,(m-s)/2.0)
+            return math.pow(qval, -m)*math.pow(Rg, s-m)*math.exp((s-m)/2.0)*math.pow((m-s)*n/2.0, (m-s)/2.0)
 
     def _first_derivative_dim(self, qval):
         """
@@ -81,12 +81,13 @@ class GuinierPorod(IFunction1D):
         q1 = math.sqrt((m-s)*n/2.0)/Rg
         qrg = qval*qval*Rg*Rg
         if qval < q1:
-            return -math.exp(-qrg/n)*math.pow(qval,-s)*math.log(qval) \
+            return -math.exp(-qrg/n)*math.pow(qval, -s)*math.log(qval) \
                 - math.exp(-qrg/n)*math.pow(qval, -s)*qrg/n/n
         else:
-            result = (2.0*s-m-3.0)/(2.0*(3.0-s)) - 0.5*(math.log(m-s)+math.log(3-s))
+            result = (2.0*s-m-3.0)/(2.0*(3.0-s)) - \
+                0.5*(math.log(m-s)+math.log(3-s))
             result += math.log(Rg) + math.log(2.0) + 1.0
-            return result * math.pow(qval,-m) * math.pow(Rg,s-m) * math.exp((s-m)/2.0) * math.pow((m-s)*n/2.0,(m-s)/2.0)
+            return result * math.pow(qval, -m) * math.pow(Rg, s-m) * math.exp((s-m)/2.0) * math.pow((m-s)*n/2.0, (m-s)/2.0)
 
     def _first_derivative_m(self, qval):
         """
@@ -107,8 +108,8 @@ class GuinierPorod(IFunction1D):
             return 0.0
         else:
             result = -math.log(qval) - math.log(Rg) - math.log(2.0) - 1.0
-            result += ( (math.log(m-s)+math.log(3-s))/2.0 + 0.5 )
-            return result * math.pow(qval,-m) * math.pow(Rg,s-m) * math.exp((s-m)/2.0) * math.pow((m-s)*n/2.0,(m-s)/2.0)
+            result += ((math.log(m-s)+math.log(3-s))/2.0 + 0.5)
+            return result * math.pow(qval, -m) * math.pow(Rg, s-m) * math.exp((s-m)/2.0) * math.pow((m-s)*n/2.0, (m-s)/2.0)
 
     def _first_derivative_rg(self, qval):
         """
@@ -124,10 +125,10 @@ class GuinierPorod(IFunction1D):
         q1 = math.sqrt((m-s)*n/2.0)/Rg
         qrg = qval*qval*Rg*Rg
         if qval < q1:
-            return -2.0*Rg*math.pow(qval,-s)*math.exp(-qrg/n)*qval*qval/n
+            return -2.0*Rg*math.pow(qval, -s)*math.exp(-qrg/n)*qval*qval/n
         else:
-            return math.pow(qval,-m)*math.exp((s-m)/2.0)*math.pow(((m-s)*n/2.0),
-                                                                  ((m-s)/2.0))*(s-m)*math.pow(Rg,(s-m-1))
+            return math.pow(qval, -m)*math.exp((s-m)/2.0)*math.pow(((m-s)*n/2.0),
+                                                                   ((m-s)/2.0))*(s-m)*math.pow(Rg, (s-m-1))
 
     def function1D(self, xvals):
         """
@@ -139,7 +140,7 @@ class GuinierPorod(IFunction1D):
         bgd = self.getParameterValue('Background')
 
         output = np.zeros(len(xvals), dtype=float)
-        for i,x in enumerate(xvals):
+        for i, x in enumerate(xvals):
             output[i] = scale * self._guinier_porod_core(x) + bgd
         return output
 
@@ -151,11 +152,11 @@ class GuinierPorod(IFunction1D):
         """
         i = 0
         for x in xvals:
-            jacobian.set(i,0, self._guinier_porod_core(x))
-            jacobian.set(i,1, self._first_derivative_dim(x))
-            jacobian.set(i,2, self._first_derivative_rg(x))
-            jacobian.set(i,3, self._first_derivative_m(x))
-            jacobian.set(i,4, 1.0)
+            jacobian.set(i, 0, self._guinier_porod_core(x))
+            jacobian.set(i, 1, self._first_derivative_dim(x))
+            jacobian.set(i, 2, self._first_derivative_rg(x))
+            jacobian.set(i, 3, self._first_derivative_m(x))
+            jacobian.set(i, 4, 1.0)
             i += 1
 
 

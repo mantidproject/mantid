@@ -36,7 +36,9 @@ class TeixeiraWater(IFunction1D):
         xvals = np.array(xvals)
 
         with np.errstate(divide='ignore'):
-            hwhm = self.hbar * np.square(xvals * length) / (tau * (6 + np.square(xvals * length)))
+            hwhm = self.hbar * \
+                np.square(xvals * length) / \
+                (tau * (6 + np.square(xvals * length)))
         return hwhm
 
     def functionDeriv1D(self, xvals, jacobian):
@@ -44,7 +46,8 @@ class TeixeiraWater(IFunction1D):
         length = self.getParameterValue("L")
 
         for i, x in enumerate(xvals, start=0):
-            hwhm = self.hbar * np.square(x * length) / (tau * (6 + np.square(x * length)))
+            hwhm = self.hbar * \
+                np.square(x * length) / (tau * (6 + np.square(x * length)))
             jacobian.set(i, 0, -hwhm / tau)
             jacobian.set(i, 1, 2 * hwhm * (1.0 - hwhm * tau) / length)
 

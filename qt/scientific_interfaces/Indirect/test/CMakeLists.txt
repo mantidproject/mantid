@@ -5,6 +5,7 @@ set(
   ConvFitModelTest.h
   IndirectDataTablePresenterTest.h
   IndirectDataValidationHelperTest.h
+  IndirectFitAnalysisTabTest.h
   IndirectFitDataPresenterTest.h
   IndirectFitDataTest.h
   IndirectFitOutputOptionsModelTest.h

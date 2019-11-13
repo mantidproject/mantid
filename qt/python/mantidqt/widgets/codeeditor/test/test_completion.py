@@ -15,7 +15,7 @@ import numpy as np  # noqa
 
 from mantid.simpleapi import Rebin  # noqa  # needed so sys.modules can pick up Rebin
 from mantid.py3compat.mock import Mock
-from mantidqt.widgets.codeeditor.completion import (CodeCompleter, get_function_spec,
+from mantidqt.widgets.codeeditor.completion import (CodeCompleter, generate_call_tips, get_function_spec,
                                                     get_builtin_argspec, get_module_import_alias)
 from testhelpers import assertRaisesNothing
 
@@ -60,6 +60,14 @@ class CodeCompletionTest(unittest.TestCase):
 
     def test_pyplot_call_tips_not_generated_if_its_not_imported(self):
         self._run_check_call_tip_not_generated("# My code", "pyplot")
+
+    def test_generate_call_tips_without_module_attribute_and_prepend_module_name(self):
+        tips = generate_call_tips({'unicode_str': u'my unicode str'}, prepend_module_name=True)
+        self.assertEqual(0, len(tips))
+
+    def test_generate_call_tips_without_module_attribute_and_prepend_module_name_false(self):
+        tips = generate_call_tips({'unicode_str': u'my unicode str'}, prepend_module_name=False)
+        self.assertEqual(0, len(tips))
 
     def test_nothing_raised_when_getting_completions_from_a_not_imported_module(self):
         completer = self._get_completer("# My code")
