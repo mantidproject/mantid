@@ -141,6 +141,7 @@ class PythonCodeExecution(QObject):
         except SyntaxError as e:  # Encoding declarations cause issues in compile calls. If found, remove them.
             if "encoding declaration in Unicode string" in str(e):
                 code_str = re.sub("coding[=:]\s*([-\w.]+)", "", code_str, 1)
+                compile(code_str, filename, mode=COMPILE_MODE, dont_inherit=True, flags=flags)
             else:
                 raise e
 
