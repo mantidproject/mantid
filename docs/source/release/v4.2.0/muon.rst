@@ -7,38 +7,42 @@ MuSR Changes
 
 New
 ###
-  * New fitting functions added and muon fitting functions re-organised into Muon Generic, Muon Specific and Muon Modelling.
-  * Newly added functions are:
-    - AFMLF
-    - AFMZF
-    - Bessel
-    - CompositePCRmagnet
-    - CombGaussLorenzKT
-    - DampedBessel
-    - FmuF
-    - GauBroadGauKT
-    - GaussBessel
-    - HighTFMuonium
-    - LowTFMuonium
-    - Meier
-    - ModOsc
-    - MuMinusExpTF
-    - MuH
-    - PCRmagRedfield
-    - PCRmagnetZFKT
-    - PCRmagnet
-    - PCRmagnetform
-    - Redfield
-    - RFresonance
-    - SpinGlass
-    - StandardSC
-    - StaticLorentzianKT
-    - StretchedKT
-    - TFMuonium
-    - ZFdipole
-    - ZFelectronDipole
-    - ZFMuonium
-    - ZFprotonDipole 
+
+- New fitting functions added and muon fitting functions re-organised into Muon Generic, Muon Specific and Muon Modelling.
+- Newly added functions are:
+   - Muon Generic
+      - :ref:`CombGaussLorenzKT<func-CombGaussLorentzKT>`
+      - :ref:`StaticLorentzianKT <func-StaticLorentzianKT>`
+      - :ref:`StretchedKT <func-StretchedKT>`
+      - :ref:`StandardSC <func-StandardSC>`
+   - Muon Modelling
+      - :ref:`Redfield <func-Redfield>`
+   - Muon Specific
+       - :ref:`AFMLF <func-AFMLF>`
+       - :ref:`AFMZF <func-AFMZF>`
+       - :ref:`Bessel <func-Bessel>`
+       - :ref:`CompositePCRmagnet <func-CompositePCRmagnet>`
+       - :ref:`DampedBessel <func-DampedBessel>`
+       - :ref:`FmuF <func-FmuF>`
+       - :ref:`GauBroadGauKT <func-GauBroadGauKT>`
+       - :ref:`GaussBessel <func-GaussBessel>`
+       - :ref:`HighTFMuonium <func-HighTFMuonium>`
+       - :ref:`LowTFMuonium <func-LowTFMuonium>`
+       - :ref:`Meier <func-Meier>`
+       - :ref:`ModOsc <func-ModOsc>`
+       - :ref:`MuMinusExpTF <func-MuMinusExpTF>`
+       - :ref:`MuH <func-MuH>`
+       - :ref:`PCRmagRedfield <func-PCRmagRedfield>`
+       - :ref:`PCRmagnetZFKT <func-PCRmagnetZFKT>`
+       - :ref:`PCRmagnet <func-PCRmagnet>`
+       - :ref:`PCRmagnetfnorm <func-PCRmagnetfnorm>`
+       - :ref:`RFresonance <func-RFresonance>`
+       - :ref:`SpinGlass <func-SpinGlass>`
+       - :ref:`TFMuonium <func-TFMuonium>`
+       - :ref:`ZFdipole <func-ZFdipole>`
+       - :ref:`ZFelectronDipole <func-ZFelectronDipole>`
+       - :ref:`ZFMuonium <func-ZFMuonium>`
+       - :ref:`ZFprotonDipole <func-ZFprotonDipole>` 
 
 Improvements
 ############
