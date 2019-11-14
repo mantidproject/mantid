@@ -8,11 +8,7 @@
 """
 Controls the dynamic displaying of errors for line on the plot
 """
-from functools import partial
 from matplotlib.container import ErrorbarContainer
-from qtpy.QtWidgets import QMenu
-
-from mantid.plots import MantidAxes
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import curve_has_errors, CurveProperties
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.presenter import CurvesTabWidgetPresenter
 from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
