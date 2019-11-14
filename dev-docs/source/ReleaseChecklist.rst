@@ -142,13 +142,13 @@ Once the unscripted testing has passed:
   uncomment ``VERSION_PATCH`` and set it to ``0``.
 * Merge ``release-next`` branch back to ``master``
 * Comment out patch number on ``master`` branch
+* Hit build on `release kit
+  builds <http://builds.mantidproject.org/view/Release%20Pipeline/>`__
+  and set the ``PACKAGE_SUFFIX`` parameter to an empty string
 * Draft a `new
   release <https://github.com/mantidproject/mantid/releases>`__ on
   GitHub. The new tag should be created based of the release branch in
   the form ``vX.Y.Z``
-* Hit build on `release kit
-  builds <http://builds.mantidproject.org/view/Release%20Pipeline/>`__
-  and set the ``PACKAGE_SUFFIX`` parameter to an empty string
 * After all of the packages have been smoke tested build the
   ``release_deploy`` job to put the packages (not windows) on
   Sourceforge.
@@ -164,7 +164,6 @@ Once the unscripted testing has passed:
   following the instructions
   `here <https://github.com/mantidproject/download.mantidproject.org>`__
 * Publish the draft release on GitHub (this will create the tag too).
-* Clear any error reports from https://errorreports.mantidproject.org for the new version.
 
 Finalise
 ========
