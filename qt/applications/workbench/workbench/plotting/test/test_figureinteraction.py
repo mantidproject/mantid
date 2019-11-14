@@ -28,9 +28,11 @@ from mantid.py3compat.mock import MagicMock, PropertyMock, call, patch
 from mantid.simpleapi import CreateWorkspace
 from mantidqt.plotting.figuretype import FigureType
 from mantidqt.plotting.functions import plot
+from mantidqt.utils.qt.testing import start_qapplication
 from workbench.plotting.figureinteraction import FigureInteraction
 
 
+@start_qapplication
 class FigureInteractionTest(unittest.TestCase):
 
     @classmethod
@@ -51,6 +53,8 @@ class FigureInteractionTest(unittest.TestCase):
             UnitX='Wavelength',
             YUnitLabel='Counts',
             OutputWorkspace='ws1')
+        # initialises the QApplication
+        super(cls, FigureInteractionTest).setUpClass()
 
     @classmethod
     def tearDownClass(cls):
@@ -67,7 +71,7 @@ class FigureInteractionTest(unittest.TestCase):
         plt.close('all')
         del self.fig
         del self.ax
-        del self.errors_manager
+        del self.interactor
 
     # Success tests
     def test_construction_registers_handler_for_button_press_event(self):
@@ -153,7 +157,7 @@ class FigureInteractionTest(unittest.TestCase):
                    autospec=True):
             with patch.object(interactor.toolbar_manager, 'is_tool_active',
                               lambda: False):
-                with patch.object(interactor.errors_manager, 'add_error_bars_menu', MagicMock()):
+                with patch.object(interactor, 'add_error_bars_menu', MagicMock()):
                     interactor.on_mouse_button_press(mouse_event)
                     self.assertEqual(0, qmenu_call1.addSeparator.call_count)
                     self.assertEqual(0, qmenu_call1.addAction.call_count)
@@ -205,6 +209,7 @@ class FigureInteractionTest(unittest.TestCase):
                                         plot_kwargs={'distribution': True, 'autoscale_on_update': False})
 
     def test_add_error_bars_menu(self):
+        self.ax.errorbar([0, 15000], [0, 14000], yerr=[10, 10000], label='MyLabel 2')
         main_menu = QMenu()
         self.interactor.add_error_bars_menu(main_menu, self.ax)
 
@@ -378,7 +383,7 @@ class FigureInteractionTest(unittest.TestCase):
 
         with patch('workbench.plotting.figureinteraction.QActionGroup', autospec=True):
             with patch.object(self.interactor.toolbar_manager, 'is_tool_active', lambda: False):
-                with patch.object(self.interactor.errors_manager, 'add_error_bars_menu', MagicMock()):
+                with patch.object(self.interactor, 'add_error_bars_menu', MagicMock()):
                     self.interactor.on_mouse_button_press(mouse_event)
                     self.assertEqual(0, qmenu_call1.addSeparator.call_count)
                     self.assertEqual(0, qmenu_call1.addAction.call_count)
