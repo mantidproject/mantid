@@ -49,6 +49,7 @@ BugFixes
 ########
 
 - A bug has been fixed in :ref:`MatchPeaks <algm-MatchPeaks>` which was causing wrong alignment in :ref:`IndirectILLReductionQENS <algm-IndirectILLReductionQENS>` with unmirror option 7, when the peaks in the alignment run are too narrow to be fitted.
+- Fixed a bug where mantid could crash when using the S(Q,w) tab with a workspace created by the Energy Transfer Tab.
 
 \* **See associated Image** \*
 

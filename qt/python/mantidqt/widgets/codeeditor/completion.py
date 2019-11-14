@@ -33,7 +33,11 @@ import re
 import sys
 from keyword import kwlist as python_keywords
 from collections import namedtuple
+
+from lib2to3.pgen2.tokenize import detect_encoding
+from io import BytesIO
 from six import PY2, string_types
+
 if PY2:  # noqa
     from inspect import getargspec as getfullargspec
 else:  # noqa
@@ -158,6 +162,9 @@ def generate_call_tips(definitions, prepend_module_name=None):
         return []
     call_tips = []
     for name, py_object in definitions.items():
+        if PY2:
+            if isinstance(py_object, unicode):
+                continue
         if name.startswith('_'):
             continue
         if prepend_module_name is True and hasattr(py_object, '__module__'):
@@ -195,6 +202,10 @@ def get_line_number_from_index(string, index):
 
 
 def get_module_import_alias(import_name, text):
+    try:
+        text = text.encode(detect_encoding(BytesIO(text.encode()).readline)[0])
+    except UnicodeEncodeError:  # Script contains unicode symbol. Cannot run detect_encoding as it requires ascii.
+        text = text.encode('utf-8')
     for node in ast.walk(ast.parse(text)):
         if isinstance(node, ast.alias) and node.name == import_name:
             return node.asname

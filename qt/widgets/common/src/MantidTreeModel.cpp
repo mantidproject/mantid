@@ -97,9 +97,15 @@ void MantidTreeModel::showAlgorithmDialog(const QString &algName,
   if (!alg)
     return;
 
-  for (QHash<QString, QString>::Iterator it = paramList.begin();
-       it != paramList.end(); ++it) {
-    alg->setPropertyValue(it.key().toStdString(), it.value().toStdString());
+  try {
+    for (QHash<QString, QString>::Iterator it = paramList.begin();
+         it != paramList.end(); ++it) {
+      alg->setPropertyValue(it.key().toStdString(), it.value().toStdString());
+    }
+  } catch (std::exception &ex) {
+    g_log.error() << "Error setting the properties for algotithm "
+                  << algName.toStdString() << ": " << ex.what() << '\n';
+    return;
   }
   MantidQt::API::AlgorithmDialog *dlg = createAlgorithmDialog(alg);
   if (obs) {

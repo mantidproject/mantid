@@ -5,6 +5,44 @@ MuSR Changes
 .. contents:: Table of Contents
    :local:
 
+New
+###
+
+- New fitting functions added and muon fitting functions re-organised into MuonGeneric, MuonSpecific and MuonModelling.
+- Newly added functions are:
+   - MuonGeneric
+      - :ref:`CombGaussLorenzKT<func-CombGaussLorentzKT>`
+      - :ref:`StaticLorentzianKT <func-StaticLorentzianKT>`
+      - :ref:`StretchedKT <func-StretchedKT>`
+      - :ref:`StandardSC <func-StandardSC>`
+   - MuonModelling
+      - :ref:`Redfield <func-Redfield>`
+   - MuonSpecific
+       - :ref:`AFMLF <func-AFMLF>`
+       - :ref:`AFMZF <func-AFMZF>`
+       - :ref:`Bessel <func-Bessel>`
+       - :ref:`CompositePCRmagnet <func-CompositePCRmagnet>`
+       - :ref:`DampedBessel <func-DampedBessel>`
+       - :ref:`FmuF <func-FmuF>`
+       - :ref:`GauBroadGauKT <func-GauBroadGauKT>`
+       - :ref:`GaussBessel <func-GaussBessel>`
+       - :ref:`HighTFMuonium <func-HighTFMuonium>`
+       - :ref:`LowTFMuonium <func-LowTFMuonium>`
+       - :ref:`Meier <func-Meier>`
+       - :ref:`ModOsc <func-ModOsc>`
+       - :ref:`MuMinusExpTF <func-MuMinusExpTF>`
+       - :ref:`MuH <func-MuH>`
+       - :ref:`PCRmagRedfield <func-PCRmagRedfield>`
+       - :ref:`PCRmagnetZFKT <func-PCRmagnetZFKT>`
+       - :ref:`PCRmagnet <func-PCRmagnet>`
+       - :ref:`PCRmagnetfnorm <func-PCRmagnetfnorm>`
+       - :ref:`RFresonance <func-RFresonance>`
+       - :ref:`SpinGlass <func-SpinGlass>`
+       - :ref:`TFMuonium <func-TFMuonium>`
+       - :ref:`ZFdipole <func-ZFdipole>`
+       - :ref:`ZFelectronDipole <func-ZFelectronDipole>`
+       - :ref:`ZFMuonium <func-ZFMuonium>`
+       - :ref:`ZFprotonDipole <func-ZFprotonDipole>` 
 
 Improvements
 ############
