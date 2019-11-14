@@ -409,6 +409,8 @@ void SofQWNormalisedPolygon::exec() {
     Resetting the number of threads here to what is set in the config file is a
     temporary solution.
     */
+  // TODO: Do this via a MultiThreaded.h macro via:
+  // https://github.com/mantidproject/mantid/issues/27375#issuecomment-553799284
   FrameworkManager::Instance().setNumOMPThreadsToConfigValue();
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int64_t i = 0; i < static_cast<int64_t>(nHistos); ++i) {
