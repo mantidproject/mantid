@@ -153,7 +153,8 @@ class VanadiumAndFocusWithSolidAngleTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         if platform.system() == "Darwin":  # OSX requires higher tolerance for splines
-            self.tolerance = 0.47
+            self.tolerance = 0.1
+            self.tolerance_is_rel_err = True
         else:
             self.tolerance = 0.20
         return self.focus_results.name(), "HRPD66063_focused_with_sac.nxs"
