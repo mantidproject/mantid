@@ -5,6 +5,40 @@ MuSR Changes
 .. contents:: Table of Contents
    :local:
 
+New
+###
+  * New fitting functions added and muon fitting functions re-organised into Muon Generic, Muon Specific and Muon Modelling.
+  * Newly added functions are:
+    - AFMLF
+    - AFMZF
+    - Bessel
+    - CompositePCRmagnet
+    - CombGaussLorenzKT
+    - DampedBessel
+    - FmuF
+    - GauBroadGauKT
+    - GaussBessel
+    - HighTFMuonium
+    - LowTFMuonium
+    - Meier
+    - ModOsc
+    - MuMinusExpTF
+    - MuH
+    - PCRmagRedfield
+    - PCRmagnetZFKT
+    - PCRmagnet
+    - PCRmagnetform
+    - Redfield
+    - RFresonance
+    - SpinGlass
+    - StandardSC
+    - StaticLorentzianKT
+    - StretchedKT
+    - TFMuonium
+    - ZFdipole
+    - ZFelectronDipole
+    - ZFMuonium
+    - ZFprotonDipole 
 
 Improvements
 ############
