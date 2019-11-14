@@ -17,20 +17,18 @@ from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
 
 
 class FigureErrorsManager(object):
-    ERROR_BARS_MENU_TEXT = "Error Bars"
-    SHOW_ERROR_BARS_BUTTON_TEXT = "Show all errors"
-    HIDE_ERROR_BARS_BUTTON_TEXT = "Hide all errors"
 
     AXES_NOT_MANTIDAXES_ERR_MESSAGE = "Plot axes are not MantidAxes. There is no way to automatically load error data."
 
     def __init__(self, canvas):
         self.canvas = canvas
-        self.active_lines = []
 
-    def toggle_all_errors(self, ax, make_visible):
-        for line in self.active_lines:
+    @classmethod
+    def toggle_all_errors(cls, ax, make_visible):
+        active_lines = cls.get_curves_from_ax(ax)
+        for line in active_lines:
             if curve_has_errors(line):
-                self.toggle_error_bars_for(ax, line, make_visible)
+                cls.toggle_error_bars_for(ax, line, make_visible)
 
     @classmethod
     def toggle_error_bars_for(cls, ax, curve, make_visible=None):

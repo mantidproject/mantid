@@ -14,10 +14,8 @@ import unittest
 import matplotlib
 matplotlib.use("AGG")  # noqa
 import matplotlib.pyplot as plt
-from qtpy.QtWidgets import QMenu
 
 # Pulling in the MantidAxes registers the 'mantid' projection
-from mantid.plots import MantidAxes  # noqa:F401
 from mantid.simpleapi import CreateWorkspace
 from mantidqt.utils.qt.testing import start_qapplication
 from workbench.plotting.figureerrorsmanager import FigureErrorsManager
@@ -34,10 +32,6 @@ def plot_things(make_them_errors):
             else:
                 self.ax.errorbar(self.ws2d_histo, specNum=1)
                 self.ax.errorbar(self.ws2d_histo, wkspIndex=2)
-
-            anonymous_menu = QMenu()
-            # this initialises some of the class internals
-            self.errors_manager.add_error_bars_menu(anonymous_menu, self.ax)
             return func(self)
 
         return function_parameters
@@ -115,3 +109,15 @@ class FigureErrorsManagerTest(unittest.TestCase):
 
         # check that the legend still has a title
         self.assertEqual(self.ax.get_legend().get_title().get_text(), "Test")
+
+    def test_curve_has_all_errorbars_on_replot_after_error_every_increase(self):
+        curve = self.ax.errorbar([0, 1, 2, 4], [0, 1, 2, 4], yerr=[0.1, 0.2, 0.3, 0.4])
+        new_curve = FigureErrorsManager._replot_mpl_curve(self.ax, curve, {'errorevery': 2})
+        self.assertEqual(2, len(new_curve[2][0].get_segments()))
+        new_curve = FigureErrorsManager._replot_mpl_curve(self.ax, new_curve, {'errorevery': 1})
+        self.assertTrue(hasattr(new_curve, 'errorbar_data'))
+        self.assertEqual(4, len(new_curve[2][0].get_segments()))
+
+
+if __name__ == '__main__':
+    unittest.main()
