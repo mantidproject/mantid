@@ -32,7 +32,9 @@ def broaden_spectrum(frequencies=None, bins=None, s_dft=None, sigma=None, scheme
               recommended for production calculations due to aliasing on
               non-commensurate output grid. Values are slightly inconsistent
               with older versions due to change in sampling grid convention.
+
     :type scheme: str
+
     :returns: (freq_points, broadened_spectrum)
 
     The *freq_points* are the mid-bin frequency values which
@@ -41,10 +43,6 @@ def broaden_spectrum(frequencies=None, bins=None, s_dft=None, sigma=None, scheme
     """
     if (bins is None) or (s_dft is None) or (sigma is None):
         raise ValueError("Frequency bins, S data and broadening width must be provided.")
-
-    # if scheme not in ('legacy', 'gaussian', 'gaussian_trunc', 'gaussian_trunc_forloop'):
-    #     raise ValueError('Broadening scheme "{}" not supported for this instrument, please correct '
-    #                      'AbinsParameters.sampling["broadening_scheme"]'.format(scheme))
 
     bins = np.asarray(bins)
     freq_points = (bins[1:] + bins[:-1]) / 2
@@ -89,7 +87,8 @@ def broaden_spectrum(frequencies=None, bins=None, s_dft=None, sigma=None, scheme
         return freq_points, hist
 
     elif scheme == 'gaussian':
-        #  Gaussian broadening on the full grid (no range cutoff, sum over all peaks)
+        # Gaussian broadening on the full grid (no range cutoff, sum over all peaks)
+        # This is not very optimised but a useful reference for "correct" results
         kernels = gaussian(sigma=sigma[:, np.newaxis],
                            points=freq_points,
                            center=frequencies[:, np.newaxis])
@@ -97,7 +96,10 @@ def broaden_spectrum(frequencies=None, bins=None, s_dft=None, sigma=None, scheme
         return freq_points, spectrum
 
     elif scheme == 'normal':
-        #  Normal distribution on the full grid (no range cutoff, sum over all peaks)
+        # Normal distribution on the full grid (no range cutoff, sum over all peaks)
+        # In principle this scheme yields slightly more accurate histograms that direct
+        # Gaussian evaluation. In practice the results are very similar but there may
+        # be a performance boost from avoiding the normalisation step.
         kernels = normal(sigma=sigma[:, np.newaxis],
                          bins=bins,
                          center=frequencies[:, np.newaxis])
@@ -107,91 +109,41 @@ def broaden_spectrum(frequencies=None, bins=None, s_dft=None, sigma=None, scheme
     elif scheme == 'gaussian_trunc':
         # Gaussian broadening on the full grid (sum over all peaks, Gaussian range limited to 3 sigma)
         kernels = trunc_function(function=gaussian,
-                                 sigma=sigma,
+                                 sigma=sigma[:, np.newaxis],
                                  points=freq_points,
-                                 center=frequencies,
+                                 center=frequencies[:, np.newaxis],
                                  limit=3)
-        spectrum = np.dot(kernels.transpose(), s_dft)
-        return freq_points, spectrum
 
-    # elif scheme == 'normal_trunc':
-    #     # Gaussian broadening on the full grid (sum over all peaks, Gaussian range limited to 3 sigma)
-    #     kernels = trunc_function(function=normal,
-    #                              sigma=sigma[:, np.newaxis],
-    #                              bins=bins,
-    #                              center=frequencies[:, np.newaxis])
-    #     spectrum = np.dot(kernels.transpose(), s_dft)
-    #     return freq_points, spectrum
+        spectrum = np.dot(kernels.transpose(), s_dft)
+        # Gaussian function call will normalise the entire set to 1 as they are given as one long array.
+        # Compensate for this by multiplying by number of curves.
+        spectrum = spectrum * len(frequencies)
+
+        return freq_points, spectrum
 
     elif scheme == 'gaussian_trunc_windowed':
         # Gaussian broadening on the full grid (sum over all peaks, Gaussian range limited to 3 sigma)
         # All peaks use the same number of points; if the center is located close to the low- or high-freq limit,
         # the frequency point set is "justified" to lie inside the range
-
-        freq_range = 3 * max(sigma)
-        nrows = len(frequencies)
-        ncols = int(np.ceil((freq_range * 2) / bin_width))
-
-        start_indices = np.asarray((frequencies - freq_points[0] - freq_range + (bin_width / 2)) // bin_width,
-                                    int)
-
-        start_freqs = freq_points[start_indices]
-
-        left_justified = frequencies < freq_range
-        start_freqs[left_justified] = freq_points[0]
-        start_indices[left_justified] = 0
-
-        right_justified = frequencies > (freq_points[-1] - freq_range)
-        start_freqs[right_justified] = freq_points[-1] - (ncols * bin_width)
-        start_indices[right_justified] = len(freq_points) - ncols
-
-        freq_matrix = start_freqs.reshape(nrows, 1) + np.arange(0, 2 * freq_range, bin_width)
-
-        kernels = gaussian(sigma=sigma.reshape(nrows, 1),
-                           points=freq_matrix,
-                           center=frequencies.reshape(nrows, 1))
-
-        hist, bin_edges = np.histogram(np.ravel(freq_matrix),
-                                       bins,
-                                       weights=np.ravel(s_dft.reshape(nrows, 1) * kernels),
-                                       density=False)
-        return freq_points, hist
+        return trunc_and_sum_inplace(function=gaussian,
+                                     sigma=sigma[:, np.newaxis],
+                                     points=freq_points,
+                                     bins=bins,
+                                     center=frequencies[:, np.newaxis],
+                                     limit=3,
+                                     weights=s_dft[:, np.newaxis],
+                                     method='histogram')
 
     elif scheme == 'gaussian_trunc_forloop':
-        # Gaussian broadening on the full grid (sum over all peaks, Gaussian range limited to 3 sigma)
-        # All peaks use the same number of points; if the center is located close to the low- or high-freq limit,
-        # the frequency point set is "justified" to lie inside the range
-        # The final summation uses a for loop instead of np.histogram
-
-        freq_range = 3 * max(sigma)
-        nrows = len(frequencies)
-        ncols = int(np.ceil((freq_range * 2) / bin_width))
-
-        start_indices = np.asarray((frequencies - freq_points[0] - freq_range + (bin_width / 2)) // bin_width,
-                                    int)
-
-        start_freqs = freq_points[start_indices]
-
-        left_justified = frequencies < freq_range
-        start_freqs[left_justified] = freq_points[0]
-        start_indices[left_justified] = 0
-
-        right_justified = frequencies > (freq_points[-1] - freq_range)
-        start_freqs[right_justified] = freq_points[-1] - (ncols * bin_width)
-        start_indices[right_justified] = len(freq_points) - ncols
-
-        freq_matrix = start_freqs.reshape(nrows, 1) + np.arange(0, 2 * freq_range, bin_width)
-
-        kernels = gaussian(sigma=sigma.reshape(nrows, 1),
-                           points=freq_matrix,
-                           center=frequencies.reshape(nrows, 1))
-
-        spectrum = np.zeros_like(freq_points)
-        for start, kernel, s in zip(start_indices, kernels, s_dft):
-            scaled_kernel = kernel * s
-            spectrum[start:start+ncols] += scaled_kernel
-
-        return freq_points, spectrum
+        # As above, but with a python loop implementation of the summation
+        return trunc_and_sum_inplace(function=gaussian,
+                                     sigma=sigma[:, np.newaxis],
+                                     points=freq_points,
+                                     bins=bins,
+                                     center=frequencies[:, np.newaxis],
+                                     limit=3,
+                                     weights=s_dft[:, np.newaxis],
+                                     method='forloop')
 
     elif scheme == 'conv_15':
         # Not a real scheme, just for testing. Convolve with a fixed sigma of 15.
@@ -243,6 +195,11 @@ def broaden_spectrum(frequencies=None, bins=None, s_dft=None, sigma=None, scheme
                                                     + right_mix * spectra[sample_i + 1, left_sigma_i:right_sigma_i])
         return freq_points, spectrum
 
+    else:
+        raise ValueError('Broadening scheme "{}" not supported for this instrument, please correct '
+                         'AbinsParameters.sampling["broadening_scheme"]'.format(scheme))
+
+
 def gaussian(sigma=None, points=None, center=0, normalized=True):
     """
     Evaluate a Gaussian function over a given mesh
@@ -267,6 +224,7 @@ def gaussian(sigma=None, points=None, center=0, normalized=True):
     two_sigma = 2.0 * sigma
     sigma_factor = two_sigma * sigma
     kernel = np.exp(-(points - center) ** 2 / sigma_factor) / (np.sqrt(sigma_factor * np.pi))
+
     if normalized:
         kernel = kernel / np.sum(kernel, axis=-1)[..., np.newaxis]
     return kernel
@@ -292,6 +250,7 @@ def normal(bins=None, sigma=None, center=0):
     bin_contents = integral_at_bin_edges[..., 1:] - integral_at_bin_edges[..., :-1]
 
     return bin_contents
+
 
 def trunc_function(function=None, sigma=None, points=None, center=None, limit=3):
     """
@@ -334,94 +293,147 @@ def trunc_function(function=None, sigma=None, points=None, center=None, limit=3)
     """
 
     points_matrix = points * np.ones((len(center), 1))
-    center_matrix = center.reshape(len(center), 1) * np.ones(len(points))
-    sigma_matrix = sigma.reshape(len(sigma), 1) * np.ones(len(points))
+    center_matrix = center * np.ones(len(points))
+    sigma_matrix = sigma * np.ones(len(points))
 
     distances = abs(points_matrix - center_matrix)
     points_close_to_peaks = distances < (limit * sigma_matrix)
 
     results = np.zeros((len(center), len(points)))
     results[points_close_to_peaks] = function(sigma=sigma_matrix[points_close_to_peaks],
-                                         points=points_matrix[points_close_to_peaks],
-                                         center=center_matrix[points_close_to_peaks])
+                                              points=points_matrix[points_close_to_peaks],
+                                              center=center_matrix[points_close_to_peaks])
     return results
 
 
-# BROKEN BUT LOGIC MAY BE USEFUL FOR SHARED-WINDOW VERSION (WHICH CAN WORK WITH BINS)
-#
-# def trunc_function(function=None, sigma=None, bins=None, points=None, center=None, limit=3):
-#     """
-#     Wrap a simple broadening function and evaluate within a limited range
+def trunc_and_sum_inplace(function=None, function_uses='points', sigma=None, points=None, bins=None, center=None, weights=1, limit=3, method='histogram'):
+    """Wrap a simple broadening function, evaluate within a consistent range and sum to spectrum
 
-#                                  *
-#                                 * *
-#                                 * *
-#                                *   *
-#                               *     *
-#                             *         *
-#                         ..: *         * :..
-#                      -----------------------
-#                             |----|
-#                          limit * sigma
+                         *
+                        * *
+                        * *
+                       *   *
+                      *     *
+                    *         *
+                ..: *         * :..
+             -----------------------
+                    |----|
+                 limit * max(sigma)
 
-#     A spectrum is returned corresponding to the entire input set of
-#     bins/points, but this is zeroed outside of a restricted range (``limit * sigma``).
-#     The purpose of this is performance optimisation compared to evaluating over the whole range.
-#     There is an artefact associated with this: a vertical step down to zero at the range cutoff.
+    A spectrum is returned corresponding to the entire input set of
+    bins/points, but this is zeroed outside of a restricted range (``limit * sigma``).
+    The range is the same for all peaks, so max(sigma) is used for all.
+    The purpose of this is performance optimisation compared to evaluating over the whole range.
+    There is an artefact associated with this: a vertical step down to zero at the range cutoff.
 
-#     Note that this relies heavily on the _broadcasting_ capabilities of the
-#     functions. They will be called with long 1-D arrays of input data, expected
-#     to return 1-D data that is unpacked to the results matrix.
+    The function will be evaluated with the input points or bins
+    for each set of (center, sigma) and summed to a single
+    spectrum. Two technical approaches are provided: a python for-loop
+    which iterates over the functions and sums/writes to the
+    appropriate regions of the output array, and a np.histogram dump of
+    all the frequency/intensity values. The for-loop approach has a
+    more consistent speed but performance ultimately depends on the array sizes.
 
-#     :param function: broadening function; this should accept named arguments "center", "sigma" and either "bins" or "points".
-#     :type function: python function
-#     :param sigma: sigma defines width of Gaussian
-#     :type sigma: float or Nx1 array
-#     :param bins: sample bins for function evaluation. This _must_ be evenly-spaced. Use this option _or_ *points*.
-#     :type bins: 1-D array
-#     :param points: points for which function should be evaluated. Use this option _or_ *bins*.
-#     :type points: 1-D array
-#     :param center: center of Gaussian
-#     :type center: float or Nx1 array
-#     :param limit: range (as multiple of sigma) for cutoff
-#     :type limit: float
+    :param function: broadening function; this should accept named arguments "center", "sigma" and either "bins" or "points".
+    :type function: python function
+    :param function_uses: 'points' or 'bins'; select which type of x data is passed to "function"
+    :param sigma: widths of broadening functions (passed to "sigma" argument of function)
+    :type sigma: float or Nx1 array
+    :param bins: sample bins for function evaluation. This _must_ be evenly-spaced.
+    :type bins: 1-D array
+    :param points: regular grid of points for which function should be evaluated.
+    :type points: 1-D array
+    :param center: centers of broadening functions
+    :type center: float or Nx1 array
+    :param weights: weights of peaks for summation
+    :type weights: float or array corresponding to "center"
+    :param limit: range (as multiple of sigma) for cutoff
+    :type limit: float
+    :param method: 'histogram' or 'forloop'; select between implementations for summation at appropriate frequencies
+    :type method: str
 
-#     :returns: numpy array with calculated Gaussian values
-#     """
-#     # ^ = bit-wise XOR; we require one None and one not-None
-#     if not (bins is None) ^ (points is None):
-#         raise ValueError("Need either bins or points to define truncated broadening function")
-#     elif bins is None:
-#         x = points
-#         results = np.zeros((len(center), len(points)))
-#     else:
-#         x = bins
-#         results = np.zeros((len(center), len(bins) - 1))
+    :returns: numpy array with calculated Gaussian values
 
-#     x_matrix = x * np.ones((len(center), 1))
-#     center_matrix = center.reshape(len(center), 1) * np.ones(len(x))
-#     sigma_matrix = sigma.reshape(len(sigma), 1) * np.ones(len(x))
+    """
+    bin_width = bins[1] - bins[0]
+    if (points[1] - points[0]) != bin_width:
+        raise ValueError("Bin spacing and point spacing are not consistent")
 
-#     distances = abs(x_matrix - center_matrix)
-#     x_close_to_peaks = distances < (limit * sigma_matrix)
+    freq_range = limit * max(sigma)
+    nrows = len(center)
+    ncols = int(np.ceil((freq_range * 2) / bin_width))
 
-#     if bins is None:
-#         results[x_close_to_peaks] = function(sigma=sigma_matrix[x_close_to_peaks],
-#                                              points=x_matrix[x_close_to_peaks],
-#                                              center=center_matrix[x_close_to_peaks])
-#     else:
-#         # When working with bins, we get back smaller arrays than we put in (corresponding to midpoints)
-#         # To line this up correctly we "erode" the blocks of True (included) points from the array of close points e.g.
-#         # FTTTFF -> FTTFF ; this is achieved by logical AND between the left and right bins
-#         points_close_to_peaks = np.logical_and(x_close_to_peaks[:,1:], x_close_to_peaks[:,:-1])
+    # Work out locations of frequency blocks. As these should all be the same size,
+    # blocks which would exceed array size are "justified" into the array
+    #
+    # Start by calculating ideal start positions (allowed to exceed bounds) and
+    # corresponding frequencies
+    #
+    # s-|-x----      |
+    #   | s---x----  |
+    #   |  s---x---- |
+    #   |     s---x--|-
+    #
+    #
+    start_indices = np.asarray((center - points[0] - freq_range + (bin_width / 2)) // bin_width,
+                                int)
+    start_freqs = points[start_indices]
 
-#         raise Exception(np.count_nonzero(x_close_to_peaks),
-#                         np.count_nonzero(points_close_to_peaks),
-#                         function(sigma=sigma_matrix[x_close_to_peaks],
-#                                  bins=x_matrix[x_close_to_peaks],
-#                                  center=center_matrix[x_close_to_peaks]).shape)
-#         results[points_close_to_peaks] = function(sigma=sigma_matrix[x_close_to_peaks],
-#                                                   bins=x_matrix[x_close_to_peaks],
-#                                                   center=center_matrix[x_close_to_peaks])
+    # Next identify points which will overshoot left: x lies to left of freq range
+    # s-|-x-:--      |
+    #   | s-:-x----  |
+    #   |  s:--x---- |
+    #   |   : s---x--|-
+    left_justified = center < freq_range
 
-#     return results
+    # "Left-justify" these points by setting start position to low limit
+    #   |sx-------   |
+    #   | s---x----  |
+    #   |  s---x---- |
+    #   |     s---x--|-
+    start_freqs[left_justified] = points[0]
+    start_indices[left_justified] = 0
+
+    # Apply same reasoning to fix regions overshooting upper bound
+    # Note that the center frequencies do not move: only the grid on which they are evaluated
+    #   |sx------:   |           |sx-------   |
+    #   | s---x--:-  |    --->   | s---x----  |
+    #   |  s---x-:-- |           |  s---x---- |
+    #   |     s--:x--|-          |   s-----x--|
+    right_justified = center > (points[-1] - freq_range)
+    start_freqs[right_justified] = points[-1] - (ncols * bin_width)
+    start_indices[right_justified] = len(points) - ncols
+
+    # freq_matrix is not used in (bins, forloop) mode so only generate if needed
+    if (function_uses == 'points') or (function_uses == 'bins' and method == 'histogram'):
+        freq_matrix = start_freqs.reshape(nrows, 1) + np.arange(0, 2 * freq_range, bin_width)
+
+    # Dispatch kernel generation depending on x-coordinate scheme
+    if function_uses == 'points':
+        kernels = function(sigma=sigma,
+                           points=freq_matrix,
+                           center=center)
+    elif function_uses == 'bins':
+        bin_matrix = start_freqs.reshape(nrows, 1) + np.arange(-bin_width / 2, 2 * freq_range + bin_width / 2, bin_width)
+        kernels = function(sigma=sigma,
+                           bins=bin_matrix,
+                           center=center)
+    else:
+        raise ValueError('x-basis "{}" for broadening function is unknown.'.format(function_uses))
+
+    # Sum spectrum using selected method
+    if method == 'histogram':
+        spectrum, bin_edges = np.histogram(np.ravel(freq_matrix),
+                                           bins,
+                                           weights=np.ravel(weights * kernels),
+                                           density=False)
+    elif method == 'forloop':
+        spectrum = np.zeros_like(points)
+        for start, kernel, weight in zip(start_indices.flatten(), kernels, np.asarray(weights).flatten()):
+            scaled_kernel = kernel * weight
+            spectrum[start:start+ncols] += scaled_kernel
+
+    else:
+        raise ValueError('Summation method "{}" is unknown.',format(method))
+
+    return points, spectrum
