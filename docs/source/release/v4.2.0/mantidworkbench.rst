@@ -125,7 +125,7 @@ Known Issues
 #############
 
 - Changing the scale of a Colorbar to Logarithmic may result in no tick labels being added. This is an issue with how matplotlib tries to deal with a Min Colorbar value of 0. Hopefully we will find a way around this for a future release. 
-For now, in Figure Options (Gear Icon on a Colorfill plot), under the Images Tab, change the Min value to 1 or a small positive value. The logarithmic tick marks should now appear and the Min and Max values can be altered appropriately to produce the best plot for the data. See the Images below for an example of before and after this change: 
+  For now, in Figure Options (Gear Icon on a Colorfill plot), under the Images Tab, change the Min value to 1 or a small positive value. The logarithmic tick marks should now appear and the Min and Max values can be altered appropriately to produce the best plot for the data. See the Images below for an example of before and after this change: 
 
 |
 
