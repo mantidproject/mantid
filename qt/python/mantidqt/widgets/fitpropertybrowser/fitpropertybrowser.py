@@ -17,7 +17,6 @@ from mantid import logger
 from mantid.api import AlgorithmManager, AnalysisDataService, ITableWorkspace, MatrixWorkspace
 from mantidqt.plotting.functions import plot
 from mantidqt.utils.qt import import_qt
-from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
 
 from .interactive_tool import FitInteractiveTool
 
