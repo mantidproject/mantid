@@ -68,7 +68,7 @@ void ExtractMask::exec() {
   }
 
   // Create a new workspace for the results, copy from the input to ensure
-  // that we copy oemplace_backnstrument and current masking
+  // that we copy over the instrument and current masking
   auto maskWS = boost::make_shared<DataObjects::MaskWorkspace>(inputWS);
   maskWS->setTitle(inputWS->getTitle());
 
