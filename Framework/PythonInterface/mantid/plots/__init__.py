@@ -138,7 +138,7 @@ class _WorkspaceArtists(object):
                     pass
 
         if (not axes.is_empty(axes)) and axes.legend_ is not None:
-            axes.legend().draggable()
+            axes.make_legend()
 
     def replace_data(self, workspace, plot_kwargs=None):
         """Replace or replot artists based on a new workspace
