@@ -16,8 +16,10 @@ import unittest
 import matplotlib
 
 matplotlib.use('AGG')  # noqa
+import matplotlib.pyplot as plt
 import numpy as np
 from qtpy.QtCore import Qt
+from qtpy.QtWidgets import QMenu
 from testhelpers import assert_almost_equal
 
 # local package imports
@@ -59,6 +61,13 @@ class FigureInteractionTest(unittest.TestCase):
         fig_manager = self._create_mock_fig_manager_to_accept_right_click()
         fig_manager.fit_browser.tool = None
         self.interactor = FigureInteraction(fig_manager)
+        self.fig, self.ax = plt.subplots()  # type: matplotlib.figure.Figure, MantidAxes
+
+    def tearDown(self):
+        plt.close('all')
+        del self.fig
+        del self.ax
+        del self.errors_manager
 
     # Success tests
     def test_construction_registers_handler_for_button_press_event(self):
@@ -194,6 +203,90 @@ class FigureInteractionTest(unittest.TestCase):
     def test_normalization_toggle_with_no_autoscale_on_update_with_errors(self):
         self._test_toggle_normalization(errorbars_on=True,
                                         plot_kwargs={'distribution': True, 'autoscale_on_update': False})
+
+    def test_add_error_bars_menu(self):
+        main_menu = QMenu()
+        self.interactor.add_error_bars_menu(main_menu, self.ax)
+
+        # Check the expected sub-menu with buttons is added
+        added_menu = main_menu.children()[1]
+        self.assertTrue(
+            any(FigureInteraction.SHOW_ERROR_BARS_BUTTON_TEXT == child.text() for child in added_menu.children()))
+        self.assertTrue(
+            any(FigureInteraction.HIDE_ERROR_BARS_BUTTON_TEXT == child.text() for child in added_menu.children()))
+
+    def test_context_menu_not_added_for_scripted_plot_without_errors(self):
+        self.ax.plot([0, 15000], [0, 15000], label='MyLabel')
+        self.ax.plot([0, 15000], [0, 14000], label='MyLabel 2')
+
+        main_menu = QMenu()
+        # QMenu always seems to have 1 child when empty,
+        # but just making sure the count as expected at this point in the test
+        self.assertEqual(1, len(main_menu.children()))
+
+        # plot above doesn't have errors, nor is a MantidAxes
+        # so no context menu will be added
+        self.interactor.add_error_bars_menu(main_menu, self.ax)
+
+        # number of children should remain unchanged
+        self.assertEqual(1, len(main_menu.children()))
+
+    def test_scripted_plot_line_without_label_handled_properly(self):
+        # having the special nolabel is usually present on lines with errors,
+        # but sometimes can be present on lines without errors, this test covers that case
+        self.ax.plot([0, 15000], [0, 15000], label='_nolegend_')
+        self.ax.plot([0, 15000], [0, 15000], label='_nolegend_')
+
+        main_menu = QMenu()
+        # QMenu always seems to have 1 child when empty,
+        # but just making sure the count as expected at this point in the test
+        self.assertEqual(1, len(main_menu.children()))
+
+        # plot above doesn't have errors, nor is a MantidAxes
+        # so no context menu will be added for error bars
+        self.interactor.add_error_bars_menu(main_menu, self.ax)
+
+        # number of children should remain unchanged
+        self.assertEqual(1, len(main_menu.children()))
+
+    def test_context_menu_added_for_scripted_plot_with_errors(self):
+        self.ax.plot([0, 15000], [0, 15000], label='MyLabel')
+        self.ax.errorbar([0, 15000], [0, 14000], yerr=[10, 10000], label='MyLabel 2')
+
+        main_menu = QMenu()
+        # QMenu always seems to have 1 child when empty,
+        # but just making sure the count as expected at this point in the test
+        self.assertEqual(1, len(main_menu.children()))
+
+        # plot above doesn't have errors, nor is a MantidAxes
+        # so no context menu will be added
+        self.interactor.add_error_bars_menu(main_menu, self.ax)
+
+        added_menu = main_menu.children()[1]
+
+        # actions should have been added now, which for this case are only `Show all` and `Hide all`
+        self.assertTrue(
+            any(FigureInteraction.SHOW_ERROR_BARS_BUTTON_TEXT == child.text() for child in added_menu.children()))
+        self.assertTrue(
+            any(FigureInteraction.HIDE_ERROR_BARS_BUTTON_TEXT == child.text() for child in added_menu.children()))
+
+    def test_scripted_plot_show_and_hide_all(self):
+        self.ax.plot([0, 15000], [0, 15000], label='MyLabel')
+        self.ax.errorbar([0, 15000], [0, 14000], yerr=[10, 10000], label='MyLabel 2')
+
+        anonymous_menu = QMenu()
+        # this initialises some of the class internals
+        self.interactor.add_error_bars_menu(anonymous_menu, self.ax)
+
+        self.assertTrue(self.ax.containers[0][2][0].get_visible())
+        self.interactor.errors_manager.toggle_all_errors(self.ax, make_visible=False)
+        self.assertFalse(self.ax.containers[0][2][0].get_visible())
+
+        # make the menu again, this updates the internal state of the errors manager
+        # and is what actually happens when the user opens the menu again
+        self.interactor.add_error_bars_menu(anonymous_menu, self.ax)
+        self.interactor.errors_manager.toggle_all_errors(self.ax, make_visible=True)
+        self.assertTrue(self.ax.containers[0][2][0].get_visible())
 
     # Failure tests
     def test_construction_with_non_qt_canvas_raises_exception(self):

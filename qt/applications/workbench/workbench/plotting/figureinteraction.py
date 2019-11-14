@@ -39,10 +39,6 @@ AXES_SCALE_MENU_OPTS = OrderedDict(
     [("Lin x/Lin y", ("linear", "linear")), ("Log x/Log y", ("log", "log")),
      ("Lin x/Log y", ("linear", "log")), ("Log x/Lin y", ("log", "linear"))])
 
-ERROR_BARS_MENU_TEXT = "Error Bars"
-SHOW_ERROR_BARS_BUTTON_TEXT = "Show all errors"
-HIDE_ERROR_BARS_BUTTON_TEXT = "Hide all errors"
-
 VALID_LINE_STYLE = ['solid', 'dashed', 'dotted', 'dashdot']
 VALID_COLORS = {
     'blue': '#1f77b4',
@@ -58,6 +54,10 @@ class FigureInteraction(object):
     Defines the behaviour of interaction events on a figure canvas. Note that
     this currently only works with Qt canvas types.
     """
+
+    ERROR_BARS_MENU_TEXT = "Error Bars"
+    SHOW_ERROR_BARS_BUTTON_TEXT = "Show all errors"
+    HIDE_ERROR_BARS_BUTTON_TEXT = "Hide all errors"
 
     def __init__(self, fig_manager):
         """
@@ -361,11 +361,11 @@ class FigureInteraction(object):
         if not isinstance(ax, MantidAxes) and len(ax.containers) == 0:
             return
 
-        error_bars_menu = QMenu(ERROR_BARS_MENU_TEXT, menu)
-        error_bars_menu.addAction(SHOW_ERROR_BARS_BUTTON_TEXT,
+        error_bars_menu = QMenu(self.ERROR_BARS_MENU_TEXT, menu)
+        error_bars_menu.addAction(self.SHOW_ERROR_BARS_BUTTON_TEXT,
                                   partial(self.errors_manager.update_plot_after,
                                           self.errors_manager.toggle_all_errors, ax, make_visible=True))
-        error_bars_menu.addAction(HIDE_ERROR_BARS_BUTTON_TEXT,
+        error_bars_menu.addAction(self.HIDE_ERROR_BARS_BUTTON_TEXT,
                                   partial(self.errors_manager.update_plot_after,
                                           self.errors_manager.toggle_all_errors, ax, make_visible=False))
         menu.addMenu(error_bars_menu)
