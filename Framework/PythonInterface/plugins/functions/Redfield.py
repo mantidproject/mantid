@@ -12,7 +12,7 @@ from mantid.api import IFunction1D, FunctionFactory
 class Redfield(IFunction1D):
 
     def category(self):
-        return "Muon Modelling"
+        return "MuonModelling"
 
     def init(self):
         self.declareParameter("A0", 1)

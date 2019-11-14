@@ -8,16 +8,16 @@ MuSR Changes
 New
 ###
 
-- New fitting functions added and muon fitting functions re-organised into Muon Generic, Muon Specific and Muon Modelling.
+- New fitting functions added and muon fitting functions re-organised into MuonGeneric, MuonSpecific and MuonModelling.
 - Newly added functions are:
-   - Muon Generic
+   - MuonGeneric
       - :ref:`CombGaussLorenzKT<func-CombGaussLorentzKT>`
       - :ref:`StaticLorentzianKT <func-StaticLorentzianKT>`
       - :ref:`StretchedKT <func-StretchedKT>`
       - :ref:`StandardSC <func-StandardSC>`
-   - Muon Modelling
+   - MuonModelling
       - :ref:`Redfield <func-Redfield>`
-   - Muon Specific
+   - MuonSpecific
        - :ref:`AFMLF <func-AFMLF>`
        - :ref:`AFMZF <func-AFMZF>`
        - :ref:`Bessel <func-Bessel>`

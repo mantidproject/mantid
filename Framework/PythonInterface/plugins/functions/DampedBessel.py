@@ -14,7 +14,7 @@ from scipy import special as sp
 class DampedBessel(IFunction1D):
 
     def category(self):
-        return "Muon Specific"
+        return "MuonSpecific"
 
     def init(self):
         self.declareParameter("A0", 0.2, 'Asymmetry')

@@ -13,7 +13,7 @@ import numpy as np
 class PCRmagnetZFKT(IFunction1D):
 
     def category(self):
-        return "Muon Specific"
+        return "MuonSpecific"
 
     def init(self):
         self.declareParameter("A0", 0.2)
