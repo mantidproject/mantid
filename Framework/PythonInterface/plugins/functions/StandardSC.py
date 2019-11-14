@@ -13,7 +13,7 @@ import numpy as np
 class StandardSC(IFunction1D):
 
     def category(self):
-        return "Muon"
+        return "MuonGeneric"
 
     def init(self):
         self.declareParameter(

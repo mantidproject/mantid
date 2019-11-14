@@ -1,10 +1,10 @@
-.. _func-RedfieldCutoff:
+.. _func-Redfield:
 
 =================
-RedfieldCutoff
+Redfield
 =================
 
-.. index:: RedfieldCutoff
+.. index:: Redfield
 
 Description
 -----------
@@ -30,7 +30,7 @@ where :math:`f` is the frequency of fluctuation at muon sites.
    import matplotlib.pyplot as plt
    import numpy as np
    x = np.logspace(-2, 4, num = 1000)
-   y = FunctionWrapper("RedfieldCutoff")
+   y = FunctionWrapper("Redfield")
    fig, ax=plt.subplots()
    ax.plot(x, y(x))
    ax.set_xlabel('t($\mu$s)')
