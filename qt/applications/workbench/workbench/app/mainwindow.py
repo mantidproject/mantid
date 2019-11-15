@@ -386,7 +386,10 @@ class MainWindow(QMainWindow):
                 interface.setParent(self, interface.windowFlags())
             interface.show()
         else:
-            window.raise_()
+            if (window.windowState() ==  Qt.WindowState.WindowMinimized):
+                window.showNormal()
+            else:
+                window.raise_()
 
     def populate_interfaces_menu(self):
         """Populate then Interfaces menu with all Python and C++ interfaces"""
