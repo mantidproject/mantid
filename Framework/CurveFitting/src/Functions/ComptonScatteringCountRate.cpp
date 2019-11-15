@@ -314,12 +314,12 @@ void ComptonScatteringCountRate::cacheFunctions() {
 void ComptonScatteringCountRate::cacheComptonProfile(
     const boost::shared_ptr<ComptonProfile> &profile,
     const size_t paramsOffset) {
-  m_profiles.push_back(profile.get());
+  m_profiles.emplace_back(profile.get());
   auto fixedParams = profile->intensityParameterIndices();
   for (auto fixedParam : fixedParams) {
     const size_t indexOfFixed = paramsOffset + fixedParam;
     this->setParameterStatus(indexOfFixed, Tied);
-    m_fixedParamIndices.push_back(indexOfFixed);
+    m_fixedParamIndices.emplace_back(indexOfFixed);
   }
 }
 
@@ -340,7 +340,7 @@ void ComptonScatteringCountRate::cacheBackground(
     {
       const size_t indexOfFixed = paramsOffset + (i - 1);
       this->setParameterStatus(indexOfFixed, Tied);
-      m_fixedParamIndices.push_back(indexOfFixed);
+      m_fixedParamIndices.emplace_back(indexOfFixed);
     }
   } else {
     std::ostringstream os;

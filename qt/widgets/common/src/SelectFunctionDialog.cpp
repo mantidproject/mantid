@@ -55,7 +55,7 @@ SelectFunctionDialog::SelectFunctionDialog(
     auto f = factory.createFunction(registeredFunction);
     std::vector<std::string> tempCategories = f->categories();
     for (size_t j = 0; j < tempCategories.size(); ++j) {
-      categories[tempCategories[boost::lexical_cast<int>(j)]].push_back(
+      categories[tempCategories[boost::lexical_cast<int>(j)]].emplace_back(
           registeredFunction);
     }
   }

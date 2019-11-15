@@ -157,7 +157,7 @@ LoadResult MuonAnalysisDataLoader::loadFiles(const QStringList &files) const {
             "All the files should be produced by the same instrument");
     }
 
-    loadedWorkspaces.push_back(loadedWorkspace);
+    loadedWorkspaces.emplace_back(loadedWorkspace);
   }
 
   // Some of the ARGUS data files contain wrong information about the
@@ -458,11 +458,11 @@ void MuonAnalysisDataLoader::updateCache() const {
   for (const auto &entry : m_loadedDataCache) {
     const auto &ws = entry.second.loadedWorkspace;
     if (!ws) { // Workspace has been deleted
-      invalidKeys.push_back(entry.first);
+      invalidKeys.emplace_back(entry.first);
     } else if (const auto wsGroup =
                    boost::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
       if (wsGroup->size() == 0) { // Group has been cleared
-        invalidKeys.push_back(entry.first);
+        invalidKeys.emplace_back(entry.first);
       }
     }
   }

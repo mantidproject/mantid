@@ -209,7 +209,7 @@ void IntegratePeaksMDHKL::integratePeak(const int neighborPts,
     BackgroundInnerRadius2 = pow(BackgroundInnerRadius2, 2.0);
   const size_t dimensionality = out->getNumDims();
   for (size_t i = 0; i < dimensionality; ++i) {
-    gridPts.push_back(static_cast<int>(out->getDimension(i)->getNBins()));
+    gridPts.emplace_back(static_cast<int>(out->getDimension(i)->getNBins()));
   }
 
   double *F = out->getSignalArray();

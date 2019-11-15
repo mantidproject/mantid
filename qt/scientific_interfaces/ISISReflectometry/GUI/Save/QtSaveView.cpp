@@ -148,7 +148,7 @@ std::vector<std::string> QtSaveView::getSelectedWorkspaces() const {
   std::vector<std::string> itemNames;
   auto items = m_ui.listOfWorkspaces->selectedItems();
   for (auto it = items.begin(); it != items.end(); it++) {
-    itemNames.push_back((*it)->text().toStdString());
+    itemNames.emplace_back((*it)->text().toStdString());
   }
   return itemNames;
 }
@@ -160,7 +160,7 @@ std::vector<std::string> QtSaveView::getSelectedParameters() const {
   std::vector<std::string> paramNames;
   auto items = m_ui.listOfLoggedParameters->selectedItems();
   for (auto it = items.begin(); it != items.end(); it++) {
-    paramNames.push_back((*it)->text().toStdString());
+    paramNames.emplace_back((*it)->text().toStdString());
   }
   return paramNames;
 }

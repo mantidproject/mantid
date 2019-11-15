@@ -46,7 +46,7 @@ void SliceMDHisto::exec() {
   m_rank = static_cast<unsigned int>(inWS->getNumDims());
   for (unsigned int i = 0; i < m_rank; i++) {
     boost::shared_ptr<const IMDDimension> arDim = inWS->getDimension(i);
-    m_dim.push_back(static_cast<int>(arDim->getNBins()));
+    m_dim.emplace_back(static_cast<int>(arDim->getNBins()));
   }
 
   std::vector<int> start = getProperty("Start");
@@ -80,7 +80,7 @@ void SliceMDHisto::exec() {
   std::vector<MDHistoDimension_sptr> dimensions;
   for (unsigned int k = 0; k < m_rank; ++k) {
     boost::shared_ptr<const IMDDimension> arDim = inWS->getDimension(k);
-    dimensions.push_back(MDHistoDimension_sptr(new MDHistoDimension(
+    dimensions.emplace_back(MDHistoDimension_sptr(new MDHistoDimension(
         arDim->getName(), arDim->getName(), arDim->getMDFrame(),
         arDim->getX(start[k]), arDim->getX(end[k]), end[k] - start[k])));
   }

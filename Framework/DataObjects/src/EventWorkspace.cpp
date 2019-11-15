@@ -55,7 +55,7 @@ EventWorkspace::EventWorkspace(const EventWorkspace &other)
     auto newel = std::make_unique<EventList>(*el);
     // Make sure to update the MRU to point to THIS event workspace.
     newel->setMRU(this->mru.get());
-    this->data.push_back(std::move(newel));
+    this->data.emplace_back(std::move(newel));
   }
 }
 

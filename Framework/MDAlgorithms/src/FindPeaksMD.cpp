@@ -483,7 +483,7 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
           break;
         }
 
-        peakBoxes.push_back(box);
+        peakBoxes.emplace_back(box);
         g_log.debug() << "Found box at ";
         for (size_t d = 0; d < nd; d++)
           g_log.debug() << (d > 0 ? "," : "") << boxCenter[d];
@@ -667,7 +667,7 @@ void FindPeaksMD::findPeaksHisto(
           break;
         }
 
-        peakBoxes.push_back(index);
+        peakBoxes.emplace_back(index);
         g_log.debug() << "Found box at index " << index;
         g_log.debug() << "; Density = " << density << '\n';
         // Report progres for each box found.
@@ -743,9 +743,9 @@ void FindPeaksMD::exec() {
 
   // Do a sort by bank name and then descending bin count (intensity)
   std::vector<std::pair<std::string, bool>> criteria;
-  criteria.push_back(std::pair<std::string, bool>("RunNumber", true));
-  criteria.push_back(std::pair<std::string, bool>("BankName", true));
-  criteria.push_back(std::pair<std::string, bool>("bincount", false));
+  criteria.emplace_back(std::pair<std::string, bool>("RunNumber", true));
+  criteria.emplace_back(std::pair<std::string, bool>("BankName", true));
+  criteria.emplace_back(std::pair<std::string, bool>("bincount", false));
   peakWS->sort(criteria);
 
   for (auto i = 0; i != peakWS->getNumberPeaks(); ++i) {

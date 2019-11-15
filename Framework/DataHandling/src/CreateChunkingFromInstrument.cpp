@@ -424,7 +424,7 @@ void CreateChunkingFromInstrument::exec() {
           if (grouping.count(parent) == 0)
             grouping[parent] = vector<string>();
 
-          grouping[parent].push_back(comp->getName());
+          grouping[parent].emplace_back(comp->getName());
         }
       }
       progress.report();

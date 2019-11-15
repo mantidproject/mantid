@@ -91,7 +91,7 @@ void AlgorithmHistory::setProperties(const Algorithm *const alg) {
   // objects.
   const std::vector<Property *> &properties = alg->getProperties();
   for (const auto &property : properties) {
-    m_properties.push_back(
+    m_properties.emplace_back(
         boost::make_shared<PropertyHistory>(property->createHistory()));
   }
 }
@@ -147,7 +147,7 @@ void AlgorithmHistory::addExecutionInfo(const DateAndTime &start,
 void AlgorithmHistory::addProperty(const std::string &name,
                                    const std::string &value, bool isdefault,
                                    const unsigned int &direction) {
-  m_properties.push_back(boost::make_shared<PropertyHistory>(
+  m_properties.emplace_back(boost::make_shared<PropertyHistory>(
       name, value, "", isdefault, direction));
 }
 

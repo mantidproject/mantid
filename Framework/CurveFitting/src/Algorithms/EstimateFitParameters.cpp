@@ -103,7 +103,7 @@ void fixBadParameters(CostFunctions::CostFuncFitting &costFunction,
     if (fix) {
       // Parameter is bad - fix it. Delay actual fixing until all bad ones
       // found.
-      indicesOfFixed.push_back(i);
+      indicesOfFixed.emplace_back(i);
     }
     ++j;
   }
@@ -231,7 +231,7 @@ void runCrossEntropy(
   for (auto &range : ranges) {
     auto mean = (range.first + range.second) / 2;
     auto sigma = std::fabs(range.first - range.second) / 2;
-    distributionParams.push_back(std::make_pair(mean, sigma));
+    distributionParams.emplace_back(std::make_pair(mean, sigma));
   }
 
   auto nParams = costFunction.nParams();
@@ -371,7 +371,7 @@ void EstimateFitParameters::execConcrete() {
     for (auto &term : expr.terms()) {
       IConstraint *c =
           ConstraintFactory::Instance().createInitialized(func.get(), term);
-      constraints.push_back(std::unique_ptr<IConstraint>(c));
+      constraints.emplace_back(std::unique_ptr<IConstraint>(c));
     }
   }
 
@@ -402,7 +402,7 @@ void EstimateFitParameters::execConcrete() {
     }
     // Use the lower and upper bounds of the constraint to set the range
     // of a generator with uniform distribution.
-    ranges.push_back(std::make_pair(boundary->lower(), boundary->upper()));
+    ranges.emplace_back(std::make_pair(boundary->lower(), boundary->upper()));
   }
   // Number of parameters could have changed
   costFunction->reset();

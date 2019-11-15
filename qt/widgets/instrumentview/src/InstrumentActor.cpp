@@ -95,9 +95,9 @@ InstrumentActor::InstrumentActor(const QString &wsName, bool autoscaling,
   m_numGridLayers = 0;
   for (size_t i = 0; i < componentInfo().size(); ++i) {
     if (!componentInfo().isDetector(i))
-      m_components.push_back(i);
+      m_components.emplace_back(i);
     else if (detectorInfo().isMonitor(i))
-      m_monitors.push_back(i);
+      m_monitors.emplace_back(i);
     if (componentInfo().componentType(i) ==
         Mantid::Beamline::ComponentType::Grid) {
       m_hasGrid = true;

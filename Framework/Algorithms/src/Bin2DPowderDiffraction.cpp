@@ -316,27 +316,27 @@ void Bin2DPowderDiffraction::ReadBinsFromFile(
     n = line.find("dp =");
     if (n != std::string::npos) {
       if (!tmp.empty()) {
-        Xbins.push_back(tmp);
+        Xbins.emplace_back(tmp);
         tmp.clear();
       }
       double dp1 = std::stod(line.substr(4), &sz); // 4 is needed to crop 'dp='
       double dp2 = std::stod(line.substr(sz + 4));
       if (dpno < 1) {
-        Ybins.push_back(dp1);
-        Ybins.push_back(dp2);
+        Ybins.emplace_back(dp1);
+        Ybins.emplace_back(dp2);
       } else {
-        Ybins.push_back(dp2);
+        Ybins.emplace_back(dp2);
       }
       dpno++;
     } else if (line.find("#") == std::string::npos) {
       std::stringstream ss(line);
       double d;
       while (ss >> d) {
-        tmp.push_back(d);
+        tmp.emplace_back(d);
       }
     }
   }
-  Xbins.push_back(tmp);
+  Xbins.emplace_back(tmp);
   g_log.information() << "Number of Ybins: " << Ybins.size() << std::endl;
   g_log.information() << "Number of Xbins sets: " << Xbins.size() << std::endl;
 }

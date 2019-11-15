@@ -833,45 +833,45 @@ public:
   } //!< get Y-range of layer l of graph s
   std::vector<int> layerXTicks(int s, int l) const {
     std::vector<int> tick;
-    tick.push_back(GRAPH[s].layer[l].xAxis.majorTicks);
-    tick.push_back(GRAPH[s].layer[l].xAxis.minorTicks);
+    tick.emplace_back(GRAPH[s].layer[l].xAxis.majorTicks);
+    tick.emplace_back(GRAPH[s].layer[l].xAxis.minorTicks);
     return tick;
   } //!< get X-axis ticks of layer l of graph s
   std::vector<int> layerYTicks(int s, int l) const {
     std::vector<int> tick;
-    tick.push_back(GRAPH[s].layer[l].yAxis.majorTicks);
-    tick.push_back(GRAPH[s].layer[l].yAxis.minorTicks);
+    tick.emplace_back(GRAPH[s].layer[l].yAxis.majorTicks);
+    tick.emplace_back(GRAPH[s].layer[l].yAxis.minorTicks);
     return tick;
   } //!< get Y-axis ticks of layer l of graph s
   std::vector<graphGrid> layerGrid(int s, int l) const {
     std::vector<graphGrid> grid;
-    grid.push_back(GRAPH[s].layer[l].xAxis.majorGrid);
-    grid.push_back(GRAPH[s].layer[l].xAxis.minorGrid);
-    grid.push_back(GRAPH[s].layer[l].yAxis.majorGrid);
-    grid.push_back(GRAPH[s].layer[l].yAxis.minorGrid);
+    grid.emplace_back(GRAPH[s].layer[l].xAxis.majorGrid);
+    grid.emplace_back(GRAPH[s].layer[l].xAxis.minorGrid);
+    grid.emplace_back(GRAPH[s].layer[l].yAxis.majorGrid);
+    grid.emplace_back(GRAPH[s].layer[l].yAxis.minorGrid);
     return grid;
   } //!< get grid of layer l of graph s
   std::vector<graphAxisFormat> layerAxisFormat(int s, int l) const {
     std::vector<graphAxisFormat> format;
-    format.push_back(GRAPH[s].layer[l].yAxis.formatAxis[0]); // bottom
-    format.push_back(GRAPH[s].layer[l].yAxis.formatAxis[1]); // top
-    format.push_back(GRAPH[s].layer[l].xAxis.formatAxis[0]); // left
-    format.push_back(GRAPH[s].layer[l].xAxis.formatAxis[1]); // right
+    format.emplace_back(GRAPH[s].layer[l].yAxis.formatAxis[0]); // bottom
+    format.emplace_back(GRAPH[s].layer[l].yAxis.formatAxis[1]); // top
+    format.emplace_back(GRAPH[s].layer[l].xAxis.formatAxis[0]); // left
+    format.emplace_back(GRAPH[s].layer[l].xAxis.formatAxis[1]); // right
     return format;
   } //!< get title and format of axes of layer l of graph s
   std::vector<graphAxisTick> layerAxisTickLabels(int s, int l) const {
     std::vector<graphAxisTick> tick;
-    tick.push_back(GRAPH[s].layer[l].yAxis.tickAxis[0]); // bottom
-    tick.push_back(GRAPH[s].layer[l].yAxis.tickAxis[1]); // top
-    tick.push_back(GRAPH[s].layer[l].xAxis.tickAxis[0]); // left
-    tick.push_back(GRAPH[s].layer[l].xAxis.tickAxis[1]); // right
+    tick.emplace_back(GRAPH[s].layer[l].yAxis.tickAxis[0]); // bottom
+    tick.emplace_back(GRAPH[s].layer[l].yAxis.tickAxis[1]); // top
+    tick.emplace_back(GRAPH[s].layer[l].xAxis.tickAxis[0]); // left
+    tick.emplace_back(GRAPH[s].layer[l].xAxis.tickAxis[1]); // right
     return tick;
   } //!< get tick labels of axes of layer l of graph s
   std::vector<double> layerHistogram(int s, int l) const {
     std::vector<double> range;
-    range.push_back(GRAPH[s].layer[l].histogram_bin);
-    range.push_back(GRAPH[s].layer[l].histogram_begin);
-    range.push_back(GRAPH[s].layer[l].histogram_end);
+    range.emplace_back(GRAPH[s].layer[l].histogram_bin);
+    range.emplace_back(GRAPH[s].layer[l].histogram_begin);
+    range.emplace_back(GRAPH[s].layer[l].histogram_end);
     return range;
   } //!< get histogram bin of layer l of graph s
   int layerXScale(int s, int l) const {

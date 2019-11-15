@@ -152,7 +152,7 @@ int FindPeakBackground::findBackground(
   auto in = std::min_element(inpY.cbegin(), inpY.cend());
   double bkg0 = inpY[in - inpY.begin()];
   for (size_t l = l0; l < n; ++l) {
-    maskedY.push_back(inpY[l] - bkg0);
+    maskedY.emplace_back(inpY[l] - bkg0);
   }
   MantidVec mask(n - l0, 0.0);
   auto xn = static_cast<double>(n - l0);

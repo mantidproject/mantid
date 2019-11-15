@@ -765,7 +765,7 @@ GeneratePeaks::createDataWorkspace(std::vector<double> binparameters) {
 
   while (xvalue <= xf) {
     // Push current value to vector
-    xarray.push_back(xvalue);
+    xarray.emplace_back(xvalue);
 
     // Calculate next value, linear or logarithmic
     if (dx > 0)
@@ -779,7 +779,7 @@ GeneratePeaks::createDataWorkspace(std::vector<double> binparameters) {
     specnum_t specid = item.first;
     g_log.debug() << "Build WorkspaceIndex-Spectrum  " << specNums.size()
                   << " , " << specid << "\n";
-    specNums.push_back(specid);
+    specNums.emplace_back(specid);
   }
 
   Indexing::IndexInfo indices(specNums.size());
@@ -799,7 +799,7 @@ GeneratePeaks::addFunctionParameterNames(std::vector<std::string> funcnames) {
 
   for (auto &funcname : funcnames) {
     // Add original name in
-    vec_funcparnames.push_back(funcname);
+    vec_funcparnames.emplace_back(funcname);
 
     // Add a full function name and parameter names in
     IFunction_sptr tempfunc =
@@ -815,7 +815,7 @@ GeneratePeaks::addFunctionParameterNames(std::vector<std::string> funcnames) {
     }
     parnamess << ")";
 
-    vec_funcparnames.push_back(parnamess.str());
+    vec_funcparnames.emplace_back(parnamess.str());
   }
 
   return vec_funcparnames;

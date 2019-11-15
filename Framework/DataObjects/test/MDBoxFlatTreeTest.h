@@ -97,7 +97,7 @@ public:
     std::vector<size_t> gridIndices;
     for (size_t i = 0; i < Boxes.size(); ++i) {
       if (!Boxes[i]->isBox())
-        gridIndices.push_back(i);
+        gridIndices.emplace_back(i);
     }
     for (auto gridIndex : gridIndices) {
       delete Boxes[gridIndex];

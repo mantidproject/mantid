@@ -521,7 +521,7 @@ PanelsSurface::processUnstructured(size_t rootIndex,
         break;
       }
     }
-    detectors.push_back(child);
+    detectors.emplace_back(child);
   }
   setBankVisited(componentInfo, rootIndex, visited);
   return std::make_pair(detectors, normal);

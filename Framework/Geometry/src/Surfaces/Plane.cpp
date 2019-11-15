@@ -355,47 +355,47 @@ void Plane::getBoundingBox(double &xmax, double &ymax, double &zmax,
   //(xmin,ymin,zmax)--- (xmin,ymax,zmax)  12
   std::vector<V3D> listOfPoints;
   if (this->side(vertex1) <= 0)
-    listOfPoints.push_back(vertex1);
+    listOfPoints.emplace_back(vertex1);
   if (this->side(vertex2) <= 0)
-    listOfPoints.push_back(vertex2);
+    listOfPoints.emplace_back(vertex2);
   if (this->side(vertex3) <= 0)
-    listOfPoints.push_back(vertex3);
+    listOfPoints.emplace_back(vertex3);
   if (this->side(vertex4) <= 0)
-    listOfPoints.push_back(vertex4);
+    listOfPoints.emplace_back(vertex4);
   if (this->side(vertex5) <= 0)
-    listOfPoints.push_back(vertex5);
+    listOfPoints.emplace_back(vertex5);
   if (this->side(vertex6) <= 0)
-    listOfPoints.push_back(vertex6);
+    listOfPoints.emplace_back(vertex6);
   if (this->side(vertex7) <= 0)
-    listOfPoints.push_back(vertex7);
+    listOfPoints.emplace_back(vertex7);
   if (this->side(vertex8) <= 0)
-    listOfPoints.push_back(vertex8);
+    listOfPoints.emplace_back(vertex8);
   V3D edge1, edge2, edge3, edge4, edge5, edge6, edge7, edge8, edge9, edge10,
       edge11, edge12;
   if (LineIntersectionWithPlane(vertex1, vertex2, edge1) == 1)
-    listOfPoints.push_back(edge1);
+    listOfPoints.emplace_back(edge1);
   if (LineIntersectionWithPlane(vertex2, vertex3, edge2) == 1)
-    listOfPoints.push_back(edge2);
+    listOfPoints.emplace_back(edge2);
   if (LineIntersectionWithPlane(vertex3, vertex4, edge3) == 1)
-    listOfPoints.push_back(edge3);
+    listOfPoints.emplace_back(edge3);
   if (LineIntersectionWithPlane(vertex4, vertex1, edge4) == 1)
-    listOfPoints.push_back(edge4);
+    listOfPoints.emplace_back(edge4);
   if (LineIntersectionWithPlane(vertex5, vertex6, edge5) == 1)
-    listOfPoints.push_back(edge5);
+    listOfPoints.emplace_back(edge5);
   if (LineIntersectionWithPlane(vertex6, vertex7, edge6) == 1)
-    listOfPoints.push_back(edge6);
+    listOfPoints.emplace_back(edge6);
   if (LineIntersectionWithPlane(vertex7, vertex8, edge7) == 1)
-    listOfPoints.push_back(edge7);
+    listOfPoints.emplace_back(edge7);
   if (LineIntersectionWithPlane(vertex8, vertex5, edge8) == 1)
-    listOfPoints.push_back(edge8);
+    listOfPoints.emplace_back(edge8);
   if (LineIntersectionWithPlane(vertex1, vertex5, edge9) == 1)
-    listOfPoints.push_back(edge9);
+    listOfPoints.emplace_back(edge9);
   if (LineIntersectionWithPlane(vertex2, vertex6, edge10) == 1)
-    listOfPoints.push_back(edge10);
+    listOfPoints.emplace_back(edge10);
   if (LineIntersectionWithPlane(vertex3, vertex7, edge11) == 1)
-    listOfPoints.push_back(edge11);
+    listOfPoints.emplace_back(edge11);
   if (LineIntersectionWithPlane(vertex4, vertex8, edge12) == 1)
-    listOfPoints.push_back(edge12);
+    listOfPoints.emplace_back(edge12);
   // now sort the vertices to find the  mins and max
   //	std::cout<<listOfPoints.size()<<'\n';
   if (!listOfPoints.empty()) {

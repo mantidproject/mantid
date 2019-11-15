@@ -422,7 +422,7 @@ protected:
       m_tofMax = tof;
 
     auto ev = Types::Event::TofEvent(tof, Types::Core::DateAndTime(offset));
-    m_eventVectors[id]->push_back(ev);
+    m_eventVectors[id]->emplace_back(ev);
   }
 
 public:

@@ -106,7 +106,7 @@ void createEventWorkspace(const int &maxToF, const double &binWidth,
   // Round up number of bins needed and reserve the space in the vector.
   xAxis.reserve(int(std::ceil(maxToF / binWidth)));
   for (auto i = 0; i < (maxToF / binWidth); i++) {
-    xAxis.push_back(i * binWidth);
+    xAxis.emplace_back(i * binWidth);
   }
 
   dataWorkspace = DataObjects::create<DataObjects::EventWorkspace>(

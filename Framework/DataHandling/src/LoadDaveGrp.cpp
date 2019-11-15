@@ -227,7 +227,7 @@ void LoadDaveGrp::getAxisValues(std::vector<double> &axis,
     readLine();
     std::istringstream is(line);
     is >> value;
-    axis.push_back(value);
+    axis.emplace_back(value);
   }
 }
 

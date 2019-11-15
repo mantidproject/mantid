@@ -396,7 +396,7 @@ void KafkaEventStreamDecoder::eventDataFromMessage(const std::string &buffer,
     std::lock_guard<std::mutex> bufferLock(m_intermediateBufferMutex);
 
     /* Store the buffered pulse */
-    m_receivedPulseBuffer.push_back(pulse);
+    m_receivedPulseBuffer.emplace_back(pulse);
     const auto pulseIndex = m_receivedPulseBuffer.size() - 1;
 
     /* Ensure storage for newly received events */

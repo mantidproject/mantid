@@ -132,7 +132,7 @@ KafkaTopicSubscriber::getTopicPartitions() {
          ++partitionNumber) {
       auto topicPartition = RdKafka::TopicPartition::create(
           topicName, static_cast<int>(partitionNumber));
-      partitions.push_back(topicPartition);
+      partitions.emplace_back(topicPartition);
     }
   }
   return partitions;
@@ -164,7 +164,7 @@ KafkaTopicSubscriber::getCurrentOffsets() {
     if (!result.second) {
       // If we could not emplace a new pair then the key already exists, so
       // append the offset to the vector belonging to the existing topic key
-      currentOffsets[topicPartition->topic()].push_back(
+      currentOffsets[topicPartition->topic()].emplace_back(
           topicPartition->offset());
     }
   }
@@ -357,7 +357,7 @@ void KafkaTopicSubscriber::subscribeAtOffset(int64_t offset) {
     }
 
     topicPartition->set_offset(confOffset);
-    topicPartitions.push_back(topicPartition);
+    topicPartitions.emplace_back(topicPartition);
   }
   LOGGER().debug() << "Attempting to subscribe to " << topicPartitions.size()
                    << " partitions in KafkaTopicSubscriber::subscribeAtOffset()"

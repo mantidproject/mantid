@@ -242,9 +242,9 @@ void CalculateEfficiency::normalizeDetectors(MatrixWorkspace_sptr rebinnedWS,
 
     // Mask this detector if the signal is outside the acceptable band
     if (!isEmpty(min_eff) && YOut[0] < min_eff)
-      dets_to_mask.push_back(i);
+      dets_to_mask.emplace_back(i);
     if (!isEmpty(max_eff) && YOut[0] > max_eff)
-      dets_to_mask.push_back(i);
+      dets_to_mask.emplace_back(i);
   }
 
   g_log.debug() << "normalizeDetectors: Masked pixels outside the acceptable "
@@ -312,7 +312,7 @@ void CalculateEfficiency::maskComponent(MatrixWorkspace &ws,
             boost::dynamic_pointer_cast<Geometry::Detector>((*xColumn)[y]);
         if (detector) {
           auto detID = detector->getID();
-          detectorList.push_back(detID);
+          detectorList.emplace_back(detID);
         }
       }
     }
@@ -365,13 +365,13 @@ void CalculateEfficiency::maskEdges(MatrixWorkspace_sptr ws, int left,
   int i = 0;
 
   while (i < left * component->idstep()) {
-    IDs.push_back(component->idstart() + i);
+    IDs.emplace_back(component->idstart() + i);
     i += 1;
   }
   // right
   i = component->maxDetectorID() - right * component->idstep();
   while (i < component->maxDetectorID()) {
-    IDs.push_back(i);
+    IDs.emplace_back(i);
     i += 1;
   }
   // low: 0,256,512,768,..,1,257,513
@@ -379,7 +379,7 @@ void CalculateEfficiency::maskEdges(MatrixWorkspace_sptr ws, int left,
     i = row + component->idstart();
     while (i < component->nelements() * component->idstep() -
                    component->idstep() + low + component->idstart()) {
-      IDs.push_back(i);
+      IDs.emplace_back(i);
       i += component->idstep();
     }
   }
@@ -388,7 +388,7 @@ void CalculateEfficiency::maskEdges(MatrixWorkspace_sptr ws, int left,
     i = component->idstep() + component->idstart() - row - 1;
     while (i < component->nelements() * component->idstep() +
                    component->idstart()) {
-      IDs.push_back(i);
+      IDs.emplace_back(i);
       i += component->idstep();
     }
   }

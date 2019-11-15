@@ -226,7 +226,7 @@ public:
     std::vector<int> index_values;
     int correct_indices[] = {1, 4, 2, 0, 1, 3, 0, -1, 0, -1, -2, -3};
     for (int correct_index : correct_indices) {
-      index_values.push_back(correct_index);
+      index_values.emplace_back(correct_index);
     }
 
     std::vector<V3D> q_vectors = getNatroliteQs();
@@ -331,7 +331,7 @@ public:
       V3D vec(current_dir);
       vec *= ((double)i + 0.6);
       vec *= 2.0 * M_PI;
-      q_vectors.push_back(vec);
+      q_vectors.emplace_back(vec);
     }
     double max_q_magnitude = 16.0;
 
@@ -471,17 +471,17 @@ public:
     V3D v5c(2.8666800, 5.39606, 8.06534);
     V3D v5d(2.9666800, 5.49606, 8.16534);
 
-    directions.push_back(v1);
-    directions.push_back(v1b);
-    directions.push_back(v1c);
-    directions.push_back(v2);
-    directions.push_back(v3);
-    directions.push_back(v3b);
-    directions.push_back(v4);
-    directions.push_back(v5);
-    directions.push_back(v5b);
-    directions.push_back(v5c);
-    directions.push_back(v5d);
+    directions.emplace_back(v1);
+    directions.emplace_back(v1b);
+    directions.emplace_back(v1c);
+    directions.emplace_back(v2);
+    directions.emplace_back(v3);
+    directions.emplace_back(v3b);
+    directions.emplace_back(v4);
+    directions.emplace_back(v5);
+    directions.emplace_back(v5b);
+    directions.emplace_back(v5c);
+    directions.emplace_back(v5d);
 
     IndexingUtils::DiscardDuplicates(new_list, directions, q_vectors,
                                      required_tolerance, length_tol, angle_tol);

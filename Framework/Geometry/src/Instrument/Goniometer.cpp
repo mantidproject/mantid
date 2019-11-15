@@ -151,7 +151,7 @@ void Goniometer::pushAxis(std::string name, double axisx, double axisy,
         throw std::invalid_argument("Motor name already defined");
     }
     GoniometerAxis a(name, V3D(axisx, axisy, axisz), angle, sense, angUnit);
-    motors.push_back(a);
+    motors.emplace_back(a);
   }
   recalculateR();
 }
@@ -320,7 +320,7 @@ void Goniometer::loadNexus(::NeXus::File *file, const std::string &group) {
   for (int i = 0; i < num_axes; i++) {
     GoniometerAxis newAxis;
     newAxis.loadNexus(file, "axis" + Strings::toString(i));
-    motors.push_back(newAxis);
+    motors.emplace_back(newAxis);
   }
   file->closeGroup();
   // Refresh cached values

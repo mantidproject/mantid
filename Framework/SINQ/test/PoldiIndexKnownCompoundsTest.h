@@ -126,9 +126,9 @@ public:
 
   void testSetExpectedPhases() {
     std::vector<PoldiPeakCollection_sptr> expectedPeaks;
-    expectedPeaks.push_back(
+    expectedPeaks.emplace_back(
         PoldiPeakCollectionHelpers::createPoldiPeakCollectionMaximum());
-    expectedPeaks.push_back(
+    expectedPeaks.emplace_back(
         PoldiPeakCollectionHelpers::createPoldiPeakCollectionMaximum());
 
     TestablePoldiIndexKnownCompounds alg;
@@ -151,9 +151,9 @@ public:
 
   void testInitializeIndexedPeaks() {
     std::vector<PoldiPeakCollection_sptr> expectedPeaks;
-    expectedPeaks.push_back(
+    expectedPeaks.emplace_back(
         PoldiPeakCollectionHelpers::createPoldiPeakCollectionMaximum());
-    expectedPeaks.push_back(
+    expectedPeaks.emplace_back(
         PoldiPeakCollectionHelpers::createPoldiPeakCollectionMaximum());
 
     TestablePoldiIndexKnownCompounds alg;
@@ -234,18 +234,18 @@ public:
 
   void testGetPeakCollections() {
     std::vector<Workspace_sptr> goodWorkspaces;
-    goodWorkspaces.push_back(
+    goodWorkspaces.emplace_back(
         PoldiPeakCollectionHelpers::createPoldiPeakTableWorkspace());
-    goodWorkspaces.push_back(
+    goodWorkspaces.emplace_back(
         PoldiPeakCollectionHelpers::createPoldiPeakTableWorkspace());
 
     TestablePoldiIndexKnownCompounds alg;
     TS_ASSERT_THROWS_NOTHING(alg.getPeakCollections(goodWorkspaces));
 
     std::vector<Workspace_sptr> badWorkspaces;
-    badWorkspaces.push_back(
+    badWorkspaces.emplace_back(
         PoldiPeakCollectionHelpers::createPoldiPeakTableWorkspace());
-    badWorkspaces.push_back(
+    badWorkspaces.emplace_back(
         WorkspaceCreationHelper::create1DWorkspaceRand(10, true));
 
     TS_ASSERT_THROWS(alg.getPeakCollections(badWorkspaces),
@@ -334,8 +334,8 @@ public:
 
   void testGetNormalizedContributions() {
     std::vector<double> contributions;
-    contributions.push_back(4.0);
-    contributions.push_back(1.0);
+    contributions.emplace_back(4.0);
+    contributions.emplace_back(1.0);
 
     TestablePoldiIndexKnownCompounds alg;
     TS_ASSERT_THROWS_NOTHING(alg.getNormalizedContributions(contributions));

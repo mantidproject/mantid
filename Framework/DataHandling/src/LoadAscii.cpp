@@ -217,7 +217,7 @@ API::Workspace_sptr LoadAscii::readData(std::ifstream &file) const {
     if (haveXErrors) {
       // Note: we only have X errors with 4-column files.
       // We are only here when i=0.
-      dx.push_back(values[3]);
+      dx.emplace_back(values[3]);
     }
     ++numBins;
   } while (getline(file, line));

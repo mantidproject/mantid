@@ -167,7 +167,7 @@ void InelasticDiffRotDiscreteCircle::setWorkspace(
       double q =
           Mantid::Kernel::UnitConversion::convertToElasticQ(usingTheta, efixed);
 
-      m_qValueCache.push_back(q);
+      m_qValueCache.emplace_back(q);
     } catch (std::runtime_error &) {
       m_qValueCache.clear();
       g_log.information("Cannot populate Q values from workspace - could not "

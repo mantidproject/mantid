@@ -672,9 +672,9 @@ private:
     testWS->setBinEdges(1, xdata);
 
     std::vector<double> edges;
-    edges.push_back(0.0);
-    edges.push_back(1.0);
-    edges.push_back(5.0);
+    edges.emplace_back(0.0);
+    edges.emplace_back(1.0);
+    edges.emplace_back(5.0);
     auto axis = std::make_unique<BinEdgeAxis>(edges);
     testWS->replaceAxis(1, std::move(axis));
 

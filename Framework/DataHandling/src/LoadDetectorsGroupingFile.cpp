@@ -380,7 +380,7 @@ void LoadDetectorsGroupingFile::generateNoInstrumentGroupWorkspace() {
     int groupid = groupspeciter->first;
     for (auto specid : groupspeciter->second) {
       spectrumidgroupmap.emplace(specid, groupid);
-      specids.push_back(specid);
+      specids.emplace_back(specid);
     }
   }
 

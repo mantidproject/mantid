@@ -447,9 +447,9 @@ public:
     for (size_t i = 0; i < 10; i++)
       ws.getSpectrum(i).setDetectorID(detid_t(i * 10));
     std::vector<detid_t> dets;
-    dets.push_back(60);
-    dets.push_back(20);
-    dets.push_back(90);
+    dets.emplace_back(60);
+    dets.emplace_back(20);
+    dets.emplace_back(90);
     std::vector<size_t> indices = ws.getIndicesFromDetectorIDs(dets);
     TS_ASSERT_EQUALS(indices.size(), 3);
     TS_ASSERT_EQUALS(indices[0], 6);

@@ -166,7 +166,7 @@ void CalculateTransmission::exec() {
   if (usingMonitor) {
     const size_t transmissionMonitorIndex =
         getIndexFromDetectorID(*sampleWS, transMonitorID);
-    transmissionIndices.push_back(transmissionMonitorIndex);
+    transmissionIndices.emplace_back(transmissionMonitorIndex);
     logIfNotMonitor(sampleWS, directWS, transmissionMonitorIndex);
   } else if (usingROI) {
     transmissionIndices = sampleWS->getIndicesFromDetectorIDs(transDetList);

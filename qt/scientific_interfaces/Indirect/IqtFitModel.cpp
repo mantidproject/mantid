@@ -47,7 +47,7 @@ std::vector<std::string> getParameters(IFunction_sptr function,
 
   for (const auto &longName : function->getParameterNames()) {
     if (boost::algorithm::ends_with(longName, shortParameterName))
-      parameters.push_back(longName);
+      parameters.emplace_back(longName);
   }
   return parameters;
 }

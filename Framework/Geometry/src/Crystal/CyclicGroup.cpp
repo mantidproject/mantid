@@ -29,7 +29,7 @@ CyclicGroup::generateAllOperations(const SymmetryOperation &operation) const {
   std::vector<SymmetryOperation> symOps(1, operation);
   symOps.reserve(operation.order());
   for (size_t i = 1; i < operation.order(); ++i) {
-    symOps.push_back(operation * symOps.back());
+    symOps.emplace_back(operation * symOps.back());
   }
 
   return symOps;

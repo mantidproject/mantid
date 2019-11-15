@@ -221,7 +221,7 @@ public:
     std::vector<MDHistoDimension_sptr> dimensions;
     Mantid::Geometry::GeneralFrame frame("m", "m");
     for (size_t i = 0; i < 7; i++) {
-      dimensions.push_back(MDHistoDimension_sptr(
+      dimensions.emplace_back(MDHistoDimension_sptr(
           new MDHistoDimension("Dim", "Dim", frame, -10, 10, 3)));
     }
 
@@ -561,10 +561,10 @@ public:
 
     std::vector<coord_t> min;
     std::vector<coord_t> max;
-    min.push_back(0);
-    min.push_back(0);
-    max.push_back(5);
-    max.push_back(5);
+    min.emplace_back(0);
+    min.emplace_back(0);
+    max.emplace_back(5);
+    max.emplace_back(5);
 
     // Mask part of the workspace
     auto function = std::make_unique<MDBoxImplicitFunction>(min, max);
@@ -982,12 +982,12 @@ public:
     std::vector<coord_t> max;
 
     // Make the box that covers the whole workspace.
-    min.push_back(0);
-    min.push_back(0);
-    min.push_back(0);
-    max.push_back(10);
-    max.push_back(10);
-    max.push_back(10);
+    min.emplace_back(0);
+    min.emplace_back(0);
+    min.emplace_back(0);
+    max.emplace_back(10);
+    max.emplace_back(10);
+    max.emplace_back(10);
 
     // Create an function that encompases ALL of the total bins.
     auto function = std::make_unique<MDBoxImplicitFunction>(min, max);
@@ -1114,12 +1114,12 @@ public:
     std::vector<coord_t> max;
 
     // Make the box that covers half the bins in the workspace.
-    min.push_back(0);
-    min.push_back(0);
-    min.push_back(0);
-    max.push_back(10);
-    max.push_back(10);
-    max.push_back(10);
+    min.emplace_back(0);
+    min.emplace_back(0);
+    min.emplace_back(0);
+    max.emplace_back(10);
+    max.emplace_back(10);
+    max.emplace_back(10);
 
     // Create an function that encompases ALL of the total bins.
     auto function = std::make_unique<MDBoxImplicitFunction>(min, max);
@@ -1131,12 +1131,12 @@ public:
     std::vector<coord_t> max;
 
     // Make the box that covers half the bins in the workspace.
-    min.push_back(0);
-    min.push_back(0);
-    min.push_back(0);
-    max.push_back(10);
-    max.push_back(10);
-    max.push_back(4.99f);
+    min.emplace_back(0);
+    min.emplace_back(0);
+    min.emplace_back(0);
+    max.emplace_back(10);
+    max.emplace_back(10);
+    max.emplace_back(4.99f);
 
     // Create an function that encompases 1/2 of the total bins.
     auto function = std::make_unique<MDBoxImplicitFunction>(min, max);
@@ -1147,12 +1147,12 @@ public:
     // Create a function that masks everything.
     std::vector<coord_t> min;
     std::vector<coord_t> max;
-    min.push_back(0);
-    min.push_back(0);
-    min.push_back(0);
-    max.push_back(10);
-    max.push_back(10);
-    max.push_back(10);
+    min.emplace_back(0);
+    min.emplace_back(0);
+    min.emplace_back(0);
+    max.emplace_back(10);
+    max.emplace_back(10);
+    max.emplace_back(10);
     auto function = std::make_unique<MDBoxImplicitFunction>(min, max);
 
     MDEventWorkspace3Lean::sptr ws =

@@ -255,7 +255,7 @@ public:
     vector<double> vecX;
     double tof = tofh1 - 10 * fwhm;
     while (tof < tofh1 + 10 * fwhm) {
-      vecX.push_back(tof);
+      vecX.emplace_back(tof);
       tof += fwhm * 0.1;
     }
     vector<double> vecY(vecX.size(), 0.0);

@@ -48,7 +48,7 @@ AffineMatrixParameter *AffineMatrixParameterParser::createParameter(
       col_it = vecStrCols.begin();
       while (col_it != vecStrCols.end()) {
         coord_t val = static_cast<coord_t>(std::stof(col_it->c_str()));
-        elements.push_back(val);
+        elements.emplace_back(val);
         ++col_it;
       }
       ++row_it;

@@ -125,7 +125,7 @@ std::string SymmetryOperationSymbolParser::getNormalizedIdentifier(
       }
     }
 
-    components.push_back(currentComponent.str());
+    components.emplace_back(currentComponent.str());
   }
 
   return boost::join(components, ",");

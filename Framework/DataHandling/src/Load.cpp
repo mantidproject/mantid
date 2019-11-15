@@ -426,7 +426,7 @@ void Load::loadMultipleFiles() {
       }
     }
     // Add the sum to the list of loaded workspace names.
-    loadedWsList.push_back(sumWS);
+    loadedWsList.emplace_back(sumWS);
   }
 
   // If we only have one loaded ws, set it as the output.

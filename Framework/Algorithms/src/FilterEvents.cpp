@@ -328,7 +328,7 @@ void FilterEvents::exec() {
     } catch (std::runtime_error &) {
       g_log.warning("Cannot set goniometer.");
     }
-    outputwsnames.push_back(miter.second->getName());
+    outputwsnames.emplace_back(miter.second->getName());
   }
   setProperty("OutputWorkspaceNames", outputwsnames);
 
@@ -627,17 +627,17 @@ void FilterEvents::copyNoneSplitLogs(
       // insert the time series property to proper target vector
       if (dbl_prop) {
         // is double time series property
-        dbl_tsp_name_vector.push_back(dbl_prop);
+        dbl_tsp_name_vector.emplace_back(dbl_prop);
       } else if (int_prop) {
         // is integer time series property
-        int_tsp_name_vector.push_back(int_prop);
+        int_tsp_name_vector.emplace_back(int_prop);
       } else if (bool_prop) {
         // is integer time series property
-        bool_tsp_name_vector.push_back(bool_prop);
+        bool_tsp_name_vector.emplace_back(bool_prop);
         continue;
       } else if (string_prop) {
         // is string time series property
-        string_tsp_vector.push_back(string_prop);
+        string_tsp_vector.emplace_back(string_prop);
       }
 
     } else {
@@ -763,7 +763,7 @@ void FilterEvents::splitTimeSeriesProperty(
   for (int tindex = 0; tindex <= max_target_index; ++tindex) {
     auto *new_property = new TimeSeriesProperty<TYPE>(property_name);
     new_property->setUnits(tsp->units());
-    output_vector.push_back(new_property);
+    output_vector.emplace_back(new_property);
   }
 
   // duplicate the time series property if the size is just one
@@ -817,7 +817,7 @@ void FilterEvents::processSplittersWorkspace() {
   bool inorder = true;
   for (size_t i = 0; i < numsplitters; i++) {
     // push back the splitter in SplittersWorkspace to list of splitters
-    m_splitters.push_back(m_splittersWorkspace->getSplitter(i));
+    m_splitters.emplace_back(m_splittersWorkspace->getSplitter(i));
     // add the target workspace index to target workspace indexes set
     m_targetWorkspaceIndexSet.insert(m_splitters.back().index());
     // register for the maximum target index
@@ -880,19 +880,19 @@ void FilterEvents::convertSplittersWorkspaceToVectors() {
     int64_t stop_time_i64 = splitter.stop().totalNanoseconds();
     if (m_vecSplitterTime.empty()) {
       // first entry: add
-      m_vecSplitterTime.push_back(start_time_i64);
-      m_vecSplitterTime.push_back(stop_time_i64);
-      m_vecSplitterGroup.push_back(splitter.index());
+      m_vecSplitterTime.emplace_back(start_time_i64);
+      m_vecSplitterTime.emplace_back(stop_time_i64);
+      m_vecSplitterGroup.emplace_back(splitter.index());
     } else if (abs(last_entry_time - start_time_i64) < TOLERANCE) {
       // start time is SAME as last entry
-      m_vecSplitterTime.push_back(stop_time_i64);
-      m_vecSplitterGroup.push_back(splitter.index());
+      m_vecSplitterTime.emplace_back(stop_time_i64);
+      m_vecSplitterGroup.emplace_back(splitter.index());
     } else if (start_time_i64 > last_entry_time + TOLERANCE) {
       // start time is way behind. then add an empty one
-      m_vecSplitterTime.push_back(start_time_i64);
-      m_vecSplitterTime.push_back(stop_time_i64);
-      m_vecSplitterGroup.push_back(no_filter_index);
-      m_vecSplitterGroup.push_back(splitter.index());
+      m_vecSplitterTime.emplace_back(start_time_i64);
+      m_vecSplitterTime.emplace_back(stop_time_i64);
+      m_vecSplitterGroup.emplace_back(no_filter_index);
+      m_vecSplitterGroup.emplace_back(splitter.index());
     } else {
       // some impossible situation
       std::stringstream errorss;
@@ -1043,14 +1043,14 @@ void FilterEvents::processTableSplittersWorkspace() {
 
     if (m_vecSplitterTime.empty()) {
       // first splitter: push the start time to vector
-      m_vecSplitterTime.push_back(start_time);
+      m_vecSplitterTime.emplace_back(start_time);
     } else if (start_time - m_vecSplitterTime.back() > TOLERANCE) {
       // the start time is way behind previous splitter's stop time
       // create a new splitter and set the time interval in the middle to target
       // -1
-      m_vecSplitterTime.push_back(start_time);
+      m_vecSplitterTime.emplace_back(start_time);
       // NOTE: use index = 0 for un-defined slot
-      m_vecSplitterGroup.push_back(UNDEFINED_SPLITTING_TARGET);
+      m_vecSplitterGroup.emplace_back(UNDEFINED_SPLITTING_TARGET);
       found_undefined_splitter = true;
     } else if (abs(start_time - m_vecSplitterTime.back()) < TOLERANCE) {
       // new splitter's start time is same (within tolerance) as the stop time
@@ -1078,8 +1078,8 @@ void FilterEvents::processTableSplittersWorkspace() {
     }
 
     // add start time, stop time and 'target
-    m_vecSplitterTime.push_back(stop_time);
-    m_vecSplitterGroup.push_back(int_target);
+    m_vecSplitterTime.emplace_back(stop_time);
+    m_vecSplitterGroup.emplace_back(int_target);
   } // END-FOR (irow)
 
   // record max target index
@@ -1211,7 +1211,7 @@ void FilterEvents::createOutputWorkspacesSplitters() {
       }
 
       // Inserted this pair to map
-      m_wsNames.push_back(wsname.str());
+      m_wsNames.emplace_back(wsname.str());
 
       // Set (property) to output workspace and set to ADS
       AnalysisDataService::Instance().addOrReplace(wsname.str(), optws);
@@ -1310,7 +1310,7 @@ void FilterEvents::createOutputWorkspacesMatrixCase() {
     }
 
     // Inserted this pair to map
-    m_wsNames.push_back(wsname.str());
+    m_wsNames.emplace_back(wsname.str());
     AnalysisDataService::Instance().addOrReplace(wsname.str(), optws);
 
     g_log.debug() << "Created output Workspace of group = " << wsgroup
@@ -1413,7 +1413,7 @@ void FilterEvents::createOutputWorkspacesTableSplitterCase() {
     // add to output workspace property
 
     // Inserted this pair to map
-    m_wsNames.push_back(wsname.str());
+    m_wsNames.emplace_back(wsname.str());
 
     // Set (property) to output workspace and set to ADS
     AnalysisDataService::Instance().addOrReplace(wsname.str(), optws);
@@ -1845,7 +1845,7 @@ void FilterEvents::generateSplitterTSP(
   for (int itarget = 0; itarget <= m_maxTargetIndex; ++itarget) {
     Kernel::TimeSeriesProperty<int> *split_tsp =
         new Kernel::TimeSeriesProperty<int>("splitter");
-    split_tsp_vec.push_back(split_tsp);
+    split_tsp_vec.emplace_back(split_tsp);
     // add initial value if the first splitter time is after the run start
     // time
     split_tsp->addValue(Types::Core::DateAndTime(m_runStartTime), 0);
@@ -1923,7 +1923,7 @@ void FilterEvents::generateSplitterTSPalpha(
     Kernel::TimeSeriesProperty<int> *split_tsp =
         new Kernel::TimeSeriesProperty<int>("splitter");
     split_tsp->addValue(m_runStartTime, 0);
-    split_tsp_vec.push_back(split_tsp);
+    split_tsp_vec.emplace_back(split_tsp);
   }
 
   for (SplittingInterval splitter : m_splitters) {
@@ -2007,7 +2007,7 @@ std::vector<std::string> FilterEvents::getTimeSeriesLogNames() {
     // append to vector if it is either double TimeSeries or int TimeSeries
     if (dbltimeprop || inttimeprop || booltimeprop) {
       const std::string &pname = ip->name();
-      lognames.push_back(pname);
+      lognames.emplace_back(pname);
     }
   }
 

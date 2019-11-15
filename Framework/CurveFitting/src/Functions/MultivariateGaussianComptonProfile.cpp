@@ -252,7 +252,7 @@ void MultivariateGaussianComptonProfile::buildS2Cache(
 
       s2 = 1.0 / s2;
 
-      s2Cache.push_back(s2);
+      s2Cache.emplace_back(s2);
     }
   }
 }

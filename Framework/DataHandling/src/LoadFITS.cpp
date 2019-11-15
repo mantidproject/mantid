@@ -278,7 +278,7 @@ void LoadFITS::loadHeader(const std::string &filePath, FITSInfo &header) {
     header.numberOfAxis = static_cast<int>(m_headerAxisNameKeys.size());
 
     for (int j = 0; j < header.numberOfAxis; ++j) {
-      header.axisPixelLengths.push_back(boost::lexical_cast<size_t>(
+      header.axisPixelLengths.emplace_back(boost::lexical_cast<size_t>(
           header.headerKeys[m_headerAxisNameKeys[j]]));
       // only debug level, when loading multiple files this is very verbose
       g_log.debug() << "Found axis length header entry: "
@@ -601,7 +601,7 @@ void LoadFITS::parseHeader(FITSInfo &headerInfo) {
       // map of individual keys.
       std::string part;
       reader.readRaw(80, part);
-      headerInfo.headerItems.push_back(part);
+      headerInfo.headerItems.emplace_back(part);
 
       // from the FITS standard about COMMENT: This keyword shall have no
       // associated value; columns 9-80 may contain any ASCII text.

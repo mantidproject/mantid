@@ -249,7 +249,7 @@ MaterialBuilder::createCompositionFromAtomicNumber() const {
                   static_cast<uint16_t>(m_massNo))),
       1.};
   Material::ChemicalFormula formula;
-  formula.push_back(unit);
+  formula.emplace_back(unit);
 
   return formula;
 }

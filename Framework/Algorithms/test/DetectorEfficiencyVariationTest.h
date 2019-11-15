@@ -137,11 +137,11 @@ public:
       std::vector<double> forInputA, forInputB;
       // the spectravalues will be multiples of the random numbers above
       for (double y : yArray) {
-        forInputA.push_back(y);
+        forInputA.emplace_back(y);
         // there is going to be a small difference between the workspaces that
         // will vary with histogram number
-        forInputB.push_back(forInputA.back() *
-                            (1 + m_ramp * (j - (Nhist / 2))));
+        forInputB.emplace_back(forInputA.back() *
+                               (1 + m_ramp * (j - (Nhist / 2))));
       }
       // insert a particularly large value to pick up later
       m_LargeValue = 3.1;

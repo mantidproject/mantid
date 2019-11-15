@@ -169,7 +169,7 @@ void ChopData::exec() {
     setProperty(wsname, workspace);
     ++wsCounter;
 
-    workspaces.push_back(workspace);
+    workspaces.emplace_back(workspace);
 
     progress->report();
   }

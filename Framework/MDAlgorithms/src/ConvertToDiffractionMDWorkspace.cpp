@@ -426,8 +426,8 @@ void ConvertToDiffractionMDWorkspace::exec() {
     // Replicate a single min,max into several
     if (extents.size() == 2) {
       for (size_t d = 1; d < nd; d++) {
-        extents.push_back(extents[0]);
-        extents.push_back(extents[1]);
+        extents.emplace_back(extents[0]);
+        extents.emplace_back(extents[1]);
       }
     }
     if (extents.size() != nd * 2)

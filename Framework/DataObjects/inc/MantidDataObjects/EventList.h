@@ -105,7 +105,7 @@ public:
    * @param event :: TofEvent to add at the end of the list.
    * */
   inline void addEventQuickly(const Types::Event::TofEvent &event) {
-    this->events.push_back(event);
+    this->events.emplace_back(event);
     this->order = UNSORTED;
   }
 
@@ -115,7 +115,7 @@ public:
    * @param event :: WeightedEvent to add at the end of the list.
    * */
   inline void addEventQuickly(const WeightedEvent &event) {
-    this->weightedEvents.push_back(event);
+    this->weightedEvents.emplace_back(event);
     this->order = UNSORTED;
   }
 
@@ -125,7 +125,7 @@ public:
    * @param event :: WeightedEventNoTime to add at the end of the list.
    * */
   inline void addEventQuickly(const WeightedEventNoTime &event) {
-    this->weightedEventsNoTime.push_back(event);
+    this->weightedEventsNoTime.emplace_back(event);
     this->order = UNSORTED;
   }
 

@@ -389,11 +389,11 @@ void MDWSTransform::setQ3DDimensionsNames(
     std::vector<double> len;
     Kernel::V3D x;
     x = Bm * dimDirections[0];
-    len.push_back(2 * M_PI * x.norm());
+    len.emplace_back(2 * M_PI * x.norm());
     x = Bm * dimDirections[1];
-    len.push_back(2 * M_PI * x.norm());
+    len.emplace_back(2 * M_PI * x.norm());
     x = Bm * dimDirections[2];
-    len.push_back(2 * M_PI * x.norm());
+    len.emplace_back(2 * M_PI * x.norm());
     for (int i = 0; i < 3; i++)
       TargWSDescription.setDimUnit(
           i, "in " + MDAlgorithms::sprintfd(len[i], 1.e-3) + " A^-1");

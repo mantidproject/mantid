@@ -95,7 +95,7 @@ MultipleFileProperty::MultipleFileProperty(const std::string &name,
 
   for (const auto &ext : exts)
     if (doesNotContainWildCard(ext))
-      m_exts.push_back(ext);
+      m_exts.emplace_back(ext);
 }
 
 /**
@@ -289,7 +289,7 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
     // so we can see how many we have.
     std::vector<std::string> plusTokenStrings;
     for (; plusToken != end; ++plusToken)
-      plusTokenStrings.push_back(plusToken->str());
+      plusTokenStrings.emplace_back(plusToken->str());
 
     for (auto &plusTokenString : plusTokenStrings) {
       try {
@@ -310,7 +310,7 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
       // existing) file within a token, but which has unexpected zero padding,
       // or some other anomaly.
       if (VectorHelper::flattenVector(f).empty())
-        f.push_back(std::vector<std::string>(1, plusTokenString));
+        f.emplace_back(std::vector<std::string>(1, plusTokenString));
 
       if (plusTokenStrings.size() > 1) {
         // See [3] in header documentation.  Basically, for reasons of
@@ -322,10 +322,10 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
                  "supported.";
 
         if (temp.empty())
-          temp.push_back(f[0]);
+          temp.emplace_back(f[0]);
         else {
           for (auto &parsedFile : f[0])
-            temp[0].push_back(parsedFile);
+            temp[0].emplace_back(parsedFile);
         }
       } else {
         temp.insert(temp.end(), f.begin(), f.end());
@@ -435,9 +435,9 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
       }
 
       // Append the file name to result.
-      fullFileNames.push_back(std::move(fullyResolvedFile));
+      fullFileNames.emplace_back(std::move(fullyResolvedFile));
     }
-    allFullFileNames.push_back(std::move(fullFileNames));
+    allFullFileNames.emplace_back(std::move(fullFileNames));
   }
 
   // Now re-set the value using the full paths found.

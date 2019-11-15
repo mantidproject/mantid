@@ -644,7 +644,7 @@ void AlgHistoryTreeWidget::itemChecked(QTreeWidgetItem *item, int index) {
 
   do {
     modelIndex = indexFromItem(item, index);
-    indicies.push_back(modelIndex.row() + 1);
+    indicies.emplace_back(modelIndex.row() + 1);
 
     if (item->flags().testFlag(Qt::ItemIsUserCheckable)) {
       item->setCheckState(index, Qt::Checked);

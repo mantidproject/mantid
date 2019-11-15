@@ -486,7 +486,7 @@ PlotPeakByLogValue::getWorkspace(const InputData &data) {
         for (size_t i = 0; i < axis->length(); ++i) {
           auto s = double(axis->spectraNo(i));
           if (s >= out.start && s <= out.end) {
-            out.indx.push_back(static_cast<int>(i));
+            out.indx.emplace_back(static_cast<int>(i));
           }
         }
       }
@@ -514,7 +514,7 @@ PlotPeakByLogValue::getWorkspace(const InputData &data) {
       for (size_t i = 0; i < axis->length(); ++i) {
         double s = (*axis)(i);
         if (s >= out.start && s <= out.end) {
-          out.indx.push_back(static_cast<int>(i));
+          out.indx.emplace_back(static_cast<int>(i));
         }
       }
     }
@@ -667,7 +667,7 @@ std::string PlotPeakByLogValue::getMinimizerString(const std::string &wsName,
       const std::string &wsPropValue = minimizerProp->value();
       if (!wsPropValue.empty()) {
         const std::string &wsPropName = minimizerProp->name();
-        m_minimizerWorkspaces[wsPropName].push_back(wsPropValue);
+        m_minimizerWorkspaces[wsPropName].emplace_back(wsPropValue);
       }
     }
   }

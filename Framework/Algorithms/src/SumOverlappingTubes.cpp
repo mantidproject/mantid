@@ -246,23 +246,23 @@ void SumOverlappingTubes::getHeightAxis(const std::string &componentName) {
       if (heightBinning.size() == 2 &&
           (posY < heightBinning[0] || posY > heightBinning[1]))
         continue;
-      m_heightAxis.push_back(posY);
+      m_heightAxis.emplace_back(posY);
     }
   } else {
     if (heightBinning.size() != 3) {
       if (heightBinning.size() == 2 && m_outputType == "1D") {
-        m_heightAxis.push_back(heightBinning[0]);
-        m_heightAxis.push_back(heightBinning[1]);
+        m_heightAxis.emplace_back(heightBinning[0]);
+        m_heightAxis.emplace_back(heightBinning[1]);
       } else
         throw std::runtime_error("Height binning must have start, step and end "
                                  "values (except for 1D option).");
     } else if (m_outputType == "1D") {
-      m_heightAxis.push_back(heightBinning[0]);
-      m_heightAxis.push_back(heightBinning[2]);
+      m_heightAxis.emplace_back(heightBinning[0]);
+      m_heightAxis.emplace_back(heightBinning[2]);
     } else {
       double height = heightBinning[0];
       while (height < heightBinning[2]) {
-        m_heightAxis.push_back(height);
+        m_heightAxis.emplace_back(height);
         height += heightBinning[1];
       }
     }

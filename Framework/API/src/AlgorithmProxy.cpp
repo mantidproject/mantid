@@ -144,7 +144,7 @@ void AlgorithmProxy::addObserver(const Poco::AbstractObserver &observer) const {
   }
   // save the observer in any case because m_alg can be reset (eg in
   // createConcreteAlg())
-  m_externalObservers.push_back(obs);
+  m_externalObservers.emplace_back(obs);
 }
 
 /** Remove an observer.

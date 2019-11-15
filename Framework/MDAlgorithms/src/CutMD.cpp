@@ -169,7 +169,7 @@ calculateSteps(const std::vector<MinMax> &inExtents,
     }
     if (outBin < 0)
       throw std::runtime_error("output bin calculated to be less than 0");
-    outBins.push_back(outBin);
+    outBins.emplace_back(outBin);
   }
   return std::make_pair(outExtents, outBins);
 }
@@ -393,16 +393,16 @@ void CutMD::exec() {
       const double extentRange = extentLimit.second - extentLimit.first;
 
       if (nArgs == 1) {
-        steppedExtents.push_back(extentLimit);
-        steppedBins.push_back(static_cast<int>(extentRange / pbins[i][0]));
+        steppedExtents.emplace_back(extentLimit);
+        steppedBins.emplace_back(static_cast<int>(extentRange / pbins[i][0]));
       } else if (nArgs == 2) {
         steppedExtents.emplace_back(pbins[i][0], pbins[i][1]);
-        steppedBins.push_back(1);
+        steppedBins.emplace_back(1);
       } else if (nArgs == 3) {
         const double dimRange = pbins[i][2] - pbins[i][0];
         const double stepSize = pbins[i][1] < dimRange ? pbins[i][1] : dimRange;
         steppedExtents.emplace_back(pbins[i][0], pbins[i][2]);
-        steppedBins.push_back(static_cast<int>(dimRange / stepSize));
+        steppedBins.emplace_back(static_cast<int>(dimRange / stepSize));
       }
 
       // and double targetUnits' length by appending itself to itself

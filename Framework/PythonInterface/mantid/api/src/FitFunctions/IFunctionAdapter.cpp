@@ -59,7 +59,7 @@ IFunction::Attribute createAttributeFromPythonValue(const object &value) {
     std::vector<double> vec;
     for (Py_ssize_t i = 0; i < n; ++i) {
       auto v = extract<double>(PyList_GetItem(rawptr, i))();
-      vec.push_back(v);
+      vec.emplace_back(v);
     }
     attr = IFunction::Attribute(vec);
   } else {

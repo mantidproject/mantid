@@ -83,7 +83,7 @@ void SaveNXTomo::init() {
 void SaveNXTomo::exec() {
   try {
     MatrixWorkspace_sptr m = getProperty("InputWorkspaces");
-    m_workspaces.push_back(boost::dynamic_pointer_cast<Workspace2D>(m));
+    m_workspaces.emplace_back(boost::dynamic_pointer_cast<Workspace2D>(m));
   } catch (...) {
   }
 
@@ -101,7 +101,7 @@ bool SaveNXTomo::processGroups() {
         AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(name);
 
     for (int i = 0; i < groupWS->getNumberOfEntries(); ++i) {
-      m_workspaces.push_back(
+      m_workspaces.emplace_back(
           boost::dynamic_pointer_cast<Workspace2D>(groupWS->getItem(i)));
     }
   } catch (...) {
@@ -136,10 +136,10 @@ void SaveNXTomo::processAll() {
   this->m_filename = getPropertyValue("Filename");
 
   // Populate the dimension array - assume all are the same
-  m_dimensions.push_back(m_workspaces.size());
-  m_dimensions.push_back(boost::lexical_cast<int64_t>(
+  m_dimensions.emplace_back(m_workspaces.size());
+  m_dimensions.emplace_back(boost::lexical_cast<int64_t>(
       m_workspaces[0]->mutableRun().getLogData("Axis1")->value()));
-  m_dimensions.push_back(boost::lexical_cast<int64_t>(
+  m_dimensions.emplace_back(boost::lexical_cast<int64_t>(
       m_workspaces[0]->mutableRun().getLogData("Axis2")->value()));
 
   m_spectraCount = m_dimensions[1] * m_dimensions[2];
@@ -149,14 +149,14 @@ void SaveNXTomo::processAll() {
   m_infDimensions[0] = NX_UNLIMITED;
 
   // What size slabs are we going to write
-  m_slabSize.push_back(1);
-  m_slabSize.push_back(m_dimensions[1]);
-  m_slabSize.push_back(m_dimensions[2]);
+  m_slabSize.emplace_back(1);
+  m_slabSize.emplace_back(m_dimensions[1]);
+  m_slabSize.emplace_back(m_dimensions[2]);
 
   // Init start to first row
-  m_slabStart.push_back(0);
-  m_slabStart.push_back(0);
-  m_slabStart.push_back(0);
+  m_slabStart.emplace_back(0);
+  m_slabStart.emplace_back(0);
+  m_slabStart.emplace_back(0);
 
   ::NeXus::File nxFile = setupFile();
 
@@ -244,7 +244,7 @@ void SaveNXTomo::processAll() {
   nxFile.makeGroup("detector", "NXdetector", true);
 
   std::vector<int64_t> infDim;
-  infDim.push_back(NX_UNLIMITED);
+  infDim.emplace_back(NX_UNLIMITED);
 
   nxFile.makeData("image_key", ::NeXus::FLOAT64, infDim, false);
   nxFile.closeGroup(); // detector
@@ -321,7 +321,7 @@ void SaveNXTomo::writeSingleWorkspace(const Workspace2D_sptr workspace,
 
   // Set the rotation value for this WS
   std::vector<double> rotValue;
-  rotValue.push_back(0);
+  rotValue.emplace_back(0);
 
   if (workspace->run().hasProperty("Rotation")) {
     std::string tmpVal = workspace->run().getLogData("Rotation")->value();
@@ -383,7 +383,7 @@ void SaveNXTomo::writeImageKeyValue(
 
   // Set the default key value for this WS
   std::vector<double> keyValue;
-  keyValue.push_back(0);
+  keyValue.emplace_back(0);
 
   if (workspace->run().hasProperty("ImageKey")) {
     std::string tmpVal = workspace->run().getLogData("ImageKey")->value();
@@ -425,8 +425,8 @@ void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr workspace,
       } catch (::NeXus::Exception &) {
         // Create the data entry if it doesn't exist yet, and open.
         std::vector<int64_t> infDim;
-        infDim.push_back(NX_UNLIMITED);
-        infDim.push_back(NX_UNLIMITED);
+        infDim.emplace_back(NX_UNLIMITED);
+        infDim.emplace_back(NX_UNLIMITED);
         nxFile.makeData(prop->name(), ::NeXus::UINT8, infDim, true);
       }
 
@@ -442,10 +442,10 @@ void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr workspace,
       strncpy(val, prop->value().c_str(), strSize);
 
       std::vector<int64_t> start, size;
-      start.push_back(thisFileInd);
-      start.push_back(0);
-      size.push_back(1);
-      size.push_back(strSize);
+      start.emplace_back(thisFileInd);
+      start.emplace_back(0);
+      size.emplace_back(1);
+      size.emplace_back(strSize);
 
       // single item
       nxFile.putSlab(val, start, size);
@@ -466,7 +466,7 @@ void SaveNXTomo::writeIntensityValue(
   }
 
   std::vector<double> intensityValue;
-  intensityValue.push_back(1);
+  intensityValue.emplace_back(1);
 
   if (workspace->run().hasProperty("Intensity")) {
     std::string tmpVal = workspace->run().getLogData("Intensity")->value();

@@ -69,7 +69,7 @@ void SaveAscii::init() {
     std::string option = spacer[0];
     m_separatorIndex.insert(
         std::pair<std::string, std::string>(option, spacer[1]));
-    sepOptions.push_back(option);
+    sepOptions.emplace_back(option);
   }
 
   declareProperty("Separator", "CSV",

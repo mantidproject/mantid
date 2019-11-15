@@ -269,7 +269,7 @@ SpaceGroupFactoryImpl::subscribedSpaceGroupSymbols(size_t number) const {
   auto keyPair = m_numberMap.equal_range(number);
 
   for (auto it = keyPair.first; it != keyPair.second; ++it) {
-    symbols.push_back(it->second);
+    symbols.emplace_back(it->second);
   }
 
   return symbols;
@@ -282,7 +282,7 @@ std::vector<size_t> SpaceGroupFactoryImpl::subscribedSpaceGroupNumbers() const {
 
   for (auto it = m_numberMap.begin(); it != m_numberMap.end();
        it = m_numberMap.upper_bound(it->first)) {
-    numbers.push_back(it->first);
+    numbers.emplace_back(it->first);
   }
 
   return numbers;
@@ -300,7 +300,7 @@ std::vector<std::string> SpaceGroupFactoryImpl::subscribedSpaceGroupSymbols(
   auto keyPair = m_pointGroupMap.equal_range(pointGroupSymbol);
 
   for (auto it = keyPair.first; it != keyPair.second; ++it) {
-    symbols.push_back(it->second);
+    symbols.emplace_back(it->second);
   }
 
   return symbols;

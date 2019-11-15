@@ -50,13 +50,13 @@ MDHistoWorkspace::MDHistoWorkspace(
       m_coordSystem(None), m_displayNormalization(displayNormalization) {
   std::vector<Mantid::Geometry::MDHistoDimension_sptr> dimensions;
   if (dimX)
-    dimensions.push_back(std::move(dimX));
+    dimensions.emplace_back(std::move(dimX));
   if (dimY)
-    dimensions.push_back(std::move(dimY));
+    dimensions.emplace_back(std::move(dimY));
   if (dimZ)
-    dimensions.push_back(std::move(dimZ));
+    dimensions.emplace_back(std::move(dimZ));
   if (dimT)
-    dimensions.push_back(std::move(dimT));
+    dimensions.emplace_back(std::move(dimT));
   this->init(dimensions);
 }
 
@@ -457,7 +457,7 @@ MDHistoWorkspace::createIterators(
     if (function)
       clonedFunction = new Mantid::Geometry::MDImplicitFunction(*function);
 
-    out.push_back(std::make_unique<MDHistoWorkspaceIterator>(
+    out.emplace_back(std::make_unique<MDHistoWorkspaceIterator>(
         this, clonedFunction, begin, end));
   }
   return out;
@@ -579,7 +579,7 @@ IMDWorkspace::LinePlot MDHistoWorkspace::getLinePoints(
 
     // Require x.size() = y.size()+1 if recording bin boundaries
     if (!bin_centres)
-      line.x.push_back(length);
+      line.x.emplace_back(length);
 
     return line;
   } else {
@@ -590,7 +590,7 @@ IMDWorkspace::LinePlot MDHistoWorkspace::getLinePoints(
     coord_t lastLinePos = *it;
     VMD lastPos = start + (dir * lastLinePos);
     if (!bin_centres) {
-      line.x.push_back(lastLinePos);
+      line.x.emplace_back(lastLinePos);
     }
 
     ++it;
@@ -612,9 +612,9 @@ IMDWorkspace::LinePlot MDHistoWorkspace::getLinePoints(
                            this->getIsMaskedAt(linearIndex))) {
         auto bin_centrePos =
             static_cast<coord_t>((linePos + lastLinePos) * 0.5);
-        line.x.push_back(bin_centrePos);
+        line.x.emplace_back(bin_centrePos);
       } else if (!bin_centres)
-        line.x.push_back(linePos);
+        line.x.emplace_back(linePos);
 
       if (linearIndex < m_length) {
 
@@ -626,15 +626,15 @@ IMDWorkspace::LinePlot MDHistoWorkspace::getLinePoints(
           signal = std::numeric_limits<signal_t>::quiet_NaN();
         }
         if (!bin_centres || !this->getIsMaskedAt(linearIndex)) {
-          line.y.push_back(signal);
-          line.e.push_back(this->getErrorAt(linearIndex) * normalizer);
+          line.y.emplace_back(signal);
+          line.e.emplace_back(this->getErrorAt(linearIndex) * normalizer);
         }
         // Save the position for next bin
         lastPos = pos;
       } else {
         // Invalid index. This shouldn't happen
-        line.y.push_back(std::numeric_limits<signal_t>::quiet_NaN());
-        line.e.push_back(std::numeric_limits<signal_t>::quiet_NaN());
+        line.y.emplace_back(std::numeric_limits<signal_t>::quiet_NaN());
+        line.e.emplace_back(std::numeric_limits<signal_t>::quiet_NaN());
       }
 
       lastLinePos = linePos;

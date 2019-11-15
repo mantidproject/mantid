@@ -175,22 +175,22 @@ MantidWebServiceAPIJobManager::queryAllRemoteJobs() const {
 
   JSONObject::const_iterator it = resp.begin();
   while (it != resp.end()) {
-    jobIds.push_back((*it).first);
+    jobIds.emplace_back((*it).first);
     JSONObject jobData;
     (*it).second.getValue(jobData);
 
     std::string value;
     jobData["JobStatus"].getValue(value);
-    jobStatusStrs.push_back(value);
+    jobStatusStrs.emplace_back(value);
 
     jobData["JobName"].getValue(value);
-    jobNames.push_back(value);
+    jobNames.emplace_back(value);
 
     jobData["ScriptName"].getValue(value);
-    scriptNames.push_back(value);
+    scriptNames.emplace_back(value);
 
     jobData["TransID"].getValue(value);
-    transIds.push_back(value);
+    transIds.emplace_back(value);
 
     // The time stuff is actually an optional extension.  We could check the
     // info
@@ -199,13 +199,13 @@ MantidWebServiceAPIJobManager::queryAllRemoteJobs() const {
     // the output and see if the values are there...
     if (jobData.find("SubmitDate") != jobData.end()) {
       jobData["SubmitDate"].getValue(value);
-      submitDates.push_back(value);
+      submitDates.emplace_back(value);
 
       jobData["StartDate"].getValue(value);
-      startDates.push_back(value);
+      startDates.emplace_back(value);
 
       jobData["CompletionDate"].getValue(value);
-      completionDates.push_back(value);
+      completionDates.emplace_back(value);
     } else {
       // push back empty strings just so all the array properties have the
       // same
@@ -232,7 +232,7 @@ MantidWebServiceAPIJobManager::queryAllRemoteJobs() const {
     info.startDate = DateAndTime(startDates[i]);
     info.completionTime = DateAndTime(completionDates[i]);
     info.cmdLine = cmdLines[i];
-    result.push_back(info);
+    result.emplace_back(info);
   }
 
   return result;
@@ -264,7 +264,7 @@ std::vector<std::string> MantidWebServiceAPIJobManager::queryRemoteFile(
     resp["Files"].getValue(files);
     for (auto &file : files) {
       file.getValue(oneFile);
-      filenames.push_back(oneFile);
+      filenames.emplace_back(oneFile);
     }
 
   } else {

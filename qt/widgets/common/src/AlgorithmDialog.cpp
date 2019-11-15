@@ -1064,7 +1064,7 @@ void AlgorithmDialog::setPreviousValue(QWidget *widget,
  */
 void AlgorithmDialog::addAlgorithmObserver(
     Mantid::API::AlgorithmObserver *observer) {
-  m_observers.push_back(observer);
+  m_observers.emplace_back(observer);
   // turn off the keep open option - it would only confuse things if someone is
   // watching
   setShowKeepOpen(false);

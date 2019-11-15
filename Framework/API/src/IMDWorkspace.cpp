@@ -135,9 +135,9 @@ const std::string IMDWorkspace::toString() const {
 void IMDWorkspace::makeSinglePointWithNaN(std::vector<coord_t> &x,
                                           std::vector<signal_t> &y,
                                           std::vector<signal_t> &e) const {
-  x.push_back(0);
-  y.push_back(std::numeric_limits<signal_t>::quiet_NaN());
-  e.push_back(std::numeric_limits<signal_t>::quiet_NaN());
+  x.emplace_back(0);
+  y.emplace_back(std::numeric_limits<signal_t>::quiet_NaN());
+  e.emplace_back(std::numeric_limits<signal_t>::quiet_NaN());
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -170,14 +170,14 @@ IMDWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
     // Coordinate along the line
     VMD coord = start + step * double(i);
     // Record the position along the line
-    line.x.push_back(static_cast<coord_t>(stepLength * double(i)));
+    line.x.emplace_back(static_cast<coord_t>(stepLength * double(i)));
 
     signal_t yVal = this->getSignalAtCoord(coord.getBareArray(), normalize);
-    line.y.push_back(yVal);
-    line.e.push_back(0.0);
+    line.y.emplace_back(yVal);
+    line.e.emplace_back(0.0);
   }
   // And the last point
-  line.x.push_back((end - start).norm());
+  line.x.emplace_back((end - start).norm());
   return line;
 }
 

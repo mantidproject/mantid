@@ -74,9 +74,9 @@ void SpecularReflectionAlgorithm::initCommonProperties() {
              "to move";
 
   std::vector<std::string> propOptions;
-  propOptions.push_back(pointDetectorAnalysis);
-  propOptions.push_back(lineDetectorAnalysis);
-  propOptions.push_back(multiDetectorAnalysis);
+  propOptions.emplace_back(pointDetectorAnalysis);
+  propOptions.emplace_back(lineDetectorAnalysis);
+  propOptions.emplace_back(multiDetectorAnalysis);
 
   declareProperty("AnalysisMode", pointDetectorAnalysis,
                   boost::make_shared<StringListValidator>(propOptions),

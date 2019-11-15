@@ -133,8 +133,8 @@ public:
     std::vector<SpectrumNumber> spectrumNumbers;
     size_t i = wsIn->getNumberHistograms() - 1;
     for (size_t j = 0; j < wsIn->getNumberHistograms(); --i, ++j) {
-      specDefinitions.push_back(SpectrumDefinition(i));
-      spectrumNumbers.push_back(SpectrumNumber(static_cast<int>(j)));
+      specDefinitions.emplace_back(SpectrumDefinition(i));
+      spectrumNumbers.emplace_back(SpectrumNumber(static_cast<int>(j)));
     }
     IndexInfo info(spectrumNumbers);
     info.setSpectrumDefinitions(specDefinitions);
@@ -191,8 +191,8 @@ public:
     std::vector<SpectrumNumber> spectrumNumbers;
     // We add a single detector index 0 to a single spectrum with number (1). No
     // other mappings provided!
-    specDefinitions.push_back(SpectrumDefinition(0));
-    spectrumNumbers.push_back(SpectrumNumber(1));
+    specDefinitions.emplace_back(SpectrumDefinition(0));
+    spectrumNumbers.emplace_back(SpectrumNumber(1));
     IndexInfo info(spectrumNumbers);
     info.setSpectrumDefinitions(specDefinitions);
     wsIn->setIndexInfo(info);
@@ -253,8 +253,8 @@ public:
       SpectrumDefinition def;
       def.add(i);
       def.add(i - 1);
-      specDefinitions.push_back(def);
-      spectrumNumbers.push_back(SpectrumNumber(static_cast<int>(j)));
+      specDefinitions.emplace_back(def);
+      spectrumNumbers.emplace_back(SpectrumNumber(static_cast<int>(j)));
     }
     IndexInfo info(spectrumNumbers);
     info.setSpectrumDefinitions(specDefinitions);
