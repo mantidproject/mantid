@@ -9,6 +9,9 @@
 # corresponds to any labels set on a slave.  BUILD_THREADS &
 # PARAVIEW_DIR should be set in the configuration of each slave.
 ###############################################################################
+# Set all string comparisons to case insensitive (i.e. Release == release)
+shopt -s nocasematch
+
 SCRIPT_DIR=$(dirname "$0")
 XVFB_SERVER_NUM=101
 ULIMIT_CORE_ORIG=$(ulimit -c)
@@ -305,6 +308,36 @@ if [[ ${DO_BUILD_PKG} == true ]]; then
     fi
 fi
 
+###############################################################################
+# Figure out if were doing a sanitizer build and setup any steps we need
+###############################################################################
+ASAN_OPTIONS=''
+LSAN_OPTIONS=''
+
+SANITIZER_FLAGS=''
+
+SUPPRESSIONS_DIR="${WORKSPACE}/buildconfig/Sanitizer"
+
+if [[ ${JOB_NAME} == *address* ]]; then
+    SANITIZER_FLAGS="-DUSE_SANITIZER=Address"
+    
+    ASAN_OPTIONS="suppressions=${SUPPRESSIONS_DIR}/Address.supp:detect_stack_use_after_return=true:halt_on_error=false:verify_asan=0"
+    LSAN_OPTIONS="suppressions=${SUPPRESSIONS_DIR}/Leak.supp"
+    
+    elif [[ ${JOB_NAME} == *memory* ]]; then
+    SANITIZER_FLAGS="-DUSE_SANITIZER=memory"
+    
+    elif [[ ${JOB_NAME} == *thread* ]]; then
+    SANITIZER_FLAGS="-DUSE_SANITIZER=thread"
+    
+    elif [[ ${JOB_NAME} == *undefined* ]]; then
+    SANITIZER_FLAGS="-DUSE_SANITIZER=undefined"
+fi
+
+if [[ -v ${SANITIZER_FLAGS} ]]; then
+    # Force build to RelWithDebInfo
+    BUILD_CONFIG="RelWithDebInfo"
+fi
 
 ###############################################################################
 # Generator
@@ -333,7 +366,7 @@ rm -f -- *.dmg *.rpm *.deb *.tar.gz *.tar.xz
 ###############################################################################
 # CMake configuration
 ###############################################################################
-$SCL_ENABLE "${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DCOLORED_COMPILER_OUTPUT=OFF ${DIST_FLAGS} ${PACKAGINGVARS} ${CLANGTIDYVAR} .."
+$SCL_ENABLE "${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DCOLORED_COMPILER_OUTPUT=OFF ${DIST_FLAGS} ${PACKAGINGVARS} ${CLANGTIDYVAR} ${SANITIZER_FLAGS} .."
 
 ###############################################################################
 # Coverity build should exit early
@@ -367,6 +400,9 @@ fi
 if [[ $USE_CLANG ]] && [[ ${JOB_NAME} == *clang_tidy* ]]; then
     exit 0
 fi
+
+# Set any ASAN options in the environment
+export ASAN_OPTIONS=${ASAN_OPTIONS}
 
 
 ###############################################################################
