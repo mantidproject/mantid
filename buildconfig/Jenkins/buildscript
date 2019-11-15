@@ -61,6 +61,14 @@ if [[ ${NODE_LABELS} == *rhel7* ]] || [[ ${NODE_LABELS} == *centos7* ]] || [[ ${
     USE_CORE_DUMPS=false
 fi
 
+# Setup software collections on rhel7 to allow using gcc7
+if [[ $ON_RHEL7 ]]; then
+    SCL_ENABLE="scl enable devtoolset-7"
+else
+    SCL_ENABLE="eval"
+fi
+
+
 ###############################################################################
 # Script cleanup
 ###############################################################################
@@ -100,10 +108,7 @@ $CMAKE_EXE --version
 ###############################################################################
 # Check job requirements from the name and changes
 ###############################################################################
-if [[ ${JOB_NAME} == *clean* ]]; then
-    CLEANBUILD=true
-fi
-if [[ ${JOB_NAME} == *clang_tidy* ]]; then
+if [[ ${JOB_NAME} == *clean* || ${JOB_NAME} == *clang_tidy* ]]; then
     CLEANBUILD=true
 fi
 
@@ -146,6 +151,7 @@ DO_DOCTESTS_USER=true
 DO_BUILD_DEVDOCS=true
 DO_BUILD_PKG=true
 DO_SYSTEMTESTS=false
+
 if [[ ${PRBUILD} == true ]]; then
     if ${SCRIPT_DIR}/check_for_changes dev-docs-only || ${SCRIPT_DIR}/check_for_changes user-docs-only; then
         DO_BUILD_CODE=false
@@ -157,7 +163,7 @@ if [[ ${PRBUILD} == true ]]; then
     DO_SYSTEMTESTS=false
 
     if [[ ${ON_RHEL7} == true ]]; then
-        # rhel does system testing
+        # rhel does system testing if there are any non-doc or gui changes
         if ! ${SCRIPT_DIR}/check_for_changes docs-gui-only; then
             if [[ ${PY3_BUILD} == true ]]; then
                DO_BUILD_PKG=true
@@ -196,15 +202,16 @@ fi
 if [[ "$CLEANBUILD" == true ]]; then
     rm -rf $BUILD_DIR
 fi
-if [ -d $BUILD_DIR ]; then
-    rm -rf ${BUILD_DIR:?}/bin ${BUILD_DIR:?}/ExternalData ${BUILD_DIR:?}/Testing
-    find ${BUILD_DIR:?} -name 'TEST-*.xml' -delete
-    if [[ -n ${CLEAN_EXTERNAL_PROJECTS} && "${CLEAN_EXTERNAL_PROJECTS}" == true ]]; then
-        rm -rf $BUILD_DIR/eigen-*
-        rm -rf $BUILD_DIR/googletest-*
-    fi
-else
-    mkdir $BUILD_DIR
+
+mkdir -p $BUILD_DIR
+
+# Tidy build dir
+rm -rf ${BUILD_DIR:?}/bin ${BUILD_DIR:?}/ExternalData ${BUILD_DIR:?}/Testing
+find ${BUILD_DIR:?} -name 'TEST-*.xml' -delete
+
+if [[ -n ${CLEAN_EXTERNAL_PROJECTS} && "${CLEAN_EXTERNAL_PROJECTS}" == true ]]; then
+    rm -rf $BUILD_DIR/eigen-*
+    rm -rf $BUILD_DIR/googletest-*
 fi
 
 ###############################################################################
@@ -307,6 +314,7 @@ if [ "$(command -v ninja)" ]; then
     elif [ "$(command -v ninja-build)" ]; then
     CMAKE_GENERATOR="-G Ninja"
 fi
+
 if [ -e $BUILD_DIR/CMakeCache.txt ]; then
     CMAKE_GENERATOR=""
 fi
