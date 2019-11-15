@@ -372,7 +372,7 @@ class MainWindow(QMainWindow):
     def launch_custom_python_gui(self, filename):
         self.interface_executor.execute(open(filename).read(), filename)
 
-    def launch_custom_cpp_gui(self, interface_name):
+    def launch_custom_cpp_gui(self, interface_name, submenu = None):
         """Create a new interface window if one does not already exist,
         else show existing window"""
         object_name = 'custom-cpp-interface-' + interface_name
@@ -381,8 +381,8 @@ class MainWindow(QMainWindow):
             interface = self.interface_manager.createSubWindow(interface_name)
             interface.setObjectName(object_name)
             interface.setAttribute(Qt.WA_DeleteOnClose, True)
-            # make indirect settings a child of workbench
-            if interface_name == "Settings":
+            # make indirect interfaces children of workbench
+            if submenu == "Indirect":
                 interface.setParent(self, interface.windowFlags())
             interface.show()
         else:
@@ -407,8 +407,8 @@ class MainWindow(QMainWindow):
                     action.triggered.connect(lambda checked_py, script=script: self.launch_custom_python_gui(script))
                 else:
                     action = submenu.addAction(name)
-                    action.triggered.connect(lambda checked_cpp, name=name:
-                                             self.launch_custom_cpp_gui(name))
+                    action.triggered.connect(lambda checked_cpp, name=name, key=key:
+                                             self.launch_custom_cpp_gui(name, key))
 
     def _discover_python_interfaces(self, interface_dir):
         """Return a dictionary mapping a category to a set of named Python interfaces"""
