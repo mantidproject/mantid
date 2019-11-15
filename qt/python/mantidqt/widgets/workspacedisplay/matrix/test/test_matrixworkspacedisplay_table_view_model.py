@@ -386,13 +386,13 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
                                                                                               MockSpectrum.SPECTRUM_NO)
         self.assertEqual(expected_output, output)
 
-    def test_headerData_vertical_header_display_for_numeric_axis(self):
+    def test_headerData_vertical_header_display_for_numeric_axis_with_point_data(self):
         dummy_unit = 'unit'
-        bin_center = 0.5
         ws = MockWorkspace()
         mock_axis = Mock()
         mock_axis.isNumeric.return_value = True
-        mock_axis.label = MagicMock(side_effect=lambda x: x)
+        expected_value = 0.
+        mock_axis.label = MagicMock(side_effect=[str(expected_value)])
         mock_axis.getUnit().symbol().utf8.return_value = dummy_unit
         ws.getAxis.return_value = mock_axis
 
@@ -403,17 +403,41 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
 
         expected_output = MatrixWorkspaceTableViewModel.VERTICAL_HEADER_DISPLAY_STRING_FOR_NUMERIC_AXIS.format(
             mock_section,
-            bin_center,
+            expected_value,
             dummy_unit)
         self.assertEqual(expected_output, output)
 
-    def test_headerData_vertical_header_tooltip_for_numeric_axis(self):
+    def test_headerData_vertical_header_display_for_numeric_axis_with_binned_data(self):
         dummy_unit = 'unit'
-        bin_center = 0.5
         ws = MockWorkspace()
         mock_axis = Mock()
         mock_axis.isNumeric.return_value = True
-        mock_axis.label = MagicMock(side_effect=lambda x: x)
+        # single spectrum with length 2 axis
+        ws.getNumberHistograms.return_value = 1
+        mock_axis.length.return_value = 2
+        mock_axis.label = MagicMock(side_effect=["0", "1"])
+        mock_axis.getUnit().symbol().utf8.return_value = dummy_unit
+        ws.getAxis.return_value = mock_axis
+
+        model_type = MatrixWorkspaceTableViewModelType.y
+        model = MatrixWorkspaceTableViewModel(ws, model_type)
+        mock_section = 0
+        output = model.headerData(mock_section, Qt.Vertical, Qt.DisplayRole)
+
+        expected_output = MatrixWorkspaceTableViewModel.VERTICAL_HEADER_DISPLAY_STRING_FOR_NUMERIC_AXIS.format(
+            mock_section,
+            0.5,
+            dummy_unit)
+        self.assertEqual(expected_output, output)
+
+    def test_headerData_vertical_header_tooltip_for_numeric_axis_with_point_data(self):
+        dummy_unit = 'unit'
+        ws = MockWorkspace()
+        mock_axis = Mock()
+        mock_axis.isNumeric.return_value = True
+        ws.getNumberHistograms.return_value = 1
+        mock_axis.length.return_value = 1
+        mock_axis.label = MagicMock(side_effect=["0"])
         mock_axis.getUnit().symbol().utf8.return_value = dummy_unit
         ws.getAxis.return_value = mock_axis
 
@@ -424,7 +448,29 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
 
         expected_output = MatrixWorkspaceTableViewModel.VERTICAL_HEADER_TOOLTIP_STRING_FOR_NUMERIC_AXIS.format(
             mock_section,
-            bin_center,
+            0,
+            dummy_unit)
+        self.assertEqual(expected_output, output)
+
+    def test_headerData_vertical_header_tooltip_for_numeric_axis_with_binned_data(self):
+        dummy_unit = 'unit'
+        ws = MockWorkspace()
+        mock_axis = Mock()
+        mock_axis.isNumeric.return_value = True
+        ws.getNumberHistograms.return_value = 1
+        mock_axis.length.return_value = 2
+        mock_axis.label = MagicMock(side_effect=["0", "1"])
+        mock_axis.getUnit().symbol().utf8.return_value = dummy_unit
+        ws.getAxis.return_value = mock_axis
+
+        model_type = MatrixWorkspaceTableViewModelType.y
+        model = MatrixWorkspaceTableViewModel(ws, model_type)
+        mock_section = 0
+        output = model.headerData(mock_section, Qt.Vertical, Qt.ToolTipRole)
+
+        expected_output = MatrixWorkspaceTableViewModel.VERTICAL_HEADER_TOOLTIP_STRING_FOR_NUMERIC_AXIS.format(
+            mock_section,
+            0.5,
             dummy_unit)
         self.assertEqual(expected_output, output)
 
