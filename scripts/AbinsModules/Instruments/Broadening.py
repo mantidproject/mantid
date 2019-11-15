@@ -535,7 +535,7 @@ def interpolated_broadening(sigma=None, points=None, bins=None,
     log_base = log_bases[spacing]
 
     # Sample on appropriate log scale: log_b(x) = log(x) / lob(b)
-    n_kernels = int(np.ceil(np.log(max(sigma) / min(sigma)) / np.log(log_base))) + 1
+    n_kernels = int(np.ceil(np.log(max(sigma) / min(sigma)) / np.log(log_base)))
 
     if n_kernels == 1:
         sigma_samples = np.array([min(sigma)])
@@ -568,8 +568,6 @@ def interpolated_broadening(sigma=None, points=None, bins=None,
                                                      sigma_locations[:-1],
                                                      sigma_locations[1:]):
         sigma_chunk = sigma[left_sigma_i:right_sigma_i]
-        if len(sigma_chunk) == 0:
-            break   # This happens at the end ofiteration; we get a repeat of the last position
 
         sigma_factors = sigma_chunk / sigma_chunk[0]
         left_mix = np.polyval(mix_functions[function][spacing]['lower'], sigma_factors)
