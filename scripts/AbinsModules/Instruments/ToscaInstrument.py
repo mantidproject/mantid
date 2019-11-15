@@ -73,7 +73,7 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
         :returns: (points_freq, broadened_spectrum)
         """
 
-        prebin_required_schemes = ['interpolate', 'conv_15']
+        prebin_required_schemes = ['interpolate', 'interpolate_coarse', 'conv_15']
 
         if AbinsParameters.sampling['pkt_per_peak'] == 1:
 

@@ -8,6 +8,8 @@ from __future__ import (absolute_import, division, print_function)
 import AbinsModules
 import numpy as np
 from scipy.special import erf
+from scipy.signal import convolve
+
 
 def broaden_spectrum(frequencies=None, bins=None, s_dft=None, sigma=None, scheme='legacy', prebin='auto'):
     """Convert frequency/S data to broadened spectrum on a regular grid
@@ -18,11 +20,15 @@ def broaden_spectrum(frequencies=None, bins=None, s_dft=None, sigma=None, scheme
 
     :param frequencies: input frequency series; these may be irregularly spaced
     :type frequencies: 1D array-like
-    :param bins: Evenly-spaced frequency bin values for the output spectrum. If *frequencies* is None, s_dft is assumed to correspond to mid-point frequencies on this mesh.
+    :param bins:
+        Evenly-spaced frequency bin values for the output spectrum. If *frequencies* is None, s_dft is assumed to
+        correspond to mid-point frequencies on this mesh.
     :type bins: 1D array-like
     :param s_dft: scattering values corresponding to *frequencies*
     :type s_dft: 1D array-like
-    :param sigma: width of broadening function. This may be a scalar used over the whole spectrum, or a series of values corresponding to *frequencies*.
+    :param sigma:
+        width of broadening function. This may be a scalar used over the whole spectrum, or a series of values
+        corresponding to *frequencies*.
     :type sigma: float or 1D array-like
     :param scheme:
         Name of broadening method used. Options:
@@ -62,6 +68,7 @@ def broaden_spectrum(frequencies=None, bins=None, s_dft=None, sigma=None, scheme
     if scheme == 'legacy':
         fwhm = AbinsModules.AbinsParameters.instruments['fwhm']
         pkt_per_peak = AbinsModules.AbinsParameters.sampling['pkt_per_peak']
+
         def multi_linspace(start, stop, npts):
             """Given 1D length-N start, stop and scalar npts, get (npts, N) linspace-like matrix"""
             ncols = len(start)
@@ -134,9 +141,35 @@ def broaden_spectrum(frequencies=None, bins=None, s_dft=None, sigma=None, scheme
                                      weights=s_dft[:, np.newaxis],
                                      method='histogram')
 
+    elif scheme == 'normal_trunc_windowed':
+        # Normal distribution on the full grid (sum over all peaks, Gaussian range limited to 3 sigma)
+        # All peaks use the same number of points; if the center is located close to the low- or high-freq limit,
+        # the frequency point set is "justified" to lie inside the range
+        return trunc_and_sum_inplace(function=normal,
+                                     function_uses='bins',
+                                     sigma=sigma[:, np.newaxis],
+                                     points=freq_points,
+                                     bins=bins,
+                                     center=frequencies[:, np.newaxis],
+                                     limit=3,
+                                     weights=s_dft[:, np.newaxis],
+                                     method='histogram')
+
     elif scheme == 'gaussian_trunc_forloop':
         # As above, but with a python loop implementation of the summation
         return trunc_and_sum_inplace(function=gaussian,
+                                     sigma=sigma[:, np.newaxis],
+                                     points=freq_points,
+                                     bins=bins,
+                                     center=frequencies[:, np.newaxis],
+                                     limit=3,
+                                     weights=s_dft[:, np.newaxis],
+                                     method='forloop')
+
+    elif scheme == 'normal_trunc_forloop':
+        # As above, but with a python loop implementation of the summation
+        return trunc_and_sum_inplace(function=normal,
+                                     function_uses='bins',
                                      sigma=sigma[:, np.newaxis],
                                      points=freq_points,
                                      bins=bins,
@@ -158,43 +191,14 @@ def broaden_spectrum(frequencies=None, bins=None, s_dft=None, sigma=None, scheme
         spectrum = convolve(hist, kernel, mode='same')
         return freq_points, spectrum
 
+    elif scheme == 'interpolate_coarse':
+        return interpolated_broadening(sigma=sigma, points=freq_points, bins=bins,
+                                       center=frequencies, weights=s_dft, is_hist=True,
+                                       limit=3, function='gaussian', spacing='2')
     elif scheme == 'interpolate':
-        from scipy.signal import convolve
-        # Use a log 2 base for now: get the range to cover
-        n_kernels = int(np.ceil(np.log2(max(sigma) / min(sigma)))) + 1
-        if n_kernels == 1:
-            sigma_samples = np.array([min(sigma)])
-        else:
-            sigma_samples = 2**np.arange(n_kernels + 1) * min(sigma)
-
-        # Get set of convolved spectra for interpolation
-        hist, bin_edges = np.histogram(frequencies, bins=bins, weights=s_dft, density=False)
-        freq_range = 3 * max(sigma)
-        kernel_npts_oneside = np.ceil(freq_range / bin_width)
-
-        kernels = gaussian(sigma=sigma_samples[:, np.newaxis],
-                           points=np.arange(-kernel_npts_oneside, kernel_npts_oneside + 1, 1) * bin_width,
-                           center=0)
-
-        spectra = np.array([convolve(hist, kernel, mode='same') for kernel in kernels])
-
-        # Interpolate with parametrised relationship
-        sigma_locations = np.searchsorted(sigma, sigma_samples) # locations in full sigma of sampled values
-        spectrum = np.zeros_like(freq_points)
-        for sample_i, left_sigma_i, right_sigma_i in zip(range(len(sigma_samples)),
-                                                         sigma_locations[:-1],
-                                                         sigma_locations[1:]):
-            sigma_chunk = sigma[left_sigma_i:right_sigma_i]
-            if len(sigma_chunk) == 0:
-                break   # This happens at the end of iteration; we get a repeat of the last position
-
-            sigma_factors = sigma_chunk / sigma_chunk[0]
-            left_mix = np.polyval([-0.1873, 1.464, -4.079, 3.803], sigma_factors)
-            right_mix = np.polyval([0.2638, -1.968, 5.057, -3.353], sigma_factors)
-            spectrum[left_sigma_i:right_sigma_i] = (left_mix * spectra[sample_i, left_sigma_i:right_sigma_i]
-                                                    + right_mix * spectra[sample_i + 1, left_sigma_i:right_sigma_i])
-        return freq_points, spectrum
-
+        return interpolated_broadening(sigma=sigma, points=freq_points, bins=bins,
+                                       center=frequencies, weights=s_dft, is_hist=True,
+                                       limit=3, function='gaussian', spacing='sqrt2')
     else:
         raise ValueError('Broadening scheme "{}" not supported for this instrument, please correct '
                          'AbinsParameters.sampling["broadening_scheme"]'.format(scheme))
@@ -228,6 +232,7 @@ def gaussian(sigma=None, points=None, center=0, normalized=True):
     if normalized:
         kernel = kernel / np.sum(kernel, axis=-1)[..., np.newaxis]
     return kernel
+
 
 def normal(bins=None, sigma=None, center=0):
     """
@@ -306,19 +311,24 @@ def trunc_function(function=None, sigma=None, points=None, center=None, limit=3)
     return results
 
 
-def trunc_and_sum_inplace(function=None, function_uses='points', sigma=None, points=None, bins=None, center=None, weights=1, limit=3, method='histogram'):
+def trunc_and_sum_inplace(function=None, function_uses='points',
+                          sigma=None, points=None, bins=None, center=None, weights=1,
+                          limit=3, method='histogram'):
     """Wrap a simple broadening function, evaluate within a consistent range and sum to spectrum
 
-                         *
-                        * *
-                        * *
-                       *   *
-                      *     *
-                    *         *
-                ..: *         * :..
-             -----------------------
-                    |----|
-                 limit * max(sigma)
+                      center1                          center2
+                         :                                :
+                         :                                :
+                         *                                :
+                        * *                               :
+                        * *                               **
+                       * |-| sigma1      +               *  *            + ...
+                      *     *                          *   |--| sigma2
+                    *         *                    . *          * .
+                ..: *         * :..             ..:: *          * ::..
+             --------------------------     -----------------------
+                    |----|                           |----|
+                 limit * max(sigma)          limit * max(sigma)
 
     A spectrum is returned corresponding to the entire input set of
     bins/points, but this is zeroed outside of a restricted range (``limit * sigma``).
@@ -352,7 +362,8 @@ def trunc_and_sum_inplace(function=None, function_uses='points', sigma=None, poi
     :param method: 'histogram' or 'forloop'; select between implementations for summation at appropriate frequencies
     :type method: str
 
-    :returns: numpy array with calculated Gaussian values
+    :returns: (points, spectrum)
+    :returntype: (1D array, 1D array)
 
     """
     bin_width = bins[1] - bins[0]
@@ -362,6 +373,9 @@ def trunc_and_sum_inplace(function=None, function_uses='points', sigma=None, poi
     freq_range = limit * max(sigma)
     nrows = len(center)
     ncols = int(np.ceil((freq_range * 2) / bin_width))
+    if ncols > len(points):
+        raise ValueError("Kernel is wider than evaluation region; "
+                         "use a smaller cutoff limit or a larger range of points/bins")
 
     # Work out locations of frequency blocks. As these should all be the same size,
     # blocks which would exceed array size are "justified" into the array
@@ -376,7 +390,7 @@ def trunc_and_sum_inplace(function=None, function_uses='points', sigma=None, poi
     #
     #
     start_indices = np.asarray((center - points[0] - freq_range + (bin_width / 2)) // bin_width,
-                                int)
+                               int)
     start_freqs = points[start_indices]
 
     # Next identify points which will overshoot left: x lies to left of freq range
@@ -432,8 +446,134 @@ def trunc_and_sum_inplace(function=None, function_uses='points', sigma=None, poi
         for start, kernel, weight in zip(start_indices.flatten(), kernels, np.asarray(weights).flatten()):
             scaled_kernel = kernel * weight
             spectrum[start:start+ncols] += scaled_kernel
-
     else:
         raise ValueError('Summation method "{}" is unknown.',format(method))
 
+    return points, spectrum
+
+
+def interpolated_broadening(sigma=None, points=None, bins=None,
+                            center=None, weights=1, is_hist=False, limit=3,
+                            function='gaussian', spacing='sqrt2'):
+    """Return a fast estimate of frequency-dependent broadening
+
+    Consider a spectrum of two peaks, in the case where (as in indirect-geometry INS) the peak width increases with frequency.
+
+       |
+       |        |
+       |        |
+    -----------------
+
+    In the traditional scheme we broaden each peak individually and combine:
+
+       *                      |                       *
+       *        |       +     |        *       =      *        *
+      * *       |             |      *   *           * *     *   *
+    -----------------      -----------------       -----------------
+
+    Instead of summing over broadening kernels evaluated at each peak, the approximate obtains
+    a spectrum corresponding to the following scheme:
+
+    - For each sigma value, the entire spectrum is convolved with an
+      appropriate-width broadening function
+    - At each frequency, the final spectrum value is drawn from the spectrum
+      broadened with corresponding sigma.
+
+    Compared to a summation over broadened peaks, this method introduces an
+    asymmetry to the spectrum about each peak.
+
+       *                    *                    *                         *
+       *        *          * *       *          * *       *      -->       **       *
+      * *       *         *   *     * *       *     *   *   *             *  *     *  *
+    ----------------- ,  ----------------- ,  -----------------         -----------------
+
+    This asymmetry should be tolerable as long as the broadening function
+    varies slowly in frequency relative to its width.
+
+    The benefit of this scheme is that we do not need to evaluate the
+    convolution at every sigma value; nearby spectra can be interpolated.
+    Trial-and-error finds that with optimal mixing the error of a Gaussian
+    approximated by mixing a wider and narrower Gaussian is ~ 5% when the sigma
+    range is factor of 2, and ~ 1% when the sigma range is a factor of sqrt(2).
+    A pre-optimised transfer function can be used for a fixed ratio between the
+    reference functions.
+
+    :param sigma: widths of broadening functions (passed to "sigma" argument of function)
+    :type sigma: float or Nx1 array
+    :param bins: sample bins for function evaluation. This _must_ be evenly-spaced.
+    :type bins: 1-D array
+    :param points: regular grid of points for which function should be evaluated.
+    :type points: 1-D array
+    :param center: centers of broadening functions
+    :type center: float or Nx1 array
+    :param weights: weights of peaks for summation
+    :type weights: float or array corresponding to "center"
+    :param is_hist:
+        If "weights" is already a histogram corresponding to evenly-spaced
+        frequencies, set this to True to avoid a redundant binning operation.
+    :type is_hist: bool
+    :param function: broadening function; currently only 'gaussian' is accepted
+    :type function: str
+    :param limit: range (as multiple of sigma) for cutoff
+    :type limit: float
+    :param spacing:
+        Spacing factor between Gaussian samples on log scale. This is not a
+        free parameter as a pre-computed curve is used for interpolation.
+        Allowed values: '2', 'sqrt2', with error ~5% and ~1% respectively.
+    :type spacing: str
+
+    :returns: (points, spectrum)
+    :returntype: (1D array, 1D array)
+
+    """
+
+    mix_functions = {'gaussian': {'2': {'lower': [-0.1873, 1.464, -4.079, 3.803],
+                                        'upper': [0.2638, -1.968, 5.057, -3.353]},
+                                  'sqrt2': {'lower': [-0.6079, 4.101, -9.632, 7.139],
+                                            'upper': [0.7533, -4.882, 10.87, -6.746]}}}
+    log_bases = {'2': 2, 'sqrt2': np.sqrt(2)}
+    log_base = log_bases[spacing]
+
+    # Sample on appropriate log scale: log_b(x) = log(x) / lob(b)
+    n_kernels = int(np.ceil(np.log(max(sigma) / min(sigma)) / np.log(log_base))) + 1
+
+    if n_kernels == 1:
+        sigma_samples = np.array([min(sigma)])
+    else:
+        sigma_samples = log_base**np.arange(n_kernels + 1) * min(sigma)
+
+    bin_width = bins[1] - bins[0]
+
+    # Get set of convolved spectra for interpolation
+    if is_hist:
+        hist = weights
+    else:
+        hist, _ = np.histogram(center, bins=bins, weights=weights, density=False)
+    freq_range = 3 * max(sigma)
+    kernel_npts_oneside = np.ceil(freq_range / bin_width)
+
+    if function == 'gaussian':
+        kernels = gaussian(sigma=sigma_samples[:, np.newaxis],
+                           points=np.arange(-kernel_npts_oneside, kernel_npts_oneside + 1, 1) * bin_width,
+                           center=0)
+    else:
+        raise ValueError('"{}" kernel not supported for "interpolate" broadening method.'.format(function))
+
+    spectra = np.array([convolve(hist, kernel, mode='same') for kernel in kernels])
+
+    # Interpolate with parametrised relationship
+    sigma_locations = np.searchsorted(sigma, sigma_samples) # locations in full sigma of sampled values
+    spectrum = np.zeros_like(points)
+    for sample_i, left_sigma_i, right_sigma_i in zip(range(len(sigma_samples)),
+                                                     sigma_locations[:-1],
+                                                     sigma_locations[1:]):
+        sigma_chunk = sigma[left_sigma_i:right_sigma_i]
+        if len(sigma_chunk) == 0:
+            break   # This happens at the end ofiteration; we get a repeat of the last position
+
+        sigma_factors = sigma_chunk / sigma_chunk[0]
+        left_mix = np.polyval(mix_functions[function][spacing]['lower'], sigma_factors)
+        right_mix = np.polyval(mix_functions[function][spacing]['upper'], sigma_factors)
+        spectrum[left_sigma_i:right_sigma_i] = (left_mix * spectra[sample_i, left_sigma_i:right_sigma_i]
+                                                + right_mix * spectra[sample_i + 1, left_sigma_i:right_sigma_i])
     return points, spectrum
