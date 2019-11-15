@@ -155,6 +155,7 @@ Testing
    SystemTests
    DataFilesForTesting
    TestingUtilities
+   RunningSanitizers
 
 :doc:`RunningTheUnitTests`
    Details on how to run the suite of unit tests.
@@ -179,6 +180,9 @@ Testing
 
 :doc:`TestingUtilities`
    Helper utlities used for testing.
+
+:doc:`RunningSanitizers`
+   How to run the various sanitizers locally.
 
 ===============
 GUI Development
