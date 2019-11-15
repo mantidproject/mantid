@@ -378,9 +378,12 @@ class MainWindow(QMainWindow):
         object_name = 'custom-cpp-interface-' + interface_name
         window = find_window(object_name, QMainWindow)
         if window is None:
-            interface = self.interface_manager.createSubWindow(interface_name,self)
+            interface = self.interface_manager.createSubWindow(interface_name)
             interface.setObjectName(object_name)
             interface.setAttribute(Qt.WA_DeleteOnClose, True)
+            # make indirect settings a child of workbench
+            if interface_name == "Settings":
+                interface.setParent(self, interface.windowFlags())
             interface.show()
         else:
             window.raise_()
