@@ -37,6 +37,11 @@ class LModel(object):
             filename: get_filename(filename, self.run)
             for filename in to_load if get_filename(filename, self.run) is not None
         }
+        unique_workspaces = {}
+        for path, workspace in iteritems(workspaces):
+            if workspace not in unique_workspaces.values():
+                unique_workspaces[path] = workspace
+        workspaces = unique_workspaces
         self._load(workspaces)
         self.loaded_runs[self.run] = merge_workspaces(self.run, workspaces.values())
         self.last_loaded_runs.append(self.run)
@@ -65,6 +70,7 @@ def search_user_dirs(run):
     for user_dir in config["datasearch.directories"].split(";"):
         path = os.path.join(user_dir, "ral{}.rooth*.dat".format(pad_run(run)))
         files.extend([file for file in glob.iglob(path)])
+
     return files
 
 
