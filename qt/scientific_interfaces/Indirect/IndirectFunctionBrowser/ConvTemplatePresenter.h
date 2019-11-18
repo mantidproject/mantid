@@ -37,6 +37,7 @@ public:
   void setDeltaFunction(bool);
   void setNumberOfDatasets(int);
   int getNumberOfDatasets() const;
+  int getCurrentDataset();
   void setFunction(const QString &funStr);
   IFunction_sptr getGlobalFunction() const;
   IFunction_sptr getFunction() const;
@@ -50,7 +51,7 @@ public:
   void setCurrentDataset(int i);
   void setDatasetNames(const QStringList &names);
   void setErrorsEnabled(bool enabled);
-  void setResolution(std::string const &name, DatasetIndex const &index);
+  void setResolution(std::string const &name, TableDatasetIndex const &index);
 
 signals:
   void functionStructureChanged();

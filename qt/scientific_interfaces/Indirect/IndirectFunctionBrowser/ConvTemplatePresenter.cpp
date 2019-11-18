@@ -82,6 +82,10 @@ void ConvTemplatePresenter::setFunction(const QString &funStr) {
   emit functionStructureChanged();
 }
 
+int ConvTemplatePresenter::getCurrentDataset() {
+  return m_model.currentDomainIndex();
+}
+
 IFunction_sptr ConvTemplatePresenter::getGlobalFunction() const {
   return m_model.getFitFunction();
 }
@@ -147,7 +151,7 @@ void ConvTemplatePresenter::setErrorsEnabled(bool enabled) {
 }
 
 void ConvTemplatePresenter::setResolution(std::string const &name,
-                                          DatasetIndex const &index) {
+                                          TableDatasetIndex const &index) {
   m_model.setResolution(name, index);
 }
 

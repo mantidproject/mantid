@@ -23,8 +23,8 @@
 #include <QDoubleValidator>
 #include <QMenu>
 
-#include <qwt_plot.h>
-#include <qwt_plot_curve.h>
+// #include <qwt_plot.h>
+// #include <qwt_plot_curve.h>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -52,9 +52,10 @@ ConvFit::ConvFit(QWidget *parent)
       m_convFittingModel, m_uiForm->fitDataView);
   connect(
       dataPresenter.get(),
-      SIGNAL(modelResolutionAdded(std::string const &, DatasetIndex const &)),
+      SIGNAL(
+          modelResolutionAdded(std::string const &, TableDatasetIndex const &)),
       this,
-      SLOT(setModelResolution(std::string const &, DatasetIndex const &)));
+      SLOT(setModelResolution(std::string const &, TableDatasetIndex const &)));
   setFitDataPresenter(std::move(dataPresenter));
 
   setEditResultVisible(true);
@@ -141,11 +142,11 @@ EstimationDataSelector ConvFit::getEstimationDataSelector() const {
 }
 
 void ConvFit::setModelResolution(const std::string &resolutionName) {
-  setModelResolution(resolutionName, DatasetIndex{0});
+  setModelResolution(resolutionName, TableDatasetIndex{0});
 }
 
 void ConvFit::setModelResolution(const std::string &resolutionName,
-                                 DatasetIndex index) {
+                                 TableDatasetIndex index) {
   const auto resolution =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           resolutionName);

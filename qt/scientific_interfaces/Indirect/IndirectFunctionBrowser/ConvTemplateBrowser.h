@@ -36,6 +36,7 @@ public:
   IFunction_sptr getGlobalFunction() const override;
   IFunction_sptr getFunction() const override;
   void setNumberOfDatasets(int) override;
+  int getCurrentDataset() override;
   int getNumberOfDatasets() const override;
   void setDatasetNames(const QStringList &names) override;
   QStringList getGlobalParameters() const override;
@@ -52,7 +53,7 @@ public:
       DataForParameterEstimationCollection &&data) override;
   void setBackgroundA0(double value) override;
   void setResolution(std::string const &name,
-                     DatasetIndex const &index) override;
+                     TableDatasetIndex const &index) override;
 
 protected slots:
   void intChanged(QtProperty *) override;

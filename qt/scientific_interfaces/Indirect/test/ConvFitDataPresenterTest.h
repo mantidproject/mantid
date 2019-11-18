@@ -139,7 +139,7 @@ public:
 
   void
   test_that_the_model_contains_the_correct_number_of_workspace_after_instantiation() {
-    TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), DatasetIndex{1});
+    TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), TableDatasetIndex{1});
   }
 
   ///----------------------------------------------------------------------

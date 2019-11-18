@@ -14,9 +14,10 @@ namespace CustomInterfaces {
 namespace IDA {
 
 using ResolutionCollectionType =
-    IndexCollectionType<DatasetIndex,
+    IndexCollectionType<TableDatasetIndex,
                         boost::weak_ptr<Mantid::API::MatrixWorkspace>>;
-using ExtendedResolutionType = IndexCollectionType<DatasetIndex, std::string>;
+using ExtendedResolutionType =
+    IndexCollectionType<TableDatasetIndex, std::string>;
 
 class DLLExport ConvFitModel : public IndirectFittingModel {
 public:
@@ -26,9 +27,11 @@ public:
   ~ConvFitModel() override;
 
   Mantid::API::MultiDomainFunction_sptr getFittingFunction() const override;
-  boost::optional<double> getInstrumentResolution(DatasetIndex dataIndex) const;
-  std::size_t getNumberHistograms(DatasetIndex index) const;
-  Mantid::API::MatrixWorkspace_sptr getResolution(DatasetIndex index) const;
+  boost::optional<double>
+  getInstrumentResolution(TableDatasetIndex dataIndex) const;
+  std::size_t getNumberHistograms(TableDatasetIndex index) const;
+  Mantid::API::MatrixWorkspace_sptr
+  getResolution(TableDatasetIndex index) const;
 
   std::vector<std::string> getSpectrumDependentAttributes() const override;
 
@@ -37,10 +40,10 @@ public:
 
   void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
                     const Spectra &spectra) override;
-  void removeWorkspace(DatasetIndex index) override;
-  void setResolution(const std::string &name, DatasetIndex index);
+  void removeWorkspace(TableDatasetIndex index) override;
+  void setResolution(const std::string &name, TableDatasetIndex index);
   void setResolution(Mantid::API::MatrixWorkspace_sptr resolution,
-                     DatasetIndex index);
+                     TableDatasetIndex index);
   void setFitTypeString(const std::string &fitType);
 
   void addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
@@ -50,11 +53,11 @@ private:
   Mantid::API::IAlgorithm_sptr simultaneousFitAlgorithm() const override;
   std::string sequentialFitOutputName() const override;
   std::string simultaneousFitOutputName() const override;
-  std::string singleFitOutputName(DatasetIndex index,
+  std::string singleFitOutputName(TableDatasetIndex index,
                                   WorkspaceIndex spectrum) const override;
   Mantid::API::MultiDomainFunction_sptr getMultiDomainFunction() const override;
   std::unordered_map<std::string, ParameterValue>
-  createDefaultParameters(DatasetIndex index) const override;
+  createDefaultParameters(TableDatasetIndex index) const override;
   std::unordered_map<std::string, std::string>
   mapDefaultParameterNames() const override;
 
@@ -83,7 +86,7 @@ private:
                  Mantid::API::WorkspaceGroup_sptr resultWorkspace,
                  IndirectFitData *fitData,
                  WorkspaceIndex spectrum) const override;
-  void addExtendedResolution(DatasetIndex index);
+  void addExtendedResolution(TableDatasetIndex index);
   void addSampleLogs();
 
   void setParameterNameChanges(const Mantid::API::IFunction &model,

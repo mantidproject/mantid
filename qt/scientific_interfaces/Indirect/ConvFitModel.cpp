@@ -474,14 +474,14 @@ std::string ConvFitModel::sequentialFitOutputName() const {
     return "MultiConvFit_" + m_fitType + m_backgroundString + "_Results";
   return createOutputName("%1%_conv_" + m_fitType + m_backgroundString +
                               "_s%2%",
-                          "_to_", DatasetIndex{0});
+                          "_to_", TableDatasetIndex{0});
 }
 
 std::string ConvFitModel::simultaneousFitOutputName() const {
   return sequentialFitOutputName();
 }
 
-std::string ConvFitModel::singleFitOutputName(DatasetIndex index,
+std::string ConvFitModel::singleFitOutputName(TableDatasetIndex index,
                                               WorkspaceIndex spectrum) const {
   return createSingleFitOutputName("%1%_conv_" + m_fitType +
                                        m_backgroundString + "_s%2%_Results",
@@ -500,17 +500,18 @@ Mantid::API::MultiDomainFunction_sptr ConvFitModel::getFittingFunction() const {
 }
 
 boost::optional<double>
-ConvFitModel::getInstrumentResolution(DatasetIndex dataIndex) const {
+ConvFitModel::getInstrumentResolution(TableDatasetIndex dataIndex) const {
   if (dataIndex < numberOfWorkspaces())
     return instrumentResolution(getWorkspace(dataIndex));
   return boost::none;
 }
 
-std::size_t ConvFitModel::getNumberHistograms(DatasetIndex index) const {
+std::size_t ConvFitModel::getNumberHistograms(TableDatasetIndex index) const {
   return getWorkspace(index)->getNumberHistograms();
 }
 
-MatrixWorkspace_sptr ConvFitModel::getResolution(DatasetIndex index) const {
+MatrixWorkspace_sptr
+ConvFitModel::getResolution(TableDatasetIndex index) const {
   if (index < m_resolution.size())
     return m_resolution[index].lock();
   return nullptr;
@@ -558,12 +559,12 @@ void ConvFitModel::addWorkspace(MatrixWorkspace_sptr workspace,
   if (m_resolution.size() < dataSize)
     m_resolution.emplace_back(MatrixWorkspace_sptr());
   else if (m_resolution.size() == dataSize &&
-           m_resolution[dataSize - DatasetIndex{1}].lock() &&
+           m_resolution[dataSize - TableDatasetIndex{1}].lock() &&
            m_extendedResolution.size() < dataSize)
-    addExtendedResolution(dataSize - DatasetIndex{1});
+    addExtendedResolution(dataSize - TableDatasetIndex{1});
 }
 
-void ConvFitModel::removeWorkspace(DatasetIndex index) {
+void ConvFitModel::removeWorkspace(TableDatasetIndex index) {
   IndirectFittingModel::removeWorkspace(index);
 
   const auto newSize = numberOfWorkspaces();
@@ -576,7 +577,8 @@ void ConvFitModel::removeWorkspace(DatasetIndex index) {
   }
 }
 
-void ConvFitModel::setResolution(const std::string &name, DatasetIndex index) {
+void ConvFitModel::setResolution(const std::string &name,
+                                 TableDatasetIndex index) {
   if (!name.empty() && doesExistInADS(name))
     setResolution(getADSMatrixWorkspace(name), index);
   else
@@ -584,7 +586,7 @@ void ConvFitModel::setResolution(const std::string &name, DatasetIndex index) {
 }
 
 void ConvFitModel::setResolution(MatrixWorkspace_sptr resolution,
-                                 DatasetIndex index) {
+                                 TableDatasetIndex index) {
   if (m_resolution.size() > index)
     m_resolution[index] = resolution;
   else if (m_resolution.size() == index)
@@ -598,7 +600,7 @@ void ConvFitModel::setResolution(MatrixWorkspace_sptr resolution,
     addExtendedResolution(index);
 }
 
-void ConvFitModel::addExtendedResolution(DatasetIndex index) {
+void ConvFitModel::addExtendedResolution(TableDatasetIndex index) {
   const std::string name = "__ConvFitResolution" + std::to_string(index.value);
 
   extendResolutionWorkspace(m_resolution[index].lock(),
@@ -615,7 +617,7 @@ void ConvFitModel::setFitTypeString(const std::string &fitType) {
 }
 
 std::unordered_map<std::string, ParameterValue>
-ConvFitModel::createDefaultParameters(DatasetIndex index) const {
+ConvFitModel::createDefaultParameters(TableDatasetIndex index) const {
   std::unordered_map<std::string, ParameterValue> defaultValues;
   defaultValues["PeakCentre"] = ParameterValue(0.0);
   defaultValues["Centre"] = ParameterValue(0.0);
