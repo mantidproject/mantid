@@ -59,6 +59,7 @@ ConvFit::ConvFit(QWidget *parent)
   setFitDataPresenter(std::move(dataPresenter));
 
   setEditResultVisible(true);
+  setStartAndEndHidden(false);
 }
 
 void ConvFit::setupFitTab() {
@@ -153,6 +154,10 @@ void ConvFit::setModelResolution(const std::string &resolutionName,
   m_convFittingModel->setResolution(resolution, index);
   m_uiForm->fitPropertyBrowser->setModelResolution(resolutionName, index);
   setModelFitFunction();
+}
+
+void ConvFit::setStartAndEndHidden(bool hidden) {
+  m_uiForm->fitDataView->setStartAndEndHidden(hidden);
 }
 
 void ConvFit::fitFunctionChanged() {
