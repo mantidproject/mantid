@@ -37,11 +37,9 @@ class LModel(object):
             filename: get_filename(filename, self.run)
             for filename in to_load if get_filename(filename, self.run) is not None
         }
-        countWorkspaces = {}
         unique_workspaces = {}
         for path, workspace in workspaces.iteritems():
-            countWorkspaces[workspace] = countWorkspaces.get(workspace, 0) + 1
-            if countWorkspaces[workspace] == 1:
+            if workspace not in unique_workspaces.values():
                 unique_workspaces[path] = workspace
         workspaces = unique_workspaces
         self._load(workspaces)
