@@ -24,11 +24,10 @@ namespace CustomInterfaces {
 namespace IDA {
 
 ConvFitDataPresenter::ConvFitDataPresenter(ConvFitModel *model,
-                                           IIndirectFitDataViewLegacy *view)
-    : IndirectFitDataPresenterLegacy(
-          model, view,
-          std::make_unique<ConvFitDataTablePresenter>(model,
-                                                      view->getDataTable())),
+                                           IIndirectFitDataView *view)
+    : IndirectFitDataPresenter(model, view,
+                               std::make_unique<ConvFitDataTablePresenter>(
+                                   model, view->getDataTable())),
       m_convModel(model) {
   setResolutionHidden(false);
 
@@ -40,15 +39,17 @@ ConvFitDataPresenter::ConvFitDataPresenter(ConvFitModel *model,
 
 void ConvFitDataPresenter::setModelResolution(const QString &name) {
   auto const workspaceCount = m_convModel->numberOfWorkspaces();
-  auto const index =
-      m_convModel->getWorkspace(0) ? workspaceCount - 1 : workspaceCount;
+  auto const index = m_convModel->getWorkspace(DatasetIndex{0})
+                         ? workspaceCount - DatasetIndex{1}
+                         : workspaceCount;
   setModelResolution(name.toStdString(), index);
 }
 
 void ConvFitDataPresenter::setModelResolution(std::string const &name,
-                                              std::size_t const &index) {
+                                              DatasetIndex const &index) {
   try {
     m_convModel->setResolution(name, index);
+    emit modelResolutionAdded(name, index);
   } catch (std::exception const &ex) {
     displayWarning(ex.what());
   }
@@ -58,21 +59,26 @@ void ConvFitDataPresenter::addDataToModel(IAddWorkspaceDialog const *dialog) {
   if (const auto convDialog =
           dynamic_cast<ConvFitAddWorkspaceDialog const *>(dialog)) {
     addWorkspace(convDialog, m_convModel);
-    m_convModel->setResolution(convDialog->resolutionName(),
-                               m_convModel->numberOfWorkspaces() - 1);
+    auto const name = convDialog->resolutionName();
+    auto const index = m_convModel->numberOfWorkspaces() - DatasetIndex{1};
+    m_convModel->setResolution(name, index);
+    emit modelResolutionAdded(name, index);
   }
 }
 
 void ConvFitDataPresenter::addWorkspace(ConvFitAddWorkspaceDialog const *dialog,
-                                        IndirectFittingModelLegacy *model) {
+                                        IndirectFittingModel *model) {
   model->addWorkspace(dialog->workspaceName(), dialog->workspaceIndices());
 }
 
 void ConvFitDataPresenter::addModelData(const std::string &name) {
-  IndirectFitDataPresenterLegacy::addModelData(name);
+  IndirectFitDataPresenter::addModelData(name);
   const auto resolution = getView()->getSelectedResolution();
-  if (!resolution.empty() && isWorkspaceLoaded(resolution))
-    m_convModel->setResolution(resolution, 0);
+  if (!resolution.empty() && isWorkspaceLoaded(resolution)) {
+    auto const index = DatasetIndex{0};
+    m_convModel->setResolution(resolution, index);
+    emit modelResolutionAdded(resolution, index);
+  }
 }
 
 std::unique_ptr<IAddWorkspaceDialog>
