@@ -72,7 +72,7 @@ public:
 
     m_model->addWorkspace(m_workspace, spectra);
 
-    TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), DatasetIndex{1});
+    TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), TableDatasetIndex{1});
   }
 
   void test_that_addWorkspace_will_add_multiple_workspaces() {
@@ -85,7 +85,7 @@ public:
     addWorkspacesToModel(spectra, m_workspace, workspace2, workspace3,
                          workspace4, workspace5);
 
-    TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), DatasetIndex{5});
+    TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), TableDatasetIndex{5});
   }
 
   void
@@ -108,7 +108,7 @@ public:
 
     addWorkspacesToModel(spectra, m_workspace, workspace2);
 
-    TS_ASSERT(!m_model->getInstrumentResolution(DatasetIndex{3}));
+    TS_ASSERT(!m_model->getInstrumentResolution(TableDatasetIndex{3}));
   }
 
   void
@@ -122,7 +122,7 @@ public:
 
     addWorkspacesToModel(spectra, m_workspace, workspace2);
 
-    TS_ASSERT(!m_model->getInstrumentResolution(DatasetIndex{0}));
+    TS_ASSERT(!m_model->getInstrumentResolution(TableDatasetIndex{0}));
   }
 
   void
@@ -133,7 +133,7 @@ public:
 
     addWorkspacesToModel(spectra, m_workspace, workspace2);
 
-    TS_ASSERT_EQUALS(m_model->getNumberHistograms(DatasetIndex{1}), 5);
+    TS_ASSERT_EQUALS(m_model->getNumberHistograms(TableDatasetIndex{1}), 5);
   }
 
   void
@@ -143,7 +143,7 @@ public:
 
     addWorkspacesToModel(spectra, m_workspace);
 
-    TS_ASSERT(!m_model->getResolution(DatasetIndex{0}));
+    TS_ASSERT(!m_model->getResolution(TableDatasetIndex{0}));
   }
 
   void test_that_getResolution_will_return_the_workspace_which_it_was_set_at() {
@@ -151,9 +151,9 @@ public:
     auto const resolution = createWorkspace(6, 3);
 
     addWorkspacesToModel(spectra, m_workspace);
-    m_model->setResolution(resolution, DatasetIndex{0});
+    m_model->setResolution(resolution, TableDatasetIndex{0});
 
-    TS_ASSERT_EQUALS(m_model->getResolution(DatasetIndex{0}), resolution);
+    TS_ASSERT_EQUALS(m_model->getResolution(TableDatasetIndex{0}), resolution);
   }
 
   void
@@ -162,9 +162,9 @@ public:
     auto const resolution = createWorkspace(6, 3);
 
     addWorkspacesToModel(spectra, m_workspace);
-    m_model->setResolution(resolution, DatasetIndex{0});
+    m_model->setResolution(resolution, TableDatasetIndex{0});
 
-    TS_ASSERT(!m_model->getResolution(DatasetIndex{2}));
+    TS_ASSERT(!m_model->getResolution(TableDatasetIndex{2}));
   }
 
   void test_that_getSpectrumDependentAttributes_returns_workspace_index() {
@@ -181,26 +181,27 @@ public:
     Spectra const spectra = Spectra("0-1");
 
     addWorkspacesToModel(spectra, m_workspace);
-    m_model->removeWorkspace(DatasetIndex{0});
+    m_model->removeWorkspace(TableDatasetIndex{0});
 
-    TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), DatasetIndex{0});
+    TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), TableDatasetIndex{0});
   }
 
   void
   test_that_setResolution_will_throw_when_provided_the_name_of_a_workspace_which_does_not_exist() {
-    TS_ASSERT_THROWS(m_model->setResolution("InvalidName", DatasetIndex{0}),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(
+        m_model->setResolution("InvalidName", TableDatasetIndex{0}),
+        const std::runtime_error &);
   }
 
   void
   test_that_setResolution_will_set_the_resolution_when_provided_a_correct_workspace_name() {
-    m_model->setResolution("Name", DatasetIndex{0});
-    TS_ASSERT_EQUALS(m_model->getResolution(DatasetIndex{0}), m_workspace);
+    m_model->setResolution("Name", TableDatasetIndex{0});
+    TS_ASSERT_EQUALS(m_model->getResolution(TableDatasetIndex{0}), m_workspace);
   }
 
   void
   test_that_setResolution_will_throw_when_provided_an_index_that_is_out_of_range() {
-    TS_ASSERT_THROWS(m_model->setResolution(m_workspace, DatasetIndex{5}),
+    TS_ASSERT_THROWS(m_model->setResolution(m_workspace, TableDatasetIndex{5}),
                      const std::out_of_range &);
   }
 
