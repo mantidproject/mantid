@@ -212,7 +212,7 @@ void ConvFunctionModel::updateParameterEstimationData(
 }
 
 void ConvFunctionModel::setResolution(std::string const &name,
-                                      DatasetIndex const &index) {
+                                      TableDatasetIndex const &index) {
   m_resolutionName = name;
   m_resolutionIndex = index;
   setModel();

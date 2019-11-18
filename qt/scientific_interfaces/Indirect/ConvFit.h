@@ -32,7 +32,7 @@ public:
 protected slots:
   void setModelResolution(const std::string &resolutionName);
   void setModelResolution(const std::string &resolutionName,
-                          DatasetIndex index);
+                          TableDatasetIndex index);
   void runClicked();
   void fitFunctionChanged();
 

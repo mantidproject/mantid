@@ -78,6 +78,10 @@ IFunction_sptr ConvTemplateBrowser::getFunction() const {
   return m_presenter.getFunction();
 }
 
+int ConvTemplateBrowser::getCurrentDataset() {
+  return m_presenter.getCurrentDataset();
+}
+
 void ConvTemplateBrowser::setNumberOfDatasets(int n) {
   m_presenter.setNumberOfDatasets(n);
 }
@@ -275,7 +279,7 @@ void ConvTemplateBrowser::updateParameterEstimationData(
 void ConvTemplateBrowser::setBackgroundA0(double value) {}
 
 void ConvTemplateBrowser::setResolution(std::string const &name,
-                                        DatasetIndex const &index) {
+                                        TableDatasetIndex const &index) {
   m_presenter.setResolution(name, index);
 }
 
