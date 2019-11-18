@@ -44,6 +44,7 @@ private:
   void setupFitTab() override;
   void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
   EstimationDataSelector getEstimationDataSelector() const override;
+  void setStartAndEndHidden(bool hidden);
 
   std::string fitTypeString() const;
 
