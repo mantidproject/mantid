@@ -710,6 +710,7 @@ public:
     auto ws = makeWorkspaceWithDetectors(2, 2);
     // Now do a valid masking
     TS_ASSERT_THROWS_NOTHING(ws->flagMasked(0, 1, 0.75));
+    TS_ASSERT(ws->hasAnyMaskedBins());
     TS_ASSERT(ws->hasMaskedBins(0));
     TS_ASSERT_EQUALS(ws->maskedBins(0).size(), 1);
     TS_ASSERT_EQUALS(ws->maskedBins(0).begin()->first, 1);
@@ -731,6 +732,7 @@ public:
   void testMasking() {
     auto ws2 = makeWorkspaceWithDetectors(1, 2);
 
+    TS_ASSERT(!ws2->hasAnyMaskedBins());
     TS_ASSERT(!ws2->hasMaskedBins(0));
     // Doesn't throw on invalid spectrum number, just returns false
     TS_ASSERT(!ws2->hasMaskedBins(1));
