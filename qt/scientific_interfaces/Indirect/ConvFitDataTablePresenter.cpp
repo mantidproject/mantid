@@ -28,14 +28,10 @@ namespace IDA {
 
 ConvFitDataTablePresenter::ConvFitDataTablePresenter(ConvFitModel *model,
                                                      QTableWidget *dataTable)
-    : IndirectDataTablePresenterLegacy(model, dataTable, convFitHeaders()),
+    : IndirectDataTablePresenter(model, dataTable, convFitHeaders()),
       m_convFitModel(model) {
   auto header = dataTable->horizontalHeader();
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   header->setResizeMode(1, QHeaderView::Stretch);
-#elif QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-  header->setSectionResizeMode(1, QHeaderView::Stretch);
-#endif
 }
 
 int ConvFitDataTablePresenter::workspaceIndexColumn() const { return 2; }
@@ -46,13 +42,15 @@ int ConvFitDataTablePresenter::endXColumn() const { return 4; }
 
 int ConvFitDataTablePresenter::excludeColumn() const { return 5; }
 
-std::string ConvFitDataTablePresenter::getResolutionName(int row) const {
+std::string
+ConvFitDataTablePresenter::getResolutionName(SpectrumRowIndex row) const {
   return getString(row, 1);
 }
 
-void ConvFitDataTablePresenter::addTableEntry(std::size_t dataIndex,
-                                              std::size_t spectrum, int row) {
-  IndirectDataTablePresenterLegacy::addTableEntry(dataIndex, spectrum, row);
+void ConvFitDataTablePresenter::addTableEntry(DatasetIndex dataIndex,
+                                              WorkspaceIndex spectrum,
+                                              SpectrumRowIndex row) {
+  IndirectDataTablePresenter::addTableEntry(dataIndex, spectrum, row);
 
   const auto resolution = m_convFitModel->getResolution(dataIndex);
   const auto name = resolution ? resolution->getName() : "";
@@ -63,10 +61,10 @@ void ConvFitDataTablePresenter::addTableEntry(std::size_t dataIndex,
   setCell(std::move(cell), row, 1);
 }
 
-void ConvFitDataTablePresenter::updateTableEntry(std::size_t dataIndex,
-                                                 std::size_t spectrum,
-                                                 int row) {
-  IndirectDataTablePresenterLegacy::updateTableEntry(dataIndex, spectrum, row);
+void ConvFitDataTablePresenter::updateTableEntry(DatasetIndex dataIndex,
+                                                 WorkspaceIndex spectrum,
+                                                 SpectrumRowIndex row) {
+  IndirectDataTablePresenter::updateTableEntry(dataIndex, spectrum, row);
 
   const auto &name = m_convFitModel->getResolution(dataIndex)->getName();
   setCellText(QString::fromStdString(name), row, 1);
