@@ -31,7 +31,7 @@ class SANSLOQBatchTest_V2(systemtesting.MantidSystemTest):
         BatchReduce(csv_file, 'raw', plotresults=False, saveAlgs={'SaveCanSAS1D': 'xml', 'SaveNexus': 'nxs'})
 
         LoadNexus(Filename='54433sans_main_1D_2.2_10.0.nxs', OutputWorkspace='result')
-        Plus(LHSWorkspace='result', RHSWorkspace='99630sanotrans', OutputWorkspace='result')
+        Plus(LHSWorkspace='result', RHSWorkspace='99630sanotrans_main_1D_2.2_10.0', OutputWorkspace='result')
 
         os.remove(os.path.join(config['defaultsave.directory'], '54433sans_main_1D_2.2_10.0.nxs'))
         os.remove(os.path.join(config['defaultsave.directory'], '99630sanotrans_main_1D_2.2_10.0.nxs'))
