@@ -83,7 +83,7 @@ def merge_workspaces(run, workspaces):
     d_string = "{}; Detector {}"
     # detectors is a dictionary of {detector_name : [names_of_workspaces]}
     detectors = {d_string.format(run, x): [] for x in range(1, 5)}
-    # fill dictionary 
+    # fill dictionary
     for workspace in workspaces:
         detector_number = get_detector_num_from_ws(workspace)
         detectors[d_string.format(run, detector_number)].append(workspace)
