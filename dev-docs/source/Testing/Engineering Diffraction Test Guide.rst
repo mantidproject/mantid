@@ -9,8 +9,7 @@ Engineering Diffraction Testing
 Preamble
 ^^^^^^^^^
 This document is tailored towards developers intending to test the Engineering Diffraction
-interface. Whilst users may benefit from the additional documentation provided in this document
-it is recommended they read :ref:`Engineering_Diffraction-ref` instead which is tailored towards users.
+interface.
 
 The files used in the following examples are found within System test files within 
 `<MantidBuildDir>/ExternalData/Testing/Data/SystemTest` after building the *SystemTestData* target.
@@ -48,16 +47,16 @@ The following files can be used for the calibration run.
 Once the calibration has completed if the calibration was successful plotting the spectra of the
 newly created workspaces will produce images similar to below:
 
-.. image:: ../images/EnggDiffExpectedVanCurve.png
+.. image:: /images/EngineeringDiffractionTest/EnggDiffExpectedVanCurve.png
     :width: 300px
-.. image:: ../images/EnggDiffExpectedLinear.png
+.. image:: /images/EngineeringDiffractionTest/EnggDiffExpectedLinear.png
     :width: 300px
 
 If the plot is incorrect check you haven't swapped the run numbers and they are both correct. 
     
 If `Current calibration` is populated the algorithm will attempt to use a cached calculation instead
 of recalculating the calibration. To force it to recalculate every time for testing purposes the
-option can be set under :ref:`settings-Engineering_Diffraction_test-ref` .
+option can be set under the Engineering Diffraction Settings.
 
 A cropped calibration can be used to limit the spectra considered during calibration. This can
 be useful if a subset of detectors are going to be used.
@@ -94,7 +93,7 @@ The saved focused .nxs filename will be of the format
 
 Plotting the focused workspace should look similar to the image below:
 
-.. image:: ../images/EnggDiffExampleFocusOutput.png
+.. image:: /images/EngineeringDiffractionTest/EnggDiffExampleFocusOutput.png
     :width: 300px
     
 Negative Testing Ideas
@@ -136,7 +135,7 @@ After the fitting has run if it managed to fit any peaks it should look similar 
 if there are no peaks and the display looks "corrupted" check the calibration was completed
 correctly:
 
-.. image:: ../images/EnggDiffExampleFitOutput.png
+.. image:: /images/EngineeringDiffractionTest/EnggDiffExampleFitOutput.png
     :width: 500px
 
 The banks available to plot are selected with the `Plot Bank` selector and then fit is clicked.
@@ -170,7 +169,7 @@ NeXuS file (obtained from
 
 After a fit has run, the plot should look something like below:
 
-.. image:: ../images/EnggDiffExampleGSASOutput.png
+.. image:: /images/EngineeringDiffractionTest/EnggDiffExampleGSASOutput.png
 
 If that fit output (the red line) is flat, or just follows the
 background of the data, the fit was not unsuccessful. Make sure you're
@@ -219,5 +218,3 @@ Settings
     Allows the user to specify the output directory of their own focused runs
     it defaults to `C:\\EnginX_Mantid\\Focus` or `~/EnginX_Mantid/Focus` but can be changed to 
     suit the users needs.
-
-.. categories:: Interfaces Diffraction
