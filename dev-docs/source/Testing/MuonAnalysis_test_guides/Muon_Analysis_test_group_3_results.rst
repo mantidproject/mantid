@@ -31,7 +31,7 @@ Test 1: individual fits
 
 Like this:
 
-.. image:: ../../images/MuonAnalysisTests/results_test1.png
+.. image:: /images/MuonAnalysisTests/results_test1.png
   :align: center
 
 Test 2: Sequential fit (simple)
@@ -51,7 +51,7 @@ Test 3: Sequential fit of simultaneous fits
 
 Like this:
 
-.. image:: ../../images/MuonAnalysisTests/results_tests2and3.png
+.. image:: /images/MuonAnalysisTests/results_tests2and3.png
   :align: center
 
 Test 4: Simultaneous fits
@@ -70,7 +70,7 @@ Test 5: Simultaneous fits (2)
 
 Should look like this:
 
-.. image:: ../../images/MuonAnalysisTests/results_tests4and5.png
+.. image:: /images/MuonAnalysisTests/results_tests4and5.png
   :align: center
 
 Test 6: Multiple simultaneous fits
@@ -85,6 +85,6 @@ Test 6: Multiple simultaneous fits
 
 Should look like this:
 
-.. image:: ../../images/MuonAnalysisTests/results_test6.png
+.. image:: /images/MuonAnalysisTests/results_test6.png
   :align: center
 

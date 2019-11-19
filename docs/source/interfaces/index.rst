@@ -15,6 +15,5 @@ Interfaces
    :glob:
    :maxdepth: 1
 
-   ./MuonAnalysis_test_guides/index
    ./isis_sans/ISIS SANS.rst
    *
