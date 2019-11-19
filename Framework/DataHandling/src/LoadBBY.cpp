@@ -610,12 +610,12 @@ void LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
       loadInstrumentParameters(entry, logParams, allParams);
 
       // Ltof_det_value is not present for monochromatic data so check
-	  // and replace with default
+      // and replace with default
       auto findLtof = logParams.find("Ltof_det_value");
       if (findLtof != logParams.end()) {
         logParams["L1_chopper_value"] =
-            logParams["Ltof_det_value"] - logParams["L2_det_value"];      
-	  } else {
+            logParams["Ltof_det_value"] - logParams["L2_det_value"];
+      } else {
         logParams["L1_chopper_value"] = 18.4726;
         g_log.warning() << "Cannot recover parameter 'L1_chopper_value'"
                         << ", using default.\n";
