@@ -504,7 +504,7 @@ void LoadBBY::loadInstrumentParameters(
           if (!hdfTag.empty() && loadNXDataSet(entry, hdfTag, tmpFloat)) {
             auto factor = std::stod(details[1]);
             logParams[logTag] = factor * tmpFloat;
-          } else {
+          } else if (details.size() > 2) {
             logParams[logTag] = std::stod(details[2]);
             if (!hdfTag.empty())
               g_log.warning() << "Cannot find hdf parameter "
@@ -609,13 +609,15 @@ void LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
 
       loadInstrumentParameters(entry, logParams, allParams);
 
-      // adjust parameters
-      try {
+      // Ltof_det_value is not present for monochromatic data so check
+	  // and replace with default
+      auto findLtof = logParams.find("Ltof_det_value");
+      if (findLtof != logParams.end()) {
         logParams["L1_chopper_value"] =
-            logParams["Ltof_det_value"] - logParams["L2_det_value"];
-      } catch (const std::invalid_argument &) {
-        logParams["L1_chopper_value"] = 18.47258984375;
-        g_log.warning() << "Cannot find parameter 'L1_chopper_value'"
+            logParams["Ltof_det_value"] - logParams["L2_det_value"];      
+	  } else {
+        logParams["L1_chopper_value"] = 18.4726;
+        g_log.warning() << "Cannot recover parameter 'L1_chopper_value'"
                         << ", using default.\n";
       }
     }
