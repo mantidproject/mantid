@@ -85,7 +85,7 @@ class LoadUtilsTest(unittest.TestCase):
 
     def test_create_merged_workspace(self):
         workspace_list = []
-        num_workspaces = 5
+        num_workspaces = lutils.num_files_per_detector
         workspace_names = []
         num_bins = 100
         X_data = np.linspace(0, 400, num_bins)
@@ -93,7 +93,7 @@ class LoadUtilsTest(unittest.TestCase):
         m = 0.1
         Yfunc = lambda x, specNo: m * x + specNo
         Efunc = lambda x, specNo: 2 * m * x + specNo
-        for i in range(0, 5):
+        for i in range(0, num_workspaces):
             name = "test_" + str(i)
             workspace_names.append(name)
             ws = mantid.WorkspaceFactory.create("Workspace2D", NVectors=1,

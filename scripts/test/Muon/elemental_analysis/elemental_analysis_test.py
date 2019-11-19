@@ -304,7 +304,7 @@ class ElementalAnalysisTest(unittest.TestCase):
         self.gui.lines.total.isChecked.return_value = True
         self.gui.lines.prompt.isChecked.return_value = False
         self.gui.lines.delayed.isChecked.return_value = True
-        mock_mantid.mtd['name1'].getName.return_value = 'Detector 1'
+        mock_mantid.mtd['name1'].name.return_value = 'Detector 1'
         self.gui.add_detector_to_plot('GE1', 'name1')
         self.assertEqual(self.gui.plotting.add_subplot.call_count, 1)
         self.assertEqual(self.gui.plotting.plot.call_count, 2)
@@ -557,8 +557,8 @@ class ElementalAnalysisTest(unittest.TestCase):
             '2695; Detector 2': mock.Mock(),
             '2695; Detector 3': mock.Mock()
         }
-        mock_mantid.mtd['2695; Detector 1'].getName.return_value = '2695; Detector 1'
-        mock_mantid.mtd['2695; Detector 2'].getName.return_value = '2695; Detector 2'
+        mock_mantid.mtd['2695; Detector 1'].name.return_value = '2695; Detector 1'
+        mock_mantid.mtd['2695; Detector 2'].name.return_value = '2695; Detector 2'
         expected_calls = [
             mock.call('1', '2695; Detector 1', color='C0',spec_num=spectrum_index['Total']),
             mock.call('2', '2695; Detector 2', color='C0',spec_num=spectrum_index['Total'])
@@ -585,8 +585,8 @@ class ElementalAnalysisTest(unittest.TestCase):
             '2695; Detector 2': mock.Mock(),
             '2695; Detector 3': mock.Mock()
         }
-        mock_mantid.mtd['2695; Detector 1'].getName.return_value = '2695; Detector 1'
-        mock_mantid.mtd['2695; Detector 2'].getName.return_value = '2695; Detector 2'
+        mock_mantid.mtd['2695; Detector 1'].name.return_value = '2695; Detector 1'
+        mock_mantid.mtd['2695; Detector 2'].name.return_value = '2695; Detector 2'
         expected_calls = [mock.call('1', '2695; Detector 1', spec=spectrum_index['Total']),
                           mock.call('2', '2695; Detector 2', spec=spectrum_index['Total'])]
         self.gui.remove_line_type(2695, 'Total')
