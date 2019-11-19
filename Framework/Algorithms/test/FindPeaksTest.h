@@ -367,7 +367,7 @@ private:
         "name=LinearBackground, A0=101.3, A1=8510.3;"
         "name=Gaussian, PeakCentre=0.1, Height=200000, Sigma=0.007;"
         "name=Lorentzian, PeakCentre=0.45, Amplitude=6000, FWHM=0.017;"
-        "name=PseudoVoigt, PeakCentre=0.75, Height=85050, FWHM=0.04;"
+        "name=PseudoVoigt, PeakCentre=0.75, Intensity=85050, FWHM=0.04;"
         "name=Gaussian, PeakCentre=0.95, Height=110000, Sigma=0.007;"
         "name=Gaussian, PeakCentre=1.15, Height=110000, Sigma=0.007;"
         "name=BackToBackExponential, X0=1.30, I=7000, A=1500.1, B=1800.2, "
