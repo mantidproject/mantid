@@ -33,13 +33,14 @@ GNU_DIAG_ON("conversion")
 #include <tbb/parallel_sort.h>
 
 using namespace Mantid::Types;
-using namespace LogSchema;
 size_t totalNumEventsSinceStart = 0;
 size_t totalNumEventsBeforeLastTimeout = 0;
 double totalPopulateWorkspaceDuration = 0;
 double numPopulateWorkspaceCalls = 0;
 double totalEventFromMessageDuration = 0;
 double numEventFromMessageCalls = 0;
+
+using namespace LogSchema;
 
 namespace {
 /// Logger
@@ -118,9 +119,9 @@ KafkaEventStreamDecoder::KafkaEventStreamDecoder(
     std::shared_ptr<IKafkaBroker> broker, const std::string &eventTopic,
     const std::string &runInfoTopic, const std::string &spDetTopic,
     const std::string &sampleEnvTopic, const std::string &chopperTopic,
-    const std::size_t bufferThreshold)
+    const std::string &monitorTopic, const std::size_t bufferThreshold)
     : IKafkaStreamDecoder(broker, eventTopic, runInfoTopic, spDetTopic,
-                          sampleEnvTopic, chopperTopic),
+                          sampleEnvTopic, chopperTopic, monitorTopic),
       m_intermediateBufferFlushThreshold(bufferThreshold) {
 #ifndef _OPENMP
   g_log.warning() << "Multithreading is not available on your system. This "
@@ -370,7 +371,6 @@ void KafkaEventStreamDecoder::eventDataFromMessage(const std::string &buffer,
   /* Get TOF and detector ID buffers */
   const auto &tofData = *(eventMsg->time_of_flight());
   const auto &detData = *(eventMsg->detector_id());
-
   /* Increment event count */
   const auto nEvents = tofData.size();
   eventCount += nEvents;
@@ -379,7 +379,7 @@ void KafkaEventStreamDecoder::eventDataFromMessage(const std::string &buffer,
   BufferedPulse pulse{pulseTime, 0};
 
   /* Perform facility specific operations */
-  if (eventMsg->facility_specific_data_type() == FacilityData_ISISData) {
+  if (eventMsg->facility_specific_data_type() == FacilityData::ISISData) {
     std::lock_guard<std::mutex> workspaceLock(m_mutex);
     const auto ISISMsg =
         static_cast<const ISISData *>(eventMsg->facility_specific_data());
@@ -403,7 +403,6 @@ void KafkaEventStreamDecoder::eventDataFromMessage(const std::string &buffer,
     const auto oldBufferSize(m_receivedEventBuffer.size());
     m_receivedEventBuffer.reserve(oldBufferSize + nEvents);
 
-    /* Store the buffered events */
     std::transform(detData.begin(), detData.end(), tofData.begin(),
                    std::back_inserter(m_receivedEventBuffer),
                    [&](uint64_t detId, uint64_t tof) -> BufferedEvent {
@@ -503,22 +502,33 @@ void KafkaEventStreamDecoder::sampleDataFromMessage(const std::string &buffer) {
 
     // If sample log with this name already exists then append to it
     // otherwise create a new log
-    if (seEvent->value_type() == Value_Int) {
+    if (seEvent->value_type() == Value::Int) {
       auto value = static_cast<const Int *>(seEvent->value());
       appendToLog<int32_t>(mutableRunInfo, name, time, value->value());
-    } else if (seEvent->value_type() == Value_Long) {
+    } else if (seEvent->value_type() == Value::Long) {
       auto value = static_cast<const Long *>(seEvent->value());
       appendToLog<int64_t>(mutableRunInfo, name, time, value->value());
-    } else if (seEvent->value_type() == Value_Double) {
+    } else if (seEvent->value_type() == Value::Double) {
       auto value = static_cast<const Double *>(seEvent->value());
       appendToLog<double>(mutableRunInfo, name, time, value->value());
-    } else if (seEvent->value_type() == Value_Float) {
+    } else if (seEvent->value_type() == Value::Float) {
       auto value = static_cast<const Float *>(seEvent->value());
       appendToLog<double>(mutableRunInfo, name, time,
                           static_cast<double>(value->value()));
+    } else if (seEvent->value_type() == Value::Short) {
+      auto value = static_cast<const Short *>(seEvent->value());
+      appendToLog<int32_t>(mutableRunInfo, name, time,
+                           static_cast<int32_t>(value->value()));
+    } else if (seEvent->value_type() == Value::String) {
+      auto value = static_cast<const String *>(seEvent->value());
+      appendToLog<std::string>(mutableRunInfo, name, time,
+                               static_cast<std::string>(value->value()->str()));
+    } else if (seEvent->value_type() == Value::ArrayByte) {
+      // do nothing for now.
     } else {
       g_log.warning() << "Value for sample log named '" << name
-                      << "' was not of recognised type" << std::endl;
+                      << "' was not of recognised type. The value type is "
+                      << EnumNameValue(seEvent->value_type()) << std::endl;
     }
   }
 }
@@ -574,18 +584,18 @@ void KafkaEventStreamDecoder::initLocalCaches(
     eventBuffer = createBufferWorkspace<DataObjects::EventWorkspace>(
         "EventWorkspace", static_cast<size_t>(spDetMsg->n_spectra()),
         spDetMsg->spectrum()->data(), spDetMsg->detector_id()->data(), nudet);
+  }
 
-    // Load the instrument if possible but continue if we can't
-    if (!instName.empty()) {
-      loadInstrument<DataObjects::EventWorkspace>(instName, eventBuffer,
-                                                  jsonGeometry);
-      if (rawMsgBuffer.empty()) {
-        eventBuffer->rebuildSpectraMapping();
-      }
-    } else {
-      g_log.warning(
-          "Empty instrument name received. Continuing without instrument");
+  // Load the instrument if possible but continue if we can't
+  if (!instName.empty()) {
+    loadInstrument<DataObjects::EventWorkspace>(instName, eventBuffer,
+                                                jsonGeometry);
+    if (rawMsgBuffer.empty()) {
+      eventBuffer->rebuildSpectraMapping();
     }
+  } else {
+    g_log.warning(
+        "Empty instrument name received. Continuing without instrument");
   }
 
   auto &mutableRun = eventBuffer->mutableRun();
@@ -630,10 +640,7 @@ std::vector<size_t> computeGroupBoundaries(
     const std::vector<Mantid::LiveData::KafkaEventStreamDecoder::BufferedEvent>
         &eventBuffer,
     const size_t numberOfGroups) {
-  std::vector<size_t> groupBoundaries(numberOfGroups + 1);
-
-  /* Fill the buffer with the end of the event buffer index */
-  std::fill(groupBoundaries.begin(), groupBoundaries.end(), eventBuffer.size());
+  std::vector<size_t> groupBoundaries(numberOfGroups + 1, eventBuffer.size());
 
   /* First group always starts at beginning of buffer */
   groupBoundaries[0] = 0;
@@ -667,7 +674,7 @@ std::vector<size_t> computeGroupBoundaries(
 
     /* If we have already gotten through all events then exit early, leaving
      * some threads without events. */
-    if (groupBoundaries[group] == eventBuffer.size()) {
+    if (groupBoundaries[group] >= eventBuffer.size()) {
       break;
     }
   }
