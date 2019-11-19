@@ -83,7 +83,7 @@ def merge_workspaces(run, workspaces):
     d_string = "{}; Detector {}"
     # detectors is a dictionary of {detector_name : [names_of_workspaces]}
     detectors = {d_string.format(run, x): [] for x in range(1, 5)}
-    # fill dictionary (we expect three workspaces per detector)
+    # fill dictionary 
     for workspace in workspaces:
         detector_number = get_detector_num_from_ws(workspace)
         detectors[d_string.format(run, detector_number)].append(workspace)
@@ -131,7 +131,7 @@ def create_merged_workspace(workspace_list):
 
         # create a merged workspace based on every entry from workspace list
         for i in range(0, num_files_per_detector):
-            # load in ws - first check workspace is not one
+            # load in ws - first check workspace exists
             if workspace_list[i]:
                 ws = mantid.mtd[workspace_list[i]]
                 # check if histogram data, and convert if necessary
