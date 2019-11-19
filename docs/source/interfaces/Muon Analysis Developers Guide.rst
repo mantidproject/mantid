@@ -10,7 +10,6 @@ Introduction
 ^^^^^^^^^^^^
 This document is intended for Mantid developers as a guide to the architecture of the Muon Analysis custom interface.
 User documentation for this interface can be found at :ref:`Muon_Analysis-ref`.
-There is also an unscripted testing guide for developers at :ref:`Muon_Analysis_TestGuide-ref`.
 
 There will be a particular focus on the *Data Analysis* tab, which has been significantly changed for Mantid 3.8.
 
