@@ -584,18 +584,18 @@ void KafkaEventStreamDecoder::initLocalCaches(
     eventBuffer = createBufferWorkspace<DataObjects::EventWorkspace>(
         "EventWorkspace", static_cast<size_t>(spDetMsg->n_spectra()),
         spDetMsg->spectrum()->data(), spDetMsg->detector_id()->data(), nudet);
+  }
 
-    // Load the instrument if possible but continue if we can't
-    if (!instName.empty()) {
-      loadInstrument<DataObjects::EventWorkspace>(instName, eventBuffer,
-                                                  jsonGeometry);
-      if (rawMsgBuffer.empty()) {
-        eventBuffer->rebuildSpectraMapping();
-      }
-    } else {
-      g_log.warning(
-          "Empty instrument name received. Continuing without instrument");
+  // Load the instrument if possible but continue if we can't
+  if (!instName.empty()) {
+    loadInstrument<DataObjects::EventWorkspace>(instName, eventBuffer,
+                                                jsonGeometry);
+    if (rawMsgBuffer.empty()) {
+      eventBuffer->rebuildSpectraMapping();
     }
+  } else {
+    g_log.warning(
+        "Empty instrument name received. Continuing without instrument");
   }
 
   auto &mutableRun = eventBuffer->mutableRun();
