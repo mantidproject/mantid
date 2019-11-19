@@ -403,17 +403,13 @@ void KafkaEventStreamDecoder::eventDataFromMessage(const std::string &buffer,
     const auto oldBufferSize(m_receivedEventBuffer.size());
     m_receivedEventBuffer.reserve(oldBufferSize + nEvents);
 
-    /* Store the buffered events */
-    for (flatbuffers::uoffset_t i = 0; i < nEvents; ++i) {
-      auto detId = detData[i];
-      auto tof = tofData[i];
-      uint32_t index = detId + m_specToIdxOffset;
-      if (index < m_specToIdx.size()) {
-        const auto workspaceIndex = m_specToIdx[index];
-        auto event = BufferedEvent{workspaceIndex, tof, pulseIndex};
-        m_receivedEventBuffer.emplace_back(std::move(event));
-      }
-    }
+    std::transform(detData.begin(), detData.end(), tofData.begin(),
+                   std::back_inserter(m_receivedEventBuffer),
+                   [&](uint64_t detId, uint64_t tof) -> BufferedEvent {
+                     const auto workspaceIndex =
+                         m_specToIdx[detId + m_specToIdxOffset];
+                     return {workspaceIndex, tof, pulseIndex};
+                   });
   }
 
   const auto endTime = std::chrono::system_clock::now();
@@ -450,7 +446,7 @@ void KafkaEventStreamDecoder::flushIntermediateBuffer() {
       ws->invalidateCommonBinsFlag();
     }
 
-    // PARALLEL_FOR_NO_WSP_CHECK()
+    PARALLEL_FOR_NO_WSP_CHECK()
     for (auto group = 0; group < numberOfGroups; ++group) {
       for (auto idx = groupBoundaries[group]; idx < groupBoundaries[group + 1];
            ++idx) {
