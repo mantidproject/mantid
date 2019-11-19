@@ -288,6 +288,17 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         last_run = self.load_widget.last_loaded_run()
         if last_run is None:
             return
+        # get detector names
+        detector_names = self.detectors.getNames()
+        # check all detectors are loaded
+        for j in range(0, len(self.detectors.detectors)):
+            if j < self.load_widget.get_run_num_loaded_detectors(last_run):
+                self.detectors.detectors[j].setEnabled(True)
+            else:
+                # disable checkbox and uncheck box
+                self.detectors.detectors[j].setEnabled(False)
+                self.detectors.setStateQuietly(detector_names[j], False)
+
         to_plot = deepcopy([det.isChecked() for det in self.detectors.detectors])
         if self.plot_window is None and any(to_plot) is False:
             return

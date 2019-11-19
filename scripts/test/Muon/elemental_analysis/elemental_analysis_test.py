@@ -268,7 +268,8 @@ class ElementalAnalysisTest(unittest.TestCase):
 
     @mock.patch('Muon.GUI.ElementalAnalysis.Detectors.detectors_view.QtWidgets.QWidget')
     def test_loading_finished_returns_correctly_if_no_plot_window_but_has_to_plot(self, mock_qwidget):
-        self.gui.load_widget.last_loaded_run = mock.Mock(return_value=['run1', 'run2', 'run3'])
+        self.gui.load_widget.last_loaded_run = mock.Mock(return_value=2695)
+        self.gui.load_widget.get_run_num_loaded_detectors = mock.Mock(return_value=4)
         self.gui.detectors.getNames.return_value = ['1', '2', '3']
         self.gui.plot_window = None
         self.gui.plotting = mock.Mock()
@@ -283,7 +284,8 @@ class ElementalAnalysisTest(unittest.TestCase):
     @mock.patch('Muon.GUI.ElementalAnalysis.Detectors.detectors_view.QtWidgets.QWidget')
     def test_loading_finished_returns_correctly_if_no_to_plot_but_has_plot_window(
             self, mock_qwidget):
-        self.gui.load_widget.last_loaded_run = mock.Mock(return_value=['run1', 'run2', 'run3'])
+        self.gui.load_widget.last_loaded_run = mock.Mock(return_value=2695)
+        self.gui.load_widget.get_run_num_loaded_detectors = mock.Mock(return_value=4)
         self.gui.detectors.getNames.return_value = ['1', '2', '3']
         mock_qwidget.return_value = True
         self.gui.plot_window = mock.Mock()
@@ -560,8 +562,8 @@ class ElementalAnalysisTest(unittest.TestCase):
         mock_mantid.mtd['2695; Detector 1'].name.return_value = '2695; Detector 1'
         mock_mantid.mtd['2695; Detector 2'].name.return_value = '2695; Detector 2'
         expected_calls = [
-            mock.call('1', '2695; Detector 1', color='C0',spec_num=spectrum_index['Total']),
-            mock.call('2', '2695; Detector 2', color='C0',spec_num=spectrum_index['Total'])
+            mock.call('1', '2695; Detector 1', color='C0', spec_num=spectrum_index['Total']),
+            mock.call('2', '2695; Detector 2', color='C0', spec_num=spectrum_index['Total'])
         ]
         self.gui.add_line_by_type(2695, 'Total')
 

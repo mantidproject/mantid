@@ -86,3 +86,9 @@ class LoadPresenter(object):
 
     def unreg_on_loading_finished(self, slot):
         self.view.unreg_on_loading_finished(slot)
+
+    def get_run_num_loaded_detectors(self, run):
+        try:
+            return self.load_model.num_loaded_detectors[run]
+        except IndexError:
+            return None

@@ -21,6 +21,7 @@ num_files_per_detector = 3
 class LModel(object):
     def __init__(self):
         self.run = 0
+        self.num_loaded_detectors ={}
         self.loaded_runs = {}
         self.last_loaded_runs = []
 
@@ -43,8 +44,14 @@ class LModel(object):
             if workspace not in unique_workspaces.values():
                 unique_workspaces[path] = workspace
         workspaces = unique_workspaces
+        # get number of detectors loaded - should be 4, but legacy data may contain less
+        loaded_detectors = {}
+        for ws_name in workspaces.values():
+            loaded_detectors[ws_name[0]] = 1
+        num_loaded_detectors = len(loaded_detectors)
         self._load(workspaces)
         self.loaded_runs[self.run] = merge_workspaces(self.run, workspaces.values())
+        self.num_loaded_detectors[self.run] = num_loaded_detectors
         self.last_loaded_runs.append(self.run)
         return self.loaded_runs[self.run]
 
