@@ -186,11 +186,17 @@ Handles attempt to close main window
 */
 void QtMainWindowView::closeEvent(QCloseEvent *event) {
   // Don't close if anything is running
-  if (m_presenter->isAnyBatchProcessing() ||
-      m_presenter->isAnyBatchAutoreducing()) {
+  if (m_presenter->isCloseEventPrevented()) {
     event->ignore();
   } else {
     event->accept();
+  }
+  if (/* "WarnDiscardChanges" == true */ && m_presenter->isAnyBatchUnsaved()) {
+      if (askUserDiscardChanges()) {
+        event->accept();
+      } else {
+        event->ignore();
+      }
   }
 }
 
@@ -217,6 +223,11 @@ bool QtMainWindowView::askUserYesNo(const std::string &prompt,
     return true;
 
   return false;
+}
+
+bool QtMainWindowView::askUserDiscardChanges() {
+  return askUserYesNo(
+      "There are unsaved changes. Continue?", "Warning");
 }
 
 void QtMainWindowView::disableSaveAndLoadBatch() {

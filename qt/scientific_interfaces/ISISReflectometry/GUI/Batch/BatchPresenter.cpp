@@ -318,6 +318,14 @@ bool BatchPresenter::isAnyBatchAutoreducing() const {
   return m_mainPresenter->isAnyBatchAutoreducing();
 }
 
+/**
+   Checks whether there are unsaved changes in any batch
+   * @return : Bool on whether there are changes
+   */
+bool BatchPresenter::isBatchUnsaved() const {
+  return m_mainPresenter->getUnsavedFlag();
+}
+
 /** Get the percent of jobs that have been completed out of the current
     processing list
  */

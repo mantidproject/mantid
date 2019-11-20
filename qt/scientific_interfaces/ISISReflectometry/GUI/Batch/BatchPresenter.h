@@ -78,6 +78,7 @@ public:
   bool requestClose() const override;
   bool isProcessing() const override;
   bool isAutoreducing() const override;
+  bool isBatchUnsaved() const override;
   bool isAnyBatchProcessing() const override;
   bool isAnyBatchAutoreducing() const override;
   Mantid::Geometry::Instrument_const_sptr instrument() const override;

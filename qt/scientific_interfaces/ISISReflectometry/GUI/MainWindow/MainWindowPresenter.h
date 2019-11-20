@@ -51,6 +51,10 @@ public:
   // IMainWindowPresenter overrides
   bool isAnyBatchProcessing() const override;
   bool isAnyBatchAutoreducing() const override;
+  bool isCloseEventPrevented() const override;
+  bool isAnyBatchUnsaved() const override;
+  bool getUnsavedFlag() const;
+  void setUnsavedFlag(bool isUnsaved);
   void notifyAnyBatchAutoreductionResumed() override;
   void notifyAnyBatchAutoreductionPaused() override;
   void notifyAnyBatchReductionResumed() override;
@@ -81,6 +85,7 @@ private:
   std::unique_ptr<MantidWidgets::OptionsDialogPresenter>
       m_optionsDialogPresenter;
   std::unique_ptr<IBatchPresenterFactory> m_batchPresenterFactory;
+  bool m_isUnsaved;
 
   void showHelp();
   void addNewBatch(IBatchView *batchView);

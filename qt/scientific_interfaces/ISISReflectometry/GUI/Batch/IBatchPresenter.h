@@ -51,6 +51,7 @@ public:
   /// Data processing check for all groups
   virtual bool isProcessing() const = 0;
   virtual bool isAutoreducing() const = 0;
+  virtual bool isBatchUnsaved() const = 0;
   virtual bool isAnyBatchProcessing() const = 0;
   virtual bool isAnyBatchAutoreducing() const = 0;
   virtual bool requestClose() const = 0;

@@ -60,6 +60,7 @@ MainWindowPresenter::MainWindowPresenter(
   view->subscribe(this);
   for (auto *batchView : m_view->batches())
     addNewBatch(batchView);
+  m_isUnsaved = false;
 }
 
 MainWindowPresenter::~MainWindowPresenter() = default;
@@ -159,6 +160,24 @@ bool MainWindowPresenter::isAnyBatchAutoreducing() const {
   return false;
 }
 
+bool MainWindowPresenter::isCloseEventPrevented() const {
+  return isAnyBatchProcessing() || isAnyBatchAutoreducing();
+}
+
+bool MainWindowPresenter::isAnyBatchUnsaved() const {
+  for (auto &batchPresenter : m_batchPresenters) {
+    if (batchPresenter->isBatchUnsaved());
+      return true;
+  }
+  return false;
+}
+
+bool MainWindowPresenter::getUnsavedFlag() const { return m_isUnsaved; }
+
+void MainWindowPresenter::setUnsavedFlag(bool isUnsaved) {
+  m_isUnsaved = isUnsaved;
+}
+
 void MainWindowPresenter::addNewBatch(IBatchView *batchView) {
   // Remember the instrument name so we can re-set it (it will otherwise
   // get overridden by the instrument list default in the new batch)
@@ -200,6 +219,7 @@ void MainWindowPresenter::notifySaveBatchRequested(int tabIndex) {
   IBatchPresenter *batchPresenter = m_batchPresenters[tabIndex].get();
   auto map = encoder.encodeBatch(batchPresenter, m_view, false);
   MantidQt::API::saveJSONToFile(filename, map);
+  setUnsavedFlag(false);
 }
 
 void MainWindowPresenter::notifyLoadBatchRequested(int tabIndex) {

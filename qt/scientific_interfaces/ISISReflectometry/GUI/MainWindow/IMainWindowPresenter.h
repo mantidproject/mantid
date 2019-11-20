@@ -24,6 +24,10 @@ class IMainWindowPresenter {
 public:
   virtual bool isAnyBatchProcessing() const = 0;
   virtual bool isAnyBatchAutoreducing() const = 0;
+  virtual bool isCloseEventPrevented() const = 0;
+  virtual bool isAnyBatchUnsaved() const = 0;
+  virtual bool getUnsavedFlag() const = 0;
+  virtual void setUnsavedFlag() = 0;
   virtual void notifyAnyBatchAutoreductionResumed() = 0;
   virtual void notifyAnyBatchAutoreductionPaused() = 0;
   virtual void notifyAnyBatchReductionResumed() = 0;
