@@ -32,7 +32,7 @@ const char *URL_PREFIX = "http://data.isis.rl.ac.uk/where.py/windir?name=";
 #else
 const char *URL_PREFIX = "http://data.isis.rl.ac.uk/where.py/unixdir?name=";
 #endif
-}
+} // namespace
 
 /**
  * Query the ISIS archive for a set of filenames and vector of extensions. The

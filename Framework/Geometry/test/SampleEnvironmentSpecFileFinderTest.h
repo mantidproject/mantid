@@ -16,8 +16,8 @@
 #include <fstream>
 #include <vector>
 
-using Mantid::Geometry::SampleEnvironmentSpecFileFinder;
 using Mantid::Geometry::SampleEnvironmentSpec_uptr;
+using Mantid::Geometry::SampleEnvironmentSpecFileFinder;
 
 class SampleEnvironmentSpecFileFinderTest : public CxxTest::TestSuite {
 public:

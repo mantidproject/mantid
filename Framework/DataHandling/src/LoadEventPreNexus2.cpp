@@ -58,13 +58,13 @@ using namespace DataObjects;
 using DataObjects::EventList;
 using DataObjects::EventWorkspace;
 using DataObjects::EventWorkspace_sptr;
-using Types::Core::DateAndTime;
-using Types::Event::TofEvent;
 using std::ifstream;
 using std::runtime_error;
 using std::string;
 using std::stringstream;
 using std::vector;
+using Types::Core::DateAndTime;
+using Types::Event::TofEvent;
 
 //------------------------------------------------------------------------------------------------
 // constants for locating the parameters to use in execution

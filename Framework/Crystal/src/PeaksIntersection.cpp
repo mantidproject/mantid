@@ -154,10 +154,9 @@ void PeaksIntersection::executePeaksIntersection(const bool checkPeakExtents) {
                                                   // the box faces.
           {
             // Check that it is actually within the face boundaries.
-            const V3D touchPoint =
-                (normals[j] * distance) +
-                peakCenter; // Vector equation of line give touch
-                            // point on plane.
+            const V3D touchPoint = (normals[j] * distance) +
+                                   peakCenter; // Vector equation of line give
+                                               // touch point on plane.
 
             // checkTouchPoint(touchPoint, normals[i], faces[i][0]); //
             // Debugging line.

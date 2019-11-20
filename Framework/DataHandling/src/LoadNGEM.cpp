@@ -401,8 +401,8 @@ bool LoadNGEM::reportProgressAndCheckCancel(size_t &numProcessedEvents,
 void LoadNGEM::createCountWorkspace(
     const std::vector<double> &frameEventCounts) {
   std::vector<double> xAxisCounts(frameEventCounts.size() + 1);
-  std::generate(xAxisCounts.begin(),
-                xAxisCounts.end(), [n = 0.0]() mutable { return ++n; });
+  std::generate(xAxisCounts.begin(), xAxisCounts.end(),
+                [n = 0.0]() mutable { return ++n; });
 
   DataObjects::Workspace2D_sptr countsWorkspace =
       DataObjects::create<DataObjects::Workspace2D>(

@@ -30,7 +30,6 @@ using Mantid::Geometry::MDHistoDimension;
 using Mantid::Geometry::MDHistoDimension_sptr;
 using Mantid::Geometry::MDImplicitFunction;
 using Mantid::Geometry::MDPlane;
-using Mantid::Geometry::MDPlane;
 using Mantid::Kernel::VMD;
 
 class MDHistoWorkspaceIteratorTest : public CxxTest::TestSuite {

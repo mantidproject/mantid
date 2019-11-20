@@ -29,8 +29,8 @@ using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::CountVariances;
 using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountVariances;
 
 class SolidAngleTest : public CxxTest::TestSuite {
 public:

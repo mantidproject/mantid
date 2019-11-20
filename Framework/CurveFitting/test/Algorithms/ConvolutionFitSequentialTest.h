@@ -28,8 +28,8 @@ using namespace Mantid::CurveFitting;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::Kernel::make_cow;
 
 using ConvolutionFitSequential =

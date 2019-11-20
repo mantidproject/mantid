@@ -72,10 +72,12 @@ int MockONCatAPI::sendHTTPSRequest(const std::string &url,
   return statusCode;
 }
 
+/// @cond DOXYGEN_BUG
 std::shared_ptr<MockONCatAPI>
 make_mock_oncat_api(const MockResponseMap &responseMap) {
   return std::make_shared<MockONCatAPI>(responseMap);
 }
+/// @endcond DOXYGEN_BUG
 
 std::unique_ptr<ONCat>
 make_oncat_with_mock_api(const std::shared_ptr<MockONCatAPI> &mockAPI) {

@@ -20,8 +20,8 @@
 #include <Poco/Path.h>
 #include <nexus/NeXusFile.hpp>
 
-using Poco::XML::DOMParser;
 using Poco::XML::Document;
+using Poco::XML::DOMParser;
 using Poco::XML::Element;
 using Poco::XML::NodeList;
 

@@ -1058,6 +1058,7 @@ void MDHistoWorkspace::power(double exponent) {
 //==============================================================================================
 
 //----------------------------------------------------------------------------------------------
+/// @cond DOXYGEN_BUG
 /** A boolean &= (and) operation, element-by-element, for two
  *MDHistoWorkspace's.
  *
@@ -1076,6 +1077,7 @@ MDHistoWorkspace &MDHistoWorkspace::operator&=(const MDHistoWorkspace &b) {
   }
   return *this;
 }
+/// @endcond DOXYGEN_BUG
 
 //----------------------------------------------------------------------------------------------
 /** A boolean |= (or) operation, element-by-element, for two MDHistoWorkspace's.

@@ -287,5 +287,5 @@ void ConvToMDHistoWS::estimateThreadWork(size_t nThreads, size_t specSize,
   m_spectraChunk = std::max(nSpectras / nThreads, static_cast<size_t>(1));
 }
 
-} // endNamespace DataObjects
+} // namespace MDAlgorithms
 } // namespace Mantid

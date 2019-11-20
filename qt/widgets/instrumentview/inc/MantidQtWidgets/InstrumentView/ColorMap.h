@@ -22,7 +22,7 @@ using ColorMap = MantidColorMap;
 #elif QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 using ColorMap = MantidQt::Widgets::MplCpp::MantidColorMap;
 #endif
-}
+} // namespace MantidWidgets
 } // namespace MantidQt
 
 #endif // MANTIDQT_WIDGETS_INSTRUMENTVIEW_COLORMAP_H

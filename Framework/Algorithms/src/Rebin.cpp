@@ -31,10 +31,10 @@ using DataObjects::EventWorkspace;
 using DataObjects::EventWorkspace_const_sptr;
 using DataObjects::EventWorkspace_sptr;
 using HistogramData::BinEdges;
-using HistogramData::Exception::InvalidBinEdgesError;
 using HistogramData::Frequencies;
 using HistogramData::FrequencyStandardDeviations;
 using HistogramData::Histogram;
+using HistogramData::Exception::InvalidBinEdgesError;
 
 //---------------------------------------------------------------------------------------------
 // Public static methods

@@ -23,8 +23,8 @@
 #include "MantidAPI/TableRow.h"
 
 using namespace Mantid::API;
-using Mantid::Algorithms::CalculateMuonAsymmetry;
 using Mantid::MantidVec;
+using Mantid::Algorithms::CalculateMuonAsymmetry;
 
 const std::string outputName = "CalculateMuonAsymmetry_Output";
 

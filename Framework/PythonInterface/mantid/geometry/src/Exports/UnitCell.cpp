@@ -16,10 +16,10 @@
 #include <boost/python/scope.hpp>
 #include <boost/python/self.hpp>
 
-using Mantid::Geometry::AngleUnits;
-using Mantid::Geometry::UnitCell;
 using Mantid::Geometry::angDegrees;
+using Mantid::Geometry::AngleUnits;
 using Mantid::Geometry::angRadians;
+using Mantid::Geometry::UnitCell;
 using Mantid::Kernel::DblMatrix;
 using Mantid::Kernel::V3D;
 using namespace boost::python;

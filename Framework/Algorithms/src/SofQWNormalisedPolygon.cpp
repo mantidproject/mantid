@@ -28,8 +28,8 @@
 
 #include <boost/math/special_functions/pow.hpp>
 
-using Mantid::Geometry::rad2deg;
 using boost::math::pow;
+using Mantid::Geometry::rad2deg;
 
 namespace {
 /**

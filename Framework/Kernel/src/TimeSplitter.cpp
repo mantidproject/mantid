@@ -42,6 +42,7 @@ bool SplittingInterval::overlaps(const SplittingInterval &b) const {
          ((this->m_stop < b.m_stop) && (this->m_stop >= b.m_start));
 }
 
+/// @cond DOXYGEN_BUG
 /// And operator. Return the smallest time interval where both intervals are
 /// TRUE.
 SplittingInterval SplittingInterval::
@@ -53,6 +54,7 @@ operator&(const SplittingInterval &b) const {
     out.m_stop = b.m_stop;
   return out;
 }
+/// @endcond DOXYGEN_BUG
 
 /// Or operator. Return the largest time interval.
 SplittingInterval SplittingInterval::

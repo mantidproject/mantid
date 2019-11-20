@@ -43,12 +43,12 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
-using Mantid::Kernel::SpecialCoordinateSystem;
-using Mantid::MantidVec;
 using Mantid::coord_t;
 using Mantid::detid_t;
+using Mantid::MantidVec;
 using Mantid::signal_t;
 using Mantid::specnum_t;
+using Mantid::Kernel::SpecialCoordinateSystem;
 
 //===================================================================================================================
 /** Helper class that implements ISpectrum */

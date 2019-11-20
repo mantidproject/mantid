@@ -18,9 +18,9 @@
 namespace Mantid {
 namespace PythonInterface {
 using API::IFunction;
-using PythonInterface::UndefinedAttributeError;
 using PythonInterface::callMethod;
 using PythonInterface::callMethodNoCheck;
+using PythonInterface::UndefinedAttributeError;
 using namespace boost::python;
 
 namespace {
