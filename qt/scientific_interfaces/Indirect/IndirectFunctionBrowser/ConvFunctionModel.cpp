@@ -66,9 +66,15 @@ void ConvFunctionModel::setFunction(IFunction_sptr fun) {
       auto f = fun->getFunction(i);
       auto const name = f->name();
       if (name == "FlatBackground") {
+        if (isBackgroundSet) {
+          throw std::runtime_error("Function has wrong structure.");
+        }
         m_backgroundType = BackgroundType::Flat;
         isBackgroundSet = true;
       } else if (name == "LinearBackground") {
+        if (isBackgroundSet) {
+          throw std::runtime_error("Function has wrong structure.");
+        }
         m_backgroundType = BackgroundType::Linear;
         isBackgroundSet = true;
       } else if (name == "Convolution") {
@@ -82,11 +88,15 @@ void ConvFunctionModel::setFunction(IFunction_sptr fun) {
 void ConvFunctionModel::checkConvolution(IFunction_sptr fun) {
   bool isFitTypeSet = false;
   int numberLorentzians = 0;
+  bool isResolutionSet = false;
   for (size_t i = 0; i < fun->nFunctions(); ++i) {
     auto f = fun->getFunction(i);
     auto const name = f->name();
     if (name == "Resolution") {
-      continue;
+      if (isResolutionSet) {
+        throw std::runtime_error("Function has wrong structure.");
+      }
+      isResolutionSet = true;
     } else if (name == "CompositeFunction") {
       checkComposite(f);
     } else if (name == "Lorentzian") {
@@ -372,10 +382,8 @@ QStringList ConvFunctionModel::makeGlobalList() const {
 }
 
 void ConvFunctionModel::setFitType(FitType fitType) {
-  auto oldValues = getCurrentValues();
   m_fitType = fitType;
   setModel();
-  setCurrentValues(oldValues);
 }
 
 int ConvFunctionModel::getNumberOfPeaks() const {
