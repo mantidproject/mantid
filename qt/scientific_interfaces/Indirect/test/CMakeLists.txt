@@ -3,6 +3,7 @@ set(
   TEST_FILES
   ConvFitDataPresenterTest.h
   ConvFitModelTest.h
+  ConvFunctionModelTest.h
   IndirectDataTablePresenterTest.h
   IndirectDataValidationHelperTest.h
   IndirectFitAnalysisTabTest.h
