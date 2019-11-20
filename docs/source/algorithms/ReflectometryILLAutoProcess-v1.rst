@@ -8,7 +8,9 @@ Description
 This algorithm executes the full data reduction for ILL reflectometers D17 and FIGARO in TOF mode (specular reflection).
 It supports the treatment of measurements at several angles together.
 It offers incoherent (sum along constant :math:`\lambda`) or coherent (sum along constant :math:`Q_{z}`) methods of peak summation.
-Treatment of polarized measurements is also provided.
+For the incoherent method, the reflectivity curve is calculated by dividing the already summed foreground of the reflected beam to the summed foreground of the direct beam.
+For the coherent method, first the reflected beam data is divided by the direct beam data in 2D, then the ratio is summed along the lines of the constant :math:`Q_{z}`.
+Treatment of polarized measurements (with or without analysers) is also provided.
 
 Input
 -----
