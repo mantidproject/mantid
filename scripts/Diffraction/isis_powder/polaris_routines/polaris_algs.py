@@ -139,15 +139,18 @@ def _merge_workspace_with_limits(focused_ws, q_lims):
     min_x = np.inf
     max_x = -np.inf
     num_x = -np.inf
-    for ws in focused_ws:
-        x_data = ws.dataX(0)
+    ws_max_range = 0
+    largest_range_spectrum = 0
+    for i in range(focused_ws.size()):
+        x_data = focused_ws[i].dataX(0)
         min_x = min(np.min(x_data), min_x)
         max_x = max(np.max(x_data), max_x)
         num_x = max(x_data.size, num_x)
+        ws_range = np.max(x_data)-np.min(x_data)
+        if ws_range > ws_max_range:
+            largest_range_spectrum = i + 1
+    focused_ws = mantid.Rebin(InputWorkspace=focused_ws, Params=[min_x, (max_x-min_x)/num_x, max_x])
 
-    width_x = (max_x-min_x)/num_x
-    binning = [min_x, width_x, max_x]
-    focused_ws = mantid.Rebin(InputWorkspace=focused_ws, Params=binning)
     while focused_ws.size() > 1:
         mantid.ConjoinWorkspaces(InputWorkspace1=focused_ws[0],
                                  InputWorkspace2=focused_ws[1])
@@ -180,10 +183,8 @@ def _merge_workspace_with_limits(focused_ws, q_lims):
         q_min[i] = pdf_x_array[tmp2]
         q_max[i] = pdf_x_array[np.amax(np.where(pdf_x_array <= q_max[i]))]
         bin_width = min(pdf_x_array[1] - pdf_x_array[0], bin_width)
-    # TODO what is the best spectra to use to match in any case, how can we always pick the correct one
-    mantid.MatchSpectra(InputWorkspace=focused_ws_conjoined,
-                        OutputWorkspace=focused_ws_conjoined,
-                        ReferenceSpectrum=5)
+    mantid.MatchSpectra(InputWorkspace=focused_ws_conjoined, OutputWorkspace=focused_ws_conjoined,
+                        ReferenceSpectrum=largest_range_spectrum)
     focused_data_combined = mantid.CropWorkspaceRagged(InputWorkspace=focused_ws_conjoined, XMin=q_min, XMax=q_max)
     focused_data_combined = mantid.Rebin(InputWorkspace=focused_data_combined,
                                          Params=[min(q_min), bin_width, max(q_max)])
