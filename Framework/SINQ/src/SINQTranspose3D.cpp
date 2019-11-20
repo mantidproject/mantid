@@ -67,9 +67,9 @@ void SINQTranspose3D::doYXZ(IMDHistoWorkspace_sptr inWS) {
   z = inWS->getZDimension();
 
   std::vector<IMDDimension_sptr> dimensions;
-  dimensions.push_back(boost::const_pointer_cast<IMDDimension>(y));
-  dimensions.push_back(boost::const_pointer_cast<IMDDimension>(x));
-  dimensions.push_back(boost::const_pointer_cast<IMDDimension>(z));
+  dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(y));
+  dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(x));
+  dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(z));
 
   auto outWS = boost::make_shared<MDHistoWorkspace>(dimensions);
 
@@ -104,9 +104,9 @@ void SINQTranspose3D::doXZY(IMDHistoWorkspace_sptr inWS) {
   z = inWS->getZDimension();
 
   std::vector<IMDDimension_sptr> dimensions;
-  dimensions.push_back(boost::const_pointer_cast<IMDDimension>(x));
-  dimensions.push_back(boost::const_pointer_cast<IMDDimension>(z));
-  dimensions.push_back(boost::const_pointer_cast<IMDDimension>(y));
+  dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(x));
+  dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(z));
+  dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(y));
 
   auto outWS = boost::make_shared<MDHistoWorkspace>(dimensions);
 
@@ -143,9 +143,9 @@ void SINQTranspose3D::doTRICS(IMDHistoWorkspace_sptr inWS) {
   z = inWS->getZDimension();
 
   std::vector<IMDDimension_sptr> dimensions;
-  dimensions.push_back(boost::const_pointer_cast<IMDDimension>(x));
-  dimensions.push_back(boost::const_pointer_cast<IMDDimension>(z));
-  dimensions.push_back(boost::const_pointer_cast<IMDDimension>(y));
+  dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(x));
+  dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(z));
+  dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(y));
 
   auto outWS = boost::make_shared<MDHistoWorkspace>(dimensions);
   outWS->setTo(.0, .0, .0);
@@ -182,9 +182,9 @@ void SINQTranspose3D::doAMOR(IMDHistoWorkspace_sptr inWS) {
   z = inWS->getZDimension();
 
   std::vector<IMDDimension_sptr> dimensions;
-  dimensions.push_back(boost::const_pointer_cast<IMDDimension>(y));
-  dimensions.push_back(boost::const_pointer_cast<IMDDimension>(x));
-  dimensions.push_back(boost::const_pointer_cast<IMDDimension>(z));
+  dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(y));
+  dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(x));
+  dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(z));
 
   auto outWS = boost::make_shared<MDHistoWorkspace>(dimensions);
   outWS->setTo(.0, .0, .0);

@@ -188,7 +188,7 @@ static string generateMappingfileName(EventWorkspace_sptr &wksp) {
                              .append("/calibrations/")
                              .append(mapping);
       if (Poco::File(path).exists()) {
-        files.push_back(path);
+        files.emplace_back(path);
       }
     }
   }
@@ -1295,8 +1295,8 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(
 
           std::vector<Types::Core::DateAndTime> tempvectime;
           std::vector<double> temptofs;
-          local_pulsetimes.push_back(tempvectime);
-          local_tofs.push_back(temptofs);
+          local_pulsetimes.emplace_back(tempvectime);
+          local_tofs.emplace_back(temptofs);
 
           theindex = newindex;
 
@@ -1307,8 +1307,8 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(
         }
 
         // Store pulse time and tof of this event
-        local_pulsetimes[theindex].push_back(pulsetime);
-        local_tofs[theindex].push_back(tof);
+        local_pulsetimes[theindex].emplace_back(pulsetime);
+        local_tofs[theindex].emplace_back(tof);
       } // END-IF-ELSE: On Event's Pixel's Nature
 
     } // ENDIF (event is masked error)
@@ -1341,8 +1341,8 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(
 
         std::vector<Types::Core::DateAndTime> vec_pulsetimes;
         std::vector<double> vec_tofs;
-        this->wrongdetid_pulsetimes.push_back(vec_pulsetimes);
-        this->wrongdetid_tofs.push_back(vec_tofs);
+        this->wrongdetid_pulsetimes.emplace_back(vec_pulsetimes);
+        this->wrongdetid_tofs.emplace_back(vec_tofs);
 
         mindex = newindex;
       } else {
@@ -1356,9 +1356,9 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(
       // Append local (thread) loaded events (pulse + tof) to global wrong detid
       // data structure
       for (size_t iv = 0; iv < local_pulsetimes[localindex].size(); iv++) {
-        this->wrongdetid_pulsetimes[mindex].push_back(
+        this->wrongdetid_pulsetimes[mindex].emplace_back(
             local_pulsetimes[localindex][iv]);
-        this->wrongdetid_tofs[mindex].push_back(local_tofs[localindex][iv]);
+        this->wrongdetid_tofs[mindex].emplace_back(local_tofs[localindex][iv]);
       }
     }
 
@@ -2070,8 +2070,8 @@ void FilterEventsByLogValuePreNexus::filterEventsLinear(
 
           std::vector<Types::Core::DateAndTime> tempvectime;
           std::vector<double> temptofs;
-          local_pulsetimes.push_back(tempvectime);
-          local_tofs.push_back(temptofs);
+          local_pulsetimes.emplace_back(tempvectime);
+          local_tofs.emplace_back(temptofs);
 
           theindex = newindex;
 
@@ -2082,8 +2082,8 @@ void FilterEventsByLogValuePreNexus::filterEventsLinear(
         }
 
         // Store pulse time and tof of this event
-        local_pulsetimes[theindex].push_back(pulsetime);
-        local_tofs[theindex].push_back(tof);
+        local_pulsetimes[theindex].emplace_back(pulsetime);
+        local_tofs[theindex].emplace_back(tof);
 #else
         // Ignore all operation
         ;
@@ -2376,8 +2376,8 @@ void FilterEventsByLogValuePreNexus::readPulseidFile(
     for (const auto &pulse : pulses) {
       DateAndTime pulseDateTime(static_cast<int64_t>(pulse.seconds),
                                 static_cast<int64_t>(pulse.nanoseconds));
-      this->pulsetimes.push_back(pulseDateTime);
-      this->m_vecEventIndex.push_back(pulse.event_index);
+      this->pulsetimes.emplace_back(pulseDateTime);
+      this->m_vecEventIndex.emplace_back(pulse.event_index);
 
       if (pulseDateTime < lastPulseDateTime)
         this->m_pulseTimesIncreasing = false;
@@ -2385,7 +2385,7 @@ void FilterEventsByLogValuePreNexus::readPulseidFile(
         lastPulseDateTime = pulseDateTime;
 
       temp = pulse.pCurrent;
-      this->m_protonCharge.push_back(temp);
+      this->m_protonCharge.emplace_back(temp);
       if (temp < 0.)
         this->g_log.warning("Individual proton charge < 0 being ignored");
       else

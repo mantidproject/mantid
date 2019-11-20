@@ -692,7 +692,7 @@ void RefinePowderInstrumentParameters3::setupRandomWalkStrategy(
   addParameterToMCMinimize(geomparams, "Zerot", parammap);
   addParameterToMCMinimize(geomparams, "Width", parammap);
   addParameterToMCMinimize(geomparams, "Tcross", parammap);
-  mcgroups.push_back(geomparams);
+  mcgroups.emplace_back(geomparams);
 
   dboutss << "Geometry parameters: ";
   for (auto &geomparam : geomparams)
@@ -765,7 +765,7 @@ void RefinePowderInstrumentParameters3::addParameterToMCMinimize(
   }
 
   if (pariter->second.fit)
-    parnamesforMC.push_back(parname);
+    parnamesforMC.emplace_back(parname);
 }
 
 //----------------------------------------------------------------------------------------------

@@ -219,9 +219,9 @@ void SaveHKL::exec() {
 
     // Save in the map
     if (type.compare(0, 2, "Ru") == 0)
-      runMap[run][bank].push_back(i);
+      runMap[run][bank].emplace_back(i);
     else
-      runMap[bank][run].push_back(i);
+      runMap[bank][run].emplace_back(i);
     // Track unique bank numbers
     uniqueBanks.insert(bank);
     uniqueRuns.insert(run);
@@ -303,8 +303,8 @@ void SaveHKL::exec() {
         if (STRING.find("Bank") == std::string::npos) {
           double time0, spectra0;
           ss >> time0 >> spectra0;
-          time[a].push_back(time0);
-          spectra[a].push_back(spectra0);
+          time[a].emplace_back(time0);
+          spectra[a].emplace_back(spectra0);
 
         } else {
           std::string temp;
@@ -629,7 +629,7 @@ void SaveHKL::exec() {
   // delete banned peaks
   std::vector<int> badPeaks;
   for (auto it = banned.crbegin(); it != banned.crend(); ++it) {
-    badPeaks.push_back(static_cast<int>(*it));
+    badPeaks.emplace_back(static_cast<int>(*it));
   }
   peaksW->removePeaks(std::move(badPeaks));
   setProperty("OutputWorkspace", peaksW);

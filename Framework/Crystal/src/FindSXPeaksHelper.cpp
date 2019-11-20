@@ -480,7 +480,7 @@ std::vector<std::unique_ptr<PeakContainer>> AllPeaksStrategy::getAllPeaks(
       isRecording = true;
     } else if (isRecording && !isAboveThreshold) {
       currentPeak->stopRecord(it);
-      peaks.push_back(std::move(currentPeak));
+      peaks.emplace_back(std::move(currentPeak));
       currentPeak = nullptr;
       isRecording = false;
     } else {
@@ -494,7 +494,7 @@ std::vector<std::unique_ptr<PeakContainer>> AllPeaksStrategy::getAllPeaks(
       --highY;
     }
     currentPeak->stopRecord(highY);
-    peaks.push_back(std::move(currentPeak));
+    peaks.emplace_back(std::move(currentPeak));
     currentPeak = nullptr;
   }
 
@@ -564,7 +564,7 @@ std::vector<SXPeak> SimpleReduceStrategy::reduce(
                               return result;
                             });
     if (pos == finalPeaks.end()) {
-      finalPeaks.push_back(currentPeak);
+      finalPeaks.emplace_back(currentPeak);
     }
   }
 
@@ -674,7 +674,7 @@ std::vector<std::vector<SXPeak *>> FindMaxReduceStrategy::getPeakGroups(
 
   for (auto i = 0u; i < components.size(); ++i) {
     auto index = components[i];
-    peakGroups[index].push_back(graph[i]);
+    peakGroups[index].emplace_back(graph[i]);
   }
 
   return peakGroups;
@@ -697,7 +697,7 @@ std::vector<SXPeak> FindMaxReduceStrategy::getFinalPeaks(
     }
 
     // Add the max peak
-    peaks.push_back(*maxPeak);
+    peaks.emplace_back(*maxPeak);
   }
   return peaks;
 }

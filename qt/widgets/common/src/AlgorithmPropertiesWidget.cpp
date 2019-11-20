@@ -316,7 +316,7 @@ void AlgorithmPropertiesWidget::replaceWSClicked(const QString &propName) {
             wsName = otherWidget->getValue();
             if (!wsName.isEmpty()) {
               // Add the candidate to the list of candidates.
-              candidateReplacementSources.push_back(otherWidget);
+              candidateReplacementSources.emplace_back(otherWidget);
             }
           }
         }

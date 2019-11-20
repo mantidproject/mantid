@@ -184,7 +184,7 @@ const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
     std::vector<boost::shared_ptr<const Geometry::IDetector>> det_ptrs;
     for (const auto &index : specDef) {
       const auto detIndex = index.first;
-      det_ptrs.push_back(m_detectorInfo.getDetectorPtr(detIndex));
+      det_ptrs.emplace_back(m_detectorInfo.getDetectorPtr(detIndex));
     }
     m_lastDetector[thread] =
         boost::make_shared<Geometry::DetectorGroup>(det_ptrs);

@@ -397,7 +397,7 @@ void PDDetermineCharacterizations::overrideRunNumProperty(
   if ((!runnumbers.empty()) && (runnumbers[0] != 0)) {
     if (runnumbers[0] < 0) {
       runnumbers.erase(runnumbers.begin(), runnumbers.end());
-      runnumbers.push_back(0);
+      runnumbers.emplace_back(0);
     }
     m_propertyManager->setProperty(propName, runnumbers);
   }

@@ -201,7 +201,7 @@ void SmoothNeighbours::findNeighboursRectangular() {
 
     det = boost::dynamic_pointer_cast<RectangularDetector>((*inst)[i]);
     if (det) {
-      detList.push_back(det);
+      detList.emplace_back(det);
     } else {
       // Also, look in the first sub-level for RectangularDetectors (e.g. PG3).
       // We are not doing a full recursive search since that will be very long
@@ -211,7 +211,7 @@ void SmoothNeighbours::findNeighboursRectangular() {
         for (int j = 0; j < assem->nelements(); j++) {
           det = boost::dynamic_pointer_cast<RectangularDetector>((*assem)[j]);
           if (det) {
-            detList.push_back(det);
+            detList.emplace_back(det);
 
           } else {
             // Also, look in the second sub-level for RectangularDetectors (e.g.
@@ -224,7 +224,7 @@ void SmoothNeighbours::findNeighboursRectangular() {
                 det = boost::dynamic_pointer_cast<RectangularDetector>(
                     (*assem2)[k]);
                 if (det) {
-                  detList.push_back(det);
+                  detList.emplace_back(det);
                 }
               }
             }

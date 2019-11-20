@@ -129,7 +129,7 @@ public:
 
     std::vector<uint64_t> freeSpaceVectorToSet;
     for (uint64_t i = 0; i < 20; i++) {
-      freeSpaceVectorToSet.push_back(i);
+      freeSpaceVectorToSet.emplace_back(i);
     }
     pSaver->setFreeSpaceVector(freeSpaceVectorToSet);
 

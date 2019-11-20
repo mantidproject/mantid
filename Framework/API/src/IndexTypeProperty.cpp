@@ -12,9 +12,9 @@ IndexTypeProperty::IndexTypeProperty(const std::string &name,
                                      const int indexType)
     : PropertyWithValue<std::string>(name, "", Kernel::Direction::Input) {
   if (indexType & IndexType::WorkspaceIndex)
-    m_allowedValues.push_back("WorkspaceIndex");
+    m_allowedValues.emplace_back("WorkspaceIndex");
   if (indexType & IndexType::SpectrumNum)
-    m_allowedValues.push_back("SpectrumNumber");
+    m_allowedValues.emplace_back("SpectrumNumber");
 
   if (m_allowedValues.empty())
     throw std::invalid_argument("Argument indexType incorrectly specified");

@@ -187,13 +187,13 @@ void SaveNexusProcessed::getWSIndexList(
     }
     indices.reserve(1 + spec_max - spec_min);
     for (int i = spec_min; i <= spec_max; i++)
-      indices.push_back(i);
+      indices.emplace_back(i);
     if (list) {
       for (auto s : spec_list) {
         if (s < 0)
           continue;
         if (s < spec_min || s > spec_max)
-          indices.push_back(s);
+          indices.emplace_back(s);
       }
     }
   } else if (list) {
@@ -202,7 +202,7 @@ void SaveNexusProcessed::getWSIndexList(
     for (auto s : spec_list) {
       if (s < 0)
         continue;
-      indices.push_back(s);
+      indices.emplace_back(s);
       if (s > spec_max)
         spec_max = s;
       if (s < spec_min)
@@ -213,7 +213,7 @@ void SaveNexusProcessed::getWSIndexList(
     spec_max = numberOfHist - 1;
     indices.reserve(1 + spec_max - spec_min);
     for (int i = spec_min; i <= spec_max; i++)
-      indices.push_back(i);
+      indices.emplace_back(i);
   }
 }
 
@@ -464,11 +464,11 @@ void SaveNexusProcessed::execEvent(Mantid::NeXus::NexusFileIO *nexusFile,
   size_t index = 0;
   for (int wi = 0;
        wi < static_cast<int>(m_eventWorkspace->getNumberHistograms()); wi++) {
-    indices.push_back(index);
+    indices.emplace_back(index);
     // Track the total # of events
     index += m_eventWorkspace->getSpectrum(wi).getNumberEvents();
   }
-  indices.push_back(index);
+  indices.emplace_back(index);
 
   // Initialize all the arrays
   int64_t num = index;
@@ -679,7 +679,7 @@ void SaveNexusProcessed::saveSpectraDetectorMapNexus(
         detPos[i] = 0.;
 
     dims.front() = static_cast<int>(nDetectors);
-    dims.push_back(3);
+    dims.emplace_back(3);
     file->writeCompData("detector_positions", detPos, dims, compression, dims);
   } catch (...) {
     g_log.error("Unknown error caught when saving detector positions.");

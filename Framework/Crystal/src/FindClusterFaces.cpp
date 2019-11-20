@@ -148,7 +148,7 @@ void findFacesAtIndex(const size_t linearIndex, IMDIterator *mdIterator,
           face.maxEdge = maxEdge;
           face.radius = radius;
 
-          localClusterFaces.push_back(face);
+          localClusterFaces.emplace_back(face);
         }
       }
     }
@@ -312,7 +312,7 @@ void FindClusterFaces::exec() {
   std::vector<size_t> imageShape;
   const size_t dimensionality = clusterImage->getNumDims();
   for (size_t i = 0; i < dimensionality; ++i) {
-    imageShape.push_back(clusterImage->getDimension(i)->getNBins());
+    imageShape.emplace_back(clusterImage->getDimension(i)->getNBins());
   }
 
   // Get the peaks workspace

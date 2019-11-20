@@ -111,8 +111,8 @@ public:
 
     std::vector<std::pair<std::string, bool>> criteria;
     // Sort by detector ID then descending wavelength
-    criteria.push_back(std::pair<std::string, bool>("detid", true));
-    criteria.push_back(std::pair<std::string, bool>("wavelength", false));
+    criteria.emplace_back(std::pair<std::string, bool>("detid", true));
+    criteria.emplace_back(std::pair<std::string, bool>("wavelength", false));
     pw->sort(criteria);
     TS_ASSERT_EQUALS(pw->getPeak(0).getDetectorID(), 1);
     TS_ASSERT_DELTA(pw->getPeak(0).getWavelength(), 5.0, 1e-5);
@@ -125,8 +125,8 @@ public:
 
     // Sort by wavelength ascending then detID
     criteria.clear();
-    criteria.push_back(std::pair<std::string, bool>("wavelength", true));
-    criteria.push_back(std::pair<std::string, bool>("detid", true));
+    criteria.emplace_back(std::pair<std::string, bool>("wavelength", true));
+    criteria.emplace_back(std::pair<std::string, bool>("detid", true));
     pw->sort(criteria);
     TS_ASSERT_EQUALS(pw->getPeak(0).getDetectorID(), 1);
     TS_ASSERT_DELTA(pw->getPeak(0).getWavelength(), 3.0, 1e-5);

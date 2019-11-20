@@ -90,7 +90,7 @@ public:
   void testGetWindowsForWorkspaceOneWindow() {
     std::vector<MantidQt::API::IProjectSerialisable *> windows;
     WindowStub win1("window1", {"ws1"});
-    windows.push_back(&win1);
+    windows.emplace_back(&win1);
 
     ProjectSaveModel model(windows);
     TS_ASSERT(model.hasWindows("ws1"));
@@ -101,8 +101,8 @@ public:
     std::vector<MantidQt::API::IProjectSerialisable *> windows;
     WindowStub win1("window1", {"ws1"});
     WindowStub win2("window2", {"ws1"});
-    windows.push_back(&win1);
-    windows.push_back(&win2);
+    windows.emplace_back(&win1);
+    windows.emplace_back(&win2);
 
     ProjectSaveModel model(windows);
     TS_ASSERT(model.hasWindows("ws1"));
@@ -113,8 +113,8 @@ public:
     std::vector<MantidQt::API::IProjectSerialisable *> windows;
     WindowStub win1("window1", {"ws1"});
     WindowStub win2("window2", {"ws2"});
-    windows.push_back(&win1);
-    windows.push_back(&win2);
+    windows.emplace_back(&win1);
+    windows.emplace_back(&win2);
 
     ProjectSaveModel model(windows);
     TS_ASSERT(model.hasWindows("ws1"));
@@ -155,10 +155,10 @@ public:
     WindowStub win2("window2", {"ws2"});
     WindowStub win3("window3", {"ws1", "ws2"});
     WindowStub win4("window4", {});
-    windows.push_back(&win1);
-    windows.push_back(&win2);
-    windows.push_back(&win3);
-    windows.push_back(&win4);
+    windows.emplace_back(&win1);
+    windows.emplace_back(&win2);
+    windows.emplace_back(&win3);
+    windows.emplace_back(&win4);
 
     ProjectSaveModel model(windows);
     auto names = model.getWindowNames({"ws1", "ws2"});
@@ -185,10 +185,10 @@ public:
     WindowStub win2("window2", {"ws2"});
     WindowStub win3("window3", {"ws1", "ws2"});
     WindowStub win4("window4", {});
-    windows.push_back(&win1);
-    windows.push_back(&win2);
-    windows.push_back(&win3);
-    windows.push_back(&win4);
+    windows.emplace_back(&win1);
+    windows.emplace_back(&win2);
+    windows.emplace_back(&win3);
+    windows.emplace_back(&win4);
 
     ProjectSaveModel model(windows);
     auto windowsSubset = model.getUniqueWindows({"ws1", "ws2"});
@@ -277,10 +277,10 @@ public:
     WindowStub win2("window2", {"ws2"});
     WindowStub win3("window3", {"ws1", "ws2"});
     WindowStub win4("window4", {});
-    windows.push_back(&win1);
-    windows.push_back(&win2);
-    windows.push_back(&win3);
-    windows.push_back(&win4);
+    windows.emplace_back(&win1);
+    windows.emplace_back(&win2);
+    windows.emplace_back(&win3);
+    windows.emplace_back(&win4);
 
     ProjectSaveModel model(windows);
 

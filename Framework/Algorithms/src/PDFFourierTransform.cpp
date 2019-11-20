@@ -79,9 +79,9 @@ void PDFFourierTransform::init() {
 
   // Set up input data type
   std::vector<std::string> inputTypes;
-  inputTypes.push_back(S_OF_Q);
-  inputTypes.push_back(S_OF_Q_MINUS_ONE);
-  inputTypes.push_back(Q_S_OF_Q_MINUS_ONE);
+  inputTypes.emplace_back(S_OF_Q);
+  inputTypes.emplace_back(S_OF_Q_MINUS_ONE);
+  inputTypes.emplace_back(Q_S_OF_Q_MINUS_ONE);
   declareProperty("InputSofQType", S_OF_Q,
                   boost::make_shared<StringListValidator>(inputTypes),
                   "To identify whether input function");
@@ -100,9 +100,9 @@ void PDFFourierTransform::init() {
 
   // Set up output data type
   std::vector<std::string> outputTypes;
-  outputTypes.push_back(BIG_G_OF_R);
-  outputTypes.push_back(LITTLE_G_OF_R);
-  outputTypes.push_back(RDF_OF_R);
+  outputTypes.emplace_back(BIG_G_OF_R);
+  outputTypes.emplace_back(LITTLE_G_OF_R);
+  outputTypes.emplace_back(RDF_OF_R);
   declareProperty("PDFType", BIG_G_OF_R,
                   boost::make_shared<StringListValidator>(outputTypes),
                   "Type of output PDF including G(r)");
@@ -285,8 +285,8 @@ void PDFFourierTransform::exec() {
     inputQ[i] += -.5*deltaQ;
     inputDQ[i] += .5*(inputDQ[i] + inputDQ[i+1]); // TODO running average
     }
-    inputQ.push_back(inputQ.back()+deltaQ);
-    inputDQ.push_back(inputDQ.back()); // copy last value
+    inputQ.emplace_back(inputQ.back()+deltaQ);
+    inputDQ.emplace_back(inputDQ.back()); // copy last value
     */
   }
 

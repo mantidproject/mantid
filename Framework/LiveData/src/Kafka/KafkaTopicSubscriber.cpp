@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <cassert>
 #include <chrono>
+#include <iostream>
 #include <sstream>
 #include <thread>
 
@@ -20,8 +21,10 @@ using RdKafka::TopicMetadata;
 
 namespace {
 /// Timeout for message consume
-const int CONSUME_TIMEOUT_MS = 30000;
-const std::string MAX_MESSAGE_SIZE = "100000000";
+const int CONSUME_TIMEOUT_MS = 300000;
+const std::string MAX_MESSAGE_SIZE = "200000000";
+// Receive buffer size must be at least MAX_MESSAGE_SIZE+512
+const std::string RECEIVE_BUFFER_SIZE = "200000512";
 /// A reference to the static logger
 Mantid::Kernel::Logger &LOGGER() {
   static Mantid::Kernel::Logger logger("KafkaTopicSubscriber");
@@ -29,19 +32,24 @@ Mantid::Kernel::Logger &LOGGER() {
 }
 
 /// Create and return the global configuration object
-std::unique_ptr<Conf> createGlobalConfiguration(const std::string &brokerAddr) {
-  auto conf = std::unique_ptr<Conf>(Conf::create(Conf::CONF_GLOBAL));
+std::unique_ptr<RdKafka::Conf>
+createGlobalConfiguration(const std::string &brokerAddr) {
+  auto conf =
+      std::unique_ptr<RdKafka::Conf>(RdKafka::Conf::create(Conf::CONF_GLOBAL));
   std::string errorMsg;
   conf->set("metadata.broker.list", brokerAddr, errorMsg);
   conf->set("session.timeout.ms", "10000", errorMsg);
   conf->set("group.id", "mantid", errorMsg);
   conf->set("message.max.bytes", MAX_MESSAGE_SIZE, errorMsg);
+  conf->set("fetch.max.bytes", MAX_MESSAGE_SIZE, errorMsg);
   conf->set("fetch.message.max.bytes", MAX_MESSAGE_SIZE, errorMsg);
+  conf->set("receive.message.max.bytes", RECEIVE_BUFFER_SIZE, errorMsg);
   conf->set("replica.fetch.max.bytes", MAX_MESSAGE_SIZE, errorMsg);
   conf->set("enable.auto.commit", "false", errorMsg);
   conf->set("enable.auto.offset.store", "false", errorMsg);
-  conf->set("offset.store.method", "none", errorMsg);
   conf->set("api.version.request", "true", errorMsg);
+  conf->set("socket.timeout.ms", "300000", errorMsg);
+  conf->set("fetch.wait.max.ms", "300200", errorMsg);
   return conf;
 }
 } // namespace
@@ -59,6 +67,7 @@ const std::string KafkaTopicSubscriber::RUN_TOPIC_SUFFIX = "_runInfo";
 const std::string KafkaTopicSubscriber::DET_SPEC_TOPIC_SUFFIX = "_detSpecMap";
 const std::string KafkaTopicSubscriber::SAMPLE_ENV_TOPIC_SUFFIX = "_sampleEnv";
 const std::string KafkaTopicSubscriber::CHOPPER_TOPIC_SUFFIX = "_choppers";
+const std::string KafkaTopicSubscriber::MONITOR_TOPIC_SUFFIX = "_monitors";
 
 /**
  * Construct a topic subscriber
@@ -132,7 +141,7 @@ KafkaTopicSubscriber::getTopicPartitions() {
          ++partitionNumber) {
       auto topicPartition = RdKafka::TopicPartition::create(
           topicName, static_cast<int>(partitionNumber));
-      partitions.push_back(topicPartition);
+      partitions.emplace_back(topicPartition);
     }
   }
   return partitions;
@@ -164,7 +173,7 @@ KafkaTopicSubscriber::getCurrentOffsets() {
     if (!result.second) {
       // If we could not emplace a new pair then the key already exists, so
       // append the offset to the vector belonging to the existing topic key
-      currentOffsets[topicPartition->topic()].push_back(
+      currentOffsets[topicPartition->topic()].emplace_back(
           topicPartition->offset());
     }
   }
@@ -278,9 +287,7 @@ void KafkaTopicSubscriber::seek(const std::string &topic, uint32_t partition,
  * Create the KafkaConsumer for required configuration
  */
 void KafkaTopicSubscriber::createConsumer() {
-  // Create configurations
   auto globalConf = createGlobalConfiguration(m_brokerAddr);
-
   std::string errorMsg;
   m_consumer = std::unique_ptr<KafkaConsumer>(
       KafkaConsumer::create(globalConf.get(), errorMsg));
@@ -357,7 +364,7 @@ void KafkaTopicSubscriber::subscribeAtOffset(int64_t offset) {
     }
 
     topicPartition->set_offset(confOffset);
-    topicPartitions.push_back(topicPartition);
+    topicPartitions.emplace_back(topicPartition);
   }
   LOGGER().debug() << "Attempting to subscribe to " << topicPartitions.size()
                    << " partitions in KafkaTopicSubscriber::subscribeAtOffset()"
@@ -429,9 +436,9 @@ void KafkaTopicSubscriber::consumeMessage(std::string *payload, int64_t &offset,
     if (kfMsg->len() > 0) {
       payload->assign(static_cast<const char *>(kfMsg->payload()),
                       static_cast<int>(kfMsg->len()));
+      topic = kfMsg->topic_name();
       offset = kfMsg->offset();
       partition = kfMsg->partition();
-      topic = kfMsg->topic_name();
     } else {
       // If RdKafka indicates no error then we should always get a
       // non-zero length message

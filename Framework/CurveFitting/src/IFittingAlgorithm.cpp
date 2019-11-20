@@ -296,7 +296,7 @@ std::vector<std::string> IFittingAlgorithm::getCostFunctionNames() const {
   for (auto &name : names) {
     if (boost::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(
             factory.create(name))) {
-      out.push_back(name);
+      out.emplace_back(name);
     }
   }
   return out;

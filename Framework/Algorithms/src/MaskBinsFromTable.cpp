@@ -199,9 +199,9 @@ void MaskBinsFromTable::processMaskBinWorkspace(
                   << " SpectraList = " << spectralist << ".\n";
 
     // Store to class variables
-    m_xminVec.push_back(xmin);
-    m_xmaxVec.push_back(xmax);
-    m_spectraVec.push_back(spectralist);
+    m_xminVec.emplace_back(xmin);
+    m_xmaxVec.emplace_back(xmax);
+    m_spectraVec.emplace_back(spectralist);
   }
 }
 
@@ -221,7 +221,7 @@ MaskBinsFromTable::convertToSpectraList(API::MatrixWorkspace_sptr dataws,
 
   size_t numitems = parser.size();
   for (size_t i = 0; i < numitems; ++i) {
-    detidvec.push_back(parser.operator()()[i]);
+    detidvec.emplace_back(parser.operator()()[i]);
     g_log.debug() << "[DB] DetetorID = " << detidvec.back() << " to mask.";
   }
 
@@ -234,7 +234,7 @@ MaskBinsFromTable::convertToSpectraList(API::MatrixWorkspace_sptr dataws,
     detid2index_map::const_iterator fiter = refermap.find(detid);
     if (fiter != refermap.end()) {
       size_t wsindex = fiter->second;
-      wsindexvec.push_back(wsindex);
+      wsindexvec.emplace_back(wsindex);
     } else {
       g_log.warning() << "Detector ID " << detid
                       << " cannot be mapped to any workspace index/spectrum."

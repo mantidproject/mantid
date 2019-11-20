@@ -612,8 +612,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         loader.setProperty("OutputWorkspace", "Exp0335_S0038F"));
     std::vector<size_t> geometryvec;
-    geometryvec.push_back(0);
-    geometryvec.push_back(0);
+    geometryvec.emplace_back(0);
+    geometryvec.emplace_back(0);
     loader.setProperty("DetectorGeometry", geometryvec);
     loader.setProperty("LoadInstrument", true);
     loader.setProperty("ShiftedDetectorDistance", 0.);
@@ -697,8 +697,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         loader.setProperty("OutputWorkspace", "Exp0335_S0038F"));
     std::vector<size_t> geometryvec;
-    geometryvec.push_back(0);
-    geometryvec.push_back(0);
+    geometryvec.emplace_back(0);
+    geometryvec.emplace_back(0);
     loader.setProperty("LoadInstrument", false);
 
     loader.execute();

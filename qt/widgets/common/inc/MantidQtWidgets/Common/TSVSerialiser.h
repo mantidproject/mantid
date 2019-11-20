@@ -53,7 +53,7 @@ public:
       std::stringstream valSS(valStr);
       T ret;
       valSS >> ret;
-      val.push_back(ret);
+      val.emplace_back(ret);
     }
     return *this;
   }
@@ -96,7 +96,7 @@ public:
     size_t index = 0;
     while (selectLine(name, index)) {
       auto value = std::forward<Extractor>(extractor)(*this);
-      container.push_back(value);
+      container.emplace_back(value);
       ++index;
     }
   }

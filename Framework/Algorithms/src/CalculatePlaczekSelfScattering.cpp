@@ -111,14 +111,14 @@ void CalculatePlaczekSelfScattering::exec() {
   double dx = (xLambda[1] - xLambda[0]) / 2.0;
   std::vector<double> phi1;
   for (size_t i = 0; i < xLambda.size() - 1; i++) {
-    phi1.push_back((xLambda[i] + dx) * incidentPrime[i] / incident[i]);
+    phi1.emplace_back((xLambda[i] + dx) * incidentPrime[i] / incident[i]);
   }
   // set detector law term (eps1)
   std::vector<double> eps1;
   constexpr auto LambdaD = 1.44;
   for (size_t i = 0; i < xLambda.size() - 1; i++) {
     auto xTerm = -(xLambda[i] + dx) / LambdaD;
-    eps1.push_back(xTerm * exp(xTerm) / (1.0 - exp(xTerm)));
+    eps1.emplace_back(xTerm * exp(xTerm) / (1.0 - exp(xTerm)));
   }
   /* Placzek
      Original Placzek inelastic correction Ref (for constant wavelength, reactor

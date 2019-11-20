@@ -38,10 +38,10 @@ void PeaksIntersection::initBaseProperties() {
                   "An input peaks workspace.");
 
   std::vector<std::string> propOptions;
-  propOptions.push_back(detectorSpaceFrame());
-  propOptions.push_back(qLabFrame());
-  propOptions.push_back(qSampleFrame());
-  propOptions.push_back(hklFrame());
+  propOptions.emplace_back(detectorSpaceFrame());
+  propOptions.emplace_back(qLabFrame());
+  propOptions.emplace_back(qSampleFrame());
+  propOptions.emplace_back(hklFrame());
 
   declareProperty(
       "CoordinateFrame", "DetectorSpace",

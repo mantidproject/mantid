@@ -272,7 +272,7 @@ std::vector<double> ConjoinXRuns::getXAxis(MatrixWorkspace_sptr ws) const {
       axis = std::vector<double>(intAxis.begin(), intAxis.end());
     } else {
       // then scalar
-      axis.push_back(run.getPropertyAsSingleValue(m_logEntry));
+      axis.emplace_back(run.getPropertyAsSingleValue(m_logEntry));
     }
   }
 
@@ -364,7 +364,7 @@ void ConjoinXRuns::exec() {
   for (const auto &input : RunCombinationHelper::unWrapGroups(inputs_given)) {
     MatrixWorkspace_sptr ws =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(input);
-    m_inputWS.push_back(ws);
+    m_inputWS.emplace_back(ws);
   }
 
   auto first = m_inputWS.front();

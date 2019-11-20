@@ -82,13 +82,13 @@ public:
         m_view.get(), std::move(mockModel), nullptr, nullptr));
 
     // default banks
-    m_ex_enginx_banks.push_back(true);
-    m_ex_enginx_banks.push_back(false);
+    m_ex_enginx_banks.emplace_back(true);
+    m_ex_enginx_banks.emplace_back(false);
 
     // default run number
     m_ex_empty_run_num.emplace_back("");
     m_invalid_run_number.emplace_back("");
-    m_ex_run_number.push_back(g_validRunNo);
+    m_ex_run_number.emplace_back(g_validRunNo);
     g_vanNo.emplace_back("8899999988");
     g_ceriaNo.emplace_back("9999999999");
 

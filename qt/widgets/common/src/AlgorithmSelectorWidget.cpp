@@ -374,7 +374,7 @@ void FindAlgComboBox::addAliases(AlgNamesType &algNamesList) {
     if ((!i->alias.empty()) && (!boost::iequals(i->alias, i->name))) {
       AlgorithmDescriptor newAlias(*i);
       newAlias.name = i->alias + " [" + i->name + "]";
-      aliasList.push_back(newAlias);
+      aliasList.emplace_back(newAlias);
     }
   }
   // add them to the list - unsorted

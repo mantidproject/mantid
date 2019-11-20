@@ -41,13 +41,13 @@ void OptimizeLatticeForCellType::init() {
                       "PeaksWorkspace", "", Direction::InOut),
                   "An input PeaksWorkspace with an instrument.");
   std::vector<std::string> cellTypes;
-  cellTypes.push_back(ReducedCell::CUBIC());
-  cellTypes.push_back(ReducedCell::TETRAGONAL());
-  cellTypes.push_back(ReducedCell::ORTHORHOMBIC());
-  cellTypes.push_back(ReducedCell::HEXAGONAL());
-  cellTypes.push_back(ReducedCell::RHOMBOHEDRAL());
-  cellTypes.push_back(ReducedCell::MONOCLINIC());
-  cellTypes.push_back(ReducedCell::TRICLINIC());
+  cellTypes.emplace_back(ReducedCell::CUBIC());
+  cellTypes.emplace_back(ReducedCell::TETRAGONAL());
+  cellTypes.emplace_back(ReducedCell::ORTHORHOMBIC());
+  cellTypes.emplace_back(ReducedCell::HEXAGONAL());
+  cellTypes.emplace_back(ReducedCell::RHOMBOHEDRAL());
+  cellTypes.emplace_back(ReducedCell::MONOCLINIC());
+  cellTypes.emplace_back(ReducedCell::TRICLINIC());
   declareProperty("CellType", cellTypes[0],
                   boost::make_shared<StringListValidator>(cellTypes),
                   "Select the cell type.");
@@ -90,17 +90,17 @@ void OptimizeLatticeForCellType::exec() {
       const std::vector<Peak> &peaks = ws->getPeaks();
       if (edgePixel(inst, peaks[i].getBankName(), peaks[i].getCol(),
                     peaks[i].getRow(), edge)) {
-        badPeaks.push_back(i);
+        badPeaks.emplace_back(i);
       }
     }
     ws->removePeaks(std::move(badPeaks));
   }
-  runWS.push_back(ws);
+  runWS.emplace_back(ws);
 
   if (perRun) {
     std::vector<std::pair<std::string, bool>> criteria;
     // Sort by run number
-    criteria.push_back(std::pair<std::string, bool>("runnumber", true));
+    criteria.emplace_back(std::pair<std::string, bool>("runnumber", true));
     ws->sort(criteria);
     const std::vector<Peak> &peaks_all = ws->getPeaks();
     int run = 0;
@@ -111,7 +111,7 @@ void OptimizeLatticeForCellType::exec() {
         auto cloneWS = boost::make_shared<PeaksWorkspace>();
         cloneWS->setInstrument(inst);
         cloneWS->copyExperimentInfoFrom(ws.get());
-        runWS.push_back(cloneWS);
+        runWS.emplace_back(cloneWS);
         runWS[count]->addPeak(peak);
         run = peak.getRunNumber();
         AnalysisDataService::Instance().addOrReplace(

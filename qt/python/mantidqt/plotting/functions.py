@@ -254,7 +254,7 @@ def _do_single_plot(ax, workspaces, errors, set_title, nums, kw, plot_kwargs):
             plot_kwargs[kw] = num
             plot_fn(ws, **plot_kwargs)
 
-    ax.legend().draggable()
+    ax.make_legend()
     if set_title:
         title = workspaces[0].name()
         ax.set_title(title)

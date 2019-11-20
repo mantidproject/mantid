@@ -1262,7 +1262,7 @@ std::vector<std::string> ScriptRepositoryImpl::check4Update() {
       // THE SAME AS it->status in (REMOTE_CHANGED, BOTH_CHANGED)
       if (file.second.status & REMOTE_CHANGED) {
         download(file.first);
-        output_list.push_back(file.first);
+        output_list.emplace_back(file.first);
         g_log.debug() << "Update file " << file.first
                       << " to more recently version available\n";
       }
@@ -1319,7 +1319,7 @@ int ScriptRepositoryImpl::setAutoUpdate(const std::string &input_path,
     RepositoryEntry &entry = it->second;
     if (entryPath.compare(0, path.size(), path) == 0 &&
         entry.status != REMOTE_ONLY && entry.status != LOCAL_ONLY)
-      filesToUpdate.push_back(entryPath);
+      filesToUpdate.emplace_back(entryPath);
   }
 
   try {
@@ -1515,13 +1515,13 @@ void ScriptRepositoryImpl::parseDownloadedEntries(Repository &repo) {
           // if the entry was not found locally or remotely, this means
           // that this entry was deleted (remotely or locally),
           // so it should not appear at local_repository json any more
-          entries_to_delete.push_back(filepath);
+          entries_to_delete.emplace_back(filepath);
           folders_of_deleted.insert(getParentFolder(filepath));
         }
       } else {
         // this entry was never created before, so it should not
         // exist in local repository json
-        entries_to_delete.push_back(filepath);
+        entries_to_delete.emplace_back(filepath);
       }
 
     } // end loop FOREACH entry in local json
@@ -1540,7 +1540,7 @@ void ScriptRepositoryImpl::parseDownloadedEntries(Repository &repo) {
 
         if (entry_it->second.auto_update) {
           entry_it->second.auto_update = false;
-          entries_to_delete.push_back(folder);
+          entries_to_delete.emplace_back(folder);
         }
       }
 
@@ -1724,9 +1724,9 @@ std::string ScriptRepositoryImpl::getParentFolder(const std::string &file) {
 std::string ScriptRepositoryImpl::convertPath(const std::string &path) {
   std::vector<std::string> lookAfter;
   using Poco::Path;
-  lookAfter.push_back(Path::current());
-  //    lookAfter.push_back(Path::home());
-  lookAfter.push_back(local_repository);
+  lookAfter.emplace_back(Path::current());
+  //    lookAfter.emplace_back(Path::home());
+  lookAfter.emplace_back(local_repository);
 
   Path pathFound;
   bool file_is_local;

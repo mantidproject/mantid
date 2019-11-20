@@ -86,8 +86,8 @@ void DetectorSearcher::createDetectorCache() {
     if (point.hasNaN() || up.coLinear(beam, pos))
       continue;
 
-    points.push_back(point);
-    m_indexMap.push_back(pointNo);
+    points.emplace_back(point);
+    m_indexMap.emplace_back(pointNo);
   }
 
   // create KDtree of cached detector Q vectors

@@ -11,8 +11,11 @@ from __future__ import (print_function, absolute_import, unicode_literals)
 
 from qtpy.QtCore import Qt, Signal, Slot
 
+import matplotlib.pyplot
+
 from mantid import logger
 from mantid.api import AlgorithmManager, AnalysisDataService, ITableWorkspace, MatrixWorkspace
+from mantidqt.plotting.functions import plot
 from mantidqt.utils.qt import import_qt
 from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
 
@@ -127,6 +130,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         BaseBrowser.closeEvent(self, event)
 
     def show(self):
+        import matplotlib.pyplot as plt
         """
         Override the base class method. Initialise the peak editing tool.
         """
@@ -159,6 +163,13 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
 
         self.setPeakToolOn(True)
         self.canvas.draw()
+
+        # change the output name if more than one plot of the same workspace
+        window_title = self.canvas.get_window_title()
+        workspace_name = window_title.rsplit('-', 1)[0]
+        for open_figures in plt.get_figlabels():
+            if open_figures != window_title and open_figures.rsplit('-', 1)[0] == workspace_name:
+                self.setOutputName(window_title)
 
     def get_fit_bounds(self):
         """
@@ -536,8 +547,8 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         if AnalysisDataService.doesExist(name):
             ws = AnalysisDataService.retrieve(name)
             if isinstance(ws, MatrixWorkspace):
-                presenter = MatrixWorkspaceDisplay(ws)
+                presenter = MatrixWorkspaceDisplay(ws, plot=plot)
                 presenter.show_view()
             elif isinstance(ws, ITableWorkspace):
-                presenter = TableWorkspaceDisplay(ws)
+                presenter = TableWorkspaceDisplay(ws, plot=matplotlib.pyplot)
                 presenter.show_view()

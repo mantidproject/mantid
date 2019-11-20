@@ -145,6 +145,8 @@ void IKafkaStreamDecoder::writeChopperTimestampsToWorkspaceLogs(
   if (buffer.empty())
     return;
 
+  std::lock_guard<std::mutex> workspaceLock(m_mutex);
+
   if (flatbuffers::BufferHasIdentifier(
           reinterpret_cast<const uint8_t *>(buffer.c_str()),
           CHOPPER_MESSAGE_ID.c_str())) {
@@ -153,10 +155,10 @@ void IKafkaStreamDecoder::writeChopperTimestampsToWorkspaceLogs(
 
     const auto *timestamps = chopperMsg->timestamps();
     std::vector<uint64_t> mantidTimestamps;
-    std::copy(timestamps->begin(), timestamps->end(), mantidTimestamps.begin());
+    std::copy(timestamps->begin(), timestamps->end(),
+              std::back_inserter(mantidTimestamps));
     auto name = chopperMsg->name()->str();
-
-    for (auto workspace : workspaces) {
+    for (auto &workspace : workspaces) {
       auto mutableRunInfo = workspace->mutableRun();
       Kernel::ArrayProperty<uint64_t> *property;
       if (mutableRunInfo.hasProperty(name)) {

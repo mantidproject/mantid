@@ -370,12 +370,12 @@ public:
         alg.setPropertyValue("Translation", origin.toString(",")));
 
     std::vector<double> OutputExtents;
-    OutputExtents.push_back(0);
-    OutputExtents.push_back(lengthX);
-    OutputExtents.push_back(0);
-    OutputExtents.push_back(lengthY);
-    OutputExtents.push_back(0);
-    OutputExtents.push_back(lengthZ);
+    OutputExtents.emplace_back(0);
+    OutputExtents.emplace_back(lengthX);
+    OutputExtents.emplace_back(0);
+    OutputExtents.emplace_back(lengthY);
+    OutputExtents.emplace_back(0);
+    OutputExtents.emplace_back(lengthZ);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputExtents", OutputExtents));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputBins", "3,3,3"));
 

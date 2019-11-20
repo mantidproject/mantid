@@ -49,6 +49,7 @@ public:
   static const std::string DET_SPEC_TOPIC_SUFFIX;
   static const std::string SAMPLE_ENV_TOPIC_SUFFIX;
   static const std::string CHOPPER_TOPIC_SUFFIX;
+  static const std::string MONITOR_TOPIC_SUFFIX;
 
   static const int64_t IGNORE_OFFSET = -1;
 

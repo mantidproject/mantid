@@ -13,11 +13,12 @@ import numpy as np
 class SpinGlass(IFunction1D):
 
     def category(self):
-        return "Muon"
+        return "MuonSpecific"
 
     def init(self):
         self.declareParameter("A0", 0.2, 'Asymmetry')
-        self.declareParameter("Width", 0.1, 'Half-width half maximum of the local field Lorentzian Distribution')
+        self.declareParameter(
+            "Width", 0.1, 'Half-width half maximum of the local field Lorentzian Distribution')
         self.declareParameter("Nu", 1, 'Rate of Markovian modulation')
         self.declareParameter("Q", 0.1, 'Order Parameter')
         self.addConstraints("Nu > 0")
@@ -28,13 +29,15 @@ class SpinGlass(IFunction1D):
         a = self.getParameterValue("Width")
         nu = self.getParameterValue("Nu")
         q = self.getParameterValue("Q")
-        x = x[1 : np.size(x)]
+        x = x[1: np.size(x)]
         term1 = 4 * (a ** 2) * (1 - q) * x / nu
         term2 = q * (a ** 2) * (x ** 2)
         term13 = np.exp(- np.sqrt(term1))
-        term23 = (1 - (term2 / np.sqrt(term1 + term2))) * np.exp(- np.sqrt(term1 + term2))
+        term23 = (1 - (term2 / np.sqrt(term1 + term2))) * \
+            np.exp(- np.sqrt(term1 + term2))
         SpinGlass = A0 * ((1./3.) * term13 + (2./3.) * term23)
         SpinGlass = np.insert(SpinGlass, 0, A0)
         return SpinGlass
+
 
 FunctionFactory.subscribe(SpinGlass)

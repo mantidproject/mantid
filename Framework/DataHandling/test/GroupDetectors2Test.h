@@ -1147,7 +1147,7 @@ private:
 
     std::vector<double> timeRanges;
     for (size_t i = 0; i < NHIST; ++i) {
-      timeRanges.push_back(double(i + 1));
+      timeRanges.emplace_back(double(i + 1));
     }
 
     builder.setTimeRanges(Mantid::Types::Core::DateAndTime(0), timeRanges);

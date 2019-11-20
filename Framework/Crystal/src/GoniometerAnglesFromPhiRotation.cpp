@@ -250,9 +250,9 @@ void GoniometerAnglesFromPhiRotation::exec() {
   MantidVec Xvals;
 
   for (int i = 0; i < Npeaks; ++i) {
-    Xvals.push_back(i);
-    Xvals.push_back(i);
-    Xvals.push_back(i);
+    Xvals.emplace_back(i);
+    Xvals.emplace_back(i);
+    Xvals.emplace_back(i);
   }
 
   ws->setPoints(0, Xvals);

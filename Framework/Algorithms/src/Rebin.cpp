@@ -322,19 +322,19 @@ void Rebin::propagateMasks(API::MatrixWorkspace_const_sptr inputWS,
   // Now iterate over the list, building up a vector of the masked bins
   auto it = mask.cbegin();
   auto &XValues = inputWS->x(hist);
-  masked_bins.push_back(XValues[(*it).first]);
-  weights.push_back((*it).second);
-  masked_bins.push_back(XValues[(*it).first + 1]);
+  masked_bins.emplace_back(XValues[(*it).first]);
+  weights.emplace_back((*it).second);
+  masked_bins.emplace_back(XValues[(*it).first + 1]);
   for (++it; it != mask.end(); ++it) {
     const double currentX = XValues[(*it).first];
     // Add an intermediate bin with zero weight if masked bins aren't
     // consecutive
     if (masked_bins.back() != currentX) {
-      weights.push_back(0.0);
-      masked_bins.push_back(currentX);
+      weights.emplace_back(0.0);
+      masked_bins.emplace_back(currentX);
     }
-    weights.push_back((*it).second);
-    masked_bins.push_back(XValues[(*it).first + 1]);
+    weights.emplace_back((*it).second);
+    masked_bins.emplace_back(XValues[(*it).first + 1]);
   }
 
   //// Create a zero vector for the errors because we don't care about them here

@@ -218,7 +218,7 @@ double DiffractionEventCalibrateDetectors::intensity(
   std::vector<double> params; // = fit_alg->getProperty("Parameters");
   Mantid::API::IFunction_sptr fun_res = fit_alg->getProperty("Function");
   for (size_t i = 0; i < fun_res->nParams(); ++i) {
-    params.push_back(fun_res->getParameter(i));
+    params.emplace_back(fun_res->getParameter(i));
   }
   peakHeight = params[0];
   peakLoc = params[1];
@@ -308,9 +308,9 @@ void DiffractionEventCalibrateDetectors::exec() {
     det = boost::dynamic_pointer_cast<RectangularDetector>((*inst)[i]);
     if (det) {
       if (det->getName() == onebank)
-        detList.push_back(det);
+        detList.emplace_back(det);
       if (!doOneBank)
-        detList.push_back(det);
+        detList.emplace_back(det);
     } else {
       // Also, look in the first sub-level for RectangularDetectors (e.g. PG3).
       // We are not doing a full recursive search since that will be very long
@@ -321,9 +321,9 @@ void DiffractionEventCalibrateDetectors::exec() {
           det = boost::dynamic_pointer_cast<RectangularDetector>((*assem)[j]);
           if (det) {
             if (det->getName() == onebank)
-              detList.push_back(det);
+              detList.emplace_back(det);
             if (!doOneBank)
-              detList.push_back(det);
+              detList.emplace_back(det);
 
           } else {
             // Also, look in the second sub-level for RectangularDetectors (e.g.
@@ -337,9 +337,9 @@ void DiffractionEventCalibrateDetectors::exec() {
                     (*assem2)[k]);
                 if (det) {
                   if (det->getName() == onebank)
-                    detList.push_back(det);
+                    detList.emplace_back(det);
                   if (!doOneBank)
-                    detList.push_back(det);
+                    detList.emplace_back(det);
                 }
               }
             }

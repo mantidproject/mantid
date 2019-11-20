@@ -1514,7 +1514,7 @@ void IntegratePeakTimeSlices::SetUpData1(
   spec_idList.clear();
 
   for (int i = 0; i < NAttributes + 2; i++)
-    StatBase.push_back(0);
+    StatBase.emplace_back(0);
 
   std::vector<double> yvalB;
   std::vector<double> errB;
@@ -1579,14 +1579,14 @@ void IntegratePeakTimeSlices::SetUpData1(
           variance += histoerrs[chan] * histoerrs[chan];
         }
 
-        yvalB.push_back(intensity);
+        yvalB.emplace_back(intensity);
         double sigma = 1;
 
-        errB.push_back(sigma);
-        xvalB.push_back(col);
-        YvalB.push_back(row);
+        errB.emplace_back(sigma);
+        xvalB.emplace_back(col);
+        YvalB.emplace_back(row);
 
-        xRef.push_back(static_cast<double>(jj));
+        xRef.emplace_back(static_cast<double>(jj));
         jj++;
 
         updateStats(intensity, variance, row, col, StatBase);
@@ -2011,25 +2011,25 @@ void IntegratePeakTimeSlices::Fit(MatrixWorkspace_sptr &Data,
     errs.clear();
     ITableWorkspace_sptr RRes = fit_alg->getProperty("OutputParameters");
     for (int prm = 0; prm < static_cast<int>(RRes->rowCount()) - 1; prm++) {
-      names.push_back(RRes->getRef<string>("Name", prm));
-      params.push_back(RRes->getRef<double>("Value", prm));
+      names.emplace_back(RRes->getRef<string>("Name", prm));
+      params.emplace_back(RRes->getRef<double>("Value", prm));
       double error = RRes->getRef<double>("Error", prm);
-      errs.push_back(error);
+      errs.emplace_back(error);
     }
     if (names.size() < 5) {
-      names.push_back(m_ParameterNames[IVXX]);
-      names.push_back(m_ParameterNames[IVYY]);
-      names.push_back(m_ParameterNames[IVXY]);
+      names.emplace_back(m_ParameterNames[IVXX]);
+      names.emplace_back(m_ParameterNames[IVYY]);
+      names.emplace_back(m_ParameterNames[IVXY]);
       double Varxx, Varxy, Varyy;
       m_AttributeValues->CalcVariancesFromData(
           params[IBACK], params[IXMEAN], params[IYMEAN], Varxx, Varxy, Varyy,
           m_AttributeValues->StatBase);
-      params.push_back(Varxx);
-      params.push_back(Varyy);
-      params.push_back(Varxy);
-      errs.push_back(0);
-      errs.push_back(0);
-      errs.push_back(0);
+      params.emplace_back(Varxx);
+      params.emplace_back(Varyy);
+      params.emplace_back(Varxy);
+      errs.emplace_back(0);
+      errs.emplace_back(0);
+      errs.emplace_back(0);
     }
 
   } catch (std::exception

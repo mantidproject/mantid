@@ -75,9 +75,9 @@ void AlphaCalc::exec() {
   // if for some reason the size of forward and backward lists are zero
   // default these to their defaults
   if (forwardSpectraList.empty())
-    forwardSpectraList.push_back(1);
+    forwardSpectraList.emplace_back(1);
   if (backwardSpectraList.empty())
-    backwardSpectraList.push_back(2);
+    backwardSpectraList.emplace_back(2);
 
   // first step is to create two workspaces which groups all forward and
   // backward spectra

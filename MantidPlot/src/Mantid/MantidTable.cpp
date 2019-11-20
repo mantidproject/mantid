@@ -403,7 +403,7 @@ void MantidTable::sortColumn(int col, int order) {
     // Customized sorting routine for this TableWorkspace
     std::vector<std::pair<std::string, bool>> criteria;
     // Only one criterion in sorting
-    criteria.push_back(std::pair<std::string, bool>(
+    criteria.emplace_back(std::pair<std::string, bool>(
         m_ws->getColumn(col)->name(), (order == 0)));
     m_ws->sort(criteria);
     // Refresh the table
@@ -437,7 +437,7 @@ void MantidTable::sortColumns(const QStringList &s, int type, int order,
     if (n != std::string::npos && n < col.size() - 1)
       col = col.substr(n + 1, col.size() - n - 1);
     // Only one criterion in sorting
-    criteria.push_back(std::pair<std::string, bool>(col, (order == 0)));
+    criteria.emplace_back(std::pair<std::string, bool>(col, (order == 0)));
     m_ws->sort(criteria);
     // Refresh the table
     this->fillTable();

@@ -541,12 +541,12 @@ void Graph3D::loadData(Table *table, int xCol, int yCol, int zCol, double xl,
           (x < xl || x > xr || y < yl || y > yr || z < zl || z > zr))
         continue;
 
-      data.push_back(Triple(x, y, z));
+      data.emplace_back(Triple(x, y, z));
       Qwt3D::Cell cell;
-      cell.push_back(index);
+      cell.emplace_back(index);
       if (index > 0)
-        cell.push_back(index - 1);
-      cells.push_back(cell);
+        cell.emplace_back(index - 1);
+      cells.emplace_back(cell);
       index++;
     }
   }
@@ -2253,7 +2253,7 @@ void Graph3D::setDataColors(const QColor &cMin, const QColor &cMax) {
     rgb.b = b1 - i * stepB;
     rgb.a = alpha;
 
-    cv.push_back(rgb);
+    cv.emplace_back(rgb);
   }
 
   col_ = new StandardColor(sp);
@@ -2368,7 +2368,7 @@ bool Graph3D::openColorMap(ColorVector &cv, QString fname) {
       rgb.r /= 255;
       rgb.g /= 255;
       rgb.b /= 255;
-      cv.push_back(rgb);
+      cv.emplace_back(rgb);
     }
   }
   return true;

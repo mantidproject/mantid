@@ -161,7 +161,7 @@ void SaveMD2::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
     IMDDimension_const_sptr dim = ws->getDimension(d);
     auto nbounds = dim->getNBoundaries();
     for (size_t n = 0; n < nbounds; n++)
-      axis.push_back(dim->getX(n));
+      axis.emplace_back(dim->getX(n));
     file->makeData(dim->getDimensionId(), ::NeXus::FLOAT64,
                    static_cast<int>(dim->getNBoundaries()), true);
     file->putData(&axis[0]);

@@ -25,6 +25,7 @@ IndirectFitDataView::IndirectFitDataView(QWidget *parent)
   m_dataForm->setupUi(this);
   m_dataForm->dsResolution->hide();
   m_dataForm->lbResolution->hide();
+  m_dataForm->wgtStartEnd->hide();
   m_dataForm->dsbStartX->setRange(-1e100, 1e100);
   m_dataForm->dsbEndX->setRange(-1e100, 1e100);
 
@@ -192,6 +193,10 @@ void IndirectFitDataView::emitViewSelected(int index) {
     emit singleDataViewSelected();
   else
     emit multipleDataViewSelected();
+}
+
+void IndirectFitDataView::setStartAndEndHidden(bool hidden) {
+  m_dataForm->wgtStartEnd->setHidden(hidden);
 }
 
 } // namespace IDA

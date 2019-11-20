@@ -156,7 +156,7 @@ void LoadMuonNexus2::doExec() {
   int nBins = raw_time.dim0();
   std::vector<double> timeBins;
   timeBins.assign(raw_time(), raw_time() + nBins);
-  timeBins.push_back(raw_time[nBins - 1] + raw_time[1] - raw_time[0]);
+  timeBins.emplace_back(raw_time[nBins - 1] + raw_time[1] - raw_time[0]);
 
   // Calculate the size of a workspace, given its number of periods & spectra to
   // read

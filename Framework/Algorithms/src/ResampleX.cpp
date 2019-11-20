@@ -154,17 +154,17 @@ string determineXMinMax(MatrixWorkspace_sptr inputWS, vector<double> &xmins,
       if (updateXMins) {
         const auto minimum = xvalues.front();
         if (std::isnan(minimum) || minimum >= xmax_wksp) {
-          xmins.push_back(xmin_wksp);
+          xmins.emplace_back(xmin_wksp);
         } else {
-          xmins.push_back(minimum);
+          xmins.emplace_back(minimum);
         }
       }
       if (updateXMaxs) {
         const auto maximum = xvalues.back();
         if (std::isnan(maximum) || maximum <= xmin_wksp) {
-          xmaxs.push_back(xmax_wksp);
+          xmaxs.emplace_back(xmax_wksp);
         } else {
-          xmaxs.push_back(maximum);
+          xmaxs.emplace_back(maximum);
         }
       }
     }
@@ -218,9 +218,9 @@ double ResampleX::determineBinning(MantidVec &xValues, const double xmin,
     expNumBoundaries += 1; // should be one more bin boundary for histograms
 
   vector<double> params; // xmin, delta, xmax
-  params.push_back(xmin);
-  params.push_back(0.); // dummy delta value
-  params.push_back(xmax);
+  params.emplace_back(xmin);
+  params.emplace_back(0.); // dummy delta value
+  params.emplace_back(xmax);
 
   // constant binning is easy
   if (m_useLogBinning) {

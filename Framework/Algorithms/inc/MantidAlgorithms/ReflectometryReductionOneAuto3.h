@@ -74,11 +74,13 @@ private:
   RebinParams getRebinParams(MatrixWorkspace_sptr inputWS, const double theta);
   boost::optional<double> getQStep(MatrixWorkspace_sptr inputWS,
                                    const double theta);
-  /// Rebin and scale a workspace in Q
+  // Optionally scale a workspace
   Mantid::API::MatrixWorkspace_sptr
-  rebinAndScale(Mantid::API::MatrixWorkspace_sptr inputWS,
-                const RebinParams &params);
-  /// Crop a workspace in Q
+  scale(Mantid::API::MatrixWorkspace_sptr inputWS);
+  /// Rebin a workspace in Q
+  Mantid::API::MatrixWorkspace_sptr
+  rebin(Mantid::API::MatrixWorkspace_sptr inputWS, const RebinParams &params);
+  /// Optionally crop a workspace in Q
   MatrixWorkspace_sptr cropQ(MatrixWorkspace_sptr inputWS,
                              const RebinParams &params);
   /// Populate algorithmic correction properties

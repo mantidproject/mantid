@@ -105,8 +105,8 @@ void Interpolation::addPoint(const double &xx, const double &yy) {
   std::vector<double>::iterator it;
 
   if (N == 0) {
-    m_x.push_back(xx);
-    m_y.push_back(yy);
+    m_x.emplace_back(xx);
+    m_y.emplace_back(yy);
     return;
   }
 
@@ -121,8 +121,8 @@ void Interpolation::addPoint(const double &xx, const double &yy) {
   }
 
   if (xx >= m_x[N - 1]) {
-    m_x.push_back(xx);
-    m_y.push_back(yy);
+    m_x.emplace_back(xx);
+    m_y.emplace_back(yy);
     return;
   }
 

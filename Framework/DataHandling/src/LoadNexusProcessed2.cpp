@@ -44,7 +44,7 @@ findEntriesOfType(const T &entry, const std::string &nxClass) {
   std::vector<Mantid::NeXus::NXClassInfo> result;
   for (const auto &group : entry.groups()) {
     if (group.nxclass == nxClass)
-      result.push_back(group);
+      result.emplace_back(group);
   }
   return result;
 }
@@ -217,7 +217,7 @@ bool LoadNexusProcessed2::loadNexusGeometry(API::Workspace &ws,
           for (size_t j = 0; j < counts; ++j, ++detCounter) {
             def.add(detInfo.indexOf(m_detectorIds[detCounter]));
           }
-          definitions.push_back(def);
+          definitions.emplace_back(def);
         }
         info.setSpectrumDefinitions(definitions);
         matrixWs->setIndexInfo(info);

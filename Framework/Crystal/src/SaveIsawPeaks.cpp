@@ -130,7 +130,7 @@ void SaveIsawPeaks::exec() {
     Strings::convert(bankName, bank);
 
     // Save in the map
-    runMap[run][bank].push_back(i);
+    runMap[run][bank].emplace_back(i);
   }
   if (m_isModulatedStructure)
     header =

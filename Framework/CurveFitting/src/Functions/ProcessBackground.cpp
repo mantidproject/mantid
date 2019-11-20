@@ -319,7 +319,7 @@ void ProcessBackground::deleteRegion() {
   std::vector<size_t> incIndexes;
   for (size_t i = 0; i < dataY.size(); i++) {
     if (dataX[i] < m_lowerBound || dataX[i] > m_upperBound) {
-      incIndexes.push_back(i);
+      incIndexes.emplace_back(i);
     }
   }
   size_t sizex = incIndexes.size();
@@ -373,15 +373,15 @@ void ProcessBackground::addRegion() {
   for (size_t i = 0; i < vecY.size(); ++i) {
     double xtmp = vecX[i];
     if (xtmp < m_lowerBound || xtmp > m_upperBound) {
-      vx.push_back(vecX[i]);
-      vy.push_back(vecY[i]);
-      ve.push_back(vecE[i]);
+      vx.emplace_back(vecX[i]);
+      vy.emplace_back(vecY[i]);
+      ve.emplace_back(vecE[i]);
     }
   }
 
   // Histogram
   if (vecX.size() > vecY.size())
-    vx.push_back(vecX.back());
+    vx.emplace_back(vecX.back());
 
   // Get access to reference workspace
   DataObjects::Workspace2D_const_sptr refWS = getProperty("ReferenceWorkspace");
@@ -514,7 +514,7 @@ void ProcessBackground::selectFromGivenXValues() {
                   << "\n";
 
     // Add index to list
-    realIndexes.push_back(index);
+    realIndexes.emplace_back(index);
 
   } // ENDFOR (i)
 
@@ -723,7 +723,7 @@ ProcessBackground::filterForBackground(BackgroundFunction_sptr bkgdfunction) {
   for (size_t i = 0; i < domain.size(); ++i) {
     double purey = visualws->y(1)[i];
     if (purey < posnoisetolerance && purey > -negnoisetolerance) {
-      selectedIndexes.push_back(i);
+      selectedIndexes.emplace_back(i);
     }
   }
   size_t wsSize = selectedIndexes.size();

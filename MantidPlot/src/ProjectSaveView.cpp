@@ -312,7 +312,7 @@ ProjectSaveView::getItemsWithCheckState(const QTreeWidget &tree,
     auto item = tree.topLevelItem(i);
     if (item->checkState(0) == state) {
       auto name = item->data(0, Qt::UserRole).toString().toStdString();
-      names.push_back(name);
+      names.emplace_back(name);
     }
 
     // now check the child items and append any that have the check state
@@ -320,7 +320,7 @@ ProjectSaveView::getItemsWithCheckState(const QTreeWidget &tree,
       auto child = item->child(i);
       if (child->checkState(0) == state) {
         auto childName = child->text(0).toStdString();
-        names.push_back(childName);
+        names.emplace_back(childName);
       }
     }
   }
@@ -339,7 +339,7 @@ std::vector<std::string> ProjectSaveView::getIncludedWindowNames() const {
   for (int i = 0; i < m_ui.includedWindows->topLevelItemCount(); ++i) {
     auto item = m_ui.includedWindows->topLevelItem(i);
     auto name = item->text(0).toStdString();
-    names.push_back(name);
+    names.emplace_back(name);
   }
   return names;
 }

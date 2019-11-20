@@ -11,7 +11,7 @@ from Muon.GUI.ElementalAnalysis.LoadWidget import load_utils as lutils
 
 import mantid.simpleapi as mantid
 from mantid import config
-
+import numpy as np
 from six import iteritems
 
 
@@ -70,16 +70,51 @@ class LoadUtilsTest(unittest.TestCase):
         for out, arg in iteritems(tests):
             self.assertEqual(lutils.hyphenise(arg), out)
 
-    def test_group_by_detector(self):
-        output, workspaces = [], []
+    def test_merge_workspaces(self):
+        expected_output, workspaces = [], []
         detectors = range(1, 5)
         for detector in detectors:
             workspace = self.var_ws_name.format(detector, self.test_run)
             workspaces.append(workspace)
-            mantid.CreateSampleWorkspace(OutputWorkspace=workspace).name()
-            output.append("{}; Detector {}".format(self.test_run, detector))
+            mantid.CreateSampleWorkspace(OutputWorkspace=workspace)
+            expected_output.append("{}; Detector {}".format(self.test_run, detector))
 
-        self.assertEquals(lutils.group_by_detector(self.test_run, workspaces), output)
+        self.assertEquals(lutils.merge_workspaces(self.test_run, workspaces), sorted(expected_output))
+        # check call works with empty workspace list
+        self.assertEqual(lutils.merge_workspaces(self.test_run, []), sorted(expected_output))
+
+    def test_create_merged_workspace(self):
+        workspace_list = []
+        num_workspaces = 5
+        workspace_names = []
+        num_bins = 100
+        X_data = np.linspace(0, 400, num_bins)
+        # create data in each workspace based on y = mx + specNumber
+        m = 0.1
+        Yfunc = lambda x, specNo: m * x + specNo
+        Efunc = lambda x, specNo: 2 * m * x + specNo
+        for i in range(0, 5):
+            name = "test_" + str(i)
+            workspace_names.append(name)
+            ws = mantid.WorkspaceFactory.create("Workspace2D", NVectors=1,
+                                                XLength=num_bins, YLength=num_bins)
+            mantid.mtd.add(name, ws)
+            Y_data = Yfunc(X_data, i)
+            E_data = Efunc(X_data, i)
+            ws.setY(0, Y_data)
+            ws.setX(0, X_data)
+            ws.setE(0, E_data)
+            workspace_list.append(ws.name())
+
+        merged_ws = lutils.create_merged_workspace(workspace_list)
+        # check number of bins, and number of histograms is correct
+        self.assertEqual(merged_ws.getNumberHistograms(), num_workspaces)
+        self.assertEqual(merged_ws.blocksize(), num_bins)
+        # check that data has been copied over correctly into the new merged workspace
+        for i in range(0, num_workspaces):
+            self.assertTrue(np.array_equal(merged_ws.readX(i), X_data))
+            self.assertTrue(np.array_equal(merged_ws.readY(i), Yfunc(X_data, i)))
+            self.assertTrue(np.array_equal(merged_ws.readE(i), Efunc(X_data, i)))
 
     def test_flatten_run_data(self):
         test_workspaces = [mantid.CreateSampleWorkspace(OutputWorkspace=name) for name in self.test_ws_names]

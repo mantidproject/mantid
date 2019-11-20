@@ -241,7 +241,7 @@ void SaveSPE::writeHists(const API::MatrixWorkspace_const_sptr WS,
       }
     } else { // if the detector isn't in the instrument definition file, write
              // mask values and prepare to log what happened
-      spuriousSpectra.push_back(i);
+      spuriousSpectra.emplace_back(i);
       writeMaskFlags(outFile);
     }
     // make regular progress reports and check for canceling the algorithm

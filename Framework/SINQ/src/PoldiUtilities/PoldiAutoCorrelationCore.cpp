@@ -322,7 +322,7 @@ PoldiAutoCorrelationCore::getRawCorrelatedIntensity(double dValue,
           std::accumulate(cmess.begin(), cmess.end(), UncertainValue(0.0, 0.0),
                           &UncertainValue::plainAddition);
 
-      current.push_back(sum);
+      current.emplace_back(sum);
     }
 
     /* Finally, the list of I/sigma values is reduced to I.
@@ -601,7 +601,7 @@ std::vector<double> PoldiAutoCorrelationCore::getTofsFor1Angstrom(
   sinThetas.reserve(elements.size());
   for (std::vector<double>::const_iterator twoTheta = twoThetas.begin();
        twoTheta != twoThetas.end(); ++twoTheta) {
-    sinThetas.push_back(sin(*twoTheta / 2.0));
+    sinThetas.emplace_back(sin(*twoTheta / 2.0));
   }
 
   // Same goes for distances

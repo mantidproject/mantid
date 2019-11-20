@@ -162,7 +162,7 @@ TimeSplitterType operator&(const TimeSplitterType &a,
         // left-hand-side (ait in this case)
         //  meaning that a has to be the splitter because the b index is
         //  ignored.
-        out.push_back(*ait & *bit);
+        out.emplace_back(*ait & *bit);
       }
     }
   }
@@ -223,10 +223,10 @@ TimeSplitterType operator|(const TimeSplitterType &a,
   ;
   for (it = a.begin(); it != a.end(); ++it)
     if (it->stop() > it->start())
-      temp.push_back(*it);
+      temp.emplace_back(*it);
   for (it = b.begin(); it != b.end(); ++it)
     if (it->stop() > it->start())
-      temp.push_back(*it);
+      temp.emplace_back(*it);
 
   // Sort by start time
   std::sort(temp.begin(), temp.end(), compareSplittingInterval);

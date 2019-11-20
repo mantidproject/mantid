@@ -368,7 +368,7 @@ std::string JumpFitModel::getResultLogName() const { return "SourceName"; }
 
 std::string JumpFitModel::constructOutputName() const {
   auto const name = createOutputName("%1%_FofQFit_" + m_fitType, "", 0);
-  auto const position = name.find("_Results");
+  auto const position = name.find("_Result");
   if (position != std::string::npos)
     return name.substr(0, position) + name.substr(position + 7, name.size());
   return name;

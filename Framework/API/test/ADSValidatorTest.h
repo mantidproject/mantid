@@ -63,9 +63,9 @@ public:
     ADSValidator adsValidator(false);
 
     StringVector sv;
-    sv.push_back(wsName);
+    sv.emplace_back(wsName);
     TS_ASSERT_EQUALS(adsValidator.isValid(sv), "");
-    sv.push_back(wsName);
+    sv.emplace_back(wsName);
     TS_ASSERT_DIFFERS(adsValidator.isValid(sv), "");
 
     ads.remove(wsName);
@@ -85,15 +85,15 @@ public:
 
     // all valid options
     StringVector sv;
-    sv.push_back(ws1Name);
+    sv.emplace_back(ws1Name);
     TS_ASSERT_EQUALS(adsValidator.isValid(sv), "");
-    sv.push_back(ws2Name);
+    sv.emplace_back(ws2Name);
     TS_ASSERT_EQUALS(adsValidator.isValid(sv), "");
-    sv.push_back(ws3Name);
+    sv.emplace_back(ws3Name);
     TS_ASSERT_EQUALS(adsValidator.isValid(sv), "");
 
     // invalid ws in string
-    sv.push_back(wsInvalidName);
+    sv.emplace_back(wsInvalidName);
     TS_ASSERT_DIFFERS(adsValidator.isValid(sv), "");
 
     ads.remove(ws1Name);

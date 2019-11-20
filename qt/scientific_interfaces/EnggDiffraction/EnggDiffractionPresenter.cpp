@@ -424,7 +424,7 @@ void EnggDiffractionPresenter::processFocusBasic() {
     g_log.debug() << " focus mode selected Focus Sum Of Files \n";
     g_sumOfFilesFocus = "basic";
     std::vector<std::string> firstRun;
-    firstRun.push_back(multi_RunNo[0]);
+    firstRun.emplace_back(multi_RunNo[0]);
 
     // to avoid multiple loops, use firstRun instead as the
     // multi-run number is not required for sumOfFiles
@@ -1059,12 +1059,12 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
       if (customName.empty()) {
         bankNames.emplace_back("cropped");
       } else {
-        bankNames.push_back(customName);
+        bankNames.emplace_back(customName);
       }
     } else if (1 == selection) {
-      bankNames.push_back("North");
+      bankNames.emplace_back("North");
     } else {
-      bankNames.push_back("South");
+      bankNames.emplace_back("South");
     }
   } else {
     constexpr size_t bankNo2 = 2;
@@ -1499,15 +1499,15 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &runNo,
   if (!specNos.empty()) {
     // Cropped focusing
     // just to iterate once, but there's no real bank here
-    bankIDs.push_back(0);
-    specs.push_back(specNos); // one spectrum Nos list given by the user
-    effectiveFilenames.push_back(outputFocusCroppedFilename(runNo));
+    bankIDs.emplace_back(0);
+    specs.emplace_back(specNos); // one spectrum Nos list given by the user
+    effectiveFilenames.emplace_back(outputFocusCroppedFilename(runNo));
   } else {
     if (dgFile.empty()) {
       // Basic/normal focusing
       for (size_t bidx = 0; bidx < banks.size(); bidx++) {
         if (banks[bidx]) {
-          bankIDs.push_back(bidx + 1);
+          bankIDs.emplace_back(bidx + 1);
           specs.emplace_back("");
           effectiveFilenames = outputFocusFilenames(runNo, banks);
         }
@@ -1603,8 +1603,8 @@ void EnggDiffractionPresenter::loadDetectorGroupingCSV(
       }
 
       size_t bankID = boost::lexical_cast<size_t>(bstr);
-      bankIDs.push_back(bankID);
-      specs.push_back(spec);
+      bankIDs.emplace_back(bankID);
+      specs.emplace_back(spec);
     } catch (std::runtime_error &re) {
       throw std::runtime_error(
           "In file '" + dgFile +
@@ -2876,7 +2876,7 @@ void EnggDiffractionPresenter::recordPathBrowsedTo(
   if (!directory.exists() || !directory.isDirectory())
     return;
 
-  m_browsedToPaths.push_back(directory.path());
+  m_browsedToPaths.emplace_back(directory.path());
 }
 
 } // namespace CustomInterfaces

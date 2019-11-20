@@ -22,7 +22,7 @@ DetectorInfoItem is only created by DetectorInfoIterator and allows users of
 the DetectorInfoIterator object access to data from DetectorInfo. The available
 methods include:
   - isMonitor()
-  - isMaksed()
+  - isMasked()
   - twoTheta()
   - position()
   - rotation()

@@ -86,7 +86,7 @@ MDGeometry::MDGeometry(const MDGeometry &other)
     // Copy the dimension
     auto dim =
         boost::make_shared<MDHistoDimension>(other.getDimension(d).get());
-    dimensions.push_back(dim);
+    dimensions.emplace_back(dim);
   }
   this->initGeometry(dimensions);
 
@@ -95,19 +95,19 @@ MDGeometry::MDGeometry(const MDGeometry &other)
   for (it = other.m_transforms_FromOriginal.begin();
        it != other.m_transforms_FromOriginal.end(); ++it) {
     if (*it)
-      m_transforms_FromOriginal.push_back(
+      m_transforms_FromOriginal.emplace_back(
           CoordTransform_const_sptr((*it)->clone()));
     else
-      m_transforms_FromOriginal.push_back(CoordTransform_const_sptr());
+      m_transforms_FromOriginal.emplace_back(CoordTransform_const_sptr());
   }
 
   for (it = other.m_transforms_ToOriginal.begin();
        it != other.m_transforms_ToOriginal.end(); ++it) {
     if (*it)
-      m_transforms_ToOriginal.push_back(
+      m_transforms_ToOriginal.emplace_back(
           CoordTransform_const_sptr((*it)->clone()));
     else
-      m_transforms_ToOriginal.push_back(CoordTransform_const_sptr());
+      m_transforms_ToOriginal.emplace_back(CoordTransform_const_sptr());
   }
 
   // Copy the references to the original workspaces
@@ -206,7 +206,7 @@ MDGeometry::getNonIntegratedDimensions() const {
 std::vector<coord_t> MDGeometry::estimateResolution() const {
   std::vector<coord_t> out;
   for (size_t d = 0; d < this->getNumDims(); d++)
-    out.push_back(this->getDimension(d)->getBinWidth());
+    out.emplace_back(this->getDimension(d)->getBinWidth());
   return out;
 }
 
@@ -245,14 +245,14 @@ size_t MDGeometry::getDimensionIndexById(const std::string &id) const {
  * @param dim :: shared pointer to the dimension object   */
 void MDGeometry::addDimension(
     boost::shared_ptr<Mantid::Geometry::IMDDimension> dim) {
-  m_dimensions.push_back(dim);
+  m_dimensions.emplace_back(dim);
 }
 
 // --------------------------------------------------------------------------------------------
 /** Add a dimension
  * @param dim :: bare pointer to the dimension object   */
 void MDGeometry::addDimension(Mantid::Geometry::IMDDimension *dim) {
-  m_dimensions.push_back(
+  m_dimensions.emplace_back(
       boost::shared_ptr<Mantid::Geometry::IMDDimension>(dim));
 }
 

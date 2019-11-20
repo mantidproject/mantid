@@ -190,6 +190,47 @@ public:
     TS_ASSERT(cylinders.empty());
   }
 
+  void test_load_full_instrument_simple_with_source() {
+    std::string json =
+        Mantid::TestHelpers::getFullJSONInstrumentSimpleWithSource();
+    JSONGeometryParser parser(json);
+    TS_ASSERT_EQUALS(parser.name(), "SimpleInstrument");
+    TS_ASSERT_EQUALS(parser.sampleName(), "sample");
+    TS_ASSERT_EQUALS(parser.samplePosition(), Eigen::Vector3d(0, 0, 0));
+    auto angleAxis = Eigen::AngleAxisd(parser.sampleOrientation());
+    TS_ASSERT_EQUALS(angleAxis.angle(), 0);
+    TS_ASSERT_EQUALS(angleAxis.axis(), Eigen::Vector3d(1, 0, 0));
+    TS_ASSERT_EQUALS(parser.sourceName(), "moderator");
+    TS_ASSERT_EQUALS(parser.sourcePosition(),
+                     Eigen::Vector3d(0, 0, -28.900002));
+    TS_ASSERT_EQUALS(parser.numberOfBanks(), 1);
+    TS_ASSERT_EQUALS(parser.detectorName(0), "detector_1");
+    const auto &detIDs = parser.detectorIDs(0);
+    TS_ASSERT_EQUALS(detIDs.size(), 4);
+    TS_ASSERT((detIDs == std::vector<detid_t>{1, 2, 3, 4}));
+    const auto &x = parser.xPixelOffsets(0);
+    TS_ASSERT((x == std::vector<double>{-0.299, -0.297, -0.299, -0.297}));
+    const auto &y = parser.yPixelOffsets(0);
+    TS_ASSERT((y == std::vector<double>{-0.299, -0.299, -0.297, -0.297}));
+    const auto &translation = parser.translation(0);
+    TS_ASSERT_EQUALS(translation, Eigen::Vector3d(0.971, 0, -0.049));
+    angleAxis = Eigen::AngleAxisd(parser.orientation(0));
+    TS_ASSERT_DELTA(angleAxis.angle(), parser.degreesToRadians(90), TOLERANCE);
+    TS_ASSERT_EQUALS(angleAxis.axis(), Eigen::Vector3d(0, 1, 0));
+    TS_ASSERT(parser.isOffGeometry(0));
+    std::vector<Eigen::Vector3d> testVerticesVec{{-0.001, -0.001, 0},
+                                                 {0.001, -0.001, 0},
+                                                 {0.001, 0.001, 0},
+                                                 {-0.001, 0.001, 0}};
+    assertVectors(parser.vertices(0), testVerticesVec);
+    std::vector<uint32_t> testFacesVec{0};
+    TS_ASSERT_EQUALS(testFacesVec, parser.faces(0));
+    std::vector<uint32_t> testWindingOrderVec{0, 1, 2, 3};
+    TS_ASSERT_EQUALS(testWindingOrderVec, parser.windingOrder(0));
+    const auto &cylinders = parser.cylinders(0);
+    TS_ASSERT(cylinders.empty());
+  }
+
   void test_load_full_instrument_simple_cylindrical_pixel_shape() {
     std::string json =
         Mantid::TestHelpers::getFullJSONInstrumentSimpleCylindrical();

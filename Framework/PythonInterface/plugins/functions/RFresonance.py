@@ -13,7 +13,7 @@ import numpy as np
 class RFresonance(IFunction1D):
 
     def category(self):
-        return "Muon"
+        return "MuonSpecific"
 
     def init(self):
         self.declareParameter("A0", 0.2)
@@ -30,5 +30,6 @@ class RFresonance(IFunction1D):
         Beff = np.sqrt(Bcentre ** 2 + B ** 2)
         RelAmp = (B / Beff) ** 2
         return A0 * (1 + (np.cos(Beff * gmu * x) * np.exp(- (width * x) ** 2) - 1) * RelAmp)
+
 
 FunctionFactory.subscribe(RFresonance)

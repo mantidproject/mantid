@@ -58,9 +58,9 @@ public:
   void setUp() override {
     // Make a little event list with 3 events
     vector<TofEvent> mylist;
-    mylist.push_back(TofEvent(100, 200));
-    mylist.push_back(TofEvent(3.5, 400));
-    mylist.push_back(TofEvent(50, 60));
+    mylist.emplace_back(TofEvent(100, 200));
+    mylist.emplace_back(TofEvent(3.5, 400));
+    mylist.emplace_back(TofEvent(50, 60));
     el = EventList(mylist);
   }
 
@@ -205,7 +205,7 @@ public:
     el2 += mylist;
     TS_ASSERT_EQUALS(events.size(), 3);
     TS_ASSERT_EQUALS(events.capacity(), 3);
-    mylist.push_back(TofEvent(88, 88));
+    mylist.emplace_back(TofEvent(88, 88));
     el2 += mylist;
     TS_ASSERT_EQUALS(events.size(), 7);
     TS_ASSERT_EQUALS(events.capacity(), 7);
@@ -235,13 +235,13 @@ public:
   //  events)
   //  {
   //    typename std::vector<T> mylist;
-  //    mylist.push_back(T(45));
-  //    mylist.push_back(T(89));
-  //    mylist.push_back(T(34));
+  //    mylist.emplace_back(T(45));
+  //    mylist.emplace_back(T(89));
+  //    mylist.emplace_back(T(34));
   //    el2 += mylist;
   //    TS_ASSERT_EQUALS(events.size(), 3);
   //    TS_ASSERT_EQUALS(events.capacity(), 3);
-  //    mylist.push_back(TofEvent(88,88));
+  //    mylist.emplace_back(TofEvent(88,88));
   //    el2 += mylist;
   //    TS_ASSERT_EQUALS(events.size(), 7);
   //    TS_ASSERT_EQUALS(events.capacity(), 7);
@@ -529,8 +529,8 @@ public:
     double step = BIN_DELTA * 10;
     X = this->makeX(step, NUMBINS / 10 + 1);
     for (std::size_t i = 0; i < X.size() - 1; i++) {
-      Y.push_back(static_cast<double>(i + 1));
-      E.push_back(sqrt(static_cast<double>(i + 1)));
+      Y.emplace_back(static_cast<double>(i + 1));
+      E.emplace_back(sqrt(static_cast<double>(i + 1)));
     }
 
     // Go through each possible EventType as the input
@@ -612,15 +612,15 @@ public:
     // one tenth of the # of bins
     double step = BIN_DELTA * 10;
     for (double tof = step; tof < BIN_DELTA * (NUMBINS + 1); tof += step) {
-      X.push_back(tof);
+      X.emplace_back(tof);
     }
     for (std::size_t i = 0; i < X.size() - 1; i++) {
       // Have one zero bin in there
       if (i == 6)
-        Y.push_back(0.0);
+        Y.emplace_back(0.0);
       else
-        Y.push_back(2.0);
-      E.push_back(0.5);
+        Y.emplace_back(2.0);
+      E.emplace_back(0.5);
     }
 
     // Go through each possible EventType as the input
@@ -847,7 +847,7 @@ public:
     double tof; // in ns
     for (tof = 0; tof < BIN_DELTA * (NUMBINS + 1); tof += BIN_DELTA) {
       // bins of 10 microsec
-      shared_x.push_back(tof);
+      shared_x.emplace_back(tof);
     }
     el.setX(make_cow<HistogramX>(shared_x));
     // Do we have the same data in X?
@@ -870,7 +870,7 @@ public:
     double tof; // in ns
     for (tof = 0; tof < 16e3 * 1e3; tof += 1e4) {
       // bins of 10 microsec
-      shared_x.push_back(tof);
+      shared_x.emplace_back(tof);
     }
     el.setX(make_cow<HistogramX>(shared_x));
     // Do we have the same data in X?
@@ -939,7 +939,7 @@ public:
     MantidVec shared_x;
     for (int pulse_time = 0; pulse_time < BIN_DELTA * (NUMBINS + 1);
          pulse_time += BIN_DELTA) {
-      shared_x.push_back(pulse_time);
+      shared_x.emplace_back(pulse_time);
     }
 
     eList.setX(make_cow<HistogramX>(shared_x));
@@ -973,7 +973,7 @@ public:
     MantidVec shared_x;
     for (int pulse_time = 0; pulse_time < BIN_DELTA * (NUMBINS + 1);
          pulse_time += BIN_DELTA) {
-      shared_x.push_back(pulse_time);
+      shared_x.emplace_back(pulse_time);
     }
 
     eList.setX(make_cow<HistogramX>(shared_x));
@@ -997,7 +997,7 @@ public:
     MantidVec shared_x;
     for (int time_at_sample = 0; time_at_sample < BIN_DELTA * (NUMBINS + 1);
          time_at_sample += BIN_DELTA) {
-      shared_x.push_back(time_at_sample);
+      shared_x.emplace_back(time_at_sample);
     }
 
     eList.setX(make_cow<HistogramX>(shared_x));
@@ -1056,9 +1056,10 @@ public:
      */
     for (int time_at_sample = 100; time_at_sample < MAX_TOF;
          time_at_sample += BIN_DELTA) {
-      shared_x.push_back(time_at_sample * 1e3); // Have x-axis in nanoseconds.
-                                                // Tof values are stored as
-                                                // microseconds.
+      shared_x.emplace_back(time_at_sample *
+                            1e3); // Have x-axis in nanoseconds.
+                                  // Tof values are stored as
+                                  // microseconds.
     }
 
     el.setX(make_cow<HistogramX>(shared_x));
@@ -1163,7 +1164,7 @@ public:
     MantidVec shared_x;
     for (double tof = BIN_DELTA * 10; tof < BIN_DELTA * (NUMBINS + 1);
          tof += BIN_DELTA)
-      shared_x.push_back(tof);
+      shared_x.emplace_back(tof);
     el.setX(make_cow<HistogramX>(shared_x));
 
     // Get them back
@@ -1187,7 +1188,7 @@ public:
     MantidVec shared_x;
     for (double tof = BIN_DELTA * 10; tof < BIN_DELTA * (NUMBINS + 1);
          tof += BIN_DELTA)
-      shared_x.push_back(tof);
+      shared_x.emplace_back(tof);
     el.setX(make_cow<HistogramX>(shared_x));
     const EventList el3(el); // need to copy to a const method in order to
                              // access the data directly.
@@ -1223,7 +1224,7 @@ public:
     MantidVec some_other_x;
     double tof; // in ns
     for (tof = 0; tof < BIN_DELTA * (NUMBINS + 1); tof += BIN_DELTA * 2)
-      some_other_x.push_back(tof);
+      some_other_x.emplace_back(tof);
 
     const EventList el3(el); // need to copy to a const method in order to
                              // access the data directly.
@@ -1242,10 +1243,10 @@ public:
   //  void test_histogram_static_function()
   //  {
   //    std::vector<WeightedEvent> events;
-  //    events.push_back(WeightedEvent(1.0, 0, 2.0, 16.0) );
+  //    events.emplace_back(WeightedEvent(1.0, 0, 2.0, 16.0) );
   //    MantidVec X, Y, E;
-  //    X.push_back(0.0);
-  //    X.push_back(10.0);
+  //    X.emplace_back(0.0);
+  //    X.emplace_back(10.0);
   //    EventList::histogramForWeightsHelper(events, X, Y, E);
   //    TS_ASSERT_EQUALS(Y.size(), 1 );
   //    TS_ASSERT_DELTA(Y[0], 2.0, 1e-5 );
@@ -1849,9 +1850,11 @@ public:
     for (int i = 1; i < 10; i++) {
       // Reject the odd hundreds pulse times (100-199, 300-399, etc).
       if ((i % 2) == 0)
-        split.push_back(SplittingInterval(i * 1000000, (i + 1) * 1000000, i));
+        split.emplace_back(
+            SplittingInterval(i * 1000000, (i + 1) * 1000000, i));
       else
-        split.push_back(SplittingInterval(i * 1000000, (i + 1) * 1000000, -1));
+        split.emplace_back(
+            SplittingInterval(i * 1000000, (i + 1) * 1000000, -1));
     }
 
     // Do the splitting
@@ -1936,12 +1939,12 @@ public:
 
       std::vector<EventList *> outputs;
       for (size_t i = 0; i < 10; i++)
-        outputs.push_back(new EventList());
+        outputs.emplace_back(new EventList());
 
       TimeSplitterType split;
       // Slices of 100
       for (int i = 0; i < 10; i++)
-        split.push_back(SplittingInterval(i * 100, (i + 1) * 100, i));
+        split.emplace_back(SplittingInterval(i * 100, (i + 1) * 100, i));
 
       if (curType == WEIGHTED_NOTIME) {
         // Error cause no time
@@ -1977,8 +1980,8 @@ public:
     std::vector<EventList *> outputs(1, new EventList());
 
     TimeSplitterType split;
-    split.push_back(SplittingInterval(100, 200, 0));
-    split.push_back(SplittingInterval(150, 250, 0));
+    split.emplace_back(SplittingInterval(100, 200, 0));
+    split.emplace_back(SplittingInterval(150, 250, 0));
 
     // Do the splitting
     el.splitByTime(split, outputs);
@@ -1995,9 +1998,9 @@ public:
       el *= 3.0;
 
     TimeSplitterType split;
-    split.push_back(SplittingInterval(100, 200, 0));
-    split.push_back(SplittingInterval(150, 250, 0));
-    split.push_back(SplittingInterval(300, 350, 0));
+    split.emplace_back(SplittingInterval(100, 200, 0));
+    split.emplace_back(SplittingInterval(150, 250, 0));
+    split.emplace_back(SplittingInterval(300, 350, 0));
 
     // Do the splitting
     el.filterInPlace(split);
@@ -2027,7 +2030,7 @@ public:
       el.switchTo(WEIGHTED);
 
     TimeSplitterType split;
-    split.push_back(SplittingInterval(1500, 1700, 0));
+    split.emplace_back(SplittingInterval(1500, 1700, 0));
 
     // Do the splitting
     el.filterInPlace(split);
@@ -2043,7 +2046,7 @@ public:
       el *= 3.0;
 
     TimeSplitterType split;
-    split.push_back(SplittingInterval(-10, 1700, 0));
+    split.emplace_back(SplittingInterval(-10, 1700, 0));
 
     // Do the splitting
     el.filterInPlace(split);
@@ -2674,7 +2677,7 @@ public:
   MantidVec makeX(double step, int numbins = 10) {
     MantidVec X;
     for (double tof = step; tof < step * numbins; tof += step) {
-      X.push_back(tof);
+      X.emplace_back(tof);
     }
     return X;
   }
@@ -2873,10 +2876,10 @@ public:
 
     // A vector for histogramming, 100,000 steps of 1.0
     for (double i = 0; i < 100000; i += 1.0)
-      fineX.push_back(i);
+      fineX.emplace_back(i);
     // Coarse vector, 1000 bins.
     for (double i = 0; i < 100000; i += 100)
-      coarseX.push_back(i);
+      coarseX.emplace_back(i);
 
     // Create FrameworkManager such that the effect of config option
     // `MultiThreaded.MaxCores` is visible: The FrameworkManager sets the TBB

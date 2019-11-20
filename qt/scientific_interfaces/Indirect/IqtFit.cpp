@@ -37,7 +37,6 @@ IqtFit::IqtFit(QWidget *parent)
       m_uiForm(new Ui::IqtFit) {
   m_uiForm->setupUi(parent);
   m_iqtFittingModel = dynamic_cast<IqtFitModel *>(fittingModel());
-
   setFitDataPresenter(std::make_unique<IndirectFitDataPresenter>(
       m_iqtFittingModel, m_uiForm->fitDataView));
   setPlotView(m_uiForm->pvFitPlotView);
@@ -48,6 +47,7 @@ IqtFit::IqtFit(QWidget *parent)
   setFitPropertyBrowser(m_uiForm->fitPropertyBrowser);
 
   setEditResultVisible(true);
+  setStartAndEndHidden(false);
 }
 
 void IqtFit::setupFitTab() {
@@ -78,14 +78,14 @@ void IqtFit::fitFunctionChanged() {
 std::string IqtFit::fitTypeString() const {
   const auto numberOfExponential = numberOfCustomFunctions("ExpDecay");
   const auto numberOfStretched = numberOfCustomFunctions("StretchExp");
-
+  std::string functionType{""};
   if (numberOfExponential > 0)
-    return std::to_string(numberOfExponential) + "E";
+    functionType += std::to_string(numberOfExponential) + "E";
 
   if (numberOfStretched > 0)
-    return std::to_string(numberOfStretched) + "S";
+    functionType += std::to_string(numberOfStretched) + "S";
 
-  return "";
+  return functionType;
 }
 
 void IqtFit::setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
@@ -99,6 +99,10 @@ void IqtFit::setRunIsRunning(bool running) {
 }
 
 void IqtFit::setRunEnabled(bool enable) { m_uiForm->pbRun->setEnabled(enable); }
+
+void IqtFit::setStartAndEndHidden(bool hidden) {
+  m_uiForm->fitDataView->setStartAndEndHidden(hidden);
+}
 
 } // namespace IDA
 } // namespace CustomInterfaces

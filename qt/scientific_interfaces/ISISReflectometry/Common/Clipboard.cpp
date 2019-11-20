@@ -100,7 +100,7 @@ std::vector<boost::optional<Row>> Clipboard::createRowsForAllRoots() const {
   for (auto const &subtree : subtrees()) {
     auto rowsToAdd = createRowsForSubtree(subtree);
     for (auto &row : rowsToAdd)
-      result.push_back(row);
+      result.emplace_back(row);
   }
   return result;
 }

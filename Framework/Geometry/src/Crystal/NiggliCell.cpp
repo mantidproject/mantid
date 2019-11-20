@@ -212,7 +212,7 @@ bool NiggliCell::MakeNiggliUB(const DblMatrix &UB, DblMatrix &newUB) {
           V3D sum(v1);
           sum += v2;
           sum += v3;
-          directions.push_back(sum);
+          directions.emplace_back(sum);
         }
       }
     }
@@ -249,7 +249,7 @@ bool NiggliCell::MakeNiggliUB(const DblMatrix &UB, DblMatrix &newUB) {
           if (vol > min_vol && HasNiggliAngles(a, b, c, 0.01)) {
             Matrix<double> new_tran(3, 3, false);
             OrientedLattice::GetUB(new_tran, a, b, c);
-            UB_list.push_back(new_tran);
+            UB_list.emplace_back(new_tran);
           }
         }
       }
@@ -273,7 +273,7 @@ bool NiggliCell::MakeNiggliUB(const DblMatrix &UB, DblMatrix &newUB) {
   double total_length;
 
   std::vector<DblMatrix> short_list;
-  short_list.push_back(UB_list[0]);
+  short_list.emplace_back(UB_list[0]);
   OrientedLattice::GetABC(short_list[0], a, b, c);
   total_length = a.norm() + b.norm() + c.norm();
 
@@ -283,7 +283,7 @@ bool NiggliCell::MakeNiggliUB(const DblMatrix &UB, DblMatrix &newUB) {
     OrientedLattice::GetABC(UB_list[i], v1, v2, v3);
     double next_length = v1.norm() + v2.norm() + v3.norm();
     if (fabs(next_length - total_length) / total_length < length_tol)
-      short_list.push_back(UB_list[i]);
+      short_list.emplace_back(UB_list[i]);
     else
       got_short_list = true;
     i++;

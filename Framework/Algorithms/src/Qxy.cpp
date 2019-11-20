@@ -420,7 +420,7 @@ Qxy::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace) {
     std::vector<double> totalBinning = positiveBinning;
     std::for_each(std::begin(totalBinning), std::end(totalBinning),
                   [](double &n) { n = -1 * n; });
-    totalBinning.push_back(0.0);
+    totalBinning.emplace_back(0.0);
     std::reverse(std::begin(positiveBinning), std::end(positiveBinning));
     totalBinning.insert(std::end(totalBinning), std::begin(positiveBinning),
                         std::end(positiveBinning));

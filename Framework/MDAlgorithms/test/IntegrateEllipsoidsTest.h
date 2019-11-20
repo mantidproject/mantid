@@ -176,9 +176,9 @@ public:
     rebinAlg->initialize();
     rebinAlg->setProperty("InputWorkspace", m_eventWS);
     auto params = std::vector<double>();
-    params.push_back(950);
-    params.push_back(10);
-    params.push_back(2500);
+    params.emplace_back(950);
+    params.emplace_back(10);
+    params.emplace_back(2500);
     rebinAlg->setProperty("Params", params);
     rebinAlg->setProperty("PreserveEvents", false); // Make a histo workspace
     rebinAlg->setPropertyValue("OutputWorkspace", "dummy");
@@ -474,9 +474,9 @@ public:
     rebinAlg->initialize();
     rebinAlg->setProperty("InputWorkspace", m_eventWS);
     auto params = std::vector<double>();
-    params.push_back(950);
-    params.push_back(5);
-    params.push_back(2500);
+    params.emplace_back(950);
+    params.emplace_back(5);
+    params.emplace_back(2500);
     rebinAlg->setProperty("Params", params);
     rebinAlg->setProperty("PreserveEvents", false); // Make a histo workspace
     rebinAlg->setPropertyValue("OutputWorkspace", "dummy");

@@ -133,9 +133,9 @@ void DgsConvertToEnergyTransfer::exec() {
     double emin = -0.5 * eiGuess;
     double deltaE = 0.01 * eiGuess;
     double emax = 0.99 * eiGuess;
-    etBinning.push_back(emin);
-    etBinning.push_back(deltaE);
-    etBinning.push_back(emax);
+    etBinning.emplace_back(emin);
+    etBinning.emplace_back(deltaE);
+    etBinning.emplace_back(emax);
   }
 
   double incidentEnergy = 0.0;

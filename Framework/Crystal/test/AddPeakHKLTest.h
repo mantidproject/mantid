@@ -89,9 +89,9 @@ public:
     alg.setChild(true);
     alg.initialize();
     std::vector<double> hklVec;
-    hklVec.push_back(hkl.X());
-    hklVec.push_back(hkl.Y());
-    hklVec.push_back(hkl.Z());
+    hklVec.emplace_back(hkl.X());
+    hklVec.emplace_back(hkl.Y());
+    hklVec.emplace_back(hkl.Z());
     alg.setProperty("HKL", hklVec);
     alg.setProperty("Workspace", ws);
     alg.execute();

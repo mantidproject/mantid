@@ -41,13 +41,13 @@ void LiveDataAlgorithm::initProps() {
       Kernel::ConfigService::Instance().getFacility().instruments();
   for (const auto &instrument : instrInfo) {
     if (instrument.hasLiveListenerInfo()) {
-      instruments.push_back(instrument.name());
+      instruments.emplace_back(instrument.name());
     }
   }
 
   // All available listener class names
   auto listeners = LiveListenerFactory::Instance().getKeys();
-  listeners.push_back(""); // Allow not specifying a listener too
+  listeners.emplace_back(""); // Allow not specifying a listener too
 
   declareProperty(std::make_unique<PropertyWithValue<std::string>>(
                       "Instrument", "",

@@ -455,7 +455,7 @@ ChebfunBase::bestFitTempl(double start, double end, FunctionType f,
   }
   p.clear();
   a.clear();
-  a.push_back(maxA);
+  a.emplace_back(maxA);
   return ChebfunBase_sptr();
 }
 
@@ -660,7 +660,7 @@ std::vector<double> ChebfunBase::fitOdd(const API::IFunction &f,
   xOdd.reserve(pOdd.size());
   // m_x is odd-sized so the loop is ok
   for (auto x = m_x.begin() + 1; x != m_x.end(); x += 2) {
-    xOdd.push_back(*x);
+    xOdd.emplace_back(*x);
   }
 
   API::FunctionDomain1DView x(xOdd.data(), xOdd.size());
@@ -737,7 +737,7 @@ std::vector<double> ChebfunBase::roots(const std::vector<double> &a) const {
     } else {
       if (im + firstIm < 1e-10) {
         double x = startX() + (re + 1.0) / 2.0 * Dx;
-        r.push_back(x);
+        r.emplace_back(x);
       }
       isFirst = true;
     }

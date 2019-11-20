@@ -22,7 +22,6 @@ GNU_DIAG_ON("conversion")
 #include <json/json.h>
 
 using namespace Mantid::Types;
-using namespace LogSchema;
 
 namespace {
 /// Logger
@@ -53,13 +52,14 @@ IKafkaStreamDecoder::IKafkaStreamDecoder(std::shared_ptr<IKafkaBroker> broker,
                                          const std::string &runInfoTopic,
                                          const std::string &spDetTopic,
                                          const std::string &sampleEnvTopic,
-                                         const std::string &chopperTopic)
+                                         const std::string &chopperTopic,
+                                         const std::string &monitorTopic)
     : m_broker(broker), m_streamTopic(streamTopic),
       m_runInfoTopic(runInfoTopic), m_spDetTopic(spDetTopic),
       m_sampleEnvTopic(sampleEnvTopic), m_chopperTopic(chopperTopic),
-      m_interrupt(false), m_specToIdx(), m_runStart(), m_runId(""), m_thread(),
-      m_capturing(false), m_exception(), m_extractWaiting(false),
-      m_cbIterationEnd([] {}), m_cbError([] {}) {}
+      m_monitorTopic(monitorTopic), m_interrupt(false), m_specToIdx(),
+      m_runStart(), m_runId(""), m_thread(), m_capturing(false), m_exception(),
+      m_extractWaiting(false), m_cbIterationEnd([] {}), m_cbError([] {}) {}
 
 /**
  * Destructor.
@@ -425,7 +425,7 @@ IKafkaStreamDecoder::getRunStartMessage(std::string &rawMsgBuffer) {
         GetRunInfo(reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
     if (runMsg->info_type_type() != InfoTypes::RunStart) {
       throw std::runtime_error("IKafkaStreamDecoder::initLocalCaches() - "
-                               "Could not find a run start message"
+                               "Could not find a run start message "
                                "in the run info topic. Unable to continue");
     }
   }

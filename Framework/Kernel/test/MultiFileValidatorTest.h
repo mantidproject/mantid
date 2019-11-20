@@ -20,7 +20,7 @@ namespace {
 void addSingleFile(std::vector<std::vector<std::string>> &fileNames,
                    const std::string &fileNameToAdd) {
   const std::vector<std::string> fileNameList(1, fileNameToAdd);
-  fileNames.push_back(fileNameList);
+  fileNames.emplace_back(fileNameList);
 }
 } // namespace
 

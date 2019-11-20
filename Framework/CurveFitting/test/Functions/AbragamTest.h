@@ -21,7 +21,7 @@ public:
 
     // check its categories
     TS_ASSERT(ab.categories().size() == 1);
-    TS_ASSERT(ab.category() == "Muon");
+    TS_ASSERT(ab.category() == "MuonSpecific");
   }
 
   void test_values() {

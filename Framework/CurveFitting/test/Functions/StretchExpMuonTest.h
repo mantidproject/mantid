@@ -19,7 +19,7 @@ public:
 
     StretchExpMuon fn;
     TS_ASSERT(fn.categories().size() == 1);
-    TS_ASSERT(fn.category() == "Muon");
+    TS_ASSERT(fn.category() == "MuonGeneric");
   }
 
   void test_values() {

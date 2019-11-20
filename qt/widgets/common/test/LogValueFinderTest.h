@@ -157,8 +157,8 @@ private:
       DateAndTime t;
       const std::string &time = "2016-08-24T14:26:0" + std::to_string(i);
       t.setFromISO8601(time);
-      times.push_back(t);
-      values.push_back(static_cast<double>(i + logValue));
+      times.emplace_back(t);
+      values.emplace_back(static_cast<double>(i + logValue));
     }
     tsp->addValues(times, values);
     run.addLogData(std::move(tsp));

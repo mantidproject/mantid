@@ -222,12 +222,12 @@ void ParamFunction::declareParameter(const std::string &name, double initValue,
     throw std::invalid_argument(msg.str());
   }
 
-  m_parameterStatus.push_back(Active);
-  m_parameterNames.push_back(name);
-  m_parameterDescriptions.push_back(description);
-  m_parameters.push_back(initValue);
-  m_errors.push_back(0.0);
-  m_explicitlySet.push_back(false);
+  m_parameterStatus.emplace_back(Active);
+  m_parameterNames.emplace_back(name);
+  m_parameterDescriptions.emplace_back(description);
+  m_parameters.emplace_back(initValue);
+  m_errors.emplace_back(0.0);
+  m_explicitlySet.emplace_back(false);
 }
 
 /// Nonvirtual member which removes all declared parameters

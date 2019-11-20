@@ -144,7 +144,7 @@ workspaceIndexVectorFromString(const std::string &listString) {
   auto const intVec = vectorFromString<int>(listString);
   std::vector<MantidQt::CustomInterfaces::IDA::WorkspaceIndex> output;
   for (auto const i : intVec) {
-    output.push_back(MantidQt::CustomInterfaces::IDA::WorkspaceIndex{i});
+    output.emplace_back(MantidQt::CustomInterfaces::IDA::WorkspaceIndex{i});
   }
   return output;
 }
@@ -359,7 +359,7 @@ void IndirectFitData::validateSpectra(Spectra const &spectra) {
   std::vector<int> notInRange;
   for (auto const i : spectra) {
     if (i.value < 0 || i.value > maxValue)
-      notInRange.push_back(i.value);
+      notInRange.emplace_back(i.value);
   }
   if (!notInRange.empty()) {
     if (notInRange.size() > 5)

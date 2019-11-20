@@ -136,7 +136,7 @@ void LoadPDFgetNFile::parseDataFile(std::string filename) {
       size_t numcols = mColumnNames.size();
       for (size_t i = 0; i < numcols; ++i) {
         std::vector<double> tempvec;
-        mData.push_back(tempvec);
+        mData.emplace_back(tempvec);
       }
 
     } else if (readdata) {
@@ -207,7 +207,7 @@ void LoadPDFgetNFile::parseColumnNameLine(std::string line) {
   stringstream msgss;
   msgss << "Column Names: ";
   for (size_t i = 0; i < numcols; ++i) {
-    this->mColumnNames.push_back(terms[i + 1]);
+    this->mColumnNames.emplace_back(terms[i + 1]);
     msgss << setw(-3) << i << ": " << setw(-10) << mColumnNames[i];
   }
   g_log.information() << msgss.str() << '\n';
@@ -252,7 +252,7 @@ void LoadPDFgetNFile::parseDataLine(string line) {
       tempvalue = std::stod(temps);
     }
 
-    mData[i].push_back(tempvalue);
+    mData[i].emplace_back(tempvalue);
   }
 }
 
@@ -301,7 +301,7 @@ size_t calcVecSize(const std::vector<double> &data0,
       // X in descending order and hit the end of one set of data
       // Record the current data set information and start the next data set
       numsets += 1;
-      numptsvec.push_back(vecsize);
+      numptsvec.emplace_back(vecsize);
       vecsize = 1;
     } else {
       // In the middle of a set of data
@@ -361,7 +361,7 @@ void LoadPDFgetNFile::generateDataWorkspace() {
 
   // Record the last data set information
   ++numsets;
-  numptsvec.push_back(calcVecSize(mData[0], numptsvec, numsets, xascend));
+  numptsvec.emplace_back(calcVecSize(mData[0], numptsvec, numsets, xascend));
 
   checkSameSize(numptsvec, numsets);
 
