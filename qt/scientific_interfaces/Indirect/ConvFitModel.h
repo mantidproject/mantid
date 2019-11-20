@@ -19,7 +19,7 @@ using ResolutionCollectionType =
 using ExtendedResolutionType =
     IndexCollectionType<TableDatasetIndex, std::string>;
 
-class DLLExport ConvFitModel : public IndirectFittingModel {
+class MANTIDQT_INDIRECT_DLL ConvFitModel : public IndirectFittingModel {
 public:
   using IndirectFittingModel::addWorkspace;
 

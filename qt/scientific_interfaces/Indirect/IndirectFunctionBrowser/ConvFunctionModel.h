@@ -118,6 +118,8 @@ private:
   void removeGlobal(const QString &parName);
   QStringList makeGlobalList() const;
   int getNumberOfPeaks() const;
+  void checkConvolution(IFunction_sptr fun);
+  void checkComposite(IFunction_sptr fun);
 
   ConvolutionFunctionModel m_model;
   FitType m_fitType = FitType::None;
