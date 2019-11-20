@@ -27,7 +27,9 @@ from Muon.GUI.Common.fitting_tab_widget.fitting_tab_widget import FittingTabWidg
 from Muon.GUI.MuonAnalysis.load_widget.load_widget import LoadWidget
 from Muon.GUI.Common.phase_table_widget.phase_table_widget import PhaseTabWidget
 from Muon.GUI.Common.results_tab_widget.results_tab_widget import ResultsTabWidget
-
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_qt4agg import (FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
+import numpy as np
 SUPPORTED_FACILITIES = ["ISIS", "SmuS"]
 
 
@@ -91,6 +93,19 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
         central_widget = QtWidgets.QWidget()
         vertical_layout = QtWidgets.QVBoxLayout()
+
+        # create the plot widget
+        plot_widget = QtWidgets.QDockWidget()
+        static_canvas = FigureCanvas(Figure(figsize=(5, 3)))
+        plot_widget.setWidget(static_canvas)
+
+        # create a test plot
+        self._static_ax = static_canvas.figure.subplots()
+        t = np.linspace(0, 10, 501)
+        self._static_ax.plot(t, np.tan(t), ".")
+
+        # add the docket widget
+        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, plot_widget)
 
         vertical_layout.addWidget(self.load_widget.load_widget_view)
         vertical_layout.addWidget(self.tabs)
