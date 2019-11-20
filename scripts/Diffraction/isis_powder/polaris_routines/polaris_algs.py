@@ -144,10 +144,14 @@ def _merge_workspace_with_limits(focused_ws, q_lims):
         min_x = min(np.min(x_data), min_x)
         max_x = max(np.max(x_data), max_x)
         num_x = max(x_data.size, num_x)
+
     width_x = (max_x-min_x)/num_x
     binning = [min_x, width_x, max_x]
     focused_ws = mantid.Rebin(InputWorkspace=focused_ws, Params=binning)
-    focused_ws_conjoined = mantid.ConjoinSpectra(InputWorkspaces=focused_ws)
+    while focused_ws.size() > 1:
+        mantid.ConjoinWorkspaces(InputWorkspace1=focused_ws[0],
+                                 InputWorkspace2=focused_ws[1])
+    focused_ws_conjoined = focused_ws[0]
 
     if type(q_lims) == str:
         q_min = []
