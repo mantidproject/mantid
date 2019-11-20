@@ -57,13 +57,39 @@ void ConvFunctionModel::setFunction(IFunction_sptr fun) {
     m_model.setFunction(fun);
     return;
   }
+
+  bool isBackgroundSet = false;
+  if (fun->name() == "Convolution") {
+    checkConvolution(fun);
+  } else if (fun->name() == "CompositeFunction") {
+    for (size_t i = 0; i < fun->nFunctions(); ++i) {
+      auto f = fun->getFunction(i);
+      auto const name = f->name();
+      if (name == "FlatBackground") {
+        m_backgroundType = BackgroundType::Flat;
+        isBackgroundSet = true;
+      } else if (name == "LinearBackground") {
+        m_backgroundType = BackgroundType::Linear;
+        isBackgroundSet = true;
+      } else if (name == "Convolution") {
+        checkConvolution(f);
+      }
+    }
+  }
+  m_model.setFunction(fun);
+}
+
+void ConvFunctionModel::checkConvolution(IFunction_sptr fun) {
   bool isFitTypeSet = false;
   int numberLorentzians = 0;
-  bool isBackgroundSet = false;
   for (size_t i = 0; i < fun->nFunctions(); ++i) {
     auto f = fun->getFunction(i);
     auto const name = f->name();
-    if (name == "Lorentzian") {
+    if (name == "Resolution") {
+      continue;
+    } else if (name == "CompositeFunction") {
+      checkComposite(f);
+    } else if (name == "Lorentzian") {
       if (isFitTypeSet) {
         throw std::runtime_error("Function has wrong structure.");
       }
@@ -73,28 +99,48 @@ void ConvFunctionModel::setFunction(IFunction_sptr fun) {
         numberLorentzians = 2;
         isFitTypeSet = true;
       }
-    } else if (name == "DeltaFunction") {
-      if (m_hasDeltaFunction || isBackgroundSet) {
+    } else if (name == "TeixeiraWaterSQE") {
+      if (isFitTypeSet) {
         throw std::runtime_error("Function has wrong structure.");
       }
+      isFitTypeSet = true;
+    } else if (name == "DeltaFunction") {
       m_hasDeltaFunction = true;
-      isFitTypeSet = true;
-    } else if (isBackgroundSet) {
-      throw std::runtime_error("Function has wrong structure.");
-    } else if (name == "FlatBackground") {
-      m_backgroundType = BackgroundType::Flat;
-      isFitTypeSet = true;
-      isBackgroundSet = true;
-    } else if (name == "LinearBackground") {
-      m_backgroundType = BackgroundType::Linear;
-      isFitTypeSet = true;
-      isBackgroundSet = true;
     } else {
       clear();
       throw std::runtime_error("Function has wrong structure.");
     }
   }
-  m_model.setFunction(fun);
+}
+
+void ConvFunctionModel::checkComposite(IFunction_sptr fun) {
+  bool isFitTypeSet = false;
+  int numberLorentzians = 0;
+  for (size_t i = 0; i < fun->nFunctions(); ++i) {
+    auto f = fun->getFunction(i);
+    auto const name = f->name();
+    if (name == "Lorentzian") {
+      if (isFitTypeSet) {
+        throw std::runtime_error("Function has wrong structure.");
+      }
+
+      numberLorentzians++;
+      if (numberLorentzians == 2) {
+        isFitTypeSet = true;
+      }
+
+    } else if (name == "TeixeiraWaterSQE") {
+      if (isFitTypeSet) {
+        throw std::runtime_error("Function has wrong structure.");
+      }
+      isFitTypeSet = true;
+    } else if (name == "DeltaFunction") {
+      m_hasDeltaFunction = true;
+    } else {
+      clear();
+      throw std::runtime_error("Function has wrong structure.");
+    }
+  }
 }
 
 IFunction_sptr ConvFunctionModel::getFitFunction() const {

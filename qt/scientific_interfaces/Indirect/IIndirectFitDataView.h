@@ -22,7 +22,7 @@ class MANTIDQT_INDIRECT_DLL IIndirectFitDataView : public QTabWidget {
   Q_OBJECT
 
 public:
-  IIndirectFitDataView(QWidget *parent) : QTabWidget(parent){};
+  IIndirectFitDataView(QWidget *parent = nullptr) : QTabWidget(parent){};
   virtual ~IIndirectFitDataView() = default;
 
   virtual QTableWidget *getDataTable() const = 0;
