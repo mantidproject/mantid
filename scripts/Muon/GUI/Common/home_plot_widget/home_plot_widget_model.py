@@ -12,11 +12,11 @@ from mantid.api import AnalysisDataService
 
 
 class HomePlotWidgetModel(object):
-    def __init__(self):
+    def __init__(self, dockable_plot_window=None):
         """
         :param plotting_window_model: This is the plotting manager class to use
         """
-        self.plot_figure = None
+        self.plot_figure = dockable_plot_window
         self._plotted_workspaces = []
         self._plotted_workspaces_inverse_binning = {}
         self._plotted_fit_workspaces = []
@@ -35,7 +35,8 @@ class HomePlotWidgetModel(object):
 
     @property
     def plotted_workspaces_inverse_binning(self):
-        self._plotted_workspaces_inverse_binning = {key: item for key, item in self._plotted_workspaces_inverse_binning.items()
+        self._plotted_workspaces_inverse_binning = {key: item for key, item in
+                                                    self._plotted_workspaces_inverse_binning.items()
                                                     if key in self.plot_figure.gca().tracked_workspaces.keys()}
         return self._plotted_workspaces_inverse_binning
 
@@ -71,7 +72,7 @@ class HomePlotWidgetModel(object):
             self.plotted_workspaces = []
             self.plotted_workspaces_inverse_binning = {}
             self.plotted_fit_workspaces = []
-            self.plot_figure.clear()
+            #self.plot_figure.clear()
             self.plot_figure.canvas.draw()
             return self.plot_figure
         try:
@@ -80,11 +81,11 @@ class HomePlotWidgetModel(object):
             return
         if (force_redraw or self.plotted_workspaces == []) and self.plot_figure:
 
-            self.plot_figure.clear()
+            #self.plot_figure.clear()
             self.plotted_workspaces = []
             self.plotted_workspaces_inverse_binning = {}
             self.plotted_fit_workspaces = []
-            self.plot_figure = plot(workspaces,wksp_indices=[0], fig=self.plot_figure, window_title=title,
+            self.plot_figure = plot(workspaces, wksp_indices=[0], fig=self.plot_figure, window_title=title,
                                     plot_kwargs={'distribution': True, 'autoscale_on_update': False}, errors=True)
             self.set_x_lim(domain)
 
@@ -100,13 +101,12 @@ class HomePlotWidgetModel(object):
             axis.set_ylim(ylim)
         else:
             self.plot_figure = plot(workspaces, wksp_indices=[0], window_title=title, plot_kwargs={'distribution': True,
-                                    'autoscale_on_update': False}, errors=True)
+                                                                                                   'autoscale_on_update': False},
+                                    errors=True)
             self.set_x_lim(domain)
 
         self.plot_figure.canvas.set_window_title(window_title)
         self.plot_figure.gca().set_title(title)
-
-        self.plot_figure.canvas.window().closing.connect(self._clear_plot_references)
 
         workspaces_to_remove = [workspace for workspace in self.plotted_workspaces if workspace not in workspace_list]
         for workspace in workspaces_to_remove:
@@ -114,7 +114,7 @@ class HomePlotWidgetModel(object):
 
         self.plotted_workspaces = workspace_list
 
-    def set_x_lim(self,domain):
+    def set_x_lim(self, domain):
         if domain == "Time":
             self.plot_figure.gca().set_xlim(left=0.0, right=15.0)
             self.autoscale_y_to_data_in_view()
@@ -136,7 +136,8 @@ class HomePlotWidgetModel(object):
             workspace_index = 3
 
         self.plot_figure = plot(workspaces, wksp_indices=[workspace_index], fig=self.plot_figure, overplot=True,
-                                plot_kwargs={'distribution': True, 'zorder': 4, 'autoscale_on_update': False, 'label': label})
+                                plot_kwargs={'distribution': True, 'zorder': 4, 'autoscale_on_update': False,
+                                             'label': label})
 
         if workspace_name not in self._plotted_fit_workspaces:
             self._plotted_fit_workspaces.append(workspace_name)
@@ -179,7 +180,7 @@ class HomePlotWidgetModel(object):
         for line in axis.lines:
             x, y = line.get_data()
             start, stop = np.searchsorted(x, xlim)
-            y_within_range = y[max(start-1,0):(stop+1)]
+            y_within_range = y[max(start - 1, 0):(stop + 1)]
             ylim = min(ylim[0], np.nanmin(y_within_range)), max(ylim[1], np.nanmax(y_within_range))
 
         new_bottom = ylim[0] * 1.3 if ylim[0] < 0.0 else ylim[0] * 0.7
