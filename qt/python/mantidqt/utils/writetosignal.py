@@ -22,8 +22,8 @@ class WriteToSignal(QObject):
 
     def __init__(self, original_out):
         QObject.__init__(self)
-        # If the file descriptor of the stream is < 0 then we are running in a no-external-console mode
-        if not hasattr(original_out, 'fileno') or original_out.fileno() < 0:
+        # Check if the output stream is a printable terminal.
+        if not original_out.isatty():
             self._original_out = None
         else:
             self._original_out = original_out
@@ -33,9 +33,6 @@ class WriteToSignal(QObject):
 
     def flush(self):
         pass
-
-    def isatty(self):
-        return False
 
     def write(self, txt):
         if self._original_out:
@@ -47,8 +44,8 @@ class WriteToSignal(QObject):
                                              "Original error: {}\n\n".format(str(e)))
             except UnicodeEncodeError:
                 """
-                Scripts containing unicode characters could fail to run if mantid is not started from the
-                terminal on unix systems. The script runs fine if this exception is caught and discarded.
+                Scripts containing unicode characters could fail to run if the original_out does not
+                support those characters. If this occurs, just don't print to that terminal and continue.
                 """
                 pass
         # always write to the message log

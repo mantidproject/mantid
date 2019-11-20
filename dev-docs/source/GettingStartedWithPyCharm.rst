@@ -207,6 +207,8 @@ Setting up PyCharm on Linux
 
 3. Go to Run->Run... and select Edit Configurations. Go to Templates > Python. Make ``<Mantid Build Directory>/bin;`` the ``Working Directory``. This will then be used for all Python configurations you make.
 
+4. Tick the "Emulate terminal in output console" check box. This will ensure that all output from mantid is sent to the debug terminal.
+
 
 Useful Plugins
 ##############

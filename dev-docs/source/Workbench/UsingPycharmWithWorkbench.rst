@@ -26,6 +26,8 @@ Note that the only difference here is the change from ``/bin/Debug/`` to ``/bin/
 
 Make sure you have finished the build you are using (Debug or Release), or there will be import errors.
 
+Make sure to tick the "Emulate terminal in output console" check box. This will ensure that all output from mantid is sent to the debug terminal.
+
 Common errors
 -------------
 
