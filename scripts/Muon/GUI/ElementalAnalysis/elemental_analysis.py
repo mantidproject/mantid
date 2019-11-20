@@ -438,9 +438,11 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
 
     def add_line_by_type(self, run, _type):
         # Ensure all detectors are enabled
-        for detector in self.detectors.detectors:
-            if not detector.isEnabled():
-                detector.setEnabled(True)
+        last_run = self.load_widget.last_loaded_run()
+        for i, detector in enumerate(self.detectors.detectors):
+            if i < self.load_widget.get_run_num_loaded_detectors(last_run):
+                if not detector.isEnabled():
+                    detector.setEnabled(True)
 
         if self.plot_window is None:
             return
@@ -472,13 +474,15 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         self.uncheck_detectors_if_no_line_plotted()
 
     def uncheck_detectors_if_no_line_plotted(self):
+        last_run = self.load_widget.last_loaded_run()
         if not any([
             self.lines.total.isChecked(),
             self.lines.prompt.isChecked(),
             self.lines.delayed.isChecked()
         ]):
-            for detector in self.detectors.detectors:
-                detector.setEnabled(False)
+            for i, detector in enumerate(self.detectors.detectors):
+                if i < self.load_widget.get_run_num_loaded_detectors(last_run):
+                    detector.setEnabled(False)
 
     # When removing a line with the remove window uncheck the line here
     def uncheck_on_removed(self, removed_lines):
