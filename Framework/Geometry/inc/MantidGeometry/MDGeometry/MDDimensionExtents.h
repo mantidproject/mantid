@@ -104,7 +104,7 @@ private:
 
 #pragma pack(pop) // Return to default packing size
 
-} // namespace API
+} // namespace Geometry
 
 } // namespace Mantid
 

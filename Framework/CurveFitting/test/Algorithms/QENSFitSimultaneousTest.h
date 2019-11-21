@@ -27,8 +27,8 @@ using Mantid::CurveFitting::Algorithms::QENSFitSimultaneous;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::Kernel::make_cow;
 
 class QENSFitSimultaneousTest : public CxxTest::TestSuite {

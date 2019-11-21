@@ -13,10 +13,10 @@
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidAlgorithms/DeadTimeCorrection.h"
 
-using Mantid::API::FrameworkManager;
-using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::Algorithms::CreateSampleWorkspace;
 using Mantid::Algorithms::DeadTimeCorrection;
+using Mantid::API::FrameworkManager;
+using Mantid::API::MatrixWorkspace_sptr;
 
 namespace {
 MatrixWorkspace_sptr createWorkspace(const int nPixelsPerBank = 3,

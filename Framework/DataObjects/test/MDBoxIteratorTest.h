@@ -27,7 +27,6 @@ using namespace Mantid;
 using namespace Mantid::Kernel;
 using Mantid::Geometry::MDBoxImplicitFunction;
 using Mantid::Geometry::MDImplicitFunction;
-using Mantid::Geometry::MDImplicitFunction;
 using Mantid::Geometry::MDPlane;
 
 class MDBoxIteratorTest : public CxxTest::TestSuite {

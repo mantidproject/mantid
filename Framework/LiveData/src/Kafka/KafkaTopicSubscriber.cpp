@@ -421,8 +421,8 @@ void KafkaTopicSubscriber::reportSuccessOrFailure(
 void KafkaTopicSubscriber::consumeMessage(std::string *payload, int64_t &offset,
                                           int32_t &partition,
                                           std::string &topic) {
-  using RdKafka::Message;
   using RdKafka::err2str;
+  using RdKafka::Message;
   assert(m_consumer);
   assert(payload);
 

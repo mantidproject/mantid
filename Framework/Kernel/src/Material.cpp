@@ -19,8 +19,8 @@ using tokenizer = Mantid::Kernel::StringTokenizer;
 using str_pair = std::pair<std::string, std::string>;
 
 using PhysicalConstants::Atom;
-using PhysicalConstants::NeutronAtom;
 using PhysicalConstants::getAtom;
+using PhysicalConstants::NeutronAtom;
 
 namespace {
 constexpr double INV_FOUR_PI = 1. / (4. * M_PI);

@@ -121,6 +121,7 @@ public:
   void power(double exponent);
 
   // --------------------------------------------------------------------------------------------
+
   MDHistoWorkspace &operator&=(const MDHistoWorkspace &b);
   MDHistoWorkspace &operator|=(const MDHistoWorkspace &b);
   MDHistoWorkspace &operator^=(const MDHistoWorkspace &b);

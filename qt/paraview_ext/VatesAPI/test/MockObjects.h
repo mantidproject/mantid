@@ -32,9 +32,9 @@
 #include <vtkFieldData.h>
 #include <vtkStringArray.h>
 
+using Mantid::coord_t;
 using Mantid::Geometry::MDHistoDimension;
 using Mantid::Geometry::MDHistoDimension_sptr;
-using Mantid::coord_t;
 
 //=====================================================================================
 // Test Helper Types. These are shared by several tests in VatesAPI

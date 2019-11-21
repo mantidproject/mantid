@@ -354,8 +354,8 @@ private:
   }
 
   Mantid::API::IAlgorithm_sptr createAlgorithm() {
-    using Mantid::API::IAlgorithm;
     using Mantid::Algorithms::MonteCarloAbsorption;
+    using Mantid::API::IAlgorithm;
     auto alg = boost::make_shared<MonteCarloAbsorption>();
     alg->initialize();
     alg->setRethrows(true);

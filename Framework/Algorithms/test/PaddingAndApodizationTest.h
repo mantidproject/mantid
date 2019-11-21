@@ -18,8 +18,8 @@
 #include <vector>
 
 using namespace Mantid::API;
-using Mantid::Algorithms::PaddingAndApodization;
 using Mantid::MantidVec;
+using Mantid::Algorithms::PaddingAndApodization;
 
 namespace {
 struct yData {

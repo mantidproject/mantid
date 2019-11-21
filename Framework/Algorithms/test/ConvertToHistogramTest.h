@@ -13,16 +13,16 @@
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+using Mantid::MantidVecPtr;
+using Mantid::Algorithms::ConvertToHistogram;
 using Mantid::API::IAlgorithm_sptr;
 using Mantid::API::MatrixWorkspace;
 using Mantid::API::MatrixWorkspace_sptr;
-using Mantid::Algorithms::ConvertToHistogram;
 using Mantid::DataObjects::Workspace2D_sptr;
 using Mantid::HistogramData::HistogramDx;
 using Mantid::HistogramData::LinearGenerator;
 using Mantid::HistogramData::Points;
 using Mantid::Kernel::make_cow;
-using Mantid::MantidVecPtr;
 
 class ConvertToHistogramTest : public CxxTest::TestSuite {
 

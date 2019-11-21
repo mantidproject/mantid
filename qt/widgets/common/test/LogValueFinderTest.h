@@ -21,8 +21,8 @@
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::ScopedWorkspace;
 using Mantid::API::WorkspaceFactory;
-using Mantid::Kernel::Math::StatisticType;
 using Mantid::Kernel::TimeSeriesProperty;
+using Mantid::Kernel::Math::StatisticType;
 using Mantid::Types::Core::DateAndTime;
 using MantidQt::MantidWidgets::LogValueFinder;
 

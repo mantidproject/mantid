@@ -20,8 +20,8 @@
 using namespace Mantid::API;
 using namespace Mantid::HistogramData;
 using namespace Mantid::Kernel::VectorHelper;
-using Mantid::Algorithms::StripVanadiumPeaks2;
 using Mantid::MantidVec;
+using Mantid::Algorithms::StripVanadiumPeaks2;
 
 class StripVanadiumPeaks2Test : public CxxTest::TestSuite {
 public:
@@ -95,9 +95,8 @@ public:
     // known positions and expected values
     const std::vector<double> PEAK_X{1.2356, 1.5133,
                                      2.1401}; // peak positions in d-spacing
-    const std::vector<double> PEAK_Y{28.5, 37.8,
-                                     12.3}; // low precision results of
-                                            // stripped peaks
+    const std::vector<double> PEAK_Y{28.5, 37.8, 12.3}; // low precision results
+                                                        // of stripped peaks
     // something is wrong with the second peak on windows
     const std::vector<double> TOL{.1, 10., .1};
 

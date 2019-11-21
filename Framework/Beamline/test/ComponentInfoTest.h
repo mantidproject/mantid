@@ -300,10 +300,9 @@ public:
             std::vector<size_t>{0, 1, 2});
     auto bankSortedComponentIndices =
         boost::make_shared<const std::vector<size_t>>(std::vector<size_t>(1));
-    auto parentIndices =
-        boost::make_shared<const std::vector<size_t>>(std::vector<size_t>{
-            9, 9, 9, 9}); // These indices are invalid, but that's
-                          // ok as not being tested here
+    auto parentIndices = boost::make_shared<const std::vector<size_t>>(
+        std::vector<size_t>{9, 9, 9, 9}); // These indices are invalid, but
+                                          // that's ok as not being tested here
     auto detectorRanges =
         boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
             1, std::pair<size_t, size_t>{0, 2});

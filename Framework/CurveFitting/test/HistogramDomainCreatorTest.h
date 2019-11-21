@@ -30,9 +30,9 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::CurveFitting::Functions;
-using Mantid::CurveFitting::Algorithms::Fit;
 using Mantid::CurveFitting::GSLJacobian;
 using Mantid::CurveFitting::HistogramDomainCreator;
+using Mantid::CurveFitting::Algorithms::Fit;
 
 class HistogramDomainCreatorTest : public CxxTest::TestSuite {
 public:
