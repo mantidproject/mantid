@@ -285,6 +285,9 @@ public:
     const std::string fileOnePath = outFilePath + "-0.gsas";
     const std::string fileTwoPath = outFilePath + "-1.gsas";
 
+    Poco::TemporaryFile::registerForDeletion(fileOnePath);
+    Poco::TemporaryFile::registerForDeletion(fileTwoPath);
+
     TS_ASSERT(FileComparisonHelper::isEqualToReferenceFile(
         "SaveGSS-SplitRef-0.gsas", fileOnePath));
     TS_ASSERT(FileComparisonHelper::isEqualToReferenceFile(

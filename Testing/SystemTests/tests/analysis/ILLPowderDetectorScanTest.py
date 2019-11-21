@@ -46,6 +46,7 @@ class D2B_2DTubes_ReductionTest(_DiffReductionTest):
 
     def runTest(self):
         PowderILLDetectorScan(Run='508093:508095', Output2DTubes = True, Output1D = False, OutputWorkspace='out')
+        super(_DiffReductionTest,self).tearDown()
 
     def validate(self):
         return ['out_2DTubes', 'D2B_2DTubes.nxs']
@@ -55,6 +56,7 @@ class D2B_2D_ReductionTest(_DiffReductionTest):
 
     def runTest(self):
         PowderILLDetectorScan(Run='508093:508095', Output2D = True, Output1D = False, OutputWorkspace='out')
+        super(_DiffReductionTest,self).tearDown()
 
     def validate(self):
         return ['out_2D', 'D2B_2D.nxs']
@@ -64,6 +66,7 @@ class D2B_1D_ReductionTest(_DiffReductionTest):
 
     def runTest(self):
         PowderILLDetectorScan(Run='508093:508095', OutputWorkspace='out')
+        super(_DiffReductionTest, self).tearDown()
 
     def validate(self):
         return ['out_1D', 'D2B_1D.nxs']
@@ -73,6 +76,7 @@ class D2B_LowCounts_ReductionTest(_DiffReductionTest):
 
     def runTest(self):
         PowderILLDetectorScan(Run='540162', OutputWorkspace='out')
+        super(_DiffReductionTest, self).tearDown()
 
     def validate(self):
         return ['out_1D', 'D2B_LowCounts.nxs']
@@ -83,6 +87,7 @@ class D20_NoMask_ReductionTest(_DiffReductionTest):
     def runTest(self):
         PowderILLDetectorScan(Run='967076', NormaliseTo='None', CropNegativeScatteringAngles=False,
                               UseCalibratedData=False, InitialMask=0, OutputWorkspace='out')
+        super(_DiffReductionTest, self).tearDown()
 
     def validate(self):
         return ['out_1D', 'D20_NoMask.nxs']
@@ -94,6 +99,7 @@ class D20_Mask_ReductionTest(_DiffReductionTest):
         ws = LoadILLDiffraction(Filename='967076')
         MaskDetectors(ws, DetectorList='0-63')
         SumOverlappingTubes(InputWorkspaces=ws, OutputType='1D', OutputWorkspace='red')
+        super(_DiffReductionTest, self).tearDown()
 
     def validate(self):
         return ['red', 'D20_Mask.nxs']
@@ -118,6 +124,7 @@ class D2B_Component_ReductionTest(_DiffReductionTest):
         CropWorkspace(InputWorkspace='alltubes_2DTubes', OutputWorkspace='alltubes_tube128', XMin=147.471)
         match = CompareWorkspaces(Workspace1='tube128_2DTubes', Workspace2='alltubes_tube128', Tolerance=self._tolerance)
         self.assertTrue(match[0])
+        super(_DiffReductionTest, self).tearDown()
 
 
 class D2B_HeightRange_ReductionTest(_DiffReductionTest):
@@ -131,6 +138,7 @@ class D2B_HeightRange_ReductionTest(_DiffReductionTest):
         ExtractSpectra(InputWorkspace='out_2D', StartWorkspaceIndex=43, EndWorkspaceIndex=84, OutputWorkspace='cropped')
         match = CompareWorkspaces(Workspace1='cropped', Workspace2='out_height_2D', CheckSpectraMap=False, Tolerance=self._tolerance)
         self.assertTrue(match[0])
+        super(_DiffReductionTest, self).tearDown()
 
 
 class D2B_Merge_ReductionTest(_DiffReductionTest):
@@ -140,3 +148,4 @@ class D2B_Merge_ReductionTest(_DiffReductionTest):
         PowderILLDetectorScan(Run='508093-508095', OutputWorkspace='sum')
         match = CompareWorkspaces(Workspace1='out_1D', Workspace2='sum_1D')
         self.assertTrue(match[0])
+        super(_DiffReductionTest, self).tearDown()

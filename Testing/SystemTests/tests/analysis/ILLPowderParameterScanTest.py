@@ -30,6 +30,7 @@ class ILLPowderParameterScanTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         PowderILLParameterScan(Run='967087,967088',OutputWorkspace='reduced')
+        self.tearDown()
 
     def validate(self):
         self.tolerance = 0.0001

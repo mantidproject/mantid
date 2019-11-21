@@ -53,6 +53,8 @@ class ILLPowderD2BEfficiencyTest(systemtesting.MantidSystemTest):
                             OutputResponseWorkspace='response')
         GroupWorkspaces(InputWorkspaces=['calib','response'], OutputWorkspace='group')
 
+        self.tearDown()
+
     def validate(self):
         self.tolerance = 0.01
         return ['group', 'D2B_DetEffCorr_Ref.nxs']

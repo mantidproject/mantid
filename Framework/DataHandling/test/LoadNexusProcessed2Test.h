@@ -178,7 +178,6 @@ public:
     using Mantid::SpectrumDefinition;
     using namespace Mantid::Indexing;
     FileResource fileInfo("test_spectra_miss_detectors.nxs");
-    fileInfo.setDebugMode(true);
 
     auto instr = ComponentCreationHelper::createTestInstrumentRectangular(
         2 /*numBanks*/, 10 /*numPixels*/); // 200 detectors in instrument

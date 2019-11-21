@@ -58,3 +58,5 @@ class D11_AutoProcess_Test(systemtesting.MantidSystemTest):
             )
 
         GroupWorkspaces(InputWorkspaces=['iq_s1', 'iq_s2', 'iq_s3'], OutputWorkspace='out')
+
+        self.tearDown()

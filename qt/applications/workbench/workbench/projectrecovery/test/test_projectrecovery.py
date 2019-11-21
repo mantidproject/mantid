@@ -36,6 +36,12 @@ class ProjectRecoveryTest(unittest.TestCase):
         self.multifileinterpreter = mock.MagicMock()
         self.pr = ProjectRecovery(self.multifileinterpreter)
         self.working_directory = tempfile.mkdtemp()
+        # Make sure there is actually a different modified time on the files by using sleeps
+        self.firstPath = tempfile.mkdtemp()
+        time.sleep(0.5)
+        self.secondPath = tempfile.mkdtemp()
+        time.sleep(0.5)
+        self.thirdPath = tempfile.mkdtemp()
 
     def tearDown(self):
         ADS.clear()
@@ -101,16 +107,10 @@ class ProjectRecoveryTest(unittest.TestCase):
 
     @unittest.skipIf(is_macOS(), "Can be unreliable on macOS and is a test of logic not OS capability")
     def test_sort_paths_by_last_modified(self):
-        # Make sure there is actually a different modified time on the files by using sleeps
-        first = tempfile.mkdtemp()
-        time.sleep(0.5)
-        second = tempfile.mkdtemp()
-        time.sleep(0.5)
-        third = tempfile.mkdtemp()
-        paths = [second, third, first]
+        paths = [self.secondPath, self.thirdPath, self.firstPath]
         paths = self.pr.sort_by_last_modified(paths)
 
-        self.assertListEqual(paths, [first, second, third])
+        self.assertListEqual(paths, [self.firstPath, self.secondPath, self.thirdPath])
 
     def test_get_pid_folder_to_be_used_to_load_a_checkpoint_from(self):
         self.pr._make_process_from_pid = mock.MagicMock()

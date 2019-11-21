@@ -69,6 +69,8 @@ class ILL_D11_Test(systemtesting.MantidSystemTest):
         # Convert to I(Q)
         SANSILLIntegration(InputWorkspace='sample_flux', OutputWorkspace='iq')
 
+        self.tearDown()
+
 
 class ILL_D22_Test(systemtesting.MantidSystemTest):
 
@@ -130,6 +132,8 @@ class ILL_D22_Test(systemtesting.MantidSystemTest):
         # Integration
         SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', CalculateResolution='None')
 
+        self.tearDown()
+
 
 class ILL_D33_VTOF_Test(systemtesting.MantidSystemTest):
 
@@ -173,6 +177,8 @@ class ILL_D33_VTOF_Test(systemtesting.MantidSystemTest):
         # I(Q)
         SANSILLIntegration(InputWorkspace='sample', CalculateResolution='None', OutputBinning='0.005,-0.1,1',
                            OutputWorkspace='iq', BinMaskingCriteria='x<1 || x>10')
+
+        self.tearDown()
 
 
 class ILL_D33_LTOF_Test(systemtesting.MantidSystemTest):
@@ -218,6 +224,8 @@ class ILL_D33_LTOF_Test(systemtesting.MantidSystemTest):
         # I(Q)
         SANSILLIntegration(InputWorkspace='sample', CalculateResolution='None', OutputBinning='0.005,-0.1,1',
                            OutputWorkspace='iq', BinMaskingCriteria='x<1 || x>10')
+
+        self.tearDown()
 
 
 class ILL_D33_Test(systemtesting.MantidSystemTest):
@@ -299,3 +307,5 @@ class ILL_D33_Test(systemtesting.MantidSystemTest):
 
         # I(Q)
         SANSILLIntegration(InputWorkspace='sample_flux', OutputWorkspace='iq', CalculateResolution='None')
+
+        self.tearDown()

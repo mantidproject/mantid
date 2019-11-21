@@ -35,6 +35,8 @@ class ILLPowderEfficiencyTest(systemtesting.MantidSystemTest):
                             OutputResponseWorkspace='response')
         GroupWorkspaces(InputWorkspaces=['calib','response'], OutputWorkspace='group')
 
+        self.tearDown()
+
     def validate(self):
         self.tolerance = 0.0001
         return ['group', 'ILL_D20_calib_def.nxs']

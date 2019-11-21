@@ -47,6 +47,8 @@ class ILLIndirectEnergyTransferBATSTest(systemtesting.MantidSystemTest):
 
         GroupWorkspaces(InputWorkspaces=[center, offset_p100, offset_m275], OutputWorkspace='group')
 
+        self.tearDown()
+
     def validate(self):
 
         return ['group', 'ILLIN16B_BATS.nxs']
