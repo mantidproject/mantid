@@ -28,9 +28,7 @@ using Types::Core::DateAndTime;
  Helper method to transform a MantidVector containing absolute times in
  nanoseconds to relative times in seconds given an offset.
  */
-class ConvertToRelativeTime
-    : public std::unary_function<const MantidVec::value_type &,
-                                 MantidVec::value_type> {
+class ConvertToRelativeTime {
 private:
   double m_offSet;
 

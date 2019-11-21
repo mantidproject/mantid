@@ -20,7 +20,7 @@ namespace MDAlgorithms {
 /**
 Helper type to compute the square in-place.
 */
-struct Square : public std::unary_function<double, void> {
+struct Square {
   void operator()(double &i) { i *= i; }
 };
 

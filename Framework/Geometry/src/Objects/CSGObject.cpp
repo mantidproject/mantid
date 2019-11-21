@@ -881,7 +881,7 @@ std::vector<int> CSGObject::getSurfaceIndex() const {
   std::vector<int> out;
   transform(m_SurList.begin(), m_SurList.end(),
             std::insert_iterator<std::vector<int>>(out, out.begin()),
-            std::mem_fun(&Surface::getName));
+            std::mem_fn(&Surface::getName));
   return out;
 }
 
