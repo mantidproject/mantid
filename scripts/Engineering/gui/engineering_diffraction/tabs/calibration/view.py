@@ -60,6 +60,21 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
         self.finder_vanadium.setInstrumentOverride(instrument)
         self.finder_calib.setInstrumentOverride(instrument)
 
+    def set_vanadium_read_only(self, set_to):
+        self.finder_vanadium.setReadOnly(set_to)
+
+    def set_calib_read_only(self, set_to):
+        self.finder_calib.setReadOnly(set_to)
+
+    def set_vanadium_text(self, text):
+        self.finder_vanadium.setText(text)
+
+    def set_calib_text(self, text):
+        self.finder_calib.setText(text)
+
+    def set_calibrate_button_text(self, text):
+        self.button_calibrate.setText(text)
+
     def get_vanadium_filename(self):
         return self.finder_vanadium.getFirstFilename()
 
@@ -83,6 +98,12 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
 
     def is_searching(self):
         return self.finder_calib.isSearching() or self.finder_calib.isSearching()
+
+    def find_calib_files(self):
+        self.finder_calib.findFiles(True)
+
+    def find_vanadium_files(self):
+        self.finder_vanadium.findFiles(True)
 
     def setup_tabbing_order(self):
         self.setTabOrder(self.radio_newCalib, self.finder_vanadium)

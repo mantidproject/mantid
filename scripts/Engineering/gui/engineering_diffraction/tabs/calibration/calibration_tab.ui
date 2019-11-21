@@ -85,6 +85,9 @@ QGroupBox:title {
             <property name="text">
              <string>Load Existing Calibration</string>
             </property>
+            <property name="checked">
+             <bool>false</bool>
+            </property>
            </widget>
           </item>
           <item row="7" column="0" colspan="2">
