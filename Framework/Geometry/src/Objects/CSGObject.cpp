@@ -858,7 +858,7 @@ int CSGObject::createSurfaceList(const int outFlag) {
  */
 std::vector<int> CSGObject::getSurfaceIndex() const {
   std::vector<int> out;
-  transform(m_surList.begin(), m_surList.end(), std::insert_iterator<std::vector<int>>(out, out.begin()),
+  transform(m_SurList.begin(), m_SurList.end(), std::insert_iterator<std::vector<int>>(out, out.begin()),
             std::mem_fn(&Surface::getName));
   return out;
 }

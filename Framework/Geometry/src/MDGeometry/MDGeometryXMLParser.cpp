@@ -24,12 +24,12 @@ struct findID {
   const std::string m_id;
   explicit findID(std::string id) : m_id(std::move(id)) {}
 
-  bool operator()(const Mantid::Geometry::IMDDimension_sptr &obj) const { return m_id == obj->getDimensionId(); }
+  bool operator()(const Mantid::Geometry::IMDDimension_sptr obj) const { return m_id == obj->getDimensionId(); }
 };
 
 /// Helper unary comparison type for finding non-integrated dimensions.
 struct findIntegrated {
-  bool operator()(const Mantid::Geometry::IMDDimension_sptr &obj) const { return obj->getIsIntegrated(); }
+  bool operator()(const Mantid::Geometry::IMDDimension_sptr obj) const { return obj->getIsIntegrated(); }
 };
 
 /**
