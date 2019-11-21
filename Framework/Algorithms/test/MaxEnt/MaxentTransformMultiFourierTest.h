@@ -16,10 +16,10 @@
 #include <boost/shared_ptr.hpp>
 #include <cmath>
 
+using Mantid::Algorithms::MaxentSpace_sptr;
 using Mantid::Algorithms::MaxentSpaceComplex;
 using Mantid::Algorithms::MaxentSpaceComplex_sptr;
 using Mantid::Algorithms::MaxentSpaceReal;
-using Mantid::Algorithms::MaxentSpace_sptr;
 using Mantid::Algorithms::MaxentTransformFourier;
 using Mantid::Algorithms::MaxentTransformMultiFourier;
 

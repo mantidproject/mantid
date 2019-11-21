@@ -119,7 +119,7 @@ void PeakIntegration::exec() {
       size_t wi = wiEntry->second;
       if ((matchRun && peak.getRunNumber() != inputW->getRunNumber()) ||
           wi >= Numberwi)
-        badPeaks.push_back(i);
+        badPeaks.emplace_back(i);
     } else // This is for appending peak workspaces when running
            // SNSSingleCrystalReduction one bank at at time
         if (i + 1 > MinPeaks)

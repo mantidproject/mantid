@@ -38,7 +38,7 @@ std::tuple<boost::shared_ptr<ComponentInfo>, boost::shared_ptr<DetectorInfo>>
 makeFlatTree(PosVec detPositions, RotVec detRotations) {
   std::vector<std::pair<size_t, size_t>> componentRanges;
   auto rootIndex = detPositions.size();
-  componentRanges.push_back(
+  componentRanges.emplace_back(
       std::make_pair(0, 1)); // sub-assembly (contains root only)
   auto bankSortedDetectorIndices =
       boost::make_shared<std::vector<size_t>>(detPositions.size());
@@ -134,15 +134,15 @@ makeTreeExampleAndReturnGeometricArguments() {
       std::vector<size_t>{3, 3, 4, 4, 4});
 
   std::vector<std::pair<size_t, size_t>> detectorRanges;
-  detectorRanges.push_back(
+  detectorRanges.emplace_back(
       std::make_pair(0, 2)); // sub-assembly (registered first)
-  detectorRanges.push_back(
+  detectorRanges.emplace_back(
       std::make_pair(0, 3)); // instrument-assembly (with 3 detectors)
 
   std::vector<std::pair<size_t, size_t>> componentRanges;
-  componentRanges.push_back(
+  componentRanges.emplace_back(
       std::make_pair(0, 1)); // sub-assembly (contains self)
-  componentRanges.push_back(std::make_pair(
+  componentRanges.emplace_back(std::make_pair(
       0, 2)); // instrument assembly (with 1 sub-component and self)
 
   // Set non-detectors at different positions
@@ -206,13 +206,13 @@ makeTreeExample() {
   auto parentIndices = boost::make_shared<const std::vector<size_t>>(
       std::vector<size_t>{3, 3, 4, 4, 4});
   std::vector<std::pair<size_t, size_t>> detectorRanges;
-  detectorRanges.push_back(std::make_pair(0, 2));
-  detectorRanges.push_back(std::make_pair(0, 3));
+  detectorRanges.emplace_back(std::make_pair(0, 2));
+  detectorRanges.emplace_back(std::make_pair(0, 3));
 
   std::vector<std::pair<size_t, size_t>> componentRanges;
-  componentRanges.push_back(
+  componentRanges.emplace_back(
       std::make_pair(0, 1)); // sub-assembly (contains self)
-  componentRanges.push_back(std::make_pair(
+  componentRanges.emplace_back(std::make_pair(
       0, 2)); // instrument assembly (with 1 sub-component and self)
 
   auto positions = boost::make_shared<PosVec>(
@@ -300,10 +300,9 @@ public:
             std::vector<size_t>{0, 1, 2});
     auto bankSortedComponentIndices =
         boost::make_shared<const std::vector<size_t>>(std::vector<size_t>(1));
-    auto parentIndices =
-        boost::make_shared<const std::vector<size_t>>(std::vector<size_t>{
-            9, 9, 9, 9}); // These indices are invalid, but that's
-                          // ok as not being tested here
+    auto parentIndices = boost::make_shared<const std::vector<size_t>>(
+        std::vector<size_t>{9, 9, 9, 9}); // These indices are invalid, but
+                                          // that's ok as not being tested here
     auto detectorRanges =
         boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
             1, std::pair<size_t, size_t>{0, 2});

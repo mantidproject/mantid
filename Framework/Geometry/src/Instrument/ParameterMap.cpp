@@ -1132,7 +1132,7 @@ const std::vector<std::string> &ParameterMap::getParameterFilenames() const {
  * @param filename the filename to add
  */
 void ParameterMap::addParameterFilename(const std::string &filename) {
-  m_parameterFileNames.push_back(filename);
+  m_parameterFileNames.emplace_back(filename);
 }
 
 /// Wrapper for ParameterFactory::create to avoid include in header

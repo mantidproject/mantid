@@ -77,9 +77,9 @@ public:
                                  Types::Core::DateAndTime(50000), 2);
 
     std::vector<Kernel::SplittingInterval> splitters;
-    splitters.push_back(s1);
-    splitters.push_back(s2);
-    splitters.push_back(s3);
+    splitters.emplace_back(s1);
+    splitters.emplace_back(s2);
+    splitters.emplace_back(s3);
 
     TS_ASSERT_THROWS_NOTHING(splitterws.addSplitter(s1));
     TS_ASSERT_THROWS_NOTHING(splitterws.addSplitter(s2));

@@ -25,12 +25,12 @@ using namespace MantidQt::CustomInterfaces::ISISReflectometry::
     ModelCreationHelper;
 using MantidQt::API::IConfiguredAlgorithm_sptr;
 using MantidQt::MantidWidgets::ISlitCalculator;
+using testing::_;
 using testing::AtLeast;
 using testing::Mock;
 using testing::NiceMock;
 using testing::Return;
 using testing::ReturnRef;
-using testing::_;
 
 class MainWindowPresenterTest : public CxxTest::TestSuite {
 public:
@@ -312,7 +312,7 @@ private:
     // factory
     for (auto batchView : m_batchViews) {
       auto batchPresenter = new NiceMock<MockBatchPresenter>();
-      m_batchPresenters.push_back(batchPresenter);
+      m_batchPresenters.emplace_back(batchPresenter);
       ON_CALL(*m_makeBatchPresenter, makeProxy(batchView))
           .WillByDefault(Return(batchPresenter));
     }

@@ -24,8 +24,8 @@ using namespace Mantid::API;
 
 using Mantid::Kernel::V3D;
 
-using ::testing::Mock;
 using ::testing::_;
+using ::testing::Mock;
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 

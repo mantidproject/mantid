@@ -211,7 +211,7 @@ void Convolution::functionFFTMode(const FunctionDomain &domain,
     for (size_t i = 0; i < cf->nFunctions(); ++i) {
       auto df = boost::dynamic_pointer_cast<DeltaFunction>(cf->getFunction(i));
       if (df) {
-        dltFuns.push_back(df);
+        dltFuns.emplace_back(df);
         if (df->getParameter("Centre") != 0.0) {
           deltaShifted = true;
         }
@@ -226,7 +226,7 @@ void Convolution::functionFFTMode(const FunctionDomain &domain,
                  boost::dynamic_pointer_cast<DeltaFunction>(getFunction(1))) {
     // single delta function - return scaled resolution
     deltaFunctionsOnly = true;
-    dltFuns.push_back(df);
+    dltFuns.emplace_back(df);
     if (df->getParameter("Centre") != 0.0) {
       deltaShifted = true;
     }
@@ -366,7 +366,7 @@ void Convolution::functionDirectMode(const FunctionDomain &domain,
     for (size_t i = 0; i < cf->nFunctions(); ++i) {
       auto df = boost::dynamic_pointer_cast<DeltaFunction>(cf->getFunction(i));
       if (df) {
-        dltFuns.push_back(df);
+        dltFuns.emplace_back(df);
         if (df->getParameter("Centre") != 0.0) {
           deltaShifted = true;
         }
@@ -381,7 +381,7 @@ void Convolution::functionDirectMode(const FunctionDomain &domain,
                  boost::dynamic_pointer_cast<DeltaFunction>(getFunction(1))) {
     // single delta function - return scaled resolution
     deltaFunctionsOnly = true;
-    dltFuns.push_back(df);
+    dltFuns.emplace_back(df);
     if (df->getParameter("Centre") != 0.0) {
       deltaShifted = true;
     }

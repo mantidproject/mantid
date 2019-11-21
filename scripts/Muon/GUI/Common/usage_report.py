@@ -6,9 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, unicode_literals)
 
-from mantid.kernel import UsageService
+from mantid.kernel import (UsageService, FeatureType)
 
 
 def report_interface_startup(name):
     #interface startup
-    UsageService.registerFeatureUsage("Interface", name, False)
+    UsageService.registerFeatureUsage(FeatureType.Interface, name, False)

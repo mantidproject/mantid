@@ -59,7 +59,7 @@ void addExtension(const std::string &extension,
       extensions.end())
     return;
   else
-    extensions.push_back(extension);
+    extensions.emplace_back(extension);
 }
 
 /**

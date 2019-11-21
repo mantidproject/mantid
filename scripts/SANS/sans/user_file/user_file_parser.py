@@ -1391,12 +1391,16 @@ class TransParser(UserFileComponentParser):
 
         dist, monitor = int(split_vars[0]), int(split_vars[1])
 
-        if monitor == 4:
-            return {TransId.spec_4_shift: dist}
-        elif monitor == 5:
+        if monitor == 5:
             return {TransId.spec_5_shift: dist}
+        elif monitor >= 0:
+            # Some instruments (i.e. LOQ) do not have monitor 4 on spectrum 4, as ZOOM
+            # is currently the only one with monitor 5 at spectrum 5 we can make it an edge case
+            # If a future instrument wants to use monitor 5 at a different spectrum number or
+            # uses monitor 4 at spectrum 5 this should be updated
+            return {TransId.spec_4_shift: dist}
         else:
-            raise RuntimeError("The monitor {0} cannot be shifted".format(monitor))
+            raise RuntimeError("Monitor {0} cannot be shifted".format(monitor))
 
     def _extract_trans_spec(self, line):
         trans_spec_string = re.sub(self._trans_spec, "", line)
@@ -1418,11 +1422,14 @@ class TransParser(UserFileComponentParser):
         trans_spec_shift_string = re.sub(" ", "", trans_spec_shift_string)
         trans_spec_shift = convert_string_to_float(trans_spec_shift_string)
 
-        # Pair up the monitor and shift amount
-        if trans_spec == 4:
-            return {TransId.spec_4_shift: trans_spec_shift, TransId.spec: trans_spec}
-        elif trans_spec == 5:
+        if trans_spec == 5:
             return {TransId.spec_5_shift: trans_spec_shift, TransId.spec: trans_spec}
+        elif trans_spec >= 0:
+            # Some instruments (i.e. LOQ) do not have monitor 4 on spectrum 4, as ZOOM
+            # is currently the only one with monitor 5 at spectrum 5 we can make it an edge case
+            # If a future instrument wants to use monitor 5 at a different spectrum number or
+            # uses monitor 4 at spectrum 5 this should be updated
+            return {TransId.spec_4_shift: trans_spec_shift, TransId.spec: trans_spec}
         else:
             raise RuntimeError("Monitor {0} cannot be shifted".format(trans_spec))
 

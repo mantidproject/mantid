@@ -209,6 +209,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
                 self.generate_plot_script_clipboard)
             self.toolbar.sig_generate_plot_script_file_triggered.connect(
                 self.generate_plot_script_file)
+            self.toolbar.sig_home_clicked.connect(self.set_figure_zoom_to_display_all)
             self.toolbar.setFloatable(False)
             tbs_height = self.toolbar.sizeHint().height()
         else:
@@ -278,7 +279,8 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
         # Hack to ensure the canvas is up to date
         self.canvas.draw_idle()
-        if figure_type(self.canvas.figure) not in [FigureType.Line, FigureType.Errorbar]:
+        if figure_type(self.canvas.figure) not in [FigureType.Line, FigureType.Errorbar] \
+                or self.toolbar is not None and len(self.canvas.figure.get_axes()) > 1:
             self._set_fit_enabled(False)
 
         # For plot-to-script button to show, we must have a MantidAxes with lines in it
@@ -396,6 +398,20 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         for i, toolbar_action in enumerate(self.toolbar.actions()):
             if toolbar_action == action:
                 self.toolbar.actions()[i+1].setVisible(enabled)
+
+    def set_figure_zoom_to_display_all(self):
+        axes = self.canvas.figure.get_axes()
+        if axes:
+            for ax in axes:
+                # We check for axes type below as a pseudo check for an axes being
+                # a colorbar. this is based on the same check in
+                # FigureManagerADSObserver.deleteHandle.
+                if type(ax) is not Axes:
+                    if ax.lines:  # Relim causes issues with colour plots, which have no lines.
+                        ax.relim()
+                    ax.autoscale()
+
+            self.canvas.draw()
 
 
 # -----------------------------------------------------------------------------

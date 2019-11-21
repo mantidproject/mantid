@@ -214,5 +214,6 @@ intersphinx_mapping = {
     'python': ('https://docs.python.org/3/', None),
     'SciPy': ('https://docs.scipy.org/doc/scipy/reference', None),
     'pandas': ('https://pandas.pydata.org/pandas-docs/stable', None),
-    'pystog': ('https://pystog.readthedocs.io/en/latest/', None)
+    'pystog': ('https://pystog.readthedocs.io/en/latest/', None),
+    'mantid-dev':('https://developer.mantidproject.org/', None)
 }

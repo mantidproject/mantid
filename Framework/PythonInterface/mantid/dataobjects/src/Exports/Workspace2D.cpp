@@ -31,9 +31,9 @@
 #include <boost/python/make_constructor.hpp>
 #include <boost/python/tuple.hpp>
 
+using Mantid::SpectrumDefinition;
 using Mantid::API::MatrixWorkspace;
 using Mantid::DataObjects::Workspace2D;
-using Mantid::SpectrumDefinition;
 using namespace Mantid::PythonInterface::Registry;
 using namespace Mantid::Indexing;
 using namespace boost::python;

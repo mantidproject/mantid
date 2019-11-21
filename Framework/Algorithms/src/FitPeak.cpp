@@ -182,7 +182,7 @@ void FitOneSinglePeak::setupGuessedFWHM(double usrwidth, int minfwhm,
         maxfwhm = 4;
     }
   } else {
-    m_vecFWHM.push_back(usrwidth);
+    m_vecFWHM.emplace_back(usrwidth);
     m_sstream << "Add user defined FWHM = " << usrwidth << "\n";
   }
 
@@ -232,7 +232,7 @@ void FitOneSinglePeak::setupGuessedFWHM(double usrwidth, int minfwhm,
                 << ", i_centre = " << i_centre << ".\n";
     }
 
-    m_vecFWHM.push_back(in_fwhm);
+    m_vecFWHM.emplace_back(in_fwhm);
   }
 }
 
@@ -1239,7 +1239,7 @@ FitPeak::addFunctionParameterNames(std::vector<std::string> funcnames) {
 
   for (auto &funcname : funcnames) {
     // Add original name in
-    vec_funcparnames.push_back(funcname);
+    vec_funcparnames.emplace_back(funcname);
 
     // Add a full function name and parameter names in
     IFunction_sptr tempfunc =
@@ -1255,7 +1255,7 @@ FitPeak::addFunctionParameterNames(std::vector<std::string> funcnames) {
     }
     parnamess << ")";
 
-    vec_funcparnames.push_back(parnamess.str());
+    vec_funcparnames.emplace_back(parnamess.str());
   }
 
   return vec_funcparnames;

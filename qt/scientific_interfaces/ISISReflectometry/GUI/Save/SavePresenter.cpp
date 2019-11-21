@@ -165,7 +165,7 @@ void SavePresenter::populateParametersList() {
                                ->run()
                                .getProperties();
   for (auto it = properties.begin(); it != properties.end(); it++) {
-    logs.push_back((*it)->name());
+    logs.emplace_back((*it)->name());
   }
   m_view->setParametersList(logs);
 }

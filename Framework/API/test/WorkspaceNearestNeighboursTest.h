@@ -44,7 +44,7 @@ boost::shared_ptr<MatrixWorkspace> makeWorkspace(const specnum_t start,
 std::vector<specnum_t> getSpectrumNumbers(const MatrixWorkspace &workspace) {
   std::vector<specnum_t> spectrumNumbers;
   for (size_t i = 0; i < workspace.getNumberHistograms(); ++i)
-    spectrumNumbers.push_back(workspace.getSpectrum(i).getSpectrumNo());
+    spectrumNumbers.emplace_back(workspace.getSpectrum(i).getSpectrumNo());
   return spectrumNumbers;
 }
 } // namespace

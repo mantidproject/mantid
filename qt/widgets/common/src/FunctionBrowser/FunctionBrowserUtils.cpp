@@ -105,7 +105,12 @@ splitConstraintString(const QString &constraint) {
         lowerBoundStr = QString::fromStdString(expr[1].str());
       }
       paramName = QString::fromStdString(expr[0].str());
-    } else {           // parameter is second
+    } else { // parameter is second
+      try {
+        boost::lexical_cast<double>(expr[0].name());
+      } catch (...) { // error - neither terms are numbers
+        return error;
+      }
       if (op == "<") { // number < param
         lowerBoundStr = QString::fromStdString(expr[0].str());
       } else { // number > param

@@ -923,9 +923,8 @@ public:
         "BasisVector1", "tty,m, 0.0, 2.0", "NormalizeBasisVectors", "0",
         "ForceOrthogonal", "0", "Translation",
         "-1, -1", /* coords in B = (-4,-4) in A */
-        "OutputExtents",
-        "-1.5, 3.5, -1.5, 3.5", /* size of 5 in C = size of 10 in B = size
-                                   of 20 in A */
+        "OutputExtents", "-1.5, 3.5, -1.5, 3.5", /* size of 5 in C = size of 10
+                                                    in B = size of 20 in A */
         "OutputBins", "10,10");
 
     // Finally, C maps back onto A (mdew) binned as reference

@@ -244,7 +244,7 @@ getWorkspaceIndicesForMonitors(Mantid::API::MatrixWorkspace *workspace) {
       auto spectrumNumber = spectrum.getSpectrumNo();
       auto workspaceIndex =
           workspace->getIndexFromSpectrumNumber(spectrumNumber);
-      workspaceIndices.push_back(workspaceIndex);
+      workspaceIndices.emplace_back(workspaceIndex);
     }
   } else {
     auto numberOfHistograms = workspace->getNumberHistograms();
@@ -252,7 +252,7 @@ getWorkspaceIndicesForMonitors(Mantid::API::MatrixWorkspace *workspace) {
     for (size_t workspaceIndex = 0; workspaceIndex < numberOfHistograms;
          ++workspaceIndex) {
       if (spectrumInfo.isMonitor(workspaceIndex)) {
-        workspaceIndices.push_back(workspaceIndex);
+        workspaceIndices.emplace_back(workspaceIndex);
       }
     }
   }

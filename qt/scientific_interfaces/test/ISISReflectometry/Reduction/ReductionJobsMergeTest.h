@@ -12,9 +12,9 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
+using testing::_;
 using testing::Mock;
 using testing::NiceMock;
-using testing::_;
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 using namespace ModelCreationHelper;

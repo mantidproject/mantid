@@ -206,8 +206,8 @@ void MeshObject::getIntersections(
     if (MeshObjectCommon::rayIntersectsTriangle(start, direction, vertex1,
                                                 vertex2, vertex3, intersection,
                                                 entryExit)) {
-      intersectionPoints.push_back(intersection);
-      entryExitFlags.push_back(entryExit);
+      intersectionPoints.emplace_back(intersection);
+      entryExitFlags.emplace_back(entryExit);
     }
   }
   // still need to deal with edge cases

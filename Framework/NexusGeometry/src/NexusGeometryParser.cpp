@@ -285,7 +285,7 @@ private:
             attribute.read(dataType, classType);
             // If group of correct type, append to subGroup vector
             if (classType == CLASS_TYPE) {
-              subGroups.push_back(childGroup);
+              subGroups.emplace_back(childGroup);
             }
           }
         }
@@ -605,14 +605,14 @@ private:
       auto &detWinding = detWindingOrder[detIndex];
       vertsForDet.reserve(nVertsInFace);
       detWinding.reserve(nVertsInFace);
-      detFaceIndices[detIndex].push_back(
+      detFaceIndices[detIndex].emplace_back(
           faceIndex); // Associate face with detector index
                       // Use face index to index into winding order.
       for (size_t v = 0; v < nVertsInFace; ++v) {
         const auto vi = windingOrder[faceIndex + v] * 3;
         vertsForDet.emplace_back(vertices[vi], vertices[vi + 1],
                                  vertices[vi + 2]);
-        detWinding.push_back(static_cast<uint32_t>(detWinding.size()));
+        detWinding.emplace_back(static_cast<uint32_t>(detWinding.size()));
       }
       // Index -> Id
       detIds[detIndex] = detID;

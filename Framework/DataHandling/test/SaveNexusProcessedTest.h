@@ -234,14 +234,14 @@ public:
                               bool clearfiles, bool PreserveEvents = true,
                               bool CompressNexus = false) {
     std::vector<std::vector<int>> groups(5);
-    groups[0].push_back(10);
-    groups[0].push_back(11);
-    groups[0].push_back(12);
-    groups[1].push_back(20);
-    groups[2].push_back(30);
-    groups[2].push_back(31);
-    groups[3].push_back(40);
-    groups[4].push_back(50);
+    groups[0].emplace_back(10);
+    groups[0].emplace_back(11);
+    groups[0].emplace_back(12);
+    groups[1].emplace_back(20);
+    groups[2].emplace_back(30);
+    groups[2].emplace_back(31);
+    groups[3].emplace_back(40);
+    groups[4].emplace_back(50);
 
     EventWorkspace_sptr WS =
         WorkspaceCreationHelper::createGroupedEventWorkspace(groups, 100, 1.0,
@@ -424,10 +424,10 @@ public:
     table->addColumn("vector_double", "DoubleVectorColumn");
 
     std::vector<double> d1, d2, d3;
-    d1.push_back(0.5);
-    d2.push_back(1.0);
-    d2.push_back(2.5);
-    d3.push_back(4.0);
+    d1.emplace_back(0.5);
+    d2.emplace_back(1.0);
+    d2.emplace_back(2.5);
+    d3.emplace_back(4.0);
 
     // Add some rows of different sizes
     TableRow row1 = table->appendRow();

@@ -4767,7 +4767,7 @@ Spectrogram *Graph::plotSpectrogram(Spectrogram *d_spectrogram,
                           *d_plot->axisScaleDiv(QwtPlot::yRight));
 
   for (int i = 0; i < QwtPlot::axisCnt; i++) {
-    updatedaxis.push_back(0);
+    updatedaxis.emplace_back(0);
   }
 
   enableFixedAspectRatio(
@@ -5531,9 +5531,8 @@ void Graph::updateWaterfallFill(bool on) {
       continue;
 
     if (on && multiLayer())
-      cv->setBrush(QBrush(
-          cv->pen()
-              .color())); // Default is that each fill color matches line color
+      cv->setBrush(QBrush(cv->pen().color())); // Default is that each fill
+                                               // color matches line color
     else
       cv->setBrush(QBrush());
   }

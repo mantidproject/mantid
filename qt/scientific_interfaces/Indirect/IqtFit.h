@@ -40,7 +40,6 @@ public:
 protected slots:
   void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
   void fitFunctionChanged();
-  void customBoolUpdated(const QString &key, bool value);
   void runClicked();
 
 protected:
@@ -48,10 +47,10 @@ protected:
   void setRunEnabled(bool enable) override;
 
 private:
-  void setConstrainIntensitiesEnabled(bool enabled);
   std::string fitTypeString() const;
-
   void setupFitTab() override;
+  EstimationDataSelector getEstimationDataSelector() const override;
+  void setStartAndEndHidden(bool hidden);
 
   IqtFitModel *m_iqtFittingModel;
   std::unique_ptr<Ui::IqtFit> m_uiForm;

@@ -324,7 +324,7 @@ MDNormDirectSC::getValuesFromOtherDimensions(bool &skipNormalization,
         currentRun.getProperty(dimension->getName()));
     if (dimProp) {
       auto value = static_cast<coord_t>(dimProp->firstValue());
-      otherDimValues.push_back(value);
+      otherDimValues.emplace_back(value);
       // in the original MD data no time was spent measuring between dimMin and
       // dimMax
       if (value < dimMin || value > dimMax) {
@@ -531,7 +531,7 @@ for (int64_t i = 0; i < ndets; i++) {
   // pre-allocate for efficiency and copy non-hkl dim values into place
   pos.resize(vmdDims + otherValues.size() + 1);
   std::copy(otherValues.begin(), otherValues.end(), pos.begin() + vmdDims);
-  pos.push_back(1.);
+  pos.emplace_back(1.);
   auto intersectionsBegin = intersections.begin();
   for (auto it = intersectionsBegin + 1; it != intersections.end(); ++it) {
     const auto &curIntSec = *it;

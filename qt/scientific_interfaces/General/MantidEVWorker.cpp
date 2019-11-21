@@ -283,14 +283,14 @@ bool MantidEVWorker::convertToHKL(const std::string &ev_ws_name,
     Mantid::Geometry::OrientedLattice o_lattice =
         ev_ws->mutableSample().getOrientedLattice();
     std::vector<V3D> hkl;
-    hkl.push_back(o_lattice.hklFromQ(V3D(Q, Q, Q)));
-    hkl.push_back(o_lattice.hklFromQ(V3D(Q, Q, -Q)));
-    hkl.push_back(o_lattice.hklFromQ(V3D(Q, -Q, Q)));
-    hkl.push_back(o_lattice.hklFromQ(V3D(-Q, Q, Q)));
-    hkl.push_back(o_lattice.hklFromQ(V3D(Q, -Q, -Q)));
-    hkl.push_back(o_lattice.hklFromQ(V3D(-Q, -Q, Q)));
-    hkl.push_back(o_lattice.hklFromQ(V3D(-Q, Q, -Q)));
-    hkl.push_back(o_lattice.hklFromQ(V3D(-Q, -Q, -Q)));
+    hkl.emplace_back(o_lattice.hklFromQ(V3D(Q, Q, Q)));
+    hkl.emplace_back(o_lattice.hklFromQ(V3D(Q, Q, -Q)));
+    hkl.emplace_back(o_lattice.hklFromQ(V3D(Q, -Q, Q)));
+    hkl.emplace_back(o_lattice.hklFromQ(V3D(-Q, Q, Q)));
+    hkl.emplace_back(o_lattice.hklFromQ(V3D(Q, -Q, -Q)));
+    hkl.emplace_back(o_lattice.hklFromQ(V3D(-Q, -Q, Q)));
+    hkl.emplace_back(o_lattice.hklFromQ(V3D(-Q, Q, -Q)));
+    hkl.emplace_back(o_lattice.hklFromQ(V3D(-Q, -Q, -Q)));
     double hmin = 0;
     double kmin = 0;
     double lmin = 0;

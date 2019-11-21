@@ -172,7 +172,7 @@ MuonAnalysisResultTableCreator::getWorkspacesByLabel() const {
       for (const auto &name : group->getNames()) {
         const size_t pos = name.find("_Workspace");
         if (pos != std::string::npos) {
-          names.push_back(name.substr(0, pos));
+          names.emplace_back(name.substr(0, pos));
         }
       }
       if (names.empty()) {
@@ -729,7 +729,7 @@ bool MuonAnalysisResultTableCreator::haveSameParameters(
       do {
         std::string key;
         row >> key;
-        keys.push_back(key);
+        keys.emplace_back(key);
       } while (row.next());
     }
     return keys;
@@ -779,7 +779,7 @@ void MuonAnalysisResultTableCreator::removeFixedParameterErrors(
       }
     }
     if (allZeros) {
-      zeroErrorColumns.push_back(name);
+      zeroErrorColumns.emplace_back(name);
     }
   }
 

@@ -80,6 +80,34 @@ void CreateDetectorTable::exec() {
   setProperty("DetectorTableWorkspace", detectorTable);
 }
 
+/*
+ * Validate the input parameters
+ * @returns map with keys corresponding to properties with errors and values
+ * containing the error messages.
+ */
+std::map<std::string, std::string> CreateDetectorTable::validateInputs() {
+  // create the map
+  std::map<std::string, std::string> validationOutput;
+
+  Workspace_sptr inputWS = getProperty("InputWorkspace");
+  const auto matrix = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS);
+
+  if (matrix) {
+    const int numSpectra = static_cast<int>(matrix->getNumberHistograms());
+    const std::vector<int> indices = getProperty("WorkspaceIndices");
+
+    if (std::any_of(indices.cbegin(), indices.cend(),
+                    [numSpectra](const auto index) {
+                      return (index >= numSpectra) || (index < 0);
+                    })) {
+      validationOutput["WorkspaceIndices"] =
+          "One or more indices out of range of available spectra.";
+    }
+  }
+
+  return validationOutput;
+}
+
 /**
  * Create the instrument detector table workspace from a MatrixWorkspace
  * @param ws :: A pointer to a MatrixWorkspace
@@ -156,23 +184,23 @@ createDetectorTableWorkspace(const MatrixWorkspace_sptr &ws,
 std::vector<std::pair<std::string, std::string>>
 createColumns(const bool isScanning, const bool includeData, const bool calcQ) {
   std::vector<std::pair<std::string, std::string>> colNames;
-  colNames.push_back(std::make_pair("double", "Index"));
-  colNames.push_back(std::make_pair("int", "Spectrum No"));
-  colNames.push_back(std::make_pair("str", "Detector ID(s)"));
+  colNames.emplace_back(std::make_pair("double", "Index"));
+  colNames.emplace_back(std::make_pair("int", "Spectrum No"));
+  colNames.emplace_back(std::make_pair("str", "Detector ID(s)"));
   if (isScanning)
-    colNames.push_back(std::make_pair("str", "Time Indexes"));
+    colNames.emplace_back(std::make_pair("str", "Time Indexes"));
   if (includeData) {
-    colNames.push_back(std::make_pair("double", "Data Value"));
-    colNames.push_back(std::make_pair("double", "Data Error"));
+    colNames.emplace_back(std::make_pair("double", "Data Value"));
+    colNames.emplace_back(std::make_pair("double", "Data Error"));
   }
 
-  colNames.push_back(std::make_pair("double", "R"));
-  colNames.push_back(std::make_pair("double", "Theta"));
+  colNames.emplace_back(std::make_pair("double", "R"));
+  colNames.emplace_back(std::make_pair("double", "Theta"));
   if (calcQ) {
-    colNames.push_back(std::make_pair("double", "Q"));
+    colNames.emplace_back(std::make_pair("double", "Q"));
   }
-  colNames.push_back(std::make_pair("double", "Phi"));
-  colNames.push_back(std::make_pair("str", "Monitor"));
+  colNames.emplace_back(std::make_pair("double", "Phi"));
+  colNames.emplace_back(std::make_pair("str", "Monitor"));
   return colNames;
 }
 

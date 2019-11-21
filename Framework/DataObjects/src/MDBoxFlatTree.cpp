@@ -420,7 +420,7 @@ void MDBoxFlatTree::loadExperimentInfos(
         if (num < std::numeric_limits<uint16_t>::max() - 1) {
           // dublicated experiment info names are impossible due to the
           // structure of the nexus file but missing -- can be found.
-          ExperimentBlockNum.push_back(num);
+          ExperimentBlockNum.emplace_back(num);
         }
       } catch (boost::bad_lexical_cast &) { /* ignore */
       }

@@ -201,7 +201,7 @@ added. It does not check the points for validity.
   const double u = (Pln.getDistance() - OdotN) / DdotN;
   if (u <= 0)
     return 0;
-  PntOut.push_back(getPoint(u));
+  PntOut.emplace_back(getPoint(u));
   return 1;
 }
 

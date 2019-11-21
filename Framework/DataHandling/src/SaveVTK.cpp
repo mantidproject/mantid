@@ -116,17 +116,17 @@ void SaveVTK::exec() {
           }
 
           if (xMax && X[i + 1] > m_Xmax) {
-            xValue.push_back(X[i]);
+            xValue.emplace_back(X[i]);
             break;
           }
 
-          xValue.push_back(X[i]);
+          xValue.emplace_back(X[i]);
           if (i == static_cast<int>(nVals) - 1) {
-            xValue.push_back(X[i + 1]);
+            xValue.emplace_back(X[i + 1]);
           }
 
-          yValue.push_back(Y[i]);
-          errors.push_back(E[i]);
+          yValue.emplace_back(Y[i]);
+          errors.emplace_back(E[i]);
         }
         // sanity check
         assert((int)xValue.size() == (int)yValue.size() + 1);

@@ -177,8 +177,8 @@ void CalculateCoverageDGS::exec() {
   for (size_t i = 0; i < detectorInfo.size(); ++i) {
     if (!detectorInfo.isMasked(i) && !detectorInfo.isMonitor(i)) {
       const auto &detector = detectorInfo.detector(i);
-      tt.push_back(detector.getTwoTheta(V3D(0, 0, 0), V3D(0, 0, 1)));
-      phi.push_back(detector.getPhi());
+      tt.emplace_back(detector.getTwoTheta(V3D(0, 0, 0), V3D(0, 0, 1)));
+      phi.emplace_back(detector.getPhi());
     }
   }
 
@@ -400,16 +400,16 @@ void CalculateCoverageDGS::exec() {
 
   for (size_t row = 0; row <= 3; row++) {
     if (affineMat[row][0] == 1.) {
-      binDimensions.push_back(out1);
+      binDimensions.emplace_back(out1);
     }
     if (affineMat[row][1] == 1.) {
-      binDimensions.push_back(out2);
+      binDimensions.emplace_back(out2);
     }
     if (affineMat[row][2] == 1.) {
-      binDimensions.push_back(out3);
+      binDimensions.emplace_back(out3);
     }
     if (affineMat[row][3] == 1.) {
-      binDimensions.push_back(out4);
+      binDimensions.emplace_back(out4);
     }
   }
 

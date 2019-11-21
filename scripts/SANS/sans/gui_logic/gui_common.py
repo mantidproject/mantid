@@ -5,7 +5,6 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
-
 from qtpy.QtCore import QSettings
 from qtpy.QtWidgets import QFileDialog
 
@@ -45,18 +44,17 @@ OPTIONS_EQUAL = "="
 # ----------------------------------------------------------------------------------------------------------------------
 #  Other Globals
 # ----------------------------------------------------------------------------------------------------------------------
-SANS2D_LAB = "rear"
-SANS2D_HAB = "front"
+LAB_STRINGS = {SANSInstrument.SANS2D: "rear",
+               SANSInstrument.LOQ: "main-detector",
+               SANSInstrument.LARMOR: "DetectorBench",
+               SANSInstrument.ZOOM: "rear-detector",
+               SANSInstrument.NoInstrument: ISISReductionMode.to_string(ISISReductionMode.LAB)
+               }
 
-LOQ_LAB = "main-detector"
-LOQ_HAB = "Hab"
+HAB_STRINGS = {SANSInstrument.SANS2D: "front",
+               SANSInstrument.LOQ: "Hab",
+               SANSInstrument.NoInstrument: ISISReductionMode.to_string(ISISReductionMode.HAB)}
 
-LARMOR_LAB = "DetectorBench"
-
-ZOOM_LAB = "rear-detector"
-
-DEFAULT_LAB = ISISReductionMode.to_string(ISISReductionMode.LAB)
-DEFAULT_HAB = ISISReductionMode.to_string(ISISReductionMode.HAB)
 MERGED = "Merged"
 ALL = "All"
 
@@ -66,42 +64,43 @@ JSON_SUFFIX = ".json"
 
 
 def get_detector_strings_for_gui(instrument=None):
-    if instrument is SANSInstrument.SANS2D:
-        return [SANS2D_LAB, SANS2D_HAB]
-    elif instrument is SANSInstrument.LOQ:
-        return [LOQ_LAB, LOQ_HAB]
-    elif instrument is SANSInstrument.LARMOR:
-        return [LARMOR_LAB]
-    elif instrument is SANSInstrument.ZOOM:
-        return [ZOOM_LAB]
+    if instrument is SANSInstrument.SANS2D or instrument is SANSInstrument.LOQ:
+        return [LAB_STRINGS[instrument], HAB_STRINGS[instrument]]
+    # Larmor and Zoom only need LAB
+    elif instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.ZOOM:
+        return [LAB_STRINGS[instrument]]
+
     else:
-        return [DEFAULT_LAB, DEFAULT_HAB]
+        return [LAB_STRINGS[SANSInstrument.NoInstrument],
+                HAB_STRINGS[SANSInstrument.NoInstrument]]
 
 
 def get_detector_strings_for_diagnostic_page(instrument=None):
     if instrument is SANSInstrument.SANS2D:
-        return [SANS2D_LAB, SANS2D_HAB]
-    elif instrument is SANSInstrument.LOQ:
-        return [LOQ_LAB]
-    elif instrument is SANSInstrument.LARMOR:
-        return [LARMOR_LAB]
-    elif instrument is SANSInstrument.ZOOM:
-        return [ZOOM_LAB]
+        return [LAB_STRINGS[instrument], HAB_STRINGS[instrument]]
+
+    elif any(instrument is x for x in [SANSInstrument.LOQ, SANSInstrument.LARMOR, SANSInstrument.ZOOM]):
+        return [LAB_STRINGS[instrument]]
+
     else:
-        return [DEFAULT_LAB, DEFAULT_HAB]
+        return [LAB_STRINGS[SANSInstrument.NoInstrument],
+                HAB_STRINGS[SANSInstrument.NoInstrument]]
 
 
 def get_reduction_mode_strings_for_gui(instrument=None):
     if instrument is SANSInstrument.SANS2D:
-        return [SANS2D_LAB, SANS2D_HAB, MERGED, ALL]
+        return [LAB_STRINGS[instrument], HAB_STRINGS[instrument], MERGED, ALL]
+
     elif instrument is SANSInstrument.LOQ:
-        return [LOQ_LAB, LOQ_HAB, MERGED, ALL]
-    elif instrument is SANSInstrument.LARMOR:
-        return [LARMOR_LAB]
-    elif instrument is SANSInstrument.ZOOM:
-        return [ZOOM_LAB]
+        return [LAB_STRINGS[instrument], HAB_STRINGS[instrument], MERGED, ALL]
+
+    elif any(instrument is x for x in [SANSInstrument.LARMOR, SANSInstrument.ZOOM]):
+        return [LAB_STRINGS[instrument]]
+
     else:
-        return [DEFAULT_LAB, DEFAULT_HAB, MERGED, ALL]
+        return [LAB_STRINGS[SANSInstrument.NoInstrument],
+                HAB_STRINGS[SANSInstrument.NoInstrument],
+                MERGED, ALL]
 
 
 def get_instrument_strings_for_gui():
@@ -111,19 +110,17 @@ def get_instrument_strings_for_gui():
 def get_reduction_selection(instrument):
     selection = {ISISReductionMode.Merged: MERGED,
                  ISISReductionMode.All: ALL}
-    if instrument is SANSInstrument.SANS2D:
-        selection.update({ISISReductionMode.LAB: SANS2D_LAB,
-                          ISISReductionMode.HAB: SANS2D_HAB})
-    elif instrument is SANSInstrument.LOQ:
-        selection.update({ISISReductionMode.LAB: LOQ_LAB,
-                          ISISReductionMode.HAB: LOQ_HAB})
-    elif instrument is SANSInstrument.LARMOR:
-        selection = {ISISReductionMode.LAB: LARMOR_LAB}
-    elif instrument is SANSInstrument.ZOOM:
-        selection = {ISISReductionMode.LAB: ZOOM_LAB}
+
+    if any (instrument is x for x in [SANSInstrument.SANS2D, SANSInstrument.LOQ]):
+        selection.update({ISISReductionMode.LAB: LAB_STRINGS[instrument],
+                          ISISReductionMode.HAB: HAB_STRINGS[instrument]})
+
+    elif any(instrument is x for x in [SANSInstrument.LARMOR, SANSInstrument.ZOOM]):
+        selection = {ISISReductionMode.LAB: LAB_STRINGS[instrument]}
+
     else:
-        selection.update({ISISReductionMode.LAB: DEFAULT_LAB,
-                          ISISReductionMode.HAB: DEFAULT_HAB})
+        selection.update({ISISReductionMode.LAB: LAB_STRINGS[SANSInstrument.NoInstrument],
+                          ISISReductionMode.HAB: HAB_STRINGS[SANSInstrument.NoInstrument]})
     return selection
 
 
@@ -143,20 +140,28 @@ def get_string_for_gui_from_instrument(instrument):
 
 
 def get_reduction_mode_from_gui_selection(gui_selection):
-    if gui_selection == MERGED:
+    # TODO when we hit only Python 3 this should use casefold rather than lower
+    case_folded_selection = gui_selection.lower()
+    if case_folded_selection == MERGED.lower():
         return ISISReductionMode.Merged
-    elif gui_selection == ALL:
+
+    elif case_folded_selection == ALL.lower():
         return ISISReductionMode.All
-    elif gui_selection == SANS2D_LAB or gui_selection == LOQ_LAB or gui_selection == LARMOR_LAB or gui_selection == ZOOM_LAB or gui_selection == DEFAULT_LAB:  # noqa
+
+    elif any(case_folded_selection == lab.lower() for lab in LAB_STRINGS.values()):
         return ISISReductionMode.LAB
-    elif gui_selection == SANS2D_HAB or gui_selection == LOQ_HAB:
+
+    elif any(case_folded_selection == hab.lower() for hab in HAB_STRINGS.values()):
         return ISISReductionMode.HAB
     else:
-        raise RuntimeError("Reduction mode selection is not valid.")
+        raise RuntimeError("Reduction mode selection {0} is not valid.".format(gui_selection))
 
 
 def get_detector_from_gui_selection(gui_selection):
-    if gui_selection == LOQ_HAB or gui_selection == SANS2D_HAB:
+    # TODO when we hit only Python 3 this should use casefold rather than lower
+    case_folded_selection = gui_selection.lower()
+
+    if any(case_folded_selection == hab.lower() for hab in HAB_STRINGS.values()):
         return DetectorType.HAB
     else:
         return DetectorType.LAB
@@ -169,7 +174,7 @@ def get_instrument_from_gui_selection(gui_selection):
         raise RuntimeError("Instrument selection is not valid.")
 
 
-def load_file(line_edit_field, filter_for_dialog, q_settings_group_key, q_settings_key, func):
+def load_file(line_edit_field, filter_for_dialog, q_settings_group_key, q_settings_key, func_to_get_line_edit_val):
     # Get the last location of the user file
     settings = QSettings()
     settings.beginGroup(q_settings_group_key)
@@ -180,7 +185,7 @@ def load_file(line_edit_field, filter_for_dialog, q_settings_group_key, q_settin
     open_file_dialog(line_edit_field, filter_for_dialog, last_path)
 
     # Save the new location
-    new_path, _ = os.path.split(func())
+    new_path = func_to_get_line_edit_val()
     if new_path:
         set_setting(q_settings_group_key, q_settings_key, new_path)
 
@@ -248,6 +253,7 @@ class SANSGuiPropertiesHandler(object):
     This class handles the setting and getting
     of SANSDataProcessorGUI default properties.
     """
+
     def __init__(self, keys, line_edits={}):
         """
         Initialise a properties handler for a particular pyqt view.

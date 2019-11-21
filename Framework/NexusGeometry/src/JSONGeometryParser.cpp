@@ -50,7 +50,7 @@ std::vector<Json::Value> getAllNXComponents(const Json::Value &instrument,
   for (const auto &component : components) {
     auto attributes = component[ATTRIBUTES];
     if (validateNXAttribute(attributes, NXClass))
-      nxComponents.push_back(component);
+      nxComponents.emplace_back(component);
   }
 
   return nxComponents;
@@ -69,19 +69,19 @@ std::vector<Json::Value> getAllChoppers(const Json::Value &instrument) {
 }
 
 void addSingleValue(const Json::Value &val, std::vector<double> &fillArray) {
-  fillArray.push_back(val.asDouble());
+  fillArray.emplace_back(val.asDouble());
 }
 
 void addSingleValue(const Json::Value &val, std::vector<float> &fillArray) {
-  fillArray.push_back(val.asFloat());
+  fillArray.emplace_back(val.asFloat());
 }
 
 void addSingleValue(const Json::Value &val, std::vector<uint32_t> &fillArray) {
-  fillArray.push_back(val.asUInt());
+  fillArray.emplace_back(val.asUInt());
 }
 
 void addSingleValue(const Json::Value &val, std::vector<int32_t> &fillArray) {
-  fillArray.push_back(val.asInt());
+  fillArray.emplace_back(val.asInt());
 }
 
 /// Recursively fills JSON array data trees which are usually arranges as arrays
@@ -126,6 +126,9 @@ void extractDatasetValues(const Json::Value &datasetParent,
   auto datadesc = datasetParent["dataset"];
   auto shape = datadesc["size"];
   auto values = datasetParent[VALUES];
+
+  if (shape.isNull())
+    return addSingleValue(values, data);
 
   std::vector<uint32_t> dims(shape.size());
 
@@ -303,7 +306,7 @@ std::vector<std::unique_ptr<Json::Value>>
 moveToUniquePtrVec(std::vector<Json::Value> &jsonVector) {
   std::vector<std::unique_ptr<Json::Value>> ret;
   for (auto &val : jsonVector)
-    ret.push_back(std::make_unique<Json::Value>(std::move(val)));
+    ret.emplace_back(std::make_unique<Json::Value>(std::move(val)));
 
   return ret;
 }
@@ -337,16 +340,19 @@ void JSONGeometryParser::validateAndRetrieveGeometry(
   if (sample.isNull())
     throw std::invalid_argument("No sample found in json.");
 
-  auto source = get(entryChildren, NX_SOURCE);
-  if (source.isNull())
-    g_log.notice() << "No source information found in json instrument."
-                   << std::endl;
-
   auto instrument = get(entryChildren, NX_INSTRUMENT);
   if (instrument.isNull())
     throw std::invalid_argument("No instrument found in json.");
 
   m_name = extractInstrumentName(instrument);
+
+  auto instrumentChildren = instrument[CHILDREN];
+
+  auto source = get(instrumentChildren, NX_SOURCE);
+
+  if (source.isNull())
+    g_log.notice() << "No source information found in json instrument."
+                   << std::endl;
 
   auto jsonDetectorBanks = getAllDetectors(instrument);
   if (jsonDetectorBanks.empty())
@@ -413,7 +419,7 @@ void JSONGeometryParser::extractTransformations(
     Eigen::Quaterniond &orientation) {
   Eigen::Vector3d location(0, 0, 0);
   Eigen::Vector3d beamDirectionOffset(0, 0, 0);
-  Eigen::Vector3d orientationVector(0, 0, 0);
+  Eigen::Vector3d orientationVector(0, 0, 1);
   double angle = 0.0;
 
   auto &children = transformations[CHILDREN];
@@ -426,8 +432,9 @@ void JSONGeometryParser::extractTransformations(
     } else if (transformation[NAME] == "beam_direction_offset") {
       extractTransformationDataset(transformation, value, beamDirectionOffset);
       beamDirectionOffset *= value;
-    } else if (transformation[NAME] == "orientation")
+    } else if (transformation[NAME] == "orientation") {
       extractTransformationDataset(transformation, angle, orientationVector);
+    }
   }
   translation = location + beamDirectionOffset;
   orientation = Eigen::AngleAxisd(degreesToRadians(angle),
@@ -489,7 +496,7 @@ void JSONGeometryParser::extractDetectorContent() {
     m_x.emplace_back(std::move(x));
     m_y.emplace_back(std::move(y));
     m_z.emplace_back(std::move(z));
-    m_isOffGeometry.push_back(isOffGeometry);
+    m_isOffGeometry.emplace_back(isOffGeometry);
     m_pixelShapeCylinders.emplace_back(std::move(cylinders));
     m_pixelShapeVertices.emplace_back(std::move(vertices));
     m_pixelShapeFaces.emplace_back(std::move(faces));
@@ -520,7 +527,7 @@ void JSONGeometryParser::extractMonitorContent() {
         extractMonitorEventStream(child, mon);
       else if (child[NAME] == "waveforms")
         extractMonitorWaveformStream(child, mon);
-      else if (child[NAME] == "transformations")
+      else if (validateNXAttribute(child[ATTRIBUTES], NX_TRANSFORMATIONS))
         extractTransformations(child, mon.translation, mon.orientation);
       else if (child[NAME] == SHAPE)
         extractShapeInformation(child, mon.cylinders, mon.faces, mon.vertices,

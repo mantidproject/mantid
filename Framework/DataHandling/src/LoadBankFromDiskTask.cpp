@@ -77,7 +77,7 @@ void LoadBankFromDiskTask::loadPulseTimes(::NeXus::File &file) {
   // Not found? Need to load and add it
   thisBankPulseTimes = boost::make_shared<BankPulseTimes>(boost::ref(file),
                                                           m_framePeriodNumbers);
-  m_loader.m_bankPulseTimes.push_back(thisBankPulseTimes);
+  m_loader.m_bankPulseTimes.emplace_back(thisBankPulseTimes);
 }
 
 /** Load the event_index field

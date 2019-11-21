@@ -10,8 +10,8 @@ using Mantid::API::AlgorithmManager;
 using Mantid::API::IAlgorithm_sptr;
 using Mantid::API::MatrixWorkspace;
 using Mantid::API::MatrixWorkspace_sptr;
-using Mantid::API::WorkspaceGroup_sptr;
 using Mantid::API::Workspace_sptr;
+using Mantid::API::WorkspaceGroup_sptr;
 
 namespace Mantid {
 namespace WorkflowAlgorithms {

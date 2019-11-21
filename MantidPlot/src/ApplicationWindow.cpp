@@ -6038,13 +6038,13 @@ int ApplicationWindow::execSaveProjectDialog() {
   for (auto window : getSerialisableWindows()) {
     auto win = dynamic_cast<IProjectSerialisable *>(window);
     if (win)
-      windows.push_back(win);
+      windows.emplace_back(win);
   }
 
   for (auto window : getAllWindows()) {
     auto win = dynamic_cast<IProjectSerialisable *>(window);
     if (win)
-      windows.push_back(win);
+      windows.emplace_back(win);
   }
 
   const QString pyInterfaceMarkerProperty("launcher");
@@ -15732,7 +15732,7 @@ void ApplicationWindow::performCustomAction(QAction *action) {
     usr_win->setAttribute(Qt::WA_DeleteOnClose, false);
     MantidQt::API::InterfaceManager interfaceManager;
     MantidQt::API::UserSubWindow *user_interface =
-        interfaceManager.createSubWindow(action_data, usr_win);
+        interfaceManager.createSubWindow(action_data, usr_win, false);
     if (user_interface) {
       setGeometry(usr_win, user_interface);
       connect(user_interface, SIGNAL(runAsPythonScript(const QString &, bool)),
@@ -16127,6 +16127,7 @@ void ApplicationWindow::setGeometry(MdiSubWindow *usr_win,
             frame.bottomRight() + user_interface->geometry().bottomRight());
   usr_win->setGeometry(iface_geom);
   usr_win->setName(user_interface->windowTitle());
+  usr_win->setWindowModality(user_interface->windowModality());
   addMdiSubWindow(usr_win);
 }
 
@@ -16255,6 +16256,7 @@ FloatingWindow *ApplicationWindow::addMdiSubWindowAsFloating(MdiSubWindow *w,
     pos += mdiAreaTopLeft();
   }
   fw->setWindowTitle(w->name());
+  fw->setWindowModality(w->windowModality());
   fw->setMdiSubWindow(w);
   fw->resize(sz);
   fw->move(pos);

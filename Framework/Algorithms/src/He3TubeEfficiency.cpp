@@ -136,7 +136,7 @@ void He3TubeEfficiency::exec() {
       // avoid leaving the workspace part corrected
       m_outputWS->mutableY(i) = 0;
       PARALLEL_CRITICAL(deteff_invalid) {
-        m_spectraSkipped.push_back(m_inputWS->getAxis(1)->spectraNo(i));
+        m_spectraSkipped.emplace_back(m_inputWS->getAxis(1)->spectraNo(i));
       }
     }
 
@@ -435,7 +435,7 @@ void He3TubeEfficiency::execEvent() {
     } catch (std::out_of_range &) {
       // Parameters are bad so skip correction
       PARALLEL_CRITICAL(deteff_invalid) {
-        m_spectraSkipped.push_back(m_outputWS->getAxis(1)->spectraNo(i));
+        m_spectraSkipped.emplace_back(m_outputWS->getAxis(1)->spectraNo(i));
         m_outputWS->getSpectrum(i).clearData();
         spectrumInfo.setMasked(i, true);
       }

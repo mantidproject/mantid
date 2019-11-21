@@ -80,9 +80,9 @@ getOffsets(const JSONGeometryParser &parser, const size_t index) {
 
 Eigen::Vector3d applyRotation(const Eigen::Vector3d &pos,
                               const Eigen::Quaterniond &rot) {
-  Eigen::Affine3d transformation;
-  transformation.rotate(rot.conjugate());
-  return transformation * pos;
+  auto transform = Eigen::Transform<double, 3, Eigen::Affine>::Identity();
+  transform = rot * transform;
+  return transform * pos;
 }
 
 void addMonitors(const JSONGeometryParser &parser, InstrumentBuilder &builder) {

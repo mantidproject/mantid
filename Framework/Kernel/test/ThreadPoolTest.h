@@ -76,7 +76,7 @@ void threadpooltest_function() { threadpooltest_check = 12; }
 std::vector<int> threadpooltest_vec;
 void threadpooltest_adding_stuff(int val) {
   // TODO: Mutex
-  threadpooltest_vec.push_back(val);
+  threadpooltest_vec.emplace_back(val);
 }
 
 // Counter for the test.

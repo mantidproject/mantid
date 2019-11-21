@@ -18,8 +18,8 @@ namespace Algorithms {
 using namespace API;
 using DataObjects::EventWorkspace;
 using DataObjects::EventWorkspace_const_sptr;
-using HistogramData::CountStandardDeviations;
 using HistogramData::Counts;
+using HistogramData::CountStandardDeviations;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(RebinToWorkspace)

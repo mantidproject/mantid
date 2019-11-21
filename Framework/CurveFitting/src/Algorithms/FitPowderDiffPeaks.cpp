@@ -699,9 +699,9 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
   map<string, double> solutiona;
   storeFunctionParameters(peak, solutiona);
 
-  chi2s.push_back(chi2a);
-  goodfits.push_back(fitgooda);
-  solutions.push_back(solutiona);
+  chi2s.emplace_back(chi2a);
+  goodfits.emplace_back(fitgooda);
+  solutions.emplace_back(solutiona);
 
   string peakinfoa1 =
       getFunctionInfo(boost::dynamic_pointer_cast<IFunction>(peak));
@@ -726,9 +726,9 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
   map<string, double> solutionb;
   storeFunctionParameters(peak, solutionb);
 
-  chi2s.push_back(chi2b);
-  goodfits.push_back(fitgoodb);
-  solutions.push_back(solutionb);
+  chi2s.emplace_back(chi2b);
+  goodfits.emplace_back(fitgoodb);
+  solutions.emplace_back(solutionb);
 
   string peakinfob1 =
       getFunctionInfo(boost::dynamic_pointer_cast<IFunction>(peak));
@@ -754,9 +754,9 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
     map<string, double> solutionc;
     storeFunctionParameters(peak, solutionc);
 
-    chi2s.push_back(chi2c);
-    goodfits.push_back(fitgoodc);
-    solutions.push_back(solutionc);
+    chi2s.emplace_back(chi2c);
+    goodfits.emplace_back(fitgoodc);
+    solutions.emplace_back(solutionc);
 
     string peakinfoc1 =
         getFunctionInfo(boost::dynamic_pointer_cast<IFunction>(peak));
@@ -765,9 +765,9 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
                    << peakinfoc1 << '\n';
   } else {
     // No right peak information: set a error entry
-    chi2s.push_back(DBL_MAX);
-    goodfits.push_back(false);
-    solutions.push_back(rightpeakparammap);
+    chi2s.emplace_back(DBL_MAX);
+    goodfits.emplace_back(false);
+    solutions.emplace_back(rightpeakparammap);
   }
 
   // 6. Summarize the above 3 approach
@@ -1133,7 +1133,7 @@ void FitPowderDiffPeaks::fitPeaksWithGoodStartingValues() {
       // a) Add this peak,
       BackToBackExponential_sptr thispeak =
           m_vecPeakFunctions[ipeak].second.second;
-      indexpeakgroup.push_back(ipeak);
+      indexpeakgroup.emplace_back(ipeak);
 
       // b) update the peak index
       --ipeak;
@@ -1190,7 +1190,7 @@ void FitPowderDiffPeaks::fitPeaksWithGoodStartingValues() {
       for (auto ipk : indexpeakgroup) {
         BackToBackExponential_sptr temppeak =
             m_vecPeakFunctions[ipk].second.second;
-        peaksgroup.push_back(temppeak);
+        peaksgroup.emplace_back(temppeak);
       }
 
       fitOverlappedPeaks(peaksgroup, backgroundfunction, -1.0);
@@ -1304,7 +1304,7 @@ bool FitPowderDiffPeaks::fitSinglePeakConfident(
   // Store parameters
   map<string, double> step1params;
   storeFunctionParameters(peak, step1params);
-  fitparamvaluemaps.push_back(step1params);
+  fitparamvaluemaps.emplace_back(step1params);
   if (!goodfit1)
     chi2height = 1.0E20;
   chi2indexvec.emplace_back(chi2height, 0);
@@ -1326,7 +1326,7 @@ bool FitPowderDiffPeaks::fitSinglePeakConfident(
   storeFunctionParameters(peak, planAparams);
   if (!goodfitA)
     chi2planA = 1.0E20;
-  fitparamvaluemaps.push_back(planAparams);
+  fitparamvaluemaps.emplace_back(planAparams);
   chi2indexvec.emplace_back(chi2planA, 1);
 
   // c) Plan B: fit parameters in two groups in 2 steps
@@ -1361,7 +1361,7 @@ bool FitPowderDiffPeaks::fitSinglePeakConfident(
   storeFunctionParameters(peak, planBparams);
   if (!goodfitB)
     chi2planB = 1.0E20;
-  fitparamvaluemaps.push_back(planBparams);
+  fitparamvaluemaps.emplace_back(planBparams);
   chi2indexvec.emplace_back(chi2planB, 2);
 
   // d) Plan C: fit parameters in two groups in 2 steps in alternate order
@@ -1396,7 +1396,7 @@ bool FitPowderDiffPeaks::fitSinglePeakConfident(
   storeFunctionParameters(peak, planCparams);
   if (!goodfitC)
     chi2planC = 1.0E20;
-  fitparamvaluemaps.push_back(planCparams);
+  fitparamvaluemaps.emplace_back(planCparams);
   chi2indexvec.emplace_back(chi2planC, 3);
 
   // d) Summarize and compare result
@@ -1565,9 +1565,9 @@ FitPowderDiffPeaks::doFitPeak(Workspace2D_sptr dataws,
   minimizers[1] = "Levenberg-Marquardt";
   vector<size_t> maxiterations(2, 1000);
   vector<double> dampings(2, 0.0);
-  vecMinimizers.push_back(minimizers);
-  vecMaxIterations.push_back(maxiterations);
-  vecDampings.push_back(dampings);
+  vecMinimizers.emplace_back(minimizers);
+  vecMaxIterations.emplace_back(maxiterations);
+  vecDampings.emplace_back(dampings);
   */
 
   vector<string> minimizers2(3);
@@ -1577,9 +1577,9 @@ FitPowderDiffPeaks::doFitPeak(Workspace2D_sptr dataws,
   vector<size_t> maxiterations2(3, 1000);
   maxiterations2[0] = 10000;
   vector<double> dampings2(3, 0.0);
-  vecMinimizers.push_back(minimizers2);
-  vecMaxIterations.push_back(maxiterations2);
-  vecDampings.push_back(dampings2);
+  vecMinimizers.emplace_back(minimizers2);
+  vecMaxIterations.emplace_back(maxiterations2);
+  vecDampings.emplace_back(dampings2);
 
   // 4. Fit in different sequential
   bool goodfit = false;
@@ -2070,7 +2070,7 @@ void FitPowderDiffPeaks::estimatePeakHeightsLeBail(
   vector<vector<double>> peakvalues;
   for (size_t i = 0; i < (peaks.size() + 1); ++i) {
     vector<double> peakvalue(domain.size(), 0.0);
-    peakvalues.push_back(peakvalue);
+    peakvalues.emplace_back(peakvalue);
   }
 
   // 2. Calcualte peak values
@@ -2320,8 +2320,8 @@ void FitPowderDiffPeaks::parseBraggPeakTable(
 
     } // ENDFOR Column
 
-    parammaps.push_back(doublemap);
-    hklmaps.push_back(intmap);
+    parammaps.emplace_back(doublemap);
+    hklmaps.emplace_back(intmap);
 
   } // ENDFOR Row
 
@@ -2405,12 +2405,12 @@ Workspace2D_sptr FitPowderDiffPeaks::genPeakParameterDataWorkspace() {
       double p_s = peak->getParameter("S");
 
       // b) To vectors
-      vecchi2.push_back(chi2);
-      vecdh.push_back(dh);
-      vectofh.push_back(p_x);
-      vecalpha.push_back(p_a);
-      vecbeta.push_back(p_b);
-      vecsigma.push_back(p_s);
+      vecchi2.emplace_back(chi2);
+      vecdh.emplace_back(dh);
+      vectofh.emplace_back(p_x);
+      vecalpha.emplace_back(p_a);
+      vecbeta.emplace_back(p_b);
+      vecsigma.emplace_back(p_s);
     }
   } // ENDFOR i(peak)
 
@@ -2512,10 +2512,10 @@ FitPowderDiffPeaks::genPeakParametersWorkspace() {
       newrow << chi2;
 
       // iv.  Prepare for Z-score
-      // vectofh.push_back(p_x);
-      // vecalpha.push_back(p_a);
-      // vecbeta.push_back(p_b);
-      // vecsigma.push_back(p_s);
+      // vectofh.emplace_back(p_x);
+      // vecalpha.emplace_back(p_a);
+      // vecbeta.emplace_back(p_b);
+      // vecsigma.emplace_back(p_s);
       vectofh[i] = p_x;
       vecalpha[i] = p_a;
       vecbeta[i] = p_b;
@@ -2962,7 +2962,7 @@ bool FitPowderDiffPeaks::getHKLFromMap(map<string, int> intmap,
     if (miter == intmap.end())
       return false;
 
-    hkl.push_back(miter->second);
+    hkl.emplace_back(miter->second);
   }
 
   return true;

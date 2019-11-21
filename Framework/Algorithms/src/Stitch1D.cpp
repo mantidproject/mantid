@@ -289,16 +289,17 @@ std::vector<double> Stitch1D::getRebinParams(MatrixWorkspace_const_sptr &lhsWS,
       calculatedStep = rhsX[1] - rhsX[0];
     }
 
-    calculatedParams.push_back(minLHSX);
-    calculatedParams.push_back(calculatedStep);
-    calculatedParams.push_back(maxRHSX);
+    calculatedParams.emplace_back(minLHSX);
+    calculatedParams.emplace_back(calculatedStep);
+    calculatedParams.emplace_back(maxRHSX);
     result = calculatedParams;
   } else {
     if (inputParams.size() == 1) {
       std::vector<double> calculatedParams;
-      calculatedParams.push_back(minLHSX);
-      calculatedParams.push_back(inputParams.front()); // Use the step supplied.
-      calculatedParams.push_back(maxRHSX);
+      calculatedParams.emplace_back(minLHSX);
+      calculatedParams.emplace_back(
+          inputParams.front()); // Use the step supplied.
+      calculatedParams.emplace_back(maxRHSX);
       result = calculatedParams;
     } else {
       result = inputParams; // user has provided params. Use those.
@@ -341,19 +342,19 @@ MatrixWorkspace_sptr Stitch1D::rebin(MatrixWorkspace_sptr &input,
     for (size_t j = 0; j < sourceY.size(); ++j) {
       const double value = sourceY[j];
       if (std::isnan(value)) {
-        nanYIndexes.push_back(j);
+        nanYIndexes.emplace_back(j);
         sourceY[j] = 0;
       } else if (std::isinf(value)) {
-        infYIndexes.push_back(j);
+        infYIndexes.emplace_back(j);
         sourceY[j] = 0;
       }
 
       const double eValue = sourceE[j];
       if (std::isnan(eValue)) {
-        nanEIndexes.push_back(j);
+        nanEIndexes.emplace_back(j);
         sourceE[j] = 0;
       } else if (std::isinf(eValue)) {
-        infEIndexes.push_back(j);
+        infEIndexes.emplace_back(j);
         sourceE[j] = 0;
       }
     }

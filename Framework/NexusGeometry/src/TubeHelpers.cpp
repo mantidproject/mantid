@@ -71,7 +71,7 @@ notInTubes(const std::vector<detail::TubeBuilder> &tubes,
   std::vector<Mantid::detid_t> used;
   for (const auto &tube : tubes) {
     for (const auto &id : tube.detIDs()) {
-      used.push_back(id);
+      used.emplace_back(id);
     }
   }
   std::vector<Mantid::detid_t> diff;

@@ -224,7 +224,7 @@ public:
         subscribeUsingGenerator<TransformationSpaceGroupGenerator>(
             number, transformedSymbol,
             std::string(hmSymbol).append("|").append(transformation));
-        transformedSpaceGroupSymbols.push_back(transformedSymbol);
+        transformedSpaceGroupSymbols.emplace_back(transformedSymbol);
       }
     }
   }

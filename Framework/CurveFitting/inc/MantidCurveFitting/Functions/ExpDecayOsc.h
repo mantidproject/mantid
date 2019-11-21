@@ -31,7 +31,7 @@ public:
   std::string name() const override { return "ExpDecayOsc"; }
 
   /// overwrite IFunction base class methods
-  const std::string category() const override { return "Muon"; }
+  const std::string category() const override { return "MuonGeneric"; }
 
 protected:
   void setActiveParameter(size_t i, double value) override;

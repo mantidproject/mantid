@@ -79,7 +79,7 @@ void FixGSASInstrumentFile::exec() {
       boost::algorithm::split(fields, line, boost::algorithm::is_any_of("\n"));
       if (fields.empty())
         throw runtime_error("Impossible to have an empty line. ");
-      vec_line.push_back(fields[0]);
+      vec_line.emplace_back(fields[0]);
     }
   }
   infile.close();

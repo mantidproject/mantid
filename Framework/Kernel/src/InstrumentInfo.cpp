@@ -298,6 +298,19 @@ void InstrumentInfo::fillLiveData(const Poco::XML::Element *elem) {
                     << m_name << " instrument. Skipping faulty connection.\n";
     }
   }
+
+  // Get kafka topics under <livedata>
+  Poco::AutoPtr<Poco::XML::NodeList> topics =
+      elem->getElementsByTagName("topic");
+  for (unsigned long i = 0; i < topics->length(); ++i) {
+    auto *topic = dynamic_cast<Poco::XML::Element *>(topics->item(i));
+    try {
+      m_kafkaTopics.emplace_back(this, topic);
+    } catch (...) {
+      g_log.error() << "Exception occured while loading livedata for " << m_name
+                    << " instrument. Skipping kafka topic.\n";
+    }
+  }
 }
 
 //-------------------------------------------------------------------------

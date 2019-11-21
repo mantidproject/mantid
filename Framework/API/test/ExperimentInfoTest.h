@@ -461,7 +461,7 @@ public:
 
     std::vector<std::string> formats = {"xml"};
     std::vector<std::string> dirs;
-    dirs.push_back(testDir);
+    dirs.emplace_back(testDir);
     std::vector<std::string> fnames = helper.getResourceFilenames(
         "ARGUS", formats, dirs, "1909-01-31 22:59:59");
     TS_ASSERT_DIFFERS(fnames[0].find("TEST1_ValidDateOverlap"),

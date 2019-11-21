@@ -185,10 +185,10 @@ public:
 
     // b) Table Line 1
     std::vector<int> speclist;
-    speclist.push_back(5);
-    speclist.push_back(6);
-    speclist.push_back(7);
-    speclist.push_back(8);
+    speclist.emplace_back(5);
+    speclist.emplace_back(6);
+    speclist.emplace_back(7);
+    speclist.emplace_back(8);
     for (int spectrum : speclist) {
       auto &yvec = WS->y(spectrum);
       for (size_t bin = 0; bin < yvec.size(); ++bin) {

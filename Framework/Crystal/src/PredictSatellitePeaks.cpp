@@ -237,11 +237,11 @@ void PredictSatellitePeaks::exec() {
   // Sort peaks by run number so that peaks with equal goniometer matrices are
   // adjacent
   std::vector<std::pair<std::string, bool>> criteria;
-  criteria.push_back(std::pair<std::string, bool>("RunNumber", true));
-  criteria.push_back(std::pair<std::string, bool>("BankName", true));
-  criteria.push_back(std::pair<std::string, bool>("h", true));
-  criteria.push_back(std::pair<std::string, bool>("k", true));
-  criteria.push_back(std::pair<std::string, bool>("l", true));
+  criteria.emplace_back(std::pair<std::string, bool>("RunNumber", true));
+  criteria.emplace_back(std::pair<std::string, bool>("BankName", true));
+  criteria.emplace_back(std::pair<std::string, bool>("h", true));
+  criteria.emplace_back(std::pair<std::string, bool>("k", true));
+  criteria.emplace_back(std::pair<std::string, bool>("l", true));
   outPeaks->sort(criteria);
 
   for (int i = 0; i < static_cast<int>(outPeaks->getNumberPeaks()); ++i) {
@@ -323,11 +323,11 @@ void PredictSatellitePeaks::exec_peaks() {
   // Sort peaks by run number so that peaks with equal goniometer matrices are
   // adjacent
   std::vector<std::pair<std::string, bool>> criteria;
-  criteria.push_back(std::pair<std::string, bool>("RunNumber", true));
-  criteria.push_back(std::pair<std::string, bool>("BankName", true));
-  criteria.push_back(std::pair<std::string, bool>("h", true));
-  criteria.push_back(std::pair<std::string, bool>("k", true));
-  criteria.push_back(std::pair<std::string, bool>("l", true));
+  criteria.emplace_back(std::pair<std::string, bool>("RunNumber", true));
+  criteria.emplace_back(std::pair<std::string, bool>("BankName", true));
+  criteria.emplace_back(std::pair<std::string, bool>("h", true));
+  criteria.emplace_back(std::pair<std::string, bool>("k", true));
+  criteria.emplace_back(std::pair<std::string, bool>("l", true));
   outPeaks->sort(criteria);
 
   for (int i = 0; i < static_cast<int>(outPeaks->getNumberPeaks()); ++i) {
@@ -378,7 +378,7 @@ void PredictSatellitePeaks::predictOffsets(
         binary_search(AlreadyDonePeaks.begin(), AlreadyDonePeaks.end(), SavPk);
 
     if (!foundPeak) {
-      AlreadyDonePeaks.push_back(SavPk);
+      AlreadyDonePeaks.emplace_back(SavPk);
     } else {
       continue;
     }
@@ -451,7 +451,7 @@ void PredictSatellitePeaks::predictOffsetsWithCrossTerms(
                                        AlreadyDonePeaks.end(), SavPk);
 
         if (!foundPeak) {
-          AlreadyDonePeaks.push_back(SavPk);
+          AlreadyDonePeaks.emplace_back(SavPk);
         } else {
           continue;
         }
@@ -467,9 +467,9 @@ void PredictSatellitePeaks::predictOffsetsWithCrossTerms(
 V3D PredictSatellitePeaks::getOffsetVector(const std::string &label) {
   vector<double> offsets = getProperty(label);
   if (offsets.empty()) {
-    offsets.push_back(0.0);
-    offsets.push_back(0.0);
-    offsets.push_back(0.0);
+    offsets.emplace_back(0.0);
+    offsets.emplace_back(0.0);
+    offsets.emplace_back(0.0);
   }
   V3D offsets1 = V3D(offsets[0], offsets[1], offsets[2]);
   return offsets1;

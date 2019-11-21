@@ -80,7 +80,7 @@ void normalizeColumns(Mantid::Kernel::DblMatrix &skewMatrix) {
     for (size_t row = 0; row < numberOfRows; ++row) {
       sumOverRow += std::pow(skewMatrix[row][column], 2);
     }
-    bNorm.push_back(std::sqrt(sumOverRow));
+    bNorm.emplace_back(std::sqrt(sumOverRow));
   }
 
   // Apply column normalisation to skew matrix
@@ -163,7 +163,7 @@ void doProvideSkewMatrix(Mantid::Kernel::DblMatrix &skewMatrix,
 
   // Expand matrix to 4 dimensions if necessary
   if (4 == workspace.getNumDims()) {
-    basisNormalization.push_back(1.0);
+    basisNormalization.emplace_back(1.0);
     Mantid::Kernel::DblMatrix temp(4, 4, true);
     for (std::size_t i = 0; i < 3; i++) {
       for (std::size_t j = 0; j < 3; j++) {

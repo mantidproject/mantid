@@ -436,7 +436,7 @@ private:
     std::vector<MatrixWorkspace_sptr> workspaces;
     for (int i = 0; i < n; ++i) {
       auto ws = create1DWorkspaceConstant(5, 2.0, 1.0, true);
-      workspaces.push_back(ws);
+      workspaces.emplace_back(ws);
     }
     return workspaces;
   }
@@ -457,7 +457,7 @@ private:
     auto workspaces = createWorkspaces(n);
     size_t i = 0;
     for (auto &ws : workspaces) {
-      names.push_back("ws_" + std::to_string(i));
+      names.emplace_back("ws_" + std::to_string(i));
       AnalysisDataService::Instance().addOrReplace(names.back(), ws);
       ++i;
     }

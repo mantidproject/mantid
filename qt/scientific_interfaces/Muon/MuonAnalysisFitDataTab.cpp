@@ -72,13 +72,13 @@ void MuonAnalysisFitDataTab::groupFittedWorkspaces(
   std::vector<std::string> inputWorkspaces;
 
   if (Mantid::API::AnalysisDataService::Instance().doesExist(wsNormalised)) {
-    inputWorkspaces.push_back(wsNormalised);
+    inputWorkspaces.emplace_back(wsNormalised);
   }
   if (Mantid::API::AnalysisDataService::Instance().doesExist(wsParameters)) {
-    inputWorkspaces.push_back(wsParameters);
+    inputWorkspaces.emplace_back(wsParameters);
   }
   if (Mantid::API::AnalysisDataService::Instance().doesExist(wsWorkspace)) {
-    inputWorkspaces.push_back(wsWorkspace);
+    inputWorkspaces.emplace_back(wsWorkspace);
   }
 
   if (inputWorkspaces.size() > 1) {

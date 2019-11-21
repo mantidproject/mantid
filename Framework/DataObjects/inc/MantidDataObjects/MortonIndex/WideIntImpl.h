@@ -5,6 +5,7 @@
 #include <array>
 #include <cstring>
 
+/// @cond DOXYGEN_BUG
 namespace std {
 #define CT(x)                                                                  \
   std::common_type_t<std::decay_t<decltype(rhs)>,                              \
@@ -1093,7 +1094,7 @@ operator++() noexcept(is_same<Signed, unsigned>::value) {
 
 template <size_t Bits, typename Signed>
 constexpr wide_integer<Bits, Signed> wide_integer<Bits, Signed>::
-operator++(int)noexcept(is_same<Signed, unsigned>::value) {
+operator++(int) noexcept(is_same<Signed, unsigned>::value) {
   auto tmp = *this;
   *this = _impl::operator_plus(*this, 1);
   return tmp;
@@ -1108,7 +1109,7 @@ operator--() noexcept(is_same<Signed, unsigned>::value) {
 
 template <size_t Bits, typename Signed>
 constexpr wide_integer<Bits, Signed> wide_integer<Bits, Signed>::
-operator--(int)noexcept(is_same<Signed, unsigned>::value) {
+operator--(int) noexcept(is_same<Signed, unsigned>::value) {
   auto tmp = *this;
   *this = _impl::operator_minus(*this, 1);
   return tmp;
@@ -1619,3 +1620,4 @@ struct hash<wide_integer<Bits, Signed>> {
 
 #undef CT
 } // namespace std
+/// @endcond DOXYGEN_BUG

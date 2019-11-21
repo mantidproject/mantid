@@ -1880,7 +1880,7 @@ std::vector<std::string> MultiLayer::getWorkspaceNames() {
           continue;
 
         name = mmc->workspaceName().toStdString();
-        names.push_back(name);
+        names.emplace_back(name);
         break;
       case QwtPlotItem::Rtti_PlotSpectrogram:
         spec = dynamic_cast<Spectrogram *>(item);
@@ -1888,7 +1888,7 @@ std::vector<std::string> MultiLayer::getWorkspaceNames() {
           continue;
 
         name = spec->workspaceName();
-        names.push_back(name);
+        names.emplace_back(name);
         break;
       }
     }

@@ -4,7 +4,7 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init,invalid-name
+# pylint: disable=no-init,invalid-name
 """
 This example reimplements a Gaussian fitting function. It is not meant to
 be used in production for fitting, it is simply provided as a relatively complete
@@ -57,17 +57,18 @@ class ExamplePeakFunction(IPeakFunction):
         the answer as a numpy array of floats
         """
         # As Fit progresses the declared parameter values will change
-        height = self.getParameterValue("Height") # Can also be retrieve by index self.getParameterValue(0)
+        # Can also be retrieve by index self.getParameterValue(0)
+        height = self.getParameterValue("Height")
         peak_centre = self.getParameterValue("PeakCentre")
         sigma = self.getParameterValue("Sigma")
-        weight = math.pow(1./sigma,2)
+        weight = math.pow(1./sigma, 2)
 
         # Here you can use the NTerms attr if required by
         #   using self._nterms: see setAttributeValue below or
         #   accessing the attribute each time directly nterms = self.getAttributeValue("NTerms") but this is much slower
 
-        offset_sq=np.square(xvals-peak_centre)
-        out=height*np.exp(-0.5*offset_sq*weight)
+        offset_sq = np.square(xvals-peak_centre)
+        out = height*np.exp(-0.5*offset_sq*weight)
         return out
 
     def functionDerivLocal(self, xvals, jacobian):
@@ -82,17 +83,17 @@ class ExamplePeakFunction(IPeakFunction):
         height = self.getParameterValue("Height")
         peak_centre = self.getParameterValue("PeakCentre")
         sigma = self.getParameterValue("Sigma")
-        weight = math.pow(1./sigma,2)
+        weight = math.pow(1./sigma, 2)
 
         # X index
         i = 0
         for x in xvals:
             diff = x-peak_centre
             exp_term = math.exp(-0.5*diff*diff*weight)
-            jacobian.set(i,0, exp_term)
-            jacobian.set(i,1, diff*height*exp_term*weight)
+            jacobian.set(i, 0, exp_term)
+            jacobian.set(i, 1, diff*height*exp_term*weight)
             # derivative with respect to weight not sigma
-            jacobian.set(i,2, -0.5*diff*diff*height*exp_term)
+            jacobian.set(i, 2, -0.5*diff*diff*height*exp_term)
             i += 1
 
     def setAttributeValue(self, name, value):
@@ -113,8 +114,8 @@ class ExamplePeakFunction(IPeakFunction):
         stability
         """
         param_value = self.getParameterValue(index)
-        if index == 2: #Sigma. Actually fit to 1/(sigma^2) for stability
-            return 1./math.pow(param_value,2)
+        if index == 2:  # Sigma. Actually fit to 1/(sigma^2) for stability
+            return 1./math.pow(param_value, 2)
         else:
             return param_value
 
@@ -133,8 +134,8 @@ class ExamplePeakFunction(IPeakFunction):
         self.setParameter(index, param_value, False)
 
         param_value = self.getParameterValue(index)
-        if index == 2: #Sigma. Actually fit to 1/(sigma^2) for stability
-            return math.pow(1./param_value,2)
+        if index == 2:  # Sigma. Actually fit to 1/(sigma^2) for stability
+            return math.pow(1./param_value, 2)
         else:
             return param_value
 
@@ -165,7 +166,7 @@ class ExamplePeakFunction(IPeakFunction):
         Called by an external entity, probably a GUI, in response to a mouse click
         that gives a guess at the centre.
         """
-        self.setParameter("PeakCentre",new_centre)
+        self.setParameter("PeakCentre", new_centre)
 
     def setHeight(self, new_height):
         """
@@ -180,7 +181,7 @@ class ExamplePeakFunction(IPeakFunction):
         the height.
         """
         sigma = new_fwhm/(2.0*math.sqrt(2.0*math.log(2.0)))
-        self.setParameter("Sigma",sigma)
+        self.setParameter("Sigma", sigma)
 
 
 # Required to have Mantid recognise the new function

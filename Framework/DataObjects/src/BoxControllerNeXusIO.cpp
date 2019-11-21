@@ -38,7 +38,7 @@ BoxControllerNeXusIO::BoxControllerNeXusIO(API::BoxController *const bc)
   m_BlockSize[1] = 4 + m_bc->getNDims();
 
   for (auto &EventHeader : EventHeaders) {
-    m_EventsTypeHeaders.push_back(EventHeader);
+    m_EventsTypeHeaders.emplace_back(EventHeader);
   }
 
   m_EventsTypesSupported.resize(2);
@@ -405,7 +405,7 @@ template <typename FROM, typename TO>
 void convertFormats(const std::vector<FROM> &inData, std::vector<TO> &outData) {
   outData.reserve(inData.size());
   for (size_t i = 0; i < inData.size(); i++) {
-    outData.push_back(static_cast<TO>(inData[i]));
+    outData.emplace_back(static_cast<TO>(inData[i]));
   }
 }
 /** Load float  data block from the opened NeXus file.

@@ -94,7 +94,7 @@ void ConvertCWSDMDtoHKL::exec() {
     qsample.setZ(-4.77349);
 
     std::vector<Kernel::V3D> vec_qsample;
-    vec_qsample.push_back(qsample);
+    vec_qsample.emplace_back(qsample);
     std::vector<Kernel::V3D> vec_mindex(0);
 
     convertFromQSampleToHKL(vec_qsample, vec_mindex);

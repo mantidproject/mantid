@@ -506,7 +506,7 @@ void SampleLogsBehaviour::updateTimeSeriesProperty(MatrixWorkspace &addeeWS,
     // Remove this to supress a warning, we will put it back after adding the
     // workspaces in MergeRuns
     const Property *addeeWSProperty = addeeWS.run().getProperty(name);
-    m_addeeLogMap.push_back(
+    m_addeeLogMap.emplace_back(
         std::shared_ptr<Property>(addeeWSProperty->clone()));
   }
 }

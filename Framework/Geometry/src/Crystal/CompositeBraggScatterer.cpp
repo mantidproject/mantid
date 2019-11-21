@@ -160,7 +160,7 @@ void CompositeBraggScatterer::addScattererImplementation(
   }
 
   BraggScatterer_sptr localScatterer = scatterer->clone();
-  m_scatterers.push_back(localScatterer);
+  m_scatterers.emplace_back(localScatterer);
 }
 
 /**

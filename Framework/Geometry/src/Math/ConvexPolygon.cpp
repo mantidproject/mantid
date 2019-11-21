@@ -54,7 +54,7 @@ void ConvexPolygon::clear() {
  * @param pt A new point for the shape
  */
 void ConvexPolygon::insert(const V2D &pt) {
-  m_vertices.push_back(pt);
+  m_vertices.emplace_back(pt);
   // Update extrema
   m_minX = std::min(m_minX, pt.X());
   m_maxX = std::max(m_maxX, pt.X());

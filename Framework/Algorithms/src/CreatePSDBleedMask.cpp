@@ -137,7 +137,7 @@ void CreatePSDBleedMask::exec() {
     Geometry::ComponentID parentID = parent->getComponentID();
     // Already have this component
     if (tubeMap.find(parentID) != tubeMap.end()) {
-      tubeMap[parentID].push_back(i);
+      tubeMap[parentID].emplace_back(i);
     }
     // New tube
     else {

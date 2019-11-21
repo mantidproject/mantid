@@ -219,6 +219,6 @@ private:
   /// Processing the input properties for purpose of investigation
   void processInvestigationInputs();
 };
-}
+} // namespace DataHandling
 } // namespace Mantid
 #endif /*LOADEVENTPRENEXUS_H_*/

@@ -205,7 +205,7 @@ public:
     std::string line;
     std::istringstream buffer(notebookText);
     while (std::getline(buffer, line))
-      notebookLines.push_back(line);
+      notebookLines.emplace_back(line);
 
     // Check that the expected line does appear in the output
     TS_ASSERT(std::find(notebookLines.cbegin(), notebookLines.cend(), result) !=
@@ -246,7 +246,7 @@ public:
     std::string line;
     std::istringstream buffer(notebookText);
     while (std::getline(buffer, line))
-      notebookLines.push_back(line);
+      notebookLines.emplace_back(line);
 
     // Check that the expected lines do appear in the output
     TS_ASSERT(std::find(notebookLines.cbegin(), notebookLines.cend(),
@@ -298,7 +298,7 @@ public:
     std::string line;
     std::istringstream buffer(notebookText);
     while (std::getline(buffer, line))
-      notebookLines.push_back(line);
+      notebookLines.emplace_back(line);
 
     // Check that the expected lines do appear in the output
     TS_ASSERT(std::find(notebookLines.cbegin(), notebookLines.cend(),
@@ -341,7 +341,7 @@ public:
     std::string line;
     std::istringstream buffer(notebookText);
     while (std::getline(buffer, line))
-      notebookLines.push_back(line);
+      notebookLines.emplace_back(line);
 
     // Check that the expected line does appear in the output
     TS_ASSERT(std::find(notebookLines.cbegin(), notebookLines.cend(), result) !=

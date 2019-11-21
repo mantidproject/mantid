@@ -30,6 +30,7 @@ public:
   virtual bool isMultipleDataTabSelected() const override;
   bool isResolutionHidden() const override;
   void setResolutionHidden(bool hide) override;
+  void setStartAndEndHidden(bool hidden) override;
   void disableMultipleDataTab() override;
 
   virtual std::string getSelectedSample() const override;
@@ -51,11 +52,15 @@ public:
   void readSettings(const QSettings &settings) override;
   UserInputValidator &validate(UserInputValidator &validator) override;
 
+  void setXRange(std::pair<double, double> const &range) override;
+
 public slots:
   void displayWarning(const std::string &warning) override;
 
 protected slots:
   void emitViewSelected(int index);
+  void setStartX(double) override;
+  void setEndX(double) override;
 
 private:
   UserInputValidator &validateMultipleData(UserInputValidator &validator);

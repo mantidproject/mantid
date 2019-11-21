@@ -49,7 +49,7 @@ void TSVSerialiser::parseLines(const std::string &lines) {
     // Check if this is a value line
     if (boost::regex_match(line, matches, valueLineRegex)) {
       std::string name = matches[1].str();
-      m_lines[name].push_back(line);
+      m_lines[name].emplace_back(line);
     }
     // Look for lines which open and close a section in one line:
     // <section>data</section>
@@ -57,7 +57,7 @@ void TSVSerialiser::parseLines(const std::string &lines) {
       std::string name = matches[1].str();
       std::string contents = matches[2].str();
 
-      m_sections[name].push_back(contents);
+      m_sections[name].emplace_back(contents);
     }
     // Check if this is the start of a multiline section, if so, consume the
     // whole section.
@@ -107,7 +107,7 @@ void TSVSerialiser::parseLines(const std::string &lines) {
       if (sectionStr.size() > 0)
         sectionStr.resize(sectionStr.size() - 1);
 
-      m_sections[name + num].push_back(sectionStr);
+      m_sections[name + num].emplace_back(sectionStr);
 
       // Skip parsing to the end of the section
       lineIt = secIt;
@@ -182,8 +182,8 @@ bool TSVSerialiser::selectSection(const std::string &name, const size_t i) {
     return false;
 
   m_curValues.clear();
-  m_curValues.push_back(name);
-  m_curValues.push_back(m_sections[name][i]);
+  m_curValues.emplace_back(name);
+  m_curValues.emplace_back(m_sections[name][i]);
   m_curIndex = 1; // 1 because we want to start on the values, not the name
   return true;
 }

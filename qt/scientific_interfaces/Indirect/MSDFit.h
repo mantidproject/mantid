@@ -7,7 +7,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_MSDFIT_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_MSDFIT_H_
 
-#include "IndirectFitAnalysisTab.h"
+#include "IndirectFitAnalysisTabLegacy.h"
 #include "MSDFitModel.h"
 #include "ui_MSDFit.h"
 
@@ -16,7 +16,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
-class DLLExport MSDFit : public IndirectFitAnalysisTab {
+class DLLExport MSDFit : public IndirectFitAnalysisTabLegacy {
   Q_OBJECT
 
 public:

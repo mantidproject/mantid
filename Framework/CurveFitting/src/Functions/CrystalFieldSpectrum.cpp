@@ -123,7 +123,7 @@ std::string CrystalFieldSpectrum::writeToString(
     if (isActive(i)) {
       ostr << ',' << paramOut.str();
     } else if (isFixed(i)) {
-      ties.push_back(paramOut.str());
+      ties.emplace_back(paramOut.str());
     }
   }
 
@@ -159,7 +159,7 @@ std::string CrystalFieldSpectrum::writeToString(
   // collect the non-default ties
   auto tiesString = writeTies();
   if (!tiesString.empty()) {
-    ties.push_back(tiesString);
+    ties.emplace_back(tiesString);
   }
   // print the ties
   if (!ties.empty()) {

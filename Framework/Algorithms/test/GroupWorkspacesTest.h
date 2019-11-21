@@ -38,9 +38,9 @@ public:
   }
 
   void testInit() {
+    using Mantid::Algorithms::GroupWorkspaces;
     using Mantid::API::WorkspaceGroup;
     using Mantid::API::WorkspaceProperty;
-    using Mantid::Algorithms::GroupWorkspaces;
 
     GroupWorkspaces alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -135,7 +135,7 @@ public:
 
     // Assert
     groupNames.reserve(4);
-    groupNames.push_back(singleWS);
+    groupNames.emplace_back(singleWS);
     checkGroupExistsWithMembers(finalGroupName, groupNames);
     TS_ASSERT_EQUALS(
         false,

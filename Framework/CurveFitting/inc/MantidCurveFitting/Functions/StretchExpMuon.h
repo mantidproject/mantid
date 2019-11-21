@@ -26,7 +26,7 @@ class DLLExport StretchExpMuon : public API::ParamFunction,
 public:
   /// overwrite IFunction base class methods
   std::string name() const override { return "StretchExpMuon"; }
-  const std::string category() const override { return "Muon"; }
+  const std::string category() const override { return "MuonGeneric"; }
 
 protected:
   void function1D(double *out, const double *xValues,

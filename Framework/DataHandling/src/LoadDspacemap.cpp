@@ -111,7 +111,7 @@ void LoadDspacemap::CalculateOffsetsFromDSpacemapFile(
     fin.read(reinterpret_cast<char *>(&read), sizeof read);
     // Factor of 10 between ISAW and Mantid
     read *= 10.;
-    dspace.push_back(read);
+    dspace.emplace_back(read);
   }
 
   const auto &detectorIds = detectorInfo.detectorIDs();

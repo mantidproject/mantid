@@ -76,8 +76,8 @@ void joinOverlappingRanges(std::vector<double> &exclude) {
   std::vector<RangePoint> points;
   points.reserve(exclude.size());
   for (auto point = exclude.begin(); point != exclude.end(); point += 2) {
-    points.push_back(RangePoint{RangePoint::Opening, *point});
-    points.push_back(RangePoint{RangePoint::Closing, *(point + 1)});
+    points.emplace_back(RangePoint{RangePoint::Opening, *point});
+    points.emplace_back(RangePoint{RangePoint::Closing, *(point + 1)});
   }
   // Sort the points according to the operator defined in RangePoint.
   std::sort(points.begin(), points.end());
@@ -91,14 +91,14 @@ void joinOverlappingRanges(std::vector<double> &exclude) {
     if (point.kind == RangePoint::Opening) {
       if (level == 0) {
         // First openning bracket starts a new exclusion range.
-        exclude.push_back(point.value);
+        exclude.emplace_back(point.value);
       }
       // Each openning bracket increases the level
       ++level;
     } else {
       if (level == 1) {
         // The bracket that makes level 0 is an end of a range.
-        exclude.push_back(point.value);
+        exclude.emplace_back(point.value);
       }
       // Each closing bracket decreases the level
       --level;
@@ -216,7 +216,7 @@ void TableWorkspaceDomainCreator::createDomain(
   std::vector<double> xData;
   xData.reserve(m_tableWorkspace->rowCount());
   for (size_t i = 0; i < m_tableWorkspace->rowCount(); ++i) {
-    xData.push_back(X->toDouble(i));
+    xData.emplace_back(X->toDouble(i));
   }
 
   // find the fitting interval: from -> to
@@ -573,9 +573,9 @@ TableWorkspaceDomainCreator::createEmptyResultWS(const size_t nhistograms,
   eData.reserve(m_tableWorkspace->rowCount());
 
   for (size_t i = 0; i < m_tableWorkspace->rowCount(); ++i) {
-    xData.push_back(inputX->toDouble(i));
-    yData.push_back(inputY->toDouble(i));
-    eData.push_back(inputE->toDouble(i));
+    xData.emplace_back(inputX->toDouble(i));
+    yData.emplace_back(inputY->toDouble(i));
+    eData.emplace_back(inputE->toDouble(i));
   }
 
   // X values for all
@@ -601,7 +601,7 @@ size_t TableWorkspaceDomainCreator::getDomainSize() const {
   std::vector<double> xData;
   xData.reserve(m_tableWorkspace->rowCount());
   for (size_t i = 0; i < m_tableWorkspace->rowCount(); ++i) {
-    xData.push_back(X->toDouble(i));
+    xData.emplace_back(X->toDouble(i));
   }
   size_t startIndex, endIndex;
   std::tie(startIndex, endIndex) = getXInterval(xData);
@@ -791,10 +791,10 @@ void TableWorkspaceDomainCreator::setAndValidateWorkspace(
   }
   setXYEColumnNames(tableWorkspace);
   std::vector<std::string> columnNames;
-  columnNames.push_back(m_xColName);
-  columnNames.push_back(m_yColName);
+  columnNames.emplace_back(m_xColName);
+  columnNames.emplace_back(m_yColName);
   if (m_errColName != "")
-    columnNames.push_back(m_errColName);
+    columnNames.emplace_back(m_errColName);
   // table workspace is cloned so it can be changed within the domain
   m_tableWorkspace = tableWorkspace->cloneColumns(columnNames);
 

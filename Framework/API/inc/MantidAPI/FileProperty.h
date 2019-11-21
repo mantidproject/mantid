@@ -126,7 +126,7 @@ private:
 #pragma warning(                                                               \
     pop) // Re-enable the warning about multiple assignment operators
 #endif
-}
+} // namespace API
 } // namespace Mantid
 
 #endif // MANTID_API_FILEPROPERTY_H_

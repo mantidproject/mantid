@@ -21,6 +21,8 @@
 #include "MantidDataObjects/TableColumn.h"
 #include "MantidKernel/Diffraction.h"
 
+using Mantid::Algorithms::CreateSampleWorkspace;
+using Mantid::Algorithms::PDCalibration;
 using Mantid::API::AnalysisDataService;
 using Mantid::API::FrameworkManager;
 using Mantid::API::ITableWorkspace;
@@ -28,8 +30,6 @@ using Mantid::API::ITableWorkspace_sptr;
 using Mantid::API::MatrixWorkspace;
 using Mantid::API::MatrixWorkspace_const_sptr;
 using Mantid::API::Workspace_sptr;
-using Mantid::Algorithms::CreateSampleWorkspace;
-using Mantid::Algorithms::PDCalibration;
 using Mantid::DataHandling::MoveInstrumentComponent;
 using Mantid::DataHandling::RotateInstrumentComponent;
 

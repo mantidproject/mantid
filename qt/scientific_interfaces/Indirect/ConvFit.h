@@ -8,8 +8,8 @@
 #define MANTIDQTCUSTOMINTERFACESIDA_CONVFIT_H_
 
 #include "ConvFitModel.h"
-#include "IndirectFitAnalysisTab.h"
-#include "IndirectSpectrumSelectionPresenter.h"
+#include "IndirectFitAnalysisTabLegacy.h"
+#include "IndirectSpectrumSelectionPresenterLegacy.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -18,7 +18,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
-class DLLExport ConvFit : public IndirectFitAnalysisTab {
+class DLLExport ConvFit : public IndirectFitAnalysisTabLegacy {
   Q_OBJECT
 
 public:

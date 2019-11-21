@@ -100,7 +100,7 @@ std::vector<ConventionalCell> ScalarUtils::GetCells(const DblMatrix &UB,
     if (best_only) {
       ConventionalCell info = GetCellBestError(temp, true);
       temp.clear();
-      temp.push_back(info);
+      temp.emplace_back(info);
     }
     for (auto &k : temp)
       AddIfBest(result, k);
@@ -147,7 +147,7 @@ ScalarUtils::GetCells(const DblMatrix &UB, const std::string &cell_type,
     UB_list = GetRelatedUBs(UB, length_factor, angle_tolerance);
   } else {
     // Get exact form requested and not permutations
-    UB_list.push_back(UB);
+    UB_list.emplace_back(UB);
   }
 
   for (auto &k : UB_list) {
@@ -199,7 +199,7 @@ ScalarUtils::GetCellsUBOnly(const DblMatrix &UB, const std::string &cell_type,
 
     if (rcell.GetCentering() == centering && rcell.GetCellType() == cell_type) {
       ConventionalCell cell_info(UB, i, allowPermutations);
-      result.push_back(cell_info);
+      result.emplace_back(cell_info);
     }
   }
 
@@ -239,7 +239,7 @@ ConventionalCell ScalarUtils::GetCellForForm(const DblMatrix &UB,
     UB_list = GetRelatedUBs(UB, length_factor, angle_tolerance);
   } else {
     // Get exact form requested and not permutations
-    UB_list.push_back(UB);
+    UB_list.emplace_back(UB);
   }
   for (auto &UB : UB_list) {
     IndexingUtils::GetLatticeParameters(UB, l_params);
@@ -419,7 +419,7 @@ std::vector<DblMatrix> ScalarUtils::GetRelatedUBs(const DblMatrix &UB,
         {                                  // experimental error
           Matrix<double> temp_UB(3, 3, false);
           OrientedLattice::GetUB(temp_UB, a, b, c);
-          result.push_back(temp_UB);
+          result.emplace_back(temp_UB);
         }
       }
     }
@@ -458,5 +458,5 @@ void ScalarUtils::AddIfBest(std::vector<ConventionalCell> &list,
   }
 
   if (!done) // if never found, add to end of list
-    list.push_back(info);
+    list.emplace_back(info);
 }

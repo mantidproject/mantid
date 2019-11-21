@@ -40,7 +40,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 JumpFit::JumpFit(QWidget *parent)
-    : IndirectFitAnalysisTab(new JumpFitModel, parent),
+    : IndirectFitAnalysisTabLegacy(new JumpFitModel, parent),
       m_uiForm(new Ui::JumpFit) {
   m_uiForm->setupUi(parent);
 

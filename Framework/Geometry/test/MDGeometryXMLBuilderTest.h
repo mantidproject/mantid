@@ -291,9 +291,9 @@ public:
         .WillOnce(Return(createDimensionXMLString(1, -1, 1, "C", "c")));
 
     VecIMDDimension_sptr vecDims;
-    vecDims.push_back(IMDDimension_sptr(pDimA));
-    vecDims.push_back(IMDDimension_sptr(pDimB));
-    vecDims.push_back(IMDDimension_sptr(pDimC));
+    vecDims.emplace_back(IMDDimension_sptr(pDimA));
+    vecDims.emplace_back(IMDDimension_sptr(pDimB));
+    vecDims.emplace_back(IMDDimension_sptr(pDimC));
 
     MDGeometryBuilderXML<NoDimensionPolicy> builder;
     builder.addManyOrdinaryDimensions(vecDims);

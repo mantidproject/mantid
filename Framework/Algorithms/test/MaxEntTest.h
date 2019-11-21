@@ -19,10 +19,10 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
-using Mantid::HistogramData::CountStandardDeviations;
-using Mantid::HistogramData::Counts;
-using Mantid::HistogramData::Points;
 using Mantid::MantidVec;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::Points;
 
 /**
  * This is a test class that exists to test the method validateInputs()

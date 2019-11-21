@@ -33,7 +33,7 @@ FileValidator::FileValidator(const std::vector<std::string> &extensions,
     const std::string ext = boost::to_lower_copy(extension);
     if (std::find(m_extensions.begin(), m_extensions.end(), ext) ==
         m_extensions.end()) {
-      m_extensions.push_back(ext);
+      m_extensions.emplace_back(ext);
     }
   }
 }

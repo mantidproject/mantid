@@ -15,8 +15,17 @@
 #include "MantidKernel/ParaViewVersion.h"
 
 #include <Poco/ActiveResult.h>
+#include <Poco/String.h>
+#include <algorithm>
+#include <boost/algorithm/string/join.hpp>
+#include <boost/algorithm/string/trim.hpp>
+#include <boost/bind.hpp>
 
 #include <json/json.h>
+
+namespace {
+constexpr auto SEPARATOR = "->";
+}
 
 namespace Mantid {
 namespace Kernel {
@@ -27,9 +36,10 @@ Kernel::Logger g_log("UsageServiceImpl");
 //----------------------------------------------------------------------------------------------
 /** FeatureUsage
  */
-FeatureUsage::FeatureUsage(const std::string &type, const std::string &name,
-                           const bool internal)
-    : type(type), name(name), internal(internal) {}
+FeatureUsage::FeatureUsage(const FeatureType &type, std::string name,
+                           const bool internal, std::string application)
+    : type(type), name(std::move(name)), internal(internal),
+      application(std::move(application)) {}
 
 // Better brute force.
 bool FeatureUsage::operator<(const FeatureUsage &r) const {
@@ -51,12 +61,27 @@ bool FeatureUsage::operator<(const FeatureUsage &r) const {
   return false;
 }
 
+/// Convert the stored feature type enum to a string
+std::string FeatureUsage::featureTypeToString() const {
+
+  switch (type) {
+  case FeatureType::Algorithm:
+    return "Algorithm";
+  case FeatureType::Feature:
+    return "Feature";
+  case FeatureType::Interface:
+    return "Interface";
+  }
+  return "Unknown";
+}
+
 ::Json::Value FeatureUsage::asJson() const {
   ::Json::Value retVal;
 
-  retVal["type"] = type;
+  retVal["type"] = featureTypeToString();
   retVal["name"] = name;
   retVal["internal"] = internal;
+  retVal["application"] = application;
 
   return retVal;
 }
@@ -106,13 +131,33 @@ void UsageServiceImpl::registerStartup() {
 
 /** registerFeatureUsage
  */
-void UsageServiceImpl::registerFeatureUsage(const std::string &type,
+void UsageServiceImpl::registerFeatureUsage(
+    const FeatureType &type, const std::vector<std::string> &name,
+    const bool internal) {
+  if (isEnabled()) {
+    std::lock_guard<std::mutex> _lock(m_mutex);
+
+    using boost::algorithm::join;
+    m_FeatureQueue.push(FeatureUsage(type, join(name, SEPARATOR), internal,
+                                     getApplicationName()));
+  }
+}
+
+void UsageServiceImpl::registerFeatureUsage(const FeatureType &type,
                                             const std::string &name,
                                             const bool internal) {
   if (isEnabled()) {
     std::lock_guard<std::mutex> _lock(m_mutex);
-    m_FeatureQueue.push(FeatureUsage(type, name, internal));
+    m_FeatureQueue.push(
+        FeatureUsage(type, name, internal, getApplicationName()));
   }
+}
+
+void UsageServiceImpl::registerFeatureUsage(
+    const FeatureType &type, std::initializer_list<std::string> name,
+    const bool internal) {
+
+  registerFeatureUsage(type, std::vector<std::string>(name), internal);
 }
 
 bool UsageServiceImpl::isEnabled() const { return m_isEnabled; }

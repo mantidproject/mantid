@@ -61,6 +61,11 @@ void applyWarningStateStyling(MantidWidgets::Batch::Cell &cell,
   cell.setToolTip(errorMessage);
 }
 
+/** Check if a group name exists in the given model.
+ * @param groupName : the name to check
+ * @param jobs : the model to compare against
+ * @rootsToIgnore : rows to ignore in the check
+ */
 bool groupNameExists(
     std::string const &groupName, ReductionJobs const &jobs,
     std::vector<MantidWidgets::Batch::RowLocation> const &rootsToIgnore) {
@@ -80,6 +85,22 @@ bool groupNameExists(
   return true;
 }
 
+/** Check if a group name exists in the clipboard.
+ * @param groupName : the name to check
+ * @param clipboard : the clipboard to compare against
+ * @indexToIgnore : the index of the original item which should be ignored
+ */
+bool groupNameExists(std::string const &groupName, Clipboard const &clipboard,
+                     int indexToIgnore) {
+  for (auto compareIndex = 0; compareIndex < clipboard.numberOfRoots();
+       ++compareIndex) {
+    if (compareIndex != indexToIgnore &&
+        groupName == clipboard.groupName(compareIndex))
+      return true;
+  }
+  return false;
+}
+
 void makePastedGroupNamesUnique(
     Clipboard &clipboard, int rootIndex,
     std::vector<MantidWidgets::Batch::RowLocation> const &replacementRoots,
@@ -88,9 +109,13 @@ void makePastedGroupNamesUnique(
   if (!clipboard.isGroupLocation(rootIndex))
     return;
 
-  // Recursively replace the group name until it is unique
   auto groupName = clipboard.groupName(rootIndex);
-  while (groupNameExists(groupName, jobs, replacementRoots))
+  if (groupName.empty())
+    return;
+
+  // Replace the group name until it is unique in the model and clipboard
+  while (groupNameExists(groupName, jobs, replacementRoots) ||
+         groupNameExists(groupName, clipboard, rootIndex))
     groupName.append(" (copy)");
 
   // Set the new name

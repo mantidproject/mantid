@@ -122,15 +122,15 @@ private:
     dim = MDHistoDimension_sptr(
         new MDHistoDimension(std::string("x"), std::string("ID0"), frame,
                              coord_t(-5), coord_t(5), size_t(10)));
-    dimensions.push_back(boost::const_pointer_cast<IMDDimension>(dim));
+    dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(dim));
     dim = MDHistoDimension_sptr(
         new MDHistoDimension(std::string("y"), std::string("ID1"), frame,
                              coord_t(-6), coord_t(6), size_t(12)));
-    dimensions.push_back(boost::const_pointer_cast<IMDDimension>(dim));
+    dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(dim));
     dim = MDHistoDimension_sptr(
         new MDHistoDimension(std::string("z"), std::string("ID2"), frame,
                              coord_t(-10), coord_t(10), size_t(20)));
-    dimensions.push_back(boost::const_pointer_cast<IMDDimension>(dim));
+    dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(dim));
 
     MDHistoWorkspace_sptr outWS(new MDHistoWorkspace(dimensions));
     outWS->setTo(1., 1., .0);

@@ -825,17 +825,17 @@ private:
     // real spectrum
     for (size_t i = 0; i < n; i++) {
       double x = 2.0 * M_PI * double(i) / double(n);
-      X.push_back(x);
-      Y.push_back(cos(omega * x));
-      E.push_back(0.1);
+      X.emplace_back(x);
+      Y.emplace_back(cos(omega * x));
+      E.emplace_back(0.1);
     }
     // imaginary spectrum
     for (size_t i = n; i < 2 * n; i++) {
       double j = (double)(i - n);
       double x = 2.0 * M_PI * j / double(n);
-      X.push_back(x);
-      Y.push_back(sin(omega * x));
-      E.push_back(0.1);
+      X.emplace_back(x);
+      Y.emplace_back(sin(omega * x));
+      E.emplace_back(0.1);
     }
     auto create =
         FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
@@ -860,21 +860,21 @@ private:
     // real spectrum
     for (size_t i = 0; i < n; i++) {
       double x = (2.0 * M_PI * double(i) / double(n)) + factor;
-      X.push_back(x);
+      X.emplace_back(x);
       double y = cos(omega * x);
       y *= exp(-1.0 * (pow((x - x0) * sigma, 2.0)));
-      Y.push_back(y);
-      E.push_back(0.1);
+      Y.emplace_back(y);
+      E.emplace_back(0.1);
     }
     // imaginary spectrum
     for (size_t i = n; i < 2 * n; i++) {
       double j = (double)(i - n);
       double x = (2.0 * M_PI * j / double(n)) + factor;
-      X.push_back(x);
+      X.emplace_back(x);
       double y = sin(omega * x);
       y *= exp(-1.0 * (pow((x - x0) * sigma, 2.0)));
-      Y.push_back(y);
-      E.push_back(0.1);
+      Y.emplace_back(y);
+      E.emplace_back(0.1);
     }
     auto create =
         FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
@@ -902,7 +902,7 @@ private:
     for (size_t i = 0; i < 2; ++i) { // spectra
       for (size_t j = 0; j < n + 1; ++j) {
         const double x = ((10.0 * double(j)) / double(n)) - x0;
-        X.push_back(x);
+        X.emplace_back(x);
       }
     }
     HistogramData::Histogram histogram(HistogramData::BinEdges{X});
@@ -912,16 +912,16 @@ private:
       const double x = points[i];
       const double yImag =
           sin(omega * x + ww * x * x) * exp(-pow(((x - xc) * sigma), 4));
-      Y.push_back(yImag);
-      E.push_back(0.1);
+      Y.emplace_back(yImag);
+      E.emplace_back(0.1);
     }
     // real spectrum
     for (size_t i = 0; i < n; ++i) {
       const double x = points[i];
       const double yReal =
           cos(omega * x + ww * x * x) * exp(-pow(((x - xc) * sigma), 4));
-      Y.push_back(yReal);
-      E.push_back(0.1);
+      Y.emplace_back(yReal);
+      E.emplace_back(0.1);
     }
     // create workspace
     auto create =
@@ -962,13 +962,13 @@ private:
     // Bin edges
     for (size_t i = 0; i < xSize; ++i) {
       const double x = ((10.0 * double(i)) / double(n)) - x0;
-      X.push_back(x);
+      X.emplace_back(x);
     }
     // Y values
     for (size_t i = 0; i < n; ++i) {
       const double xp = isHisto ? 0.5 * (X[i] + X[i + 1]) : X[i];
       const double y = cos(omega * xp) * exp(-pow((xp * sigma), 4));
-      Y.push_back(y);
+      Y.emplace_back(y);
     }
     // create workspace
     auto create =

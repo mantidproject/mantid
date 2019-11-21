@@ -41,8 +41,8 @@ Output:
 .. testoutput:: HFIRSANS2Wavelength
 
   1
-  6.0
-  7.0
+  3.25
+  9.75
   Wavelength
 
 .. categories::

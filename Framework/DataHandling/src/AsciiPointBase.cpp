@@ -127,9 +127,9 @@ void AsciiPointBase::outputval(double val, std::ofstream &file,
 /// appends the separator property to the algorithm
 void AsciiPointBase::appendSeparatorProperty() {
   std::vector<std::string> propOptions;
-  propOptions.push_back("comma");
-  propOptions.push_back("space");
-  propOptions.push_back("tab");
+  propOptions.emplace_back("comma");
+  propOptions.emplace_back("space");
+  propOptions.emplace_back("tab");
   declareProperty("Separator", "tab",
                   boost::make_shared<StringListValidator>(propOptions),
                   "The separator used for splitting data columns.");

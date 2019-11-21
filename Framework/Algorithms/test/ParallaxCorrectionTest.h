@@ -18,12 +18,12 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/V3D.h"
 
-using Mantid::API::FrameworkManager;
-using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::Algorithms::CompareWorkspaces;
 using Mantid::Algorithms::CreateSampleWorkspace;
 using Mantid::Algorithms::ParallaxCorrection;
 using Mantid::Algorithms::SetInstrumentParameter;
+using Mantid::API::FrameworkManager;
+using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::Geometry::DetectorInfo;
 using Mantid::Kernel::V3D;
 

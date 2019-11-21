@@ -162,7 +162,7 @@ void IndexSXPeaks::exec() {
     for (int i = 1; i <= int(npeaks);
          i++) // create indexes corresponding to all peak indexes
     {
-      peakindices.push_back(i);
+      peakindices.emplace_back(i);
     }
     g_log.information("No peak indexes provided. Algorithm will use all peaks "
                       "in the workspace for the calculation.");

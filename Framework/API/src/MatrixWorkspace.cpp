@@ -143,7 +143,7 @@ const Indexing::IndexInfo &MatrixWorkspace::indexInfo() const {
   if (m_indexInfoNeedsUpdate) {
     std::vector<Indexing::SpectrumNumber> spectrumNumbers;
     for (size_t i = 0; i < getNumberHistograms(); ++i)
-      spectrumNumbers.push_back(getSpectrum(i).getSpectrumNo());
+      spectrumNumbers.emplace_back(getSpectrum(i).getSpectrumNo());
     m_indexInfo->setSpectrumNumbers(std::move(spectrumNumbers));
     m_indexInfoNeedsUpdate = false;
   }
@@ -594,7 +594,7 @@ std::vector<size_t> MatrixWorkspace::getIndicesFromSpectra(
   while (iter != spectraList.cend()) {
     for (size_t i = 0; i < this->getNumberHistograms(); ++i) {
       if (this->getSpectrum(i).getSpectrumNo() == *iter) {
-        indexList.push_back(i);
+        indexList.emplace_back(i);
         break;
       }
     }
@@ -682,7 +682,7 @@ std::vector<specnum_t> MatrixWorkspace::getSpectraFromDetectorIDs(
     }
 
     if (foundDet)
-      spectraList.push_back(foundSpecNum);
+      spectraList.emplace_back(foundSpecNum);
   } // for each detector ID in the list
   return spectraList;
 }
@@ -1200,6 +1200,11 @@ bool MatrixWorkspace::hasMaskedBins(const size_t &workspaceIndex) const {
   return m_masks.find(workspaceIndex) != m_masks.end();
 }
 
+/** Does this workspace contain any masked bins
+ *  @return True if there are masked bins somewhere in this workspace
+ */
+bool MatrixWorkspace::hasAnyMaskedBins() const { return !m_masks.empty(); }
+
 /** Returns the list of masked bins for a spectrum.
  *  @param  workspaceIndex
  *  @return A const reference to the list of masked bins
@@ -1675,8 +1680,8 @@ std::vector<std::unique_ptr<IMDIterator>> MatrixWorkspace::createIterators(
     size_t end = ((i + 1) * numElements) / numCores;
     if (end > numElements)
       end = numElements;
-    out.push_back(std::make_unique<MatrixWorkspaceMDIterator>(this, function,
-                                                              begin, end));
+    out.emplace_back(std::make_unique<MatrixWorkspaceMDIterator>(this, function,
+                                                                 begin, end));
   }
   return out;
 }

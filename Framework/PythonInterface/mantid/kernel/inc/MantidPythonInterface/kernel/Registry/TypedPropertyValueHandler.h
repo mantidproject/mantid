@@ -59,9 +59,9 @@ struct DLLExport TypedPropertyValueHandler : public PropertyValueHandler {
   create(const std::string &name, const boost::python::object &defaultValue,
          const boost::python::object &validator,
          const unsigned int direction) const override {
+    using boost::python::extract;
     using Mantid::Kernel::IValidator;
     using Mantid::Kernel::PropertyWithValue;
-    using boost::python::extract;
     const ValueType valueInC = extract<ValueType>(defaultValue)();
     std::unique_ptr<Kernel::Property> valueProp;
     if (isNone(validator)) {
@@ -123,10 +123,10 @@ struct DLLExport TypedPropertyValueHandler<
   create(const std::string &name, const boost::python::object &defaultValue,
          const boost::python::object &validator,
          const unsigned int direction) const override {
+    using boost::python::extract;
     using Kernel::IValidator;
     using Kernel::Property;
     using Kernel::PropertyWithValue;
-    using boost::python::extract;
     const PropertyValueType valueInC =
         extract<PropertyValueType>(defaultValue)();
     std::unique_ptr<Property> valueProp;

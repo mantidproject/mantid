@@ -500,9 +500,9 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
           zBinsVec.begin();
       if (qIndex != 0 && qIndex < static_cast<int>(zBinsVec.size())) {
         // Add this spectra-detector pair to the mapping
-        specNumberMapping.push_back(
+        specNumberMapping.emplace_back(
             outWS->getSpectrum(qIndex - 1).getSpectrumNo());
-        detIDMapping.push_back(detector.getID());
+        detIDMapping.emplace_back(detector.getID());
       }
       // Debugging
       if (dumpVertexes) {

@@ -301,11 +301,11 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
   // check dimension names
   std::vector<std::string> originalDimensionNames;
   for (size_t i = 3; i < inputWS->getNumDims(); i++) {
-    originalDimensionNames.push_back(inputWS->getDimension(i)->getName());
+    originalDimensionNames.emplace_back(inputWS->getDimension(i)->getName());
   }
-  originalDimensionNames.push_back("QDimension0");
-  originalDimensionNames.push_back("QDimension1");
-  originalDimensionNames.push_back("QDimension2");
+  originalDimensionNames.emplace_back("QDimension0");
+  originalDimensionNames.emplace_back("QDimension1");
+  originalDimensionNames.emplace_back("QDimension2");
   std::vector<std::string> selectedDimensions;
   for (std::size_t i = 0; i < 6; i++) {
     std::string propName = "Dimension" + Strings::toString(i) + "Name";
@@ -326,7 +326,7 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
         auto itSel = std::find(selectedDimensions.begin(),
                                selectedDimensions.end(), dimName);
         if (itSel == selectedDimensions.end()) {
-          selectedDimensions.push_back(dimName);
+          selectedDimensions.emplace_back(dimName);
         } else {
           errorMessage.emplace(propName,
                                "Name '" + dimName + "' was already selected");
@@ -570,11 +570,11 @@ std::map<std::string, std::string> MDNorm::getBinParameters() {
   std::stringstream extents;
   std::stringstream bins;
   std::vector<std::string> originalDimensionNames;
-  originalDimensionNames.push_back("QDimension0");
-  originalDimensionNames.push_back("QDimension1");
-  originalDimensionNames.push_back("QDimension2");
+  originalDimensionNames.emplace_back("QDimension0");
+  originalDimensionNames.emplace_back("QDimension1");
+  originalDimensionNames.emplace_back("QDimension2");
   for (size_t i = 3; i < m_inputWS->getNumDims(); i++) {
-    originalDimensionNames.push_back(m_inputWS->getDimension(i)->getName());
+    originalDimensionNames.emplace_back(m_inputWS->getDimension(i)->getName());
   }
 
   if (m_isRLU) {
@@ -652,10 +652,10 @@ std::map<std::string, std::string> MDNorm::getBinParameters() {
       for (size_t j = 0; j < originalDimensionNames.size(); j++) {
         if (j == static_cast<size_t>(dimIndex)) {
           propertyValue << ",1";
-          transformation.push_back(1.);
+          transformation.emplace_back(1.);
         } else {
           propertyValue << ",0";
-          transformation.push_back(0.);
+          transformation.emplace_back(0.);
         }
       }
       parameters.emplace(property, propertyValue.str());
@@ -892,7 +892,7 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(
       }
 
     } else if ((key != "OutputBins") && (key != "OutputExtents")) {
-      nonDimensionIndex.push_back(parametersIndex);
+      nonDimensionIndex.emplace_back(parametersIndex);
     }
     parametersIndex++;
   }
@@ -977,7 +977,7 @@ MDNorm::binInputWS(std::vector<Geometry::SymmetryOperation> symmetryOps) {
           projection[0] = 1.;
           basisVector << QDimensionNameQSample(0) << ",A^{-1}";
         } else {
-          qDimensionIndices.push_back(qindex);
+          qDimensionIndices.emplace_back(qindex);
           projection[0] = Qtransform[0][0];
           projection[1] = Qtransform[1][0];
           projection[2] = Qtransform[2][0];
@@ -989,7 +989,7 @@ MDNorm::binInputWS(std::vector<Geometry::SymmetryOperation> symmetryOps) {
           projection[1] = 1.;
           basisVector << QDimensionNameQSample(1) << ",A^{-1}";
         } else {
-          qDimensionIndices.push_back(qindex);
+          qDimensionIndices.emplace_back(qindex);
           projection[0] = Qtransform[0][1];
           projection[1] = Qtransform[1][1];
           projection[2] = Qtransform[2][1];
@@ -1001,7 +1001,7 @@ MDNorm::binInputWS(std::vector<Geometry::SymmetryOperation> symmetryOps) {
           projection[2] = 1.;
           basisVector << QDimensionNameQSample(2) << ",A^{-1}";
         } else {
-          qDimensionIndices.push_back(qindex);
+          qDimensionIndices.emplace_back(qindex);
           projection[0] = Qtransform[0][2];
           projection[1] = Qtransform[1][2];
           projection[2] = Qtransform[2][2];
@@ -1088,7 +1088,7 @@ MDNorm::getValuesFromOtherDimensions(bool &skipNormalization,
     } else {
       coord_t value = static_cast<coord_t>(currentRun.getLogAsSingleValue(
           dimension->getName(), Mantid::Kernel::Math::TimeAveragedMean));
-      otherDimValues.push_back(value);
+      otherDimValues.emplace_back(value);
       if (value < inputDimMin || value > inputDimMax) {
         skipNormalization = true;
       }

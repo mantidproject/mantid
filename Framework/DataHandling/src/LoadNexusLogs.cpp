@@ -32,8 +32,8 @@ using API::FileProperty;
 using API::MatrixWorkspace;
 using API::MatrixWorkspace_sptr;
 using API::WorkspaceProperty;
-using Types::Core::DateAndTime;
 using std::size_t;
+using Types::Core::DateAndTime;
 
 // Anonymous namespace
 namespace {
@@ -354,8 +354,8 @@ void LoadNexusLogs::exec() {
           plog->timesAsVector();
       std::vector<double> plogv = plog->valuesAsVector();
       for (auto number : event_frame_number) {
-        ptime.push_back(plogt[number]);
-        pval.push_back(plogv[number]);
+        ptime.emplace_back(plogt[number]);
+        pval.emplace_back(plogv[number]);
       }
       pcharge->create(ptime, pval);
       pcharge->setUnits("uAh");

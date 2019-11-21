@@ -7,6 +7,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITPLOTMODEL_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITPLOTMODEL_H_
 
+#include "IndexTypes.h"
 #include "IndirectFittingModel.h"
 
 #include "MantidAPI/IAlgorithm.h"
@@ -33,10 +34,11 @@ public:
   Mantid::API::MatrixWorkspace_sptr
   appendGuessToInput(Mantid::API::MatrixWorkspace_sptr guessWorkspace) const;
 
-  std::size_t getActiveDataIndex() const;
-  std::size_t getActiveSpectrum() const;
-  std::size_t numberOfWorkspaces() const;
-  std::string getFitDataName(std::size_t index) const;
+  TableDatasetIndex getActiveDataIndex() const;
+  WorkspaceIndex getActiveSpectrum() const;
+  TableDatasetIndex numberOfWorkspaces() const;
+  TableRowIndex getActiveDomainIndex() const;
+  std::string getFitDataName(TableDatasetIndex index) const;
   std::string getFitDataName() const;
   std::string getLastFitDataName() const;
   std::pair<double, double> getRange() const;
@@ -49,8 +51,8 @@ public:
   double calculateHWHMMinimum(double maximum) const;
   bool canCalculateGuess() const;
 
-  void setActiveIndex(std::size_t index);
-  void setActiveSpectrum(std::size_t spectrum);
+  void setActiveIndex(TableDatasetIndex index);
+  void setActiveSpectrum(WorkspaceIndex spectrum);
   void setStartX(double startX);
   void setEndX(double endX);
   void setFWHM(double fwhm);
@@ -94,8 +96,8 @@ private:
   void deleteWorkspace(const std::string &name) const;
 
   IndirectFittingModel *m_fittingModel;
-  std::size_t m_activeIndex;
-  std::size_t m_activeSpectrum;
+  TableDatasetIndex m_activeIndex;
+  WorkspaceIndex m_activeSpectrum;
 };
 
 } // namespace IDA

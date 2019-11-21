@@ -73,10 +73,10 @@ public:
                                                           qSampleFrame, 1);
     // Workspace with mixed frames
     std::vector<Mantid::Geometry::MDFrame_sptr> frames;
-    frames.push_back(std::make_shared<Mantid::Geometry::QSample>());
-    frames.push_back(std::make_shared<Mantid::Geometry::QSample>());
-    frames.push_back(std::make_shared<Mantid::Geometry::QSample>());
-    frames.push_back(std::make_shared<Mantid::Geometry::GeneralFrame>(
+    frames.emplace_back(std::make_shared<Mantid::Geometry::QSample>());
+    frames.emplace_back(std::make_shared<Mantid::Geometry::QSample>());
+    frames.emplace_back(std::make_shared<Mantid::Geometry::QSample>());
+    frames.emplace_back(std::make_shared<Mantid::Geometry::GeneralFrame>(
         Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m"));
     wsMixedFrames = MDEventsTestHelper::makeMDEWWithIndividualFrames<4>(
         5, 0.0, 10.0, frames, 1);
@@ -372,9 +372,9 @@ public:
     alg.m_inWS = ws;
     TS_ASSERT_EQUALS(alg.m_bases.size(), 0);
     // Set up data that comes from other properties
-    alg.m_minExtents.push_back(-5.0);
-    alg.m_maxExtents.push_back(+5.0);
-    alg.m_numBins.push_back(20);
+    alg.m_minExtents.emplace_back(-5.0);
+    alg.m_maxExtents.emplace_back(+5.0);
+    alg.m_numBins.emplace_back(20);
 
     TSM_ASSERT_THROWS_ANYTHING("Blank name",
                                alg.makeBasisVectorFromString(",units,1,2,3"));
@@ -399,9 +399,9 @@ public:
       SlicingAlgorithmImpl alg;
       alg.m_inWS = ws;
       // Set up data that comes from other properties
-      alg.m_minExtents.push_back(-5.0);
-      alg.m_maxExtents.push_back(+5.0);
-      alg.m_numBins.push_back(20);
+      alg.m_minExtents.emplace_back(-5.0);
+      alg.m_maxExtents.emplace_back(+5.0);
+      alg.m_numBins.emplace_back(20);
       alg.m_NormalizeBasisVectors = (normalize > 0);
 
       TS_ASSERT_EQUALS(alg.m_bases.size(), 0);
@@ -450,9 +450,9 @@ public:
       SlicingAlgorithmImpl alg;
       alg.m_inWS = wsQSample; // All dimensions are QSample
       // Set up data that comes from other properties
-      alg.m_minExtents.push_back(-5.0);
-      alg.m_maxExtents.push_back(+5.0);
-      alg.m_numBins.push_back(20);
+      alg.m_minExtents.emplace_back(-5.0);
+      alg.m_maxExtents.emplace_back(+5.0);
+      alg.m_numBins.emplace_back(20);
       alg.m_NormalizeBasisVectors = (normalize > 0);
 
       TS_ASSERT_EQUALS(alg.m_bases.size(), 0);
@@ -509,9 +509,9 @@ public:
       alg.m_inWS = wsMixedFrames; // First three dimensions are Q Sample
                                   // the last is General Frame
       // Set up data that comes from other properties
-      alg.m_minExtents.push_back(-5.0);
-      alg.m_maxExtents.push_back(+5.0);
-      alg.m_numBins.push_back(20);
+      alg.m_minExtents.emplace_back(-5.0);
+      alg.m_maxExtents.emplace_back(+5.0);
+      alg.m_numBins.emplace_back(20);
       alg.m_NormalizeBasisVectors = (normalize > 0);
 
       TS_ASSERT_EQUALS(alg.m_bases.size(), 0);
@@ -567,9 +567,9 @@ public:
     SlicingAlgorithmImpl alg;
     alg.m_inWS = ws;
     // Set up data that comes from other properties
-    alg.m_minExtents.push_back(-5.0);
-    alg.m_maxExtents.push_back(+5.0);
-    alg.m_numBins.push_back(20);
+    alg.m_minExtents.emplace_back(-5.0);
+    alg.m_maxExtents.emplace_back(+5.0);
+    alg.m_numBins.emplace_back(20);
     alg.m_NormalizeBasisVectors = true;
 
     TS_ASSERT_EQUALS(alg.m_bases.size(), 0);

@@ -96,7 +96,7 @@ public:
     int lineCount = 0;
     std::vector<std::string> notebookLines;
     while (std::getline(file, notebookLine)) {
-      notebookLines.push_back(notebookLine);
+      notebookLines.emplace_back(notebookLine);
       if (lineCount < 8) {
         TS_ASSERT_EQUALS(result[lineCount], notebookLine);
         lineCount++;

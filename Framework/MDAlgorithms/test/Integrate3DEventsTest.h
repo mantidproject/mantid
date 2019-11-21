@@ -56,37 +56,37 @@ public:
     // peak 3.
     std::vector<std::pair<double, V3D>> event_Qs;
     for (int i = -100; i <= 100; i++) {
-      event_Qs.push_back(
+      event_Qs.emplace_back(
           std::make_pair(1., V3D(peak_1 + V3D((double)i / 100.0, 0, 0))));
-      event_Qs.push_back(
+      event_Qs.emplace_back(
           std::make_pair(1., V3D(peak_2 + V3D((double)i / 100.0, 0, 0))));
-      event_Qs.push_back(
+      event_Qs.emplace_back(
           std::make_pair(1., V3D(peak_3 + V3D((double)i / 100.0, 0, 0))));
 
-      event_Qs.push_back(
+      event_Qs.emplace_back(
           std::make_pair(1., V3D(peak_1 + V3D(0, (double)i / 200.0, 0))));
-      event_Qs.push_back(
+      event_Qs.emplace_back(
           std::make_pair(1., V3D(peak_2 + V3D(0, (double)i / 200.0, 0))));
-      event_Qs.push_back(
+      event_Qs.emplace_back(
           std::make_pair(1., V3D(peak_3 + V3D(0, (double)i / 200.0, 0))));
 
-      event_Qs.push_back(
+      event_Qs.emplace_back(
           std::make_pair(1., V3D(peak_1 + V3D(0, 0, (double)i / 300.0))));
-      event_Qs.push_back(
+      event_Qs.emplace_back(
           std::make_pair(1., V3D(peak_2 + V3D(0, 0, (double)i / 300.0))));
-      event_Qs.push_back(
+      event_Qs.emplace_back(
           std::make_pair(1., V3D(peak_3 + V3D(0, 0, (double)i / 300.0))));
     }
 
     for (int i = -50; i <= 50; i++) {
-      event_Qs.push_back(
+      event_Qs.emplace_back(
           std::make_pair(1., V3D(peak_1 + V3D(0, (double)i / 147.0, 0))));
-      event_Qs.push_back(
+      event_Qs.emplace_back(
           std::make_pair(1., V3D(peak_2 + V3D(0, (double)i / 147.0, 0))));
     }
 
     for (int i = -25; i <= 25; i++) {
-      event_Qs.push_back(
+      event_Qs.emplace_back(
           std::make_pair(1., V3D(peak_1 + V3D(0, 0, (double)i / 61.0))));
     }
 
@@ -169,37 +169,37 @@ public:
     // peak 3.
     std::vector<std::pair<double, V3D>> event_Qs;
     for (int i = -100; i <= 100; i++) {
-      event_Qs.push_back(
+      event_Qs.emplace_back(
           std::make_pair(1., V3D(peak_1 + V3D((double)i / 100.0, 0, 0))));
-      event_Qs.push_back(
+      event_Qs.emplace_back(
           std::make_pair(1., V3D(peak_2 + V3D((double)i / 100.0, 0, 0))));
-      event_Qs.push_back(
+      event_Qs.emplace_back(
           std::make_pair(1., V3D(peak_3 + V3D((double)i / 100.0, 0, 0))));
 
-      event_Qs.push_back(
+      event_Qs.emplace_back(
           std::make_pair(1., V3D(peak_1 + V3D(0, (double)i / 200.0, 0))));
-      event_Qs.push_back(
+      event_Qs.emplace_back(
           std::make_pair(1., V3D(peak_2 + V3D(0, (double)i / 200.0, 0))));
-      event_Qs.push_back(
+      event_Qs.emplace_back(
           std::make_pair(1., V3D(peak_3 + V3D(0, (double)i / 200.0, 0))));
 
-      event_Qs.push_back(
+      event_Qs.emplace_back(
           std::make_pair(1., V3D(peak_1 + V3D(0, 0, (double)i / 300.0))));
-      event_Qs.push_back(
+      event_Qs.emplace_back(
           std::make_pair(1., V3D(peak_2 + V3D(0, 0, (double)i / 300.0))));
-      event_Qs.push_back(
+      event_Qs.emplace_back(
           std::make_pair(1., V3D(peak_3 + V3D(0, 0, (double)i / 300.0))));
     }
 
     for (int i = -50; i <= 50; i++) {
-      event_Qs.push_back(
+      event_Qs.emplace_back(
           std::make_pair(1., V3D(peak_1 + V3D(0, (double)i / 147.0, 0))));
-      event_Qs.push_back(
+      event_Qs.emplace_back(
           std::make_pair(1., V3D(peak_2 + V3D(0, (double)i / 147.0, 0))));
     }
 
     for (int i = -25; i <= 25; i++) {
-      event_Qs.push_back(
+      event_Qs.emplace_back(
           std::make_pair(1., V3D(peak_1 + V3D(0, 0, (double)i / 61.0))));
     }
 
@@ -501,7 +501,7 @@ private:
 
     for (size_t i = 0; i < numSamples; ++i) {
       V3D offset(d(gen), d(gen), d(gen));
-      event_Qs.push_back(std::make_pair(1., center + offset));
+      event_Qs.emplace_back(std::make_pair(1., center + offset));
     }
   }
 

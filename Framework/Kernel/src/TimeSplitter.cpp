@@ -42,6 +42,7 @@ bool SplittingInterval::overlaps(const SplittingInterval &b) const {
          ((this->m_stop < b.m_stop) && (this->m_stop >= b.m_start));
 }
 
+/// @cond DOXYGEN_BUG
 /// And operator. Return the smallest time interval where both intervals are
 /// TRUE.
 SplittingInterval SplittingInterval::
@@ -53,6 +54,7 @@ operator&(const SplittingInterval &b) const {
     out.m_stop = b.m_stop;
   return out;
 }
+/// @endcond DOXYGEN_BUG
 
 /// Or operator. Return the largest time interval.
 SplittingInterval SplittingInterval::
@@ -162,7 +164,7 @@ TimeSplitterType operator&(const TimeSplitterType &a,
         // left-hand-side (ait in this case)
         //  meaning that a has to be the splitter because the b index is
         //  ignored.
-        out.push_back(*ait & *bit);
+        out.emplace_back(*ait & *bit);
       }
     }
   }
@@ -223,10 +225,10 @@ TimeSplitterType operator|(const TimeSplitterType &a,
   ;
   for (it = a.begin(); it != a.end(); ++it)
     if (it->stop() > it->start())
-      temp.push_back(*it);
+      temp.emplace_back(*it);
   for (it = b.begin(); it != b.end(); ++it)
     if (it->stop() > it->start())
-      temp.push_back(*it);
+      temp.emplace_back(*it);
 
   // Sort by start time
   std::sort(temp.begin(), temp.end(), compareSplittingInterval);

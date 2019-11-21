@@ -209,7 +209,7 @@ const std::vector<int> UnwrapMonitor::unwrapX(std::vector<double> &newX,
     // First deal with bins where m_Tmin < tof < T2
     if (tof < T2) {
       const double wavelength = (m_conversionConstant * tof) / Ld;
-      tempX_L.push_back(wavelength);
+      tempX_L.emplace_back(wavelength);
       // Record the bins that fall in this range for copying over the data &
       // errors
       if (binRange[0] == -1)
@@ -220,7 +220,7 @@ const std::vector<int> UnwrapMonitor::unwrapX(std::vector<double> &newX,
     else if (tof > T1) {
       const double velocity = Ld / (tof - m_Tmax + m_Tmin);
       const double wavelength = m_conversionConstant / velocity;
-      newX.push_back(wavelength);
+      newX.emplace_back(wavelength);
       // Remove the duplicate boundary bin
       if (tof == m_Tmax && std::abs(wavelength - tempX_L.front()) < 1.0e-5)
         newX.pop_back();

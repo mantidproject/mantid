@@ -32,7 +32,7 @@ void setupConsistentSpectrumNumbers(IndexInfo &filtered,
   // included in DetectorInfo).
   for (int32_t i = 0; i < static_cast<int32_t>(detIDs.size()); ++i) {
     if (filtered.spectrumNumber(spectrumNumbers.size()) == detIDs[i])
-      spectrumNumbers.push_back(i + 1);
+      spectrumNumbers.emplace_back(i + 1);
     if (filtered.size() == spectrumNumbers.size())
       break;
   }
@@ -186,7 +186,8 @@ LoadEventNexusIndexSetup::filterIndexInfo(const IndexInfo &indexInfo) {
     const auto indices = indexInfo.makeIndexSet(
         static_cast<SpectrumNumber>(m_min), static_cast<SpectrumNumber>(m_max));
     for (const auto index : indices)
-      m_range.push_back(static_cast<int32_t>(indexInfo.spectrumNumber(index)));
+      m_range.emplace_back(
+          static_cast<int32_t>(indexInfo.spectrumNumber(index)));
   }
   // Check if SpectrumList was supplied (or filled via min/max above)
   if (!m_range.empty()) {

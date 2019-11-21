@@ -42,8 +42,8 @@ SaveAscii2::SaveAscii2()
 /// Initialisation method.
 void SaveAscii2::init() {
   declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                            Direction::Input),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "",
+                                                           Direction::Input),
       "The name of the workspace containing the data you want to save to a "
       "Ascii file.");
 
@@ -89,7 +89,7 @@ void SaveAscii2::init() {
     std::string option = spacer[0];
     m_separatorIndex.insert(
         std::pair<std::string, std::string>(option, spacer[1]));
-    sepOptions.push_back(option);
+    sepOptions.emplace_back(option);
   }
 
   declareProperty("Separator", "CSV",
@@ -393,7 +393,7 @@ void SaveAscii2::populateQMetaData() {
     // Convert to MomentumTransfer
     auto qValue = Kernel::UnitConversion::convertToElasticQ(theta, efixed);
     auto qValueStr = boost::lexical_cast<std::string>(qValue);
-    qValues.push_back(qValueStr);
+    qValues.emplace_back(qValueStr);
   }
   m_metaDataMap["q"] = qValues;
 }
@@ -407,7 +407,7 @@ void SaveAscii2::populateSpectrumNumberMetaData() {
   for (size_t i = 0; i < nHist; i++) {
     const auto specNum = m_ws->getSpectrum(i).getSpectrumNo();
     const auto specNumStr = std::to_string(specNum);
-    spectrumNumbers.push_back(specNumStr);
+    spectrumNumbers.emplace_back(specNumStr);
   }
   m_metaDataMap["spectrumnumber"] = spectrumNumbers;
 }
@@ -424,7 +424,7 @@ void SaveAscii2::populateAngleMetaData() {
     constexpr double rad2deg = 180. / M_PI;
     const auto angleInDeg = two_theta * rad2deg;
     const auto angleInDegStr = boost::lexical_cast<std::string>(angleInDeg);
-    angles.push_back(angleInDegStr);
+    angles.emplace_back(angleInDegStr);
   }
   m_metaDataMap["angle"] = angles;
 }

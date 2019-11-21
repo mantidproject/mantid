@@ -89,9 +89,9 @@ std::unique_ptr<Kernel::Property> SequenceTypeHandler<ContainerType>::create(
     const boost::python::object &validator,
     const unsigned int direction) const {
   using DestElementType = typename ContainerType::value_type;
+  using boost::python::extract;
   using Kernel::IValidator;
   using Kernel::PropertyWithValue;
-  using boost::python::extract;
 
   ContainerType valueInC;
   // Current workaround for things that still pass back wrapped vectors...
