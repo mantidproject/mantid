@@ -99,24 +99,31 @@ public:
         m_indexedPeaks,
         {{"HOffset", "-0.5,0,0.5"}, {"KOffset", "0.0"}, {"LOffset", "0.2"}});
 
-    TS_ASSERT_EQUALS(117, fracPeaks->getNumberPeaks())
-    const auto &peak0 = fracPeaks->getPeak(0);
-    TS_ASSERT_DELTA(peak0.getH(), -5.5, .0001)
-    TS_ASSERT_DELTA(peak0.getK(), 7.0, .0001)
-    TS_ASSERT_DELTA(peak0.getL(), -3.8, .0001)
-    TS_ASSERT_EQUALS(peak0.getDetectorID(), 1146353)
+    auto nPeaks = fracPeaks->getNumberPeaks();
+    TS_ASSERT_EQUALS(117, nPeaks)
+    if (nPeaks > 0) {
+      const auto &peak0 = fracPeaks->getPeak(0);
+      TS_ASSERT_DELTA(peak0.getH(), -5.5, .0001)
+      TS_ASSERT_DELTA(peak0.getK(), 7.0, .0001)
+      TS_ASSERT_DELTA(peak0.getL(), -3.8, .0001)
+      TS_ASSERT_EQUALS(peak0.getDetectorID(), 1146353)
+    }
 
-    const auto &peak3 = fracPeaks->getPeak(3);
-    TS_ASSERT_DELTA(peak3.getH(), -5.5, .0001)
-    TS_ASSERT_DELTA(peak3.getK(), 3.0, .0001)
-    TS_ASSERT_DELTA(peak3.getL(), -2.8, .0001)
-    TS_ASSERT_EQUALS(peak3.getDetectorID(), 1747163)
+    if (nPeaks > 3) {
+      const auto &peak3 = fracPeaks->getPeak(3);
+      TS_ASSERT_DELTA(peak3.getH(), -5.5, .0001)
+      TS_ASSERT_DELTA(peak3.getK(), 3.0, .0001)
+      TS_ASSERT_DELTA(peak3.getL(), -2.8, .0001)
+      TS_ASSERT_EQUALS(peak3.getDetectorID(), 1747163)
+    }
 
-    const auto &peak6 = fracPeaks->getPeak(6);
-    TS_ASSERT_DELTA(peak6.getH(), -6.5, .0001)
-    TS_ASSERT_DELTA(peak6.getK(), 4.0, .0001)
-    TS_ASSERT_DELTA(peak6.getL(), -3.8, .0001)
-    TS_ASSERT_EQUALS(peak6.getDetectorID(), 1737894)
+    if (nPeaks > 6) {
+      const auto &peak6 = fracPeaks->getPeak(6);
+      TS_ASSERT_DELTA(peak6.getH(), -6.5, .0001)
+      TS_ASSERT_DELTA(peak6.getK(), 4.0, .0001)
+      TS_ASSERT_DELTA(peak6.getL(), -3.8, .0001)
+      TS_ASSERT_EQUALS(peak6.getDetectorID(), 1737894)
+    }
   }
 
   void test_exec_with_include_in_range_and_hit_detector() {

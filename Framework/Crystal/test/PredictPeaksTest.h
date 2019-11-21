@@ -244,9 +244,12 @@ public:
   void test_manual_U_and_gonio() { do_test_manual(22.5, 22.5); }
 
   void test_crystallography() {
-    Kernel::ConfigService::Instance().setString("Q.convention",
+    using Kernel::ConfigService;
+    auto origQConv = ConfigService::Instance().getString("Q.convention");
+    ConfigService::Instance().setString("Q.convention",
                                                 "Crystallography");
     do_test_exec("Primitive", 10, std::vector<V3D>(), -1);
+    ConfigService::Instance().setString("Q.convention", origQConv);
   }
   void test_edge() {
     do_test_exec("Primitive", 5, std::vector<V3D>(), 1, false, false, 10);
