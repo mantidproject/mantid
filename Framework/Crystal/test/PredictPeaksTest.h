@@ -246,8 +246,7 @@ public:
   void test_crystallography() {
     using Kernel::ConfigService;
     auto origQConv = ConfigService::Instance().getString("Q.convention");
-    ConfigService::Instance().setString("Q.convention",
-                                                "Crystallography");
+    ConfigService::Instance().setString("Q.convention", "Crystallography");
     do_test_exec("Primitive", 10, std::vector<V3D>(), -1);
     ConfigService::Instance().setString("Q.convention", origQConv);
   }
