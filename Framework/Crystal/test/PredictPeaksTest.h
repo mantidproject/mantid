@@ -255,6 +255,10 @@ public:
   }
 
   void test_exec_with_CalculateGoniometerForCW() {
+    using Kernel::ConfigService;
+    auto origQConv = ConfigService::Instance().getString("Q.convention");
+    ConfigService::Instance().setString("Q.convention", "Crystallography");
+
     // Name of the output workspace.
     std::string outWSName("PredictPeaksTest_OutputWS");
 
@@ -298,6 +302,8 @@ public:
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
+
+    ConfigService::Instance().setString("Q.convention", origQConv);
   }
 };
 
