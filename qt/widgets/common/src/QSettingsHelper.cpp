@@ -27,11 +27,27 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace QSettingsHelper {
 
+/* Load an individual setting from disk */
 template <typename T>
 T getSetting(std::string const& settingGroup, std::string const& settingName) {
   return getSettingAsQVariant(std::string const &settingGroup,
                               std::string const &settingName)
       .value<T>();
+}
+
+/* Load a map of settings with the same type */
+template <typename T>
+std::map<std::string, T> getSettingsAsMap(std::string const &settingGroup) {
+  QSettings settings;
+  settings.beginGroup(QString::fromStdString(settingGroup));
+  QStringList settingNames = settings.childKeys();
+  for (auto &settingName : settingNames)
+    if (settings.value(settingName).type() == T) {
+      auto settingsMap[settingName.toStdString()] = settings.value<T>(settingName);
+    }
+  settings.endGroup();
+
+  return settingsMap;
 }
 
 template <typename T>

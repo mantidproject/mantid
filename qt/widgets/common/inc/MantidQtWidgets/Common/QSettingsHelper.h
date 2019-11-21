@@ -17,6 +17,9 @@ template <typename T>
 T getSetting(std::string const &settingGroup, std::string const &settingName);
 
 template <typename T>
+std::map<std::string, T> getSettingsAsMap(std::string const &settingGroup);
+
+template <typename T>
 void setSetting(std::string const &settingGroup, std::string const &settingName,
                 T const &value);
 
