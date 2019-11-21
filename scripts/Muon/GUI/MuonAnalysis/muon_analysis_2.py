@@ -32,7 +32,19 @@ SUPPORTED_FACILITIES = ["ISIS", "SmuS"]
 from Muon.GUI.Common.home_plot_widget.home_plot_widget_model import HomePlotWidgetModel
 from Muon.GUI.Common.home_plot_widget.home_plot_widget_presenter import HomePlotWidgetPresenter
 from Muon.GUI.Common.home_plot_widget.home_plot_widget_view import HomePlotWidgetView
-from mantidqt.plotting.functions import get_plot_fig
+
+from matplotlib.backends.qt_compat import QtCore, QtWidgets, is_pyqt5
+
+if is_pyqt5():
+    from matplotlib.backends.backend_qt5agg import (
+        FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
+else:
+    from matplotlib.backends.backend_qt4agg import (
+        FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
+from matplotlib.figure import Figure
+from mantidqt.plotting.functions import _create_subplots, get_plot_fig
+import matplotlib.pyplot as plt
+from pylab import *
 
 
 class DockablePlotWidget(QtWidgets.QWidget):
@@ -43,23 +55,32 @@ class DockablePlotWidget(QtWidgets.QWidget):
         # create the layout
         vertical_layout = QtWidgets.QVBoxLayout()
 
-        # plotting widget
-        self.fig, axes = get_plot_fig(False, None, None, 1, fig=None)
-        self.window = self.fig.canvas.window()
+        self.fig = Figure()
+        self.fig.canvas = FigureCanvas(self.fig)
+        self.toolBar = NavigationToolbar(self.fig.canvas, self)
+        self.toolBar.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+
+        # Create a set of mantid axis for the figure
+        self.fig, axes = get_plot_fig(overplot=False, ax_properties=None, window_title="Muon Analysis 2", axes_num=1,
+                                      fig=self.fig)
+
+        self.fig.canvas.set_window_title('Muon Analysis 2')
 
         # plotting options
-        self.plot_view = HomePlotWidgetView()
+        self.plot_view = HomePlotWidgetView(self)
+        self.plot_view.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         self.plot_widget = HomePlotWidgetPresenter(self.plot_view, HomePlotWidgetModel(self.fig),
                                                    context)
         # add widgets to layout
         vertical_layout.addWidget(self.plot_view)
-        vertical_layout.addWidget(self.window)
+        vertical_layout.addWidget(self.toolBar)
+        vertical_layout.addWidget(self.fig.canvas.window())
 
         self.setLayout(vertical_layout)
 
     def close(self):
         self.plot_view.close()
-        self.window.close()
+        plt.close(self.fig)
         super(DockablePlotWidget, self).close()
 
 
@@ -94,6 +115,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         except AttributeError as error:
             self.warning_popup(error.args[0])
 
+        # self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         # initialise the data storing classes of the interface
         self.loaded_data = MuonLoadData()
         self.data_context = MuonDataContext('Muon Data', self.loaded_data)
@@ -111,12 +133,13 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
                                    workspace_suffix=' MA')
 
         # create the dockable widget
-        self.dockable_plot_widget = QtWidgets.QDockWidget("Plotting", self)
+        self.dockable_plot_widget = QtWidgets.QDockWidget()
+        self.dockable_plot_widget.setParent(self)
         self.dockable_plot_widget.setFeatures(
-            QtWidgets.QDockWidget.DockWidgetFloatable | QtWidgets.QDockWidget.DockWidgetMovable | QtWidgets.QDockWidget.DockWidgetClosable)
+            QtWidgets.QDockWidget.DockWidgetFloatable | QtWidgets.QDockWidget.DockWidgetMovable)
         self.dockable_plot_widget.setAllowedAreas(QtCore.Qt.RightDockWidgetArea | QtCore.Qt.LeftDockWidgetArea)
         # create the widget to be stored in the dock
-        self.dockable_plot_window = DockablePlotWidget(self.dockable_plot_widget, self.context)
+        self.dockable_plot_window = DockablePlotWidget(parent=self.dockable_plot_widget, context=self.context)
         self.dockable_plot_widget.setWidget(self.dockable_plot_window)
         self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.dockable_plot_widget)
 
@@ -236,7 +259,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
             self.phase_tab.phase_table_presenter.instrument_changed_observer)
 
         self.context.data_context.instrumentNotifier.add_subscriber(
-         self.dockable_plot_window.plot_widget.instrument_observer)
+            self.dockable_plot_window.plot_widget.instrument_observer)
 
     def setup_group_calculation_enable_notifer(self):
         self.grouping_tab_widget.group_tab_presenter.enable_editing_notifier.add_subscriber(
@@ -283,10 +306,10 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
             self.fitting_tab.fitting_tab_presenter.input_workspace_observer)
 
         self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
-         self.dockable_plot_window.plot_widget.input_workspace_observer)
+            self.dockable_plot_window.plot_widget.input_workspace_observer)
 
         self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
-           self.dockable_plot_window.plot_widget.rebin_options_set_observer)
+            self.dockable_plot_window.plot_widget.rebin_options_set_observer)
 
     def setup_phase_quad_changed_notifer(self):
         pass
@@ -307,5 +330,6 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
     def closeEvent(self, event):
         self.tabs.closeEvent(event)
         self.dockable_plot_widget.widget().close()
+        # self.removeDockWidget(self.dockable_plot_widget)
         self.context.ads_observer = None
         super(MuonAnalysisGui, self).closeEvent(event)

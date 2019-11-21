@@ -31,7 +31,7 @@ from mantid.plots import MantidAxes
 from mantidqt.plotting.figuretype import figure_type, FigureType
 from mantid.py3compat import is_text_string, string_types
 from mantidqt.dialogs.spectraselectorutils import get_spectra_selection
-
+import time
 # -----------------------------------------------------------------------------
 # Constants
 # -----------------------------------------------------------------------------
@@ -216,6 +216,8 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
 
     fig, axes = get_plot_fig(overplot, ax_properties, window_title, num_axes, fig)
 
+    print(axes)
+
     # Convert to a MantidAxes if it isn't already. Ignore legend since
     # a new one will be drawn later
     axes = [MantidAxes.from_mpl_axes(ax, ignore_artists=[Legend]) if not isinstance(ax, MantidAxes) else ax
@@ -242,7 +244,7 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
     except AttributeError:
         pass
     fig.canvas.draw()
-    fig.show()
+    #fig.show()
     return fig
 
 
