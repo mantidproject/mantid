@@ -205,6 +205,29 @@ def _load_qlims(q_lims):
     return q_min, q_max
 
 
+def _load_qlims(q_lims):
+    if type(q_lims) == str or type(q_lims) == unicode:
+        q_min = []
+        q_max = []
+        try:
+            with open(q_lims, 'r') as f:
+                line_list = [line.rstrip('\n') for line in f]
+                for line in line_list[1:]:
+                    value_list = line.split()
+                    q_min.append(float(value_list[2]))
+                    q_max.append(float(value_list[3]))
+            q_min = np.array(q_min)
+            q_max = np.array(q_max)
+        except IOError:
+            raise RuntimeError("q_lims directory is not valid")
+    elif type(q_lims) == list or type(q_lims) == np.ndarray:
+        q_min = q_lims[0, :]
+        q_max = q_lims[1, :]
+    else:
+        raise RuntimeError("q_lims type is not valid")
+    return q_min, q_max
+
+
 def _calculate_self_scattering_correction(run_number, cal_file_name, sample_details):
     raw_ws = mantid.Load(Filename='POLARIS'+str(run_number)+'.nxs')
     mantid.SetSample(InputWorkspace=raw_ws,
