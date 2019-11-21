@@ -9,9 +9,9 @@
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include <cxxtest/TestSuite.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
+#include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/AppendGeometryToSNSNexus.h"
 
