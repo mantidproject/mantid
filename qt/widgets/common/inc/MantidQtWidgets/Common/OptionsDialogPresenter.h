@@ -32,10 +32,12 @@ public:
 
 private:
   // Settings
-  void loadSettings(std::map<QString, QVariant> &options);
-  void saveSettings(const std::map<QString, QVariant> &options);
+  void loadSettings(std::map<std::string, bool> &boolOptions, std::map<std::string, int> &intOptions);
+  void saveSettings(const std::map<std::string, bool> &boolOptions,
+                    const std::map<std::string, int> &intOptions);
   void initOptions();
-  void applyDefaultOptions(std::map<QString, QVariant> &options);
+  void applyDefaultOptions(std::map<std::string, bool> &boolOptions,
+                           std::map<std::string, int> &intOptions);
 
 private:
   // Handle to the view for this presenter
@@ -43,7 +45,9 @@ private:
   // Handle to the model for this presenter
   OptionsDialogModel m_model;
   // stores the user options for the presenter
-  std::map<QString, QVariant> m_options;
+  std::map<std::string, bool> m_boolOptions;
+  std::map<std::string, int> m_intOptions;
+  const std::string REFLECTOMETRY_SETTINGS_GROUP = "ISISReflectometryUI";
 };
 
 } // namespace MantidWidgets

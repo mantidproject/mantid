@@ -27,8 +27,10 @@ class EXPORT_OPT_MANTIDQT_COMMON OptionsDialog : public QDialog,
 public:
   OptionsDialog(QWidget *parent);
   ~OptionsDialog() override;
-  void getOptions(std::map<QString, QVariant> &options) override;
-  void setOptions(std::map<QString, QVariant> &options) override;
+  void getOptions(std::map<std::string, bool> &boolOptions,
+                  std::map<std::string, int> &intOptions) override;
+  void setOptions(std::map<std::string, bool> &boolOptions,
+                  std::map<std::string, int> &intOptions) override;
   void show() override;
   void subscribe(OptionsDialogSubscriber *notifyee) override;
 

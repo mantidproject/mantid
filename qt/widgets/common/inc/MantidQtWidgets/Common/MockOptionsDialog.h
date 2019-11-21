@@ -15,8 +15,10 @@
 class MockOptionsDialog : public MantidQt::MantidWidgets::IOptionsDialog {
 public:
   GNU_DIAG_OFF_SUGGEST_OVERRIDE
-  MOCK_METHOD1(getOptions, void(std::map<QString, QVariant> &options));
-  MOCK_METHOD1(setOptions, void(std::map<QString, QVariant> &options));
+  MOCK_METHOD1(getOptions, void(std::map<std::string, bool> &boolOptions,
+                                std::map<std::string, int> &intOptions));
+  MOCK_METHOD1(setOptions, void(std::map<std::string, bool> &boolOptions,
+                                std::map<std::string, int> &intOptions));
   MOCK_METHOD1(subscribe, void(MantidQt::MantidWidgets::OptionsDialogSubscriber *notifyee));
   MOCK_METHOD0(show, void());
   GNU_DIAG_ON_SUGGEST_OVERRIDE

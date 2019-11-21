@@ -7,10 +7,13 @@
 
 #include "MantidQtWidgets/Common/OptionsDialogPresenter.h"
 #include "MantidQtWidgets/Common/IOptionsDialog.h"
+#include "MantidQtWidgets/Common/QSettingsHelper.h"
 #include <QSettings>
 
 namespace MantidQt {
 namespace MantidWidgets {
+
+using namespace MantidQt::MantidWidgets::QSettingsHelper;
 
 /**
  * Construct a new presenter with the given view
@@ -23,62 +26,59 @@ OptionsDialogPresenter::OptionsDialogPresenter(IOptionsDialog *view)
 }
 
 /* Loads the settings saved by the user */
-void OptionsDialogPresenter::loadSettings(std::map<QString, QVariant>& options) {
-  QSettings settings;
-  const QString settingsGroupName = "ISISReflectometryUI";
-  settings.beginGroup(settingsGroupName);
-  QStringList keys = settings.childKeys();
-  for (auto &key : keys)
-    options[key] = settings.value(key);
-  settings.endGroup();
+void OptionsDialogPresenter::loadSettings(
+    std::map<std::string, bool> &boolOptions,
+    std::map<std::string, int> &intOptions) {
+  boolOptions = getSettingsAsMap<bool>(REFLECTOMETRY_SETTINGS_GROUP);
+  intOptions = getSettingsAsMap<int>(REFLECTOMETRY_SETTINGS_GROUP);
 }
 
 /* Saves the settings specified by the user */
 void OptionsDialogPresenter::saveSettings(
-    const std::map<QString, QVariant> &options) {
-  QSettings settings;
-  const QString settingsGroupName = "ISISReflectometryUI";
-  settings.beginGroup(settingsGroupName);
-  QStringList keys = settings.childKeys();
-  for (const auto &option : options)
-    settings.setValue(option.first, option.second);
-  settings.endGroup();
+    const std::map<std::string, bool> &boolOptions, const std::map<std::string, int> &intOptions) {
+  for (const auto &boolOption : boolOptions)
+    setSetting(REFLECTOMETRY_SETTINGS_GROUP, boolOption.first, boolOption.second);
+  for (const auto &intOption : intOptions)
+    setSetting(REFLECTOMETRY_SETTINGS_GROUP, intOption.first,
+               intOption.second);
 }
 
 /** Load options from disk if possible, or set to defaults */
 void OptionsDialogPresenter::initOptions() {
-  m_options.clear();
-  applyDefaultOptions(m_options);
+  m_boolOptions.clear();
+  m_intOptions.clear();
+  applyDefaultOptions(m_boolOptions, m_intOptions);
 
   // TODO: Apply checks
 
   // Load saved values from disk
-  loadSettings(m_options);
+  loadSettings(m_boolOptions, m_intOptions);
 }
 
 void OptionsDialogPresenter::applyDefaultOptions(
-    std::map<QString, QVariant> &options) {
-  options["WarnProcessAll"] = true;
-  options["WarnDiscardChanges"] = true;
-  options["WarnProcessPartialGroup"] = true;
-  options["Round"] = false;
-  options["RoundPrecision"] = 3;
+    std::map<std::string, bool> &boolOptions,
+    std::map<std::string, int> &intOptions) {
+  boolOptions["WarnProcessAll"] = true;
+  boolOptions["WarnDiscardChanges"] = true;
+  boolOptions["WarnProcessPartialGroup"] = true;
+  boolOptions["Round"] = false;
+  intOptions["RoundPrecision"] = 3;
 }
 
 /** Loads the options used into the view */
 void
 OptionsDialogPresenter::loadOptions() {
-  loadSettings(m_options);
-  m_view->setOptions(m_options);
+  loadSettings(m_boolOptions, m_intOptions);
+  m_view->setOptions(m_boolOptions, m_intOptions);
 }
 
 /** Saves the options selected in the view */
 void OptionsDialogPresenter::saveOptions() {
-  m_view->getOptions(m_options);
+  m_view->getOptions(m_boolOptions, m_intOptions);
 
   // TODO Update model
 
-  saveSettings(m_options);  
+  saveSettings(m_boolOptions, m_intOptions);  
 }
 
 void OptionsDialogPresenter::showView() { m_view->show(); }

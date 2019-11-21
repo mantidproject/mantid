@@ -46,8 +46,8 @@ void OptionsDialog::initBindings() {
   }
 }
 
-/** This sets the ui to match the presenter's options */
-void OptionsDialog::getOptions(std::map<QString, QVariant> & options) {
+/** This saves the currently configured options to the presenter */
+void OptionsDialog::getOptions(std::map<std::string, bool> &boolOptions, std::map<std::string, int> &intOptions) {
   // Iterate through all our bound widgets, pushing their value into the options
   // map
   for (const auto &binding : m_bindings) {
@@ -57,35 +57,41 @@ void OptionsDialog::getOptions(std::map<QString, QVariant> & options) {
 
     QCheckBox *checkbox = findChild<QCheckBox *>(widgetName);
     if (checkbox) {
-      options[binding.first] = checkbox->isChecked();
+      boolOptions[binding.first.toStdString()] = checkbox->isChecked();
       continue;
     }
 
     QSpinBox *spinbox = findChild<QSpinBox *>(widgetName);
     if (spinbox) {
-      options[binding.first] = spinbox->value();
+      intOptions[binding.first.toStdString()] = spinbox->value();
       continue;
     }
   }
 }
 
-/** This saves the currently configured options to the presenter */
-void OptionsDialog::setOptions(std::map<QString, QVariant> &options) {
+/** This sets the ui to match the presenter's options */
+void OptionsDialog::setOptions(std::map<std::string, bool> &boolOptions,
+                               std::map<std::string, int> &intOptions) {
   // Set the values from the options
-  for (auto &option : options) {
-    QString widgetName = m_bindings[option.first];
+  for (auto &boolOption : boolOptions) {
+    QString widgetName = m_bindings[QString::fromStdString(boolOption.first)];
     if (widgetName.isEmpty())
       continue;
 
     QCheckBox *checkbox = findChild<QCheckBox *>(widgetName);
     if (checkbox) {
-      checkbox->setChecked(option.second.toBool());
+      checkbox->setChecked(boolOption.second);
       continue;
     }
+  }
+  for (auto &intOption : intOptions) {
+    QString widgetName = m_bindings[QString::fromStdString(intOption.first)];
+    if (widgetName.isEmpty())
+      continue;
 
     QSpinBox *spinbox = findChild<QSpinBox *>(widgetName);
     if (spinbox) {
-      spinbox->setValue(option.second.toInt());
+      spinbox->setValue(intOption.second);
       continue;
     }
   }
@@ -102,6 +108,8 @@ void OptionsDialog::notifySaveOptions() { m_notifyee->saveOptions(); }
 void OptionsDialog::closeEvent(QCloseEvent *event) {
   notifyLoadOptions();
   QDialog::reject();
+
+  // TODO investigate if event->ignore() is better
 }
 
 void OptionsDialog::show() { QDialog::exec(); }

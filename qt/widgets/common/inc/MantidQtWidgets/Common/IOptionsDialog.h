@@ -23,8 +23,10 @@ public:
 class EXPORT_OPT_MANTIDQT_COMMON IOptionsDialog {
 public:
   virtual ~IOptionsDialog() = default;
-  virtual void getOptions(std::map<QString, QVariant> &options) = 0;
-  virtual void setOptions(std::map<QString, QVariant> &options) = 0;
+  virtual void getOptions(std::map<std::string, bool> &boolOptions,
+                          std::map<std::string, int> &intOptions) = 0;
+  virtual void setOptions(std::map<std::string, bool> &boolOptions,
+                          std::map<std::string, int> &intOptions) = 0;
   virtual void show() = 0;
   virtual void subscribe(OptionsDialogSubscriber *notifyee) = 0;
 };
