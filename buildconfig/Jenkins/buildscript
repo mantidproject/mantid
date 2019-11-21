@@ -321,7 +321,8 @@ SUPPRESSIONS_DIR="${WORKSPACE}/buildconfig/Sanitizer"
 if [[ ${JOB_NAME} == *address* ]]; then
     SANITIZER_FLAGS="-DUSE_SANITIZER=Address"
     
-    ASAN_OPTIONS="suppressions=${SUPPRESSIONS_DIR}/Address.supp:detect_stack_use_after_return=true:halt_on_error=false:verify_asan=0"
+    # At a future date we could add an LD_PRELOAD export here, see docs for info
+    ASAN_OPTIONS="suppressions=${SUPPRESSIONS_DIR}/Address.supp:detect_stack_use_after_return=true:halt_on_error=false:verify_asan_link_order=0"
     LSAN_OPTIONS="suppressions=${SUPPRESSIONS_DIR}/Leak.supp"
     
     elif [[ ${JOB_NAME} == *memory* ]]; then

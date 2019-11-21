@@ -48,7 +48,7 @@ if(NOT ${USE_SANITIZERS_LOWER} MATCHES "off")
         add_link_options(-fsanitize=address)
 
     elseif (USE_SANITIZERS_LOWER STREQUAL "memory")
-        # Requires Clang > 10 and libc++ (rather than libstdc++)
+        # Requires Clang > 4 and libc++ (rather than libstdc++)
         # so we will wire up later
         message(FATAL_ERROR "Not Enabled Yet")
         message(STATUS "Enabling Memory sanitizer")

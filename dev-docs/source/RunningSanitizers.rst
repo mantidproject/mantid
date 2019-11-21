@@ -93,7 +93,7 @@ the path to your Mantid source directly:
 
     .. code-block:: sh
 
-        export ASAN_OPTIONS="verify_asan=0:detect_stack_use_after_return=true:halt_on_error=false:suppressions=*path_to_mantid*/buildconfig/Sanitizer/Address.supp"
+        export ASAN_OPTIONS="verify_asan_link_order=0:detect_stack_use_after_return=true:halt_on_error=false:suppressions=*path_to_mantid*/buildconfig/Sanitizer/Address.supp"
         export LSAN_OPTIONS="suppressions=*path_to_mantid*/buildconfig/Sanitizer/Leak.supp"
 
 For example, if Mantid was checked out in the home directory of user *abc* in a
@@ -101,11 +101,40 @@ folder called mantid it would be:
 
     .. code-block:: sh
 
-        export ASAN_OPTIONS="verify_asan=0:detect_stack_use_after_return=true:halt_on_error=false:suppressions=/home/abc/mantid/buildconfig/Sanitizer/Address.supp"
+        export ASAN_OPTIONS="verify_asan_link_order=0:detect_stack_use_after_return=true:halt_on_error=false:suppressions=/home/abc/mantid/buildconfig/Sanitizer/Address.supp"
         export LSAN_OPTIONS="suppressions=/home/abc/mantid/buildconfig/Sanitizer/Leak.supp"
 
 All code executed in **the shell where the previous commands were run in**
 will now be sanitized correctly.
+
+Instrumenting Python (Advanced)
+-------------------------------
+
+Currently any code started in Python (i.e. Python Unit Tests) will not pre-load
+ASAN instrumentation. This can be split into two categories:
+
+- Code which uses Python only components: Not worth instrumenting as any
+  issues will be upstream. This also will emit an error if
+  *verify_asan_link_order* is set to true, as we technically haven't
+  instrumented anything (unless you have a sanitized Python build)
+- Code which uses Mantid C++ components: This can be instrumented, but
+  (currently) isn't by default, as the user has to determine the *LD_PRELOAD*
+  path.
+
+If you need / want to profile C++ components which are triggered from Python
+the following steps should setup your environment:
+
+    .. code-block:: sh
+
+        # Get the path to your linked ASAN
+        ldd bin/KernelTest | grep "libasan"
+        export LD_PRELOAD=/usr/lib/path_to/libasan.so.x
+
+        # You may want to re-run the ASAN_OPTIONS export dropping
+        # the verify to make sure that the C++ component is being instrumented:
+
+        export ASAN_OPTIONS="detect_stack_use_after_return=true:halt_on_error=false:suppressions=*path_to_mantid*/buildconfig/Sanitizer/Address.supp"
+
 
 Common Problems
 ===============
@@ -124,5 +153,6 @@ ASAN was not the first library loaded
 --------------------------------------
 
 This can appear when running Python tests, as the executable is not build
-with instrumentation. To avoid this warning ensure that *verify_asan=0* is
-set in your options and that you are using GCC 8 onwards.
+with instrumentation. To avoid this warning ensure that
+*verify_asan_link_order=0* is set in your environment and that you are
+using GCC 8 onwards.
