@@ -234,6 +234,7 @@ public:
                void(const std::string &, const std::string &));
   MOCK_METHOD2(giveUserInfo, void(const std::string &, const std::string &));
   MOCK_METHOD2(askUserYesNo, bool(const std::string &, const std::string &));
+  MOCK_METHOD0(askUserDiscardChanges, bool());
 };
 
 class MockPythonRunner : public IPythonRunner {

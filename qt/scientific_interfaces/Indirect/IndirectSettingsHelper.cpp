@@ -30,11 +30,11 @@ bool externalPlotErrorBars() {
 }
 
 void setRestrictInputDataByName(bool restricted) {
-  setSetting(INDIRECT_SETTINGS_GROUP, RESTRICT_DATA_PROPERTY, restricted);
+  setSetting<bool>(INDIRECT_SETTINGS_GROUP, RESTRICT_DATA_PROPERTY, restricted);
 }
 
 void setExternalPlotErrorBars(bool errorBars) {
-  setSetting(INDIRECT_SETTINGS_GROUP, ERROR_BARS_PROPERTY, errorBars);
+  setSetting<bool>(INDIRECT_SETTINGS_GROUP, ERROR_BARS_PROPERTY, errorBars);
 }
 
 } // namespace IndirectSettingsHelper

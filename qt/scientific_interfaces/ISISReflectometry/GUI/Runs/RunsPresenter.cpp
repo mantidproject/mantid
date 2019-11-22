@@ -198,7 +198,7 @@ bool RunsPresenter::resumeAutoreduction() {
                                         ISearcher::SearchType::AUTO)) {
     // If there are unsaved changes, ask the user first
     if (m_mainPresenter->isBatchUnsaved()) {
-      if (m_messageHandler->askUserDiscardChanges)
+      if (m_messageHandler->askUserDiscardChanges())
         return false;
     }
     m_searcher->reset();

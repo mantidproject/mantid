@@ -27,7 +27,7 @@ public:
   virtual bool isCloseEventPrevented() const = 0;
   virtual bool isAnyBatchUnsaved() const = 0;
   virtual bool getUnsavedFlag() const = 0;
-  virtual void setUnsavedFlag() = 0;
+  virtual void setUnsavedFlag(bool isUnsaved) = 0;
   virtual void notifyAnyBatchAutoreductionResumed() = 0;
   virtual void notifyAnyBatchAutoreductionPaused() = 0;
   virtual void notifyAnyBatchReductionResumed() = 0;

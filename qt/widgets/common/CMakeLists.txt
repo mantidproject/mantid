@@ -71,7 +71,6 @@ set(
   src/PropertyWidget.cpp
   src/PropertyWidgetFactory.cpp
   src/PythonRunner.cpp
-  src/QSettingsHelper.cpp
   src/QtSignalChannel.cpp
   src/QtJSONUtils.cpp
   src/RenameParDialog.cpp
@@ -359,7 +358,6 @@ set(
   src/PropertyWidgetFactory.cpp
   src/PythonRunner.cpp
   src/QScienceSpinBox.cpp
-  src/QSettingsHelper.cpp
   src/QtSignalChannel.cpp
   src/QtJSONUtils.cpp
   src/RepoModel.cpp

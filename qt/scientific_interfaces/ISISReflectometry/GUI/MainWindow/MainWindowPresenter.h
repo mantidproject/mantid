@@ -53,8 +53,8 @@ public:
   bool isAnyBatchAutoreducing() const override;
   bool isCloseEventPrevented() const override;
   bool isAnyBatchUnsaved() const override;
-  bool getUnsavedFlag() const;
-  void setUnsavedFlag(bool isUnsaved);
+  bool getUnsavedFlag() const override;
+  void setUnsavedFlag(bool isUnsaved) override;
   void notifyAnyBatchAutoreductionResumed() override;
   void notifyAnyBatchAutoreductionPaused() override;
   void notifyAnyBatchReductionResumed() override;
