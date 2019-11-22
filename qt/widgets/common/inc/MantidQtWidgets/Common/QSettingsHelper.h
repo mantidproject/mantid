@@ -10,6 +10,7 @@
 #include <map>
 #include <string>
 #include <typeinfo>
+#include <QMetaType>
 #include <QSettings>
 #include <QString>
 #include <QStringList>
@@ -37,13 +38,12 @@ std::map<std::string, T> getSettingsAsMap(std::string const &settingGroup) {
   QSettings settings;
   settings.beginGroup(QString::fromStdString(settingGroup));
   QStringList settingNames = settings.childKeys();
-  static const char *templateTypeName = typeid(T).name();
+  std::string templateTypeName = typeid(T).name();
   for (auto &settingName : settingNames) {
     auto setting = settings.value(settingName);
-    if (QVariant::typeToName(setting.type()) ==
-        templateTypeName) {
-      settingsMap[settingName.toStdString()] =
-          setting.value<T>();
+    std::string settingTypeName = QMetaType::typeName(setting.type());
+    if (settingTypeName == templateTypeName) {
+      settingsMap[settingName.toStdString()] = setting.value<T>();
     }
   }
   settings.endGroup();
