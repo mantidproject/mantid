@@ -28,15 +28,13 @@ public:
   
   void loadOptions() override;
   void saveOptions() override;
+  bool getBoolOption(std::string &optionName);
+  int getIntOption(std::string &optionName);
   void showView();
 
 private:
-  // Settings
-  void loadSettings(std::map<std::string, bool> &boolOptions, std::map<std::string, int> &intOptions);
-  void saveSettings(const std::map<std::string, bool> &boolOptions,
-                    const std::map<std::string, int> &intOptions);
   void initOptions();
-  void applyDefaultOptions(std::map<std::string, bool> &boolOptions,
+  void notifyApplyDefaultOptions(std::map<std::string, bool> &boolOptions,
                            std::map<std::string, int> &intOptions);
 
 private:
@@ -47,7 +45,6 @@ private:
   // stores the user options for the presenter
   std::map<std::string, bool> m_boolOptions;
   std::map<std::string, int> m_intOptions;
-  const std::string REFLECTOMETRY_SETTINGS_GROUP = "ISISReflectometryUI";
 };
 
 } // namespace MantidWidgets
