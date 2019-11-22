@@ -30,7 +30,7 @@ class ILLPowderEfficiencyClosureTest(systemtesting.MantidSystemTest):
     def requiredFiles(self):
         return ['967076.nxs']
 
-    def tearDown(self):
+    def cleanup(self):
         mtd.clear()
         remove(self._m_tmp_file)
 
@@ -44,5 +44,3 @@ class ILLPowderEfficiencyClosureTest(systemtesting.MantidSystemTest):
 
         for i in range(mtd['calib-2nd'].getNumberHistograms()):
             self.assertDelta(mtd['calib-2nd'].readY(i), 1., 1E-3)
-
-        self.tearDown()

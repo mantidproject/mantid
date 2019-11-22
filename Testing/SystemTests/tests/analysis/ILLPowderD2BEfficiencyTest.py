@@ -26,7 +26,7 @@ class ILLPowderD2BEfficiencyTest(systemtesting.MantidSystemTest):
     def requiredFiles(self):
         return ['532008.nxs', '532009.nxs']
 
-    def tearDown(self):
+    def cleanup(self):
         mtd.clear()
 
     def testAutoMasking(self):
@@ -52,8 +52,6 @@ class ILLPowderD2BEfficiencyTest(systemtesting.MantidSystemTest):
                             OutputWorkspace='calib',
                             OutputResponseWorkspace='response')
         GroupWorkspaces(InputWorkspaces=['calib','response'], OutputWorkspace='group')
-
-        self.tearDown()
 
     def validate(self):
         self.tolerance = 0.01

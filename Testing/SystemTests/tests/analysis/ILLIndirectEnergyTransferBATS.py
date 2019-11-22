@@ -32,7 +32,7 @@ class ILLIndirectEnergyTransferBATSTest(systemtesting.MantidSystemTest):
         # parameters file evolves quite often, so this is not checked
         self.disableChecking = ['Instrument']
 
-    def tearDown(self):
+    def cleanup(self):
         config['default.facility'] = self.facility
         config['default.instrument'] = self.instrument
         config['datasearch.directories'] = self.datadirs
@@ -46,8 +46,6 @@ class ILLIndirectEnergyTransferBATSTest(systemtesting.MantidSystemTest):
         offset_m275 = IndirectILLEnergyTransfer(Run='215968', InputElasticChannelWorkspace=epp, PulseChopper='34', GroupDetectors=False)
 
         GroupWorkspaces(InputWorkspaces=[center, offset_p100, offset_m275], OutputWorkspace='group')
-
-        self.tearDown()
 
     def validate(self):
 

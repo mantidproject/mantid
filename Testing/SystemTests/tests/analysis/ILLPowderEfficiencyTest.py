@@ -25,7 +25,7 @@ class ILLPowderEfficiencyTest(systemtesting.MantidSystemTest):
     def requiredFiles(self):
         return ['967076.nxs']
 
-    def tearDown(self):
+    def cleanup(self):
         mtd.clear()
 
     def runTest(self):
@@ -34,8 +34,6 @@ class ILLPowderEfficiencyTest(systemtesting.MantidSystemTest):
                             OutputWorkspace='calib',
                             OutputResponseWorkspace='response')
         GroupWorkspaces(InputWorkspaces=['calib','response'], OutputWorkspace='group')
-
-        self.tearDown()
 
     def validate(self):
         self.tolerance = 0.0001

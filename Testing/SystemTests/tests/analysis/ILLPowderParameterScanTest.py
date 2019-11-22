@@ -25,12 +25,11 @@ class ILLPowderParameterScanTest(systemtesting.MantidSystemTest):
     def requiredFiles(self):
         return ['967087.nxs', '967088.nxs']
 
-    def tearDown(self):
+    def cleanup(self):
         mtd.clear()
 
     def runTest(self):
         PowderILLParameterScan(Run='967087,967088',OutputWorkspace='reduced')
-        self.tearDown()
 
     def validate(self):
         self.tolerance = 0.0001

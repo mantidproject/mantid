@@ -22,7 +22,7 @@ class D11_AutoProcess_Test(systemtesting.MantidSystemTest):
         config['logging.loggers.root.level'] = 'Warning'
         config.appendDataSearchSubDir('ILL/D11/')
 
-    def tearDown(self):
+    def cleanup(self):
         mtd.clear()
 
     def validate(self):
@@ -58,5 +58,3 @@ class D11_AutoProcess_Test(systemtesting.MantidSystemTest):
             )
 
         GroupWorkspaces(InputWorkspaces=['iq_s1', 'iq_s2', 'iq_s3'], OutputWorkspace='out')
-
-        self.tearDown()
