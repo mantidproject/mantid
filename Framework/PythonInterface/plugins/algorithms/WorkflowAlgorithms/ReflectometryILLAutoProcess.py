@@ -710,11 +710,12 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         if self.is_polarized():
             self.polarization_correction(directForegroundName, directForegroundName)
 
-    def process_reflected_beam(self, reflectedInput, reflectedBeamName, directForegroundName, angle_index):
+    def process_reflected_beam(self, reflectedInput, reflectedBeamName, directBeamName, angle_index):
         """Combine all algorithm runs of the reflected beam processing for an angle."""
         twoTheta = self.two_theta(angle_index)
-        self.preprocess_reflected_beam(reflectedInput, reflectedBeamName, angle_index, twoTheta, directForegroundName)
+        self.preprocess_reflected_beam(reflectedInput, reflectedBeamName, angle_index, twoTheta, directBeamName)
         foregroundName = reflectedBeamName + '_frg'
+        directForegroundName = directBeamName + '_frg'
         sum_type = self.get_value(PropertyNames.SUM_TYPE, angle_index)
         sum_type = 'SumInLambda' if sum_type == PropertyNames.INCOHERENT else 'SumInQ'
         self.sum_foreground(reflectedBeamName, foregroundName, sum_type, angle_index, directForegroundName)
@@ -738,7 +739,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 runRB = self.make_name(self._rb[angle_index])
                 reflectedBeamName = runRB + '_reflected'
                 reflectedBeamInput = self.compose_run_string(self._rb[angle_index])
-                to_convert_to_q = self.process_reflected_beam(reflectedBeamInput, reflectedBeamName, directForegroundName, angle_index)
+                to_convert_to_q = self.process_reflected_beam(reflectedBeamInput, reflectedBeamName, directBeamName, angle_index)
             else:
                 run00_name = self.make_name(self._rb00[angle_index]) + '_00'
                 run00_input = self.compose_run_string(self._rb00[angle_index])
