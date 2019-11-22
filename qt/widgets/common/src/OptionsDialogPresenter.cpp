@@ -17,7 +17,8 @@ namespace MantidWidgets {
  * @param model :: a handle to a model for this presenter
  */
 OptionsDialogPresenter::OptionsDialogPresenter(IOptionsDialog *view)
-    : m_view(view) {
+    : m_view(view), m_model(OptionsDialogModel()) {
+  initOptions();
   m_view->subscribe(this);
 }
 
