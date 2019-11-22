@@ -166,7 +166,7 @@ bool MainWindowPresenter::isCloseEventPrevented() const {
   else if (m_optionsDialogPresenter->getBoolOption(
                std::string("WarnDiscardChanges")) == true &&
            isAnyBatchUnsaved()) {
-    return m_messageHandler->askUserDiscardChanges();
+    return !m_messageHandler->askUserDiscardChanges();
   }
 }
 
