@@ -18,14 +18,17 @@ where :math:`A_0, ...,  A_n` are constant coefficients.
 Usage
 -----
 
-**Example - Fit a polynomial background excluding some peaks
+**Example - Fit a polynomial background excluding some peaks**
 
 .. testcode:: Ex
 
-    x = np.linspace(-10, 10, 100)
-    y = np.exp(-4*(x+3)**2) + np.exp(-4*(x-3)**2) + 0.1 - 0.001*x**2
+    # create a sample workspace with a peak at x = 4 and a polynomial background
+    x = np.linspace(0, 10, 100)
+    y = np.exp(-4*(x-4)**2) -0.01*(x-5)**2 + 0.3
     ws = CreateWorkspace(x, y)
-    Fit("name=Polynomial,n=2", ws, Exclude=[-5, -1, 1, 5], Output='out')
+    
+    # do a fit with the polynomial fit function
+    Fit("name=Polynomial,n=2", ws, Exclude=[2, 6], Output='out')
 
 .. attributes::
     n;Integer;-;The degree of polynomial
