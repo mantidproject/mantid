@@ -428,8 +428,8 @@ Reference" and hit Enter.
 The C++ extension in VS Code provides limited inspection: it (currently) has
 warnings disabled and will only emit errors.
 
-Clang be used to provide live warnings and will notify on common bugs, like
-implicit casts, which are normally only picked building.
+Clang can be used to provide live warnings and will notify on common bugs, like
+implicit casts, which are normally only detected whilst building.
 
 Future versions of clangd (>=10) will also emit clang-tidy warnings as you
 work.
@@ -446,13 +446,25 @@ work.
 - Install the official clangd extension: `vscode-clangd`
 - Install clangd >= 8 which is part of `clang-tools-n`
   (where n is the latest version)
+- Create a folder for a clang build separate to your main Mantid build.
+  One recommended location is to create it in a folder called **build**
+  within the source folder since this will also be rebuilt by the
+  *CMakeTools* extension, if you have it.
+- Configure this separate folder to use the clang compiler:
+
+.. code-block:: sh
+
+    cd *path/to/clang_build*
+    CXX=clang++ CC=clang cmake *path/to/src* -DPYTHON_EXECTUABLE=/usr/bin/python2  # (or 3)
+    # Note this does not have to build unless you want to!
+
 - Go to the clangd setting in VS Code and add the following argument:
-  `--compile-commands-dir=/path/to/your/mantid/build` ensuring that build
+  `--compile-commands-dir=/path/to/your/clang-build` ensuring that build
   folder is related to the source folder. This allows clangd to understand
   the structure of Mantid.
 - Restart VS Code - attempt to write: `int i = (size_t) 1;` and check a warning
   appears.
-- Any "errors" about unknown types can usually be resolved by briefly opening
+- Any errors about unknown types can usually be resolved by briefly opening
   that header to force clangd to parse the type.
 
 
