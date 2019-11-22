@@ -295,13 +295,6 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         )
         self.declareProperty(
             FloatArrayProperty(
-                Prop.LINE_POSITION,
-                values=[Property.EMPTY_DBL]
-            ),
-            doc='A fractional workspace index corresponding to the beam centre between 0 and 255'
-        )
-        self.declareProperty(
-            FloatArrayProperty(
                 PropertyNames.WAVELENGTH_LOWER,
                 values=[0.],
                 validator=nonnegativeFloatArray
@@ -327,7 +320,6 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         self.setPropertyGroup(PropertyNames.ANGLE_OPTION, commonProp)
         self.setPropertyGroup(PropertyNames.THETA, commonProp)
         self.setPropertyGroup(PropertyNames.SUM_TYPE, commonProp)
-        self.setPropertyGroup(Prop.LINE_POSITION, commonProp)
         self.setPropertyGroup(PropertyNames.WAVELENGTH_LOWER, commonProp)
         self.setPropertyGroup(PropertyNames.WAVELENGTH_UPPER, commonProp)
         self.setPropertyGroup(PropertyNames.GROUPING_FRACTION, commonProp)
@@ -546,9 +538,9 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             issues[PropertyNames.RB] = 'Reflected beam input runs are mandatory'
         if self.getPropertyValue(PropertyNames.POLARIZATION_OPTION) == 'Polarized':
             if not self.getPropertyValue(PropertyNames.RB00):
-                issues[PropertyNames.RB00] = 'Reflected beam input runs are mandatory for 00'
+                issues[PropertyNames.RB00] = 'Reflected beam input runs are mandatory for 00 (or 0)'
             if not self.getPropertyValue(PropertyNames.RB11):
-                issues[PropertyNames.RB11] = 'Reflected beam input runs are mandatory for 11'
+                issues[PropertyNames.RB11] = 'Reflected beam input runs are mandatory for 11 (or 1)'
         return issues
 
     def setup(self):
@@ -598,9 +590,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         return self.getProperty(PropertyNames.POLARIZATION_OPTION).value == 'Polarized'
 
     def theta_from_sample_angle(self, run):
-        """Return the two theta angle in degrees of the sample angle."""
+        """Return the sample theta angle in degrees."""
         import h5py
-        # Need to still check whether the unit is degree
         if isinstance(run, list):
             first_run = run[0]
         else:
@@ -629,41 +620,46 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             self.log().information('Using Theta angle : {} degree'.format(theta))
             return 2 * theta
 
-    def line_position(self, angle_index):
-        """Return the value of the line position input property."""
-        line_pos = self.get_value(Prop.LINE_POSITION, angle_index)
-        if numpy.isclose(line_pos, Property.EMPTY_DBL):
-            return Property.EMPTY_DBL
-        else:
-            return float(line_pos)
+    def preprocess_direct_beam(self, run, out_ws, angle_index):
 
-    def preprocess(self, run, outputWorkspaceName, angle_index, linePosition = Property.EMPTY_DBL, twoTheta = Property.EMPTY_DBL):
-        """Run the ReflectometryILLPreprocess, linePosition decides, if reflected beam is present."""
-        halfWidths = [int(self.get_value(PropertyNames.LOW_FRG_HALF_WIDTH, angle_index)),
-                      int(self.get_value(PropertyNames.HIGH_FRG_HALF_WIDTH, angle_index))]
-        if linePosition != Property.EMPTY_DBL:
-            directBeamName = self.make_name(self._db[angle_index]) + '_direct'
-            direct = '_DIRECT'
-        else:
-            directBeamName = ''
-            direct = ''
         ReflectometryILLPreprocess(
             Run=run,
-            OutputWorkspace=outputWorkspaceName,
-            TwoTheta=twoTheta,
-            LinePosition=linePosition,
-            DirectLineWorkspace=directBeamName,
-            ForegroundHalfWidth=halfWidths,
+            OutputWorkspace=out_ws,
             SlitNormalisation=self.getProperty(Prop.SLIT_NORM).value,
-            FluxNormalisation=self.getProperty(Prop.FLUX_NORM_METHOD + direct).value,
-            LowAngleBkgOffset=int(self.get_value(PropertyNames.LOW_BKG_OFFSET + direct, angle_index)),
-            LowAngleBkgWidth=int(self.get_value(PropertyNames.LOW_BKG_WIDTH + direct, angle_index)),
-            HighAngleBkgOffset=int(self.get_value(PropertyNames.HIGH_BKG_OFFSET + direct, angle_index)),
-            HighAngleBkgWidth=int(self.get_value(PropertyNames.HIGH_BKG_WIDTH + direct, angle_index)),
-            FitStartWorkspaceIndex=int(self.get_value(PropertyNames.START_WS_INDEX + direct, angle_index)),
-            FitEndWorkspaceIndex=int(self.get_value(PropertyNames.END_WS_INDEX + direct, angle_index)),
+            FluxNormalisation=self.getProperty(Prop.FLUX_NORM_METHOD).value,
             SubalgorithmLogging=self._subalgLogging,
             Cleanup=self._cleanup,
+            ForegroundHalfWidth=[
+                int(self.get_value(PropertyNames.LOW_FRG_HALF_WIDTH_DIRECT, angle_index)),
+                int(self.get_value(PropertyNames.HIGH_FRG_HALF_WIDTH_DIRECT, angle_index))],
+            LowAngleBkgOffset=int(self.get_value(PropertyNames.LOW_BKG_OFFSET_DIRECT, angle_index)),
+            LowAngleBkgWidth=int(self.get_value(PropertyNames.LOW_BKG_WIDTH_DIRECT, angle_index)),
+            HighAngleBkgOffset=int(self.get_value(PropertyNames.HIGH_BKG_OFFSET_DIRECT, angle_index)),
+            HighAngleBkgWidth=int(self.get_value(PropertyNames.HIGH_BKG_WIDTH_DIRECT, angle_index)),
+            FitStartWorkspaceIndex=int(self.get_value(PropertyNames.START_WS_INDEX_DIRECT, angle_index)),
+            FitEndWorkspaceIndex=int(self.get_value(PropertyNames.END_WS_INDEX_DIRECT, angle_index))
+        )
+
+    def preprocess_reflected_beam(self, run, out_ws, angle_index, two_theta=Property.EMPTY_DBL, direct_line_ws=''):
+
+        ReflectometryILLPreprocess(
+            Run=run,
+            OutputWorkspace=out_ws,
+            SlitNormalisation=self.getProperty(Prop.SLIT_NORM).value,
+            FluxNormalisation=self.getProperty(Prop.FLUX_NORM_METHOD).value,
+            SubalgorithmLogging=self._subalgLogging,
+            Cleanup=self._cleanup,
+            TwoTheta=two_theta,
+            DirectLineWorkspace=direct_line_ws,
+            ForegroundHalfWidth=[
+                int(self.get_value(PropertyNames.LOW_FRG_HALF_WIDTH, angle_index)),
+                int(self.get_value(PropertyNames.HIGH_FRG_HALF_WIDTH, angle_index))],
+            LowAngleBkgOffset=int(self.get_value(PropertyNames.LOW_BKG_OFFSET, angle_index)),
+            LowAngleBkgWidth=int(self.get_value(PropertyNames.LOW_BKG_WIDTH, angle_index)),
+            HighAngleBkgOffset=int(self.get_value(PropertyNames.HIGH_BKG_OFFSET, angle_index)),
+            HighAngleBkgWidth=int(self.get_value(PropertyNames.HIGH_BKG_WIDTH, angle_index)),
+            FitStartWorkspaceIndex=int(self.get_value(PropertyNames.START_WS_INDEX, angle_index)),
+            FitEndWorkspaceIndex=int(self.get_value(PropertyNames.END_WS_INDEX, angle_index))
         )
 
     def sum_foreground(self, inputWorkspaceName, outputWorkspaceName, sumType, angle_index, directForegroundName = ''):
@@ -671,7 +667,6 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         wavelengthRange = [float(self.get_value(PropertyNames.WAVELENGTH_LOWER, angle_index)),
                            float(self.get_value(PropertyNames.WAVELENGTH_UPPER, angle_index))]
         directBeamName = directForegroundName[:-4] if directForegroundName else ''
-        # we need to cache both direct line workspace and its foreground, as they are both needed for reflected beam
         ReflectometryILLSumForeground(
             InputWorkspace=inputWorkspaceName,
             OutputWorkspace=outputWorkspaceName,
@@ -708,7 +703,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         """Combine all algorithm runs of the direct beam processing for an angle."""
         self.log().information('Direct beam {} not cached in AnalysisDataService.'.format(directBeamName))
         directBeamInput = self.compose_run_string(self._db[angle_index])
-        self.preprocess(directBeamInput, directBeamName, angle_index)
+        self.preprocess_direct_beam(directBeamInput, directBeamName, angle_index)
         self._autoCleanup.protect(directBeamName)
         self.sum_foreground(directBeamName, directForegroundName, SumType.IN_LAMBDA, angle_index)
         self._autoCleanup.protect(directForegroundName)
@@ -718,8 +713,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
     def process_reflected_beam(self, reflectedInput, reflectedBeamName, directForegroundName, angle_index):
         """Combine all algorithm runs of the reflected beam processing for an angle."""
         twoTheta = self.two_theta(angle_index)
-        linePosition = self.line_position(angle_index)
-        self.preprocess(reflectedInput, reflectedBeamName, angle_index, linePosition, twoTheta)
+        self.preprocess_reflected_beam(reflectedInput, reflectedBeamName, angle_index, twoTheta, directForegroundName)
         foregroundName = reflectedBeamName + '_frg'
         sum_type = self.get_value(PropertyNames.SUM_TYPE, angle_index)
         sum_type = 'SumInLambda' if sum_type == PropertyNames.INCOHERENT else 'SumInQ'
