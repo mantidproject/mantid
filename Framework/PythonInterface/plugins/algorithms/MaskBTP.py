@@ -242,7 +242,11 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         elif self.instname == 'REF_M':
             return "detector{}".format(banknum)
         elif self.instname == 'CG2' or self.instname == 'GPSANS':
-            return "bank{}".format(banknum)
+            if '2019-10-01' in validFrom:
+                return "bank{}".format(banknum)
+            else:
+                if banknum == 1:
+                    return 'detector1'
         elif self.instname == 'EQ-SANS':
             if '2019-' in validFrom:
                 return "bank{}".format(banknum)
@@ -256,8 +260,6 @@ class MaskBTP(mantid.api.PythonAlgorithm):
                     return 'detector1'
                 elif banknum == 2:
                     return 'wing_detector'
-                else:
-                    raise ValueError("Out of range index for old BIOSANS IDF")
         else:
             return "bank" + str(banknum)
 
