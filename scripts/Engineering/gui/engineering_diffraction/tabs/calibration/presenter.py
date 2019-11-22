@@ -37,16 +37,18 @@ class CalibrationPresenter(object):
 
     def on_calibrate_clicked(self):
         plot_output = self.view.get_plot_output()
-        if self.view.radio_newCalib.isChecked():
+        if self.view.get_new_checked():
             # Do nothing if run numbers are invalid or view is searching.
             if not self.validate_run_numbers():
-                if self.view.is_searching():
-                    self._create_error_message("Mantid is searching for the file. Please wait.")
+                self._create_error_message("Check run numbers/path is valid.")
+                return
+            if self.view.is_searching():
+                self._create_error_message("Mantid is searching for the file. Please wait.")
                 return
             vanadium_no = self.view.get_vanadium_filename()
             calib_no = self.view.get_calib_filename()
             self.start_calibration_worker(vanadium_no, calib_no, plot_output, self.rb_num)
-        elif self.view.radio_loadCalib.isChecked():
+        elif self.view.get_load_checked():
             if not self.validate_path():
                 return
             filename = self.view.get_path_filename()
@@ -133,7 +135,7 @@ class CalibrationPresenter(object):
             self.find_files()
 
     def set_load_existing_enabled(self, enabled):
-        self.view.finder_path.setReadOnly(not enabled)
+        self.view.set_path_read_only(not enabled)
         if enabled:
             self.set_calibrate_button_text("Load")
             self.view.set_check_plot_output_enabled(False)

@@ -30,6 +30,10 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
         self.finder_path.isForRunFiles(False)
         self.finder_path.setReadOnly(True)
 
+    # =================
+    # Slot Connectors
+    # =================
+
     def set_on_text_changed(self, slot):
         self.finder_vanadium.fileTextChanged.connect(slot)
         self.finder_calib.fileTextChanged.connect(slot)
@@ -50,6 +54,10 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
     def set_enable_controls_connection(self, slot):
         self.sig_enable_controls.connect(slot)
 
+    # =================
+    # Component Setters
+    # =================
+
     def set_calibrate_button_enabled(self, enabled):
         self.button_calibrate.setEnabled(enabled)
 
@@ -66,6 +74,9 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
     def set_calib_read_only(self, set_to):
         self.finder_calib.setReadOnly(set_to)
 
+    def set_path_read_only(self, set_to):
+        self.finder_path.setReadOnly(set_to)
+
     def set_vanadium_text(self, text):
         self.finder_vanadium.setText(text)
 
@@ -74,6 +85,10 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
 
     def set_calibrate_button_text(self, text):
         self.button_calibrate.setText(text)
+
+    # =================
+    # Component Getters
+    # =================
 
     def get_vanadium_filename(self):
         return self.finder_vanadium.getFirstFilename()
@@ -96,14 +111,32 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
     def get_plot_output(self):
         return self.check_plotOutput.isChecked()
 
+    def get_new_checked(self):
+        return self.radio_newCalib.isChecked()
+
+    def get_load_checked(self):
+        return self.radio_loadCalib.isChecked()
+
+    # =================
+    # State Getters
+    # =================
+
     def is_searching(self):
         return self.finder_calib.isSearching() or self.finder_calib.isSearching()
+
+    # =================
+    # Force Actions
+    # =================
 
     def find_calib_files(self):
         self.finder_calib.findFiles(True)
 
     def find_vanadium_files(self):
         self.finder_vanadium.findFiles(True)
+
+    # =================
+    # Internal Setup
+    # =================
 
     def setup_tabbing_order(self):
         self.setTabOrder(self.radio_newCalib, self.finder_vanadium)
