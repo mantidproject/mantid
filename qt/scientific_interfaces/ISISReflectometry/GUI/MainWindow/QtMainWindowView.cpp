@@ -185,19 +185,12 @@ Handles attempt to close main window
 * @param event : [input] The close event
 */
 void QtMainWindowView::closeEvent(QCloseEvent *event) {
-  // Don't close if anything is running
-  if (m_presenter->isCloseEventPrevented()) {
+  // Don't close if anything is running or
+  // user does not want to discard unsaved changes
+  if (m_presenter->isCloseEventPrevented())
     event->ignore();
-  } else {
+  else
     event->accept();
-  }
-  if (/* "WarnDiscardChanges" == true */ && m_presenter->isAnyBatchUnsaved()) {
-      if (askUserDiscardChanges()) {
-        event->accept();
-      } else {
-        event->ignore();
-      }
-  }
 }
 
 void QtMainWindowView::giveUserCritical(const std::string &prompt,

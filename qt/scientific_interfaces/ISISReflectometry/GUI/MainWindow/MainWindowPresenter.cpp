@@ -161,7 +161,13 @@ bool MainWindowPresenter::isAnyBatchAutoreducing() const {
 }
 
 bool MainWindowPresenter::isCloseEventPrevented() const {
-  return isAnyBatchProcessing() || isAnyBatchAutoreducing();
+  if (isAnyBatchProcessing() || isAnyBatchAutoreducing())
+    return true;
+  else if (m_optionsDialogPresenter->getBoolOption(
+               std::string("WarnDiscardChanges")) == true &&
+           isAnyBatchUnsaved()) {
+    return m_messageHandler->askUserDiscardChanges();
+  }
 }
 
 bool MainWindowPresenter::isAnyBatchUnsaved() const {
