@@ -216,8 +216,6 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
 
     fig, axes = get_plot_fig(overplot, ax_properties, window_title, num_axes, fig)
 
-    print(axes)
-
     # Convert to a MantidAxes if it isn't already. Ignore legend since
     # a new one will be drawn later
     axes = [MantidAxes.from_mpl_axes(ax, ignore_artists=[Legend]) if not isinstance(ax, MantidAxes) else ax
@@ -255,7 +253,6 @@ def _do_single_plot(ax, workspaces, errors, set_title, nums, kw, plot_kwargs):
         for num in nums:
             plot_kwargs[kw] = num
             plot_fn(ws, **plot_kwargs)
-
     ax.make_legend()
     if set_title:
         title = workspaces[0].name()

@@ -64,7 +64,9 @@ class DockablePlotWidget(QtWidgets.QWidget):
         self.fig, axes = get_plot_fig(overplot=False, ax_properties=None, window_title="Muon Analysis 2", axes_num=1,
                                       fig=self.fig)
 
+
         self.fig.canvas.set_window_title('Muon Analysis 2')
+
 
         # plotting options
         self.plot_view = HomePlotWidgetView(self)
@@ -134,6 +136,8 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
         # create the dockable widget
         self.dockable_plot_widget = QtWidgets.QDockWidget()
+        self.dockable_plot_widget.setMinimumWidth(550)
+
         self.dockable_plot_widget.setParent(self)
         self.dockable_plot_widget.setFeatures(
             QtWidgets.QDockWidget.DockWidgetFloatable | QtWidgets.QDockWidget.DockWidgetMovable)

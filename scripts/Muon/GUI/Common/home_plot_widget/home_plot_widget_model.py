@@ -9,6 +9,9 @@ import numpy as np
 
 from mantidqt.plotting.functions import plot
 from mantid.api import AnalysisDataService
+from mantidqt.plotting.functions import get_plot_fig
+import time
+from mantidqt.plotting.functions import _do_single_plot
 
 
 class HomePlotWidgetModel(object):
@@ -71,7 +74,7 @@ class HomePlotWidgetModel(object):
         if not workspace_list:
             self.plotted_workspaces = []
             self.plotted_workspaces_inverse_binning = {}
-            self.plotted_fit_workspaces = []
+            self._plotted_fit_workspaces = []
             self.plot_figure.clear()
             self.plot_figure.canvas.draw()
             return self.plot_figure
@@ -79,57 +82,60 @@ class HomePlotWidgetModel(object):
             workspaces = AnalysisDataService.Instance().retrieveWorkspaces(workspace_list, unrollGroups=True)
         except RuntimeError:
             return
-        if (force_redraw or self.plotted_workspaces == []) and self.plot_figure:
-            axis = self.plot_figure.gca()
-            # delete old legend
-            if axis.get_legend():
-                axis.get_legend().remove()
+        if force_redraw:
+
             # remove all data from plot
             self._remove_all_data_workspaces_from_plot()
-
             self.plotted_workspaces = []
             self.plotted_workspaces_inverse_binning = {}
-            self.plotted_fit_workspaces = []
 
-            self.plot_figure = plot(workspaces, wksp_indices=[0], fig=self.plot_figure,
-                                    window_title=title, overplot=True,
-                                    plot_kwargs={'distribution': True, 'autoscale_on_update': False},
-                                    errors=True)
-            self.set_x_lim(domain)
-            # update the toolbar
-            toolbar = self.plot_figure.canvas.toolbar
-            toolbar.update()
-        elif self.plot_figure:
-            axis = self.plot_figure.gca()
-            axis.get_legend().remove()
-            xlim = axis.get_xlim()
-            ylim = axis.get_ylim()
-            self._remove_all_data_workspaces_from_plot()
+            # plot new workspace
             self.plot_figure = plot(workspaces, wksp_indices=[0], fig=self.plot_figure, window_title=title,
                                     overplot=True,
                                     plot_kwargs={'distribution': True, 'autoscale_on_update': False}, errors=True)
-            axis = self.plot_figure.gca()
-            axis.set_xlim(xlim)
-            axis.set_ylim(ylim)
+            self.set_x_lim(domain)
+            # update the toolbar
+            toolbar = self.plot_figure.canvas.toolbar
+            toolbar.update()
+        else:
+
+            print("NOT REDRAWING - Creating a new plot window")
+
+            # get the axis
+            self.plot_figure.clf()
+            # Create a set of mantid axis for the figure
+            self.plot_figure, axes = get_plot_fig(overplot=False, ax_properties=None, window_title="Muon Analysis 2",
+                                                  axes_num=1,
+                                                  fig=self.plot_figure)
+
+            self.plotted_fit_workspaces = []
+            self.plotted_workspaces = []
+            self.plotted_workspaces_inverse_binning = {}
+
+            # plot new workspace
+            self.plot_figure = plot(workspaces, wksp_indices=[0], fig=self.plot_figure, window_title=title,
+                                    overplot=True,
+                                    plot_kwargs={'distribution': True, 'autoscale_on_update': False}, errors=True)
+            # set x and y limits
+            self.set_x_lim(domain)
+            # axis.set_ylim(ylim)
             # update the toolbar
             toolbar = self.plot_figure.canvas.toolbar
             toolbar.update()
 
-        else:
-            self.plot_figure = plot(workspaces, wksp_indices=[0], window_title=title, overplot=True,
-                                    plot_kwargs={'distribution': True,
-                                                 'autoscale_on_update': False},
-                                    errors=True)
-            self.set_x_lim(domain)
-
         self.plot_figure.canvas.set_window_title(window_title)
         self.plot_figure.gca().set_title(title)
+        ax = self.plot_figure.gca()
+        ax.legend(prop=dict(size=8))
+        self.plot_figure.canvas.draw()
 
         workspaces_to_remove = [workspace for workspace in self.plotted_workspaces if workspace not in workspace_list]
         for workspace in workspaces_to_remove:
             self.remove_workpace_from_plot(workspace)
 
         self.plotted_workspaces = workspace_list
+        print(self.plotted_workspaces)
+        print(self.plotted_fit_workspaces)
 
     def set_x_lim(self, domain):
         if domain == "Time":
@@ -156,8 +162,12 @@ class HomePlotWidgetModel(object):
                                 plot_kwargs={'distribution': True, 'zorder': 4, 'autoscale_on_update': False,
                                              'label': label})
 
-        if workspace_name not in self._plotted_fit_workspaces:
-            self._plotted_fit_workspaces.append(workspace_name)
+        if workspace_name not in self.plotted_fit_workspaces:
+            self.plotted_fit_workspaces.append(workspace_name)
+
+        ax = self.plot_figure.gca()
+        ax.legend(prop=dict(size=6))
+        self.plot_figure.canvas.draw()
 
     def remove_workpace_from_plot(self, workspace_name):
         """

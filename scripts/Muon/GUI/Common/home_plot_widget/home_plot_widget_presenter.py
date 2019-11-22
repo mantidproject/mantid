@@ -12,7 +12,6 @@ from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 from Muon.GUI.FrequencyDomainAnalysis.frequency_context import FREQUENCY_EXTENSIONS
 
-
 COUNTS_PLOT_TYPE = 'Counts'
 ASYMMETRY_PLOT_TYPE = 'Asymmetry'
 FREQ_PLOT_TYPE = "Frequency "
@@ -44,8 +43,8 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         self._force_redraw = False
         if self.context._frequency_context:
             for ext in FREQUENCY_EXTENSIONS.keys():
-                self._view.addItem(FREQ_PLOT_TYPE+FREQUENCY_EXTENSIONS[ext])
-            self._view.addItem(FREQ_PLOT_TYPE+"All")
+                self._view.addItem(FREQ_PLOT_TYPE + FREQUENCY_EXTENSIONS[ext])
+            self._view.addItem(FREQ_PLOT_TYPE + "All")
         self.instrument_observer = GenericObserver(self.handle_instrument_changed)
         self.keep = False
 
@@ -131,23 +130,27 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         workspace_list = self.get_workspaces_to_plot(
             self.context.group_pair_context.selected, self._view.if_raw(),
             self._view.get_selected())
-        self._model.plot(workspace_list, self.get_plot_title(), self.get_domain(), self._force_redraw, self.context.window_title)
+        self._model.plot(workspace_list, self.get_plot_title(), self.get_domain(), self._force_redraw,
+                         self.context.window_title)
         self._force_redraw = False
 
-        self._model.plotted_workspaces_inverse_binning = {workspace: self.context.group_pair_context.get_equivalent_group_pair(workspace)
-                                                          for workspace in workspace_list
-                                                          if self.context.group_pair_context.get_equivalent_group_pair(workspace)}
+        self._model.plotted_workspaces_inverse_binning = {
+            workspace: self.context.group_pair_context.get_equivalent_group_pair(workspace)
+            for workspace in workspace_list
+            if self.context.group_pair_context.get_equivalent_group_pair(workspace)}
 
-        if self.context.fitting_context.fit_list:
-            self.handle_fit_completed()
-
-        self.handle_plot_guess_changed()
+        # if self.context.fitting_context.fit_list:
+        #     self.handle_fit_completed()
+        #
+        # self.handle_plot_guess_changed()
 
     def handle_fit_completed(self):
         """
         When a new fit is done adds the fit to the plotted workspaces if appropriate
         :return:
         """
+
+        print("got here in handle fit compelted")
         if self._model.plot_figure is None:
             return
 
@@ -157,11 +160,12 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
 
         if self.context.fitting_context.fit_list:
             current_fit = self.context.fitting_context.fit_list[-1]
-            combined_ws_list = self._model.plotted_workspaces + list(self._model.plotted_workspaces_inverse_binning.values())
+            combined_ws_list = self._model.plotted_workspaces + list(
+                self._model.plotted_workspaces_inverse_binning.values())
             list_of_output_workspaces_to_plot = [output for output, input in
                                                  zip(current_fit.output_workspace_names, current_fit.input_workspaces)
                                                  if input in combined_ws_list]
-            list_of_output_workspaces_to_plot = list_of_output_workspaces_to_plot if list_of_output_workspaces_to_plot\
+            list_of_output_workspaces_to_plot = list_of_output_workspaces_to_plot if list_of_output_workspaces_to_plot \
                 else [current_fit.output_workspace_names[-1]]
         else:
             list_of_output_workspaces_to_plot = []
@@ -203,7 +207,7 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         except AttributeError:
             return []
 
-    def get_time_workspaces_to_plot(self,current_group_pair, is_raw, plot_type):
+    def get_time_workspaces_to_plot(self, current_group_pair, is_raw, plot_type):
         """
         :param current_group_pair: The group/pair currently selected
         :param is_raw: Whether to use raw or rebinned data
@@ -215,7 +219,8 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
                 workspace_list = self.context.group_pair_context[current_group_pair].get_asymmetry_workspace_names(
                     self.context.data_context.current_runs)
             else:
-                workspace_list = self.context.group_pair_context[current_group_pair].get_asymmetry_workspace_names_rebinned(
+                workspace_list = self.context.group_pair_context[
+                    current_group_pair].get_asymmetry_workspace_names_rebinned(
                     self.context.data_context.current_runs)
 
             if plot_type == COUNTS_PLOT_TYPE:
@@ -234,7 +239,7 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         flattened_run_list = [
             item for sublist in self.context.data_context.current_runs for item in sublist]
         return self.context.data_context.instrument + ' ' + run_list_to_string(flattened_run_list) + ' ' + \
-            self.context.group_pair_context.selected
+               self.context.group_pair_context.selected
 
     def handle_rebin_options_set(self):
         if self.context._do_rebin():
