@@ -128,7 +128,6 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         if len(tubes) > 0 or len(pixels) > 0:
             for bankIndex in bankIndices:
                 tubeIndices = self._getChildIndices(compInfo, bankIndex, tubes)
-
                 for tubeIndex in tubeIndices:
                     pixelIndices = self._getChildIndices(compInfo, tubeIndex, pixels)
 
@@ -242,7 +241,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         elif self.instname == 'REF_M':
             return "detector{}".format(banknum)
         elif self.instname == 'CG2' or self.instname == 'GPSANS':
-            if '2019-10-01' in validFrom:
+            if '1900' not in validFrom:
                 return "bank{}".format(banknum)
             else:
                 if banknum == 1:
