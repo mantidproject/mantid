@@ -10,9 +10,14 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Plotting/DllOption.h"
 #include "qwt_text.h"
-MSVC_DIAG_OFF(4244)
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable : 4244)
+#endif
 #include <QPainter>
-MSVC_DIAG_ON(4244)
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
 #include <qwt_plot.h>
 
 namespace MantidQt {
