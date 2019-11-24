@@ -27,6 +27,7 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/shared_ptr.hpp>
 #include <fstream>
 #include <map>
 #include <memory>
@@ -780,7 +781,7 @@ std::string LoadPSIMuonBin::detectTempFile() {
   // a fixed limited depth to ensure we don't accidentally
   // crawl the while filesystem.
   namespace fs = boost::filesystem;
-  const fs::path searchDir{fs::path{getPropertyValue("Filename")}.parent_path()};
+  const fs::path searchDir{fs ::path{getPropertyValue("Filename")}.parent_path()};
 
   std::deque<fs::path> queue;
   queue.push_back(fs::path{searchDir});
