@@ -406,6 +406,9 @@ One can do twin axes as well:
 Custom Colors
 =============
 
+Custom Color Cycle (Line / 1D plots)
+####################################
+
 The Default Color Cycle doesn't have to be used. Here is an example where a Custom Color Cycle is chosen. Make sure to fill the list `custom_colors` with the HTML codes for the desired colours. 
 These can be found `online <https://www.rapidtables.com/web/color/html-color-codes.html>`_ or using Mantid Workbench. On Workbench, plot a Spectrum and navigate to Figure Options(Gear Icon) > Curves > Line > Color (RGBA). Click on the nearby colorbox and use the 'Select Color' pop-up to chose your colors and their associated HTML codes. `Further Details <https://matplotlib.org/3.1.1/gallery/color/color_cycle_default.html>`_
 
@@ -530,7 +533,8 @@ To Create and Plot with a new ColorMap in MantidWorkbench (The second half of th
 
 NB. This is not saved in the MantidInstall and so will have to be run and plotted from the script eachtime.
 
-There is an extra way that you can create MatPlotLib colormaps suitable for Workbench: `install the colormap package <https://pypi.org/project/colormap/>`_.
+There is an alternative way that you can create MatPlotLib colormaps suitable for Workbench: `install the colormap package <https://pypi.org/project/colormap/>`_.
+
 ====================
 Plotting Sample Logs
 ====================
