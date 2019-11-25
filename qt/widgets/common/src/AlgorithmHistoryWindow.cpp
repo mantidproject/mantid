@@ -643,14 +643,13 @@ void AlgHistoryTreeWidget::itemChecked(QTreeWidgetItem *item, int index) {
   QModelIndex modelIndex;
 
   QTreeWidgetItem *itemCopy;
-  QTreeWidgetItem *parent;
   auto userCheckedItem = item;
 
   QList<QTreeWidgetItem *> children;
   bool hadToCheck{false};
   std::vector<QTreeWidgetItem *> itemsChecked;
 
-  do {
+  do { 
     modelIndex = indexFromItem(item, index);
     indicies.emplace_back(modelIndex.row() + 1);
 
@@ -677,8 +676,7 @@ void AlgHistoryTreeWidget::itemChecked(QTreeWidgetItem *item, int index) {
     children = itemCopy->takeChildren();
     modelIndex = indexFromItem(item, index);
 
-    parent = item->parent();
-    if (parent) {
+    if (auto parent = item->parent()) {
       parent->insertChildren(modelIndex.row() + 1, children);
     } else {
       insertTopLevelItems(modelIndex.row() + 1, children);
