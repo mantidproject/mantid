@@ -40,6 +40,7 @@ public:
 
   void subscribe(MainWindowSubscriber *notifyee) override;
 
+  // cppcheck-suppress returnTempReference
   static std::string name() { return "ISIS Reflectometry"; }
   static QString categoryInfo() { return "Reflectometry"; }
   std::string runPythonAlgorithm(const std::string &pythonCode) override;
