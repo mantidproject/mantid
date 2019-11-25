@@ -143,6 +143,9 @@ void HistoryView::rollChildren(std::vector<HistoryItem>::iterator it) {
   for (size_t i = 0; i < numChildren; ++i) {
     if (it->isUnrolled())
       roll(it);
+    else {
+      ++it;
+	}
   }
 }
 

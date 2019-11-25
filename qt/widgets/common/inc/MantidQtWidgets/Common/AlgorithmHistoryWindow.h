@@ -86,6 +86,7 @@ private:
   void populateNestedHistory(AlgHistoryItem *parentWidget,
                              Mantid::API::AlgorithmHistory_sptr history);
   void uncheckAllChildren(QTreeWidgetItem *item, int index);
+  void removeHiddenChildren(QTreeWidgetItem *item);
   QString concatVersionwithName(const std::string &name, const int version);
 
   const static int UNROLL_COLUMN_INDEX = 1;

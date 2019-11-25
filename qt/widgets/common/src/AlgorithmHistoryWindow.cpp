@@ -642,16 +642,48 @@ void AlgHistoryTreeWidget::itemChecked(QTreeWidgetItem *item, int index) {
   std::vector<int> indicies;
   QModelIndex modelIndex;
 
+  QTreeWidgetItem *itemCopy;
+  QTreeWidgetItem *parent;
+  auto userCheckedItem = item;
+
+  QList<QTreeWidgetItem *> children;
+  bool hadToCheck{false};
+  std::vector<QTreeWidgetItem *> itemsChecked;
+
   do {
     modelIndex = indexFromItem(item, index);
     indicies.emplace_back(modelIndex.row() + 1);
 
-    if (item->flags().testFlag(Qt::ItemIsUserCheckable)) {
+    if (item->flags().testFlag(Qt::ItemIsUserCheckable) &&
+        item->checkState(index) != Qt::Checked) {
       item->setCheckState(index, Qt::Checked);
+      hadToCheck = true;
+    }
+
+    if (hadToCheck || item == userCheckedItem) {
+      itemsChecked.emplace_back(item);
     }
 
     item = item->parent();
   } while (item);
+
+  for (auto it = itemsChecked.rbegin(); it != itemsChecked.rend(); ++it) {
+    item = *it;
+    itemCopy = item->clone();
+    children = itemCopy->takeChildren();
+    modelIndex = indexFromItem(item, index);
+
+    parent = item->parent();
+    if (parent) {
+      parent->insertChildren(modelIndex.row() + 1, children);
+    } else {
+      insertTopLevelItems(modelIndex.row() + 1, children);
+    }
+
+    for (auto child : children) {
+      child->setHidden(true);
+    }
+  }
 
   indicies[indicies.size() - 1] -= 1;
 
@@ -670,6 +702,7 @@ void AlgHistoryTreeWidget::itemUnchecked(QTreeWidgetItem *item, int index) {
   int rollIndex = 0;
   QModelIndex modelIndex;
 
+  removeHiddenChildren(item);
   // disable any children
   uncheckAllChildren(item, index);
 
@@ -692,6 +725,29 @@ void AlgHistoryTreeWidget::uncheckAllChildren(QTreeWidgetItem *item,
     item->setCheckState(index, Qt::Unchecked);
     for (int i = 0; i < item->childCount(); ++i) {
       uncheckAllChildren(item->child(i), index);
+    }
+  }
+}
+
+void AlgHistoryTreeWidget::removeHiddenChildren(QTreeWidgetItem *item) {
+  int index;
+  if (auto parent = item->parent()) {
+    index = parent->indexOfChild(item);
+
+    for (int i = 0; i < item->childCount(); i++) {
+      if (item->child(i)->checkState(1) == Qt::Checked) {
+        removeHiddenChildren(item->child(i));
+      }
+      delete parent->child(index + 1);
+    }
+  } else {
+    index = indexOfTopLevelItem(item);
+
+    for (int i = 0; i < item->childCount(); i++) {
+      if (item->child(i)->checkState(index) == Qt::Checked) {
+        removeHiddenChildren(item->child(i));
+      }
+      delete topLevelItem(index + 1);
     }
   }
 }
