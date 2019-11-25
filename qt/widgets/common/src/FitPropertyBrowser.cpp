@@ -107,10 +107,12 @@ FitPropertyBrowser::FitPropertyBrowser(QWidget *parent, QObject *mantidui)
       m_shouldBeNormalised(false), m_oldWorkspaceIndex(-1) {
   Mantid::API::FrameworkManager::Instance().loadPlugins();
 
-  // Try to create a Gaussian. Failing will mean that CurveFitting dll is not
-  // loaded
-  boost::shared_ptr<Mantid::API::IFunction>(
-      Mantid::API::FunctionFactory::Instance().createFunction("Gaussian"));
+  // If Gaussian does not exist then the plugins did not load.
+  if (!Mantid::API::FunctionFactory::Instance().exists("Gaussian")) {
+    throw std::runtime_error(
+        "FitPropertyBrowser: Unable to find Gaussian function\n"
+        "Has the CurveFitting plugin loaded?");
+  }
   if (m_autoBgName.toLower() == "none") {
     m_autoBgName = "";
   } else {

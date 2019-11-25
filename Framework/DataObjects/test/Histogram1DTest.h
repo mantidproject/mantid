@@ -15,6 +15,7 @@
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 using namespace Mantid;
 using namespace API;
@@ -170,16 +171,22 @@ public:
   }
   void testrangeexceptionX() {
     h.setPoints(x1);
+    MSVC_DIAG_OFF(4834)
     TS_ASSERT_THROWS(h.dataX().at(nel), const std::out_of_range &);
+    MSVC_DIAG_ON()
   }
   void testrangeexceptionY() {
     h.setCounts(y1);
+    MSVC_DIAG_OFF(4834)
     TS_ASSERT_THROWS(h.dataY().at(nel), const std::out_of_range &);
+    MSVC_DIAG_ON()
   }
   void testrangeexceptionE() {
     h.setCounts(y1);
     h.setCountStandardDeviations(e1);
+    MSVC_DIAG_OFF(4834)
     TS_ASSERT_THROWS(h.dataE().at(nel), const std::out_of_range &);
+    MSVC_DIAG_ON()
   }
 
   void test_copy_constructor() {
