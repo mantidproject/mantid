@@ -99,6 +99,10 @@ class PropertyNames(object):
     INCOHERENT = 'Incoherent'
     COHERENT = 'Coherent'
 
+    USE_MANUAL_SCALE_FACTORS = 'UseManualScaleFactors'
+    MANUAL_SCALE_FACTORS = 'ManualScaleFactors'
+    CACHE_DIRECT_BEAM = 'CacheDirectBeam'
+
 
 class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
 
@@ -263,6 +267,31 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             PropertyNames.SCALE_FACTOR,
             defaultValue=1.0,
             doc='Scale factor.'
+        )
+
+        self.declareProperty(
+            PropertyNames.USE_MANUAL_SCALE_FACTORS,
+            defaultValue=False,
+            doc='Choose to apply manual scale factors for stitching.'
+        )
+
+        self.declareProperty(
+            FloatArrayProperty(
+                PropertyNames.MANUAL_SCALE_FACTORS,
+                values=[Property.EMPTY_DBL]
+            ),
+            doc='A list of manual scale factors for stitching (number of anlge configurations minus 1)'
+        )
+
+        self.setPropertySettings(PropertyNames.MANUAL_SCALE_FACTORS,
+                                 EnabledWhenProperty(PropertyNames.USE_MANUAL_SCALE_FACTORS, PropertyCriterion.IsNotDefault))
+
+        self.declareProperty(
+            PropertyNames.CACHE_DIRECT_BEAM,
+            defaultValue=True,
+            doc='Cache the processed direct beam in ADS for ready use with further reflected beams;'
+                'saves important execution time, however assumes that the direct beam processing '
+                'configuration must be invariant for different reflected beams.'
         )
 
         # ======================== Common Properties ========================
@@ -524,6 +553,11 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             if len(value) != dimensionality and len(value) != 1:
                 issues[property_name] = 'Must have a single value or as many as there are reflected beams: given {0}, ' \
                                         'but there are {1} reflected beams'.format(len(value), dimensionality)
+        if self.getProperty(PropertyNames.USE_MANUAL_SCALE_FACTORS).value:
+            manual_scale_factors = self.getProperty(PropertyNames.MANUAL_SCALE_FACTORS).value
+            if len(manual_scale_factors) != dimensionality-1:
+                issues[PropertyNames.MANUAL_SCALE_FACTORS] = \
+                    'Provide N-1 manual scale factors, where N is the number of different angle configurations'
         angle_options = self.getProperty(PropertyNames.ANGLE_OPTION).value
         for angle_option in angle_options:
             if angle_option not in [PropertyNames.DAN, PropertyNames.SAN]:
@@ -621,7 +655,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             return 2 * theta
 
     def preprocess_direct_beam(self, run, out_ws, angle_index):
-
+        """Runs preprocess for the direct beam"""
         ReflectometryILLPreprocess(
             Run=run,
             OutputWorkspace=out_ws,
@@ -641,7 +675,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         )
 
     def preprocess_reflected_beam(self, run, out_ws, angle_index, two_theta=Property.EMPTY_DBL, direct_line_ws=''):
-
+        """Runs preprocess for the reflected beam"""
         ReflectometryILLPreprocess(
             Run=run,
             OutputWorkspace=out_ws,
@@ -700,8 +734,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         )
 
     def process_direct_beam(self, directBeamName, directForegroundName, angle_index):
-        """Combine all algorithm runs of the direct beam processing for an angle."""
-        self.log().information('Direct beam {} not cached in AnalysisDataService.'.format(directBeamName))
+        """Processes the direct beam for the given angle configuration."""
         directBeamInput = self.compose_run_string(self._db[angle_index])
         self.preprocess_direct_beam(directBeamInput, directBeamName, angle_index)
         self._autoCleanup.protect(directBeamName)
@@ -711,7 +744,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             self.polarization_correction(directForegroundName, directForegroundName)
 
     def process_reflected_beam(self, reflectedInput, reflectedBeamName, directBeamName, angle_index):
-        """Combine all algorithm runs of the reflected beam processing for an angle."""
+        """Processes the reflected beam for the given angle."""
         twoTheta = self.two_theta(angle_index)
         self.preprocess_reflected_beam(reflectedInput, reflectedBeamName, angle_index, twoTheta, directBeamName)
         foregroundName = reflectedBeamName + '_frg'
@@ -733,7 +766,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             runDB = self.make_name(self._db[angle_index])
             directBeamName = runDB + '_direct'
             directForegroundName = directBeamName + '_frg'
-            if directBeamName not in mtd.getObjectNames():
+            if directBeamName not in mtd.getObjectNames() or not self.getProperty(PropertyNames.CACHE_DIRECT_BEAM).value:
                 self.process_direct_beam(directBeamName, directForegroundName, angle_index)
             if not self.is_polarized():
                 runRB = self.make_name(self._rb[angle_index])
@@ -771,7 +804,10 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         if len(to_group) > 1:
             try:
                 stitched = self._outWS + '_stitched'
-                Stitch1DMany(InputWorkspaces=to_group, OutputWorkspace=stitched)
+                use_manual = self.getProperty(PropertyNames.USE_MANUAL_SCALE_FACTORS).value
+                scale_factors = self.getProperty(PropertyNames.MANUAL_SCALE_FACTORS).value
+                Stitch1DMany(InputWorkspaces=to_group, OutputWorkspace=stitched, UseManualScaleFactors=use_manual,
+                             ManualScaleFactors=scale_factors)
                 to_group.append(stitched)
             except RuntimeError as re:
                 self.log().warning('Unable to stitch automatically, consider stitching manually: ' + re.message)
