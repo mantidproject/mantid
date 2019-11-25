@@ -34,7 +34,7 @@ Additionally these models also contain some state information, e.g. the `Row` an
 
 ### `Common`
 
-Contains non-GUI-specific utility files useful in more that one component of the reflectometry interface but that are still specific to this interface; more generic utilities should be put elsewhere, e.g. in Framework.
+Contains non-GUI-specific utility files useful in more than one component of the reflectometry interface but that are still specific to this interface; more generic utilities should be put elsewhere, e.g. in Framework.
 
 ### `TestHelpers`
 
@@ -225,4 +225,3 @@ void testChangingSliceCountNotifiesMainPresenter() {
 Note that we may have functions in the presenter that are initiated from different callers than the view, e.g. the parent presenter, so we must test these too. Generally, we want to test all functions in the public interface to the presenter class - and exercise all possible code paths that can result.
 
 Also note that although the `EventPresenter` tests currently check the model directly, the model could (and should) be mocked out and tested separately if it was more complex.
-
