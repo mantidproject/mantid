@@ -31,7 +31,6 @@ from mantid.plots import MantidAxes
 from mantidqt.plotting.figuretype import figure_type, FigureType
 from mantid.py3compat import is_text_string, string_types
 from mantidqt.dialogs.spectraselectorutils import get_spectra_selection
-import time
 # -----------------------------------------------------------------------------
 # Constants
 # -----------------------------------------------------------------------------
