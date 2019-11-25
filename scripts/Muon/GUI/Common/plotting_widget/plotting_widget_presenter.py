@@ -17,7 +17,7 @@ ASYMMETRY_PLOT_TYPE = 'Asymmetry'
 FREQ_PLOT_TYPE = "Frequency "
 
 
-class HomePlotWidgetPresenter(HomeTabSubWidget):
+class PlotWidgetPresenter(HomeTabSubWidget):
 
     def __init__(self, view, model, context):
         """
@@ -152,8 +152,6 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         :return:
         """
 
-        print("got here in handle fit compelted")
-
         if self._model.plot_figure is None:
             return
 
@@ -274,3 +272,4 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
                                               label='Fit Function Guess')
 
         self._model.force_redraw()
+

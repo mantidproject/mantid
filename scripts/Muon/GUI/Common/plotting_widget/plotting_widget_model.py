@@ -12,7 +12,7 @@ from mantid.api import AnalysisDataService
 from mantidqt.plotting.functions import get_plot_fig
 
 
-class HomePlotWidgetModel(object):
+class PlotWidgetModel(object):
     def __init__(self, dockable_plot_window=None):
         """
         :param plotting_window_model: This is the plotting manager class to use
@@ -92,16 +92,12 @@ class HomePlotWidgetModel(object):
                                     overplot=True,
                                     plot_kwargs={'distribution': True, 'autoscale_on_update': False}, errors=True)
             self.set_x_lim(domain)
-
-            print(self.plot_figure.get_axes())
             # update the toolbar
             toolbar = self.plot_figure.canvas.toolbar
             toolbar.update()
         else:
-
-            print("NOT REDRAWING - Creating a new plot window")
+            # remove all plots
             self._remove_all_data_workspaces_from_plot()
-
             # get the axis
             self.plot_figure.clf()
             # Create a set of mantid axis for the figure
@@ -137,8 +133,6 @@ class HomePlotWidgetModel(object):
             self.remove_workpace_from_plot(workspace)
 
         self.plotted_workspaces = workspace_list
-        print(self.plotted_workspaces)
-        print(self.plotted_fit_workspaces)
 
     def set_x_lim(self, domain):
         if domain == "Time":

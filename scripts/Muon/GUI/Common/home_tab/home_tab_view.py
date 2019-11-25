@@ -38,3 +38,4 @@ class HomeTabView(QtWidgets.QWidget):
     # for docking
     def getLayout(self):
         return self.vertical_layout
+

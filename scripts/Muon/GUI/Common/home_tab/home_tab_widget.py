@@ -22,10 +22,6 @@ from Muon.GUI.Common.home_tab.home_tab_model import HomeTabModel
 from Muon.GUI.Common.home_tab.home_tab_view import HomeTabView
 from Muon.GUI.Common.home_tab.home_tab_presenter import HomeTabPresenter
 
-from Muon.GUI.Common.home_plot_widget.home_plot_widget_model import HomePlotWidgetModel
-from Muon.GUI.Common.home_plot_widget.home_plot_widget_presenter import HomePlotWidgetPresenter
-from Muon.GUI.Common.home_plot_widget.home_plot_widget_view import HomePlotWidgetView
-
 
 class HomeTabWidget(object):
     def __init__(self, context, parent):

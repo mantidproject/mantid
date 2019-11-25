@@ -206,7 +206,6 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
     if plot_kwargs is None:
         plot_kwargs = {}
     _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices, tiled, overplot)
-
     if spectrum_nums is not None:
         kw, nums = 'specNum', spectrum_nums
     else:
