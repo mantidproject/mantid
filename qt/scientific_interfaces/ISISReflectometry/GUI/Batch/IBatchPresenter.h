@@ -51,13 +51,15 @@ public:
   /// Data processing check for all groups
   virtual bool isProcessing() const = 0;
   virtual bool isAutoreducing() const = 0;
-  virtual bool isBatchUnsaved() const = 0;
   virtual bool isAnyBatchProcessing() const = 0;
   virtual bool isAnyBatchAutoreducing() const = 0;
+  virtual bool isOperationPrevented() const = 0;
   virtual bool requestClose() const = 0;
   virtual int percentComplete() const = 0;
   virtual AlgorithmRuntimeProps rowProcessingProperties() const = 0;
 
+  virtual bool getUnsavedBatchFlag() const = 0;
+  virtual void setUnsavedBatchFlag(bool isUnsaved) = 0;
   virtual Mantid::Geometry::Instrument_const_sptr instrument() const = 0;
   virtual std::string instrumentName() const = 0;
 };

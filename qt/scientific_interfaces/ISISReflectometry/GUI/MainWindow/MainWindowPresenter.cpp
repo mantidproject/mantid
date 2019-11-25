@@ -76,15 +76,7 @@ void MainWindowPresenter::notifyNewBatchRequested() {
 }
 
 void MainWindowPresenter::notifyCloseBatchRequested(int batchIndex) {
-  if (m_batchPresenters[batchIndex]->isAutoreducing() ||
-      m_batchPresenters[batchIndex]->isProcessing()) {
-    m_messageHandler->giveUserCritical(
-        "Cannot close batch while processing or autoprocessing is in progress",
-        "Error");
-    return;
-  }
-
-  if (m_batchPresenters[batchIndex]->requestClose()) {
+  if(!isCloseBatchPrevented(batchIndex) && m_batchPresenters[batchIndex]->requestClose()) {
     m_batchPresenters.erase(m_batchPresenters.begin() + batchIndex);
     m_view->removeBatch(batchIndex);
   }
@@ -170,9 +162,37 @@ bool MainWindowPresenter::isCloseEventPrevented() const {
   }
 }
 
+bool MainWindowPresenter::isCloseBatchPrevented(int batchIndex) const {
+  if (m_batchPresenters[batchIndex]->isAutoreducing() ||
+      m_batchPresenters[batchIndex]->isProcessing()) {
+    m_messageHandler->giveUserCritical(
+        "Cannot close batch while processing or autoprocessing is in progress",
+        "Error");
+    return true;
+  } else if (m_optionsDialogPresenter->getBoolOption(
+                 std::string("WarnDiscardChanges")) == true &&
+             isBatchUnsaved(batchIndex)) {
+    return !m_messageHandler->askUserDiscardChanges();
+  }
+  return false;
+}
+
+/**
+  Checks whether there are any unsaved changed in the specified batch
+*/
+bool MainWindowPresenter::isBatchUnsaved(int batchIndex) const {
+  return m_batchPresenters[batchIndex]->getUnsavedBatchFlag();
+}
+
+/**
+     Checks whether there are unsaved changes in any batch
+     * @return : Bool on whether there are changes
+*/
 bool MainWindowPresenter::isAnyBatchUnsaved() const {
-  for (auto &batchPresenter : m_batchPresenters) {
-    if (batchPresenter->isBatchUnsaved());
+  for (auto it = m_batchPresenters.begin(); it != m_batchPresenters.end();
+       ++it) {
+    int batchIndex = std::distance(m_batchPresenters.begin(), it);
+    if (isBatchUnsaved(batchIndex))
       return true;
   }
   return false;
