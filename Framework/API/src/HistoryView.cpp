@@ -145,7 +145,7 @@ void HistoryView::rollChildren(std::vector<HistoryItem>::iterator it) {
       roll(it);
     else {
       ++it;
-	}
+    }
   }
 }
 
