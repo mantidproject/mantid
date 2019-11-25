@@ -161,13 +161,6 @@ size_t ComponentInfo::numberOfDetectorsInSubtree(const size_t componentIndex) co
   return std::distance(range.begin(), range.end());
 }
 
-bool ComponentInfo::isMonitor(const size_t componentIndex) const {
-  if (hasDetectorInfo()) {
-    return this->m_detectorInfo->isMonitor(componentIndex);
-  }
-  return false;
-}
-
 const Eigen::Vector3d &ComponentInfo::position(const size_t componentIndex) const {
   checkNoTimeDependence();
   if (isDetector(componentIndex)) {
@@ -461,23 +454,6 @@ bool ComponentInfo::hasEquivalentSource(const ComponentInfo &other) const {
 }
 
 bool ComponentInfo::hasSample() const { return m_sampleIndex >= 0; }
-
-/*
- * @brief Check the samples of two componentInfo objects coincide
- *
- * @details check both objects either lack or have a sample. If the latter,
- * check their positions differ by less than 1 nm = 1e-9 m.
- *
- * @returns true if sources are equivalent
- */
-bool ComponentInfo::hasEquivalentSample(const ComponentInfo &other) const {
-  if (this->hasSample() != other.hasSample())
-    return false; // one has a source while the other does not
-  if (this->hasSample() && other.hasSample()) {
-    return (this->samplePosition() - other.samplePosition()).norm() < 1e-9;
-  }
-  return true;
-}
 
 const Eigen::Vector3d &ComponentInfo::sourcePosition() const {
   if (!hasSource()) {
