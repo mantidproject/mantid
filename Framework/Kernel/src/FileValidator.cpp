@@ -23,7 +23,6 @@ Logger g_log("FileValidator");
  *  @param extensions :: The permitted file extensions (e.g. .RAW)
  *  @param testFileExists :: Flag indicating whether to test for existence of
  * file (default: yes)
- *  @param testCanWrite :: Flag to check if file writing permissible.
  */
 FileValidator::FileValidator(const std::vector<std::string> &extensions,
                              bool testFileExists)
