@@ -24,7 +24,6 @@ from MultiPlotting.multi_plotting_widget import MultiPlotWidget
 from MultiPlotting.label import Label
 
 
-
 @start_qapplication
 class ElementalAnalysisTest(unittest.TestCase):
     @classmethod
@@ -292,6 +291,27 @@ class ElementalAnalysisTest(unittest.TestCase):
 
         self.gui.loading_finished()
         self.assertEqual(self.gui.plotting.remove_subplot.call_count, 3)
+
+    @mock.patch('Muon.GUI.ElementalAnalysis.Detectors.detectors_view.QtWidgets.QWidget')
+    def test_loading_finished_correctly_disables_detectors_if_less_detectors_are_loaded(
+            self, mock_qwidget):
+        num_loaded_detectors = 1
+        num_detectors = 4
+        self.gui.load_widget.last_loaded_run = mock.Mock(return_value=2695)
+        self.gui.load_widget.get_run_num_loaded_detectors = mock.Mock(return_value=num_loaded_detectors)
+        self.gui.detectors.getNames.return_value = ['1', '2', '3', '4']
+        self.gui.plotting.get_subplots.return_value = ['1', '2', '3', '4']
+        mock_qwidget.return_value = True
+        self.gui.plot_window = mock.Mock()
+
+        self.gui.loading_finished()
+        self.assertEqual(self.gui.plotting.remove_subplot.call_count, num_detectors)
+        # should have set num_detectors - num_loaded_detectors states
+        self.assertEqual(self.gui.detectors.setStateQuietly.call_count,num_detectors-num_loaded_detectors)
+        # should have only enabled the detector we have loaded
+        self.assertEqual(self.gui.detectors.enableDetector.call_count, num_loaded_detectors)
+        # other (num_detectors - num_lodaded)  detectors should be disabaled
+        self.assertEqual(self.gui.detectors.disableDetector.call_count, num_detectors-num_loaded_detectors)
 
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.add_peak_data')
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.mantid')
