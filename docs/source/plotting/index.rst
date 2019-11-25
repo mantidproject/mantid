@@ -402,7 +402,135 @@ One can do twin axes as well:
    fig.tight_layout()
    #fig.show()
 
+=============
+Custom Colors
+=============
 
+The Default Color Cycle doesn't have to be used. Here is an example where a Custom Color Cycle is chosen. Make sure to fill the list `custom_colors` with the HTML codes for the desired colours. 
+These can be found `online <https://www.rapidtables.com/web/color/html-color-codes.html>`_ or using Mantid Workbench. On Workbench, plot a Spectrum and navigate to Figure Options(Gear Icon) > Curves > Line > Color (RGBA). Click on the nearby colorbox and use the 'Select Color' pop-up to chose your colors and their associated HTML codes. `Further Details <https://matplotlib.org/3.1.1/gallery/color/color_cycle_default.html>`_
+
+.. plot::
+   :include-source:
+
+   from __future__ import (absolute_import, division, print_function, unicode_literals)
+   import matplotlib.pyplot as plt
+   from mantid import plots
+   from mantid.simpleapi import *
+
+   ws=Load('164199.nxs')
+
+   prop_cycle = plt.rcParams['axes.prop_cycle']
+   colors = prop_cycle.by_key()['color'] # 10 colors in default cycle
+
+   '''Change the following two parameters as you wish'''
+   custom_colors = ['#0000ffff', '#ff0000ff','#00ff00ff'] # I've chosen Blue, Red, Green
+   Number = 12 # How many Spectra to Plot
+
+   fig = plt.figure(figsize = (10,10))
+
+   ax1 = plt.subplot(211,projection='mantid')
+   for i in range(Number):
+      ax1.plot(ws, specNum = i+1, color=colors[i%len(colors)])
+   ax1.set_title('Default')
+   ax1.legend()
+
+   ax2 = plt.subplot(212,projection='mantid')
+   for i in range(Number):
+      ax2.plot(ws, specNum= i+1, color=custom_colors[i%len(custom_colors)])
+   ax2.set_title('Custom')
+   ax2.legend()
+
+   fig.suptitle('Line Plots: Color Cycle', fontsize='x-large')
+   #fig.show()
+
+
+Custom Colormap (MantidPlot)
+############################
+
+In MantidPlot, a Custom Colormap (256 entries of Red, Green and Blue values [0-255 for each]) can be created and saved with:
+
+.. plot::
+   :include-source:
+
+   from __future__ import (absolute_import, division, print_function, unicode_literals)
+   from mantid.simpleapi import *
+   import matplotlib.pyplot as plt
+   import numpy as np
+
+   r = np.zeros(256)
+   b = np.zeros(256)
+   g = np.zeros(256)
+   for i in range(256):
+      r[i] = i
+      b[i] = 255 - i
+    
+   f = open("C:\MantidInstall\colormaps\GreenRed.map","w+")
+   for i in range(256):
+      f.write(str(int(r[i])))
+      f.write(' ')
+      f.write(str(int(b[i])))
+      f.write(' ')
+      f.write(str(int(g[i])))
+      f.write('\n')
+   f.close()
+
+Then open up any dataset(such as EMU00020884.nxs from the `TrainingCourseData <https://sourceforge.net/projects/mantid/files/Sample%20Data/TrainingCourseData.zip/download>`_) and produce a Colorfill plot. Change the Colormap by following `these instructions <https://docs.mantidproject.org/nightly/tutorials/mantid_basic_course/loading_and_displaying_data/04_displaying_2D_data.html#changing-the-colour-map>`_ and selecting the newly created `Greenred.map`.
+   
+This New Colormap is saved within the MantidInstall folder so it can be used without re-running this script!
+
+   
+Custom Colormap (MantidWorkbench)
+#################################
+
+In Workbench, a Custom Colormap is more complicated (`See here for more details <https://matplotlib.org/3.1.0/tutorials/colors/colormap-manipulation.html>`_). Also they are stored within C:\MantidInstall\bin\Lib\site-packages\matplotlib\_cm.py so it is harder to alter this core storage folder.
+
+To Create and Plot with a new ColorMap in MantidWorkbench (The second half of this is from an example above):
+
+.. plot::
+   :include-source:
+
+   from __future__ import (absolute_import, division, print_function, unicode_literals)
+   from mantid.simpleapi import *
+   import matplotlib.pyplot as plt
+   import numpy as np
+   from matplotlib import cm
+   from matplotlib.colors import ListedColormap, LinearSegmentedColormap
+
+   # Load Premade Solid Color to White Colormaps
+   top = cm.get_cmap('Greens_r', 256) # _r has reversed the Colormap 'Greens'
+   bottom = cm.get_cmap('Reds', 256)
+
+   # Combine the Colormaps
+   newcolors = np.vstack((top(np.linspace(0, 1, 256)),bottom(np.linspace(0, 1, 256))))
+   Newname = 'GreenRed'
+   newcmp = ListedColormap(newcolors, name=Newname)
+
+   # Produce 2D plot as in the 'Simple Plots' section
+   from mantid import plots
+   from mantid.simpleapi import Load, ConvertToMD, BinMD, ConvertUnits, Rebin
+   from matplotlib.colors import LogNorm
+
+   # generate a nice 2D multi-dimensional workspace
+   data = Load('CNCS_7860')
+   data = ConvertUnits(InputWorkspace=data,Target='DeltaE', EMode='Direct', EFixed=3)
+   data = Rebin(InputWorkspace=data, Params='-3,0.025,3', PreserveEvents=False)
+   md = ConvertToMD(InputWorkspace=data,
+                 QDimensions='|Q|',
+                 dEAnalysisMode='Direct')
+   sqw = BinMD(InputWorkspace=md,
+            AlignedDim0='|Q|,0,3,100',
+            AlignedDim1='DeltaE,-3,3,100')
+
+   #2D plot
+   fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
+   c = ax.pcolormesh(sqw, cmap = newcmp, norm=LogNorm()) # Our New Colormap is used
+   cbar=fig.colorbar(c)
+   cbar.set_label('Intensity (arb. units)') #add text to colorbar
+   #fig.show()
+
+NB. This is not saved in the MantidInstall and so will have to be run and plotted from the script eachtime.
+
+There is an extra way that you can create MatPlotLib colormaps suitable for Workbench: `install the colormap package <https://pypi.org/project/colormap/>`_.
 ====================
 Plotting Sample Logs
 ====================
