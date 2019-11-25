@@ -107,9 +107,7 @@ void OptionsDialog::notifySaveOptions() { m_notifyee->saveOptions(); }
 
 void OptionsDialog::closeEvent(QCloseEvent *event) {
   notifyLoadOptions();
-  QDialog::reject();
-
-  // TODO investigate if event->ignore() is better
+  this->reject();
 }
 
 void OptionsDialog::show() { QDialog::exec(); }
