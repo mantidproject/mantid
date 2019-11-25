@@ -43,6 +43,13 @@ Options
 Many options can be specified as a single value, which will be applied to all the angle configurations, or as a list of values.
 In the case of the latter, the list must be of the same size, as many different angle configurations there are.
 
+Direct Beam Caching
+-------------------
+
+The processed direct beam run will be cached in Analysis Data Service in order to save significant time when multiple samples correspond to the same reflected beam.
+The direct beam run number is put in the name of the workspace. However, if the same direct beam must be used with different options (e.g. different wavelength ranges), the caching will result in an error in subsequent reductions due to incompatibility.
+In such circumstances it must be disabled.
+
 Workflow
 --------
 
@@ -57,38 +64,21 @@ Usage
 
 .. include:: ../usagedata-note.txt
 
-**Example - ReflectometryILLAutoProcess1**
+**Example - Single Angle**
 
-.. testcode:: ReflectometryILLAutoProcess1
+.. testcode:: SingleAngle
 
-   angleOffset = 10
-   angleWidth = 20
-   foreground = [5]
-
-   ws = ReflectometryILLAutoProcess(
-       Run='ILL/D17/317370.nxs',
-       DirectRun='ILL/D17/317369.nxs',
-       DirectLowAngleFrgHalfWidth=foreground,
-       DirectHighAngleFrgHalfWidth=foreground,
-       DirectLowAngleBkgOffset=angleOffset,
-       DirectLowAngleBkgWidth=angleWidth,
-       DirectHighAngleBkgOffset=angleOffset,
-       DirectHighAngleBkgWidth=angleWidth,
-       ReflLowAngleFrgHalfWidth=foreground,
-       ReflHighAngleFrgHalfWidth=foreground,
-       ReflLowAngleBkgOffset=angleOffset,
-       ReflLowAngleBkgWidth=angleWidth,
-       ReflHighAngleBkgOffset=angleOffset,
-       ReflHighAngleBkgWidth=angleWidth,
-       WavelengthLowerBound=3.5,
-       WavelengthUpperBound=25.
+    ws = ReflectometryILLAutoProcess(
+     Run='317370',
+     DirectRun='317369',
+     WavelengthLowerBound=3.5,
+     WavelengthUpperBound=24.5
     )
-
     print('The R(Q) workspace has {0} points, from {1} to {2} inverse Angstrom'.format(ws.getItem(0).blocksize(), ws.getItem(0).readX(0)[0], ws.getItem(0).readX(0)[-1]))
 
-.. testoutput:: ReflectometryILLAutoProcess1
+.. testoutput:: SingleAngle
 
-    The R(Q) workspace has 688 points, from 0.00678002009846 to 0.0479086988309 inverse Angstrom
+    The R(Q) workspace has 672 points, from 0.00718855456602 to 0.0497798802388 inverse Angstrom
 
 .. relatedalgorithms::
 
