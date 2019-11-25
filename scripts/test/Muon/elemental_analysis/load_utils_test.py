@@ -116,12 +116,12 @@ class LoadUtilsTest(unittest.TestCase):
             self.assertTrue(np.array_equal(merged_ws.readY(i), Yfunc(X_data, i)))
             self.assertTrue(np.array_equal(merged_ws.readE(i), Efunc(X_data, i)))
 
-    def test_merge_workspaces_returns_correctly_if_delayed_data_missing_data(self):
+    def test_merge_workspaces_returns_correctly_if_delayed_data_missing(self):
         num_files_per_detector = lutils.num_files_per_detector
         workspace_list = [None] * num_files_per_detector
         num_bins = 100
         X_data = np.linspace(0, 400, num_bins)
-        names = ["Total", "Delayed"]
+        names = ["Total", "Prompt"]
         # create data in each workspace based on y = mx + specNumber
         Yfunc = lambda x, specNo: 0.1 * x + specNo
         Efunc = lambda x, specNo: 2 * 0.1 * x + specNo
@@ -148,7 +148,8 @@ class LoadUtilsTest(unittest.TestCase):
             self.assertTrue(np.array_equal(merged_ws.readY(input_index), Yfunc(X_data, i)))
             self.assertTrue(np.array_equal(merged_ws.readE(input_index), Efunc(X_data, i)))
         # check y data for delayed response is all zeros
-        self.assertTrue(not np.any(merged_ws.readY(lutils.spectrum_index["Delayed"])))
+        self.assertTrue(not np.any(merged_ws.readY(lutils.spectrum_index["Delayed"]-1)))
+
 
     def test_flatten_run_data(self):
         test_workspaces = [mantid.CreateSampleWorkspace(OutputWorkspace=name) for name in self.test_ws_names]
