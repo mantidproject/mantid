@@ -755,7 +755,7 @@ public:
     TS_ASSERT(compInfo.relativePosition(subComponentIndex)
                   .isApprox(subCompPosition - rootPosition));
 
-    const auto diffPos =
+    const Vector3d diffPos =
         compInfo.position(subComponentIndex) - compInfo.position(rootIndex);
     TSM_ASSERT("Vector between comp and root is not the same as relative "
                "position. Rotation involved.",
