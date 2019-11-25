@@ -667,6 +667,10 @@ void AlgHistoryTreeWidget::itemChecked(QTreeWidgetItem *item, int index) {
     item = item->parent();
   } while (item);
 
+  // When an algorithm is unrolled, a copy of its children is made, added to
+  // the tree after the algorithm being unrolled, and hidden.
+  // This means that the unrollIndicies which are passed to HistoryView line
+  // up correctly with the list of algorithms in m_historyItems
   for (auto it = itemsChecked.rbegin(); it != itemsChecked.rend(); ++it) {
     item = *it;
     itemCopy = item->clone();
@@ -702,6 +706,8 @@ void AlgHistoryTreeWidget::itemUnchecked(QTreeWidgetItem *item, int index) {
   int rollIndex = 0;
   QModelIndex modelIndex;
 
+  // The hidden copy of the algorithm's children which were made when the
+  // algorithm was unrolled are removed.
   removeHiddenChildren(item);
   // disable any children
   uncheckAllChildren(item, index);
