@@ -187,16 +187,12 @@ class DetectorType(Enum):
     LAB = "LAB"
 
 
-# --------------------------
-#  Transmission Type
-# --------------------------
-@string_convertible
-@serializable_enum("Calculated", "Unfitted")
-class TransmissionType(object):
+class TransmissionType(Enum):
     """
     Defines the detector type
     """
-    pass
+    CALCULATED = "Calculated"
+    UNFITTED = "Unfitted"
 
 
 # --------------------------

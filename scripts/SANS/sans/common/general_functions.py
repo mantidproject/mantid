@@ -925,9 +925,9 @@ def get_state_hash_for_can_reduction(state, reduction_mode, partial_type=None):
         state_string += "counts"
     elif partial_type is OutputParts.NORM:
         state_string += "norm"
-    elif partial_type is TransmissionType.Calculated:
+    elif partial_type is TransmissionType.CALCULATED:
         state_string += "calculated_transmission"
-    elif partial_type is TransmissionType.Unfitted:
+    elif partial_type is TransmissionType.UNFITTED:
         state_string += "unfitted_transmission"
     return str(get_hash_value(state_string))
 
@@ -968,9 +968,9 @@ def get_transmission_workspaces_from_ads(state, reduction_mode):
         :param reduction_mode: the reduction mode which at this point is either HAB or LAB
         :return: a reduced transmission can object or None.
         """
-    hashed_state = get_state_hash_for_can_reduction(state, reduction_mode, TransmissionType.Calculated)
+    hashed_state = get_state_hash_for_can_reduction(state, reduction_mode, TransmissionType.CALCULATED)
     calculated_transmission = get_workspace_from_ads_based_on_hash(hashed_state)
-    hashed_state = get_state_hash_for_can_reduction(state, reduction_mode, TransmissionType.Unfitted)
+    hashed_state = get_state_hash_for_can_reduction(state, reduction_mode, TransmissionType.UNFITTED)
     unfitted_transmission = get_workspace_from_ads_based_on_hash(hashed_state)
     return calculated_transmission, unfitted_transmission
 
