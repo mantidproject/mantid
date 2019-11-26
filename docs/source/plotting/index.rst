@@ -1,11 +1,14 @@
 .. _plotting:
 
+====================
+Matplotlib in Mantid
+====================
+
 .. contents:: Table of contents
     :local:
 
-====================================
-Introduction to Matplotlib in Mantid
-====================================
+Introduction
+------------
 
 Mantid can now use `Matplotlib <https://matplotlib.org/>`_ to produce figures.
 There are several advantages of using this software package:
@@ -173,9 +176,8 @@ Here are some of the highlights:
   One can have multiple Axes objects in one Figure
 * **Axis** is the container for the ticks and labels for the x and y axis of the plot
 
-======================
 Showing/saving figures
-======================
+----------------------
 
 There are two main ways that one can visualize images produced by matplotlib. The first one
 is to pop up a window with the required graph. For that, we use the `show()` function of the figure.
@@ -221,9 +223,9 @@ Sometimes one wants to save a multi-page pdf document. Here is how to do this:
        pdf.savefig(fig)
 
 
-============
+
 Simple plots
-============
+------------
 
 For matrix workspaces, if we use the `mantid` projection, one can plot the data in a similar
 fashion as the plotting of arrays in matplotlib. Moreover, one can combine the two in the same figure
@@ -402,9 +404,8 @@ One can do twin axes as well:
    fig.tight_layout()
    #fig.show()
 
-=============
 Custom Colors
-=============
+-------------
 
 Custom Color Cycle (Line / 1D plots)
 ####################################
@@ -467,7 +468,7 @@ In MantidPlot, a Custom Colormap (256 entries of Red, Green and Blue values [0-2
       r[i] = i
       b[i] = 255 - i
     
-   f = open("C:\MantidInstall\colormaps\GreenRed.map","w+")
+   f = open("C:\MantidInstall\colormaps\GreenRed.map","w+") #Change the .map filename as you wish!
    for i in range(256):
       f.write(str(int(r[i])))
       f.write(' ')
@@ -490,6 +491,7 @@ Custom Colormap (MantidWorkbench)
 | *Method A is easier but Method B has greater functionality.*
 
 - **A) Combine Premade Colormaps** 
+
 The Script below combines Red-to-White with Green-to-White (reverse) to produce Red-to-White-to-Green. Just Green-to-Red is not possible. You can view the premade Colormaps `here <https://matplotlib.org/2.2.3/gallery/color/colormap_reference.html?highlight=colormap>`_.
 
 .. plot::
@@ -536,6 +538,7 @@ The Script below combines Red-to-White with Green-to-White (reverse) to produce 
    #fig.show()
 
 - **B) Using the** `Colormap <https://colormap.readthedocs.io/en/latest/index.html>`_**Package** 
+
 Combining any 2 or 3 colours is possible!!! 
 
 Firstly, (On Windows) open a command prompt and cd into the C:\MantidInstall\bin\ directory. Then run `scripts\pip install colormap`. Also run `scripts\pip install easydev`. Then re-open Workbench and use one of the following methods (as mentioned in the Custom Color Cycle section, HTML codes can be found `here <https://www.rapidtables.com/web/color/html-color-codes.html>`_):
@@ -605,9 +608,8 @@ Test your chosen method as follows, setting ax.pcolormesh parameter cmap to the 
    cbar.set_label('Intensity (arb. units)') #add text to colorbar
    fig.show()
 
-====================
 Plotting Sample Logs
-====================
+--------------------
 
 The :func:`mantid.plots.MantidAxes.plot<mantid.plots.MantidAxes.plot>` function can show sample logs. By default,
 the time axis represents the time since the first proton charge pulse (the
@@ -648,10 +650,8 @@ So one needs to use :func:`mantid.plots.plotfunctions.plot<mantid.plots.plotfunc
    plots.plotfunctions.plot(axt,w,LogName='ChopperStatus5', FullTime=True)
    #fig.show()
 
-
-=============
 Complex plots
-=============
+-------------
 
 One common type of a slightly more complex figure involves drawing an inset.
 
@@ -801,9 +801,8 @@ Plotting dispersion curves  on multiple panels can also be done using matplotlib
 
 .. _mplDefaults:
 
-==========================
 Change Matplotlib Defaults
-==========================
+--------------------------
 
 It is possible to alter the default appearance of Matplotlib plots, e.g. linewidths, label sizes,
 colour cycles etc. This is most readily achieved by setting the ``rcParams`` at the start of a
