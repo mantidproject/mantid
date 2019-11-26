@@ -71,12 +71,14 @@ public:
   void updateParameters(const IFunction &fun) override;
   QString setBackgroundA0(double value) override;
 
+protected:
+  size_t m_numberDomains = 0;
+  MultiDomainFunction_sptr m_function;
+
 private:
   void checkIndex(int) const;
   void updateGlobals();
-  MultiDomainFunction_sptr m_function;
   size_t m_currentDomainIndex = 0;
-  size_t m_numberDomains = 0;
   mutable QStringList m_datasetNames;
   mutable QStringList m_globalParameterNames;
 };
