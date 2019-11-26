@@ -180,17 +180,6 @@ class FitModeForMerge(Enum):
 
 
 # --------------------------
-#  Detectors
-# --------------------------
-@serializable_enum("Horizontal", "Vertical", "Rotated")
-class DetectorOrientation(object):
-    """
-    Defines the detector orientation.
-    """
-    pass
-
-
-# --------------------------
 #  Detector Type
 # --------------------------
 @string_convertible
