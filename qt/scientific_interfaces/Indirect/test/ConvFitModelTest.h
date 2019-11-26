@@ -205,6 +205,16 @@ public:
                      const std::out_of_range &);
   }
 
+  void
+  test_that_get_resolution_for_fit_returns_correctly_for_single_workspace() {
+    addWorkspacesToModel(spectra, m_workspace);
+    m_model->setResolution(m_workspace, TableDatasetIndex{0});
+
+    auto fitResolutions = m_model->getResolutionFotFit();
+
+    TS_ASSERT_EQUALS(fitResolutions, std::pair<std::string, int>());
+  }
+
 private:
   template <typename Workspace, typename... Workspaces>
   void addWorkspacesToModel(Spectra const &spectra, Workspace const &workspace,

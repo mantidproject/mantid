@@ -383,7 +383,7 @@ void IndirectFitOutput::addOutput(WorkspaceGroup_sptr resultGroup,
   updateParameters(parameterTable, fitDataBegin, fitDataEnd);
   updateFitResults(resultGroup, fitDataBegin, fitDataEnd);
   renameResult(resultWorkspace, fitDataBegin, fitDataEnd);
-  renameFitWorkspace(resultGroup, resultWorkspace);
+  // renameFitWorkspace(resultGroup, resultWorkspace);
   m_resultWorkspace = resultWorkspace;
   m_resultGroup = resultGroup;
 }

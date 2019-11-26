@@ -48,6 +48,8 @@ public:
 
   void addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
 
+  std::pair<std::string, int> getResolutionsForFit() const;
+
 private:
   Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm() const override;
   Mantid::API::IAlgorithm_sptr simultaneousFitAlgorithm() const override;
