@@ -35,15 +35,15 @@ def centre_finder_new(state, r_min = 0.06, r_max = 0.26, iterations = 10, positi
     # ------------------------------------------------------------------------------------------------------------------
     # Load the data
     # ------------------------------------------------------------------------------------------------------------------
-    workspace_to_name = {SANSDataType.SampleScatter: "SampleScatterWorkspace",
-                         SANSDataType.SampleTransmission: "SampleTransmissionWorkspace",
-                         SANSDataType.SampleDirect: "SampleDirectWorkspace",
-                         SANSDataType.CanScatter: "CanScatterWorkspace",
-                         SANSDataType.CanTransmission: "CanTransmissionWorkspace",
-                         SANSDataType.CanDirect: "CanDirectWorkspace"}
+    workspace_to_name = {SANSDataType.SAMPLE_SCATTER: "SampleScatterWorkspace",
+                         SANSDataType.SAMPLE_TRANSMISSION: "SampleTransmissionWorkspace",
+                         SANSDataType.SAMPLE_DIRECT: "SampleDirectWorkspace",
+                         SANSDataType.CAN_SCATTER: "CanScatterWorkspace",
+                         SANSDataType.CAN_TRANSMISSION: "CanTransmissionWorkspace",
+                         SANSDataType.CAN_DIRECT: "CanDirectWorkspace"}
 
-    workspace_to_monitor = {SANSDataType.SampleScatter: "SampleScatterMonitorWorkSpace",
-                            SANSDataType.CanScatter: "CanScatterMonitorWorkspace"}
+    workspace_to_monitor = {SANSDataType.SAMPLE_SCATTER: "SampleScatterMonitorWorkSpace",
+                            SANSDataType.CAN_SCATTER: "CanScatterMonitorWorkspace"}
 
     workspaces, monitors = provide_loaded_data(state, False, workspace_to_name, workspace_to_monitor)
 
@@ -98,9 +98,9 @@ def centre_finder_mass(state, r_min = 0.06, max_iter=10, position_1_start = 0.0,
     # ------------------------------------------------------------------------------------------------------------------
     # Load the data
     # ------------------------------------------------------------------------------------------------------------------
-    workspace_to_name = {SANSDataType.SampleScatter: "SampleScatterWorkspace"}
+    workspace_to_name = {SANSDataType.SAMPLE_SCATTER: "SampleScatterWorkspace"}
 
-    workspace_to_monitor = {SANSDataType.SampleScatter: "SampleScatterMonitorWorkSpace"}
+    workspace_to_monitor = {SANSDataType.SAMPLE_SCATTER: "SampleScatterMonitorWorkSpace"}
 
     workspaces, monitors = provide_loaded_data(state, False, workspace_to_name, workspace_to_monitor)
 

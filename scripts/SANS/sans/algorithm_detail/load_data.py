@@ -86,28 +86,28 @@ def get_file_and_period_information_from_data(data):
     period_information = dict()
     if data.sample_scatter:
         update_file_information(file_information, file_information_factory,
-                                SANSDataType.SampleScatter, data.sample_scatter)
-        period_information.update({SANSDataType.SampleScatter: data.sample_scatter_period})
+                                SANSDataType.SAMPLE_SCATTER, data.sample_scatter)
+        period_information.update({SANSDataType.SAMPLE_SCATTER: data.sample_scatter_period})
     if data.sample_transmission:
         update_file_information(file_information, file_information_factory,
-                                SANSDataType.SampleTransmission, data.sample_transmission)
-        period_information.update({SANSDataType.SampleTransmission: data.sample_transmission_period})
+                                SANSDataType.SAMPLE_TRANSMISSION, data.sample_transmission)
+        period_information.update({SANSDataType.SAMPLE_TRANSMISSION: data.sample_transmission_period})
     if data.sample_direct:
         update_file_information(file_information, file_information_factory,
-                                SANSDataType.SampleDirect, data.sample_direct)
-        period_information.update({SANSDataType.SampleDirect: data.sample_direct_period})
+                                SANSDataType.SAMPLE_DIRECT, data.sample_direct)
+        period_information.update({SANSDataType.SAMPLE_DIRECT: data.sample_direct_period})
     if data.can_scatter:
         update_file_information(file_information, file_information_factory,
-                                SANSDataType.CanScatter, data.can_scatter)
-        period_information.update({SANSDataType.CanScatter: data.can_scatter_period})
+                                SANSDataType.CAN_SCATTER, data.can_scatter)
+        period_information.update({SANSDataType.CAN_SCATTER: data.can_scatter_period})
     if data.can_transmission:
         update_file_information(file_information, file_information_factory,
-                                SANSDataType.CanTransmission, data.can_transmission)
-        period_information.update({SANSDataType.CanTransmission: data.can_transmission_period})
+                                SANSDataType.CAN_TRANSMISSION, data.can_transmission)
+        period_information.update({SANSDataType.CAN_TRANSMISSION: data.can_transmission_period})
     if data.can_direct:
         update_file_information(file_information, file_information_factory,
-                                SANSDataType.CanDirect, data.can_direct)
-        period_information.update({SANSDataType.CanDirect: data.can_direct_period})
+                                SANSDataType.CAN_DIRECT, data.can_direct)
+        period_information.update({SANSDataType.CAN_DIRECT: data.can_direct_period})
     return file_information, period_information
 
 
@@ -119,8 +119,8 @@ def is_transmission_type(to_check):
     :param to_check: A SANSDataType object.
     :return: true if the SANSDataType object is a transmission object (transmission or direct) else false.
     """
-    return ((to_check is SANSDataType.SampleTransmission) or (to_check is SANSDataType.SampleDirect) or
-            (to_check is SANSDataType.CanTransmission) or (to_check is SANSDataType.CanDirect))
+    return ((to_check is SANSDataType.SAMPLE_TRANSMISSION) or (to_check is SANSDataType.SAMPLE_DIRECT) or
+            (to_check is SANSDataType.CAN_TRANSMISSION) or (to_check is SANSDataType.CAN_DIRECT))
 
 
 def get_expected_file_tags(file_information, is_transmission, period):
@@ -729,7 +729,7 @@ class SANSLoadDataISIS(SANSLoadData):
 
         for key, value in list(file_infos.items()):
             # Loading
-            report_message = "Loading {0}".format(SANSDataType.to_string(key))
+            report_message = "Loading {0}".format(key.value)
             progress.report(report_message)
 
             workspace_pack, workspace_monitors_pack = load_isis(key, value, period_infos[key],
@@ -766,7 +766,7 @@ class SANSLoadDataFactory(object):
         # Get the correct loader based on the sample scatter file from the data sub state
         data.validate()
         file_info, _ = get_file_and_period_information_from_data(data)
-        sample_scatter_info = file_info[SANSDataType.SampleScatter]
+        sample_scatter_info = file_info[SANSDataType.SAMPLE_SCATTER]
         return sample_scatter_info.get_facility()
 
     @staticmethod

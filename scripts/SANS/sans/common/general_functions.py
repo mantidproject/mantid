@@ -857,7 +857,7 @@ def get_facility(instrument):
     if instrument in SANSInstrument_enum_list:
         return SANSFacility.ISIS
     else:
-        return SANSFacility.NoFacility
+        return SANSFacility.NO_FACILITY
 
 
 # ----------------------------------------------------------------------------------------------------------------------

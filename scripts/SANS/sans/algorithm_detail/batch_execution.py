@@ -75,15 +75,15 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
     # ------------------------------------------------------------------------------------------------------------------
     # Load the data
     # ------------------------------------------------------------------------------------------------------------------
-    workspace_to_name = {SANSDataType.SampleScatter: "SampleScatterWorkspace",
-                         SANSDataType.SampleTransmission: "SampleTransmissionWorkspace",
-                         SANSDataType.SampleDirect: "SampleDirectWorkspace",
-                         SANSDataType.CanScatter: "CanScatterWorkspace",
-                         SANSDataType.CanTransmission: "CanTransmissionWorkspace",
-                         SANSDataType.CanDirect: "CanDirectWorkspace"}
+    workspace_to_name = {SANSDataType.SAMPLE_SCATTER: "SampleScatterWorkspace",
+                         SANSDataType.SAMPLE_TRANSMISSION: "SampleTransmissionWorkspace",
+                         SANSDataType.SAMPLE_DIRECT: "SampleDirectWorkspace",
+                         SANSDataType.CAN_SCATTER: "CanScatterWorkspace",
+                         SANSDataType.CAN_TRANSMISSION: "CanTransmissionWorkspace",
+                         SANSDataType.CAN_DIRECT: "CanDirectWorkspace"}
 
-    workspace_to_monitor = {SANSDataType.SampleScatter: "SampleScatterMonitorWorkspace",
-                            SANSDataType.CanScatter: "CanScatterMonitorWorkspace"}
+    workspace_to_monitor = {SANSDataType.SAMPLE_SCATTER: "SampleScatterMonitorWorkspace",
+                            SANSDataType.CAN_SCATTER: "CanScatterMonitorWorkspace"}
 
     workspaces, monitors = provide_loaded_data(state, use_optimizations, workspace_to_name, workspace_to_monitor)
 
@@ -213,15 +213,15 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
 
 
 def load_workspaces_from_states(state):
-    workspace_to_name = {SANSDataType.SampleScatter: "SampleScatterWorkspace",
-                         SANSDataType.SampleTransmission: "SampleTransmissionWorkspace",
-                         SANSDataType.SampleDirect: "SampleDirectWorkspace",
-                         SANSDataType.CanScatter: "CanScatterWorkspace",
-                         SANSDataType.CanTransmission: "CanTransmissionWorkspace",
-                         SANSDataType.CanDirect: "CanDirectWorkspace"}
+    workspace_to_name = {SANSDataType.SAMPLE_SCATTER: "SampleScatterWorkspace",
+                         SANSDataType.SAMPLE_TRANSMISSION: "SampleTransmissionWorkspace",
+                         SANSDataType.SAMPLE_DIRECT: "SampleDirectWorkspace",
+                         SANSDataType.CAN_SCATTER: "CanScatterWorkspace",
+                         SANSDataType.CAN_TRANSMISSION: "CanTransmissionWorkspace",
+                         SANSDataType.CAN_DIRECT: "CanDirectWorkspace"}
 
-    workspace_to_monitor = {SANSDataType.SampleScatter: "SampleScatterMonitorWorkspace",
-                            SANSDataType.CanScatter: "CanScatterMonitorWorkspace"}
+    workspace_to_monitor = {SANSDataType.SAMPLE_SCATTER: "SampleScatterMonitorWorkspace",
+                            SANSDataType.CAN_SCATTER: "CanScatterMonitorWorkspace"}
 
     workspaces, monitors = provide_loaded_data(state, True, workspace_to_name, workspace_to_monitor)
 
@@ -266,7 +266,7 @@ def plot_workspace_mantidplot(reduction_package, output_graph, plotting_module):
         graph_handle.activeLayer().logLogAxes()
     elif reduction_package.reduction_mode == ISISReductionMode.Merged:
         graph_handle = plotSpectrum([reduction_package.reduced_merged,
-                                    reduction_package.reduced_hab, reduction_package.reduced_lab], 0,
+                                     reduction_package.reduced_hab, reduction_package.reduced_lab], 0,
                                     window=graph(output_graph), clearWindow=True)
         graph_handle.activeLayer().logLogAxes()
 
@@ -456,12 +456,12 @@ def provide_loaded_data(state, use_optimizations, workspace_to_name, workspace_t
     load_alg.execute()
 
     # Retrieve the data
-    workspace_to_count = {SANSDataType.SampleScatter: "NumberOfSampleScatterWorkspaces",
-                          SANSDataType.SampleTransmission: "NumberOfSampleTransmissionWorkspaces",
-                          SANSDataType.SampleDirect: "NumberOfSampleDirectWorkspaces",
-                          SANSDataType.CanScatter: "NumberOfCanScatterWorkspaces",
-                          SANSDataType.CanTransmission: "NumberOfCanTransmissionWorkspaces",
-                          SANSDataType.CanDirect: "NumberOfCanDirectWorkspaces"}
+    workspace_to_count = {SANSDataType.SAMPLE_SCATTER: "NumberOfSampleScatterWorkspaces",
+                          SANSDataType.SAMPLE_TRANSMISSION: "NumberOfSampleTransmissionWorkspaces",
+                          SANSDataType.SAMPLE_DIRECT: "NumberOfSampleDirectWorkspaces",
+                          SANSDataType.CAN_SCATTER: "NumberOfCanScatterWorkspaces",
+                          SANSDataType.CAN_TRANSMISSION: "NumberOfCanTransmissionWorkspaces",
+                          SANSDataType.CAN_DIRECT: "NumberOfCanDirectWorkspaces"}
 
     workspaces = get_workspaces_from_load_algorithm(load_alg, workspace_to_count, workspace_to_name)
     monitors = get_workspaces_from_load_algorithm(load_alg, workspace_to_count, workspace_to_monitor)
@@ -716,12 +716,12 @@ def create_initial_reduction_packages(state, workspaces, monitors):
 
     data_info = state.data
     sample_scatter_period = data_info.sample_scatter_period
-    requires_new_period_selection = len(workspaces[SANSDataType.SampleScatter]) > 1 \
+    requires_new_period_selection = len(workspaces[SANSDataType.SAMPLE_SCATTER]) > 1 \
                                     and sample_scatter_period == ALL_PERIODS  # noqa
 
-    is_multi_period = len(workspaces[SANSDataType.SampleScatter]) > 1
+    is_multi_period = len(workspaces[SANSDataType.SAMPLE_SCATTER]) > 1
 
-    for index in range(0, len(workspaces[SANSDataType.SampleScatter])):
+    for index in range(0, len(workspaces[SANSDataType.SAMPLE_SCATTER])):
         workspaces_for_package = {}
         # For each workspace type, i.e sample scatter, can transmission, etc. find the correct workspace
         for workspace_type, workspace_list in list(workspaces.items()):
@@ -1481,6 +1481,7 @@ class ReductionPackage(object):
     7. The reduced can and the reduced partial can workspaces (non have to exist, this is only for optimizations)
     8. The unfitted transmission workspaces
     """
+
     def __init__(self, state, workspaces, monitors, is_part_of_multi_period_reduction=False,
                  is_part_of_event_slice_reduction=False, is_part_of_wavelength_range_reduction=False):
         super(ReductionPackage, self).__init__()

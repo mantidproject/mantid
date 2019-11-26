@@ -43,12 +43,12 @@ class StateData(StateBase):
 
     sample_scatter_run_number = PositiveIntegerParameter()
     sample_scatter_is_multi_period = BoolParameter()
-    facility = ClassTypeParameter(SANSFacility)
     idf_file_path = StringParameter()
     ipf_file_path = StringParameter()
-
     user_file = StringParameter()
+
     instrument = SANSInstrument.NO_INSTRUMENT
+    facility = SANSFacility.NO_FACILITY
 
     def __init__(self):
         super(StateData, self).__init__()
@@ -65,7 +65,7 @@ class StateData(StateBase):
         # This should be reset by the builder. Setting this to NoInstrument ensure that we will trip early on,
         # in case this is not set, for example by not using the builders.
         self.instrument = SANSInstrument.NO_INSTRUMENT
-        self.facility = SANSFacility.NoFacility
+        self.facility = SANSFacility.NO_FACILITY
         self.user_file = ""
 
     def validate(self):

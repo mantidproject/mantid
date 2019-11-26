@@ -29,8 +29,8 @@ class CentreFinderNewTest(unittest.TestCase):
         iterations = 10
         verbose = False
 
-        load_data_mock.return_value = {SANSDataType.SampleScatter: [mock.MagicMock()]}, {
-            SANSDataType.SampleScatter: [mock.MagicMock()]}
+        load_data_mock.return_value = {SANSDataType.SAMPLE_SCATTER: [mock.MagicMock()]}, {
+            SANSDataType.SAMPLE_SCATTER: [mock.MagicMock()]}
 
         beam_centre_finder = "SANSBeamCentreFinder"
         beam_centre_finder_options = {"Component":'LAB', "Iterations": iterations, "RMin": r_min / 1000, "RMax": r_max / 1000,
@@ -53,8 +53,8 @@ class CentreFinderNewTest(unittest.TestCase):
         tolerance = 0.001
         iterations = 10
 
-        load_data_mock.return_value = {SANSDataType.SampleScatter: [mock.MagicMock()]}, {
-            SANSDataType.SampleScatter: [mock.MagicMock()]}
+        load_data_mock.return_value = {SANSDataType.SAMPLE_SCATTER: [mock.MagicMock()]}, {
+            SANSDataType.SAMPLE_SCATTER: [mock.MagicMock()]}
 
         beam_centre_finder = "SANSBeamCentreFinderMassMethod"
         beam_centre_finder_options = {"RMin": r_min / 1000,

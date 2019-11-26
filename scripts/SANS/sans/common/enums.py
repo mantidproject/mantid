@@ -96,9 +96,6 @@ def string_convertible(cls):
     return cls
 
 
-# --------------------------------
-#  Instrument and facility types
-# --------------------------------
 class SANSInstrument(Enum):
     NO_INSTRUMENT = "No Instrument"
 
@@ -107,24 +104,24 @@ class SANSInstrument(Enum):
     SANS2D = "SANS2D"
     ZOOM = "ZOOM"
 
-@string_convertible
-@serializable_enum("ISIS", "NoFacility")
-class SANSFacility(object):
-    pass
+
+class SANSFacility(Enum):
+    NO_FACILITY = "No Facility"
+    ISIS = "ISIS"
 
 
-# ------------------------------------
-# Data Types
-# ------------------------------------
-@string_convertible
-@serializable_enum("SampleScatter", "SampleTransmission", "SampleDirect", "CanScatter", "CanTransmission", "CanDirect",
-                   "Calibration")
-class SANSDataType(object):
+class SANSDataType(Enum):
     """
     Defines the different data types which are required for the reduction. Besides the fundamental data of the
     sample and the can, we can also specify a calibration.
     """
-    pass
+    CAN_DIRECT = "Can Direct"
+    CAN_TRANSMISSION = "Can Transmission"
+    CAN_SCATTER = "Can Scatter"
+    CALIBRATION = "Calibration"
+    SAMPLE_DIRECT = "Sample Direct"
+    SAMPLE_SCATTER = "Sample Scatter"
+    SAMPLE_TRANSMISSION = "Sample Transmission"
 
 
 # ---------------------------

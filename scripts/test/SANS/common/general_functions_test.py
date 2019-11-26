@@ -248,7 +248,6 @@ class SANSFunctionsTest(unittest.TestCase):
         self.assertEqual(output_workspace, "test_output_trans_Can")
         self.assertEqual(group_output_name, 'test_output_trans')
 
-
     def test_that_get_transmission_output_name_returns_correct_name_for_CAN(self):
         # Arrange
         state = SANSFunctionsTest._get_state()
@@ -258,7 +257,6 @@ class SANSFunctionsTest(unittest.TestCase):
         # Assert
         self.assertEqual(output_workspace, "12345_trans_Can_1.0_10.0")
         self.assertEqual(group_output_name, '12345_trans_1.0_10.0')
-
 
     def test_that_get_transmission_output_name_returns_correct_name_for_wavelength_slices_for_CAN(self):
         state = self._get_state()
@@ -383,7 +381,7 @@ class SANSFunctionsTest(unittest.TestCase):
         self.assertEqual(get_facility(SANSInstrument.LOQ), SANSFacility.ISIS)
         self.assertEqual(get_facility(SANSInstrument.LARMOR), SANSFacility.ISIS)
         self.assertEqual(get_facility(SANSInstrument.ZOOM), SANSFacility.ISIS)
-        self.assertEqual(get_facility(SANSInstrument.NO_INSTRUMENT), SANSFacility.NoFacility)
+        self.assertEqual(get_facility(SANSInstrument.NO_INSTRUMENT), SANSFacility.NO_FACILITY)
 
     def test_that_diagnostic_parser_produces_correct_list(self):
         string_to_parse = '8-11, 12:15, 5, 7:9'
@@ -562,6 +560,7 @@ class SANSFunctionsTest(unittest.TestCase):
         alg_manager_mock.reset_mock()
         create_managed_non_child_algorithm("TestAlg", **{"test_val": 5})
         alg_manager_mock.create.assert_called_once_with("TestAlg")
+
 
 if __name__ == '__main__':
     unittest.main()
