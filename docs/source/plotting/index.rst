@@ -453,8 +453,7 @@ Custom Colormap (MantidPlot)
 
 In MantidPlot, a Custom Colormap (256 entries of Red, Green and Blue values [0-255 for each]) can be created and saved with:
 
-.. plot::
-   :include-source:
+.. code-block:: python
 
    from __future__ import (absolute_import, division, print_function, unicode_literals)
    from mantid.simpleapi import *
@@ -512,7 +511,7 @@ The Script below combines Red-to-White with Green-to-White (reverse) to produce 
    newcolors = np.vstack((top(np.linspace(0, 1, 256)),bottom(np.linspace(0, 1, 256))))
    Newname = 'GreenRed'
    newcmp = ListedColormap(newcolors, name=Newname)
-   plt.register_cmap(name= Newname, cmap=newcmp)
+   plt.register_cmap(name= Newname, cmap=newcmp) #important line to register the new Colormap
 
    ''' Produce 2D plot as in the 'Simple Plots' section '''
    from mantid import plots
@@ -543,8 +542,8 @@ Combining any 2 or 3 colours is possible!!!
 
 Firstly, (On Windows) open a command prompt and cd into the C:\MantidInstall\bin\ directory. Then run `scripts\pip install colormap`. Also run `scripts\pip install easydev`. Then re-open Workbench and use one of the following methods (as mentioned in the Custom Color Cycle section, HTML codes can be found `here <https://www.rapidtables.com/web/color/html-color-codes.html>`_):
 
-.. plot::
-   :include-source:
+.. code-block:: python
+
    ''' Method 1 "RGB Add Components": Figure 1 '''
    from colormap import Colormap
    c1 = Colormap()
@@ -554,8 +553,8 @@ Firstly, (On Windows) open a command prompt and cd into the C:\MantidInstall\bin
    c1.test_colormap(mycmap1) #Test Colormap
    plt.register_cmap(name='NewWhitePurpleBlack', cmap=mycmap1) #important line to register the new Colormap
 
-.. plot::
-   :include-source:
+.. code-block:: python
+
    ''' Method 2 "Name 2 Colors": Figure 2 '''
    from colormap import Colormap
    c2 = Colormap()
@@ -564,8 +563,8 @@ Firstly, (On Windows) open a command prompt and cd into the C:\MantidInstall\bin
    c2.test_colormap(mycmap2)
    plt.register_cmap(name='NewTurquoiseViolet', cmap=mycmap2) #important line to register the new Colormap
 
-.. plot::
-   :include-source:
+.. code-block:: python
+
    ''' Method 3 "Name 3 Colors": Figure 3 '''
    from colormap import Colormap
    c3 = Colormap()
@@ -606,7 +605,7 @@ Test your chosen method as follows, setting ax.pcolormesh parameter cmap to the 
    c = ax.pcolormesh(sqw, cmap = mycmap3, norm=LogNorm()) # Our New Colormap is used
    cbar=fig.colorbar(c)
    cbar.set_label('Intensity (arb. units)') #add text to colorbar
-   fig.show()
+   #fig.show()
 
 Plotting Sample Logs
 --------------------
