@@ -7,6 +7,7 @@
 # pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
 
+from Muon.GUI.Common.plotting_widget.plotting_widget import PlottingWidget
 from qtpy import QtWidgets, QtCore
 
 from mantid.kernel import ConfigServiceImpl
@@ -29,8 +30,6 @@ from Muon.GUI.Common.phase_table_widget.phase_table_widget import PhaseTabWidget
 from Muon.GUI.Common.results_tab_widget.results_tab_widget import ResultsTabWidget
 
 SUPPORTED_FACILITIES = ["ISIS", "SmuS"]
-
-from Muon.GUI.Common.plotting_widget.plotting_widget import PlottingWidget
 
 
 def check_facility():

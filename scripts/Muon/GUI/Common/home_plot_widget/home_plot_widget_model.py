@@ -82,6 +82,7 @@ class HomePlotWidgetModel(object):
             return
         if force_redraw:
 
+            xlim = self.plot_figure.gca().get_xlim()
             # remove all data from plot
             self._remove_all_data_workspaces_from_plot()
             self.plotted_workspaces = []
@@ -91,20 +92,14 @@ class HomePlotWidgetModel(object):
             self.plot_figure = plot(workspaces, wksp_indices=[0], fig=self.plot_figure, window_title=title,
                                     overplot=True,
                                     plot_kwargs={'distribution': True, 'autoscale_on_update': False}, errors=True)
-            self.set_x_lim(domain)
+            self.set_x_lim(xlim)
 
-            print(self.plot_figure.get_axes())
-            # update the toolbar
-            toolbar = self.plot_figure.canvas.toolbar
-            toolbar.update()
         else:
-
-            print("NOT REDRAWING - Creating a new plot window")
+            # create a new plot window
             self._remove_all_data_workspaces_from_plot()
-
             # get the axis
             self.plot_figure.clf()
-            # Create a set of mantid axis for the figure
+            # Create a new set of mantid axis for the figure
             self.plot_figure, axes = get_plot_fig(overplot=False, ax_properties=None, window_title="Muon Analysis 2",
                                                   axes_num=1,
                                                   fig=self.plot_figure)
@@ -117,11 +112,8 @@ class HomePlotWidgetModel(object):
             self.plot_figure = plot(workspaces, wksp_indices=[0], fig=self.plot_figure, window_title=title,
                                     overplot=True,
                                     plot_kwargs={'distribution': True, 'autoscale_on_update': False}, errors=True)
-            # set x and y limits
+            # set x limits
             self.set_x_lim(domain)
-            # update the toolbar
-            toolbar = self.plot_figure.canvas.toolbar
-            toolbar.update()
 
         # set title and adjust plot size, and legend scale
         self.plot_figure.canvas.set_window_title(window_title)
@@ -130,6 +122,9 @@ class HomePlotWidgetModel(object):
         ax = self.plot_figure.gca()
         ax.legend(prop=dict(size=7))
         self.plot_figure.canvas.draw()
+        # update the toolbar
+        toolbar = self.plot_figure.canvas.toolbar
+        toolbar.update()
 
         # remove workspaces
         workspaces_to_remove = [workspace for workspace in self.plotted_workspaces if workspace not in workspace_list]
@@ -137,8 +132,6 @@ class HomePlotWidgetModel(object):
             self.remove_workpace_from_plot(workspace)
 
         self.plotted_workspaces = workspace_list
-        print(self.plotted_workspaces)
-        print(self.plotted_fit_workspaces)
 
     def set_x_lim(self, domain):
         if domain == "Time":

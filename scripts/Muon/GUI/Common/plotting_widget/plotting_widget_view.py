@@ -10,7 +10,7 @@ from qtpy import QtWidgets
 import Muon.GUI.Common.message_box as message_box
 from matplotlib.figure import Figure
 from mantidqt.plotting.functions import get_plot_fig
-from matplotlib.backends.qt_compat import QtWidgets, is_pyqt5
+from matplotlib.backends.qt_compat import is_pyqt5
 if is_pyqt5():
     from matplotlib.backends.backend_qt5agg import (
         FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
