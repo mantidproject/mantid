@@ -8,7 +8,7 @@ import unittest
 
 from mantid.py3compat import mock
 from mantidqt.utils.qt.testing import start_qapplication
-from Muon.GUI.Common.home_plot_widget.home_plot_widget_presenter import HomePlotWidgetPresenter
+from Muon.GUI.Common.plotting_widget.plotting_widget_presenter import PlotWidgetPresenter
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.contexts.fitting_context import FitInformation
@@ -16,7 +16,7 @@ from Muon.GUI.Common.test_helpers.context_setup import setup_context
 
 
 @start_qapplication
-class HomeTabPlotPresenterFreqTest(unittest.TestCase):
+class PlottingWidgetPresenterFreqTest(unittest.TestCase):
     def setUp(self):
         self.context = setup_context(True)
         self.plotting_window_model = mock.MagicMock()
@@ -29,7 +29,7 @@ class HomeTabPlotPresenterFreqTest(unittest.TestCase):
                                'FFT; Re MUSR62260; Group; fwd; Asymmetry; FD; Im MUSR62260; Group; fwd; Asymmetry; FD_mod'
                                'MUSR62260_raw_data FD; MaxEnt']
 
-        self.presenter = HomePlotWidgetPresenter(self.view, self.model, self.context)
+        self.presenter = PlotWidgetPresenter(self.view, self.model, self.context)
         self.presenter.get_plot_title = mock.MagicMock(return_value='MUSR62260-62261 bottom')
 
     def test_time_plot_in_FDA(self):
@@ -39,7 +39,7 @@ class HomeTabPlotPresenterFreqTest(unittest.TestCase):
         self.presenter.handle_use_raw_workspaces_changed()
 
         self.model.plot.assert_called_once_with(['MUSR62260; Group; bottom; Asymmetry; FD',
-                                                 'MUSR62261; Group; bottom; Asymmetry; FD'], 'MUSR62260-62261 bottom', 'Time', False, "Frequency Domain Analysis")
+                                                 'MUSR62261; Group; bottom; Asymmetry; FD'], 'MUSR62260-62261 bottom', 'Time', "Frequency Domain Analysis")
 
 
     def test_plot_type_changed(self):

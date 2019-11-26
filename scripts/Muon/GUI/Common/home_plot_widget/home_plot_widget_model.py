@@ -87,7 +87,6 @@ class HomePlotWidgetModel(object):
             self._remove_all_data_workspaces_from_plot()
             self.plotted_workspaces = []
             self.plotted_workspaces_inverse_binning = {}
-
             # plot new workspace
             self.plot_figure = plot(workspaces, wksp_indices=[0], fig=self.plot_figure, window_title=title,
                                     overplot=True,
@@ -95,22 +94,17 @@ class HomePlotWidgetModel(object):
             self.set_x_lim(xlim)
 
         else:
-            # create a new plot window
-            self._remove_all_data_workspaces_from_plot()
-            # get the axis
-            self.plot_figure.clf()
-            # Create a new set of mantid axis for the figure
-            self.plot_figure, axes = get_plot_fig(overplot=False, ax_properties=None, window_title="Muon Analysis 2",
-                                                  axes_num=1,
-                                                  fig=self.plot_figure)
 
+            # Clear up previous plot
+            self._remove_all_data_workspaces_from_plot()
+            self.plot_figure.clf()
             self.plotted_fit_workspaces = []
             self.plotted_workspaces = []
             self.plotted_workspaces_inverse_binning = {}
 
             # plot new workspace
-            self.plot_figure = plot(workspaces, wksp_indices=[0], fig=self.plot_figure, window_title=title,
-                                    overplot=True,
+            plot(workspaces, wksp_indices=[0], fig=self.plot_figure, window_title=title,
+                                    overplot=False,
                                     plot_kwargs={'distribution': True, 'autoscale_on_update': False}, errors=True)
             # set x limits
             self.set_x_lim(domain)

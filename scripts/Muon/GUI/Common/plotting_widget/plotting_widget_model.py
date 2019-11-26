@@ -9,7 +9,7 @@ import numpy as np
 
 from mantidqt.plotting.functions import plot
 from mantid.api import AnalysisDataService
-from mantidqt.plotting.functions import get_plot_fig
+from mantid.plots import MantidAxes
 
 
 class PlotWidgetModel(object):
@@ -59,7 +59,7 @@ class PlotWidgetModel(object):
     def plotted_fit_workspaces(self, value):
         self._plotted_fit_workspaces = value
 
-    def plot(self, workspace_list, title, domain, force_redraw, window_title):
+    def plot(self, workspace_list, title, domain, window_title):
         """
         Plots a list of workspaces in a new plot window, closing any existing plot windows.
         :param workspace_list: A list of workspace name to plot. They must be in the ADS
@@ -70,53 +70,27 @@ class PlotWidgetModel(object):
         :return: A reference to the newly created plot window is passed back
         """
         if not workspace_list:
-            self.plotted_workspaces = []
-            self.plotted_workspaces_inverse_binning = {}
-            self._plotted_fit_workspaces = []
-            self.plot_figure.clear()
-            self.plot_figure.canvas.draw()
-            return self.plot_figure
+            return
         try:
             workspaces = AnalysisDataService.Instance().retrieveWorkspaces(workspace_list, unrollGroups=True)
         except RuntimeError:
             return
-        if force_redraw:
-            # remove all data from plot
-            self._remove_all_data_workspaces_from_plot()
-            self.plotted_workspaces = []
-            self.plotted_workspaces_inverse_binning = {}
+        # Clean up previous plot
+        self._remove_all_data_workspaces_from_plot()
+        # clear the figure
+        self.plotted_fit_workspaces = []
+        self.plotted_workspaces = []
+        self.plotted_workspaces_inverse_binning = {}
 
-            # plot new workspace
-            self.plot_figure = plot(workspaces, wksp_indices=[0], fig=self.plot_figure, window_title=title,
-                                    overplot=True,
-                                    plot_kwargs={'distribution': True, 'autoscale_on_update': False}, errors=True)
-            self.set_x_lim(domain)
-            # update the toolbar
-            toolbar = self.plot_figure.canvas.toolbar
-            toolbar.update()
-        else:
-            # remove all plots
-            self._remove_all_data_workspaces_from_plot()
-            # clear the figure
-            self.plot_figure.clf()
-            # Create a set of mantid axis for the figure
-            self.plot_figure, axes = get_plot_fig(overplot=False, ax_properties=None, window_title="Muon Analysis 2",
-                                                  axes_num=1,
-                                                  fig=self.plot_figure)
-
-            self.plotted_fit_workspaces = []
-            self.plotted_workspaces = []
-            self.plotted_workspaces_inverse_binning = {}
-
-            # plot new workspace
-            self.plot_figure = plot(workspaces, wksp_indices=[0], fig=self.plot_figure, window_title=title,
-                                    overplot=True,
-                                    plot_kwargs={'distribution': True, 'autoscale_on_update': False}, errors=True)
-            # set x and y limits
-            self.set_x_lim(domain)
-            # update the toolbar
-            toolbar = self.plot_figure.canvas.toolbar
-            toolbar.update()
+        # plot new workspace
+        plot(workspaces, wksp_indices=[0], fig=self.plot_figure, window_title=title,
+             overplot=True,
+             plot_kwargs={'distribution': True, 'autoscale_on_update': False}, errors=True)
+        # set x and y limits
+        self.set_x_lim(domain)
+        # update the toolbar
+        toolbar = self.plot_figure.canvas.toolbar
+        toolbar.update()
 
         # set title and adjust plot size, and legend scale
         self.plot_figure.canvas.set_window_title(window_title)
@@ -125,11 +99,6 @@ class PlotWidgetModel(object):
         ax = self.plot_figure.gca()
         ax.legend(prop=dict(size=7))
         self.plot_figure.canvas.draw()
-
-        # remove workspaces
-        workspaces_to_remove = [workspace for workspace in self.plotted_workspaces if workspace not in workspace_list]
-        for workspace in workspaces_to_remove:
-            self.remove_workpace_from_plot(workspace)
 
         self.plotted_workspaces = workspace_list
 
@@ -170,6 +139,7 @@ class PlotWidgetModel(object):
         ax.legend(prop=dict(size=7))
 
         self.plot_figure.canvas.draw()
+
 
     def remove_workpace_from_plot(self, workspace_name):
         """
@@ -219,5 +189,8 @@ class PlotWidgetModel(object):
 
     def _remove_all_data_workspaces_from_plot(self):
         workspaces_to_remove = self.plotted_workspaces
+        for workspace in workspaces_to_remove:
+            self.remove_workpace_from_plot(workspace)
+        workspaces_to_remove = self.plotted_fit_workspaces
         for workspace in workspaces_to_remove:
             self.remove_workpace_from_plot(workspace)

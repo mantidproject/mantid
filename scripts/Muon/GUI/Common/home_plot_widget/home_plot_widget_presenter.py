@@ -141,18 +141,16 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
             for workspace in workspace_list
             if self.context.group_pair_context.get_equivalent_group_pair(workspace)}
 
-        if self.context.fitting_context.fit_list:
-            self.handle_fit_completed()
-
-        self.handle_plot_guess_changed()
+        # if self.context.fitting_context.fit_list:
+        #     self.handle_fit_completed()
+        #
+        # self.handle_plot_guess_changed()
 
     def handle_fit_completed(self):
         """
         When a new fit is done adds the fit to the plotted workspaces if appropriate
         :return:
         """
-
-        print("got here in handle fit compelted")
 
         if self._model.plot_figure is None:
             return

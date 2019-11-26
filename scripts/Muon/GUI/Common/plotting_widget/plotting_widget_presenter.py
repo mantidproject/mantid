@@ -131,20 +131,23 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             self.context.group_pair_context.selected, self._view.if_raw(),
             self._view.get_selected())
 
-        if workspace_list:
-            self._model.plot(workspace_list, self.get_plot_title(), self.get_domain(), self._force_redraw,
-                             self.context.window_title)
+        self._model.plot(workspace_list, self.get_plot_title(), self.get_domain(),
+                         self.context.window_title)
+
+        # if we are redrawing, keep previous fit
+        if self._force_redraw:
+            if self.context.fitting_context.fit_list:
+                self.handle_fit_completed()
+            self.handle_plot_guess_changed()
+        else:
+            self.context.fitting_context.clear()
+        # reset redraw flag
         self._force_redraw = False
 
         self._model.plotted_workspaces_inverse_binning = {
             workspace: self.context.group_pair_context.get_equivalent_group_pair(workspace)
             for workspace in workspace_list
             if self.context.group_pair_context.get_equivalent_group_pair(workspace)}
-
-        if self.context.fitting_context.fit_list:
-            self.handle_fit_completed()
-
-        self.handle_plot_guess_changed()
 
     def handle_fit_completed(self):
         """
@@ -154,6 +157,8 @@ class PlotWidgetPresenter(HomeTabSubWidget):
 
         if self._model.plot_figure is None:
             return
+
+        label = self._model.plot_figure.gca().get_ylabel()
 
         if self.context.fitting_context.number_of_fits <= 1:
             for workspace_name in self._model.plotted_fit_workspaces:
@@ -174,6 +179,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         for workspace_name in list_of_output_workspaces_to_plot:
             self._model.add_workspace_to_plot(workspace_name, 1, workspace_name + ': Fit')
             self._model.add_workspace_to_plot(workspace_name, 2, workspace_name + ': Diff')
+        self._model.plot_figure.gca().set_ylabel(label)
 
         self._model.force_redraw()
 
@@ -240,7 +246,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         flattened_run_list = [
             item for sublist in self.context.data_context.current_runs for item in sublist]
         return self.context.data_context.instrument + ' ' + run_list_to_string(flattened_run_list) + ' ' + \
-            self.context.group_pair_context.selected
+               self.context.group_pair_context.selected
 
     def handle_rebin_options_set(self):
         if self.context._do_rebin():
