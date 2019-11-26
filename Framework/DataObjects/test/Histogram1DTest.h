@@ -171,12 +171,16 @@ public:
   }
   void testrangeexceptionX() {
     h.setPoints(x1);
+    // vector.at() is marked nodiscard in MSVC but we just want to test it
+    // throws so suppress the warning
     MSVC_DIAG_OFF(4834)
     TS_ASSERT_THROWS(h.dataX().at(nel), const std::out_of_range &);
     MSVC_DIAG_ON()
   }
   void testrangeexceptionY() {
     h.setCounts(y1);
+    // vector.at() is marked nodiscard in MSVC but we just want to test it
+    // throws so suppress the warning
     MSVC_DIAG_OFF(4834)
     TS_ASSERT_THROWS(h.dataY().at(nel), const std::out_of_range &);
     MSVC_DIAG_ON()
@@ -184,6 +188,8 @@ public:
   void testrangeexceptionE() {
     h.setCounts(y1);
     h.setCountStandardDeviations(e1);
+    // vector.at() is marked nodiscard in MSVC but we just want to test it
+    // throws so suppress the warning
     MSVC_DIAG_OFF(4834)
     TS_ASSERT_THROWS(h.dataE().at(nel), const std::out_of_range &);
     MSVC_DIAG_ON()
