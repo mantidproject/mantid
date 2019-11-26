@@ -719,6 +719,10 @@ void ConvFitModel::setParameterNameChanges(
       model, backgroundIndex, m_temperature.is_initialized());
 }
 
+std::pair<std::string, int> ConvFitModel::getResolutionsForFit() const {
+  return std::pair<std::string, int>();
+}
+
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
