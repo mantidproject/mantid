@@ -305,12 +305,11 @@ class ElementalAnalysisTest(unittest.TestCase):
         self.gui.plot_window = mock.Mock()
 
         self.gui.loading_finished()
-        self.assertEqual(self.gui.plotting.remove_subplot.call_count, num_detectors)
-        # should have set num_detectors - num_loaded_detectors states
+        # should have set the states of num_detectors - num_loaded_detectors
         self.assertEqual(self.gui.detectors.setStateQuietly.call_count,num_detectors-num_loaded_detectors)
         # should have only enabled the detector we have loaded
         self.assertEqual(self.gui.detectors.enableDetector.call_count, num_loaded_detectors)
-        # other (num_detectors - num_lodaded)  detectors should be disabaled
+        # Should disable (num_detectors - num_loaded_detectors) detectors
         self.assertEqual(self.gui.detectors.disableDetector.call_count, num_detectors-num_loaded_detectors)
 
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.add_peak_data')

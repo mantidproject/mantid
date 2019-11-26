@@ -292,7 +292,6 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         for j, detector in enumerate(self.detectors.getNames()):
             if j < self.load_widget.get_run_num_loaded_detectors(last_run):
                 self.detectors.enableDetector(detector)
-
             else:
                 # disable checkbox and uncheck box
                 self.detectors.disableDetector(detector)

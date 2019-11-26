@@ -140,14 +140,14 @@ class LoadUtilsTest(unittest.TestCase):
 
         merged_ws = lutils.create_merged_workspace(workspace_list)
         self.assertEqual(merged_ws.getNumberHistograms(), num_files_per_detector)
-        # check that total and prompt data was copied to the correct place
+        # check that total and prompt data were copied to the correct place
         for i in range(0, 2):
             name = names[i]
             input_index = lutils.spectrum_index[name] - 1
             self.assertTrue(np.array_equal(merged_ws.readX(input_index), X_data))
             self.assertTrue(np.array_equal(merged_ws.readY(input_index), Yfunc(X_data, i)))
             self.assertTrue(np.array_equal(merged_ws.readE(input_index), Efunc(X_data, i)))
-        # check y data for delayed response is all zeros
+        # check that the y data for delayed response is all zeros
         self.assertTrue(not np.any(merged_ws.readY(lutils.spectrum_index["Delayed"]-1)))
 
 
