@@ -746,37 +746,37 @@ class FitParserTest(unittest.TestCase):
 
     def test_that_general_fit_is_parsed_correctly(self):
         valid_settings = {"FIT/ trans / LIN 123 3556": {FitId.general: fit_general(start=123, stop=3556,
-                                                        fit_type=FitType.Linear, data_type=None, polynomial_order=0)},
+                                                                                   fit_type=FitType.LINEAR, data_type=None, polynomial_order=0)},
                           "FIT/ tranS/linear 123 3556": {FitId.general: fit_general(start=123, stop=3556,
-                                                         fit_type=FitType.Linear, data_type=None, polynomial_order=0)},
+                                                                                    fit_type=FitType.LINEAR, data_type=None, polynomial_order=0)},
                           "FIT/TRANS/Straight 123 3556": {FitId.general: fit_general(start=123, stop=3556,
-                                                          fit_type=FitType.Linear, data_type=None, polynomial_order=0)},
+                                                                                     fit_type=FitType.LINEAR, data_type=None, polynomial_order=0)},
                           "FIT/ tranS/LoG 123  3556.6 ": {FitId.general: fit_general(start=123, stop=3556.6,
-                                                          fit_type=FitType.Logarithmic, data_type=None, polynomial_order=0)},  # noqa
+                                                                                     fit_type=FitType.LOGARITHMIC, data_type=None, polynomial_order=0)},  # noqa
                           "FIT/TRANS/  YlOG 123   3556": {FitId.general: fit_general(start=123, stop=3556,
-                                                          fit_type=FitType.Logarithmic, data_type=None, polynomial_order=0)},  # noqa
-                          "FIT/Trans/Lin": {FitId.general: fit_general(start=None, stop=None, fit_type=FitType.Linear,
+                                                                                     fit_type=FitType.LOGARITHMIC, data_type=None, polynomial_order=0)},  # noqa
+                          "FIT/Trans/Lin": {FitId.general: fit_general(start=None, stop=None, fit_type=FitType.LINEAR,
                                                                        data_type=None, polynomial_order=0)},
-                          "FIT/Trans/ Log": {FitId.general: fit_general(start=None, stop=None, fit_type=FitType.Logarithmic,  # noqa
+                          "FIT/Trans/ Log": {FitId.general: fit_general(start=None, stop=None, fit_type=FitType.LOGARITHMIC,  # noqa
                                                                         data_type=None, polynomial_order=0)},
                           "FIT/Trans/ polYnomial": {FitId.general: fit_general(start=None, stop=None,
-                                                    fit_type=FitType.Polynomial, data_type=None, polynomial_order=2)},
+                                                                               fit_type=FitType.POLYNOMIAL, data_type=None, polynomial_order=2)},
                           "FIT/Trans/ polYnomial 3": {FitId.general: fit_general(start=None, stop=None,
-                                                                                 fit_type=FitType.Polynomial,
+                                                                                 fit_type=FitType.POLYNOMIAL,
                                                                                  data_type=None, polynomial_order=3)},
                           "FIT/Trans/Sample/Log 23.4 56.7": {FitId.general: fit_general(start=23.4, stop=56.7,
-                                                                                        fit_type=FitType.Logarithmic, data_type=DataType.SAMPLE,
+                                                                                        fit_type=FitType.LOGARITHMIC, data_type=DataType.SAMPLE,
                                                                                         polynomial_order=0)},
                           "FIT/Trans/can/ lIn 23.4 56.7": {FitId.general: fit_general(start=23.4, stop=56.7,
-                                                                                      fit_type=FitType.Linear, data_type=DataType.CAN,
+                                                                                      fit_type=FitType.LINEAR, data_type=DataType.CAN,
                                                                                       polynomial_order=0)},
                           "FIT/Trans / can/polynomiAL 5 23 45": {FitId.general: fit_general(start=23, stop=45,
-                                                                                            fit_type=FitType.Polynomial, data_type=DataType.CAN,
+                                                                                            fit_type=FitType.POLYNOMIAL, data_type=DataType.CAN,
                                                                                             polynomial_order=5)},
                           "FIT/ trans / clear": {FitId.general: fit_general(start=None, stop=None,
-                                                 fit_type=FitType.NoFit, data_type=None, polynomial_order=None)},
+                                                                            fit_type=FitType.NO_FIT, data_type=None, polynomial_order=None)},
                           "FIT/traNS /ofF": {FitId.general: fit_general(start=None, stop=None,
-                                             fit_type=FitType.NoFit, data_type=None, polynomial_order=None)}
+                                                                        fit_type=FitType.NO_FIT, data_type=None, polynomial_order=None)}
                           }
 
         invalid_settings = {"FIT/TRANS/ YlOG 123": RuntimeError,
@@ -1105,7 +1105,7 @@ class UserFileParserTest(unittest.TestCase):
 
         # FitParser
         result = user_file_parser.parse_line("FIT/TRANS/Straight 123 3556")
-        assert_valid_result(result, {FitId.general: fit_general(start=123, stop=3556, fit_type=FitType.Linear,
+        assert_valid_result(result, {FitId.general: fit_general(start=123, stop=3556, fit_type=FitType.LINEAR,
                                                                 data_type=None, polynomial_order=0)},
                             self.assertTrue)
 

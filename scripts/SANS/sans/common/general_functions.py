@@ -715,7 +715,7 @@ def get_transmission_output_name(state, data_type=DataType.SAMPLE, multi_reducti
     short_run_number_as_string = str(short_run_number)
 
     calculated_transmission_state = state.adjustment.calculate_transmission
-    fit = calculated_transmission_state.fit[DataType.SAMPLE.value]
+    fit = calculated_transmission_state.fit[DataType.SAMPLE]
     wavelength_range_string = "_" + str(fit.wavelength_low) + "_" + str(fit.wavelength_high)
 
     trans_suffix = "_trans_Sample" if data_type == DataType.SAMPLE else "_trans_Can"

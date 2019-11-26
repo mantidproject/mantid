@@ -41,7 +41,7 @@ class UserFileReaderTest(unittest.TestCase):
                                                     back_single_monitor_entry(2, 85000, 98000)],
                            DetectorId.reduction_mode: [ReductionMode.LAB],
                            GravityId.on_off: [True],
-                           FitId.general: [fit_general(start=1.5, stop=12.5, fit_type=FitType.Logarithmic,
+                           FitId.general: [fit_general(start=1.5, stop=12.5, fit_type=FitType.LOGARITHMIC,
                                                        data_type=None, polynomial_order=0)],
                            MaskId.vertical_single_strip_mask: [single_entry_with_detector(191, DetectorType.LAB),
                                                                single_entry_with_detector(191, DetectorType.HAB),

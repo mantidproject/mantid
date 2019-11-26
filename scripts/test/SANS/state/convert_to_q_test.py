@@ -5,13 +5,12 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-import unittest
-import mantid
 
+import unittest
+
+from sans.common.enums import (RangeStepType, ReductionDimensionality, SANSFacility, SANSInstrument)
 from sans.state.convert_to_q import (StateConvertToQ, get_convert_to_q_builder)
 from sans.state.data import get_data_builder
-from sans.common.enums import (RangeStepType, ReductionDimensionality, SANSFacility, SANSInstrument)
-from state_test_helper import (assert_validate_error, assert_raises_nothing)
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
@@ -42,11 +41,12 @@ class StateConvertToQTest(unittest.TestCase):
     def check_bad_and_good_value(self, bad_convert_to_q, good_convert_to_q):
         # Bad values
         state = self._get_convert_to_q_state(bad_convert_to_q)
-        assert_validate_error(self, ValueError, state)
+        with self.assertRaises(ValueError):
+            state.validate()
 
         # Good values
         state = self._get_convert_to_q_state(good_convert_to_q)
-        assert_raises_nothing(self, state)
+        self.assertIsNone(state.validate())
 
     def test_that_raises_with_inconsistent_1D_q_values(self):
         self.check_bad_and_good_value({"q_min": None, "q_max": 2.}, {"q_min": 1., "q_max": 2.})

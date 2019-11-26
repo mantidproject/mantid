@@ -863,14 +863,14 @@ class SANSDataProcessorGui(QMainWindow,
     def _on_transmission_fit_type_has_changed(self):
         # Check the sample settings
         fit_type_sample_as_string = self.fit_sample_fit_type_combo_box.currentText().encode('utf-8')
-        fit_type_sample = FitType.from_string(fit_type_sample_as_string)
-        is_sample_polynomial = fit_type_sample is FitType.Polynomial
+        fit_type_sample = FitType(fit_type_sample_as_string)
+        is_sample_polynomial = fit_type_sample is FitType.POLYNOMIAL
         self.fit_sample_polynomial_order_spin_box.setEnabled(is_sample_polynomial)
 
         # Check the can settings
         fit_type_can_as_string = self.fit_can_fit_type_combo_box.currentText().encode('utf-8')
-        fit_type_can = FitType.from_string(fit_type_can_as_string)
-        is_can_polynomial = fit_type_can is FitType.Polynomial
+        fit_type_can = FitType(fit_type_can_as_string)
+        is_can_polynomial = fit_type_can is FitType.POLYNOMIAL
         self.fit_can_polynomial_order_spin_box.setEnabled(is_can_polynomial)
 
     def _on_transmission_target_has_changed(self):
@@ -1507,7 +1507,7 @@ class SANSDataProcessorGui(QMainWindow,
     @property
     def transmission_sample_fit_type(self):
         fit_type_as_string = self.fit_sample_fit_type_combo_box.currentText().encode('utf-8')
-        return FitType.from_string(fit_type_as_string)
+        return FitType(fit_type_as_string)
 
     @transmission_sample_fit_type.setter
     def transmission_sample_fit_type(self, value):
@@ -1520,7 +1520,7 @@ class SANSDataProcessorGui(QMainWindow,
     @property
     def transmission_can_fit_type(self):
         fit_type_as_string = self.fit_can_fit_type_combo_box.currentText().encode('utf-8')
-        return FitType.from_string(fit_type_as_string)
+        return FitType(fit_type_as_string)
 
     @transmission_can_fit_type.setter
     def transmission_can_fit_type(self, value):

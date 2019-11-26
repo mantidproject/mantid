@@ -75,7 +75,7 @@ class CommandInterfaceStateDirectorTest(unittest.TestCase):
 
         # # Trans fit
         command = NParameterCommand(command_id=NParameterCommandId.trans_fit, values=[FitData.Can, 10.4, 12.54,
-                                                                                      FitType.Logarithmic, 0])
+                                                                                      FitType.LOGARITHMIC, 0])
         self._assert_raises_nothing(command_interface.add_command, command)
 
         # Front detector rescale
@@ -140,14 +140,14 @@ class CommandInterfaceStateDirectorTest(unittest.TestCase):
         self.assertEqual(state.move.detectors[DetectorType.HAB.value].sample_centre_pos1,  12.4/1000.)
         self.assertTrue(state.move.detectors[DetectorType.HAB.value].sample_centre_pos2
                         == 23.54/1000.)
-        self.assertTrue(state.adjustment.calculate_transmission.fit[DataType.CAN.value].fit_type
-                        is FitType.Logarithmic)
-        self.assertTrue(state.adjustment.calculate_transmission.fit[DataType.CAN.value].polynomial_order
+        self.assertTrue(state.adjustment.calculate_transmission.fit[DataType.CAN].fit_type
+                        is FitType.LOGARITHMIC)
+        self.assertTrue(state.adjustment.calculate_transmission.fit[DataType.CAN].polynomial_order
                         == 0)
 
-        self.assertTrue(state.adjustment.calculate_transmission.fit[DataType.CAN.value].wavelength_low
+        self.assertTrue(state.adjustment.calculate_transmission.fit[DataType.CAN].wavelength_low
                         == 10.4)
-        self.assertTrue(state.adjustment.calculate_transmission.fit[DataType.CAN.value].wavelength_high
+        self.assertTrue(state.adjustment.calculate_transmission.fit[DataType.CAN].wavelength_high
                         == 12.54)
 
         self.assertEqual(state.reduction.merge_scale,  1.2)

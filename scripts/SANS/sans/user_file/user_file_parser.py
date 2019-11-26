@@ -1774,7 +1774,7 @@ class FitParser(UserFileComponentParser):
         return wavelength_min, wavelength_max
 
     def _get_polynomial_order(self, fit_type, line):
-        if fit_type != FitType.Polynomial:
+        if fit_type != FitType.POLYNOMIAL:
             poly_order = 0
         else:
             poly_order, _, _ = self._get_wavelength_and_polynomial(line)
@@ -1817,11 +1817,11 @@ class FitParser(UserFileComponentParser):
 
     def _get_fit_type(self, line):
         if re.search(self._log, line) is not None:
-            fit_type = FitType.Logarithmic
+            fit_type = FitType.LOGARITHMIC
         elif re.search(self._lin, line) is not None:
-            fit_type = FitType.Linear
+            fit_type = FitType.LINEAR
         elif re.search(self._polynomial, line) is not None:
-            fit_type = FitType.Polynomial
+            fit_type = FitType.POLYNOMIAL
         else:
             raise RuntimeError("FitParser: Encountered unknown fit function: {0}".format(line))
         return fit_type
@@ -1840,7 +1840,7 @@ class FitParser(UserFileComponentParser):
         """
         With this we want to clear the fit type settings.
         """
-        return {FitId.general: fit_general(start=None, stop=None, fit_type=FitType.NoFit,
+        return {FitId.general: fit_general(start=None, stop=None, fit_type=FitType.NO_FIT,
                                            data_type=None, polynomial_order=None)}
 
     @staticmethod

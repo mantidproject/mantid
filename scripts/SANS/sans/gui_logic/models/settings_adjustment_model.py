@@ -79,10 +79,10 @@ class SettingsAdjustmentModel(ModelCommon):
                                                 polynomial_order=setting_general.polynomial_order))
                 else:
                     settings.append(fit_general(start=None, stop=None, data_type=data_type,
-                                                fit_type=FitType.NoFit, polynomial_order=2))
+                                                fit_type=FitType.NO_FIT, polynomial_order=2))
         else:
             settings = [fit_general(start=None, stop=None, data_type=data_type,
-                                    fit_type=FitType.NoFit, polynomial_order=2)]
+                                    fit_type=FitType.NO_FIT, polynomial_order=2)]
 
         new_settings = []
         for setting in settings:
@@ -181,7 +181,7 @@ class SettingsAdjustmentModel(ModelCommon):
 
     @property
     def transmission_sample_fit_type(self):
-        return self._get_transmission_fit(data_type=DataType.SAMPLE, attribute="fit_type", default_value=FitType.NoFit)
+        return self._get_transmission_fit(data_type=DataType.SAMPLE, attribute="fit_type", default_value=FitType.NO_FIT)
 
     @transmission_sample_fit_type.setter
     def transmission_sample_fit_type(self, value):
@@ -189,7 +189,7 @@ class SettingsAdjustmentModel(ModelCommon):
 
     @property
     def transmission_can_fit_type(self):
-        return self._get_transmission_fit(data_type=DataType.CAN, attribute="fit_type", default_value=FitType.NoFit)
+        return self._get_transmission_fit(data_type=DataType.CAN, attribute="fit_type", default_value=FitType.NO_FIT)
 
     @transmission_can_fit_type.setter
     def transmission_can_fit_type(self, value):

@@ -5,14 +5,13 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-import unittest
-import mantid
 
+import unittest
+
+from sans.common.enums import (RebinType, RangeStepType, SANSFacility, SANSInstrument)
+from sans.state.data import get_data_builder
 from sans.state.normalize_to_monitor import (StateNormalizeToMonitor, StateNormalizeToMonitorLOQ,
                                              get_normalize_to_monitor_builder)
-from sans.state.data import get_data_builder
-from sans.common.enums import (RebinType, RangeStepType, SANSFacility, SANSInstrument)
-from state_test_helper import assert_validate_error, assert_raises_nothing
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
@@ -40,9 +39,10 @@ class StateNormalizeToMonitorTest(unittest.TestCase):
     def assert_raises_for_bad_value_and_raises_nothing_for_good_value(self, entry_name, bad_value, good_value):
         kwargs = {entry_name: bad_value}
         state = self._get_normalize_to_monitor_state(**kwargs)
-        assert_validate_error(self, ValueError, state)
+        with self.assertRaises(ValueError):
+            state.validate()
         setattr(state, entry_name, good_value)
-        assert_raises_nothing(self, state)
+        self.assertIsNone(state.validate())
 
     def test_that_is_sans_state_normalize_to_monitor_object(self):
         state = StateNormalizeToMonitorLOQ()

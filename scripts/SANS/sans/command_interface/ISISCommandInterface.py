@@ -531,14 +531,14 @@ def TransFit(mode, lambdamin=None, lambdamax=None, selector='BOTH'):
     mode = str(mode).strip().upper()
 
     if mode == "LINEAR" or mode == "STRAIGHT" or mode == "LIN":
-        fit_type = FitType.Linear
+        fit_type = FitType.LINEAR
     elif mode == "LOGARITHMIC" or mode == "LOG" or mode == "YLOG":
-        fit_type = FitType.Logarithmic
+        fit_type = FitType.LOGARITHMIC
     elif does_pattern_match(polynomial_pattern, mode):
-        fit_type = FitType.Polynomial
+        fit_type = FitType.POLYNOMIAL
         polynomial_order = extract_polynomial_order(mode)
     else:
-        fit_type = FitType.NoFit
+        fit_type = FitType.NO_FIT
 
     # Get the selected detector to which the fit settings apply
     selector = str(selector).strip().upper()

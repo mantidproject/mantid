@@ -221,16 +221,14 @@ class SaveType(Enum):
     RKH = "RKH"
 
 
-# ------------------------------------------
-# Fit type for the transmission calculation
-# ------------------------------------------
-@string_convertible
-@serializable_enum("Linear", "Logarithmic", "Polynomial", "NoFit")
-class FitType(object):
+class FitType(Enum):
     """
-    Defines possible fit types
+    Defines possible fit types for the transmission calculation
     """
-    pass
+    LINEAR = "Linear"
+    LOGARITHMIC = "Logarithmic"
+    POLYNOMIAL = "Polynomial"
+    NO_FIT = "NotFit"
 
 
 # --------------------------

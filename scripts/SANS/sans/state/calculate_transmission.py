@@ -11,6 +11,9 @@
 from __future__ import (absolute_import, division, print_function)
 import json
 import copy
+import abc
+import six
+
 from sans.state.state_base import (StateBase, rename_descriptor_names, PositiveIntegerParameter, BoolParameter,
                                    PositiveFloatParameter, ClassTypeParameter, FloatParameter, DictParameter,
                                    StringListParameter, PositiveFloatWithNoneParameter, PositiveFloatListParameter)
@@ -27,19 +30,19 @@ from sans.common.xml_parsing import get_named_elements_from_ipf_file
 # ----------------------------------------------------------------------------------------------------------------------
 @rename_descriptor_names
 class StateTransmissionFit(StateBase):
-    fit_type = ClassTypeParameter(FitType)
+    fit_type = FitType.LOGARITHMIC
     polynomial_order = PositiveIntegerParameter()
     wavelength_low = PositiveFloatWithNoneParameter()
     wavelength_high = PositiveFloatWithNoneParameter()
 
     def __init__(self):
         super(StateTransmissionFit, self).__init__()
-        self.fit_type = FitType.Logarithmic
+        self.fit_type = FitType.LOGARITHMIC
         self.polynomial_order = 0
 
-    def validate(self):  # noqa
+    def validate(self):
         is_invalid = {}
-        if self.fit_type is FitType.Polynomial and self.polynomial_order == 0:
+        if self.fit_type is FitType.POLYNOMIAL and self.polynomial_order == 0:
             entry = validation_message("You can only select a polynomial fit if you set a polynomial order (2 to 6).",
                                        "Make sure that you select a polynomial order.",
                                        {"fit_type": self.fit_type,
@@ -109,19 +112,14 @@ class StateCalculateTransmission(StateBase):
     background_TOF_roi_start = FloatParameter()
     background_TOF_roi_stop = FloatParameter()
 
-    # -----------------------
-    # Fit
-    # ----------------------
-    fit = DictParameter()
+    fit = {DataType.CAN : StateTransmissionFit(),
+           DataType.SAMPLE : StateTransmissionFit()}
 
     def __init__(self):
         super(StateCalculateTransmission, self).__init__()
         # The keys of this dictionaries are the spectrum number of the monitors (as a string)
         self.background_TOF_monitor_start = {}
         self.background_TOF_monitor_stop = {}
-
-        self.fit = {DataType.SAMPLE.value: StateTransmissionFit(),
-                    DataType.CAN.value: StateTransmissionFit()}
         self.use_full_wavelength_range = False
 
         # Default rebin type is a standard Rebin
@@ -278,11 +276,8 @@ class StateCalculateTransmission(StateBase):
                                                     "background_TOF_monitor_stop": self.background_TOF_monitor_stop})
                         is_invalid.update(entry)
 
-        # -----
-        # Fit
-        # -----
-        self.fit[DataType.SAMPLE.value].validate()
-        self.fit[DataType.CAN.value].validate()
+        for fit_type in self.fit.itervalues():
+            fit_type.validate()
 
         if is_invalid:
             raise ValueError("StateCalculateTransmission: The provided inputs are illegal. "
@@ -364,80 +359,88 @@ def set_default_monitors(calculate_transmission_info, data_info):
 # ---------------------------------------
 # State builders
 # ---------------------------------------
-class StateCalculateTransmissionBuilderLOQ(object):
+@six.add_metaclass(abc.ABCMeta)
+class StateCalculateTransmissionBuilderCommon(object):
+    def __init__(self, state):
+        self.state = state
+
+    def set_wavelength_step_type(self, val):
+        self.state.wavelength_step_type = val
+
+    def set_rebin_type(self, val):
+        self.state.rebin_type = val
+
+    def set_can_fit_type(self, val):
+        self.state.fit[DataType.CAN].fit_type = val
+
+    def set_can_polynomial_order(self, val):
+        self.state.fit[DataType.CAN].polynomial_order = val
+
+    def set_can_wavelength_low(self, val):
+        self.state.fit[DataType.CAN].wavelength_low = val
+
+    def set_can_wavelength_high(self, val):
+        self.state.fit[DataType.CAN].wavelength_high = val
+
+    def set_sample_fit_type(self, val):
+        self.state.fit[DataType.SAMPLE].fit_type = val
+
+    def set_sample_polynomial_order(self, val):
+        self.state.fit[DataType.SAMPLE].polynomial_order = val
+
+    def set_sample_wavelength_low(self, val):
+        self.state.fit[DataType.SAMPLE].wavelength_low = val
+
+    def set_sample_wavelength_high(self, val):
+        self.state.fit[DataType.SAMPLE].wavelength_high = val
+
+
+class StateCalculateTransmissionBuilderLOQ(StateCalculateTransmissionBuilderCommon):
     @automatic_setters(StateCalculateTransmissionLOQ)
     def __init__(self, data_info):
-        super(StateCalculateTransmissionBuilderLOQ, self).__init__()
+        super(StateCalculateTransmissionBuilderLOQ, self).__init__(state=StateCalculateTransmissionLOQ())
         self._data = data_info
-        self.state = StateCalculateTransmissionLOQ()
         set_default_monitors(self.state, self._data)
 
     def build(self):
         self.state.validate()
         return copy.copy(self.state)
 
-    def set_wavelength_step_type(self, val):
-        self.state.wavelength_step_type = val
 
-    def set_rebin_type(self, val):
-        self.state.rebin_type = val
-
-
-class StateCalculateTransmissionBuilderSANS2D(object):
+class StateCalculateTransmissionBuilderSANS2D(StateCalculateTransmissionBuilderCommon):
     @automatic_setters(StateCalculateTransmissionSANS2D)
     def __init__(self, data_info):
-        super(StateCalculateTransmissionBuilderSANS2D, self).__init__()
+        super(StateCalculateTransmissionBuilderSANS2D, self).__init__(state=StateCalculateTransmissionSANS2D())
         self._data = data_info
-        self.state = StateCalculateTransmissionSANS2D()
         set_default_monitors(self.state, self._data)
 
     def build(self):
         self.state.validate()
         return copy.copy(self.state)
 
-    def set_wavelength_step_type(self, val):
-        self.state.wavelength_step_type = val
 
-    def set_rebin_type(self, val):
-        self.state.rebin_type = val
-
-
-class StateCalculateTransmissionBuilderLARMOR(object):
+class StateCalculateTransmissionBuilderLARMOR(StateCalculateTransmissionBuilderCommon):
     @automatic_setters(StateCalculateTransmissionLARMOR)
     def __init__(self, data_info):
-        super(StateCalculateTransmissionBuilderLARMOR, self).__init__()
+        super(StateCalculateTransmissionBuilderLARMOR, self).__init__(state=StateCalculateTransmissionLARMOR())
         self._data = data_info
-        self.state = StateCalculateTransmissionLARMOR()
         set_default_monitors(self.state, self._data)
 
     def build(self):
         self.state.validate()
         return copy.copy(self.state)
 
-    def set_wavelength_step_type(self, val):
-        self.state.wavelength_step_type = val
 
-    def set_rebin_type(self, val):
-        self.state.rebin_type = val
-
-
-class StateCalculateTransmissionBuilderZOOM(object):
+class StateCalculateTransmissionBuilderZOOM(StateCalculateTransmissionBuilderCommon):
     @automatic_setters(StateCalculateTransmissionZOOM)
     def __init__(self, data_info):
-        super(StateCalculateTransmissionBuilderZOOM, self).__init__()
+        super(StateCalculateTransmissionBuilderZOOM, self).__init__(state=StateCalculateTransmissionZOOM())
         self._data = data_info
-        self.state = StateCalculateTransmissionZOOM()
         set_default_monitors(self.state, self._data)
 
     def build(self):
         self.state.validate()
         return copy.copy(self.state)
-
-    def set_wavelength_step_type(self, val):
-        self.state.wavelength_step_type = val
-
-    def set_rebin_type(self, val):
-        self.state.rebin_type = val
 
 
 # ------------------------------------------

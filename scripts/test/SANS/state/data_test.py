@@ -5,12 +5,11 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-import unittest
-import mantid
 
-from sans.state.data import (StateData, get_data_builder)
-from state_test_helper import (assert_validate_error, assert_raises_nothing)
+import unittest
+
 from sans.common.enums import (SANSFacility, SANSInstrument)
+from sans.state.data import (StateData, get_data_builder)
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
@@ -36,11 +35,12 @@ class StateDataTest(unittest.TestCase):
                                                                       data_entries_good):
         # Bad values
         state = StateDataTest._get_data_state(**data_entries_bad)
-        assert_validate_error(self, ValueError, state)
+        with self.assertRaises(ValueError):
+            state.validate()
 
         # Good values
         state = StateDataTest._get_data_state(**data_entries_good)
-        assert_raises_nothing(self, state)
+        self.assertIsNone(state.validate())
 
     def test_that_raises_when_sample_scatter_is_missing(self):
         self.assert_raises_for_bad_value_and_raises_nothing_for_good_value({"sample_scatter": None},

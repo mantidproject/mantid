@@ -5,15 +5,13 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
+
 import unittest
-import mantid
 
-from sans.state.mask import (StateMaskSANS2D, get_mask_builder)
+from sans.common.enums import (SANSFacility, DetectorType)
 from sans.state.data import get_data_builder
-from sans.common.enums import (SANSFacility, SANSInstrument, DetectorType)
-from state_test_helper import (assert_validate_error, assert_raises_nothing)
+from sans.state.mask import (StateMaskSANS2D, get_mask_builder)
 from sans.test_helper.file_information_mock import SANSFileInformationMock
-
 
 # ----------------------------------------------------------------------------------------------------------------------
 # State
@@ -86,13 +84,14 @@ class StateMaskTest(unittest.TestCase):
         bad_value_detector_dict = StateMaskTest._get_dict(entry_name, bad_value_detector)
 
         state = self._get_mask_state(bad_value_general_dict, bad_value_detector_dict)
-        assert_validate_error(self, ValueError, state)
+        with self.assertRaises(ValueError):
+            state.validate()
 
         # Good values
         good_value_general_dict = StateMaskTest._get_dict(entry_name, good_value_general)
         good_value_detector_dict = StateMaskTest._get_dict(entry_name, good_value_detector)
         state = self._get_mask_state(good_value_general_dict, good_value_detector_dict)
-        assert_raises_nothing(self, state)
+        self.assertIsNone(state.validate())
 
     def test_that_raises_when_lower_radius_bound_larger_than_upper_bound(self):
         self.assert_raises_for_bad_value_and_raises_nothing_for_good_value("radius_min", 500., None, 12., None)

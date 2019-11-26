@@ -12,7 +12,7 @@ from sans.algorithm_detail.calculate_transmission_helper import (get_detector_id
                                                                  apply_flat_background_correction_to_detectors,
                                                                  get_region_of_interest)
 from sans.common.constants import EMPTY_NAME
-from sans.common.enums import (RangeStepType, RebinType, FitType, DataType)
+from sans.common.enums import (RangeStepType, FitType, DataType)
 from sans.common.general_functions import create_unmanaged_algorithm
 
 
@@ -53,12 +53,12 @@ def calculate_transmission(transmission_ws, direct_ws, state_adjustment_calculat
 
     # 2. Clean transmission data
 
-    transmission_ws = _get_corrected_wavelength_workspace(transmission_ws, all_detector_ids,
-                                                          calculate_transmission_state, data_type_str)
-    direct_ws = _get_corrected_wavelength_workspace(direct_ws, all_detector_ids,
-                                                    calculate_transmission_state, data_type_str)
-
     data_type = DataType(data_type_str)
+    transmission_ws = _get_corrected_wavelength_workspace(transmission_ws, all_detector_ids,
+                                                          calculate_transmission_state, data_type=data_type)
+    direct_ws = _get_corrected_wavelength_workspace(direct_ws, all_detector_ids,
+                                                    calculate_transmission_state, data_type=data_type)
+
 
     # 3. Fit
     output_workspace, unfitted_transmission_workspace = \
@@ -115,17 +115,17 @@ def _perform_fit(transmission_workspace, direct_workspace,
         raise RuntimeError("No transmission monitor has been provided.")
 
     # Get the fit setting for the correct data type, ie either for the Sample of the Can
-    fit_type = calculate_transmission_state.fit[data_type.value].fit_type
-    if fit_type is FitType.Logarithmic:
+    fit_type = calculate_transmission_state.fit[data_type].fit_type
+    if fit_type is FitType.LOGARITHMIC:
         fit_string = "Log"
-    elif fit_type is FitType.Polynomial:
+    elif fit_type is FitType.POLYNOMIAL:
         fit_string = "Polynomial"
     else:
         fit_string = "Linear"
 
     trans_options.update({"FitMethod": fit_string})
-    if fit_type is FitType.Polynomial:
-        polynomial_order = calculate_transmission_state.fit[data_type.value].polynomial_order
+    if fit_type is FitType.POLYNOMIAL:
+        polynomial_order = calculate_transmission_state.fit[data_type].polynomial_order
         trans_options.update({"PolynomialOrder": polynomial_order})
 
     trans_alg = create_unmanaged_algorithm(trans_name, **trans_options)
@@ -144,7 +144,7 @@ def _perform_fit(transmission_workspace, direct_workspace,
     if unfitted_transmission_workspace:
         unfitted_transmission_workspace.setYUnitLabel(y_unit_label_transmission_ratio)
 
-    if fit_type is FitType.NoFit:
+    if fit_type is FitType.NO_FIT:
         output_workspace = unfitted_transmission_workspace
     else:
         output_workspace = fitted_transmission_workspace
@@ -183,14 +183,14 @@ def _get_detector_ids_for_transmission_calculation(transmission_workspace, calcu
     return detector_ids_roi, detector_id_transmission_monitor, detector_id_default_transmission_monitor
 
 
-def _get_corrected_wavelength_workspace(workspace, detector_ids, calculate_transmission_state, data_type_str):
+def _get_corrected_wavelength_workspace(workspace, detector_ids, calculate_transmission_state, data_type):
     """
     Performs a prompt peak correction, a background correction, converts to wavelength and rebins.
 
     :param workspace: the workspace which is being corrected.
     :param detector_ids: a list of relevant detector ids
     :param calculate_transmission_state: a SANSStateCalculateTransmission state
-    :param data_type_str The component of the instrument which is to be reduced
+    :param data_type The component of the instrument which is to be reduced
     :return:  a corrected workspace.
     """
     # Extract the relevant spectra. These include
@@ -257,7 +257,7 @@ def _get_corrected_wavelength_workspace(workspace, detector_ids, calculate_trans
         wavelength_low = calculate_transmission_state.wavelength_full_range_low
         wavelength_high = calculate_transmission_state.wavelength_full_range_high
     else:
-        fit_state = calculate_transmission_state.fit[data_type_str]
+        fit_state = calculate_transmission_state.fit[data_type]
         wavelength_low = fit_state.wavelength_low if fit_state.wavelength_low \
             else calculate_transmission_state.wavelength_low[0]
         wavelength_high = fit_state.wavelength_high if fit_state.wavelength_high \

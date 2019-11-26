@@ -8,8 +8,6 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
-from state_test_helper import assert_validate_error, assert_raises_nothing
-
 from sans.common.enums import (RebinType, RangeStepType, FitType, DataType, SANSFacility, SANSInstrument)
 from sans.state.calculate_transmission import (StateCalculateTransmission, StateCalculateTransmissionLOQ,
                                                get_calculate_transmission_builder)
@@ -23,13 +21,12 @@ from sans.test_helper.file_information_mock import SANSFileInformationMock
 class StateCalculateTransmissionTest(unittest.TestCase):
     @staticmethod
     def _set_fit(state, default_settings, custom_settings, fit_key):
-        fit = state.fit[fit_key]
         for key, value in list(default_settings.items()):
             if key in custom_settings:
                 value = custom_settings[key]
+
             if value is not None:  # If the value is None, then don't set it
-                setattr(fit, key, value)
-        state.fit[fit_key] = fit
+                setattr(state.fit[fit_key], key, value)
 
     @staticmethod
     def _get_calculate_transmission_state(trans_entries, fit_entries):
@@ -54,14 +51,12 @@ class StateCalculateTransmissionTest(unittest.TestCase):
             if value is not None:  # If the value is None, then don't set it
                 setattr(state, key, value)
 
-        fit_settings = {"fit_type": FitType.Polynomial, "polynomial_order": 1, "wavelength_low": 12.,
+        fit_settings = {"fit_type": FitType.POLYNOMIAL, "polynomial_order": 1, "wavelength_low": 12.,
                         "wavelength_high": 232.}
         if fit_entries is None:
             fit_entries = {}
-        StateCalculateTransmissionTest._set_fit(state, fit_settings, fit_entries,
-                                                DataType.SAMPLE.value)
-        StateCalculateTransmissionTest._set_fit(state, fit_settings, fit_entries,
-                                                DataType.CAN.value)
+        StateCalculateTransmissionTest._set_fit(state, fit_settings, fit_entries, DataType.SAMPLE)
+        StateCalculateTransmissionTest._set_fit(state, fit_settings, fit_entries, DataType.CAN)
         return state
 
     @staticmethod
@@ -74,11 +69,12 @@ class StateCalculateTransmissionTest(unittest.TestCase):
     def check_bad_and_good_values(self, bad_trans=None, bad_fit=None, good_trans=None, good_fit=None):
         # Bad values
         state = self._get_calculate_transmission_state(bad_trans, bad_fit)
-        assert_validate_error(self, ValueError, state)
+        with self.assertRaises(ValueError):
+            state.validate()
 
         # Good values
         state = self._get_calculate_transmission_state(good_trans, good_fit)
-        assert_raises_nothing(self, state)
+        self.assertIsNone(state.validate())
 
     def test_that_is_sans_state_data_object(self):
         state = StateCalculateTransmissionLOQ()
@@ -183,8 +179,8 @@ class StateCalculateTransmissionTest(unittest.TestCase):
                                                    "background_TOF_monitor_stop": {"1": 2., "2": 2.}})
 
     def test_that_polynomial_order_can_only_be_set_with_polynomial_setting(self):
-        self.check_bad_and_good_values(bad_fit={"fit_type": FitType.Polynomial, "polynomial_order": 0},
-                                       good_fit={"fit_type": FitType.Polynomial,  "polynomial_order": 4})
+        self.check_bad_and_good_values(bad_fit={"fit_type": FitType.POLYNOMIAL, "polynomial_order": 0},
+                                       good_fit={"fit_type": FitType.POLYNOMIAL, "polynomial_order": 4})
 
     def test_that_raises_for_inconsistent_wavelength_in_fit(self):
         self.check_bad_and_good_values(bad_trans={"wavelength_low": None,  "wavelength_high": [2.]},
@@ -238,15 +234,15 @@ class StateCalculateTransmissionBuilderTest(unittest.TestCase):
         builder.set_background_TOF_roi_start(1.4)
         builder.set_background_TOF_roi_stop(34.4)
 
-        builder.set_Sample_fit_type(FitType.Linear)
-        builder.set_Sample_polynomial_order(0)
-        builder.set_Sample_wavelength_low(10.0)
-        builder.set_Sample_wavelength_high(20.0)
+        builder.set_sample_fit_type(FitType.LINEAR)
+        builder.set_sample_polynomial_order(0)
+        builder.set_sample_wavelength_low(10.0)
+        builder.set_sample_wavelength_high(20.0)
 
-        builder.set_Can_fit_type(FitType.Polynomial)
-        builder.set_Can_polynomial_order(3)
-        builder.set_Can_wavelength_low(10.0)
-        builder.set_Can_wavelength_high(20.0)
+        builder.set_can_fit_type(FitType.POLYNOMIAL)
+        builder.set_can_polynomial_order(3)
+        builder.set_can_wavelength_low(10.0)
+        builder.set_can_wavelength_high(20.0)
 
         state = builder.build()
 
@@ -278,15 +274,15 @@ class StateCalculateTransmissionBuilderTest(unittest.TestCase):
         self.assertEqual(state.background_TOF_roi_start,  1.4)
         self.assertEqual(state.background_TOF_roi_stop,  34.4)
 
-        self.assertEqual(state.fit[DataType.SAMPLE.value].fit_type, FitType.Linear)
-        self.assertEqual(state.fit[DataType.SAMPLE.value].polynomial_order, 0)
-        self.assertEqual(state.fit[DataType.SAMPLE.value].wavelength_low, 10.)
-        self.assertEqual(state.fit[DataType.SAMPLE.value].wavelength_high, 20.)
+        self.assertEqual(state.fit[DataType.SAMPLE].fit_type, FitType.LINEAR)
+        self.assertEqual(state.fit[DataType.SAMPLE].polynomial_order, 0)
+        self.assertEqual(state.fit[DataType.SAMPLE].wavelength_low, 10.)
+        self.assertEqual(state.fit[DataType.SAMPLE].wavelength_high, 20.)
 
-        self.assertEqual(state.fit[DataType.CAN.value].fit_type, FitType.Polynomial)
-        self.assertEqual(state.fit[DataType.CAN.value].polynomial_order, 3)
-        self.assertEqual(state.fit[DataType.CAN.value].wavelength_low, 10.)
-        self.assertEqual(state.fit[DataType.CAN.value].wavelength_high, 20.)
+        self.assertEqual(state.fit[DataType.CAN].fit_type, FitType.POLYNOMIAL)
+        self.assertEqual(state.fit[DataType.CAN].polynomial_order, 3)
+        self.assertEqual(state.fit[DataType.CAN].wavelength_low, 10.)
+        self.assertEqual(state.fit[DataType.CAN].wavelength_high, 20.)
 
 
 if __name__ == '__main__':

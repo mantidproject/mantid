@@ -149,14 +149,14 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         self.assertEqual(calculate_transmission.background_TOF_monitor_stop["2"],  98000)
         self.assertEqual(calculate_transmission.background_TOF_roi_start,  123)
         self.assertEqual(calculate_transmission.background_TOF_roi_stop,  466)
-        self.assertEqual(calculate_transmission.fit[DataType.SAMPLE.value].fit_type, FitType.Logarithmic)
-        self.assertEqual(calculate_transmission.fit[DataType.SAMPLE.value].wavelength_low, 1.5)
-        self.assertEqual(calculate_transmission.fit[DataType.SAMPLE.value].wavelength_high, 12.5)
-        self.assertEqual(calculate_transmission.fit[DataType.SAMPLE.value].polynomial_order, 0)
-        self.assertEqual(calculate_transmission.fit[DataType.CAN.value].fit_type, FitType.Logarithmic)
-        self.assertEqual(calculate_transmission.fit[DataType.CAN.value].wavelength_low, 1.5)
-        self.assertEqual(calculate_transmission.fit[DataType.CAN.value].wavelength_high, 12.5)
-        self.assertEqual(calculate_transmission.fit[DataType.CAN.value].polynomial_order, 0)
+        self.assertEqual(calculate_transmission.fit[DataType.SAMPLE].fit_type, FitType.LOGARITHMIC)
+        self.assertEqual(calculate_transmission.fit[DataType.SAMPLE].wavelength_low, 1.5)
+        self.assertEqual(calculate_transmission.fit[DataType.SAMPLE].wavelength_high, 12.5)
+        self.assertEqual(calculate_transmission.fit[DataType.SAMPLE].polynomial_order, 0)
+        self.assertEqual(calculate_transmission.fit[DataType.CAN].fit_type, FitType.LOGARITHMIC)
+        self.assertEqual(calculate_transmission.fit[DataType.CAN].wavelength_low, 1.5)
+        self.assertEqual(calculate_transmission.fit[DataType.CAN].wavelength_high, 12.5)
+        self.assertEqual(calculate_transmission.fit[DataType.CAN].polynomial_order, 0)
 
         # Wavelength and Pixel Adjustment
         wavelength_and_pixel_adjustment = adjustment.wavelength_and_pixel_adjustment

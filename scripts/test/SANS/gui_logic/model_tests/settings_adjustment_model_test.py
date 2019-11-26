@@ -116,19 +116,19 @@ class SettingsTransmissionModelTest(unittest.TestCase):
 
     def test_transmission_fit_defaults(self):
         state_gui_model = self.create_model()
-        self.assertEqual(state_gui_model.transmission_sample_fit_type, FitType.NoFit)
-        self.assertEqual(state_gui_model.transmission_can_fit_type, FitType.NoFit)
+        self.assertEqual(state_gui_model.transmission_sample_fit_type, FitType.NO_FIT)
+        self.assertEqual(state_gui_model.transmission_can_fit_type, FitType.NO_FIT)
         self.assertEqual(state_gui_model.transmission_sample_polynomial_order, 2)
         self.assertEqual(state_gui_model.transmission_can_polynomial_order, 2)
 
     def test_that_can_set_transmission_fit_options(self):
         state_gui_model = self.create_model()
-        state_gui_model.transmission_sample_fit_type = FitType.Logarithmic
-        state_gui_model.transmission_can_fit_type = FitType.Linear
+        state_gui_model.transmission_sample_fit_type = FitType.LOGARITHMIC
+        state_gui_model.transmission_can_fit_type = FitType.LINEAR
         state_gui_model.transmission_sample_polynomial_order = 2
         state_gui_model.transmission_can_polynomial_order = 2
-        self.assertEqual(state_gui_model.transmission_sample_fit_type, FitType.Logarithmic)
-        self.assertEqual(state_gui_model.transmission_can_fit_type, FitType.Linear)
+        self.assertEqual(state_gui_model.transmission_sample_fit_type, FitType.LOGARITHMIC)
+        self.assertEqual(state_gui_model.transmission_can_fit_type, FitType.LINEAR)
         self.assertEqual(state_gui_model.transmission_sample_polynomial_order, 2)
         self.assertEqual(state_gui_model.transmission_can_polynomial_order, 2)
 

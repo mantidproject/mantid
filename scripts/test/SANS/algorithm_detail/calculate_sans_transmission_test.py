@@ -149,22 +149,22 @@ class CalculateSansTransmissionTest(unittest.TestCase):
             calculate_transmission_builder.set_background_TOF_roi_stop(background_TOF_roi_stop)
 
         if sample_fit_type:
-            calculate_transmission_builder.set_Sample_fit_type(sample_fit_type)
+            calculate_transmission_builder.set_sample_fit_type(sample_fit_type)
         if sample_polynomial_order:
-            calculate_transmission_builder.set_Sample_polynomial_order(sample_polynomial_order)
+            calculate_transmission_builder.set_sample_polynomial_order(sample_polynomial_order)
         if sample_wavelength_low:
-            calculate_transmission_builder.set_Sample_wavelength_low(sample_wavelength_low)
+            calculate_transmission_builder.set_sample_wavelength_low(sample_wavelength_low)
         if sample_wavelength_high:
-            calculate_transmission_builder.set_Sample_wavelength_high(sample_wavelength_high)
+            calculate_transmission_builder.set_sample_wavelength_high(sample_wavelength_high)
 
         if can_fit_type:
-            calculate_transmission_builder.set_Can_fit_type(can_fit_type)
+            calculate_transmission_builder.set_can_fit_type(can_fit_type)
         if can_polynomial_order:
-            calculate_transmission_builder.set_Can_polynomial_order(can_polynomial_order)
+            calculate_transmission_builder.set_can_polynomial_order(can_polynomial_order)
         if can_wavelength_low:
-            calculate_transmission_builder.set_Can_wavelength_low(can_wavelength_low)
+            calculate_transmission_builder.set_can_wavelength_low(can_wavelength_low)
         if can_wavelength_high:
-            calculate_transmission_builder.set_Can_wavelength_high(can_wavelength_high)
+            calculate_transmission_builder.set_can_wavelength_high(can_wavelength_high)
         calculate_transmission = calculate_transmission_builder.build()
         state.adjustment.calculate_transmission = calculate_transmission
         return state
@@ -239,7 +239,7 @@ class CalculateSansTransmissionTest(unittest.TestCase):
                                                          wavelength_step_type=RangeStepType.LIN,
                                                          background_TOF_general_start=5000.,
                                                          background_TOF_general_stop=10000., incident_monitor=1,
-                                                         transmission_monitor=3, sample_fit_type=FitType.Linear,
+                                                         transmission_monitor=3, sample_fit_type=FitType.LINEAR,
                                                          sample_polynomial_order=0, sample_wavelength_low=2.,
                                                          sample_wavelength_high=8.)
         # Get a test monitor workspace with 4 bins where the first bin is the back ground
@@ -279,7 +279,7 @@ class CalculateSansTransmissionTest(unittest.TestCase):
                                                          background_TOF_monitor_stop=background_TOF_monitor_stop,
                                                          incident_monitor=incident_spectrum,
                                                          transmission_monitor=transmission_spectrum,
-                                                         can_fit_type=FitType.Linear,
+                                                         can_fit_type=FitType.LINEAR,
                                                          can_polynomial_order=0, can_wavelength_low=2.,
                                                          can_wavelength_high=8.)
         # Get a test monitor workspace with 4 bins where the first bin is the back ground
@@ -318,7 +318,7 @@ class CalculateSansTransmissionTest(unittest.TestCase):
                                                          background_TOF_general_start=5000.,
                                                          background_TOF_general_stop=10000., incident_monitor=1,
                                                          transmission_radius_on_detector=0.01,
-                                                         sample_fit_type=FitType.Linear,
+                                                         sample_fit_type=FitType.LINEAR,
                                                          sample_polynomial_order=0, sample_wavelength_low=2.,
                                                          sample_wavelength_high=8.)
         # Gets the full workspace

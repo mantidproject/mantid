@@ -134,7 +134,7 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertEqual(view.transmission_monitor, 4)
         self.assertEqual(view.transmission_mn_4_shift, -70)
         self.assertTrue(view.transmission_sample_use_fit)
-        self.assertEqual(view.transmission_sample_fit_type, FitType.Logarithmic)
+        self.assertEqual(view.transmission_sample_fit_type, FitType.LOGARITHMIC)
         self.assertEqual(view.transmission_sample_polynomial_order, 2)
         self.assertEqual(view.transmission_sample_wavelength_min, 1.5)
         self.assertEqual(view.transmission_sample_wavelength_max, 12.5)

@@ -1195,49 +1195,49 @@ class StateDirectorISIS(object):
             # As usual if there are multiple settings for a specific case, then the last in the list is used.
 
             # 1 Fit type settings
-            clear_settings = [item for item in fit_general if item.data_type is None and item.fit_type is FitType.NoFit]
+            clear_settings = [item for item in fit_general if item.data_type is None and item.fit_type is FitType.NO_FIT]
 
             if clear_settings:
                 check_if_contains_only_one_element(clear_settings, FitId.general)
                 clear_settings = clear_settings[-1]
                 # Will set the fitting to NoFit
-                self._calculate_transmission_builder.set_Sample_fit_type(clear_settings.fit_type)
-                self._calculate_transmission_builder.set_Can_fit_type(clear_settings.fit_type)
+                self._calculate_transmission_builder.set_sample_fit_type(clear_settings.fit_type)
+                self._calculate_transmission_builder.set_can_fit_type(clear_settings.fit_type)
 
             # 2. General settings
             general_settings = [item for item in fit_general if item.data_type is None and
-                                item.fit_type is not FitType.NoFit]
+                                item.fit_type is not FitType.NO_FIT]
             if general_settings:
                 check_if_contains_only_one_element(general_settings, FitId.general)
                 general_settings = general_settings[-1]
-                self._calculate_transmission_builder.set_Sample_fit_type(general_settings.fit_type)
-                self._calculate_transmission_builder.set_Sample_polynomial_order(general_settings.polynomial_order)
-                self._calculate_transmission_builder.set_Sample_wavelength_low(general_settings.start)
-                self._calculate_transmission_builder.set_Sample_wavelength_high(general_settings.stop)
-                self._calculate_transmission_builder.set_Can_fit_type(general_settings.fit_type)
-                self._calculate_transmission_builder.set_Can_polynomial_order(general_settings.polynomial_order)
-                self._calculate_transmission_builder.set_Can_wavelength_low(general_settings.start)
-                self._calculate_transmission_builder.set_Can_wavelength_high(general_settings.stop)
+                self._calculate_transmission_builder.set_sample_fit_type(general_settings.fit_type)
+                self._calculate_transmission_builder.set_sample_polynomial_order(general_settings.polynomial_order)
+                self._calculate_transmission_builder.set_sample_wavelength_low(general_settings.start)
+                self._calculate_transmission_builder.set_sample_wavelength_high(general_settings.stop)
+                self._calculate_transmission_builder.set_can_fit_type(general_settings.fit_type)
+                self._calculate_transmission_builder.set_can_polynomial_order(general_settings.polynomial_order)
+                self._calculate_transmission_builder.set_can_wavelength_low(general_settings.start)
+                self._calculate_transmission_builder.set_can_wavelength_high(general_settings.stop)
 
             # 3. Sample settings
             sample_settings = [item for item in fit_general if item.data_type is DataType.SAMPLE]
             if sample_settings:
                 check_if_contains_only_one_element(sample_settings, FitId.general)
                 sample_settings = sample_settings[-1]
-                self._calculate_transmission_builder.set_Sample_fit_type(sample_settings.fit_type)
-                self._calculate_transmission_builder.set_Sample_polynomial_order(sample_settings.polynomial_order)
-                self._calculate_transmission_builder.set_Sample_wavelength_low(sample_settings.start)
-                self._calculate_transmission_builder.set_Sample_wavelength_high(sample_settings.stop)
+                self._calculate_transmission_builder.set_sample_fit_type(sample_settings.fit_type)
+                self._calculate_transmission_builder.set_sample_polynomial_order(sample_settings.polynomial_order)
+                self._calculate_transmission_builder.set_sample_wavelength_low(sample_settings.start)
+                self._calculate_transmission_builder.set_sample_wavelength_high(sample_settings.stop)
 
             # 4. Can settings
             can_settings = [item for item in fit_general if item.data_type is DataType.CAN]
             if can_settings:
                 check_if_contains_only_one_element(can_settings, FitId.general)
                 can_settings = can_settings[-1]
-                self._calculate_transmission_builder.set_Can_fit_type(can_settings.fit_type)
-                self._calculate_transmission_builder.set_Can_polynomial_order(can_settings.polynomial_order)
-                self._calculate_transmission_builder.set_Can_wavelength_low(can_settings.start)
-                self._calculate_transmission_builder.set_Can_wavelength_high(can_settings.stop)
+                self._calculate_transmission_builder.set_can_fit_type(can_settings.fit_type)
+                self._calculate_transmission_builder.set_can_polynomial_order(can_settings.polynomial_order)
+                self._calculate_transmission_builder.set_can_wavelength_low(can_settings.start)
+                self._calculate_transmission_builder.set_can_wavelength_high(can_settings.stop)
 
         # Set the wavelength default configuration
         set_wavelength_limits(self._calculate_transmission_builder, user_file_items)

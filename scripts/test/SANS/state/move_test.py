@@ -6,13 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import unittest
-import mantid
 
 from sans.state.move import (StateMoveLOQ, StateMoveSANS2D, StateMoveLARMOR, StateMoveZOOM, StateMove,
                              StateMoveDetector, get_move_builder)
 from sans.state.data import get_data_builder
 from sans.common.enums import (CanonicalCoordinates, SANSFacility, DetectorType, SANSInstrument)
-from state_test_helper import assert_validate_error, assert_raises_nothing
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
@@ -27,9 +25,11 @@ class StateMoveWorkspaceTest(unittest.TestCase):
         state.detectors[DetectorType.LAB.value].detector_name = "test"
         state.detectors[DetectorType.HAB.value].detector_name_short = "test"
         state.detectors[DetectorType.LAB.value].detector_name_short = "test"
-        assert_validate_error(self, ValueError, state)
+        with self.assertRaises(ValueError):
+            state.validate()
+
         state.detectors[DetectorType.HAB.value].detector_name = "test"
-        assert_raises_nothing(self, state)
+        self.assertIsNone(state.validate())
 
     def test_that_raises_if_the_short_detector_name_is_not_set_up(self):
         state = StateMove()
@@ -38,9 +38,11 @@ class StateMoveWorkspaceTest(unittest.TestCase):
         state.detectors[DetectorType.HAB.value].detector_name = "test"
         state.detectors[DetectorType.LAB.value].detector_name = "test"
         state.detectors[DetectorType.HAB.value].detector_name_short = "test"
-        assert_validate_error(self, ValueError, state)
+        with self.assertRaises(ValueError):
+            state.validate()
+
         state.detectors[DetectorType.LAB.value].detector_name_short = "test"
-        assert_raises_nothing(self, state)
+        self.assertIsNone(state.validate())
 
     def test_that_general_isis_default_values_are_set_up(self):
         state = StateMove()

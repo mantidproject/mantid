@@ -28,6 +28,7 @@ from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 class TestDirector(object):
     """ The purpose of this builder is to create a valid state object for tests"""
+
     def __init__(self):
         super(TestDirector, self).__init__()
         self.data_state = None
@@ -152,14 +153,14 @@ class TestDirector(object):
             calculate_transmission_builder.set_background_TOF_general_start(1000.)
             calculate_transmission_builder.set_background_TOF_general_stop(2000.)
 
-            calculate_transmission_builder.set_Sample_fit_type(FitType.Linear)
-            calculate_transmission_builder.set_Sample_polynomial_order(0)
-            calculate_transmission_builder.set_Sample_wavelength_low(1.0)
-            calculate_transmission_builder.set_Sample_wavelength_high(10.0)
-            calculate_transmission_builder.set_Can_fit_type(FitType.Polynomial)
-            calculate_transmission_builder.set_Can_polynomial_order(3)
-            calculate_transmission_builder.set_Can_wavelength_low(10.0)
-            calculate_transmission_builder.set_Can_wavelength_high(20.0)
+            calculate_transmission_builder.set_sample_fit_type(FitType.LINEAR)
+            calculate_transmission_builder.set_sample_polynomial_order(0)
+            calculate_transmission_builder.set_sample_wavelength_low(1.0)
+            calculate_transmission_builder.set_sample_wavelength_high(10.0)
+            calculate_transmission_builder.set_can_fit_type(FitType.POLYNOMIAL)
+            calculate_transmission_builder.set_can_polynomial_order(3)
+            calculate_transmission_builder.set_can_wavelength_low(10.0)
+            calculate_transmission_builder.set_can_wavelength_high(20.0)
             calculate_transmission = calculate_transmission_builder.build()
 
             # Wavelength and pixel adjustment

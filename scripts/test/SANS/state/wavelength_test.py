@@ -5,13 +5,12 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-import unittest
-import mantid
 
-from sans.state.wavelength import (StateWavelength, get_wavelength_builder)
-from sans.state.data import get_data_builder
+import unittest
+
 from sans.common.enums import (SANSFacility, SANSInstrument, RebinType, RangeStepType)
-from state_test_helper import assert_validate_error, assert_raises_nothing
+from sans.state.data import get_data_builder
+from sans.state.wavelength import (StateWavelength, get_wavelength_builder)
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
@@ -27,20 +26,27 @@ class StateWavelengthTest(unittest.TestCase):
     def test_that_raises_when_wavelength_entry_is_missing(self):
         # Arrange
         state = StateWavelength()
-        assert_validate_error(self, ValueError, state)
+        with self.assertRaises(ValueError):
+            state.validate()
+
         state.wavelength_low = [1.]
-        assert_validate_error(self, ValueError, state)
+        with self.assertRaises(ValueError):
+            state.validate()
+
         state.wavelength_high = [2.]
-        assert_validate_error(self, ValueError, state)
+        with self.assertRaises(ValueError):
+            state.validate()
+
         state.wavelength_step = 2.
-        assert_raises_nothing(self, state)
+        self.assertIsNone(state.validate())
 
     def test_that_raises_when_lower_wavelength_is_smaller_than_high_wavelength(self):
         state = StateWavelength()
         state.wavelength_low = [2.]
         state.wavelength_high = [1.]
         state.wavelength_step = 2.
-        assert_validate_error(self, ValueError, state)
+        with self.assertRaises(ValueError):
+            state.validate()
 
 
 # ----------------------------------------------------------------------------------------------------------------------
