@@ -11,6 +11,7 @@ import mantid
 
 from mantid.kernel import (PropertyManagerProperty, PropertyManager)
 from mantid.api import Algorithm
+from mantid.py3compat import Enum
 
 from sans.state.state_base import (StringParameter, BoolParameter, FloatParameter, PositiveFloatParameter,
                                    PositiveIntegerParameter, DictParameter, ClassTypeParameter,
@@ -52,6 +53,20 @@ class StateBaseTestClass(StateBase):
 
     def validate(self):
         pass
+
+
+class FakeEnumClass(Enum):
+    FOO = 1
+    BAR = "2"
+
+
+class ExampleWrapper(StateBase):
+    # This has to be at the top module level, else the module name finding will fail
+    _foo = FakeEnumClass.FOO
+    bar = FakeEnumClass.BAR
+
+    def validate(self):
+        return True
 
 
 class TypedParameterTest(unittest.TestCase):
@@ -225,6 +240,13 @@ class ComplexState(StateBase):
 
 
 class TestStateBase(unittest.TestCase):
+    class FakeAlgorithm(Algorithm):
+        def PyInit(self):
+            self.declareProperty(PropertyManagerProperty("Args"))
+
+        def PyExec(self):
+            pass
+
     def _assert_simple_state(self, state):
         self.assertEqual(state.string_parameter,  "String_in_SimpleState")
         self.assertFalse(state.bool_parameter)
@@ -255,21 +277,34 @@ class TestStateBase(unittest.TestCase):
         self.assertEqual(state.class_type_list_parameter[1],  TestType.TypeB)
 
         self.assertEqual(state.sub_state_very_simple.string_parameter,  "test_in_very_simple")
-        
+
+    def test_that_enum_can_be_serialized(self):
+        original_obj = ExampleWrapper()
+
+        # Serializing test
+        serialized = original_obj.property_manager
+        self.assertTrue("bar" in serialized)
+        self.assertTrue("_foo" in serialized)
+        self.assertTrue(isinstance(serialized["bar"], str), "The type was not converted to a string")
+        self.assertTrue(isinstance(serialized["_foo"], str), "The type was not converted to a string")
+
+        # Deserializing Test
+        fake = TestStateBase.FakeAlgorithm()
+        fake.initialize()
+        fake.setProperty("Args", serialized)
+        property_manager = fake.getProperty("Args").value
+
+        new_obj = create_deserialized_sans_state_from_property_manager(property_manager)
+        self.assertEqual(FakeEnumClass.BAR, new_obj.bar)
+        self.assertEqual(FakeEnumClass.FOO, new_obj._foo)
+
     def test_that_sans_state_can_be_serialized_and_deserialized_when_going_through_an_algorithm(self):
-        class FakeAlgorithm(Algorithm):
-            def PyInit(self):
-                self.declareProperty(PropertyManagerProperty("Args"))
-
-            def PyExec(self):
-                pass
-
         # Arrange
         state = ComplexState()
 
         # Act
         serialized = state.property_manager
-        fake = FakeAlgorithm()
+        fake = TestStateBase.FakeAlgorithm()
         fake.initialize()
         fake.setProperty("Args", serialized)
         property_manager = fake.getProperty("Args").value
