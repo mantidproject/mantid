@@ -13,7 +13,7 @@ from __future__ import (absolute_import, division, print_function)
 import copy
 import json
 
-from sans.common.enums import (Coordinates, CanonicalCoordinates, SANSInstrument, DetectorType)
+from sans.common.enums import (CanonicalCoordinates, SANSInstrument, DetectorType)
 from sans.state.automatic_setters import automatic_setters
 from sans.state.state_base import (StateBase, FloatParameter, DictParameter, ClassTypeParameter,
                                    StringWithNoneParameter, rename_descriptor_names)
@@ -83,9 +83,10 @@ class StateMoveDetector(StateBase):
 @rename_descriptor_names
 class StateMove(StateBase):
     sample_offset = FloatParameter()
-    sample_offset_direction = ClassTypeParameter(Coordinates)
     detectors = DictParameter()
     monitor_names = DictParameter()
+
+    sample_offset_direction = None
 
     def __init__(self):
         super(StateMove, self).__init__()

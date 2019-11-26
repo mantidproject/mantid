@@ -127,13 +127,10 @@ class SANSDataType(Enum):
 # ---------------------------
 #  Coordinate Definitions (3D)
 # --------------------------
-class Coordinates(object):
-    pass
-
-
-@serializable_enum("X", "Y", "Z")
-class CanonicalCoordinates(Coordinates):
-    pass
+class CanonicalCoordinates(Enum):
+    X = "X"
+    Y = "Y"
+    Z = "Z"
 
 
 # --------------------------
