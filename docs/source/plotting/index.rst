@@ -486,11 +486,11 @@ Custom Colormap (MantidWorkbench)
 #################################
 
 | In Workbench, a Custom Colormap is more complicated (`See here for more details <https://matplotlib.org/3.1.0/tutorials/colors/colormap-manipulation.html>`_), but there are also more options to make them. 
-| NB. These are not saved in the MantidInstall and so will have to be run and plotted from the script eachtime.
+| NB. These can be registered and remain for the current session, but need to be rerun if Mantid has been reopened.
 | *Method A is easier but Method B has greater functionality.*
 
 - **A) Combine Premade Colormaps** 
-The Script below combines Red-to-White with Green-to-White to produce Red-to-White-to-Green. Just Green-to-Red is not possible. You can view the preset
+The Script below combines Red-to-White with Green-to-White (reverse) to produce Red-to-White-to-Green. Just Green-to-Red is not possible. You can view the premade Colormaps `here <https://matplotlib.org/2.2.3/gallery/color/colormap_reference.html?highlight=colormap>`_.
 
 .. plot::
    :include-source:
@@ -510,6 +510,7 @@ The Script below combines Red-to-White with Green-to-White to produce Red-to-Whi
    newcolors = np.vstack((top(np.linspace(0, 1, 256)),bottom(np.linspace(0, 1, 256))))
    Newname = 'GreenRed'
    newcmp = ListedColormap(newcolors, name=Newname)
+   plt.register_cmap(name= Newname, cmap=newcmp)
 
    ''' Produce 2D plot as in the 'Simple Plots' section '''
    from mantid import plots
@@ -537,7 +538,7 @@ The Script below combines Red-to-White with Green-to-White to produce Red-to-Whi
 - **B) Using the** `Colormap <https://colormap.readthedocs.io/en/latest/index.html>`_**Package** 
 Combining any 2 or 3 colours is possible!!! 
 
-Firstly, (On Windows) open a command prompt and cd into the C:\MantidInstall\bin\ directory. Then run `scripts\pip install colormap`. Also run `scripts\pip install easydev`
+Firstly, (On Windows) open a command prompt and cd into the C:\MantidInstall\bin\ directory. Then run `scripts\pip install colormap`. Also run `scripts\pip install easydev`. Then re-open Workbench and use one of the following methods (as mentioned in the Custom Color Cycle section, HTML codes can be found `here <https://www.rapidtables.com/web/color/html-color-codes.html>`_):
 
 .. plot::
    :include-source:
@@ -548,6 +549,7 @@ Firstly, (On Windows) open a command prompt and cd into the C:\MantidInstall\bin
    # LowerRGB = 1,1,1 -> White // MiddleRBG = 1,0,1 -> Purple // HighRBG = 0,0,0 -> Black
    mycmap1 = c1.cmap( {'red':[1,1,0], 'green':[1,0,0], 'blue':[1,1,0]})
    c1.test_colormap(mycmap1) #Test Colormap
+   plt.register_cmap(name='NewWhitePurpleBlack', cmap=mycmap1) #important line to register the new Colormap
 
 .. plot::
    :include-source:
@@ -557,6 +559,7 @@ Firstly, (On Windows) open a command prompt and cd into the C:\MantidInstall\bin
    # For this Cmap, simply enter any names at the link above, or any valid #HTML-code.
    mycmap2 = c2.cmap_bicolor('mediumvioletred','#27FCAE')
    c2.test_colormap(mycmap2)
+   plt.register_cmap(name='NewTurquoiseViolet', cmap=mycmap2) #important line to register the new Colormap
 
 .. plot::
    :include-source:
@@ -566,6 +569,7 @@ Firstly, (On Windows) open a command prompt and cd into the C:\MantidInstall\bin
    # As in Method 2, simply enter any names at the link above, or any valid #HTML-code.
    mycmap3 = c3.cmap_linear('mediumvioletred','#27FCAE', 'blue')
    c3.test_colormap(mycmap3)
+   plt.register_cmap(name='NewTurquoiseVioletBlue', cmap=mycmap3) #important line to register the new Colormap
 
 Test your chosen method as follows, setting ax.pcolormesh parameter cmap to the New Colormap:
 
@@ -576,6 +580,7 @@ Test your chosen method as follows, setting ax.pcolormesh parameter cmap to the 
    # As in Method 2, simply enter any names at the link above, or any valid #HTML-code.
    mycmap3 = c3.cmap_linear('mediumvioletred','#27FCAE', 'blue')
    c3.test_colormap(mycmap3)
+   plt.register_cmap(name='NewTurquoiseVioletBlue', cmap=mycmap3) #important line to register the new Colormap
 
    ''' Produce 2D plot as in the 'Simple Plots' section '''
    from mantid.simpleapi import *
