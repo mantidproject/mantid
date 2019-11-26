@@ -7,9 +7,11 @@
 # pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
 
+from copy import deepcopy
 from qtpy.QtWidgets import QMessageBox
 
 from Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT
+from Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
 from mantidqt.utils.asynchronous import AsyncTask
 from mantid.simpleapi import logger
 from mantidqt.utils.observer_pattern import Observable
@@ -22,12 +24,13 @@ class CalibrationPresenter(object):
         self.worker = None
         self.calibration_notifier = self.CalibrationNotifier(self)
 
-        self.current_calibration = {"vanadium_path": None, "ceria_path": None, "instrument": None}
-        self.pending_calibration = {"vanadium_path": None, "ceria_path": None, "instrument": None}
+        self.current_calibration = CalibrationInfo()
+        self.pending_calibration = CalibrationInfo()
 
         # Connect view signals to local functions.
         self.view.set_on_calibrate_clicked(self.on_calibrate_clicked)
         self.view.set_enable_controls_connection(self.set_calibrate_controls_enabled)
+        self.view.set_update_fields_connection(self.set_field_values)
         self.view.set_on_radio_new_toggled(self.set_create_new_enabled)
         self.view.set_on_radio_existing_toggled(self.set_load_existing_enabled)
 
@@ -53,9 +56,7 @@ class CalibrationPresenter(object):
                 return
             filename = self.view.get_path_filename()
             instrument, vanadium_no, calib_no = self.model.load_existing_gsas_parameters(filename)
-            self.pending_calibration["vanadium_path"] = vanadium_no
-            self.pending_calibration["ceria_path"] = calib_no
-            self.pending_calibration["instrument"] = instrument
+            self.pending_calibration.set_calibration(vanadium_no, calib_no, instrument)
             self.set_current_calibration()
 
     def start_calibration_worker(self, vanadium_path, calib_path, plot_output, rb_num):
@@ -73,9 +74,7 @@ class CalibrationPresenter(object):
         },
                                 error_cb=self._on_error,
                                 success_cb=self._on_success)
-        self.pending_calibration["vanadium_path"] = vanadium_path
-        self.pending_calibration["ceria_path"] = calib_path
-        self.pending_calibration["instrument"] = self.instrument
+        self.pending_calibration.set_calibration(vanadium_path, calib_path, self.instrument)
         self.set_calibrate_controls_enabled(False)
         self.worker.start()
 
@@ -85,14 +84,14 @@ class CalibrationPresenter(object):
     def set_current_calibration(self, success_info=None):
         if success_info:
             logger.information("Thread executed in " + str(success_info.elapsed_time) + " seconds.")
-        self.current_calibration = self.pending_calibration
+        self.current_calibration = deepcopy(self.pending_calibration)
         self.calibration_notifier.notify_subscribers(self.current_calibration)
-        self.set_field_values()
-        self.pending_calibration = {"vanadium_path": None, "ceria_path": None, "instrument": None}
+        self.emit_update_fields_signal()
+        self.pending_calibration.clear()
 
     def set_field_values(self):
-        self.view.set_calib_text(self.current_calibration["ceria_path"])
-        self.view.set_vanadium_text(self.current_calibration["vanadium_path"])
+        self.view.set_calib_text(self.current_calibration.get_ceria())
+        self.view.set_vanadium_text(self.current_calibration.get_vanadium())
 
     def set_instrument_override(self, instrument):
         instrument = INSTRUMENT_DICT[instrument]
@@ -113,6 +112,9 @@ class CalibrationPresenter(object):
 
     def emit_enable_button_signal(self):
         self.view.sig_enable_controls.emit(True)
+
+    def emit_update_fields_signal(self):
+        self.view.sig_update_fields.emit()
 
     def set_calibrate_controls_enabled(self, enabled):
         self.view.set_calibrate_button_enabled(enabled)

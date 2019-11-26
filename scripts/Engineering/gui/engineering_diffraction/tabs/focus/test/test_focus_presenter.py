@@ -12,6 +12,7 @@ import unittest
 from mantid.py3compat import mock
 from mantid.py3compat.mock import patch
 from Engineering.gui.engineering_diffraction.tabs.focus import model, view, presenter
+from Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
 
 tab_path = "Engineering.gui.engineering_diffraction.tabs.focus"
 
@@ -25,10 +26,9 @@ class FocusPresenterTest(unittest.TestCase):
     @patch(tab_path + ".presenter.check_workspaces_exist")
     @patch(tab_path + ".presenter.FocusPresenter.start_focus_worker")
     def test_worker_started_with_correct_params(self, worker, wsp_exists):
-        self.presenter.current_calibration = {
-            "vanadium_path": "Fake/Path",
-            "ceria_path": "Fake/Path"
-        }
+        self.presenter.current_calibration = CalibrationInfo(vanadium_path="Fake/Path",
+                                                             ceria_path="Fake/Path",
+                                                             instrument="ENGINX")
         self.view.get_focus_filename.return_value = "305738"
         self.view.get_north_bank.return_value = False
         self.view.get_south_bank.return_value = True
@@ -101,20 +101,21 @@ class FocusPresenterTest(unittest.TestCase):
 
     @patch(tab_path + ".presenter.FocusPresenter._create_error_message")
     def test_validate_with_invalid_calibration(self, create_error):
-        self.presenter.current_calibration = {"vanadium_path": None, "ceria_path": None}
+        self.presenter.current_calibration = CalibrationInfo(vanadium_path=None,
+                                                             ceria_path=None,
+                                                             instrument=None)
         banks = ["North", "South"]
 
         self.presenter._validate(banks)
         create_error.assert_called_with(
-            "Load a calibration from the Calibration tab before focusing.")
+            "Create or Load a calibration via the Calibration tab before focusing.")
 
     @patch(tab_path + ".presenter.check_workspaces_exist")
     @patch(tab_path + ".presenter.FocusPresenter._create_error_message")
     def test_validate_while_searching(self, create_error, wsp_check):
-        self.presenter.current_calibration = {
-            "vanadium_path": "Fake/File/Path",
-            "ceria_path": "Fake/Path"
-        }
+        self.presenter.current_calibration = CalibrationInfo(vanadium_path="Fake/File/Path",
+                                                             ceria_path="Fake/Path",
+                                                             instrument="ENGINX")
         self.view.is_searching.return_value = True
         wsp_check.return_value = True
         banks = ["North", "South"]
@@ -125,10 +126,9 @@ class FocusPresenterTest(unittest.TestCase):
     @patch(tab_path + ".presenter.check_workspaces_exist")
     @patch(tab_path + ".presenter.FocusPresenter._create_error_message")
     def test_validate_with_no_banks_selected(self, create_error, wsp_check):
-        self.presenter.current_calibration = {
-            "vanadium_path": "Fake/Path",
-            "ceria_path": "Fake/Path"
-        }
+        self.presenter.current_calibration = CalibrationInfo(vanadium_path="Fake/Path",
+                                                             ceria_path="Fake/Path",
+                                                             instrument="ENGINX")
         self.view.is_searching.return_value = False
         banks = []
         wsp_check.return_value = True

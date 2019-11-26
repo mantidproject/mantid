@@ -11,6 +11,7 @@ from qtpy.QtWidgets import QMessageBox
 
 from Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT
 from Engineering.gui.engineering_diffraction.tabs.common.vanadium_corrections import check_workspaces_exist
+from Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
 from mantidqt.utils.asynchronous import AsyncTask
 from mantidqt.utils.observer_pattern import Observer
 from mantid.simpleapi import logger
@@ -28,7 +29,7 @@ class FocusPresenter(object):
         self.view.set_enable_controls_connection(self.set_focus_controls_enabled)
 
         # Variables from other GUI tabs.
-        self.current_calibration = {"vanadium_path": None, "ceria_path": None}
+        self.current_calibration = CalibrationInfo()
         self.instrument = "ENGINX"
         self.rb_num = None
 
@@ -70,10 +71,15 @@ class FocusPresenter(object):
         """
         if not self.view.get_focus_valid():
             return False
-        if self.current_calibration["vanadium_path"] is None or not check_workspaces_exist():
+        if not self.current_calibration.is_valid():
             self._create_error_message(
-                "Load a calibration from the Calibration tab before focusing.")
+                "Create or Load a calibration via the Calibration tab before focusing.")
             return False
+        if self.current_calibration.get_instrument() != self.instrument:
+            self._create_error_message(
+                "Please make sure the selected instrument matches instrument for the current calibration.\n"
+                "The instrument for the calibration is: " +
+                self.current_calibration.get_instrument())
         if self.view.is_searching():
             return False
         if len(banks) == 0:

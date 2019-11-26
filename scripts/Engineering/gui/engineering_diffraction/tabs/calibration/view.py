@@ -15,6 +15,7 @@ Ui_calib, _ = load_ui(__file__, "calibration_tab.ui")
 
 class CalibrationView(QtWidgets.QWidget, Ui_calib):
     sig_enable_controls = QtCore.Signal(bool)
+    sig_update_fields = QtCore.Signal()
 
     def __init__(self, parent=None, instrument="ENGINX"):
         super(CalibrationView, self).__init__(parent)
@@ -53,6 +54,9 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
 
     def set_enable_controls_connection(self, slot):
         self.sig_enable_controls.connect(slot)
+
+    def set_update_fields_connection(self, slot):
+        self.sig_update_fields.connect(slot)
 
     # =================
     # Component Setters
