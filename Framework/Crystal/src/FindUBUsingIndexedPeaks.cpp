@@ -195,22 +195,22 @@ void FindUBUsingIndexedPeaks::exec() {
            << satetolerance << " ,out of " << n_peaks << " Peaks \n";
     g_log.notice(stream.str());
 
-    OrientedLattice o_lattice;
-    o_lattice.setUB(UB);
-    o_lattice.setModUB(modUB);
-    o_lattice.setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4],
-                       sigabc[5]);
+    auto o_lattice = std::make_unique<OrientedLattice>();
+    o_lattice->setUB(UB);
+    o_lattice->setModUB(modUB);
+    o_lattice->setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4],
+                        sigabc[5]);
     double ind_count_inv = 1. / static_cast<double>(indexed_count);
     errorHKL *= ind_count_inv;
-    o_lattice.setErrorModHKL(errorHKL);
+    o_lattice->setErrorModHKL(errorHKL);
 
-    o_lattice.setMaxOrder(MaxOrder);
-    o_lattice.setCrossTerm(CrossTerm);
+    o_lattice->setMaxOrder(MaxOrder);
+    o_lattice->setCrossTerm(CrossTerm);
 
     // Show the modified lattice parameters
-    logLattice(o_lattice, ModDim);
+    logLattice(*o_lattice, ModDim);
 
-    ws->mutableSample().setOrientedLattice(&o_lattice);
+    ws->mutableSample().setOrientedLattice(std::move(o_lattice));
   }
 }
 void FindUBUsingIndexedPeaks::logLattice(OrientedLattice &o_lattice,

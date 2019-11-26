@@ -2377,9 +2377,8 @@ public:
         ws->hasOrientedLattice(), false);
 
     // add an oriented lattice
-    OrientedLattice *latt = new OrientedLattice(1.0, 2.0, 3.0, 90, 90, 90);
-    ws->mutableSample().setOrientedLattice(latt);
-    delete latt;
+    ws->mutableSample().setOrientedLattice(
+        std::make_unique<OrientedLattice>(1.0, 2.0, 3.0, 90, 90, 90));
     TSM_ASSERT_EQUALS("A workspace with an oriented lattice should report true",
                       ws->hasOrientedLattice(), true);
 

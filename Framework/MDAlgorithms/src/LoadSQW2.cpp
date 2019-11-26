@@ -238,8 +238,6 @@ boost::shared_ptr<API::ExperimentInfo> LoadSQW2::readSingleSPEHeader() {
   V3D uVec(floats[6], floats[7], floats[8]),
       vVec(floats[9], floats[10], floats[11]);
   lattice->setUFromVectors(uVec, vVec);
-  // Lattice is copied into the Sample object
-  sample.setOrientedLattice(lattice.get());
   if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
     std::stringstream os;
     os << "Lattice:"
@@ -255,6 +253,7 @@ boost::shared_ptr<API::ExperimentInfo> LoadSQW2::readSingleSPEHeader() {
        << "Inverse B matrix (calculated): " << lattice->getBinv() << "\n";
     g_log.debug(os.str());
   }
+  sample.setOrientedLattice(std::move(lattice));
 
   // goniometer angles
   float psi(0.0f), omega(0.0f), dpsi(0.0f), gl(0.0f), gs(0.0f);

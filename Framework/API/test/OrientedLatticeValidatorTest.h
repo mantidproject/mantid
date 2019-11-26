@@ -33,9 +33,9 @@ public:
   }
 
   void test_isValid_is_valid_when_latticeDefined() {
-    OrientedLattice lattice;
     auto info = boost::make_shared<ExperimentInfo>();
-    info->mutableSample().setOrientedLattice(&lattice);
+    info->mutableSample().setOrientedLattice(
+        std::make_unique<OrientedLattice>());
 
     OrientedLatticeValidator validator;
     TS_ASSERT_EQUALS(validator.isValid(info), "");

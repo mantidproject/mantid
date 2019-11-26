@@ -611,8 +611,8 @@ private:
   PeaksWorkspace_sptr makeWorkspace(const PeakParameters &params) {
     auto ws = boost::make_shared<PeaksWorkspace>();
     ws->setInstrument(params.instrument);
-    OrientedLattice lattice(params.lattice);
-    ws->mutableSample().setOrientedLattice(&lattice);
+    ws->mutableSample().setOrientedLattice(
+        std::make_unique<OrientedLattice>(params.lattice));
     ws->mutableRun().setGoniometer(params.goniometer, false);
     return ws;
   }
