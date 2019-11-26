@@ -9,7 +9,6 @@ import numpy as np
 
 from mantidqt.plotting.functions import plot
 from mantid.api import AnalysisDataService
-from mantid.plots import MantidAxes
 
 
 class PlotWidgetModel(object):
@@ -139,7 +138,6 @@ class PlotWidgetModel(object):
         ax.legend(prop=dict(size=7))
 
         self.plot_figure.canvas.draw()
-
 
     def remove_workpace_from_plot(self, workspace_name):
         """
