@@ -53,7 +53,8 @@ public:
 
   /// open the nexus file for writing
   void openNexusWrite(const std::string &fileName,
-                      optional_size_t entryNumber = optional_size_t());
+                      optional_size_t entryNumber = optional_size_t(),
+                      const bool append_to_file = true);
   /// write the header ifon for the Mantid workspace format
   int writeNexusProcessedHeader(const std::string &title,
                                 const std::string &wsName = "") const;
