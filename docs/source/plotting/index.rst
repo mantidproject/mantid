@@ -485,9 +485,12 @@ This New Colormap is saved within the MantidInstall folder so it can be used wit
 Custom Colormap (MantidWorkbench)
 #################################
 
-In Workbench, a Custom Colormap is more complicated (`See here for more details <https://matplotlib.org/3.1.0/tutorials/colors/colormap-manipulation.html>`_). Also they are stored within C:\MantidInstall\bin\Lib\site-packages\matplotlib\_cm.py so it is harder to alter this core storage folder.
+| In Workbench, a Custom Colormap is more complicated (`See here for more details <https://matplotlib.org/3.1.0/tutorials/colors/colormap-manipulation.html>`_), but there are also more options to make them. 
+| NB. These are not saved in the MantidInstall and so will have to be run and plotted from the script eachtime.
+| *Method A is easier but Method B has greater functionality.*
 
-To Create and Plot with a new ColorMap in MantidWorkbench (The second half of this is from an example above):
+- **A) Combine Premade Colormaps** 
+The Script below combines Red-to-White with Green-to-White to produce Red-to-White-to-Green. Just Green-to-Red is not possible. You can view the preset
 
 .. plot::
    :include-source:
@@ -508,7 +511,7 @@ To Create and Plot with a new ColorMap in MantidWorkbench (The second half of th
    Newname = 'GreenRed'
    newcmp = ListedColormap(newcolors, name=Newname)
 
-   # Produce 2D plot as in the 'Simple Plots' section
+   ''' Produce 2D plot as in the 'Simple Plots' section '''
    from mantid import plots
    from mantid.simpleapi import Load, ConvertToMD, BinMD, ConvertUnits, Rebin
    from matplotlib.colors import LogNorm
@@ -531,9 +534,71 @@ To Create and Plot with a new ColorMap in MantidWorkbench (The second half of th
    cbar.set_label('Intensity (arb. units)') #add text to colorbar
    #fig.show()
 
-NB. This is not saved in the MantidInstall and so will have to be run and plotted from the script eachtime.
+- **B) Using the** `Colormap <https://colormap.readthedocs.io/en/latest/index.html>`_**Package** 
+Combining any 2 or 3 colours is possible!!! 
 
-There is an alternative way that you can create MatPlotLib colormaps suitable for Workbench: `install the colormap package <https://pypi.org/project/colormap/>`_.
+Firstly, (On Windows) open a command prompt and cd into the C:\MantidInstall\bin\ directory. Then run `scripts\pip install colormap`. Also run `scripts\pip install easydev`
+
+.. plot::
+   :include-source:
+   ''' Method 1 "RGB Add Components": Figure 1 '''
+   from colormap import Colormap
+   c1 = Colormap()
+   # This Cmap shows the rgb component at the lower, middle and high portions. NB. Colors add like light.
+   # LowerRGB = 1,1,1 -> White // MiddleRBG = 1,0,1 -> Purple // HighRBG = 0,0,0 -> Black
+   mycmap1 = c1.cmap( {'red':[1,1,0], 'green':[1,0,0], 'blue':[1,1,0]})
+   c1.test_colormap(mycmap1) #Test Colormap
+
+.. plot::
+   :include-source:
+   ''' Method 2 "Name 2 Colors": Figure 2 '''
+   from colormap import Colormap
+   c2 = Colormap()
+   # For this Cmap, simply enter any names at the link above, or any valid #HTML-code.
+   mycmap2 = c2.cmap_bicolor('mediumvioletred','#27FCAE')
+   c2.test_colormap(mycmap2)
+
+.. plot::
+   :include-source:
+   ''' Method 3 "Name 3 Colors": Figure 3 '''
+   from colormap import Colormap
+   c3 = Colormap()
+   # As in Method 2, simply enter any names at the link above, or any valid #HTML-code.
+   mycmap3 = c3.cmap_linear('mediumvioletred','#27FCAE', 'blue')
+   c3.test_colormap(mycmap3)
+
+Test your chosen method as follows, setting ax.pcolormesh parameter cmap to the New Colormap:
+
+.. plot::
+   :include-source:
+   from colormap import Colormap
+   c3 = Colormap()
+   # As in Method 2, simply enter any names at the link above, or any valid #HTML-code.
+   mycmap3 = c3.cmap_linear('mediumvioletred','#27FCAE', 'blue')
+   c3.test_colormap(mycmap3)
+
+   ''' Produce 2D plot as in the 'Simple Plots' section '''
+   from mantid.simpleapi import *
+   import matplotlib.pyplot as plt
+   from mantid import plots
+   from matplotlib.colors import LogNorm
+   # generate a nice 2D multi-dimensional workspace
+   data = Load('CNCS_7860')
+   data = ConvertUnits(InputWorkspace=data,Target='DeltaE', EMode='Direct', EFixed=3)
+   data = Rebin(InputWorkspace=data, Params='-3,0.025,3', PreserveEvents=False)
+   md = ConvertToMD(InputWorkspace=data,
+                    QDimensions='|Q|',
+                    dEAnalysisMode='Direct')
+   sqw = BinMD(InputWorkspace=md,
+               AlignedDim0='|Q|,0,3,100',
+               AlignedDim1='DeltaE,-3,3,100')
+
+   #2D plot
+   fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
+   c = ax.pcolormesh(sqw, cmap = mycmap3, norm=LogNorm()) # Our New Colormap is used
+   cbar=fig.colorbar(c)
+   cbar.set_label('Intensity (arb. units)') #add text to colorbar
+   fig.show()
 
 ====================
 Plotting Sample Logs
