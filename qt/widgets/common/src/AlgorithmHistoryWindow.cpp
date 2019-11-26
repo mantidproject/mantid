@@ -649,7 +649,7 @@ void AlgHistoryTreeWidget::itemChecked(QTreeWidgetItem *item, int index) {
   bool hadToCheck{false};
   std::vector<QTreeWidgetItem *> itemsChecked;
 
-  do { 
+  do {
     modelIndex = indexFromItem(item, index);
     indicies.emplace_back(modelIndex.row() + 1);
 
