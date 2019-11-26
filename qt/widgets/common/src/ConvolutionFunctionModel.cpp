@@ -64,6 +64,35 @@ void ConvolutionFunctionModel::setModel(const std::string &background,
   setFunction(FunctionFactory::Instance().createInitialized(function));
 }
 
+void ConvolutionFunctionModel::setModel(
+    const std::string &background,
+    const std::vector<std::string> &resolutionWorkspaces,
+    std::vector<int> resolutionWorkspaceIndex, const std::string &peaks,
+    bool hasDeltaFunction) {
+  std::string resolution, convolution, function;
+  auto const model = hasDeltaFunction ? "name=DeltaFunction;" + peaks : peaks;
+  auto fitFunction = boost::make_shared<MultiDomainFunction>();
+
+  auto const nf = m_numberDomains > 0 ? static_cast<int>(m_numberDomains) : 1;
+  for (int i = 0; i < nf; ++i) {
+    auto workspace = resolutionWorkspaces[i];
+    resolution = workspace.empty()
+                     ? "name=Resolution"
+                     : "name=Resolution,Workspace=\"" + workspace +
+                           "\",WorkspaceIndex=" +
+                           std::to_string(resolutionWorkspaceIndex[i]);
+    convolution = "composite=Convolution;" + resolution + ";" + model;
+    function = background.empty() ? convolution
+                                  : background + ";(" + convolution + ")";
+    auto domainFunction =
+        FunctionFactory::Instance().createInitialized(function);
+    fitFunction->addFunction(domainFunction);
+    fitFunction->setDomainIndex(i, i);
+  }
+
+  setFunction(fitFunction);
+}
+
 void ConvolutionFunctionModel::findComponentPrefixes() {
   m_backgroundPrefix.reset();
   m_convolutionPrefix.reset();

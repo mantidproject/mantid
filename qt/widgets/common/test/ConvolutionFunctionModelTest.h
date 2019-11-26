@@ -246,6 +246,29 @@ public:
     TS_ASSERT(model.peakPrefixes());
     TS_ASSERT_EQUALS(model.peakPrefixes()->at(0).toStdString(), "f1.");
   }
+
+  void test_setModel_with_resolution_workspace_list_creates_correct_function() {
+    auto algo = FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
+    algo->initialize();
+    algo->setPropertyValue("DataX", "1,2,3");
+    algo->setPropertyValue("DataY", "1,2,3");
+    algo->setPropertyValue("OutputWorkspace", "abc");
+    algo->execute();
+    ConvolutionFunctionModel model;
+    model.setNumberDomains(2);
+
+    model.setModel("", std::vector<std::string>(2, "abc"),
+                   std::vector<int>({1, 2}), "", false);
+
+    auto fitFunctionAsString = model.getFitFunction()->asString();
+    TS_ASSERT_EQUALS(
+        fitFunctionAsString,
+        "composite=MultiDomainFunction,NumDeriv=true;(composite=Convolution,"
+        "FixResolution=true,NumDeriv=true,$domains=i;name=Resolution,Workspace="
+        "abc,WorkspaceIndex=1,X=(),Y=());(composite=Convolution,FixResolution="
+        "true,NumDeriv=true,$domains=i;name=Resolution,Workspace=abc,"
+        "WorkspaceIndex=2,X=(),Y=())");
+  }
 };
 
 #endif // MANTIDWIDGETS_CONVOLUTIONFUNCTIONMODELTEST_H_
