@@ -8,6 +8,8 @@
 from __future__ import (absolute_import, division, print_function)
 
 from os import path, makedirs
+from matplotlib import gridspec
+import matplotlib.pyplot as plt
 
 from mantid.api import AnalysisDataService as Ads
 from mantid.kernel import logger
@@ -53,7 +55,8 @@ class CalibrationModel(object):
             for i in range(2):
                 difc = [output[i].DIFC]
                 tzero = [output[i].TZERO]
-                self._plot_difc_zero(difc, tzero)
+                self._generate_difc_tzero_workspace(difc, tzero, i + 1)
+            self._plot_difc_tzero()
         difc = [output[0].DIFC, output[1].DIFC]
         tzero = [output[0].TZERO, output[1].TZERO]
 
@@ -110,58 +113,73 @@ class CalibrationModel(object):
             DeleteWorkspace(van_curve_twin_ws)
         CloneWorkspace(InputWorkspace="engggui_vanadium_curves", OutputWorkspace=van_curve_twin_ws)
         van_curves_ws = Ads.retrieve(van_curve_twin_ws)
-        for i in range(1, 3):
-            if i == 1:
-                curve_plot_bank_1 = plot([van_curves_ws], [0, 1, 2])
-                curve_plot_bank_1.gca().set_title("Engg GUI Vanadium Curves Bank 1")
-                curve_plot_bank_1.gca().legend(["Data", "Calc", "Diff"])
-            if i == 2:
-                curve_plot_bank_2 = plot([van_curves_ws], [3, 4, 5])
-                curve_plot_bank_2.gca().set_title("Engg GUI Vanadium Curves Bank 2")
-                curve_plot_bank_2.gca().legend(["Data", "Calc", "Diff"])
+
+        fig = plt.figure()
+        gs = gridspec.GridSpec(1, 2)
+        curve_plot_bank_1 = fig.add_subplot(gs[0], projection="mantid")
+        curve_plot_bank_2 = fig.add_subplot(gs[1], projection="mantid")
+
+        curve_plot_bank_1.plot(van_curves_ws, wkspIndex=0)
+        curve_plot_bank_1.plot(van_curves_ws, wkspIndex=1)
+        curve_plot_bank_1.plot(van_curves_ws, wkspIndex=2)
+        curve_plot_bank_1.set_title("Engg GUI Vanadium Curves Bank 1")
+        curve_plot_bank_1.legend(["Data", "Calc", "Diff"])
+
+        curve_plot_bank_2.plot(van_curves_ws, wkspIndex=3)
+        curve_plot_bank_2.plot(van_curves_ws, wkspIndex=4)
+        curve_plot_bank_2.plot(van_curves_ws, wkspIndex=5)
+        curve_plot_bank_2.set_title("Engg GUI Vanadium Curves Bank 2")
+        curve_plot_bank_2.legend(["Data", "Calc", "Diff"])
+
+        fig.show()
 
     @staticmethod
-    def _plot_difc_zero(difc, tzero):
-        for i in range(1, 3):
-            bank_ws = Ads.retrieve(CalibrationModel._generate_table_workspace_name(i - 1))
+    def _generate_difc_tzero_workspace(difc, tzero, bank):
+        bank_ws = Ads.retrieve(CalibrationModel._generate_table_workspace_name(bank - 1))
 
-            x_val = []
-            y_val = []
-            y2_val = []
+        x_val = []
+        y_val = []
+        y2_val = []
 
-            difc_to_plot = difc[0]
-            tzero_to_plot = tzero[0]
+        difc_to_plot = difc[0]
+        tzero_to_plot = tzero[0]
 
-            for irow in range(0, bank_ws.rowCount()):
-                x_val.append(bank_ws.cell(irow, 0))
-                y_val.append(bank_ws.cell(irow, 5))
-                y2_val.append(x_val[irow] * difc_to_plot + tzero_to_plot)
+        for irow in range(0, bank_ws.rowCount()):
+            x_val.append(bank_ws.cell(irow, 0))
+            y_val.append(bank_ws.cell(irow, 5))
+            y2_val.append(x_val[irow] * difc_to_plot + tzero_to_plot)
 
-            ws1 = CreateWorkspace(DataX=x_val,
-                                  DataY=y_val,
-                                  UnitX="Expected Peaks Centre (dSpacing A)",
-                                  YUnitLabel="Fitted Peaks Centre(TOF, us)")
-            ws2 = CreateWorkspace(DataX=x_val, DataY=y2_val)
+        ws1 = CreateWorkspace(DataX=x_val,
+                              DataY=y_val,
+                              UnitX="Expected Peaks Centre (dSpacing A)",
+                              YUnitLabel="Fitted Peaks Centre(TOF, us)")
+        ws2 = CreateWorkspace(DataX=x_val, DataY=y2_val)
 
-            output_ws = "engggui_difc_zero_peaks_bank_" + str(i)
-            if Ads.doesExist(output_ws):
-                DeleteWorkspace(output_ws)
+        output_ws = "engggui_difc_zero_peaks_bank_" + str(bank)
+        if Ads.doesExist(output_ws):
+            DeleteWorkspace(output_ws)
 
-            AppendSpectra(ws1, ws2, OutputWorkspace=output_ws)
-            DeleteWorkspace(ws1)
-            DeleteWorkspace(ws2)
+        AppendSpectra(ws1, ws2, OutputWorkspace=output_ws)
+        DeleteWorkspace(ws1)
+        DeleteWorkspace(ws2)
 
-            difc_zero_ws = Ads.retrieve(output_ws)
-            # Create plot
-            difc_zero_plot = plot([difc_zero_ws], [0, 1],
-                                  plot_kwargs={
-                                      "linestyle": "--",
-                                      "marker": "o",
-                                      "markersize": "3"
-                                  })
-            difc_zero_plot.gca().set_title("Engg Gui Difc Zero Peaks Bank " + str(i))
-            difc_zero_plot.gca().legend(("Peaks Fitted", "DifC/TZero Fitted Straight Line"))
-            difc_zero_plot.gca().set_xlabel("Expected Peaks Centre(dSpacing, A)")
+    @staticmethod
+    def _plot_difc_tzero():
+        bank_1_ws = Ads.retrieve("engggui_difc_zero_peaks_bank_1")
+        bank_2_ws = Ads.retrieve("engggui_difc_zero_peaks_bank_2")
+        # Create plot
+        fig = plt.figure()
+        gs = gridspec.GridSpec(1, 2)
+        plot_bank_1 = fig.add_subplot(gs[0], projection="mantid")
+        plot_bank_2 = fig.add_subplot(gs[1], projection="mantid")
+
+        for ax, ws, bank in zip([plot_bank_1, plot_bank_2], [bank_1_ws, bank_2_ws], [1, 2]):
+            ax.plot(ws, wkspIndex=0, linestyle="--", marker="o", markersize="3")
+            ax.plot(ws, wkspIndex=1, linestyle="--", marker="o", markersize="3")
+            ax.set_title("Engg Gui Difc Zero Peaks Bank " + str(bank))
+            ax.legend(("Peaks Fitted", "DifC/TZero Fitted Straight Line"))
+            ax.set_xlabel("Expected Peaks Centre(dSpacing, A)")
+        fig.show()
 
     @staticmethod
     def load_ceria(ceria_run_no):

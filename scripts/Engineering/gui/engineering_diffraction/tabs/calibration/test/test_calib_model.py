@@ -58,24 +58,27 @@ class CalibrationModelTest(unittest.TestCase):
     @patch(class_path + '.load_ceria')
     @patch(file_path + '.vanadium_corrections.fetch_correction_workspaces')
     @patch(class_path + '._plot_vanadium_curves')
-    @patch(class_path + '._plot_difc_zero')
+    @patch(class_path + '._generate_difc_tzero_workspace')
+    @patch(class_path + '._plot_difc_tzero')
     @patch(class_path + '.run_calibration')
-    def test_plotting_check(self, calib, plot_difc_zero, plot_van, van, ceria, output_files,
+    def test_plotting_check(self, calib, plot_difc_zero, gen_difc, plot_van, van, ceria, output_files,
                             update_table):
         van.return_value = ("A", "B")
         self.model.create_new_calibration(VANADIUM_NUMBER, CERIUM_NUMBER, False, "ENGINX")
         plot_van.assert_not_called()
         plot_difc_zero.assert_not_called()
+        gen_difc.assert_not_called()
         self.model.create_new_calibration(VANADIUM_NUMBER, CERIUM_NUMBER, True, "ENGINX")
         plot_van.assert_called_once()
-        self.assertEqual(plot_difc_zero.call_count, 2)
+        self.assertEqual(gen_difc.call_count, 2)
+        self.assertEqual(plot_difc_zero.call_count, 1)
 
     @patch(class_path + '.update_calibration_params_table')
     @patch(class_path + '.create_output_files')
     @patch(class_path + '.load_ceria')
     @patch(file_path + '.vanadium_corrections.fetch_correction_workspaces')
     @patch(class_path + '._plot_vanadium_curves')
-    @patch(class_path + '._plot_difc_zero')
+    @patch(class_path + '._plot_difc_tzero')
     @patch(class_path + '.run_calibration')
     def test_present_RB_number_results_in_user_output_files(self, calib, plot_difc_zero, plot_van,
                                                             van, ceria, output_files, update_table):
@@ -92,7 +95,7 @@ class CalibrationModelTest(unittest.TestCase):
     @patch(class_path + '.load_ceria')
     @patch(file_path + '.vanadium_corrections.fetch_correction_workspaces')
     @patch(class_path + '._plot_vanadium_curves')
-    @patch(class_path + '._plot_difc_zero')
+    @patch(class_path + '._plot_difc_tzero')
     @patch(class_path + '.run_calibration')
     def test_absent_run_number_results_in_no_user_output_files(self, calib, plot_difc_zero,
                                                                plot_van, van, ceria, output_files,

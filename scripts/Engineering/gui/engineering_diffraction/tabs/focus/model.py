@@ -8,9 +8,11 @@
 from __future__ import (absolute_import, division, print_function)
 
 from os import path
+from matplotlib import gridspec
+import matplotlib.pyplot as plt
 
 from Engineering.gui.engineering_diffraction.tabs.common import vanadium_corrections, path_handling
-from mantid.simpleapi import EnggFocus, Load, logger, AnalysisDataService as Ads, SaveNexus
+from mantid.simpleapi import EnggFocus, Load, logger, AnalysisDataService as Ads, SaveNexus, SaveGSS, SaveFocusedXYE
 from mantidqt.plotting.functions import plot
 
 SAMPLE_RUN_WORKSPACE_NAME = "engggui_focusing_input_ws"
@@ -33,16 +35,17 @@ class FocusModel(object):
         integration_workspace = Ads.retrieve(vanadium_corrections.INTEGRATED_WORKSPACE_NAME)
         curves_workspace = Ads.retrieve(vanadium_corrections.CURVES_WORKSPACE_NAME)
         sample_workspace = self._load_focus_sample_run(sample_path)
+        output_workspaces = []
         for name in banks:
             output_workspace_name = FOCUSED_OUTPUT_WORKSPACE_NAME + str(name)
             self._run_focus(sample_workspace, output_workspace_name, integration_workspace,
                             curves_workspace, name)
-            # Plot the output
-            if plot_output:
-                self._plot_focused_workspace(output_workspace_name)
+            output_workspaces.append(output_workspace_name)
             # Save the output to the file system.
-            self._save_focused_output_files_as_nexus(instrument, sample_path, name,
-                                                     output_workspace_name, rb_number)
+            self._save_output(instrument, sample_path, name, output_workspace_name, rb_number)
+        # Plot the output
+        if plot_output:
+            self._plot_focused_workspaces(output_workspaces)
 
     @staticmethod
     def _run_focus(input_workspace, output_workspace, vanadium_integration_ws, vanadium_curves_ws,
@@ -70,21 +73,47 @@ class FocusModel(object):
             raise RuntimeError
 
     @staticmethod
-    def _plot_focused_workspace(focused):
-        focused_wsp = Ads.retrieve(focused)
-        plot([focused_wsp], wksp_indices=[0])
+    def _plot_focused_workspaces(focused_workspaces):
+        fig = plt.figure()
+        gs = gridspec.GridSpec(1, len(focused_workspaces))
+        plots = [fig.add_subplot(gs[i], projection="mantid") for i in range(len(focused_workspaces))]
 
-    def _save_focused_output_files_as_nexus(self, instrument, sample_path, bank, sample_workspace,
-                                            rb_number):
+        for ax, ws_name in zip(plots, focused_workspaces):
+            ax.plot(Ads.retrieve(ws_name), wkspIndex=0)
+            ax.set_title(ws_name)
+        fig.show()
+
+    def _save_output(self, instrument, sample_path, bank, sample_workspace, rb_number):
         """
-        Save a focused workspace to the file system. Saves a separate copy to a User directory if an rb number has been
-        set.
+        Save a focused workspace to the file system. Saves separate copies to a User directory if an rb number has
+        been set.
         :param instrument: The instrument the data is from.
         :param sample_path: The path to the data file that was focused.
         :param bank: The name of the bank being saved.
         :param sample_workspace: The name of the workspace to be saved.
         :param rb_number: Usually an experiment id, defines the name of the user directory.
         """
+        self._save_focused_output_files_as_nexus(instrument, sample_path, bank, sample_workspace,
+                                                 rb_number)
+        self._save_focused_output_files_as_gss(instrument, sample_path, bank, sample_workspace,
+                                               rb_number)
+        self._save_focused_output_files_as_xye(instrument, sample_path, bank, sample_workspace,
+                                               rb_number)
+
+    def _save_focused_output_files_as_gss(self, instrument, sample_path, bank, sample_workspace,
+                                          rb_number):
+        gss_output_path = path.join(
+            path_handling.OUT_FILES_ROOT_DIR, "Focus",
+            self._generate_output_file_name(instrument, sample_path, bank, ".gss"))
+        SaveGSS(InputWorkspace=sample_workspace, Filename=gss_output_path)
+        if rb_number is not None:
+            gss_output_path = path.join(
+                path_handling.OUT_FILES_ROOT_DIR, "User", rb_number, "Focus",
+                self._generate_output_file_name(instrument, sample_path, bank, ".gss"))
+            SaveGSS(InputWorkspace=sample_workspace, Filename=gss_output_path)
+
+    def _save_focused_output_files_as_nexus(self, instrument, sample_path, bank, sample_workspace,
+                                            rb_number):
         nexus_output_path = path.join(
             path_handling.OUT_FILES_ROOT_DIR, "Focus",
             self._generate_output_file_name(instrument, sample_path, bank, ".nxs"))
@@ -94,6 +123,20 @@ class FocusModel(object):
                 path_handling.OUT_FILES_ROOT_DIR, "User", rb_number, "Focus",
                 self._generate_output_file_name(instrument, sample_path, bank, ".nxs"))
             SaveNexus(InputWorkspace=sample_workspace, Filename=nexus_output_path)
+
+    def _save_focused_output_files_as_xye(self, instrument, sample_path, bank, sample_workspace,
+                                          rb_number):
+        xye_output_path = path.join(
+            path_handling.OUT_FILES_ROOT_DIR, "Focus",
+            self._generate_output_file_name(instrument, sample_path, bank, ".dat"))
+        SaveFocusedXYE(InputWorkspace=sample_workspace, Filename=xye_output_path, SplitFiles=False)
+        if rb_number is not None:
+            xye_output_path = path.join(
+                path_handling.OUT_FILES_ROOT_DIR, "User", rb_number, "Focus",
+                self._generate_output_file_name(instrument, sample_path, bank, ".dat"))
+            SaveFocusedXYE(InputWorkspace=sample_workspace,
+                           Filename=xye_output_path,
+                           SplitFiles=False)
 
     @staticmethod
     def _generate_output_file_name(instrument, sample_path, bank, suffix):
