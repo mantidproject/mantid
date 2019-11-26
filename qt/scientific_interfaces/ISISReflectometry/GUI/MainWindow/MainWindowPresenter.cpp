@@ -152,11 +152,15 @@ bool MainWindowPresenter::isAnyBatchAutoreducing() const {
   return false;
 }
 
+bool MainWindowPresenter::isWarnDiscardChangesChecked() const {
+  return m_optionsDialogPresenter->getBoolOption(
+      std::string("WarnDiscardChanges"));
+}
+
 bool MainWindowPresenter::isCloseEventPrevented() const {
   if (isAnyBatchProcessing() || isAnyBatchAutoreducing())
     return true;
-  else if (m_optionsDialogPresenter->getBoolOption(
-               std::string("WarnDiscardChanges")) == true &&
+  else if (isWarnDiscardChangesChecked() == true &&
            isAnyBatchUnsaved()) {
     return !m_messageHandler->askUserDiscardChanges();
   }
@@ -169,8 +173,7 @@ bool MainWindowPresenter::isCloseBatchPrevented(int batchIndex) const {
         "Cannot close batch while processing or autoprocessing is in progress",
         "Error");
     return true;
-  } else if (m_optionsDialogPresenter->getBoolOption(
-                 std::string("WarnDiscardChanges")) == true &&
+  } else if (isWarnDiscardChangesChecked() == true &&
              isBatchUnsaved(batchIndex)) {
     return !m_messageHandler->askUserDiscardChanges();
   }
@@ -178,8 +181,7 @@ bool MainWindowPresenter::isCloseBatchPrevented(int batchIndex) const {
 }
 
 bool MainWindowPresenter::isOperationPrevented() const {
-  if (m_optionsDialogPresenter->getBoolOption(
-          std::string("WarnDiscardChanges")) == true) {
+  if (isWarnDiscardChangesChecked() == true) {
     return !m_messageHandler->askUserDiscardChanges();
   }
   return false;
