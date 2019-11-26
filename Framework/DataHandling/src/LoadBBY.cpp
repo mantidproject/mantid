@@ -454,7 +454,7 @@ std::vector<bool> LoadBBY::createRoiVector(const std::string &maskfile) {
 void LoadBBY::loadInstrumentParameters(
     NeXus::NXEntry &entry, std::map<std::string, double> &logParams,
     std::map<std::string, std::string> &allParams) {
-
+  using namespace Poco::XML;
   std::string idfDirectory =
       Mantid::Kernel::ConfigService::Instance().getString(
           "instrumentDefinition.directory");
@@ -462,21 +462,21 @@ void LoadBBY::loadInstrumentParameters(
   try {
     std::string parameterFilename = idfDirectory + "BILBY_Parameters.xml";
     // Set up the DOM parser and parse xml file
-    Poco::XML::DOMParser pParser;
-    Poco::XML::AutoPtr<Poco::XML::Document> pDoc;
+    DOMParser pParser;
+    Poco::AutoPtr<Poco::XML::Document> pDoc;
     try {
       pDoc = pParser.parse(parameterFilename);
     } catch (...) {
       throw Kernel::Exception::FileError("Unable to parse File:",
                                          parameterFilename);
     }
-    Poco::XML::NodeIterator it(pDoc, Poco::XML::NodeFilter::SHOW_ELEMENT);
-    Poco::XML::Node *pNode = it.nextNode();
+    NodeIterator it(pDoc, Poco::XML::NodeFilter::SHOW_ELEMENT);
+    Node *pNode = it.nextNode();
     while (pNode) {
       if (pNode->nodeName() == "parameter") {
-        auto pElem = dynamic_cast<Poco::XML::Element *>(pNode);
+        auto pElem = dynamic_cast<Element *>(pNode);
         std::string name = pElem->getAttribute("name");
-        auto nodeList = pElem->childNodes();
+        Poco::AutoPtr<NodeList> nodeList = pElem->childNodes();
         for (unsigned long i = 0; i < nodeList->length(); i++) {
           auto cNode = nodeList->item(i);
           if (cNode->nodeName() == "value") {
