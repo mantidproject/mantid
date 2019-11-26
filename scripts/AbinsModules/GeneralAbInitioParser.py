@@ -30,9 +30,13 @@ class GeneralAbInitioParser(object):
         :type regex: str
         """
         if not six.PY2:
-            msg = bytes(msg, "utf8")
+            if msg is not None:
+                msg = bytes(msg, "utf8")
+            if regex is not None:
+                regex = bytes(regex, "utf8")
+
         if msg and regex:
-            raise ValueError("msg or regex should be provided,not both")
+            raise ValueError("msg or regex should be provided, not both")
         elif msg:
             while not self.file_end(file_obj=file_obj):
                 line = file_obj.readline()
@@ -45,8 +49,6 @@ class GeneralAbInitioParser(object):
                 line = file_obj.readline()
                 if test.match(line):
                     return(line)
-                elif 'X(ANGSTROM)' in line:
-                    raise Exception(line)
             raise ValueError("'{}' not found".format(regex))
         else:
             raise ValueError("No msg or regex provided: nothing to match")
