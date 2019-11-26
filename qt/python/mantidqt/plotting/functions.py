@@ -239,8 +239,13 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
         fig.canvas.manager.toolbar.update()
     except AttributeError:
         pass
+
     fig.canvas.draw()
-    #fig.show()
+    try:
+        fig.show()
+    except AttributeError:
+        pass
+
     return fig
 
 

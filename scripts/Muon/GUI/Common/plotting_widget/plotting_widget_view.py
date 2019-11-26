@@ -8,6 +8,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from qtpy import QtWidgets
 import Muon.GUI.Common.message_box as message_box
+import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from mantidqt.plotting.functions import get_plot_fig
 from matplotlib.backends.qt_compat import is_pyqt5
@@ -104,7 +105,6 @@ class PlotWidgetView(QtWidgets.QWidget):
         self.fig = Figure()
         self.fig.canvas = FigureCanvas(self.fig)
         self.toolBar = NavigationToolbar(self.fig.canvas, self)
-
         # set size policy
         self.toolBar.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
 

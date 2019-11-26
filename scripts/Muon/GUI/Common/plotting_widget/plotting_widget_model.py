@@ -81,7 +81,6 @@ class PlotWidgetModel(object):
         except RuntimeError:
             return
         if force_redraw:
-
             # remove all data from plot
             self._remove_all_data_workspaces_from_plot()
             self.plotted_workspaces = []
@@ -98,7 +97,7 @@ class PlotWidgetModel(object):
         else:
             # remove all plots
             self._remove_all_data_workspaces_from_plot()
-            # get the axis
+            # clear the figure
             self.plot_figure.clf()
             # Create a set of mantid axis for the figure
             self.plot_figure, axes = get_plot_fig(overplot=False, ax_properties=None, window_title="Muon Analysis 2",
@@ -137,6 +136,10 @@ class PlotWidgetModel(object):
     def set_x_lim(self, domain):
         if domain == "Time":
             self.plot_figure.gca().set_xlim(left=0.0, right=15.0)
+            self.autoscale_y_to_data_in_view()
+            self.plot_figure.canvas.draw()
+        if domain == "Frequency":
+            self.plot_figure.gca().set_xlim(left=0.0, right=50.0)
             self.autoscale_y_to_data_in_view()
             self.plot_figure.canvas.draw()
 
