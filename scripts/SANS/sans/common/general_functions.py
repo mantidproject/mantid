@@ -921,9 +921,9 @@ def get_state_hash_for_can_reduction(state, reduction_mode, partial_type=None):
                            " {} was provided".format(reduction_mode))
 
     # If we are dealing with a partial output workspace, then mark it as such
-    if partial_type is OutputParts.Count:
+    if partial_type is OutputParts.COUNT:
         state_string += "counts"
-    elif partial_type is OutputParts.Norm:
+    elif partial_type is OutputParts.NORM:
         state_string += "norm"
     elif partial_type is TransmissionType.Calculated:
         state_string += "calculated_transmission"
@@ -953,9 +953,9 @@ def get_reduced_can_workspace_from_ads(state, output_parts, reduction_mode):
     reduced_can_count = None
     reduced_can_norm = None
     if output_parts:
-        hashed_state_count = get_state_hash_for_can_reduction(state, reduction_mode, OutputParts.Count)
+        hashed_state_count = get_state_hash_for_can_reduction(state, reduction_mode, OutputParts.COUNT)
         reduced_can_count = get_workspace_from_ads_based_on_hash(hashed_state_count)
-        hashed_state_norm = get_state_hash_for_can_reduction(state, reduction_mode, OutputParts.Norm)
+        hashed_state_norm = get_state_hash_for_can_reduction(state, reduction_mode, OutputParts.NORM)
         reduced_can_norm = get_workspace_from_ads_based_on_hash(hashed_state_norm)
     return reduced_can, reduced_can_count, reduced_can_norm
 

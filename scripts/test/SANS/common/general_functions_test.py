@@ -306,8 +306,8 @@ class SANSFunctionsTest(unittest.TestCase):
         test_director = TestDirector()
         state = test_director.construct()
         tagged_workspace_names = {None: "test_ws",
-                                  OutputParts.Count: "test_ws_count",
-                                  OutputParts.Norm: "test_ws_norm"}
+                                  OutputParts.COUNT: "test_ws_count",
+                                  OutputParts.NORM: "test_ws_norm"}
         SANSFunctionsTest._prepare_workspaces(number_of_workspaces=4,
                                               tagged_workspace_names=tagged_workspace_names,
                                               state=state,

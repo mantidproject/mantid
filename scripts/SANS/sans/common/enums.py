@@ -161,15 +161,12 @@ class DataType(Enum):
     SAMPLE = "Sample"
 
 
-# ---------------------------------
-#  Partial reduction output setting
-# ---------------------------------
-@serializable_enum("Count", "Norm")
-class OutputParts(object):
+class OutputParts(Enum):
     """
     Defines the partial outputs of a reduction. They are the numerator (Count) and denominator (Norm) of a division.
     """
-    pass
+    COUNT = "Count"
+    NORM = "Norm"
 
 
 # -----------------------------------------------------

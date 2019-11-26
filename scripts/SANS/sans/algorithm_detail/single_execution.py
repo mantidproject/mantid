@@ -394,12 +394,12 @@ def run_optimized_for_can(reduction_alg, reduction_setting_bundle, event_slice_o
                 output_parts_bundle.output_workspace_norm is not None):
             write_hash_into_reduced_can_workspace(state=output_parts_bundle.state,
                                                   workspace=output_parts_bundle.output_workspace_count,
-                                                  partial_type=OutputParts.Count,
+                                                  partial_type=OutputParts.COUNT,
                                                   reduction_mode=reduction_mode)
 
             write_hash_into_reduced_can_workspace(state=output_parts_bundle.state,
                                                   workspace=output_parts_bundle.output_workspace_norm,
-                                                  partial_type=OutputParts.Norm,
+                                                  partial_type=OutputParts.NORM,
                                                   reduction_mode=reduction_mode)
 
     return output_bundle, output_parts_bundle, output_transmission_bundle
