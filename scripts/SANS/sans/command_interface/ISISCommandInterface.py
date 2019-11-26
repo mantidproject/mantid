@@ -287,7 +287,7 @@ def Set1D():
     """
     print_message('Set1D()')
     set_1d_command = NParameterCommand(command_id=NParameterCommandId.reduction_dimensionality,
-                                       values=[ReductionDimensionality.OneDim])
+                                       values=[ReductionDimensionality.ONE_DIM])
     director.add_command(set_1d_command)
 
 
@@ -297,7 +297,7 @@ def Set2D():
     """
     print_message('Set2D()')
     set_2d_command = NParameterCommand(command_id=NParameterCommandId.reduction_dimensionality,
-                                       values=[ReductionDimensionality.TwoDim])
+                                       values=[ReductionDimensionality.TWO_DIM])
     director.add_command(set_2d_command)
 
 

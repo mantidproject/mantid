@@ -92,12 +92,12 @@ class StateGuiModelTest(unittest.TestCase):
     # ------------------------------------------------------------------------------------------------------------------
     def test_that_is_1D_reduction_by_default(self):
         state_gui_model = StateGuiModel({"test": [1]})
-        self.assertEqual(state_gui_model.reduction_dimensionality, ReductionDimensionality.OneDim)
+        self.assertEqual(state_gui_model.reduction_dimensionality, ReductionDimensionality.ONE_DIM)
 
     def test_that_is_set_to_2D_reduction(self):
         state_gui_model = StateGuiModel({"test": [1]})
-        state_gui_model.reduction_dimensionality = ReductionDimensionality.TwoDim
-        self.assertEqual(state_gui_model.reduction_dimensionality, ReductionDimensionality.TwoDim)
+        state_gui_model.reduction_dimensionality = ReductionDimensionality.TWO_DIM
+        self.assertEqual(state_gui_model.reduction_dimensionality, ReductionDimensionality.TWO_DIM)
 
     def test_that_raises_when_not_setting_with_reduction_dim_enum(self):
         def red_dim_wrapper():
@@ -106,10 +106,10 @@ class StateGuiModelTest(unittest.TestCase):
         self.assertRaises(ValueError, red_dim_wrapper)
 
     def test_that_can_update_reduction_dimensionality(self):
-        state_gui_model = StateGuiModel({OtherId.reduction_dimensionality: [ReductionDimensionality.OneDim]})
-        self.assertEqual(state_gui_model.reduction_dimensionality, ReductionDimensionality.OneDim)
-        state_gui_model.reduction_dimensionality = ReductionDimensionality.TwoDim
-        self.assertEqual(state_gui_model.reduction_dimensionality, ReductionDimensionality.TwoDim)
+        state_gui_model = StateGuiModel({OtherId.reduction_dimensionality: [ReductionDimensionality.ONE_DIM]})
+        self.assertEqual(state_gui_model.reduction_dimensionality, ReductionDimensionality.ONE_DIM)
+        state_gui_model.reduction_dimensionality = ReductionDimensionality.TWO_DIM
+        self.assertEqual(state_gui_model.reduction_dimensionality, ReductionDimensionality.TWO_DIM)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Event binning for compatibility mode

@@ -351,8 +351,8 @@ class SANSSingleReductionTest(SingleReductionTest):
         user_file_director.set_user_file("USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt")
         # Set the reduction mode to LAB
         user_file_director.set_reduction_builder_reduction_mode(ReductionMode.LAB)
-        user_file_director.set_reduction_builder_reduction_dimensionality(ReductionDimensionality.TwoDim)
-        user_file_director.set_convert_to_q_builder_reduction_dimensionality(ReductionDimensionality.TwoDim)
+        user_file_director.set_reduction_builder_reduction_dimensionality(ReductionDimensionality.TWO_DIM)
+        user_file_director.set_convert_to_q_builder_reduction_dimensionality(ReductionDimensionality.TWO_DIM)
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         # COMPATIBILITY BEGIN -- Remove when appropriate
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

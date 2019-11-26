@@ -170,11 +170,11 @@ class StateGuiModel(ModelCommon):
     @property
     def reduction_dimensionality(self):
         return self.get_simple_element_with_attribute(element_id=OtherId.reduction_dimensionality,
-                                                      default_value=ReductionDimensionality.OneDim)
+                                                      default_value=ReductionDimensionality.ONE_DIM)
 
     @reduction_dimensionality.setter
     def reduction_dimensionality(self, value):
-        if value is ReductionDimensionality.OneDim or value is ReductionDimensionality.TwoDim:
+        if value is ReductionDimensionality.ONE_DIM or value is ReductionDimensionality.TWO_DIM:
             if OtherId.reduction_dimensionality in self._user_file_items:
                 del self._user_file_items[OtherId.reduction_dimensionality]
             new_state_entries = {OtherId.reduction_dimensionality: [value]}

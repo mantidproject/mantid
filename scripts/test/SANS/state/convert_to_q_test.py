@@ -22,7 +22,7 @@ class StateConvertToQTest(unittest.TestCase):
     @staticmethod
     def _get_convert_to_q_state(convert_to_q_entries):
         state = StateConvertToQ()
-        default_entries = {"reduction_dimensionality": ReductionDimensionality.OneDim, "use_gravity": True,
+        default_entries = {"reduction_dimensionality": ReductionDimensionality.ONE_DIM, "use_gravity": True,
                            "gravity_extra_length": 12., "radius_cutoff": 1.5, "wavelength_cutoff": 2.7,
                            "q_min": 0.5, "q_max": 1., "q_1d_rebin_string": "0.5,0.2,1.",
                            "q_step2": 1., "q_step_type2": RangeStepType.Lin, "q_mid": 1.,
@@ -56,9 +56,9 @@ class StateConvertToQTest(unittest.TestCase):
 
     def test_that_raises_when_no_q_bounds_are_set_for_explicit_1D_reduction(self):
         self.check_bad_and_good_value({"q_min": None, "q_max": None,
-                                       "reduction_dimensionality": ReductionDimensionality.OneDim},
+                                       "reduction_dimensionality": ReductionDimensionality.ONE_DIM},
                                       {"q_min": 1., "q_max": 2.,
-                                       "reduction_dimensionality": ReductionDimensionality.OneDim})
+                                       "reduction_dimensionality": ReductionDimensionality.ONE_DIM})
 
     def test_that_raises_when_q_rebin_string_is_invalid(self):
         self.check_bad_and_good_value({"q_1d_rebin_string": ""}, {"q_1d_rebin_string": "1.0,2.0"})
@@ -68,9 +68,9 @@ class StateConvertToQTest(unittest.TestCase):
 
     def test_that_raises_when_no_q_bounds_are_set_for_explicit_2D_reduction(self):
         self.check_bad_and_good_value({"q_xy_max": None, "q_xy_step": None,
-                                       "reduction_dimensionality": ReductionDimensionality.TwoDim},
+                                       "reduction_dimensionality": ReductionDimensionality.TWO_DIM},
                                       {"q_xy_max": 1., "q_xy_step": 2.,
-                                       "reduction_dimensionality": ReductionDimensionality.TwoDim})
+                                       "reduction_dimensionality": ReductionDimensionality.TWO_DIM})
 
     def test_that_raises_when_inconsistent_circular_values_for_q_resolution_are_specified(self):
         self.check_bad_and_good_value({"use_q_resolution": True, "q_resolution_a1": None,
@@ -115,7 +115,7 @@ class StateConvertToQBuilderTest(unittest.TestCase):
         builder.set_q_min(12.0)
         builder.set_q_max(17.0)
         builder.set_q_1d_rebin_string("12.0,-1.2,17.0")
-        builder.set_reduction_dimensionality(ReductionDimensionality.OneDim)
+        builder.set_reduction_dimensionality(ReductionDimensionality.ONE_DIM)
 
         state = builder.build()
 
@@ -123,7 +123,7 @@ class StateConvertToQBuilderTest(unittest.TestCase):
         self.assertEqual(state.q_min,  12.0)
         self.assertEqual(state.q_max,  17.0)
         self.assertEqual(state.q_1d_rebin_string,  "12.0,-1.2,17.0")
-        self.assertEqual(state.reduction_dimensionality, ReductionDimensionality.OneDim)
+        self.assertEqual(state.reduction_dimensionality, ReductionDimensionality.ONE_DIM)
 
 
 if __name__ == '__main__':

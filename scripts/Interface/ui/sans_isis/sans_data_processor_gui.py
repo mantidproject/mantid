@@ -1169,12 +1169,12 @@ class SANSDataProcessorGui(QMainWindow,
     # ------------------------------------------------------------------------------------------------------------------
     @property
     def reduction_dimensionality(self):
-        return ReductionDimensionality.OneDim if self.reduction_dimensionality_1D.isChecked() \
-            else ReductionDimensionality.TwoDim
+        return ReductionDimensionality.ONE_DIM if self.reduction_dimensionality_1D.isChecked() \
+            else ReductionDimensionality.TWO_DIM
 
     @reduction_dimensionality.setter
     def reduction_dimensionality(self, value):
-        is_1d = value is ReductionDimensionality.OneDim
+        is_1d = value is ReductionDimensionality.ONE_DIM
         self.reduction_dimensionality_1D.setChecked(is_1d)
         self.reduction_dimensionality_2D.setChecked(not is_1d)
 

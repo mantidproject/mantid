@@ -24,7 +24,7 @@ class StateReductionModeTest(unittest.TestCase):
         state = StateReductionMode()
 
         state.reduction_mode = ReductionMode.MERGED
-        state.dimensionality = ReductionDimensionality.TwoDim
+        state.dimensionality = ReductionDimensionality.TWO_DIM
         state.merge_shift = 12.65
         state.merge_scale = 34.6
         state.merge_fit_mode = FitModeForMerge.ShiftOnly
@@ -72,7 +72,7 @@ class StateReductionModeBuilderTest(unittest.TestCase):
         self.assertTrue(builder)
 
         mode = ReductionMode.MERGED
-        dim = ReductionDimensionality.OneDim
+        dim = ReductionDimensionality.ONE_DIM
         builder.set_reduction_mode(mode)
         builder.set_reduction_dimensionality(dim)
 

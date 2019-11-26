@@ -78,7 +78,7 @@ class TestDirector(object):
         # Build the SANSStateReduction
         if self.reduction_state is None:
             reduction_builder = get_reduction_mode_builder(self.data_state)
-            reduction_builder.set_reduction_dimensionality(ReductionDimensionality.OneDim)
+            reduction_builder.set_reduction_dimensionality(ReductionDimensionality.ONE_DIM)
             reduction_builder.set_merge_fit_mode(FitModeForMerge.Both)
             reduction_builder.set_merge_shift(324.2)
             reduction_builder.set_merge_scale(3420.98)
@@ -180,7 +180,7 @@ class TestDirector(object):
         # SANSStateConvertToQ
         if self.convert_to_q_state is None:
             convert_to_q_builder = get_convert_to_q_builder(self.data_state)
-            convert_to_q_builder.set_reduction_dimensionality(ReductionDimensionality.OneDim)
+            convert_to_q_builder.set_reduction_dimensionality(ReductionDimensionality.ONE_DIM)
             convert_to_q_builder.set_use_gravity(False)
             convert_to_q_builder.set_radius_cutoff(0.002)
             convert_to_q_builder.set_wavelength_cutoff(12.)

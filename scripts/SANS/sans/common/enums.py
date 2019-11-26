@@ -138,15 +138,9 @@ class ReductionMode(Enum):
     LAB = "LAB"
 
 
-# --------------------------
-#  Reduction dimensionality
-# --------------------------
-@serializable_enum("OneDim", "TwoDim")
-class ReductionDimensionality(object):
-    """
-    Defines the dimensionality for reduction. This can be either 1D or 2D
-    """
-    pass
+class ReductionDimensionality(Enum):
+    ONE_DIM = "OneDim"
+    TWO_DIM = "TwoDim"
 
 
 # --------------------------

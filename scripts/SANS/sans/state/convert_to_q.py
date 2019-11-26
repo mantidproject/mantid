@@ -24,7 +24,7 @@ from sans.state.automatic_setters import (automatic_setters)
 # ----------------------------------------------------------------------------------------------------------------------
 @rename_descriptor_names
 class StateConvertToQ(StateBase):
-    reduction_dimensionality = ClassTypeParameter(ReductionDimensionality)
+    reduction_dimensionality = ReductionDimensionality.ONE_DIM
     use_gravity = BoolParameter()
     gravity_extra_length = PositiveFloatParameter()
     radius_cutoff = PositiveFloatParameter()
@@ -60,7 +60,7 @@ class StateConvertToQ(StateBase):
 
     def __init__(self):
         super(StateConvertToQ, self).__init__()
-        self.reduction_dimensionality = ReductionDimensionality.OneDim
+        self.reduction_dimensionality = ReductionDimensionality.ONE_DIM
         self.use_gravity = False
         self.gravity_extra_length = 0.0
         self.use_q_resolution = False
@@ -84,7 +84,7 @@ class StateConvertToQ(StateBase):
                                         "q_max": self.q_max})
             is_invalid.update(entry)
 
-        if self.reduction_dimensionality is ReductionDimensionality.OneDim:
+        if self.reduction_dimensionality is ReductionDimensionality.ONE_DIM:
             if self.q_min is None or self.q_max is None:
                 entry = validation_message("Q bounds not set for 1D reduction.",
                                            "Make sure to set the q boundaries when using a 1D reduction.",
@@ -105,7 +105,7 @@ class StateConvertToQ(StateBase):
                 is_invalid.update(entry)
 
         # QXY settings
-        if self.reduction_dimensionality is ReductionDimensionality.TwoDim:
+        if self.reduction_dimensionality is ReductionDimensionality.TWO_DIM:
             if self.q_xy_max is None or self.q_xy_step is None:
                 entry = validation_message("Q bounds not set for 2D reduction.",
                                            "Make sure that the q_max value bound and the step for the 2D reduction.",
@@ -167,6 +167,9 @@ class StateConvertToQBuilder(object):
     def build(self):
         self.state.validate()
         return copy.copy(self.state)
+
+    def set_reduction_dimensionality(self, val):
+        self.state.reduction_dimensionality = val
 
 
 # ------------------------------------------

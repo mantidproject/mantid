@@ -45,12 +45,12 @@ class CommandInterfaceStateDirectorTest(unittest.TestCase):
 
         # Reduction Dimensionality One Dim
         command = NParameterCommand(command_id=NParameterCommandId.reduction_dimensionality,
-                                    values=[ReductionDimensionality.OneDim])
+                                    values=[ReductionDimensionality.ONE_DIM])
         self._assert_raises_nothing(command_interface.add_command, command)
 
         # Reduction Dimensionality Two Dim
         command = NParameterCommand(command_id=NParameterCommandId.reduction_dimensionality,
-                                    values=[ReductionDimensionality.TwoDim])
+                                    values=[ReductionDimensionality.TWO_DIM])
         self._assert_raises_nothing(command_interface.add_command, command)
 
         # Sample offset
@@ -129,8 +129,8 @@ class CommandInterfaceStateDirectorTest(unittest.TestCase):
         self.assertEqual(state.adjustment.normalize_to_monitor.rebin_type, RebinType.InterpolatingRebin)
         self.assertEqual(state.adjustment.calculate_transmission.incident_monitor,  7)
         self.assertEqual(state.adjustment.calculate_transmission.rebin_type, RebinType.Rebin)
-        self.assertEqual(state.reduction.reduction_dimensionality, ReductionDimensionality.TwoDim)
-        self.assertEqual(state.convert_to_q.reduction_dimensionality, ReductionDimensionality.TwoDim)
+        self.assertEqual(state.reduction.reduction_dimensionality, ReductionDimensionality.TWO_DIM)
+        self.assertEqual(state.convert_to_q.reduction_dimensionality, ReductionDimensionality.TWO_DIM)
         self.assertEqual(state.move.sample_offset,  23.6/1000.)
         self.assertEqual(state.data.sample_scatter,  "SANS2D00022024")
         self.assertEqual(state.data.sample_scatter_period,  3)

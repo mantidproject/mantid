@@ -108,7 +108,7 @@ class RunTabPresenterTest(unittest.TestCase):
         # Assert
         # Note that the event slices are not set in the user file
         self.assertFalse(view.event_slices)
-        self.assertEqual(view.reduction_dimensionality, ReductionDimensionality.OneDim)
+        self.assertEqual(view.reduction_dimensionality, ReductionDimensionality.ONE_DIM)
         self.assertEqual(view.save_types[0], SaveType.NXcanSAS)
         self.assertTrue(view.zero_error_free)
         self.assertTrue(view.use_optimizations)
@@ -332,7 +332,7 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertEqual(state0.slice.start_time, None)
         self.assertEqual(state0.slice.end_time, None)
 
-        self.assertEqual(state0.reduction.reduction_dimensionality, ReductionDimensionality.OneDim)
+        self.assertEqual(state0.reduction.reduction_dimensionality, ReductionDimensionality.ONE_DIM)
         self.assertEqual(state0.move.detectors['LAB'].sample_centre_pos1, 0.15544999999999998)
 
         # Clean up

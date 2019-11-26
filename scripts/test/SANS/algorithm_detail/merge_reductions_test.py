@@ -37,7 +37,7 @@ class MergeReductionsTest(unittest.TestCase):
         # Set the reduction parameters
         reduction_info = StateReductionMode()
         reduction_info.reduction_mode = ReductionMode.MERGED
-        reduction_info.dimensionality = ReductionDimensionality.TwoDim
+        reduction_info.dimensionality = ReductionDimensionality.TWO_DIM
         reduction_info.merge_shift = shift
         reduction_info.merge_scale = scale
         reduction_info.merge_fit_mode = fit_type

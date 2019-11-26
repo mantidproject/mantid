@@ -40,7 +40,7 @@ class ConvertToQTest(unittest.TestCase):
     @staticmethod
     def _get_sample_state(q_min=1., q_max=2., q_step=0.1, q_step_type=RangeStepType.Lin,
                           q_xy_max=None, q_xy_step=None, q_xy_step_type=None,
-                          use_gravity=False, dim=ReductionDimensionality.OneDim):
+                          use_gravity=False, dim=ReductionDimensionality.ONE_DIM):
         facility = SANSFacility.ISIS
         file_information = SANSFileInformationMock(instrument=SANSInstrument.LOQ, run_number=74044)
         data_builder = get_data_builder(facility, file_information)
@@ -109,7 +109,7 @@ class ConvertToQTest(unittest.TestCase):
         adj_workspace = self._get_workspace(is_adjustment=True)
 
         state = self._get_sample_state(q_xy_max=2., q_xy_step=0.5, q_xy_step_type=RangeStepType.Lin,
-                                       dim=ReductionDimensionality.TwoDim)
+                                       dim=ReductionDimensionality.TWO_DIM)
 
         output_dict = convert_workspace(workspace=workspace, output_summed_parts=True,
                                         state_convert_to_q=state.convert_to_q, wavelength_adj_workspace=adj_workspace)

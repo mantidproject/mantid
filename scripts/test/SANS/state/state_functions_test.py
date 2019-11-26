@@ -24,7 +24,7 @@ class StateFunctionsTest(unittest.TestCase):
         state.data.sample_scatter_run_number = 12345
         state.data.sample_scatter_period = StateData.ALL_PERIODS 
 
-        state.reduction.dimensionality = ReductionDimensionality.OneDim
+        state.reduction.dimensionality = ReductionDimensionality.ONE_DIM
 
         state.wavelength.wavelength_low = 12.0
         state.wavelength.wavelength_high = 34.0

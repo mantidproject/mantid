@@ -42,7 +42,7 @@ class StateReductionBase(with_metaclass(ABCMeta, object)):
 class StateReductionMode(StateReductionBase, StateBase):
     reduction_mode = ReductionMode.NOT_SET
 
-    reduction_dimensionality = ClassTypeParameter(ReductionDimensionality)
+    reduction_dimensionality = ReductionDimensionality.ONE_DIM
     merge_max = FloatWithNoneParameter()
     merge_min = FloatWithNoneParameter()
     merge_mask = BoolParameter()
@@ -60,7 +60,7 @@ class StateReductionMode(StateReductionBase, StateBase):
     def __init__(self):
         super(StateReductionMode, self).__init__()
         self.reduction_mode = ReductionMode.LAB
-        self.reduction_dimensionality = ReductionDimensionality.OneDim
+        self.reduction_dimensionality = ReductionDimensionality.ONE_DIM
 
         # Set the shifts to defaults which essentially don't do anything.
         self.merge_shift = 0.0
@@ -135,6 +135,9 @@ class StateReductionModeBuilder(object):
     # TODO this whole class is a shim around state, so we should remove it at a later date
     def set_reduction_mode(self, val):
         self.state.reduction_mode = val
+
+    def set_reduction_dimensionality(self, val):
+        self.state.reduction_dimensionality = val
 
     def build(self):
         self.state.validate()

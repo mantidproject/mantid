@@ -667,7 +667,7 @@ def get_standard_output_workspace_name(state, reduction_data_type, data_type = D
 
     # 4. Dimensionality
     reduction = state.reduction
-    if reduction.reduction_dimensionality is ReductionDimensionality.OneDim:
+    if reduction.reduction_dimensionality is ReductionDimensionality.ONE_DIM:
         dimensionality_as_string = "_1D"
     else:
         dimensionality_as_string = "_2D"
@@ -678,7 +678,7 @@ def get_standard_output_workspace_name(state, reduction_data_type, data_type = D
 
     # 6. Phi Limits
     mask = state.mask
-    if reduction.reduction_dimensionality is ReductionDimensionality.OneDim:
+    if reduction.reduction_dimensionality is ReductionDimensionality.ONE_DIM:
         if mask.phi_min and mask.phi_max and (abs(mask.phi_max - mask.phi_min) != 180.0):
             phi_limits_as_string = 'Phi' + str(mask.phi_min) + '_' + str(mask.phi_max)
         else:
