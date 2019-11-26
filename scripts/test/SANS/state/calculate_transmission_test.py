@@ -40,7 +40,7 @@ class StateCalculateTransmissionTest(unittest.TestCase):
                           "transmission_mask_files": ["test.xml"], "default_transmission_monitor": 3,
                           "transmission_monitor": 4, "default_incident_monitor": 1, "incident_monitor": 2,
                           "prompt_peak_correction_min": 123., "prompt_peak_correction_max": 1234.,
-                          "rebin_type": RebinType.Rebin, "wavelength_low": [1.], "wavelength_high": [2.7],
+                          "rebin_type": RebinType.REBIN, "wavelength_low": [1.], "wavelength_high": [2.7],
                           "wavelength_step": 0.5,  "wavelength_step_type": RangeStepType.LIN,
                           "use_full_wavelength_range": True, "wavelength_full_range_low": 12.,
                           "wavelength_full_range_high": 434., "background_TOF_general_start": 1.4,
@@ -222,7 +222,7 @@ class StateCalculateTransmissionBuilderTest(unittest.TestCase):
         builder.set_transmission_roi_files(["sdfs", "sddfsdf"])
         builder.set_transmission_mask_files(["sdfs", "bbbbbb"])
 
-        builder.set_rebin_type(RebinType.Rebin)
+        builder.set_rebin_type(RebinType.REBIN)
         builder.set_wavelength_low([1.5])
         builder.set_wavelength_high([2.7])
         builder.set_wavelength_step(0.5)
@@ -262,7 +262,7 @@ class StateCalculateTransmissionBuilderTest(unittest.TestCase):
         self.assertEqual(state.transmission_roi_files,  ["sdfs", "sddfsdf"])
         self.assertEqual(state.transmission_mask_files,  ["sdfs", "bbbbbb"])
 
-        self.assertEqual(state.rebin_type, RebinType.Rebin)
+        self.assertEqual(state.rebin_type, RebinType.REBIN)
         self.assertEqual(state.wavelength_low,  [1.5])
         self.assertEqual(state.wavelength_high,  [2.7])
         self.assertEqual(state.wavelength_step,  0.5)

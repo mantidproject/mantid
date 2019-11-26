@@ -126,9 +126,9 @@ class CommandInterfaceStateDirectorTest(unittest.TestCase):
         self.assertTrue(state.mask.detectors[DetectorType.HAB.value].range_horizontal_strip_stop[-1]
                         == 199)
         self.assertEqual(state.adjustment.normalize_to_monitor.incident_monitor,  1)
-        self.assertEqual(state.adjustment.normalize_to_monitor.rebin_type, RebinType.InterpolatingRebin)
+        self.assertEqual(state.adjustment.normalize_to_monitor.rebin_type, RebinType.INTERPOLATING_REBIN)
         self.assertEqual(state.adjustment.calculate_transmission.incident_monitor,  7)
-        self.assertEqual(state.adjustment.calculate_transmission.rebin_type, RebinType.Rebin)
+        self.assertEqual(state.adjustment.calculate_transmission.rebin_type, RebinType.REBIN)
         self.assertEqual(state.reduction.reduction_dimensionality, ReductionDimensionality.TWO_DIM)
         self.assertEqual(state.convert_to_q.reduction_dimensionality, ReductionDimensionality.TWO_DIM)
         self.assertEqual(state.move.sample_offset,  23.6/1000.)

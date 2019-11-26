@@ -89,10 +89,10 @@ class StateCalculateTransmission(StateBase):
     # ----------------
     # Wavelength rebin
     # ----------------
-    rebin_type = ClassTypeParameter(RebinType)
     wavelength_low = PositiveFloatListParameter()
     wavelength_high = PositiveFloatListParameter()
     wavelength_step = PositiveFloatParameter()
+    rebin_type = RebinType.REBIN
     wavelength_step_type = RangeStepType.NOT_SET
 
     use_full_wavelength_range = BoolParameter()
@@ -125,7 +125,7 @@ class StateCalculateTransmission(StateBase):
         self.use_full_wavelength_range = False
 
         # Default rebin type is a standard Rebin
-        self.rebin_type = RebinType.Rebin
+        self.rebin_type = RebinType.REBIN
 
         self.prompt_peak_correction_enabled = False
 
@@ -304,6 +304,9 @@ class StateCalculateTransmissionLOQ(StateCalculateTransmission):
     def validate(self):
         super(StateCalculateTransmissionLOQ, self).validate()
 
+    def set_rebin_type(self, val):
+        self.state.rebin_type = val
+
 
 class StateCalculateTransmissionSANS2D(StateCalculateTransmission):
     def __init__(self):
@@ -376,6 +379,9 @@ class StateCalculateTransmissionBuilderLOQ(object):
     def set_wavelength_step_type(self, val):
         self.state.wavelength_step_type = val
 
+    def set_rebin_type(self, val):
+        self.state.rebin_type = val
+
 
 class StateCalculateTransmissionBuilderSANS2D(object):
     @automatic_setters(StateCalculateTransmissionSANS2D)
@@ -391,6 +397,9 @@ class StateCalculateTransmissionBuilderSANS2D(object):
 
     def set_wavelength_step_type(self, val):
         self.state.wavelength_step_type = val
+
+    def set_rebin_type(self, val):
+        self.state.rebin_type = val
 
 
 class StateCalculateTransmissionBuilderLARMOR(object):
@@ -408,6 +417,9 @@ class StateCalculateTransmissionBuilderLARMOR(object):
     def set_wavelength_step_type(self, val):
         self.state.wavelength_step_type = val
 
+    def set_rebin_type(self, val):
+        self.state.rebin_type = val
+
 
 class StateCalculateTransmissionBuilderZOOM(object):
     @automatic_setters(StateCalculateTransmissionZOOM)
@@ -423,6 +435,9 @@ class StateCalculateTransmissionBuilderZOOM(object):
 
     def set_wavelength_step_type(self, val):
         self.state.wavelength_step_type = val
+
+    def set_rebin_type(self, val):
+        self.state.rebin_type = val
 
 
 # ------------------------------------------

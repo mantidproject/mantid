@@ -22,7 +22,7 @@ from sans.state.automatic_setters import (automatic_setters)
 # ----------------------------------------------------------------------------------------------------------------------
 @rename_descriptor_names
 class StateWavelength(StateBase):
-    rebin_type = ClassTypeParameter(RebinType)
+    rebin_type = RebinType.REBIN
     wavelength_low = PositiveFloatListParameter()
     wavelength_high = PositiveFloatListParameter()
     wavelength_step = PositiveFloatParameter()
@@ -30,7 +30,7 @@ class StateWavelength(StateBase):
 
     def __init__(self):
         super(StateWavelength, self).__init__()
-        self.rebin_type = RebinType.Rebin
+        self.rebin_type = RebinType.REBIN
 
     def validate(self):
         is_invalid = dict()
@@ -70,6 +70,9 @@ class StateWavelengthBuilder(object):
 
     def set_wavelength_step_type(self, val):
         self.state.wavelength_step_type = val
+
+    def set_rebin_type(self, val):
+        self.state.rebin_type = val
 
 
 def get_wavelength_builder(data_info):

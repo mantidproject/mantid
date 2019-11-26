@@ -1107,7 +1107,7 @@ class StateDirectorISIS(object):
 
             if mon_spec:
                 mon_spec = mon_spec[-1]
-                rebin_type = RebinType.InterpolatingRebin if mon_spec.interpolate else RebinType.Rebin
+                rebin_type = RebinType.INTERPOLATING_REBIN if mon_spec.interpolate else RebinType.REBIN
                 self._normalize_to_monitor_builder.set_rebin_type(rebin_type)
 
                 #  We have to check if the spectrum is None, this can be the case when the user wants to use the
@@ -1159,7 +1159,7 @@ class StateDirectorISIS(object):
             mon_spec = [spec for spec in mon_spectrum if spec.is_trans]
             if mon_spec:
                 mon_spec = mon_spec[-1]
-                rebin_type = RebinType.InterpolatingRebin if mon_spec.interpolate else RebinType.Rebin
+                rebin_type = RebinType.INTERPOLATING_REBIN if mon_spec.interpolate else RebinType.REBIN
                 self._calculate_transmission_builder.set_rebin_type(rebin_type)
 
                 # We have to check if the spectrum is None, this can be the case when the user wants to use the

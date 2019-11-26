@@ -24,7 +24,7 @@ class StateNormalizeToMonitorTest(unittest.TestCase):
     def _get_normalize_to_monitor_state(**kwargs):
         state = StateNormalizeToMonitor()
         default_entries = {"prompt_peak_correction_min": 12., "prompt_peak_correction_max": 17.,
-                           "rebin_type": RebinType.Rebin, "wavelength_low": [1.5], "wavelength_high": [2.7],
+                           "rebin_type": RebinType.REBIN, "wavelength_low": [1.5], "wavelength_high": [2.7],
                            "wavelength_step": 0.5, "incident_monitor": 1, "wavelength_step_type": RangeStepType.LIN,
                            "background_TOF_general_start": 1.4, "background_TOF_general_stop": 24.5,
                            "background_TOF_monitor_start": {"1": 123, "2": 123},
@@ -105,7 +105,7 @@ class StateReductionBuilderTest(unittest.TestCase):
 
         builder.set_prompt_peak_correction_min(12.0)
         builder.set_prompt_peak_correction_max(17.0)
-        builder.set_rebin_type(RebinType.Rebin)
+        builder.set_rebin_type(RebinType.REBIN)
         builder.set_wavelength_low([1.5])
         builder.set_wavelength_high([2.7])
         builder.set_wavelength_step(0.5)
@@ -121,7 +121,7 @@ class StateReductionBuilderTest(unittest.TestCase):
         # Assert
         self.assertEqual(state.prompt_peak_correction_min,  12.0)
         self.assertEqual(state.prompt_peak_correction_max,  17.0)
-        self.assertEqual(state.rebin_type, RebinType.Rebin)
+        self.assertEqual(state.rebin_type, RebinType.REBIN)
         self.assertEqual(state.wavelength_low,  [1.5])
         self.assertEqual(state.wavelength_high,  [2.7])
         self.assertEqual(state.wavelength_step,  0.5)

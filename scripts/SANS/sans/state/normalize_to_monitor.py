@@ -30,7 +30,7 @@ class StateNormalizeToMonitor(StateBase):
     prompt_peak_correction_max = PositiveFloatWithNoneParameter()
     prompt_peak_correction_enabled = BoolParameter()
 
-    rebin_type = ClassTypeParameter(RebinType)
+    rebin_type = RebinType.REBIN
     wavelength_low = PositiveFloatListParameter()
     wavelength_high = PositiveFloatListParameter()
     wavelength_step = PositiveFloatParameter()
@@ -50,7 +50,7 @@ class StateNormalizeToMonitor(StateBase):
         self.prompt_peak_correction_enabled = False
 
         # Default rebin type is a standard Rebin
-        self.rebin_type = RebinType.Rebin
+        self.rebin_type = RebinType.REBIN
 
     def validate(self):
         is_invalid = {}
@@ -195,6 +195,9 @@ class StateNormalizeToMonitorBuilder(object):
     def set_wavelength_step_type(self, val):
         self.state.wavelength_step_type = val
 
+    def set_rebin_type(self, val):
+        self.state.rebin_type = val
+
 
 class StateNormalizeToMonitorBuilderLOQ(object):
     @automatic_setters(StateNormalizeToMonitorLOQ)
@@ -210,6 +213,9 @@ class StateNormalizeToMonitorBuilderLOQ(object):
 
     def set_wavelength_step_type(self, val):
         self.state.wavelength_step_type = val
+
+    def set_rebin_type(self, val):
+        self.state.rebin_type = val
 
 
 def get_normalize_to_monitor_builder(data_info):

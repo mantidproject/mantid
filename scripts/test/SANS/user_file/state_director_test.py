@@ -107,7 +107,7 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         normalize_to_monitor = adjustment.normalize_to_monitor
         self.assertEqual(normalize_to_monitor.prompt_peak_correction_min,  1000)
         self.assertEqual(normalize_to_monitor.prompt_peak_correction_max,  2000)
-        self.assertEqual(normalize_to_monitor.rebin_type, RebinType.InterpolatingRebin)
+        self.assertEqual(normalize_to_monitor.rebin_type, RebinType.INTERPOLATING_REBIN)
         self.assertEqual(normalize_to_monitor.wavelength_low,  [1.5])
         self.assertEqual(normalize_to_monitor.wavelength_high,  [12.5])
         self.assertEqual(normalize_to_monitor.wavelength_step,  0.125)
@@ -131,7 +131,7 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         self.assertEqual(calculate_transmission.transmission_roi_files,  ["test.xml", "test2.xml"])
         self.assertEqual(calculate_transmission.transmission_mask_files,  ["test3.xml", "test4.xml"])
         self.assertEqual(calculate_transmission.transmission_monitor,  4)
-        self.assertEqual(calculate_transmission.rebin_type, RebinType.InterpolatingRebin)
+        self.assertEqual(calculate_transmission.rebin_type, RebinType.INTERPOLATING_REBIN)
         self.assertEqual(calculate_transmission.wavelength_low,  [1.5])
         self.assertEqual(calculate_transmission.wavelength_high,  [12.5])
         self.assertEqual(calculate_transmission.wavelength_step,  0.125)

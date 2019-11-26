@@ -205,16 +205,13 @@ class RangeStepType(Enum):
     RANGE_LIN = "RangeLin"
     RANGE_LOG = "RangeLog"
 
-# --------------------------
-#  Rebin
-# --------------------------
-@string_convertible
-@serializable_enum("Rebin", "InterpolatingRebin")
-class RebinType(object):
+
+class RebinType(Enum):
     """
     Defines the rebin types available
     """
-    pass
+    INTERPOLATING_REBIN = "InterpolatingRebin"
+    REBIN = "Rebin"
 
 
 # --------------------------

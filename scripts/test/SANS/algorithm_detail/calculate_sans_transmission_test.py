@@ -234,7 +234,7 @@ class CalculateSansTransmissionTest(unittest.TestCase):
 
     def test_that_calculates_transmission_for_general_background_and_no_prompt_peak(self):
         # Arrange
-        state = CalculateSansTransmissionTest._get_state(rebin_type=RebinType.Rebin, wavelength_low=2.,
+        state = CalculateSansTransmissionTest._get_state(rebin_type=RebinType.REBIN, wavelength_low=2.,
                                                          wavelength_high=8., wavelength_step=2.,
                                                          wavelength_step_type=RangeStepType.LIN,
                                                          background_TOF_general_start=5000.,
@@ -270,7 +270,7 @@ class CalculateSansTransmissionTest(unittest.TestCase):
         fix_for_remove_bins = 1e-6
         background_TOF_monitor_start = {str(incident_spectrum): 5000., str(transmission_spectrum): 5000.}
         background_TOF_monitor_stop = {str(incident_spectrum): 10000., str(transmission_spectrum): 10000.}
-        state = CalculateSansTransmissionTest._get_state(rebin_type=RebinType.Rebin, wavelength_low=2.,
+        state = CalculateSansTransmissionTest._get_state(rebin_type=RebinType.REBIN, wavelength_low=2.,
                                                          wavelength_high=8., wavelength_step=2.,
                                                          wavelength_step_type=RangeStepType.LIN,
                                                          prompt_peak_correction_min=15000. + fix_for_remove_bins,
@@ -312,7 +312,7 @@ class CalculateSansTransmissionTest(unittest.TestCase):
         # This test picks the monitor detector ids based on a radius around the centre of the detector. This is much
         # more tricky to test here and in principle the main tests should be happening in the actual
         # CalculateTransmission algorithm.
-        state = CalculateSansTransmissionTest._get_state(rebin_type=RebinType.Rebin, wavelength_low=2.,
+        state = CalculateSansTransmissionTest._get_state(rebin_type=RebinType.REBIN, wavelength_low=2.,
                                                          wavelength_high=8., wavelength_step=2.,
                                                          wavelength_step_type=RangeStepType.LIN,
                                                          background_TOF_general_start=5000.,

@@ -106,7 +106,7 @@ class TestDirector(object):
             wavelength_builder.set_wavelength_high([10.0])
             wavelength_builder.set_wavelength_step(2.0)
             wavelength_builder.set_wavelength_step_type(RangeStepType.LIN)
-            wavelength_builder.set_rebin_type(RebinType.Rebin)
+            wavelength_builder.set_rebin_type(RebinType.REBIN)
             self.wavelength_state = wavelength_builder.build()
 
         # Build the SANSStateSave
@@ -134,7 +134,7 @@ class TestDirector(object):
             normalize_to_monitor_builder.set_wavelength_high([10.0])
             normalize_to_monitor_builder.set_wavelength_step(2.0)
             normalize_to_monitor_builder.set_wavelength_step_type(RangeStepType.LIN)
-            normalize_to_monitor_builder.set_rebin_type(RebinType.Rebin)
+            normalize_to_monitor_builder.set_rebin_type(RebinType.REBIN)
             normalize_to_monitor_builder.set_background_TOF_general_start(1000.)
             normalize_to_monitor_builder.set_background_TOF_general_stop(2000.)
             normalize_to_monitor_builder.set_incident_monitor(1)
@@ -148,7 +148,7 @@ class TestDirector(object):
             calculate_transmission_builder.set_wavelength_high([10.0])
             calculate_transmission_builder.set_wavelength_step(2.0)
             calculate_transmission_builder.set_wavelength_step_type(RangeStepType.LIN)
-            calculate_transmission_builder.set_rebin_type(RebinType.Rebin)
+            calculate_transmission_builder.set_rebin_type(RebinType.REBIN)
             calculate_transmission_builder.set_background_TOF_general_start(1000.)
             calculate_transmission_builder.set_background_TOF_general_stop(2000.)
 

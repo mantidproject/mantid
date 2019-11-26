@@ -273,7 +273,7 @@ def _get_corrected_wavelength_workspace(workspace, detector_ids, calculate_trans
                        "WavelengthHigh": wavelength_high,
                        "WavelengthStep": wavelength_step,
                        "WavelengthStepType": wavelength_step_type.value,
-                       "RebinMode": RebinType.to_string(rebin_type)}
+                       "RebinMode": rebin_type.value}
     convert_alg = create_unmanaged_algorithm(convert_name, **convert_options)
     convert_alg.setPropertyValue("OutputWorkspace", EMPTY_NAME)
     convert_alg.setProperty("OutputWorkspace", workspace)
