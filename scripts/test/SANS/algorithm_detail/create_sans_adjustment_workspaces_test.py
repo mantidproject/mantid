@@ -80,7 +80,7 @@ class CreateSANSAdjustmentWorkspacesTest(unittest.TestCase):
 
     @staticmethod
     def _run_test(state, sample_data, sample_monitor_data, transmission_data, direct_data, is_lab=True, is_sample=True):
-        data_type = DataType.to_string(DataType.Sample) if is_sample else DataType.to_string(DataType.Can)
+        data_type = DataType.SAMPLE.value if is_sample else DataType.CAN.value
         component = DetectorType.to_string(DetectorType.LAB) if is_lab else DetectorType.to_string(DetectorType.HAB)
 
         alg = CreateSANSAdjustmentWorkspaces(state_adjustment=state.adjustment,

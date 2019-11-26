@@ -143,28 +143,22 @@ class ReductionDimensionality(Enum):
     TWO_DIM = "TwoDim"
 
 
-# --------------------------
-#  Reduction data
-# --------------------------
-@serializable_enum("Scatter", "Transmission", "Direct")
-class ReductionData(object):
+class ReductionData(Enum):
     """
     Defines the workspace type of the reduction data. For all known instances this can be scatter, transmission
     or direct
     """
-    pass
+    DIRECT = "Direct"
+    SCATTER = "Scatter"
+    TRANSMISSION = "Transmission"
 
 
-# --------------------------
-#  Type of data
-# --------------------------
-@string_convertible
-@serializable_enum("Sample", "Can")
-class DataType(object):
+class DataType(Enum):
     """
     Defines the type of reduction data. This can either the sample or only the can.
     """
-    pass
+    CAN = "Can"
+    SAMPLE = "Sample"
 
 
 # ---------------------------------

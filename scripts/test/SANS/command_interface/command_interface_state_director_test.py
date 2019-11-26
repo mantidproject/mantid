@@ -140,14 +140,14 @@ class CommandInterfaceStateDirectorTest(unittest.TestCase):
         self.assertEqual(state.move.detectors[DetectorType.to_string(DetectorType.HAB)].sample_centre_pos1,  12.4/1000.)
         self.assertTrue(state.move.detectors[DetectorType.to_string(DetectorType.HAB)].sample_centre_pos2
                         == 23.54/1000.)
-        self.assertTrue(state.adjustment.calculate_transmission.fit[DataType.to_string(DataType.Can)].fit_type
+        self.assertTrue(state.adjustment.calculate_transmission.fit[DataType.CAN.value].fit_type
                         is FitType.Logarithmic)
-        self.assertTrue(state.adjustment.calculate_transmission.fit[DataType.to_string(DataType.Can)].polynomial_order
+        self.assertTrue(state.adjustment.calculate_transmission.fit[DataType.CAN.value].polynomial_order
                         == 0)
 
-        self.assertTrue(state.adjustment.calculate_transmission.fit[DataType.to_string(DataType.Can)].wavelength_low
+        self.assertTrue(state.adjustment.calculate_transmission.fit[DataType.CAN.value].wavelength_low
                         == 10.4)
-        self.assertTrue(state.adjustment.calculate_transmission.fit[DataType.to_string(DataType.Can)].wavelength_high
+        self.assertTrue(state.adjustment.calculate_transmission.fit[DataType.CAN.value].wavelength_high
                         == 12.54)
 
         self.assertEqual(state.reduction.merge_scale,  1.2)

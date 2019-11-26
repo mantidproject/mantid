@@ -223,8 +223,8 @@ def get_shift_and_scale_parameter(reduction_mode_vs_output_bundles):
 
 
 def is_sample(x):
-    return x.data_type is DataType.Sample
+    return x.data_type is DataType.SAMPLE
 
 
 def is_can(x):
-    return x.data_type is DataType.Can
+    return x.data_type is DataType.CAN

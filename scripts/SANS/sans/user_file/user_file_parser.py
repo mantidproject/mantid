@@ -1828,9 +1828,9 @@ class FitParser(UserFileComponentParser):
 
     def _get_workspace_type(self, line):
         if re.search(self._sample, line) is not None:
-            ws_type = DataType.Sample
+            ws_type = DataType.SAMPLE
         elif re.search(self._can, line) is not None:
-            ws_type = DataType.Can
+            ws_type = DataType.CAN
         else:
             ws_type = None
         return ws_type

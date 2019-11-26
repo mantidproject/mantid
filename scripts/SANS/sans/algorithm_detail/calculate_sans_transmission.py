@@ -58,7 +58,7 @@ def calculate_transmission(transmission_ws, direct_ws, state_adjustment_calculat
     direct_ws = _get_corrected_wavelength_workspace(direct_ws, all_detector_ids,
                                                     calculate_transmission_state, data_type_str)
 
-    data_type = DataType.from_string(data_type_str)
+    data_type = DataType(data_type_str)
 
     # 3. Fit
     output_workspace, unfitted_transmission_workspace = \
@@ -115,7 +115,7 @@ def _perform_fit(transmission_workspace, direct_workspace,
         raise RuntimeError("No transmission monitor has been provided.")
 
     # Get the fit setting for the correct data type, ie either for the Sample of the Can
-    fit_type = calculate_transmission_state.fit[DataType.to_string(data_type)].fit_type
+    fit_type = calculate_transmission_state.fit[data_type.value].fit_type
     if fit_type is FitType.Logarithmic:
         fit_string = "Log"
     elif fit_type is FitType.Polynomial:
@@ -125,7 +125,7 @@ def _perform_fit(transmission_workspace, direct_workspace,
 
     trans_options.update({"FitMethod": fit_string})
     if fit_type is FitType.Polynomial:
-        polynomial_order = calculate_transmission_state.fit[DataType.to_string(data_type)].polynomial_order
+        polynomial_order = calculate_transmission_state.fit[data_type.value].polynomial_order
         trans_options.update({"PolynomialOrder": polynomial_order})
 
     trans_alg = create_unmanaged_algorithm(trans_name, **trans_options)

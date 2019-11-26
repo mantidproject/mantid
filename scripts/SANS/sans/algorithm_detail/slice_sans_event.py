@@ -29,7 +29,7 @@ def slice_sans_event(state_slice, input_ws, input_ws_monitor, data_type_str="Sam
              'OutputWorkspaceMonitor' : The output monitor workspace which has the correct slice factor applied to it.
     """
 
-    data_type = DataType.from_string(data_type_str)
+    data_type = DataType(data_type_str)
 
     if isinstance(input_ws, Workspace2D):
         sliced_workspace = input_ws
@@ -72,7 +72,7 @@ def _create_slice(workspace, slice_info, data_type):
     total_charge, total_time = get_charge_and_time(workspace)
 
     # If we are dealing with a Can reduction then the slice times are -1
-    if data_type is DataType.Can:
+    if data_type is DataType.CAN:
         start_time = -1.
         end_time = -1.
 

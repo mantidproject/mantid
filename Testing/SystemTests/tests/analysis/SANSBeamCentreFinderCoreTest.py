@@ -58,8 +58,8 @@ class SANSBeamCentreFinderCoreTest(unittest.TestCase):
         return sample_scatter, sample_scatter_monitor_workspace, transmission_workspace, direct_workspace
 
     def _run_beam_centre_core(self, state, workspace, monitor, transmission=None, direct=None,
-                              detector_type=DetectorType.LAB, component=DataType.Sample, centre_1 = 0.1, centre_2 = -0.1
-                              ,r_min = 0.06, r_max = 0.26):
+                              detector_type=DetectorType.LAB, component=DataType.SAMPLE, centre_1 = 0.1, centre_2 = -0.1
+                              , r_min = 0.06, r_max = 0.26):
         beam_centre_core_alg = AlgorithmManager.createUnmanaged("SANSBeamCentreFinderCore")
         beam_centre_core_alg.setChild(True)
         beam_centre_core_alg.initialize()
@@ -76,7 +76,7 @@ class SANSBeamCentreFinderCoreTest(unittest.TestCase):
             beam_centre_core_alg.setProperty("DirectWorkspace", direct)
 
         beam_centre_core_alg.setProperty("Component", DetectorType.to_string(detector_type))
-        beam_centre_core_alg.setProperty("DataType", DataType.to_string(component))
+        beam_centre_core_alg.setProperty("DataType", component.value)
         beam_centre_core_alg.setProperty("Centre1", centre_1)
         beam_centre_core_alg.setProperty("Centre2", centre_2)
         beam_centre_core_alg.setProperty("RMax", r_max)

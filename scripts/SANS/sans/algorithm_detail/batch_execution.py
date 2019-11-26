@@ -928,16 +928,16 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
     # Set the output workspaces for the calculated and unfitted transmission
     # ------------------------------------------------------------------------------------------------------------------
     sample_calculated_transmission, \
-        sample_calculated_transmission_base = get_transmission_output_name(reduction_package.state, DataType.Sample,
+        sample_calculated_transmission_base = get_transmission_output_name(reduction_package.state, DataType.SAMPLE,
                                                                            multi_reduction_type, True)
     can_calculated_transmission, \
-        can_calculated_transmission_base = get_transmission_output_name(reduction_package.state, DataType.Can,
+        can_calculated_transmission_base = get_transmission_output_name(reduction_package.state, DataType.CAN,
                                                                         multi_reduction_type, True)
     sample_unfitted_transmission, \
-        sample_unfitted_transmission_base = get_transmission_output_name(reduction_package.state, DataType.Sample,
+        sample_unfitted_transmission_base = get_transmission_output_name(reduction_package.state, DataType.SAMPLE,
                                                                          multi_reduction_type, False)
     can_unfitted_transmission, \
-        can_unfitted_transmission_base = get_transmission_output_name(reduction_package.state, DataType.Can,
+        can_unfitted_transmission_base = get_transmission_output_name(reduction_package.state, DataType.CAN,
                                                                       multi_reduction_type, False)
 
     _set_output_name_from_string(reduction_alg, reduction_package, "OutputWorkspaceCalculatedTransmission",

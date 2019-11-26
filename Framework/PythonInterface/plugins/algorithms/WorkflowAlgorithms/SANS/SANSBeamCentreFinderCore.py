@@ -72,9 +72,9 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
                              doc="The component of the instrument which is to be reduced.")
 
         # The data type
-        allowed_data = StringListValidator([DataType.to_string(DataType.Sample),
-                                            DataType.to_string(DataType.Can)])
-        self.declareProperty("DataType", DataType.to_string(DataType.Sample),
+        allowed_data = StringListValidator([DataType.SAMPLE.value,
+                                            DataType.CAN.value])
+        self.declareProperty("DataType", DataType.SAMPLE.value,
                              validator=allowed_data, direction=Direction.Input,
                              doc="The component of the instrument which is to be reduced.")
 

@@ -262,7 +262,7 @@ class SANSSingleReductionBase(DistributedDataProcessorAlgorithm):
 
         # Create the Scatter information
         sample_info = self._create_reduction_bundles_for_data_type(state=state,
-                                                                   data_type=DataType.Sample,
+                                                                   data_type=DataType.SAMPLE,
                                                                    reduction_modes=reduction_modes,
                                                                    output_parts=output_parts,
                                                                    scatter_name="SampleScatterWorkspace",
@@ -272,7 +272,7 @@ class SANSSingleReductionBase(DistributedDataProcessorAlgorithm):
 
         # Create the Can information
         can_info = self._create_reduction_bundles_for_data_type(state=state,
-                                                                data_type=DataType.Can,
+                                                                data_type=DataType.CAN,
                                                                 reduction_modes=reduction_modes,
                                                                 output_parts=output_parts,
                                                                 scatter_name="CanScatterWorkspace",

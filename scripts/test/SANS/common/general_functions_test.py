@@ -243,7 +243,7 @@ class SANSFunctionsTest(unittest.TestCase):
         state = SANSFunctionsTest._get_state()
         state.save.user_specified_output_name = "test_output"
         # Act
-        output_workspace, group_output_name = get_transmission_output_name(state, data_type=DataType.Can)
+        output_workspace, group_output_name = get_transmission_output_name(state, data_type=DataType.CAN)
         # Assert
         self.assertEqual(output_workspace, "test_output_trans_Can")
         self.assertEqual(group_output_name, 'test_output_trans')
@@ -253,7 +253,7 @@ class SANSFunctionsTest(unittest.TestCase):
         state = SANSFunctionsTest._get_state()
         state.save.user_specified_output_name = ''
         # Act
-        output_workspace, group_output_name = get_transmission_output_name(state, data_type=DataType.Can)
+        output_workspace, group_output_name = get_transmission_output_name(state, data_type=DataType.CAN)
         # Assert
         self.assertEqual(output_workspace, "12345_trans_Can_1.0_10.0")
         self.assertEqual(group_output_name, '12345_trans_1.0_10.0')
@@ -268,7 +268,7 @@ class SANSFunctionsTest(unittest.TestCase):
 
         output_name, group_output_name = get_transmission_output_name(state,
                                                                       multi_reduction_type=multi_reduction_type,
-                                                                      data_type=DataType.Can)
+                                                                      data_type=DataType.CAN)
 
         self.assertEqual(output_name, '12345_trans_Can_1.0_10.0_12.0_34.0')
         self.assertEqual(group_output_name, '12345_trans_1.0_10.0')
@@ -283,7 +283,7 @@ class SANSFunctionsTest(unittest.TestCase):
 
         output_name, group_output_name = get_transmission_output_name(state,
                                                                       multi_reduction_type=multi_reduction_type,
-                                                                      data_type=DataType.Can, fitted=False)
+                                                                      data_type=DataType.CAN, fitted=False)
 
         self.assertEqual(output_name, '12345_trans_Can_unfitted_1.0_10.0')
         self.assertEqual(group_output_name, '12345_trans_1.0_10.0')

@@ -1220,7 +1220,7 @@ class StateDirectorISIS(object):
                 self._calculate_transmission_builder.set_Can_wavelength_high(general_settings.stop)
 
             # 3. Sample settings
-            sample_settings = [item for item in fit_general if item.data_type is DataType.Sample]
+            sample_settings = [item for item in fit_general if item.data_type is DataType.SAMPLE]
             if sample_settings:
                 check_if_contains_only_one_element(sample_settings, FitId.general)
                 sample_settings = sample_settings[-1]
@@ -1230,7 +1230,7 @@ class StateDirectorISIS(object):
                 self._calculate_transmission_builder.set_Sample_wavelength_high(sample_settings.stop)
 
             # 4. Can settings
-            can_settings = [item for item in fit_general if item.data_type is DataType.Can]
+            can_settings = [item for item in fit_general if item.data_type is DataType.CAN]
             if can_settings:
                 check_if_contains_only_one_element(can_settings, FitId.general)
                 can_settings = can_settings[-1]

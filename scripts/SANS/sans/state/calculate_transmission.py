@@ -120,8 +120,8 @@ class StateCalculateTransmission(StateBase):
         self.background_TOF_monitor_start = {}
         self.background_TOF_monitor_stop = {}
 
-        self.fit = {DataType.to_string(DataType.Sample): StateTransmissionFit(),
-                    DataType.to_string(DataType.Can): StateTransmissionFit()}
+        self.fit = {DataType.SAMPLE.value: StateTransmissionFit(),
+                    DataType.CAN.value: StateTransmissionFit()}
         self.use_full_wavelength_range = False
 
         # Default rebin type is a standard Rebin
@@ -276,8 +276,8 @@ class StateCalculateTransmission(StateBase):
         # -----
         # Fit
         # -----
-        self.fit[DataType.to_string(DataType.Sample)].validate()
-        self.fit[DataType.to_string(DataType.Can)].validate()
+        self.fit[DataType.SAMPLE.value].validate()
+        self.fit[DataType.CAN.value].validate()
 
         if is_invalid:
             raise ValueError("StateCalculateTransmission: The provided inputs are illegal. "

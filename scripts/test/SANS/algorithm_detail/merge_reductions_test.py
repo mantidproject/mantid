@@ -71,7 +71,7 @@ class MergeReductionsTest(unittest.TestCase):
         data_x_hab = list(range(0, 10))
         data_y_hab_count = [3.] * 10
         data_y_hab_norm = [4.] * 10
-        sample_lab, sample_hab = MergeReductionsTest._create_workspaces(state, DataType.Sample, data_x_lab,
+        sample_lab, sample_hab = MergeReductionsTest._create_workspaces(state, DataType.SAMPLE, data_x_lab,
                                                                         data_y_lab_count, data_y_lab_norm,
                                                                         data_x_hab, data_y_hab_count, data_y_hab_norm)
 
@@ -83,7 +83,7 @@ class MergeReductionsTest(unittest.TestCase):
         data_x_hab = list(range(0, 10))
         data_y_hab_count = [7.] * 10
         data_y_hab_norm = [8.] * 10
-        can_lab, can_hab = MergeReductionsTest._create_workspaces(state, DataType.Can, data_x_lab,
+        can_lab, can_hab = MergeReductionsTest._create_workspaces(state, DataType.CAN, data_x_lab,
                                                                   data_y_lab_count, data_y_lab_norm,
                                                                   data_x_hab, data_y_hab_count, data_y_hab_norm)
         return sample_lab, sample_hab, can_lab, can_hab

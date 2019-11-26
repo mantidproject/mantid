@@ -29,7 +29,6 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         self.assertEqual(data.calibration,  "TUBE_SANS2D_BOTH_31681_25Sept15.nxs")
         self.assertEqual(data.user_file,  "USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger_FRONT.txt")
 
-
     def _assert_move(self, state):
         move = state.move
         # Check the elements which were set on move
@@ -150,14 +149,14 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         self.assertEqual(calculate_transmission.background_TOF_monitor_stop["2"],  98000)
         self.assertEqual(calculate_transmission.background_TOF_roi_start,  123)
         self.assertEqual(calculate_transmission.background_TOF_roi_stop,  466)
-        self.assertEqual(calculate_transmission.fit[DataType.to_string(DataType.Sample)].fit_type, FitType.Logarithmic)
-        self.assertEqual(calculate_transmission.fit[DataType.to_string(DataType.Sample)].wavelength_low,  1.5)
-        self.assertEqual(calculate_transmission.fit[DataType.to_string(DataType.Sample)].wavelength_high,  12.5)
-        self.assertEqual(calculate_transmission.fit[DataType.to_string(DataType.Sample)].polynomial_order,  0)
-        self.assertEqual(calculate_transmission.fit[DataType.to_string(DataType.Can)].fit_type, FitType.Logarithmic)
-        self.assertEqual(calculate_transmission.fit[DataType.to_string(DataType.Can)].wavelength_low,  1.5)
-        self.assertEqual(calculate_transmission.fit[DataType.to_string(DataType.Can)].wavelength_high,  12.5)
-        self.assertEqual(calculate_transmission.fit[DataType.to_string(DataType.Can)].polynomial_order,  0)
+        self.assertEqual(calculate_transmission.fit[DataType.SAMPLE.value].fit_type, FitType.Logarithmic)
+        self.assertEqual(calculate_transmission.fit[DataType.SAMPLE.value].wavelength_low, 1.5)
+        self.assertEqual(calculate_transmission.fit[DataType.SAMPLE.value].wavelength_high, 12.5)
+        self.assertEqual(calculate_transmission.fit[DataType.SAMPLE.value].polynomial_order, 0)
+        self.assertEqual(calculate_transmission.fit[DataType.CAN.value].fit_type, FitType.Logarithmic)
+        self.assertEqual(calculate_transmission.fit[DataType.CAN.value].wavelength_low, 1.5)
+        self.assertEqual(calculate_transmission.fit[DataType.CAN.value].wavelength_high, 12.5)
+        self.assertEqual(calculate_transmission.fit[DataType.CAN.value].polynomial_order, 0)
 
         # Wavelength and Pixel Adjustment
         wavelength_and_pixel_adjustment = adjustment.wavelength_and_pixel_adjustment

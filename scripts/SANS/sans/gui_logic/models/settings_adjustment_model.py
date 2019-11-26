@@ -40,8 +40,8 @@ class SettingsAdjustmentModel(ModelCommon):
         if FitId.general in self._user_file_items:
             settings = self._user_file_items[FitId.general]
             if settings:
-                settings_sample = [setting for setting in settings if setting.data_type is DataType.Sample]
-                settings_can = [setting for setting in settings if setting.data_type is DataType.Can]
+                settings_sample = [setting for setting in settings if setting.data_type is DataType.SAMPLE]
+                settings_can = [setting for setting in settings if setting.data_type is DataType.CAN]
                 # If we have either one or the other
                 if settings_sample or settings_can:
                     return True
@@ -181,69 +181,69 @@ class SettingsAdjustmentModel(ModelCommon):
 
     @property
     def transmission_sample_fit_type(self):
-        return self._get_transmission_fit(data_type=DataType.Sample, attribute="fit_type", default_value=FitType.NoFit)
+        return self._get_transmission_fit(data_type=DataType.SAMPLE, attribute="fit_type", default_value=FitType.NoFit)
 
     @transmission_sample_fit_type.setter
     def transmission_sample_fit_type(self, value):
-        self._set_transmission_fit(data_type=DataType.Sample, fit_type=value)
+        self._set_transmission_fit(data_type=DataType.SAMPLE, fit_type=value)
 
     @property
     def transmission_can_fit_type(self):
-        return self._get_transmission_fit(data_type=DataType.Can, attribute="fit_type", default_value=FitType.NoFit)
+        return self._get_transmission_fit(data_type=DataType.CAN, attribute="fit_type", default_value=FitType.NoFit)
 
     @transmission_can_fit_type.setter
     def transmission_can_fit_type(self, value):
-        self._set_transmission_fit(data_type=DataType.Can, fit_type=value)
+        self._set_transmission_fit(data_type=DataType.CAN, fit_type=value)
 
     @property
     def transmission_sample_polynomial_order(self):
-        return self._get_transmission_fit(data_type=DataType.Sample, attribute="polynomial_order",
+        return self._get_transmission_fit(data_type=DataType.SAMPLE, attribute="polynomial_order",
                                           default_value=2)
 
     @transmission_sample_polynomial_order.setter
     def transmission_sample_polynomial_order(self, value):
-        self._set_transmission_fit(data_type=DataType.Sample, polynomial_order=value)
+        self._set_transmission_fit(data_type=DataType.SAMPLE, polynomial_order=value)
 
     @property
     def transmission_can_polynomial_order(self):
-        return self._get_transmission_fit(data_type=DataType.Can, attribute="polynomial_order",
+        return self._get_transmission_fit(data_type=DataType.CAN, attribute="polynomial_order",
                                           default_value=2)
 
     @transmission_can_polynomial_order.setter
     def transmission_can_polynomial_order(self, value):
-        self._set_transmission_fit(data_type=DataType.Can, polynomial_order=value)
+        self._set_transmission_fit(data_type=DataType.CAN, polynomial_order=value)
 
     @property
     def transmission_sample_wavelength_min(self):
-        return self._get_transmission_fit(data_type=DataType.Sample, attribute="start", default_value="")
+        return self._get_transmission_fit(data_type=DataType.SAMPLE, attribute="start", default_value="")
 
     @transmission_sample_wavelength_min.setter
     def transmission_sample_wavelength_min(self, value):
-        self._set_transmission_fit(data_type=DataType.Sample, start=value)
+        self._set_transmission_fit(data_type=DataType.SAMPLE, start=value)
 
     @property
     def transmission_sample_wavelength_max(self):
-        return self._get_transmission_fit(data_type=DataType.Sample, attribute="stop", default_value="")
+        return self._get_transmission_fit(data_type=DataType.SAMPLE, attribute="stop", default_value="")
 
     @transmission_sample_wavelength_max.setter
     def transmission_sample_wavelength_max(self, value):
-        self._set_transmission_fit(data_type=DataType.Sample, stop=value)
+        self._set_transmission_fit(data_type=DataType.SAMPLE, stop=value)
 
     @property
     def transmission_can_wavelength_min(self):
-        return self._get_transmission_fit(data_type=DataType.Can, attribute="start", default_value="")
+        return self._get_transmission_fit(data_type=DataType.CAN, attribute="start", default_value="")
 
     @transmission_can_wavelength_min.setter
     def transmission_can_wavelength_min(self, value):
-        self._set_transmission_fit(data_type=DataType.Can, start=value)
+        self._set_transmission_fit(data_type=DataType.CAN, start=value)
 
     @property
     def transmission_can_wavelength_max(self):
-        return self._get_transmission_fit(data_type=DataType.Can, attribute="stop", default_value="")
+        return self._get_transmission_fit(data_type=DataType.CAN, attribute="stop", default_value="")
 
     @transmission_can_wavelength_max.setter
     def transmission_can_wavelength_max(self, value):
-        self._set_transmission_fit(data_type=DataType.Can, stop=value)
+        self._set_transmission_fit(data_type=DataType.CAN, stop=value)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Monitor normalization

@@ -168,7 +168,7 @@ class SANSSingleReduction(SANSSingleReductionBase):
                 # If a can workspace has already been reduced with the same can
                 # settings and is stored in the ADS, then we should use it
                 # (provided the user has optimizations enabled).
-                if use_optimizations and slice_bundle.data_type is DataType.Can:
+                if use_optimizations and slice_bundle.data_type is DataType.CAN:
                     output_bundle, output_parts_bundle, \
                         output_transmission_bundle = run_optimized_for_can(reduction_alg,
                                                                            slice_bundle,
@@ -301,7 +301,7 @@ class SANSSingleReduction(SANSSingleReductionBase):
         # Find the LAB Can and HAB Can entries if they exist
         for component_bundle in output_bundles:
             for output_bundle in component_bundle:
-                if output_bundle.data_type is DataType.Can:
+                if output_bundle.data_type is DataType.CAN:
                     reduction_mode = output_bundle.reduction_mode
                     output_workspace = output_bundle.output_workspace
                     # Make sure that the output workspace is not None which can be the case if there has never been a
@@ -341,7 +341,7 @@ class SANSSingleReduction(SANSSingleReductionBase):
         # Find the partial output bundles fo LAB Can and HAB Can if they exist
         for event_slice_bundles in output_bundles_parts:
             for output_bundle_part in event_slice_bundles:
-                if output_bundle_part.data_type is DataType.Can:
+                if output_bundle_part.data_type is DataType.CAN:
                     reduction_mode = output_bundle_part.reduction_mode
                     output_workspace_count = output_bundle_part.output_workspace_count
                     output_workspace_norm = output_bundle_part.output_workspace_norm
@@ -391,7 +391,7 @@ class SANSSingleReduction(SANSSingleReductionBase):
 
         for component_bundle in output_bundles:
             for output_bundle in component_bundle:
-                if output_bundle.data_type is DataType.Can:
+                if output_bundle.data_type is DataType.CAN:
                     reduction_mode = output_bundle.reduction_mode
                     output_workspace = output_bundle.output_workspace
 
@@ -406,7 +406,7 @@ class SANSSingleReduction(SANSSingleReductionBase):
                         else:
                             raise RuntimeError("SANSSingleReduction: The reduction mode {0} should not"
                                                " be set with a can.".format(reduction_mode))
-                elif output_bundle.data_type is DataType.Sample:
+                elif output_bundle.data_type is DataType.SAMPLE:
                     reduction_mode = output_bundle.reduction_mode
                     output_workspace = output_bundle.output_workspace
 
@@ -433,10 +433,10 @@ class SANSSingleReduction(SANSSingleReductionBase):
 
     def set_transmission_workspaces_on_output(self, transmission_bundles, fit_state):
         for transmission_bundle in transmission_bundles:
-            fit_performed = fit_state[DataType.to_string(transmission_bundle.data_type)].fit_type != FitType.NoFit
+            fit_performed = fit_state[transmission_bundle.data_type.value].fit_type != FitType.NoFit
             calculated_transmission_workspace = transmission_bundle.calculated_transmission_workspace
             unfitted_transmission_workspace = transmission_bundle.unfitted_transmission_workspace
-            if transmission_bundle.data_type is DataType.Can:
+            if transmission_bundle.data_type is DataType.CAN:
                 if does_can_workspace_exist_on_ads(calculated_transmission_workspace):
                     # The workspace is cloned here because the transmission runs are diagnostic output so even though
                     # the values already exist they need to be labelled seperately for each reduction.
@@ -447,7 +447,7 @@ class SANSSingleReduction(SANSSingleReductionBase):
                 if fit_performed:
                     self.setProperty("OutputWorkspaceCalculatedTransmissionCan", calculated_transmission_workspace)
                 self.setProperty("OutputWorkspaceUnfittedTransmissionCan", unfitted_transmission_workspace)
-            elif transmission_bundle.data_type is DataType.Sample:
+            elif transmission_bundle.data_type is DataType.SAMPLE:
                 if fit_performed:
                     self.setProperty("OutputWorkspaceCalculatedTransmission", calculated_transmission_workspace)
                 self.setProperty("OutputWorkspaceUnfittedTransmission", unfitted_transmission_workspace)
@@ -473,7 +473,7 @@ class SANSSingleReduction(SANSSingleReductionBase):
             # Find the sample in the data collection
             state, reduction_mode = next(((output_bundle.state, output_bundle.reduction_mode)
                                           for output_bundle in output_bundles
-                                          if output_bundle.data_type == DataType.Sample), None)
+                                          if output_bundle.data_type == DataType.SAMPLE), None)
 
             # Get the workspace name
             name = self._get_output_workspace_name(state, reduction_mode=reduction_mode)

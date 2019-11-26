@@ -409,7 +409,7 @@ class CommandInterfaceStateDirector(object):
 
     def _process_trans_fit(self, command):
         def fit_type_to_data_type(fit_type_to_convert):
-            return DataType.Can if fit_type_to_convert is FitData.Can else DataType.Sample
+            return DataType.CAN if fit_type_to_convert is FitData.Can else DataType.SAMPLE
 
         fit_data = command.values[0]
         wavelength_low = command.values[1]
