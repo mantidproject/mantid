@@ -430,6 +430,9 @@ def is_enum_type_parameter(value):
 
 
 def is_enum_list_parameter(value):
+    if isinstance(value, string_types):
+        return False
+    
     try:
         return all(ENUM_TYPE_TAG in s for s in value)
     except TypeError:

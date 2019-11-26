@@ -81,7 +81,7 @@ class StateGuiModel(ModelCommon):
 
     @property
     def save_types(self):
-        return self.get_simple_element(element_id=OtherId.save_types, default_value=[SaveType.NXcanSAS])
+        return self.get_simple_element(element_id=OtherId.save_types, default_value=[SaveType.NX_CAN_SAS])
 
     @save_types.setter
     def save_types(self, value):

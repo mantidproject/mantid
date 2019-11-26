@@ -79,7 +79,7 @@ class GuiCommonTest(unittest.TestCase):
 
     def test_create_gui_state_from_userfile_adds_save_format_from_gui(self):
         gui_state = StateGuiModel({})
-        gui_state.save_types = [SaveType.NXcanSAS]
+        gui_state.save_types = [SaveType.NX_CAN_SAS]
 
         row_state = create_gui_state_from_userfile('MaskLOQData.txt', gui_state)
 

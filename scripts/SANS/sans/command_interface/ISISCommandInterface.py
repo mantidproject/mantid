@@ -842,15 +842,15 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs=None, verbose=Fals
             if key == "SaveRKH":
                 save_algs.append(SaveType.RKH)
             elif key == "SaveNexus":
-                save_algs.append(SaveType.Nexus)
+                save_algs.append(SaveType.NEXUS)
             elif key == "SaveNistQxy":
-                save_algs.append(SaveType.NistQxy)
+                save_algs.append(SaveType.NIST_QXY)
             elif key == "SaveCanSAS" or key == "SaveCanSAS1D":
-                save_algs.append(SaveType.CanSAS)
+                save_algs.append(SaveType.CAN_SAS)
             elif key == "SaveCSV":
                 save_algs.append(SaveType.CSV)
             elif key == "SaveNXcanSAS":
-                save_algs.append(SaveType.NXcanSAS)
+                save_algs.append(SaveType.NX_CAN_SAS)
             else:
                 raise RuntimeError("The save format {0} is not known.".format(key))
         output_mode = OutputMode.Both

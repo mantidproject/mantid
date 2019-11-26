@@ -1438,13 +1438,13 @@ def save_workspace_to_file(workspace_name, file_formats, file_name, additional_r
                          "TransmissionCan": transmission_can_name})
     save_options.update(additional_run_numbers)
 
-    if SaveType.Nexus in file_formats:
+    if SaveType.NEXUS in file_formats:
         save_options.update({"Nexus": True})
-    if SaveType.CanSAS in file_formats:
+    if SaveType.CAN_SAS in file_formats:
         save_options.update({"CanSAS": True})
-    if SaveType.NXcanSAS in file_formats:
+    if SaveType.NX_CAN_SAS in file_formats:
         save_options.update({"NXcanSAS": True})
-    if SaveType.NistQxy in file_formats:
+    if SaveType.NIST_QXY in file_formats:
         save_options.update({"NistQxy": True})
     if SaveType.RKH in file_formats:
         save_options.update({"RKH": True})

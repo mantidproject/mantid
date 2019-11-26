@@ -38,7 +38,7 @@ class StateReductionBuilderTest(unittest.TestCase):
 
         user_specified_output_name = "test_file_name"
         zero_free_correction = True
-        file_format = [SaveType.Nexus, SaveType.CanSAS]
+        file_format = [SaveType.NEXUS, SaveType.CAN_SAS]
 
         builder.set_user_specified_output_name(user_specified_output_name)
         builder.set_zero_free_correction(zero_free_correction)

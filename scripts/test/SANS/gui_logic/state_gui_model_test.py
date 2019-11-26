@@ -58,12 +58,12 @@ class StateGuiModelTest(unittest.TestCase):
 
     def test_that_default_save_type_is_NXcanSAS(self):
         state_gui_model = StateGuiModel({"test": [1]})
-        self.assertEqual(state_gui_model.save_types, [SaveType.NXcanSAS])
+        self.assertEqual(state_gui_model.save_types, [SaveType.NX_CAN_SAS])
 
     def test_that_can_select_multiple_save_types(self):
         state_gui_model = StateGuiModel({"test": [1]})
-        state_gui_model.save_types = [SaveType.RKH, SaveType.NXcanSAS]
-        self.assertEqual(state_gui_model.save_types, [SaveType.RKH, SaveType.NXcanSAS])
+        state_gui_model.save_types = [SaveType.RKH, SaveType.NX_CAN_SAS]
+        self.assertEqual(state_gui_model.save_types, [SaveType.RKH, SaveType.NX_CAN_SAS])
 
     # ==================================================================================================================
     # ==================================================================================================================

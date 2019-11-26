@@ -207,23 +207,18 @@ class RangeStepType(Enum):
 
 
 class RebinType(Enum):
-    """
-    Defines the rebin types available
-    """
     INTERPOLATING_REBIN = "InterpolatingRebin"
     REBIN = "Rebin"
 
 
-# --------------------------
-#  SaveType
-# --------------------------
-@string_convertible
-@serializable_enum("Nexus", "NistQxy", "CanSAS", "RKH", "CSV", "NXcanSAS", "Nexus", "NoType")
-class SaveType(object):
-    """
-    Defines the save types available
-    """
-    pass
+class SaveType(Enum):
+    CAN_SAS = "CanSAS"
+    CSV = "CSV"
+    NEXUS = "Nexus"
+    NIST_QXY = "NistQxy"
+    NO_TYPE = "NoType"
+    NX_CAN_SAS = "NXcanSAS"
+    RKH = "RKH"
 
 
 # ------------------------------------------

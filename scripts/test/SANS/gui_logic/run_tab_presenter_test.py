@@ -109,7 +109,7 @@ class RunTabPresenterTest(unittest.TestCase):
         # Note that the event slices are not set in the user file
         self.assertFalse(view.event_slices)
         self.assertEqual(view.reduction_dimensionality, ReductionDimensionality.ONE_DIM)
-        self.assertEqual(view.save_types[0], SaveType.NXcanSAS)
+        self.assertEqual(view.save_types[0], SaveType.NX_CAN_SAS)
         self.assertTrue(view.zero_error_free)
         self.assertTrue(view.use_optimizations)
         self.assertEqual(view.reduction_mode, ReductionMode.LAB)
@@ -1088,7 +1088,7 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter = RunTabPresenter(SANSFacility.ISIS)
         view = mock.MagicMock()
 
-        view.save_types = [SaveType.NoType]
+        view.save_types = [SaveType.NO_TYPE]
 
         view.output_mode_memory_radio_button.isChecked = mock.MagicMock(return_value=False)
         view.output_mode_file_radio_button.isChecked = mock.MagicMock(return_value=True)
@@ -1101,7 +1101,7 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter = RunTabPresenter(SANSFacility.ISIS)
         view = mock.MagicMock()
 
-        view.save_types = [SaveType.NoType]
+        view.save_types = [SaveType.NO_TYPE]
 
         view.output_mode_memory_radio_button.isChecked = mock.MagicMock(return_value=False)
         view.output_mode_file_radio_button.isChecked = mock.MagicMock(return_value=False)
@@ -1113,7 +1113,7 @@ class RunTabPresenterTest(unittest.TestCase):
     def test_that_validate_output_modes_does_not_raise_if_no_file_types_selected_for_memory_mode(self):
         presenter = RunTabPresenter(SANSFacility.ISIS)
         view = mock.MagicMock()
-        view.save_types = [SaveType.NoType]
+        view.save_types = [SaveType.NO_TYPE]
 
         view.output_mode_memory_radio_button.isChecked = mock.Mock(return_value=True)
         view.output_mode_file_radio_button.isChecked = mock.Mock(return_value=False)

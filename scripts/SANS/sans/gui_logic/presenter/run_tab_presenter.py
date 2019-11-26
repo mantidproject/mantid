@@ -643,7 +643,7 @@ class RunTabPresenter(PresenterCommon):
         """
         if (self._view.output_mode_file_radio_button.isChecked() or
                 self._view.output_mode_both_radio_button.isChecked()):
-            if self._view.save_types == [SaveType.NoType]:
+            if self._view.save_types == [SaveType.NO_TYPE]:
                 raise RuntimeError("You have selected an output mode which saves to file, "
                                    "but no file types have been selected.")
 

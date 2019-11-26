@@ -1032,22 +1032,22 @@ class SANSDataProcessorGui(QMainWindow,
     def save_types(self):
         checked_save_types = []
         if self.can_sas_checkbox.isChecked():
-            checked_save_types.append(SaveType.CanSAS)
+            checked_save_types.append(SaveType.CAN_SAS)
         if self.nx_can_sas_checkbox.isChecked():
-            checked_save_types.append(SaveType.NXcanSAS)
+            checked_save_types.append(SaveType.NX_CAN_SAS)
         if self.rkh_checkbox.isChecked():
             checked_save_types.append(SaveType.RKH)
         # If empty, provide the NoType type
         if not checked_save_types:
-            checked_save_types = [SaveType.NoType]
+            checked_save_types = [SaveType.NO_TYPE]
         return checked_save_types
 
     @save_types.setter
     def save_types(self, values):
         for value in values:
-            if value is SaveType.CanSAS:
+            if value is SaveType.CAN_SAS:
                 self.can_sas_checkbox.setChecked(True)
-            elif value is SaveType.NXcanSAS:
+            elif value is SaveType.NX_CAN_SAS:
                 self.nx_can_sas_checkbox.setChecked(True)
             elif value is SaveType.RKH:
                 self.rkh_checkbox.setChecked(True)

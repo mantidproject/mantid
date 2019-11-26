@@ -268,7 +268,7 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         ws_name = "wsName"
         filename = "fileName"
         additional_run_numbers = {}
-        file_types = [SaveType.Nexus, SaveType.CanSAS, SaveType.NXcanSAS, SaveType.NistQxy, SaveType.RKH, SaveType.CSV]
+        file_types = [SaveType.NEXUS, SaveType.CAN_SAS, SaveType.NX_CAN_SAS, SaveType.NIST_QXY, SaveType.RKH, SaveType.CSV]
 
         save_workspace_to_file(ws_name, file_types, filename, additional_run_numbers)
 

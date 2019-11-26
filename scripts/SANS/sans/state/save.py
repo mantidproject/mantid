@@ -22,7 +22,7 @@ from sans.state.automatic_setters import (automatic_setters)
 @rename_descriptor_names
 class StateSave(StateBase):
     zero_free_correction = BoolParameter()
-    file_format = ClassTypeListParameter(SaveType)
+    file_format = SaveType.NO_TYPE
 
     # Settings for the output name
     user_specified_output_name = StringWithNoneParameter()
@@ -49,6 +49,9 @@ class StateSaveBuilder(object):
     def build(self):
         self.state.validate()
         return copy.copy(self.state)
+
+    def set_file_format(self, val):
+        self.state.file_format = val
 
 
 def get_save_builder(data_info):
