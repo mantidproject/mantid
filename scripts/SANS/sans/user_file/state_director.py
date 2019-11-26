@@ -593,7 +593,7 @@ class StateDirectorISIS(object):
             has_shift_fit = shift_fit.use_fit
 
         if has_rescale_fit and has_shift_fit:
-            self._reduction_builder.set_merge_fit_mode(FitModeForMerge.Both)
+            self._reduction_builder.set_merge_fit_mode(FitModeForMerge.BOTH)
             min_q = get_min_q_boundary(q_range_min_scale, q_range_min_shift)
             max_q = get_max_q_boundary(q_range_max_scale, q_range_max_shift)
             if min_q:
@@ -601,19 +601,19 @@ class StateDirectorISIS(object):
             if max_q:
                 self._reduction_builder.set_merge_range_max(max_q)
         elif has_rescale_fit and not has_shift_fit:
-            self._reduction_builder.set_merge_fit_mode(FitModeForMerge.ScaleOnly)
+            self._reduction_builder.set_merge_fit_mode(FitModeForMerge.SCALE_ONLY)
             if q_range_min_scale:
                 self._reduction_builder.set_merge_range_min(q_range_min_scale)
             if q_range_max_scale:
                 self._reduction_builder.set_merge_range_max(q_range_max_scale)
         elif not has_rescale_fit and has_shift_fit:
-            self._reduction_builder.set_merge_fit_mode(FitModeForMerge.ShiftOnly)
+            self._reduction_builder.set_merge_fit_mode(FitModeForMerge.SHIFT_ONLY)
             if q_range_min_shift:
                 self._reduction_builder.set_merge_range_min(q_range_min_shift)
             if q_range_max_shift:
                 self._reduction_builder.set_merge_range_max(q_range_max_shift)
         else:
-            self._reduction_builder.set_merge_fit_mode(FitModeForMerge.NoFit)
+            self._reduction_builder.set_merge_fit_mode(FitModeForMerge.NO_FIT)
 
         # ------------------------
         # Reduction Dimensionality

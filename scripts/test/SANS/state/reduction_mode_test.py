@@ -27,7 +27,7 @@ class StateReductionModeTest(unittest.TestCase):
         state.dimensionality = ReductionDimensionality.TWO_DIM
         state.merge_shift = 12.65
         state.merge_scale = 34.6
-        state.merge_fit_mode = FitModeForMerge.ShiftOnly
+        state.merge_fit_mode = FitModeForMerge.SHIFT_ONLY
 
         state.detector_names[DetectorType.to_string(DetectorType.LAB)] = "Test1"
         state.detector_names[DetectorType.to_string(DetectorType.HAB)] = "Test2"
@@ -78,7 +78,7 @@ class StateReductionModeBuilderTest(unittest.TestCase):
 
         merge_shift = 324.2
         merge_scale = 3420.98
-        fit_mode = FitModeForMerge.Both
+        fit_mode = FitModeForMerge.BOTH
         builder.set_merge_fit_mode(fit_mode)
         builder.set_merge_shift(merge_shift)
         builder.set_merge_scale(merge_scale)

@@ -152,7 +152,7 @@ class CommandInterfaceStateDirectorTest(unittest.TestCase):
 
         self.assertEqual(state.reduction.merge_scale,  1.2)
         self.assertEqual(state.reduction.merge_shift,  2.4)
-        self.assertEqual(state.reduction.merge_fit_mode, FitModeForMerge.ScaleOnly)
+        self.assertEqual(state.reduction.merge_fit_mode, FitModeForMerge.SCALE_ONLY)
         self.assertEqual(state.reduction.merge_range_min, None)
         self.assertEqual(state.reduction.merge_range_max,  7.2)
 

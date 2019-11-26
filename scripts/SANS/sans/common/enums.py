@@ -169,16 +169,14 @@ class OutputParts(Enum):
     NORM = "Norm"
 
 
-# -----------------------------------------------------
-#  The fit type during merge of HAB and LAB reductions
-# -----------------------------------------------------
-@string_convertible
-@serializable_enum("Both", "NoFit", "ShiftOnly", "ScaleOnly")
-class FitModeForMerge(object):
+class FitModeForMerge(Enum):
     """
     Defines which fit operation to use during the merge of two reductions.
     """
-    pass
+    BOTH = "Both"
+    NO_FIT = "NoFit"
+    SCALE_ONLY = "ScaleOnly"
+    SHIFT_ONLY = "ShiftOnly"
 
 
 # --------------------------

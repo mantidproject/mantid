@@ -48,7 +48,7 @@ class StateReductionMode(StateReductionBase, StateBase):
     merge_mask = BoolParameter()
 
     # Fitting
-    merge_fit_mode = ClassTypeParameter(FitModeForMerge)
+    merge_fit_mode = FitModeForMerge.NO_FIT
     merge_shift = FloatParameter()
     merge_scale = FloatParameter()
     merge_range_min = FloatWithNoneParameter()
@@ -65,7 +65,7 @@ class StateReductionMode(StateReductionBase, StateBase):
         # Set the shifts to defaults which essentially don't do anything.
         self.merge_shift = 0.0
         self.merge_scale = 1.0
-        self.merge_fit_mode = FitModeForMerge.NoFit
+        self.merge_fit_mode = FitModeForMerge.NO_FIT
         self.merge_range_min = None
         self.merge_range_max = None
         self.merge_max = None
@@ -138,6 +138,9 @@ class StateReductionModeBuilder(object):
 
     def set_reduction_dimensionality(self, val):
         self.state.reduction_dimensionality = val
+
+    def set_merge_fit_mode(self, val):
+        self.state.merge_fit_mode = val
 
     def build(self):
         self.state.validate()

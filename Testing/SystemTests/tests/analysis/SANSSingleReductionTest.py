@@ -286,7 +286,7 @@ class SANSSingleReductionTest(SingleReductionTest):
         user_file_director.set_user_file("USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt")
         # Set the reduction mode to LAB
         user_file_director.set_reduction_builder_reduction_mode(ReductionMode.MERGED)
-        user_file_director.set_reduction_builder_merge_fit_mode(FitModeForMerge.Both)
+        user_file_director.set_reduction_builder_merge_fit_mode(FitModeForMerge.BOTH)
         user_file_director.set_reduction_builder_merge_scale(1.0)
         user_file_director.set_reduction_builder_merge_shift(0.0)
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
