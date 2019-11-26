@@ -773,7 +773,7 @@ class SANSDataProcessorGui(QMainWindow,
 
     def _on_reduction_mode_selection_has_changed(self):
         selection = self.reduction_mode_combo_box.currentText()
-        is_merged = selection == ReductionMode.to_string(ReductionMode.Merged)
+        is_merged = ReductionMode(selection) is ReductionMode.MERGED
         self.merged_settings.setEnabled(is_merged)
         self._call_settings_listeners(lambda listener: listener.on_reduction_mode_selection_has_changed(selection))
 

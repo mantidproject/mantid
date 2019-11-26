@@ -13,7 +13,7 @@ are not available in the model associated with the data table.
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.py3compat import ensure_str
-from sans.common.enums import (ReductionDimensionality, ISISReductionMode, RangeStepType, SaveType,
+from sans.common.enums import (ReductionDimensionality, ReductionMode, RangeStepType, SaveType,
                                DetectorType)
 from sans.gui_logic.models.model_common import ModelCommon
 from sans.user_file.settings_tags import (OtherId, DetectorId, LimitsId, SetId, SampleId, GravityId,
@@ -249,12 +249,12 @@ class StateGuiModel(ModelCommon):
     @property
     def reduction_mode(self):
         return self.get_simple_element_with_attribute(element_id=DetectorId.reduction_mode,
-                                                      default_value=ISISReductionMode.LAB)
+                                                      default_value=ReductionMode.LAB)
 
     @reduction_mode.setter
     def reduction_mode(self, value):
-        if (value is ISISReductionMode.LAB or value is ISISReductionMode.HAB or
-            value is ISISReductionMode.Merged or value is ISISReductionMode.All):  # noqa
+        if (value is ReductionMode.LAB or value is ReductionMode.HAB or
+            value is ReductionMode.MERGED or value is ReductionMode.ALL):  # noqa
             if DetectorId.reduction_mode in self._user_file_items:
                 del self._user_file_items[DetectorId.reduction_mode]
             new_state_entries = {DetectorId.reduction_mode: [value]}

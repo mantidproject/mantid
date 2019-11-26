@@ -20,7 +20,7 @@ from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
 from sans.common.file_information import (find_sans_file, find_full_file_path)
 from sans.common.enums import (DetectorType, FitType, RangeStepType, ReductionDimensionality,
-                               ISISReductionMode, SANSFacility, SaveType, BatchReductionEntry, OutputMode, FindDirectionEnum)
+                               ReductionMode, SANSFacility, SaveType, BatchReductionEntry, OutputMode, FindDirectionEnum)
 from sans.common.general_functions import (convert_bank_name_to_detector_type_isis, get_output_name,
                                            is_part_of_reduced_output_workspace_group)
 
@@ -359,7 +359,7 @@ def Detector(det_name):
     """
     print_message('Detector("' + det_name + '")')
     detector_type = convert_bank_name_to_detector_type_isis(det_name)
-    reduction_mode = ISISReductionMode.HAB if detector_type is DetectorType.HAB else ISISReductionMode.LAB
+    reduction_mode = ReductionMode.HAB if detector_type is DetectorType.HAB else ReductionMode.LAB
     detector_command = NParameterCommand(command_id=NParameterCommandId.detector, values=[reduction_mode])
     director.add_command(detector_command)
 
@@ -753,13 +753,13 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
     if combineDet is None:
         reduction_mode = None
     elif combineDet == 'rear':
-        reduction_mode = ISISReductionMode.LAB
+        reduction_mode = ReductionMode.LAB
     elif combineDet == "front":
-        reduction_mode = ISISReductionMode.HAB
+        reduction_mode = ReductionMode.HAB
     elif combineDet == "merged":
-        reduction_mode = ISISReductionMode.Merged
+        reduction_mode = ReductionMode.MERGED
     elif combineDet == "both":
-        reduction_mode = ISISReductionMode.All
+        reduction_mode = ReductionMode.ALL
     else:
         raise RuntimeError("WavRangeReduction: The combineDet input parameter was given a value of {0}. rear, front,"
                            " both, merged and no input are allowed".format(combineDet))
@@ -797,11 +797,11 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
     # -----------------------------------------------------------
     reduction_mode = state.reduction.reduction_mode
     is_group = is_part_of_reduced_output_workspace_group(state)
-    if reduction_mode != ISISReductionMode.All:
+    if reduction_mode != ReductionMode.ALL:
         _, output_workspace_base_name = get_output_name(state, reduction_mode, is_group)
     else:
-        _, output_workspace_base_name_hab = get_output_name(state, ISISReductionMode.HAB, is_group)
-        _, output_workspace_base_name_lab = get_output_name(state, ISISReductionMode.LAB, is_group)
+        _, output_workspace_base_name_hab = get_output_name(state, ReductionMode.HAB, is_group)
+        _, output_workspace_base_name_lab = get_output_name(state, ReductionMode.LAB, is_group)
         output_workspace_base_name = [output_workspace_base_name_lab, output_workspace_base_name_hab]
     return output_workspace_base_name
 

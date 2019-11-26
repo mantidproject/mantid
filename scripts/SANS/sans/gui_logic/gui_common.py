@@ -11,7 +11,7 @@ from qtpy.QtWidgets import QFileDialog
 
 from sans.common.constant_containers import (SANSInstrument_enum_as_key, SANSInstrument_string_as_key_NoInstrument,
                                              SANSInstrument_string_list)
-from sans.common.enums import ISISReductionMode, DetectorType, SANSInstrument
+from sans.common.enums import ReductionMode, DetectorType, SANSInstrument
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -55,10 +55,10 @@ LARMOR_LAB = "DetectorBench"
 
 ZOOM_LAB = "rear-detector"
 
-DEFAULT_LAB = ISISReductionMode.to_string(ISISReductionMode.LAB)
-DEFAULT_HAB = ISISReductionMode.to_string(ISISReductionMode.HAB)
-MERGED = "Merged"
-ALL = "All"
+ALL = ReductionMode.ALL.value
+DEFAULT_LAB = ReductionMode.LAB.value
+DEFAULT_HAB = ReductionMode.HAB.value
+MERGED = ReductionMode.MERGED.value
 
 GENERIC_SETTINGS = "Mantid/ISISSANS"
 
@@ -110,21 +110,21 @@ def get_instrument_strings_for_gui():
 
 
 def get_reduction_selection(instrument):
-    selection = {ISISReductionMode.Merged: MERGED,
-                 ISISReductionMode.All: ALL}
+    selection = {ReductionMode.MERGED: MERGED,
+                 ReductionMode.ALL: ALL}
     if instrument is SANSInstrument.SANS2D:
-        selection.update({ISISReductionMode.LAB: SANS2D_LAB,
-                          ISISReductionMode.HAB: SANS2D_HAB})
+        selection.update({ReductionMode.LAB: SANS2D_LAB,
+                          ReductionMode.HAB: SANS2D_HAB})
     elif instrument is SANSInstrument.LOQ:
-        selection.update({ISISReductionMode.LAB: LOQ_LAB,
-                          ISISReductionMode.HAB: LOQ_HAB})
+        selection.update({ReductionMode.LAB: LOQ_LAB,
+                          ReductionMode.HAB: LOQ_HAB})
     elif instrument is SANSInstrument.LARMOR:
-        selection = {ISISReductionMode.LAB: LARMOR_LAB}
+        selection = {ReductionMode.LAB: LARMOR_LAB}
     elif instrument is SANSInstrument.ZOOM:
-        selection = {ISISReductionMode.LAB: ZOOM_LAB}
+        selection = {ReductionMode.LAB: ZOOM_LAB}
     else:
-        selection.update({ISISReductionMode.LAB: DEFAULT_LAB,
-                          ISISReductionMode.HAB: DEFAULT_HAB})
+        selection.update({ReductionMode.LAB: DEFAULT_LAB,
+                          ReductionMode.HAB: DEFAULT_HAB})
     return selection
 
 
@@ -145,13 +145,13 @@ def get_string_for_gui_from_instrument(instrument):
 
 def get_reduction_mode_from_gui_selection(gui_selection):
     if gui_selection == MERGED:
-        return ISISReductionMode.Merged
+        return ReductionMode.MERGED
     elif gui_selection == ALL:
-        return ISISReductionMode.All
+        return ReductionMode.ALL
     elif gui_selection == SANS2D_LAB or gui_selection == LOQ_LAB or gui_selection == LARMOR_LAB or gui_selection == ZOOM_LAB or gui_selection == DEFAULT_LAB:  # noqa
-        return ISISReductionMode.LAB
+        return ReductionMode.LAB
     elif gui_selection == SANS2D_HAB or gui_selection == LOQ_HAB:
-        return ISISReductionMode.HAB
+        return ReductionMode.HAB
     else:
         raise RuntimeError("Reduction mode selection is not valid.")
 

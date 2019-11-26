@@ -14,7 +14,7 @@ from sans.algorithm_detail.bundles import (EventSliceSettingBundle, OutputBundle
 from sans.algorithm_detail.merge_reductions import (MergeFactory, is_sample, is_can)
 from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
 from sans.common.constants import EMPTY_NAME
-from sans.common.enums import (DataType, DetectorType, ISISReductionMode, OutputParts, TransmissionType)
+from sans.common.enums import (DataType, DetectorType, ReductionMode, OutputParts, TransmissionType)
 from sans.common.general_functions import (create_child_algorithm, get_reduced_can_workspace_from_ads,
                                            get_transmission_workspaces_from_ads,
                                            write_hash_into_reduced_can_workspace)
@@ -302,9 +302,9 @@ def get_component_to_reduce(reduction_setting_bundle):
     # Get the reduction mode
     reduction_mode = reduction_setting_bundle.reduction_mode
 
-    if reduction_mode is ISISReductionMode.LAB:
+    if reduction_mode is ReductionMode.LAB:
         reduction_mode_setting = DetectorType.to_string(DetectorType.LAB)
-    elif reduction_mode is ISISReductionMode.HAB:
+    elif reduction_mode is ReductionMode.HAB:
         reduction_mode_setting = DetectorType.to_string(DetectorType.HAB)
     else:
         raise RuntimeError("SingleExecution: An unknown reduction mode was selected: {}. "

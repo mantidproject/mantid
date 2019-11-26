@@ -20,7 +20,7 @@ from sans.common.constant_containers import (SANSInstrument_enum_list, SANSInstr
 from sans.common.constants import (SANS_FILE_TAG, ALL_PERIODS, SANS2D, EMPTY_NAME,
                                    REDUCED_CAN_TAG)
 from sans.common.log_tagger import (get_tag, has_tag, set_tag, has_hash, get_hash_value, set_hash)
-from sans.common.enums import (DetectorType, RangeStepType, ReductionDimensionality, OutputParts, ISISReductionMode,
+from sans.common.enums import (DetectorType, RangeStepType, ReductionDimensionality, OutputParts, ReductionMode,
                                SANSFacility, DataType, TransmissionType, SANSInstrument)
 # -------------------------------------------
 # Constants
@@ -653,12 +653,12 @@ def get_standard_output_workspace_name(state, reduction_data_type, data_type = D
     # 3. Detector name
     move = state.move
     detectors = move.detectors
-    if reduction_data_type is ISISReductionMode.Merged:
+    if reduction_data_type is ReductionMode.MERGED:
         detector_name_short = "merged"
-    elif reduction_data_type is ISISReductionMode.HAB:
+    elif reduction_data_type is ReductionMode.HAB:
         det_name = detectors[DetectorType.to_string(DetectorType.HAB)].detector_name_short
         detector_name_short = det_name if det_name is not None else "hab"
-    elif reduction_data_type is ISISReductionMode.LAB:
+    elif reduction_data_type is ReductionMode.LAB:
         det_name = detectors[DetectorType.to_string(DetectorType.LAB)].detector_name_short
         detector_name_short = det_name if det_name is not None else "lab"
     else:
@@ -748,7 +748,7 @@ def get_output_name(state, reduction_mode, is_group, suffix="", multi_reduction_
     use_reduction_mode_as_suffix = save_info.use_reduction_mode_as_suffix
     # This adds a reduction mode suffix in merged or all reductions so the workspaces do not overwrite each other.
     if (
-            state.reduction.reduction_mode == ISISReductionMode.Merged or state.reduction.reduction_mode == ISISReductionMode.All) \
+            state.reduction.reduction_mode == ReductionMode.MERGED or state.reduction.reduction_mode == ReductionMode.ALL) \
             and user_specified_output_name:
         use_reduction_mode_as_suffix = True
 
@@ -775,13 +775,13 @@ def get_output_name(state, reduction_mode, is_group, suffix="", multi_reduction_
 
     # Add a reduction mode suffix if it is required
     if use_reduction_mode_as_suffix:
-        if reduction_mode is ISISReductionMode.LAB:
+        if reduction_mode is ReductionMode.LAB:
             output_name += "_rear"
             output_base_name += "_rear"
-        elif reduction_mode is ISISReductionMode.HAB:
+        elif reduction_mode is ReductionMode.HAB:
             output_name += "_front"
             output_base_name += "_front"
-        elif reduction_mode is ISISReductionMode.Merged:
+        elif reduction_mode is ReductionMode.MERGED:
             output_name += "_merged"
             output_base_name += "_merged"
 
@@ -912,9 +912,9 @@ def get_state_hash_for_can_reduction(state, reduction_mode, partial_type=None):
 
     # Add a tag for the reduction mode
     state_string = str(new_state_serialized)
-    if reduction_mode is ISISReductionMode.LAB:
+    if reduction_mode is ReductionMode.LAB:
         state_string += "LAB"
-    elif reduction_mode is ISISReductionMode.HAB:
+    elif reduction_mode is ReductionMode.HAB:
         state_string += "HAB"
     else:
         raise RuntimeError("Only LAB and HAB reduction modes are allowed at this point."

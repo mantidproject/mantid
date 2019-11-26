@@ -19,7 +19,7 @@ from sans.algorithm_detail.bundles import ReductionSettingBundle
 from sans.algorithm_detail.single_execution import (get_final_output_workspaces,
                                                     get_merge_bundle_for_merge_request)
 from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
-from sans.common.enums import (ReductionMode, DataType, ISISReductionMode)
+from sans.common.enums import (ReductionMode, DataType, ReductionMode)
 from sans.common.general_functions import create_child_algorithm
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 
@@ -147,22 +147,22 @@ class SANSSingleReductionBase(DistributedDataProcessorAlgorithm):
         # Merge if required with stitching etc.
         scale_factors = []
         shift_factors = []
-        if overall_reduction_mode is ReductionMode.Merged:
+        if overall_reduction_mode is ReductionMode.MERGED:
             progress.report("Merging reductions ...")
             for i, event_slice_part_bundle in enumerate(output_parts_bundles):
                 merge_bundle = get_merge_bundle_for_merge_request(event_slice_part_bundle, self)
                 scale_factors.append(merge_bundle.scale)
                 shift_factors.append(merge_bundle.shift)
-                reduction_mode_vs_output_workspaces[ReductionMode.Merged].append(merge_bundle.merged_workspace)
+                reduction_mode_vs_output_workspaces[ReductionMode.MERGED].append(merge_bundle.merged_workspace)
                 merged_name = self._get_merged_workspace_name(event_slice_part_bundle)
-                reduction_mode_vs_workspace_names[ReductionMode.Merged].append(merged_name)
+                reduction_mode_vs_workspace_names[ReductionMode.MERGED].append(merged_name)
 
                 scaled_HAB = strip_end_nans(merge_bundle.scaled_hab_workspace, self)
-                reduction_mode_vs_output_workspaces[ISISReductionMode.HAB].append(scaled_HAB)
+                reduction_mode_vs_output_workspaces[ReductionMode.HAB].append(scaled_HAB)
                 # Get HAB workspace name
                 state = event_slice_part_bundle[0].state
-                hab_name = self._get_output_workspace_name(state, reduction_mode=ISISReductionMode.HAB)
-                reduction_mode_vs_workspace_names[ISISReductionMode.HAB].append(hab_name)
+                hab_name = self._get_output_workspace_name(state, reduction_mode=ReductionMode.HAB)
+                reduction_mode_vs_workspace_names[ReductionMode.HAB].append(hab_name)
 
             self.set_shift_and_scale_output(scale_factors, shift_factors)
 
@@ -246,15 +246,15 @@ class SANSSingleReductionBase(DistributedDataProcessorAlgorithm):
 
     def _get_reduction_setting_bundles(self, state, reduction_mode):
         # We need to output the parts if we request a merged reduction mode. This is necessary for stitching later on.
-        output_parts = reduction_mode is ReductionMode.Merged
+        output_parts = reduction_mode is ReductionMode.MERGED
 
         # If the reduction mode is MERGED, then we need to make sure that all reductions for that selection
         # are executed, i.e. we need to split it up
-        if reduction_mode is ReductionMode.Merged:
+        if reduction_mode is ReductionMode.MERGED:
             # If we are dealing with a merged reduction we need to know which detectors should be merged.
             reduction_info = state.reduction
             reduction_modes = reduction_info.get_merge_strategy()
-        elif reduction_mode is ReductionMode.All:
+        elif reduction_mode is ReductionMode.ALL:
             reduction_info = state.reduction
             reduction_modes = reduction_info.get_all_reduction_modes()
         else:
@@ -312,6 +312,6 @@ class SANSSingleReductionBase(DistributedDataProcessorAlgorithm):
         return reduction_setting_bundles
 
     def _get_progress(self, number_of_reductions, overall_reduction_mode):
-        number_from_merge = 1 if overall_reduction_mode is ReductionMode.Merged else 0
+        number_from_merge = 1 if overall_reduction_mode is ReductionMode.MERGED else 0
         number_of_progress_reports = number_of_reductions + number_from_merge + 1
         return Progress(self, start=0.0, end=1.0, nreports=number_of_progress_reports)

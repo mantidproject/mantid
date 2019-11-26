@@ -24,7 +24,7 @@ from mantid.kernel import Logger, ConfigService, ConfigPropertyObserver
 from mantid.py3compat import csv_open_type
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
-from sans.common.enums import (BatchReductionEntry, ISISReductionMode, RangeStepType, RowState, SampleShape,
+from sans.common.enums import (BatchReductionEntry, ReductionMode, RangeStepType, RowState, SampleShape,
                                SaveType, SANSInstrument)
 from sans.gui_logic.gui_common import (add_dir_to_datasearch, get_reduction_mode_from_gui_selection,
                                        get_reduction_mode_strings_for_gui, get_string_for_gui_from_instrument,
@@ -925,9 +925,9 @@ class RunTabPresenter(PresenterCommon):
         if not selection:
             return
         mode = get_reduction_mode_from_gui_selection(selection)
-        if mode == ISISReductionMode.HAB:
+        if mode == ReductionMode.HAB:
             self._beam_centre_presenter.update_hab_selected()
-        elif mode == ISISReductionMode.LAB:
+        elif mode == ReductionMode.LAB:
             self._beam_centre_presenter.update_lab_selected()
         else:
             self._beam_centre_presenter.update_all_selected()

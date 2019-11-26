@@ -13,7 +13,7 @@ from mantid.api import AnalysisDataService
 from sans.sans_batch import SANSBatchReduction
 from sans.user_file.state_director import StateDirectorISIS
 from sans.state.data import get_data_builder
-from sans.common.enums import (SANSFacility, ISISReductionMode, OutputMode)
+from sans.common.enums import (SANSFacility, ReductionMode, OutputMode)
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_unmanaged_algorithm
 from sans.common.file_information import SANSFileInformationFactory
@@ -81,7 +81,7 @@ class SANSBatchReductionTest(unittest.TestCase):
         user_file_director = StateDirectorISIS(data_info, file_information)
         user_file_director.set_user_file("USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt")
         # Set the reduction mode to LAB
-        user_file_director.set_reduction_builder_reduction_mode(ISISReductionMode.LAB)
+        user_file_director.set_reduction_builder_reduction_mode(ReductionMode.LAB)
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         # COMPATIBILITY BEGIN -- Remove when appropriate
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -120,7 +120,7 @@ class SANSBatchReductionTest(unittest.TestCase):
         user_file_director = StateDirectorISIS(data_info, file_information)
         user_file_director.set_user_file("MASKSANS2Doptions.091A")
         # Set the reduction mode to LAB
-        user_file_director.set_reduction_builder_reduction_mode(ISISReductionMode.LAB)
+        user_file_director.set_reduction_builder_reduction_mode(ReductionMode.LAB)
         state = user_file_director.construct()
 
         # Act
@@ -165,7 +165,7 @@ class SANSBatchReductionTest(unittest.TestCase):
         user_file_director = StateDirectorISIS(data_info, file_information)
         user_file_director.set_user_file("USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt")
         # Set the reduction mode to LAB
-        user_file_director.set_reduction_builder_reduction_mode(ISISReductionMode.LAB)
+        user_file_director.set_reduction_builder_reduction_mode(ReductionMode.LAB)
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         # COMPATIBILITY BEGIN -- Remove when appropriate
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -218,7 +218,7 @@ class SANSBatchReductionTest(unittest.TestCase):
         user_file_director = StateDirectorISIS(data_info, file_information)
         user_file_director.set_user_file("USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt")
         # Set the reduction mode to LAB
-        user_file_director.set_reduction_builder_reduction_mode(ISISReductionMode.LAB)
+        user_file_director.set_reduction_builder_reduction_mode(ReductionMode.LAB)
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         # COMPATIBILITY BEGIN -- Remove when appropriate
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -277,7 +277,7 @@ class SANSBatchReductionTest(unittest.TestCase):
         user_file_director = StateDirectorISIS(data_info, file_information)
         user_file_director.set_user_file("MASKSANS2Doptions.091A")
         # Set the reduction mode to LAB
-        user_file_director.set_reduction_builder_reduction_mode(ISISReductionMode.LAB)
+        user_file_director.set_reduction_builder_reduction_mode(ReductionMode.LAB)
 
         user_file_director.set_slice_event_builder_start_time([1.0, 3.0])
         user_file_director.set_slice_event_builder_end_time([3.0, 5.0])

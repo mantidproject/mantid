@@ -12,7 +12,7 @@ from mantid.api import AnalysisDataService, WorkspaceGroup
 from sans.common.general_functions import (add_to_sample_log, create_managed_non_child_algorithm,
                                            create_unmanaged_algorithm, get_output_name,
                                            get_base_name_from_multi_period_name, get_transmission_output_name)
-from sans.common.enums import (SANSDataType, SaveType, OutputMode, ISISReductionMode, DataType)
+from sans.common.enums import (SANSDataType, SaveType, OutputMode, ReductionMode, DataType)
 from sans.common.constants import (TRANS_SUFFIX, SANS_SUFFIX, ALL_PERIODS,
                                    LAB_CAN_SUFFIX, LAB_CAN_COUNT_SUFFIX, LAB_CAN_NORM_SUFFIX,
                                    HAB_CAN_SUFFIX, HAB_CAN_COUNT_SUFFIX, HAB_CAN_NORM_SUFFIX,
@@ -254,17 +254,17 @@ def plot_workspace_mantidplot(reduction_package, output_graph, plotting_module):
     """
     plotSpectrum, graph = plotting_module.plotSpectrum, plotting_module.graph
 
-    if reduction_package.reduction_mode == ISISReductionMode.All:
+    if reduction_package.reduction_mode == ReductionMode.ALL:
         graph_handle = plotSpectrum([reduction_package.reduced_hab, reduction_package.reduced_lab], 0,
                                     window=graph(output_graph), clearWindow=True)
         graph_handle.activeLayer().logLogAxes()
-    elif reduction_package.reduction_mode == ISISReductionMode.HAB:
+    elif reduction_package.reduction_mode == ReductionMode.HAB:
         graph_handle = plotSpectrum(reduction_package.reduced_hab, 0, window=graph(output_graph), clearWindow=True)
         graph_handle.activeLayer().logLogAxes()
-    elif reduction_package.reduction_mode == ISISReductionMode.LAB:
+    elif reduction_package.reduction_mode == ReductionMode.LAB:
         graph_handle = plotSpectrum(reduction_package.reduced_lab, 0, window=graph(output_graph), clearWindow=True)
         graph_handle.activeLayer().logLogAxes()
-    elif reduction_package.reduction_mode == ISISReductionMode.Merged:
+    elif reduction_package.reduction_mode == ReductionMode.MERGED:
         graph_handle = plotSpectrum([reduction_package.reduced_merged,
                                      reduction_package.reduced_hab, reduction_package.reduced_lab], 0,
                                     window=graph(output_graph), clearWindow=True)
@@ -283,16 +283,16 @@ def plot_workspace_mantidqt(reduction_package, output_graph, plotting_module):
 
     plot_kwargs = {"scalex": True,
                    "scaley": True}
-    if reduction_package.reduction_mode == ISISReductionMode.All:
+    if reduction_package.reduction_mode == ReductionMode.ALL:
         plot([reduction_package.reduced_hab, reduction_package.reduced_lab],
              wksp_indices=[0], overplot=True, fig=output_graph, plot_kwargs=plot_kwargs)
-    elif reduction_package.reduction_mode == ISISReductionMode.HAB:
+    elif reduction_package.reduction_mode == ReductionMode.HAB:
         plot([reduction_package.reduced_hab],
              wksp_indices=[0], overplot=True, fig=output_graph, plot_kwargs=plot_kwargs)
-    elif reduction_package.reduction_mode == ISISReductionMode.LAB:
+    elif reduction_package.reduction_mode == ReductionMode.LAB:
         plot([reduction_package.reduced_lab],
              wksp_indices=[0], overplot=True, fig=output_graph, plot_kwargs=plot_kwargs)
-    elif reduction_package.reduction_mode == ISISReductionMode.Merged:
+    elif reduction_package.reduction_mode == ReductionMode.MERGED:
         plot([reduction_package.reduced_merged, reduction_package.reduced_hab, reduction_package.reduced_lab],
              wksp_indices=[0], overplot=True, fig=output_graph, plot_kwargs=plot_kwargs)
 
@@ -805,41 +805,41 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
         setattr(reduction_package, package_attribute_name_base, workspace_name_base)
 
     def _set_lab(_reduction_alg, _reduction_package, _is_group):
-        _set_output_name(_reduction_alg, _reduction_package, _is_group, ISISReductionMode.LAB,
+        _set_output_name(_reduction_alg, _reduction_package, _is_group, ReductionMode.LAB,
                          "OutputWorkspaceLABCan", "reduced_lab_can_name", "reduced_lab_can_base_name",
                          multi_reduction_type, LAB_CAN_SUFFIX)
 
         # Lab Can Count workspace - this is a partial workspace
-        _set_output_name(_reduction_alg, _reduction_package, _is_group, ISISReductionMode.LAB,
+        _set_output_name(_reduction_alg, _reduction_package, _is_group, ReductionMode.LAB,
                          "OutputWorkspaceLABCanCount", "reduced_lab_can_count_name", "reduced_lab_can_count_base_name",
                          multi_reduction_type, LAB_CAN_COUNT_SUFFIX)
 
         # Lab Can Norm workspace - this is a partial workspace
-        _set_output_name(_reduction_alg, _reduction_package, _is_group, ISISReductionMode.LAB,
+        _set_output_name(_reduction_alg, _reduction_package, _is_group, ReductionMode.LAB,
                          "OutputWorkspaceLABCanNorm", "reduced_lab_can_norm_name", "reduced_lab_can_norm_base_name",
                          multi_reduction_type, LAB_CAN_NORM_SUFFIX)
 
-        _set_output_name(_reduction_alg, _reduction_package, _is_group, ISISReductionMode.LAB,
+        _set_output_name(_reduction_alg, _reduction_package, _is_group, ReductionMode.LAB,
                          "OutputWorkspaceLABSample", "reduced_lab_sample_name", "reduced_lab_sample_base_name",
                          multi_reduction_type, LAB_SAMPLE_SUFFIX)
 
     def _set_hab(_reduction_alg, _reduction_package, _is_group):
         # Hab Can Workspace
-        _set_output_name(_reduction_alg, _reduction_package, _is_group, ISISReductionMode.HAB,
+        _set_output_name(_reduction_alg, _reduction_package, _is_group, ReductionMode.HAB,
                          "OutputWorkspaceHABCan", "reduced_hab_can_name", "reduced_hab_can_base_name",
                          multi_reduction_type, HAB_CAN_SUFFIX)
 
         # Hab Can Count workspace - this is a partial workspace
-        _set_output_name(_reduction_alg, _reduction_package, _is_group, ISISReductionMode.HAB,
+        _set_output_name(_reduction_alg, _reduction_package, _is_group, ReductionMode.HAB,
                          "OutputWorkspaceHABCanCount", "reduced_hab_can_count_name", "reduced_hab_can_count_base_name",
                          multi_reduction_type, HAB_CAN_COUNT_SUFFIX)
 
         # Hab Can Norm workspace - this is a partial workspace
-        _set_output_name(_reduction_alg, _reduction_package, _is_group, ISISReductionMode.HAB,
+        _set_output_name(_reduction_alg, _reduction_package, _is_group, ReductionMode.HAB,
                          "OutputWorkspaceHABCanNorm", "reduced_hab_can_norm_name", "reduced_hab_can_norm_base_name",
                          multi_reduction_type, HAB_CAN_NORM_SUFFIX)
 
-        _set_output_name(_reduction_alg, _reduction_package, _is_group, ISISReductionMode.HAB,
+        _set_output_name(_reduction_alg, _reduction_package, _is_group, ReductionMode.HAB,
                          "OutputWorkspaceHABSample", "reduced_hab_sample_name", "reduced_hab_sample_base_name",
                          multi_reduction_type, HAB_SAMPLE_SUFFIX)
 
@@ -883,24 +883,24 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
         reduction_alg.setProperty("WavelengthRange", is_part_of_wavelength_range_reduction)
 
     reduction_mode = reduction_package.reduction_mode
-    if reduction_mode is ISISReductionMode.Merged:
-        _set_output_name(reduction_alg, reduction_package, is_group, ISISReductionMode.Merged,
+    if reduction_mode is ReductionMode.MERGED:
+        _set_output_name(reduction_alg, reduction_package, is_group, ReductionMode.MERGED,
                          "OutputWorkspaceMerged", "reduced_merged_name", "reduced_merged_base_name",
                          multi_reduction_type)
-        _set_output_name(reduction_alg, reduction_package, is_group, ISISReductionMode.LAB,
+        _set_output_name(reduction_alg, reduction_package, is_group, ReductionMode.LAB,
                          "OutputWorkspaceLAB", "reduced_lab_name", "reduced_lab_base_name", multi_reduction_type)
-        _set_output_name(reduction_alg, reduction_package, is_group, ISISReductionMode.HAB,
+        _set_output_name(reduction_alg, reduction_package, is_group, ReductionMode.HAB,
                          "OutputWorkspaceHAB", "reduced_hab_name", "reduced_hab_base_name", multi_reduction_type)
-    elif reduction_mode is ISISReductionMode.LAB:
-        _set_output_name(reduction_alg, reduction_package, is_group, ISISReductionMode.LAB,
+    elif reduction_mode is ReductionMode.LAB:
+        _set_output_name(reduction_alg, reduction_package, is_group, ReductionMode.LAB,
                          "OutputWorkspaceLAB", "reduced_lab_name", "reduced_lab_base_name", multi_reduction_type)
-    elif reduction_mode is ISISReductionMode.HAB:
-        _set_output_name(reduction_alg, reduction_package, is_group, ISISReductionMode.HAB,
+    elif reduction_mode is ReductionMode.HAB:
+        _set_output_name(reduction_alg, reduction_package, is_group, ReductionMode.HAB,
                          "OutputWorkspaceHAB", "reduced_hab_name", "reduced_hab_base_name", multi_reduction_type)
-    elif reduction_mode is ISISReductionMode.All:
-        _set_output_name(reduction_alg, reduction_package, is_group, ISISReductionMode.LAB,
+    elif reduction_mode is ReductionMode.ALL:
+        _set_output_name(reduction_alg, reduction_package, is_group, ReductionMode.LAB,
                          "OutputWorkspaceLAB", "reduced_lab_name", "reduced_lab_base_name", multi_reduction_type)
-        _set_output_name(reduction_alg, reduction_package, is_group, ISISReductionMode.HAB,
+        _set_output_name(reduction_alg, reduction_package, is_group, ReductionMode.HAB,
                          "OutputWorkspaceHAB", "reduced_hab_name", "reduced_hab_base_name", multi_reduction_type)
     else:
         raise RuntimeError("The reduction mode {0} is not known".format(reduction_mode))
@@ -911,14 +911,14 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
     # Set the output workspaces for the can reductions -- note that these will only be set if optimizations
     # are enabled
     # Lab Can Workspace
-    if reduction_mode is ISISReductionMode.Merged:
+    if reduction_mode is ReductionMode.MERGED:
         _set_lab(reduction_alg, reduction_package, is_group)
         _set_hab(reduction_alg, reduction_package, is_group)
-    elif reduction_mode is ISISReductionMode.LAB:
+    elif reduction_mode is ReductionMode.LAB:
         _set_lab(reduction_alg, reduction_package, is_group)
-    elif reduction_mode is ISISReductionMode.HAB:
+    elif reduction_mode is ReductionMode.HAB:
         _set_hab(reduction_alg, reduction_package, is_group)
-    elif reduction_mode is ISISReductionMode.All:
+    elif reduction_mode is ReductionMode.ALL:
         _set_lab(reduction_alg, reduction_package, is_group)
         _set_hab(reduction_alg, reduction_package, is_group)
     else:

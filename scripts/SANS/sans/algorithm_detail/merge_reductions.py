@@ -177,8 +177,8 @@ def get_partial_workspaces(primary_detector, secondary_detector, reduction_mode_
     """
     Get the partial workspaces for the primary and secondary detectors.
 
-    :param primary_detector: the primary detector (now normally ISISReductionMode.LAB)
-    :param secondary_detector: the secondary detector (now normally ISISReductionMode.HAB)
+    :param primary_detector: the primary detector (now normally ReductionMode.LAB)
+    :param secondary_detector: the secondary detector (now normally ReductionMode.HAB)
     :param reduction_mode_vs_output_bundles: a ReductionMode vs OutputBundles map
     :param is_data_type: the data type, i.e. if can or sample
     :return: the primary count workspace, the primary normalization workspace, the secondary count workspace and the

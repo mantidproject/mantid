@@ -15,7 +15,7 @@ import copy
 import json
 from sans.state.state_base import (StateBase, ClassTypeParameter, FloatParameter, DictParameter,
                                    FloatWithNoneParameter, rename_descriptor_names, BoolParameter)
-from sans.common.enums import (ReductionMode, ISISReductionMode, ReductionDimensionality, FitModeForMerge,
+from sans.common.enums import (ReductionMode, ReductionMode, ReductionDimensionality, FitModeForMerge,
                                SANSFacility, DetectorType)
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
 from sans.state.automatic_setters import (automatic_setters)
@@ -40,7 +40,8 @@ class StateReductionBase(with_metaclass(ABCMeta, object)):
 
 @rename_descriptor_names
 class StateReductionMode(StateReductionBase, StateBase):
-    reduction_mode = ClassTypeParameter(ReductionMode)
+    reduction_mode = ReductionMode.NOT_SET
+
     reduction_dimensionality = ClassTypeParameter(ReductionDimensionality)
     merge_max = FloatWithNoneParameter()
     merge_min = FloatWithNoneParameter()
@@ -58,7 +59,7 @@ class StateReductionMode(StateReductionBase, StateBase):
 
     def __init__(self):
         super(StateReductionMode, self).__init__()
-        self.reduction_mode = ISISReductionMode.LAB
+        self.reduction_mode = ReductionMode.LAB
         self.reduction_dimensionality = ReductionDimensionality.OneDim
 
         # Set the shifts to defaults which essentially don't do anything.
@@ -76,15 +77,15 @@ class StateReductionMode(StateReductionBase, StateBase):
                                DetectorType.to_string(DetectorType.HAB): ""}
 
     def get_merge_strategy(self):
-        return [ISISReductionMode.LAB, ISISReductionMode.HAB]
+        return [ReductionMode.LAB, ReductionMode.HAB]
 
     def get_all_reduction_modes(self):
-        return [ISISReductionMode.LAB, ISISReductionMode.HAB]
+        return [ReductionMode.LAB, ReductionMode.HAB]
 
     def get_detector_name_for_reduction_mode(self, reduction_mode):
-        if reduction_mode is ISISReductionMode.LAB:
+        if reduction_mode is ReductionMode.LAB:
             bank_type = DetectorType.to_string(DetectorType.LAB)
-        elif reduction_mode is ISISReductionMode.HAB:
+        elif reduction_mode is ReductionMode.HAB:
             bank_type = DetectorType.to_string(DetectorType.HAB)
         else:
             raise RuntimeError("SANStateReductionISIS: There is no detector available for the"
@@ -128,9 +129,12 @@ def setup_detectors_from_ipf(reduction_info, data_info):
 class StateReductionModeBuilder(object):
     @automatic_setters(StateReductionMode, exclusions=["detector_names"])
     def __init__(self, data_info):
-        super(StateReductionModeBuilder, self).__init__()
         self.state = StateReductionMode()
         setup_detectors_from_ipf(self.state, data_info)
+
+    # TODO this whole class is a shim around state, so we should remove it at a later date
+    def set_reduction_mode(self, val):
+        self.state.reduction_mode = val
 
     def build(self):
         self.state.validate()

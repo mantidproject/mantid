@@ -14,7 +14,7 @@ from mantid.kernel import PropertyManagerDataService
 from mantid.py3compat import mock
 
 from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
-from sans.common.enums import (SANSFacility, ReductionDimensionality, SaveType, ISISReductionMode,
+from sans.common.enums import (SANSFacility, ReductionDimensionality, SaveType, ReductionMode,
                                RangeStepType, FitType, SANSInstrument, RowState)
 from sans.test_helper.user_file_test_helper import (create_user_file, sample_user_file, sample_user_file_gravity_OFF,
                                                     sample_user_file_with_instrument)
@@ -112,7 +112,7 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertEqual(view.save_types[0], SaveType.NXcanSAS)
         self.assertTrue(view.zero_error_free)
         self.assertTrue(view.use_optimizations)
-        self.assertEqual(view.reduction_mode, ISISReductionMode.LAB)
+        self.assertEqual(view.reduction_mode, ReductionMode.LAB)
         self.assertEqual(view.merge_scale, 1.)
         self.assertEqual(view.merge_shift, 0.)
         self.assertFalse(view.merge_scale_fit)

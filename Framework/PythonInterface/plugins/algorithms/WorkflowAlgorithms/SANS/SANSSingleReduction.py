@@ -14,7 +14,7 @@ from mantid.api import (MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode)
 from mantid.kernel import (Direction, Property)
 from mantid.simpleapi import CloneWorkspace
 from sans.algorithm_detail.single_execution import (run_core_reduction, run_optimized_for_can)
-from sans.common.enums import (ReductionMode, DataType, ISISReductionMode, FitType)
+from sans.common.enums import (ReductionMode, DataType, ReductionMode, FitType)
 from sans.common.general_functions import does_can_workspace_exist_on_ads
 
 from SANSSingleReductionBase import SANSSingleReductionBase
@@ -173,11 +173,11 @@ class SANSSingleReduction(SANSSingleReductionBase):
             # In an MPI reduction output_workspace is produced on the master rank, skip others.
             if output_workspace is None:
                 continue
-            if reduction_mode is ReductionMode.Merged:
+            if reduction_mode is ReductionMode.MERGED:
                 self.setProperty("OutputWorkspaceMerged", output_workspace)
-            elif reduction_mode is ISISReductionMode.LAB:
+            elif reduction_mode is ReductionMode.LAB:
                 self.setProperty("OutputWorkspaceLAB", output_workspace)
-            elif reduction_mode is ISISReductionMode.HAB:
+            elif reduction_mode is ReductionMode.HAB:
                 self.setProperty("OutputWorkspaceHAB", output_workspace)
             else:
                 raise RuntimeError("SANSSingleReduction: Cannot set the output workspace. The selected reduction "
@@ -201,9 +201,9 @@ class SANSSingleReduction(SANSSingleReductionBase):
                 # Make sure that the output workspace is not None which can be the case if there has never been a
                 # can set for the reduction.
                 if output_workspace is not None and not does_can_workspace_exist_on_ads(output_workspace):
-                    if reduction_mode is ISISReductionMode.LAB:
+                    if reduction_mode is ReductionMode.LAB:
                         self.setProperty("OutputWorkspaceLABCan", output_workspace)
-                    elif reduction_mode is ISISReductionMode.HAB:
+                    elif reduction_mode is ReductionMode.HAB:
                         self.setProperty("OutputWorkspaceHABCan", output_bundle.output_workspace)
                     else:
                         raise RuntimeError("SANSSingleReduction: The reduction mode {0} should not"
@@ -232,10 +232,10 @@ class SANSSingleReduction(SANSSingleReductionBase):
                 if output_workspace_norm is not None and output_workspace_count is not None and \
                         not does_can_workspace_exist_on_ads(output_workspace_norm) and \
                         not does_can_workspace_exist_on_ads(output_workspace_count):
-                    if reduction_mode is ISISReductionMode.LAB:
+                    if reduction_mode is ReductionMode.LAB:
                         self.setProperty("OutputWorkspaceLABCanCount", output_workspace_count)
                         self.setProperty("OutputWorkspaceLABCanNorm", output_workspace_norm)
-                    elif reduction_mode is ISISReductionMode.HAB:
+                    elif reduction_mode is ReductionMode.HAB:
                         self.setProperty("OutputWorkspaceHABCanCount", output_workspace_count)
                         self.setProperty("OutputWorkspaceHABCanNorm", output_workspace_norm)
                     else:
@@ -260,9 +260,9 @@ class SANSSingleReduction(SANSSingleReductionBase):
                 output_workspace = output_bundle.output_workspace
 
                 if output_workspace is not None and not does_can_workspace_exist_on_ads(output_workspace):
-                    if reduction_mode is ISISReductionMode.LAB:
+                    if reduction_mode is ReductionMode.LAB:
                         self.setProperty("OutputWorkspaceLABCan", output_workspace)
-                    elif reduction_mode is ISISReductionMode.HAB:
+                    elif reduction_mode is ReductionMode.HAB:
                         self.setProperty("OutputWorkspaceHABCan", output_bundle.output_workspace)
                     else:
                         raise RuntimeError("SANSSingleReduction: The reduction mode {0} should not"
@@ -273,9 +273,9 @@ class SANSSingleReduction(SANSSingleReductionBase):
                 output_workspace = output_bundle.output_workspace
 
                 if output_workspace is not None:
-                    if reduction_mode is ISISReductionMode.LAB:
+                    if reduction_mode is ReductionMode.LAB:
                         self.setProperty("OutputWorkspaceLABSample", output_workspace)
-                    elif reduction_mode is ISISReductionMode.HAB:
+                    elif reduction_mode is ReductionMode.HAB:
                         self.setProperty("OutputWorkspaceHABSample", output_bundle.output_workspace)
                     else:
                         raise RuntimeError("SANSSingleReduction: The reduction mode {0} should not"

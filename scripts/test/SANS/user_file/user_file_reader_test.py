@@ -8,7 +8,7 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 import mantid
 import os
-from sans.common.enums import (ISISReductionMode, DetectorType, RangeStepType, FitType)
+from sans.common.enums import (ReductionMode, DetectorType, RangeStepType, FitType)
 from sans.user_file.user_file_reader import UserFileReader
 from sans.user_file.settings_tags import (DetectorId, BackId, range_entry, back_single_monitor_entry,
                                           single_entry_with_detector, mask_angle_entry, LimitsId, rebin_string_values,
@@ -39,7 +39,7 @@ class UserFileReaderTest(unittest.TestCase):
                            LimitsId.qxy: [simple_range(0, 0.05, 0.001, RangeStepType.Lin)],
                            BackId.single_monitors: [back_single_monitor_entry(1, 35000, 65000),
                                                     back_single_monitor_entry(2, 85000, 98000)],
-                           DetectorId.reduction_mode: [ISISReductionMode.LAB],
+                           DetectorId.reduction_mode: [ReductionMode.LAB],
                            GravityId.on_off: [True],
                            FitId.general: [fit_general(start=1.5, stop=12.5, fit_type=FitType.Logarithmic,
                                                        data_type=None, polynomial_order=0)],

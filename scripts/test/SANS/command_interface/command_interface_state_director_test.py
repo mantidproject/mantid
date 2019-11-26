@@ -11,7 +11,7 @@ from sans.command_interface.command_interface_state_director import (NParameterC
                                                                      CommandInterfaceStateDirector, DataCommand,
                                                                      DataCommandId, FitData)
 from sans.common.enums import (SANSFacility, RebinType, DetectorType, ReductionDimensionality,
-                               FitType, RangeStepType, ISISReductionMode, FitModeForMerge, DataType)
+                               FitType, RangeStepType, ReductionMode, FitModeForMerge, DataType)
 
 
 class CommandInterfaceStateDirectorTest(unittest.TestCase):
@@ -62,7 +62,7 @@ class CommandInterfaceStateDirectorTest(unittest.TestCase):
         self._assert_raises_nothing(command_interface.add_command, command)
 
         # Detector
-        command = NParameterCommand(command_id=NParameterCommandId.detector, values=[ISISReductionMode.HAB])
+        command = NParameterCommand(command_id=NParameterCommandId.detector, values=[ReductionMode.HAB])
         self._assert_raises_nothing(command_interface.add_command, command)
 
         # Gravity
@@ -134,7 +134,7 @@ class CommandInterfaceStateDirectorTest(unittest.TestCase):
         self.assertEqual(state.move.sample_offset,  23.6/1000.)
         self.assertEqual(state.data.sample_scatter,  "SANS2D00022024")
         self.assertEqual(state.data.sample_scatter_period,  3)
-        self.assertEqual(state.reduction.reduction_mode, ISISReductionMode.HAB)
+        self.assertEqual(state.reduction.reduction_mode, ReductionMode.HAB)
         self.assertTrue(state.convert_to_q.use_gravity)
         self.assertEqual(state.convert_to_q.gravity_extra_length,  12.4)
         self.assertEqual(state.move.detectors[DetectorType.to_string(DetectorType.HAB)].sample_centre_pos1,  12.4/1000.)

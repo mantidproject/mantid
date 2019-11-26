@@ -8,7 +8,7 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.user_file.settings_tags import (OtherId, event_binning_string_values, DetectorId, det_fit_range)
-from sans.common.enums import (ReductionDimensionality, ISISReductionMode, RangeStepType, SampleShape, SaveType,
+from sans.common.enums import (ReductionDimensionality, ReductionMode, RangeStepType, SampleShape, SaveType,
                                FitType, SANSInstrument)
 from sans.user_file.settings_tags import (det_fit_range)
 
@@ -128,12 +128,12 @@ class StateGuiModelTest(unittest.TestCase):
     # ------------------------------------------------------------------------------------------------------------------
     def test_that_is_set_to_lab_by_default(self):
         state_gui_model = StateGuiModel({"test": [1]})
-        self.assertEqual(state_gui_model.reduction_mode, ISISReductionMode.LAB)
+        self.assertEqual(state_gui_model.reduction_mode, ReductionMode.LAB)
 
     def test_that_can_be_set_to_something_else(self):
         state_gui_model = StateGuiModel({"test": [1]})
-        state_gui_model.reduction_mode = ISISReductionMode.Merged
-        self.assertEqual(state_gui_model.reduction_mode, ISISReductionMode.Merged)
+        state_gui_model.reduction_mode = ReductionMode.MERGED
+        self.assertEqual(state_gui_model.reduction_mode, ReductionMode.MERGED)
 
     def test_that_raises_when_setting_with_wrong_input(self):
         def red_mode_wrapper():
@@ -142,10 +142,10 @@ class StateGuiModelTest(unittest.TestCase):
         self.assertRaises(ValueError, red_mode_wrapper)
 
     def test_that_can_update_reduction_mode(self):
-        state_gui_model = StateGuiModel({DetectorId.reduction_mode: [ISISReductionMode.HAB]})
-        self.assertEqual(state_gui_model.reduction_mode, ISISReductionMode.HAB)
-        state_gui_model.reduction_mode = ISISReductionMode.All
-        self.assertEqual(state_gui_model.reduction_mode, ISISReductionMode.All)
+        state_gui_model = StateGuiModel({DetectorId.reduction_mode: [ReductionMode.HAB]})
+        self.assertEqual(state_gui_model.reduction_mode, ReductionMode.HAB)
+        state_gui_model.reduction_mode = ReductionMode.ALL
+        self.assertEqual(state_gui_model.reduction_mode, ReductionMode.ALL)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Merge range

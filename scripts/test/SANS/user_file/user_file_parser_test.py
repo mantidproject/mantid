@@ -8,7 +8,7 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 import mantid
 
-from sans.common.enums import (ISISReductionMode, DetectorType, RangeStepType, FitType, DataType, SANSInstrument)
+from sans.common.enums import (ReductionMode, DetectorType, RangeStepType, FitType, DataType, SANSInstrument)
 from sans.user_file.user_file_parser import (InstrParser, DetParser, LimitParser, MaskParser, SampleParser, SetParser, TransParser,
                                              TubeCalibFileParser, QResolutionParser, FitParser, GravityParser,
                                              MaskFileParser, MonParser, PrintParser, BackParser, SANS2DParser, LOQParser,
@@ -89,13 +89,13 @@ class DetParserTest(unittest.TestCase):
 
     def test_that_reduction_mode_is_parsed_correctly(self):
         # The dict below has the string to parse as the key and the expected result as a value
-        valid_settings = {"DET/HAB": {DetectorId.reduction_mode: ISISReductionMode.HAB},
-                          "dEt/ frONT ": {DetectorId.reduction_mode: ISISReductionMode.HAB},
-                          "dET/REAR": {DetectorId.reduction_mode: ISISReductionMode.LAB},
-                          "dEt/MAIn   ": {DetectorId.reduction_mode: ISISReductionMode.LAB},
-                          " dEt/ BOtH": {DetectorId.reduction_mode: ISISReductionMode.All},
-                          "DeT /merge ": {DetectorId.reduction_mode: ISISReductionMode.Merged},
-                          " DEt / MERGED": {DetectorId.reduction_mode: ISISReductionMode.Merged}}
+        valid_settings = {"DET/HAB": {DetectorId.reduction_mode: ReductionMode.HAB},
+                          "dEt/ frONT ": {DetectorId.reduction_mode: ReductionMode.HAB},
+                          "dET/REAR": {DetectorId.reduction_mode: ReductionMode.LAB},
+                          "dEt/MAIn   ": {DetectorId.reduction_mode: ReductionMode.LAB},
+                          " dEt/ BOtH": {DetectorId.reduction_mode: ReductionMode.ALL},
+                          "DeT /merge ": {DetectorId.reduction_mode: ReductionMode.MERGED},
+                          " DEt / MERGED": {DetectorId.reduction_mode: ReductionMode.MERGED}}
 
         invalid_settings = {"DET/HUB": RuntimeError,
                             "DET/HAB/": RuntimeError}

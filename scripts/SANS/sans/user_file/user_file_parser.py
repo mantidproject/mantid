@@ -12,7 +12,7 @@ import re
 from math import copysign
 
 
-from sans.common.enums import (ISISReductionMode, DetectorType, RangeStepType, FitType, DataType, SANSInstrument)
+from sans.common.enums import (ReductionMode, DetectorType, RangeStepType, FitType, DataType, SANSInstrument)
 from sans.user_file.settings_tags import (DetectorId, BackId, range_entry, back_single_monitor_entry,
                                           single_entry_with_detector, mask_angle_entry, LimitsId,
                                           simple_range, complex_range, MaskId, mask_block, mask_block_cross,
@@ -404,13 +404,13 @@ class DetParser(UserFileComponentParser):
     def _extract_reduction_mode(self, line):
         line_capital = line.upper()
         if line_capital in self._HAB:
-            return {DetectorId.reduction_mode: ISISReductionMode.HAB}
+            return {DetectorId.reduction_mode: ReductionMode.HAB}
         elif line_capital in self._LAB:
-            return {DetectorId.reduction_mode: ISISReductionMode.LAB}
+            return {DetectorId.reduction_mode: ReductionMode.LAB}
         elif line_capital in self._BOTH:
-            return {DetectorId.reduction_mode: ISISReductionMode.All}
+            return {DetectorId.reduction_mode: ReductionMode.ALL}
         elif line_capital in self._MERGE:
-            return {DetectorId.reduction_mode: ISISReductionMode.Merged}
+            return {DetectorId.reduction_mode: ReductionMode.MERGED}
         else:
             raise RuntimeError("DetParser:  Could not extract line: {0}".format(line))
 

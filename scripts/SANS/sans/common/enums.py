@@ -124,34 +124,18 @@ class SANSDataType(Enum):
     SAMPLE_TRANSMISSION = "Sample Transmission"
 
 
-# ---------------------------
-#  Coordinate Definitions (3D)
-# --------------------------
 class CanonicalCoordinates(Enum):
     X = "X"
     Y = "Y"
     Z = "Z"
 
 
-# --------------------------
-#  ReductionMode
-# --------------------------
-@string_convertible
-@serializable_enum("Merged", "All")
-class ReductionMode(object):
-    """
-    Defines the reduction modes which should be common to all implementations, namely All and Merged.
-    """
-    pass
-
-
-@string_convertible
-@serializable_enum("HAB", "LAB")
-class ISISReductionMode(ReductionMode):
-    """
-    Defines the different reduction modes. This can be the high-angle bank, the low-angle bank
-    """
-    pass
+class ReductionMode(Enum):
+    NOT_SET = "Not Set"
+    ALL = "All"
+    MERGED = "Merged"
+    HAB = "HAB"
+    LAB = "LAB"
 
 
 # --------------------------

@@ -21,7 +21,7 @@ from sans.state.wavelength_and_pixel_adjustment import get_wavelength_and_pixel_
 from sans.state.adjustment import get_adjustment_builder
 from sans.state.convert_to_q import get_convert_to_q_builder
 
-from sans.common.enums import (SANSFacility, ISISReductionMode, ReductionDimensionality,
+from sans.common.enums import (SANSFacility, ReductionMode, ReductionDimensionality,
                                FitModeForMerge, RebinType, RangeStepType, SaveType, FitType, SampleShape, SANSInstrument)
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
@@ -78,12 +78,12 @@ class TestDirector(object):
         # Build the SANSStateReduction
         if self.reduction_state is None:
             reduction_builder = get_reduction_mode_builder(self.data_state)
-            reduction_builder.set_reduction_mode(ISISReductionMode.Merged)
             reduction_builder.set_reduction_dimensionality(ReductionDimensionality.OneDim)
             reduction_builder.set_merge_fit_mode(FitModeForMerge.Both)
             reduction_builder.set_merge_shift(324.2)
             reduction_builder.set_merge_scale(3420.98)
             self.reduction_state = reduction_builder.build()
+            self.reduction_state.reduction_mode = ReductionMode.MERGED
 
         # Build the SANSStateSliceEvent
         if self.slice_state is None:

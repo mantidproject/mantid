@@ -11,7 +11,7 @@ import mantid
 
 
 from sans.user_file.state_director import StateDirectorISIS
-from sans.common.enums import (SANSFacility, ISISReductionMode, RangeStepType, RebinType, DataType, FitType,
+from sans.common.enums import (SANSFacility, ReductionMode, RangeStepType, RebinType, DataType, FitType,
                                DetectorType, SampleShape, SANSInstrument)
 from sans.common.configurations import Configurations
 from sans.state.data import get_data_builder
@@ -69,7 +69,7 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
 
     def _assert_reduction(self, state):
         reduction = state.reduction
-        self.assertEqual(reduction.reduction_mode, ISISReductionMode.LAB)
+        self.assertEqual(reduction.reduction_mode, ReductionMode.LAB)
         self.assertFalse(reduction.merge_mask)
         self.assertEqual(reduction.merge_min,  None)
         self.assertEqual(reduction.merge_max,  None)

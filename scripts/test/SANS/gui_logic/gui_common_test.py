@@ -15,7 +15,7 @@ from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, get_r
                                        add_dir_to_datasearch,
                                        remove_dir_from_datasearch,
                                        SANSGuiPropertiesHandler)
-from sans.common.enums import (SANSInstrument, ISISReductionMode)
+from sans.common.enums import (SANSInstrument, ReductionMode)
 
 
 class GuiCommonTest(unittest.TestCase):
@@ -49,26 +49,26 @@ class GuiCommonTest(unittest.TestCase):
 
     def test_that_gets_correct_reduction_selection(self):
         sans_settings = get_reduction_selection(SANSInstrument.SANS2D)
-        self._assert_same_map(sans_settings, {ISISReductionMode.LAB: "rear", ISISReductionMode.HAB: "front",
-                                              ISISReductionMode.Merged: "Merged", ISISReductionMode.All: "All"})
+        self._assert_same_map(sans_settings, {ReductionMode.LAB: "rear", ReductionMode.HAB: "front",
+                                              ReductionMode.MERGED: "Merged", ReductionMode.ALL: "All"})
 
         loq_settings = get_reduction_selection(SANSInstrument.LOQ)
-        self._assert_same_map(loq_settings, {ISISReductionMode.LAB: "main-detector", ISISReductionMode.HAB: "Hab",
-                                             ISISReductionMode.Merged: "Merged", ISISReductionMode.All: "All"})
+        self._assert_same_map(loq_settings, {ReductionMode.LAB: "main-detector", ReductionMode.HAB: "Hab",
+                                             ReductionMode.MERGED: "Merged", ReductionMode.ALL: "All"})
 
         larmor_settings = get_reduction_selection(SANSInstrument.LARMOR)
-        self._assert_same_map(larmor_settings, {ISISReductionMode.LAB: "DetectorBench"})
+        self._assert_same_map(larmor_settings, {ReductionMode.LAB: "DetectorBench"})
 
         default_settings = get_reduction_selection(SANSInstrument.NO_INSTRUMENT)
-        self._assert_same_map(default_settings, {ISISReductionMode.LAB: "LAB", ISISReductionMode.HAB: "HAB",
-                                                 ISISReductionMode.Merged: "Merged", ISISReductionMode.All: "All"})
+        self._assert_same_map(default_settings, {ReductionMode.LAB: "LAB", ReductionMode.HAB: "HAB",
+                                                 ReductionMode.MERGED: "Merged", ReductionMode.ALL: "All"})
 
     def test_that_can_get_reduction_mode_string(self):
-        self.do_test_reduction_mode_string(SANSInstrument.SANS2D, ISISReductionMode.LAB, "rear")
-        self.do_test_reduction_mode_string(SANSInstrument.LOQ, ISISReductionMode.HAB, "Hab")
-        self.do_test_reduction_mode_string(SANSInstrument.LARMOR, ISISReductionMode.LAB, "DetectorBench")
-        self.do_test_reduction_mode_string(SANSInstrument.NO_INSTRUMENT, ISISReductionMode.LAB, "LAB")
-        self.do_test_reduction_mode_string(SANSInstrument.NO_INSTRUMENT, ISISReductionMode.HAB, "HAB")
+        self.do_test_reduction_mode_string(SANSInstrument.SANS2D, ReductionMode.LAB, "rear")
+        self.do_test_reduction_mode_string(SANSInstrument.LOQ, ReductionMode.HAB, "Hab")
+        self.do_test_reduction_mode_string(SANSInstrument.LARMOR, ReductionMode.LAB, "DetectorBench")
+        self.do_test_reduction_mode_string(SANSInstrument.NO_INSTRUMENT, ReductionMode.LAB, "LAB")
+        self.do_test_reduction_mode_string(SANSInstrument.NO_INSTRUMENT, ReductionMode.HAB, "HAB")
 
     def test_that_batch_file_dir_returns_none_if_no_forwardslash(self):
         a_path = "test_batch_file_path.csv"
