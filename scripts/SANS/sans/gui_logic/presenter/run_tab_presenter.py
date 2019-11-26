@@ -247,10 +247,10 @@ class RunTabPresenter(PresenterCommon):
         self._view.set_reduction_modes(reduction_mode_list)
 
         # Set the step type options for wavelength
-        range_step_types = [RangeStepType.to_string(RangeStepType.Lin),
-                            RangeStepType.to_string(RangeStepType.Log),
-                            RangeStepType.to_string(RangeStepType.RangeLog),
-                            RangeStepType.to_string(RangeStepType.RangeLin)]
+        range_step_types = [RangeStepType.LIN.value,
+                            RangeStepType.LOG.value,
+                            RangeStepType.RANGE_LOG.value,
+                            RangeStepType.RANGE_LIN.value]
         self._view.wavelength_step_type = range_step_types
 
         # Set the geometry options. This needs to include the option to read the sample shape from file.
@@ -261,10 +261,10 @@ class RunTabPresenter(PresenterCommon):
         self._view.sample_shape = sample_shape
 
         # Set the q range
-        self._view.q_1d_step_type = [RangeStepType.to_string(RangeStepType.Lin),
-                                     RangeStepType.to_string(RangeStepType.Log)]
-        self._view.q_xy_step_type = [RangeStepType.to_string(RangeStepType.Lin),
-                                     RangeStepType.to_string(RangeStepType.Log)]
+        self._view.q_1d_step_type = [RangeStepType.LIN.value,
+                                     RangeStepType.LOG.value]
+        self._view.q_xy_step_type = [RangeStepType.LIN.value,
+                                     RangeStepType.LOG.value]
 
     def _handle_output_directory_changed(self, new_directory):
         """
@@ -1101,7 +1101,7 @@ class RunTabPresenter(PresenterCommon):
         if len(elements) == 3:
             step_element = float(elements[1])
             step = abs(step_element)
-            step_type = RangeStepType.Lin if step_element >= 0 else RangeStepType.Log
+            step_type = RangeStepType.LIN if step_element >= 0 else RangeStepType.LOG
 
             # Set on the view
             self._view.q_1d_min_or_rebin_string = float(elements[0])
@@ -1207,7 +1207,7 @@ class RunTabPresenter(PresenterCommon):
             q_1d_step = self._view.q_1d_step
             if q_1d_min and q_1d_max and q_1d_step and q_1d_step_type:
                 q_1d_rebin_string = str(q_1d_min) + ","
-                q_1d_step_type_factor = -1. if q_1d_step_type is RangeStepType.Log else 1.
+                q_1d_step_type_factor = -1. if q_1d_step_type is RangeStepType.LOG else 1.
                 q_1d_rebin_string += str(q_1d_step_type_factor * q_1d_step) + ","
                 q_1d_rebin_string += str(q_1d_max)
                 state_model.q_1d_rebin_string = q_1d_rebin_string

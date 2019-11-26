@@ -63,7 +63,7 @@ class StateSliceEventBuilderTest(unittest.TestCase):
         builder.set_wavelength_low([10.0])
         builder.set_wavelength_high([20.0])
         builder.set_wavelength_step(3.0)
-        builder.set_wavelength_step_type(RangeStepType.Lin)
+        builder.set_wavelength_step_type(RangeStepType.LIN)
         builder.set_rebin_type(RebinType.Rebin)
 
         # Assert
@@ -71,7 +71,7 @@ class StateSliceEventBuilderTest(unittest.TestCase):
 
         self.assertEqual(state.wavelength_low,  [10.0])
         self.assertEqual(state.wavelength_high,  [20.0])
-        self.assertEqual(state.wavelength_step_type, RangeStepType.Lin)
+        self.assertEqual(state.wavelength_step_type, RangeStepType.LIN)
         self.assertEqual(state.rebin_type, RebinType.Rebin)
 
 

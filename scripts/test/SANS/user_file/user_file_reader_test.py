@@ -34,9 +34,9 @@ class UserFileReaderTest(unittest.TestCase):
 
         # Assert
         expected_values = {LimitsId.wavelength: [simple_range(start=1.5, stop=12.5, step=0.125,
-                                                              step_type=RangeStepType.Lin)],
+                                                              step_type=RangeStepType.LIN)],
                            LimitsId.q: [q_rebin_values(min=.001, max=.2, rebin_string="0.001,0.001,0.0126,-0.08,0.2")],
-                           LimitsId.qxy: [simple_range(0, 0.05, 0.001, RangeStepType.Lin)],
+                           LimitsId.qxy: [simple_range(0, 0.05, 0.001, RangeStepType.LIN)],
                            BackId.single_monitors: [back_single_monitor_entry(1, 35000, 65000),
                                                     back_single_monitor_entry(2, 85000, 98000)],
                            DetectorId.reduction_mode: [ReductionMode.LAB],

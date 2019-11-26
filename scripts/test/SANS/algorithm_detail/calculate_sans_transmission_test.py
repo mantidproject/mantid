@@ -236,7 +236,7 @@ class CalculateSansTransmissionTest(unittest.TestCase):
         # Arrange
         state = CalculateSansTransmissionTest._get_state(rebin_type=RebinType.Rebin, wavelength_low=2.,
                                                          wavelength_high=8., wavelength_step=2.,
-                                                         wavelength_step_type=RangeStepType.Lin,
+                                                         wavelength_step_type=RangeStepType.LIN,
                                                          background_TOF_general_start=5000.,
                                                          background_TOF_general_stop=10000., incident_monitor=1,
                                                          transmission_monitor=3, sample_fit_type=FitType.Linear,
@@ -272,7 +272,7 @@ class CalculateSansTransmissionTest(unittest.TestCase):
         background_TOF_monitor_stop = {str(incident_spectrum): 10000., str(transmission_spectrum): 10000.}
         state = CalculateSansTransmissionTest._get_state(rebin_type=RebinType.Rebin, wavelength_low=2.,
                                                          wavelength_high=8., wavelength_step=2.,
-                                                         wavelength_step_type=RangeStepType.Lin,
+                                                         wavelength_step_type=RangeStepType.LIN,
                                                          prompt_peak_correction_min=15000. + fix_for_remove_bins,
                                                          prompt_peak_correction_max=20000.,
                                                          background_TOF_monitor_start=background_TOF_monitor_start,
@@ -314,7 +314,7 @@ class CalculateSansTransmissionTest(unittest.TestCase):
         # CalculateTransmission algorithm.
         state = CalculateSansTransmissionTest._get_state(rebin_type=RebinType.Rebin, wavelength_low=2.,
                                                          wavelength_high=8., wavelength_step=2.,
-                                                         wavelength_step_type=RangeStepType.Lin,
+                                                         wavelength_step_type=RangeStepType.LIN,
                                                          background_TOF_general_start=5000.,
                                                          background_TOF_general_stop=10000., incident_monitor=1,
                                                          transmission_radius_on_detector=0.01,

@@ -227,19 +227,19 @@ class StateGuiModelTest(unittest.TestCase):
 
     def test_that_default_wavelength_step_type_is_linear(self):
         state_gui_model = StateGuiModel({"test": [1]})
-        self.assertEqual(state_gui_model.wavelength_step_type,  RangeStepType.Lin)
+        self.assertEqual(state_gui_model.wavelength_step_type, RangeStepType.LIN)
 
     def test_that_can_set_wavelength(self):
         state_gui_model = StateGuiModel({"test": [1]})
         state_gui_model.wavelength_min = 1.
         state_gui_model.wavelength_max = 2.
         state_gui_model.wavelength_step = .5
-        state_gui_model.wavelength_step_type = RangeStepType.Lin
-        state_gui_model.wavelength_step_type = RangeStepType.Log
+        state_gui_model.wavelength_step_type = RangeStepType.LIN
+        state_gui_model.wavelength_step_type = RangeStepType.LOG
         self.assertEqual(state_gui_model.wavelength_min, 1.)
         self.assertEqual(state_gui_model.wavelength_max, 2.)
         self.assertEqual(state_gui_model.wavelength_step, .5)
-        self.assertEqual(state_gui_model.wavelength_step_type, RangeStepType.Log)
+        self.assertEqual(state_gui_model.wavelength_step_type, RangeStepType.LOG)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Scale
@@ -301,14 +301,14 @@ class StateGuiModelTest(unittest.TestCase):
         state_gui_model.q_1d_rebin_string = "test"
         state_gui_model.q_xy_max = 1.
         state_gui_model.q_xy_step = 122.
-        state_gui_model.q_xy_step_type = RangeStepType.Log
+        state_gui_model.q_xy_step_type = RangeStepType.LOG
         state_gui_model.r_cut = 45.
         state_gui_model.w_cut = 890.
 
         self.assertEqual(state_gui_model.q_1d_rebin_string, "test")
         self.assertEqual(state_gui_model.q_xy_max, 1.)
         self.assertEqual(state_gui_model.q_xy_step, 122.)
-        self.assertEqual(state_gui_model.q_xy_step_type, RangeStepType.Log)
+        self.assertEqual(state_gui_model.q_xy_step_type, RangeStepType.LOG)
         self.assertEqual(state_gui_model.r_cut, 45.)
         self.assertEqual(state_gui_model.w_cut, 890.)
 

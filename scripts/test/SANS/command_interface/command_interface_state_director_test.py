@@ -107,12 +107,12 @@ class CommandInterfaceStateDirectorTest(unittest.TestCase):
 
         # Wavelength limits
         command = NParameterCommand(command_id=NParameterCommandId.wavelength_limit,
-                                    values=[1.23, 23., 1.1, RangeStepType.Lin])
+                                    values=[1.23, 23., 1.1, RangeStepType.LIN])
         self._assert_raises_nothing(command_interface.add_command, command)
 
         # QXY Limits
         command = NParameterCommand(command_id=NParameterCommandId.qxy_limit,
-                                    values=[1.23, 23., 1.1, RangeStepType.Lin])
+                                    values=[1.23, 23., 1.1, RangeStepType.LIN])
         self._assert_raises_nothing(command_interface.add_command, command)
 
         # Process all commands
@@ -177,10 +177,10 @@ class CommandInterfaceStateDirectorTest(unittest.TestCase):
         self.assertEqual(state.wavelength.wavelength_low,  [1.23])
         self.assertEqual(state.adjustment.normalize_to_monitor.wavelength_high,  [23.])
         self.assertEqual(state.adjustment.wavelength_and_pixel_adjustment.wavelength_step,  1.1)
-        self.assertEqual(state.adjustment.calculate_transmission.wavelength_step_type, RangeStepType.Lin)
+        self.assertEqual(state.adjustment.calculate_transmission.wavelength_step_type, RangeStepType.LIN)
         self.assertEqual(state.convert_to_q.q_xy_max,  23.)
         self.assertEqual(state.convert_to_q.q_xy_step,  1.1)
-        self.assertEqual(state.convert_to_q.q_xy_step_type, RangeStepType.Lin)
+        self.assertEqual(state.convert_to_q.q_xy_step_type, RangeStepType.LIN)
 
     def test_that_can_remove_last_command(self):
         # Arrange

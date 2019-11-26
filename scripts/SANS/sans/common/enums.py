@@ -195,17 +195,15 @@ class TransmissionType(Enum):
     UNFITTED = "Unfitted"
 
 
-# --------------------------
-#  Ranges
-# --------------------------
-@string_convertible
-@serializable_enum("Lin", "Log", "RangeLin", "RangeLog")
-class RangeStepType(object):
+class RangeStepType(Enum):
     """
     Defines the step type of a range
     """
-    pass
-
+    LIN = "Lin"
+    LOG = "Log"
+    NOT_SET = "NotSet"
+    RANGE_LIN = "RangeLin"
+    RANGE_LOG = "RangeLog"
 
 # --------------------------
 #  Rebin

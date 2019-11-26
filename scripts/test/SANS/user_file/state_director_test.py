@@ -82,7 +82,7 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         self.assertEqual(wavelength.wavelength_low,  [1.5])
         self.assertEqual(wavelength.wavelength_high,  [12.5])
         self.assertEqual(wavelength.wavelength_step,  0.125)
-        self.assertEqual(wavelength.wavelength_step_type, RangeStepType.Lin)
+        self.assertEqual(wavelength.wavelength_step_type, RangeStepType.LIN)
 
     def _assert_convert_to_q(self, state):
         convert_to_q = state.convert_to_q
@@ -111,7 +111,7 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         self.assertEqual(normalize_to_monitor.wavelength_low,  [1.5])
         self.assertEqual(normalize_to_monitor.wavelength_high,  [12.5])
         self.assertEqual(normalize_to_monitor.wavelength_step,  0.125)
-        self.assertEqual(normalize_to_monitor.wavelength_step_type, RangeStepType.Lin)
+        self.assertEqual(normalize_to_monitor.wavelength_step_type, RangeStepType.LIN)
         self.assertEqual(normalize_to_monitor.background_TOF_general_start,  3500)
         self.assertEqual(normalize_to_monitor.background_TOF_general_stop,  4500)
         self.assertEqual(normalize_to_monitor.background_TOF_monitor_start["1"],  35000)
@@ -135,7 +135,7 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         self.assertEqual(calculate_transmission.wavelength_low,  [1.5])
         self.assertEqual(calculate_transmission.wavelength_high,  [12.5])
         self.assertEqual(calculate_transmission.wavelength_step,  0.125)
-        self.assertEqual(calculate_transmission.wavelength_step_type, RangeStepType.Lin)
+        self.assertEqual(calculate_transmission.wavelength_step_type, RangeStepType.LIN)
         self.assertFalse(calculate_transmission.use_full_wavelength_range)
         self.assertEqual(calculate_transmission.wavelength_full_range_low,
                          Configurations.SANS2D.wavelength_full_range_low)
@@ -163,7 +163,7 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         self.assertEqual(wavelength_and_pixel_adjustment.wavelength_low,  [1.5])
         self.assertEqual(wavelength_and_pixel_adjustment.wavelength_high,  [12.5])
         self.assertEqual(wavelength_and_pixel_adjustment.wavelength_step,  0.125)
-        self.assertEqual(wavelength_and_pixel_adjustment.wavelength_step_type, RangeStepType.Lin)
+        self.assertEqual(wavelength_and_pixel_adjustment.wavelength_step_type, RangeStepType.LIN)
         self.assertTrue(wavelength_and_pixel_adjustment.adjustment_files[
                         DetectorType.LAB.value].wavelength_adjustment_file ==
                         "DIRECTM1_15785_12m_31Oct12_v12.dat")

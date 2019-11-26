@@ -91,7 +91,7 @@ def _perform_fit(transmission_workspace, direct_workspace,
     wavelength_high = calculate_transmission_state.wavelength_high[0]
     wavelength_step = calculate_transmission_state.wavelength_step
     wavelength_step_type = calculate_transmission_state.wavelength_step_type
-    prefix = 1.0 if wavelength_step_type is RangeStepType.Lin else -1.0
+    prefix = 1.0 if wavelength_step_type is RangeStepType.LIN else -1.0
     wavelength_step *= prefix
     rebin_params = str(wavelength_low) + "," + str(wavelength_step) + "," + str(wavelength_high)
 
@@ -272,7 +272,7 @@ def _get_corrected_wavelength_workspace(workspace, detector_ids, calculate_trans
                        "WavelengthLow": wavelength_low,
                        "WavelengthHigh": wavelength_high,
                        "WavelengthStep": wavelength_step,
-                       "WavelengthStepType": RangeStepType.to_string(wavelength_step_type),
+                       "WavelengthStepType": wavelength_step_type.value,
                        "RebinMode": RebinType.to_string(rebin_type)}
     convert_alg = create_unmanaged_algorithm(convert_name, **convert_options)
     convert_alg.setPropertyValue("OutputWorkspace", EMPTY_NAME)

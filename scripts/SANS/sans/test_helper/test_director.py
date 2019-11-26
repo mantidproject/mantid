@@ -105,7 +105,7 @@ class TestDirector(object):
             wavelength_builder.set_wavelength_low([1.0])
             wavelength_builder.set_wavelength_high([10.0])
             wavelength_builder.set_wavelength_step(2.0)
-            wavelength_builder.set_wavelength_step_type(RangeStepType.Lin)
+            wavelength_builder.set_wavelength_step_type(RangeStepType.LIN)
             wavelength_builder.set_rebin_type(RebinType.Rebin)
             self.wavelength_state = wavelength_builder.build()
 
@@ -133,7 +133,7 @@ class TestDirector(object):
             normalize_to_monitor_builder.set_wavelength_low([1.0])
             normalize_to_monitor_builder.set_wavelength_high([10.0])
             normalize_to_monitor_builder.set_wavelength_step(2.0)
-            normalize_to_monitor_builder.set_wavelength_step_type(RangeStepType.Lin)
+            normalize_to_monitor_builder.set_wavelength_step_type(RangeStepType.LIN)
             normalize_to_monitor_builder.set_rebin_type(RebinType.Rebin)
             normalize_to_monitor_builder.set_background_TOF_general_start(1000.)
             normalize_to_monitor_builder.set_background_TOF_general_stop(2000.)
@@ -147,7 +147,7 @@ class TestDirector(object):
             calculate_transmission_builder.set_wavelength_low([1.0])
             calculate_transmission_builder.set_wavelength_high([10.0])
             calculate_transmission_builder.set_wavelength_step(2.0)
-            calculate_transmission_builder.set_wavelength_step_type(RangeStepType.Lin)
+            calculate_transmission_builder.set_wavelength_step_type(RangeStepType.LIN)
             calculate_transmission_builder.set_rebin_type(RebinType.Rebin)
             calculate_transmission_builder.set_background_TOF_general_start(1000.)
             calculate_transmission_builder.set_background_TOF_general_stop(2000.)
@@ -167,7 +167,7 @@ class TestDirector(object):
             wavelength_and_pixel_builder.set_wavelength_low([1.0])
             wavelength_and_pixel_builder.set_wavelength_high([10.0])
             wavelength_and_pixel_builder.set_wavelength_step(2.0)
-            wavelength_and_pixel_builder.set_wavelength_step_type(RangeStepType.Lin)
+            wavelength_and_pixel_builder.set_wavelength_step_type(RangeStepType.LIN)
             wavelength_and_pixel = wavelength_and_pixel_builder.build()
 
             # Adjustment

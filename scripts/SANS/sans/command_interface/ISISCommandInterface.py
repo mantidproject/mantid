@@ -606,7 +606,7 @@ def LimitsWav(lmin, lmax, step, bin_type):
     print_message('LimitsWav(' + str(lmin) + ', ' + str(lmax) + ', ' + str(step) + ', ' + bin_type + ')')
 
     rebin_string = bin_type.strip().upper()
-    rebin_type = RangeStepType.Log if rebin_string == "LOGARITHMIC" else RangeStepType.Lin
+    rebin_type = RangeStepType.LOG if rebin_string == "LOGARITHMIC" else RangeStepType.LIN
 
     wavelength_command = NParameterCommand(command_id=NParameterCommandId.wavelength_limit,
                                            values=[lmin, lmax, step, rebin_type])
@@ -628,9 +628,9 @@ def LimitsQXY(qmin, qmax, step, type):
     print_message('LimitsQXY(' + str(qmin) + ', ' + str(qmax) + ', ' + str(step) + ', ' + str(type) + ')')
     step_type_string = type.strip().upper()
     if step_type_string == "LOGARITHMIC" or step_type_string == "LOG":
-        step_type = RangeStepType.Log
+        step_type = RangeStepType.LOG
     else:
-        step_type = RangeStepType.Lin
+        step_type = RangeStepType.LIN
     qxy_command = NParameterCommand(command_id=NParameterCommandId.qxy_limit, values=[qmin, qmax, step, step_type])
     director.add_command(qxy_command)
 

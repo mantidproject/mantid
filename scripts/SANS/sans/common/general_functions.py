@@ -566,7 +566,7 @@ def get_bins_for_rebin_setting(min_value, max_value, step_value, step_type):
 
         bins.append(lower_bound)
         # We can either have linear or logarithmic steps. The logarithmic step depends on the lower bound.
-        if step_type is RangeStepType.Lin:
+        if step_type is RangeStepType.LIN:
             step = step_value
         else:
             step = lower_bound*step_value
@@ -610,7 +610,7 @@ def get_ranges_for_rebin_array(rebin_array):
     min_value = rebin_array[0]
     step_value = rebin_array[1]
     max_value = rebin_array[2]
-    step_type = RangeStepType.Lin if step_value >= 0. else RangeStepType.Log
+    step_type = RangeStepType.LIN if step_value >= 0. else RangeStepType.LOG
     step_value = abs(step_value)
     return get_ranges_for_rebin_setting(min_value, max_value, step_value, step_type)
 

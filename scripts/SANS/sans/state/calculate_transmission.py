@@ -93,7 +93,7 @@ class StateCalculateTransmission(StateBase):
     wavelength_low = PositiveFloatListParameter()
     wavelength_high = PositiveFloatListParameter()
     wavelength_step = PositiveFloatParameter()
-    wavelength_step_type = ClassTypeParameter(RangeStepType)
+    wavelength_step_type = RangeStepType.NOT_SET
 
     use_full_wavelength_range = BoolParameter()
     wavelength_full_range_low = PositiveFloatParameter()
@@ -177,8 +177,7 @@ class StateCalculateTransmission(StateBase):
         # -----------------
         # Wavelength rebin
         # -----------------
-        if one_is_none([self.wavelength_low, self.wavelength_high, self.wavelength_step, self.wavelength_step_type,
-                        self.wavelength_step_type, self.rebin_type]):
+        if one_is_none([self.wavelength_low, self.wavelength_high, self.wavelength_step, self.rebin_type]):
             entry = validation_message("A wavelength entry has not been set.",
                                        "Make sure that all entries are set.",
                                        {"wavelength_low": self.wavelength_low,
@@ -186,6 +185,12 @@ class StateCalculateTransmission(StateBase):
                                         "wavelength_step": self.wavelength_step,
                                         "wavelength_step_type": self.wavelength_step_type,
                                         "rebin_type": self.rebin_type})
+            is_invalid.update(entry)
+
+        if self.wavelength_step_type is RangeStepType.NOT_SET:
+            entry = validation_message("A wavelength entry has not been set.",
+                                       "Make sure that all entries are set.",
+                                       {"wavelength_step_type" : self.wavelength_step_type})
             is_invalid.update(entry)
 
         if is_not_none_and_first_larger_than_second([self.wavelength_low, self.wavelength_high]):
@@ -368,6 +373,9 @@ class StateCalculateTransmissionBuilderLOQ(object):
         self.state.validate()
         return copy.copy(self.state)
 
+    def set_wavelength_step_type(self, val):
+        self.state.wavelength_step_type = val
+
 
 class StateCalculateTransmissionBuilderSANS2D(object):
     @automatic_setters(StateCalculateTransmissionSANS2D)
@@ -380,6 +388,9 @@ class StateCalculateTransmissionBuilderSANS2D(object):
     def build(self):
         self.state.validate()
         return copy.copy(self.state)
+
+    def set_wavelength_step_type(self, val):
+        self.state.wavelength_step_type = val
 
 
 class StateCalculateTransmissionBuilderLARMOR(object):
@@ -394,6 +405,9 @@ class StateCalculateTransmissionBuilderLARMOR(object):
         self.state.validate()
         return copy.copy(self.state)
 
+    def set_wavelength_step_type(self, val):
+        self.state.wavelength_step_type = val
+
 
 class StateCalculateTransmissionBuilderZOOM(object):
     @automatic_setters(StateCalculateTransmissionZOOM)
@@ -406,6 +420,9 @@ class StateCalculateTransmissionBuilderZOOM(object):
     def build(self):
         self.state.validate()
         return copy.copy(self.state)
+
+    def set_wavelength_step_type(self, val):
+        self.state.wavelength_step_type = val
 
 
 # ------------------------------------------

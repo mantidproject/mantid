@@ -111,7 +111,7 @@ class CreateSANSWavelengthPixelAdjustmentTest(unittest.TestCase):
 
         state = self._get_state(wavelength_low=1., wavelength_high=11.,
                                 wavelength_step=2.,
-                                wavelength_step_type=RangeStepType.Lin)
+                                wavelength_step_type=RangeStepType.LIN)
 
         # Act
         wavelength_adjustment, pixel_adjustment = self._run_test(transmission_workspace,
@@ -141,7 +141,7 @@ class CreateSANSWavelengthPixelAdjustmentTest(unittest.TestCase):
         state = CreateSANSWavelengthPixelAdjustmentTest._get_state(hab_wavelength_file=direct_file_name,
                                                                    wavelength_low=1., wavelength_high=11.,
                                                                    wavelength_step=2.,
-                                                                   wavelength_step_type=RangeStepType.Lin)
+                                                                   wavelength_step_type=RangeStepType.LIN)
         # Act
         wavelength_adjustment, pixel_adjustment = CreateSANSWavelengthPixelAdjustmentTest._run_test(
             transmission_workspace,

@@ -204,7 +204,7 @@ def create_mock_view(user_file_path, batch_file_path=None, row_user_file_path=""
     _q_1d_step = mock.PropertyMock(return_value=.001)
     type(view).q_1d_step = _q_1d_step
 
-    _q_1d_step_type = mock.PropertyMock(return_value=RangeStepType.Lin)
+    _q_1d_step_type = mock.PropertyMock(return_value=RangeStepType.LIN)
     type(view)._q_1d_step_type = _q_1d_step_type
 
     _output_mode = mock.PropertyMock(return_value=OutputMode.PublishToADS)

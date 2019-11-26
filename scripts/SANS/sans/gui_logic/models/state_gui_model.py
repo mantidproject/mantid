@@ -376,7 +376,7 @@ class StateGuiModel(ModelCommon):
         else:
             # If the entry does not already exist, then add it. The -1. is an illegal input which should get overridden
             # and if not we want it to fail.
-            settings = [simple_range(start=-1., stop=-1., step=-1., step_type=RangeStepType.Lin)]
+            settings = [simple_range(start=-1., stop=-1., step=-1., step_type=RangeStepType.LIN)]
 
         new_settings = []
         for setting in settings:
@@ -402,7 +402,7 @@ class StateGuiModel(ModelCommon):
 
     @property
     def wavelength_step_type(self):
-        return self.get_simple_element_with_attribute(element_id=LimitsId.wavelength, default_value=RangeStepType.Lin,
+        return self.get_simple_element_with_attribute(element_id=LimitsId.wavelength, default_value=RangeStepType.LIN,
                                                       attribute="step_type")
 
     @wavelength_step_type.setter

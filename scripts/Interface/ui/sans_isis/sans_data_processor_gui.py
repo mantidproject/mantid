@@ -408,16 +408,16 @@ class SANSDataProcessorGui(QMainWindow,
         return True
 
     def _on_wavelength_step_type_changed(self):
-        if self.wavelength_step_type == RangeStepType.RangeLin:
+        if self.wavelength_step_type == RangeStepType.RANGE_LIN:
             self.wavelength_stacked_widget.setCurrentIndex(1)
             self.wavelength_step_label.setText(u'Step [\u00c5^-1]')
-        elif self.wavelength_step_type == RangeStepType.RangeLog:
+        elif self.wavelength_step_type == RangeStepType.RANGE_LOG:
             self.wavelength_stacked_widget.setCurrentIndex(1)
             self.wavelength_step_label.setText(u'Step [d\u03BB/\u03BB]')
-        elif self.wavelength_step_type == RangeStepType.Log:
+        elif self.wavelength_step_type == RangeStepType.LOG:
             self.wavelength_stacked_widget.setCurrentIndex(0)
             self.wavelength_step_label.setText(u'Step [d\u03BB/\u03BB]')
-        elif self.wavelength_step_type == RangeStepType.Lin:
+        elif self.wavelength_step_type == RangeStepType.LIN:
             self.wavelength_stacked_widget.setCurrentIndex(0)
             self.wavelength_step_label.setText(u'Step [\u00c5^-1]')
 
@@ -1321,7 +1321,7 @@ class SANSDataProcessorGui(QMainWindow,
     @property
     def wavelength_step_type(self):
         step_type_as_string = self.wavelength_step_type_combo_box.currentText().encode('utf-8')
-        return RangeStepType.from_string(step_type_as_string)
+        return RangeStepType(step_type_as_string)
 
     @wavelength_step_type.setter
     def wavelength_step_type(self, value):
@@ -1700,7 +1700,7 @@ class SANSDataProcessorGui(QMainWindow,
         q_1d_step_type_as_string = self.q_1d_step_type_combo_box.currentText().encode('utf-8')
         # Hedge for trying to read out
         try:
-            return RangeStepType.from_string(q_1d_step_type_as_string)
+            return RangeStepType(q_1d_step_type_as_string)
         except RuntimeError:
             return None
 
@@ -1741,7 +1741,7 @@ class SANSDataProcessorGui(QMainWindow,
     def q_xy_step_type(self):
         q_xy_step_type_as_string = self.q_xy_step_type_combo_box.currentText().encode('utf-8')
         try:
-            return RangeStepType.from_string(q_xy_step_type_as_string)
+            return RangeStepType(q_xy_step_type_as_string)
         except RuntimeError:
             return None
 

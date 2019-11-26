@@ -124,7 +124,7 @@ def set_wavelength_limits(builder, user_file_items):
         check_if_contains_only_one_element(wavelength_limits, LimitsId.wavelength)
         wavelength_limits = wavelength_limits[-1]
 
-        if wavelength_limits.step_type in [RangeStepType.RangeLin, RangeStepType.RangeLog]:
+        if wavelength_limits.step_type in [RangeStepType.RANGE_LIN, RangeStepType.RANGE_LOG]:
             wavelength_range = user_file_items[OtherId.wavelength_range]
             check_if_contains_only_one_element(wavelength_range, OtherId.wavelength_range)
             wavelength_range = wavelength_range[-1]
@@ -132,8 +132,8 @@ def set_wavelength_limits(builder, user_file_items):
             wavelength_start = [min(wavelength_start)] + wavelength_start
             wavelength_stop = [max(wavelength_stop)] + wavelength_stop
 
-            wavelength_step_type = RangeStepType.Lin if wavelength_limits.step_type is RangeStepType.RangeLin \
-                else RangeStepType.Log
+            wavelength_step_type = RangeStepType.LIN if wavelength_limits.step_type is RangeStepType.RANGE_LIN \
+                else RangeStepType.LOG
 
             builder.set_wavelength_low(wavelength_start)
             builder.set_wavelength_high(wavelength_stop)

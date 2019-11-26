@@ -44,7 +44,7 @@ class StateWavelengthAndPixelAdjustment(StateBase):
     wavelength_low = PositiveFloatListParameter()
     wavelength_high = PositiveFloatListParameter()
     wavelength_step = PositiveFloatParameter()
-    wavelength_step_type = ClassTypeParameter(RangeStepType)
+    wavelength_step_type = RangeStepType.NOT_SET
 
     adjustment_files = DictParameter()
 
@@ -65,6 +65,12 @@ class StateWavelengthAndPixelAdjustment(StateBase):
                                         "wavelength_high": self.wavelength_high,
                                         "wavelength_step": self.wavelength_step,
                                         "wavelength_step_type": self.wavelength_step_type})
+            is_invalid.update(entry)
+
+        if self.wavelength_step_type is RangeStepType.NOT_SET:
+            entry = validation_message("A wavelength entry has not been set.",
+                                       "Make sure that all entries are set.",
+                                       {"wavelength_step_type": self.wavelength_step_type})
             is_invalid.update(entry)
 
         if is_not_none_and_first_larger_than_second([self.wavelength_low, self.wavelength_high]):
@@ -99,6 +105,9 @@ class StateWavelengthAndPixelAdjustmentBuilder(object):
     def build(self):
         self.state.validate()
         return copy.copy(self.state)
+
+    def set_wavelength_step_type(self, val):
+        self.state.wavelength_step_type = val
 
 
 def get_wavelength_and_pixel_adjustment_builder(data_info):

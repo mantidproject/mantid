@@ -112,7 +112,7 @@ def _run_q_2d(workspace, output_summed_parts, state_convert_to_q,
 
     # Extract relevant settings
     max_q_xy = state_convert_to_q.q_xy_max
-    log_binning = True if state_convert_to_q.q_xy_step_type is RangeStepType.Log else False
+    log_binning = True if state_convert_to_q.q_xy_step_type is RangeStepType.LOG else False
     delta_q = state_convert_to_q.q_xy_step
     radius_cutoff = state_convert_to_q.radius_cutoff / 1000.  # Qxy expects the radius cutoff to be in mm
     wavelength_cutoff = state_convert_to_q.wavelength_cutoff

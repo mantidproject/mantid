@@ -167,7 +167,7 @@ def _convert_to_wavelength(workspace, normalize_to_monitor_state):
                        "WavelengthLow": wavelength_low,
                        "WavelengthHigh": wavelength_high,
                        "WavelengthStep": wavelength_step,
-                       "WavelengthStepType": RangeStepType.to_string(wavelength_step_type),
+                       "WavelengthStepType": wavelength_step_type.value,
                        "RebinMode": RebinType.to_string(wavelength_rebin_mode)}
 
     convert_alg = create_unmanaged_algorithm(convert_name, **convert_options)

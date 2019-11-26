@@ -677,7 +677,7 @@ class LimitParser(UserFileComponentParser):
         else:
             simple_pattern = self._extract_simple_pattern(event_binning, LimitsId.events_binning)
             rebin_values = simple_pattern[LimitsId.events_binning]
-            prefix = -1. if rebin_values.step_type is RangeStepType.Log else 1.
+            prefix = -1. if rebin_values.step_type is RangeStepType.LOG else 1.
             binning_string = str(rebin_values.start) + "," + str(prefix*rebin_values.step) + "," + \
                              str(rebin_values.stop)  # noqa
 
@@ -703,7 +703,7 @@ class LimitParser(UserFileComponentParser):
         if does_pattern_match(self._q_simple_pattern, line):
             simple_output = self._extract_simple_pattern(q_range, LimitsId.q)
             simple_output = simple_output[LimitsId.q]
-            prefix = -1.0 if simple_output.step_type is RangeStepType.Log else 1.0
+            prefix = -1.0 if simple_output.step_type is RangeStepType.LOG else 1.0
             q_limit_output = [simple_output.start]
             if simple_output.step:
                 q_limit_output.append(prefix*simple_output.step)
@@ -711,8 +711,8 @@ class LimitParser(UserFileComponentParser):
         elif does_pattern_match(self._q_complex_pattern, line):
             complex_output = self._extract_complex_pattern(q_range, LimitsId.q)
             complex_output = complex_output[LimitsId.q]
-            prefix1 = -1.0 if complex_output.step_type1 is RangeStepType.Log else 1.0
-            prefix2 = -1.0 if complex_output.step_type2 is RangeStepType.Log else 1.0
+            prefix1 = -1.0 if complex_output.step_type1 is RangeStepType.LOG else 1.0
+            prefix2 = -1.0 if complex_output.step_type2 is RangeStepType.LOG else 1.0
             q_limit_output = [complex_output.start, prefix1*complex_output.step1, complex_output.mid,
                               prefix2*complex_output.step2, complex_output.stop]
         else:
@@ -784,8 +784,8 @@ class LimitParser(UserFileComponentParser):
 
         # Check if there is a sign on the individual steps, this shows if something had been marked as linear or log.
         # If there is an explicit LOG/LIN command, then this overwrites the sign
-        step_type1 = RangeStepType.Log if copysign(1, range_with_steps[1]) == -1 else RangeStepType.Lin
-        step_type2 = RangeStepType.Log if copysign(1, range_with_steps[3]) == -1 else RangeStepType.Lin
+        step_type1 = RangeStepType.LOG if copysign(1, range_with_steps[1]) == -1 else RangeStepType.LIN
+        step_type2 = RangeStepType.LOG if copysign(1, range_with_steps[3]) == -1 else RangeStepType.LIN
         if step_type is not None:
             step_type1 = step_type
             step_type2 = step_type
@@ -807,17 +807,17 @@ class LimitParser(UserFileComponentParser):
         range_with_steps = extract_float_list(range_with_steps_string, " ")
 
         if step_type is not None:
-            prefix = -1.0 if step_type is RangeStepType.Log else 1.0
+            prefix = -1.0 if step_type is RangeStepType.LOG else 1.0
             for index in range(1, len(range_with_steps), 2):
                 range_with_steps[index] *= prefix
         return range_with_steps
 
-    def _get_step_type(self, range_string, default=RangeStepType.Lin):
+    def _get_step_type(self, range_string, default=RangeStepType.LIN):
         range_type = default
         if re.search(self._log, range_string):
-            range_type = RangeStepType.Log
+            range_type = RangeStepType.LOG
         elif re.search(self._lin, range_string):
-            range_type = RangeStepType.Lin
+            range_type = RangeStepType.LIN
         return range_type
 
     @staticmethod

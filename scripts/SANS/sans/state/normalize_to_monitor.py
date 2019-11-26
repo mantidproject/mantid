@@ -34,7 +34,7 @@ class StateNormalizeToMonitor(StateBase):
     wavelength_low = PositiveFloatListParameter()
     wavelength_high = PositiveFloatListParameter()
     wavelength_step = PositiveFloatParameter()
-    wavelength_step_type = ClassTypeParameter(RangeStepType)
+    wavelength_step_type = RangeStepType.NOT_SET
 
     background_TOF_general_start = FloatParameter()
     background_TOF_general_stop = FloatParameter()
@@ -192,6 +192,9 @@ class StateNormalizeToMonitorBuilder(object):
         self.state.validate()
         return copy.copy(self.state)
 
+    def set_wavelength_step_type(self, val):
+        self.state.wavelength_step_type = val
+
 
 class StateNormalizeToMonitorBuilderLOQ(object):
     @automatic_setters(StateNormalizeToMonitorLOQ)
@@ -204,6 +207,9 @@ class StateNormalizeToMonitorBuilderLOQ(object):
     def build(self):
         self.state.validate()
         return copy.copy(self.state)
+
+    def set_wavelength_step_type(self, val):
+        self.state.wavelength_step_type = val
 
 
 def get_normalize_to_monitor_builder(data_info):

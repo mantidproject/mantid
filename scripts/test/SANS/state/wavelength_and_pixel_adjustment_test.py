@@ -30,7 +30,7 @@ class StateWavelengthAndPixelAdjustmentTest(unittest.TestCase):
         assert_validate_error(self, ValueError, state)
         state.wavelength_step = 2.
         assert_validate_error(self, ValueError, state)
-        state.wavelength_step_type = RangeStepType.Lin
+        state.wavelength_step_type = RangeStepType.LIN
         assert_raises_nothing(self, state)
 
     def test_that_raises_when_lower_wavelength_is_smaller_than_high_wavelength(self):
@@ -38,7 +38,7 @@ class StateWavelengthAndPixelAdjustmentTest(unittest.TestCase):
         state.wavelength_low = [2.]
         state.wavelength_high = [1.]
         state.wavelength_step = 2.
-        state.wavelength_step_type = RangeStepType.Lin
+        state.wavelength_step_type = RangeStepType.LIN
         assert_validate_error(self, ValueError, state)
 
 
@@ -63,7 +63,7 @@ class StateWavelengthAndPixelAdjustmentBuilderTest(unittest.TestCase):
         builder.set_wavelength_low([1.5])
         builder.set_wavelength_high([2.7])
         builder.set_wavelength_step(0.5)
-        builder.set_wavelength_step_type(RangeStepType.Lin)
+        builder.set_wavelength_step_type(RangeStepType.LIN)
 
         state = builder.build()
 
@@ -73,7 +73,7 @@ class StateWavelengthAndPixelAdjustmentBuilderTest(unittest.TestCase):
         self.assertEqual(state.wavelength_low,  [1.5])
         self.assertEqual(state.wavelength_high,  [2.7])
         self.assertEqual(state.wavelength_step,  0.5)
-        self.assertEqual(state.wavelength_step_type, RangeStepType.Lin)
+        self.assertEqual(state.wavelength_step_type, RangeStepType.LIN)
 
 
 if __name__ == '__main__':

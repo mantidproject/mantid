@@ -280,11 +280,11 @@ class LimitParserTest(unittest.TestCase):
     def test_that_qxy_limits_are_parsed_correctly(self):
         valid_settings = {"L/QXY 12 34": {LimitsId.qxy: simple_range(start=12, stop=34, step=None,  step_type=None)},
                           "L/QXY 12 34 2.7": {LimitsId.qxy: simple_range(start=12, stop=34, step=2.7,
-                                                                         step_type=RangeStepType.Lin)},
+                                                                         step_type=RangeStepType.LIN)},
                           "L/QXY -12 34.6 2.7/LOG": {LimitsId.qxy: simple_range(start=-12, stop=34.6, step=2.7,
-                                                                                step_type=RangeStepType.Log)},
+                                                                                step_type=RangeStepType.LOG)},
                           "L/qxY -12 3.6 2 /LIN": {LimitsId.qxy: simple_range(start=-12, stop=3.6, step=2,
-                                                                              step_type=RangeStepType.Lin)}}
+                                                                              step_type=RangeStepType.LIN)}}
         """
         These tests should be added back to valid settings when SANS GUI can accept complex QXY strings.
         "L/qxy -12  , 0.4,  23, -3.48, 36": {LimitsId.qxy: complex_range(start=-12, step1=0.4,
@@ -314,11 +314,11 @@ class LimitParserTest(unittest.TestCase):
         valid_settings = {"L/WAV 12 34": {LimitsId.wavelength: simple_range(start=12, stop=34, step=None,
                                                                             step_type=None)},
                           "L/waV 12 34 2.7": {LimitsId.wavelength: simple_range(start=12, stop=34, step=2.7,
-                                                                                step_type=RangeStepType.Lin)},
+                                                                                step_type=RangeStepType.LIN)},
                           "L/wAv -12 34.6 2.7/LOG": {LimitsId.wavelength: simple_range(start=-12, stop=34.6, step=2.7,
-                                                                                       step_type=RangeStepType.Log)},
-                          "L/WaV -12 3.6 2 /LIN": {LimitsId.wavelength: simple_range(start=-12, stop=3.6,  step=2,
-                                                                                     step_type=RangeStepType.Lin)}}
+                                                                                       step_type=RangeStepType.LOG)},
+                          "L/WaV -12 3.6 2 /LIN": {LimitsId.wavelength: simple_range(start=-12, stop=3.6, step=2,
+                                                                                     step_type=RangeStepType.LIN)}}
 
         invalid_settings = {"L/WAV 12 2 3 4": RuntimeError,
                             "L/WAV 12 2 3 4 23 3": RuntimeError,

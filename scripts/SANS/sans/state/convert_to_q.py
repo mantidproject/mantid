@@ -38,7 +38,7 @@ class StateConvertToQ(StateBase):
     # 2D settings
     q_xy_max = PositiveFloatParameter()
     q_xy_step = PositiveFloatParameter()
-    q_xy_step_type = ClassTypeParameter(RangeStepType)
+    q_xy_step_type = RangeStepType.LIN
 
     # -----------------------
     # Q Resolution specific
@@ -170,6 +170,12 @@ class StateConvertToQBuilder(object):
 
     def set_reduction_dimensionality(self, val):
         self.state.reduction_dimensionality = val
+
+    def set_wavelength_step_type(self, val):
+        self.state.wavelength_step_type = val
+
+    def set_q_xy_step_type(self, val):
+        self.state.q_xy_step_type = val
 
 
 # ------------------------------------------

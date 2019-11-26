@@ -26,7 +26,7 @@ class StateWavelength(StateBase):
     wavelength_low = PositiveFloatListParameter()
     wavelength_high = PositiveFloatListParameter()
     wavelength_step = PositiveFloatParameter()
-    wavelength_step_type = ClassTypeParameter(RangeStepType)
+    wavelength_step_type = RangeStepType.NOT_SET
 
     def __init__(self):
         super(StateWavelength, self).__init__()
@@ -67,6 +67,9 @@ class StateWavelengthBuilder(object):
         # Make sure that the product is in a valid state, ie not incomplete
         self.state.validate()
         return copy.copy(self.state)
+
+    def set_wavelength_step_type(self, val):
+        self.state.wavelength_step_type = val
 
 
 def get_wavelength_builder(data_info):
