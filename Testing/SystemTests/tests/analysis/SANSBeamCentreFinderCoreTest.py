@@ -75,7 +75,7 @@ class SANSBeamCentreFinderCoreTest(unittest.TestCase):
         if direct:
             beam_centre_core_alg.setProperty("DirectWorkspace", direct)
 
-        beam_centre_core_alg.setProperty("Component", DetectorType.to_string(detector_type))
+        beam_centre_core_alg.setProperty("Component", detector_type.value)
         beam_centre_core_alg.setProperty("DataType", component.value)
         beam_centre_core_alg.setProperty("Centre1", centre_1)
         beam_centre_core_alg.setProperty("Centre2", centre_2)

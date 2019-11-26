@@ -303,9 +303,9 @@ def get_component_to_reduce(reduction_setting_bundle):
     reduction_mode = reduction_setting_bundle.reduction_mode
 
     if reduction_mode is ReductionMode.LAB:
-        reduction_mode_setting = DetectorType.to_string(DetectorType.LAB)
+        reduction_mode_setting = DetectorType.LAB.value
     elif reduction_mode is ReductionMode.HAB:
-        reduction_mode_setting = DetectorType.to_string(DetectorType.HAB)
+        reduction_mode_setting = DetectorType.HAB.value
     else:
         raise RuntimeError("SingleExecution: An unknown reduction mode was selected: {}. "
                            "Currently only HAB and LAB are supported.".format(reduction_mode))

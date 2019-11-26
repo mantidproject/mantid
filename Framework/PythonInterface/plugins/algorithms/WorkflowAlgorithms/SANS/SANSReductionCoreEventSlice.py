@@ -62,9 +62,9 @@ class SANSReductionCoreEventSlice(SANSReductionCoreBase):
         self.setPropertyGroup("TransmissionWorkspace", 'Data')
 
         # The component
-        allowed_detectors = StringListValidator([DetectorType.to_string(DetectorType.LAB),
-                                                 DetectorType.to_string(DetectorType.HAB)])
-        self.declareProperty("Component", DetectorType.to_string(DetectorType.LAB),
+        allowed_detectors = StringListValidator([DetectorType.LAB.value,
+                                                 DetectorType.HAB.value])
+        self.declareProperty("Component", DetectorType.LAB.value,
                              validator=allowed_detectors, direction=Direction.Input,
                              doc="The component of the instrument which is to be reduced.")
 

@@ -73,8 +73,8 @@ class StateReductionMode(StateReductionBase, StateBase):
         self.merge_mask = False
 
         # Set the detector names to empty strings
-        self.detector_names = {DetectorType.to_string(DetectorType.LAB): "",
-                               DetectorType.to_string(DetectorType.HAB): ""}
+        self.detector_names = {DetectorType.LAB.value: "",
+                               DetectorType.HAB.value: ""}
 
     def get_merge_strategy(self):
         return [ReductionMode.LAB, ReductionMode.HAB]
@@ -84,9 +84,9 @@ class StateReductionMode(StateReductionBase, StateBase):
 
     def get_detector_name_for_reduction_mode(self, reduction_mode):
         if reduction_mode is ReductionMode.LAB:
-            bank_type = DetectorType.to_string(DetectorType.LAB)
+            bank_type = DetectorType.LAB.value
         elif reduction_mode is ReductionMode.HAB:
-            bank_type = DetectorType.to_string(DetectorType.HAB)
+            bank_type = DetectorType.HAB.value
         else:
             raise RuntimeError("SANStateReductionISIS: There is no detector available for the"
                                " reduction mode {0}.".format(reduction_mode))
@@ -109,8 +109,8 @@ class StateReductionMode(StateReductionBase, StateBase):
 def setup_detectors_from_ipf(reduction_info, data_info):
     ipf_file_path = data_info.ipf_file_path
 
-    detector_names = {DetectorType.to_string(DetectorType.LAB): "low-angle-detector-name",
-                      DetectorType.to_string(DetectorType.HAB): "high-angle-detector-name"}
+    detector_names = {DetectorType.LAB.value: "low-angle-detector-name",
+                      DetectorType.HAB.value: "high-angle-detector-name"}
 
     names_to_search = []
     names_to_search.extend(list(detector_names.values()))

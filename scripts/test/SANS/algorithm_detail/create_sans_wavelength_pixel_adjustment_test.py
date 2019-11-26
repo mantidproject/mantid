@@ -92,7 +92,7 @@ class CreateSANSWavelengthPixelAdjustmentTest(unittest.TestCase):
     def _run_test(transmission_workspace, norm_workspace, state, is_lab=True):
         state_to_send = state.adjustment.wavelength_and_pixel_adjustment
 
-        component = DetectorType.to_string(DetectorType.LAB) if is_lab else DetectorType.to_string(DetectorType.HAB)
+        component = DetectorType.LAB.value if is_lab else DetectorType.HAB.value
 
         alg = CreateSANSWavelengthPixelAdjustment(state_adjustment_wavelength_and_pixel=state_to_send,
                                                   component=component)

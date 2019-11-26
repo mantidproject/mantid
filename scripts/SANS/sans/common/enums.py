@@ -179,16 +179,12 @@ class FitModeForMerge(Enum):
     SHIFT_ONLY = "ShiftOnly"
 
 
-# --------------------------
-#  Detector Type
-# --------------------------
-@string_convertible
-@serializable_enum("HAB", "LAB")
-class DetectorType(object):
+class DetectorType(Enum):
     """
     Defines the detector type
     """
-    pass
+    HAB = "HAB"
+    LAB = "LAB"
 
 
 # --------------------------

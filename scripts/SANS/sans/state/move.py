@@ -120,8 +120,8 @@ class StateMoveLOQ(StateMove):
         self.monitor_names = {}
 
         # Setup the detectors
-        self.detectors = {DetectorType.to_string(DetectorType.LAB): StateMoveDetector(),
-                          DetectorType.to_string(DetectorType.HAB): StateMoveDetector()}
+        self.detectors = {DetectorType.LAB.value: StateMoveDetector(),
+                          DetectorType.HAB.value: StateMoveDetector()}
 
     def validate(self):
         # No validation of the descriptors on this level, let potential exceptions from detectors "bubble" up
@@ -166,8 +166,8 @@ class StateMoveSANS2D(StateMove):
         self.monitor_4_offset = 0.0
 
         # Setup the detectors
-        self.detectors = {DetectorType.to_string(DetectorType.LAB): StateMoveDetector(),
-                          DetectorType.to_string(DetectorType.HAB): StateMoveDetector()}
+        self.detectors = {DetectorType.LAB.value: StateMoveDetector(),
+                          DetectorType.HAB.value: StateMoveDetector()}
 
     def validate(self):
         super(StateMoveSANS2D, self).validate()
@@ -187,7 +187,7 @@ class StateMoveLARMOR(StateMove):
         self.monitor_names = {}
 
         # Setup the detectors
-        self.detectors = {DetectorType.to_string(DetectorType.LAB): StateMoveDetector()}
+        self.detectors = {DetectorType.LAB.value: StateMoveDetector()}
 
     def validate(self):
         super(StateMoveLARMOR, self).validate()
@@ -211,7 +211,7 @@ class StateMoveZOOM(StateMove):
         self.monitor_5_offset = 0.0
 
         # Setup the detectors
-        self.detectors = {DetectorType.to_string(DetectorType.LAB): StateMoveDetector()}
+        self.detectors = {DetectorType.LAB.value: StateMoveDetector()}
 
     def validate(self):
         super(StateMoveZOOM, self).validate()

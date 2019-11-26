@@ -65,9 +65,9 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         self.setPropertyGroup("TransmissionWorkspace", 'Data')
         self.setPropertyGroup("DirectWorkspace", 'Data')
 
-        allowed_detectors = StringListValidator([DetectorType.to_string(DetectorType.LAB),
-                                                 DetectorType.to_string(DetectorType.HAB)])
-        self.declareProperty("Component", DetectorType.to_string(DetectorType.LAB),
+        allowed_detectors = StringListValidator([DetectorType.LAB.value,
+                                                 DetectorType.HAB.value])
+        self.declareProperty("Component", DetectorType.LAB.value,
                              validator=allowed_detectors, direction=Direction.Input,
                              doc="The component of the instrument which is to be reduced.")
 
@@ -123,9 +123,9 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         # state.compatibility.use_compatibility_mode = self.getProperty('CompatibilityMode').value
 
         # Set test centre
-        state.move.detectors[DetectorType.to_string(DetectorType.LAB)].sample_centre_pos1 = \
+        state.move.detectors[DetectorType.LAB.value].sample_centre_pos1 = \
             self.getProperty("Centre1").value
-        state.move.detectors[DetectorType.to_string(DetectorType.LAB)].sample_centre_pos2 = \
+        state.move.detectors[DetectorType.LAB.value].sample_centre_pos2 = \
             self.getProperty("Centre2").value
 
         component_as_string = self.getProperty("Component").value
@@ -279,7 +279,7 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         scatter_workspace = self.getProperty("ScatterWorkspace").value
         alg_name = "CropToComponent"
 
-        component_to_crop = DetectorType.from_string(component)
+        component_to_crop = DetectorType(component)
         component_to_crop = get_component_name(scatter_workspace, component_to_crop)
 
         crop_options = {"InputWorkspace": scatter_workspace,

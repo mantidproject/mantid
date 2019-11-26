@@ -656,10 +656,10 @@ def get_standard_output_workspace_name(state, reduction_data_type, data_type = D
     if reduction_data_type is ReductionMode.MERGED:
         detector_name_short = "merged"
     elif reduction_data_type is ReductionMode.HAB:
-        det_name = detectors[DetectorType.to_string(DetectorType.HAB)].detector_name_short
+        det_name = detectors[DetectorType.HAB.value].detector_name_short
         detector_name_short = det_name if det_name is not None else "hab"
     elif reduction_data_type is ReductionMode.LAB:
-        det_name = detectors[DetectorType.to_string(DetectorType.LAB)].detector_name_short
+        det_name = detectors[DetectorType.LAB.value].detector_name_short
         detector_name_short = det_name if det_name is not None else "lab"
     else:
         raise RuntimeError("SANSStateFunctions: Unknown reduction data type {0} cannot be used to "

@@ -59,9 +59,9 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
         self.setPropertyGroup("DirectWorkspace", 'Data')
 
         # The component
-        allowed_detectors = StringListValidator([DetectorType.to_string(DetectorType.LAB),
-                                                 DetectorType.to_string(DetectorType.HAB)])
-        self.declareProperty("Component", DetectorType.to_string(DetectorType.LAB),
+        allowed_detectors = StringListValidator([DetectorType.LAB.value,
+                                                 DetectorType.HAB.value])
+        self.declareProperty("Component", DetectorType.LAB.value,
                              validator=allowed_detectors, direction=Direction.Input,
                              doc="The component of the instrument which is to be reduced.")
 
@@ -101,7 +101,7 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
         scatter_workspace = self.getProperty("ScatterWorkspace").value
         alg_name = "CropToComponent"
 
-        component_to_crop = DetectorType.from_string(component)
+        component_to_crop = DetectorType(component)
         component_to_crop = get_component_name(scatter_workspace, component_to_crop)
 
         crop_options = {"InputWorkspace": scatter_workspace,

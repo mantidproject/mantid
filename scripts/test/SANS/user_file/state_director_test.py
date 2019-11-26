@@ -35,8 +35,8 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         self.assertEqual(move.sample_offset,  53.0/1000.)
 
         # Detector specific
-        lab = move.detectors[DetectorType.to_string(DetectorType.LAB)]
-        hab = move.detectors[DetectorType.to_string(DetectorType.HAB)]
+        lab = move.detectors[DetectorType.LAB.value]
+        hab = move.detectors[DetectorType.HAB.value]
         self.assertEqual(lab.x_translation_correction,  -16.0/1000.)
         self.assertEqual(lab.z_translation_correction,  47.0/1000.)
         self.assertEqual(hab.x_translation_correction,  -44.0/1000.)
@@ -53,17 +53,17 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         self.assertEqual(mask.radius_max,  15/1000.)
         self.assertEqual(mask.clear, True)
         self.assertEqual(mask.clear_time, True)
-        self.assertEqual(mask.detectors[DetectorType.to_string(DetectorType.LAB)].single_horizontal_strip_mask,  [0])
-        self.assertEqual(mask.detectors[DetectorType.to_string(DetectorType.LAB)].single_vertical_strip_mask,  [0, 191])
-        self.assertEqual(mask.detectors[DetectorType.to_string(DetectorType.HAB)].single_horizontal_strip_mask,  [0])
-        self.assertEqual(mask.detectors[DetectorType.to_string(DetectorType.HAB)].single_vertical_strip_mask,  [0, 191])
-        self.assertTrue(mask.detectors[DetectorType.to_string(DetectorType.LAB)].range_horizontal_strip_start
+        self.assertEqual(mask.detectors[DetectorType.LAB.value].single_horizontal_strip_mask,  [0])
+        self.assertEqual(mask.detectors[DetectorType.LAB.value].single_vertical_strip_mask,  [0, 191])
+        self.assertEqual(mask.detectors[DetectorType.HAB.value].single_horizontal_strip_mask,  [0])
+        self.assertEqual(mask.detectors[DetectorType.HAB.value].single_vertical_strip_mask,  [0, 191])
+        self.assertTrue(mask.detectors[DetectorType.LAB.value].range_horizontal_strip_start
                         == [190, 167])
-        self.assertTrue(mask.detectors[DetectorType.to_string(DetectorType.LAB)].range_horizontal_strip_stop
+        self.assertTrue(mask.detectors[DetectorType.LAB.value].range_horizontal_strip_stop
                         == [191, 172])
-        self.assertTrue(mask.detectors[DetectorType.to_string(DetectorType.HAB)].range_horizontal_strip_start
+        self.assertTrue(mask.detectors[DetectorType.HAB.value].range_horizontal_strip_start
                         == [190, 156])
-        self.assertTrue(mask.detectors[DetectorType.to_string(DetectorType.HAB)].range_horizontal_strip_stop
+        self.assertTrue(mask.detectors[DetectorType.HAB.value].range_horizontal_strip_stop
                         == [191, 159])
 
     def _assert_reduction(self, state):
@@ -165,10 +165,10 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         self.assertEqual(wavelength_and_pixel_adjustment.wavelength_step,  0.125)
         self.assertEqual(wavelength_and_pixel_adjustment.wavelength_step_type, RangeStepType.Lin)
         self.assertTrue(wavelength_and_pixel_adjustment.adjustment_files[
-                        DetectorType.to_string(DetectorType.LAB)].wavelength_adjustment_file ==
+                        DetectorType.LAB.value].wavelength_adjustment_file ==
                         "DIRECTM1_15785_12m_31Oct12_v12.dat")
         self.assertTrue(wavelength_and_pixel_adjustment.adjustment_files[
-                        DetectorType.to_string(DetectorType.HAB)].wavelength_adjustment_file ==
+                        DetectorType.HAB.value].wavelength_adjustment_file ==
                         "DIRECTM1_15785_12m_31Oct12_v12.dat")
 
         # Assert wide angle correction

@@ -76,9 +76,9 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
                              doc='The can direct data')
 
         # The component, i.e. HAB or LAB
-        allowed_detectors = StringListValidator([DetectorType.to_string(DetectorType.LAB),
-                                                 DetectorType.to_string(DetectorType.HAB)])
-        self.declareProperty("Component", DetectorType.to_string(DetectorType.LAB),
+        allowed_detectors = StringListValidator([DetectorType.LAB.value,
+                                                 DetectorType.HAB.value])
+        self.declareProperty("Component", DetectorType.LAB.value,
                              validator=allowed_detectors, direction=Direction.Input,
                              doc="The component of the instrument which is to be reduced.")
 
@@ -312,7 +312,7 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
 
     def _get_component(self, workspace):
         component_as_string = self.getProperty("Component").value
-        component = DetectorType.from_string(component_as_string)
+        component = DetectorType(component_as_string)
         return get_component_name(workspace, component)
 
     def _get_state(self):
