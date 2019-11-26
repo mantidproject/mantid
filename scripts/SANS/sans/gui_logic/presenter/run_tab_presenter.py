@@ -384,7 +384,7 @@ class RunTabPresenter(PresenterCommon):
                     self._workspace_diagnostic_presenter.on_user_file_load(user_file_path)
 
                     # 6. Warning if user file did not contain a recognised instrument
-                    if self._view.instrument == SANSInstrument.NoInstrument:
+                    if self._view.instrument == SANSInstrument.NO_INSTRUMENT:
                         raise RuntimeError("User file did not contain a SANS Instrument.")
 
                 except RuntimeError as instrument_e:
@@ -398,8 +398,8 @@ class RunTabPresenter(PresenterCommon):
                                                     use_error_name=True)
 
     def _on_user_file_load_failure(self, e, message, use_error_name=False):
-        self._setup_instrument_specific_settings(SANSInstrument.NoInstrument)
-        self._view.instrument = SANSInstrument.NoInstrument
+        self._setup_instrument_specific_settings(SANSInstrument.NO_INSTRUMENT)
+        self._view.instrument = SANSInstrument.NO_INSTRUMENT
         self._view.on_user_file_load_failure()
         self.display_errors(e, message, use_error_name)
 
@@ -1255,7 +1255,7 @@ class RunTabPresenter(PresenterCommon):
         if not instrument:
             instrument = self._view.instrument
 
-        if instrument == SANSInstrument.NoInstrument:
+        if instrument == SANSInstrument.NO_INSTRUMENT:
             self._view.disable_process_buttons()
         else:
             instrument_string = get_string_for_gui_from_instrument(instrument)

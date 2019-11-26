@@ -4,7 +4,7 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from sans.common.enums import (SANSInstrument, FindDirectionEnum, DetectorType)
+from sans.common.enums import (FindDirectionEnum, DetectorType, SANSInstrument)
 from mantid.kernel import (Logger)
 from sans.common.file_information import get_instrument_paths_for_sans_file
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
@@ -55,6 +55,7 @@ class BeamCentreModel(object):
     def set_scaling(self, instrument):
         self.scale_1 = 1000
         self.scale_2 = 1000
+
         if instrument == SANSInstrument.LARMOR:
             self.scale_1 = 1.0
 

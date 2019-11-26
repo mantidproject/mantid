@@ -21,7 +21,7 @@ class StateGuiModelTest(unittest.TestCase):
     # ==================================================================================================================
     def test_that_default_instrument_is_NoInstrument(self):
         state_gui_model = StateGuiModel({"test": [1]})
-        self.assertEqual(state_gui_model.instrument, SANSInstrument.NoInstrument)
+        self.assertEqual(state_gui_model.instrument, SANSInstrument.NO_INSTRUMENT)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Compatibility Mode

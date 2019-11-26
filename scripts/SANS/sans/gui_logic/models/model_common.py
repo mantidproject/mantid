@@ -26,7 +26,7 @@ class ModelCommon(with_metaclass(ABCMeta)):
 
     @property
     def instrument(self):
-        return self.get_simple_element(element_id=DetectorId.instrument, default_value=SANSInstrument.NoInstrument)
+        return self.get_simple_element(element_id=DetectorId.instrument, default_value=SANSInstrument.NO_INSTRUMENT)
 
     @instrument.setter
     def instrument(self, value):

@@ -17,6 +17,9 @@ from six import PY2
 # ----------------------------------------------------------------------------------------------------------------------
 # Serializable Enum decorator
 # ----------------------------------------------------------------------------------------------------------------------
+from mantid.py3compat import Enum
+
+
 def serializable_enum(*inner_classes):
     """
     Class decorator which changes the name of an inner class to include the name of the outer class. The inner class
@@ -96,12 +99,15 @@ def string_convertible(cls):
 # --------------------------------
 #  Instrument and facility types
 # --------------------------------
+class SANSInstrument(Enum):
+    NO_INSTRUMENT = "No Instrument"
+
+    LARMOR = "LARMOR"
+    LOQ = "LOQ"
+    SANS2D = "SANS2D"
+    ZOOM = "ZOOM"
+
 @string_convertible
-@serializable_enum("LOQ", "LARMOR", "SANS2D", "ZOOM", "NoInstrument")
-class SANSInstrument(object):
-    pass
-
-
 @serializable_enum("ISIS", "NoFacility")
 class SANSFacility(object):
     pass

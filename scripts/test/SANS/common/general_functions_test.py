@@ -383,7 +383,7 @@ class SANSFunctionsTest(unittest.TestCase):
         self.assertEqual(get_facility(SANSInstrument.LOQ), SANSFacility.ISIS)
         self.assertEqual(get_facility(SANSInstrument.LARMOR), SANSFacility.ISIS)
         self.assertEqual(get_facility(SANSInstrument.ZOOM), SANSFacility.ISIS)
-        self.assertEqual(get_facility(SANSInstrument.NoInstrument), SANSFacility.NoFacility)
+        self.assertEqual(get_facility(SANSInstrument.NO_INSTRUMENT), SANSFacility.NoFacility)
 
     def test_that_diagnostic_parser_produces_correct_list(self):
         string_to_parse = '8-11, 12:15, 5, 7:9'

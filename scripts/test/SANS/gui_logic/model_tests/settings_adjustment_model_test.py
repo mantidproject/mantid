@@ -18,7 +18,7 @@ class SettingsTransmissionModelTest(unittest.TestCase):
         self.assertTrue(model_under_test.does_instrument_support_monitor_5())
 
     def test_monitor_5_disabled_for_no_inst(self):
-        user_file = {DetectorId.instrument: [SANSInstrument.NoInstrument]}
+        user_file = {DetectorId.instrument: [SANSInstrument.NO_INSTRUMENT]}
         model_under_test = self.create_model(user_file)
 
         self.assertFalse(model_under_test.does_instrument_support_monitor_5())

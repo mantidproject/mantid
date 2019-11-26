@@ -12,7 +12,7 @@ from mantid.api import MatrixWorkspace
 from six import with_metaclass
 from abc import (ABCMeta, abstractmethod)
 from sans.state.move import StateMove
-from sans.common.enums import (SANSInstrument, CanonicalCoordinates, DetectorType)
+from sans.common.enums import CanonicalCoordinates, DetectorType, SANSInstrument
 from sans.common.general_functions import (create_unmanaged_algorithm, get_single_valued_logs_from_workspace,
                                            quaternion_to_angle_and_axis, sanitise_instrument_name)
 
@@ -782,7 +782,7 @@ def create_mover(workspace):
     instrument = workspace.getInstrument()
     instrument_name = instrument.getName()
     instrument_name = sanitise_instrument_name(instrument_name)
-    instrument_type = SANSInstrument.from_string(instrument_name)
+    instrument_type = SANSInstrument[instrument_name]
     if SANSMoveLOQ.is_correct(instrument_type, run_number):
         mover = SANSMoveLOQ()
     elif SANSMoveSANS2D.is_correct(instrument_type, run_number):

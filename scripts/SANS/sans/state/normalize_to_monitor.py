@@ -208,6 +208,7 @@ class StateNormalizeToMonitorBuilderLOQ(object):
 
 def get_normalize_to_monitor_builder(data_info):
     instrument = data_info.instrument
+
     if instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.SANS2D or instrument is SANSInstrument.ZOOM:
         return StateNormalizeToMonitorBuilder(data_info)
     elif instrument is SANSInstrument.LOQ:

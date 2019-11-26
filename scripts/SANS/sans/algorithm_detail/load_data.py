@@ -59,7 +59,7 @@ from sans.common.file_information import (SANSFileInformationFactory, FileType, 
 from sans.common.constants import (EMPTY_NAME, SANS_SUFFIX, TRANS_SUFFIX, MONITOR_SUFFIX, CALIBRATION_WORKSPACE_TAG,
                                    SANS_FILE_TAG, OUTPUT_WORKSPACE_GROUP, OUTPUT_MONITOR_WORKSPACE,
                                    OUTPUT_MONITOR_WORKSPACE_GROUP)
-from sans.common.enums import (SANSFacility, SANSInstrument, SANSDataType)
+from sans.common.enums import (SANSFacility, SANSDataType, SANSInstrument)
 from sans.common.general_functions import (create_child_algorithm)
 from sans.common.log_tagger import (set_tag, has_tag, get_tag)
 from sans.state.data import (StateData)
@@ -709,6 +709,7 @@ class SANSLoadData(with_metaclass(ABCMeta, object)):
 
 class SANSLoadDataISIS(SANSLoadData):
     """Load implementation of SANSLoad for ISIS data"""
+
     def do_execute(self, data_info, use_cached, publish_to_ads, progress, parent_alg):
         # Get all entries from the state file
         file_infos, period_infos = get_file_and_period_information_from_data(data_info)
@@ -755,6 +756,7 @@ class SANSLoadDataISIS(SANSLoadData):
 
 class SANSLoadDataFactory(object):
     """ A factory for SANSLoadData."""
+
     def __init__(self):
         super(SANSLoadDataFactory, self).__init__()
 
@@ -836,6 +838,7 @@ class LOQTransmissionCorrection(TransmissionCorrection):
 
 def get_transmission_correction(data_info):
     instrument_type = data_info.instrument
+
     if instrument_type is SANSInstrument.LOQ:
         return LOQTransmissionCorrection()
     else:

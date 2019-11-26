@@ -39,14 +39,14 @@ class GuiCommonTest(unittest.TestCase):
 
     def test_create_states_returns_correct_number_of_states(self):
         states, errors = create_states(self.state_gui_model, self.table_model, SANSInstrument.LOQ, SANSFacility.ISIS,
-                               row_index=[0,1])
+                                       row_index=[0,1])
 
         self.assertEqual(len(states), 2)
 
     def test_create_states_returns_correct_number_of_states_for_specified_row_index(self):
 
         states, errors = create_states(self.state_gui_model, self.table_model, SANSInstrument.LOQ, SANSFacility.ISIS,
-                               row_index=[1])
+                                       row_index=[1])
 
         self.assertEqual(len(states), 1)
 
@@ -57,7 +57,7 @@ class GuiCommonTest(unittest.TestCase):
         self.qApp.processEvents()
 
         states, errors = create_states(self.state_gui_model, self.table_model, SANSInstrument.LOQ, SANSFacility.ISIS,
-                               row_index=[0,1, 2])
+                                       row_index=[0,1, 2])
 
         self.assertEqual(len(states), 2)
 
@@ -72,7 +72,7 @@ class GuiCommonTest(unittest.TestCase):
         self.qApp.processEvents()
 
         states, errors = create_states(self.state_gui_model, table_model, SANSInstrument.LOQ, SANSFacility.ISIS,
-                               row_index=[0,1, 2])
+                                       row_index=[0,1, 2])
 
         self.assertEqual(len(states), 1)
         create_gui_state_mock.assert_called_once_with('MaskLOQData.txt', self.state_gui_model)

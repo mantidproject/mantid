@@ -85,7 +85,6 @@ class BeamCentrePresenterTest(unittest.TestCase):
         self.presenter._beam_centre_model.update_lab = True
         self.presenter._beam_centre_model.update_hab = True
 
-
         self.presenter.on_processing_finished_centre_finder(result)
         self.assertEqual(result['pos1'], self.presenter._beam_centre_model.lab_pos_1)
         self.assertEqual(result['pos2'], self.presenter._beam_centre_model.lab_pos_2)

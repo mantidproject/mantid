@@ -17,7 +17,7 @@ from sans.state.state_base import (StateBase, BoolParameter, StringListParameter
 from sans.state.state_functions import (is_pure_none_or_not_none, validation_message, set_detector_names)
 from sans.state.automatic_setters import (automatic_setters)
 from sans.common.file_information import find_full_file_path
-from sans.common.enums import (SANSInstrument, DetectorType)
+from sans.common.enums import (DetectorType, SANSInstrument)
 from sans.common.general_functions import get_bank_for_spectrum_number
 
 
@@ -381,6 +381,7 @@ def get_mask_builder(data_info):
     # The data state has most of the information that we require to define the mask. For the factory method, only
     # the facility/instrument is of relevance.
     instrument = data_info.instrument
+
     if instrument is SANSInstrument.SANS2D:
         return StateMaskBuilder(data_info, StateMaskSANS2D())
     elif instrument is SANSInstrument.LOQ:

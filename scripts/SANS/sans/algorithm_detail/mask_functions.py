@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 from collections import (namedtuple, Sequence)
-from sans.common.enums import (SANSInstrument, DetectorOrientation, DetectorType)
+from sans.common.enums import (SANSInstrument, DetectorOrientation, DetectorType, SANSInstrument)
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
 
 

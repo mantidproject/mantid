@@ -13,7 +13,7 @@ import copy
 
 from sans.state.state_base import (StateBase, StringParameter, PositiveIntegerParameter, BoolParameter,
                                    ClassTypeParameter, rename_descriptor_names)
-from sans.common.enums import (SANSInstrument, SANSFacility)
+from sans.common.enums import SANSFacility, SANSInstrument
 import sans.common.constants
 from sans.state.state_functions import (is_pure_none_or_not_none, validation_message)
 from sans.state.automatic_setters import automatic_setters
@@ -43,12 +43,12 @@ class StateData(StateBase):
 
     sample_scatter_run_number = PositiveIntegerParameter()
     sample_scatter_is_multi_period = BoolParameter()
-    instrument = ClassTypeParameter(SANSInstrument)
     facility = ClassTypeParameter(SANSFacility)
     idf_file_path = StringParameter()
     ipf_file_path = StringParameter()
 
     user_file = StringParameter()
+    instrument = SANSInstrument.NO_INSTRUMENT
 
     def __init__(self):
         super(StateData, self).__init__()
@@ -64,7 +64,7 @@ class StateData(StateBase):
 
         # This should be reset by the builder. Setting this to NoInstrument ensure that we will trip early on,
         # in case this is not set, for example by not using the builders.
-        self.instrument = SANSInstrument.NoInstrument
+        self.instrument = SANSInstrument.NO_INSTRUMENT
         self.facility = SANSFacility.NoFacility
         self.user_file = ""
 

@@ -413,6 +413,7 @@ class StateCalculateTransmissionBuilderZOOM(object):
 # ------------------------------------------
 def get_calculate_transmission_builder(data_info):
     instrument = data_info.instrument
+
     if instrument is SANSInstrument.LARMOR:
         return StateCalculateTransmissionBuilderLARMOR(data_info)
     elif instrument is SANSInstrument.SANS2D:

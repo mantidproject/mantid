@@ -466,6 +466,7 @@ def get_descriptor_values(instance):
     if enum_vars:
         member_variables = member_variables + enum_vars
 
+
     for descriptor_name, descriptor_object in member_variables:
         if descriptor_name is "property_manager":
             # Property manager is a fake property that wraps the serializing method (i.e. this)
@@ -626,7 +627,6 @@ def get_serialized_class_type_parameter(value):
     module_name, class_name = get_module_and_class_name(value)
     outer_class_name = value.outer_class_name
     class_name = outer_class_name + SEPARATOR_SERIAL + class_name
-
     return CLASS_TYPE_TAG + module_name + SEPARATOR_SERIAL + class_name
 
 

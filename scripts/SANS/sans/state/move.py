@@ -329,6 +329,7 @@ def get_move_builder(data_info):
     # The data state has most of the information that we require to define the move. For the factory method, only
     # the instrument is of relevance.
     instrument = data_info.instrument
+
     if instrument is SANSInstrument.LOQ:
         return StateMoveLOQBuilder(data_info)
     elif instrument is SANSInstrument.SANS2D:

@@ -44,7 +44,7 @@ class GuiCommonTest(unittest.TestCase):
         larmor_settings = get_reduction_mode_strings_for_gui(SANSInstrument.LARMOR)
         self._assert_same(larmor_settings, ["DetectorBench"])
 
-        default_settings = get_reduction_mode_strings_for_gui(SANSInstrument.NoInstrument)
+        default_settings = get_reduction_mode_strings_for_gui(SANSInstrument.NO_INSTRUMENT)
         self._assert_same(default_settings, ["LAB", "HAB", "Merged", "All"])
 
     def test_that_gets_correct_reduction_selection(self):
@@ -59,7 +59,7 @@ class GuiCommonTest(unittest.TestCase):
         larmor_settings = get_reduction_selection(SANSInstrument.LARMOR)
         self._assert_same_map(larmor_settings, {ISISReductionMode.LAB: "DetectorBench"})
 
-        default_settings = get_reduction_selection(SANSInstrument.NoInstrument)
+        default_settings = get_reduction_selection(SANSInstrument.NO_INSTRUMENT)
         self._assert_same_map(default_settings, {ISISReductionMode.LAB: "LAB", ISISReductionMode.HAB: "HAB",
                                                  ISISReductionMode.Merged: "Merged", ISISReductionMode.All: "All"})
 
@@ -67,8 +67,8 @@ class GuiCommonTest(unittest.TestCase):
         self.do_test_reduction_mode_string(SANSInstrument.SANS2D, ISISReductionMode.LAB, "rear")
         self.do_test_reduction_mode_string(SANSInstrument.LOQ, ISISReductionMode.HAB, "Hab")
         self.do_test_reduction_mode_string(SANSInstrument.LARMOR, ISISReductionMode.LAB, "DetectorBench")
-        self.do_test_reduction_mode_string(SANSInstrument.NoInstrument, ISISReductionMode.LAB, "LAB")
-        self.do_test_reduction_mode_string(SANSInstrument.NoInstrument, ISISReductionMode.HAB, "HAB")
+        self.do_test_reduction_mode_string(SANSInstrument.NO_INSTRUMENT, ISISReductionMode.LAB, "LAB")
+        self.do_test_reduction_mode_string(SANSInstrument.NO_INSTRUMENT, ISISReductionMode.HAB, "HAB")
 
     def test_that_batch_file_dir_returns_none_if_no_forwardslash(self):
         a_path = "test_batch_file_path.csv"

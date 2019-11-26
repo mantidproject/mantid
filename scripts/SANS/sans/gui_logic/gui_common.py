@@ -11,7 +11,7 @@ from qtpy.QtWidgets import QFileDialog
 
 from sans.common.constant_containers import (SANSInstrument_enum_as_key, SANSInstrument_string_as_key_NoInstrument,
                                              SANSInstrument_string_list)
-from sans.common.enums import SANSInstrument, ISISReductionMode, DetectorType
+from sans.common.enums import ISISReductionMode, DetectorType, SANSInstrument
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -66,6 +66,7 @@ JSON_SUFFIX = ".json"
 
 
 def get_detector_strings_for_gui(instrument=None):
+
     if instrument is SANSInstrument.SANS2D:
         return [SANS2D_LAB, SANS2D_HAB]
     elif instrument is SANSInstrument.LOQ:
@@ -248,6 +249,7 @@ class SANSGuiPropertiesHandler(object):
     This class handles the setting and getting
     of SANSDataProcessorGUI default properties.
     """
+
     def __init__(self, keys, line_edits={}):
         """
         Initialise a properties handler for a particular pyqt view.

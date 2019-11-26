@@ -12,7 +12,7 @@ from __future__ import (absolute_import, division, print_function)
 import math
 
 from sans.common.constants import EMPTY_NAME
-from sans.common.enums import SANSInstrument, SampleShape
+from sans.common.enums import SampleShape, SANSInstrument
 
 from sans.common.general_functions import append_to_sans_file_tag, create_unmanaged_algorithm
 

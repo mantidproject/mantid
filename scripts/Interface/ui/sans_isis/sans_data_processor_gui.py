@@ -26,7 +26,7 @@ from six import with_metaclass
 from mantid.kernel import (Logger, UsageService)
 from reduction_gui.reduction.scripter import execute_script
 from sans.common.enums import (BinningType, ReductionDimensionality, OutputMode, SaveType, SANSInstrument,
-                               RangeStepType, ReductionMode, FitType)
+                               RangeStepType, ReductionMode, FitType, SANSInstrument)
 from sans.common.file_information import SANSFileInformationFactory
 from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection,
                                        get_reduction_mode_strings_for_gui,
@@ -217,13 +217,13 @@ class SANSDataProcessorGui(QMainWindow,
         self._has_monitor_5 = False
 
         # Instrument
-        SANSDataProcessorGui.INSTRUMENTS = ",".join([SANSInstrument.to_string(item)
+        SANSDataProcessorGui.INSTRUMENTS = ",".join(item.value
                                                      for item in [SANSInstrument.SANS2D,
                                                                   SANSInstrument.LOQ,
                                                                   SANSInstrument.LARMOR,
-                                                                  SANSInstrument.ZOOM]])
+                                                                  SANSInstrument.ZOOM])
 
-        self.instrument = SANSInstrument.NoInstrument
+        self.instrument = SANSInstrument.NO_INSTRUMENT
 
         self.paste_button.setIcon(icons.get_icon("mdi.content-paste"))
         self.copy_button.setIcon(icons.get_icon("mdi.content-copy"))
@@ -949,7 +949,7 @@ class SANSDataProcessorGui(QMainWindow,
             reduction_mode_list = get_reduction_mode_strings_for_gui(instrument)
             self.set_reduction_modes(reduction_mode_list)
 
-            if instrument != SANSInstrument.NoInstrument:
+            if instrument != SANSInstrument.NO_INSTRUMENT:
                 self._setup_add_runs_page()
 
     def update_gui_combo_box(self, value, expected_type, combo_box):

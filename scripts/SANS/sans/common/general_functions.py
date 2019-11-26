@@ -21,7 +21,7 @@ from sans.common.constants import (SANS_FILE_TAG, ALL_PERIODS, SANS2D, EMPTY_NAM
                                    REDUCED_CAN_TAG)
 from sans.common.log_tagger import (get_tag, has_tag, set_tag, has_hash, get_hash_value, set_hash)
 from sans.common.enums import (DetectorType, RangeStepType, ReductionDimensionality, OutputParts, ISISReductionMode,
-                               SANSInstrument, SANSFacility, DataType, TransmissionType)
+                               SANSFacility, DataType, TransmissionType, SANSInstrument)
 # -------------------------------------------
 # Constants
 # -------------------------------------------
@@ -1018,6 +1018,7 @@ def get_bank_for_spectrum_number(spectrum_number, instrument):
     :returns: either LAB or HAB
     """
     detector = DetectorType.LAB
+
     if instrument is SANSInstrument.LOQ:
         if 16387 <= spectrum_number <= 17784:
             detector = DetectorType.HAB
