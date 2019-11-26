@@ -500,7 +500,11 @@ class SPowderSemiEmpiricalCalculator(object):
                                                      b_tensor=self._b_tensors[atom],
                                                      b_trace=self._b_traces[atom])
 
-            _, rebinned_broad_spectrum = self._instrument.convolve_with_resolution_function(frequencies=local_freq, bins=self._bins, s_dft=value_dft)
+            broadening_scheme = AbinsParameters.sampling['broadening_scheme']
+            _, rebinned_broad_spectrum = self._instrument.convolve_with_resolution_function(frequencies=local_freq,
+                                                                                            bins=self._bins,
+                                                                                            s_dft=value_dft,
+                                                                                            scheme=broadening_scheme)
 
             local_freq, local_coeff = self._calculate_s_over_threshold(s=value_dft,
                                                                        freq=local_freq,

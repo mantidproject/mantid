@@ -45,13 +45,12 @@ hdf_groups = {
 
 # Parameters related to sampling density and numerical cutoffs ##########################
 sampling = {
-    'pkt_per_peak': 50,  # number of points for each peak broadened by the experimental resolution
     'max_wavenumber': 4100.0,  # maximum wavenumber in cm^-1 taken into account while creating workspaces (exclusive)
     'min_wavenumber': 0.0,  # minimal wavenumber in cm^-1 taken into account while creating workspaces (exclusive)
     'frequencies_threshold': 0.0,  # minimum included frequency
     's_relative_threshold': 0.01,  # low cutoff for S intensity (fraction of maximum S)
     's_absolute_threshold': 10e-8,  # low cutoff for S intensity (absolute value)
-    'broadening_scheme': 'legacy',
+    'broadening_scheme': 'auto',
     }
 
 # Parameters related to performance optimisation that do NOT impact calculation results

@@ -25,12 +25,20 @@ class Instrument(object):
 
         return None
 
-    def convolve_with_resolution_function(self, frequencies=None, s_dft=None):
+    def convolve_with_resolution_function(self, frequencies=None, bins=None, s_dft=None, scheme='auto'):
         """
-        Convolves discrete spectrum with the  resolution function for the particular instrument.
+        Convolves discrete spectrum with the resolution function for the particular instrument.
 
         :param frequencies: frequencies for which resolution function should be calculated (frequencies in cm-1)
-        :param s_dft:  discrete S calculated directly from DFT
+        :type frequencies: 1D array-like
+        :param bins: Bin edges for output histogram. Most broadening implementations expect this to be regularly-spaced.
+        :type bins: 1D array-like
+        :param s_dft: discrete S calculated directly from DFT
+        :type s_dft: 1D array-like
+        :param scheme: Broadening scheme. Multiple implementations are available in *Instruments.Broadening* that trade-
+            off between speed and accuracy. Not all schemes must (or should?) be implemented for all instruments, but
+            'auto' should select something sensible.
+        :type scheme: str
 
        """
         return None

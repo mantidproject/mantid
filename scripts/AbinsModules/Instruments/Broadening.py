@@ -10,8 +10,10 @@ import numpy as np
 from scipy.special import erf
 from scipy.signal import convolve
 
+prebin_required_schemes = ['interpolate', 'interpolate_coarse']
 
-def broaden_spectrum(frequencies=None, bins=None, s_dft=None, sigma=None, scheme='legacy', prebin='auto'):
+
+def broaden_spectrum(frequencies=None, bins=None, s_dft=None, sigma=None, scheme='gaussian_truncated'):
     """Convert frequency/S data to broadened spectrum on a regular grid
 
     Several algorithms are implemented, for purposes of
@@ -33,11 +35,24 @@ def broaden_spectrum(frequencies=None, bins=None, s_dft=None, sigma=None, scheme
     :param scheme:
         Name of broadening method used. Options:
 
-        - legacy: Implementation of the legacy Abins method (sum over
-              Gaussian kernels with fixed number of samples). Not
-              recommended for production calculations due to aliasing on
-              non-commensurate output grid. Values are slightly inconsistent
-              with older versions due to change in sampling grid convention.
+        - none: Return the input data
+        - gaussian: Evaluate a Gaussian on the output grid for every input point and sum them. Simple but slow, and
+              recommended only for benchmarking and reference calculations.
+        - normal: Generate histograms with appropriately-located normal distributions for every input point. In
+              principle this is more accurate than 'Gaussian' but in practice results are very similar and just as slow.
+        - gaussian_truncated: Gaussians are cut off at a range of 3 * max(sigma). This leads to small discontinuities in
+              the tails of the broadened peaks, but is _much_ faster to evaluate as all the broadening functions are the
+              same (limited) size. Recommended for production calculations.
+        - normal_truncated: As gaussian_truncated, but with normally-distributed histograms replacing Gaussian evaluation.
+              Results are marginally more accurate at a marginally increased cost.
+        - interpolate: A possibly-novel approach in which the spectrum broadened with a frequency-dependent kernel is
+              approximated by interpolation between a small set of spectra broadened with logarithmically-spaced
+              fixed-width kernels. In principle this method introduces an incorrect asymmetry to the peaks. In practice
+              the results are visually acceptable for a slowly-varying instrumental broadening function, with greatly
+              reduced computation time. The default spacing factor of sqrt(2) gives error of ~1%.
+        - interpolate_coarse: The approximate interpolative scheme (above) with a spacing factor of 2, which yields
+              error of ~5%. This is more likely to cause artefacts in the results... but it is very fast. Not recomended
+              for production calculations.
 
     :type scheme: str
 
@@ -65,32 +80,9 @@ def broaden_spectrum(frequencies=None, bins=None, s_dft=None, sigma=None, scheme
         else:
             raise ValueError("Cannot determine frequency values for s_dft before broadening")
 
-    if scheme == 'legacy':
-        fwhm = AbinsModules.AbinsParameters.instruments['fwhm']
-        pkt_per_peak = AbinsModules.AbinsParameters.sampling['pkt_per_peak']
-
-        def multi_linspace(start, stop, npts):
-            """Given 1D length-N start, stop and scalar npts, get (npts, N) linspace-like matrix"""
-            ncols = len(start)
-            step = (stop - start) / (npts - 1)
-            step_matrix = step.reshape((ncols, 1)) * np.ones((1, npts))
-            start_matrix = start.reshape((ncols, 1)) * np.ones((1, npts))
-            return (np.arange(npts) * step_matrix) + start_matrix
-        broad_freq = multi_linspace(frequencies - fwhm * sigma,
-                                    frequencies + fwhm * sigma,
-                                    pkt_per_peak)
-        ncols = len(frequencies)
-        if np.asarray(sigma).shape == ():
-            sigma = np.full(ncols, sigma)
-        sigma_matrix = sigma.reshape(ncols, 1) * np.ones((1, pkt_per_peak))
-        freq_matrix = frequencies.reshape(ncols, 1) * np.ones((1, pkt_per_peak))
-        s_dft_matrix = s_dft.reshape(ncols, 1) * np.ones((1, pkt_per_peak))
-        dirac_val = gaussian(sigma=sigma_matrix, points=broad_freq, center=freq_matrix, normalized=False)
-
-        flattened_spectrum = np.ravel(s_dft_matrix * dirac_val)
-        flattened_freq = np.ravel(broad_freq)
-
-        hist, bin_edges = np.histogram(flattened_freq, bins, weights=flattened_spectrum, density=False)
+    if scheme == 'none':
+        # Null broadening; resample input data and return
+        hist, _ = np.histogram(frequencies, bins=bins, weights=s_dft, density=False)
         return freq_points, hist
 
     elif scheme == 'gaussian':
@@ -113,22 +105,7 @@ def broaden_spectrum(frequencies=None, bins=None, s_dft=None, sigma=None, scheme
         spectrum = np.dot(kernels.transpose(), s_dft)
         return freq_points, spectrum
 
-    elif scheme == 'gaussian_trunc':
-        # Gaussian broadening on the full grid (sum over all peaks, Gaussian range limited to 3 sigma)
-        kernels = trunc_function(function=gaussian,
-                                 sigma=sigma[:, np.newaxis],
-                                 points=freq_points,
-                                 center=frequencies[:, np.newaxis],
-                                 limit=3)
-
-        spectrum = np.dot(kernels.transpose(), s_dft)
-        # Gaussian function call will normalise the entire set to 1 as they are given as one long array.
-        # Compensate for this by multiplying by number of curves.
-        spectrum = spectrum * len(frequencies)
-
-        return freq_points, spectrum
-
-    elif scheme == 'gaussian_trunc_windowed':
+    elif scheme == 'gaussian_truncated':
         # Gaussian broadening on the full grid (sum over all peaks, Gaussian range limited to 3 sigma)
         # All peaks use the same number of points; if the center is located close to the low- or high-freq limit,
         # the frequency point set is "justified" to lie inside the range
@@ -139,9 +116,9 @@ def broaden_spectrum(frequencies=None, bins=None, s_dft=None, sigma=None, scheme
                                      center=frequencies[:, np.newaxis],
                                      limit=3,
                                      weights=s_dft[:, np.newaxis],
-                                     method='histogram')
+                                     method='auto')
 
-    elif scheme == 'normal_trunc_windowed':
+    elif scheme == 'normal_truncated':
         # Normal distribution on the full grid (sum over all peaks, Gaussian range limited to 3 sigma)
         # All peaks use the same number of points; if the center is located close to the low- or high-freq limit,
         # the frequency point set is "justified" to lie inside the range
@@ -153,52 +130,18 @@ def broaden_spectrum(frequencies=None, bins=None, s_dft=None, sigma=None, scheme
                                      center=frequencies[:, np.newaxis],
                                      limit=3,
                                      weights=s_dft[:, np.newaxis],
-                                     method='histogram')
+                                     method='auto')
 
-    elif scheme == 'gaussian_trunc_forloop':
-        # As above, but with a python loop implementation of the summation
-        return trunc_and_sum_inplace(function=gaussian,
-                                     sigma=sigma[:, np.newaxis],
-                                     points=freq_points,
-                                     bins=bins,
-                                     center=frequencies[:, np.newaxis],
-                                     limit=3,
-                                     weights=s_dft[:, np.newaxis],
-                                     method='forloop')
-
-    elif scheme == 'normal_trunc_forloop':
-        # As above, but with a python loop implementation of the summation
-        return trunc_and_sum_inplace(function=normal,
-                                     function_uses='bins',
-                                     sigma=sigma[:, np.newaxis],
-                                     points=freq_points,
-                                     bins=bins,
-                                     center=frequencies[:, np.newaxis],
-                                     limit=3,
-                                     weights=s_dft[:, np.newaxis],
-                                     method='forloop')
-
-    elif scheme == 'conv_15':
-        # Not a real scheme, just for testing. Convolve with a fixed sigma of 15.
-        from scipy.signal import convolve
-        sigma = 15
-        hist, bin_edges = np.histogram(frequencies, bins=bins, weights=s_dft, density=False)
-        freq_range = 3 * sigma
-        kernel_npts_oneside = np.ceil(freq_range / bin_width)
-        kernel = gaussian(sigma=15,
-                          points=np.arange(-kernel_npts_oneside, kernel_npts_oneside + 1, 1) * bin_width,
-                          center=0)
-        spectrum = convolve(hist, kernel, mode='same')
-        return freq_points, spectrum
+    elif scheme == 'interpolate':
+        return interpolated_broadening(sigma=sigma, points=freq_points, bins=bins,
+                                       center=frequencies, weights=s_dft, is_hist=True,
+                                       limit=3, function='gaussian', spacing='sqrt2')
 
     elif scheme == 'interpolate_coarse':
         return interpolated_broadening(sigma=sigma, points=freq_points, bins=bins,
                                        center=frequencies, weights=s_dft, is_hist=True,
                                        limit=3, function='gaussian', spacing='2')
-    elif scheme == 'interpolate':
-        return interpolated_broadening(sigma=sigma, points=freq_points, bins=bins,
-                                       center=frequencies, weights=s_dft, is_hist=True,
-                                       limit=3, function='gaussian', spacing='sqrt2')
+
     else:
         raise ValueError('Broadening scheme "{}" not supported for this instrument, please correct '
                          'AbinsParameters.sampling["broadening_scheme"]'.format(scheme))
@@ -313,7 +256,7 @@ def trunc_function(function=None, sigma=None, points=None, center=None, limit=3)
 
 def trunc_and_sum_inplace(function=None, function_uses='points',
                           sigma=None, points=None, bins=None, center=None, weights=1,
-                          limit=3, method='histogram'):
+                          limit=3, method='auto'):
     """Wrap a simple broadening function, evaluate within a consistent range and sum to spectrum
 
                       center1                          center2
@@ -359,13 +302,26 @@ def trunc_and_sum_inplace(function=None, function_uses='points',
     :type weights: float or array corresponding to "center"
     :param limit: range (as multiple of sigma) for cutoff
     :type limit: float
-    :param method: 'histogram' or 'forloop'; select between implementations for summation at appropriate frequencies
+    :param method:
+        'auto', 'histogram' or 'forloop'; select between implementations for summation at appropriate 
+        frequencies. 'auto' uses 'forloop' when there are > 1500 frequencies
     :type method: str
 
     :returns: (points, spectrum)
     :returntype: (1D array, 1D array)
 
     """
+    # Select method for summation
+    # Histogram seems to be faster below 1500 points; tested on a macbook pro and a Xeon workstation.
+    # This threshold may change depending on updates to hardware, Python and Numpy...
+    # For now we hard-code the number. It would ideally live in AbinsParameters but is very specific to this function.
+    if method == 'auto' and points.size < 1500:
+        sum_method = 'histogram'
+    elif method == 'auto':
+        sum_method = 'forloop'
+    else:
+        sum_method = method
+
     bin_width = bins[1] - bins[0]
     if (points[1] - points[0]) != bin_width:
         raise ValueError("Bin spacing and point spacing are not consistent")
@@ -419,7 +375,7 @@ def trunc_and_sum_inplace(function=None, function_uses='points',
     start_indices[right_justified] = len(points) - ncols
 
     # freq_matrix is not used in (bins, forloop) mode so only generate if needed
-    if (function_uses == 'points') or (function_uses == 'bins' and method == 'histogram'):
+    if (function_uses == 'points') or (function_uses == 'bins' and sum_method == 'histogram'):
         freq_matrix = start_freqs.reshape(nrows, 1) + np.arange(0, 2 * freq_range, bin_width)
 
     # Dispatch kernel generation depending on x-coordinate scheme
@@ -436,18 +392,18 @@ def trunc_and_sum_inplace(function=None, function_uses='points',
         raise ValueError('x-basis "{}" for broadening function is unknown.'.format(function_uses))
 
     # Sum spectrum using selected method
-    if method == 'histogram':
+    if sum_method == 'histogram':
         spectrum, bin_edges = np.histogram(np.ravel(freq_matrix),
                                            bins,
                                            weights=np.ravel(weights * kernels),
                                            density=False)
-    elif method == 'forloop':
+    elif sum_method == 'forloop':
         spectrum = np.zeros_like(points)
         for start, kernel, weight in zip(start_indices.flatten(), kernels, np.asarray(weights).flatten()):
             scaled_kernel = kernel * weight
             spectrum[start:start+ncols] += scaled_kernel
     else:
-        raise ValueError('Summation method "{}" is unknown.',format(method))
+        raise ValueError('Summation method "{}" is unknown.', format(method))
 
     return points, spectrum
 
@@ -457,7 +413,8 @@ def interpolated_broadening(sigma=None, points=None, bins=None,
                             function='gaussian', spacing='sqrt2'):
     """Return a fast estimate of frequency-dependent broadening
 
-    Consider a spectrum of two peaks, in the case where (as in indirect-geometry INS) the peak width increases with frequency.
+    Consider a spectrum of two peaks, in the case where (as in indirect-geometry INS) the peak width
+    increases with frequency.
 
        |
        |        |

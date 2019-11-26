@@ -737,10 +737,6 @@ class Abins(PythonAlgorithm):
         Checks rebinning parameters.
         :param message_end: closing part of the error message.
         """
-        pkt_per_peak = AbinsParameters.sampling['pkt_per_peak']
-        if not (isinstance(pkt_per_peak, six.integer_types) and 1 <= pkt_per_peak <= 1000):
-            raise RuntimeError("Invalid value of pkt_per_peak" + message_end)
-
         min_wavenumber = AbinsParameters.sampling['min_wavenumber']
         if not (isinstance(min_wavenumber, float) and min_wavenumber >= 0.0):
             raise RuntimeError("Invalid value of min_wavenumber" + message_end)
