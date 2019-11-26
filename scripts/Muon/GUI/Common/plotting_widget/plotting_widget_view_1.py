@@ -6,6 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
+from Muon.GUI.Common.home_plot_widget.home_plot_widget_view import HomePlotWidgetView
+from mantidqt.plotting.functions import get_plot_fig
+from matplotlib.figure import Figure
 from qtpy import QtWidgets
 import Muon.GUI.Common.message_box as message_box
 
@@ -15,9 +18,6 @@ if is_pyqt5():
 else:
     from matplotlib.backends.backend_qt4agg import (
         FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
-from matplotlib.figure import Figure
-from mantidqt.plotting.functions import get_plot_fig
-from Muon.GUI.Common.home_plot_widget.home_plot_widget_view import HomePlotWidgetView
 
 
 class PlotWidgetView(QtWidgets.QWidget):
