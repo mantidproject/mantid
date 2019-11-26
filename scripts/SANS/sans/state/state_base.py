@@ -424,8 +424,16 @@ def provide_class(instance):
 def is_class_type_parameter(value):
     return isinstance(value, string_types) and CLASS_TYPE_TAG in value
 
+
 def is_enum_type_parameter(value):
     return isinstance(value, string_types) and ENUM_TYPE_TAG in value
+
+
+def is_enum_list_parameter(value):
+    try:
+        return all(ENUM_TYPE_TAG in s for s in value)
+    except TypeError:
+        return False
 
 
 def is_vector_with_class_type_parameter(value):
@@ -597,7 +605,7 @@ def set_state_from_property_manager(instance, property_manager):
         elif is_class_type_parameter(value):
             class_type_parameter = get_deserialized_class_type_parameter(value)
             _set_element(instance, key, class_type_parameter)
-        elif is_enum_type_parameter(value):
+        elif is_enum_type_parameter(value) or is_enum_list_parameter(value):
             enum_type_parameter = deserialize_enum(value)
             _set_element(instance, key, enum_type_parameter)
         elif is_vector_with_class_type_parameter(value):
@@ -631,24 +639,37 @@ def get_serialized_class_type_parameter(value):
 
 
 def serialize_enum(value):
-    assert(isinstance(value, Enum))
-    module_name, class_name = get_module_and_class_name(value)
-    selected_val = value.value
+    to_parse = value if isinstance(value, list) else [value]
+    serialized = []
+    for val in to_parse:
+        assert(isinstance(val, Enum))
+        module_name, class_name = get_module_and_class_name(val)
+        selected_val = val.value
 
-    # Some devs use int for enums too so handle that
-    if isinstance(selected_val, int):
-        selected_val = INT_TAG + str(selected_val)
+        # Some devs use int for enums too so handle that
+        if isinstance(selected_val, int):
+            selected_val = INT_TAG + str(selected_val)
 
-    return ENUM_TYPE_TAG + module_name + SEPARATOR_SERIAL + class_name + SEPARATOR_SERIAL + selected_val
+        serialized.append(ENUM_TYPE_TAG + module_name + SEPARATOR_SERIAL + class_name + SEPARATOR_SERIAL + selected_val)
+
+    return serialized[0] if len(serialized) == 1 else serialized
 
 
 def deserialize_enum(value):
-    module_name, class_name, selection = get_module_and_class_name_from_encoded_string(ENUM_TYPE_TAG, value)
-    enum_class = provide_class_from_module_and_class_name(module_name, class_name)
+    # Mantid returns a std::vec type which needs to decay to a list
+    to_parse = [value] if isinstance(value, string_types) else [i for i in value]
+    parsed = []
 
-    selection = int(selection.replace(INT_TAG, '')) if INT_TAG in selection else selection
-    selected_val = enum_class(selection)
-    return selected_val
+    for serialized_str in to_parse:
+        module_name, class_name, selection = get_module_and_class_name_from_encoded_string(ENUM_TYPE_TAG,
+                                                                                           serialized_str)
+        enum_class = provide_class_from_module_and_class_name(module_name, class_name)
+
+        selection = int(selection.replace(INT_TAG, '')) if INT_TAG in selection else selection
+        parsed_val = enum_class(selection)
+        parsed.append(parsed_val)
+
+    return parsed[0] if len(parsed) == 1 else parsed
 
 
 def get_deserialized_class_type_parameter(value):

@@ -298,6 +298,28 @@ class TestStateBase(unittest.TestCase):
         self.assertEqual(FakeEnumClass.BAR, new_obj.bar)
         self.assertEqual(FakeEnumClass.FOO, new_obj._foo)
 
+    def test_that_enum_list_can_be_serialized(self):
+        original_obj = ExampleWrapper()
+        original_obj.bar = [FakeEnumClass.BAR, FakeEnumClass.BAR]
+
+        # Serializing test
+        serialized = original_obj.property_manager
+        self.assertTrue("bar" in serialized)
+        self.assertTrue("_foo" in serialized)
+        self.assertTrue(isinstance(serialized["bar"], list), "The type was not converted to a list of strings")
+        self.assertTrue(isinstance(serialized["_foo"], str), "The type was not converted to a string")
+
+        # Deserializing Test
+        fake = TestStateBase.FakeAlgorithm()
+        fake.initialize()
+        fake.setProperty("Args", serialized)
+        property_manager = fake.getProperty("Args").value
+
+        new_obj = create_deserialized_sans_state_from_property_manager(property_manager)
+        self.assertEqual(original_obj.bar, new_obj.bar)
+        self.assertEqual(original_obj._foo, new_obj._foo)
+
+
     def test_that_sans_state_can_be_serialized_and_deserialized_when_going_through_an_algorithm(self):
         # Arrange
         state = ComplexState()
