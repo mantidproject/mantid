@@ -5,18 +5,17 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
+
 import unittest
-import mantid
-from sans.algorithm_detail.merge_reductions import (MergeFactory, ISIS1DMerger)
+
 from sans.algorithm_detail.bundles import OutputPartsBundle
-
-from sans.state.reduction_mode import StateReductionMode
-from sans.test_helper.test_director import TestDirector
-
-from sans.common.enums import (ReductionMode, ReductionDimensionality, FitModeForMerge)
-from sans.common.general_functions import create_unmanaged_algorithm
+from sans.algorithm_detail.merge_reductions import (MergeFactory, ISIS1DMerger)
 from sans.common.constants import EMPTY_NAME
 from sans.common.enums import (DataType, ReductionMode)
+from sans.common.enums import (ReductionDimensionality, FitModeForMerge)
+from sans.common.general_functions import create_unmanaged_algorithm
+from sans.state.reduction_mode import StateReductionMode
+from sans.test_helper.test_director import TestDirector
 
 
 class MergeReductionsTest(unittest.TestCase):

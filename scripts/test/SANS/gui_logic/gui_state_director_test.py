@@ -6,16 +6,16 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-import unittest
 import os
+import unittest
 
-from sans.gui_logic.presenter.gui_state_director import GuiStateDirector
-from sans.gui_logic.models.table_model import (TableModel, TableIndexModel)
-from sans.gui_logic.models.state_gui_model import StateGuiModel
-from sans.user_file.user_file_reader import UserFileReader
 from sans.common.enums import SANSFacility
+from sans.gui_logic.models.state_gui_model import StateGuiModel
+from sans.gui_logic.models.table_model import (TableModel, TableIndexModel)
+from sans.gui_logic.presenter.gui_state_director import GuiStateDirector
 from sans.state.state import State
 from sans.test_helper.user_file_test_helper import create_user_file, sample_user_file
+from sans.user_file.user_file_reader import UserFileReader
 
 
 class GuiStateDirectorTest(unittest.TestCase):

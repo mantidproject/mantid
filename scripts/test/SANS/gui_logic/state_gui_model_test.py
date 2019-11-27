@@ -5,11 +5,13 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
+
 import unittest
-from sans.gui_logic.models.state_gui_model import StateGuiModel
-from sans.user_file.settings_tags import (OtherId, event_binning_string_values, DetectorId, det_fit_range)
+
 from sans.common.enums import (ReductionDimensionality, ReductionMode, RangeStepType, SampleShape, SaveType,
-                               FitType, SANSInstrument)
+                               SANSInstrument)
+from sans.gui_logic.models.state_gui_model import StateGuiModel
+from sans.user_file.settings_tags import (OtherId, event_binning_string_values, DetectorId)
 from sans.user_file.settings_tags import (det_fit_range)
 
 

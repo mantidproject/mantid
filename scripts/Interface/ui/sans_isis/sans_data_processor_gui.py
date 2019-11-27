@@ -11,7 +11,6 @@
 from __future__ import (absolute_import, division, print_function)
 
 from abc import ABCMeta, abstractmethod
-from inspect import isclass
 from qtpy import PYQT4
 from qtpy.QtCore import QRegExp
 from qtpy.QtGui import (QDoubleValidator, QIntValidator, QRegExpValidator)
@@ -24,9 +23,10 @@ from mantidqt.widgets import jobtreeview, manageuserdirectories
 from six import with_metaclass
 
 from mantid.kernel import (Logger, UsageService, FeatureType)
+from mantid.py3compat import Enum
 from reduction_gui.reduction.scripter import execute_script
-from sans.common.enums import (BinningType, ReductionDimensionality, OutputMode, SaveType, SANSInstrument,
-                               RangeStepType, ReductionMode, FitType, SANSInstrument)
+from sans.common.enums import (BinningType, ReductionDimensionality, OutputMode, SaveType, RangeStepType, ReductionMode,
+                               FitType, SANSInstrument)
 from sans.common.file_information import SANSFileInformationFactory
 from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection,
                                        get_reduction_mode_strings_for_gui,
@@ -47,6 +47,7 @@ if PYQT4:
     IN_MANTIDPLOT = False
     try:
         from pymantidplot import proxies
+
         IN_MANTIDPLOT = True
     except ImportError:
         # We are not in MantidPlot e.g. testing
@@ -217,11 +218,10 @@ class SANSDataProcessorGui(QMainWindow,
         self._has_monitor_5 = False
 
         # Instrument
-        SANSDataProcessorGui.INSTRUMENTS = ",".join(item.value
-                                                     for item in [SANSInstrument.SANS2D,
-                                                                  SANSInstrument.LOQ,
-                                                                  SANSInstrument.LARMOR,
-                                                                  SANSInstrument.ZOOM])
+        SANSDataProcessorGui.INSTRUMENTS = ",".join(item.value for item in [SANSInstrument.SANS2D,
+                                                                            SANSInstrument.LOQ,
+                                                                            SANSInstrument.LARMOR,
+                                                                            SANSInstrument.ZOOM])
 
         self.instrument = SANSInstrument.NO_INSTRUMENT
 
@@ -491,22 +491,22 @@ class SANSDataProcessorGui(QMainWindow,
         """
         Process runs
         """
-        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Process Selected"], False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Process Selected"], False)
         self._call_settings_listeners(lambda listener: listener.on_process_selected_clicked())
 
     def _process_all_clicked(self):
         """
         Process All button clicked
         """
-        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Process All"], False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Process All"], False)
         self._call_settings_listeners(lambda listener: listener.on_process_all_clicked())
 
     def _load_clicked(self):
-        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Load"], False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Load"], False)
         self._call_settings_listeners(lambda listener: listener.on_load_clicked())
 
     def _export_table_clicked(self):
-        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Export Table"], False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Export Table"], False)
         self._call_settings_listeners(lambda listener: listener.on_export_table_clicked())
 
     def _processing_finished(self):
@@ -543,23 +543,23 @@ class SANSDataProcessorGui(QMainWindow,
 
     def _remove_rows_requested_from_button(self):
         rows = self.get_selected_rows()
-        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Rows removed button"], False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Rows removed button"], False)
         self._call_settings_listeners(lambda listener: listener.on_rows_removed(rows))
 
     def _copy_rows_requested(self):
-        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Copy rows button"], False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Copy rows button"], False)
         self._call_settings_listeners(lambda listener: listener.on_copy_rows_requested())
 
     def _erase_rows(self):
-        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Erase rows button"], False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Erase rows button"], False)
         self._call_settings_listeners(lambda listener: listener.on_erase_rows())
 
     def _cut_rows(self):
-        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Cut rows button"], False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Cut rows button"], False)
         self._call_settings_listeners(lambda listener: listener.on_cut_rows())
 
     def _paste_rows_requested(self):
-        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Paste rows button"], False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Paste rows button"], False)
         self._call_settings_listeners(lambda listener: listener.on_paste_rows_requested())
 
     def _instrument_changed(self):
@@ -596,7 +596,7 @@ class SANSDataProcessorGui(QMainWindow,
 
     def _on_save_can_clicked(self, value):
         self.save_can_checkBox.setChecked(value)
-        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Save Can Toggled"], False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Save Can Toggled"], False)
         set_setting(self.__generic_settings, self.__save_can_key, value)
 
     def _on_reduction_dimensionality_changed(self, is_1d):
@@ -669,7 +669,7 @@ class SANSDataProcessorGui(QMainWindow,
         Load the batch file
         """
 
-        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Loaded Batch File"], False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Loaded Batch File"], False)
         load_file(self.batch_line_edit, "*.*", self.__generic_settings, self.__batch_file_key,
                   self.get_batch_file_path)
         self._call_settings_listeners(lambda listener: listener.on_batch_file_load())
@@ -775,7 +775,11 @@ class SANSDataProcessorGui(QMainWindow,
 
     def _on_reduction_mode_selection_has_changed(self):
         selection = self.reduction_mode_combo_box.currentText()
-        is_merged = ReductionMode(selection) is ReductionMode.MERGED
+        try:
+            is_merged = ReductionMode(selection) is ReductionMode.MERGED
+        except ValueError:
+            is_merged = False
+
         self.merged_settings.setEnabled(is_merged)
         self._call_settings_listeners(lambda listener: listener.on_reduction_mode_selection_has_changed(selection))
 
@@ -932,12 +936,12 @@ class SANSDataProcessorGui(QMainWindow,
         self._call_settings_listeners(lambda listener: listener.on_mask_file_add())
 
     def _on_multi_period_selection(self):
-        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Multiple Period Toggled"], False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Multiple Period Toggled"], False)
         self._call_settings_listeners(
             lambda listener: listener.on_multi_period_selection(self.is_multi_period_view()))
 
     def _on_sample_geometry_selection(self):
-        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Sample Geometry Toggled"], False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Sample Geometry Toggled"], False)
         self._call_settings_listeners(lambda listener: listener.on_sample_geometry_selection(self.is_sample_geometry()))
 
     def _on_manage_directories(self):
@@ -960,11 +964,9 @@ class SANSDataProcessorGui(QMainWindow,
         if isinstance(value, list):
             gui_element.clear()
             for element in value:
-                self._add_list_element_to_combo_box(gui_element=gui_element, element=element,
-                                                    expected_type=expected_type)
-        elif expected_type.has_member(value):
-            self._set_enum_as_element_in_combo_box(gui_element=gui_element, element=value,
-                                                   expected_type=expected_type)
+                self._add_list_element_to_combo_box(gui_element=gui_element, element=element)
+        elif isinstance(value, Enum):
+            self._set_enum_as_element_in_combo_box(gui_element=gui_element, element=value)
         elif isinstance(value, str):
             index = gui_element.findText(value)
             if index != -1:
@@ -972,22 +974,21 @@ class SANSDataProcessorGui(QMainWindow,
         else:
             raise RuntimeError("Expected an input of type {}, but got {}".format(expected_type, type(value)))
 
-    def _add_list_element_to_combo_box(self, gui_element, element, expected_type=None):
-        if expected_type is not None and isclass(element) and issubclass(element, expected_type):
-            self._add_enum_as_element_in_combo_box(gui_element=gui_element, element=element,
-                                                   expected_type=expected_type)
+    def _add_list_element_to_combo_box(self, gui_element, element):
+        if isinstance(element, Enum):
+            self._add_enum_as_element_in_combo_box(gui_element=gui_element, element=element)
         else:
             gui_element.addItem(element)
 
     @staticmethod
-    def _set_enum_as_element_in_combo_box(gui_element, element, expected_type):
-        value_as_string = expected_type.to_string(element)
+    def _set_enum_as_element_in_combo_box(gui_element, element):
+        value_as_string = element.value
         index = gui_element.findText(value_as_string)
         if index != -1:
             gui_element.setCurrentIndex(index)
 
-    def _add_enum_as_element_in_combo_box(self, gui_element, element, expected_type):
-        value_as_string = expected_type.to_string(element)
+    def _add_enum_as_element_in_combo_box(self, gui_element, element):
+        value_as_string = element.value
         gui_element.addItem(value_as_string)
 
     def get_simple_line_edit_field(self, expected_type, line_edit):
@@ -1153,7 +1154,8 @@ class SANSDataProcessorGui(QMainWindow,
 
     @instrument.setter
     def instrument(self, value):
-        instrument_string = SANSInstrument.to_string(value)
+        assert (isinstance(value, Enum))
+        instrument_string = value.value
         self.instrument_type.setText("{}".format(instrument_string))
         self._instrument_changed()
 
@@ -1717,8 +1719,7 @@ class SANSDataProcessorGui(QMainWindow,
                 gui_element.clear()
                 value.append(self.VARIABLE)
                 for element in value:
-                    self._add_list_element_to_combo_box(gui_element=gui_element, element=element,
-                                                        expected_type=RangeStepType)
+                    self._add_list_element_to_combo_box(gui_element=gui_element, element=element)
 
     @property
     def q_xy_max(self):
@@ -1757,8 +1758,7 @@ class SANSDataProcessorGui(QMainWindow,
                 gui_element = self.q_xy_step_type_combo_box
                 gui_element.clear()
                 for element in value:
-                    self._add_list_element_to_combo_box(gui_element=gui_element, element=element,
-                                                        expected_type=RangeStepType)
+                    self._add_list_element_to_combo_box(gui_element=gui_element, element=element)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Gravity

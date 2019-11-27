@@ -4,14 +4,12 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-# pylint: disable=invalid-name
 
 """ SANSNormalizeToMonitor algorithm calculates the normalization to the monitor."""
 
 from __future__ import (absolute_import, division, print_function)
 
 from sans.common.constants import EMPTY_NAME
-from sans.common.enums import RebinType, RangeStepType
 from sans.common.general_functions import create_unmanaged_algorithm
 
 

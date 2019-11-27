@@ -7,7 +7,7 @@
 import os
 
 from mantid.kernel import ConfigService
-from sans.common.enums import SANSInstrument
+from mantid.py3compat import Enum
 from sans.gui_logic.gui_common import SANSGuiPropertiesHandler
 
 
@@ -16,7 +16,8 @@ class AddRunsFilenameManager(object):
         if isinstance(inst, str):
             self.instrument_string = inst
         else:
-            self.instrument_string = SANSInstrument[inst]
+            assert(isinstance(inst, Enum))
+            self.instrument_string = inst.value
 
     def make_filename(self, runs):
         if runs:

@@ -11,11 +11,12 @@
 """ SANSSave algorithm performs saving of SANS reduction data."""
 
 from __future__ import (absolute_import, division, print_function)
-from mantid.kernel import (Direction)
+
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
                         FileProperty, FileAction, Progress)
-from sans.common.enums import (SaveType)
+from mantid.kernel import (Direction)
 from sans.algorithm_detail.save_workspace import (save_to_file, get_zero_error_free_workspace, file_format_with_append)
+from sans.common.enums import (SaveType)
 
 
 class SANSSave(DataProcessorAlgorithm):

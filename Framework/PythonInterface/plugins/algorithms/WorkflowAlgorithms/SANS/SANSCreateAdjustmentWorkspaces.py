@@ -11,11 +11,12 @@
 """
 
 from __future__ import (absolute_import, division, print_function)
-from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator, CompositeValidator)
+
 from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
                         WorkspaceUnitValidator)
-from sans.algorithm_detail.normalize_to_sans_monitor import normalize_to_monitor
+from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator, CompositeValidator)
 from sans.algorithm_detail.calculate_sans_transmission import calculate_transmission
+from sans.algorithm_detail.normalize_to_sans_monitor import normalize_to_monitor
 from sans.common.constants import EMPTY_NAME
 from sans.common.enums import (DataType, DetectorType)
 from sans.common.general_functions import create_unmanaged_algorithm

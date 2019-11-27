@@ -7,12 +7,15 @@
 """ Merges two reduction types to single reduction"""
 
 from __future__ import (absolute_import, division, print_function)
+
 from abc import (ABCMeta, abstractmethod)
+
 from six import with_metaclass
-from sans.common.general_functions import create_child_algorithm
-from sans.common.enums import (SANSFacility, DataType, FitModeForMerge)
-from sans.algorithm_detail.bundles import MergeBundle
+
 import mantid.simpleapi as mantid_api
+from sans.algorithm_detail.bundles import MergeBundle
+from sans.common.enums import (SANSFacility, DataType)
+from sans.common.general_functions import create_child_algorithm
 
 
 class Merger(with_metaclass(ABCMeta, object)):

@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from qtpy.QtCore import QThreadPool
 import unittest
+from qtpy.QtCore import QThreadPool
 
 from mantid.py3compat import mock
 from sans.common.enums import (OutputMode)

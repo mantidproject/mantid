@@ -10,14 +10,14 @@
 
 from __future__ import (absolute_import, division, print_function)
 
+from SANSSingleReductionBase import SANSSingleReductionBase
+
 from mantid.api import (MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode)
 from mantid.kernel import (Direction, Property)
 from mantid.simpleapi import CloneWorkspace
 from sans.algorithm_detail.single_execution import (run_core_reduction, run_optimized_for_can)
-from sans.common.enums import (ReductionMode, DataType, ReductionMode, FitType)
+from sans.common.enums import (DataType, ReductionMode, FitType)
 from sans.common.general_functions import does_can_workspace_exist_on_ads
-
-from SANSSingleReductionBase import SANSSingleReductionBase
 
 
 class SANSSingleReduction(SANSSingleReductionBase):

@@ -276,7 +276,7 @@ class StateCalculateTransmission(StateBase):
                                                     "background_TOF_monitor_stop": self.background_TOF_monitor_stop})
                         is_invalid.update(entry)
 
-        for fit_type in self.fit.itervalues():
+        for fit_type in six.itervalues(self.fit):
             fit_type.validate()
 
         if is_invalid:

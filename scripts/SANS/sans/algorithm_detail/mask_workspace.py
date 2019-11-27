@@ -5,14 +5,17 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-from six import with_metaclass
+
 from abc import (ABCMeta, abstractmethod)
-from sans.common.constants import EMPTY_NAME
-from sans.common.enums import (DetectorType, SANSInstrument)
-from sans.common.general_functions import create_unmanaged_algorithm
-from sans.common.file_information import (find_full_file_path, get_instrument_paths_for_sans_file)
+
+from six import with_metaclass
+
+from sans.algorithm_detail.mask_functions import SpectraBlock
 from sans.algorithm_detail.xml_shapes import (add_cylinder, add_outside_cylinder, create_phi_mask, create_line_mask)
-from sans.algorithm_detail.mask_functions import (SpectraBlock)
+from sans.common.constants import EMPTY_NAME
+from sans.common.enums import SANSInstrument
+from sans.common.file_information import (find_full_file_path, get_instrument_paths_for_sans_file)
+from sans.common.general_functions import create_unmanaged_algorithm
 
 
 # ------------------------------------------------------------------

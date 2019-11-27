@@ -5,8 +5,9 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
+
 import unittest
-import mantid
+
 from sans.command_interface.command_interface_state_director import (NParameterCommand, NParameterCommandId,
                                                                      CommandInterfaceStateDirector, DataCommand,
                                                                      DataCommandId, FitData)

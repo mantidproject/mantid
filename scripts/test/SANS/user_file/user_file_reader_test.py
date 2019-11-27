@@ -5,19 +5,19 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-import unittest
-import mantid
+
 import os
+import unittest
+
 from sans.common.enums import (ReductionMode, DetectorType, RangeStepType, FitType)
-from sans.user_file.user_file_reader import UserFileReader
-from sans.user_file.settings_tags import (DetectorId, BackId, range_entry, back_single_monitor_entry,
-                                          single_entry_with_detector, mask_angle_entry, LimitsId, rebin_string_values,
-                                          simple_range, complex_range, MaskId, mask_block, mask_block_cross,
-                                          mask_line, range_entry_with_detector, SampleId, SetId, set_scales_entry,
-                                          position_entry, TransId, TubeCalibrationFileId, QResolutionId, FitId,
-                                          fit_general, MonId, monitor_length, monitor_file, GravityId,
-                                          monitor_spectrum, PrintId, q_rebin_values)
 from sans.test_helper.user_file_test_helper import create_user_file, sample_user_file
+from sans.user_file.settings_tags import (DetectorId, BackId, range_entry, back_single_monitor_entry,
+                                          single_entry_with_detector, LimitsId, simple_range, complex_range, MaskId,
+                                          range_entry_with_detector, SampleId, SetId, set_scales_entry,
+                                          position_entry, TransId, TubeCalibrationFileId, QResolutionId, FitId,
+                                          fit_general, MonId, monitor_file, GravityId,
+                                          monitor_spectrum, PrintId, q_rebin_values)
+from sans.user_file.user_file_reader import UserFileReader
 
 
 # -----------------------------------------------------------------

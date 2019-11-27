@@ -5,21 +5,23 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
+
 import unittest
-import mantid
 
 from sans.common.enums import (ReductionMode, DetectorType, RangeStepType, FitType, DataType, SANSInstrument)
-from sans.user_file.user_file_parser import (InstrParser, DetParser, LimitParser, MaskParser, SampleParser, SetParser, TransParser,
-                                             TubeCalibFileParser, QResolutionParser, FitParser, GravityParser,
-                                             MaskFileParser, MonParser, PrintParser, BackParser, SANS2DParser, LOQParser,
-                                             UserFileParser, LARMORParser, CompatibilityParser)
 from sans.user_file.settings_tags import (DetectorId, BackId, range_entry, back_single_monitor_entry,
                                           single_entry_with_detector, mask_angle_entry, LimitsId,
-                                          simple_range, complex_range, MaskId, mask_block, mask_block_cross,
+                                          simple_range, MaskId, mask_block, mask_block_cross,
                                           mask_line, range_entry_with_detector, SampleId, SetId, set_scales_entry,
                                           position_entry, TransId, TubeCalibrationFileId, QResolutionId, FitId,
                                           fit_general, MonId, monitor_length, monitor_file, GravityId, OtherId,
                                           monitor_spectrum, PrintId, det_fit_range, q_rebin_values)
+from sans.user_file.user_file_parser import (InstrParser, DetParser, LimitParser, MaskParser, SampleParser, SetParser,
+                                             TransParser,
+                                             TubeCalibFileParser, QResolutionParser, FitParser, GravityParser,
+                                             MaskFileParser, MonParser, PrintParser, BackParser, SANS2DParser,
+                                             LOQParser,
+                                             UserFileParser, LARMORParser, CompatibilityParser)
 
 
 # -----------------------------------------------------------------

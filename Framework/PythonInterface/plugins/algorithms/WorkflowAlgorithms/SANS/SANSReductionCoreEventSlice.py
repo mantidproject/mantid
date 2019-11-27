@@ -11,12 +11,12 @@ for which data must be event sliced. These steps are: slicing, adjustment, conve
 
 from __future__ import (absolute_import, division, print_function)
 
+from SANSReductionCoreBase import SANSReductionCoreBase
+
 from mantid.api import (MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
                         Progress)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator)
 from sans.common.enums import (DetectorType, DataType)
-
-from SANSReductionCoreBase import SANSReductionCoreBase
 
 
 class SANSReductionCoreEventSlice(SANSReductionCoreBase):

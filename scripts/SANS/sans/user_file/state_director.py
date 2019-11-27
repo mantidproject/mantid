@@ -259,7 +259,7 @@ class StateDirectorISIS(object):
         self._set_up_mask_state(user_file_items)
 
         # Reduction state
-        reduction_state = self._set_up_reduction_state(user_file_items)
+        self._set_up_reduction_state(user_file_items)
 
         # Move state
         self._set_up_move_state(user_file_items)

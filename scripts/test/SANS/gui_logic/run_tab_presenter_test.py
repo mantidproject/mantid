@@ -9,21 +9,18 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
-from mantid.kernel import config
 from mantid.kernel import PropertyManagerDataService
+from mantid.kernel import config
 from mantid.py3compat import mock
-
-from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
-from sans.common.enums import (SANSFacility, ReductionDimensionality, SaveType, ReductionMode,
-                               RangeStepType, FitType, SANSInstrument, RowState)
-from sans.test_helper.user_file_test_helper import (create_user_file, sample_user_file, sample_user_file_gravity_OFF,
-                                                    sample_user_file_with_instrument)
-from sans.test_helper.mock_objects import (create_mock_view)
-from sans.test_helper.common import (remove_file)
 from sans.common.enums import BatchReductionEntry, SANSInstrument
+from sans.common.enums import (SANSFacility, ReductionDimensionality, SaveType, ReductionMode,
+                               RangeStepType, FitType, RowState)
 from sans.gui_logic.models.table_model import TableModel, TableIndexModel
+from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
+from sans.test_helper.common import (remove_file)
 from sans.test_helper.file_information_mock import SANSFileInformationMock
-
+from sans.test_helper.mock_objects import (create_mock_view)
+from sans.test_helper.user_file_test_helper import (create_user_file, sample_user_file, sample_user_file_gravity_OFF)
 
 BATCH_FILE_TEST_CONTENT_1 = [{BatchReductionEntry.SAMPLE_SCATTER: 1, BatchReductionEntry.SAMPLE_TRANSMISSION: 2,
                               BatchReductionEntry.SAMPLE_DIRECT: 3, BatchReductionEntry.OUTPUT: 'test_file',

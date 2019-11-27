@@ -9,13 +9,13 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 
 from mantid.py3compat import mock
+from sans.common.enums import (SANSInstrument, ReductionMode)
 from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, get_reduction_selection,
                                        get_string_for_gui_from_reduction_mode,
                                        get_batch_file_dir_from_path,
                                        add_dir_to_datasearch,
                                        remove_dir_from_datasearch,
                                        SANSGuiPropertiesHandler, get_reduction_mode_from_gui_selection)
-from sans.common.enums import (SANSInstrument, ReductionMode)
 
 
 class GuiCommonTest(unittest.TestCase):

@@ -7,14 +7,14 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
+from qtpy.QtCore import QCoreApplication
 
 from mantid.py3compat import mock
+from sans.common.enums import (SANSInstrument, SANSFacility, SaveType)
 from sans.gui_logic.models.create_state import (create_states, create_gui_state_from_userfile)
-from sans.common.enums import (SANSInstrument, ReductionMode, SANSFacility, SaveType)
 from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.gui_logic.models.table_model import TableModel, TableIndexModel
 from sans.state.state import State
-from qtpy.QtCore import QCoreApplication
 
 
 class GuiCommonTest(unittest.TestCase):

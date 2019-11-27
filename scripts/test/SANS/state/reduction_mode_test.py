@@ -5,13 +5,13 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-import unittest
-import mantid
 
-from sans.state.reduction_mode import (StateReductionMode, get_reduction_mode_builder)
-from sans.state.data import get_data_builder
+import unittest
+
 from sans.common.enums import (ReductionMode, ReductionDimensionality, FitModeForMerge,
                                SANSFacility, SANSInstrument, DetectorType)
+from sans.state.data import get_data_builder
+from sans.state.reduction_mode import (StateReductionMode, get_reduction_mode_builder)
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 

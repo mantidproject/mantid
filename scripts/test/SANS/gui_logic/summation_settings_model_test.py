@@ -5,7 +5,6 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-import sys
 
 from sans.common.enums import BinningType
 from sans.gui_logic.models.summation_settings import SummationSettings

@@ -121,7 +121,7 @@ def run_algorithm(input_workspace, range, integral, output_workspace, x_dim, y_d
 
 
 def generate_output_workspace_name(range, integral, mask, detector, input_workspace_name):
-    integral_string = IntegralEnum.to_string(integral)
+    integral_string = integral.value
     detector_string = detector.value
 
     return 'Run:{}, Range:{}, Direction:{}, Detector:{}, Mask:{}'.format(input_workspace_name, range,

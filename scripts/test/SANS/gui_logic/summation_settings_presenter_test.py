@@ -6,14 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
+from assert_called import assert_called
+from fake_signal import FakeSignal
 from mantid.py3compat import mock
 from sans.common.enums import BinningType
-from sans.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
 from sans.gui_logic.models.summation_settings import SummationSettings
+from sans.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
 from ui.sans_isis.summation_settings_widget import SummationSettingsWidget
-from fake_signal import FakeSignal
-
-from assert_called import assert_called
 
 
 class SummationSettingsPresenterTest(unittest.TestCase):

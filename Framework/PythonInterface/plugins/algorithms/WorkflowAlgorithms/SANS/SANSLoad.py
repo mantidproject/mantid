@@ -9,15 +9,15 @@
 """ SANSLoad algorithm which handles loading SANS files"""
 
 from __future__ import (absolute_import, division, print_function)
-from mantid.kernel import (Direction, PropertyManagerProperty, FloatArrayProperty)
+
 from mantid.api import (ParallelDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
                         Progress,
                         WorkspaceProperty)
-from sans.algorithm_detail.move_sans_instrument_component import move_component, MoveTypes
-
-from sans.state.state_base import create_deserialized_sans_state_from_property_manager
-from sans.common.enums import SANSDataType
+from mantid.kernel import (Direction, PropertyManagerProperty, FloatArrayProperty)
 from sans.algorithm_detail.load_data import SANSLoadDataFactory
+from sans.algorithm_detail.move_sans_instrument_component import move_component, MoveTypes
+from sans.common.enums import SANSDataType
+from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 
 
 class SANSLoad(ParallelDataProcessorAlgorithm):

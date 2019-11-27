@@ -9,18 +9,19 @@
 """ Finds the beam centre for SANS"""
 
 from __future__ import (absolute_import, division, print_function)
+
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress,
                         IEventWorkspace)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator)
-from sans.algorithm_detail.scale_sans_workspace import scale_workspace
 from sans.algorithm_detail.crop_helper import get_component_name
 from sans.algorithm_detail.mask_sans_workspace import mask_workspace
 from sans.algorithm_detail.move_sans_instrument_component import move_component, MoveTypes
+from sans.algorithm_detail.scale_sans_workspace import scale_workspace
 from sans.algorithm_detail.slice_sans_event import slice_sans_event
 from sans.common.constants import EMPTY_NAME
+from sans.common.enums import (DetectorType)
 from sans.common.general_functions import create_child_algorithm, append_to_sans_file_tag
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
-from sans.common.enums import (DetectorType, RangeStepType, RebinType)
 
 
 class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):

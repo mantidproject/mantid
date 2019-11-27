@@ -5,14 +5,13 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
+
 import unittest
-import mantid
 
-from sans.state.scale import get_scale_builder
+from sans.common.enums import (SANSFacility, SampleShape)
 from sans.state.data import get_data_builder
-from sans.common.enums import (SANSFacility, SANSInstrument, SampleShape)
+from sans.state.scale import get_scale_builder
 from sans.test_helper.file_information_mock import SANSFileInformationMock
-
 
 
 # ----------------------------------------------------------------------------------------------------------------------

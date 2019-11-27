@@ -5,12 +5,14 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-import unittest
+
 import os
+import unittest
+
 import mantid
-from sans.common.enums import BatchReductionEntry
-from sans.common.constants import ALL_PERIODS
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
+from sans.common.constants import ALL_PERIODS
+from sans.common.enums import BatchReductionEntry
 
 
 class BatchCsvParserTest(unittest.TestCase):

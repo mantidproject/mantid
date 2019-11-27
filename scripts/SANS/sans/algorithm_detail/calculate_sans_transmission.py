@@ -59,7 +59,6 @@ def calculate_transmission(transmission_ws, direct_ws, state_adjustment_calculat
     direct_ws = _get_corrected_wavelength_workspace(direct_ws, all_detector_ids,
                                                     calculate_transmission_state, data_type=data_type)
 
-
     # 3. Fit
     output_workspace, unfitted_transmission_workspace = \
         _perform_fit(transmission_ws, direct_ws, detector_ids_roi,

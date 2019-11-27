@@ -18,6 +18,7 @@ SANSInstrument_string_as_key = {LARMOR: SANSInstrument.LARMOR,
 # Include NoInstrument in a dict
 SANSInstrument_string_as_key_NoInstrument = SANSInstrument_string_as_key.copy()
 SANSInstrument_string_as_key_NoInstrument.update({"NoInstrument": SANSInstrument.NO_INSTRUMENT})
+SANSInstrument_string_as_key_NoInstrument.update({"No Instrument": SANSInstrument.NO_INSTRUMENT})
 
 SANSInstrument_enum_as_key = {SANSInstrument.LARMOR: LARMOR,
                               SANSInstrument.LOQ: LOQ,

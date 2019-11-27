@@ -5,14 +5,14 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-import unittest
-import mantid
 
+import unittest
+
+from sans.common.enums import (ReductionDimensionality)
+from sans.state.data import StateData
 from sans.state.state_functions import (is_pure_none_or_not_none, one_is_none,
                                         validation_message, is_not_none_and_first_larger_than_second)
 from sans.test_helper.test_director import TestDirector
-from sans.state.data import StateData
-from sans.common.enums import (ReductionDimensionality, ReductionMode, OutputParts)
 
 
 class StateFunctionsTest(unittest.TestCase):
