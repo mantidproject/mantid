@@ -126,10 +126,17 @@ class TubeCalibrationFileId(Enum):
     FILE = "file"
 
 
-# -- QRESOLUTION
-@serializable_enum("on", "delta_r", "collimation_length", "a1", "a2", "h1", "w1", "h2", "w2", "moderator")
-class QResolutionId(object):
-    pass
+class QResolutionId(Enum):
+    A1 = "a1"
+    A2 = "a2"
+    COLLIMATION_LENGTH = "collimation_length"
+    DELTA_R = "delta_r"
+    H1 = "h1"
+    H2 = "h2"
+    MODERATOR = "moderator"
+    ON = "on"
+    W1 = "w1"
+    W2 = "w2"
 
 
 # --- FIT

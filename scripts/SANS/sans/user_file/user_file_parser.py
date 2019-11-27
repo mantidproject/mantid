@@ -1637,38 +1637,38 @@ class QResolutionParser(UserFileComponentParser):
 
     def _extract_on_off(self, line):
         value = False if re.search(self._off, line) is not None else True
-        return {QResolutionId.on: value}
+        return {QResolutionId.ON: value}
 
     def _extract_delta_r(self, line):
-        return {QResolutionId.delta_r: QResolutionParser.extract_float(line, self._delta_r)}
+        return {QResolutionId.DELTA_R: QResolutionParser.extract_float(line, self._delta_r)}
 
     def _extract_collimation_length(self, line):
-        return {QResolutionId.collimation_length: QResolutionParser.extract_float(line, self._collimation_length)}
+        return {QResolutionId.COLLIMATION_LENGTH: QResolutionParser.extract_float(line, self._collimation_length)}
 
     def _extract_a1(self, line):
-        return {QResolutionId.a1: QResolutionParser.extract_float(line, self._a1)}
+        return {QResolutionId.A1: QResolutionParser.extract_float(line, self._a1)}
 
     def _extract_a2(self, line):
-        return {QResolutionId.a2: QResolutionParser.extract_float(line, self._a2)}
+        return {QResolutionId.A2: QResolutionParser.extract_float(line, self._a2)}
 
     def _extract_h1(self, line):
-        return {QResolutionId.h1: QResolutionParser.extract_float(line, self._h1)}
+        return {QResolutionId.H1: QResolutionParser.extract_float(line, self._h1)}
 
     def _extract_w1(self, line):
-        return {QResolutionId.w1: QResolutionParser.extract_float(line, self._w1)}
+        return {QResolutionId.W1: QResolutionParser.extract_float(line, self._w1)}
 
     def _extract_h2(self, line):
-        return {QResolutionId.h2: QResolutionParser.extract_float(line, self._h2)}
+        return {QResolutionId.H2: QResolutionParser.extract_float(line, self._h2)}
 
     def _extract_w2(self, line):
-        return {QResolutionId.w2: QResolutionParser.extract_float(line, self._w2)}
+        return {QResolutionId.W2: QResolutionParser.extract_float(line, self._w2)}
 
     def _extract_moderator(self, line, original_line):
         moderator_capital = re.sub(self._moderator, "", line)
         moderator_capital = re.sub("\"", "", moderator_capital)
         moderator = re.search(moderator_capital, original_line, re.IGNORECASE).group(0)
         # Remove quotation marks
-        return {QResolutionId.moderator: moderator}
+        return {QResolutionId.MODERATOR: moderator}
 
     @staticmethod
     def extract_float(line, to_remove):

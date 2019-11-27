@@ -83,12 +83,12 @@ class UserFileReaderTest(unittest.TestCase):
                            SampleId.PATH: [True],
                            LimitsId.RADIUS_CUT: [200.0],
                            LimitsId.WAVELENGTH_CUT: [8.0],
-                           QResolutionId.on: [True],
-                           QResolutionId.delta_r: [11.],
-                           QResolutionId.collimation_length: [12.],
-                           QResolutionId.a1: [13.],
-                           QResolutionId.a2: [14.],
-                           QResolutionId.moderator: ["moderator_rkh_file.txt"],
+                           QResolutionId.ON: [True],
+                           QResolutionId.DELTA_R: [11.],
+                           QResolutionId.COLLIMATION_LENGTH: [12.],
+                           QResolutionId.A1: [13.],
+                           QResolutionId.A2: [14.],
+                           QResolutionId.MODERATOR: ["moderator_rkh_file.txt"],
                            TubeCalibrationFileId.FILE: ["TUBE_SANS2D_BOTH_31681_25Sept15.nxs"]}
 
         self.assertEqual(len(expected_values), len(output))

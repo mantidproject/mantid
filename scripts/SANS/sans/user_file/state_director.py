@@ -1069,24 +1069,24 @@ class StateDirectorISIS(object):
                          user_file_items)
 
         # Get the QResolution settings set_q_resolution_delta_r
-        set_single_entry(self._convert_to_q_builder, "set_use_q_resolution", QResolutionId.on, user_file_items)
-        set_single_entry(self._convert_to_q_builder, "set_q_resolution_delta_r", QResolutionId.delta_r,
+        set_single_entry(self._convert_to_q_builder, "set_use_q_resolution", QResolutionId.ON, user_file_items)
+        set_single_entry(self._convert_to_q_builder, "set_q_resolution_delta_r", QResolutionId.DELTA_R,
                          user_file_items, apply_to_value=convert_mm_to_m)
         set_single_entry(self._convert_to_q_builder, "set_q_resolution_collimation_length",
-                         QResolutionId.collimation_length, user_file_items)
-        set_single_entry(self._convert_to_q_builder, "set_q_resolution_a1", QResolutionId.a1, user_file_items,
+                         QResolutionId.COLLIMATION_LENGTH, user_file_items)
+        set_single_entry(self._convert_to_q_builder, "set_q_resolution_a1", QResolutionId.A1, user_file_items,
                          apply_to_value=convert_mm_to_m)
-        set_single_entry(self._convert_to_q_builder, "set_q_resolution_a2", QResolutionId.a2, user_file_items,
+        set_single_entry(self._convert_to_q_builder, "set_q_resolution_a2", QResolutionId.A2, user_file_items,
                          apply_to_value=convert_mm_to_m)
-        set_single_entry(self._convert_to_q_builder, "set_moderator_file", QResolutionId.moderator,
+        set_single_entry(self._convert_to_q_builder, "set_moderator_file", QResolutionId.MODERATOR,
                          user_file_items)
-        set_single_entry(self._convert_to_q_builder, "set_q_resolution_h1", QResolutionId.h1, user_file_items,
+        set_single_entry(self._convert_to_q_builder, "set_q_resolution_h1", QResolutionId.H1, user_file_items,
                          apply_to_value=convert_mm_to_m)
-        set_single_entry(self._convert_to_q_builder, "set_q_resolution_h2", QResolutionId.h2, user_file_items,
+        set_single_entry(self._convert_to_q_builder, "set_q_resolution_h2", QResolutionId.H2, user_file_items,
                          apply_to_value=convert_mm_to_m)
-        set_single_entry(self._convert_to_q_builder, "set_q_resolution_w1", QResolutionId.w1, user_file_items,
+        set_single_entry(self._convert_to_q_builder, "set_q_resolution_w1", QResolutionId.W1, user_file_items,
                          apply_to_value=convert_mm_to_m)
-        set_single_entry(self._convert_to_q_builder, "set_q_resolution_w2", QResolutionId.w2, user_file_items,
+        set_single_entry(self._convert_to_q_builder, "set_q_resolution_w2", QResolutionId.W2, user_file_items,
                          apply_to_value=convert_mm_to_m)
 
         # ------------------------

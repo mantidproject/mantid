@@ -702,8 +702,8 @@ class QResolutionParserTest(unittest.TestCase):
         self.assertTrue(QResolutionParser.get_type(), "QRESOL")
 
     def test_that_q_resolution_on_off_is_parsed_correctly(self):
-        valid_settings = {"QRESOL/ON": {QResolutionId.on: True},
-                          "QREsoL / oFF": {QResolutionId.on: False}}
+        valid_settings = {"QRESOL/ON": {QResolutionId.ON: True},
+                          "QREsoL / oFF": {QResolutionId.ON: False}}
 
         invalid_settings = {"QRESOL= ON": RuntimeError}
 
@@ -711,14 +711,14 @@ class QResolutionParserTest(unittest.TestCase):
         do_test(q_resolution_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_q_resolution_float_values_are_parsed_correctly(self):
-        valid_settings = {"QRESOL/deltaR = 23.546": {QResolutionId.delta_r: 23.546},
-                          "QRESOL/ Lcollim = 23.546": {QResolutionId.collimation_length: 23.546},
-                          "QRESOL/ a1 = 23.546": {QResolutionId.a1: 23.546},
-                          "QRESOL/ a2 =  23": {QResolutionId.a2: 23},
-                          "QRESOL /  H1 = 23.546 ": {QResolutionId.h1: 23.546},
-                          "QRESOL /h2 = 23.546 ": {QResolutionId.h2: 23.546},
-                          "QRESOL /  W1 = 23.546 ": {QResolutionId.w1: 23.546},
-                          "QRESOL /W2 = 23.546 ": {QResolutionId.w2: 23.546}
+        valid_settings = {"QRESOL/deltaR = 23.546": {QResolutionId.DELTA_R: 23.546},
+                          "QRESOL/ Lcollim = 23.546": {QResolutionId.COLLIMATION_LENGTH: 23.546},
+                          "QRESOL/ a1 = 23.546": {QResolutionId.A1: 23.546},
+                          "QRESOL/ a2 =  23": {QResolutionId.A2: 23},
+                          "QRESOL /  H1 = 23.546 ": {QResolutionId.H1: 23.546},
+                          "QRESOL /h2 = 23.546 ": {QResolutionId.H2: 23.546},
+                          "QRESOL /  W1 = 23.546 ": {QResolutionId.W1: 23.546},
+                          "QRESOL /W2 = 23.546 ": {QResolutionId.W2: 23.546}
                           }
 
         invalid_settings = {"QRESOL/DELTAR 23": RuntimeError,
@@ -730,7 +730,7 @@ class QResolutionParserTest(unittest.TestCase):
         do_test(q_resolution_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_moderator_is_parsed_correctly(self):
-        valid_settings = {"QRESOL/MODERATOR = test_file.txt": {QResolutionId.moderator: "test_file.txt"}}
+        valid_settings = {"QRESOL/MODERATOR = test_file.txt": {QResolutionId.MODERATOR: "test_file.txt"}}
 
         invalid_settings = {"QRESOL/MODERATOR = test_file.nxs": RuntimeError,
                             "QRESOL/MODERATOR/test_file.txt": RuntimeError,
@@ -1101,7 +1101,7 @@ class UserFileParserTest(unittest.TestCase):
 
         # QResolutionParser
         result = user_file_parser.parse_line("QRESOL/ON")
-        assert_valid_result(result, {QResolutionId.on: True}, self.assertTrue)
+        assert_valid_result(result, {QResolutionId.ON: True}, self.assertTrue)
 
         # FitParser
         result = user_file_parser.parse_line("FIT/TRANS/Straight 123 3556")

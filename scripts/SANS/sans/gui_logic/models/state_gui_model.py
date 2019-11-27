@@ -630,83 +630,83 @@ class StateGuiModel(ModelCommon):
     # ------------------------------------------------------------------------------------------------------------------
     @property
     def use_q_resolution(self):
-        return self.get_simple_element(element_id=QResolutionId.on, default_value=False)
+        return self.get_simple_element(element_id=QResolutionId.ON, default_value=False)
 
     @use_q_resolution.setter
     def use_q_resolution(self, value):
-        self.set_simple_element(element_id=QResolutionId.on, value=value)
+        self.set_simple_element(element_id=QResolutionId.ON, value=value)
 
     @property
     def q_resolution_source_a(self):
-        return self.get_simple_element(element_id=QResolutionId.a1, default_value="")
+        return self.get_simple_element(element_id=QResolutionId.A1, default_value="")
 
     @q_resolution_source_a.setter
     def q_resolution_source_a(self, value):
-        self.set_simple_element(element_id=QResolutionId.a1, value=value)
+        self.set_simple_element(element_id=QResolutionId.A1, value=value)
 
     @property
     def q_resolution_sample_a(self):
-        return self.get_simple_element(element_id=QResolutionId.a2, default_value="")
+        return self.get_simple_element(element_id=QResolutionId.A2, default_value="")
 
     @q_resolution_sample_a.setter
     def q_resolution_sample_a(self, value):
-        self.set_simple_element(element_id=QResolutionId.a2, value=value)
+        self.set_simple_element(element_id=QResolutionId.A2, value=value)
 
     @property
     def q_resolution_source_h(self):
-        return self.get_simple_element(element_id=QResolutionId.h1, default_value="")
+        return self.get_simple_element(element_id=QResolutionId.H1, default_value="")
 
     @q_resolution_source_h.setter
     def q_resolution_source_h(self, value):
-        self.set_simple_element(element_id=QResolutionId.h1, value=value)
+        self.set_simple_element(element_id=QResolutionId.H1, value=value)
 
     @property
     def q_resolution_sample_h(self):
-        return self.get_simple_element(element_id=QResolutionId.h2, default_value="")
+        return self.get_simple_element(element_id=QResolutionId.H2, default_value="")
 
     @q_resolution_sample_h.setter
     def q_resolution_sample_h(self, value):
-        self.set_simple_element(element_id=QResolutionId.h2, value=value)
+        self.set_simple_element(element_id=QResolutionId.H2, value=value)
 
     @property
     def q_resolution_source_w(self):
-        return self.get_simple_element(element_id=QResolutionId.w1, default_value="")
+        return self.get_simple_element(element_id=QResolutionId.W1, default_value="")
 
     @q_resolution_source_w.setter
     def q_resolution_source_w(self, value):
-        self.set_simple_element(element_id=QResolutionId.w1, value=value)
+        self.set_simple_element(element_id=QResolutionId.W1, value=value)
 
     @property
     def q_resolution_sample_w(self):
-        return self.get_simple_element(element_id=QResolutionId.w2, default_value="")
+        return self.get_simple_element(element_id=QResolutionId.W2, default_value="")
 
     @q_resolution_sample_w.setter
     def q_resolution_sample_w(self, value):
-        self.set_simple_element(element_id=QResolutionId.w2, value=value)
+        self.set_simple_element(element_id=QResolutionId.W2, value=value)
 
     @property
     def q_resolution_delta_r(self):
-        return self.get_simple_element(element_id=QResolutionId.delta_r, default_value="")
+        return self.get_simple_element(element_id=QResolutionId.DELTA_R, default_value="")
 
     @q_resolution_delta_r.setter
     def q_resolution_delta_r(self, value):
-        self.set_simple_element(element_id=QResolutionId.delta_r, value=value)
+        self.set_simple_element(element_id=QResolutionId.DELTA_R, value=value)
 
     @property
     def q_resolution_moderator_file(self):
-        return self.get_simple_element(element_id=QResolutionId.moderator, default_value="")
+        return self.get_simple_element(element_id=QResolutionId.MODERATOR, default_value="")
 
     @q_resolution_moderator_file.setter
     def q_resolution_moderator_file(self, value):
-        self.set_simple_element(element_id=QResolutionId.moderator, value=value)
+        self.set_simple_element(element_id=QResolutionId.MODERATOR, value=value)
 
     @property
     def q_resolution_collimation_length(self):
-        return self.get_simple_element(element_id=QResolutionId.collimation_length, default_value="")
+        return self.get_simple_element(element_id=QResolutionId.COLLIMATION_LENGTH, default_value="")
 
     @q_resolution_collimation_length.setter
     def q_resolution_collimation_length(self, value):
-        self.set_simple_element(element_id=QResolutionId.collimation_length, value=value)
+        self.set_simple_element(element_id=QResolutionId.COLLIMATION_LENGTH, value=value)
 
     # ==================================================================================================================
     # ==================================================================================================================
