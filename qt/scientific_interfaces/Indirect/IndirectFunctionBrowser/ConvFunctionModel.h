@@ -88,6 +88,8 @@ public:
   void
   updateParameterEstimationData(DataForParameterEstimationCollection &&data);
   void setResolution(std::string const &name, TableDatasetIndex const &index);
+  void
+  setResolution(const std::vector<std::pair<std::string, int>> &fitResolutions);
 
   QMap<ParamID, double> getCurrentValues() const;
   QMap<ParamID, double> getCurrentErrors() const;
@@ -131,6 +133,7 @@ private:
   BackgroundSubType m_backgroundSubtype;
   std::string m_resolutionName;
   TableDatasetIndex m_resolutionIndex;
+  std::vector<std::pair<std::string, int>> m_fitResolutions;
 };
 
 } // namespace IDA

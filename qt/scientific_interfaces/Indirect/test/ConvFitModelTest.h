@@ -207,12 +207,41 @@ public:
 
   void
   test_that_get_resolution_for_fit_returns_correctly_for_single_workspace() {
+    Spectra const spectra = Spectra("0,5");
     addWorkspacesToModel(spectra, m_workspace);
     m_model->setResolution(m_workspace, TableDatasetIndex{0});
 
-    auto fitResolutions = m_model->getResolutionFotFit();
+    auto fitResolutions = m_model->getResolutionsForFit();
 
-    TS_ASSERT_EQUALS(fitResolutions, std::pair<std::string, int>());
+    TS_ASSERT_EQUALS(fitResolutions.size(), 2);
+    TS_ASSERT_EQUALS(fitResolutions[0].first, "Name");
+    TS_ASSERT_EQUALS(fitResolutions[0].second, 0);
+    TS_ASSERT_EQUALS(fitResolutions[1].first, "Name");
+    TS_ASSERT_EQUALS(fitResolutions[1].second, 5);
+  }
+
+  void
+  test_that_get_resolution_for_fit_returns_correctly_for_multiple_workspaces() {
+    Spectra const spectra = Spectra("0,5");
+    addWorkspacesToModel(spectra, m_workspace);
+    auto const workspace2 = createWorkspace(3, 3);
+    m_ads->addOrReplace("Workspace2", workspace2);
+    Spectra const spectra2 = Spectra("1-2");
+    addWorkspacesToModel(spectra2, workspace2);
+    m_model->setResolution(m_workspace, TableDatasetIndex{0});
+    m_model->setResolution(workspace2, TableDatasetIndex{1});
+
+    auto fitResolutions = m_model->getResolutionsForFit();
+
+    TS_ASSERT_EQUALS(fitResolutions.size(), 4);
+    TS_ASSERT_EQUALS(fitResolutions[0].first, "Name");
+    TS_ASSERT_EQUALS(fitResolutions[0].second, 0);
+    TS_ASSERT_EQUALS(fitResolutions[1].first, "Name");
+    TS_ASSERT_EQUALS(fitResolutions[1].second, 5);
+    TS_ASSERT_EQUALS(fitResolutions[2].first, "Workspace2");
+    TS_ASSERT_EQUALS(fitResolutions[2].second, 1);
+    TS_ASSERT_EQUALS(fitResolutions[3].first, "Workspace2");
+    TS_ASSERT_EQUALS(fitResolutions[3].second, 2);
   }
 
 private:

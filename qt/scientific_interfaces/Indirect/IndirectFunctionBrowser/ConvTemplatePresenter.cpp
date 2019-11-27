@@ -155,6 +155,11 @@ void ConvTemplatePresenter::setResolution(std::string const &name,
   m_model.setResolution(name, index);
 }
 
+void ConvTemplatePresenter::setResolution(
+    const std::vector<std::pair<std::string, int>> &fitResolutions) {
+  m_model.setResolution(fitResolutions);
+}
+
 void ConvTemplatePresenter::updateViewParameters() {
   auto values = m_model.getCurrentValues();
   auto errors = m_model.getCurrentErrors();

@@ -25,10 +25,10 @@ public:
   void setModel(const std::string &background, const std::string &workspace,
                 int workspaceIndex, const std::string &peaks,
                 bool hasDeltaFunction);
-  void setModel(const std::string &background,
-                const std::vector<std::string> &resolutionWorkspaces,
-                std::vector<int> resolutionWorkspaceIndex,
-                const std::string &peaks, bool hasDeltaFunction);
+  void
+  setModel(const std::string &background,
+           const std::vector<std::pair<std::string, int>> &resolutionWorkspaces,
+           const std::string &peaks, bool hasDeltaFunction);
   boost::optional<QString> backgroundPrefix() const {
     return m_backgroundPrefix;
   }
