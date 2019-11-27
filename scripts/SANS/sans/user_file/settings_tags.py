@@ -139,10 +139,10 @@ class QResolutionId(Enum):
     W2 = "w2"
 
 
-# --- FIT
-@serializable_enum("clear", "monitor_times", "general")
-class FitId(object):
-    pass
+class FitId(Enum):
+    CLEAR = "clear"
+    GENERAL = "general"
+    MONITOR_TIMES = "monitor_times"
 
 
 # --- GRAVITY

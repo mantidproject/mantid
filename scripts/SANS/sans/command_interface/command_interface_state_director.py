@@ -443,7 +443,7 @@ class CommandInterfaceStateDirector(object):
         new_state_entries = {}
         for element in data_to_fit:
             data_type = fit_type_to_data_type(element)
-            new_state_entries.update({FitId.general: fit_general(start=wavelength_low, stop=wavelength_high,
+            new_state_entries.update({FitId.GENERAL: fit_general(start=wavelength_low, stop=wavelength_high,
                                                                  fit_type=fit_type, data_type=data_type,
                                                                  polynomial_order=polynomial_order)})
         self.add_to_processed_state_settings(new_state_entries)

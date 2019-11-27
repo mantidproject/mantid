@@ -37,8 +37,8 @@ class SettingsAdjustmentModel(ModelCommon):
         return True if self.instrument is SANSInstrument.ZOOM else False
 
     def has_transmission_fit_got_separate_settings_for_sample_and_can(self):
-        if FitId.general in self._user_file_items:
-            settings = self._user_file_items[FitId.general]
+        if FitId.GENERAL in self._user_file_items:
+            settings = self._user_file_items[FitId.GENERAL]
             if settings:
                 settings_sample = [setting for setting in settings if setting.data_type is DataType.SAMPLE]
                 settings_can = [setting for setting in settings if setting.data_type is DataType.CAN]
@@ -50,8 +50,8 @@ class SettingsAdjustmentModel(ModelCommon):
     # =================== Property helper methods ================
 
     def _get_transmission_fit(self, data_type, attribute, default_value):
-        if FitId.general in self._user_file_items:
-            settings = self._user_file_items[FitId.general]
+        if FitId.GENERAL in self._user_file_items:
+            settings = self._user_file_items[FitId.GENERAL]
             # Check first if there are data type specific settings, else check if there are general settings
             extracted_settings = [setting for setting in settings if setting.data_type is data_type]
             if not extracted_settings:
@@ -62,9 +62,9 @@ class SettingsAdjustmentModel(ModelCommon):
         return default_value
 
     def _set_transmission_fit(self, data_type, start=None, stop=None, fit_type=None, polynomial_order=None):
-        if FitId.general in self._user_file_items:
+        if FitId.GENERAL in self._user_file_items:
             # Gather all settings which correspond to the data type and where the data type is none
-            settings = self._user_file_items[FitId.general]
+            settings = self._user_file_items[FitId.GENERAL]
             settings_general = [setting for setting in settings if setting.data_type is None]
             settings_for_data_type = [setting for setting in settings if setting.data_type is data_type]
             # We check if there are data-type specific settings.
@@ -97,7 +97,7 @@ class SettingsAdjustmentModel(ModelCommon):
                                                 data_type=setting.data_type, polynomial_order=new_polynomial_order))
             else:
                 new_settings.append(setting)
-        self._user_file_items.update({FitId.general: new_settings})
+        self._user_file_items.update({FitId.GENERAL: new_settings})
 
     # ------------------------------------------------------------------------------------------------------------------
     # Wavelength- and pixel-adjustment files

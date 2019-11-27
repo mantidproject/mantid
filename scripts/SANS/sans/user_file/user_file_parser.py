@@ -1759,14 +1759,14 @@ class FitParser(UserFileComponentParser):
     def _extract_monitor(self, line):
         values_string = re.sub(self._monitor, "", line)
         values = extract_float_range(values_string)
-        return {FitId.monitor_times: range_entry(start=values[0], stop=values[1])}
+        return {FitId.MONITOR_TIMES: range_entry(start=values[0], stop=values[1])}
 
     def _extract_general_fit(self, line):
         fit_type = self._get_fit_type(line)
         ws_type = self._get_workspace_type(line)
         wavelength_min, wavelength_max = self._get_wavelength(line)
         polynomial_order = self._get_polynomial_order(fit_type, line)
-        return {FitId.general: fit_general(start=wavelength_min, stop=wavelength_max, fit_type=fit_type,
+        return {FitId.GENERAL: fit_general(start=wavelength_min, stop=wavelength_max, fit_type=fit_type,
                                            data_type=ws_type, polynomial_order=polynomial_order)}
 
     def _get_wavelength(self, line):
@@ -1840,7 +1840,7 @@ class FitParser(UserFileComponentParser):
         """
         With this we want to clear the fit type settings.
         """
-        return {FitId.general: fit_general(start=None, stop=None, fit_type=FitType.NO_FIT,
+        return {FitId.GENERAL: fit_general(start=None, stop=None, fit_type=FitType.NO_FIT,
                                            data_type=None, polynomial_order=None)}
 
     @staticmethod

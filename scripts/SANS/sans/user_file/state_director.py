@@ -147,10 +147,10 @@ def set_wavelength_limits(builder, user_file_items):
 
 
 def set_prompt_peak_correction(builder, user_file_items):
-    if FitId.monitor_times in user_file_items:
-        fit_monitor_times = user_file_items[FitId.monitor_times]
+    if FitId.MONITOR_TIMES in user_file_items:
+        fit_monitor_times = user_file_items[FitId.MONITOR_TIMES]
         # Should the user have chosen several values, then the last element is selected
-        check_if_contains_only_one_element(fit_monitor_times, FitId.monitor_times)
+        check_if_contains_only_one_element(fit_monitor_times, FitId.MONITOR_TIMES)
         fit_monitor_times = fit_monitor_times[-1]
         builder.set_prompt_peak_correction_min(fit_monitor_times.start)
         builder.set_prompt_peak_correction_max(fit_monitor_times.stop)
@@ -1183,8 +1183,8 @@ class StateDirectorISIS(object):
             self._calculate_transmission_builder.set_background_TOF_roi_stop(back_trans.stop)
 
         # Set the fit settings
-        if FitId.general in user_file_items:
-            fit_general = user_file_items[FitId.general]
+        if FitId.GENERAL in user_file_items:
+            fit_general = user_file_items[FitId.GENERAL]
             # We can have settings for both the sample or the can or individually
             # There can be three types of settings:
             # 1. Clearing the fit setting
@@ -1198,7 +1198,7 @@ class StateDirectorISIS(object):
             clear_settings = [item for item in fit_general if item.data_type is None and item.fit_type is FitType.NO_FIT]
 
             if clear_settings:
-                check_if_contains_only_one_element(clear_settings, FitId.general)
+                check_if_contains_only_one_element(clear_settings, FitId.GENERAL)
                 clear_settings = clear_settings[-1]
                 # Will set the fitting to NoFit
                 self._calculate_transmission_builder.set_sample_fit_type(clear_settings.fit_type)
@@ -1208,7 +1208,7 @@ class StateDirectorISIS(object):
             general_settings = [item for item in fit_general if item.data_type is None and
                                 item.fit_type is not FitType.NO_FIT]
             if general_settings:
-                check_if_contains_only_one_element(general_settings, FitId.general)
+                check_if_contains_only_one_element(general_settings, FitId.GENERAL)
                 general_settings = general_settings[-1]
                 self._calculate_transmission_builder.set_sample_fit_type(general_settings.fit_type)
                 self._calculate_transmission_builder.set_sample_polynomial_order(general_settings.polynomial_order)
@@ -1222,7 +1222,7 @@ class StateDirectorISIS(object):
             # 3. Sample settings
             sample_settings = [item for item in fit_general if item.data_type is DataType.SAMPLE]
             if sample_settings:
-                check_if_contains_only_one_element(sample_settings, FitId.general)
+                check_if_contains_only_one_element(sample_settings, FitId.GENERAL)
                 sample_settings = sample_settings[-1]
                 self._calculate_transmission_builder.set_sample_fit_type(sample_settings.fit_type)
                 self._calculate_transmission_builder.set_sample_polynomial_order(sample_settings.polynomial_order)
@@ -1232,7 +1232,7 @@ class StateDirectorISIS(object):
             # 4. Can settings
             can_settings = [item for item in fit_general if item.data_type is DataType.CAN]
             if can_settings:
-                check_if_contains_only_one_element(can_settings, FitId.general)
+                check_if_contains_only_one_element(can_settings, FitId.GENERAL)
                 can_settings = can_settings[-1]
                 self._calculate_transmission_builder.set_can_fit_type(can_settings.fit_type)
                 self._calculate_transmission_builder.set_can_polynomial_order(can_settings.polynomial_order)
