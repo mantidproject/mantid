@@ -13,7 +13,6 @@
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Utils.h"
 #include "MantidKernel/VMD.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -69,7 +68,7 @@ MDHistoWorkspace::MDHistoWorkspace(
 MDHistoWorkspace::MDHistoWorkspace(
     std::vector<Mantid::Geometry::MDHistoDimension_sptr> &dimensions,
     Mantid::API::MDNormalization displayNormalization)
-    : IMDHistoWorkspace(), numDimensions(0), m_numEvents(nullptr),
+    : IMDHistoWorkspace(), numDimensions(0),
       m_nEventsContributed(std::numeric_limits<uint64_t>::quiet_NaN()),
       m_coordSystem(None), m_displayNormalization(displayNormalization) {
   this->init(dimensions);
@@ -84,7 +83,7 @@ MDHistoWorkspace::MDHistoWorkspace(
 MDHistoWorkspace::MDHistoWorkspace(
     std::vector<Mantid::Geometry::IMDDimension_sptr> &dimensions,
     Mantid::API::MDNormalization displayNormalization)
-    : IMDHistoWorkspace(), numDimensions(0), m_numEvents(nullptr),
+    : IMDHistoWorkspace(), numDimensions(0),
       m_nEventsContributed(std::numeric_limits<uint64_t>::quiet_NaN()),
       m_coordSystem(None), m_displayNormalization(displayNormalization) {
   this->init(dimensions);
@@ -103,31 +102,15 @@ MDHistoWorkspace::MDHistoWorkspace(const MDHistoWorkspace &other)
   // Dimensions are copied by the copy constructor of MDGeometry
   this->cacheValues();
   // Allocate the linear arrays
-  m_signals = new signal_t[m_length];
-  m_errorsSquared = new signal_t[m_length];
-  m_numEvents = new signal_t[m_length];
-  m_masks = new bool[m_length];
+  m_signals = std::vector<signal_t>(m_length);
+  m_errorsSquared = std::vector<signal_t>(m_length);
+  m_numEvents = std::vector<signal_t>(m_length);
+  m_masks = std::make_unique<bool[]>(m_length);
   // Now copy all the data
-  std::copy_n(other.m_signals, m_length, m_signals);
-  std::copy_n(other.m_errorsSquared, m_length, m_errorsSquared);
-  std::copy_n(other.m_numEvents, m_length, m_numEvents);
-  std::copy_n(other.m_masks, m_length, m_masks);
-}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-MDHistoWorkspace::~MDHistoWorkspace() {
-  delete[] m_signals;
-  delete[] m_errorsSquared;
-  delete[] m_numEvents;
-  delete[] indexMultiplier;
-  delete[] m_vertexesArray;
-  delete[] m_boxLength;
-  delete[] m_indexMaker;
-  delete[] m_indexMax;
-  delete[] m_origin;
-  delete[] m_masks;
+  std::copy_n(other.m_signals.begin(), m_length, m_signals.begin());
+  std::copy_n(other.m_errorsSquared.begin(), m_length, m_errorsSquared.begin());
+  std::copy_n(other.m_numEvents.begin(), m_length, m_numEvents.begin());
+  std::copy_n(other.m_masks.get(), m_length, m_masks.get());
 }
 
 //----------------------------------------------------------------------------------------------
@@ -156,10 +139,10 @@ void MDHistoWorkspace::init(
   this->cacheValues();
 
   // Allocate the linear arrays
-  m_signals = new signal_t[m_length];
-  m_errorsSquared = new signal_t[m_length];
-  m_numEvents = new signal_t[m_length];
-  m_masks = new bool[m_length];
+  m_signals = std::vector<signal_t>(m_length);
+  m_errorsSquared = std::vector<signal_t>(m_length);
+  m_numEvents = std::vector<signal_t>(m_length);
+  m_masks = std::make_unique<bool[]>(m_length);
   // Initialize them to NAN (quickly)
   signal_t nan = std::numeric_limits<signal_t>::quiet_NaN();
   this->setTo(nan, nan, nan);
@@ -176,9 +159,9 @@ void MDHistoWorkspace::cacheValues() {
 
   // For indexing.
   if (numDimensions < 4)
-    indexMultiplier = new size_t[4];
+    indexMultiplier = std::vector<size_t>(4);
   else
-    indexMultiplier = new size_t[numDimensions];
+    indexMultiplier = std::vector<size_t>(numDimensions);
 
   // For quick indexing, accumulate these values
   // First multiplier
@@ -216,7 +199,7 @@ void MDHistoWorkspace::initVertexesArray() {
   size_t numVertices = size_t{1} << numDimensions;
 
   // Allocate the array of the right size
-  m_vertexesArray = new coord_t[nd * numVertices];
+  m_vertexesArray = std::vector<coord_t>(nd * numVertices);
 
   // For each vertex, increase an integeer
   for (size_t i = 0; i < numVertices; ++i) {
@@ -239,20 +222,20 @@ void MDHistoWorkspace::initVertexesArray() {
   }
 
   // Now set the m_boxLength and origin
-  m_boxLength = new coord_t[nd];
-  m_origin = new coord_t[nd];
+  m_boxLength = std::vector<coord_t>(nd);
+  m_origin = std::vector<coord_t>(nd);
   for (size_t d = 0; d < nd; d++) {
     m_boxLength[d] = m_dimensions[d]->getX(1) - m_dimensions[d]->getX(0);
     m_origin[d] = m_dimensions[d]->getX(0);
   }
 
   // The index calculator
-  m_indexMax = new size_t[numDimensions];
+  m_indexMax = std::vector<size_t>(numDimensions);
   for (size_t d = 0; d < nd; d++)
     m_indexMax[d] = m_dimensions[d]->getNBins();
-  m_indexMaker = new size_t[numDimensions];
-  Utils::NestedForLoop::SetUpIndexMaker(numDimensions, m_indexMaker,
-                                        m_indexMax);
+  m_indexMaker = std::vector<size_t>(numDimensions);
+  Utils::NestedForLoop::SetUpIndexMaker(numDimensions, m_indexMaker.data(),
+                                        m_indexMax.data());
 }
 
 //----------------------------------------------------------------------------------------------
@@ -264,10 +247,10 @@ void MDHistoWorkspace::initVertexesArray() {
  */
 void MDHistoWorkspace::setTo(signal_t signal, signal_t errorSquared,
                              signal_t numEvents) {
-  std::fill_n(m_signals, m_length, signal);
-  std::fill_n(m_errorsSquared, m_length, errorSquared);
-  std::fill_n(m_numEvents, m_length, numEvents);
-  std::fill_n(m_masks, m_length, false);
+  std::fill_n(m_signals.begin(), m_length, signal);
+  std::fill_n(m_errorsSquared.begin(), m_length, errorSquared);
+  std::fill_n(m_numEvents.begin(), m_length, numEvents);
+  std::fill_n(m_masks.get(), m_length, false);
   m_nEventsContributed = static_cast<uint64_t>(numEvents) * m_length;
 }
 
@@ -326,7 +309,8 @@ MDHistoWorkspace::getVertexesArray(size_t linearIndex,
   // Index into each dimension. Built from the linearIndex.
   size_t dimIndexes[10];
   Utils::NestedForLoop::GetIndicesFromLinearIndex(
-      numDimensions, linearIndex, m_indexMaker, m_indexMax, dimIndexes);
+      numDimensions, linearIndex, m_indexMaker.data(), m_indexMax.data(),
+      dimIndexes);
 
   // The output vertexes coordinates
   auto out = std::make_unique<coord_t[]>(numDimensions * numVertices);
@@ -352,7 +336,8 @@ Mantid::Kernel::VMD MDHistoWorkspace::getCenter(size_t linearIndex) const {
   // Index into each dimension. Built from the linearIndex.
   size_t dimIndexes[10];
   Utils::NestedForLoop::GetIndicesFromLinearIndex(
-      numDimensions, linearIndex, m_indexMaker, m_indexMax, dimIndexes);
+      numDimensions, linearIndex, m_indexMaker.data(), m_indexMax.data(),
+      dimIndexes);
 
   // The output vertexes coordinates
   VMD out(numDimensions);
@@ -1334,7 +1319,7 @@ void MDHistoWorkspace::clearMDMasking() {
 uint64_t MDHistoWorkspace::getNEvents() const {
   volatile uint64_t cach = this->m_nEventsContributed;
   if (cach != this->m_nEventsContributed) {
-    if (!m_numEvents)
+    if (m_numEvents.empty())
       m_nEventsContributed = std::numeric_limits<uint64_t>::quiet_NaN();
     else
       m_nEventsContributed = sumNContribEvents();

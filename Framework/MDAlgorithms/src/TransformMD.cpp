@@ -171,9 +171,9 @@ void TransformMD::exec() {
         axes[i] = 0;
         if (i > 0)
           histo = transposeMD(histo, axes);
-        signal_t *signals = histo->getSignalArray();
-        signal_t *errorsSq = histo->getErrorSquaredArray();
-        signal_t *numEvents = histo->getNumEventsArray();
+        signal_t *signals = histo->mutableSignalArray();
+        signal_t *errorsSq = histo->mutableErrorSquaredArray();
+        signal_t *numEvents = histo->mutableNumEventsArray();
 
         // Find the extents
         size_t nPoints =

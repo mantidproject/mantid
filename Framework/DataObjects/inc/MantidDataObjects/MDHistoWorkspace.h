@@ -11,15 +11,12 @@
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/MDGeometry.h"
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/System.h"
-
-// using Mantid::DataObjects::WorkspaceSingleValue;
-// using Mantid::API::MDNormalization;
 
 namespace Mantid {
 namespace DataObjects {
@@ -38,7 +35,7 @@ namespace DataObjects {
  * @author Janik Zikovsky
  * @date 2011-03-24 11:21:06.280523
  */
-class DLLExport MDHistoWorkspace : public API::IMDHistoWorkspace {
+class MANTID_DATAOBJECTS_DLL MDHistoWorkspace : public API::IMDHistoWorkspace {
 public:
   MDHistoWorkspace(Mantid::Geometry::MDHistoDimension_sptr dimX,
                    Mantid::Geometry::MDHistoDimension_sptr dimY =
@@ -58,7 +55,6 @@ public:
                    Mantid::API::MDNormalization displayNormalization =
                        Mantid::API::NoNormalization);
   MDHistoWorkspace &operator=(const MDHistoWorkspace &other) = delete;
-  ~MDHistoWorkspace() override;
 
   /// Returns a clone of the workspace
   std::unique_ptr<MDHistoWorkspace> clone() const {
@@ -144,29 +140,51 @@ public:
    * To find the index into the linear array, dim0 + indexMultiplier[0]*dim1 +
    * ...
    */
-  const size_t *getIndexMultiplier() const { return indexMultiplier; }
+  const size_t *getIndexMultiplier() const { return indexMultiplier.data(); }
 
   /** @return the direct pointer to the signal array. For speed */
-  signal_t *getSignalArray() const override { return m_signals; }
+  const signal_t *getSignalArray() const override { return m_signals.data(); }
 
   /** @return the inverse of volume of EACH cell in the workspace. For
    * normalizing. */
   coord_t getInverseVolume() const override { return m_inverseVolume; }
 
   /** @return the direct pointer to the error squared array. For speed */
-  signal_t *getErrorSquaredArray() const override { return m_errorsSquared; }
+  const signal_t *getErrorSquaredArray() const override {
+    return m_errorsSquared.data();
+  }
 
   /** @return the direct pointer to the array of the number of events. For speed
    */
-  signal_t *getNumEventsArray() const override { return m_numEvents; }
+  const signal_t *getNumEventsArray() const override {
+    return m_numEvents.data();
+  }
 
   /** @return the direct pointer to the array of mask bits (bool). For
    * speed/testing */
-  bool *getMaskArray() const { return m_masks; }
+  const bool *getMaskArray() const { return m_masks.get(); }
 
   /** Return the aray of bin withs  (the linear length of a box) for each
    * dimension */
-  const coord_t *getBinWidths() const { return m_boxLength; }
+  const coord_t *getBinWidths() const { return m_boxLength.data(); }
+
+  /** @return the direct pointer to the signal array. For speed. non-const
+   * version */
+  signal_t *mutableSignalArray() override { return m_signals.data(); }
+
+  /** @return the direct pointer to the errors array. For speed. non-const
+   * version */
+  signal_t *mutableErrorSquaredArray() override {
+    return m_errorsSquared.data();
+  }
+
+  /** @return the direct pointer to the errors array. For speed. non-const
+   * version */
+  signal_t *mutableNumEventsArray() override { return m_numEvents.data(); }
+
+  /** @return the direct pointer to the array of mask bits (bool). For
+   * speed/testing */
+  bool *mutableMaskArray() { return m_masks.get(); }
 
   /// Get the special coordinate system.
   Kernel::SpecialCoordinateSystem getSpecialCoordinateSystem() const override;
@@ -446,36 +464,36 @@ private:
   size_t numDimensions;
 
   /// Linear array of signals for each bin
-  signal_t *m_signals;
+  std::vector<signal_t> m_signals;
 
   /// Linear array of errors for each bin
-  signal_t *m_errorsSquared;
+  std::vector<signal_t> m_errorsSquared;
 
   /// Number of contributing events for each bin.
-  signal_t *m_numEvents;
+  std::vector<signal_t> m_numEvents;
 
   /// Length of the m_signals / m_errorsSquared arrays.
   size_t m_length;
 
   /// To find the index into the linear array, dim0 + indexMultiplier[0]*dim1 +
   /// ...
-  size_t *indexMultiplier;
+  std::vector<size_t> indexMultiplier;
   /// For converting to/from linear index to tdimensions
-  size_t *m_indexMaker;
+  std::vector<size_t> m_indexMaker;
   /// Max index into each dimension
-  size_t *m_indexMax;
+  std::vector<size_t> m_indexMax;
 
   /// Inverse of the volume of EACH cell
   coord_t m_inverseVolume;
 
   /// Pre-calculated vertexes array for the 0th box
-  coord_t *m_vertexesArray;
+  std::vector<coord_t> m_vertexesArray;
 
   /// Vector of the length of the box in each dimension
-  coord_t *m_boxLength;
+  std::vector<coord_t> m_boxLength;
 
   /// Vector of the origin in each dimension
-  coord_t *m_origin;
+  std::vector<coord_t> m_origin;
   /// the number of events, contributed into the workspace;
   mutable uint64_t m_nEventsContributed;
 
@@ -502,8 +520,9 @@ protected:
   /// Protected copy constructor. May be used by childs for cloning.
   MDHistoWorkspace(const MDHistoWorkspace &other);
 
-  /// Linear array of masks for each bin
-  bool *m_masks;
+  /// Linear array of masks for each bin. Avoids using vector<bool>
+  /// due to performance concerns.
+  std::unique_ptr<bool[]> m_masks;
 };
 
 /// A shared pointer to a MDHistoWorkspace

@@ -250,19 +250,19 @@ public:
     VMD outV;
 
     // The "binning" transform
-    CoordTransform *trans = alg->m_transform;
+    CoordTransform *trans = alg->m_transform.get();
     TS_ASSERT(trans);
     trans->apply(in, out);
     TS_ASSERT_EQUALS(VMD(3, out), VMD(0.5, 0.75, 1.25));
 
     // The "real" transform from original
-    CoordTransform *transFrom = alg->m_transformFromOriginal;
+    CoordTransform *transFrom = alg->m_transformFromOriginal.get();
     TS_ASSERT(transFrom);
     transFrom->apply(in, out);
     TS_ASSERT_EQUALS(VMD(3, out), VMD(2.5, 3.5, 4.5));
 
     // The "reverse" transform
-    CoordTransform *transTo = alg->m_transformToOriginal;
+    CoordTransform *transTo = alg->m_transformToOriginal.get();
     TS_ASSERT(transTo);
     transTo->apply(out, in);
     TS_ASSERT_EQUALS(VMD(3, in), VMD(2.5, 3.5, 4.5));
@@ -288,19 +288,19 @@ public:
     VMD outV;
 
     // The "binning" transform
-    CoordTransform *trans = alg->m_transform;
+    CoordTransform *trans = alg->m_transform.get();
     TS_ASSERT(trans);
     trans->apply(in, out);
     TS_ASSERT_EQUALS(VMD(3, out), VMD(1.25, 0.5, 0.75));
 
     // The "real" transform from original
-    CoordTransform *transFrom = alg->m_transformFromOriginal;
+    CoordTransform *transFrom = alg->m_transformFromOriginal.get();
     TS_ASSERT(transFrom);
     transFrom->apply(in, out);
     TS_ASSERT_EQUALS(VMD(3, out), VMD(4.5, 2.5, 3.5));
 
     // The "reverse" transform
-    CoordTransform *transTo = alg->m_transformToOriginal;
+    CoordTransform *transTo = alg->m_transformToOriginal.get();
     TS_ASSERT(transTo);
     transTo->apply(out, in);
     TS_ASSERT_EQUALS(VMD(3, in), VMD(2.5, 3.5, 4.5));
@@ -319,27 +319,26 @@ public:
     coord_t out[1];
 
     // The "binning" transform
-    CoordTransform *trans = alg->m_transform;
+    CoordTransform *trans = alg->m_transform.get();
     TS_ASSERT(trans);
     trans->apply(in, out);
     TS_ASSERT_DELTA(out[0], 0.5, 1e-5);
 
     // The "real" transform from original
-    CoordTransform *transFrom = alg->m_transformFromOriginal;
+    CoordTransform *transFrom = alg->m_transformFromOriginal.get();
     TS_ASSERT(transFrom);
     transFrom->apply(in, out);
     TS_ASSERT_DELTA(out[0], 2.5, 1e-5);
 
     // The "reverse" transform does NOT exist
-    CoordTransform *transTo = alg->m_transformToOriginal;
+    CoordTransform *transTo = alg->m_transformToOriginal.get();
     TS_ASSERT(transTo == nullptr);
   }
 
   void test_aligned_ImplicitFunction() {
     SlicingAlgorithmImpl *alg = do_createAlignedTransform(
         "Axis0, 2.0,8.0, 6", "Axis1, 2.0,8.0, 3", "Axis2, 2.0,8.0, 3", "");
-    MDImplicitFunction *func =
-        alg->getImplicitFunctionForChunk(nullptr, nullptr);
+    auto func = alg->getImplicitFunctionForChunk(nullptr, nullptr);
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 6);
     TS_ASSERT(func->isPointContained(VMD(3, 4, 5)));
@@ -353,8 +352,7 @@ public:
     /* This defines a chunk implicit function between 3-4 in each axis */
     size_t chunkMin[3] = {1, 1, 1};
     size_t chunkMax[3] = {2, 2, 2};
-    MDImplicitFunction *func =
-        alg->getImplicitFunctionForChunk(chunkMin, chunkMax);
+    auto func = alg->getImplicitFunctionForChunk(chunkMin, chunkMax);
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 6);
     TS_ASSERT(func->isPointContained(VMD(3.5, 3.5, 3.5)));
@@ -670,26 +668,25 @@ public:
     VMD outV;
 
     // The "binning" transform
-    CoordTransform *trans = alg->m_transform;
+    CoordTransform *trans = alg->m_transform.get();
     TS_ASSERT(trans);
     trans->apply(in, out);
     TS_ASSERT_EQUALS(VMD(3, out), VMD(cos(angle), -sin(angle), 1.3));
 
     // The "real" transform from original
-    CoordTransform *transFrom = alg->m_transformFromOriginal;
+    CoordTransform *transFrom = alg->m_transformFromOriginal.get();
     TS_ASSERT(transFrom);
     transFrom->apply(in, out);
     TS_ASSERT_EQUALS(VMD(3, out), VMD(cos(angle), -sin(angle), 1.3) * 2);
 
     // The "reverse" transform
-    CoordTransform *transTo = alg->m_transformToOriginal;
+    CoordTransform *transTo = alg->m_transformToOriginal.get();
     TS_ASSERT(transTo);
     transTo->apply(out, in);
     TS_ASSERT_EQUALS(VMD(3, in), VMD(3.0, 1.0, 2.6));
 
     // The implicit function
-    MDImplicitFunction *func =
-        alg->getImplicitFunctionForChunk(nullptr, nullptr);
+    auto func = alg->getImplicitFunctionForChunk(nullptr, nullptr);
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 6);
     TS_ASSERT(func->isPointContained(VMD(1.5, 1.5, 2)));
@@ -728,26 +725,25 @@ public:
     VMD outV;
 
     // The "binning" transform
-    CoordTransform *trans = alg->m_transform;
+    CoordTransform *trans = alg->m_transform.get();
     TS_ASSERT(trans);
     trans->apply(in, out);
     TS_ASSERT_EQUALS(VMD(3, out), VMD(1.5, 0.5, 1.3));
 
     // The "real" transform from original
-    CoordTransform *transFrom = alg->m_transformFromOriginal;
+    CoordTransform *transFrom = alg->m_transformFromOriginal.get();
     TS_ASSERT(transFrom);
     transFrom->apply(in, out);
     TS_ASSERT_EQUALS(VMD(3, out), VMD(3.0, 1.0, 2.6));
 
     // The "reverse" transform
-    CoordTransform *transTo = alg->m_transformToOriginal;
+    CoordTransform *transTo = alg->m_transformToOriginal.get();
     TS_ASSERT(transTo);
     transTo->apply(out, in);
     TS_ASSERT_EQUALS(VMD(3, in), VMD(3.0, -1.0, 2.6));
 
     // The implicit function
-    MDImplicitFunction *func =
-        alg->getImplicitFunctionForChunk(nullptr, nullptr);
+    auto func = alg->getImplicitFunctionForChunk(nullptr, nullptr);
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 6);
     TS_ASSERT(func->isPointContained(VMD(1.5, -1.5, 2)));
@@ -764,7 +760,7 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 3);
 
     // The implicit function
-    MDImplicitFunction *func(nullptr);
+    std::unique_ptr<MDImplicitFunction> func;
     TS_ASSERT_THROWS_NOTHING(
         func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
@@ -785,7 +781,7 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 4);
 
     // The implicit function
-    MDImplicitFunction *func(nullptr);
+    std::unique_ptr<MDImplicitFunction> func;
     TS_ASSERT_THROWS_NOTHING(
         func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
@@ -804,7 +800,7 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 4);
 
     // The implicit function
-    MDImplicitFunction *func(nullptr);
+    std::unique_ptr<MDImplicitFunction> func;
     TS_ASSERT_THROWS_NOTHING(
         func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
@@ -822,7 +818,7 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 3);
 
     // The implicit function
-    MDImplicitFunction *func(nullptr);
+    std::unique_ptr<MDImplicitFunction> func;
     TS_ASSERT_THROWS_NOTHING(
         func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
@@ -843,7 +839,7 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 2);
 
     // The implicit function
-    MDImplicitFunction *func(nullptr);
+    std::unique_ptr<MDImplicitFunction> func;
     TS_ASSERT_THROWS_NOTHING(
         func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
@@ -862,7 +858,7 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 2);
 
     // The implicit function
-    MDImplicitFunction *func(nullptr);
+    std::unique_ptr<MDImplicitFunction> func;
     TS_ASSERT_THROWS_NOTHING(
         func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
@@ -881,7 +877,7 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 2);
 
     // The implicit function
-    MDImplicitFunction *func(nullptr);
+    std::unique_ptr<MDImplicitFunction> func;
     TS_ASSERT_THROWS_NOTHING(
         func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
@@ -923,26 +919,25 @@ public:
     VMD outV;
 
     // The "binning" transform
-    CoordTransform *trans = alg->m_transform;
+    CoordTransform *trans = alg->m_transform.get();
     TS_ASSERT(trans);
     trans->apply(in, out);
     TS_ASSERT_EQUALS(VMD(2, out), VMD(3.0, 1.0));
 
     // The "real" transform from original
-    CoordTransform *transFrom = alg->m_transformFromOriginal;
+    CoordTransform *transFrom = alg->m_transformFromOriginal.get();
     TS_ASSERT(transFrom);
     transFrom->apply(in, out);
     TS_ASSERT_EQUALS(VMD(2, out), VMD(+2, -12));
 
     // The "reverse" transform
-    CoordTransform *transTo = alg->m_transformToOriginal;
+    CoordTransform *transTo = alg->m_transformToOriginal.get();
     TS_ASSERT(transTo);
     transTo->apply(out, in);
     TS_ASSERT_EQUALS(VMD(2, in), VMD(3., -11.));
 
     // The implicit function
-    MDImplicitFunction *func =
-        alg->getImplicitFunctionForChunk(nullptr, nullptr);
+    auto func = alg->getImplicitFunctionForChunk(nullptr, nullptr);
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 4);
     TS_ASSERT(func->isPointContained(VMD(-8.9, -18.9)));
@@ -989,26 +984,25 @@ public:
        which is offset by (11, 17.6) from the minimum (-10, -20)
        with bins of size (4,8) (in the OUTPUT dimensions),
        which means the bin coordinate is (11/4, 17.6/8) */
-    CoordTransform *trans = alg->m_transform;
+    CoordTransform *trans = alg->m_transform.get();
     TS_ASSERT(trans);
     trans->apply(in, out);
     TS_ASSERT_EQUALS(VMD(2, out), VMD(11. / 4., 17.6 / 8.));
 
     // The "real" transform from original
-    CoordTransform *transFrom = alg->m_transformFromOriginal;
+    CoordTransform *transFrom = alg->m_transformFromOriginal.get();
     TS_ASSERT(transFrom);
     transFrom->apply(in, out);
     TS_ASSERT_EQUALS(VMD(2, out), VMD(+1., -2.4));
 
     // The "reverse" transform
-    CoordTransform *transTo = alg->m_transformToOriginal;
+    CoordTransform *transTo = alg->m_transformToOriginal.get();
     TS_ASSERT(transTo);
     transTo->apply(out, in);
     TS_ASSERT_EQUALS(VMD(2, in), VMD(3., -11.));
 
     // The implicit function
-    MDImplicitFunction *func =
-        alg->getImplicitFunctionForChunk(nullptr, nullptr);
+    auto func = alg->getImplicitFunctionForChunk(nullptr, nullptr);
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 4);
     TS_ASSERT(func->isPointContained(VMD(-18.9, -98.9)));
@@ -1036,7 +1030,7 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 2);
 
     // The implicit function
-    MDImplicitFunction *func(nullptr);
+    std::unique_ptr<MDImplicitFunction> func;
     TS_ASSERT_THROWS_NOTHING(
         func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
@@ -1058,7 +1052,7 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 2);
 
     // The implicit function
-    MDImplicitFunction *func(nullptr);
+    std::unique_ptr<MDImplicitFunction> func;
     TS_ASSERT_THROWS_NOTHING(
         func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
@@ -1082,7 +1076,7 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 4);
 
     // The implicit function
-    MDImplicitFunction *func(nullptr);
+    std::unique_ptr<MDImplicitFunction> func;
     TS_ASSERT_THROWS_NOTHING(
         func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
@@ -1103,7 +1097,7 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 3);
 
     // The implicit function
-    MDImplicitFunction *func(nullptr);
+    std::unique_ptr<MDImplicitFunction> func;
     TS_ASSERT_THROWS_NOTHING(
         func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
@@ -1123,8 +1117,7 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 1);
 
     // The implicit function
-    MDImplicitFunction *func =
-        alg->getImplicitFunctionForChunk(nullptr, nullptr);
+    auto func = alg->getImplicitFunctionForChunk(nullptr, nullptr);
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 2);
     TS_ASSERT(func->isPointContained(VMD(1.5, 1.5, 2, 345)));
@@ -1139,8 +1132,7 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 1);
 
     // The implicit function
-    MDImplicitFunction *func =
-        alg->getImplicitFunctionForChunk(nullptr, nullptr);
+    auto func = alg->getImplicitFunctionForChunk(nullptr, nullptr);
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 2);
     TS_ASSERT(func->isPointContained(VMD(1.5, 1.5, 2)));
@@ -1155,8 +1147,7 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 1);
 
     // The implicit function
-    MDImplicitFunction *func =
-        alg->getImplicitFunctionForChunk(nullptr, nullptr);
+    auto func = alg->getImplicitFunctionForChunk(nullptr, nullptr);
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 2);
     TS_ASSERT(func->isPointContained(VMD(1.5, 1.5)));
@@ -1173,8 +1164,7 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 1);
 
     // The implicit function
-    MDImplicitFunction *func =
-        alg->getImplicitFunctionForChunk(nullptr, nullptr);
+    auto func = alg->getImplicitFunctionForChunk(nullptr, nullptr);
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 2);
     VMD point(1);

@@ -126,7 +126,7 @@ void SaveZODS::exec() {
   file->writeData("size", size_field);
 
   // Copy data into a vector
-  signal_t *signal = ws->getSignalArray();
+  const auto signal = ws->getSignalArray();
   std::vector<double> data;
 
   for (int i = 0; i < size_field[0]; i++)
@@ -139,7 +139,7 @@ void SaveZODS::exec() {
   file->writeData("Data", data, size);
 
   // Copy errors (not squared) into a vector called sigma
-  signal_t *errorSquared = ws->getErrorSquaredArray();
+  const auto errorSquared = ws->getErrorSquaredArray();
   std::vector<double> sigma;
   sigma.reserve(numPoints);
   for (int i = 0; i < size_field[0]; i++)
