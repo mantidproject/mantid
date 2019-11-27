@@ -755,7 +755,13 @@ public:
     TS_ASSERT(compInfo.relativePosition(subComponentIndex)
                   .isApprox(subCompPosition - rootPosition));
 
-    const auto diffPos =
+    // We deliberately avoid auto here as it does not mix well with Eigen and
+    // its expression templates. If position returned by value (as it used to)
+    // then const auto diffPos is an expression template that refers to
+    // stack-based values that go out of scope after this line as run and
+    // evaluating diffPos after that leads to undefined behaviour. Address
+    // sanitizer will show a stack-use-after-scope error.
+    const Vector3d diffPos =
         compInfo.position(subComponentIndex) - compInfo.position(rootIndex);
     TSM_ASSERT("Vector between comp and root is not the same as relative "
                "position. Rotation involved.",

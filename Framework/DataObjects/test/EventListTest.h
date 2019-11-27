@@ -297,14 +297,12 @@ public:
     this->fake_data();
     TS_ASSERT_EQUALS(el.getEvents().size(), NUMEVENTS);
     TS_ASSERT_EQUALS(el.getNumberEvents(), NUMEVENTS);
-    TS_ASSERT_THROWS(el.getWeightedEvents().size(), const std::runtime_error &);
-    TS_ASSERT_THROWS(el.getWeightedEventsNoTime().size(),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(el.getWeightedEvents(), const std::runtime_error &);
+    TS_ASSERT_THROWS(el.getWeightedEventsNoTime(), const std::runtime_error &);
 
     el.switchTo(WEIGHTED);
-    TS_ASSERT_THROWS(el.getEvents().size(), const std::runtime_error &);
-    TS_ASSERT_THROWS(el.getWeightedEventsNoTime().size(),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(el.getEvents(), const std::runtime_error &);
+    TS_ASSERT_THROWS(el.getWeightedEventsNoTime(), const std::runtime_error &);
     TS_ASSERT_EQUALS(el.getWeightedEvents().size(), NUMEVENTS);
     TS_ASSERT_EQUALS(el.getNumberEvents(), NUMEVENTS);
     TS_ASSERT_EQUALS(el.getEvent(0).weight(), 1.0);
@@ -316,8 +314,8 @@ public:
     // Start with a bit of fake data
     this->fake_data();
     el.switchTo(WEIGHTED_NOTIME);
-    TS_ASSERT_THROWS(el.getEvents().size(), const std::runtime_error &);
-    TS_ASSERT_THROWS(el.getWeightedEvents().size(), const std::runtime_error &);
+    TS_ASSERT_THROWS(el.getEvents(), const std::runtime_error &);
+    TS_ASSERT_THROWS(el.getWeightedEvents(), const std::runtime_error &);
     TS_ASSERT_EQUALS(el.getWeightedEventsNoTime().size(), NUMEVENTS);
     TS_ASSERT_EQUALS(el.getNumberEvents(), NUMEVENTS);
     TS_ASSERT_EQUALS(el.getWeightedEventsNoTime()[0].weight(), 1.0);

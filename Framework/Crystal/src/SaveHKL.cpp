@@ -366,9 +366,9 @@ void SaveHKL::exec() {
           continue;
         }
         // Take out the "bank" part of the bank name and convert to an int
-        bankName.erase(remove_if(bankName.begin(), bankName.end(),
-                                 not1(std::ptr_fun(::isdigit))),
-                       bankName.end());
+        bankName.erase(
+            remove_if(bankName.begin(), bankName.end(), std::not_fn(::isdigit)),
+            bankName.end());
         Strings::convert(bankName, bank);
 
         // Two-theta = polar angle = scattering angle = between +Z vector and

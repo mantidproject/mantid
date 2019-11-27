@@ -252,16 +252,16 @@ bool groupnumber(std::string groupi, std::string groupj) {
   int i = 0;
   std::string groupName = groupi;
   // Take out the "group" part of the group name and convert to an int
-  groupName.erase(remove_if(groupName.begin(), groupName.end(),
-                            not1(std::ptr_fun(::isdigit))),
-                  groupName.end());
+  groupName.erase(
+      remove_if(groupName.begin(), groupName.end(), std::not_fn(::isdigit)),
+      groupName.end());
   Strings::convert(groupName, i);
   int j = 0;
   groupName = groupj;
   // Take out the "group" part of the group name and convert to an int
-  groupName.erase(remove_if(groupName.begin(), groupName.end(),
-                            not1(std::ptr_fun(::isdigit))),
-                  groupName.end());
+  groupName.erase(
+      remove_if(groupName.begin(), groupName.end(), std::not_fn(::isdigit)),
+      groupName.end());
   Strings::convert(groupName, j);
   return (i < j);
 }

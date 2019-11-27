@@ -7,8 +7,6 @@
 #ifndef MANTID_KERNEL_MULTITHREADED_H_
 #define MANTID_KERNEL_MULTITHREADED_H_
 
-#include "MantidKernel/DataItem.h"
-
 #include <atomic>
 #include <mutex>
 
