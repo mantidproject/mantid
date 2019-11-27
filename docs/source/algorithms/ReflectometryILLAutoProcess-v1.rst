@@ -6,19 +6,14 @@ Description
 -----------
 
 This algorithm executes the full data reduction for ILL reflectometers D17 and FIGARO in TOF mode (specular reflection).
-It supports the treatment of measurements at several angles together.
-It offers incoherent (sum along constant :math:`\lambda`) or coherent (sum along constant :math:`Q_{z}`) methods of peak summation.
-For the incoherent method, the reflectivity curve is calculated by dividing the already summed foreground of the reflected beam to the summed foreground of the direct beam.
-For the coherent method, first the reflected beam data is divided by the direct beam data in 2D, then the ratio is summed along the lines of the constant :math:`Q_{z}`.
-Treatment of polarized measurements (with or without analysers) is also provided.
 
 Input
 -----
 
 The mandatory inputs are comma separated list of nexus files for direct and reflected beam measurements.
-`,` stands as the separator of different angle configurations.
-`+` (sum) or `-` (range sum) operations can be used to sum different files at the same instrument configuration.
-When summing, the metadata (e.g. acquisition time) will also be summed, so that the subsequent normalisation is handled correctly.
+**,** stands as the separator of different angle configurations.
+**+** (sum) or **-** (range sum) operations can be used to sum different files at the same instrument configuration.
+When summing the metadata (e.g. acquisition time) will also be summed, so that the subsequent normalisation is handled correctly.
 There must be the same number of angle configurations both for direct and reflected beam inputs.
 
 Output
@@ -31,11 +26,17 @@ An automatically stitched result is also produced.
 Stitch in this case just takes the union of all the initial points without merging or removal, only scaling can be applied.
 The outputs can be readily saved by :ref:`SaveReflectometryAscii <algm-SaveReflectometryAscii>` algorithm for further analysis.
 
-BraggAngle
-----------
+Bragg Angle
+-----------
 
 If user specified :math:`\theta` angles are provided, they will be used.
 Otherwise `SampleAngle` or `DetectorAngle` (default) option is executed.
+
+Summation Type
+--------------
+
+The default summation type is incoherent (sum along constant :math:`\lambda`), where the reflectivity curve is calculated by dividing the summed foreground of the reflected beam by the summed foreground of the direct beam.
+For coherent summing, first the reflected beam data is divided by the direct beam data in 2D, then the ratio is summed along the lines of the constant :math:`Q_{z}`.
 
 Options
 -------
@@ -53,11 +54,7 @@ In such circumstances it must be disabled.
 Workflow
 --------
 
-The processing of the direct and reflected beams are shown in the following diagrams.
-
-.. diagram:: ReflectometryILLAutoProcess1-v1_wkflw.dot
-
-.. diagram:: ReflectometryILLAutoProcess2-v1_wkflw.dot
+.. diagram:: ReflectometryILLAutoProcess-v1_wkflw.dot
 
 Usage
 -----
@@ -74,11 +71,33 @@ Usage
      WavelengthLowerBound=3.5,
      WavelengthUpperBound=24.5
     )
-    print('The R(Q) workspace has {0} points, from {1} to {2} inverse Angstrom'.format(ws.getItem(0).blocksize(), ws.getItem(0).readX(0)[0], ws.getItem(0).readX(0)[-1]))
+    print('The R(Q) workspace has {0} points'.format(ws.getItem(0).blocksize()))
 
 .. testoutput:: SingleAngle
 
-    The R(Q) workspace has 672 points, from 0.00718855456602 to 0.0497798802388 inverse Angstrom
+    The R(Q) workspace has 672 points
+
+**Example - Multiple Angles**
+
+.. testcode:: MultipleAngles
+
+    ws = ReflectometryILLAutoProcess(
+     Run='541853,541854',
+     DirectRun='541838,541839',
+     WavelengthLowerBound=[3.5,3.5],
+     WavelengthUpperBound=[25.,22.],
+     GlobalScaleFactor=0.13,
+     DeltaQFractionBinning=0.5,
+    )
+    print('The R(Q) workspace at first angle has {0} points'.format(ws.getItem(0).blocksize()))
+    print('The R(Q) workspace at second angle has {0} points'.format(ws.getItem(1).blocksize()))
+    print('The stitched R(Q) workspace has {0} points'.format(ws.getItem(2).blocksize()))
+
+.. testoutput:: MultipleAngles
+
+    The R(Q) workspace at first angle has 237 points
+    The R(Q) workspace at second angle has 127 points
+    The stitched R(Q) workspace has 364 points
 
 .. relatedalgorithms::
 
