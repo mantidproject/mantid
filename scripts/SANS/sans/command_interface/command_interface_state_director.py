@@ -482,7 +482,7 @@ class CommandInterfaceStateDirector(object):
         phi_min = command.values[0]
         phi_max = command.values[1]
         use_phi_mirror = command.values[2]
-        new_state_entries = {LimitsId.angle: mask_angle_entry(min=phi_min, max=phi_max, use_mirror=use_phi_mirror)}
+        new_state_entries = {LimitsId.ANGLE: mask_angle_entry(min=phi_min, max=phi_max, use_mirror=use_phi_mirror)}
         self.add_to_processed_state_settings(new_state_entries)
 
     def _process_wavelength_correction_file(self, command):
@@ -494,7 +494,7 @@ class CommandInterfaceStateDirector(object):
     def _process_mask_radius(self, command):
         radius_min = command.values[0]
         radius_max = command.values[1]
-        new_state_entries = {LimitsId.radius: range_entry(start=radius_min, stop=radius_max)}
+        new_state_entries = {LimitsId.RADIUS: range_entry(start=radius_min, stop=radius_max)}
         self.add_to_processed_state_settings(new_state_entries)
 
     def _process_wavelength_limit(self, command):
@@ -502,7 +502,7 @@ class CommandInterfaceStateDirector(object):
         wavelength_high = command.values[1]
         wavelength_step = command.values[2]
         wavelength_step_type = command.values[3]
-        new_state_entries = {LimitsId.wavelength: simple_range(start=wavelength_low, stop=wavelength_high,
+        new_state_entries = {LimitsId.WAVELENGTH: simple_range(start=wavelength_low, stop=wavelength_high,
                                                                step=wavelength_step, step_type=wavelength_step_type)}
         self.add_to_processed_state_settings(new_state_entries)
 
@@ -517,8 +517,8 @@ class CommandInterfaceStateDirector(object):
         # is not nice but the command interface forces us to do so. We take a copy of the last LimitsId.wavelength
         # entry, we copy it and then change the desired settings. This means it has to be set at this point, else
         # something is wrong
-        if LimitsId.wavelength in self._processed_state_settings:
-            last_entry = self._processed_state_settings[LimitsId.wavelength][-1]
+        if LimitsId.WAVELENGTH in self._processed_state_settings:
+            last_entry = self._processed_state_settings[LimitsId.WAVELENGTH][-1]
 
             new_wavelength_low = wavelength_low if wavelength_low is not None else last_entry.start
             new_wavelength_high = wavelength_high if wavelength_high is not None else last_entry.stop
@@ -526,7 +526,7 @@ class CommandInterfaceStateDirector(object):
                                      step_type=last_entry.step_type)
 
             if wavelength_low is not None or wavelength_high is not None:
-                copied_entry = {LimitsId.wavelength: new_range}
+                copied_entry = {LimitsId.WAVELENGTH: new_range}
                 self.add_to_processed_state_settings(copied_entry)
         else:
             raise RuntimeError("CommandInterfaceStateDirector: Setting the lower and upper wavelength bounds is not"
@@ -545,7 +545,7 @@ class CommandInterfaceStateDirector(object):
         q_max = command.values[1]
         q_step = command.values[2]
         q_step_type = command.values[3]
-        new_state_entries = {LimitsId.qxy: simple_range(start=q_min, stop=q_max, step=q_step, step_type=q_step_type)}
+        new_state_entries = {LimitsId.QXY: simple_range(start=q_min, stop=q_max, step=q_step, step_type=q_step_type)}
         self.add_to_processed_state_settings(new_state_entries)
 
     def _process_compatibility_mode(self, command):

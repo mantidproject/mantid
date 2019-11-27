@@ -187,9 +187,9 @@ class LimitParserTest(unittest.TestCase):
         self.assertTrue(LimitParser.get_type(), "L")
 
     def test_that_angle_limit_is_parsed_correctly(self):
-        valid_settings = {"L/PhI 123   345.2": {LimitsId.angle: mask_angle_entry(min=123, max=345.2,
+        valid_settings = {"L/PhI 123   345.2": {LimitsId.ANGLE: mask_angle_entry(min=123, max=345.2,
                                                                                  use_mirror=True)},
-                          "L/PHI / NOMIRROR 123 -345.2": {LimitsId.angle: mask_angle_entry(min=123, max=-345.2,
+                          "L/PHI / NOMIRROR 123 -345.2": {LimitsId.ANGLE: mask_angle_entry(min=123, max=-345.2,
                                                                                            use_mirror=False)}}
 
         invalid_settings = {"L/PHI/NMIRROR/ 23 454": RuntimeError,
@@ -201,9 +201,9 @@ class LimitParserTest(unittest.TestCase):
         do_test(limit_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_event_time_limit_is_parsed_correctly(self):
-        valid_settings = {"L  / EVEnTStime 0,-10,32,434,34523,35": {LimitsId.events_binning:
+        valid_settings = {"L  / EVEnTStime 0,-10,32,434,34523,35": {LimitsId.EVENTS_BINNING:
                                                                     "0.0,-10.0,32.0,434.0,34523.0,35.0"},
-                          "L / Eventstime 0 -10 32 434 34523 35": {LimitsId.events_binning:
+                          "L / Eventstime 0 -10 32 434 34523 35": {LimitsId.EVENTS_BINNING:
                                                                    "0.0,-10.0,32.0,434.0,34523.0,35.0"}}
 
         invalid_settings = {"L  / EEnTStime 0,-10,32,434,34523,35": RuntimeError,
@@ -213,10 +213,10 @@ class LimitParserTest(unittest.TestCase):
         do_test(limit_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_cut_limits_are_parsed_correctly(self):
-        valid_settings = {"L/Q/RCUT 234.4": {LimitsId.radius_cut: 234.4},
-                          "L /q / RcUT -234.34": {LimitsId.radius_cut: -234.34},
-                          "l/Q/WCUT 234.4": {LimitsId.wavelength_cut: 234.4},
-                          "L /q / wcUT -234.34": {LimitsId.wavelength_cut: -234.34}}
+        valid_settings = {"L/Q/RCUT 234.4": {LimitsId.RADIUS_CUT: 234.4},
+                          "L /q / RcUT -234.34": {LimitsId.RADIUS_CUT: -234.34},
+                          "l/Q/WCUT 234.4": {LimitsId.WAVELENGTH_CUT: 234.4},
+                          "L /q / wcUT -234.34": {LimitsId.WAVELENGTH_CUT: -234.34}}
 
         invalid_settings = {"L/Q/Rcu 123": RuntimeError,
                             "L/Q/RCUT/ 2134": RuntimeError,
@@ -228,9 +228,9 @@ class LimitParserTest(unittest.TestCase):
         do_test(limit_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_radius_limits_are_parsed_correctly(self):
-        valid_settings = {"L/R 234 235": {LimitsId.radius: range_entry(start=234, stop=235)},
-                          "L / r   -234   235": {LimitsId.radius: range_entry(start=-234, stop=235)},
-                          "L / r   -234   235 454": {LimitsId.radius: range_entry(start=-234, stop=235)}
+        valid_settings = {"L/R 234 235": {LimitsId.RADIUS: range_entry(start=234, stop=235)},
+                          "L / r   -234   235": {LimitsId.RADIUS: range_entry(start=-234, stop=235)},
+                          "L / r   -234   235 454": {LimitsId.RADIUS: range_entry(start=-234, stop=235)}
                           }
         invalid_settings = {"L/R/ 234 435": RuntimeError,
                             "L/Rr 234 435": RuntimeError,
@@ -242,31 +242,31 @@ class LimitParserTest(unittest.TestCase):
         do_test(limit_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_q_limits_are_parsed_correctly(self):
-        valid_settings = {"L/Q 12 34": {LimitsId.q: q_rebin_values(min=12., max=34., rebin_string="12.0,34.0")},
-                          "L/Q 12 34 2.7": {LimitsId.q: q_rebin_values(min=12., max=34., rebin_string="12.0,2.7,34.0")},
-                          "L/Q -12 34.6 2.7/LOG": {LimitsId.q: q_rebin_values(min=-12., max=34.6,
+        valid_settings = {"L/Q 12 34": {LimitsId.Q: q_rebin_values(min=12., max=34., rebin_string="12.0,34.0")},
+                          "L/Q 12 34 2.7": {LimitsId.Q: q_rebin_values(min=12., max=34., rebin_string="12.0,2.7,34.0")},
+                          "L/Q -12 34.6 2.7/LOG": {LimitsId.Q: q_rebin_values(min=-12., max=34.6,
                                                                               rebin_string="-12.0,-2.7,34.6")},
-                          "L/q -12 3.6 2 /LIN": {LimitsId.q: q_rebin_values(min=-12., max=3.6,
+                          "L/q -12 3.6 2 /LIN": {LimitsId.Q: q_rebin_values(min=-12., max=3.6,
                                                                             rebin_string="-12.0,2.0,3.6")},
-                          "L/q -12   0.41  23 -34.8 3.6": {LimitsId.q: q_rebin_values(min=-12., max=3.6,
-                                                              rebin_string="-12.0,0.41,23.0,-34.8,3.6")},  # noqa
-                          "L/q -12   0.42  23 -34.8 3.6 /LIn": {LimitsId.q: q_rebin_values(min=-12., max=3.6,
-                                                                   rebin_string="-12.0,0.42,23.0,34.8,3.6")},
-                          "L/q -12   0.43     23 -34.8 3.6": {LimitsId.q: q_rebin_values(min=-12., max=3.6,
-                                                                            rebin_string="-12.0,0.43,23.0,-34.8,3.6")},
-                          "L/q -12   0.44  23  ,34.8,3.6  /Log": {LimitsId.q: q_rebin_values(min=-12., max=3.6,
-                                                                    rebin_string="-12.0,-0.44,23.0,-34.8,3.6")},
-                          "L/q -12  , 0.45 , 23  ,34.8 ,3.6, .123, 5.6  /Log": {LimitsId.q: q_rebin_values(min=-12.,
-                                                                                                          max=5.6,
-                                                                    rebin_string="-12.0,-0.45,23.0,-34.8,3.6,"
+                          "L/q -12   0.41  23 -34.8 3.6": {LimitsId.Q: q_rebin_values(min=-12., max=3.6,
+                                                                                      rebin_string="-12.0,0.41,23.0,-34.8,3.6")},  # noqa
+                          "L/q -12   0.42  23 -34.8 3.6 /LIn": {LimitsId.Q: q_rebin_values(min=-12., max=3.6,
+                                                                                           rebin_string="-12.0,0.42,23.0,34.8,3.6")},
+                          "L/q -12   0.43     23 -34.8 3.6": {LimitsId.Q: q_rebin_values(min=-12., max=3.6,
+                                                                                         rebin_string="-12.0,0.43,23.0,-34.8,3.6")},
+                          "L/q -12   0.44  23  ,34.8,3.6  /Log": {LimitsId.Q: q_rebin_values(min=-12., max=3.6,
+                                                                                             rebin_string="-12.0,-0.44,23.0,-34.8,3.6")},
+                          "L/q -12  , 0.45 , 23  ,34.8 ,3.6, .123, 5.6  /Log": {LimitsId.Q: q_rebin_values(min=-12.,
+                                                                                                           max=5.6,
+                                                                                                           rebin_string="-12.0,-0.45,23.0,-34.8,3.6,"
                                                                                  "-0.123,5.6")},
-                          "L/q -12  , 0.46 , 23  ,34.8 ,3.6, -.123, 5.6": {LimitsId.q: q_rebin_values(min=-12.,
-                                                                                                     max=5.6,
-                                                                          rebin_string="-12.0,0.46,23.0,34.8,3.6,"
+                          "L/q -12  , 0.46 , 23  ,34.8 ,3.6, -.123, 5.6": {LimitsId.Q: q_rebin_values(min=-12.,
+                                                                                                      max=5.6,
+                                                                                                      rebin_string="-12.0,0.46,23.0,34.8,3.6,"
                                                                                        "-0.123,5.6")},
-                          "L/q -12   0.47   23 34.8  3.6, -.123    5.6": {LimitsId.q: q_rebin_values(min=-12.,
-                                                                            max=5.6,
-                                                                            rebin_string="-12.0,0.47,23.0,34.8,3.6,"
+                          "L/q -12   0.47   23 34.8  3.6, -.123    5.6": {LimitsId.Q: q_rebin_values(min=-12.,
+                                                                                                     max=5.6,
+                                                                                                     rebin_string="-12.0,0.47,23.0,34.8,3.6,"
                                                                                             "-0.123,5.6")}
                           }
 
@@ -278,12 +278,12 @@ class LimitParserTest(unittest.TestCase):
         do_test(limit_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_qxy_limits_are_parsed_correctly(self):
-        valid_settings = {"L/QXY 12 34": {LimitsId.qxy: simple_range(start=12, stop=34, step=None,  step_type=None)},
-                          "L/QXY 12 34 2.7": {LimitsId.qxy: simple_range(start=12, stop=34, step=2.7,
+        valid_settings = {"L/QXY 12 34": {LimitsId.QXY: simple_range(start=12, stop=34, step=None, step_type=None)},
+                          "L/QXY 12 34 2.7": {LimitsId.QXY: simple_range(start=12, stop=34, step=2.7,
                                                                          step_type=RangeStepType.LIN)},
-                          "L/QXY -12 34.6 2.7/LOG": {LimitsId.qxy: simple_range(start=-12, stop=34.6, step=2.7,
+                          "L/QXY -12 34.6 2.7/LOG": {LimitsId.QXY: simple_range(start=-12, stop=34.6, step=2.7,
                                                                                 step_type=RangeStepType.LOG)},
-                          "L/qxY -12 3.6 2 /LIN": {LimitsId.qxy: simple_range(start=-12, stop=3.6, step=2,
+                          "L/qxY -12 3.6 2 /LIN": {LimitsId.QXY: simple_range(start=-12, stop=3.6, step=2,
                                                                               step_type=RangeStepType.LIN)}}
         """
         These tests should be added back to valid settings when SANS GUI can accept complex QXY strings.
@@ -311,13 +311,13 @@ class LimitParserTest(unittest.TestCase):
         do_test(limit_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_wavelength_limits_are_parsed_correctly(self):
-        valid_settings = {"L/WAV 12 34": {LimitsId.wavelength: simple_range(start=12, stop=34, step=None,
+        valid_settings = {"L/WAV 12 34": {LimitsId.WAVELENGTH: simple_range(start=12, stop=34, step=None,
                                                                             step_type=None)},
-                          "L/waV 12 34 2.7": {LimitsId.wavelength: simple_range(start=12, stop=34, step=2.7,
+                          "L/waV 12 34 2.7": {LimitsId.WAVELENGTH: simple_range(start=12, stop=34, step=2.7,
                                                                                 step_type=RangeStepType.LIN)},
-                          "L/wAv -12 34.6 2.7/LOG": {LimitsId.wavelength: simple_range(start=-12, stop=34.6, step=2.7,
+                          "L/wAv -12 34.6 2.7/LOG": {LimitsId.WAVELENGTH: simple_range(start=-12, stop=34.6, step=2.7,
                                                                                        step_type=RangeStepType.LOG)},
-                          "L/WaV -12 3.6 2 /LIN": {LimitsId.wavelength: simple_range(start=-12, stop=3.6, step=2,
+                          "L/WaV -12 3.6 2 /LIN": {LimitsId.WAVELENGTH: simple_range(start=-12, stop=3.6, step=2,
                                                                                      step_type=RangeStepType.LIN)}}
 
         invalid_settings = {"L/WAV 12 2 3 4": RuntimeError,
@@ -1081,7 +1081,7 @@ class UserFileParserTest(unittest.TestCase):
 
         # LimitParser
         result = user_file_parser.parse_line("l/Q/WCUT 234.4")
-        assert_valid_result(result, {LimitsId.wavelength_cut: 234.4}, self.assertTrue)
+        assert_valid_result(result, {LimitsId.WAVELENGTH_CUT: 234.4}, self.assertTrue)
 
         # MaskParser
         result = user_file_parser.parse_line("MASK S 12  ")

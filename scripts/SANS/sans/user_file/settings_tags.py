@@ -71,11 +71,16 @@ class DetectorId(Enum):
     SHIFT_FIT = "shift_fit"
 
 
-# --- LIMITS
-@serializable_enum("angle", "events_binning", "events_binning_range", "radius_cut", "wavelength_cut", "radius", "q",
-                   "qxy", "wavelength")
-class LimitsId(object):
-    pass
+class LimitsId(Enum):
+    ANGLE = "angle"
+    EVENTS_BINNING = "events_binning"
+    EVENTS_BINNING_RANGE = "events_binning_range"
+    RADIUS_CUT = "radius_cut"
+    WAVELENGTH_CUT = "wavelength_cut"
+    RADIUS = "radius"
+    Q = "q"
+    QXY = "qxy"
+    WAVELENGTH = "wavelength"
 
 
 # --- MASK

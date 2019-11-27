@@ -355,11 +355,11 @@ class StateGuiModel(ModelCommon):
     # ------------------------------------------------------------------------------------------------------------------
     @property
     def event_binning(self):
-        return self.get_simple_element(element_id=LimitsId.events_binning, default_value="")
+        return self.get_simple_element(element_id=LimitsId.EVENTS_BINNING, default_value="")
 
     @event_binning.setter
     def event_binning(self, value):
-        self.set_simple_element(element_id=LimitsId.events_binning, value=value)
+        self.set_simple_element(element_id=LimitsId.EVENTS_BINNING, value=value)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Wavelength properties
@@ -371,8 +371,8 @@ class StateGuiModel(ModelCommon):
     # This is not something that needs to be known at this point, but it is good to know.
     # ------------------------------------------------------------------------------------------------------------------
     def _update_wavelength(self, min_value=None, max_value=None, step=None, step_type=None, wavelength_range=None):
-        if LimitsId.wavelength in self._user_file_items:
-            settings = self._user_file_items[LimitsId.wavelength]
+        if LimitsId.WAVELENGTH in self._user_file_items:
+            settings = self._user_file_items[LimitsId.WAVELENGTH]
         else:
             # If the entry does not already exist, then add it. The -1. is an illegal input which should get overridden
             # and if not we want it to fail.
@@ -386,7 +386,7 @@ class StateGuiModel(ModelCommon):
             new_step_type = step_type if step_type else setting.step_type
             new_setting = simple_range(start=new_min, stop=new_max, step=new_step, step_type=new_step_type)
             new_settings.append(new_setting)
-        self._user_file_items.update({LimitsId.wavelength: new_settings})
+        self._user_file_items.update({LimitsId.WAVELENGTH: new_settings})
 
         if wavelength_range:
             if OtherId.wavelength_range in self._user_file_items:
@@ -402,7 +402,7 @@ class StateGuiModel(ModelCommon):
 
     @property
     def wavelength_step_type(self):
-        return self.get_simple_element_with_attribute(element_id=LimitsId.wavelength, default_value=RangeStepType.LIN,
+        return self.get_simple_element_with_attribute(element_id=LimitsId.WAVELENGTH, default_value=RangeStepType.LIN,
                                                       attribute="step_type")
 
     @wavelength_step_type.setter
@@ -411,7 +411,7 @@ class StateGuiModel(ModelCommon):
 
     @property
     def wavelength_min(self):
-        return self.get_simple_element_with_attribute(element_id=LimitsId.wavelength,
+        return self.get_simple_element_with_attribute(element_id=LimitsId.WAVELENGTH,
                                                       default_value="",
                                                       attribute="start")
 
@@ -421,7 +421,7 @@ class StateGuiModel(ModelCommon):
 
     @property
     def wavelength_max(self):
-        return self.get_simple_element_with_attribute(element_id=LimitsId.wavelength,
+        return self.get_simple_element_with_attribute(element_id=LimitsId.WAVELENGTH,
                                                       default_value="",
                                                       attribute="stop")
 
@@ -431,7 +431,7 @@ class StateGuiModel(ModelCommon):
 
     @property
     def wavelength_step(self):
-        return self.get_simple_element_with_attribute(element_id=LimitsId.wavelength,
+        return self.get_simple_element_with_attribute(element_id=LimitsId.WAVELENGTH,
                                                       default_value="",
                                                       attribute="step")
 
@@ -523,7 +523,7 @@ class StateGuiModel(ModelCommon):
     # Q Limits
     # ------------------------------------------------------------------------------------------------------------------
     def _set_q_1d_limits(self, min_value=None, max_value=None, rebin_string=None):
-        element_id = LimitsId.q
+        element_id = LimitsId.Q
         if element_id in self._user_file_items:
             settings = self._user_file_items[element_id]
         else:
@@ -539,7 +539,7 @@ class StateGuiModel(ModelCommon):
         self._user_file_items.update({element_id: new_settings})
 
     def _set_q_xy_limits(self, stop_value=None, step_value=None, step_type_value=None):
-        element_id = LimitsId.qxy
+        element_id = LimitsId.QXY
         if element_id in self._user_file_items:
             settings = self._user_file_items[element_id]
         else:
@@ -556,7 +556,7 @@ class StateGuiModel(ModelCommon):
 
     @property
     def q_1d_rebin_string(self):
-        return self.get_simple_element_with_attribute(element_id=LimitsId.q, default_value="",
+        return self.get_simple_element_with_attribute(element_id=LimitsId.Q, default_value="",
                                                       attribute="rebin_string")
 
     @q_1d_rebin_string.setter
@@ -565,7 +565,7 @@ class StateGuiModel(ModelCommon):
 
     @property
     def q_xy_max(self):
-        return self.get_simple_element_with_attribute(element_id=LimitsId.qxy, default_value="",
+        return self.get_simple_element_with_attribute(element_id=LimitsId.QXY, default_value="",
                                                       attribute="stop")
 
     @q_xy_max.setter
@@ -574,7 +574,7 @@ class StateGuiModel(ModelCommon):
 
     @property
     def q_xy_step(self):
-        return self.get_simple_element_with_attribute(element_id=LimitsId.qxy, default_value="",
+        return self.get_simple_element_with_attribute(element_id=LimitsId.QXY, default_value="",
                                                       attribute="step")
 
     @q_xy_step.setter
@@ -583,7 +583,7 @@ class StateGuiModel(ModelCommon):
 
     @property
     def q_xy_step_type(self):
-        return self.get_simple_element_with_attribute(element_id=LimitsId.qxy, default_value=None,
+        return self.get_simple_element_with_attribute(element_id=LimitsId.QXY, default_value=None,
                                                       attribute="step_type")
 
     @q_xy_step_type.setter
@@ -592,19 +592,19 @@ class StateGuiModel(ModelCommon):
 
     @property
     def r_cut(self):
-        return self.get_simple_element(element_id=LimitsId.radius_cut, default_value="")
+        return self.get_simple_element(element_id=LimitsId.RADIUS_CUT, default_value="")
 
     @r_cut.setter
     def r_cut(self, value):
-        self.set_simple_element(element_id=LimitsId.radius_cut, value=value)
+        self.set_simple_element(element_id=LimitsId.RADIUS_CUT, value=value)
 
     @property
     def w_cut(self):
-        return self.get_simple_element(element_id=LimitsId.wavelength_cut, default_value="")
+        return self.get_simple_element(element_id=LimitsId.WAVELENGTH_CUT, default_value="")
 
     @w_cut.setter
     def w_cut(self, value):
-        self.set_simple_element(element_id=LimitsId.wavelength_cut, value=value)
+        self.set_simple_element(element_id=LimitsId.WAVELENGTH_CUT, value=value)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Gravity
@@ -718,8 +718,8 @@ class StateGuiModel(ModelCommon):
     # Phi limit
     # ------------------------------------------------------------------------------------------------------------------
     def _set_phi_limit(self, min_value=None, max_value=None, use_mirror=None):
-        if LimitsId.angle in self._user_file_items:
-            settings = self._user_file_items[LimitsId.angle]
+        if LimitsId.ANGLE in self._user_file_items:
+            settings = self._user_file_items[LimitsId.ANGLE]
         else:
             settings = [mask_angle_entry(min=None, max=None, use_mirror=False)]
 
@@ -729,11 +729,11 @@ class StateGuiModel(ModelCommon):
             new_max = max_value if max_value is not None else setting.max
             new_use_mirror = use_mirror if use_mirror is not None else setting.use_mirror
             new_settings.append(mask_angle_entry(min=new_min, max=new_max, use_mirror=new_use_mirror))
-        self._user_file_items.update({LimitsId.angle: new_settings})
+        self._user_file_items.update({LimitsId.ANGLE: new_settings})
 
     @property
     def phi_limit_min(self):
-        return self.get_simple_element_with_attribute(element_id=LimitsId.angle, attribute="min", default_value="-90")
+        return self.get_simple_element_with_attribute(element_id=LimitsId.ANGLE, attribute="min", default_value="-90")
 
     @phi_limit_min.setter
     def phi_limit_min(self, value):
@@ -741,7 +741,7 @@ class StateGuiModel(ModelCommon):
 
     @property
     def phi_limit_max(self):
-        return self.get_simple_element_with_attribute(element_id=LimitsId.angle, attribute="max", default_value="90")
+        return self.get_simple_element_with_attribute(element_id=LimitsId.ANGLE, attribute="max", default_value="90")
 
     @phi_limit_max.setter
     def phi_limit_max(self, value):
@@ -749,7 +749,7 @@ class StateGuiModel(ModelCommon):
 
     @property
     def phi_limit_use_mirror(self):
-        return self.get_simple_element_with_attribute(element_id=LimitsId.angle, attribute="use_mirror", default_value=True)  # noqa
+        return self.get_simple_element_with_attribute(element_id=LimitsId.ANGLE, attribute="use_mirror", default_value=True)  # noqa
 
     @phi_limit_use_mirror.setter
     def phi_limit_use_mirror(self, value):
@@ -759,8 +759,8 @@ class StateGuiModel(ModelCommon):
     # Radius limit
     # ------------------------------------------------------------------------------------------------------------------
     def _set_radius_limit(self, min_value=None, max_value=None):
-        if LimitsId.radius in self._user_file_items:
-            settings = self._user_file_items[LimitsId.radius]
+        if LimitsId.RADIUS in self._user_file_items:
+            settings = self._user_file_items[LimitsId.RADIUS]
         else:
             settings = [range_entry(start=None, stop=None)]
 
@@ -769,11 +769,11 @@ class StateGuiModel(ModelCommon):
             new_min = min_value if min_value is not None else setting.start
             new_max = max_value if max_value is not None else setting.stop
             new_settings.append(range_entry(start=new_min, stop=new_max))
-        self._user_file_items.update({LimitsId.radius: new_settings})
+        self._user_file_items.update({LimitsId.RADIUS: new_settings})
 
     @property
     def radius_limit_min(self):
-        return self.get_simple_element_with_attribute(element_id=LimitsId.radius, attribute="start", default_value="")
+        return self.get_simple_element_with_attribute(element_id=LimitsId.RADIUS, attribute="start", default_value="")
 
     @radius_limit_min.setter
     def radius_limit_min(self, value):
@@ -781,7 +781,7 @@ class StateGuiModel(ModelCommon):
 
     @property
     def radius_limit_max(self):
-        return self.get_simple_element_with_attribute(element_id=LimitsId.radius, attribute="stop", default_value="")
+        return self.get_simple_element_with_attribute(element_id=LimitsId.RADIUS, attribute="stop", default_value="")
 
     @radius_limit_max.setter
     def radius_limit_max(self, value):

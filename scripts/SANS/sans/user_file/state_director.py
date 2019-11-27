@@ -119,9 +119,9 @@ def set_background_tof_monitor(builder, user_file_items):
 
 
 def set_wavelength_limits(builder, user_file_items):
-    if LimitsId.wavelength in user_file_items:
-        wavelength_limits = user_file_items[LimitsId.wavelength]
-        check_if_contains_only_one_element(wavelength_limits, LimitsId.wavelength)
+    if LimitsId.WAVELENGTH in user_file_items:
+        wavelength_limits = user_file_items[LimitsId.WAVELENGTH]
+        check_if_contains_only_one_element(wavelength_limits, LimitsId.WAVELENGTH)
         wavelength_limits = wavelength_limits[-1]
 
         if wavelength_limits.step_type in [RangeStepType.RANGE_LIN, RangeStepType.RANGE_LOG]:
@@ -939,10 +939,10 @@ class StateDirectorISIS(object):
         # ------------------------------------------------------------
         # 14. Angles --> they are specified in L/Phi
         # -----------------------------------------------------------
-        if LimitsId.angle in user_file_items:
-            angles = user_file_items[LimitsId.angle]
+        if LimitsId.ANGLE in user_file_items:
+            angles = user_file_items[LimitsId.ANGLE]
             # Should the user have chosen several values, then the last element is selected
-            check_if_contains_only_one_element(angles, LimitsId.angle)
+            check_if_contains_only_one_element(angles, LimitsId.ANGLE)
             angle = angles[-1]
             self._mask_builder.set_phi_min(angle.min)
             self._mask_builder.set_phi_max(angle.max)
@@ -958,10 +958,10 @@ class StateDirectorISIS(object):
         # ------------------------------------------------------------
         # 16. Radius masks
         # -----------------------------------------------------------
-        if LimitsId.radius in user_file_items:
-            radii = user_file_items[LimitsId.radius]
+        if LimitsId.RADIUS in user_file_items:
+            radii = user_file_items[LimitsId.RADIUS]
             # Should the user have chosen several values, then the last element is selected
-            check_if_contains_only_one_element(radii, LimitsId.radius)
+            check_if_contains_only_one_element(radii, LimitsId.RADIUS)
             radius = radii[-1]
             if radius.start > radius.stop > 0:
                 raise RuntimeError("UserFileStateDirector: The inner radius {0} appears to be larger that the outer"
@@ -1031,26 +1031,26 @@ class StateDirectorISIS(object):
 
     def _set_up_convert_to_q_state(self, user_file_items):
         # Get the radius cut off if any is present
-        set_single_entry(self._convert_to_q_builder, "set_radius_cutoff", LimitsId.radius_cut, user_file_items,
+        set_single_entry(self._convert_to_q_builder, "set_radius_cutoff", LimitsId.RADIUS_CUT, user_file_items,
                          apply_to_value=convert_mm_to_m)
 
         # Get the wavelength cut off if any is present
-        set_single_entry(self._convert_to_q_builder, "set_wavelength_cutoff", LimitsId.wavelength_cut,
+        set_single_entry(self._convert_to_q_builder, "set_wavelength_cutoff", LimitsId.WAVELENGTH_CUT,
                          user_file_items)
 
         # Get the 1D q values
-        if LimitsId.q in user_file_items:
-            limits_q = user_file_items[LimitsId.q]
-            check_if_contains_only_one_element(limits_q, LimitsId.q)
+        if LimitsId.Q in user_file_items:
+            limits_q = user_file_items[LimitsId.Q]
+            check_if_contains_only_one_element(limits_q, LimitsId.Q)
             limits_q = limits_q[-1]
             self._convert_to_q_builder.set_q_min(limits_q.min)
             self._convert_to_q_builder.set_q_max(limits_q.max)
             self._convert_to_q_builder.set_q_1d_rebin_string(limits_q.rebin_string)
 
         # Get the 2D q values
-        if LimitsId.qxy in user_file_items:
-            limits_qxy = user_file_items[LimitsId.qxy]
-            check_if_contains_only_one_element(limits_qxy, LimitsId.qxy)
+        if LimitsId.QXY in user_file_items:
+            limits_qxy = user_file_items[LimitsId.QXY]
+            check_if_contains_only_one_element(limits_qxy, LimitsId.QXY)
             limits_qxy = limits_qxy[-1]
             # Now we have to check if we have a simple pattern or a more complex pattern at hand
             is_complex = isinstance(limits_qxy, complex_range)
@@ -1282,9 +1282,9 @@ class StateDirectorISIS(object):
         set_wavelength_limits(self._wavelength_and_pixel_adjustment_builder, user_file_items)
 
     def _set_up_compatibility(self, user_file_items):
-        if LimitsId.events_binning in user_file_items:
-            events_binning = user_file_items[LimitsId.events_binning]
-            check_if_contains_only_one_element(events_binning, LimitsId.events_binning)
+        if LimitsId.EVENTS_BINNING in user_file_items:
+            events_binning = user_file_items[LimitsId.EVENTS_BINNING]
+            check_if_contains_only_one_element(events_binning, LimitsId.EVENTS_BINNING)
             events_binning = events_binning[-1]
             self._compatibility_builder.set_time_rebin_string(events_binning)
 

@@ -667,7 +667,7 @@ class LimitParser(UserFileComponentParser):
         use_mirror = re.search(self._phi_no_mirror, line) is None
         angles_string = re.sub(self._phi, "", line)
         angles = extract_float_range(angles_string)
-        return {LimitsId.angle: mask_angle_entry(min=angles[0], max=angles[1], use_mirror=use_mirror)}
+        return {LimitsId.ANGLE: mask_angle_entry(min=angles[0], max=angles[1], use_mirror=use_mirror)}
 
     def _extract_event_binning(self, line):
         event_binning = re.sub(self._events_time, "", line)
@@ -675,42 +675,42 @@ class LimitParser(UserFileComponentParser):
             rebin_values = extract_float_list(event_binning, separator=" ")
             binning_string = ",".join([str(val) for val in rebin_values])
         else:
-            simple_pattern = self._extract_simple_pattern(event_binning, LimitsId.events_binning)
-            rebin_values = simple_pattern[LimitsId.events_binning]
+            simple_pattern = self._extract_simple_pattern(event_binning, LimitsId.EVENTS_BINNING)
+            rebin_values = simple_pattern[LimitsId.EVENTS_BINNING]
             prefix = -1. if rebin_values.step_type is RangeStepType.LOG else 1.
             binning_string = str(rebin_values.start) + "," + str(prefix*rebin_values.step) + "," + \
                              str(rebin_values.stop)  # noqa
 
-        output = {LimitsId.events_binning: binning_string}
+        output = {LimitsId.EVENTS_BINNING: binning_string}
         return output
 
     def _extract_cut_limit(self, line):
         if self._radius_cut_pattern.match(line) is not None:
-            key = LimitsId.radius_cut
+            key = LimitsId.RADIUS_CUT
             limit_value = re.sub(self._radius_cut, "", line)
         else:
-            key = LimitsId.wavelength_cut
+            key = LimitsId.WAVELENGTH_CUT
             limit_value = re.sub(self._wavelength_cut, "", line)
         return {key: convert_string_to_float(limit_value)}
 
     def _extract_radius_limit(self, line):
         radius_range_string = re.sub(self._radius, "", line)
         radius_range = extract_float_list(radius_range_string, separator=" ")
-        return {LimitsId.radius: range_entry(start=radius_range[0], stop=radius_range[1])}
+        return {LimitsId.RADIUS: range_entry(start=radius_range[0], stop=radius_range[1])}
 
     def _extract_q_limit(self, line):
         q_range = re.sub(self._q, "", line)
         if does_pattern_match(self._q_simple_pattern, line):
-            simple_output = self._extract_simple_pattern(q_range, LimitsId.q)
-            simple_output = simple_output[LimitsId.q]
+            simple_output = self._extract_simple_pattern(q_range, LimitsId.Q)
+            simple_output = simple_output[LimitsId.Q]
             prefix = -1.0 if simple_output.step_type is RangeStepType.LOG else 1.0
             q_limit_output = [simple_output.start]
             if simple_output.step:
                 q_limit_output.append(prefix*simple_output.step)
             q_limit_output.append(simple_output.stop)
         elif does_pattern_match(self._q_complex_pattern, line):
-            complex_output = self._extract_complex_pattern(q_range, LimitsId.q)
-            complex_output = complex_output[LimitsId.q]
+            complex_output = self._extract_complex_pattern(q_range, LimitsId.Q)
+            complex_output = complex_output[LimitsId.Q]
             prefix1 = -1.0 if complex_output.step_type1 is RangeStepType.LOG else 1.0
             prefix2 = -1.0 if complex_output.step_type2 is RangeStepType.LOG else 1.0
             q_limit_output = [complex_output.start, prefix1*complex_output.step1, complex_output.mid,
@@ -721,13 +721,13 @@ class LimitParser(UserFileComponentParser):
         # The output is a q_rebin_values object with q_min, q_max and the rebin string.
         rebinning_string = ",".join([str(element) for element in q_limit_output])
         q_rebin = q_rebin_values(min=q_limit_output[0], max=q_limit_output[-1], rebin_string=rebinning_string)
-        output = {LimitsId.q: q_rebin}
+        output = {LimitsId.Q: q_rebin}
         return output
 
     def _extract_qxy_limit(self, line):
         qxy_range = re.sub(self._qxy, "", line)
         if does_pattern_match(self._qxy_simple_pattern, line):
-            output = self._extract_simple_pattern(qxy_range, LimitsId.qxy)
+            output = self._extract_simple_pattern(qxy_range, LimitsId.QXY)
         else:
             # v2 GUI cannot currently support complex QXY ranges
             #output = self._extract_complex_pattern(qxy_range, LimitsId.qxy)
@@ -738,7 +738,7 @@ class LimitParser(UserFileComponentParser):
     def _extract_wavelength_limit(self, line):
         wavelength_range = re.sub(self._wavelength, "", line)
         if does_pattern_match(self._wavelength_simple_pattern, line):
-            output = self._extract_simple_pattern(wavelength_range, LimitsId.wavelength)
+            output = self._extract_simple_pattern(wavelength_range, LimitsId.WAVELENGTH)
         else:
             # This is not implemented in the old parser, hence disable here
             # output = self._extract_complex_pattern(wavelength_range, LimitsId.wavelength)
