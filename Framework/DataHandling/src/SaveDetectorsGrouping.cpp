@@ -125,16 +125,16 @@ void SaveDetectorsGrouping::convertToDetectorsRanges(
         ed = detid;
       } else {
         // broken:  (1) store (2) start new
-        detranges.push_back(st);
-        detranges.push_back(ed);
+        detranges.emplace_back(st);
+        detranges.emplace_back(ed);
 
         st = detid;
         ed = detid;
       }
     } // ENDFOR detectors
     // Complete the uncompleted
-    detranges.push_back(st);
-    detranges.push_back(ed);
+    detranges.emplace_back(st);
+    detranges.emplace_back(ed);
 
     // c) Save entry in output
     groupdetidrangemap[groupid] = detranges;

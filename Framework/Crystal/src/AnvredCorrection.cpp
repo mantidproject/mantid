@@ -512,7 +512,7 @@ void AnvredCorrection::BuildLamdaWeights() {
     // value.
     m_lamda_weight.reserve(NUM_WAVELENGTHS);
     for (int i = 0; i < NUM_WAVELENGTHS; i++)
-      m_lamda_weight.push_back(1.);
+      m_lamda_weight.emplace_back(1.);
   }
 
   for (size_t i = 0; i < m_lamda_weight.size(); ++i) {

@@ -16,7 +16,6 @@ class SANSFileInformationMock(SANSFileInformation):
         super(SANSFileInformationMock, self).__init__(file_name)
         self._instrument = instrument
         self._facility = facility
-        self._run_number = run_number
         self._height = height
         self._width = width
         self._thickness = thickness
@@ -42,9 +41,6 @@ class SANSFileInformationMock(SANSFileInformation):
     def get_number_of_periods(self):
         return self._periods
 
-    def get_run_number(self):
-        return self._run_number
-
     def get_type(self):
         return FileType.ISIS_NEXUS
 
@@ -65,3 +61,6 @@ class SANSFileInformationMock(SANSFileInformation):
 
     def get_shape(self):
         return self._shape
+
+    def _get_run_number_from_file(self, file_name):
+        return "12345"

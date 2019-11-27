@@ -148,7 +148,7 @@ std::vector<double> FunctionQDepends::extractQValues(
         double usignTheta = 0.5 * spectrumInfo.twoTheta(wi);
         double q = Mantid::Kernel::UnitConversion::convertToElasticQ(usignTheta,
                                                                      efixed);
-        qs.push_back(q);
+        qs.emplace_back(q);
       } else {
         g_log.debug("Cannot populate Q values from workspace");
         qs.clear();

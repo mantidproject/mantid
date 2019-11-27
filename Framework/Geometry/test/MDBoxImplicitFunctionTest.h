@@ -27,10 +27,10 @@ public:
     std::vector<coord_t> max;
     TSM_ASSERT_THROWS_ANYTHING("0 dimensions is bad.",
                                MDBoxImplicitFunction f(min, max));
-    min.push_back(1.234f);
+    min.emplace_back(1.234f);
     TSM_ASSERT_THROWS_ANYTHING("Mismatch in nd",
                                MDBoxImplicitFunction f(min, max));
-    max.push_back(4.56f);
+    max.emplace_back(4.56f);
     TS_ASSERT_THROWS_NOTHING(MDBoxImplicitFunction f(min, max));
   }
 
@@ -43,11 +43,11 @@ public:
   /** Make a box from 1,1 - 2,2 */
   void test_2D() {
     std::vector<coord_t> min;
-    min.push_back(1.0);
-    min.push_back(1.0);
+    min.emplace_back(1.0f);
+    min.emplace_back(1.0f);
     std::vector<coord_t> max;
-    max.push_back(2.0);
-    max.push_back(2.0);
+    max.emplace_back(2.0f);
+    max.emplace_back(2.0f);
     MDBoxImplicitFunction f(min, max);
     TS_ASSERT(try2Dpoint(f, 1.5, 1.5));
     TS_ASSERT(!try2Dpoint(f, 0.9, 1.5));
@@ -58,12 +58,12 @@ public:
 
   void test_volume() {
     std::vector<coord_t> min, max;
-    min.push_back(0);
-    min.push_back(0);
-    min.push_back(0);
-    max.push_back(1);
-    max.push_back(2);
-    max.push_back(3);
+    min.emplace_back(0.f);
+    min.emplace_back(0.f);
+    min.emplace_back(0.f);
+    max.emplace_back(1.f);
+    max.emplace_back(2.f);
+    max.emplace_back(3.f);
     MDBoxImplicitFunction box(min, max);
     TS_ASSERT_EQUALS(1 * 2 * 3, box.volume());
   }
@@ -73,11 +73,11 @@ public:
     const coord_t areaMin = 1.0f;
     const coord_t areaMax = 2.0f;
     std::vector<coord_t> min;
-    min.push_back(areaMin);
-    min.push_back(areaMin);
+    min.emplace_back(areaMin);
+    min.emplace_back(areaMin);
     std::vector<coord_t> max;
-    max.push_back(areaMax);
-    max.push_back(areaMax);
+    max.emplace_back(areaMax);
+    max.emplace_back(areaMax);
     MDBoxImplicitFunction f(min, max);
 
     // The box to test.
@@ -85,9 +85,9 @@ public:
     const coord_t boxMax = 0.1f;
     std::vector<Extent> extents;
     // extent
-    extents.push_back(Extent(boxMin, boxMax));
+    extents.emplace_back(Extent(boxMin, boxMax));
     // extent
-    extents.push_back(Extent(boxMin, boxMax));
+    extents.emplace_back(Extent(boxMin, boxMax));
 
     TS_ASSERT_EQUALS(0.0, f.fraction(extents));
   }
@@ -97,11 +97,11 @@ public:
     const coord_t areaMin = 1.0f;
     const coord_t areaMax = 2.0f;
     std::vector<coord_t> min;
-    min.push_back(areaMin);
-    min.push_back(areaMin);
+    min.emplace_back(areaMin);
+    min.emplace_back(areaMin);
     std::vector<coord_t> max;
-    max.push_back(areaMax);
-    max.push_back(areaMax);
+    max.emplace_back(areaMax);
+    max.emplace_back(areaMax);
     MDBoxImplicitFunction f(min, max);
 
     // The box to test.
@@ -110,13 +110,13 @@ public:
     std::vector<coord_t> boxVertexes;
     std::vector<Extent> extents;
     // extent
-    extents.push_back(Extent(boxMin, boxMax));
+    extents.emplace_back(Extent(boxMin, boxMax));
     // extent
-    extents.push_back(Extent(boxMin, boxMax));
+    extents.emplace_back(Extent(boxMin, boxMax));
     // extent
-    extents.push_back(Extent(boxMin, boxMax));
+    extents.emplace_back(Extent(boxMin, boxMax));
     // extent
-    extents.push_back(Extent(boxMin, boxMax));
+    extents.emplace_back(Extent(boxMin, boxMax));
 
     TS_ASSERT_EQUALS(1.0, f.fraction(extents));
   }
@@ -126,9 +126,9 @@ public:
     const coord_t areaMin = 0.9f;
     const coord_t areaMax = 2.0f;
     std::vector<coord_t> min;
-    min.push_back(areaMin);
+    min.emplace_back(areaMin);
     std::vector<coord_t> max;
-    max.push_back(areaMax);
+    max.emplace_back(areaMax);
     MDBoxImplicitFunction f(min, max);
 
     // The box to test.
@@ -136,7 +136,7 @@ public:
     const coord_t boxMax = 1;
     std::vector<Extent> extents;
     // extent
-    extents.push_back(Extent(boxMin, boxMax));
+    extents.emplace_back(Extent(boxMin, boxMax));
 
     /*
 
@@ -157,9 +157,9 @@ public:
     const coord_t areaMin = 0.25;
     const coord_t areaMax = 0.75;
     std::vector<coord_t> min;
-    min.push_back(areaMin);
+    min.emplace_back(areaMin);
     std::vector<coord_t> max;
-    max.push_back(areaMax);
+    max.emplace_back(areaMax);
     MDBoxImplicitFunction f(min, max);
 
     // The box to test.
@@ -167,7 +167,7 @@ public:
     const coord_t boxMax = 1.0;
     std::vector<Extent> extents;
     // extent
-    extents.push_back(Extent(boxMin, boxMax));
+    extents.emplace_back(Extent(boxMin, boxMax));
 
     /*
 
@@ -208,11 +208,11 @@ public:
     const coord_t areaMin = 0.5;
     const coord_t areaMax = 1.5;
     std::vector<coord_t> min;
-    min.push_back(areaMin);
-    min.push_back(areaMin);
+    min.emplace_back(areaMin);
+    min.emplace_back(areaMin);
     std::vector<coord_t> max;
-    max.push_back(areaMax);
-    max.push_back(areaMax);
+    max.emplace_back(areaMax);
+    max.emplace_back(areaMax);
     MDBoxImplicitFunction f(min, max);
 
     // The box to test.
@@ -220,9 +220,9 @@ public:
     const coord_t boxMax = 1;
     std::vector<Extent> extents;
     // extent
-    extents.push_back(Extent(boxMin, boxMax));
+    extents.emplace_back(Extent(boxMin, boxMax));
     // extent
-    extents.push_back(Extent(boxMin, boxMax));
+    extents.emplace_back(Extent(boxMin, boxMax));
 
     TSM_ASSERT_DELTA("2d overlap incorrectly calculated", 1.0 / 4,
                      f.fraction(extents), 1e-3);
@@ -253,11 +253,11 @@ public:
     const coord_t areaMin = 0.5;
     const coord_t areaMax = 1.5;
     std::vector<coord_t> min;
-    min.push_back(areaMin);                 // xmin at 0.5
-    min.push_back(areaMin + (areaMin / 2)); // ymin at 0.75
+    min.emplace_back(areaMin);                 // xmin at 0.5
+    min.emplace_back(areaMin + (areaMin / 2)); // ymin at 0.75
     std::vector<coord_t> max;
-    max.push_back(areaMax);
-    max.push_back(areaMax + (areaMin / 2)); // ymax at 0.75
+    max.emplace_back(areaMax);
+    max.emplace_back(areaMax + (areaMin / 2)); // ymax at 0.75
     MDBoxImplicitFunction f(min, max);
 
     // The box to test.
@@ -265,9 +265,9 @@ public:
     const coord_t boxMax = 1;
     std::vector<Extent> extents;
     // extent
-    extents.push_back(Extent(boxMin, boxMax));
+    extents.emplace_back(Extent(boxMin, boxMax));
     // extent
-    extents.push_back(Extent(boxMin, boxMax));
+    extents.emplace_back(Extent(boxMin, boxMax));
 
     TSM_ASSERT_DELTA("2d overlap incorrectly calculated", 1.0 / 8,
                      f.fraction(extents), 1e-3);
@@ -278,27 +278,27 @@ class MDBoxImplicitFunctionTestPerformance : public CxxTest::TestSuite {
 public:
   MDBoxImplicitFunction get3DFunction() {
     std::vector<coord_t> min;
-    min.push_back(1.0);
-    min.push_back(2.0);
-    min.push_back(3.0);
+    min.emplace_back(1.0f);
+    min.emplace_back(2.0f);
+    min.emplace_back(3.0f);
     std::vector<coord_t> max;
-    max.push_back(2.0);
-    max.push_back(3.0);
-    max.push_back(4.0);
+    max.emplace_back(2.0f);
+    max.emplace_back(3.0f);
+    max.emplace_back(4.0f);
     return MDBoxImplicitFunction(min, max);
   }
 
   MDBoxImplicitFunction get4DFunction() {
     std::vector<coord_t> min;
-    min.push_back(1.0);
-    min.push_back(2.0);
-    min.push_back(3.0);
-    min.push_back(4.0);
+    min.emplace_back(1.0f);
+    min.emplace_back(2.0f);
+    min.emplace_back(3.0f);
+    min.emplace_back(4.0f);
     std::vector<coord_t> max;
-    max.push_back(2.0);
-    max.push_back(3.0);
-    max.push_back(4.0);
-    max.push_back(5.0);
+    max.emplace_back(2.0f);
+    max.emplace_back(3.0f);
+    max.emplace_back(4.0f);
+    max.emplace_back(5.0f);
     return MDBoxImplicitFunction(min, max);
   }
 

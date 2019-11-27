@@ -40,14 +40,14 @@ ProjectSaveModel::ProjectSaveModel(
     // then track it so we can always add it to the included
     // window list
     if (wsNames.size() == 0) {
-      m_unattachedWindows.push_back(window);
+      m_unattachedWindows.emplace_back(window);
       continue;
     }
 
     // otherwise add a reference mapping the window to the
     // it's various connected workspaces
     for (auto &name : wsNames) {
-      m_workspaceWindows[name].push_back(window);
+      m_workspaceWindows[name].emplace_back(window);
     }
   }
 }
@@ -146,13 +146,13 @@ ProjectSaveModel::getWindowInformation(const std::vector<std::string> &wsNames,
 
   for (auto window : getUniqueWindows(wsNames)) {
     auto info = makeWindowInfoObject(window);
-    winInfo.push_back(info);
+    winInfo.emplace_back(info);
   }
 
   if (includeUnattached) {
     for (const auto window : m_unattachedWindows) {
       auto info = makeWindowInfoObject(window);
-      winInfo.push_back(info);
+      winInfo.emplace_back(info);
     }
   }
 
@@ -185,11 +185,11 @@ std::vector<WorkspaceInfo> ProjectSaveModel::getWorkspaceInformation() const {
       auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
       for (int i = 0; i < group->getNumberOfEntries(); ++i) {
         auto subInfo = makeWorkspaceInfoObject(group->getItem(i));
-        info.subWorkspaces.push_back(subInfo);
+        info.subWorkspaces.emplace_back(subInfo);
       }
     }
 
-    wsInfo.push_back(info);
+    wsInfo.emplace_back(info);
   }
 
   return wsInfo;

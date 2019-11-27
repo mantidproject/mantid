@@ -164,7 +164,7 @@ void DiskBuffer::writeOldObjects() {
     } else // object busy
     {
       // The object is busy, can't write. Save it for later
-      couldNotWrite.push_back(obj);
+      couldNotWrite.emplace_back(obj);
       // When a prefix or postfix operator is applied to a function argument,
       // the value of the argument is
       // NOT GUARANTEED to be incremented or decremented before it is passed to
@@ -358,8 +358,8 @@ void DiskBuffer::getFreeSpaceVector(std::vector<uint64_t> &free) const {
   freeSpace_bySize_t::const_iterator it = m_free_bySize.begin();
   freeSpace_bySize_t::const_iterator it_end = m_free_bySize.end();
   for (; it != it_end; ++it) {
-    free.push_back(it->getFilePosition());
-    free.push_back(it->getSize());
+    free.emplace_back(it->getFilePosition());
+    free.emplace_back(it->getSize());
   }
 }
 

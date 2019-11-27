@@ -33,7 +33,11 @@ import re
 import sys
 from keyword import kwlist as python_keywords
 from collections import namedtuple
-from six import PY2
+
+from lib2to3.pgen2.tokenize import detect_encoding
+from io import BytesIO
+from six import PY2, string_types
+
 if PY2:  # noqa
     from inspect import getargspec as getfullargspec
 else:  # noqa
@@ -158,15 +162,20 @@ def generate_call_tips(definitions, prepend_module_name=None):
         return []
     call_tips = []
     for name, py_object in definitions.items():
+        if PY2:
+            if isinstance(py_object, unicode):
+                continue
         if name.startswith('_'):
             continue
-        if prepend_module_name is True:
-            prepend_module_name = py_object.__module__
+        if prepend_module_name is True and hasattr(py_object, '__module__'):
+            module_name = py_object.__module__
+        else:
+            module_name = prepend_module_name
         if inspect.isfunction(py_object) or inspect.isbuiltin(py_object):
-            if not prepend_module_name:
-                call_tips.append(name + get_function_spec(py_object))
+            if isinstance(module_name, string_types):
+                call_tips.append(module_name + '.' + name + get_function_spec(py_object))
             else:
-                call_tips.append(prepend_module_name + '.' + name + get_function_spec(py_object))
+                call_tips.append(name + get_function_spec(py_object))
             continue
         # Ignore modules or we get duplicates of methods/classes that are imported
         # in outer scopes, e.g. numpy.array and numpy.core.array
@@ -183,8 +192,8 @@ def generate_call_tips(definitions, prepend_module_name=None):
                 call_tip = name + '.' + attr + get_function_spec(f_attr)
             else:
                 call_tip = name + '.' + attr
-            if prepend_module_name:
-                call_tips.append(prepend_module_name + '.' + call_tip)
+            if isinstance(module_name, string_types):
+                call_tips.append(module_name + '.' + call_tip)
     return call_tips
 
 
@@ -193,6 +202,10 @@ def get_line_number_from_index(string, index):
 
 
 def get_module_import_alias(import_name, text):
+    try:
+        text = text.encode(detect_encoding(BytesIO(text.encode()).readline)[0])
+    except UnicodeEncodeError:  # Script contains unicode symbol. Cannot run detect_encoding as it requires ascii.
+        text = text.encode('utf-8')
     for node in ast.walk(ast.parse(text)):
         if isinstance(node, ast.alias) and node.name == import_name:
             return node.asname

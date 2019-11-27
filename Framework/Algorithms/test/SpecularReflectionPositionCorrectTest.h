@@ -268,12 +268,12 @@ public:
 
   void test_correct_line_detector_position_many_spec_numbers_equal_averaging() {
     std::vector<int> specNumbers;
-    specNumbers.push_back(74);
+    specNumbers.emplace_back(74);
     double offset1 = do_test_correct_line_detector_position(specNumbers, 1,
                                                             "lineardetector");
 
-    specNumbers.push_back(73); // Add spectra below
-    specNumbers.push_back(75); // Add spectra above
+    specNumbers.emplace_back(73); // Add spectra below
+    specNumbers.emplace_back(75); // Add spectra above
     double offset2 = do_test_correct_line_detector_position(specNumbers, 1,
                                                             "lineardetector");
 
@@ -284,12 +284,12 @@ public:
 
   void test_correct_line_detector_position_average_offset_by_one_pixel() {
     std::vector<int> specNumbers;
-    specNumbers.push_back(100);
+    specNumbers.emplace_back(100);
     double offset1 = do_test_correct_line_detector_position(
         specNumbers, 0.1, "lineardetector"); // Average spectrum number at 100
 
-    specNumbers.push_back(101);
-    specNumbers.push_back(102);
+    specNumbers.emplace_back(101);
+    specNumbers.emplace_back(102);
     double offset2 = do_test_correct_line_detector_position(
         specNumbers, 0.1,
         "lineardetector"); // Average spectrum number now at 101.
@@ -301,11 +301,11 @@ public:
 
   void test_correct_line_detector_position_average_offset_by_many_pixels() {
     std::vector<int> specNumbers;
-    specNumbers.push_back(100);
+    specNumbers.emplace_back(100);
     double offset1 = do_test_correct_line_detector_position(
         specNumbers, 0.1, "lineardetector"); // Average spectrum number at 100
 
-    specNumbers.push_back(104);
+    specNumbers.emplace_back(104);
     const bool strictSpectrumCheck = false;
     double offset2 = do_test_correct_line_detector_position(
         specNumbers, 0.1, "lineardetector",
@@ -319,8 +319,8 @@ public:
   void
   test_correct_line_detector_position_throws_with_non_sequential_spec_numbers() {
     std::vector<int> specNumbers;
-    specNumbers.push_back(1);
-    specNumbers.push_back(3); // Missing 2 in sequence.
+    specNumbers.emplace_back(1);
+    specNumbers.emplace_back(3); // Missing 2 in sequence.
     TS_ASSERT_THROWS(do_test_correct_line_detector_position(specNumbers, 0.1,
                                                             "lineardetector"),
                      std::invalid_argument &);

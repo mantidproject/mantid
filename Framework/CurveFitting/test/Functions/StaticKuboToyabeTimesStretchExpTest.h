@@ -41,7 +41,7 @@ public:
 
   void test_category() {
     TS_ASSERT_EQUALS(fn.categories().size(), 1);
-    TS_ASSERT_EQUALS(fn.category(), "Muon");
+    TS_ASSERT_EQUALS(fn.category(), "MuonGeneric");
   }
 
   void test_values() {

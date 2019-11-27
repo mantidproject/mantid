@@ -7,15 +7,15 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_CONVFITMODEL_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_CONVFITMODEL_H_
 
-#include "IndirectFittingModel.h"
+#include "IndirectFittingModelLegacy.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class DLLExport ConvFitModel : public IndirectFittingModel {
+class DLLExport ConvFitModel : public IndirectFittingModelLegacy {
 public:
-  using IndirectFittingModel::addWorkspace;
+  using IndirectFittingModelLegacy::addWorkspace;
 
   ConvFitModel();
   ~ConvFitModel() override;
@@ -31,7 +31,7 @@ public:
   void setTemperature(const boost::optional<double> &temperature);
 
   void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
-                    const Spectra &spectra) override;
+                    const SpectraLegacy &spectra) override;
   void removeWorkspace(std::size_t index) override;
   void setResolution(const std::string &name, std::size_t index);
   void setResolution(Mantid::API::MatrixWorkspace_sptr resolution,
@@ -48,35 +48,36 @@ private:
   std::string singleFitOutputName(std::size_t index,
                                   std::size_t spectrum) const override;
   Mantid::API::CompositeFunction_sptr getMultiDomainFunction() const override;
-  std::unordered_map<std::string, ParameterValue>
+  std::unordered_map<std::string, ParameterValueLegacy>
   createDefaultParameters(std::size_t index) const override;
   std::unordered_map<std::string, std::string>
   mapDefaultParameterNames() const override;
 
-  IndirectFitOutput
+  IndirectFitOutputLegacy
   createFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
                   Mantid::API::ITableWorkspace_sptr parameterTable,
                   Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-                  const FitDataIterator &fitDataBegin,
-                  const FitDataIterator &fitDataEnd) const override;
-  IndirectFitOutput
+                  const FitDataIteratorLegacy &fitDataBegin,
+                  const FitDataIteratorLegacy &fitDataEnd) const override;
+  IndirectFitOutputLegacy
   createFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
                   Mantid::API::ITableWorkspace_sptr parameterTable,
                   Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-                  IndirectFitData *fitData,
+                  IndirectFitDataLegacy *fitData,
                   std::size_t spectrum) const override;
 
-  void addOutput(IndirectFitOutput *fitOutput,
+  void addOutput(IndirectFitOutputLegacy *fitOutput,
                  Mantid::API::WorkspaceGroup_sptr resultGroup,
                  Mantid::API::ITableWorkspace_sptr parameterTable,
                  Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-                 const FitDataIterator &fitDataBegin,
-                 const FitDataIterator &fitDataEnd) const override;
-  void addOutput(IndirectFitOutput *fitOutput,
+                 const FitDataIteratorLegacy &fitDataBegin,
+                 const FitDataIteratorLegacy &fitDataEnd) const override;
+  void addOutput(IndirectFitOutputLegacy *fitOutput,
                  Mantid::API::WorkspaceGroup_sptr resultGroup,
                  Mantid::API::ITableWorkspace_sptr parameterTable,
                  Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-                 IndirectFitData *fitData, std::size_t spectrum) const override;
+                 IndirectFitDataLegacy *fitData,
+                 std::size_t spectrum) const override;
   void addExtendedResolution(std::size_t index);
   void addSampleLogs();
 

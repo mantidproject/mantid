@@ -876,7 +876,7 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs=None, verbose=Fals
 
         # Sample transmission
         if (BatchReductionEntry.SAMPLE_TRANSMISSION in list(parsed_batch_entry.keys()) and
-           BatchReductionEntry.SAMPLE_DIRECT in list(parsed_batch_entry.keys())):
+                BatchReductionEntry.SAMPLE_DIRECT in list(parsed_batch_entry.keys())):
             sample_transmission = parsed_batch_entry[BatchReductionEntry.SAMPLE_TRANSMISSION]
             sample_transmission_period = parsed_batch_entry[BatchReductionEntry.SAMPLE_TRANSMISSION_PERIOD]
             sample_direct = parsed_batch_entry[BatchReductionEntry.SAMPLE_DIRECT]
@@ -892,7 +892,7 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs=None, verbose=Fals
 
         # Can transmission
         if (BatchReductionEntry.CAN_TRANSMISSION in list(parsed_batch_entry.keys()) and
-           BatchReductionEntry.CAN_DIRECT in list(parsed_batch_entry.keys())):
+                BatchReductionEntry.CAN_DIRECT in list(parsed_batch_entry.keys())):
             can_transmission = parsed_batch_entry[BatchReductionEntry.CAN_TRANSMISSION]
             can_transmission_period = parsed_batch_entry[BatchReductionEntry.CAN_TRANSMISSION_PERIOD]
             can_direct = parsed_batch_entry[BatchReductionEntry.CAN_DIRECT]
@@ -934,7 +934,7 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs=None, verbose=Fals
             director.remove_last_scatter_can()
 
         if (BatchReductionEntry.CAN_TRANSMISSION in list(parsed_batch_entry.keys()) and
-           BatchReductionEntry.CAN_DIRECT in list(parsed_batch_entry.keys())):
+                BatchReductionEntry.CAN_DIRECT in list(parsed_batch_entry.keys())):
             director.remove_last_can_transmission_and_direct()
 
         # Plot the results if that was requested, the flag 1 is from the old version.

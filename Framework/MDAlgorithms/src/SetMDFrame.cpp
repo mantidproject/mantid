@@ -69,11 +69,11 @@ void SetMDFrame::init() {
 
   // Options for the MDFrames
   std::vector<std::string> mdFrames;
-  mdFrames.push_back(Mantid::Geometry::GeneralFrame::GeneralFrameName);
-  mdFrames.push_back(Mantid::Geometry::QSample::QSampleName);
-  mdFrames.push_back(Mantid::Geometry::QLab::QLabName);
-  mdFrames.push_back(Mantid::Geometry::HKL::HKLName);
-  mdFrames.push_back(Mantid::Geometry::UnknownFrame::UnknownFrameName);
+  mdFrames.emplace_back(Mantid::Geometry::GeneralFrame::GeneralFrameName);
+  mdFrames.emplace_back(Mantid::Geometry::QSample::QSampleName);
+  mdFrames.emplace_back(Mantid::Geometry::QLab::QLabName);
+  mdFrames.emplace_back(Mantid::Geometry::HKL::HKLName);
+  mdFrames.emplace_back(Mantid::Geometry::UnknownFrame::UnknownFrameName);
 
   // Create a selection of MDFrames and units for each dimension
   std::string propName = mdFrameSpecifier;

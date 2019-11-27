@@ -79,7 +79,7 @@ void EQSANSPatchSensitivity::exec() {
 
       // If this detector is masked, skip to the next one
       if (spectrumInfo.isMasked(iDet))
-        patched_ids.push_back(iDet);
+        patched_ids.emplace_back(iDet);
       else {
         if (!inSpectrumInfo.isMasked(iDet)) {
           double yPosition = spectrumInfo.position(iDet).Y();

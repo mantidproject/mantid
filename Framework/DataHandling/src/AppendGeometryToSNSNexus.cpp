@@ -232,10 +232,10 @@ void AppendGeometryToSNSNexus::exec() {
                 azimuthal_angle.reserve(dets.size());
 
                 for (auto &det : dets) {
-                  pixel_id.push_back(det->getID());
-                  distance.push_back(det->getDistance(*sample));
-                  azimuthal_angle.push_back(det->getPhi());
-                  polar_angle.push_back(ws->detectorTwoTheta(*det));
+                  pixel_id.emplace_back(det->getID());
+                  distance.emplace_back(det->getDistance(*sample));
+                  azimuthal_angle.emplace_back(det->getPhi());
+                  polar_angle.emplace_back(ws->detectorTwoTheta(*det));
                 }
 
                 // Write Pixel ID to file

@@ -56,7 +56,7 @@ public:
     TS_ASSERT_EQUALS(A.getNPoints(), 1);
     TS_ASSERT_EQUALS(A.getPoints(), pntOut);
     std::vector<double> Dist;
-    Dist.push_back(2.0);
+    Dist.emplace_back(2.0);
     TS_ASSERT_EQUALS(A.getDistance(), Dist);
   }
 
@@ -96,8 +96,8 @@ public:
     TS_ASSERT_EQUALS(A.getNPoints(), 1);
     TS_ASSERT_EQUALS(A.getPoints(), pntOut);
     std::vector<double> Dist;
-    // Dist.push_back(1.0);
-    Dist.push_back(1.0);
+    // Dist.emplace_back(1.0);
+    Dist.emplace_back(1.0);
     TS_ASSERT_EQUALS(A.getDistance(), Dist);
 
     LineIntersectVisit C(V3D(1.1, 0.0, 0.0), V3D(-1.0, 0.0, 0.0));

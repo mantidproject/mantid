@@ -239,7 +239,7 @@ boost::shared_ptr<Grouping> GroupingLoader::getDummyGrouping() {
   auto dummyGrouping = boost::make_shared<Mantid::API::Grouping>();
   dummyGrouping->description = "Dummy grouping";
   dummyGrouping->groupNames.emplace_back("all");
-  dummyGrouping->groups.push_back(all.str());
+  dummyGrouping->groups.emplace_back(all.str());
   return dummyGrouping;
 }
 
@@ -258,14 +258,14 @@ Grouping::Grouping(ITableWorkspace_sptr table) {
     // Convert to a range string, i.e. 1-5,6-8,9
     std::string detectorRange = Kernel::Strings::toString(detectors);
 
-    this->groupNames.push_back(std::to_string(row + 1));
-    this->groups.push_back(detectorRange);
+    this->groupNames.emplace_back(std::to_string(row + 1));
+    this->groups.emplace_back(detectorRange);
   }
 
   // If we have 2 groups only - create a longitudinal pair
   if (this->groups.size() == 2) {
     this->pairNames.emplace_back("long");
-    this->pairAlphas.push_back(1.0);
+    this->pairAlphas.emplace_back(1.0);
     this->pairs.emplace_back(0, 1);
   }
 }

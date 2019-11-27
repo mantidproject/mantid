@@ -719,8 +719,8 @@ void GenerateEventsFilter::processMultipleValueFilters(double minvalue,
     // Log interval/value boundary
     double lowbound = curvalue - valuetolerance;
     double upbound = curvalue + valueinterval - valuetolerance;
-    logvalueranges.push_back(lowbound);
-    logvalueranges.push_back(upbound);
+    logvalueranges.emplace_back(lowbound);
+    logvalueranges.emplace_back(upbound);
 
     // Workgroup information
     std::stringstream ss;
@@ -988,8 +988,8 @@ void GenerateEventsFilter::makeMultipleFiltersByValues(
   // tempvectimes.reserve(m_dblLog->size());
   vector<int> tempvecgroup;
   // tempvecgroup.reserve(m_dblLog->size());
-  m_vecSplitterTimeSet.push_back(tempvectimes);
-  m_vecGroupIndexSet.push_back(tempvecgroup);
+  m_vecSplitterTimeSet.emplace_back(tempvectimes);
+  m_vecGroupIndexSet.emplace_back(tempvecgroup);
   int istart = 0;
   auto iend = static_cast<int>(logsize - 1);
 
@@ -1061,8 +1061,8 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesParallel(
     if (i < extra)
       ++iend;
 
-    vecStart.push_back(istart);
-    vecEnd.push_back(iend);
+    vecStart.emplace_back(istart);
+    vecEnd.emplace_back(iend);
   }
 
   {
@@ -1085,8 +1085,8 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesParallel(
     tempvectimes.reserve(m_dblLog->size());
     vector<int> tempvecgroup;
     tempvecgroup.reserve(m_dblLog->size());
-    m_vecSplitterTimeSet.push_back(tempvectimes);
-    m_vecGroupIndexSet.push_back(tempvecgroup);
+    m_vecSplitterTimeSet.emplace_back(tempvectimes);
+    m_vecGroupIndexSet.emplace_back(tempvecgroup);
   }
 
   // Create event filters/splitters in parallel
@@ -1148,8 +1148,8 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesParallel(
         if (lastindex != -1 && firstindex != -1) {
           // T_stop < T_start, I_stop != -1, I_start != 1. : Insert a minus-one
           // entry to make it complete
-          m_vecGroupIndexSet[i - 1].push_back(-1);
-          m_vecSplitterTimeSet[i - 1].push_back(
+          m_vecGroupIndexSet[i - 1].emplace_back(-1);
+          m_vecSplitterTimeSet[i - 1].emplace_back(
               m_vecSplitterTimeSet[i].front());
         } else if (lastindex == -1 && m_vecGroupIndexSet[i - 1].size() == 1) {
           // Empty splitter of the thread. Extend this to next
@@ -1668,11 +1668,11 @@ void GenerateEventsFilter::addNewTimeFilterSplitter(
     // Start of splitter
     if (m_vecSplitterTime.empty()) {
       // First splitter
-      m_vecSplitterTime.push_back(starttime);
+      m_vecSplitterTime.emplace_back(starttime);
     } else if (m_vecSplitterTime.back() < starttime) {
       // Splitter to insert has a gap to previous splitter
-      m_vecSplitterTime.push_back(starttime);
-      m_vecSplitterGroup.push_back(-1);
+      m_vecSplitterTime.emplace_back(starttime);
+      m_vecSplitterGroup.emplace_back(-1);
 
     } else if (m_vecSplitterTime.back() == starttime) {
       // Splitter to insert is just behind previous one (no gap): nothing
@@ -1682,9 +1682,9 @@ void GenerateEventsFilter::addNewTimeFilterSplitter(
                           "start time is earlier than last splitter.");
     }
     // Stop of splitter
-    m_vecSplitterTime.push_back(stoptime);
+    m_vecSplitterTime.emplace_back(stoptime);
     // Group
-    m_vecSplitterGroup.push_back(wsindex);
+    m_vecSplitterGroup.emplace_back(wsindex);
   } else {
     // For regular Splitter
     Kernel::SplittingInterval spiv(starttime, stoptime, wsindex);
@@ -1719,12 +1719,12 @@ DateAndTime GenerateEventsFilter::makeSplitterInVector(
   // Start time of splitter
   if (timevecsize == 0) {
     // First value
-    vecSplitTime.push_back(starttime);
+    vecSplitTime.emplace_back(starttime);
   } else if (lasttime < starttime) {
     // Stop time of previous splitter is earlier than start time of this
     // splitter (gap)
-    vecSplitTime.push_back(starttime);
-    vecGroupIndex.push_back(-1);
+    vecSplitTime.emplace_back(starttime);
+    vecGroupIndex.emplace_back(-1);
   } else if (lasttime > starttime) {
     // Impossible situation
     throw runtime_error("Impossible situation.");
@@ -1736,9 +1736,9 @@ DateAndTime GenerateEventsFilter::makeSplitterInVector(
 
   // Complete this splitter, i.e., stoptime and group
   // Stop time of splitter
-  vecSplitTime.push_back(stoptime);
+  vecSplitTime.emplace_back(stoptime);
   // Group index
-  vecGroupIndex.push_back(group);
+  vecGroupIndex.emplace_back(group);
 
   return stoptime;
 }

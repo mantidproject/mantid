@@ -281,7 +281,7 @@ void CompareWorkspaces::processGroups(
     // Skip those not set and the input workspaces
     if (p->isDefault() || propName == "Workspace1" || propName == "Workspace2")
       continue;
-    nonDefaultProps.push_back(p);
+    nonDefaultProps.emplace_back(p);
   }
   const size_t numNonDefault = nonDefaultProps.size();
 
@@ -558,7 +558,7 @@ bool CompareWorkspaces::compareEventWorkspaces(
             numUnequalWeights += tempNumWeight;
           }
 
-          vec_mismatchedwsindex.push_back(i);
+          vec_mismatchedwsindex.emplace_back(i);
         } // Parallel critical region
 
       } // If elist 1 is not equal to elist 2

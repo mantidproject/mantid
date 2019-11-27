@@ -95,15 +95,15 @@ void LoadRKH::readLinesForRKH1D(std::istream &stream, int readStart,
     std::istringstream datastr(fileline);
     datastr >> xValue >> yValue >> yErrorValue;
 
-    xData.push_back(xValue);
-    yData.push_back(yValue);
-    yError.push_back(yErrorValue);
+    xData.emplace_back(xValue);
+    yData.emplace_back(yValue);
+    yError.emplace_back(yErrorValue);
 
     // check if we need to read in x error values
     if (readXError) {
       double xErrorValue(0.);
       datastr >> xErrorValue;
-      xError.push_back(xErrorValue);
+      xError.emplace_back(xErrorValue);
     }
 
     prog.report();

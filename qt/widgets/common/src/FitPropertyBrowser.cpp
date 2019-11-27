@@ -544,9 +544,9 @@ void FitPropertyBrowser::addFitResultWorkspacesToTableWidget() {
   auto name = outputName();
   std::vector<std::string> workspaceNames;
   workspaceNames.reserve(3);
-  workspaceNames.push_back(name + "_NormalisedCovarianceMatrix");
-  workspaceNames.push_back(name + "_Parameters");
-  workspaceNames.push_back(name + "_Workspace");
+  workspaceNames.emplace_back(name + "_NormalisedCovarianceMatrix");
+  workspaceNames.emplace_back(name + "_Parameters");
+  workspaceNames.emplace_back(name + "_Workspace");
 
   for (const auto &name : workspaceNames) {
     // check if already in the list
@@ -751,7 +751,7 @@ void FitPropertyBrowser::addFunction() {
             m_registeredFunctions[i].toStdString());
     std::vector<std::string> tempCategories = f->categories();
     for (size_t j = 0; j < tempCategories.size(); ++j) {
-      categories[tempCategories[boost::lexical_cast<int>(j)]].push_back(
+      categories[tempCategories[boost::lexical_cast<int>(j)]].emplace_back(
           m_registeredFunctions[i].toStdString());
     }
   }
@@ -2010,7 +2010,7 @@ QVector<double> FitPropertyBrowser::getXRange() {
     auto col = tbl->getColumn(xColumnIndex);
     try {
       for (size_t i = 0; i < tbl->rowCount(); ++i) {
-        xColumnData.push_back(col->toDouble(i));
+        xColumnData.emplace_back(col->toDouble(i));
       }
     } catch (std::invalid_argument &err) {
       QMessageBox::critical(this, "Mantid - Error",
@@ -2892,9 +2892,6 @@ void FitPropertyBrowser::removeLogValue() {
 }
 
 void FitPropertyBrowser::sequentialFit() {
-  if (workspaceName() == outputName()) {
-    setOutputName(outputName() + "_res");
-  }
   SequentialFitDialog *dlg = new SequentialFitDialog(this, m_mantidui);
   std::string wsName = workspaceName();
   if (!wsName.empty() &&

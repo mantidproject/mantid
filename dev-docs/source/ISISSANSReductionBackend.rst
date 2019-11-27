@@ -300,7 +300,7 @@ reduction. It contains the following parameters:
 =============================== ===================================================== ============================================== ========= =============== ===========================================
 Name                            Comment                                               Type                                           Optional? Auto-generated? Default value
 =============================== ===================================================== ============================================== ========= =============== ===========================================
-reduction_mode                  The type of reduction, i.e. LAB, HAB, merged or both  *Enum(ReductionMode)*            N         N               *ISISReductionMode.LAB* enum value
+reduction_mode                  The type of reduction, i.e. LAB, HAB, merged or both  *Enum(ReductionMode)*            N         N               *ReductionMode.LAB* enum value
 reduction_dimensionality        If 1D or 2D reduction                                 *Enum(ReductionDimensionality)*  N         N               *ReductionDimensionality.OneDim* enum value
 merge_fit_mode                  The fit mode for merging                              *Enum(FitModeForMerge)*          Y         N               *FitModeForMerge.NoFit* enum value
 merge_shift                     The shift value for merging                           *FloatParameter*                               Y         N               0.0

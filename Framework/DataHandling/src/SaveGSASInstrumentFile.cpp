@@ -242,7 +242,7 @@ ChopperConfiguration::parseStringDbl(const string &instring) const {
   for (auto &str : strs) {
     if (!str.empty()) {
       double item = std::stod(str.c_str());
-      vecdouble.push_back(item);
+      vecdouble.emplace_back(item);
       // cout << "[C] |" << strs[i] << "|" << item << "\n";
     }
   }
@@ -269,7 +269,7 @@ ChopperConfiguration::parseStringUnsignedInt(const string &instring) const {
         throw runtime_error(
             "Found negative number in a string for unsigned integers.");
       }
-      vecinteger.push_back(static_cast<unsigned int>(item));
+      vecinteger.emplace_back(static_cast<unsigned int>(item));
     }
   }
 
@@ -362,7 +362,7 @@ void SaveGSASInstrumentFile::exec() {
     // Default is to export all banks
     for (auto &miter : bankprofileparammap) {
       unsigned int bankid = miter.first;
-      m_vecBankID2File.push_back(bankid);
+      m_vecBankID2File.emplace_back(bankid);
     }
     sort(m_vecBankID2File.begin(), m_vecBankID2File.end());
   }
@@ -565,7 +565,7 @@ ChopperConfiguration_sptr SaveGSASInstrumentFile::setupInstrumentConstants(
   map<unsigned int, map<string, double>>::const_iterator bmiter;
   for (bmiter = profmap.begin(); bmiter != profmap.end(); ++bmiter) {
     int bankid = bmiter->first;
-    bankids.push_back(bankid);
+    bankids.emplace_back(bankid);
   }
 
   // Create a configuration object

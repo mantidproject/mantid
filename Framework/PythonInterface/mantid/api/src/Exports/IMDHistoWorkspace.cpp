@@ -72,7 +72,7 @@ std::vector<Py_intptr_t> countDimensions(const IMDHistoWorkspace &self) {
 
   // invert dimensions in C way, e.g. slowest changing ndim goes first
   for (size_t i = 0; i < ndims; ++i) {
-    nd.push_back(self.getDimension(i)->getNBins());
+    nd.emplace_back(self.getDimension(i)->getNBins());
   }
 
   ndims = nd.size();

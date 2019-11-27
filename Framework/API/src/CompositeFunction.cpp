@@ -403,13 +403,13 @@ void CompositeFunction::clear() {
  */
 size_t CompositeFunction::addFunction(IFunction_sptr f) {
   m_IFunction.insert(m_IFunction.end(), f->nParams(), m_functions.size());
-  m_functions.push_back(f);
+  m_functions.emplace_back(f);
   //?f->init();
   if (m_paramOffsets.empty()) {
-    m_paramOffsets.push_back(0);
+    m_paramOffsets.emplace_back(0);
     m_nParams = f->nParams();
   } else {
-    m_paramOffsets.push_back(m_nParams);
+    m_paramOffsets.emplace_back(m_nParams);
     m_nParams += f->nParams();
   }
   return m_functions.size() - 1;
@@ -828,14 +828,14 @@ CompositeFunction::createEquivalentFunctions() const {
   std::vector<std::vector<IFunction_sptr>> equiv;
   equiv.reserve(nf);
   for (size_t i = 0; i < nf; ++i) {
-    equiv.push_back(getFunction(i)->createEquivalentFunctions());
+    equiv.emplace_back(getFunction(i)->createEquivalentFunctions());
   }
 
   std::vector<IFunction_sptr> funs;
   funs.reserve(nd);
   for (size_t i = 0; i < nd; ++i) {
     auto comp = new CompositeFunction;
-    funs.push_back(IFunction_sptr(comp));
+    funs.emplace_back(IFunction_sptr(comp));
     for (size_t j = 0; j < nf; ++j) {
       comp->addFunction(equiv[j][i]);
     }

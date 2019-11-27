@@ -159,10 +159,9 @@ double getThetaFromLogs(MatrixWorkspace_sptr inputWs) {
     if (!incidentThetas) {
       throw std::runtime_error("stheta log not found");
     }
-    theta =
-        incidentThetas->valuesAsVector().back(); // Not quite sure what to do
-                                                 // with the time series for
-                                                 // stheta
+    theta = incidentThetas->valuesAsVector().back(); // Not quite sure what to
+                                                     // do with the time series
+                                                     // for stheta
   } catch (Exception::NotFoundError &) {
     return theta;
   }

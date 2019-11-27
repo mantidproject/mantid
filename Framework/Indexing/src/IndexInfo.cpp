@@ -317,7 +317,7 @@ IndexInfo::globalSpectrumIndicesFromDetectorIndices(
         const auto timeIndex = static_cast<size_t>(spectrumDefinition.second);
         if (detectorMap.size() > detectorIndex &&
             detectorMap[detectorIndex].first != 0) {
-          spectrumIndices.push_back(i);
+          spectrumIndices.emplace_back(i);
           if (detectorMap[detectorIndex].first == 1) {
             ++detectorMap[detectorIndex].first;
           }

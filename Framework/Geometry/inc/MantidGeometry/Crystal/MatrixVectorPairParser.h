@@ -43,9 +43,9 @@ public:
 
     std::vector<T> typedMatrixElements;
     for (const auto &rb : m_matrixRows) {
-      typedMatrixElements.push_back(boost::rational_cast<T>((rb).x()));
-      typedMatrixElements.push_back(boost::rational_cast<T>((rb).y()));
-      typedMatrixElements.push_back(boost::rational_cast<T>((rb).z()));
+      typedMatrixElements.emplace_back(boost::rational_cast<T>((rb).x()));
+      typedMatrixElements.emplace_back(boost::rational_cast<T>((rb).y()));
+      typedMatrixElements.emplace_back(boost::rational_cast<T>((rb).z()));
     }
     Kernel::Matrix<T> mat(typedMatrixElements);
 

@@ -387,7 +387,7 @@ if(ENABLE_CPACK)
       "sip >= 4.18,"
       "python-six,python-ipython >= 1.1.0,python-ipython-notebook,PyYAML,"
       "python-requests,"
-      "scipy,python2-scikit-image,"
+      "scipy,"
       "hdf,hdf5,jsoncpp >= 0.7.0")
     if(ENABLE_MANTIDPLOT)
       set(CPACK_RPM_PACKAGE_REQUIRES
@@ -395,7 +395,7 @@ if(ENABLE_CPACK)
     endif()
     if(ENABLE_WORKBENCH)
       set(CPACK_RPM_PACKAGE_REQUIRES
-          "${CPACK_RPM_PACKAGE_REQUIRES},qt5-qtbase,python-qt5")
+          "${CPACK_RPM_PACKAGE_REQUIRES},qt5-qtbase,python2-qt5")
     endif()
 
     if("${UNIX_CODENAME}" MATCHES "Santiago") # RHEL6
@@ -414,7 +414,15 @@ if(ENABLE_CPACK)
            # rendering - oddly matplotlib-qt4 contains qt5 backend as well
       set(
         CPACK_RPM_PACKAGE_REQUIRES
-        "${CPACK_RPM_PACKAGE_REQUIRES},python2-QtPy,boost >= 1.53.0,python2-matplotlib-qt4 >= 1.5.2"
+        "${CPACK_RPM_PACKAGE_REQUIRES},"
+        "boost169-date-time,"
+        "boost169-regex,"
+        "boost169-serialization,"
+        "boost169-filesystem,"
+        "boost169-system,"
+        "boost169-python2,"
+        "python2-QtPy,"
+        "python2-matplotlib-qt4 >= 1.5.2"
         )
       if(ENABLE_MANTIDPLOT)
         set(CPACK_RPM_PACKAGE_REQUIRES
@@ -498,7 +506,6 @@ if(ENABLE_CPACK)
           "python3-matplotlib,"
           "python3-qtpy,"
           "python3-scipy,"
-          "python3-skimage,"
           "python3-pycifrw (>= 4.2.1),"
           "python3-yaml,"
           "ipython3-qtconsole") # transitional package for bionic
@@ -521,7 +528,6 @@ if(ENABLE_CPACK)
           "python-matplotlib,"
           "python-qtpy,"
           "python-scipy,"
-          "python-skimage,"
           "python-pycifrw (>= 4.2.1),"
           "python-yaml,"
           "ipython-qtconsole")

@@ -156,7 +156,7 @@ size_t doConnectedComponentLabeling(IMDIterator *iterator,
         const DisjointElement &neighbourElement = neighbourElements[neighIndex];
 
         if (!neighbourElement.isEmpty()) {
-          nonEmptyNeighbourIndexes.push_back(neighIndex);
+          nonEmptyNeighbourIndexes.emplace_back(neighIndex);
           neighbourIds.insert(neighbourElement.getId());
         }
       }

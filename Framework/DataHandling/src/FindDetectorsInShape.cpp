@@ -68,7 +68,7 @@ void FindDetectorsInShape::exec() {
       if (shape_sptr->isValid(detectorInfo.position(i))) {
         // shape encloses this objectComponent
         g_log.debug() << "Detector contained in shape " << detIDs[i] << '\n';
-        foundDets.push_back(detIDs[i]);
+        foundDets.emplace_back(detIDs[i]);
       }
     }
     iprogress++;

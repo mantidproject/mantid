@@ -1000,7 +1000,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
     }
 
     // store column names
-    columnNames.push_back(str);
+    columnNames.emplace_back(str);
 
     // determine number of peaks
     // here we assume that a peaks_table has always one column of doubles

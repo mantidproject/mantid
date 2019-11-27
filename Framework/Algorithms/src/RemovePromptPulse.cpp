@@ -197,7 +197,7 @@ RemovePromptPulse::calculatePulseTimes(const double tmin, const double tmax,
 
   // calculate all times possible
   while (time < tmax) {
-    times.push_back(time);
+    times.emplace_back(time);
     time += period;
   }
 

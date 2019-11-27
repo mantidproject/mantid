@@ -143,9 +143,9 @@ void LoadPreNexusMonitors::exec() {
         if (pDataListChildren->item(i)->nodeName() == "monitor") {
           auto *element =
               static_cast<Poco::XML::Element *>(pDataListChildren->item(i));
-          monitorIDs.push_back(
+          monitorIDs.emplace_back(
               boost::lexical_cast<int>(element->getAttribute("id")));
-          monitorFilenames.push_back(element->getAttribute("name"));
+          monitorFilenames.emplace_back(element->getAttribute("name"));
         }
       }
     }

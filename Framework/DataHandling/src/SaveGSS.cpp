@@ -542,7 +542,7 @@ void SaveGSS::generateOutFileNames(size_t numberOfOutFiles) {
   if (numberOfOutFiles == 1) {
     // Only add one name and don't generate split filenames
     // when we are not in split mode
-    m_outFileNames.push_back(outputFileName);
+    m_outFileNames.emplace_back(outputFileName);
     return;
   }
 

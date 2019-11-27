@@ -51,9 +51,9 @@ void SeqDomain::getDomainAndValues(size_t i, API::FunctionDomain_sptr &domain,
  * @param creator :: A shared pointer to a new creator.
  */
 void SeqDomain::addCreator(API::IDomainCreator_sptr creator) {
-  m_creators.push_back(creator);
-  m_domain.push_back(API::FunctionDomain_sptr());
-  m_values.push_back(API::FunctionValues_sptr());
+  m_creators.emplace_back(creator);
+  m_domain.emplace_back(API::FunctionDomain_sptr());
+  m_values.emplace_back(API::FunctionValues_sptr());
 }
 
 /**

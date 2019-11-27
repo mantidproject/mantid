@@ -26,23 +26,23 @@ class DefaultEventLoader;
 class ProcessBankData : public Mantid::Kernel::Task {
 public:
   /** Constructor
-  *
-  * @param loader :: DefaultEventLoader
-  * @param entry_name :: name of the bank
-  * @param prog :: Progress reporter
-  * @param event_id :: array with event IDs
-  * @param event_time_of_flight :: array with event TOFS
-  * @param numEvents :: how many events in the arrays
-  * @param startAt :: index of the first event from event_index
-  * @param event_index :: vector of event index (length of # of pulses)
-  * @param thisBankPulseTimes :: ptr to the pulse times for this particular
-  *bank.
-  * @param have_weight :: flag for handling simulated files
-  * @param event_weight :: array with weights for events
-  * @param min_event_id ;: minimum detector ID to load
-  * @param max_event_id :: maximum detector ID to load
-  * @return
-  */ // API::IFileLoader<Kernel::NexusDescriptor>
+   *
+   * @param loader :: DefaultEventLoader
+   * @param entry_name :: name of the bank
+   * @param prog :: Progress reporter
+   * @param event_id :: array with event IDs
+   * @param event_time_of_flight :: array with event TOFS
+   * @param numEvents :: how many events in the arrays
+   * @param startAt :: index of the first event from event_index
+   * @param event_index :: vector of event index (length of # of pulses)
+   * @param thisBankPulseTimes :: ptr to the pulse times for this particular
+   *bank.
+   * @param have_weight :: flag for handling simulated files
+   * @param event_weight :: array with weights for events
+   * @param min_event_id ;: minimum detector ID to load
+   * @param max_event_id :: maximum detector ID to load
+   * @return
+   */ // API::IFileLoader<Kernel::NexusDescriptor>
   ProcessBankData(DefaultEventLoader &loader, std::string entry_name,
                   API::Progress *prog, boost::shared_array<uint32_t> event_id,
                   boost::shared_array<float> event_time_of_flight,

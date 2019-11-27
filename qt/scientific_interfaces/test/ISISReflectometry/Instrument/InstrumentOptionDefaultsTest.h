@@ -18,11 +18,11 @@
 #include <gtest/gtest.h>
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
+using testing::_;
 using testing::AtLeast;
 using testing::Mock;
 using testing::NiceMock;
 using testing::Return;
-using testing::_;
 
 class InstrumentOptionDefaultsTest : public CxxTest::TestSuite {
 public:

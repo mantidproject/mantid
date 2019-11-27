@@ -195,8 +195,8 @@ int Regroup::newAxis(const std::vector<double> &params,
                           std::bind(std::greater_equal<double>(), _1, xcurr));
   if (iup != xold.end()) {
     xcurr = *iup;
-    xnew.push_back(xcurr);
-    xoldIndex.push_back(inew);
+    xnew.emplace_back(xcurr);
+    xoldIndex.emplace_back(inew);
     inew++;
   } else
     return 0;
@@ -216,8 +216,8 @@ int Regroup::newAxis(const std::vector<double> &params,
     if (iup != xold.end()) {
       if (*iup <= params[ibound]) {
         xcurr = *iup;
-        xnew.push_back(xcurr);
-        xoldIndex.push_back(inew);
+        xnew.emplace_back(xcurr);
+        xoldIndex.emplace_back(inew);
         inew++;
       } else {
         ibound += 2;

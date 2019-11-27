@@ -408,12 +408,12 @@ public:
     std::vector<coord_t> min;
     std::vector<coord_t> max;
 
-    min.push_back(0);
-    min.push_back(0);
-    min.push_back(0);
-    max.push_back(1.5);
-    max.push_back(1.5);
-    max.push_back(1.5);
+    min.emplace_back(0);
+    min.emplace_back(0);
+    min.emplace_back(0);
+    max.emplace_back(1.5);
+    max.emplace_back(1.5);
+    max.emplace_back(1.5);
 
     // Create a function to mask some of the workspace.
     auto function = std::make_unique<MDBoxImplicitFunction>(min, max);
@@ -502,7 +502,7 @@ public:
     for (double x = 4.0005; x < 7; x += 1.0)
       for (double y = 4.0005; y < 7; y += 1.0) {
         double centers[2] = {x, y};
-        events.push_back(MDLeanEvent<2>(2.0, 2.0, centers));
+        events.emplace_back(MDLeanEvent<2>(2.0, 2.0, centers));
       }
     // So it doesn't split
     ws->getBoxController()->setSplitThreshold(1000);
@@ -570,12 +570,12 @@ public:
     std::vector<coord_t> min;
     std::vector<coord_t> max;
 
-    min.push_back(0);
-    min.push_back(0);
-    min.push_back(0);
-    max.push_back(10);
-    max.push_back(10);
-    max.push_back(10);
+    min.emplace_back(0);
+    min.emplace_back(0);
+    min.emplace_back(0);
+    max.emplace_back(10);
+    max.emplace_back(10);
+    max.emplace_back(10);
 
     // Create an function that encompases 1/4 of the total bins.
     auto function = std::make_unique<MDBoxImplicitFunction>(min, max);
@@ -593,12 +593,12 @@ public:
     std::vector<coord_t> max;
 
     // Make the box lay over a non-intersecting region of space.
-    min.push_back(-1);
-    min.push_back(-1);
-    min.push_back(-1);
-    max.push_back(-0.01f);
-    max.push_back(-0.01f);
-    max.push_back(-0.01f);
+    min.emplace_back(-1);
+    min.emplace_back(-1);
+    min.emplace_back(-1);
+    max.emplace_back(-0.01f);
+    max.emplace_back(-0.01f);
+    max.emplace_back(-0.01f);
 
     // Create an function that encompases 1/4 of the total bins.
     auto function = std::make_unique<MDBoxImplicitFunction>(min, max);
@@ -611,12 +611,12 @@ public:
     std::vector<coord_t> max;
 
     // Make the box that covers half the bins in the workspace.
-    min.push_back(0);
-    min.push_back(0);
-    min.push_back(0);
-    max.push_back(10);
-    max.push_back(10);
-    max.push_back(4.99f);
+    min.emplace_back(0);
+    min.emplace_back(0);
+    min.emplace_back(0);
+    max.emplace_back(10);
+    max.emplace_back(10);
+    max.emplace_back(4.99f);
 
     // Create an function that encompases 1/4 of the total bins.
     auto function = std::make_unique<MDBoxImplicitFunction>(min, max);
@@ -628,12 +628,12 @@ public:
     // Create a function that masks everything.
     std::vector<coord_t> min;
     std::vector<coord_t> max;
-    min.push_back(0);
-    min.push_back(0);
-    min.push_back(0);
-    max.push_back(10);
-    max.push_back(10);
-    max.push_back(10);
+    min.emplace_back(0);
+    min.emplace_back(0);
+    min.emplace_back(0);
+    max.emplace_back(10);
+    max.emplace_back(10);
+    max.emplace_back(10);
     auto function = std::make_unique<MDBoxImplicitFunction>(min, max);
 
     MDEventWorkspace3Lean::sptr ws =

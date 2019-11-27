@@ -23,8 +23,8 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/UnitFactory.h"
 
-using Mantid::DataHandling::GroupDetectors;
 using Mantid::MantidVecPtr;
+using Mantid::DataHandling::GroupDetectors;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;

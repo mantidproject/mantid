@@ -180,8 +180,8 @@ public:
     std::vector<SpectrumNumber> spectrumNumbers;
     size_t i = wsIn->getNumberHistograms() - 1;
     for (size_t j = 0; j < wsIn->getNumberHistograms(); --i, ++j) {
-      specDefinitions.push_back(SpectrumDefinition(i));
-      spectrumNumbers.push_back(SpectrumNumber(static_cast<int>(j)));
+      specDefinitions.emplace_back(SpectrumDefinition(i));
+      spectrumNumbers.emplace_back(SpectrumNumber(static_cast<int>(j)));
     }
     IndexInfo info(spectrumNumbers);
     info.setSpectrumDefinitions(specDefinitions);

@@ -403,7 +403,7 @@ void SumEventsByLogValue::createBinnedOutput(
   // If only the number of bins was given, add the min & max values of the log
   if (m_binningParams.size() == 1) {
     m_binningParams.insert(m_binningParams.begin(), log->minValue());
-    m_binningParams.push_back(
+    m_binningParams.emplace_back(
         log->maxValue() *
         1.000001); // Make it a tiny bit larger to cover full range
   }

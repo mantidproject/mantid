@@ -111,7 +111,7 @@ std::vector<double> getZscore(const vector<TYPE> &data) {
   }
   for (auto it = data.cbegin(); it != data.cend(); ++it) {
     auto tmp = static_cast<double>(*it);
-    Zscore.push_back(fabs((stats.mean - tmp) / stats.standard_deviation));
+    Zscore.emplace_back(fabs((stats.mean - tmp) / stats.standard_deviation));
   }
   return Zscore;
 }
@@ -146,8 +146,8 @@ std::vector<double> getWeightedZscore(const vector<TYPE> &data,
         std::pow(static_cast<double>(weights[it]) / sumWeights, 2);
   }
   for (auto it = data.cbegin(); it != data.cend(); ++it) {
-    Zscore.push_back(fabs((static_cast<double>(*it) - weightedMean) /
-                          std::sqrt(weightedVariance)));
+    Zscore.emplace_back(fabs((static_cast<double>(*it) - weightedMean) /
+                             std::sqrt(weightedVariance)));
   }
   return Zscore;
 }
@@ -169,7 +169,7 @@ std::vector<double> getModifiedZscore(const vector<TYPE> &data,
   double median = getMedian(data, num_data, sorted);
   for (auto it = data.cbegin(); it != data.cend(); ++it) {
     tmp = static_cast<double>(*it);
-    MADvec.push_back(fabs(tmp - median));
+    MADvec.emplace_back(fabs(tmp - median));
   }
   double MAD = getMedian(MADvec, num_data, sorted);
   if (MAD == 0.) {
@@ -180,7 +180,7 @@ std::vector<double> getModifiedZscore(const vector<TYPE> &data,
   std::vector<double> Zscore;
   for (auto it = data.begin(); it != data.end(); ++it) {
     tmp = static_cast<double>(*it);
-    Zscore.push_back(0.6745 * fabs((tmp - median) / MAD));
+    Zscore.emplace_back(0.6745 * fabs((tmp - median) / MAD));
   }
   return Zscore;
 }

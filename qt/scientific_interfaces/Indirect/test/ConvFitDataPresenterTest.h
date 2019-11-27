@@ -12,7 +12,7 @@
 
 #include "ConvFitDataPresenter.h"
 #include "ConvFitModel.h"
-#include "IIndirectFitDataView.h"
+#include "IIndirectFitDataViewLegacy.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -39,7 +39,7 @@ std::unique_ptr<QTableWidget> createEmptyTableWidget(int columns, int rows) {
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 /// Mock object to mock the view
-class MockConvFitDataView : public IIndirectFitDataView {
+class MockConvFitDataView : public IIndirectFitDataViewLegacy {
 public:
   /// Signals
   void emitResolutionLoaded(QString const &workspaceName) {
@@ -51,6 +51,7 @@ public:
   MOCK_CONST_METHOD0(isMultipleDataTabSelected, bool());
   MOCK_CONST_METHOD0(isResolutionHidden, bool());
   MOCK_METHOD1(setResolutionHidden, void(bool hide));
+  MOCK_METHOD1(setStartAndEndHidden, void(bool hidden));
   MOCK_METHOD0(disableMultipleDataTab, void());
 
   MOCK_CONST_METHOD0(getSelectedSample, std::string());

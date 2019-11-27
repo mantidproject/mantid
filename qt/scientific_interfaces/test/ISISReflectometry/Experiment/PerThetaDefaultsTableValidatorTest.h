@@ -178,7 +178,7 @@ private:
                                                    std::vector<int> columns) {
     std::vector<InvalidDefaultsError> errors;
     for (auto row : rows)
-      errors.push_back(InvalidDefaultsError(row, columns));
+      errors.emplace_back(InvalidDefaultsError(row, columns));
     return errors;
   }
 

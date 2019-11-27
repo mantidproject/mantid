@@ -7,7 +7,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_JUMPFIT_H_
 #define MANTIDQTCUSTOMINTERFACES_JUMPFIT_H_
 
-#include "IndirectFitAnalysisTab.h"
+#include "IndirectFitAnalysisTabLegacy.h"
 #include "JumpFitModel.h"
 #include "ui_JumpFit.h"
 
@@ -17,7 +17,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
-class DLLExport JumpFit : public IndirectFitAnalysisTab {
+class DLLExport JumpFit : public IndirectFitAnalysisTabLegacy {
   Q_OBJECT
 
 public:

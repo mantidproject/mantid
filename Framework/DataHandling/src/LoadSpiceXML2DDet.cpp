@@ -168,8 +168,8 @@ const std::string LoadSpiceXML2DDet::summary() const {
  */
 void LoadSpiceXML2DDet::init() {
   std::vector<std::string> exts;
-  exts.push_back(".xml");
-  exts.push_back(".bin");
+  exts.emplace_back(".xml");
+  exts.emplace_back(".bin");
   declareProperty(
       std::make_unique<FileProperty>("Filename", "",
                                      FileProperty::FileAction::Load, exts),
@@ -426,7 +426,7 @@ LoadSpiceXML2DDet::xmlParseSpice(const std::string &xmlfilename) {
           std::string attvalue = pNode->attributes()->item(j)->innerText();
           SpiceXMLNode xmlnode(attname);
           xmlnode.setValue(attvalue);
-          vecspicenode.push_back(xmlnode);
+          vecspicenode.emplace_back(xmlnode);
           g_log.debug() << "SPICErack attribute " << j << " Name = " << attname
                         << ", Value = " << attvalue << "\n";
         }
@@ -462,7 +462,7 @@ LoadSpiceXML2DDet::xmlParseSpice(const std::string &xmlfilename) {
       xmlnode.setParameters(nodetype, nodeunit, nodedescription);
       xmlnode.setValue(innertext);
 
-      vecspicenode.push_back(xmlnode);
+      vecspicenode.emplace_back(xmlnode);
     } else {
       // An unexpected case but no guarantee for not happening
       g_log.error("Funny... No child node.");

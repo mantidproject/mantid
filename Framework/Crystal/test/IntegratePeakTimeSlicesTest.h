@@ -114,7 +114,7 @@ public:
     const auto L2 = detectorInfo.l2(detInfoIndex);
     const auto ScatAng = detectorInfo.twoTheta(detInfoIndex) / 180 * M_PI;
     std::vector<double> x;
-    x.push_back(PeakTime);
+    x.emplace_back(PeakTime);
 
     wl.fromTOF(x, x, L1, L2, ScatAng, 0, 0, 0);
     double wavelength = x[0];
@@ -152,8 +152,8 @@ public:
           T[chan] += val;
           val += 1.4;
 
-          dataY.push_back(val);
-          dataE.push_back(sqrt(val));
+          dataY.emplace_back(val);
+          dataE.emplace_back(sqrt(val));
           if ((val - 1.4) > MaxPeakIntensity * .1) {
             double Q = calcQ(bankR, detectorInfo, row, col, 1000.0 + chan * 50);
             dQ = max<double>(dQ, fabs(Q - Q0));
@@ -249,7 +249,7 @@ private:
 
     Kernel::Units::MomentumTransfer Q;
     std::vector<double> x;
-    x.push_back(time);
+    x.emplace_back(time);
     const auto ScatAng = detectorInfo.twoTheta(detInfoIndex) / 180 * M_PI;
 
     Q.fromTOF(x, x, L1, L2, ScatAng, 0, 0, 0.0);

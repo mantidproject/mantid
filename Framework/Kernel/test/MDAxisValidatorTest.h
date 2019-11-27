@@ -73,9 +73,9 @@ public:
     int nAxes = 3;
     std::vector<int> axes;
     for (int i = 0; i < nAxes - 1; i++) {
-      axes.push_back(i);
+      axes.emplace_back(i);
     }
-    axes.push_back(99); // a dimension out of the real dimension range
+    axes.emplace_back(99); // a dimension out of the real dimension range
     MDAxisValidator checker(axes, nAxes, true);
     auto errors = checker.validate();
     TS_ASSERT_EQUALS(errors.size(), 1);
@@ -95,7 +95,7 @@ private:
                                        bool checkIfEmpty) const {
     std::vector<int> axes;
     for (int i = 0; i < nAxes; i++) {
-      axes.push_back(i);
+      axes.emplace_back(i);
     }
     auto checker =
         boost::make_shared<MDAxisValidator>(axes, nDimensions, checkIfEmpty);

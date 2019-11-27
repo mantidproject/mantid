@@ -14,10 +14,10 @@ from __future__ import (absolute_import, division, print_function)
 
 import copy
 
+from sans.common.enums import (SANSInstrument)
+from sans.common.file_information import SANSFileInformationBlank
 from sans.state.data import get_data_builder
 from sans.user_file.state_director import StateDirectorISIS
-from sans.common.enums import SANSInstrument
-from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
 class GuiStateDirector(object):
@@ -36,7 +36,7 @@ class GuiStateDirector(object):
         if file_lookup:
             file_information = table_index_model.file_information
         else:
-            file_information = SANSFileInformationMock(instrument=instrument, facility=self._facility)
+            file_information = SANSFileInformationBlank()
 
         data_builder = get_data_builder(self._facility, file_information, user_file)
 

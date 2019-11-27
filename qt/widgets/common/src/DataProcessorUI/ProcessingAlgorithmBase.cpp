@@ -42,17 +42,18 @@ void ProcessingAlgorithmBase::countWsProperties() {
         (prop->type() == "MatrixWorkspace" || prop->type() == "Workspace" ||
          prop->type() == "Workspace2D")) {
 
-      m_inputWsProperties.push_back(QString::fromStdString(prop->name()));
+      m_inputWsProperties.emplace_back(QString::fromStdString(prop->name()));
     }
     if (prop->direction() == Mantid::Kernel::Direction::Input &&
         prop->type() == "str list") {
 
-      m_inputStrListProperties.push_back(QString::fromStdString(prop->name()));
+      m_inputStrListProperties.emplace_back(
+          QString::fromStdString(prop->name()));
     }
     if (prop->direction() == Mantid::Kernel::Direction::Output &&
         (prop->type() == "MatrixWorkspace" || prop->type() == "Workspace")) {
 
-      m_OutputWsProperties.push_back(QString::fromStdString(prop->name()));
+      m_OutputWsProperties.emplace_back(QString::fromStdString(prop->name()));
     }
   }
 }

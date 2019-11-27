@@ -583,7 +583,7 @@ size_t LoadNexusMonitors2::getMonitorInfo(::NeXus::File &file,
       }
 
       file.closeGroup(); // close NXmonitor
-      m_monitorInfo.push_back(info);
+      m_monitorInfo.emplace_back(info);
     }
     prog2.report();
   }
@@ -646,12 +646,12 @@ bool LoadNexusMonitors2::createOutputWorkspace(
   if (useEventMon) {
     // load event
     for (size_t i_mon = 0; i_mon < m_monitor_count; ++i_mon) {
-      loadMonitorFlags.push_back(m_monitorInfo[i_mon].hasEvent);
+      loadMonitorFlags.emplace_back(m_monitorInfo[i_mon].hasEvent);
     }
   } else {
     // load histogram
     for (size_t i_mon = 0; i_mon < m_monitor_count; ++i_mon) {
-      loadMonitorFlags.push_back(m_monitorInfo[i_mon].hasHisto);
+      loadMonitorFlags.emplace_back(m_monitorInfo[i_mon].hasHisto);
     }
   }
 

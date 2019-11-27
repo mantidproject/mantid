@@ -26,6 +26,7 @@ class GuiCommonTest(unittest.TestCase):
         table_index_model_1 = TableIndexModel('LOQ74044', '', '', '', '', '', '', '', '', '', '', '')
         self.table_model.add_table_entry(0, table_index_model_0)
         self.table_model.add_table_entry(1, table_index_model_1)
+        self.table_model.get_thickness_for_rows()
         self.table_model.wait_for_file_finding_done()
         self.qApp.processEvents()
 
@@ -39,12 +40,11 @@ class GuiCommonTest(unittest.TestCase):
 
     def test_create_states_returns_correct_number_of_states(self):
         states, errors = create_states(self.state_gui_model, self.table_model, SANSInstrument.LOQ, SANSFacility.ISIS,
-                                       row_index=[0,1])
+                                       row_index=[0, 1])
 
         self.assertEqual(len(states), 2)
 
     def test_create_states_returns_correct_number_of_states_for_specified_row_index(self):
-
         states, errors = create_states(self.state_gui_model, self.table_model, SANSInstrument.LOQ, SANSFacility.ISIS,
                                        row_index=[1])
 
@@ -53,11 +53,12 @@ class GuiCommonTest(unittest.TestCase):
     def test_skips_empty_rows(self):
         table_index_model = TableIndexModel('', '', '', '', '', '', '', '', '', '', '', '')
         self.table_model.add_table_entry(1, table_index_model)
+        self.table_model.get_thickness_for_rows()
         self.table_model.wait_for_file_finding_done()
         self.qApp.processEvents()
 
         states, errors = create_states(self.state_gui_model, self.table_model, SANSInstrument.LOQ, SANSFacility.ISIS,
-                                       row_index=[0,1, 2])
+                                       row_index=[0, 1, 2])
 
         self.assertEqual(len(states), 2)
 
@@ -68,11 +69,12 @@ class GuiCommonTest(unittest.TestCase):
                                             user_file='MaskLOQData.txt')
         table_model = TableModel()
         table_model.add_table_entry(0, table_index_model)
+        table_model.get_thickness_for_rows()
         table_model.wait_for_file_finding_done()
         self.qApp.processEvents()
 
         states, errors = create_states(self.state_gui_model, table_model, SANSInstrument.LOQ, SANSFacility.ISIS,
-                                       row_index=[0,1, 2])
+                                       row_index=[0, 1, 2])
 
         self.assertEqual(len(states), 1)
         create_gui_state_mock.assert_called_once_with('MaskLOQData.txt', self.state_gui_model)

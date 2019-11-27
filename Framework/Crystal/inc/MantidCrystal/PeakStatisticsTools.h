@@ -36,7 +36,7 @@ public:
 
   const Kernel::V3D &getHKL() const { return m_hkl; }
 
-  void addPeak(const DataObjects::Peak &peak) { m_peaks.push_back(peak); }
+  void addPeak(const DataObjects::Peak &peak) { m_peaks.emplace_back(peak); }
   const std::vector<DataObjects::Peak> &getPeaks() const { return m_peaks; }
   size_t count() const { return m_peaks.size(); }
 

@@ -24,20 +24,20 @@ public:
   TrackedAction(const QIcon &icon, const QString &text, QObject *parent);
   virtual ~TrackedAction() = default;
 
-  void setTrackingName(const std::string &name);
-  std::string getTrackingName() const;
+  void setTrackingName(const std::vector<std::string> &name);
+  std::vector<std::string> getTrackingName() const;
 
   void setIsTracking(const bool enableTracking);
   bool getIsTracking() const;
 
 protected:
-  virtual std::string generateTrackingName() const;
-  virtual void registerUsage(const std::string &name);
+  virtual std::vector<std::string> generateTrackingName() const;
+  virtual void registerUsage(const std::vector<std::string> &name);
 
 private:
   void setupTracking();
   bool m_isTracking;
-  mutable std::string m_trackingName;
+  mutable std::vector<std::string> m_trackingName;
 
 public slots:
   void trackActivation(const bool checked);

@@ -216,7 +216,7 @@ AlgorithmFactoryImpl::getKeys(bool includeHidden) const {
       if (!toBeRemoved) {
         // just mark them to be removed as we are iterating around the vector at
         // the moment
-        validNames.push_back(name);
+        validNames.emplace_back(name);
       }
     }
     return validNames;
@@ -383,7 +383,7 @@ AlgorithmFactoryImpl::getDescriptors(bool includeHidden) const {
       }
 
       if (!categoryIsHidden)
-        res.push_back(desc);
+        res.emplace_back(desc);
     }
   }
   return res;

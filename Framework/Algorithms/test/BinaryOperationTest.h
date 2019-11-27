@@ -322,9 +322,9 @@ public:
     std::vector<std::vector<int>> lhs(6), rhs(2);
     for (int i = 0; i < 6; i++) {
       // one detector per pixel in lhs
-      lhs[i].push_back(i);
+      lhs[i].emplace_back(i);
       // 3 detectors in each on the rhs
-      rhs[i / 3].push_back(i);
+      rhs[i / 3].emplace_back(i);
     }
     auto table = do_test_buildBinaryOperationTable(lhs, rhs);
     for (int i = 0; i < 6; i++) {

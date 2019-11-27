@@ -156,12 +156,12 @@ std::vector<std::string> splitDetectorNames(std::string detectorNames) {
   while ((pos = detectorNames.find(delimiter)) != std::string::npos) {
     detectorName = detectorNames.substr(0, pos);
     boost::algorithm::trim(detectorName);
-    detectors.push_back(detectorName);
+    detectors.emplace_back(detectorName);
     detectorNames.erase(0, pos + delimiter.length());
   }
   // Push remaining element
   boost::algorithm::trim(detectorNames);
-  detectors.push_back(detectorNames);
+  detectors.emplace_back(detectorNames);
   return detectors;
 }
 
@@ -552,7 +552,7 @@ private:
   void setSpectrumAxisValues() {
     auto sAxis = m_workspace->getAxis(1);
     for (size_t index = 0; index < sAxis->length(); ++index) {
-      m_spectrumAxisValues.push_back((*sAxis)(index));
+      m_spectrumAxisValues.emplace_back((*sAxis)(index));
     }
   }
 

@@ -37,8 +37,8 @@ using Mantid::DataObjects::GroupingWorkspace_sptr;
 using Mantid::DataObjects::MaskWorkspace_sptr;
 using Mantid::DataObjects::Workspace2D;
 using Mantid::Kernel::Direction;
-using Mantid::Kernel::Exception::FileError;
 using Mantid::Kernel::PropertyWithValue;
+using Mantid::Kernel::Exception::FileError;
 
 using namespace H5;
 

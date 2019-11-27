@@ -477,7 +477,7 @@ private:
       auto *tempUnmanagedDet = detectors[i].release();
       spInst->add(tempUnmanagedDet);
       spInst->markAsDetector(tempUnmanagedDet);
-      detectorIDs.push_back(tempUnmanagedDet->getID());
+      detectorIDs.emplace_back(tempUnmanagedDet->getID());
     }
     inputWS->getSpectrum(0).setSpectrumNo(1);
     inputWS->getSpectrum(0).clearDetectorIDs();

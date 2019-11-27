@@ -56,7 +56,7 @@ public:
                                       700 * static_cast<int64_t>(m_bank + 1)};
     std::vector<double> time_zero;
     for (size_t i = 0; i < index.size(); ++i)
-      time_zero.push_back(static_cast<double>(10 * i + bank));
+      time_zero.emplace_back(static_cast<double>(10 * i + bank));
 
     // Drift depening on bank to ensure correct offset is used for every bank.
     int64_t time_zero_offset = 123456789 + 1000000 * m_bank;

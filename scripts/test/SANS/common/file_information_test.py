@@ -5,13 +5,15 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-import unittest
-import mantid
 
-from sans.common.file_information import (SANSFileInformationFactory, SANSFileInformation, FileType,
-                                          SANSInstrument, get_instrument_paths_for_sans_file)
-from sans.common.enums import SampleShape
+import mock
+import unittest
+
 from mantid.kernel import DateAndTime
+from sans.common.enums import SampleShape
+from sans.common.file_information import (SANSFileInformationFactory, FileType,
+                                          SANSInstrument, get_instrument_paths_for_sans_file)
+from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
 class SANSFileInformationTest(unittest.TestCase):
@@ -136,6 +138,49 @@ class SANSFileInformationTest(unittest.TestCase):
 
         # Assert
         self.assertTrue(file_information)
+
+    def test_that_run_number_is_from_file_with_ext(self):
+        filename = "INST12345.nxs"
+        expected = 12345
+
+        file_info = SANSFileInformationMock(file_name=filename)
+        self.assertEqual(expected, file_info.get_run_number())
+
+    def test_run_number_without_ext(self):
+        filename = "INST2D12345"
+        expected = 12345
+
+        file_info = SANSFileInformationMock(file_name=filename)
+        self.assertEqual(expected, file_info.get_run_number())
+
+    def test_run_number_with_n001_ext(self):
+        filename = "INST2345.n001"
+        expected = 2345
+
+        file_info = SANSFileInformationMock(file_name=filename)
+        self.assertEqual(expected, file_info.get_run_number())
+
+    def test_run_number_with_appendix(self):
+        filename = "INST2D101-001"
+        expected = 101
+
+        file_info = SANSFileInformationMock(file_name=filename)
+        self.assertEqual(expected, file_info.get_run_number())
+
+    def test_bad_run_name_gets_file_no_from_file(self):
+        # Make sure we don't log before the mock gets injected as it will warn during init
+        file_info = SANSFileInformationMock(file_name="0")
+        logger_mock = mock.Mock()
+        file_info.logger = logger_mock
+
+        filename = "NoDigits"
+        # Should get the mock's returned name - overriding classes should call hdf5
+        expected = int(file_info._get_run_number_from_file(""))
+        # Call init again now we have injected our mock
+        file_info.__init__(file_name=filename)
+
+        self.assertEqual(expected, file_info.get_run_number())
+        logger_mock.warning.assert_called_once_with(mock.ANY)
 
 
 class SANSFileInformationGeneralFunctionsTest(unittest.TestCase):

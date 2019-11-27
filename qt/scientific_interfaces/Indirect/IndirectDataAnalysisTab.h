@@ -53,7 +53,7 @@ class RangeSelector;
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
-class DLLExport IndirectDataAnalysisTab : public IndirectTab {
+class MANTIDQT_INDIRECT_DLL IndirectDataAnalysisTab : public IndirectTab {
   Q_OBJECT
 
 public:
@@ -74,9 +74,6 @@ public:
 
   /// Prevent loading of data with incorrect naming
   void filterInputData(bool filter);
-
-  /// Sets the active workspace in the selected tab
-  void setActiveWorkspace();
 
 protected:
   /// Function to run a string as python code
@@ -165,7 +162,7 @@ private:
   /// Overidden by child class.
   virtual void loadSettings(const QSettings &settings) = 0;
   virtual void setFileExtensionsByName(bool filter) = 0;
-  virtual void setBrowserWorkspace() = 0;
+  virtual void setBrowserWorkspace(){};
 
   /// A pointer to the parent (friend) IndirectDataAnalysis object.
   IndirectDataAnalysis *m_parent;
@@ -181,4 +178,4 @@ private:
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif /* MANTIDQTCUSTOMINTERFACESIDA_IDATAB_H_ */
+#endif /* MANTIDQTCUSTOMINTERFACESIDA_IDATABLEGACY_H_ */

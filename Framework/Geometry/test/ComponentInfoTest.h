@@ -91,14 +91,14 @@ std::unique_ptr<Beamline::ComponentInfo> makeSingleBeamlineComponentInfo(
       boost::make_shared<std::vector<size_t>>(); // No detectors in this example
   auto detectorRanges =
       boost::make_shared<std::vector<std::pair<size_t, size_t>>>();
-  detectorRanges->push_back(
+  detectorRanges->emplace_back(
       std::make_pair(0, 0)); // One component with no detectors
 
   auto componentIndices = boost::make_shared<std::vector<size_t>>(
       std::vector<size_t>{0}); // No detectors in this example
   auto componentRanges =
       boost::make_shared<std::vector<std::pair<size_t, size_t>>>();
-  componentRanges->push_back(
+  componentRanges->emplace_back(
       std::make_pair(0, 1)); // One component with no sub-components
 
   auto parentIndices = boost::make_shared<const std::vector<size_t>>(
@@ -138,18 +138,18 @@ public:
                                                    // example
     auto detectorRanges =
         boost::make_shared<std::vector<std::pair<size_t, size_t>>>();
-    detectorRanges->push_back(
+    detectorRanges->emplace_back(
         std::make_pair(0, 0)); // One component with no detectors
-    detectorRanges->push_back(
+    detectorRanges->emplace_back(
         std::make_pair(0, 0)); // Another component with no detectors
 
     auto componentIndices = boost::make_shared<std::vector<size_t>>(
         std::vector<size_t>{0, 1}); // No detectors in this example
     auto componentRanges =
         boost::make_shared<std::vector<std::pair<size_t, size_t>>>();
-    componentRanges->push_back(
+    componentRanges->emplace_back(
         std::make_pair(0, 0)); // One component with no sub-components
-    componentRanges->push_back(
+    componentRanges->emplace_back(
         std::make_pair(0, 0)); // Another component with no subcomponents
 
     auto parentIndices = boost::make_shared<const std::vector<size_t>>(
@@ -179,8 +179,8 @@ public:
 
     auto shapes = boost::make_shared<
         std::vector<boost::shared_ptr<const Geometry::IObject>>>();
-    shapes->push_back(boost::make_shared<const Geometry::CSGObject>());
-    shapes->push_back(boost::make_shared<const Geometry::CSGObject>());
+    shapes->emplace_back(boost::make_shared<const Geometry::CSGObject>());
+    shapes->emplace_back(boost::make_shared<const Geometry::CSGObject>());
 
     ComponentInfo info(std::move(internalInfo), componentIds,
                        makeComponentIDMap(componentIds), shapes);
@@ -198,7 +198,7 @@ public:
 
     auto shapes = boost::make_shared<
         std::vector<boost::shared_ptr<const Geometry::IObject>>>();
-    shapes->push_back(createCappedCylinder());
+    shapes->emplace_back(createCappedCylinder());
 
     ComponentInfo a(std::move(internalInfo), componentIds,
                     makeComponentIDMap(componentIds), shapes);
@@ -225,7 +225,7 @@ public:
 
     auto shapes = boost::make_shared<
         std::vector<boost::shared_ptr<const Geometry::IObject>>>();
-    shapes->push_back(createCappedCylinder());
+    shapes->emplace_back(createCappedCylinder());
 
     ComponentInfo compInfo(std::move(internalInfo), componentIds,
                            makeComponentIDMap(componentIds), shapes);
@@ -253,7 +253,7 @@ public:
 
     auto shapes = boost::make_shared<
         std::vector<boost::shared_ptr<const Geometry::IObject>>>();
-    shapes->push_back(ComponentCreationHelper::createSphere(radius));
+    shapes->emplace_back(ComponentCreationHelper::createSphere(radius));
 
     ComponentInfo info(std::move(internalInfo), componentIds,
                        makeComponentIDMap(componentIds), shapes);
@@ -288,7 +288,7 @@ public:
 
     auto shapes = boost::make_shared<
         std::vector<boost::shared_ptr<const Geometry::IObject>>>();
-    shapes->push_back(createCappedCylinder());
+    shapes->emplace_back(createCappedCylinder());
 
     ComponentInfo info(std::move(internalInfo), componentIds,
                        makeComponentIDMap(componentIds), shapes);
@@ -311,7 +311,7 @@ public:
 
     auto shapes = boost::make_shared<
         std::vector<boost::shared_ptr<const Geometry::IObject>>>();
-    shapes->push_back(ComponentCreationHelper::createSphere(radius));
+    shapes->emplace_back(ComponentCreationHelper::createSphere(radius));
 
     ComponentInfo componentInfo(std::move(internalInfo), componentIds,
                                 makeComponentIDMap(componentIds), shapes);

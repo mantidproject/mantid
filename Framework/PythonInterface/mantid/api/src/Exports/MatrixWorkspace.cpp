@@ -332,6 +332,9 @@ void export_MatrixWorkspace() {
            MatrixWorkspace_YUnitLabelOverloads(
                (arg("self"), arg("useLatex"), arg("plotAsDistribution")),
                "Returns the caption for the Y axis"))
+      .def("hasAnyMaskedBins", &MatrixWorkspace::hasAnyMaskedBins,
+           (arg("self")),
+           "Returns true if any of the bins in this workspace are masked.")
       .def("hasMaskedBins", &MatrixWorkspace::hasMaskedBins,
            (arg("self"), arg("workspaceIndex")),
            "Returns true if this spectrum contains any masked bins")

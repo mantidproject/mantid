@@ -86,7 +86,7 @@ std::vector<int> findAxes(const IMDHistoWorkspace &shapeWS,
     if (!dataDim->getIsIntegrated()) {
       auto index = static_cast<int>(
           shapeWS.getDimensionIndexById(dataDim->getDimensionId()));
-      axes.push_back(index);
+      axes.emplace_back(index);
     }
   }
   return axes;

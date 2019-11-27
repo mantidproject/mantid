@@ -80,9 +80,9 @@ public:
     // 1. Generate masking files
     std::vector<int> banks1;
     std::vector<int> detids;
-    detids.push_back(26284);
-    detids.push_back(27250);
-    detids.push_back(28268);
+    detids.emplace_back(26284);
+    detids.emplace_back(27250);
+    detids.emplace_back(28268);
     auto maskDetFile = genMaskingFile("maskingdet.xml", detids, banks1);
 
     // 2. Run
@@ -179,14 +179,14 @@ public:
   void test_ISISFormat() {
     // 1. Generate masking files
     std::vector<specnum_t> singlespectra;
-    singlespectra.push_back(35);
-    singlespectra.push_back(1001);
-    singlespectra.push_back(2001);
+    singlespectra.emplace_back(35);
+    singlespectra.emplace_back(1001);
+    singlespectra.emplace_back(2001);
     std::vector<specnum_t> pairspectra;
-    pairspectra.push_back(1002);
-    pairspectra.push_back(1005);
-    pairspectra.push_back(37);
-    pairspectra.push_back(40);
+    pairspectra.emplace_back(1002);
+    pairspectra.emplace_back(1005);
+    pairspectra.emplace_back(37);
+    pairspectra.emplace_back(40);
 
     auto isisMaskFile =
         genISISMaskingFile("isismask.msk", singlespectra, pairspectra);
@@ -330,13 +330,13 @@ public:
       if (source_masked) {
         const auto &detector = spectrumInfoSource.detector(i);
         const auto detectorId = detector.getID();
-        maskSourceDet.push_back(detectorId);
+        maskSourceDet.emplace_back(detectorId);
       }
       bool targ_masked = (maskWs->getSpectrum(i).y()[0] > 0.5);
       if (targ_masked) {
         const auto &detector = spectrumInfoTarget.detector(i);
         const auto detectorId = detector.getID();
-        maskTargDet.push_back(detectorId);
+        maskTargDet.emplace_back(detectorId);
       }
     }
     std::sort(maskSourceDet.begin(), maskSourceDet.end());
@@ -397,17 +397,17 @@ public:
   void test_Banks() {
     // 0. Generate masking files
     std::vector<int> banks1;
-    banks1.push_back(21);
-    banks1.push_back(22);
-    banks1.push_back(2200);
+    banks1.emplace_back(21);
+    banks1.emplace_back(22);
+    banks1.emplace_back(2200);
     std::vector<int> detids;
     auto maskFile1 = genMaskingFile("masking01.xml", detids, banks1);
 
     std::vector<int> banks2;
-    banks2.push_back(23);
-    banks2.push_back(26);
-    banks2.push_back(27);
-    banks2.push_back(28);
+    banks2.emplace_back(23);
+    banks2.emplace_back(26);
+    banks2.emplace_back(27);
+    banks2.emplace_back(28);
     auto maskFile2 = genMaskingFile("masking02.xml", detids, banks2);
 
     // 1. Generate Mask Workspace

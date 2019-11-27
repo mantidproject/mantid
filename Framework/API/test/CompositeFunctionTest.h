@@ -38,7 +38,7 @@ public:
       : m_blocksize(ny) {
     for (size_t i = 0; i < nspec; ++i) {
       CompositeFunctionTest_MocSpectrum sp(nx, ny);
-      m_spectra.push_back(sp);
+      m_spectra.emplace_back(sp);
     }
   }
 

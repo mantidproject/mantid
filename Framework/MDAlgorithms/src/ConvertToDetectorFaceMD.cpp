@@ -239,7 +239,7 @@ void ConvertToDetectorFaceMD::exec() {
     MDHistoDimension_sptr dimBanks(new MDHistoDimension(
         "bank", "bank", frameNumber, static_cast<coord_t>(min),
         static_cast<coord_t>(max), max - min));
-    dims.push_back(dimBanks);
+    dims.emplace_back(dimBanks);
   }
 
   // --------- Create the workspace with the right number of dimensions

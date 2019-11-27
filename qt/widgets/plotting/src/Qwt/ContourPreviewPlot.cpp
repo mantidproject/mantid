@@ -301,7 +301,7 @@ void ContourPreviewPlot::setVectorDimensions() {
     for (auto i = 0u; i < m_workspace->getNumDims(); ++i) {
       MDHistoDimension_sptr dimension(std::make_unique<MDHistoDimension>(
           m_workspace->getDimension(i).get()));
-      m_dimensions.push_back(dimension);
+      m_dimensions.emplace_back(dimension);
     }
   }
 }

@@ -92,7 +92,7 @@ class MainWindow(QMainWindow):
         try:
             import mantid
             #register startup
-            mantid.UsageService.registerFeatureUsage("Interface","TofConverter",False)
+            mantid.UsageService.registerFeatureUsage(mantid.kernel.FeatureType.Interface,"TofConverter",False)
         except ImportError:
             pass
 

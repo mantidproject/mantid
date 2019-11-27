@@ -160,36 +160,36 @@ public:
     TimeSplitterType a, b;
     start = DateAndTime("2007-11-30T16:17:00");
     stop = DateAndTime("2007-11-30T16:17:10");
-    a.push_back(SplittingInterval(start, stop, 0));
+    a.emplace_back(SplittingInterval(start, stop, 0));
 
     start = DateAndTime("2007-11-30T16:17:20");
     stop = DateAndTime("2007-11-30T16:17:30");
-    a.push_back(SplittingInterval(start, stop, 0));
+    a.emplace_back(SplittingInterval(start, stop, 0));
 
     start = DateAndTime("2007-11-30T16:17:40");
     stop = DateAndTime("2007-11-30T16:17:50");
-    a.push_back(SplittingInterval(start, stop, 0));
+    a.emplace_back(SplittingInterval(start, stop, 0));
 
     start = DateAndTime("2007-11-30T16:18:00");
     stop = DateAndTime("2007-11-30T16:18:10");
-    a.push_back(SplittingInterval(start, stop, 0));
+    a.emplace_back(SplittingInterval(start, stop, 0));
 
     start = DateAndTime("2007-11-30T16:18:20");
     stop = DateAndTime("2007-11-30T16:18:30");
-    a.push_back(SplittingInterval(start, stop, 0));
+    a.emplace_back(SplittingInterval(start, stop, 0));
 
     // Smaller than the first one
     start = DateAndTime("2007-11-30T16:17:01");
     stop = DateAndTime("2007-11-30T16:17:25");
-    b.push_back(SplittingInterval(start, stop, 0));
+    b.emplace_back(SplittingInterval(start, stop, 0));
 
     start = DateAndTime("2007-11-30T16:17:26");
     stop = DateAndTime("2007-11-30T16:17:27");
-    b.push_back(SplittingInterval(start, stop, 0));
+    b.emplace_back(SplittingInterval(start, stop, 0));
 
     start = DateAndTime("2007-11-30T16:17:45");
     stop = DateAndTime("2007-11-30T16:18:15");
-    b.push_back(SplittingInterval(start, stop, 0));
+    b.emplace_back(SplittingInterval(start, stop, 0));
 
     // Now AND the splitters (filters) together
     TimeSplitterType c;
@@ -224,40 +224,40 @@ public:
     TimeSplitterType a, b;
     start = DateAndTime("2007-11-30T16:17:00");
     stop = DateAndTime("2007-11-30T16:17:10");
-    a.push_back(SplittingInterval(start, stop, 0));
+    a.emplace_back(SplittingInterval(start, stop, 0));
 
     start = DateAndTime("2007-11-30T16:17:20");
     stop = DateAndTime("2007-11-30T16:17:30");
-    a.push_back(SplittingInterval(start, stop, 0));
+    a.emplace_back(SplittingInterval(start, stop, 0));
 
     start = DateAndTime("2007-11-30T16:17:40");
     stop = DateAndTime("2007-11-30T16:17:50");
-    a.push_back(SplittingInterval(start, stop, 0));
+    a.emplace_back(SplittingInterval(start, stop, 0));
 
     start = DateAndTime("2007-11-30T16:18:00");
     stop = DateAndTime("2007-11-30T16:18:10");
-    a.push_back(SplittingInterval(start, stop, 0));
+    a.emplace_back(SplittingInterval(start, stop, 0));
 
     start = DateAndTime("2007-11-30T16:18:20");
     stop = DateAndTime("2007-11-30T16:18:30");
-    a.push_back(SplittingInterval(start, stop, 0));
+    a.emplace_back(SplittingInterval(start, stop, 0));
 
     // Smaller than the first one
     start = DateAndTime("2007-11-30T16:17:01");
     stop = DateAndTime("2007-11-30T16:17:25");
-    b.push_back(SplittingInterval(start, stop, 0));
+    b.emplace_back(SplittingInterval(start, stop, 0));
 
     start = DateAndTime("2007-11-30T16:17:26");
     stop = DateAndTime("2007-11-30T16:17:27");
-    b.push_back(SplittingInterval(start, stop, 0));
+    b.emplace_back(SplittingInterval(start, stop, 0));
 
     start = DateAndTime("2007-11-30T16:17:45");
     stop = DateAndTime("2007-11-30T16:18:15");
-    b.push_back(SplittingInterval(start, stop, 0));
+    b.emplace_back(SplittingInterval(start, stop, 0));
 
     start = DateAndTime("2007-11-30T16:18:50");
     stop = DateAndTime("2007-11-30T16:18:55");
-    b.push_back(SplittingInterval(start, stop, 0));
+    b.emplace_back(SplittingInterval(start, stop, 0));
 
     // Now AND the splitters (filters) together
     TimeSplitterType c;
@@ -290,22 +290,22 @@ public:
 
     start = DateAndTime("2007-11-30T16:17:20");
     stop = DateAndTime("2007-11-30T16:17:30");
-    a.push_back(SplittingInterval(start, stop, 0));
+    a.emplace_back(SplittingInterval(start, stop, 0));
 
     // A bad (reversed) interval
     start = DateAndTime("2007-11-30T16:17:32");
     stop = DateAndTime("2007-11-30T16:17:31");
-    a.push_back(SplittingInterval(start, stop, 0));
+    a.emplace_back(SplittingInterval(start, stop, 0));
 
     // REVERSED interval that is before the first one
     start = DateAndTime("2007-11-30T16:17:15");
     stop = DateAndTime("2007-11-30T16:17:00");
-    b.push_back(SplittingInterval(start, stop, 0));
+    b.emplace_back(SplittingInterval(start, stop, 0));
 
     // Another bad interval
     start = DateAndTime("2007-11-30T16:17:45");
     stop = DateAndTime("2007-11-30T16:17:35");
-    b.push_back(SplittingInterval(start, stop, 0));
+    b.emplace_back(SplittingInterval(start, stop, 0));
 
     // Now AND the splitters (filters) together
     TimeSplitterType c;
@@ -330,11 +330,11 @@ public:
     //---- Normal Case ------
     start = DateAndTime("2007-11-30T16:17:00");
     stop = DateAndTime("2007-11-30T16:17:10");
-    a.push_back(SplittingInterval(start, stop, 0));
+    a.emplace_back(SplittingInterval(start, stop, 0));
 
     start = DateAndTime("2007-11-30T16:17:20");
     stop = DateAndTime("2007-11-30T16:17:30");
-    a.push_back(SplittingInterval(start, stop, 0));
+    a.emplace_back(SplittingInterval(start, stop, 0));
 
     // Perform the NOT operation
     c = ~a;
@@ -378,11 +378,11 @@ public:
     // Overlapping case ------
     start = DateAndTime("2007-11-30T16:17:00");
     stop = DateAndTime("2007-11-30T16:17:15");
-    a.push_back(SplittingInterval(start, stop, 0));
+    a.emplace_back(SplittingInterval(start, stop, 0));
 
     start = DateAndTime("2007-11-30T16:17:10");
     stop = DateAndTime("2007-11-30T16:17:30");
-    a.push_back(SplittingInterval(start, stop, 0));
+    a.emplace_back(SplittingInterval(start, stop, 0));
 
     c = ~a;
     TS_ASSERT_EQUALS(c.size(), 2);
@@ -406,40 +406,40 @@ public:
     //  the splitter ------
     start = DateAndTime("2007-11-30T16:15:00");
     stop = DateAndTime("2007-11-30T16:16:00");
-    b.push_back(SplittingInterval(start, stop, 0));
+    b.emplace_back(SplittingInterval(start, stop, 0));
 
     start = DateAndTime("2007-11-30T16:17:00");
     stop = DateAndTime("2007-11-30T16:18:00");
-    b.push_back(SplittingInterval(start, stop, 1));
+    b.emplace_back(SplittingInterval(start, stop, 1));
 
     start = DateAndTime("2007-11-30T16:18:00");
     stop = DateAndTime("2007-11-30T16:19:00");
-    b.push_back(SplittingInterval(start, stop, 2));
+    b.emplace_back(SplittingInterval(start, stop, 2));
 
     start = DateAndTime("2007-11-30T16:19:00");
     stop = DateAndTime("2007-11-30T16:20:00");
-    b.push_back(SplittingInterval(start, stop, 3));
+    b.emplace_back(SplittingInterval(start, stop, 3));
 
     // the filter ------
     start = DateAndTime("2007-11-30T16:16:50");
     stop = DateAndTime("2007-11-30T16:17:10");
-    a.push_back(SplittingInterval(start, stop, 0));
+    a.emplace_back(SplittingInterval(start, stop, 0));
 
     start = DateAndTime("2007-11-30T16:17:20");
     stop = DateAndTime("2007-11-30T16:17:30");
-    a.push_back(SplittingInterval(start, stop, 0));
+    a.emplace_back(SplittingInterval(start, stop, 0));
 
     start = DateAndTime("2007-11-30T16:17:40");
     stop = DateAndTime("2007-11-30T16:18:10");
-    a.push_back(SplittingInterval(start, stop, 0));
+    a.emplace_back(SplittingInterval(start, stop, 0));
 
     start = DateAndTime("2007-11-30T16:18:50");
     stop = DateAndTime("2007-11-30T16:18:55");
-    a.push_back(SplittingInterval(start, stop, 0));
+    a.emplace_back(SplittingInterval(start, stop, 0));
 
     start = DateAndTime("2007-11-30T16:22:20");
     stop = DateAndTime("2007-11-30T16:22:30");
-    a.push_back(SplittingInterval(start, stop, 0));
+    a.emplace_back(SplittingInterval(start, stop, 0));
 
     // Do the PLUS operation
     c = a + b;
@@ -485,19 +485,19 @@ public:
     //  the splitter ------
     start = DateAndTime("2007-11-30T16:15:00");
     stop = DateAndTime("2007-11-30T16:16:00");
-    b.push_back(SplittingInterval(start, stop, 0));
+    b.emplace_back(SplittingInterval(start, stop, 0));
 
     start = DateAndTime("2007-11-30T16:19:00");
     stop = DateAndTime("2007-11-30T16:20:00");
-    b.push_back(SplittingInterval(start, stop, 3));
+    b.emplace_back(SplittingInterval(start, stop, 3));
 
     start = DateAndTime("2007-11-30T16:18:00");
     stop = DateAndTime("2007-11-30T16:19:00");
-    b.push_back(SplittingInterval(start, stop, 2));
+    b.emplace_back(SplittingInterval(start, stop, 2));
 
     start = DateAndTime("2007-11-30T16:17:00");
     stop = DateAndTime("2007-11-30T16:18:00");
-    b.push_back(SplittingInterval(start, stop, 1));
+    b.emplace_back(SplittingInterval(start, stop, 1));
 
     std::sort(b.begin(), b.end());
 
@@ -515,19 +515,19 @@ public:
     //  the splitter ------
     start = DateAndTime("2007-11-30T16:15:00");
     stop = DateAndTime("2007-11-30T16:16:00");
-    b.push_back(SplittingInterval(start, stop, 0));
+    b.emplace_back(SplittingInterval(start, stop, 0));
 
     start = DateAndTime("2007-11-30T16:19:00");
     stop = DateAndTime("2007-11-30T16:20:00");
-    b.push_back(SplittingInterval(start, stop, 3));
+    b.emplace_back(SplittingInterval(start, stop, 3));
 
     start = DateAndTime("2007-11-30T16:18:00");
     stop = DateAndTime("2007-11-30T16:19:00");
-    b.push_back(SplittingInterval(start, stop, 2));
+    b.emplace_back(SplittingInterval(start, stop, 2));
 
     start = DateAndTime("2007-11-30T16:17:00");
     stop = DateAndTime("2007-11-30T16:18:00");
-    b.push_back(SplittingInterval(start, stop, 1));
+    b.emplace_back(SplittingInterval(start, stop, 1));
 
     std::sort(b.begin(), b.end());
 

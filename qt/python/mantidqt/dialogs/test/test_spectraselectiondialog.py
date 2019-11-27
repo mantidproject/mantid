@@ -11,6 +11,7 @@ from qtpy.QtWidgets import QDialogButtonBox
 
 from mantid.api import WorkspaceFactory
 from mantid.py3compat import mock
+from mantid.simpleapi import ExtractSpectra
 from mantidqt.dialogs.spectraselectordialog import parse_selection_str, SpectraSelectionDialog
 from mantidqt.dialogs.spectraselectorutils import get_spectra_selection
 from mantidqt.utils.qt.testing import start_qapplication
@@ -136,6 +137,12 @@ class SpectraSelectionDialogTest(unittest.TestCase):
     def test_get_spectra_selection_raises_error_with_wrong_workspace_type(self):
         table = WorkspaceFactory.Instance().createTable()
         self.assertRaises(ValueError, get_spectra_selection, [self._single_spec_ws, table])
+
+    def test_set_placeholder_text_raises_error_if_workspaces_have_no_common_spectra(self):
+        spectra_1 = ExtractSpectra(InputWorkspace=self._multi_spec_ws, StartWorkspaceIndex=0, EndWorkspaceIndex=5)
+        spectra_2 = ExtractSpectra(InputWorkspace=self._multi_spec_ws, StartWorkspaceIndex=6, EndWorkspaceIndex=10)
+        workspaces = [spectra_1, spectra_2]
+        self.assertRaises(Exception, 'Error: Workspaces have no common spectra.', SpectraSelectionDialog, workspaces)
 
 
 if __name__ == '__main__':

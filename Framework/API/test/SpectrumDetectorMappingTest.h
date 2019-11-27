@@ -80,12 +80,12 @@ public:
 
     // Now fill the vectors and test again
     for (int i = 1; i < 4; ++i) {
-      specs.push_back(i);
-      detids.push_back(i * 10);
+      specs.emplace_back(i);
+      detids.emplace_back(i * 10);
     }
     // Add a second entry to one
-    specs.push_back(2);
-    detids.push_back(99);
+    specs.emplace_back(2);
+    detids.emplace_back(99);
 
     SpectrumDetectorMapping map2(specs, detids);
     check_the_map(map2);

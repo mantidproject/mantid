@@ -88,9 +88,9 @@ void QueryMDWorkspace::init() {
                                          "LimitRows", IS_DEFAULT));
 
   std::vector<std::string> propOptions;
-  propOptions.push_back(noNormalisationOption());
-  propOptions.push_back(volumeNormalisationOption());
-  propOptions.push_back(numberOfEventsNormalisationOption());
+  propOptions.emplace_back(noNormalisationOption());
+  propOptions.emplace_back(volumeNormalisationOption());
+  propOptions.emplace_back(numberOfEventsNormalisationOption());
 
   declareProperty("Normalisation", "none",
                   boost::make_shared<StringListValidator>(propOptions),

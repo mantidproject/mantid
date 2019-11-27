@@ -77,7 +77,8 @@ public:
 
   /// Create a new instance of the correct type of UserSubWindow
   UserSubWindow *createSubWindow(const QString &interface_name,
-                                 QWidget *parent = nullptr);
+                                 QWidget *parent = nullptr,
+                                 bool isWindow = true);
 
   /**
    * Function that instantiates the Vates simple user interface.

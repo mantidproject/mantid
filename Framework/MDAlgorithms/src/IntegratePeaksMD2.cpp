@@ -693,7 +693,7 @@ void IntegratePeaksMD2::calculateE1(
     V3D E1 = V3D(-std::sin(tt1) * std::cos(ph1), -std::sin(tt1) * std::sin(ph1),
                  1. - std::cos(tt1)); // end of trajectory
     E1 = E1 * (1. / E1.norm());       // normalize
-    E1Vec.push_back(E1);
+    E1Vec.emplace_back(E1);
   }
 }
 

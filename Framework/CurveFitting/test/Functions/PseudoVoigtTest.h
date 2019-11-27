@@ -33,7 +33,7 @@ public:
   PseudoVoigtTest() : m_xValues() {
     for (size_t i = 0; i < 200; ++i) {
       double x_i = -10 + 0.1 * static_cast<double>(i);
-      m_xValues.push_back(x_i);
+      m_xValues.emplace_back(x_i);
     }
   }
 
@@ -255,7 +255,7 @@ public:
         pv->setParameter(0, param_value);
         pv->functionDeriv(domain, jacobian);
         // get value and add to the vector
-        vec_jocob_deriv.push_back(jacobian.get(0, 0));
+        vec_jocob_deriv.emplace_back(jacobian.get(0, 0));
         // update eta
         param_value += eta_resolution;
       }
@@ -306,7 +306,7 @@ public:
         pv->setParameter(1, param_value);
         pv->functionDeriv(domain, jacobian);
         // get value and add to the vector
-        vec_jocob_deriv.push_back(jacobian.get(0, 1));
+        vec_jocob_deriv.emplace_back(jacobian.get(0, 1));
         // update eta
         param_value += intensity_resolution;
       }
@@ -355,7 +355,7 @@ public:
         pv->setParameter(2, param_value);
         pv->functionDeriv(domain, jacobian);
         // get value and add to the vector
-        vec_jocob_deriv.push_back(jacobian.get(0, 2));
+        vec_jocob_deriv.emplace_back(jacobian.get(0, 2));
         // update eta
         param_value += x0_resolution;
       }
@@ -403,7 +403,7 @@ public:
         pv->setParameter(3, param_value);
         pv->functionDeriv(domain, jacobian);
         // get value and add to the vector
-        vec_jocob_deriv.push_back(jacobian.get(0, 3));
+        vec_jocob_deriv.emplace_back(jacobian.get(0, 3));
         // update eta
         param_value += fwhm_resolution;
       }
@@ -493,8 +493,8 @@ private:
       pv->setParameter(param_index, param_value);
       pv->function(domain, values);
       // set to vector
-      param_vec.push_back(param_value);
-      pv_vec.push_back(values[0]);
+      param_vec.emplace_back(param_value);
+      pv_vec.emplace_back(values[0]);
       // increment
       param_value += resolution;
     }

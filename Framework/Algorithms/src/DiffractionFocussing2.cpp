@@ -236,7 +236,7 @@ void DiffractionFocussing2::exec() {
       // Check for masked bins in this spectrum
       if (m_matrixInputW->hasMaskedBins(i)) {
         MantidVec weight_bins, weights;
-        weight_bins.push_back(Xin.front());
+        weight_bins.emplace_back(Xin.front());
         // If there are masked bins, get a reference to the list of them
         const API::MatrixWorkspace::MaskList &mask =
             m_matrixInputW->maskedBins(i);
@@ -247,19 +247,19 @@ void DiffractionFocussing2::exec() {
           // Add an intermediate bin with full weight if masked bins aren't
           // consecutive
           if (weight_bins.back() != currentX) {
-            weights.push_back(1.0);
-            weight_bins.push_back(currentX);
+            weights.emplace_back(1.0);
+            weight_bins.emplace_back(currentX);
           }
           // The weight for this masked bin is 1 - the degree to which this bin
           // is masked
-          weights.push_back(1.0 - bin.second);
-          weight_bins.push_back(Xin[bin.first + 1]);
+          weights.emplace_back(1.0 - bin.second);
+          weight_bins.emplace_back(Xin[bin.first + 1]);
         }
         // Add on a final bin with full weight if masking doesn't go up to the
         // end
         if (weight_bins.back() != Xin.back()) {
-          weights.push_back(1.0);
-          weight_bins.push_back(Xin.back());
+          weights.emplace_back(1.0);
+          weight_bins.emplace_back(Xin.back());
         }
 
         // Create a zero vector for the errors because we don't care about them
@@ -653,19 +653,19 @@ size_t DiffractionFocussing2::setupGroupToWSIndices() {
     }
 
     // Also record a list of workspace indices
-    wsIndices[group].push_back(wi);
+    wsIndices[group].emplace_back(wi);
   }
 
   // initialize a vector of the valid group numbers
   size_t totalHistProcess = 0;
   for (const auto &item : group2xvector) {
     const auto group = item.first;
-    m_validGroups.push_back(group);
+    m_validGroups.emplace_back(group);
     totalHistProcess += wsIndices[group].size();
   }
 
   for (const auto &group : m_validGroups)
-    m_wsIndices.push_back(std::move(wsIndices[static_cast<int>(group)]));
+    m_wsIndices.emplace_back(std::move(wsIndices[static_cast<int>(group)]));
 
   return totalHistProcess;
 }

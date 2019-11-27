@@ -249,7 +249,7 @@ void PoldiSpectrumDomainFunction::initializeInstrumentParameters(
         Conversions::dtoTOF(dMin, distance, sinTheta) / m_deltaT);
     curr->setFactors(m_timeTransformer, static_cast<size_t>(i));
 
-    m_2dHelpers.push_back(curr);
+    m_2dHelpers.emplace_back(curr);
   }
 }
 

@@ -14,8 +14,8 @@
 #include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
 
 using namespace Mantid::Poldi;
-using ::testing::Return;
 using ::testing::_;
+using ::testing::Return;
 
 class PoldiDetectorDecoratorTest : public CxxTest::TestSuite {
   boost::shared_ptr<MockDetector> m_detector;

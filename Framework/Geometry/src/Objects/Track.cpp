@@ -150,7 +150,7 @@ int Track::addLink(const V3D &firstPoint, const V3D &secondPoint,
   Link newLink(firstPoint, secondPoint, distanceAlongTrack, obj, compID);
   int index(0);
   if (m_links.empty()) {
-    m_links.push_back(newLink);
+    m_links.emplace_back(newLink);
     index = 0;
   } else {
     auto linkPtr = std::lower_bound(m_links.begin(), m_links.end(), newLink);

@@ -99,7 +99,7 @@ int CompAssembly::add(IComponent *comp) {
 
   if (comp) {
     comp->setParent(this);
-    m_children.push_back(comp);
+    m_children.emplace_back(comp);
   }
   return static_cast<int>(m_children.size());
 }
@@ -120,7 +120,7 @@ int CompAssembly::addCopy(IComponent *comp) {
   if (comp) {
     IComponent *newcomp = comp->clone();
     newcomp->setParent(this);
-    m_children.push_back(newcomp);
+    m_children.emplace_back(newcomp);
   }
   return static_cast<int>(m_children.size());
 }
@@ -143,7 +143,7 @@ int CompAssembly::addCopy(IComponent *comp, const std::string &n) {
     IComponent *newcomp = comp->clone();
     newcomp->setParent(this);
     newcomp->setName(n);
-    m_children.push_back(newcomp);
+    m_children.emplace_back(newcomp);
   }
   return static_cast<int>(m_children.size());
 }
@@ -235,7 +235,7 @@ void CompAssembly::getChildren(std::vector<IComponent_const_sptr> &outVector,
   for (int i = 0; i < this->nelements(); i++) {
     boost::shared_ptr<IComponent> comp = this->getChild(i);
     if (comp) {
-      outVector.push_back(comp);
+      outVector.emplace_back(comp);
       // Look deeper, on option.
       if (recursive) {
         boost::shared_ptr<ICompAssembly> assemb =
@@ -343,7 +343,7 @@ CompAssembly::getComponentByName(const std::string &cname, int nlevels) const {
             boost::shared_ptr<const ICompAssembly> compAssembly =
                 boost::dynamic_pointer_cast<const ICompAssembly>(comp);
             if (bool(compAssembly)) {
-              nodeQueue.push_back(compAssembly);
+              nodeQueue.emplace_back(compAssembly);
             }
           }
         }
@@ -413,7 +413,7 @@ void CompAssembly::testIntersectionWithChildren(
     boost::shared_ptr<Geometry::IComponent> comp = this->getChild(i);
     if (ICompAssembly_sptr childAssembly =
             boost::dynamic_pointer_cast<ICompAssembly>(comp)) {
-      searchQueue.push_back(comp);
+      searchQueue.emplace_back(comp);
     }
     // Check the physical object intersection
     else if (auto *physicalObject = dynamic_cast<IObjComponent *>(comp.get())) {

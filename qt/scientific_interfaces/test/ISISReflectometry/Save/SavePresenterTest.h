@@ -26,11 +26,11 @@ using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 using Mantid::API::AlgorithmManager;
 using Mantid::API::AnalysisDataService;
 using Mantid::DataObjects::Workspace2D_sptr;
+using testing::_;
 using testing::AtLeast;
 using testing::Mock;
 using testing::NiceMock;
 using testing::Return;
-using testing::_;
 
 class SavePresenterTest : public CxxTest::TestSuite {
 public:

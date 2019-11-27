@@ -50,7 +50,7 @@ Group_sptr constructGroupFromPythonList(const boost::python::list &symOpList) {
   std::vector<SymmetryOperation> operations;
 
   for (int i = 0; i < len(symOpList); ++i) {
-    operations.push_back(
+    operations.emplace_back(
         boost::python::extract<SymmetryOperation>(symOpList[i]));
   }
 

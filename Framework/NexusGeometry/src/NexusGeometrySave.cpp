@@ -89,9 +89,9 @@ inline H5::Group tryCreateGroup(const H5::Group &parentGroup,
 std::vector<double> toStdVector(const V3D &data) {
   std::vector<double> stdVector;
   stdVector.reserve(3);
-  stdVector.push_back(data.X());
-  stdVector.push_back(data.Y());
-  stdVector.push_back(data.Z());
+  stdVector.emplace_back(data.X());
+  stdVector.emplace_back(data.Y());
+  stdVector.emplace_back(data.Z());
   return stdVector;
 }
 
@@ -235,9 +235,9 @@ void writeXYZPixeloffset(H5::Group &grp,
     auto offset = Geometry::ComponentInfoBankHelpers::offsetFromAncestor(
         compInfo, idx, i);
 
-    posx.push_back(offset[0]);
-    posy.push_back(offset[1]);
-    posz.push_back(offset[2]);
+    posx.emplace_back(offset[0]);
+    posy.emplace_back(offset[1]);
+    posz.emplace_back(offset[2]);
   }
 
   bool xIsZero = isApproxZero(posx, PRECISION);
@@ -314,7 +314,7 @@ void writeNXDetectorNumber(H5::Group &grp,
   // dataset
   std::for_each(bankDetectors.begin(), bankDetectors.end(),
                 [&bankDetIDs, &detectorIDs](const size_t index) {
-                  bankDetIDs.push_back(detectorIDs[index]);
+                  bankDetIDs.emplace_back(detectorIDs[index]);
                 });
 
   write1DIntDataset(grp, DETECTOR_IDS, bankDetIDs);
@@ -1075,8 +1075,9 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
         if (reporter != nullptr)
           reporter->report();
         writer.detector(instrument, compInfo, detIds, index);
-        saved_indices.push_back(index); // Now record the fact that children of
-                                        // this are not needed as NXdetectors
+        saved_indices.emplace_back(
+            index); // Now record the fact that children of
+                    // this are not needed as NXdetectors
       }
     }
   }
@@ -1175,8 +1176,9 @@ void saveInstrument(const Mantid::API::MatrixWorkspace &ws,
         if (reporter != nullptr)
           reporter->report();
         writer.detector(instrument, compInfo, detIds, index, mappings);
-        saved_indices.push_back(index); // Now record the fact that children of
-                                        // this are not needed as NXdetectors
+        saved_indices.emplace_back(
+            index); // Now record the fact that children of
+                    // this are not needed as NXdetectors
       }
     }
   }

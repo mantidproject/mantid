@@ -74,9 +74,9 @@ public:
                       std::runtime_error &);
 
     std::vector<double> widthVector;
-    widthVector.push_back(3); // OK
-    widthVector.push_back(5); // OK
-    widthVector.push_back(2); // Not OK
+    widthVector.emplace_back(3); // OK
+    widthVector.emplace_back(5); // OK
+    widthVector.emplace_back(2); // Not OK
 
     alg.setProperty("WidthVector",
                     widthVector); // Width vector contains even number
@@ -255,8 +255,8 @@ public:
     alg.setChild(true);
     alg.initialize();
     WidthVector widthVector;
-    widthVector.push_back(3); // 3 = width in zeroth dimension
-    widthVector.push_back(5); // 5 = width in first dimension
+    widthVector.emplace_back(3); // 3 = width in zeroth dimension
+    widthVector.emplace_back(5); // 5 = width in first dimension
     alg.setProperty("WidthVector", widthVector);
     alg.setProperty("InputWorkspace", toSmooth);
     alg.setPropertyValue("OutputWorkspace", "dummy");

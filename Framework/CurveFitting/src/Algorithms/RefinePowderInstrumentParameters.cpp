@@ -540,7 +540,7 @@ void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(
   for (size_t i = 0; i < numparameters; ++i) {
     string parname = parnames[i];
     double parvalue = m_FuncParameters[parname];
-    paramvalues.push_back(parvalue);
+    paramvalues.emplace_back(parvalue);
     m_Function->setParameter(parname, parvalue);
   }
 
@@ -674,7 +674,7 @@ void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(
         newparvalues.reserve(numparameters);
         for (size_t i = 0; i < numparameters; ++i) {
           double parvalue = func4fit->getParameter(i);
-          newparvalues.push_back(parvalue);
+          newparvalues.emplace_back(parvalue);
         }
         m_BestFitParameters.emplace_back(homchi2, newparvalues);
         m_BestFitChi2s.emplace_back(homchi2, gslchi2);
@@ -882,9 +882,9 @@ void RefinePowderInstrumentParameters::genPeaksFromTable(
     newpeakptr->setParameter("I", height);
 
     std::vector<int> hkl;
-    hkl.push_back(h);
-    hkl.push_back(k);
-    hkl.push_back(l);
+    hkl.emplace_back(h);
+    hkl.emplace_back(k);
+    hkl.emplace_back(l);
 
     m_Peaks.emplace(hkl, newpeakptr);
 
@@ -1008,9 +1008,9 @@ void RefinePowderInstrumentParameters::importMonteCarloParametersFromTable(
         tstepsize = tmpdbl;
     }
     vector<double> tmpvec;
-    tmpvec.push_back(tmin);
-    tmpvec.push_back(tmax);
-    tmpvec.push_back(tstepsize);
+    tmpvec.emplace_back(tmin);
+    tmpvec.emplace_back(tmax);
+    tmpvec.emplace_back(tstepsize);
     mcparameters.emplace(parname, tmpvec);
   }
 
@@ -1030,9 +1030,9 @@ void RefinePowderInstrumentParameters::importMonteCarloParametersFromTable(
     vector<double> mcparvalues = mit->second;
 
     // b) Build for the output
-    lowerbounds.push_back(mcparvalues[0]);
-    upperbounds.push_back(mcparvalues[1]);
-    stepsizes.push_back(mcparvalues[2]);
+    lowerbounds.emplace_back(mcparvalues[0]);
+    upperbounds.emplace_back(mcparvalues[1]);
+    stepsizes.emplace_back(mcparvalues[2]);
   }
 }
 
@@ -1060,7 +1060,7 @@ void RefinePowderInstrumentParameters::calculateThermalNeutronSpecial(
                     << " is not ThermalNeutronDtoTOFFunction.  And it is not "
                        "required to calculate n.\n";
     for (size_t i = 0; i < xVals.size(); ++i)
-      vec_n.push_back(0);
+      vec_n.emplace_back(0);
   }
 
   double width = m_Function->getParameter("Width");
@@ -1068,7 +1068,7 @@ void RefinePowderInstrumentParameters::calculateThermalNeutronSpecial(
 
   for (double dh : xVals) {
     double n = 0.5 * gsl_sf_erfc(width * (tcross - 1 / dh));
-    vec_n.push_back(n);
+    vec_n.emplace_back(n);
   }
 }
 

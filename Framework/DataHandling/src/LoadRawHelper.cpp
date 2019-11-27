@@ -455,7 +455,7 @@ LoadRawHelper::getmonitorSpectrumList(const SpectrumDetectorMapping &mapping) {
         if (std::find(m_monitordetectorList.begin(),
                       m_monitordetectorList.end(),
                       detID) != m_monitordetectorList.end()) {
-          spectrumIndices.push_back(SpectrumDetectorPair.first);
+          spectrumIndices.emplace_back(SpectrumDetectorPair.first);
         }
       }
     }
@@ -514,7 +514,7 @@ LoadRawHelper::getTimeChannels(const int64_t &regimes,
       std::transform(channelsVec->begin(), channelsVec->end(),
                      channelsVec->begin(),
                      std::bind(std::plus<double>(), _1, shift));
-      timeChannelsVec.push_back(channelsVec);
+      timeChannelsVec.emplace_back(channelsVec);
     }
     // In this case, also need to populate the map of spectrum-regime
     // correspondence
@@ -531,7 +531,7 @@ LoadRawHelper::getTimeChannels(const int64_t &regimes,
   {
     boost::shared_ptr<HistogramData::HistogramX> channelsVec(
         new HistogramData::HistogramX(timeChannels, timeChannels + lengthIn));
-    timeChannelsVec.push_back(channelsVec);
+    timeChannelsVec.emplace_back(channelsVec);
   }
   // Done with the timeChannels C array so clean up
   delete[] timeChannels;

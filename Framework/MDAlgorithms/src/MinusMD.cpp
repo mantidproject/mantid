@@ -86,7 +86,7 @@ void MinusMD::doMinus(typename MDEventWorkspace<MDE, nd>::sptr ws1) {
       for (auto it = events.begin(); it != events.end(); it++) {
         MDE eventCopy(*it);
         eventCopy.setSignal(-eventCopy.getSignal());
-        eventsCopy.push_back(eventCopy);
+        eventsCopy.emplace_back(eventCopy);
       }
       // Add events, with bounds checking
       box1->addEvents(eventsCopy);

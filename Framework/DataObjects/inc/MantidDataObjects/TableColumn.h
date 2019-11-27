@@ -495,7 +495,7 @@ void TableColumn<Type>::sortIndex(
       if (m_data[*i] != m_data[*(i - 1)]) {
         auto p = std::make_pair(
             eqStart, static_cast<size_t>(std::distance(indexVec.begin(), i)));
-        equalRanges.push_back(p);
+        equalRanges.emplace_back(p);
         same = false;
       }
     }
@@ -505,7 +505,7 @@ void TableColumn<Type>::sortIndex(
   if (same) {
     auto p = std::make_pair(
         eqStart, static_cast<size_t>(std::distance(indexVec.begin(), iEnd)));
-    equalRanges.push_back(p);
+    equalRanges.emplace_back(p);
   }
 }
 

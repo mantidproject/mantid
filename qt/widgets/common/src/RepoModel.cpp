@@ -165,8 +165,8 @@ RepoModel::RepoModel(QObject *parent) : QAbstractItemModel(parent) {
   repo_path = QString::fromStdString(config.getString("ScriptLocalRepository"));
   rootItem = new RepoItem("/");
   using Mantid::API::ScriptRepository;
-  using Mantid::API::ScriptRepositoryFactory;
   using Mantid::API::ScriptRepository_sptr;
+  using Mantid::API::ScriptRepositoryFactory;
   repo_ptr = ScriptRepositoryFactory::Instance().create("ScriptRepositoryImpl");
   connect(&download_watcher, SIGNAL(finished()), this,
           SLOT(downloadFinished()));

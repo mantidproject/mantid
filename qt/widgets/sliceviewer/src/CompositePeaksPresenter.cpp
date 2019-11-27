@@ -158,7 +158,7 @@ void CompositePeaksPresenter::addPeaksPresenter(PeaksPresenter_sptr presenter) {
   // Only add a peaks presenter if the contents are different. The presenter may
   // be different, but manage the same workspace set.
   if (result_it == m_subjects.end() && presenter->contentsDifferent(this)) {
-    m_subjects.push_back(presenter);
+    m_subjects.emplace_back(presenter);
     presenter->registerOwningPresenter(this);
   }
 }

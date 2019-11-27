@@ -109,7 +109,7 @@ public:
   void createDirectory(Poco::Path path) {
     Poco::File file(path);
     if (file.createDirectory()) {
-      m_directoriesToRemove.push_back(file);
+      m_directoriesToRemove.emplace_back(file);
     }
   }
 

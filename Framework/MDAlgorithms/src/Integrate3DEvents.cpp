@@ -179,9 +179,9 @@ Integrate3DEvents::integrateStrongPeak(const IntegrationParameters &params,
   std::vector<double> abcBackgroundOuterRadii, abcBackgroundInnerRadii;
   std::vector<double> peakRadii;
   for (int i = 0; i < 3; i++) {
-    abcBackgroundOuterRadii.push_back(r3 * sigmas[i]);
-    abcBackgroundInnerRadii.push_back(r2 * sigmas[i]);
-    peakRadii.push_back(r1 * sigmas[i]);
+    abcBackgroundOuterRadii.emplace_back(r3 * sigmas[i]);
+    abcBackgroundInnerRadii.emplace_back(r2 * sigmas[i]);
+    peakRadii.emplace_back(r1 * sigmas[i]);
   }
 
   const auto isPeakOnDetector =
@@ -318,9 +318,9 @@ double Integrate3DEvents::estimateSignalToNoiseRatio(
   std::vector<double> abcBackgroundOuterRadii, abcBackgroundInnerRadii;
   std::vector<double> peakRadii;
   for (int i = 0; i < 3; i++) {
-    abcBackgroundOuterRadii.push_back(r3 * sigmas[i]);
-    abcBackgroundInnerRadii.push_back(r2 * sigmas[i]);
-    peakRadii.push_back(r1 * sigmas[i]);
+    abcBackgroundOuterRadii.emplace_back(r3 * sigmas[i]);
+    abcBackgroundInnerRadii.emplace_back(r2 * sigmas[i]);
+    peakRadii.emplace_back(r1 * sigmas[i]);
   }
 
   // Background / Peak / Background
@@ -601,7 +601,7 @@ double Integrate3DEvents::numInEllipsoidBkg(
       sumIn += comp * comp;
     }
     if (sum <= 1 && sumIn >= 1)
-      eventVec.push_back(event.first);
+      eventVec.emplace_back(event.first);
   }
 
   auto endIndex = eventVec.size();
@@ -1023,7 +1023,7 @@ void Integrate3DEvents::addEvent(std::pair<double, V3D> event_Q,
       else
         event_Q.second = event_Q.second - peak_it->second;
       if (event_Q.second.norm() < m_radius) {
-        m_event_lists[hkl_key].push_back(event_Q);
+        m_event_lists[hkl_key].emplace_back(event_Q);
       }
     }
   }
@@ -1065,9 +1065,9 @@ void Integrate3DEvents::addModEvent(std::pair<double, V3D> event_Q,
 
       if (hklmnp_key % 10000 == 0) {
         if (event_Q.second.norm() < m_radius)
-          m_event_lists[hklmnp_key].push_back(event_Q);
+          m_event_lists[hklmnp_key].emplace_back(event_Q);
       } else if (event_Q.second.norm() < s_radius) {
-        m_event_lists[hklmnp_key].push_back(event_Q);
+        m_event_lists[hklmnp_key].emplace_back(event_Q);
       }
     }
   }
@@ -1158,10 +1158,10 @@ PeakShapeEllipsoid_const_sptr Integrate3DEvents::ellipseIntegrateEvents(
   std::vector<double> abcBackgroundInnerRadii;
   std::vector<double> abcRadii;
   for (int i = 0; i < 3; i++) {
-    abcBackgroundOuterRadii.push_back(r3 * sigmas[i]);
-    abcBackgroundInnerRadii.push_back(r2 * sigmas[i]);
-    abcRadii.push_back(r1 * sigmas[i]);
-    axes_radii.push_back(r1 * sigmas[i]);
+    abcBackgroundOuterRadii.emplace_back(r3 * sigmas[i]);
+    abcBackgroundInnerRadii.emplace_back(r2 * sigmas[i]);
+    abcRadii.emplace_back(r1 * sigmas[i]);
+    axes_radii.emplace_back(r1 * sigmas[i]);
   }
 
   if (!E1Vec.empty()) {

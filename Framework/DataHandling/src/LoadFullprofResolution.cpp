@@ -167,7 +167,7 @@ void LoadFullprofResolution::exec() {
           g_log.error(errmsg.str());
           throw runtime_error(errmsg.str());
         } else {
-          vec_bankids.push_back(outputbankid);
+          vec_bankids.emplace_back(outputbankid);
         }
       }
     }
@@ -258,7 +258,7 @@ void LoadFullprofResolution::loadFile(string filename, vector<string> &lines) {
       // display the line we gathered:
       boost::algorithm::trim(line);
       if (!line.empty())
-        lines.push_back(line);
+        lines.emplace_back(line);
     }
 
     // close the stream:
@@ -339,7 +339,7 @@ void LoadFullprofResolution::scanBanks(const vector<string> &lines,
       } else { // Get bank ID as ordinal number of bank
         bankid++;
       }
-      banks.push_back(bankid);
+      banks.emplace_back(bankid);
     }
   }
   if (startindex >= 0) {
@@ -672,13 +672,13 @@ TableWorkspace_sptr LoadFullprofResolution::genTableWorkspace(
   for (parmapiter = bankmapiter->second.begin();
        parmapiter != bankmapiter->second.end(); ++parmapiter) {
     string parname = parmapiter->first;
-    vec_parname.push_back(parname);
+    vec_parname.emplace_back(parname);
   }
 
   for (bankmapiter = bankparammap.begin(); bankmapiter != bankparammap.end();
        ++bankmapiter) {
     int bankid = bankmapiter->first;
-    vec_bankids.push_back(bankid);
+    vec_bankids.emplace_back(bankid);
   }
 
   g_log.debug() << "[DBx240] Number of imported parameters is " << numparams

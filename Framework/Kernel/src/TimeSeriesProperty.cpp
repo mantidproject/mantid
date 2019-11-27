@@ -389,7 +389,7 @@ void TimeSeriesProperty<TYPE>::filterByTimes(
 
     if (tstartindex == tstopindex) {
       TimeValueUnit<TYPE> temp(t_start, m_values[tstartindex].value());
-      mp_copy.push_back(temp);
+      mp_copy.emplace_back(temp);
     } else {
       mp_copy.emplace_back(t_start, m_values[tstartindex].value());
       for (auto im = size_t(tstartindex + 1); im <= size_t(tstopindex); ++im) {
@@ -440,7 +440,7 @@ void TimeSeriesProperty<TYPE>::splitByTime(
   for (size_t i = 0; i < numOutputs; i++) {
     auto *myOutput = dynamic_cast<TimeSeriesProperty<TYPE> *>(outputs[i]);
     if (myOutput) {
-      outputs_tsp.push_back(myOutput);
+      outputs_tsp.emplace_back(myOutput);
       if (this->m_values.size() == 1) {
         // Special case for TSP with a single entry = just copy.
         myOutput->m_values = this->m_values;
@@ -450,7 +450,7 @@ void TimeSeriesProperty<TYPE>::splitByTime(
         myOutput->m_size = 0;
       }
     } else {
-      outputs_tsp.push_back(nullptr);
+      outputs_tsp.emplace_back(nullptr);
     }
   }
 
@@ -1124,7 +1124,7 @@ std::vector<TYPE> TimeSeriesProperty<TYPE>::valuesAsVector() const {
   out.reserve(m_values.size());
 
   for (size_t i = 0; i < m_values.size(); i++)
-    out.push_back(m_values[i].value());
+    out.emplace_back(m_values[i].value());
 
   return out;
 }
@@ -1161,7 +1161,7 @@ std::vector<DateAndTime> TimeSeriesProperty<TYPE>::timesAsVector() const {
   out.reserve(m_values.size());
 
   for (size_t i = 0; i < m_values.size(); i++) {
-    out.push_back(m_values[i].time());
+    out.emplace_back(m_values[i].time());
   }
 
   return out;
@@ -1182,7 +1182,8 @@ std::vector<double> TimeSeriesProperty<TYPE>::timesAsVectorSeconds() const {
 
   Types::Core::DateAndTime start = m_values[0].time();
   for (size_t i = 0; i < m_values.size(); i++) {
-    out.push_back(DateAndTime::secondsFromDuration(m_values[i].time() - start));
+    out.emplace_back(
+        DateAndTime::secondsFromDuration(m_values[i].time() - start));
   }
 
   return out;
@@ -1198,7 +1199,7 @@ void TimeSeriesProperty<TYPE>::addValue(const Types::Core::DateAndTime &time,
                                         const TYPE value) {
   TimeValueUnit<TYPE> newvalue(time, value);
   // Add the value to the back of the vector
-  m_values.push_back(newvalue);
+  m_values.emplace_back(newvalue);
   // Increment the separate record of the property's size
   m_size++;
 
@@ -1410,7 +1411,7 @@ std::vector<std::string> TimeSeriesProperty<TYPE>::time_tValue() const {
   for (size_t i = 0; i < m_values.size(); i++) {
     std::stringstream line;
     line << m_values[i].time().toSimpleString() << " " << m_values[i].value();
-    values.push_back(line.str());
+    values.emplace_back(line.str());
   }
 
   return values;
@@ -1505,7 +1506,7 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::clearOutdated() {
   if (realSize() > 1) {
     auto lastValue = m_values.back();
     clear();
-    m_values.push_back(lastValue);
+    m_values.emplace_back(lastValue);
     m_size = 1;
   }
 }
@@ -1558,7 +1559,7 @@ void TimeSeriesProperty<TYPE>::create(
   m_propSortedFlag = TimeSeriesSortStatus::TSSORTED;
   for (std::size_t i = 0; i < num; i++) {
     TimeValueUnit<TYPE> newentry(new_times[i], new_values[i]);
-    m_values.push_back(newentry);
+    m_values.emplace_back(newentry);
     if (m_propSortedFlag == TimeSeriesSortStatus::TSSORTED && i > 0 &&
         new_times[i - 1] > new_times[i]) {
       // Status gets to unsorted

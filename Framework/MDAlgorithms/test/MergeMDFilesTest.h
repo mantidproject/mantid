@@ -53,8 +53,8 @@ public:
       MDEventWorkspace3Lean::sptr ws =
           MDAlgorithmsTestHelper::makeFileBackedMDEWwithMDFrame(
               mess.str(), true, frame, -nFileEvents, appliedCoord);
-      inWorkspaces.push_back(ws);
-      filenames.push_back(
+      inWorkspaces.emplace_back(ws);
+      filenames.emplace_back(
           std::vector<std::string>(1, ws->getBoxController()->getFilename()));
     }
 

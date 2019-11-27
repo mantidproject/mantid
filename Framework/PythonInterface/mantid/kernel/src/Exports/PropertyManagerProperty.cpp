@@ -19,8 +19,8 @@
 #include <boost/python/make_constructor.hpp>
 
 using Mantid::Kernel::Direction;
-using Mantid::Kernel::PropertyManagerProperty;
 using Mantid::Kernel::PropertyManager_sptr;
+using Mantid::Kernel::PropertyManagerProperty;
 using Mantid::PythonInterface::PropertyWithValueExporter;
 namespace Registry = Mantid::PythonInterface::Registry;
 using namespace boost::python;

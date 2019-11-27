@@ -8,6 +8,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
+
 from sans.common.enums import (SANSFacility, SANSInstrument)
 from sans.state.data import (StateData, get_data_builder)
 from sans.test_helper.file_information_mock import SANSFileInformationMock
@@ -78,7 +79,7 @@ class StateDataBuilderTest(unittest.TestCase):
     def test_that_data_state_can_be_built(self):
         # Arrange
         facility = SANSFacility.ISIS
-        file_information = SANSFileInformationMock(run_number=74044)
+        file_information = SANSFileInformationMock(run_number=74044, file_name="LOQ74044")
         # Act
         data_builder = get_data_builder(facility, file_information)
 

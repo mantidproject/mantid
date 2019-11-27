@@ -32,8 +32,8 @@ public:
     m_filename = "SaveILLCosmosAsciiTestFile.txt";
     m_name = "SaveILLCosmosAsciiWS";
     for (int i = 1; i < m_points + 1; ++i) {
-      m_data.push_back(i);
-      m_zeros.push_back(0.);
+      m_data.emplace_back(i);
+      m_zeros.emplace_back(0.);
     }
   }
   ~SaveILLCosmosAsciiTest() override {}

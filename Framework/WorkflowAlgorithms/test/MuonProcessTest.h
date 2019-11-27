@@ -55,10 +55,10 @@ public:
     std::vector<int> group1, group2;
 
     for (int i = 1; i <= 16; ++i)
-      group1.push_back(i);
+      group1.emplace_back(i);
 
     for (int i = 17; i <= 32; ++i)
-      group2.push_back(i);
+      group2.emplace_back(i);
 
     TableWorkspace_sptr grouping = createGroupingTable(group1, group2);
 
@@ -111,10 +111,10 @@ public:
     std::vector<int> group1, group2;
 
     for (int i = 1; i <= 16; ++i)
-      group1.push_back(i);
+      group1.emplace_back(i);
 
     for (int i = 17; i <= 32; ++i)
-      group2.push_back(i);
+      group2.emplace_back(i);
 
     TableWorkspace_sptr grouping = createGroupingTable(group1, group2);
 
@@ -160,10 +160,10 @@ public:
     std::vector<int> group1, group2;
 
     for (int i = 1; i <= 16; ++i)
-      group1.push_back(i);
+      group1.emplace_back(i);
 
     for (int i = 17; i <= 32; ++i)
-      group2.push_back(i);
+      group2.emplace_back(i);
 
     TableWorkspace_sptr grouping = createGroupingTable(group1, group2);
 
@@ -209,9 +209,9 @@ public:
     std::vector<int> group1, group2;
 
     for (int i = 33; i <= 64; ++i)
-      group1.push_back(i);
+      group1.emplace_back(i);
     for (int i = 1; i <= 32; ++i)
-      group2.push_back(i);
+      group2.emplace_back(i);
 
     TableWorkspace_sptr grouping = createGroupingTable(group1, group2);
 
@@ -263,9 +263,9 @@ public:
     std::vector<int> group1, group2;
 
     for (int i = 1; i <= 16; ++i)
-      group1.push_back(i);
+      group1.emplace_back(i);
     for (int i = 17; i <= 32; ++i)
-      group2.push_back(i);
+      group2.emplace_back(i);
 
     TableWorkspace_sptr grouping = createGroupingTable(group1, group2);
 
@@ -322,9 +322,9 @@ public:
     std::vector<int> group1, group2;
 
     for (int i = 1; i <= 16; ++i)
-      group1.push_back(i);
+      group1.emplace_back(i);
     for (int i = 17; i <= 32; ++i)
-      group2.push_back(i);
+      group2.emplace_back(i);
 
     TableWorkspace_sptr grouping = createGroupingTable(group1, group2);
 
@@ -431,9 +431,9 @@ public:
     ScopedWorkspace output;
     std::vector<int> group1, group2;
     for (int i = 1; i <= 16; ++i)
-      group1.push_back(i);
+      group1.emplace_back(i);
     for (int i = 17; i <= 32; ++i)
-      group2.push_back(i);
+      group2.emplace_back(i);
     TableWorkspace_sptr grouping = createGroupingTable(group1, group2);
 
     MuonProcess alg;
@@ -461,9 +461,9 @@ public:
     ScopedWorkspace output;
     std::vector<int> group1, group2;
     for (int i = 1; i <= 16; ++i)
-      group1.push_back(i);
+      group1.emplace_back(i);
     for (int i = 17; i <= 32; ++i)
-      group2.push_back(i);
+      group2.emplace_back(i);
     TableWorkspace_sptr grouping = createGroupingTable(group1, group2);
 
     MuonProcess alg;
@@ -492,9 +492,9 @@ public:
     ScopedWorkspace output;
     std::vector<int> group1, group2;
     for (int i = 1; i <= 16; ++i)
-      group1.push_back(i);
+      group1.emplace_back(i);
     for (int i = 17; i <= 32; ++i)
-      group2.push_back(i);
+      group2.emplace_back(i);
     TableWorkspace_sptr grouping = createGroupingTable(group1, group2);
 
     MuonProcess alg;
@@ -521,9 +521,9 @@ public:
     ScopedWorkspace output;
     std::vector<int> group1, group2;
     for (int i = 1; i <= 16; ++i)
-      group1.push_back(i);
+      group1.emplace_back(i);
     for (int i = 17; i <= 32; ++i)
-      group2.push_back(i);
+      group2.emplace_back(i);
     TableWorkspace_sptr grouping = createGroupingTable(group1, group2);
 
     MuonProcess alg;

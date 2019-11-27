@@ -43,8 +43,8 @@
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::Types::Core;
-using Poco::XML::DOMParser;
 using Poco::XML::Document;
+using Poco::XML::DOMParser;
 using Poco::XML::Element;
 using Poco::XML::Node;
 using Poco::XML::NodeFilter;
@@ -460,7 +460,7 @@ void InstrumentDefinitionParser::
   while (pNode) {
     if (pNode->nodeName() == "parameter") {
       auto pParameterElem = dynamic_cast<Element *>(pNode);
-      m_hasParameterElement.push_back(
+      m_hasParameterElement.emplace_back(
           dynamic_cast<Element *>(pParameterElem->parentNode()));
     }
     pNode = it.nextNode();
@@ -557,9 +557,9 @@ void InstrumentDefinitionParser::getTypeAndComponentPointers(
     auto pElem = dynamic_cast<Element *>(pNode);
     if (pElem) {
       if (pElem->tagName() == "type")
-        typeElems.push_back(pElem);
+        typeElems.emplace_back(pElem);
       else if (pElem->tagName() == "component")
-        compElems.push_back(pElem);
+        compElems.emplace_back(pElem);
     }
   }
 }
@@ -1106,7 +1106,7 @@ std::vector<std::string> InstrumentDefinitionParser::buildExcludeList(
   for (unsigned long i = 0; i < numberExcludeEle; i++) {
     auto *pExElem = static_cast<Element *>(pNLexclude->item(i));
     if (pExElem->hasAttribute("sub-part"))
-      newExcludeList.push_back(pExElem->getAttribute("sub-part"));
+      newExcludeList.emplace_back(pExElem->getAttribute("sub-part"));
   }
 
   return newExcludeList;
@@ -1377,7 +1377,7 @@ void InstrumentDefinitionParser::createDetectorOrMonitor(
   // Add all monitors and detectors to 'facing component' container. This is
   // only used if the
   // "facing" elements are defined in the instrument definition file
-  m_facingComponent.push_back(detector);
+  m_facingComponent.emplace_back(detector);
 }
 
 void InstrumentDefinitionParser::createGridDetector(
@@ -1693,9 +1693,9 @@ void InstrumentDefinitionParser::createStructuredDetector(
       auto *pVertElem = static_cast<Element *>(pNode);
 
       if (pVertElem->hasAttribute("x"))
-        xValues.push_back(attrToDouble(pVertElem, "x"));
+        xValues.emplace_back(attrToDouble(pVertElem, "x"));
       if (pVertElem->hasAttribute("y"))
-        yValues.push_back(attrToDouble(pVertElem, "y"));
+        yValues.emplace_back(attrToDouble(pVertElem, "y"));
     }
 
     pNode = it.nextNode();
@@ -1904,7 +1904,7 @@ void InstrumentDefinitionParser::populateIdList(Poco::XML::Element *pE,
 
     idList.vec.reserve(steps);
     for (int i = startID; i != endID + increment; i += increment) {
-      idList.vec.push_back(i);
+      idList.vec.emplace_back(i);
     }
   } else {
     // test first if any <id> elements
@@ -1928,7 +1928,7 @@ void InstrumentDefinitionParser::populateIdList(Poco::XML::Element *pE,
 
         if (pIDElem->hasAttribute("val")) {
           int valID = std::stoi(pIDElem->getAttribute("val"));
-          idList.vec.push_back(valID);
+          idList.vec.emplace_back(valID);
         } else if (pIDElem->hasAttribute("start")) {
           int startID = std::stoi(pIDElem->getAttribute("start"));
 
@@ -1965,7 +1965,7 @@ void InstrumentDefinitionParser::populateIdList(Poco::XML::Element *pE,
 
           idList.vec.reserve(numSteps);
           for (int i = startID; i != endID + increment; i += increment) {
-            idList.vec.push_back(i);
+            idList.vec.emplace_back(i);
           }
         } else {
           throw Kernel::Exception::InstrumentDefinitionError(
@@ -2524,7 +2524,7 @@ void InstrumentDefinitionParser::setComponentLinks(
               "Invalid detector id in component-link tag.");
         }
 
-        sharedIComp.push_back(detector);
+        sharedIComp.emplace_back(detector);
 
         // If the user also supplied a name, make sure it's consistent with
         // the
@@ -2554,7 +2554,7 @@ void InstrumentDefinitionParser::setComponentLinks(
         } else { // Pathname given. Assume it is unique.
           boost::shared_ptr<const Geometry::IComponent> shared =
               instrument->getComponentByName(name);
-          sharedIComp.push_back(shared);
+          sharedIComp.emplace_back(shared);
         }
       }
 
@@ -2804,7 +2804,7 @@ void InstrumentDefinitionParser::adjust(
     std::string locationElementName = pLoc->getAttribute("name");
     if (std::find(allLocationName.begin(), allLocationName.end(),
                   locationElementName) == allLocationName.end())
-      allLocationName.push_back(locationElementName);
+      allLocationName.emplace_back(locationElementName);
     else
       throw Exception::InstrumentDefinitionError(
           std::string("Names in a <type> element containing ") +

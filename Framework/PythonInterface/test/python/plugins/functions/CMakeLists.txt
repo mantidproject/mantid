@@ -1,10 +1,13 @@
 # Tests for Fit functions
 
 set(TEST_PY_FILES
+    AFM_LFTest.py
+    AFM_ZFTest.py
     AttributeTest.py
     BesselTest.py
     CombGaussLorentzKTTest.py
     DampedBesselTest.py
+    CompositePCRmagnetTest.py
     DSFinterp1DFitTest.py
     EISFDiffSphereTest.py
     EISFDiffCylinderTest.py
@@ -12,14 +15,22 @@ set(TEST_PY_FILES
     Example1DFunctionTest.py
     ExamplePeakFunctionTest.py
     FmuFTest.py
+    GauBroadGauKTTest.py
+    GaussBesselTest.py
     HighTFMuoniumTest.py
+    LowTFMuoniumTest.py
     MeierTest.py
+    ModOscTest.py
     MsdGaussTest.py
     MsdPetersTest.py
     MsdYiTest.py
     MuHTest.py
+    MuMinusExpTFTest.py
+    PCRmagnetTest.py
+    PCRmagnetZFKTTest.py
+    PCRmagnetRedfieldTest.py
+    PCRmagnetfnormTest.py
     RFresonanceTest.py
-    SilverBaselineTest.py
     SpinGlassTest.py
     StandardSCTest.py
     StaticLorentzianKTTest.py
@@ -27,7 +38,9 @@ set(TEST_PY_FILES
     StretchedKTTest.py
     TeixeiraWaterTest.py
     TFMuoniumTest.py
-    TriangleOscTest.py
+    ZFprotonDipoleTest.py
+    ZFdipoleTest.py
+    ZFelectronDipoleTest.py
     ZFMuoniumTest.py)
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})

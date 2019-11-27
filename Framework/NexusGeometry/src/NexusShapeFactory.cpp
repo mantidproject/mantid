@@ -55,9 +55,9 @@ void createTrianglesFromPolygon(const std::vector<uint32_t> &windingOrder,
   triangularFaces.reserve(triangularFaces.size() + 3 * polygonOrder);
   for (int polygonVertex = 1; polygonVertex < polygonOrder - 1;
        ++polygonVertex) {
-    triangularFaces.push_back(*first);
-    triangularFaces.push_back(*(first + polygonVertex));
-    triangularFaces.push_back(*(first + polygonVertex + 1));
+    triangularFaces.emplace_back(*first);
+    triangularFaces.emplace_back(*(first + polygonVertex));
+    triangularFaces.emplace_back(*(first + polygonVertex + 1));
   }
   startOfFace = endOfFace; // start of the next face
 }
@@ -154,8 +154,8 @@ createCylinder(const Eigen::Matrix<double, 3, 3> &pointsDef) {
     }
 
     // xmax, xmin, ymax, ymin, zmax, zmin
-    boundingBoxSimplified.push_back(max);
-    boundingBoxSimplified.push_back(min);
+    boundingBoxSimplified.emplace_back(max);
+    boundingBoxSimplified.emplace_back(min);
   }
 
   std::string algebra = "(-1 -2 3)";

@@ -65,7 +65,7 @@ public:
     num = 1000000;
     // Make a list where 1/3 of the blocks are adjacent
     for (size_t i = 0; i < num; i++)
-      blocks.push_back(FreeBlock(i * 10, (i % 3 == 0) ? 10 : 7));
+      blocks.emplace_back(FreeBlock(i * 10, (i % 3 == 0) ? 10 : 7));
   }
 
   void test_merge() {

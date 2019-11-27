@@ -26,7 +26,7 @@ from isis_reflectometry import load_live_runs
 from isis_reflectometry.combineMulti import *
 import mantidqtpython
 from mantid.api import Workspace, WorkspaceGroup, CatalogManager, AlgorithmManager
-from mantid import UsageService
+from mantid.kernel import UsageService, FeatureType
 from mantid import logger
 
 from ui.reflectometer.ui_refl_window import Ui_windowRefl
@@ -144,7 +144,7 @@ We recommend you use ISIS Reflectometry instead, If this is not possible contact
 
         del settings
         # register startup
-        UsageService.registerFeatureUsage("Interface", "ISIS Reflectomety", False)
+        UsageService.registerFeatureUsage(FeatureType.Interface, "ISIS Reflectomety", False)
 
     def __del__(self):
         """

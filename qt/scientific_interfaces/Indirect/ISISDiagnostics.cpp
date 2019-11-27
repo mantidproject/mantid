@@ -158,14 +158,14 @@ void ISISDiagnostics::run() {
   QString filenames = m_uiForm.dsInputFiles->getFilenames().join(",");
 
   std::vector<long> spectraRange;
-  spectraRange.push_back(
+  spectraRange.emplace_back(
       static_cast<long>(m_dblManager->value(m_properties["SpecMin"])));
-  spectraRange.push_back(
+  spectraRange.emplace_back(
       static_cast<long>(m_dblManager->value(m_properties["SpecMax"])));
 
   std::vector<double> peakRange;
-  peakRange.push_back(m_dblManager->value(m_properties["PeakStart"]));
-  peakRange.push_back(m_dblManager->value(m_properties["PeakEnd"]));
+  peakRange.emplace_back(m_dblManager->value(m_properties["PeakStart"]));
+  peakRange.emplace_back(m_dblManager->value(m_properties["PeakEnd"]));
 
   IAlgorithm_sptr sliceAlg = AlgorithmManager::Instance().create("TimeSlice");
   sliceAlg->initialize();
@@ -183,9 +183,9 @@ void ISISDiagnostics::run() {
 
   if (m_blnManager->value(m_properties["UseTwoRanges"])) {
     std::vector<double> backgroundRange;
-    backgroundRange.push_back(
+    backgroundRange.emplace_back(
         m_dblManager->value(m_properties["BackgroundStart"]));
-    backgroundRange.push_back(
+    backgroundRange.emplace_back(
         m_dblManager->value(m_properties["BackgroundEnd"]));
     sliceAlg->setProperty("BackgroundRange", backgroundRange);
   }

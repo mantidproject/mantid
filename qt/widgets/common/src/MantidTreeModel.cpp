@@ -33,7 +33,7 @@ void MantidTreeModel::deleteWorkspaces(const QStringList &wsNames) {
       std::vector<std::string> vecWsNames;
       vecWsNames.reserve(wsNames.size());
       foreach (auto wsName, wsNames) {
-        vecWsNames.push_back(wsName.toStdString());
+        vecWsNames.emplace_back(wsName.toStdString());
       }
       alg->setProperty("WorkspaceList", vecWsNames);
       executeAlgorithmAsync(alg);
@@ -97,9 +97,15 @@ void MantidTreeModel::showAlgorithmDialog(const QString &algName,
   if (!alg)
     return;
 
-  for (QHash<QString, QString>::Iterator it = paramList.begin();
-       it != paramList.end(); ++it) {
-    alg->setPropertyValue(it.key().toStdString(), it.value().toStdString());
+  try {
+    for (QHash<QString, QString>::Iterator it = paramList.begin();
+         it != paramList.end(); ++it) {
+      alg->setPropertyValue(it.key().toStdString(), it.value().toStdString());
+    }
+  } catch (std::exception &ex) {
+    g_log.error() << "Error setting the properties for algotithm "
+                  << algName.toStdString() << ": " << ex.what() << '\n';
+    return;
   }
   MantidQt::API::AlgorithmDialog *dlg = createAlgorithmDialog(alg);
   if (obs) {

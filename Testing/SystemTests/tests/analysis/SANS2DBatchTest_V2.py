@@ -30,14 +30,14 @@ class SANS2DBatchTest_V2(systemtesting.MantidSystemTest):
         csv_file = FileFinder.getFullPath('SANS2D_periodTests.csv')
 
         BatchReduce(csv_file, 'nxs', plotresults=False, saveAlgs={'SaveCanSAS1D': 'xml', 'SaveNexus': 'nxs'})
-        os.remove(os.path.join(config['defaultsave.directory'], '5512p7_SANS2DBatch.xml'))
+        os.remove(os.path.join(config['defaultsave.directory'], '5512p7_SANS2DBatch_p7rear_1D_2.0_14.0Phi-45.0_45.0.xml'))
 
     def validate(self):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         self.disableChecking.append('Instrument')
 
-        return '5512p7_SANS2DBatch', 'SANS2DBatch.nxs'
+        return '5512p7_SANS2DBatch_p7rear_1D_2.0_14.0Phi-45.0_45.0', 'SANS2DBatch.nxs'
 
 
 class SANS2DNewSettingsCarriedAcrossInBatchModeTest_V2(systemtesting.MantidSystemTest):
@@ -74,7 +74,7 @@ class SANS2DNewSettingsCarriedAcrossInBatchModeTest_V2(systemtesting.MantidSyste
         self.tolerance_is_rel_err = True
         self.tolerance = 1.0e-2
         self.disableChecking.append('Instrument')
-        return "iteration_2", "SANS2DNewSettingsCarriedAcross.nxs"
+        return "iteration_2_rear_1D_1.5_12.5", "SANS2DNewSettingsCarriedAcross.nxs"
 
 
 class SANS2DTUBESBatchWithZeroErrorCorrectionTest_V2(systemtesting.MantidSystemTest):
@@ -96,11 +96,11 @@ class SANS2DTUBESBatchWithZeroErrorCorrectionTest_V2(systemtesting.MantidSystemT
         csv_file = FileFinder.getFullPath("SANS2DTUBES_ZeroErrorFree_batch.csv")
         save_alg = {"SaveNexus": "nxs"}
         BatchReduce(csv_file, 'nxs', saveAlgs=save_alg, plotresults=False, save_as_zero_error_free=True)
-        DeleteWorkspace('zero_free_out')
+        DeleteWorkspace('zero_free_out_rear_1D_1.75_12.5')
 
         # The zero correction only occurs for the saved files. Stephen King mentioned that the
         # original workspaces should not be tampered with
-        self._final_output = os.path.join(config['defaultsave.directory'], 'zero_free_out.nxs')
+        self._final_output = os.path.join(config['defaultsave.directory'], 'zero_free_out_rear_1D_1.75_12.5.nxs')
         self._final_workspace = 'ws'
         Load(Filename=self._final_output, OutputWorkspace=self._final_workspace)
 

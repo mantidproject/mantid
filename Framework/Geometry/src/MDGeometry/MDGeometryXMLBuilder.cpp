@@ -39,7 +39,7 @@ bool MDGeometryBuilderXML<CheckDimensionPolicy>::addOrdinaryDimension(
                        return dimensionId == b->getDimensionId();
                      });
     if (location == m_vecDimensions.cend()) {
-      m_vecDimensions.push_back(std::move(dimensionToAdd));
+      m_vecDimensions.emplace_back(std::move(dimensionToAdd));
       bAdded = true;
       m_changed = true;
     }

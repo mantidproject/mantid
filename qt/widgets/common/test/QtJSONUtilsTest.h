@@ -30,7 +30,7 @@ public:
   static void destroySuite(QtJSONUtilsTest *suite) { delete suite; }
 
   void test_saveJSONToFile_and_loadJSONFromFile() {
-    QString filename("/tmp/tempFile");
+    QString filename("/tmp/tempFile.json");
     auto map1 = constructJSONMap();
     MantidQt::API::saveJSONToFile(filename, map1);
 

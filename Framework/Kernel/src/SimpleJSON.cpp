@@ -399,7 +399,7 @@ void initArrayFromStream(JSONArray &arr, istream &istr) {
     // We expect to start the loop with the stream pointing to the
     // first character of the value
     // Add the value to our array
-    arr.push_back(initValueFromStream(istr));
+    arr.emplace_back(initValueFromStream(istr));
 
     istr >> nextChar;
     // nextChar is guaranteed to be either a comma, close brace or close

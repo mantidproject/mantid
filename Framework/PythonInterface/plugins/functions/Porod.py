@@ -4,7 +4,7 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init,invalid-name
+# pylint: disable=no-init,invalid-name
 '''
 @author Mathieu Doucet, ORNL
 @date Oct 13, 2014
@@ -45,8 +45,8 @@ class Porod(IFunction1D):
         """
         i = 0
         for x in xvals:
-            jacobian.set(i,0, math.pow(x, -4))
-            jacobian.set(i,1, 1.0)
+            jacobian.set(i, 0, math.pow(x, -4))
+            jacobian.set(i, 1, 1.0)
             i += 1
 
 

@@ -373,8 +373,8 @@ void Cylinder::getBoundingBox(double &xmax, double &ymax, double &zmax,
   if (Normal[0] != 0) {
     xminPoint = Centre + Normal * ((xmin - Centre[0]) / Normal[0]);
     xmaxPoint = Centre + Normal * ((xmax - Centre[0]) / Normal[0]);
-    listOfPoints.push_back(xminPoint);
-    listOfPoints.push_back(xmaxPoint);
+    listOfPoints.emplace_back(xminPoint);
+    listOfPoints.emplace_back(xmaxPoint);
   }
 
   if (Normal[1] != 0) {
@@ -382,16 +382,16 @@ void Cylinder::getBoundingBox(double &xmax, double &ymax, double &zmax,
     yminPoint = Centre + Normal * ((ymin - Centre[1]) / Normal[1]);
     // ymax plane
     ymaxPoint = Centre + Normal * ((ymax - Centre[1]) / Normal[1]);
-    listOfPoints.push_back(yminPoint);
-    listOfPoints.push_back(ymaxPoint);
+    listOfPoints.emplace_back(yminPoint);
+    listOfPoints.emplace_back(ymaxPoint);
   }
   if (Normal[2] != 0) {
     // zmin plane
     zminPoint = Centre + Normal * ((zmin - Centre[2]) / Normal[2]);
     // zmax plane
     zmaxPoint = Centre + Normal * ((zmax - Centre[2]) / Normal[2]);
-    listOfPoints.push_back(zminPoint);
-    listOfPoints.push_back(zmaxPoint);
+    listOfPoints.emplace_back(zminPoint);
+    listOfPoints.emplace_back(zmaxPoint);
   }
   if (!listOfPoints.empty()) {
     xmin = ymin = zmin = std::numeric_limits<double>::max();

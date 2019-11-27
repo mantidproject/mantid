@@ -43,9 +43,9 @@ void MultiPeriodGroupWorker::tryAddInputWorkspaceToInputGroups(
       boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
   if (inputGroup) {
     if (inputGroup->isMultiperiod()) {
-      vecMultiPeriodWorkspaceGroups.push_back(inputGroup);
+      vecMultiPeriodWorkspaceGroups.emplace_back(inputGroup);
     } else {
-      vecWorkspaceGroups.push_back(inputGroup);
+      vecWorkspaceGroups.emplace_back(inputGroup);
     }
   }
 }
