@@ -52,7 +52,7 @@ class StateGuiModelTest(unittest.TestCase):
         self.assertTrue(state_gui_model.zero_error_free)
 
     def test_that_can_zero_error_free_saving_can_be_changed(self):
-        state_gui_model = StateGuiModel({OtherId.save_as_zero_error_free: [True]})
+        state_gui_model = StateGuiModel({OtherId.SAVE_AS_ZERO_ERROR_FREE: [True]})
         state_gui_model.zero_error_free = False
         self.assertFalse(state_gui_model.zero_error_free)
 
@@ -79,11 +79,11 @@ class StateGuiModelTest(unittest.TestCase):
         self.assertEqual(state_gui_model.event_slices, "")
 
     def test_that_slice_event_can_be_retrieved_if_it_exists(self):
-        state_gui_model = StateGuiModel({OtherId.event_slices: [event_binning_string_values(value="test")]})
+        state_gui_model = StateGuiModel({OtherId.EVENT_SLICES: [event_binning_string_values(value="test")]})
         self.assertEqual(state_gui_model.event_slices, "test")
 
     def test_that_slice_event_can_be_updated(self):
-        state_gui_model = StateGuiModel({OtherId.event_slices: [event_binning_string_values(value="test")]})
+        state_gui_model = StateGuiModel({OtherId.EVENT_SLICES: [event_binning_string_values(value="test")]})
         state_gui_model.event_slices = "test2"
         self.assertEqual(state_gui_model.event_slices, "test2")
 
@@ -106,7 +106,7 @@ class StateGuiModelTest(unittest.TestCase):
         self.assertRaises(ValueError, red_dim_wrapper)
 
     def test_that_can_update_reduction_dimensionality(self):
-        state_gui_model = StateGuiModel({OtherId.reduction_dimensionality: [ReductionDimensionality.ONE_DIM]})
+        state_gui_model = StateGuiModel({OtherId.REDUCTION_DIMENSIONALITY: [ReductionDimensionality.ONE_DIM]})
         self.assertEqual(state_gui_model.reduction_dimensionality, ReductionDimensionality.ONE_DIM)
         state_gui_model.reduction_dimensionality = ReductionDimensionality.TWO_DIM
         self.assertEqual(state_gui_model.reduction_dimensionality, ReductionDimensionality.TWO_DIM)

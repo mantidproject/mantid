@@ -5,11 +5,10 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
+
 from collections import namedtuple
 
 from mantid.py3compat import Enum
-from sans.common.enums import serializable_enum
-
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Named tuples for passing around data in a structured way, a bit like a plain old c-struct.
@@ -171,11 +170,29 @@ class BackId(Enum):
     TRANS = "trans"
 
 
-# -- OTHER - not settable in user file
-@serializable_enum("reduction_dimensionality", "use_full_wavelength_range", "event_slices",
-                   "use_compatibility_mode", "save_types", "save_as_zero_error_free", "user_specified_output_name",
-                   "user_specified_output_name_suffix", "use_reduction_mode_as_suffix", "sample_width", "sample_height",
-                   "sample_thickness", "sample_shape", "merge_mask", "merge_min", "merge_max", "wavelength_range",
-                   "use_event_slice_optimisation")
-class OtherId(object):
-    pass
+class OtherId(Enum):
+    EVENT_SLICES = "event_slices"
+
+    MERGE_MASK = "merge_mask"
+    MERGE_MIN = "merge_min"
+    MERGE_MAX = "merge_max"
+
+    REDUCTION_DIMENSIONALITY = "reduction_dimensionality"
+
+    SAVE_AS_ZERO_ERROR_FREE = "save_as_zero_error_free"
+    SAVE_TYPES = "save_types"
+
+    SAMPLE_HEIGHT = "sample_height"
+    SAMPLE_WIDTH = "sample_width"
+    SAMPLE_THICKNESS = "sample_thickness"
+    SAMPLE_SHAPE = "sample_shape"
+
+    USE_COMPATIBILITY_MODE = "use_compatibility_mode"
+    USE_EVENT_SLICE_OPTIMISATION = "use_event_slice_optimisation"
+    USE_FULL_WAVELENGTH_RANGE = "use_full_wavelength_range"
+    USE_REDUCTION_MODE_AS_SUFFIX = "use_reduction_mode_as_suffix"
+
+    USER_SPECIFIED_OUTPUT_NAME = "user_specified_output_name"
+    USER_SPECIFIED_OUTPUT_NAME_SUFFIX = "user_specified_output_name_suffix"
+
+    WAVELENGTH_RANGE = "wavelength_range"

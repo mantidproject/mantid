@@ -399,7 +399,7 @@ class CommandInterfaceStateDirector(object):
     def _process_reduction_dimensionality(self, command):
         _ = command  # noqa
         reduction_dimensionality = command.values[0]
-        new_state_entries = {OtherId.reduction_dimensionality: reduction_dimensionality}
+        new_state_entries = {OtherId.REDUCTION_DIMENSIONALITY: reduction_dimensionality}
         self.add_to_processed_state_settings(new_state_entries)
 
     def _process_sample_offset(self, command):
@@ -469,7 +469,7 @@ class CommandInterfaceStateDirector(object):
 
     def _process_event_slices(self, command):
         event_slice_value = command.values
-        new_state_entries = {OtherId.event_slices: event_binning_string_values(value=event_slice_value)}
+        new_state_entries = {OtherId.EVENT_SLICES: event_binning_string_values(value=event_slice_value)}
         self.add_to_processed_state_settings(new_state_entries)
 
     def _process_flood_file(self, command):
@@ -533,7 +533,7 @@ class CommandInterfaceStateDirector(object):
                                " possible. We require also a step and step range")
 
         if full_wavelength_range is not None:
-            full_wavelength_range_entry = {OtherId.use_full_wavelength_range: full_wavelength_range}
+            full_wavelength_range_entry = {OtherId.USE_FULL_WAVELENGTH_RANGE: full_wavelength_range}
             self.add_to_processed_state_settings(full_wavelength_range_entry)
 
         if reduction_mode is not None:
@@ -550,7 +550,7 @@ class CommandInterfaceStateDirector(object):
 
     def _process_compatibility_mode(self, command):
         use_compatibility_mode = command.values[0]
-        new_state_entries = {OtherId.use_compatibility_mode: use_compatibility_mode}
+        new_state_entries = {OtherId.USE_COMPATIBILITY_MODE: use_compatibility_mode}
         self.add_to_processed_state_settings(new_state_entries)
 
     def _process_detector_offsets(self, command):
@@ -584,23 +584,23 @@ class CommandInterfaceStateDirector(object):
     def _process_save(self, command):
         save_algorithms = command.values[0]
         save_as_zero_error_free = command.values[1]
-        new_state_entries = {OtherId.save_types: save_algorithms,
-                             OtherId.save_as_zero_error_free: save_as_zero_error_free}
+        new_state_entries = {OtherId.SAVE_TYPES: save_algorithms,
+                             OtherId.SAVE_AS_ZERO_ERROR_FREE: save_as_zero_error_free}
         self.add_to_processed_state_settings(new_state_entries,  treat_list_as_element=True)
 
     def _process_user_specified_output_name(self, command):
         user_specified_output_name = command.values[0]
-        new_state_entry = {OtherId.user_specified_output_name: user_specified_output_name}
+        new_state_entry = {OtherId.USER_SPECIFIED_OUTPUT_NAME: user_specified_output_name}
         self.add_to_processed_state_settings(new_state_entry)
 
     def _process_user_specified_output_name_suffix(self, command):
         user_specified_output_name_suffix = command.values[0]
-        new_state_entry = {OtherId.user_specified_output_name_suffix: user_specified_output_name_suffix}
+        new_state_entry = {OtherId.USER_SPECIFIED_OUTPUT_NAME_SUFFIX: user_specified_output_name_suffix}
         self.add_to_processed_state_settings(new_state_entry)
 
     def _process_use_reduction_mode_as_suffix(self, command):
         use_reduction_mode_as_suffix = command.values[0]
-        new_state_entry = {OtherId.use_reduction_mode_as_suffix: use_reduction_mode_as_suffix}
+        new_state_entry = {OtherId.USE_REDUCTION_MODE_AS_SUFFIX: use_reduction_mode_as_suffix}
         self.add_to_processed_state_settings(new_state_entry)
 
     def remove_last_user_file(self):

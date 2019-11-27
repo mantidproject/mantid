@@ -125,8 +125,8 @@ def set_wavelength_limits(builder, user_file_items):
         wavelength_limits = wavelength_limits[-1]
 
         if wavelength_limits.step_type in [RangeStepType.RANGE_LIN, RangeStepType.RANGE_LOG]:
-            wavelength_range = user_file_items[OtherId.wavelength_range]
-            check_if_contains_only_one_element(wavelength_range, OtherId.wavelength_range)
+            wavelength_range = user_file_items[OtherId.WAVELENGTH_RANGE]
+            check_if_contains_only_one_element(wavelength_range, OtherId.WAVELENGTH_RANGE)
             wavelength_range = wavelength_range[-1]
             wavelength_start, wavelength_stop = get_ranges_from_event_slice_setting(wavelength_range)
             wavelength_start = [min(wavelength_start)] + wavelength_start
@@ -618,7 +618,7 @@ class StateDirectorISIS(object):
         # ------------------------
         # Reduction Dimensionality
         # ------------------------
-        set_single_entry(self._reduction_builder, "set_reduction_dimensionality", OtherId.reduction_dimensionality,
+        set_single_entry(self._reduction_builder, "set_reduction_dimensionality", OtherId.REDUCTION_DIMENSIONALITY,
                          user_file_items)
 
     def _set_up_mask_state(self, user_file_items):  # noqa
@@ -976,9 +976,9 @@ class StateDirectorISIS(object):
 
     def _set_up_slice_event_state(self, user_file_items):
         # Setting up the slice limits is current
-        if OtherId.event_slices in user_file_items:
-            event_slices = user_file_items[OtherId.event_slices]
-            check_if_contains_only_one_element(event_slices, OtherId.event_slices)
+        if OtherId.EVENT_SLICES in user_file_items:
+            event_slices = user_file_items[OtherId.EVENT_SLICES]
+            check_if_contains_only_one_element(event_slices, OtherId.EVENT_SLICES)
             event_slices = event_slices[-1]
             # The events binning can come in three forms.
             # 1. As a simple range object
@@ -1005,27 +1005,27 @@ class StateDirectorISIS(object):
 
         # We can also have settings for the sample geometry (Note that at the moment this is not settable via the
         # user file nor the command line interface
-        if OtherId.sample_shape in user_file_items:
-            sample_shape = user_file_items[OtherId.sample_shape]
-            check_if_contains_only_one_element(sample_shape, OtherId.sample_shape)
+        if OtherId.SAMPLE_SHAPE in user_file_items:
+            sample_shape = user_file_items[OtherId.SAMPLE_SHAPE]
+            check_if_contains_only_one_element(sample_shape, OtherId.SAMPLE_SHAPE)
             sample_shape = sample_shape[-1]
             self._scale_builder.set_shape(sample_shape)
 
-        if OtherId.sample_width in user_file_items:
-            sample_width = user_file_items[OtherId.sample_width]
-            check_if_contains_only_one_element(sample_width, OtherId.sample_width)
+        if OtherId.SAMPLE_WIDTH in user_file_items:
+            sample_width = user_file_items[OtherId.SAMPLE_WIDTH]
+            check_if_contains_only_one_element(sample_width, OtherId.SAMPLE_WIDTH)
             sample_width = sample_width[-1]
             self._scale_builder.set_width(sample_width)
 
-        if OtherId.sample_height in user_file_items:
-            sample_height = user_file_items[OtherId.sample_height]
-            check_if_contains_only_one_element(sample_height, OtherId.sample_height)
+        if OtherId.SAMPLE_HEIGHT in user_file_items:
+            sample_height = user_file_items[OtherId.SAMPLE_HEIGHT]
+            check_if_contains_only_one_element(sample_height, OtherId.SAMPLE_HEIGHT)
             sample_height = sample_height[-1]
             self._scale_builder.set_height(sample_height)
 
-        if OtherId.sample_thickness in user_file_items:
-            sample_thickness = user_file_items[OtherId.sample_thickness]
-            check_if_contains_only_one_element(sample_thickness, OtherId.sample_thickness)
+        if OtherId.SAMPLE_THICKNESS in user_file_items:
+            sample_thickness = user_file_items[OtherId.SAMPLE_THICKNESS]
+            check_if_contains_only_one_element(sample_thickness, OtherId.SAMPLE_THICKNESS)
             sample_thickness = sample_thickness[-1]
             self._scale_builder.set_thickness(sample_thickness)
 
@@ -1092,7 +1092,7 @@ class StateDirectorISIS(object):
         # ------------------------
         # Reduction Dimensionality
         # ------------------------
-        set_single_entry(self._convert_to_q_builder, "set_reduction_dimensionality", OtherId.reduction_dimensionality,
+        set_single_entry(self._convert_to_q_builder, "set_reduction_dimensionality", OtherId.REDUCTION_DIMENSIONALITY,
                          user_file_items)
 
     def _set_up_adjustment_state(self, user_file_items):
@@ -1243,9 +1243,9 @@ class StateDirectorISIS(object):
         set_wavelength_limits(self._calculate_transmission_builder, user_file_items)
 
         # Set the full wavelength range. Note that this can currently only be set from the ISISCommandInterface
-        if OtherId.use_full_wavelength_range in user_file_items:
-            use_full_wavelength_range = user_file_items[OtherId.use_full_wavelength_range]
-            check_if_contains_only_one_element(use_full_wavelength_range, OtherId.use_full_wavelength_range)
+        if OtherId.USE_FULL_WAVELENGTH_RANGE in user_file_items:
+            use_full_wavelength_range = user_file_items[OtherId.USE_FULL_WAVELENGTH_RANGE]
+            check_if_contains_only_one_element(use_full_wavelength_range, OtherId.USE_FULL_WAVELENGTH_RANGE)
             use_full_wavelength_range = use_full_wavelength_range[-1]
             self._calculate_transmission_builder.set_use_full_wavelength_range(use_full_wavelength_range)
 
@@ -1288,48 +1288,48 @@ class StateDirectorISIS(object):
             events_binning = events_binning[-1]
             self._compatibility_builder.set_time_rebin_string(events_binning)
 
-        if OtherId.use_compatibility_mode in user_file_items:
-            use_compatibility_mode = user_file_items[OtherId.use_compatibility_mode]
-            check_if_contains_only_one_element(use_compatibility_mode, OtherId.use_compatibility_mode)
+        if OtherId.USE_COMPATIBILITY_MODE in user_file_items:
+            use_compatibility_mode = user_file_items[OtherId.USE_COMPATIBILITY_MODE]
+            check_if_contains_only_one_element(use_compatibility_mode, OtherId.USE_COMPATIBILITY_MODE)
             use_compatibility_mode = use_compatibility_mode[-1]
             self._compatibility_builder.set_use_compatibility_mode(use_compatibility_mode)
 
-        if OtherId.use_event_slice_optimisation in user_file_items:
-            use_event_slice_optimisation = user_file_items[OtherId.use_event_slice_optimisation]
-            check_if_contains_only_one_element(use_event_slice_optimisation, OtherId.use_event_slice_optimisation)
+        if OtherId.USE_EVENT_SLICE_OPTIMISATION in user_file_items:
+            use_event_slice_optimisation = user_file_items[OtherId.USE_EVENT_SLICE_OPTIMISATION]
+            check_if_contains_only_one_element(use_event_slice_optimisation, OtherId.USE_EVENT_SLICE_OPTIMISATION)
             use_event_slice_optimisation = use_event_slice_optimisation[-1]
             self._compatibility_builder.set_use_event_slice_optimisation(use_event_slice_optimisation)
 
     def _set_up_save(self, user_file_items):
-        if OtherId.save_types in user_file_items:
-            save_types = user_file_items[OtherId.save_types]
-            check_if_contains_only_one_element(save_types, OtherId.save_types)
+        if OtherId.SAVE_TYPES in user_file_items:
+            save_types = user_file_items[OtherId.SAVE_TYPES]
+            check_if_contains_only_one_element(save_types, OtherId.SAVE_TYPES)
             save_types = save_types[-1]
             self._save_builder.set_file_format(save_types)
 
-        if OtherId.save_as_zero_error_free in user_file_items:
-            save_as_zero_error_free = user_file_items[OtherId.save_as_zero_error_free]
-            check_if_contains_only_one_element(save_as_zero_error_free, OtherId.save_as_zero_error_free)
+        if OtherId.SAVE_AS_ZERO_ERROR_FREE in user_file_items:
+            save_as_zero_error_free = user_file_items[OtherId.SAVE_AS_ZERO_ERROR_FREE]
+            check_if_contains_only_one_element(save_as_zero_error_free, OtherId.SAVE_AS_ZERO_ERROR_FREE)
             save_as_zero_error_free = save_as_zero_error_free[-1]
             self._save_builder.set_zero_free_correction(save_as_zero_error_free)
 
-        if OtherId.user_specified_output_name in user_file_items:
-            user_specified_output_name = user_file_items[OtherId.user_specified_output_name]
-            check_if_contains_only_one_element(user_specified_output_name, OtherId.user_specified_output_name)
+        if OtherId.USER_SPECIFIED_OUTPUT_NAME in user_file_items:
+            user_specified_output_name = user_file_items[OtherId.USER_SPECIFIED_OUTPUT_NAME]
+            check_if_contains_only_one_element(user_specified_output_name, OtherId.USER_SPECIFIED_OUTPUT_NAME)
             user_specified_output_name = user_specified_output_name[-1]
             self._save_builder.set_user_specified_output_name(user_specified_output_name)
 
-        if OtherId.user_specified_output_name_suffix in user_file_items:
-            user_specified_output_name_suffix = user_file_items[OtherId.user_specified_output_name_suffix]
+        if OtherId.USER_SPECIFIED_OUTPUT_NAME_SUFFIX in user_file_items:
+            user_specified_output_name_suffix = user_file_items[OtherId.USER_SPECIFIED_OUTPUT_NAME_SUFFIX]
             check_if_contains_only_one_element(user_specified_output_name_suffix,
-                                               OtherId.user_specified_output_name_suffix)
+                                               OtherId.USER_SPECIFIED_OUTPUT_NAME_SUFFIX)
             user_specified_output_name_suffix = user_specified_output_name_suffix[-1]
             self._save_builder.set_user_specified_output_name_suffix(user_specified_output_name_suffix)
 
-        if OtherId.use_reduction_mode_as_suffix in user_file_items:
-            use_reduction_mode_as_suffix = user_file_items[OtherId.use_reduction_mode_as_suffix]
+        if OtherId.USE_REDUCTION_MODE_AS_SUFFIX in user_file_items:
+            use_reduction_mode_as_suffix = user_file_items[OtherId.USE_REDUCTION_MODE_AS_SUFFIX]
             check_if_contains_only_one_element(use_reduction_mode_as_suffix,
-                                               OtherId.use_reduction_mode_as_suffix)
+                                               OtherId.USE_REDUCTION_MODE_AS_SUFFIX)
             use_reduction_mode_as_suffix = use_reduction_mode_as_suffix[-1]
             self._save_builder.set_use_reduction_mode_as_suffix(use_reduction_mode_as_suffix)
 

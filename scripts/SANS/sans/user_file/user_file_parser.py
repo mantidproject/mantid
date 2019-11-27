@@ -1944,7 +1944,7 @@ class CompatibilityParser(UserFileComponentParser):
 
     def _extract_on_off(self, line):
         value = re.sub(self._on, "", line).strip() == ""
-        return {OtherId.use_compatibility_mode: value}
+        return {OtherId.USE_COMPATIBILITY_MODE: value}
 
     @staticmethod
     def get_type():

@@ -45,27 +45,27 @@ class StateGuiModel(ModelCommon):
     # ------------------------------------------------------------------------------------------------------------------
     @property
     def compatibility_mode(self):
-        return self.get_simple_element(element_id=OtherId.use_compatibility_mode, default_value=True)
+        return self.get_simple_element(element_id=OtherId.USE_COMPATIBILITY_MODE, default_value=True)
 
     @compatibility_mode.setter
     def compatibility_mode(self, value):
-        self.set_simple_element(element_id=OtherId.use_compatibility_mode, value=value)
+        self.set_simple_element(element_id=OtherId.USE_COMPATIBILITY_MODE, value=value)
 
     @property
     def event_slice_optimisation(self):
-        return self.get_simple_element(element_id=OtherId.use_event_slice_optimisation, default_value=False)
+        return self.get_simple_element(element_id=OtherId.USE_EVENT_SLICE_OPTIMISATION, default_value=False)
 
     @event_slice_optimisation.setter
     def event_slice_optimisation(self, value):
-        self.set_simple_element(element_id=OtherId.use_event_slice_optimisation, value=value)
+        self.set_simple_element(element_id=OtherId.USE_EVENT_SLICE_OPTIMISATION, value=value)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Save Options
     # ------------------------------------------------------------------------------------------------------------------
     @property
     def zero_error_free(self):
-        if OtherId.save_as_zero_error_free in self._user_file_items:
-            return self._user_file_items[OtherId.save_as_zero_error_free][-1]
+        if OtherId.SAVE_AS_ZERO_ERROR_FREE in self._user_file_items:
+            return self._user_file_items[OtherId.SAVE_AS_ZERO_ERROR_FREE][-1]
         else:
             # Turn on zero error free saving by default
             return True
@@ -74,18 +74,18 @@ class StateGuiModel(ModelCommon):
     def zero_error_free(self, value):
         if value is None:
             return
-        if OtherId.save_as_zero_error_free in self._user_file_items:
-            del self._user_file_items[OtherId.save_as_zero_error_free]
-        new_state_entries = {OtherId.save_as_zero_error_free: [value]}
+        if OtherId.SAVE_AS_ZERO_ERROR_FREE in self._user_file_items:
+            del self._user_file_items[OtherId.SAVE_AS_ZERO_ERROR_FREE]
+        new_state_entries = {OtherId.SAVE_AS_ZERO_ERROR_FREE: [value]}
         self._user_file_items.update(new_state_entries)
 
     @property
     def save_types(self):
-        return self.get_simple_element(element_id=OtherId.save_types, default_value=[SaveType.NX_CAN_SAS])
+        return self.get_simple_element(element_id=OtherId.SAVE_TYPES, default_value=[SaveType.NX_CAN_SAS])
 
     @save_types.setter
     def save_types(self, value):
-        self.set_simple_element(element_id=OtherId.save_types, value=value)
+        self.set_simple_element(element_id=OtherId.SAVE_TYPES, value=value)
 
     # ==================================================================================================================
     # ==================================================================================================================
@@ -151,7 +151,7 @@ class StateGuiModel(ModelCommon):
     # ------------------------------------------------------------------------------------------------------------------
     @property
     def event_slices(self):
-        return self.get_simple_element_with_attribute(element_id=OtherId.event_slices,
+        return self.get_simple_element_with_attribute(element_id=OtherId.EVENT_SLICES,
                                                       default_value="",
                                                       attribute="value")
 
@@ -159,9 +159,9 @@ class StateGuiModel(ModelCommon):
     def event_slices(self, value):
         if not value:
             return
-        if OtherId.event_slices in self._user_file_items:
-            del self._user_file_items[OtherId.event_slices]
-        new_state_entries = {OtherId.event_slices: [event_binning_string_values(value=value)]}
+        if OtherId.EVENT_SLICES in self._user_file_items:
+            del self._user_file_items[OtherId.EVENT_SLICES]
+        new_state_entries = {OtherId.EVENT_SLICES: [event_binning_string_values(value=value)]}
         self._user_file_items.update(new_state_entries)
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -169,15 +169,15 @@ class StateGuiModel(ModelCommon):
     # ------------------------------------------------------------------------------------------------------------------
     @property
     def reduction_dimensionality(self):
-        return self.get_simple_element_with_attribute(element_id=OtherId.reduction_dimensionality,
+        return self.get_simple_element_with_attribute(element_id=OtherId.REDUCTION_DIMENSIONALITY,
                                                       default_value=ReductionDimensionality.ONE_DIM)
 
     @reduction_dimensionality.setter
     def reduction_dimensionality(self, value):
         if value is ReductionDimensionality.ONE_DIM or value is ReductionDimensionality.TWO_DIM:
-            if OtherId.reduction_dimensionality in self._user_file_items:
-                del self._user_file_items[OtherId.reduction_dimensionality]
-            new_state_entries = {OtherId.reduction_dimensionality: [value]}
+            if OtherId.REDUCTION_DIMENSIONALITY in self._user_file_items:
+                del self._user_file_items[OtherId.REDUCTION_DIMENSIONALITY]
+            new_state_entries = {OtherId.REDUCTION_DIMENSIONALITY: [value]}
             self._user_file_items.update(new_state_entries)
         else:
             raise ValueError("A reduction dimensionality was expected, got instead {}".format(value))
@@ -389,8 +389,8 @@ class StateGuiModel(ModelCommon):
         self._user_file_items.update({LimitsId.WAVELENGTH: new_settings})
 
         if wavelength_range:
-            if OtherId.wavelength_range in self._user_file_items:
-                settings = self._user_file_items[OtherId.wavelength_range]
+            if OtherId.WAVELENGTH_RANGE in self._user_file_items:
+                settings = self._user_file_items[OtherId.WAVELENGTH_RANGE]
             else:
                 settings = [""]
 
@@ -398,7 +398,7 @@ class StateGuiModel(ModelCommon):
             for setting in settings:
                 new_range = wavelength_range if wavelength_range else setting
                 new_settings.append(new_range)
-            self._user_file_items.update({OtherId.wavelength_range: new_settings})
+            self._user_file_items.update({OtherId.WAVELENGTH_RANGE: new_settings})
 
     @property
     def wavelength_step_type(self):
@@ -441,7 +441,7 @@ class StateGuiModel(ModelCommon):
 
     @property
     def wavelength_range(self):
-        return self.get_simple_element(element_id=OtherId.wavelength_range, default_value="")
+        return self.get_simple_element(element_id=OtherId.WAVELENGTH_RANGE, default_value="")
 
     @wavelength_range.setter
     def wavelength_range(self, value):
@@ -472,38 +472,38 @@ class StateGuiModel(ModelCommon):
 
     @property
     def sample_height(self):
-        return self.get_simple_element(element_id=OtherId.sample_height, default_value="")
+        return self.get_simple_element(element_id=OtherId.SAMPLE_HEIGHT, default_value="")
 
     @sample_height.setter
     def sample_height(self, value):
-        self.set_simple_element(element_id=OtherId.sample_height, value=value)
+        self.set_simple_element(element_id=OtherId.SAMPLE_HEIGHT, value=value)
 
     @property
     def sample_width(self):
-        return self.get_simple_element(element_id=OtherId.sample_width, default_value="")
+        return self.get_simple_element(element_id=OtherId.SAMPLE_WIDTH, default_value="")
 
     @sample_width.setter
     def sample_width(self, value):
-        self.set_simple_element(element_id=OtherId.sample_width, value=value)
+        self.set_simple_element(element_id=OtherId.SAMPLE_WIDTH, value=value)
 
     @property
     def sample_thickness(self):
-        return self.get_simple_element(element_id=OtherId.sample_thickness, default_value="")
+        return self.get_simple_element(element_id=OtherId.SAMPLE_THICKNESS, default_value="")
 
     @sample_thickness.setter
     def sample_thickness(self, value):
-        self.set_simple_element(element_id=OtherId.sample_thickness, value=value)
+        self.set_simple_element(element_id=OtherId.SAMPLE_THICKNESS, value=value)
 
     @property
     def sample_shape(self):
-        return self.get_simple_element(element_id=OtherId.sample_shape, default_value=None)
+        return self.get_simple_element(element_id=OtherId.SAMPLE_SHAPE, default_value=None)
 
     @sample_shape.setter
     def sample_shape(self, value):
         # We only set the value if it is not None. Note that it can be None if the sample shape selection
         #  is "Read from file"
         if value is not None:
-            self.set_simple_element(element_id=OtherId.sample_shape, value=value)
+            self.set_simple_element(element_id=OtherId.SAMPLE_SHAPE, value=value)
 
     @property
     def z_offset(self):
@@ -810,8 +810,8 @@ class StateGuiModel(ModelCommon):
     # ------------------------------------------------------------------------------------------------------------------
     @property
     def output_name(self):
-        return self.get_simple_element(element_id=OtherId.user_specified_output_name, default_value="")
+        return self.get_simple_element(element_id=OtherId.USER_SPECIFIED_OUTPUT_NAME, default_value="")
 
     @output_name.setter
     def output_name(self, value):
-        self.set_simple_element(element_id=OtherId.user_specified_output_name, value=value)
+        self.set_simple_element(element_id=OtherId.USER_SPECIFIED_OUTPUT_NAME, value=value)

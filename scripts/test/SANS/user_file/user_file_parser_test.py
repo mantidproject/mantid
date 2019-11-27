@@ -835,8 +835,8 @@ class CompatibilityParserTest(unittest.TestCase):
         self.assertTrue(CompatibilityParser.get_type(), "COMPATIBILITY")
 
     def test_that_compatibility_on_off_is_parsed_correctly(self):
-        valid_settings = {"COMPATIBILITY on ": {OtherId.use_compatibility_mode: True},
-                          "COMPATIBILITY   OFF ": {OtherId.use_compatibility_mode: False}}
+        valid_settings = {"COMPATIBILITY on ": {OtherId.USE_COMPATIBILITY_MODE: True},
+                          "COMPATIBILITY   OFF ": {OtherId.USE_COMPATIBILITY_MODE: False}}
 
         invalid_settings = {"COMPATIBILITY ": RuntimeError,
                             "COMPATIBILITY ONN": RuntimeError}
