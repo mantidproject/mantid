@@ -75,6 +75,8 @@ public slots:
   void sequentialFit();
   void setModelResolution(std::string const &name,
                           TableDatasetIndex const &index);
+  void setModelResolution(
+      const std::vector<std::pair<std::string, int>> &fitResolutions);
 
 protected slots:
   void clear();

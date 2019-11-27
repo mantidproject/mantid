@@ -283,6 +283,11 @@ void ConvTemplateBrowser::setResolution(std::string const &name,
   m_presenter.setResolution(name, index);
 }
 
+void ConvTemplateBrowser::setResolution(
+    const std::vector<std::pair<std::string, int>> &fitResolutions) {
+  m_presenter.setResolution(fitResolutions);
+}
+
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

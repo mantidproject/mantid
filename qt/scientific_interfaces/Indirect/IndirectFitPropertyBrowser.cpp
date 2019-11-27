@@ -362,6 +362,14 @@ void IndirectFitPropertyBrowser::setModelResolution(
   m_templateBrowser->setResolution(name, index);
 }
 
+void IndirectFitPropertyBrowser::setModelResolution(
+    const std::vector<std::pair<std::string, int>> &fitResolutions) {
+  if (isFullFunctionBrowserActive()) {
+    showFullFunctionBrowser(false);
+  }
+  m_templateBrowser->setResolution(fitResolutions);
+}
+
 /**
  * Called when the browser visibility has changed.
  *

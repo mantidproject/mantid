@@ -66,21 +66,20 @@ void ConvolutionFunctionModel::setModel(const std::string &background,
 
 void ConvolutionFunctionModel::setModel(
     const std::string &background,
-    const std::vector<std::string> &resolutionWorkspaces,
-    std::vector<int> resolutionWorkspaceIndex, const std::string &peaks,
-    bool hasDeltaFunction) {
+    const std::vector<std::pair<std::string, int>> &resolutionWorkspaces,
+    const std::string &peaks, bool hasDeltaFunction) {
   std::string resolution, convolution, function;
   auto const model = hasDeltaFunction ? "name=DeltaFunction;" + peaks : peaks;
   auto fitFunction = boost::make_shared<MultiDomainFunction>();
 
   auto const nf = m_numberDomains > 0 ? static_cast<int>(m_numberDomains) : 1;
   for (int i = 0; i < nf; ++i) {
-    auto workspace = resolutionWorkspaces[i];
+    auto workspace = resolutionWorkspaces[i].first;
     resolution = workspace.empty()
                      ? "name=Resolution"
                      : "name=Resolution,Workspace=\"" + workspace +
                            "\",WorkspaceIndex=" +
-                           std::to_string(resolutionWorkspaceIndex[i]);
+                           std::to_string(resolutionWorkspaces[i].second);
     convolution = "composite=Convolution;" + resolution + ";" + model;
     function = background.empty() ? convolution
                                   : background + ";(" + convolution + ")";

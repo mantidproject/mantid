@@ -31,9 +31,8 @@ void ConvFunctionModel::clearData() {
 }
 
 void ConvFunctionModel::setModel() {
-  m_model.setModel(buildBackgroundFunctionString(), m_resolutionName,
-                   m_resolutionIndex.value, buildPeaksFunctionString(),
-                   m_hasDeltaFunction);
+  m_model.setModel(buildBackgroundFunctionString(), m_fitResolutions,
+                   buildPeaksFunctionString(), m_hasDeltaFunction);
   m_model.setGlobalParameters(makeGlobalList());
 }
 
@@ -271,6 +270,12 @@ void ConvFunctionModel::setResolution(std::string const &name,
                                       TableDatasetIndex const &index) {
   m_resolutionName = name;
   m_resolutionIndex = index;
+  setModel();
+}
+
+void ConvFunctionModel::setResolution(
+    const std::vector<std::pair<std::string, int>> &fitResolutions) {
+  m_fitResolutions = fitResolutions;
   setModel();
 }
 
