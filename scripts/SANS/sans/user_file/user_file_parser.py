@@ -278,7 +278,7 @@ class InstrParser(object):
             raise RuntimeError("InstrParser: Unknown command for INSTR: {0}".format(line))
         else:
             # If no exception raised
-            return {DetectorId.instrument: ret_val}
+            return {DetectorId.INSTRUMENT: ret_val}
 
     @staticmethod
     def get_type():
@@ -404,13 +404,13 @@ class DetParser(UserFileComponentParser):
     def _extract_reduction_mode(self, line):
         line_capital = line.upper()
         if line_capital in self._HAB:
-            return {DetectorId.reduction_mode: ReductionMode.HAB}
+            return {DetectorId.REDUCTION_MODE: ReductionMode.HAB}
         elif line_capital in self._LAB:
-            return {DetectorId.reduction_mode: ReductionMode.LAB}
+            return {DetectorId.REDUCTION_MODE: ReductionMode.LAB}
         elif line_capital in self._BOTH:
-            return {DetectorId.reduction_mode: ReductionMode.ALL}
+            return {DetectorId.REDUCTION_MODE: ReductionMode.ALL}
         elif line_capital in self._MERGE:
-            return {DetectorId.reduction_mode: ReductionMode.MERGED}
+            return {DetectorId.REDUCTION_MODE: ReductionMode.MERGED}
         else:
             raise RuntimeError("DetParser:  Could not extract line: {0}".format(line))
 
@@ -429,28 +429,28 @@ class DetParser(UserFileComponentParser):
     def _extract_detector_setting(self, qualifier, detector_type):
         if self._x_pattern.match(qualifier):
             value_string = re.sub(self._x, "", qualifier)
-            key = DetectorId.correction_x
+            key = DetectorId.CORRECTION_X
         elif self._y_pattern.match(qualifier):
             value_string = re.sub(self._y, "", qualifier)
-            key = DetectorId.correction_y
+            key = DetectorId.CORRECTION_Y
         elif self._z_pattern.match(qualifier):
             value_string = re.sub(self._z, "", qualifier)
-            key = DetectorId.correction_z
+            key = DetectorId.CORRECTION_Z
         elif self._rotation_pattern.match(qualifier):
             value_string = re.sub(self._rotation, "", qualifier)
-            key = DetectorId.correction_rotation
+            key = DetectorId.CORRECTION_ROTATION
         elif self._translation_pattern.match(qualifier):
             value_string = re.sub(self._translation, "", qualifier)
-            key = DetectorId.correction_translation
+            key = DetectorId.CORRECTION_TRANSLATION
         elif self._radius_pattern.match(qualifier):
             value_string = re.sub(self._radius, "", qualifier)
-            key = DetectorId.correction_radius
+            key = DetectorId.CORRECTION_RADIUS
         elif self._x_tilt_pattern.match(qualifier):
             value_string = re.sub(self._x_tilt, "", qualifier)
-            key = DetectorId.correction_x_tilt
+            key = DetectorId.CORRECTION_X_TILT
         elif self._y_tilt_pattern.match(qualifier):
             value_string = re.sub(self._y_tilt, "", qualifier)
-            key = DetectorId.correction_y_tilt
+            key = DetectorId.CORRECTION_Y_TILT
         else:
             raise RuntimeError("DetParser: Unknown qualifier encountered: {0}".format(qualifier))
 
@@ -463,11 +463,11 @@ class DetParser(UserFileComponentParser):
         if self._rescale_pattern.match(line) is not None:
             rescale_string = re.sub(self._rescale, "", line)
             rescale = convert_string_to_float(rescale_string)
-            return {DetectorId.rescale: rescale}
+            return {DetectorId.RESCALE: rescale}
         elif self._shift_pattern.match(line) is not None:
             shift_string = re.sub(self._shift, "", line)
             shift = convert_string_to_float(shift_string)
-            return {DetectorId.shift: shift}
+            return {DetectorId.SHIFT: shift}
         elif self._rescale_fit_pattern.match(line) is not None:
             rescale_fit_string = re.sub(self._rescale_fit, "", line)
             if rescale_fit_string:
@@ -475,7 +475,7 @@ class DetParser(UserFileComponentParser):
                 value = det_fit_range(start=rescale_fit[0], stop=rescale_fit[1], use_fit=True)
             else:
                 value = det_fit_range(start=None, stop=None, use_fit=True)
-            return {DetectorId.rescale_fit: value}
+            return {DetectorId.RESCALE_FIT: value}
         elif self._shift_fit_pattern.match(line) is not None:
             shift_fit_string = re.sub(self._shift_fit, "", line)
             if shift_fit_string:
@@ -483,7 +483,7 @@ class DetParser(UserFileComponentParser):
                 value = det_fit_range(start=shift_fit[0], stop=shift_fit[1], use_fit=True)
             else:
                 value = det_fit_range(start=None, stop=None, use_fit=True)
-            return {DetectorId.shift_fit: value}
+            return {DetectorId.SHIFT_FIT: value}
         elif self._merge_range_pattern.match(line) is not None:
             merge_range_string = re.sub(self._merge_range, "", line)
             if merge_range_string:
@@ -491,7 +491,7 @@ class DetParser(UserFileComponentParser):
                 value = det_fit_range(start=merge_range[0], stop=merge_range[1], use_fit=True)
             else:
                 raise RuntimeError("DetParser: Could not extract line: {0}".format(line))
-            return {DetectorId.merge_range: value}
+            return {DetectorId.MERGE_RANGE: value}
         else:
             raise RuntimeError("DetParser: Could not extract line: {0}".format(line))
 

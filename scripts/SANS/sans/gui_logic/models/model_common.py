@@ -26,11 +26,11 @@ class ModelCommon(with_metaclass(ABCMeta)):
 
     @property
     def instrument(self):
-        return self.get_simple_element(element_id=DetectorId.instrument, default_value=SANSInstrument.NO_INSTRUMENT)
+        return self.get_simple_element(element_id=DetectorId.INSTRUMENT, default_value=SANSInstrument.NO_INSTRUMENT)
 
     @instrument.setter
     def instrument(self, value):
-        self.set_simple_element(element_id=DetectorId.instrument, value=value)
+        self.set_simple_element(element_id=DetectorId.INSTRUMENT, value=value)
 
     def _get_incident_spectrum_info(self, default_value, attribute, is_trans):
         if MonId.spectrum in self._user_file_items:

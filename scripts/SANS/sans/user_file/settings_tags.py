@@ -6,6 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 from collections import namedtuple
+
+from mantid.py3compat import Enum
 from sans.common.enums import serializable_enum
 
 
@@ -51,17 +53,22 @@ monitor_file = namedtuple('monitor_file', 'file_path, detector_type')
 det_fit_range = namedtuple('det_fit_range', 'start, stop, use_fit')
 
 
-# ------------------------------------------------------------------
-# --- State director keys ------------------------------------------
-# ------------------------------------------------------------------
-
-
-# --- DET
-@serializable_enum("reduction_mode", "rescale", "shift", "rescale_fit", "shift_fit", "correction_x", "correction_y",
-                   "correction_z", "correction_rotation", "correction_radius", "correction_translation",
-                   "correction_x_tilt", "correction_y_tilt", "merge_range", "instrument")
-class DetectorId(object):
-    pass
+class DetectorId(Enum):
+    CORRECTION_X = "correction_x"
+    CORRECTION_X_TILT = "correction_x_tilt"
+    CORRECTION_Y = "correction_y"
+    CORRECTION_Y_TILT = "correction_y_tilt"
+    CORRECTION_Z = "correction_z"
+    CORRECTION_RADIUS = "correction_radius"
+    CORRECTION_ROTATION = "correction_rotation"
+    CORRECTION_TRANSLATION = "correction_translation"
+    MERGE_RANGE = "merge_range"
+    INSTRUMENT = "instrument"
+    REDUCTION_MODE = "reduction_mode"
+    RESCALE = "rescale"
+    RESCALE_FIT = "rescale_fit"
+    SHIFT = "shift"
+    SHIFT_FIT = "shift_fit"
 
 
 # --- LIMITS

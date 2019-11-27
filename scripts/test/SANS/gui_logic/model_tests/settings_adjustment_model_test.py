@@ -12,19 +12,19 @@ class SettingsTransmissionModelTest(unittest.TestCase):
         return model_under_test
 
     def test_monitor_5_reported_for_zoom(self):
-        user_file = {DetectorId.instrument: [SANSInstrument.ZOOM]}
+        user_file = {DetectorId.INSTRUMENT: [SANSInstrument.ZOOM]}
         model_under_test = self.create_model(user_file)
 
         self.assertTrue(model_under_test.does_instrument_support_monitor_5())
 
     def test_monitor_5_disabled_for_no_inst(self):
-        user_file = {DetectorId.instrument: [SANSInstrument.NO_INSTRUMENT]}
+        user_file = {DetectorId.INSTRUMENT: [SANSInstrument.NO_INSTRUMENT]}
         model_under_test = self.create_model(user_file)
 
         self.assertFalse(model_under_test.does_instrument_support_monitor_5())
 
     def test_monitor_5_disabled_for_sans(self):
-        user_file = {DetectorId.instrument: [SANSInstrument.SANS2D]}
+        user_file = {DetectorId.INSTRUMENT: [SANSInstrument.SANS2D]}
         model_under_test = self.create_model(user_file)
 
         self.assertFalse(model_under_test.does_instrument_support_monitor_5())

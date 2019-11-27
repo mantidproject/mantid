@@ -369,8 +369,8 @@ class StateDirectorISIS(object):
         # ---------------------------
         # Correction for X, Y, Z
         # ---------------------------
-        if DetectorId.correction_x in user_file_items:
-            corrections_in_x = user_file_items[DetectorId.correction_x]
+        if DetectorId.CORRECTION_X in user_file_items:
+            corrections_in_x = user_file_items[DetectorId.CORRECTION_X]
             for correction_x in corrections_in_x:
                 if correction_x.detector_type is DetectorType.HAB:
                     self._move_builder.set_HAB_x_translation_correction(convert_mm_to_m(correction_x.entry))
@@ -380,8 +380,8 @@ class StateDirectorISIS(object):
                     raise RuntimeError("UserFileStateDirector: An unknown detector {0} was used for the"
                                        " x correction.".format(correction_x.detector_type))
 
-        if DetectorId.correction_y in user_file_items:
-            corrections_in_y = user_file_items[DetectorId.correction_y]
+        if DetectorId.CORRECTION_Y in user_file_items:
+            corrections_in_y = user_file_items[DetectorId.CORRECTION_Y]
             for correction_y in corrections_in_y:
                 if correction_y.detector_type is DetectorType.HAB:
                     self._move_builder.set_HAB_y_translation_correction(convert_mm_to_m(correction_y.entry))
@@ -391,8 +391,8 @@ class StateDirectorISIS(object):
                     raise RuntimeError("UserFileStateDirector: An unknown detector {0} was used for the"
                                        " y correction.".format(correction_y.detector_type))
 
-        if DetectorId.correction_z in user_file_items:
-            corrections_in_z = user_file_items[DetectorId.correction_z]
+        if DetectorId.CORRECTION_Z in user_file_items:
+            corrections_in_z = user_file_items[DetectorId.CORRECTION_Z]
             for correction_z in corrections_in_z:
                 if correction_z.detector_type is DetectorType.HAB:
                     self._move_builder.set_HAB_z_translation_correction(convert_mm_to_m(correction_z.entry))
@@ -405,10 +405,10 @@ class StateDirectorISIS(object):
         # ---------------------------
         # Correction for Rotation
         # ---------------------------
-        if DetectorId.correction_rotation in user_file_items:
-            rotation_correction = user_file_items[DetectorId.correction_rotation]
+        if DetectorId.CORRECTION_ROTATION in user_file_items:
+            rotation_correction = user_file_items[DetectorId.CORRECTION_ROTATION]
             # Should the user have chosen several values, then the last element is selected
-            check_if_contains_only_one_element(rotation_correction, DetectorId.correction_rotation)
+            check_if_contains_only_one_element(rotation_correction, DetectorId.CORRECTION_ROTATION)
             rotation_correction = rotation_correction[-1]
             if rotation_correction.detector_type is DetectorType.HAB:
                 self._move_builder.set_HAB_rotation_correction(rotation_correction.entry)
@@ -421,8 +421,8 @@ class StateDirectorISIS(object):
         # ---------------------------
         # Correction for Radius
         # ---------------------------
-        if DetectorId.correction_radius in user_file_items:
-            radius_corrections = user_file_items[DetectorId.correction_radius]
+        if DetectorId.CORRECTION_RADIUS in user_file_items:
+            radius_corrections = user_file_items[DetectorId.CORRECTION_RADIUS]
             for radius_correction in radius_corrections:
                 if radius_correction.detector_type is DetectorType.HAB:
                     self._move_builder.set_HAB_radius_correction(convert_mm_to_m(radius_correction.entry))
@@ -435,8 +435,8 @@ class StateDirectorISIS(object):
         # ---------------------------
         # Correction for Translation
         # ---------------------------
-        if DetectorId.correction_translation in user_file_items:
-            side_corrections = user_file_items[DetectorId.correction_translation]
+        if DetectorId.CORRECTION_TRANSLATION in user_file_items:
+            side_corrections = user_file_items[DetectorId.CORRECTION_TRANSLATION]
             for side_correction in side_corrections:
                 if side_correction.detector_type is DetectorType.HAB:
                     self._move_builder.set_HAB_side_correction(convert_mm_to_m(side_correction.entry))
@@ -449,8 +449,8 @@ class StateDirectorISIS(object):
         # ---------------------------
         # Tilt
         # ---------------------------
-        if DetectorId.correction_x_tilt in user_file_items:
-            tilt_correction = user_file_items[DetectorId.correction_x_tilt]
+        if DetectorId.CORRECTION_X_TILT in user_file_items:
+            tilt_correction = user_file_items[DetectorId.CORRECTION_X_TILT]
             tilt_correction = tilt_correction[-1]
             if tilt_correction.detector_type is DetectorType.HAB:
                 self._move_builder.set_HAB_x_tilt_correction(tilt_correction.entry)
@@ -460,8 +460,8 @@ class StateDirectorISIS(object):
                 raise RuntimeError("UserFileStateDirector: An unknown detector {0} was used for the"
                                    " titlt correction.".format(tilt_correction.detector_type))
 
-        if DetectorId.correction_y_tilt in user_file_items:
-            tilt_correction = user_file_items[DetectorId.correction_y_tilt]
+        if DetectorId.CORRECTION_Y_TILT in user_file_items:
+            tilt_correction = user_file_items[DetectorId.CORRECTION_Y_TILT]
             tilt_correction = tilt_correction[-1]
             if tilt_correction.detector_type is DetectorType.HAB:
                 self._move_builder.set_HAB_y_tilt_correction(tilt_correction.entry)
@@ -538,13 +538,13 @@ class StateDirectorISIS(object):
         # ------------------------
         # Reduction mode
         # ------------------------
-        set_single_entry(self._reduction_builder, "set_reduction_mode", DetectorId.reduction_mode, user_file_items)
+        set_single_entry(self._reduction_builder, "set_reduction_mode", DetectorId.REDUCTION_MODE, user_file_items)
 
         # -------------------------------
         # Shift and rescale
         # -------------------------------
-        set_single_entry(self._reduction_builder, "set_merge_scale", DetectorId.rescale, user_file_items)
-        set_single_entry(self._reduction_builder, "set_merge_shift", DetectorId.shift, user_file_items)
+        set_single_entry(self._reduction_builder, "set_merge_scale", DetectorId.RESCALE, user_file_items)
+        set_single_entry(self._reduction_builder, "set_merge_shift", DetectorId.SHIFT, user_file_items)
 
         # -------------------------------
         # User masking
@@ -552,10 +552,10 @@ class StateDirectorISIS(object):
         merge_min = None
         merge_max = None
         merge_mask = False
-        if DetectorId.merge_range in user_file_items:
-            merge_range = user_file_items[DetectorId.merge_range]
+        if DetectorId.MERGE_RANGE in user_file_items:
+            merge_range = user_file_items[DetectorId.MERGE_RANGE]
             # Should the user have chosen several values, then the last element is selected
-            check_if_contains_only_one_element(merge_range, DetectorId.rescale_fit)
+            check_if_contains_only_one_element(merge_range, DetectorId.RESCALE_FIT)
             merge_range = merge_range[-1]
             merge_min = merge_range.start
             merge_max = merge_range.stop
@@ -571,10 +571,10 @@ class StateDirectorISIS(object):
         q_range_min_scale = None
         q_range_max_scale = None
         has_rescale_fit = False
-        if DetectorId.rescale_fit in user_file_items:
-            rescale_fits = user_file_items[DetectorId.rescale_fit]
+        if DetectorId.RESCALE_FIT in user_file_items:
+            rescale_fits = user_file_items[DetectorId.RESCALE_FIT]
             # Should the user have chosen several values, then the last element is selected
-            check_if_contains_only_one_element(rescale_fits, DetectorId.rescale_fit)
+            check_if_contains_only_one_element(rescale_fits, DetectorId.RESCALE_FIT)
             rescale_fit = rescale_fits[-1]
             q_range_min_scale = rescale_fit.start
             q_range_max_scale = rescale_fit.stop
@@ -583,10 +583,10 @@ class StateDirectorISIS(object):
         q_range_min_shift = None
         q_range_max_shift = None
         has_shift_fit = False
-        if DetectorId.shift_fit in user_file_items:
-            shift_fits = user_file_items[DetectorId.shift_fit]
+        if DetectorId.SHIFT_FIT in user_file_items:
+            shift_fits = user_file_items[DetectorId.SHIFT_FIT]
             # Should the user have chosen several values, then the last element is selected
-            check_if_contains_only_one_element(shift_fits, DetectorId.shift_fit)
+            check_if_contains_only_one_element(shift_fits, DetectorId.SHIFT_FIT)
             shift_fit = shift_fits[-1]
             q_range_min_shift = shift_fit.start
             q_range_max_shift = shift_fit.stop

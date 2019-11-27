@@ -409,7 +409,7 @@ class CommandInterfaceStateDirector(object):
 
     def _process_detector(self, command):
         reduction_mode = command.values[0]
-        new_state_entries = {DetectorId.reduction_mode: reduction_mode}
+        new_state_entries = {DetectorId.REDUCTION_MODE: reduction_mode}
         self.add_to_processed_state_settings(new_state_entries)
 
     def _process_gravity(self, command):
@@ -457,13 +457,13 @@ class CommandInterfaceStateDirector(object):
         q_max = command.values[5]
 
         # Set the scale and the shift
-        new_state_entries = {DetectorId.rescale: scale, DetectorId.shift: shift}
+        new_state_entries = {DetectorId.RESCALE: scale, DetectorId.SHIFT: shift}
 
         # Set the fit for the scale
-        new_state_entries.update({DetectorId.rescale_fit: det_fit_range(start=q_min, stop=q_max, use_fit=fit_scale)})
+        new_state_entries.update({DetectorId.RESCALE_FIT: det_fit_range(start=q_min, stop=q_max, use_fit=fit_scale)})
 
         # Set the fit for shift
-        new_state_entries.update({DetectorId.shift_fit: det_fit_range(start=q_min, stop=q_max, use_fit=fit_shift)})
+        new_state_entries.update({DetectorId.SHIFT_FIT: det_fit_range(start=q_min, stop=q_max, use_fit=fit_shift)})
 
         self.add_to_processed_state_settings(new_state_entries)
 
@@ -537,7 +537,7 @@ class CommandInterfaceStateDirector(object):
             self.add_to_processed_state_settings(full_wavelength_range_entry)
 
         if reduction_mode is not None:
-            reduction_mode_entry = {DetectorId.reduction_mode: reduction_mode}
+            reduction_mode_entry = {DetectorId.REDUCTION_MODE: reduction_mode}
             self.add_to_processed_state_settings(reduction_mode_entry)
 
     def _process_qxy_limit(self, command):
@@ -565,18 +565,18 @@ class CommandInterfaceStateDirector(object):
         y_tilt = command.values[8]
 
         # Set the offsets
-        new_state_entries = {DetectorId.correction_x: single_entry_with_detector(entry=x, detector_type=detector_type),
-                             DetectorId.correction_y: single_entry_with_detector(entry=y, detector_type=detector_type),
-                             DetectorId.correction_z: single_entry_with_detector(entry=z, detector_type=detector_type),
-                             DetectorId.correction_rotation:
+        new_state_entries = {DetectorId.CORRECTION_X: single_entry_with_detector(entry=x, detector_type=detector_type),
+                             DetectorId.CORRECTION_Y: single_entry_with_detector(entry=y, detector_type=detector_type),
+                             DetectorId.CORRECTION_Z: single_entry_with_detector(entry=z, detector_type=detector_type),
+                             DetectorId.CORRECTION_ROTATION:
                                  single_entry_with_detector(entry=rotation, detector_type=detector_type),
-                             DetectorId.correction_radius:
+                             DetectorId.CORRECTION_RADIUS:
                                  single_entry_with_detector(entry=radius, detector_type=detector_type),
-                             DetectorId.correction_translation:
+                             DetectorId.CORRECTION_TRANSLATION:
                                  single_entry_with_detector(entry=side, detector_type=detector_type),
-                             DetectorId.correction_x_tilt:
+                             DetectorId.CORRECTION_X_TILT:
                                  single_entry_with_detector(entry=x_tilt, detector_type=detector_type),
-                             DetectorId.correction_y_tilt:
+                             DetectorId.CORRECTION_Y_TILT:
                                  single_entry_with_detector(entry=y_tilt, detector_type=detector_type),
                              }
         self.add_to_processed_state_settings(new_state_entries)

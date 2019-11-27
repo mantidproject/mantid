@@ -70,10 +70,10 @@ class InstrParserTest(unittest.TestCase):
         self.assertFalse(InstrParser.get_type_pattern("SANS2D/something else"))
 
     def test_that_instruments_are_parsed_correctly(self):
-        valid_settings = {"SANS2D": {DetectorId.instrument: SANSInstrument.SANS2D},
-                          "LOQ": {DetectorId.instrument: SANSInstrument.LOQ},
-                          "ZOOM": {DetectorId.instrument: SANSInstrument.ZOOM},
-                          "LARMOR": {DetectorId.instrument: SANSInstrument.LARMOR}}
+        valid_settings = {"SANS2D": {DetectorId.INSTRUMENT: SANSInstrument.SANS2D},
+                          "LOQ": {DetectorId.INSTRUMENT: SANSInstrument.LOQ},
+                          "ZOOM": {DetectorId.INSTRUMENT: SANSInstrument.ZOOM},
+                          "LARMOR": {DetectorId.INSTRUMENT: SANSInstrument.LARMOR}}
 
         invalid_settings = {"NOINSTRUMENT": RuntimeError,
                             "SANS2D/HAB": RuntimeError,
@@ -89,13 +89,13 @@ class DetParserTest(unittest.TestCase):
 
     def test_that_reduction_mode_is_parsed_correctly(self):
         # The dict below has the string to parse as the key and the expected result as a value
-        valid_settings = {"DET/HAB": {DetectorId.reduction_mode: ReductionMode.HAB},
-                          "dEt/ frONT ": {DetectorId.reduction_mode: ReductionMode.HAB},
-                          "dET/REAR": {DetectorId.reduction_mode: ReductionMode.LAB},
-                          "dEt/MAIn   ": {DetectorId.reduction_mode: ReductionMode.LAB},
-                          " dEt/ BOtH": {DetectorId.reduction_mode: ReductionMode.ALL},
-                          "DeT /merge ": {DetectorId.reduction_mode: ReductionMode.MERGED},
-                          " DEt / MERGED": {DetectorId.reduction_mode: ReductionMode.MERGED}}
+        valid_settings = {"DET/HAB": {DetectorId.REDUCTION_MODE: ReductionMode.HAB},
+                          "dEt/ frONT ": {DetectorId.REDUCTION_MODE: ReductionMode.HAB},
+                          "dET/REAR": {DetectorId.REDUCTION_MODE: ReductionMode.LAB},
+                          "dEt/MAIn   ": {DetectorId.REDUCTION_MODE: ReductionMode.LAB},
+                          " dEt/ BOtH": {DetectorId.REDUCTION_MODE: ReductionMode.ALL},
+                          "DeT /merge ": {DetectorId.REDUCTION_MODE: ReductionMode.MERGED},
+                          " DEt / MERGED": {DetectorId.REDUCTION_MODE: ReductionMode.MERGED}}
 
         invalid_settings = {"DET/HUB": RuntimeError,
                             "DET/HAB/": RuntimeError}
@@ -103,11 +103,11 @@ class DetParserTest(unittest.TestCase):
         do_test(det_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_merge_option_is_parsed_correctly(self):
-        valid_settings = {"DET/RESCALE 123": {DetectorId.rescale: 123},
-                          "dEt/ shiFt 48.5": {DetectorId.shift: 48.5},
-                          "dET/reSCale/FIT   23 34.6 ": {DetectorId.rescale_fit: det_fit_range(start=23, stop=34.6,
+        valid_settings = {"DET/RESCALE 123": {DetectorId.RESCALE: 123},
+                          "dEt/ shiFt 48.5": {DetectorId.SHIFT: 48.5},
+                          "dET/reSCale/FIT   23 34.6 ": {DetectorId.RESCALE_FIT: det_fit_range(start=23, stop=34.6,
                                                                                                use_fit=True)},
-                          "dEt/SHIFT/FIT 235.2  341   ": {DetectorId.shift_fit: det_fit_range(start=235.2, stop=341,
+                          "dEt/SHIFT/FIT 235.2  341   ": {DetectorId.SHIFT_FIT: det_fit_range(start=235.2, stop=341,
                                                                                               use_fit=True)}}
 
         invalid_settings = {"DET/Ruscale": RuntimeError,
@@ -120,39 +120,39 @@ class DetParserTest(unittest.TestCase):
         do_test(det_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_detector_setting_is_parsed_correctly(self):
-        valid_settings = {"Det/CORR/REAR/X 123": {DetectorId.correction_x: single_entry_with_detector(entry=123,
-                                                                    detector_type=DetectorType.LAB)},  # noqa
-                          "DEt/CORR/ frOnt/X +95.7": {DetectorId.correction_x:
+        valid_settings = {"Det/CORR/REAR/X 123": {DetectorId.CORRECTION_X: single_entry_with_detector(entry=123,
+                                                                                                      detector_type=DetectorType.LAB)},  # noqa
+                          "DEt/CORR/ frOnt/X +95.7": {DetectorId.CORRECTION_X:
                                                           single_entry_with_detector(entry=95.7,
                                                                                      detector_type=DetectorType.HAB)},
-                          "DeT/ CORR / ReAR/ y 12.3": {DetectorId.correction_y:
+                          "DeT/ CORR / ReAR/ y 12.3": {DetectorId.CORRECTION_Y:
                                                            single_entry_with_detector(entry=12.3,
                                                                                       detector_type=DetectorType.LAB)},
-                          " DET/CoRR/fROnt/Y -957": {DetectorId.correction_y:
+                          " DET/CoRR/fROnt/Y -957": {DetectorId.CORRECTION_Y:
                                                          single_entry_with_detector(entry=-957,
                                                                                     detector_type=DetectorType.HAB)},
-                          "DeT/ CORR /reAR/Z 12.3": {DetectorId.correction_z:
+                          "DeT/ CORR /reAR/Z 12.3": {DetectorId.CORRECTION_Z:
                                                          single_entry_with_detector(entry=12.3,
                                                                                     detector_type=DetectorType.LAB)},
-                          " DET/CoRR/FRONT/ Z -957": {DetectorId.correction_z:
+                          " DET/CoRR/FRONT/ Z -957": {DetectorId.CORRECTION_Z:
                                                           single_entry_with_detector(entry=-957,
                                                                                      detector_type=DetectorType.HAB)},
-                          "DeT/ CORR /reAR/SIDE 12.3": {DetectorId.correction_translation:
+                          "DeT/ CORR /reAR/SIDE 12.3": {DetectorId.CORRECTION_TRANSLATION:
                                                             single_entry_with_detector(entry=12.3,
                                                                                        detector_type=DetectorType.LAB)},
-                          " DET/CoRR/FRONT/ SidE -957": {DetectorId.correction_translation:
+                          " DET/CoRR/FRONT/ SidE -957": {DetectorId.CORRECTION_TRANSLATION:
                                                              single_entry_with_detector(entry=-957,
                                                                                     detector_type=DetectorType.HAB)},
-                          "DeT/ CORR /reAR/ROt 12.3": {DetectorId.correction_rotation:
+                          "DeT/ CORR /reAR/ROt 12.3": {DetectorId.CORRECTION_ROTATION:
                                                            single_entry_with_detector(entry=12.3,
                                                                                       detector_type=DetectorType.LAB)},
-                          " DET/CoRR/FRONT/ROT -957": {DetectorId.correction_rotation:
+                          " DET/CoRR/FRONT/ROT -957": {DetectorId.CORRECTION_ROTATION:
                                                            single_entry_with_detector(entry=-957,
                                                                                       detector_type=DetectorType.HAB)},
-                          "DeT/ CORR /reAR/Radius 12.3": {DetectorId.correction_radius:
+                          "DeT/ CORR /reAR/Radius 12.3": {DetectorId.CORRECTION_RADIUS:
                                                               single_entry_with_detector(entry=12.3,
                                                                                      detector_type=DetectorType.LAB)},
-                          " DET/CoRR/FRONT/RADIUS 957": {DetectorId.correction_radius:
+                          " DET/CoRR/FRONT/RADIUS 957": {DetectorId.CORRECTION_RADIUS:
                                                              single_entry_with_detector(entry=957,
                                                                                      detector_type=DetectorType.HAB)}}
 
@@ -169,8 +169,8 @@ class DetParserTest(unittest.TestCase):
         do_test(det_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_DET_OVERLAP_option_is_parsed_correctly(self):
-        valid_settings = {"DET/OVERLAP 0.13 0.15": {DetectorId.merge_range: det_fit_range(start=0.13, stop=0.15, use_fit=True)},
-                          "DeT/OverLAP 0.13 0.15": {DetectorId.merge_range: det_fit_range(start=0.13, stop=0.15, use_fit=True)}
+        valid_settings = {"DET/OVERLAP 0.13 0.15": {DetectorId.MERGE_RANGE: det_fit_range(start=0.13, stop=0.15, use_fit=True)},
+                          "DeT/OverLAP 0.13 0.15": {DetectorId.MERGE_RANGE: det_fit_range(start=0.13, stop=0.15, use_fit=True)}
                           }
 
         invalid_settings = {"DET/OVERLAP 0.13 0.15 0.17": RuntimeError,
@@ -1076,8 +1076,8 @@ class UserFileParserTest(unittest.TestCase):
 
         # DetParser
         result = user_file_parser.parse_line(" DET/CoRR/FRONT/ SidE -957")
-        assert_valid_result(result, {DetectorId.correction_translation: single_entry_with_detector(entry=-957,
-                                     detector_type=DetectorType.HAB)}, self.assertTrue)
+        assert_valid_result(result, {DetectorId.CORRECTION_TRANSLATION: single_entry_with_detector(entry=-957,
+                                                                                                   detector_type=DetectorType.HAB)}, self.assertTrue)
 
         # LimitParser
         result = user_file_parser.parse_line("l/Q/WCUT 234.4")
@@ -1133,11 +1133,11 @@ class UserFileParserTest(unittest.TestCase):
 
         # Instrument parser
         result = user_file_parser.parse_line("SANS2D")
-        assert_valid_result(result, {DetectorId.instrument: SANSInstrument.SANS2D}, self.assertTrue)
+        assert_valid_result(result, {DetectorId.INSTRUMENT: SANSInstrument.SANS2D}, self.assertTrue)
 
         # Instrument parser - whitespace
         result = user_file_parser.parse_line("     ZOOM      ")
-        assert_valid_result(result, {DetectorId.instrument: SANSInstrument.ZOOM}, self.assertTrue)
+        assert_valid_result(result, {DetectorId.INSTRUMENT: SANSInstrument.ZOOM}, self.assertTrue)
 
     def test_that_non_existent_parser_throws(self):
         # Arrange

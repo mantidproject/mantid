@@ -211,10 +211,10 @@ class StateGuiModel(ModelCommon):
         q_stop = []
 
         settings = []
-        if DetectorId.rescale_fit in self._user_file_items:
-            settings.extend(self._user_file_items[DetectorId.rescale_fit])
-        if DetectorId.shift_fit in self._user_file_items:
-            settings.extend(self._user_file_items[DetectorId.shift_fit])
+        if DetectorId.RESCALE_FIT in self._user_file_items:
+            settings.extend(self._user_file_items[DetectorId.RESCALE_FIT])
+        if DetectorId.SHIFT_FIT in self._user_file_items:
+            settings.extend(self._user_file_items[DetectorId.SHIFT_FIT])
 
         for setting in settings:
             if setting.start is not None:
@@ -232,8 +232,8 @@ class StateGuiModel(ModelCommon):
         q_stop = []
 
         settings = []
-        if DetectorId.merge_range in self._user_file_items:
-            settings.extend(self._user_file_items[DetectorId.merge_range])
+        if DetectorId.MERGE_RANGE in self._user_file_items:
+            settings.extend(self._user_file_items[DetectorId.MERGE_RANGE])
 
         for setting in settings:
             if setting.start is not None:
@@ -248,55 +248,55 @@ class StateGuiModel(ModelCommon):
 
     @property
     def reduction_mode(self):
-        return self.get_simple_element_with_attribute(element_id=DetectorId.reduction_mode,
+        return self.get_simple_element_with_attribute(element_id=DetectorId.REDUCTION_MODE,
                                                       default_value=ReductionMode.LAB)
 
     @reduction_mode.setter
     def reduction_mode(self, value):
         if (value is ReductionMode.LAB or value is ReductionMode.HAB or
             value is ReductionMode.MERGED or value is ReductionMode.ALL):  # noqa
-            if DetectorId.reduction_mode in self._user_file_items:
-                del self._user_file_items[DetectorId.reduction_mode]
-            new_state_entries = {DetectorId.reduction_mode: [value]}
+            if DetectorId.REDUCTION_MODE in self._user_file_items:
+                del self._user_file_items[DetectorId.REDUCTION_MODE]
+            new_state_entries = {DetectorId.REDUCTION_MODE: [value]}
             self._user_file_items.update(new_state_entries)
         else:
             raise ValueError("A reduction mode was expected, got instead {}".format(value))
 
     @property
     def merge_scale(self):
-        return self.get_simple_element(element_id=DetectorId.rescale, default_value="1.0")
+        return self.get_simple_element(element_id=DetectorId.RESCALE, default_value="1.0")
 
     @merge_scale.setter
     def merge_scale(self, value):
-        self.set_simple_element(element_id=DetectorId.rescale, value=value)
+        self.set_simple_element(element_id=DetectorId.RESCALE, value=value)
 
     @property
     def merge_shift(self):
-        return self.get_simple_element(element_id=DetectorId.shift, default_value="0.0")
+        return self.get_simple_element(element_id=DetectorId.SHIFT, default_value="0.0")
 
     @merge_shift.setter
     def merge_shift(self, value):
-        self.set_simple_element(element_id=DetectorId.shift, value=value)
+        self.set_simple_element(element_id=DetectorId.SHIFT, value=value)
 
     @property
     def merge_scale_fit(self):
-        return self.get_simple_element_with_attribute(element_id=DetectorId.rescale_fit,
+        return self.get_simple_element_with_attribute(element_id=DetectorId.RESCALE_FIT,
                                                       default_value=False,
                                                       attribute="use_fit")
 
     @merge_scale_fit.setter
     def merge_scale_fit(self, value):
-        self._update_merged_fit(element_id=DetectorId.rescale_fit, use_fit=value)
+        self._update_merged_fit(element_id=DetectorId.RESCALE_FIT, use_fit=value)
 
     @property
     def merge_shift_fit(self):
-        return self.get_simple_element_with_attribute(element_id=DetectorId.shift_fit,
+        return self.get_simple_element_with_attribute(element_id=DetectorId.SHIFT_FIT,
                                                       default_value=False,
                                                       attribute="use_fit")
 
     @merge_shift_fit.setter
     def merge_shift_fit(self, value):
-        self._update_merged_fit(element_id=DetectorId.shift_fit, use_fit=value)
+        self._update_merged_fit(element_id=DetectorId.SHIFT_FIT, use_fit=value)
 
     @property
     def merge_q_range_start(self):
@@ -306,9 +306,9 @@ class StateGuiModel(ModelCommon):
     @merge_q_range_start.setter
     def merge_q_range_start(self, value):
         # Update for the shift
-        self._update_merged_fit(element_id=DetectorId.shift_fit, q_start=value)
+        self._update_merged_fit(element_id=DetectorId.SHIFT_FIT, q_start=value)
         # Update for the scale
-        self._update_merged_fit(element_id=DetectorId.rescale_fit, q_start=value)
+        self._update_merged_fit(element_id=DetectorId.RESCALE_FIT, q_start=value)
 
     @property
     def merge_q_range_stop(self):
@@ -318,19 +318,19 @@ class StateGuiModel(ModelCommon):
     @merge_q_range_stop.setter
     def merge_q_range_stop(self, value):
         # Update for the shift
-        self._update_merged_fit(element_id=DetectorId.shift_fit, q_stop=value)
+        self._update_merged_fit(element_id=DetectorId.SHIFT_FIT, q_stop=value)
         # Update for the scale
-        self._update_merged_fit(element_id=DetectorId.rescale_fit, q_stop=value)
+        self._update_merged_fit(element_id=DetectorId.RESCALE_FIT, q_stop=value)
 
     @property
     def merge_mask(self):
-        return self.get_simple_element_with_attribute(element_id=DetectorId.merge_range,
+        return self.get_simple_element_with_attribute(element_id=DetectorId.MERGE_RANGE,
                                                       default_value=False,
                                                       attribute="use_fit")
 
     @merge_mask.setter
     def merge_mask(self, value):
-        self._update_merged_fit(element_id=DetectorId.merge_range, use_fit=value)
+        self._update_merged_fit(element_id=DetectorId.MERGE_RANGE, use_fit=value)
 
     @property
     def merge_max(self):
@@ -339,7 +339,7 @@ class StateGuiModel(ModelCommon):
 
     @merge_max.setter
     def merge_max(self, value):
-        self._update_merged_fit(element_id=DetectorId.merge_range, q_stop=value)
+        self._update_merged_fit(element_id=DetectorId.MERGE_RANGE, q_stop=value)
 
     @property
     def merge_min(self):
@@ -348,7 +348,7 @@ class StateGuiModel(ModelCommon):
 
     @merge_min.setter
     def merge_min(self, value):
-        self._update_merged_fit(element_id=DetectorId.merge_range, q_start=value)
+        self._update_merged_fit(element_id=DetectorId.MERGE_RANGE, q_start=value)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Event binning for compatibility mode

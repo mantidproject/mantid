@@ -142,7 +142,7 @@ class StateGuiModelTest(unittest.TestCase):
         self.assertRaises(ValueError, red_mode_wrapper)
 
     def test_that_can_update_reduction_mode(self):
-        state_gui_model = StateGuiModel({DetectorId.reduction_mode: [ReductionMode.HAB]})
+        state_gui_model = StateGuiModel({DetectorId.REDUCTION_MODE: [ReductionMode.HAB]})
         self.assertEqual(state_gui_model.reduction_mode, ReductionMode.HAB)
         state_gui_model.reduction_mode = ReductionMode.ALL
         self.assertEqual(state_gui_model.reduction_mode, ReductionMode.ALL)
@@ -173,7 +173,7 @@ class StateGuiModelTest(unittest.TestCase):
         self.assertEqual(state_gui_model.merge_min, 78.9)
 
     def test_that_merge_range_set_correctly(self):
-        state_gui_model = StateGuiModel({DetectorId.merge_range: [det_fit_range(use_fit=True, start=0.13, stop=0.15)]})
+        state_gui_model = StateGuiModel({DetectorId.MERGE_RANGE: [det_fit_range(use_fit=True, start=0.13, stop=0.15)]})
         self.assertEqual(state_gui_model.merge_min, 0.13)
         self.assertEqual(state_gui_model.merge_max, 0.15)
         self.assertTrue(state_gui_model.merge_mask)
@@ -191,10 +191,10 @@ class StateGuiModelTest(unittest.TestCase):
         self.assertEqual(state_gui_model.merge_q_range_stop, "")
 
     def test_that_can_set_and_reset_merged_settings(self):
-        state_gui_model = StateGuiModel({DetectorId.shift_fit: [det_fit_range(start=1., stop=2., use_fit=True)],
-                                         DetectorId.rescale_fit: [det_fit_range(start=1.4, stop=7., use_fit=False)],
-                                         DetectorId.rescale: [12.],
-                                         DetectorId.shift: [234.]})
+        state_gui_model = StateGuiModel({DetectorId.SHIFT_FIT: [det_fit_range(start=1., stop=2., use_fit=True)],
+                                         DetectorId.RESCALE_FIT: [det_fit_range(start=1.4, stop=7., use_fit=False)],
+                                         DetectorId.RESCALE: [12.],
+                                         DetectorId.SHIFT: [234.]})
         self.assertEqual(state_gui_model.merge_scale, 12.)
         self.assertEqual(state_gui_model.merge_shift, 234.)
         self.assertFalse(state_gui_model.merge_scale_fit)
