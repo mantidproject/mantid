@@ -713,7 +713,7 @@ def SetDetectorOffsets(bank, x, y, z, rot, radius, side, xtilt=0.0, ytilt=0.0):
 # Commands which actually kick off a reduction
 # --------------------------------------------
 def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_suffix=None, combineDet=None,
-                      resetSetup=True, out_fit_settings=None, output_name=None, output_mode=OutputMode.PublishToADS,
+                      resetSetup=True, out_fit_settings=None, output_name=None, output_mode=OutputMode.PUBLISH_TO_ADS,
                       use_reduction_mode_as_suffix=False):
     """
         Run reduction from loading the raw data to calculating Q. Its optional arguments allows specifics
@@ -853,9 +853,9 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs=None, verbose=Fals
                 save_algs.append(SaveType.NX_CAN_SAS)
             else:
                 raise RuntimeError("The save format {0} is not known.".format(key))
-        output_mode = OutputMode.Both
+        output_mode = OutputMode.BOTH
     else:
-        output_mode = OutputMode.PublishToADS
+        output_mode = OutputMode.PUBLISH_TO_ADS
 
     # Get the information from the csv file
     batch_csv_parser = BatchCsvParser(filename)

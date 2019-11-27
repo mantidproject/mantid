@@ -191,10 +191,10 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
     # 3. Both:
     #    * This means that we need to save out the reduced data
     #    * The data is already on the ADS, so do nothing
-    if output_mode is OutputMode.SaveToFile:
+    if output_mode is OutputMode.SAVE_TO_FILE:
         save_to_file(reduction_packages, save_can, additional_run_numbers, event_slice_optimisation=event_slice_optimisation)
         delete_reduced_workspaces(reduction_packages)
-    elif output_mode is OutputMode.Both:
+    elif output_mode is OutputMode.BOTH:
         save_to_file(reduction_packages, save_can, additional_run_numbers, event_slice_optimisation=event_slice_optimisation)
 
     # -----------------------------------------------------------------------
@@ -1052,7 +1052,7 @@ def group_workspaces_if_required(reduction_package, output_mode, save_can, event
     #  Y  |   N  | NO
     #  N  |   N  | YES
 
-    if save_can and output_mode is not OutputMode.SaveToFile:
+    if save_can and output_mode is not OutputMode.SAVE_TO_FILE:
         CAN_WORKSPACE_GROUP = CAN_AND_SAMPLE_WORKSPACE
     else:
         CAN_WORKSPACE_GROUP = CAN_COUNT_AND_NORM_FOR_OPTIMIZATION

@@ -248,16 +248,13 @@ class FileType(Enum):
     NO_FILE_TYPE = "NoFileType"
 
 
-# ---------------------------
-# OutputMode
-# ---------------------------
-@string_convertible
-@serializable_enum("PublishToADS", "SaveToFile", "Both")
-class OutputMode(object):
+class OutputMode(Enum):
     """
     Defines the output modes of a batch reduction.
     """
-    pass
+    BOTH = "Both"
+    PUBLISH_TO_ADS = "PublishToADS"
+    SAVE_TO_FILE = "SaveToFile"
 
 
 # ------------------------------

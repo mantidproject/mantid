@@ -631,7 +631,7 @@ class SANSDataProcessorGui(QMainWindow,
 
     def set_out_default_output_mode(self):
         try:
-            default_output_mode = OutputMode.from_string(load_property(self.__generic_settings, self.__output_mode_key))
+            default_output_mode = OutputMode(load_property(self.__generic_settings, self.__output_mode_key))
         except RuntimeError:
             pass
         else:
@@ -645,11 +645,11 @@ class SANSDataProcessorGui(QMainWindow,
         2. Via the presenter, from state
         :param value: An OutputMode (SANS enum) object
         """
-        if value is OutputMode.PublishToADS:
+        if value is OutputMode.PUBLISH_TO_ADS:
             self.output_mode_memory_radio_button.setChecked(True)
-        elif value is OutputMode.SaveToFile:
+        elif value is OutputMode.SAVE_TO_FILE:
             self.output_mode_file_radio_button.setChecked(True)
-        elif value is OutputMode.Both:
+        elif value is OutputMode.BOTH:
             self.output_mode_both_radio_button.setChecked(True)
 
         # Notify the presenter
@@ -1114,21 +1114,21 @@ class SANSDataProcessorGui(QMainWindow,
     @property
     def output_mode(self):
         if self.output_mode_memory_radio_button.isChecked():
-            return OutputMode.PublishToADS
+            return OutputMode.PUBLISH_TO_ADS
         elif self.output_mode_file_radio_button.isChecked():
-            return OutputMode.SaveToFile
+            return OutputMode.SAVE_TO_FILE
         elif self.output_mode_both_radio_button.isChecked():
-            return OutputMode.Both
+            return OutputMode.BOTH
         else:
             self.gui_logger.warning(
                 "The output format was not specified. Defaulting to saving to memory only.")
-            return OutputMode.PublishToADS
+            return OutputMode.PUBLISH_TO_ADS
 
     @output_mode.setter
     def output_mode(self, value):
         self._check_output_mode(value)
         try:
-            set_setting(self.__generic_settings, self.__output_mode_key, OutputMode.to_string(value))
+            set_setting(self.__generic_settings, self.__output_mode_key, value.value)
         except RuntimeError:
             pass
 

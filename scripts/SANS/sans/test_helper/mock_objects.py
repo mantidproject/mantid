@@ -207,7 +207,7 @@ def create_mock_view(user_file_path, batch_file_path=None, row_user_file_path=""
     _q_1d_step_type = mock.PropertyMock(return_value=RangeStepType.LIN)
     type(view)._q_1d_step_type = _q_1d_step_type
 
-    _output_mode = mock.PropertyMock(return_value=OutputMode.PublishToADS)
+    _output_mode = mock.PropertyMock(return_value=OutputMode.PUBLISH_TO_ADS)
     type(view).output_mode = _output_mode
 
     _wavelength_range = mock.PropertyMock(return_value='')
@@ -231,7 +231,7 @@ def create_mock_view2(user_file_path, batch_file_path=None):
     view._on_user_file_load = mock.MagicMock(side_effect=on_load_user_file_mock)
     view._on_batch_file_load = mock.MagicMock(side_effect=on_load_batch_file_mock)
 
-    _output_mode = mock.PropertyMock(return_value=OutputMode.PublishToADS)
+    _output_mode = mock.PropertyMock(return_value=OutputMode.PUBLISH_TO_ADS)
     type(view).output_mode = _output_mode
 
     return view

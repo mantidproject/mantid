@@ -40,7 +40,7 @@ class BatchProcessRunnerTest(unittest.TestCase):
         self.notify_done.assert_called_once_with()
 
     def test_that_process_states_calls_batch_reduce_for_each_row(self):
-        self.batch_process_runner.process_states(self.states, False, OutputMode.Both, False, '')
+        self.batch_process_runner.process_states(self.states, False, OutputMode.BOTH, False, '')
         QThreadPool.globalInstance().waitForDone()
 
         self.assertEqual(self.sans_batch_instance.call_count, 3)
@@ -48,7 +48,7 @@ class BatchProcessRunnerTest(unittest.TestCase):
     def test_that_process_states_emits_row_processed_signal_after_each_row(self):
         self.batch_process_runner.row_processed_signal = mock.MagicMock()
         self.batch_process_runner.row_failed_signal = mock.MagicMock()
-        self.batch_process_runner.process_states(self.states, False, OutputMode.Both, False, '')
+        self.batch_process_runner.process_states(self.states, False, OutputMode.BOTH, False, '')
         QThreadPool.globalInstance().waitForDone()
 
         self.assertEqual(self.batch_process_runner.row_processed_signal.emit.call_count, 3)
@@ -62,7 +62,7 @@ class BatchProcessRunnerTest(unittest.TestCase):
         self.batch_process_runner.row_failed_signal = mock.MagicMock()
         self.sans_batch_instance.side_effect = Exception('failure')
 
-        self.batch_process_runner.process_states(self.states, False, OutputMode.Both, False, '')
+        self.batch_process_runner.process_states(self.states, False, OutputMode.BOTH, False, '')
         QThreadPool.globalInstance().waitForDone()
 
         self.assertEqual(self.batch_process_runner.row_failed_signal.emit.call_count, 3)
