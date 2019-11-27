@@ -270,12 +270,12 @@ class StateGuiModelTest(unittest.TestCase):
         state_gui_model.sample_height = 1.6
         state_gui_model.sample_thickness = 1.8
         state_gui_model.z_offset = 1.78
-        state_gui_model.sample_shape = SampleShape.FlatPlate
+        state_gui_model.sample_shape = SampleShape.FLAT_PLATE
         self.assertEqual(state_gui_model.sample_width, 1.2)
         self.assertEqual(state_gui_model.sample_height, 1.6)
         self.assertEqual(state_gui_model.sample_thickness, 1.8)
         self.assertEqual(state_gui_model.z_offset, 1.78)
-        self.assertEqual(state_gui_model.sample_shape, SampleShape.FlatPlate)
+        self.assertEqual(state_gui_model.sample_shape, SampleShape.FLAT_PLATE)
 
     # ==================================================================================================================
     # ==================================================================================================================

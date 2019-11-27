@@ -221,7 +221,7 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         director.set_scale_builder_width(1.)
         director.set_scale_builder_height(1.5)
         director.set_scale_builder_thickness(12.)
-        director.set_scale_builder_shape(SampleShape.FlatPlate)
+        director.set_scale_builder_shape(SampleShape.FLAT_PLATE)
 
         # Act
         state = director.construct()
@@ -232,7 +232,7 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         self.assertEqual(state.scale.width,  1.)
         self.assertEqual(state.scale.height,  1.5)
         self.assertEqual(state.scale.thickness,  12.)
-        self.assertEqual(state.scale.shape, SampleShape.FlatPlate)
+        self.assertEqual(state.scale.shape, SampleShape.FLAT_PLATE)
 
         # clean up
         if os.path.exists(user_file_path):

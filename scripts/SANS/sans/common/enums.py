@@ -231,16 +231,14 @@ class FitType(Enum):
     NO_FIT = "NotFit"
 
 
-# --------------------------
-#  SampleShape
-# --------------------------
-@string_convertible
-@serializable_enum("Cylinder", "FlatPlate", "Disc")
-class SampleShape(object):
+class SampleShape(Enum):
     """
     Defines the sample shape types
     """
-    pass
+    CYLINDER = "Cylinder"
+    DISC = "Disc"
+    FLAT_PLATE = "FlatPlate"
+    NOT_SET = "NOT_SET"
 
 
 def convert_int_to_shape(shape_int):

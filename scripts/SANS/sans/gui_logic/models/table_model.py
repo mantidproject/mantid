@@ -16,6 +16,7 @@ import functools
 import os
 import re
 
+from mantid.py3compat import Enum
 from sans.common.constants import ALL_PERIODS
 from sans.common.enums import RowState, SampleShape
 from sans.common.file_information import SANSFileInformationFactory
@@ -475,21 +476,18 @@ class SampleShapeColumnModel(object):
         self._get_sample_shape(original_value)
 
     def _get_sample_shape(self, original_value):
-        try:
-            original_value = SampleShape.to_string(original_value)
-        except RuntimeError as e:
-            if not isinstance(original_value, str):
-                raise ValueError(str(e))
+        if isinstance(original_value, Enum):
+            original_value = original_value.value
 
         value = original_value.strip().lower()
         if value == "":
-            self.sample_shape = ""
+            self.sample_shape = SampleShape.NOT_SET
             self.sample_shape_string = ""
         else:
             for shape in SampleShapeColumnModel.SAMPLE_SHAPES:
                 if shape.startswith(value):
                     shape_enum_string = SampleShapeColumnModel.SAMPLE_SHAPES_DICT[shape]
-                    self.sample_shape = SampleShape.from_string(shape_enum_string)
+                    self.sample_shape = SampleShape(shape_enum_string)
                     self.sample_shape_string = shape_enum_string
                     break
 

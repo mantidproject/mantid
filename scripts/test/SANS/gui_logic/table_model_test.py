@@ -64,7 +64,7 @@ class TableModelTest(unittest.TestCase):
         sample_shape_enum = table_index_model.sample_shape
         sample_shape_text = table_index_model.sample_shape_string
 
-        self.assertEqual(sample_shape_enum, SampleShape.FlatPlate)
+        self.assertEqual(sample_shape_enum, SampleShape.FLAT_PLATE)
         self.assertEqual(sample_shape_text, "FlatPlate")
 
     def test_that_sample_shape_can_be_set_as_enum(self):
@@ -72,11 +72,11 @@ class TableModelTest(unittest.TestCase):
         # So SampleShapeColumnModel must be able to parse this.
         table_index_model = TableIndexModel('0', "", "", "", "", "", "",
                                             "", "", "", "", "", "", "", "",
-                                            sample_shape=SampleShape.FlatPlate)
+                                            sample_shape=SampleShape.FLAT_PLATE)
         sample_shape_enum = table_index_model.sample_shape
         sample_shape_text = table_index_model.sample_shape_string
 
-        self.assertEqual(sample_shape_enum, SampleShape.FlatPlate)
+        self.assertEqual(sample_shape_enum, SampleShape.FLAT_PLATE)
         self.assertEqual(sample_shape_text, "FlatPlate")
 
     def test_that_incorrect_sample_shape_reverts_to_previous_sampleshape(self):
@@ -90,7 +90,7 @@ class TableModelTest(unittest.TestCase):
         else:
             self.assertEqual("Disc", table_index_model.sample_shape_string)
 
-    def test_that_empty_string_is_acceptable_sample_shape(self):
+    def test_that_empty_string_turns_to_not_set(self):
         table_index_model = TableIndexModel('0', "", "", "", "", "", "",
                                             "", "", "", "", "", "", "", "",
                                             sample_shape="Disc")
@@ -99,8 +99,8 @@ class TableModelTest(unittest.TestCase):
         sample_shape_enum = table_index_model.sample_shape
         sample_shape_text = table_index_model.sample_shape_string
 
-        self.assertEqual(sample_shape_enum, "")
-        self.assertEqual(sample_shape_text, "")
+        self.assertEqual(SampleShape.NOT_SET, sample_shape_enum)
+        self.assertEqual('', sample_shape_text)
 
     def test_that_table_model_completes_partial_sample_shape(self):
         table_index_model = TableIndexModel('0', "", "", "", "", "", "",
@@ -110,7 +110,7 @@ class TableModelTest(unittest.TestCase):
         sample_shape_enum = table_index_model.sample_shape
         sample_shape_text = table_index_model.sample_shape_string
 
-        self.assertEqual(sample_shape_enum, SampleShape.Cylinder)
+        self.assertEqual(sample_shape_enum, SampleShape.CYLINDER)
         self.assertEqual(sample_shape_text, "Cylinder")
 
     def test_that_querying_nonexistent_row_index_raises_IndexError_exception(self):

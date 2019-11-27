@@ -35,7 +35,7 @@ class SANSFileInformationTest(unittest.TestCase):
         self.assertEqual(file_information.get_width(),  8.0)
         self.assertEqual(file_information.get_height(),  8.0)
         self.assertEqual(file_information.get_thickness(),  1.0)
-        self.assertEqual(file_information.get_shape(), SampleShape.Disc)
+        self.assertEqual(file_information.get_shape(), SampleShape.DISC)
 
     def test_that_can_extract_information_from_file_for_LOQ_single_period_and_raw_format(self):
         # Arrange
@@ -56,7 +56,7 @@ class SANSFileInformationTest(unittest.TestCase):
         self.assertEqual(file_information.get_width(),  8.0)
         self.assertEqual(file_information.get_height(),  8.0)
         self.assertEqual(file_information.get_thickness(),  1.0)
-        self.assertEqual(file_information.get_shape(), SampleShape.Disc)
+        self.assertEqual(file_information.get_shape(), SampleShape.DISC)
 
     def test_that_can_extract_information_from_file_for_SANS2D_multi_period_event_and_nexus_format(self):
         # Arrange
@@ -78,7 +78,7 @@ class SANSFileInformationTest(unittest.TestCase):
         self.assertEqual(file_information.get_width(),  8.0)
         self.assertEqual(file_information.get_height(),  8.0)
         self.assertEqual(file_information.get_thickness(),  2.0)
-        self.assertEqual(file_information.get_shape(), SampleShape.FlatPlate)
+        self.assertEqual(file_information.get_shape(), SampleShape.FLAT_PLATE)
 
     def test_that_can_extract_information_for_added_histogram_data_and_nexus_format(self):
         # Arrange
@@ -100,7 +100,7 @@ class SANSFileInformationTest(unittest.TestCase):
         self.assertEqual(file_information.get_width(),  8.0)
         self.assertEqual(file_information.get_height(),  8.0)
         self.assertEqual(file_information.get_thickness(),  1.0)
-        self.assertEqual(file_information.get_shape(), SampleShape.Disc)
+        self.assertEqual(file_information.get_shape(), SampleShape.DISC)
 
     def test_that_can_extract_information_for_LARMOR_added_event_data_and_multi_period_and_nexus_format(self):
         # Arrange
@@ -122,7 +122,7 @@ class SANSFileInformationTest(unittest.TestCase):
         self.assertEqual(file_information.get_width(),  6.0)
         self.assertEqual(file_information.get_height(),  8.0)
         self.assertEqual(file_information.get_thickness(),  1.0)
-        self.assertEqual(file_information.get_shape(), SampleShape.FlatPlate)
+        self.assertEqual(file_information.get_shape(), SampleShape.FLAT_PLATE)
 
     def test_that_can_find_data_with_numbers_but_no_instrument(self):
         # Arrange
