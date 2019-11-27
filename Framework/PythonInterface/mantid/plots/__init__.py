@@ -188,6 +188,8 @@ class MantidAxes(Axes):
         self.tracked_workspaces = dict()
         self.creation_args = []
         self.interactive_markers = []
+        # flag to indicate if a function has been set to replace data
+        self.data_replaced = False
 
     def add_artist_correctly(self, artist):
         """
@@ -321,9 +323,10 @@ class MantidAxes(Axes):
         name = workspace.name()
         if name:
             if data_replace_cb is None:
-
-                def data_replace_cb(_, __):
+                def data_replace_cb(*args):
                     logger.warning("Updating data on this plot type is not yet supported")
+            else:
+                self.data_replaced = True
 
             artist_info = self.tracked_workspaces.setdefault(name, [])
 
@@ -821,13 +824,18 @@ class MantidAxes(Axes):
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
 
-            def _update_data(artists, workspace):
+            def _update_data(artists, workspace, new_kwargs=None):
+                if new_kwargs:
+                    return self._redraw_colorplot(plotfunctions.imshow, artists, workspace,
+                                                  **new_kwargs)
                 return self._redraw_colorplot(plotfunctions.imshow, artists, workspace, **kwargs)
 
             workspace = args[0]
+            normalize_by_bin_width, _ = get_normalize_by_bin_width(workspace, self, **kwargs)
+            is_normalized = normalize_by_bin_width or workspace.isDistribution()
             return self.track_workspace_artist(workspace,
-                                               plotfunctions.imshow(self, *args,
-                                                                    **kwargs), _update_data)
+                                               plotfunctions.imshow(self, *args, **kwargs),
+                                               _update_data, is_normalized=is_normalized)
         else:
             return Axes.imshow(self, *args, **kwargs)
 
@@ -863,7 +871,7 @@ class MantidAxes(Axes):
 
     def _redraw_colorplot(self, colorfunc, artists_orig, workspace, **kwargs):
         """
-        Redraw a pcolor* or imshow type plot bsaed on a new workspace
+        Redraw a pcolor* or imshow type plot based on a new workspace
         :param colorfunc: The Axes function to use to draw the new artist
         :param artists_orig: A reference to an iterable of existing artists
         :param workspace: A reference to the workspace object
@@ -873,7 +881,17 @@ class MantidAxes(Axes):
             artist_orig.remove()
             if hasattr(artist_orig, 'colorbar_cid'):
                 artist_orig.callbacksSM.disconnect(artist_orig.colorbar_cid)
-        artists_new = colorfunc(self, workspace, **kwargs)
+        interpolation = None
+        artists_new = colorfunc(self, workspace, cmap=artist_orig.cmap,
+                                norm=artist_orig.norm,  **kwargs)
+
+        if hasattr(artist_orig, 'interpolation'):
+            artists_new.set_interpolation(artist_orig.get_interpolation())
+
+        artists_new.autoscale()
+        artists_new.set_norm(
+            type(artist_orig.norm)(vmin = artists_new.norm.vmin, vmax = artists_new.norm.vmax))
+
         if not isinstance(artists_new, Iterable):
             artists_new = [artists_new]
         plotfunctions.update_colorplot_datalimits(self, artists_new)

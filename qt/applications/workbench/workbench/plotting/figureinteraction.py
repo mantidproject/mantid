@@ -276,21 +276,24 @@ class FigureInteraction(object):
             return
 
         fig_type = figure_type(self.canvas.figure)
-        if fig_type == FigureType.Empty or fig_type == FigureType.Image:
-            # Fitting or changing scale types does not make sense in
-            # these cases
+        if fig_type == FigureType.Empty:
+            # Fitting or changing scale types does not make sense in this case
             return
 
         menu = QMenu()
 
-        if self.fit_browser.tool is not None:
-            self.fit_browser.add_to_menu(menu)
-            menu.addSeparator()
-        self._add_axes_scale_menu(menu, event.inaxes)
-        if isinstance(event.inaxes, MantidAxes):
-            self._add_normalization_option_menu(menu, event.inaxes)
-        self.errors_manager.add_error_bars_menu(menu, event.inaxes)
-        self._add_marker_option_menu(menu, event)
+        if fig_type == FigureType.Image:
+            if isinstance(event.inaxes, MantidAxes):
+                self._add_normalization_option_menu(menu, event.inaxes)
+        else:
+            if self.fit_browser.tool is not None:
+                self.fit_browser.add_to_menu(menu)
+                menu.addSeparator()
+            self._add_axes_scale_menu(menu, event.inaxes)
+            if isinstance(event.inaxes, MantidAxes):
+                self._add_normalization_option_menu(menu, event.inaxes)
+            self.errors_manager.add_error_bars_menu(menu, event.inaxes)
+            self._add_marker_option_menu(menu, event)
 
         menu.exec_(QCursor.pos())
 
@@ -554,7 +557,7 @@ class FigureInteraction(object):
                 arg_set_copy = copy(arg_set)
                 [
                     arg_set_copy.pop(key)
-                    for key in ['function', 'workspaces', 'autoscale_on_update']
+                    for key in ['function', 'workspaces', 'autoscale_on_update', 'cmap']
                     if key in arg_set_copy.keys()
                 ]
                 if 'specNum' not in arg_set:
@@ -564,6 +567,9 @@ class FigureInteraction(object):
                     else:
                         raise RuntimeError("No spectrum number associated with plot of "
                                            "workspace '{}'".format(workspace.name()))
+                # 2D plots have no spec number so remove it
+                if figure_type(self.canvas.figure) == FigureType.Image:
+                    arg_set_copy.pop('specNum')
                 for ws_artist in ax.tracked_workspaces[workspace.name()]:
                     if ws_artist.spec_num == arg_set.get('specNum'):
                         ws_artist.is_normalized = not is_normalized
@@ -574,15 +580,16 @@ class FigureInteraction(object):
 
     def _can_toggle_normalization(self, ax):
         """
-        Return True if no plotted workspaces are distributions and all curves
-        on the figure are either distributions or non-distributions. Return
+        Return True if no plotted workspaces are distributions, all curves
+        on the figure are either distributions or non-distributions
+        and the data_replace_cb method was set when plotting . Return
         False otherwise.
         :param ax: A MantidAxes object
         :return: bool
         """
         plotted_normalized = []
         for workspace_name, artists in ax.tracked_workspaces.items():
-            if not ads.retrieve(workspace_name).isDistribution():
+            if not ads.retrieve(workspace_name).isDistribution() and ax.data_replaced:
                 plotted_normalized += [a.is_normalized for a in artists]
             else:
                 return False

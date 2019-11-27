@@ -406,7 +406,7 @@ def common_x(arr):
     return np.all(arr == arr[0, :], axis=(1, 0))
 
 
-def get_matrix_2d_ragged(workspace, distribution, histogram2D=False, transpose=False):
+def get_matrix_2d_ragged(workspace, normalize_by_bin_width, histogram2D=False, transpose=False):
     num_hist = workspace.getNumberHistograms()
     delta = np.finfo(np.float64).max
     min_value = np.finfo(np.float64).max
@@ -429,7 +429,7 @@ def get_matrix_2d_ragged(workspace, distribution, histogram2D=False, transpose=F
     z = np.empty([num_hist, num_edges], dtype=np.float64)
     for i in range(num_hist):
         centers, ztmp, _, _ = mantid.plots.helperfunctions.get_spectrum(
-            workspace, i, normalize_by_bin_width=distribution, withDy=False, withDx=False)
+            workspace, i, normalize_by_bin_width=normalize_by_bin_width, withDy=False, withDx=False)
         f = interp1d(centers, ztmp, kind='nearest', bounds_error=False, fill_value=np.nan)
         z[i] = f(x_centers)
     if histogram2D:

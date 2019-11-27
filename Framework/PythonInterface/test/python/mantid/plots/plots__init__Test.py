@@ -281,6 +281,41 @@ class Plots__init__Test(unittest.TestCase):
         self.assertEqual(auto_dist, self.ax.tracked_workspaces[non_dist_ws.name()][0].is_normalized)
         del self.ax.tracked_workspaces[non_dist_ws.name()]
 
+    def test_artists_normalization_state_labeled_correctly_for_2d_plots_of_dist_workspace(self):
+        dist_2d_ws = CreateWorkspace(DataX=[10, 20, 10, 20],
+                                     DataY=[2, 3, 2, 3],
+                                     DataE=[1, 2, 1, 2],
+                                     NSpec=2,
+                                     Distribution=True,
+                                     OutputWorkspace='non_dist_workpace')
+        self.ax.imshow(dist_2d_ws, distribution=False)
+        self.ax.imshow(dist_2d_ws, distribution=True)
+        self.ax.imshow(dist_2d_ws)
+        ws_artists = self.ax.tracked_workspaces[dist_2d_ws.name()]
+        self.assertTrue(ws_artists[0].is_normalized)
+        self.assertTrue(ws_artists[1].is_normalized)
+        self.assertTrue(ws_artists[2].is_normalized)
+
+    def test_artists_normalization_state_labeled_correctly_for_2d_plots_of_non_dist_workspace(self):
+        non_dist_2d_ws = CreateWorkspace(DataX=[10, 20, 10, 20],
+                                         DataY=[2, 3, 2, 3],
+                                         DataE=[1, 2, 1, 2],
+                                         NSpec=2,
+                                         Distribution=False,
+                                         OutputWorkspace='non_dist_workpace')
+        self.ax.imshow(non_dist_2d_ws, distribution=False)
+        self.assertTrue(self.ax.tracked_workspaces[non_dist_2d_ws.name()][0].is_normalized)
+        del self.ax.tracked_workspaces[non_dist_2d_ws.name()]
+
+        self.ax.imshow(non_dist_2d_ws, distribution=True)
+        self.assertFalse(self.ax.tracked_workspaces[non_dist_2d_ws.name()][0].is_normalized)
+        del self.ax.tracked_workspaces[non_dist_2d_ws.name()]
+
+        self.ax.imshow(non_dist_2d_ws)
+        auto_dist = (config['graph1d.autodistribution'] == 'On')
+        self.assertEqual(auto_dist, self.ax.tracked_workspaces[non_dist_2d_ws.name()][0].is_normalized)
+        del self.ax.tracked_workspaces[non_dist_2d_ws.name()]
+
     def test_check_axes_distribution_consistency_mixed_normalization(self):
         mock_logger = self._run_check_axes_distribution_consistency([True, False, True])
         mock_logger.assert_called_once_with("You are overlaying distribution and "

@@ -46,11 +46,12 @@ def _setLabels1D(axes, workspace, indices=None, normalize_by_bin_width=True,
     axes.set_ylabel(labels[0])
 
 
-def _setLabels2D(axes, workspace, indices=None, transpose=False, xscale=None):
+def _setLabels2D(axes, workspace, indices=None, transpose=False,
+                 xscale=None, normalize_by_bin_width=True):
     '''
     helper function to automatically set axes labels for 2D plots
     '''
-    labels = get_axes_labels(workspace, indices)
+    labels = get_axes_labels(workspace, indices, normalize_by_bin_width)
     if transpose:
         axes.set_xlabel(labels[2])
         axes.set_ylabel(labels[1])
@@ -552,13 +553,13 @@ def imshow(axes, workspace, *args, **kwargs):
         x, y, z = get_md_data2d_bin_bounds(workspace, normalization, indices, transpose)
         _setLabels2D(axes, workspace, indices, transpose)
     else:
-        (uneven_bins, kwargs) = get_data_uneven_flag(workspace, **kwargs)
+        (normalize_by_bin_width, kwargs) = get_normalize_by_bin_width(workspace, axes, **kwargs)
         (distribution, kwargs) = get_distribution(workspace, **kwargs)
         if check_resample_to_regular_grid(workspace):
-            (x, y, z) = get_matrix_2d_ragged(workspace, distribution, histogram2D=True, transpose=transpose)
+            (x, y, z) = get_matrix_2d_ragged(workspace, normalize_by_bin_width, histogram2D=True, transpose=transpose)
         else:
-            (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=True, transpose=transpose)
-        _setLabels2D(axes, workspace, transpose=transpose)
+            (x, y, z) = get_matrix_2d_data(workspace, distribution=distribution, histogram2D=True, transpose=transpose)
+        _setLabels2D(axes, workspace, transpose=transpose, normalize_by_bin_width=normalize_by_bin_width)
     if 'extent' not in kwargs:
         if x.ndim == 2 and y.ndim == 2:
             kwargs['extent'] = [x[0, 0], x[0, -1], y[0, 0], y[-1, 0]]
