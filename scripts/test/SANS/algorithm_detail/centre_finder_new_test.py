@@ -25,7 +25,7 @@ class CentreFinderNewTest(unittest.TestCase):
         position_1_start = 300
         position_2_start = -300
         tolerance = 0.001
-        find_direction = FindDirectionEnum.All
+        find_direction = FindDirectionEnum.ALL
         iterations = 10
         verbose = False
 
@@ -35,7 +35,7 @@ class CentreFinderNewTest(unittest.TestCase):
         beam_centre_finder = "SANSBeamCentreFinder"
         beam_centre_finder_options = {"Component":'LAB', "Iterations": iterations, "RMin": r_min / 1000, "RMax": r_max / 1000,
                                       "Position1Start": position_1_start, "Position2Start": position_2_start,
-                                      "Tolerance": tolerance, "Direction": FindDirectionEnum.to_string(find_direction),
+                                      "Tolerance": tolerance, "Direction": find_direction.value,
                                       "Verbose": verbose}
 
         centre_finder_new(self.state, r_min=r_min, r_max=r_max, iterations=iterations, position_1_start=position_1_start

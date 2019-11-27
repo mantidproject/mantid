@@ -1017,7 +1017,7 @@ def PhiRanges(phis, plot=True):
 
 
 def FindBeamCentre(rlow, rupp, MaxIter=10, xstart=None, ystart=None, tolerance=1.251e-4,
-                   find_direction=FindDirectionEnum.All, reduction_method=True):
+                   find_direction=FindDirectionEnum.ALL, reduction_method=True):
     state = director.process_commands()
     """
     Finds the beam centre position.

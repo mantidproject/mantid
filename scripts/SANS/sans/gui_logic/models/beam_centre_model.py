@@ -70,11 +70,11 @@ class BeamCentreModel(object):
         centre_finder = self.SANSCentreFinder()
         find_direction = None
         if self.up_down and self.left_right:
-            find_direction = FindDirectionEnum.All
+            find_direction = FindDirectionEnum.ALL
         elif self.up_down:
-            find_direction = FindDirectionEnum.Up_Down
+            find_direction = FindDirectionEnum.UP_DOWN
         elif self.left_right:
-            find_direction = FindDirectionEnum.Left_Right
+            find_direction = FindDirectionEnum.LEFT_RIGHT
         else:
             logger = Logger("CentreFinder")
             logger.notice("Have chosen no find direction exiting early")

@@ -16,7 +16,7 @@ from mantid.simpleapi import CreateEmptyTableWorkspace
 # Functions for the execution of a single batch iteration
 # ----------------------------------------------------------------------------------------------------------------------
 def centre_finder_new(state, r_min = 0.06, r_max = 0.26, iterations = 10, position_1_start = 0.0, position_2_start = 0.0
-                      , tolerance = 0.0001251, find_direction = FindDirectionEnum.All, verbose=False, component=DetectorType.LAB):
+                      , tolerance = 0.0001251, find_direction = FindDirectionEnum.ALL, verbose=False, component=DetectorType.LAB):
     """
     Finds the beam centre from a good initial guess.
 
@@ -61,7 +61,7 @@ def centre_finder_new(state, r_min = 0.06, r_max = 0.26, iterations = 10, positi
     beam_centre_finder = "SANSBeamCentreFinder"
     beam_centre_finder_options = {"Iterations": iterations, "RMin": r_min/1000, "RMax": r_max/1000,
                                   "Position1Start": position_1_start, "Position2Start": position_2_start,
-                                  "Tolerance": tolerance, "Direction" : FindDirectionEnum.to_string(find_direction),
+                                  "Tolerance": tolerance, "Direction" : find_direction.value,
                                   "Verbose": verbose, "Component": component.value}
     beam_centre_alg = create_managed_non_child_algorithm(beam_centre_finder, **beam_centre_finder_options)
     beam_centre_alg.setChild(False)

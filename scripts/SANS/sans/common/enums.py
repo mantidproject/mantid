@@ -288,40 +288,32 @@ class BatchReductionEntry(Enum):
     USER_FILE = "UserFile"
 
 
-# ------------------------------
-# Quadrants for beam centre finder
-# -------------------------------
-@string_convertible
-@serializable_enum("Left", "Right", "Top", "Bottom")
-class MaskingQuadrant(object):
+class MaskingQuadrant(Enum):
     """
     Defines the entries of a batch reduction file.
     """
-    pass
+    BOTTOM = "Bottom"
+    LEFT = "Left"
+    RIGHT = "Right"
+    TOP = "Top"
 
 
-# ------------------------------
-# Directions for Beam centre finder
-# -------------------------------
-@string_convertible
-@serializable_enum("All", "Up_Down", "Left_Right")
-class FindDirectionEnum(object):
+class FindDirectionEnum(Enum):
     """
     Defines the entries of a batch reduction file.
     """
-    pass
+    ALL = "All"
+    UP_DOWN = "Up_Down"
+    LEFT_RIGHT = "Left_Right"
 
 
-# ------------------------------
-# Integrals for diagnostic tab
-# -------------------------------
-@string_convertible
-@serializable_enum("Horizontal", "Vertical", "Time")
-class IntegralEnum(object):
+class IntegralEnum(Enum):
     """
     Defines the entries of a batch reduction file.
     """
-    pass
+    Horizontal = "Horizontal"
+    Time = "Time"
+    Vertical = "Vertical"
 
 
 @string_convertible

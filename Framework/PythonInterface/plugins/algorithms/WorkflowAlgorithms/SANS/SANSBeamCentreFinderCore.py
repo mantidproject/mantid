@@ -241,7 +241,7 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         # ------------------------------------------------------------
         # 10. Split workspace into 4 quadrant workspaces
         # ------------------------------------------------------------
-        quadrants = [MaskingQuadrant.Left, MaskingQuadrant.Right, MaskingQuadrant.Top, MaskingQuadrant.Bottom]
+        quadrants = [MaskingQuadrant.LEFT, MaskingQuadrant.RIGHT, MaskingQuadrant.TOP, MaskingQuadrant.BOTTOM]
         quadrant_scatter_reduced = {}
         centre = [0, 0, 0]
         r_min = self.getProperty("RMin").value
@@ -263,10 +263,10 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         # # ------------------------------------------------------------
         # # Populate the output
         # # ------------------------------------------------------------
-        self.setProperty("OutputWorkspaceLeft", quadrant_scatter_reduced[MaskingQuadrant.Left])
-        self.setProperty("OutputWorkspaceRight", quadrant_scatter_reduced[MaskingQuadrant.Right])
-        self.setProperty("OutputWorkspaceTop", quadrant_scatter_reduced[MaskingQuadrant.Top])
-        self.setProperty("OutputWorkspaceBottom", quadrant_scatter_reduced[MaskingQuadrant.Bottom])
+        self.setProperty("OutputWorkspaceLeft", quadrant_scatter_reduced[MaskingQuadrant.LEFT])
+        self.setProperty("OutputWorkspaceRight", quadrant_scatter_reduced[MaskingQuadrant.RIGHT])
+        self.setProperty("OutputWorkspaceTop", quadrant_scatter_reduced[MaskingQuadrant.TOP])
+        self.setProperty("OutputWorkspaceBottom", quadrant_scatter_reduced[MaskingQuadrant.BOTTOM])
 
     def _mask_quadrants(self, workspace, shape):
         mask_name = "MaskDetectorsInShape"

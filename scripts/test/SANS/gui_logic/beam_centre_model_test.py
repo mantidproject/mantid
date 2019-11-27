@@ -75,7 +75,7 @@ class BeamCentreModelTest(unittest.TestCase):
                                                                    x_start=self.beam_centre_model.lab_pos_1,
                                                                    y_start=self.beam_centre_model.lab_pos_2,
                                                                    tolerance=self.beam_centre_model.tolerance,
-                                                                   find_direction=FindDirectionEnum.All,
+                                                                   find_direction=FindDirectionEnum.ALL,
                                                                    reduction_method=True,
                                                                    verbose=False, component=DetectorType.LAB)
 
@@ -93,7 +93,7 @@ class BeamCentreModelTest(unittest.TestCase):
                                                               x_start=self.result['pos1'],
                                                               y_start=self.result['pos2'],
                                                               tolerance=self.beam_centre_model.tolerance,
-                                                              find_direction=FindDirectionEnum.All,
+                                                              find_direction=FindDirectionEnum.ALL,
                                                               reduction_method=True,
                                                               verbose=False, component=DetectorType.LAB)
 
@@ -103,7 +103,7 @@ class BeamCentreModelTest(unittest.TestCase):
                                                            x_start=self.beam_centre_model.lab_pos_1,
                                                            y_start=self.beam_centre_model.lab_pos_2,
                                                            tolerance=self.beam_centre_model.tolerance,
-                                                           find_direction=FindDirectionEnum.All,
+                                                           find_direction=FindDirectionEnum.ALL,
                                                            reduction_method=False, component=DetectorType.LAB)
 
 
