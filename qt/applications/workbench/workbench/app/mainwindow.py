@@ -386,8 +386,8 @@ class MainWindow(QMainWindow):
                 interface.setParent(self, interface.windowFlags())
             interface.show()
         else:
-            if (window.windowState() ==  Qt.WindowState.WindowMinimized):
-                window.showNormal()
+            if window.windowState() == Qt.WindowMinimized:
+                window.setWindowState(Qt.WindowActive)
             else:
                 window.raise_()
 
