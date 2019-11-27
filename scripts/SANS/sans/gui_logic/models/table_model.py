@@ -507,7 +507,7 @@ class SampleShapeColumnModel(object):
 
         value = original_value.strip().lower()
         if value == "":
-            self.sample_shape = SampleShape.NOT_SET
+            self.sample_shape = None
             self.sample_shape_string = ""
         else:
             for shape in SampleShapeColumnModel.SAMPLE_SHAPES:

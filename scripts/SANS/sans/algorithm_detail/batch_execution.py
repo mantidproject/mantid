@@ -450,6 +450,7 @@ def provide_loaded_data(state, use_optimizations, workspace_to_name, workspace_t
                     "UseCached": use_optimizations}
 
     # Set the output workspaces
+
     set_output_workspaces_on_load_algorithm(load_options, state)
 
     load_alg = create_managed_non_child_algorithm(load_name, **load_options)

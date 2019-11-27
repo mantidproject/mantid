@@ -18,7 +18,8 @@ from sans.state.automatic_setters import (automatic_setters)
 # ----------------------------------------------------------------------------------------------------------------------
 @rename_descriptor_names
 class StateScale(StateBase):
-    shape = SampleShape.DISC
+    shape = None
+
     thickness = PositiveFloatParameter()
     width = PositiveFloatParameter()
     height = PositiveFloatParameter()
@@ -32,10 +33,6 @@ class StateScale(StateBase):
 
     def __init__(self):
         super(StateScale, self).__init__()
-
-        # The default geometry
-        self.shape_from_file = SampleShape.DISC
-
         # The default values are 1mm
         self.thickness_from_file = 1.
         self.width_from_file = 1.

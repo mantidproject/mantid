@@ -86,7 +86,7 @@ class StateMove(StateBase):
     detectors = DictParameter()
     monitor_names = DictParameter()
 
-    sample_offset_direction = None
+    sample_offset_direction = CanonicalCoordinates.Z
 
     def __init__(self):
         super(StateMove, self).__init__()

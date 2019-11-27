@@ -413,35 +413,27 @@ def create_sub_state(value):
 
 
 def get_descriptor_values(instance):
-    # Get all descriptor names which are TypedParameter of instance's type
-    descriptor_names = []
-    descriptor_types = {}
+    # Get all user defined attributes
+    member_variables = inspect.getmembers(type(instance), lambda x: not(inspect.isroutine(x)))
+    # Remove anything starting with a '_' or '__' - i.e. private attributes such as weak ref
+    member_variables = [item for item in member_variables if not item[0].startswith('_')]
 
-    member_variables = inspect.getmembers(type(instance), inspect.isdatadescriptor)
-    # Enums do not have get and set methods so they aren't data descriptors
-    enum_vars = inspect.getmembers(type(instance), lambda x: isinstance(x, Enum))
+    # Property manager is a fake property that wraps the serializing method (i.e. this)
+    # so trying to pack it causes inf recursion
+    member_variables = [item for item in member_variables if "property_manager" not in item[0]]
 
-    if enum_vars:
-        member_variables = member_variables + enum_vars
-
-    for descriptor_name, descriptor_object in member_variables:
-        if descriptor_name is "property_manager":
-            # Property manager is a fake property that wraps the serializing method (i.e. this)
-            # so trying to pack it causes inf recursion
-            continue
-
-        descriptor_names.append(descriptor_name)
-        descriptor_types.update({descriptor_name: descriptor_object})
+    # We only need names
+    member_variables = [item[0] for item in member_variables]
 
     # Get the descriptor values from the instance
     descriptor_values = {}
-    for key in descriptor_names:
+    for key in member_variables:
         if hasattr(instance, key):
             value = getattr(instance, key)
             if value is not None:
                 descriptor_values.update({key: value})
 
-    return descriptor_values, descriptor_types
+    return descriptor_values
 
 
 def get_class_descriptor_types(instance):
@@ -460,36 +452,52 @@ def convert_state_to_dict(instance):
     :param instance: the instance which is to be converted
     :return: a serialized state object in the form of a dict
     """
-    descriptor_values, descriptor_types = get_descriptor_values(instance)
+    attribute = get_descriptor_values(instance)
     # Add the descriptors to a dict
     state_dict = dict()
 
-    for key, value in descriptor_values.items():
-        # If the value is a SANSBaseState then create a dict from it
-        # If the value is a dict, then we need to check what the sub types are
+    # Don't do anything if primitive type that Mantid can serialize
+    primative_types = (int, str, bool, float, TypedParameter)
 
-        if isinstance(value, StateBase):
-            sub_state_dict = value.property_manager
-            value = sub_state_dict
-        elif isinstance(value, dict):
-            # If we have a dict, then we need to watch out since a value in the dict might be a State
-            sub_dictionary = {}
-            for key_sub, val_sub in list(value.items()):
-                if isinstance(val_sub, StateBase):
-                    sub_dictionary_value = val_sub.property_manager
-                else:
-                    sub_dictionary_value = val_sub
-                sub_dictionary.update({key_sub: sub_dictionary_value})
-            value = sub_dictionary
-        elif isinstance(descriptor_types[key], Enum):
-            value = serialize_enum(value)
+    for attr_name, attr_val in attribute.items():
+        if isinstance(attr_val, StateBase):
+            # If the value is a SANSBaseState then create a dict from it
+            sub_state_dict = attr_val.property_manager
+            attr_val = sub_state_dict
+        elif isinstance(attr_val, dict):
+            attr_val = serialize_dict(attr_val)
+        elif isinstance(attr_val, Enum) or isinstance(attr_val, list) and all(isinstance(x, Enum) for x in attr_val):
+            attr_val = serialize_enum(attr_val)
+        elif isinstance(attr_val, primative_types) \
+                or isinstance(attr_val, list) and all(isinstance(x, primative_types) for x in attr_val):
+            pass  # A primative type or list of primitives don't need anything special
+        else:
+            raise ValueError("Cannot serialize {0}".format(attr_val))
 
-        state_dict.update({key: value})
+        state_dict.update({attr_name: attr_val})
     # Add information about the current state object, such as in which module it lives and what its name is
     module_name, class_name = get_module_and_class_name(instance)
     state_dict.update({STATE_MODULE: module_name})
     state_dict.update({STATE_NAME: class_name})
     return state_dict
+
+
+def serialize_dict(value):
+    # If we have a dict, then we need to watch out since a value in the dict might be a State
+    sub_dictionary = {}
+    for key_sub, val_sub in list(value.items()):
+        # We have to handle the key being an enum too
+        if isinstance(key_sub, Enum):
+            key_sub = serialize_enum(key_sub)
+
+        if isinstance(val_sub, StateBase):
+            val_sub = val_sub.property_manager
+        elif isinstance(val_sub, Enum):
+            val_sub = serialize_enum(val_sub)
+
+        sub_dictionary.update({key_sub: val_sub})
+
+    return sub_dictionary
 
 
 def set_state_from_property_manager(instance, property_manager):
@@ -517,19 +525,7 @@ def set_state_from_property_manager(instance, property_manager):
             sub_state = create_sub_state(value)
             setattr(instance, key, sub_state)
         elif type(value) is PropertyManager:
-            # We must be dealing with an actual dict descriptor
-            sub_dict_keys = list(value.keys())
-            dict_element = {}
-            # We need to watch out if a value of the dictionary is a sub state
-            for sub_dict_key in sub_dict_keys:
-                sub_dict_value = value.getProperty(sub_dict_key).value
-                if type(sub_dict_value) == PropertyManager and is_state(sub_dict_value):
-                    sub_state = create_sub_state(sub_dict_value)
-                    sub_dict_value_to_insert = sub_state
-                else:
-                    sub_dict_value_to_insert = sub_dict_value
-                dict_element.update({sub_dict_key: sub_dict_value_to_insert})
-            setattr(instance, key, dict_element)
+            deserialize_dict(instance, key, value)
         elif is_enum_type_parameter(value) or is_enum_list_parameter(value):
             enum_type_parameter = deserialize_enum(value)
             _set_element(instance, key, enum_type_parameter)
@@ -544,6 +540,28 @@ def set_state_from_property_manager(instance, property_manager):
             _set_element(instance, key, int_list_value)
         else:
             _set_element(instance, key, value)
+
+
+def deserialize_dict(instance, key, value):
+    # We must be dealing with an actual dict descriptor
+    sub_dict_keys = list(value.keys())
+    dict_element = {}
+    # We need to watch out if a value of the dictionary is a sub state
+    for sub_dict_key in sub_dict_keys:
+        sub_dict_value = value.getProperty(sub_dict_key).value
+        if type(sub_dict_value) == PropertyManager and is_state(sub_dict_value):
+            sub_state = create_sub_state(sub_dict_value)
+            sub_dict_value_to_insert = sub_state
+        elif is_enum_type_parameter(sub_dict_value):
+            sub_dict_value_to_insert = deserialize_enum(sub_dict_value)
+        else:
+            sub_dict_value_to_insert = sub_dict_value
+
+        if is_enum_type_parameter(sub_dict_key):
+            sub_dict_key = deserialize_enum(sub_dict_key)
+
+        dict_element.update({sub_dict_key: sub_dict_value_to_insert})
+    setattr(instance, key, dict_element)
 
 
 def serialize_enum(value):

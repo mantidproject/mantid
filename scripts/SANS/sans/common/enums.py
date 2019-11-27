@@ -153,7 +153,6 @@ class SampleShape(Enum):
     CYLINDER = "Cylinder"
     DISC = "Disc"
     FLAT_PLATE = "FlatPlate"
-    NOT_SET = "NOT_SET"
 
 
 class FileType(Enum):

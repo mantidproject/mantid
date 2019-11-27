@@ -260,9 +260,8 @@ class TestStateBase(unittest.TestCase):
         # Serializing test
         serialized = original_obj.property_manager
         self.assertTrue("bar" in serialized)
-        self.assertTrue("_foo" in serialized)
+        self.assertFalse("_foo" in serialized)
         self.assertTrue(isinstance(serialized["bar"], str), "The type was not converted to a string")
-        self.assertTrue(isinstance(serialized["_foo"], str), "The type was not converted to a string")
 
         # Deserializing Test
         fake = TestStateBase.FakeAlgorithm()
@@ -281,9 +280,8 @@ class TestStateBase(unittest.TestCase):
         # Serializing test
         serialized = original_obj.property_manager
         self.assertTrue("bar" in serialized)
-        self.assertTrue("_foo" in serialized)
+        self.assertFalse("_foo" in serialized)
         self.assertTrue(isinstance(serialized["bar"], list), "The type was not converted to a list of strings")
-        self.assertTrue(isinstance(serialized["_foo"], str), "The type was not converted to a string")
 
         # Deserializing Test
         fake = TestStateBase.FakeAlgorithm()
@@ -294,7 +292,6 @@ class TestStateBase(unittest.TestCase):
         new_obj = create_deserialized_sans_state_from_property_manager(property_manager)
         self.assertEqual(original_obj.bar, new_obj.bar)
         self.assertEqual(original_obj._foo, new_obj._foo)
-
 
     def test_that_sans_state_can_be_serialized_and_deserialized_when_going_through_an_algorithm(self):
         # Arrange

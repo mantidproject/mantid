@@ -91,7 +91,7 @@ class TableModelTest(unittest.TestCase):
         sample_shape_enum = table_index_model.sample_shape
         sample_shape_text = table_index_model.sample_shape_string
 
-        self.assertEqual(SampleShape.NOT_SET, sample_shape_enum)
+        self.assertIsNone(sample_shape_enum)
         self.assertEqual('', sample_shape_text)
 
     def test_that_table_model_completes_partial_sample_shape(self):
