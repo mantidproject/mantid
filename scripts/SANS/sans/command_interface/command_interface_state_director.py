@@ -415,8 +415,8 @@ class CommandInterfaceStateDirector(object):
     def _process_gravity(self, command):
         use_gravity = command.values[0]
         extra_length = command.values[1]
-        new_state_entries = {GravityId.on_off: use_gravity,
-                             GravityId.extra_length: extra_length}
+        new_state_entries = {GravityId.ON_OFF: use_gravity,
+                             GravityId.EXTRA_LENGTH: extra_length}
         self.add_to_processed_state_settings(new_state_entries)
 
     def _process_centre(self, command):

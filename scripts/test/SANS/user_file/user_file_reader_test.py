@@ -40,7 +40,7 @@ class UserFileReaderTest(unittest.TestCase):
                            BackId.single_monitors: [back_single_monitor_entry(1, 35000, 65000),
                                                     back_single_monitor_entry(2, 85000, 98000)],
                            DetectorId.REDUCTION_MODE: [ReductionMode.LAB],
-                           GravityId.on_off: [True],
+                           GravityId.ON_OFF: [True],
                            FitId.GENERAL: [fit_general(start=1.5, stop=12.5, fit_type=FitType.LOGARITHMIC,
                                                        data_type=None, polynomial_order=0)],
                            MaskId.VERTICAL_SINGLE_STRIP_MASK: [single_entry_with_detector(191, DetectorType.LAB),

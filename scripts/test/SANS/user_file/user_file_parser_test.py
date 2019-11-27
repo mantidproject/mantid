@@ -809,8 +809,8 @@ class GravityParserTest(unittest.TestCase):
         self.assertTrue(GravityParser.get_type(), "GRAVITY")
 
     def test_that_gravity_on_off_is_parsed_correctly(self):
-        valid_settings = {"Gravity on ": {GravityId.on_off: True},
-                          "Gravity   OFF ": {GravityId.on_off: False}}
+        valid_settings = {"Gravity on ": {GravityId.ON_OFF: True},
+                          "Gravity   OFF ": {GravityId.ON_OFF: False}}
 
         invalid_settings = {"Gravity ": RuntimeError,
                             "Gravity ONN": RuntimeError}
@@ -819,9 +819,9 @@ class GravityParserTest(unittest.TestCase):
         do_test(gravity_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_gravity_extra_length_is_parsed_correctly(self):
-        valid_settings = {"Gravity/LExtra =23.5": {GravityId.extra_length: 23.5},
-                          "Gravity  / lExtra =  23.5": {GravityId.extra_length: 23.5},
-                          "Gravity  / lExtra  23.5": {GravityId.extra_length: 23.5}}
+        valid_settings = {"Gravity/LExtra =23.5": {GravityId.EXTRA_LENGTH: 23.5},
+                          "Gravity  / lExtra =  23.5": {GravityId.EXTRA_LENGTH: 23.5},
+                          "Gravity  / lExtra  23.5": {GravityId.EXTRA_LENGTH: 23.5}}
 
         invalid_settings = {"Gravity/LExtra - 23.5": RuntimeError,
                             "Gravity/LExtra =tw": RuntimeError}
@@ -1111,7 +1111,7 @@ class UserFileParserTest(unittest.TestCase):
 
         # GravityParser
         result = user_file_parser.parse_line("Gravity/LExtra =23.5")
-        assert_valid_result(result, {GravityId.extra_length: 23.5}, self.assertTrue)
+        assert_valid_result(result, {GravityId.EXTRA_LENGTH: 23.5}, self.assertTrue)
 
         # MaskFileParser
         result = user_file_parser.parse_line("MaskFile= test.xml,   testKsdk2.xml,tesetlskd.xml")

@@ -1064,8 +1064,8 @@ class StateDirectorISIS(object):
                 self._convert_to_q_builder.set_q_xy_step_type(limits_qxy.step_type)
 
         # Get the Gravity settings
-        set_single_entry(self._convert_to_q_builder, "set_use_gravity", GravityId.on_off, user_file_items)
-        set_single_entry(self._convert_to_q_builder, "set_gravity_extra_length", GravityId.extra_length,
+        set_single_entry(self._convert_to_q_builder, "set_use_gravity", GravityId.ON_OFF, user_file_items)
+        set_single_entry(self._convert_to_q_builder, "set_gravity_extra_length", GravityId.EXTRA_LENGTH,
                          user_file_items)
 
         # Get the QResolution settings set_q_resolution_delta_r

@@ -1895,12 +1895,12 @@ class GravityParser(UserFileComponentParser):
 
     def _extract_on_off(self, line):
         value = re.sub(self._on, "", line).strip() == ""
-        return {GravityId.on_off: value}
+        return {GravityId.ON_OFF: value}
 
     def _extract_extra_length(self, line):
         extra_length_string = re.sub(self._extra_length, "", line)
         extra_length = convert_string_to_float(extra_length_string)
-        return {GravityId.extra_length: extra_length}
+        return {GravityId.EXTRA_LENGTH: extra_length}
 
     @staticmethod
     def get_type():

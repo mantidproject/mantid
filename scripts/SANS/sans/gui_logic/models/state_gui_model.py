@@ -611,19 +611,19 @@ class StateGuiModel(ModelCommon):
     # ------------------------------------------------------------------------------------------------------------------
     @property
     def gravity_on_off(self):
-        return self.get_simple_element(element_id=GravityId.on_off, default_value=True)
+        return self.get_simple_element(element_id=GravityId.ON_OFF, default_value=True)
 
     @gravity_on_off.setter
     def gravity_on_off(self, value):
-        self.set_simple_element(element_id=GravityId.on_off, value=value)
+        self.set_simple_element(element_id=GravityId.ON_OFF, value=value)
 
     @property
     def gravity_extra_length(self):
-        return self.get_simple_element(element_id=GravityId.extra_length, default_value="")
+        return self.get_simple_element(element_id=GravityId.EXTRA_LENGTH, default_value="")
 
     @gravity_extra_length.setter
     def gravity_extra_length(self, value):
-        self.set_simple_element(element_id=GravityId.extra_length, value=value)
+        self.set_simple_element(element_id=GravityId.EXTRA_LENGTH, value=value)
 
     # ------------------------------------------------------------------------------------------------------------------
     # QResolution

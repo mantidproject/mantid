@@ -145,10 +145,9 @@ class FitId(Enum):
     MONITOR_TIMES = "monitor_times"
 
 
-# --- GRAVITY
-@serializable_enum("on_off", "extra_length")
-class GravityId(object):
-    pass
+class GravityId(Enum):
+    EXTRA_LENGTH = "extra_length"
+    ON_OFF = "on_off"
 
 
 # --- MON
