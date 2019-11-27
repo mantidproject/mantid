@@ -336,8 +336,8 @@ class MaskParserTest(unittest.TestCase):
         self.assertTrue(MaskParser.get_type(), "MASK")
 
     def test_that_masked_line_is_parsed_correctly(self):
-        valid_settings = {"MASK/LiNE 12  23.6": {MaskId.line: mask_line(width=12, angle=23.6, x=None, y=None)},
-                          "MASK/LiNE 12  23.6 2 346": {MaskId.line: mask_line(width=12, angle=23.6, x=2, y=346)}
+        valid_settings = {"MASK/LiNE 12  23.6": {MaskId.LINE: mask_line(width=12, angle=23.6, x=None, y=None)},
+                          "MASK/LiNE 12  23.6 2 346": {MaskId.LINE: mask_line(width=12, angle=23.6, x=2, y=346)}
                           }
         invalid_settings = {"MASK/LiN 12 4": RuntimeError,
                             "MASK/LINE 12": RuntimeError,
@@ -350,18 +350,18 @@ class MaskParserTest(unittest.TestCase):
         do_test(mask_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_masked_time_is_parsed_correctly(self):
-        valid_settings = {"MASK/TIME 23 35": {MaskId.time: range_entry_with_detector(start=23, stop=35,
+        valid_settings = {"MASK/TIME 23 35": {MaskId.TIME: range_entry_with_detector(start=23, stop=35,
                                                                                      detector_type=None)},
-                          "MASK/T 23 35": {MaskId.time: range_entry_with_detector(start=23, stop=35,
+                          "MASK/T 23 35": {MaskId.TIME: range_entry_with_detector(start=23, stop=35,
                                                                                   detector_type=None)},
-                          "MASK/REAR/T 13 35": {MaskId.time_detector: range_entry_with_detector(start=13, stop=35,
-                                                detector_type=DetectorType.LAB)},
-                          "MASK/FRONT/TIME 33 35": {MaskId.time_detector: range_entry_with_detector(start=33, stop=35,
-                                                    detector_type=DetectorType.HAB)},
-                          "MASK/TIME/REAR 13 35": {MaskId.time_detector: range_entry_with_detector(start=13, stop=35,
-                                                   detector_type=DetectorType.LAB)},
-                          "MASK/T/FRONT 33 35": {MaskId.time_detector: range_entry_with_detector(start=33, stop=35,
-                                                 detector_type=DetectorType.HAB)}
+                          "MASK/REAR/T 13 35": {MaskId.TIME_DETECTOR: range_entry_with_detector(start=13, stop=35,
+                                                                                                detector_type=DetectorType.LAB)},
+                          "MASK/FRONT/TIME 33 35": {MaskId.TIME_DETECTOR: range_entry_with_detector(start=33, stop=35,
+                                                                                                    detector_type=DetectorType.HAB)},
+                          "MASK/TIME/REAR 13 35": {MaskId.TIME_DETECTOR: range_entry_with_detector(start=13, stop=35,
+                                                                                                   detector_type=DetectorType.LAB)},
+                          "MASK/T/FRONT 33 35": {MaskId.TIME_DETECTOR: range_entry_with_detector(start=33, stop=35,
+                                                                                                 detector_type=DetectorType.HAB)}
                           }
 
         invalid_settings = {"MASK/TIME 12 34 4 ": RuntimeError,
@@ -374,8 +374,8 @@ class MaskParserTest(unittest.TestCase):
         do_test(mask_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_clear_mask_is_parsed_correctly(self):
-        valid_settings = {"MASK/CLEAR": {MaskId.clear_detector_mask: True},
-                          "MASK/CLeaR /TIMe": {MaskId.clear_time_mask: True}}
+        valid_settings = {"MASK/CLEAR": {MaskId.CLEAR_DETECTOR_MASK: True},
+                          "MASK/CLeaR /TIMe": {MaskId.CLEAR_TIME_MASK: True}}
 
         invalid_settings = {"MASK/CLEAR/TIME/test": RuntimeError,
                             "MASK/CLEAR/TIIE": RuntimeError,
@@ -385,8 +385,8 @@ class MaskParserTest(unittest.TestCase):
         do_test(mask_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_single_spectrum_mask_is_parsed_correctly(self):
-        valid_settings = {"MASK S 12  ": {MaskId.single_spectrum_mask: 12},
-                          "MASK S234": {MaskId.single_spectrum_mask: 234}}
+        valid_settings = {"MASK S 12  ": {MaskId.SINGLE_SPECTRUM_MASK: 12},
+                          "MASK S234": {MaskId.SINGLE_SPECTRUM_MASK: 234}}
 
         invalid_settings = {"MASK B 12  ": RuntimeError,
                             "MASK S 12 23 ": RuntimeError}
@@ -394,8 +394,8 @@ class MaskParserTest(unittest.TestCase):
         do_test(mask_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_single_spectrum_range_is_parsed_correctly(self):
-        valid_settings = {"MASK S 12 >  S23  ": {MaskId.spectrum_range_mask: range_entry(start=12, stop=23)},
-                          "MASK S234>S1234": {MaskId.spectrum_range_mask: range_entry(start=234, stop=1234)}}
+        valid_settings = {"MASK S 12 >  S23  ": {MaskId.SPECTRUM_RANGE_MASK: range_entry(start=12, stop=23)},
+                          "MASK S234>S1234": {MaskId.SPECTRUM_RANGE_MASK: range_entry(start=234, stop=1234)}}
 
         invalid_settings = {"MASK S 12> S123.5  ": RuntimeError,
                             "MASK S 12> 23 ": RuntimeError}
@@ -403,18 +403,18 @@ class MaskParserTest(unittest.TestCase):
         do_test(mask_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_single_vertical_strip_mask_is_parsed_correctly(self):
-        valid_settings = {"MASK V 12  ": {MaskId.vertical_single_strip_mask: single_entry_with_detector(entry=12,
-                                          detector_type=DetectorType.LAB)},
-                          "MASK / Rear V  12  ": {MaskId.vertical_single_strip_mask: single_entry_with_detector(
+        valid_settings = {"MASK V 12  ": {MaskId.VERTICAL_SINGLE_STRIP_MASK: single_entry_with_detector(entry=12,
+                                                                                                        detector_type=DetectorType.LAB)},
+                          "MASK / Rear V  12  ": {MaskId.VERTICAL_SINGLE_STRIP_MASK: single_entry_with_detector(
                                                   entry=12, detector_type=DetectorType.LAB)},
-                          "MASK/mAin V234": {MaskId.vertical_single_strip_mask: single_entry_with_detector(entry=234,
-                                             detector_type=DetectorType.LAB)},
-                          "MASK / LaB V  234": {MaskId.vertical_single_strip_mask: single_entry_with_detector(entry=234,
-                                                detector_type=DetectorType.LAB)},
-                          "MASK /frOnt V  12  ": {MaskId.vertical_single_strip_mask: single_entry_with_detector(
+                          "MASK/mAin V234": {MaskId.VERTICAL_SINGLE_STRIP_MASK: single_entry_with_detector(entry=234,
+                                                                                                           detector_type=DetectorType.LAB)},
+                          "MASK / LaB V  234": {MaskId.VERTICAL_SINGLE_STRIP_MASK: single_entry_with_detector(entry=234,
+                                                                                                              detector_type=DetectorType.LAB)},
+                          "MASK /frOnt V  12  ": {MaskId.VERTICAL_SINGLE_STRIP_MASK: single_entry_with_detector(
                                                   entry=12, detector_type=DetectorType.HAB)},
-                          "MASK/HAB V234": {MaskId.vertical_single_strip_mask:  single_entry_with_detector(entry=234,
-                                            detector_type=DetectorType.HAB)}}
+                          "MASK/HAB V234": {MaskId.VERTICAL_SINGLE_STRIP_MASK:  single_entry_with_detector(entry=234,
+                                                                                                           detector_type=DetectorType.HAB)}}
 
         invalid_settings = {"MASK B 12  ": RuntimeError,
                             "MASK V 12 23 ": RuntimeError,
@@ -423,19 +423,19 @@ class MaskParserTest(unittest.TestCase):
         do_test(mask_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_range_vertical_strip_mask_is_parsed_correctly(self):
-        valid_settings = {"MASK V  12 >  V23  ": {MaskId.vertical_range_strip_mask: range_entry_with_detector(start=12,
-                                                  stop=23, detector_type=DetectorType.LAB)},
-                          "MASK V123>V234": {MaskId.vertical_range_strip_mask: range_entry_with_detector(start=123,
-                                             stop=234, detector_type=DetectorType.LAB)},
-                          "MASK / Rear V123>V234": {MaskId.vertical_range_strip_mask:  range_entry_with_detector(
+        valid_settings = {"MASK V  12 >  V23  ": {MaskId.VERTICAL_RANGE_STRIP_MASK: range_entry_with_detector(start=12,
+                                                                                                              stop=23, detector_type=DetectorType.LAB)},
+                          "MASK V123>V234": {MaskId.VERTICAL_RANGE_STRIP_MASK: range_entry_with_detector(start=123,
+                                                                                                         stop=234, detector_type=DetectorType.LAB)},
+                          "MASK / Rear V123>V234": {MaskId.VERTICAL_RANGE_STRIP_MASK:  range_entry_with_detector(
                                                     start=123, stop=234, detector_type=DetectorType.LAB)},
-                          "MASK/mAin  V123>V234": {MaskId.vertical_range_strip_mask: range_entry_with_detector(
+                          "MASK/mAin  V123>V234": {MaskId.VERTICAL_RANGE_STRIP_MASK: range_entry_with_detector(
                                                    start=123, stop=234, detector_type=DetectorType.LAB)},
-                          "MASK / LaB V123>V234": {MaskId.vertical_range_strip_mask: range_entry_with_detector(
+                          "MASK / LaB V123>V234": {MaskId.VERTICAL_RANGE_STRIP_MASK: range_entry_with_detector(
                                                    start=123, stop=234, detector_type=DetectorType.LAB)},
-                          "MASK/frOnt V123>V234": {MaskId.vertical_range_strip_mask: range_entry_with_detector(
+                          "MASK/frOnt V123>V234": {MaskId.VERTICAL_RANGE_STRIP_MASK: range_entry_with_detector(
                                                    start=123, stop=234, detector_type=DetectorType.HAB)},
-                          "MASK/HAB V123>V234": {MaskId.vertical_range_strip_mask: range_entry_with_detector(
+                          "MASK/HAB V123>V234": {MaskId.VERTICAL_RANGE_STRIP_MASK: range_entry_with_detector(
                                                  start=123, stop=234, detector_type=DetectorType.HAB)}}
 
         invalid_settings = {"MASK V 12> V123.5  ": RuntimeError,
@@ -445,18 +445,18 @@ class MaskParserTest(unittest.TestCase):
         do_test(mask_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_single_horizontal_strip_mask_is_parsed_correctly(self):
-        valid_settings = {"MASK H 12  ": {MaskId.horizontal_single_strip_mask: single_entry_with_detector(entry=12,
-                                          detector_type=DetectorType.LAB)},
-                          "MASK / Rear H  12  ": {MaskId.horizontal_single_strip_mask: single_entry_with_detector(
+        valid_settings = {"MASK H 12  ": {MaskId.HORIZONTAL_SINGLE_STRIP_MASK: single_entry_with_detector(entry=12,
+                                                                                                          detector_type=DetectorType.LAB)},
+                          "MASK / Rear H  12  ": {MaskId.HORIZONTAL_SINGLE_STRIP_MASK: single_entry_with_detector(
                                                   entry=12, detector_type=DetectorType.LAB)},
-                          "MASK/mAin H234": {MaskId.horizontal_single_strip_mask: single_entry_with_detector(entry=234,
-                                             detector_type=DetectorType.LAB)},
-                          "MASK / LaB H  234": {MaskId.horizontal_single_strip_mask: single_entry_with_detector(
+                          "MASK/mAin H234": {MaskId.HORIZONTAL_SINGLE_STRIP_MASK: single_entry_with_detector(entry=234,
+                                                                                                             detector_type=DetectorType.LAB)},
+                          "MASK / LaB H  234": {MaskId.HORIZONTAL_SINGLE_STRIP_MASK: single_entry_with_detector(
                                                 entry=234, detector_type=DetectorType.LAB)},
-                          "MASK /frOnt H  12  ": {MaskId.horizontal_single_strip_mask: single_entry_with_detector(
+                          "MASK /frOnt H  12  ": {MaskId.HORIZONTAL_SINGLE_STRIP_MASK: single_entry_with_detector(
                                                   entry=12, detector_type=DetectorType.HAB)},
-                          "MASK/HAB H234": {MaskId.horizontal_single_strip_mask: single_entry_with_detector(entry=234,
-                                            detector_type=DetectorType.HAB)}}
+                          "MASK/HAB H234": {MaskId.HORIZONTAL_SINGLE_STRIP_MASK: single_entry_with_detector(entry=234,
+                                                                                                            detector_type=DetectorType.HAB)}}
 
         invalid_settings = {"MASK H/12  ": RuntimeError,
                             "MASK H 12 23 ": RuntimeError,
@@ -465,19 +465,19 @@ class MaskParserTest(unittest.TestCase):
         do_test(mask_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_range_horizontal_strip_mask_is_parsed_correctly(self):
-        valid_settings = {"MASK H  12 >  H23  ": {MaskId.horizontal_range_strip_mask: range_entry_with_detector(
+        valid_settings = {"MASK H  12 >  H23  ": {MaskId.HORIZONTAL_RANGE_STRIP_MASK: range_entry_with_detector(
                                                   start=12, stop=23, detector_type=DetectorType.LAB)},
-                          "MASK H123>H234": {MaskId.horizontal_range_strip_mask: range_entry_with_detector(
+                          "MASK H123>H234": {MaskId.HORIZONTAL_RANGE_STRIP_MASK: range_entry_with_detector(
                                              start=123, stop=234, detector_type=DetectorType.LAB)},
-                          "MASK / Rear H123>H234": {MaskId.horizontal_range_strip_mask: range_entry_with_detector(
+                          "MASK / Rear H123>H234": {MaskId.HORIZONTAL_RANGE_STRIP_MASK: range_entry_with_detector(
                                                     start=123, stop=234, detector_type=DetectorType.LAB)},
-                          "MASK/mAin H123>H234": {MaskId.horizontal_range_strip_mask: range_entry_with_detector(
+                          "MASK/mAin H123>H234": {MaskId.HORIZONTAL_RANGE_STRIP_MASK: range_entry_with_detector(
                                                   start=123, stop=234, detector_type=DetectorType.LAB)},
-                          "MASK / LaB H123>H234": {MaskId.horizontal_range_strip_mask: range_entry_with_detector(
+                          "MASK / LaB H123>H234": {MaskId.HORIZONTAL_RANGE_STRIP_MASK: range_entry_with_detector(
                                                    start=123, stop=234, detector_type=DetectorType.LAB)},
-                          "MASK/frOnt H123>H234": {MaskId.horizontal_range_strip_mask: range_entry_with_detector(
+                          "MASK/frOnt H123>H234": {MaskId.HORIZONTAL_RANGE_STRIP_MASK: range_entry_with_detector(
                                                    start=123, stop=234, detector_type=DetectorType.HAB)},
-                          "MASK/HAB H123>H234": {MaskId.horizontal_range_strip_mask:  range_entry_with_detector(
+                          "MASK/HAB H123>H234": {MaskId.HORIZONTAL_RANGE_STRIP_MASK:  range_entry_with_detector(
                                                  start=123, stop=234, detector_type=DetectorType.HAB)}}
 
         invalid_settings = {"MASK H 12> H123.5  ": RuntimeError,
@@ -487,18 +487,18 @@ class MaskParserTest(unittest.TestCase):
         do_test(mask_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_block_mask_is_parsed_correctly(self):
-        valid_settings = {"MASK H12>H23 + V14>V15 ": {MaskId.block: mask_block(horizontal1=12, horizontal2=23,
+        valid_settings = {"MASK H12>H23 + V14>V15 ": {MaskId.BLOCK: mask_block(horizontal1=12, horizontal2=23,
                                                                                vertical1=14, vertical2=15,
                                                                                detector_type=DetectorType.LAB)},
-                          "MASK/ HAB H12>H23 + V14>V15 ": {MaskId.block: mask_block(horizontal1=12, horizontal2=23,
+                          "MASK/ HAB H12>H23 + V14>V15 ": {MaskId.BLOCK: mask_block(horizontal1=12, horizontal2=23,
                                                                                     vertical1=14, vertical2=15,
                                                                                     detector_type=DetectorType.HAB)},
-                          "MASK/ HAB V12>V23 + H14>H15 ": {MaskId.block: mask_block(horizontal1=14, horizontal2=15,
+                          "MASK/ HAB V12>V23 + H14>H15 ": {MaskId.BLOCK: mask_block(horizontal1=14, horizontal2=15,
                                                                                     vertical1=12, vertical2=23,
                                                                                     detector_type=DetectorType.HAB)},
-                          "MASK  V12 + H 14": {MaskId.block_cross: mask_block_cross(horizontal=14, vertical=12,
+                          "MASK  V12 + H 14": {MaskId.BLOCK_CROSS: mask_block_cross(horizontal=14, vertical=12,
                                                                                     detector_type=DetectorType.LAB)},
-                          "MASK/HAB H12 + V 14": {MaskId.block_cross: mask_block_cross(horizontal=12, vertical=14,
+                          "MASK/HAB H12 + V 14": {MaskId.BLOCK_CROSS: mask_block_cross(horizontal=12, vertical=14,
                                                                                        detector_type=DetectorType.HAB)}}
 
         invalid_settings = {"MASK H12>H23 + V14 + V15 ": RuntimeError,
@@ -851,7 +851,7 @@ class MaskFileParserTest(unittest.TestCase):
 
     def test_that_gravity_on_off_is_parsed_correctly(self):
         valid_settings = {"MaskFile= test.xml,   testKsdk2.xml,tesetlskd.xml":
-                          {MaskId.file: ["test.xml", "testKsdk2.xml", "tesetlskd.xml"]}}
+                          {MaskId.FILE: ["test.xml", "testKsdk2.xml", "tesetlskd.xml"]}}
 
         invalid_settings = {"MaskFile=": RuntimeError,
                             "MaskFile=test.txt": RuntimeError,
@@ -1085,7 +1085,7 @@ class UserFileParserTest(unittest.TestCase):
 
         # MaskParser
         result = user_file_parser.parse_line("MASK S 12  ")
-        assert_valid_result(result, {MaskId.single_spectrum_mask: 12}, self.assertTrue)
+        assert_valid_result(result, {MaskId.SINGLE_SPECTRUM_MASK: 12}, self.assertTrue)
 
         # SampleParser
         result = user_file_parser.parse_line("SAMPLE /Offset 234.5")
@@ -1115,7 +1115,7 @@ class UserFileParserTest(unittest.TestCase):
 
         # MaskFileParser
         result = user_file_parser.parse_line("MaskFile= test.xml,   testKsdk2.xml,tesetlskd.xml")
-        assert_valid_result(result, {MaskId.file: ["test.xml", "testKsdk2.xml", "tesetlskd.xml"]},
+        assert_valid_result(result, {MaskId.FILE: ["test.xml", "testKsdk2.xml", "tesetlskd.xml"]},
                             self.assertTrue)
 
         # MonParser

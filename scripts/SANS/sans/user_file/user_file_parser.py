@@ -990,15 +990,15 @@ class MaskParser(UserFileComponentParser):
                 if self._is_vertical_range_strip_mask(block):
                     prelim_range = self._extract_vertical_range_strip_mask(block)
                     # Note we use the lab key word since the extraction defaults to lab
-                    vertical_part = prelim_range[MaskId.vertical_range_strip_mask]
+                    vertical_part = prelim_range[MaskId.VERTICAL_RANGE_STRIP_MASK]
                 elif self._is_horizontal_range_strip_mask(block):
                     prelim_range = self._extract_horizontal_range_strip_mask(block)
                     # Note we use the lab key word since the extraction defaults to lab
-                    horizontal_part = prelim_range[MaskId.horizontal_range_strip_mask]
+                    horizontal_part = prelim_range[MaskId.HORIZONTAL_RANGE_STRIP_MASK]
                 else:
                     raise RuntimeError("MaskParser: Cannot handle part of block mask: {0}".format(block))
             # Now that we have both parts we can assemble the output
-            output = {MaskId.block: mask_block(horizontal1=horizontal_part.start, horizontal2=horizontal_part.stop,
+            output = {MaskId.BLOCK: mask_block(horizontal1=horizontal_part.start, horizontal2=horizontal_part.stop,
                                                vertical1=vertical_part.start, vertical2=vertical_part.stop,
                                                detector_type=detector_type)}
         else:
@@ -1006,14 +1006,14 @@ class MaskParser(UserFileComponentParser):
                 if self._is_vertical_single_strip_mask(block):
                     prelim_single = self._extract_vertical_single_strip_mask(block)
                     # Note we use the lab key word since the extraction defaults to lab
-                    vertical_part = prelim_single[MaskId.vertical_single_strip_mask]
+                    vertical_part = prelim_single[MaskId.VERTICAL_SINGLE_STRIP_MASK]
                 elif self._is_horizontal_single_strip_mask(block):
                     prelim_single = self._extract_horizontal_single_strip_mask(block)
                     # Note we use the lab key word since the extraction defaults to lab
-                    horizontal_part = prelim_single[MaskId.horizontal_single_strip_mask]
+                    horizontal_part = prelim_single[MaskId.HORIZONTAL_SINGLE_STRIP_MASK]
                 else:
                     raise RuntimeError("MaskParser: Cannot handle part of block cross mask: {0}".format(block))
-            output = {MaskId.block_cross: mask_block_cross(horizontal=horizontal_part.entry,
+            output = {MaskId.BLOCK_CROSS: mask_block_cross(horizontal=horizontal_part.entry,
                                                            vertical=vertical_part.entry,
                                                            detector_type=detector_type)}
         return output
@@ -1023,10 +1023,10 @@ class MaskParser(UserFileComponentParser):
         line_values = extract_float_list(line_string, " ")
         length_values = len(line_values)
         if length_values == 2:
-            output = {MaskId.line: mask_line(width=line_values[0], angle=line_values[1],
+            output = {MaskId.LINE: mask_line(width=line_values[0], angle=line_values[1],
                                              x=None, y=None)}
         elif length_values == 4:
-            output = {MaskId.line: mask_line(width=line_values[0], angle=line_values[1],
+            output = {MaskId.LINE: mask_line(width=line_values[0], angle=line_values[1],
                                              x=line_values[2], y=line_values[3])}
         else:
             raise ValueError("MaskParser: Line mask accepts wither 2 or 4 parameters,"
@@ -1038,12 +1038,12 @@ class MaskParser(UserFileComponentParser):
         has_hab = re.search(self._hab, line)
         has_lab = re.search(self._lab, line)
         if has_hab is not None or has_lab is not None:
-            key = MaskId.time_detector
+            key = MaskId.TIME_DETECTOR
             detector_type = DetectorType.HAB if has_hab is not None else DetectorType.LAB
             regex_string = "\s*(" + self._hab + ")\s*" if has_hab else "\s*(" + self._lab + ")\s*"
             min_and_max_time_range = re.sub(regex_string, "", line)
         else:
-            key = MaskId.time
+            key = MaskId.TIME
             detector_type = None
             min_and_max_time_range = line
         min_and_max_time_range = re.sub("\s*/\s*", "", min_and_max_time_range)
@@ -1054,26 +1054,26 @@ class MaskParser(UserFileComponentParser):
 
     def _extract_clear_mask(self, line):
         clear_removed = re.sub(self._clear, "", line)
-        return {MaskId.clear_detector_mask: True} if clear_removed == "" else \
-            {MaskId.clear_time_mask: True}
+        return {MaskId.CLEAR_DETECTOR_MASK: True} if clear_removed == "" else \
+            {MaskId.CLEAR_TIME_MASK: True}
 
     def _extract_single_spectrum_mask(self, line):
         single_spectrum_string = re.sub(self._spectrum, "", line)
         single_spectrum = convert_string_to_integer(single_spectrum_string)
-        return {MaskId.single_spectrum_mask: single_spectrum}
+        return {MaskId.SINGLE_SPECTRUM_MASK: single_spectrum}
 
     def _extract_spectrum_range_mask(self, line):
         spectrum_range_string = re.sub(self._spectrum, "", line)
         spectrum_range_string = re.sub(self._range, " ", spectrum_range_string)
         spectrum_range = extract_int_range(spectrum_range_string)
-        return {MaskId.spectrum_range_mask: range_entry(start=spectrum_range[0], stop=spectrum_range[1])}
+        return {MaskId.SPECTRUM_RANGE_MASK: range_entry(start=spectrum_range[0], stop=spectrum_range[1])}
 
     def _extract_vertical_single_strip_mask(self, line):
         detector_type = DetectorType.HAB if re.search(self._hab, line) is not None else DetectorType.LAB
         single_vertical_strip_string = re.sub(self._detector, "", line)
         single_vertical_strip_string = re.sub(self._v, "", single_vertical_strip_string)
         single_vertical_strip = convert_string_to_integer(single_vertical_strip_string)
-        return {MaskId.vertical_single_strip_mask: single_entry_with_detector(entry=single_vertical_strip,
+        return {MaskId.VERTICAL_SINGLE_STRIP_MASK: single_entry_with_detector(entry=single_vertical_strip,
                                                                               detector_type=detector_type)}
 
     def _extract_vertical_range_strip_mask(self, line):
@@ -1082,7 +1082,7 @@ class MaskParser(UserFileComponentParser):
         range_vertical_strip_string = re.sub(self._v, "", range_vertical_strip_string)
         range_vertical_strip_string = re.sub(self._range, " ", range_vertical_strip_string)
         range_vertical_strip = extract_int_range(range_vertical_strip_string)
-        return {MaskId.vertical_range_strip_mask: range_entry_with_detector(start=range_vertical_strip[0],
+        return {MaskId.VERTICAL_RANGE_STRIP_MASK: range_entry_with_detector(start=range_vertical_strip[0],
                                                                             stop=range_vertical_strip[1],
                                                                             detector_type=detector_type)}
 
@@ -1091,7 +1091,7 @@ class MaskParser(UserFileComponentParser):
         single_horizontal_strip_string = re.sub(self._detector, "", line)
         single_horizontal_strip_string = re.sub(self._h, "", single_horizontal_strip_string)
         single_horizontal_strip = convert_string_to_integer(single_horizontal_strip_string)
-        return {MaskId.horizontal_single_strip_mask: single_entry_with_detector(entry=single_horizontal_strip,
+        return {MaskId.HORIZONTAL_SINGLE_STRIP_MASK: single_entry_with_detector(entry=single_horizontal_strip,
                                                                                 detector_type=detector_type)}
 
     def _extract_horizontal_range_strip_mask(self, line):
@@ -1100,7 +1100,7 @@ class MaskParser(UserFileComponentParser):
         range_horizontal_strip_string = re.sub(self._h, "", range_horizontal_strip_string)
         range_horizontal_strip_string = re.sub(self._range, " ", range_horizontal_strip_string)
         range_horizontal_strip = extract_int_range(range_horizontal_strip_string)
-        return {MaskId.horizontal_range_strip_mask: range_entry_with_detector(start=range_horizontal_strip[0],
+        return {MaskId.HORIZONTAL_RANGE_STRIP_MASK: range_entry_with_detector(start=range_horizontal_strip[0],
                                                                               stop=range_horizontal_strip[1],
                                                                               detector_type=detector_type)}
 
@@ -1989,7 +1989,7 @@ class MaskFileParser(UserFileComponentParser):
     def extract_mask_file(line, original_line):
         elements_capital = extract_string_list(line)
         elements = [re.search(element, original_line, re.IGNORECASE).group(0) for element in elements_capital]
-        return {MaskId.file: elements}
+        return {MaskId.FILE: elements}
 
     @staticmethod
     def get_type():

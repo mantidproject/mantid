@@ -643,10 +643,10 @@ class StateDirectorISIS(object):
         # ---------------------------------
         # 1. Line Mask
         # ---------------------------------
-        if MaskId.line in user_file_items:
-            mask_lines = user_file_items[MaskId.line]
+        if MaskId.LINE in user_file_items:
+            mask_lines = user_file_items[MaskId.LINE]
             # If there were several arms specified then we take only the last
-            check_if_contains_only_one_element(mask_lines, MaskId.line)
+            check_if_contains_only_one_element(mask_lines, MaskId.LINE)
             mask_line = mask_lines[-1]
             # We need the width and the angle
             angle = mask_line.angle
@@ -669,8 +669,8 @@ class StateDirectorISIS(object):
         # ---------------------------------
         # 2. General time mask
         # ---------------------------------
-        if MaskId.time in user_file_items:
-            mask_time_general = user_file_items[MaskId.time]
+        if MaskId.TIME in user_file_items:
+            mask_time_general = user_file_items[MaskId.TIME]
             start_time = []
             stop_time = []
             for times in mask_time_general:
@@ -686,8 +686,8 @@ class StateDirectorISIS(object):
         # ---------------------------------
         # 3. Detector-bound time mask
         # ---------------------------------
-        if MaskId.time_detector in user_file_items:
-            mask_times = user_file_items[MaskId.time_detector]
+        if MaskId.TIME_DETECTOR in user_file_items:
+            mask_times = user_file_items[MaskId.TIME_DETECTOR]
             start_times_hab = []
             stop_times_hab = []
             start_times_lab = []
@@ -718,9 +718,9 @@ class StateDirectorISIS(object):
         # ---------------------------------
         # 4. Clear detector
         # ---------------------------------
-        if MaskId.clear_detector_mask in user_file_items:
-            clear_detector_mask = user_file_items[MaskId.clear_detector_mask]
-            check_if_contains_only_one_element(clear_detector_mask, MaskId.clear_detector_mask)
+        if MaskId.CLEAR_DETECTOR_MASK in user_file_items:
+            clear_detector_mask = user_file_items[MaskId.CLEAR_DETECTOR_MASK]
+            check_if_contains_only_one_element(clear_detector_mask, MaskId.CLEAR_DETECTOR_MASK)
             # We select the entry which was added last.
             clear_detector_mask = clear_detector_mask[-1]
             self._mask_builder.set_clear(clear_detector_mask)
@@ -728,9 +728,9 @@ class StateDirectorISIS(object):
         # ---------------------------------
         # 5. Clear time
         # ---------------------------------
-        if MaskId.clear_time_mask in user_file_items:
-            clear_time_mask = user_file_items[MaskId.clear_time_mask]
-            check_if_contains_only_one_element(clear_time_mask, MaskId.clear_time_mask)
+        if MaskId.CLEAR_TIME_MASK in user_file_items:
+            clear_time_mask = user_file_items[MaskId.CLEAR_TIME_MASK]
+            check_if_contains_only_one_element(clear_time_mask, MaskId.CLEAR_TIME_MASK)
             # We select the entry which was added last.
             clear_time_mask = clear_time_mask[-1]
             self._mask_builder.set_clear_time(clear_time_mask)
@@ -738,16 +738,16 @@ class StateDirectorISIS(object):
         # ---------------------------------
         # 6. Single Spectrum
         # ---------------------------------
-        if MaskId.single_spectrum_mask in user_file_items:
-            single_spectra = user_file_items[MaskId.single_spectrum_mask]
+        if MaskId.SINGLE_SPECTRUM_MASK in user_file_items:
+            single_spectra = user_file_items[MaskId.SINGLE_SPECTRUM_MASK]
             # Note that we are using an unusual setter here. Check mask.py for why we are doing this.
             self._mask_builder.set_single_spectra_on_detector(single_spectra)
 
         # ---------------------------------
         # 7. Spectrum Range
         # ---------------------------------
-        if MaskId.spectrum_range_mask in user_file_items:
-            spectrum_ranges = user_file_items[MaskId.spectrum_range_mask]
+        if MaskId.SPECTRUM_RANGE_MASK in user_file_items:
+            spectrum_ranges = user_file_items[MaskId.SPECTRUM_RANGE_MASK]
             start_range = []
             stop_range = []
             for spectrum_range in spectrum_ranges:
@@ -763,8 +763,8 @@ class StateDirectorISIS(object):
         # ---------------------------------
         # 8. Vertical single strip
         # ---------------------------------
-        if MaskId.vertical_single_strip_mask in user_file_items:
-            single_vertical_strip_masks = user_file_items[MaskId.vertical_single_strip_mask]
+        if MaskId.VERTICAL_SINGLE_STRIP_MASK in user_file_items:
+            single_vertical_strip_masks = user_file_items[MaskId.VERTICAL_SINGLE_STRIP_MASK]
             entry_hab = []
             entry_lab = []
             for single_vertical_strip_mask in single_vertical_strip_masks:
@@ -785,8 +785,8 @@ class StateDirectorISIS(object):
         # ---------------------------------
         # 9. Vertical range strip
         # ---------------------------------
-        if MaskId.vertical_range_strip_mask in user_file_items:
-            range_vertical_strip_masks = user_file_items[MaskId.vertical_range_strip_mask]
+        if MaskId.VERTICAL_RANGE_STRIP_MASK in user_file_items:
+            range_vertical_strip_masks = user_file_items[MaskId.VERTICAL_RANGE_STRIP_MASK]
             start_hab = []
             stop_hab = []
             start_lab = []
@@ -815,8 +815,8 @@ class StateDirectorISIS(object):
         # ---------------------------------
         # 10. Horizontal single strip
         # ---------------------------------
-        if MaskId.horizontal_single_strip_mask in user_file_items:
-            single_horizontal_strip_masks = user_file_items[MaskId.horizontal_single_strip_mask]
+        if MaskId.HORIZONTAL_SINGLE_STRIP_MASK in user_file_items:
+            single_horizontal_strip_masks = user_file_items[MaskId.HORIZONTAL_SINGLE_STRIP_MASK]
             entry_hab = []
             entry_lab = []
             for single_horizontal_strip_mask in single_horizontal_strip_masks:
@@ -837,8 +837,8 @@ class StateDirectorISIS(object):
         # ---------------------------------
         # 11. Horizontal range strip
         # ---------------------------------
-        if MaskId.horizontal_range_strip_mask in user_file_items:
-            range_horizontal_strip_masks = user_file_items[MaskId.horizontal_range_strip_mask]
+        if MaskId.HORIZONTAL_RANGE_STRIP_MASK in user_file_items:
+            range_horizontal_strip_masks = user_file_items[MaskId.HORIZONTAL_RANGE_STRIP_MASK]
             start_hab = []
             stop_hab = []
             start_lab = []
@@ -867,8 +867,8 @@ class StateDirectorISIS(object):
         # ---------------------------------
         # 12. Block
         # ---------------------------------
-        if MaskId.block in user_file_items:
-            blocks = user_file_items[MaskId.block]
+        if MaskId.BLOCK in user_file_items:
+            blocks = user_file_items[MaskId.BLOCK]
             horizontal_start_hab = []
             horizontal_stop_hab = []
             vertical_start_hab = []
@@ -910,8 +910,8 @@ class StateDirectorISIS(object):
         # ---------------------------------
         # 13. Block cross
         # ---------------------------------
-        if MaskId.block_cross in user_file_items:
-            block_crosses = user_file_items[MaskId.block_cross]
+        if MaskId.BLOCK_CROSS in user_file_items:
+            block_crosses = user_file_items[MaskId.BLOCK_CROSS]
             horizontal_hab = []
             vertical_hab = []
             horizontal_lab = []
@@ -951,8 +951,8 @@ class StateDirectorISIS(object):
         # ------------------------------------------------------------
         # 15. Maskfiles
         # -----------------------------------------------------------
-        if MaskId.file in user_file_items:
-            mask_files = user_file_items[MaskId.file]
+        if MaskId.FILE in user_file_items:
+            mask_files = user_file_items[MaskId.FILE]
             self._mask_builder.set_mask_files(mask_files)
 
         # ------------------------------------------------------------

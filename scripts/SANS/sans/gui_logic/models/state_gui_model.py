@@ -792,17 +792,17 @@ class StateGuiModel(ModelCommon):
     # ------------------------------------------------------------------------------------------------------------------
     @property
     def mask_files(self):
-        if MaskId.file in self._user_file_items:
-            return self._user_file_items[MaskId.file]
+        if MaskId.FILE in self._user_file_items:
+            return self._user_file_items[MaskId.FILE]
         return []
 
     @mask_files.setter
     def mask_files(self, value):
         if value is None:
             return
-        if MaskId.file in self._user_file_items:
-            del self._user_file_items[MaskId.file]
-        new_state_entries = {MaskId.file: value}
+        if MaskId.FILE in self._user_file_items:
+            del self._user_file_items[MaskId.FILE]
+        new_state_entries = {MaskId.FILE: value}
         self._user_file_items.update(new_state_entries)
 
     # ------------------------------------------------------------------------------------------------------------------

@@ -75,20 +75,29 @@ class LimitsId(Enum):
     ANGLE = "angle"
     EVENTS_BINNING = "events_binning"
     EVENTS_BINNING_RANGE = "events_binning_range"
-    RADIUS_CUT = "radius_cut"
-    WAVELENGTH_CUT = "wavelength_cut"
     RADIUS = "radius"
+    RADIUS_CUT = "radius_cut"
     Q = "q"
     QXY = "qxy"
     WAVELENGTH = "wavelength"
+    WAVELENGTH_CUT = "wavelength_cut"
 
 
-# --- MASK
-@serializable_enum("line", "time", "time_detector", "clear_detector_mask", "clear_time_mask", "single_spectrum_mask",
-                   "spectrum_range_mask", "vertical_single_strip_mask", "vertical_range_strip_mask", "file",
-                   "horizontal_single_strip_mask", "horizontal_range_strip_mask", "block", "block_cross")
-class MaskId(object):
-    pass
+class MaskId(Enum):
+    BLOCK = "block"
+    BLOCK_CROSS = "block_cross"
+    CLEAR_DETECTOR_MASK = "clear_detector_mask"
+    CLEAR_TIME_MASK = "clear_time_mask"
+    FILE = "file"
+    LINE = "line"
+    HORIZONTAL_SINGLE_STRIP_MASK = "horizontal_single_strip_mask"
+    HORIZONTAL_RANGE_STRIP_MASK = "horizontal_range_strip_mask"
+    TIME = "time"
+    TIME_DETECTOR = "time_detector"
+    SINGLE_SPECTRUM_MASK = "single_spectrum_mask"
+    SPECTRUM_RANGE_MASK = "spectrum_range_mask"
+    VERTICAL_SINGLE_STRIP_MASK = "vertical_single_strip_mask"
+    VERTICAL_RANGE_STRIP_MASK = "vertical_range_strip_mask"
 
 
 # --- SAMPLE
