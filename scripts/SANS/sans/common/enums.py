@@ -241,22 +241,6 @@ class SampleShape(Enum):
     NOT_SET = "NOT_SET"
 
 
-def convert_int_to_shape(shape_int):
-    """
-    Note that we convert the sample shape to an integer here. This is required for the workspace, hence we don't
-    use the string_convertible decorator.
-    """
-    if shape_int == 1:
-        as_type = SampleShape.CylinderAxisUp
-    elif shape_int == 2:
-        as_type = SampleShape.Cuboid
-    elif shape_int == 3:
-        as_type = SampleShape.CylinderAxisAlong
-    else:
-        raise ValueError("SampleShape: Cannot convert unknown sample shape integer: {0}".format(shape_int))
-    return as_type
-
-
 # ---------------------------
 # FileTypes
 # ---------------------------
