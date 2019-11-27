@@ -39,7 +39,7 @@ class SummationSettingsPresenterTest(unittest.TestCase):
     def test_sets_binning_type_when_changed(self):
         new_binning_type = 0
         self.view.binningTypeChanged.emit(new_binning_type)
-        self.summation_settings.set_histogram_binning_type.assert_called_with(BinningType.Custom)
+        self.summation_settings.set_histogram_binning_type.assert_called_with(BinningType.CUSTOM)
 
     def test_retrieves_additional_time_shifts_when_changed(self):
         self.view.additionalTimeShiftsChanged.emit()

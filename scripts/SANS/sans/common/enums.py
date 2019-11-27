@@ -325,12 +325,10 @@ class RowState(Enum):
     UNPROCESSED = "Unprocessed"
 
 
-# ------------------------------
-# Binning Types for AddRuns
-# -------------------------------
-@string_convertible
-@serializable_enum("SaveAsEventData", "Custom", "FromMonitors")
-class BinningType(object):
+class BinningType(Enum):
     """
     Defines the types of binning when adding runs together
     """
+    CUSTOM = "Custom"
+    FROM_MONITORS = "FromMonitors"
+    SAVE_AS_EVENT_DATA = "SaveAsEventData"
