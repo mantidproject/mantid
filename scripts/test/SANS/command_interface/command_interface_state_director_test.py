@@ -58,7 +58,7 @@ class CommandInterfaceStateDirectorTest(unittest.TestCase):
         self._assert_raises_nothing(command_interface.add_command, command)
 
         # Sample scatter data
-        command = DataCommand(command_id=DataCommandId.sample_scatter, file_name="SANS2D00022024", period=3)
+        command = DataCommand(command_id=DataCommandId.SAMPLE_SCATTER, file_name="SANS2D00022024", period=3)
         self._assert_raises_nothing(command_interface.add_command, command)
 
         # Detector

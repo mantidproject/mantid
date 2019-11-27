@@ -172,7 +172,7 @@ def AssignSample(sample_run, reload=True, period=ALL_PERIODS):
     file_name = find_sans_file(sample_run)
 
     # Set the command
-    data_command = DataCommand(command_id=DataCommandId.sample_scatter, file_name=file_name, period=period)
+    data_command = DataCommand(command_id=DataCommandId.SAMPLE_SCATTER, file_name=file_name, period=period)
     director.add_command(data_command)
 
 
@@ -200,7 +200,7 @@ def AssignCan(can_run, reload=True, period=ALL_PERIODS):
     file_name = find_sans_file(can_run)
 
     # Set the command
-    data_command = DataCommand(command_id=DataCommandId.can_scatter, file_name=file_name, period=period)
+    data_command = DataCommand(command_id=DataCommandId.CAN_SCATTER, file_name=file_name, period=period)
     director.add_command(data_command)
 
 
@@ -229,9 +229,9 @@ def TransmissionSample(sample, direct, reload=True,
     direct_file_name = find_sans_file(direct)
 
     # Set the command
-    trans_command = DataCommand(command_id=DataCommandId.sample_transmission, file_name=trans_file_name,
+    trans_command = DataCommand(command_id=DataCommandId.SAMPLE_TRANSMISSION, file_name=trans_file_name,
                                 period=period_t)
-    direct_command = DataCommand(command_id=DataCommandId.sample_direct, file_name=direct_file_name, period=period_d)
+    direct_command = DataCommand(command_id=DataCommandId.SAMPLE_DIRECT, file_name=direct_file_name, period=period_d)
     director.add_command(trans_command)
     director.add_command(direct_command)
 
@@ -259,8 +259,8 @@ def TransmissionCan(can, direct, reload=True, period_t=-1, period_d=-1):
     direct_file_name = find_sans_file(direct)
 
     # Set the command
-    trans_command = DataCommand(command_id=DataCommandId.can_transmission, file_name=trans_file_name, period=period_t)
-    direct_command = DataCommand(command_id=DataCommandId.can_direct, file_name=direct_file_name, period=period_d)
+    trans_command = DataCommand(command_id=DataCommandId.CAN_TRANSMISSION, file_name=trans_file_name, period=period_t)
+    direct_command = DataCommand(command_id=DataCommandId.CAN_DIRECT, file_name=direct_file_name, period=period_d)
     director.add_command(trans_command)
     director.add_command(direct_command)
 

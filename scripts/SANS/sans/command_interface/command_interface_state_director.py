@@ -1,10 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
+
+from mantid.py3compat import Enum
 from sans.common.enums import (serializable_enum, DataType)
 from sans.user_file.state_director import StateDirectorISIS
 from sans.state.data import get_data_builder
@@ -24,10 +26,14 @@ from sans.common.file_information import SANSFileInformationFactory
 # ------------------
 # IDs for commands. We use here serializable_enum since enum is not available in the current Python configuration.
 # ------------------
-@serializable_enum("sample_scatter", "sample_transmission", "sample_direct", "can_scatter", "can_transmission",
-                   "can_direct")
-class DataCommandId(object):
-    pass
+class DataCommandId(Enum):
+    CAN_DIRECT = "can_direct"
+    CAN_SCATTER = "can_scatter"
+    CAN_TRANSMISSION = "can_transmission"
+
+    SAMPLE_SCATTER = "sample_scatter"
+    SAMPLE_TRANSMISSION = "sample_transmission"
+    SAMPLE_DIRECT = "sample_direct"
 
 
 @serializable_enum("clean", "reduction_dimensionality", "compatibility_mode",  # Null Parameter commands
@@ -147,7 +153,7 @@ class CommandInterfaceStateDirector(object):
     def _get_data_state(self):
         # Get the data commands
         data_commands = self._get_data_commands()
-        data_elements = self._get_elements_with_key(DataCommandId.sample_scatter, data_commands)
+        data_elements = self._get_elements_with_key(DataCommandId.SAMPLE_SCATTER, data_commands)
         data_element = data_elements[-1]
         file_name = data_element.file_name
         file_information_factory = SANSFileInformationFactory()
@@ -156,17 +162,17 @@ class CommandInterfaceStateDirector(object):
         # Build the state data
         data_builder = get_data_builder(self._facility, file_information)
         self._set_data_element(data_builder.set_sample_scatter, data_builder.set_sample_scatter_period,
-                               DataCommandId.sample_scatter, data_commands)
+                               DataCommandId.SAMPLE_SCATTER, data_commands)
         self._set_data_element(data_builder.set_sample_transmission, data_builder.set_sample_transmission_period,
-                               DataCommandId.sample_transmission, data_commands)
+                               DataCommandId.SAMPLE_TRANSMISSION, data_commands)
         self._set_data_element(data_builder.set_sample_direct, data_builder.set_sample_direct_period,
-                               DataCommandId.sample_direct, data_commands)
+                               DataCommandId.SAMPLE_DIRECT, data_commands)
         self._set_data_element(data_builder.set_can_scatter, data_builder.set_can_scatter_period,
-                               DataCommandId.can_scatter, data_commands)
+                               DataCommandId.CAN_SCATTER, data_commands)
         self._set_data_element(data_builder.set_can_transmission, data_builder.set_can_transmission_period,
-                               DataCommandId.can_transmission, data_commands)
+                               DataCommandId.CAN_TRANSMISSION, data_commands)
         self._set_data_element(data_builder.set_can_direct, data_builder.set_can_direct_period,
-                               DataCommandId.can_direct, data_commands)
+                               DataCommandId.CAN_DIRECT, data_commands)
 
         return data_builder.build()
 
@@ -598,7 +604,7 @@ class CommandInterfaceStateDirector(object):
 
         See _remove_last_element for further explanation.
         """
-        self._remove_last_element(DataCommandId.sample_scatter)
+        self._remove_last_element(DataCommandId.SAMPLE_SCATTER)
 
     def remove_last_sample_transmission_and_direct(self):
         """
@@ -606,8 +612,8 @@ class CommandInterfaceStateDirector(object):
 
         See _remove_last_element for further explanation.
         """
-        self._remove_last_element(DataCommandId.sample_transmission)
-        self._remove_last_element(DataCommandId.sample_direct)
+        self._remove_last_element(DataCommandId.SAMPLE_TRANSMISSION)
+        self._remove_last_element(DataCommandId.SAMPLE_DIRECT)
 
     def remove_last_scatter_can(self):
         """
@@ -615,7 +621,7 @@ class CommandInterfaceStateDirector(object):
 
         See _remove_last_element for further explanation.
         """
-        self._remove_last_element(DataCommandId.can_scatter)
+        self._remove_last_element(DataCommandId.CAN_SCATTER)
 
     def remove_last_can_transmission_and_direct(self):
         """
@@ -623,8 +629,8 @@ class CommandInterfaceStateDirector(object):
 
         See _remove_last_element for further explanation.
         """
-        self._remove_last_element(DataCommandId.can_transmission)
-        self._remove_last_element(DataCommandId.can_direct)
+        self._remove_last_element(DataCommandId.CAN_TRANSMISSION)
+        self._remove_last_element(DataCommandId.CAN_DIRECT)
 
     def _remove_last_element(self, command_id):
         """
