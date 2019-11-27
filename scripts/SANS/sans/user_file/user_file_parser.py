@@ -1500,7 +1500,7 @@ class TubeCalibFileParser(UserFileComponentParser):
     def _extract_tube_calib_file(line, original_line):
         file_name_capital = line.strip()
         file_name = re.search(file_name_capital, original_line, re.IGNORECASE).group(0)
-        return {TubeCalibrationFileId.file: file_name}
+        return {TubeCalibrationFileId.FILE: file_name}
 
     @staticmethod
     def get_type():

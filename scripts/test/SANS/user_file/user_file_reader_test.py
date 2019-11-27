@@ -89,7 +89,7 @@ class UserFileReaderTest(unittest.TestCase):
                            QResolutionId.a1: [13.],
                            QResolutionId.a2: [14.],
                            QResolutionId.moderator: ["moderator_rkh_file.txt"],
-                           TubeCalibrationFileId.file: ["TUBE_SANS2D_BOTH_31681_25Sept15.nxs"]}
+                           TubeCalibrationFileId.FILE: ["TUBE_SANS2D_BOTH_31681_25Sept15.nxs"]}
 
         self.assertEqual(len(expected_values), len(output))
         for key, value in list(expected_values.items()):

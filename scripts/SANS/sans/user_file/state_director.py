@@ -1336,9 +1336,9 @@ class StateDirectorISIS(object):
     def _add_information_to_data_state(self, user_file_items):
         # The only thing that should be set on the data is the tube calibration file which is specified in
         # the user file.
-        if TubeCalibrationFileId.file in user_file_items:
-            tube_calibration = user_file_items[TubeCalibrationFileId.file]
-            check_if_contains_only_one_element(tube_calibration, TubeCalibrationFileId.file)
+        if TubeCalibrationFileId.FILE in user_file_items:
+            tube_calibration = user_file_items[TubeCalibrationFileId.FILE]
+            check_if_contains_only_one_element(tube_calibration, TubeCalibrationFileId.FILE)
             tube_calibration = tube_calibration[-1]
             self._data.calibration = tube_calibration
 

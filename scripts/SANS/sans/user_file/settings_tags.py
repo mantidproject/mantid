@@ -122,10 +122,8 @@ class TransId(Enum):
     SPEC_5_SHIFT = "spec_5_shift"
 
 
-# --- TUBECALIBFILE
-@serializable_enum("file")
-class TubeCalibrationFileId(object):
-    pass
+class TubeCalibrationFileId(Enum):
+    FILE = "file"
 
 
 # -- QRESOLUTION

@@ -686,8 +686,8 @@ class TubeCalibFileParserTest(unittest.TestCase):
         self.assertTrue(TubeCalibFileParser.get_type(), "TRANS")
 
     def test_that_tube_calibration_file_is_parsed_correctly(self):
-        valid_settings = {"TUBECALIbfile= calib_file.nxs": {TubeCalibrationFileId.file: "calib_file.nxs"},
-                          " tUBECALIBfile=  caAlib_file.Nxs": {TubeCalibrationFileId.file: "caAlib_file.Nxs"}}
+        valid_settings = {"TUBECALIbfile= calib_file.nxs": {TubeCalibrationFileId.FILE: "calib_file.nxs"},
+                          " tUBECALIBfile=  caAlib_file.Nxs": {TubeCalibrationFileId.FILE: "caAlib_file.Nxs"}}
 
         invalid_settings = {"TUBECALIFILE file.nxs": RuntimeError,
                             "TUBECALIBFILE=file.txt": RuntimeError,
@@ -1097,7 +1097,7 @@ class UserFileParserTest(unittest.TestCase):
 
         # TubeCalibFileParser
         result = user_file_parser.parse_line("TUBECALIbfile= calib_file.nxs")
-        assert_valid_result(result, {TubeCalibrationFileId.file: "calib_file.nxs"}, self.assertTrue)
+        assert_valid_result(result, {TubeCalibrationFileId.FILE: "calib_file.nxs"}, self.assertTrue)
 
         # QResolutionParser
         result = user_file_parser.parse_line("QRESOL/ON")
