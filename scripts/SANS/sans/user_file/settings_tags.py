@@ -100,10 +100,9 @@ class MaskId(Enum):
     VERTICAL_RANGE_STRIP_MASK = "vertical_range_strip_mask"
 
 
-# --- SAMPLE
-@serializable_enum("path", "offset")
-class SampleId(object):
-    pass
+class SampleId(Enum):
+    PATH = "path"
+    OFFSET = "offset"
 
 
 # --- SET

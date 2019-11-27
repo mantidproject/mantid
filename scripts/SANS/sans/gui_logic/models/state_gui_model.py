@@ -507,11 +507,11 @@ class StateGuiModel(ModelCommon):
 
     @property
     def z_offset(self):
-        return self.get_simple_element(element_id=SampleId.offset, default_value="")
+        return self.get_simple_element(element_id=SampleId.OFFSET, default_value="")
 
     @z_offset.setter
     def z_offset(self, value):
-        self.set_simple_element(element_id=SampleId.offset, value=value)
+        self.set_simple_element(element_id=SampleId.OFFSET, value=value)
 
     # ==================================================================================================================
     # ==================================================================================================================

@@ -1157,12 +1157,12 @@ class SampleParser(UserFileComponentParser):
 
     def _extract_sample_path(self, line):
         value = False if re.search(self._off, line) is not None else True
-        return {SampleId.path: value}
+        return {SampleId.PATH: value}
 
     def _extract_sample_offset(self, line):
         offset_string = re.sub(self._offset, "", line)
         offset = convert_string_to_float(offset_string)
-        return {SampleId.offset: offset}
+        return {SampleId.OFFSET: offset}
 
     @staticmethod
     def get_type():

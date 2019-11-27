@@ -474,7 +474,7 @@ class StateDirectorISIS(object):
         # ---------------------------
         # Sample offset
         # ---------------------------
-        set_single_entry(self._move_builder, "set_sample_offset", SampleId.offset,
+        set_single_entry(self._move_builder, "set_sample_offset", SampleId.OFFSET,
                          user_file_items, apply_to_value=convert_mm_to_m)
 
         # ---------------------------
@@ -1097,7 +1097,7 @@ class StateDirectorISIS(object):
 
     def _set_up_adjustment_state(self, user_file_items):
         # Get the wide angle correction setting
-        set_single_entry(self._adjustment_builder, "set_wide_angle_correction", SampleId.path, user_file_items)
+        set_single_entry(self._adjustment_builder, "set_wide_angle_correction", SampleId.PATH, user_file_items)
 
     def _set_up_normalize_to_monitor_state(self, user_file_items):
         # Extract the incident monitor and which type of rebinning to use (interpolating or normal)

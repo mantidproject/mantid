@@ -513,8 +513,8 @@ class SampleParserTest(unittest.TestCase):
         self.assertTrue(SampleParser.get_type(), "SAMPLE")
 
     def test_that_setting_sample_path_is_parsed_correctly(self):
-        valid_settings = {"SAMPLE /PATH/ON": {SampleId.path: True},
-                          "SAMPLE / PATH / OfF": {SampleId.path: False}}
+        valid_settings = {"SAMPLE /PATH/ON": {SampleId.PATH: True},
+                          "SAMPLE / PATH / OfF": {SampleId.PATH: False}}
 
         invalid_settings = {"SAMPLE/PATH ON": RuntimeError,
                             "SAMPLE /pATh ": RuntimeError,
@@ -524,8 +524,8 @@ class SampleParserTest(unittest.TestCase):
         do_test(sample_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_setting_sample_offset_is_parsed_correctly(self):
-        valid_settings = {"SAMPLE /Offset 234.5": {SampleId.offset: 234.5},
-                          "SAMPLE / Offset 25": {SampleId.offset: 25}}
+        valid_settings = {"SAMPLE /Offset 234.5": {SampleId.OFFSET: 234.5},
+                          "SAMPLE / Offset 25": {SampleId.OFFSET: 25}}
 
         invalid_settings = {"SAMPL/offset fg": RuntimeError,
                             "SAMPLE /Offset/ 23 ": RuntimeError,
@@ -1089,7 +1089,7 @@ class UserFileParserTest(unittest.TestCase):
 
         # SampleParser
         result = user_file_parser.parse_line("SAMPLE /Offset 234.5")
-        assert_valid_result(result, {SampleId.offset: 234.5}, self.assertTrue)
+        assert_valid_result(result, {SampleId.OFFSET: 234.5}, self.assertTrue)
 
         # TransParser
         result = user_file_parser.parse_line("TRANS / radius  =23")

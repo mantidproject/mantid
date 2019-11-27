@@ -404,7 +404,7 @@ class CommandInterfaceStateDirector(object):
 
     def _process_sample_offset(self, command):
         sample_offset = command.values[0]
-        new_state_entries = {SampleId.offset: sample_offset}
+        new_state_entries = {SampleId.OFFSET: sample_offset}
         self.add_to_processed_state_settings(new_state_entries)
 
     def _process_detector(self, command):
