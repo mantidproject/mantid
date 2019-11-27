@@ -25,36 +25,36 @@ class CommandInterfaceStateDirectorTest(unittest.TestCase):
         command_interface = CommandInterfaceStateDirector(SANSFacility.ISIS)
 
         # User file
-        command = NParameterCommand(command_id=NParameterCommandId.user_file,
+        command = NParameterCommand(command_id=NParameterCommandId.USER_FILE,
                                     values=["test_user_file_sans2d.txt"])
         self._assert_raises_nothing(command_interface.add_command, command)
 
         # Mask
-        command = NParameterCommand(command_id=NParameterCommandId.mask,
+        command = NParameterCommand(command_id=NParameterCommandId.MASK,
                                     values=["MASK/ FRONT H197>H199"])
         self._assert_raises_nothing(command_interface.add_command, command)
 
         # Monitor spectrum (incident monitor for monitor normalization)
-        command = NParameterCommand(command_id=NParameterCommandId.incident_spectrum,
+        command = NParameterCommand(command_id=NParameterCommandId.INCIDENT_SPECTRUM,
                                     values=[1, True, False])
         self._assert_raises_nothing(command_interface.add_command, command)
 
         # Transmission spectrum (incident monitor for transmission calculation)
-        command = NParameterCommand(command_id=NParameterCommandId.incident_spectrum, values=[7, False, True])
+        command = NParameterCommand(command_id=NParameterCommandId.INCIDENT_SPECTRUM, values=[7, False, True])
         self._assert_raises_nothing(command_interface.add_command, command)
 
         # Reduction Dimensionality One Dim
-        command = NParameterCommand(command_id=NParameterCommandId.reduction_dimensionality,
+        command = NParameterCommand(command_id=NParameterCommandId.REDUCTION_DIMENSIONALITY,
                                     values=[ReductionDimensionality.ONE_DIM])
         self._assert_raises_nothing(command_interface.add_command, command)
 
         # Reduction Dimensionality Two Dim
-        command = NParameterCommand(command_id=NParameterCommandId.reduction_dimensionality,
+        command = NParameterCommand(command_id=NParameterCommandId.REDUCTION_DIMENSIONALITY,
                                     values=[ReductionDimensionality.TWO_DIM])
         self._assert_raises_nothing(command_interface.add_command, command)
 
         # Sample offset
-        command = NParameterCommand(command_id=NParameterCommandId.sample_offset, values=[23.6])
+        command = NParameterCommand(command_id=NParameterCommandId.SAMPLE_OFFSET, values=[23.6])
         self._assert_raises_nothing(command_interface.add_command, command)
 
         # Sample scatter data
@@ -62,56 +62,56 @@ class CommandInterfaceStateDirectorTest(unittest.TestCase):
         self._assert_raises_nothing(command_interface.add_command, command)
 
         # Detector
-        command = NParameterCommand(command_id=NParameterCommandId.detector, values=[ReductionMode.HAB])
+        command = NParameterCommand(command_id=NParameterCommandId.DETECTOR, values=[ReductionMode.HAB])
         self._assert_raises_nothing(command_interface.add_command, command)
 
         # Gravity
-        command = NParameterCommand(command_id=NParameterCommandId.gravity, values=[True, 12.4])
+        command = NParameterCommand(command_id=NParameterCommandId.GRAVITY, values=[True, 12.4])
         self._assert_raises_nothing(command_interface.add_command, command)
 
         # Set centre
-        command = NParameterCommand(command_id=NParameterCommandId.centre, values=[12.4, 23.54, DetectorType.HAB])
+        command = NParameterCommand(command_id=NParameterCommandId.CENTRE, values=[12.4, 23.54, DetectorType.HAB])
         self._assert_raises_nothing(command_interface.add_command, command)
 
         # # Trans fit
-        command = NParameterCommand(command_id=NParameterCommandId.trans_fit, values=[FitData.Can, 10.4, 12.54,
+        command = NParameterCommand(command_id=NParameterCommandId.TRANS_FIT, values=[FitData.Can, 10.4, 12.54,
                                                                                       FitType.LOGARITHMIC, 0])
         self._assert_raises_nothing(command_interface.add_command, command)
 
         # Front detector rescale
-        command = NParameterCommand(command_id=NParameterCommandId.front_detector_rescale, values=[1.2, 2.4, True,
+        command = NParameterCommand(command_id=NParameterCommandId.FRONT_DETECTOR_RESCALE, values=[1.2, 2.4, True,
                                                                                                    False, None, 7.2])
         self._assert_raises_nothing(command_interface.add_command, command)
 
         # Event slices
-        command = NParameterCommand(command_id=NParameterCommandId.event_slices, values="1-23,55:3:65")
+        command = NParameterCommand(command_id=NParameterCommandId.EVENT_SLICES, values="1-23,55:3:65")
         self._assert_raises_nothing(command_interface.add_command, command)
 
         # Flood file
-        command = NParameterCommand(command_id=NParameterCommandId.flood_file, values=["test", DetectorType.LAB])
+        command = NParameterCommand(command_id=NParameterCommandId.FLOOD_FILE, values=["test", DetectorType.LAB])
         self._assert_raises_nothing(command_interface.add_command, command)
 
         # Phi limits
-        command = NParameterCommand(command_id=NParameterCommandId.phi_limit, values=[12.5, 123.6, False])
+        command = NParameterCommand(command_id=NParameterCommandId.PHI_LIMIT, values=[12.5, 123.6, False])
         self._assert_raises_nothing(command_interface.add_command, command)
 
         # Wavelength correction file
-        command = NParameterCommand(command_id=NParameterCommandId.wavelength_correction_file,
+        command = NParameterCommand(command_id=NParameterCommandId.WAVELENGTH_CORRECTION_FILE,
                                     values=["test", DetectorType.HAB])
         self._assert_raises_nothing(command_interface.add_command, command)
 
         # Radius mask
-        command = NParameterCommand(command_id=NParameterCommandId.mask_radius,
+        command = NParameterCommand(command_id=NParameterCommandId.MASK_RADIUS,
                                     values=[23.5, 234.7])
         self._assert_raises_nothing(command_interface.add_command, command)
 
         # Wavelength limits
-        command = NParameterCommand(command_id=NParameterCommandId.wavelength_limit,
+        command = NParameterCommand(command_id=NParameterCommandId.WAVELENGTH_LIMIT,
                                     values=[1.23, 23., 1.1, RangeStepType.LIN])
         self._assert_raises_nothing(command_interface.add_command, command)
 
         # QXY Limits
-        command = NParameterCommand(command_id=NParameterCommandId.qxy_limit,
+        command = NParameterCommand(command_id=NParameterCommandId.QXY_LIMIT,
                                     values=[1.23, 23., 1.1, RangeStepType.LIN])
         self._assert_raises_nothing(command_interface.add_command, command)
 
@@ -185,11 +185,11 @@ class CommandInterfaceStateDirectorTest(unittest.TestCase):
     def test_that_can_remove_last_command(self):
         # Arrange
         command_interface = CommandInterfaceStateDirector(SANSFacility.ISIS)
-        command_interface.add_command(NParameterCommand(command_id=NParameterCommandId.user_file,
+        command_interface.add_command(NParameterCommand(command_id=NParameterCommandId.USER_FILE,
                                                         values=["file_1.txt"]))
-        command_interface.add_command(NParameterCommand(command_id=NParameterCommandId.user_file,
+        command_interface.add_command(NParameterCommand(command_id=NParameterCommandId.USER_FILE,
                                                         values=["file_2.txt"]))
-        command_interface.add_command(NParameterCommand(command_id=NParameterCommandId.user_file,
+        command_interface.add_command(NParameterCommand(command_id=NParameterCommandId.USER_FILE,
                                                         values=["file_3.txt"]))
         # Act
         commands = command_interface.get_commands()

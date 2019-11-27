@@ -277,7 +277,7 @@ def Clean():
     """
     Removes all previous settings.
     """
-    clean_command = NParameterCommand(command_id=NParameterCommandId.clean, values=[])
+    clean_command = NParameterCommand(command_id=NParameterCommandId.CLEAN, values=[])
     director.add_command(clean_command)
 
 
@@ -286,7 +286,7 @@ def Set1D():
     Sets the reduction dimensionality to 1D
     """
     print_message('Set1D()')
-    set_1d_command = NParameterCommand(command_id=NParameterCommandId.reduction_dimensionality,
+    set_1d_command = NParameterCommand(command_id=NParameterCommandId.REDUCTION_DIMENSIONALITY,
                                        values=[ReductionDimensionality.ONE_DIM])
     director.add_command(set_1d_command)
 
@@ -296,7 +296,7 @@ def Set2D():
     Sets the reduction dimensionality to 2D
     """
     print_message('Set2D()')
-    set_2d_command = NParameterCommand(command_id=NParameterCommandId.reduction_dimensionality,
+    set_2d_command = NParameterCommand(command_id=NParameterCommandId.REDUCTION_DIMENSIONALITY,
                                        values=[ReductionDimensionality.TWO_DIM])
     director.add_command(set_2d_command)
 
@@ -305,7 +305,7 @@ def UseCompatibilityMode():
     """
     Sets the compatibility mode to True
     """
-    set_2d_command = NParameterCommand(command_id=NParameterCommandId.compatibility_mode,
+    set_2d_command = NParameterCommand(command_id=NParameterCommandId.COMPATIBILITY_MODE,
                                        values=[True])
     director.add_command(set_2d_command)
 
@@ -323,7 +323,7 @@ def MaskFile(file_name):
 
     # Get the full file path
     file_name_full = find_full_file_path(file_name)
-    user_file_command = NParameterCommand(command_id=NParameterCommandId.user_file, values=[file_name_full])
+    user_file_command = NParameterCommand(command_id=NParameterCommandId.USER_FILE, values=[file_name_full])
     director.add_command(user_file_command)
 
 
@@ -334,7 +334,7 @@ def Mask(details):
     @param details: a string that specifies masking as it would appear in a mask file
     """
     print_message('Mask("' + details + '")')
-    mask_command = NParameterCommand(command_id=NParameterCommandId.mask, values=[details])
+    mask_command = NParameterCommand(command_id=NParameterCommandId.MASK, values=[details])
     director.add_command(mask_command)
 
 
@@ -345,7 +345,7 @@ def SetSampleOffset(value):
     @param value: the offset in mm
     """
     value = float(value)
-    sample_offset_command = NParameterCommand(command_id=NParameterCommandId.sample_offset, values=[value])
+    sample_offset_command = NParameterCommand(command_id=NParameterCommandId.SAMPLE_OFFSET, values=[value])
     director.add_command(sample_offset_command)
 
 
@@ -360,7 +360,7 @@ def Detector(det_name):
     print_message('Detector("' + det_name + '")')
     detector_type = convert_bank_name_to_detector_type_isis(det_name)
     reduction_mode = ReductionMode.HAB if detector_type is DetectorType.HAB else ReductionMode.LAB
-    detector_command = NParameterCommand(command_id=NParameterCommandId.detector, values=[reduction_mode])
+    detector_command = NParameterCommand(command_id=NParameterCommandId.DETECTOR, values=[reduction_mode])
     director.add_command(detector_command)
 
 
@@ -368,7 +368,7 @@ def SetEventSlices(input_str):
     """
     Sets the events slices
     """
-    event_slices_command = NParameterCommand(command_id=NParameterCommandId.event_slices, values=input_str)
+    event_slices_command = NParameterCommand(command_id=NParameterCommandId.EVENT_SLICES, values=input_str)
     director.add_command(event_slices_command)
 
 
@@ -384,7 +384,7 @@ def SetMonitorSpectrum(specNum, interp=False):
     """
     specNum = int(specNum)
     is_trans = False
-    monitor_spectrum_command = NParameterCommand(command_id=NParameterCommandId.incident_spectrum, values=[specNum,
+    monitor_spectrum_command = NParameterCommand(command_id=NParameterCommandId.INCIDENT_SPECTRUM, values=[specNum,
                                                                                                            interp,
                                                                                                            is_trans])
     director.add_command(monitor_spectrum_command)
@@ -400,7 +400,7 @@ def SetTransSpectrum(specNum, interp=False):
     """
     specNum = int(specNum)
     is_trans = True
-    transmission_spectrum_command = NParameterCommand(command_id=NParameterCommandId.incident_spectrum,
+    transmission_spectrum_command = NParameterCommand(command_id=NParameterCommandId.INCIDENT_SPECTRUM,
                                                       values=[specNum, interp, is_trans])
     director.add_command(transmission_spectrum_command)
 
@@ -414,7 +414,7 @@ def Gravity(flag, extra_length=0.0):
     """
     extra_length = float(extra_length)
     print_message('Gravity(' + str(flag) + ', ' + str(extra_length) + ')')
-    gravity_command = NParameterCommand(command_id=NParameterCommandId.gravity, values=[flag, extra_length])
+    gravity_command = NParameterCommand(command_id=NParameterCommandId.GRAVITY, values=[flag, extra_length])
     director.add_command(gravity_command)
 
 
@@ -427,7 +427,7 @@ def SetDetectorFloodFile(filename, detector_name="REAR"):
     """
     file_name = find_full_file_path(filename)
     detector_name = convert_bank_name_to_detector_type_isis(detector_name)
-    flood_command = NParameterCommand(command_id=NParameterCommandId.flood_file, values=[file_name, detector_name])
+    flood_command = NParameterCommand(command_id=NParameterCommandId.FLOOD_FILE, values=[file_name, detector_name])
     director.add_command(flood_command)
 
 
@@ -445,7 +445,7 @@ def SetCorrectionFile(bank, filename):
     print_message("SetCorrectionFile(" + str(bank) + ', ' + filename + ')')
     detector_type = convert_bank_name_to_detector_type_isis(bank)
     file_name = find_full_file_path(filename)
-    flood_command = NParameterCommand(command_id=NParameterCommandId.wavelength_correction_file,
+    flood_command = NParameterCommand(command_id=NParameterCommandId.WAVELENGTH_CORRECTION_FILE,
                                       values=[file_name, detector_type])
     director.add_command(flood_command)
 
@@ -468,7 +468,7 @@ def SetCentre(xcoord, ycoord, bank='rear'):
     ycoord = float(ycoord)
     print_message('SetCentre(' + str(xcoord) + ', ' + str(ycoord) + ')')
     detector_type = convert_bank_name_to_detector_type_isis(bank)
-    centre_command = NParameterCommand(command_id=NParameterCommandId.centre, values=[xcoord, ycoord, detector_type])
+    centre_command = NParameterCommand(command_id=NParameterCommandId.CENTRE, values=[xcoord, ycoord, detector_type])
     director.add_command(centre_command)
 
 
@@ -486,7 +486,7 @@ def SetPhiLimit(phimin, phimax, use_mirror=True):
     # a beam centre of [0,0,0] makes sense if the detector has been moved such that beam centre is at [0,0,0]
     phimin = float(phimin)
     phimax = float(phimax)
-    centre_command = NParameterCommand(command_id=NParameterCommandId.phi_limit, values=[phimin, phimax, use_mirror])
+    centre_command = NParameterCommand(command_id=NParameterCommandId.PHI_LIMIT, values=[phimin, phimax, use_mirror])
     director.add_command(centre_command)
 
 
@@ -497,7 +497,7 @@ def set_save(save_algorithms, save_as_zero_error_free):
     @param save_algorithms: A list of SaveType enums.
     @param save_as_zero_error_free: True if a zero error correction should be performed.
     """
-    save_command = NParameterCommand(command_id=NParameterCommandId.save, values=[save_algorithms,
+    save_command = NParameterCommand(command_id=NParameterCommandId.SAVE, values=[save_algorithms,
                                                                                   save_as_zero_error_free])
     director.add_command(save_command)
 
@@ -565,7 +565,7 @@ def TransFit(mode, lambdamin=None, lambdamax=None, selector='BOTH'):
 
     # Configure fit settings
     polynomial_order = polynomial_order if polynomial_order is not None else 0
-    fit_command = NParameterCommand(command_id=NParameterCommandId.centre, values=[fit_data, lambdamin, lambdamax,
+    fit_command = NParameterCommand(command_id=NParameterCommandId.CENTRE, values=[fit_data, lambdamin, lambdamax,
                                                                                    fit_type, polynomial_order])
     director.add_command(fit_command)
 
@@ -586,7 +586,7 @@ def LimitsR(rmin, rmax, quiet=False, reducer=None):
         print_message('LimitsR(' + str(rmin) + ', ' + str(rmax) + ')', reducer)
     rmin /= 1000.
     rmax /= 1000.
-    radius_command = NParameterCommand(command_id=NParameterCommandId.mask_radius, values=[rmin, rmax])
+    radius_command = NParameterCommand(command_id=NParameterCommandId.MASK_RADIUS, values=[rmin, rmax])
     director.add_command(radius_command)
 
 
@@ -608,7 +608,7 @@ def LimitsWav(lmin, lmax, step, bin_type):
     rebin_string = bin_type.strip().upper()
     rebin_type = RangeStepType.LOG if rebin_string == "LOGARITHMIC" else RangeStepType.LIN
 
-    wavelength_command = NParameterCommand(command_id=NParameterCommandId.wavelength_limit,
+    wavelength_command = NParameterCommand(command_id=NParameterCommandId.WAVELENGTH_LIMIT,
                                            values=[lmin, lmax, step, rebin_type])
     director.add_command(wavelength_command)
 
@@ -631,7 +631,7 @@ def LimitsQXY(qmin, qmax, step, type):
         step_type = RangeStepType.LOG
     else:
         step_type = RangeStepType.LIN
-    qxy_command = NParameterCommand(command_id=NParameterCommandId.qxy_limit, values=[qmin, qmax, step, step_type])
+    qxy_command = NParameterCommand(command_id=NParameterCommandId.QXY_LIMIT, values=[qmin, qmax, step, step_type])
     director.add_command(qxy_command)
 
 
@@ -660,7 +660,7 @@ def SetFrontDetRescaleShift(scale=1.0, shift=0.0, fitScale=False, fitShift=False
         qMax = float(qMax)
 
     print_message('Set front detector rescale/shift values to {0} and {1}'.format(scale, shift))
-    front_command = NParameterCommand(command_id=NParameterCommandId.front_detector_rescale, values=[scale, shift,
+    front_command = NParameterCommand(command_id=NParameterCommandId.FRONT_DETECTOR_RESCALE, values=[scale, shift,
                                                                                                      fitScale, fitShift,
                                                                                                      qMin, qMax])
     director.add_command(front_command)
@@ -702,7 +702,7 @@ def SetDetectorOffsets(bank, x, y, z, rot, radius, side, xtilt=0.0, ytilt=0.0):
                   + ',' + str(y) + ',' + str(z) + ',' + str(rot)
                   + ',' + str(radius) + ',' + str(side) + ',' + str(xtilt) + ',' + str(ytilt) + ')')
     detector_type = convert_bank_name_to_detector_type_isis(bank)
-    detector_offsets = NParameterCommand(command_id=NParameterCommandId.detector_offsets, values=[detector_type,
+    detector_offsets = NParameterCommand(command_id=NParameterCommandId.DETECTOR_OFFSETS, values=[detector_type,
                                                                                                   x, y, z,
                                                                                                   rot, radius, side,
                                                                                                   xtilt, ytilt])
@@ -770,19 +770,19 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
     if wav_end is not None:
         wav_end = float(wav_end)
 
-    wavelength_command = NParameterCommand(command_id=NParameterCommandId.wavrange_settings,
+    wavelength_command = NParameterCommand(command_id=NParameterCommandId.WAV_RANGE_SETTINGS,
                                            values=[wav_start, wav_end, full_trans_wav, reduction_mode])
     director.add_command(wavelength_command)
 
     # Save options
     if output_name is not None:
-        director.add_command(NParameterCommand(command_id=NParameterCommandId.user_specified_output_name,
+        director.add_command(NParameterCommand(command_id=NParameterCommandId.USER_SPECIFIED_OUTPUT_NAME,
                                                values=[output_name]))
     if name_suffix is not None:
-        director.add_command(NParameterCommand(command_id=NParameterCommandId.user_specified_output_name_suffix,
+        director.add_command(NParameterCommand(command_id=NParameterCommandId.USER_SPECIFIED_OUTPUT_NAME_SUFFIX,
                                                values=[name_suffix]))
     if use_reduction_mode_as_suffix:
-        director.add_command(NParameterCommand(command_id=NParameterCommandId.use_reduction_mode_as_suffix,
+        director.add_command(NParameterCommand(command_id=NParameterCommandId.USE_REDUCTION_MODE_AS_SUFFIX,
                                                values=[use_reduction_mode_as_suffix]))
 
     # Get the states

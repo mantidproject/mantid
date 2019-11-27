@@ -7,16 +7,17 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.py3compat import Enum
-from sans.common.enums import (serializable_enum, DataType)
-from sans.user_file.state_director import StateDirectorISIS
+from sans.common.enums import DataType
+from sans.common.file_information import SANSFileInformationFactory
 from sans.state.data import get_data_builder
-from sans.user_file.user_file_parser import (UserFileParser)
-from sans.user_file.user_file_reader import (UserFileReader)
 from sans.user_file.settings_tags import (MonId, monitor_spectrum, OtherId, SampleId, GravityId, SetId, position_entry,
                                           fit_general, FitId, monitor_file, mask_angle_entry, LimitsId, range_entry,
                                           simple_range, DetectorId, event_binning_string_values, det_fit_range,
                                           single_entry_with_detector)
-from sans.common.file_information import SANSFileInformationFactory
+from sans.user_file.state_director import StateDirectorISIS
+from sans.user_file.user_file_parser import (UserFileParser)
+from sans.user_file.user_file_reader import (UserFileReader)
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Commands
@@ -36,20 +37,32 @@ class DataCommandId(Enum):
     SAMPLE_DIRECT = "sample_direct"
 
 
-@serializable_enum("clean", "reduction_dimensionality", "compatibility_mode",  # Null Parameter commands
-                   "user_file", "mask", "sample_offset", "detector", "event_slices",  # Single parameter commands
-                   "flood_file", "wavelength_correction_file",  # Single parameter commands
-                   "user_specified_output_name", "user_specified_output_name_suffix",  # Single parameter commands
-                   "use_reduction_mode_as_suffix",  # Single parameter commands
-                   "incident_spectrum", "gravity",  # Double parameter commands
-                   "centre", "save",   # Three parameter commands
-                   "trans_fit", "phi_limit", "mask_radius", "wavelength_limit", "qxy_limit",  # Four parameter commands
-                   "wavrange_settings",  # Five parameter commands
-                   "front_detector_rescale",  # Six parameter commands
-                   "detector_offsets"  # Nine parameter commands
-                   )
 class NParameterCommandId(object):
-    pass
+    CENTRE = "centre"
+    CLEAN = "clean"
+    COMPATIBILITY_MODE = "compatibility_mode"
+    DETECTOR = "detector"
+    DETECTOR_OFFSETS = "detector_offsets"
+    EVENT_SLICES = "event_slices"
+    FLOOD_FILE = "flood_file"
+    FRONT_DETECTOR_RESCALE = "front_detector_rescale"
+    GRAVITY = "gravity"
+    INCIDENT_SPECTRUM = "incident_spectrum"
+    MASK = "mask"
+    MASK_RADIUS = "mask_radius"
+    REDUCTION_DIMENSIONALITY = "reduction_dimensionality"
+    PHI_LIMIT = "phi_limit"
+    QXY_LIMIT = "qxy_limit"
+    SAMPLE_OFFSET = "sample_offset"
+    SAVE = "save"
+    TRANS_FIT = "trans_fit"
+    USER_FILE = "user_file"
+    USE_REDUCTION_MODE_AS_SUFFIX = "use_reduction_mode_as_suffix"
+    USER_SPECIFIED_OUTPUT_NAME = "user_specified_output_name"
+    USER_SPECIFIED_OUTPUT_NAME_SUFFIX = "user_specified_output_name_suffix"
+    WAVELENGTH_CORRECTION_FILE = "wavelength_correction_file"
+    WAVELENGTH_LIMIT = "wavelength_limit"
+    WAV_RANGE_SETTINGS = "wavrange_settings"
 
 
 class Command(object):
@@ -259,32 +272,32 @@ class CommandInterfaceStateDirector(object):
         """
         Sets up a mapping between command ids and the adequate processing methods which can handle the command.
         """
-        self._method_map = {NParameterCommandId.user_file: self._process_user_file,
-                            NParameterCommandId.mask: self._process_mask,
-                            NParameterCommandId.incident_spectrum: self._process_incident_spectrum,
-                            NParameterCommandId.clean: self._process_clean,
-                            NParameterCommandId.reduction_dimensionality: self._process_reduction_dimensionality,
-                            NParameterCommandId.sample_offset: self._process_sample_offset,
-                            NParameterCommandId.detector: self._process_detector,
-                            NParameterCommandId.gravity: self._process_gravity,
-                            NParameterCommandId.centre: self._process_centre,
-                            NParameterCommandId.trans_fit: self._process_trans_fit,
-                            NParameterCommandId.front_detector_rescale: self._process_front_detector_rescale,
-                            NParameterCommandId.event_slices: self._process_event_slices,
-                            NParameterCommandId.flood_file: self._process_flood_file,
-                            NParameterCommandId.phi_limit: self._process_phi_limit,
-                            NParameterCommandId.wavelength_correction_file: self._process_wavelength_correction_file,
-                            NParameterCommandId.mask_radius: self._process_mask_radius,
-                            NParameterCommandId.wavelength_limit: self._process_wavelength_limit,
-                            NParameterCommandId.qxy_limit: self._process_qxy_limit,
-                            NParameterCommandId.wavrange_settings: self._process_wavrange,
-                            NParameterCommandId.compatibility_mode: self._process_compatibility_mode,
-                            NParameterCommandId.detector_offsets: self._process_detector_offsets,
-                            NParameterCommandId.save: self._process_save,
-                            NParameterCommandId.user_specified_output_name: self._process_user_specified_output_name,
-                            NParameterCommandId.user_specified_output_name_suffix:
+        self._method_map = {NParameterCommandId.USER_FILE: self._process_user_file,
+                            NParameterCommandId.MASK: self._process_mask,
+                            NParameterCommandId.INCIDENT_SPECTRUM: self._process_incident_spectrum,
+                            NParameterCommandId.CLEAN: self._process_clean,
+                            NParameterCommandId.REDUCTION_DIMENSIONALITY: self._process_reduction_dimensionality,
+                            NParameterCommandId.SAMPLE_OFFSET: self._process_sample_offset,
+                            NParameterCommandId.DETECTOR: self._process_detector,
+                            NParameterCommandId.GRAVITY: self._process_gravity,
+                            NParameterCommandId.CENTRE: self._process_centre,
+                            NParameterCommandId.TRANS_FIT: self._process_trans_fit,
+                            NParameterCommandId.FRONT_DETECTOR_RESCALE: self._process_front_detector_rescale,
+                            NParameterCommandId.EVENT_SLICES: self._process_event_slices,
+                            NParameterCommandId.FLOOD_FILE: self._process_flood_file,
+                            NParameterCommandId.PHI_LIMIT: self._process_phi_limit,
+                            NParameterCommandId.WAVELENGTH_CORRECTION_FILE: self._process_wavelength_correction_file,
+                            NParameterCommandId.MASK_RADIUS: self._process_mask_radius,
+                            NParameterCommandId.WAVELENGTH_LIMIT: self._process_wavelength_limit,
+                            NParameterCommandId.QXY_LIMIT: self._process_qxy_limit,
+                            NParameterCommandId.WAV_RANGE_SETTINGS: self._process_wavrange,
+                            NParameterCommandId.COMPATIBILITY_MODE: self._process_compatibility_mode,
+                            NParameterCommandId.DETECTOR_OFFSETS: self._process_detector_offsets,
+                            NParameterCommandId.SAVE: self._process_save,
+                            NParameterCommandId.USER_SPECIFIED_OUTPUT_NAME: self._process_user_specified_output_name,
+                            NParameterCommandId.USER_SPECIFIED_OUTPUT_NAME_SUFFIX:
                                 self._process_user_specified_output_name_suffix,
-                            NParameterCommandId.use_reduction_mode_as_suffix:
+                            NParameterCommandId.USE_REDUCTION_MODE_AS_SUFFIX:
                                 self._process_use_reduction_mode_as_suffix
                             }
 
@@ -371,7 +384,7 @@ class CommandInterfaceStateDirector(object):
         index_first_clean_command = None
         for index in reversed(list(range(0, len(self._commands)))):
             element = self._commands[index]
-            if element.command_id == NParameterCommandId.clean:
+            if element.command_id == NParameterCommandId.CLEAN:
                 index_first_clean_command = index
                 break
         if index_first_clean_command is not None:
@@ -596,7 +609,7 @@ class CommandInterfaceStateDirector(object):
 
         See _remove_last_element for further explanation.
         """
-        self._remove_last_element(NParameterCommandId.user_file)
+        self._remove_last_element(NParameterCommandId.USER_FILE)
 
     def remove_last_scatter_sample(self):
         """
