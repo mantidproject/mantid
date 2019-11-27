@@ -48,7 +48,7 @@ public:
 
   void addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
 
-  std::pair<std::string, int> getResolutionsForFit() const;
+  std::vector<std::pair<std::string, int>> getResolutionsForFit() const;
 
 private:
   Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm() const override;
@@ -62,7 +62,8 @@ private:
   createDefaultParameters(TableDatasetIndex index) const override;
   std::unordered_map<std::string, std::string>
   mapDefaultParameterNames() const override;
-
+  Mantid::API::IAlgorithm_sptr
+  createSequentialFit(Mantid::API::IFunction_sptr function) const override;
   IndirectFitOutput
   createFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
                   Mantid::API::ITableWorkspace_sptr parameterTable,
@@ -93,6 +94,8 @@ private:
 
   void setParameterNameChanges(const Mantid::API::IFunction &model,
                                boost::optional<std::size_t> backgroundIndex);
+
+  std::string constructSequentialResolutionWorkspace() const;
 
   ResolutionCollectionType m_resolution;
   ExtendedResolutionType m_extendedResolution;

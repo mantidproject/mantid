@@ -218,6 +218,20 @@ MatrixWorkspace_sptr appendWorkspace(MatrixWorkspace_sptr leftWS,
   return getADSMatrixWorkspace(outputName);
 }
 
+MatrixWorkspace_sptr extractSingleSpectrum(const std::string &inputWS,
+                                           const std::string &outputWS,
+                                           int index) {
+  auto extractAlg =
+      AlgorithmManager::Instance().create("ExtractSingleSpectrum");
+  extractAlg->setLogging(false);
+  extractAlg->initialize();
+  extractAlg->setProperty("InputWorkspace", inputWS);
+  extractAlg->setProperty("WorkspaceIndex", index);
+  extractAlg->setProperty("OutputWorkspace", outputWS);
+  extractAlg->execute();
+  return getADSMatrixWorkspace(outputWS);
+}
+
 void renameWorkspace(std::string const &name, std::string const &newName) {
   auto renamer = AlgorithmManager::Instance().create("RenameWorkspace");
   renamer->setLogging(false);
@@ -488,6 +502,34 @@ std::string ConvFitModel::singleFitOutputName(TableDatasetIndex index,
                                    index, spectrum);
 }
 
+Mantid::API::IAlgorithm_sptr
+ConvFitModel::createSequentialFit(Mantid::API::IFunction_sptr function) const {
+  auto resolutionWorkspaceName = constructSequentialResolutionWorkspace();
+  auto functionCopy = function->clone();
+  IFunction::Attribute attr(resolutionWorkspaceName);
+  setResolutionAttribute(
+      boost::dynamic_pointer_cast<CompositeFunction>(functionCopy), attr);
+  return IndirectFittingModel::createSequentialFit(functionCopy);
+}
+
+std::string ConvFitModel::constructSequentialResolutionWorkspace() const {
+  auto resolutionWorkspaceName = "__ConvFitSequential";
+  auto resolutionWorkspaces = getResolutionsForFit();
+  auto resolutionWS = extractSingleSpectrum(resolutionWorkspaces[0].first,
+                                            resolutionWorkspaceName,
+                                            resolutionWorkspaces[0].second);
+  for (size_t index = 1; index < resolutionWorkspaces.size(); index++) {
+    auto extractedSpectra = extractSingleSpectrum(
+        resolutionWorkspaces[index].first, "__indirectResolutionCreationTemp",
+        resolutionWorkspaces[index].second);
+    resolutionWS = appendWorkspace(resolutionWS, extractedSpectra, 1,
+                                   resolutionWorkspaceName);
+  }
+  deleteWorkspace("__indirectResolutionCreationTemp");
+
+  return resolutionWorkspaceName;
+}
+
 Mantid::API::MultiDomainFunction_sptr ConvFitModel::getFittingFunction() const {
   // auto function = shallowCopy(IndirectFittingModel::getFittingFunction());
   // auto composite = boost::dynamic_pointer_cast<CompositeFunction>(function);
@@ -719,8 +761,23 @@ void ConvFitModel::setParameterNameChanges(
       model, backgroundIndex, m_temperature.is_initialized());
 }
 
-std::pair<std::string, int> ConvFitModel::getResolutionsForFit() const {
-  return std::pair<std::string, int>();
+std::vector<std::pair<std::string, int>>
+ConvFitModel::getResolutionsForFit() const {
+  std::vector<std::pair<std::string, int>> resolutionVector;
+  resolutionVector.reserve(20);
+  for (TableDatasetIndex index = TableDatasetIndex{0};
+       index < m_resolution.size(); index++) {
+
+    auto spectra = getSpectra(index);
+    auto singleSpectraResolution =
+        getResolution(index)->getNumberHistograms() == 1;
+    for (auto &spectraIndex : spectra) {
+      auto resolutionIndex = singleSpectraResolution ? 0 : spectraIndex.value;
+      resolutionVector.emplace_back(
+          std::make_pair(getResolution(index)->getName(), resolutionIndex));
+    }
+  }
+  return resolutionVector;
 }
 
 } // namespace IDA

@@ -256,9 +256,13 @@ public:
     algo->execute();
     ConvolutionFunctionModel model;
     model.setNumberDomains(2);
+    auto pair1 = std::make_pair<std::string, int>("abc", 1);
+    auto pair2 = std::make_pair<std::string, int>("abc", 2);
+    auto fitResolutions = std::vector<std::pair<std::string, int>>();
+    fitResolutions.emplace_back(pair1);
+    fitResolutions.emplace_back(pair2);
 
-    model.setModel("", std::vector<std::string>(2, "abc"),
-                   std::vector<int>({1, 2}), "", false);
+    model.setModel("", fitResolutions, "", false);
 
     auto fitFunctionAsString = model.getFitFunction()->asString();
     TS_ASSERT_EQUALS(

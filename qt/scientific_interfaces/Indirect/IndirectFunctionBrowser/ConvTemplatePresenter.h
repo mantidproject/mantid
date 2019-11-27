@@ -52,6 +52,8 @@ public:
   void setDatasetNames(const QStringList &names);
   void setErrorsEnabled(bool enabled);
   void setResolution(std::string const &name, TableDatasetIndex const &index);
+  void
+  setResolution(const std::vector<std::pair<std::string, int>> &fitResolutions);
 
 signals:
   void functionStructureChanged();
