@@ -92,7 +92,6 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         current_group_pair = self.context.group_pair_context[
             self.context.group_pair_context.selected]
         current_plot_type = self._view.get_selected()
-
         if isinstance(current_group_pair, MuonPair) and current_plot_type == COUNTS_PLOT_TYPE:
             self._view.plot_selector.blockSignals(True)
             self._view.plot_selector.setCurrentText(ASYMMETRY_PLOT_TYPE)
@@ -130,17 +129,17 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         workspace_list = self.get_workspaces_to_plot(
             self.context.group_pair_context.selected, self._view.if_raw(),
             self._view.get_selected())
+        print(workspace_list)
 
         self._model.plot(workspace_list, self.get_plot_title(), self.get_domain(),
                          self.context.window_title)
 
         # if we are redrawing, keep previous fit
         if self._force_redraw:
-            if self.context.fitting_context.fit_list:
-                self.handle_fit_completed()
-            self.handle_plot_guess_changed()
+            self.handle_fit_completed()
         else:
             self.context.fitting_context.clear()
+        self.handle_plot_guess_changed()
         # reset redraw flag
         self._force_redraw = False
 
@@ -163,6 +162,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         if self.context.fitting_context.number_of_fits <= 1:
             for workspace_name in self._model.plotted_fit_workspaces:
                 self._model.remove_workpace_from_plot(workspace_name)
+            self._model.plot_figure.gca().legend(prop=dict(size=7))
 
         if self.context.fitting_context.fit_list:
             current_fit = self.context.fitting_context.fit_list[-1]
@@ -246,7 +246,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         flattened_run_list = [
             item for sublist in self.context.data_context.current_runs for item in sublist]
         return self.context.data_context.instrument + ' ' + run_list_to_string(flattened_run_list) + ' ' + \
-            self.context.group_pair_context.selected
+               self.context.group_pair_context.selected
 
     def handle_rebin_options_set(self):
         if self.context._do_rebin():
@@ -271,10 +271,11 @@ class PlotWidgetPresenter(HomeTabSubWidget):
 
         for guess in [ws for ws in self._model.plotted_fit_workspaces if '_guess' in ws]:
             self._model.remove_workpace_from_plot(guess)
+            # refresh legend
+            self._model.plot_figure.gca().legend(prop=dict(size=7))
 
         if self.context.fitting_context.plot_guess and self.context.fitting_context.guess_ws is not None:
             self._model.add_workspace_to_plot(self.context.fitting_context.guess_ws,
                                               workspace_index=1,
                                               label='Fit Function Guess')
-
         self._model.force_redraw()

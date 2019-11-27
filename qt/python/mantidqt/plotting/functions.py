@@ -233,14 +233,16 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
 
     if not overplot:
         fig.canvas.set_window_title(figure_title(workspaces, fig.number))
-    # This updates the toolbar so the home button now takes you back to this point, the try catch is in case the manager does not
-    # have a toolbar attatched.
+    # This updates the toolbar so the home button now takes you back to this point.
+    # The try catch is in case the manager does not have a toolbar attached.
     try:
         fig.canvas.manager.toolbar.update()
     except AttributeError:
         pass
 
     fig.canvas.draw()
+    # This displays the figure, but only works if a manager is attached to the figure.
+    # The try catch is in case a figure manager is not present
     try:
         fig.show()
     except AttributeError:
