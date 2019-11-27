@@ -498,11 +498,11 @@ class StateDirectorISIS(object):
             else:
                 log_non_existing_field("set_monitor_{0}_offset".format(spec_num))
 
-        if TransId.spec_4_shift in user_file_items:
-            parse_shift(key_to_parse=TransId.spec_4_shift, spec_num=4)
+        if TransId.SPEC_4_SHIFT in user_file_items:
+            parse_shift(key_to_parse=TransId.SPEC_4_SHIFT, spec_num=4)
 
-        if TransId.spec_5_shift in user_file_items:
-            parse_shift(key_to_parse=TransId.spec_5_shift, spec_num=5)
+        if TransId.SPEC_5_SHIFT in user_file_items:
+            parse_shift(key_to_parse=TransId.SPEC_5_SHIFT, spec_num=5)
 
         # ---------------------------
         # Beam Centre, this can be for HAB and LAB
@@ -1129,27 +1129,27 @@ class StateDirectorISIS(object):
 
     def _set_up_calculate_transmission(self, user_file_items):
         # Transmission radius
-        set_single_entry(self._calculate_transmission_builder, "set_transmission_radius_on_detector", TransId.radius,
+        set_single_entry(self._calculate_transmission_builder, "set_transmission_radius_on_detector", TransId.RADIUS,
                          user_file_items, apply_to_value=convert_mm_to_m)
 
         # List of transmission roi files
-        if TransId.roi in user_file_items:
-            trans_roi = user_file_items[TransId.roi]
+        if TransId.ROI in user_file_items:
+            trans_roi = user_file_items[TransId.ROI]
             self._calculate_transmission_builder.set_transmission_roi_files(trans_roi)
 
         # List of transmission mask files
-        if TransId.mask in user_file_items:
-            trans_mask = user_file_items[TransId.mask]
+        if TransId.MASK in user_file_items:
+            trans_mask = user_file_items[TransId.MASK]
             self._calculate_transmission_builder.set_transmission_mask_files(trans_mask)
 
         # The prompt peak correction values
         set_prompt_peak_correction(self._calculate_transmission_builder, user_file_items)
 
         # The transmission spectrum
-        if TransId.spec in user_file_items:
-            trans_spec = user_file_items[TransId.spec]
+        if TransId.SPEC in user_file_items:
+            trans_spec = user_file_items[TransId.SPEC]
             # Should the user have chosen several values, then the last element is selected
-            check_if_contains_only_one_element(trans_spec, TransId.spec)
+            check_if_contains_only_one_element(trans_spec, TransId.SPEC)
             trans_spec = trans_spec[-1]
             self._calculate_transmission_builder.set_transmission_monitor(trans_spec)
 

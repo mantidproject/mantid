@@ -106,15 +106,20 @@ class SampleId(Enum):
 
 
 class SetId(Enum):
-    SCALES = "scales"
     CENTRE = "centre"
     CENTRE_HAB = "centre_HAB"
+    SCALES = "scales"
 
 
-# --- TRANS
-@serializable_enum("spec", "spec_4_shift", "spec_5_shift", "radius", "roi", "mask", "sample_workspace", "can_workspace")
-class TransId(object):
-    pass
+class TransId(Enum):
+    CAN_WORKSPACE = "can_workspace"
+    RADIUS = "radius"
+    ROI = "roi"
+    MASK = "mask"
+    SAMPLE_WORKSPACE = "sample_workspace"
+    SPEC = "spec"
+    SPEC_4_SHIFT = "spec_4_shift"
+    SPEC_5_SHIFT = "spec_5_shift"
 
 
 # --- TUBECALIBFILE

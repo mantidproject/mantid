@@ -1392,16 +1392,16 @@ class TransParser(UserFileComponentParser):
         dist, monitor = int(split_vars[0]), int(split_vars[1])
 
         if monitor == 4:
-            return {TransId.spec_4_shift: dist}
+            return {TransId.SPEC_4_SHIFT: dist}
         elif monitor == 5:
-            return {TransId.spec_5_shift: dist}
+            return {TransId.SPEC_5_SHIFT: dist}
         else:
             raise RuntimeError("The monitor {0} cannot be shifted".format(monitor))
 
     def _extract_trans_spec(self, line):
         trans_spec_string = re.sub(self._trans_spec, "", line)
         trans_spec = convert_string_to_integer(trans_spec_string)
-        return {TransId.spec: trans_spec}
+        return {TransId.SPEC: trans_spec}
 
     def _extract_trans_spec_shift(self, line):
         # Get the transpec
@@ -1420,32 +1420,32 @@ class TransParser(UserFileComponentParser):
 
         # Pair up the monitor and shift amount
         if trans_spec == 4:
-            return {TransId.spec_4_shift: trans_spec_shift, TransId.spec: trans_spec}
+            return {TransId.SPEC_4_SHIFT: trans_spec_shift, TransId.SPEC: trans_spec}
         elif trans_spec == 5:
-            return {TransId.spec_5_shift: trans_spec_shift, TransId.spec: trans_spec}
+            return {TransId.SPEC_5_SHIFT: trans_spec_shift, TransId.SPEC: trans_spec}
         else:
             raise RuntimeError("Monitor {0} cannot be shifted".format(trans_spec))
 
     def _extract_radius(self, line):
         radius_string = re.sub(self._radius, "", line)
         radius = convert_string_to_float(radius_string)
-        return {TransId.radius: radius}
+        return {TransId.RADIUS: radius}
 
     def _extract_roi(self, line, original_line):
         file_names = TransParser.extract_file_names(line, original_line, self._roi)
-        return {TransId.roi: file_names}
+        return {TransId.ROI: file_names}
 
     def _extract_mask(self, line, original_line):
         file_names = TransParser.extract_file_names(line, original_line, self._mask)
-        return {TransId.mask: file_names}
+        return {TransId.MASK: file_names}
 
     def _extract_sample_workspace(self, line, original_line):
         sample_workspace = TransParser.extract_workspace(line, original_line, self._sample_workspace)
-        return {TransId.sample_workspace:  sample_workspace}
+        return {TransId.SAMPLE_WORKSPACE:  sample_workspace}
 
     def _extract_can_workspace(self, line, original_line):
         can_workspace = TransParser.extract_workspace(line, original_line, self._can_workspace)
-        return {TransId.can_workspace:  can_workspace}
+        return {TransId.CAN_WORKSPACE:  can_workspace}
 
     @staticmethod
     def extract_workspace(line, original_line, to_remove):

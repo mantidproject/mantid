@@ -577,8 +577,8 @@ class TransParserTest(unittest.TestCase):
         self.assertTrue(TransParser.get_type(), "TRANS")
 
     def test_that_trans_spec_is_parsed_correctly(self):
-        valid_settings = {"TRANS/TRANSPEC=23": {TransId.spec: 23},
-                          "TRANS / TransPEC =  23": {TransId.spec: 23}}
+        valid_settings = {"TRANS/TRANSPEC=23": {TransId.SPEC: 23},
+                          "TRANS / TransPEC =  23": {TransId.SPEC: 23}}
 
         invalid_settings = {"TRANS/TRANSPEC 23": RuntimeError,
                             "TRANS/TRANSPEC/23": RuntimeError,
@@ -590,13 +590,13 @@ class TransParserTest(unittest.TestCase):
         do_test(trans_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_mon_shift_is_parsed_correctly(self):
-        valid_settings = {"TRANS/SHIFT = 4000 5": {TransId.spec_5_shift: 4000},
-                          "TRANS/SHIFT=4000 4" : {TransId.spec_4_shift: 4000},
-                          "TRANS/SHIFT=4000 5": {TransId.spec_5_shift: 4000},
-                          "TRANS/SHIFT=-100 4": {TransId.spec_4_shift: -100},
-                          "TRANS/ SHIFT=4000 5": {TransId.spec_5_shift: 4000},
-                          "TRANS /SHIFT=4000 5": {TransId.spec_5_shift: 4000},
-                          "TRANS/SHIFT=4000      5": {TransId.spec_5_shift: 4000},
+        valid_settings = {"TRANS/SHIFT = 4000 5": {TransId.SPEC_5_SHIFT: 4000},
+                          "TRANS/SHIFT=4000 4" : {TransId.SPEC_4_SHIFT: 4000},
+                          "TRANS/SHIFT=4000 5": {TransId.SPEC_5_SHIFT: 4000},
+                          "TRANS/SHIFT=-100 4": {TransId.SPEC_4_SHIFT: -100},
+                          "TRANS/ SHIFT=4000 5": {TransId.SPEC_5_SHIFT: 4000},
+                          "TRANS /SHIFT=4000 5": {TransId.SPEC_5_SHIFT: 4000},
+                          "TRANS/SHIFT=4000      5": {TransId.SPEC_5_SHIFT: 4000},
                           }
 
         invalid_settings = {"TRANS/SHIFT=1000 12": RuntimeError,
@@ -620,8 +620,8 @@ class TransParserTest(unittest.TestCase):
         do_test(trans_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_trans_spec_shift_is_parsed_correctly(self):
-        valid_settings = {"TRANS/TRANSPEC=4/SHIFT=23": {TransId.spec_4_shift: 23, TransId.spec: 4},
-                          "TRANS/TRANSPEC =4/ SHIFT = 23": {TransId.spec_4_shift: 23, TransId.spec: 4},
+        valid_settings = {"TRANS/TRANSPEC=4/SHIFT=23": {TransId.SPEC_4_SHIFT: 23, TransId.SPEC: 4},
+                          "TRANS/TRANSPEC =4/ SHIFT = 23": {TransId.SPEC_4_SHIFT: 23, TransId.SPEC: 4},
 
                           }
 
@@ -636,17 +636,17 @@ class TransParserTest(unittest.TestCase):
         do_test(trans_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_radius_is_parsed_correctly(self):
-        valid_settings = {"TRANS / radius  =23": {TransId.radius: 23},
-                          "TRANS /RADIUS= 245.7": {TransId.radius: 245.7}}
+        valid_settings = {"TRANS / radius  =23": {TransId.RADIUS: 23},
+                          "TRANS /RADIUS= 245.7": {TransId.RADIUS: 245.7}}
         invalid_settings = {}
 
         trans_parser = TransParser()
         do_test(trans_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_roi_is_parsed_correctly(self):
-        valid_settings = {"TRANS/ROI =testFile.xml": {TransId.roi: ["testFile.xml"]},
+        valid_settings = {"TRANS/ROI =testFile.xml": {TransId.ROI: ["testFile.xml"]},
                           "TRANS/ROI =testFile.xml, "
-                          "TestFile2.XmL,testFile4.xml": {TransId.roi: ["testFile.xml", "TestFile2.XmL",
+                          "TestFile2.XmL,testFile4.xml": {TransId.ROI: ["testFile.xml", "TestFile2.XmL",
                                                                         "testFile4.xml"]}}
         invalid_settings = {"TRANS/ROI =t estFile.xml": RuntimeError,
                             "TRANS/ROI =testFile.txt": RuntimeError,
@@ -657,9 +657,9 @@ class TransParserTest(unittest.TestCase):
         do_test(trans_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_mask_is_parsed_correctly(self):
-        valid_settings = {"TRANS/Mask =testFile.xml": {TransId.mask: ["testFile.xml"]},
+        valid_settings = {"TRANS/Mask =testFile.xml": {TransId.MASK: ["testFile.xml"]},
                           "TRANS/ MASK =testFile.xml, "
-                          "TestFile2.XmL,testFile4.xml": {TransId.mask: ["testFile.xml", "TestFile2.XmL",
+                          "TestFile2.XmL,testFile4.xml": {TransId.MASK: ["testFile.xml", "TestFile2.XmL",
                                                                          "testFile4.xml"]}}
         invalid_settings = {"TRANS/MASK =t estFile.xml": RuntimeError,
                             "TRANS/  MASK =testFile.txt": RuntimeError,
@@ -670,10 +670,10 @@ class TransParserTest(unittest.TestCase):
         do_test(trans_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_workspaces_are_parsed_correctly(self):
-        valid_settings = {"TRANS/SampleWS =testworksaoe234Name": {TransId.sample_workspace: "testworksaoe234Name"},
-                          "TRANS/ SampleWS = testworksaoe234Name": {TransId.sample_workspace: "testworksaoe234Name"},
-                          "TRANS/ CanWS =testworksaoe234Name": {TransId.can_workspace: "testworksaoe234Name"},
-                          "TRANS/ CANWS = testworksaoe234Name": {TransId.can_workspace: "testworksaoe234Name"}}
+        valid_settings = {"TRANS/SampleWS =testworksaoe234Name": {TransId.SAMPLE_WORKSPACE: "testworksaoe234Name"},
+                          "TRANS/ SampleWS = testworksaoe234Name": {TransId.SAMPLE_WORKSPACE: "testworksaoe234Name"},
+                          "TRANS/ CanWS =testworksaoe234Name": {TransId.CAN_WORKSPACE: "testworksaoe234Name"},
+                          "TRANS/ CANWS = testworksaoe234Name": {TransId.CAN_WORKSPACE: "testworksaoe234Name"}}
         invalid_settings = {"TRANS/CANWS/ test": RuntimeError,
                             "TRANS/SAMPLEWS =": RuntimeError}
 
@@ -1093,7 +1093,7 @@ class UserFileParserTest(unittest.TestCase):
 
         # TransParser
         result = user_file_parser.parse_line("TRANS / radius  =23")
-        assert_valid_result(result, {TransId.radius: 23}, self.assertTrue)
+        assert_valid_result(result, {TransId.RADIUS: 23}, self.assertTrue)
 
         # TubeCalibFileParser
         result = user_file_parser.parse_line("TUBECALIbfile= calib_file.nxs")

@@ -287,52 +287,52 @@ class SettingsAdjustmentModel(ModelCommon):
 
     @property
     def transmission_roi_files(self):
-        return self.get_simple_element(element_id=TransId.roi, default_value="")
+        return self.get_simple_element(element_id=TransId.ROI, default_value="")
 
     @transmission_roi_files.setter
     def transmission_roi_files(self, value):
-        self.set_simple_element(element_id=TransId.roi, value=value)
+        self.set_simple_element(element_id=TransId.ROI, value=value)
 
     @property
     def transmission_mask_files(self):
-        return self.get_simple_element(element_id=TransId.mask, default_value="")
+        return self.get_simple_element(element_id=TransId.MASK, default_value="")
 
     @transmission_mask_files.setter
     def transmission_mask_files(self, value):
-        self.set_simple_element(element_id=TransId.mask, value=value)
+        self.set_simple_element(element_id=TransId.MASK, value=value)
 
     @property
     def transmission_radius(self):
-        return self.get_simple_element(element_id=TransId.radius, default_value="")
+        return self.get_simple_element(element_id=TransId.RADIUS, default_value="")
 
     @transmission_radius.setter
     def transmission_radius(self, value):
-        self.set_simple_element(element_id=TransId.radius, value=value)
+        self.set_simple_element(element_id=TransId.RADIUS, value=value)
 
     @property
     def transmission_monitor(self):
-        return self.get_simple_element(element_id=TransId.spec, default_value=3)
+        return self.get_simple_element(element_id=TransId.SPEC, default_value=3)
 
     @transmission_monitor.setter
     def transmission_monitor(self, value):
-        self.set_simple_element(element_id=TransId.spec, value=value)
+        self.set_simple_element(element_id=TransId.SPEC, value=value)
 
     @property
     def transmission_mn_4_shift(self):
         # Note that this is actually part of the move operation, but is conceptually part of transmission
-        return self.get_simple_element(element_id=TransId.spec_4_shift, default_value="")
+        return self.get_simple_element(element_id=TransId.SPEC_4_SHIFT, default_value="")
 
     @transmission_mn_4_shift.setter
     def transmission_mn_4_shift(self, value):
         # Note that this is actually part of the move operation, but is conceptually part of transmission
-        self.set_simple_element(element_id=TransId.spec_4_shift, value=value)
+        self.set_simple_element(element_id=TransId.SPEC_4_SHIFT, value=value)
 
     @property
     def transmission_mn_5_shift(self):
         # Note that this is actually part of the move operation, but is conceptually part of transmission
-        return self.get_simple_element(element_id=TransId.spec_5_shift, default_value="")
+        return self.get_simple_element(element_id=TransId.SPEC_5_SHIFT, default_value="")
 
     @transmission_mn_5_shift.setter
     def transmission_mn_5_shift(self, value):
         # Note that this is actually part of the move operation, but is conceptually part of transmission
-        self.set_simple_element(element_id=TransId.spec_5_shift, value=value)
+        self.set_simple_element(element_id=TransId.SPEC_5_SHIFT, value=value)
