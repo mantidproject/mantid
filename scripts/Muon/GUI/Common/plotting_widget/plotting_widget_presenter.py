@@ -129,7 +129,6 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         workspace_list = self.get_workspaces_to_plot(
             self.context.group_pair_context.selected, self._view.if_raw(),
             self._view.get_selected())
-        print(workspace_list)
 
         self._model.plot(workspace_list, self.get_plot_title(), self.get_domain(),
                          self.context.window_title)
@@ -246,7 +245,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         flattened_run_list = [
             item for sublist in self.context.data_context.current_runs for item in sublist]
         return self.context.data_context.instrument + ' ' + run_list_to_string(flattened_run_list) + ' ' + \
-               self.context.group_pair_context.selected
+            self.context.group_pair_context.selected
 
     def handle_rebin_options_set(self):
         if self.context._do_rebin():
