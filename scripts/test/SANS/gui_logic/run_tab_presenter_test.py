@@ -25,37 +25,37 @@ from sans.gui_logic.models.table_model import TableModel, TableIndexModel
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
-BATCH_FILE_TEST_CONTENT_1 = [{BatchReductionEntry.SampleScatter: 1, BatchReductionEntry.SampleTransmission: 2,
-                              BatchReductionEntry.SampleDirect: 3, BatchReductionEntry.Output: 'test_file',
-                              BatchReductionEntry.UserFile: 'user_test_file'},
-                             {BatchReductionEntry.SampleScatter: 1, BatchReductionEntry.CanScatter: 2,
-                              BatchReductionEntry.Output: 'test_file2'}]
+BATCH_FILE_TEST_CONTENT_1 = [{BatchReductionEntry.SAMPLE_SCATTER: 1, BatchReductionEntry.SAMPLE_TRANSMISSION: 2,
+                              BatchReductionEntry.SAMPLE_DIRECT: 3, BatchReductionEntry.OUTPUT: 'test_file',
+                              BatchReductionEntry.USER_FILE: 'user_test_file'},
+                             {BatchReductionEntry.SAMPLE_SCATTER: 1, BatchReductionEntry.CAN_SCATTER: 2,
+                              BatchReductionEntry.OUTPUT: 'test_file2'}]
 
-BATCH_FILE_TEST_CONTENT_2 = [{BatchReductionEntry.SampleScatter: 'SANS2D00022024',
-                              BatchReductionEntry.SampleTransmission: 'SANS2D00022048',
-                              BatchReductionEntry.SampleDirect: 'SANS2D00022048',
-                              BatchReductionEntry.Output: 'test_file'},
-                             {BatchReductionEntry.SampleScatter: 'SANS2D00022024',
-                              BatchReductionEntry.Output: 'test_file2'}]
+BATCH_FILE_TEST_CONTENT_2 = [{BatchReductionEntry.SAMPLE_SCATTER: 'SANS2D00022024',
+                              BatchReductionEntry.SAMPLE_TRANSMISSION: 'SANS2D00022048',
+                              BatchReductionEntry.SAMPLE_DIRECT: 'SANS2D00022048',
+                              BatchReductionEntry.OUTPUT: 'test_file'},
+                             {BatchReductionEntry.SAMPLE_SCATTER: 'SANS2D00022024',
+                              BatchReductionEntry.OUTPUT: 'test_file2'}]
 
-BATCH_FILE_TEST_CONTENT_3 = [{BatchReductionEntry.SampleScatter: 'SANS2D00022024',
-                              BatchReductionEntry.SampleScatterPeriod: '3',
-                              BatchReductionEntry.Output: 'test_file'}]
+BATCH_FILE_TEST_CONTENT_3 = [{BatchReductionEntry.SAMPLE_SCATTER: 'SANS2D00022024',
+                              BatchReductionEntry.SAMPLE_SCATTER_PERIOD: '3',
+                              BatchReductionEntry.OUTPUT: 'test_file'}]
 
-BATCH_FILE_TEST_CONTENT_4 = [{BatchReductionEntry.SampleScatter: 'SANS2D00022024',
-                              BatchReductionEntry.SampleTransmission: 'SANS2D00022048',
-                              BatchReductionEntry.SampleDirect: 'SANS2D00022048',
-                              BatchReductionEntry.Output: 'test_file'},
-                             {BatchReductionEntry.SampleScatter: 'SANS2D00022024',
-                              BatchReductionEntry.Output: 'test_file2'}]
+BATCH_FILE_TEST_CONTENT_4 = [{BatchReductionEntry.SAMPLE_SCATTER: 'SANS2D00022024',
+                              BatchReductionEntry.SAMPLE_TRANSMISSION: 'SANS2D00022048',
+                              BatchReductionEntry.SAMPLE_DIRECT: 'SANS2D00022048',
+                              BatchReductionEntry.OUTPUT: 'test_file'},
+                             {BatchReductionEntry.SAMPLE_SCATTER: 'SANS2D00022024',
+                              BatchReductionEntry.OUTPUT: 'test_file2'}]
 
-BATCH_FILE_TEST_CONTENT_5 = [{BatchReductionEntry.SampleScatter: 'SANS2D00022024',
-                              BatchReductionEntry.SampleTransmission: 'SANS2D00022048',
-                              BatchReductionEntry.SampleDirect: 'SANS2D00022048',
-                              BatchReductionEntry.Output: 'test_file',
-                              BatchReductionEntry.SampleThickness: '5',
-                              BatchReductionEntry.SampleHeight: '2',
-                              BatchReductionEntry.SampleWidth: '8'}]
+BATCH_FILE_TEST_CONTENT_5 = [{BatchReductionEntry.SAMPLE_SCATTER: 'SANS2D00022024',
+                              BatchReductionEntry.SAMPLE_TRANSMISSION: 'SANS2D00022048',
+                              BatchReductionEntry.SAMPLE_DIRECT: 'SANS2D00022048',
+                              BatchReductionEntry.OUTPUT: 'test_file',
+                              BatchReductionEntry.SAMPLE_THICKNESS: '5',
+                              BatchReductionEntry.SAMPLE_HEIGHT: '2',
+                              BatchReductionEntry.SAMPLE_WIDTH: '8'}]
 
 
 def get_non_empty_row_mock(value):
@@ -1215,7 +1215,7 @@ class RunTabPresenterTest(unittest.TestCase):
 
     def _get_files_and_mock_presenter(self, content, is_multi_period=True, row_user_file_path=""):
         if row_user_file_path:
-            content[1].update({BatchReductionEntry.UserFile : row_user_file_path})
+            content[1].update({BatchReductionEntry.USER_FILE : row_user_file_path})
 
         batch_parser = mock.MagicMock()
         batch_parser.parse_batch_file = mock.MagicMock(return_value=content)

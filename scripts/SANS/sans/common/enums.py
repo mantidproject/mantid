@@ -257,19 +257,35 @@ class OutputMode(Enum):
     SAVE_TO_FILE = "SaveToFile"
 
 
-# ------------------------------
-# Entries of batch reduction file
-# -------------------------------
-@string_convertible
-@serializable_enum("SampleScatter", "SampleTransmission", "SampleDirect", "CanScatter", "CanTransmission", "CanDirect",
-                   "Output", "UserFile", "SampleScatterPeriod", "SampleTransmissionPeriod", "SampleDirectPeriod",
-                   "CanScatterPeriod", "CanTransmissionPeriod", "CanDirectPeriod", "SampleThickness", "SampleHeight",
-                   "SampleWidth")
-class BatchReductionEntry(object):
+class BatchReductionEntry(Enum):
     """
     Defines the entries of a batch reduction file.
     """
-    pass
+    CAN_DIRECT = "CanDirect"
+    CAN_DIRECT_PERIOD = "CanDirectPeriod"
+
+    CAN_SCATTER = "CanScatter"
+    CAN_SCATTER_PERIOD = "CanScatterPeriod"
+
+    CAN_TRANSMISSION = "CanTransmission"
+    CAN_TRANSMISSION_PERIOD = "CanTransmissionPeriod"
+
+    OUTPUT = "Output"
+
+    SAMPLE_DIRECT = "SampleDirect"
+    SAMPLE_DIRECT_PERIOD = "SampleDirectPeriod"
+
+    SAMPLE_SCATTER = "SampleScatter"
+    SAMPLE_SCATTER_PERIOD = "SampleScatterPeriod"
+
+    SAMPLE_TRANSMISSION = "SampleTransmission"
+    SAMPLE_TRANSMISSION_PERIOD = "SampleTransmissionPeriod"
+
+    SAMPLE_HEIGHT = "SampleHeight"
+    SAMPLE_THICKNESS = "SampleThickness"
+    SAMPLE_WIDTH = "SampleWidth"
+
+    USER_FILE = "UserFile"
 
 
 # ------------------------------

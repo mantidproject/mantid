@@ -13,28 +13,28 @@ from sans.common.constants import ALL_PERIODS
 
 
 class BatchCsvParser(object):
-    batch_file_keywords = {"sample_sans": BatchReductionEntry.SampleScatter,
-                           "output_as": BatchReductionEntry.Output,
-                           "sample_trans": BatchReductionEntry.SampleTransmission,
-                           "sample_direct_beam": BatchReductionEntry.SampleDirect,
-                           "can_sans": BatchReductionEntry.CanScatter,
-                           "can_trans": BatchReductionEntry.CanTransmission,
-                           "can_direct_beam": BatchReductionEntry.CanDirect,
-                           "user_file": BatchReductionEntry.UserFile,
-                           "sample_thickness": BatchReductionEntry.SampleThickness,
-                           "sample_height": BatchReductionEntry.SampleHeight,
-                           "sample_width": BatchReductionEntry.SampleWidth}
+    batch_file_keywords = {"sample_sans": BatchReductionEntry.SAMPLE_SCATTER,
+                           "output_as": BatchReductionEntry.OUTPUT,
+                           "sample_trans": BatchReductionEntry.SAMPLE_TRANSMISSION,
+                           "sample_direct_beam": BatchReductionEntry.SAMPLE_DIRECT,
+                           "can_sans": BatchReductionEntry.CAN_SCATTER,
+                           "can_trans": BatchReductionEntry.CAN_TRANSMISSION,
+                           "can_direct_beam": BatchReductionEntry.CAN_DIRECT,
+                           "user_file": BatchReductionEntry.USER_FILE,
+                           "sample_thickness": BatchReductionEntry.SAMPLE_THICKNESS,
+                           "sample_height": BatchReductionEntry.SAMPLE_HEIGHT,
+                           "sample_width": BatchReductionEntry.SAMPLE_WIDTH}
     batch_file_keywords_which_are_dropped = {"background_sans": None,
                                              "background_trans": None,
                                              "background_direct_beam": None,
                                              "": None}
 
-    data_keys = {BatchReductionEntry.SampleScatter: BatchReductionEntry.SampleScatterPeriod,
-                 BatchReductionEntry.SampleTransmission: BatchReductionEntry.SampleTransmissionPeriod,
-                 BatchReductionEntry.SampleDirect: BatchReductionEntry.SampleDirectPeriod,
-                 BatchReductionEntry.CanScatter: BatchReductionEntry.CanScatterPeriod,
-                 BatchReductionEntry.CanTransmission: BatchReductionEntry.CanTransmissionPeriod,
-                 BatchReductionEntry.CanDirect: BatchReductionEntry.CanDirectPeriod}
+    data_keys = {BatchReductionEntry.SAMPLE_SCATTER: BatchReductionEntry.SAMPLE_SCATTER_PERIOD,
+                 BatchReductionEntry.SAMPLE_TRANSMISSION: BatchReductionEntry.SAMPLE_TRANSMISSION_PERIOD,
+                 BatchReductionEntry.SAMPLE_DIRECT: BatchReductionEntry.SAMPLE_DIRECT_PERIOD,
+                 BatchReductionEntry.CAN_SCATTER: BatchReductionEntry.CAN_SCATTER_PERIOD,
+                 BatchReductionEntry.CAN_TRANSMISSION: BatchReductionEntry.CAN_TRANSMISSION_PERIOD,
+                 BatchReductionEntry.CAN_DIRECT: BatchReductionEntry.CAN_DIRECT_PERIOD}
 
     def __init__(self, batch_file_name):
         super(BatchCsvParser, self).__init__()
@@ -104,13 +104,13 @@ class BatchCsvParser(object):
                 raise RuntimeError("The key {0} is not part of the SANS batch csv file keywords".format(key))
 
         # Ensure that sample_scatter was set
-        if BatchReductionEntry.SampleScatter not in output or not output[BatchReductionEntry.SampleScatter]:
+        if BatchReductionEntry.SAMPLE_SCATTER not in output or not output[BatchReductionEntry.SAMPLE_SCATTER]:
             raise RuntimeError("The sample_scatter entry in row {0} seems to be missing.".format(row_number))
 
         # Ensure that the transmission data for the sample is specified either completely or not at all.
-        has_sample_transmission = BatchReductionEntry.SampleTransmission in output and \
-                                  output[BatchReductionEntry.SampleTransmission]  # noqa
-        has_sample_direct_beam = BatchReductionEntry.SampleDirect in output and output[BatchReductionEntry.SampleDirect]
+        has_sample_transmission = BatchReductionEntry.SAMPLE_TRANSMISSION in output and \
+                                  output[BatchReductionEntry.SAMPLE_TRANSMISSION]  # noqa
+        has_sample_direct_beam = BatchReductionEntry.SAMPLE_DIRECT in output and output[BatchReductionEntry.SAMPLE_DIRECT]
 
         if (not has_sample_transmission and has_sample_direct_beam) or \
                 (has_sample_transmission and not has_sample_direct_beam):
@@ -118,9 +118,9 @@ class BatchCsvParser(object):
                                "and the direct beam run are set or none.".format(row_number))
 
         # Ensure that the transmission data for the can is specified either completely or not at all.
-        has_can_transmission = BatchReductionEntry.CanTransmission in output and \
-                               output[BatchReductionEntry.CanTransmission]  # noqa
-        has_can_direct_beam = BatchReductionEntry.CanDirect in output and output[BatchReductionEntry.CanDirect]
+        has_can_transmission = BatchReductionEntry.CAN_TRANSMISSION in output and \
+                               output[BatchReductionEntry.CAN_TRANSMISSION]  # noqa
+        has_can_direct_beam = BatchReductionEntry.CAN_DIRECT in output and output[BatchReductionEntry.CAN_DIRECT]
 
         if (not has_can_transmission and has_can_direct_beam) or \
                 (has_can_transmission and not has_can_direct_beam):
@@ -128,7 +128,7 @@ class BatchCsvParser(object):
                                "and the direct beam run are set or none.".format(row_number))
 
         # Ensure that can scatter is specified if the transmissions are set
-        has_can_scatter = BatchReductionEntry.CanScatter in output and output[BatchReductionEntry.CanScatter]
+        has_can_scatter = BatchReductionEntry.CAN_SCATTER in output and output[BatchReductionEntry.CAN_SCATTER]
         if not has_can_scatter and has_can_transmission:
             raise RuntimeError("The can transmission was set but not the scatter file in row {0}.".format(row_number))
         return output

@@ -462,33 +462,33 @@ class RunTabPresenter(PresenterCommon):
 
         # ----Pull out the entries----
         # Run numbers
-        sample_scatter = get_string_entry(BatchReductionEntry.SampleScatter, row)
+        sample_scatter = get_string_entry(BatchReductionEntry.SAMPLE_SCATTER, row)
         sample_scatter_period = get_string_period(
-            get_string_entry(BatchReductionEntry.SampleScatterPeriod, row))
-        sample_transmission = get_string_entry(BatchReductionEntry.SampleTransmission, row)
+            get_string_entry(BatchReductionEntry.SAMPLE_SCATTER_PERIOD, row))
+        sample_transmission = get_string_entry(BatchReductionEntry.SAMPLE_TRANSMISSION, row)
         sample_transmission_period = \
-            get_string_period(get_string_entry(BatchReductionEntry.SampleTransmissionPeriod, row))
-        sample_direct = get_string_entry(BatchReductionEntry.SampleDirect, row)
+            get_string_period(get_string_entry(BatchReductionEntry.SAMPLE_TRANSMISSION_PERIOD, row))
+        sample_direct = get_string_entry(BatchReductionEntry.SAMPLE_DIRECT, row)
         sample_direct_period = get_string_period(
-            get_string_entry(BatchReductionEntry.SampleDirectPeriod, row))
-        can_scatter = get_string_entry(BatchReductionEntry.CanScatter, row)
+            get_string_entry(BatchReductionEntry.SAMPLE_DIRECT_PERIOD, row))
+        can_scatter = get_string_entry(BatchReductionEntry.CAN_SCATTER, row)
         can_scatter_period = get_string_period(
-            get_string_entry(BatchReductionEntry.CanScatterPeriod, row))
-        can_transmission = get_string_entry(BatchReductionEntry.CanTransmission, row)
+            get_string_entry(BatchReductionEntry.CAN_SCATTER_PERIOD, row))
+        can_transmission = get_string_entry(BatchReductionEntry.CAN_TRANSMISSION, row)
         can_transmission_period = get_string_period(
-            get_string_entry(BatchReductionEntry.CanScatterPeriod, row))
-        can_direct = get_string_entry(BatchReductionEntry.CanDirect, row)
+            get_string_entry(BatchReductionEntry.CAN_SCATTER_PERIOD, row))
+        can_direct = get_string_entry(BatchReductionEntry.CAN_DIRECT, row)
         can_direct_period = get_string_period(
-            get_string_entry(BatchReductionEntry.CanDirectPeriod, row))
+            get_string_entry(BatchReductionEntry.CAN_DIRECT_PERIOD, row))
 
         # Other information
-        output_name = get_string_entry(BatchReductionEntry.Output, row)
-        user_file = get_string_entry(BatchReductionEntry.UserFile, row)
+        output_name = get_string_entry(BatchReductionEntry.OUTPUT, row)
+        user_file = get_string_entry(BatchReductionEntry.USER_FILE, row)
 
         # Sample geometries
-        sample_thickness = get_string_entry(BatchReductionEntry.SampleThickness, row)
-        sample_height = get_string_entry(BatchReductionEntry.SampleHeight, row)
-        sample_width = get_string_entry(BatchReductionEntry.SampleWidth, row)
+        sample_thickness = get_string_entry(BatchReductionEntry.SAMPLE_THICKNESS, row)
+        sample_height = get_string_entry(BatchReductionEntry.SAMPLE_HEIGHT, row)
+        sample_width = get_string_entry(BatchReductionEntry.SAMPLE_WIDTH, row)
 
         # ----Form a row----
         row_entry = [sample_scatter, sample_scatter_period, sample_transmission,
