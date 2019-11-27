@@ -540,7 +540,7 @@ class SetParserTest(unittest.TestCase):
         self.assertTrue(SetParser.get_type(), "SET")
 
     def test_that_setting_scales_is_parsed_correctly(self):
-        valid_settings = {"SET  scales 2 5 4    7 8": {SetId.scales: set_scales_entry(s=2, a=5, b=4, c=7, d=8)}}
+        valid_settings = {"SET  scales 2 5 4    7 8": {SetId.SCALES: set_scales_entry(s=2, a=5, b=4, c=7, d=8)}}
 
         invalid_settings = {"SET scales 2 4 6 7 8 9": RuntimeError,
                             "SET scales ": RuntimeError}
@@ -549,18 +549,18 @@ class SetParserTest(unittest.TestCase):
         do_test(set_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_centre_is_parsed_correctly(self):
-        valid_settings = {"SET centre 23 45": {SetId.centre: position_entry(pos1=23, pos2=45,
+        valid_settings = {"SET centre 23 45": {SetId.CENTRE: position_entry(pos1=23, pos2=45,
                                                                             detector_type=DetectorType.LAB)},
-                          "SET centre /main 23 45": {SetId.centre: position_entry(pos1=23, pos2=45,
+                          "SET centre /main 23 45": {SetId.CENTRE: position_entry(pos1=23, pos2=45,
                                                                                   detector_type=DetectorType.LAB)},
-                          "SET centre / lAb 23 45": {SetId.centre: position_entry(pos1=23, pos2=45,
+                          "SET centre / lAb 23 45": {SetId.CENTRE: position_entry(pos1=23, pos2=45,
                                                                                   detector_type=DetectorType.LAB)},
-                          "SET centre / hAb 23 45": {SetId.centre_HAB: position_entry(pos1=23, pos2=45,
-                                                                                  detector_type=DetectorType.HAB)},
-                          "SET centre /FRONT 23 45": {SetId.centre_HAB: position_entry(pos1=23, pos2=45,
-                                                      detector_type=DetectorType.HAB)},
-                          "SET centre /FRONT 23 45 55 67": {SetId.centre_HAB: position_entry(pos1=23, pos2=45,
-                                                            detector_type=DetectorType.HAB)},
+                          "SET centre / hAb 23 45": {SetId.CENTRE_HAB: position_entry(pos1=23, pos2=45,
+                                                                                      detector_type=DetectorType.HAB)},
+                          "SET centre /FRONT 23 45": {SetId.CENTRE_HAB: position_entry(pos1=23, pos2=45,
+                                                                                       detector_type=DetectorType.HAB)},
+                          "SET centre /FRONT 23 45 55 67": {SetId.CENTRE_HAB: position_entry(pos1=23, pos2=45,
+                                                                                             detector_type=DetectorType.HAB)},
                           }
 
         invalid_settings = {"SET centre 23": RuntimeError,

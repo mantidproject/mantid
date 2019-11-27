@@ -94,7 +94,7 @@ class StateGuiModel(ModelCommon):
     # ==================================================================================================================
     @property
     def lab_pos_1(self):
-        return self.get_simple_element_with_attribute(element_id=SetId.centre, default_value='', attribute="pos1")
+        return self.get_simple_element_with_attribute(element_id=SetId.CENTRE, default_value='', attribute="pos1")
 
     @lab_pos_1.setter
     def lab_pos_1(self, value):
@@ -102,7 +102,7 @@ class StateGuiModel(ModelCommon):
 
     @property
     def lab_pos_2(self):
-        return self.get_simple_element_with_attribute(element_id=SetId.centre, default_value='', attribute="pos2")
+        return self.get_simple_element_with_attribute(element_id=SetId.CENTRE, default_value='', attribute="pos2")
 
     @lab_pos_2.setter
     def lab_pos_2(self, value):
@@ -110,7 +110,7 @@ class StateGuiModel(ModelCommon):
 
     @property
     def hab_pos_1(self):
-        return self.get_simple_element_with_attribute(element_id=SetId.centre_HAB, default_value='', attribute="pos1")
+        return self.get_simple_element_with_attribute(element_id=SetId.CENTRE_HAB, default_value='', attribute="pos1")
 
     @hab_pos_1.setter
     def hab_pos_1(self, value):
@@ -118,15 +118,15 @@ class StateGuiModel(ModelCommon):
 
     @property
     def hab_pos_2(self):
-        return self.get_simple_element_with_attribute(element_id=SetId.centre_HAB, default_value='', attribute="pos2")
+        return self.get_simple_element_with_attribute(element_id=SetId.CENTRE_HAB, default_value='', attribute="pos2")
 
     @hab_pos_2.setter
     def hab_pos_2(self, value):
         self._update_centre(pos_2=value)
 
     def _update_centre(self, pos_1=None, pos_2=None, detector_type=None):
-        if SetId.centre in self._user_file_items:
-            settings = self._user_file_items[SetId.centre]
+        if SetId.CENTRE in self._user_file_items:
+            settings = self._user_file_items[SetId.CENTRE]
         else:
             # If the entry does not already exist, then add it. The -1. is an illegal input which should get overridden
             # and if not we want it to fail.
@@ -139,7 +139,7 @@ class StateGuiModel(ModelCommon):
             new_detector_type = detector_type if detector_type else setting.detector_type
             new_setting = position_entry(pos1=new_pos1, pos2=new_pos2, detector_type=new_detector_type)
             new_settings.append(new_setting)
-        self._user_file_items.update({SetId.centre: new_settings})
+        self._user_file_items.update({SetId.CENTRE: new_settings})
     # ==================================================================================================================
     # ==================================================================================================================
     # General TAB
@@ -453,14 +453,14 @@ class StateGuiModel(ModelCommon):
     # ------------------------------------------------------------------------------------------------------------------
     @property
     def absolute_scale(self):
-        return self.get_simple_element_with_attribute(element_id=SetId.scales,
+        return self.get_simple_element_with_attribute(element_id=SetId.SCALES,
                                                       default_value="",
                                                       attribute="s")
 
     @absolute_scale.setter
     def absolute_scale(self, value):
-        if SetId.scales in self._user_file_items:
-            settings = self._user_file_items[SetId.scales]
+        if SetId.SCALES in self._user_file_items:
+            settings = self._user_file_items[SetId.SCALES]
         else:
             settings = [set_scales_entry(s=100., a=0., b=0., c=0., d=0.)]
 
@@ -468,7 +468,7 @@ class StateGuiModel(ModelCommon):
         for setting in settings:
             s_parameter = value if value else setting.s
             new_settings.append(set_scales_entry(s=s_parameter, a=0., b=0., c=0., d=0.))
-        self._user_file_items.update({SetId.scales: new_settings})
+        self._user_file_items.update({SetId.SCALES: new_settings})
 
     @property
     def sample_height(self):

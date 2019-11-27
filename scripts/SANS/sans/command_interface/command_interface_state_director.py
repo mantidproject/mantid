@@ -423,7 +423,7 @@ class CommandInterfaceStateDirector(object):
         pos1 = command.values[0]
         pos2 = command.values[1]
         detector_type = command.values[2]
-        new_state_entries = {SetId.centre: position_entry(pos1=pos1, pos2=pos2, detector_type=detector_type)}
+        new_state_entries = {SetId.CENTRE: position_entry(pos1=pos1, pos2=pos2, detector_type=detector_type)}
         self.add_to_processed_state_settings(new_state_entries)
 
     def _process_trans_fit(self, command):

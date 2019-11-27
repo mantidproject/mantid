@@ -1240,7 +1240,7 @@ class SetParser(UserFileComponentParser):
         scales = extract_float_list(scales_string, separator=" ")
         if len(scales) != 5:
             raise ValueError("SetParser: Expected 5 entries for the SCALES setting, but got {0}.".format(len(scales)))
-        return {SetId.scales: set_scales_entry(s=scales[0], a=scales[1], b=scales[2], c=scales[3], d=scales[4])}
+        return {SetId.SCALES: set_scales_entry(s=scales[0], a=scales[1], b=scales[2], c=scales[3], d=scales[4])}
 
     def _extract_centre(self, line):
         detector_type = DetectorType.HAB if re.search(self._hab, line) is not None else DetectorType.LAB
@@ -1248,7 +1248,7 @@ class SetParser(UserFileComponentParser):
         centre_string = re.sub("/" + self._lab, "", centre_string)
         centre_string = ' '.join(centre_string.split())
         centre = extract_float_list(centre_string, separator=" ")
-        return {SetId.centre: position_entry(pos1=centre[0], pos2=centre[1], detector_type=detector_type)}
+        return {SetId.CENTRE: position_entry(pos1=centre[0], pos2=centre[1], detector_type=detector_type)}
 
     def _extract_centre_HAB(self, line):
         detector_type = DetectorType.HAB if re.search(self._hab, line) is not None else DetectorType.LAB
@@ -1256,7 +1256,7 @@ class SetParser(UserFileComponentParser):
         centre_string = re.sub("/" + self._hab, "", centre_string)
         centre_string = ' '.join(centre_string.split())
         centre = extract_float_list(centre_string, separator=" ")
-        return {SetId.centre_HAB: position_entry(pos1=centre[0], pos2=centre[1], detector_type=detector_type)}
+        return {SetId.CENTRE_HAB: position_entry(pos1=centre[0], pos2=centre[1], detector_type=detector_type)}
 
     @staticmethod
     def get_type():

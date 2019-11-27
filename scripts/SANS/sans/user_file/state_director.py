@@ -507,8 +507,8 @@ class StateDirectorISIS(object):
         # ---------------------------
         # Beam Centre, this can be for HAB and LAB
         # ---------------------------
-        if SetId.centre in user_file_items:
-            beam_centres = user_file_items[SetId.centre]
+        if SetId.CENTRE in user_file_items:
+            beam_centres = user_file_items[SetId.CENTRE]
             beam_centres_for_hab = [beam_centre for beam_centre in beam_centres if beam_centre.detector_type
                                     is DetectorType.HAB]
             beam_centres_for_lab = [beam_centre for beam_centre in beam_centres if beam_centre.detector_type
@@ -997,9 +997,9 @@ class StateDirectorISIS(object):
     def _set_up_scale_state(self, user_file_items):
         # We only extract the first entry here, ie the s entry. Although there are other entries which a user can
         # specify such as a, b, c, d they seem to be
-        if SetId.scales in user_file_items:
-            scales = user_file_items[SetId.scales]
-            check_if_contains_only_one_element(scales, SetId.scales)
+        if SetId.SCALES in user_file_items:
+            scales = user_file_items[SetId.SCALES]
+            check_if_contains_only_one_element(scales, SetId.SCALES)
             scales = scales[-1]
             self._scale_builder.set_scale(scales.s)
 

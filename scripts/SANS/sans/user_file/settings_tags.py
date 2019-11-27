@@ -105,10 +105,10 @@ class SampleId(Enum):
     OFFSET = "offset"
 
 
-# --- SET
-@serializable_enum("scales", "centre", "centre_HAB")
-class SetId(object):
-    pass
+class SetId(Enum):
+    SCALES = "scales"
+    CENTRE = "centre"
+    CENTRE_HAB = "centre_HAB"
 
 
 # --- TRANS
