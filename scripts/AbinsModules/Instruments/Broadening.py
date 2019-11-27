@@ -5,7 +5,6 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-import AbinsModules
 import numpy as np
 from scipy.special import erf
 from scipy.signal import convolve
@@ -67,7 +66,6 @@ def broaden_spectrum(frequencies=None, bins=None, s_dft=None, sigma=None, scheme
 
     bins = np.asarray(bins)
     freq_points = (bins[1:] + bins[:-1]) / 2
-    bin_width = bins[1] - bins[0]
 
     #  Don't bother broadening if there is nothing here to broaden: return empty spectrum
     if (len(s_dft) == 0) or not np.any(s_dft):
@@ -303,7 +301,7 @@ def trunc_and_sum_inplace(function=None, function_uses='points',
     :param limit: range (as multiple of sigma) for cutoff
     :type limit: float
     :param method:
-        'auto', 'histogram' or 'forloop'; select between implementations for summation at appropriate 
+        'auto', 'histogram' or 'forloop'; select between implementations for summation at appropriate
         frequencies. 'auto' uses 'forloop' when there are > 1500 frequencies
     :type method: str
 
