@@ -241,12 +241,11 @@ class SampleShape(Enum):
     NOT_SET = "NOT_SET"
 
 
-# ---------------------------
-# FileTypes
-# ---------------------------
-@serializable_enum("ISISNexus", "ISISNexusAdded", "ISISRaw", "NoFileType")
-class FileType(object):
-    pass
+class FileType(Enum):
+    ISIS_NEXUS = "ISISNexus"
+    ISIS_NEXUS_ADDED = "ISISNexusAdded"
+    ISIS_RAW = "ISISRaw"
+    NO_FILE_TYPE = "NoFileType"
 
 
 # ---------------------------

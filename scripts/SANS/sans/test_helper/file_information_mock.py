@@ -46,7 +46,7 @@ class SANSFileInformationMock(SANSFileInformation):
         return self._run_number
 
     def get_type(self):
-        return FileType.ISISNexus
+        return FileType.ISIS_NEXUS
 
     def is_event_mode(self):
         return self._event_mode

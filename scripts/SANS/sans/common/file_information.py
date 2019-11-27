@@ -128,9 +128,9 @@ def get_extension_for_file_type(file_info):
     :param file_info: a SANSFileInformation object.
     :return: the extension a string. This can be either nxs or raw.
     """
-    if file_info.get_type() is FileType.ISISNexus or file_info.get_type() is FileType.ISISNexusAdded:
+    if file_info.get_type() is FileType.ISIS_NEXUS or file_info.get_type() is FileType.ISIS_NEXUS_ADDED:
         extension = NXS_EXTENSION
-    elif file_info.get_type() is FileType.ISISRaw:
+    elif file_info.get_type() is FileType.ISIS_RAW:
         extension = RAW_EXTENSION
     else:
         raise RuntimeError("The file extension type for a file of type {0} is unknown"
@@ -872,7 +872,7 @@ class SANSFileInformationISISNexus(SANSFileInformation):
         return self._run_number
 
     def get_type(self):
-        return FileType.ISISNexus
+        return FileType.ISIS_NEXUS
 
     def is_event_mode(self):
         return self._is_event_mode
@@ -937,7 +937,7 @@ class SANSFileInformationISISAdded(SANSFileInformation):
         return self._run_number
 
     def get_type(self):
-        return FileType.ISISNexusAdded
+        return FileType.ISIS_NEXUS_ADDED
 
     def is_event_mode(self):
         return self._is_event_mode
@@ -1004,7 +1004,7 @@ class SANSFileInformationRaw(SANSFileInformation):
         return self._run_number
 
     def get_type(self):
-        return FileType.ISISRaw
+        return FileType.ISIS_RAW
 
     def is_event_mode(self):
         return False

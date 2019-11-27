@@ -637,11 +637,11 @@ def get_loader_strategy(file_information):
     :param file_information: a SANSFileInformation object.
     :return: a handle to the correct loading function/strategy.
     """
-    if file_information.get_type() == FileType.ISISNexus:
+    if file_information.get_type() == FileType.ISIS_NEXUS:
         loader = loader_for_isis_nexus
-    elif file_information.get_type() == FileType.ISISRaw:
+    elif file_information.get_type() == FileType.ISIS_RAW:
         loader = loader_for_raw
-    elif file_information.get_type() == FileType.ISISNexusAdded:
+    elif file_information.get_type() == FileType.ISIS_NEXUS_ADDED:
         loader = loader_for_added_isis_nexus
     else:
         raise RuntimeError("SANSLoad: Cannot load SANS file of type {0}".format(str(file_information.get_type())))
