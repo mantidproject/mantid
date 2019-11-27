@@ -15,7 +15,7 @@ import abc
 import six
 
 from sans.state.state_base import (StateBase, rename_descriptor_names, PositiveIntegerParameter, BoolParameter,
-                                   PositiveFloatParameter, ClassTypeParameter, FloatParameter, DictParameter,
+                                   PositiveFloatParameter, FloatParameter, DictParameter,
                                    StringListParameter, PositiveFloatWithNoneParameter, PositiveFloatListParameter)
 from sans.common.enums import (RebinType, RangeStepType, FitType, DataType, SANSInstrument)
 from sans.common.configurations import Configurations

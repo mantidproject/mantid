@@ -12,7 +12,7 @@ from __future__ import (absolute_import, division, print_function)
 import json
 import copy
 from sans.state.state_base import (StateBase, rename_descriptor_names, PositiveIntegerParameter,
-                                   PositiveFloatParameter, FloatParameter, ClassTypeParameter, DictParameter,
+                                   PositiveFloatParameter, FloatParameter, DictParameter,
                                    PositiveFloatWithNoneParameter, BoolParameter, PositiveFloatListParameter)
 from sans.state.automatic_setters import (automatic_setters)
 from sans.common.enums import (RebinType, RangeStepType, SANSInstrument)

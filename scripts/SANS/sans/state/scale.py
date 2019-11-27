@@ -8,7 +8,7 @@
 
 from __future__ import (absolute_import, division, print_function)
 import copy
-from sans.state.state_base import (StateBase, rename_descriptor_names, PositiveFloatParameter, ClassTypeParameter)
+from sans.state.state_base import (StateBase, rename_descriptor_names, PositiveFloatParameter)
 from sans.common.enums import (SampleShape, SANSFacility)
 from sans.state.automatic_setters import (automatic_setters)
 

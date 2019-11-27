@@ -4,21 +4,23 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-# pylint: disable=too-few-public-methods
 
 """ Defines the state of the reduction."""
 
 from __future__ import (absolute_import, division, print_function)
-from abc import (ABCMeta, abstractmethod)
-from six import (with_metaclass)
+
 import copy
 import json
-from sans.state.state_base import (StateBase, ClassTypeParameter, FloatParameter, DictParameter,
-                                   FloatWithNoneParameter, rename_descriptor_names, BoolParameter)
-from sans.common.enums import (ReductionMode, ReductionMode, ReductionDimensionality, FitModeForMerge,
+from abc import (ABCMeta, abstractmethod)
+
+from six import (with_metaclass)
+
+from sans.common.enums import (ReductionMode, ReductionDimensionality, FitModeForMerge,
                                SANSFacility, DetectorType)
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
 from sans.state.automatic_setters import (automatic_setters)
+from sans.state.state_base import (StateBase, FloatParameter, DictParameter,
+                                   FloatWithNoneParameter, rename_descriptor_names, BoolParameter)
 
 
 # ----------------------------------------------------------------------------------------------------------------------

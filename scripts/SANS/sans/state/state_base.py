@@ -4,23 +4,26 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=too-few-public-methods, invalid-name
+# pylint: disable=too-few-public-methods, invalid-name
 
 """ Fundamental classes and Descriptors for the State mechanism."""
 from __future__ import (absolute_import, division, print_function)
-from abc import (ABCMeta, abstractmethod)
+
 import copy
 import inspect
+from abc import (ABCMeta, abstractmethod)
 from functools import (partial)
+from importlib import import_module
+
 from six import string_types, with_metaclass
 
 from mantid.kernel import (PropertyManager, std_vector_dbl, std_vector_str, std_vector_int, std_vector_long)
+from mantid.py3compat import Enum
 
 
 # ---------------------------------------------------------------
 # Validator functions
 # ---------------------------------------------------------------
-from mantid.py3compat import Enum
 
 
 def is_not_none(value):
@@ -212,24 +215,6 @@ class DictFloatsParameter(TypedParameter):
                                                                                value, type(value)))
 
 
-class ClassTypeParameter(TypedParameter):
-    """
-    This TypedParameter variant allows for storing a class type.
-
-    This could be for example something from the SANSType module, e.g. CanonicalCoordinates.X
-    It is something that is used frequently with the main of moving away from using strings where types
-    should be used instead.
-    """
-    def __init__(self, class_type):
-        super(ClassTypeParameter, self).__init__(class_type, is_not_none)
-
-    def _type_check(self, value):
-        if not issubclass(value, self.parameter_type):
-            raise TypeError("Trying to set {0} which expects a value of type {1}."
-                            " Got a value of {2} which is of type: {3}".format(self.name, self.parameter_type,
-                                                                               value, type(value)))
-
-
 class FloatWithNoneParameter(TypedParameter):
     def __init__(self):
         super(FloatWithNoneParameter, self).__init__(float)
@@ -279,7 +264,6 @@ class PositiveFloatListParameter(TypedParameter):
         super(PositiveFloatListParameter, self).__init__(list, all_list_elements_are_float_and_positive_and_not_empty)
 
     def _type_check(self, value):
-
         if not isinstance(value, self.parameter_type) or not all_list_elements_are_float_and_not_empty(value):
             raise TypeError("Trying to set {0} which expects a value of type {1}."
                             " Got a value of {2} which is of type: {3}".format(self.name, self.parameter_type,
@@ -307,12 +291,6 @@ class PositiveIntegerListParameter(TypedParameter):
             raise TypeError("Trying to set {0} which expects a value of type {1}."
                             " Got a value of {2} which is of type: {3}".format(self.name, self.parameter_type,
                                                                                value, type(value)))
-
-
-class ClassTypeListParameter(TypedParameter):
-    def __init__(self, class_type):
-        typed_comparison = partial(all_list_elements_are_of_class_type_and_not_empty, comparison_type=class_type)
-        super(ClassTypeListParameter, self).__init__(list, typed_comparison)
 
 
 # ------------------------------------------------
@@ -361,9 +339,6 @@ def rename_descriptor_names(cls):
 #
 # During serialization we place identifier tags into the serialized object, e.g. we add a specifier if the item
 # is a State type at all and if so which state it is.
-
-
-CLASS_TYPE_TAG = "ClassTypeParameterID#"
 ENUM_TYPE_TAG = "EnumTag#"
 
 INT_TAG = "int"
@@ -399,19 +374,7 @@ def get_module_and_class_name(instance):
 
 
 def provide_class_from_module_and_class_name(module_name, class_name):
-    # Importlib seems to be missing on RHEL6, hence we resort to __import__
-    try:
-        from importlib import import_module
-        module = import_module(module_name)
-    except ImportError:
-        if "." in module_name:
-            _, mod_name = module_name.rsplit(".", 1)
-        else:
-            mod_name = None
-        if not mod_name:
-            module = __import__(module_name)
-        else:
-            module = __import__(module_name, fromlist=[mod_name])
+    module = import_module(module_name)
     return getattr(module, class_name)
 
 
@@ -419,10 +382,6 @@ def provide_class(instance):
     module_name = instance.getProperty(STATE_MODULE).value
     class_name = instance.getProperty(STATE_NAME).value
     return provide_class_from_module_and_class_name(module_name, class_name)
-
-
-def is_class_type_parameter(value):
-    return isinstance(value, string_types) and CLASS_TYPE_TAG in value
 
 
 def is_enum_type_parameter(value):
@@ -437,18 +396,6 @@ def is_enum_list_parameter(value):
         return all(ENUM_TYPE_TAG in s for s in value)
     except TypeError:
         return False
-
-
-def is_vector_with_class_type_parameter(value):
-    is_vector_with_class_type = True
-    contains_str = is_string_vector(value)
-    if contains_str:
-        for element in value:
-            if not is_class_type_parameter(element):
-                is_vector_with_class_type = False
-    else:
-        is_vector_with_class_type = False
-    return is_vector_with_class_type
 
 
 def get_module_and_class_name_from_encoded_string(encoder, value):
@@ -476,7 +423,6 @@ def get_descriptor_values(instance):
 
     if enum_vars:
         member_variables = member_variables + enum_vars
-
 
     for descriptor_name, descriptor_object in member_variables:
         if descriptor_name is "property_manager":
@@ -521,8 +467,6 @@ def convert_state_to_dict(instance):
     for key, value in descriptor_values.items():
         # If the value is a SANSBaseState then create a dict from it
         # If the value is a dict, then we need to check what the sub types are
-        # If the value is a ClassTypeParameter, then we need to encode it
-        # If the value is a list of ClassTypeParameters, then we need to encode each element in the list
 
         if isinstance(value, StateBase):
             sub_state_dict = value.property_manager
@@ -537,19 +481,8 @@ def convert_state_to_dict(instance):
                     sub_dictionary_value = val_sub
                 sub_dictionary.update({key_sub: sub_dictionary_value})
             value = sub_dictionary
-        elif isinstance(descriptor_types[key], ClassTypeParameter) :
-            value = get_serialized_class_type_parameter(value)
         elif isinstance(descriptor_types[key], Enum):
             value = serialize_enum(value)
-        elif isinstance(descriptor_types[key], ClassTypeListParameter):
-            if value:
-                # If there are entries in the list, then convert them individually and place them into a list.
-                # The list will contain a sequence of serialized ClassTypeParameters
-                serialized_value = []
-                for element in value:
-                    serialized_element = get_serialized_class_type_parameter(element)
-                    serialized_value.append(serialized_element)
-                value = serialized_value
 
         state_dict.update({key: value})
     # Add information about the current state object, such as in which module it lives and what its name is
@@ -566,6 +499,7 @@ def set_state_from_property_manager(instance, property_manager):
     :param instance: the instance which is to be set with a values of the property manager
     :param property_manager: the property manager with the stored setting
     """
+
     def _set_element(inst, k_element, v_element):
         if k_element != STATE_NAME and k_element != STATE_MODULE:
             setattr(inst, k_element, v_element)
@@ -573,20 +507,11 @@ def set_state_from_property_manager(instance, property_manager):
     keys = list(property_manager.keys())
     for key in keys:
         value = property_manager.getProperty(key).value
-        # There are four scenarios that need to be considered
+        # There are some special scenarios that need to be considered
         # 1. ParameterManager 1: This indicates (most often) that we are dealing with a new state -> create it and
         #                      apply recursion
         # 2. ParameterManager 2: In some cases the ParameterManager object is actually a map rather than a state ->
         #                         populate the state
-        # 3. String with special meaning: Admittedly this is a hack, but we are limited by the input property types
-        #                                 of Mantid algorithms, which can be string, int, float and containers of these
-        #                                 types (and PropertyManagerProperties). We need a wider range of types, such
-        #                                 as ClassTypeParameters. These are encoded (as good as possible) in a string
-        # 4. Vector of strings with special meaning: See point 3)
-        # 5. Vector for float: This needs to handle Mantid's float array
-        # 6. Vector for string: This needs to handle Mantid's string array
-        # 7. Vector for int: This needs to handle Mantid's integer array
-        # 8. Normal values: all is fine, just populate them
 
         if type(value) is PropertyManager and is_state(value):
             sub_state = create_sub_state(value)
@@ -605,18 +530,9 @@ def set_state_from_property_manager(instance, property_manager):
                     sub_dict_value_to_insert = sub_dict_value
                 dict_element.update({sub_dict_key: sub_dict_value_to_insert})
             setattr(instance, key, dict_element)
-        elif is_class_type_parameter(value):
-            class_type_parameter = get_deserialized_class_type_parameter(value)
-            _set_element(instance, key, class_type_parameter)
         elif is_enum_type_parameter(value) or is_enum_list_parameter(value):
             enum_type_parameter = deserialize_enum(value)
             _set_element(instance, key, enum_type_parameter)
-        elif is_vector_with_class_type_parameter(value):
-            class_type_list = []
-            for element in value:
-                class_type_parameter = get_deserialized_class_type_parameter(element)
-                class_type_list.append(class_type_parameter)
-            _set_element(instance, key, class_type_list)
         elif is_float_vector(value):
             float_list_value = list(value)
             _set_element(instance, key, float_list_value)
@@ -630,22 +546,11 @@ def set_state_from_property_manager(instance, property_manager):
             _set_element(instance, key, value)
 
 
-def get_serialized_class_type_parameter(value):
-    # The module will only know about the outer class name, therefore we need
-    # 1. The module name
-    # 2. The name of the outer class
-    # 3. The name of the actual class
-    module_name, class_name = get_module_and_class_name(value)
-    outer_class_name = value.outer_class_name
-    class_name = outer_class_name + SEPARATOR_SERIAL + class_name
-    return CLASS_TYPE_TAG + module_name + SEPARATOR_SERIAL + class_name
-
-
 def serialize_enum(value):
     to_parse = value if isinstance(value, list) else [value]
     serialized = []
     for val in to_parse:
-        assert(isinstance(val, Enum))
+        assert (isinstance(val, Enum))
         module_name, class_name = get_module_and_class_name(val)
         selected_val = val.value
 
@@ -673,15 +578,6 @@ def deserialize_enum(value):
         parsed.append(parsed_val)
 
     return parsed[0] if len(parsed) == 1 else parsed
-
-
-def get_deserialized_class_type_parameter(value):
-    # We need to first get the outer class from the module
-    module_name, outer_class_name, class_name = \
-        get_module_and_class_name_from_encoded_string(CLASS_TYPE_TAG, value)
-    outer_class_type_parameter = provide_class_from_module_and_class_name(module_name, outer_class_name)
-    # From the outer class we can then retrieve the inner class which normally defines the users selection
-    return getattr(outer_class_type_parameter, class_name)
 
 
 def create_deserialized_sans_state_from_property_manager(property_manager):

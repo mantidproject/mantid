@@ -12,7 +12,7 @@ import json
 import copy
 
 from sans.state.state_base import (StateBase, StringParameter, PositiveIntegerParameter, BoolParameter,
-                                   ClassTypeParameter, rename_descriptor_names)
+                                   rename_descriptor_names)
 from sans.common.enums import SANSFacility, SANSInstrument
 import sans.common.constants
 from sans.state.state_functions import (is_pure_none_or_not_none, validation_message)

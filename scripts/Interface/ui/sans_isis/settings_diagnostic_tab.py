@@ -22,6 +22,7 @@ from mantidqt.utils.qt import load_ui
 
 from mantid import UsageService
 from sans.gui_logic.gui_common import (GENERIC_SETTINGS, JSON_SUFFIX, load_file)
+from sans.state.state_base import ENUM_TYPE_TAG
 
 if PY3:
     unicode = str
@@ -64,7 +65,6 @@ class SettingsDiagnosticTab(QtWidgets.QWidget, Ui_SettingsDiagnosticTab):
 
         # Excluded settings entries
         self.excluded = ["state_module", "state_name"]
-        self.class_type_id = "ClassTypeParameter"
 
         # Q Settings
         self.__generic_settings = GENERIC_SETTINGS
@@ -154,7 +154,8 @@ class SettingsDiagnosticTab(QtWidgets.QWidget, Ui_SettingsDiagnosticTab):
             item.addChild(child)
 
     def clean_class_type(self, value):
-        if isinstance(value, str) and self.class_type_id in value:
+        # TODO the UI should not be doing logic like this
+        if isinstance(value, str) and ENUM_TYPE_TAG in value:
             # Only the last element is of interest
             split_values = value.split("#")
             return split_values[-1]

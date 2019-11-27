@@ -15,7 +15,7 @@ import json
 
 from sans.common.enums import (CanonicalCoordinates, SANSInstrument, DetectorType)
 from sans.state.automatic_setters import automatic_setters
-from sans.state.state_base import (StateBase, FloatParameter, DictParameter, ClassTypeParameter,
+from sans.state.state_base import (StateBase, FloatParameter, DictParameter,
                                    StringWithNoneParameter, rename_descriptor_names)
 from sans.state.state_functions import (validation_message, set_detector_names, set_monitor_names)
 

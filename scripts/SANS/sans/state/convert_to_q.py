@@ -12,7 +12,7 @@ from __future__ import (absolute_import, division, print_function)
 import json
 import copy
 from sans.state.state_base import (StateBase, rename_descriptor_names, BoolParameter, PositiveFloatParameter,
-                                   ClassTypeParameter, StringParameter)
+                                   StringParameter)
 from sans.common.enums import (ReductionDimensionality, RangeStepType, SANSFacility)
 from sans.state.state_functions import (is_pure_none_or_not_none, is_not_none_and_first_larger_than_second,
                                         validation_message)
