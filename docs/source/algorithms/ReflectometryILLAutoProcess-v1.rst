@@ -63,6 +63,11 @@ Usage
 
 **Example - Single Angle**
 
+.. testsetup:: SingleAngle
+
+    config['default.facility'] = 'ILL'
+    config.appendDataSearchSubDir('ILL/D17/')
+
 .. testcode:: SingleAngle
 
     ws = ReflectometryILLAutoProcess(
@@ -78,6 +83,11 @@ Usage
     The R(Q) workspace has 672 points
 
 **Example - Multiple Angles**
+
+.. testsetup:: MultipleAngles
+
+    config['default.facility'] = 'ILL'
+    config.appendDataSearchSubDir('ILL/D17/')
 
 .. testcode:: MultipleAngles
 
