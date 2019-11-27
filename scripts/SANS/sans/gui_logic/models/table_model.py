@@ -126,7 +126,7 @@ class TableModel(object):
 
     def update_table_entry(self, row, column, value):
         self._table_entries[row].update_attribute(self.column_name_converter[column], value)
-        self._table_entries[row].update_attribute('row_state', RowState.Unprocessed)
+        self._table_entries[row].update_attribute('row_state', RowState.UNPROCESSED)
         self._table_entries[row].update_attribute('tool_tip', '')
         if column == 0:
             self.get_thickness_for_rows([row])
@@ -150,17 +150,17 @@ class TableModel(object):
         return SampleShapeColumnModel.get_hint_strategy()
 
     def set_row_to_processed(self, row, tool_tip):
-        self._table_entries[row].update_attribute('row_state', RowState.Processed)
+        self._table_entries[row].update_attribute('row_state', RowState.PROCESSED)
         self._table_entries[row].update_attribute('tool_tip', tool_tip)
         self.notify_subscribers()
 
     def reset_row_state(self, row):
-        self._table_entries[row].update_attribute('row_state', RowState.Unprocessed)
+        self._table_entries[row].update_attribute('row_state', RowState.UNPROCESSED)
         self._table_entries[row].update_attribute('tool_tip', '')
         self.notify_subscribers()
 
     def set_row_to_error(self, row, tool_tip):
-        self._table_entries[row].update_attribute('row_state', RowState.Error)
+        self._table_entries[row].update_attribute('row_state', RowState.ERROR)
         self._table_entries[row].update_attribute('tool_tip', tool_tip)
         self.notify_subscribers()
 
@@ -294,7 +294,7 @@ class TableIndexModel(object):
         self.sample_shape_model = SampleShapeColumnModel()
         self.sample_shape = sample_shape
 
-        self.row_state = RowState.Unprocessed
+        self.row_state = RowState.UNPROCESSED
 
         self.tool_tip = ''
         self.file_information = None

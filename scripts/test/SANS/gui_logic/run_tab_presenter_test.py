@@ -860,7 +860,7 @@ class RunTabPresenterTest(unittest.TestCase):
 
         presenter.notify_progress(0, [0.0], [1.0])
 
-        self.assertEqual(presenter._table_model.get_table_entry(0).row_state, RowState.Processed)
+        self.assertEqual(presenter._table_model.get_table_entry(0).row_state, RowState.PROCESSED)
         self.assertEqual(presenter._table_model.get_table_entry(0).options_column_model.get_options_string(),
                          'MergeScale=1.0, MergeShift=0.0')
 
@@ -877,7 +877,7 @@ class RunTabPresenterTest(unittest.TestCase):
 
         presenter.notify_progress(0, [], [])
 
-        self.assertEqual(presenter._table_model.get_table_entry(0).row_state, RowState.Processed)
+        self.assertEqual(presenter._table_model.get_table_entry(0).row_state, RowState.PROCESSED)
         self.assertEqual(presenter._table_model.get_table_entry(0).tool_tip, '')
 
     def test_that_process_selected_does_nothing_if_no_states_selected(self):

@@ -59,8 +59,8 @@ if PYQT4:
 else:
     from mantidqt.plotting.functions import get_plot_fig
 
-row_state_to_colour_mapping = {RowState.Unprocessed: '#FFFFFF', RowState.Processed: '#d0f4d0',
-                               RowState.Error: '#accbff'}
+row_state_to_colour_mapping = {RowState.UNPROCESSED: '#FFFFFF', RowState.PROCESSED: '#d0f4d0',
+                               RowState.ERROR: '#accbff'}
 
 
 def log_times(func):
@@ -528,7 +528,7 @@ class RunTabPresenter(PresenterCommon):
 
     def on_data_changed(self, row, column, new_value, old_value):
         self._table_model.update_table_entry(row, column, new_value)
-        self._view.change_row_color(row_state_to_colour_mapping[RowState.Unprocessed], row)
+        self._view.change_row_color(row_state_to_colour_mapping[RowState.UNPROCESSED], row)
         self._view.set_row_tooltip('', row)
         self._beam_centre_presenter.on_update_rows()
         self._masking_table_presenter.on_update_rows()

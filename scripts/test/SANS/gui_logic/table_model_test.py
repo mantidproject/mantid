@@ -219,7 +219,7 @@ class TableModelTest(unittest.TestCase):
         table_index_model = TableIndexModel(0, "", "", "", "", "", "",
                                             "", "", "", "", "", "")
 
-        self.assertEqual(table_index_model.row_state, RowState.Unprocessed)
+        self.assertEqual(table_index_model.row_state, RowState.UNPROCESSED)
         self.assertEqual(table_index_model.tool_tip, '')
 
     def test_that_set_processed_sets_state_to_processed(self):
@@ -232,7 +232,7 @@ class TableModelTest(unittest.TestCase):
 
         table_model.set_row_to_processed(row, tool_tip)
 
-        self.assertEqual(table_index_model.row_state, RowState.Processed)
+        self.assertEqual(table_index_model.row_state, RowState.PROCESSED)
         self.assertEqual(table_index_model.tool_tip, tool_tip)
 
     def test_that_reset_row_state_sets_row_to_unproceesed_and_sets_tool_tip_to_empty(self):
@@ -246,7 +246,7 @@ class TableModelTest(unittest.TestCase):
 
         table_model.reset_row_state(row)
 
-        self.assertEqual(table_index_model.row_state, RowState.Unprocessed)
+        self.assertEqual(table_index_model.row_state, RowState.UNPROCESSED)
         self.assertEqual(table_index_model.tool_tip, '')
 
     def test_that_set_row_to_error_sets_row_to_error_and_tool_tip(self):
@@ -259,7 +259,7 @@ class TableModelTest(unittest.TestCase):
 
         table_model.set_row_to_error(row, tool_tip)
 
-        self.assertEqual(table_index_model.row_state, RowState.Error)
+        self.assertEqual(table_index_model.row_state, RowState.ERROR)
         self.assertEqual(table_index_model.tool_tip, tool_tip)
 
     def test_serialise_options_dict_correctly(self):
@@ -390,7 +390,7 @@ class TableModelThreadingTest(unittest.TestCase):
         self.qApp.processEvents()
 
         self.assertEqual(table_index_model.tool_tip, 'File Error')
-        self.assertEqual(table_index_model.row_state, RowState.Error)
+        self.assertEqual(table_index_model.row_state, RowState.ERROR)
 
     def test_that_get_thickness_for_rows_updates_table_correctly(self):
         table_model = TableModel()

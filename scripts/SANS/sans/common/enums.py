@@ -316,13 +316,13 @@ class IntegralEnum(Enum):
     Vertical = "Vertical"
 
 
-@string_convertible
-@serializable_enum("Unprocessed", "Processed", "Error")
-class RowState(object):
+class RowState(Enum):
     """
     Defines the entries of a batch reduction file.
     """
-    pass
+    ERROR = "Error"
+    PROCESSED = "Processed"
+    UNPROCESSED = "Unprocessed"
 
 
 # ------------------------------
