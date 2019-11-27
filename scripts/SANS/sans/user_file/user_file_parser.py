@@ -219,24 +219,24 @@ class BackParser(UserFileComponentParser):
     def _extract_all_mon(self, line):
         all_mons_string = re.sub(self._all_mons, "", line)
         time_range = extract_float_range(all_mons_string)
-        return {BackId.all_monitors: range_entry(start=time_range[0], stop=time_range[1])}
+        return {BackId.ALL_MONITORS: range_entry(start=time_range[0], stop=time_range[1])}
 
     def _extract_single_mon(self, line):
         monitor_number = self._get_monitor_number(line)
         single_string = re.sub(self._times, "", line)
         all_mons_string = re.sub(self._single_monitor, "", single_string)
         time_range = extract_float_range(all_mons_string)
-        return {BackId.single_monitors: back_single_monitor_entry(monitor=monitor_number, start=time_range[0],
+        return {BackId.SINGLE_MONITORS: back_single_monitor_entry(monitor=monitor_number, start=time_range[0],
                                                                   stop=time_range[1])}
 
     def _extract_off(self, line):
         monitor_number = self._get_monitor_number(line)
-        return {BackId.monitor_off: monitor_number}
+        return {BackId.MONITOR_OFF: monitor_number}
 
     def _extract_trans(self, line):
         trans_string = re.sub(self._trans, "", line)
         time_range = extract_float_range(trans_string)
-        return {BackId.trans: range_entry(start=time_range[0], stop=time_range[1])}
+        return {BackId.TRANS: range_entry(start=time_range[0], stop=time_range[1])}
 
     def _get_monitor_number(self, line):
         monitor_selection = re.search(self._single_monitor, line).group(0)
@@ -2099,7 +2099,7 @@ class MonParser(UserFileComponentParser):
         if len(length_entries) != 2:
             raise RuntimeError("MonParser: Length setting needs 2 numeric parameters, "
                                "but received {0}.".format(len(length_entries)))
-        return {MonId.length: monitor_length(length=length_entries[0], spectrum=length_entries[1],
+        return {MonId.LENGTH: monitor_length(length=length_entries[0], spectrum=length_entries[1],
                                              interpolate=interpolate)}
 
     def _extract_direct(self, line, original_line):
@@ -2118,7 +2118,7 @@ class MonParser(UserFileComponentParser):
             output.append(monitor_file(file_path=file_path, detector_type=DetectorType.HAB))
         if is_lab:
             output.append(monitor_file(file_path=file_path, detector_type=DetectorType.LAB))
-        return {MonId.direct: output}
+        return {MonId.DIRECT: output}
 
     def _extract_flat(self, line, original_line):
         # If we have a HAB specified then select HAB
@@ -2126,12 +2126,12 @@ class MonParser(UserFileComponentParser):
         # If nothing is specified then select LAB
         detector_type = DetectorType.HAB if re.search(self._hab, line, re.IGNORECASE) else DetectorType.LAB
         file_path = self._extract_file_path(line, original_line, self._flat)
-        return {MonId.flat: monitor_file(file_path=file_path, detector_type=detector_type)}
+        return {MonId.FLAT: monitor_file(file_path=file_path, detector_type=detector_type)}
 
     def _extract_hab(self, line, original_line):
         # This is the same as direct/front
         file_path = self._extract_file_path(line, original_line, self._hab_file)
-        return {MonId.direct: [monitor_file(file_path=file_path, detector_type=DetectorType.HAB)]}
+        return {MonId.DIRECT: [monitor_file(file_path=file_path, detector_type=DetectorType.HAB)]}
 
     def _extract_file_path(self, line, original_line, to_remove):
         direct = re.sub(self._detector, "", line)
@@ -2170,7 +2170,7 @@ class MonParser(UserFileComponentParser):
         line = re.sub(self._spectrum, "", line)
         line = re.sub(self._equal, "", line)
         spectrum = convert_string_to_integer(line)
-        return {MonId.spectrum: monitor_spectrum(spectrum=spectrum, is_trans=is_trans, interpolate=interpolate)}
+        return {MonId.SPECTRUM: monitor_spectrum(spectrum=spectrum, is_trans=is_trans, interpolate=interpolate)}
 
     @staticmethod
     def get_type():
@@ -2203,7 +2203,7 @@ class PrintParser(UserFileComponentParser):
         else:
             raise RuntimeError("PrintParser: Failed to extract line {} it does not start with {}".format(line, PrintParser.Type))
 
-        return {PrintId.print_line: setting}
+        return {PrintId.PRINT_LINE: setting}
 
     @staticmethod
     def get_type():

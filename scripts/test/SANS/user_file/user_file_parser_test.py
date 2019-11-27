@@ -866,9 +866,9 @@ class MonParserTest(unittest.TestCase):
         self.assertTrue(MonParser.get_type(), "MON")
 
     def test_that_length_is_parsed_correctly(self):
-        valid_settings = {"MON/length= 23.5 34": {MonId.length: monitor_length(length=23.5, spectrum=34,
+        valid_settings = {"MON/length= 23.5 34": {MonId.LENGTH: monitor_length(length=23.5, spectrum=34,
                                                                                interpolate=False)},
-                          "MON/length= 23.5 34  / InterPolate": {MonId.length: monitor_length(length=23.5, spectrum=34,
+                          "MON/length= 23.5 34  / InterPolate": {MonId.LENGTH: monitor_length(length=23.5, spectrum=34,
                                                                                               interpolate=True)}}
 
         invalid_settings = {"MON/length= 23.5 34.7": RuntimeError,
@@ -880,27 +880,27 @@ class MonParserTest(unittest.TestCase):
         do_test(mon_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_direct_files_are_parsed_correctly(self):
-        valid_settings = {"MON/DIRECT= C:\path1\Path2\file.ext ": {MonId.direct: [monitor_file(
+        valid_settings = {"MON/DIRECT= C:\path1\Path2\file.ext ": {MonId.DIRECT: [monitor_file(
                           file_path="C:/path1/Path2/file.ext", detector_type=DetectorType.HAB),
                           monitor_file(file_path="C:/path1/Path2/file.ext", detector_type=DetectorType.LAB)]},
-                          "MON/ direct  = filE.Ext ": {MonId.direct: [monitor_file(file_path="filE.Ext",
-                                                       detector_type=DetectorType.HAB), monitor_file(
+                          "MON/ direct  = filE.Ext ": {MonId.DIRECT: [monitor_file(file_path="filE.Ext",
+                                                                                   detector_type=DetectorType.HAB), monitor_file(
                                                        file_path="filE.Ext", detector_type=DetectorType.LAB)
-                                                       ]},
-                          "MON/DIRECT= \path1\Path2\file.ext ": {MonId.direct: [monitor_file(
+                                                                      ]},
+                          "MON/DIRECT= \path1\Path2\file.ext ": {MonId.DIRECT: [monitor_file(
                                                                  file_path="/path1/Path2/file.ext",
                                                                  detector_type=DetectorType.HAB),
                                                                  monitor_file(file_path="/path1/Path2/file.ext",
                                                                               detector_type=DetectorType.LAB)]},
-                          "MON/DIRECT= /path1/Path2/file.ext ": {MonId.direct: [monitor_file(
+                          "MON/DIRECT= /path1/Path2/file.ext ": {MonId.DIRECT: [monitor_file(
                                                                                 file_path="/path1/Path2/file.ext",
                                                                                 detector_type=DetectorType.HAB),
                                                                  monitor_file(file_path="/path1/Path2/file.ext",
                                                                               detector_type=DetectorType.LAB)]},
-                          "MON/DIRECT/ rear= /path1/Path2/file.ext ": {MonId.direct: [monitor_file(
+                          "MON/DIRECT/ rear= /path1/Path2/file.ext ": {MonId.DIRECT: [monitor_file(
                                                                        file_path="/path1/Path2/file.ext",
                                                                        detector_type=DetectorType.LAB)]},
-                          "MON/DIRECT/ frONT= path1/Path2/file.ext ": {MonId.direct: [monitor_file(
+                          "MON/DIRECT/ frONT= path1/Path2/file.ext ": {MonId.DIRECT: [monitor_file(
                                                                        file_path="path1/Path2/file.ext",
                                                                        detector_type=DetectorType.HAB)]}
                           }
@@ -913,21 +913,21 @@ class MonParserTest(unittest.TestCase):
         do_test(mon_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_flat_files_are_parsed_correctly(self):
-        valid_settings = {"MON/FLat  = C:\path1\Path2\file.ext ": {MonId.flat: monitor_file(
+        valid_settings = {"MON/FLat  = C:\path1\Path2\file.ext ": {MonId.FLAT: monitor_file(
                                                                    file_path="C:/path1/Path2/file.ext",
                                                                    detector_type=DetectorType.LAB)},
-                          "MON/ flAt  = filE.Ext ": {MonId.flat: monitor_file(file_path="filE.Ext",
-                                                     detector_type=DetectorType.LAB)},
-                          "MON/flAT= \path1\Path2\file.ext ": {MonId.flat: monitor_file(
+                          "MON/ flAt  = filE.Ext ": {MonId.FLAT: monitor_file(file_path="filE.Ext",
+                                                                              detector_type=DetectorType.LAB)},
+                          "MON/flAT= \path1\Path2\file.ext ": {MonId.FLAT: monitor_file(
                                                                file_path="/path1/Path2/file.ext",
                                                                detector_type=DetectorType.LAB)},
-                          "MON/FLat= /path1/Path2/file.ext ": {MonId.flat: monitor_file(
+                          "MON/FLat= /path1/Path2/file.ext ": {MonId.FLAT: monitor_file(
                                                                file_path="/path1/Path2/file.ext",
                                                                detector_type=DetectorType.LAB)},
-                          "MON/FLat/ rear= /path1/Path2/file.ext ": {MonId.flat: monitor_file(
+                          "MON/FLat/ rear= /path1/Path2/file.ext ": {MonId.FLAT: monitor_file(
                                                                      file_path="/path1/Path2/file.ext",
                                                                      detector_type=DetectorType.LAB)},
-                          "MON/FLat/ frONT= path1/Path2/file.ext ": {MonId.flat: monitor_file(
+                          "MON/FLat/ frONT= path1/Path2/file.ext ": {MonId.FLAT: monitor_file(
                                                                      file_path="path1/Path2/file.ext",
                                                                      detector_type=DetectorType.HAB)}}
 
@@ -939,16 +939,16 @@ class MonParserTest(unittest.TestCase):
         do_test(mon_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_hab_files_are_parsed_correctly(self):
-        valid_settings = {"MON/HAB  = C:\path1\Path2\file.ext ": {MonId.direct: [monitor_file(
+        valid_settings = {"MON/HAB  = C:\path1\Path2\file.ext ": {MonId.DIRECT: [monitor_file(
                                                                                 file_path="C:/path1/Path2/file.ext",
                                                                                 detector_type=DetectorType.HAB)]},
-                          "MON/ hAB  = filE.Ext ": {MonId.direct: [monitor_file(
+                          "MON/ hAB  = filE.Ext ": {MonId.DIRECT: [monitor_file(
                                                                    file_path="filE.Ext",
                                                                    detector_type=DetectorType.HAB)]},
-                          "MON/HAb= \path1\Path2\file.ext ": {MonId.direct: [monitor_file(
+                          "MON/HAb= \path1\Path2\file.ext ": {MonId.DIRECT: [monitor_file(
                                                               file_path="/path1/Path2/file.ext",
                                                               detector_type=DetectorType.HAB)]},
-                          "MON/hAB= /path1/Path2/file.ext ": {MonId.direct: [monitor_file(
+                          "MON/hAB= /path1/Path2/file.ext ": {MonId.DIRECT: [monitor_file(
                                                               file_path="/path1/Path2/file.ext",
                                                               detector_type=DetectorType.HAB)]}}
         invalid_settings = {"MON/HAB= /path1/ Path2/file.ext ": RuntimeError,
@@ -959,13 +959,13 @@ class MonParserTest(unittest.TestCase):
         do_test(mon_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_hab_files_are_parsed_correctly2(self):
-        valid_settings = {"MON/Spectrum = 123 ": {MonId.spectrum: monitor_spectrum(spectrum=123, is_trans=False,
+        valid_settings = {"MON/Spectrum = 123 ": {MonId.SPECTRUM: monitor_spectrum(spectrum=123, is_trans=False,
                                                                                    interpolate=False)},
-                          "MON/trans/Spectrum = 123 ": {MonId.spectrum: monitor_spectrum(spectrum=123, is_trans=True,
+                          "MON/trans/Spectrum = 123 ": {MonId.SPECTRUM: monitor_spectrum(spectrum=123, is_trans=True,
                                                                                          interpolate=False)},
-                          "MON/trans/Spectrum = 123 /  interpolate": {MonId.spectrum: monitor_spectrum(spectrum=123,
-                                                                      is_trans=True, interpolate=True)},
-                          "MON/Spectrum = 123 /  interpolate": {MonId.spectrum:  monitor_spectrum(spectrum=123,
+                          "MON/trans/Spectrum = 123 /  interpolate": {MonId.SPECTRUM: monitor_spectrum(spectrum=123,
+                                                                                                       is_trans=True, interpolate=True)},
+                          "MON/Spectrum = 123 /  interpolate": {MonId.SPECTRUM:  monitor_spectrum(spectrum=123,
                                                                                                   is_trans=False,
                                                                                                   interpolate=True)}}
         invalid_settings = {}
@@ -979,10 +979,10 @@ class PrintParserTest(unittest.TestCase):
         self.assertTrue(PrintParser.get_type(), "PRINT")
 
     def test_that_print_is_parsed_correctly(self):
-        valid_settings = {"PRINT OdlfP slsk 23lksdl2 34l": {PrintId.print_line: "OdlfP slsk 23lksdl2 34l"},
-                          "PRiNt OdlfP slsk 23lksdl2 34l": {PrintId.print_line: "OdlfP slsk 23lksdl2 34l"},
+        valid_settings = {"PRINT OdlfP slsk 23lksdl2 34l": {PrintId.PRINT_LINE: "OdlfP slsk 23lksdl2 34l"},
+                          "PRiNt OdlfP slsk 23lksdl2 34l": {PrintId.PRINT_LINE: "OdlfP slsk 23lksdl2 34l"},
                           "  PRINT Loaded: USER_LOQ_174J, 12/03/18, Xuzhi (Lu), 12mm, Sample Changer, Banjo cells":
-                          {PrintId.print_line: "Loaded: USER_LOQ_174J, 12/03/18, Xuzhi (Lu), 12mm, Sample Changer, Banjo cells"}
+                          {PrintId.PRINT_LINE: "Loaded: USER_LOQ_174J, 12/03/18, Xuzhi (Lu), 12mm, Sample Changer, Banjo cells"}
                           }
 
         invalid_settings = {"j PRINT OdlfP slsk 23lksdl2 34l ": RuntimeError,}
@@ -996,7 +996,7 @@ class BackParserTest(unittest.TestCase):
         self.assertTrue(BackParser.get_type(), "BACK")
 
     def test_that_all_monitors_is_parsed_correctly(self):
-        valid_settings = {"BACK / MON /times  123 34": {BackId.all_monitors: range_entry(start=123, stop=34)}}
+        valid_settings = {"BACK / MON /times  123 34": {BackId.ALL_MONITORS: range_entry(start=123, stop=34)}}
 
         invalid_settings = {}
 
@@ -1004,10 +1004,10 @@ class BackParserTest(unittest.TestCase):
         do_test(back_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_single_monitors_is_parsed_correctly(self):
-        valid_settings = {"BACK / M3 /times  123 34": {BackId.single_monitors: back_single_monitor_entry(monitor=3,
+        valid_settings = {"BACK / M3 /times  123 34": {BackId.SINGLE_MONITORS: back_single_monitor_entry(monitor=3,
                                                                                                          start=123,
                                                                                                          stop=34)},
-                          "BACK / M3 123 34": {BackId.single_monitors: back_single_monitor_entry(monitor=3,
+                          "BACK / M3 123 34": {BackId.SINGLE_MONITORS: back_single_monitor_entry(monitor=3,
                                                                                                  start=123,
                                                                                                  stop=34)}}
 
@@ -1018,7 +1018,7 @@ class BackParserTest(unittest.TestCase):
         do_test(back_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_off_is_parsed_correctly(self):
-        valid_settings = {"BACK / M3 /OFF": {BackId.monitor_off: 3}}
+        valid_settings = {"BACK / M3 /OFF": {BackId.MONITOR_OFF: 3}}
 
         invalid_settings = {"BACK / M /OFF": RuntimeError}
 
@@ -1026,8 +1026,8 @@ class BackParserTest(unittest.TestCase):
         do_test(back_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_trans_mon_is_parsed_correctly(self):
-        valid_settings = {"BACK / TRANS  123 344": {BackId.trans:  range_entry(start=123, stop=344)},
-                          "BACK / tranS 123 34": {BackId.trans: range_entry(start=123, stop=34)}}
+        valid_settings = {"BACK / TRANS  123 344": {BackId.TRANS:  range_entry(start=123, stop=344)},
+                          "BACK / tranS 123 34": {BackId.TRANS: range_entry(start=123, stop=34)}}
 
         invalid_settings = {"BACK / Trans / 123 34": RuntimeError,
                             "BACK / trans 123": RuntimeError}
@@ -1120,16 +1120,16 @@ class UserFileParserTest(unittest.TestCase):
 
         # MonParser
         result = user_file_parser.parse_line("MON/length= 23.5 34")
-        assert_valid_result(result, {MonId.length: monitor_length(length=23.5, spectrum=34, interpolate=False)},
+        assert_valid_result(result, {MonId.LENGTH: monitor_length(length=23.5, spectrum=34, interpolate=False)},
                             self.assertTrue)
 
         # PrintParser
         result = user_file_parser.parse_line("PRINT OdlfP slsk 23lksdl2 34l")
-        assert_valid_result(result, {PrintId.print_line: "OdlfP slsk 23lksdl2 34l"}, self.assertTrue)
+        assert_valid_result(result, {PrintId.PRINT_LINE: "OdlfP slsk 23lksdl2 34l"}, self.assertTrue)
 
         # BackParser
         result = user_file_parser.parse_line("BACK / M3 /OFF")
-        assert_valid_result(result, {BackId.monitor_off: 3}, self.assertTrue)
+        assert_valid_result(result, {BackId.MONITOR_OFF: 3}, self.assertTrue)
 
         # Instrument parser
         result = user_file_parser.parse_line("SANS2D")

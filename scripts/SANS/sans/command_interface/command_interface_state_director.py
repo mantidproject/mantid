@@ -370,7 +370,7 @@ class CommandInterfaceStateDirector(object):
         incident_monitor = command.values[0]
         interpolate = command.values[1]
         is_trans = command.values[2]
-        new_state_entries = {MonId.spectrum: monitor_spectrum(spectrum=incident_monitor,
+        new_state_entries = {MonId.SPECTRUM: monitor_spectrum(spectrum=incident_monitor,
                                                               is_trans=is_trans,
                                                               interpolate=interpolate)}
         self.add_to_processed_state_settings(new_state_entries)
@@ -475,7 +475,7 @@ class CommandInterfaceStateDirector(object):
     def _process_flood_file(self, command):
         file_path = command.values[0]
         detector_type = command.values[1]
-        new_state_entries = {MonId.flat: monitor_file(file_path=file_path, detector_type=detector_type)}
+        new_state_entries = {MonId.FLAT: monitor_file(file_path=file_path, detector_type=detector_type)}
         self.add_to_processed_state_settings(new_state_entries)
 
     def _process_phi_limit(self, command):
@@ -488,7 +488,7 @@ class CommandInterfaceStateDirector(object):
     def _process_wavelength_correction_file(self, command):
         file_path = command.values[0]
         detector_type = command.values[1]
-        new_state_entries = {MonId.direct: monitor_file(file_path=file_path, detector_type=detector_type)}
+        new_state_entries = {MonId.DIRECT: monitor_file(file_path=file_path, detector_type=detector_type)}
         self.add_to_processed_state_settings(new_state_entries)
 
     def _process_mask_radius(self, command):

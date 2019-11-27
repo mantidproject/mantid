@@ -141,39 +141,39 @@ class SettingsAdjustmentModel(ModelCommon):
 
     @property
     def pixel_adjustment_det_1(self):
-        return self._get_adjustment_file_setting(element_id=MonId.flat, detector_type=DetectorType.LAB,
+        return self._get_adjustment_file_setting(element_id=MonId.FLAT, detector_type=DetectorType.LAB,
                                                  default_value="")
 
     @pixel_adjustment_det_1.setter
     def pixel_adjustment_det_1(self, value):
-        self._set_adjustment_file_setting(element_id=MonId.flat, detector_type=DetectorType.LAB, file_path=value)
+        self._set_adjustment_file_setting(element_id=MonId.FLAT, detector_type=DetectorType.LAB, file_path=value)
 
     @property
     def pixel_adjustment_det_2(self):
-        return self._get_adjustment_file_setting(element_id=MonId.flat, detector_type=DetectorType.HAB,
+        return self._get_adjustment_file_setting(element_id=MonId.FLAT, detector_type=DetectorType.HAB,
                                                  default_value="")
 
     @pixel_adjustment_det_2.setter
     def pixel_adjustment_det_2(self, value):
-        self._set_adjustment_file_setting(element_id=MonId.flat, detector_type=DetectorType.HAB, file_path=value)
+        self._set_adjustment_file_setting(element_id=MonId.FLAT, detector_type=DetectorType.HAB, file_path=value)
 
     @property
     def wavelength_adjustment_det_1(self):
-        return self._get_adjustment_file_setting(element_id=MonId.direct, detector_type=DetectorType.LAB,
+        return self._get_adjustment_file_setting(element_id=MonId.DIRECT, detector_type=DetectorType.LAB,
                                                  default_value="")
 
     @wavelength_adjustment_det_1.setter
     def wavelength_adjustment_det_1(self, value):
-        self._set_adjustment_file_setting(element_id=MonId.direct, detector_type=DetectorType.LAB, file_path=value)
+        self._set_adjustment_file_setting(element_id=MonId.DIRECT, detector_type=DetectorType.LAB, file_path=value)
 
     @property
     def wavelength_adjustment_det_2(self):
-        return self._get_adjustment_file_setting(element_id=MonId.direct, detector_type=DetectorType.HAB,
+        return self._get_adjustment_file_setting(element_id=MonId.DIRECT, detector_type=DetectorType.HAB,
                                                  default_value="")
 
     @wavelength_adjustment_det_2.setter
     def wavelength_adjustment_det_2(self, value):
-        self._set_adjustment_file_setting(element_id=MonId.direct, detector_type=DetectorType.HAB, file_path=value)
+        self._set_adjustment_file_setting(element_id=MonId.DIRECT, detector_type=DetectorType.HAB, file_path=value)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Transmission Fitting

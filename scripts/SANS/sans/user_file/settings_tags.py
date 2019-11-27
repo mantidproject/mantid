@@ -150,22 +150,25 @@ class GravityId(Enum):
     ON_OFF = "on_off"
 
 
-# --- MON
-@serializable_enum("length", "direct", "flat", "hab", "spectrum", "spectrum_trans", "interpolate")
-class MonId(object):
-    pass
+class MonId(Enum):
+    DIRECT = "direct"
+    FLAT = "flat"
+    HAB = "hab"
+    INTERPOLATE = "interpolate"
+    LENGTH = "length"
+    SPECTRUM = "spectrum"
+    SPECTRUM_TRANS = "spectrum_trans"
 
 
-# --- PRINT
-@serializable_enum("print_line")
-class PrintId(object):
-    pass
+class PrintId(Enum):
+    PRINT_LINE = "print_line"
 
 
-# -- BACK
-@serializable_enum("all_monitors", "single_monitors", "monitor_off", "trans")
-class BackId(object):
-    pass
+class BackId(Enum):
+    ALL_MONITORS = "all_monitors"
+    MONITOR_OFF = "monitor_off"
+    SINGLE_MONITORS = "single_monitors"
+    TRANS = "trans"
 
 
 # -- OTHER - not settable in user file

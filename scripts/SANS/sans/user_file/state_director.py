@@ -86,10 +86,10 @@ def convert_mm_to_m(value):
 
 def set_background_tof_general(builder, user_file_items):
     # The general background settings
-    if BackId.all_monitors in user_file_items:
-        back_all_monitors = user_file_items[BackId.all_monitors]
+    if BackId.ALL_MONITORS in user_file_items:
+        back_all_monitors = user_file_items[BackId.ALL_MONITORS]
         # Should the user have chosen several values, then the last element is selected
-        check_if_contains_only_one_element(back_all_monitors, BackId.all_monitors)
+        check_if_contains_only_one_element(back_all_monitors, BackId.ALL_MONITORS)
         back_all_monitors = back_all_monitors[-1]
         builder.set_background_TOF_general_start(back_all_monitors.start)
         builder.set_background_TOF_general_stop(back_all_monitors.stop)
@@ -98,16 +98,16 @@ def set_background_tof_general(builder, user_file_items):
 def set_background_tof_monitor(builder, user_file_items):
     # The monitor off switches. Get all monitors which should not have an individual background setting
     monitor_exclusion_list = []
-    if BackId.monitor_off in user_file_items:
-        back_monitor_off = user_file_items[BackId.monitor_off]
+    if BackId.MONITOR_OFF in user_file_items:
+        back_monitor_off = user_file_items[BackId.MONITOR_OFF]
         monitor_exclusion_list = list(back_monitor_off.values())
 
     # Get all individual monitor background settings. But ignore those settings where there was an explicit
     # off setting. Those monitors were collected in the monitor_exclusion_list collection
-    if BackId.single_monitors in user_file_items:
+    if BackId.SINGLE_MONITORS in user_file_items:
         background_tof_monitor_start = {}
         background_tof_monitor_stop = {}
-        back_single_monitors = user_file_items[BackId.single_monitors]
+        back_single_monitors = user_file_items[BackId.SINGLE_MONITORS]
         for element in back_single_monitors:
             monitor = element.monitor
             if monitor not in monitor_exclusion_list:
@@ -1101,8 +1101,8 @@ class StateDirectorISIS(object):
 
     def _set_up_normalize_to_monitor_state(self, user_file_items):
         # Extract the incident monitor and which type of rebinning to use (interpolating or normal)
-        if MonId.spectrum in user_file_items:
-            mon_spectrum = user_file_items[MonId.spectrum]
+        if MonId.SPECTRUM in user_file_items:
+            mon_spectrum = user_file_items[MonId.SPECTRUM]
             mon_spec = [spec for spec in mon_spectrum if not spec.is_trans]
 
             if mon_spec:
@@ -1154,8 +1154,8 @@ class StateDirectorISIS(object):
             self._calculate_transmission_builder.set_transmission_monitor(trans_spec)
 
         # The incident monitor spectrum for transmission calculation
-        if MonId.spectrum in user_file_items:
-            mon_spectrum = user_file_items[MonId.spectrum]
+        if MonId.SPECTRUM in user_file_items:
+            mon_spectrum = user_file_items[MonId.SPECTRUM]
             mon_spec = [spec for spec in mon_spectrum if spec.is_trans]
             if mon_spec:
                 mon_spec = mon_spec[-1]
@@ -1174,10 +1174,10 @@ class StateDirectorISIS(object):
         set_background_tof_monitor(self._calculate_transmission_builder, user_file_items)
 
         # The roi-specific background settings
-        if BackId.trans in user_file_items:
-            back_trans = user_file_items[BackId.trans]
+        if BackId.TRANS in user_file_items:
+            back_trans = user_file_items[BackId.TRANS]
             # Should the user have chosen several values, then the last element is selected
-            check_if_contains_only_one_element(back_trans, BackId.trans)
+            check_if_contains_only_one_element(back_trans, BackId.TRANS)
             back_trans = back_trans[-1]
             self._calculate_transmission_builder.set_background_TOF_roi_start(back_trans.start)
             self._calculate_transmission_builder.set_background_TOF_roi_stop(back_trans.stop)
@@ -1251,8 +1251,8 @@ class StateDirectorISIS(object):
 
     def _set_up_wavelength_and_pixel_adjustment(self, user_file_items):
         # Get the flat/flood files. There can be entries for LAB and HAB.
-        if MonId.flat in user_file_items:
-            mon_flat = user_file_items[MonId.flat]
+        if MonId.FLAT in user_file_items:
+            mon_flat = user_file_items[MonId.FLAT]
             hab_flat_entries = [item for item in mon_flat if item.detector_type is DetectorType.HAB]
             lab_flat_entries = [item for item in mon_flat if item.detector_type is DetectorType.LAB]
             if hab_flat_entries:
@@ -1264,8 +1264,8 @@ class StateDirectorISIS(object):
                 self._wavelength_and_pixel_adjustment_builder.set_LAB_pixel_adjustment_file(lab_flat_entry.file_path)
 
         # Get the direct files. There can be entries for LAB and HAB.
-        if MonId.direct in user_file_items:
-            mon_direct = user_file_items[MonId.direct]
+        if MonId.DIRECT in user_file_items:
+            mon_direct = user_file_items[MonId.DIRECT]
             hab_direct_entries = [item for item in mon_direct if item.detector_type is DetectorType.HAB]
             lab_direct_entries = [item for item in mon_direct if item.detector_type is DetectorType.LAB]
             if hab_direct_entries:
