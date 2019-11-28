@@ -110,7 +110,7 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
         return self.finder_path.getFirstFilename()
 
     def get_path_valid(self):
-        return self.finder_path.isValid()
+        return self.finder_path.isValid() and self.finder_path.getText()
 
     def get_plot_output(self):
         return self.check_plotOutput.isChecked()
