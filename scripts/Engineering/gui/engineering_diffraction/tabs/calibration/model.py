@@ -47,7 +47,7 @@ class CalibrationModel(object):
         :param rb_num: The RB number for file creation.
         """
         van_integration, van_curves = vanadium_corrections.fetch_correction_workspaces(
-            vanadium_path, instrument)
+            vanadium_path, instrument, rb_number=rb_num)
         sample_workspace = self.load_sample(sample_path)
         output = self.run_calibration(sample_workspace, van_integration, van_curves)
         if plot_output:
