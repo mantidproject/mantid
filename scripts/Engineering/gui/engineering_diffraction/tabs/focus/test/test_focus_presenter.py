@@ -27,7 +27,7 @@ class FocusPresenterTest(unittest.TestCase):
     @patch(tab_path + ".presenter.FocusPresenter.start_focus_worker")
     def test_worker_started_with_correct_params(self, worker, wsp_exists):
         self.presenter.current_calibration = CalibrationInfo(vanadium_path="Fake/Path",
-                                                             ceria_path="Fake/Path",
+                                                             sample_path="Fake/Path",
                                                              instrument="ENGINX")
         self.view.get_focus_filename.return_value = "305738"
         self.view.get_north_bank.return_value = False
@@ -102,7 +102,7 @@ class FocusPresenterTest(unittest.TestCase):
     @patch(tab_path + ".presenter.FocusPresenter._create_error_message")
     def test_validate_with_invalid_calibration(self, create_error):
         self.presenter.current_calibration = CalibrationInfo(vanadium_path=None,
-                                                             ceria_path=None,
+                                                             sample_path=None,
                                                              instrument=None)
         banks = ["North", "South"]
 
@@ -114,7 +114,7 @@ class FocusPresenterTest(unittest.TestCase):
     @patch(tab_path + ".presenter.FocusPresenter._create_error_message")
     def test_validate_while_searching(self, create_error, wsp_check):
         self.presenter.current_calibration = CalibrationInfo(vanadium_path="Fake/File/Path",
-                                                             ceria_path="Fake/Path",
+                                                             sample_path="Fake/Path",
                                                              instrument="ENGINX")
         self.view.is_searching.return_value = True
         wsp_check.return_value = True
@@ -127,7 +127,7 @@ class FocusPresenterTest(unittest.TestCase):
     @patch(tab_path + ".presenter.FocusPresenter._create_error_message")
     def test_validate_with_no_banks_selected(self, create_error, wsp_check):
         self.presenter.current_calibration = CalibrationInfo(vanadium_path="Fake/Path",
-                                                             ceria_path="Fake/Path",
+                                                             sample_path="Fake/Path",
                                                              instrument="ENGINX")
         self.view.is_searching.return_value = False
         banks = []

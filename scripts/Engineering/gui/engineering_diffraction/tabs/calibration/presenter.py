@@ -48,33 +48,33 @@ class CalibrationPresenter(object):
             if self.view.is_searching():
                 self._create_error_message("Mantid is searching for the file. Please wait.")
                 return
-            vanadium_no = self.view.get_vanadium_filename()
-            calib_no = self.view.get_calib_filename()
-            self.start_calibration_worker(vanadium_no, calib_no, plot_output, self.rb_num)
+            vanadium_file = self.view.get_vanadium_filename()
+            sample_file = self.view.get_sample_filename()
+            self.start_calibration_worker(vanadium_file, sample_file, plot_output, self.rb_num)
         elif self.view.get_load_checked():
             if not self.validate_path():
                 return
             filename = self.view.get_path_filename()
-            instrument, vanadium_no, calib_no = self.model.load_existing_gsas_parameters(filename)
-            self.pending_calibration.set_calibration(vanadium_no, calib_no, instrument)
+            instrument, vanadium_file, sample_file = self.model.load_existing_gsas_parameters(filename)
+            self.pending_calibration.set_calibration(vanadium_file, sample_file, instrument)
             self.set_current_calibration()
 
-    def start_calibration_worker(self, vanadium_path, calib_path, plot_output, rb_num):
+    def start_calibration_worker(self, vanadium_path, sample_path, plot_output, rb_num):
         """
         Calibrate the data in a separate thread so as to not freeze the GUI.
         :param vanadium_path: Path to vanadium data file.
-        :param calib_path: Path to calibration data file.
+        :param sample_path: Path to sample data file.
         :param plot_output: Whether to plot the output.
         :param rb_num: The current RB number set in the GUI.
         """
-        self.worker = AsyncTask(self.model.create_new_calibration, (vanadium_path, calib_path), {
+        self.worker = AsyncTask(self.model.create_new_calibration, (vanadium_path, sample_path), {
             "plot_output": plot_output,
             "instrument": self.instrument,
             "rb_num": rb_num
         },
                                 error_cb=self._on_error,
                                 success_cb=self._on_success)
-        self.pending_calibration.set_calibration(vanadium_path, calib_path, self.instrument)
+        self.pending_calibration.set_calibration(vanadium_path, sample_path, self.instrument)
         self.set_calibrate_controls_enabled(False)
         self.worker.start()
 
@@ -90,7 +90,7 @@ class CalibrationPresenter(object):
         self.pending_calibration.clear()
 
     def set_field_values(self):
-        self.view.set_calib_text(self.current_calibration.get_ceria())
+        self.view.set_sample_text(self.current_calibration.get_sample())
         self.view.set_vanadium_text(self.current_calibration.get_vanadium())
 
     def set_instrument_override(self, instrument):
@@ -102,7 +102,7 @@ class CalibrationPresenter(object):
         self.rb_num = rb_number
 
     def validate_run_numbers(self):
-        if self.view.get_calib_valid() and self.view.get_vanadium_valid():
+        if self.view.get_sample_valid() and self.view.get_vanadium_valid():
             return True
         else:
             return False
@@ -130,7 +130,7 @@ class CalibrationPresenter(object):
 
     def set_create_new_enabled(self, enabled):
         self.view.set_vanadium_enabled(enabled)
-        self.view.set_calib_enabled(enabled)
+        self.view.set_sample_enabled(enabled)
         if enabled:
             self.set_calibrate_button_text("Calibrate")
             self.view.set_check_plot_output_enabled(True)
@@ -146,7 +146,7 @@ class CalibrationPresenter(object):
         self.view.set_calibrate_button_text(text)
 
     def find_files(self):
-        self.view.find_calib_files()
+        self.view.find_sample_files()
         self.view.find_vanadium_files()
 
     # -----------------------

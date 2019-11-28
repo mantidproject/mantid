@@ -34,22 +34,22 @@ SOUTH_BANK_TEMPLATE_FILE = "template_ENGINX_241391_236516_South_bank.prm"
 class CalibrationModel(object):
     def create_new_calibration(self,
                                vanadium_path,
-                               ceria_path,
+                               sample_path,
                                plot_output,
                                instrument,
                                rb_num=None):
         """
-        Create a new calibration from a vanadium run and ceria run
+        Create a new calibration from a vanadium run and sample run
         :param vanadium_path: Path to vanadium data file.
-        :param ceria_path: Path to ceria data file
+        :param sample_path: Path to sample (CeO2) data file
         :param plot_output: Whether the output should be plotted.
         :param instrument: The instrument the data relates to.
         :param rb_num: The RB number for file creation.
         """
         van_integration, van_curves = vanadium_corrections.fetch_correction_workspaces(
             vanadium_path, instrument)
-        ceria_workspace = self.load_ceria(ceria_path)
-        output = self.run_calibration(ceria_workspace, van_integration, van_curves)
+        sample_workspace = self.load_sample(sample_path)
+        output = self.run_calibration(sample_workspace, van_integration, van_curves)
         if plot_output:
             self._plot_vanadium_curves()
             for i in range(2):
@@ -65,12 +65,12 @@ class CalibrationModel(object):
             params_table.append([i, difc[i], 0.0, tzero[i]])
         self.update_calibration_params_table(params_table)
 
-        self.create_output_files(CALIBRATION_DIR, difc, tzero, ceria_path, vanadium_path,
+        self.create_output_files(CALIBRATION_DIR, difc, tzero, sample_path, vanadium_path,
                                  instrument)
         if rb_num:
             user_calib_dir = path.join(path_handling.OUT_FILES_ROOT_DIR, "User", rb_num,
                                        "Calibration", "")
-            self.create_output_files(user_calib_dir, difc, tzero, ceria_path, vanadium_path,
+            self.create_output_files(user_calib_dir, difc, tzero, sample_path, vanadium_path,
                                      instrument)
 
     def load_existing_gsas_parameters(self, file_path):
@@ -78,13 +78,13 @@ class CalibrationModel(object):
             logger.warning("Could not open GSAS calibration file: ", file_path)
             return
         try:
-            instrument, van_no, ceria_no, params_table = self.get_info_from_file(file_path)
+            instrument, van_no, sample_no, params_table = self.get_info_from_file(file_path)
             self.update_calibration_params_table(params_table)
         except RuntimeError:
             logger.error("Invalid file selected: ", file_path)
             return
         vanadium_corrections.fetch_correction_workspaces(van_no, instrument)
-        return instrument, van_no, ceria_no
+        return instrument, van_no, sample_no
 
     @staticmethod
     def update_calibration_params_table(params_table):
@@ -182,20 +182,20 @@ class CalibrationModel(object):
         fig.show()
 
     @staticmethod
-    def load_ceria(ceria_run_no):
+    def load_sample(sample_run_no):
         try:
-            return Load(Filename=ceria_run_no, OutputWorkspace="engggui_calibration_sample_ws")
+            return Load(Filename=sample_run_no, OutputWorkspace="engggui_calibration_sample_ws")
         except Exception as e:
             logger.error("Error while loading calibration sample data. "
                          "Could not run the algorithm Load successfully for the calibration sample "
-                         "(run number: " + str(ceria_run_no) + "). Error description: " + str(e) +
+                         "(run number: " + str(sample_run_no) + "). Error description: " + str(e) +
                          " Please check also the previous log messages for details.")
             raise RuntimeError
 
-    def run_calibration(self, ceria_ws, van_integration, van_curves):
+    def run_calibration(self, sample_ws, van_integration, van_curves):
         """
         Runs the main Engineering calibration algorithm.
-        :param ceria_ws: The workspace with the ceria data.
+        :param sample_ws: The workspace with the sample data.
         :param van_integration: The integration values from the vanadium corrections
         :param van_curves: The curves from the vanadium corrections.
         :return: The output of the algorithm.
@@ -203,28 +203,28 @@ class CalibrationModel(object):
         output = [None] * 2
         for i in range(2):
             table_name = self._generate_table_workspace_name(i)
-            output[i] = EnggCalibrate(InputWorkspace=ceria_ws,
+            output[i] = EnggCalibrate(InputWorkspace=sample_ws,
                                       VanIntegrationWorkspace=van_integration,
                                       VanCurvesWorkspace=van_curves,
                                       Bank=str(i + 1),
                                       FittedPeaks=table_name)
         return output
 
-    def create_output_files(self, calibration_dir, difc, tzero, ceria_path, vanadium_path,
+    def create_output_files(self, calibration_dir, difc, tzero, sample_path, vanadium_path,
                             instrument):
         """
         Create output files from the algorithms in the specified directory
         :param calibration_dir: The directory to save the files into.
         :param difc: DIFC values from the calibration algorithm.
         :param tzero: TZERO values from the calibration algorithm.
-        :param ceria_path: The path to the ceria data file.
+        :param sample_path: The path to the sample data file.
         :param vanadium_path: The path to the vanadium data file.
         :param instrument: The instrument (ENGINX or IMAT)
         """
         if not path.exists(calibration_dir):
             makedirs(calibration_dir)
         filename = self._generate_output_file_name(vanadium_path,
-                                                   ceria_path,
+                                                   sample_path,
                                                    instrument,
                                                    bank="all")
         # Both Banks
@@ -232,21 +232,21 @@ class CalibrationModel(object):
         write_ENGINX_GSAS_iparam_file(file_path,
                                       difc,
                                       tzero,
-                                      ceria_run=ceria_path,
+                                      ceria_run=sample_path,
                                       vanadium_run=vanadium_path)
         # North Bank
         file_path = calibration_dir + self._generate_output_file_name(
-            vanadium_path, ceria_path, instrument, bank="north")
+            vanadium_path, sample_path, instrument, bank="north")
         write_ENGINX_GSAS_iparam_file(file_path, [difc[0]], [tzero[0]],
-                                      ceria_run=ceria_path,
+                                      ceria_run=sample_path,
                                       vanadium_run=vanadium_path,
                                       template_file=NORTH_BANK_TEMPLATE_FILE,
                                       bank_names=["North"])
         # South Bank
         file_path = calibration_dir + self._generate_output_file_name(
-            vanadium_path, ceria_path, instrument, bank="south")
+            vanadium_path, sample_path, instrument, bank="south")
         write_ENGINX_GSAS_iparam_file(file_path, [difc[1]], [tzero[1]],
-                                      ceria_run=ceria_path,
+                                      ceria_run=sample_path,
                                       vanadium_run=vanadium_path,
                                       template_file=SOUTH_BANK_TEMPLATE_FILE,
                                       bank_names=["South"])
@@ -276,27 +276,27 @@ class CalibrationModel(object):
             raise RuntimeError("Invalid file format.")
 
         words = run_numbers.split()
-        ceria_no = words[2]  # Run numbers are stored as the 3rd and 4th word in this line.
+        sample_no = words[2]  # Run numbers are stored as the 3rd and 4th word in this line.
         van_no = words[3]
-        return instrument, van_no, ceria_no, params_table
+        return instrument, van_no, sample_no, params_table
 
     @staticmethod
     def _generate_table_workspace_name(bank_num):
         return "engggui_calibration_bank_" + str(bank_num + 1)
 
     @staticmethod
-    def _generate_output_file_name(vanadium_path, ceria_path, instrument, bank):
+    def _generate_output_file_name(vanadium_path, sample_path, instrument, bank):
         """
-        Generate an output filename in the form INSTRUMENT_VanadiumRunNo_CeriaRunCo_BANKS
+        Generate an output filename in the form INSTRUMENT_VanadiumRunNo_SampleRunNo_BANKS
         :param vanadium_path: Path to vanadium data file
-        :param ceria_path: Path to ceria data file
+        :param sample_path: Path to sample data file
         :param instrument: The instrument in use.
         :param bank: The bank being saved.
-        :return: The filename, the vanadium run number, and ceria run number.
+        :return: The filename, the vanadium run number, and sample run number.
         """
         vanadium_no = path_handling.get_run_number_from_path(vanadium_path, instrument)
-        ceria_no = path_handling.get_run_number_from_path(ceria_path, instrument)
-        filename = instrument + "_" + vanadium_no + "_" + ceria_no + "_"
+        sample_no = path_handling.get_run_number_from_path(sample_path, instrument)
+        filename = instrument + "_" + vanadium_no + "_" + sample_no + "_"
         if bank == "all":
             filename = filename + "all_banks.prm"
         elif bank == "north":
