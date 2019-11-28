@@ -103,13 +103,10 @@ void addFrameToOutputWorkspace(
 void createEventWorkspace(const double &maxToF, const double &binWidth,
                           std::vector<DataObjects::EventList> &events,
                           DataObjects::EventWorkspace_sptr &dataWorkspace) {
-  std::vector<double> xAxis;
-  // Round up number of bins needed and reserve the space in the vector.
-  const int nbins{int(std::ceil(maxToF / binWidth))};
-  xAxis.reserve(nbins);
-  for (auto i = 0; i < nbins; i++) {
-    xAxis.emplace_back(i * binWidth);
-  }
+  // Round up number of bins needed
+  std::vector<double> xAxis(int(std::ceil(maxToF / binWidth)));
+  std::generate(xAxis.begin(), xAxis.end(),
+                [i = 0, &binWidth]() mutable { return binWidth * i++; });
 
   dataWorkspace = DataObjects::create<DataObjects::EventWorkspace>(
       NUM_OF_SPECTRA, HistogramData::Histogram(HistogramData::BinEdges(xAxis)));
