@@ -97,7 +97,7 @@ Usage
      WavelengthLowerBound=[3.5,3.5],
      WavelengthUpperBound=[25.,22.],
      GlobalScaleFactor=0.13,
-     DeltaQFractionBinning=0.5,
+     DeltaQFractionBinning=0.5
     )
     print('The R(Q) workspace at first angle has {0} points'.format(ws.getItem(0).blocksize()))
     print('The R(Q) workspace at second angle has {0} points'.format(ws.getItem(1).blocksize()))

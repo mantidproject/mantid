@@ -810,7 +810,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                              ManualScaleFactors=scale_factors)
                 to_group.append(stitched)
             except RuntimeError as re:
-                self.log().warning('Unable to stitch automatically, consider stitching manually: ' + re.message)
+                self.log().warning('Unable to stitch automatically, consider stitching manually: ' + str(re))
 
         GroupWorkspaces(InputWorkspaces=to_group, OutputWorkspace=self._outWS)
         self.setProperty(Prop.OUTPUT_WS, self._outWS)
