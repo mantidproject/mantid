@@ -9,6 +9,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MultipleFileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/Run.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -99,15 +100,13 @@ void addFrameToOutputWorkspace(
  * @param events The main events data.
  * @param dataWorkspace The workspace to add the data to.
  */
-void createEventWorkspace(const int &maxToF, const double &binWidth,
+void createEventWorkspace(const double &maxToF, const double &binWidth,
                           std::vector<DataObjects::EventList> &events,
                           DataObjects::EventWorkspace_sptr &dataWorkspace) {
-  std::vector<double> xAxis;
-  // Round up number of bins needed and reserve the space in the vector.
-  xAxis.reserve(int(std::ceil(maxToF / binWidth)));
-  for (auto i = 0; i < (maxToF / binWidth); i++) {
-    xAxis.emplace_back(i * binWidth);
-  }
+  // Round up number of bins needed
+  std::vector<double> xAxis(int(std::ceil(maxToF / binWidth)));
+  std::generate(xAxis.begin(), xAxis.end(),
+                [i = 0, &binWidth]() mutable { return binWidth * i++; });
 
   dataWorkspace = DataObjects::create<DataObjects::EventWorkspace>(
       NUM_OF_SPECTRA, HistogramData::Histogram(HistogramData::BinEdges(xAxis)));
@@ -122,6 +121,20 @@ void createEventWorkspace(const int &maxToF, const double &binWidth,
       Kernel::UnitFactory::Instance().create("TOF");
   dataWorkspace->setYUnit("Counts");
 }
+
+/**
+ * @brief Add a value to the sample logs.
+ *
+ * @param name The name of the log.
+ * @param value The content of the log.
+ * @param ws The workspace to add the log to.
+ */
+template <typename ValueType>
+void addToSampleLog(const std::string &name, const ValueType &value,
+                    DataObjects::EventWorkspace &ws) {
+  ws.mutableRun().addProperty(name, value, false);
+}
+
 } // namespace
 
 /**
@@ -189,8 +202,8 @@ void LoadNGEM::exec() {
   const int minEventsReq(getProperty("MinEventsPerFrame"));
   const int maxEventsReq(getProperty("MaxEventsPerFrame"));
 
-  int maxToF = -1;
-  int minToF = 2147483647;
+  double maxToF{-std::numeric_limits<double>::max()},
+      minToF{std::numeric_limits<double>::max()};
   const double binWidth(getProperty("BinWidth"));
 
   int rawFrames = 0;
@@ -219,10 +232,10 @@ void LoadNGEM::exec() {
   DataObjects::EventWorkspace_sptr dataWorkspace;
   createEventWorkspace(maxToF, binWidth, events, dataWorkspace);
 
-  addToSampleLog("raw_frames", rawFrames, dataWorkspace);
-  addToSampleLog("good_frames", goodFrames, dataWorkspace);
-  addToSampleLog("max_ToF", maxToF, dataWorkspace);
-  addToSampleLog("min_ToF", minToF, dataWorkspace);
+  addToSampleLog("raw_frames", rawFrames, *dataWorkspace);
+  addToSampleLog("good_frames", goodFrames, *dataWorkspace);
+  addToSampleLog("max_ToF", maxToF, *dataWorkspace);
+  addToSampleLog("min_ToF", minToF, *dataWorkspace);
 
   loadInstrument(dataWorkspace);
 
@@ -252,7 +265,7 @@ void LoadNGEM::exec() {
  */
 void LoadNGEM::loadSingleFile(
     const std::vector<std::string> &filePath, int &eventCountInFrame,
-    int &maxToF, int &minToF, int &rawFrames, int &goodFrames,
+    double &maxToF, double &minToF, int &rawFrames, int &goodFrames,
     const int &minEventsReq, const int &maxEventsReq,
     MantidVec &frameEventCounts, std::vector<DataObjects::EventList> &events,
     std::vector<DataObjects::EventList> &eventsInFrame,
@@ -282,8 +295,8 @@ void LoadNGEM::loadSingleFile(
     if (event.coincidence.check()) { // Check for coincidence event.
       ++eventCountInFrame;
       uint64_t pixel = event.coincidence.getPixel();
-      int tof =
-          event.coincidence.timeOfFlight / 1000; // Convert to microseconds (us)
+      // Convert to microseconds (us)
+      const double tof = event.coincidence.timeOfFlight / 1000.0;
 
       if (tof > maxToF) {
         maxToF = tof;
@@ -308,41 +321,6 @@ void LoadNGEM::loadSingleFile(
   }
   g_log.information() << "Finished loading a file.\n";
   ++fileCount;
-}
-
-/**
- * @brief Add a string value to the sample logs.
- *
- * @param logName The name of the log.
- * @param logText The content of the log.
- * @param ws The workspace to add the log to.
- */
-void LoadNGEM::addToSampleLog(const std::string &logName,
-                              const std::string &logText,
-                              DataObjects::EventWorkspace_sptr &ws) {
-  API::Algorithm_sptr sampLogAlg = createChildAlgorithm("AddSampleLog");
-  sampLogAlg->setProperty("Workspace", ws);
-  sampLogAlg->setProperty("LogType", "String");
-  sampLogAlg->setProperty("LogName", logName);
-  sampLogAlg->setProperty("LogText", logText);
-  sampLogAlg->executeAsChildAlg();
-}
-
-/**
- * @brief Add a number value to the sample logs.
- *
- * @param logName Name of the log.
- * @param logNumber The value of the log.
- * @param ws The workspace to add the log to.
- */
-void LoadNGEM::addToSampleLog(const std::string &logName, const int &logNumber,
-                              DataObjects::EventWorkspace_sptr &ws) {
-  API::Algorithm_sptr sampLogAlg = createChildAlgorithm("AddSampleLog");
-  sampLogAlg->setProperty("Workspace", ws);
-  sampLogAlg->setProperty("LogType", "Number");
-  sampLogAlg->setProperty("LogName", logName);
-  sampLogAlg->setProperty("LogText", std::to_string(logNumber));
-  sampLogAlg->executeAsChildAlg();
 }
 
 /**
