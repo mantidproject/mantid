@@ -1,5 +1,6 @@
-# CMake version check. Require CMake 3.5, required by ParaView 5.1.0
-cmake_minimum_required(VERSION 3.5)
+# CMake version check. Require CMake 3.13 - Required for add_link_options
+# 3.15 is required on Windows, but is not available to RHEL yet
+cmake_minimum_required(VERSION 3.13)
 
 # Define the project name.
 project(Mantid)
