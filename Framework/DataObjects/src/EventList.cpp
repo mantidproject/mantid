@@ -63,9 +63,7 @@ int64_t calculateCorrectedFullTime(const EventType &event,
 /**
  * Type for comparing events in terms of time at sample
  */
-template <typename EventType>
-class CompareTimeAtSample
-    : public std::binary_function<EventType, EventType, bool> {
+template <typename EventType> class CompareTimeAtSample {
 private:
   const double m_tofFactor;
   const double m_tofShift;

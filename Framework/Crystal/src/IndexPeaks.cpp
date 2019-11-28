@@ -353,7 +353,7 @@ indexPeaks(const std::vector<Peak *> &peaks, DblMatrix ub,
   std::vector<V3D> qSample(nPeaks);
   std::generate(
       std::begin(qSample), std::end(qSample),
-      [&peaks, i = 0u ]() mutable { return peaks[i++]->getQSampleFrame(); });
+      [&peaks, i = 0u]() mutable { return peaks[i++]->getQSampleFrame(); });
 
   if (optimizeUB) {
     ub = optimizeUBMatrix(ub, qSample, mainTolerance);

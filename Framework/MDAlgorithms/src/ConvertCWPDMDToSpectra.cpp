@@ -25,8 +25,8 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::MDAlgorithms;
 using HistogramData::BinEdges;
-using HistogramData::CountStandardDeviations;
 using HistogramData::Counts;
+using HistogramData::CountStandardDeviations;
 
 DECLARE_ALGORITHM(ConvertCWPDMDToSpectra)
 

@@ -81,7 +81,8 @@ void NexusFileIO::resetProgress(Progress *prog) { m_progress = prog; }
 // </NXentry>
 
 void NexusFileIO::openNexusWrite(const std::string &fileName,
-                                 NexusFileIO::optional_size_t entryNumber) {
+                                 NexusFileIO::optional_size_t entryNumber,
+                                 const bool append_to_file) {
   // open named file and entry - file may exist
   // @throw Exception::FileError if cannot open Nexus file for writing
   //
@@ -93,7 +94,7 @@ void NexusFileIO::openNexusWrite(const std::string &fileName,
   // if so open as xml
   // format otherwise as compressed hdf5
   //
-  if (Poco::File(m_filename).exists())
+  if ((Poco::File(m_filename).exists() && append_to_file) || m_filehandle)
     mode = NXACC_RDWR;
 
   else {

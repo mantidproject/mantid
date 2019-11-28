@@ -15,10 +15,10 @@
 #include "MantidAlgorithms/CreateWorkspace.h"
 #include "MantidAlgorithms/MaskBinsIf.h"
 
-using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::Algorithms::CreateSampleWorkspace;
 using Mantid::Algorithms::CreateWorkspace;
 using Mantid::Algorithms::MaskBinsIf;
+using Mantid::API::MatrixWorkspace_sptr;
 
 class MaskBinsIfTest : public CxxTest::TestSuite {
 private:

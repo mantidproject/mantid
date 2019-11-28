@@ -19,8 +19,8 @@
 #include "MantidQtWidgets/Common/IFunctionBrowser.h"
 #include "MantidQtWidgets/Common/IMuonFitFunctionModel.h"
 
-using MantidQt::CustomInterfaces::Muon::MultiFitState;
 using MantidQt::CustomInterfaces::MuonAnalysisFitFunctionPresenter;
+using MantidQt::CustomInterfaces::Muon::MultiFitState;
 using MantidQt::MantidWidgets::IFunctionBrowser;
 using MantidQt::MantidWidgets::IMuonFitFunctionModel;
 using namespace testing;

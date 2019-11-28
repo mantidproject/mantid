@@ -33,8 +33,8 @@
 
 using namespace Mantid;
 using namespace Geometry;
-using Mantid::Kernel::V3D;
 using detail::ShapeInfo;
+using Mantid::Kernel::V3D;
 
 class CSGObjectTest : public CxxTest::TestSuite {
 

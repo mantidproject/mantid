@@ -33,9 +33,9 @@
 
 #include "boost/make_shared.hpp"
 
+using Poco::XML::Document;
 using Poco::XML::DOMParser;
 using Poco::XML::DOMWriter;
-using Poco::XML::Document;
 using Poco::XML::Element;
 using Poco::XML::Node;
 using Poco::XML::NodeList;

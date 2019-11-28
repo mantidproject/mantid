@@ -20,9 +20,9 @@
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
+using ::testing::_;
 using ::testing::Mock;
 using ::testing::Return;
-using ::testing::_;
 
 class HKLFilterTest : public CxxTest::TestSuite {
 public:

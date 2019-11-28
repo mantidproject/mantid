@@ -8,9 +8,12 @@
 #define MANTID_MANTIDWIDGETS_SAFEQWTPLOT_H_
 
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Plotting/DllOption.h"
 #include "qwt_text.h"
+MSVC_DIAG_OFF(4244)
 #include <QPainter>
+MSVC_DIAG_ON()
 #include <qwt_plot.h>
 
 namespace MantidQt {

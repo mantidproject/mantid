@@ -194,9 +194,9 @@ void SaveLauenorm::exec() {
          p.getRow() > (nRows - widthBorder)))
       continue;
     // Take out the "bank" part of the bank name and convert to an int
-    bankName.erase(remove_if(bankName.begin(), bankName.end(),
-                             not1(std::ptr_fun(::isdigit))),
-                   bankName.end());
+    bankName.erase(
+        remove_if(bankName.begin(), bankName.end(), std::not_fn(::isdigit)),
+        bankName.end());
     if (type.compare(0, 2, "Ba") == 0) {
       Strings::convert(bankName, sequence);
     }
@@ -270,9 +270,9 @@ void SaveLauenorm::exec() {
          p.getRow() > (nRows - widthBorder)))
       continue;
     // Take out the "bank" part of the bank name and convert to an int
-    bankName.erase(remove_if(bankName.begin(), bankName.end(),
-                             not1(std::ptr_fun(::isdigit))),
-                   bankName.end());
+    bankName.erase(
+        remove_if(bankName.begin(), bankName.end(), std::not_fn(::isdigit)),
+        bankName.end());
     if (type.compare(0, 2, "Ba") == 0) {
       Strings::convert(bankName, sequence);
     }

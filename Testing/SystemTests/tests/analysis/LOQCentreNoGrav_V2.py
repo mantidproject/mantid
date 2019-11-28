@@ -39,7 +39,7 @@ class LOQCentreNoGrav(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.disableChecking.append('Instrument')
-        return '54431main_1D_3.0_9.0','LOQCentreNoGravSearchCentreFixed.nxs'
+        return '54431_main_1D_3.0_9.0','LOQCentreNoGravSearchCentreFixed.nxs'
 
 
 class LOQCentreNoGravDefineCentreTest_V2(systemtesting.MantidSystemTest):
@@ -67,4 +67,4 @@ class LOQCentreNoGravDefineCentreTest_V2(systemtesting.MantidSystemTest):
         self.disableChecking.append('Axes')
         self.disableChecking.append('Instrument')
 
-        return '54431main_1D_3.0_9.0', 'LOQCentreNoGrav_V2.nxs'
+        return '54431_main_1D_3.0_9.0', 'LOQCentreNoGrav_V2.nxs'

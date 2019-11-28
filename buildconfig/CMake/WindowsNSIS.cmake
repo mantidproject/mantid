@@ -100,6 +100,7 @@ set ( MISC_CORE_DIST_DLLS
     libNeXusCPP-0.dll
     librdkafka.dll
     librdkafkacpp.dll
+    muparser.dll
     ssleay32.dll
     szip.dll
     tbb.dll

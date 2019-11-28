@@ -18,11 +18,11 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
-using Mantid::API::AlgorithmManager;
-using Mantid::API::Algorithm_sptr;
-using Mantid::API::MatrixWorkspace_sptr;
-using Mantid::Algorithms::CalculatePlaczekSelfScattering;
 using Mantid::MantidVec;
+using Mantid::Algorithms::CalculatePlaczekSelfScattering;
+using Mantid::API::Algorithm_sptr;
+using Mantid::API::AlgorithmManager;
+using Mantid::API::MatrixWorkspace_sptr;
 
 // generate incident spectrum data
 std::vector<double>

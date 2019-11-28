@@ -17,7 +17,7 @@ namespace {
 #define EXPORT_MANDATORYVALIDATOR(ElementType, prefix)                         \
   class_<MandatoryValidator<ElementType>, bases<IValidator>,                   \
          boost::noncopyable>(#prefix "MandatoryValidator");
-}
+} // namespace
 
 void export_MandatoryValidator() {
   EXPORT_MANDATORYVALIDATOR(double, Float);

@@ -1,3 +1,7 @@
+if(NOT ENABLE_OPENGL)
+  message(FATAL_ERROR "Building instrument view with OpenGL disabled is not supported. Please set ENABLE_OPENGL=ON to continue.")
+endif()
+
 set(
   SRC_FILES
   src/BankRenderingHelpers.cpp

@@ -18,8 +18,8 @@
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
-using Mantid::Algorithms::EstimateMuonAsymmetryFromCounts;
 using Mantid::MantidVec;
+using Mantid::Algorithms::EstimateMuonAsymmetryFromCounts;
 
 const std::string outputName = "EstimateMuonAsymmetryFromCounts_Output";
 

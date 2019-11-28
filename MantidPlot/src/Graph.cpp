@@ -5531,9 +5531,8 @@ void Graph::updateWaterfallFill(bool on) {
       continue;
 
     if (on && multiLayer())
-      cv->setBrush(QBrush(
-          cv->pen()
-              .color())); // Default is that each fill color matches line color
+      cv->setBrush(QBrush(cv->pen().color())); // Default is that each fill
+                                               // color matches line color
     else
       cv->setBrush(QBrush());
   }

@@ -35,6 +35,6 @@ DEFINE_TYPE_MAPPING(unsigned long long, NPY_ULONGLONG, NPY_ULONGLONGLTR)
 DEFINE_TYPE_MAPPING(bool, NPY_BOOL, NPY_BOOLLTR)
 DEFINE_TYPE_MAPPING(double, NPY_DOUBLE, NPY_DOUBLELTR)
 DEFINE_TYPE_MAPPING(float, NPY_FLOAT, NPY_CFLOATLTR)
-}
+} // namespace Converters
 } // namespace PythonInterface
 } // namespace Mantid

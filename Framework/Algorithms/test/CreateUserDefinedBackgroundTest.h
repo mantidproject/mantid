@@ -19,9 +19,9 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cmath>
 
+using Mantid::Algorithms::CreateUserDefinedBackground;
 using Mantid::API::ITableWorkspace_sptr;
 using Mantid::API::MatrixWorkspace_sptr;
-using Mantid::Algorithms::CreateUserDefinedBackground;
 
 namespace {
 // Gaussian

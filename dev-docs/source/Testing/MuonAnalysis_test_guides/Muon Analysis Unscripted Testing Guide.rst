@@ -8,14 +8,17 @@ Muon Interfaces Unscripted Testing
     
 Preamble
 ^^^^^^^^^
-This document is intended for developers to use for unscripted testing of :program:`Muon Analysis` and :program:`Frequency Domain Analysis` GUI.
-User documentation for this interface can be found at :ref:`Muon_Analysis-ref` and :ref:`Frequency_Domain_Analysis-ref` .
+This document is intended for developers to use for unscripted testing of `Muon Analysis` and
+`Frequency Domain Analysis` GUI.
 
 Testing here mostly focuses on the changes for Mantid 3.11, but includes other functionality as well.
 The tests follow real use cases provided by scientists and are intended to exercise all the interface's functionality.
-As changes are made to the interface and features added, anything for which it is not possible to write an automated test should have a manual test added to this list.
+As changes are made to the interface and features added, anything for which it is not possible to write an automated
+test should have a manual test added to this list.
 
-.. note:: The tests here are grouped into four sections. The test groups should be run in order and, within each test group, the individual tests should also be run in order. This is because, to avoid duplication, some tests rely on previous tests having been run first.
+.. note:: The tests here are grouped into four sections. The test groups should be run in order and, within each test
+   group, the individual tests should also be run in order. This is because, to avoid duplication, some tests rely on
+   previous tests having been run first.
 
 Common setup
 ^^^^^^^^^^^^
@@ -49,5 +52,3 @@ Group 4: Frequequency Domain Analysis tests
 Test instructions for group 4 can be found at :ref:`Muon_Analysis_TestGuide_4_FDAG-ref`.
 These test the Frequency Domain Analysis GUI and use data loaded from the tests in group 2.
 
-
-.. categories:: Interfaces Muon

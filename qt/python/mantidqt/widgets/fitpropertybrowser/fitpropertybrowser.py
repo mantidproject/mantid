@@ -17,7 +17,6 @@ from mantid import logger
 from mantid.api import AlgorithmManager, AnalysisDataService, ITableWorkspace, MatrixWorkspace
 from mantidqt.plotting.functions import plot
 from mantidqt.utils.qt import import_qt
-from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
 
 from .interactive_tool import FitInteractiveTool
 
@@ -265,10 +264,10 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         """
         This needs to be called to update plot's legend after removing lines.
         """
-        axes = self.get_axes()
-        if axes.legend_ is not None:
-            props = LegendProperties.from_legend(axes.legend_)
-            LegendProperties.create_legend(props, axes)
+        ax = self.get_axes()
+        # only create a legend if the plot already had one
+        if ax.get_legend():
+            ax.make_legend()
 
     def plot_guess(self):
         """
@@ -280,16 +279,13 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
             return
         out_ws_name = '{}_guess'.format(ws_name)
 
-        legend = self.get_axes().get_legend()
-        if legend:
-            legend_props = LegendProperties.from_legend(legend)
-
         try:
             out_ws = self.evaluate_function(ws_name, fun, out_ws_name)
         except RuntimeError:
             return
 
         ax = self.get_axes()
+        legend = ax.get_legend()
 
         # Setting distribution=True prevents the guess being normalised
         self.guess_line = ax.plot(out_ws,
@@ -300,7 +296,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
                                   autoscale_on_update=False)[0]
 
         if legend:
-            LegendProperties.create_legend(legend_props, ax)
+            ax.make_legend()
 
         if self.guess_line:
             self.setTextPlotGuess('Remove Guess')
@@ -369,10 +365,6 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
     def do_plot(self, ws, plot_diff = False, **plot_kwargs):
         ax = self.get_axes()
 
-        plot_has_legend = bool(ax.legend_)
-        if plot_has_legend:
-            props = LegendProperties.from_legend(ax.legend_)
-
         self.clear_fit_result_lines()
 
         # Keep local copy of the original lines
@@ -388,9 +380,9 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         for new_line, old_line in zip(new_lines, original_lines):
             new_line.update_from(old_line)
 
-        if plot_has_legend:
+        if ax.get_legend():
             # Update the legend to make sure it changes to the old properties
-            LegendProperties.create_legend(props, ax)
+            ax.make_legend()
 
         ax.figure.canvas.draw()
 

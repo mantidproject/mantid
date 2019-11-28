@@ -214,8 +214,8 @@ Complementary subtraction is by making A-B == A*B'
 
   // Have DNF parts and will return the same...
   // Sort the components of the list
-  std::for_each(Fparts.begin(), Fparts.end(), std::mem_fun_ref(&Acomp::Sort));
-  std::for_each(Gparts.begin(), Gparts.end(), std::mem_fun_ref(&Acomp::Sort));
+  std::for_each(Fparts.begin(), Fparts.end(), std::mem_fn(&Acomp::Sort));
+  std::for_each(Gparts.begin(), Gparts.end(), std::mem_fn(&Acomp::Sort));
 
   // Sort the list itself...
   std::sort(Gparts.begin(), Gparts.end());
@@ -603,7 +603,7 @@ Decends down the Comp Tree.
 {
   std::sort(Units.begin(), Units.end());
   // Sort each decending object first
-  std::for_each(Comp.begin(), Comp.end(), std::mem_fun_ref(&Acomp::Sort));
+  std::for_each(Comp.begin(), Comp.end(), std::mem_fn(&Acomp::Sort));
   // use the sorted components to sort our component list
   std::sort(Comp.begin(), Comp.end());
 }
@@ -756,9 +756,6 @@ literals
   for (cc = Comp.begin(); cc != Comp.end(); ++cc) {
     cc->getLiterals(literalMap);
   }
-  // Doesn't work because literal map is a reference
-  //  for_each(Comp.begin(),Comp.end(),
-  // std::bind2nd(std::mem_fun(&Acomp::getLiterals), literalMap));
 }
 
 int Acomp::isSimple() const
@@ -838,7 +835,7 @@ i.e. one pass.
     // set PI status to 1
     using std::placeholders::_1;
     for_each(Work.begin(), Work.end(),
-             std::bind(std::mem_fun_ref(&BnId::setPI), _1, 1));
+             std::bind(std::mem_fn(&BnId::setPI), _1, 1));
 
     // Collect into pairs which have a difference of +/- one
     // object
@@ -1522,7 +1519,7 @@ ab -> a'+b'
             std::bind(std::multiplies<int>(), _1, -1));
   sort(Units.begin(), Units.end()); /// Resort the list. use reverse?
 
-  for_each(Comp.begin(), Comp.end(), std::mem_fun_ref(&Acomp::complement));
+  for_each(Comp.begin(), Comp.end(), std::mem_fn(&Acomp::complement));
   sort(Comp.begin(), Comp.end());
 }
 
