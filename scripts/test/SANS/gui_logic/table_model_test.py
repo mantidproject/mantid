@@ -75,12 +75,12 @@ class TableModelTest(unittest.TestCase):
         self.assertEqual(sample_shape_enum, SampleShape.FLAT_PLATE)
         self.assertEqual(sample_shape_text, "FlatPlate")
 
-    def test_that_incorrect_sample_shape_reverts_to_previous_sampleshape(self):
+    def test_that_incorrect_sample_shape_turns_to_not_set(self):
         table_index_model = TableIndexModel('0', "", "", "", "", "", "",
                                             "", "", "", "", "", "", "", "",
                                             sample_shape="Disc")
         table_index_model.sample_shape = "not a sample shape"
-        self.assertEqual("Disc", table_index_model.sample_shape_string)
+        self.assertEqual("", table_index_model.sample_shape_string)
 
     def test_that_empty_string_turns_to_not_set(self):
         table_index_model = TableIndexModel('0', "", "", "", "", "", "",
@@ -91,7 +91,7 @@ class TableModelTest(unittest.TestCase):
         sample_shape_enum = table_index_model.sample_shape
         sample_shape_text = table_index_model.sample_shape_string
 
-        self.assertIsNone(sample_shape_enum)
+        self.assertEqual(SampleShape.NOT_SET, sample_shape_enum)
         self.assertEqual('', sample_shape_text)
 
     def test_that_table_model_completes_partial_sample_shape(self):

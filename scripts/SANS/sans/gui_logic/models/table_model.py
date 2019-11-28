@@ -503,19 +503,26 @@ class SampleShapeColumnModel(object):
 
     def _get_sample_shape(self, original_value):
         if isinstance(original_value, Enum):
-            original_value = original_value.value
+            self.sample_shape = original_value
+            self.sample_shape_string = original_value.value
+            return
 
-        value = original_value.strip().lower()
-        if value == "":
-            self.sample_shape = None
-            self.sample_shape_string = ""
-        else:
-            for shape in SampleShapeColumnModel.SAMPLE_SHAPES:
-                if shape.startswith(value):
-                    shape_enum_string = SampleShapeColumnModel.SAMPLE_SHAPES_DICT[shape]
-                    self.sample_shape = SampleShape(shape_enum_string)
-                    self.sample_shape_string = shape_enum_string
-                    break
+        user_val = original_value.strip().lower()
+
+        # Set it to none as our fallback
+        self.sample_shape = SampleShape.NOT_SET
+        self.sample_shape_string = ""
+
+        if not user_val:
+            return  # If we don't return here an empty string will match with the first shape
+
+        for shape in SampleShape:
+            # Case insensitive lookup
+            value = str(shape.value)
+            if user_val in value.lower() :
+                self.sample_shape = shape
+                self.sample_shape_string = shape.value
+                return
 
     @staticmethod
     def get_hint_strategy():
