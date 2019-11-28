@@ -565,16 +565,17 @@ def get_data_uneven_flag(workspace, **kwargs):
     return aligned, kwargs
 
 
-def check_resample_to_regular_grid(ws):
-    if not ws.isCommonBins():
-        return True
+def check_resample_to_regular_grid(ws, **kwargs):
+    aligned = kwargs.pop('axisaligned', False)
+    if not ws.isCommonBins() or aligned:
+        return True, kwargs
 
     x = ws.dataX(0)
     difference = np.diff(x)
     if not np.all(np.isclose(difference[:-1], difference[0])):
-        return True
+        return True, kwargs
 
-    return False
+    return False, kwargs
 
 
 # ====================================================

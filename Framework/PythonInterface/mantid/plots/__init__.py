@@ -858,10 +858,12 @@ class MantidAxes(Axes):
                 return self._redraw_colorplot(plotfunctions_func, artists, workspace, **kwargs)
 
             workspace = args[0]
+            normalize_by_bin_width, _ = get_normalize_by_bin_width(workspace, self, **kwargs)
+            is_normalized = normalize_by_bin_width or workspace.isDistribution()
             # We return the last mesh so the return type is a single artist like the standard Axes
             artists = self.track_workspace_artist(workspace,
                                                   plotfunctions_func(self, *args, **kwargs),
-                                                  _update_data)
+                                                  _update_data, is_normalized=is_normalized)
             try:
                 return artists[-1]
             except TypeError:
@@ -881,7 +883,6 @@ class MantidAxes(Axes):
             artist_orig.remove()
             if hasattr(artist_orig, 'colorbar_cid'):
                 artist_orig.callbacksSM.disconnect(artist_orig.colorbar_cid)
-        interpolation = None
         artists_new = colorfunc(self, workspace, cmap=artist_orig.cmap,
                                 norm=artist_orig.norm,  **kwargs)
 

@@ -421,14 +421,15 @@ def pcolor(axes, workspace, *args, **kwargs):
         x, y, z = get_md_data2d_bin_bounds(workspace, normalization, indices, transpose)
         _setLabels2D(axes, workspace, indices, transpose)
     else:
-        (aligned, kwargs) = get_data_uneven_flag(workspace, **kwargs)
+        (aligned, kwargs) = check_resample_to_regular_grid(workspace, **kwargs)
+        (normalize_by_bin_width, kwargs) = get_normalize_by_bin_width(workspace, axes, **kwargs)
         (distribution, kwargs) = get_distribution(workspace, **kwargs)
         if aligned:
             kwargs['pcolortype'] = ''
             return _pcolorpieces(axes, workspace, distribution, *args, **kwargs)
         else:
             (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=True, transpose=transpose)
-            _setLabels2D(axes, workspace, transpose=transpose)
+            _setLabels2D(axes, workspace, transpose=transpose, normalize_by_bin_width=normalize_by_bin_width)
     return axes.pcolor(x, y, z, *args, **kwargs)
 
 
@@ -465,14 +466,15 @@ def pcolorfast(axes, workspace, *args, **kwargs):
         x, y, z = get_md_data2d_bin_bounds(workspace, normalization, indices, transpose)
         _setLabels2D(axes, workspace, indices, transpose)
     else:
-        (aligned, kwargs) = get_data_uneven_flag(workspace, **kwargs)
+        (aligned, kwargs) = check_resample_to_regular_grid(workspace, **kwargs)
+        (normalize_by_bin_width, kwargs) = get_normalize_by_bin_width(workspace, axes, **kwargs)
         (distribution, kwargs) = get_distribution(workspace, **kwargs)
         if aligned:
             kwargs['pcolortype'] = 'fast'
             return _pcolorpieces(axes, workspace, distribution, *args, **kwargs)
         else:
             (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=True, transpose=transpose)
-        _setLabels2D(axes, workspace, transpose=transpose)
+        _setLabels2D(axes, workspace, transpose=transpose, normalize_by_bin_width=normalize_by_bin_width)
     return axes.pcolorfast(x, y, z, *args, **kwargs)
 
 
@@ -509,14 +511,15 @@ def pcolormesh(axes, workspace, *args, **kwargs):
         x, y, z = get_md_data2d_bin_bounds(workspace, normalization, indices, transpose)
         _setLabels2D(axes, workspace, indices, transpose)
     else:
-        (aligned, kwargs) = get_data_uneven_flag(workspace, **kwargs)
+        (aligned, kwargs) = check_resample_to_regular_grid(workspace, **kwargs)
+        (normalize_by_bin_width, kwargs) = get_normalize_by_bin_width(workspace, axes, **kwargs)
         (distribution, kwargs) = get_distribution(workspace, **kwargs)
         if aligned:
             kwargs['pcolortype'] = 'mesh'
             return _pcolorpieces(axes, workspace, distribution, *args, **kwargs)
         else:
             (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=True, transpose=transpose)
-        _setLabels2D(axes, workspace, transpose=transpose)
+        _setLabels2D(axes, workspace, transpose=transpose, normalize_by_bin_width=normalize_by_bin_width)
     return axes.pcolormesh(x, y, z, *args, **kwargs)
 
 
@@ -553,9 +556,10 @@ def imshow(axes, workspace, *args, **kwargs):
         x, y, z = get_md_data2d_bin_bounds(workspace, normalization, indices, transpose)
         _setLabels2D(axes, workspace, indices, transpose)
     else:
+        (aligned, kwargs) = check_resample_to_regular_grid(workspace, **kwargs)
         (normalize_by_bin_width, kwargs) = get_normalize_by_bin_width(workspace, axes, **kwargs)
         (distribution, kwargs) = get_distribution(workspace, **kwargs)
-        if check_resample_to_regular_grid(workspace):
+        if aligned:
             (x, y, z) = get_matrix_2d_ragged(workspace, normalize_by_bin_width, histogram2D=True, transpose=transpose)
         else:
             (x, y, z) = get_matrix_2d_data(workspace, distribution=distribution, histogram2D=True, transpose=transpose)
