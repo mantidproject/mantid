@@ -36,33 +36,35 @@ public:
 
   void testCheckingClipboardTypeThrowsForEmptyClipboard() {
     auto clipboard = Clipboard();
-    TS_ASSERT_THROWS(clipboard.isGroupLocation(0), std::runtime_error);
+    TS_ASSERT_THROWS(clipboard.isGroupLocation(0), const std::runtime_error &);
   }
 
   void testCheckingGroupNameThrowsForEmptyClipboard() {
     auto clipboard = Clipboard();
-    TS_ASSERT_THROWS(clipboard.groupName(0), std::runtime_error);
+    TS_ASSERT_THROWS(clipboard.groupName(0), const std::runtime_error &);
   }
 
   void testSettingGroupNameThrowsForEmptyClipboard() {
     auto clipboard = Clipboard();
     TS_ASSERT_THROWS(clipboard.setGroupName(0, "test group"),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void testCreateGroupForRootThrowsForEmptyClipboard() {
     auto clipboard = Clipboard();
-    TS_ASSERT_THROWS(clipboard.createGroupForRoot(0), std::runtime_error);
+    TS_ASSERT_THROWS(clipboard.createGroupForRoot(0),
+                     const std::runtime_error &);
   }
 
   void testCreateRowsForAllRootsThrowsForEmptyClipboard() {
     auto clipboard = Clipboard();
-    TS_ASSERT_THROWS(clipboard.createRowsForAllRoots(), std::runtime_error);
+    TS_ASSERT_THROWS(clipboard.createRowsForAllRoots(),
+                     const std::runtime_error &);
   }
 
   void testContainsGroupsThrowsForEmptyClipboard() {
     auto clipboard = Clipboard();
-    TS_ASSERT_THROWS(containsGroups(clipboard), std::runtime_error);
+    TS_ASSERT_THROWS(containsGroups(clipboard), const std::runtime_error &);
   }
 
   void testClipboardIsInitializedWithRow() {
@@ -77,18 +79,19 @@ public:
 
   void testGettingGroupNameThrowsForRow() {
     auto clipboard = clipboardWithARow();
-    TS_ASSERT_THROWS(clipboard.groupName(0), std::runtime_error);
+    TS_ASSERT_THROWS(clipboard.groupName(0), const std::runtime_error &);
   }
 
   void testSettingGroupNameThrowsForRow() {
     auto clipboard = clipboardWithARow();
     TS_ASSERT_THROWS(clipboard.setGroupName(0, "test group"),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void testCreateGroupForRootThrowsForRow() {
     auto clipboard = clipboardWithARow();
-    TS_ASSERT_THROWS(clipboard.createGroupForRoot(0), std::runtime_error);
+    TS_ASSERT_THROWS(clipboard.createGroupForRoot(0),
+                     const std::runtime_error &);
   }
 
   void testCreateRowsForAllRootsSucceeds() {
@@ -133,7 +136,8 @@ public:
 
   void testCreateRowsForAllRootsThrowsForGroup() {
     auto clipboard = clipboardWithAGroup();
-    TS_ASSERT_THROWS(clipboard.createRowsForAllRoots(), std::runtime_error);
+    TS_ASSERT_THROWS(clipboard.createRowsForAllRoots(),
+                     const std::runtime_error &);
   }
 
   void testContainsGroupsReturnsTrueIfGroupsExist() {
@@ -173,7 +177,8 @@ public:
 
   void testCreateRowsForAllRootsThrowsForMultiGroupClipboard() {
     auto clipboard = clipboardWithTwoMultiRowGroups();
-    TS_ASSERT_THROWS(clipboard.createRowsForAllRoots(), std::runtime_error);
+    TS_ASSERT_THROWS(clipboard.createRowsForAllRoots(),
+                     const std::runtime_error &);
   }
 
   void testContainsGroupsReturnsTrueIfMultipleGroupsExist() {

@@ -307,7 +307,7 @@ void populateTable(ITableWorkspace_sptr &t, const MatrixWorkspace_sptr &ws,
 
       colValues << phi               // rtp
                 << isMonitorDisplay; // monitor
-    } catch (std::exception) {
+    } catch (const std::exception &) {
       // spectrumNo=-1, detID=0
       colValues << -1 << "0";
       // Y/E
