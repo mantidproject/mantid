@@ -199,10 +199,10 @@ void createMDEvents1Run(std::vector<Mantid::Kernel::V3D> &vec_qsample,
         Mantid::Kernel::V3D qsample(q_x, q_y, q_z);
         double signal = qsample.distance(origin) * 1000;
 
-        vec_qsample.push_back(qsample);
-        vec_signal.push_back(signal);
-        vec_detid.push_back(detid);
-        vec_runnumber.push_back(121);
+        vec_qsample.emplace_back(qsample);
+        vec_signal.emplace_back(signal);
+        vec_detid.emplace_back(detid);
+        vec_runnumber.emplace_back(121);
 
         ++detid;
       }
@@ -240,10 +240,10 @@ void createMDEvents2Run(std::vector<Mantid::Kernel::V3D> &vec_qsample,
         Mantid::Kernel::V3D qsample(q_x, q_y, q_z);
         double signal = qsample.distance(origin) * 1000;
 
-        vec_qsample.push_back(qsample);
-        vec_signal.push_back(signal);
-        vec_detid.push_back(detid);
-        vec_runnumber.push_back(121);
+        vec_qsample.emplace_back(qsample);
+        vec_signal.emplace_back(signal);
+        vec_detid.emplace_back(detid);
+        vec_runnumber.emplace_back(121);
 
         ++detid;
       }
@@ -266,10 +266,10 @@ void createMDEvents2Run(std::vector<Mantid::Kernel::V3D> &vec_qsample,
         Mantid::Kernel::V3D qsample(q_x, q_y, q_z);
         double signal = qsample.distance(origin) * 100;
 
-        vec_qsample.push_back(qsample);
-        vec_signal.push_back(signal);
-        vec_detid.push_back(detid);
-        vec_runnumber.push_back(144);
+        vec_qsample.emplace_back(qsample);
+        vec_signal.emplace_back(signal);
+        vec_detid.emplace_back(detid);
+        vec_runnumber.emplace_back(144);
 
         ++detid;
       }
@@ -318,10 +318,10 @@ public:
     AnalysisDataService::Instance().addOrReplace("TestMDWS", inputws);
 
     std::vector<int> runnumberlist;
-    runnumberlist.push_back(vec_runnumbers[0]);
+    runnumberlist.emplace_back(vec_runnumbers[0]);
     Mantid::Kernel::V3D peakcenter(1.4, 2.4, 3.4);
     std::vector<Mantid::Kernel::V3D> peakcenterlist;
-    peakcenterlist.push_back(peakcenter);
+    peakcenterlist.emplace_back(peakcenter);
     PeaksWorkspace_sptr peakws =
         buildPeakWorkspace(runnumberlist, peakcenterlist);
     AnalysisDataService::Instance().addOrReplace("TestPeaksWS", peakws);
@@ -369,12 +369,12 @@ public:
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TestMDWS2"));
 
     std::vector<int> runnumberlist;
-    runnumberlist.push_back(vec_runnumbers.front());
-    runnumberlist.push_back(vec_runnumbers.back());
+    runnumberlist.emplace_back(vec_runnumbers.front());
+    runnumberlist.emplace_back(vec_runnumbers.back());
     Mantid::Kernel::V3D peakcenter(3, 3, 3);
     std::vector<Mantid::Kernel::V3D> peakcenterlist;
-    peakcenterlist.push_back(peakcenter);
-    peakcenterlist.push_back(peakcenter);
+    peakcenterlist.emplace_back(peakcenter);
+    peakcenterlist.emplace_back(peakcenter);
     PeaksWorkspace_sptr peakws =
         buildPeakWorkspace(runnumberlist, peakcenterlist);
     AnalysisDataService::Instance().addOrReplace("TestPeaksWS", peakws);
@@ -473,12 +473,12 @@ public:
         createMDWorkspace(vec_qsample, vec_signal, vec_detid, vec_runnumbers);
     AnalysisDataService::Instance().addOrReplace("TestMDWS2", inputws);
 
-    runnumberlist.push_back(vec_runnumbers.front());
-    runnumberlist.push_back(vec_runnumbers.back());
+    runnumberlist.emplace_back(vec_runnumbers.front());
+    runnumberlist.emplace_back(vec_runnumbers.back());
     Mantid::Kernel::V3D peakcenter(3, 3, 3);
     std::vector<Mantid::Kernel::V3D> peakcenterlist;
-    peakcenterlist.push_back(peakcenter);
-    peakcenterlist.push_back(peakcenter);
+    peakcenterlist.emplace_back(peakcenter);
+    peakcenterlist.emplace_back(peakcenter);
     peakws = buildPeakWorkspace(runnumberlist, peakcenterlist);
     AnalysisDataService::Instance().addOrReplace("TestPeaksWS", peakws);
 

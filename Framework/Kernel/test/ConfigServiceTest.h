@@ -297,8 +297,8 @@ public:
     auto originalDirectories =
         ConfigService::Instance().getInstrumentDirectories();
     std::vector<std::string> testDirectories;
-    testDirectories.push_back("Test Directory 1");
-    testDirectories.push_back("Test Directory 2");
+    testDirectories.emplace_back("Test Directory 1");
+    testDirectories.emplace_back("Test Directory 2");
     ConfigService::Instance().setInstrumentDirectories(testDirectories);
     auto readDirectories = ConfigService::Instance().getInstrumentDirectories();
     TS_ASSERT_EQUALS(readDirectories.size(), testDirectories.size());

@@ -45,7 +45,7 @@ public:
 
     // The results we should get back
     FindFilesSearchResults exp_results;
-    exp_results.filenames.push_back("FoundFile");
+    exp_results.filenames.emplace_back("FoundFile");
 
     auto fakeAllocator =
         [&exp_results](const FindFilesSearchParameters &parameters) {
@@ -84,7 +84,7 @@ public:
 
     // The results we should get back
     FindFilesSearchResults exp_results;
-    exp_results.filenames.push_back("FoundFile");
+    exp_results.filenames.emplace_back("FoundFile");
 
     auto fakeAllocatorNoResults =
         [](const FindFilesSearchParameters &parameters) {

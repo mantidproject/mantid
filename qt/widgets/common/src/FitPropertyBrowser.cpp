@@ -107,10 +107,12 @@ FitPropertyBrowser::FitPropertyBrowser(QWidget *parent, QObject *mantidui)
       m_shouldBeNormalised(false), m_oldWorkspaceIndex(-1) {
   Mantid::API::FrameworkManager::Instance().loadPlugins();
 
-  // Try to create a Gaussian. Failing will mean that CurveFitting dll is not
-  // loaded
-  boost::shared_ptr<Mantid::API::IFunction>(
-      Mantid::API::FunctionFactory::Instance().createFunction("Gaussian"));
+  // If Gaussian does not exist then the plugins did not load.
+  if (!Mantid::API::FunctionFactory::Instance().exists("Gaussian")) {
+    throw std::runtime_error(
+        "FitPropertyBrowser: Unable to find Gaussian function\n"
+        "Has the CurveFitting plugin loaded?");
+  }
   if (m_autoBgName.toLower() == "none") {
     m_autoBgName = "";
   } else {
@@ -544,9 +546,9 @@ void FitPropertyBrowser::addFitResultWorkspacesToTableWidget() {
   auto name = outputName();
   std::vector<std::string> workspaceNames;
   workspaceNames.reserve(3);
-  workspaceNames.push_back(name + "_NormalisedCovarianceMatrix");
-  workspaceNames.push_back(name + "_Parameters");
-  workspaceNames.push_back(name + "_Workspace");
+  workspaceNames.emplace_back(name + "_NormalisedCovarianceMatrix");
+  workspaceNames.emplace_back(name + "_Parameters");
+  workspaceNames.emplace_back(name + "_Workspace");
 
   for (const auto &name : workspaceNames) {
     // check if already in the list
@@ -751,7 +753,7 @@ void FitPropertyBrowser::addFunction() {
             m_registeredFunctions[i].toStdString());
     std::vector<std::string> tempCategories = f->categories();
     for (size_t j = 0; j < tempCategories.size(); ++j) {
-      categories[tempCategories[boost::lexical_cast<int>(j)]].push_back(
+      categories[tempCategories[boost::lexical_cast<int>(j)]].emplace_back(
           m_registeredFunctions[i].toStdString());
     }
   }
@@ -2010,7 +2012,7 @@ QVector<double> FitPropertyBrowser::getXRange() {
     auto col = tbl->getColumn(xColumnIndex);
     try {
       for (size_t i = 0; i < tbl->rowCount(); ++i) {
-        xColumnData.push_back(col->toDouble(i));
+        xColumnData.emplace_back(col->toDouble(i));
       }
     } catch (std::invalid_argument &err) {
       QMessageBox::critical(this, "Mantid - Error",

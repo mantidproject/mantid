@@ -321,15 +321,15 @@ void Algorithm::cacheWorkspaceProperties() {
       continue;
     switch (prop->direction()) {
     case Kernel::Direction::Input:
-      m_inputWorkspaceProps.push_back(wsProp);
+      m_inputWorkspaceProps.emplace_back(wsProp);
       break;
     case Kernel::Direction::InOut:
-      m_inputWorkspaceProps.push_back(wsProp);
-      m_outputWorkspaceProps.push_back(wsProp);
+      m_inputWorkspaceProps.emplace_back(wsProp);
+      m_outputWorkspaceProps.emplace_back(wsProp);
       break;
     case Kernel::Direction::Output:
-      m_outputWorkspaceProps.push_back(wsProp);
-      m_pureOutputWorkspaceProps.push_back(wsProp);
+      m_outputWorkspaceProps.emplace_back(wsProp);
+      m_pureOutputWorkspaceProps.emplace_back(wsProp);
       break;
     default:
       throw std::logic_error(
@@ -433,7 +433,7 @@ void Algorithm::lockWorkspaces() {
         // Write-lock it if not already
         debugLog << "Write-locking " << ws->getName() << '\n';
         ws->getLock()->writeLock();
-        m_writeLockedWorkspaces.push_back(ws);
+        m_writeLockedWorkspaces.emplace_back(ws);
       }
     }
   }
@@ -451,7 +451,7 @@ void Algorithm::lockWorkspaces() {
         // Read-lock it if not already write-locked
         debugLog << "Read-locking " << ws->getName() << '\n';
         ws->getLock()->readLock();
-        m_readLockedWorkspaces.push_back(ws);
+        m_readLockedWorkspaces.emplace_back(ws);
       }
     }
   }
@@ -773,7 +773,7 @@ void Algorithm::store() {
           throw;
         }
       } else {
-        groupWsIndicies.push_back(i);
+        groupWsIndicies.emplace_back(i);
       }
     }
   }
@@ -870,7 +870,7 @@ void Algorithm::setupAsChildAlgorithm(Algorithm_sptr alg,
   // in parallel safely.
   boost::weak_ptr<IAlgorithm> weakPtr(alg);
   PARALLEL_CRITICAL(Algorithm_StoreWeakPtr) {
-    m_ChildAlgorithms.push_back(weakPtr);
+    m_ChildAlgorithms.emplace_back(weakPtr);
   }
 }
 
@@ -1390,7 +1390,7 @@ bool Algorithm::processGroups() {
     auto *prop = dynamic_cast<Property *>(pureOutputWorkspaceProp);
     if (prop && !prop->value().empty()) {
       auto outWSGrp = boost::make_shared<WorkspaceGroup>();
-      outGroups.push_back(outWSGrp);
+      outGroups.emplace_back(outWSGrp);
       // Put the GROUP in the ADS
       AnalysisDataService::Instance().addOrReplace(prop->value(), outWSGrp);
       outWSGrp->observeADSNotifications(false);

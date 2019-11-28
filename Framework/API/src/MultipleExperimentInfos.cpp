@@ -63,7 +63,7 @@ MultipleExperimentInfos::getExperimentInfo(const uint16_t runIndex) const {
  * @throw std::runtime_error if you reach the limit of 65536 entries.
  */
 uint16_t MultipleExperimentInfos::addExperimentInfo(ExperimentInfo_sptr ei) {
-  m_expInfos.push_back(ei);
+  m_expInfos.emplace_back(ei);
   if (m_expInfos.size() >=
       static_cast<size_t>(std::numeric_limits<uint16_t>::max()))
     throw std::runtime_error("MDWorkspace: Reached the capacity for the number "
@@ -101,7 +101,7 @@ void MultipleExperimentInfos::copyExperimentInfos(
   // Do a deep copy of ExperimentInfo's
   for (const auto &expInfo : other.m_expInfos) {
     auto copy(boost::make_shared<ExperimentInfo>(*expInfo));
-    m_expInfos.push_back(copy);
+    m_expInfos.emplace_back(copy);
   }
 }
 

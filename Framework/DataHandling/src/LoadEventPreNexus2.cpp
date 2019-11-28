@@ -58,13 +58,13 @@ using namespace DataObjects;
 using DataObjects::EventList;
 using DataObjects::EventWorkspace;
 using DataObjects::EventWorkspace_sptr;
-using Types::Core::DateAndTime;
-using Types::Event::TofEvent;
 using std::ifstream;
 using std::runtime_error;
 using std::string;
 using std::stringstream;
 using std::vector;
+using Types::Core::DateAndTime;
+using Types::Event::TofEvent;
 
 //------------------------------------------------------------------------------------------------
 // constants for locating the parameters to use in execution
@@ -185,7 +185,7 @@ static string generateMappingfileName(EventWorkspace_sptr &wksp) {
                              .append("/calibrations/")
                              .append(mapping);
       if (Poco::File(path).exists())
-        files.push_back(path);
+        files.emplace_back(path);
     }
   }
 
@@ -1095,8 +1095,8 @@ void LoadEventPreNexus2::procEventsLinear(
 
         std::vector<Types::Core::DateAndTime> tempvectime;
         std::vector<double> temptofs;
-        local_pulsetimes.push_back(tempvectime);
-        local_tofs.push_back(temptofs);
+        local_pulsetimes.emplace_back(tempvectime);
+        local_tofs.emplace_back(temptofs);
 
         theindex = newindex;
 
@@ -1110,8 +1110,8 @@ void LoadEventPreNexus2::procEventsLinear(
 
       // ii. calculate and add absolute time
       // int64_t abstime = (pulsetime.totalNanoseconds()+int64_t(tof*1000));
-      local_pulsetimes[theindex].push_back(pulsetime);
-      local_tofs[theindex].push_back(tof);
+      local_pulsetimes[theindex].emplace_back(pulsetime);
+      local_tofs[theindex].emplace_back(tof);
 
     } // END-IF-ELSE: On Event's Pixel's Nature
 
@@ -1144,8 +1144,8 @@ void LoadEventPreNexus2::procEventsLinear(
 
         std::vector<Types::Core::DateAndTime> temppulsetimes;
         std::vector<double> temptofs;
-        this->wrongdetid_pulsetimes.push_back(temppulsetimes);
-        this->wrongdetid_tofs.push_back(temptofs);
+        this->wrongdetid_pulsetimes.emplace_back(temppulsetimes);
+        this->wrongdetid_tofs.emplace_back(temptofs);
 
         mindex = newindex;
       } else {
@@ -1157,9 +1157,9 @@ void LoadEventPreNexus2::procEventsLinear(
       size_t localindex = lit->second;
 
       for (size_t iv = 0; iv < local_pulsetimes[localindex].size(); iv++) {
-        this->wrongdetid_pulsetimes[mindex].push_back(
+        this->wrongdetid_pulsetimes[mindex].emplace_back(
             local_pulsetimes[localindex][iv]);
-        this->wrongdetid_tofs[mindex].push_back(local_tofs[localindex][iv]);
+        this->wrongdetid_tofs[mindex].emplace_back(local_tofs[localindex][iv]);
       }
       // std::sort(this->wrongdetid_abstimes[mindex].begin(),
       // this->wrongdetid_abstimes[mindex].end());
@@ -1333,8 +1333,8 @@ void LoadEventPreNexus2::readPulseidFile(const std::string &filename,
     for (const auto &pulse : pulses) {
       DateAndTime pulseDateTime(static_cast<int64_t>(pulse.seconds),
                                 static_cast<int64_t>(pulse.nanoseconds));
-      this->pulsetimes.push_back(pulseDateTime);
-      this->event_indices.push_back(pulse.event_index);
+      this->pulsetimes.emplace_back(pulseDateTime);
+      this->event_indices.emplace_back(pulse.event_index);
 
       if (pulseDateTime < lastPulseDateTime)
         this->pulsetimesincreasing = false;
@@ -1342,7 +1342,7 @@ void LoadEventPreNexus2::readPulseidFile(const std::string &filename,
         lastPulseDateTime = pulseDateTime;
 
       temp = pulse.pCurrent;
-      this->proton_charge.push_back(temp);
+      this->proton_charge.emplace_back(temp);
       if (temp < 0.)
         this->g_log.warning("Individual proton charge < 0 being ignored");
       else

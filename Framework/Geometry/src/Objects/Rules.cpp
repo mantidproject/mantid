@@ -620,7 +620,7 @@ int Rule::getKeyList(std::vector<int> &IList) const
     } else {
       const auto *SurX = dynamic_cast<const SurfPoint *>(tmpA);
       if (SurX)
-        IList.push_back(SurX->getKeyN());
+        IList.emplace_back(SurX->getKeyN());
       else {
         logger.error() << "Error with surface List\n";
         return static_cast<int>(IList.size());
@@ -649,7 +649,7 @@ int Rule::Eliminate()
   getKeyList(baseKeys);
   std::vector<int>::const_iterator xv;
   for (xv = baseKeys.begin(); xv != baseKeys.end(); ++xv) {
-    baseVal.push_back(0);
+    baseVal.emplace_back(0);
     Base[(*xv)] = 1;
   }
 
@@ -685,7 +685,7 @@ int Rule::Eliminate()
       }
     }
     if (keyChange < 0) // Success !!!!!
-      deadKeys.push_back(targetKey);
+      deadKeys.emplace_back(targetKey);
   }
   return static_cast<int>(deadKeys.size());
 }

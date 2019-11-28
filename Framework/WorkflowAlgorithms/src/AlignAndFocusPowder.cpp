@@ -381,9 +381,9 @@ void AlignAndFocusPowder::exec() {
       if (dmin > 0. && dmax > dmin) {
         double step = m_params[0];
         m_params.clear();
-        m_params.push_back(dmin);
-        m_params.push_back(step);
-        m_params.push_back(dmax);
+        m_params.emplace_back(dmin);
+        m_params.emplace_back(step);
+        m_params.emplace_back(dmax);
         g_log.information()
             << "d-Spacing binning updated: " << m_params[0] << "  "
             << m_params[1] << "  " << m_params[2] << "\n";
@@ -398,8 +398,8 @@ void AlignAndFocusPowder::exec() {
       if (tmin > 0. && tmax > tmin) {
         double step = m_params[0];
         m_params[0] = tmin;
-        m_params.push_back(step);
-        m_params.push_back(tmax);
+        m_params.emplace_back(step);
+        m_params.emplace_back(tmax);
         g_log.information() << "TOF binning updated: " << m_params[0] << "  "
                             << m_params[1] << "  " << m_params[2] << "\n";
       } else {
@@ -965,7 +965,7 @@ AlignAndFocusPowder::conjoinWorkspaces(API::MatrixWorkspace_sptr ws1,
   std::vector<specnum_t> origspecNos;
   for (size_t i = 0; i < nspec1; ++i) {
     specnum_t tmpspecNo = ws1->getSpectrum(i).getSpectrumNo();
-    origspecNos.push_back(tmpspecNo);
+    origspecNos.emplace_back(tmpspecNo);
     if (tmpspecNo > maxspecNo1)
       maxspecNo1 = tmpspecNo;
   }

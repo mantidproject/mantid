@@ -84,7 +84,7 @@ public:
     std::vector<std::unique_ptr<IMDIterator>> ret;
     auto ptr = std::unique_ptr<IMDIterator>{
         std::make_unique<IMDWorkspaceTesterIterator>(this)};
-    ret.push_back(std::move(ptr));
+    ret.emplace_back(std::move(ptr));
     return ret;
   }
 };

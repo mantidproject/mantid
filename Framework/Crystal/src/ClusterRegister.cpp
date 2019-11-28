@@ -63,13 +63,13 @@ public:
     // ------------- Find equivalent sets
     for (auto &cluster : m_groups) {
       if (cluster.find(aLabel) != cluster.end()) {
-        containingAny.push_back(cluster);
+        containingAny.emplace_back(cluster);
       } else if (cluster.find(bLabel) != cluster.end()) {
-        containingAny.push_back(cluster);
+        containingAny.emplace_back(cluster);
       } else {
-        containingNone.push_back(cluster); // Current iterated set contains
-                                           // NEITHER of these labels. It can
-                                           // therfore be ignored.
+        containingNone.emplace_back(cluster); // Current iterated set contains
+                                              // NEITHER of these labels. It can
+                                              // therfore be ignored.
       }
     }
     // ------------ Process equivalent sets
@@ -78,7 +78,7 @@ public:
       GroupType::value_type newSet;
       newSet.insert(aLabel);
       newSet.insert(bLabel);
-      m_groups.push_back(newSet);
+      m_groups.emplace_back(newSet);
     } else {
       // At least one set already contains at least one label. We merge all such
       // sets into a master set.
@@ -92,7 +92,7 @@ public:
         masterSet.insert(childSet.begin(),
                          childSet.end()); // Build the master set.
       }
-      temp.push_back(masterSet);
+      temp.emplace_back(masterSet);
       m_groups = temp; // Swap.
       newItem = false;
     }
@@ -111,7 +111,7 @@ public:
         boost::shared_ptr<ICluster> &cluster = m_register[j];
         composite->add(cluster);
       }
-      composites.push_back(composite);
+      composites.emplace_back(composite);
     }
     return composites;
   }

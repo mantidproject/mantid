@@ -26,5 +26,6 @@ Bugfixes
 - Fixes an issue where the Load dialog would not resize correctly after clicking Run.
 - Useless Help [?] buttons removed from multiple dialogs.
 - Dragging and dropping workspaces onto the Spectrum Viewer no longer causes a crash.
+- Fixes an issue where opening any help menu after previously opening the help menu in the Manage User Directories window would crash MantidPlot.
 
 :ref:`Release 4.2.0 <v4.2.0>`

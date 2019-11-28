@@ -115,7 +115,7 @@ protected:
   /// Add a command to the list of available commands
   void addCommand(std::vector<std::unique_ptr<Command>> &commands,
                   std::unique_ptr<Command> command) {
-    commands.push_back(std::move(command));
+    commands.emplace_back(std::move(command));
   }
 };
 } // namespace DataProcessor

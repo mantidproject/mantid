@@ -67,10 +67,10 @@ public:
     boost::random::mt19937 gen;
     boost::random::uniform_int_distribution<uint16_t> dist(1, 96);
     for (size_t i = 0; i < test_size; ++i) {
-      z_input.push_back(dist(gen));
+      z_input.emplace_back(dist(gen));
     }
     for (auto z : z_input) {
-      symbol_input.push_back(getAtom(z).symbol);
+      symbol_input.emplace_back(getAtom(z).symbol);
     }
   }
 

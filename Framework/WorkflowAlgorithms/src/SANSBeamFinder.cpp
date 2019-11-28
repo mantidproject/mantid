@@ -268,12 +268,12 @@ void SANSBeamFinder::maskEdges(MatrixWorkspace_sptr beamCenterWS, int high,
 
   // right
   for (int i = 0; i < right * component->idstep(); i++) {
-    IDs.push_back(component->idstart() + i);
+    IDs.emplace_back(component->idstart() + i);
   }
   // left
   for (int i = component->maxDetectorID();
        i > (component->maxDetectorID() - left * component->idstep()); i--) {
-    IDs.push_back(i);
+    IDs.emplace_back(i);
   }
   // low
   // 0,256,512,768,..,1,257,513
@@ -282,7 +282,7 @@ void SANSBeamFinder::maskEdges(MatrixWorkspace_sptr beamCenterWS, int high,
          i < component->nelements() * component->idstep() -
                  component->idstep() + low + component->idstart();
          i += component->idstep()) {
-      IDs.push_back(i);
+      IDs.emplace_back(i);
     }
   }
   // high
@@ -292,7 +292,7 @@ void SANSBeamFinder::maskEdges(MatrixWorkspace_sptr beamCenterWS, int high,
          i <
          component->nelements() * component->idstep() + component->idstart();
          i += component->idstep()) {
-      IDs.push_back(i);
+      IDs.emplace_back(i);
     }
   }
 

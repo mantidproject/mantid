@@ -639,7 +639,7 @@ void IqtFunctionModel::estimateExpParameters() {
     if (!heightName2 || !lifeTimeName2)
       return;
   }
-  assert(getNumberDomains() == m_estimationData.size());
+  assert(getNumberDomains() == static_cast<int>(m_estimationData.size()));
   for (auto i = 0; i < getNumberDomains(); ++i) {
     // estimate first exp
     auto const &x = m_estimationData[i].x;

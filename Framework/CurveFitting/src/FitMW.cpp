@@ -82,8 +82,8 @@ void joinOverlappingRanges(std::vector<double> &exclude) {
   std::vector<RangePoint> points;
   points.reserve(exclude.size());
   for (auto point = exclude.begin(); point != exclude.end(); point += 2) {
-    points.push_back(RangePoint{RangePoint::Openning, *point});
-    points.push_back(RangePoint{RangePoint::Closing, *(point + 1)});
+    points.emplace_back(RangePoint{RangePoint::Openning, *point});
+    points.emplace_back(RangePoint{RangePoint::Closing, *(point + 1)});
   }
   // Sort the points according to the operator defined in RangePoint.
   std::sort(points.begin(), points.end());
@@ -97,14 +97,14 @@ void joinOverlappingRanges(std::vector<double> &exclude) {
     if (point.kind == RangePoint::Openning) {
       if (level == 0) {
         // First openning bracket starts a new exclusion range.
-        exclude.push_back(point.value);
+        exclude.emplace_back(point.value);
       }
       // Each openning bracket increases the level
       ++level;
     } else {
       if (level == 1) {
         // The bracket that makes level 0 is an end of a range.
-        exclude.push_back(point.value);
+        exclude.emplace_back(point.value);
       }
       // Each closing bracket decreases the level
       --level;

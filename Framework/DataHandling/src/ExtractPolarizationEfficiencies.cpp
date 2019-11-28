@@ -43,7 +43,7 @@ std::vector<double> parseVector(std::string const &name,
   std::vector<double> result;
   double number;
   while (istr >> number) {
-    result.push_back(number);
+    result.emplace_back(number);
   }
 
   if (!istr.eof()) {

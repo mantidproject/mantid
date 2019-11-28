@@ -21,9 +21,9 @@
 using namespace Mantid::Poldi;
 using namespace Mantid::API;
 
-using ::testing::Return;
 using Mantid::HistogramData::LinearGenerator;
 using Mantid::HistogramData::Points;
+using ::testing::Return;
 
 class PoldiTruncateDataTest : public CxxTest::TestSuite {
 public:

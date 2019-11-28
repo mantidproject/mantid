@@ -560,7 +560,7 @@ void Quasi::plotClicked() {
 
         auto const found = axisLabel.find(paramName);
         if (found != std::string::npos) {
-          spectraIndices.push_back(i);
+          spectraIndices.emplace_back(i);
 
           if (program == "Lorentzians") {
             if (spectraIndices.size() == 3) {

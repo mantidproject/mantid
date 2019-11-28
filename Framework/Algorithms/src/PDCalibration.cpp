@@ -581,9 +581,9 @@ void PDCalibration::exec() {
       if (height < 0.5 * std::sqrt(height + background)) {
         continue;
       }
-      d_vec.push_back(m_peaksInDspacing[peakIndex]);
-      tof_vec.push_back(centre);
-      height2.push_back(height * height);
+      d_vec.emplace_back(m_peaksInDspacing[peakIndex]);
+      tof_vec.emplace_back(centre);
+      height2.emplace_back(height * height);
       tof_vec_full[peakIndex] = centre;
       width_vec_full[peakIndex] = width;
       height_vec_full[peakIndex] = height;
@@ -1145,8 +1145,8 @@ API::MatrixWorkspace_sptr PDCalibration::calculateResolutionTable() {
     for (size_t peakIndex = 1; peakIndex < numPeaks + 1; ++peakIndex) {
       const double pos = m_peakPositionTable->Double(rowIndex, peakIndex);
       if (std::isnormal(pos)) {
-        resolution.push_back(m_peakWidthTable->Double(rowIndex, peakIndex) /
-                             pos);
+        resolution.emplace_back(m_peakWidthTable->Double(rowIndex, peakIndex) /
+                                pos);
       }
     }
 

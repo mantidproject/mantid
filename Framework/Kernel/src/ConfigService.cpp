@@ -94,7 +94,7 @@ std::vector<std::string> splitPath(const std::string &path) {
   std::vector<std::string> splitted;
 
   if (path.find(';') == std::string::npos) { // don't bother tokenizing
-    splitted.push_back(path);
+    splitted.emplace_back(path);
   } else {
     int options = Mantid::Kernel::StringTokenizer::TOK_TRIM +
                   Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY;
@@ -102,7 +102,7 @@ std::vector<std::string> splitPath(const std::string &path) {
     auto iend = tokenizer.end();
     for (auto itr = tokenizer.begin(); itr != iend; ++itr) {
       if (!itr->empty()) {
-        splitted.push_back(*itr);
+        splitted.emplace_back(*itr);
       }
     }
   }
@@ -935,7 +935,7 @@ void ConfigServiceImpl::getKeysRecursive(
   std::vector<std::string> rootKeys = getKeys(root);
 
   if (rootKeys.empty())
-    allKeys.push_back(root);
+    allKeys.emplace_back(root);
 
   for (auto &rootKey : rootKeys) {
     std::string searchString;
@@ -1595,7 +1595,7 @@ void ConfigServiceImpl::appendDataSearchSubDir(const std::string &subdir) {
       // only add new path if it isn't already there
       if (std::find(newDataDirs.begin(), newDataDirs.end(),
                     newDirPath.toString()) == newDataDirs.end())
-        newDataDirs.push_back(newDirPath.toString());
+        newDataDirs.emplace_back(newDirPath.toString());
     } catch (Poco::PathSyntaxException &) {
       continue;
     }
@@ -1728,7 +1728,7 @@ bool ConfigServiceImpl::addDirectoryifExists(
     const std::string &directoryName, std::vector<std::string> &directoryList) {
   try {
     if (Poco::File(directoryName).isDirectory()) {
-      directoryList.push_back(directoryName);
+      directoryList.emplace_back(directoryName);
       return true;
     } else {
       g_log.information("Unable to locate directory at: " + directoryName);

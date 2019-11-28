@@ -29,7 +29,7 @@ namespace MDAlgorithms {
 /**
 Functor to compute the product of the set.
 */
-struct Product : public std::unary_function<size_t, void> {
+struct Product {
   Product() : result(1) {}
   size_t result;
   void operator()(size_t x) { result *= x; }
@@ -126,7 +126,7 @@ MDHistoWorkspace_sptr ImportMDHistoWorkspaceBase::createEmptyOutputWorkspace() {
   std::vector<MDHistoDimension_sptr> dimensions;
   for (size_t k = 0; k < ndims; ++k) {
     auto frame = createMDFrame(frames[k], units[k]);
-    dimensions.push_back(MDHistoDimension_sptr(new MDHistoDimension(
+    dimensions.emplace_back(MDHistoDimension_sptr(new MDHistoDimension(
         names[k], names[k], *frame, static_cast<coord_t>(extents[k * 2]),
         static_cast<coord_t>(extents[(k * 2) + 1]), nbins[k])));
   }
@@ -162,10 +162,10 @@ ImportMDHistoWorkspaceBase::validateInputs() {
   auto ndims = static_cast<size_t>(ndims_prop);
 
   std::vector<std::string> targetFrames;
-  targetFrames.push_back(Mantid::Geometry::GeneralFrame::GeneralFrameName);
-  targetFrames.push_back(Mantid::Geometry::HKL::HKLName);
-  targetFrames.push_back(Mantid::Geometry::QLab::QLabName);
-  targetFrames.push_back(Mantid::Geometry::QSample::QSampleName);
+  targetFrames.emplace_back(Mantid::Geometry::GeneralFrame::GeneralFrameName);
+  targetFrames.emplace_back(Mantid::Geometry::HKL::HKLName);
+  targetFrames.emplace_back(Mantid::Geometry::QLab::QLabName);
+  targetFrames.emplace_back(Mantid::Geometry::QSample::QSampleName);
 
   auto isValidFrame = true;
   for (auto &frame : frames) {

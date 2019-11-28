@@ -434,10 +434,10 @@ ConvertEmptyToTof::findAverageEppAndEpTof(const std::map<int, int> &eppMap) {
       firstL2 = l2;
     }
 
-    epTofList.push_back(
+    epTofList.emplace_back(
         (calculateTOF(l1, wavelength) + calculateTOF(l2, wavelength)) *
         1e6); // microsecs
-    eppList.push_back(epp.first);
+    eppList.emplace_back(epp.first);
 
     g_log.debug() << "WS index = " << epp.first << ", l1 = " << l1
                   << ", l2 = " << l2

@@ -217,7 +217,8 @@ void LoadFlexiNexus::loadMD(NeXus::File *fin) {
 
   std::vector<MDHistoDimension_sptr> dimensions;
   for (int k = static_cast<int>(inf.dims.size()) - 1; k >= 0; k--) {
-    dimensions.push_back(makeDimension(fin, k, static_cast<int>(inf.dims[k])));
+    dimensions.emplace_back(
+        makeDimension(fin, k, static_cast<int>(inf.dims[k])));
   }
 
   auto ws = boost::make_shared<MDHistoWorkspace>(dimensions);

@@ -208,11 +208,11 @@ public:
     const double theta_shift = 0.4;
     for (size_t i = 0; i < 40; ++i) {
       const double theta = 0.02 * double(i) * M_PI;
-      s1.push_back(std::sin(theta));
-      e1.push_back(std::sin(theta));
-      s2.push_back(std::sin(theta + theta_shift));
-      e2.push_back(std::sin(theta + theta_shift));
-      x.push_back(double(i));
+      s1.emplace_back(std::sin(theta));
+      e1.emplace_back(std::sin(theta));
+      s2.emplace_back(std::sin(theta + theta_shift));
+      e2.emplace_back(std::sin(theta + theta_shift));
+      x.emplace_back(double(i));
     }
 
     // Create Input MDWorkspaces

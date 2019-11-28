@@ -81,7 +81,8 @@ void NexusFileIO::resetProgress(Progress *prog) { m_progress = prog; }
 // </NXentry>
 
 void NexusFileIO::openNexusWrite(const std::string &fileName,
-                                 NexusFileIO::optional_size_t entryNumber) {
+                                 NexusFileIO::optional_size_t entryNumber,
+                                 const bool append_to_file) {
   // open named file and entry - file may exist
   // @throw Exception::FileError if cannot open Nexus file for writing
   //
@@ -93,7 +94,7 @@ void NexusFileIO::openNexusWrite(const std::string &fileName,
   // if so open as xml
   // format otherwise as compressed hdf5
   //
-  if (Poco::File(m_filename).exists())
+  if ((Poco::File(m_filename).exists() && append_to_file) || m_filehandle)
     mode = NXACC_RDWR;
 
   else {
@@ -273,7 +274,7 @@ bool NexusFileIO::writeNxNote(const std::string &noteName,
   std::vector<std::string> attributes, avalues;
   if (!date.empty()) {
     attributes.emplace_back("date");
-    avalues.push_back(date);
+    avalues.emplace_back(date);
   }
   if (!writeNxValue<std::string>("author", author, NX_CHAR, attributes,
                                  avalues))
@@ -339,10 +340,10 @@ int NexusFileIO::writeNexusProcessedData2D(
   std::vector<double> axis2;
   if (nSpect < nHist)
     for (size_t i = 0; i < nSpect; i++)
-      axis2.push_back((*sAxis)(spec[i]));
+      axis2.emplace_back((*sAxis)(spec[i]));
   else
     for (size_t i = 0; i < sAxis->length(); i++)
-      axis2.push_back((*sAxis)(i));
+      axis2.emplace_back((*sAxis)(i));
 
   int start[2] = {0, 0};
   int asize[2] = {1, dims_array[1]};
@@ -1164,11 +1165,11 @@ bool NexusFileIO::writeNexusBinMasking(
   for (std::size_t i = 0; i < ws->getNumberHistograms(); ++i) {
     if (ws->hasMaskedBins(i)) {
       const API::MatrixWorkspace::MaskList &mList = ws->maskedBins(i);
-      spectra.push_back(spectra_count);
-      spectra.push_back(offset);
+      spectra.emplace_back(spectra_count);
+      spectra.emplace_back(offset);
       for (const auto &mask : mList) {
-        bins.push_back(mask.first);
-        weights.push_back(mask.second);
+        bins.emplace_back(mask.first);
+        weights.emplace_back(mask.second);
       }
       ++spectra_count;
       offset += static_cast<int>(mList.size());
@@ -1264,7 +1265,7 @@ int getNexusEntryTypes(const std::string &fileName,
          NX_OK) {
     std::string nxc(nxclass);
     if (nxc == "NXentry")
-      entryList.push_back(nxname);
+      entryList.emplace_back(nxname);
   }
   // for each entry found, look for "analysis" or "definition" text data fields
   // and return value plus entry name
@@ -1287,8 +1288,8 @@ int getNexusEntryTypes(const std::string &fileName,
             continue;
           value[dims[0]] = '\0';
           // return e.g entryName "analysis"/definition "muonTD"
-          definition.push_back(value);
-          entryName.push_back(entry);
+          definition.emplace_back(value);
+          entryName.emplace_back(entry);
           delete[] value;
           NXclosegroup(fileH); // close data group, then entry
           NXclosegroup(fileH);

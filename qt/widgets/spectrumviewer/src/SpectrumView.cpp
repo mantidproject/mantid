@@ -106,7 +106,7 @@ void SpectrumView::renderWorkspace(
     return;
 
   auto dataSource = MatrixWSDataSource_sptr(new MatrixWSDataSource(wksp));
-  m_dataSource.push_back(dataSource);
+  m_dataSource.emplace_back(dataSource);
 
   // If we have a MatrixWSDataSource give it the handler for the
   // EMode, so the user can set EMode and EFixed.  NOTE: we could avoid
@@ -471,7 +471,7 @@ std::string SpectrumView::getWindowName() {
 std::vector<std::string> SpectrumView::getWorkspaceNames() {
   std::vector<std::string> names;
   for (const auto &source : m_dataSource) {
-    names.push_back(source->getWorkspace()->getName());
+    names.emplace_back(source->getWorkspace()->getName());
   }
   return names;
 }

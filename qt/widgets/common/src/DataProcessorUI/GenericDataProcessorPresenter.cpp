@@ -1796,7 +1796,7 @@ void GenericDataProcessorPresenter::addCommands() {
   auto commands = m_manager->publishCommands();
   std::vector<std::unique_ptr<Command>> commandsToShow;
   for (auto comm = 10u; comm < commands.size(); comm++)
-    commandsToShow.push_back(std::move(commands.at(comm)));
+    commandsToShow.emplace_back(std::move(commands.at(comm)));
   m_view->addActions(std::move(commandsToShow));
 }
 

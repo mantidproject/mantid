@@ -74,7 +74,7 @@ std::vector<std::string> ADSValidator::allowedValues() const {
       Mantid::Kernel::DataServiceSort::Sorted);
   if (isOptional()) // Insert an empty option
   {
-    vals.push_back("");
+    vals.emplace_back("");
   }
   return vals;
 }

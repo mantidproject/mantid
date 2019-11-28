@@ -24,7 +24,6 @@ class SANS2DFrontNoGrav(systemtesting.MantidSystemTest):
         Set1D()
 
         AssignSample('2500.nxs')
-
         WavRangeReduction(4.6, 12.85, False)
 
     def validate(self):

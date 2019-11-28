@@ -654,7 +654,7 @@ public:
       // Vector with 10 bins, 10 wide
       MantidVec X;
       for (size_t j = 0; j < 11; j++)
-        X.push_back(static_cast<double>(j) * 10.0);
+        X.emplace_back(static_cast<double>(j) * 10.0);
       ew1->setX(i, make_cow<HistogramX>(X));
 
       // Now it should be 20 in that spot

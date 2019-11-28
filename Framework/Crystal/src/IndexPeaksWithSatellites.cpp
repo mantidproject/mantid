@@ -168,7 +168,7 @@ void IndexPeaksWithSatellites::exec() {
 
     q_vectors.reserve(n_peaks);
     for (size_t i = 0; i < n_peaks; i++) {
-      q_vectors.push_back(peaks[i].getQSampleFrame());
+      q_vectors.emplace_back(peaks[i].getQSampleFrame());
     }
 
     total_indexed = IndexingUtils::CalculateMillerIndices(
@@ -200,7 +200,7 @@ void IndexPeaksWithSatellites::exec() {
 
       for (size_t i = 0; i < n_peaks; i++) {
         if (peaks[i].getRunNumber() == run)
-          q_vectors.push_back(peaks[i].getQSampleFrame());
+          q_vectors.emplace_back(peaks[i].getQSampleFrame());
       }
 
       Matrix<double> tempUB(UB);
@@ -515,9 +515,9 @@ void IndexPeaksWithSatellites::exec() {
 V3D IndexPeaksWithSatellites::getOffsetVector(const std::string &label) {
   std::vector<double> offsets = getProperty(label);
   if (offsets.empty()) {
-    offsets.push_back(0.0);
-    offsets.push_back(0.0);
-    offsets.push_back(0.0);
+    offsets.emplace_back(0.0);
+    offsets.emplace_back(0.0);
+    offsets.emplace_back(0.0);
   }
   V3D offsets1 = V3D(offsets[0], offsets[1], offsets[2]);
   return offsets1;

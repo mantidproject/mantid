@@ -204,14 +204,14 @@ IsotropicAtomBraggScattererParser::getCleanScattererTokens(
   std::vector<std::string> cleanTokens;
 
   // Element
-  cleanTokens.push_back(tokens[0]);
+  cleanTokens.emplace_back(tokens[0]);
 
   // X, Y, Z
   cleanTokens.emplace_back("[" + tokens[1] + "," + tokens[2] + "," + tokens[3] +
                            "]");
 
   for (size_t i = 4; i < tokens.size(); ++i) {
-    cleanTokens.push_back(tokens[i]);
+    cleanTokens.emplace_back(tokens[i]);
   }
 
   return cleanTokens;

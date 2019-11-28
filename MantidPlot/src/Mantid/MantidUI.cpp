@@ -181,7 +181,7 @@ bool workspaceIsFitResult(const QString &wsName) {
       const auto specAxis = ws->getAxis(1); // y
       for (size_t iSpec = 0; iSpec < FIT_RESULTS_SPECTRA_NAMES.size();
            ++iSpec) {
-        spectraNames.push_back(specAxis->label(iSpec));
+        spectraNames.emplace_back(specAxis->label(iSpec));
       }
       isFit = spectraNames == FIT_RESULTS_SPECTRA_NAMES;
     }
@@ -209,7 +209,7 @@ getWorkspacesFromAds(const QList<QString> &workspaceNames) {
         boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 workspaceName.toStdString()));
-    workspaces.push_back(workspace);
+    workspaces.emplace_back(workspace);
   }
   return workspaces;
 }
@@ -508,7 +508,7 @@ void MantidUI::deleteWorkspaces(const QStringList &wsNames) {
       std::vector<std::string> vecWsNames;
       vecWsNames.reserve(wsNames.size());
       foreach (auto wsName, wsNames) {
-        vecWsNames.push_back(wsName.toStdString());
+        vecWsNames.emplace_back(wsName.toStdString());
       }
       alg->setProperty("WorkspaceList", vecWsNames);
       executeAlgorithmAsync(alg);
@@ -1787,7 +1787,7 @@ void MantidUI::copyWorkspacestoVector(
   QList<QTreeWidgetItem *>::const_iterator itr;
   for (itr = selectedItems.begin(); itr != selectedItems.end(); ++itr) {
     std::string inputWSName = (*itr)->text(0).toStdString();
-    inputWSVec.push_back(inputWSName);
+    inputWSVec.emplace_back(inputWSName);
   } // end of for loop for input workspaces
 }
 
@@ -3257,7 +3257,7 @@ void MantidUI::putLogsIntoCurveSpecs(std::vector<CurveSpec> &curveSpecList,
       }
       curveSpec.wsName = it.key();
       curveSpec.index = it.value();
-      curveSpecList.push_back(curveSpec);
+      curveSpecList.emplace_back(curveSpec);
 
     } catch (Mantid::Kernel::Exception::NotFoundError &) {
       g_log.warning() << "Workspace " << it.key().toStdString()
@@ -3959,7 +3959,7 @@ void countVirtual(vector<mem_block> &mem, int &total) {
     size += info.RegionSize;
 
     mem_block b = {info.RegionSize, state};
-    mem.push_back(b);
+    mem.emplace_back(b);
 
     /*cerr<<"BaseAddress = "<< info.BaseAddress<<'\n';
     cerr<<"AllocationBase = "<< info.AllocationBase<<'\n';
@@ -4045,9 +4045,9 @@ void MantidUI::memoryImage2() {
 }
 
 #endif
-  //=======================================================================
-  // End of Windows specific stuff
-  //=======================================================================
+//=======================================================================
+// End of Windows specific stuff
+//=======================================================================
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"

@@ -20,12 +20,12 @@
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using Mantid::MantidVec;
 using Mantid::Algorithms::ResampleX;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::Histogram;
-using Mantid::MantidVec;
 using std::vector;
 
 class ResampleXTest : public CxxTest::TestSuite {

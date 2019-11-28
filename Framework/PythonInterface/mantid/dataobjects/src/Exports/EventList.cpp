@@ -20,6 +20,13 @@ void addEventToEventList(EventList &self, double tof,
                          Mantid::Types::Core::DateAndTime pulsetime) {
   self.addEventQuickly(Mantid::Types::Event::TofEvent(tof, pulsetime));
 }
+
+void addWeightedEventToEventList(EventList &self, double tof, double weight,
+                                 double errorsquare,
+                                 Mantid::Types::Core::DateAndTime pulsetime) {
+  self.addEventQuickly(WeightedEvent(
+      Mantid::Types::Event::TofEvent(tof, pulsetime), weight, errorsquare));
+}
 } // namespace
 
 void export_EventList() {
@@ -30,6 +37,9 @@ void export_EventList() {
       .def("addEventQuickly", &addEventToEventList,
            args("self", "tof", "pulsetime"),
            "Create TofEvent and add to EventList.")
+      .def("addWeightedEventQuickly", &addWeightedEventToEventList,
+           args("self", "tof", "weight", "errorsquare", "pulsetime"),
+           "Create weighted TofEvent and add to eventlist")
       .def("__iadd__",
            (EventList & (EventList::*)(const EventList &)) &
                EventList::operator+=,

@@ -87,8 +87,8 @@ public:
  */
 Statistics getStatisticsNumpy(const NDArray &data, const bool sorted = false) {
   using Converters::NDArrayToVector;
-  using Mantid::Kernel::StatOptions;
   using Mantid::Kernel::getStatistics;
+  using Mantid::Kernel::StatOptions;
 
   if (isFloatArray(data.ptr())) {
     unsigned int flags = StatOptions::AllStats;

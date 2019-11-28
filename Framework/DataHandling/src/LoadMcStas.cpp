@@ -507,7 +507,7 @@ std::vector<std::string> LoadMcStas::readHistogramData(
     nxFile.readData<double>(axis1Name, axis1Values);
     if (axis2Name.length() == 0) {
       axis2Name = nameAttrValueYLABEL;
-      axis2Values.push_back(0.0);
+      axis2Values.emplace_back(0.0);
     } else {
       nxFile.readData<double>(axis2Name, axis2Values);
     }

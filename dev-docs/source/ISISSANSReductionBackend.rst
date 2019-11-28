@@ -1214,7 +1214,7 @@ The sub-steps of this algorithm are:
    to reset the components to known positions from the IDF. The second
    time the components are moved and rotated to the requested positions.
    Note that all steps up until now were performed in the time-of-flight domain.
-6. Convert the data from time-of-flight to wavelengths.
+6. Convert the data from time-of-flight to wavelength.
 7. Scale the data set using :ref:`Multiply <algm-Multiply>`. This will multiply the data set
    with the absolute scale and divide :ref:`Divide <algm-Divide>` by the sample volume.
 8. This step creates the adjustment workspaces by *Create SANS Adjustment Workspaces*.

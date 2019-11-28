@@ -22,8 +22,7 @@ namespace VATES {
  @date 09/02/2011
  */
 
-class DLLExport FieldDataToMetadata
-    : public std::binary_function<vtkFieldData *, std::string, std::string> {
+class DLLExport FieldDataToMetadata {
 public:
   /// Act as Functor.
   std::string operator()(vtkFieldData *fieldData, const std::string &id) const;

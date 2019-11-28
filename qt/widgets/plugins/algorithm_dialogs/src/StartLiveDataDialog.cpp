@@ -24,8 +24,8 @@
 
 using namespace MantidQt::CustomDialogs;
 using namespace MantidQt::API;
-using Mantid::API::AlgorithmManager;
 using Mantid::API::Algorithm_sptr;
+using Mantid::API::AlgorithmManager;
 using Mantid::Kernel::ConfigService;
 using Mantid::Types::Core::DateAndTime;
 

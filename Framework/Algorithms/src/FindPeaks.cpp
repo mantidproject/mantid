@@ -630,7 +630,7 @@ std::vector<Histogram> FindPeaks::calculateSecondDifference(
 
   // Loop over spectra
   for (const auto i : m_indexSet) {
-    diffed.push_back(input->histogram(i));
+    diffed.emplace_back(input->histogram(i));
     diffed.back().mutableY() = 0.0;
     diffed.back().mutableE() = 0.0;
 
@@ -1040,8 +1040,8 @@ int FindPeaks::findPeakBackground(const MatrixWorkspace_sptr &input,
   estimate->setProperty("WorkspaceIndex", spectrum);
   // estimate->setProperty("SigmaConstant", 1.0);
   std::vector<double> fwvec;
-  fwvec.push_back(vecX[i_min]);
-  fwvec.push_back(vecX[i_max]);
+  fwvec.emplace_back(vecX[i_min]);
+  fwvec.emplace_back(vecX[i_max]);
   estimate->setProperty("BackgroundType", m_backgroundType);
   estimate->setProperty("FitWindow", fwvec);
   estimate->executeAsChildAlg();

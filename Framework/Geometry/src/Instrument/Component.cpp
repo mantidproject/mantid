@@ -159,7 +159,7 @@ Component::getAncestors() const {
 
   boost::shared_ptr<const IComponent> current = this->getParent();
   while (current) {
-    ancs.push_back(current);
+    ancs.emplace_back(current);
     current = current->getParent();
   }
   return ancs;

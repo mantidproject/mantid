@@ -18,11 +18,11 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
-using Mantid::API::AlgorithmManager;
-using Mantid::API::Algorithm_sptr;
-using Mantid::API::MatrixWorkspace_sptr;
-using Mantid::Algorithms::CalculatePlaczekSelfScattering;
 using Mantid::MantidVec;
+using Mantid::Algorithms::CalculatePlaczekSelfScattering;
+using Mantid::API::Algorithm_sptr;
+using Mantid::API::AlgorithmManager;
+using Mantid::API::MatrixWorkspace_sptr;
 
 // generate incident spectrum data
 std::vector<double>
@@ -38,7 +38,7 @@ generateIncidentSpectrum(const Mantid::HistogramData::HistogramX &lambda,
       double term1 = phiMax * (pow(lambdaT, 4.0) / pow((x + dx), 5.0)) *
                      exp(-pow((lambdaT / (x + dx)), 2.0));
       double term2 = phiEpi * deltaTerm / (pow((x + dx), (1.0 + 2.0 * alpha)));
-      amplitude.push_back(term1 + term2);
+      amplitude.emplace_back(term1 + term2);
     }
   }
   return amplitude;
@@ -61,7 +61,7 @@ generateIncidentSpectrumPrime(const Mantid::HistogramData::HistogramX &lambda,
       double term2 = -phiEpi / pow((x + dx), (1.0 + 2.0 * alpha)) * deltaTerm *
                      ((1.0 + 2.0 * alpha) / (x + dx) +
                       (1 / deltaTerm - 1) / lambda2 * deltaTerm);
-      amplitude.push_back(term1 + term2);
+      amplitude.emplace_back(term1 + term2);
     }
   }
   return amplitude;
@@ -76,12 +76,12 @@ MatrixWorkspace_sptr generateIncidentSpectrum() {
   std::vector<double> y;
   std::vector<double> yPrime;
   for (int i = 0; i < (xEnd - xStart) / xInc; i++) {
-    x.push_back(xStart + i * xInc);
+    x.emplace_back(xStart + i * xInc);
   }
   y = generateIncidentSpectrum(x);
   yPrime = generateIncidentSpectrumPrime(x);
   for (double prime : yPrime) {
-    y.push_back(prime);
+    y.emplace_back(prime);
   }
   Algorithm_sptr alg =
       AlgorithmManager::Instance().createUnmanaged("CreateWorkspace");

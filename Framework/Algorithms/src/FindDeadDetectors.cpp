@@ -108,7 +108,7 @@ void FindDeadDetectors::exec() {
         file << " " << id;
         // we could write dead detectors to the log but if they are viewing the
         // log in the MantidPlot viewer it will crash MantidPlot
-        deadDets.push_back(id);
+        deadDets.emplace_back(id);
         ++countDets;
       }
       file << '\n';

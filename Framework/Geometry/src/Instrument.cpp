@@ -216,12 +216,12 @@ std::vector<detid_t> Instrument::getDetectorIDs(bool skipMonitors) const {
     const auto &in_dets = m_instr->m_detectorCache;
     for (const auto &in_det : in_dets)
       if (!skipMonitors || !std::get<2>(in_det))
-        out.push_back(std::get<0>(in_det));
+        out.emplace_back(std::get<0>(in_det));
   } else {
     const auto &in_dets = m_detectorCache;
     for (const auto &in_det : in_dets)
       if (!skipMonitors || !std::get<2>(in_det))
-        out.push_back(std::get<0>(in_det));
+        out.emplace_back(std::get<0>(in_det));
   }
   return out;
 }
@@ -293,7 +293,7 @@ void Instrument::getDetectorsInBank(std::vector<IDetector_const_sptr> &dets,
       IDetector_const_sptr det =
           boost::dynamic_pointer_cast<const IDetector>(*it);
       if (det) {
-        dets.push_back(det);
+        dets.emplace_back(det);
       }
     }
   }
@@ -411,12 +411,12 @@ Instrument::getAllComponentsWithName(const std::string &cname) const {
   std::vector<boost::shared_ptr<const IComponent>> retVec;
   // Check the instrument name first
   if (this->getName() == cname) {
-    retVec.push_back(node);
+    retVec.emplace_back(node);
   }
   // Same algorithm as used in getComponentByName() but searching the full tree
   std::deque<boost::shared_ptr<const IComponent>> nodeQueue;
   // Need to be able to enter the while loop
-  nodeQueue.push_back(node);
+  nodeQueue.emplace_back(node);
   while (!nodeQueue.empty()) {
     node = nodeQueue.front();
     nodeQueue.pop_front();
@@ -429,9 +429,9 @@ Instrument::getAllComponentsWithName(const std::string &cname) const {
     for (int i = 0; i < nchildren; ++i) {
       boost::shared_ptr<const IComponent> comp = (*asmb)[i];
       if (comp->getName() == cname) {
-        retVec.push_back(comp);
+        retVec.emplace_back(comp);
       } else {
-        nodeQueue.push_back(comp);
+        nodeQueue.emplace_back(comp);
       }
     }
   } // while-end
@@ -553,7 +553,7 @@ Instrument::getDetectors(const std::vector<detid_t> &det_ids) const {
   dets_ptr.reserve(det_ids.size());
   std::vector<detid_t>::const_iterator it;
   for (it = det_ids.begin(); it != det_ids.end(); ++it) {
-    dets_ptr.push_back(this->getDetector(*it));
+    dets_ptr.emplace_back(this->getDetector(*it));
   }
   return dets_ptr;
 }
@@ -568,7 +568,7 @@ Instrument::getDetectors(const std::set<detid_t> &det_ids) const {
   dets_ptr.reserve(det_ids.size());
   std::set<detid_t>::const_iterator it;
   for (it = det_ids.begin(); it != det_ids.end(); ++it) {
-    dets_ptr.push_back(this->getDetector(*it));
+    dets_ptr.emplace_back(this->getDetector(*it));
   }
   return dets_ptr;
 }
@@ -742,7 +742,7 @@ std::vector<detid_t> Instrument::getMonitors() const {
   std::vector<detid_t> mons;
   for (const auto &item : m_detectorCache)
     if (std::get<2>(item))
-      mons.push_back(std::get<0>(item));
+      mons.emplace_back(std::get<0>(item));
   return mons;
 }
 
@@ -830,9 +830,9 @@ void Instrument::appendPlottable(
       auto *d = dynamic_cast<Detector *>(c);
       auto *o = dynamic_cast<ObjComponent *>(c);
       if (d)
-        lst.push_back(IObjComponent_const_sptr(d, NoDeleting()));
+        lst.emplace_back(IObjComponent_const_sptr(d, NoDeleting()));
       else if (o)
-        lst.push_back(IObjComponent_const_sptr(o, NoDeleting()));
+        lst.emplace_back(IObjComponent_const_sptr(o, NoDeleting()));
       else
         g_log.error() << "Unknown comp type\n";
     }
@@ -960,7 +960,7 @@ void Instrument::saveNexus(::NeXus::File *file,
     std::vector<detid_t> monitorIDs;
     for (size_t i = 0; i < detmonIDs.size(); i++) {
       if (isMonitorViaIndex(i))
-        monitorIDs.push_back(detmonIDs[i]);
+        monitorIDs.emplace_back(detmonIDs[i]);
     }
 
     // Add Monitors group

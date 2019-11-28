@@ -36,9 +36,9 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite {
 
     void init(const size_t &NVectors, const size_t &XLength,
               const size_t &YLength) override {
-      size.push_back(NVectors);
-      size.push_back(XLength);
-      size.push_back(YLength);
+      size.emplace_back(NVectors);
+      size.emplace_back(XLength);
+      size.emplace_back(YLength);
       WorkspaceTester::init(NVectors, XLength, YLength);
     }
     using WorkspaceTester::init;

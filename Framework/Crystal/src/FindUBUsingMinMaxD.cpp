@@ -93,7 +93,7 @@ void FindUBUsingMinMaxD::exec() {
   q_vectors.reserve(n_peaks);
 
   for (size_t i = 0; i < n_peaks; i++)
-    q_vectors.push_back(peaks[i].getQSampleFrame());
+    q_vectors.emplace_back(peaks[i].getQSampleFrame());
 
   Matrix<double> UB(3, 3, false);
   double error =

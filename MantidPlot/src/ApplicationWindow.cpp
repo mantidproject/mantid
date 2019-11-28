@@ -6038,13 +6038,13 @@ int ApplicationWindow::execSaveProjectDialog() {
   for (auto window : getSerialisableWindows()) {
     auto win = dynamic_cast<IProjectSerialisable *>(window);
     if (win)
-      windows.push_back(win);
+      windows.emplace_back(win);
   }
 
   for (auto window : getAllWindows()) {
     auto win = dynamic_cast<IProjectSerialisable *>(window);
     if (win)
-      windows.push_back(win);
+      windows.emplace_back(win);
   }
 
   const QString pyInterfaceMarkerProperty("launcher");

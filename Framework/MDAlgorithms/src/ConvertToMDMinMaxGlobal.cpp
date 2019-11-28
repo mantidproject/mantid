@@ -139,8 +139,8 @@ void ConvertToMDMinMaxGlobal::exec() {
   if (QDimension == "CopyToMD") {
     double xmin, xmax;
     ws->getXMinMax(xmin, xmax);
-    MinValues.push_back(xmin);
-    MaxValues.push_back(xmax);
+    MinValues.emplace_back(xmin);
+    MaxValues.emplace_back(xmax);
   } else // need to calculate the appropriate q values
   {
     double qmax, deltaEmax, deltaEmin;
@@ -214,19 +214,19 @@ void ConvertToMDMinMaxGlobal::exec() {
     }
     // Calculate limits from qmax
     if (QDimension == "|Q|") {
-      MinValues.push_back(0.);
-      MaxValues.push_back(qmax);
+      MinValues.emplace_back(0.);
+      MaxValues.emplace_back(qmax);
     } else // Q3D
     {
       // Q in angstroms
       if ((Q3DFrames == "Q") || ((Q3DFrames == "AutoSelect") &&
                                  (!ws->sample().hasOrientedLattice()))) {
-        MinValues.push_back(-qmax);
-        MinValues.push_back(-qmax);
-        MinValues.push_back(-qmax);
-        MaxValues.push_back(qmax);
-        MaxValues.push_back(qmax);
-        MaxValues.push_back(qmax);
+        MinValues.emplace_back(-qmax);
+        MinValues.emplace_back(-qmax);
+        MinValues.emplace_back(-qmax);
+        MaxValues.emplace_back(qmax);
+        MaxValues.emplace_back(qmax);
+        MaxValues.emplace_back(qmax);
       } else // HKL
       {
         if (!ws->sample().hasOrientedLattice()) {
@@ -236,19 +236,19 @@ void ConvertToMDMinMaxGlobal::exec() {
         Mantid::Geometry::OrientedLattice ol =
             ws->sample().getOrientedLattice();
         qmax /= (2. * M_PI);
-        MinValues.push_back(-qmax * ol.a());
-        MinValues.push_back(-qmax * ol.b());
-        MinValues.push_back(-qmax * ol.c());
-        MaxValues.push_back(qmax * ol.a());
-        MaxValues.push_back(qmax * ol.b());
-        MaxValues.push_back(qmax * ol.c());
+        MinValues.emplace_back(-qmax * ol.a());
+        MinValues.emplace_back(-qmax * ol.b());
+        MinValues.emplace_back(-qmax * ol.c());
+        MaxValues.emplace_back(qmax * ol.a());
+        MaxValues.emplace_back(qmax * ol.b());
+        MaxValues.emplace_back(qmax * ol.c());
       }
     }
 
     // Push deltaE if necessary
     if (GeometryMode != "Elastic") {
-      MinValues.push_back(deltaEmin);
-      MaxValues.push_back(deltaEmax);
+      MinValues.emplace_back(deltaEmin);
+      MaxValues.emplace_back(deltaEmax);
     }
   }
 
@@ -261,8 +261,8 @@ void ConvertToMDMinMaxGlobal::exec() {
     Kernel::Property *pProperty = (ws->run().getProperty(OtherDimension));
     auto *p = dynamic_cast<TimeSeriesProperty<double> *>(pProperty);
     if (p) {
-      MinValues.push_back(p->getStatistics().minimum);
-      MaxValues.push_back(p->getStatistics().maximum);
+      MinValues.emplace_back(p->getStatistics().minimum);
+      MaxValues.emplace_back(p->getStatistics().maximum);
     } else // it may be not a time series property but just number property
     {
       auto *property =
@@ -276,8 +276,8 @@ void ConvertToMDMinMaxGlobal::exec() {
         throw(std::invalid_argument(ERR));
       }
       double val = *property;
-      MinValues.push_back(val);
-      MaxValues.push_back(val);
+      MinValues.emplace_back(val);
+      MaxValues.emplace_back(val);
     }
   }
 

@@ -110,7 +110,7 @@ MatrixWorkspace_sptr JoinISISPolarizationEfficiencies::createEfficiencies(
           "Loaded workspace must contain a single histogram. Found " +
           std::to_string(ws->getNumberHistograms()));
     }
-    workspaces.push_back(ws);
+    workspaces.emplace_back(ws);
   }
 
   return createEfficiencies(props, workspaces);
@@ -180,14 +180,14 @@ JoinISISPolarizationEfficiencies::interpolateWorkspaces(
   for (auto const &ws : workspaces) {
     if (ws->blocksize() < maxSize) {
       if (allAreHistograms) {
-        interpolatedWorkspaces.push_back(
+        interpolatedWorkspaces.emplace_back(
             interpolateHistogramWorkspace(ws, maxSize));
       } else {
-        interpolatedWorkspaces.push_back(
+        interpolatedWorkspaces.emplace_back(
             interpolatePointDataWorkspace(ws, maxSize));
       }
     } else {
-      interpolatedWorkspaces.push_back(ws);
+      interpolatedWorkspaces.emplace_back(ws);
     }
   }
 

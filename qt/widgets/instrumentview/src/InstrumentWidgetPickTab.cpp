@@ -643,7 +643,7 @@ void InstrumentWidgetPickTab::addToContextMenu(
     QAction *action,
     std::function<bool(std::map<std::string, bool>)> &actionCondition) {
   auto pair = std::make_pair(action, actionCondition);
-  m_addedActions.push_back(pair);
+  m_addedActions.emplace_back(pair);
 }
 /**
  * Fill in the context menu.
@@ -1611,7 +1611,7 @@ void DetectorPlotController::savePlotToWorkspace() {
       prepareDataForSinglePlot(actor.getDetectorByDetID(detid), x, y, &e);
       unitX = parentWorkspace->getAxis(0)->unit()->unitID();
       // save det ids for the output workspace
-      detids.push_back(static_cast<Mantid::detid_t>(detid));
+      detids.emplace_back(static_cast<Mantid::detid_t>(detid));
     } else {
       continue;
     }

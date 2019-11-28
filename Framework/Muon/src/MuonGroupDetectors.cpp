@@ -72,7 +72,7 @@ void MuonGroupDetectors::exec() {
   // First pass to determine how many non-empty groups we have
   for (size_t row = 0; row < table->rowCount(); ++row) {
     if (!table->cell<std::vector<int>>(row, 0).empty())
-      nonEmptyRows.push_back(row);
+      nonEmptyRows.emplace_back(row);
   }
 
   if (nonEmptyRows.empty())

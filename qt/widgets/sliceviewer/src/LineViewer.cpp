@@ -499,15 +499,15 @@ LineViewer::applyMDWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
 
   // The X basis vector
   alg->setPropertyValue("BasisVector0", "X,units," + basisX.toString(","));
-  OutputExtents.push_back(0);
-  OutputExtents.push_back(length);
-  OutputBins.push_back(int(numBins));
+  OutputExtents.emplace_back(0);
+  OutputExtents.emplace_back(length);
+  OutputBins.emplace_back(int(numBins));
 
   // The Y basis vector, with one bin
   alg->setPropertyValue("BasisVector1", "Y,units," + basisY.toString(","));
-  OutputExtents.push_back(-planeWidth);
-  OutputExtents.push_back(+planeWidth);
-  OutputBins.push_back(1);
+  OutputExtents.emplace_back(-planeWidth);
+  OutputExtents.emplace_back(+planeWidth);
+  OutputBins.emplace_back(1);
 
   // Now each remaining dimension
   std::string dimChars = "012345"; // SlicingAlgorithm::getDimensionChars();
@@ -523,9 +523,9 @@ LineViewer::applyMDWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
       // Set the basis vector with the width *2 and 1 bin
       alg->setPropertyValue("BasisVector" + dim,
                             dim + ",units," + basis.toString(","));
-      OutputExtents.push_back(-0.5 * m_thickness[d]);
-      OutputExtents.push_back(+0.5 * m_thickness[d]);
-      OutputBins.push_back(1);
+      OutputExtents.emplace_back(-0.5 * m_thickness[d]);
+      OutputExtents.emplace_back(+0.5 * m_thickness[d]);
+      OutputBins.emplace_back(1);
 
       propNum++;
       if (propNum > dimChars.size())

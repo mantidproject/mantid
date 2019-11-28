@@ -304,16 +304,16 @@ public:
     UncertainValue pair2(0.0, 2.0);
 
     std::vector<UncertainValue> goodList;
-    goodList.push_back(pair0);
-    goodList.push_back(pair1);
+    goodList.emplace_back(pair0);
+    goodList.emplace_back(pair1);
 
     TS_ASSERT_DELTA(autoCorrelationCore.reduceChopperSlitList(goodList, 1.0),
                     3.428571428571428, 1e-6);
 
     std::vector<UncertainValue> badList;
-    badList.push_back(pair0);
-    badList.push_back(pair1);
-    badList.push_back(pair2);
+    badList.emplace_back(pair0);
+    badList.emplace_back(pair1);
+    badList.emplace_back(pair2);
 
     TS_ASSERT_EQUALS(autoCorrelationCore.reduceChopperSlitList(badList, 1.0),
                      0.0);

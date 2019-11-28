@@ -43,10 +43,10 @@ public:
       : m_h(3.0), m_k(2.0), m_l(4.0), m_hkl(m_h, m_k, m_l),
         m_hhl(m_h, m_h, m_l), m_hk0(m_h, m_k, 0.0), m_h00(m_h, 0.0, 0.0),
         m_allHkl() {
-    m_allHkl.push_back(m_hkl);
-    m_allHkl.push_back(m_hhl);
-    m_allHkl.push_back(m_hk0);
-    m_allHkl.push_back(m_h00);
+    m_allHkl.emplace_back(m_hkl);
+    m_allHkl.emplace_back(m_hhl);
+    m_allHkl.emplace_back(m_hk0);
+    m_allHkl.emplace_back(m_h00);
   }
 
   void testDefaultConstructor() {

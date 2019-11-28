@@ -477,7 +477,7 @@ void LoadAscii2::addToCurrentSpectra(std::list<std::string> &columns) {
   case 4: {
     // E and DX in file, include both
     histo.mutableE().back() = values[2];
-    m_curDx.push_back(values[3]);
+    m_curDx.emplace_back(values[3]);
     break;
   }
   }
@@ -537,7 +537,7 @@ void LoadAscii2::newSpectra() {
       if (specSize > 0 && specSize == m_lastBins) {
         if (m_curSpectra->x().size() == m_curDx.size())
           m_curSpectra->setPointStandardDeviations(std::move(m_curDx));
-        m_spectra.push_back(*m_curSpectra);
+        m_spectra.emplace_back(*m_curSpectra);
       }
       m_curSpectra.reset();
     }

@@ -164,7 +164,7 @@ void CentroidPeaks::integrate() {
       workspaceIndex = (detidIterator->second);
       Mantid::Kernel::Units::Wavelength wl;
       std::vector<double> timeflight;
-      timeflight.push_back(inWS->x(workspaceIndex)[chan]);
+      timeflight.emplace_back(inWS->x(workspaceIndex)[chan]);
       double scattering = peak.getScattering();
       double L1 = peak.getL1();
       double L2 = peak.getL2();
@@ -285,7 +285,7 @@ void CentroidPeaks::integrateEvent() {
       double tof = tofcentroid / intensity;
       Mantid::Kernel::Units::Wavelength wl;
       std::vector<double> timeflight;
-      timeflight.push_back(tof);
+      timeflight.emplace_back(tof);
       double scattering = peak.getScattering();
       double L1 = peak.getL1();
       double L2 = peak.getL2();
@@ -361,7 +361,7 @@ void CentroidPeaks::removeEdgePeaks(
     const std::string &bankName = peak.getBankName();
 
     if (edgePixel(inst, bankName, col, row, Edge)) {
-      badPeaks.push_back(i);
+      badPeaks.emplace_back(i);
     }
   }
   peakWS.removePeaks(std::move(badPeaks));

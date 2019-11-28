@@ -271,7 +271,7 @@ public:
     uint16_t detectorId = 45678;
     Mantid::coord_t center[3] = {1.25, 2.5, 3.5};
     for (size_t i = 0; i < num; i++)
-      events3.push_back(
+      events3.emplace_back(
           MDEvent<3>(signal, error, runIndex, detectorId, center));
   }
 
@@ -282,7 +282,7 @@ public:
     uint16_t detectorId = 45678;
     Mantid::coord_t center[4] = {1.25, 2.5, 3.5, 4.75};
     for (size_t i = 0; i < num; i++)
-      events4.push_back(
+      events4.emplace_back(
           MDEvent<4>(signal, error, runIndex, detectorId, center));
   }
 
@@ -291,7 +291,7 @@ public:
     float error(2.5);
     Mantid::coord_t center[3] = {1.25, 2.5, 3.5};
     for (size_t i = 0; i < num; i++)
-      lean_events3.push_back(MDLeanEvent<3>(signal, error, center));
+      lean_events3.emplace_back(MDLeanEvent<3>(signal, error, center));
   }
 
   void test_create_MDLeanEvent4() {
@@ -299,7 +299,7 @@ public:
     float error(2.5);
     Mantid::coord_t center[4] = {1.25, 2.5, 3.5, 4.75};
     for (size_t i = 0; i < num; i++)
-      lean_events4.push_back(MDLeanEvent<4>(signal, error, center));
+      lean_events4.emplace_back(MDLeanEvent<4>(signal, error, center));
   }
 
   void test_serialize_deserializeLean() {

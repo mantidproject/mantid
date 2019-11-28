@@ -908,7 +908,7 @@ void ProjectionSurface::comparePeaks(const QRect &rect) {
       // only collect peaks in the same detector & with the same origin
       if (marker->origin() == origin) {
         auto peak = po->getPeaksWorkspace()->getPeakPtr(marker->getRow());
-        peaks.push_back(peak);
+        peaks.emplace_back(peak);
       }
     }
   }
@@ -968,7 +968,7 @@ void ProjectionSurface::alignPeaks(const QRect &rect) {
         });
 
     if (result == m_selectedAlignmentPlane.cend()) {
-      m_selectedAlignmentPlane.push_back(
+      m_selectedAlignmentPlane.emplace_back(
           std::make_pair(peak->getQSampleFrame(), origin));
     }
   } else {

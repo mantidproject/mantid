@@ -40,13 +40,6 @@ TimeToTimeStep::TimeToTimeStep(double timeMin, double timeMax,
 }
 
 /**
-  Default constructor.
-*/
-TimeToTimeStep::TimeToTimeStep()
-    : m_timeMin(0.0), m_timeMax(0.0), m_c(0.0), m_fraction(0.0),
-      m_runnable(false) {}
-
-/**
   Overloaded funtion operator.
   @param time : time/property value wrt max and min property values of this
   type.

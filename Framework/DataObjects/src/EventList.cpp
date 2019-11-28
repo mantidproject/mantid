@@ -63,9 +63,7 @@ int64_t calculateCorrectedFullTime(const EventType &event,
 /**
  * Type for comparing events in terms of time at sample
  */
-template <typename EventType>
-class CompareTimeAtSample
-    : public std::binary_function<EventType, EventType, bool> {
+template <typename EventType> class CompareTimeAtSample {
 private:
   const double m_tofFactor;
   const double m_tofShift;
@@ -355,7 +353,7 @@ EventList &EventList::operator+=(const TofEvent &event) {
   switch (this->eventType) {
   case TOF:
     // Simply push the events
-    this->events.push_back(event);
+    this->events.emplace_back(event);
     break;
 
   case WEIGHTED:
@@ -420,7 +418,7 @@ EventList &EventList::operator+=(const std::vector<TofEvent> &more_events) {
  * */
 EventList &EventList::operator+=(const WeightedEvent &event) {
   this->switchTo(WEIGHTED);
-  this->weightedEvents.push_back(event);
+  this->weightedEvents.emplace_back(event);
   this->order = UNSORTED;
   return *this;
 }
@@ -1690,8 +1688,8 @@ inline void EventList::compressFatEventsHelper(
       // Track the average tof
       totalTof += it->m_tof * norm;
       // Accumulate the pulse times
-      pulsetimes.push_back(it->m_pulsetime);
-      pulsetimeWeights.push_back(norm);
+      pulsetimes.emplace_back(it->m_pulsetime);
+      pulsetimeWeights.emplace_back(norm);
     } else {
       // We exceeded the tolerance
       if (!pulsetimes.empty()) {
@@ -1715,9 +1713,9 @@ inline void EventList::compressFatEventsHelper(
       lastTof = it->m_tof;
       lastPulseBin = eventPulseBin;
       pulsetimes.clear();
-      pulsetimes.push_back(it->m_pulsetime);
+      pulsetimes.emplace_back(it->m_pulsetime);
       pulsetimeWeights.clear();
-      pulsetimeWeights.push_back(norm);
+      pulsetimeWeights.emplace_back(norm);
     }
   }
 
@@ -2819,7 +2817,7 @@ void EventList::getTofsHelper(const std::vector<T> &events,
                               std::vector<double> &tofs) {
   tofs.clear();
   for (auto itev = events.cbegin(); itev != events.cend(); ++itev)
-    tofs.push_back(itev->m_tof);
+    tofs.emplace_back(itev->m_tof);
 }
 
 /** Fill a vector with the list of TOFs
@@ -3793,7 +3791,7 @@ void EventList::filterByPulseTimeHelper(std::vector<T> &events,
 
   while ((itev != itev_end) && (itev->m_pulsetime < stop)) {
     // Add the copy to the output
-    output.push_back(*itev);
+    output.emplace_back(*itev);
     ++itev;
   }
 }
@@ -3824,7 +3822,7 @@ void EventList::filterByTimeAtSampleHelper(std::vector<T> &events,
          (calculateCorrectedFullTime(*itev, tofFactor, tofOffset) <
           stop.totalNanoseconds())) {
     // Add the copy to the output
-    output.push_back(*itev);
+    output.emplace_back(*itev);
     ++itev;
   }
 }

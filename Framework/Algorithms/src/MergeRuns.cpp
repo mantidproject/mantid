@@ -284,7 +284,7 @@ void MergeRuns::buildAdditionTables() {
     }
 
     // Add this table to the list
-    m_tables.push_back(table);
+    m_tables.emplace_back(table);
 
   } // each of the workspaces being added
 
@@ -452,7 +452,7 @@ bool MergeRuns::validateInputsForEventWorkspaces(
     if (!ws) { // Either it is not found, or it is not an EventWorkspace
       return false;
     }
-    m_inEventWS.push_back(ws);
+    m_inEventWS.emplace_back(ws);
 
     // Check a few things are the same for all input workspaces
     if (i == 0) {

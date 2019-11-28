@@ -349,11 +349,11 @@ public:
     V3D samplePosition = V3D(0.0, 0.0, 0.0);
 
     std::vector<double> guideLogDetails;
-    guideLogDetails.push_back(guideCutoff + 10);
-    guideLogDetails.push_back(guideCutoff - 10);
-    guideLogDetails.push_back(guideCutoff + 10);
-    guideLogDetails.push_back(guideCutoff - 10);
-    guideLogDetails.push_back(guideCutoff + 10);
+    guideLogDetails.emplace_back(guideCutoff + 10);
+    guideLogDetails.emplace_back(guideCutoff - 10);
+    guideLogDetails.emplace_back(guideCutoff + 10);
+    guideLogDetails.emplace_back(guideCutoff - 10);
+    guideLogDetails.emplace_back(guideCutoff + 10);
 
     auto testWorkspace = createTestWorkspace(
         10, 0, 10, 0.1, collimationMethod, collimationLengthCorrection,
@@ -385,11 +385,13 @@ public:
     V3D samplePosition = V3D(0.0, 0.0, 0.0);
 
     std::vector<double> guideLogDetails;
-    guideLogDetails.push_back(guideCutoff - 10); // Guide 1 -- Is flipped here
-    guideLogDetails.push_back(guideCutoff + 10); // Guide 2 -- Is flipped here
-    guideLogDetails.push_back(guideCutoff + 10); // Guide 3
-    guideLogDetails.push_back(guideCutoff - 10); // Guide 4
-    guideLogDetails.push_back(guideCutoff + 10); // Guide 5
+    guideLogDetails.emplace_back(guideCutoff -
+                                 10); // Guide 1 -- Is flipped here
+    guideLogDetails.emplace_back(guideCutoff +
+                                 10); // Guide 2 -- Is flipped here
+    guideLogDetails.emplace_back(guideCutoff + 10); // Guide 3
+    guideLogDetails.emplace_back(guideCutoff - 10); // Guide 4
+    guideLogDetails.emplace_back(guideCutoff + 10); // Guide 5
 
     auto testWorkspace = createTestWorkspace(
         10, 0, 10, 0.1, collimationMethod, collimationLengthCorrection,
@@ -418,11 +420,15 @@ public:
     V3D samplePosition = V3D(0.0, 0.0, 0.0);
 
     std::vector<double> guideLogDetails;
-    guideLogDetails.push_back(guideCutoff - 10); // Guide 1 -- Is flipped here
-    guideLogDetails.push_back(guideCutoff + 10); // Guide 2 -- Is flipped here
-    guideLogDetails.push_back(guideCutoff - 10); // Guide 3 -- Is flipped here
-    guideLogDetails.push_back(guideCutoff + 10); // Guide 4 -- Is flipped here
-    guideLogDetails.push_back(guideCutoff + 10); // Guide 5
+    guideLogDetails.emplace_back(guideCutoff -
+                                 10); // Guide 1 -- Is flipped here
+    guideLogDetails.emplace_back(guideCutoff +
+                                 10); // Guide 2 -- Is flipped here
+    guideLogDetails.emplace_back(guideCutoff -
+                                 10); // Guide 3 -- Is flipped here
+    guideLogDetails.emplace_back(guideCutoff +
+                                 10); // Guide 4 -- Is flipped here
+    guideLogDetails.emplace_back(guideCutoff + 10); // Guide 5
 
     auto testWorkspace = createTestWorkspace(
         10, 0, 10, 0.1, collimationMethod, collimationLengthCorrection,

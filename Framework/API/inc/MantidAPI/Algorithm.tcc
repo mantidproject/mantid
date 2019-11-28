@@ -69,9 +69,9 @@ void Algorithm::declareWorkspaceInputProperties(const std::string &propertyName,
                   "index type; Indices are entered as a comma-separated list "
                   "of values, and/or ranges; For example, '4,6,10-20,1000';");
 
-  m_reservedList.push_back(propertyName);
-  m_reservedList.push_back(indexTypePropName);
-  m_reservedList.push_back(indexPropName);
+  m_reservedList.emplace_back(propertyName);
+  m_reservedList.emplace_back(indexTypePropName);
+  m_reservedList.emplace_back(indexPropName);
 }
 
 template <typename T1, typename T2, typename WsType>

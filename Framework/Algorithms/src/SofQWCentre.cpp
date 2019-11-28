@@ -143,9 +143,9 @@ void SofQWCentre::exec() {
               xAxis.begin() - 1;
 
           // Add this spectra-detector pair to the mapping
-          specNumberMapping.push_back(
+          specNumberMapping.emplace_back(
               outputWorkspace->getSpectrum(qIndex).getSpectrumNo());
-          detIDMapping.push_back(detID);
+          detIDMapping.emplace_back(detID);
 
           // And add the data and it's error to that bin, taking into account
           // the number of detectors contributing to this bin

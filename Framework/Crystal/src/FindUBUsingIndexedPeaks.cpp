@@ -78,9 +78,9 @@ void FindUBUsingIndexedPeaks::exec() {
       CrossTerm = true;
 
     if (isPeakIndexed(peak)) {
-      q_vectors.push_back(peak.getQSampleFrame());
-      hkl_vectors.push_back(hkl);
-      mnp_vectors.push_back(mnp);
+      q_vectors.emplace_back(peak.getQSampleFrame());
+      hkl_vectors.emplace_back(hkl);
+      mnp_vectors.emplace_back(mnp);
       indexed_count++;
     }
   }
@@ -109,7 +109,7 @@ void FindUBUsingIndexedPeaks::exec() {
     q_vectors.clear(); // save the UB in the sample
     q_vectors.reserve(n_peaks);
     for (const auto &peak : peaks) {
-      q_vectors.push_back(peak.getQSampleFrame());
+      q_vectors.emplace_back(peak.getQSampleFrame());
     }
 
     int num_indexed = IndexingUtils::NumberIndexed(UB, q_vectors, tolerance);
@@ -143,9 +143,9 @@ void FindUBUsingIndexedPeaks::exec() {
             V3D hkl(peak.getIntHKL());
             V3D mnp(peak.getIntMNP());
             if (isPeakIndexed(peak)) {
-              run_q_vectors.push_back(peak.getQSampleFrame());
-              run_hkl_vectors.push_back(hkl);
-              run_mnp_vectors.push_back(mnp);
+              run_q_vectors.emplace_back(peak.getQSampleFrame());
+              run_hkl_vectors.emplace_back(hkl);
+              run_mnp_vectors.emplace_back(mnp);
             }
           }
         }

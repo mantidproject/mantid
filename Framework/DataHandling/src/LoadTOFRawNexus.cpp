@@ -30,8 +30,8 @@ using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
 using HistogramData::BinEdges;
-using HistogramData::CountStandardDeviations;
 using HistogramData::Counts;
+using HistogramData::CountStandardDeviations;
 
 LoadTOFRawNexus::LoadTOFRawNexus()
     : m_numPixels(0), m_signalNo(0), pulseTimes(0), m_numBins(0), m_spec_min(0),
@@ -202,7 +202,7 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename,
         const auto bankEntries = file.getEntries();
 
         if (bankEntries.find("pixel_id") != bankEntries.end()) {
-          bankNames.push_back(name);
+          bankNames.emplace_back(name);
 
           // Count how many pixels in the bank
           file.openData("pixel_id");
@@ -216,7 +216,7 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename,
             m_numPixels += newPixels;
           }
         } else {
-          bankNames.push_back(name);
+          bankNames.emplace_back(name);
 
           // Get the number of pixels from the offsets arrays
           file.openData("x_pixel_offset");
@@ -351,7 +351,7 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
 
     for (size_t i = 0; i < numX; i++) {
       for (size_t j = 0; j < numY; j++) {
-        pixel_id.push_back(
+        pixel_id.emplace_back(
             static_cast<uint32_t>(j + numY * (i + numX * bankNum)));
       }
     }

@@ -201,10 +201,10 @@ GSL_FitData::GSL_FitData(
   int j = 0;
   for (size_t i = 0; i < function->nParams(); ++i) {
     if (function->isActive(i)) {
-      J.m_index.push_back(j);
+      J.m_index.emplace_back(j);
       j++;
     } else
-      J.m_index.push_back(-1);
+      J.m_index.emplace_back(-1);
   }
 }
 

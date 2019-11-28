@@ -25,10 +25,10 @@ class SpectrumIndexSet;
 MANTID_INDEXING_DLL IndexInfo extract(const IndexInfo &source,
                                       const SpectrumIndexSet &indices);
 MANTID_INDEXING_DLL IndexInfo extract(const IndexInfo &source,
-                                      const std::vector<size_t> &indices);
+                                      const std::vector<std::size_t> &indices);
 MANTID_INDEXING_DLL IndexInfo extract(const IndexInfo &source,
-                                      const size_t minIndex,
-                                      const size_t maxIndex);
+                                      const std::size_t minIndex,
+                                      const std::size_t maxIndex);
 
 } // namespace Indexing
 } // namespace Mantid

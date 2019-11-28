@@ -43,7 +43,7 @@ public:
     std::vector<int> notBank47;
     for (int i = 0; i < int(numberPeaks); i++)
       if (pws->getPeak(i).getBankName() != "bank47")
-        notBank47.push_back(i);
+        notBank47.emplace_back(i);
     pws->removePeaks(std::move(notBank47));
 
     // run the calibration

@@ -412,8 +412,8 @@ void VesuvioL1ThetaResolution::calculateDetector(
       // Convert angle to degrees
       angle *= 180.0 / M_PI;
 
-      l1Values.push_back(l1);
-      thetaValues.push_back(angle);
+      l1Values.emplace_back(l1);
+      thetaValues.emplace_back(angle);
     }
 
     interruption_point();

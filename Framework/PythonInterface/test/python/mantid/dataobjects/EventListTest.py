@@ -34,6 +34,14 @@ class EventListTest(unittest.TestCase):
         self.assertEqual(el.getTofs()[0], float(0.123))
         self.assertEqual(el.getPulseTimes()[0], DateAndTime(42))
 
+    def test_event_list_addWeightedEventQuickly(self):
+        el = EventList()
+        el.switchTo(EventType.WEIGHTED)
+        el.addWeightedEventQuickly(float(0.123), 1.0, 0.1, DateAndTime(42))
+        self.assertEqual(el.getEventType(), EventType.WEIGHTED)
+        self.assertEqual(el.getTofs()[0], float(0.123))
+        self.assertEqual(el.getPulseTimes()[0], DateAndTime(42))
+        self.assertEqual(el.getWeights()[0], 1.0)
 
     def test_event_list_iadd(self):
         left = self.createRandomEventList(10)

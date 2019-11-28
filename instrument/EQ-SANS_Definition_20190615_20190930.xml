@@ -1,5 +1,11 @@
 <?xml version='1.0' encoding='ASCII'?>
-<instrument xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.mantidproject.org/IDF/1.0" last-modified="2019-06-14 10:59:05.366006" name="EQ-SANS" valid-from="2019-01-01 00:00:00" valid-to="2100-12-31 23:59:59" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd">
+<instrument xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	    xmlns="http://www.mantidproject.org/IDF/1.0"
+	    last-modified="2019-06-14 10:59:05.366006"
+	    name="EQ-SANS"
+	    valid-from="2019-01-01 00:00:00"
+	    valid-to="2019-09-30 23:59:59"
+	    xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd">
   <!--Created by Jose Borregero, borreguerojm@ornl.gov-->
   <defaults>
     <length unit="metre"/>
@@ -416,7 +422,6 @@
   </type>
   <!---->
   <!--COMPONENT: DOUBLE CURVED PANEL-->
-  <!--Panel is translated to the origin, then shifted by an amount specified in the logs-->
   <!---->
   <component idlist="pixel_ids" name="detector1" type="double-curved-panel">
     <location x="0.0" y="0.0" z="0.0"/>

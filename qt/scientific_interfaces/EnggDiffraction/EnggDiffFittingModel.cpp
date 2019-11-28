@@ -505,7 +505,7 @@ void EnggDiffFittingModel::loadWorkspaces(const std::string &filenamesString) {
     RunLabel runLabel(runNumber, bank);
 
     addFocusedWorkspace(runLabel, ws, filename);
-    collectedRunLabels.push_back(runLabel);
+    collectedRunLabels.emplace_back(runLabel);
   }
 
   if (collectedRunLabels.size() == 1) {

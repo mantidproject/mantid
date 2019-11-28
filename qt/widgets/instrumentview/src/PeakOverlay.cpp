@@ -120,7 +120,7 @@ void AbstractIntensityScale::setPeaksWorkspace(
     intensities.reserve(peakCount);
 
     for (int i = 0; i < peakCount; ++i) {
-      intensities.push_back(pws->getPeak(i).getIntensity());
+      intensities.emplace_back(pws->getPeak(i).getIntensity());
     }
 
     auto minMaxIntensity =
@@ -202,7 +202,7 @@ void PeakOverlay::removeShapes(const QList<Shape2D *> &shapeList) {
     PeakMarker2D *marker = dynamic_cast<PeakMarker2D *>(shape);
     if (!marker)
       throw std::logic_error("Wrong shape type found.");
-    rows.push_back(static_cast<size_t>(marker->getRow()));
+    rows.emplace_back(static_cast<size_t>(marker->getRow()));
   }
 
   // Run the DeleteTableRows algorithm to delete the peak.

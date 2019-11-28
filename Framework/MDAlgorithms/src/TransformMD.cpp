@@ -218,10 +218,10 @@ void TransformMD::exec() {
       for (size_t d = 0; d < nd; d++) {
         Geometry::IMDDimension_const_sptr dim = event->getDimension(d);
         // Find the extents
-        extents.push_back(dim->getMinimum());
-        extents.push_back(dim->getMaximum());
-        names.push_back(std::string(dim->getName()));
-        units.push_back(dim->getUnits());
+        extents.emplace_back(dim->getMinimum());
+        extents.emplace_back(dim->getMaximum());
+        names.emplace_back(std::string(dim->getName()));
+        units.emplace_back(dim->getUnits());
       }
       Algorithm_sptr create_alg = createChildAlgorithm("CreateMDWorkspace");
       create_alg->setProperty("Dimensions", static_cast<int>(nd));
@@ -238,7 +238,7 @@ void TransformMD::exec() {
       Mantid::API::BoxController_sptr boxController = event->getBoxController();
       std::vector<int> splits;
       for (size_t d = 0; d < nd; d++) {
-        splits.push_back(static_cast<int>(boxController->getSplitInto(d)));
+        splits.emplace_back(static_cast<int>(boxController->getSplitInto(d)));
       }
       Algorithm_sptr merge_alg = createChildAlgorithm("MergeMD");
       merge_alg->setPropertyValue("InputWorkspaces", outName + ",__none");

@@ -70,7 +70,7 @@ void Integration::init() {
  * @return true if first argument < second argument (with some
  * tolerance/epsilon)
  */
-struct tolerant_less : public std::binary_function<double, double, bool> {
+struct tolerant_less {
 public:
   bool operator()(const double &left, const double &right) const {
     // soft equal, if the diff left-right is below a numerical error

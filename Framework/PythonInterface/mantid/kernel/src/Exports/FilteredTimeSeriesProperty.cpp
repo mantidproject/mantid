@@ -36,7 +36,7 @@ namespace {
       .def("unfiltered", &FilteredTimeSeriesProperty<TYPE>::unfiltered,        \
            (arg("self")), return_value_policy<RemoveConst>(),                  \
            "Returns a time series containing the unfiltered data");
-}
+} // namespace
 
 void export_FilteredTimeSeriesProperty() {
   EXPORT_FILTEREDTIMESERIES_PROP(double, Float);

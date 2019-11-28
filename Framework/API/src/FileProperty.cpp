@@ -43,8 +43,8 @@ IValidator_sptr createValidator(unsigned int action,
     return boost::make_shared<DirectoryValidator>(action ==
                                                   FileProperty::Directory);
   } else {
-    return boost::make_shared<FileValidator>(
-        exts, (action == FileProperty::Load), (action == FileProperty::Save));
+    return boost::make_shared<FileValidator>(exts,
+                                             (action == FileProperty::Load));
   }
 }
 
@@ -59,7 +59,7 @@ void addExtension(const std::string &extension,
       extensions.end())
     return;
   else
-    extensions.push_back(extension);
+    extensions.emplace_back(extension);
 }
 
 /**

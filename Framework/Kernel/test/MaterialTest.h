@@ -17,8 +17,8 @@
 #include "MantidTestHelpers/NexusTestHelper.h"
 
 using Mantid::Kernel::Material;
-using Mantid::PhysicalConstants::NeutronAtom;
 using Mantid::PhysicalConstants::getNeutronAtom;
+using Mantid::PhysicalConstants::NeutronAtom;
 
 class MaterialTest : public CxxTest::TestSuite {
 public:

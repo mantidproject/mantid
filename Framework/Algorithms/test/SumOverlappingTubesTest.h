@@ -43,7 +43,7 @@ MatrixWorkspace_sptr createTestScanningWS(size_t nTubes, size_t nPixelsPerTube,
 
   std::vector<std::pair<DateAndTime, DateAndTime>> timeRanges;
   for (size_t i = 0; i < nTimeIndexes; ++i)
-    timeRanges.push_back(std::make_pair(DateAndTime(i), DateAndTime(i + 1)));
+    timeRanges.emplace_back(std::make_pair(DateAndTime(i), DateAndTime(i + 1)));
 
   ScanningWorkspaceBuilder builder(instrument, nTimeIndexes, nBins);
   builder.setTimeRanges(timeRanges);
@@ -693,7 +693,7 @@ public:
     for (size_t i = 0; i < m_numberOfWorkspaces; ++i) {
       std::vector<double> rotations;
       for (size_t j = 0; j < 25; ++j)
-        rotations.push_back(double(j * m_numberOfWorkspaces + i) * 0.1);
+        rotations.emplace_back(double(j * m_numberOfWorkspaces + i) * 0.1);
 
       auto testWS =
           createTestScanningWS(100, 128, rotations, "a" + std::to_string(i));

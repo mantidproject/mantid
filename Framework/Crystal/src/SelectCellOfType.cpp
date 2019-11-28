@@ -32,24 +32,24 @@ void SelectCellOfType::init() {
                         "Input Peaks Workspace");
 
   std::vector<std::string> type_list;
-  type_list.push_back(ReducedCell::CUBIC());
-  type_list.push_back(ReducedCell::HEXAGONAL());
-  type_list.push_back(ReducedCell::RHOMBOHEDRAL());
-  type_list.push_back(ReducedCell::TETRAGONAL());
-  type_list.push_back(ReducedCell::ORTHORHOMBIC());
-  type_list.push_back(ReducedCell::MONOCLINIC());
-  type_list.push_back(ReducedCell::TRICLINIC());
+  type_list.emplace_back(ReducedCell::CUBIC());
+  type_list.emplace_back(ReducedCell::HEXAGONAL());
+  type_list.emplace_back(ReducedCell::RHOMBOHEDRAL());
+  type_list.emplace_back(ReducedCell::TETRAGONAL());
+  type_list.emplace_back(ReducedCell::ORTHORHOMBIC());
+  type_list.emplace_back(ReducedCell::MONOCLINIC());
+  type_list.emplace_back(ReducedCell::TRICLINIC());
 
   declareProperty("CellType", type_list[0],
                   boost::make_shared<Kernel::StringListValidator>(type_list),
                   "The conventional cell type to use");
 
   std::vector<std::string> centering_list;
-  centering_list.push_back(ReducedCell::F_CENTERED());
-  centering_list.push_back(ReducedCell::I_CENTERED());
-  centering_list.push_back(ReducedCell::C_CENTERED());
-  centering_list.push_back(ReducedCell::P_CENTERED());
-  centering_list.push_back(ReducedCell::R_CENTERED());
+  centering_list.emplace_back(ReducedCell::F_CENTERED());
+  centering_list.emplace_back(ReducedCell::I_CENTERED());
+  centering_list.emplace_back(ReducedCell::C_CENTERED());
+  centering_list.emplace_back(ReducedCell::P_CENTERED());
+  centering_list.emplace_back(ReducedCell::R_CENTERED());
 
   declareProperty(
       "Centering", centering_list[3],
@@ -134,7 +134,7 @@ void SelectCellOfType::exec() {
       std::vector<V3D> miller_indices;
       std::vector<V3D> q_vectors;
       for (size_t i = 0; i < n_peaks; i++) {
-        q_vectors.push_back(peaks[i].getQSampleFrame());
+        q_vectors.emplace_back(peaks[i].getQSampleFrame());
       }
       num_indexed = IndexingUtils::CalculateMillerIndices(
           newUB, q_vectors, tolerance, miller_indices, average_error);

@@ -38,10 +38,10 @@ void PeaksIntersection::initBaseProperties() {
                   "An input peaks workspace.");
 
   std::vector<std::string> propOptions;
-  propOptions.push_back(detectorSpaceFrame());
-  propOptions.push_back(qLabFrame());
-  propOptions.push_back(qSampleFrame());
-  propOptions.push_back(hklFrame());
+  propOptions.emplace_back(detectorSpaceFrame());
+  propOptions.emplace_back(qLabFrame());
+  propOptions.emplace_back(qSampleFrame());
+  propOptions.emplace_back(hklFrame());
 
   declareProperty(
       "CoordinateFrame", "DetectorSpace",
@@ -154,10 +154,9 @@ void PeaksIntersection::executePeaksIntersection(const bool checkPeakExtents) {
                                                   // the box faces.
           {
             // Check that it is actually within the face boundaries.
-            const V3D touchPoint =
-                (normals[j] * distance) +
-                peakCenter; // Vector equation of line give touch
-                            // point on plane.
+            const V3D touchPoint = (normals[j] * distance) +
+                                   peakCenter; // Vector equation of line give
+                                               // touch point on plane.
 
             // checkTouchPoint(touchPoint, normals[i], faces[i][0]); //
             // Debugging line.

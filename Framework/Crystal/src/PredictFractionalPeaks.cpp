@@ -353,11 +353,11 @@ void PredictFractionalPeaks::exec() {
   std::vector<double> kOffsets = getProperty(PropertyNames::KOFFSET);
   std::vector<double> lOffsets = getProperty(PropertyNames::LOFFSET);
   if (hOffsets.empty())
-    hOffsets.push_back(0.0);
+    hOffsets.emplace_back(0.0);
   if (kOffsets.empty())
-    kOffsets.push_back(0.0);
+    kOffsets.emplace_back(0.0);
   if (lOffsets.empty())
-    lOffsets.push_back(0.0);
+    lOffsets.emplace_back(0.0);
   const bool includePeaksInRange = getProperty("IncludeAllPeaksInRange");
   const V3D hklMin{getProperty(PropertyNames::HMIN),
                    getProperty(PropertyNames::KMIN),

@@ -386,7 +386,7 @@ void LoadMD::loadDimensions() {
     std::string dimXML;
     m_file->getAttr(mess.str(), dimXML);
     // Use the dimension factory to read the XML
-    m_dims.push_back(createDimension(dimXML));
+    m_dims.emplace_back(createDimension(dimXML));
   }
   // Since this is an old algorithm we will
   // have to provide an MDFrame correction
@@ -430,7 +430,7 @@ void LoadMD::loadDimensions2() {
             MDFrameArgument(frame, units));
     m_file->getData(axis);
     m_file->closeData();
-    m_dims.push_back(boost::make_shared<MDHistoDimension>(
+    m_dims.emplace_back(boost::make_shared<MDHistoDimension>(
         long_name, splitAxes[d - 1], *mdFrame,
         static_cast<coord_t>(axis.front()), static_cast<coord_t>(axis.back()),
         axis.size() - 1));

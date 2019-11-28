@@ -22,6 +22,7 @@ from sans.common.constants import (SANS_FILE_TAG, ALL_PERIODS, SANS2D, EMPTY_NAM
 from sans.common.log_tagger import (get_tag, has_tag, set_tag, has_hash, get_hash_value, set_hash)
 from sans.common.enums import (DetectorType, RangeStepType, ReductionDimensionality, OutputParts, ISISReductionMode,
                                SANSInstrument, SANSFacility, DataType, TransmissionType)
+
 # -------------------------------------------
 # Constants
 # -------------------------------------------
@@ -168,6 +169,7 @@ def get_input_workspace_as_copy_if_not_same_as_output_workspace(alg):
     :param alg: a handle to the algorithm which has a InputWorkspace property and a OutputWorkspace property
     :return: a workspace
     """
+
     def _clone_input(_ws):
         clone_name = "CloneWorkspace"
         clone_options = {"InputWorkspace": _ws,
@@ -205,8 +207,8 @@ def quaternion_to_angle_and_axis(quaternion):
     The conversion from a quaternion to an angle + axis is explained here:
     http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToAngle/
     """
-    angle = 2*acos(quaternion[0])
-    s_parameter = sqrt(1 - quaternion[0]*quaternion[0])
+    angle = 2 * acos(quaternion[0])
+    s_parameter = sqrt(1 - quaternion[0] * quaternion[0])
 
     axis = []
     # If the the angle is zero, then it does not make sense to have an axis
@@ -215,9 +217,9 @@ def quaternion_to_angle_and_axis(quaternion):
         axis.append(quaternion[2])
         axis.append(quaternion[3])
     else:
-        axis.append(quaternion[1]/s_parameter)
-        axis.append(quaternion[2]/s_parameter)
-        axis.append(quaternion[3]/s_parameter)
+        axis.append(quaternion[1] / s_parameter)
+        axis.append(quaternion[2] / s_parameter)
+        axis.append(quaternion[3] / s_parameter)
     return degrees(angle), axis
 
 
@@ -231,7 +233,7 @@ def get_charge_and_time(workspace):
     run = workspace.getRun()
     charges = run.getLogData('proton_charge')
     total_charge = sum(charges.value)
-    time_passed = int((charges.times[-1] - charges.times[0]) / np.timedelta64(1,'us')) # microseconds
+    time_passed = int((charges.times[-1] - charges.times[0]) / np.timedelta64(1, 'us'))  # microseconds
     time_passed = float(time_passed) / 1e6
     return total_charge, time_passed
 
@@ -391,7 +393,7 @@ def parse_diagnostic_settings(string_to_parse):
         if start > stop:
             raise ValueError("Parsing event slices. It appears that the start value {0} is larger than the stop "
                              "value {1}. Make sure that this is not the case.").format(start, stop)
-        return range(start, stop+1, step)
+        return range(start, stop + 1, step)
 
     def _extract_multiple_entry(line):
         split_line = line.split(":")
@@ -418,7 +420,8 @@ def parse_diagnostic_settings(string_to_parse):
 
     multiple_entry_pattern = re.compile("\\s*" + number + "\\s*" + r':' + "\\s*" + number + "\\s*")
 
-    simple_range_with_step_pattern = re.compile("\\s*" + number + "\\s*" r'-' + "\\s*" + number + "\\s*" + r':' + "\\s*")
+    simple_range_with_step_pattern = re.compile(
+        "\\s*" + number + "\\s*" r'-' + "\\s*" + number + "\\s*" + r':' + "\\s*")
 
     slice_settings = string_to_parse.split(',')
 
@@ -570,7 +573,7 @@ class EventSliceParser(object):
             return [-1., value]
 
     def _parse_comma_separated_range(self):
-        assert(isinstance(self.user_input, list))
+        assert (isinstance(self.user_input, list))
         output_list = []
         for i, j in zip(self.user_input, self.user_input[1:]):
             output_list.append([float(i), float(j)])
@@ -614,7 +617,7 @@ def get_bins_for_rebin_setting(min_value, max_value, step_value, step_type):
         if step_type is RangeStepType.Lin:
             step = step_value
         else:
-            step = lower_bound*step_value
+            step = lower_bound * step_value
 
         # Check if the step will bring us out of bounds. If so, then set the new upper value to the max_value
         upper_bound = lower_bound + step
@@ -663,8 +666,8 @@ def get_ranges_for_rebin_array(rebin_array):
 # ----------------------------------------------------------------------------------------------------------------------
 # Functions related to workspace names
 # ----------------------------------------------------------------------------------------------------------------------
-def get_standard_output_workspace_name(state, reduction_data_type, data_type = DataType.to_string(DataType.Sample),
-                                       include_slice_limits=True):
+def get_standard_output_workspace_name(state, reduction_data_type,
+                                       include_slice_limits=True, custom_run_name=None):
     """
     Creates the name of the output workspace from a state object.
 
@@ -686,12 +689,16 @@ def get_standard_output_workspace_name(state, reduction_data_type, data_type = D
     # 1. Short run number
     data = state.data
     short_run_number = data.sample_scatter_run_number
-    short_run_number_as_string = str(short_run_number)
+
+    # If the user has specified a custom run name we should prepend that instead
+    short_run_number_as_string = custom_run_name if custom_run_name else str(short_run_number)
+    if short_run_number_as_string[-1] != '_':
+        short_run_number_as_string = short_run_number_as_string + '_'
 
     # 2. Multiperiod
     if state.data.sample_scatter_period != ALL_PERIODS:
         period = data.sample_scatter_period
-        period_as_string = "p"+str(period)
+        period_as_string = "p" + str(period)
     else:
         period_as_string = ""
 
@@ -743,9 +750,10 @@ def get_standard_output_workspace_name(state, reduction_data_type, data_type = D
         end_time_as_string = ""
 
     # Piece it all together
-    output_workspace_name = (short_run_number_as_string + period_as_string + detector_name_short +
-                             dimensionality_as_string + wavelength_range_string + phi_limits_as_string +
-                             start_time_as_string + end_time_as_string)
+    output_workspace_name = (short_run_number_as_string + period_as_string + detector_name_short
+                             + dimensionality_as_string + wavelength_range_string + phi_limits_as_string
+                             + start_time_as_string + end_time_as_string)
+
     output_workspace_base_name = (short_run_number_as_string + detector_name_short + dimensionality_as_string
                                   + phi_limits_as_string)
 
@@ -788,47 +796,17 @@ def get_output_name(state, reduction_mode, is_group, suffix="", multi_reduction_
     # Get the external settings from the save state
     save_info = state.save
     user_specified_output_name = save_info.user_specified_output_name
-    user_specified_output_name_group = user_specified_output_name
     user_specified_output_name_suffix = save_info.user_specified_output_name_suffix
-    use_reduction_mode_as_suffix = save_info.use_reduction_mode_as_suffix
-    # This adds a reduction mode suffix in merged or all reductions so the workspaces do not overwrite each other.
-    if (
-            state.reduction.reduction_mode == ISISReductionMode.Merged or state.reduction.reduction_mode == ISISReductionMode.All) \
-            and user_specified_output_name:
-        use_reduction_mode_as_suffix = True
 
     # Get the standard workspace name
     workspace_name, \
         workspace_base_name = get_standard_output_workspace_name(state, reduction_mode,
-                                                                 include_slice_limits=(not event_slice_optimisation))
+                                                                 include_slice_limits=(not event_slice_optimisation),
+                                                                 custom_run_name=user_specified_output_name)
 
     # If user specified output name is not none then we use it for the base name
-    if user_specified_output_name and not is_group:
-        # Deal with single period data which has a user-specified name
-        output_name = user_specified_output_name
-        output_base_name = user_specified_output_name
-    elif user_specified_output_name and is_group:
-        # Deal with data which requires special attention and which has a user-specified name
-        output_name = user_specified_output_name
-        output_base_name = user_specified_output_name_group
-    elif not user_specified_output_name and is_group:
-        output_name = workspace_name
-        output_base_name = workspace_base_name
-    else:
-        output_name = workspace_name
-        output_base_name = workspace_name
-
-    # Add a reduction mode suffix if it is required
-    if use_reduction_mode_as_suffix:
-        if reduction_mode is ISISReductionMode.LAB:
-            output_name += "_rear"
-            output_base_name += "_rear"
-        elif reduction_mode is ISISReductionMode.HAB:
-            output_name += "_front"
-            output_base_name += "_front"
-        elif reduction_mode is ISISReductionMode.Merged:
-            output_name += "_merged"
-            output_base_name += "_merged"
+    output_name = workspace_name
+    output_base_name = workspace_base_name if is_group else workspace_name
 
     if multi_reduction_type and user_specified_output_name:
         if multi_reduction_type["period"]:
@@ -935,6 +913,7 @@ def get_state_hash_for_can_reduction(state, reduction_mode, partial_type=None):
     :param partial_type: if it is a partial type, then it needs to be specified here.
     :return: the hash of the state
     """
+
     def remove_sample_related_information(full_state):
         state_to_hash = deepcopy(full_state)
 
@@ -951,6 +930,7 @@ def get_state_hash_for_can_reduction(state, reduction_mode, partial_type=None):
         state_to_hash.save.user_specified_output_name = ""
 
         return state_to_hash
+
     new_state = remove_sample_related_information(state)
     new_state_serialized = new_state.property_manager
     new_state_serialized = json.dumps(new_state_serialized, sort_keys=True, indent=4)

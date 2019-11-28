@@ -62,7 +62,7 @@ WidgetFactory::createSliceViewerWindow(const QString &wsName,
   QPointer<MantidQt::SliceViewer::SliceViewerWindow> pWindow(window);
 
   // Save in a list for later use
-  m_windows.push_back(pWindow);
+  m_windows.emplace_back(pWindow);
 
   return window;
 }

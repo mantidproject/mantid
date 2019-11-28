@@ -414,7 +414,7 @@ void LeBailFit::processInputBackground() {
     for (size_t i = i0; i < numparams; ++i) {
       stringstream parss;
       parss << "A" << (i - i0);
-      m_backgroundParameterNames.push_back(parss.str());
+      m_backgroundParameterNames.emplace_back(parss.str());
     }
 
     g_log.information() << "[Input] Use background specified with vector with "
@@ -748,7 +748,7 @@ void LeBailFit::createLeBailFunction() {
   vector<pair<vector<int>, double>>::iterator piter;
   for (piter = m_inputPeakInfoVec.begin(); piter != m_inputPeakInfoVec.end();
        ++piter)
-    vecHKL.push_back(piter->first);
+    vecHKL.emplace_back(piter->first);
   m_lebailFunction->addPeaks(vecHKL);
 
   // Add background
@@ -958,11 +958,10 @@ void LeBailFit::parseInstrumentParametersTable() {
         // string data
         g_log.debug() << "Col-name = " << colname << ", ";
         trow >> strvalue;
-        strvalue.erase(
-            std::find_if(strvalue.rbegin(), strvalue.rend(),
-                         std::not1(std::ptr_fun<int, int>(std::isspace)))
-                .base(),
-            strvalue.end());
+        strvalue.erase(std::find_if(strvalue.rbegin(), strvalue.rend(),
+                                    std::not_fn(::isspace))
+                           .base(),
+                       strvalue.end());
 
         g_log.debug() << "Value = " << strvalue << ".\n";
         tempstrmap.emplace(colname, strvalue);
@@ -1123,9 +1122,9 @@ void LeBailFit::parseBraggPeaksParametersTable() {
 
     // 3. Insert related data structure
     std::vector<int> hkl;
-    hkl.push_back(h);
-    hkl.push_back(k);
-    hkl.push_back(l);
+    hkl.emplace_back(h);
+    hkl.emplace_back(k);
+    hkl.emplace_back(l);
 
     // optional peak height
     double peakheight = 1.0;
@@ -1203,8 +1202,8 @@ void LeBailFit::parseBackgroundTableWorkspace(TableWorkspace_sptr bkgdparamws,
   for (mit = parmap.begin(); mit != parmap.end(); ++mit) {
     std::string parname = mit->first;
     double parvalue = mit->second;
-    bkgdparnames.push_back(parname);
-    bkgdorderparams.push_back(parvalue);
+    bkgdparnames.emplace_back(parname);
+    bkgdorderparams.emplace_back(parvalue);
   }
 
   // Debug output
@@ -1765,7 +1764,7 @@ void LeBailFit::setupRandomWalkStrategyFromTable(
     map<int, vector<string>>::iterator giter;
     giter = m_MCGroups.find(group);
     if (giter != m_MCGroups.end()) {
-      giter->second.push_back(parname);
+      giter->second.emplace_back(parname);
     } else {
       // First instance in the new group.
       m_MCGroups.emplace(group, vector<string>{parname});
@@ -1954,7 +1953,7 @@ void LeBailFit::addParameterToMCMinimize(vector<string> &parnamesforMC,
   }
 
   if (pariter->second.fit)
-    parnamesforMC.push_back(parname);
+    parnamesforMC.emplace_back(parname);
 }
 
 //----------------------------------------------------------------------------------------------
