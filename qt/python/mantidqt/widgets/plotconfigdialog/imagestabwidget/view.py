@@ -27,7 +27,7 @@ SCALES = {'Linear': Normalize, 'Logarithmic': LogNorm}
 
 
 def create_colormap_img(cmap_name, width=50, height=20):
-    colormap = cm.get_cmap(cm, cmap_name)
+    colormap = cm.get_cmap(cmap_name)
     gradient_array = np.tile(np.linspace(0, 1, width), height)
     img_array = (colormap(gradient_array)*255).astype(np.uint8)
     return QImage(img_array, width, height, QImage.Format_RGBA8888_Premultiplied)
