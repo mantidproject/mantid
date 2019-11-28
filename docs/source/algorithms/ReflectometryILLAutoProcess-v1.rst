@@ -84,11 +84,6 @@ Usage
 
 **Example - Multiple Angles**
 
-.. testsetup:: MultipleAngles
-
-    config['default.facility'] = 'ILL'
-    config.appendDataSearchSubDir('ILL/D17/')
-
 .. testcode:: MultipleAngles
 
     ws = ReflectometryILLAutoProcess(
