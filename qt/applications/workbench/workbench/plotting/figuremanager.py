@@ -31,6 +31,8 @@ from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
 from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
 from mantidqt.widgets.plotconfigdialog import curve_in_ax
 from mantidqt.widgets.plotconfigdialog.presenter import PlotConfigDialogPresenter
+from mantidqt.widgets.waterfallplotfillareadialog.presenter import WaterfallPlotFillAreaDialogPresenter
+from mantidqt.widgets.waterfallplotoffsetdialog.presenter import WaterfallPlotOffsetDialogPresenter
 from workbench.plotting.figureinteraction import FigureInteraction
 from workbench.plotting.figurewindow import FigureWindow
 from workbench.plotting.plotscriptgenerator import generate_script
@@ -210,6 +212,9 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.toolbar.sig_generate_plot_script_file_triggered.connect(
                 self.generate_plot_script_file)
             self.toolbar.sig_home_clicked.connect(self.set_figure_zoom_to_display_all)
+            self.toolbar.sig_waterfall_reverse_order_triggered.connect(self.waterfall_reverse_line_order)
+            self.toolbar.sig_waterfall_offset_amount_triggered.connect(self.launch_waterfall_offset_options)
+            self.toolbar.sig_waterfall_fill_area_triggered.connect(self.launch_waterfall_fill_area_options)
             self.toolbar.setFloatable(False)
             tbs_height = self.toolbar.sizeHint().height()
         else:
@@ -287,6 +292,9 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         if not any((isinstance(ax, MantidAxes) and curve_in_ax(ax))
                    for ax in self.canvas.figure.get_axes()):
             self._set_generate_plot_script_enabled(False)
+
+        if len(self.canvas.figure.get_axes()) > 1 or not self.canvas.figure.get_axes()[0].is_waterfall_plot():
+            self.toolbar.set_waterfall_options_enabled(False)
 
     def destroy(self, *args):
         # check for qApp first, as PySide deletes it in its atexit handler
@@ -413,6 +421,19 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
             self.canvas.draw()
 
+    def waterfall_reverse_line_order(self):
+        ax = self.canvas.figure.get_axes()[0]
+        x, y = ax.waterfall_x_offset, ax.waterfall_y_offset
+        ax.convert_from_waterfall()
+        ax.lines.reverse()
+        ax.update_waterfall_plot(x, y)
+        ax.make_legend()
+
+    def launch_waterfall_offset_options(self):
+        WaterfallPlotOffsetDialogPresenter(self.canvas.figure, parent=self.window)
+
+    def launch_waterfall_fill_area_options(self):
+        WaterfallPlotFillAreaDialogPresenter(self.canvas.figure, parent=self.window)
 
 # -----------------------------------------------------------------------------
 # Figure control

@@ -196,6 +196,9 @@ class MantidAxes(Axes):
         # flag to indicate if a function has been set to replace data
         self.data_replaced = False
 
+        self.waterfall_x_offset = 0
+        self.waterfall_y_offset = 0
+
     def add_artist_correctly(self, artist):
         """
         Add an artist via the correct function.
@@ -1044,6 +1047,61 @@ class MantidAxes(Axes):
         For keywords related to workspaces, see :func:`plotfunctions.tricontourf`
         """
         return self._plot_2d_func('tricontourf', *args, **kwargs)
+
+    def set_initial_dimensions(self, x_lim, y_lim):
+        self.width = x_lim[1] - x_lim[0]
+        self.height = y_lim[1] - y_lim[0]
+
+    def is_waterfall_plot(self):
+        return self.waterfall_x_offset != 0 or self.waterfall_y_offset != 0
+
+    def update_waterfall_plot(self, x_offset, y_offset):
+        self.set_waterfall_x_offset(x_offset)
+        self.set_waterfall_y_offset(y_offset)
+
+    def set_waterfall_x_offset(self, x_offset):
+        if self.waterfall_x_offset != 0:
+            for i, line in enumerate(self.get_lines()):
+                line.set_xdata(line.get_xdata() - (i * self.width * (self.waterfall_x_offset / 500)))
+
+        self.waterfall_x_offset = x_offset
+
+        if self.waterfall_x_offset != 0:
+            for i, line in enumerate(self.get_lines()):
+                line.set_xdata(line.get_xdata() + (i * self.width * (self.waterfall_x_offset / 500)))
+
+        self.set_waterfall_toolbar_options_enabled()
+        self.get_figure().canvas.draw()
+
+    def set_waterfall_y_offset(self, y_offset):
+        for i, line in enumerate(self.get_lines()):
+            line.set_ydata(line.get_ydata() - (i * self.height * (self.waterfall_y_offset / 500)))
+
+        self.waterfall_y_offset = y_offset
+
+        for i, line in enumerate(self.get_lines()):
+            line.set_ydata(line.get_ydata() + (i * self.height * (self.waterfall_y_offset / 500)))
+
+        self.set_waterfall_toolbar_options_enabled()
+        self.get_figure().canvas.draw()
+
+    def set_waterfall_toolbar_options_enabled(self):
+        if self.is_waterfall_plot():
+            self.get_figure().canvas.toolbar.set_waterfall_options_enabled(True)
+        else:
+            self.get_figure().canvas.toolbar.set_waterfall_options_enabled(False)
+
+    def convert_to_waterfall(self):
+        if self.is_waterfall_plot():
+            return
+
+        self.update_waterfall_plot(10, 20)
+
+    def convert_from_waterfall(self):
+        if not self.is_waterfall_plot():
+            return
+
+        self.update_waterfall_plot(0, 0)
 
     # ------------------ Private api --------------------------------------------------------
 

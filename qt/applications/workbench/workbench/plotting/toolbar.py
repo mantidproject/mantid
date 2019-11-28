@@ -26,6 +26,9 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
     sig_plot_options_triggered = QtCore.Signal()
     sig_generate_plot_script_file_triggered = QtCore.Signal()
     sig_generate_plot_script_clipboard_triggered = QtCore.Signal()
+    sig_waterfall_reverse_order_triggered = QtCore.Signal()
+    sig_waterfall_offset_amount_triggered = QtCore.Signal()
+    sig_waterfall_fill_area_triggered = QtCore.Signal()
 
     toolitems = (
         ('Home', 'Center display on contents', 'mdi.home', 'on_home_clicked', None),
@@ -45,6 +48,10 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
          'mdi.script-text-outline', 'generate_plot_script', None),
         (None, None, None, None, None),
         ('Fit', 'Toggle fit browser on/off', None, 'toggle_fit', False),
+        (None, None, None, None, None),
+        ('Offset Amount... ', 'to do', None, 'waterfall_offset_amount', None),
+        ('Reverse Order... ', 'to do', None, 'waterfall_reverse_order', None),
+        ('Fill Area', 'to do', None, 'waterfall_fill_area', None)
     )
 
     def _init_toolbar(self):
@@ -128,6 +135,20 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         self.sig_home_clicked.emit()
         self.push_current()
 
+    def set_waterfall_options_enabled(self, on):
+        for action in ['waterfall_offset_amount', 'waterfall_reverse_order', 'waterfall_fill_area']:
+            toolbar_action = self._actions[action]
+            toolbar_action.setEnabled(on)
+            toolbar_action.setVisible(on)
+
+    def waterfall_offset_amount(self):
+        self.sig_waterfall_offset_amount_triggered.emit()
+
+    def waterfall_reverse_order(self):
+        self.sig_waterfall_reverse_order_triggered.emit()
+
+    def waterfall_fill_area(self):
+        self.sig_waterfall_fill_area_triggered.emit()
 
 class ToolbarStateManager(object):
     """

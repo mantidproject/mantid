@@ -307,6 +307,9 @@ class FigureInteraction(object):
             self.add_error_bars_menu(menu, event.inaxes)
             self._add_marker_option_menu(menu, event)
 
+        if len(event.inaxes.get_figure().get_axes()) == 1 and isinstance(event.inaxes, MantidAxes):
+            self._add_plot_type_option_menu(menu, event.inaxes)
+
         menu.exec_(QCursor.pos())
 
     def _add_axes_scale_menu(self, menu, ax):
@@ -440,6 +443,31 @@ class FigureInteraction(object):
             marker_action_group.addAction(action)
 
         menu.addMenu(marker_menu)
+
+    def _add_plot_type_option_menu(self, menu, ax):
+        plot_type_menu = QMenu("Plot Type", menu)
+        plot_type_action_group = QActionGroup(plot_type_menu)
+        standard = plot_type_menu.addAction("Standard", lambda: self._change_plot_type(
+            ax, plot_type_action_group.checkedAction()))
+        waterfall = plot_type_menu.addAction("Waterfall", lambda: self._change_plot_type(
+            ax, plot_type_action_group.checkedAction()))
+
+        for action in [waterfall, standard]:
+            plot_type_action_group.addAction(action)
+            action.setCheckable(True)
+
+        if ax.is_waterfall_plot():
+            waterfall.setChecked(True)
+        else:
+            standard.setChecked(True)
+
+        menu.addMenu(plot_type_menu)
+
+    def _change_plot_type(self, ax, action):
+        if action.text() == "Waterfall":
+            ax.convert_to_waterfall()
+        else:
+            ax.convert_from_waterfall()
 
     def _global_edit_markers(self):
         """Open a window that allows editing of all currently plotted markers"""

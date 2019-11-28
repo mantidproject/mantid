@@ -147,7 +147,8 @@ def plot_from_names(names, errors, overplot, fig=None, show_colorfill_btn=False)
 
     return plot(selection.workspaces, spectrum_nums=selection.spectra,
                 wksp_indices=selection.wksp_indices,
-                errors=errors, overplot=overplot, fig=fig, tiled=selection.plot_type==selection.Tiled)
+                errors=errors, overplot=overplot, fig=fig, tiled=selection.plot_type==selection.Tiled,
+                waterfall=selection.plot_type==selection.Waterfall)
 
 
 def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=1, fig=None):
@@ -183,7 +184,7 @@ def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=
 @manage_workspace_names
 def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
          overplot=False, fig=None, plot_kwargs=None, ax_properties=None,
-         window_title=None, tiled=False):
+         window_title=None, tiled=False, waterfall=False):
     """
     Create a figure with a single subplot and for each workspace/index add a
     line plot to the new axes. show() is called before returning the figure instance. A legend
@@ -200,6 +201,7 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
     :param ax_properties: A dict of axes properties. E.g. {'yscale': 'log'}
     :param window_title: A string denoting name of the GUI window which holds the graph
     :param tiled: An optional flag controlling whether to do a tiled or overlayed plot
+    :param waterfall: An optional flag controlling whether or not to do a waterfall plot
     :return: The figure containing the plots
     """
     if plot_kwargs is None:
@@ -230,6 +232,12 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
         ax = overplot if isinstance(overplot, MantidAxes) else axes[0]
         ax.axis('on')
         _do_single_plot(ax, workspaces, errors, not overplot, nums, kw, plot_kwargs)
+
+    if len(nums) == 1:
+        waterfall = False
+
+    ax.set_initial_dimensions(ax.get_xlim(), ax.get_ylim())
+    toggle_waterfall(waterfall, ax)
 
     if not overplot:
         fig.canvas.set_window_title(figure_title(workspaces, fig.number))
@@ -355,6 +363,13 @@ def pcolormesh_on_axis(ax, ws):
         lbl.set_rotation(45)
 
     return pcm
+
+
+def toggle_waterfall(on, axes):
+    if on:
+        axes.convert_to_waterfall()
+    else:
+        axes.convert_from_waterfall()
 
 
 # ----------------- Compatability functions ---------------------
