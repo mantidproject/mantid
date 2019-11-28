@@ -198,7 +198,7 @@ LoadIDFFromNexus::getParameterCorrectionFile(const std::string &instName) {
 void LoadIDFFromNexus::readParameterCorrectionFile(
     const std::string &correction_file, const std::string &date,
     std::string &parameter_file, bool &append) {
-
+  using namespace Poco::XML;
   // Set output arguments to default
   parameter_file = "";
   append = false;
@@ -215,7 +215,7 @@ void LoadIDFFromNexus::readParameterCorrectionFile(
 
   // Set up the DOM parser and parse xml file
   DOMParser pParser;
-  Document *pDoc;
+  Poco::AutoPtr<Document> pDoc;
   try {
     pDoc = pParser.parseString(xmlText);
   } catch (Poco::Exception &exc) {

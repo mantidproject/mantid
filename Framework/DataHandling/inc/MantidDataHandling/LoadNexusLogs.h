@@ -76,10 +76,6 @@ private:
   void loadNPeriods(::NeXus::File &file,
                     boost::shared_ptr<API::MatrixWorkspace> workspace) const;
 
-  /// Create a time series property
-  Kernel::Property *createTimeSeries(::NeXus::File &file,
-                                     const std::string &prop_name) const;
-
   /// Progress reporting object
   boost::shared_ptr<API::Progress> m_progress;
 
