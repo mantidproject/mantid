@@ -33,7 +33,7 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.presenter.on_calibrate_clicked()
         worker_method.assert_called_with("307521", "305738", True, None)
 
-    @patch(tab_path + ".presenter.CalibrationPresenter._create_error_message")
+    @patch(tab_path + ".presenter.create_error_message")
     @patch(tab_path + ".presenter.CalibrationPresenter.start_calibration_worker")
     def test_worker_not_started_while_finder_is_searching(self, worker_method, err_msg):
         self.view.get_vanadium_filename.return_value = "307521"
@@ -45,7 +45,7 @@ class CalibrationPresenterTest(unittest.TestCase):
         worker_method.assert_not_called()
         self.assertEqual(err_msg.call_count, 1)
 
-    @patch(tab_path + ".presenter.CalibrationPresenter._create_error_message")
+    @patch(tab_path + ".presenter.create_error_message")
     @patch(tab_path + ".presenter.CalibrationPresenter.validate_run_numbers")
     @patch(tab_path + ".presenter.CalibrationPresenter.start_calibration_worker")
     def test_worker_not_started_when_run_numbers_invalid(self, worker_method, validator, err_msg):

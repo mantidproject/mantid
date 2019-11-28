@@ -8,9 +8,8 @@
 from __future__ import (absolute_import, division, print_function)
 
 from copy import deepcopy
-from qtpy.QtWidgets import QMessageBox
 
-from Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT
+from Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT, create_error_message
 from Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
 from mantidqt.utils.asynchronous import AsyncTask
 from mantid.simpleapi import logger
@@ -43,10 +42,13 @@ class CalibrationPresenter(object):
         if self.view.get_new_checked():
             # Do nothing if run numbers are invalid or view is searching.
             if not self.validate_run_numbers():
-                self._create_error_message("Check run numbers/path is valid.")
+                if self.view.is_searching():
+                    create_error_message(self.view, "GUI is searching for data files. Please wait.")
+                else:
+                    create_error_message(self.view, "Check run numbers/path is valid.")
                 return
             if self.view.is_searching():
-                self._create_error_message("Mantid is searching for the file. Please wait.")
+                create_error_message(self.view, "Mantid is searching for the file. Please wait.")
                 return
             vanadium_file = self.view.get_vanadium_filename()
             sample_file = self.view.get_sample_filename()
@@ -55,7 +57,8 @@ class CalibrationPresenter(object):
             if not self.validate_path():
                 return
             filename = self.view.get_path_filename()
-            instrument, vanadium_file, sample_file = self.model.load_existing_gsas_parameters(filename)
+            instrument, vanadium_file, sample_file = self.model.load_existing_gsas_parameters(
+                filename)
             self.pending_calibration.set_calibration(vanadium_file, sample_file, instrument)
             self.set_current_calibration()
 
@@ -77,9 +80,6 @@ class CalibrationPresenter(object):
         self.pending_calibration.set_calibration(vanadium_path, sample_path, self.instrument)
         self.set_calibrate_controls_enabled(False)
         self.worker.start()
-
-    def _create_error_message(self, message):
-        QMessageBox.warning(self.view, "Engineering Diffraction - Error", str(message))
 
     def set_current_calibration(self, success_info=None):
         if success_info:

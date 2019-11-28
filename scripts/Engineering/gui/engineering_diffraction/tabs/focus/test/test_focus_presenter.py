@@ -93,13 +93,15 @@ class FocusPresenterTest(unittest.TestCase):
 
         self.assertEqual([], self.presenter._get_banks())
 
-    def test_validate_with_invalid_focus_path(self):
+    @patch(tab_path + ".presenter.create_error_message")
+    def test_validate_with_invalid_focus_path(self, error_message):
         self.view.get_focus_valid.return_value = False
         banks = ["North", "South"]
 
         self.assertFalse(self.presenter._validate(banks))
+        self.assertEqual(error_message.call_count, 1)
 
-    @patch(tab_path + ".presenter.FocusPresenter._create_error_message")
+    @patch(tab_path + ".presenter.create_error_message")
     def test_validate_with_invalid_calibration(self, create_error):
         self.presenter.current_calibration = CalibrationInfo(vanadium_path=None,
                                                              sample_path=None,
@@ -108,10 +110,10 @@ class FocusPresenterTest(unittest.TestCase):
 
         self.presenter._validate(banks)
         create_error.assert_called_with(
-            "Create or Load a calibration via the Calibration tab before focusing.")
+            self.presenter.view, "Create or Load a calibration via the Calibration tab before focusing.")
 
     @patch(tab_path + ".presenter.check_workspaces_exist")
-    @patch(tab_path + ".presenter.FocusPresenter._create_error_message")
+    @patch(tab_path + ".presenter.create_error_message")
     def test_validate_while_searching(self, create_error, wsp_check):
         self.presenter.current_calibration = CalibrationInfo(vanadium_path="Fake/File/Path",
                                                              sample_path="Fake/Path",
@@ -121,10 +123,10 @@ class FocusPresenterTest(unittest.TestCase):
         banks = ["North", "South"]
 
         self.assertEqual(False, self.presenter._validate(banks))
-        self.assertEqual(0, create_error.call_count)
+        self.assertEqual(1, create_error.call_count)
 
     @patch(tab_path + ".presenter.check_workspaces_exist")
-    @patch(tab_path + ".presenter.FocusPresenter._create_error_message")
+    @patch(tab_path + ".presenter.create_error_message")
     def test_validate_with_no_banks_selected(self, create_error, wsp_check):
         self.presenter.current_calibration = CalibrationInfo(vanadium_path="Fake/Path",
                                                              sample_path="Fake/Path",
@@ -134,7 +136,7 @@ class FocusPresenterTest(unittest.TestCase):
         wsp_check.return_value = True
 
         self.presenter._validate(banks)
-        create_error.assert_called_with("Please select at least one bank.")
+        create_error.assert_called_with(self.presenter.view, "Please select at least one bank.")
 
 
 if __name__ == '__main__':

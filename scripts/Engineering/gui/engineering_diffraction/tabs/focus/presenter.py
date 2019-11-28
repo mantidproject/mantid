@@ -7,11 +7,9 @@
 # pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
 
-from qtpy.QtWidgets import QMessageBox
-
-from Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT
-from Engineering.gui.engineering_diffraction.tabs.common.vanadium_corrections import check_workspaces_exist
+from Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT, create_error_message
 from Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
+from Engineering.gui.engineering_diffraction.tabs.common.vanadium_corrections import check_workspaces_exist
 from mantidqt.utils.asynchronous import AsyncTask
 from mantidqt.utils.observer_pattern import Observer
 from mantid.simpleapi import logger
@@ -70,25 +68,29 @@ class FocusPresenter(object):
         :return: True if the worker can be started safely.
         """
         if not self.view.get_focus_valid():
+            if self.view.is_searching():
+                create_error_message(self.view, "GUI is searching for data files. Please wait.")
+            else:
+                create_error_message(self.view, "Check run numbers/path is valid.")
             return False
         if not self.current_calibration.is_valid():
-            self._create_error_message(
-                "Create or Load a calibration via the Calibration tab before focusing.")
+            create_error_message(
+                self.view, "Create or Load a calibration via the Calibration tab before focusing.")
             return False
         if self.current_calibration.get_instrument() != self.instrument:
-            self._create_error_message(
+            create_error_message(
+                self.view,
                 "Please make sure the selected instrument matches instrument for the current calibration.\n"
-                "The instrument for the calibration is: " +
+                "The instrument for the current calibration is: " +
                 self.current_calibration.get_instrument())
-        if self.view.is_searching():
             return False
         if len(banks) == 0:
-            self._create_error_message("Please select at least one bank.")
+            create_error_message(self.view, "Please select at least one bank.")
+            return False
+        if self.view.is_searching():
+            create_error_message(self.view, "GUI is searching for data files. Please wait.")
             return False
         return True
-
-    def _create_error_message(self, message):
-        QMessageBox.warning(self.view, "Engineering Diffraction - Error", str(message))
 
     def _on_worker_error(self, failure_info):
         logger.warning(str(failure_info))
