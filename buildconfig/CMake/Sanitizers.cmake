@@ -9,12 +9,6 @@ set_property(CACHE USE_SANITIZER PROPERTY STRINGS
 string(TOLOWER "${USE_SANITIZER}" USE_SANITIZERS_LOWER)
 
 if(NOT ${USE_SANITIZERS_LOWER} MATCHES "off")
-    if(${CMAKE_VERSION} VERSION_LESS "3.13.0")
-        # Version 13 is needed for add_link_options, but not all platforms
-        # currently have it
-        message(FATAL_ERROR "CMake 3.13 onwards is required to run the sanitizers")
-    endif()
-
     if(WIN32)
         message(FATAL_ERROR "Windows does not support sanitizers")
     endif()
@@ -39,32 +33,24 @@ if(NOT ${USE_SANITIZERS_LOWER} MATCHES "off")
     # Allow all instrumented code to continue beyond the first error
     add_compile_options(-fsanitize-recover=all)
 
-    # N.b. we can switch this to add_link_options in CMake 3.13
-    # rather than have to check the linker options etc
-    if (USE_SANITIZERS_LOWER STREQUAL "address")
-        message(STATUS "Enabling address sanitizer")
+    # Address
+    add_compile_options(
+        $<$<STREQUAL:$<LOWER_CASE:${USE_SANITIZER}>,"address">:-fsanitize=address>)
+    add_link_options(
+        $<$<STREQUAL:$<LOWER_CASE:${USE_SANITIZER}>,"address">:-fsanitize=address>)
 
-        add_compile_options(-fsanitize=address)
-        add_link_options(-fsanitize=address)
+    # Thread
+    add_compile_options(
+        $<$<STREQUAL:$<LOWER_CASE:${USE_SANITIZER}>,"thread">:-fsanitize=thread>)
+    add_link_options(
+        $<$<STREQUAL:$<LOWER_CASE:${USE_SANITIZER}>,"thread">:-fsanitize=thread>)
 
-    elseif (USE_SANITIZERS_LOWER STREQUAL "thread")
-        message(STATUS "Enabling Thread sanitizer")
-
-        add_compile_options(-fsanitize=thread)
-        add_link_options(-fsanitize=thread)
-
-    elseif (USE_SANITIZERS_LOWER STREQUAL "undefined")
-        message(STATUS "Enabling undefined behaviour sanitizer")
-
-        add_compile_options(
-            -fsanitize=undefined
-            # RTTI information is not exported for some classes causing the
-            # linker to fail whilst adding vptr instrumentation
-            -fno-sanitize=vptr
-        )
-        add_link_options(-fsanitize=undefined)
-    else()
-        message(FATAL_ERROR "Unrecognised Sanitizer Option")
-    endif()
+    # Undefined
+    # RTTI information is not exported for some classes causing the
+    # linker to fail whilst adding vptr instrumentation
+    add_compile_options(
+        $<$<STREQUAL:$<LOWER_CASE:${USE_SANITIZER}>,"undefined">:-fsanitize=undefined -fno-sanitize=vptr>)
+    add_link_options(
+        $<$<STREQUAL:$<LOWER_CASE:${USE_SANITIZER}>,"undefined">:-fsanitize=undefined>)
 
 endif()
