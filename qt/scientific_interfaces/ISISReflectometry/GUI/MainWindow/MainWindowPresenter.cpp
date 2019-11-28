@@ -152,9 +152,26 @@ bool MainWindowPresenter::isAnyBatchAutoreducing() const {
   return false;
 }
 
+bool MainWindowPresenter::isWarnProcessAllChecked() const {
+  return m_optionsDialogPresenter->getBoolOption(std::string("WarnProcessAll"));
+}
+
+bool MainWindowPresenter::isWarnProcessPartialGroupChecked() const {
+  return m_optionsDialogPresenter->getBoolOption(
+      std::string("WarnProcessPartialGroup"));
+}
+
 bool MainWindowPresenter::isWarnDiscardChangesChecked() const {
   return m_optionsDialogPresenter->getBoolOption(
       std::string("WarnDiscardChanges"));
+}
+
+bool MainWindowPresenter::isRoundChecked() const {
+  return m_optionsDialogPresenter->getBoolOption(std::string("Round"));
+}
+
+int MainWindowPresenter::getRoundPrecision() const {
+  return m_optionsDialogPresenter->getIntOption(std::string("RoundPrecision"));
 }
 
 bool MainWindowPresenter::isCloseEventPrevented() const {

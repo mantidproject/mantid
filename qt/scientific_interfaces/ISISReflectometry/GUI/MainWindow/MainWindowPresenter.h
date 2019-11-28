@@ -51,7 +51,11 @@ public:
   // IMainWindowPresenter overrides
   bool isAnyBatchProcessing() const override;
   bool isAnyBatchAutoreducing() const override;
+  bool isWarnProcessAllChecked() const override;
+  bool isWarnProcessPartialGroupChecked() const override;
   bool isWarnDiscardChangesChecked() const override;
+  bool isRoundChecked() const override;
+  int getRoundPrecision() const override;
   bool isCloseEventPrevented() const override;
   bool isCloseBatchPrevented(int batchIndex) const override;
   bool isOperationPrevented() const override;
