@@ -337,7 +337,8 @@ void LoadMD::loadHisto() {
   this->loadSlab("signal", ws->mutableSignalArray(), ws, ::NeXus::FLOAT64);
   this->loadSlab("errors_squared", ws->mutableErrorSquaredArray(), ws,
                  ::NeXus::FLOAT64);
-  this->loadSlab("num_events", ws->mutableNumEventsArray(), ws, ::NeXus::FLOAT64);
+  this->loadSlab("num_events", ws->mutableNumEventsArray(), ws,
+                 ::NeXus::FLOAT64);
   this->loadSlab("mask", ws->mutableMaskArray(), ws, ::NeXus::INT8);
 
   m_file->close();

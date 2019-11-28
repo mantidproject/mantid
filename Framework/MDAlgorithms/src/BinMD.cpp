@@ -38,8 +38,8 @@ using namespace Mantid::DataObjects;
 /** Constructor
  */
 BinMD::BinMD()
-  : SlicingAlgorithm(), outWS(), implicitFunction(), indexMultiplier(), signals(nullptr),
-    errors(nullptr), numEvents(nullptr) {}
+    : SlicingAlgorithm(), outWS(), implicitFunction(), indexMultiplier(),
+      signals(nullptr), errors(nullptr), numEvents(nullptr) {}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
@@ -354,7 +354,6 @@ void BinMD::binByIterating(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       signal_t nan = std::numeric_limits<signal_t>::quiet_NaN();
       outWS->applyImplicitFunction(implicitFunction.get(), nan, nan);
     }
-
 }
 
 //----------------------------------------------------------------------------------------------

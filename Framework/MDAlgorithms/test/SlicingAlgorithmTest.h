@@ -195,11 +195,11 @@ public:
     TS_ASSERT_EQUALS(dim->getX(10), 9.0);
   }
 
-  SlicingAlgorithmImpl *do_createAlignedTransform(std::string name1,
-                                                  std::string name2,
-                                                  std::string name3,
-                                                  std::string name4) {
-    SlicingAlgorithmImpl *alg = new SlicingAlgorithmImpl();
+  std::unique_ptr<SlicingAlgorithmImpl>
+  do_createAlignedTransform(const std::string &name1, const std::string &name2,
+                            const std::string &name3,
+                            const std::string &name4) {
+    auto alg = std::make_unique<SlicingAlgorithmImpl>();
     alg->m_inWS = ws;
     alg->initSlicingProps();
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("AxisAligned", "1"));
@@ -231,7 +231,7 @@ public:
   }
 
   void test_createAlignedTransform() {
-    SlicingAlgorithmImpl *alg = do_createAlignedTransform(
+    auto alg = do_createAlignedTransform(
         "Axis0, 2.0,8.0, 6", "Axis1, 2.0,8.0, 3", "Axis2, 2.0,8.0, 3", "");
 
     TS_ASSERT_EQUALS(alg->m_bases.size(), 3);
@@ -269,7 +269,7 @@ public:
   }
 
   void test_createAlignedTransform_scrambled() {
-    SlicingAlgorithmImpl *alg = do_createAlignedTransform(
+    auto alg = do_createAlignedTransform(
         "Axis2, 2.0,8.0, 3", "Axis0, 2.0,8.0, 6", "Axis1, 2.0,8.0, 3", "");
 
     TS_ASSERT_EQUALS(alg->m_bases.size(), 3);
@@ -308,8 +308,7 @@ public:
 
   /** Integrate 2 dimensions so that the output has fewer dimensions */
   void test_createAlignedTransform_integrating() {
-    SlicingAlgorithmImpl *alg =
-        do_createAlignedTransform("Axis0, 2.0,8.0, 6", "", "", "");
+    auto alg = do_createAlignedTransform("Axis0, 2.0,8.0, 6", "", "", "");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 1);
     TS_ASSERT_EQUALS(alg->m_binDimensions.size(), 1);
     TS_ASSERT_EQUALS(alg->m_bases[0], VMD(1, 0, 0));
@@ -336,7 +335,7 @@ public:
   }
 
   void test_aligned_ImplicitFunction() {
-    SlicingAlgorithmImpl *alg = do_createAlignedTransform(
+    auto alg = do_createAlignedTransform(
         "Axis0, 2.0,8.0, 6", "Axis1, 2.0,8.0, 3", "Axis2, 2.0,8.0, 3", "");
     auto func = alg->getImplicitFunctionForChunk(nullptr, nullptr);
     TS_ASSERT(func);
@@ -347,7 +346,7 @@ public:
   }
 
   void test_aligned_ImplicitFunction_chunk() {
-    SlicingAlgorithmImpl *alg = do_createAlignedTransform(
+    auto alg = do_createAlignedTransform(
         "Axis0, 2.0,8.0, 6", "Axis1, 2.0,8.0, 6", "Axis2, 2.0,8.0, 6", "");
     /* This defines a chunk implicit function between 3-4 in each axis */
     size_t chunkMin[3] = {1, 1, 1};
@@ -595,12 +594,12 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  SlicingAlgorithmImpl *do_createGeneralTransform(
+  std::unique_ptr<SlicingAlgorithmImpl> do_createGeneralTransform(
       IMDEventWorkspace_sptr inWS, std::string name1, std::string name2,
       std::string name3, std::string name4, VMD translation,
       std::string extents, std::string numBins, bool ForceOrthogonal = false,
       bool NormalizeBasisVectors = true) {
-    SlicingAlgorithmImpl *alg = new SlicingAlgorithmImpl();
+    auto alg = std::make_unique<SlicingAlgorithmImpl>();
     alg->m_inWS = inWS;
     alg->initSlicingProps();
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("AxisAligned", "0"));
@@ -651,7 +650,7 @@ public:
     VMD baseY(-sin(angle), cos(angle), 0.0);
     VMD baseZ(0.0, 0.0, 1.0);
 
-    SlicingAlgorithmImpl *alg = do_createGeneralTransform(
+    auto alg = do_createGeneralTransform(
         ws3, "OutX,m," + baseX.toString(","), "OutY,m," + baseY.toString(","),
         "OutZ,m," + baseZ.toString(","), "", VMD(1, 1, 0), "0,10,0,10,0,10",
         "5,5,5");
@@ -708,7 +707,7 @@ public:
     VMD baseY(0.0, -1., 0.0);
     VMD baseZ(0.0, 0.0, 1.0);
 
-    SlicingAlgorithmImpl *alg = do_createGeneralTransform(
+    auto alg = do_createGeneralTransform(
         ws3, "OutX,m," + baseX.toString(","), "OutY,m," + baseY.toString(","),
         "OutZ,m," + baseZ.toString(","), "", VMD(0, 0, 0), "0,10,0,10,0,10",
         "5,5,5");
@@ -754,7 +753,7 @@ public:
   }
 
   void test_createGeneralTransform_4D_to_3D() {
-    SlicingAlgorithmImpl *alg = do_createGeneralTransform(
+    auto alg = do_createGeneralTransform(
         ws4, "OutX,m, 1,0,0,0", "OutY,m, 0,1,0,0", "OutZ,m, 0,0,1,0", "",
         VMD(1, 1, 1, 0), "0,10,0,10,0,10", "5,5,5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 3);
@@ -775,7 +774,7 @@ public:
   }
 
   void test_createGeneralTransform_4D_to_4D() {
-    SlicingAlgorithmImpl *alg = do_createGeneralTransform(
+    auto alg = do_createGeneralTransform(
         ws4, "OutX,m, 1,0,0,0", "OutY,m, 0,1,0,0", "OutZ,m, 0,0,1,0",
         "OutE,m, 0,0,0,1", VMD(1, 1, 1, 1), "0,10,0,10,0,10,0,10", "5,5,5,5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 4);
@@ -794,7 +793,7 @@ public:
   /** 4D "left-handed" coordinate system
    * obtained by flipping the Y basis vector.  */
   void test_createGeneralTransform_4D_to_4D_LeftHanded() {
-    SlicingAlgorithmImpl *alg = do_createGeneralTransform(
+    auto alg = do_createGeneralTransform(
         ws4, "OutX,m, 1,0,0,0", "OutY,m, 0,-1,0,0", "OutZ,m, 0,0,1,0",
         "OutE,m, 0,0,0,1", VMD(1, 1, 1, 1), "0,10,0,10,0,10,0,10", "5,5,5,5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 4);
@@ -812,7 +811,7 @@ public:
   }
 
   void test_createGeneralTransform_5D_to_3D() {
-    SlicingAlgorithmImpl *alg = do_createGeneralTransform(
+    auto alg = do_createGeneralTransform(
         ws5, "OutX,m, 1,0,0,0,0", "OutY,m, 0,1,0,0,0", "OutZ,m, 0,0,1,0,0", "",
         VMD(1, 1, 1, 0, 0), "0,10,0,10,0,10", "5,5,5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 3);
@@ -833,7 +832,7 @@ public:
   }
 
   void test_createGeneralTransform_4D_to_2D() {
-    SlicingAlgorithmImpl *alg =
+    auto alg =
         do_createGeneralTransform(ws4, "OutX,m, 1,0,0,0", "OutY,m, 0,1,0,0", "",
                                   "", VMD(1, 1, 0, 0), "0,10,0,10", "5,5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 2);
@@ -852,7 +851,7 @@ public:
   }
 
   void test_createGeneralTransform_3D_to_2D() {
-    SlicingAlgorithmImpl *alg =
+    auto alg =
         do_createGeneralTransform(ws3, "OutX,m, 1,0,0", "OutY,m, 0,1,0", "", "",
                                   VMD(1, 1, 0), "0,10,0,10", "5,5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 2);
@@ -871,9 +870,8 @@ public:
   }
 
   void test_createGeneralTransform_2D_to_2D() {
-    SlicingAlgorithmImpl *alg =
-        do_createGeneralTransform(ws2, "OutX,m, 1,0", "OutY,m, 0,1", "", "",
-                                  VMD(1, 1), "0,10,0,10", "5,5");
+    auto alg = do_createGeneralTransform(ws2, "OutX,m, 1,0", "OutY,m, 0,1", "",
+                                         "", VMD(1, 1), "0,10,0,10", "5,5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 2);
 
     // The implicit function
@@ -897,7 +895,7 @@ public:
    * Maximum edge in the output = (+11, +21) in the input
    */
   void test_createGeneralTransform_2D_to_2D_withNonZeroOrigin() {
-    SlicingAlgorithmImpl *alg =
+    auto alg =
         do_createGeneralTransform(ws2, "OutX,m, 2,0", "OutY,m, 0,3", "", "",
                                   VMD(1, 1), "-10,10, -20,20", "5,5");
 
@@ -959,7 +957,7 @@ public:
    * Maximum edge in the output (+10,+20) = (+21, +101) in the input
    */
   void test_createGeneralTransform_2D_to_2D_withNonZeroOrigin_withScaling() {
-    SlicingAlgorithmImpl *alg = do_createGeneralTransform(
+    auto alg = do_createGeneralTransform(
         ws2, "OutX,m, 2,0", "OutY,m, 0,5", "", "", VMD(1, 1), "-10,10, -20,20",
         "5,5", false /*force orthogonal*/, false /*normalize basis vectors */);
 
@@ -1024,9 +1022,8 @@ public:
    *
    */
   void test_createGeneralTransform_2D_to_2D_nonOrthogonal() {
-    SlicingAlgorithmImpl *alg =
-        do_createGeneralTransform(ws2, "OutX,m, 1,0", "OutY,m, 1,1", "", "",
-                                  VMD(0., 0.), "0,10,0,10", "5,5");
+    auto alg = do_createGeneralTransform(ws2, "OutX,m, 1,0", "OutY,m, 1,1", "",
+                                         "", VMD(0., 0.), "0,10,0,10", "5,5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 2);
 
     // The implicit function
@@ -1046,7 +1043,7 @@ public:
   }
 
   void test_createGeneralTransform_3D_to_2D_nonOrthogonal() {
-    SlicingAlgorithmImpl *alg =
+    auto alg =
         do_createGeneralTransform(ws3, "OutX,m, 1,0,0", "OutY,m, 1,1,0", "", "",
                                   VMD(0., 0., 0.), "0,10,0,10", "5,5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 2);
@@ -1069,10 +1066,10 @@ public:
   }
 
   void test_createGeneralTransform_4D_to_4D_nonOrthogonal() {
-    SlicingAlgorithmImpl *alg = do_createGeneralTransform(
-        ws4, "OutX,m, 1,0,0,0", "OutY,m, 1,1,0,0", "OutZ,m, 0,0,1,0",
-        "OutE,m, 0,0,0,1", VMD(0., 0., 0., 0.), "0,10,0,10,0,10,0,10",
-        "5,5,5,5");
+    auto alg = do_createGeneralTransform(ws4, "OutX,m, 1,0,0,0",
+                                         "OutY,m, 1,1,0,0", "OutZ,m, 0,0,1,0",
+                                         "OutE,m, 0,0,0,1", VMD(0., 0., 0., 0.),
+                                         "0,10,0,10,0,10,0,10", "5,5,5,5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 4);
 
     // The implicit function
@@ -1091,7 +1088,7 @@ public:
   }
 
   void test_createGeneralTransform_4D_to_3D_nonOrthogonal() {
-    SlicingAlgorithmImpl *alg = do_createGeneralTransform(
+    auto alg = do_createGeneralTransform(
         ws4, "OutX,m, 1,0,0,0", "OutY,m, 1,1,0,0", "OutZ,m, 0,0,1,0", "",
         VMD(0., 0., 0., 0.), "0,10,0,10,0,10", "5,5,5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 3);
@@ -1112,8 +1109,8 @@ public:
   }
 
   void test_createGeneralTransform_4D_to_1D() {
-    SlicingAlgorithmImpl *alg = do_createGeneralTransform(
-        ws4, "OutX,m, 1,0,0,0", "", "", "", VMD(1, 1, 0, 0), "0,10", "5");
+    auto alg = do_createGeneralTransform(ws4, "OutX,m, 1,0,0,0", "", "", "",
+                                         VMD(1, 1, 0, 0), "0,10", "5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 1);
 
     // The implicit function
@@ -1127,8 +1124,8 @@ public:
   }
 
   void test_createGeneralTransform_3D_to_1D() {
-    SlicingAlgorithmImpl *alg = do_createGeneralTransform(
-        ws3, "OutX,m, 1,0,0", "", "", "", VMD(1, 1, 0), "0,10", "5");
+    auto alg = do_createGeneralTransform(ws3, "OutX,m, 1,0,0", "", "", "",
+                                         VMD(1, 1, 0), "0,10", "5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 1);
 
     // The implicit function
@@ -1142,8 +1139,8 @@ public:
   }
 
   void test_createGeneralTransform_2D_to_1D() {
-    SlicingAlgorithmImpl *alg = do_createGeneralTransform(
-        ws2, "OutX,m, 1,0", "", "", "", VMD(1, 1), "0,10", "5");
+    auto alg = do_createGeneralTransform(ws2, "OutX,m, 1,0", "", "", "",
+                                         VMD(1, 1), "0,10", "5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 1);
 
     // The implicit function
@@ -1159,8 +1156,8 @@ public:
   void test_createGeneralTransform_1D_to_1D() {
     VMD translation(1);
     translation[0] = 1.0;
-    SlicingAlgorithmImpl *alg = do_createGeneralTransform(
-        ws1, "OutX,m, 1", "", "", "", translation, "0,10", "5");
+    auto alg = do_createGeneralTransform(ws1, "OutX,m, 1", "", "", "",
+                                         translation, "0,10", "5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 1);
 
     // The implicit function
