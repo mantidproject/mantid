@@ -282,7 +282,8 @@ class Plots__init__Test(unittest.TestCase):
         del self.ax.tracked_workspaces[non_dist_ws.name()]
 
     def test_artists_normalization_state_labeled_correctly_for_2d_plots_of_dist_workspace(self):
-        plot_funcs = ['imshow', 'pcolor', 'pcolormesh', 'pcolorfast']
+        plot_funcs = ['imshow', 'pcolor', 'pcolormesh', 'pcolorfast', 'tripcolor',
+                      'contour', 'contourf', 'tricontour', 'tricontourf']
         dist_2d_ws = CreateWorkspace(DataX=[10, 20, 10, 20],
                                      DataY=[2, 3, 2, 3],
                                      DataE=[1, 2, 1, 2],
@@ -300,7 +301,8 @@ class Plots__init__Test(unittest.TestCase):
             self.assertTrue(ws_artists[2].is_normalized)
 
     def test_artists_normalization_state_labeled_correctly_for_2d_plots_of_non_dist_workspace(self):
-        plot_funcs = ['imshow', 'pcolor', 'pcolormesh', 'pcolorfast']
+        plot_funcs = ['imshow', 'pcolor', 'pcolormesh', 'pcolorfast', 'tripcolor',
+                        'contour', 'contourf', 'tricontour', 'tricontourf']
         non_dist_2d_ws = CreateWorkspace(DataX=[10, 20, 10, 20],
                                          DataY=[2, 3, 2, 3],
                                          DataE=[1, 2, 1, 2],

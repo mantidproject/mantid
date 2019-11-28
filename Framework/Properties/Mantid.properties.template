@@ -151,7 +151,7 @@ MantidOptions.InstrumentView.UseOpenGL = On
 
 # Controls the default normalization mode for graph plotting
 # Allowed values are:
-#   On: Normalize to the bin width for plots
+#   On: Normalize to the bin width for 1d and 2d plots
 #   Off: Do not normalize
 graph1d.autodistribution = On
 

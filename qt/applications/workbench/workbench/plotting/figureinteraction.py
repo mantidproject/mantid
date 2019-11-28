@@ -574,7 +574,8 @@ class FigureInteraction(object):
                     if ws_artist.spec_num == arg_set.get('specNum'):
                         ws_artist.is_normalized = not is_normalized
                         ws_artist.replace_data(workspace, arg_set_copy)
-        ax.relim()
+        if ax.lines:  # Relim causes issues with colour plots, which have no lines.
+            ax.relim()
         ax.autoscale()
         self.canvas.draw()
 
