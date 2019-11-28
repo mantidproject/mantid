@@ -51,6 +51,42 @@ void QtSaveView::initLayout() {
           SLOT(browseToSaveDirectory()));
 }
 
+void QtSaveView::connectSettingsChange(QLineEdit &edit) {
+  connect(&edit, SIGNAL(textChanged(QString const &)), this,
+          SLOT(onSettingsChanged()));
+}
+
+void QtSaveView::connectSettingsChange(QComboBox &edit) {
+  connect(&edit, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(onSettingsChanged()));
+}
+
+void QtSaveView::connectSettingsChange(QCheckBox &edit) {
+  connect(&edit, SIGNAL(stateChanged(int)), this, SLOT(onSettingsChanged()));
+}
+
+void QtSaveView::connectSettingsChange(QRadioButton &edit) {
+  connect(&edit, SIGNAL(clicked()), this, SLOT(onSettingsChanged()));
+}
+
+void QtSaveView::onSettingsChanged() {
+  m_notifyee->notifySettingsChanged();
+}
+
+void QtSaveView::connectInstrumentSettingsWidgets() {
+  connectSettingsChange(*m_ui.savePathEdit);
+  connectSettingsChange(*m_ui.prefixEdit);
+  connectSettingsChange(*m_ui.filterEdit);
+  connectSettingsChange(*m_ui.regexCheckBox);
+  connectSettingsChange(*m_ui.saveReductionResultsCheckBox);
+  connectSettingsChange(*m_ui.titleCheckBox);
+  connectSettingsChange(*m_ui.qResolutionCheckBox);
+  connectSettingsChange(*m_ui.commaRadioButton);
+  connectSettingsChange(*m_ui.spaceRadioButton);
+  connectSettingsChange(*m_ui.tabRadioButton);
+  connectSettingsChange(*m_ui.fileFormatComboBox);
+}
+
 void QtSaveView::browseToSaveDirectory() {
   auto savePath = QFileDialog::getExistingDirectory(
       this, "Select the directory to save to.");

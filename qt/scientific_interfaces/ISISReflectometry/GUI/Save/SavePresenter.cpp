@@ -42,6 +42,10 @@ void SavePresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) {
   m_mainPresenter = mainPresenter;
 }
 
+void SavePresenter::notifySettingsChanged() {
+  m_mainPresenter->notifySettingsChanged();
+}
+
 void SavePresenter::notifyPopulateWorkspaceList() { populateWorkspaceList(); }
 
 void SavePresenter::notifyFilterWorkspaceList() { filterWorkspaceNames(); }

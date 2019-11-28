@@ -41,6 +41,7 @@ public:
   void notifyAutoreductionResumed() override;
 
   // SaveViewSubscriber overrides
+  void notifySettingsChanged() override;
   void notifyPopulateWorkspaceList() override;
   void notifyFilterWorkspaceList() override;
   void notifyPopulateParametersList() override;
