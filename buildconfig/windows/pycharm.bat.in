@@ -1,12 +1,26 @@
-@echo OFF
+@echo off
 setlocal enableextensions enabledelayedexpansion
 
-set KEY_NAME="HKCR\Applications\pycharm.exe\shell\open\command"
+set PYCHARM_32_KEY_NAME="HKCR\Applications\pycharm.exe\shell\open\command"
+set PYCHARM_64_KEY_NAME="HKCR\Applications\pycharm64.exe\shell\open\command"
 
-reg query %KEY_NAME% 2> nul
-if %ERRORLEVEL% NEQ 0 set KEY_NAME="HKCR\Applications\pycharm64.exe\shell\open\command"
+reg query %PYCHARM_32_KEY_NAME% 2> nul
+if %ERRORLEVEL% NEQ 0 (
+    :: reset error level
+    cmd /c "exit /b 0"
+    reg query %PYCHARM_64_KEY_NAME% 2> nul
+    if !ERRORLEVEL! NEQ 0 (
+        echo Cannot find either a 32 bit or a 64 bit installation of PyCharm
+        pause
+        exit /b !ERRORLEVEL!
+    ) else (
+        set KEY_NAME=%PYCHARM_64_KEY_NAME%
+    )
+) else (
+    set KEY_NAME=%PYCHARM_32_KEY_NAME%
+)
 
-FOR /F "usebackq tokens=2*" %%A IN (`REG QUERY %KEY_NAME% `) DO (
+for /f "usebackq tokens=2*" %%A in (`reg query %KEY_NAME% `) do (
     set ValueType=%%A
     set ValueValue=%%B
 )
@@ -18,5 +32,5 @@ if defined ValueValue (
     call %~dp0thirdpartypaths.bat
     start "" "!ValueValue!"
 ) else (
-    @echo %KEY_NAME% not found.
+    echo %KEY_NAME% not found.
 )
