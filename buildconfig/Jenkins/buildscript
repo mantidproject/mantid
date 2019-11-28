@@ -311,19 +311,11 @@ fi
 ###############################################################################
 # Figure out if were doing a sanitizer build and setup any steps we need
 ###############################################################################
-ASAN_OPTIONS=''
-LSAN_OPTIONS=''
 
 SANITIZER_FLAGS=''
 
-SUPPRESSIONS_DIR="${WORKSPACE}/buildconfig/Sanitizer"
-
 if [[ ${JOB_NAME} == *address* ]]; then
     SANITIZER_FLAGS="-DUSE_SANITIZER=Address"
-    
-    # At a future date we could add an LD_PRELOAD export here, see docs for info
-    ASAN_OPTIONS="suppressions=${SUPPRESSIONS_DIR}/Address.supp:detect_stack_use_after_return=true:halt_on_error=false:verify_asan_link_order=0"
-    LSAN_OPTIONS="suppressions=${SUPPRESSIONS_DIR}/Leak.supp"
     
     elif [[ ${JOB_NAME} == *memory* ]]; then
     SANITIZER_FLAGS="-DUSE_SANITIZER=memory"
@@ -401,10 +393,6 @@ fi
 if [[ $USE_CLANG ]] && [[ ${JOB_NAME} == *clang_tidy* ]]; then
     exit 0
 fi
-
-# Set any ASAN options in the environment
-export ASAN_OPTIONS=${ASAN_OPTIONS}
-
 
 ###############################################################################
 # Run the unit tests

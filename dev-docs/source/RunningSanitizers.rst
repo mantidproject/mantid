@@ -85,27 +85,25 @@ resolve (or have been resolved but not appeared downstream).
 We can suppress warnings in the address sanitizer by setting environment
 variables in the console before running in each mode.
 
-Address Sanitizer
------------------
+Advanced Details
+================
 
-Run the following code to set the sanitizers options, being sure to substitute
-the path to your Mantid source directly:
+Most developers do not need to read this, but it's good for those who
+want to know what's happening
 
-    .. code-block:: sh
-
-        export ASAN_OPTIONS="verify_asan_link_order=0:detect_stack_use_after_return=true:halt_on_error=false:suppressions=*path_to_mantid*/buildconfig/Sanitizer/Address.supp"
-        export LSAN_OPTIONS="suppressions=*path_to_mantid*/buildconfig/Sanitizer/Leak.supp"
-
-For example, if Mantid was checked out in the home directory of user *abc* in a
-folder called mantid it would be:
+CMake substitutes in various flags for the address sanitizer builds to
+setup suppressions etc... this is the equivalent of doing the following
+in a local shell:
 
     .. code-block:: sh
 
-        export ASAN_OPTIONS="verify_asan_link_order=0:detect_stack_use_after_return=true:halt_on_error=false:suppressions=/home/abc/mantid/buildconfig/Sanitizer/Address.supp"
-        export LSAN_OPTIONS="suppressions=/home/abc/mantid/buildconfig/Sanitizer/Leak.supp"
+        export ASAN_OPTIONS="verify_asan_link_order=0:detect_stack_use_after_return=true:halt_on_error=false:suppressions=*path_to_mantid*/tools/Sanitizer/Address.supp"
+        export LSAN_OPTIONS="suppressions=*path_to_mantid*/tools/Sanitizer/Leak.supp"
 
-All code executed in **the shell where the previous commands were run in**
-will now be sanitized correctly.
+All code executed which is executed in that shell will now be sanitized
+correctly. To save developers effort the CXX_ADD_TEST macro (in
+FindCxxTest.cmake) will append these environment variables on a developers
+behalf.
 
 Instrumenting Python (Advanced)
 -------------------------------

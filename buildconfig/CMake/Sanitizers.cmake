@@ -4,7 +4,7 @@
 
 set(USE_SANITIZER "Off" CACHE STRING "Sanitizer mode to enable")
 set_property(CACHE USE_SANITIZER PROPERTY STRINGS
-             Off Address Memory Thread Undefined)
+             Off Address Thread Undefined)
 
 string(TOLOWER "${USE_SANITIZER}" USE_SANITIZERS_LOWER)
 
@@ -46,12 +46,6 @@ if(NOT ${USE_SANITIZERS_LOWER} MATCHES "off")
 
         add_compile_options(-fsanitize=address)
         add_link_options(-fsanitize=address)
-
-    elseif (USE_SANITIZERS_LOWER STREQUAL "memory")
-        # Requires Clang > 4 and libc++ (rather than libstdc++)
-        # so we will wire up later
-        message(FATAL_ERROR "Not Enabled Yet")
-        message(STATUS "Enabling Memory sanitizer")
 
     elseif (USE_SANITIZERS_LOWER STREQUAL "thread")
         message(STATUS "Enabling Thread sanitizer")

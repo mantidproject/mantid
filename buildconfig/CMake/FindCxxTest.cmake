@@ -180,26 +180,43 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
       add_test ( NAME ${_cxxtest_separate_name}
                 COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing"
             $<TARGET_FILE:${_cxxtest_testname}> ${_suitename} )
+
       set_tests_properties ( ${_cxxtest_separate_name} PROPERTIES
                              TIMEOUT ${TESTING_TIMEOUT} )
 
-  if (CXXTEST_ADD_PERFORMANCE)
-    # ------ Performance test version -------
-    # Name of the possibly-existing Performance test suite
-    set( _performance_suite_name "${_suitename}Performance" )
-    # Read the contents of the header file
-      FILE( READ ${part} _file_contents )
-    # Is that suite defined in there at all?
-    STRING(REGEX MATCH ${_performance_suite_name} _search_res ${_file_contents} )
-    if (NOT "${_search_res}" STREQUAL "")
-      set( _cxxtest_separate_name "${_cxxtest_testname}_${_performance_suite_name}")
-      add_test ( NAME ${_cxxtest_separate_name}
-                COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing"
-            $<TARGET_FILE:${_cxxtest_testname}> ${_performance_suite_name} )
-      set_tests_properties ( ${_cxxtest_separate_name} PROPERTIES
-                             TIMEOUT ${TESTING_TIMEOUT} )
-    endif ()
-  endif ()
+      if (CXXTEST_ADD_PERFORMANCE)
+        # ------ Performance test version -------
+        # Name of the possibly-existing Performance test suite
+        set( _performance_suite_name "${_suitename}Performance" )
+        # Read the contents of the header file
+          FILE( READ ${part} _file_contents )
+        # Is that suite defined in there at all?
+        STRING(REGEX MATCH ${_performance_suite_name} _search_res ${_file_contents} )
+        if (NOT "${_search_res}" STREQUAL "")
+          set( _cxxtest_separate_name "${_cxxtest_testname}_${_performance_suite_name}")
+          add_test ( NAME ${_cxxtest_separate_name}
+                    COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing"
+                $<TARGET_FILE:${_cxxtest_testname}> ${_performance_suite_name} )
+          set_tests_properties ( ${_cxxtest_separate_name} PROPERTIES
+                                TIMEOUT ${TESTING_TIMEOUT} )
+        endif ()
+      endif ()
+
+      set( SUPPRESSIONS_DIR "${CMAKE_SOURCE_DIR}/tools/Sanitizer" )
+      if ( USE_SANITIZERS_LOWER STREQUAL "address" )
+        # See dev docs on sanitizers for details on why verify_asan_link is false
+        # Trying to quote these options causes the quotation to be forwarded
+        set(_ASAN_OPTS "suppressions=${SUPPRESSIONS_DIR}/Address.supp:detect_stack_use_after_return=true:halt_on_error=false:verify_asan_link_order=false")
+        set_property( TEST ${_cxxtest_separate_name} APPEND PROPERTY
+          ENVIRONMENT ASAN_OPTIONS=${_ASAN_OPTS} )
+
+        set( _LSAN_OPTS "suppressions=${SUPPRESSIONS_DIR}/Leak.supp" )
+          set_property( TEST ${_cxxtest_separate_name} APPEND PROPERTY
+          ENVIRONMENT LSAN_OPTIONS= ${_LSAN_OPTS} )
+
+      endif()
+
+
     endforeach ( part ${ARGN} )
 endmacro(CXXTEST_ADD_TEST)
 
