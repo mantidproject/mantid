@@ -68,6 +68,7 @@ Usage
 .. testsetup:: SingleAngle
 
     config['default.facility'] = 'ILL'
+    config['default.instrument'] = 'D17'
     config.appendDataSearchSubDir('ILL/D17/')
 
 .. testcode:: SingleAngle
@@ -86,9 +87,10 @@ Usage
 
 **Example - Multiple Angles**
 
-.. testsetup:: MultipleAngle
+.. testsetup:: MultipleAngles
 
     config['default.facility'] = 'ILL'
+    config['default.instrument'] = 'D17'
     config.appendDataSearchSubDir('ILL/D17/')
 
 .. testcode:: MultipleAngles
