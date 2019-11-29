@@ -9,7 +9,6 @@ from __future__ import (absolute_import, division, print_function)
 
 from Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT, create_error_message
 from Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
-from Engineering.gui.engineering_diffraction.tabs.common.vanadium_corrections import check_workspaces_exist
 from mantidqt.utils.asynchronous import AsyncTask
 from mantidqt.utils.observer_pattern import Observer
 from mantid.simpleapi import logger

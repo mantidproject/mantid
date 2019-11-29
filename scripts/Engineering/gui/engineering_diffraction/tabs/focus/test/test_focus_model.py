@@ -32,13 +32,6 @@ class FocusModelTest(unittest.TestCase):
         self.model.focus_run("307593", ["1", "2"], False, "ENGINX", "0")
         self.assertEqual(load.call_count, 0)
 
-    @patch(file_path + ".FocusModel._load_focus_sample_run")
-    @patch(file_path + ".vanadium_corrections.Ads.doesExist")
-    def test_focus_cancelled_if_van_wsp_missing(self, ads_exist, load):
-        ads_exist.return_value = False
-        self.model.focus_run("307593", ["1", "2"], False, "ENGINX", "0")
-        self.assertEqual(load.call_count, 0)
-
     @patch(file_path + ".Ads")
     @patch(file_path + ".FocusModel._save_output")
     @patch(file_path + ".FocusModel._run_focus")

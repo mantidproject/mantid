@@ -44,4 +44,3 @@ class CalibrationInfo(object):
 
     def is_valid(self):
         return True if self.vanadium_path and self.sample_path and self.instrument else False
-

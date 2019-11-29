@@ -13,7 +13,6 @@ import matplotlib.pyplot as plt
 
 from Engineering.gui.engineering_diffraction.tabs.common import vanadium_corrections, path_handling
 from mantid.simpleapi import EnggFocus, Load, logger, AnalysisDataService as Ads, SaveNexus, SaveGSS, SaveFocusedXYE
-from mantidqt.plotting.functions import plot
 
 SAMPLE_RUN_WORKSPACE_NAME = "engggui_focusing_input_ws"
 FOCUSED_OUTPUT_WORKSPACE_NAME = "engggui_focusing_output_ws_bank_"
