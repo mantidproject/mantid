@@ -25,7 +25,7 @@ from mantid.py3compat import csv_open_type
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
 from sans.common.enums import (BatchReductionEntry, ISISReductionMode, RangeStepType, RowState, SampleShape,
-                               SaveType, SANSInstrument)
+                               SANSFacility, SaveType, SANSInstrument)
 from sans.gui_logic.gui_common import (add_dir_to_datasearch, get_reduction_mode_from_gui_selection,
                                        get_reduction_mode_strings_for_gui, get_string_for_gui_from_instrument,
                                        remove_dir_from_datasearch, SANSGuiPropertiesHandler)
@@ -1227,6 +1227,10 @@ class RunTabPresenter(PresenterCommon):
     # Settings
     # ------------------------------------------------------------------------------------------------------------------
     def _setup_instrument_specific_settings(self, instrument=None):
+        if ConfigService["default.facility"] != SANSFacility.to_string(self._facility):
+            ConfigService["default.facility"] = SANSFacility.to_string(self._facility)
+            self.sans_logger.notice("Facility changed to ISIS.")
+
         if not instrument:
             instrument = self._view.instrument
 
@@ -1235,6 +1239,7 @@ class RunTabPresenter(PresenterCommon):
         else:
             instrument_string = get_string_for_gui_from_instrument(instrument)
             ConfigService["default.instrument"] = instrument_string
+            self.sans_logger.notice("Instrument changed to {}.".format(instrument_string))
             self._view.enable_process_buttons()
 
         self._view.set_instrument_settings(instrument)

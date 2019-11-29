@@ -236,9 +236,7 @@ std::string MainWindowPresenter::instrumentName() const {
 }
 
 void MainWindowPresenter::updateInstrument(const std::string &instrumentName) {
-  Mantid::Kernel::ConfigService::Instance().setString("default.instrument",
-                                                      instrumentName);
-  g_log.information() << "Instrument changed to " << instrumentName;
+  setDefaultInstrument(instrumentName);
 
   // Load a workspace for this instrument so we can get the actual instrument
   auto loadAlg =
@@ -259,6 +257,24 @@ void MainWindowPresenter::updateInstrument(const std::string &instrumentName) {
   // Notify the slit calculator
   m_slitCalculator->setCurrentInstrumentName(instrumentName);
   m_slitCalculator->processInstrumentHasBeenChanged();
+}
+
+void MainWindowPresenter::setDefaultInstrument(
+    const std::string &requiredInstrument) {
+  auto &config = Mantid::Kernel::ConfigService::Instance();
+
+  auto currentFacility = config.getString("default.facility");
+  auto requiredFacility = "ISIS";
+  if (currentFacility != requiredFacility) {
+    config.setString("default.facility", requiredFacility);
+    g_log.notice() << "Facility changed to " << requiredFacility;
+  }
+
+  auto currentInstrument = config.getString("default.instrument");
+  if (currentInstrument != requiredInstrument) {
+    config.setString("default.instrument", requiredInstrument);
+    g_log.notice() << "Instrument changed to " << requiredInstrument;
+  }
 }
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
