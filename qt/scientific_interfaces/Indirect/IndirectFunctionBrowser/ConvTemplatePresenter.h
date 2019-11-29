@@ -54,6 +54,7 @@ public:
   void setResolution(std::string const &name, TableDatasetIndex const &index);
   void
   setResolution(const std::vector<std::pair<std::string, int>> &fitResolutions);
+  void setBackgroundA0(double value);
 
 signals:
   void functionStructureChanged();

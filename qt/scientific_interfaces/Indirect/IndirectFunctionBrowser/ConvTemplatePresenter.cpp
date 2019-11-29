@@ -146,6 +146,11 @@ void ConvTemplatePresenter::setDatasetNames(const QStringList &names) {
   m_model.setDatasetNames(names);
 }
 
+void ConvTemplatePresenter::setBackgroundA0(double value) {
+  m_model.setBackgroundA0(value);
+  updateViewParameters();
+};
+
 void ConvTemplatePresenter::setErrorsEnabled(bool enabled) {
   m_view->setErrorsEnabled(enabled);
 }

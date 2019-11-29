@@ -276,7 +276,9 @@ void ConvTemplateBrowser::setParameterValueQuiet(ParamID id, double value,
 void ConvTemplateBrowser::updateParameterEstimationData(
     DataForParameterEstimationCollection &&data) {}
 
-void ConvTemplateBrowser::setBackgroundA0(double value) {}
+void ConvTemplateBrowser::setBackgroundA0(double value) {
+  m_presenter.setBackgroundA0(value);
+}
 
 void ConvTemplateBrowser::setResolution(std::string const &name,
                                         TableDatasetIndex const &index) {
