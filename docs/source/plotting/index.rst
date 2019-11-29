@@ -411,7 +411,7 @@ Custom Color Cycle (Line / 1D plots)
 ####################################
 
 The Default Color Cycle doesn't have to be used. Here is an example where a Custom Color Cycle is chosen. Make sure to fill the list `custom_colors` with the HTML codes for the desired colours. 
-These can be found `online <https://www.rapidtables.com/web/color/html-color-codes.html>`_ or using Mantid Workbench. On Workbench, plot a Spectrum and navigate to Figure Options(Gear Icon) > Curves > Line > Color (RGBA). Click on the nearby colorbox and use the 'Select Color' pop-up to chose your colors and their associated HTML codes. `Further Details <https://matplotlib.org/3.1.1/gallery/color/color_cycle_default.html>`_
+These can be found `online <https://www.rapidtables.com/web/color/html-color-codes.html>`_ or using Mantid Workbench: On Workbench, plot a Spectrum and navigate to Figure Options(Gear Icon) > Curves > Line > Color (RGBA). Click on the nearby colorbox and use the 'Select Color' pop-up to chose your colors and their associated HTML codes. `Further Details <https://matplotlib.org/3.1.1/gallery/color/color_cycle_default.html>`_
 
 .. code-block:: python
 
@@ -445,7 +445,7 @@ These can be found `online <https://www.rapidtables.com/web/color/html-color-cod
    fig.suptitle('Line Plots: Color Cycle', fontsize='x-large')
    #fig.show()
 
-.. figure:: ../../images/ColorCustomCycleLine.PNG
+.. figure:: ../images/ColorCustomCycleLine.PNG
    :class: screenshot
    :width: 750px
    :align: centre
@@ -466,9 +466,10 @@ In MantidPlot, a Custom Colormap (256 entries of Red, Green and Blue values [0-2
    g = np.zeros(256)
    b = np.zeros(256)
    for i in range(256):
-      r[i] = i
-      g[i] = 255 - i
-    
+   '''Control how the RGB values change throughout the Colormap'''
+      r[i] = i          #linear increase in Red
+      g[i] = 255 - i    #linear decrease in Green
+
    f = open("C:\MantidInstall\colormaps\GreenRed.map","w+") #Change the .map filename as you wish!
    for i in range(256):
       f.write(str(int(r[i])))
@@ -479,9 +480,9 @@ In MantidPlot, a Custom Colormap (256 entries of Red, Green and Blue values [0-2
       f.write('\n')
    f.close()
 
-Then open up any dataset(such as EMU00020884.nxs from the `TrainingCourseData <https://sourceforge.net/projects/mantid/files/Sample%20Data/TrainingCourseData.zip/download>`_) and produce a Colorfill plot. Change the Colormap by following `these instructions <https://docs.mantidproject.org/nightly/tutorials/mantid_basic_course/loading_and_displaying_data/04_displaying_2D_data.html#changing-the-colour-map>`_ and selecting the newly created `Greenred.map`.
+Then open up any dataset (such as EMU00020884.nxs from the `TrainingCourseData <https://sourceforge.net/projects/mantid/files/Sample%20Data/TrainingCourseData.zip/download>`_) and produce a Colorfill plot. Change the Colormap by following `these instructions <https://docs.mantidproject.org/nightly/tutorials/mantid_basic_course/loading_and_displaying_data/04_displaying_2D_data.html#changing-the-colour-map>`_ and selecting the newly created `Greenred.map`.
 
-.. figure:: ../../images/ColorMapCustomPlot.PNG
+.. figure:: ../images/ColorMapCustomPlot.PNG
    :class: screenshot
    :width: 500px
    :align: centre
@@ -492,16 +493,14 @@ This New Colormap is saved within the MantidInstall folder so it can be used wit
 Custom Colormap (MantidWorkbench)
 #################################
 
-| You can view the premade Colormaps `here <https://matplotlib.org/2.2.3/gallery/color/colormap_reference.html?highlight=colormap>`_.
-| In Workbench, a Custom Colormap file format is similar, but not the same as Plot (`See here for more details <https://matplotlib.org/3.1.0/tutorials/colors/colormap-manipulation.html>`_).
-| NB. These Colormaps can be registered and remain for the current session, but need to be rerun if Mantid has been reopened.
-|
-| The following methods show how to Load, Convert from MantidPlot format, Create from Scratch and Visualise a Custom Colormap
-| Choose the location to Save your Colormap file wisely, outside of your MantidInstall folder!
-|
-| If you already have a Colormap file in an (N by 4) format, with all values between 0 and 1, then use:
-|
-| *1a. Load Colormap and Register*
+You can view the premade Colormaps `here <https://matplotlib.org/2.2.3/gallery/color/colormap_reference.html?highlight=colormap>`_.
+These Colormaps can be registered and remain for the current session, but need to be rerun if Mantid has been reopened. Choose the location to Save your Colormap file wisely, outside of your MantidInstall folder!
+
+The following methods show how to Load, Convert from MantidPlot format, Create from Scratch and Visualise a Custom Colormap.
+
+- If you already have a Colormap file in an (N by 4) format, with all values between 0 and 1, then use:
+
+*1a. Load Colormap and Register*
 
 .. code-block:: python
 
@@ -525,9 +524,9 @@ Custom Colormap (MantidWorkbench)
   Listed_CustomCmap_r = ListedColormap(Reverse, name=(Cmap_Name + '_r') )
   plt.register_cmap(name=(Cmap_Name + '_r'), cmap= Listed_CustomCmap_r)
 
-| If you have a Colormap file in a MantidPlot format (N by 3) with all values between 0 and 255, firstly **rename the file extension from .map to .txt**, then use:
-|
-| *1b. Convert MantidPlot Colormap and Register*
+- If you have a Colormap file in a MantidPlot format (N by 3) with all values between 0 and 255, firstly **rename the file extension from .map to .txt**, then use:
+
+*1b. Convert MantidPlot Colormap and Register*
 
 .. code-block:: python
 
@@ -571,9 +570,9 @@ Custom Colormap (MantidWorkbench)
   Listed_CustomCmap_r = ListedColormap(Reverse, name=(Cmap_Name + '_r') )
   plt.register_cmap(name=(Cmap_Name + '_r'), cmap= Listed_CustomCmap_r)
 
-| To Create a Colormap from scratch, use:
-|
-| *1c. Create and Register*
+- To Create a Colormap from scratch, use:
+
+*1c. Create and Register*
 
 .. code-block:: python
 
@@ -617,10 +616,11 @@ Custom Colormap (MantidWorkbench)
   Listed_CustomCmap_r = ListedColormap(Reverse, name=(Cmap_Name + '_r') )
   plt.register_cmap(name=(Cmap_Name + '_r'), cmap= Listed_CustomCmap_r)
 
-|Now the Custom Colormap has been registered, right-click on a workspace and produce a colorfill plot. In Figure Options (Gear Icon in Plot Figure), under the Images Tab, you can use the drop down-menu to select the new Colormap, and use the check-box to select its Reverse! 
-|Otherwise, use a script like this to plot with your new Colormap:
-|
-| *2. Plot New Colormap* (change the "cmap" name in line 12 accordingly)
+Now the Custom Colormap has been registered, right-click on a workspace and produce a colorfill plot. In Figure Options (Gear Icon in Plot Figure), under the Images Tab, you can use the drop down-menu to select the new Colormap, and use the check-box to select its Reverse! 
+
+- Otherwise, use a script like this (from above in Section "Simple Plots") to plot with your new Colormap:
+
+*2. Plot New Colormap* (change the "cmap" name in line 12 accordingly)
 
 .. plot::
    :include-source:
@@ -640,6 +640,8 @@ Custom Colormap (MantidWorkbench)
    cbar=fig.colorbar(c)
    cbar.set_label('Intensity (arb. units)') #add text to colorbar
    #fig.show()
+
+Colormaps can also be created with the `colormaps package <https://colormap.readthedocs.io/en/latest/>`_ or by `concatenating existing colormaps <https://matplotlib.org/3.1.0/tutorials/colors/colormap-manipulation.html>`_.
 
 Plotting Sample Logs
 --------------------
