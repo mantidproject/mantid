@@ -193,6 +193,9 @@ class RunTabPresenter(PresenterCommon):
         self._table_model = TableModel()
         self._table_model.subscribe_to_model_changes(self)
 
+        # Any child presenters
+        self._setup_sub_presenters()
+
         # Presenter needs to have a handle on the view since it delegates it
         self.set_view(view)
         self._processing = False
@@ -204,8 +207,6 @@ class RunTabPresenter(PresenterCommon):
         # File information for the first input
         self._file_information = None
         self._clipboard = []
-
-        self._setup_sub_presenters()
 
         # Check save dir for display
         self._save_directory_observer = \
@@ -286,56 +287,60 @@ class RunTabPresenter(PresenterCommon):
         Sets the view
         :param view: the view is the SANSDataProcessorGui. The presenter needs to access some of the API
         """
-        if view is not None:
-            self._view = view
+        if not view:
+            self.sans_logger.warning("Empty view passed to set view at:")
+            traceback.print_stack()
+            return
 
-            listener = RunTabPresenter.ConcreteRunTabListener(self)
-            self._view.add_listener(listener)
+        self._view = view
 
-            self.default_gui_setup()
-            self._view.disable_process_buttons()
+        listener = RunTabPresenter.ConcreteRunTabListener(self)
+        self._view.add_listener(listener)
 
-            for presenter in self._common_sub_presenters:
-                # TODO when the below presenters are converted to use a common presenter
-                # use this for in loop
-                presenter.set_view(view)
-                presenter.default_gui_setup()
+        self.default_gui_setup()
+        self._view.disable_process_buttons()
 
-            # Set appropriate view for the state diagnostic tab presenter
-            self._settings_diagnostic_tab_presenter.set_view(self._view.settings_diagnostic_tab)
+        for presenter in self._common_sub_presenters:
+            # TODO when the below presenters are converted to use a common presenter
+            # use this for in loop
+            presenter.set_view(view)
+            presenter.default_gui_setup()
 
-            # Set appropriate view for the masking table presenter
-            self._masking_table_presenter.set_view(self._view.masking_table)
+        # Set appropriate view for the state diagnostic tab presenter
+        self._settings_diagnostic_tab_presenter.set_view(self._view.settings_diagnostic_tab)
 
-            # Set the appropriate view for the beam centre presenter
-            self._beam_centre_presenter.set_view(self._view.beam_centre)
+        # Set appropriate view for the masking table presenter
+        self._masking_table_presenter.set_view(self._view.masking_table)
 
-            # Set the appropriate view for the diagnostic page
-            self._workspace_diagnostic_presenter.set_view(self._view.diagnostic_page,
-                                                          self._view.instrument)
+        # Set the appropriate view for the beam centre presenter
+        self._beam_centre_presenter.set_view(self._view.beam_centre)
 
-            self._view.setup_layout()
+        # Set the appropriate view for the diagnostic page
+        self._workspace_diagnostic_presenter.set_view(self._view.diagnostic_page,
+                                                      self._view.instrument)
 
-            self._view.set_out_file_directory(ConfigService.Instance().getString("defaultsave.directory"))
+        self._view.setup_layout()
 
-            self._view.set_out_default_output_mode()
-            self._view.set_out_default_save_can()
+        self._view.set_out_file_directory(ConfigService.Instance().getString("defaultsave.directory"))
 
-            self._view.set_hinting_line_edit_for_column(
-                self._table_model.column_name_converter.index('sample_shape'),
-                self._table_model.get_sample_shape_hint_strategy())
+        self._view.set_out_default_output_mode()
+        self._view.set_out_default_save_can()
 
-            self._view.set_hinting_line_edit_for_column(
-                self._table_model.column_name_converter.index('options_column_model'),
-                self._table_model.get_options_hint_strategy())
+        self._view.set_hinting_line_edit_for_column(
+            self._table_model.column_name_converter.index('sample_shape'),
+            self._table_model.get_sample_shape_hint_strategy())
 
-            self._view.gui_properties_handler = SANSGuiPropertiesHandler(
-                                                    {"user_file": (self._view.set_out_default_user_file,
-                                                                   str)},
-                                                    line_edits={"user_file":
-                                                                self._view.user_file_line_edit})
-            if self._view.get_user_file_path() == '':
-                self._view.gui_properties_handler.set_setting("user_file", '')
+        self._view.set_hinting_line_edit_for_column(
+            self._table_model.column_name_converter.index('options_column_model'),
+            self._table_model.get_options_hint_strategy())
+
+        self._view.gui_properties_handler = SANSGuiPropertiesHandler(
+                                                {"user_file": (self._view.set_out_default_user_file,
+                                                               str)},
+                                                line_edits={"user_file":
+                                                            self._view.user_file_line_edit})
+        if self._view.get_user_file_path() == '':
+            self._view.gui_properties_handler.set_setting("user_file", '')
 
     def on_user_file_load(self):
         """

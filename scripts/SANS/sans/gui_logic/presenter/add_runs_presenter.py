@@ -11,14 +11,15 @@ from mantid.py3compat import Enum
 from sans.common.enums import BinningType
 from sans.common.file_information import SANSFileInformationFactory
 from sans.gui_logic.gui_common import SANSGuiPropertiesHandler
+from sans.gui_logic.models.RunSelectionModel import RunSelectionModel
+from sans.gui_logic.models.SummationSettingsModel import SummationSettingsModel
 from sans.gui_logic.models.run_finder import SummableRunFinder
-from sans.gui_logic.models.run_selection import RunSelection
-from sans.gui_logic.models.summation_settings import SummationSettings
 from sans.gui_logic.presenter.run_selector_presenter import RunSelectorPresenter
 from sans.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
 
 DEFAULT_BIN_SETTINGS = \
     '5.5,45.5,50.0, 50.0,1000.0, 500.0,1500.0, 750.0,99750.0, 255.0,100005.0'
+
 
 class AddRunsFilenameManager(object):
     def __init__(self, inst):
@@ -61,27 +62,14 @@ class AddRunsFilenameManager(object):
         return zeros_to_add * "0"
 
 
-class RunSelectorPresenterFactory(object):
-    def __init__(self, title, run_finder):
-        self._title = title
-        self._run_finder = run_finder
-
-
-
-
 class AddRunsPagePresenter(object):
-    def __init__(self,
-                 sum_runs,
-                 view,
-                 parent_view):
-
+    def __init__(self, sum_runs_model, view, parent_view):
         self._view = view
         self._parent_view = parent_view
-        self._sum_runs = sum_runs
+        self._sum_runs_model = sum_runs_model
         self._use_generated_file_name = True
 
         self._init_sub_presenters(view)
-
 
         self.save_directory = ""
         self._connect_to_view(view)
@@ -90,28 +78,27 @@ class AddRunsPagePresenter(object):
                                                                                               str)})
 
     def _init_sub_presenters(self, view):
-        # TODO this should really be DI rather than created in the presenter
         self._run_selector_presenter = self._init_run_selector_presenter(view.run_selector_view(),
                                                                          self._handle_selection_changed, view)
 
         self._summation_settings_presenter = \
             self._init_run_summations_settings_presenter(view.summation_settings_view(),
-                                                        view, ConfigService.Instance().getString("default.instrument"))
+                                                         view, ConfigService.Instance().getString("default.instrument"))
 
     @staticmethod
     def _init_run_selector_presenter(run_selector_view, on_selection_change, parent_view):
         title = 'Runs To Sum'
         run_finder = SummableRunFinder(SANSFileInformationFactory())
-        run_selection = RunSelection(on_selection_change)
+        run_selection = RunSelectionModel(on_selection_change)
         return RunSelectorPresenter(title, run_selection, run_finder, run_selector_view, parent_view)
 
     @staticmethod
-    def _init_run_summations_settings_presenter(summation_settings_view, parent_view, instrument):
-        if instrument != "LOQ":
+    def _init_run_summations_settings_presenter(summation_settings_view, parent_view, instrument_str):
+        if instrument_str != "LOQ":
             binning_type = BinningType.SaveAsEventData
         else:
             binning_type = BinningType.Custom
-        summation_settings = SummationSettings(binning_type)
+        summation_settings = SummationSettingsModel(binning_type)
         summation_settings.bin_settings = DEFAULT_BIN_SETTINGS
         return SummationSettingsPresenter(summation_settings,
                                           summation_settings_view,
@@ -189,9 +176,9 @@ class AddRunsPagePresenter(object):
 
         if self._output_directory_is_not_empty(settings):
             self._view.disable_sum()
-            self._sum_runs(run_selection,
-                           settings,
-                           self._sum_base_file_name(run_selection))
+            self._sum_runs_model(run_selection,
+                                 settings,
+                                 self._sum_base_file_name(run_selection))
         else:
             self._view.no_save_directory()
 

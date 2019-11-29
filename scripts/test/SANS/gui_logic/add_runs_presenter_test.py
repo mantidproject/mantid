@@ -11,10 +11,10 @@ from assert_called import assert_called
 from fake_signal import FakeSignal
 from mantid.kernel import ConfigService
 from mantid.py3compat import mock
+from sans.gui_logic.models.RunSelectionModel import RunSelectionModel
+from sans.gui_logic.models.SumRunsModel import SumRunsModel
+from sans.gui_logic.models.SummationSettingsModel import SummationSettingsModel
 from sans.gui_logic.models.run_file import SummableRunFile
-from sans.gui_logic.models.run_selection import RunSelection
-from sans.gui_logic.models.run_summation import RunSummation
-from sans.gui_logic.models.summation_settings import SummationSettings
 from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter, AddRunsFilenameManager
 from sans.gui_logic.presenter.run_selector_presenter import RunSelectorPresenter
 from sans.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
@@ -79,12 +79,12 @@ class AddRunsPagePresenterTestCase(unittest.TestCase):
         return self._just_use(self._summation_settings_presenter)
 
     def _make_mock_run_selection(self, iterable):
-        mock_runs = mock.create_autospec(RunSelection, spec_set=True)
+        mock_runs = mock.create_autospec(RunSelectionModel, spec_set=True)
         mock_runs.__iter__.return_value = list(iterable)
         return mock_runs
 
     def _make_mock_run_summation(self):
-        return mock.create_autospec(RunSummation, spec_set=True)
+        return mock.create_autospec(SumRunsModel, spec_set=True)
 
     def _make_fake_run(self, path, is_event_data=False):
         return SummableRunFile(path, path, is_event_data)
@@ -96,7 +96,7 @@ class AddRunsPagePresenterTestCase(unittest.TestCase):
         return self._make_fake_run(path, path, True)
 
     def _summation_settings_with_save_directory(self, directory):
-        mock_summation_settings = mock.create_autospec(SummationSettings, spec_set=True)
+        mock_summation_settings = mock.create_autospec(SummationSettingsModel, spec_set=True)
         mock_summation_settings.save_directory = directory
         return mock_summation_settings
 
