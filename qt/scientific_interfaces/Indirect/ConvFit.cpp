@@ -23,9 +23,6 @@
 #include <QDoubleValidator>
 #include <QMenu>
 
-// #include <qwt_plot.h>
-// #include <qwt_plot_curve.h>
-
 using namespace Mantid;
 using namespace Mantid::API;
 
@@ -63,7 +60,6 @@ ConvFit::ConvFit(QWidget *parent)
 }
 
 void ConvFit::setupFitTab() {
-  // setDefaultPeakType("Lorentzian");
   setConvolveMembers(true);
 
   // Initialise fitTypeStrings
@@ -94,28 +90,6 @@ void ConvFit::setupFitTab() {
 
   auto deltaFunction = functionFactory.createFunction("DeltaFunction");
 
-  // addCheckBoxFunctionGroup("Use Delta Function", {deltaFunction});
-
-  // addComboBoxFunctionGroup("One Lorentzian", {lorentzian});
-  // addComboBoxFunctionGroup("Two Lorentzians", {lorentzian, lorentzian});
-  // addComboBoxFunctionGroup("Teixeira Water", {teixeiraWater});
-  // addComboBoxFunctionGroup("InelasticDiffSphere", {inelasticDiffSphere});
-  // addComboBoxFunctionGroup("InelasticDiffRotDiscreteCircle",
-  //                         {inelasticDiffRotDiscCircle});
-  // addComboBoxFunctionGroup("ElasticDiffSphere", {elasticDiffSphere});
-  // addComboBoxFunctionGroup("ElasticDiffRotDiscreteCircle",
-  //                         {elasticDiffRotDiscCircle});
-  // addComboBoxFunctionGroup("StretchedExpFT", {stretchedExpFT});
-
-  //// Set available background options
-  // setBackgroundOptions({"None", "FlatBackground", "LinearBackground"});
-
-  // addBoolCustomSetting("ExtractMembers", "Extract Members");
-  // addOptionalDoubleSetting("TempCorrection", "Temp. Correction",
-  //                         "UseTempCorrection", "Use Temp. Correction");
-  // setCustomSettingChangesFunction("TempCorrection", true);
-  // setCustomSettingChangesFunction("UseTempCorrection", true);
-
   // Instrument resolution
   m_properties["InstrumentResolution"] =
       m_dblManager->addProperty("InstrumentResolution");
@@ -127,9 +101,9 @@ void ConvFit::setupFitTab() {
 
 void ConvFit::setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
   // if (boolSettingValue("UseTempCorrection"))
-  //  m_convFittingModel->setTemperature(doubleSettingValue("TempCorrection"));
+  //   m_convFittingModel->setTemperature(doubleSettingValue("TempCorrection"));
   // else
-  //  m_convFittingModel->setTemperature(boost::none);
+  //   m_convFittingModel->setTemperature(boost::none);
   // fitAlgorithm->setProperty("ExtractMembers",
   //                          boolSettingValue("ExtractMembers"));
   IndirectFitAnalysisTab::setupFit(fitAlgorithm);
