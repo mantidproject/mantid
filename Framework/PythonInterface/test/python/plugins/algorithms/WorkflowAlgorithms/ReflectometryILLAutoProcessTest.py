@@ -127,7 +127,7 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
         self.assertEqual(algH.getPropertyValue(Prop.CLEANUP), 'Cleanup ON')
         self.assertEqual(algH.getPropertyValue(Prop.SLIT_NORM), 'Slit Normalisation AUTO')
         self.assertEqual(algH.getPropertyValue(Prop.FLUX_NORM_METHOD), 'Normalise To Time')
-        self.assertEqual(algH.getPropertyValue(PropertyNames.CACHE_DIRECT_BEAM), '1')
+        self.assertEqual(algH.getPropertyValue(PropertyNames.CACHE_DIRECT_BEAM), '0')
         self.assertEqual(algH.getPropertyValue(PropertyNames.BKG_METHOD_DIRECT), 'Background Constant Fit')
         self.assertEqual(algH.getPropertyValue(PropertyNames.BKG_METHOD), 'Background Constant Fit')
         self.assertEqual(algH.getPropertyValue(PropertyNames.START_WS_INDEX_DIRECT), '0')
