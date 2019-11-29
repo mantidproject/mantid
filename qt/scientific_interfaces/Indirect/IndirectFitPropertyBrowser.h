@@ -52,7 +52,8 @@ public:
   int getPeakRadius() const;
   std::string costFunction() const;
   bool convolveMembers() const;
-  bool isHistogramFit() const;
+  std::string fitEvaluationType() const;
+  std::string fitType() const;
   bool ignoreInvalidData() const;
   void updateParameters(const IFunction &fun);
   void updateMultiDatasetParameters(const IFunction &fun);

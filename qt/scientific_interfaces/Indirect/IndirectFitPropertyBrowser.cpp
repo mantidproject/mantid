@@ -234,11 +234,20 @@ std::string IndirectFitPropertyBrowser::costFunction() const {
   return m_fitOptionsBrowser->getProperty("CostFunction").toStdString();
 }
 
-bool IndirectFitPropertyBrowser::convolveMembers() const { return false; }
+bool IndirectFitPropertyBrowser::convolveMembers() const {
+  return m_fitOptionsBrowser->getProperty("ConvolveMembers").toStdString() !=
+         "0";
+}
 
-bool IndirectFitPropertyBrowser::isHistogramFit() const { return false; }
+std::string IndirectFitPropertyBrowser::fitEvaluationType() const {
+  return m_fitOptionsBrowser->getProperty("EvaluationType").toStdString();
+}
 
 bool IndirectFitPropertyBrowser::ignoreInvalidData() const { return false; }
+
+std::string IndirectFitPropertyBrowser::fitType() const {
+  return m_fitOptionsBrowser->getProperty("FitType").toStdString();
+}
 
 int IndirectFitPropertyBrowser::getNumberOfDatasets() const {
   return isFullFunctionBrowserActive()
