@@ -766,7 +766,7 @@ ConvFitModel::getResolutionsForFit() const {
   std::vector<std::pair<std::string, int>> resolutionVector;
   resolutionVector.reserve(20);
   for (TableDatasetIndex index = TableDatasetIndex{0};
-       index < m_resolution.size(); index++) {
+       index < m_resolution.size(); ++index) {
 
     auto spectra = getSpectra(index);
     auto singleSpectraResolution =
