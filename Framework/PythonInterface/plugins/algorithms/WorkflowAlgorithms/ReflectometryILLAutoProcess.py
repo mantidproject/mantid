@@ -288,7 +288,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
 
         self.declareProperty(
             PropertyNames.CACHE_DIRECT_BEAM,
-            defaultValue=True,
+            defaultValue=False,
             doc='Cache the processed direct beam in ADS for ready use with further reflected beams;'
                 'saves important execution time, however assumes that the direct beam processing '
                 'configuration must be invariant for different reflected beams.'

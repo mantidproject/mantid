@@ -47,9 +47,11 @@ In the case of the latter, the list must be of the same size, as many different 
 Direct Beam Caching
 -------------------
 
-The processed direct beam run will be cached in Analysis Data Service in order to save significant time when multiple samples correspond to the same reflected beam.
-The direct beam run number is put in the name of the workspace. However, if the same direct beam must be used with different options (e.g. different wavelength ranges), the caching will result in an error in subsequent reductions due to incompatibility.
-In such circumstances it must be disabled.
+The processed direct beam runs can be cached in Analysis Data Service in order to save significant time when multiple samples correspond to the same direct beam with the same processing configurations.
+The name for the cached direct beam runs are derived from the run numbers; it is the run number if there is only one numor, or the first run number if there are several numors summed.
+Both the processed direct beam, and its summed foreground are cached.
+Care must be taken when enabling the caching, since if the same direct beam must be used with different options (e.g. different wavelength ranges) for different reflected beams, the caching will result in an error in subsequent reduction steps due to incompatibility of the workspaces.
+In such case the caching must be disabled, or one has to clean the cache manually by deleting the corresponding workspaces.
 
 Workflow
 --------
