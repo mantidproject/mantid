@@ -25,21 +25,15 @@ from six import with_metaclass
 from mantid.kernel import (Logger, UsageService, FeatureType)
 from mantid.py3compat import Enum
 from reduction_gui.reduction.scripter import execute_script
-from sans.common.enums import (BinningType, ReductionDimensionality, OutputMode, SaveType, RangeStepType, ReductionMode,
+from sans.common.enums import (ReductionDimensionality, OutputMode, SaveType, RangeStepType, ReductionMode,
                                FitType, SANSInstrument)
-from sans.common.file_information import SANSFileInformationFactory
 from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection,
                                        get_reduction_mode_strings_for_gui,
                                        get_string_for_gui_from_reduction_mode, GENERIC_SETTINGS,
                                        load_file, load_property, set_setting,
                                        get_instrument_from_gui_selection)
-from sans.gui_logic.models.run_finder import SummableRunFinder
-from sans.gui_logic.models.run_selection import RunSelection
 from sans.gui_logic.models.run_summation import RunSummation
-from sans.gui_logic.models.summation_settings import SummationSettings
 from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter
-from sans.gui_logic.presenter.run_selector_presenter import RunSelectorPresenter
-from sans.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
 from ui.sans_isis.SANSSaveOtherWindow import SANSSaveOtherDialog
 from ui.sans_isis.work_handler import WorkHandler
 
@@ -53,39 +47,7 @@ if PYQT4:
         # We are not in MantidPlot e.g. testing
         pass
 
-DEFAULT_BIN_SETTINGS = \
-    '5.5,45.5,50.0, 50.0,1000.0, 500.0,1500.0, 750.0,99750.0, 255.0,100005.0'
-
 Ui_SansDataProcessorWindow, _ = load_ui(__file__, "sans_data_processor_window.ui")
-
-
-class RunSelectorPresenterFactory(object):
-    def __init__(self, title, run_finder):
-        self._title = title
-        self._run_finder = run_finder
-
-    def __call__(self,
-                 run_selector_view,
-                 on_selection_change,
-                 parent_view):
-        return RunSelectorPresenter(self._title,
-                                    RunSelection(on_selection_change),
-                                    self._run_finder,
-                                    run_selector_view,
-                                    parent_view)
-
-
-def _make_run_summation_settings_presenter(summation_settings_view, parent_view, instrument):
-    if instrument != "LOQ":
-        binning_type = BinningType.SAVE_AS_EVENT_DATA
-    else:
-        binning_type = BinningType.CUSTOM
-    summation_settings = SummationSettings(binning_type)
-    summation_settings.bin_settings = DEFAULT_BIN_SETTINGS
-    return SummationSettingsPresenter(summation_settings,
-                                      summation_settings_view,
-                                      parent_view)
-
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Gui Classes
@@ -277,10 +239,6 @@ class SANSDataProcessorGui(QMainWindow,
 
     def _setup_add_runs_page(self):
         self.add_runs_presenter = AddRunsPagePresenter(RunSummation(WorkHandler(), self.add_runs_page),
-                                                       RunSelectorPresenterFactory('Runs To Sum',
-                                                                                   SummableRunFinder(
-                                                                                       SANSFileInformationFactory())),
-                                                       _make_run_summation_settings_presenter,
                                                        self.add_runs_page, self)
 
     def setup_layout(self):
