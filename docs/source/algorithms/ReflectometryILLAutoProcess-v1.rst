@@ -86,7 +86,7 @@ Usage
 
 **Example - Multiple Angles**
 
-.. testsetup:: SingleAngle
+.. testsetup:: MultipleAngle
 
     config['default.facility'] = 'ILL'
     config.appendDataSearchSubDir('ILL/D17/')
