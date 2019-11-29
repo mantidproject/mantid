@@ -174,7 +174,7 @@ int MainWindowPresenter::getRoundPrecision() const {
   return m_optionsDialogPresenter->getIntOption(std::string("RoundPrecision"));
 }
 
-bool MainWindowPresenter::isCloseEventPrevented() const {
+bool MainWindowPresenter::isCloseEventPrevented() {
   if (isAnyBatchProcessing() || isAnyBatchAutoreducing())
     return true;
   else if (isWarnDiscardChangesChecked() == true &&
@@ -222,12 +222,14 @@ bool MainWindowPresenter::isBatchUnsaved(int batchIndex) const {
      Checks whether there are unsaved changes in any batch
      * @return : Bool on whether there are changes
 */
-bool MainWindowPresenter::isAnyBatchUnsaved() const {
+bool MainWindowPresenter::isAnyBatchUnsaved() {
   for (auto it = m_batchPresenters.begin(); it != m_batchPresenters.end();
        ++it) {
     int batchIndex = std::distance(m_batchPresenters.begin(), it);
-    if (isBatchUnsaved(batchIndex))
+    if (isBatchUnsaved(batchIndex)) {
+      setUnsavedFlag(true);
       return true;
+    }
   }
   return false;
 }

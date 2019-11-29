@@ -56,12 +56,12 @@ public:
   bool isWarnDiscardChangesChecked() const override;
   bool isRoundChecked() const override;
   int getRoundPrecision() const override;
-  bool isCloseEventPrevented() const override;
+  bool isCloseEventPrevented() override;
   bool isCloseBatchPrevented(int batchIndex) const override;
   bool isOperationPrevented() const override;
   bool isOperationPrevented(int tabIndex) const override;
   bool isBatchUnsaved(int batchIndex) const override;
-  bool isAnyBatchUnsaved() const override;
+  bool isAnyBatchUnsaved() override;
   bool getUnsavedFlag() const override;
   void setUnsavedFlag(bool isUnsaved) override;
   void notifyAnyBatchAutoreductionResumed() override;

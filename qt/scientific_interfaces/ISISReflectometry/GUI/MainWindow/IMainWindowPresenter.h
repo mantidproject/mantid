@@ -29,12 +29,12 @@ public:
   virtual bool isWarnDiscardChangesChecked() const = 0;
   virtual bool isRoundChecked() const = 0;
   virtual int getRoundPrecision() const = 0;
-  virtual bool isCloseEventPrevented() const = 0;
+  virtual bool isCloseEventPrevented() = 0;
   virtual bool isCloseBatchPrevented(int batchIndex) const = 0;
   virtual bool isOperationPrevented() const = 0;
   virtual bool isOperationPrevented(int tabIndex) const = 0;
   virtual bool isBatchUnsaved(int batchIndex) const = 0;
-  virtual bool isAnyBatchUnsaved() const = 0;
+  virtual bool isAnyBatchUnsaved() = 0;
   virtual bool getUnsavedFlag() const = 0;
   virtual void setUnsavedFlag(bool isUnsaved) = 0;
   virtual void notifyAnyBatchAutoreductionResumed() = 0;
