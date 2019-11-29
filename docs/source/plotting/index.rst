@@ -641,7 +641,7 @@ Now the Custom Colormap has been registered, right-click on a workspace and prod
    cbar.set_label('Intensity (arb. units)') #add text to colorbar
    #fig.show()
 
-Colormaps can also be created with the `colormaps package <https://colormap.readthedocs.io/en/latest/>`_ or by `concatenating existing colormaps <https://matplotlib.org/3.1.0/tutorials/colors/colormap-manipulation.html>`_.
+Colormaps can also be created with the `colormap package <https://colormap.readthedocs.io/en/latest/>`_ or by `concatenating existing colormaps <https://matplotlib.org/3.1.0/tutorials/colors/colormap-manipulation.html>`_.
 
 Plotting Sample Logs
 --------------------
