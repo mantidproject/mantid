@@ -178,6 +178,11 @@ void BatchPresenter::resumeReduction() {
     notifyReductionPaused();
     return;
   }
+  if (m_jobRunner->getProcessAll() && m_mainPresenter->isProcessAllPrevented())
+    return;
+  if (m_jobRunner->getProcessPartial() &&
+      m_mainPresenter->isProcessPartialGroupPrevented())
+    return;
   // Start processing
   notifyReductionResumed();
   startBatch(std::move(algorithms));

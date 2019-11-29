@@ -60,6 +60,8 @@ public:
   bool isCloseBatchPrevented(int batchIndex) const override;
   bool isOperationPrevented() const override;
   bool isOperationPrevented(int tabIndex) const override;
+  bool isProcessAllPrevented() const override;
+  bool isProcessPartialGroupPrevented() const override;
   bool isBatchUnsaved(int batchIndex) const override;
   bool isAnyBatchUnsaved() override;
   bool getUnsavedFlag() const override;

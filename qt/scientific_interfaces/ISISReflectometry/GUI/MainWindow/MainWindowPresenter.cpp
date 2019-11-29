@@ -177,7 +177,7 @@ int MainWindowPresenter::getRoundPrecision() const {
 bool MainWindowPresenter::isCloseEventPrevented() {
   if (isAnyBatchProcessing() || isAnyBatchAutoreducing())
     return true;
-  else if (isWarnDiscardChangesChecked() == true &&
+  else if (isWarnDiscardChangesChecked() &&
            isAnyBatchUnsaved()) {
     return !m_messageHandler->askUserDiscardChanges();
   }
@@ -190,7 +190,7 @@ bool MainWindowPresenter::isCloseBatchPrevented(int batchIndex) const {
         "Cannot close batch while processing or autoprocessing is in progress",
         "Error");
     return true;
-  } else if (isWarnDiscardChangesChecked() == true &&
+  } else if (isWarnDiscardChangesChecked() &&
              isBatchUnsaved(batchIndex)) {
     return !m_messageHandler->askUserDiscardChanges();
   }
@@ -198,15 +198,33 @@ bool MainWindowPresenter::isCloseBatchPrevented(int batchIndex) const {
 }
 
 bool MainWindowPresenter::isOperationPrevented() const {
-  if (isWarnDiscardChangesChecked() == true) {
+  if (isWarnDiscardChangesChecked()) {
     return !m_messageHandler->askUserDiscardChanges();
   }
   return false;
 }
 
 bool MainWindowPresenter::isOperationPrevented(int tabIndex) const {
-  if (isWarnDiscardChangesChecked() == true && isBatchUnsaved(tabIndex)) {
+  if (isWarnDiscardChangesChecked() && isBatchUnsaved(tabIndex)) {
     return !m_messageHandler->askUserDiscardChanges();
+  }
+  return false;
+}
+
+bool MainWindowPresenter::isProcessAllPrevented() const {
+  if (isWarnProcessAllChecked()) {
+    return !m_messageHandler->askUserYesNo(
+        "This will process all rows in the table. Continue?",
+        "Process all rows?");
+  }
+  return false;
+}
+
+bool MainWindowPresenter::isProcessPartialGroupPrevented() const {
+  if (isWarnProcessAllChecked()) {
+    return !m_messageHandler->askUserYesNo(
+        "Some groups will not be fully processed. Continue?",
+        "Process partial group?");
   }
   return false;
 }

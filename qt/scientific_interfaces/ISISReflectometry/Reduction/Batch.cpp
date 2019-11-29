@@ -29,6 +29,10 @@ Batch::selectedRowLocations() const {
   return m_runsTable.selectedRowLocations();
 }
 
+std::vector<Group> Batch::selectedGroups() const {
+  return m_runsTable.selectedGroups();
+}
+
 PerThetaDefaults const *Batch::defaultsForTheta(double thetaAngle) const {
   return experiment().defaultsForTheta(thetaAngle,
                                        runsTable().thetaTolerance());

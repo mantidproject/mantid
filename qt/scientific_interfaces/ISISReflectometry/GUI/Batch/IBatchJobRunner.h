@@ -46,6 +46,8 @@ public:
   virtual std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>
   getAlgorithms() = 0;
   virtual AlgorithmRuntimeProps rowProcessingProperties() const = 0;
+  virtual bool getProcessPartial() const = 0;
+  virtual bool getProcessAll() const = 0;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
