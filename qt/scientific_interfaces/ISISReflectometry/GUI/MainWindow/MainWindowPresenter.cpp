@@ -177,6 +177,21 @@ bool MainWindowPresenter::isCloseBatchPrevented(int batchIndex) const {
   return false;
 }
 
+bool MainWindowPresenter::isOperationPrevented() const {
+  if (m_optionsDialogPresenter->getBoolOption(
+          std::string("WarnDiscardChanges")) == true) {
+    return !m_messageHandler->askUserDiscardChanges();
+  }
+  return false;
+}
+
+bool MainWindowPresenter::isOperationPrevented(int tabIndex) const {
+  if (isWarnDiscardChangesChecked() == true && isBatchUnsaved(tabIndex)) {
+    return !m_messageHandler->askUserDiscardChanges();
+  }
+  return false;
+}
+
 /**
   Checks whether there are any unsaved changed in the specified batch
 */
@@ -245,10 +260,12 @@ void MainWindowPresenter::notifySaveBatchRequested(int tabIndex) {
   IBatchPresenter *batchPresenter = m_batchPresenters[tabIndex].get();
   auto map = encoder.encodeBatch(batchPresenter, m_view, false);
   MantidQt::API::saveJSONToFile(filename, map);
-  setUnsavedFlag(false);
+  batchPresenter->setUnsavedBatchFlag(false);
 }
 
 void MainWindowPresenter::notifyLoadBatchRequested(int tabIndex) {
+  if (isOperationPrevented(tabIndex))
+    return;
   const QString jsonFilter = QString("JSON (*.json)");
   auto filename =
       QFileDialog::getOpenFileName(nullptr, QString(), QString(), jsonFilter,
@@ -267,6 +284,7 @@ void MainWindowPresenter::notifyLoadBatchRequested(int tabIndex) {
   IBatchPresenter *batchPresenter = m_batchPresenters[tabIndex].get();
   Decoder decoder;
   decoder.decodeBatch(batchPresenter, m_view, map);
+  batchPresenter->setUnsavedBatchFlag(false);
 }
 
 void MainWindowPresenter::disableSaveAndLoadBatch() {

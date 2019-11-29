@@ -848,6 +848,7 @@ void RunsTablePresenter::notifyRowStateChanged() {
     }
     ++groupIndex;
   }
+  m_mainPresenter->notifySetUnsavedBatch(true);
 }
 
 void RunsTablePresenter::notifyRowStateChanged(

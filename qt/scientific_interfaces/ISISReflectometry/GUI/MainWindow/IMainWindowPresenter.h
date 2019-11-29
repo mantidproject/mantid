@@ -26,6 +26,8 @@ public:
   virtual bool isAnyBatchAutoreducing() const = 0;
   virtual bool isCloseEventPrevented() const = 0;
   virtual bool isCloseBatchPrevented(int batchIndex) const = 0;
+  virtual bool isOperationPrevented() const = 0;
+  virtual bool isOperationPrevented(int tabIndex) const = 0;
   virtual bool isBatchUnsaved(int batchIndex) const = 0;
   virtual bool isAnyBatchUnsaved() const = 0;
   virtual bool getUnsavedFlag() const = 0;

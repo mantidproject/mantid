@@ -53,6 +53,8 @@ public:
   bool isAnyBatchAutoreducing() const override;
   bool isCloseEventPrevented() const override;
   bool isCloseBatchPrevented(int batchIndex) const override;
+  bool isOperationPrevented() const override;
+  bool isOperationPrevented(int tabIndex) const override;
   bool isBatchUnsaved(int batchIndex) const override;
   bool isAnyBatchUnsaved() const override;
   bool getUnsavedFlag() const override;
