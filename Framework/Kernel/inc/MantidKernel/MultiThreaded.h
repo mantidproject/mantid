@@ -202,12 +202,13 @@ void AtomicOp(std::atomic<T> &f, T d, BinaryOp op) {
 #define PARALLEL_SECTION PRAGMA(omp section)
 
 #define PARALLEL_SET_THREADS_TO_CONFIG                                         \
-  if (Mantid::Kernel::ConfigService::Instance()                                \
-          .getValue<int>("MultiThreaded.MaxCores")                             \
-          .get_value_or(0) > 0) {                                              \
-    PARALLEL_SET_NUM_THREADS(Mantid::Kernel::ConfigService::Instance()         \
-                                 .getValue<int>("MultiThreaded.MaxCores")      \
-                                 .get());                                      \
+  {                                                                            \
+    const auto maxCores =                                                      \
+        Mantid::Kernel::ConfigService::Instance().getValue<int>(               \
+            "MultiThreaded.MaxCores");                                         \
+    if (maxCores.get_value_or(0) > 0) {                                        \
+      PARALLEL_SET_NUM_THREADS(maxCores.get());                                \
+    }                                                                          \
   }
 
 /** General purpose define for OpenMP, becomes the equivalent of
