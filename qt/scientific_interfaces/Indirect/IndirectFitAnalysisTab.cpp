@@ -649,9 +649,14 @@ void IndirectFitAnalysisTab::setAlgorithmProperties(
                             m_fitPropertyBrowser->costFunction());
   fitAlgorithm->setProperty("IgnoreInvalidData",
                             m_fitPropertyBrowser->ignoreInvalidData());
+  fitAlgorithm->setProperty("EvaluationType",
+                            m_fitPropertyBrowser->fitEvaluationType());
+  fitAlgorithm->setProperty("PeakRadius",
+                            m_fitPropertyBrowser->getPeakRadius());
 
-  if (m_fitPropertyBrowser->isHistogramFit())
-    fitAlgorithm->setProperty("EvaluationType", "Histogram");
+  if (m_fittingModel->getFittingMode() == FittingMode::SEQUENTIAL) {
+    fitAlgorithm->setProperty("FitType", m_fitPropertyBrowser->fitType());
+  }
 }
 
 /*

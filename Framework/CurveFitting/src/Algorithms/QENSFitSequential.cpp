@@ -465,6 +465,16 @@ void QENSFitSequential::init() {
       "The way the function is evaluated: CentrePoint or Histogram.",
       Kernel::Direction::Input);
 
+  const std::array<std::string, 2> fitTypes = {{"Sequential", "Individual"}};
+  declareProperty(
+      "FitType", "Sequential",
+      Kernel::IValidator_sptr(new Kernel::ListValidator<std::string>(fitTypes)),
+      "Defines the way of setting initial values. If set to ‘Sequential’ every "
+      "next fit starts with parameters returned by the previous fit. If set to "
+      "‘Individual’ each fit starts with the same initial values defined in "
+      "the Function property. Allowed values: [‘Sequential’, ‘Individual’]",
+      Kernel::Direction::Input);
+
   declareProperty(std::make_unique<ArrayProperty<double>>("Exclude", ""),
                   "A list of pairs of real numbers, defining the regions to "
                   "exclude from the fit.");
@@ -735,6 +745,7 @@ ITableWorkspace_sptr QENSFitSequential::performFit(const std::string &input,
   plotPeaks->setProperty("PeakRadius", getPropertyValue("PeakRadius"));
   plotPeaks->setProperty("LogValue", getPropertyValue("LogName"));
   plotPeaks->setProperty("EvaluationType", getPropertyValue("EvaluationType"));
+  plotPeaks->setProperty("FitType", getPropertyValue("FitType"));
   plotPeaks->setProperty("CostFunction", getPropertyValue("CostFunction"));
   plotPeaks->executeAsChildAlg();
   return plotPeaks->getProperty("OutputWorkspace");
