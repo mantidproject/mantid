@@ -385,7 +385,7 @@ void IndirectFitAnalysisTab::fitAlgorithmComplete(bool error) {
   enableOutputOptions(!error);
   m_fitPropertyBrowser->setErrorsEnabled(!error);
   if (!error) {
-    updateParameterValues();
+    updateFitBrowserParameterValuesFromAlg();
     setModelFitFunction();
   }
   m_spectrumPresenter->enableView();
@@ -421,24 +421,41 @@ void IndirectFitAnalysisTab::updateParameterValues(
 }
 
 void IndirectFitAnalysisTab::updateFitBrowserParameterValues() {
-  if (m_fittingAlgorithm) {
-    MantidQt::API::SignalBlocker blocker(m_fitPropertyBrowser);
-    if (m_fittingModel->getFittingMode() == FittingMode::SEQUENTIAL) {
-      auto const paramWsName =
-          m_fittingAlgorithm->getPropertyValue("OutputParameterWorkspace");
-      auto paramWs =
-          AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-              paramWsName);
-      auto rowCount = static_cast<int>(paramWs->rowCount());
-      if (TableRowIndex{rowCount} == m_fittingModel->getNumberOfDomains())
-        m_fitPropertyBrowser->updateMultiDatasetParameters(*paramWs);
-    } else {
-      IFunction_sptr fun = m_fittingAlgorithm->getProperty("Function");
-      if (fun->getNumberDomains() > 1)
-        m_fitPropertyBrowser->updateMultiDatasetParameters(*fun);
-      else
-        m_fitPropertyBrowser->updateParameters(*fun);
+  IFunction_sptr fun = m_fittingModel->getFittingFunction();
+  if (fun->getNumberDomains() > 1)
+    m_fitPropertyBrowser->updateMultiDatasetParameters(*fun);
+  else
+    m_fitPropertyBrowser->updateParameters(*fun);
+}
+
+void IndirectFitAnalysisTab::updateFitBrowserParameterValuesFromAlg() {
+  try {
+    updateFitBrowserParameterValues();
+    if (m_fittingAlgorithm) {
+      MantidQt::API::SignalBlocker blocker(m_fitPropertyBrowser);
+      if (m_fittingModel->getFittingMode() == FittingMode::SEQUENTIAL) {
+        auto const paramWsName =
+            m_fittingAlgorithm->getPropertyValue("OutputParameterWorkspace");
+        auto paramWs =
+            AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+                paramWsName);
+        auto rowCount = static_cast<int>(paramWs->rowCount());
+        if (TableRowIndex{rowCount} == m_fittingModel->getNumberOfDomains())
+          m_fitPropertyBrowser->updateMultiDatasetParameters(*paramWs);
+      } else {
+        IFunction_sptr fun = m_fittingAlgorithm->getProperty("Function");
+        if (fun->getNumberDomains() > 1)
+          m_fitPropertyBrowser->updateMultiDatasetParameters(*fun);
+        else
+          m_fitPropertyBrowser->updateParameters(*fun);
+      }
     }
+  } catch (const std::out_of_range &) {
+    g_log.warning(
+        "Warning issue updating parameter values in fit property browser");
+  } catch (const std::invalid_argument &) {
+    g_log.warning(
+        "Warning issue updating parameter values in fit property browser");
   }
 }
 
