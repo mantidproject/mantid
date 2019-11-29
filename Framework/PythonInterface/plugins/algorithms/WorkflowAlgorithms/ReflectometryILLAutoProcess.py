@@ -737,9 +737,13 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         """Processes the direct beam for the given angle configuration."""
         directBeamInput = self.compose_run_string(self._db[angle_index])
         self.preprocess_direct_beam(directBeamInput, directBeamName, angle_index)
-        self._autoCleanup.protect(directBeamName)
         self.sum_foreground(directBeamName, directForegroundName, SumType.IN_LAMBDA, angle_index)
-        self._autoCleanup.protect(directForegroundName)
+        if self.getProperty(PropertyNames.CACHE_DIRECT_BEAM).value:
+            self._autoCleanup.protect(directBeamName)
+            self._autoCleanup.protect(directForegroundName)
+        else:
+            self._autoCleanup.cleanupLater(directBeamName)
+            self._autoCleanup.cleanupLater(directForegroundName)
         if self.is_polarized():
             self.polarization_correction(directForegroundName, directForegroundName)
 
