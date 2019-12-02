@@ -8,18 +8,23 @@
 #
 #
 from __future__ import (absolute_import, division, print_function)
-from qtpy.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout
-from qtpy.QtCore import Qt
-from mantidqt.MPLwidgets import FigureCanvas
-from .toolbar import SliceViewerNavigationToolbar
-from matplotlib.figure import Figure
 from matplotlib import gridspec
-from .dimensionwidget import DimensionWidget
-from mantidqt.widgets.colorbar.colorbar import ColorbarWidget
+from matplotlib.figure import Figure
 from matplotlib.transforms import Bbox, BboxTransform
-import numpy as np
-from .samplingimage import imshow_sampling
 
+import mantid.api
+from mantid.plots.helperfunctions import get_normalize_by_bin_width
+from mantidqt.MPLwidgets import FigureCanvas
+from mantidqt.widgets.colorbar.colorbar import ColorbarWidget
+from .dimensionwidget import DimensionWidget
+from .samplingimage import imshow_sampling
+from .toolbar import SliceViewerNavigationToolbar
+
+import numpy as np
+
+from qtpy.QtCore import Qt
+from qtpy.QtWidgets import (QComboBox, QLabel, QHBoxLayout, QMenu,
+                            QSpacerItem, QVBoxLayout, QWidget)
 
 class SliceViewerView(QWidget):
     def __init__(self, presenter, dims_info, parent=None):
@@ -34,9 +39,22 @@ class SliceViewerView(QWidget):
         self.line_plots = False
 
         # Dimension widget
+        self.dimensions_layout = QHBoxLayout()
         self.dimensions = DimensionWidget(dims_info, parent=self)
         self.dimensions.dimensionsChanged.connect(self.presenter.new_plot)
         self.dimensions.valueChanged.connect(self.presenter.update_plot_data)
+        self.dimensions_layout.addWidget(self.dimensions)
+
+        # normalization options
+        self.norm_layout = QHBoxLayout()
+        self.norm_label = QLabel("Normalization = ")
+        self.norm_layout.addWidget(self.norm_label)
+        self.norm_opts = QComboBox()
+        self.norm_opts.addItems(["None", "Bin width/area"])
+        self.norm_opts.setToolTip("Normalization options")
+        self.norm_layout.addWidget(self.norm_opts)
+        self.norm_layout.setAlignment(Qt.AlignBottom)
+        self.dimensions_layout.addLayout(self.norm_layout)
 
         # MPL figure + colorbar
         self.mpl_layout = QHBoxLayout()
@@ -60,7 +78,7 @@ class SliceViewerView(QWidget):
 
         # layout
         self.layout = QVBoxLayout(self)
-        self.layout.addWidget(self.dimensions)
+        self.layout.addLayout(self.dimensions_layout)
         self.layout.addWidget(self.mpl_toolbar)
         self.layout.addLayout(self.mpl_layout, stretch=1)
 
