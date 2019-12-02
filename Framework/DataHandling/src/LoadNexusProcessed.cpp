@@ -1302,6 +1302,13 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(
   NXDataSetTyped<double> fracarea = errors;
   if (hasFracArea) {
     fracarea = wksp_cls.openNXDouble("frac_area");
+
+    // Set the fractional area attributes
+    auto rbWS = boost::dynamic_pointer_cast<RebinnedOutput>(local_workspace);
+    auto finalized = (fracarea.attributes("finalized") == "1");
+    rbWS->setFinalized(finalized);
+    auto sqrdErrs = (fracarea.attributes("sqrd_errors") == "1");
+    rbWS->setSqrdErrors(sqrdErrs);
   }
 
   // Check for x errors; as with fracArea we set it to xbins

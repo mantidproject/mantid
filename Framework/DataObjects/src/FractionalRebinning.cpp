@@ -663,6 +663,8 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
     if (inputRB->isFinalized()) {
       signal *= inF[j];
       error *= inF[j];
+      if (inputRB->hasSqrdErrors())
+        error *= inF[j];
     }
   }
 

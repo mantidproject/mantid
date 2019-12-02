@@ -155,7 +155,7 @@ void Rebin2D::exec() {
   }
   PARALLEL_CHECK_INTERUPT_REGION
   if (useFractionalArea) {
-    outputRB->finalize(true, true);
+    outputRB->finalize(true);
   }
 
   FractionalRebinning::normaliseOutput(outputWS, inputWS, m_progress.get());

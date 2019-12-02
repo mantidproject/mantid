@@ -159,6 +159,9 @@ void SumSpectra::init() {
                   "If enabled floating point special values such as NaN or Inf"
                   " are removed before the spectra are summed.");
 
+  declareProperty("UseFractionalArea", true,
+                  "Normalize to fractional area for RebinnedOutput workspaces.");
+
   declareProperty("MultiplyBySpectra", true,
                   "For unnormalized data one should multiply the weighted sum "
                   "by the number of spectra contributing to the bin.");
@@ -345,13 +348,13 @@ SumSpectra::getOutputSpecNo(MatrixWorkspace_const_sptr localworkspace) {
  * such as NaN or Inf to 0.
  * @return The workspace with special floating point values set to 0
  */
-API::MatrixWorkspace_sptr SumSpectra::replaceSpecialValues() {
+API::MatrixWorkspace_sptr SumSpectra::replaceSpecialValues(bool forceCopy) {
   // Get a copy of the input workspace
   MatrixWorkspace_sptr wksp = getProperty("InputWorkspace");
 
   if (!m_replaceSpecialValues) {
-    // Skip any additional processing
-    return wksp;
+    // Skip any additional processing but create copy if needed
+    return (forceCopy ? wksp->clone() : wksp);
   }
 
   IAlgorithm_sptr alg = createChildAlgorithm("ReplaceSpecialValues");
@@ -512,13 +515,16 @@ void SumSpectra::doFractionalSum(MatrixWorkspace_sptr outputWorkspace,
   // First, we need to clean the input workspace for nan's and inf's in order
   // to treat the data correctly later. This will create a new private
   // workspace that will be retrieved as mutable.
-  auto localworkspace = replaceSpecialValues();
+  auto localworkspace = replaceSpecialValues(true);
 
   // Transform to real workspace types
   RebinnedOutput_sptr inWS =
       boost::dynamic_pointer_cast<RebinnedOutput>(localworkspace);
   RebinnedOutput_sptr outWS =
       boost::dynamic_pointer_cast<RebinnedOutput>(outputWorkspace);
+
+  // Unfinalize the workspace prior to the sum process
+  inWS->unfinalize();
 
   // Get references to the output workspaces's data vectors
   auto &outSpec = outputWorkspace->getSpectrum(0);
@@ -549,20 +555,18 @@ void SumSpectra::doFractionalSum(MatrixWorkspace_sptr outputWorkspace,
       for (size_t yIndex = 0; yIndex < m_yLength; ++yIndex) {
         const double yErrorsVal = YErrors[yIndex];
         if (std::isnormal(yErrorsVal)) { // is non-zero, nan, or infinity
-          const double errsq =
-              yErrorsVal * yErrorsVal * FracArea[yIndex] * FracArea[yIndex];
+          const double errsq = yErrorsVal * yErrorsVal;
           YErrorSum[yIndex] += errsq;
           Weight[yIndex] += 1. / errsq;
-          YSum[yIndex] += YValues[yIndex] * FracArea[yIndex] / errsq;
+          YSum[yIndex] += YValues[yIndex] / errsq;
         } else {
           nZeros[yIndex]++;
         }
       }
     } else {
       for (size_t yIndex = 0; yIndex < m_yLength; ++yIndex) {
-        YSum[yIndex] += YValues[yIndex] * FracArea[yIndex];
-        YErrorSum[yIndex] += YErrors[yIndex] * YErrors[yIndex] *
-                             FracArea[yIndex] * FracArea[yIndex];
+        YSum[yIndex] += YValues[yIndex];
+        YErrorSum[yIndex] += YErrors[yIndex] * YErrors[yIndex];
       }
     }
     // accumulation of fractional weight is the same
@@ -583,8 +587,11 @@ void SumSpectra::doFractionalSum(MatrixWorkspace_sptr outputWorkspace,
     numZeros = 0;
   }
 
-  // Create the correct representation
-  outWS->finalize();
+  // Create the correct representation if using fractional area
+  auto useFractionalArea = getProperty("UseFractionalArea");
+  if (useFractionalArea) {
+    outWS->finalize();
+  }
 }
 
 /** Executes the algorithm

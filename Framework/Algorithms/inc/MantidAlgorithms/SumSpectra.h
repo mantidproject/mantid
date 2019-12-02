@@ -76,7 +76,7 @@ private:
                  size_t &numZeros);
   specnum_t getOutputSpecNo(API::MatrixWorkspace_const_sptr localworkspace);
 
-  API::MatrixWorkspace_sptr replaceSpecialValues();
+  API::MatrixWorkspace_sptr replaceSpecialValues(bool forceCopy=false);
   void determineIndices(const size_t numberOfSpectra);
 
   /// The output spectrum number

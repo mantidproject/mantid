@@ -67,9 +67,9 @@ void CorrectKiKf::exec() {
   }
 
   // If input and output workspaces are not the same, create a new workspace for
-  // the output
+  // the output using the clone method to account for different workspace types
   if (outputWS != inputWS) {
-    outputWS = create<MatrixWorkspace>(*inputWS);
+    outputWS = inputWS->clone(); 
   }
 
   const size_t size = inputWS->blocksize();

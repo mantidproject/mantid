@@ -82,12 +82,25 @@ const MantidVec &RebinnedOutput::readF(const std::size_t index) const {
 }
 
 /**
- * Function that sets the fractional area arrat for a given index.
+ * Function that sets the fractional area array for a given index.
  * @param index :: the particular array to set
  * @param F :: the array contained the information
  */
 void RebinnedOutput::setF(const std::size_t index, const MantidVecPtr &F) {
   this->fracArea[index] = *F;
+}
+
+/**
+ * Function that scales the fractional area arrays.
+ * @param scale :: the scale factor
+ */
+void RebinnedOutput::scaleF(const double scale) {
+  std::size_t nHist = this->getNumberHistograms();
+  for (std::size_t i = 0; i < nHist; ++i) {
+    MantidVec &frac = this->dataF(i);
+    std::transform(frac.begin(), frac.end(), frac.begin(),
+                   [scale](double x) { return scale * x; });
+  }
 }
 
 /**
@@ -98,10 +111,30 @@ void RebinnedOutput::setF(const std::size_t index, const MantidVecPtr &F) {
  * @param hasSqrdErrs :: does the workspace have squared errors?
  * @param force :: ignore finalize flag or not?
  */
-void RebinnedOutput::finalize(bool hasSqrdErrs, bool force) {
-  if (m_finalized && !force)
+void RebinnedOutput::finalize(bool hasSqrdErrs) {
+  if (m_finalized && hasSqrdErrs == m_hasSqrdErrs)
     return;
+
   auto nHist = static_cast<int>(this->getNumberHistograms());
+  if (m_finalized) {
+    PARALLEL_FOR_IF(Kernel::threadSafe(*this))
+    for (int i = 0; i < nHist; ++i) {
+      MantidVec &err = this->dataE(i);
+      MantidVec &frac = this->dataF(i);
+      if (hasSqrdErrs) {
+        std::transform(err.begin(), err.end(), frac.begin(), err.begin(),
+                       std::divides<double>());
+      } else {
+        std::transform(err.begin(), err.end(), frac.begin(), err.begin(),
+                       std::multiplies<double>());
+      }
+    }
+
+    // Sets flag so subsequent algorithms know to correctly treat data
+    m_hasSqrdErrs = hasSqrdErrs;
+    return;
+  }
+
   // Checks that the fractions are not all zeros.
   bool frac_all_zeros = true;
   for (int i = 0; i < nHist; ++i) {
@@ -127,8 +160,9 @@ void RebinnedOutput::finalize(bool hasSqrdErrs, bool force) {
                      std::divides<double>());
     }
   }
-  // Sets flag so subsequent algorithms know to correctly treat data
+  // Sets flags so subsequent algorithms know to correctly treat data
   m_finalized = true;
+  m_hasSqrdErrs = hasSqrdErrs;
 }
 
 /**
@@ -137,8 +171,8 @@ void RebinnedOutput::finalize(bool hasSqrdErrs, bool force) {
  * @param hasSqrdErrs :: does the workspace have squared errors?
  * @param force :: ignore finalize flag or not?
  */
-void RebinnedOutput::unfinalize(bool hasSqrdErrs, bool force) {
-  if (!m_finalized && !force)
+void RebinnedOutput::unfinalize() {
+  if (!m_finalized)
     return;
   auto nHist = static_cast<int>(this->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*this))
@@ -150,7 +184,7 @@ void RebinnedOutput::unfinalize(bool hasSqrdErrs, bool force) {
                    std::multiplies<double>());
     std::transform(err.begin(), err.end(), frac.begin(), err.begin(),
                    std::multiplies<double>());
-    if (hasSqrdErrs) {
+    if (this->m_hasSqrdErrs) {
       std::transform(err.begin(), err.end(), frac.begin(), err.begin(),
                      std::multiplies<double>());
     }
