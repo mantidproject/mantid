@@ -11,13 +11,16 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Fill Area Dialog</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
     <widget class="QGroupBox" name="enable_fill_group_box">
      <property name="title">
       <string>Enable Fill</string>
+     </property>
+     <property name="flat">
+      <bool>false</bool>
      </property>
      <property name="checkable">
       <bool>true</bool>

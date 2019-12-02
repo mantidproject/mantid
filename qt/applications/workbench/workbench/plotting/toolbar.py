@@ -49,9 +49,9 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         (None, None, None, None, None),
         ('Fit', 'Toggle fit browser on/off', None, 'toggle_fit', False),
         (None, None, None, None, None),
-        ('Offset Amount... ', 'to do', None, 'waterfall_offset_amount', None),
-        ('Reverse Order... ', 'to do', None, 'waterfall_reverse_order', None),
-        ('Fill Area', 'to do', None, 'waterfall_fill_area', None)
+        ('Offset Amount', 'to do', None, 'waterfall_offset_amount', None),
+        ('Reverse Order', 'Reverse order', 'mdi.swap-horizontal', 'waterfall_reverse_order', None),
+        ('Fill Area', 'Fill area under curves', 'mdi.pencil', 'waterfall_fill_area', None)
     )
 
     def _init_toolbar(self):

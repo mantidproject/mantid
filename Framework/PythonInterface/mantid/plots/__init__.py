@@ -1060,27 +1060,34 @@ class MantidAxes(Axes):
         self.set_waterfall_y_offset(y_offset)
 
     def set_waterfall_x_offset(self, x_offset):
+        lines = self.get_lines()
+
         if self.waterfall_x_offset != 0:
-            for i, line in enumerate(self.get_lines()):
+            for i, line in enumerate(lines):
                 line.set_xdata(line.get_xdata() - (i * self.width * (self.waterfall_x_offset / 500)))
 
         self.waterfall_x_offset = x_offset
 
         if self.waterfall_x_offset != 0:
-            for i, line in enumerate(self.get_lines()):
+            for i, line in enumerate(lines):
                 line.set_xdata(line.get_xdata() + (i * self.width * (self.waterfall_x_offset / 500)))
 
         self.set_waterfall_toolbar_options_enabled()
         self.get_figure().canvas.draw()
 
     def set_waterfall_y_offset(self, y_offset):
-        for i, line in enumerate(self.get_lines()):
-            line.set_ydata(line.get_ydata() - (i * self.height * (self.waterfall_y_offset / 500)))
+        lines = self.get_lines()
+
+        if self.waterfall_y_offset != 0:
+            for i, line in enumerate(lines):
+                line.set_ydata(line.get_ydata() - (i * self.height * (self.waterfall_y_offset / 500)))
 
         self.waterfall_y_offset = y_offset
 
-        for i, line in enumerate(self.get_lines()):
-            line.set_ydata(line.get_ydata() + (i * self.height * (self.waterfall_y_offset / 500)))
+        if self.waterfall_y_offset != 0:
+            for i, line in enumerate(lines):
+                line.set_ydata(line.get_ydata() + (i * self.height * (self.waterfall_y_offset / 500)))
+                line.set_zorder(1-i)
 
         self.set_waterfall_toolbar_options_enabled()
         self.get_figure().canvas.draw()

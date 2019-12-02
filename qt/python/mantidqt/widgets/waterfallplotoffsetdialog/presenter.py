@@ -14,7 +14,7 @@ from mantidqt.widgets.waterfallplotoffsetdialog.view import WaterfallPlotOffsetD
 class WaterfallPlotOffsetDialogPresenter:
 
     def __init__(self, fig, view=None, parent=None):
-        self.fig = fig
+        self.ax = fig.get_axes()[0]
         if view:
             self.view = view
         else:
@@ -29,11 +29,42 @@ class WaterfallPlotOffsetDialogPresenter:
 
         self.view.y_offset_spin_box.valueChanged.connect(lambda: self.update_y_offset())
         self.view.x_offset_spin_box.valueChanged.connect(lambda: self.update_x_offset())
+        self.view.keep_proportion_check_box.clicked.connect(self.keep_proportion)
+
+        self.keep_proportion_on = False
 
     def update_x_offset(self):
-        ax = self.fig.get_axes()[0]
-        ax.set_waterfall_x_offset(self.view.get_x_offset())
+        prev_x = self.ax.waterfall_x_offset
+        new_x = self.view.get_x_offset()
+        self.ax.set_waterfall_x_offset(new_x)
+
+        if self.view.x_offset_spin_box.hasFocus() and self.keep_proportion_on:
+            if prev_x == 0 or new_x == 0:
+                self.view.keep_proportion_check_box.setChecked(False)
+                self.keep_proportion_on = False
+                return
+
+            proportion = float(prev_x) / float(new_x)
+
+            self.view.set_y_offset(self.view.get_y_offset() / proportion)
 
     def update_y_offset(self):
-        ax = self.fig.get_axes()[0]
-        ax.set_waterfall_y_offset(self.view.get_y_offset())
+        prev_y = self.ax.waterfall_y_offset
+        new_y = self.view.get_y_offset()
+        self.ax.set_waterfall_y_offset(new_y)
+
+        if self.view.y_offset_spin_box.hasFocus() and self.keep_proportion_on:
+            if prev_y == 0 or new_y == 0:
+                self.view.keep_proportion_check_box.setChecked(False)
+                self.keep_proportion_on = False
+                return
+
+            proportion = float(prev_y) / float(new_y)
+
+            self.view.set_x_offset(self.view.get_x_offset() / proportion)
+
+    def keep_proportion(self, enabled):
+        if enabled:
+            self.keep_proportion_on = True
+        else:
+            self.keep_proportion_on = False
