@@ -35,14 +35,14 @@ Test 2: Data loading and rebinning
 - After data is loaded, the *Grouping Options* and *Data Analysis* tabs should be enabled.
 - The data should look like this:
 
-.. image:: ../../images/MuonAnalysisTests/emu20918.png
+.. image:: /images/MuonAnalysisTests/emu20918.png
   :align: center
 
 (settings used on *Settings* tab are: finish 10 us, autoscale on, line plot, no rebinning).
 
 - Go to *Settings* tab and, under "Rebin data", select "Fixed" with steps of 5. Should now look like this:
 
-.. image:: ../../images/MuonAnalysisTests/emu20918_rebin.png
+.. image:: /images/MuonAnalysisTests/emu20918_rebin.png
   :align: center
 
 Test 3: Old style data analysis GUI

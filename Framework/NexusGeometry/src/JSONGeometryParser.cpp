@@ -282,7 +282,7 @@ Json::Value getRoot(const std::string &jsonGeometry) {
     throw std::invalid_argument("Empty geometry json string provided.");
 
   Json::CharReaderBuilder rbuilder;
-  auto reader = rbuilder.newCharReader();
+  auto reader = std::unique_ptr<Json::CharReader>(rbuilder.newCharReader());
   Json::Value root;
   std::string errors;
 
@@ -382,7 +382,7 @@ void JSONGeometryParser::extractSampleContent() {
       Eigen::Quaterniond(Eigen::AngleAxisd(0, Eigen::Vector3d(1, 0, 0)));
   m_sampleName = (*m_sample)[NAME].asString();
   for (const auto &child : children) {
-    if (child[NAME] == TRANSFORMATIONS)
+    if (validateNXAttribute(child[ATTRIBUTES], NX_TRANSFORMATIONS))
       extractTransformations(child, m_samplePosition, m_sampleOrientation);
   }
 }
@@ -396,7 +396,7 @@ void JSONGeometryParser::extractSourceContent() {
     m_sourceName = (*m_source)[NAME].asCString();
     const auto &children = (*m_source)[CHILDREN];
     for (const auto &child : children) {
-      if (child[NAME] == TRANSFORMATIONS)
+      if (validateNXAttribute(child[ATTRIBUTES], NX_TRANSFORMATIONS))
         extractTransformations(child, m_sourcePosition, m_sourceOrientation);
     }
   }

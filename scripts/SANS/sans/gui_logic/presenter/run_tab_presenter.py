@@ -1227,6 +1227,10 @@ class RunTabPresenter(PresenterCommon):
     # Settings
     # ------------------------------------------------------------------------------------------------------------------
     def _setup_instrument_specific_settings(self, instrument=None):
+        if ConfigService["default.facility"] != self._facility.value:
+            ConfigService["default.facility"] = self._facility.value
+            self.sans_logger.notice("Facility changed to ISIS.")
+
         if not instrument:
             instrument = self._view.instrument
 
@@ -1235,6 +1239,7 @@ class RunTabPresenter(PresenterCommon):
         else:
             instrument_string = get_string_for_gui_from_instrument(instrument)
             ConfigService["default.instrument"] = instrument_string
+            self.sans_logger.notice("Instrument changed to {}.".format(instrument_string))
             self._view.enable_process_buttons()
 
         self._view.set_instrument_settings(instrument)

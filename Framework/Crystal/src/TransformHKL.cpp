@@ -123,7 +123,8 @@ void TransformHKL::exec() {
   SelectCellWithForm::DetermineErrors(sigabc, UB, ws, tolerance);
   o_lattice.setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4],
                      sigabc[5]);
-  ws->mutableSample().setOrientedLattice(&o_lattice);
+  ws->mutableSample().setOrientedLattice(
+      std::make_unique<OrientedLattice>(o_lattice));
 
   std::vector<Peak> &peaks = ws->getPeaks();
   size_t n_peaks = ws->getNumberPeaks();

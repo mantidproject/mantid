@@ -74,7 +74,13 @@ class MultiPeriodMock(object):
 
 class RunTabPresenterTest(unittest.TestCase):
     def setUp(self):
-        config.setFacility("ISIS")
+        # Backup properties that the tests or GUI may change
+        self._backup_facility = config["default.facility"]
+        self._backup_instrument = config["default.instrument"]
+        self._backup_datasearch_dirs = config["datasearch.directories"]
+        self._backup_save_dir = config["defaultsave.directory"]
+
+        config["default.facility"] = "ISIS"
 
         patcher = mock.patch('sans.gui_logic.presenter.run_tab_presenter.BatchCsvParser')
         self.addCleanup(patcher.stop)
@@ -83,6 +89,12 @@ class RunTabPresenterTest(unittest.TestCase):
         self.os_patcher = mock.patch('sans.gui_logic.presenter.run_tab_presenter.os')
         self.addCleanup(self.os_patcher.stop)
         self.osMock = self.os_patcher.start()
+
+    def tearDown(self):
+        config["default.facility"] = self._backup_facility
+        config["default.instrument"] = self._backup_instrument
+        config["datasearch.directories"] = self._backup_datasearch_dirs
+        config["defaultsave.directory2"] = self._backup_save_dir
 
     def test_that_will_load_user_file(self):
         # Setup presenter and mock view
@@ -607,6 +619,28 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter._view.set_instrument_settings.called_once_with(instrument)
         presenter._beam_centre_presenter.on_update_instrument.called_once_with(instrument)
         presenter._workspace_diagnostic_presenter.called_once_with(instrument)
+
+    def test_setup_instrument_specific_settings_sets_facility_in_config(self):
+        config.setFacility('TEST_LIVE')
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        presenter.set_view(mock.MagicMock())
+        presenter._beam_centre_presenter = mock.MagicMock()
+        presenter._workspace_diagnostic_presenter = mock.MagicMock()
+        instrument = SANSInstrument.LOQ
+
+        presenter._setup_instrument_specific_settings(instrument)
+        self.assertEqual(config.getFacility().name(), 'ISIS')
+
+    def test_setup_instrument_specific_settings_sets_instrument_in_config(self):
+        config['default.instrument'] = 'ALF'
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        presenter.set_view(mock.MagicMock())
+        presenter._beam_centre_presenter = mock.MagicMock()
+        presenter._workspace_diagnostic_presenter = mock.MagicMock()
+        instrument = SANSInstrument.LOQ
+
+        presenter._setup_instrument_specific_settings(instrument)
+        self.assertEqual(config['default.instrument'], 'LOQ')
 
     def test_on_copy_rows_requested_adds_correct_rows_to_clipboard(self):
         presenter = RunTabPresenter(SANSFacility.ISIS)

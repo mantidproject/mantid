@@ -173,13 +173,11 @@ OrientedLattice &Sample::getOrientedLattice() {
 
 /** Attach an OrientedLattice onto this sample
  *
- * @param latt :: A pointer to a OrientedLattice.
+ * @param lattice :: A pointer to a OrientedLattice.
  */
-void Sample::setOrientedLattice(OrientedLattice *latt) {
-  if (latt != nullptr)
-    m_lattice = std::make_unique<OrientedLattice>(*latt);
-  else
-    m_lattice.reset(nullptr);
+void Sample::setOrientedLattice(
+    std::unique_ptr<Geometry::OrientedLattice> lattice) {
+  m_lattice = std::move(lattice);
 }
 
 /** @return true if the sample has an OrientedLattice  */

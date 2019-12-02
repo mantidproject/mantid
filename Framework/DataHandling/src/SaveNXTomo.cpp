@@ -414,9 +414,9 @@ void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr workspace,
 
   // Loop through all log values, create it if it doesn't exist. Then append
   // value
-  std::vector<Property *> logVals = workspace->run().getLogData();
+  const auto &logVals = workspace->run().getLogData();
 
-  for (auto prop : logVals) {
+  for (const auto &prop : logVals) {
     if (prop->name() != "ImageKey" && prop->name() != "Rotation" &&
         prop->name() != "Intensity" && prop->name() != "Axis1" &&
         prop->name() != "Axis2") {
@@ -429,26 +429,16 @@ void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr workspace,
         infDim.emplace_back(NX_UNLIMITED);
         nxFile.makeData(prop->name(), ::NeXus::UINT8, infDim, true);
       }
-
-      size_t strSize = prop->value().length();
-
-      auto val = new char[80]();
-
+      auto valueAsStr = prop->value();
+      size_t strSize = valueAsStr.length();
       // If log value is from FITS file as it should be,
       // it won't be greater than this. Otherwise Shorten it
       if (strSize > 80)
         strSize = 80;
-
-      strncpy(val, prop->value().c_str(), strSize);
-
-      std::vector<int64_t> start, size;
-      start.emplace_back(thisFileInd);
-      start.emplace_back(0);
-      size.emplace_back(1);
-      size.emplace_back(strSize);
-
+      std::vector<int64_t> start = {thisFileInd, 0};
+      std::vector<int64_t> size = {1, static_cast<int64_t>(strSize)};
       // single item
-      nxFile.putSlab(val, start, size);
+      nxFile.putSlab(valueAsStr.data(), start, size);
 
       nxFile.closeData();
     }

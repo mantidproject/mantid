@@ -958,11 +958,10 @@ void LeBailFit::parseInstrumentParametersTable() {
         // string data
         g_log.debug() << "Col-name = " << colname << ", ";
         trow >> strvalue;
-        strvalue.erase(
-            std::find_if(strvalue.rbegin(), strvalue.rend(),
-                         std::not1(std::ptr_fun<int, int>(std::isspace)))
-                .base(),
-            strvalue.end());
+        strvalue.erase(std::find_if(strvalue.rbegin(), strvalue.rend(),
+                                    std::not_fn(::isspace))
+                           .base(),
+                       strvalue.end());
 
         g_log.debug() << "Value = " << strvalue << ".\n";
         tempstrmap.emplace(colname, strvalue);

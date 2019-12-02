@@ -8,7 +8,6 @@
 #define MANTID_PARAVIEW_TIMESTEP_TO_TIMESTEP
 
 #include "MantidKernel/System.h"
-#include <functional>
 
 /** Maps from a timestep to a timestep. Provides the static compile time
  polymorphism required by vtkDataSetFactory type classes.
@@ -19,7 +18,8 @@
 
 namespace Mantid {
 namespace VATES {
-class DLLExport TimeStepToTimeStep : std::unary_function<int, int> {
+
+class DLLExport TimeStepToTimeStep {
 private:
   TimeStepToTimeStep(double timeMin, double timeMax, size_t intervalStep);
 

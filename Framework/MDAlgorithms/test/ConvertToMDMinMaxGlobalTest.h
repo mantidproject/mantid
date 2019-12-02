@@ -82,8 +82,8 @@ Mantid::API::MatrixWorkspace_sptr MakeWorkspace(double xmin, double dx,
         new Mantid::Kernel::PropertyWithValue<double>("Ei", Ei));
   }
 
-  Mantid::Geometry::OrientedLattice latt(2, 3, 4, 90, 90, 90);
-  ws->mutableSample().setOrientedLattice(&latt);
+  ws->mutableSample().setOrientedLattice(
+      std::make_unique<Mantid::Geometry::OrientedLattice>(2, 3, 4, 90, 90, 90));
 
   Mantid::Kernel::TimeSeriesProperty<double> *p =
       new Mantid::Kernel::TimeSeriesProperty<double>("doubleProp");

@@ -31,7 +31,7 @@ namespace {
 
 /// Functor used for computing the sum of the square values of a vector
 // Used by the eplus templates below
-template <class T> struct SumGaussError : public std::binary_function<T, T, T> {
+template <class T> struct SumGaussError {
   SumGaussError() {}
   /// Sums the arguments in quadrature
   inline T operator()(const T &l, const T &r) const {

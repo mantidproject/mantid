@@ -50,7 +50,7 @@ class PresenterCommon(with_metaclass(ABCMeta)):
     def _set_on_custom_model(self, attribute_name, model):
         attribute = getattr(self._view, attribute_name)
         if attribute is not None and attribute != '':
-            setattr(self._model, attribute_name, attribute)
+            setattr(model, attribute_name, attribute)
 
     def _set_on_view_to_custom_view(self, attribute_name, view):
         attribute = getattr(self._model, attribute_name)

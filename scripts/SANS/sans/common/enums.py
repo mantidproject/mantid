@@ -7,7 +7,6 @@
 """ The elements of this module define typed enums which are used in the SANS reduction framework."""
 
 from __future__ import (absolute_import, division, print_function)
-
 from mantid.py3compat import Enum
 
 

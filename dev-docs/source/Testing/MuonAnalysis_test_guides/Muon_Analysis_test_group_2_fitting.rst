@@ -28,7 +28,7 @@ Test 1: individual fit
 - Check the reverse - change start/end times and blue lines should be updated on graph.
 - Set up the interface to look like this. Note the non-default values for ``f0.Omega`` and ``f0.Tau``:
 
-.. image:: ../../images/MuonAnalysisTests/fitting_test1.png
+.. image:: /images/MuonAnalysisTests/fitting_test1.png
   :align: center
   :height: 500
 

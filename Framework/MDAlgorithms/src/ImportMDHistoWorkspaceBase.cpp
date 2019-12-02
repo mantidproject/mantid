@@ -29,7 +29,7 @@ namespace MDAlgorithms {
 /**
 Functor to compute the product of the set.
 */
-struct Product : public std::unary_function<size_t, void> {
+struct Product {
   Product() : result(1) {}
   size_t result;
   void operator()(size_t x) { result *= x; }

@@ -62,9 +62,9 @@ createDiffractionData(const int nPixels = 100, const int nEventsPerPeak = 20,
   // Set the instrument to be the fake rectangular bank above.
   peaksWS->setInstrument(inst);
   // Set the oriented lattice for a cubic crystal
-  OrientedLattice ol(6, 6, 6, 90, 90, 90);
-  ol.setUFromVectors(V3D(6, 0, 0), V3D(0, 6, 0));
-  peaksWS->mutableSample().setOrientedLattice(&ol);
+  auto lattice = std::make_unique<OrientedLattice>(6, 6, 6, 90, 90, 90);
+  lattice->setUFromVectors(V3D(6, 0, 0), V3D(0, 6, 0));
+  peaksWS->mutableSample().setOrientedLattice(std::move(lattice));
 
   // Make an event workspace and add fake peak data
   auto eventWS = boost::make_shared<EventWorkspace>();

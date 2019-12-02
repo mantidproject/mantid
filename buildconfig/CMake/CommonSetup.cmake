@@ -67,6 +67,8 @@ find_package(
 add_definitions(-DBOOST_ALL_DYN_LINK -DBOOST_ALL_NO_LIB)
 # Need this defined globally for our log time values
 add_definitions(-DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG)
+# Silence issues with deprecated allocator methods in boost regex
+add_definitions(-D_SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING)
 
 find_package(Poco 1.4.6 REQUIRED)
 add_definitions(-DPOCO_ENABLE_CPP11)
@@ -75,7 +77,9 @@ find_package(Nexus 4.3.1 REQUIRED)
 find_package(MuParser REQUIRED)
 find_package(JsonCPP 0.7.0 REQUIRED)
 
+option(ENABLE_OPENGL "Enable OpenGLbased rendering" ON)
 option(ENABLE_OPENCASCADE "Enable OpenCascade-based 3D visualisation" ON)
+
 if(ENABLE_OPENCASCADE)
   find_package(OpenCascade REQUIRED)
   add_definitions(-DENABLE_OPENCASCADE)
@@ -284,9 +288,9 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 endif()
 
 # ##############################################################################
-# Set the c++ standard to 14 - cmake should do the right thing with msvc
+# Set the c++ standard to 17 - cmake should do the right thing with msvc
 # ##############################################################################
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # ##############################################################################

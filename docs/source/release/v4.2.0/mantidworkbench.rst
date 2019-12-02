@@ -120,6 +120,7 @@ Bugfixes
 - "MantidPlot" in window titles have been removed.
 - If multiple plots of the same workspace are open, the fit property browser will change the default output name so any output workspaces are not overridden. 
 - When showing the data table for a sqw workspace the vertical header now shows the bin center value and unit.
+- Fixes an issue where opening any help menu after previously opening the help menu in the Manage User Directories window would crash Workbench.
 
 Known Issues
 #############
