@@ -4,14 +4,15 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTMANTIDWIDGETS_OPTIONSDIALOGMODEL_H
-#define MANTIDQTMANTIDWIDGETS_OPTIONSDIALOGMODEL_H
+#ifndef MANTID_ISISREFLECTOMETRY_OPTIONSDIALOGMODEL_H
+#define MANTID_ISISREFLECTOMETRY_OPTIONSDIALOGMODEL_H
 
 #include <map>
 #include <string>
 
 namespace MantidQt {
-namespace MantidWidgets {
+namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class OptionsDialogModel {
 public:
@@ -28,7 +29,8 @@ private:
   const std::string REFLECTOMETRY_SETTINGS_GROUP = "ISISReflectometryUI";
 };
 
-} // namespace MantidWidgets
+} // namespace ISISReflectometry
+} // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif /* MANTIDQTMANTIDWIDGETS_OPTIONSDIALOGMODEL_H */
+#endif /* MANTID_ISISREFLECTOMETRY_OPTIONSDIALOGMODEL_H */

@@ -9,15 +9,15 @@
 #include "GUI/Common/Decoder.h"
 #include "GUI/Common/Encoder.h"
 #include "GUI/Common/IMessageHandler.h"
+#include "GUI/Options/IOptionsDialog.h"
+#include "GUI/Options/OptionsDialogPresenter.h"
 #include "GUI/Runs/IRunsPresenter.h"
 #include "IMainWindowView.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
-#include "MantidQtWidgets/Common/IOptionsDialog.h"
 #include "MantidQtWidgets/Common/ISlitCalculator.h"
-#include <MantidQtWidgets/Common/OptionsDialogPresenter.h>
 #include "MantidQtWidgets/Common/QtJSONUtils.h"
 #include "Reduction/Batch.h"
 
@@ -30,8 +30,6 @@ namespace ISISReflectometry {
 using Mantid::API::AlgorithmManager;
 using Mantid::API::MatrixWorkspace_sptr;
 using MantidWidgets::ISlitCalculator;
-using MantidWidgets::IOptionsDialog;
-using MantidWidgets::OptionsDialogPresenter;
 
 // unnamed namespace
 namespace {

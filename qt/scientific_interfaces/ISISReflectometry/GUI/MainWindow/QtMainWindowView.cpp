@@ -11,15 +11,14 @@
 #include "GUI/Common/Decoder.h"
 #include "GUI/Common/Encoder.h"
 #include "GUI/Common/Plotter.h"
+#include "GUI/Options/OptionsDialog.h"
 #include "MantidKernel/UsageService.h"
-#include "MantidQtWidgets/Common/OptionsDialog.h"
 #include "MantidQtWidgets/Common/SlitCalculator.h"
 #include <QMessageBox>
 #include <QToolButton>
 
 namespace MantidQt {
 
-using MantidWidgets::OptionsDialog;
 using MantidWidgets::SlitCalculator;
 
 namespace CustomInterfaces {

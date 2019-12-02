@@ -57,9 +57,6 @@ set(
   src/MessageDisplay.cpp
   src/MultifitSetupDialog.cpp
   src/MWRunFiles.cpp
-  src/OptionsDialog.cpp
-  src/OptionsDialogModel.cpp
-  src/OptionsDialogPresenter.cpp
   src/OptionsPropertyWidget.cpp
   src/ParseKeyValueString.cpp
   src/pixmaps.cpp
@@ -181,10 +178,6 @@ set(
   inc/MantidQtWidgets/Common/MessageDisplay.h
   inc/MantidQtWidgets/Common/MultifitSetupDialog.h
   inc/MantidQtWidgets/Common/MWRunFiles.h
-  inc/MantidQtWidgets/Common/IOptionsDialog.h
-  inc/MantidQtWidgets/Common/OptionsDialog.h
-  inc/MantidQtWidgets/Common/OptionsDialogModel.h
-  inc/MantidQtWidgets/Common/OptionsDialogPresenter.h
   inc/MantidQtWidgets/Common/OptionsPropertyWidget.h
   inc/MantidQtWidgets/Common/pqHelpWindow.h
   inc/MantidQtWidgets/Common/ProcessingAlgoWidget.h
@@ -258,10 +251,6 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/MantidDesktopServices.h
     inc/MantidQtWidgets/Common/MantidTreeWidgetItem.h
     inc/MantidQtWidgets/Common/MultifitSetupDialog.h
-    inc/MantidQtWidgets/Common/IOptionsDialog.h
-    inc/MantidQtWidgets/Common/OptionsDialog.h
-    inc/MantidQtWidgets/Common/OptionsDialogModel.h
-    inc/MantidQtWidgets/Common/OptionsDialogPresenter.h
     inc/MantidQtWidgets/Common/ParseKeyValueString.h
     inc/MantidQtWidgets/Common/pixmaps.h
     inc/MantidQtWidgets/Common/ProgressableView.h
@@ -306,7 +295,6 @@ set(QT5_UI_FILES
     inc/MantidQtWidgets/Common/ManageUserDirectories.ui
     inc/MantidQtWidgets/Common/MultifitSetupDialog.ui
     inc/MantidQtWidgets/Common/MWRunFiles.ui
-    inc/MantidQtWidgets/Common/OptionsDialog.ui
     inc/MantidQtWidgets/Common/pqHelpWindow.ui
     inc/MantidQtWidgets/Common/ProcessingAlgoWidget.ui
     inc/MantidQtWidgets/Common/RenameParDialog.ui
@@ -452,9 +440,6 @@ set(
   src/MuonFitDataSelector.cpp
   src/MuonFitPropertyBrowser.cpp
   src/MuonFunctionBrowser.cpp
-  src/OptionsDialog.cpp
-  src/OptionsDialogModel.cpp
-  src/OptionsDialogPresenter.cpp
   src/ProcessingAlgoWidget.cpp
   src/ProgressableView.cpp
   src/ProjectSavePresenter.cpp
@@ -568,10 +553,6 @@ set(
   inc/MantidQtWidgets/Common/MuonFitDataSelector.h
   inc/MantidQtWidgets/Common/MuonFitPropertyBrowser.h
   inc/MantidQtWidgets/Common/MuonFunctionBrowser.h
-  inc/MantidQtWidgets/Common/IOptionsDialog.h
-  inc/MantidQtWidgets/Common/OptionsDialog.h
-  inc/MantidQtWidgets/Common/OptionsDialogModel.h
-  inc/MantidQtWidgets/Common/OptionsDialogPresenter.h
   inc/MantidQtWidgets/Common/pqHelpWindow.h
   inc/MantidQtWidgets/Common/PropertyHandler.h
   inc/MantidQtWidgets/Common/ProcessingAlgoWidget.h
@@ -641,11 +622,6 @@ set(
   inc/MantidQtWidgets/Common/MdConstants.h
   inc/MantidQtWidgets/Common/MdSettings.h
   inc/MantidQtWidgets/Common/NonOrthogonal.h
-  inc/MantidQtWidgets/Common/IOptionsDialog.h
-  inc/MantidQtWidgets/Common/MockOptionsDialog.h
-  inc/MantidQtWidgets/Common/OptionsDialog.h
-  inc/MantidQtWidgets/Common/OptionsDialogModel.h
-  inc/MantidQtWidgets/Common/OptionsDialogPresenter.h
   inc/MantidQtWidgets/Common/pixmaps.h
   inc/MantidQtWidgets/Common/PlotAxis.h
   inc/MantidQtWidgets/Common/PluginLibraries.h
@@ -791,7 +767,6 @@ set(UI_FILES
     inc/MantidQtWidgets/Common/MultifitSetupDialog.ui
     inc/MantidQtWidgets/Common/MuonFitDataSelector.ui
     inc/MantidQtWidgets/Common/MWRunFiles.ui
-    inc/MantidQtWidgets/Common/OptionsDialog.ui
     inc/MantidQtWidgets/Common/ProcessingAlgoWidget.ui
     inc/MantidQtWidgets/Common/RenameParDialog.ui
     inc/MantidQtWidgets/Common/ScriptRepositoryView.ui

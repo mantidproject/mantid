@@ -4,23 +4,24 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MANTIDWIDGETS_IOPTIONSDIALOG_H
-#define MANTID_MANTIDWIDGETS_IOPTIONSDIALOG_H
+#ifndef MANTID_ISISREFLECTOMETRY_IOPTIONSDIALOG_H
+#define MANTID_ISISREFLECTOMETRY_IOPTIONSDIALOG_H
 
-#include "DllOption.h"
-#include <map>
+#include "Common/DllConfig.h"
 #include <QVariant>
+#include <map>
 
 namespace MantidQt {
-namespace MantidWidgets {
+namespace CustomInterfaces {
+namespace ISISReflectometry {
 
-class EXPORT_OPT_MANTIDQT_COMMON OptionsDialogSubscriber {
+class MANTIDQT_ISISREFLECTOMETRY_DLL OptionsDialogSubscriber {
 public:
   virtual void loadOptions() = 0;
   virtual void saveOptions() = 0;
 };
 
-class EXPORT_OPT_MANTIDQT_COMMON IOptionsDialog {
+class MANTIDQT_ISISREFLECTOMETRY_DLL IOptionsDialog {
 public:
   virtual ~IOptionsDialog() = default;
   virtual void getOptions(std::map<std::string, bool> &boolOptions,
@@ -31,7 +32,8 @@ public:
   virtual void subscribe(OptionsDialogSubscriber *notifyee) = 0;
 };
 
-} // namespace MantidWidgets
+} // namespace ISISReflectometry
+} // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif /* MANTID_MANTIDWIDGETS_IOPTIONSDIALOG_H */
+#endif /* MANTID_ISISREFLECTOMETRY_IOPTIONSDIALOG_H */

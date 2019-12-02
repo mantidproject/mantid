@@ -4,14 +4,15 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidQtWidgets/Common/OptionsDialog.h"
-#include "MantidQtWidgets/Common/OptionsDialogModel.h"
-#include "MantidQtWidgets/Common/OptionsDialogPresenter.h"
+#include "OptionsDialog.h"
+#include "OptionsDialogModel.h"
+#include "OptionsDialogPresenter.h"
 #include <QCloseEvent>
 #include <QPushButton>
 
 namespace MantidQt {
-namespace MantidWidgets {
+namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** Constructor */
 OptionsDialog::OptionsDialog(QWidget *parent) {
@@ -28,8 +29,8 @@ void OptionsDialog::initLayout() {
   m_ui.setupUi(this);
   connect(m_ui.buttonBox->button(QDialogButtonBox::Ok), SIGNAL(clicked()), this,
           SLOT(notifySaveOptions()));
-  connect(m_ui.buttonBox->button(QDialogButtonBox::Cancel), SIGNAL(clicked()), this,
-          SLOT(notifyLoadOptions()));
+  connect(m_ui.buttonBox->button(QDialogButtonBox::Cancel), SIGNAL(clicked()),
+          this, SLOT(notifyLoadOptions()));
 }
 
 /** Bind options to their widgets */
@@ -47,7 +48,8 @@ void OptionsDialog::initBindings() {
 }
 
 /** This saves the currently configured options to the presenter */
-void OptionsDialog::getOptions(std::map<std::string, bool> &boolOptions, std::map<std::string, int> &intOptions) {
+void OptionsDialog::getOptions(std::map<std::string, bool> &boolOptions,
+                               std::map<std::string, int> &intOptions) {
   // Iterate through all our bound widgets, pushing their value into the options
   // map
   for (const auto &binding : m_bindings) {
@@ -112,5 +114,6 @@ void OptionsDialog::closeEvent(QCloseEvent *event) {
 
 void OptionsDialog::show() { QDialog::exec(); }
 
-} // namespace MantidWidgets
+} // namespace ISISReflectometry
+} // namespace CustomInterfaces
 } // namespace MantidQt

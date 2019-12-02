@@ -5,11 +5,12 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "MantidQtWidgets/Common/OptionsDialogModel.h"
+#include "OptionsDialogModel.h"
 #include "MantidQtWidgets/Common/QSettingsHelper.h"
 
 namespace MantidQt {
-namespace MantidWidgets {
+namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 using namespace MantidQt::MantidWidgets::QSettingsHelper;
 
@@ -27,9 +28,8 @@ void OptionsDialogModel::applyDefaultOptions(
 }
 
 /* Loads the settings saved by the user */
-void OptionsDialogModel::loadSettings(
-    std::map<std::string, bool> &boolOptions,
-    std::map<std::string, int> &intOptions) {
+void OptionsDialogModel::loadSettings(std::map<std::string, bool> &boolOptions,
+                                      std::map<std::string, int> &intOptions) {
   boolOptions = getSettingsAsMap<bool>(REFLECTOMETRY_SETTINGS_GROUP);
   intOptions = getSettingsAsMap<int>(REFLECTOMETRY_SETTINGS_GROUP);
 }
@@ -45,5 +45,6 @@ void OptionsDialogModel::saveSettings(
     setSetting(REFLECTOMETRY_SETTINGS_GROUP, intOption.first, intOption.second);
 }
 
-} // namespace MantidWidgets
+} // namespace ISISReflectometry
+} // namespace CustomInterfaces
 } // namespace MantidQt
