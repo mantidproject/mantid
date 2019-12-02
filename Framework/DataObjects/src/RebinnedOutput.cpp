@@ -109,7 +109,6 @@ void RebinnedOutput::scaleF(const double scale) {
  * is easily visualized. The Rebin and Integration algorithms will have to
  * undo this in order to properly treat the data.
  * @param hasSqrdErrs :: does the workspace have squared errors?
- * @param force :: ignore finalize flag or not?
  */
 void RebinnedOutput::finalize(bool hasSqrdErrs) {
   if (m_finalized && hasSqrdErrs == m_hasSqrdErrs)
@@ -168,8 +167,6 @@ void RebinnedOutput::finalize(bool hasSqrdErrs) {
 /**
  * This function "unfinalizes" the workspace by taking the data/error arrays
  * and multiplying them by the corresponding fractional area array.
- * @param hasSqrdErrs :: does the workspace have squared errors?
- * @param force :: ignore finalize flag or not?
  */
 void RebinnedOutput::unfinalize() {
   if (!m_finalized)
