@@ -75,7 +75,8 @@ class CalibrationModel(object):
             logger.warning("Could not open GSAS calibration file: ", file_path)
             return
         try:
-            instrument, van_no, ceria_no = self.get_info_from_file(file_path)
+            instrument, van_no, ceria_no, params_table = self.get_info_from_file(file_path)
+            self.update_calibration_params_table(params_table)
         except RuntimeError:
             logger.error("Invalid file selected: ", file_path)
             return
@@ -238,11 +239,16 @@ class CalibrationModel(object):
         instrument = file_path.split("/")[-1].split("_", 1)[0]
         # Get run numbers from file.
         run_numbers = ""
+        params_table = []
         with open(file_path) as f:
             for line in f:
-                if line.startswith("INS    CALIB"):
+                if "INS    CALIB" in line:
                     run_numbers = line
-                    break
+                if "ICONS" in line:
+                    # If formatted correctly the line should be in the format INS bank ICONS difc difa tzero
+                    elements = line.split()
+                    bank = elements[1]
+                    params_table.append([int(bank) - 1, float(elements[3]), float(elements[4]), float(elements[5])])
 
         if run_numbers == "":
             raise RuntimeError("Invalid file format.")
@@ -250,7 +256,7 @@ class CalibrationModel(object):
         words = run_numbers.split()
         ceria_no = words[2]  # Run numbers are stored as the 3rd and 4th word in this line.
         van_no = words[3]
-        return instrument, van_no, ceria_no
+        return instrument, van_no, ceria_no, params_table
 
     @staticmethod
     def _generate_table_workspace_name(bank_num):
