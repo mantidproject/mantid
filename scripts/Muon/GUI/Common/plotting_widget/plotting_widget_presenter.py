@@ -39,6 +39,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         self.rebin_options_set_observer = GenericObserver(self.handle_rebin_options_set)
         self.plot_guess_observer = GenericObserver(self.handle_plot_guess_changed)
         self.workspace_deleted_from_ads_observer = GenericObserverWithArgPassing(self.handle_workspace_deleted_from_ads)
+        self.workspace_replaced_in_ads_observer = GenericObserverWithArgPassing(self.handle_workspace_replaced_in_ads)
 
         self.plot_type_changed_notifier = GenericObservable()
 
@@ -79,6 +80,10 @@ class PlotWidgetPresenter(HomeTabSubWidget):
     def handle_workspace_deleted_from_ads(self, workspace):
         if workspace in self._model.plotted_workspaces:
             self._model.remove_workspace_from_plot_by_name(workspace)
+
+    def handle_workspace_replaced_in_ads(self, workspace):
+        if workspace in self._model.plotted_workspaces:
+            self.plot_standard_workspaces()
 
     def handle_use_raw_workspaces_changed(self):
         """
