@@ -197,3 +197,4 @@ class DNSScriptGenerator_presenter(DNSObserver):
         """
         self.script = [""]
         return self.script
+

@@ -39,6 +39,10 @@ class DNSPath_view(DNSView):
             'prop_nb': self._content.lE_prop_nb,
             'standards_dir': self._content.lE_standards_dir,
             'script_dir': self._content.lE_script_dir,
+            'export_dir': self._content.lE_export_dir,
+            'nexus': self._content.cB_nexus,
+            'ascii': self._content.cB_ascii,
+            'export': self._content.gB_export,
         }
 
         ## connect signals
@@ -48,6 +52,7 @@ class DNSPath_view(DNSView):
         self._content.pB_file_standards.clicked.connect(self.filedialog)
         self._content.pB_file_script.clicked.connect(self.filedialog)
         self._content.pB_clear.clicked.connect(self.clear_directories)
+        self._content.pB_file_export.clicked.connect(self.filedialog)
 
     ### for testing
         self._content.lE_data_dir.setText('C:/Daten/mantid_test')
@@ -85,6 +90,8 @@ class DNSPath_view(DNSView):
                     self.set_path('standards_dir', dir_name + '/standards')
                 if not self.get_path('script_dir'):
                     self.set_path('script_dir', dir_name + '/scripts')
+                if not self.get_path('export_dir'):
+                    self.set_path('export_dir', dir_name + '/exports')
             elif sender == 'pB_file_psd':
                 self.set_path('psd_dir', dir_name)
             elif sender == 'pB_file_logbook':
@@ -93,6 +100,8 @@ class DNSPath_view(DNSView):
                 self.set_path('standards_dir', dir_name)
             elif sender == 'pB_file_script':
                 self.set_path('script_dir', dir_name)
+            elif sender == 'pB_file_export':
+                self.set_path('export_dir', dir_name)
         return dir_name
 
     def clear_directories(self):
@@ -103,6 +112,7 @@ class DNSPath_view(DNSView):
         self.set_path('standards_dir', '')
         self.set_path('script_dir', '')
         self.set_path('psd_dir', '')
+        self.set_path('export_dir', '')
 
     def get_path(self, pathtype):
         return self._mapping[pathtype].text()

@@ -38,7 +38,6 @@ class DNSElasticPowderPlot_presenter(DNSObserver):
         xaxis = self.view.get_xaxis()
         wavelength = self.param_dict['elastic_powder_options']["wavelength"]
         max_int = 0
-        print(checked_workspaces)
         for ws in checked_workspaces:
             if ws != 'simulation':
                 maxy = max(mtd['mat_{}'.format(ws)].extractY()[0])

@@ -13,6 +13,7 @@ import numpy as np
 from mantid.simpleapi import LoadDNSSCD, mtd, BinMD, DivideMD, MultiplyMD
 from mantid.simpleapi import MinusMD, CreateSingleValuedWorkspace
 from mantid.simpleapi import IntegrateMDHistoWorkspace, PlusMD, GroupWorkspaces
+from mantid.simpleapi import SaveAscii, SaveNexus
 
 from DNSReduction.data_structures.dns_error import DNSError
 
@@ -38,7 +39,7 @@ def background_substraction(workspacename, factor=1):
     background_scaled = mtd[backgroundname] * ratio * factor
     mtd[workspacename] = mtd[workspacename] - background_scaled
     return mtd[workspacename]
-
+   
 
 def fliping_ratio_correction(workspace):
     """Given SF channel, SF and NSF are corrected for finite flipping ratio """
