@@ -104,7 +104,9 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None,
     focused_ws = mantid.Subtract(LHSWorkspace=focused_ws, RHSWorkspace=self_scattering_correction)
 
     if merge_banks:
-        merged_ws = _merge_workspace_with_limits(focused_ws, q_lims)
+        q_min, q_max = _load_qlims(q_lims)
+        merged_ws = mantid.MergeWorkspaceWithLimits(focused_ws, q_min, q_max)
+        #merged_ws = _merge_workspace_with_limits(focused_ws, q_min, q_max)
         pdf_output = mantid.PDFFourierTransform(Inputworkspace=merged_ws, InputSofQType="S(Q)-1", PDFType="G(r)",
                                                 Filter=True)
     else:
@@ -142,7 +144,7 @@ def _obtain_focused_run(run_number, focus_file_path):
     return focused_ws
 
 
-def _merge_workspace_with_limits(focused_ws, q_lims):
+def _merge_workspace_with_limits(focused_ws, q_min, q_max):
     min_x = np.inf
     max_x = -np.inf
     num_x = -np.inf
@@ -167,7 +169,6 @@ def _merge_workspace_with_limits(focused_ws, q_lims):
     mantid.MatchSpectra(InputWorkspace=focused_ws_conjoined, OutputWorkspace=focused_ws_conjoined,
                         ReferenceSpectrum=largest_range_spectrum)
 
-    q_min, q_max = _load_qlims(q_lims)
     bin_width = np.inf
     for i in range(q_min.size):
         pdf_x_array = focused_ws_conjoined.readX(i)
@@ -186,29 +187,6 @@ def _merge_workspace_with_limits(focused_ws, q_lims):
                                               MultiplyBySpectra=False)
     common.remove_intermediate_workspace(focused_ws_conjoined)
     return focused_data_combined
-
-
-def _load_qlims(q_lims):
-    if type(q_lims) == str or type(q_lims) == unicode:
-        q_min = []
-        q_max = []
-        try:
-            with open(q_lims, 'r') as f:
-                line_list = [line.rstrip('\n') for line in f]
-                for line in line_list[1:]:
-                    value_list = line.split()
-                    q_min.append(float(value_list[2]))
-                    q_max.append(float(value_list[3]))
-            q_min = np.array(q_min)
-            q_max = np.array(q_max)
-        except IOError:
-            raise RuntimeError("q_lims directory is not valid")
-    elif type(q_lims) == list or type(q_lims) == np.ndarray:
-        q_min = q_lims[0, :]
-        q_max = q_lims[1, :]
-    else:
-        raise RuntimeError("q_lims type is not valid")
-    return q_min, q_max
 
 
 def _load_qlims(q_lims):
