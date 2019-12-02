@@ -106,17 +106,30 @@ class FigureInteractionTest(unittest.TestCase):
            autospec=True)
     @patch('workbench.plotting.figureinteraction.figure_type',
            autospec=True)
-    def test_right_click_gives_no_context_menu_for_color_plot(self, mocked_figure_type,
-                                                              mocked_qmenu):
+    def test_right_click_gives_context_menu_for_color_plot(self, mocked_figure_type,
+                                                           mocked_qmenu):
         fig_manager = self._create_mock_fig_manager_to_accept_right_click()
         interactor = FigureInteraction(fig_manager)
         mouse_event = self._create_mock_right_click()
         mocked_figure_type.return_value = FigureType.Image
 
-        with patch.object(interactor.toolbar_manager, 'is_tool_active',
-                          lambda: False):
-            interactor.on_mouse_button_press(mouse_event)
-            self.assertEqual(0, mocked_qmenu.call_count)
+        # Expect a call to QMenu() for the outer menu followed by one more call
+        # for the Normalization menu
+        qmenu_call1 = MagicMock()
+        qmenu_call2 = MagicMock()
+        mocked_qmenu.side_effect = [qmenu_call1, qmenu_call2]
+
+        with patch('workbench.plotting.figureinteraction.QActionGroup',
+                   autospec=True):
+            with patch.object(interactor.toolbar_manager, 'is_tool_active',
+                              lambda: False):
+                interactor.on_mouse_button_press(mouse_event)
+                self.assertEqual(0, qmenu_call1.addAction.call_count)
+                expected_qmenu_calls = [call(),
+                                        call("Normalization", qmenu_call1)]
+                self.assertEqual(expected_qmenu_calls, mocked_qmenu.call_args_list)
+                # 2 actions in Normalization submenu
+                self.assertEqual(2, qmenu_call2.addAction.call_count)
 
     @patch('workbench.plotting.figureinteraction.QMenu',
            autospec=True)
