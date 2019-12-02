@@ -7,7 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from Muon.GUI.Common.home_tab.home_tab_presenter import HomeTabSubWidget
-from mantidqt.utils.observer_pattern import GenericObservable, GenericObserver
+from mantidqt.utils.observer_pattern import GenericObservable, GenericObserver, GenericObserverWithArgPassing
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 from Muon.GUI.FrequencyDomainAnalysis.frequency_context import FREQUENCY_EXTENSIONS
@@ -38,6 +38,8 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         self.plot_type_observer = GenericObserver(self.handle_group_pair_to_plot_changed)
         self.rebin_options_set_observer = GenericObserver(self.handle_rebin_options_set)
         self.plot_guess_observer = GenericObserver(self.handle_plot_guess_changed)
+        self.workspace_deleted_from_ads_observer = GenericObserverWithArgPassing(self.handle_workspace_deleted_from_ads)
+
         self.plot_type_changed_notifier = GenericObservable()
 
         self._force_redraw = False
@@ -73,6 +75,10 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             return
 
         self.plot_standard_workspaces()
+
+    def handle_workspace_deleted_from_ads(self, workspace):
+        if workspace in self._model.plotted_workspaces:
+            self._model.remove_workspace_from_plot_by_name(workspace)
 
     def handle_use_raw_workspaces_changed(self):
         """
@@ -245,7 +251,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         flattened_run_list = [
             item for sublist in self.context.data_context.current_runs for item in sublist]
         return self.context.data_context.instrument + ' ' + run_list_to_string(flattened_run_list) + ' ' + \
-            self.context.group_pair_context.selected
+               self.context.group_pair_context.selected
 
     def handle_rebin_options_set(self):
         if self.context._do_rebin():

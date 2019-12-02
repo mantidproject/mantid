@@ -154,6 +154,20 @@ class PlotWidgetModel(object):
         if workspace_name in self.plotted_workspaces_inverse_binning:
             self.plotted_workspaces_inverse_binning.pop(workspace_name)
 
+    def remove_workspace_from_plot_by_name(self, workspace_name):
+
+        ax = self.plot_figure.gca()
+        artist_info = ax.tracked_workspaces.pop(workspace_name)
+        for workspace_artist in artist_info:
+            workspace_artist.remove(ax)
+
+        self.plotted_workspaces = [item for item in self.plotted_workspaces if item != workspace_name]
+        self.plotted_fit_workspaces = [item for item in self.plotted_fit_workspaces if item != workspace_name]
+        if workspace_name in self.plotted_workspaces_inverse_binning:
+            self.plotted_workspaces_inverse_binning.pop(workspace_name)
+
+        self.plot_figure.canvas.draw()
+
     def _clear_plot_references(self):
         """
         callback to call when the plot window is closed. Removes the reference and resets plotted workspaces

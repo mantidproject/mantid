@@ -63,7 +63,6 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         except AttributeError as error:
             self.warning_popup(error.args[0])
 
-        # self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         # initialise the data storing classes of the interface
         self.loaded_data = MuonLoadData()
         self.data_context = MuonDataContext('Muon Data', self.loaded_data)

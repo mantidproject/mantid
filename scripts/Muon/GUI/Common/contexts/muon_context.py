@@ -44,6 +44,7 @@ class MuonContext(object):
              'selected_group_pair': ''})
 
         self.update_view_from_model_notifier = Observable()
+        self.update_plot_notifier = Observable()
 
     def __del__(self):
         self.ads_observer.unsubscribe()
@@ -378,6 +379,7 @@ class MuonContext(object):
         self.fitting_context.remove_workspace_by_name(workspace_name)
         self.gui_context.remove_workspace_by_name(workspace_name)
         self.update_view_from_model_notifier.notify_subscribers(workspace_name)
+        self.update_plot_notifier.notify_subscribers(workspace_name)
 
     def clear_context(self):
         self.data_context.clear()
