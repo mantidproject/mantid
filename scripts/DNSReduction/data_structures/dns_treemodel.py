@@ -78,7 +78,8 @@ class DNSTreeModel(QAbstractItemModel):
     def scanExpectedPointsFromRow(self, row):
         """
         returns the number of the scanpoints which are expected from the scan
-        command can be smaller than number of childs if scan did not run completly
+        command can be smaller than number of childs if scan did not run
+        completly
         """
         scancommand = self.scanCommandFromRow(row)
         scancommand = scancommand.split('#')[1]
@@ -122,7 +123,9 @@ class DNSTreeModel(QAbstractItemModel):
         if not index.isValid():
             return Qt.NoItemFlags
         if index.column() == 0:
-            return Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsUserCheckable
+            return (Qt.ItemIsEnabled
+                    | Qt.ItemIsSelectable
+                    | Qt.ItemIsUserCheckable)
         return Qt.ItemIsEnabled | Qt.ItemIsSelectable
 
     def scanIndexFromRow(self, row):
@@ -172,31 +175,19 @@ class DNSTreeModel(QAbstractItemModel):
             if not item.hasChildren():
                 if fullinfo:
                     nchecked.append({
-                        'filenumber':
-                        int(item.data(0)),
-                        'det_rot':
-                        float(item.data(1)),
-                        'sample_rot':
-                        float(item.data(2)),
-                        'field':
-                        item.data(3),
-                        'temperature':
-                        float(item.data(4)),
-                        'samplename':
-                        item.data(5),
-                        'tofchannels':
-                        int(item.data(7)),
-                        'channelwidth':
-                        float(item.data(8)),
-                        'filename':
-                        item.data(9),
-                        'wavelength':
-                        float(item.data(10)) * 10,
-                        'sampletype':
-                        self.get_sampletype(item.data(5)),
-                        'selector_speed':
-                        float(item.data(11))
-                    })
+                        'filenumber' : int(item.data(0)),
+                        'det_rot' : float(item.data(1)),
+                        'sample_rot' : float(item.data(2)),
+                        'field' : item.data(3),
+                        'temperature' : float(item.data(4)),
+                        'samplename' : item.data(5),
+                        'tofchannels' : int(item.data(7)),
+                        'channelwidth' : float(item.data(8)),
+                        'filename' : item.data(9),
+                        'wavelength': float(item.data(10)) * 10,
+                        'sampletype' : self.get_sampletype(item.data(5)),
+                        'selector_speed' : float(item.data(11))
+                        })
                 else:
                     nchecked.append(int(item.data(0)))
         return nchecked
@@ -216,7 +207,6 @@ class DNSTreeModel(QAbstractItemModel):
                 item.setChecked(value)
                 self.item_checked(index)
                 self.dataChanged.emit(index, index)
-                return True
         return True
 
     def setCheckedScan(self, row, value):
@@ -281,7 +271,8 @@ class DNSTreeModel(QAbstractItemModel):
                     '', '', '', '', ''
                 ]
                 self.scan = DNSTreeItem(scantext, rootitem)
-                self.beginInsertRows(QModelIndex(), self.numberOfScans(),
+                self.beginInsertRows(QModelIndex(),
+                                     self.numberOfScans(),
                                      self.numberOfScans())
                 rootitem.appendChild(self.scan)
                 self.endInsertRows()

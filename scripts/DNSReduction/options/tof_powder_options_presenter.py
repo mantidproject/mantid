@@ -40,13 +40,13 @@ class DNSTofPowderOptions_presenter(DNSObserver):
         tofchannels = [x['tofchannels'] for x in fulldata]
         if len(set(channelwidth)) != 1:
             self.raise_error(
-                'Waning different channelwidths in selected datafiles: {}'.
-                format(str(channelwidth)))
+                'Waning different channelwidths in selected datafiles: '\
+                '{}'.format(channelwidth))
         if len(set(tofchannels)) != 1:
             self.raise_error(
                 'Waning different number of tofchannels in ' \
                 'selected datafiles: {}'
-                .format(str(tofchannels)))
+                .format(tofchannels))
         channelwidth = channelwidth[0]
         tofchannels = tofchannels[0]
         velocity = 0.85 * 1000000 / channelwidth / tofchannels
@@ -56,7 +56,7 @@ class DNSTofPowderOptions_presenter(DNSObserver):
         own_options['dEmin'] = -dE
         own_options['dEmax'] = dE
         # in principle *10 should not be done, prevents empty bins
-        own_options['dEstep'] = 2 * dE / tofchannels * 10  #
+        own_options['dEstep'] = 2*dE / tofchannels * 10  #
         own_options['qmax'] = twotheta_to_q(det_rot_max + 115, wavelength, -dE)
         own_options['qmin'] = twotheta_to_q(det_rot_min, wavelength, 0)
         own_options['qstep'] = 0.025  ## anyhow linear steps not good
@@ -85,7 +85,7 @@ class DNSTofPowderOptions_presenter(DNSObserver):
                 selector_wavelength = 1 / selector_speeds[0] * 4.448 / 7500
             if abs(selector_wavelength - wavelength) > 0.1 * wavelength:
                 self.raise_error(
-                    'Warning, selector speed differs from wavelength more' +
+                    'Warning, selector speed differs from wavelength more' \
                     ' than 10%, set wavelength manually.')
                 self.view.deactivate_get_wavelength()
             else:

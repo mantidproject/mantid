@@ -82,9 +82,9 @@ def fliping_ratio_correction(workspace):
                                 OutputWorkspace=nsf_workspace)
 
 
-def load_all(data_dict, binning, normalizeto='monitor'):
+def load_all(data_dict, binning, normalizeto='monitor', standard = False):
     """Loading of multiple DNS files given in a dictionary to workspaces
-    """
+    """       
     workspacenames = {}
     for samplename, fields in data_dict.items():
         workspacenames[samplename] = []
@@ -145,6 +145,7 @@ def raise_error(error):
 
 
 def vanadium_correction(workspacename,
+                        binning, 
                         vanaset=None,
                         ignore_vana_fields=False,
                         sum_vana_sf_nsf=False):
@@ -222,10 +223,10 @@ def vanadium_correction(workspacename,
             return mtd[workspacename]
     ### commen code, which will be run regardless of the case
     vana_total = IntegrateMDHistoWorkspace(vana_sum,
-                                           P1Bin=[5.0, 124.5],
+                                           P1Bin=[4.7, 124.8],
                                            P2Bin=[])
     vana_total_norm = IntegrateMDHistoWorkspace(vana_sum_norm,
-                                                P1Bin=[5.0, 124.5],
+                                                P1Bin=[4.7, 124.8],
                                                 P2Bin=[])
     vana_total = CreateSingleValuedWorkspace(
         DataValue=vana_total.getSignalArray()[0][0][0],
@@ -269,7 +270,7 @@ def xyz_seperation(x_sf, y_sf, z_sf, z_nsf):
 
 def non_mag_sep(sf_workspace, nsf_workspace):
     """Seperation for non magnetic samples based on SF/NSF measurements"""
-    samplename = sf_workspace[:-5]
+    samplename = sf_workspace[:-3]
     mtd['{}_nuclear_coh'.format(
         samplename)] = mtd[nsf_workspace] - 0.5 * mtd[sf_workspace]
     mtd['{}_spin_incoh'.format(samplename)] = 1.5 * mtd[sf_workspace]

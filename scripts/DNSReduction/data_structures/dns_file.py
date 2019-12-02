@@ -25,7 +25,7 @@ class DNSFile(dict):
         if name in self:
             return self[name]
         else:
-            raise AttributeError("No such attribute: " + name)
+            raise AttributeError("No such attribute: {}".format(name))
 
     def __setattr__(self, name, value):
         self[name] = value
@@ -34,7 +34,7 @@ class DNSFile(dict):
         if name in self:
             del self[name]
         else:
-            raise AttributeError("No such attribute: " + name)
+            raise AttributeError("No such attribute: {}".format(name))
 
     def write(self, filename):
         # mostly stolen form nicos
@@ -54,9 +54,13 @@ class DNSFile(dict):
 
         w("# DNS   Mono  d-spacing[nm]  Theta[deg]   "
           "Lambda[nm]   Energy[meV]   Speed[m/sec]\n")
-        w("#      {}   {:6.4f}         {:6.2f}         {:6.3f}{:6.3f}      {:7.2f}\n"
-          .format("PG-002", 0.3350, self['mon_rot'], wavelength,
-                  self['energy'], self['speed']))
+        w("#      {}   {:6.4f}         {:6.2f}" \
+           "         {:6.3f}{:6.3f}      {:7.2f}\n".format("PG-002",
+                                                           0.3350,
+                                                           self['mon_rot'],
+                                                           wavelength,
+                                                           self['energy'],
+                                                           self['speed']))
 
         w("# Distances [cm] Sample_Chopper    "
           "Sample_Detector    Sample_Monochromator\n")

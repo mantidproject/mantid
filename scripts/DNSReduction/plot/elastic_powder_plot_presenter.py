@@ -38,17 +38,18 @@ class DNSElasticPowderPlot_presenter(DNSObserver):
         xaxis = self.view.get_xaxis()
         wavelength = self.param_dict['elastic_powder_options']["wavelength"]
         max_int = 0
+        print(checked_workspaces)
         for ws in checked_workspaces:
-            if ws != 'mat_simulation':
+            if ws != 'simulation':
                 maxy = max(mtd['mat_{}'.format(ws)].extractY()[0])
                 if maxy > max_int:
                     max_int = maxy
         for ws in checked_workspaces:
             x = mtd['mat_{}'.format(ws)].extractX()[0] * 2
-            x = (abs(x[1] - x[0]) / 2 + x)[0:-1]
+            x = (abs(x[1] - x[0])/2 + x)[0:-1]
             y = mtd['mat_{}'.format(ws)].extractY()[0]
             yerr = mtd['mat_{}'.format(ws)].extractE()[0]
-            if ws == 'mat_simulation':
+            if ws == 'simulation':
                 x = x / 2.0
                 y = y / max(y) * max_int
             if xaxis == 'd':
@@ -69,7 +70,8 @@ class DNSElasticPowderPlot_presenter(DNSObserver):
         ]
         compare = ['mat_{}'.format(x) for x in self.view.get_datalist()]
         if (self.param_dict['elastic_powder_script_generator']['script_number']
-                != self.plotted_script_number or workspaces != compare):
+                != self.plotted_script_number
+                or workspaces != compare):
             self.view.set_datalist([x[4:] for x in workspaces])
             if self.param_dict['elastic_powder_options']["separation"]:
                 self.view.check_seperated()

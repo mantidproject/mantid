@@ -11,7 +11,8 @@ from __future__ import (absolute_import, division, print_function)
 from collections import OrderedDict
 
 from qtpy.QtWidgets import QWidget, QDoubleSpinBox, QLineEdit, QCheckBox
-from qtpy.QtWidgets import QSpinBox, QRadioButton, QGroupBox, QMessageBox, QSlider, QComboBox
+from qtpy.QtWidgets import QSpinBox, QRadioButton, QGroupBox, QMessageBox
+from qtpy.QtWidgets import  QSlider, QComboBox
 from qtpy.QtCore import Qt
 
 from mantidqt.gui_helper import get_qapplication
@@ -80,12 +81,14 @@ class DNSView(QWidget):
 
     def get_state(self):
         """
-        Retuning of a dictionary with the names of the widgets as keys and the values
+        Retuning of a dictionary with the names of the widgets
+        as keys and the values
         """
         state_dict = OrderedDict()
         for key, target_object in self._mapping.items():
             state = self.get_single_state(target_object)
-            if state is not None:  ## pushbuttons for example are not defined in the get function
+            if state is not None:
+                ## pushbuttons for example are not defined in the get function
                 state_dict[key] = state
         return state_dict
 

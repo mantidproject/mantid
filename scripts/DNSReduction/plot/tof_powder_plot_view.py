@@ -74,11 +74,13 @@ class DNSTofPowderPlot_view(DNSView):
         for m in colormaps:
             if self.within_mantid:
                 self._mapping['colormap'].addItem(
-                    QIcon("scripts/DNSReduction/plot/colormaps/" + m + ".png"),
+                    QIcon("scripts/DNSReduction/plot/colormaps/"\
+                          "{}.png".format(m)),
                     m)
             else:
                 self._mapping['colormap'].addItem(
-                    QIcon("DNSReduction/plot/colormaps/" + m + ".png"), m)
+                    QIcon("DNSReduction/plot/colormaps/{}.png".format(m)),
+                    m)
 
         self._mapping['colormap'].setCurrentIndex(colormaps.index('viridis'))
         self._mapping['colormap'].currentIndexChanged.connect(
@@ -105,11 +107,12 @@ class DNSTofPowderPlot_view(DNSView):
         else:
             norm = colors.Normalize(vmin=self.minimum, vmax=self.maximum)
             myformatter = ScalarFormatter()
-        self.cb.set_norm(norm)
-        self.cl.set_norm(norm)
-        self.cb.formatter = myformatter
-        self.cb.update_ticks()
-        self.ax.figure.canvas.draw()
+        if self.cl is not None:
+            self.cb.set_norm(norm)
+            self.cl.set_norm(norm)
+            self.cb.formatter = myformatter
+            self.cb.update_ticks()
+            self.ax.figure.canvas.draw()
 
     def set_colormap(self):
         own_dict = self.get_state()
@@ -128,7 +131,7 @@ class DNSTofPowderPlot_view(DNSView):
         self.workspace = workspace
         self.ax.set_title('Inelastic Powder TOF')
         norm = colors.Normalize(vmin=self.minimum, vmax=self.maximum)
-        self.cl = self.ax.pcolor(workspace, norm=norm)
+        self.cl = self.ax.pcolormesh(workspace, norm=norm)
         self.cb = self.static_canvas.figure.colorbar(self.cl)
         self.cb.set_label('Intensity normed to monitor')
         self.set_colormap()
@@ -141,6 +144,8 @@ class DNSTofPowderPlot_view(DNSView):
         self.set_log()
 
     def update_min(self, slidervalue):
+        if self.cl is None:
+            return
         self.minimum = (self.plotmax -
                         self.plotmin) * slidervalue / 1000.0 + self.plotmin
         self.cl.set_clim(vmin=self.minimum, vmax=self.maximum)
@@ -148,6 +153,8 @@ class DNSTofPowderPlot_view(DNSView):
         self.static_canvas.figure.tight_layout()
 
     def update_max(self, slidervalue):
+        if self.cl is None:
+            return
         self.maximum = (self.plotmax -
                         self.plotmin) * slidervalue / 1000.0 + self.plotmin
         self.cl.set_clim(vmin=self.minimum, vmax=self.maximum)

@@ -164,8 +164,8 @@ class DNSFileSelector_view(DNSView):
         filters = {
             'det_rot': state_dict['filter_det_rot'],
             'sample_rot': state_dict['filter_sample_rot'],
-            ' scan': state_dict[
-                'filter_scans'],  ## space is important to not get cscans
+            ' scan': state_dict['filter_scans'],
+            ## space is important to not get cscans
             'cscan': state_dict['filter_cscans'],
             freetext: state_dict['filter_free'],
         }
@@ -215,7 +215,9 @@ class DNSFileSelector_view(DNSView):
 
     def open_progress_dialog(self, numofsteps):
         self.progress = QProgressDialog(
-            "Loading {} files...".format(numofsteps), "Abort Loading", 0,
+            "Loading {} files...".format(numofsteps),
+            "Abort Loading",
+            0,
             numofsteps)
         self.progress.setWindowModality(Qt.WindowModal)
         self.progress.setMinimumDuration(200)

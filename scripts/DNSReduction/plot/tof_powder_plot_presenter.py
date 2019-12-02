@@ -31,7 +31,11 @@ class DNSTofPowderPlot_presenter(DNSObserver):
 
     def plot(self):
         try:
-            self.view.set_plot(mtd['data1_sqw'])
+            if mtd['data1_sqw'].id() == 'WorkspaceGroup':
+                ## I have no idear why sometimes you get a group
+                self.view.set_plot(mtd['data1_sqw'].getItem(0))
+            else:
+                self.view.set_plot(mtd['data1_sqw'])
             self.script_plotted = True
         except KeyError:
             self.raise_error('No processed data found, generate script first.')

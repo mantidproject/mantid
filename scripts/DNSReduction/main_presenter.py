@@ -19,10 +19,6 @@ class DNSReductionGUI_presenter(object):
     """
     def __init__(self, view):
         self.view = view
-        self.view.sig_tab_changed.connect(self.tab_changed)
-        self.view.sig_save_as_triggered.connect(self.save_as)
-        self.view.sig_open_triggered.connect(self.load_xml)
-        self.view.sig_modus_change.connect(self.switch_mode)
         self.view.clear_subviews()
         self.modus = DNSModus('powder_elastic', parent=self)
         self.parameter_abo = ParameterAbo()
@@ -30,6 +26,13 @@ class DNSReductionGUI_presenter(object):
             self.view.add_subview(presenter.view)
             self.parameter_abo.register(presenter)
         self.switch_mode('powder_elastic')
+        
+        ## connect signals
+        self.view.sig_tab_changed.connect(self.tab_changed)
+        self.view.sig_save_as_triggered.connect(self.save_as)
+        self.view.sig_save_triggered.connect(self.save)
+        self.view.sig_open_triggered.connect(self.load_xml)
+        self.view.sig_modus_change.connect(self.switch_mode)
         return
 
     def load_xml(self):
@@ -41,8 +44,13 @@ class DNSReductionGUI_presenter(object):
     def save_as(self):
         """Saving of GUI status as XML file"""
         self.parameter_abo.update_from_all_observers()
-        self.modus.presenters['xml_dump'].save_xml()
+        self.modus.presenters['xml_dump'].save_as_xml()
 
+    def save(self):
+        """Saving of GUI status as XML file to known filename"""
+        self.parameter_abo.update_from_all_observers()
+        self.modus.presenters['xml_dump'].save_xml()
+    
     def switch_mode(self, modus):
         """
         Switching between differnt data reduction modes

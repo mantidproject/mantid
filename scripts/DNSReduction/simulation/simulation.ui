@@ -128,11 +128,14 @@
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
+           <property name="minimum">
+            <double>0.010000000000000</double>
+           </property>
            <property name="maximum">
             <double>10.000000000000000</double>
            </property>
            <property name="value">
-            <double>4.740000000000000</double>
+            <double>4.200000000000000</double>
            </property>
           </widget>
          </item>
@@ -189,6 +192,9 @@
            </property>
            <property name="maximum">
             <double>0.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>-5.000000000000000</double>
            </property>
           </widget>
          </item>
@@ -266,8 +272,14 @@
          </item>
          <item row="5" column="1">
           <widget class="QDoubleSpinBox" name="dSB_a">
+           <property name="minimum">
+            <double>0.010000000000000</double>
+           </property>
            <property name="maximum">
             <double>1000.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>1.000000000000000</double>
            </property>
           </widget>
          </item>
@@ -286,15 +298,27 @@
          </item>
          <item row="6" column="1">
           <widget class="QDoubleSpinBox" name="dSB_b">
+           <property name="minimum">
+            <double>0.010000000000000</double>
+           </property>
            <property name="maximum">
             <double>1000.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>1.000000000000000</double>
            </property>
           </widget>
          </item>
          <item row="7" column="1">
           <widget class="QDoubleSpinBox" name="dSB_c">
+           <property name="minimum">
+            <double>0.010000000000000</double>
+           </property>
            <property name="maximum">
             <double>1000.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>1.000000000000000</double>
            </property>
           </widget>
          </item>
@@ -625,6 +649,16 @@
              </item>
              <item row="2" column="1">
               <widget class="QDoubleSpinBox" name="dSB_shift"/>
+             </item>
+             <item row="2" column="2">
+              <widget class="QCheckBox" name="cB_labels">
+               <property name="text">
+                <string>labels</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
              </item>
             </layout>
            </item>

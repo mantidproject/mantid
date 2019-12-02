@@ -27,7 +27,7 @@ class DNSPath_presenter(DNSObserver):
 
     def set_user_prop_from_datafile(self, dir_name):
         try:
-            firstfilename = glob.iglob(dir_name + '/*.d_dat').next()
+            firstfilename = glob.iglob('{}/*.d_dat'.format(dir_name)).next()
             with open(firstfilename, 'r') as datafile:
                 txt = datafile.readline().split('userid=')[1].split(',exp=')
                 prop_nb = txt[1].split(',file=')[0]

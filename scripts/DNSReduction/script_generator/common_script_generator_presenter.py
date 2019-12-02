@@ -106,8 +106,8 @@ class DNSScriptGenerator_presenter(DNSObserver):
         if not sampledata:
             self.raise_error('no data selected', critical=True)
             return
-        self.sig_request_from_abo.emit(
-        )  ### should be catched by main presenter
+        self.sig_request_from_abo.emit()  
+        ### should be catched by main presenter
         #to ask other observer for automatic data reduction
         script = self.script_maker()
         if script:

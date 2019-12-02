@@ -48,16 +48,21 @@ class DNSSimulation_model(DNSObsModel):
 
     def create_dns_surface(self, q1, q2):
         tth_start = -self.own_dict['sc_det_start']
-        tth_end = -self.own_dict['sc_det_end'] + 23 * 5
+        tth_end = -self.own_dict['sc_det_end'] + 23*5
         omega_start = self.own_dict['sc_sam_start'] + tth_start
         omega_end = self.own_dict['sc_sam_end'] + tth_start
         wavelength = self.own_dict['wavelength']
-        tth_rang = np.linspace(tth_start, tth_end,
+        tth_rang = np.linspace(tth_start,
+                               tth_end,
                                int(abs((tth_end - tth_start))))
-        omega_rang = np.linspace(omega_start, omega_end,
+        omega_rang = np.linspace(omega_start,
+                                 omega_end,
                                  int(abs(omega_end - omega_start)))
-        surface = sim_help.return_dns_surface_shape(self.orilat, tth_rang,
-                                                    omega_rang, q1, q2,
+        surface = sim_help.return_dns_surface_shape(self.orilat,
+                                                    tth_rang,
+                                                    omega_rang,
+                                                    q1,
+                                                    q2,
                                                     wavelength)
         return surface
 
@@ -70,14 +75,15 @@ class DNSSimulation_model(DNSObsModel):
         y = tth * 0
         for refl in self.refls:
             shiftedtth = refl.tth + shift
-            FWHM = sqrt(u + v * tan(radians(shiftedtth) / 2.0) +
-                        w * tan(radians(shiftedtth) / 2.0)**2)
-            c = FWHM / (2 * sqrt(2 * log(2)))
-            peak = (1 / (c * sqrt(2 * pi)) * np.exp(-0.5 *
-                                                    ((x - shiftedtth) / c)**2))
+            FWHM = sqrt(u + v*tan(radians(shiftedtth) / 2.0) +
+                        w*tan(radians(shiftedtth) / 2.0)**2)
+            c = FWHM / (2*sqrt(2*log(2)))
+            peak = (1 / (c*sqrt(2 * pi))
+                    * np.exp(-0.5*((x - shiftedtth) / c)**2)
+                   )
             y += refl.fs_lc * peak
-        bins = tth - tth_step / 2.0
-        bins = np.append(bins, tth[-1] + tth_step / 2.0)
+        bins = tth - tth_step/2.0
+        bins = np.append(bins, tth[-1] + tth_step/2.0)
         CreateWorkspace(OutputWorkspace='mat_simulation',
                         DataX=bins,
                         DataY=y,
@@ -132,12 +138,14 @@ class DNSSimulation_model(DNSObsModel):
             reffilter = ReflectionConditionFilter.SpaceGroup
         else:
             reffilter = ReflectionConditionFilter.StructureFactor
-        hkls_unique = self.generator.getUniqueHKLsUsingFilter(
-            1 / maxq, 100, reffilter)  # dived by 2pi
-        hkls = self.generator.getHKLsUsingFilter(1 / maxq, 100,
-                                                 reffilter)  # dived by 2pi
+        hkls_unique = self.generator.getUniqueHKLsUsingFilter(1/maxq,
+                                                              100,
+                                                              reffilter)
+        hkls = self.generator.getHKLsUsingFilter(1/maxq,
+                                                 100,
+                                                 reffilter)
         dval = self.generator.getDValues(hkls)
-        qval = [2 * pi / d for d in dval]
+        qval = [2*pi / d for d in dval]
         fSquared = self.generator.getFsSquared(hkls)
         pg = self.cryst.getSpaceGroup().getPointGroup()
         UB = self.orilat.getUB()
@@ -173,10 +181,12 @@ class DNSSimulation_model(DNSObsModel):
 
             refl.channel, refl.det_rot = sim_help.shift_channels_below_23(
                 refl.channel, refl.det_rot)
-            refl.omega = sim_help.hkl_to_omega(refl.hkl, UB, wavelength,
+            refl.omega = sim_help.hkl_to_omega(refl.hkl,
+                                               UB,
+                                               wavelength,
                                                refl.tth)
-            refl.sample_rot = sim_help.omega_to_samp_rot(
-                refl.omega, refl.det_rot)
+            refl.sample_rot = sim_help.omega_to_samp_rot(refl.omega,
+                                                         refl.det_rot)
             self.refls.append(refl)
         return self.refls
 
@@ -225,9 +235,12 @@ class DNSSimulation_model(DNSObsModel):
                             Unit=0)
         orilat = OrientedLattice(unitcell)
         self.non_rot_lat = OrientedLattice(unitcell)
-        cellstr = "{} {} {} {} {} {}".format(unitcell.a(), unitcell.b(),
-                                             unitcell.c(), unitcell.alpha(),
-                                             unitcell.beta(), unitcell.gamma())
+        cellstr = "{} {} {} {} {} {}".format(unitcell.a(),
+                                             unitcell.b(),
+                                             unitcell.c(),
+                                             unitcell.alpha(),
+                                             unitcell.beta(),
+                                             unitcell.gamma())
         if not self.own_dict['cif_filename']:
             atomstr = "Si 0 0 1 1.0 0.01"  # dummy
         else:

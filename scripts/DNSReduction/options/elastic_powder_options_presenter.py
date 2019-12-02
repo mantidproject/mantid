@@ -43,8 +43,7 @@ class DNSElasticPowderOptions_presenter(DNSObserver):
             if abs(selector_wavelength - wavelength) > 0.1 * wavelength:
                 self.raise_error(
                     'Warning, selector speed differs from wavelength' \
-                    ' more than 10%, set wavelength manually.'
-                )
+                    ' more than 10%, set wavelength manually.')
                 self.view.deactivate_get_wavelength()
             else:
                 own_options = self.get_option_dict()

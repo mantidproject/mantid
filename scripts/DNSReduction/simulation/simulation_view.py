@@ -36,6 +36,7 @@ class MyTableWidgetItem(QTableWidgetItem):
         self.__number = float(number)
 
     def __lt__(self, other):
+        # pylint: disable=W0212
         return self.__number < other.__number
 
 
@@ -104,7 +105,8 @@ class DNSSimulation_view(DNSView):
             'sample_rot': self._content.dSB_sample_rot,
             'inplane': self._content.cB_inplane,
             'sc_sam_start': self._content.dSB_sc_sam_start,
-            'gamma': self._content.dSB_gamma
+            'gamma': self._content.dSB_gamma,
+            'labels': self._content.cB_labels,
         }
 
         #setting up matplotlib widget
@@ -127,7 +129,7 @@ class DNSSimulation_view(DNSView):
         self.sc_static_canvas.mpl_connect('axes_enter_event', self.mouseonplot)
         self.sc_static_canvas.mpl_connect('axes_leave_event',
                                           self.mouseoutplot)
-
+        self._mapping['labels'].toggled.connect(self.powderplot_clicked)
 ## custom signals for presenter
 
     sig_cif_set = Signal(str)
@@ -231,10 +233,12 @@ class DNSSimulation_view(DNSView):
         return
 
     def mouseonplot(self, event):
+        #pylint: disable=unused-argument
         self.cid = self.sc_static_canvas.mpl_connect('motion_notify_event',
                                                      self.mouse_pos_changed)
 
     def mouseoutplot(self, event):
+        #pylint: disable=unused-argument
         self.sc_static_canvas.mpl_disconnect(self.cid)
 
     def powderplot(self, x, y, refl_to_annotate):
@@ -243,14 +247,16 @@ class DNSSimulation_view(DNSView):
         ax.plot(x, y, zorder=1)
         ax.set_xlabel('2 theta', fontsize=14)
         ax.set_ylabel("Intensity (M*F2)", fontsize=14)
-        for i, hkl in enumerate(refl_to_annotate[1]):
-            ax.annotate('  [{:4.2f}, {:4.2f}, {:4.2f}]'.format(*hkl),
-                        (refl_to_annotate[0][i], refl_to_annotate[2][i]),
-                        fontsize=10)
+        if self._mapping['labels'].isChecked():
+            for i, hkl in enumerate(refl_to_annotate[1]):
+                ax.annotate('  [{:4.2f}, {:4.2f}, {:4.2f}]'.format(*hkl),
+                            (refl_to_annotate[0][i], refl_to_annotate[2][i]),
+                            fontsize=10)
         self.powd_toolbar.update()
         ax.figure.canvas.draw()
 
     def sample_rotchanged(self, value):
+        #pylint: disable=unused-argument
         """ if sample rot of identifiying reflection changes set offset = 0 """
         if not self._content.cB_fix_omega.isChecked():
             self._content.dSB_omega_offset.setValue(0)

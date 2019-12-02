@@ -26,11 +26,12 @@ def twotheta_to_q(twotheta, wavelength, deltaE):
     hquer = 6.626070040 * 10**-34 / pi / 2  ### in J*s
     mneutron = 1.674927471 * 10**-27  ## in kg
     twotheta = radians(twotheta)
-    ki = pi * 2 / wavelength  # incoming wavevector
-    #outgoing wavevector # = ki for elastic  ## factor 10**-20 is for converting 1/m^2 to 1/Angstroem^2
+    ki = pi*2 / wavelength  # incoming wavevector
+    #outgoing wavevector # = ki for elastic
+    ## factor 10**-20 is for converting 1/m^2 to 1/Angstroem^2
     kf = (ki**2 - deltaE * 2 * mneutron / hquer**2 * 10**-20)**0.5
-    qabs = 2 * pi * (ki**2 + kf**2 - 2 * ki * kf * cos(twotheta)
-                    )**0.5 / 2.0 / pi  # length of Q in inelastic case
+    qabs = 2 * pi * (ki**2 + kf**2 - 2*ki*kf*cos(twotheta)
+                    )**0.5 /2.0/pi  # length of Q in inelastic case
     return qabs
 
 

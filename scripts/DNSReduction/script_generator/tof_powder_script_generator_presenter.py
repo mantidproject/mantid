@@ -49,27 +49,46 @@ def create_dataset(data):
     return dataset
 
 
+
 def format_dataset(dataset):
-    longest_samplename = max([len(a) for a in dataset.keys()])
-    dataset_string = '{'
-    for samplename, det_rots in dataset.items():
-        if not dataset_string.endswith('{'):
-            dataset_string += ",\n "
-        else:
-            dataset_string += "\n "
-        dataset_string += " " * (longest_samplename - len(samplename)
-                                ) + "'{:s}' : {{".format(samplename)
-        spacing = len(" " * (longest_samplename - len(samplename)) +
-                      "'{:s}' : {{".format(samplename))
-        dataset_string += "'path' : '{}'".format(det_rots['path'])
-        for det_rot, filenumbers in sorted(det_rots.items()):
-            if det_rot != 'path':
-                dataset_string += ",\n" + " " * spacing + " {:6.2f}".format(
-                    det_rot)
-                dataset_string += " : {}".format(filenumbers)
-        dataset_string += "}"
+    """Formating the dictionary to a nicely indented string"""
+    llens = max([len(a) for a in dataset.keys()])+6+4
+    dataset_string = '{\n'
+    for samplename, fields in dataset.items():
+        dataset_string += "'{:s}' : {{".format(samplename).rjust(llens)
+
+        dataset_string += "{}'path' : '{}',\n"\
+            "".format(" "*(0), dataset[samplename].pop('path'))
+        dataset_string += ",\n".join(
+            [("{}{:6.2f} : {}").format(" "*llens,
+                                      key,
+                                      value)
+             for key, value in sorted(fields.items())])
+        dataset_string += "},\n"
     dataset_string += "}"
     return dataset_string
+
+#def format_dataset(dataset):
+#    longest_samplename = max([len(a) for a in dataset.keys()])
+#    dataset_string = '{'
+#    for samplename, det_rots in dataset.items():
+#        if not dataset_string.endswith('{'):
+#            dataset_string += ",\n "
+#        else:
+#            dataset_string += "\n "
+#        dataset_string += " " * (longest_samplename - len(samplename)
+#                                ) + "'{:s}' : {{".format(samplename)
+#        spacing = len(" " * (longest_samplename - len(samplename)) +
+#                      "'{:s}' : {{".format(samplename))
+#        dataset_string += "'path' : '{}'".format(det_rots['path'])
+#        for det_rot, filenumbers in sorted(det_rots.items()):
+#            if det_rot != 'path':
+#                dataset_string += ",\n" + " " * spacing + " {:6.2f}".format(
+#                    det_rot)
+#                dataset_string += " : {}".format(filenumbers)
+#        dataset_string += "}"
+#    dataset_string += "}"
+#    return dataset_string
 
 
 class DNSTofPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
@@ -92,7 +111,8 @@ class DNSTofPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
         sample_data = create_dataset(
             self.param_dict['file_selector']['full_data'])
         tof_opt = self.param_dict['tof_powder_options']
-        if (tof_opt['dEstep'] == 0 or tof_opt['qstep'] == 0
+        if (tof_opt['dEstep'] == 0
+                or tof_opt['qstep'] == 0
                 or tof_opt['qmax'] <= tof_opt['qmin']
                 or tof_opt['dEmax'] <= tof_opt['dEmin']):
             self.raise_error('Bin sizes make no sense.', critical=True)
@@ -126,69 +146,84 @@ class DNSTofPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
         vanadium_correction = False
         background_correction = False
 
-        if self.number_of_vana_banks > 0 and tof_opt[
-                'corrections'] and tof_opt['det_efficency']:
+        if (self.number_of_vana_banks > 0
+                and tof_opt['corrections']
+                and tof_opt['det_efficency']):
             vanadium_correction = True
-        if self.number_of_empty_banks > 0 and tof_opt['corrections']:
+        if (self.number_of_empty_banks > 0
+                and tof_opt['corrections']):
             background_correction = True
         if self.number_of_banks == 0:
             self.raise_error('No data selected.', critical=True)
             return False
-        if self.number_of_vana_banks == 0 and tof_opt[
-                'corrections'] and tof_opt['det_efficency']:
-            self.raise_error(
-                'No vanadium files selected, but Vanadium correction' \
-                ' option choosen.'
-            )
+        if (self.number_of_vana_banks == 0
+                and tof_opt['corrections']
+                and tof_opt['det_efficency']):
+            self.raise_error('No vanadium files selected, but'\
+                             'Vanadium correction option choosen.')
             return False
-        if (self.number_of_empty_banks == 0 and tof_opt['corrections']
+        if (self.number_of_empty_banks == 0
+                and tof_opt['corrections']
                 and (tof_opt['substract_vana_back']
                      or tof_opt['substract_sample_back'])):
-            self.raise_error(
-                'No Background files selected, but background substraction ' \
-                'option choosen.'
-            )
+            self.raise_error('No Background files selected, but background'\
+                             ' substraction option choosen.')
             return False
+        
+        
+        
+        ### startin wrting script
         l("import numpy as np")
-        l("from mantid.simpleapi import *")
-        l("from DNSReduction.scripts.dnstof import *")
+        l("from mantid.simpleapi import MonitorEfficiencyCorUser, FindEPP") 
+        l("from mantid.simpleapi import ComputeCalibrationCoefVan, Divide,"\
+          "CorrectTOF")
+        l("from DNSReduction.scripts.dnstof import convert_to_dE, get_sqw, "\
+          "load_data")
         l()
         l('sample_data = {}'.format(format_dataset(sample_data)))
         l('standard_data = {}'.format(format_dataset(standard_data)))
 
-        paramstring = ("params = {{'e_channel'        : {}, ".format(
-            tof_opt['epp_channel']) +
-                       "\n          'wavelength'       : {},".format(
-                           tof_opt['wavelength']) +
-                       "\n          'delete_raw'       : {},".format(
-                           tof_opt['delete_raw']))
+
         if vanadium_correction:
-            paramstring += "\n          'vana_temperature' : {},".format(
-                tof_opt['vanadium_temperature'])
+            vanastring = "\n          'vana_temperature' : "\
+                         "{},".format(tof_opt['vanadium_temperature'])
+
         if background_correction and tof_opt['vana_back_factor'] != 1:
-            paramstring += "\n          'ecVanaFactor'     : {},".format(
-                tof_opt['vana_back_factor'])
+            backstring = "\n          'ecVanaFactor'     : "\
+                          "{},".format(tof_opt['vana_back_factor'])
+
         if background_correction and tof_opt['sample_back_factor'] != 1:
-            paramstring += "\n          'ecSampleFactor'   : {},".format(
-                tof_opt['sample_back_factor'])
-        paramstring += '}'
+            backtofstring = "\n          'ecSampleFactor'   : "\
+                            "{},".format(tof_opt['sample_back_factor'])
+
+        paramstring = "params = {{'e_channel'        : {}, " \
+                      "\n          'wavelength'       : {}," \
+                      "\n          'delete_raw'       : {}," \
+                      "{}{}{} }}".format(tof_opt['epp_channel'],
+                                         tof_opt['wavelength'],
+                                         tof_opt['delete_raw'],
+                                         vanastring,
+                                         backstring,
+                                         backtofstring)
         l(paramstring)
         l()
-        l("bins = {{'qmin' : "\
-          "{:7.3f}, 'qmax' : {:7.3f}, 'qstep' : {:7.3f},".format(
-              tof_opt['qmin'], tof_opt['qmax'], tof_opt['qstep']) +
-          "\n        'dEmin': "\
-          "{:7.3f}, 'dEmax': {:7.3f}, 'dEstep': {:7.3f}}}".format(
-              tof_opt['dEmin'], tof_opt['dEmax'], tof_opt['dEstep']))
+        l("bins = {{'qmin' : {:7.3f}, 'qmax' : {:7.3f}, 'qstep' : {:7.3f},"\
+          "\n        'dEmin': {:7.3f}, 'dEmax': {:7.3f}, 'dEstep': {:7.3f}" \
+          "}}".format(tof_opt['qmin'],
+                      tof_opt['qmax'],
+                      tof_opt['qstep'],
+                      tof_opt['dEmin'],
+                      tof_opt['dEmax'],
+                      tof_opt['dEstep']))
         l()
-        l('load_data(sample_data["'\
-          '{}"], "raw_data1", params)'.format(samplefilename))
+        l('load_data(sample_data["{}"], "raw_data1", params)'\
+          ''.format(samplefilename))
         if background_correction:
-            l('load_data(standard_data["'\
-              '{}"], "raw_ec", params)'.format(emptyfilename))
+            l('load_data(standard_data["{}"], "raw_ec", params)'\
+              ''.format(emptyfilename))
         if vanadium_correction:
-            l('load_data(standard_data["'\
-              '{}"], "raw_vanadium", params)'.format(vanafilename))
+            l('load_data(standard_data["{}"], "raw_vanadium", params)'\
+              ''.format(vanafilename))
         l("")
         if tof_opt['norm_monitor']:
             l('# normalize')
@@ -209,7 +244,8 @@ class DNSTofPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
                 l("data1 = data1 - ec * params['ecSampleFactor']")
 
         if vanadium_correction:
-            if (tof_opt['substract_vana_back'] and background_correction):
+            if (tof_opt['substract_vana_back']
+                    and background_correction):
                 if tof_opt['vana_back_factor'] != 1:
                     l("vanadium = vanadium - ec * params['ecVanaFactor']")
                 else:
@@ -221,21 +257,21 @@ class DNSTofPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
             l('# detector efficciency correction: compute coefficients')
             l('epptable = FindEPP(vanadium)')
             l("coefs = ComputeCalibrationCoefVan(vanadium, epptable," \
-              " Temperature=params['vana_temperature'])"
-             )
+              " Temperature=params['vana_temperature'])")
             l()
             if tof_opt['mask_bad_detectors']:
                 l('# get list of bad detectors')
-                if self.number_of_vana_banks > 1:
+                 ## the lastr part should not be necessary,
+                 ## script should not return group workspaces
+                if (self.number_of_vana_banks > 1
+                        or self.number_of_vana_banks == self.number_of_banks):
                     l('badDetectors = np.where(np.array(coefs[0].extractY())' \
-                      '.flatten() <= 0)[0]'
-                     )
+                      '.flatten() <= 0)[0]')
                 else:
                     l('badDetectors = np.where(np.array(coefs.extractY())' \
-                      '.flatten() <= 0)[0]'
-                     )
-                l('print("Following detectors will be masked: ", badDetectors)'
-                 )
+                      '.flatten() <= 0)[0]')
+                l('print("Following detectors will be masked: ",' \
+                  'badDetectors)')
                 l('MaskDetectors(data1, DetectorList=badDetectors)')
                 l()
             l('# apply detector efficiency correction')

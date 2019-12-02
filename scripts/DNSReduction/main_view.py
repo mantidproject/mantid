@@ -17,7 +17,7 @@ try:
     from mantidqt.utils.qt import load_ui
 except ImportError:
     from mantidplot import load_ui
-from mantidqt.interfacemanager import InterfaceManager
+#from mantidqt.interfacemanager import InterfaceManager
 
 from DNSReduction.main_presenter import DNSReductionGUI_presenter
 
@@ -35,6 +35,7 @@ class DNSReductionGUI_view(QMainWindow):
         ### connect menu signals
         self.ui.actionQuit.triggered.connect(self.close)
         self.ui.actionSave_as.triggered.connect(self.save_as_triggered)
+        self.ui.actionSave.triggered.connect(self.save_triggered)
         self.ui.actionOpen.triggered.connect(self.open_triggered)
         self.ui.actionMantid_help.triggered.connect(self.help_button_clicked)
         self.ui.actionDNS_website.triggered.connect(self.open_dns_webpage)
@@ -69,6 +70,7 @@ class DNSReductionGUI_view(QMainWindow):
 
     sig_tab_changed = Signal(int, int)
     sig_save_as_triggered = Signal()
+    sig_save_triggered = Signal()
     sig_open_triggered = Signal()
     sig_modus_change = Signal(str)
 
@@ -102,7 +104,8 @@ class DNSReductionGUI_view(QMainWindow):
         return None
 
     def help_button_clicked(self):
-		InterfaceManager().showCustomInterfaceHelp('DNS Reduction')
+        pass
+        #InterfaceManager().showCustomInterfaceHelp('DNS Reduction')
 
     def modus_change(self):
         self.ui.tabWidget.currentChanged.disconnect(self._tab_changed)
@@ -122,6 +125,10 @@ class DNSReductionGUI_view(QMainWindow):
 
     def save_as_triggered(self):
         self.sig_save_as_triggered.emit()
+
+    def save_triggered(self):
+        self.sig_save_triggered.emit()
+
 
     def show_statusmessage(self, message='', time=10, clear=False):
         oldmessage = self.ui.statusbar.currentMessage()

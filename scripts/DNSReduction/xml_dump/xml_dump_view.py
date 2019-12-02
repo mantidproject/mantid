@@ -28,6 +28,7 @@ class DNSXMLDump_view(DNSView):
         self.xml_filepath = None
         self.main_view = parent
         self.has_tab = False
+        self.setVisible(False)
 
     def get_load_filename(self, startpath=expanduser("~")):
         """

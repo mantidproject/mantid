@@ -15,7 +15,8 @@ from DNSReduction.data_structures.dns_observer import DNSObserver
 from DNSReduction.data_structures.dns_treemodel import DNSTreeModel
 from DNSReduction.data_structures.dns_file import DNSFile
 from DNSReduction.file_selector.file_selector_view import DNSFileSelector_view
-from DNSReduction.helpers.file_processing import filter_filenames, return_filelist
+from DNSReduction.helpers.file_processing import filter_filenames
+from DNSReduction.helpers.file_processing import return_filelist
 
 
 class DNSFileSelector_presenter(DNSObserver):
@@ -56,7 +57,8 @@ class DNSFileSelector_presenter(DNSObserver):
                 self.read_all()
         else:
             self.fs_watcher.removePaths(self.fs_watcher.directories())
-            self.fs_watcher.directoryChanged.disconnect()
+            if datadir:
+                self.fs_watcher.directoryChanged.disconnect()
 
     def check_buttons(self, sender_name):
         """
@@ -77,16 +79,19 @@ class DNSFileSelector_presenter(DNSObserver):
             if number_of_scans_to_check > model.numberOfScans():
                 return
             for i in range(number_of_scans_to_check):
-                while (row - i) >= 0 and (
-                        ((view.is_scan_hidden(row - i)) or
-                         ('scan' not in model.scanCommandFromRow(row - i)))):
+                while ((row - i) >= 0
+                       and (view.is_scan_hidden(row - i)
+                            or 'scan' not in model.scanCommandFromRow(row - i)
+                           )):
                     row += -1  # do not check hidden rows
-                while (row - i) >= 0 and (
-                    ('scan' not in model.scanCommandFromRow(row - i)) or
-                        (view.is_scan_hidden(row - i)) or
-                        (('complete' in sender_name) and (row - i > 0) and
-                     (model.scanFromRow(row - i).childCount() <
-                      model.scanExpectedPointsFromRow(row - i)))):
+                while ((row - i) >= 0
+                       and ('scan' not in model.scanCommandFromRow(row - i)
+                            or view.is_scan_hidden(row - i)
+                            or ('complete' in sender_name
+                                and (row - i > 0)
+                                and (model.scanFromRow(row - i).childCount() <
+                                     model.scanExpectedPointsFromRow(row - i))
+                               ))):
                     row += -1
                 model.setCheckedScan(row - i, 2)
         elif 'selected' in sender_name:
@@ -106,7 +111,7 @@ class DNSFileSelector_presenter(DNSObserver):
         if standard_set:
             self.view.sig_read_all.disconnect(self.read_all)
             self.view.sig_read_all.connect(self.read_standard)
-            self.active_model = self.standard_data  # some buttons
+            self.active_model = self.standard_data
             self.changed_to_standard()
         else:
             self.view.sig_read_all.disconnect(self.read_standard)
@@ -129,8 +134,9 @@ class DNSFileSelector_presenter(DNSObserver):
                 self.view.hide_scan(row, hidden=True)
                 model.setCheckedScan(row, 0)
             for text, filter_condition in filters.items():
-                if filter_condition and not text in model.scanCommandFromRow(
-                        row):
+                if (filter_condition
+                        and not text in model.scanCommandFromRow(row)
+                   ):
                     self.view.hide_scan(row, hidden=True)
                     model.setCheckedScan(row, 0)
         return
@@ -163,15 +169,18 @@ class DNSFileSelector_presenter(DNSObserver):
                 else:
                     self.view.hide_file(child, scanindex, hidden=True)
                 sample = child.data()[5]
-                if filters['vanadium']:
-                    if 'vanadium' in sample or 'vana' in sample:
-                        self.view.hide_file(child, scanindex, hidden=False)
-                if filters['nicr']:
-                    if 'nicr' in sample or 'NiCr' in sample:
-                        self.view.hide_file(child, scanindex, hidden=False)
-                if filters['empty']:
-                    if 'empty' in sample or 'leer' in sample:
-                        self.view.hide_file(child, scanindex, hidden=False)
+                if (filters['vanadium']
+                        and ('vanadium' in sample
+                             or 'vana' in sample)):
+                    self.view.hide_file(child, scanindex, hidden=False)
+                if (filters['nicr']
+                        and ('nicr' in sample
+                             or 'NiCr' in sample)):
+                    self.view.hide_file(child, scanindex, hidden=False)
+                if (filters['empty']
+                        and ('empty' in sample
+                             or 'leer' in sample)):
+                    self.view.hide_file(child, scanindex, hidden=False)
                 if not self.view.is_file_hidden(child, scanindex):
                     unhiddenchild = True
             if not unhiddenchild:
@@ -196,6 +205,9 @@ class DNSFileSelector_presenter(DNSObserver):
     def process_request(self):
         own_options = self.get_option_dict()
         view = self.view
+        was = self.active_model != self.standard_data
+        if was:
+            view.combo_changed(1)
         model = self.standard_data
         if own_options['auto_standard'] and not own_options['standard_data']:
             self.read_standard()
@@ -204,6 +216,8 @@ class DNSFileSelector_presenter(DNSObserver):
                     model.setCheckedScan(row, 2)
             self.view.show_statusmessage(
                 'automatically loaded all standard files', 30)
+            if was:
+                view.combo_changed(0)
 
     def read_all(self, filtered=False, watcher=False):
         """
@@ -287,11 +301,15 @@ class DNSFileSelector_presenter(DNSObserver):
             except KeyError:
                 notfound += 1
         if notfound:
-            print(
-                'Of {} loaded checked filenumbers {} were not found ' \
-                'in list of datafiles'
-                .format(len(filenumbers), notfound))
+            print('Of {} loaded checked filenumbers {} were not found ' \
+                 'in list of datafiles'
+                  .format(len(filenumbers), notfound))
 
     def sequential_load(self):
         self.autoload_timer.stop()
         self.read_all(watcher=True)
+    
+    def tab_got_focus(self):
+        self.filter_scans()
+        self.filter_standard()
+        self.view.hide_tof(hidden='_tof' not in self.modus)

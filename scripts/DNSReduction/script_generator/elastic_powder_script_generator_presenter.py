@@ -7,7 +7,6 @@
 """
 DNS script generator for elastic powder data
 """
-
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
 
@@ -24,16 +23,23 @@ class DNSElasticPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
               self).__init__(parent, 'elastic_powder_script_generator')
         self.script = None
 
-    def create_dataset(self, data):
+    def create_dataset(self, data, sample=False):
+        """Converting data from fileselector to a smaller dictionary """
         dataset = {}
-        for entry in data:
-            if entry['samplename'] == 'leer':  ## compatibility with old names
+        for entry in data: ## in case sample is standard datafile
+            if (sample
+                    and entry['samplename'] in ['leer',
+                                                'empty',
+                                                'vana',
+                                                'nicr']):
+                datatype = 'sample_{}'.format(entry['samplename'].strip(' _'))
+            elif entry['samplename'] == 'leer':  # compatibility with old names
                 datatype = 'empty'
             else:
                 datatype = entry['samplename'].strip(' _')
             field = field_dict.get(entry['field'], entry['field'])
             datapath = entry['filename'].replace(
-                '_' + str(entry['filenumber']) + '.d_dat', '')
+                '_{}.d_dat'.format(entry['filenumber']), '')
             if datatype in dataset.keys():
                 if field in dataset[datatype].keys():
                     dataset[datatype][field].append(entry['filenumber'])
@@ -51,27 +57,22 @@ class DNSElasticPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
         return dataset
 
     def format_dataset(self, dataset):
-        if len(dataset.keys()):
-            longest_samplename = max([len(a) for a in dataset.keys()])
-        else:
-            longest_samplename = ''
-        dataset_string = '{'
+        """Formating the dictionary to a nicely indented string"""
+        llens = max([len(a) for a in dataset.keys()])+6+4
+        dataset_string = '{\n'
         for samplename, fields in dataset.items():
-            if not dataset_string.endswith('{'):
-                dataset_string += ",\n "
-            else:
-                dataset_string += "\n "
-            dataset_string += " " * (longest_samplename - len(samplename)
-                                    ) + "'{:s}' : {{".format(samplename)
-            spacing = len(" " * (longest_samplename - len(samplename)) +
-                          "'{:s}' : {{".format(samplename)) + 1
-            dataset_string += "'path'  : '{}'".format(fields['path'])
-            for field, filenumbers in sorted(fields.items()):
-                if field != 'path':
-                    dataset_string += ",\n" + " " * spacing + "'{:s}'".format(
-                        field) + " " * (5 - len(field))
-                    dataset_string += " : {}".format(filenumbers)
-            dataset_string += "}"
+            lmax = max([len(key) for key in fields.keys()] +[0])
+
+            dataset_string += "'{:s}' : {{".format(samplename).rjust(llens)
+
+            dataset_string += "{}'path' : '{}',\n"\
+                "".format(" "*(lmax -4), dataset[samplename].pop('path'))
+            dataset_string += ",\n".join(
+                [("{}'{:s}' : {}").format(" "*(lmax - len(key) + llens),
+                                          key,
+                                          value)
+                 for key, value in sorted(fields.items())])
+            dataset_string += "},\n"
         dataset_string += "}"
         return dataset_string
 
@@ -82,8 +83,30 @@ class DNSElasticPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
         def l(line=""):
             self.script += [line]
 
+        ### get data from dictionary
         sample_data = self.param_dict['file_selector']['full_data']
+        standard_data = self.param_dict['file_selector']['standard_data']
 
+
+        ## shortcuts for options
+        vanac = options['corrections'] and options['det_efficency']
+        nicrc = options['corrections'] and options['flipping_ratio']
+        sampb = options['substract_background_from_sample']
+        backfac = options['background_factor']
+        ign_vana = str(options['ignore_vana_fields'])
+        sum_sfnsf = str(options['sum_vana_sf_nsf'])
+        nonmag = options["separation"] and options['separation_coh_inc']
+        xyz = options["separation"] and options['separation_xyz']
+        backgroundstring = ''
+        vanacstring = ''
+        
+        ## normation
+        if options['norm_monitor']:
+            norm = 'monitor'
+        else:
+            norm = 'time'
+
+        ### binning determination, using dns uncertainty
         det_rot = [entry['det_rot'] for entry in sample_data]
         diff_rot = [
             abs(det_rot[i] - det_rot[i + 1]) for i in range(len(det_rot) - 1)
@@ -101,152 +124,131 @@ class DNSElasticPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
             round((twotheta_max - twotheta_min) * stepfactor + 1, 0))
         twotheta_min = twotheta_min - twothetastep / 2.0
         twotheta_max = twotheta_max + twothetastep / 2.0
-        standard_data = self.param_dict['file_selector']['standard_data']
+        ## end binning
+
+        ## making smaller dictrionary for printing
+        sample_data = self.create_dataset(sample_data, sample=True)
         standard_data = self.create_dataset(standard_data)
-        sample_data = self.create_dataset(sample_data)
-        importstring = 'from DNSReduction.scripts.md_powder_elastic import ' \
-                       'load_all, background_substraction'
-        if options['corrections'] and (options['det_efficency']
-                                       or options['flipping_ratio']):
-            importstring += ', vanadium_correction'
-        if options['corrections'] and (options['det_efficency']
-                                       or options['flipping_ratio']):
-            importstring += ', fliping_ratio_correction'
-        if options["separation"] and options['separation_coh_inc']:
-            importstring += ", non_mag_sep"
-        if options["separation"] and options['separation_xyz']:
-            importstring += ', xyz_seperation'
-        l(importstring)
+
+        ## loop over multiple or single samples, spac is indention for rest
+        if len(sample_data.keys()) == 1:
+            loop = "for workspace in wss_sample['{}']:"\
+                   "".format(sample_data.keys()[0])
+            spac = "\n" + " "*4
+        else:
+            loop = "for sample, workspacelist in wss_sample.items(): "\
+                   "\n    for workspace in workspacelist:"
+            spac = "\n" + " "*8
+
+    ##### starting to write file
+
+        ## imports
+        l('from DNSReduction.scripts.md_powder_elastic import ' \
+          'load_all, background_substraction ' \
+          '\nfrom DNSReduction.scripts.md_powder_elastic import ' \
+          'vanadium_correction, fliping_ratio_correction' \
+          '\nfrom DNSReduction.scripts.md_powder_elastic import ' \
+          'non_mag_sep, xyz_seperation')
         l('from mantid.simpleapi import ConvertMDHistoToMatrixWorkspace, mtd')
+
+        ## formated sample dict
         l('sample_data = {}'.format(self.format_dataset(sample_data)))
         l('standard_data = {}'.format(self.format_dataset(standard_data)))
         l()
-        if options['norm_monitor']:
-            normalizestring = "normalizeto='monitor'"
-        else:
-            normalizestring = "normalizeto='time'"
+
+        ## binning
         l("binning = ['twoTheta' , {:.2f}, {:.2f}, {:d}] # min, max,"\
-          " number_of_bins"
-          .format(twotheta_min, twotheta_max, numberofbins))
-        l("wss_sample = load_all(sample_data, binning, {})".format(
-            normalizestring))
-        l("wss_standard = load_all(standard_data, binning, {})".format(
-            normalizestring))
+          " number_of_bins".format(twotheta_min,
+                                   twotheta_max,
+                                   numberofbins))
+        l("wss_sample = load_all(sample_data, binning, normalizeto='{}')"\
+          "".format(norm))
+        l("wss_standard = load_all(standard_data, binning, normalizeto='{}',"\
+          "standard=True)".format(norm))
         l()
-        l("## substract background from vanadium and nicr")
-        l("for sample, workspacelist in wss_standard.items(): " +
-          "\n    for workspace in workspacelist:" +
-          "\n        background_substraction(workspace)")
-        l()
-        l("## correct sample data")
-        correctionstring = ''
-        if (options['substract_background_from_sample']
-                or (options['corrections'] and options['det_efficency'])):
-            if len(sample_data.keys()) == 1:
-                samplename = sample_data.keys()[0]
-                spacing = 4
-                correctionstring = "for workspace in wss_sample['{}']:".format(
-                    samplename)
-            else:
-                spacing = 8
-                correctionstring = (
-                    "for sample, workspacelist in wss_sample.items(): " +
-                    "\n    for workspace in workspacelist:")
-        if options['substract_background_from_sample']:
-            if options['background_factor'] != 1:
-                factorstring = ", factor={}".format(
-                    options['background_factor'])
-            else:
-                factorstring = ""
-            correctionstring += "\n" + spacing * " " + "background_substracti"\
-                "on(workspace{})".format(factorstring)
-        if options['corrections'] and options['det_efficency']:
-            if options['det_efficency']:
-                correctionstring += "\n" + spacing * " " + "vanadium_correc" \
-                    "tion(workspace, vanaset=standard_data['vana']"
-                if options['ignore_vana_fields']:
-                    correctionstring += " ,ignore_vana_fields=True"
-                if options['sum_vana_sf_nsf']:
-                    correctionstring += ", sum_vana_sf_nsf=True"
-                correctionstring += ")"
-        l(correctionstring)
-        if options['corrections'] and options['flipping_ratio']:
-            if len(sample_data.keys()) == 1:
-                samplename = sample_data.keys()[0]
-                spacing = 4
-                correctionstring = "for workspace in wss_sample['{}']:".format(
-                    samplename)
-            else:
-                spacing = 8
-                correctionstring = (
-                    "for sample, workspacelist in wss_sample.items(): " +
-                    "\n    for workspace in workspacelist:")
-            correctionstring += "\n" + spacing * " " + "fliping_ratio_corr" \
-                "ection(workspace)"
-        l(correctionstring)
-        if len(sample_data.keys()) == 1:
-            samplename = sample_data.keys()[0]
-            spacing = 4
-            correctionstring = "for workspace in wss_sample['{}']:".format(
-                samplename)
-        else:
-            spacing = 8
-            correctionstring = (
-                "for sample, workspacelist in wss_sample.items(): " +
-                "\n    for workspace in workspacelist:")
-        correctionstring += "\n" + spacing * " " + "ConvertMDHistoToMatrix" \
-            "Workspace(workspace, Outputworkspace='mat_' + workspace, " \
-            "Normalization='NoNormalization')"
-        l(correctionstring)
-        if options["separation"] and options['separation_xyz']:
+
+        ## background substraction from standard data
+        if vanac or nicrc:
+            l("## substract background from vanadium and nicr" \
+              "\nfor sample, workspacelist in wss_standard.items(): " \
+              "\n    for workspace in workspacelist:" \
+              "\n        background_substraction(workspace)")
             l()
-            l("## do xyz polarization analysis for magnetic powders")
+            
+        if sampb:
+            backgroundstring = "{}background_substraction(workspace, "\
+                               "factor={})".format(spac, backfac)
+
+        if vanac:
+            vanacstring = "{}vanadium_correction(workspace, binning=binning,"\
+                          " vanaset=standard_data['vana'], " \
+                          "ignore_vana_fields={}, " \
+                          "sum_vana_sf_nsf={})".format(spac,
+                                                      ign_vana,
+                                                      sum_sfnsf)
+
+        ## sample background sumstraction + vanadium correction
+        if sampb or vanac:
+            l('## correct sample data')
+            l("{}{}{}".format(loop, backgroundstring, vanacstring))
+
+        # Nicr correction
+        if nicrc:
+            l("{}{}fliping_ratio_correction(workspace)".format(loop, spac))
+
+        ## converting to matrix for plotting
+        l("{}{}ConvertMDHistoToMatrixWorkspace(workspace," \
+          " Outputworkspace='mat_{{}}'.format(workspace), " \
+          "Normalization='NoNormalization')".format(loop, spac))
+
+        ### xyz polarization analysis for magnetic samples
+        if xyz:
             for sample, fields in sample_data.items():
                 if not all(field in fields
                            for field in ['x_sf', 'y_sf', 'z_sf', 'z_nsf']):
-                    self.raise_error(
-                        'Not all fields necesarry found for XYZ analysis.')
+                    self.raise_error("Not all fields necesarry found for XYZ"\
+                                     " analysis.")
                 else:
+                    l()
+                    l("## do xyz polarization analysis for magnetic powders")
+
                     l("{0}_nuclear_coh, {0}_magnetic, {0}_spin_incoh = xyz_" \
-                      "seperation(x_sf='{0}_x_sf',"
-                      .format(sample) + "\n" + " " * (len(sample) + 64) +
-                      "y_sf='{}_y_sf',".format(sample) + "\n" + " " *
-                      (len(sample) + 64) + "z_sf='{}_z_sf',".format(sample) +
-                      "\n" + " " * (len(sample) + 64) +
-                      "z_nsf='{}_z_nsf')".format(sample))
-                    l("ConvertMDHistoToMatrixWorkspace('{0}_nuclear_coh', O" \
-                      "utputworkspace='mat_{0}_nuclear_coh', Normalization=" \
-                      "'NoNormalization')"
-                      .format(sample))
-                    l("ConvertMDHistoToMatrixWorkspace('{0}_magnetic', Outpu" \
-                      "tworkspace='mat_{0}_magnetic', Normalization='NoNorma" \
-                      "lization')"
-                      .format(sample))
-                    l("ConvertMDHistoToMatrixWorkspace('{0}_spin_incoh', Out" \
-                      "putworkspace='mat_{0}_spin_incoh', Normalization='NoN" \
-                      "ormalization')"
-                      .format(sample))
-        if options["separation"] and options['separation_coh_inc']:
+                      "seperation(x_sf='{0}_x_sf'," \
+                      "{1}{2}y_sf='{0}_y_sf'," \
+                      "{1}{2}z_sf='{0}_z_sf'," \
+                      "{1}{2}z_nsf='{0}_z_nsf')" \
+                      "".format(sample, '\n', " "*(len(sample) + 64)))
+
+                    for samp_type in ['nuclear_coh',
+                                      'magnetic',
+                                      'spin_incoh']:
+                        l("ConvertMDHistoToMatrixWorkspace('{0}_{1}', " \
+                          "Outputworkspace='mat_{0}_{1}',"\
+                          " Normalization='NoNormalization')"\
+                          "".format(sample, samp_type))
+
+        ### nuc_coherent + spin_incoherent seperation for non-magnetic samples
+        if nonmag:
             nsf_sf_pairs = []
             l()
             for sample, fields in sample_data.items():
                 for field in fields.keys():
-                    if field.endswith(
-                            '_sf'
-                    ) and field[:-2] + 'nsf' in sample_data[sample].keys():
+                    if (field.endswith('_sf')
+                            and ('{}nsf'.format(field[:-2])
+                                 in sample_data[sample].keys())):
                         nsf_sf_pairs.append("{}_{}".format(sample, field[:-3]))
                 if not nsf_sf_pairs:
-                    self.raise_error(
-                        'No pair of SF and NSF measurements found for {}'.
-                        format(sample))
+                    self.raise_error("No pair of SF and NSF measurements"\
+                                     " found for {}".format(sample))
             l("## sepearation of coherent and incoherent scattering of non" \
-              " magnetic sample"
-             )
-            for sample_field in sorted(
-                    nsf_sf_pairs
-            ):  # normally only z is measured but just in case
-                l("{0}_nuc_coherent, {0}_spin_incoherent = non_mag_sep" \
-                  "('{0}_sf', '{0}_nsf')"
-                  .format(sample_field))
+              " magnetic sample")
+            for sample_field in sorted(nsf_sf_pairs):
+                # normally only z is measured but just in case
+                l("{0}_nuclear_coh, {0}_spin_incoh = non_mag_sep" \
+                  "('{0}_sf', '{0}_nsf')".format(sample_field))
+                for samp_type in ['_nuclear_coh', '_spin_incoh']:
+                    l("ConvertMDHistoToMatrixWorkspace('{0}{1}', "\
+                      "Outputworkspace='mat_{0}{1}', Normalization=" \
+                      "'NoNormalization')".format(sample_field, samp_type))
 
         return self.script

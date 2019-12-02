@@ -99,11 +99,7 @@ class DNSElasticPowderPlot_view(DNSView):
         self._mapping['xaxis_scale'].currentIndexChanged.connect(
             self.something_changed)
         self.gridstate = 0
-        self.linestyles = {
-            0: '-',
-            1: '.',
-            2: '.-',
-        }
+        self.linestyles = {0: '-', 1: '.', 2: '.-', }
         self.linestyle = 0
         self.errorbar = 0
 
@@ -201,7 +197,7 @@ class DNSElasticPowderPlot_view(DNSView):
                              yerr=yerr,
                              fmt=self.linestyles[self.linestyle],
                              label=label,
-                             capsize=(self.errorbar - 1) * 3)
+                             capsize=(self.errorbar - 1)*3)
         else:
             self.ax.plot(x, y, self.linestyles[self.linestyle], label=label)
 
@@ -230,13 +226,15 @@ class DNSElasticPowderPlot_view(DNSView):
 
     def get_state(self):
         """
-        returns a dictionary with the names of the widgets as keys and the values
+        returns a dictionary with the names of the widgets
+        as keys and the values
         """
         state_dict = OrderedDict()
 
         for key, target_object in self._mapping.items():
             state = self.get_single_state(target_object)
-            if state is not None:  ## pushbuttons for example are not defined in the get function
+            if state is not None: 
+            ## pushbuttons for example are not defined in the get function
                 state_dict[key] = state
         state_dict['linestyle'] = self.linestyle
         state_dict['gridstate'] = self.gridstate
@@ -244,7 +242,8 @@ class DNSElasticPowderPlot_view(DNSView):
 
     def set_state(self, state_dict):
         """
-        sets the gui state from a dictionary containing the shortnames of the widgets as keys and the values
+        sets the gui state from a dictionary containing the shortnames
+        of the widgets as keys and the values
         """
         self.gridstate = state_dict.get('gridstate', 0)
         self.linestyle = state_dict.get('linestyle', 0)

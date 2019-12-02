@@ -19,7 +19,6 @@ import DNSReduction.simulation.simulation_helpers as sim_help
 
 class DNSSimulation_presenter(DNSObserver):
     TTHLIMIT = 5  ## limit for 2theta difference under which entries marked
-
     ## as matching, 5deg is detector distance at DNS
 
     def __init__(self, parent):
@@ -30,6 +29,7 @@ class DNSSimulation_presenter(DNSObserver):
         self.refls = None
         self.own_dict['cifset'] = False
         self.set_ki()
+
         ## connect Signals
         self.view.sig_cif_set.connect(self.cif_set)
         self.view.sig_unitcell_changed.connect(self.unitcell_changed)
@@ -41,9 +41,29 @@ class DNSSimulation_presenter(DNSObserver):
         self.view.sig_scplot_clicked.connect(self.sc_plot)
         self.view.sig_mouse_pos_changed.connect(self.set_hkl_pos_on_plot)
 
-    def calculate(self):
+
+    def get_and_validate(self):
         self.get_option_dict()
-        self.refls = self.model.get_refls_and_set_orientation()
+        hkl1 = self.own_dict['hkl1_v']
+        hkl2 = self.own_dict['hkl2_v']
+        if (hkl1[0] is None or hkl2[0] is None):
+            self.raise_error('Could not parse hkl, enter 3 comma'
+                             'seperated numbers.')
+            return False
+        if (np.cross(hkl1, hkl2) == 0).all():
+            self.raise_error('hkl1 cannot be paralell hkl2')
+            return False
+        return True
+
+    def calculate(self):
+        if not self.get_and_validate():
+            return
+        try:
+            self.refls = self.model.get_refls_and_set_orientation()
+        except ValueError:
+            self.raise_error('Spacegroup not valid, use HM'
+                             'Symbol or IT Number.')
+            return
         filtered_refls = self.model.filter_refls(self.refls)
         self.perp_inplane()
         self.d_tooltip()
@@ -87,9 +107,11 @@ class DNSSimulation_presenter(DNSObserver):
         end = -self.own_dict['powder_end']
         shift = self.own_dict['shift']
         tth_step = 0.1
-        tth_end = end + 23 * 5 + shift
+        tth_end = end + 23*5 + shift
         tth_start = start + shift
-        x, y = self.model.create_powder_profile(tth_start, tth_end, tth_step,
+        x, y = self.model.create_powder_profile(tth_start,
+                                                tth_end,
+                                                tth_step,
                                                 shift)
         refls = [refl for refl in self.refls if refl.unique]
         annotate_list = [[], [], []]
@@ -119,7 +141,7 @@ class DNSSimulation_presenter(DNSObserver):
         hkl1 = np.asarray(self.own_dict['hkl1_v'])
         hkl2_p = np.asarray(self.own_dict['hkl2_p_v'])
         if x is not None and y is not None:
-            hkl = hkl1 * x + hkl2_p * y
+            hkl = hkl1*x + hkl2_p*y
         self.view.set_hkl_position_on_plot(hkl)
 
     def set_ki(self):
