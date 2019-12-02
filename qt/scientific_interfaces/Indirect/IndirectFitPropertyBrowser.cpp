@@ -85,6 +85,17 @@ void IndirectFitPropertyBrowser::initFitOptionsBrowser() {
       nullptr, FitOptionsBrowser::SimultaneousAndSequential);
   m_fitOptionsBrowser->setObjectName("fitOptionsBrowser");
   m_fitOptionsBrowser->setCurrentFittingType(FitOptionsBrowser::Sequential);
+  m_fitOptionsBrowser->addPropertyToBlacklist(QString("CreateOutput"));
+  m_fitOptionsBrowser->addPropertyToBlacklist(QString("LogValue"));
+  m_fitOptionsBrowser->addPropertyToBlacklist(QString("PassWSIndexToFunction"));
+  m_fitOptionsBrowser->addPropertyToBlacklist(QString("ConvolveMembers"));
+  m_fitOptionsBrowser->addPropertyToBlacklist(
+      QString("OutputCompositeMembers"));
+  m_fitOptionsBrowser->addPropertyToBlacklist(QString("OutputWorkspace"));
+  m_fitOptionsBrowser->addPropertyToBlacklist(QString("IgnoreInvalidData"));
+  m_fitOptionsBrowser->addPropertyToBlacklist(QString("Output"));
+  m_fitOptionsBrowser->addPropertyToBlacklist(QString("PeakRadius"));
+  m_fitOptionsBrowser->addPropertyToBlacklist(QString("PlotParameter"));
 }
 
 bool IndirectFitPropertyBrowser::isFullFunctionBrowserActive() const {

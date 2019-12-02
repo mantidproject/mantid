@@ -525,6 +525,7 @@ void IndirectFitAnalysisTab::singleFit(TableDatasetIndex dataIndex,
     m_plotPresenter->setFitSingleSpectrumIsFitting(true);
     enableFitButtons(false);
     enableOutputOptions(false);
+    m_fittingModel->setFittingMode(FittingMode::SIMULTANEOUS);
     runSingleFit(m_fittingModel->getSingleFit(dataIndex, spectrum));
   }
 }

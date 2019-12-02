@@ -306,7 +306,10 @@ void FitOptionsBrowser::createSequentialFitProperties() {
 
   // Create LogValue property
   m_plotParameter = m_enumManager->addProperty("Plot parameter");
-  { m_sequentialProperties << m_plotParameter; }
+  {
+    m_propertyNameMap["PlotParameter"] = m_plotParameter;
+    m_sequentialProperties << m_plotParameter;
+  }
 }
 
 void FitOptionsBrowser::addProperty(
@@ -828,6 +831,20 @@ void FitOptionsBrowser::displayProperty(const QString &propertyName,
   } else {
     m_browser->removeProperty(prop);
   }
+}
+
+/**
+ * Adds the property with the given name to a blacklist of properties to hide
+ */
+bool FitOptionsBrowser::addPropertyToBlacklist(QString name) {
+  if (!m_propertyNameMap.contains(name)) {
+    return false;
+  }
+  auto prop = m_propertyNameMap[name];
+  m_sequentialProperties.removeAll(prop);
+  m_simultaneousProperties.removeAll(prop);
+  m_browser->removeProperty(prop);
+  return true;
 }
 
 /**

@@ -241,6 +241,8 @@ void renameWorkspace(std::string const &name, std::string const &newName) {
 }
 
 void deleteWorkspace(std::string const &workspaceName) {
+  if (!AnalysisDataService::Instance().doesExist(workspaceName))
+    return;
   auto deleter = AlgorithmManager::Instance().create("DeleteWorkspace");
   deleter->setLogging(false);
   deleter->setProperty("Workspace", workspaceName);
