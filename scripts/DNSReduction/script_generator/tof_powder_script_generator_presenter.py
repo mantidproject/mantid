@@ -61,8 +61,8 @@ def format_dataset(dataset):
             "".format(" "*(0), dataset[samplename].pop('path'))
         dataset_string += ",\n".join(
             [("{}{:6.2f} : {}").format(" "*llens,
-                                      key,
-                                      value)
+                                       key,
+                                       value)
              for key, value in sorted(fields.items())])
         dataset_string += "},\n"
     dataset_string += "}"
@@ -108,6 +108,7 @@ class DNSTofPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
         def l(line=""):
             self.script += [line]
 
+        paths = self.param_dict['paths']
         sample_data = create_dataset(
             self.param_dict['file_selector']['full_data'])
         tof_opt = self.param_dict['tof_powder_options']
@@ -169,14 +170,18 @@ class DNSTofPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
             self.raise_error('No Background files selected, but background'\
                              ' substraction option choosen.')
             return False
-        
-        
-        
+
+        export_path = paths["export_dir"]
+        ascii = paths["ascii"] and paths["export"] and export_path
+        nexus = paths["nexus"] and paths["export"]  and export_path
+
         ### startin wrting script
         l("import numpy as np")
-        l("from mantid.simpleapi import MonitorEfficiencyCorUser, FindEPP") 
+        l("from mantid.simpleapi import MonitorEfficiencyCorUser, FindEPP")
         l("from mantid.simpleapi import ComputeCalibrationCoefVan, Divide,"\
           "CorrectTOF")
+        l('from mantid.simpleapi import SaveAscii, SaveNexus')
+
         l("from DNSReduction.scripts.dnstof import convert_to_dE, get_sqw, "\
           "load_data")
         l()
@@ -290,4 +295,14 @@ class DNSTofPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
         l()
         l('# merge al detector positions together')
         l("get_sqw('data1_dE_S', 'data1', bins)")
+
+        if ascii:
+            l("SaveAscii('data1_dE_S', '{}/data1_dE_S.csv', "\
+              "WriteSpectrumID=False)"\
+              "".format(export_path))
+        if nexus:
+            l("SaveNexus('data1_dE_S', '{}/data1_dE_S.csv', )"\
+              "".format(export_path))
+
+
         return self.script

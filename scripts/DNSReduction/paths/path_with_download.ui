@@ -19,9 +19,6 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <property name="statusTip">
-   <string/>
-  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QGroupBox" name="groupBox">
@@ -39,9 +36,6 @@
        <widget class="QLineEdit" name="lE_prop_nb">
         <property name="toolTip">
          <string>filled out automatically from first file found in data path</string>
-        </property>
-        <property name="statusTip">
-         <string/>
         </property>
         <property name="maxLength">
          <number>20</number>
@@ -186,47 +180,65 @@
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="gB_export">
+    <widget class="QGroupBox" name="gB_data_download">
      <property name="title">
-      <string>Export</string>
-     </property>
-     <property name="checkable">
-      <bool>true</bool>
+      <string>Data download</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
+      <item row="0" column="4">
+       <widget class="QLineEdit" name="lE_server">
+        <property name="text">
+         <string>phys.dns.frm2:data/current/data/*</string>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="0">
-       <widget class="QLabel" name="l_export_dir">
+       <widget class="QLabel" name="l_origin">
         <property name="text">
-         <string>Export directory:</string>
+         <string>Origin Data Path</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="lE_export_dir"/>
+      <item row="3" column="6">
+       <widget class="QLineEdit" name="lE_password"/>
       </item>
-      <item row="0" column="2">
-       <widget class="QPushButton" name="pB_file_export">
-        <property name="text">
-         <string>Export Dir</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0" colspan="3">
+      <item row="1" column="0" colspan="7">
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
-         <widget class="QCheckBox" name="cB_nexus">
+         <widget class="QCheckBox" name="cB_pa_data">
           <property name="text">
-           <string>Nexus</string>
+           <string>PA data</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QCheckBox" name="cB_ascii">
+         <widget class="QCheckBox" name="cB_psd_data">
           <property name="text">
-           <string>ascii</string>
+           <string>PSD data</string>
           </property>
-          <property name="checked">
-           <bool>true</bool>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="cB_logbook">
+          <property name="text">
+           <string>Logbook</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="cB_standard_data">
+          <property name="text">
+           <string>Standard data</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="cB_scripts">
+          <property name="text">
+           <string>Scripts</string>
           </property>
          </widget>
         </item>
@@ -242,6 +254,68 @@
            </size>
           </property>
          </spacer>
+        </item>
+       </layout>
+      </item>
+      <item row="3" column="5">
+       <widget class="QLabel" name="l_password">
+        <property name="text">
+         <string>Password</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="5">
+       <widget class="QRadioButton" name="rB_rsync">
+        <property name="text">
+         <string>rsync</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="6">
+       <widget class="QRadioButton" name="rB_scp">
+        <property name="text">
+         <string>scp</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="l_login">
+        <property name="text">
+         <string>Login</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2" colspan="3">
+       <widget class="QLineEdit" name="lE_login"/>
+      </item>
+      <item row="5" column="6">
+       <widget class="QPushButton" name="pB_download">
+        <property name="text">
+         <string>Download Data</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0" colspan="6">
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QCheckBox" name="cB_auto_download">
+          <property name="text">
+           <string>autodownload every</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="sB_auto_download_time"/>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>seconds</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </item>
