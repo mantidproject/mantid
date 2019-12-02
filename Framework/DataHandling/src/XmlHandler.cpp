@@ -4,33 +4,30 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include <algorithm>
-#include <boost/algorithm/string/trim.hpp>
-#include <iostream>
-#include <iterator>
-#include <string>
-#include <vector>
-
 #include "MantidDataHandling/XmlHandler.h"
+
+#include <Poco/DOM/DOMParser.h>
+#include <boost/algorithm/string/trim.hpp>
+//#include <Poco/DOM/Element.h>
+#include <Poco/DOM/NamedNodeMap.h>
+//#include <Poco/DOM/Node.h>
+#include <Poco/DOM/NodeFilter.h>
+#include <Poco/DOM/NodeIterator.h>
+#include <Poco/DOM/NodeList.h>
+//#include <Poco/DOM/Text.h>
+#include <Poco/SAX/InputSource.h>
+
+#include <fstream>
+//#include <iterator>
 
 namespace Mantid {
 namespace DataHandling {
 
-XmlHandler::XmlHandler() {
-  // TODO Auto-generated constructor stub
-}
-
 XmlHandler::XmlHandler(std::string filename) {
-
   std::ifstream in(filename);
   Poco::XML::InputSource src(in);
   Poco::XML::DOMParser parser;
   pDoc = parser.parse(&src);
-}
-
-XmlHandler::~XmlHandler() {
-  // TODO Auto-generated destructor stub
-  // pDoc->release();
 }
 
 /**
@@ -46,7 +43,8 @@ XmlHandler::get_metadata(const std::vector<std::string> &tags_to_ignore) {
   Poco::XML::Node *pNode = it.nextNode();
 
   while (pNode) {
-    if (pNode->childNodes()->length() == 1 &&
+    Poco::AutoPtr<Poco::XML::NodeList> children = pNode->childNodes();
+    if (children->length() == 1 &&
         std::find(std::begin(tags_to_ignore), std::end(tags_to_ignore),
                   pNode->nodeName()) == std::end(tags_to_ignore)) {
       std::string key =
@@ -77,7 +75,8 @@ XmlHandler::get_attributes_from_tag(const std::string &xpath) {
   Poco::XML::Node *pNode = it.nextNode();
   Poco::XML::Node *detectorNode = pNode->getNodeByPath(xpath);
   if (detectorNode) {
-    Poco::XML::NamedNodeMap *attributes = detectorNode->attributes();
+    Poco::AutoPtr<Poco::XML::NamedNodeMap> attributes =
+        detectorNode->attributes();
     for (unsigned int i = 0; i < attributes->length(); i++) {
       Poco::XML::Node *attribute = attributes->item(i);
       attributes_map.emplace(attribute->nodeName(), attribute->nodeValue());
@@ -100,7 +99,8 @@ std::vector<std::string> XmlHandler::get_subnodes(const std::string &xpath) {
   Poco::XML::Node *pNode = it.nextNode();
 
   while (pNode) {
-    if (pNode->childNodes()->length() == 1) {
+    Poco::AutoPtr<Poco::XML::NodeList> children = pNode->childNodes();
+    if (children->length() == 1) {
       subnodes.emplace_back(pNode->nodeName());
     }
     pNode = it.nextNode();

@@ -102,6 +102,7 @@ class SANSInstrument(object):
     pass
 
 
+@string_convertible
 @serializable_enum("ISIS", "NoFacility")
 class SANSFacility(object):
     pass

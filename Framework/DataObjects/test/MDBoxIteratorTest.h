@@ -607,6 +607,9 @@ public:
     it->getBox()->mask();
     // For masked boxes, getNormalizedSignal() should return NaN.
     TS_ASSERT(std::isnan(it->getNormalizedSignal()));
+
+    delete A->getBoxController();
+    delete A;
   }
 };
 

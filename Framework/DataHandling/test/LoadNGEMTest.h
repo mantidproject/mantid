@@ -9,6 +9,7 @@
 
 #include <MantidAPI/AnalysisDataService.h>
 #include <MantidAPI/FileFinder.h>
+#include <MantidAPI/Run.h>
 #include <MantidDataHandling/LoadNGEM.h>
 #include <MantidDataObjects/EventWorkspace.h>
 #include <cxxtest/TestSuite.h>
@@ -41,11 +42,31 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(alg.setProperty(
         "Filename", getTestFilePath("GEM000005_00_000_short.edb")));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BinWidth", 0.1));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateEventsPerFrame", false));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove("ws"));
+    auto &ads = AnalysisDataService::Instance();
+    auto outputWS = ads.retrieveWS<DataObjects::EventWorkspace>("ws");
+    // check some random values
+    const auto &ydata{outputWS->y(100)};
+    const auto &xdata{outputWS->x(100)};
+    const auto &edata{outputWS->e(100)};
+    TS_ASSERT_DELTA(1.0, ydata[130378], 1e-8);
+    TS_ASSERT_DELTA(13037.8, xdata[130378], 1e-8);
+    TS_ASSERT_DELTA(13037.9, xdata[130379], 1e-8);
+    TS_ASSERT_DELTA(1.0, edata[130378], 1e-8);
+    // sample logs
+    const auto &run = outputWS->run();
+    TS_ASSERT_DELTA(700.92, run.getPropertyValueAsType<double>("min_TOF"),
+                    1e-08);
+    TS_ASSERT_DELTA(98132.97, run.getPropertyValueAsType<double>("max_TOF"),
+                    1e-08);
+    TS_ASSERT_EQUALS(224, run.getPropertyValueAsType<int>("raw_frames"));
+    TS_ASSERT_EQUALS(224, run.getPropertyValueAsType<int>("good_frames"));
+
+    TS_ASSERT_THROWS_NOTHING(ads.remove("ws"));
   }
 
   void test_exec_loads_event_counts_workspace() {

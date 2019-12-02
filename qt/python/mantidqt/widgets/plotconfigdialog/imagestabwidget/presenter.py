@@ -41,7 +41,7 @@ class ImagesTabWidgetPresenter:
         if props.interpolation:
             image.set_interpolation(props.interpolation)
 
-        current_axis_images = self.fig.gca().images[-1]
+        current_axis_images = get_images_from_fig(self.fig)[-1]
 
         if current_axis_images.colorbar:
             current_axis_images.colorbar.remove()

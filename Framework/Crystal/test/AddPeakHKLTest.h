@@ -71,9 +71,6 @@ public:
         Mantid::PhysicalConstants::h_bar;
     V3D qLab = qLabDir * wavenumber_in_angstrom_times_tof_in_microsec;
 
-    Mantid::Geometry::OrientedLattice orientedLattice(
-        1, 1, 1, 90, 90, 90); // U is identity, real and reciprocal lattice
-                              // vectors are identical.
     Mantid::Geometry::Goniometer goniometer; // identity
     V3D hkl = qLab / (2 * M_PI); // Given our settings above, this is the
                                  // simplified relationship between qLab and
@@ -82,7 +79,9 @@ public:
     // Now create a peaks workspace around the simple fictional instrument
     PeaksWorkspace_sptr ws = boost::make_shared<PeaksWorkspace>();
     ws->setInstrument(minimalInstrument);
-    ws->mutableSample().setOrientedLattice(&orientedLattice);
+    ws->mutableSample().setOrientedLattice(
+        std::make_unique<Mantid::Geometry::OrientedLattice>(1, 1, 1, 90, 90,
+                                                            90));
     ws->mutableRun().setGoniometer(goniometer, false);
 
     AddPeakHKL alg;

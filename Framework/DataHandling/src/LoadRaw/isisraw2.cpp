@@ -101,7 +101,6 @@ int ISISRAW2::ioRAW(FILE *file, bool from_file, bool read_data) {
   // use section offsets
   i = 0;
   ISISRAW::ioRAW(file, &i, 1, from_file);
-  //		ISISRAW::ioRAW(file, &u_len, 1, from_file);
   if (from_file) {
     u_len = add.ad_data - add.ad_user - 2;
 
@@ -121,12 +120,14 @@ int ISISRAW2::ioRAW(FILE *file, bool from_file, bool read_data) {
   fgetpos(file, &dhdr_pos);
   ISISRAW::ioRAW(file, &dhdr, 1, from_file);
 
-  outbuff = new char[m_bufferSize];
+  if (!outbuff)
+    outbuff = new char[m_bufferSize];
   ndes = t_nper * (t_nsp1 + 1);
   ISISRAW::ioRAW(file, &ddes, ndes, true);
-  dat1 = new uint32_t[t_ntc1 + 1]; //  space for just one spectrum
-  memset(outbuff, 0,
-         m_bufferSize); // so when we round up words we get a zero written
+  if (!dat1)
+    dat1 = new uint32_t[t_ntc1 + 1]; //  space for just one spectrum
+  // so when we round up words we get a zero written
+  memset(outbuff, 0, m_bufferSize);
 
   return 0; // stop reading here
 }
@@ -167,7 +168,6 @@ bool ISISRAW2::readData(FILE *file, int i) {
 }
 
 ISISRAW2::~ISISRAW2() {
-  // fclose(m_file);
   if (outbuff)
     delete[] outbuff;
 }

@@ -152,23 +152,22 @@ void PredictSatellitePeaks::exec() {
   }
 
   API::Sample sample = Peaks->mutableSample();
-
-  OrientedLattice lattice = sample.getOrientedLattice();
+  auto lattice = std::make_unique<OrientedLattice>(sample.getOrientedLattice());
 
   bool fromUB = getProperty("GetModVectorsFromUB");
   if (fromUB) {
-    offsets1 = lattice.getModVec(0);
-    offsets2 = lattice.getModVec(1);
-    offsets3 = lattice.getModVec(2);
+    offsets1 = lattice->getModVec(0);
+    offsets2 = lattice->getModVec(1);
+    offsets3 = lattice->getModVec(2);
     if (maxOrder == 0)
-      maxOrder = lattice.getMaxOrder();
-    crossTerms = lattice.getCrossTerm();
+      maxOrder = lattice->getMaxOrder();
+    crossTerms = lattice->getCrossTerm();
   } else {
-    lattice.setModVec1(offsets1);
-    lattice.setModVec2(offsets2);
-    lattice.setModVec3(offsets3);
-    lattice.setMaxOrder(maxOrder);
-    lattice.setCrossTerm(crossTerms);
+    lattice->setModVec1(offsets1);
+    lattice->setModVec2(offsets2);
+    lattice->setModVec3(offsets3);
+    lattice->setMaxOrder(maxOrder);
+    lattice->setCrossTerm(crossTerms);
   }
 
   const auto instrument = Peaks->getInstrument();
@@ -176,7 +175,7 @@ void PredictSatellitePeaks::exec() {
   outPeaks = boost::dynamic_pointer_cast<IPeaksWorkspace>(
       WorkspaceFactory::Instance().createPeaks());
   outPeaks->setInstrument(instrument);
-  outPeaks->mutableSample().setOrientedLattice(&lattice);
+  outPeaks->mutableSample().setOrientedLattice(std::move(lattice));
 
   Kernel::Matrix<double> goniometer;
   goniometer.identityMatrix();
@@ -188,9 +187,9 @@ void PredictSatellitePeaks::exec() {
   std::vector<V3D> possibleHKLs;
   const double dMin = getProperty("MinDSpacing");
   const double dMax = getProperty("MaxDSpacing");
-  Geometry::HKLGenerator gen(lattice, dMin);
-  auto dSpacingFilter =
-      boost::make_shared<HKLFilterDRange>(lattice, dMin, dMax);
+  Geometry::HKLGenerator gen(outPeaks->sample().getOrientedLattice(), dMin);
+  auto dSpacingFilter = boost::make_shared<HKLFilterDRange>(
+      outPeaks->sample().getOrientedLattice(), dMin, dMax);
 
   V3D hkl = *(gen.begin());
   g_log.information() << "HKL range for d_min of " << dMin << " to d_max of "
@@ -207,7 +206,7 @@ void PredictSatellitePeaks::exec() {
 
   size_t N = possibleHKLs.size();
   N = max<size_t>(100, N);
-  auto &UB = lattice.getUB();
+  const auto &UB = outPeaks->sample().getOrientedLattice().getUB();
   goniometer = peak0.getGoniometerMatrix();
   Progress prog(this, 0.0, 1.0, N);
   vector<vector<int>> AlreadyDonePeaks;
@@ -260,22 +259,22 @@ void PredictSatellitePeaks::exec_peaks() {
 
   API::Sample sample = Peaks->mutableSample();
 
-  OrientedLattice lattice = sample.getOrientedLattice();
+  auto lattice = std::make_unique<OrientedLattice>(sample.getOrientedLattice());
 
   bool fromUB = getProperty("GetModVectorsFromUB");
   if (fromUB) {
-    offsets1 = lattice.getModVec(0);
-    offsets2 = lattice.getModVec(1);
-    offsets3 = lattice.getModVec(2);
+    offsets1 = lattice->getModVec(0);
+    offsets2 = lattice->getModVec(1);
+    offsets3 = lattice->getModVec(2);
     if (maxOrder == 0)
-      maxOrder = lattice.getMaxOrder();
-    crossTerms = lattice.getCrossTerm();
+      maxOrder = lattice->getMaxOrder();
+    crossTerms = lattice->getCrossTerm();
   } else {
-    lattice.setModVec1(offsets1);
-    lattice.setModVec2(offsets2);
-    lattice.setModVec3(offsets3);
-    lattice.setMaxOrder(maxOrder);
-    lattice.setCrossTerm(crossTerms);
+    lattice->setModVec1(offsets1);
+    lattice->setModVec2(offsets2);
+    lattice->setModVec3(offsets3);
+    lattice->setMaxOrder(maxOrder);
+    lattice->setCrossTerm(crossTerms);
   }
 
   bool includePeaksInRange = false;
@@ -293,7 +292,7 @@ void PredictSatellitePeaks::exec_peaks() {
   outPeaks = boost::dynamic_pointer_cast<IPeaksWorkspace>(
       WorkspaceFactory::Instance().createPeaks());
   outPeaks->setInstrument(instrument);
-  outPeaks->mutableSample().setOrientedLattice(&lattice);
+  outPeaks->mutableSample().setOrientedLattice(std::move(lattice));
 
   vector<vector<int>> AlreadyDonePeaks;
   HKLFilterWavelength lambdaFilter(DblMatrix(3, 3, true), 0.1, 100.);
