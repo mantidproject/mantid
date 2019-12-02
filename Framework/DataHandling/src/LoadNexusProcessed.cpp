@@ -1303,11 +1303,14 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(
   if (hasFracArea) {
     fracarea = wksp_cls.openNXDouble("frac_area");
 
-    // Set the fractional area attributes
+    // Set the fractional area attributes, default values consistent with
+    // previous assumptions: finalized = true, sqrdErrs = false
     auto rbWS = boost::dynamic_pointer_cast<RebinnedOutput>(local_workspace);
-    auto finalized = (fracarea.attributes("finalized") == "1");
+    auto finalizedValue = fracarea.attributes("finalized");
+    auto finalized = (finalizedValue.empty() ? true : finalizedValue == "1");
     rbWS->setFinalized(finalized);
-    auto sqrdErrs = (fracarea.attributes("sqrd_errors") == "1");
+    auto sqrdErrsValue = fracarea.attributes("sqrd_errors");
+    auto sqrdErrs = (sqrdErrsValue.empty() ? false : sqrdErrsValue == "1");
     rbWS->setSqrdErrors(sqrdErrs);
   }
 
