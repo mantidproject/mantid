@@ -83,7 +83,14 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None,
                     sample_details=None):
     focused_ws = _obtain_focused_run(run_number, focus_file_path)
     focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, Target="MomentumTransfer", EMode='Elastic')
-    self_scattering_correction = _calculate_self_scattering_correction(run_number, cal_file_name, sample_details)
+
+    raw_ws = mantid.Load(Filename='POLARIS'+str(run_number)+'.nxs')
+    sample_geometry = common.generate_sample_geometry(sample_details)
+    sample_material = common.generate_sample_material(sample_details)
+    self_scattering_correction = mantid.CalculateSelfScatteringCorrection(RawWorkspace=raw_ws,
+                                                                          CalFileName=cal_file_name,
+                                                                          SampleGeometry=sample_geometry,
+                                                                          SampleMaterial=sample_material)
 
     ws_group_list = []
     for i in range(self_scattering_correction.getNumberHistograms()):
