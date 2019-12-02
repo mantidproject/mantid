@@ -81,11 +81,12 @@ void export_RebinnedOutput() {
       .def("isFinalized", &RebinnedOutput::isFinalized, (arg("self")),
            "Returns if values are normalized to the fractional area array")
       .def("hasSqrdErrors", &RebinnedOutput::hasSqrdErrors, (arg("self")),
-           "Returns if squared errors are used with fractional area normalization")
+           "Returns if squared errors are used with fractional area "
+           "normalization")
       .def("setFinalized", &RebinnedOutput::setFinalized,
            (arg("self"), arg("value")),
            "Sets the value of the is finalized flag")
-	  .def("setSqrdErrors", &RebinnedOutput::setSqrdErrors,
+      .def("setSqrdErrors", &RebinnedOutput::setSqrdErrors,
            (arg("self"), arg("value")),
            "Sets the value of the squared errors flag");
   // register pointers
