@@ -12,7 +12,7 @@ from mantid.py3compat import mock
 from sans.gui_logic.models.RunSelectionModel import RunSelectionModel
 from sans.gui_logic.models.run_file import SummableRunFile
 from sans.gui_logic.models.run_finder import SummableRunFinder
-from sans.gui_logic.presenter.run_selector_presenter import RunSelectorPresenter
+from sans.gui_logic.presenter.RunSelectorPresenter import RunSelectorPresenter
 from ui.sans_isis.run_selector_widget import RunSelectorWidget
 
 

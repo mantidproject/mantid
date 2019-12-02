@@ -14,7 +14,7 @@ from sans.gui_logic.gui_common import SANSGuiPropertiesHandler
 from sans.gui_logic.models.RunSelectionModel import RunSelectionModel
 from sans.gui_logic.models.SummationSettingsModel import SummationSettingsModel
 from sans.gui_logic.models.run_finder import SummableRunFinder
-from sans.gui_logic.presenter.run_selector_presenter import RunSelectorPresenter
+from sans.gui_logic.presenter.RunSelectorPresenter import RunSelectorPresenter
 from sans.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
 
 DEFAULT_BIN_SETTINGS = \
@@ -95,9 +95,9 @@ class AddRunsPagePresenter(object):
     @staticmethod
     def _init_run_summations_settings_presenter(summation_settings_view, parent_view, instrument_str):
         if instrument_str != "LOQ":
-            binning_type = BinningType.SaveAsEventData
+            binning_type = BinningType.SAVE_AS_EVENT_DATA
         else:
-            binning_type = BinningType.Custom
+            binning_type = BinningType.CUSTOM
         summation_settings = SummationSettingsModel(binning_type)
         summation_settings.bin_settings = DEFAULT_BIN_SETTINGS
         return SummationSettingsPresenter(summation_settings,
@@ -119,19 +119,22 @@ class AddRunsPagePresenter(object):
 
     def _make_base_file_name_from_selection(self, run_selection):
         filename_manager = self._get_filename_manager()
-        names = [run.display_name() for run in run_selection]
 
+        if not run_selection.has_any_runs():
+            return ""
+
+        names = [run.display_name() for run in run_selection]
         return filename_manager.make_filename(names)
 
     def _sum_base_file_name(self, run_selection):
         if self._use_generated_file_name:
-            return self._generated_output_file_name
+            return self._make_base_file_name_from_selection(run_selection)
         else:
             return self._view.out_file_name()
 
     def _refresh_view(self, run_selection):
         self._update_output_filename(run_selection)
-        self._update_histogram_binning(run_selection)
+        self._update_histogram_binning()
         if run_selection.has_any_runs():
             self._view.enable_sum()
         else:
@@ -142,7 +145,7 @@ class AddRunsPagePresenter(object):
         if self._use_generated_file_name:
             self._view.set_out_file_name(self._generated_output_file_name)
 
-    def _update_histogram_binning(self, run_selection):
+    def _update_histogram_binning(self):
         self._view.enable_summation_settings()
 
     def _handle_selection_changed(self, run_selection):
@@ -153,7 +156,7 @@ class AddRunsPagePresenter(object):
 
     @staticmethod
     def _output_directory_is_not_empty(settings):
-        return settings.save_directory != ''
+        return settings.save_directory
 
     def _handle_output_directory_changed(self):
         directory = self._view.display_save_directory_box("Save sum runs", self.save_directory)
@@ -176,8 +179,7 @@ class AddRunsPagePresenter(object):
 
         if self._output_directory_is_not_empty(settings):
             self._view.disable_sum()
-            self._sum_runs_model(run_selection,
-                                 settings,
+            self._sum_runs_model(run_selection, settings,
                                  self._sum_base_file_name(run_selection))
         else:
             self._view.no_save_directory()
