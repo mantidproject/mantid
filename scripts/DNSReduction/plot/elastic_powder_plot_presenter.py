@@ -62,11 +62,13 @@ class DNSElasticPowderPlot_presenter(DNSObserver):
         self.view.finish_plot(xaxis)
 
     def tab_got_focus(self):
-        workspaces = [
-            workspace for workspace in mtd.getObjectNames()
-            if (mtd[workspace].id() == 'Workspace2D'
-                and workspace.startswith('mat_'))
-        ]
+#        workspaces = [
+#            workspace for workspace in mtd.getObjectNames()
+#            if (mtd[workspace].id() == 'Workspace2D'
+#                and workspace.startswith('mat_'))
+#        ]
+        workspaces = sorted(self.param_dict['elastic_powder'\
+                                    '_script_generator']['plotlist'])
         compare = ['mat_{}'.format(x) for x in self.view.get_datalist()]
         if (self.param_dict['elastic_powder_script_generator']['script_number']
                 != self.plotted_script_number

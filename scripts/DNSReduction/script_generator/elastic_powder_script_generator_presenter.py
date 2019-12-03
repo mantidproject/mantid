@@ -22,7 +22,7 @@ class DNSElasticPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
         super(DNSElasticPowderScriptGenerator_presenter,
               self).__init__(parent, 'elastic_powder_script_generator')
         self.script = None
-
+        self.plotlist = []
     def create_dataset(self, data, sample=False):
         """Converting data from fileselector to a smaller dictionary """
         dataset = {}
@@ -55,6 +55,15 @@ class DNSElasticPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
                     dataset[sample_typ][field] = list_to_multirange(
                         filenumbers)
         return dataset
+
+    def create_plotlist(self, sample_data):
+        plotlist= []
+        for sample, workspacelist in sample_data.items():
+            for workspace in workspacelist:
+                if workspace != 'path':
+                    plotlist.append("mat_{}_{}".format(sample, workspace))
+        return plotlist
+
 
     def format_dataset(self, dataset):
         """Formating the dictionary to a nicely indented string"""
@@ -133,6 +142,8 @@ class DNSElasticPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
         sample_data = self.create_dataset(sample_data, sample=True)
         standard_data = self.create_dataset(standard_data)
 
+
+        self.plotlist = self.create_plotlist(sample_data)
         ## loop over multiple or single samples, spac is indention for rest
         if len(sample_data.keys()) == 1:
             loop = "for workspace in wss_sample['{}']:"\
@@ -217,7 +228,7 @@ class DNSElasticPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
         ## converting to matrix for plotting
         l("{0}{1}ConvertMDHistoToMatrixWorkspace(workspace," \
           " Outputworkspace='mat_{{}}'.format(workspace), " \
-          "Normalization='NoNormalization')\n{2}"
+          "Normalization='NoNormalization'){2}"
           "".format(loop, spac, "\n".join(saving_list)))
         ## saving raw data
 
@@ -246,6 +257,8 @@ class DNSElasticPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
                           "Outputworkspace='mat_{0}_{1}',"\
                           " Normalization='NoNormalization')"\
                           "".format(sample, samp_type))
+                        self.plotlist.append('mat_{0}_{1}' \
+                                             ''.format(sample, samp_type))
                         if ascii:
                             l("SaveAscii('mat_{0}_{1}', '{2}/{0}_{1}.csv', "\
                               "WriteSpectrumID=False)"\
@@ -276,11 +289,22 @@ class DNSElasticPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
                     l("ConvertMDHistoToMatrixWorkspace('{0}{1}', "\
                       "Outputworkspace='mat_{0}{1}', Normalization=" \
                       "'NoNormalization')".format(sample_field, samp_type))
+                    self.plotlist.append('mat_{0}{1}' \
+                                         ''.format(sample_field, samp_type))
                     if ascii:
-                        l("SaveAscii('mat_{0}_{1}', '{2}/{0}_{1}.csv', "\
+                        l("SaveAscii('mat_{0}{1}', '{2}/{0}{1}.csv', "\
                           "WriteSpectrumID=False)"\
                           "".format(sample_field, samp_type, export_path))
                         if nexus:
-                            l("SaveNexus('mat_{0}_{1}', '{2}/{0}_{1}.nxs')"\
+                            l("SaveNexus('mat_{0}{1}', '{2}/{0}{1}.nxs')"\
                               "".format(sample_field, samp_type, export_path))
         return self.script
+
+    def get_option_dict(self):
+        if self.view is not None:
+            self.own_dict.update(self.view.get_state())
+        self.own_dict['script_path'] = self.scriptpath
+        self.own_dict['script_number'] = self.script_number
+        self.own_dict['script_text'] = self.scripttext
+        self.own_dict['plotlist'] = self.plotlist
+        return self.own_dict

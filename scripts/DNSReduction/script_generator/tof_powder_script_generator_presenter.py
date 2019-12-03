@@ -295,7 +295,6 @@ class DNSTofPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
         l()
         l('# merge al detector positions together')
         l("get_sqw('data1_dE_S', 'data1', bins)")
-
         if ascii:
             l("SaveAscii('data1_dE_S', '{}/data1_dE_S.csv', "\
               "WriteSpectrumID=False)"\

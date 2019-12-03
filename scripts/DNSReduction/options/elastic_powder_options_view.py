@@ -36,7 +36,7 @@ class DNSElasticPowderOptions_view(DNSView):
             #'multiple_scattering': self._content.dSB_multiple_scattering,
             'norm_time': self._content.rB_norm_time,
             'separation_coh_inc': self._content.rB_separation_coh_inc,
-            'sum_vana_det_pos': self._content.cB_sum_vana_det_pos,
+            #'sum_vana_det_pos': self._content.cB_sum_vana_det_pos,
             'sum_vana_sf_nsf': self._content.cB_sum_vana_sf_nsf,
             'ignore_vana_fields': self._content.cB_ignore_vana_fields,
             'separation': self._content.gB_separation,
@@ -68,7 +68,7 @@ class DNSElasticPowderOptions_view(DNSView):
     def disable_sub_det_efficency(self, state):
         self._mapping['ignore_vana_fields'].setEnabled(state)
         self._mapping['sum_vana_sf_nsf'].setEnabled(state)
-        self._mapping['sum_vana_det_pos'].setEnabled(state)
+        #self._mapping['sum_vana_det_pos'].setEnabled(state)
 
     def disable_sub_sample_back(self, state):
         self._mapping['background_factor'].setEnabled(state)

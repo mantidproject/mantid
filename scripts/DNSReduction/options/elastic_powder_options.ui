@@ -189,13 +189,6 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="1" colspan="3">
-       <widget class="QCheckBox" name="cB_sum_vana_det_pos">
-        <property name="text">
-         <string>Sum Vanadium over detector positions</string>
-        </property>
-       </widget>
-      </item>
       <item row="14" column="1">
        <widget class="QLabel" name="l_background_factor">
         <property name="text">
@@ -213,7 +206,10 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
+      <item row="7" column="1" colspan="3">
+       <layout class="QHBoxLayout" name="horizontalLayout_multiple_scattering"/>
+      </item>
+      <item row="2" column="0">
        <spacer name="horizontalSpacer_2">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -228,9 +224,6 @@
          </size>
         </property>
        </spacer>
-      </item>
-      <item row="7" column="1" colspan="3">
-       <layout class="QHBoxLayout" name="horizontalLayout_multiple_scattering"/>
       </item>
      </layout>
     </widget>
