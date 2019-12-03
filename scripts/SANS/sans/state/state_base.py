@@ -462,8 +462,7 @@ def convert_state_to_dict(instance):
     for attr_name, attr_val in attribute.items():
         if isinstance(attr_val, StateBase):
             # If the value is a SANSBaseState then create a dict from it
-            sub_state_dict = attr_val.property_manager
-            attr_val = sub_state_dict
+            attr_val = attr_val.property_manager
         elif isinstance(attr_val, dict):
             attr_val = serialize_dict(attr_val)
         elif isinstance(attr_val, Enum) or isinstance(attr_val, list) and all(isinstance(x, Enum) for x in attr_val):

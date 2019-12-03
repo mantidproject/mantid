@@ -499,9 +499,9 @@ class SampleShapeColumnModel(object):
         self.sample_shape_string = ""
 
     def __call__(self, original_value):
-        self._get_sample_shape(original_value)
+        self._set_sample_shape(original_value)
 
-    def _get_sample_shape(self, original_value):
+    def _set_sample_shape(self, original_value):
         if isinstance(original_value, Enum):
             self.sample_shape = original_value
             self.sample_shape_string = original_value.value
