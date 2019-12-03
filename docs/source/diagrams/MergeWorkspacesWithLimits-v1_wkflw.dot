@@ -27,8 +27,8 @@ subgraph algorithms {
 }
 
 subgraph process  {
-    $process_style
-	findLargestRange		[label="Find detector data with the largest X range"]
+  $process_style
+  findLargestRange		[label="Find detector data with the largest X range"]
 }
 
 inputWorkspace              -> findLargestRange

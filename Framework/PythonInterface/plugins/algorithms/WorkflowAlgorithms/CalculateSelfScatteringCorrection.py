@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -16,17 +16,27 @@ import numpy as np
 
 class CalculateSelfScatteringCorrection(DataProcessorAlgorithm):
 
+    def __init__(self):
+        """Initialize an instance of the algorithm."""
+        DataProcessorAlgorithm.__init__(self)
+
+    def name(self):
+        return 'CalculateSelfScatteringCorrection'
+
     def category(self):
         return "Workflow\\Diffraction"
 
     def seeAlso(self):
-        return [""]
+        return []
 
     def summary(self):
         return "Calculates the self scattering correction factor for total scattering data."
 
     def checkGroups(self):
         return False
+
+    def version(self):
+        return 1
 
     def PyInit(self):
         self.declareProperty(WorkspaceProperty('RawWorkspace', '', direction=Direction.Input),
