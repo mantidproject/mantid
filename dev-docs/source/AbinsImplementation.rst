@@ -36,24 +36,33 @@ whole number of *bin_width*.
 
 The histogram of data sampled in these N bins has N-1 "points", which
 should be aligned with the corresponding bin centres if plotted as a
-line.
+line. In the code this array of frequency coordinates is generally
+named _freq_points_.
 
 Broadening
 ----------
 
-The legacy implementation of broadening uses a Gaussian kernel with a
+Earlier versions of Abins implemented a Gaussian kernel with a
 fixed number of points spread over a range scaled to the peak width,
-set by the *pkt_per_peak* and *fwhm* parameters in
-``AbinsParameters.sampling``. This method is not recommended, as
-aliasing occurs when the x-coordinates are not commensurate with the
-histogram bin.
+set by *pkt_per_peak* and *fwhm* parameters in
+``AbinsParameters.sampling``. This method leads to aliasing when the
+x-coordinates are not commensurate with the histogram bin.
 
 .. image:: ../images/gaussian_aliasing.png
     :align: center
 
-These parameters are retained temporarily in order to allow a
-comparison with the newer broadening implementations, but will
-not be used going forwards.
+The safest way to avoid such trouble is for all broadening methods to
+output onto the regular _freq_points_ grid. A number of broadening
+implementations have been provided in
+_AbinsModules.Instruments.Broadening_. It is up to the Instrument
+logic to dispatch broadening calls to the requested implementation,
+and it is up to specific Instruments to select an appropriate scheme
+for their needs.
+The advanced parameter *AbinsParameters.sampling['broadening_scheme']*
+is made available so that this can be overruled, but it is up to the
+Instrument to interpret this information. 'auto' should select an
+intelligent scheme and inappropriate methods can be forbidden.
+
 
 
 Deprecation plans
