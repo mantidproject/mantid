@@ -25,11 +25,13 @@ class WaterfallPlotFillAreaDialogPresenter:
 
         self.view.show()
         self.view.close_push_button.clicked.connect(self.view.close)
-        self.view.enable_fill_group_box.clicked.connect(self.set_fill_enabled)
+        self.view.enable_fill_group_box.clicked.connect(lambda: self.set_fill_enabled())
         self.view.use_line_colour_radio_button.clicked.connect(self.line_colour_fill)
+        self.view.use_solid_colour_radio_button.clicked.connect(self.solid_colour_fill)
+        self.view.colour_selector_widget.line_edit.textChanged.connect(self.solid_colour_fill)
 
-    def set_fill_enabled(self, enabled):
-        if enabled:
+    def set_fill_enabled(self):
+        if self.view.enable_fill_group_box.isChecked():
             if self.view.use_line_colour_radio_button.isChecked():
                 self.line_colour_fill()
 
@@ -47,6 +49,23 @@ class WaterfallPlotFillAreaDialogPresenter:
 
         self.fig.canvas.draw()
 
+    def solid_colour_fill(self):
+        if len(self.ax.collections) == 0:
+            self.create_fill()
+
+        colour = self.view.colour_selector_widget.get_color()
+
+        for i, collection in enumerate(self.ax.collections):
+            if isinstance(collection, PolyCollection):
+                try:
+                    collection.set_color(colour)
+                except:
+                    return
+                collection.set_zorder(1 - i)
+
+        self.fig.canvas.draw()
+
     def create_fill(self):
-        for line in self.ax.get_lines():
-            self.ax.fill_between(line.get_xdata(), line.get_ydata())
+        for i, line in enumerate(self.ax.get_lines()):
+            bottom_line = [min(line.get_ydata())-((i*self.ax.height)/100)]
+            self.ax.fill_between(line.get_xdata(), line.get_ydata(), bottom_line)
