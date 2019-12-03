@@ -633,7 +633,7 @@ class SANSDataProcessorGui(QMainWindow,
     def set_out_default_output_mode(self):
         try:
             default_output_mode = OutputMode(load_property(self.__generic_settings, self.__output_mode_key))
-        except RuntimeError:
+        except ValueError:
             pass
         else:
             self._check_output_mode(default_output_mode)
@@ -868,13 +868,13 @@ class SANSDataProcessorGui(QMainWindow,
 
     def _on_transmission_fit_type_has_changed(self):
         # Check the sample settings
-        fit_type_sample_as_string = self.fit_sample_fit_type_combo_box.currentText().encode('utf-8')
+        fit_type_sample_as_string = self.fit_sample_fit_type_combo_box.currentText()
         fit_type_sample = FitType(fit_type_sample_as_string)
         is_sample_polynomial = fit_type_sample is FitType.POLYNOMIAL
         self.fit_sample_polynomial_order_spin_box.setEnabled(is_sample_polynomial)
 
         # Check the can settings
-        fit_type_can_as_string = self.fit_can_fit_type_combo_box.currentText().encode('utf-8')
+        fit_type_can_as_string = self.fit_can_fit_type_combo_box.currentText()
         fit_type_can = FitType(fit_type_can_as_string)
         is_can_polynomial = fit_type_can is FitType.POLYNOMIAL
         self.fit_can_polynomial_order_spin_box.setEnabled(is_can_polynomial)
@@ -1321,7 +1321,7 @@ class SANSDataProcessorGui(QMainWindow,
     # ------------------------------------------------------------------------------------------------------------------
     @property
     def wavelength_step_type(self):
-        step_type_as_string = self.wavelength_step_type_combo_box.currentText().encode('utf-8')
+        step_type_as_string = self.wavelength_step_type_combo_box.currentText()
         return RangeStepType(step_type_as_string)
 
     @wavelength_step_type.setter
@@ -1507,7 +1507,7 @@ class SANSDataProcessorGui(QMainWindow,
 
     @property
     def transmission_sample_fit_type(self):
-        fit_type_as_string = self.fit_sample_fit_type_combo_box.currentText().encode('utf-8')
+        fit_type_as_string = self.fit_sample_fit_type_combo_box.currentText()
         return FitType(fit_type_as_string)
 
     @transmission_sample_fit_type.setter
@@ -1520,7 +1520,7 @@ class SANSDataProcessorGui(QMainWindow,
 
     @property
     def transmission_can_fit_type(self):
-        fit_type_as_string = self.fit_can_fit_type_combo_box.currentText().encode('utf-8')
+        fit_type_as_string = self.fit_can_fit_type_combo_box.currentText()
         return FitType(fit_type_as_string)
 
     @transmission_can_fit_type.setter
@@ -1673,7 +1673,7 @@ class SANSDataProcessorGui(QMainWindow,
         try:
             value = float(value_as_string)
         except ValueError:
-            value = value_as_string.encode('utf-8')
+            value = value_as_string
         return value
 
     @q_1d_min_or_rebin_string.setter
@@ -1698,7 +1698,7 @@ class SANSDataProcessorGui(QMainWindow,
 
     @property
     def q_1d_step_type(self):
-        q_1d_step_type_as_string = self.q_1d_step_type_combo_box.currentText().encode('utf-8')
+        q_1d_step_type_as_string = self.q_1d_step_type_combo_box.currentText()
         # Hedge for trying to read out
         try:
             return RangeStepType(q_1d_step_type_as_string)
@@ -1739,7 +1739,7 @@ class SANSDataProcessorGui(QMainWindow,
 
     @property
     def q_xy_step_type(self):
-        q_xy_step_type_as_string = self.q_xy_step_type_combo_box.currentText().encode('utf-8')
+        q_xy_step_type_as_string = self.q_xy_step_type_combo_box.currentText()
         try:
             return RangeStepType(q_xy_step_type_as_string)
         except RuntimeError:
