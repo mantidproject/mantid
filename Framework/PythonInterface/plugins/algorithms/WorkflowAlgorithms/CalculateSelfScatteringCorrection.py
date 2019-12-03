@@ -31,7 +31,7 @@ class CalculateSelfScatteringCorrection(DataProcessorAlgorithm):
     def PyInit(self):
         self.declareProperty(WorkspaceProperty('RawWorkspace', '', direction=Direction.Input),
                              doc='Raw workspace')
-        self.declareProperty(WorkspaceProperty('CorrectionsWorkspace', '', direction=Direction.Output),
+        self.declareProperty(WorkspaceProperty('CorrectionWorkspace', '', direction=Direction.Output),
                              doc='Focused corrected workspace')
         self.declareProperty(name='CalFileName', defaultValue='',
                              doc='Chemical formula for the sample material')
@@ -96,7 +96,7 @@ class CalculateSelfScatteringCorrection(DataProcessorAlgorithm):
         DeleteWorkspace(fit_spectra)
         DeleteWorkspace(monitor)
         DeleteWorkspace(raw_ws)
-        self.setProperty('CorrectionsWorkspace', self_scattering_correction)
+        self.setProperty('CorrectionWorkspace', self_scattering_correction)
 
 
 # Register algorithm with Mantid

@@ -105,8 +105,7 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None,
 
     if merge_banks:
         q_min, q_max = _load_qlims(q_lims)
-        merged_ws = mantid.MergeWorkspaceWithLimits(focused_ws, q_min, q_max)
-        #merged_ws = _merge_workspace_with_limits(focused_ws, q_min, q_max)
+        merged_ws = mantid.MergeWorkspacesWithLimits(focused_ws, q_min, q_max)
         pdf_output = mantid.PDFFourierTransform(Inputworkspace=merged_ws, InputSofQType="S(Q)-1", PDFType="G(r)",
                                                 Filter=True)
     else:

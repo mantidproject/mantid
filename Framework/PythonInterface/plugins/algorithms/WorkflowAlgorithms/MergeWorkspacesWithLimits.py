@@ -12,19 +12,29 @@ from mantid.kernel import (Direction, FloatArrayProperty)
 import numpy as np
 
 
-class MergeWorkspaceWithLimits(DataProcessorAlgorithm):
+class MergeWorkspacesWithLimits(DataProcessorAlgorithm):
+
+    def __init__(self):
+        """Initialize an instance of the algorithm."""
+        DataProcessorAlgorithm.__init__(self)
+
+    def name(self):
+        return 'MergeWorkspacesWithLimits'
 
     def category(self):
-        return "Workflow\\Diffraction"
+        return 'Workflow\\Diffraction'
 
     def seeAlso(self):
-        return [""]
+        return []
 
     def summary(self):
-        return "Merges a group workspace using weighting from a set of range limits for each workspace."
+        return 'Merges a group workspace using weighting from a set of range limits for each workspace.'
 
     def checkGroups(self):
         return False
+
+    def version(self):
+        return 1
 
     def PyInit(self):
         self.declareProperty(WorkspaceProperty('WorkspaceGroup', '', direction=Direction.Input),
@@ -78,4 +88,4 @@ class MergeWorkspaceWithLimits(DataProcessorAlgorithm):
 
 
 # Register algorithm with Mantid
-AlgorithmFactory.subscribe(MergeWorkspaceWithLimits)
+AlgorithmFactory.subscribe(MergeWorkspacesWithLimits)

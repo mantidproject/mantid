@@ -1,0 +1,48 @@
+digraph MergeWorkspacesWithLimits {
+label = "MergeWorkspacesWithLimits Workflow Diagram"
+$global_style
+
+subgraph params {
+  $param_style
+  inputWorkspace            [label="WorkspaceGroup"]
+  outputWorkspace           [label="OutputWorkspace"]
+  xMin                      [label="XMin"]
+  xMax                      [label="XMax"]
+  matchSpectraIndex         [label="Index of spectra with largest X range"]
+}
+
+subgraph decisions {
+  $decision_style
+  isGroupWsNotConjoined     [label="Are there\n un-conjoined workspaces\n in the WorkspaceGroup"]
+}
+
+subgraph algorithms {
+  $algorithm_style
+  Rebin1                    [label="Rebin v1"]
+  ConjoinWorkspaces         [label="ConjoinWorkspaces v1"]
+  MatchSpectra              [label="MatchSpectra v1"]
+  CropWorkspaceRagged       [label="CropWorkspaceRagged v1"]
+  Rebin2                    [label="Rebin v1"]
+  SumSpectra                [label="SumSpectra v1"]
+}
+
+subgraph process  {
+    $process_style
+	findLargestRange		[label="Find detector data with the largest X range"]
+}
+
+inputWorkspace              -> findLargestRange
+findLargestRange            -> Rebin1
+findLargestRange            -> matchSpectraIndex
+Rebin1                      -> isGroupWsNotConjoined
+isGroupWsNotConjoined       -> ConjoinWorkspaces        [label="Yes"]
+isGroupWsNotConjoined       -> MatchSpectra             [label="No"]
+ConjoinWorkspaces           -> isGroupWsNotConjoined
+matchSpectraIndex           -> MatchSpectra
+MatchSpectra                -> CropWorkspaceRagged
+xMin                        -> CropWorkspaceRagged
+xMax                        -> CropWorkspaceRagged
+CropWorkspaceRagged         -> Rebin2
+Rebin2                      -> SumSpectra
+SumSpectra                  -> outputWorkspace
+}
