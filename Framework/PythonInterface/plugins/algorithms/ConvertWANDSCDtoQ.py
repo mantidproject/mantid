@@ -71,7 +71,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
                                                direction=Direction.Output),
                              "Output Workspace")
 
-    def validateInputs(self):
+    def validateInputs(self):  # noqa C901
         issues = dict()
 
         inWS = self.getProperty("InputWorkspace").value
@@ -147,7 +147,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
 
         return issues
 
-    def PyExec(self):
+    def PyExec(self):  # noqa C901
         inWS = self.getProperty("InputWorkspace").value
         normWS = self.getProperty("NormalisationWorkspace").value
         _norm = bool(normWS)
