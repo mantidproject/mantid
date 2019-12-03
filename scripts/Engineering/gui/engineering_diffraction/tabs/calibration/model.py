@@ -80,6 +80,7 @@ class CalibrationModel(object):
         except RuntimeError:
             logger.error("Invalid file selected: ", file_path)
             return
+        vanadium_corrections.fetch_correction_workspaces(van_no, instrument)
         return instrument, van_no, ceria_no
 
     @staticmethod
@@ -248,7 +249,11 @@ class CalibrationModel(object):
                     # If formatted correctly the line should be in the format INS bank ICONS difc difa tzero
                     elements = line.split()
                     bank = elements[1]
-                    params_table.append([int(bank) - 1, float(elements[3]), float(elements[4]), float(elements[5])])
+                    params_table.append(
+                        [int(bank) - 1,
+                         float(elements[3]),
+                         float(elements[4]),
+                         float(elements[5])])
 
         if run_numbers == "":
             raise RuntimeError("Invalid file format.")

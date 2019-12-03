@@ -22,8 +22,9 @@ class FocusPresenterTest(unittest.TestCase):
         self.model = mock.create_autospec(model.FocusModel)
         self.presenter = presenter.FocusPresenter(self.model, self.view)
 
+    @patch(tab_path + ".presenter.check_workspaces_exist")
     @patch(tab_path + ".presenter.FocusPresenter.start_focus_worker")
-    def test_worker_started_with_correct_params(self, worker):
+    def test_worker_started_with_correct_params(self, worker, wsp_exists):
         self.presenter.current_calibration = {
             "vanadium_path": "Fake/Path",
             "ceria_path": "Fake/Path"
@@ -33,6 +34,7 @@ class FocusPresenterTest(unittest.TestCase):
         self.view.get_south_bank.return_value = True
         self.view.get_plot_output.return_value = True
         self.view.is_searching.return_value = False
+        wsp_exists.return_value = True
 
         self.presenter.on_focus_clicked()
         worker.assert_called_with("305738", ["South"], True, None)
@@ -106,26 +108,30 @@ class FocusPresenterTest(unittest.TestCase):
         create_error.assert_called_with(
             "Load a calibration from the Calibration tab before focusing.")
 
+    @patch(tab_path + ".presenter.check_workspaces_exist")
     @patch(tab_path + ".presenter.FocusPresenter._create_error_message")
-    def test_validate_while_searching(self, create_error):
+    def test_validate_while_searching(self, create_error, wsp_check):
         self.presenter.current_calibration = {
             "vanadium_path": "Fake/File/Path",
             "ceria_path": "Fake/Path"
         }
         self.view.is_searching.return_value = True
+        wsp_check.return_value = True
         banks = ["North", "South"]
 
         self.assertEqual(False, self.presenter._validate(banks))
         self.assertEqual(0, create_error.call_count)
 
+    @patch(tab_path + ".presenter.check_workspaces_exist")
     @patch(tab_path + ".presenter.FocusPresenter._create_error_message")
-    def test_validate_with_no_banks_selected(self, create_error):
+    def test_validate_with_no_banks_selected(self, create_error, wsp_check):
         self.presenter.current_calibration = {
             "vanadium_path": "Fake/Path",
             "ceria_path": "Fake/Path"
         }
         self.view.is_searching.return_value = False
         banks = []
+        wsp_check.return_value = True
 
         self.presenter._validate(banks)
         create_error.assert_called_with("Please select at least one bank.")
