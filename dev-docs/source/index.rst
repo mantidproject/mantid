@@ -62,6 +62,7 @@ Development Process
    DevelopmentAndReleaseCycle
    Communication
    IssueTracking
+   UserSupport
    GitWorkflow
    AutomatedBuildProcess
    JenkinsConfiguration
@@ -78,6 +79,9 @@ Development Process
 
 :doc:`IssueTracking`
    Describes how issues are tracked over the project.
+
+:doc:`UserSupport`
+   Procedures for User Problems to be tested and passed to the Development Team.
 
 :doc:`GitWorkflow`
    Details the workflow used development with git and GitHub.
