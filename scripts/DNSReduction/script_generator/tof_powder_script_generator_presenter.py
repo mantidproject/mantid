@@ -188,7 +188,9 @@ class DNSTofPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
         l('sample_data = {}'.format(format_dataset(sample_data)))
         l('standard_data = {}'.format(format_dataset(standard_data)))
 
-
+        backstring = ''
+        vanastring = ''
+        backtofstring = ''
         if vanadium_correction:
             vanastring = "\n          'vana_temperature' : "\
                          "{},".format(tof_opt['vanadium_temperature'])
