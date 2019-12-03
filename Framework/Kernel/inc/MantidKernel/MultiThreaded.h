@@ -137,6 +137,7 @@ void AtomicOp(std::atomic<T> &f, T d, BinaryOp op) {
  */
 #define PARALLEL_FOR_IF(condition)                                             \
   PARALLEL_SET_THREADS_TO_CONFIG                                               \
+  PARALLEL_SET_DYNAMIC(false);                                                 \
   PRAGMA(omp parallel for if (condition) )
 
 /** Includes code to add OpenMP commands to run the next for loop in parallel.
@@ -145,6 +146,7 @@ void AtomicOp(std::atomic<T> &f, T d, BinaryOp op) {
  */
 #define PARALLEL_FOR_NO_WSP_CHECK()                                            \
   PARALLEL_SET_THREADS_TO_CONFIG                                               \
+  PARALLEL_SET_DYNAMIC(false);                                                 \
   PRAGMA(omp parallel for)
 
 /** Includes code to add OpenMP commands to run the next for loop in parallel.
@@ -154,10 +156,12 @@ void AtomicOp(std::atomic<T> &f, T d, BinaryOp op) {
  */
 #define PARALLEL_FOR_NOWS_CHECK_FIRSTPRIVATE(variable)                         \
   PARALLEL_SET_THREADS_TO_CONFIG                                               \
+  PARALLEL_SET_DYNAMIC(false);                                                 \
   PRAGMA(omp parallel for firstprivate(variable) )
 
 #define PARALLEL_FOR_NO_WSP_CHECK_FIRSTPRIVATE2(variable1, variable2)          \
   PARALLEL_SET_THREADS_TO_CONFIG                                               \
+  PARALLEL_SET_DYNAMIC(false);                                                 \
   PRAGMA(omp parallel for firstprivate(variable1, variable2) )
 
 /** Ensures that the next execution line or block is only executed if
