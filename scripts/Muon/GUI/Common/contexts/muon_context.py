@@ -380,7 +380,6 @@ class MuonContext(object):
         self.fitting_context.remove_workspace_by_name(workspace_name)
         self.gui_context.remove_workspace_by_name(workspace_name)
         self.update_view_from_model_notifier.notify_subscribers(workspace_name)
-        self.update_plot_notifier.notify_subscribers(workspace_name)
 
     def clear_context(self):
         self.data_context.clear()
