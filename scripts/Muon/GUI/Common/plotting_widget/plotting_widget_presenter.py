@@ -82,8 +82,9 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             self._model.remove_workspace_from_plot_by_name(workspace)
 
     def handle_workspace_replaced_in_ads(self, workspace):
-        if workspace in self._model.plotted_workspaces:
-            self.plot_standard_workspaces()
+        if not self._view.if_raw():
+            if workspace in self._model.plotted_workspaces:
+                self.plot_standard_workspaces()
 
     def handle_use_raw_workspaces_changed(self):
         """
