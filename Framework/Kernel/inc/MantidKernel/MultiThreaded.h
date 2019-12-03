@@ -136,7 +136,7 @@ void AtomicOp(std::atomic<T> &f, T d, BinaryOp op) {
  *   code to be executed in parallel
  */
 #define PARALLEL_FOR_IF(condition)                                             \
-  PARALLEL_SET_THREADS_TO_CONFIG                                               \
+  setMaxCoresToConfig();                                                       \
   PARALLEL_SET_DYNAMIC(false);                                                 \
   PRAGMA(omp parallel for if (condition) )
 
@@ -145,7 +145,7 @@ void AtomicOp(std::atomic<T> &f, T d, BinaryOp op) {
  *   and therefore should not be used in any loops that access workspaces.
  */
 #define PARALLEL_FOR_NO_WSP_CHECK()                                            \
-  PARALLEL_SET_THREADS_TO_CONFIG                                               \
+  setMaxCoresToConfig();                                                       \
   PARALLEL_SET_DYNAMIC(false);                                                 \
   PRAGMA(omp parallel for)
 
@@ -155,12 +155,12 @@ void AtomicOp(std::atomic<T> &f, T d, BinaryOp op) {
  *  and therefore should not be used in any loops that access workspace.
  */
 #define PARALLEL_FOR_NOWS_CHECK_FIRSTPRIVATE(variable)                         \
-  PARALLEL_SET_THREADS_TO_CONFIG                                               \
+  setMaxCoresToConfig();                                                       \
   PARALLEL_SET_DYNAMIC(false);                                                 \
   PRAGMA(omp parallel for firstprivate(variable) )
 
 #define PARALLEL_FOR_NO_WSP_CHECK_FIRSTPRIVATE2(variable1, variable2)          \
-  PARALLEL_SET_THREADS_TO_CONFIG                                               \
+  setMaxCoresToConfig();                                                       \
   PARALLEL_SET_DYNAMIC(false);                                                 \
   PRAGMA(omp parallel for firstprivate(variable1, variable2) )
 
@@ -205,15 +205,13 @@ void AtomicOp(std::atomic<T> &f, T d, BinaryOp op) {
 
 #define PARALLEL_SECTION PRAGMA(omp section)
 
-#define PARALLEL_SET_THREADS_TO_CONFIG                                         \
-  {                                                                            \
-    const auto maxCores =                                                      \
-        Mantid::Kernel::ConfigService::Instance().getValue<int>(               \
-            "MultiThreaded.MaxCores");                                         \
-    if (maxCores.get_value_or(0) > 0) {                                        \
-      PARALLEL_SET_NUM_THREADS(maxCores.get());                                \
-    }                                                                          \
+inline void setMaxCoresToConfig() {
+  const auto maxCores = Mantid::Kernel::ConfigService::Instance().getValue<int>(
+      "MultiThreaded.MaxCores");
+  if (maxCores.get_value_or(0) > 0) {
+    PARALLEL_SET_NUM_THREADS(maxCores.get());
   }
+}
 
 /** General purpose define for OpenMP, becomes the equivalent of
  * #pragma omp EXPRESSION
