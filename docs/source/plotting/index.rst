@@ -448,7 +448,7 @@ These can be found `online <https://www.rapidtables.com/web/color/html-color-cod
 .. figure:: ../images/ColorCustomCycleLine.PNG
    :class: screenshot
    :width: 750px
-   :align: centre
+   :align: center
 
 Custom Colormap (MantidPlot)
 ############################
@@ -485,7 +485,7 @@ Then open up any dataset (such as EMU00020884.nxs from the `TrainingCourseData <
 .. figure:: ../images/ColorMapCustomPlot.PNG
    :class: screenshot
    :width: 500px
-   :align: centre
+   :align: center
 
 This New Colormap is saved within the MantidInstall folder so it can be used without re-running this script!
 
