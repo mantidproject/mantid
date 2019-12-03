@@ -87,7 +87,7 @@ Usage
 
 **Example - Multiple Angles**
 
-.. testsetup:: MultipleAngles
+.. testsetup:: MultipleAnglesPP
 
     config['default.facility'] = 'ILL'
     config['default.instrument'] = 'D17'
@@ -105,13 +105,11 @@ Usage
     )
     print('The R(Q) workspace at first angle has {0} points'.format(ws.getItem(0).blocksize()))
     print('The R(Q) workspace at second angle has {0} points'.format(ws.getItem(1).blocksize()))
-    print('The stitched R(Q) workspace has {0} points'.format(ws.getItem(2).blocksize()))
 
 .. testoutput:: MultipleAngles
 
     The R(Q) workspace at first angle has 237 points
     The R(Q) workspace at second angle has 127 points
-    The stitched R(Q) workspace has 364 points
 
 .. relatedalgorithms::
 
