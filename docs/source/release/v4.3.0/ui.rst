@@ -11,6 +11,9 @@ UI & Usability Changes
 
 Installation
 ------------
+- Mantid Plot and Workbench can now be opened on Windows by typing
+  "Workbench", "Plot" or "Mantid" into the start menu, previously only
+  "Mantid" worked.
 
 MantidPlot
 ----------

@@ -178,8 +178,8 @@ install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/images/${WINDOWS_NSIS_MANTIDNOTEBOOK
 ###########################################################################
 # On install. The blank lines seem to be required or it doesn't create the shortcut
 
-set ( MANTIDPLOT_LINK_NAME "MantidPlot${WINDOWS_CAPITALIZED_PACKAGE_SUFFIX}.lnk" )
-set ( MANTIDNOTEBOOK_LINK_NAME "MantidNotebook${WINDOWS_CAPITALIZED_PACKAGE_SUFFIX}.lnk" )
+set ( MANTIDPLOT_LINK_NAME "Mantid Plot ${WINDOWS_CAPITALIZED_PACKAGE_SUFFIX}.lnk" )
+set ( MANTIDNOTEBOOK_LINK_NAME "Mantid Notebook ${WINDOWS_CAPITALIZED_PACKAGE_SUFFIX}.lnk" )
 
 set (CPACK_NSIS_CREATE_ICONS_EXTRA "
   CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\${MANTIDPLOT_LINK_NAME}' '$SYSDIR\\\\wscript.exe' '\\\"$INSTDIR\\\\bin\\\\launch_mantidplot.vbs\\\"' '$INSTDIR\\\\bin\\\\${WINDOWS_NSIS_MANTIDPLOT_ICON_NAME}.ico'
@@ -213,7 +213,7 @@ set (CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "
 # this is done via appending the relevant commands to the already declared variables
 if ( ENABLE_WORKBENCH )
   install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/images/${WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME}.ico DESTINATION bin )
-  set ( MANTIDWORKBENCH_LINK_NAME "MantidWorkbench${WINDOWS_CAPITALIZED_PACKAGE_SUFFIX}.lnk" )
+  set ( MANTIDWORKBENCH_LINK_NAME "Mantid Workbench ${WINDOWS_CAPITALIZED_PACKAGE_SUFFIX}.lnk" )
   message(STATUS "Adding icons for Workbench as it is being packaged in the installation.")
   set (CPACK_NSIS_CREATE_ICONS_EXTRA "
     CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\${MANTIDWORKBENCH_LINK_NAME}' '\\\"$INSTDIR\\\\bin\\\\launch_workbench.exe\\\"' '' '$INSTDIR\\\\bin\\\\${WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME}.ico'
