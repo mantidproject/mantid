@@ -147,6 +147,9 @@ required for Mantid development.
 
 %changelog
 
+* Tue Dec 03 2019 David Fairbrother <david.fairbrother@stfc.ac.uk>
+- Added Python Enum34 back-port to the required Python dependencies
+
 * Tue Nov 5 2019 Martyn Gigg <martyn.gigg@stfc.ac.uk>
 - Switch to python{2,3}-qt5-devel
 - Remove python2-scikit-image
