@@ -73,7 +73,8 @@ class MergeWorkspacesWithLimits(DataProcessorAlgorithm):
                               CheckOverlapping=False)
 
         ws_conjoined, offset, scale, chisq = MatchSpectra(InputWorkspace=ws_group[0],
-                                                          ReferenceSpectrum=largest_range_spectrum)
+                                                          ReferenceSpectrum=largest_range_spectrum,
+                                                          CalculateScale=False)
         bin_width = np.inf
         for i in range(x_min.size):
             pdf_x_array = ws_conjoined.readX(i)
