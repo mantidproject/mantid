@@ -18,6 +18,7 @@ from functools import partial
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QCursor
 from qtpy.QtWidgets import QActionGroup, QMenu, QApplication
+from matplotlib.colors import LogNorm, Normalize
 
 # third party imports
 from mantid.api import AnalysisDataService as ads
@@ -36,6 +37,8 @@ from workbench.plotting.toolbar import ToolbarStateManager
 AXES_SCALE_MENU_OPTS = OrderedDict(
     [("Lin x/Lin y", ("linear", "linear")), ("Log x/Log y", ("log", "log")),
      ("Lin x/Log y", ("linear", "log")), ("Log x/Lin y", ("log", "linear"))])
+COLORBAR_SCALE_MENU_OPTS = OrderedDict(
+    [("Linear", Normalize), ("Log", LogNorm)])
 VALID_LINE_STYLE = ['solid', 'dashed', 'dotted', 'dashdot']
 VALID_COLORS = {
     'blue': '#1f77b4',
@@ -284,7 +287,9 @@ class FigureInteraction(object):
 
         if fig_type == FigureType.Image:
             if isinstance(event.inaxes, MantidAxes):
+                self._add_axes_scale_menu(menu, event.inaxes)
                 self._add_normalization_option_menu(menu, event.inaxes)
+                self._add_colorbar_axes_scale_menu(menu, event.inaxes)
         else:
             if self.fit_browser.tool is not None:
                 self.fit_browser.add_to_menu(menu)
@@ -334,6 +339,19 @@ class FigureInteraction(object):
             none_action.setChecked(True)
 
         menu.addMenu(norm_menu)
+
+    def _add_colorbar_axes_scale_menu(self, menu, ax):
+        """Add the Axes scale options menu to the given menu"""
+        axes_menu = QMenu("Color bar", menu)
+        axes_actions = QActionGroup(axes_menu)
+        images = ax.images + [col for col in ax.collections if hasattr(ax, 'collections')]
+        for label, scale_type in iteritems(COLORBAR_SCALE_MENU_OPTS):
+            action = axes_menu.addAction(label, partial(self._change_colorbar_axes, scale_type))
+            if type(images[0].norm) == scale_type:
+                action.setCheckable(True)
+                action.setChecked(True)
+            axes_actions.addAction(action)
+        menu.addMenu(axes_menu)
 
     def _add_marker_option_menu(self, menu, event):
         """
@@ -612,4 +630,14 @@ class FigureInteraction(object):
         ax.set_xscale(scale_types[0])
         ax.set_yscale(scale_types[1])
 
+        self.canvas.draw_idle()
+
+    def _change_colorbar_axes(self, scale_type):
+        for ax in self.canvas.figure.get_axes():
+            images = ax.images + [col for col in ax.collections if hasattr(ax, 'collections')]
+            for image in images:
+                image.set_norm(scale_type())
+                if image.colorbar:
+                    image.colorbar.remove()
+                    self.canvas.figure.colorbar(image)
         self.canvas.draw_idle()
