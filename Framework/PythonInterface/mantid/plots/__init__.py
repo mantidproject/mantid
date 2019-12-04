@@ -871,9 +871,11 @@ class MantidAxes(Axes):
                     col.remove()
             if hasattr(artist_orig, 'colorbar_cid'):
                 artist_orig.callbacksSM.disconnect(artist_orig.colorbar_cid)
-        artists_new = colorfunc(self, workspace, cmap=artist_orig.cmap,
-                                norm=artist_orig.norm,  **kwargs)
+        if artist_orig.norm.vmin == 0:  # avoid errors with log 0
+            artist_orig.norm.vmin += 1e-6
+        artists_new = colorfunc(self, workspace, norm=artist_orig.norm,  **kwargs)
 
+        artists_new.set_cmap(artist_orig.cmap)
         if hasattr(artist_orig, 'interpolation'):
             artists_new.set_interpolation(artist_orig.get_interpolation())
 
