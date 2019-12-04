@@ -28,7 +28,7 @@ The main purpose of user support for the Mantid project, is to aide contact betw
 Bugs and Error Reports
 ----------------------
 
-1.	Users can report bugs via the `Mantid Help Forum <https://forum.mantidproject.org/>`_ or the `Mantid Help Email <mantid-help@mantidproject.org>_, or from collected **Error Reports**. Currently this is a quick first contact with the team, but doesn't give much detail about the usage or unexpected error.
+1.	Users can report bugs via the `Mantid Help Forum <https://forum.mantidproject.org/>`_ or the `Mantid Help Email <mantid-help@mantidproject.org>`_, or from collected **Error Reports**. Currently this is a quick first contact with the team, but doesn't give much detail about the usage or unexpected error.
 2.	The bug is verified and reproduced by the support team.
 3.	The impact and importance is assessed by the support team member by contacting the users, instrument scientists, developers or project manager as appropriate.
 4.	A Github issue to resolve the problem is created if appropriate and/or workaround tested if possible.
