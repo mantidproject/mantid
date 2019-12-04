@@ -114,15 +114,15 @@ class DNSTofPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
             return True
         return False
 
-    def ceck_background_correction(self, tof_opt):
-        if (self.number_of_empty_banks > 0
+    def check_background_correction(self, tof_opt):
+        if not (self.number_of_empty_banks > 0
                 and tof_opt['corrections']):
-            return True
-        return False
-        if self.number_of_banks == 0:
+            return False
+        elif self.number_of_banks == 0:
             self.raise_error('No data selected.', critical=True)
             return False
-
+        else:
+            return True
     def validate_input(self, tof_opt):
         if (tof_opt['dEstep'] == 0
                 or tof_opt['qstep'] == 0
@@ -143,6 +143,7 @@ class DNSTofPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
             self.raise_error('No Background files selected, but background'
                              ' substraction option choosen.')
             return False
+        return True
 
     def script_maker(self): # noqa: C901
         self.script = [""]
@@ -158,8 +159,8 @@ class DNSTofPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
         standard_data = create_dataset(
             self.param_dict['file_selector']['standard_data'])
         vanafilename = self.get_vana_filename(standard_data)
-        emptyfilename = self.get_empty_filename(self, standard_data)
-        samplefilename =  self.get_sample_filename(self, sample_data)
+        emptyfilename = self.get_empty_filename(standard_data)
+        samplefilename = self.get_sample_filename(sample_data)
 
         self.number_of_banks = len(sample_data.get(samplefilename, ' ')) - 1
         self.number_of_vana_banks = len(standard_data.get(vanafilename,
@@ -167,9 +168,9 @@ class DNSTofPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
         self.number_of_empty_banks = len(standard_data.get(emptyfilename,
                                                            ' ')) - 1
         vanadium_correction = self.check_vanadium_correction(tof_opt)
-        background_correction =  self.check_background_correction(tof_opt)
+        background_correction = self.check_background_correction(tof_opt)
 
-        if not self.validate_input(self, tof_opt):
+        if not self.validate_input(tof_opt):
             return False
 
         export_path = paths["export_dir"]
