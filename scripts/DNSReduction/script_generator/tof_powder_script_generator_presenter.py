@@ -123,6 +123,10 @@ class DNSTofPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
             return False
         else:
             return True
+<<<<<<< HEAD
+
+=======
+>>>>>>> 2522bdd228fcb0328e32ba294815076378dfc2d8
     def validate_input(self, tof_opt):
         if (tof_opt['dEstep'] == 0
                 or tof_opt['qstep'] == 0
