@@ -4,12 +4,12 @@
 ISIS Reflectometry Interface
 ============================
 
-This document gives a brief overview of the :ref:`ISIS Reflectometry Interface <interface-isis-refl>` design and things that you should be aware of when working on this interface. If you need to work on this interface, please make sure you are familiar with the `Development guidelines`_ below as a minimum.
+This document gives a brief overview of the `ISIS Reflectometry Interface <https://docs.mantidproject.org/nightly/interfaces/ISIS%20Reflectometry.html>`_ design and things that you should be aware of when working on this interface. If you need to work on this interface, please make sure you are familiar with the `Development guidelines`_ below as a minimum.
 
 Overview
 --------
 
-The :ref:`ISIS Reflectometry Interface <interface-isis-refl>` provides a way for users to easily run a reduction on a *batch* of runs. A batch of runs is entered into a table, which is actually a tree structure with two levels - this allows sets of runs to be grouped so that their outputs are post-processed (stitched) together. Various default settings can be specified on the tabs. A tab is also provided to make exporting the results for a set of workspaces easy.
+The `ISIS Reflectometry Interface <https://docs.mantidproject.org/nightly/interfaces/ISIS%20Reflectometry.html>`_ provides a way for users to easily run a reduction on a *batch* of runs. A batch of runs is entered into a table, which is actually a tree structure with two levels - this allows sets of runs to be grouped so that their outputs are post-processed (stitched) together. Various default settings can be specified on the tabs. A tab is also provided to make exporting the results for a set of workspaces easy.
 
 The reduction for each row is done via :ref:`algm-ReflectometryISISLoadAndProcess` (which includes any pre-processing). Post-processing for a group is done via :ref:`algm-Stitch1DMany`.
 
@@ -21,7 +21,7 @@ Structure
 :code:`GUI`
 ###########
 
-This directory contains all of the GUI code for the interface. Each separate component e.g. the Experiment tab, has its own subdirectory. Each of these components has its own view and presenter. There is also a :code:`Common` subdirectory for GUI components/interfaces common to more than one widget.
+This directory contains all of the GUI code for the interface. Each separate component e.g. the Experiment tab, has its own subdirectory. Each of these components has its own view and presenter. There is also a :code:`Common` subdirectory for GUI components/interfaces common to more than one widget (e.g. the :code:`IMessageHandler` interface).
 
 Briefly the structure is as follows:
 
@@ -48,7 +48,7 @@ Additionally, these models also contain state information, e.g. the :code:`Row` 
 :code:`Common`
 ##############
 
-This directory contains non-GUI-specific utility files useful in more than one component of the reflectometry interface but that are still specific to this interface; more generic utilities should be put elsewhere, e.g. in Framework.
+This directory contains non-GUI-specific utility files useful in more than one component of the reflectometry interface but that are still specific to this interface, e.g. :code:`Parse.h` contains parsing utility functions that are specific for parsing reflectometry input strings such as lists of run numbers. More generic utilities should be put elsewhere, e.g. generic string handling functions might go in :code:`Framework/Kernel`.
 
 :code:`TestHelpers`
 ###################
@@ -60,7 +60,7 @@ Reduction back-end
 
 The back-end is primarily a set of algorithms, with the entry points from the GUI being :ref:`algm-ReflectometryISISLoadAndProcess` (for reducing a row) and :ref:`algm-Stitch1DMany` (for post-processing a group). Any additional processing should be added to these algorithms, or a new wrapper algorithm could be added if appropriate (this might be necessary in future if post-processing will involve more than just stitching).
 
-The :code:`BatchPresenter` is the main coordinator for executing a reduction. It uses the :code:`BatchJobRunner`, which converts the reduction configuration to a format appropriate for the algorithms. The conversion functions are in :code:`RowProcessingAlgorithm` and :code:`GroupProcessingAlgorithm`, and any algorithm-specific code should be kept to these files.
+The :code:`BatchPresenter` is the main coordinator for executing a reduction. It uses the :code:`BatchJobRunner`, which converts the reduction configuration to a format appropriate for the algorithms. The conversion functions are in files called :code:`RowProcessingAlgorithm` and :code:`GroupProcessingAlgorithm`, and any algorithm-specific code should be kept to these files.
 
 Unfortunately the whole batch cannot be farmed off to a single algorithm because we need to update the GUI after each row completes, and we must be able to interrupt processing so that we can cancel a large batch operation. We also need to know whether rows completed successfully before we can set up the group post-processing algorithms. Some queue management is therefore done by the :code:`BatchPresenter`, with the help of the :code:`BatchAlgorithmRunner`.
 
@@ -76,26 +76,34 @@ To ensure the GUI can be easily tested we follow the MVP design pattern. There i
 
 The view cannot easily be tested, so the aim of MVP is to keep the view as simple as possible so that testing it is not necessary. Typically any user action on the view results in a notification to the presenter and is handled from there (even if that is just an update back to the view). Even simple things like which buttons are enabled on startup are controlled via the presenter rather than setting defaults in the view itself.
 
-The views should not have a direct pointer to their presenters, so the notification is done via a subscriber interface (see the `Subscriber pattern`_ example below). The only exception is the :code:`QtMainWindowView` (see `Dependency inversion`_), but notifications should still be done via the subscriber interface.
+It can be tempting to add one line to toggle or update something in the view without wiring up the presenter. But these quick fixes can quickly introduce bugs as they accumulate. The first question to ask yourself before making any change is: how will I unit test it? In fact, we recommend you follow `test driven development <https://www.mantidproject.org/TDD>`_ and write the unit tests first.
+
+Note that the views should not have a direct pointer to their presenters, so the notification is done via a subscriber interface (see `Subscriber pattern`_ for an example). The only exception is the :code:`QtMainWindowView` (see `Dependency inversion`_), but notifications should still be done via the subscriber interface. This helps to avoid accidentally introducing logic into the view about what should happen on an event and instead just notify that an event happened. It could also be easily extended to support multiple notifyees of different types, such as different subscribed presenters.
 
 Dependency inversion
 ####################
 
-Dependency inversion has been introduced in an effort to simplify some aspects of the design and to make the code more modular and easier to test. Most injection is currently performed using constructors and takes place at the 'entry-point' for the Reflectometry GUI, in :code:`QtMainWindowView`. See the `Dependency injection`_ example below.
+Dependency inversion has been introduced in an effort to simplify some aspects of the design and to make the code more modular. Objects that a class depends on are "injected", rather than being created directly within the class that requires them. This makes testing easier, because the real objects can easily be replaced with mocks. Most injection is currently performed using constructors and takes place at the 'entry-point' for the Reflectometry GUI, in :code:`QtMainWindowView`. See the `Dependency injection`_ example below.
 
-It is not normal in MVP for a view to have ownership of its presenter. However since the whole of mantid does not use Dependency Injection, and due to the way interfaces get instantiated this is currently necessary for :code:`QtMainWindowView`. Use of this for any other purpose should be avoided, so ensure you use the :code:`MainWindowSubscriber` interface to send notifications to the presenter instead.
+It is not normal in MVP for a view to have ownership of its presenter. However since the whole of mantid does not use Dependency Injection, and due to the way interfaces get instantiated this is currently necessary for :code:`QtMainWindowView`. This pointer should only be used for ownership and all other usage should be avoided, so ensure you use the :code:`MainWindowSubscriber` interface to send notifications to the presenter - i.e. use :code:`m_notifyee` instead of :code:`m_presenter`.
 
 Coordinate via presenters
 #########################
 
-Coordination between different components is done via the presenters. Each presenter owns any child presenters, and has a pointer to its parent presenter which is set by the parent calling :code:`acceptMainPresenter` on the child.
+Although the components are largely self-contained, there are occasions where communication between them is required. For example, when processing is running, we do not want the user to be able to edit any settings, because this would change the model that the reduction is running on. We therefore disable all inputs that would affect the reduction when processing is running, and re-enable them when it stops.
 
-Coordination between horizontal tabs is done by notifying up to the :code:`BatchPresenter` which then notifies its child components. Coordination between different batch tabs is occasionally required (e.g. to ensure only one autoprocessing operation can run at a time) and in this case this is done via calls to the :code:`MainWindowPresenter`.
+Although enabling/disabling inputs in this example affects the views, coordination between components is done via the presenters. This is to ensure that all of these interactions can be unit tested. Each presenter owns its child presenters, and also has a pointer to its parent presenter (which is set by its parent calling :code:`acceptMainPresenter` on the child and passing a pointer to itself).
+
+In the example mentioned, processing is initiated from e.g. the button on the :code:`RunsView`. This sends a notification to the :code:`RunsPresenter` via the subscriber interface. However, the :code:`RunsPresenter` cannot initiate processing because information is needed from the other tabs, and the other tabs need to be updated after it starts. Processing therefore needs to be coordinated at the Batch level. The :code:`RunsPresenter` therefore simply notifies its parent :code:`BatchPresenter` that the user requested to start processing. The :code:`BatchPresenter` then does the work to initiate processing. Once it has started (assuming it started successfully) it then notifies all of its child presenters (including the :code:`RunsPresenter`) that processing is in progress.
+
+Communication between different Batch components is also occasionally required. For example, for usability reasons, only one autoprocessing operation is allowed to be running at any one time. This means that when autoprocessing is running, we need to disable the :code:`AutoProcess` button on all of the other Batch tabs as well. This must be coordinated via the MainWindow component, which is the only component that has access to all of the Batch tabs. The user initiates autoprocessing using the :code:`AutoProcess` button on the :code:`BatchView`, which notifies the :code:`BatchPresenter` via the subscriber interface. Since the :code:`BatchPresenter` knows everything it needs to start autoprocessing for that batch, it does the work to initiate autoprocessing itself. It then simply notifies its parent :code:`MainWindowPresneter` that autoprocessing is in progress (again, assuming that it started successfully). The :code:`MainWindowPresenter` then notifies all of its child presenters that autoprocessing is in progress so that they can enable/disable any buttons/widgets as required.
 
 Avoid use of Qt types outside of Qt classes
 ###########################################
 
-Qt specific types such as :code:`QString`, :code:`QColor` and subclasses of :code:`QWidget` should be kept out of the presenters and models. All classes that use Qt (namely the views, along with a few supporting classes which wrap or subclass :code:`QObject`) are named with a :code:`Qt` prefix to make it clear where Qt is used. Conversion from types like :code:`QString` to :code:`std::string` is performed within the view, and no Qt types are present in their interfaces. 
+Qt-specific types such as :code:`QString`, :code:`QColor` and subclasses of :code:`QWidget` should be kept out of the presenters and models. This avoids confusion over which types should be used and a potentially messy situation where we are always having to convert back and forth between Qt types and :code:`std` types. It also avoids an over-reliance on Qt, so that the view could be swapped out in future to one using a different framework, with little or no changes to the presenters and models.
+
+To help make it clear where Qt is used, all classes that use Qt (namely the views, along with a few supporting classes which wrap or subclass :code:`QObject`) are named with a :code:`Qt` prefix in their file and class names. Conversion from types like :code:`QString` to :code:`std::string` is performed within the views, and no Qt types are present in their interfaces. 
 
 Keep the reduction configuration up to date
 ###########################################
@@ -124,7 +132,7 @@ Let's take the :code:`Event` component as an example.
   .. code-block:: c++
 
     EventPresenter::EventPresenter(IEventView *view)
-        : m_view(view), m_sliceType(SliceType::None) {
+        : m_view(view) {
       m_view->subscribe(this);
     }
 
@@ -144,13 +152,10 @@ Let's take the :code:`Event` component as an example.
     public:
       virtual void notifySliceTypeChanged(SliceType newSliceType) = 0;
       virtual void notifyUniformSliceCountChanged(int sliceCount) = 0;
-      virtual void notifyUniformSecondsChanged(double sliceLengthInSeconds) = 0;
-      virtual void
-      notifyCustomSliceValuesChanged(std::string pythonListOfSliceTimes) = 0;
-      virtual void
-      notifyLogSliceBreakpointsChanged(std::string logValueBreakpoints) = 0;
-      virtual void notifyLogBlockNameChanged(std::string blockName) = 0;
+      ...
     };
+
+  Note that :code:`MANTIDQT_ISISREFLECTOMETRY_DLL` is used to expose classes/functions so they can be used in different modules. In this case, it is needed in order for this class to be used in the tests, because the tests are not part of the ISISReflectometry library. If you get linker errors, this is one thing to check.
 
 - The presenter implements the subscriber interface.
 
@@ -169,7 +174,7 @@ Let's take the :code:`Event` component as an example.
       m_mainPresenter->notifySettingsChanged();
     }
 
-- When a user interacts with the view, all the view needs to do is send the appropriate notification. The view does not know anything about the concrete type that it is notifying. This helps to avoid accidentally introducing logic into the view about what should happen on an event and instead just notify that an event happened. It could also be easily extended to support multiple notifyees of different types. 
+- When a user interacts with the view, all the view needs to do is send the appropriate notification. By using an interface, the view does not know anything about the concrete type that it is notifying. This helps to avoid accidentally introducing logic into the view about what should happen on an event and instead just notify that an event happened. It could also be easily extended to support multiple notifyees of different types, such as different subscribed presenters.
 
   .. code-block:: c++
 
@@ -181,7 +186,7 @@ Let's take the :code:`Event` component as an example.
 Dependency injection
 ####################
 
-A simple example of dependency injection is in the use of an :code:`IMessageHandler` interface to provide a service to display messages to the user. These messages must be displayed by a Qt view. Rather than each view having to implement this, we use one object (in this case the :code:`QtMainWindowView`) to implement this functionality and pass it as an :code:`IMessageHandler` to all of the presenters that need it.
+A simple example of `Dependency inversion`_ is in the use of an :code:`IMessageHandler` interface to provide a service to display messages to the user. These messages must be displayed by a Qt view. Rather than each view having to implement this, we use one object (in this case the :code:`QtMainWindowView`) to implement this functionality and inject it as an :code:`IMessageHandler` to all of the presenters that need it.
 
 - The :code:`IMessageHandler` interface defines the functions for displaying messages:
 
@@ -205,7 +210,7 @@ A simple example of dependency injection is in the use of an :code:`IMessageHand
                             QMessageBox::Ok);
     }
 
-- The :code:`QtMainWindowView` sets up the concrete instance (actually just a pointer to itself) and passes it in the construction of anything that needs it, e.g. the :code:`RunsPresenter` (in this case using a factory - more about the `Factory pattern`_ below):
+- The :code:`QtMainWindowView` creates a concrete instance of the interface (actually just a pointer to itself) and passes it in the construction of anything that needs it, e.g. the :code:`RunsPresenter` (in this case using a factory to perform the construction - more about the `Factory pattern`_ below):
 
   .. code-block:: c++
 
@@ -216,8 +221,19 @@ A simple example of dependency injection is in the use of an :code:`IMessageHand
 
   .. code-block:: c++
 
-    m_messageHandler->giveUserInfo("Search field is empty", "Search Issue");
+    m_messageHandler->giveUserCritical("Catalog login failed", "Error");
 
+- Our unit tests can then ensure that a notification is sent to Qt in a known critical situation, e.g. in :code:`RunsPresenterTest`:
+
+  .. code-block:: c++
+
+    void testSearchCatalogLoginFails() {
+      ...
+      EXPECT_CALL(m_messageHandler,
+                  giveUserCritical("Catalog login failed", "Error"))
+      .Times(1);
+      ...
+    }
 
 Factory pattern
 ###############
@@ -228,7 +244,7 @@ The :code:`MainWindowPresenter` constructs the child Batch presenters on demand.
 
   - creates an :code:`EventPresenterFactory`;
   - passes this to the :code:`BatchPresenterFactory` constructor so it can create the child :code:`EventPresenter` when needed;
-  - passes this to the :code:`MainWindowPresenter` constructor ready for making a Batch when needed.
+  - passes this to the :code:`MainWindowPresenter` constructor, which accepts a :code:`BatchPresenterFactory`, ready for making a Batch when needed.
 
 - When required, we then create a Batch:
 
@@ -243,7 +259,7 @@ The :code:`MainWindowPresenter` constructs the child Batch presenters on demand.
 
   - The :code:`IBatchPresenter` is then added to the :code:`MainWindowPresenter`'s list of child presenters.
     
-The :code:`MainWindowPresenter` therefore creates, and owns, the :code:`BatchPresenter`, but does not need to know its concrete type. In turn, the :code:`BatchPresenterFactory` creates the child :code:`EventPresenter` and injects this into the :code:`BatchPresenter`, also without knowing the child's concrete type.
+The :code:`MainWindowPresenter` therefore creates, and owns, the :code:`BatchPresenter`, but does not need to know its concrete type. In turn, the :code:`BatchPresenterFactory` creates the child :code:`EventPresenter` and injects this into the :code:`BatchPresenter`, also without knowing the child's concrete type. As mentioned in the `Dependency inversion`_ section, this helps testability by allowing us to replace the real dependencies with mock objects.
 
 Testing
 -------
