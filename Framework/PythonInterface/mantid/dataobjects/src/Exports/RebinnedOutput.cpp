@@ -71,6 +71,8 @@ void export_RebinnedOutput() {
            "simple copy into the array")
       .def("scaleF", &RebinnedOutput::scaleF, (arg("self"), arg("scale")),
            "Scales the fractional area arrays")
+      .def("nonZeroF", &RebinnedOutput::nonZeroF, (arg("self")),
+           "Returns if the fractional area is non zero")
       .def("finalize", &RebinnedOutput::finalize,
            (arg("self"), arg("hasSqrdErrs")),
            "Divides the data/error arrays by the corresponding fractional area "

@@ -460,11 +460,13 @@ class MatrixWorkspaceTest(unittest.TestCase):
 
     def test_rebinnedOutput(self):
         rebin = WorkspaceFactory.create("RebinnedOutput", 2, 3, 2)
+        self.assertFalse(rebin.nonZeroF())
         fv = rebin.readF(1)
         rebin.dataY(1)[:] = 10.0
         rebin.dataE(1)[:] = 1.0
         twos = np.ones(len(fv)) * 2.0
         rebin.setF(1, twos)
+        self.assertTrue(rebin.nonZeroF())
         rebin.setFinalized(False)
         rebin.setSqrdErrors(False)
         rebin.unfinalize()

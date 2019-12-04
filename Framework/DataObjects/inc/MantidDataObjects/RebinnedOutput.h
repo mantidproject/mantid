@@ -69,6 +69,8 @@ public:
   void setF(const std::size_t index, const MantidVecPtr &F);
   /// Multiply the fractional area arrays by a scale factor
   void scaleF(const double scale);
+  /// Returns if the fractional area is non zero
+  bool nonZeroF() const;
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
