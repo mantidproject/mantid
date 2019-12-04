@@ -27,7 +27,7 @@ from qtpy.QtWidgets import (QComboBox, QLabel, QHBoxLayout, QMenu,
                             QSpacerItem, QVBoxLayout, QWidget)
 
 class SliceViewerView(QWidget):
-    def __init__(self, presenter, dims_info, parent=None):
+    def __init__(self, presenter, dims_info, can_normalise, parent=None):
         super(SliceViewerView, self).__init__(parent)
 
         self.presenter = presenter
@@ -37,6 +37,7 @@ class SliceViewerView(QWidget):
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
         self.line_plots = False
+        self.can_normalise = can_normalise
 
         # Dimension widget
         self.dimensions_layout = QHBoxLayout()
@@ -45,16 +46,18 @@ class SliceViewerView(QWidget):
         self.dimensions.valueChanged.connect(self.presenter.update_plot_data)
         self.dimensions_layout.addWidget(self.dimensions)
 
+        self.colorbar_layout = QVBoxLayout()
+
         # normalization options
-        self.norm_layout = QHBoxLayout()
-        self.norm_label = QLabel("Normalization = ")
-        self.norm_layout.addWidget(self.norm_label)
-        self.norm_opts = QComboBox()
-        self.norm_opts.addItems(["None", "Bin width/area"])
-        self.norm_opts.setToolTip("Normalization options")
-        self.norm_layout.addWidget(self.norm_opts)
-        self.norm_layout.setAlignment(Qt.AlignBottom)
-        self.dimensions_layout.addLayout(self.norm_layout)
+        if can_normalise:
+            self.norm_layout = QHBoxLayout()
+            self.norm_label = QLabel("Normalization =")
+            self.norm_layout.addWidget(self.norm_label)
+            self.norm_opts = QComboBox()
+            self.norm_opts.addItems(["None", "By bin width"])
+            self.norm_opts.setToolTip("Normalization options")
+            self.norm_layout.addWidget(self.norm_opts)
+            self.colorbar_layout.addLayout(self.norm_layout)
 
         # MPL figure + colorbar
         self.mpl_layout = QHBoxLayout()
@@ -66,9 +69,10 @@ class SliceViewerView(QWidget):
         self.create_axes()
         self.mpl_layout.addWidget(self.canvas)
         self.colorbar = ColorbarWidget(self)
+        self.colorbar_layout.addWidget(self.colorbar)
         self.colorbar.colorbarChanged.connect(self.update_data_clim)
         self.colorbar.colorbarChanged.connect(self.update_line_plot_limits)
-        self.mpl_layout.addWidget(self.colorbar)
+        self.mpl_layout.addLayout(self.colorbar_layout)
 
         # MPL toolbar
         self.mpl_toolbar = SliceViewerNavigationToolbar(self.canvas, self)
@@ -108,8 +112,8 @@ class SliceViewerView(QWidget):
         """
         self.ax.clear()
         self.im = self.ax.imshow(ws, origin='lower', aspect='auto',
-                                 transpose=self.dimensions.transpose,
-                                 norm=self.colorbar.get_norm(), **kwargs)
+                         transpose=self.dimensions.transpose,
+                         norm=self.colorbar.get_norm(), **kwargs)
         self.draw_plot()
 
     def plot_matrix(self, ws, **kwargs):
@@ -203,6 +207,16 @@ class SliceViewerView(QWidget):
             self.plot_x_line(np.linspace(xmin, xmax, arr.shape[1]), arr[i,:])
         if 0 <= j < arr.shape[1]:
             self.plot_y_line(np.linspace(ymin, ymax, arr.shape[0]), arr[:,j])
+
+    def set_normalization(self, ws, **kwargs):
+        normalize_by_bin_width, _ = get_normalize_by_bin_width(ws, self.ax, **kwargs)
+        is_normalized = normalize_by_bin_width or ws.isDistribution()
+        if is_normalized:
+            self.presenter.normalization = mantid.api.MDNormalization.VolumeNormalization
+            self.norm_opts.setCurrentIndex(1)
+        else:
+            self.presenter.normalization = mantid.api.MDNormalization.NoNormalization
+            self.norm_opts.setCurrentIndex(0)
 
     def closeEvent(self, event):
         self.deleteLater()
