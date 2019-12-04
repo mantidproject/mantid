@@ -127,6 +127,7 @@ def reduceRun(run_number, angle, first_transmission_runs = [], second_transmissi
                                     FirstTransmissionRunList=','.join(first_transmission_runs),
                                     SecondTransmissionRunList=','.join(second_transmission_runs),
                                     SliceWorkspace=do_slicing, TimeInterval=time_interval,
+                                    UseNewFilterAlgorithm=False,
                                     OutputWorkspaceBinned=run_name + suffix + '_binned',
                                     OutputWorkspace=run_name + suffix,
                                     OutputWorkspaceWavelength=run_name + '_lam')

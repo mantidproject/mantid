@@ -36,12 +36,12 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
                                                     direction=Direction.Output),
                              doc='Group name for the output workspace(s).')
+        self.declareProperty("UseNewFilterAlgorithm", True, doc='If true, use the new FilterEvents algorithm instead of FilterByTime.')
 
     def PyExec(self):
         self._input_ws = self.getProperty("InputWorkspace").value
         self._output_ws_group_name = self.getPropertyValue("OutputWorkspace")
 
-        self._create_filter()
         output_ws_group = self._slice_input_workspace()
         self._scale_monitors_for_each_slice(output_ws_group)
         output_ws_group = self._rebin_to_monitors()
@@ -50,19 +50,15 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
         self.setProperty("OutputWorkspace", self._output_ws_group_name)
         self._clean_up()
 
-    def _create_filter(self):
-        """Generate the splitter workspace for performing the filtering for each required slice"""
-        alg = self.createChildAlgorithm("GenerateEventsFilter")
-        for property in self._filter_properties:
-            alg.setProperty(property, self.getPropertyValue(property))
-        alg.setProperty("OutputWorkspace", '__split')
-        alg.setProperty("InformationWorkspace", '__info')
-        alg.execute()
-        self._split_ws = alg.getProperty("OutputWorkspace").value
-        self._info_ws = alg.getProperty("InformationWorkspace").value
-
     def _slice_input_workspace(self):
+        if self.getProperty("UseNewFilterAlgorithm").value:
+            return self._slice_input_workspace_with_filter_events()
+        else:
+            return self._slice_input_workspace_with_filter_by_time()
+
+    def _slice_input_workspace_with_filter_events(self):
         """Perform the slicing of the input workspace"""
+        self._create_filter()
         alg = self.createChildAlgorithm("FilterEvents")
         alg.setProperty("InputWorkspace", self._input_ws)
         alg.setProperty("SplitterWorkspace", self._split_ws)
@@ -83,10 +79,52 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
         # sample logs as a string (FilterEvents converts it to a double).
         group = mtd[self._output_ws_group_name]
         for ws in group:
-            if ws.run().hasProperty('run_number'):
-                run_number = int(ws.run()['run_number'].value)
-                AddSampleLog(Workspace=ws, LogName='run_number', LogType='String',
-                             LogText=str(run_number))
+            self._copy_run_number_to_sample_log(ws, ws)
+        return group
+
+    def _create_filter(self):
+        """Generate the splitter workspace for performing the filtering for each required slice"""
+        alg = self.createChildAlgorithm("GenerateEventsFilter")
+        for property in self._filter_properties:
+            alg.setProperty(property, self.getPropertyValue(property))
+        alg.setProperty("OutputWorkspace", '__split')
+        alg.setProperty("InformationWorkspace", '__info')
+        alg.execute()
+        self._split_ws = alg.getProperty("OutputWorkspace").value
+        self._info_ws = alg.getProperty("InformationWorkspace").value
+
+    def _slice_input_workspace_with_filter_by_time(self):
+        start_time = DateAndTime(self._get_property_or_default("StartTime",
+                                                               self._input_ws.run().startTime()))
+        stop_time = DateAndTime(self._get_property_or_default("StopTime",
+                                                              self._input_ws.run().endTime()))
+        total_interval = (stop_time - start_time).total_seconds()
+        time_interval = int(self._get_property_or_default("TimeInterval",
+                                                          total_interval))
+        slice_names = list()
+        slice_start_time = 0
+        while slice_start_time < total_interval:
+            slice_stop_time = slice_start_time + time_interval
+            slice_name = self._output_ws_group_name + '_' + str(slice_start_time) + '_' + str(slice_stop_time)
+            slice_names.append(slice_name)
+            alg = self.createChildAlgorithm("FilterByTime")
+            alg.setProperty("InputWorkspace", self._input_ws)
+            alg.setProperty("OutputWorkspace", slice_name)
+            alg.setProperty("StartTime", str(slice_start_time))
+            alg.setProperty("StopTime", str(slice_stop_time))
+            alg.execute()
+            sliced_workspace = alg.getProperty("OutputWorkspace").value
+            mtd.addOrReplace(slice_name, sliced_workspace)
+            # Proceed to the next interval
+            slice_start_time = slice_stop_time
+
+        # Group the sliced workspaces
+        group = self._group_workspaces(slice_names, self._output_ws_group_name)
+        mtd.addOrReplace(self._output_ws_group_name, group)
+        # Ensure the run number for the child workspaces is stored in the
+        # sample logs as a string (FilterEvents converts it to a double).
+        for ws in group:
+            self._copy_run_number_to_sample_log(ws, ws)
         return group
 
     def _scale_monitors_for_each_slice(self, sliced_ws_group):
@@ -102,9 +140,10 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
             scale_factor = slice.run().getProtonCharge() / total_proton_charge
             slice_monitor_ws = self._scale_workspace(slice_monitor_ws, slice_monitor_ws_name,
                                                      scale_factor)
-            # The workspace must be in the ADS for grouping
+            # The workspace must be in the ADS for grouping and updating the sample log
             mtd.addOrReplace(slice_monitor_ws_name, slice_monitor_ws)
             monitors_ws_list.append(slice_monitor_ws_name)
+            self._copy_run_number_to_sample_log(slice, slice_monitor_ws)
             i+=1
 
         self._monitor_ws_group_name = input_monitor_ws.name() + '_sliced'
@@ -152,7 +191,7 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
         alg = self.createChildAlgorithm("AppendSpectra")
         alg.setProperty("InputWorkspace1", self._monitor_ws_group_name)
         alg.setProperty("InputWorkspace2", self._output_ws_group_name)
-        alg.setProperty("MergeLogs", True)
+        alg.setProperty("MergeLogs", False)
         alg.setProperty("OutputWorkspace", self._output_ws_group_name)
         alg.execute()
         return alg.getProperty("OutputWorkspace").value
@@ -165,5 +204,17 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
         alg.execute()
         for ws_name in monitor_ws_names:
             mtd.remove(ws_name)
+
+    def _get_property_or_default(self, property_name, default_value):
+        if self.getProperty(property_name).isDefault:
+            return default_value
+        else:
+            return self.getProperty(property_name).value
+
+    def _copy_run_number_to_sample_log(self, ws_with_run_number, ws_to_update):
+        if ws_with_run_number.run().hasProperty('run_number'):
+            run_number = int(ws_with_run_number.run()['run_number'].value)
+            AddSampleLog(Workspace=ws_to_update, LogName='run_number', LogType='String',
+                         LogText=str(run_number))
 
 AlgorithmFactory.subscribe(ReflectometrySliceEventWorkspace())
