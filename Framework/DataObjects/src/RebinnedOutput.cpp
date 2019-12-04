@@ -137,7 +137,7 @@ void RebinnedOutput::finalize(bool hasSqrdErrs) {
   if (!this->nonZeroF())
     return;
 
-   // Fix the squared error representation before returning  
+  // Fix the squared error representation before returning
   auto nHist = static_cast<int>(this->getNumberHistograms());
   if (m_finalized) {
     PARALLEL_FOR_IF(Kernel::threadSafe(*this))
