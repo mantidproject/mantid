@@ -54,6 +54,10 @@ public:
   /// A label for the unit to be printed on axes, @see UnitLabel
   /// @return The unit label
   virtual const UnitLabel label() const = 0;
+  
+  /// Returns if the unit can be used in conversions
+  /// @return true if the unit can be used in unit conversions
+  virtual const bool isConvertible() const { return true; }
 
   // Equality operators based on the value returned by unitID();
   bool operator==(const Unit &u) const;
@@ -244,6 +248,7 @@ public:
   const std::string caption() const override { return ""; }
   const UnitLabel label() const override;
 
+  const bool isConvertible() const override { return false; }
   double singleToTOF(const double x) const override;
   double singleFromTOF(const double tof) const override;
   void init() override;
@@ -595,6 +600,7 @@ public:
   const std::string caption() const override { return "t"; }
   const UnitLabel label() const override;
 
+  const bool isConvertible() const override { return false; }
   double singleToTOF(const double x) const override;
   double singleFromTOF(const double tof) const override;
   double conversionTOFMax() const override;

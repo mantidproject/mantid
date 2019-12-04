@@ -29,6 +29,23 @@ public:
     TS_ASSERT_THROWS(UnitFactory::Instance().create("_NOT_A_REAL_UNIT"),
                      const Exception::NotFoundError &);
   }
+
+  void test_getKeys_Includes_Label_and_TOF() {
+    auto keys =  UnitFactory::Instance().getKeys();
+    TSM_ASSERT("Cannot find Label in the keys of the unit factory",
+               std::find(keys.begin(), keys.end(), "Label") != keys.end());
+    TSM_ASSERT("Cannot find TOF in the keys of the unit factory",
+               std::find(keys.begin(), keys.end(), "TOF") != keys.end());
+  }
+
+  
+  void test_getConvertibleUnits_Includes_TOF_but_not_label() {
+    auto keys = UnitFactory::Instance().getConvertibleUnits();
+    TSM_ASSERT("Can find Label in the ConvertibleUnits of the unit factory",
+               std::find(keys.begin(), keys.end(), "Label") == keys.end());
+    TSM_ASSERT("Cannot find TOF in the ConvertibleUnits of the unit factory",
+               std::find(keys.begin(), keys.end(), "TOF") != keys.end());
+  }
 };
 
 #endif /*UNITFACTORYTEST_H_*/
