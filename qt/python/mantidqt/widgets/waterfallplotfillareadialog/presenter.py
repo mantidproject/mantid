@@ -9,7 +9,9 @@
 from __future__ import (absolute_import, unicode_literals)
 
 from matplotlib.collections import PolyCollection
+from matplotlib.colors import to_rgba_array
 
+from mantidqt.widgets.plotconfigdialog.colorselector import convert_color_to_hex
 from mantidqt.widgets.waterfallplotfillareadialog.view import WaterfallPlotFillAreaDialogView
 
 
@@ -23,49 +25,93 @@ class WaterfallPlotFillAreaDialogPresenter:
         else:
             self.view = WaterfallPlotFillAreaDialogView(parent)
 
+        self.init_view()
         self.view.show()
+
+        # Signals
         self.view.close_push_button.clicked.connect(self.view.close)
         self.view.enable_fill_group_box.clicked.connect(lambda: self.set_fill_enabled())
         self.view.use_line_colour_radio_button.clicked.connect(self.line_colour_fill)
         self.view.use_solid_colour_radio_button.clicked.connect(self.solid_colour_fill)
         self.view.colour_selector_widget.line_edit.textChanged.connect(self.solid_colour_fill)
 
+    def init_view(self):
+        # This function sets the correct values in the menu when it is first opened.
+
+        # If the axes has any PolyCollections then fill area has been enabled.
+        if self.ax.waterfall_has_fill():
+            self.view.enable_fill_group_box.setChecked(True)
+
+            poly_colour_is_line_colour = True
+            i = 0
+            # Check that for each line, the fill area is the same colour as the line. If not then the Use Solid Colour
+            # option must be checked.
+            for collection in self.ax.collections:
+                if isinstance(collection, PolyCollection):
+                    line_colour = to_rgba_array(self.ax.get_lines()[i].get_color())
+                    poly_colour = collection.get_facecolor()
+                    if (line_colour != poly_colour).any():
+                        poly_colour_is_line_colour = False
+                        break
+                    i = i + 1
+
+            if poly_colour_is_line_colour:
+                self.view.use_line_colour_radio_button.setChecked(True)
+            else:
+                self.view.use_solid_colour_radio_button.setChecked(True)
+                self.view.colour_selector_widget.set_color(convert_color_to_hex(poly_colour[0]))
+
     def set_fill_enabled(self):
         if self.view.enable_fill_group_box.isChecked():
             if self.view.use_line_colour_radio_button.isChecked():
                 self.line_colour_fill()
+            else:
+                self.solid_colour_fill()
+        else:
+            self.remove_fill()
 
     def line_colour_fill(self):
-        if len(self.ax.collections) == 0:
+        # Add the fill areas if there aren't any already.
+        if not any(isinstance(collection, PolyCollection) for collection in self.ax.collections):
             self.create_fill()
 
-        j = 0
-        for i, collection in enumerate(self.ax.collections):
+        i = 0
+        for collection in self.ax.collections:
             if isinstance(collection, PolyCollection):
-                colour = self.ax.get_lines()[j].get_color()
+                colour = self.ax.get_lines()[i].get_color()
                 collection.set_color(colour)
-                collection.set_zorder(1-j)
-                j = j + 1
+                # Only want the counter to iterate if the current collection is a PolyCollection (the fill areas) since
+                # the axes may have other collections which can be ignored.
+                i = i + 1
 
         self.fig.canvas.draw()
 
     def solid_colour_fill(self):
-        if len(self.ax.collections) == 0:
+        # If the colour selector has been changed then presumably the user wants to set a custom fill colour
+        # so that option is checked if it wasn't already.
+        if not self.view.use_solid_colour_radio_button.isChecked():
+            self.view.use_solid_colour_radio_button.setChecked(True)
+
+        # Add the fill areas if there aren't any already.
+        if not any(isinstance(collection, PolyCollection) for collection in self.ax.collections):
             self.create_fill()
 
         colour = self.view.colour_selector_widget.get_color()
 
         for i, collection in enumerate(self.ax.collections):
             if isinstance(collection, PolyCollection):
+                # This function is called every time the colour line edit is changed so it's possible
+                # that the current input is not a valid colour, such as if the user hasn't finished entering
+                # a colour. So if setting the colour fails, the function just stops.
                 try:
                     collection.set_color(colour)
                 except:
                     return
-                collection.set_zorder(1 - i)
 
         self.fig.canvas.draw()
 
     def create_fill(self):
-        for i, line in enumerate(self.ax.get_lines()):
-            bottom_line = [min(line.get_ydata())-((i*self.ax.height)/100)]
-            self.ax.fill_between(line.get_xdata(), line.get_ydata(), bottom_line)
+        self.ax.waterfall_create_fill()
+
+    def remove_fill(self):
+        self.ax.waterfall_remove_fill()

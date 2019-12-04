@@ -8,6 +8,7 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
+from matplotlib.collections import PolyCollection
 from mantidqt.utils.qt import block_signals
 from mantidqt.widgets.plotconfigdialog import get_axes_names_dict, curve_in_ax
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import (
@@ -139,10 +140,29 @@ class CurvesTabWidgetPresenter:
         ax = self.get_selected_ax()
         if ax.legend_:
             self.legend_props = LegendProperties.from_legend(ax.legend_)
+
+        waterfall = ax.is_waterfall_plot()
+        if waterfall:
+            x, y = ax.waterfall_x_offset, ax.waterfall_y_offset
+            ax.update_waterfall_plot(0,0)
+
+            current_curve_index = self.view.select_curve_combo_box.currentIndex()
+            i = 0
+            for collection in ax.collections:
+                if isinstance(collection, PolyCollection):
+                    if current_curve_index == i:
+                        ax.collections.remove(collection)
+                        break
+                    i = i + 1
+
+
         # Remove curve from ax and remove from curve names dictionary
         remove_curve_from_ax(self.get_selected_curve())
         self.curve_names_dict.pop(self.view.get_selected_curve_name())
         self.set_apply_to_all_buttons_enabled()
+
+        if waterfall:
+            ax.update_waterfall_plot(x, y)
 
         ax = self.get_selected_ax()
         # Update the legend and redraw

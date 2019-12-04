@@ -424,8 +424,9 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
     def waterfall_reverse_line_order(self):
         ax = self.canvas.figure.get_axes()[0]
         x, y = ax.waterfall_x_offset, ax.waterfall_y_offset
-        ax.convert_from_waterfall()
+        ax.update_waterfall_plot(0,0)
         ax.lines.reverse()
+        ax.collections.reverse()
         ax.update_waterfall_plot(x, y)
         ax.make_legend()
 
