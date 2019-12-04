@@ -211,60 +211,6 @@ def _load_qlims(q_lims):
     return q_min, q_max
 
 
-def _calculate_self_scattering_correction(run_number, cal_file_name, sample_details):
-    raw_ws = mantid.Load(Filename='POLARIS'+str(run_number)+'.nxs')
-    mantid.SetSample(InputWorkspace=raw_ws,
-                     Geometry=common.generate_sample_geometry(sample_details),
-                     Material=common.generate_sample_material(sample_details))
-    # find the closest monitor to the sample for incident spectrum
-    raw_spec_info = raw_ws.spectrumInfo()
-    incident_index = None
-    for i in range(raw_spec_info.size()):
-        if raw_spec_info.isMonitor(i):
-            l2 = raw_spec_info.position(i)[2]
-            if not incident_index:
-                incident_index = i
-            else:
-                if raw_spec_info.position(incident_index)[2] < l2 < 0:
-                    incident_index = i
-    monitor = mantid.ExtractSpectra(InputWorkspace=raw_ws, WorkspaceIndexList=[incident_index])
-    monitor = mantid.ConvertUnits(InputWorkspace=monitor, Target="Wavelength")
-    x_data = monitor.dataX(0)
-    min_x = np.min(x_data)
-    max_x = np.max(x_data)
-    width_x = (max_x - min_x) / x_data.size
-    fit_spectra = mantid.FitIncidentSpectrum(InputWorkspace=monitor,
-                                             BinningForCalc=[min_x, 1 * width_x, max_x],
-                                             BinningForFit=[min_x, 10 * width_x, max_x],
-                                             FitSpectrumWith="CubicSpline")
-    self_scattering_correction = mantid.CalculatePlaczekSelfScattering(InputWorkspace=raw_ws,
-                                                                       IncidentSpecta=fit_spectra)
-    cal_workspace = mantid.LoadCalFile(InputWorkspace=self_scattering_correction,
-                                       CalFileName=cal_file_name,
-                                       Workspacename='cal_workspace',
-                                       MakeOffsetsWorkspace=False,
-                                       MakeMaskWorkspace=False)
-    self_scattering_correction = mantid.DiffractionFocussing(InputWorkspace=self_scattering_correction,
-                                                             GroupingFilename=cal_file_name)
-    n_pixel = np.zeros(self_scattering_correction.getNumberHistograms())
-    for i in range(cal_workspace.getNumberHistograms()):
-        grouping = cal_workspace.dataY(i)
-        if grouping[0] > 0:
-            n_pixel[int(grouping[0] - 1)] += 1
-    correction_ws = mantid.CreateWorkspace(DataY=n_pixel, DataX=[0, 1],
-                                           NSpec=self_scattering_correction.getNumberHistograms())
-    self_scattering_correction = mantid.Divide(LHSWorkspace=self_scattering_correction, RHSWorkspace=correction_ws)
-    mantid.ConvertToDistribution(Workspace=self_scattering_correction)
-    self_scattering_correction = mantid.ConvertUnits(InputWorkspace=self_scattering_correction,
-                                                     Target="MomentumTransfer", EMode='Elastic')
-    common.remove_intermediate_workspace('cal_workspace_group')
-    common.remove_intermediate_workspace(correction_ws)
-    common.remove_intermediate_workspace(fit_spectra)
-    common.remove_intermediate_workspace(monitor)
-    common.remove_intermediate_workspace(raw_ws)
-    return self_scattering_correction
-
-
 def _determine_chopper_mode(ws):
     if ws.getRun().hasProperty('Frequency'):
         frequency = ws.getRun()['Frequency'].lastValue()
