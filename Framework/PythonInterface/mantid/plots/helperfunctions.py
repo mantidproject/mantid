@@ -61,12 +61,12 @@ def get_normalize_by_bin_width(workspace, axes, **kwargs):
     setting.
     :param workspace: :class:`mantid.api.MatrixWorkspace` workspace being plotted
     :param axes: The axes being plotted on
-    :param pop: Bool. Set to True to remove 'normalize_by_bin_width' from 'kwargs'
     """
     distribution = kwargs.get('distribution', None)
+    aligned, _ = check_resample_to_regular_grid(workspace, **kwargs)
     if distribution or (hasattr(workspace, 'isDistribution') and workspace.isDistribution()):
         return False, kwargs
-    elif distribution is False:
+    elif distribution is False or aligned:
         return True, kwargs
     else:
         try:
@@ -566,15 +566,15 @@ def get_data_uneven_flag(workspace, **kwargs):
 
 
 def check_resample_to_regular_grid(ws, **kwargs):
-    aligned = kwargs.pop('axisaligned', False)
-    if not ws.isCommonBins() or aligned:
-        return True, kwargs
+    if not isinstance(ws, MDHistoWorkspace):
+        aligned = kwargs.pop('axisaligned', False)
+        if not ws.isCommonBins() or aligned:
+            return True, kwargs
 
-    x = ws.dataX(0)
-    difference = np.diff(x)
-    if not np.all(np.isclose(difference[:-1], difference[0])):
-        return True, kwargs
-
+        x = ws.dataX(0)
+        difference = np.diff(x)
+        if x.size > 1 and not np.all(np.isclose(difference[:-1], difference[0])):
+            return True, kwargs
     return False, kwargs
 
 

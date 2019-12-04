@@ -19,6 +19,7 @@ from qtpy.QtCore import Qt
 from qtpy.QtGui import QCursor
 from qtpy.QtWidgets import QActionGroup, QMenu, QApplication
 from matplotlib.colors import LogNorm, Normalize
+from matplotlib.collections import Collection
 
 # third party imports
 from mantid.api import AnalysisDataService as ads
@@ -344,7 +345,7 @@ class FigureInteraction(object):
         """Add the Axes scale options menu to the given menu"""
         axes_menu = QMenu("Color bar", menu)
         axes_actions = QActionGroup(axes_menu)
-        images = ax.images + [col for col in ax.collections if hasattr(ax, 'collections')]
+        images = ax.get_images() + [col for col in ax.collections if isinstance(col, Collection)]
         for label, scale_type in iteritems(COLORBAR_SCALE_MENU_OPTS):
             action = axes_menu.addAction(label, partial(self._change_colorbar_axes, scale_type))
             if type(images[0].norm) == scale_type:
@@ -634,7 +635,7 @@ class FigureInteraction(object):
 
     def _change_colorbar_axes(self, scale_type):
         for ax in self.canvas.figure.get_axes():
-            images = ax.images + [col for col in ax.collections if hasattr(ax, 'collections')]
+            images = ax.get_images() + [col for col in ax.collections if isinstance(col, Collection)]
             for image in images:
                 image.set_norm(scale_type())
                 if image.colorbar:

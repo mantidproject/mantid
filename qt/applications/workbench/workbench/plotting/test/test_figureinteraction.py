@@ -113,11 +113,13 @@ class FigureInteractionTest(unittest.TestCase):
         mouse_event = self._create_mock_right_click()
         mocked_figure_type.return_value = FigureType.Image
 
-        # Expect a call to QMenu() for the outer menu followed by one more call
-        # for the Normalization menu
+        # Expect a call to QMenu() for the outer menu followed by three more calls
+        # for the Axes, Normalization and Colorbar menus
         qmenu_call1 = MagicMock()
         qmenu_call2 = MagicMock()
-        mocked_qmenu.side_effect = [qmenu_call1, qmenu_call2]
+        qmenu_call3 = MagicMock()
+        qmenu_call4 = MagicMock()
+        mocked_qmenu.side_effect = [qmenu_call1, qmenu_call2, qmenu_call3, qmenu_call4]
 
         with patch('workbench.plotting.figureinteraction.QActionGroup',
                    autospec=True):
@@ -126,10 +128,16 @@ class FigureInteractionTest(unittest.TestCase):
                 interactor.on_mouse_button_press(mouse_event)
                 self.assertEqual(0, qmenu_call1.addAction.call_count)
                 expected_qmenu_calls = [call(),
-                                        call("Normalization", qmenu_call1)]
+                                        call("Axes", qmenu_call1),
+                                        call("Normalization", qmenu_call1),
+                                        call("Color bar", qmenu_call1)]
                 self.assertEqual(expected_qmenu_calls, mocked_qmenu.call_args_list)
+                # 4 actions in Axes submenu
+                self.assertEqual(4, qmenu_call2.addAction.call_count)
                 # 2 actions in Normalization submenu
-                self.assertEqual(2, qmenu_call2.addAction.call_count)
+                self.assertEqual(2, qmenu_call3.addAction.call_count)
+                # 2 actions in Colorbar submenu
+                self.assertEqual(2, qmenu_call4.addAction.call_count)
 
     @patch('workbench.plotting.figureinteraction.QMenu',
            autospec=True)
@@ -245,7 +253,7 @@ class FigureInteractionTest(unittest.TestCase):
         return fig_manager
 
     def _create_mock_right_click(self):
-        mouse_event = MagicMock(inaxes=MagicMock(spec=MantidAxes))
+        mouse_event = MagicMock(inaxes=MagicMock(spec=MantidAxes, collections = []))
         type(mouse_event).button = PropertyMock(return_value=3)
         return mouse_event
 
