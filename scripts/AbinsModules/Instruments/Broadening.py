@@ -321,7 +321,7 @@ def trunc_and_sum_inplace(function=None, function_uses='points',
         sum_method = method
 
     bin_width = bins[1] - bins[0]
-    if (points[1] - points[0]) != bin_width:
+    if not np.isclose(points[1] - points[0], bin_width):
         raise ValueError("Bin spacing and point spacing are not consistent")
 
     freq_range = limit * max(sigma)
