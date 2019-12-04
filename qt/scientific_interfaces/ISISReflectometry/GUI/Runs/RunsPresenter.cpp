@@ -331,6 +331,10 @@ int RunsPresenter::percentComplete() const {
   return m_mainPresenter->percentComplete();
 }
 
+void RunsPresenter::setRoundPrecision(int &precision) {
+  m_tablePresenter->setTablePrecision(precision);
+}
+
 IRunsTablePresenter *RunsPresenter::tablePresenter() const {
   return m_tablePresenter.get();
 }

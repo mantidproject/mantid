@@ -344,6 +344,10 @@ bool BatchPresenter::getUnsavedBatchFlag() const { return m_unsavedBatchFlag; }
 */
 void BatchPresenter::setUnsavedBatchFlag(bool isUnsaved) { m_unsavedBatchFlag = isUnsaved; }
 
+void BatchPresenter::notifySetRoundPrecision(int &precision) {
+  m_runsPresenter->setRoundPrecision(precision);
+}
+
 /** Get the percent of jobs that have been completed out of the current
     processing list
  */

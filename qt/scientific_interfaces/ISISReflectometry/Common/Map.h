@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <boost/optional.hpp>
 #include <iterator>
+#include <sstream>
 #include <type_traits>
 #include <vector>
 
@@ -42,6 +43,29 @@ std::string optionalToString(boost::optional<T> maybeValue) {
                return std::to_string(value);
              })
       .get_value_or(std::string());
+}
+
+template <typename T> std::string valueToString(T value, int precision) {
+  std::ostringstream result;
+  result.precision(precision);
+  result << std::fixed << value;
+  return result.str();
+}
+
+template <typename T> std::string valueToString(T value, boost::optional<int> precision) {
+  if (precision.is_initialized())
+    return valueToString(value, precision.get());
+  return std::to_string(value);
+}
+
+template <typename T>
+std::string optionalToString(boost::optional<T> maybeValue, boost::optional<int> precision) {
+  if (maybeValue.is_initialized())
+    if (precision.is_initialized())
+      return valueToString(maybeValue.get(), precision.get());
+    else
+      return optionalToString(maybeValue);
+  return std::string();
 }
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

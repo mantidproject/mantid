@@ -42,6 +42,7 @@ public:
   virtual void notifyInstrumentChanged(const std::string &instrumentName) = 0;
   virtual void notifyUpdateInstrumentRequested() = 0;
   virtual void notifySettingsChanged() = 0;
+  virtual void notifySetRoundPrecision(int &precision) = 0;
   virtual void notifyAnyBatchReductionResumed() = 0;
   virtual void notifyAnyBatchReductionPaused() = 0;
   virtual void notifyAnyBatchAutoreductionResumed() = 0;

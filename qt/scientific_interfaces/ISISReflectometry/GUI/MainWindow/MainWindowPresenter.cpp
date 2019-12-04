@@ -56,6 +56,7 @@ MainWindowPresenter::MainWindowPresenter(
           new OptionsDialogPresenter(optionsDialog)),
       m_batchPresenterFactory(std::move(batchPresenterFactory)) {
   view->subscribe(this);
+  m_optionsDialogPresenter->acceptMainPresenter(this);
   for (auto *batchView : m_view->batches())
     addNewBatch(batchView);
   m_isUnsaved = false;
@@ -168,8 +169,14 @@ bool MainWindowPresenter::isRoundChecked() const {
   return m_optionsDialogPresenter->getBoolOption(std::string("Round"));
 }
 
-int MainWindowPresenter::getRoundPrecision() const {
+int& MainWindowPresenter::getRoundPrecision() const {
   return m_optionsDialogPresenter->getIntOption(std::string("RoundPrecision"));
+}
+
+boost::optional<int> MainWindowPresenter::roundPrecision() const {
+  if (isRoundChecked())
+    return getRoundPrecision();
+  return boost::none;
 }
 
 bool MainWindowPresenter::isCloseEventPrevented() {
@@ -256,20 +263,29 @@ void MainWindowPresenter::setUnsavedFlag(bool isUnsaved) {
   m_isUnsaved = isUnsaved;
 }
 
+void MainWindowPresenter::notifyOptionsChanged() const {
+  if (isRoundChecked()) {
+    for (auto &batchPresenter : m_batchPresenters)
+      batchPresenter->notifySetRoundPrecision(getRoundPrecision());
+  }
+}
+
 void MainWindowPresenter::addNewBatch(IBatchView *batchView) {
   // Remember the instrument name so we can re-set it (it will otherwise
   // get overridden by the instrument list default in the new batch)
   auto const instrument = instrumentName();
   m_batchPresenters.emplace_back(m_batchPresenterFactory->make(batchView));
   m_batchPresenters.back()->acceptMainPresenter(this);
-  initNewBatch(m_batchPresenters.back().get(), instrument);
+  initNewBatch(m_batchPresenters.back().get(), instrument, roundPrecision());
 }
 
 void MainWindowPresenter::initNewBatch(IBatchPresenter *batchPresenter,
-                                       std::string const &instrument) {
+                                       std::string const &instrument, boost::optional<int> precision) {
 
   batchPresenter->initInstrumentList();
   batchPresenter->notifyInstrumentChanged(instrument);
+  if (precision.is_initialized())
+    batchPresenter->notifySetRoundPrecision(precision.get());
 
   // starts in the paused state
   batchPresenter->notifyReductionPaused();

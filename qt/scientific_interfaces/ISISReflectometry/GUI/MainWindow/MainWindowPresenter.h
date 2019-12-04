@@ -55,7 +55,8 @@ public:
   bool isWarnProcessPartialGroupChecked() const override;
   bool isWarnDiscardChangesChecked() const override;
   bool isRoundChecked() const override;
-  int getRoundPrecision() const override;
+  int& getRoundPrecision() const override;
+  boost::optional<int> roundPrecision() const override;
   bool isCloseEventPrevented() override;
   bool isCloseBatchPrevented(int batchIndex) const override;
   bool isOperationPrevented() const override;
@@ -66,6 +67,7 @@ public:
   bool isAnyBatchUnsaved() override;
   bool getUnsavedFlag() const override;
   void setUnsavedFlag(bool isUnsaved) override;
+  void notifyOptionsChanged() const;
   void notifyAnyBatchAutoreductionResumed() override;
   void notifyAnyBatchAutoreductionPaused() override;
   void notifyAnyBatchReductionResumed() override;
@@ -101,7 +103,7 @@ private:
   void showHelp();
   void addNewBatch(IBatchView *batchView);
   void initNewBatch(IBatchPresenter *batchPresenter,
-                    std::string const &instrument);
+                    std::string const &instrument, boost::optional<int> precision);
   void updateInstrument(const std::string &instrumentName);
 
   void disableSaveAndLoadBatch();

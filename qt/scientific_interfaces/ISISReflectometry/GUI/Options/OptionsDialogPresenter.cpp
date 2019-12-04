@@ -68,7 +68,7 @@ bool OptionsDialogPresenter::getBoolOption(std::string &optionName) {
 }
 
 /* Get an int option state */
-int OptionsDialogPresenter::getIntOption(std::string &optionName) {
+int& OptionsDialogPresenter::getIntOption(std::string &optionName) {
   return m_intOptions[optionName];
 }
 

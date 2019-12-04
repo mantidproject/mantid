@@ -75,6 +75,7 @@ public:
   bool isProcessing() const override;
   bool isAutoreducing() const override;
   int percentComplete() const override;
+  void setRoundPrecision(int &precision) override;
   void
   notifyChangeInstrumentRequested(std::string const &instrumentName) override;
   void notifyResumeReductionRequested() override;

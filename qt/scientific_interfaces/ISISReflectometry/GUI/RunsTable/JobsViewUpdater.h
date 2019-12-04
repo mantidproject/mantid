@@ -29,14 +29,14 @@ using ValueFunction = boost::optional<double> (RangeInQ::*)() const;
 
 MantidWidgets::Batch::Cell qRangeCellOrDefault(RangeInQ const &qRangeInput,
                                                RangeInQ const &qRangeOutput,
-                                               ValueFunction valueFunction) {
+                                               ValueFunction valueFunction, boost::optional<int> precision) {
   auto maybeValue = (qRangeInput.*valueFunction)();
   auto useOutputValue = false;
   if (!maybeValue.is_initialized()) {
     maybeValue = (qRangeOutput.*valueFunction)();
     useOutputValue = true;
   }
-  auto result = MantidWidgets::Batch::Cell(optionalToString(maybeValue));
+  auto result = MantidWidgets::Batch::Cell(optionalToString(maybeValue, precision));
   if (useOutputValue)
     result.setOutput();
   else
@@ -44,19 +44,19 @@ MantidWidgets::Batch::Cell qRangeCellOrDefault(RangeInQ const &qRangeInput,
   return result;
 }
 
-std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row) {
+std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row, boost::optional<int> precision) {
   return std::vector<MantidQt::MantidWidgets::Batch::Cell>(
       {MantidQt::MantidWidgets::Batch::Cell(boost::join(row.runNumbers(), "+")),
-       MantidQt::MantidWidgets::Batch::Cell(std::to_string(row.theta())),
+       MantidQt::MantidWidgets::Batch::Cell(valueToString(row.theta(), precision)),
        MantidQt::MantidWidgets::Batch::Cell(
            row.transmissionWorkspaceNames().firstRunList()),
        MantidQt::MantidWidgets::Batch::Cell(
            row.transmissionWorkspaceNames().secondRunList()),
-       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::min),
-       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::max),
-       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::step),
+       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::min, precision),
+       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::max, precision),
+       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::step, precision),
        MantidQt::MantidWidgets::Batch::Cell(
-           optionalToString(row.scaleFactor())),
+           optionalToString(row.scaleFactor(), precision)),
        MantidQt::MantidWidgets::Batch::Cell(
            MantidWidgets::optionsToString(row.reductionOptions()))});
 }
@@ -74,7 +74,7 @@ public:
       if (row.is_initialized())
         m_view.appendChildRowOf(
             MantidQt::MantidWidgets::Batch::RowLocation({groupIndex}),
-            cellsFromRow(row.get()));
+            cellsFromRow(row.get(), m_precision));
   }
 
   void groupRemoved(int groupIndex) {
@@ -85,17 +85,20 @@ public:
   void rowInserted(int groupIndex, int rowIndex, Row const &row) {
     m_view.insertChildRowOf(
         MantidQt::MantidWidgets::Batch::RowLocation({groupIndex}), rowIndex,
-        cellsFromRow(row));
+        cellsFromRow(row, m_precision));
   }
 
   void rowModified(int groupIndex, int rowIndex, Row const &row) {
     m_view.setCellsAt(
         MantidQt::MantidWidgets::Batch::RowLocation({groupIndex, rowIndex}),
-        cellsFromRow(row));
+        cellsFromRow(row, m_precision));
   }
+
+  void setPrecision(int &precision) { m_precision = precision; }
 
 private:
   MantidQt::MantidWidgets::Batch::IJobTreeView &m_view;
+  boost::optional<int> m_precision;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

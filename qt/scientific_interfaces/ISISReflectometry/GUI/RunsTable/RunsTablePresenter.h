@@ -39,6 +39,7 @@ public:
   RunsTable &mutableRunsTable() override;
   void mergeAdditionalJobs(ReductionJobs const &jobs) override;
   void notifyInstrumentChanged(std::string const &instrumentName) override;
+  void setTablePrecision(int &precision) override;
   void settingsChanged() override;
 
   // RunsTableViewSubscriber overrides

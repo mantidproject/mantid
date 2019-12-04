@@ -34,7 +34,7 @@ public:
 
   void acceptMainPresenter(IMainWindowPresenter *mainPresenter);
   bool getBoolOption(std::string &optionName);
-  int getIntOption(std::string &optionName);
+  int& getIntOption(std::string &optionName);
   void showView();
 
 private:
