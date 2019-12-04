@@ -87,7 +87,7 @@ Usage
 
 **Example - Multiple Angles**
 
-.. testsetup:: MultipleAnglesPP
+.. testsetup:: MultipleAngles
 
     config['default.facility'] = 'ILL'
     config['default.instrument'] = 'D17'
