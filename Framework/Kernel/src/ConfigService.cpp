@@ -1622,9 +1622,8 @@ void ConfigServiceImpl::appendDataSearchDir(const std::string &path) {
   }
   if (!isInDataSearchList(dirPath.toString())) {
     std::string newSearchString;
-    std::vector<std::string>::const_iterator it = m_DataSearchDirs.begin();
-    for (; it != m_DataSearchDirs.end(); ++it) {
-      newSearchString.append(*it);
+    for (const std::string &it : m_DataSearchDirs) {
+      newSearchString.append(it);
       newSearchString.append(";");
     }
     newSearchString.append(path);
@@ -1936,10 +1935,10 @@ const std::vector<FacilityInfo *> ConfigServiceImpl::getFacilities() const {
 const std::vector<std::string> ConfigServiceImpl::getFacilityNames() const {
   auto names = std::vector<std::string>(m_facilities.size());
   auto itFacilities = m_facilities.begin();
-  auto itNames = names.begin();
-  for (; itFacilities != m_facilities.end(); ++itFacilities, ++itNames) {
-    *itNames = (**itFacilities).name();
-  }
+
+  std::transform(m_facilities.cbegin(), m_facilities.cend(), names.begin(),
+                 [](const FacilityInfo *facility) { return facility->name(); });
+
   return names;
 }
 
@@ -1984,19 +1983,15 @@ ConfigServiceImpl::getFacility(const std::string &facilityName) const {
 void ConfigServiceImpl::setFacility(const std::string &facilityName) {
   bool found = false;
   // Look through the facilities for a matching one.
-  std::vector<FacilityInfo *>::const_iterator it = m_facilities.begin();
-  for (; it != m_facilities.end(); ++it) {
-    if ((**it).name() == facilityName) {
-      // Found the facility
-      found = true;
-      // So it's safe to set it as our default
-      setString("default.facility", facilityName);
-    }
-  }
-  if (!found) {
+  try {
+    // Get facility looks up by string - so re-use that to check if the facility
+    // is known
+    getFacility(facilityName);
+    setString("default.facility", facilityName);
+  } catch (const Exception::NotFoundError &) {
     g_log.error("Failed to set default facility to be " + facilityName +
                 ". Facility not found");
-    throw Exception::NotFoundError("Facilities", facilityName);
+    throw;
   }
 }
 
