@@ -105,7 +105,7 @@ This could present a significant cost saving compared to full evaluation of ~400
 
 Alternatively we can perform convolution of the full spectrum with each of the sampled kernels, and then interpolate *between the spectra* using the predetermined mixing weights. The convolution is performed efficiently using FFTs, and relatively little memory is required to hold this limited number of spectra and interpolate between them.
 
-NEW FIGURE NEEDED: ILLUSTRATE INTERP BETWEEN SPECTRA
+.. image:: ../images/abins_interp_broadening_schematic.png
 
 This procedure is not strictly equivalent to a summation over frequency-dependent functions, even if there is no interpolation error.
 At each energy coordinate :math:`\epsilon` we "see" a fragment of full spectrum convolved at the same width as any points at :math:`\epsilon` would be.
@@ -249,3 +249,80 @@ Deprecation plans
                               sigma_max=2)
         plot_optimised_interp(filename='gaussian_mix_optimal_scale_sqrt2.png',
                               sigma_max=np.sqrt(2))
+
+.. source code for interpolated broadening schematic
+
+   from __future__ import (absolute_import, division, print_function, unicode_literals)
+
+   # import mantid algorithms, numpy and matplotlib
+   from mantid.simpleapi import *
+
+   import matplotlib.pyplot as plt
+
+   import numpy as np
+
+   from AbinsModules.Instruments import Broadening
+
+   bins = np.linspace(0, 100, 1001, dtype=np.float64)
+   frequencies = (bins[:-1] + bins [1:]) / 2
+
+   # Generate synthetic data with two peaks
+   intensities = np.zeros_like(frequencies)
+   peak1_loc = 300
+   peak2_loc = 600
+   intensities[peak1_loc] = 1.5
+   intensities[peak2_loc] = 1
+
+   sigma = np.linspace(1, 10, 1000)
+   peak1_sigma = sigma[peak1_loc]
+   peak2_sigma = sigma[peak2_loc]
+
+   fig, (ax1, ax2, ax3) = plt.subplots(nrows=3, sharex=True, figsize=(8,6))
+
+   # Original spectrum
+   ax1.plot(freq_points, intensities, 'k-', label='Unbroadened spectrum')
+
+   # Narrow limit
+   freq_points, spectrum = Broadening.broaden_spectrum(frequencies=frequencies,
+                                                       bins=bins,
+                                                       s_dft=intensities,
+                                                       sigma=(peak1_sigma * np.ones_like(frequencies)),
+                                                       scheme='gaussian')
+   ax2.plot(freq_points, spectrum, label='Convolve with min(sigma)')
+
+   # Broad limit
+   freq_points, spectrum = Broadening.broaden_spectrum(frequencies=frequencies,
+                                                       bins=bins,
+                                                       s_dft=intensities,
+                                                       sigma=(peak2_sigma * np.ones_like(frequencies)),
+                                                       scheme='gaussian')
+   ax2.plot(freq_points, spectrum, label='Convolve with max(sigma)')
+
+   # Reference method: sum individually
+   freq_points, spectrum = Broadening.broaden_spectrum(frequencies=frequencies,
+                                                       bins=bins,
+                                                       s_dft=intensities,
+                                                       sigma=sigma,
+                                                       scheme='gaussian')
+   ax3.plot(freq_points, spectrum, 'k-', label='Sum individual peaks')
+
+   # Interpolated
+   freq_points, spectrum = Broadening.broaden_spectrum(frequencies=frequencies,
+                                                       bins=bins,
+                                                       s_dft=intensities,
+                                                       sigma=sigma,
+                                                       scheme='interpolate')
+   ax2.plot(freq_points, spectrum, c='C2', linestyle='--', label='Interpolated', zorder=0.5)
+   ax3.plot(freq_points, spectrum, c='C2', linestyle='--', label='Interpolated', zorder=0.5)
+
+   ax1.legend()
+   ax2.legend()
+   ax3.legend()
+
+   for ax in ax1, ax2, ax3:
+       ax.tick_params(labelbottom=False, labelleft=False)
+
+   margin=0.05
+   fig.subplots_adjust(left=margin, right=(1-margin), bottom=margin, top=(1-margin))
+
+   fig.savefig('abins_interp_broadening_schematic.png')
