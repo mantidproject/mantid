@@ -159,9 +159,9 @@ void SumSpectra::init() {
                   "If enabled floating point special values such as NaN or Inf"
                   " are removed before the spectra are summed.");
 
-  declareProperty(
-      "UseFractionalArea", true,
-      "Normalize to fractional area for RebinnedOutput workspaces.");
+  declareProperty("UseFractionalArea", true,
+                  "Normalize the output workspace to the fractional area for "
+                  "RebinnedOutput workspaces.");
 
   declareProperty("MultiplyBySpectra", true,
                   "For unnormalized data one should multiply the weighted sum "
