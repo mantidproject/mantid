@@ -150,6 +150,8 @@ def _merge_workspace_with_limits(focused_ws, q_lims):
         if ws_range > ws_max_range:
             largest_range_spectrum = i + 1
             ws_max_range = ws_range
+    if min_x == -np.inf or max_x == np.inf:
+        raise AttributeError("Workspace x range contains an infinite value.")
     focused_ws = mantid.Rebin(InputWorkspace=focused_ws, Params=[min_x, (max_x-min_x)/num_x, max_x])
     while focused_ws.size() > 1:
         mantid.ConjoinWorkspaces(InputWorkspace1=focused_ws[0],
@@ -167,6 +169,9 @@ def _merge_workspace_with_limits(focused_ws, q_lims):
         q_min[i] = pdf_x_array[tmp2]
         q_max[i] = pdf_x_array[np.amax(np.where(pdf_x_array <= q_max[i]))]
         bin_width = min(pdf_x_array[1] - pdf_x_array[0], bin_width)
+
+    if min_x == -np.inf or max_x == np.inf:
+        raise AttributeError("Q lims contains an infinite value.")
     focused_data_combined = mantid.CropWorkspaceRagged(InputWorkspace=focused_ws_conjoined, XMin=q_min, XMax=q_max)
     focused_data_combined = mantid.Rebin(InputWorkspace=focused_data_combined,
                                          Params=[min(q_min), bin_width, max(q_max)])
