@@ -233,7 +233,7 @@ class DNSElasticPowderPlot_view(DNSView):
 
         for key, target_object in self._mapping.items():
             state = self.get_single_state(target_object)
-            if state is not None: 
+            if state is not None:
             ## pushbuttons for example are not defined in the get function
                 state_dict[key] = state
         state_dict['linestyle'] = self.linestyle

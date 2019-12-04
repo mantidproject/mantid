@@ -23,7 +23,7 @@ class DNSXMLDump_presenter(DNSObserver):
         self.name = 'xml_dump'
         self.view = DNSXMLDump_view(self.parent.view)
         self.last_filename = None
-        
+
     def load_xml(self):
         """Load DNS GUI options from xml file """
         xml_file_path = self.view.get_load_filename()

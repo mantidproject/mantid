@@ -5,9 +5,9 @@ Created on Wed Jul 10 14:08:05 2019
 @author: thomasm
 """
 
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.cm as colormaps
+#import numpy as np
+#import matplotlib.pyplot as plt
+#import matplotlib.cm as colormaps
 
 colormaps = [
     u'Accent', u'afmhot', u'autumn', u'binary', u'Blues', u'bone', u'BrBG',
@@ -25,17 +25,17 @@ colormaps = [
 ]
 
 
-def create_images():
-    gradient = np.linspace(0, 1, 256)
-    gradient = np.vstack((gradient, gradient))
-    #colormaps=[m for m in colormaps.cmap_d.keys() if not m.endswith("_r")] ## this returns a mix of unicode and string
-    #colormaps.sort(key=unicode.lower)
-    fig = plt.figure(frameon=False)
-    fig.set_size_inches(20, 1)
-    ax = plt.Axes(fig, [0., 0., 1., 1.])
-    ax.set_axis_off()
-    fig.add_axes(ax)
-    print(colormaps)
-    for m in colormaps:
-        ax.imshow(gradient, cmap=plt.get_cmap(m), aspect='auto')
-        fig.savefig(m + '.png', dpi=15)
+#def create_images():
+#    gradient = np.linspace(0, 1, 256)
+#    gradient = np.vstack((gradient, gradient))
+#    #colormaps=[m for m in colormaps.cmap_d.keys() if not m.endswith("_r")] ## this returns a mix of unicode and string
+#    #colormaps.sort(key=unicode.lower)
+#    fig = plt.figure(frameon=False)
+#    fig.set_size_inches(20, 1)
+#    ax = plt.Axes(fig, [0., 0., 1., 1.])
+#    ax.set_axis_off()
+#    fig.add_axes(ax)
+#    print(colormaps)
+#    for m in colormaps:
+#        ax.imshow(gradient, cmap=plt.get_cmap(m), aspect='auto')
+#        fig.savefig(m + '.png', dpi=15)

@@ -74,7 +74,7 @@ class DNSTofPowderPlot_view(DNSView):
         for m in colormaps:
             if self.within_mantid:
                 self._mapping['colormap'].addItem(
-                    QIcon("scripts/DNSReduction/plot/colormaps/"\
+                    QIcon("scripts/DNSReduction/plot/colormaps/"
                           "{}.png".format(m)),
                     m)
             else:
@@ -146,8 +146,8 @@ class DNSTofPowderPlot_view(DNSView):
     def update_min(self, slidervalue):
         if self.cl is None:
             return
-        self.minimum = (self.plotmax -
-                        self.plotmin) * slidervalue / 1000.0 + self.plotmin
+        self.minimum = (self.plotmax
+                        - self.plotmin) * slidervalue / 1000.0 + self.plotmin
         self.cl.set_clim(vmin=self.minimum, vmax=self.maximum)
         self.ax.figure.canvas.draw()
         self.static_canvas.figure.tight_layout()
@@ -155,8 +155,8 @@ class DNSTofPowderPlot_view(DNSView):
     def update_max(self, slidervalue):
         if self.cl is None:
             return
-        self.maximum = (self.plotmax -
-                        self.plotmin) * slidervalue / 1000.0 + self.plotmin
+        self.maximum = (self.plotmax
+                        - self.plotmin) * slidervalue / 1000.0 + self.plotmin
         self.cl.set_clim(vmin=self.minimum, vmax=self.maximum)
         self.ax.figure.canvas.draw()
         self.static_canvas.figure.tight_layout()

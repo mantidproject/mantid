@@ -39,10 +39,10 @@ field_dict = {
     '-z20_nsf': 'minus_z_nsf',
 }
 
-number_dict = {entry['filenumber']: entry for entry in fulldata}
+#number_dict = {entry['filenumber']: entry for entry in fulldata}
 
 
-def create_standard():
+def create_standard(fulldata):
     dataset = {}
     for entry in fulldata:
         if entry['samplename'] not in ['vana', 'nicr', 'leer', 'empty']:
@@ -61,7 +61,7 @@ def create_standard():
                         entry['filenumber'])
                 else:
                     dataset[datatype][field][datapath] = [entry['filenumber']
-                                                         ]  #
+                                                          ]  #
             else:
                 dataset[datatype][field] = {}
                 dataset[datatype][field][datapath] = [entry['filenumber']]
@@ -84,6 +84,7 @@ for mykey, values in vanadata['sample']['x_sf'].items():
         with open(filename, 'r') as f:
             txt = f.readlines()
         del f
+
         det_rot = float(txt[13][-15:-5].strip())
         time = float(txt[56][-15:-5].strip())
         monitor = int(txt[57][-15:-1].strip())

@@ -151,7 +151,7 @@ class DNSTreeModel(QAbstractItemModel):
         else:
             parentItem = parent.internalPointer()
 
-        if not parent is None and parent.column() > 0:
+        if parent is not None and parent.column() > 0:
             return 0
 
         return parentItem.childCount()
@@ -192,9 +192,7 @@ class DNSTreeModel(QAbstractItemModel):
                     nchecked.append(int(item.data(0)))
         return nchecked
 
-
 ### setting stuff
-
     def setData(self, index, value, role=Qt.EditRole):
         """
         Checking of a specific item

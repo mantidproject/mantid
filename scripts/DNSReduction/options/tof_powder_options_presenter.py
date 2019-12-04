@@ -40,11 +40,11 @@ class DNSTofPowderOptions_presenter(DNSObserver):
         tofchannels = [x['tofchannels'] for x in fulldata]
         if len(set(channelwidth)) != 1:
             self.raise_error(
-                'Waning different channelwidths in selected datafiles: '\
+                'Waning different channelwidths in selected datafiles: '
                 '{}'.format(channelwidth))
         if len(set(tofchannels)) != 1:
             self.raise_error(
-                'Waning different number of tofchannels in ' \
+                'Waning different number of tofchannels in '
                 'selected datafiles: {}'
                 .format(tofchannels))
         channelwidth = channelwidth[0]
@@ -85,7 +85,7 @@ class DNSTofPowderOptions_presenter(DNSObserver):
                 selector_wavelength = 1 / selector_speeds[0] * 4.448 / 7500
             if abs(selector_wavelength - wavelength) > 0.1 * wavelength:
                 self.raise_error(
-                    'Warning, selector speed differs from wavelength more' \
+                    'Warning, selector speed differs from wavelength more'
                     ' than 10%, set wavelength manually.')
                 self.view.deactivate_get_wavelength()
             else:

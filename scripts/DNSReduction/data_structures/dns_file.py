@@ -54,13 +54,13 @@ class DNSFile(dict):
 
         w("# DNS   Mono  d-spacing[nm]  Theta[deg]   "
           "Lambda[nm]   Energy[meV]   Speed[m/sec]\n")
-        w("#      {}   {:6.4f}         {:6.2f}" \
-           "         {:6.3f}{:6.3f}      {:7.2f}\n".format("PG-002",
-                                                           0.3350,
-                                                           self['mon_rot'],
-                                                           wavelength,
-                                                           self['energy'],
-                                                           self['speed']))
+        w("#      {}   {:6.4f}         {:6.2f}"
+          "         {:6.3f}{:6.3f}      {:7.2f}\n".format("PG-002",
+                                                          0.3350,
+                                                          self['mon_rot'],
+                                                          wavelength,
+                                                          self['energy'],
+                                                          self['speed']))
 
         w("# Distances [cm] Sample_Chopper    "
           "Sample_Detector    Sample_Monochromator\n")

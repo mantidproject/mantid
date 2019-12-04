@@ -41,7 +41,6 @@ class DNSSimulation_presenter(DNSObserver):
         self.view.sig_scplot_clicked.connect(self.sc_plot)
         self.view.sig_mouse_pos_changed.connect(self.set_hkl_pos_on_plot)
 
-
     def get_and_validate(self):
         self.get_option_dict()
         hkl1 = self.own_dict['hkl1_v']

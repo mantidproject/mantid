@@ -27,8 +27,8 @@ except (ImportError, ImportWarning):
     mantid_version = None
 
 SCRIPT_EXEC_METHOD = 'exec'
-try:
-    import mantidplot
+try: ## we need import to check if we are in mantidplot
+    import mantidplot  # noqa: F401
     SCRIPT_EXEC_METHOD = 'mantidplot'
 except (ImportError, ImportWarning):
     # are we running workbench

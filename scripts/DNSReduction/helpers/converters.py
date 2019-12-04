@@ -14,7 +14,8 @@ from numpy import cos, radians, pi
 def lambda_to_E(wavelength):
     mneutron = 1.674927471 * 10**-27  ## in kg
     hquer = 6.626070040 * 10**-34  ### in J*s
-    E = hquer**2 / 2 / mneutron / wavelength**2 * 10**20 / 1.6021766208 / 10**-22
+    E = (hquer**2 / 2 / mneutron / wavelength**2 * 10**20
+         / 1.6021766208 / 10**-22)
     return E
 
 
@@ -31,7 +32,7 @@ def twotheta_to_q(twotheta, wavelength, deltaE):
     ## factor 10**-20 is for converting 1/m^2 to 1/Angstroem^2
     kf = (ki**2 - deltaE * 2 * mneutron / hquer**2 * 10**-20)**0.5
     qabs = 2 * pi * (ki**2 + kf**2 - 2*ki*kf*cos(twotheta)
-                    )**0.5 /2.0/pi  # length of Q in inelastic case
+                     )**0.5 /2.0/pi  # length of Q in inelastic case
     return qabs
 
 

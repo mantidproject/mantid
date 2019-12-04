@@ -23,6 +23,7 @@ class DNSElasticPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
               self).__init__(parent, 'elastic_powder_script_generator')
         self.script = None
         self.plotlist = []
+
     def create_dataset(self, data, sample=False):
         """Converting data from fileselector to a smaller dictionary """
         dataset = {}
@@ -64,7 +65,6 @@ class DNSElasticPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
                     plotlist.append("mat_{}_{}".format(sample, workspace))
         return plotlist
 
-
     def format_dataset(self, dataset):
         """Formating the dictionary to a nicely indented string"""
         llens = max([len(a) for a in dataset.keys()])+6+4
@@ -85,8 +85,13 @@ class DNSElasticPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
         dataset_string += "}"
         return dataset_string
 
-    def script_maker(self):
-        self.script = [""]
+    def get_normation(self, options):
+        if options['norm_monitor']:
+            return 'monitor'
+        return 'time'
+
+    def script_maker(self): # noqa: C901
+        self.script = []
         options = self.param_dict['elastic_powder_options']
         paths = self.param_dict['paths']
 
@@ -96,7 +101,6 @@ class DNSElasticPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
         ### get data from dictionary
         sample_data = self.param_dict['file_selector']['full_data']
         standard_data = self.param_dict['file_selector']['standard_data']
-
 
         ## shortcuts for options
         vanac = options['corrections'] and options['det_efficency']
@@ -113,11 +117,7 @@ class DNSElasticPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
         ascii = paths["ascii"] and paths["export"] and export_path
         nexus = paths["nexus"] and paths["export"]  and export_path
         ## normation
-        if options['norm_monitor']:
-            norm = 'monitor'
-        else:
-            norm = 'time'
-
+        norm = self.get_normation(options)
         ### binning determination, using dns uncertainty
         det_rot = [entry['det_rot'] for entry in sample_data]
         diff_rot = [
@@ -142,7 +142,6 @@ class DNSElasticPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
         sample_data = self.create_dataset(sample_data, sample=True)
         standard_data = self.create_dataset(standard_data)
 
-
         self.plotlist = self.create_plotlist(sample_data)
         ## loop over multiple or single samples, spac is indention for rest
         if len(sample_data.keys()) == 1:
@@ -157,11 +156,11 @@ class DNSElasticPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
     ##### starting to write file
 
         ## imports
-        l('from DNSReduction.scripts.md_powder_elastic import ' \
-          'load_all, background_substraction' \
-          '\nfrom DNSReduction.scripts.md_powder_elastic import ' \
-          'vanadium_correction, fliping_ratio_correction' \
-          '\nfrom DNSReduction.scripts.md_powder_elastic import ' \
+        l('from DNSReduction.scripts.md_powder_elastic import '
+          'load_all, background_substraction'
+          '\nfrom DNSReduction.scripts.md_powder_elastic import '
+          'vanadium_correction, fliping_ratio_correction'
+          '\nfrom DNSReduction.scripts.md_powder_elastic import '
           'non_mag_sep, xyz_seperation')
         l('from mantid.simpleapi import ConvertMDHistoToMatrixWorkspace, mtd')
         l('from mantid.simpleapi import SaveAscii, SaveNexus')
@@ -173,21 +172,21 @@ class DNSElasticPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
         l()
 
         ## binning
-        l("binning = ['twoTheta' , {:.2f}, {:.2f}, {:d}] # min, max,"\
+        l("binning = ['twoTheta' , {:.2f}, {:.2f}, {:d}] # min, max,"
           " number_of_bins".format(twotheta_min,
                                    twotheta_max,
                                    numberofbins))
-        l("wss_sample = load_all(sample_data, binning, normalizeto='{}')"\
+        l("wss_sample = load_all(sample_data, binning, normalizeto='{}')"
           "".format(norm))
-        l("wss_standard = load_all(standard_data, binning, normalizeto='{}',"\
+        l("wss_standard = load_all(standard_data, binning, normalizeto='{}',"
           "standard=True)".format(norm))
         l()
 
         ## background substraction from standard data
         if vanac or nicrc:
-            l("## substract background from vanadium and nicr" \
-              "\nfor sample, workspacelist in wss_standard.items(): " \
-              "\n    for workspace in workspacelist:" \
+            l("## substract background from vanadium and nicr"
+              "\nfor sample, workspacelist in wss_standard.items(): "
+              "\n    for workspace in workspacelist:"
               "\n        background_substraction(workspace)")
             l()
 
@@ -212,22 +211,21 @@ class DNSElasticPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
         if nicrc:
             l("{}{}fliping_ratio_correction(workspace)".format(loop, spac))
 
-
         ## saving
         saving_list = []
         if ascii:
-            saving_list.append("{0}SaveAscii('mat_{{}}'.format(workspace), " \
-                               "'{{}}/{{}}.csv'.format(exportpath, workspace)"\
-                               ", WriteSpectrumID=False)"\
+            saving_list.append("{0}SaveAscii('mat_{{}}'.format(workspace), "
+                               "'{{}}/{{}}.csv'.format(exportpath, workspace)"
+                               ", WriteSpectrumID=False)"
                                "".format(spac))
         if nexus:
-            saving_list.append("{0}SaveNexus('mat_{{}}'.format(workspace), "\
-                               "'{{}}/{{}}.nxs'.format(exportpath," \
+            saving_list.append("{0}SaveNexus('mat_{{}}'.format(workspace), "
+                               "'{{}}/{{}}.nxs'.format(exportpath,"
                                " workspace))".format(spac))
 
         ## converting to matrix for plotting
-        l("{0}{1}ConvertMDHistoToMatrixWorkspace(workspace," \
-          " Outputworkspace='mat_{{}}'.format(workspace), " \
+        l("{0}{1}ConvertMDHistoToMatrixWorkspace(workspace,"
+          " Outputworkspace='mat_{{}}'.format(workspace), "
           "Normalization='NoNormalization'){2}"
           "".format(loop, spac, "\n".join(saving_list)))
         ## saving raw data
@@ -237,34 +235,34 @@ class DNSElasticPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
             for sample, fields in sample_data.items():
                 if not all(field in fields
                            for field in ['x_sf', 'y_sf', 'z_sf', 'z_nsf']):
-                    self.raise_error("Not all fields necesarry found for XYZ"\
+                    self.raise_error("Not all fields necesarry found for XYZ"
                                      " analysis.")
                 else:
                     l()
                     l("## do xyz polarization analysis for magnetic powders")
 
-                    l("{0}_nuclear_coh, {0}_magnetic, {0}_spin_incoh = xyz_" \
-                      "seperation(x_sf='{0}_x_sf'," \
-                      "{1}{2}y_sf='{0}_y_sf'," \
-                      "{1}{2}z_sf='{0}_z_sf'," \
-                      "{1}{2}z_nsf='{0}_z_nsf')" \
+                    l("{0}_nuclear_coh, {0}_magnetic, {0}_spin_incoh = xyz_"
+                      "seperation(x_sf='{0}_x_sf',"
+                      "{1}{2}y_sf='{0}_y_sf',"
+                      "{1}{2}z_sf='{0}_z_sf',"
+                      "{1}{2}z_nsf='{0}_z_nsf')"
                       "".format(sample, '\n', " "*(len(sample) + 64)))
 
                     for samp_type in ['nuclear_coh',
                                       'magnetic',
                                       'spin_incoh']:
-                        l("ConvertMDHistoToMatrixWorkspace('{0}_{1}', " \
-                          "Outputworkspace='mat_{0}_{1}',"\
-                          " Normalization='NoNormalization')"\
+                        l("ConvertMDHistoToMatrixWorkspace('{0}_{1}', "
+                          "Outputworkspace='mat_{0}_{1}',"
+                          " Normalization='NoNormalization')"
                           "".format(sample, samp_type))
-                        self.plotlist.append('mat_{0}_{1}' \
+                        self.plotlist.append('mat_{0}_{1}'
                                              ''.format(sample, samp_type))
                         if ascii:
-                            l("SaveAscii('mat_{0}_{1}', '{2}/{0}_{1}.csv', "\
-                              "WriteSpectrumID=False)"\
+                            l("SaveAscii('mat_{0}_{1}', '{2}/{0}_{1}.csv', "
+                              "WriteSpectrumID=False)"
                               "".format(sample, samp_type, export_path))
                         if nexus:
-                            l("SaveNexus('mat_{0}_{1}', '{2}/{0}_{1}.nxs')"\
+                            l("SaveNexus('mat_{0}_{1}', '{2}/{0}_{1}.nxs')"
                               "".format(sample, samp_type, export_path))
         ### nuc_coherent + spin_incoherent seperation for non-magnetic samples
         if nonmag:
@@ -277,26 +275,26 @@ class DNSElasticPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
                                  in sample_data[sample].keys())):
                         nsf_sf_pairs.append("{}_{}".format(sample, field[:-3]))
                 if not nsf_sf_pairs:
-                    self.raise_error("No pair of SF and NSF measurements"\
+                    self.raise_error("No pair of SF and NSF measurements"
                                      " found for {}".format(sample))
-            l("## sepearation of coherent and incoherent scattering of non" \
+            l("## sepearation of coherent and incoherent scattering of non"
               " magnetic sample")
             for sample_field in sorted(nsf_sf_pairs):
                 # normally only z is measured but just in case
-                l("{0}_nuclear_coh, {0}_spin_incoh = non_mag_sep" \
+                l("{0}_nuclear_coh, {0}_spin_incoh = non_mag_sep"
                   "('{0}_sf', '{0}_nsf')".format(sample_field))
                 for samp_type in ['_nuclear_coh', '_spin_incoh']:
-                    l("ConvertMDHistoToMatrixWorkspace('{0}{1}', "\
-                      "Outputworkspace='mat_{0}{1}', Normalization=" \
+                    l("ConvertMDHistoToMatrixWorkspace('{0}{1}', "
+                      "Outputworkspace='mat_{0}{1}', Normalization="
                       "'NoNormalization')".format(sample_field, samp_type))
-                    self.plotlist.append('mat_{0}{1}' \
+                    self.plotlist.append('mat_{0}{1}'
                                          ''.format(sample_field, samp_type))
                     if ascii:
-                        l("SaveAscii('mat_{0}{1}', '{2}/{0}{1}.csv', "\
-                          "WriteSpectrumID=False)"\
+                        l("SaveAscii('mat_{0}{1}', '{2}/{0}{1}.csv', "
+                          "WriteSpectrumID=False)"
                           "".format(sample_field, samp_type, export_path))
                         if nexus:
-                            l("SaveNexus('mat_{0}{1}', '{2}/{0}{1}.nxs')"\
+                            l("SaveNexus('mat_{0}{1}', '{2}/{0}{1}.nxs')"
                               "".format(sample_field, samp_type, export_path))
         return self.script
 

@@ -185,9 +185,7 @@ class DNSSimulation_view(DNSView):
     def wavelength_changed(self):
         self.sig_wavelength_changed.emit()
 
-
-## end signal emitting
-
+## end signal emiting
     def clear_d_tooltip(self):
         """called if hkl changed but no new calculation of d was done"""
         self._mapping['hkl1'].setToolTip('')

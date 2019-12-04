@@ -44,8 +44,8 @@ def list_to_multirange(value_list):
         start = 0
         increment = value_list[start + 1] - value_list[start]
         for i, value in enumerate(value_list):
-            if i == len(value_list) - 1 or value + increment != value_list[i +
-                                                                           1]:
+            if (i == len(value_list) - 1
+                    or value + increment != value_list[i + 1]):
                 end = i + 1
                 if range_string:
                     range_string = ' + '.join(
@@ -106,7 +106,7 @@ class DNSScriptGenerator_presenter(DNSObserver):
         if not sampledata:
             self.raise_error('no data selected', critical=True)
             return
-        self.sig_request_from_abo.emit()  
+        self.sig_request_from_abo.emit()
         ### should be catched by main presenter
         #to ask other observer for automatic data reduction
         script = self.script_maker()
@@ -156,8 +156,8 @@ class DNSScriptGenerator_presenter(DNSObserver):
                 files_dict[inside[0]] += [dnsfile['filenumber']]
             else:
                 files_dict[str(
-                    round(det_rot / rounding_limit) *
-                    rounding_limit)] = [dnsfile['filenumber']]
+                    round(det_rot / rounding_limit)
+                    * rounding_limit)] = [dnsfile['filenumber']]
         new_dict = OrderedDict()
         keylist = sorted([float(x) for x in files_dict.keys()], reverse=True)
         for key in keylist:
@@ -197,4 +197,3 @@ class DNSScriptGenerator_presenter(DNSObserver):
         """
         self.script = [""]
         return self.script
-

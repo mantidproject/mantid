@@ -104,7 +104,8 @@ class DNSReductionGUI_view(QMainWindow):
         return None
 
     def help_button_clicked(self):
-		InterfaceManager().showCustomInterfaceHelp('DNS Reduction')
+        pass
+        #InterfaceManager().showCustomInterfaceHelp('DNS Reduction')
 
     def modus_change(self):
         self.ui.tabWidget.currentChanged.disconnect(self._tab_changed)
@@ -116,8 +117,8 @@ class DNSReductionGUI_view(QMainWindow):
 
     def open_dns_webpage(self):
         webbrowser.open(
-            'https://www.mlz-garching.de/instrumente-und-labore'\
-                '/spektroskopie/dns.html', new=1, autoraise=True)
+            'https://www.mlz-garching.de/instrumente-und-labore'
+            '/spektroskopie/dns.html', new=1, autoraise=True)
 
     def open_triggered(self):
         self.sig_open_triggered.emit()
@@ -127,7 +128,6 @@ class DNSReductionGUI_view(QMainWindow):
 
     def save_triggered(self):
         self.sig_save_triggered.emit()
-
 
     def show_statusmessage(self, message='', time=10, clear=False):
         oldmessage = self.ui.statusbar.currentMessage()

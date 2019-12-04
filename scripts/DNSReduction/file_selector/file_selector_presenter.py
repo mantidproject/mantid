@@ -82,16 +82,20 @@ class DNSFileSelector_presenter(DNSObserver):
                 while ((row - i) >= 0
                        and (view.is_scan_hidden(row - i)
                             or 'scan' not in model.scanCommandFromRow(row - i)
-                           )):
+                            )
+                       ):
                     row += -1  # do not check hidden rows
                 while ((row - i) >= 0
                        and ('scan' not in model.scanCommandFromRow(row - i)
                             or view.is_scan_hidden(row - i)
                             or ('complete' in sender_name
                                 and (row - i > 0)
-                                and (model.scanFromRow(row - i).childCount() <
-                                     model.scanExpectedPointsFromRow(row - i))
-                               ))):
+                                and (model.scanFromRow(row - i).childCount()
+                                     < model.scanExpectedPointsFromRow(row
+                                                                       - i))
+                                )
+                            )
+                       ):
                     row += -1
                 model.setCheckedScan(row - i, 2)
         elif 'selected' in sender_name:
@@ -135,8 +139,7 @@ class DNSFileSelector_presenter(DNSObserver):
                 model.setCheckedScan(row, 0)
             for text, filter_condition in filters.items():
                 if (filter_condition
-                        and not text in model.scanCommandFromRow(row)
-                   ):
+                        and text not in model.scanCommandFromRow(row)):
                     self.view.hide_scan(row, hidden=True)
                     model.setCheckedScan(row, 0)
         return
@@ -216,8 +219,8 @@ class DNSFileSelector_presenter(DNSObserver):
                     model.setCheckedScan(row, 2)
             self.view.show_statusmessage(
                 'automatically loaded all standard files', 30)
-            if was:
-                view.combo_changed(0)
+        if was:
+            view.combo_changed(0)
 
     def read_all(self, filtered=False, watcher=False):
         """
@@ -301,15 +304,17 @@ class DNSFileSelector_presenter(DNSObserver):
             except KeyError:
                 notfound += 1
         if notfound:
-            print('Of {} loaded checked filenumbers {} were not found ' \
-                 'in list of datafiles'
+            print('Of {} loaded checked filenumbers {} were not found '
+                  'in list of datafiles'
                   .format(len(filenumbers), notfound))
 
     def sequential_load(self):
         self.autoload_timer.stop()
         self.read_all(watcher=True)
-    
+
     def tab_got_focus(self):
-        self.filter_scans()
-        self.filter_standard()
+        if self.active_model == self.standard_data:
+            self.filter_standard()
+        else:
+            self.filter_scans()
         self.view.hide_tof(hidden='_tof' not in self.modus)

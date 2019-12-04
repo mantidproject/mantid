@@ -75,12 +75,12 @@ class DNSSimulation_model(DNSObsModel):
         y = tth * 0
         for refl in self.refls:
             shiftedtth = refl.tth + shift
-            FWHM = sqrt(u + v*tan(radians(shiftedtth) / 2.0) +
-                        w*tan(radians(shiftedtth) / 2.0)**2)
+            FWHM = sqrt(u + v*tan(radians(shiftedtth) / 2.0)
+                        + w*tan(radians(shiftedtth) / 2.0)**2)
             c = FWHM / (2*sqrt(2*log(2)))
             peak = (1 / (c*sqrt(2 * pi))
                     * np.exp(-0.5*((x - shiftedtth) / c)**2)
-                   )
+                    )
             y += refl.fs_lc * peak
         bins = tth - tth_step/2.0
         bins = np.append(bins, tth[-1] + tth_step/2.0)

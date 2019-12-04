@@ -13,7 +13,6 @@ import numpy as np
 from mantid.simpleapi import LoadDNSSCD, mtd, BinMD, DivideMD, MultiplyMD
 from mantid.simpleapi import MinusMD, CreateSingleValuedWorkspace
 from mantid.simpleapi import IntegrateMDHistoWorkspace, PlusMD, GroupWorkspaces
-from mantid.simpleapi import SaveAscii, SaveNexus
 
 from DNSReduction.data_structures.dns_error import DNSError
 
@@ -39,7 +38,7 @@ def background_substraction(workspacename, factor=1):
     background_scaled = mtd[backgroundname] * ratio * factor
     mtd[workspacename] = mtd[workspacename] - background_scaled
     return mtd[workspacename]
-   
+
 
 def fliping_ratio_correction(workspace):
     """Given SF channel, SF and NSF are corrected for finite flipping ratio """
@@ -85,7 +84,7 @@ def fliping_ratio_correction(workspace):
 
 def load_all(data_dict, binning, normalizeto='monitor', standard = False):
     """Loading of multiple DNS files given in a dictionary to workspaces
-    """       
+    """
     workspacenames = {}
     for samplename, fields in data_dict.items():
         workspacenames[samplename] = []
@@ -146,7 +145,7 @@ def raise_error(error):
 
 
 def vanadium_correction(workspacename,
-                        binning, 
+                        binning,
                         vanaset=None,
                         ignore_vana_fields=False,
                         sum_vana_sf_nsf=False):
@@ -185,7 +184,7 @@ def vanadium_correction(workspacename,
             vana_sum_norm = sum(normlist)
         else:
             raise_error(
-                'Need to give vanadium dataset explicit if you want all'\
+                'Need to give vanadium dataset explicit if you want all'
                 ' vandium files to be added.'
             )
     elif sum_vana_sf_nsf:
@@ -199,7 +198,7 @@ def vanadium_correction(workspacename,
             vana_sf_norm = mtd[vana_sf_norm]
         except KeyError:
             raise_error(
-                'No vanadium file for {}_sf . You can choose to ignore' \
+                'No vanadium file for {}_sf . You can choose to ignore'
                 ' vanadium fields in the options.'.format(polarization))
             return mtd[workspacename]
         try:
@@ -207,7 +206,7 @@ def vanadium_correction(workspacename,
             vana_nsf_norm = mtd[vana_nsf_norm]
         except KeyError:
             raise_error(
-                'No vanadium file for {}_nsf. You can choose to ignore' \
+                'No vanadium file for {}_nsf. You can choose to ignore'
                 ' vanadium fields in the options.'.format(polarization))
             return mtd[workspacename]
         vana_sum = vana_sf + vana_nsf
@@ -219,7 +218,7 @@ def vanadium_correction(workspacename,
             vana_sum = mtd[vananame]
             vana_sum_norm = mtd[vananorm]
         except KeyError:
-            raise_error('No vanadium file for {}. You can choose to ignore' \
+            raise_error('No vanadium file for {}. You can choose to ignore'
                         ' vanadium fields in the options.'.format(fieldname))
             return mtd[workspacename]
     ### commen code, which will be run regardless of the case
@@ -258,10 +257,10 @@ def xyz_seperation(x_sf, y_sf, z_sf, z_nsf):
     mtd['{}_magnetic'.format(samplename)] = half_imag * 2
     mtd['{}_spin_incoh'.format(samplename)] = one_third_inc * 3
     mtd['{}_nuclear_coh'.format(samplename)] = mtd[z_nsf] - mag_inc_sum
-    seperated = GroupWorkspaces([
+    GroupWorkspaces([
         '{}_magnetic'.format(samplename), '{}_spin_incoh'.format(samplename),
-        '{}_nuclear_coh'.format(samplename)
-    ])
+        '{}_nuclear_coh'.format(samplename)],
+        OutputWorkspace='seperated')
     return [
         mtd['{}_nuclear_coh'.format(samplename)],
         mtd['{}_magnetic'.format(samplename)],
@@ -275,9 +274,9 @@ def non_mag_sep(sf_workspace, nsf_workspace):
     mtd['{}_nuclear_coh'.format(
         samplename)] = mtd[nsf_workspace] - 0.5 * mtd[sf_workspace]
     mtd['{}_spin_incoh'.format(samplename)] = 1.5 * mtd[sf_workspace]
-    seperated = GroupWorkspaces([
-        '{}_nuclear_coh'.format(samplename), '{}_spin_incoh'.format(samplename)
-    ])
+    GroupWorkspaces(['{}_nuclear_coh'.format(samplename),
+                     '{}_spin_incoh'.format(samplename)],
+                    OutputWorkspace='separted')
     return [
         mtd['{}_nuclear_coh'.format(samplename)],
         mtd['{}_spin_incoh'.format(samplename)]
