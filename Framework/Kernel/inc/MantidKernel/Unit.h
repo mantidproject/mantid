@@ -54,7 +54,7 @@ public:
   /// A label for the unit to be printed on axes, @see UnitLabel
   /// @return The unit label
   virtual const UnitLabel label() const = 0;
-  
+
   /// Returns if the unit can be used in conversions
   /// @return true if the unit can be used in unit conversions
   virtual const bool isConvertible() const { return true; }
