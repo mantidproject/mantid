@@ -12,6 +12,8 @@ Diffraction Changes
 Powder Diffraction
 ------------------
 
+- The create_total_scattering_pdf merging banks now matches spectra to the spectrum with the largest x range.
+
 Engineering Diffraction
 -----------------------
 
