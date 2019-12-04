@@ -69,7 +69,8 @@ class MergeWorkspacesWithLimits(DataProcessorAlgorithm):
                          StoreInADS=False)
         while ws_group.size() > 1:
             ConjoinWorkspaces(InputWorkspace1=ws_group[0],
-                              InputWorkspace2=ws_group[1])
+                              InputWorkspace2=ws_group[1],
+                              CheckOverlapping=False)
 
         ws_conjoined, offset, scale, chisq = MatchSpectra(InputWorkspace=ws_group[0],
                                                           ReferenceSpectrum=largest_range_spectrum)
