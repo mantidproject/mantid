@@ -50,6 +50,28 @@ class MergeWorkspacesWithLimits(DataProcessorAlgorithm):
         ws_group = self.getProperty('WorkspaceGroup').value
         x_min = self.getProperty('XMin').value
         x_max = self.getProperty('XMax').value
+        largest_range_spectrum, rebin_param = self.get_common_bin_range_and_largest_spectra(ws_group)
+        ws_group = Rebin(InputWorkspace=ws_group,
+                         Params=rebin_param,
+                         StoreInADS=False)
+        while ws_group.size() > 1:
+            ConjoinWorkspaces(InputWorkspace1=ws_group[0],
+                              InputWorkspace2=ws_group[1],
+                              CheckOverlapping=False)
+
+        ws_conjoined, offset, scale, chisq = MatchSpectra(InputWorkspace=ws_group[0],
+                                                          ReferenceSpectrum=largest_range_spectrum,
+                                                          CalculateScale=False)
+        x_min, x_max, bin_width = self.fit_x_lims_to_match_histogram_bins(ws_conjoined, x_min, x_max)
+
+        ws_conjoined = CropWorkspaceRagged(InputWorkspace=ws_conjoined, XMin=x_min, XMax=x_max)
+        ws_conjoined = Rebin(InputWorkspace=ws_conjoined, Params=[min(x_min), bin_width, max(x_max)])
+        merged_ws = SumSpectra(InputWorkspace=ws_conjoined, WeightedSum=True, MultiplyBySpectra=False, StoreInADS=False)
+        DeleteWorkspace(ws_group)
+        DeleteWorkspace(ws_conjoined)
+        self.setProperty('MergedWorkspace', merged_ws)
+
+    def get_common_bin_range_and_largest_spectra(self, ws_group):
         min_x = np.inf
         max_x = -np.inf
         num_x = -np.inf
@@ -64,29 +86,16 @@ class MergeWorkspacesWithLimits(DataProcessorAlgorithm):
             if ws_range > ws_max_range:
                 largest_range_spectrum = i + 1
                 ws_max_range = ws_range
-        ws_group = Rebin(InputWorkspace=ws_group,
-                         Params=[min_x, (max_x - min_x) / num_x, max_x],
-                         StoreInADS=False)
-        while ws_group.size() > 1:
-            ConjoinWorkspaces(InputWorkspace1=ws_group[0],
-                              InputWorkspace2=ws_group[1],
-                              CheckOverlapping=False)
+        return largest_range_spectrum, [min_x, (max_x - min_x) / num_x, max_x]
 
-        ws_conjoined, offset, scale, chisq = MatchSpectra(InputWorkspace=ws_group[0],
-                                                          ReferenceSpectrum=largest_range_spectrum,
-                                                          CalculateScale=False)
+    def fit_x_lims_to_match_histogram_bins(self, ws_conjoined, x_min, x_max):
         bin_width = np.inf
         for i in range(x_min.size):
             pdf_x_array = ws_conjoined.readX(i)
             x_min[i] = pdf_x_array[np.amin(np.where(pdf_x_array >= x_min[i]))]
             x_max[i] = pdf_x_array[np.amax(np.where(pdf_x_array <= x_max[i]))]
             bin_width = min(pdf_x_array[1] - pdf_x_array[0], bin_width)
-        ws_conjoined = CropWorkspaceRagged(InputWorkspace=ws_conjoined, XMin=x_min, XMax=x_max)
-        ws_conjoined = Rebin(InputWorkspace=ws_conjoined, Params=[min(x_min), bin_width, max(x_max)])
-        merged_ws = SumSpectra(InputWorkspace=ws_conjoined, WeightedSum=True, MultiplyBySpectra=False, StoreInADS=False)
-        DeleteWorkspace(ws_group)
-        DeleteWorkspace(ws_conjoined)
-        self.setProperty('MergedWorkspace', merged_ws)
+        return x_min, x_max, bin_width
 
 
 # Register algorithm with Mantid
