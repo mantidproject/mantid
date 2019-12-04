@@ -12,6 +12,24 @@ infrastructure and built-in design decisions. Details are collected
 here: this is primarily for the benefit of those developing or
 hacking Abins.
 
+
+Deprecation plans
+-----------------
+
+- The *pkt_per_peak* and *fwhm* parameters in
+  ``AbinsParameters.sampling`` are no longer in use and should be
+  removed in a future release.
+
+- The "SingleCrystal" modules and objects support non-existent
+  functionality and should be removed. They may return when that
+  functionality is added, but it is likely that their interfaces will
+  change in the process.
+
+- The *frequencies_threshold* parameter in
+  ``AbinsParameters.sampling`` is currently non-functional and should
+  be removed until it *is* functional.
+
+
 Sampling
 --------
 
@@ -52,10 +70,12 @@ implemented within AbinsModules.
 Earlier versions of Abins implemented a Gaussian kernel with a
 fixed number of points spread over a range scaled to the peak width,
 set by *pkt_per_peak* and *fwhm* parameters in
-``AbinsParameters.sampling``. This method leads to aliasing when the
-x-coordinates are not commensurate with the histogram bin.
+``AbinsParameters.sampling``.
+This method leads to aliasing when the x-coordinates are
+incommensurate with the histogram spacing, and an uneven number of
+samples falls into each bin.
 
-.. image:: ../images/gaussian_aliasing.png
+.. image:: images/gaussian_aliasing.png
     :align: center
 
 The safest way to avoid such trouble is for all broadening methods to
@@ -88,24 +108,24 @@ widths the results are not impressive:
 But if we optimise the mixing parameter at each width then the
 magnitudes improve significantly, even if the shapes remain distinctly non-Gaussian:
 
-.. image:: ../images/gaussian_mix_optimal_scale4.png
+.. image:: images/gaussian_mix_optimal_scale4.png
 
 This error is closely related to the width difference between the
 endpoints. Here the range is reduced from a factor 4 to a factor 2,
 and the resulting functions are visually quite convincing
 
-.. image:: ../images/gaussian_mix_optimal_scale2.png
+.. image:: images/gaussian_mix_optimal_scale2.png
 
 while a gap of :math:`\sqrt{2}` is practically indistinguishable with error below 1% of the peak maximum.
 
-.. image:: ../images/gaussian_mix_optimal_scale_sqrt2.png
+.. image:: images/gaussian_mix_optimal_scale_sqrt2.png
 
 For TOSCA :math:`\sigma = a f^2 + b f + c` where :math:`a, b, c$ = $10^{-7}, 0.005, 2.5`. For an energy range of 32 cm\ :sup:`-1` to 4100 cm\ :sup:`-1` sigma ranges from 2.66 to 24.68, which could covered by 5 Gaussians separated by width factor 2 or 9 Gaussians seperated by width factor :math:`\sqrt{2}`.
 This could present a significant cost saving compared to full evaluation of ~4000 convolution kernels (one per convolution bin).
 
-Alternatively we can perform convolution of the full spectrum with each of the sampled kernels, and then interpolate *between the spectra* using the predetermined mixing weights. The convolution is performed efficiently using FFTs, and relatively little memory is required to hold this limited number of spectra and interpolate between them.
+We can build on this by performing convolution of the full spectrum with each of the sampled kernels, and then interpolate *between the spectra* using the predetermined mixing weights. The convolution is performed efficiently using FFTs, and relatively little memory is required to hold this limited number of spectra and interpolate between them.
 
-.. image:: ../images/abins_interp_broadening_schematic.png
+.. image:: images/abins_interp_broadening_schematic.png
 
 This procedure is not strictly equivalent to a summation over frequency-dependent functions, even if there is no interpolation error.
 At each energy coordinate :math:`\epsilon` we "see" a fragment of full spectrum convolved at the same width as any points at :math:`\epsilon` would be.
@@ -114,28 +134,11 @@ As a result, peaks will appear asymmetric.
 In practice, the magnitude of this error depends on the rate of change of :math:`\sigma` relative to the size of :math:`\sigma`.
 In the case of the TOSCA parameters, the error is very small. This should be re-evaluated for other instruments with different energy-dependent broadening functions.
 
-.. image:: ../images/abins-interpolation-benzene.png
+.. image:: images/abins-interpolation-benzene.png
 
-We can see the artefacts of this approach more clearly if we use a wider sample spacing (factor 2) and zoom in on the spectrum. The interpolation method has a tendency to show small peaks at turning points; this may be related to the imperfection in the shape of the smooth bell.
+We can see the artefacts of this approach more clearly if we use fewer Gaussians (spaced by factor 2) and zoom in on the spectrum. The interpolation method has a tendency to show small peaks at turning points; this may be related to the imperfection in the shape of the smooth bell.
 
-.. image:: ../images/abins-interpolation-zoom.png
-           
-Deprecation plans
------------------
-
-- The *pkt_per_peak* and *fwhm* parameters in
-  ``AbinsParameters.sampling`` are no longer in use and should be
-  removed in a future release.
-
-- The "SingleCrystal" modules and objects support non-existent
-  functionality and should be removed. They may return when that
-  functionality is added, but it is likely that their interfaces will
-  change in the process.
-
-- The *frequencies_threshold* parameter in
-  ``AbinsParameters.sampling`` is currently non-functional and should
-  be removed until it *is* functional.
-
+.. image:: images/abins-interpolation-zoom.png
 
 
 .. Source code for Gaussian interpolation plots
