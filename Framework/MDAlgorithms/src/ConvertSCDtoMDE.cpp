@@ -13,10 +13,12 @@
 #include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventInserter.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitLabelTypes.h"
 
 #include "Eigen/Dense"
@@ -39,9 +41,7 @@ DECLARE_ALGORITHM(ConvertSCDtoMDE)
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string ConvertSCDtoMDE::name() const {
-  return "ConvertSCDtoMDE";
-}
+const std::string ConvertSCDtoMDE::name() const { return "ConvertSCDtoMDE"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int ConvertSCDtoMDE::version() const { return 1; }
@@ -101,14 +101,12 @@ void ConvertSCDtoMDE::init() {
   // Box controller properties. These are the defaults
   this->initBoxControllerProps("5" /*SplitInto*/, 1000 /*SplitThreshold*/,
                                20 /*MaxRecursionDepth*/);
-  declareProperty(
-      std::make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>(
-          "InputWorkspace", "", Direction::Input),
-      "An input workspace.");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<API::IMDEventWorkspace>>(
-          "OutputWorkspace", "", Direction::Output),
-      "An output workspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
+                  "An input workspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<API::IMDEventWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
+                  "An output workspace.");
   declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "wavelength", Mantid::EMPTY_DBL(), Direction::Input),
                   "wavelength");
@@ -137,14 +135,40 @@ void ConvertSCDtoMDE::exec() {
 
   API::IMDHistoWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
   auto &expInfo = *(inputWS->getExperimentInfo(static_cast<uint16_t>(0)));
-  auto s1 = (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(
-      expInfo.getLog("s1"))))();
-  auto azimuthal =
-      (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(
-          expInfo.getLog("azimuthal"))))();
-  auto twotheta =
-      (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(
-          expInfo.getLog("twotheta"))))();
+  std::string instrument = expInfo.getInstrument()->getName();
+  g_log.notice() << instrument << "\n";
+  std::vector<double> twotheta, azimuthal;
+  std::vector<double> s1, omega, chi, phi;
+  if (instrument == "HB3A") {
+    auto omegaLog = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
+        expInfo.run().getLogData("omega"));
+    omega = omegaLog->valuesAsVector();
+    auto chiLog = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
+        expInfo.run().getLogData("chi"));
+    chi = chiLog->valuesAsVector();
+    auto phiLog = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
+        expInfo.run().getLogData("phi"));
+    phi = phiLog->valuesAsVector();
+    const auto &di = expInfo.detectorInfo();
+    for (size_t x = 0; x < 512; x++) {
+      for (size_t y = 0; y < 512 * 3; y++) {
+        size_t n = x + y * 512;
+        if (!di.isMonitor(n)) {
+          twotheta.push_back(di.twoTheta(n));
+          azimuthal.push_back(di.azimuthal(n));
+        }
+      }
+    }
+  } else { // HB2C
+    s1 = (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(
+        expInfo.getLog("s1"))))();
+    azimuthal =
+        (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(
+            expInfo.getLog("azimuthal"))))();
+    twotheta =
+        (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(
+            expInfo.getLog("twotheta"))))();
+  }
 
   auto outputWS = DataObjects::MDEventFactory::CreateMDWorkspace(3, "MDEvent");
   Mantid::Geometry::QSample frame;
@@ -184,21 +208,39 @@ void ConvertSCDtoMDE::exec() {
                          (1.f - cos(twotheta_f)) * k});
   }
 
-  for (size_t n = 0; n < s1.size(); n++) {
+  for (size_t n = 0; n < inputWS->getDimension(2)->getNBins(); n++) {
     Eigen::Matrix3f goniometer;
-    float sl_radian =
-        static_cast<float>(s1[n]) * boost::math::float_constants::degree;
-    goniometer(0, 0) = cos(sl_radian);
-    goniometer(0, 2) = sin(sl_radian);
-    goniometer(2, 0) = -sin(sl_radian);
-    goniometer(2, 2) = cos(sl_radian);
-    goniometer = goniometer.inverse();
+    if (instrument == "HB3A") {
+      float omega_radian =
+          static_cast<float>(omega[n]) * boost::math::float_constants::degree;
+      float chi_radian =
+          static_cast<float>(chi[n]) * boost::math::float_constants::degree;
+      float phi_radian =
+          static_cast<float>(phi[n]) * boost::math::float_constants::degree;
+      Eigen::Matrix3f r1;
+      r1 << cos(omega_radian), 0, -sin(omega_radian), 0, 1, 0,
+          sin(omega_radian), 0, cos(omega_radian); // omega 0,1,0,-1
+      Eigen::Matrix3f r2;
+      r2 << cos(chi_radian), sin(chi_radian), 0, -sin(chi_radian),
+          cos(chi_radian), 0, 0, 0, 1; // chi 0,0,1,-1
+      Eigen::Matrix3f r3;
+      r3 << cos(phi_radian), 0, -sin(phi_radian), 0, 1, 0, sin(phi_radian), 0,
+          cos(phi_radian); // phi 0,1,0,-1
+      goniometer = r1 * r2 * r3;
+    } else { // HB2C
+      float s1_radian =
+          static_cast<float>(s1[n]) * boost::math::float_constants::degree;
+      goniometer << cos(s1_radian), 0, sin(s1_radian), 0, 1, 0, -sin(s1_radian),
+          0, cos(s1_radian); // s1 0,1,0,1
+    }
+    goniometer = goniometer.inverse().eval();
     for (size_t m = 0; m < azimuthal.size(); m++) {
-      Eigen::Vector3f q_sample = goniometer * q_lab_pre[m];
       size_t idx = n * azimuthal.size() + m;
       coord_t signal = static_cast<coord_t>(inputWS->getSignalAt(idx));
-      if (signal > 0.f)
+      if (signal > 0.f) {
+        Eigen::Vector3f q_sample = goniometer * q_lab_pre[m];
         inserter.insertMDEvent(signal, signal, 0, 0, q_sample.data());
+      }
     }
   }
 
