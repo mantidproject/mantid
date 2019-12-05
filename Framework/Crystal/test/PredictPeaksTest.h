@@ -277,7 +277,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("CalculateGoniometerForCW", true));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Wavelength", "1.5"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("MinAngle", "0"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("MaxAngle", "10.0"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("MaxAngle", "5.0"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
