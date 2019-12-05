@@ -39,7 +39,7 @@ using return_readwrite_numpy =
  * Set the F values from an python array-style object
  * @param self :: A reference to the calling object
  * @param wsIndex :: The workspace index for the spectrum to set
- * @param values :: A numpy array. The length must match the size of the
+ * @param values :: A numpy array, length must match F array length
  */
 void setFFromPyObject(RebinnedOutput &self, const size_t wsIndex,
                       const boost::python::object &values) {
