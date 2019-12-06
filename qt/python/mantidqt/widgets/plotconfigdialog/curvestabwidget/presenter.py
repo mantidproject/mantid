@@ -107,8 +107,33 @@ class CurvesTabWidgetPresenter:
         """Replot the selected curve with the given plot kwargs"""
         ax = self.get_selected_ax()
         curve = self.get_selected_curve()
+    
+        waterfall = ax.is_waterfall_plot()
+        check_line_colour = False
+        # If the plot is a waterfall plot and the user has set it so the area under each line is filled, and the fill
+        # colour for each line is set as the line colour, after the curve is updated we need to check if its colour has
+        # changed so the fill can be updated accordingly.
+        if waterfall and ax.waterfall_has_fill() and ax.waterfall_fill_is_line_colour():
+            check_line_colour = True    
+
         new_curve = FigureErrorsManager.replot_curve(ax, curve, plot_kwargs)
         self.curve_names_dict[self.view.get_selected_curve_name()] = new_curve
+
+        curve_index = self.view.select_curve_combo_box.currentIndex()
+        line = ax.lines.pop()
+        ax.lines.insert(curve_index, line)
+        if waterfall:
+            if check_line_colour:
+                # curve can be either a Line2D or an ErrorContainer and the colour is accessed differently for each.
+                if isinstance(curve, Line2D):
+                    # if the line colour hasn't changed then the fill colour doesn't need to be updated.
+                    update_fill = curve.get_color() != new_curve[0].get_color()
+                else:
+                    update_fill = curve[0].get_color() != new_curve[0].get_color()
+                ax.convert_single_line_to_waterfall(curve_index, update_fill)
+            else:
+                # the curve has been reset to its original position so for a waterfall plot it needs to be re-offset.
+                ax.convert_single_line_to_waterfall(curve_index)
 
     def populate_curve_combo_box_and_update_view(self):
         """
@@ -154,7 +179,6 @@ class CurvesTabWidgetPresenter:
                         ax.collections.remove(collection)
                         break
                     i = i + 1
-
 
         # Remove curve from ax and remove from curve names dictionary
         remove_curve_from_ax(self.get_selected_curve())

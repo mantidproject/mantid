@@ -10,6 +10,7 @@ Controls the dynamic displaying of errors for line on the plot
 """
 from matplotlib.container import ErrorbarContainer
 from matplotlib.lines import Line2D
+
 from mantid.plots import MantidAxes
 from mantid.plots.helperfunctions import get_data_from_errorbar_container, set_errorbars_hidden
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import curve_has_errors, CurveProperties, remove_curve_from_ax
@@ -38,11 +39,22 @@ class FigureErrorsManager(object):
         else:
             legend_props = None
 
+        if isinstance(curve, Line2D):
+            curve_index = ax.get_lines().index(curve)
+        else:
+            curve_index = ax.get_lines().index(curve[0])
+
         # get all curve properties
         curve_props = CurveProperties.from_curve(curve)
         # and remove the ones that matplotlib doesn't recognise
         plot_kwargs = curve_props.get_plot_kwargs()
         new_curve = cls.replot_curve(ax, curve, plot_kwargs)
+
+        line = ax.lines.pop()
+        ax.lines.insert(curve_index, line)
+
+        if ax.is_waterfall_plot:
+            ax.convert_single_line_to_waterfall(curve_index)
 
         # Inverts either the current state of hide_errors
         # or the make_visible kwarg that forces a state:

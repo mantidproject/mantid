@@ -9,7 +9,6 @@
 from __future__ import (absolute_import, unicode_literals)
 
 from matplotlib.collections import PolyCollection
-from matplotlib.colors import to_rgba_array
 
 from mantidqt.widgets.plotconfigdialog.colorselector import convert_color_to_hex
 from mantidqt.widgets.waterfallplotfillareadialog.view import WaterfallPlotFillAreaDialogView
@@ -38,28 +37,16 @@ class WaterfallPlotFillAreaDialogPresenter:
     def init_view(self):
         # This function sets the correct values in the menu when it is first opened.
 
-        # If the axes has any PolyCollections then fill area has been enabled.
         if self.ax.waterfall_has_fill():
             self.view.enable_fill_group_box.setChecked(True)
 
-            poly_colour_is_line_colour = True
-            i = 0
-            # Check that for each line, the fill area is the same colour as the line. If not then the Use Solid Colour
-            # option must be checked.
-            for collection in self.ax.collections:
-                if isinstance(collection, PolyCollection):
-                    line_colour = to_rgba_array(self.ax.get_lines()[i].get_color())
-                    poly_colour = collection.get_facecolor()
-                    if (line_colour != poly_colour).any():
-                        poly_colour_is_line_colour = False
-                        break
-                    i = i + 1
-
-            if poly_colour_is_line_colour:
+            if self.ax.waterfall_fill_is_line_colour():
                 self.view.use_line_colour_radio_button.setChecked(True)
             else:
                 self.view.use_solid_colour_radio_button.setChecked(True)
-                self.view.colour_selector_widget.set_color(convert_color_to_hex(poly_colour[0]))
+                poly = next(poly_collection for poly_collection in self.ax.collections
+                            if isinstance(poly_collection, PolyCollection))
+                self.view.colour_selector_widget.set_color(convert_color_to_hex(poly.get_facecolor()))
 
     def set_fill_enabled(self):
         if self.view.enable_fill_group_box.isChecked():

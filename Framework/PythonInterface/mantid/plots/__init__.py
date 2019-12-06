@@ -22,7 +22,7 @@ except ImportError:
    from collections import Iterable   
 from matplotlib.axes import Axes
 from matplotlib.collections import Collection, PolyCollection
-from matplotlib.colors import Colormap
+from matplotlib.colors import Colormap, to_rgba_array
 from matplotlib.container import Container, ErrorbarContainer
 from matplotlib.image import AxesImage
 from matplotlib.lines import Line2D
@@ -1141,7 +1141,7 @@ class MantidAxes(Axes):
                                 point[0][1] += amount_to_move
                                 point[1][1] += amount_to_move
                             bar_line_col.set_segments(segments)
-                        bar_line_col.set_zorder(len(self.get_lines())-i)
+                        bar_line_col.set_zorder((len(self.get_lines())-i)+1)
                         break
 
         if any(isinstance(collection, PolyCollection) for collection in self.collections):
@@ -1169,17 +1169,59 @@ class MantidAxes(Axes):
         self.update_waterfall_plot(0, 0)
         self.waterfall_remove_fill()
 
+    def convert_single_line_to_waterfall(self, index, need_to_update_fill=False):
+        line = self.get_lines()[index]
+        amount_to_move_x = index * self.width * (self.waterfall_x_offset / 500)
+        line.set_xdata(line.get_xdata() + amount_to_move_x)
+        amount_to_move_y = index * self.height * (self.waterfall_y_offset / 500)
+        line.set_ydata(line.get_ydata() + amount_to_move_y)
+        line.set_zorder(len(self.get_lines()) - index)
+
+        for container in self.containers:
+            if isinstance(container, ErrorbarContainer) and container[0] == line:
+                for bar_line_col in container[2]:
+                    segments = bar_line_col.get_segments()
+                    for point in segments:
+                        point[0][1] += amount_to_move_y
+                        point[1][1] += amount_to_move_y
+                        point[0][0] += amount_to_move_x
+                        point[1][0] += amount_to_move_x
+                    bar_line_col.set_segments(segments)
+                bar_line_col.set_zorder((len(self.get_lines()) - index)+1)
+                break
+
+        if need_to_update_fill:
+            i = 0
+            for collection in self.collections:
+                if isinstance(collection, PolyCollection):
+                    if i == index:
+                        collection.set_color(line.get_color())
+                        break
+                    i = i + 1
+
     def waterfall_has_fill(self):
         if any(isinstance(collection, PolyCollection) for collection in self.collections):
             return True
         else:
             return False
 
+    def waterfall_fill_is_line_colour(self):
+        i = 0
+        # Check that for each line, the fill area is the same colour as the line.
+        for collection in self.collections:
+            if isinstance(collection, PolyCollection):
+                line_colour = to_rgba_array(self.get_lines()[i].get_color())
+                poly_colour = collection.get_facecolor()
+                if (line_colour != poly_colour).any():
+                    return False
+                i = i + 1
+        return True
+
     def waterfall_create_fill(self):
         for i, line in enumerate(self.get_lines()):
             bottom_line = [min(line.get_ydata())-((i*self.height)/100)]
             fill = self.fill_between(line.get_xdata(), line.get_ydata(), bottom_line)
-            fill.set_zorder((len(self.get_lines())-i)*10)
+            fill.set_zorder((len(self.get_lines())-i)+1)
 
     def waterfall_remove_fill(self):
         self.collections[:] = filter(lambda x: not isinstance(x, PolyCollection), self.collections)
