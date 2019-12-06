@@ -189,8 +189,7 @@ class CalibrationModel(object):
                                       VanIntegrationWorkspace=van_integration,
                                       VanCurvesWorkspace=van_curves,
                                       Bank=str(i + 1),
-                                      FittedPeaks=table_name,
-                                      OutputParametersTableName=table_name)
+                                      FittedPeaks=table_name)
         return output
 
     def create_output_files(self, calibration_dir, difc, tzero, ceria_path, vanadium_path,
