@@ -149,6 +149,8 @@ public:
   void setInstrumentOverride(const QString &instName);
   /// Set the input read-only or not
   void setReadOnly(bool readOnly);
+  /// Disable the browse button and file input field.
+  void setEnabled(bool enabled);
   /// Get the last directory
   QString getLastDirectory() { return m_lastDir; }
   /// Set the last directory

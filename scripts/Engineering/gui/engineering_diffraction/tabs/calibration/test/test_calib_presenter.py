@@ -190,10 +190,10 @@ class CalibrationPresenterTest(unittest.TestCase):
     def test_create_new_enabled_true(self):
         self.presenter.set_create_new_enabled(True)
 
-        self.assertEqual(self.view.set_vanadium_read_only.call_count, 1)
-        self.view.set_vanadium_read_only.assert_called_with(False)
-        self.assertEqual(self.view.set_calib_read_only.call_count, 1)
-        self.view.set_calib_read_only.assert_called_with(False)
+        self.assertEqual(self.view.set_vanadium_enabled.call_count, 1)
+        self.view.set_vanadium_enabled.assert_called_with(True)
+        self.assertEqual(self.view.set_calib_enabled.call_count, 1)
+        self.view.set_calib_enabled.assert_called_with(True)
         self.view.set_calibrate_button_text.assert_called_with("Calibrate")
         self.view.set_check_plot_output_enabled.assert_called_with(True)
         self.assertEqual(self.view.find_calib_files.call_count, 1)
@@ -201,10 +201,10 @@ class CalibrationPresenterTest(unittest.TestCase):
     def test_create_new_enabled_false(self):
         self.presenter.set_create_new_enabled(False)
 
-        self.assertEqual(self.view.set_vanadium_read_only.call_count, 1)
-        self.view.set_vanadium_read_only.assert_called_with(True)
-        self.assertEqual(self.view.set_calib_read_only.call_count, 1)
-        self.view.set_calib_read_only.assert_called_with(True)
+        self.assertEqual(self.view.set_vanadium_enabled.call_count, 1)
+        self.view.set_vanadium_enabled.assert_called_with(False)
+        self.assertEqual(self.view.set_calib_enabled.call_count, 1)
+        self.view.set_calib_enabled.assert_called_with(False)
         self.assertEqual(self.view.set_calibrate_button_text.call_count, 0)
         self.assertEqual(self.view.set_check_plot_output_enabled.call_count, 0)
         self.assertEqual(self.view.find_calib_files.call_count, 0)
@@ -212,16 +212,16 @@ class CalibrationPresenterTest(unittest.TestCase):
     def test_load_existing_enabled_true(self):
         self.presenter.set_load_existing_enabled(True)
 
-        self.assertEqual(self.view.set_path_read_only.call_count, 1)
-        self.view.set_path_read_only.assert_called_with(False)
+        self.assertEqual(self.view.set_path_enabled.call_count, 1)
+        self.view.set_path_enabled.assert_called_with(True)
         self.view.set_calibrate_button_text.assert_called_with("Load")
         self.view.set_check_plot_output_enabled.assert_called_with(False)
 
     def test_load_existing_enabled_false(self):
         self.presenter.set_load_existing_enabled(False)
 
-        self.assertEqual(self.view.set_path_read_only.call_count, 1)
-        self.view.set_path_read_only.assert_called_with(True)
+        self.assertEqual(self.view.set_path_enabled.call_count, 1)
+        self.view.set_path_enabled.assert_called_with(False)
         self.assertEqual(self.view.set_calibrate_button_text.call_count, 0)
         self.assertEqual(self.view.set_check_plot_output_enabled.call_count, 0)
 

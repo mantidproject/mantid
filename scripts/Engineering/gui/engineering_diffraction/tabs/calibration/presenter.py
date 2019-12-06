@@ -127,15 +127,15 @@ class CalibrationPresenter(object):
         self.emit_enable_button_signal()
 
     def set_create_new_enabled(self, enabled):
-        self.view.set_vanadium_read_only(not enabled)
-        self.view.set_calib_read_only(not enabled)
+        self.view.set_vanadium_enabled(enabled)
+        self.view.set_calib_enabled(enabled)
         if enabled:
             self.set_calibrate_button_text("Calibrate")
             self.view.set_check_plot_output_enabled(True)
             self.find_files()
 
     def set_load_existing_enabled(self, enabled):
-        self.view.set_path_read_only(not enabled)
+        self.view.set_path_enabled(enabled)
         if enabled:
             self.set_calibrate_button_text("Load")
             self.view.set_check_plot_output_enabled(False)

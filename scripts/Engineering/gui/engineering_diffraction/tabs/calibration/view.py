@@ -28,7 +28,7 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
 
         self.finder_path.setLabelText("Path")
         self.finder_path.isForRunFiles(False)
-        self.finder_path.setReadOnly(True)
+        self.finder_path.setEnabled(False)
 
     # =================
     # Slot Connectors
@@ -68,14 +68,14 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
         self.finder_vanadium.setInstrumentOverride(instrument)
         self.finder_calib.setInstrumentOverride(instrument)
 
-    def set_vanadium_read_only(self, set_to):
-        self.finder_vanadium.setReadOnly(set_to)
+    def set_vanadium_enabled(self, set_to):
+        self.finder_vanadium.setEnabled(set_to)
 
-    def set_calib_read_only(self, set_to):
-        self.finder_calib.setReadOnly(set_to)
+    def set_calib_enabled(self, set_to):
+        self.finder_calib.setEnabled(set_to)
 
-    def set_path_read_only(self, set_to):
-        self.finder_path.setReadOnly(set_to)
+    def set_path_enabled(self, set_to):
+        self.finder_path.setEnabled(set_to)
 
     def set_vanadium_text(self, text):
         self.finder_vanadium.setText(text)
