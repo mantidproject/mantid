@@ -1062,7 +1062,7 @@ DECLARE_UNIT(SpinEchoLength)
 
 const UnitLabel SpinEchoLength::label() const { return Symbol::Nanometre; }
 
-SpinEchoLength::SpinEchoLength() : Wavelength() { }
+SpinEchoLength::SpinEchoLength() : Wavelength() {}
 
 void SpinEchoLength::init() {
   // Efixed must be set to something
@@ -1113,7 +1113,7 @@ DECLARE_UNIT(SpinEchoTime)
 
 const UnitLabel SpinEchoTime::label() const { return Symbol::Nanosecond; }
 
-SpinEchoTime::SpinEchoTime() : Wavelength() { }
+SpinEchoTime::SpinEchoTime() : Wavelength() {}
 
 void SpinEchoTime::init() {
   // Efixed must be set to something
