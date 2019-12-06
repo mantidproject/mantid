@@ -72,21 +72,23 @@ class MergeWorkspacesWithLimits(DataProcessorAlgorithm):
         self.setProperty('MergedWorkspace', merged_ws)
 
     def get_common_bin_range_and_largest_spectra(self, ws_group):
-        min_x = np.inf
-        max_x = -np.inf
-        num_x = -np.inf
+        x_min = np.inf
+        x_max = -np.inf
+        x_num = -np.inf
         ws_max_range = 0
         largest_range_spectrum = 0
         for i in range(ws_group.size()):
             x_data = ws_group[i].dataX(0)
-            min_x = min(np.min(x_data), min_x)
-            max_x = max(np.max(x_data), max_x)
-            num_x = max(x_data.size, num_x)
+            x_min = min(np.min(x_data), x_min)
+            x_max = max(np.max(x_data), x_max)
+            x_num = max(x_data.size, x_num)
             ws_range = np.max(x_data) - np.min(x_data)
             if ws_range > ws_max_range:
                 largest_range_spectrum = i + 1
                 ws_max_range = ws_range
-        return largest_range_spectrum, [min_x, (max_x - min_x) / num_x, max_x]
+        if x_min.any() == -np.inf or x_min.any() == np.inf:
+            raise AttributeError("Workspace x range contains an infinite value.")
+        return largest_range_spectrum, [x_min, (x_max - x_min) / x_num, x_max]
 
     def fit_x_lims_to_match_histogram_bins(self, ws_conjoined, x_min, x_max):
         bin_width = np.inf
@@ -95,6 +97,8 @@ class MergeWorkspacesWithLimits(DataProcessorAlgorithm):
             x_min[i] = pdf_x_array[np.amin(np.where(pdf_x_array >= x_min[i]))]
             x_max[i] = pdf_x_array[np.amax(np.where(pdf_x_array <= x_max[i]))]
             bin_width = min(pdf_x_array[1] - pdf_x_array[0], bin_width)
+        if x_min.any() == -np.inf or x_min.any() == np.inf:
+            raise AttributeError("Limits contains an infinite value.")
         return x_min, x_max, bin_width
 
 
