@@ -71,10 +71,11 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
                                                direction=Direction.Output),
                              "Output Workspace")
 
-    def validateInputs(self):
+    def validateInputs(self):  # noqa C901
         issues = dict()
 
         inWS = self.getProperty("InputWorkspace").value
+        instrument = inWS.getExperimentInfo(0).getInstrument().getName()
 
         if inWS.getNumDims() != 3:
             issues["InputWorkspace"] = "InputWorkspace has wrong number of dimensions, need 3"
@@ -95,21 +96,29 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
 
         # Check that all logs are there and are of correct length
         run = inWS.getExperimentInfo(0).run()
-        for prop in ['duration', 'monitor_count', 's1']:
-            if run.hasProperty(prop):
-                p = run.getProperty(prop).value
-                if np.size(p) != number_of_runs:
-                    issues["InputWorkspace"] = "log {} is of incorrect length".format(prop)
-            else:
-                issues["InputWorkspace"] = "missing log {}".format(prop)
+
+        if instrument == "HB3A":
+            for prop in ['omega', 'chi', 'phi', 'monitor', 'time']:
+                if run.hasProperty(prop):
+                    p = run.getProperty(prop).value
+                    if np.size(p) != number_of_runs:
+                        issues["InputWorkspace"] = "log {} is of incorrect length".format(prop)
+                else:
+                    issues["InputWorkspace"] = "missing log {}".format(prop)
+        else:
+            for prop in ['duration', 'monitor_count', 's1']:
+                if run.hasProperty(prop):
+                    p = run.getProperty(prop).value
+                    if np.size(p) != number_of_runs:
+                        issues["InputWorkspace"] = "log {} is of incorrect length".format(prop)
+                else:
+                    issues["InputWorkspace"] = "missing log {}".format(prop)
 
         for prop in ['azimuthal', 'twotheta']:
             if run.hasProperty(prop):
                 p = run.getProperty(prop).value
                 if np.size(p) != d0.getNBins()*d1.getNBins():
                     issues["InputWorkspace"] = "log {} is of incorrect length".format(prop)
-            else:
-                issues["InputWorkspace"] = "missing log {}".format(prop)
 
         normWS = self.getProperty("NormalisationWorkspace").value
 
@@ -138,10 +147,12 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
 
         return issues
 
-    def PyExec(self):
+    def PyExec(self):  # noqa C901
         inWS = self.getProperty("InputWorkspace").value
         normWS = self.getProperty("NormalisationWorkspace").value
         _norm = bool(normWS)
+
+        instrument = inWS.getExperimentInfo(0).getInstrument().getName()
 
         dim0_min, dim0_max, dim0_bins = self.getProperty('BinningDim0').value
         dim1_min, dim1_max, dim1_bins = self.getProperty('BinningDim1').value
@@ -160,21 +171,38 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
         progress = Progress(self, 0.0, 1.0, number_of_runs+4)
 
         # Get rotation array
-        s1 = np.deg2rad(inWS.getExperimentInfo(0).run().getProperty('s1').value) + np.deg2rad(self.getProperty("S1Offset").value)
+        if instrument == "HB3A":
+            omega = np.deg2rad(inWS.getExperimentInfo(0).run().getProperty('omega').value)
+            chi = np.deg2rad(inWS.getExperimentInfo(0).run().getProperty('chi').value)
+            phi = np.deg2rad(inWS.getExperimentInfo(0).run().getProperty('phi').value)
+        else:
+            s1 = np.deg2rad(inWS.getExperimentInfo(0).run().getProperty('s1').value) + np.deg2rad(self.getProperty("S1Offset").value)
 
         normaliseBy = self.getProperty("NormaliseBy").value
         if normaliseBy == "Monitor":
-            scale = np.asarray(inWS.getExperimentInfo(0).run().getProperty('monitor_count').value)
+            if instrument == "HB3A":
+                scale = np.asarray(inWS.getExperimentInfo(0).run().getProperty('monitor').value)
+            else:
+                scale = np.asarray(inWS.getExperimentInfo(0).run().getProperty('monitor_count').value)
         elif normaliseBy == "Time":
-            scale = np.asarray(inWS.getExperimentInfo(0).run().getProperty('duration').value)
+            if instrument == "HB3A":
+                scale = np.asarray(inWS.getExperimentInfo(0).run().getProperty('time').value)
+            else:
+                scale = np.asarray(inWS.getExperimentInfo(0).run().getProperty('duration').value)
         else:
             scale = np.ones(number_of_runs)
 
         if _norm:
             if normaliseBy == "Monitor":
-                norm_scale = np.sum(normWS.getExperimentInfo(0).run().getProperty('monitor_count').value)
+                if instrument == "HB3A":
+                    norm_scale = np.sum(normWS.getExperimentInfo(0).run().getProperty('monitor').value)
+                else:
+                    norm_scale = np.sum(normWS.getExperimentInfo(0).run().getProperty('monitor_count').value)
             elif normaliseBy == "Time":
-                norm_scale = np.sum(normWS.getExperimentInfo(0).run().getProperty('duration').value)
+                if instrument == "HB3A":
+                    norm_scale = np.sum(normWS.getExperimentInfo(0).run().getProperty('time').value)
+                else:
+                    norm_scale = np.sum(normWS.getExperimentInfo(0).run().getProperty('duration').value)
             else:
                 norm_scale = 1.
             norm_array = normWS.getSignalArray().sum(axis=2)
@@ -213,8 +241,22 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
             k = 2*np.pi/self.getProperty("Wavelength").value
 
         progress.report('Calculating Qlab for each pixel')
-        polar = np.array(inWS.getExperimentInfo(0).run().getProperty('twotheta').value)
-        azim = np.array(inWS.getExperimentInfo(0).run().getProperty('azimuthal').value)
+        if inWS.getExperimentInfo(0).run().hasProperty('twotheta'):
+            polar = np.array(inWS.getExperimentInfo(0).run().getProperty('twotheta').value)
+        else:
+            di = inWS.getExperimentInfo(0).detectorInfo()
+            polar = np.array([di.twoTheta(i) for i in range(di.size()) if not di.isMonitor(i)])
+            if inWS.getExperimentInfo(0).getInstrument().getName() == 'HB3A':
+                polar = polar.reshape(512*3, 512).T.flatten()
+
+        if inWS.getExperimentInfo(0).run().hasProperty('twotheta'):
+            azim = np.array(inWS.getExperimentInfo(0).run().getProperty('azimuthal').value)
+        else:
+            di = inWS.getExperimentInfo(0).detectorInfo()
+            azim = np.array([di.azimuthal(i) for i in range(di.size()) if not di.isMonitor(i)])
+            if inWS.getExperimentInfo(0).getInstrument().getName() == 'HB3A':
+                azim = azim.reshape(512*3, 512).T.flatten()
+
         qlab = np.vstack((np.sin(polar)*np.cos(azim),
                           np.sin(polar)*np.sin(azim),
                           np.cos(polar) - 1)).T * -k # Kf - Ki(0,0,1)
@@ -246,9 +288,21 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
         assert data_array[:,:,0].flags.fnc
 
         for n in range(number_of_runs):
-            R = np.array([[ np.cos(s1[n]), 0, np.sin(s1[n])],
-                          [             0, 1,             0],
-                          [-np.sin(s1[n]), 0, np.cos(s1[n])]])
+            if instrument == "HB3A":
+                R1 = np.array([[np.cos(omega[n]), 0, -np.sin(omega[n])], # omega 0,1,0,-1
+                               [               0, 1,                 0],
+                               [np.sin(omega[n]), 0,  np.cos(omega[n])]])
+                R2 = np.array([[ np.cos(chi[n]),  np.sin(chi[n]), 0], # chi 0,0,1,-1
+                               [-np.sin(chi[n]),  np.cos(chi[n]), 0],
+                               [              0,               0, 1]])
+                R3 = np.array([[np.cos(phi[n]), 0, -np.sin(phi[n])], # phi 0,1,0,-1
+                               [             0, 1,               0],
+                               [np.sin(phi[n]), 0,  np.cos(phi[n])]])
+                R = np.dot(np.dot(R1, R2), R3)
+            else:
+                R = np.array([[ np.cos(s1[n]), 0, np.sin(s1[n])], # s1 0,1,0,1
+                              [             0, 1,             0],
+                              [-np.sin(s1[n]), 0, np.cos(s1[n])]])
             RUBW = np.dot(R,UBW)
             q = np.round(np.dot(np.linalg.inv(RUBW),qlab.T)/bin_size-offset).astype(np.int)
             q_index = np.ravel_multi_index(q, (dim0_bins+2, dim1_bins+2, dim2_bins+2), mode='clip')

@@ -62,6 +62,11 @@ works for a constant wavelength source and only for Q sample
 workspaces. It also assumes the goniometer rotation is around the
 y-axis only.
 
+You can specify if the goniometer to calculated is omega or phi, outer
+or inner respectively, by setting the option InnerGoniometer. The
+existing goniometer on the workspace will then be taken into account
+correctly.
+
 The goniometer (:math:`G`) is calculated from
 :math:`\textbf{Q}_{sample}` for a given wavelength (:math:`\lambda`)
 by:
@@ -83,9 +88,12 @@ First calculate the :math:`\textbf{Q}_{lab}` using
 
 .. math:: \theta = \cos^{-1}(1-\frac{|\textbf{Q}_{sample}|^2}{2k^2})
 
-.. math:: \phi = \sin^{-1}(-\textbf{Q}_{sample}^y \sin(\theta)/k)
+.. math:: \phi = \sin^{-1}(-\frac{\textbf{Q}_{sample}^y}{k \sin(\theta)})
 
-where :math:`\theta` is from 0 to :math:`\pi` and  :math:`\phi` is from :math:`-\pi/2` to :math:`\pi/2`. This means that it will assume your detector position is on the left of the beam even it it's not.
+where :math:`\theta` is from 0 to :math:`\pi` and :math:`\phi` is from
+:math:`-\pi/2` to :math:`\pi/2`. This means that it will assume your
+detector position is on the left of the beam even it it's not, unless
+the option FlipX is set to True then the :math:`\textbf{Q}_{lab}^x = -\textbf{Q}_{lab}^x`.
 
 Now you have :math:`\theta`, :math:`\phi` and k you can get :math:`\textbf{Q}_{lab}` using (1).
 
@@ -108,7 +116,7 @@ make
 
 .. math:: A = \begin{bmatrix}
           \textbf{Q}_{sample}^x & \textbf{Q}_{sample}^z \\
-          \textbf{Q}_{sample}^z & \textbf{Q}_{sample}^x
+          \textbf{Q}_{sample}^z & -\textbf{Q}_{sample}^x
           \end{bmatrix}
 
 .. math:: B = \begin{bmatrix}
