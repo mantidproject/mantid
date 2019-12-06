@@ -4,13 +4,14 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidGeometry/Rendering/RenderingHelpers.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/GeometryTriangulator.h"
+#include "MantidGeometry/Rendering/OpenGL_Headers.h"
+#include "MantidGeometry/Rendering/RenderingHelpers.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidGeometry/Surfaces/Cone.h"
 #include "MantidGeometry/Surfaces/Cylinder.h"

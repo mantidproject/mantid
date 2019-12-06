@@ -935,7 +935,7 @@ The algorithm performs the following steps:
 
 
 *Create SANS Wavelength and Pixel Adjustment*
--------------------------------------------
+---------------------------------------------
 
 This step combines the output of the *Calculate SANS Transmission* step,
 the output of the *Normalize To SANS Monitor*,
@@ -1063,7 +1063,7 @@ manual selection takes precedence.
 
 
 *Normalize To SANS Monitor*
---------------------------
+---------------------------
 
 This step provides a monitor normalization workspace for subsequent 
 wavelength correction in :ref:`algm-Q1D` or :ref:`algm-Qxy`. 
@@ -1203,19 +1203,18 @@ The sub-steps of this algorithm are:
 3. If we are dealing with an even-mode workspace and the compatibility mode has been chosen then
    either a custom binning or the monitor binning is applied using :ref:`Rebin <algm-Rebin>` or
    :ref:`RebinToWorkspace <algm-RebinToWorkspace>`, respectively.
-4. Both the data and the monitor workspace perform an initial move operation
-   using :ref:`SANSMove <algm-SANSMove>`. The algorithm is applied twice. The first time using
-   the *SetToZero* mode in case the algorithm had been loaded and moved already previously. This
-   resets the instrument position of the workspace to the positions of the base instrument. The second
-   time the move algorithm is operated in *InitialMove* mode.
+4. Both the data and the monitor workspace perform an initial move operation.
+   The first step sets the instrument positions back to the IDF,
+   in case the algorithm had been loaded and moved already previously.
+   The second time the move algorithm is operated in *InitialMove* mode to apply
+   and offset.
 5. The data workspace is masked using various modes. Note that
    using :ref:`MoveInstrumentComponent <algm-MoveInstrumentComponent>`.
    The algorithm is applied twice. The first time using the *SetToZero* mode
    to reset the components to known positions from the IDF. The second
    time the components are moved and rotated to the requested positions.
    Note that all steps up until now were performed in the time-of-flight domain.
-6. Convert the data from the time-of-flight to the wavelength domain using
-   :ref:`SANSConvertToWavelength <algm-SANSConvertToWavelength>`.
+6. Convert the data from time-of-flight to wavelength.
 7. Scale the data set using :ref:`Multiply <algm-Multiply>`. This will multiply the data set
    with the absolute scale and divide :ref:`Divide <algm-Divide>` by the sample volume.
 8. This step creates the adjustment workspaces by *Create SANS Adjustment Workspaces*.

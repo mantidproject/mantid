@@ -51,9 +51,8 @@ public:
         envName,
         boost::make_shared<Container>(ShapeFactory().createShape(canShape)));
     sample.setEnvironment(std::move(kit));
-    OrientedLattice *latt = new OrientedLattice(1.0, 2.0, 3.0, 90, 90, 90);
-    sample.setOrientedLattice(latt);
-    delete latt;
+    sample.setOrientedLattice(
+        std::make_unique<OrientedLattice>(1.0, 2.0, 3.0, 90, 90, 90));
     auto shape_sptr = ComponentCreationHelper::createCappedCylinder(
         0.0127, 1.0, V3D(), V3D(0.0, 1.0, 0.0), "cyl");
     shape_sptr->setMaterial(Material(
@@ -238,9 +237,8 @@ public:
     ExperimentInfo_sptr ei1(new ExperimentInfo);
     Sample s = createsample();
     Sample s1;
-    OrientedLattice *latt = new OrientedLattice(6.0, 7.0, 8.0, 90, 90, 90);
-    s1.setOrientedLattice(latt);
-    delete latt;
+    s1.setOrientedLattice(
+        std::make_unique<OrientedLattice>(6.0, 7.0, 8.0, 90, 90, 90));
     s1.setName("newsample");
     ei->mutableSample() = s;
     TS_ASSERT_EQUALS(ew->addExperimentInfo(ei), 0);

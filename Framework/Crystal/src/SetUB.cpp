@@ -95,7 +95,7 @@ void SetUB::init() {
   @throws :: |B.u|=0 or |B.v|=0 or u||v
  */
 void SetUB::exec() {
-  Mantid::Geometry::OrientedLattice o;
+  std::unique_ptr<Mantid::Geometry::OrientedLattice> lattice;
   std::vector<double> UBvec = getProperty("UB");
   Mantid::Kernel::DblMatrix UBMatrix(UBvec), zeroMatrix(3, 3);
   if (UBMatrix == zeroMatrix) {
@@ -109,14 +109,16 @@ void SetUB::exec() {
     std::vector<double> u = getProperty("u");
     std::vector<double> v = getProperty("v");
 
-    o = Mantid::Geometry::OrientedLattice(a, b, c, alpha, beta, gamma);
-    o.setUFromVectors(Mantid::Kernel::V3D(u[0], u[1], u[2]),
-                      Mantid::Kernel::V3D(v[0], v[1], v[2]));
+    lattice = std::make_unique<OrientedLattice>(a, b, c, alpha, beta, gamma);
+    lattice->setUFromVectors(Mantid::Kernel::V3D(u[0], u[1], u[2]),
+                             Mantid::Kernel::V3D(v[0], v[1], v[2]));
   } else {
     if (UBMatrix.determinant() == 0)
       throw std::invalid_argument("UB matrix determinant is 0");
-    else
-      o.setUB(UBMatrix);
+    else {
+      lattice = std::make_unique<OrientedLattice>();
+      lattice->setUB(UBMatrix);
+    }
   }
 
   // now attach the oriented lattice to the workspace
@@ -130,8 +132,10 @@ void SetUB::exec() {
     if ((sampleNumber == EMPTY_INT()) ||
         (sampleNumber < 0)) // copy to all samples
     {
-      for (uint16_t i = 0; i < mdws->getNumExperimentInfo(); i++)
-        mdws->getExperimentInfo(i)->mutableSample().setOrientedLattice(&o);
+      for (uint16_t i = 0; i < mdws->getNumExperimentInfo(); i++) {
+        mdws->getExperimentInfo(i)->mutableSample().setOrientedLattice(
+            std::make_unique<OrientedLattice>(*lattice));
+      }
     } else // copy to a single sample
     {
       if (static_cast<uint16_t>(sampleNumber) >
@@ -144,14 +148,14 @@ void SetUB::exec() {
       }
       mdws->getExperimentInfo(static_cast<uint16_t>(sampleNumber))
           ->mutableSample()
-          .setOrientedLattice(&o);
+          .setOrientedLattice(std::move(lattice));
     }
   } else // peaks workspace or matrix workspace
   {
     ExperimentInfo_sptr ei = boost::dynamic_pointer_cast<ExperimentInfo>(ws);
     if (!ei)
       throw std::invalid_argument("Wrong type of workspace");
-    ei->mutableSample().setOrientedLattice(&o);
+    ei->mutableSample().setOrientedLattice(std::move(lattice));
   }
   this->setProperty("Workspace", ws);
 }

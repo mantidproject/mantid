@@ -181,10 +181,11 @@ bool isMultiPeriodFile(int nWorkspaceEntries, Workspace_sptr sampleWS,
 LoadNexusProcessed::LoadNexusProcessed()
     : m_shared_bins(false), m_xbins(0), m_axis1vals(), m_list(false),
       m_interval(false), m_spec_min(0), m_spec_max(Mantid::EMPTY_INT()),
-      m_spec_list(), m_filtered_spec_idxs(), m_nexusFile(nullptr) {}
+      m_spec_list(), m_filtered_spec_idxs(), m_nexusFile() {}
 
-/// Delete NexusFileIO in destructor
-LoadNexusProcessed::~LoadNexusProcessed() { delete m_nexusFile; }
+/// Destructor defined here so that NeXus::File can be forward declared
+/// in header
+LoadNexusProcessed::~LoadNexusProcessed() {}
 
 /**
  * Return the confidence with with this algorithm can load the file
@@ -361,7 +362,7 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(
 
   try {
     // This loads logs, sample, and instrument.
-    periodWorkspace->loadSampleAndLogInfoNexus(m_nexusFile);
+    periodWorkspace->loadSampleAndLogInfoNexus(m_nexusFile.get());
   } catch (std::exception &e) {
     g_log.information("Error loading Instrument section of nxs file");
     g_log.information(e.what());
@@ -396,7 +397,7 @@ void LoadNexusProcessed::exec() {
     NXRoot root(filename);
 
     // "Open" the same file but with the C++ interface
-    m_nexusFile = new ::NeXus::File(root.m_fileID);
+    m_nexusFile = std::make_unique<::NeXus::File>(root.m_fileID);
 
     // Find out how many first level entries there are
     // Cast down to int as another property later on is an int
@@ -1031,8 +1032,8 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
   }
   try {
     // This loads logs, sample, and instrument.
-    peakWS->loadExperimentInfoNexus(getPropertyValue("Filename"), m_nexusFile,
-                                    parameterStr);
+    peakWS->loadExperimentInfoNexus(getPropertyValue("Filename"),
+                                    m_nexusFile.get(), parameterStr);
     // Populate the instrument parameters in this workspace
     peakWS->readParameterMap(parameterStr);
   } catch (std::exception &e) {
@@ -1600,7 +1601,7 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root,
   try {
     // This loads logs, sample, and instrument.
     local_workspace->loadExperimentInfoNexus(
-        getPropertyValue("Filename"), m_nexusFile,
+        getPropertyValue("Filename"), m_nexusFile.get(),
         parameterStr); // REQUIRED PER PERIOD
 
     // Parameter map parsing only if instrument loaded OK.
@@ -1632,7 +1633,7 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root,
   try {
     bool load_history = getProperty("LoadHistory");
     if (load_history)
-      local_workspace->history().loadNexus(m_nexusFile);
+      local_workspace->history().loadNexus(m_nexusFile.get());
   } catch (std::out_of_range &) {
     g_log.warning() << "Error in the workspaces algorithm list, its processing "
                        "history is incomplete\n";

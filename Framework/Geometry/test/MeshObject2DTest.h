@@ -296,7 +296,7 @@ public:
 
   void test_clone() {
     auto mesh = makeSimpleTriangleMesh();
-    auto clone = mesh.clone();
+    auto clone = std::unique_ptr<MeshObject2D>(mesh.clone());
     TS_ASSERT_EQUALS(*clone, mesh);
   }
 
@@ -304,11 +304,12 @@ public:
     using namespace Mantid::Kernel;
     auto a = makeSimpleTriangleMesh();
     // Use a different material
-    auto b = a.cloneWithMaterial(
-        Material("hydrogen", Material::parseChemicalFormula("H"), 3));
+    auto b = std::unique_ptr<MeshObject2D>(a.cloneWithMaterial(
+        Material("hydrogen", Material::parseChemicalFormula("H"), 3)));
     TS_ASSERT_DIFFERS(a, *b);
     // Use same material
-    auto c = a.cloneWithMaterial(Material{}); // same empty material
+    auto c = std::unique_ptr<MeshObject2D>(
+        a.cloneWithMaterial(Material{})); // same empty material
     TS_ASSERT_EQUALS(a, *c);
   }
 

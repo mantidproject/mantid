@@ -288,6 +288,15 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         last_run = self.load_widget.last_loaded_run()
         if last_run is None:
             return
+        # check all detectors are loaded
+        for j, detector in enumerate(self.detectors.getNames()):
+            if j < self.load_widget.get_run_num_loaded_detectors(last_run):
+                self.detectors.enableDetector(detector)
+            else:
+                # disable checkbox and uncheck box
+                self.detectors.disableDetector(detector)
+                self.detectors.setStateQuietly(detector, False)
+
         to_plot = deepcopy([det.isChecked() for det in self.detectors.detectors])
         if self.plot_window is None and any(to_plot) is False:
             return
@@ -309,11 +318,11 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         ws.setYUnit('Counts')
         # find correct detector number from the workspace group run
         if self.lines.total.isChecked():
-            self.plotting.plot(detector, ws.getName(), spec_num=spectrum_index["Total"], color=self.BLUE)
+            self.plotting.plot(detector, ws.name(), spec_num=spectrum_index["Total"], color=self.BLUE)
         if self.lines.prompt.isChecked():
-            self.plotting.plot(detector, ws.getName(), spec_num=spectrum_index["Prompt"], color=self.ORANGE)
+            self.plotting.plot(detector, ws.name(), spec_num=spectrum_index["Prompt"], color=self.ORANGE)
         if self.lines.delayed.isChecked():
-            self.plotting.plot(detector, ws.getName(), spec_num=spectrum_index["Delayed"], color=self.GREEN)
+            self.plotting.plot(detector, ws.name(), spec_num=spectrum_index["Delayed"], color=self.GREEN)
 
         # add current selection of lines
         for element in self.ptable.selection:
@@ -427,9 +436,11 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
 
     def add_line_by_type(self, run, _type):
         # Ensure all detectors are enabled
-        for detector in self.detectors.detectors:
-            if not detector.isEnabled():
-                detector.setEnabled(True)
+        last_run = self.load_widget.last_loaded_run()
+        for i, detector in enumerate(self.detectors.detectors):
+            if i < self.load_widget.get_run_num_loaded_detectors(last_run):
+                if not detector.isEnabled():
+                    detector.setEnabled(True)
 
         if self.plot_window is None:
             return
@@ -444,7 +455,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         for subplot in self.plotting.get_subplots():
             name = '{}; Detector {}'.format(run, subplot[-1])
             ws = mantid.mtd[name]
-            self.plotting.plot(subplot, ws.getName(), spec_num=spectrum_index[_type], color=color)
+            self.plotting.plot(subplot, ws.name(), spec_num=spectrum_index[_type], color=color)
 
     def remove_line_type(self, run, _type):
         if self.plot_window is None:
@@ -455,19 +466,21 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         for subplot in self.plotting.get_subplots():
             name = '{}; Detector {}'.format(run, subplot[-1])
             ws = mantid.mtd[name]
-            self.plotting.remove_line(subplot, ws.getName(), spec=spectrum_index[_type])
+            self.plotting.remove_line(subplot, ws.name(), spec=spectrum_index[_type])
 
         # If no line type is selected do not allow plotting
         self.uncheck_detectors_if_no_line_plotted()
 
     def uncheck_detectors_if_no_line_plotted(self):
+        last_run = self.load_widget.last_loaded_run()
         if not any([
             self.lines.total.isChecked(),
             self.lines.prompt.isChecked(),
             self.lines.delayed.isChecked()
         ]):
-            for detector in self.detectors.detectors:
-                detector.setEnabled(False)
+            for i, detector in enumerate(self.detectors.detectors):
+                if i < self.load_widget.get_run_num_loaded_detectors(last_run):
+                    detector.setEnabled(False)
 
     # When removing a line with the remove window uncheck the line here
     def uncheck_on_removed(self, removed_lines):

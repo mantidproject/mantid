@@ -18,6 +18,8 @@ Engineering Diffraction
 Single Crystal Diffraction
 --------------------------
 
+- Support added for DEMAND (HB3A) to the algorithms :ref:`ConvertWANDSCDtoQ <algm-ConvertWANDSCDtoQ-v1>` and :ref:`FindPeaksMD <algm-FindPeaksMD-v1>` in order to handle additional goniometers.
+
 Imaging
 -------
 

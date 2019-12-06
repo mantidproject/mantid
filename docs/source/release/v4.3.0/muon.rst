@@ -22,4 +22,6 @@ Muon Analysis 2 and Frequency Domain Interfaces
 Bug Fixes
 #########
 
+- The elemental analysis GUI can now handle legacy data which is missing a response dataset, e.g Delayed.
+
 :ref:`Release 4.3.0 <v4.3.0>`

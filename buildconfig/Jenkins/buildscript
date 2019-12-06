@@ -11,7 +11,6 @@
 ###############################################################################
 SCRIPT_DIR=$(dirname "$0")
 XVFB_SERVER_NUM=101
-XVFB_ERROR_LOG_PREFIX=${WORKSPACE}/mantid-xvfb-error
 ULIMIT_CORE_ORIG=$(ulimit -c)
 
 ###############################################################################
@@ -19,21 +18,20 @@ ULIMIT_CORE_ORIG=$(ulimit -c)
 ###############################################################################
 
 function onexit {
-  if [[ ${USE_CORE_DUMPS} == true ]]; then
-    ulimit -c $ULIMIT_CORE_ORIG
-  fi
+    if [[ ${USE_CORE_DUMPS} == true ]]; then
+        ulimit -c $ULIMIT_CORE_ORIG
+    fi
 }
 
 function run_with_xvfb {
-  if [ $(command -v xvfb-run) ]; then
-    # -e=--error-file. A bug in Xvfb on RHEL7 means --error-file
-    # produces an error: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=337703;msg=2
-    xvfb-run --server-args="-screen 0 640x480x24" \
-             --server-num=${XVFB_SERVER_NUM} \
-             -e ${XVFB_ERROR_LOG_PREFIX}-`date +%y-%m-%d-%H-%M`.xlog $@
-  else
-    eval $@
-  fi
+    if [ $(command -v xvfb-run) ]; then
+        # -e=--error-file. A bug in Xvfb on RHEL7 means --error-file
+        # produces an error: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=337703;msg=2
+        xvfb-run --server-args="-screen 0 640x480x24" \
+        --server-num=${XVFB_SERVER_NUM} $@
+    else
+        eval $@
+    fi
 }
 
 
@@ -41,16 +39,13 @@ function run_with_xvfb {
 # Terminate existing Xvfb sessions
 ###############################################################################
 if [ $(command -v xvfb-run) ]; then
-  echo "Terminating existing Xvfb sessions"
-
-  # Kill Xvfb processes
-  killall Xvfb || true
-
-  # Remove Xvfb X server lock files
-  rm -f /tmp/.X${XVFB_SERVER_NUM}-lock
-
-  # Remove any Xvfb error logs
-  rm -f ${XVFB_ERROR_LOG_PREFIX}*.xlog
+    echo "Terminating existing Xvfb sessions"
+    
+    # Kill Xvfb processes
+    killall Xvfb || true
+    
+    # Remove Xvfb X server lock files
+    rm -f /tmp/.X${XVFB_SERVER_NUM}-lock
 fi
 
 ###############################################################################
@@ -58,12 +53,12 @@ fi
 ###############################################################################
 USE_CORE_DUMPS=true
 if [[ ${NODE_LABELS} == *rhel7* ]] || [[ ${NODE_LABELS} == *centos7* ]] || [[ ${NODE_LABELS} == *scilin7* ]]; then
-  ON_RHEL7=true
-elif [[ ${NODE_LABELS} == *ubuntu* ]]; then
-  ON_UBUNTU=true
-elif [[ ${NODE_LABELS} == *osx* ]]; then
-  ON_MACOS=true
-  USE_CORE_DUMPS=false
+    ON_RHEL7=true
+    elif [[ ${NODE_LABELS} == *ubuntu* ]]; then
+    ON_UBUNTU=true
+    elif [[ ${NODE_LABELS} == *osx* ]]; then
+    ON_MACOS=true
+    USE_CORE_DUMPS=false
 fi
 
 ###############################################################################
@@ -106,29 +101,29 @@ $CMAKE_EXE --version
 # Check job requirements from the name and changes
 ###############################################################################
 if [[ ${JOB_NAME} == *clean* ]]; then
-  CLEANBUILD=true
+    CLEANBUILD=true
 fi
 if [[ ${JOB_NAME} == *clang_tidy* ]]; then
-  CLEANBUILD=true
+    CLEANBUILD=true
 fi
 
 if [[ ${JOB_NAME} == *pull_requests* ]]; then
-  PRBUILD=true
+    PRBUILD=true
 fi
 
 if [[ ${JOB_NAME} == *debug* ]]; then
-  BUILD_CONFIG="Debug"
-elif [[ ${JOB_NAME} == *relwithdbg* ]]; then
-  BUILD_CONFIG="RelWithDbg"
+    BUILD_CONFIG="Debug"
+    elif [[ ${JOB_NAME} == *relwithdbg* ]]; then
+    BUILD_CONFIG="RelWithDbg"
 else
-  BUILD_CONFIG="Release"
+    BUILD_CONFIG="Release"
 fi
 
 # Setup software collections on rhel7 to allow using gcc7
 if [[ $ON_RHEL7 ]]; then
-  SCL_ENABLE="scl enable devtoolset-7"
+    SCL_ENABLE="scl enable devtoolset-7"
 else
-  SCL_ENABLE="eval"
+    SCL_ENABLE="eval"
 fi
 
 # For pull requests decide on what to build based on changeset and Jenkins
@@ -140,31 +135,31 @@ DO_BUILD_DEVDOCS=true
 DO_BUILD_PKG=true
 DO_SYSTEMTESTS=false
 if [[ ${PRBUILD} == true ]]; then
-  if ${SCRIPT_DIR}/check_for_changes dev-docs-only || ${SCRIPT_DIR}/check_for_changes user-docs-only; then
-    DO_BUILD_CODE=false
-    DO_UNITTESTS=false
-  fi
-  DO_DOCTESTS_USER=false
-  DO_BUILD_DEVDOCS=false
-  DO_BUILD_PKG=${BUILD_PACKAGE:-false}
-  DO_SYSTEMTESTS=false
-
-  if [[ ${ON_RHEL7} == true ]]; then
-    # rhel does system testing
-    if ! ${SCRIPT_DIR}/check_for_changes docs-gui-only; then
-      DO_BUILD_PKG=true
-      DO_SYSTEMTESTS=true
+    if ${SCRIPT_DIR}/check_for_changes dev-docs-only || ${SCRIPT_DIR}/check_for_changes user-docs-only; then
+        DO_BUILD_CODE=false
+        DO_UNITTESTS=false
     fi
-  elif [[ ${ON_UBUNTU} == true ]]; then
-    # ubuntu does the docs build
-    if ${SCRIPT_DIR}/check_for_changes dev-docs-only; then
-      DO_BUILD_CODE=false
-      DO_DOCTESTS_USER=false
-    else
-      DO_BUILD_CODE=true # code needs to be up to date
-      DO_DOCTESTS_USER=true
+    DO_DOCTESTS_USER=false
+    DO_BUILD_DEVDOCS=false
+    DO_BUILD_PKG=${BUILD_PACKAGE:-false}
+    DO_SYSTEMTESTS=false
+    
+    if [[ ${ON_RHEL7} == true ]]; then
+        # rhel does system testing
+        if ! ${SCRIPT_DIR}/check_for_changes docs-gui-only; then
+            DO_BUILD_PKG=true
+            DO_SYSTEMTESTS=true
+        fi
+        elif [[ ${ON_UBUNTU} == true ]]; then
+        # ubuntu does the docs build
+        if ${SCRIPT_DIR}/check_for_changes dev-docs-only; then
+            DO_BUILD_CODE=false
+            DO_DOCTESTS_USER=false
+        else
+            DO_BUILD_CODE=true # code needs to be up to date
+            DO_DOCTESTS_USER=true
+        fi
     fi
-  fi
 fi
 
 ###############################################################################
@@ -180,64 +175,64 @@ fi
 #                       the links helps keep it fresh
 ###############################################################################
 if [ -z "$BUILD_DIR" ]; then
-  echo "Build directory not set. Cannot continue"
-  exit 1
+    echo "Build directory not set. Cannot continue"
+    exit 1
 fi
 
 if [[ "$CLEANBUILD" == true ]]; then
-  rm -rf $BUILD_DIR
+    rm -rf $BUILD_DIR
 fi
 if [ -d $BUILD_DIR ]; then
-  rm -rf ${BUILD_DIR:?}/bin ${BUILD_DIR:?}/ExternalData ${BUILD_DIR:?}/Testing
-  find ${BUILD_DIR:?} -name 'TEST-*.xml' -delete
-  if [[ -n ${CLEAN_EXTERNAL_PROJECTS} && "${CLEAN_EXTERNAL_PROJECTS}" == true ]]; then
-      rm -rf $BUILD_DIR/eigen-*
-      rm -rf $BUILD_DIR/googletest-*
-  fi
+    rm -rf ${BUILD_DIR:?}/bin ${BUILD_DIR:?}/ExternalData ${BUILD_DIR:?}/Testing
+    find ${BUILD_DIR:?} -name 'TEST-*.xml' -delete
+    if [[ -n ${CLEAN_EXTERNAL_PROJECTS} && "${CLEAN_EXTERNAL_PROJECTS}" == true ]]; then
+        rm -rf $BUILD_DIR/eigen-*
+        rm -rf $BUILD_DIR/googletest-*
+    fi
 else
-  mkdir $BUILD_DIR
+    mkdir $BUILD_DIR
 fi
 
 ###############################################################################
 # Setup clang
 ###############################################################################
 if [[ ${JOB_NAME} == *clang* ]]; then
-  USE_CLANG=true
-elif [[ ${ON_MACOS} == true ]] ; then
-  if [[ ! $(command -v icpc) ]] ; then
     USE_CLANG=true
-  fi
+    elif [[ ${ON_MACOS} == true ]] ; then
+    if [[ ! $(command -v icpc) ]] ; then
+        USE_CLANG=true
+    fi
 fi
 
 if [[ $USE_CLANG ]]; then
-  # Assuming we are using the clang compiler
-  echo "Using clang/llvm compiler."
-  clang --version
-  export CC=clang
-  export CXX=clang++
-  # check if this is also a clang-tidy build
-  if [[ ${JOB_NAME} == *clang_tidy* ]]; then
-      CLANGTIDYVAR="-DENABLE_CLANG_TIDY=ON"
-  fi
-  #check if CMakeCache.txt exists and if so that the cxx compiler is clang++
-  #only needed with incremental builds. Clean builds delete this directory in a later step.
-  if [[ -e $BUILD_DIR/CMakeCache.txt ]] && [[ ${JOB_NAME} != *clean* ]]; then
-    COMPILERFILEPATH=$(grep 'CMAKE_CXX_COMPILER:FILEPATH' $BUILD_DIR/CMakeCache.txt)
-    if [[ $COMPILERFILEPATH != *clang++* ]]; then
-      # Removing the build directory entirely guarantees clang is used.
-      rm -rf $BUILD_DIR
+    # Assuming we are using the clang compiler
+    echo "Using clang/llvm compiler."
+    clang --version
+    export CC=clang
+    export CXX=clang++
+    # check if this is also a clang-tidy build
+    if [[ ${JOB_NAME} == *clang_tidy* ]]; then
+        CLANGTIDYVAR="-DENABLE_CLANG_TIDY=ON"
     fi
-  fi
+    #check if CMakeCache.txt exists and if so that the cxx compiler is clang++
+    #only needed with incremental builds. Clean builds delete this directory in a later step.
+    if [[ -e $BUILD_DIR/CMakeCache.txt ]] && [[ ${JOB_NAME} != *clean* ]]; then
+        COMPILERFILEPATH=$(grep 'CMAKE_CXX_COMPILER:FILEPATH' $BUILD_DIR/CMakeCache.txt)
+        if [[ $COMPILERFILEPATH != *clang++* ]]; then
+            # Removing the build directory entirely guarantees clang is used.
+            rm -rf $BUILD_DIR
+        fi
+    fi
 fi
 
 #for openmp support on OS X run
 # `brew install llvm`
 # `ln -s /usr/local/opt/llvm/lib/libomp.dylib /usr/local/lib/libomp.dylib`
 if [[ ${ON_MACOS} == true ]] ; then
-  if [[ ${JOB_NAME} == *openmp* ]]; then
-    export CC=/usr/local/opt/llvm/bin/clang
-    export CXX=/usr/local/opt/llvm/bin/clang++
-  fi
+    if [[ ${JOB_NAME} == *openmp* ]]; then
+        export CC=/usr/local/opt/llvm/bin/clang
+        export CXX=/usr/local/opt/llvm/bin/clang++
+    fi
 fi
 
 ###############################################################################
@@ -247,7 +242,7 @@ fi
 # It can be overridden by setting the MANTID_DATA_STORE environment variable.
 ###############################################################################
 if [ -z "$MANTID_DATA_STORE" ]; then
-  export MANTID_DATA_STORE=$HOME/MantidExternalData
+    export MANTID_DATA_STORE=$HOME/MantidExternalData
 fi
 
 ###############################################################################
@@ -256,56 +251,56 @@ fi
 PY2_BUILD=false
 PY3_BUILD=false
 if [[ ${JOB_NAME} == *python3* ]]; then
-  PY3_BUILD=true
-  PYTHON3_EXECUTABLE=$(which python3)
-  DIST_FLAGS="${DIST_FLAGS} -DPYTHON_EXECUTABLE=$PYTHON3_EXECUTABLE"
-  PARAVIEW_DIR="${PARAVIEW_DIR}-python3"
+    PY3_BUILD=true
+    PYTHON3_EXECUTABLE=$(which python3)
+    DIST_FLAGS="${DIST_FLAGS} -DPYTHON_EXECUTABLE=$PYTHON3_EXECUTABLE"
+    PARAVIEW_DIR="${PARAVIEW_DIR}-python3"
 else
-  PY2_BUILD=true
+    PY2_BUILD=true
 fi
 
 ###############################################################################
 # Packaging options
 ###############################################################################
 if [[ ${DO_BUILD_PKG} == true ]]; then
-  PACKAGINGVARS="-DPACKAGE_DOCS=ON"
-  # Set some variables relating to the linux packages
-  if [[ "${ON_MACOS}" == true ]]; then
-    PACKAGINGVARS="${PACKAGINGVARS} -DCPACK_PACKAGE_SUFFIX="
-  else
-    # Use different suffix for linux builds if parameter is not defined
-    if [[ -n "${PACKAGE_SUFFIX}" ]]; then
-       echo "Using PACKAGE_SUFFIX=${PACKAGE_SUFFIX} from job parameter"
-    elif [[ ${JOB_NAME} == *release* ]]; then
-       PACKAGE_SUFFIX=""
-    elif [[ ${JOB_NAME} == *master* ]]; then
-      PACKAGE_SUFFIX="nightly"
-    elif [[ ${JOB_NAME} == *pvnext* ]]; then
-      PACKAGE_SUFFIX="mantidunstable-pvnext"
+    PACKAGINGVARS="-DPACKAGE_DOCS=ON"
+    # Set some variables relating to the linux packages
+    if [[ "${ON_MACOS}" == true ]]; then
+        PACKAGINGVARS="${PACKAGINGVARS} -DCPACK_PACKAGE_SUFFIX="
     else
-      PACKAGE_SUFFIX="unstable"
+        # Use different suffix for linux builds if parameter is not defined
+        if [[ -n "${PACKAGE_SUFFIX}" ]]; then
+            echo "Using PACKAGE_SUFFIX=${PACKAGE_SUFFIX} from job parameter"
+            elif [[ ${JOB_NAME} == *release* ]]; then
+            PACKAGE_SUFFIX=""
+            elif [[ ${JOB_NAME} == *master* ]]; then
+            PACKAGE_SUFFIX="nightly"
+            elif [[ ${JOB_NAME} == *pvnext* ]]; then
+            PACKAGE_SUFFIX="mantidunstable-pvnext"
+        else
+            PACKAGE_SUFFIX="unstable"
+        fi
+        
+        if [[ ${PY3_BUILD} == true ]]; then
+            # Add '-python3' to package name and install path
+            PACKAGE_SUFFIX=${PACKAGE_SUFFIX}-python3
+        fi
+        
+        if [[ ${JOB_NAME} == *release* ]] && [[ ${PY2_BUILD} == true ]] && [[ -z "${PACKAGE_SUFFIX}" ]]; then
+            # Traditional install path for python 2 release build
+            PACKAGINGVARS="${PACKAGINGVARS} -DCMAKE_INSTALL_PREFIX=/opt/Mantid -DCPACK_PACKAGE_SUFFIX="
+        else
+            # everything else uses lower-case values
+            PACKAGINGVARS="${PACKAGINGVARS} -DCMAKE_INSTALL_PREFIX=/opt/mantid${PACKAGE_SUFFIX} -DCPACK_PACKAGE_SUFFIX=${PACKAGE_SUFFIX}"
+        fi
+        
+        if [[ ${ON_RHEL7} == true ]]; then
+            if [[ -n "${RELEASE_NUMBER}" ]]; then
+                RELEASE_NUMBER="1"
+            fi
+            PACKAGINGVARS="${PACKAGINGVARS} -DCPACK_RPM_PACKAGE_RELEASE=${RELEASE_NUMBER}"
+        fi
     fi
-
-    if [[ ${PY3_BUILD} == true ]]; then
-      # Add '-python3' to package name and install path
-      PACKAGE_SUFFIX=${PACKAGE_SUFFIX}-python3
-    fi
-
-    if [[ ${JOB_NAME} == *release* ]] && [[ ${PY2_BUILD} == true ]] && [[ -z "${PACKAGE_SUFFIX}" ]]; then
-      # Traditional install path for python 2 release build
-      PACKAGINGVARS="${PACKAGINGVARS} -DCMAKE_INSTALL_PREFIX=/opt/Mantid -DCPACK_PACKAGE_SUFFIX="
-    else
-      # everything else uses lower-case values
-      PACKAGINGVARS="${PACKAGINGVARS} -DCMAKE_INSTALL_PREFIX=/opt/mantid${PACKAGE_SUFFIX} -DCPACK_PACKAGE_SUFFIX=${PACKAGE_SUFFIX}"
-    fi
-
-    if [[ ${ON_RHEL7} == true ]]; then
-      if [[ -n "${RELEASE_NUMBER}" ]]; then
-        RELEASE_NUMBER="1"
-      fi
-      PACKAGINGVARS="${PACKAGINGVARS} -DCPACK_RPM_PACKAGE_RELEASE=${RELEASE_NUMBER}"
-    fi
-  fi
 fi
 
 
@@ -313,12 +308,12 @@ fi
 # Generator
 ###############################################################################
 if [ "$(command -v ninja)" ]; then
-  CMAKE_GENERATOR="-G Ninja"
-elif [ "$(command -v ninja-build)" ]; then
-  CMAKE_GENERATOR="-G Ninja"
+    CMAKE_GENERATOR="-G Ninja"
+    elif [ "$(command -v ninja-build)" ]; then
+    CMAKE_GENERATOR="-G Ninja"
 fi
 if [ -e $BUILD_DIR/CMakeCache.txt ]; then
-  CMAKE_GENERATOR=""
+    CMAKE_GENERATOR=""
 fi
 
 ###############################################################################
@@ -341,33 +336,33 @@ $SCL_ENABLE "${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} 
 # Coverity build should exit early
 ###############################################################################
 if [[ ${JOB_NAME} == *coverity_build_and_submit* ]]; then
-  ${COVERITY_DIR}/cov-build --dir cov-int ${CMAKE_EXE} --build . -- -j ${BUILD_THREADS:?}
-  tar czvf mantid.tgz cov-int
-  status=$(curl --form token=$COVERITY_TOKEN --form email=mantidproject@gmail.com \
-       --form file=@mantid.tgz --form version=$GIT_COMMIT \
-       https://scan.coverity.com/builds?project=mantidproject%2Fmantid)
-  status=$(echo ${status} | sed -e 's/^ *//' -e 's/ *$//')
-  if [[ -z $status ]] || [[ ${status} == "Build successfully submitted." ]]; then
-    exit 0
-  else
-    echo "$status"
-    exit 1
-  fi
+    ${COVERITY_DIR}/cov-build --dir cov-int ${CMAKE_EXE} --build . -- -j ${BUILD_THREADS:?}
+    tar czvf mantid.tgz cov-int
+    status=$(curl --form token=$COVERITY_TOKEN --form email=mantidproject@gmail.com \
+        --form file=@mantid.tgz --form version=$GIT_COMMIT \
+    https://scan.coverity.com/builds?project=mantidproject%2Fmantid)
+    status=$(echo ${status} | sed -e 's/^ *//' -e 's/ *$//')
+    if [[ -z $status ]] || [[ ${status} == "Build successfully submitted." ]]; then
+        exit 0
+    else
+        echo "$status"
+        exit 1
+    fi
 fi
 
 ###############################################################################
 # Build step
 ###############################################################################
 if [[ ${DO_BUILD_CODE} == true ]]; then
-  ${CMAKE_EXE} --build . -- -j${BUILD_THREADS:?}
-  ${CMAKE_EXE} --build . --target AllTests -- -j${BUILD_THREADS:?}
+    ${CMAKE_EXE} --build . -- -j${BUILD_THREADS:?}
+    ${CMAKE_EXE} --build . --target AllTests -- -j${BUILD_THREADS:?}
 fi
 
 ###############################################################################
 # Static analysis builds or stop here
 ###############################################################################
 if [[ $USE_CLANG ]] && [[ ${JOB_NAME} == *clang_tidy* ]]; then
-  exit 0
+    exit 0
 fi
 
 
@@ -377,18 +372,18 @@ fi
 # Activate core dumps. They are deactivated by the registered EXIT function
 # at the top of this script
 if [[ ${USE_CORE_DUMPS} == true ]]; then
-  ulimit -c unlimited
+    ulimit -c unlimited
 fi
 # Prevent race conditions when creating the user config directory
 userconfig_dir=$HOME/.mantid
 rm -fr $userconfig_dir
 # Remove GUI qsettings files
 if [[ ${ON_MACOS} == true ]] ; then
-  rm -f $HOME/Library/Preferences/com.mantid.MantidPlot.plist
-  rm -f $HOME/Library/Preferences/org.mantidproject.MantidPlot.plist
-  rm -f "$HOME/Library/Saved Application State/org.mantidproject.MantidPlot.savedState/windows.plist"
+    rm -f $HOME/Library/Preferences/com.mantid.MantidPlot.plist
+    rm -f $HOME/Library/Preferences/org.mantidproject.MantidPlot.plist
+    rm -f "$HOME/Library/Saved Application State/org.mantidproject.MantidPlot.savedState/windows.plist"
 else
-  rm -f ~/.config/Mantid/MantidPlot.conf
+    rm -f ~/.config/Mantid/MantidPlot.conf
 fi
 rm -f ~/.config/mantidproject/mantidworkbench.ini
 
@@ -398,23 +393,23 @@ userprops_file=$userconfig_dir/Mantid.user.properties
 echo MultiThreaded.MaxCores=2 > $userprops_file
 
 if [[ ${DO_UNITTESTS} == true ]]; then
-  run_with_xvfb $CTEST_EXE --no-compress-output -T Test -j${BUILD_THREADS:?} --schedule-random --output-on-failure
+    run_with_xvfb $CTEST_EXE --no-compress-output -T Test -j${BUILD_THREADS:?} --schedule-random --output-on-failure
 fi
 
 ###############################################################################
 # User Documentation
 ###############################################################################
 if [[ ${DO_DOCTESTS_USER} == true ]]; then
-  # use default configuration
-  rm -f $userprops_file
-  # Remove doctrees directory so it forces a full reparse. It seems that
-  # without this newly added doctests are not executed
-  if [ -d $BUILD_DIR/docs/doctrees ]; then
-    rm -fr $BUILD_DIR/docs/doctrees/*
-  fi
-  # Build HTML to verify that no referencing errors have crept in.
-  run_with_xvfb ${CMAKE_EXE} --build . --target docs-html
-  run_with_xvfb ${CMAKE_EXE} --build . --target docs-test
+    # use default configuration
+    rm -f $userprops_file
+    # Remove doctrees directory so it forces a full reparse. It seems that
+    # without this newly added doctests are not executed
+    if [ -d $BUILD_DIR/docs/doctrees ]; then
+        rm -fr $BUILD_DIR/docs/doctrees/*
+    fi
+    # Build HTML to verify that no referencing errors have crept in.
+    run_with_xvfb ${CMAKE_EXE} --build . --target docs-html
+    run_with_xvfb ${CMAKE_EXE} --build . --target docs-test
 fi
 
 ###############################################################################
@@ -433,19 +428,19 @@ fi
 # documentation
 ###############################################################################
 if [[ ${DO_BUILD_PKG} == true ]]; then
-  run_with_xvfb ${CMAKE_EXE} --build . --target docs-qthelp
-  ${CPACK_EXE}
-
-  # Source tarball on clean build (arbitrarily choose rhel7)
-  # Also, parcel up the documentation into a tar file that is easier to move around
-  # and labelled by the commit id it was built with. This assumes the Jenkins git plugin
-  # has set the GIT_COMMIT environment variable
-  if [[ ${CLEANBUILD} == true && ${ON_RHEL7} == true ]]; then
-    run_with_xvfb ${CMAKE_EXE} --build . --target docs-html
-    tar -cjf mantiddocs-g${GIT_COMMIT:0:7}.tar.bz2 --exclude='*.buildinfo' --exclude="MantidProject.q*" docs/html
-    # The ..._PREFIX argument avoids opt/Mantid directories at the top of the tree
-    ${CPACK_EXE} --config CPackSourceConfig.cmake -D CPACK_PACKAGING_INSTALL_PREFIX=
-  fi
+    run_with_xvfb ${CMAKE_EXE} --build . --target docs-qthelp
+    ${CPACK_EXE}
+    
+    # Source tarball on clean build (arbitrarily choose rhel7)
+    # Also, parcel up the documentation into a tar file that is easier to move around
+    # and labelled by the commit id it was built with. This assumes the Jenkins git plugin
+    # has set the GIT_COMMIT environment variable
+    if [[ ${CLEANBUILD} == true && ${ON_RHEL7} == true ]]; then
+        run_with_xvfb ${CMAKE_EXE} --build . --target docs-html
+        tar -cjf mantiddocs-g${GIT_COMMIT:0:7}.tar.bz2 --exclude='*.buildinfo' --exclude="MantidProject.q*" docs/html
+        # The ..._PREFIX argument avoids opt/Mantid directories at the top of the tree
+        ${CPACK_EXE} --config CPackSourceConfig.cmake -D CPACK_PACKAGING_INSTALL_PREFIX=
+    fi
 fi
 
 ###############################################################################
@@ -453,9 +448,9 @@ fi
 # Linux checks it install okay
 ###############################################################################
 if [[ ${DO_SYSTEMTESTS} == true ]]; then
-  if [[ ${PRBUILD} == true ]]; then
-    EXTRA_ARGS="--exclude-in-pull-requests" $SCRIPT_DIR/systemtests
-  else
-    $SCRIPT_DIR/systemtests
-  fi
+    if [[ ${PRBUILD} == true ]]; then
+        EXTRA_ARGS="--exclude-in-pull-requests" $SCRIPT_DIR/systemtests
+    else
+        $SCRIPT_DIR/systemtests
+    fi
 fi

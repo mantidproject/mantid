@@ -245,11 +245,6 @@ LoadEventPreNexus2::LoadEventPreNexus2()
       m_dbOpBlockNumber(0), m_dbOpNumEvents(0), m_dbOpNumPulses(0) {}
 
 //----------------------------------------------------------------------------------------------
-/** Desctructor
- */
-LoadEventPreNexus2::~LoadEventPreNexus2() { delete this->eventfile; }
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm, i.e, declare properties
  */
 void LoadEventPreNexus2::init() {
@@ -1261,7 +1256,7 @@ void LoadEventPreNexus2::loadPixelMap(const std::string &filename) {
  */
 void LoadEventPreNexus2::openEventFile(const std::string &filename) {
   // Open the file
-  eventfile = new BinaryFile<DasEvent>(filename);
+  eventfile = std::make_unique<BinaryFile<DasEvent>>(filename);
   num_events = eventfile->getNumElements();
   g_log.debug() << "File contains " << num_events << " event records.\n";
 

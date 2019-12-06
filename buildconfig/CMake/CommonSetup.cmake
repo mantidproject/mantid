@@ -77,7 +77,9 @@ find_package(Nexus 4.3.1 REQUIRED)
 find_package(MuParser REQUIRED)
 find_package(JsonCPP 0.7.0 REQUIRED)
 
+option(ENABLE_OPENGL "Enable OpenGLbased rendering" ON)
 option(ENABLE_OPENCASCADE "Enable OpenCascade-based 3D visualisation" ON)
+
 if(ENABLE_OPENCASCADE)
   find_package(OpenCascade REQUIRED)
   add_definitions(-DENABLE_OPENCASCADE)

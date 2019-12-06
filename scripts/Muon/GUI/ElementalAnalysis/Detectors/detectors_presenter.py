@@ -17,5 +17,11 @@ class DetectorsPresenter(object):
     def setStateQuietly(self, name, state):
         self.view.setStateQuietly(name, state)
 
+    def enableDetector(self, name):
+        self.view.enableDetector(name)
+
+    def disableDetector(self, name):
+        self.view.disableDetector(name)
+
     def getNames(self):
         return self.view.widgets.keys()

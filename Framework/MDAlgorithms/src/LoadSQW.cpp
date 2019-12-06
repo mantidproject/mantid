@@ -399,9 +399,8 @@ void LoadSQW::addLattice(
   // frame,
   // Q units so general goniometer should provide unit rotation matrix
   info->mutableRun().mutableGoniometer().makeUniversalGoniometer();
-  //
-  OrientedLattice latt(a, b, c, aa, bb, cc);
-  info->mutableSample().setOrientedLattice(&latt);
+  info->mutableSample().setOrientedLattice(
+      std::make_unique<OrientedLattice>(a, b, c, aa, bb, cc));
   ws->addExperimentInfo(info);
 }
 

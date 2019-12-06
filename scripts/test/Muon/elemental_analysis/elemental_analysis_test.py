@@ -24,7 +24,6 @@ from MultiPlotting.multi_plotting_widget import MultiPlotWidget
 from MultiPlotting.label import Label
 
 
-
 @start_qapplication
 class ElementalAnalysisTest(unittest.TestCase):
     @classmethod
@@ -268,7 +267,8 @@ class ElementalAnalysisTest(unittest.TestCase):
 
     @mock.patch('Muon.GUI.ElementalAnalysis.Detectors.detectors_view.QtWidgets.QWidget')
     def test_loading_finished_returns_correctly_if_no_plot_window_but_has_to_plot(self, mock_qwidget):
-        self.gui.load_widget.last_loaded_run = mock.Mock(return_value=['run1', 'run2', 'run3'])
+        self.gui.load_widget.last_loaded_run = mock.Mock(return_value=2695)
+        self.gui.load_widget.get_run_num_loaded_detectors = mock.Mock(return_value=4)
         self.gui.detectors.getNames.return_value = ['1', '2', '3']
         self.gui.plot_window = None
         self.gui.plotting = mock.Mock()
@@ -283,13 +283,34 @@ class ElementalAnalysisTest(unittest.TestCase):
     @mock.patch('Muon.GUI.ElementalAnalysis.Detectors.detectors_view.QtWidgets.QWidget')
     def test_loading_finished_returns_correctly_if_no_to_plot_but_has_plot_window(
             self, mock_qwidget):
-        self.gui.load_widget.last_loaded_run = mock.Mock(return_value=['run1', 'run2', 'run3'])
+        self.gui.load_widget.last_loaded_run = mock.Mock(return_value=2695)
+        self.gui.load_widget.get_run_num_loaded_detectors = mock.Mock(return_value=4)
         self.gui.detectors.getNames.return_value = ['1', '2', '3']
         mock_qwidget.return_value = True
         self.gui.plot_window = mock.Mock()
 
         self.gui.loading_finished()
         self.assertEqual(self.gui.plotting.remove_subplot.call_count, 3)
+
+    @mock.patch('Muon.GUI.ElementalAnalysis.Detectors.detectors_view.QtWidgets.QWidget')
+    def test_loading_finished_correctly_disables_detectors_if_less_detectors_are_loaded(
+            self, mock_qwidget):
+        num_loaded_detectors = 1
+        num_detectors = 4
+        self.gui.load_widget.last_loaded_run = mock.Mock(return_value=2695)
+        self.gui.load_widget.get_run_num_loaded_detectors = mock.Mock(return_value=num_loaded_detectors)
+        self.gui.detectors.getNames.return_value = ['1', '2', '3', '4']
+        self.gui.plotting.get_subplots.return_value = ['1', '2', '3', '4']
+        mock_qwidget.return_value = True
+        self.gui.plot_window = mock.Mock()
+
+        self.gui.loading_finished()
+        # should have set the states of num_detectors - num_loaded_detectors
+        self.assertEqual(self.gui.detectors.setStateQuietly.call_count,num_detectors-num_loaded_detectors)
+        # should have only enabled the detector we have loaded
+        self.assertEqual(self.gui.detectors.enableDetector.call_count, num_loaded_detectors)
+        # Should disable (num_detectors - num_loaded_detectors) detectors
+        self.assertEqual(self.gui.detectors.disableDetector.call_count, num_detectors-num_loaded_detectors)
 
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.add_peak_data')
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.mantid')
@@ -304,7 +325,7 @@ class ElementalAnalysisTest(unittest.TestCase):
         self.gui.lines.total.isChecked.return_value = True
         self.gui.lines.prompt.isChecked.return_value = False
         self.gui.lines.delayed.isChecked.return_value = True
-        mock_mantid.mtd['name1'].getName.return_value = 'Detector 1'
+        mock_mantid.mtd['name1'].name.return_value = 'Detector 1'
         self.gui.add_detector_to_plot('GE1', 'name1')
         self.assertEqual(self.gui.plotting.add_subplot.call_count, 1)
         self.assertEqual(self.gui.plotting.plot.call_count, 2)
@@ -557,11 +578,11 @@ class ElementalAnalysisTest(unittest.TestCase):
             '2695; Detector 2': mock.Mock(),
             '2695; Detector 3': mock.Mock()
         }
-        mock_mantid.mtd['2695; Detector 1'].getName.return_value = '2695; Detector 1'
-        mock_mantid.mtd['2695; Detector 2'].getName.return_value = '2695; Detector 2'
+        mock_mantid.mtd['2695; Detector 1'].name.return_value = '2695; Detector 1'
+        mock_mantid.mtd['2695; Detector 2'].name.return_value = '2695; Detector 2'
         expected_calls = [
-            mock.call('1', '2695; Detector 1', color='C0',spec_num=spectrum_index['Total']),
-            mock.call('2', '2695; Detector 2', color='C0',spec_num=spectrum_index['Total'])
+            mock.call('1', '2695; Detector 1', color='C0', spec_num=spectrum_index['Total']),
+            mock.call('2', '2695; Detector 2', color='C0', spec_num=spectrum_index['Total'])
         ]
         self.gui.add_line_by_type(2695, 'Total')
 
@@ -585,8 +606,8 @@ class ElementalAnalysisTest(unittest.TestCase):
             '2695; Detector 2': mock.Mock(),
             '2695; Detector 3': mock.Mock()
         }
-        mock_mantid.mtd['2695; Detector 1'].getName.return_value = '2695; Detector 1'
-        mock_mantid.mtd['2695; Detector 2'].getName.return_value = '2695; Detector 2'
+        mock_mantid.mtd['2695; Detector 1'].name.return_value = '2695; Detector 1'
+        mock_mantid.mtd['2695; Detector 2'].name.return_value = '2695; Detector 2'
         expected_calls = [mock.call('1', '2695; Detector 1', spec=spectrum_index['Total']),
                           mock.call('2', '2695; Detector 2', spec=spectrum_index['Total'])]
         self.gui.remove_line_type(2695, 'Total')
