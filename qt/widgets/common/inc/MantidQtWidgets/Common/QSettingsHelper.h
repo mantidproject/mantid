@@ -37,13 +37,20 @@ std::map<std::string, T> getSettingsAsMap(std::string const &settingGroup) {
   std::map<std::string, T> settingsMap;
   QSettings settings;
   settings.beginGroup(QString::fromStdString(settingGroup));
-  QStringList settingNames = settings.childKeys();
+  QStringList settingNames = settings.allKeys();
   std::string templateTypeName = typeid(T).name();
   for (auto &settingName : settingNames) {
-    auto setting = settings.value(settingName);
-    std::string settingTypeName = QMetaType::typeName(setting.type());
-    if (settingTypeName == templateTypeName) {
-      settingsMap[settingName.toStdString()] = setting.value<T>();
+    std::string settingTypeName;
+    if (settingName.endsWith("/type")) {
+      settingTypeName =
+          settings.value(settingName).toString().toStdString();
+      if (settingTypeName == templateTypeName) {
+        auto settingValueName =
+            settingName.replace(QString("/type"), QString("/value"));
+        auto setting = settings.value(settingValueName);
+        auto strippedSettingName = settingName.remove(QString("/value"));
+        settingsMap[strippedSettingName.toStdString()] = setting.value<T>();
+      }
     }
   }
   settings.endGroup();
@@ -56,7 +63,8 @@ void setSetting(std::string const &settingGroup, std::string const &settingName,
                 T const &value) {
   QSettings settings;
   settings.beginGroup(QString::fromStdString(settingGroup));
-  settings.setValue(QString::fromStdString(settingName), value);
+  settings.setValue(QString::fromStdString(settingName).append("/value"), value);
+  settings.setValue(QString::fromStdString(settingName).append("/type"), typeid(value).name());
   settings.endGroup();
 }
 
