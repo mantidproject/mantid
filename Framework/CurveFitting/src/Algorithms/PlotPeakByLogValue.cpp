@@ -107,6 +107,11 @@ void PlotPeakByLogValue::init() {
                   "functions that"
                   "have attribute WorkspaceIndex.");
 
+  declareProperty("PassInputIndexToFunction", false,
+                  "For each spectrum in Input pass its workspace index to all "
+                  "functions that"
+                  "have attribute WorkspaceIndex.");
+
   declareProperty("Minimizer", "Levenberg-Marquardt",
                   "Minimizer to use for fitting. Minimizers available are "
                   "'Levenberg-Marquardt', 'Simplex', 'FABADA',\n"
@@ -178,6 +183,7 @@ void PlotPeakByLogValue::exec() {
   std::string logName = getProperty("LogValue");
   bool individual = getPropertyValue("FitType") == "Individual";
   bool passWSIndexToFunction = getProperty("PassWSIndexToFunction");
+  bool passInputIndexToFunction = getProperty("PassInputIndexToFunction");
   bool createFitOutput = getProperty("CreateOutput");
   bool outputCompositeMembers = getProperty("OutputCompositeMembers");
   bool outputConvolvedMembers = getProperty("ConvolveMembers");
@@ -288,6 +294,8 @@ void PlotPeakByLogValue::exec() {
       try {
         if (passWSIndexToFunction) {
           setWorkspaceIndexAttribute(ifun, j);
+        } else if (passInputIndexToFunction) {
+          setWorkspaceIndexAttribute(ifun, i);
         }
 
         g_log.debug() << "Fitting " << data.ws->getName() << " index " << j

@@ -208,7 +208,7 @@ MatrixWorkspace_sptr appendWorkspace(MatrixWorkspace_sptr leftWS,
                                      int numHistograms,
                                      std::string const &outputName) {
   auto appendAlg = AlgorithmManager::Instance().create("AppendSpectra");
-  appendAlg->setLogging(false);
+  appendAlg->setLogging(true);
   appendAlg->initialize();
   appendAlg->setProperty("InputWorkspace1", leftWS);
   appendAlg->setProperty("InputWorkspace2", rightWS);
