@@ -16,8 +16,8 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidCrystal/SCDCalibratePanels.h"
-#include <cxxtest/TestSuite.h>
 #include <boost/filesystem.hpp>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
