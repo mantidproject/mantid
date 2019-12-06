@@ -444,10 +444,7 @@ class MantidAxes(Axes):
         :param unary_predicate: A predicate taking a single matplotlib artist object
         :return: True if the artist_info is empty, false if artist_info remain
         """
-        is_empty_list = []
-        for workspace_artist in artist_info:
-            empty = workspace_artist.remove_if(self, unary_predicate)
-            is_empty_list.append(empty)
+        is_empty_list = [workspace_artist.remove_if(self, unary_predicate) for workspace_artist in artist_info]
 
         for index, empty in reversed(list(enumerate(is_empty_list))):
             if empty:
@@ -467,10 +464,7 @@ class MantidAxes(Axes):
         except KeyError:
             return False
 
-        is_empty_list = []
-        for workspace_artist in artist_info:
-            empty = workspace_artist.replace_data(workspace)
-            is_empty_list.append(empty)
+        is_empty_list = [workspace_artist.replace_data(workspace) for workspace_artist in artist_info]
 
         for index, empty in reversed(list(enumerate(is_empty_list))):
             if empty:
@@ -615,15 +609,15 @@ class MantidAxes(Axes):
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
 
-            autoscale = kwargs.pop("autoscale_on_update", self.get_autoscale_on())
+            autoscale_on = kwargs.pop("autoscale_on_update", self.get_autoscale_on())
 
             def _data_update(artists, workspace, new_kwargs=None):
                 # It's only possible to plot 1 line at a time from a workspace
                 try:
                     if new_kwargs:
-                        x, y, _, __ = plotfunctions._plot_impl(self, workspace, args, new_kwargs)
+                        x, y, _, _ = plotfunctions._plot_impl(self, workspace, args, new_kwargs)
                     else:
-                        x, y, _, __ = plotfunctions._plot_impl(self, workspace, args, kwargs)
+                        x, y, _, _ = plotfunctions._plot_impl(self, workspace, args, kwargs)
                     artists[0].set_data(x, y)
                 except RuntimeError as ex:
                     # if curve couldn't be plotted then remove it - can happen if the workspace doesn't contain the
@@ -641,11 +635,11 @@ class MantidAxes(Axes):
                         self.legend().draggable()
 
                 if new_kwargs:
-                    _autoscale = new_kwargs.pop("autoscale_on_update", self.get_autoscale_on())
+                    _autoscale_on = new_kwargs.pop("autoscale_on_update", self.get_autoscale_on())
                 else:
-                    _autoscale = self.get_autoscale_on()
+                    _autoscale_on = self.get_autoscale_on()
 
-                if _autoscale:
+                if _autoscale_on:
                     self.relim()
                     self.autoscale()
                 return artists
@@ -655,7 +649,7 @@ class MantidAxes(Axes):
             normalize_by_bin_width, kwargs = get_normalize_by_bin_width(workspace, self, **kwargs)
             is_normalized = normalize_by_bin_width or workspace.isDistribution()
 
-            with autoscale_on_update(self, autoscale):
+            with autoscale_on_update(self, autoscale_on):
                 artist = self.track_workspace_artist(workspace,
                                                      plotfunctions.plot(self, *args, **kwargs),
                                                      _data_update, spec_num, is_normalized,
@@ -712,13 +706,13 @@ class MantidAxes(Axes):
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
 
-            autoscale = kwargs.pop("autoscale_on_update", self.get_autoscale_on())
+            autoscale_on = kwargs.pop("autoscale_on_update", self.get_autoscale_on())
 
             def _data_update(artists, workspace, new_kwargs=None):
                 if new_kwargs:
-                    _autoscale = new_kwargs.pop("autoscale_on_update", self.get_autoscale_on())
+                    _autoscale_on = new_kwargs.pop("autoscale_on_update", self.get_autoscale_on())
                 else:
-                    _autoscale = self.get_autoscale_on()
+                    _autoscale_on = self.get_autoscale_on()
                 # errorbar with workspaces can only return a single container
                 container_orig = artists[0]
                 # It is not possible to simply reset the error bars so
@@ -733,7 +727,7 @@ class MantidAxes(Axes):
                     pass
                 # this gets pushed back onto the containers list
                 try:
-                    with autoscale_on_update(self, _autoscale):
+                    with autoscale_on_update(self, _autoscale_on):
                         # this gets pushed back onto the containers list
                         if new_kwargs:
                             container_new = plotfunctions.errorbar(self, workspace, **new_kwargs)
@@ -770,7 +764,7 @@ class MantidAxes(Axes):
             spec_num = self.get_spec_number_or_bin(workspace, kwargs)
             is_normalized, kwargs = get_normalize_by_bin_width(workspace, self, **kwargs)
 
-            with autoscale_on_update(self, autoscale):
+            with autoscale_on_update(self, autoscale_on):
                 artist = self.track_workspace_artist(workspace,
                                                      plotfunctions.errorbar(self, *args, **kwargs),
                                                      _data_update, spec_num, is_normalized,
