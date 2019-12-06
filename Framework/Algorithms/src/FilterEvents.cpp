@@ -758,13 +758,14 @@ void FilterEvents::splitTimeSeriesProperty(
     const int max_target_index) {
   // skip the sample logs if they are specified
   // get property name and etc
-  std::string property_name = tsp->name();
+  const std::string &property_name = tsp->name();
   // generate new propertys for the source to split to
-  std::vector<TimeSeriesProperty<TYPE> *> output_vector;
+  std::vector<std::unique_ptr<TimeSeriesProperty<TYPE>>> output_vector;
   for (int tindex = 0; tindex <= max_target_index; ++tindex) {
-    auto *new_property = new TimeSeriesProperty<TYPE>(property_name);
+    auto new_property =
+        std::make_unique<TimeSeriesProperty<TYPE>>(property_name);
     new_property->setUnits(tsp->units());
-    output_vector.emplace_back(new_property);
+    output_vector.emplace_back(std::move(new_property));
   }
 
   // duplicate the time series property if the size is just one
@@ -775,27 +776,31 @@ void FilterEvents::splitTimeSeriesProperty(
     }
   } else {
     // split log
+    std::vector<TimeSeriesProperty<TYPE> *> split_properties(
+        output_vector.size());
+    // use vector of raw pointers for splitting
+    std::transform(output_vector.begin(), output_vector.end(),
+                   split_properties.begin(),
+                   [](const std::unique_ptr<TimeSeriesProperty<TYPE>> &x) {
+                     return x.get();
+                   });
     tsp->splitByTimeVector(split_datetime_vec, m_vecSplitterGroup,
-                           output_vector);
+                           split_properties);
   }
 
   // assign to output workspaces
   for (int tindex = 0; tindex <= max_target_index; ++tindex) {
     // find output workspace
-    std::map<int, DataObjects::EventWorkspace_sptr>::iterator wsiter;
-    wsiter = m_outputWorkspacesMap.find(tindex);
+    auto wsiter = m_outputWorkspacesMap.find(tindex);
     if (wsiter == m_outputWorkspacesMap.end()) {
       // unable to find workspace associated with target index
       g_log.information() << "Workspace target (" << tindex
                           << ") does not have workspace associated."
                           << "\n";
-      delete output_vector[tindex];
     } else {
       // add property to the associated workspace
       DataObjects::EventWorkspace_sptr ws_i = wsiter->second;
-      ws_i->mutableRun().addProperty(
-          std::unique_ptr<TimeSeriesProperty<TYPE>>(output_vector[tindex]),
-          true);
+      ws_i->mutableRun().addProperty(std::move(output_vector[tindex]), true);
     }
   }
 
