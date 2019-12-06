@@ -868,7 +868,7 @@ IAlgorithm_sptr IndirectFittingModel::createSequentialFit(
   addFitProperties(*fitAlgorithm, function, getResultXAxisUnit());
   fitAlgorithm->setProperty("Input", input);
   fitAlgorithm->setProperty("OutputWorkspace", sequentialFitOutputName());
-  fitAlgorithm->setProperty("PassWSIndexToFunction", true);
+  fitAlgorithm->setProperty("PassInputIndexToFunction", true);
   fitAlgorithm->setProperty("LogName", getResultLogName());
 
   auto const firstWsIndex = initialFitData->getSpectrum(TableRowIndex{0});
