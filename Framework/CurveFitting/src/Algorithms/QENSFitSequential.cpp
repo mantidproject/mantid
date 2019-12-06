@@ -417,6 +417,11 @@ void QENSFitSequential::init() {
                   "functions that"
                   "have attribute WorkspaceIndex.");
 
+  declareProperty("PassInputIndexToFunction", false,
+                  "For each spectrum in Input pass its workspace index to all "
+                  "functions that"
+                  "have attribute WorkspaceIndex.");
+
   declareProperty("Minimizer", "Levenberg-Marquardt",
                   "Minimizer to use for fitting. Minimizers available are "
                   "'Levenberg-Marquardt', 'Simplex', 'FABADA',\n"
@@ -724,6 +729,7 @@ ITableWorkspace_sptr QENSFitSequential::performFit(const std::string &input,
   const std::vector<double> exclude = getProperty("Exclude");
   const bool convolveMembers = getProperty("ConvolveMembers");
   const bool passWsIndex = getProperty("PassWSIndexToFunction");
+  const bool passInputIndex = getProperty("PassInputIndexToFunction");
   const bool ignoreInvalidData = getProperty("IgnoreInvalidData");
 
   // Run PlotPeaksByLogValue
@@ -742,6 +748,7 @@ ITableWorkspace_sptr QENSFitSequential::performFit(const std::string &input,
   plotPeaks->setProperty("MaxIterations", getPropertyValue("MaxIterations"));
   plotPeaks->setProperty("Minimizer", getPropertyValue("Minimizer"));
   plotPeaks->setProperty("PassWSIndexToFunction", passWsIndex);
+  plotPeaks->setProperty("PassInputIndexToFunction", passInputIndex);
   plotPeaks->setProperty("PeakRadius", getPropertyValue("PeakRadius"));
   plotPeaks->setProperty("LogValue", getPropertyValue("LogName"));
   plotPeaks->setProperty("EvaluationType", getPropertyValue("EvaluationType"));
