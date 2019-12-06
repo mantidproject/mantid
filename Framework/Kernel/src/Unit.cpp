@@ -104,12 +104,6 @@ void Unit::addConversion(std::string to, const double &factor,
 }
 
 //---------------------------------------------------------------------------------------
-/** Removes all registered 'quick conversions' from the unit class on which this
- * method is called.
- */
-void Unit::clearConversions() const { s_conversionFactors.clear(); }
-
-//---------------------------------------------------------------------------------------
 /** Initialize the unit to perform conversion using singleToTof() and
  *singleFromTof()
  *
@@ -1068,7 +1062,7 @@ DECLARE_UNIT(SpinEchoLength)
 
 const UnitLabel SpinEchoLength::label() const { return Symbol::Nanometre; }
 
-SpinEchoLength::SpinEchoLength() : Wavelength() { clearConversions(); }
+SpinEchoLength::SpinEchoLength() : Wavelength() { }
 
 void SpinEchoLength::init() {
   // Efixed must be set to something
@@ -1119,7 +1113,7 @@ DECLARE_UNIT(SpinEchoTime)
 
 const UnitLabel SpinEchoTime::label() const { return Symbol::Nanosecond; }
 
-SpinEchoTime::SpinEchoTime() : Wavelength() { clearConversions(); }
+SpinEchoTime::SpinEchoTime() : Wavelength() { }
 
 void SpinEchoTime::init() {
   // Efixed must be set to something

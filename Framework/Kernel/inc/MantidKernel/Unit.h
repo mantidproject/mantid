@@ -193,9 +193,6 @@ protected:
   void addConversion(std::string to, const double &factor,
                      const double &power = 1.0) const;
 
-  /// Removes all registered 'quick conversions'
-  void clearConversions() const;
-
   /// The unit values have been initialized
   bool initialized;
   /// l1 ::       The source-sample distance (in metres)
