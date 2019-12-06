@@ -9,10 +9,32 @@ Diffraction Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+
+Improvements
+############
+
 Powder Diffraction
 ------------------
 
 - The create_total_scattering_pdf merging banks now matches spectra to the spectrum with the largest x range.
+- The create_total_scattering_pdf merging banks no longer matches spectra with scale, it now only matches with offset.
+
+Engineering Diffraction
+-----------------------
+
+Single Crystal Diffraction
+--------------------------
+
+Imaging
+-------
+
+BugFixes
+########
+
+Powder Diffraction
+------------------
+
+- A bug has been fixed that prevented unicode strings being given as a lim file directory in polaris create_total_scattering_pdf merging banks.
 
 Engineering Diffraction
 -----------------------
