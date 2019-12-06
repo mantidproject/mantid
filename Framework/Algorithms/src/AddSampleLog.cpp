@@ -285,7 +285,7 @@ void AddSampleLog::addTimeSeriesProperty(Run &run_obj,
 
   // initialze the TimeSeriesProperty and add unit
   if (is_int_series) {
-    auto tsp = new TimeSeriesProperty<int>(prop_name);
+    auto tsp = std::make_unique<TimeSeriesProperty<int>>(prop_name);
     if (use_single_value) {
       int intVal;
       if (Strings::convert(prop_value, intVal)) {
@@ -295,9 +295,9 @@ void AddSampleLog::addTimeSeriesProperty(Run &run_obj,
             "Input value cannot be converted to an integer value.");
       }
     }
-    run_obj.addLogData(tsp);
+    run_obj.addLogData(std::move(tsp));
   } else {
-    auto tsp = new TimeSeriesProperty<double>(prop_name);
+    auto tsp = std::make_unique<TimeSeriesProperty<double>>(prop_name);
     if (use_single_value) {
       double dblVal;
       if (Strings::convert(prop_value, dblVal)) {
@@ -307,7 +307,7 @@ void AddSampleLog::addTimeSeriesProperty(Run &run_obj,
             "Input value cannot be converted to a double number.");
       }
     }
-    run_obj.addLogData(tsp);
+    run_obj.addLogData(std::move(tsp));
   }
   // add unit
   run_obj.getProperty(prop_name)->setUnits(prop_unit);

@@ -116,7 +116,7 @@ void NormaliseByPeakArea::exec() {
       static_cast<int64_t>(yspaceIn->getNumberHistograms() +
                            2 * m_symmetrisedWS->getNumberHistograms() *
                                m_symmetrisedWS->blocksize());
-  m_progress = new API::Progress(this, 0.10, 1.0, nreports);
+  m_progress = std::make_unique<API::Progress>(this, 0.10, 1.0, nreports);
 
   for (int64_t i = 0; i < nhist; ++i) {
     m_normalisedWS->setSharedX(i, m_inputWS->sharedX(i)); // TOF

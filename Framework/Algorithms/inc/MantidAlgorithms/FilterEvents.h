@@ -131,14 +131,17 @@ private:
   std::vector<std::string> getTimeSeriesLogNames();
 
   void generateSplitterTSP(
-      std::vector<Kernel::TimeSeriesProperty<int> *> &split_tsp_vec);
+      std::vector<std::unique_ptr<Kernel::TimeSeriesProperty<int>>>
+          &split_tsp_vec);
 
   void generateSplitterTSPalpha(
-      std::vector<Kernel::TimeSeriesProperty<int> *> &split_tsp_vec);
+      std::vector<std::unique_ptr<Kernel::TimeSeriesProperty<int>>>
+          &split_tsp_vec);
 
   /// Add time series property 'Splitter' to each child workspace
   void mapSplitterTSPtoWorkspaces(
-      const std::vector<Kernel::TimeSeriesProperty<int> *> &split_tsp_vec);
+      std::vector<std::unique_ptr<Kernel::TimeSeriesProperty<int>>>
+          &split_tsp_vec);
 
   void copyNoneSplitLogs(
       std::vector<Kernel::TimeSeriesProperty<int> *> &int_tsp_name_vector,
