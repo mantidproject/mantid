@@ -17,11 +17,10 @@ namespace ISISReflectometry {
  * @param view :: a handle to a view for this presenter
  * @param model :: a handle to a model for this presenter
  */
-OptionsDialogPresenter::OptionsDialogPresenter(IOptionsDialog *view)
-    : m_view(view), m_mainPresenter(), m_model(OptionsDialogModel()) {
-  initOptions();
-  m_view->subscribe(this);
-}
+OptionsDialogPresenter::OptionsDialogPresenter(
+    IOptionsDialog *view, IMainWindowPresenter *mainPresenter)
+    : m_view(view), m_mainPresenter(mainPresenter),
+      m_model(OptionsDialogModel()){}
 
 /** Accept a main presenter
  * @param mainPresenter :: [input] A main presenter
@@ -30,6 +29,15 @@ void OptionsDialogPresenter::acceptMainPresenter(
     IMainWindowPresenter *mainPresenter) {
   m_mainPresenter = mainPresenter;
 }
+
+/** Allow options to be initialised once the main presenter
+    is constructed (necessary due to rounding impl)
+ */
+void OptionsDialogPresenter::notifyInitOptions() { initOptions(); }
+
+/** Subscribe the view to this presenter
+ */
+void OptionsDialogPresenter::notifySubscribe() { m_view->subscribe(this); }
 
 /** Load options from disk if possible, or set to defaults */
 void OptionsDialogPresenter::initOptions() {

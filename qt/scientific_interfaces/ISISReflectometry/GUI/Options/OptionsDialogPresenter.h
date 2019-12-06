@@ -25,13 +25,16 @@ Implements a presenter for the options dialog.
 class MANTIDQT_ISISREFLECTOMETRY_DLL OptionsDialogPresenter
     : public OptionsDialogSubscriber {
 public:
-  OptionsDialogPresenter(IOptionsDialog *view);
+  OptionsDialogPresenter(IOptionsDialog *view,
+                         IMainWindowPresenter *mainPresenter);
   ~OptionsDialogPresenter() = default;
 
   // OptionsDialogSubscriber overrides
   void loadOptions() override;
   void saveOptions() override;
 
+  void notifyInitOptions();
+  void notifySubscribe();
   void acceptMainPresenter(IMainWindowPresenter *mainPresenter);
   bool getBoolOption(std::string &optionName);
   int& getIntOption(std::string &optionName);

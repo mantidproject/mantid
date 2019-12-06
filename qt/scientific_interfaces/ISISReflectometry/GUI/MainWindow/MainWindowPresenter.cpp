@@ -53,10 +53,11 @@ MainWindowPresenter::MainWindowPresenter(
     : m_view(view), m_messageHandler(messageHandler), m_instrument(),
       m_slitCalculator(std::move(slitCalculator)),
       m_optionsDialogPresenter(
-          new OptionsDialogPresenter(optionsDialog)),
+          new OptionsDialogPresenter(optionsDialog, this)),
       m_batchPresenterFactory(std::move(batchPresenterFactory)) {
+  m_optionsDialogPresenter->notifyInitOptions();
+  m_optionsDialogPresenter->notifySubscribe();
   view->subscribe(this);
-  m_optionsDialogPresenter->acceptMainPresenter(this);
   for (auto *batchView : m_view->batches())
     addNewBatch(batchView);
   m_isUnsaved = false;
