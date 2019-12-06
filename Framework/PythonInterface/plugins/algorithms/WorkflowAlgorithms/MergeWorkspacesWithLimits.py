@@ -36,6 +36,19 @@ class MergeWorkspacesWithLimits(DataProcessorAlgorithm):
     def version(self):
         return 1
 
+    def validateInputs(self):
+        # given workspaces must exist
+        # and must be public of ExperimentInfo
+        issues = dict()
+        ws_group = self.getProperty('WorkspaceGroup').value
+        x_min = self.getProperty('XMin').value
+        x_max = self.getProperty('XMax').value
+        if not x_min.size == ws_group.size():
+            issues['x_min'] = 'x_min entries does not match size of workspace group'
+        if not x_max.size == ws_group.size():
+            issues['x_max'] = 'x_max entries does not match size of workspace group'
+        return issues
+
     def PyInit(self):
         self.declareProperty(WorkspaceProperty('WorkspaceGroup', '', direction=Direction.Input),
                              doc='Workspace group for merging')
