@@ -16,6 +16,7 @@ from abc import (ABCMeta, abstractmethod)
 from mantid.api import FileFinder
 from mantid.kernel import (DateAndTime, ConfigService, Logger)
 from mantid.api import (AlgorithmManager, ExperimentInfo)
+from sans.common.FileInformationCache import FileInformationCache, CachedRequest
 from sans.common.enums import (SANSInstrument, FileType, SampleShape)
 from sans.common.general_functions import (get_instrument, instrument_name_correction, get_facility)
 from six import with_metaclass
@@ -75,10 +76,29 @@ E_WIDTH = 'e_width'
 E_THICK = 'e_thick'
 E_GEOM = 'e_geom'
 
+file_information_cache = FileInformationCache(max_len=100)
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 # General functions
 # ----------------------------------------------------------------------------------------------------------------------
+def cache_file_info(func):
+    def inner(file_name):
+        cached_entry = file_information_cache.get_element(file_name)
+
+        if cached_entry:
+            return cached_entry.found_path
+
+        # Lookup and add to cache
+        found_path = func(file_name)
+        if found_path:
+            file_information_cache.add_new_element(CachedRequest(requested_name=file_name, found_path=found_path))
+
+        return found_path
+    return inner
+
+
+@cache_file_info
 def find_full_file_path(file_name):
     """
     Gets the full path of a file name if it is available on the Mantid paths.
@@ -86,7 +106,21 @@ def find_full_file_path(file_name):
     :param file_name: the name of the file.
     :return: the full file path.
     """
-    return FileFinder.getFullPath(file_name)
+    found = FileFinder.getFullPath(file_name)
+    if not found:
+        # Attempt to find it was .nxs extension if they have forgot it (common with 123-add files)
+        found = FileFinder.getFullPath(file_name + '.nxs')
+    return found
+
+
+@cache_file_info
+def find_by_run_no(file_name):
+    file_name_as_bytes = str.encode(file_name)
+    assert (type(file_name_as_bytes) == bytes)
+    runs = FileFinder.findRuns(file_name_as_bytes)
+    if runs:
+        runs = runs[0]
+    return runs
 
 
 def find_sans_file(file_name):
@@ -102,17 +136,10 @@ def find_sans_file(file_name):
                     "the relevant paths are added and the correct instrument is selected."
     try:
         full_path = find_full_file_path(file_name)
-        if not full_path and not file_name.endswith('.nxs'):
-            full_path = find_full_file_path(file_name + '.nxs')
+
         if not full_path:
-            # TODO: If we only provide a run number for example 98843 for LOQ measurments, but have LARMOR specified as the
-            #       Mantid instrument, then the FileFinder will search itself to death. This is a general Mantid issue.
-            #       One way to handle this graceful would be a timeout option.
-            file_name_as_bytes = str.encode(file_name)
-            assert (type(file_name_as_bytes) == bytes)
-            runs = FileFinder.findRuns(file_name_as_bytes)
-            if runs:
-                full_path = runs[0]
+            full_path = find_by_run_no(file_name)
+
     except RuntimeError:
         raise RuntimeError(error_message.format(file_name))
 
