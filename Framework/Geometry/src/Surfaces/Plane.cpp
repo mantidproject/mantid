@@ -306,14 +306,19 @@ int Plane::LineIntersectionWithPlane(V3D startpt, V3D endpt, V3D &output) {
   double sprod = this->getNormal().scalar_prod(startpt - endpt);
   if (sprod == 0)
     return 0;
-  double s1 = (NormV[0] * startpt[0] + NormV[1] * startpt[1] +
-               NormV[2] * startpt[2] - Dist) /
-              sprod;
+  double projection = NormV[0] * startpt[0] + NormV[1] * startpt[1] + NormV[2] * startpt[2];
+  double s1 = (projection - Dist) / sprod;
   if (s1 < 0 || s1 > 1)
     return 0;
+  /*Action: deprecated expressions below. Reason: incur in numerical errors when Dist << sprod
   output[0] = startpt[0] + s1 * (endpt[0] - startpt[0]);
   output[1] = startpt[1] + s1 * (endpt[1] - startpt[1]);
   output[2] = startpt[2] + s1 * (endpt[2] - startpt[2]);
+  */
+  double ratio = projection / sprod;
+  output[0] = ratio * endpt[0] + (1 - ratio) * startpt[0] - ((endpt[0] - startpt[0])/sprod) * Dist;
+  output[1] = ratio * endpt[1] + (1 - ratio) * startpt[1] - ((endpt[1] - startpt[1])/sprod) * Dist;
+  output[2] = ratio * endpt[2] + (1 - ratio) * startpt[2] - ((endpt[2] - startpt[2])/sprod) * Dist;
   return 1;
 }
 
