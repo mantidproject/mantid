@@ -332,7 +332,8 @@ public:
     TS_ASSERT(boundingBox.isNull());
   }
 
-  // Test dimensions of a very small capped cylinder
+  // Test calculation of the bounding box for a milimiter-sized
+  // capped-cylinder detector pixel
   void test_boundingBox_single_component_capped_cylinder() {
 
     const double radius = 0.00275;
@@ -344,33 +345,41 @@ public:
     Eigen::Vector3d position{1., 1., 1.};
     auto internalInfo = makeSingleBeamlineComponentInfo(position);
     Mantid::Geometry::ObjComponent comp1(
-            "component1", ComponentCreationHelper::createCappedCylinder(radius, height, baseCentre, axis, id));
+        "component1", ComponentCreationHelper::createCappedCylinder(
+                          radius, height, baseCentre, axis, id));
 
     auto componentIds =
-            boost::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
-                    std::vector<Mantid::Geometry::ComponentID>{&comp1});
+        boost::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
+            std::vector<Mantid::Geometry::ComponentID>{&comp1});
 
     auto shapes = boost::make_shared<
-            std::vector<boost::shared_ptr<const Geometry::IObject>>>();
-    shapes->push_back(ComponentCreationHelper::createCappedCylinder(radius, height, baseCentre, axis, id));
+        std::vector<boost::shared_ptr<const Geometry::IObject>>>();
+    shapes->push_back(ComponentCreationHelper::createCappedCylinder(
+        radius, height, baseCentre, axis, id));
 
     ComponentInfo componentInfo(std::move(internalInfo), componentIds,
                                 makeComponentIDMap(componentIds), shapes);
 
     BoundingBox boundingBox = componentInfo.boundingBox(0 /*componentIndex*/);
 
-    TS_ASSERT((boundingBox.width() - (Kernel::V3D{2 * radius, height, 2 * radius})).norm() < 1e-9);
-    TS_ASSERT((boundingBox.minPoint() -
-              (Kernel::V3D{position[0] - radius, position[1], position[2] - radius})).norm() < 1e-9);
+    TS_ASSERT(
+        (boundingBox.width() - (Kernel::V3D{2 * radius, height, 2 * radius}))
+            .norm() < 1e-9);
+    TS_ASSERT(
+        (boundingBox.minPoint() -
+         (Kernel::V3D{position[0] - radius, position[1], position[2] - radius}))
+            .norm() < 1e-9);
     TS_ASSERT((boundingBox.maxPoint() -
-              (Kernel::V3D{position[0] + radius, position[1] + height, position[2] + radius})).norm() < 1e-9);
+               (Kernel::V3D{position[0] + radius, position[1] + height,
+                            position[2] + radius}))
+                  .norm() < 1e-9);
     // Nullify shape and retest BoundingBox
     shapes->at(0) = boost::shared_ptr<const Geometry::IObject>(nullptr);
     boundingBox = componentInfo.boundingBox(0);
     TS_ASSERT(boundingBox.isNull());
   }
 
-    void test_boundingBox_complex() {
+  void test_boundingBox_complex() {
     const V3D sourcePos(-1, 0, 0);
     const V3D samplePos(0, 0, 0);
     const V3D detectorPos(11, 0, 0);
