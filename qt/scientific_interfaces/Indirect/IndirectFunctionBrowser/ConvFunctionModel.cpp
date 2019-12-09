@@ -86,7 +86,6 @@ void ConvFunctionModel::setFunction(IFunction_sptr fun) {
 
 void ConvFunctionModel::checkConvolution(IFunction_sptr fun) {
   bool isFitTypeSet = false;
-  int numberLorentzians = 0;
   bool isResolutionSet = false;
   for (size_t i = 0; i < fun->nFunctions(); ++i) {
     auto f = fun->getFunction(i);
@@ -102,16 +101,14 @@ void ConvFunctionModel::checkConvolution(IFunction_sptr fun) {
       if (isFitTypeSet) {
         throw std::runtime_error("Function has wrong structure.");
       }
-      if (numberLorentzians == 0) {
-        numberLorentzians = 1;
-      } else {
-        numberLorentzians = 2;
-        isFitTypeSet = true;
-      }
+      m_fitType = FitType::OneLorentzian;
+      isFitTypeSet = true;
+
     } else if (name == "TeixeiraWaterSQE") {
       if (isFitTypeSet) {
         throw std::runtime_error("Function has wrong structure.");
       }
+      m_fitType = FitType::TeixeiraWater;
       isFitTypeSet = true;
     } else if (name == "DeltaFunction") {
       m_hasDeltaFunction = true;
@@ -120,7 +117,7 @@ void ConvFunctionModel::checkConvolution(IFunction_sptr fun) {
       throw std::runtime_error("Function has wrong structure.");
     }
   }
-}
+} // namespace IDA
 
 void ConvFunctionModel::checkComposite(IFunction_sptr fun) {
   bool isFitTypeSet = false;
@@ -129,19 +126,21 @@ void ConvFunctionModel::checkComposite(IFunction_sptr fun) {
     auto f = fun->getFunction(i);
     auto const name = f->name();
     if (name == "Lorentzian") {
-      if (isFitTypeSet) {
+      if (isFitTypeSet && m_fitType != FitType::OneLorentzian) {
         throw std::runtime_error("Function has wrong structure.");
       }
+      if (isFitTypeSet)
+        m_fitType = FitType::TwoLorentzians;
+      else
+        m_fitType = FitType::OneLorentzian;
 
-      numberLorentzians++;
-      if (numberLorentzians == 2) {
-        isFitTypeSet = true;
-      }
+      isFitTypeSet = true;
 
     } else if (name == "TeixeiraWaterSQE") {
       if (isFitTypeSet) {
         throw std::runtime_error("Function has wrong structure.");
       }
+      m_fitType = FitType::TeixeiraWater;
       isFitTypeSet = true;
     } else if (name == "DeltaFunction") {
       m_hasDeltaFunction = true;
@@ -155,6 +154,11 @@ void ConvFunctionModel::checkComposite(IFunction_sptr fun) {
 IFunction_sptr ConvFunctionModel::getFitFunction() const {
   return m_model.getFitFunction();
 }
+
+FitType ConvFunctionModel::getFitType() const { return m_fitType; };
+BackgroundType ConvFunctionModel::getBackgroundType() const {
+  return m_backgroundType;
+};
 
 bool ConvFunctionModel::hasFunction() const { return m_model.hasFunction(); }
 
