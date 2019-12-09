@@ -17,7 +17,7 @@ try:
     from mantidqt.utils.qt import load_ui
 except ImportError:
     from mantidplot import load_ui
-#from mantidqt.interfacemanager import InterfaceManager
+from mantidqt.interfacemanager import InterfaceManager
 
 from DNSReduction.main_presenter import DNSReductionGUI_presenter
 
@@ -104,8 +104,7 @@ class DNSReductionGUI_view(QMainWindow):
         return None
 
     def help_button_clicked(self):
-        pass
-        #InterfaceManager().showCustomInterfaceHelp('DNS Reduction')
+        InterfaceManager().showCustomInterfaceHelp('DNS Reduction')
 
     def modus_change(self):
         self.ui.tabWidget.currentChanged.disconnect(self._tab_changed)
