@@ -49,6 +49,7 @@ public:
   virtual void notifyAnyBatchAutoreductionResumed() = 0;
   virtual void notifyInstrumentChanged(std::string const &instrumentName) = 0;
   virtual void setTablePrecision(int &precision) = 0;
+  virtual void resetTablePrecision() = 0;
   virtual void settingsChanged() = 0;
 };
 } // namespace ISISReflectometry

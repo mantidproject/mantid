@@ -268,6 +268,9 @@ void MainWindowPresenter::notifyOptionsChanged() const {
   if (isRoundChecked()) {
     for (auto &batchPresenter : m_batchPresenters)
       batchPresenter->notifySetRoundPrecision(getRoundPrecision());
+  } else {
+    for (auto &batchPresenter : m_batchPresenters)
+      batchPresenter->notifyResetRoundPrecision();
   }
 }
 

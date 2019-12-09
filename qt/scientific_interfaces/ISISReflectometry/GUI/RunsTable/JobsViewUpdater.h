@@ -96,6 +96,8 @@ public:
 
   void setPrecision(int &precision) { m_precision = precision; }
 
+  void resetPrecision() { m_precision = boost::none; }
+
 private:
   MantidQt::MantidWidgets::Batch::IJobTreeView &m_view;
   boost::optional<int> m_precision;

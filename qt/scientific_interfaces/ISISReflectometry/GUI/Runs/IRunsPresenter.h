@@ -60,6 +60,7 @@ public:
   virtual bool isAutoreducing() const = 0;
   virtual int percentComplete() const = 0;
   virtual void setRoundPrecision(int &precision) = 0;
+  virtual void resetRoundPrecision() = 0;
   virtual void notifySearchComplete() = 0;
 };
 } // namespace ISISReflectometry
