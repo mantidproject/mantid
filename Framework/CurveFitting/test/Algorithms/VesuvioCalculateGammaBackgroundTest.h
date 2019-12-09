@@ -76,7 +76,7 @@ public:
     const auto &backY(backgroundWS->y(0));
     TS_ASSERT_DELTA(backY.front(), -0.0000012042, 1e-08);
     TS_ASSERT_DELTA(backY[npts / 2], -0.0001317931, 1e-08);
-    TS_ASSERT_DELTA(backY.back(), -0.0144492041, 1e-08);
+    TS_ASSERT_DELTA(backY.back(), 0.0144492041, 1e-08);
   }
 
   void
@@ -167,7 +167,7 @@ public:
     const auto &corrY(correctedWS->y(0));
     TS_ASSERT_DELTA(corrY.front(), 0.0000012042, 1e-08);
     TS_ASSERT_DELTA(corrY[npts / 2], 0.1580361070, 1e-08);
-    TS_ASSERT_DELTA(corrY.back(), 0.0144492041, 1e-08);
+    TS_ASSERT_DELTA(corrY.back(), -0.0144492041, 1e-08);
 
     // Background Y values = 0.0
     const auto &backY(backgroundWS->y(0));
