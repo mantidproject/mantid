@@ -9,6 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT, create_error_message
 from Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
+from Engineering.gui.engineering_diffraction.tabs.common.vanadium_corrections import check_workspaces_exist
 from mantidqt.utils.asynchronous import AsyncTask
 from mantidqt.utils.observer_pattern import Observer
 from mantid.simpleapi import logger
@@ -72,7 +73,7 @@ class FocusPresenter(object):
             else:
                 create_error_message(self.view, "Check run numbers/path is valid.")
             return False
-        if not self.current_calibration.is_valid():
+        if not check_workspaces_exist() or not self.current_calibration.is_valid():
             create_error_message(
                 self.view, "Create or Load a calibration via the Calibration tab before focusing.")
             return False

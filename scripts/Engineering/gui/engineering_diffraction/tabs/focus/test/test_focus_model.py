@@ -59,7 +59,7 @@ class FocusModelTest(unittest.TestCase):
         banks = ["1", "2"]
         load_focus.return_value = "mocked_sample"
 
-        self.model.focus_run("305761", banks, True, "ENGINX", "0", self.current_calibration)
+        self.model.focus_run("305761", banks, True, "ENGINX", "0")
         self.assertEqual(1, plot_focus.call_count)
 
     @patch(file_path + ".Ads")

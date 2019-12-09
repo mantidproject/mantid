@@ -72,8 +72,8 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
         self.finder_vanadium.setInstrumentOverride(instrument)
         self.finder_sample.setInstrumentOverride(instrument)
 
-    def set_vanadium_read_only(self, set_to):
-        self.finder_vanadium.setReadOnly(set_to)
+    def set_vanadium_enabled(self, set_to):
+        self.finder_vanadium.setEnabled(set_to)
 
     def set_sample_enabled(self, set_to):
         self.finder_sample.setEnabled(set_to)
