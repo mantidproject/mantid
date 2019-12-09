@@ -58,7 +58,7 @@ def _setLabels2D(axes, workspace, indices=None, transpose=False,
     else:
         axes.set_xlabel(labels[1])
         axes.set_ylabel(labels[2])
-    axes.set_title(labels[-1])
+    axes.set_title(labels[0])
     if xscale is None and hasattr(workspace, 'isCommonLogBins') and workspace.isCommonLogBins():
         axes.set_xscale('log')
     elif xscale is not None:
