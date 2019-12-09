@@ -160,6 +160,27 @@ class SliceViewerModelTest(unittest.TestCase):
         self.assertEqual(dim_info['units'], 'meV')
         self.assertEqual(dim_info['type'], 'MATRIX')
 
+    def test_matrix_workspace_can_be_normalized_if_not_a_distribution(self):
+        ws2d = CreateWorkspace(DataX=[10, 20, 30, 10, 20, 30],
+                               DataY=[2, 3, 4, 5],
+                               DataE=[1, 2, 3, 4],
+                               NSpec=2,
+                               Distribution=False,
+                               OutputWorkspace='ws2d')
+        model = SliceViewerModel(ws2d)
+        self.assertTrue(model.can_normalize_workspace())
+
+    def test_matrix_workspace_cannot_be_normalized_if_a_distribution(self):
+        model = SliceViewerModel(self.ws2d_histo)
+        self.assertFalse(model.can_normalize_workspace())
+
+    def test_3d_workspaces_cannot_be_normalized(self):
+        model = SliceViewerModel(self.ws_MD_3D)
+        self.assertFalse(model.can_normalize_workspace())
+
+        model = SliceViewerModel(self.ws_MDE_3D)
+        self.assertFalse(model.can_normalize_workspace())
+
 
 if __name__ == '__main__':
     unittest.main()
