@@ -410,8 +410,8 @@ Custom Colors
 Custom Color Cycle (Line / 1D plots)
 ####################################
 
-The Default Color Cycle doesn't have to be used. Here is an example where a Custom Color Cycle is chosen. Make sure to fill the list `custom_colors` with the HTML codes for the desired colours. 
-These can be found `online <https://www.rapidtables.com/web/color/html-color-codes.html>`_ or using Mantid Workbench: On Workbench, plot a Spectrum and navigate to Figure Options(Gear Icon) > Curves > Line > Color (RGBA). Click on the nearby colorbox and use the 'Select Color' pop-up to chose your colors and their associated HTML codes. `Further Details <https://matplotlib.org/3.1.1/gallery/color/color_cycle_default.html>`_
+The Default Color Cycle doesn't have to be used. Here is an example where a Custom Color Cycle is chosen. Make sure to fill the list `custom_colors` with either the HTML codes or recognised names for the desired colours. 
+Both can be found `online <https://www.rapidtables.com/web/color/html-color-codes.html>`_.
 
 .. code-block:: python
 
@@ -427,7 +427,7 @@ These can be found `online <https://www.rapidtables.com/web/color/html-color-cod
    colors = prop_cycle.by_key()['color'] # 10 colors in default cycle
 
    '''Change the following two parameters as you wish'''
-   custom_colors = ['#0000ffff', '#ff0000ff','#00ff00ff'] # I've chosen Blue, Red, Green
+   custom_colors = ['#0000ffff', 'salmon','#00ff00ff'] # I've chosen Blue, Salmon, Green
    
    fig = plt.figure(figsize = (10,10))
    ax1 = plt.subplot(211,projection='mantid')
@@ -466,7 +466,7 @@ In MantidPlot, a Custom Colormap (256 entries of Red, Green and Blue values [0-2
    g = np.zeros(256)
    b = np.zeros(256)
    for i in range(256):
-   '''Control how the RGB values change throughout the Colormap'''
+      '''Control how the RGB values change throughout the Colormap'''
       r[i] = i          #linear increase in Red
       g[i] = 255 - i    #linear decrease in Green
 
@@ -474,9 +474,9 @@ In MantidPlot, a Custom Colormap (256 entries of Red, Green and Blue values [0-2
    for i in range(256):
       f.write(str(int(r[i])))
       f.write(' ')
-      f.write(str(int(b[i])))
-      f.write(' ')
       f.write(str(int(g[i])))
+      f.write(' ')
+      f.write(str(int(b[i])))
       f.write('\n')
    f.close()
 
