@@ -62,21 +62,9 @@ int ConvTemplatePresenter::getNumberOfDatasets() const {
 
 void ConvTemplatePresenter::setFunction(const QString &funStr) {
   m_model.setFunctionString(funStr);
-  m_view->clear();
+  m_view->setSubType(0, static_cast<int>(m_model.getFitType()));
+  m_view->setSubType(1, static_cast<int>(m_model.getBackgroundType()));
   setErrorsEnabled(false);
-  // if (m_model.hasBackground()) {
-  //  m_view->addFlatBackground();
-  //}
-  // if (m_model.hasStretchExponential()) {
-  //  m_view->addStretchExponential();
-  //}
-  // auto const nExp = m_model.getNumberOfExponentials();
-  // if (nExp > 0) {
-  //  m_view->addExponentialOne();
-  //}
-  // if (nExp > 1) {
-  //  m_view->addExponentialTwo();
-  //}
   updateViewParameterNames();
   updateViewParameters();
   emit functionStructureChanged();

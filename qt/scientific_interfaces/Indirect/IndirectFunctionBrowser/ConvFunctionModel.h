@@ -36,6 +36,8 @@ public:
   void removeFunction(const QString &prefix) override;
   void setParameter(const QString &paramName, double value) override;
   void setParameterError(const QString &paramName, double value) override;
+  FitType getFitType() const;
+  BackgroundType getBackgroundType() const;
   double getParameter(const QString &paramName) const override;
   double getParameterError(const QString &paramName) const override;
   QString getParameterDescription(const QString &paramName) const override;
