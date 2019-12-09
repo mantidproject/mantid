@@ -67,7 +67,7 @@ class DNSElasticPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
 
     def format_dataset(self, dataset):
         """Formating the dictionary to a nicely indented string"""
-        llens = max([len(a) for a in dataset.keys()])+6+4
+        llens = max([len(a) for a in dataset.keys()] +[0])+6+4
         dataset_string = '{\n'
         for samplename, fields in dataset.items():
             lmax = max([len(key) for key in fields.keys()] +[0])
