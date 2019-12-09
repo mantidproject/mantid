@@ -413,14 +413,15 @@ Custom Color Cycle (Line / 1D plots)
 The Default Color Cycle doesn't have to be used. Here is an example where a Custom Color Cycle is chosen. Make sure to fill the list `custom_colors` with either the HTML codes or recognised names for the desired colours. 
 Both can be found `online <https://www.rapidtables.com/web/color/html-color-codes.html>`_.
 
-.. code-block:: python
+.. plot::
+   :include-source:
 
    from __future__ import (absolute_import, division, print_function, unicode_literals)
    import matplotlib.pyplot as plt
    from mantid import plots
    from mantid.simpleapi import *
 
-   ws=Load('164199.nxs')
+   ws=Load('GEM40979.raw')
    Number = 12 # How many Spectra to Plot
 
    prop_cycle = plt.rcParams['axes.prop_cycle']
@@ -444,11 +445,6 @@ Both can be found `online <https://www.rapidtables.com/web/color/html-color-code
 
    fig.suptitle('Line Plots: Color Cycle', fontsize='x-large')
    #fig.show()
-
-.. figure:: ../images/ColorCustomCycleLine.PNG
-   :class: screenshot
-   :width: 750px
-   :align: center
 
 Custom Colormap (MantidPlot)
 ############################
