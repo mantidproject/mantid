@@ -14,11 +14,16 @@ class GeneralLoadAbInitioTester(object):
 
     _loaders_extensions = {"LoadCASTEP": "phonon", "LoadCRYSTAL": "out", "LoadDMOL3": "outmol", "LoadGAUSSIAN": "log"}
 
-    # noinspection PyMethodMayBeStatic
-    def _prepare_data(self, filename=None):
-        """Reads reference values from ASCII file."""
+    @staticmethod
+    def _prepare_data(seedname):
+        """Reads reference values from ASCII files
 
-        with open(AbinsModules.AbinsTestHelpers.find_file(filename + "_data.txt")) as data_file:
+        :param seedname: Reference data will read from the file {seedname}_data.txt, except for the atomic displacements
+            which are read from files {seedname}_atomic_displacements_data_{I}.txt, where {I} are k-point indices.
+        :type seedname: str
+        """
+
+        with open(AbinsModules.AbinsTestHelpers.find_file(seedname + "_data.txt")) as data_file:
             correct_data = json.loads(data_file.read().replace("\n", " "))
 
         num_k = len(correct_data["datasets"]["k_points_data"]["weights"])
@@ -26,9 +31,9 @@ class GeneralLoadAbInitioTester(object):
         array = {}
         for k in range(num_k):
 
-            temp = np.loadtxt(
-                AbinsModules.AbinsTestHelpers.find_file(
-                    filename + "_atomic_displacements_data_%s.txt" % k)).view(complex).reshape(-1)
+            temp = np.loadtxt(AbinsModules.AbinsTestHelpers.find_file(
+                    "{seedname}_atomic_displacements_data_{k}.txt".format(seedname=seedname, k=k))
+                ).view(complex).reshape(-1)
             total_size = temp.size
             num_freq = int(total_size / (atoms * 3))
             array[str(k)] = temp.reshape(atoms, num_freq, 3)
@@ -64,9 +69,12 @@ class GeneralLoadAbInitioTester(object):
                                                atoms["atom_%s" % item]["coord"]))
 
         # check attributes
-        self.assertEqual(correct_data["attributes"]["advanced_parameters"], data["attributes"]["advanced_parameters"])
         self.assertEqual(correct_data["attributes"]["hash"], data["attributes"]["hash"])
         self.assertEqual(correct_data["attributes"]["ab_initio_program"], data["attributes"]["ab_initio_program"])
+        # advanced_parameters is stored as a str but we unpack/compare to dict
+        # so comparison will tolerate unimportant formatting changes
+        self.assertEqual(correct_data["attributes"]["advanced_parameters"],
+                         json.loads(data["attributes"]["advanced_parameters"]))
 
         try:
             self.assertEqual(AbinsModules.AbinsTestHelpers.find_file(filename + "." + extension),
@@ -120,13 +128,16 @@ class GeneralLoadAbInitioTester(object):
         data = self._read_ab_initio(loader=loader, filename=name, extension=extension)
 
         # get correct data
-        correct_data = self._prepare_data(filename=name)
+        correct_data = self._prepare_data(name)
 
         # check read data
         self._check_reader_data(correct_data=correct_data, data=data, filename=name, extension=extension)
 
         # check loaded data
-        self._check_loader_data(correct_data=correct_data, input_ab_initio_filename=name, extension=extension, loader=loader)
+        self._check_loader_data(correct_data=correct_data,
+                                input_ab_initio_filename=name,
+                                extension=extension,
+                                loader=loader)
 
     def _read_ab_initio(self, loader=None, filename=None, extension=None):
         """
@@ -143,15 +154,15 @@ class GeneralLoadAbInitioTester(object):
             read_filename = AbinsModules.AbinsTestHelpers.find_file(filename=filename + "." + extension.upper())
             ab_initio_reader = loader(input_ab_initio_filename=read_filename)
 
-        data = self._get_reader_data(ab_initio_reader=ab_initio_reader)
+        data = self._get_reader_data(ab_initio_reader)
 
         # test validData method
         self.assertEqual(True, ab_initio_reader._clerk._valid_hash())
 
         return data
 
-    # noinspection PyMethodMayBeStatic
-    def _get_reader_data(self, ab_initio_reader=None):
+    @staticmethod
+    def _get_reader_data(ab_initio_reader):
         """
         :param ab_initio_reader: object of type  GeneralAbInitioProgram
         :returns: read data
@@ -162,3 +173,46 @@ class GeneralLoadAbInitioTester(object):
                 }
         data["datasets"].update({"unit_cell": ab_initio_reader._clerk._data["unit_cell"]})
         return data
+
+    @classmethod
+    def save_ab_initio_test_data(cls, ab_initio_reader, seedname):
+        """
+        Write ab initio calculation data to JSON file for use in test cases
+
+        :param ab_initio_reader: Reader after import of external calculation
+        :type ab_initio_reader: AbinsModules.GeneralAbInitioProgram
+        :param filename: Seed for text files for JSON output. Data will be written to the file {seedname}_data.txt,
+            except for the atomic displacements which are written to files {seedname}_atomic_displacements_data_{I}.txt,
+            where {I} are k-point indices.
+        :type filename: str
+
+        """
+
+        data = cls._get_reader_data(ab_initio_reader)
+        # Unpack advanced parameters into a dictionary for ease of comparison later.
+        # It might be wise to remove this and store escaped strings for consistency,
+        # but for now we don't want to disturb the old test data so follow its format.
+        data["attributes"]["advanced_parameters"] = json.loads(data["attributes"]["advanced_parameters"])
+
+        displacements = data["datasets"]["k_points_data"].pop("atomic_displacements")
+        for i, eigenvector in displacements.items():
+            with open('{seedname}_atomic_displacements_data_{i}.txt'.format(seedname=seedname, i=i), 'wt') as f:
+                eigenvector.flatten().view(float).tofile(f, sep=' ')
+
+        with open('{seedname}_data.txt'.format(seedname=seedname), 'wt') as f:
+            json.dump(cls._arrays_to_lists(data), f, indent=4, sort_keys=True)
+
+    @classmethod
+    def _arrays_to_lists(cls, mydict):
+        """Recursively convert numpy arrays in a nested dict to lists (i.e. valid JSON)
+
+        Returns a processed *copy* of the input dictionary: in-place values will not be altered."""
+        clean_dict = {}
+        for key, value in mydict.items():
+            if isinstance(value, np.ndarray):
+                clean_dict[key] = value.tolist()
+            elif isinstance(value, dict):
+                clean_dict[key] = cls._arrays_to_lists(value)
+            else:
+                clean_dict[key] = value
+        return clean_dict

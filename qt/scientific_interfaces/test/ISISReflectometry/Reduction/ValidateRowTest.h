@@ -44,7 +44,7 @@ public:
   }
 
   void testFailsForOutOfRangeDoubles() {
-    auto bigPositiveDoubleAsString = std::string("9", 380);
+    auto bigPositiveDoubleAsString = std::string(380, '9');
     TS_ASSERT_EQUALS(boost::none, parseDouble(bigPositiveDoubleAsString));
     auto smallNegativeDoubleAsString = "-" + bigPositiveDoubleAsString;
     TS_ASSERT_EQUALS(boost::none, parseDouble(smallNegativeDoubleAsString));
@@ -78,7 +78,7 @@ public:
   }
 
   void testFailsForOutOfRangeInts() {
-    auto bigPositiveIntAsString = std::string("9", 380);
+    auto bigPositiveIntAsString = std::string(380, '9');
     TS_ASSERT_EQUALS(boost::none, parseInt(bigPositiveIntAsString));
     auto smallNegativeIntAsString = "-" + bigPositiveIntAsString;
     TS_ASSERT_EQUALS(boost::none, parseInt(smallNegativeIntAsString));
@@ -112,7 +112,7 @@ public:
   }
 
   void testFailsForOutOfRangeNonNegativeInts() {
-    auto bigPositiveIntAsString = std::string("9", 380);
+    auto bigPositiveIntAsString = std::string(380, '9');
     TS_ASSERT_EQUALS(boost::none, parseNonNegativeInt(bigPositiveIntAsString));
     auto smallNegativeIntAsString = "-" + bigPositiveIntAsString;
     TS_ASSERT_EQUALS(boost::none,

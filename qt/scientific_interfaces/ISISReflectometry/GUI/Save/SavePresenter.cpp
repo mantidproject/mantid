@@ -34,6 +34,8 @@ SavePresenter::SavePresenter(ISaveView *view,
     : m_view(view), m_saver(std::move(saver)), m_shouldAutosave(false) {
 
   m_view->subscribe(this);
+  populateWorkspaceList();
+  suggestSaveDir();
 }
 
 void SavePresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) {
@@ -47,8 +49,6 @@ void SavePresenter::notifyFilterWorkspaceList() { filterWorkspaceNames(); }
 void SavePresenter::notifyPopulateParametersList() { populateParametersList(); }
 
 void SavePresenter::notifySaveSelectedWorkspaces() { saveSelectedWorkspaces(); }
-
-void SavePresenter::notifySuggestSaveDir() { suggestSaveDir(); }
 
 void SavePresenter::notifyAutosaveDisabled() { disableAutosave(); }
 
@@ -165,7 +165,7 @@ void SavePresenter::populateParametersList() {
                                ->run()
                                .getProperties();
   for (auto it = properties.begin(); it != properties.end(); it++) {
-    logs.push_back((*it)->name());
+    logs.emplace_back((*it)->name());
   }
   m_view->setParametersList(logs);
 }

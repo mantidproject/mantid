@@ -46,11 +46,11 @@ public:
     PeaksWorkspace_sptr ws(new PeaksWorkspace());
     ws->setInstrument(inst);
 
-    auto lattice = new Mantid::Geometry::OrientedLattice;
+    auto lattice = std::make_unique<Mantid::Geometry::OrientedLattice>();
     Mantid::Kernel::DblMatrix UB(3, 3, true);
     UB.identityMatrix();
     lattice->setUB(UB);
-    ws->mutableSample().setOrientedLattice(lattice);
+    ws->mutableSample().setOrientedLattice(std::move(lattice));
 
     double smu = 0.357;
     double amu = 0.011;

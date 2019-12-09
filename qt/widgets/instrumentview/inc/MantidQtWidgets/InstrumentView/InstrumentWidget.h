@@ -155,6 +155,10 @@ public:
   void loadFromProject(const std::string &lines);
   /// Save the widget to a Mantid projecy file.
   std::string saveToProject() const;
+  void removeTab(const std::string &tabName);
+  void addTab(const std::string &tabName);
+  void hideHelp();
+  InstrumentWidgetPickTab *getPickTab() { return m_pickTab; };
 
 signals:
   void enableLighting(bool /*_t1*/);
@@ -254,7 +258,8 @@ protected:
   void setSurfaceType(const QString &typeStr);
   /// Return a filename to save a grouping to
   QString getSaveGroupingFilename();
-
+  /// add the selected tabs
+  void addSelectedTabs();
   // GUI elements
   QLabel *mInteractionInfo;
   QTabWidget *mControlsTab;
@@ -304,6 +309,8 @@ protected:
   bool m_blocked;
   QList<int> m_selectedDetectors;
   bool m_instrumentDisplayContextMenuOn;
+  /// dict of selected tabs
+  std::vector<std::pair<std::string, bool>> m_stateOfTabs;
 
 private:
   /// ADS notification handlers
@@ -330,6 +337,8 @@ private:
   void loadTabs(const std::string &lines) const;
   /// Save tabs on the widget to a string
   std::string saveTabs() const;
+
+  QPushButton *m_help;
 };
 
 } // namespace MantidWidgets

@@ -375,7 +375,7 @@ if(MSVC)
   set_target_properties(MDAlgorithms PROPERTIES COMPILE_FLAGS "/bigobj")
 endif()
 
-if(OSX_VERSION VERSION_GREATER 10.8)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(MDAlgorithms
                         PROPERTIES INSTALL_RPATH
                                    "@loader_path/../Contents/MacOS")

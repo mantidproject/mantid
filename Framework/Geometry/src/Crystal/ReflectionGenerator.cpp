@@ -118,7 +118,7 @@ std::vector<V3D> ReflectionGenerator::getUniqueHKLs(
 
   for (auto hkl = generator.begin(); hkl != generator.end(); ++hkl) {
     if (filter->isAllowed(*hkl)) {
-      hkls.push_back(pg->getReflectionFamily(*hkl));
+      hkls.emplace_back(pg->getReflectionFamily(*hkl));
     }
   }
 

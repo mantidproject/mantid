@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/SofQWNormalisedPolygon.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -27,8 +28,8 @@
 
 #include <boost/math/special_functions/pow.hpp>
 
-using Mantid::Geometry::rad2deg;
 using boost::math::pow;
+using Mantid::Geometry::rad2deg;
 
 namespace {
 /**

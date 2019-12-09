@@ -179,7 +179,8 @@ ComponentInfo::numberOfDetectorsInSubtree(const size_t componentIndex) const {
   return std::distance(range.begin(), range.end());
 }
 
-Eigen::Vector3d ComponentInfo::position(const size_t componentIndex) const {
+const Eigen::Vector3d &
+ComponentInfo::position(const size_t componentIndex) const {
   checkNoTimeDependence();
   if (isDetector(componentIndex)) {
     return m_detectorInfo->position(componentIndex);
@@ -188,7 +189,7 @@ Eigen::Vector3d ComponentInfo::position(const size_t componentIndex) const {
   return (*m_positions)[rangesIndex];
 }
 
-Eigen::Vector3d
+const Eigen::Vector3d &
 ComponentInfo::position(const std::pair<size_t, size_t> &index) const {
 
   const auto componentIndex = index.first;
@@ -481,7 +482,7 @@ bool ComponentInfo::hasSource() const { return m_sourceIndex >= 0; }
 
 bool ComponentInfo::hasSample() const { return m_sampleIndex >= 0; }
 
-Eigen::Vector3d ComponentInfo::sourcePosition() const {
+const Eigen::Vector3d &ComponentInfo::sourcePosition() const {
   if (!hasSource()) {
     throw std::runtime_error("Source component has not been specified");
   }
@@ -490,7 +491,7 @@ Eigen::Vector3d ComponentInfo::sourcePosition() const {
   return position({static_cast<size_t>(m_sourceIndex), 0});
 }
 
-Eigen::Vector3d ComponentInfo::samplePosition() const {
+const Eigen::Vector3d &ComponentInfo::samplePosition() const {
   if (!hasSample()) {
     throw std::runtime_error("Sample component has not been specified");
   }
@@ -644,7 +645,7 @@ void ComponentInfo::merge(const ComponentInfo &other) {
       continue;
     auto &positions = m_positions.access();
     auto &rotations = m_rotations.access();
-    m_scanIntervals.push_back(other.m_scanIntervals[timeIndex]);
+    m_scanIntervals.emplace_back(other.m_scanIntervals[timeIndex]);
     const size_t indexStart = other.linearIndex({0, timeIndex});
     size_t indexEnd = indexStart + nonDetectorSize();
     positions.insert(positions.end(), other.m_positions->begin() + indexStart,

@@ -52,6 +52,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QToolButton>
 #include <QUrl>
 
+namespace {
+  /// Prefix for qthelp scheme
+  constexpr auto QTHELP_SCHEME = "qthelp";
+}
+
 // ****************************************************************************
 //            CLASS pqHelpWindowNetworkReply
 // ****************************************************************************
@@ -158,7 +163,7 @@ protected:
   QNetworkReply *createRequest(Operation operation,
                                const QNetworkRequest &request,
                                QIODevice *device) override {
-    if (request.url().scheme() == "qthelp" && operation == GetOperation) {
+    if (request.url().scheme() == QTHELP_SCHEME && operation == GetOperation) {
       return new pqHelpWindowNetworkReply(request.url(), this->Engine, this);
     } else {
       return this->Superclass::createRequest(operation, request, device);
@@ -169,14 +174,30 @@ private:
   Q_DISABLE_COPY(pqNetworkAccessManager)
 };
 
-#else
-
+#else // !USE_WEBKIT
 #include <QWebEngineHistory>
 #include <QWebEnginePage>
 #include <QWebEngineProfile>
 #include <QWebEngineUrlRequestJob>
 #include <QWebEngineUrlSchemeHandler>
 #include <QWebEngineView>
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+#include <QWebEngineUrlScheme>
+
+/// Register on the scheme on library load as it must be done before QApplication
+/// is created
+struct QtHelpSchemeRegistration {
+  QtHelpSchemeRegistration() {
+    auto scheme = QWebEngineUrlScheme(QTHELP_SCHEME);
+    scheme.setFlags(QWebEngineUrlScheme::LocalScheme |
+		    QWebEngineUrlScheme::LocalAccessAllowed);
+    QWebEngineUrlScheme::registerScheme(scheme);
+  }
+};
+
+const QtHelpSchemeRegistration QTHELP_REGISTRATION;
+#endif // end QT_VERSION >= 5.12
 
 /// Adds support for qthelp scheme links that load content from them QHelpEngine
 class QtHelpUrlHandler : public QWebEngineUrlSchemeHandler {
@@ -282,7 +303,7 @@ pqHelpWindow::pqHelpWindow(QHelpEngine *engine, QWidget *parentObject,
           this, SLOT(linkHovered(QString, QString, QString)));
 #else
   QWebEngineProfile::defaultProfile()->installUrlSchemeHandler(
-      "qthelp", new QtHelpUrlHandler(engine));
+      QTHELP_SCHEME, new QtHelpUrlHandler(engine));
   m_browser = new QWebEngineView(this);
   m_browser->setPage(new DelegatingWebPage(m_browser));
   connect(m_browser->page(), SIGNAL(linkClicked(QUrl)), this,
@@ -334,7 +355,7 @@ void pqHelpWindow::showPage(const QString &url,
 
 //-----------------------------------------------------------------------------
 void pqHelpWindow::showPage(const QUrl &url, bool linkClicked /* = false */) {
-  if (url.scheme() == "qthelp") {
+  if (url.scheme() == QTHELP_SCHEME) {
     if (this->m_helpEngine->findFile(url).isValid()) {
       if (!linkClicked)
         this->m_browser->setUrl(url);

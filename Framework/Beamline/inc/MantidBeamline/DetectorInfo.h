@@ -68,10 +68,11 @@ public:
   void setMasked(const size_t index, bool masked);
   void setMasked(const std::pair<size_t, size_t> &index, bool masked);
   bool hasMaskedDetectors() const;
-  Eigen::Vector3d position(const size_t index) const;
-  Eigen::Vector3d position(const std::pair<size_t, size_t> &index) const;
-  Eigen::Quaterniond rotation(const size_t index) const;
-  Eigen::Quaterniond rotation(const std::pair<size_t, size_t> &index) const;
+  const Eigen::Vector3d &position(const size_t index) const;
+  const Eigen::Vector3d &position(const std::pair<size_t, size_t> &index) const;
+  const Eigen::Quaterniond &rotation(const size_t index) const;
+  const Eigen::Quaterniond &
+  rotation(const std::pair<size_t, size_t> &index) const;
   void setPosition(const size_t index, const Eigen::Vector3d &position);
   void setPosition(const std::pair<size_t, size_t> &index,
                    const Eigen::Vector3d &position);
@@ -85,8 +86,8 @@ public:
   void setComponentInfo(ComponentInfo *componentInfo);
   bool hasComponentInfo() const;
   double l1() const;
-  Eigen::Vector3d sourcePosition() const;
-  Eigen::Vector3d samplePosition() const;
+  const Eigen::Vector3d &sourcePosition() const;
+  const Eigen::Vector3d &samplePosition() const;
 
   /** The `merge()` operation was made private in `DetectorInfo`, and only
    * accessible through `ComponentInfo` (via this `friend` declaration)
@@ -134,13 +135,13 @@ inline bool DetectorInfo::isScanning() const {
  *
  * Convenience method for beamlines with static (non-moving) detectors.
  * Throws if there are time-dependent detectors. */
-inline Eigen::Vector3d DetectorInfo::position(const size_t index) const {
+inline const Eigen::Vector3d &DetectorInfo::position(const size_t index) const {
   checkNoTimeDependence();
   return (*m_positions)[index];
 }
 
 /// Returns the position of the detector with given index.
-inline Eigen::Vector3d
+inline const Eigen::Vector3d &
 DetectorInfo::position(const std::pair<size_t, size_t> &index) const {
   return (*m_positions)[linearIndex(index)];
 }
@@ -149,13 +150,14 @@ DetectorInfo::position(const std::pair<size_t, size_t> &index) const {
  *
  * Convenience method for beamlines with static (non-moving) detectors.
  * Throws if there are time-dependent detectors. */
-inline Eigen::Quaterniond DetectorInfo::rotation(const size_t index) const {
+inline const Eigen::Quaterniond &
+DetectorInfo::rotation(const size_t index) const {
   checkNoTimeDependence();
   return (*m_rotations)[index];
 }
 
 /// Returns the rotation of the detector with given index.
-inline Eigen::Quaterniond
+inline const Eigen::Quaterniond &
 DetectorInfo::rotation(const std::pair<size_t, size_t> &index) const {
   return (*m_rotations)[linearIndex(index)];
 }

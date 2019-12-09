@@ -442,12 +442,12 @@ private:
     std::vector<double> dataY;
 
     for (auto i = 0; i < nspec; ++i) {
-      YVals.push_back(axisValue);
+      YVals.emplace_back(axisValue);
     }
 
     for (int i = 0; i < 100; ++i) {
-      dataX.push_back(double(i));
-      dataY.push_back(double(i));
+      dataX.emplace_back(double(i));
+      dataY.emplace_back(double(i));
     }
 
     auto createWS = Mantid::API::FrameworkManager::Instance().createAlgorithm(

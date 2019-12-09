@@ -1129,7 +1129,7 @@ public:
     std::vector<V3D> output;
     output.reserve(num);
     for (size_t i = 0; i < num; ++i) {
-      output.push_back(create_test_point(i, dim));
+      output.emplace_back(create_test_point(i, dim));
     }
     return output;
   }
@@ -1151,7 +1151,7 @@ public:
     std::vector<Track> output;
     output.reserve(num);
     for (size_t i = 0; i < num; ++i) {
-      output.push_back(create_test_ray(i, sDim, dDim));
+      output.emplace_back(create_test_ray(i, sDim, dDim));
     }
     return output;
   }

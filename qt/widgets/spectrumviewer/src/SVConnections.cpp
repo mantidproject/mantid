@@ -546,7 +546,7 @@ void SVConnections::loadColorMap(const QString &file_name) {
   std::vector<QRgb> positive_color_table;
   for (int i = 1; i < mantid_color_table.size(); i++) // NO NaN Color
   {
-    positive_color_table.push_back(mantid_color_table[i]);
+    positive_color_table.emplace_back(mantid_color_table[i]);
   }
 
   int n_colors = (int)positive_color_table.size();

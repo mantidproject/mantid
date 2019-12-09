@@ -23,17 +23,15 @@ Logger g_log("FileValidator");
  *  @param extensions :: The permitted file extensions (e.g. .RAW)
  *  @param testFileExists :: Flag indicating whether to test for existence of
  * file (default: yes)
- *  @param testCanWrite :: Flag to check if file writing permissible.
  */
 FileValidator::FileValidator(const std::vector<std::string> &extensions,
-                             bool testFileExists, bool testCanWrite)
-    : TypedValidator<std::string>(), m_testExist(testFileExists),
-      m_testCanWrite(testCanWrite) {
+                             bool testFileExists)
+    : TypedValidator<std::string>(), m_testExist(testFileExists) {
   for (const auto &extension : extensions) {
     const std::string ext = boost::to_lower_copy(extension);
     if (std::find(m_extensions.begin(), m_extensions.end(), ext) ==
         m_extensions.end()) {
-      m_extensions.push_back(ext);
+      m_extensions.emplace_back(ext);
     }
   }
 }
@@ -90,47 +88,6 @@ std::string FileValidator::checkValidity(const std::string &value) const {
   // If the file is required to exist check it is there
   if (m_testExist && (value.empty() || !Poco::File(value).exists())) {
     return "File \"" + abspath + "\" not found";
-  }
-
-  // If the file is required to be writable...
-  if (m_testCanWrite) {
-    if (value.empty())
-      return "Cannot write to empty filename";
-
-    Poco::File file(value);
-    // the check for writable is different for whether or not a version exists
-    // this is taken from ConfigService near line 443
-    if (file.exists()) {
-      try {
-        if (!file.canWrite())
-          return "File \"" + abspath + "\" cannot be written";
-      } catch (std::exception &e) {
-        g_log.information()
-            << "Encountered exception while checking for writable: "
-            << e.what();
-      }
-    } else // if the file doesn't exist try to temporarily create one
-    {
-      try {
-        Poco::Path direc(value);
-        if (direc.isAbsolute()) {
-          // see if file is writable
-          if (Poco::File(direc).canWrite())
-            return "";
-          else
-            return "Cannot write to file \"" + direc.toString() + "\"";
-        }
-
-        g_log.debug() << "Do not have enough information to validate \""
-                      << abspath << "\"\n";
-      } catch (std::exception &e) {
-        g_log.information()
-            << "Encountered exception while checking for writable: "
-            << e.what();
-      } catch (...) {
-        g_log.information() << "Unknown exception while checking for writable";
-      }
-    }
   }
 
   // Otherwise we are okay, file extensions are just a suggestion so no

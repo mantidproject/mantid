@@ -379,7 +379,7 @@ void adjustTimeOfFlightISISLegacy(::NeXus::File &file, T localWorkspace,
       std::string entry_name(it->first);
       std::string entry_class(it->second);
       if (entry_class == classType) {
-        bankNames.push_back(entry_name);
+        bankNames.emplace_back(entry_name);
       }
     }
     for (size_t i = 0; i < bankNames.size(); ++i) {

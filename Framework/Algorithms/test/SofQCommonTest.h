@@ -236,9 +236,9 @@ public:
 private:
   static double k(const double E) {
     using namespace Mantid;
-    using PhysicalConstants::NeutronMass;
     using PhysicalConstants::h_bar;
     using PhysicalConstants::meV;
+    using PhysicalConstants::NeutronMass;
     return std::sqrt(2 * NeutronMass * E * meV) / h_bar * 1e-10;
   }
 

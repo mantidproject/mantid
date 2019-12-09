@@ -193,9 +193,9 @@ bool LoadSpiceAscii::validateLogNamesType(
     const std::vector<std::string> &intlognames,
     const std::vector<std::string> &strlognames) {
   std::vector<std::vector<std::string>> vec_lognamelist;
-  vec_lognamelist.push_back(floatlognames);
-  vec_lognamelist.push_back(intlognames);
-  vec_lognamelist.push_back(strlognames);
+  vec_lognamelist.emplace_back(floatlognames);
+  vec_lognamelist.emplace_back(intlognames);
+  vec_lognamelist.emplace_back(strlognames);
 
   // Check whther there is any intersction among 3 sets
   bool hascommon = false;
@@ -301,7 +301,7 @@ void LoadSpiceAscii::parseSPICEAscii(
       std::vector<std::string> terms;
       boost::split(terms, line, boost::is_any_of(" \t\n"),
                    boost::token_compress_on);
-      datalist.push_back(terms);
+      datalist.emplace_back(terms);
     }
   }
 

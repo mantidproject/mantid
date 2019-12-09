@@ -56,7 +56,7 @@ std::vector<std::string> splitByDelim(const std::string &s, const char delim) {
   // Split by \t char
   while (std::getline(sstream, wsName, delim)) {
     if (!wsName.empty()) {
-      foundWsNames.push_back(wsName);
+      foundWsNames.emplace_back(wsName);
     }
   }
   return foundWsNames;
@@ -943,7 +943,7 @@ void ProjectSerialiser::loadWorkspacesIntoMantid(
         // execute the algorithm
         alg->execute();
 
-        workspaceList.push_back(unusedName);
+        workspaceList.emplace_back(unusedName);
       }
 
       // Group the workspaces as they were when the project was saved
@@ -1140,7 +1140,7 @@ MantidQt::API::ProjectSerialiser::parseWsNames(const std::string &wsNames) {
 
     if (workspaceName.find(groupWorkspaceChar) == std::string::npos) {
       // Normal workspace
-      allWsNames[ALL_WS].push_back(workspaceName);
+      allWsNames[ALL_WS].emplace_back(workspaceName);
       continue;
     }
 
@@ -1154,8 +1154,8 @@ MantidQt::API::ProjectSerialiser::parseWsNames(const std::string &wsNames) {
 
     for (auto end = groupWorkspaceElements.end(); groupMember != end;
          ++groupMember) {
-      allWsNames[*groupName].push_back(*groupMember);
-      allWsNames[ALL_GROUP_NAMES].push_back(*groupName);
+      allWsNames[*groupName].emplace_back(*groupMember);
+      allWsNames[ALL_GROUP_NAMES].emplace_back(*groupName);
     }
   }
 

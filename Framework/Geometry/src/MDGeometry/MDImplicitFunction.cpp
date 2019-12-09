@@ -28,7 +28,7 @@ void MDImplicitFunction::addPlane(const MDPlane &plane) {
                                   "a plane with different number of dimensions "
                                   "as the previous ones.");
   }
-  m_planes.push_back(plane);
+  m_planes.emplace_back(plane);
   m_nd = plane.getNumDims();
   m_numPlanes = m_planes.size();
 }

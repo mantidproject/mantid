@@ -77,7 +77,13 @@ class MultiPeriodMock(object):
 
 class RunTabPresenterTest(unittest.TestCase):
     def setUp(self):
-        config.setFacility("ISIS")
+        # Backup properties that the tests or GUI may change
+        self._backup_facility = config["default.facility"]
+        self._backup_instrument = config["default.instrument"]
+        self._backup_datasearch_dirs = config["datasearch.directories"]
+        self._backup_save_dir = config["defaultsave.directory"]
+
+        config["default.facility"] = "ISIS"
 
         patcher = mock.patch('sans.gui_logic.presenter.run_tab_presenter.BatchCsvParser')
         self.addCleanup(patcher.stop)
@@ -87,9 +93,11 @@ class RunTabPresenterTest(unittest.TestCase):
         self.addCleanup(self.os_patcher.stop)
         self.osMock = self.os_patcher.start()
 
-        self.thickness_patcher = mock.patch('sans.gui_logic.models.table_model.create_file_information')
-        self.addCleanup(self.thickness_patcher.stop)
-        self.thickness_patcher.start()
+    def tearDown(self):
+        config["default.facility"] = self._backup_facility
+        config["default.instrument"] = self._backup_instrument
+        config["datasearch.directories"] = self._backup_datasearch_dirs
+        config["defaultsave.directory2"] = self._backup_save_dir
 
     def test_that_will_load_user_file(self):
         # Setup presenter and mock view
@@ -615,6 +623,28 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter._beam_centre_presenter.on_update_instrument.called_once_with(instrument)
         presenter._workspace_diagnostic_presenter.called_once_with(instrument)
 
+    def test_setup_instrument_specific_settings_sets_facility_in_config(self):
+        config.setFacility('TEST_LIVE')
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        presenter.set_view(mock.MagicMock())
+        presenter._beam_centre_presenter = mock.MagicMock()
+        presenter._workspace_diagnostic_presenter = mock.MagicMock()
+        instrument = SANSInstrument.LOQ
+
+        presenter._setup_instrument_specific_settings(instrument)
+        self.assertEqual(config.getFacility().name(), 'ISIS')
+
+    def test_setup_instrument_specific_settings_sets_instrument_in_config(self):
+        config['default.instrument'] = 'ALF'
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        presenter.set_view(mock.MagicMock())
+        presenter._beam_centre_presenter = mock.MagicMock()
+        presenter._workspace_diagnostic_presenter = mock.MagicMock()
+        instrument = SANSInstrument.LOQ
+
+        presenter._setup_instrument_specific_settings(instrument)
+        self.assertEqual(config['default.instrument'], 'LOQ')
+
     def test_on_copy_rows_requested_adds_correct_rows_to_clipboard(self):
         presenter = RunTabPresenter(SANSFacility.ISIS)
         view = mock.MagicMock()
@@ -867,6 +897,16 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertEqual(presenter.progress, 1)
         self.assertEqual(presenter._view.progress_bar_value, 1)
 
+    def test_that_update_progress_sets_correctly(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+        presenter.set_view(view)
+
+        presenter._set_progress_bar(current=100, number_steps=200)
+        self.assertEqual(presenter.progress, 100)
+        self.assertEqual(view.progress_bar_value, 100)
+        self.assertEqual(view.progress_bar_maximum, 200)
+
     def test_that_notify_progress_updates_state_and_tooltip_of_row(self):
         presenter = RunTabPresenter(SANSFacility.ISIS)
         view = mock.MagicMock()
@@ -901,9 +941,12 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter = RunTabPresenter(SANSFacility.ISIS)
         view = mock.MagicMock()
         view.get_selected_rows = mock.MagicMock(return_value=[0, 3, 4])
+        # Suppress plots
+        view.plot_results = False
         
         presenter.set_view(view)
         presenter._table_model.reset_row_state = mock.MagicMock()
+        presenter._table_model.get_thickness_for_rows = mock.MagicMock()
         presenter._table_model.get_non_empty_rows = mock.MagicMock(side_effect=get_non_empty_row_mock)
 
         presenter.on_process_selected_clicked()
@@ -935,12 +978,16 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter = RunTabPresenter(SANSFacility.ISIS)
         view = mock.MagicMock()
         view.get_selected_rows = mock.MagicMock(return_value=[0, 3, 4])
+
+        # Suppress plots
+        view.plot_results = False
         
         presenter._table_model.get_number_of_rows = mock.MagicMock(return_value=7)
         presenter.set_view(view)
         presenter._table_model.reset_row_state = mock.MagicMock()
+        presenter._table_model.get_thickness_for_rows = mock.MagicMock()
         presenter._table_model.get_non_empty_rows = mock.MagicMock(side_effect=get_non_empty_row_mock)
-        
+
         presenter.on_process_all_clicked()
         self.assertEqual(
             presenter._table_model.reset_row_state.call_count, 7,

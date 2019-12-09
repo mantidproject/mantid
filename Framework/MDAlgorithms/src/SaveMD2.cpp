@@ -97,8 +97,7 @@ void SaveMD2::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
     oldFile.remove();
 
   // Create a new file in HDF5 mode.
-  ::NeXus::File *file;
-  file = new ::NeXus::File(filename, NXACC_CREATE5);
+  auto file = std::make_unique<::NeXus::File>(filename, NXACC_CREATE5);
 
   // The base entry. Named so as to distinguish from other workspace types.
   file->makeGroup("MDHistoWorkspace", "NXentry", true);
@@ -122,7 +121,7 @@ void SaveMD2::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
 
   // Save the algorithm history under "process"
   if (getProperty("SaveHistory"))
-    ws->getHistory().saveNexus(file);
+    ws->getHistory().saveNexus(file.get());
 
   // Save all the ExperimentInfos
   if (getProperty("SaveInstrument") || (getProperty("SaveSample")) ||
@@ -134,7 +133,7 @@ void SaveMD2::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
         // Can't overwrite entries. Just add the new ones
         file->makeGroup(groupName, "NXgroup", true);
         file->putAttr("version", 1);
-        ei->saveExperimentInfoNexus(file, getProperty("SaveInstrument"),
+        ei->saveExperimentInfoNexus(file.get(), getProperty("SaveInstrument"),
                                     getProperty("SaveSample"),
                                     getProperty("SaveLogs"));
         file->closeGroup();
@@ -145,7 +144,7 @@ void SaveMD2::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
   // Write out the affine matrices
   if (getProperty("SaveSample"))
     MDBoxFlatTree::saveAffineTransformMatricies(
-        file, boost::dynamic_pointer_cast<const IMDWorkspace>(ws));
+        file.get(), boost::dynamic_pointer_cast<const IMDWorkspace>(ws));
 
   // Check that the typedef has not been changed. The NeXus types would need
   // changing if it does!
@@ -161,7 +160,7 @@ void SaveMD2::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
     IMDDimension_const_sptr dim = ws->getDimension(d);
     auto nbounds = dim->getNBoundaries();
     for (size_t n = 0; n < nbounds; n++)
-      axis.push_back(dim->getX(n));
+      axis.emplace_back(dim->getX(n));
     file->makeData(dim->getDimensionId(), ::NeXus::FLOAT64,
                    static_cast<int>(dim->getNBoundaries()), true);
     file->putData(&axis[0]);

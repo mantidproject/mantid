@@ -25,8 +25,8 @@ TubeBuilder::TubeBuilder(const Mantid::Geometry::IObject &pixelShape,
   m_axis = Kernel::toVector3d(
       pixelShape.getGeometryHandler()->shapeInfo().points()[1]);
   // Set position and id of first detector in tube
-  m_positions.push_back(firstDetectorPosition);
-  m_detIDs.push_back(firstDetectorId);
+  m_positions.emplace_back(firstDetectorPosition);
+  m_detIDs.emplace_back(firstDetectorId);
 
   // points which define the line the tube sits on
   m_p1 = m_axis + firstDetectorPosition;
@@ -83,8 +83,8 @@ bool TubeBuilder::addDetectorIfCoLinear(const Eigen::Vector3d &pos, int detID) {
 
   if (isCoLinear) {
     // Add Detector
-    m_positions.push_back(pos);
-    m_detIDs.push_back(detID);
+    m_positions.emplace_back(pos);
+    m_detIDs.emplace_back(detID);
 
     // Recalculate height as distance between base of tube and tip of new
     // detector

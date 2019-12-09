@@ -93,7 +93,7 @@ KernelVector gaussianKernel(const double fwhm) {
   double pixel_value = std::erf(0.5 * sigma_factor) * sigma;
   int pixel_count = 0;
   while (pixel_value > 0.02) {
-    kernel_one_side.push_back(pixel_value);
+    kernel_one_side.emplace_back(pixel_value);
     pixel_count++;
     pixel_value = (std::erf((pixel_count + 0.5) * sigma_factor) -
                    std::erf((pixel_count - 0.5) * sigma_factor)) *

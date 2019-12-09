@@ -298,7 +298,7 @@ MDNormSCD::getValuesFromOtherDimensions(bool &skipNormalization,
         currentRun.getProperty(dimension->getName()));
     if (dimProp) {
       auto value = static_cast<coord_t>(dimProp->firstValue());
-      otherDimValues.push_back(value);
+      otherDimValues.emplace_back(value);
       // in the original MD data no time was spent measuring between dimMin and
       // dimMax
       if (value < dimMin || value > dimMax) {
@@ -495,7 +495,7 @@ for (int64_t i = 0; i < ndets; i++) {
   // pre-allocate for efficiency and copy non-hkl dim values into place
   pos.resize(vmdDims + otherValues.size());
   std::copy(otherValues.begin(), otherValues.end(), pos.begin() + vmdDims - 1);
-  pos.push_back(1.);
+  pos.emplace_back(1.);
 
   for (auto it = intersectionsBegin + 1; it != intersections.end(); ++it) {
     const auto &curIntSec = *it;
@@ -531,11 +531,11 @@ PARALLEL_CHECK_INTERUPT_REGION
 if (m_accumulate) {
   std::transform(
       signalArray.cbegin(), signalArray.cend(), m_normWS->getSignalArray(),
-      m_normWS->getSignalArray(),
+      m_normWS->mutableSignalArray(),
       [](const std::atomic<signal_t> &a, const signal_t &b) { return a + b; });
 } else {
   std::copy(signalArray.cbegin(), signalArray.cend(),
-            m_normWS->getSignalArray());
+            m_normWS->mutableSignalArray());
 }
 }
 

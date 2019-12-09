@@ -26,11 +26,11 @@ using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 using Mantid::API::AlgorithmManager;
 using Mantid::API::AnalysisDataService;
 using Mantid::DataObjects::Workspace2D_sptr;
+using testing::_;
 using testing::AtLeast;
 using testing::Mock;
 using testing::NiceMock;
 using testing::Return;
-using testing::_;
 
 class SavePresenterTest : public CxxTest::TestSuite {
 public:
@@ -44,6 +44,21 @@ public:
 
   void testPresenterSubscribesToView() {
     EXPECT_CALL(m_view, subscribe(_)).Times(1);
+    auto presenter = makePresenter();
+    verifyAndClear();
+  }
+
+  void testSetWorkspaceListOnConstruction() {
+    auto workspaceNames = createWorkspaces();
+    expectSetWorkspaceListFromADS(workspaceNames);
+    auto presenter = makePresenter();
+    verifyAndClear();
+  }
+
+  void testSetDefaultSavePathOnConstruction() {
+    auto const path = Mantid::Kernel::ConfigService::Instance().getString(
+        "defaultsave.directory");
+    EXPECT_CALL(m_view, setSavePath(path)).Times(1);
     auto presenter = makePresenter();
     verifyAndClear();
   }
@@ -171,15 +186,6 @@ public:
         .WillOnce(Return(emptyWorkspaceList));
     EXPECT_CALL(m_view, noWorkspacesSelected()).Times(1);
     presenter.notifySaveSelectedWorkspaces();
-    verifyAndClear();
-  }
-
-  void testNotifySuggestSaveDir() {
-    auto presenter = makePresenter();
-    auto const path = Mantid::Kernel::ConfigService::Instance().getString(
-        "defaultsave.directory");
-    EXPECT_CALL(m_view, setSavePath(path)).Times(1);
-    presenter.notifySuggestSaveDir();
     verifyAndClear();
   }
 

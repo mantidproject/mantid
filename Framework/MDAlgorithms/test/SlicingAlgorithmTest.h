@@ -73,10 +73,10 @@ public:
                                                           qSampleFrame, 1);
     // Workspace with mixed frames
     std::vector<Mantid::Geometry::MDFrame_sptr> frames;
-    frames.push_back(std::make_shared<Mantid::Geometry::QSample>());
-    frames.push_back(std::make_shared<Mantid::Geometry::QSample>());
-    frames.push_back(std::make_shared<Mantid::Geometry::QSample>());
-    frames.push_back(std::make_shared<Mantid::Geometry::GeneralFrame>(
+    frames.emplace_back(std::make_shared<Mantid::Geometry::QSample>());
+    frames.emplace_back(std::make_shared<Mantid::Geometry::QSample>());
+    frames.emplace_back(std::make_shared<Mantid::Geometry::QSample>());
+    frames.emplace_back(std::make_shared<Mantid::Geometry::GeneralFrame>(
         Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m"));
     wsMixedFrames = MDEventsTestHelper::makeMDEWWithIndividualFrames<4>(
         5, 0.0, 10.0, frames, 1);
@@ -195,11 +195,11 @@ public:
     TS_ASSERT_EQUALS(dim->getX(10), 9.0);
   }
 
-  SlicingAlgorithmImpl *do_createAlignedTransform(std::string name1,
-                                                  std::string name2,
-                                                  std::string name3,
-                                                  std::string name4) {
-    SlicingAlgorithmImpl *alg = new SlicingAlgorithmImpl();
+  std::unique_ptr<SlicingAlgorithmImpl>
+  do_createAlignedTransform(const std::string &name1, const std::string &name2,
+                            const std::string &name3,
+                            const std::string &name4) {
+    auto alg = std::make_unique<SlicingAlgorithmImpl>();
     alg->m_inWS = ws;
     alg->initSlicingProps();
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("AxisAligned", "1"));
@@ -231,7 +231,7 @@ public:
   }
 
   void test_createAlignedTransform() {
-    SlicingAlgorithmImpl *alg = do_createAlignedTransform(
+    auto alg = do_createAlignedTransform(
         "Axis0, 2.0,8.0, 6", "Axis1, 2.0,8.0, 3", "Axis2, 2.0,8.0, 3", "");
 
     TS_ASSERT_EQUALS(alg->m_bases.size(), 3);
@@ -250,26 +250,26 @@ public:
     VMD outV;
 
     // The "binning" transform
-    CoordTransform *trans = alg->m_transform;
+    CoordTransform *trans = alg->m_transform.get();
     TS_ASSERT(trans);
     trans->apply(in, out);
     TS_ASSERT_EQUALS(VMD(3, out), VMD(0.5, 0.75, 1.25));
 
     // The "real" transform from original
-    CoordTransform *transFrom = alg->m_transformFromOriginal;
+    CoordTransform *transFrom = alg->m_transformFromOriginal.get();
     TS_ASSERT(transFrom);
     transFrom->apply(in, out);
     TS_ASSERT_EQUALS(VMD(3, out), VMD(2.5, 3.5, 4.5));
 
     // The "reverse" transform
-    CoordTransform *transTo = alg->m_transformToOriginal;
+    CoordTransform *transTo = alg->m_transformToOriginal.get();
     TS_ASSERT(transTo);
     transTo->apply(out, in);
     TS_ASSERT_EQUALS(VMD(3, in), VMD(2.5, 3.5, 4.5));
   }
 
   void test_createAlignedTransform_scrambled() {
-    SlicingAlgorithmImpl *alg = do_createAlignedTransform(
+    auto alg = do_createAlignedTransform(
         "Axis2, 2.0,8.0, 3", "Axis0, 2.0,8.0, 6", "Axis1, 2.0,8.0, 3", "");
 
     TS_ASSERT_EQUALS(alg->m_bases.size(), 3);
@@ -288,19 +288,19 @@ public:
     VMD outV;
 
     // The "binning" transform
-    CoordTransform *trans = alg->m_transform;
+    CoordTransform *trans = alg->m_transform.get();
     TS_ASSERT(trans);
     trans->apply(in, out);
     TS_ASSERT_EQUALS(VMD(3, out), VMD(1.25, 0.5, 0.75));
 
     // The "real" transform from original
-    CoordTransform *transFrom = alg->m_transformFromOriginal;
+    CoordTransform *transFrom = alg->m_transformFromOriginal.get();
     TS_ASSERT(transFrom);
     transFrom->apply(in, out);
     TS_ASSERT_EQUALS(VMD(3, out), VMD(4.5, 2.5, 3.5));
 
     // The "reverse" transform
-    CoordTransform *transTo = alg->m_transformToOriginal;
+    CoordTransform *transTo = alg->m_transformToOriginal.get();
     TS_ASSERT(transTo);
     transTo->apply(out, in);
     TS_ASSERT_EQUALS(VMD(3, in), VMD(2.5, 3.5, 4.5));
@@ -308,8 +308,7 @@ public:
 
   /** Integrate 2 dimensions so that the output has fewer dimensions */
   void test_createAlignedTransform_integrating() {
-    SlicingAlgorithmImpl *alg =
-        do_createAlignedTransform("Axis0, 2.0,8.0, 6", "", "", "");
+    auto alg = do_createAlignedTransform("Axis0, 2.0,8.0, 6", "", "", "");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 1);
     TS_ASSERT_EQUALS(alg->m_binDimensions.size(), 1);
     TS_ASSERT_EQUALS(alg->m_bases[0], VMD(1, 0, 0));
@@ -319,27 +318,26 @@ public:
     coord_t out[1];
 
     // The "binning" transform
-    CoordTransform *trans = alg->m_transform;
+    CoordTransform *trans = alg->m_transform.get();
     TS_ASSERT(trans);
     trans->apply(in, out);
     TS_ASSERT_DELTA(out[0], 0.5, 1e-5);
 
     // The "real" transform from original
-    CoordTransform *transFrom = alg->m_transformFromOriginal;
+    CoordTransform *transFrom = alg->m_transformFromOriginal.get();
     TS_ASSERT(transFrom);
     transFrom->apply(in, out);
     TS_ASSERT_DELTA(out[0], 2.5, 1e-5);
 
     // The "reverse" transform does NOT exist
-    CoordTransform *transTo = alg->m_transformToOriginal;
+    CoordTransform *transTo = alg->m_transformToOriginal.get();
     TS_ASSERT(transTo == nullptr);
   }
 
   void test_aligned_ImplicitFunction() {
-    SlicingAlgorithmImpl *alg = do_createAlignedTransform(
+    auto alg = do_createAlignedTransform(
         "Axis0, 2.0,8.0, 6", "Axis1, 2.0,8.0, 3", "Axis2, 2.0,8.0, 3", "");
-    MDImplicitFunction *func =
-        alg->getImplicitFunctionForChunk(nullptr, nullptr);
+    auto func = alg->getImplicitFunctionForChunk(nullptr, nullptr);
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 6);
     TS_ASSERT(func->isPointContained(VMD(3, 4, 5)));
@@ -348,13 +346,12 @@ public:
   }
 
   void test_aligned_ImplicitFunction_chunk() {
-    SlicingAlgorithmImpl *alg = do_createAlignedTransform(
+    auto alg = do_createAlignedTransform(
         "Axis0, 2.0,8.0, 6", "Axis1, 2.0,8.0, 6", "Axis2, 2.0,8.0, 6", "");
     /* This defines a chunk implicit function between 3-4 in each axis */
     size_t chunkMin[3] = {1, 1, 1};
     size_t chunkMax[3] = {2, 2, 2};
-    MDImplicitFunction *func =
-        alg->getImplicitFunctionForChunk(chunkMin, chunkMax);
+    auto func = alg->getImplicitFunctionForChunk(chunkMin, chunkMax);
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 6);
     TS_ASSERT(func->isPointContained(VMD(3.5, 3.5, 3.5)));
@@ -372,9 +369,9 @@ public:
     alg.m_inWS = ws;
     TS_ASSERT_EQUALS(alg.m_bases.size(), 0);
     // Set up data that comes from other properties
-    alg.m_minExtents.push_back(-5.0);
-    alg.m_maxExtents.push_back(+5.0);
-    alg.m_numBins.push_back(20);
+    alg.m_minExtents.emplace_back(-5.0);
+    alg.m_maxExtents.emplace_back(+5.0);
+    alg.m_numBins.emplace_back(20);
 
     TSM_ASSERT_THROWS_ANYTHING("Blank name",
                                alg.makeBasisVectorFromString(",units,1,2,3"));
@@ -399,9 +396,9 @@ public:
       SlicingAlgorithmImpl alg;
       alg.m_inWS = ws;
       // Set up data that comes from other properties
-      alg.m_minExtents.push_back(-5.0);
-      alg.m_maxExtents.push_back(+5.0);
-      alg.m_numBins.push_back(20);
+      alg.m_minExtents.emplace_back(-5.0);
+      alg.m_maxExtents.emplace_back(+5.0);
+      alg.m_numBins.emplace_back(20);
       alg.m_NormalizeBasisVectors = (normalize > 0);
 
       TS_ASSERT_EQUALS(alg.m_bases.size(), 0);
@@ -450,9 +447,9 @@ public:
       SlicingAlgorithmImpl alg;
       alg.m_inWS = wsQSample; // All dimensions are QSample
       // Set up data that comes from other properties
-      alg.m_minExtents.push_back(-5.0);
-      alg.m_maxExtents.push_back(+5.0);
-      alg.m_numBins.push_back(20);
+      alg.m_minExtents.emplace_back(-5.0);
+      alg.m_maxExtents.emplace_back(+5.0);
+      alg.m_numBins.emplace_back(20);
       alg.m_NormalizeBasisVectors = (normalize > 0);
 
       TS_ASSERT_EQUALS(alg.m_bases.size(), 0);
@@ -509,9 +506,9 @@ public:
       alg.m_inWS = wsMixedFrames; // First three dimensions are Q Sample
                                   // the last is General Frame
       // Set up data that comes from other properties
-      alg.m_minExtents.push_back(-5.0);
-      alg.m_maxExtents.push_back(+5.0);
-      alg.m_numBins.push_back(20);
+      alg.m_minExtents.emplace_back(-5.0);
+      alg.m_maxExtents.emplace_back(+5.0);
+      alg.m_numBins.emplace_back(20);
       alg.m_NormalizeBasisVectors = (normalize > 0);
 
       TS_ASSERT_EQUALS(alg.m_bases.size(), 0);
@@ -567,9 +564,9 @@ public:
     SlicingAlgorithmImpl alg;
     alg.m_inWS = ws;
     // Set up data that comes from other properties
-    alg.m_minExtents.push_back(-5.0);
-    alg.m_maxExtents.push_back(+5.0);
-    alg.m_numBins.push_back(20);
+    alg.m_minExtents.emplace_back(-5.0);
+    alg.m_maxExtents.emplace_back(+5.0);
+    alg.m_numBins.emplace_back(20);
     alg.m_NormalizeBasisVectors = true;
 
     TS_ASSERT_EQUALS(alg.m_bases.size(), 0);
@@ -597,12 +594,12 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  SlicingAlgorithmImpl *do_createGeneralTransform(
+  std::unique_ptr<SlicingAlgorithmImpl> do_createGeneralTransform(
       IMDEventWorkspace_sptr inWS, std::string name1, std::string name2,
       std::string name3, std::string name4, VMD translation,
       std::string extents, std::string numBins, bool ForceOrthogonal = false,
       bool NormalizeBasisVectors = true) {
-    SlicingAlgorithmImpl *alg = new SlicingAlgorithmImpl();
+    auto alg = std::make_unique<SlicingAlgorithmImpl>();
     alg->m_inWS = inWS;
     alg->initSlicingProps();
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("AxisAligned", "0"));
@@ -653,7 +650,7 @@ public:
     VMD baseY(-sin(angle), cos(angle), 0.0);
     VMD baseZ(0.0, 0.0, 1.0);
 
-    SlicingAlgorithmImpl *alg = do_createGeneralTransform(
+    auto alg = do_createGeneralTransform(
         ws3, "OutX,m," + baseX.toString(","), "OutY,m," + baseY.toString(","),
         "OutZ,m," + baseZ.toString(","), "", VMD(1, 1, 0), "0,10,0,10,0,10",
         "5,5,5");
@@ -670,26 +667,25 @@ public:
     VMD outV;
 
     // The "binning" transform
-    CoordTransform *trans = alg->m_transform;
+    CoordTransform *trans = alg->m_transform.get();
     TS_ASSERT(trans);
     trans->apply(in, out);
     TS_ASSERT_EQUALS(VMD(3, out), VMD(cos(angle), -sin(angle), 1.3));
 
     // The "real" transform from original
-    CoordTransform *transFrom = alg->m_transformFromOriginal;
+    CoordTransform *transFrom = alg->m_transformFromOriginal.get();
     TS_ASSERT(transFrom);
     transFrom->apply(in, out);
     TS_ASSERT_EQUALS(VMD(3, out), VMD(cos(angle), -sin(angle), 1.3) * 2);
 
     // The "reverse" transform
-    CoordTransform *transTo = alg->m_transformToOriginal;
+    CoordTransform *transTo = alg->m_transformToOriginal.get();
     TS_ASSERT(transTo);
     transTo->apply(out, in);
     TS_ASSERT_EQUALS(VMD(3, in), VMD(3.0, 1.0, 2.6));
 
     // The implicit function
-    MDImplicitFunction *func =
-        alg->getImplicitFunctionForChunk(nullptr, nullptr);
+    auto func = alg->getImplicitFunctionForChunk(nullptr, nullptr);
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 6);
     TS_ASSERT(func->isPointContained(VMD(1.5, 1.5, 2)));
@@ -711,7 +707,7 @@ public:
     VMD baseY(0.0, -1., 0.0);
     VMD baseZ(0.0, 0.0, 1.0);
 
-    SlicingAlgorithmImpl *alg = do_createGeneralTransform(
+    auto alg = do_createGeneralTransform(
         ws3, "OutX,m," + baseX.toString(","), "OutY,m," + baseY.toString(","),
         "OutZ,m," + baseZ.toString(","), "", VMD(0, 0, 0), "0,10,0,10,0,10",
         "5,5,5");
@@ -728,26 +724,25 @@ public:
     VMD outV;
 
     // The "binning" transform
-    CoordTransform *trans = alg->m_transform;
+    CoordTransform *trans = alg->m_transform.get();
     TS_ASSERT(trans);
     trans->apply(in, out);
     TS_ASSERT_EQUALS(VMD(3, out), VMD(1.5, 0.5, 1.3));
 
     // The "real" transform from original
-    CoordTransform *transFrom = alg->m_transformFromOriginal;
+    CoordTransform *transFrom = alg->m_transformFromOriginal.get();
     TS_ASSERT(transFrom);
     transFrom->apply(in, out);
     TS_ASSERT_EQUALS(VMD(3, out), VMD(3.0, 1.0, 2.6));
 
     // The "reverse" transform
-    CoordTransform *transTo = alg->m_transformToOriginal;
+    CoordTransform *transTo = alg->m_transformToOriginal.get();
     TS_ASSERT(transTo);
     transTo->apply(out, in);
     TS_ASSERT_EQUALS(VMD(3, in), VMD(3.0, -1.0, 2.6));
 
     // The implicit function
-    MDImplicitFunction *func =
-        alg->getImplicitFunctionForChunk(nullptr, nullptr);
+    auto func = alg->getImplicitFunctionForChunk(nullptr, nullptr);
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 6);
     TS_ASSERT(func->isPointContained(VMD(1.5, -1.5, 2)));
@@ -758,13 +753,13 @@ public:
   }
 
   void test_createGeneralTransform_4D_to_3D() {
-    SlicingAlgorithmImpl *alg = do_createGeneralTransform(
+    auto alg = do_createGeneralTransform(
         ws4, "OutX,m, 1,0,0,0", "OutY,m, 0,1,0,0", "OutZ,m, 0,0,1,0", "",
         VMD(1, 1, 1, 0), "0,10,0,10,0,10", "5,5,5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 3);
 
     // The implicit function
-    MDImplicitFunction *func(nullptr);
+    std::unique_ptr<MDImplicitFunction> func;
     TS_ASSERT_THROWS_NOTHING(
         func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
@@ -779,13 +774,13 @@ public:
   }
 
   void test_createGeneralTransform_4D_to_4D() {
-    SlicingAlgorithmImpl *alg = do_createGeneralTransform(
+    auto alg = do_createGeneralTransform(
         ws4, "OutX,m, 1,0,0,0", "OutY,m, 0,1,0,0", "OutZ,m, 0,0,1,0",
         "OutE,m, 0,0,0,1", VMD(1, 1, 1, 1), "0,10,0,10,0,10,0,10", "5,5,5,5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 4);
 
     // The implicit function
-    MDImplicitFunction *func(nullptr);
+    std::unique_ptr<MDImplicitFunction> func;
     TS_ASSERT_THROWS_NOTHING(
         func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
@@ -798,13 +793,13 @@ public:
   /** 4D "left-handed" coordinate system
    * obtained by flipping the Y basis vector.  */
   void test_createGeneralTransform_4D_to_4D_LeftHanded() {
-    SlicingAlgorithmImpl *alg = do_createGeneralTransform(
+    auto alg = do_createGeneralTransform(
         ws4, "OutX,m, 1,0,0,0", "OutY,m, 0,-1,0,0", "OutZ,m, 0,0,1,0",
         "OutE,m, 0,0,0,1", VMD(1, 1, 1, 1), "0,10,0,10,0,10,0,10", "5,5,5,5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 4);
 
     // The implicit function
-    MDImplicitFunction *func(nullptr);
+    std::unique_ptr<MDImplicitFunction> func;
     TS_ASSERT_THROWS_NOTHING(
         func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
@@ -816,13 +811,13 @@ public:
   }
 
   void test_createGeneralTransform_5D_to_3D() {
-    SlicingAlgorithmImpl *alg = do_createGeneralTransform(
+    auto alg = do_createGeneralTransform(
         ws5, "OutX,m, 1,0,0,0,0", "OutY,m, 0,1,0,0,0", "OutZ,m, 0,0,1,0,0", "",
         VMD(1, 1, 1, 0, 0), "0,10,0,10,0,10", "5,5,5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 3);
 
     // The implicit function
-    MDImplicitFunction *func(nullptr);
+    std::unique_ptr<MDImplicitFunction> func;
     TS_ASSERT_THROWS_NOTHING(
         func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
@@ -837,13 +832,13 @@ public:
   }
 
   void test_createGeneralTransform_4D_to_2D() {
-    SlicingAlgorithmImpl *alg =
+    auto alg =
         do_createGeneralTransform(ws4, "OutX,m, 1,0,0,0", "OutY,m, 0,1,0,0", "",
                                   "", VMD(1, 1, 0, 0), "0,10,0,10", "5,5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 2);
 
     // The implicit function
-    MDImplicitFunction *func(nullptr);
+    std::unique_ptr<MDImplicitFunction> func;
     TS_ASSERT_THROWS_NOTHING(
         func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
@@ -856,13 +851,13 @@ public:
   }
 
   void test_createGeneralTransform_3D_to_2D() {
-    SlicingAlgorithmImpl *alg =
+    auto alg =
         do_createGeneralTransform(ws3, "OutX,m, 1,0,0", "OutY,m, 0,1,0", "", "",
                                   VMD(1, 1, 0), "0,10,0,10", "5,5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 2);
 
     // The implicit function
-    MDImplicitFunction *func(nullptr);
+    std::unique_ptr<MDImplicitFunction> func;
     TS_ASSERT_THROWS_NOTHING(
         func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
@@ -875,13 +870,12 @@ public:
   }
 
   void test_createGeneralTransform_2D_to_2D() {
-    SlicingAlgorithmImpl *alg =
-        do_createGeneralTransform(ws2, "OutX,m, 1,0", "OutY,m, 0,1", "", "",
-                                  VMD(1, 1), "0,10,0,10", "5,5");
+    auto alg = do_createGeneralTransform(ws2, "OutX,m, 1,0", "OutY,m, 0,1", "",
+                                         "", VMD(1, 1), "0,10,0,10", "5,5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 2);
 
     // The implicit function
-    MDImplicitFunction *func(nullptr);
+    std::unique_ptr<MDImplicitFunction> func;
     TS_ASSERT_THROWS_NOTHING(
         func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
@@ -901,7 +895,7 @@ public:
    * Maximum edge in the output = (+11, +21) in the input
    */
   void test_createGeneralTransform_2D_to_2D_withNonZeroOrigin() {
-    SlicingAlgorithmImpl *alg =
+    auto alg =
         do_createGeneralTransform(ws2, "OutX,m, 2,0", "OutY,m, 0,3", "", "",
                                   VMD(1, 1), "-10,10, -20,20", "5,5");
 
@@ -923,26 +917,25 @@ public:
     VMD outV;
 
     // The "binning" transform
-    CoordTransform *trans = alg->m_transform;
+    CoordTransform *trans = alg->m_transform.get();
     TS_ASSERT(trans);
     trans->apply(in, out);
     TS_ASSERT_EQUALS(VMD(2, out), VMD(3.0, 1.0));
 
     // The "real" transform from original
-    CoordTransform *transFrom = alg->m_transformFromOriginal;
+    CoordTransform *transFrom = alg->m_transformFromOriginal.get();
     TS_ASSERT(transFrom);
     transFrom->apply(in, out);
     TS_ASSERT_EQUALS(VMD(2, out), VMD(+2, -12));
 
     // The "reverse" transform
-    CoordTransform *transTo = alg->m_transformToOriginal;
+    CoordTransform *transTo = alg->m_transformToOriginal.get();
     TS_ASSERT(transTo);
     transTo->apply(out, in);
     TS_ASSERT_EQUALS(VMD(2, in), VMD(3., -11.));
 
     // The implicit function
-    MDImplicitFunction *func =
-        alg->getImplicitFunctionForChunk(nullptr, nullptr);
+    auto func = alg->getImplicitFunctionForChunk(nullptr, nullptr);
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 4);
     TS_ASSERT(func->isPointContained(VMD(-8.9, -18.9)));
@@ -964,7 +957,7 @@ public:
    * Maximum edge in the output (+10,+20) = (+21, +101) in the input
    */
   void test_createGeneralTransform_2D_to_2D_withNonZeroOrigin_withScaling() {
-    SlicingAlgorithmImpl *alg = do_createGeneralTransform(
+    auto alg = do_createGeneralTransform(
         ws2, "OutX,m, 2,0", "OutY,m, 0,5", "", "", VMD(1, 1), "-10,10, -20,20",
         "5,5", false /*force orthogonal*/, false /*normalize basis vectors */);
 
@@ -989,26 +982,25 @@ public:
        which is offset by (11, 17.6) from the minimum (-10, -20)
        with bins of size (4,8) (in the OUTPUT dimensions),
        which means the bin coordinate is (11/4, 17.6/8) */
-    CoordTransform *trans = alg->m_transform;
+    CoordTransform *trans = alg->m_transform.get();
     TS_ASSERT(trans);
     trans->apply(in, out);
     TS_ASSERT_EQUALS(VMD(2, out), VMD(11. / 4., 17.6 / 8.));
 
     // The "real" transform from original
-    CoordTransform *transFrom = alg->m_transformFromOriginal;
+    CoordTransform *transFrom = alg->m_transformFromOriginal.get();
     TS_ASSERT(transFrom);
     transFrom->apply(in, out);
     TS_ASSERT_EQUALS(VMD(2, out), VMD(+1., -2.4));
 
     // The "reverse" transform
-    CoordTransform *transTo = alg->m_transformToOriginal;
+    CoordTransform *transTo = alg->m_transformToOriginal.get();
     TS_ASSERT(transTo);
     transTo->apply(out, in);
     TS_ASSERT_EQUALS(VMD(2, in), VMD(3., -11.));
 
     // The implicit function
-    MDImplicitFunction *func =
-        alg->getImplicitFunctionForChunk(nullptr, nullptr);
+    auto func = alg->getImplicitFunctionForChunk(nullptr, nullptr);
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 4);
     TS_ASSERT(func->isPointContained(VMD(-18.9, -98.9)));
@@ -1030,13 +1022,12 @@ public:
    *
    */
   void test_createGeneralTransform_2D_to_2D_nonOrthogonal() {
-    SlicingAlgorithmImpl *alg =
-        do_createGeneralTransform(ws2, "OutX,m, 1,0", "OutY,m, 1,1", "", "",
-                                  VMD(0., 0.), "0,10,0,10", "5,5");
+    auto alg = do_createGeneralTransform(ws2, "OutX,m, 1,0", "OutY,m, 1,1", "",
+                                         "", VMD(0., 0.), "0,10,0,10", "5,5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 2);
 
     // The implicit function
-    MDImplicitFunction *func(nullptr);
+    std::unique_ptr<MDImplicitFunction> func;
     TS_ASSERT_THROWS_NOTHING(
         func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
@@ -1052,13 +1043,13 @@ public:
   }
 
   void test_createGeneralTransform_3D_to_2D_nonOrthogonal() {
-    SlicingAlgorithmImpl *alg =
+    auto alg =
         do_createGeneralTransform(ws3, "OutX,m, 1,0,0", "OutY,m, 1,1,0", "", "",
                                   VMD(0., 0., 0.), "0,10,0,10", "5,5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 2);
 
     // The implicit function
-    MDImplicitFunction *func(nullptr);
+    std::unique_ptr<MDImplicitFunction> func;
     TS_ASSERT_THROWS_NOTHING(
         func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
@@ -1075,14 +1066,14 @@ public:
   }
 
   void test_createGeneralTransform_4D_to_4D_nonOrthogonal() {
-    SlicingAlgorithmImpl *alg = do_createGeneralTransform(
-        ws4, "OutX,m, 1,0,0,0", "OutY,m, 1,1,0,0", "OutZ,m, 0,0,1,0",
-        "OutE,m, 0,0,0,1", VMD(0., 0., 0., 0.), "0,10,0,10,0,10,0,10",
-        "5,5,5,5");
+    auto alg = do_createGeneralTransform(ws4, "OutX,m, 1,0,0,0",
+                                         "OutY,m, 1,1,0,0", "OutZ,m, 0,0,1,0",
+                                         "OutE,m, 0,0,0,1", VMD(0., 0., 0., 0.),
+                                         "0,10,0,10,0,10,0,10", "5,5,5,5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 4);
 
     // The implicit function
-    MDImplicitFunction *func(nullptr);
+    std::unique_ptr<MDImplicitFunction> func;
     TS_ASSERT_THROWS_NOTHING(
         func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
@@ -1097,13 +1088,13 @@ public:
   }
 
   void test_createGeneralTransform_4D_to_3D_nonOrthogonal() {
-    SlicingAlgorithmImpl *alg = do_createGeneralTransform(
+    auto alg = do_createGeneralTransform(
         ws4, "OutX,m, 1,0,0,0", "OutY,m, 1,1,0,0", "OutZ,m, 0,0,1,0", "",
         VMD(0., 0., 0., 0.), "0,10,0,10,0,10", "5,5,5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 3);
 
     // The implicit function
-    MDImplicitFunction *func(nullptr);
+    std::unique_ptr<MDImplicitFunction> func;
     TS_ASSERT_THROWS_NOTHING(
         func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
@@ -1118,13 +1109,12 @@ public:
   }
 
   void test_createGeneralTransform_4D_to_1D() {
-    SlicingAlgorithmImpl *alg = do_createGeneralTransform(
-        ws4, "OutX,m, 1,0,0,0", "", "", "", VMD(1, 1, 0, 0), "0,10", "5");
+    auto alg = do_createGeneralTransform(ws4, "OutX,m, 1,0,0,0", "", "", "",
+                                         VMD(1, 1, 0, 0), "0,10", "5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 1);
 
     // The implicit function
-    MDImplicitFunction *func =
-        alg->getImplicitFunctionForChunk(nullptr, nullptr);
+    auto func = alg->getImplicitFunctionForChunk(nullptr, nullptr);
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 2);
     TS_ASSERT(func->isPointContained(VMD(1.5, 1.5, 2, 345)));
@@ -1134,13 +1124,12 @@ public:
   }
 
   void test_createGeneralTransform_3D_to_1D() {
-    SlicingAlgorithmImpl *alg = do_createGeneralTransform(
-        ws3, "OutX,m, 1,0,0", "", "", "", VMD(1, 1, 0), "0,10", "5");
+    auto alg = do_createGeneralTransform(ws3, "OutX,m, 1,0,0", "", "", "",
+                                         VMD(1, 1, 0), "0,10", "5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 1);
 
     // The implicit function
-    MDImplicitFunction *func =
-        alg->getImplicitFunctionForChunk(nullptr, nullptr);
+    auto func = alg->getImplicitFunctionForChunk(nullptr, nullptr);
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 2);
     TS_ASSERT(func->isPointContained(VMD(1.5, 1.5, 2)));
@@ -1150,13 +1139,12 @@ public:
   }
 
   void test_createGeneralTransform_2D_to_1D() {
-    SlicingAlgorithmImpl *alg = do_createGeneralTransform(
-        ws2, "OutX,m, 1,0", "", "", "", VMD(1, 1), "0,10", "5");
+    auto alg = do_createGeneralTransform(ws2, "OutX,m, 1,0", "", "", "",
+                                         VMD(1, 1), "0,10", "5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 1);
 
     // The implicit function
-    MDImplicitFunction *func =
-        alg->getImplicitFunctionForChunk(nullptr, nullptr);
+    auto func = alg->getImplicitFunctionForChunk(nullptr, nullptr);
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 2);
     TS_ASSERT(func->isPointContained(VMD(1.5, 1.5)));
@@ -1168,13 +1156,12 @@ public:
   void test_createGeneralTransform_1D_to_1D() {
     VMD translation(1);
     translation[0] = 1.0;
-    SlicingAlgorithmImpl *alg = do_createGeneralTransform(
-        ws1, "OutX,m, 1", "", "", "", translation, "0,10", "5");
+    auto alg = do_createGeneralTransform(ws1, "OutX,m, 1", "", "", "",
+                                         translation, "0,10", "5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 1);
 
     // The implicit function
-    MDImplicitFunction *func =
-        alg->getImplicitFunctionForChunk(nullptr, nullptr);
+    auto func = alg->getImplicitFunctionForChunk(nullptr, nullptr);
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 2);
     VMD point(1);

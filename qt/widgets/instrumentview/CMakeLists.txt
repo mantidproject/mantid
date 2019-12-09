@@ -1,3 +1,7 @@
+if(NOT ENABLE_OPENGL)
+  message(FATAL_ERROR "Building instrument view with OpenGL disabled is not supported. Please set ENABLE_OPENGL=ON to continue.")
+endif()
+
 set(
   SRC_FILES
   src/BankRenderingHelpers.cpp
@@ -123,83 +127,90 @@ set(
 set(UI_FILES inc/MantidQtWidgets/InstrumentView/UCorrectionDialog.ui)
 
 # Target
-mtd_add_qt_library(
-  TARGET_NAME MantidQtWidgetsInstrumentView
-  QT_VERSION 4
-  SRC
-    ${SRC_FILES}
-    ${QT4_SRC_FILES}
-  MOC
-    ${MOC_FILES}
-    ${QT4_MOC_FILES}
-  NOMOC
-    ${INC_FILES}
-    ${QT4_INC_FILES}
-  UI ${UI_FILES}
-  RES ../../../images/instrumentview.qrc
-  DEFS IN_MANTIDQT_INSTRUMENTVIEW
-  INCLUDE_DIRS inc
-  SYSTEM_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-  LINK_LIBS
-    ${TCMALLOC_LIBRARIES_LINKTIME}
-    ${CORE_MANTIDLIBS}
-    ${POCO_LIBRARIES}
-    ${Boost_LIBRARIES}
-    ${PYTHON_LIBRARIES}
-    ${OPENGL_gl_LIBRARY}
-    ${OPENGL_glu_LIBRARY}
-  QT4_LINK_LIBS
-    Qt4::QtOpenGL
-    Qwt5
-  MTD_QT_LINK_LIBS
-    MantidQtWidgetsCommon
-    MantidQtWidgetsPlotting
-  INSTALL_DIR ${LIB_DIR}
-  OSX_INSTALL_RPATH
-    @loader_path/../MacOS
-    @loader_path/../Libraries
-  LINUX_INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}"
-)
+mtd_add_qt_library(TARGET_NAME MantidQtWidgetsInstrumentView
+                   QT_VERSION 4
+                   SRC
+                     ${SRC_FILES}
+                     ${QT4_SRC_FILES}
+                   MOC
+                     ${MOC_FILES}
+                     ${QT4_MOC_FILES}
+                   NOMOC
+                     ${INC_FILES}
+                     ${QT4_INC_FILES}
+                   UI
+                     ${UI_FILES}
+                   RES
+                     ../../../images/instrumentview.qrc
+                   DEFS
+                     IN_MANTIDQT_INSTRUMENTVIEW
+                   INCLUDE_DIRS
+                     inc
+                   SYSTEM_INCLUDE_DIRS
+                     ${Boost_INCLUDE_DIRS}
+                   LINK_LIBS
+                     ${TCMALLOC_LIBRARIES_LINKTIME}
+                     ${CORE_MANTIDLIBS}
+                     ${POCO_LIBRARIES}
+                     ${Boost_LIBRARIES}
+                     ${PYTHON_LIBRARIES}
+                     ${OPENGL_gl_LIBRARY}
+                     ${OPENGL_glu_LIBRARY}
+                   QT4_LINK_LIBS
+                     Qt4::QtOpenGL
+                     Qwt5
+                   MTD_QT_LINK_LIBS
+                     MantidQtWidgetsCommon
+                     MantidQtWidgetsPlotting
+                   INSTALL_DIR
+                     ${LIB_DIR}
+                   OSX_INSTALL_RPATH
+                     @loader_path/../MacOS
+                     @loader_path/../Frameworks
+                   LINUX_INSTALL_RPATH
+                     "\$ORIGIN/../${LIB_DIR}")
 
-find_package(
-  BoostPython
-  REQUIRED
-)
-mtd_add_qt_library(
-  TARGET_NAME MantidQtWidgetsInstrumentView
-  QT_VERSION 5
-  SRC
-    ${SRC_FILES}
-    ${QT5_SRC_FILES}
-  MOC
-    ${MOC_FILES}
-    ${QT5_MOC_FILES}
-  NOMOC
-    ${INC_FILES}
-    ${QT5_INC_FILES}
-  UI ${UI_FILES}
-  RES ../../../images/instrumentview.qrc
-  DEFS IN_MANTIDQT_INSTRUMENTVIEW
-  INCLUDE_DIRS inc
-  LINK_LIBS
-    ${TCMALLOC_LIBRARIES_LINKTIME}
-    ${CORE_MANTIDLIBS}
-    PythonInterfaceCore
-    ${POCO_LIBRARIES}
-    ${Boost_LIBRARIES}
-    ${PYTHON_LIBRARIES}
-    ${OPENGL_gl_LIBRARY}
-    ${OPENGL_glu_LIBRARY}
-  QT5_LINK_LIBS Qt5::OpenGL
-  MTD_QT_LINK_LIBS
-    MantidQtWidgetsCommon
-    MantidQtWidgetsMplCpp
-  INSTALL_DIR ${WORKBENCH_LIB_DIR}
-  OSX_INSTALL_RPATH
-    @loader_path/../MacOS
-    @loader_path/../Libraries
-  LINUX_INSTALL_RPATH "\$ORIGIN/../${WORKBENCH_LIB_DIR}"
-)
+find_package(BoostPython REQUIRED)
+mtd_add_qt_library(TARGET_NAME MantidQtWidgetsInstrumentView
+                   QT_VERSION 5
+                   SRC
+                     ${SRC_FILES}
+                     ${QT5_SRC_FILES}
+                   MOC
+                     ${MOC_FILES}
+                     ${QT5_MOC_FILES}
+                   NOMOC
+                     ${INC_FILES}
+                     ${QT5_INC_FILES}
+                   UI
+                     ${UI_FILES}
+                   RES
+                     ../../../images/instrumentview.qrc
+                   DEFS
+                     IN_MANTIDQT_INSTRUMENTVIEW
+                   INCLUDE_DIRS
+                     inc
+                   LINK_LIBS
+                     ${TCMALLOC_LIBRARIES_LINKTIME}
+                     ${CORE_MANTIDLIBS}
+                     PythonInterfaceCore
+                     ${POCO_LIBRARIES}
+                     ${Boost_LIBRARIES}
+                     ${PYTHON_LIBRARIES}
+                     ${OPENGL_gl_LIBRARY}
+                     ${OPENGL_glu_LIBRARY}
+                   QT5_LINK_LIBS
+                     Qt5::OpenGL
+                   MTD_QT_LINK_LIBS
+                     MantidQtWidgetsCommon
+                     MantidQtWidgetsMplCpp
+                   INSTALL_DIR
+                     ${WORKBENCH_LIB_DIR}
+                   OSX_INSTALL_RPATH
+                     @loader_path/../MacOS
+                     @loader_path/../Frameworks
+                   LINUX_INSTALL_RPATH
+                     "\$ORIGIN/../${WORKBENCH_LIB_DIR}")
 
 # Testing
 set(

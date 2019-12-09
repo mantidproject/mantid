@@ -336,9 +336,9 @@ public:
         double e = 1.0;
         if (y > 1.0E-5)
           e = std::sqrt(y);
-        vx.push_back(x);
-        vy.push_back(y);
-        ve.push_back(e);
+        vx.emplace_back(x);
+        vy.emplace_back(y);
+        ve.emplace_back(e);
       }
     }
 

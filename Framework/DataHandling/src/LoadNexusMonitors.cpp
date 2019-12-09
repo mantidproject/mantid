@@ -11,8 +11,8 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
-using Mantid::API::WorkspaceGroup;
 using Mantid::API::Workspace_sptr;
+using Mantid::API::WorkspaceGroup;
 
 namespace Mantid {
 namespace DataHandling {

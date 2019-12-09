@@ -158,7 +158,7 @@ void CompositePeaksPresenter::addPeaksPresenter(PeaksPresenter_sptr presenter) {
   // Only add a peaks presenter if the contents are different. The presenter may
   // be different, but manage the same workspace set.
   if (result_it == m_subjects.end() && presenter->contentsDifferent(this)) {
-    m_subjects.push_back(presenter);
+    m_subjects.emplace_back(presenter);
     presenter->registerOwningPresenter(this);
   }
 }
@@ -472,8 +472,7 @@ bool CompositePeaksPresenter::getShowBackground(
 
 namespace {
 // Helper comparitor type.
-class MatchWorkspaceName
-    : public std::unary_function<SetPeaksWorkspaces::value_type, bool> {
+class MatchWorkspaceName {
 private:
   const QString m_wsName;
 
@@ -552,7 +551,7 @@ void CompositePeaksPresenter::performUpdate() {
 
 namespace {
 // Private helper class
-class MatchPointer : public std::unary_function<bool, PeaksPresenter_sptr> {
+class MatchPointer {
 private:
   PeaksPresenter *m_toFind;
 

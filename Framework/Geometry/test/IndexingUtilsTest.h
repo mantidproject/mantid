@@ -226,7 +226,7 @@ public:
     std::vector<int> index_values;
     int correct_indices[] = {1, 4, 2, 0, 1, 3, 0, -1, 0, -1, -2, -3};
     for (int correct_index : correct_indices) {
-      index_values.push_back(correct_index);
+      index_values.emplace_back(correct_index);
     }
 
     std::vector<V3D> q_vectors = getNatroliteQs();
@@ -331,7 +331,7 @@ public:
       V3D vec(current_dir);
       vec *= ((double)i + 0.6);
       vec *= 2.0 * M_PI;
-      q_vectors.push_back(vec);
+      q_vectors.emplace_back(vec);
     }
     double max_q_magnitude = 16.0;
 
@@ -471,17 +471,17 @@ public:
     V3D v5c(2.8666800, 5.39606, 8.06534);
     V3D v5d(2.9666800, 5.49606, 8.16534);
 
-    directions.push_back(v1);
-    directions.push_back(v1b);
-    directions.push_back(v1c);
-    directions.push_back(v2);
-    directions.push_back(v3);
-    directions.push_back(v3b);
-    directions.push_back(v4);
-    directions.push_back(v5);
-    directions.push_back(v5b);
-    directions.push_back(v5c);
-    directions.push_back(v5d);
+    directions.emplace_back(v1);
+    directions.emplace_back(v1b);
+    directions.emplace_back(v1c);
+    directions.emplace_back(v2);
+    directions.emplace_back(v3);
+    directions.emplace_back(v3b);
+    directions.emplace_back(v4);
+    directions.emplace_back(v5);
+    directions.emplace_back(v5b);
+    directions.emplace_back(v5c);
+    directions.emplace_back(v5d);
 
     IndexingUtils::DiscardDuplicates(new_list, directions, q_vectors,
                                      required_tolerance, length_tol, angle_tol);
@@ -492,6 +492,20 @@ public:
     TS_ASSERT_DELTA(new_list[2].norm(), 9.71905, 1e-4);
     TS_ASSERT_DELTA(new_list[3].norm(), 9.87855, 1e-4);
     TS_ASSERT_DELTA(new_list[4].norm(), 9.93006, 1e-4);
+  }
+
+  void test_RoundHKL() {
+    V3D hkl(-1.234, 0.345, 7.5765);
+    IndexingUtils::RoundHKL(hkl);
+    TS_ASSERT_EQUALS(V3D(-1, 0, 8), hkl)
+  }
+
+  void test_RoundHKLs() {
+    std::vector<V3D> hkls{V3D(-1.234, 0.345, 7.5765),
+                          V3D(3.5345, -1.346, 0.2347)};
+    IndexingUtils::RoundHKLs(hkls);
+    TS_ASSERT_EQUALS(V3D(-1, 0, 8), hkls[0])
+    TS_ASSERT_EQUALS(V3D(4, -1, 0), hkls[1])
   }
 
   void test_ValidIndex() {
@@ -621,6 +635,34 @@ public:
       diff = (indices[i] - miller_indices[i]).norm();
       TS_ASSERT_DELTA(diff, 0, 0.1);
     }
+  }
+
+  void test_CalculateMillerIndicesSingleQ_for_Valid_Index() {
+    const auto q_vectors = getNatroliteQs();
+    const auto indices = getNatroliteIndices();
+    auto UB = getNatroliteUB();
+    UB.Invert();
+
+    const double tolerance = 0.1;
+    V3D miller_indices;
+
+    const bool success = IndexingUtils::CalculateMillerIndices(
+        UB, q_vectors[0], tolerance, miller_indices);
+    TS_ASSERT(success);
+    const auto diff = (indices[0] - miller_indices).norm();
+    TS_ASSERT_DELTA(diff, 0, 0.1);
+  }
+
+  void test_CalculateMillerIndicesSingleQ_No_Tolerance() {
+    const auto q_vectors = getNatroliteQs();
+    const auto indices = getNatroliteIndices();
+    auto UB = getNatroliteUB();
+    UB.Invert();
+
+    const V3D millerIndices =
+        IndexingUtils::CalculateMillerIndices(UB, q_vectors[0]);
+    const auto diff = (indices[0] - millerIndices).norm();
+    TS_ASSERT_DELTA(diff, 0, 0.1);
   }
 
   void test_GetIndexedPeaks_1D() {

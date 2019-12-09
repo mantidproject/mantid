@@ -10,7 +10,7 @@
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Material.h"
-#include "MantidKernel/System.h"
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -20,6 +20,7 @@ DECLARE_ALGORITHM(CopySample)
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using Geometry::IObject;
+using Geometry::OrientedLattice;
 using Geometry::SampleEnvironment;
 
 //----------------------------------------------------------------------------------------------
@@ -196,7 +197,9 @@ void CopySample::copyParameters(Sample &from, Sample &to, bool nameFlag,
     if (to.hasOrientedLattice() && orientationOnlyFlag) {
       to.getOrientedLattice().setU(from.getOrientedLattice().getU());
     } else {
-      to.setOrientedLattice(&from.getOrientedLattice());
+      // copy over
+      to.setOrientedLattice(
+          std::make_unique<OrientedLattice>(from.getOrientedLattice()));
     }
   }
 }

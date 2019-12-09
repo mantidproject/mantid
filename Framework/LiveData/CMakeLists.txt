@@ -75,6 +75,7 @@ if(LIBRDKAFKA_FOUND)
       src/Kafka/private/Schema/flatbuffers/base.h
       src/Kafka/private/Schema/flatbuffers/stl_emulation.h
       src/Kafka/private/Schema/df12_det_spec_map_generated.h
+      src/Kafka/private/Schema/dtdb_adc_pulse_debug_generated.h
       src/Kafka/private/Schema/ev42_events_generated.h
       src/Kafka/private/Schema/f142_logdata_generated.h
       src/Kafka/private/Schema/fwdi_forwarder_internal_generated.h
@@ -109,7 +110,7 @@ add_library(LiveData ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties(LiveData PROPERTIES OUTPUT_NAME MantidLiveData)
 
-if(OSX_VERSION VERSION_GREATER 10.8)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(LiveData
                         PROPERTIES INSTALL_RPATH
                                    "@loader_path/../Contents/MacOS")
@@ -140,8 +141,11 @@ target_link_libraries(LiveData LINK_PRIVATE ${PRIVATE_LINK_LIBRARIES})
 # Add the unit tests directory
 add_subdirectory(test)
 
-# Installation settings
+# Auto-generate exports header
+target_include_directories(LiveData PUBLIC ${CMAKE_BINARY_DIR}/Framework/LiveData)
+generate_mantid_export_header(LiveData)
 
+# Installation settings
 mtd_install_targets(TARGETS
                     LiveData
                     INSTALL_DIRS

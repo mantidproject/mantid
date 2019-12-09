@@ -140,7 +140,7 @@ void GramCharlierComptonProfile::setHermiteCoefficients(
           "NCSCountRate - Error reading int from hermite coefficient string: " +
           coeffs);
     }
-    m_hermite.push_back(value);
+    m_hermite.emplace_back(value);
   }
   declareGramCharlierParameters();
 }
@@ -177,13 +177,13 @@ GramCharlierComptonProfile::intensityParameterIndices() const {
       std::ostringstream os;
       os << HERMITE_PREFIX
          << 2 * i; // refactor to have method that produces the name
-      indices.push_back(this->parameterIndex(os.str()));
+      indices.emplace_back(this->parameterIndex(os.str()));
     }
   }
   // Include Kfse if it is not fixed
   const size_t kIndex = this->parameterIndex(KFSE_NAME);
   if (isActive(kIndex)) {
-    indices.push_back(kIndex);
+    indices.emplace_back(kIndex);
   }
 
   return indices;

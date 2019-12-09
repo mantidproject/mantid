@@ -99,12 +99,12 @@ double SpectrumInfo::signedTwoTheta(const size_t index) const {
   return signedTwoTheta / static_cast<double>(spectrumDefinition(index).size());
 }
 
-/** Returns the out-of-plane angle in radians (angle w.r.t. to vecPointingHorizontal
- * direction).
+/** Returns the out-of-plane angle in radians (angle w.r.t. to
+ * vecPointingHorizontal direction).
  *
  * Throws an exception if the spectrum is a monitor.
- */ double
-SpectrumInfo::azimuthal(const size_t index) const {
+ */
+double SpectrumInfo::azimuthal(const size_t index) const {
   double phi{0.0};
   for (const auto &detIndex : checkAndGetSpectrumDefinition(index))
     phi += m_detectorInfo.azimuthal(detIndex);
@@ -184,7 +184,7 @@ const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
     std::vector<boost::shared_ptr<const Geometry::IDetector>> det_ptrs;
     for (const auto &index : specDef) {
       const auto detIndex = index.first;
-      det_ptrs.push_back(m_detectorInfo.getDetectorPtr(detIndex));
+      det_ptrs.emplace_back(m_detectorInfo.getDetectorPtr(detIndex));
     }
     m_lastDetector[thread] =
         boost::make_shared<Geometry::DetectorGroup>(det_ptrs);

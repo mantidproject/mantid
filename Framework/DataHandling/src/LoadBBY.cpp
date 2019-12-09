@@ -454,7 +454,7 @@ std::vector<bool> LoadBBY::createRoiVector(const std::string &maskfile) {
 void LoadBBY::loadInstrumentParameters(
     NeXus::NXEntry &entry, std::map<std::string, double> &logParams,
     std::map<std::string, std::string> &allParams) {
-
+  using namespace Poco::XML;
   std::string idfDirectory =
       Mantid::Kernel::ConfigService::Instance().getString(
           "instrumentDefinition.directory");
@@ -462,21 +462,21 @@ void LoadBBY::loadInstrumentParameters(
   try {
     std::string parameterFilename = idfDirectory + "BILBY_Parameters.xml";
     // Set up the DOM parser and parse xml file
-    Poco::XML::DOMParser pParser;
-    Poco::XML::AutoPtr<Poco::XML::Document> pDoc;
+    DOMParser pParser;
+    Poco::AutoPtr<Poco::XML::Document> pDoc;
     try {
       pDoc = pParser.parse(parameterFilename);
     } catch (...) {
       throw Kernel::Exception::FileError("Unable to parse File:",
                                          parameterFilename);
     }
-    Poco::XML::NodeIterator it(pDoc, Poco::XML::NodeFilter::SHOW_ELEMENT);
-    Poco::XML::Node *pNode = it.nextNode();
+    NodeIterator it(pDoc, Poco::XML::NodeFilter::SHOW_ELEMENT);
+    Node *pNode = it.nextNode();
     while (pNode) {
       if (pNode->nodeName() == "parameter") {
-        auto pElem = dynamic_cast<Poco::XML::Element *>(pNode);
+        auto pElem = dynamic_cast<Element *>(pNode);
         std::string name = pElem->getAttribute("name");
-        auto nodeList = pElem->childNodes();
+        Poco::AutoPtr<NodeList> nodeList = pElem->childNodes();
         for (unsigned long i = 0; i < nodeList->length(); i++) {
           auto cNode = nodeList->item(i);
           if (cNode->nodeName() == "value") {
@@ -504,7 +504,7 @@ void LoadBBY::loadInstrumentParameters(
           if (!hdfTag.empty() && loadNXDataSet(entry, hdfTag, tmpFloat)) {
             auto factor = std::stod(details[1]);
             logParams[logTag] = factor * tmpFloat;
-          } else {
+          } else if (details.size() > 2) {
             logParams[logTag] = std::stod(details[2]);
             if (!hdfTag.empty())
               g_log.warning() << "Cannot find hdf parameter "
@@ -609,13 +609,15 @@ void LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
 
       loadInstrumentParameters(entry, logParams, allParams);
 
-      // adjust parameters
-      try {
+      // Ltof_det_value is not present for monochromatic data so check
+      // and replace with default
+      auto findLtof = logParams.find("Ltof_det_value");
+      if (findLtof != logParams.end()) {
         logParams["L1_chopper_value"] =
             logParams["Ltof_det_value"] - logParams["L2_det_value"];
-      } catch (const std::invalid_argument &) {
-        logParams["L1_chopper_value"] = 18.47258984375;
-        g_log.warning() << "Cannot find parameter 'L1_chopper_value'"
+      } else {
+        logParams["L1_chopper_value"] = 18.4726;
+        g_log.warning() << "Cannot recover parameter 'L1_chopper_value'"
                         << ", using default.\n";
       }
     }

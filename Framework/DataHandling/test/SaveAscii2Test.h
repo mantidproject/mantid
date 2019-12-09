@@ -75,7 +75,7 @@ public:
 
     boost::split(binstr, binlines, boost::is_any_of(","));
     for (const auto &i : binstr) {
-      bins.push_back(boost::lexical_cast<double>(i));
+      bins.emplace_back(boost::lexical_cast<double>(i));
     }
     TS_ASSERT_EQUALS(bins[0], 0);
     TS_ASSERT_EQUALS(bins[1], 2);
@@ -85,7 +85,7 @@ public:
     bins.clear();
     boost::split(binstr, binlines, boost::is_any_of(","));
     for (const auto &i : binstr) {
-      bins.push_back(boost::lexical_cast<double>(i));
+      bins.emplace_back(boost::lexical_cast<double>(i));
     }
     TS_ASSERT_EQUALS(bins[0], 1.66667);
     TS_ASSERT_EQUALS(bins[1], 8.66667);
@@ -172,7 +172,7 @@ public:
 
     boost::split(binstr, binlines, boost::is_any_of(","));
     for (const auto &i : binstr) {
-      bins.push_back(boost::lexical_cast<double>(i));
+      bins.emplace_back(boost::lexical_cast<double>(i));
     }
     TS_ASSERT_EQUALS(bins[0], 0);
     TS_ASSERT_EQUALS(bins[1], 2);
@@ -182,7 +182,7 @@ public:
     bins.clear();
     boost::split(binstr, binlines, boost::is_any_of(","));
     for (const auto &i : binstr) {
-      bins.push_back(boost::lexical_cast<double>(i));
+      bins.emplace_back(boost::lexical_cast<double>(i));
     }
     TS_ASSERT_EQUALS(bins[0], 1.66667);
     TS_ASSERT_EQUALS(bins[1], 8.66667);
@@ -228,6 +228,41 @@ public:
     TS_ASSERT_EQUALS(qVal, 2.2092230401788049);
     TS_ASSERT_EQUALS(angle, 57.295779513082316);
 
+    in.close();
+
+    Poco::File(filename).remove();
+    AnalysisDataService::Instance().remove(m_name);
+  }
+
+  void test_spectrum_axis_values() {
+    MatrixWorkspace_sptr wsToSave;
+    writeInelasticWS(wsToSave);
+
+    SaveAscii2 save;
+    std::string filename = initSaveAscii2(save);
+
+    TS_ASSERT_THROWS_NOTHING(save.setProperty("WriteSpectrumAxisValue", true));
+    TS_ASSERT_THROWS_NOTHING(save.execute());
+
+    // has the algorithm written a file to disk?
+    TS_ASSERT(Poco::File(filename).exists());
+
+    // Now make some checks on the content of the file
+    std::ifstream in(filename.c_str());
+    double axisVal;
+    std::string header1, header2, header3, separator, comment;
+
+    // Test that the first few column headers, separator and first two bins are
+    // as expected
+    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >>
+        axisVal;
+
+    TS_ASSERT_EQUALS(comment, "#");
+    TS_ASSERT_EQUALS(separator, ",");
+    TS_ASSERT_EQUALS(header1, "X");
+    TS_ASSERT_EQUALS(header2, "Y");
+    TS_ASSERT_EQUALS(header3, "E");
+    TS_ASSERT_EQUALS(axisVal, 1.);
     in.close();
 
     Poco::File(filename).remove();
@@ -596,7 +631,7 @@ public:
 
     boost::split(binstr, binlines, boost::is_any_of(","));
     for (const auto &i : binstr) {
-      bins.push_back(boost::lexical_cast<double>(i));
+      bins.emplace_back(boost::lexical_cast<double>(i));
     }
     TS_ASSERT_EQUALS(bins[0], 0);
     TS_ASSERT_EQUALS(bins[1], 4);
@@ -606,7 +641,7 @@ public:
     bins.clear();
     boost::split(binstr, binlines, boost::is_any_of(","));
     for (const auto &i : binstr) {
-      bins.push_back(boost::lexical_cast<double>(i));
+      bins.emplace_back(boost::lexical_cast<double>(i));
     }
     TS_ASSERT_EQUALS(bins[0], 1.66667);
     TS_ASSERT_EQUALS(bins[1], 17.3333);

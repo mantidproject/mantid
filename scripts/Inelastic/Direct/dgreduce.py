@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 """ Empty class temporary left for compatibility with previous interfaces """
-from __future__ import (absolute_import, division, print_function)
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 import Direct.DirectEnergyConversion as DRC
 from mantid.simpleapi import *
 from mantid.kernel import funcinspect

@@ -81,8 +81,8 @@ Mantid::Kernel::TimeSeriesProperty<double> *AddLogDerivative::makeDerivative(
         // Avoid repeated time values giving infinite derivatives
         double dy = (y1 - y0) / (t1 - t0);
         double t = (t0 + t1) / 2.0;
-        dVal.push_back(dy);
-        dTime.push_back(t);
+        dVal.emplace_back(dy);
+        dTime.emplace_back(t);
         // For the next time interval
         t0 = t1;
         y0 = y1;

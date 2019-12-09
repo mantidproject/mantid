@@ -12,7 +12,7 @@ from contextlib import contextmanager
 from matplotlib import cm
 from matplotlib.container import ErrorbarContainer
 
-from mantid.py3compat import Enum
+from enum import Enum
 
 
 # Any changes here must be reflected in the definition in

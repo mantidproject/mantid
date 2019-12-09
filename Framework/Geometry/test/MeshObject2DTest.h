@@ -51,36 +51,36 @@ public:
 
   void test_not_in_plane_if_insufficient_points() {
     std::vector<V3D> points;
-    points.push_back(V3D{1, 0, 0});
-    points.push_back(V3D{2, 1, 0});
+    points.emplace_back(V3D{1, 0, 0});
+    points.emplace_back(V3D{2, 1, 0});
     TS_ASSERT(!MeshObject2D::pointsCoplanar(points));
   }
 
   void test_points_not_in_plane_if_colinear() {
     std::vector<V3D> points;
-    points.push_back(V3D{1, 0, 0});
-    points.push_back(V3D{2, 0, 0});
-    points.push_back(V3D{3, 0, 0});
+    points.emplace_back(V3D{1, 0, 0});
+    points.emplace_back(V3D{2, 0, 0});
+    points.emplace_back(V3D{3, 0, 0});
     TS_ASSERT(!MeshObject2D::pointsCoplanar(points));
   }
 
   void test_points_in_plane() {
     using Mantid::Kernel::V3D;
     std::vector<V3D> points;
-    points.push_back(V3D{1, 0, 0});
-    points.push_back(V3D{2, 0, 0});
-    points.push_back(V3D{3, 0, 0});
-    points.push_back(V3D{1, 1, 0});
+    points.emplace_back(V3D{1, 0, 0});
+    points.emplace_back(V3D{2, 0, 0});
+    points.emplace_back(V3D{3, 0, 0});
+    points.emplace_back(V3D{1, 1, 0});
     TS_ASSERT(MeshObject2D::pointsCoplanar(points));
   }
 
   void test_points_not_in_plane() {
     std::vector<V3D> points;
     // Make tetrahedron
-    points.push_back(V3D{-1, 0, 0});
-    points.push_back(V3D{1, 0, 0});
-    points.push_back(V3D{0, 0, -1});
-    points.push_back(V3D{0, 1, 0});
+    points.emplace_back(V3D{-1, 0, 0});
+    points.emplace_back(V3D{1, 0, 0});
+    points.emplace_back(V3D{0, 0, -1});
+    points.emplace_back(V3D{0, 1, 0});
     TS_ASSERT(!MeshObject2D::pointsCoplanar(points));
   }
   void test_construct_with_insufficient_points_throws() {
@@ -296,7 +296,7 @@ public:
 
   void test_clone() {
     auto mesh = makeSimpleTriangleMesh();
-    auto clone = mesh.clone();
+    auto clone = std::unique_ptr<MeshObject2D>(mesh.clone());
     TS_ASSERT_EQUALS(*clone, mesh);
   }
 
@@ -304,11 +304,12 @@ public:
     using namespace Mantid::Kernel;
     auto a = makeSimpleTriangleMesh();
     // Use a different material
-    auto b = a.cloneWithMaterial(
-        Material("hydrogen", Material::parseChemicalFormula("H"), 3));
+    auto b = std::unique_ptr<MeshObject2D>(a.cloneWithMaterial(
+        Material("hydrogen", Material::parseChemicalFormula("H"), 3)));
     TS_ASSERT_DIFFERS(a, *b);
     // Use same material
-    auto c = a.cloneWithMaterial(Material{}); // same empty material
+    auto c = std::unique_ptr<MeshObject2D>(
+        a.cloneWithMaterial(Material{})); // same empty material
     TS_ASSERT_EQUALS(a, *c);
   }
 

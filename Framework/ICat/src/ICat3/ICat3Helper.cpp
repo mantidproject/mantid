@@ -516,12 +516,12 @@ CICatHelper::buildSearchQuery(const CatalogSearchParam &inputs) {
 
   // instrument name
   if (!inputs.getInstrument().empty()) {
-    advancedSearchDetails->instruments.push_back(inputs.getInstrument());
+    advancedSearchDetails->instruments.emplace_back(inputs.getInstrument());
   }
 
   // keywords
   if (!inputs.getKeywords().empty()) {
-    advancedSearchDetails->keywords.push_back(inputs.getKeywords());
+    advancedSearchDetails->keywords.emplace_back(inputs.getKeywords());
   }
 
   std::string investigationName, investigationType, datafileName, sampleName;
@@ -552,7 +552,7 @@ CICatHelper::buildSearchQuery(const CatalogSearchParam &inputs) {
 
   // investigator's surname
   if (!inputs.getInvestigatorSurName().empty()) {
-    advancedSearchDetails->investigators.push_back(
+    advancedSearchDetails->investigators.emplace_back(
         inputs.getInvestigatorSurName());
   }
 

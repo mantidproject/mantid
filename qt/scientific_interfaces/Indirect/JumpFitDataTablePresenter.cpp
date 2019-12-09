@@ -28,7 +28,7 @@ namespace IDA {
 
 JumpFitDataTablePresenter::JumpFitDataTablePresenter(JumpFitModel *model,
                                                      QTableWidget *dataTable)
-    : IndirectDataTablePresenter(model, dataTable, jumpFitHeaders()),
+    : IndirectDataTablePresenterLegacy(model, dataTable, jumpFitHeaders()),
       m_jumpFitModel(model) {
   auto header = dataTable->horizontalHeader();
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
@@ -48,7 +48,7 @@ int JumpFitDataTablePresenter::excludeColumn() const { return 5; }
 
 void JumpFitDataTablePresenter::addTableEntry(std::size_t dataIndex,
                                               std::size_t spectrum, int row) {
-  IndirectDataTablePresenter::addTableEntry(dataIndex, spectrum, row);
+  IndirectDataTablePresenterLegacy::addTableEntry(dataIndex, spectrum, row);
 
   const auto parameter =
       m_jumpFitModel->getFitParameterName(dataIndex, spectrum);
@@ -63,7 +63,7 @@ void JumpFitDataTablePresenter::addTableEntry(std::size_t dataIndex,
 void JumpFitDataTablePresenter::updateTableEntry(std::size_t dataIndex,
                                                  std::size_t spectrum,
                                                  int row) {
-  IndirectDataTablePresenter::updateTableEntry(dataIndex, spectrum, row);
+  IndirectDataTablePresenterLegacy::updateTableEntry(dataIndex, spectrum, row);
 
   const auto parameter =
       m_jumpFitModel->getFitParameterName(dataIndex, spectrum);

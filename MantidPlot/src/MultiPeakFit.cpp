@@ -279,13 +279,13 @@ void MultiPeakFit::generateFitCurve() {
       if (d_peaks > 1)
         insertFitFunctionCurve(
             QString(objectName()) + tr("Fit"), X.data(), Y.data(),
-            2); // insertFitFunctionCurve(QString(objectName()) + tr("Fit"), X,
-                // Y, 2);
+            2); // insertFitFunctionCurve(QString(objectName())
+                // + tr("Fit"), X, Y, 2);
       else
         insertFitFunctionCurve(
             QString(objectName()) + tr("Fit"), X.data(),
-            Y.data()); // insertFitFunctionCurve(QString(objectName()) +
-                       // tr("Fit"), X, Y);
+            Y.data()); // insertFitFunctionCurve(QString(objectName())
+                       // + tr("Fit"), X, Y);
 
       if (generate_peak_curves) {
         for (i = 0; i < peaks_aux; i++) { // add the peak curves

@@ -312,7 +312,7 @@ void ExtractSpectra::checkProperties() {
       if (maxSpec - minSpec + 1 != numberOfSpectra) {
         m_workspaceIndexList.reserve(maxSpec - minSpec + 1);
         for (size_t i = minSpec; i <= maxSpec; ++i)
-          m_workspaceIndexList.push_back(i);
+          m_workspaceIndexList.emplace_back(i);
       }
     }
   }

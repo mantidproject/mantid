@@ -98,9 +98,9 @@ public:
   void testSizeOfVectorProperty() {
     // Test vector value property.
     std::vector<int> v;
-    v.push_back(1);
-    v.push_back(2);
-    v.push_back(3);
+    v.emplace_back(1);
+    v.emplace_back(2);
+    v.emplace_back(3);
     PropertyWithValue<std::vector<int>> *pv =
         new PropertyWithValue<std::vector<int>>("some_array", v);
     TS_ASSERT_EQUALS(int(v.size()), pv->size());
@@ -117,9 +117,9 @@ public:
     using VecVecInt = std::vector<VecInt>;
     // Test vector value property.
     VecVecInt v;
-    v.push_back(VecInt(1, 0));
-    v.push_back(VecInt(2, 0));
-    v.push_back(VecInt(1, 0));
+    v.emplace_back(VecInt(1, 0));
+    v.emplace_back(VecInt(2, 0));
+    v.emplace_back(VecInt(1, 0));
     PropertyWithValue<VecVecInt> *pv =
         new PropertyWithValue<VecVecInt>("some_vec_vec_int", v);
     TSM_ASSERT_EQUALS(
@@ -364,9 +364,9 @@ public:
 
   void testPlusEqualOperator() {
     std::vector<int> v;
-    v.push_back(1);
-    v.push_back(2);
-    v.push_back(3);
+    v.emplace_back(1);
+    v.emplace_back(2);
+    v.emplace_back(3);
     PropertyWithValue<std::vector<int>> *pv =
         new PropertyWithValue<std::vector<int>>("some_array", v);
     PropertyWithValue<std::vector<int>> *pv2 =
@@ -379,9 +379,9 @@ public:
 
   void testPlusEqualOperatorOnYourself() {
     std::vector<int> v;
-    v.push_back(1);
-    v.push_back(2);
-    v.push_back(3);
+    v.emplace_back(1);
+    v.emplace_back(2);
+    v.emplace_back(3);
     PropertyWithValue<std::vector<int>> *pv =
         new PropertyWithValue<std::vector<int>>("some_array", v);
     (*pv) += pv;

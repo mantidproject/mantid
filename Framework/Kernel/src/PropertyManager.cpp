@@ -151,10 +151,10 @@ void PropertyManager::splitByTime(
     std::vector<Property *> output_properties;
     for (size_t i = 0; i < n; i++) {
       if (outputs[i])
-        output_properties.push_back(
+        output_properties.emplace_back(
             outputs[i]->getPointerToPropertyOrNull(prop->name()));
       else
-        output_properties.push_back(nullptr);
+        output_properties.emplace_back(nullptr);
     }
 
     // Now the property does the splitting.
@@ -202,7 +202,7 @@ void PropertyManager::declareProperty(std::unique_ptr<Property> p,
   const std::string key = createKey(p->name());
   auto existing = m_properties.find(key);
   if (existing == m_properties.end()) {
-    m_orderedProperties.push_back(p.get());
+    m_orderedProperties.emplace_back(p.get());
     m_properties[key] = std::move(p);
   } else {
     // Don't error if this is actually the same property object!
@@ -235,7 +235,7 @@ void PropertyManager::declareOrReplaceProperty(std::unique_ptr<Property> p,
     assert(ordereredPropPos != std::end(m_orderedProperties));
     *ordereredPropPos = p.get();
   } else {
-    m_orderedProperties.push_back(p.get());
+    m_orderedProperties.emplace_back(p.get());
   }
   m_properties[key] = std::move(p);
 }

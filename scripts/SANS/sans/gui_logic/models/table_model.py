@@ -12,14 +12,13 @@ information regarding the custom output name and the information in the options 
 
 from __future__ import (absolute_import, division, print_function)
 
-import functools
 import os
 import re
 
+from mantid.kernel import Logger
 from sans.common.constants import ALL_PERIODS
 from sans.common.enums import RowState, SampleShape
 from sans.common.file_information import SANSFileInformationFactory
-from sans.gui_logic.presenter.create_file_information import create_file_information
 from ui.sans_isis.work_handler import WorkHandler
 
 
@@ -32,7 +31,9 @@ class TableModel(object):
                              "sample_shape", "options_column_model"]
     THICKNESS_ROW = 14
 
-    def __init__(self):
+    logger = Logger("ISIS SANS GUI")
+
+    def __init__(self, file_information_factory=SANSFileInformationFactory()):
         super(TableModel, self).__init__()
         self._user_file = ""
         self._batch_file = ""
@@ -40,6 +41,8 @@ class TableModel(object):
         self.work_handler = WorkHandler()
         self._subscriber_list = []
         self._id_count = 0
+
+        self._file_information = file_information_factory
 
     @staticmethod
     def _validate_file_name(file_name):
@@ -87,18 +90,15 @@ class TableModel(object):
         table_index_model.id = self._id_count
         self._id_count += 1
         self._table_entries.insert(row, table_index_model)
-        if row >= self.get_number_of_rows():
-            row = self.get_number_of_rows() - 1
 
-        # If we did not provide a sample thickness, get it from file information
-        if table_index_model.sample_thickness == '':
-            self.get_thickness_for_rows([row])
+        # Ensure state is created correctly if we have any values
+        if table_index_model.sample_scatter:
+            table_index_model.file_finding = False
 
     def append_table_entry(self, table_index_model):
         table_index_model.id = self._id_count
         self._id_count += 1
         self._table_entries.append(table_index_model)
-        self.get_thickness_for_rows([self.get_number_of_rows() - 1])
         self.notify_subscribers()
 
     def remove_table_entries(self, rows):
@@ -127,8 +127,6 @@ class TableModel(object):
         self._table_entries[row].update_attribute(self.column_name_converter[column], value)
         self._table_entries[row].update_attribute('row_state', RowState.Unprocessed)
         self._table_entries[row].update_attribute('tool_tip', '')
-        if column == 0:
-            self.get_thickness_for_rows([row])
         self.notify_subscribers()
 
     def is_empty_row(self, row):
@@ -156,7 +154,6 @@ class TableModel(object):
     def reset_row_state(self, row):
         self._table_entries[row].update_attribute('row_state', RowState.Unprocessed)
         self._table_entries[row].update_attribute('tool_tip', '')
-        self.notify_subscribers()
 
     def set_row_to_error(self, row, tool_tip):
         self._table_entries[row].update_attribute('row_state', RowState.Error)
@@ -170,19 +167,23 @@ class TableModel(object):
         """
         if not rows:
             rows = range(len(self._table_entries))
+
         for row in rows:
             entry = self._table_entries[row]
             if entry.is_empty():
                 continue
             entry.file_finding = True
-            success_callback = functools.partial(self.update_thickness_from_file_information, entry.id)
 
-            error_callback = functools.partial(self.failure_handler, entry.id)
-            create_file_information(entry.sample_scatter, error_callback, success_callback,
-                                    self.work_handler, entry.id)
+            try:
+                file_info = self._file_information.create_sans_file_information(entry.sample_scatter)
+            except RuntimeError:
+                continue
+
+            self.update_thickness_from_file_information(id=entry.id, file_information=file_info)
 
     def failure_handler(self, id, error):
         row = self.get_row_from_id(id)
+
         self._table_entries[row].update_attribute('file_information', '')
         self._table_entries[row].update_attribute('sample_thickness', '')
         self._table_entries[row].update_attribute('sample_height', '')
@@ -191,17 +192,43 @@ class TableModel(object):
         self._table_entries[row].file_finding = False
         self.set_row_to_error(row, str(error[1]))
 
-    def update_thickness_from_file_information(self, id, file_information):
-        row = self.get_row_from_id(id)
-        if file_information:
-            rounded_file_thickness = round(file_information.get_thickness(), 2)
-            rounded_file_height = round(file_information.get_height(), 2)
-            rounded_file_width = round(file_information.get_width(), 2)
+    @staticmethod
+    def convert_to_float_or_return_none(val):
+        """
+        Attempts to convert to a float or return None
+        :param val: The value to convert
+        :return: The float or None if the conversion failed
+        """
+        try:
+            converted_val = float(val)
+            return converted_val
+        except ValueError:
+            return None
 
+    def update_thickness_from_file_information(self, id, file_information):
+
+        row = self.get_row_from_id(id)
+        entry = self._table_entries[row]
+
+        for attr in ["sample_thickness", "sample_height", "sample_width"]:
+            original_val = getattr(entry, attr)
+            converted = self.convert_to_float_or_return_none(original_val)
+            setattr(entry, attr, converted)
+            if converted is None and original_val:
+                self.logger.warning(
+                    "The {0} entered ({1}) could not be converted to a length. Using the one from the original sample."
+                    .format(attr.replace('_', ' '), original_val))
+
+        thickness = float(entry.sample_thickness) if entry.sample_thickness else round(file_information.get_thickness(),
+                                                                                       2)
+        height = float(entry.sample_height) if entry.sample_height else round(file_information.get_height(), 2)
+        width = float(entry.sample_width) if entry.sample_width else round(file_information.get_width(), 2)
+
+        if file_information:
             self._table_entries[row].update_attribute('file_information', file_information)
-            self._table_entries[row].update_attribute('sample_thickness', rounded_file_thickness)
-            self._table_entries[row].update_attribute('sample_height', rounded_file_height)
-            self._table_entries[row].update_attribute('sample_width', rounded_file_width)
+            self._table_entries[row].update_attribute('sample_thickness', thickness)
+            self._table_entries[row].update_attribute('sample_height', height)
+            self._table_entries[row].update_attribute('sample_width', width)
             if self._table_entries[row].sample_shape_string == "":
                 self._table_entries[row].update_attribute('sample_shape', file_information.get_shape())
             self._table_entries[row].file_finding = False
@@ -238,8 +265,7 @@ class TableModel(object):
             row = self.get_number_of_rows() - 1
 
         entry = self._table_entries[row]
-        file_information_factory = SANSFileInformationFactory()
-        file_information = file_information_factory.create_sans_file_information(entry.sample_scatter)
+        file_information = self._file_information.create_sans_file_information(entry.sample_scatter)
         self.update_thickness_from_file_information(entry.id, file_information)
 
     def set_option(self, row, key, value):
@@ -398,9 +424,9 @@ class OptionsColumnModel(object):
                                   "MergeScale": 'The scale applied to the HAB when merging',
                                   "MergeShift": 'The shift applied to the HAB when merging',
                                   "EventSlices": 'The event slices to reduce.'
-                                  ' The format is the same as for the event slices'
-                                  ' box in settings, however if a comma separated list is given '
-                                  'it must be enclosed in quotes'})
+                                                 ' The format is the same as for the event slices'
+                                                 ' box in settings, however if a comma separated list is given '
+                                                 'it must be enclosed in quotes'})
 
     @staticmethod
     def _parse_string(options_column_string):
@@ -428,13 +454,13 @@ class OptionsColumnModel(object):
         # The findall option finds all instances of the pattern specified above in the options string.
         for key, value in option_pattern.findall(options_column_string_no_whitespace):
             if value.endswith(','):
-                value=value[:-1]
-            parsed.update({key:value})
+                value = value[:-1]
+            parsed.update({key: value})
 
         return parsed
 
     def _serialise_options_dict(self):
-        return ', '.join(['{}={}'.format(k,self._options[k]) for k in sorted(self._options)])
+        return ', '.join(['{}={}'.format(k, self._options[k]) for k in sorted(self._options)])
 
     @staticmethod
     def _get_options(options_column_string):

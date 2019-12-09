@@ -109,7 +109,7 @@ boost::shared_ptr<Workspace> SINQHMListener::extractData() {
   std::vector<MDHistoDimension_sptr> dimensions;
   for (int i = 0; i < rank; i++) {
     Mantid::Geometry::GeneralFrame frame(dimNames[i], "");
-    dimensions.push_back(MDHistoDimension_sptr(new MDHistoDimension(
+    dimensions.emplace_back(MDHistoDimension_sptr(new MDHistoDimension(
         dimNames[i], dimNames[i], frame, .0, coord_t(dim[i]), dim[i])));
   }
   auto ws = boost::make_shared<MDHistoWorkspace>(dimensions);

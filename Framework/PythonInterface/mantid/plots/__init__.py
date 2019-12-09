@@ -26,26 +26,7 @@ from matplotlib.patches import Patch
 from matplotlib.projections import register_projection
 from matplotlib.scale import register_scale
 from matplotlib.table import Table
-try:
-    from mpl_toolkits.mplot3d.axes3d import Axes3D
-except ImportError:
-    # Special case to handle issues with importing mpl_toolkits
-    #
-    # Matplotlib adds a *nspkg.pth file to the user site packages directory.
-    # When that file is processed a fake built-in mpl_toolkits is imported
-    # which forces the site packages version to take precidence over our
-    # local copy regardless of python sys path settings.
-    #
-    # Work around by removing the fake built-in module from sys modules,
-    # then forcing python to search the path as expected.
-    #
-    # This is mostly but not necessarily limited to being an issue on OSX
-    # where there are multiple versions of matplotlib installed across the
-    # system.
-    import sys
-
-    del sys.modules['mpl_toolkits']
-    from mpl_toolkits.mplot3d.axes3d import Axes3D
+from mpl_toolkits.mplot3d.axes3d import Axes3D
 
 from mantid.api import AnalysisDataService as ads
 from mantid.kernel import logger
@@ -53,10 +34,8 @@ from mantid.plots import helperfunctions, plotfunctions, plotfunctions3D
 from mantid.plots.utility import autoscale_on_update
 from mantid.plots.helperfunctions import get_normalize_by_bin_width
 from mantid.plots.scales import PowerScale, SquareScale
-from mantid.plots.utility import artists_hidden
-
-BIN_AXIS = 0
-SPEC_AXIS = 1
+from mantid.plots.utility import artists_hidden, MantidAxType
+from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
 
 
 def plot_decorator(func):
@@ -159,7 +138,7 @@ class _WorkspaceArtists(object):
                     pass
 
         if (not axes.is_empty(axes)) and axes.legend_ is not None:
-            axes.legend().draggable()
+            axes.make_legend()
 
     def replace_data(self, workspace, plot_kwargs=None):
         """Replace or replot artists based on a new workspace
@@ -201,10 +180,6 @@ class MantidAxes(Axes):
     """
     # Required by Axes base class
     name = 'mantid'
-
-    # Enumerators for plotting directions
-    HORIZONTAL = BIN = 0
-    VERTICAL = SPECTRUM = 1
 
     # Store information for any workspaces attached to this axes instance
     tracked_workspaces = None
@@ -274,7 +249,7 @@ class MantidAxes(Axes):
     def is_axis_of_type(axis_type, kwargs):
         if kwargs.get('axis', None) is not None:
             return kwargs.get('axis', None) == axis_type
-        return axis_type == SPEC_AXIS
+        return axis_type == MantidAxType.SPECTRUM
 
     @staticmethod
     def get_spec_num_from_wksp_index(workspace, wksp_index):
@@ -286,15 +261,15 @@ class MantidAxes(Axes):
             return kwargs['specNum']
         elif kwargs.get('wkspIndex', None) is not None:
             # If wanting to plot a bin
-            if MantidAxes.is_axis_of_type(BIN_AXIS, kwargs):
+            if MantidAxes.is_axis_of_type(MantidAxType.BIN, kwargs):
                 return kwargs['wkspIndex']
             # If wanting to plot a spectrum
-            elif MantidAxes.is_axis_of_type(SPEC_AXIS, kwargs):
+            elif MantidAxes.is_axis_of_type(MantidAxType.SPECTRUM, kwargs):
                 return MantidAxes.get_spec_num_from_wksp_index(workspace, kwargs['wkspIndex'])
         elif getattr(workspace, 'getNumberHistograms', lambda: -1)() == 1:
             # If the workspace has one histogram, just plot that
             kwargs['wkspIndex'] = 0
-            if MantidAxes.is_axis_of_type(BIN_AXIS, kwargs):
+            if MantidAxes.is_axis_of_type(MantidAxType.BIN, kwargs):
                 return kwargs['wkspIndex']
             return MantidAxes.get_spec_num_from_wksp_index(workspace, kwargs['wkspIndex'])
         else:
@@ -515,6 +490,13 @@ class MantidAxes(Axes):
             # update_datalim will update limits with union of current lims and xys
             self.update_datalim(xys)
 
+    def make_legend(self):
+        if self.legend_ is None:
+            self.legend().draggable()
+        else:
+            props = LegendProperties.from_legend(self.legend_)
+            LegendProperties.create_legend(props, self)
+
     @staticmethod
     def is_empty(axes):
         """
@@ -653,7 +635,7 @@ class MantidAxes(Axes):
                 artist = self.track_workspace_artist(workspace,
                                                      plotfunctions.plot(self, *args, **kwargs),
                                                      _data_update, spec_num, is_normalized,
-                                                     MantidAxes.is_axis_of_type(SPEC_AXIS, kwargs))
+                                                     MantidAxes.is_axis_of_type(MantidAxType.SPECTRUM, kwargs))
             return artist
         else:
             return Axes.plot(self, *args, **kwargs)
@@ -768,7 +750,7 @@ class MantidAxes(Axes):
                 artist = self.track_workspace_artist(workspace,
                                                      plotfunctions.errorbar(self, *args, **kwargs),
                                                      _data_update, spec_num, is_normalized,
-                                                     MantidAxes.is_axis_of_type(SPEC_AXIS, kwargs))
+                                                     MantidAxes.is_axis_of_type(MantidAxType.SPECTRUM, kwargs))
             return artist
         else:
             return Axes.errorbar(self, *args, **kwargs)

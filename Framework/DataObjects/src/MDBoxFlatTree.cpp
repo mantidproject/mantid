@@ -420,7 +420,7 @@ void MDBoxFlatTree::loadExperimentInfos(
         if (num < std::numeric_limits<uint16_t>::max() - 1) {
           // dublicated experiment info names are impossible due to the
           // structure of the nexus file but missing -- can be found.
-          ExperimentBlockNum.push_back(num);
+          ExperimentBlockNum.emplace_back(num);
         }
       } catch (boost::bad_lexical_cast &) { /* ignore */
       }
@@ -461,7 +461,11 @@ void MDBoxFlatTree::loadExperimentInfos(
         // Get the sample, logs, instrument
         ei->loadExperimentInfoNexus(filename, file, parameterStr);
         // Now do the parameter map
-        ei->readParameterMap(parameterStr);
+        if (parameterStr.empty()) {
+          ei->populateInstrumentParameters();
+        } else {
+          ei->readParameterMap(parameterStr);
+        }
         // And add it to the mutliple experiment info.
         mei->addExperimentInfo(ei);
       } catch (std::exception &e) {

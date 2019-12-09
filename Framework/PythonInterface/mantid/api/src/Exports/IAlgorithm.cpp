@@ -41,8 +41,8 @@ using Mantid::Kernel::IPropertyManager;
 using Mantid::Kernel::Property;
 using Mantid::PythonInterface::AlgorithmIDProxy;
 using Mantid::PythonInterface::GlobalInterpreterLock;
-using Mantid::PythonInterface::Policies::VectorToNumpy;
 using Mantid::PythonInterface::isNone;
+using Mantid::PythonInterface::Policies::VectorToNumpy;
 using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(IAlgorithm)

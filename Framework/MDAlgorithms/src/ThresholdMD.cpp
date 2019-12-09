@@ -51,8 +51,8 @@ void ThresholdMD::init() {
                   "An input workspace.");
 
   std::vector<std::string> propOptions;
-  propOptions.push_back(LessThan());
-  propOptions.push_back(GreaterThan());
+  propOptions.emplace_back(LessThan());
+  propOptions.emplace_back(GreaterThan());
 
   declareProperty("Condition", LessThan(),
                   boost::make_shared<StringListValidator>(propOptions),

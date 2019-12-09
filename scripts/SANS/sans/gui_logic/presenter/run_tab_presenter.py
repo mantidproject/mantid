@@ -25,7 +25,7 @@ from mantid.py3compat import csv_open_type
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
 from sans.common.enums import (BatchReductionEntry, ISISReductionMode, RangeStepType, RowState, SampleShape,
-                               SaveType, SANSInstrument)
+                               SANSFacility, SaveType, SANSInstrument)
 from sans.gui_logic.gui_common import (add_dir_to_datasearch, get_reduction_mode_from_gui_selection,
                                        get_reduction_mode_strings_for_gui, get_string_for_gui_from_instrument,
                                        remove_dir_from_datasearch, SANSGuiPropertiesHandler)
@@ -540,18 +540,6 @@ class RunTabPresenter(PresenterCommon):
     # Processing
     # ----------------------------------------------------------------------------------------------
 
-    def _handle_get_states(self, rows):
-        """
-        Return the states for the supplied rows, calling on_processing_error for any errors
-        which occur.
-        """
-        states, errors = self.get_states(row_index=rows)
-        error_msg = "\n\n"
-        for row, error in errors.items():
-            self.on_processing_error(row, error)
-            error_msg += "{}\n".format(error)
-        return states, error_msg
-
     def _plot_graph(self):
         """
         Plot a graph if continuous output specified.
@@ -567,20 +555,23 @@ class RunTabPresenter(PresenterCommon):
                 fig.show()
                 self.output_fig = fig
 
-    def _set_progress_bar_min_max(self, min, max):
+    def _set_progress_bar(self, current, number_steps):
         """
         The progress of the progress bar is given by min / max
-        :param min: Current value of the progress bar.
-        :param max: The value at which the progress bar is full
+        :param current: Current value of the progress bar.
+        :param number_steps: The value at which the progress bar is full
         """
-        setattr(self._view, 'progress_bar_value', min)
-        setattr(self._view, 'progress_bar_maximum', max)
+        self.progress = current
+        setattr(self._view, 'progress_bar_value', current)
+        setattr(self._view, 'progress_bar_maximum', number_steps)
 
     def _process_rows(self, rows):
         """
         Processes a list of rows. Any errors cause the row to be coloured red.
         """
-        error_msg = ""
+
+        self._set_progress_bar(current=0, number_steps=len(rows))
+
         try:
             # Trip up early if output modes are invalid
             self._validate_output_modes()
@@ -593,19 +584,14 @@ class RunTabPresenter(PresenterCommon):
             self._processing = True
             self.sans_logger.information("Starting processing of batch table.")
 
-            states, error_msg = self._handle_get_states(rows)
-            if not states:
-                raise Exception("No states found")
-
             self._plot_graph()
-            self.progress = 0
-            self._set_progress_bar_min_max(self.progress, len(states))
             save_can = self._view.save_can
 
             # MantidPlot and Workbench have different approaches to plotting
             output_graph = self.output_graph if PYQT4 else self.output_fig
 
-            self.batch_process_runner.process_states(states,
+            self.batch_process_runner.process_states(rows, self.get_states,
+                                                     self._table_model.get_thickness_for_rows,
                                                      self._view.use_optimizations,
                                                      self._view.output_mode,
                                                      self._view.plot_results,
@@ -615,7 +601,7 @@ class RunTabPresenter(PresenterCommon):
         except Exception as e:
             self.on_processing_finished(None)
             self.sans_logger.error("Process halted due to: {}".format(str(e)))
-            self.display_warning_box('Warning', 'Process halted', str(e) + error_msg)
+            self.display_warning_box('Warning', 'Process halted', str(e))
 
     def on_reduction_dimensionality_changed(self, is_1d):
         """
@@ -693,32 +679,24 @@ class RunTabPresenter(PresenterCommon):
         self._processing = False
 
     def on_load_clicked(self):
-        error_msg = "\n\n"
+        self._view.disable_buttons()
+        self._processing = True
+        self.sans_logger.information("Starting load of batch table.")
+
+        selected_rows = self._get_selected_rows()
+        for row in selected_rows:
+            self._table_model.reset_row_state(row)
+
+        self._set_progress_bar(current=0, number_steps=len(selected_rows))
+        selected_rows = self._table_model.get_non_empty_rows(selected_rows)
+
         try:
-            self._view.disable_buttons()
-            self._processing = True
-            self.sans_logger.information("Starting load of batch table.")
-
-            selected_rows = self._get_selected_rows()
-            selected_rows = self._table_model.get_non_empty_rows(selected_rows)
-            states, errors = self.get_states(row_index=selected_rows)
-
-            for row, error in errors.items():
-                self.on_processing_error(row, error)
-                error_msg += "{}\n".format(error)
-
-            if not states:
-                self.on_processing_finished(None)
-                return
-
-            self.progress = 0
-            setattr(self._view, 'progress_bar_value', self.progress)
-            setattr(self._view, 'progress_bar_maximum', len(states))
-            self.batch_process_runner.load_workspaces(states)
+            self.batch_process_runner.load_workspaces(selected_rows=selected_rows, get_states_func=self.get_states,
+                                                      get_thickness_for_rows_func=self._table_model.get_thickness_for_rows)
         except Exception as e:
             self._view.enable_buttons()
             self.sans_logger.error("Process halted due to: {}".format(str(e)))
-            self.display_warning_box("Warning", "Process halted", str(e) + error_msg)
+            self.display_warning_box("Warning", "Process halted", str(e))
 
     @staticmethod
     def _get_filename_to_save(filename):
@@ -955,10 +933,6 @@ class RunTabPresenter(PresenterCommon):
     def _get_selected_rows(self):
         selected_rows = self._view.get_selected_rows()
         selected_rows = selected_rows if selected_rows else range(self._table_model.get_number_of_rows())
-        for row in selected_rows:
-            self._table_model.reset_row_state(row)
-        self.update_view_from_table_model()
-
         return selected_rows
 
     @log_times
@@ -1009,8 +983,9 @@ class RunTabPresenter(PresenterCommon):
         states, errors = self.get_states(row_index=[row_index], file_lookup=file_lookup,
                                          suppress_warnings=suppress_warnings)
         if states is None:
-            self.sans_logger.warning(
-                "There does not seem to be data for a row {}.".format(row_index))
+            if not suppress_warnings:
+                self.sans_logger.warning(
+                    "There does not seem to be data for a row {}.".format(row_index))
             return None
 
         if row_index in states:
@@ -1252,6 +1227,10 @@ class RunTabPresenter(PresenterCommon):
     # Settings
     # ------------------------------------------------------------------------------------------------------------------
     def _setup_instrument_specific_settings(self, instrument=None):
+        if ConfigService["default.facility"] != SANSFacility.to_string(self._facility):
+            ConfigService["default.facility"] = SANSFacility.to_string(self._facility)
+            self.sans_logger.notice("Facility changed to ISIS.")
+
         if not instrument:
             instrument = self._view.instrument
 
@@ -1260,6 +1239,7 @@ class RunTabPresenter(PresenterCommon):
         else:
             instrument_string = get_string_for_gui_from_instrument(instrument)
             ConfigService["default.instrument"] = instrument_string
+            self.sans_logger.notice("Instrument changed to {}.".format(instrument_string))
             self._view.enable_process_buttons()
 
         self._view.set_instrument_settings(instrument)

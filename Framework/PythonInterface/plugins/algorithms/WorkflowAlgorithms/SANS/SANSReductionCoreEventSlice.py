@@ -84,7 +84,6 @@ class SANSReductionCoreEventSlice(SANSReductionCoreBase):
     def PyExec(self):
         # Get the input
         state = self._get_state()
-        state_serialized = state.property_manager
         progress = self._get_progress()
 
         workspace = self.getProperty("ScatterWorkspace").value
@@ -95,7 +94,7 @@ class SANSReductionCoreEventSlice(SANSReductionCoreBase):
         progress.report("Event slicing ...")
         data_type_as_string = self.getProperty("DataType").value
         monitor_workspace = self._get_monitor_workspace()
-        workspace, monitor_workspace, slice_event_factor = self._slice(state_serialized, workspace, monitor_workspace,
+        workspace, monitor_workspace, slice_event_factor = self._slice(state, workspace, monitor_workspace,
                                                                        data_type_as_string)
 
         # --------------------------------------------------------------------------------------------------------------
@@ -109,7 +108,7 @@ class SANSReductionCoreEventSlice(SANSReductionCoreBase):
         progress.report("Creating adjustment workspaces ...")
         wavelength_adjustment_workspace, pixel_adjustment_workspace, wavelength_and_pixel_adjustment_workspace, \
             calculated_transmission_workspace, unfitted_transmission_workspace = \
-            self._adjustment(state_serialized, workspace, monitor_workspace, component_as_string, data_type_as_string)
+            self._adjustment(state, workspace, monitor_workspace, component_as_string, data_type_as_string)
 
         # ------------------------------------------------------------
         # 3. Convert event workspaces to histogram workspaces
@@ -129,11 +128,12 @@ class SANSReductionCoreEventSlice(SANSReductionCoreBase):
         # 5. Convert to Q
         # -----------------------------------------------------------
         progress.report("Converting to q ...")
-        workspace, sum_of_counts, sum_of_norms = self._convert_to_q(state_serialized,
-                                                                    workspace,
-                                                                    wavelength_adjustment_workspace,
-                                                                    pixel_adjustment_workspace,
-                                                                    wavelength_and_pixel_adjustment_workspace)
+        workspace, sum_of_counts, sum_of_norms = \
+            self._convert_to_q(state=state,
+                               workspace=workspace,
+                               wavelength_adjustment_workspace=wavelength_adjustment_workspace,
+                               pixel_adjustment_workspace=pixel_adjustment_workspace,
+                               wavelength_and_pixel_adjustment_workspace=wavelength_and_pixel_adjustment_workspace)
 
         progress.report("Completed SANSReductionCoreEventSlice...")
 

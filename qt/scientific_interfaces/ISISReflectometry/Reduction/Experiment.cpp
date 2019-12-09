@@ -76,7 +76,7 @@ std::vector<PerThetaDefaults::ValueArray>
 Experiment::perThetaDefaultsArray() const {
   auto result = std::vector<PerThetaDefaults::ValueArray>();
   for (auto const &perThetaDefaults : m_perThetaDefaults)
-    result.push_back(perThetaDefaultsToArray(perThetaDefaults));
+    result.emplace_back(perThetaDefaultsToArray(perThetaDefaults));
   return result;
 }
 

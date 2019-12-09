@@ -447,9 +447,9 @@ public:
     for (size_t i = 0; i < 10; i++)
       ws.getSpectrum(i).setDetectorID(detid_t(i * 10));
     std::vector<detid_t> dets;
-    dets.push_back(60);
-    dets.push_back(20);
-    dets.push_back(90);
+    dets.emplace_back(60);
+    dets.emplace_back(20);
+    dets.emplace_back(90);
     std::vector<size_t> indices = ws.getIndicesFromDetectorIDs(dets);
     TS_ASSERT_EQUALS(indices.size(), 3);
     TS_ASSERT_EQUALS(indices[0], 6);
@@ -710,6 +710,7 @@ public:
     auto ws = makeWorkspaceWithDetectors(2, 2);
     // Now do a valid masking
     TS_ASSERT_THROWS_NOTHING(ws->flagMasked(0, 1, 0.75));
+    TS_ASSERT(ws->hasAnyMaskedBins());
     TS_ASSERT(ws->hasMaskedBins(0));
     TS_ASSERT_EQUALS(ws->maskedBins(0).size(), 1);
     TS_ASSERT_EQUALS(ws->maskedBins(0).begin()->first, 1);
@@ -731,6 +732,7 @@ public:
   void testMasking() {
     auto ws2 = makeWorkspaceWithDetectors(1, 2);
 
+    TS_ASSERT(!ws2->hasAnyMaskedBins());
     TS_ASSERT(!ws2->hasMaskedBins(0));
     // Doesn't throw on invalid spectrum number, just returns false
     TS_ASSERT(!ws2->hasMaskedBins(1));
@@ -2375,9 +2377,8 @@ public:
         ws->hasOrientedLattice(), false);
 
     // add an oriented lattice
-    OrientedLattice *latt = new OrientedLattice(1.0, 2.0, 3.0, 90, 90, 90);
-    ws->mutableSample().setOrientedLattice(latt);
-    delete latt;
+    ws->mutableSample().setOrientedLattice(
+        std::make_unique<OrientedLattice>(1.0, 2.0, 3.0, 90, 90, 90));
     TSM_ASSERT_EQUALS("A workspace with an oriented lattice should report true",
                       ws->hasOrientedLattice(), true);
 

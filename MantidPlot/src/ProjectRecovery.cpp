@@ -309,7 +309,8 @@ ProjectRecovery::~ProjectRecovery() {
 
 void ProjectRecovery::attemptRecovery() {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "ProjectRecovery->AttemptRecovery", true);
+      Mantid::Kernel::FeatureType::Feature,
+      {"ProjectRecovery", "AttemptRecovery"}, true);
 
   m_recoveryGui = new ProjectRecoveryPresenter(this, m_windowPtr);
   bool failed = m_recoveryGui->startRecoveryView();

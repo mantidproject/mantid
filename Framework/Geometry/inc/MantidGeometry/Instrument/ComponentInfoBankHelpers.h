@@ -8,11 +8,13 @@ namespace Mantid {
 namespace Geometry {
 
 class ComponentInfo;
+class DetectorInfo;
 namespace ComponentInfoBankHelpers {
 
 MANTID_GEOMETRY_DLL bool isDetectorFixedInBank(const ComponentInfo &compInfo,
                                                const size_t detIndex);
 MANTID_GEOMETRY_DLL bool isSaveableBank(const ComponentInfo &compInfo,
+                                        const DetectorInfo &detInfo,
                                         const size_t idx);
 
 MANTID_GEOMETRY_DLL bool isAncestorOf(const ComponentInfo &compInfo,

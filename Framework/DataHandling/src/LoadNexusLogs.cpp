@@ -32,8 +32,8 @@ using API::FileProperty;
 using API::MatrixWorkspace;
 using API::MatrixWorkspace_sptr;
 using API::WorkspaceProperty;
-using Types::Core::DateAndTime;
 using std::size_t;
+using Types::Core::DateAndTime;
 
 // Anonymous namespace
 namespace {
@@ -128,6 +128,156 @@ bool isControlValue(const char &c, const std::string &propName,
     std::locale locale{};
     // Use c++ style call so we don't need to cast from int to bool
     return std::iscntrl(c, locale);
+  }
+}
+
+/**
+ * Creates a time series property from the currently opened log entry. It is
+ * assumed to
+ * have been checked to have a time field and the value entry's name is given
+ * as an argument
+ * @param file :: A reference to the file handle
+ * @param propName :: The name of the property
+ * @param freqStart :: A string containing the start time of the frequency log
+ * on SNAP
+ * @param log :: Reference to logger to print out to
+ * @returns A pointer to a new property containing the time series
+ */
+std::unique_ptr<Kernel::Property> createTimeSeries(::NeXus::File &file,
+                                                   const std::string &propName,
+                                                   const std::string &freqStart,
+                                                   Kernel::Logger &log) {
+  file.openData("time");
+  //----- Start time is an ISO8601 string date and time. ------
+  std::string start;
+  try {
+    file.getAttr("start", start);
+  } catch (::NeXus::Exception &) {
+    // Some logs have "offset" instead of start
+    try {
+      file.getAttr("offset", start);
+    } catch (::NeXus::Exception &) {
+      log.warning() << "Log entry has no start time indicated.\n";
+      file.closeData();
+      throw;
+    }
+  }
+  if (start == "No Time") {
+    start = freqStart;
+  }
+
+  // Convert to date and time
+  Types::Core::DateAndTime start_time = Types::Core::DateAndTime(start);
+  std::string time_units;
+  file.getAttr("units", time_units);
+  if (time_units.compare("second") < 0 && time_units != "s" &&
+      time_units != "minutes") // Can be s/second/seconds/minutes
+  {
+    file.closeData();
+    throw ::NeXus::Exception("Unsupported time unit '" + time_units + "'");
+  }
+  //--- Load the seconds into a double array ---
+  std::vector<double> time_double;
+  try {
+    file.getDataCoerce(time_double);
+  } catch (::NeXus::Exception &e) {
+    log.warning() << "Log entry's time field could not be loaded: '" << e.what()
+                  << "'.\n";
+    file.closeData();
+    throw;
+  }
+  file.closeData(); // Close time data
+  log.debug() << "   done reading \"time\" array\n";
+
+  // Convert to seconds if needed
+  if (time_units == "minutes") {
+    using std::placeholders::_1;
+    std::transform(time_double.begin(), time_double.end(), time_double.begin(),
+                   std::bind(std::multiplies<double>(), _1, 60.0));
+  }
+  // Now the values: Could be a string, int or double
+  file.openData("value");
+  // Get the units of the property
+  std::string value_units;
+  try {
+    file.getAttr("units", value_units);
+  } catch (::NeXus::Exception &) {
+    // Ignore missing units field.
+    value_units = "";
+  }
+
+  // Now the actual data
+  ::NeXus::Info info = file.getInfo();
+  // Check the size
+  if (size_t(info.dims[0]) != time_double.size()) {
+    file.closeData();
+    throw ::NeXus::Exception("Invalid value entry for time series");
+  }
+  if (file.isDataInt()) // Int type
+  {
+    std::vector<int> values;
+    try {
+      file.getDataCoerce(values);
+      file.closeData();
+    } catch (::NeXus::Exception &) {
+      file.closeData();
+      throw;
+    }
+    // Make an int TSP
+    auto tsp = std::make_unique<TimeSeriesProperty<int>>(propName);
+    tsp->create(start_time, time_double, values);
+    tsp->setUnits(value_units);
+    log.debug() << "   done reading \"value\" array\n";
+    return tsp;
+  } else if (info.type == ::NeXus::CHAR) {
+    std::string values;
+    const int64_t item_length = info.dims[1];
+    try {
+      const int64_t nitems = info.dims[0];
+      const int64_t total_length = nitems * item_length;
+      boost::scoped_array<char> val_array(new char[total_length]);
+      file.getData(val_array.get());
+      file.closeData();
+      values = std::string(val_array.get(), total_length);
+    } catch (::NeXus::Exception &) {
+      file.closeData();
+      throw;
+    }
+    // The string may contain non-printable (i.e. control) characters, replace
+    // these
+    std::replace_if(
+        values.begin(), values.end(),
+        [&](const char &c) { return isControlValue(c, propName, log); }, ' ');
+    auto tsp = std::make_unique<TimeSeriesProperty<std::string>>(propName);
+    std::vector<DateAndTime> times;
+    DateAndTime::createVector(start_time, time_double, times);
+    const size_t ntimes = times.size();
+    for (size_t i = 0; i < ntimes; ++i) {
+      std::string value_i =
+          std::string(values.data() + i * item_length, item_length);
+      tsp->addValue(times[i], value_i);
+    }
+    tsp->setUnits(value_units);
+    log.debug() << "   done reading \"value\" array\n";
+    return tsp;
+  } else if (info.type == ::NeXus::FLOAT32 || info.type == ::NeXus::FLOAT64) {
+    std::vector<double> values;
+    try {
+      file.getDataCoerce(values);
+      file.closeData();
+    } catch (::NeXus::Exception &) {
+      file.closeData();
+      throw;
+    }
+    auto tsp = std::make_unique<TimeSeriesProperty<double>>(propName);
+    tsp->create(start_time, time_double, values);
+    tsp->setUnits(value_units);
+    log.debug() << "   done reading \"value\" array\n";
+    return tsp;
+  } else {
+    throw ::NeXus::Exception(
+        "Invalid value type for time series. Only int, double or strings are "
+        "supported");
   }
 }
 
@@ -354,8 +504,8 @@ void LoadNexusLogs::exec() {
           plog->timesAsVector();
       std::vector<double> plogv = plog->valuesAsVector();
       for (auto number : event_frame_number) {
-        ptime.push_back(plogt[number]);
-        pval.push_back(plogv[number]);
+        ptime.emplace_back(plogt[number]);
+        pval.emplace_back(plogv[number]);
       }
       pcharge->create(ptime, pval);
       pcharge->setUnits("uAh");
@@ -544,9 +694,9 @@ void LoadNexusLogs::loadNXLog(
   bool overwritelogs = this->getProperty("OverwriteLogs");
   try {
     if (overwritelogs || !(workspace->run().hasProperty(entry_name))) {
-      Kernel::Property *logValue = createTimeSeries(file, entry_name);
-      appendEndTimeLog(logValue, workspace->run());
-      workspace->mutableRun().addProperty(logValue, overwritelogs);
+      auto logValue = createTimeSeries(file, entry_name, freqStart, g_log);
+      appendEndTimeLog(logValue.get(), workspace->run());
+      workspace->mutableRun().addProperty(std::move(logValue), overwritelogs);
     }
   } catch (::NeXus::Exception &e) {
     g_log.warning() << "NXlog entry " << entry_name
@@ -576,8 +726,8 @@ void LoadNexusLogs::loadSELog(
   //   value_log - A time series entry. This can contain a corrupt value entry
   //   so if it does use the value one
   //   value - A single value float entry
-  Kernel::Property *logValue(nullptr);
-  std::map<std::string, std::string> entries = file.getEntries();
+  std::unique_ptr<Kernel::Property> logValue;
+  const auto entries = file.getEntries();
   if (entries.find("value_log") != entries.end()) {
     try {
       try {
@@ -587,8 +737,8 @@ void LoadNexusLogs::loadSELog(
         throw;
       }
 
-      logValue = createTimeSeries(file, propName);
-      appendEndTimeLog(logValue, workspace->run());
+      logValue = createTimeSeries(file, propName, freqStart, g_log);
+      appendEndTimeLog(logValue.get(), workspace->run());
 
       file.closeGroup();
     } catch (std::exception &e) {
@@ -609,7 +759,7 @@ void LoadNexusLogs::loadSELog(
         boost::scoped_array<float> value(new float[info.dims[0]]);
         file.getData(value.get());
         file.closeData();
-        logValue = new Kernel::PropertyWithValue<double>(
+        logValue = std::make_unique<Kernel::PropertyWithValue<double>>(
             propName, static_cast<double>(value[0]), true);
       } else {
         file.closeGroup();
@@ -629,155 +779,8 @@ void LoadNexusLogs::loadSELog(
     file.closeGroup();
     return;
   }
-  workspace->mutableRun().addProperty(logValue);
+  workspace->mutableRun().addProperty(std::move(logValue));
   file.closeGroup();
-}
-
-/**
- * Creates a time series property from the currently opened log entry. It is
- * assumed to
- * have been checked to have a time field and the value entry's name is given as
- * an argument
- * @param file :: A reference to the file handle
- * @param prop_name :: The name of the property
- * @returns A pointer to a new property containing the time series
- */
-Kernel::Property *
-LoadNexusLogs::createTimeSeries(::NeXus::File &file,
-                                const std::string &prop_name) const {
-  file.openData("time");
-  //----- Start time is an ISO8601 string date and time. ------
-  std::string start;
-  try {
-    file.getAttr("start", start);
-  } catch (::NeXus::Exception &) {
-    // Some logs have "offset" instead of start
-    try {
-      file.getAttr("offset", start);
-    } catch (::NeXus::Exception &) {
-      g_log.warning() << "Log entry has no start time indicated.\n";
-      file.closeData();
-      throw;
-    }
-  }
-  if (start == "No Time") {
-    start = freqStart;
-  }
-
-  // Convert to date and time
-  Types::Core::DateAndTime start_time = Types::Core::DateAndTime(start);
-  std::string time_units;
-  file.getAttr("units", time_units);
-  if (time_units.compare("second") < 0 && time_units != "s" &&
-      time_units != "minutes") // Can be s/second/seconds/minutes
-  {
-    file.closeData();
-    throw ::NeXus::Exception("Unsupported time unit '" + time_units + "'");
-  }
-  //--- Load the seconds into a double array ---
-  std::vector<double> time_double;
-  try {
-    file.getDataCoerce(time_double);
-  } catch (::NeXus::Exception &e) {
-    g_log.warning() << "Log entry's time field could not be loaded: '"
-                    << e.what() << "'.\n";
-    file.closeData();
-    throw;
-  }
-  file.closeData(); // Close time data
-  g_log.debug() << "   done reading \"time\" array\n";
-
-  // Convert to seconds if needed
-  if (time_units == "minutes") {
-    using std::placeholders::_1;
-    std::transform(time_double.begin(), time_double.end(), time_double.begin(),
-                   std::bind(std::multiplies<double>(), _1, 60.0));
-  }
-  // Now the values: Could be a string, int or double
-  file.openData("value");
-  // Get the units of the property
-  std::string value_units;
-  try {
-    file.getAttr("units", value_units);
-  } catch (::NeXus::Exception &) {
-    // Ignore missing units field.
-    value_units = "";
-  }
-
-  // Now the actual data
-  ::NeXus::Info info = file.getInfo();
-  // Check the size
-  if (size_t(info.dims[0]) != time_double.size()) {
-    file.closeData();
-    throw ::NeXus::Exception("Invalid value entry for time series");
-  }
-  if (file.isDataInt()) // Int type
-  {
-    std::vector<int> values;
-    try {
-      file.getDataCoerce(values);
-      file.closeData();
-    } catch (::NeXus::Exception &) {
-      file.closeData();
-      throw;
-    }
-    // Make an int TSP
-    auto tsp = new TimeSeriesProperty<int>(prop_name);
-    tsp->create(start_time, time_double, values);
-    tsp->setUnits(value_units);
-    g_log.debug() << "   done reading \"value\" array\n";
-    return tsp;
-  } else if (info.type == ::NeXus::CHAR) {
-    std::string values;
-    const int64_t item_length = info.dims[1];
-    try {
-      const int64_t nitems = info.dims[0];
-      const int64_t total_length = nitems * item_length;
-      boost::scoped_array<char> val_array(new char[total_length]);
-      file.getData(val_array.get());
-      file.closeData();
-      values = std::string(val_array.get(), total_length);
-    } catch (::NeXus::Exception &) {
-      file.closeData();
-      throw;
-    }
-    // The string may contain non-printable (i.e. control) characters, replace
-    // these
-    std::replace_if(
-        values.begin(), values.end(),
-        [&](const char &c) { return isControlValue(c, prop_name, g_log); },
-        ' ');
-    auto tsp = new TimeSeriesProperty<std::string>(prop_name);
-    std::vector<DateAndTime> times;
-    DateAndTime::createVector(start_time, time_double, times);
-    const size_t ntimes = times.size();
-    for (size_t i = 0; i < ntimes; ++i) {
-      std::string value_i =
-          std::string(values.data() + i * item_length, item_length);
-      tsp->addValue(times[i], value_i);
-    }
-    tsp->setUnits(value_units);
-    g_log.debug() << "   done reading \"value\" array\n";
-    return tsp;
-  } else if (info.type == ::NeXus::FLOAT32 || info.type == ::NeXus::FLOAT64) {
-    std::vector<double> values;
-    try {
-      file.getDataCoerce(values);
-      file.closeData();
-    } catch (::NeXus::Exception &) {
-      file.closeData();
-      throw;
-    }
-    auto tsp = new TimeSeriesProperty<double>(prop_name);
-    tsp->create(start_time, time_double, values);
-    tsp->setUnits(value_units);
-    g_log.debug() << "   done reading \"value\" array\n";
-    return tsp;
-  } else {
-    throw ::NeXus::Exception(
-        "Invalid value type for time series. Only int, double or strings are "
-        "supported");
-  }
 }
 
 } // namespace DataHandling

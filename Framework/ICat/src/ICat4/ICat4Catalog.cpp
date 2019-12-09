@@ -82,11 +82,11 @@ API::CatalogSession_sptr ICat4Catalog::login(const std::string &username,
   // Setting the username and pass credentials to the login class.
   entry.key = &usernameKey;
   entry.value = &userName;
-  entries.push_back(entry);
+  entries.emplace_back(entry);
 
   entry.key = &passwordKey;
   entry.value = &passWord;
-  entries.push_back(entry);
+  entries.emplace_back(entry);
 
   int result = icat.login(&login, &loginResponse);
 
@@ -557,7 +557,7 @@ void ICat4Catalog::listInstruments(std::vector<std::string> &instruments) {
   for (auto &searchResult : searchResults) {
     auto instrument = dynamic_cast<xsd__string *>(searchResult);
     if (instrument)
-      instruments.push_back(instrument->__item);
+      instruments.emplace_back(instrument->__item);
   }
 }
 
@@ -576,7 +576,7 @@ void ICat4Catalog::listInvestigationTypes(
   for (auto &searchResult : searchResults) {
     auto investigationType = dynamic_cast<xsd__string *>(searchResult);
     if (investigationType)
-      invstTypes.push_back(investigationType->__item);
+      invstTypes.emplace_back(investigationType->__item);
   }
 }
 

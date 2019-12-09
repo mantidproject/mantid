@@ -14,8 +14,8 @@
 
 using namespace Mantid::Poldi;
 
-using ::testing::Return;
 using ::testing::_;
+using ::testing::Return;
 
 class PoldiDeadWireDecoratorTest : public CxxTest::TestSuite {
 private:

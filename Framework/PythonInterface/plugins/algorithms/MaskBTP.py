@@ -18,14 +18,15 @@ class MaskBTP(mantid.api.PythonAlgorithm):
     """
 
     # list of supported instruments
-    INSTRUMENT_LIST = ['ARCS', 'BIOSANS', 'CG2', 'CHESS', 'CNCS', 'CORELLI', 'EQ-SANS', 'HYSPEC', 'MANDI', 'NOMAD',
+    INSTRUMENT_LIST = ['ARCS', 'BIOSANS', 'CG2', 'CG3', 'CHESS', 'CNCS', 'CORELLI', 'EQ-SANS', 'GPSANS', 'HYSPEC', 'MANDI', 'NOMAD',
                        'POWGEN', 'REF_M', 'SEQUOIA', 'SNAP', 'SXD', 'TOPAZ', 'WAND', 'WISH']
 
     instname = None
     instrument = None
-    bankmin = defaultdict(lambda: 1, {'SEQUOIA':23, 'TOPAZ':10})  # default is one
-    bankmax = {'ARCS':115, 'BIOSANS':2, 'CG2':48, 'CHESS':163, 'CNCS':50, 'CORELLI':91, 'EQ-SANS':48, 'HYSPEC':20, 'MANDI':59,
-               'NOMAD':99, 'POWGEN':300, 'REF_M':1, 'SEQUOIA':150,'SNAP':64,'SXD':11,'TOPAZ':59,'WAND':8,'WISH':10}
+    bankmin = defaultdict(lambda: 1, {'SEQUOIA': 23, 'TOPAZ': 10})  # default is one
+    bankmax = {'ARCS': 115, 'BIOSANS': 88, 'CG2': 48, 'CG3': 88, 'CHESS': 163, 'CNCS': 50, 'CORELLI': 91, 'EQ-SANS': 48,
+               'GPSANS': 48, 'HYSPEC': 20, 'MANDI': 59, 'NOMAD': 99, 'POWGEN': 300, 'REF_M': 1, 'SEQUOIA': 150, 'SNAP': 64,
+               'SXD': 11, 'TOPAZ': 59, 'WAND': 8, 'WISH': 10}
 
     def category(self):
         """ Mantid required
@@ -127,7 +128,6 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         if len(tubes) > 0 or len(pixels) > 0:
             for bankIndex in bankIndices:
                 tubeIndices = self._getChildIndices(compInfo, bankIndex, tubes)
-
                 for tubeIndex in tubeIndices:
                     pixelIndices = self._getChildIndices(compInfo, tubeIndex, pixels)
 
@@ -152,8 +152,15 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         self.setProperty("MaskedDetectors", detlist)
 
     def _startsFrom(self):
-        '''Returns what the minimum tube/pixel index for the instrument'''
-        if self.instname in ['ARCS', 'BIOSANS', 'CG2', 'CHESS', 'CNCS', 'CORELLI', 'EQ-SANS', 'HYSPEC', 'NOMAD', 'SEQUOIA', 'WAND', 'WISH']:
+        r"""
+        Minimum tube or pixel index as specified in the instrument definition file.
+
+        Returns
+        -------
+        int
+        """
+        if self.instname in ['ARCS', 'BIOSANS', 'CG2', 'CG3', 'CHESS', 'CNCS', 'CORELLI', 'EQ-SANS', 'GPSANS',
+                             'HYSPEC', 'NOMAD', 'SEQUOIA', 'WAND', 'WISH']:
             return 1
         else:
             return 0
@@ -233,20 +240,25 @@ class MaskBTP(mantid.api.PythonAlgorithm):
             return "panel" + "%02d" % banknum
         elif self.instname == 'REF_M':
             return "detector{}".format(banknum)
-        elif self.instname == 'CG2':
-            return "bank{}".format(banknum)
+        elif self.instname == 'CG2' or self.instname == 'GPSANS':
+            if '1900' not in validFrom:
+                return "bank{}".format(banknum)
+            else:
+                if banknum == 1:
+                    return 'detector1'
         elif self.instname == 'EQ-SANS':
             if '2019-' in validFrom:
                 return "bank{}".format(banknum)
             else:
                 return "detector{}".format(banknum)
-        elif self.instname == 'BIOSANS':
-            if banknum == 1:
-                return 'detector1'
-            elif banknum == 2:
-                return 'wing_detector'
+        elif self.instname == 'CG3' or self.instname == 'BIOSANS':
+            if '2019-10-01' in validFrom:
+                return "bank{}".format(banknum)
             else:
-                raise ValueError('Out of range index for BIOSANS instrument bank numbers: {}'.format(banknum))
+                if banknum == 1:
+                    return 'detector1'
+                elif banknum == 2:
+                    return 'wing_detector'
         else:
             return "bank" + str(banknum)
 

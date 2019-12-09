@@ -17,20 +17,16 @@ using Mantid::detid_t;
 class ExtractSingleSpectrumTest : public CxxTest::TestSuite {
 public:
   void testName() {
-    IAlgorithm *nameTester = createExtractSingleSpectrum();
-    TS_ASSERT_EQUALS(nameTester->name(), "ExtractSingleSpectrum");
+    TS_ASSERT_EQUALS(ExtractSingleSpectrum().name(), "ExtractSingleSpectrum");
   }
 
-  void testVersion() {
-    IAlgorithm *versionTester = createExtractSingleSpectrum();
-    TS_ASSERT_EQUALS(versionTester->version(), 1);
-  }
+  void testVersion() { TS_ASSERT_EQUALS(ExtractSingleSpectrum().version(), 1); }
 
   void testInit() {
-    IAlgorithm *initTester = createExtractSingleSpectrum();
-    TS_ASSERT_THROWS_NOTHING(initTester->initialize());
-    TS_ASSERT(initTester->isInitialized());
-    TS_ASSERT_EQUALS(initTester->getProperties().size(), 3);
+    ExtractSingleSpectrum initTester;
+    TS_ASSERT_THROWS_NOTHING(initTester.initialize());
+    TS_ASSERT(initTester.isInitialized());
+    TS_ASSERT_EQUALS(initTester.getProperties().size(), 3);
   }
 
   void testExec() {
@@ -93,26 +89,22 @@ public:
   }
 
 private:
-  ExtractSingleSpectrum *createExtractSingleSpectrum() {
-    return new ExtractSingleSpectrum();
-  }
-
   MatrixWorkspace_sptr runAlgorithm(MatrixWorkspace_sptr inputWS,
                                     const int index) {
-    Algorithm *extractor = createExtractSingleSpectrum();
-    extractor->initialize();
-    extractor->setChild(true); // Don't add the output to the ADS, then we don't
-                               // have to clear it
-    TS_ASSERT_THROWS_NOTHING(extractor->setProperty("InputWorkspace", inputWS));
+    ExtractSingleSpectrum extractor;
+    extractor.initialize();
+    extractor.setChild(true); // Don't add the output to the ADS, then we don't
+                              // have to clear it
+    TS_ASSERT_THROWS_NOTHING(extractor.setProperty("InputWorkspace", inputWS));
     TS_ASSERT_THROWS_NOTHING(
-        extractor->setPropertyValue("OutputWorkspace", "child_algorithm"));
-    TS_ASSERT_THROWS_NOTHING(extractor->setProperty("WorkspaceIndex", index));
-    TS_ASSERT_THROWS_NOTHING(extractor->execute());
-    TS_ASSERT(extractor->isExecuted());
-    if (!extractor->isExecuted()) {
+        extractor.setPropertyValue("OutputWorkspace", "child_algorithm"));
+    TS_ASSERT_THROWS_NOTHING(extractor.setProperty("WorkspaceIndex", index));
+    TS_ASSERT_THROWS_NOTHING(extractor.execute());
+    TS_ASSERT(extractor.isExecuted());
+    if (!extractor.isExecuted()) {
       TS_FAIL("Error running algorithm");
     }
-    return extractor->getProperty("OutputWorkspace");
+    return extractor.getProperty("OutputWorkspace");
   }
 
   void do_Spectrum_Tests(MatrixWorkspace_sptr outputWS, const specnum_t specID,

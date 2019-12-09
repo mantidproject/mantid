@@ -65,10 +65,10 @@ void TrustRegionMinimizer::initialize(API::ICostFunction_sptr costFunction,
   int j = 0;
   for (size_t i = 0; i < m_function->nParams(); ++i) {
     if (m_function->isActive(i)) {
-      m_J.m_index.push_back(j);
+      m_J.m_index.emplace_back(j);
       j++;
     } else
-      m_J.m_index.push_back(-1);
+      m_J.m_index.emplace_back(-1);
   }
   m_options.initial_radius = getProperty("InitialRadius");
 }
@@ -1056,7 +1056,7 @@ void solveSubproblemMain(int n, double radius, double f,
       history_type history_item;
       history_item.lambda = lambda;
       history_item.x_norm = inform.x_norm;
-      inform.history.push_back(history_item);
+      inform.history.emplace_back(history_item);
       inform.len_history = inform.len_history + 1;
     }
 

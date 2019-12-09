@@ -55,9 +55,8 @@ class SANS2DMultiPeriodBatchTest_V2(SANS2DMultiPeriodSingleTest_V2):
         Gravity(True)
 
         csv_file = FileFinder.getFullPath('SANS2D_multiPeriodTests.csv')
-
         BatchReduce(csv_file, 'nxs', saveAlgs={})
-        self.reduced = '5512_SANS2DBatch'
+        self.reduced = '5512_SANS2DBatch_rear_1DPhi-45.0_45.0'
 
 
 class LARMORMultiPeriodEventModeLoadingTest_V2(systemtesting.MantidSystemTest):

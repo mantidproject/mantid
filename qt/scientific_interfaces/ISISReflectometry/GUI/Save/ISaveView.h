@@ -21,7 +21,6 @@ public:
   virtual void notifyFilterWorkspaceList() = 0;
   virtual void notifyPopulateParametersList() = 0;
   virtual void notifySaveSelectedWorkspaces() = 0;
-  virtual void notifySuggestSaveDir() = 0;
   virtual void notifyAutosaveDisabled() = 0;
   virtual void notifyAutosaveEnabled() = 0;
   virtual void notifySavePathChanged() = 0;

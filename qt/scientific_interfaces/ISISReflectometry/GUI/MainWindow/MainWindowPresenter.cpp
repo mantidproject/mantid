@@ -182,7 +182,10 @@ void MainWindowPresenter::showHelp() {
 }
 
 void MainWindowPresenter::notifySaveBatchRequested(int tabIndex) {
-  auto filename = QFileDialog::getSaveFileName();
+  const QString jsonFilter = QString("JSON (*.json)");
+  auto filename =
+      QFileDialog::getSaveFileName(nullptr, QString(), QString(), jsonFilter,
+                                   nullptr, QFileDialog::DontResolveSymlinks);
   if (filename == "")
     return;
   Encoder encoder;
@@ -192,10 +195,21 @@ void MainWindowPresenter::notifySaveBatchRequested(int tabIndex) {
 }
 
 void MainWindowPresenter::notifyLoadBatchRequested(int tabIndex) {
-  auto filename = QFileDialog::getOpenFileName();
+  const QString jsonFilter = QString("JSON (*.json)");
+  auto filename =
+      QFileDialog::getOpenFileName(nullptr, QString(), QString(), jsonFilter,
+                                   nullptr, QFileDialog::DontResolveSymlinks);
   if (filename == "")
     return;
-  auto map = MantidQt::API::loadJSONFromFile(filename);
+  QMap<QString, QVariant> map;
+  try {
+    map = MantidQt::API::loadJSONFromFile(filename);
+  } catch (const std::runtime_error) {
+    m_messageHandler->giveUserCritical(
+        "Unable to load requested file. Please load a file of "
+        "appropriate format saved from the GUI.",
+        "Error:");
+  }
   IBatchPresenter *batchPresenter = m_batchPresenters[tabIndex].get();
   Decoder decoder;
   decoder.decodeBatch(batchPresenter, m_view, map);
@@ -222,9 +236,7 @@ std::string MainWindowPresenter::instrumentName() const {
 }
 
 void MainWindowPresenter::updateInstrument(const std::string &instrumentName) {
-  Mantid::Kernel::ConfigService::Instance().setString("default.instrument",
-                                                      instrumentName);
-  g_log.information() << "Instrument changed to " << instrumentName;
+  setDefaultInstrument(instrumentName);
 
   // Load a workspace for this instrument so we can get the actual instrument
   auto loadAlg =
@@ -245,6 +257,24 @@ void MainWindowPresenter::updateInstrument(const std::string &instrumentName) {
   // Notify the slit calculator
   m_slitCalculator->setCurrentInstrumentName(instrumentName);
   m_slitCalculator->processInstrumentHasBeenChanged();
+}
+
+void MainWindowPresenter::setDefaultInstrument(
+    const std::string &requiredInstrument) {
+  auto &config = Mantid::Kernel::ConfigService::Instance();
+
+  auto currentFacility = config.getString("default.facility");
+  auto requiredFacility = "ISIS";
+  if (currentFacility != requiredFacility) {
+    config.setString("default.facility", requiredFacility);
+    g_log.notice() << "Facility changed to " << requiredFacility;
+  }
+
+  auto currentInstrument = config.getString("default.instrument");
+  if (currentInstrument != requiredInstrument) {
+    config.setString("default.instrument", requiredInstrument);
+    g_log.notice() << "Instrument changed to " << requiredInstrument;
+  }
 }
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

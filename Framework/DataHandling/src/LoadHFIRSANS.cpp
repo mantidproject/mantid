@@ -299,7 +299,7 @@ std::vector<int> LoadHFIRSANS::readData(const std::string &dataXpath) {
     std::stringstream iss(data_str);
     double number;
     while (iss >> number) {
-      data.push_back(static_cast<int>(number));
+      data.emplace_back(static_cast<int>(number));
     }
     g_log.debug() << "Detector XPath: " << detectorXpath
                   << " parsed. Total size of data processed up to now = "
@@ -455,13 +455,13 @@ void LoadHFIRSANS::setBeamTrapRunProperty() {
   double trapDiameterInUse = trapDiameters[1];
 
   std::vector<double> trapMotorPositions;
-  trapMotorPositions.push_back(
+  trapMotorPositions.emplace_back(
       boost::lexical_cast<double>(m_metadata["Motor_Positions/trap_y_25mm"]));
-  trapMotorPositions.push_back(
+  trapMotorPositions.emplace_back(
       boost::lexical_cast<double>(m_metadata["Motor_Positions/trap_y_50mm"]));
-  trapMotorPositions.push_back(
+  trapMotorPositions.emplace_back(
       boost::lexical_cast<double>(m_metadata["Motor_Positions/trap_y_76mm"]));
-  trapMotorPositions.push_back(
+  trapMotorPositions.emplace_back(
       boost::lexical_cast<double>(m_metadata["Motor_Positions/trap_y_101mm"]));
 
   // Check how many traps are in use (store indexes):
@@ -469,7 +469,7 @@ void LoadHFIRSANS::setBeamTrapRunProperty() {
   for (size_t i = 0; i < trapMotorPositions.size(); i++) {
     if (trapMotorPositions[i] > 26.0) {
       // Resting positions are below 25. Make sure we have one trap in use!
-      trapIndexInUse.push_back(i);
+      trapIndexInUse.emplace_back(i);
     }
   }
 
@@ -479,7 +479,7 @@ void LoadHFIRSANS::setBeamTrapRunProperty() {
   std::vector<double> trapDiametersInUse;
   trapDiametersInUse.reserve(trapIndexInUse.size());
   for (auto index : trapIndexInUse) {
-    trapDiametersInUse.push_back(trapDiameters[index]);
+    trapDiametersInUse.emplace_back(trapDiameters[index]);
   }
 
   g_log.debug() << "trapDiametersInUse length:" << trapDiametersInUse.size()

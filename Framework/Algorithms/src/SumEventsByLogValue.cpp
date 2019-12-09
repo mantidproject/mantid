@@ -385,11 +385,11 @@ double SumEventsByLogValue::sumProtonCharge(
     const Kernel::TimeSeriesProperty<double> *protonChargeLog,
     const Kernel::TimeSplitterType &filter) {
   // Clone the proton charge log and filter the clone on this log value
-  auto protonChargeLogClone(protonChargeLog->clone());
+  std::unique_ptr<Kernel::TimeSeriesProperty<double>> protonChargeLogClone(
+      protonChargeLog->clone());
   protonChargeLogClone->filterByTimes(filter);
   // Seems like the only way to sum this is to yank out the values
   const std::vector<double> pcValues = protonChargeLogClone->valuesAsVector();
-
   return std::accumulate(pcValues.begin(), pcValues.end(), 0.0);
 }
 
@@ -403,7 +403,7 @@ void SumEventsByLogValue::createBinnedOutput(
   // If only the number of bins was given, add the min & max values of the log
   if (m_binningParams.size() == 1) {
     m_binningParams.insert(m_binningParams.begin(), log->minValue());
-    m_binningParams.push_back(
+    m_binningParams.emplace_back(
         log->maxValue() *
         1.000001); // Make it a tiny bit larger to cover full range
   }

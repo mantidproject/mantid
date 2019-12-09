@@ -622,7 +622,7 @@ std::vector<double> LoadILLDiffraction::getScannedVaribleByPropertyName(
   for (size_t i = 0; i < m_scanVar.size(); ++i) {
     if (m_scanVar[i].property == propertyName) {
       for (size_t j = 0; j < m_numberScanPoints; ++j) {
-        scannedVariable.push_back(
+        scannedVariable.emplace_back(
             scan(static_cast<int>(i), static_cast<int>(j)));
       }
       break;
@@ -710,7 +710,7 @@ LoadILLDiffraction::getAbsoluteTimes(const NXDouble &scan) const {
   size_t timeIndex = 1;
   while (timeIndex < m_numberScanPoints) {
     time += durations[timeIndex - 1];
-    times.push_back(time);
+    times.emplace_back(time);
     ++timeIndex;
   }
   return times;

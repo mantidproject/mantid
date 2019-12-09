@@ -136,7 +136,7 @@ LoadILLTOF2::getMonitorInfo(NeXus::NXEntry &firstEntry) {
       data.load();
 
       std::vector<int> thisMonitor(data(), data() + data.size());
-      monitorList.push_back(thisMonitor);
+      monitorList.emplace_back(thisMonitor);
     }
   }
   return monitorList;

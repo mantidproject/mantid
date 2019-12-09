@@ -24,13 +24,13 @@ public:
     std::vector<coord_t> point;
     TSM_ASSERT_THROWS_ANYTHING("O-dimensions are not allowed.",
                                MDPlane test(normal, point));
-    normal.push_back(1.234f);
-    normal.push_back(4.56f);
-    point.push_back(0);
+    normal.emplace_back(1.234f);
+    normal.emplace_back(4.56f);
+    point.emplace_back(0.f);
     TSM_ASSERT_THROWS_ANYTHING(
         "Mismatched dimensions in normal/point are not allowed.",
         MDPlane test(normal, point));
-    point.push_back(0);
+    point.emplace_back(0.f);
     MDPlane p(normal, point);
     TS_ASSERT_EQUALS(p.getNumDims(), 2);
     TS_ASSERT_DELTA(p.getNormal()[0], 1.234, 1e-5);
@@ -64,13 +64,13 @@ public:
     std::vector<VMD> points;
     VMD insidePoint(1);
     TS_ASSERT_THROWS_ANYTHING(MDPlane p(points, VMD(1, 2, 3), insidePoint));
-    points.push_back(VMD(1, 2, 3));
+    points.emplace_back(VMD(1, 2, 3));
     TS_ASSERT_THROWS_ANYTHING(MDPlane p(points, VMD(1, 2, 3), VMD(2, 3, 4)));
   }
 
   void test_constructorVectors_2D() {
     std::vector<VMD> points;
-    points.push_back(VMD(1.0, 1.0));
+    points.emplace_back(VMD(1.0, 1.0));
     MDPlane p(points, VMD(0., 0.), VMD(1.5, 0.5));
     TS_ASSERT(p.isPointBounded(VMD(0.2, 0.1)));
   }
@@ -78,8 +78,8 @@ public:
   /// Define a plane along x=y axis vertical in Z
   void test_constructorVectors_3D() {
     std::vector<VMD> points;
-    points.push_back(VMD(1., 1., 0.));
-    points.push_back(VMD(0., 0., 1.));
+    points.emplace_back(VMD(1., 1., 0.));
+    points.emplace_back(VMD(0., 0., 1.));
     MDPlane p(points, VMD(0., 0., 0.), VMD(0.5, 1.5, 1.0));
     TS_ASSERT(p.isPointBounded(VMD(0.5, 1.5, 1.0)));
   }
@@ -87,8 +87,8 @@ public:
   /// Bad vectors = they are collinear
   void test_constructorVectors_3D_collinear() {
     std::vector<VMD> points;
-    points.push_back(VMD(1., 1., 0.));
-    points.push_back(VMD(2., 2., 0.));
+    points.emplace_back(VMD(1., 1., 0.));
+    points.emplace_back(VMD(2., 2., 0.));
     TS_ASSERT_THROWS_ANYTHING(
         MDPlane p(points, VMD(0., 0., 0.), VMD(0.5, 1.5, 1.0)));
   }
@@ -96,9 +96,9 @@ public:
   /// Define a plane along x=y axis vertical in Z and t
   void test_constructorVectors_4D() {
     std::vector<VMD> points;
-    points.push_back(VMD(1., 1., 0., 0.));
-    points.push_back(VMD(0., 0., 1., 0.));
-    points.push_back(VMD(0., 0., 0., 1.));
+    points.emplace_back(VMD(1., 1., 0., 0.));
+    points.emplace_back(VMD(0., 0., 1., 0.));
+    points.emplace_back(VMD(0., 0., 0., 1.));
     MDPlane p(points, VMD(0., 0., 0., 0.), VMD(0.5, 1.5, 1.0, 1.0));
     TS_ASSERT(p.isPointBounded(VMD(0.5, 1.5, 1.0, -23.0)));
     TS_ASSERT(!p.isPointBounded(VMD(1.5, 0.5, 1.0, -23.0)));
@@ -211,20 +211,20 @@ public:
     MDPlane p1(2, normal1, point1);
     std::vector<coord_t> point;
     point.clear();
-    point.push_back(4.0);
-    point.push_back(12.0);
+    point.emplace_back(4.0f);
+    point.emplace_back(12.0f);
     TS_ASSERT(p1.isPointBounded(point));
 
     point.clear();
-    point.push_back(5.0);
-    point.push_back(-5.0);
+    point.emplace_back(5.0f);
+    point.emplace_back(-5.0f);
     TSM_ASSERT("Point should be found to be bounded by "
                "plane, it lies exactly on the plane",
                p1.isPointBounded(point));
 
     point.clear();
-    point.push_back(6.0);
-    point.push_back(-5.0);
+    point.emplace_back(6.0f);
+    point.emplace_back(-5.0f);
     TS_ASSERT(!p1.isPointBounded(point));
   }
 
@@ -235,15 +235,15 @@ public:
     MDPlane p1(2, normal1, point1);
     std::vector<coord_t> point;
     point.clear();
-    point.push_back(4.0);
-    point.push_back(12.0);
+    point.emplace_back(4.0f);
+    point.emplace_back(12.0f);
     TSM_ASSERT("Point should be found to be inside region bounded by plane",
                p1.isPointInside(point));
 
     // Point lies on the plane, not inside it
     point.clear();
-    point.push_back(5.0);
-    point.push_back(-5.0);
+    point.emplace_back(5.0f);
+    point.emplace_back(-5.0f);
     TSM_ASSERT("Point should not be found to be inside region bounded by "
                "plane, it lies exactly on the plane",
                !p1.isPointInside(point));
@@ -305,10 +305,10 @@ public:
     coord_t point[4] = {1};
 
     std::vector<coord_t> pointA;
-    pointA.push_back(0.111f);
-    pointA.push_back(0.222f);
-    pointA.push_back(0.333f);
-    pointA.push_back(0.444f);
+    pointA.emplace_back(0.111f);
+    pointA.emplace_back(0.222f);
+    pointA.emplace_back(0.333f);
+    pointA.emplace_back(0.444f);
 
     MDPlane p(4, normal, point);
     bool res = false;

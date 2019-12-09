@@ -22,6 +22,12 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
+/// Default constructor. Marks algorithm as deprecated.
+IndexPeaksWithSatellites::IndexPeaksWithSatellites()
+    : API::Algorithm(), API::DeprecatedAlgorithm() {
+  useAlgorithm("IndexPeaks");
+}
+
 /** Initialize the algorithm's properties.
  */
 void IndexPeaksWithSatellites::init() {
@@ -120,10 +126,8 @@ void IndexPeaksWithSatellites::exec() {
     return;
   }
 
-  API::Sample sample = ws->mutableSample();
-
-  OrientedLattice o_lattice = sample.getOrientedLattice();
-
+  auto &sample = ws->mutableSample();
+  auto &o_lattice = sample.getOrientedLattice();
   if (getProperty("GetModVectorsFromUB")) {
     offsets1 = o_lattice.getModVec(0);
     offsets2 = o_lattice.getModVec(1);
@@ -140,7 +144,6 @@ void IndexPeaksWithSatellites::exec() {
   }
 
   const Matrix<double> &UB = o_lattice.getUB();
-
   if (!IndexingUtils::CheckUB(UB)) {
     throw std::runtime_error(
         "ERROR: The stored UB is not a valid orientation matrix");
@@ -165,7 +168,7 @@ void IndexPeaksWithSatellites::exec() {
 
     q_vectors.reserve(n_peaks);
     for (size_t i = 0; i < n_peaks; i++) {
-      q_vectors.push_back(peaks[i].getQSampleFrame());
+      q_vectors.emplace_back(peaks[i].getQSampleFrame());
     }
 
     total_indexed = IndexingUtils::CalculateMillerIndices(
@@ -197,7 +200,7 @@ void IndexPeaksWithSatellites::exec() {
 
       for (size_t i = 0; i < n_peaks; i++) {
         if (peaks[i].getRunNumber() == run)
-          q_vectors.push_back(peaks[i].getQSampleFrame());
+          q_vectors.emplace_back(peaks[i].getQSampleFrame());
       }
 
       Matrix<double> tempUB(UB);
@@ -512,9 +515,9 @@ void IndexPeaksWithSatellites::exec() {
 V3D IndexPeaksWithSatellites::getOffsetVector(const std::string &label) {
   std::vector<double> offsets = getProperty(label);
   if (offsets.empty()) {
-    offsets.push_back(0.0);
-    offsets.push_back(0.0);
-    offsets.push_back(0.0);
+    offsets.emplace_back(0.0);
+    offsets.emplace_back(0.0);
+    offsets.emplace_back(0.0);
   }
   V3D offsets1 = V3D(offsets[0], offsets[1], offsets[2]);
   return offsets1;

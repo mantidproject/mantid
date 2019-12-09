@@ -51,7 +51,7 @@ private:
     std::vector<double> potentiallySorted;
     for (size_t rowIndex = 0; rowIndex < outWS->rowCount(); ++rowIndex) {
       TableRow row = outWS->getRow(rowIndex);
-      potentiallySorted.push_back(row.Double(columnIndex));
+      potentiallySorted.emplace_back(row.Double(columnIndex));
     }
 
     // Compare the contents of the container to determine how the column has

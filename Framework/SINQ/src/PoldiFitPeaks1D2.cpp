@@ -193,7 +193,7 @@ std::vector<RefinedRange_sptr> PoldiFitPeaks1D2::getRefinedRanges(
     const PoldiPeakCollection_sptr &peaks) const {
   std::vector<RefinedRange_sptr> ranges;
   for (size_t i = 0; i < peaks->peakCount(); ++i) {
-    ranges.push_back(
+    ranges.emplace_back(
         boost::make_shared<RefinedRange>(peaks->peak(i), m_fwhmMultiples));
   }
 
@@ -206,7 +206,7 @@ std::vector<RefinedRange_sptr> PoldiFitPeaks1D2::getReducedRanges(
   std::sort(workingRanges.begin(), workingRanges.end());
 
   std::vector<RefinedRange_sptr> reducedRanges;
-  reducedRanges.push_back(
+  reducedRanges.emplace_back(
       boost::make_shared<RefinedRange>(*(workingRanges.front())));
 
   double allowedOverlap = getProperty("AllowedOverlap");
@@ -217,7 +217,7 @@ std::vector<RefinedRange_sptr> PoldiFitPeaks1D2::getReducedRanges(
 
     if (!lastReduced->contains(*current) &&
         !lastReduced->overlaps(*current, allowedOverlap)) {
-      reducedRanges.push_back(boost::make_shared<RefinedRange>(*current));
+      reducedRanges.emplace_back(boost::make_shared<RefinedRange>(*current));
     } else {
       lastReduced->merge(*current);
     }

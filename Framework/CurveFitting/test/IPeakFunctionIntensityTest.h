@@ -107,7 +107,7 @@ private:
                 FunctionFactory::Instance().createFunction(registeredFunction));
 
         if (peakFunction) {
-          peakFunctions.push_back(peakFunction);
+          peakFunctions.emplace_back(peakFunction);
         }
       }
     }
@@ -139,10 +139,10 @@ private:
 
   std::vector<ParameterSet> getParameterSets() const {
     std::vector<ParameterSet> parameterSets;
-    parameterSets.push_back(ParameterSet(0.0, 4.34, 0.25));
-    parameterSets.push_back(ParameterSet(0.0, 5.34, 0.25));
-    parameterSets.push_back(ParameterSet(0.0, 6.34, 0.25));
-    parameterSets.push_back(ParameterSet(0.0, 7.34, 0.25));
+    parameterSets.emplace_back(ParameterSet(0.0, 4.34, 0.25));
+    parameterSets.emplace_back(ParameterSet(0.0, 5.34, 0.25));
+    parameterSets.emplace_back(ParameterSet(0.0, 6.34, 0.25));
+    parameterSets.emplace_back(ParameterSet(0.0, 7.34, 0.25));
 
     return parameterSets;
   }
@@ -152,7 +152,7 @@ private:
     std::vector<double> intensities;
 
     for (const auto &peak : peaks) {
-      intensities.push_back(peak->intensity());
+      intensities.emplace_back(peak->intensity());
     }
 
     return intensities;

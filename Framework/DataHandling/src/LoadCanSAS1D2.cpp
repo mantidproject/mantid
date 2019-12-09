@@ -223,7 +223,7 @@ LoadCanSAS1D2::loadEntry(Poco::XML::Node *const workspaceData,
     dataWS->getAxis(0)->setUnit("Wavelength");
 
     // add to group
-    group.push_back(dataWS);
+    group.emplace_back(dataWS);
   }
   return main_out;
 }

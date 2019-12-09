@@ -41,13 +41,13 @@ void OptimizeLatticeForCellType::init() {
                       "PeaksWorkspace", "", Direction::InOut),
                   "An input PeaksWorkspace with an instrument.");
   std::vector<std::string> cellTypes;
-  cellTypes.push_back(ReducedCell::CUBIC());
-  cellTypes.push_back(ReducedCell::TETRAGONAL());
-  cellTypes.push_back(ReducedCell::ORTHORHOMBIC());
-  cellTypes.push_back(ReducedCell::HEXAGONAL());
-  cellTypes.push_back(ReducedCell::RHOMBOHEDRAL());
-  cellTypes.push_back(ReducedCell::MONOCLINIC());
-  cellTypes.push_back(ReducedCell::TRICLINIC());
+  cellTypes.emplace_back(ReducedCell::CUBIC());
+  cellTypes.emplace_back(ReducedCell::TETRAGONAL());
+  cellTypes.emplace_back(ReducedCell::ORTHORHOMBIC());
+  cellTypes.emplace_back(ReducedCell::HEXAGONAL());
+  cellTypes.emplace_back(ReducedCell::RHOMBOHEDRAL());
+  cellTypes.emplace_back(ReducedCell::MONOCLINIC());
+  cellTypes.emplace_back(ReducedCell::TRICLINIC());
   declareProperty("CellType", cellTypes[0],
                   boost::make_shared<StringListValidator>(cellTypes),
                   "Select the cell type.");
@@ -90,17 +90,17 @@ void OptimizeLatticeForCellType::exec() {
       const std::vector<Peak> &peaks = ws->getPeaks();
       if (edgePixel(inst, peaks[i].getBankName(), peaks[i].getCol(),
                     peaks[i].getRow(), edge)) {
-        badPeaks.push_back(i);
+        badPeaks.emplace_back(i);
       }
     }
     ws->removePeaks(std::move(badPeaks));
   }
-  runWS.push_back(ws);
+  runWS.emplace_back(ws);
 
   if (perRun) {
     std::vector<std::pair<std::string, bool>> criteria;
     // Sort by run number
-    criteria.push_back(std::pair<std::string, bool>("runnumber", true));
+    criteria.emplace_back(std::pair<std::string, bool>("runnumber", true));
     ws->sort(criteria);
     const std::vector<Peak> &peaks_all = ws->getPeaks();
     int run = 0;
@@ -111,7 +111,7 @@ void OptimizeLatticeForCellType::exec() {
         auto cloneWS = boost::make_shared<PeaksWorkspace>();
         cloneWS->setInstrument(inst);
         cloneWS->copyExperimentInfoFrom(ws.get());
-        runWS.push_back(cloneWS);
+        runWS.emplace_back(cloneWS);
         runWS[count]->addPeak(peak);
         run = peak.getRunNumber();
         AnalysisDataService::Instance().addOrReplace(
@@ -173,23 +173,24 @@ void OptimizeLatticeForCellType::exec() {
     ub_alg->setProperty("gamma", refinedCell.gamma());
     ub_alg->executeAsChildAlg();
     DblMatrix UBnew = peakWS->mutableSample().getOrientedLattice().getUB();
-    OrientedLattice o_lattice;
-    o_lattice.setUB(UBnew);
+    auto o_lattice = std::make_unique<OrientedLattice>();
+    o_lattice->setUB(UBnew);
     if (maxOrder > 0) {
-      o_lattice.setModUB(modUB);
-      o_lattice.setMaxOrder(maxOrder);
-      o_lattice.setCrossTerm(crossTerms);
+      o_lattice->setModUB(modUB);
+      o_lattice->setMaxOrder(maxOrder);
+      o_lattice->setCrossTerm(crossTerms);
     }
-    o_lattice.set(refinedCell.a(), refinedCell.b(), refinedCell.c(),
-                  refinedCell.alpha(), refinedCell.beta(), refinedCell.gamma());
-    o_lattice.setError(refinedCell.errora(), refinedCell.errorb(),
-                       refinedCell.errorc(), refinedCell.erroralpha(),
-                       refinedCell.errorbeta(), refinedCell.errorgamma());
+    o_lattice->set(refinedCell.a(), refinedCell.b(), refinedCell.c(),
+                   refinedCell.alpha(), refinedCell.beta(),
+                   refinedCell.gamma());
+    o_lattice->setError(refinedCell.errora(), refinedCell.errorb(),
+                        refinedCell.errorc(), refinedCell.erroralpha(),
+                        refinedCell.errorbeta(), refinedCell.errorgamma());
 
     // Show the modified lattice parameters
-    g_log.notice() << i_run->getName() << "  " << o_lattice << "\n";
+    g_log.notice() << i_run->getName() << "  " << *o_lattice << "\n";
 
-    i_run->mutableSample().setOrientedLattice(&o_lattice);
+    i_run->mutableSample().setOrientedLattice(std::move(o_lattice));
 
     setProperty("OutputChi2", chisq);
 

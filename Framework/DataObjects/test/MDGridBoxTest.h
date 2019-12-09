@@ -286,7 +286,7 @@ public:
     BoxController *const bcc = g->getBoxController();
     std::vector<API::IMDNode *> boxes;
     for (size_t i = 0; i < 15; i++)
-      boxes.push_back(MDEventsTestHelper::makeMDBox1(10, bcc));
+      boxes.emplace_back(MDEventsTestHelper::makeMDBox1(10, bcc));
     TS_ASSERT_THROWS_NOTHING(g->setChildren(boxes, 2, 12));
 
     TS_ASSERT_EQUALS(g->getNumChildren(), 10);
@@ -818,7 +818,7 @@ public:
     for (double x = 0.5; x < 10; x += 1.0)
       for (double y = 0.5; y < 10; y += 1.0) {
         coord_t centers[2] = {static_cast<coord_t>(x), static_cast<coord_t>(y)};
-        events.push_back(MDLeanEvent<2>(2.0, 2.0, centers));
+        events.emplace_back(MDLeanEvent<2>(2.0, 2.0, centers));
       }
 
     size_t numbad = 0;
@@ -848,7 +848,7 @@ public:
     for (double x = -5.0; x < 20; x += 20.0)
       for (double y = -5.0; y < 20; y += 20.0) {
         double centers[2] = {x, y};
-        events.push_back(MDLeanEvent<2>(2.0, 2.0, centers));
+        events.emplace_back(MDLeanEvent<2>(2.0, 2.0, centers));
       }
     // Get the right totals again
     b->refreshCache(nullptr);
@@ -872,15 +872,15 @@ public:
     auto b = MDEventsTestHelper::makeMDGridBox<2>();
     std::vector<MDLeanEvent<2>> events;
     coord_t centers[2] = {0.0f, 0.0f};
-    events.push_back(MDLeanEvent<2>(2.0, 2.0, centers));
+    events.emplace_back(MDLeanEvent<2>(2.0, 2.0, centers));
     centers[1] = 10.0f;
-    events.push_back(MDLeanEvent<2>(2.0, 2.0, centers));
+    events.emplace_back(MDLeanEvent<2>(2.0, 2.0, centers));
     centers[0] = 10.0f;
     centers[1] = 0.0f;
-    events.push_back(MDLeanEvent<2>(2.0, 2.0, centers));
+    events.emplace_back(MDLeanEvent<2>(2.0, 2.0, centers));
     centers[0] = 10.0f;
     centers[1] = 10.0f;
-    events.push_back(MDLeanEvent<2>(2.0, 2.0, centers));
+    events.emplace_back(MDLeanEvent<2>(2.0, 2.0, centers));
 
     size_t numbad(-1);
     TS_ASSERT_THROWS_NOTHING(numbad = b->addEvents(events));
@@ -911,7 +911,7 @@ public:
   //    for (double y=0.5; y < 10; y += 1.0)
   //    {
   //      double centers[2] = {x,y};
-  //      events.push_back( MDLeanEvent<2>(2.0, 2.0, centers) );
+  //      events.emplace_back( MDLeanEvent<2>(2.0, 2.0, centers) );
   //    }
 
   //  size_t numbad = 0;
@@ -939,7 +939,7 @@ public:
       for (double x = 0.5; x < 10; x += 1.0)
         for (double y = 0.5; y < 10; y += 1.0) {
           double centers[2] = {x, y};
-          events.push_back(MDLeanEvent<2>(2.0, 2.0, centers));
+          events.emplace_back(MDLeanEvent<2>(2.0, 2.0, centers));
         }
       TS_ASSERT_THROWS_NOTHING(b->addEvents(events););
     }
@@ -1001,7 +1001,7 @@ public:
     for (size_t i = 0; i < num_repeat; i++) {
       // Make an event in the middle of each box
       double centers[2] = {1e-10, 1e-10};
-      events.push_back(MDLeanEvent<2>(2.0, 2.0, centers));
+      events.emplace_back(MDLeanEvent<2>(2.0, 2.0, centers));
     }
     TS_ASSERT_THROWS_NOTHING(b0->addEvents(events););
 
@@ -1482,8 +1482,8 @@ public:
         .Times(1)
         .WillOnce(Return(false)); // Not masked
 
-    boxes.push_back(a);
-    boxes.push_back(b);
+    boxes.emplace_back(a);
+    boxes.emplace_back(b);
 
     auto bc = boost::make_shared<BoxController>(1);
     std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> extentsVector(1);
@@ -1507,8 +1507,8 @@ public:
     EXPECT_CALL(*b, getIsMasked())
         .Times(0); // Not masked, but will never be called.
 
-    boxes.push_back(a);
-    boxes.push_back(b);
+    boxes.emplace_back(a);
+    boxes.emplace_back(b);
 
     auto bc = boost::make_shared<BoxController>(1);
     std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> extentsVector(1);
@@ -1532,8 +1532,8 @@ public:
         .WillOnce(Return(false)); // NOT MASKED
     EXPECT_CALL(*b, getIsMasked()).Times(1).WillOnce(Return(true)); // MASKED
 
-    boxes.push_back(a);
-    boxes.push_back(b);
+    boxes.emplace_back(a);
+    boxes.emplace_back(b);
 
     auto bc = boost::make_shared<BoxController>(1);
     std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> extentsVector(1);
@@ -1556,8 +1556,8 @@ public:
     EXPECT_CALL(*a, mask()).Times(1);
     EXPECT_CALL(*b, mask()).Times(1);
 
-    boxes.push_back(a);
-    boxes.push_back(b);
+    boxes.emplace_back(a);
+    boxes.emplace_back(b);
 
     auto bc = boost::make_shared<BoxController>(1);
     std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> extentsVector(1);
@@ -1580,8 +1580,8 @@ public:
     EXPECT_CALL(*a, unmask()).Times(1);
     EXPECT_CALL(*b, unmask()).Times(1);
 
-    boxes.push_back(a);
-    boxes.push_back(b);
+    boxes.emplace_back(a);
+    boxes.emplace_back(b);
 
     auto bc = boost::make_shared<BoxController>(1);
     std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> extentsVector(1);
@@ -1633,7 +1633,7 @@ public:
       for (double &center : centers)
         center = flat(rng);
       // Create and add the event.
-      events.push_back(MDLeanEvent<3>(1.0, 1.0, centers));
+      events.emplace_back(MDLeanEvent<3>(1.0, 1.0, centers));
     }
 
     box3b->addEvents(events);

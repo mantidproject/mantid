@@ -102,7 +102,6 @@ void BatchJobRunner::notifyReductionPaused() {
 
 void BatchJobRunner::notifyAutoreductionResumed() {
   m_isAutoreducing = true;
-  m_isProcessing = true;
   m_reprocessFailed = true;
   m_processAll = true;
   m_batch.resetSkippedItems();
@@ -263,7 +262,7 @@ BatchJobRunner::getWorkspacesToSave(Row const &row) const {
     return workspaces;
 
   // We currently only save the binned workspace in Q
-  workspaces.push_back(row.reducedWorkspaceNames().iVsQBinned());
+  workspaces.emplace_back(row.reducedWorkspaceNames().iVsQBinned());
   return workspaces;
 }
 

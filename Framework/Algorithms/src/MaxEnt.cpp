@@ -522,7 +522,7 @@ void MaxEnt::exec() {
         // it + 1 iterations have been done because we count from zero
         g_log.information()
             << "Converged after " << it + 1 << " iterations" << std::endl;
-        iterationCounts.push_back(it + 1);
+        iterationCounts.emplace_back(it + 1);
         converged = true;
         break;
       }
@@ -538,7 +538,7 @@ void MaxEnt::exec() {
 
     // If we didn't converge, we still need to record the number of iterations
     if (!converged) {
-      iterationCounts.push_back(nIter);
+      iterationCounts.emplace_back(nIter);
     }
 
     // Get calculated data

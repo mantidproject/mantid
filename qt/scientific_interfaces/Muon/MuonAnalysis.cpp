@@ -98,8 +98,8 @@ void zoomYAxis(const QString &wsName, QMap<QString, QString> &params) {
     for (size_t index = 0; index < matrix_workspace->e(0).size(); index++) {
       const auto &yData = matrix_workspace->y(0)[index];
       const auto &eData = matrix_workspace->e(0)[index];
-      yPlusEData.push_back(yData + eData);
-      yMinusEData.push_back(yData - eData);
+      yPlusEData.emplace_back(yData + eData);
+      yMinusEData.emplace_back(yData - eData);
     }
 
     auto xN = std::distance(xData.begin(),
@@ -146,7 +146,10 @@ MuonAnalysis::MuonAnalysis(QWidget *parent)
       m_dataLoader(Muon::DeadTimesType::None, // will be replaced by correct
                                               // instruments later
                    {"MUSR", "HIFI", "EMU", "ARGUS", "CHRONUS"}),
-      m_deadTimeIndex(-1), m_useDeadTime(true) {}
+      m_deadTimeIndex(-1), m_useDeadTime(true) {
+  g_log.warning(
+      "This interface is deprecated, please use Muon Analysis instead");
+}
 
 /**
  * Destructor
@@ -483,7 +486,7 @@ void MuonAnalysis::moveUnNormWS(const std::string &name,
   }
   if (ads.doesExist("tmp_unNorm")) {
     ads.rename("tmp_unNorm", name + unnorm);
-    wsNames.push_back(name + unnorm);
+    wsNames.emplace_back(name + unnorm);
   }
 }
 /**

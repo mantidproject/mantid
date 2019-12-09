@@ -10,7 +10,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Strings.h"
-#include <iostream>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel::Strings;
@@ -242,7 +241,6 @@ void IndirectPlotOptionsModel::plotContour() {
 void IndirectPlotOptionsModel::plotTiled() {
   auto const workspaceName = workspace();
   auto const indicesString = indices();
-  std::cout << "indices string is " << indicesString.get() << std::endl;
   if (workspaceName && indicesString)
     m_plotter->plotTiled(workspaceName.get(), indicesString.get());
 }

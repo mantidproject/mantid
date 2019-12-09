@@ -464,9 +464,9 @@ void WorkspaceTreeWidget::saveWorkspaces(const StringList &wsNames) {
         saveAlg->setProperty("InputWorkspace", wsName);
         saveAlg->setProperty("Filename", filename);
         saveAlg->execute();
-      } catch (std::runtime_error &rte) {
+      } catch (std::exception &ex) {
         docklog.error() << "Error saving workspace " << wsName << ": "
-                        << rte.what() << '\n';
+                        << ex.what() << '\n';
       }
     }
   }

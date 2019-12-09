@@ -271,8 +271,8 @@ void RemoveBins::transformRangeUnit(const int index, double &startX,
     double l1, l2, theta;
     this->calculateDetectorPosition(index, l1, l2, theta);
     std::vector<double> endPoints;
-    endPoints.push_back(startX);
-    endPoints.push_back(endX);
+    endPoints.emplace_back(startX);
+    endPoints.emplace_back(endX);
     std::vector<double> emptyVec;
     m_rangeUnit->toTOF(endPoints, emptyVec, l1, l2, theta, 0, 0.0, 0.0);
     inputUnit->fromTOF(endPoints, emptyVec, l1, l2, theta, 0, 0.0, 0.0);

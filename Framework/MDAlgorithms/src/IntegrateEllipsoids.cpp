@@ -404,8 +404,8 @@ void IntegrateEllipsoids::exec() {
     if (Geometry::IndexingUtils::ValidIndex(hkl, 1.0)) {
       peak_q_list.emplace_back(peaks[i].getQLabFrame());
       qList.emplace_back(1., V3D(peaks[i].getQLabFrame()));
-      hkl_vectors.push_back(hkl);
-      mnp_vectors.push_back(mnp);
+      hkl_vectors.emplace_back(hkl);
+      mnp_vectors.emplace_back(mnp);
       indexed_count++;
     }
   }
@@ -535,13 +535,13 @@ void IntegrateEllipsoids::exec() {
       if (axes_radii.size() == 3) {
         if (inti / sigi > cutoffIsigI || cutoffIsigI == EMPTY_DBL()) {
           if (mnp == V3D(0, 0, 0)) {
-            principalaxis1.push_back(axes_radii[0]);
-            principalaxis2.push_back(axes_radii[1]);
-            principalaxis3.push_back(axes_radii[2]);
+            principalaxis1.emplace_back(axes_radii[0]);
+            principalaxis2.emplace_back(axes_radii[1]);
+            principalaxis3.emplace_back(axes_radii[2]);
           } else {
-            sateprincipalaxis1.push_back(axes_radii[0]);
-            sateprincipalaxis2.push_back(axes_radii[1]);
-            sateprincipalaxis3.push_back(axes_radii[2]);
+            sateprincipalaxis1.emplace_back(axes_radii[0]);
+            sateprincipalaxis2.emplace_back(axes_radii[1]);
+            sateprincipalaxis3.emplace_back(axes_radii[2]);
           }
         }
       }
@@ -635,13 +635,13 @@ void IntegrateEllipsoids::exec() {
           peaks[i].setSigmaIntensity(sigi);
           if (axes_radii.size() == 3) {
             if (mnp == V3D(0, 0, 0)) {
-              principalaxis1.push_back(axes_radii[0]);
-              principalaxis2.push_back(axes_radii[1]);
-              principalaxis3.push_back(axes_radii[2]);
+              principalaxis1.emplace_back(axes_radii[0]);
+              principalaxis2.emplace_back(axes_radii[1]);
+              principalaxis3.emplace_back(axes_radii[2]);
             } else {
-              sateprincipalaxis1.push_back(axes_radii[0]);
-              sateprincipalaxis2.push_back(axes_radii[1]);
-              sateprincipalaxis3.push_back(axes_radii[2]);
+              sateprincipalaxis1.emplace_back(axes_radii[0]);
+              sateprincipalaxis2.emplace_back(axes_radii[1]);
+              sateprincipalaxis3.emplace_back(axes_radii[2]);
             }
           }
         } else {
@@ -736,7 +736,7 @@ void IntegrateEllipsoids::calculateE1(
     V3D E1 = V3D(-std::sin(tt1) * std::cos(ph1), -std::sin(tt1) * std::sin(ph1),
                  1. - std::cos(tt1)); // end of trajectory
     E1 = E1 * (1. / E1.norm());       // normalize
-    E1Vec.push_back(E1);
+    E1Vec.emplace_back(E1);
   }
 }
 

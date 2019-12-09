@@ -5,7 +5,8 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
-from __future__ import (absolute_import, division, print_function)
+from __future__ import (absolute_import, division, print_function, unicode_literals)
+from six import string_types
 from Direct.PropertiesDescriptors import *
 from Direct.RunDescriptor import RunDescriptor,RunDescriptorDependent
 from mantid.simpleapi import *
@@ -202,7 +203,7 @@ class NonIDF_Properties(object):
                     facility_ = config.getFacility('TEST_LIVE')
                 #end
 
-            elif isinstance(Instrument,str): # instrument name defined
+            elif isinstance(Instrument, string_types): # instrument name defined
                 new_name,full_name,facility_ = prop_helpers.check_instrument_name(None,Instrument)
                 #idf_dir = config.getString('instrumentDefinitgeton.directory')
                 idf_file = api.ExperimentInfo.getInstrumentFilename(full_name)

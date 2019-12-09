@@ -63,18 +63,16 @@ createDiffractionData(const int nPixels = 100, const int nEventsPerPeak = 20,
   // Set the instrument to be the fake rectangular bank above.
   peaksWS->setInstrument(inst);
   // Set the oriented lattice for a cubic crystal
-  OrientedLattice ol(6, 6, 6, 90, 90, 90);
-  ol.setUFromVectors(V3D(6, 0, 0), V3D(0, 6, 0));
+  auto lattice = std::make_unique<OrientedLattice>(6, 6, 6, 90, 90, 90);
+  lattice->setUFromVectors(V3D(6, 0, 0), V3D(0, 6, 0));
   Matrix<double> modUB(3, 3, false);
-  Matrix<double> UB = ol.getUB();
+  Matrix<double> UB = lattice->getUB();
   modUB[0][0] = 0.2;
-  // modUB = UB.Invert() * modUB;
-  ol.setModUB(modUB);
-  ol.setMaxOrder(1);
-  ol.setCrossTerm(false);
-  ol.setModHKL(0, 0.5, 0., 0., 0., 0., 0., 0., 0.);
-
-  peaksWS->mutableSample().setOrientedLattice(&ol);
+  lattice->setModUB(modUB);
+  lattice->setMaxOrder(1);
+  lattice->setCrossTerm(false);
+  lattice->setModHKL(0, 0.5, 0., 0., 0., 0., 0., 0., 0.);
+  peaksWS->mutableSample().setOrientedLattice(std::move(lattice));
 
   // Make an event workspace and add fake peak data
   auto eventWS = boost::make_shared<EventWorkspace>();
@@ -218,9 +216,9 @@ public:
     rebinAlg->initialize();
     rebinAlg->setProperty("InputWorkspace", m_eventWS);
     auto params = std::vector<double>();
-    params.push_back(950);
-    params.push_back(10);
-    params.push_back(2500);
+    params.emplace_back(950);
+    params.emplace_back(10);
+    params.emplace_back(2500);
     rebinAlg->setProperty("Params", params);
     rebinAlg->setProperty("PreserveEvents", false); // Make a histo workspace
     rebinAlg->setPropertyValue("OutputWorkspace", "dummy");
@@ -462,9 +460,9 @@ public:
     rebinAlg->initialize();
     rebinAlg->setProperty("InputWorkspace", m_eventWS);
     auto params = std::vector<double>();
-    params.push_back(950);
-    params.push_back(5);
-    params.push_back(2500);
+    params.emplace_back(950);
+    params.emplace_back(5);
+    params.emplace_back(2500);
     rebinAlg->setProperty("Params", params);
     rebinAlg->setProperty("PreserveEvents", false); // Make a histo workspace
     rebinAlg->setPropertyValue("OutputWorkspace", "dummy");

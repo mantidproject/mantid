@@ -118,7 +118,6 @@ set(SRC_FILES
     src/Rasterize.cpp
     src/Rendering/GeometryHandler.cpp
     src/Rendering/GeometryTriangulator.cpp
-    src/Rendering/RenderingHelpers.cpp
     src/Rendering/ShapeInfo.cpp
     src/Rendering/vtkGeometryCacheReader.cpp
     src/Rendering/vtkGeometryCacheWriter.cpp
@@ -280,7 +279,6 @@ set(INC_FILES
     inc/MantidGeometry/Rasterize.h
     inc/MantidGeometry/Rendering/GeometryHandler.h
     inc/MantidGeometry/Rendering/GeometryTriangulator.h
-    inc/MantidGeometry/Rendering/OpenGL_Headers.h
     inc/MantidGeometry/Rendering/RenderingHelpers.h
     inc/MantidGeometry/Rendering/RenderingMesh.h
     inc/MantidGeometry/Rendering/ShapeInfo.h
@@ -458,12 +456,25 @@ if(APPLE)
   add_definitions(-DHAVE_IOSTREAM -DHAVE_LIMITS -DHAVE_IOMANIP)
 endif()
 
+if(ENABLE_OPENGL)
+  list(APPEND
+    INC_FILES
+    inc/MantidGeometry/Rendering/OpenGL_Headers.h)
+  list(APPEND
+    SRC_FILES
+    src/Rendering/RenderingHelpersOpenGL.cpp)
+else()
+  list(APPEND
+    SRC_FILES
+    src/Rendering/RenderingHelpersThrowing.cpp)
+endif()
+
 # Add a precompiled header where they are supported
 enable_precompiled_headers(inc/MantidGeometry/PrecompiledHeader.h SRC_FILES)
 # Add the target for this directory
 add_library(Geometry ${SRC_FILES} ${INC_FILES})
 
-target_include_directories(Geometry SYSTEM PUBLIC ${OPENGL_INCLUDE_DIR} ${TBB_INCLUDE_DIRS} ${GSL_INCLUDE_DIR} ${Boost_INCLUDE_DIRS})
+target_include_directories(Geometry SYSTEM PUBLIC  ${TBB_INCLUDE_DIRS} ${GSL_INCLUDE_DIR} ${Boost_INCLUDE_DIRS})
 
 # Set the name of the generated library
 set_target_properties(Geometry
@@ -472,9 +483,9 @@ set_target_properties(Geometry
                                  COMPILE_DEFINITIONS
                                  IN_MANTID_GEOMETRY)
 
-if(OSX_VERSION VERSION_GREATER 10.8)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(Geometry
-                        PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+                        PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set_target_properties(Geometry
                         PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
@@ -501,6 +512,14 @@ target_link_libraries(Geometry
                       LINK_PUBLIC
                       ${TBB_LIBRARIES}
                       ${TBB_MALLOC_LIBRARIES})
+
+if(ENABLE_OPENGL)
+  target_include_directories(Geometry SYSTEM PRIVATE ${OPENGL_INCLUDE_DIR})
+  target_link_libraries(Geometry
+    LINK_PRIVATE
+    ${OPENGL_gl_LIBRARY}
+    ${OPENGL_glu_LIBRARY})
+endif()
 
 if(ENABLE_OPENCASCADE)
   target_link_libraries(Geometry LINK_PRIVATE ${OPENCASCADE_LIBRARIES})

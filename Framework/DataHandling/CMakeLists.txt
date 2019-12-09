@@ -126,7 +126,6 @@ set(SRC_FILES
     src/LoadSwans.cpp
     src/LoadTBL.cpp
     src/LoadTOFRawNexus.cpp
-    src/LoadVulcanCalFile.cpp
     src/MaskDetectors.cpp
     src/MaskDetectorsInShape.cpp
     src/MaskSpectra.cpp
@@ -325,7 +324,6 @@ set(INC_FILES
     inc/MantidDataHandling/LoadSwans.h
     inc/MantidDataHandling/LoadTBL.h
     inc/MantidDataHandling/LoadTOFRawNexus.h
-    inc/MantidDataHandling/LoadVulcanCalFile.h
     inc/MantidDataHandling/MaskDetectors.h
     inc/MantidDataHandling/MaskDetectorsInShape.h
     inc/MantidDataHandling/MaskSpectra.h
@@ -517,7 +515,6 @@ set(TEST_FILES
     LoadTBLTest.h
     LoadTOFRawNexusTest.h
     LoadTest.h
-    LoadVulcanCalFileTest.h
     MaskDetectorsInShapeTest.h
     MaskDetectorsTest.h
     MaskSpectraTest.h
@@ -609,7 +606,7 @@ set_target_properties(DataHandling
                                  COMPILE_DEFINITIONS
                                  "IN_MANTID_DATAHANDLING")
 
-if(OSX_VERSION VERSION_GREATER 10.8)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(DataHandling
                         PROPERTIES INSTALL_RPATH
                                    "@loader_path/../Contents/MacOS")

@@ -12,9 +12,9 @@
 #include "MantidPythonInterface/core/Policies/MatrixToNumpy.h"
 #include <boost/python/class.hpp>
 
+using Mantid::Geometry::angDegrees;
 using Mantid::Geometry::OrientedLattice;
 using Mantid::Geometry::UnitCell;
-using Mantid::Geometry::angDegrees;
 using namespace boost::python;
 
 namespace //<unnamed>

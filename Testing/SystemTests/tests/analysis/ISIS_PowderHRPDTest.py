@@ -16,9 +16,11 @@ from mantid import config
 
 from isis_powder import HRPD, SampleDetails
 
+
 DIRS = config['datasearch.directories'].split(';')
 user_name = "Test"
 cycle_number = "16_5"
+WINDOW = "10-110"
 
 # Setup various path details
 
@@ -47,7 +49,7 @@ calibration_dir = os.path.join(input_dir, calibration_folder_name)
 spline_path = os.path.join(calibration_dir, spline_rel_path)
 
 
-class CreateVanadiumTest(systemtesting.MantidSystemTest):
+class CreateVanadiumNoSolidAngleTest(systemtesting.MantidSystemTest):
 
     calibration_results = None
     existing_config = config['datasearch.directories']
@@ -57,7 +59,7 @@ class CreateVanadiumTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         setup_mantid_paths()
-        self.calibration_results = run_vanadium_calibration()
+        self.calibration_results = run_vanadium_calibration(do_solid_angle_corrections=False)
 
     def validate(self):
         self.tolerance = 0.05  # Required for difference in spline data between operating systems
@@ -73,7 +75,7 @@ class CreateVanadiumTest(systemtesting.MantidSystemTest):
             config['datasearch.directories'] = self.existing_config
 
 
-class FocusTest(systemtesting.MantidSystemTest):
+class FocusNoSolidAngleTest(systemtesting.MantidSystemTest):
 
     focus_results = None
     existing_config = config["datasearch.directories"]
@@ -84,7 +86,7 @@ class FocusTest(systemtesting.MantidSystemTest):
     def runTest(self):
         # Gen vanadium calibration first
         setup_mantid_paths()
-        self.focus_results = run_focus()
+        self.focus_results = run_focus(do_solid_angle_corrections=False)
 
     def validate(self):
         # check output files as expected
@@ -117,15 +119,45 @@ class FocusTest(systemtesting.MantidSystemTest):
             assert_output_file_exists(output_dat_dir, tof_filename)
             # looks like TOF data
             self.assertTrue(
-                9800 < first_x_value(os.path.join(output_dat_dir, tof_filename)) < 10500,
+                9700 < first_x_value(os.path.join(output_dat_dir, tof_filename)) < 10500,
                 msg="First TOF value={}".format(
                     first_x_value(os.path.join(output_dat_dir, tof_filename))))
 
         if platform.system() == "Darwin":  # OSX requires higher tolerance for splines
             self.tolerance = 0.47
         else:
-            self.tolerance = 0.16
+            self.tolerance = 0.20
         return self.focus_results.name(), "HRPD66063_focused.nxs"
+
+    def cleanup(self):
+        try:
+            _try_delete(spline_path)
+            _try_delete(output_dir)
+        finally:
+            config["datasearch.directories"] = self.existing_config
+            mantid.mtd.clear()
+
+
+class VanadiumAndFocusWithSolidAngleTest(systemtesting.MantidSystemTest):
+
+    focus_results = None
+    existing_config = config["datasearch.directories"]
+
+    def requiredFiles(self):
+        return _gen_required_files()
+
+    def runTest(self):
+        setup_mantid_paths()
+        run_vanadium_calibration(do_solid_angle_corrections=True)
+        self.focus_results = run_focus(do_solid_angle_corrections=True)
+
+    def validate(self):
+        if platform.system() == "Darwin":  # OSX requires higher tolerance for splines
+            self.tolerance = 0.1
+            self.tolerance_is_rel_err = True
+        else:
+            self.tolerance = 0.20
+        return self.focus_results.name(), "HRPD66063_focused_with_sac.nxs"
 
     def cleanup(self):
         try:
@@ -153,13 +185,14 @@ def gen_required_run_numbers():
     ]  # Run to focus
 
 
-def run_vanadium_calibration():
+def run_vanadium_calibration(do_solid_angle_corrections):
     vanadium_run = 66031  # Choose arbitrary run from cycle 16_5
     inst_obj = setup_inst_object()
     inst_obj.create_vanadium(first_cycle_run_no=vanadium_run,
+                             do_solid_angle_corrections=do_solid_angle_corrections,
                              do_absorb_corrections=True,
                              multiple_scattering=False,
-                             window="10-110")
+                             window=WINDOW)
 
     # Check the spline looks good and was saved
     if not os.path.exists(spline_path):
@@ -170,7 +203,7 @@ def run_vanadium_calibration():
     return splined_ws
 
 
-def run_focus():
+def run_focus(do_solid_angle_corrections):
     [sample_empty, _, run_number] = gen_required_run_numbers()
     sample_empty_scale = 1
 
@@ -187,10 +220,11 @@ def run_focus():
     inst_object.set_sample_details(sample=sample)
 
     return inst_object.focus(run_number=run_number,
-                             window="10-110",
+                             window=WINDOW,
                              sample_empty=sample_empty,
                              sample_empty_scale=sample_empty_scale,
                              vanadium_normalisation=True,
+                             do_solid_angle_corrections=do_solid_angle_corrections,
                              do_absorb_corrections=True,
                              multiple_scattering=False)
 

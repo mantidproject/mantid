@@ -39,7 +39,8 @@ BackgroundRemover::BackgroundRemover(QWidget *parent)
     : UserSubWindow{parent}, m_sliceSelector(), m_inputDataControl(),
       m_displayControl(), m_fitControl{nullptr}, m_fourierTransform{nullptr} {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Interface", "DynamicPDF->BackgroundRemover", false);
+      Mantid::Kernel::FeatureType::Interface,
+      {"DynamicPDF", "BackgroundRemover"}, false);
 }
 
 /**

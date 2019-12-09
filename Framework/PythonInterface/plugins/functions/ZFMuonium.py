@@ -14,12 +14,14 @@ import numpy as np
 class ZFMuonium(IFunction1D):
 
     def category(self):
-        return "Muon"
+        return "MuonSpecific"
 
     def init(self):
         self.declareParameter("A0", 0.2)
-        self.declareParameter("FreqA", 0.3, 'Isotropic hyperfine coupling constant (MHz)')
-        self.declareParameter("FreqD", 0.2, 'Anisotropic hyperfine coupling constant (MHz)')
+        self.declareParameter(
+            "FreqA", 0.3, 'Isotropic hyperfine coupling constant (MHz)')
+        self.declareParameter(
+            "FreqD", 0.2, 'Anisotropic hyperfine coupling constant (MHz)')
         self.declareParameter("FCut", 1.0, 'Frequency cut (MHz)')
         self.declareParameter("Phi", 0.0, 'Phase')
         self.addConstraints("FreqA > 0")
@@ -27,7 +29,7 @@ class ZFMuonium(IFunction1D):
         self.addConstraints("FCut > 0")
 
     def function1D(self, x):
-        A0= self.getParameterValue("A0")
+        A0 = self.getParameterValue("A0")
         FreqA = self.getParameterValue("FreqA")
         FreqD = self.getParameterValue("FreqD")
         Fcut = self.getParameterValue("FCut")
@@ -44,5 +46,6 @@ class ZFMuonium(IFunction1D):
             A2 = 2
             A3 = 2
         return A0 * (A1 * np.cos(W1 * x + Phi) + A2 * np.cos(W2 * x + Phi) + A3 * np.cos(W3 * x + Phi)) / 6
+
 
 FunctionFactory.subscribe(ZFMuonium)

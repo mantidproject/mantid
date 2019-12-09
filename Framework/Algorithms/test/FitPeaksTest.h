@@ -29,8 +29,8 @@ using namespace Mantid::DataObjects;
 
 using namespace std;
 
-using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::Points;
 
 class FitPeaksTest : public CxxTest::TestSuite {
@@ -73,7 +73,7 @@ public:
 
     // create a 1-value peak index vector for peak (0) at X=5
     std::vector<int> peak_index_vec;
-    peak_index_vec.push_back(0);
+    peak_index_vec.emplace_back(0);
     const std::string ws_name("peakcenter1");
     const std::string peak_center_ws_name =
         genPeakCenterWorkspace(peak_index_vec, ws_name);
@@ -846,19 +846,19 @@ public:
     parvalues.clear();
 
     parnames.emplace_back("I");
-    parvalues.push_back(2.5e+06);
+    parvalues.emplace_back(2.5e+06);
 
     parnames.emplace_back("A");
-    parvalues.push_back(5400);
+    parvalues.emplace_back(5400);
 
     parnames.emplace_back("B");
-    parvalues.push_back(1700);
+    parvalues.emplace_back(1700);
 
     parnames.emplace_back("X0");
-    parvalues.push_back(1.07);
+    parvalues.emplace_back(1.07);
 
     parnames.emplace_back("S");
-    parvalues.push_back(0.000355);
+    parvalues.emplace_back(0.000355);
 
     return;
   }
@@ -1009,13 +1009,13 @@ public:
     parvalues.clear();
 
     parnames.emplace_back("Height");
-    parvalues.push_back(2.5e+06);
+    parvalues.emplace_back(2.5e+06);
 
     parnames.emplace_back("Sigma");
-    parvalues.push_back(0.1);
+    parvalues.emplace_back(0.1);
 
     parnames.emplace_back("PeakCentre");
-    parvalues.push_back(10.0);
+    parvalues.emplace_back(10.0);
 
     return;
   }

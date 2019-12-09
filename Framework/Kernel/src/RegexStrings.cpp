@@ -145,7 +145,7 @@ int StrFullCut(std::string &Text, const boost::regex &Re,
       T tmp;
       if (!Mantid::Kernel::Strings::convert((*m1)[index].str(), tmp))
         return 0;
-      Aout.push_back(tmp);
+      Aout.emplace_back(tmp);
     }
     ML = m1->position(zero) + (*m1)[0].str().length();
   }
@@ -182,7 +182,7 @@ int StrFullCut(std::string &Text, const boost::regex &Re,
   for (; m1 != empty; m1++) {
     ML = static_cast<int>(m1->position(zero) + (*m1)[0].str().length());
     for (unsigned int index = 1; index < m1->size(); index++)
-      Aout.push_back((*m1)[index].str());
+      Aout.emplace_back((*m1)[index].str());
   }
   logger.information() << "SFC :: " << M0 << " " << ML << '\n';
   // Found object
@@ -211,7 +211,7 @@ int StrFullSplit(const std::string &text, const boost::regex &Re,
       T tmp;
       if (!Mantid::Kernel::Strings::convert((*m1)[index].str(), tmp))
         return static_cast<int>(Aout.size());
-      Aout.push_back(tmp);
+      Aout.emplace_back(tmp);
     }
   return static_cast<int>(Aout.size());
 }
@@ -237,7 +237,7 @@ int StrSingleSplit(const std::string &text, const boost::regex &Re,
       T tmp;
       if (!Mantid::Kernel::Strings::convert((*m1)[index].str(), tmp))
         return static_cast<int>(Aout.size());
-      Aout.push_back(tmp);
+      Aout.emplace_back(tmp);
     }
 
   return static_cast<int>(Aout.size());
@@ -262,7 +262,7 @@ int StrSingleSplit(const std::string &text, const boost::regex &Re,
   boost::sregex_iterator empty;
   if (m1 != empty) {
     for (unsigned int index = 1; index < m1->size(); index++)
-      Aout.push_back((*m1)[index].str());
+      Aout.emplace_back((*m1)[index].str());
     return 1;
   }
   return 0;

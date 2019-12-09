@@ -834,10 +834,10 @@ public:
     table->addColumn("vector_double", "DoubleVectorColumn");
 
     std::vector<double> d1, d2, d3;
-    d1.push_back(0.5);
-    d2.push_back(1.0);
-    d2.push_back(2.5);
-    d3.push_back(4.0);
+    d1.emplace_back(0.5);
+    d2.emplace_back(1.0);
+    d2.emplace_back(2.5);
+    d3.emplace_back(4.0);
 
     std::vector<int> i1(Strings::parseRange("1"));
     std::vector<int> i2(Strings::parseRange("2,3,"));
@@ -1242,16 +1242,16 @@ private:
       return;
 
     std::vector<std::vector<int>> groups(6);
-    groups[0].push_back(9);
-    groups[0].push_back(12);
-    groups[1].push_back(5);
-    groups[1].push_back(10);
-    groups[2].push_back(20);
-    groups[2].push_back(21);
-    groups[3].push_back(10);
-    groups[4].push_back(50);
-    groups[5].push_back(15);
-    groups[5].push_back(20);
+    groups[0].emplace_back(9);
+    groups[0].emplace_back(12);
+    groups[1].emplace_back(5);
+    groups[1].emplace_back(10);
+    groups[2].emplace_back(20);
+    groups[2].emplace_back(21);
+    groups[3].emplace_back(10);
+    groups[4].emplace_back(50);
+    groups[5].emplace_back(15);
+    groups[5].emplace_back(20);
 
     EventWorkspace_sptr ws =
         WorkspaceCreationHelper::createGroupedEventWorkspace(groups, 30, 1.0);
@@ -1305,8 +1305,8 @@ private:
       inputWs->setPointStandardDeviations(0, dx1);
       inputWs->setPointStandardDeviations(1, dx2);
       if (legacyXErrors) {
-        inputWs->dataDx(0).push_back(1);
-        inputWs->dataDx(1).push_back(1);
+        inputWs->dataDx(0).emplace_back(1);
+        inputWs->dataDx(1).emplace_back(1);
       }
     }
     if (numericAxis) {

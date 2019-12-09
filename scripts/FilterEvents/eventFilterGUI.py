@@ -198,7 +198,7 @@ class MainWindow(QMainWindow):
         self._defaultdir = os.getcwd()
 
         # register startup
-        mantid.UsageService.registerFeatureUsage("Interface", "EventFilter", False)
+        mantid.UsageService.registerFeatureUsage(mantid.kernel.FeatureType.Interface, "EventFilter", False)
 
     def on_mouseDownEvent(self, event):
         """ Respond to pick up a value with mouse down event
@@ -963,17 +963,15 @@ class MainWindow(QMainWindow):
         fastLog = self.ui.checkBox_fastLog.isChecked()
 
         title = str(self.ui.lineEdit_title.text())
-
-        splitws, infows = api.GenerateEventsFilter(InputWorkspace=self._dataWS,
-                                                   UnitOfTime="Seconds",
-                                                   TitleOfSplitters=title,
-                                                   OutputWorkspace=splitwsname,
-                                                   LogName=samplelog,
-                                                   FastLog=fastLog,
-                                                   InformationWorkspace=splitinfowsname,
-                                                   **kwargs)
-
         try:
+            splitws, infows = api.GenerateEventsFilter(InputWorkspace=self._dataWS,
+                                                       UnitOfTime="Seconds",
+                                                       TitleOfSplitters=title,
+                                                       OutputWorkspace=splitwsname,
+                                                       LogName=samplelog,
+                                                       FastLog=fastLog,
+                                                       InformationWorkspace=splitinfowsname,
+                                                       **kwargs)
             self.splitWksp(splitws, infows)
         except RuntimeError as e:
             self._setErrorMsg("Splitting Failed!\n %s" % (str(e)))

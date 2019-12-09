@@ -266,7 +266,7 @@ void IFunction::addTie(std::unique_ptr<ParameterTie> tie) {
     }
   }
   if (!found) {
-    m_ties.push_back(std::move(tie));
+    m_ties.emplace_back(std::move(tie));
     setParameterStatus(iPar, Tied);
   }
 }
@@ -368,7 +368,7 @@ void IFunction::addConstraint(std::unique_ptr<IConstraint> ic) {
     }
   }
   if (!found) {
-    m_constraints.push_back(std::move(ic));
+    m_constraints.emplace_back(std::move(ic));
   }
 }
 
@@ -478,7 +478,7 @@ IFunction::writeToString(const std::string &parentLocalAttributesStr) const {
     ostr << ',' << paramOut.str();
     // Output non-default ties only.
     if (getParameterStatus(i) == Fixed) {
-      ties.push_back(paramOut.str());
+      ties.emplace_back(paramOut.str());
     }
   }
 
@@ -492,7 +492,7 @@ IFunction::writeToString(const std::string &parentLocalAttributesStr) const {
   // collect the non-default ties
   auto tiesString = writeTies();
   if (!tiesString.empty()) {
-    ties.push_back(tiesString);
+    ties.emplace_back(tiesString);
   }
   // print the ties
   if (!ties.empty()) {
@@ -549,7 +549,7 @@ void IFunction::addConstraints(const std::string &str, bool isDefault) {
 std::vector<std::string> IFunction::getParameterNames() const {
   std::vector<std::string> out;
   for (size_t i = 0; i < nParams(); ++i) {
-    out.push_back(parameterName(i));
+    out.emplace_back(parameterName(i));
   }
   return out;
 }
@@ -1583,7 +1583,7 @@ void IFunction::sortTies() {
       }
       orderedTieNodes.push_front(newNode);
     } else {
-      orderedTieNodes.push_back(newNode);
+      orderedTieNodes.emplace_back(newNode);
     }
   }
   for (auto &&node : orderedTieNodes) {

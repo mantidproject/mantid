@@ -91,7 +91,7 @@ void LoadRawBin0::exec() {
 
   // no real X values for bin 0,so initialize this to zero
   auto channelsVec = boost::make_shared<HistogramData::HistogramX>(1, 0);
-  m_timeChannelsVec.push_back(channelsVec);
+  m_timeChannelsVec.emplace_back(channelsVec);
 
   auto histTotal = static_cast<double>(m_total_specs * m_numberOfPeriods);
   int64_t histCurrent = -1;

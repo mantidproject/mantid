@@ -90,11 +90,17 @@ mtd_add_qt_library(
     ${CORE_MANTIDLIBS}
     ${POCO_LIBRARIES}
     ${Boost_LIBRARIES}
-  QT4_LINK_LIBS Qwt5
-  MTD_QT_LINK_LIBS MantidQtWidgetsCommon
-  INSTALL_DIR ${LIB_DIR}
-  OSX_INSTALL_RPATH @loader_path/../MacOS
-  LINUX_INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}"
+  QT4_LINK_LIBS
+    Qwt5
+  MTD_QT_LINK_LIBS
+    MantidQtWidgetsCommon
+  INSTALL_DIR
+    ${LIB_DIR}
+  OSX_INSTALL_RPATH
+    @loader_path/../MacOS
+    @loader_path/../Frameworks
+  LINUX_INSTALL_RPATH
+    "\$ORIGIN/../${LIB_DIR}"
 )
 
 set(
@@ -195,7 +201,11 @@ mtd_add_qt_library(
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
     MantidQtWidgetsMplCpp
-  INSTALL_DIR ${WORKBENCH_LIB_DIR}
-  OSX_INSTALL_RPATH @loader_path/../MacOS
-  LINUX_INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}"
+  INSTALL_DIR
+    ${WORKBENCH_LIB_DIR}
+  OSX_INSTALL_RPATH
+    @loader_path/../MacOS
+    @loader_path/../Frameworks
+  LINUX_INSTALL_RPATH
+    "\$ORIGIN/../${LIB_DIR}"
 )

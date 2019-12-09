@@ -13,11 +13,11 @@ set(SRC_FILES
     src/ChecksumHelper.cpp
     src/CompositeValidator.cpp
     src/ComputeResourceInfo.cpp
-    src/ConfigService.cpp
     src/ConfigObserver.cpp
     src/ConfigPropertyObserver.cpp
-    src/DateAndTime.cpp
+    src/ConfigService.cpp
     src/DataItem.cpp
+    src/DateAndTime.cpp
     src/DateAndTimeHelpers.cpp
     src/DateTimeValidator.cpp
     src/DateValidator.cpp
@@ -112,6 +112,7 @@ set(SRC_FILES
     src/TimeSeriesProperty.cpp
     src/TimeSplitter.cpp
     src/Timer.cpp
+    src/TopicInfo.cpp
     src/Unit.cpp
     src/UnitConversion.cpp
     src/UnitLabel.cpp
@@ -160,12 +161,12 @@ set(INC_FILES
     inc/MantidKernel/ChecksumHelper.h
     inc/MantidKernel/CompositeValidator.h
     inc/MantidKernel/ComputeResourceInfo.h
-    inc/MantidKernel/ConfigService.h
     inc/MantidKernel/ConfigObserver.h
     inc/MantidKernel/ConfigPropertyObserver.h
-    inc/MantidKernel/DateAndTime.h
+    inc/MantidKernel/ConfigService.h
     inc/MantidKernel/DataItem.h
     inc/MantidKernel/DataService.h
+    inc/MantidKernel/DateAndTime.h
     inc/MantidKernel/DateAndTimeHelpers.h
     inc/MantidKernel/DateTimeValidator.h
     inc/MantidKernel/DateValidator.h
@@ -181,8 +182,8 @@ set(INC_FILES
     inc/MantidKernel/EmptyValues.h
     inc/MantidKernel/EnabledWhenProperty.h
     inc/MantidKernel/EnvironmentHistory.h
-    inc/MantidKernel/ErrorReporter.h
     inc/MantidKernel/EqualBinsChecker.h
+    inc/MantidKernel/ErrorReporter.h
     inc/MantidKernel/Exception.h
     inc/MantidKernel/FacilityInfo.h
     inc/MantidKernel/Fast_Exponential.h
@@ -240,7 +241,6 @@ set(INC_FILES
     inc/MantidKernel/NetworkProxy.h
     inc/MantidKernel/NeutronAtom.h
     inc/MantidKernel/NexusDescriptor.h
-    inc/MantidKernel/normal_distribution.h
     inc/MantidKernel/NullValidator.h
     inc/MantidKernel/OptionalBool.h
     inc/MantidKernel/ParaViewVersion.h
@@ -289,6 +289,7 @@ set(INC_FILES
     inc/MantidKernel/TimeSplitter.h
     inc/MantidKernel/Timer.h
     inc/MantidKernel/Tolerance.h
+    inc/MantidKernel/TopicInfo.h
     inc/MantidKernel/TypedValidator.h
     inc/MantidKernel/Unit.h
     inc/MantidKernel/UnitConversion.h
@@ -308,7 +309,8 @@ set(INC_FILES
     inc/MantidKernel/WriteLock.h
     inc/MantidKernel/XMLInstantiator.h
     inc/MantidKernel/cow_ptr.h
-    inc/MantidKernel/make_cow.h)
+    inc/MantidKernel/make_cow.h
+    inc/MantidKernel/normal_distribution.h)
 
 set(TEST_FILES
     ArrayBoundedValidatorTest.h
@@ -330,9 +332,9 @@ set(TEST_FILES
     ChecksumHelperTest.h
     CompositeValidatorTest.h
     ComputeResourceInfoTest.h
-    ConfigServiceTest.h
     ConfigObserverTest.h
     ConfigPropertyObserverTest.h
+    ConfigServiceTest.h
     CowPtrTest.h
     DataServiceTest.h
     DateAndTimeHelpersTest.h
@@ -348,8 +350,8 @@ set(TEST_FILES
     EigenConversionHelpersTest.h
     EnabledWhenPropertyTest.h
     EnvironmentHistoryTest.h
-    ErrorReporterTest.h
     EqualBinsCheckerTest.h
+    ErrorReporterTest.h
     FacilitiesTest.h
     FileDescriptorTest.h
     FileValidatorTest.h
@@ -403,8 +405,8 @@ set(TEST_FILES
     PropertyManagerTest.h
     PropertyNexusTest.h
     PropertyTest.h
-    PropertyWithValueTest.h
     PropertyWithValueJSONTest.h
+    PropertyWithValueTest.h
     ProxyInfoTest.h
     QuatTest.h
     ReadLockTest.h
@@ -430,6 +432,7 @@ set(TEST_FILES
     TimeSeriesPropertyTest.h
     TimeSplitterTest.h
     TimerTest.h
+    TopicInfoTest.h
     TypedValidatorTest.h
     UnitConversionTest.h
     UnitFactoryTest.h
@@ -490,8 +493,8 @@ target_include_directories(Kernel SYSTEM
                            PRIVATE ${NEXUS_INCLUDE_DIR} ${GSL_INCLUDE_DIR}
                                    ${OPENSSL_INCLUDE_DIR} ${SPAN_INCLUDE_DIR})
 
-if(OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties(Kernel PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  set_target_properties(Kernel PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set_target_properties(Kernel
                         PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
@@ -506,13 +509,13 @@ if(GCC_COMPILER_VERSION AND GCC_COMPILER_VERSION VERSION_LESS "4.5")
   target_link_libraries(Kernel LINK_PRIVATE stdc++)
 endif()
 target_link_libraries(Kernel
-                      LINK_PUBLIC
+                      PUBLIC
                       ${NEXUS_LIBRARIES}
                       Eigen3::Eigen
                       ${JSONCPP_LIBRARIES}
                       ${TBB_LIBRARIES}
                       ${TBB_MALLOC_LIBRARIES}
-                      LINK_PRIVATE
+                      PRIVATE
                       ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${GSL_LIBRARIES}
                       ${MANTIDLIBS}
@@ -633,11 +636,7 @@ mtd_install_targets(TARGETS Kernel INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
 
 # Create the properties file for the installer
 set(MANTID_ROOT_BUILD ${MANTID_ROOT})
-if(APPLE AND ENABLE_MANTIDPLOT)
-  set(MANTID_ROOT ../..)
-else()
-  set(MANTID_ROOT ..)
-endif()
+set(MANTID_ROOT ..)
 
 # Log to file for installed packages but not mpi
 if(MPI_BUILD OR MPI_EXPERIMENTAL)

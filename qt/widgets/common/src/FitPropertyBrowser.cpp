@@ -44,6 +44,7 @@
 #include <QClipboard>
 #include <QGridLayout>
 #include <QInputDialog>
+#include <QListWidget>
 #include <QMenu>
 #include <QMessageBox>
 #include <QPushButton>
@@ -106,10 +107,12 @@ FitPropertyBrowser::FitPropertyBrowser(QWidget *parent, QObject *mantidui)
       m_shouldBeNormalised(false), m_oldWorkspaceIndex(-1) {
   Mantid::API::FrameworkManager::Instance().loadPlugins();
 
-  // Try to create a Gaussian. Failing will mean that CurveFitting dll is not
-  // loaded
-  boost::shared_ptr<Mantid::API::IFunction>(
-      Mantid::API::FunctionFactory::Instance().createFunction("Gaussian"));
+  // If Gaussian does not exist then the plugins did not load.
+  if (!Mantid::API::FunctionFactory::Instance().exists("Gaussian")) {
+    throw std::runtime_error(
+        "FitPropertyBrowser: Unable to find Gaussian function\n"
+        "Has the CurveFitting plugin loaded?");
+  }
   if (m_autoBgName.toLower() == "none") {
     m_autoBgName = "";
   } else {
@@ -494,6 +497,13 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   layout->addWidget(m_browser);
   m_browser->setObjectName("tree_browser");
 
+  m_workspaceLabel = new QLabel("Workspaces");
+  layout->addWidget(m_workspaceLabel);
+  m_wsListWidget = new QListWidget();
+  layout->addWidget(m_wsListWidget);
+  m_workspaceLabel->hide();
+  m_wsListWidget->hide();
+
   setWidget(w);
 
   m_browser->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -503,6 +513,9 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
           SLOT(currentItemChanged(QtBrowserItem *)));
   connect(this, SIGNAL(multifitFinished()), this,
           SLOT(processMultiBGResults()));
+
+  connect(m_wsListWidget, SIGNAL(itemDoubleClicked(QListWidgetItem *)), this,
+          SLOT(workspaceDoubleClicked(QListWidgetItem *)));
 
   createCompositeFunction();
 
@@ -526,6 +539,40 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   m_changeSlotsEnabled = true;
 
   populateFunctionNames();
+}
+
+// Adds the fit result workspaces to the qlistwidget in the browser
+void FitPropertyBrowser::addFitResultWorkspacesToTableWidget() {
+  auto name = outputName();
+  std::vector<std::string> workspaceNames;
+  workspaceNames.reserve(3);
+  workspaceNames.emplace_back(name + "_NormalisedCovarianceMatrix");
+  workspaceNames.emplace_back(name + "_Parameters");
+  workspaceNames.emplace_back(name + "_Workspace");
+
+  for (const auto &name : workspaceNames) {
+    // check if already in the list
+    auto foundInList = m_wsListWidget->findItems(QString::fromStdString(name),
+                                                 Qt::MatchExactly);
+    if (foundInList.size() == 0 &&
+        AnalysisDataService::Instance().doesExist(name)) {
+      new QListWidgetItem(QString::fromStdString(name), m_wsListWidget);
+    }
+  }
+
+  auto noOfItems = m_wsListWidget->count();
+  if (noOfItems != 0) {
+    auto height = m_wsListWidget->sizeHintForRow(0) * (noOfItems + 1) +
+                  2 * m_wsListWidget->frameWidth();
+    m_wsListWidget->setMaximumHeight(height);
+    m_workspaceLabel->show();
+    m_wsListWidget->show();
+  }
+}
+
+void FitPropertyBrowser::workspaceDoubleClicked(QListWidgetItem *item) {
+  auto wsName = item->text();
+  emit workspaceClicked(wsName);
 }
 
 /**
@@ -706,7 +753,7 @@ void FitPropertyBrowser::addFunction() {
             m_registeredFunctions[i].toStdString());
     std::vector<std::string> tempCategories = f->categories();
     for (size_t j = 0; j < tempCategories.size(); ++j) {
-      categories[tempCategories[boost::lexical_cast<int>(j)]].push_back(
+      categories[tempCategories[boost::lexical_cast<int>(j)]].emplace_back(
           m_registeredFunctions[i].toStdString());
     }
   }
@@ -1688,7 +1735,7 @@ FitPropertyBrowser::getFunctionAtIndex(std::size_t const &index) const {
 }
 
 void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm *alg) {
-  // Emit a signal to show that the fitting has completed. (workspaceName that
+  // Emit a signal to show that the fitting has completed. (workspaceNames that
   // the fit has been done against is sent as a parameter)
   QString name(QString::fromStdString(alg->getProperty("InputWorkspace")));
   if (name.contains('_')) // Must be fitting to raw data, need to group under
@@ -1797,6 +1844,7 @@ void FitPropertyBrowser::hideEvent(QHideEvent *e) {
 void FitPropertyBrowser::setADSObserveEnabled(bool enabled) {
   observeAdd(enabled);
   observePostDelete(enabled);
+  observeRename(enabled);
 }
 
 /// workspace was added
@@ -1854,6 +1902,37 @@ void FitPropertyBrowser::postDeleteHandle(const std::string &wsName) {
   }
 
   m_enumManager->blockSignals(initialSignalsBlocked);
+
+  for (auto i = 0; i < m_wsListWidget->count(); ++i) {
+    auto item = m_wsListWidget->item(i);
+    if (item->text().toStdString() == wsName) {
+      m_wsListWidget->takeItem(m_wsListWidget->row(item));
+    }
+  }
+
+  if (m_wsListWidget->count() == 0) {
+    m_wsListWidget->hide();
+    m_workspaceLabel->hide();
+  }
+}
+
+void FitPropertyBrowser::renameHandle(const std::string &oldName,
+                                      const std::string &newName) {
+  int i = m_workspaceNames.indexOf(QString(oldName.c_str()));
+  if (i >= 0) {
+    m_workspaceNames.replace(i, QString::fromStdString(newName));
+    m_enumManager->setEnumNames(m_workspace, m_workspaceNames);
+  }
+  workspaceChange(QString::fromStdString(newName));
+
+  for (auto i = 0; i < m_wsListWidget->count(); ++i) {
+    auto item = m_wsListWidget->item(i);
+    if (item->text().toStdString() == oldName) {
+      m_wsListWidget->takeItem(m_wsListWidget->row(item));
+      m_wsListWidget->insertItem(m_wsListWidget->row(item),
+                                 QString::fromStdString(newName));
+    }
+  }
 }
 
 /** Check if the workspace can be used in the fit. The accepted types are
@@ -1933,7 +2012,7 @@ QVector<double> FitPropertyBrowser::getXRange() {
     auto col = tbl->getColumn(xColumnIndex);
     try {
       for (size_t i = 0; i < tbl->rowCount(); ++i) {
-        xColumnData.push_back(col->toDouble(i));
+        xColumnData.emplace_back(col->toDouble(i));
       }
     } catch (std::invalid_argument &err) {
       QMessageBox::critical(this, "Mantid - Error",
@@ -2815,9 +2894,6 @@ void FitPropertyBrowser::removeLogValue() {
 }
 
 void FitPropertyBrowser::sequentialFit() {
-  if (workspaceName() == outputName()) {
-    setOutputName(outputName() + "_res");
-  }
   SequentialFitDialog *dlg = new SequentialFitDialog(this, m_mantidui);
   std::string wsName = workspaceName();
   if (!wsName.empty() &&
@@ -3067,7 +3143,7 @@ void FitPropertyBrowser::processMultiBGResults() {
     // Mantid::API::MatrixWorkspace_sptr mws =
     // fun->createCalculatedWorkspace(fun->getMatrixWorkspace(),wi);
     // worspaceNames[i] =
-    // workspaceName()+"_"+QString::number(wi).toStdString()+"_Workspace";
+    // workspaceNames()+"_"+QString::number(wi).toStdString()+"_Workspace";
     // Mantid::API::AnalysisDataService::Instance().addOrReplace(worspaceNames[i],mws);
   }
 

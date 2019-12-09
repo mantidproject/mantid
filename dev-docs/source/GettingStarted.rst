@@ -73,10 +73,13 @@ Red Hat/Cent OS/Fedora
 
 Ubuntu
 ~~~~~~
-Follow the `Ubuntu instructions <http://download.mantidproject.org/ubuntu.html>`_ to add the
-stable release repository and mantid ppa. Download the latest
-`mantid-developer <https://sourceforge.net/projects/mantid/files/developer>`_
-package and install it:
+- Setup the Kitware APT repository to get a recent version of CMake by
+  following `these instructions <https://apt.kitware.com/>`_
+- Follow the `Ubuntu instructions <http://download.mantidproject.org/ubuntu.html>`_
+  to add the stable release repository and mantid ppa.
+- Download the latest
+  `mantid-developer <https://sourceforge.net/projects/mantid/files/developer>`_
+  package and install it:
 
 .. code-block:: sh
 
@@ -131,8 +134,8 @@ Archive access
 ##############
 
 It is very convenient to be able to access the data archive directly.
-At ISIS, this is automatically done on the Windows machines, however OSX
-requires some extra setup.
+At ISIS, this is automatically done on the Windows machines, however OSX and Linux
+require some extra setup.
 
 OSX
 ---
@@ -144,3 +147,49 @@ OSX
 * It can be found at `/Volumes/inst$`
 
 **NB** the address in step 2 sometimes changes - if it does not work, replace `80` with `55` or `3`.
+
+Linux
+------
+1. Install packages:
+
+* ``autofs``
+* ``smbfs`` - Ubuntu 12.04
+* ``cifs-utils`` - Ubuntu 14.04
+
+2. Create an ``/archive.creds`` file in the root directory containing this, filling in the relevant details:
+
+This should only be done if full disk encryption is enabled or if the ``archive.creds`` file is stored in a secure (encrypted) location; to ensure passwords are kept safe.
+
+.. code-block:: text
+
+   username=FEDERAL_ID_HERE
+   password=FED_PASSWD_HERE
+   domain=CLRC
+
+3. Edit ``/etc/auto.master`` and add the line:
+
+.. code-block:: text
+
+   /archive      /etc/auto.archive
+
+4. Create ``/etc/auto.archive`` and add the single line:
+
+.. code-block:: text
+
+   *     -fstype=cifs,ro,credentials=/archive.creds,file_mode=0444,dir_mode=0555       ://isisdatar55/&\$
+
+5. Enter the following commands:
+
+.. code-block:: bash
+
+   sudo chmod 400 /archive.creds
+   sudo mkdir /archive
+   service autofs restart
+
+Done. You can now access directories in the archive. Test it by doing:
+
+.. code-block:: bash
+
+   ls /archive/ndxalf
+
+If it's working the command should return ``ls: cannot access '/archive/ndxalf/DfsrPrivate': Permission denied``

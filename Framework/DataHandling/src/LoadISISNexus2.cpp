@@ -605,7 +605,7 @@ bool LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors,
       // The spec_min - spec_max range needs to be added to the spec list
       for (int64_t i = spec_min; i < spec_max + 1; ++i) {
         auto spec_num = static_cast<specnum_t>(i);
-        spec_list.push_back(spec_num);
+        spec_list.emplace_back(spec_num);
         std::sort(spec_list.begin(), spec_list.end());
         // supplied range converted into the list, so no more supplied range
       }
@@ -720,12 +720,12 @@ LoadISISNexus2::prepareSpectraBlocks(std::map<int64_t, std::string> &monitors,
   for (const auto &dataBlock : dataBlocks) {
     auto min = dataBlock.getMinSpectrumID();
     if (isMonitor(min)) {
-      m_spectraBlocks.push_back(
+      m_spectraBlocks.emplace_back(
           SpectraBlock(min, min, true, monitors.find(min)->second));
-      includedMonitors.push_back(min);
+      includedMonitors.emplace_back(min);
     } else {
       auto max = dataBlock.getMaxSpectrumID();
-      m_spectraBlocks.push_back(SpectraBlock(min, max, false, ""));
+      m_spectraBlocks.emplace_back(SpectraBlock(min, max, false, ""));
     }
   }
 

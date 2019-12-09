@@ -8,6 +8,9 @@ from qtpy import QtCore, QtWidgets
 
 from mantidqt.utils.qt import load_ui
 from mantidqt.widgets.workspacewidget import workspacetreewidget
+
+from mantid import UsageService
+from mantid.kernel import FeatureType
 from sans.common.enums import SaveType
 
 from qtpy import PYQT4
@@ -28,6 +31,8 @@ class SANSSaveOtherDialog(QtWidgets.QDialog, Ui_SaveOtherDialog):
         super(QtWidgets.QDialog, self).__init__(parent=parent_widget)
         self.subscribers = []
         self.setup_view()
+
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Save Other Tab"], False)
 
     def setup_view(self):
         self.setupUi(self)

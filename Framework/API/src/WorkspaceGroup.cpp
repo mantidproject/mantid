@@ -121,7 +121,7 @@ void WorkspaceGroup::addWorkspace(const Workspace_sptr &workspace) {
   const auto it =
       std::find(m_workspaces.begin(), m_workspaces.end(), workspace);
   if (it == m_workspaces.end()) {
-    m_workspaces.push_back(workspace);
+    m_workspaces.emplace_back(workspace);
   } else {
     g_log.warning() << "Workspace already exists in a WorkspaceGroup\n";
   }

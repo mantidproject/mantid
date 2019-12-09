@@ -232,7 +232,7 @@ endif()
 add_library(Crystal ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties(Crystal PROPERTIES OUTPUT_NAME MantidCrystal)
-if(OSX_VERSION VERSION_GREATER 10.8)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(Crystal
                         PROPERTIES INSTALL_RPATH
                                    "@loader_path/../Contents/MacOS/")

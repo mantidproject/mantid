@@ -55,8 +55,7 @@ struct InputArgument {
 };
 
 /// Comparator to allow sorting by dimension index.
-struct LessThanIndex
-    : std::binary_function<InputArgument, InputArgument, bool> {
+struct LessThanIndex {
   bool operator()(const InputArgument &a, const InputArgument &b) const {
     return a.index < b.index;
   }

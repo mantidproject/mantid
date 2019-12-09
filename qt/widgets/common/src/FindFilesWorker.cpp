@@ -100,7 +100,7 @@ void FindFilesWorker::run() {
         std::string result = fileSearcher.getFullPath(*it);
         Poco::File test(result);
         if ((!result.empty()) && test.exists()) {
-          filenames.push_back(*it);
+          filenames.emplace_back(*it);
           valueForProperty += QString::fromStdString(*it) + ",";
         } else {
           throw std::invalid_argument("File \"" + (*it) + "\" not found");
@@ -151,7 +151,7 @@ FindFilesWorker::getFilesFromAlgorithm() {
       dynamic_cast<MultipleFileProperty *>(prop);
 
   if (fileProp) {
-    filenames.push_back(fileProp->value());
+    filenames.emplace_back(fileProp->value());
   } else if (multiFileProp) {
     // This flattens any summed files to a set of single files so that you lose
     // the information about

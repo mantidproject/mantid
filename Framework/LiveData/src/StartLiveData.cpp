@@ -12,7 +12,6 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/System.h"
 #include "MantidLiveData/LoadLiveData.h"
 #include "MantidLiveData/MonitorLiveData.h"
 #include "MantidTypes/Core/DateAndTime.h"
@@ -126,7 +125,7 @@ void StartLiveData::removeListenerProperties() {
   // Find properties tagged with the listener property group
   for (const auto &prop : getProperties()) {
     if (prop->getGroup() == listenerPropertyGroup) {
-      propertiesToRemove.push_back(prop->name());
+      propertiesToRemove.emplace_back(prop->name());
     }
   }
 

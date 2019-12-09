@@ -1,0 +1,86 @@
+<?xml version='1.0' encoding='ASCII'?>
+<instrument xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.mantidproject.org/IDF/1.0" last-modified="2019-11-14 11:49:00.375183" name="HB3A" valid-from="2018-10-20 23:59:59" valid-to="3018-10-20 23:59:59" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd">
+  <!--Created by Ross Whitfield-->
+  <!--SOURCE-->
+  <component type="moderator">
+    <location z="-2.0"/>
+  </component>
+  <type is="Source" name="moderator"/>
+  <!--SAMPLE-->
+  <component type="sample-position">
+    <location x="0.0" y="0.0" z="0.0"/>
+  </component>
+  <type is="SamplePos" name="sample-position"/>
+  <!--PANEL Bottom-->
+  <component type="bank1">
+    <!-- beam center is at (256, 268) y=0.0-0.0002265625*12.5 -->
+    <location x="0.0" y="-0.00283203125" z="0.0"/>
+  </component>
+  <type name="bank1">
+    <component type="panel" idfillbyfirst="x" idstart="1" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <logfile eq="value/1000" id="det_trans"/>
+        </parameter>
+        <parameter name="t-position">
+          <logfile eq="-value" id="2theta"/>
+        </parameter>
+        <parameter name="roty">
+          <logfile eq="-value" id="2theta"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+  <!--PANEL Middle-->
+  <component type="bank2">
+    <!-- beam center is at (256, 268), detector is 11.6cm and gap is 5mm y=0.116+0.005-0.0002265625*12.5 -->
+    <location x="0.0" y="0.11816796875" z="0.0"/>
+  </component>
+  <type name="bank2">
+    <component type="panel" idfillbyfirst="x" idstart="262145" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <logfile eq="value/1000" id="det_trans"/>
+        </parameter>
+        <parameter name="t-position">
+          <logfile eq="-value" id="2theta"/>
+        </parameter>
+        <parameter name="roty">
+          <logfile eq="-value" id="2theta"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+  <!--PANEL Upper-->
+  <component type="bank3">
+    <!-- beam center is at (256, 268), detectoris 11.6cmand gapis 5mm y=(0.116+0.005)*2-0.0002265625*12.5 -->
+    <location x="0.0" y="0.23916796875" z="0.0"/>
+  </component>
+  <type name="bank3">
+    <component type="panel" idfillbyfirst="x" idstart="524289" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <logfile eq="value/1000" id="det_trans"/>
+        </parameter>
+        <parameter name="t-position">
+          <logfile eq="-value" id="2theta"/>
+        </parameter>
+        <parameter name="roty">
+          <logfile eq="-value" id="2theta"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+  <type is="rectangular_detector" name="panel" type="pixel"
+	xpixels="512" xstart="0.05788671875" xstep="-0.0002265625"
+	ypixels="512" ystart="-0.05788671875" ystep="0.0002265625"/>
+  <type is="detector" name="pixel">
+    <cuboid id="pixel-shape">
+      <left-front-bottom-point x="0.00011328125" y="-0.00011328125" z="0"/>
+      <left-front-top-point x="0.00011328125" y="0.00011328125" z="0"/>
+      <left-back-bottom-point x="0.00011328125" y="-0.00011328125" z="-0.0001"/>
+      <right-front-bottom-point x="-0.00011328125" y="-0.00011328125" z="0"/>
+    </cuboid>
+    <algebra val="pixel-shape"/>
+  </type>
+</instrument>

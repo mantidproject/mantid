@@ -19,9 +19,8 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
 
-#include <Poco/Path.h>
-#include <Poco/RecursiveDirectoryIterator.h>
 #include <boost/algorithm/string.hpp>
+#include <boost/filesystem.hpp>
 #include <boost/shared_ptr.hpp>
 #include <fstream>
 #include <map>
@@ -30,13 +29,15 @@ namespace Mantid {
 namespace DataHandling {
 
 namespace {
-const std::map<std::string, std::string> months{
+const std::map<std::string, std::string> MONTHS{
     {"JAN", "01"}, {"FEB", "02"}, {"MAR", "03"}, {"APR", "04"},
     {"MAY", "05"}, {"JUN", "06"}, {"JUL", "07"}, {"AUG", "08"},
     {"SEP", "09"}, {"OCT", "10"}, {"NOV", "11"}, {"DEC", "12"}};
-const std::vector<std::string> psiMonths{"JAN", "FEB", "MAR", "APR",
-                                         "MAY", "JUN", "JUL", "AUG",
-                                         "SEP", "OCT", "NOV", "DEC"};
+const std::vector<std::string> PSI_MONTHS{"JAN", "FEB", "MAR", "APR",
+                                          "MAY", "JUN", "JUL", "AUG",
+                                          "SEP", "OCT", "NOV", "DEC"};
+constexpr int TEMPERATURE_FILE_MAX_SEARCH_DEPTH = 3;
+constexpr auto TEMPERATURE_FILE_EXT = ".mon";
 } // namespace
 
 DECLARE_FILELOADER_ALGORITHM(LoadPSIMuonBin)
@@ -204,7 +205,7 @@ std::string LoadPSIMuonBin::getFormattedDateTime(std::string date,
   } else {
     year = "20" + date.substr(7, 2);
   }
-  return year + "-" + months.find(date.substr(3, 3))->second + "-" +
+  return year + "-" + MONTHS.find(date.substr(3, 3))->second + "-" +
          date.substr(0, 2) + "T" + time;
 }
 
@@ -393,16 +394,17 @@ void LoadPSIMuonBin::generateUnknownAxis() {
   // Create a x axis, assumption that m_histograms will all be the same size,
   // and that x will be 1 more in size than y
   for (auto xIndex = 0u; xIndex <= m_histograms[0].size(); ++xIndex) {
-    m_xAxis.push_back(static_cast<double>(xIndex) * m_header.histogramBinWidth);
+    m_xAxis.emplace_back(static_cast<double>(xIndex) *
+                         m_header.histogramBinWidth);
   }
 
   // Create Errors
   for (const auto &histogram : m_histograms) {
     std::vector<double> newEAxis;
     for (auto eIndex = 0u; eIndex < m_histograms[0].size(); ++eIndex) {
-      newEAxis.push_back(sqrt(histogram[eIndex]));
+      newEAxis.emplace_back(sqrt(histogram[eIndex]));
     }
-    m_eAxis.push_back(newEAxis);
+    m_eAxis.emplace_back(newEAxis);
   }
 }
 
@@ -671,8 +673,8 @@ void LoadPSIMuonBin::processHeaderLine(const std::string &line) {
   if (line.find("Title") != std::string::npos) {
     // Find sample log titles from the header
     processTitleHeaderLine(line);
-  } else if (std::find(std::begin(psiMonths), std::end(psiMonths),
-                       line.substr(5, 3)) != std::end(psiMonths)) {
+  } else if (std::find(std::begin(PSI_MONTHS), std::end(PSI_MONTHS),
+                       line.substr(5, 3)) != std::end(PSI_MONTHS)) {
     // If the line contains a Month in the PSI format then assume it conains a
     // date on the line. 5 is the index of the line that is where the month is
     // found and 3 is the length of the month.
@@ -750,24 +752,39 @@ void LoadPSIMuonBin::processLine(const std::string &line,
 }
 
 std::string LoadPSIMuonBin::detectTempFile() {
-  const std::string binFileName = getPropertyValue("Filename");
-  const Poco::Path fileDir(Poco::Path(binFileName).parent());
+  // Perform a breadth-first search starting from
+  // directory containing the main file. The search has
+  // a fixed limited depth to ensure we don't accidentally
+  // crawl the while filesystem.
+  namespace fs = boost::filesystem;
+  const fs::path searchDir{
+      fs ::path{getPropertyValue("Filename")}.parent_path()};
 
-  Poco::SiblingsFirstRecursiveDirectoryIterator end;
-  // 3 represents the maximum recursion depth for this search
-  const uint16_t maxRecursionDepth = 3;
-  for (Poco::SiblingsFirstRecursiveDirectoryIterator it(fileDir,
-                                                        maxRecursionDepth);
-       it != end; ++it) {
-    // If it is not a directory, exists, has the extension '.mon', and it
-    // contains the current run number.
-    const Poco::Path path = it->path();
-    if (!it->isDirectory() && it->exists() && path.getExtension() == "mon" &&
-        path.getFileName().find(std::to_string(m_header.numberOfRuns)) !=
-            std::string::npos) {
-      return path.toString();
+  std::deque<fs::path> queue;
+  queue.push_back(fs::path{searchDir});
+  while (!queue.empty()) {
+    const auto entry = queue.front();
+    queue.pop_front();
+    for (fs::directory_iterator dirIter{entry};
+         dirIter != fs::directory_iterator(); ++dirIter) {
+      const auto &entry{dirIter->path()};
+
+      if (fs::is_directory(entry)) {
+        const auto relPath{entry.lexically_relative(searchDir)};
+        if (std::distance(relPath.begin(), relPath.end()) <
+            TEMPERATURE_FILE_MAX_SEARCH_DEPTH) {
+          // save the directory for searching when we have exhausted
+          // the file entries at this level
+          queue.push_back(entry);
+        }
+      } else if (entry.extension() == TEMPERATURE_FILE_EXT &&
+                 entry.filename().string().find(std::to_string(
+                     m_header.numberOfRuns)) != std::string::npos) {
+        return entry.string();
+      }
     }
   }
+
   return "";
 }
 

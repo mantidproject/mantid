@@ -293,7 +293,7 @@ void LeBailFunction::addPeaks(std::vector<std::vector<int>> peakhkls) {
       double dsp = newpeak->getPeakParameter("d_h");
 
       // Add new peak to all related data storage
-      m_vecPeaks.push_back(newpeak);
+      m_vecPeaks.emplace_back(newpeak);
       // FIXME - Refining lattice size is not considered here!
       m_dspPeakVec.emplace_back(dsp, newpeak);
       m_mapHKLPeak.emplace(hkl, newpeak);
@@ -773,7 +773,7 @@ void LeBailFunction::groupPeaks(
     IPowderDiffPeakFunction_sptr peak = m_dspPeakVec[ipk].second;
     if (peak->centre() <= xmin) {
       // Add peak
-      outboundpeakvec.push_back(peak);
+      outboundpeakvec.emplace_back(peak);
       ipk += 1;
     } else {
       // Get out of while loop if peak is in bound
@@ -790,7 +790,7 @@ void LeBailFunction::groupPeaks(
       // Peak is in the boundary still
 
       // add peak to CURRENT peak group
-      peakgroup.push_back(m_dspPeakVec[ipk]);
+      peakgroup.emplace_back(m_dspPeakVec[ipk]);
 
       if (ipk < m_numPeaks - 1) {
         // Any peak but not the last (rightmost) peak
@@ -806,7 +806,7 @@ void LeBailFunction::groupPeaks(
         if (thispeak_rightbound < rightpeak_leftbound) {
           // this peak and its right peak are well separated.
           // finish this group by swapping values
-          peakgroupvec.push_back(std::move(peakgroup));
+          peakgroupvec.emplace_back(std::move(peakgroup));
           peakgroup = {};
         } else {
           // this peak and its right peak are close enough to be in same group.
@@ -815,7 +815,7 @@ void LeBailFunction::groupPeaks(
         }
       } else {
         // Rightmost peak.  Finish the current peak
-        peakgroupvec.push_back(peakgroup);
+        peakgroupvec.emplace_back(peakgroup);
       }
 
       ++ipk;
@@ -828,14 +828,14 @@ void LeBailFunction::groupPeaks(
                           << "peak over at maximum TOF = " << xmax << ".\n";
 
       if (!peakgroup.empty()) {
-        peakgroupvec.push_back(peakgroup);
+        peakgroupvec.emplace_back(peakgroup);
       }
     } // FIRST out of boundary
   }   // ENDWHILE
 
   while (ipk < m_numPeaks) {
     // Group peaks out of uppper boundary to a separate vector of peaks
-    outboundpeakvec.push_back(m_dspPeakVec[ipk].second);
+    outboundpeakvec.emplace_back(m_dspPeakVec[ipk].second);
     ipk += 1;
   }
 

@@ -168,8 +168,8 @@ const std::string LoadSpiceXML2DDet::summary() const {
  */
 void LoadSpiceXML2DDet::init() {
   std::vector<std::string> exts;
-  exts.push_back(".xml");
-  exts.push_back(".bin");
+  exts.emplace_back(".xml");
+  exts.emplace_back(".bin");
   declareProperty(
       std::make_unique<FileProperty>("Filename", "",
                                      FileProperty::FileAction::Load, exts),
@@ -410,23 +410,24 @@ LoadSpiceXML2DDet::xmlParseSpice(const std::string &xmlfilename) {
   Poco::XML::Node *pNode = nodeIter.nextNode();
   while (pNode) {
     const Poco::XML::XMLString nodename = pNode->nodeName();
-    // const Poco::XML::XMLString nodevalue = pNode->nodeValue();
 
     // get number of children
-    size_t numchildren = pNode->childNodes()->length();
+    Poco::AutoPtr<Poco::XML::NodeList> children = pNode->childNodes();
+    const size_t numchildren = children->length();
     if (numchildren > 1) {
       g_log.debug() << "Parent node " << nodename << " has " << numchildren
                     << " children."
                     << "\n";
       if (nodename == "SPICErack") {
         // SPICErack is the main parent node.  start_time and end_time are there
-        unsigned long numattr = pNode->attributes()->length();
+        Poco::AutoPtr<Poco::XML::NamedNodeMap> attributes = pNode->attributes();
+        unsigned long numattr = attributes->length();
         for (unsigned long j = 0; j < numattr; ++j) {
-          std::string attname = pNode->attributes()->item(j)->nodeName();
-          std::string attvalue = pNode->attributes()->item(j)->innerText();
+          std::string attname = attributes->item(j)->nodeName();
+          std::string attvalue = attributes->item(j)->innerText();
           SpiceXMLNode xmlnode(attname);
           xmlnode.setValue(attvalue);
-          vecspicenode.push_back(xmlnode);
+          vecspicenode.emplace_back(xmlnode);
           g_log.debug() << "SPICErack attribute " << j << " Name = " << attname
                         << ", Value = " << attvalue << "\n";
         }
@@ -434,7 +435,8 @@ LoadSpiceXML2DDet::xmlParseSpice(const std::string &xmlfilename) {
 
     } else if (numchildren == 1) {
       std::string innertext = pNode->innerText();
-      unsigned long numattr = pNode->attributes()->length();
+      Poco::AutoPtr<Poco::XML::NamedNodeMap> attributes = pNode->attributes();
+      unsigned long numattr = attributes->length();
       g_log.debug() << "  Child node " << nodename << "'s attributes: "
                     << "\n";
 
@@ -444,8 +446,8 @@ LoadSpiceXML2DDet::xmlParseSpice(const std::string &xmlfilename) {
       std::string nodedescription;
 
       for (unsigned long j = 0; j < numattr; ++j) {
-        std::string atttext = pNode->attributes()->item(j)->innerText();
-        std::string attname = pNode->attributes()->item(j)->nodeName();
+        std::string atttext = attributes->item(j)->innerText();
+        std::string attname = attributes->item(j)->nodeName();
         g_log.debug() << "     attribute " << j << " name = " << attname << ", "
                       << "value = " << atttext << "\n";
         if (attname == "type") {
@@ -462,7 +464,7 @@ LoadSpiceXML2DDet::xmlParseSpice(const std::string &xmlfilename) {
       xmlnode.setParameters(nodetype, nodeunit, nodedescription);
       xmlnode.setValue(innertext);
 
-      vecspicenode.push_back(xmlnode);
+      vecspicenode.emplace_back(xmlnode);
     } else {
       // An unexpected case but no guarantee for not happening
       g_log.error("Funny... No child node.");

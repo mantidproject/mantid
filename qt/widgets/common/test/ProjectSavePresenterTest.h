@@ -346,7 +346,7 @@ public:
       WorkspaceCreationHelper::storeWS(name, ws);
       WorkspaceInfo info;
       info.name = name;
-      wsInfo.push_back(info);
+      wsInfo.emplace_back(info);
     }
 
     return wsInfo;

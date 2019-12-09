@@ -14,7 +14,7 @@ include (InstallRequiredSystemLibraries)
 add_definitions ( -D_WINDOWS -DMS_VISUAL_STUDIO )
 add_definitions ( -D_USE_MATH_DEFINES -DNOMINMAX )
 add_definitions ( -DGSL_DLL -DJSON_DLL )
-add_definitions ( -DPOCO_DLL -DPOCO_NO_UNWINDOWS )
+add_definitions ( -DPOCO_DLL -DPOCO_NO_UNWINDOWS -DPOCO_NO_AUTOMATIC_LIBS)
 add_definitions ( -DBOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE )
 add_definitions ( -D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS )
   # Prevent deprecation errors from std::tr1 in googletest until it is fixed upstream. In MSVC 2017 and later
@@ -23,11 +23,16 @@ add_definitions ( -D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING )
 ##########################################################################
 # Additional compiler flags
 ##########################################################################
-string ( REGEX REPLACE "/" "\\\\" THIRD_PARTY_INCLUDE_DIR "${THIRD_PARTY_DIR}/include/" )  # Replace "/" with "\" for use in command prompt
+# Replace "/" with "\" for use in command prompt
+string ( REGEX REPLACE "/" "\\\\" THIRD_PARTY_INCLUDE_DIR "${THIRD_PARTY_DIR}/include/" )
+string ( REGEX REPLACE "/" "\\\\" THIRD_PARTY_LIB_DIR "${THIRD_PARTY_DIR}/lib/" )
 # /MP            - Compile .cpp files in parallel
 # /W3            - Warning Level 3 (This is also the default)
 # /external:I    - Ignore third party library warnings (similar to "isystem" in GCC)
-set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /W3 /experimental:external /external:I ${THIRD_PARTY_INCLUDE_DIR}" )
+set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
+  /MP /W3 \
+  /experimental:external /external:W0 /external:I ${THIRD_PARTY_INCLUDE_DIR} /external:I ${THIRD_PARTY_LIB_DIR}\\python2.7\\ "
+)
 
 # Set PCH heap limit, the default does not work when running msbuild from the commandline for some reason
 # Any other value lower or higher seems to work but not the default. It is fine without this when compiling

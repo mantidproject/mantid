@@ -419,7 +419,7 @@ MatrixWorkspace_sptr create2DDetectorScanWorkspaceWithFullInstrument(
 
   std::vector<double> timeRanges;
   for (size_t i = 0; i < nTimeIndexes; ++i) {
-    timeRanges.push_back(double(i + firstInterval));
+    timeRanges.emplace_back(double(i + firstInterval));
   }
 
   builder.setTimeRanges(DateAndTime(int(startTime), 0), timeRanges);
@@ -999,8 +999,8 @@ void addTSPEntry(Run &runInfo, std::string name, double val) {
  */
 void setOrientedLattice(Mantid::API::MatrixWorkspace_sptr ws, double a,
                         double b, double c) {
-  auto latt = std::make_unique<OrientedLattice>(a, b, c, 90., 90., 90.);
-  ws->mutableSample().setOrientedLattice(latt.release());
+  ws->mutableSample().setOrientedLattice(
+      std::make_unique<OrientedLattice>(a, b, c, 90., 90., 90.));
 }
 
 // =====================================================================================
@@ -1040,8 +1040,8 @@ createProcessedWorkspaceWithCylComplexInstrument(size_t numPixels,
   pAxis0->setUnit("DeltaE");
   ws->replaceAxis(0, std::move(pAxis0));
   if (has_oriented_lattice) {
-    auto latt = std::make_unique<OrientedLattice>(1, 1, 1, 90., 90., 90.);
-    ws->mutableSample().setOrientedLattice(latt.release());
+    ws->mutableSample().setOrientedLattice(
+        std::make_unique<OrientedLattice>(1, 1, 1, 90., 90., 90.));
 
     addTSPEntry(ws->mutableRun(), "phi", 0);
     addTSPEntry(ws->mutableRun(), "chi", 0);
@@ -1099,7 +1099,7 @@ createProcessedInelasticWS(const std::vector<double> &L2,
     std::vector<double> E_transfer;
     E_transfer.reserve(numBins);
     for (size_t i = 0; i <= numBins; i++) {
-      E_transfer.push_back(Emin + static_cast<double>(i) * dE);
+      E_transfer.emplace_back(Emin + static_cast<double>(i) * dE);
     }
     ws->mutableX(j) = std::move(E_transfer);
   }
@@ -1117,8 +1117,8 @@ createProcessedInelasticWS(const std::vector<double> &L2,
   ws->replaceAxis(0, std::move(pAxis0));
 
   // define oriented lattice which requested for processed ws
-  auto latt = std::make_unique<OrientedLattice>(1, 1, 1, 90., 90., 90.);
-  ws->mutableSample().setOrientedLattice(latt.release());
+  ws->mutableSample().setOrientedLattice(
+      std::make_unique<OrientedLattice>(1, 1, 1, 90., 90., 90.));
 
   ws->mutableRun().addProperty(
       new PropertyWithValue<std::string>("deltaE-mode", "Direct"), true);
@@ -1324,8 +1324,8 @@ createPeaksWorkspace(const int numPeaks, const bool createOrientedLattice) {
   }
 
   if (createOrientedLattice) {
-    Mantid::Geometry::OrientedLattice lattice;
-    peaksWS->mutableSample().setOrientedLattice(&lattice);
+    peaksWS->mutableSample().setOrientedLattice(
+        std::make_unique<OrientedLattice>());
   }
   return peaksWS;
 }
@@ -1403,10 +1403,8 @@ void processDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,
   std::string InstrName = instrument->getName();
   targWS->logs()->addProperty<std::string>("InstrumentName", InstrName, true);
   targWS->logs()->addProperty<bool>("FakeDetectors", false, true);
-  targWS->logs()->addProperty<double>("Ei", Ei, true); //"Incident energy for
-  // Direct or Analysis
-  // energy for indirect
-  // instrument");
+  // Incident energy for Direct or Analysis energy for indirect instrument;
+  targWS->logs()->addProperty<double>("Ei", Ei, true);
 
   // get access to the workspace memory
   auto &sp2detMap = targWS->getColVector<size_t>("spec2detMap");

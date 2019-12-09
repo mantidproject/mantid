@@ -43,8 +43,7 @@ class LegendTabWidgetPresenter:
 
     def init_view(self):
         if int(matplotlib.__version__[0]) < 2:
-            self.view.background_color_selector_widget.setVisible(False)
-            self.view.edge_color_selector_widget.setVisible(False)
+            self.view.hide_box_properties()
 
         """Sets all of the initial values of the input fields when the tab is first loaded"""
         legend_props = LegendProperties.from_legend(self.axes[0].get_legend())
@@ -56,9 +55,10 @@ class LegendTabWidgetPresenter:
         self.view.set_edge_color(legend_props.edge_color)
 
         # Converts alpha value (opacity value between 0 and 1) to transparency percentage.
-        transparency = 100-(legend_props.transparency*100)
-        self.view.set_transparency_spin_box(transparency)
-        self.view.set_transparency_slider(transparency)
+        if int(matplotlib.__version__[0]) >= 2:
+            transparency = 100-(legend_props.transparency*100)
+            self.view.set_transparency_spin_box(transparency)
+            self.view.set_transparency_slider(transparency)
         self.view.set_entries_font(legend_props.entries_font)
         self.view.set_entries_size(legend_props.entries_size)
         self.view.set_entries_color(legend_props.entries_color)

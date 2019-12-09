@@ -12,7 +12,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from qtpy import QtGui
 from qtpy.QtCore import QVariant, Qt, QAbstractTableModel
-from mantid.py3compat import Enum
+from enum import Enum
 
 
 class MatrixWorkspaceTableViewModelType(Enum):
@@ -22,14 +22,17 @@ class MatrixWorkspaceTableViewModelType(Enum):
 
 
 class MatrixWorkspaceTableViewModel(QAbstractTableModel):
-    HORIZONTAL_HEADER_DISPLAY_STRING = u"{0}\n{1:0.1f}{2}"
-    HORIZONTAL_HEADER_TOOLTIP_STRING = u"index {0}\n{1} {2:0.1f}{3} (bin centre)"
+    HORIZONTAL_HEADER_DISPLAY_STRING = u"{0}\n{1:0.4f}{2}"
+    HORIZONTAL_HEADER_TOOLTIP_STRING = u"index {0}\n{1} {2:0.6f}{3} (bin centre)"
 
     HORIZONTAL_HEADER_DISPLAY_STRING_FOR_X_VALUES = "{0}"
     HORIZONTAL_HEADER_TOOLTIP_STRING_FOR_X_VALUES = "index {0}"
 
     VERTICAL_HEADER_DISPLAY_STRING = "{0} {1}"
     VERTICAL_HEADER_TOOLTIP_STRING = "index {0}\nspectra no {1}"
+
+    VERTICAL_HEADER_DISPLAY_STRING_FOR_NUMERIC_AXIS = u"{0} {1:0.2f}{2}"
+    VERTICAL_HEADER_TOOLTIP_STRING_FOR_NUMERIC_AXIS = u"index {0}\nbin center {1:0.2f}{2}"
 
     HORIZONTAL_BINS_VARY_DISPLAY_STRING = "{0}\nbins vary"
     HORIZONTAL_BINS_VARY_TOOLTIP_STRING = "index {0}\nbin centre value varies\nRebin to set common bins"
@@ -81,14 +84,32 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
             raise ValueError("Unknown model type {0}".format(self.type))
 
     def _makeVerticalHeader(self, section, role):
+        def _numeric_axis_value_unit(axis):
+            # binned/point data
+            if axis.length() == self.ws.getNumberHistograms() + 1:
+                value = 0.5 * (float(axis.label(section)) + float(axis.label(section + 1)))
+            else:
+                value = float(axis.label(section))
+            return value, axis.getUnit().symbol().utf8()
+
         axis_index = 1
         # check that the vertical axis actually exists in the workspace
         if self.ws.axes() > axis_index:
+            axis = self.ws.getAxis(axis_index)
             if role == Qt.DisplayRole:
-                return self.VERTICAL_HEADER_DISPLAY_STRING.format(section, self.ws.getAxis(axis_index).label(section))
+                if not axis.isNumeric():
+                    return self.VERTICAL_HEADER_DISPLAY_STRING.format(
+                        section, axis.label(section))
+                else:
+                    display_value, unit = _numeric_axis_value_unit(axis)
+                    return self.VERTICAL_HEADER_DISPLAY_STRING_FOR_NUMERIC_AXIS.format(section, display_value, unit)
             else:
-                spectrum_number = self.ws.getSpectrum(section).getSpectrumNo()
-                return self.VERTICAL_HEADER_TOOLTIP_STRING.format(section, spectrum_number)
+                if not axis.isNumeric():
+                    spectrum_number = self.ws.getSpectrum(section).getSpectrumNo()
+                    return self.VERTICAL_HEADER_TOOLTIP_STRING.format(section, spectrum_number)
+                else:
+                    display_value, unit = _numeric_axis_value_unit(axis)
+                    return self.VERTICAL_HEADER_TOOLTIP_STRING_FOR_NUMERIC_AXIS.format(section, display_value, unit)
         else:
             raise NotImplementedError("What do we do here? Handle if the vertical axis does NOT exist")
 

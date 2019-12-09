@@ -77,7 +77,10 @@ double getPhiOffset(const Mantid::Kernel::V3D &pos, const double offset) {
  */
 InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
     : InstrumentWidgetTab(instrWidget), m_freezePlot(false),
-      m_tubeXUnitsCache(0), m_plotTypeCache(0) {
+      m_tubeXUnitsCache(0), m_plotTypeCache(0),
+      m_addedActions(
+          std::vector<std::pair<
+              QAction *, std::function<bool(std::map<std::string, bool>)>>>{}) {
 
   // connect to InstrumentWindow signals
   connect(m_instrWidget, SIGNAL(integrationRangeChanged(double, double)), this,
@@ -636,7 +639,12 @@ void InstrumentWidgetPickTab::loadSettings(const QSettings &settings) {
   m_plotTypeCache =
       settings.value("PlotType", DetectorPlotController::Single).toInt();
 }
-
+void InstrumentWidgetPickTab::addToContextMenu(
+    QAction *action,
+    std::function<bool(std::map<std::string, bool>)> &actionCondition) {
+  auto pair = std::make_pair(action, actionCondition);
+  m_addedActions.emplace_back(pair);
+}
 /**
  * Fill in the context menu.
  * @param context :: A menu to fill.
@@ -651,6 +659,15 @@ bool InstrumentWidgetPickTab::addToDisplayContextMenu(QMenu &context) const {
   if (m_plot->hasStored() || m_plot->hasCurve()) {
     context.addAction(m_savePlotToWorkspace);
     res = true;
+  }
+  std::map<std::string, bool> tabBools = {};
+  tabBools.insert(std::make_pair("plotStored", m_plot->hasStored()));
+  tabBools.insert(std::make_pair("hasCurve", m_plot->hasCurve()));
+  tabBools.insert(std::make_pair("isTube", m_tube->isChecked()));
+  for (auto actionPair : m_addedActions) {
+    if (actionPair.second && actionPair.second(tabBools)) {
+      context.addAction(actionPair.first);
+    }
   }
   return res;
 }
@@ -1594,7 +1611,7 @@ void DetectorPlotController::savePlotToWorkspace() {
       prepareDataForSinglePlot(actor.getDetectorByDetID(detid), x, y, &e);
       unitX = parentWorkspace->getAxis(0)->unit()->unitID();
       // save det ids for the output workspace
-      detids.push_back(static_cast<Mantid::detid_t>(detid));
+      detids.emplace_back(static_cast<Mantid::detid_t>(detid));
     } else {
       continue;
     }
@@ -1808,9 +1825,9 @@ void DetectorPlotController::addPeak(double x, double y) {
     // if data WS has UB copy it to the new peaks workspace
     if (newPeaksWorkspace && ws->sample().hasOrientedLattice()) {
       auto UB = ws->sample().getOrientedLattice().getUB();
-      auto lattice = new Mantid::Geometry::OrientedLattice;
+      auto lattice = std::make_unique<Mantid::Geometry::OrientedLattice>();
       lattice->setUB(UB);
-      tw->mutableSample().setOrientedLattice(lattice);
+      tw->mutableSample().setOrientedLattice(std::move(lattice));
     }
 
     // if there is a UB available calculate HKL for the new peak

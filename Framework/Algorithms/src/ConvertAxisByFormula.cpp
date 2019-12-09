@@ -120,15 +120,15 @@ void ConvertAxisByFormula::exec() {
   std::vector<Variable_ptr> variables;
   variables.reserve(8);
   // axis value lookups
-  variables.push_back(boost::make_shared<Variable>("x", false));
-  variables.push_back(boost::make_shared<Variable>("X", false));
-  variables.push_back(boost::make_shared<Variable>("y", false));
-  variables.push_back(boost::make_shared<Variable>("Y", false));
+  variables.emplace_back(boost::make_shared<Variable>("x", false));
+  variables.emplace_back(boost::make_shared<Variable>("X", false));
+  variables.emplace_back(boost::make_shared<Variable>("y", false));
+  variables.emplace_back(boost::make_shared<Variable>("Y", false));
   // geometry lookups
-  variables.push_back(boost::make_shared<Variable>("twotheta", true));
-  variables.push_back(boost::make_shared<Variable>("signedtwotheta", true));
-  variables.push_back(boost::make_shared<Variable>("l1", true));
-  variables.push_back(boost::make_shared<Variable>("l2", true));
+  variables.emplace_back(boost::make_shared<Variable>("twotheta", true));
+  variables.emplace_back(boost::make_shared<Variable>("signedtwotheta", true));
+  variables.emplace_back(boost::make_shared<Variable>("l1", true));
+  variables.emplace_back(boost::make_shared<Variable>("l2", true));
 
   bool isGeometryRequired = false;
   for (auto variablesIter = variables.begin();
@@ -157,19 +157,12 @@ void ConvertAxisByFormula::exec() {
       p.DefineVar(variable->name, &(variable->value));
     }
     // set some constants
-    double pi = M_PI;
-    p.DefineVar("pi", &pi);
-    double h = PhysicalConstants::h;
-    p.DefineVar("h", &h);
-    double hBar = PhysicalConstants::h_bar;
-    p.DefineVar("h_bar", &hBar);
-    double g = PhysicalConstants::g;
-    p.DefineVar("g", &g);
-    double mN = PhysicalConstants::NeutronMass;
-    p.DefineVar("mN", &mN);
-    double mNAMU = PhysicalConstants::NeutronMassAMU;
-    p.DefineVar("mNAMU", &mNAMU);
-
+    p.DefineConst("pi", M_PI);
+    p.DefineConst("h", PhysicalConstants::h);
+    p.DefineConst("h_bar", PhysicalConstants::h_bar);
+    p.DefineConst("g", PhysicalConstants::g);
+    p.DefineConst("mN", PhysicalConstants::NeutronMass);
+    p.DefineConst("mNAMU", PhysicalConstants::NeutronMassAMU);
     p.SetExpr(formula);
   } catch (mu::Parser::exception_type &e) {
     std::stringstream ss;

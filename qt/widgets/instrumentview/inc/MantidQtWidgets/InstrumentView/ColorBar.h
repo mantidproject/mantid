@@ -22,7 +22,7 @@ using ColorBar = DraggableColorBarWidget;
 #elif QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 using ColorBar = MantidQt::Widgets::MplCpp::ColorbarWidget;
 #endif
-}
+} // namespace MantidWidgets
 } // namespace MantidQt
 
 #endif // MANTIDQT_WIDGETS_INSTRUMENTVIEW_COLORBAR_H

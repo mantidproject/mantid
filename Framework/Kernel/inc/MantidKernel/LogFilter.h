@@ -12,10 +12,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
 
-#ifndef Q_MOC_RUN
-#include <boost/scoped_ptr.hpp>
-#endif
-
+#include <memory>
 #include <vector>
 
 namespace Mantid {

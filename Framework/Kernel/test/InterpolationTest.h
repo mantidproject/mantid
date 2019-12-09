@@ -32,33 +32,33 @@ public:
    */
   InterpolationTest() {
     // values for setting up the interpolation
-    m_tableXValues.push_back(200.0);
-    m_tableXValues.push_back(201.0);
-    m_tableXValues.push_back(202.0);
-    m_tableXValues.push_back(203.0);
-    m_tableXValues.push_back(204.0);
+    m_tableXValues.emplace_back(200.0);
+    m_tableXValues.emplace_back(201.0);
+    m_tableXValues.emplace_back(202.0);
+    m_tableXValues.emplace_back(203.0);
+    m_tableXValues.emplace_back(204.0);
 
-    m_tableYValues.push_back(50);
-    m_tableYValues.push_back(60);
-    m_tableYValues.push_back(100);
-    m_tableYValues.push_back(300);
-    m_tableYValues.push_back(400);
+    m_tableYValues.emplace_back(50);
+    m_tableYValues.emplace_back(60);
+    m_tableYValues.emplace_back(100);
+    m_tableYValues.emplace_back(300);
+    m_tableYValues.emplace_back(400);
 
     // bulk values for interpolation test
-    m_interpolationXValues.push_back(200.5);
-    m_interpolationXValues.push_back(201.25);
-    m_interpolationXValues.push_back(203.5);
+    m_interpolationXValues.emplace_back(200.5);
+    m_interpolationXValues.emplace_back(201.25);
+    m_interpolationXValues.emplace_back(203.5);
 
-    m_expectedYValues.push_back(55.0);
-    m_expectedYValues.push_back(70.0);
-    m_expectedYValues.push_back(350.0);
+    m_expectedYValues.emplace_back(55.0);
+    m_expectedYValues.emplace_back(70.0);
+    m_expectedYValues.emplace_back(350.0);
 
     // values outside interpolation range
-    m_outsideXValues.push_back(100.0);
-    m_outsideXValues.push_back(3000.0);
+    m_outsideXValues.emplace_back(100.0);
+    m_outsideXValues.emplace_back(3000.0);
 
-    m_outsideYValues.push_back(-950.0);
-    m_outsideYValues.push_back(280000.0);
+    m_outsideYValues.emplace_back(-950.0);
+    m_outsideYValues.emplace_back(280000.0);
   }
 
   void testCopyConstruction() {

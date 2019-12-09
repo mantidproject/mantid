@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtRunsTableView.h"
 #include "Common/IndexOf.h"
-#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/UsageService.h"
 #include "MantidQtIcons/Icon.h"
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
 #include <QMessageBox>
@@ -85,6 +85,9 @@ void QtRunsTableView::onFilterChanged(QString const &filter) {
 
 void QtRunsTableView::onInstrumentChanged(int index) {
   UNUSED_ARG(index);
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      Mantid::Kernel::FeatureType::Feature,
+      {"ISIS Reflectometry", "RunsTable", "InstrumentChanged"}, false);
   m_notifyee->notifyChangeInstrumentRequested();
 }
 
@@ -239,10 +242,16 @@ void QtRunsTableView::onCollapseAllGroupsPressed(bool) {
 }
 
 void QtRunsTableView::onProcessPressed(bool) {
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      Mantid::Kernel::FeatureType::Feature,
+      {"ISIS Reflectometry", "RunsTable", "StartProcessing"}, false);
   m_notifyee->notifyResumeReductionRequested();
 }
 
 void QtRunsTableView::onPausePressed(bool) {
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      Mantid::Kernel::FeatureType::Feature,
+      {"ISIS Reflectometry", "RunsTable", "PauseProcessing"}, false);
   m_notifyee->notifyPauseReductionRequested();
 }
 
@@ -275,10 +284,16 @@ void QtRunsTableView::onPastePressed(bool) {
 }
 
 void QtRunsTableView::onPlotSelectedPressed(bool) {
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      Mantid::Kernel::FeatureType::Feature,
+      {"ISIS Reflectometry", "RunsTable", "PlotRows"}, false);
   m_notifyee->notifyPlotSelectedPressed();
 }
 
 void QtRunsTableView::onPlotSelectedStitchedOutputPressed(bool) {
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      Mantid::Kernel::FeatureType::Feature,
+      {"ISIS Reflectometry", "RunsTable", "PlotGroups"}, false);
   m_notifyee->notifyPlotSelectedStitchedOutputPressed();
 }
 

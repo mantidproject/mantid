@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='ASCII'?>
-<instrument xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	    xmlns="http://www.mantidproject.org/IDF/1.0"
-	    last-modified="2019-08-22 14:48:55.282715"
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0"
+	    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	    name="CG2"
-	    valid-from="2016-04-22 00:00:00"
+	    valid-from="2019-10-01 00:00:00"
 	    valid-to="2100-12-31 23:59:59"
- xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd">
+	    last-modified="2019-10-29 13:50:55.780007"
+	    xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd">
   <!--Created by Jose Borregero, borreguerojm@ornl.gov-->
   <defaults>
     <length unit="metre"/>
@@ -433,10 +433,10 @@
   <component type="double-flat-panel" idlist="pixel_ids" name="detector1">
     <location>
       <parameter name="x">
-        <logfile id="detector-translation" eq="-0.001*value"/>
+        <logfile id="detector_trans" eq="-0.001*value"/>
       </parameter>
       <parameter name="z">
-        <logfile id="sdd" eq="0.001*value"/>
+        <logfile id="sample_detector_distance" eq="value"/>
       </parameter>
     </location>
   </component>

@@ -20,7 +20,6 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidNexus/NexusFileIO.h"
-#include <Poco/File.h>
 #include <boost/shared_ptr.hpp>
 
 using namespace Mantid::API;
@@ -187,13 +186,13 @@ void SaveNexusProcessed::getWSIndexList(
     }
     indices.reserve(1 + spec_max - spec_min);
     for (int i = spec_min; i <= spec_max; i++)
-      indices.push_back(i);
+      indices.emplace_back(i);
     if (list) {
       for (auto s : spec_list) {
         if (s < 0)
           continue;
         if (s < spec_min || s > spec_max)
-          indices.push_back(s);
+          indices.emplace_back(s);
       }
     }
   } else if (list) {
@@ -202,7 +201,7 @@ void SaveNexusProcessed::getWSIndexList(
     for (auto s : spec_list) {
       if (s < 0)
         continue;
-      indices.push_back(s);
+      indices.emplace_back(s);
       if (s > spec_max)
         spec_max = s;
       if (s < spec_min)
@@ -213,7 +212,7 @@ void SaveNexusProcessed::getWSIndexList(
     spec_max = numberOfHist - 1;
     indices.reserve(1 + spec_max - spec_min);
     for (int i = spec_min; i <= spec_max; i++)
-      indices.push_back(i);
+      indices.emplace_back(i);
   }
 }
 
@@ -288,16 +287,11 @@ void SaveNexusProcessed::doExec(
   // get the workspace name to write to file
   const std::string wsName = inputWorkspace->getName();
 
-  // If we don't want to append then remove the file if it already exists
+  // If not append, openNexusWrite will open with _CREATES perm and overwrite
   const bool append_to_file = getProperty("Append");
-  if (!append_to_file && !keepFile) {
-    Poco::File file(filename);
-    if (file.exists())
-      file.remove();
-  }
 
   nexusFile->resetProgress(&prog_init);
-  nexusFile->openNexusWrite(filename, entryNumber);
+  nexusFile->openNexusWrite(filename, entryNumber, append_to_file || keepFile);
 
   // Equivalent C++ API handle
   ::NeXus::File cppFile(nexusFile->fileID);
@@ -464,11 +458,11 @@ void SaveNexusProcessed::execEvent(Mantid::NeXus::NexusFileIO *nexusFile,
   size_t index = 0;
   for (int wi = 0;
        wi < static_cast<int>(m_eventWorkspace->getNumberHistograms()); wi++) {
-    indices.push_back(index);
+    indices.emplace_back(index);
     // Track the total # of events
     index += m_eventWorkspace->getSpectrum(wi).getNumberEvents();
   }
-  indices.push_back(index);
+  indices.emplace_back(index);
 
   // Initialize all the arrays
   int64_t num = index;
@@ -582,18 +576,6 @@ bool SaveNexusProcessed::processGroups() {
   // Then immediately open the file
   auto nexusFile = boost::make_shared<Mantid::NeXus::NexusFileIO>();
 
-  /* Unless we have explicity been asked to append to the file. We should assume
-  that we can remove any existing
-  files of the same name prior to processing. */
-  bool append_to_file = this->getProperty("Append");
-  if (!append_to_file) {
-    const std::string filename = getPropertyValue("Filename");
-    Poco::File file(filename);
-    if (file.exists()) {
-      file.remove();
-    }
-  }
-
   // If we have arrived here then a WorkspaceGroup was passed to the
   // InputWorkspace property. Pull out the unrolled workspaces and append an
   // entry for each one. We only have a single input workspace property declared
@@ -606,7 +588,7 @@ bool SaveNexusProcessed::processGroups() {
         throw std::runtime_error("SaveNexusProcessed: NeXus files do not "
                                  "support nested groups of groups");
       }
-      this->doExec(ws, nexusFile, true /*keepFile*/, entry);
+      this->doExec(ws, nexusFile, entry > 0 /*keepFile*/, entry);
       g_log.information() << "Saving group index " << entry << "\n";
     }
   }
@@ -679,7 +661,7 @@ void SaveNexusProcessed::saveSpectraDetectorMapNexus(
         detPos[i] = 0.;
 
     dims.front() = static_cast<int>(nDetectors);
-    dims.push_back(3);
+    dims.emplace_back(3);
     file->writeCompData("detector_positions", detPos, dims, compression, dims);
   } catch (...) {
     g_log.error("Unknown error caught when saving detector positions.");

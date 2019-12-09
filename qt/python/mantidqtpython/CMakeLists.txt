@@ -88,9 +88,10 @@ mtd_add_sip_module(MODULE_NAME mantidqtpython
                    INCLUDE_DIRS
                      ${CMAKE_CURRENT_LIST_DIR}
                      ${COMMON_SIP_DIR}
+                     ../../../Framework/PythonInterface/core/inc
+                   SYSTEM_INCLUDE_DIRS
                      ${PYTHON_INCLUDE_PATH}
                      ${SIP_INCLUDE_DIR}
-                     ../../../Framework/PythonInterface/core/inc
                    PYQT_VERSION 4
                    LINK_LIBS
                      ${TCMALLOC_LIBRARIES_LINKTIME}
@@ -112,6 +113,7 @@ mtd_add_sip_module(MODULE_NAME mantidqtpython
                    FOLDER Qt4
                    OSX_INSTALL_RPATH
                      @loader_path/../Contents/MacOS
+		     @loader_path/../Contents/Frameworks
                    LINUX_INSTALL_RPATH
                      "\$ORIGIN/../${LIB_DIR}")
 

@@ -11,7 +11,7 @@ from Muon.GUI.ElementalAnalysis.LoadWidget import load_utils as lutils
 
 import mantid.simpleapi as mantid
 from mantid import config
-
+import numpy as np
 from six import iteritems
 
 
@@ -70,16 +70,86 @@ class LoadUtilsTest(unittest.TestCase):
         for out, arg in iteritems(tests):
             self.assertEqual(lutils.hyphenise(arg), out)
 
-    def test_group_by_detector(self):
-        output, workspaces = [], []
+    def test_merge_workspaces(self):
+        expected_output, workspaces = [], []
         detectors = range(1, 5)
         for detector in detectors:
             workspace = self.var_ws_name.format(detector, self.test_run)
             workspaces.append(workspace)
-            mantid.CreateSampleWorkspace(OutputWorkspace=workspace).name()
-            output.append("{}; Detector {}".format(self.test_run, detector))
+            mantid.CreateSampleWorkspace(OutputWorkspace=workspace)
+            expected_output.append("{}; Detector {}".format(self.test_run, detector))
 
-        self.assertEquals(lutils.group_by_detector(self.test_run, workspaces), output)
+        self.assertEquals(lutils.merge_workspaces(self.test_run, workspaces), sorted(expected_output))
+        # check call works with empty workspace list
+        self.assertEqual(lutils.merge_workspaces(self.test_run, []), sorted(expected_output))
+
+    def test_create_merged_workspace(self):
+        workspace_list = []
+        num_workspaces = lutils.num_files_per_detector
+        workspace_names = []
+        num_bins = 100
+        X_data = np.linspace(0, 400, num_bins)
+        # create data in each workspace based on y = mx + specNumber
+        m = 0.1
+        Yfunc = lambda x, specNo: m * x + specNo
+        Efunc = lambda x, specNo: 2 * m * x + specNo
+        for i in range(0, num_workspaces):
+            name = "test_" + str(i)
+            workspace_names.append(name)
+            ws = mantid.WorkspaceFactory.create("Workspace2D", NVectors=1,
+                                                XLength=num_bins, YLength=num_bins)
+            mantid.mtd.add(name, ws)
+            Y_data = Yfunc(X_data, i)
+            E_data = Efunc(X_data, i)
+            ws.setY(0, Y_data)
+            ws.setX(0, X_data)
+            ws.setE(0, E_data)
+            workspace_list.append(ws.name())
+
+        merged_ws = lutils.create_merged_workspace(workspace_list)
+        # check number of bins, and number of histograms is correct
+        self.assertEqual(merged_ws.getNumberHistograms(), num_workspaces)
+        self.assertEqual(merged_ws.blocksize(), num_bins)
+        # check that data has been copied over correctly into the new merged workspace
+        for i in range(0, num_workspaces):
+            self.assertTrue(np.array_equal(merged_ws.readX(i), X_data))
+            self.assertTrue(np.array_equal(merged_ws.readY(i), Yfunc(X_data, i)))
+            self.assertTrue(np.array_equal(merged_ws.readE(i), Efunc(X_data, i)))
+
+    def test_merge_workspaces_returns_correctly_if_delayed_data_missing(self):
+        num_files_per_detector = lutils.num_files_per_detector
+        workspace_list = [None] * num_files_per_detector
+        num_bins = 100
+        X_data = np.linspace(0, 400, num_bins)
+        names = ["Total", "Prompt"]
+        # create data in each workspace based on y = mx + specNumber
+        Yfunc = lambda x, specNo: 0.1 * x + specNo
+        Efunc = lambda x, specNo: 2 * 0.1 * x + specNo
+        for i in range(0, 2):
+            name = names[i]
+            ws = mantid.WorkspaceFactory.create("Workspace2D", NVectors=1,
+                                                XLength=num_bins, YLength=num_bins)
+            mantid.mtd.add(name, ws)
+            Y_data = Yfunc(X_data, i)
+            E_data = Efunc(X_data, i)
+            ws.setY(0, Y_data)
+            ws.setX(0, X_data)
+            ws.setE(0, E_data)
+            input_index = lutils.spectrum_index[name] - 1
+            workspace_list[input_index] = name
+
+        merged_ws = lutils.create_merged_workspace(workspace_list)
+        self.assertEqual(merged_ws.getNumberHistograms(), num_files_per_detector)
+        # check that total and prompt data were copied to the correct place
+        for i in range(0, 2):
+            name = names[i]
+            input_index = lutils.spectrum_index[name] - 1
+            self.assertTrue(np.array_equal(merged_ws.readX(input_index), X_data))
+            self.assertTrue(np.array_equal(merged_ws.readY(input_index), Yfunc(X_data, i)))
+            self.assertTrue(np.array_equal(merged_ws.readE(input_index), Efunc(X_data, i)))
+        # check that the y data for delayed response is all zeros
+        self.assertTrue(not np.any(merged_ws.readY(lutils.spectrum_index["Delayed"]-1)))
+
 
     def test_flatten_run_data(self):
         test_workspaces = [mantid.CreateSampleWorkspace(OutputWorkspace=name) for name in self.test_ws_names]

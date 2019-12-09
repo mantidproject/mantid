@@ -68,34 +68,36 @@ public:
 
   void watchADS(bool watch) override;
 
-  std::size_t getSelectedSpectrum() const override;
-  int getSelectedSpectrumIndex() const override;
-  int getSelectedDataIndex() const override;
-  std::size_t dataSelectionSize() const override;
+  WorkspaceIndex getSelectedSpectrum() const override;
+  TableRowIndex getSelectedSpectrumIndex() const override;
+  TableDatasetIndex getSelectedDataIndex() const override;
+  TableDatasetIndex dataSelectionSize() const override;
   bool isPlotGuessChecked() const override;
 
   void hideMultipleDataSelection() override;
   void showMultipleDataSelection() override;
 
-  void setAvailableSpectra(std::size_t minimum, std::size_t maximum) override;
+  void setAvailableSpectra(WorkspaceIndex minimum,
+                           WorkspaceIndex maximum) override;
   void setAvailableSpectra(
-      const std::vector<std::size_t>::const_iterator &from,
-      const std::vector<std::size_t>::const_iterator &to) override;
+      const std::vector<WorkspaceIndex>::const_iterator &from,
+      const std::vector<WorkspaceIndex>::const_iterator &to) override;
 
   void setMinimumSpectrum(int minimum) override;
   void setMaximumSpectrum(int maximum) override;
-  void setPlotSpectrum(int spectrum) override;
+  void setPlotSpectrum(WorkspaceIndex spectrum) override;
   void appendToDataSelection(const std::string &dataName) override;
   void setNameInDataSelection(const std::string &dataName,
-                              std::size_t index) override;
+                              TableDatasetIndex index) override;
   void clearDataSelection() override;
 
   void plotInTopPreview(const QString &name,
                         Mantid::API::MatrixWorkspace_sptr workspace,
-                        std::size_t spectrum, Qt::GlobalColor colour) override;
+                        WorkspaceIndex spectrum,
+                        Qt::GlobalColor colour) override;
   void plotInBottomPreview(const QString &name,
                            Mantid::API::MatrixWorkspace_sptr workspace,
-                           std::size_t spectrum,
+                           WorkspaceIndex spectrum,
                            Qt::GlobalColor colour) override;
 
   void removeFromTopPreview(const QString &name) override;

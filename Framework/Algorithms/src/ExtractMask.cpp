@@ -63,7 +63,7 @@ void ExtractMask::exec() {
   for (size_t i = 0; i < detInfo.size(); ++i) {
     if ((inputWSIsSpecial && inputMaskWS->isMasked(detIds[i])) ||
         detInfo.isMasked(i)) {
-      detectorList.push_back(detIds[i]);
+      detectorList.emplace_back(detIds[i]);
     }
   }
 

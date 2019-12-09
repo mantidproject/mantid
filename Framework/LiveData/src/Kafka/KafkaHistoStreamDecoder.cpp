@@ -29,8 +29,6 @@ GNU_DIAG_ON("conversion")
 
 #include <json/json.h>
 
-using namespace HistoSchema;
-
 namespace {
 const std::string PROTON_CHARGE_PROPERTY = "proton_charge";
 const std::string RUN_NUMBER_PROPERTY = "run_number";
@@ -40,6 +38,8 @@ Mantid::Kernel::Logger g_log("KafkaHistoStreamDecoder");
 
 const std::string HISTO_MESSAGE_ID = "hs00";
 } // namespace
+
+using namespace HistoSchema;
 
 namespace Mantid {
 namespace LiveData {
@@ -60,14 +60,14 @@ KafkaHistoStreamDecoder::KafkaHistoStreamDecoder(
     const std::string &runInfoTopic, const std::string &spDetTopic,
     const std::string &sampleEnvTopic, const std::string &chopperTopic)
     : IKafkaStreamDecoder(broker, histoTopic, runInfoTopic, spDetTopic,
-                          sampleEnvTopic, chopperTopic),
+                          sampleEnvTopic, chopperTopic, ""),
       m_workspace() {}
 
 /**
  * Destructor.
  * Stops capturing from the stream
  */
-KafkaHistoStreamDecoder::~KafkaHistoStreamDecoder() {}
+KafkaHistoStreamDecoder::~KafkaHistoStreamDecoder() = default;
 
 /**
  * Check if there is data available to extract
@@ -221,8 +221,6 @@ void KafkaHistoStreamDecoder::initLocalCaches(
     // Create buffer
     histoBuffer = boost::static_pointer_cast<DataObjects::Workspace2D>(
         API::WorkspaceFactory::Instance().create("Workspace2D", nspec, 2, 1));
-    histoBuffer->setInstrument(ws->getInstrument());
-    histoBuffer->rebuildSpectraMapping();
     histoBuffer->getAxis(0)->unit() =
         Kernel::UnitFactory::Instance().create("TOF");
     histoBuffer->setYUnit("Counts");
@@ -244,19 +242,18 @@ void KafkaHistoStreamDecoder::initLocalCaches(
     histoBuffer = createBufferWorkspace<DataObjects::Workspace2D>(
         "Workspace2D", static_cast<size_t>(spDetMsg->n_spectra()),
         spDetMsg->spectrum()->data(), spDetMsg->detector_id()->data(), nudet);
-
-    // Load the instrument if possible but continue if we can't
-    if (!instName.empty()) {
-      loadInstrument<DataObjects::Workspace2D>(instName, histoBuffer,
-                                               jsonGeometry);
-      if (rawMsgBuffer.empty()) {
-        histoBuffer->rebuildSpectraMapping();
-      }
-    } else {
-      g_log.warning(
-          "Empty instrument name received. Continuing without instrument");
-    }
   }
+
+  // Load the instrument if possible but continue if we can't
+  if (!instName.empty()) {
+    loadInstrument<DataObjects::Workspace2D>(instName, histoBuffer,
+                                             jsonGeometry);
+    if (rawMsgBuffer.empty()) {
+      histoBuffer->rebuildSpectraMapping();
+    }
+  } else
+    g_log.warning(
+        "Empty instrument name received. Continuing without instrument");
 
   auto &mutableRun = histoBuffer->mutableRun();
   // Run start. Cache locally for computing frame times

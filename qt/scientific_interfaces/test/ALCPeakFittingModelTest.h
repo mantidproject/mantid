@@ -21,8 +21,8 @@
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
-using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::Points;
 
 class ALCPeakFittingModelTest : public CxxTest::TestSuite {

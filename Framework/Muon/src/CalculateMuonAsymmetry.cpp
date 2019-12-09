@@ -377,7 +377,7 @@ std::vector<double> CalculateMuonAsymmetry::getNormConstants(
     if (wsNames.size() == 1) {
       // N(1+g) + exp
       auto TFFunc = boost::dynamic_pointer_cast<API::CompositeFunction>(tmp);
-      norms.push_back(getNormValue(TFFunc));
+      norms.emplace_back(getNormValue(TFFunc));
     } else {
       auto result = boost::dynamic_pointer_cast<API::MultiDomainFunction>(tmp);
       for (size_t j = 0; j < wsNames.size(); j++) {
@@ -386,7 +386,7 @@ std::vector<double> CalculateMuonAsymmetry::getNormConstants(
             result->getFunction(j));
         // N(1+g) + exp
         TFFunc = boost::dynamic_pointer_cast<API::CompositeFunction>(TFFunc);
-        norms.push_back(getNormValue(TFFunc));
+        norms.emplace_back(getNormValue(TFFunc));
       }
     }
   } catch (...) {

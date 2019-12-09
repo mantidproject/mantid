@@ -5,15 +5,17 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-import h5py
-import numpy as np
+import hashlib
+import io
+import json
+import os
 import six
 import subprocess
 import shutil
-import hashlib
-import io
+import h5py
+import numpy as np
 import AbinsModules
-import os
+
 from mantid.kernel import logger, ConfigService
 
 
@@ -51,13 +53,6 @@ class IOmodule(object):
         save_dir_path = ConfigService.getString("defaultsave.directory")
         self._hdf_filename = os.path.join(save_dir_path, core_name + ".hdf5")  # name of hdf file
 
-        try:
-            self._advanced_parameters = self._get_advanced_parameters()
-        except IOError as err:
-            logger.error(str(err))
-        except ValueError as err:
-            logger.error(str(err))
-
         self._attributes = {}  # attributes for group
 
         # data  for group; they are expected to be numpy arrays or
@@ -77,12 +72,15 @@ class IOmodule(object):
 
     def _valid_advanced_parameters(self):
         """
-        In case of rerun checks if advanced parameters haven't changed.
-        Returns: True if they are the same, otherwise False
+        Check if advanced parameters haven't changed.
+
+        Compare JSON dict stored as data attribute with data in AbinsParams.
+        :returns: True if they are the same, otherwise False
 
         """
         previous_advanced_parameters = self.load(list_of_attributes=["advanced_parameters"])
-        return self._advanced_parameters == previous_advanced_parameters["attributes"]["advanced_parameters"]
+        return (AbinsModules.AbinsParameters.non_performance_parameters
+                == json.loads(previous_advanced_parameters["attributes"]["advanced_parameters"]))
 
     def get_previous_ab_initio_program(self):
         """
@@ -120,11 +118,12 @@ class IOmodule(object):
 
     def add_file_attributes(self):
         """
-        Adds file attributes: filename and hash of file to the collection of all attributes.
+        Add attributes for input data filename, hash of file, advanced parameters to data for HDF5 file
         """
         self.add_attribute("hash", self._hash_input_filename)
         self.add_attribute("filename", self._input_filename)
-        self.add_attribute("advanced_parameters", self._advanced_parameters)
+        self.add_attribute("advanced_parameters",
+                           json.dumps(AbinsModules.AbinsParameters.non_performance_parameters))
 
     def add_data(self, name=None, value=None):
         """
@@ -443,16 +442,6 @@ class IOmodule(object):
                 hash_calculator.update(data.encode(coding))
 
         return hash_calculator.hexdigest()
-
-    @classmethod
-    def _get_advanced_parameters(cls):
-        """
-        Calculates hash of file with advanced parameters.
-        Returns: string representation of hash for  file  with advanced parameters
-                 which contains only hexadecimal digits
-        """
-        h = cls._calculate_hash(filename=AbinsModules.AbinsParameters.__file__.replace(".pyc", ".py"))
-        return h
 
     def get_input_filename(self):
         return self._input_filename

@@ -19,9 +19,9 @@ using Mantid::Kernel::V3D;
 
 using namespace Mantid::API;
 
+using ::testing::_;
 using ::testing::Mock;
 using ::testing::Return;
-using ::testing::_;
 
 class ILatticeFunctionTest : public CxxTest::TestSuite {
 public:

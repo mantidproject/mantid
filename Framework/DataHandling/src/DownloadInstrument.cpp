@@ -329,7 +329,7 @@ size_t DownloadInstrument::removeOrphanedFiles(
         g_log.debug() << "File not found in remote instrument repository, will "
                          "be deleted: "
                       << entryPath.getFileName() << '\n';
-        filesToDelete.push_back(it->path());
+        filesToDelete.emplace_back(it->path());
       }
     }
   } catch (Poco::Exception &ex) {

@@ -13,11 +13,11 @@ import numpy as np
 class MuH(IFunction1D):
 
     def category(self):
-        return "Muon"
+        return "MuonSpecific"
 
     def init(self):
         self.declareParameter("A0", 0.5, 'Amplitude')
-        self.declareParameter("NuD", 0.5, 'Oscillating Frequency (MHz)' )
+        self.declareParameter("NuD", 0.5, 'Oscillating Frequency (MHz)')
         self.declareParameter("Lambda", 0.3, 'Exponential decay rate')
         self.declareParameter("Sigma", 0.05, 'Gaussian decay rate')
         self.declareParameter("Phi", 0.0, 'Phase (rad)')
@@ -30,7 +30,8 @@ class MuH(IFunction1D):
         phi = self.getParameterValue("Phi")
         OmegaD = NuD * 2 * np.pi
         gau = np.exp(-0.5 * (x * sigma) ** 2)
-        Lor = np.exp( - Lambda * x)
+        Lor = np.exp(- Lambda * x)
         return A0 * gau * Lor * (1 + np.cos(OmegaD * x + phi) + 2 * np.cos(0.5 * OmegaD * x + phi) + 2 * np.cos(1.5 * OmegaD * x + phi)) / 6
+
 
 FunctionFactory.subscribe(MuH)

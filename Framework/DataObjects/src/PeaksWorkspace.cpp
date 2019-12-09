@@ -81,7 +81,7 @@ PeaksWorkspace::PeaksWorkspace(const PeaksWorkspace &other)
 //=====================================================================================
 /** Comparator class for sorting peaks by one or more criteria
  */
-class PeakComparator : public std::binary_function<Peak, Peak, bool> {
+class PeakComparator {
 public:
   std::vector<std::pair<std::string, bool>> &criteria;
 
@@ -338,7 +338,7 @@ PeaksWorkspace::peakInfo(const Kernel::V3D &qFrame, bool labCoords) const {
   std::ostringstream oss;
   oss << std::setw(12) << std::fixed << std::setprecision(3) << (qFrame.norm());
   std::pair<std::string, std::string> QMag("|Q|", oss.str());
-  Result.push_back(QMag);
+  Result.emplace_back(QMag);
 
   oss.str("");
   oss.clear();
@@ -348,7 +348,7 @@ PeaksWorkspace::peakInfo(const Kernel::V3D &qFrame, bool labCoords) const {
   std::pair<std::string, std::string> dspc("d-spacing", oss.str());
   oss.str("");
   oss.clear();
-  Result.push_back(dspc);
+  Result.emplace_back(dspc);
 
   int seqNum = -1;
   bool hasOneRunNumber = true;
@@ -398,14 +398,14 @@ PeaksWorkspace::peakInfo(const Kernel::V3D &qFrame, bool labCoords) const {
   {
     std::pair<std::string, std::string> QlabStr(
         "Qlab", boost::lexical_cast<std::string>(Qlab));
-    Result.push_back(QlabStr);
+    Result.emplace_back(QlabStr);
   }
 
   if (!labCoords || seqNum >= 0) {
 
     std::pair<std::string, std::string> QsampStr(
         "QSample", boost::lexical_cast<std::string>(Qsamp));
-    Result.push_back(QsampStr);
+    Result.emplace_back(QsampStr);
   }
 
   try {
@@ -422,13 +422,13 @@ PeaksWorkspace::peakInfo(const Kernel::V3D &qFrame, bool labCoords) const {
 
       std::pair<std::string, std::string> HKL(
           "HKL", boost::lexical_cast<std::string>(hkl));
-      Result.push_back(HKL);
+      Result.emplace_back(HKL);
     }
 
     if (hasOneRunNumber) {
       std::pair<std::string, std::string> runn("RunNumber",
                                                "   " + std::to_string(runNum));
-      Result.push_back(runn);
+      Result.emplace_back(runn);
     }
 
     //------- Now get phi, chi and omega ----------------
@@ -438,16 +438,16 @@ PeaksWorkspace::peakInfo(const Kernel::V3D &qFrame, bool labCoords) const {
 
     std::pair<std::string, std::string> GRead(
         "Goniometer Angles", boost::lexical_cast<std::string>(PhiChiOmega));
-    Result.push_back(GRead);
+    Result.emplace_back(GRead);
 
     std::pair<std::string, std::string> SeqNum(
         "Seq Num,1st=1", "    " + std::to_string(seqNum + 1));
-    Result.push_back(SeqNum);
+    Result.emplace_back(SeqNum);
 
     oss << std::setw(12) << std::fixed << std::setprecision(3)
         << (peak->getWavelength());
     std::pair<std::string, std::string> wl("Wavelength", oss.str());
-    Result.push_back(wl);
+    Result.emplace_back(wl);
     oss.str("");
     oss.clear();
 
@@ -455,38 +455,38 @@ PeaksWorkspace::peakInfo(const Kernel::V3D &qFrame, bool labCoords) const {
       std::pair<std::string, std::string> detpos(
           "Position(x,y,z)",
           boost::lexical_cast<std::string>(peak->getDetPos()));
-      Result.push_back(detpos);
+      Result.emplace_back(detpos);
 
       oss << std::setw(15) << std::fixed << std::setprecision(3)
           << (peak->getTOF());
       std::pair<std::string, std::string> tof("TOF", oss.str());
-      Result.push_back(tof);
+      Result.emplace_back(tof);
       oss.str("");
       oss.clear();
 
       oss << std::setw(12) << std::fixed << std::setprecision(3)
           << (peak->getFinalEnergy());
       std::pair<std::string, std::string> Energy("Energy", oss.str());
-      Result.push_back(Energy);
+      Result.emplace_back(Energy);
       oss.str("");
       oss.clear();
 
       std::pair<std::string, std::string> row(
           "Row", "    " + std::to_string(peak->getRow()));
-      Result.push_back(row);
+      Result.emplace_back(row);
 
       std::pair<std::string, std::string> col(
           "Col", "    " + std::to_string(peak->getCol()));
-      Result.push_back(col);
+      Result.emplace_back(col);
 
       std::pair<std::string, std::string> bank("Bank",
                                                "    " + peak->getBankName());
-      Result.push_back(bank);
+      Result.emplace_back(bank);
 
       oss << std::setw(12) << std::fixed << std::setprecision(3)
           << (peak->getScattering());
       std::pair<std::string, std::string> scat("Scattering Angle", oss.str());
-      Result.push_back(scat);
+      Result.emplace_back(scat);
     }
 
   } catch (...) // Impossible position
@@ -549,7 +549,7 @@ int PeaksWorkspace::peakInfoNumber(const Kernel::V3D &qFrame,
   std::ostringstream oss;
   oss << std::setw(12) << std::fixed << std::setprecision(3) << (qFrame.norm());
   std::pair<std::string, std::string> QMag("|Q|", oss.str());
-  Result.push_back(QMag);
+  Result.emplace_back(QMag);
 
   oss.str("");
   oss.clear();
@@ -559,7 +559,7 @@ int PeaksWorkspace::peakInfoNumber(const Kernel::V3D &qFrame,
   std::pair<std::string, std::string> dspc("d-spacing", oss.str());
   oss.str("");
   oss.clear();
-  Result.push_back(dspc);
+  Result.emplace_back(dspc);
 
   int seqNum = -1;
   double minDist = 10000000;
@@ -666,10 +666,10 @@ void PeaksWorkspace::initColumns() {
  **/
 void PeaksWorkspace::addPeakColumn(const std::string &name) {
   // Create the PeakColumn.
-  columns.push_back(boost::shared_ptr<DataObjects::PeakColumn>(
+  columns.emplace_back(boost::shared_ptr<DataObjects::PeakColumn>(
       new DataObjects::PeakColumn(this->peaks, name)));
   // Cache the names
-  columnNames.push_back(name);
+  columnNames.emplace_back(name);
 }
 
 //---------------------------------------------------------------------------------------------
@@ -900,8 +900,8 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
 
   // Goniometer Matrix Column
   std::vector<int> array_dims;
-  array_dims.push_back(static_cast<int>(peaks.size()));
-  array_dims.push_back(9);
+  array_dims.emplace_back(static_cast<int>(peaks.size()));
+  array_dims.emplace_back(9);
   file->writeData("column_15", goniometerMatrix, array_dims);
   file->openData("column_15");
   file->putAttr("name", "Goniometer Matrix");
@@ -911,8 +911,8 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
 
   // Shape
   std::vector<int64_t> dims;
-  dims.push_back(np);
-  dims.push_back(static_cast<int>(maxShapeJSONLength));
+  dims.emplace_back(np);
+  dims.emplace_back(static_cast<int>(maxShapeJSONLength));
   const std::string name = "column_16";
   file->makeData(name, NeXus::CHAR, dims, false);
   file->openData(name);

@@ -379,8 +379,8 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName,
 
   // Get detector range
   std::vector<long> detRange;
-  detRange.push_back(static_cast<long>(m_uiForm.spSpecMin->value()));
-  detRange.push_back(static_cast<long>(m_uiForm.spSpecMax->value()));
+  detRange.emplace_back(static_cast<long>(m_uiForm.spSpecMin->value()));
+  detRange.emplace_back(static_cast<long>(m_uiForm.spSpecMax->value()));
 
   // Get generic reduction algorithm instance
   IAlgorithm_sptr msgDiffReduction =
@@ -513,8 +513,8 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
   m_batchAlgoRunner->addAlgorithm(convertUnits, inputFromReductionProps);
 
   m_plotWorkspaces.clear();
-  m_plotWorkspaces.push_back(tofWsName.toStdString());
-  m_plotWorkspaces.push_back(drangeWsName.toStdString());
+  m_plotWorkspaces.emplace_back(tofWsName.toStdString());
+  m_plotWorkspaces.emplace_back(drangeWsName.toStdString());
 
   // Handles completion of the diffraction algorithm chain
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,

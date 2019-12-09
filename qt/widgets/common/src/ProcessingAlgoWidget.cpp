@@ -15,8 +15,8 @@
 #include <fstream>
 #include <iosfwd>
 
-using Mantid::API::AlgorithmManager;
 using Mantid::API::Algorithm_sptr;
+using Mantid::API::AlgorithmManager;
 
 namespace MantidQt {
 namespace MantidWidgets {

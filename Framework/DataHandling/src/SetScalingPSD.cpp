@@ -142,7 +142,7 @@ bool SetScalingPSD::processScalingFile(const std::string &scalingFile,
       Kernel::V3D truPos;
       // use abs as correction file has -ve l2 for first few detectors
       truPos.spherical(fabs(l2), theta, phi);
-      truepos.push_back(truPos);
+      truepos.emplace_back(truPos);
       try {
         // detIndex is what Mantid usually calls detectorID
         size_t index = detectorInfo.indexOf(detIndex);
@@ -323,8 +323,8 @@ void SetScalingPSD::getDetPositionsFromRaw(std::string rawfile,
   Kernel::V3D point;
   for (int i = 0; i < numDetector; ++i) {
     point.spherical(r[i], angle[i], phi[i]);
-    pos.push_back(point);
-    detID.push_back(rawDetID[i]);
+    pos.emplace_back(point);
+    detID.emplace_back(rawDetID[i]);
   }
 }
 

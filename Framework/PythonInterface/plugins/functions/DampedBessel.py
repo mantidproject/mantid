@@ -14,15 +14,17 @@ from scipy import special as sp
 class DampedBessel(IFunction1D):
 
     def category(self):
-        return "Muon"
+        return "MuonSpecific"
 
     def init(self):
         self.declareParameter("A0", 0.2, 'Asymmetry')
         self.declareParameter("Phi", 0.0, 'Phase (rad)')
         self.declareParameter("Field", 10, 'B Field (G)')
-        self.declareParameter("LambdaL", 0.1, 'Dynamic longitudinal spin relaxation rate')
+        self.declareParameter(
+            "LambdaL", 0.1, 'Dynamic longitudinal spin relaxation rate')
         self.declareParameter("LambdaT", 0.1, 'Damping of the oscillation')
-        self.declareParameter("FractionL", 0.1, 'Fraction of longitudinal signal component')
+        self.declareParameter(
+            "FractionL", 0.1, 'Fraction of longitudinal signal component')
         self.addConstraints("0 < FractionL < 1")
 
     def function1D(self, x):
@@ -34,5 +36,6 @@ class DampedBessel(IFunction1D):
         fraction = self.getParameterValue("FractionL")
         omega = 0.01355342 * 2 * np.pi * field
         return A0 * np.exp(- LambdaL * x) * ((1 - fraction) * np.exp(LambdaT * x) * sp.j0(omega * x + phi) + fraction)
+
 
 FunctionFactory.subscribe(DampedBessel)

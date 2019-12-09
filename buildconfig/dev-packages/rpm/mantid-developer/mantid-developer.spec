@@ -5,7 +5,7 @@
 %endif
 
 Name:           mantid-developer
-Version:        1.33
+Version:        1.35
 Release:        1%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
@@ -19,7 +19,8 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires: clang
 %{?fedora:Requires: cmake-gui}
 %{?rhel:Requires: cmake3-gui}
-Requires: boost-devel
+Requires: boost169-devel
+Requires: boost169-python2-devel
 Requires: doxygen
 Requires: gperftools-devel
 Requires: gperftools-libs
@@ -40,15 +41,15 @@ Requires: numpy
 Requires: OCE-devel
 Requires: poco-devel >= 1.4.6
 Requires: PyQt4-devel
-Requires: python-qt5-devel
+Requires: python2-qt5-devel
 Requires: python-QtPy
 Requires: python-requests
 Requires: python-devel
 Requires: python-setuptools
 Requires: python-ipython >= 1.1
-Requires: python-matplotlib
-%{?fedora:Requires: python2-matplotlib-qt4}
-%{?el7:Requires: python-matplotlib-qt4}
+Requires: python2-matplotlib
+Requires: python2-matplotlib-qt4
+Requires: python2-matplotlib-qt4
 Requires: python-pip
 %{?fedora:Requires: python2-qtconsole}
 Requires: python-sphinx
@@ -56,6 +57,7 @@ Requires: python2-sphinx-bootstrap-theme
 Requires: PyYAML
 Requires: python2-mock
 Requires: python2-psutil
+Requires: python-enum34
 Requires: qscintilla-devel
 Requires: qt-devel >= 4.6
 Requires: qwt5-qt4-devel
@@ -63,7 +65,6 @@ Requires: qwtplot3d-qt4-devel
 Requires: redhat-lsb
 Requires: rpmdevtools
 Requires: scipy
-Requires: python2-scikit-image
 Requires: sip-devel
 Requires: tbb
 Requires: tbb-devel
@@ -91,7 +92,7 @@ Requires: graphviz
 Requires: python3-setuptools
 Requires: python3-sip-devel
 Requires: python3-PyQt4-devel
-Requires: python-qt5-devel
+Requires: python3-qt5-devel
 Requires: python3-QtPy
 Requires: python3-numpy
 Requires: python3-scipy
@@ -111,11 +112,17 @@ Requires: boost-python3-devel
 %endif
 
 %if 0%{?el7}
-Requires: boost-python36-devel
-Requires: python36-devel
-Requires: python36-h5py
+Requires: python36-setuptools
+Requires: python36-qt5-devel
 Requires: python36-numpy
+Requires: python36-scipy
+Requires: python36-sphinx
+Requires: python36-dateutil
 Requires: python36-PyYAML
+Requires: python36-mock
+Requires: python36-psutil
+Requires: python36-requests
+Requires: boost169-python3-devel
 %endif
 
 BuildArch: noarch
@@ -139,6 +146,22 @@ required for Mantid development.
 %files
 
 %changelog
+
+* Tue Dec 03 2019 David Fairbrother <david.fairbrother@stfc.ac.uk>
+- Added Python Enum34 back-port to the required Python dependencies
+
+* Tue Nov 5 2019 Martyn Gigg <martyn.gigg@stfc.ac.uk>
+- Switch to python{2,3}-qt5-devel
+- Remove python2-scikit-image
+- Add remaining python36 packages that exist.
+  Missing:
+    * python36-h5py
+    * python36-qt4
+    * python36-QtPy
+    * python36-sphinx-bootstrap-theme
+    * python36-matplotlib
+    * python36-ipython-gui
+- Add boost169
 
 * Thu Jun 27 2019 Peter Peterson <petersonpf@ornl.gov>
 - Added python3 dependencies for framework on rhel7

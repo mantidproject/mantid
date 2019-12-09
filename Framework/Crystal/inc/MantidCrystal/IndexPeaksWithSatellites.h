@@ -9,6 +9,7 @@
 #define MANTID_CRYSTAL_INDEX_PEAKS_WITH_SATELLITES_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
@@ -22,8 +23,10 @@ namespace Crystal {
     @author Shiyun Jin
     @date   2019-03-19
 */
-class DLLExport IndexPeaksWithSatellites : public API::Algorithm {
+class DLLExport IndexPeaksWithSatellites : public API::Algorithm,
+                                           API::DeprecatedAlgorithm {
 public:
+  IndexPeaksWithSatellites();
   /// Algorithm's name for identification
   const std::string name() const override {
     return "IndexPeaksWithSatellites";

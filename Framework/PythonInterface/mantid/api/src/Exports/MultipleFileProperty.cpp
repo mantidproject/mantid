@@ -17,8 +17,8 @@
 using Mantid::API::FileProperty;
 using Mantid::API::MultipleFileProperty;
 using Mantid::Kernel::PropertyWithValue;
-using Mantid::PythonInterface::Converters::PySequenceToVector;
 using Mantid::PythonInterface::PropertyWithValueExporter;
+using Mantid::PythonInterface::Converters::PySequenceToVector;
 using namespace boost::python;
 
 namespace {

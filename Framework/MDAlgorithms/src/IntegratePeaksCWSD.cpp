@@ -379,7 +379,7 @@ std::vector<detid_t> IntegratePeaksCWSD::processMaskWorkspace(
     if (vecY[0] > 0.1) {
       // vecY[] > 0 is masked.  det->isMasked() may not be reliable.
       const detid_t detid = specInfo.detector(iws).getID();
-      vecMaskedDetID.push_back(detid);
+      vecMaskedDetID.emplace_back(detid);
     }
   }
 

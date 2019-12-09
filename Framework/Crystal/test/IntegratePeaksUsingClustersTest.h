@@ -239,8 +239,8 @@ public:
     const double peakRadius = 1;
     const double threshold = 100;
     std::vector<size_t> nEventsInPeakVec;
-    nEventsInPeakVec.push_back(10000);
-    nEventsInPeakVec.push_back(
+    nEventsInPeakVec.emplace_back(10000);
+    nEventsInPeakVec.emplace_back(
         20000); // Second peak has DOUBLE the intensity of the firse one.
 
     MDHistoPeaksWSTuple inputWorkspaces = make_peak_and_md_ws(

@@ -155,13 +155,13 @@ vector<string> OPJFile::findDataByIndex(int index) const {
   for (const auto &spread : SPREADSHEET)
     for (const auto &i : spread.column)
       if (i.index == index) {
-        str.push_back(i.name);
+        str.emplace_back(i.name);
         str.emplace_back("T_" + spread.name);
         return str;
       }
   for (const auto &i : MATRIX)
     if (i.index == index) {
-      str.push_back(i.name);
+      str.emplace_back(i.name);
       str.emplace_back("M_" + i.name);
       return str;
     }
@@ -169,13 +169,13 @@ vector<string> OPJFile::findDataByIndex(int index) const {
     for (const auto &j : i.sheet)
       for (const auto &k : j.column)
         if (k.index == index) {
-          str.push_back(k.name);
+          str.emplace_back(k.name);
           str.emplace_back("E_" + i.name);
           return str;
         }
   for (const auto &i : FUNCTION)
     if (i.index == index) {
-      str.push_back(i.name);
+      str.emplace_back(i.name);
       str.emplace_back("F_" + i.name);
       return str;
     }
@@ -208,10 +208,10 @@ string OPJFile::findObjectByIndex(int index) {
 
 void OPJFile::convertSpreadToExcel(int spread) {
   // add new Excel sheet
-  EXCEL.push_back(excel(SPREADSHEET[spread].name, SPREADSHEET[spread].label,
-                        SPREADSHEET[spread].maxRows,
-                        SPREADSHEET[spread].bHidden,
-                        SPREADSHEET[spread].bLoose));
+  EXCEL.emplace_back(excel(SPREADSHEET[spread].name, SPREADSHEET[spread].label,
+                           SPREADSHEET[spread].maxRows,
+                           SPREADSHEET[spread].bHidden,
+                           SPREADSHEET[spread].bLoose));
   for (auto &i : SPREADSHEET[spread].column) {
     string name = i.name;
     int pos = static_cast<int>(name.find_last_of("@"));
@@ -225,7 +225,7 @@ void OPJFile::convertSpreadToExcel(int spread) {
     if (EXCEL.back().sheet.size() <= index)
       EXCEL.back().sheet.resize(index + 1);
     i.name = col;
-    EXCEL.back().sheet[index].column.push_back(i);
+    EXCEL.back().sheet[index].column.emplace_back(i);
   }
   SPREADSHEET.erase(SPREADSHEET.begin() + spread);
 }
@@ -415,7 +415,7 @@ int OPJFile::ParseFormatOld() {
     if (SPREADSHEET.size() == 0 || compareSpreadnames(sname) == -1) {
       fprintf(debug, "NEW SPREADSHEET\n");
       current_col = 1;
-      SPREADSHEET.push_back(spreadSheet(sname));
+      SPREADSHEET.emplace_back(spreadSheet(sname));
       spread = static_cast<int>(SPREADSHEET.size()) - 1;
       SPREADSHEET.back().maxRows = 0;
     } else {
@@ -491,9 +491,9 @@ int OPJFile::ParseFormatOld() {
           stmp[1] = char(i / 26 % 26 + 0x41);
           stmp[2] = char(i % 26 + 0x41);
         }
-        SPREADSHEET.back().column.push_back(stmp);
+        SPREADSHEET.back().column.emplace_back(stmp);
         CHECKED_FREAD(debug, &value, 8, 1, f);
-        SPREADSHEET.back().column[i].odata.push_back(originData(value));
+        SPREADSHEET.back().column[i].odata.emplace_back(originData(value));
 
         fprintf(debug, "%g ", value);
       }
@@ -501,7 +501,7 @@ int OPJFile::ParseFormatOld() {
       fflush(debug);
 
     } else { // worksheet
-      SPREADSHEET[spread].column.push_back(spreadColumn(cname));
+      SPREADSHEET[spread].column.emplace_back(spreadColumn(cname));
 
       ////////////////////////////// SIZE of column
       ////////////////////////////////////////////////
@@ -537,13 +537,13 @@ int OPJFile::ParseFormatOld() {
           if (IsBigEndian())
             SwapBytes(a);
           fprintf(debug, "%g ", a);
-          SPREADSHEET[spread].column[(current_col - 1)].odata.push_back(
+          SPREADSHEET[spread].column[(current_col - 1)].odata.emplace_back(
               originData(a));
         } else { // label
           char *stmp = new char[valuesize + 1];
           CHECKED_FREAD(debug, stmp, valuesize, 1, f);
           fprintf(debug, "%s ", stmp);
-          SPREADSHEET[spread].column[(current_col - 1)].odata.push_back(
+          SPREADSHEET[spread].column[(current_col - 1)].odata.emplace_back(
               originData(stmp));
           delete[] stmp;
         }
@@ -961,7 +961,7 @@ int OPJFile::ParseFormatNew() {
       case 0x50F2:
       case 0x50E2:
         fprintf(debug, "NEW MATRIX\n");
-        MATRIX.push_back(matrix(sname, dataIndex));
+        MATRIX.emplace_back(matrix(sname, dataIndex));
         dataIndex++;
 
         fprintf(debug, "VALUES :\n");
@@ -973,7 +973,7 @@ int OPJFile::ParseFormatNew() {
             CHECKED_FREAD(debug, &value, valuesize, 1, f);
             if (IsBigEndian())
               SwapBytes(value);
-            MATRIX.back().data.push_back((double)value);
+            MATRIX.back().data.emplace_back((double)value);
             fprintf(debug, "%g ", MATRIX.back().data.back());
           }
           break;
@@ -983,7 +983,7 @@ int OPJFile::ParseFormatNew() {
             CHECKED_FREAD(debug, &value, valuesize, 1, f);
             if (IsBigEndian())
               SwapBytes(value);
-            MATRIX.back().data.push_back((double)value);
+            MATRIX.back().data.emplace_back((double)value);
             fprintf(debug, "%g ", MATRIX.back().data.back());
           }
           break;
@@ -994,7 +994,7 @@ int OPJFile::ParseFormatNew() {
               CHECKED_FREAD(debug, &value, valuesize, 1, f);
               if (IsBigEndian())
                 SwapBytes(value);
-              MATRIX.back().data.push_back((double)value);
+              MATRIX.back().data.emplace_back((double)value);
               fprintf(debug, "%g ", MATRIX.back().data.back());
             }
           else
@@ -1003,7 +1003,7 @@ int OPJFile::ParseFormatNew() {
               CHECKED_FREAD(debug, &value, valuesize, 1, f);
               if (IsBigEndian())
                 SwapBytes(value);
-              MATRIX.back().data.push_back((double)value);
+              MATRIX.back().data.emplace_back((double)value);
               fprintf(debug, "%g ", MATRIX.back().data.back());
             }
           break;
@@ -1014,7 +1014,7 @@ int OPJFile::ParseFormatNew() {
               CHECKED_FREAD(debug, &value, valuesize, 1, f);
               if (IsBigEndian())
                 SwapBytes(value);
-              MATRIX.back().data.push_back((double)value);
+              MATRIX.back().data.emplace_back((double)value);
               fprintf(debug, "%g ", MATRIX.back().data.back());
             }
           else
@@ -1023,7 +1023,7 @@ int OPJFile::ParseFormatNew() {
               CHECKED_FREAD(debug, &value, valuesize, 1, f);
               if (IsBigEndian())
                 SwapBytes(value);
-              MATRIX.back().data.push_back((double)value);
+              MATRIX.back().data.emplace_back((double)value);
               fprintf(debug, "%g ", MATRIX.back().data.back());
             }
           break;
@@ -1034,7 +1034,7 @@ int OPJFile::ParseFormatNew() {
               CHECKED_FREAD(debug, &value, valuesize, 1, f);
               if (IsBigEndian())
                 SwapBytes(value);
-              MATRIX.back().data.push_back((double)value);
+              MATRIX.back().data.emplace_back((double)value);
               fprintf(debug, "%g ", MATRIX.back().data.back());
             }
           else
@@ -1043,7 +1043,7 @@ int OPJFile::ParseFormatNew() {
               CHECKED_FREAD(debug, &value, valuesize, 1, f);
               if (IsBigEndian())
                 SwapBytes(value);
-              MATRIX.back().data.push_back((double)value);
+              MATRIX.back().data.emplace_back((double)value);
               fprintf(debug, "%g ", MATRIX.back().data.back());
             }
           break;
@@ -1057,7 +1057,7 @@ int OPJFile::ParseFormatNew() {
         break;
       case 0x10C8:
         fprintf(debug, "NEW FUNCTION\n");
-        FUNCTION.push_back(function(sname, dataIndex));
+        FUNCTION.emplace_back(function(sname, dataIndex));
         dataIndex++;
 
         char *cmd;
@@ -1112,7 +1112,7 @@ int OPJFile::ParseFormatNew() {
       if (SPREADSHEET.size() == 0 || compareSpreadnames(sname) == -1) {
         fprintf(debug, "NEW SPREADSHEET\n");
         current_col = 1;
-        SPREADSHEET.push_back(spreadSheet(sname));
+        SPREADSHEET.emplace_back(spreadSheet(sname));
         spread = static_cast<int>(SPREADSHEET.size()) - 1;
         SPREADSHEET.back().maxRows = 0;
       } else {
@@ -1128,7 +1128,7 @@ int OPJFile::ParseFormatNew() {
       fprintf(debug, "SPREADSHEET = %s COLUMN NAME = %s (%d) (@0x%X)\n", sname,
               cname, current_col, (unsigned int)ftell(f));
       fflush(debug);
-      SPREADSHEET[spread].column.push_back(spreadColumn(cname, dataIndex));
+      SPREADSHEET[spread].column.emplace_back(spreadColumn(cname, dataIndex));
       int sheetpos = static_cast<int>(
           SPREADSHEET[spread].column.back().name.find_last_of("@"));
       if (!SPREADSHEET[spread].bMultisheet && sheetpos != -1)
@@ -1172,7 +1172,7 @@ int OPJFile::ParseFormatNew() {
           if (IsBigEndian())
             SwapBytes(a);
           fprintf(debug, "%g ", a);
-          SPREADSHEET[spread].column[(current_col - 1)].odata.push_back(
+          SPREADSHEET[spread].column[(current_col - 1)].odata.emplace_back(
               originData(a));
         } else if ((data_type & 0x100) == 0x100) // Text&Numeric
         {
@@ -1185,7 +1185,7 @@ int OPJFile::ParseFormatNew() {
             if (IsBigEndian())
               SwapBytes(a);
             fprintf(debug, "%g ", a);
-            SPREADSHEET[spread].column[(current_col - 1)].odata.push_back(
+            SPREADSHEET[spread].column[(current_col - 1)].odata.emplace_back(
                 originData(a));
             CHECKED_FSEEK(debug, f, valuesize - 10, SEEK_CUR);
           } else // text
@@ -1195,7 +1195,7 @@ int OPJFile::ParseFormatNew() {
             if (strchr(stmp,
                        0x0E)) // try find non-printable symbol - garbage test
               stmp[0] = '\0';
-            SPREADSHEET[spread].column[(current_col - 1)].odata.push_back(
+            SPREADSHEET[spread].column[(current_col - 1)].odata.emplace_back(
                 originData(stmp));
             fprintf(debug, "%s ", stmp);
             delete[] stmp;
@@ -1207,7 +1207,7 @@ int OPJFile::ParseFormatNew() {
           if (strchr(stmp,
                      0x0E)) // try find non-printable symbol - garbage test
             stmp[0] = '\0';
-          SPREADSHEET[spread].column[(current_col - 1)].odata.push_back(
+          SPREADSHEET[spread].column[(current_col - 1)].odata.emplace_back(
               originData(stmp));
           fprintf(debug, "%s ", stmp);
           delete[] stmp;
@@ -1356,7 +1356,7 @@ int OPJFile::ParseFormatNew() {
       delete[] stmp;
       break;
     } else {
-      NOTE.push_back(note(stmp));
+      NOTE.emplace_back(note(stmp));
       NOTE.back().objectID = objectIndex;
       NOTE.back().creation_date = creation_date;
       NOTE.back().modification_date = modification_date;
@@ -2123,7 +2123,7 @@ void OPJFile::readGraphInfo(FILE *f, int file_size, FILE *debug) {
   CHECKED_FSEEK(debug, f, POS + 0x2, SEEK_SET);
   CHECKED_FREAD(debug, &name, 25, 1, f);
 
-  GRAPH.push_back(graph(name));
+  GRAPH.emplace_back(graph(name));
   readWindowProperties(GRAPH.back(), f, debug, POS, headersize);
   // char c = 0;
 
@@ -2145,7 +2145,7 @@ void OPJFile::readGraphInfo(FILE *f, int file_size, FILE *debug) {
   int sec_size;
   while (true) // multilayer loop
   {
-    GRAPH.back().layer.push_back(graphLayer());
+    GRAPH.back().layer.emplace_back(graphLayer());
     // LAYER section
     LAYER += 0x5;
     double range = 0.0;
@@ -2427,7 +2427,7 @@ void OPJFile::readGraphInfo(FILE *f, int file_size, FILE *debug) {
       {
         stmp[sec_size] = '\0';
         CHECKED_FREAD(debug, &stmp, sec_size, 1, f);
-        GRAPH.back().layer.back().texts.push_back(text(stmp));
+        GRAPH.back().layer.back().texts.emplace_back(text(stmp));
         GRAPH.back().layer.back().texts.back().color = color;
         GRAPH.back().layer.back().texts.back().clientRect = r;
         GRAPH.back().layer.back().texts.back().tab = tab;
@@ -2440,7 +2440,7 @@ void OPJFile::readGraphInfo(FILE *f, int file_size, FILE *debug) {
           GRAPH.back().layer.back().texts.back().border_type = None;
       } else if (size == 0x78 && type == 2) // line
       {
-        GRAPH.back().layer.back().lines.push_back(line());
+        GRAPH.back().layer.back().lines.emplace_back(line());
         GRAPH.back().layer.back().lines.back().color = color;
         GRAPH.back().layer.back().lines.back().clientRect = r;
         GRAPH.back().layer.back().lines.back().attach = attach;
@@ -2451,7 +2451,7 @@ void OPJFile::readGraphInfo(FILE *f, int file_size, FILE *debug) {
       } else if (size == 0x28 && type == 4) // bitmap
       {
         unsigned long filesize = sec_size + 14;
-        GRAPH.back().layer.back().bitmaps.push_back(bitmap());
+        GRAPH.back().layer.back().bitmaps.emplace_back(bitmap());
         GRAPH.back().layer.back().bitmaps.back().left = bitmap_left;
         GRAPH.back().layer.back().bitmaps.back().top = bitmap_top;
         GRAPH.back().layer.back().bitmaps.back().width =
@@ -2762,7 +2762,7 @@ void OPJFile::readGraphInfo(FILE *f, int file_size, FILE *debug) {
         CHECKED_FREAD(debug, &h, 1, 1, f);
         curve.point_offset = h;
 
-        GRAPH.back().layer.back().curve.push_back(curve);
+        GRAPH.back().layer.back().curve.emplace_back(curve);
 
         LAYER += 0x1E7 + 0x1;
         CHECKED_FSEEK(debug, f, LAYER, SEEK_SET);

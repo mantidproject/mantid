@@ -43,11 +43,11 @@ public:
     PeaksWorkspace_sptr ws(new PeaksWorkspace());
     ws->setInstrument(inst);
 
-    auto lattice = new Mantid::Geometry::OrientedLattice;
+    auto lattice = std::make_unique<Mantid::Geometry::OrientedLattice>();
     Mantid::Kernel::DblMatrix UB(3, 3, true);
     UB.identityMatrix();
     lattice->setUB(UB);
-    ws->mutableSample().setOrientedLattice(lattice);
+    ws->mutableSample().setOrientedLattice(std::move(lattice));
 
     for (int run = 1000; run < numRuns + 1000; run++)
       for (size_t b = 1; b <= numBanks; b++)

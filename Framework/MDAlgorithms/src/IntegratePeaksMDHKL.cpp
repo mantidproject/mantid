@@ -209,10 +209,10 @@ void IntegratePeaksMDHKL::integratePeak(const int neighborPts,
     BackgroundInnerRadius2 = pow(BackgroundInnerRadius2, 2.0);
   const size_t dimensionality = out->getNumDims();
   for (size_t i = 0; i < dimensionality; ++i) {
-    gridPts.push_back(static_cast<int>(out->getDimension(i)->getNBins()));
+    gridPts.emplace_back(static_cast<int>(out->getDimension(i)->getNBins()));
   }
 
-  double *F = out->getSignalArray();
+  const auto F = out->getSignalArray();
   double Fmax = 0.;
   double Fmin = std::numeric_limits<double>::max();
   for (int i = 0; i < gridPts[0] * gridPts[1] * gridPts[2]; i++) {
@@ -221,7 +221,7 @@ void IntegratePeaksMDHKL::integratePeak(const int neighborPts,
       Fmax = std::max(Fmax, F[i]);
     }
   }
-  double *SqError = out->getErrorSquaredArray();
+  const auto SqError = out->getErrorSquaredArray();
 
   double minIntensity = Fmin + 0.01 * (Fmax - Fmin);
   int measuredPoints = 0;

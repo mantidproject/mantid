@@ -142,7 +142,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
       if (i != mid_ind) {
         V3D shifted_vec(shifted_qs[i]);
         shifted_vec -= mid_vec;
-        sorted_qs.push_back(shifted_vec);
+        sorted_qs.emplace_back(shifted_vec);
       }
     }
   } else {
@@ -159,7 +159,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
   some_qs.reserve(q_vectors.size());
 
   for (size_t i = 0; i < num_initial; i++)
-    some_qs.push_back(sorted_qs[i]);
+    some_qs.emplace_back(sorted_qs[i]);
 
   ScanFor_UB(UB, some_qs, lattice, degrees_per_step, required_tolerance);
 
@@ -180,7 +180,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
       num_initial = sorted_qs.size();
 
     for (size_t i = some_qs.size(); i < num_initial; i++)
-      some_qs.push_back(sorted_qs[i]);
+      some_qs.emplace_back(sorted_qs[i]);
     for (int counter = 0; counter < iterations; counter++) {
       try {
         GetIndexedPeaks(UB, some_qs, required_tolerance, miller_ind, indexed_qs,
@@ -339,7 +339,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
       if (i != mid_ind) {
         V3D shifted_vec(shifted_qs[i]);
         shifted_vec -= mid_vec;
-        sorted_qs.push_back(shifted_vec);
+        sorted_qs.emplace_back(shifted_vec);
       }
     }
   } else {
@@ -356,7 +356,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
   some_qs.reserve(q_vectors.size());
 
   for (size_t i = 0; i < num_initial; i++)
-    some_qs.push_back(sorted_qs[i]);
+    some_qs.emplace_back(sorted_qs[i]);
   std::vector<V3D> directions;
   ScanFor_Directions(directions, some_qs, min_d, max_d, required_tolerance,
                      degrees_per_step);
@@ -390,7 +390,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
       num_initial = sorted_qs.size();
 
     for (size_t i = some_qs.size(); i < num_initial; i++)
-      some_qs.push_back(sorted_qs[i]);
+      some_qs.emplace_back(sorted_qs[i]);
 
     GetIndexedPeaks(UB, some_qs, required_tolerance, miller_ind, indexed_qs,
                     fit_error);
@@ -1290,9 +1290,9 @@ double IndexingUtils::ScanFor_UB(DblMatrix &UB,
         max_indexed = num_indexed;
       }
       if (num_indexed == max_indexed) {
-        selected_a_dirs.push_back(a_dir_temp);
-        selected_b_dirs.push_back(b_dir_temp);
-        selected_c_dirs.push_back(c_dir_temp);
+        selected_a_dirs.emplace_back(a_dir_temp);
+        selected_b_dirs.emplace_back(b_dir_temp);
+        selected_c_dirs.emplace_back(c_dir_temp);
       }
     }
   }
@@ -1452,7 +1452,7 @@ size_t IndexingUtils::ScanFor_Directions(std::vector<V3D> &directions,
         }
       }
       if (!duplicate) {
-        directions.push_back(current_dir);
+        directions.emplace_back(current_dir);
       }
     }
   }
@@ -1555,7 +1555,7 @@ size_t IndexingUtils::FFTScanFor_Directions(std::vector<V3D> &directions,
   std::vector<V3D> temp_dirs;
   for (size_t i = 0; i < max_fft_val.size(); i++) {
     if (max_fft_val[i] >= threshold) {
-      temp_dirs.push_back(full_list[i]);
+      temp_dirs.emplace_back(full_list[i]);
     }
   }
   // now scan through temp_dirs and use the
@@ -1576,7 +1576,7 @@ size_t IndexingUtils::FFTScanFor_Directions(std::vector<V3D> &directions,
       double d_val = 1 / q_val;
       if (d_val >= 0.8 * min_d && d_val <= 1.2 * max_d) {
         temp = temp_dir * d_val;
-        temp_dirs_2.push_back(temp);
+        temp_dirs_2.emplace_back(temp);
       }
     }
   }
@@ -1599,7 +1599,7 @@ size_t IndexingUtils::FFTScanFor_Directions(std::vector<V3D> &directions,
     current_dir = dir_num;
     num_indexed = NumberIndexed_1D(current_dir, q_vectors, required_tolerance);
     if (num_indexed >= 0.50 * max_indexed)
-      temp_dirs.push_back(current_dir);
+      temp_dirs.emplace_back(current_dir);
   }
   // refine directions and again find the
   // max number indexed, for the optimized
@@ -1634,7 +1634,7 @@ size_t IndexingUtils::FFTScanFor_Directions(std::vector<V3D> &directions,
     current_dir = temp_dir;
     double length = current_dir.norm();
     if (length >= 0.8 * min_d && length <= 1.2 * max_d)
-      temp_dirs_2.push_back(current_dir);
+      temp_dirs_2.emplace_back(current_dir);
   }
   // only keep directions that index at
   // least 75% of the max number of peaks
@@ -1643,7 +1643,7 @@ size_t IndexingUtils::FFTScanFor_Directions(std::vector<V3D> &directions,
     current_dir = dir_num;
     num_indexed = NumberIndexed_1D(current_dir, q_vectors, required_tolerance);
     if (num_indexed > max_indexed * 0.75)
-      temp_dirs.push_back(current_dir);
+      temp_dirs.emplace_back(current_dir);
   }
 
   std::sort(temp_dirs.begin(), temp_dirs.end(), V3D::compareMagnitude);
@@ -2048,7 +2048,7 @@ void IndexingUtils::DiscardDuplicates(std::vector<V3D> &new_list,
     if (current_length > 0) // skip any zero vectors
     {
       temp.clear();
-      temp.push_back(current_dir);
+      temp.emplace_back(current_dir);
       check_index = dir_num;
       new_dir = false;
       while (check_index < directions.size() && !new_dir) {
@@ -2062,7 +2062,7 @@ void IndexingUtils::DiscardDuplicates(std::vector<V3D> &new_list,
             if ((std::isnan)(angle))
               angle = 0;
             if ((angle < ang_tol) || (angle > (180.0 - ang_tol))) {
-              temp.push_back(next_dir);
+              temp.emplace_back(next_dir);
               directions[check_index] = zero_vec; // mark off this direction
             }                                     // since it was duplicate
 
@@ -2091,12 +2091,22 @@ void IndexingUtils::DiscardDuplicates(std::vector<V3D> &new_list,
 
       if (max_indexed > 0) // don't bother to add any direction
       {                    // that doesn't index anything
-        new_list.push_back(temp[max_i]);
+        new_list.emplace_back(temp[max_i]);
       }
     }
   }
 
   directions.clear();
+}
+
+/**
+  Round all of the components of the V3D to the nearest integer.
+  @param hkl V3D object whose components will be rounded.
+*/
+void IndexingUtils::RoundHKL(Mantid::Kernel::V3D &hkl) {
+  for (size_t i = 0; i < 3; i++) {
+    hkl[i] = std::round(hkl[i]);
+  }
 }
 
 /**
@@ -2110,9 +2120,7 @@ void IndexingUtils::DiscardDuplicates(std::vector<V3D> &new_list,
  */
 void IndexingUtils::RoundHKLs(std::vector<V3D> &hkl_list) {
   for (auto &entry : hkl_list) {
-    for (size_t i = 0; i < 3; i++) {
-      entry[i] = std::round(entry[i]);
-    }
+    RoundHKL(entry);
   }
 }
 
@@ -2412,20 +2420,14 @@ int IndexingUtils::CalculateMillerIndices(const DblMatrix &UB,
   miller_indices.reserve(q_vectors.size());
 
   int count = 0;
-  double h_error, k_error, l_error;
   ave_error = 0.0;
-  V3D hkl;
   for (const auto &q_vector : q_vectors) {
-    hkl = UB_inverse * q_vector / (2.0 * M_PI);
-    if (ValidIndex(hkl, tolerance)) {
+    V3D hkl;
+    if (CalculateMillerIndices(UB_inverse, q_vector, tolerance, hkl)) {
       count++;
-      miller_indices.emplace_back(hkl);
-      h_error = std::abs(std::round(hkl[0]) - hkl[0]);
-      k_error = std::abs(std::round(hkl[1]) - hkl[1]);
-      l_error = std::abs(std::round(hkl[2]) - hkl[2]);
-      ave_error += h_error + k_error + l_error;
-    } else
-      miller_indices.emplace_back(0, 0, 0);
+      ave_error += hkl.hklError();
+    }
+    miller_indices.emplace_back(std::move(hkl));
   }
 
   if (count > 0) {
@@ -2433,6 +2435,54 @@ int IndexingUtils::CalculateMillerIndices(const DblMatrix &UB,
   }
 
   return count;
+}
+
+/**
+  Calculate the Miller Indices for the specified Q vector, using the
+  inverse of the specified UB matrix. If the peak could not be indexed it is
+  set to (0,0,0)
+
+  @param inverseUB A 3x3 matrix of doubles holding the inverse UB matrix.
+                   The matrix is not checked for validity
+  @param q_vector  std::vector of V3D objects that contains the list of
+                   q_vectors that are to be indexed.
+  @param tolerance The maximum allowed distance between each component
+                   of UB^(-1)*Q and the nearest integer value, required to
+                   to count the peak as indexed by UB.
+  @param miller_indices This vector returns a list of Miller Indices, with
+                        one entry for each given Q vector.
+
+  @return True if the peak was index, false otherwise
+
+ */
+
+bool IndexingUtils::CalculateMillerIndices(const DblMatrix &inverseUB,
+                                           const V3D &q_vector,
+                                           double tolerance,
+                                           V3D &miller_indices) {
+  miller_indices = CalculateMillerIndices(inverseUB, q_vector);
+  if (ValidIndex(miller_indices, tolerance)) {
+    return true;
+  } else {
+    miller_indices = V3D(0, 0, 0);
+    return false;
+  }
+}
+
+/**
+  Calculate the Miller Indices for the specified Q vector, using the
+  inverse of the specified UB matrix.
+
+  @param inverseUB A 3x3 matrix of doubles holding the inverse UB matrix.
+                   The matrix is not checked for validity
+  @param q_vector V3D object containing Q vector in sample frame
+
+  @return The indexes of the given peak. They have not been tested for validity
+
+ */
+V3D IndexingUtils::CalculateMillerIndices(const DblMatrix &inverseUB,
+                                          const V3D &q_vector) {
+  return inverseUB * q_vector / (2.0 * M_PI);
 }
 
 /**
@@ -2487,8 +2537,8 @@ int IndexingUtils::GetIndexedPeaks_1D(const V3D &direction,
     double error = fabs(proj_value - nearest_int);
     if (error < required_tolerance) {
       fit_error += error * error;
-      indexed_qs.push_back(q_vector);
-      index_vals.push_back(boost::numeric_cast<int>(nearest_int));
+      indexed_qs.emplace_back(q_vector);
+      index_vals.emplace_back(boost::numeric_cast<int>(nearest_int));
       num_indexed++;
     }
   }
@@ -2507,7 +2557,8 @@ int IndexingUtils::GetIndexedPeaks_1D(const V3D &direction,
   to the unit cell edges, then the resulting indices will be proper Miller
   indices for the peaks.  This method is similar to GetIndexedPeaks_1D, but
   checks three directions simultaneously and requires that the peak lies
-  on all three families of planes simultaneously and does NOT index as (0,0,0).
+  on all three families of planes simultaneously and does NOT index as
+  (0,0,0).
 
   @param direction_1         Direction vector in the direction of the normal
                              vector for the first family of parallel planes.
@@ -2565,10 +2616,10 @@ int IndexingUtils::GetIndexedPeaks_3D(
 
       fit_error += h_error * h_error + k_error * k_error + l_error * l_error;
 
-      indexed_qs.push_back(q_vector);
+      indexed_qs.emplace_back(q_vector);
 
       V3D miller_ind(h_int, k_int, l_int);
-      miller_indices.push_back(miller_ind);
+      miller_indices.emplace_back(miller_ind);
 
       num_indexed++;
     }
@@ -2636,10 +2687,10 @@ int IndexingUtils::GetIndexedPeaks(const DblMatrix &UB,
         fit_error += error * error;
       }
 
-      indexed_qs.push_back(q_vector);
+      indexed_qs.emplace_back(q_vector);
 
       V3D miller_ind(round(hkl[0]), round(hkl[1]), round(hkl[2]));
-      miller_indices.push_back(miller_ind);
+      miller_indices.emplace_back(miller_ind);
 
       num_indexed++;
     }
@@ -2766,7 +2817,7 @@ std::vector<V3D> IndexingUtils::MakeCircleDirections(int n_steps,
     V3D vec(vector_at_angle);
     rotation_2.setAngleAxis(i * angle_step, axis);
     rotation_2.rotate(vec);
-    directions.push_back(vec);
+    directions.emplace_back(vec);
   }
 
   return directions;
@@ -2778,16 +2829,15 @@ std::vector<V3D> IndexingUtils::MakeCircleDirections(int n_steps,
   plane_spacing.  The direction is chosen from the specified direction_list.
 
   @param  best_direction      This will be set to the direction that minimizes
-                              the sum squared distances of projections of peaks
-                              from integer multiples of the specified plane
-                              spacing.
+                              the sum squared distances of projections of
+  peaks from integer multiples of the specified plane spacing.
   @param  q_vectors           List of peak positions, specified according to
                               the convention that |q| = 1/d.  (i.e. Q/2PI)
   @param  direction_list      List of possible directions for plane normals.
                               Initially, this will be a long list of possible
                               directions from MakeHemisphereDirections().
-  @param  plane_spacing       The required spacing between planes in reciprocal
-                              space.
+  @param  plane_spacing       The required spacing between planes in
+  reciprocal space.
   @param  required_tolerance  The maximum deviation of the component of a
                               peak Qxyz in the direction of the best_direction
                               vector for that peak to count as being indexed.
@@ -2855,7 +2905,8 @@ int IndexingUtils::SelectDirection(V3D &best_direction,
  *  @param UB           A non-singular matrix representing an orientation
  *                      matrix.
  *  @param lattice_par  std::vector of doubles that will contain the lattice
- *                      parameters and cell volume as it's first seven entries.
+ *                      parameters and cell volume as it's first seven
+ * entries.
  *  @return true if the lattice_par vector was filled with the lattice
  *          parameters and false if the matrix could not be inverted.
  */
@@ -2865,16 +2916,16 @@ bool IndexingUtils::GetLatticeParameters(const DblMatrix &UB,
   o_lattice.setUB(UB);
 
   lattice_par.clear();
-  lattice_par.push_back(o_lattice.a());
-  lattice_par.push_back(o_lattice.b());
-  lattice_par.push_back(o_lattice.c());
+  lattice_par.emplace_back(o_lattice.a());
+  lattice_par.emplace_back(o_lattice.b());
+  lattice_par.emplace_back(o_lattice.c());
 
-  lattice_par.push_back(o_lattice.alpha());
-  lattice_par.push_back(o_lattice.beta());
-  lattice_par.push_back(o_lattice.gamma());
+  lattice_par.emplace_back(o_lattice.alpha());
+  lattice_par.emplace_back(o_lattice.beta());
+  lattice_par.emplace_back(o_lattice.gamma());
 
-  lattice_par.push_back(o_lattice.volume()); // keep volume > 0 even if
-                                             // cell is left handed
+  lattice_par.emplace_back(o_lattice.volume()); // keep volume > 0 even if
+                                                // cell is left handed
   return true;
 }
 

@@ -108,18 +108,12 @@ private:
   void exec() override;
   /// Load a file into the event lists.
   void loadSingleFile(const std::vector<std::string> &filePath,
-                      int &eventCountInFrame, int &maxToF, int &minToF,
+                      int &eventCountInFrame, double &maxToF, double &minToF,
                       int &rawFrames, int &goodFrames, const int &minEventsReq,
                       const int &maxEventsReq, MantidVec &frameEventCounts,
                       std::vector<DataObjects::EventList> &events,
                       std::vector<DataObjects::EventList> &eventsInFrame,
                       const size_t &totalFilePaths, int &fileCount);
-  /// Add some text information to the sample logs.
-  void addToSampleLog(const std::string &logName, const std::string &logText,
-                      DataObjects::EventWorkspace_sptr &ws);
-  /// Add some number information to the sample logs.
-  void addToSampleLog(const std::string &logName, const int &logNumber,
-                      DataObjects::EventWorkspace_sptr &ws);
   /// Check that a file to be loaded is in 128 bit words.
   size_t verifyFileSize(std::ifstream &file);
   /// Reports progress and checks cancel flag.

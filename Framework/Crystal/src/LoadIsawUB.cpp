@@ -190,16 +190,16 @@ void LoadIsawUB::readModulatedUB(std::ifstream &in, DblMatrix &ub) {
     throw std::invalid_argument("Must specify either a MatrixWorkspace or a "
                                 "PeaksWorkspace or a MDWorkspace.");
 
-  // Save it into the workspace
-  ws->mutableSample().setOrientedLattice(latt.get());
-
-  // Save it to every experiment info in MD workspaces
+  // Save a copy of it to every experiment info in MD workspaces
   if ((MDWS != nullptr) && (MDWS->getNumExperimentInfo() > 1)) {
     for (uint16_t i = 1; i < MDWS->getNumExperimentInfo(); i++) {
       ws = MDWS->getExperimentInfo(i);
-      ws->mutableSample().setOrientedLattice(latt.get());
+      ws->mutableSample().setOrientedLattice(
+          std::make_unique<OrientedLattice>(*latt));
     }
   }
+  // Save it into the main workspace
+  ws->mutableSample().setOrientedLattice(std::move(latt));
 
   this->setProperty("InputWorkspace", ws1);
 }

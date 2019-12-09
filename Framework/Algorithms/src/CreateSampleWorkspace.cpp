@@ -337,8 +337,8 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createScanningWorkspace(
   auto angles = std::vector<double>();
   auto timeRanges = std::vector<double>();
   for (int i = 0; i < numScanPoints; ++i) {
-    angles.push_back(double(i));
-    timeRanges.push_back(double(i + 1));
+    angles.emplace_back(double(i));
+    timeRanges.emplace_back(double(i + 1));
   }
 
   builder.setTimeRanges(Types::Core::DateAndTime(0), timeRanges);

@@ -512,7 +512,7 @@ void AnvredCorrection::BuildLamdaWeights() {
     // value.
     m_lamda_weight.reserve(NUM_WAVELENGTHS);
     for (int i = 0; i < NUM_WAVELENGTHS; i++)
-      m_lamda_weight.push_back(1.);
+      m_lamda_weight.emplace_back(1.);
   }
 
   for (size_t i = 0; i < m_lamda_weight.size(); ++i) {
@@ -551,9 +551,9 @@ void AnvredCorrection::scale_exec(std::string &bankName, double &lambda,
   double eff_R = 1.0 - exp(-mu * pathlength); // efficiency at point R
   value *= eff_center / eff_R;                // slant path efficiency ratio
   // Take out the "bank" part of the bank name
-  bankName.erase(remove_if(bankName.begin(), bankName.end(),
-                           not1(std::ptr_fun(::isdigit))),
-                 bankName.end());
+  bankName.erase(
+      remove_if(bankName.begin(), bankName.end(), std::not_fn(::isdigit)),
+      bankName.end());
   if (inst->hasParameter("detScale" + bankName))
     value *=
         static_cast<double>(inst->getNumberParameter("detScale" + bankName)[0]);

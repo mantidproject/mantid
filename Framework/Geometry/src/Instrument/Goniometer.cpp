@@ -151,7 +151,7 @@ void Goniometer::pushAxis(std::string name, double axisx, double axisy,
         throw std::invalid_argument("Motor name already defined");
     }
     GoniometerAxis a(name, V3D(axisx, axisy, axisz), angle, sense, angUnit);
-    motors.push_back(a);
+    motors.emplace_back(a);
   }
   recalculateR();
 }
@@ -192,19 +192,38 @@ void Goniometer::setRotationAngle(size_t axisnumber, double value) {
  * Q Sample
  * @param position :: Q Sample position in reciprocal space
  * @param wavelength :: wavelength
+ * @param flip_x :: option if the q_lab x value should be negative, hence the
+ * detector of the other side of the beam
+ * @param inner :: whether the goniometer is the most inner (phi) or most outer
+ * (omega)
  */
 void Goniometer::calcFromQSampleAndWavelength(
-    const Mantid::Kernel::V3D &position, double wavelength) {
+    const Mantid::Kernel::V3D &position, double wavelength, bool flip_x,
+    bool inner) {
   V3D Q(position);
   if (Kernel::ConfigService::Instance().getString("Q.convention") ==
       "Crystallography")
     Q *= -1;
+
+  Matrix<double> starting_goniometer = getR();
+
+  if (!inner)
+    Q = starting_goniometer * Q;
+
   double wv = 2.0 * M_PI / wavelength;
   double norm_q2 = Q.norm2();
   double theta = acos(1 - norm_q2 / (2 * wv * wv)); // [0, pi]
-  double phi = asin(-Q[1] / wv * sin(theta));       // [-pi/2, pi/2]
+  double phi = asin(-Q[1] / (wv * sin(theta)));     // [-pi/2, pi/2]
   V3D Q_lab(-wv * sin(theta) * cos(phi), -wv * sin(theta) * sin(phi),
             wv * (1 - cos(theta)));
+
+  if (flip_x)
+    Q_lab[0] *= -1;
+
+  if (inner) {
+    starting_goniometer.Invert();
+    Q_lab = starting_goniometer * Q_lab;
+  }
 
   // Solve to find rotation matrix, assuming only rotation around y-axis
   // A * X = B
@@ -219,7 +238,12 @@ void Goniometer::calcFromQSampleAndWavelength(
   goniometer[0][2] = sin(rot);
   goniometer[2][0] = -sin(rot);
   goniometer[2][2] = cos(rot);
-  setR(goniometer);
+  if (inner) {
+    starting_goniometer.Invert();
+    setR(starting_goniometer * goniometer);
+  } else {
+    setR(goniometer * starting_goniometer);
+  }
 }
 
 /// Get GoniometerAxis obfject using motor number
@@ -320,7 +344,7 @@ void Goniometer::loadNexus(::NeXus::File *file, const std::string &group) {
   for (int i = 0; i < num_axes; i++) {
     GoniometerAxis newAxis;
     newAxis.loadNexus(file, "axis" + Strings::toString(i));
-    motors.push_back(newAxis);
+    motors.emplace_back(newAxis);
   }
   file->closeGroup();
   // Refresh cached values

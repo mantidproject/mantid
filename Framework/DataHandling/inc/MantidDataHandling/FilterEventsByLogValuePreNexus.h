@@ -271,6 +271,6 @@ private:
 
   bool m_corretctTOF;
 };
-}
+} // namespace DataHandling
 } // namespace Mantid
 #endif /*FILTEREVENTSBYLOGVALUEPRENEXUS_H_*/
