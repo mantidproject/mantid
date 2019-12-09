@@ -190,7 +190,7 @@ class TotalScatteringMergedTest(systemtesting.MantidSystemTest):
         # Whilst total scattering is in development, the validation will avoid using reference files as they will have
         # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.9 Angstrom will be checked.
         # After rebin this is at X index 37
-        self.assertAlmostEqual(self.pdf_output.dataY(0)[37], 0.8055205, places=3)
+        self.assertAlmostEqual(self.pdf_output.dataY(0)[37], 0.7376667, places=3)
 
 
 def run_total_scattering(run_number, merge_banks, q_lims=None):
