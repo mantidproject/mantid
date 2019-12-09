@@ -17,7 +17,7 @@ different avenues; therefore, below is detailed our support procedures.
 
 The main purpose of user support for the Mantid project, is to aide contact between the users and developers.
 
-.. figure:: ../images/errorReporter.png
+.. figure:: images/errorReporter.png
    :class: screenshot
    :width: 700px
    :align: right
@@ -34,6 +34,5 @@ Bugs and Error Reports
 4.	A Github issue to resolve the problem is created if appropriate and/or workaround tested if possible.
 5.	The user is contacted to give a link to the created issue and/or workaround solution.
 6.	When any issue is completed naming a user, that user is contacted to let them know it will be available in the nightly build and next release.
-
 
 
