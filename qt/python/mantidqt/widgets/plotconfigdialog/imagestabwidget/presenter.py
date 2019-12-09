@@ -8,6 +8,9 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
+from matplotlib.colors import LogNorm
+from matplotlib.ticker import LogLocator
+
 from mantidqt.utils.qt import block_signals
 from mantidqt.widgets.plotconfigdialog import generate_ax_name, get_images_from_fig
 from mantidqt.widgets.plotconfigdialog.imagestabwidget import ImageProperties
@@ -46,7 +49,11 @@ class ImagesTabWidgetPresenter:
         if current_axis_images.colorbar:
             current_axis_images.colorbar.remove()
 
-        self.fig.colorbar(image)
+        locator = None
+        if SCALES[props.scale] == LogNorm:
+            locator = LogLocator()
+
+        self.fig.colorbar(image, ticks=locator)
 
     def get_selected_image(self):
         return self.image_names_dict[self.view.get_selected_image_name()]
