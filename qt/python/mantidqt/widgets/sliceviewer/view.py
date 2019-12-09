@@ -23,8 +23,8 @@ from .toolbar import SliceViewerNavigationToolbar
 import numpy as np
 
 from qtpy.QtCore import Qt
-from qtpy.QtWidgets import (QComboBox, QLabel, QHBoxLayout, QMenu,
-                            QSpacerItem, QVBoxLayout, QWidget)
+from qtpy.QtWidgets import QComboBox, QLabel, QHBoxLayout, QVBoxLayout, QWidget
+
 
 class SliceViewerView(QWidget):
     def __init__(self, presenter, dims_info, can_normalise, parent=None):
@@ -112,8 +112,8 @@ class SliceViewerView(QWidget):
         """
         self.ax.clear()
         self.im = self.ax.imshow(ws, origin='lower', aspect='auto',
-                         transpose=self.dimensions.transpose,
-                         norm=self.colorbar.get_norm(), **kwargs)
+                                 transpose=self.dimensions.transpose,
+                                 norm=self.colorbar.get_norm(), **kwargs)
         self.draw_plot()
 
     def plot_matrix(self, ws, **kwargs):
