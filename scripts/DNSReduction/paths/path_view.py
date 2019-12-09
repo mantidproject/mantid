@@ -55,9 +55,9 @@ class DNSPath_view(DNSView):
         self._content.pB_file_export.clicked.connect(self.filedialog)
 
     ### for testing
-        self._content.lE_data_dir.setText('C:/Daten/mantid_test')
-        self._content.lE_standards_dir.setText('C:/Daten/mantid_test/standards')
-        self._content.lE_script_dir.setText('C:/Daten/mantid_test/scripts')
+    #    self._content.lE_data_dir.setText('C:/Daten/mantid_test')
+    #    self._content.lE_standards_dir.setText('C:/Daten/mantid_test/standards')
+    #    self._content.lE_script_dir.setText('C:/Daten/mantid_test/scripts')
 
     #self._content.lE_data_dir.setText('C:/data/p13656')
 
