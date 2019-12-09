@@ -14,7 +14,7 @@ from mantid.kernel import DateAndTime
 from mantid.api import EventType
 from mantid.dataobjects import EventList
 
-gps_epoch_plus_42_nanoseconds = np.datetime64('1990-01-01T00:00:00.000000042', 'ns')
+gps_epoch_plus_42_nanoseconds = np.datetime64('1990-01-01T00:00:00.000000042Z', 'ns')
 
 class EventListTest(unittest.TestCase):
 
