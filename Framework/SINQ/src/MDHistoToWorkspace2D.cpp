@@ -72,13 +72,15 @@ void MDHistoToWorkspace2D::exec() {
     outWS->getSpectrum(i).setDetectorID(static_cast<detid_t>(i + 1));
   outWS->setYUnit("Counts");
 
-  auto *pos = reinterpret_cast<coord_t *>(malloc(m_rank * sizeof(coord_t)));
-  memset(pos, 0, m_rank * sizeof(coord_t));
+  struct FreeDeleter {
+    void operator()(void *x) { free(x); }
+  };
+  auto pos = std::unique_ptr<coord_t, FreeDeleter>(
+      reinterpret_cast<coord_t *>(malloc(m_rank * sizeof(coord_t))));
+  memset(pos.get(), 0, m_rank * sizeof(coord_t));
   m_currentSpectra = 0;
-  recurseData(inWS, outWS, 0, pos);
+  recurseData(inWS, outWS, 0, pos.get());
   copyMetaData(inWS, outWS);
-
-  // checkW2D(outWS);
 
   setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(outWS));
 }

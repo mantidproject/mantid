@@ -201,12 +201,11 @@ void FilterByLogValue::exec() {
 
     // To split/filter the runs, first you make a vector with just the one
     // output run
-    std::vector<LogManager *> output_runs;
-    LogManager *output_run = new Run(inputWS->mutableRun());
-    output_runs.emplace_back(output_run);
-    inputWS->run().splitByTime(splitter, output_runs);
+    auto newRun = Kernel::make_cow<Run>(inputWS->run());
+    std::vector<LogManager *> splitRuns = {&newRun.access()};
+    inputWS->run().splitByTime(splitter, splitRuns);
     // Set the output back in the input
-    inputWS->mutableRun() = *(static_cast<Run *>(output_runs[0]));
+    inputWS->setSharedRun(newRun);
     inputWS->mutableRun().integrateProtonCharge();
 
     // Cast the outputWS to the matrixOutputWS and save it

@@ -139,17 +139,51 @@ def _merge_workspace_with_limits(focused_ws, q_lims):
     min_x = np.inf
     max_x = -np.inf
     num_x = -np.inf
-    for ws in focused_ws:
-        x_data = ws.dataX(0)
+    ws_max_range = 0
+    largest_range_spectrum = 0
+    for i in range(focused_ws.size()):
+        x_data = focused_ws[i].dataX(0)
         min_x = min(np.min(x_data), min_x)
         max_x = max(np.max(x_data), max_x)
         num_x = max(x_data.size, num_x)
-    width_x = (max_x-min_x)/num_x
-    binning = [min_x, width_x, max_x]
-    focused_ws = mantid.Rebin(InputWorkspace=focused_ws, Params=binning)
-    focused_ws_conjoined = mantid.ConjoinSpectra(InputWorkspaces=focused_ws)
+        ws_range = np.max(x_data)-np.min(x_data)
+        if ws_range > ws_max_range:
+            largest_range_spectrum = i + 1
+            ws_max_range = ws_range
+    if min_x == -np.inf or max_x == np.inf:
+        raise AttributeError("Workspace x range contains an infinite value.")
+    focused_ws = mantid.Rebin(InputWorkspace=focused_ws, Params=[min_x, (max_x-min_x)/num_x, max_x])
+    while focused_ws.size() > 1:
+        mantid.ConjoinWorkspaces(InputWorkspace1=focused_ws[0],
+                                 InputWorkspace2=focused_ws[1])
+    focused_ws_conjoined = focused_ws[0]
+    mantid.MatchSpectra(InputWorkspace=focused_ws_conjoined, OutputWorkspace=focused_ws_conjoined,
+                        ReferenceSpectrum=largest_range_spectrum)
 
-    if type(q_lims) == str:
+    q_min, q_max = _load_qlims(q_lims)
+    bin_width = np.inf
+    for i in range(q_min.size):
+        pdf_x_array = focused_ws_conjoined.readX(i)
+        tmp1 = np.where(pdf_x_array >= q_min[i])
+        tmp2 = np.amin(tmp1)
+        q_min[i] = pdf_x_array[tmp2]
+        q_max[i] = pdf_x_array[np.amax(np.where(pdf_x_array <= q_max[i]))]
+        bin_width = min(pdf_x_array[1] - pdf_x_array[0], bin_width)
+
+    if min_x == -np.inf or max_x == np.inf:
+        raise AttributeError("Q lims contains an infinite value.")
+    focused_data_combined = mantid.CropWorkspaceRagged(InputWorkspace=focused_ws_conjoined, XMin=q_min, XMax=q_max)
+    focused_data_combined = mantid.Rebin(InputWorkspace=focused_data_combined,
+                                         Params=[min(q_min), bin_width, max(q_max)])
+    focused_data_combined = mantid.SumSpectra(InputWorkspace=focused_data_combined,
+                                              WeightedSum=True,
+                                              MultiplyBySpectra=False)
+    common.remove_intermediate_workspace(focused_ws_conjoined)
+    return focused_data_combined
+
+
+def _load_qlims(q_lims):
+    if type(q_lims) == str or type(q_lims) == unicode:
         q_min = []
         q_max = []
         try:
@@ -168,26 +202,7 @@ def _merge_workspace_with_limits(focused_ws, q_lims):
         q_max = q_lims[1, :]
     else:
         raise RuntimeError("q_lims type is not valid")
-    bin_width = np.inf
-    for i in range(q_min.size):
-        pdf_x_array = focused_ws_conjoined.readX(i)
-        tmp1 = np.where(pdf_x_array >= q_min[i])
-        tmp2 = np.amin(tmp1)
-        q_min[i] = pdf_x_array[tmp2]
-        q_max[i] = pdf_x_array[np.amax(np.where(pdf_x_array <= q_max[i]))]
-        bin_width = min(pdf_x_array[1] - pdf_x_array[0], bin_width)
-    # TODO what is the best spectra to use to match in any case, how can we always pick the correct one
-    mantid.MatchSpectra(InputWorkspace=focused_ws_conjoined,
-                        OutputWorkspace=focused_ws_conjoined,
-                        ReferenceSpectrum=5)
-    focused_data_combined = mantid.CropWorkspaceRagged(InputWorkspace=focused_ws_conjoined, XMin=q_min, XMax=q_max)
-    focused_data_combined = mantid.Rebin(InputWorkspace=focused_data_combined,
-                                         Params=[min(q_min), bin_width, max(q_max)])
-    focused_data_combined = mantid.SumSpectra(InputWorkspace=focused_data_combined,
-                                              WeightedSum=True,
-                                              MultiplyBySpectra=False)
-    common.remove_intermediate_workspace(focused_ws_conjoined)
-    return focused_data_combined
+    return q_min, q_max
 
 
 def _calculate_self_scattering_correction(run_number, cal_file_name, sample_details):

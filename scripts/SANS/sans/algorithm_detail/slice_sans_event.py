@@ -8,6 +8,7 @@
 
 from __future__ import (absolute_import, division, print_function)
 
+from SANSUtility import _clean_logs
 from mantid.dataobjects import Workspace2D
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import append_to_sans_file_tag, get_charge_and_time, create_unmanaged_algorithm
@@ -30,6 +31,10 @@ def slice_sans_event(state_slice, input_ws, input_ws_monitor, data_type_str="Sam
     """
 
     data_type = DataType.from_string(data_type_str)
+
+    # This should be removed in the future when cycle 19/1 data is unlikely to be processed by users
+    # This prevents time slicing falling over, since we wrap around and get -0
+    _clean_logs(ws=input_ws, estimate_logs=True)
 
     if isinstance(input_ws, Workspace2D):
         sliced_workspace = input_ws

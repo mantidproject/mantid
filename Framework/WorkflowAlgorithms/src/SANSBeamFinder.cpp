@@ -264,6 +264,13 @@ void SANSBeamFinder::maskEdges(MatrixWorkspace_sptr beamCenterWS, int high,
                   " to be a RectangularDetector. maskEdges not executed.");
     return;
   }
+
+  if (!component) {
+    g_log.warning("Expecting the component " + componentName +
+                  " to be a RectangularDetector. maskEdges not executed.");
+    return;
+  }
+
   std::vector<int> IDs;
 
   // right

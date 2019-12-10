@@ -42,7 +42,7 @@ namespace {
  * @param dims :: the dimensions vector (Py_intptr_t type)
  * @returns A python object containing the numpy array
  */
-PyObject *WrapReadOnlyNumpyFArray(Mantid::signal_t *arr,
+PyObject *WrapReadOnlyNumpyFArray(const Mantid::signal_t *arr,
                                   std::vector<Py_intptr_t> dims) {
   int datatype = Converters::NDArrayTypeIndex<Mantid::signal_t>::typenum;
 #if NPY_API_VERSION >= 0x00000007 //(1.7)

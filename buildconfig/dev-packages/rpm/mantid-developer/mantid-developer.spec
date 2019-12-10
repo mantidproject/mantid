@@ -5,7 +5,7 @@
 %endif
 
 Name:           mantid-developer
-Version:        1.34
+Version:        1.35
 Release:        1%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
@@ -57,6 +57,7 @@ Requires: python2-sphinx-bootstrap-theme
 Requires: PyYAML
 Requires: python2-mock
 Requires: python2-psutil
+Requires: python-enum34
 Requires: qscintilla-devel
 Requires: qt-devel >= 4.6
 Requires: qwt5-qt4-devel
@@ -145,6 +146,9 @@ required for Mantid development.
 %files
 
 %changelog
+
+* Tue Dec 03 2019 David Fairbrother <david.fairbrother@stfc.ac.uk>
+- Added Python Enum34 back-port to the required Python dependencies
 
 * Tue Nov 5 2019 Martyn Gigg <martyn.gigg@stfc.ac.uk>
 - Switch to python{2,3}-qt5-devel

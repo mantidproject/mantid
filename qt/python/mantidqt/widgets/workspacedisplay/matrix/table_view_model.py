@@ -12,7 +12,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from qtpy import QtGui
 from qtpy.QtCore import QVariant, Qt, QAbstractTableModel
-from mantid.py3compat import Enum
+from enum import Enum
 
 
 class MatrixWorkspaceTableViewModelType(Enum):

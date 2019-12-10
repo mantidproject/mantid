@@ -15,6 +15,7 @@ from __future__ import (absolute_import, unicode_literals)
 from collections import OrderedDict
 from copy import copy
 from functools import partial
+from matplotlib.container import ErrorbarContainer
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QCursor
 from qtpy.QtWidgets import QActionGroup, QMenu, QApplication
@@ -28,6 +29,7 @@ from mantid.plots.utility import zoom
 from mantid.py3compat import iteritems
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.plotting.markers import SingleMarker
+from mantidqt.widgets.plotconfigdialog.curvestabwidget import curve_has_errors, CurveProperties
 from workbench.plotting.figureerrorsmanager import FigureErrorsManager
 from workbench.plotting.propertiesdialog import (LabelEditor, XAxisEditor, YAxisEditor,
                                                  SingleMarkerEditor, GlobalMarkerEditor,
@@ -55,6 +57,10 @@ class FigureInteraction(object):
     Defines the behaviour of interaction events on a figure canvas. Note that
     this currently only works with Qt canvas types.
     """
+
+    ERROR_BARS_MENU_TEXT = "Error Bars"
+    SHOW_ERROR_BARS_BUTTON_TEXT = "Show all errors"
+    HIDE_ERROR_BARS_BUTTON_TEXT = "Hide all errors"
 
     def __init__(self, fig_manager):
         """
@@ -298,7 +304,7 @@ class FigureInteraction(object):
             self._add_axes_scale_menu(menu, event.inaxes)
             if isinstance(event.inaxes, MantidAxes):
                 self._add_normalization_option_menu(menu, event.inaxes)
-            self.errors_manager.add_error_bars_menu(menu, event.inaxes)
+            self.add_error_bars_menu(menu, event.inaxes)
             self._add_marker_option_menu(menu, event)
 
         menu.exec_(QCursor.pos())
@@ -353,6 +359,63 @@ class FigureInteraction(object):
                 action.setChecked(True)
             axes_actions.addAction(action)
         menu.addMenu(axes_menu)
+
+    def add_error_bars_menu(self, menu, ax):
+        """
+        Add menu actions to toggle the errors for all lines in the plot.
+
+        Lines without errors are added in the context menu first,
+        then lines containing errors are appended afterwards.
+
+        This is done so that the context menu always has
+        the same order of curves as the legend is currently showing - and the
+        legend always appends curves with errors after the lines without errors.
+        Relevant source, as of 10 July 2019:
+        https://github.com/matplotlib/matplotlib/blob/154922992722db37a9d9c8680682ccc4acf37f8c/lib/matplotlib/legend.py#L1201
+
+        :param menu: The menu to which the actions will be added
+        :type menu: QMenu
+        :param ax: The Axes containing lines to toggle errors on
+        """
+        # if the ax is not a MantidAxes, and there are no errors plotted,
+        # then do not add any options for the menu
+        if not isinstance(ax, MantidAxes) and len(ax.containers) == 0:
+            return
+
+        error_bars_menu = QMenu(self.ERROR_BARS_MENU_TEXT, menu)
+        error_bars_menu.addAction(self.SHOW_ERROR_BARS_BUTTON_TEXT,
+                                  partial(self.errors_manager.update_plot_after,
+                                          self.errors_manager.toggle_all_errors, ax, make_visible=True))
+        error_bars_menu.addAction(self.HIDE_ERROR_BARS_BUTTON_TEXT,
+                                  partial(self.errors_manager.update_plot_after,
+                                          self.errors_manager.toggle_all_errors, ax, make_visible=False))
+        menu.addMenu(error_bars_menu)
+
+        self.errors_manager.active_lines = self.errors_manager.get_curves_from_ax(ax)
+
+        # if there's more than one line plotted, then
+        # add a sub menu, containing an action to hide the
+        # error bar for each line
+        error_bars_menu.addSeparator()
+        add_later = []
+        for index, line in enumerate(self.errors_manager.active_lines):
+            if curve_has_errors(line):
+                curve_props = CurveProperties.from_curve(line)
+                # Add lines without errors first, lines with errors are appended later. Read docstring for more info
+                if not isinstance(line, ErrorbarContainer):
+                    action = error_bars_menu.addAction(line.get_label(), partial(
+                        self.errors_manager.update_plot_after, self.errors_manager.toggle_error_bars_for, ax, line))
+                    action.setCheckable(True)
+                    action.setChecked(not curve_props.hide_errors)
+                else:
+                    add_later.append((line.get_label(), partial(
+                        self.errors_manager.update_plot_after, self.errors_manager.toggle_error_bars_for, ax, line),
+                                      not curve_props.hide_errors))
+
+        for label, function, visible in add_later:
+            action = error_bars_menu.addAction(label, function)
+            action.setCheckable(True)
+            action.setChecked(visible)
 
     def _add_marker_option_menu(self, menu, event):
         """
@@ -601,7 +664,7 @@ class FigureInteraction(object):
     def _can_toggle_normalization(self, ax):
         """
         Return True if no plotted workspaces are distributions, all curves
-        on the figure are either distributions or non-distributions
+        on the figure are either distributions or non-distributions,
         and the data_replace_cb method was set when plotting . Return
         False otherwise.
         :param ax: A MantidAxes object

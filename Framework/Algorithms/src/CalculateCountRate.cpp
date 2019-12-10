@@ -177,17 +177,16 @@ void CalculateCountRate::exec() {
   this->checkAndInitVisWorkspace();
 
   // create results log and add it to the source workspace
-  std::string logname = getProperty("CountRateLogName");
-  auto newlog = new Kernel::TimeSeriesProperty<double>(logname);
-  sourceWS->mutableRun().addProperty(newlog, true);
-
+  const std::string logname = getProperty("CountRateLogName");
+  auto newlog = std::make_unique<Kernel::TimeSeriesProperty<double>>(logname);
   // calculate averages requested and modify results log
-  this->calcRateLog(m_workingWS, newlog);
+  this->calcRateLog(m_workingWS, newlog.get());
+  sourceWS->mutableRun().addProperty(std::move(newlog), true);
 
   // clear up log derivative and existing log pointer (if any)
   // to avoid incorrect usage
   // at subsequent calls to the same algorithm.
-  m_tmpLogHolder.release();
+  m_tmpLogHolder.reset();
   m_pNormalizationLog = nullptr;
 }
 
@@ -412,8 +411,8 @@ void CalculateCountRate::setOutLogParameters(
         useLogAccuracy = false;
       } else {
         if (!m_tmpLogHolder) {
-          m_tmpLogHolder = std::make_unique<Kernel::TimeSeriesProperty<double>>(
-              *m_pNormalizationLog->clone());
+          m_tmpLogHolder = std::unique_ptr<Kernel::TimeSeriesProperty<double>>(
+              m_pNormalizationLog->clone());
         }
         m_tmpLogHolder->filterByTime(runTMin, runTMax);
         m_pNormalizationLog = m_tmpLogHolder.get();

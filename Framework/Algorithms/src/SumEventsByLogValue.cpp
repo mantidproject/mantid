@@ -385,11 +385,11 @@ double SumEventsByLogValue::sumProtonCharge(
     const Kernel::TimeSeriesProperty<double> *protonChargeLog,
     const Kernel::TimeSplitterType &filter) {
   // Clone the proton charge log and filter the clone on this log value
-  auto protonChargeLogClone(protonChargeLog->clone());
+  std::unique_ptr<Kernel::TimeSeriesProperty<double>> protonChargeLogClone(
+      protonChargeLog->clone());
   protonChargeLogClone->filterByTimes(filter);
   // Seems like the only way to sum this is to yank out the values
   const std::vector<double> pcValues = protonChargeLogClone->valuesAsVector();
-
   return std::accumulate(pcValues.begin(), pcValues.end(), 0.0);
 }
 

@@ -52,7 +52,7 @@ public:
     TS_ASSERT_EQUALS(3, data->getNumDims());
     long nBin = static_cast<long>(data->getNPoints());
     long sum = 0;
-    double *sdata = data->getSignalArray();
+    const auto sdata = data->getSignalArray();
     for (long i = 0; i < nBin; i++) {
       sum += (long)sdata[i];
     }

@@ -10,6 +10,7 @@
 #include "MantidPythonInterface/core/Policies/VectorToNumpy.h"
 #include <boost/python/class.hpp>
 #include <boost/python/enum.hpp>
+#include <boost/python/make_function.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 #include <vector>
 
@@ -91,6 +92,10 @@ void export_IEventList() {
            args("self"), return_clone_numpy(),
            "Get a vector of the weights of the events")
       .def("getPulseTimes", &IEventList::getPulseTimes, args("self"),
+           "Get a vector of the pulse times of the events")
+      .def("getPulseTimesAsNumpy",
+           make_function(&IEventList::getPulseTimes,
+                         return_value_policy<Policies::VectorToNumpy>()),
            "Get a vector of the pulse times of the events")
       .def("getPulseTimeMax", &IEventList::getPulseTimeMax, args("self"),
            "The maximum pulse time for the list of the events.")

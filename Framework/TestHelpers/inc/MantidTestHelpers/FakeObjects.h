@@ -484,15 +484,27 @@ public:
     throw std::runtime_error("Not Implemented");
   }
 
-  signal_t *getSignalArray() const override {
+  const signal_t *getSignalArray() const override {
     throw std::runtime_error("Not Implemented");
   }
 
-  signal_t *getErrorSquaredArray() const override {
+  const signal_t *getErrorSquaredArray() const override {
     throw std::runtime_error("Not Implemented");
   }
 
-  signal_t *getNumEventsArray() const override {
+  const signal_t *getNumEventsArray() const override {
+    throw std::runtime_error("Not Implemented");
+  }
+
+  signal_t *mutableSignalArray() override {
+    throw std::runtime_error("Not Implemented");
+  }
+
+  signal_t *mutableErrorSquaredArray() override {
+    throw std::runtime_error("Not Implemented");
+  }
+
+  signal_t *mutableNumEventsArray() override {
     throw std::runtime_error("Not Implemented");
   }
 

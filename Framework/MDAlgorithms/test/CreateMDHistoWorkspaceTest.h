@@ -137,10 +137,10 @@ public:
     TS_ASSERT_EQUALS(5, dim1->getNBins());
 
     // Check the data
-    double *signals = outWs->getSignalArray();
+    const auto signals = outWs->getSignalArray();
     TS_ASSERT_DELTA(1, signals[0], 0.0001); // Check the first signal value
     TS_ASSERT_DELTA(2, signals[1], 0.0001); // Check the second signal value
-    double *errorsSQ = outWs->getErrorSquaredArray();
+    const auto errorsSQ = outWs->getErrorSquaredArray();
     TS_ASSERT_DELTA(0, errorsSQ[0], 0.0001); // Check the first error sq value
     TS_ASSERT_DELTA(0.01, errorsSQ[1],
                     0.0001); // Check the second error sq value
@@ -196,10 +196,10 @@ public:
                       dim2->getMDFrame().name());
 
     // Check the data
-    double *signals = outWs->getSignalArray();
+    const auto signals = outWs->getSignalArray();
     TS_ASSERT_DELTA(1, signals[0], 0.0001); // Check the first signal value
     TS_ASSERT_DELTA(2, signals[1], 0.0001); // Check the second signal value
-    double *errorsSQ = outWs->getErrorSquaredArray();
+    const auto errorsSQ = outWs->getErrorSquaredArray();
     TS_ASSERT_DELTA(0, errorsSQ[0], 0.0001); // Check the first error sq value
     TS_ASSERT_DELTA(0.01, errorsSQ[1],
                     0.0001); // Check the second error sq value

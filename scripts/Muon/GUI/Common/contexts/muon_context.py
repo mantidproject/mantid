@@ -36,7 +36,8 @@ class MuonContext(object):
 
         self.ads_observer = MuonContextADSObserver(
             self.remove_workspace_by_name,
-            self.clear_context)
+            self.clear_context,
+            self.workspace_replaced)
 
         self.gui_context.update(
             {'DeadTimeSource': 'None',
@@ -44,6 +45,7 @@ class MuonContext(object):
              'selected_group_pair': ''})
 
         self.update_view_from_model_notifier = Observable()
+        self.update_plots_notifier = Observable()
 
     def __del__(self):
         self.ads_observer.unsubscribe()
@@ -385,3 +387,6 @@ class MuonContext(object):
         self.phase_context.clear()
         self.fitting_context.clear()
         self.update_view_from_model_notifier.notify_subscribers()
+
+    def workspace_replaced(self, workspace):
+        self.update_plots_notifier.notify_subscribers(workspace)
