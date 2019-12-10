@@ -1173,6 +1173,10 @@ class MantidAxes(Axes):
         self.waterfall_remove_fill()
 
     def convert_single_line_to_waterfall(self, index, need_to_update_fill=False):
+        # If the curve index is 0 then nothing needs to change.
+        if index == 0:
+            return
+
         line = self.get_lines()[index]
         amount_to_move_x = index * self.width * (self.waterfall_x_offset / 500)
         line.set_xdata(line.get_xdata() + amount_to_move_x)
@@ -1180,20 +1184,24 @@ class MantidAxes(Axes):
         line.set_ydata(line.get_ydata() + amount_to_move_y)
         line.set_zorder(len(self.get_lines()) - index)
 
+        # If the curve has errorbars then these also need to be moved.
         for container in self.containers:
             if isinstance(container, ErrorbarContainer) and container[0] == line:
                 for bar_line_col in container[2]:
                     segments = bar_line_col.get_segments()
                     for point in segments:
-                        point[0][1] += amount_to_move_y
-                        point[1][1] += amount_to_move_y
-                        point[0][0] += amount_to_move_x
-                        point[1][0] += amount_to_move_x
+                        for row in range(2):
+                            point[row][1] += amount_to_move_y
+                        for column in range(2):
+                            point[column][0] += amount_to_move_x
                     bar_line_col.set_segments(segments)
                 bar_line_col.set_zorder((len(self.get_lines()) - index)+1)
                 break
 
+        # If the curves are filled and the fill has been set to match the line colour and the line colour has changed
+        # then the fill's colour is updated.
         if need_to_update_fill:
+            # Finds the fill that corresponds to the line being updated.
             i = 0
             for collection in self.collections:
                 if isinstance(collection, PolyCollection):
@@ -1231,6 +1239,7 @@ class MantidAxes(Axes):
         self.get_figure().canvas.draw()
 
     def waterfall_update_fill(self):
+        # Get the colours of each fill so they can be reapplied after updating.
         colours = []
         for collection in self.collections:
             if isinstance(collection, PolyCollection):
@@ -1241,6 +1250,11 @@ class MantidAxes(Axes):
 
         poly_collections = [collection for collection in self.collections if isinstance(collection, PolyCollection)]
         line_colours = True
+        # If there are more fill areas than colours, this means that new curves have been added to the plot
+        # (overplotting). In which case, we need to determine whether the fill colours are set to match the line
+        # colours by checking that the colour of each fill that existed previously is the same as the line it belongs
+        # to. If so, the list of colours is appended to with the colours of the new lines. Otherwise the fills are
+        # all set to the same colour and so the list of colours is extended with the same colour for each new curve.
         if len(poly_collections) > len(colours):
             for i in range(len(colours)-1):
                 if (colours[i] != to_rgba_array(self.get_lines()[i].get_color())).any():
@@ -1255,11 +1269,8 @@ class MantidAxes(Axes):
                 for i in range(colours_length, len(poly_collections)):
                     colours.append(colours[0])
 
-        i = 0
-        for collection in self.collections:
-            if isinstance(collection, PolyCollection):
-                collection.set_color(colours[i])
-            i = i + 1
+        for i, collection in enumerate(poly_collections):
+            collection.set_color(colours[i])
 
     # ------------------ Private api --------------------------------------------------------
 

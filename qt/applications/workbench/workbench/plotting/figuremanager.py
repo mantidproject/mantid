@@ -289,11 +289,13 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self._set_fit_enabled(False)
 
         # For plot-to-script button to show, we must have a MantidAxes with lines in it
+        # Plot-to-script currently doesn't work with waterfall plots so the button is hidden for that plot type.
         if not any((isinstance(ax, MantidAxes) and curve_in_ax(ax))
                    for ax in self.canvas.figure.get_axes()) or self.canvas.figure.get_axes()[0].is_waterfall_plot():
             self.toolbar.set_generate_plot_script_enabled(False)
 
-        if len(self.canvas.figure.get_axes()) > 1 or not self.canvas.figure.get_axes()[0].is_waterfall_plot():
+        # Only show options specific to waterfall plots if the axes is a waterfall plot.
+        if not self.canvas.figure.get_axes()[0].is_waterfall_plot():
             self.toolbar.set_waterfall_options_enabled(False)
 
     def destroy(self, *args):

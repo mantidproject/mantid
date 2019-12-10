@@ -168,9 +168,11 @@ class CurvesTabWidgetPresenter:
 
         waterfall = ax.is_waterfall_plot()
         if waterfall:
+            # Waterfall plots are reset so they can be reconverted after the curve is removed.
             x, y = ax.waterfall_x_offset, ax.waterfall_y_offset
             ax.update_waterfall_plot(0,0)
 
+            # If the curves have a fill, the one which corresponds to the curve being removed also needs to be removed.
             current_curve_index = self.view.select_curve_combo_box.currentIndex()
             i = 0
             for collection in ax.collections:
@@ -185,6 +187,7 @@ class CurvesTabWidgetPresenter:
         self.curve_names_dict.pop(self.view.get_selected_curve_name())
         self.set_apply_to_all_buttons_enabled()
 
+        # If there is now only one curve on a waterfall plot, the plot becomes non-waterfall.
         if waterfall:
             if len(ax.get_lines()) > 1:
                 ax.update_waterfall_plot(x, y)

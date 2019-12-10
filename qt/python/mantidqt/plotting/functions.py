@@ -240,9 +240,12 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
         ax.axis('on')
         _do_single_plot(ax, workspaces, errors, not overplot, nums, kw, plot_kwargs)
 
+    # Can't have a waterfall plot with only one line.
     if len(nums) == 1 and waterfall:
         waterfall = False
 
+    # The plot's initial xlim and ylim are used to offset each curve in a waterfall plot.
+    # Need to do this whether the current curve is a waterfall plot or not because it may be converted later.
     ax.set_initial_dimensions(ax.get_xlim(), ax.get_ylim())
 
     if waterfall:
