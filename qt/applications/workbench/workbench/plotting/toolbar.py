@@ -141,6 +141,15 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
             toolbar_action.setEnabled(on)
             toolbar_action.setVisible(on)
 
+    def set_generate_plot_script_enabled(self, enabled):
+        action = self._actions['generate_plot_script']
+        action.setEnabled(enabled)
+        action.setVisible(enabled)
+        # Show/hide the separator between this button and the "Fit" button
+        for i, toolbar_action in enumerate(self.actions()):
+            if toolbar_action == action:
+                self.actions()[i+1].setVisible(enabled)
+
     def waterfall_offset_amount(self):
         self.sig_waterfall_offset_amount_triggered.emit()
 

@@ -290,8 +290,8 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
         # For plot-to-script button to show, we must have a MantidAxes with lines in it
         if not any((isinstance(ax, MantidAxes) and curve_in_ax(ax))
-                   for ax in self.canvas.figure.get_axes()):
-            self._set_generate_plot_script_enabled(False)
+                   for ax in self.canvas.figure.get_axes()) or self.canvas.figure.get_axes()[0].is_waterfall_plot():
+            self.toolbar.set_generate_plot_script_enabled(False)
 
         if len(self.canvas.figure.get_axes()) > 1 or not self.canvas.figure.get_axes()[0].is_waterfall_plot():
             self.toolbar.set_waterfall_options_enabled(False)
@@ -397,15 +397,6 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             except IOError as io_error:
                 logger.error("Could not write file: {}\n{}"
                              "".format(filepath, io_error))
-
-    def _set_generate_plot_script_enabled(self, enabled):
-        action = self.toolbar._actions['generate_plot_script']
-        action.setEnabled(enabled)
-        action.setVisible(enabled)
-        # Show/hide the separator between this button and the "Fit" button
-        for i, toolbar_action in enumerate(self.toolbar.actions()):
-            if toolbar_action == action:
-                self.toolbar.actions()[i+1].setVisible(enabled)
 
     def set_figure_zoom_to_display_all(self):
         axes = self.canvas.figure.get_axes()

@@ -229,15 +229,26 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
             else:
                 ax.axis('off')
     else:
-        ax = overplot if isinstance(overplot, MantidAxes) else axes[0]
+        if isinstance(overplot, MantidAxes):
+            ax = overplot
+            x, y = 0, 0
+            if ax.is_waterfall_plot():
+                x, y = ax.waterfall_x_offset, ax.waterfall_y_offset
+                ax.update_waterfall_plot(0, 0)
+        else:
+            ax = axes[0]
         ax.axis('on')
         _do_single_plot(ax, workspaces, errors, not overplot, nums, kw, plot_kwargs)
 
-    if len(nums) == 1:
+    if len(nums) == 1 and waterfall:
         waterfall = False
 
     ax.set_initial_dimensions(ax.get_xlim(), ax.get_ylim())
-    toggle_waterfall(waterfall, ax)
+
+    if waterfall:
+        ax.convert_to_waterfall()
+    elif overplot and x != 0 and y != 0:
+        ax.update_waterfall_plot(x, y)
 
     if not overplot:
         fig.canvas.set_window_title(figure_title(workspaces, fig.number))
@@ -363,14 +374,6 @@ def pcolormesh_on_axis(ax, ws):
         lbl.set_rotation(45)
 
     return pcm
-
-
-def toggle_waterfall(on, axes):
-    if on:
-        axes.convert_to_waterfall()
-    else:
-        axes.convert_from_waterfall()
-
 
 # ----------------- Compatability functions ---------------------
 

@@ -1151,10 +1151,13 @@ class MantidAxes(Axes):
         self.get_figure().canvas.draw()
 
     def set_waterfall_toolbar_options_enabled(self):
+        toolbar = self.get_figure().canvas.toolbar
         if self.is_waterfall_plot():
-            self.get_figure().canvas.toolbar.set_waterfall_options_enabled(True)
+            toolbar.set_waterfall_options_enabled(True)
+            toolbar.set_generate_plot_script_enabled(False)
         else:
-            self.get_figure().canvas.toolbar.set_waterfall_options_enabled(False)
+            toolbar.set_waterfall_options_enabled(False)
+            toolbar.set_generate_plot_script_enabled(True)
 
     def convert_to_waterfall(self):
         if self.is_waterfall_plot():
@@ -1236,11 +1239,27 @@ class MantidAxes(Axes):
         self.waterfall_remove_fill()
         self.waterfall_create_fill()
 
+        poly_collections = [collection for collection in self.collections if isinstance(collection, PolyCollection)]
+        line_colours = True
+        if len(poly_collections) > len(colours):
+            for i in range(len(colours)-1):
+                if (colours[i] != to_rgba_array(self.get_lines()[i].get_color())).any():
+                    line_colours = False
+                    break
+
+            colours_length = len(colours)
+            if line_colours:
+                for i in range(colours_length, len(poly_collections)):
+                    colours.append(self.get_lines()[i].get_color())
+            else:
+                for i in range(colours_length, len(poly_collections)):
+                    colours.append(colours[0])
+
         i = 0
         for collection in self.collections:
             if isinstance(collection, PolyCollection):
                 collection.set_color(colours[i])
-                i = i + 1
+            i = i + 1
 
     # ------------------ Private api --------------------------------------------------------
 
