@@ -7,12 +7,11 @@
 #ifndef MANTIDQT_CUSTOMINTERFACES_BASEINSTRUMENTVIEW_H_
 #define MANTIDQT_CUSTOMINTERFACES_BASEINSTRUMENTVIEW_H_
 
-#include "DllConfig.h"
+#include "DllOption.h"
 #include "MantidQtWidgets/Common/FunctionBrowser.h"
 #include "MantidQtWidgets/Common/MWRunFiles.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
-#include "MantidQtWidgets/Plotting/PreviewPlot.h"
 
 #include <QObject>
 #include <QPushButton>
@@ -21,9 +20,9 @@
 #include <string>
 
 namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidWidgets {
 
-class BaseInstrumentView : public QSplitter {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW BaseInstrumentView : public QSplitter {
   Q_OBJECT
 
 public:
@@ -66,7 +65,7 @@ private:
   MantidWidgets::InstrumentWidget *m_instrumentWidget;
   QPushButton *m_help;
 };
-} // namespace CustomInterfaces
+} // namespace MantidWidgets
 } // namespace MantidQt
 
 #endif /* MANTIDQT_CUSTOMINTERFACES_BASEINSTRUMENTVIEW_H_ */

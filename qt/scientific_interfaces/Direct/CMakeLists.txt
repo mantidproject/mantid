@@ -3,9 +3,9 @@ set(SRC_FILES
     ALFView_view.cpp
     ALFView_presenter.cpp
     ALFView_model.cpp
-    BaseInstrumentModel.cpp
-    BaseInstrumentView.cpp
-    BaseInstrumentPresenter.cpp
+    #BaseInstrumentModel.cpp
+    #BaseInstrumentView.cpp
+    #BaseInstrumentPresenter.cpp
     PlotFitAnalysisPaneView.cpp
     PlotFitAnalysisPanePresenter.cpp
     PlotFitAnalysisPaneModel.cpp)
@@ -14,9 +14,8 @@ set(MOC_FILES
     ALFView.h
     ALFView_view.h
     ALFView_presenter.h
-    BaseInstrumentView.h
-    BaseInstrumentView.h
-    BaseInstrumentPresenter.h
+    #BaseInstrumentView.h
+    #BaseInstrumentPresenter.h
     PlotFitAnalysisPaneView.h
     PlotFitAnalysisPanePresenter.h)
     

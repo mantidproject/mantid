@@ -7,7 +7,7 @@
 #ifndef MANTIDQT_CUSTOMINTERFACES_ALFVIEW_VIEW_H_
 #define MANTIDQT_CUSTOMINTERFACES_ALFVIEW_VIEW_H_
 
-#include "BaseInstrumentView.h"
+#include "MantidQtWidgets/InstrumentView/BaseInstrumentView.h"
 #include "DllConfig.h"
 #include "MantidQtWidgets/Common/MWRunFiles.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
@@ -22,7 +22,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class ALFView_view : public BaseInstrumentView {
+class ALFView_view : public MantidWidgets::BaseInstrumentView {
   Q_OBJECT
 
 public:

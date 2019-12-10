@@ -9,8 +9,8 @@
 #include "PlotFitAnalysisPaneModel.h"
 #include "PlotFitAnalysisPaneView.h"
 
-#include "BaseInstrumentModel.h"
-#include "BaseInstrumentView.h"
+#include "MantidQtWidgets/InstrumentView/BaseInstrumentModel.h"
+#include "MantidQtWidgets/InstrumentView/BaseInstrumentView.h"
 // will need these later
 #include "MantidQtWidgets/Common/FunctionBrowser.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"

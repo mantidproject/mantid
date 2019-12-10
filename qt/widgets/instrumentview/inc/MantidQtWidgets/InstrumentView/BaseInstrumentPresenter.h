@@ -6,22 +6,21 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQT_CUSTOMINTERFACES_BASEINSTRUMENTPRESENTER_H_
 #define MANTIDQT_CUSTOMINTERFACES_BASEINSTRUMENTPRESENTER_H_
+#include "DllOption.h"
 
-#include "BaseInstrumentModel.h"
-#include "BaseInstrumentView.h"
-#include "PlotFitAnalysisPaneView.h"
+#include "MantidQtWidgets/InstrumentView/BaseInstrumentModel.h"
+#include "MantidQtWidgets/InstrumentView/BaseInstrumentView.h"
 
-#include "ALFView_view.h"
-#include "DllConfig.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 
 #include <string>
 
 namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidWidgets {
 
-class BaseInstrumentPresenter : public QObject {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW BaseInstrumentPresenter
+    : public QObject {
   Q_OBJECT
 
 public:
@@ -60,7 +59,7 @@ private:
   VoidObserver *m_loadRunObserver;
   QWidget *m_analysisPaneView;
 };
-} // namespace CustomInterfaces
+} // namespace MantidWidgets
 } // namespace MantidQt
 
 #endif /* MANTIDQT_CUSTOMINTERFACES_BASEINSTRUMENTPRESENTER_H_ */

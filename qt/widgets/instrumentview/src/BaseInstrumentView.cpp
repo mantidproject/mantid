@@ -4,7 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "BaseInstrumentView.h"
+#include "MantidQtWidgets/InstrumentView/BaseInstrumentView.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h"
 
@@ -15,7 +15,7 @@
 #include <QVBoxLayout>
 
 namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidWidgets {
 
 BaseInstrumentView::BaseInstrumentView(const std::string &instrument,
                                        QWidget *parent)
@@ -27,13 +27,13 @@ BaseInstrumentView::BaseInstrumentView(const std::string &instrument,
   this->addWidget(loadWidget);
 }
 
-void MantidQt::CustomInterfaces::BaseInstrumentView::setUpInstrument(
+void BaseInstrumentView::setUpInstrument(
     const std::string &fileName,
     std::vector<std::function<bool(std::map<std::string, bool>)>> &instrument) {
 
   (void)instrument;
   auto instrumentWidget =
-      new MantidWidgets::InstrumentWidget(QString::fromStdString(fileName));
+      new InstrumentWidget(QString::fromStdString(fileName));
   instrumentWidget->hideHelp();
   setInstrumentWidget(instrumentWidget);
 }
@@ -119,5 +119,5 @@ void BaseInstrumentView::warningBox(const QString &message) {
   QMessageBox::warning(this, m_instrument + " view", message);
 }
 
-} // namespace CustomInterfaces
+} // namespace MantidWidgets
 } // namespace MantidQt
