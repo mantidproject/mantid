@@ -186,7 +186,10 @@ class CurvesTabWidgetPresenter:
         self.set_apply_to_all_buttons_enabled()
 
         if waterfall:
-            ax.update_waterfall_plot(x, y)
+            if len(ax.get_lines()) > 1:
+                ax.update_waterfall_plot(x, y)
+            else:
+                ax.convert_from_waterfall()
 
         ax = self.get_selected_ax()
         # Update the legend and redraw
