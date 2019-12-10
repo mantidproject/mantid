@@ -44,8 +44,8 @@ class FocusModelTest(unittest.TestCase):
         self.model.focus_run("305761", banks, False, "ENGINX", "0")
         self.assertEqual(len(banks), run_focus.call_count)
         run_focus.assert_called_with("mocked_sample",
-                                     model.FOCUSED_OUTPUT_WORKSPACE_NAME + banks[-1],
-                                     "test_wsp", "test_wsp", banks[-1])
+                                     model.FOCUSED_OUTPUT_WORKSPACE_NAME + banks[-1], "test_wsp",
+                                     "test_wsp", banks[-1])
 
     @patch(file_path + ".Ads")
     @patch(file_path + ".FocusModel._save_output")
@@ -53,7 +53,8 @@ class FocusModelTest(unittest.TestCase):
     @patch(file_path + ".FocusModel._run_focus")
     @patch(file_path + ".FocusModel._load_focus_sample_run")
     @patch(file_path + ".vanadium_corrections.fetch_correction_workspaces")
-    def test_focus_plotted_when_checked(self, fetch_van, load_focus, run_focus, plot_focus, output, ads):
+    def test_focus_plotted_when_checked(self, fetch_van, load_focus, run_focus, plot_focus, output,
+                                        ads):
         ads.doesExist.return_value = True
         fetch_van.return_value = ("mocked_integ", "mocked_curves")
         banks = ["1", "2"]

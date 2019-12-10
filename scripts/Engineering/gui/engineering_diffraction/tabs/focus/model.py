@@ -75,7 +75,9 @@ class FocusModel(object):
     def _plot_focused_workspaces(focused_workspaces):
         fig = plt.figure()
         gs = gridspec.GridSpec(1, len(focused_workspaces))
-        plots = [fig.add_subplot(gs[i], projection="mantid") for i in range(len(focused_workspaces))]
+        plots = [
+            fig.add_subplot(gs[i], projection="mantid") for i in range(len(focused_workspaces))
+        ]
 
         for ax, ws_name in zip(plots, focused_workspaces):
             ax.plot(Ads.retrieve(ws_name), wkspIndex=0)

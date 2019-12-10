@@ -61,7 +61,8 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         self.tabs.addTab(focus_view, "Focus")
 
     def setup_calibration_notifier(self):
-        self.calibration_presenter.calibration_notifier.add_subscriber(self.focus_presenter.calibration_observer)
+        self.calibration_presenter.calibration_notifier.add_subscriber(
+            self.focus_presenter.calibration_observer)
 
     def set_on_help_clicked(self, slot):
         self.pushButton_help.clicked.connect(slot)

@@ -121,10 +121,16 @@ class CalibrationPresenterTest(unittest.TestCase):
     @patch(tab_path + ".presenter.CalibrationPresenter.emit_update_fields_signal")
     def test_set_current_calibration(self, update_sig):
         self.presenter.calibration_notifier = MagicMock()
-        pending = CalibrationInfo(vanadium_path="/test/set/path", sample_path="test/set/path/2", instrument="TEST_INS")
-        pendcpy = CalibrationInfo(vanadium_path="/test/set/path", sample_path="test/set/path/2", instrument="TEST_INS")
+        pending = CalibrationInfo(vanadium_path="/test/set/path",
+                                  sample_path="test/set/path/2",
+                                  instrument="TEST_INS")
+        pendcpy = CalibrationInfo(vanadium_path="/test/set/path",
+                                  sample_path="test/set/path/2",
+                                  instrument="TEST_INS")
         self.presenter.pending_calibration = pending
-        current = CalibrationInfo(vanadium_path="old/value", sample_path="old/cera", instrument="ENGINX")
+        current = CalibrationInfo(vanadium_path="old/value",
+                                  sample_path="old/cera",
+                                  instrument="ENGINX")
         blank = CalibrationInfo()
         self.presenter.current_calibration = current
 
@@ -145,7 +151,9 @@ class CalibrationPresenterTest(unittest.TestCase):
         path.return_value = True
         instrument, van, cer = ("test_ins", "test_van", "test_cer")
         self.model.load_existing_gsas_parameters.return_value = instrument, van, cer
-        current = CalibrationInfo(vanadium_path="old/value", sample_path="old/cera", instrument="ENGINX")
+        current = CalibrationInfo(vanadium_path="old/value",
+                                  sample_path="old/cera",
+                                  instrument="ENGINX")
         new = CalibrationInfo(vanadium_path=van, sample_path=cer, instrument=instrument)
         self.presenter.current_calibration = current
 
@@ -163,7 +171,9 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.view.get_new_checked.return_value = False
         self.view.get_load_checked.return_value = True
         path.return_value = False
-        current = CalibrationInfo(vanadium_path="old/value", sample_path="old/cera", instrument="ENGINX")
+        current = CalibrationInfo(vanadium_path="old/value",
+                                  sample_path="old/cera",
+                                  instrument="ENGINX")
         self.presenter.current_calibration = current
 
         self.presenter.on_calibrate_clicked()
@@ -214,7 +224,9 @@ class CalibrationPresenterTest(unittest.TestCase):
         instrument, van, cer = ("test_ins", "test_van", "test_cer")
         old_pending = CalibrationInfo(vanadium_path=None, sample_path=None, instrument=None)
         self.presenter.pending_calibration = old_pending
-        expected_pending = CalibrationInfo(vanadium_path=van, sample_path=cer, instrument=instrument)
+        expected_pending = CalibrationInfo(vanadium_path=van,
+                                           sample_path=cer,
+                                           instrument=instrument)
         self.presenter.instrument = instrument
 
         self.presenter.start_calibration_worker(van, cer, False, None)

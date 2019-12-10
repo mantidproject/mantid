@@ -111,7 +111,8 @@ class FocusPresenterTest(unittest.TestCase):
 
         self.presenter._validate(banks)
         create_error.assert_called_with(
-            self.presenter.view, "Create or Load a calibration via the Calibration tab before focusing.")
+            self.presenter.view,
+            "Create or Load a calibration via the Calibration tab before focusing.")
 
     @patch(tab_path + ".presenter.check_workspaces_exist")
     @patch(tab_path + ".presenter.create_error_message")
