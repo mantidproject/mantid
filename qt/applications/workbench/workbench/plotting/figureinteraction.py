@@ -450,7 +450,7 @@ class FigureInteraction(object):
     def _add_plot_type_option_menu(self, menu, ax):
         plot_type_menu = QMenu("Plot Type", menu)
         plot_type_action_group = QActionGroup(plot_type_menu)
-        standard = plot_type_menu.addAction("Standard", lambda: self._change_plot_type(
+        standard = plot_type_menu.addAction("1D", lambda: self._change_plot_type(
             ax, plot_type_action_group.checkedAction()))
         waterfall = plot_type_menu.addAction("Waterfall", lambda: self._change_plot_type(
             ax, plot_type_action_group.checkedAction()))

@@ -514,6 +514,36 @@ class Plots__init__Test(unittest.TestCase):
         ax.autoscale()
         np.testing.assert_almost_equal((y_min, y_max), ax.get_ylim())
 
+    def test_converting_to_and_from_waterfall_plot(self):
+        from mantid.plots import MantidAxes
+        MantidAxes.set_waterfall_toolbar_options_enabled = Mock()
+        fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+        # Plot the same line twice
+        ax.plot([0, 1], [0, 1])
+        ax.plot([0, 1], [0, 1])
+        ax.width, ax.height = 10, 10
+
+        # Make a waterfall plot and fill the area under each curve.
+        ax.convert_to_waterfall()
+        ax.waterfall_create_fill()
+
+        self.assertTrue(ax.is_waterfall_plot())
+        # Check the lines' data are different now that it is a waterfall plot
+        self.assertNotEqual(ax.get_lines()[0].get_xdata()[0], ax.get_lines()[1].get_xdata()[0])
+        self.assertNotEqual(ax.get_lines()[0].get_ydata()[0], ax.get_lines()[1].get_ydata()[0])
+        # Check that the fills have been created
+        self.assertTrue(ax.waterfall_has_fill())
+
+        # Make the plot non-waterfall again.
+        ax.convert_from_waterfall()
+
+        self.assertFalse(ax.is_waterfall_plot())
+        # Check that the lines now have the same x and y data.
+        self.assertEqual(ax.get_lines()[0].get_xdata()[0], ax.get_lines()[1].get_xdata()[0])
+        self.assertEqual(ax.get_lines()[0].get_xdata()[0], ax.get_lines()[1].get_xdata()[0])
+        # Check that the lines no longer have fills
+        self.assertFalse(ax.waterfall_has_fill())
+
     def _run_check_axes_distribution_consistency(self, normalization_states):
         mock_tracked_workspaces = {
             'ws': [
