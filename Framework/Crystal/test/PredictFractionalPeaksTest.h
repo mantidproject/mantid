@@ -229,6 +229,50 @@ public:
     TS_ASSERT_EQUALS(fracPeaks->getPeak(24).getDetectorID(), 3157981)
   }
 
+  void test_providing_modulation_vector_saves_properties_to_lattice() {
+    const auto fracPeaks = runPredictFractionalPeaks(
+        m_indexedPeaks, {{"ModVector1", "-0.5,0,0.5"},
+                         {"ModVector2", "0.0,0.5,0.5"},
+                         {"MaxOrder", "1"},
+                         {"CrossTerms", "0"}});
+
+    TS_ASSERT_EQUALS(124, fracPeaks->getNumberPeaks())
+
+    // check lattice
+    const auto &lattice = fracPeaks->sample().getOrientedLattice();
+    TS_ASSERT_EQUALS(1, lattice.getMaxOrder())
+    TS_ASSERT_EQUALS(false, lattice.getCrossTerm())
+    const auto mod1 = lattice.getModVec(0);
+    TS_ASSERT_EQUALS(-0.5, mod1.X())
+    TS_ASSERT_EQUALS(0.0, mod1.Y())
+    TS_ASSERT_EQUALS(0.5, mod1.Z())
+    const auto mod2 = lattice.getModVec(1);
+    TS_ASSERT_EQUALS(0.0, mod2.X())
+    TS_ASSERT_EQUALS(0.5, mod2.Y())
+    TS_ASSERT_EQUALS(0.5, mod2.Z())
+
+    // check a couple of peaks
+    const auto &peak0 = fracPeaks->getPeak(0);
+    TS_ASSERT_DELTA(peak0.getH(), -4.5, .0001)
+    TS_ASSERT_DELTA(peak0.getK(), 7.0, .0001)
+    TS_ASSERT_DELTA(peak0.getL(), -4.5, .0001)
+    TS_ASSERT_EQUALS(peak0.getDetectorID(), 1129591)
+    const auto mnp0 = peak0.getIntMNP();
+    TS_ASSERT_DELTA(mnp0.X(), -1., 1e-08)
+    TS_ASSERT_DELTA(mnp0.Y(), 0., 1e-08)
+    TS_ASSERT_DELTA(mnp0.Z(), 0., 1e-08)
+
+    const auto &peak34 = fracPeaks->getPeak(34);
+    TS_ASSERT_DELTA(peak34.getH(), -7, .0001)
+    TS_ASSERT_DELTA(peak34.getK(), 7.5, .0001)
+    TS_ASSERT_DELTA(peak34.getL(), -2.5, .0001)
+    TS_ASSERT_EQUALS(peak34.getDetectorID(), 1812163)
+    const auto mnp34 = peak34.getIntMNP();
+    TS_ASSERT_DELTA(mnp34.X(), 0., 1e-08)
+    TS_ASSERT_DELTA(mnp34.Y(), 1., 1e-08)
+    TS_ASSERT_DELTA(mnp34.Z(), 0., 1e-08)
+  }
+
   // ---------------- Failure tests -----------------------------
   void test_empty_peaks_workspace_is_not_allowed() {
     PredictFractionalPeaks alg;
