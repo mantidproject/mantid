@@ -189,9 +189,8 @@ class CurvesTabWidgetPresenter:
 
         # If there is now only one curve on a waterfall plot, the plot becomes non-waterfall.
         if waterfall:
-            if len(ax.get_lines()) > 1:
-                ax.update_waterfall_plot(x, y)
-            else:
+            ax.update_waterfall_plot(x, y)
+            if len(ax.get_lines()) <= 1:
                 ax.convert_from_waterfall()
 
         ax = self.get_selected_ax()
