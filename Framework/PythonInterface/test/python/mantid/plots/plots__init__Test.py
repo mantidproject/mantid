@@ -14,6 +14,7 @@ import numpy as np
 import unittest
 
 from mantid.kernel import config
+from mantid.plots import MantidAxes
 from mantid.plots.plotfunctions import get_colorplot_extents
 from mantid.py3compat.mock import Mock, patch
 from mantid.simpleapi import (CreateWorkspace, CreateSampleWorkspace, DeleteWorkspace,
@@ -515,7 +516,6 @@ class Plots__init__Test(unittest.TestCase):
         np.testing.assert_almost_equal((y_min, y_max), ax.get_ylim())
 
     def test_converting_to_and_from_waterfall_plot(self):
-        from mantid.plots import MantidAxes
         MantidAxes.set_waterfall_toolbar_options_enabled = Mock()
         fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
         # Plot the same line twice

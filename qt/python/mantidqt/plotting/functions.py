@@ -250,7 +250,8 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
 
     if waterfall:
         ax.convert_to_waterfall()
-    elif overplot and x != 0 and y != 0:
+
+    if isinstance(overplot, MantidAxes) and x != 0 and y != 0:
         ax.update_waterfall_plot(x, y)
 
     if not overplot:

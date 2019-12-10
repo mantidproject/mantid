@@ -180,6 +180,7 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         ax = fig.add_subplot(111, projection='mantid')
         ax.set_title('Axes 0')
         ax.plot(self.ws, specNum=1, label='Workspace')
+        MantidAxes.lines = Mock()
         presenter = self._generate_presenter(fig=fig)
         new_plot_kwargs = {'errorevery': 2, 'linestyle': '-.', 'color': 'r',
                            'marker': 'v'}

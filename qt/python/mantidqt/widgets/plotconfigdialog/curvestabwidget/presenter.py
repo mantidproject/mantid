@@ -10,7 +10,7 @@ from __future__ import (absolute_import, unicode_literals)
 
 from matplotlib.collections import PolyCollection
 
-from mantid.plots import Line2D
+from mantid.plots import Line2D, MantidAxes
 from mantidqt.utils.qt import block_signals
 from mantidqt.widgets.plotconfigdialog import get_axes_names_dict, curve_in_ax
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import (
@@ -110,7 +110,9 @@ class CurvesTabWidgetPresenter:
         ax = self.get_selected_ax()
         curve = self.get_selected_curve()
 
-        waterfall = ax.is_waterfall_plot()
+        waterfall = False
+        if isinstance(ax, MantidAxes):
+            waterfall = ax.is_waterfall_plot()
         check_line_colour = False
         # If the plot is a waterfall plot and the user has set it so the area under each line is filled, and the fill
         # colour for each line is set as the line colour, after the curve is updated we need to check if its colour has
@@ -168,7 +170,10 @@ class CurvesTabWidgetPresenter:
         if ax.legend_:
             self.legend_props = LegendProperties.from_legend(ax.legend_)
 
-        waterfall = ax.is_waterfall_plot()
+        waterfall = False
+        if isinstance(ax, MantidAxes):
+            waterfall = ax.is_waterfall_plot()
+
         if waterfall:
             # Waterfall plots are reset so they can be reconverted after the curve is removed.
             x, y = ax.waterfall_x_offset, ax.waterfall_y_offset
