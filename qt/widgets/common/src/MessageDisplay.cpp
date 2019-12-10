@@ -241,7 +241,9 @@ void MessageDisplay::append(const Message &msg) {
 
     if (msg.priority() <= Message::Priority::PRIO_ERROR) {
       NotificationService::showMessage(
-          "Mantid Workbench", "Sorry, there was an error, please look at the message display for details.",
+          "Mantid Workbench",
+          "Sorry, there was an error, please look at the message display for "
+          "details.",
           NotificationService::MessageIcon::Critical);
       emit errorReceived(msg.text());
     }

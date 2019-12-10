@@ -11,7 +11,7 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-	// Key for the "normalize data to bin width" plot option
+// Key for the "normalize data to bin width" plot option
 const std::string NotificationService::NOTIFICATIONSENABLEDKEY =
     "Notifications.Enabled";
 
@@ -19,27 +19,27 @@ void NotificationService::showMessage(const QString &title,
                                       const QString &message, MessageIcon icon,
                                       int millisecondsTimeoutHint) {
   if (isEnabled() && isSupportedByOS()) {
-      QSystemTrayIcon sysTrayIcon(qApp);
-      // get the window icon for the app
-      QIcon windowIcon = qApp->windowIcon();
-      // if no icon is set then use a blank icon
-      if (windowIcon.isNull()) {
-        windowIcon = QIcon(":/images/MantidIcon.ico");
-      }
-      // set this as the window icon otherwise you get a warning on the console
-      sysTrayIcon.setIcon(windowIcon);
-
-      sysTrayIcon.show();
-      sysTrayIcon.showMessage(title, message, icon, millisecondsTimeoutHint);
-
-      sysTrayIcon.hide();
+    QSystemTrayIcon sysTrayIcon(qApp);
+    // get the window icon for the app
+    QIcon windowIcon = qApp->windowIcon();
+    // if no icon is set then use a blank icon
+    if (windowIcon.isNull()) {
+      windowIcon = QIcon(":/images/MantidIcon.ico");
     }
+    // set this as the window icon otherwise you get a warning on the console
+    sysTrayIcon.setIcon(windowIcon);
+
+    sysTrayIcon.show();
+    sysTrayIcon.showMessage(title, message, icon, millisecondsTimeoutHint);
+
+    sysTrayIcon.hide();
+  }
 }
 
-bool NotificationService::isEnabled() { 
-        return Mantid::Kernel::ConfigService::Instance()
-            .getValue<bool>(NOTIFICATIONSENABLEDKEY)
-            .get_value_or(true);
+bool NotificationService::isEnabled() {
+  return Mantid::Kernel::ConfigService::Instance()
+      .getValue<bool>(NOTIFICATIONSENABLEDKEY)
+      .get_value_or(true);
 }
 
 bool NotificationService::isSupportedByOS() {

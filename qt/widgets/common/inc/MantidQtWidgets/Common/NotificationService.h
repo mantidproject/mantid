@@ -8,10 +8,8 @@
 #define MANTIDQTAPI_NOTIFICATIONSERVICE_H_
 
 #include "DllOption.h"
-#include <QSystemTrayIcon>
 #include <QObject>
-
-
+#include <QSystemTrayIcon>
 
 /** The ase class from which mantid custom widgets are derived it contains
  *  some useful functions
@@ -19,8 +17,8 @@
 namespace MantidQt {
 namespace MantidWidgets {
 /**
-This is a singleton providing a notification service for the Mantid Qt based applications.
-This is just a thin simplistic wrapper around QSystemTray
+This is a singleton providing a notification service for the Mantid Qt based
+applications. This is just a thin simplistic wrapper around QSystemTray
 */
 class EXPORT_OPT_MANTIDQT_COMMON NotificationService : public QObject {
   Q_OBJECT
@@ -33,10 +31,9 @@ public:
   NotificationService() : QObject() {}
 
   /// Display a notification
-  static void showMessage(
-      const QString &title, const QString &message,
-      MessageIcon icon = MessageIcon::Information,
-      int millisecondsTimeoutHint = 10000);
+  static void showMessage(const QString &title, const QString &message,
+                          MessageIcon icon = MessageIcon::Information,
+                          int millisecondsTimeoutHint = 10000);
 
   /// Is the notification service enabled through the config service?
   static bool isEnabled();
@@ -45,7 +42,6 @@ public:
 
   /// Are notifications supported by this OS?
   static bool isSupportedByOS();
-
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
