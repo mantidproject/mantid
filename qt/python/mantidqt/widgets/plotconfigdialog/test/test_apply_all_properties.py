@@ -94,6 +94,7 @@ def _run_apply_properties_on_figure_with_curve():
     ax = fig.add_subplot(111)
     ax.errorbar([0, 1], [0, 1], yerr=[0.1, 0.2], label='old label')
     presenter = PlotConfigDialogPresenter(fig, view=Mock())
+    presenter.tab_widget_views[1][0].select_curve_combo_box.currentIndex.return_value = 0
     with patch.object(presenter.tab_widget_presenters[1], 'update_view',
                       lambda: None):
         presenter.apply_properties()
