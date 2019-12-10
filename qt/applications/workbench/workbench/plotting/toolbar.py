@@ -160,6 +160,7 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
     def waterfall_fill_area(self):
         self.sig_waterfall_fill_area_triggered.emit()
 
+
 class ToolbarStateManager(object):
     """
     An object that lets users check and manipulate the state of the toolbar

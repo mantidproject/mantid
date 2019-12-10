@@ -109,14 +109,14 @@ class CurvesTabWidgetPresenter:
         """Replot the selected curve with the given plot kwargs"""
         ax = self.get_selected_ax()
         curve = self.get_selected_curve()
-    
+
         waterfall = ax.is_waterfall_plot()
         check_line_colour = False
         # If the plot is a waterfall plot and the user has set it so the area under each line is filled, and the fill
         # colour for each line is set as the line colour, after the curve is updated we need to check if its colour has
         # changed so the fill can be updated accordingly.
         if waterfall and ax.waterfall_has_fill() and ax.waterfall_fill_is_line_colour():
-            check_line_colour = True    
+            check_line_colour = True
 
         new_curve = FigureErrorsManager.replot_curve(ax, curve, plot_kwargs)
         self.curve_names_dict[self.view.get_selected_curve_name()] = new_curve
