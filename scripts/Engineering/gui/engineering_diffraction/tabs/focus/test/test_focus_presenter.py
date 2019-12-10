@@ -106,6 +106,7 @@ class FocusPresenterTest(unittest.TestCase):
         self.presenter.current_calibration = CalibrationInfo(vanadium_path=None,
                                                              sample_path=None,
                                                              instrument=None)
+        self.view.is_searching.return_value = False
         banks = ["North", "South"]
 
         self.presenter._validate(banks)

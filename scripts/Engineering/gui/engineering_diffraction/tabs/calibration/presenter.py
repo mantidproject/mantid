@@ -39,17 +39,7 @@ class CalibrationPresenter(object):
 
     def on_calibrate_clicked(self):
         plot_output = self.view.get_plot_output()
-        if self.view.get_new_checked():
-            # Do nothing if run numbers are invalid or view is searching.
-            if not self.validate_run_numbers():
-                if self.view.is_searching():
-                    create_error_message(self.view, "GUI is searching for data files. Please wait.")
-                else:
-                    create_error_message(self.view, "Check run numbers/path is valid.")
-                return
-            if self.view.is_searching():
-                create_error_message(self.view, "Mantid is searching for the file. Please wait.")
-                return
+        if self.view.get_new_checked() and self._validate():
             vanadium_file = self.view.get_vanadium_filename()
             sample_file = self.view.get_sample_filename()
             self.start_calibration_worker(vanadium_file, sample_file, plot_output, self.rb_num)
@@ -98,14 +88,21 @@ class CalibrationPresenter(object):
         self.view.set_instrument_override(instrument)
         self.instrument = instrument
 
-    def set_rb_number(self, rb_number):
-        self.rb_num = rb_number
+    def set_rb_num(self, rb_num):
+        self.rb_num = rb_num
+
+    def _validate(self):
+        # Do nothing if run numbers are invalid or view is searching.
+        if self.view.is_searching():
+            create_error_message(self.view, "Mantid is searching for data files. Please wait.")
+            return False
+        if not self.validate_run_numbers():
+            create_error_message(self.view, "Check run numbers/path is valid.")
+            return False
+        return True
 
     def validate_run_numbers(self):
-        if self.view.get_sample_valid() and self.view.get_vanadium_valid():
-            return True
-        else:
-            return False
+        return self.view.get_sample_valid() and self.view.get_vanadium_valid()
 
     def validate_path(self):
         return self.view.get_path_valid()

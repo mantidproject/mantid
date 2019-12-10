@@ -39,6 +39,7 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.view.get_vanadium_filename.return_value = "307521"
         self.view.get_sample_filename.return_value = "305738"
         self.view.get_plot_output.return_value = True
+        self.view.get_load_checked.return_value = False
         self.view.is_searching.return_value = True
 
         self.presenter.on_calibrate_clicked()
@@ -53,6 +54,7 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.view.get_sample_filename.return_value = "305738"
         self.view.get_plot_output.return_value = True
         self.view.is_searching.return_value = False
+        self.view.get_load_checked.return_value = False
         validator.return_value = False
 
         self.presenter.on_calibrate_clicked()
@@ -126,7 +128,6 @@ class CalibrationPresenterTest(unittest.TestCase):
         blank = CalibrationInfo()
         self.presenter.current_calibration = current
 
-        self.assertEqual(self.presenter.current_calibration, current)
         self.presenter.set_current_calibration()
 
         self.check_calibration_equal(self.presenter.current_calibration, pendcpy)

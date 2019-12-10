@@ -36,8 +36,8 @@ class CalibrationModelTest(unittest.TestCase):
     @patch(class_path + '.run_calibration')
     @patch(class_path + '.load_sample')
     @patch(file_path + '.vanadium_corrections.fetch_correction_workspaces')
-    def test_EnggVanadiumCorrections_algorithm_is_called(self, van, load_sample, calib, output_files,
-                                                         update_table):
+    def test_EnggVanadiumCorrections_algorithm_is_called(self, van, load_sample, calib,
+                                                         output_files, update_table):
         van.return_value = ("A", "B")
         self.model.create_new_calibration(VANADIUM_NUMBER, CERIUM_NUMBER, False, "ENGINX")
         van.assert_called_once()
@@ -61,8 +61,8 @@ class CalibrationModelTest(unittest.TestCase):
     @patch(class_path + '._generate_difc_tzero_workspace')
     @patch(class_path + '._plot_difc_tzero')
     @patch(class_path + '.run_calibration')
-    def test_plotting_check(self, calib, plot_difc_zero, gen_difc, plot_van, van, sample, output_files,
-                            update_table):
+    def test_plotting_check(self, calib, plot_difc_zero, gen_difc, plot_van, van, sample,
+                            output_files, update_table):
         van.return_value = ("A", "B")
         self.model.create_new_calibration(VANADIUM_NUMBER, CERIUM_NUMBER, False, "ENGINX")
         plot_van.assert_not_called()
@@ -81,7 +81,8 @@ class CalibrationModelTest(unittest.TestCase):
     @patch(class_path + '._plot_difc_tzero')
     @patch(class_path + '.run_calibration')
     def test_present_RB_number_results_in_user_output_files(self, calib, plot_difc_zero, plot_van,
-                                                            van, sample, output_files, update_table):
+                                                            van, sample, output_files,
+                                                            update_table):
         van.return_value = ("A", "B")
         self.model.create_new_calibration(VANADIUM_NUMBER,
                                           CERIUM_NUMBER,
@@ -141,30 +142,32 @@ class CalibrationModelTest(unittest.TestCase):
         self.assertEqual(self.model._generate_table_workspace_name(20),
                          "engggui_calibration_bank_21")
 
-    def test_generate_output_file_name_for_valid_bank(self):
-        filename = self.model._generate_output_file_name(
-            "test/20.raw", "test/10.raw", "ENGINX", "north")
+    def test_generate_output_file_name_for_north_bank(self):
+        filename = self.model._generate_output_file_name("test/20.raw", "test/10.raw", "ENGINX",
+                                                         "north")
         self.assertEqual(filename, "ENGINX_20_10_bank_North.prm")
 
-        filename = self.model._generate_output_file_name(
-            "test/20.raw", "test/10.raw", "ENGINX", "south")
+    def test_generate_output_file_name_for_south_bank(self):
+        filename = self.model._generate_output_file_name("test/20.raw", "test/10.raw", "ENGINX",
+                                                         "south")
         self.assertEqual(filename, "ENGINX_20_10_bank_South.prm")
 
-        filename = self.model._generate_output_file_name(
-            "test/20.raw", "test/10.raw", "ENGINX", "all")
+    def test_generate_output_file_name_for_both_banks(self):
+        filename = self.model._generate_output_file_name("test/20.raw", "test/10.raw", "ENGINX",
+                                                         "all")
         self.assertEqual(filename, "ENGINX_20_10_all_banks.prm")
 
     def test_generate_output_file_name_for_invalid_bank(self):
         self.assertRaises(ValueError, self.model._generate_output_file_name, "test/20.raw",
                           "test/10.raw", "ENGINX", "INVALID")
 
-    def test_generate_output_file_name_for_unconventional_filename(self):
-        filename = self.model._generate_output_file_name(
-            "test/20", "test/10.raw", "ENGINX", "north")
+    def test_generate_output_file_name_with_no_ext_in_filename(self):
+        filename = self.model._generate_output_file_name("test/20", "test/10.raw", "ENGINX",
+                                                         "north")
         self.assertEqual(filename, "ENGINX_20_10_bank_North.prm")
 
-        filename = self.model._generate_output_file_name(
-            "20", "test/10.raw", "ENGINX", "north")
+    def test_generate_output_file_name_with_no_path_in_filename(self):
+        filename = self.model._generate_output_file_name("20.raw", "test/10.raw", "ENGINX", "north")
         self.assertEqual(filename, "ENGINX_20_10_bank_North.prm")
 
     @patch("Engineering.gui.engineering_diffraction.tabs.calibration.model.Ads")

@@ -44,7 +44,7 @@ class FocusPresenter(object):
         :param focus_path: The path to the file containing the data to focus.
         :param banks: A list of banks that are to be focused.
         :param plot_output: True if the output should be plotted.
-        :param rb_num: The rb_number from the main window (often an experiment id)
+        :param rb_num: The RB Number from the main window (often an experiment id)
         """
         self.worker = AsyncTask(self.model.focus_run,
                                 (focus_path, banks, plot_output, self.instrument, rb_num),
@@ -58,8 +58,8 @@ class FocusPresenter(object):
         self.view.set_instrument_override(instrument)
         self.instrument = instrument
 
-    def set_rb_number(self, rb_number):
-        self.rb_num = rb_number
+    def set_rb_num(self, rb_num):
+        self.rb_num = rb_num
 
     def _validate(self, banks):
         """
@@ -67,11 +67,11 @@ class FocusPresenter(object):
         :param banks: A list of banks to focus.
         :return: True if the worker can be started safely.
         """
+        if self.view.is_searching():
+            create_error_message(self.view, "Mantid is searching for data files. Please wait.")
+            return False
         if not self.view.get_focus_valid():
-            if self.view.is_searching():
-                create_error_message(self.view, "GUI is searching for data files. Please wait.")
-            else:
-                create_error_message(self.view, "Check run numbers/path is valid.")
+            create_error_message(self.view, "Check run numbers/path is valid.")
             return False
         if not check_workspaces_exist() or not self.current_calibration.is_valid():
             create_error_message(
@@ -86,9 +86,6 @@ class FocusPresenter(object):
             return False
         if len(banks) == 0:
             create_error_message(self.view, "Please select at least one bank.")
-            return False
-        if self.view.is_searching():
-            create_error_message(self.view, "GUI is searching for data files. Please wait.")
             return False
         return True
 

@@ -49,7 +49,7 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         cal_view = CalibrationView(parent=self.tabs)
         self.calibration_presenter = CalibrationPresenter(cal_model, cal_view)
         self.set_on_instrument_changed(self.calibration_presenter.set_instrument_override)
-        self.set_on_rb_num_changed(self.calibration_presenter.set_rb_number)
+        self.set_on_rb_num_changed(self.calibration_presenter.set_rb_num)
         self.tabs.addTab(cal_view, "Calibration")
 
     def setup_focus(self):
@@ -57,7 +57,7 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         focus_view = FocusView()
         self.focus_presenter = FocusPresenter(focus_model, focus_view)
         self.set_on_instrument_changed(self.focus_presenter.set_instrument_override)
-        self.set_on_rb_num_changed(self.focus_presenter.set_rb_number)
+        self.set_on_rb_num_changed(self.focus_presenter.set_rb_num)
         self.tabs.addTab(focus_view, "Focus")
 
     def setup_calibration_notifier(self):
