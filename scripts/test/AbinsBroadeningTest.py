@@ -43,6 +43,21 @@ class AbinsBroadeningTest(unittest.TestCase):
                                    0.01257,
                                    places=places)
 
+    def test_out_of_bounds(self):
+        """Check schemes allowing arbitrary placement can handle data beyond bins"""
+        frequencies = np.array([2000.])
+        bins = np.linspace(0, 100, 100)
+        s_dft = np.array([1.])
+        sigma = np.array([3.])
+
+        schemes = ['none',
+                   'gaussian', 'gaussian_truncated',
+                   'normal', 'normal_truncated']
+
+        for scheme in schemes:
+            Broadening.broaden_spectrum(frequencies=frequencies,
+                                        bins=bins, s_dft=s_dft, sigma=sigma,
+                                        scheme=scheme)
 
     def test_broadening_normalisation(self):
         """Check broadening implementations do not change overall intensity"""
@@ -61,10 +76,8 @@ class AbinsBroadeningTest(unittest.TestCase):
 
         pre_broadening_total = sum(s_dft)
 
-        # Gaussian scheme is normalised by values; truncated form still has correct sum
-        for scheme in ('none',
-                       'gaussian', 'gaussian_truncated',
-                       ):
+        # Full Gaussian should reproduce null total
+        for scheme in ('none', 'gaussian'):
             freq_points, spectrum = Broadening.broaden_spectrum(frequencies=frequencies,
                                                                 bins=bins,
                                                                 s_dft=s_dft,
@@ -83,14 +96,16 @@ class AbinsBroadeningTest(unittest.TestCase):
                                pre_broadening_total * (bins[1] - bins[0]),)
         self.assertAlmostEqual(sum(spectrum), pre_broadening_total)
 
-        # truncated form will be a little off but shouldn't be _too_ off
-        freq_points, trunc_spectrum = Broadening.broaden_spectrum(frequencies=frequencies,
-                                                                 bins=bins,
-                                                                 s_dft=s_dft,
-                                                                 sigma=sigma,
-                                                                 scheme='normal_truncated')
-        self.assertLess(abs(sum(full_spectrum) - sum(trunc_spectrum)) / sum(full_spectrum),
-                            0.03)
+        # truncated forms will be a little off but shouldn't be _too_ off
+        for scheme in ('gaussian_truncated', 'normal_truncated'):
+                       
+            freq_points, trunc_spectrum = Broadening.broaden_spectrum(frequencies=frequencies,
+                                                                      bins=bins,
+                                                                      s_dft=s_dft,
+                                                                      sigma=sigma,
+                                                                      scheme=scheme)
+            self.assertLess(abs(sum(full_spectrum) - sum(trunc_spectrum)) / sum(full_spectrum),
+                                0.03)
 
         # Interpolated methods need histogram input and smooth sigma
         hist_spec, _ = np.histogram(frequencies, bins, weights=s_dft)

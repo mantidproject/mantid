@@ -84,11 +84,12 @@ def broaden_spectrum(frequencies=None, bins=None, s_dft=None, sigma=None, scheme
         return freq_points, hist
 
     elif scheme == 'gaussian':
-        # Gaussian broadening on the full grid (no range cutoff, sum over all peaks)
-        # This is not very optimised but a useful reference for "correct" results
-        kernels = gaussian(sigma=sigma[:, np.newaxis],
-                           points=freq_points,
-                           center=frequencies[:, np.newaxis])
+        # Gaussian broadening on the full grid (no range cutoff, sum over all peaks).
+        # This is not very optimised but a useful reference for "correct" results.
+        bin_width = bins[1] - bins[0]
+        kernels = mesh_gaussian(sigma=sigma[:, np.newaxis],
+                                points=freq_points,
+                                center=frequencies[:, np.newaxis])
         spectrum = np.dot(kernels.transpose(), s_dft)
         return freq_points, spectrum
 
@@ -107,14 +108,17 @@ def broaden_spectrum(frequencies=None, bins=None, s_dft=None, sigma=None, scheme
         # Gaussian broadening on the full grid (sum over all peaks, Gaussian range limited to 3 sigma)
         # All peaks use the same number of points; if the center is located close to the low- or high-freq limit,
         # the frequency point set is "justified" to lie inside the range
-        return trunc_and_sum_inplace(function=gaussian,
-                                     sigma=sigma[:, np.newaxis],
-                                     points=freq_points,
-                                     bins=bins,
-                                     center=frequencies[:, np.newaxis],
-                                     limit=3,
-                                     weights=s_dft[:, np.newaxis],
-                                     method='auto')
+        points, spectrum = trunc_and_sum_inplace(function=gaussian,
+                                                 sigma=sigma[:, np.newaxis],
+                                                 points=freq_points,
+                                                 bins=bins,
+                                                 center=frequencies[:, np.newaxis],
+                                                 limit=3,
+                                                 weights=s_dft[:, np.newaxis],
+                                                 method='auto')
+        # Normalize the Gaussian kernel such that sum of points matches input
+        bin_width = bins[1] - bins[0]
+        return points, spectrum * bin_width
 
     elif scheme == 'normal_truncated':
         # Normal distribution on the full grid (sum over all peaks, Gaussian range limited to 3 sigma)
@@ -145,20 +149,21 @@ def broaden_spectrum(frequencies=None, bins=None, s_dft=None, sigma=None, scheme
                          'AbinsParameters.sampling["broadening_scheme"]'.format(scheme))
 
 
-def gaussian(sigma=None, points=None, center=0, normalized=True):
-    """
-    Evaluate a Gaussian function over a given mesh
+def mesh_gaussian(sigma=None, points=None, center=0):
+    """Evaluate a Gaussian function over a regular (given) mesh
 
-    Note that in order to obtain a normalised convolution kernel this should be
-    divided by the width of the (regular) sampling bins.
+    The Gaussian is normalized by multiplying by the bin-width. This approach will give correct results even when the
+    function extends (or originates) beyond the sampling region; however, it cannot be applied to an irreglar mesh.
+    Note that this normalisation gives a consistent _sum_ rather than a consistent _area_; it is a suitable kernel for
+    convolution of a histogram.
+
+    If 'points' contains less than two values, an empty or zero array is returned as the spacing cannot be inferred.
 
     :param sigma: sigma defines width of Gaussian
     :param points: points for which Gaussian should be evaluated
     :type points: 1-D array
     :param center: center of Gaussian
     :type center: float or array
-    :param normalized: If True, scale the kernel so that the sum of all values equals 1
-    :type normalized: bool
     :returns:
         numpy array with calculated Gaussian values. Dimensions are broadcast from inputs:
         to obtain an (M x N) 2D array of gaussians at M centers and
@@ -166,12 +171,37 @@ def gaussian(sigma=None, points=None, center=0, normalized=True):
         *center* be arrays of shape (M, 1) (column vectors) and *points* have
          shape (N,) or (1, N) (row vector).
     """
+
+    if len(points) < 2:
+        return(np.zeros_like(points * sigma))
+        
+    bin_width = points[1] - points[0]
+    return(gaussian(sigma=sigma, points=points, center=center) * bin_width)
+    
+def gaussian(sigma=None, points=None, center=0):
+    """Evaluate a Gaussian function over a given mesh
+
+    :param sigma: sigma defines width of Gaussian
+    :param points: points for which Gaussian should be evaluated
+    :type points: 1-D array
+    :param center: center of Gaussian
+    :type center: float or array
+    :param normalized:
+    If True, scale the output so that the sum of all values 
+    equals 1 (i.e. make a suitable kernel for convolution of a histogram.)
+    This will not be reliable if the function extends beyond the provided set of points.
+    :type normalized: bool
+    :returns:
+        numpy array with calculated Gaussian values. Dimensions are broadcast from inputs:
+        to obtain an (M x N) 2D array of gaussians at M centers and
+        corresponding sigma values, evaluated over N points, let *sigma* and
+        *center* be arrays of shape (M, 1) (column vectors) and *points* have
+         shape (N,) or (1, N) (row vector).
+         """
     two_sigma = 2.0 * sigma
     sigma_factor = two_sigma * sigma
     kernel = np.exp(-(points - center) ** 2 / sigma_factor) / (np.sqrt(sigma_factor * np.pi))
 
-    if normalized:
-        kernel = kernel / np.sum(kernel, axis=-1)[..., np.newaxis]
     return kernel
 
 
@@ -238,13 +268,19 @@ def trunc_function(function=None, sigma=None, points=None, center=None, limit=3)
     :returns: numpy array with calculated Gaussian values
     """
 
+    if isinstance(center, float):
+        center = np.array([[center]])
+    if isinstance(sigma, float):
+        sigma = sigma * np.ones_like(center)
+
     points_matrix = points * np.ones((len(center), 1))
+
     center_matrix = center * np.ones(len(points))
     sigma_matrix = sigma * np.ones(len(points))
 
     distances = abs(points_matrix - center_matrix)
     points_close_to_peaks = distances < (limit * sigma_matrix)
-
+    
     results = np.zeros((len(center), len(points)))
     results[points_close_to_peaks] = function(sigma=sigma_matrix[points_close_to_peaks],
                                               points=points_matrix[points_close_to_peaks],
@@ -345,6 +381,10 @@ def trunc_and_sum_inplace(function=None, function_uses='points',
     #
     start_indices = np.asarray((center - points[0] - freq_range + (bin_width / 2)) // bin_width,
                                int)
+    # Values exceeding calculation range would have illegally large "initial guess" indices so clip those to final point
+    #   |            | s---x----     ->       |           s|--x----
+    start_indices[start_indices > len(points)] = -1
+
     start_freqs = points[start_indices]
 
     # Next identify points which will overshoot left: x lies to left of freq range
@@ -508,9 +548,9 @@ def interpolated_broadening(sigma=None, points=None, bins=None,
     kernel_npts_oneside = np.ceil(freq_range / bin_width)
 
     if function == 'gaussian':
-        kernels = gaussian(sigma=sigma_samples[:, np.newaxis],
-                           points=np.arange(-kernel_npts_oneside, kernel_npts_oneside + 1, 1) * bin_width,
-                           center=0)
+        kernels = mesh_gaussian(sigma=sigma_samples[:, np.newaxis],
+                                points=np.arange(-kernel_npts_oneside, kernel_npts_oneside + 1, 1) * bin_width,
+                                center=0)
     else:
         raise ValueError('"{}" kernel not supported for "interpolate" broadening method.'.format(function))
 
