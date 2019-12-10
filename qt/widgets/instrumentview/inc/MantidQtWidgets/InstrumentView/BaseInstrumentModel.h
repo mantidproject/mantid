@@ -6,9 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQT_INSTRUMENTVIEW_BASEINSTRUMENTMODEL_H_
 #define MANTIDQT_INSTRUMENTVIEW_BASEINSTRUMENTMODEL_H_
+
+#include "DllOption.h"
+
 #include <map>
 #include <string>
-#include "DllOption.h"
 
 namespace MantidQt {
 namespace MantidWidgets {

@@ -4,11 +4,10 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_CUSTOMINTERFACES_BASEINSTRUMENTVIEW_H_
-#define MANTIDQT_CUSTOMINTERFACES_BASEINSTRUMENTVIEW_H_
+#ifndef MANTIDQT_INSTRUMENTVIEW_BASEINSTRUMENTVIEW_H_
+#define MANTIDQT_INSTRUMENTVIEW_BASEINSTRUMENTVIEW_H_
 
 #include "DllOption.h"
-#include "MantidQtWidgets/Common/FunctionBrowser.h"
 #include "MantidQtWidgets/Common/MWRunFiles.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
@@ -68,4 +67,4 @@ private:
 } // namespace MantidWidgets
 } // namespace MantidQt
 
-#endif /* MANTIDQT_CUSTOMINTERFACES_BASEINSTRUMENTVIEW_H_ */
+#endif /* MANTIDQT_INSTRUMENTVIEW_BASEINSTRUMENTVIEW_H_ */

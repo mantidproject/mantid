@@ -29,5 +29,5 @@ PlotFitAnalysisPaneModel::doFit(const std::string &wsName,
   return alg->getProperty("Function");
 }
 
-} // namespace MAntidWidgets
+} // namespace MantidWidgets
 } // namespace MantidQt

@@ -74,8 +74,6 @@ void BaseInstrumentPresenter::loadRunNumber() {
   loadAndAnalysis(pathToRun);
 }
 
-// All of the below are specific to ALF
-
 void BaseInstrumentPresenter::initInstrument(
     std::pair<instrumentSetUp, instrumentObserverOptions> *setUp) {
   if (!setUp) {

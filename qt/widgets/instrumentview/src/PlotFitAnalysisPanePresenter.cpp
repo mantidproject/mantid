@@ -6,10 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h"
 
-#include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/FileFinder.h"
-#include "MantidAPI/FunctionFactory.h"
-
 #include <exception>
 #include <functional>
 #include <tuple>
