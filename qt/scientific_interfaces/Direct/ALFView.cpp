@@ -4,20 +4,12 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
+#include "ALFView.h"
 #include "ALFView_model.h"
 #include "ALFView_presenter.h"
+
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneModel.h"
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneView.h"
-
-#include "MantidQtWidgets/InstrumentView/BaseInstrumentModel.h"
-#include "MantidQtWidgets/InstrumentView/BaseInstrumentView.h"
-// will need these later
-#include "MantidQtWidgets/Common/FunctionBrowser.h"
-#include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
-#include "MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h"
-#include "MantidQtWidgets/Plotting/PreviewPlot.h"
-
-#include "ALFView.h"
 
 #include <tuple>
 

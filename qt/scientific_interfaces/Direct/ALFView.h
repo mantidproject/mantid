@@ -13,7 +13,6 @@
 #include "DllConfig.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
-
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h"
 
 namespace MantidQt {

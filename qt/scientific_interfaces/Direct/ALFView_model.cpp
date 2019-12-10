@@ -11,9 +11,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
-
 #include "MantidGeometry/Instrument.h"
-
 #include "MantidKernel/Unit.h"
 
 #include <utility>

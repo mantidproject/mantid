@@ -38,8 +38,8 @@ mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesDirect
                      Qwt5
                    MTD_QT_LINK_LIBS
                      MantidQtWidgetsCommon
-                     MantidQtWidgetsPlotting
                      MantidQtWidgetsInstrumentView
+                     MantidQtWidgetsPlotting
                    INSTALL_DIR_BASE
                      ${PLUGINS_DIR}
                    OSX_INSTALL_RPATH
@@ -73,7 +73,7 @@ mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesDirect
                    MTD_QT_LINK_LIBS
                      MantidQtWidgetsCommon
                      MantidQtWidgetsInstrumentView
-					 MantidQtWidgetsPlotting
+                     MantidQtWidgetsPlotting
                      MantidQtWidgetsMplCpp
                    INSTALL_DIR_BASE
                      ${WORKBENCH_PLUGINS_DIR}

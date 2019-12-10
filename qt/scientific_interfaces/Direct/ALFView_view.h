@@ -11,7 +11,6 @@
 #include "DllConfig.h"
 #include "MantidQtWidgets/Common/MWRunFiles.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
-#include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneView.h"
 
 #include <QObject>

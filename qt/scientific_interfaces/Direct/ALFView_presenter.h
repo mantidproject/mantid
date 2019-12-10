@@ -14,7 +14,6 @@
 #include "ALFView_view.h"
 #include "DllConfig.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
-#include "MantidQtWidgets/Common/UserSubWindow.h"
 
 #include <string>
 
