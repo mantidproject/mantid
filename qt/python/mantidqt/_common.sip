@@ -897,7 +897,6 @@ public:
     void setText(const QString&);
     void setUserInput(const QVariant &);
     void setReadOnly(bool readOnly);
-    void setEnabled(bool enabled);
     void findFiles(bool isModified);
 
 signals:
