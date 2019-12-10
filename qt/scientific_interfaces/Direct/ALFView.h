@@ -14,8 +14,7 @@
 #include "MantidQtWidgets/Common/ObserverPattern.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 
-#include "PlotFitAnalysisPanePresenter.h"
-#include "PlotFitAnalysisPaneView.h"
+#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -37,7 +36,7 @@ private:
   ALFView_view *m_view;
   ALFView_model *m_model;
   ALFView_presenter *m_presenter;
-  PlotFitAnalysisPanePresenter *m_analysisPane;
+  MantidWidgets::PlotFitAnalysisPanePresenter *m_analysisPane;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -2,22 +2,12 @@ set(SRC_FILES
     ALFView.cpp
     ALFView_view.cpp
     ALFView_presenter.cpp
-    ALFView_model.cpp
-    #BaseInstrumentModel.cpp
-    #BaseInstrumentView.cpp
-    #BaseInstrumentPresenter.cpp
-    PlotFitAnalysisPaneView.cpp
-    PlotFitAnalysisPanePresenter.cpp
-    PlotFitAnalysisPaneModel.cpp)
+    ALFView_model.cpp)
     
 set(MOC_FILES
     ALFView.h
     ALFView_view.h
-    ALFView_presenter.h
-    #BaseInstrumentView.h
-    #BaseInstrumentPresenter.h
-    PlotFitAnalysisPaneView.h
-    PlotFitAnalysisPanePresenter.h)
+    ALFView_presenter.h)
     
 set(INC_FILES
     DllConfig.h)

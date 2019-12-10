@@ -13,7 +13,7 @@
 #include <string>
 using namespace Mantid::API;
 namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidWidgets {
 
 class PlotFitAnalysisPaneModel {
 
@@ -23,7 +23,7 @@ public:
                        const IFunction_sptr func);
 };
 
-} // namespace CustomInterfaces
+} // namespace MantidWidgets
 } // namespace MantidQt
 
 #endif /* MANTIDQT_CUSTOMINTERFACES_PLOTFITANALYSISPANEMODEL_H_ */

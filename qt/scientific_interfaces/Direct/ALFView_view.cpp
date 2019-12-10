@@ -80,7 +80,7 @@ void ALFView_view::addObserver(std::tuple<std::string, Observer *> &listener) {
   }
 }
 
-void ALFView_view::setupAnalysisPane(PlotFitAnalysisPaneView *analysis) {
+void ALFView_view::setupAnalysisPane(MantidWidgets::PlotFitAnalysisPaneView *analysis) {
   // keep a copy here so we can use a custom class
   m_analysisPane = analysis;
   // just adds it to the view

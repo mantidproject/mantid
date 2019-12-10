@@ -7,7 +7,7 @@
 #include "ALFView_presenter.h"
 #include "ALFView_model.h"
 #include "ALFView_view.h"
-
+#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h"
 #include "MantidAPI/FileFinder.h"
 
 #include <functional>
@@ -17,7 +17,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 ALFView_presenter::ALFView_presenter(ALFView_view *view, ALFView_model *model,
-                                     PlotFitAnalysisPanePresenter *analysisPane)
+                                     MantidWidgets::PlotFitAnalysisPanePresenter *analysisPane)
     : BaseInstrumentPresenter(view, model, analysisPane->getView()),
       m_view(view), m_model(model), m_analysisPane(analysisPane),
       m_extractSingleTubeObserver(nullptr), m_averageTubeObserver(nullptr) {

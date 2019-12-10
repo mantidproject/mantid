@@ -8,7 +8,7 @@
 #define MANTIDQT_CUSTOMINTERFACES_ALFVIEWPRESENTER_H_
 
 #include "MantidQtWidgets/InstrumentView/BaseInstrumentPresenter.h"
-#include "PlotFitAnalysisPanePresenter.h"
+#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h"
 
 #include "ALFView_model.h"
 #include "ALFView_view.h"
@@ -26,7 +26,7 @@ class MANTIDQT_DIRECT_DLL ALFView_presenter : public MantidWidgets::BaseInstrume
 
 public:
   ALFView_presenter(ALFView_view *view, ALFView_model *model,
-                    PlotFitAnalysisPanePresenter *analysisPane);
+                    MantidWidgets::PlotFitAnalysisPanePresenter *analysisPane);
   ~ALFView_presenter() {
     delete m_extractSingleTubeObserver;
     delete m_averageTubeObserver;
@@ -49,7 +49,7 @@ private:
 
   ALFView_view *m_view;
   ALFView_model *m_model;
-  PlotFitAnalysisPanePresenter *m_analysisPane;
+  MantidWidgets::PlotFitAnalysisPanePresenter *m_analysisPane;
   VoidObserver *m_extractSingleTubeObserver;
   VoidObserver *m_averageTubeObserver;
 };

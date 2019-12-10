@@ -7,16 +7,17 @@
 #ifndef MANTIDQT_CUSTOMINTERFACES_PLOTFITANALYSISPANEPRESENTER_H_
 #define MANTIDQT_CUSTOMINTERFACES_PLOTFITANALYSISPANEPRESENTER_H_
 
-#include "PlotFitAnalysisPaneModel.h"
-#include "PlotFitAnalysisPaneView.h"
-
+#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneModel.h"
+#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneView.h"
+#include "DllOption.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
 #include <string>
 
 namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidWidgets {
 
-class PlotFitAnalysisPanePresenter : public QObject {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW PlotFitAnalysisPanePresenter
+    : public QObject {
   Q_OBJECT
 
 public:
@@ -39,7 +40,7 @@ private:
   PlotFitAnalysisPaneModel *m_model;
   std::string m_currentName;
 };
-} // namespace CustomInterfaces
+} // namespace MantidWidgets
 } // namespace MantidQt
 
 #endif /* MANTIDQT_CUSTOMINTERFACES_PLOTFITANALYSISPANEPRESENTER_H_ */

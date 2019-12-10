@@ -4,7 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "PlotFitAnalysisPanePresenter.h"
+#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FileFinder.h"
@@ -15,11 +15,11 @@
 #include <tuple>
 
 namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidWidgets {
 
 PlotFitAnalysisPanePresenter::PlotFitAnalysisPanePresenter(
     PlotFitAnalysisPaneView *view, PlotFitAnalysisPaneModel *model)
-    : m_fitObserver(nullptr), m_view(view), m_model(model), m_currentName("") {
+    : m_fitObserver(nullptr), m_view(view), m_model(model), m_currentName(""){
 
   m_fitObserver = new VoidObserver();
   m_view->observeFitButton(m_fitObserver);
@@ -54,5 +54,5 @@ void PlotFitAnalysisPanePresenter::addSpectrum(const std::string &wsName) {
   m_view->addSpectrum(wsName);
 }
 
-} // namespace CustomInterfaces
+} // namespace MantidWidgets
 } // namespace MantidQt
