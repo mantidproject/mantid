@@ -53,7 +53,7 @@ class FigureErrorsManager(object):
         line = ax.lines.pop()
         ax.lines.insert(curve_index, line)
 
-        if ax.is_waterfall_plot():
+        if isinstance(ax, MantidAxes) and ax.is_waterfall_plot():
             ax.convert_single_line_to_waterfall(curve_index)
 
         # Inverts either the current state of hide_errors

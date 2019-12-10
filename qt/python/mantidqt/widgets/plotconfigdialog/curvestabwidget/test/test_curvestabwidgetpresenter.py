@@ -180,8 +180,8 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         ax = fig.add_subplot(111, projection='mantid')
         ax.set_title('Axes 0')
         ax.plot(self.ws, specNum=1, label='Workspace')
-        MantidAxes.lines = Mock()
         presenter = self._generate_presenter(fig=fig)
+        presenter.view.select_curve_combo_box.currentIndex.return_value = 0
         new_plot_kwargs = {'errorevery': 2, 'linestyle': '-.', 'color': 'r',
                            'marker': 'v'}
         presenter._replot_selected_curve(new_plot_kwargs)
@@ -203,6 +203,7 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         mock_view = Mock(get_selected_ax_name=lambda: "(0, 0)",
                          get_selected_curve_name=lambda: "errorbar_plot",
                          get_properties=lambda: mock_view_props)
+        mock_view.select_curve_combo_box.currentIndex.return_value = 0
         presenter = self._generate_presenter(fig=fig, mock_view=mock_view)
         presenter.apply_properties()
         self.assertFalse(ax.containers[0][2][0].get_visible())
