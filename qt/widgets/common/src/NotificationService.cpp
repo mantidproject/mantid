@@ -20,11 +20,11 @@ void NotificationService::showMessage(const QString &title,
                                       int millisecondsTimeoutHint) {
   if (isEnabled() && isSupportedByOS()) {
       QSystemTrayIcon sysTrayIcon(qApp);
-      // get the windo icon for the app
+      // get the window icon for the app
       QIcon windowIcon = qApp->windowIcon();
       // if no icon is set then use a blank icon
       if (windowIcon.isNull()) {
-        windowIcon = QIcon(QPixmap(32, 32));
+        windowIcon = QIcon(":/images/MantidIcon.ico");
       }
       // set this as the window icon otherwise you get a warning on the console
       sysTrayIcon.setIcon(windowIcon);
