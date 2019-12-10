@@ -43,6 +43,8 @@ python.plugins.directories = @PYTHONPLUGIN_DIRS@
 
 # Where to load instrument definition files from
 instrumentDefinition.directory = @MANTID_ROOT@/instrument
+# Controls wether Mantid Workbench will use system notifications for important messages (On/Off)
+Notifications.Enabled = On
 
 # Whether to check for updated instrument definitions on startup of Mantid
 UpdateInstrumentDefinitions.OnStartup = @UPDATE_INSTRUMENT_DEFINTITIONS@
@@ -154,11 +156,6 @@ MantidOptions.InstrumentView.UseOpenGL = On
 #   On: Normalize to the bin width for plots
 #   Off: Do not normalize
 graph1d.autodistribution = On
-
-#Uncommenting the line below will enable algorithm chain re-running whenever a
-#workspace is replaced. Uncommenting and setting it to 0 will also turn it off
-#enabling this is currently discouraged as it could cause race conditions with python scripts
-#AlgorithmChaining.SwitchedOn = 1
 
 # logging configuration
 # root level message filter (This sets a minimal level possible for any channel)
