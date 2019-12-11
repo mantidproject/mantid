@@ -16,7 +16,7 @@ class PlottingDockWidget(QtWidgets.QDockWidget):
         self.setFeatures(
             QtWidgets.QDockWidget.DockWidgetFloatable | QtWidgets.QDockWidget.DockWidgetMovable)
         self.setAllowedAreas(QtCore.Qt.RightDockWidgetArea | QtCore.Qt.LeftDockWidgetArea)
-        # cthe widget to be stored within
+        # the widget to be stored within
         self.dockable_plot_widget = plotting_widget
         # set the widget for this dockable plot window
         self.setWidget(self.dockable_plot_widget)
