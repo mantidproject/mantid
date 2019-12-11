@@ -356,7 +356,6 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         """
         Correct for sample only (when no container is given).
         """
-
         logger.information('Correcting sample')
         return sample_workspace / self._convert_units_wavelength(a_ss_workspace)
 
