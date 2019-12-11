@@ -1232,7 +1232,7 @@ class MantidAxes(Axes):
 
     def waterfall_create_fill(self):
         for i, line in enumerate(self.get_lines()):
-            bottom_line = [min(line.get_ydata())-((i*self.height)/100)]
+            bottom_line = [min(line.get_ydata())-((i*self.height)/100)] * len(line.get_ydata())
             fill = self.fill_between(line.get_xdata(), line.get_ydata(), bottom_line)
             fill.set_zorder((len(self.get_lines())-i)+1)
 
