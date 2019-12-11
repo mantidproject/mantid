@@ -7,9 +7,9 @@
 #ifndef MANTIDQT_CUSTOMINTERFACES_ALFVIEWMODEL_H_
 #define MANTIDQT_CUSTOMINTERFACES_ALFVIEWMODEL_H_
 
-#include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentModel.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentModel.h"
 
 #include <map>
 #include <string>
@@ -17,7 +17,8 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class ALFCustomInstrumentModel : public MantidWidgets::BaseCustomInstrumentModel {
+class ALFCustomInstrumentModel
+    : public MantidWidgets::BaseCustomInstrumentModel {
 
 public:
   ALFCustomInstrumentModel();

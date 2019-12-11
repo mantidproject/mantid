@@ -26,12 +26,14 @@ ALFView::ALFView(QWidget *parent)
       m_analysisPane(nullptr) {
   m_model = new ALFCustomInstrumentModel();
   m_view = new ALFCustomInstrumentView(m_model->getInstrument(), this);
-  auto analysisView = new MantidWidgets::PlotFitAnalysisPaneView(-15.0, 15.0, m_view);
+  auto analysisView =
+      new MantidWidgets::PlotFitAnalysisPaneView(-15.0, 15.0, m_view);
   auto analysisModel = new MantidWidgets::PlotFitAnalysisPaneModel();
-  m_analysisPane =
-      new MantidWidgets::PlotFitAnalysisPanePresenter(analysisView, analysisModel);
+  m_analysisPane = new MantidWidgets::PlotFitAnalysisPanePresenter(
+      analysisView, analysisModel);
 
-  m_presenter = new ALFCustomInstrumentPresenter(m_view, m_model, m_analysisPane);
+  m_presenter =
+      new ALFCustomInstrumentPresenter(m_view, m_model, m_analysisPane);
 }
 void ALFView::initLayout() { this->setCentralWidget(m_view); }
 

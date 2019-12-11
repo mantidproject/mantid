@@ -5,9 +5,9 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentPresenter.h"
-#include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentView.h"
-#include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentModel.h"
 #include "MantidAPI/FileFinder.h"
+#include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentModel.h"
+#include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentView.h"
 
 #include <functional>
 #include <tuple>
@@ -17,7 +17,7 @@ namespace MantidWidgets {
 
 BaseCustomInstrumentPresenter::BaseCustomInstrumentPresenter(
     BaseCustomInstrumentView *view, BaseCustomInstrumentModel *model,
-                                                 QWidget *analysisPaneView)
+    QWidget *analysisPaneView)
     : m_view(view), m_model(model), m_currentRun(0), m_currentFile(""),
       m_loadRunObserver(nullptr), m_analysisPaneView(analysisPaneView) {
   m_loadRunObserver = new VoidObserver();
@@ -110,5 +110,5 @@ BaseCustomInstrumentPresenter::setupInstrument() {
   return std::make_pair(setUpContextConditions, customInstrumentOptions);
 }
 
-} // namespace MantdWidgets
+} // namespace MantidWidgets
 } // namespace MantidQt

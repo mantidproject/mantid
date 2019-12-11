@@ -25,7 +25,8 @@ using namespace Mantid::API;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-ALFCustomInstrumentModel::ALFCustomInstrumentModel() : m_numberOfTubesInAverage(0) {
+ALFCustomInstrumentModel::ALFCustomInstrumentModel()
+    : m_numberOfTubesInAverage(0) {
   m_tmpName = "ALF_tmp";
   m_instrumentName = "ALF";
   m_wsName = "ALFData";
@@ -38,7 +39,8 @@ ALFCustomInstrumentModel::ALFCustomInstrumentModel() : m_numberOfTubesInAverage(
  * @param name:: string name for ALF data
  * @return std::pair<int,std::string>:: the run number and status
  */
-std::pair<int, std::string> ALFCustomInstrumentModel::loadData(const std::string &name) {
+std::pair<int, std::string>
+ALFCustomInstrumentModel::loadData(const std::string &name) {
   auto alg = AlgorithmManager::Instance().create("Load");
   alg->initialize();
   alg->setProperty("Filename", name);
@@ -162,7 +164,8 @@ bool ALFCustomInstrumentModel::hasTubeBeenExtracted(const std::string &name) {
   return AnalysisDataService::Instance().doesExist(EXTRACTEDWS + name);
 }
 
-bool ALFCustomInstrumentModel::extractTubeConditon(std::map<std::string, bool> tabBools) {
+bool ALFCustomInstrumentModel::extractTubeConditon(
+    std::map<std::string, bool> tabBools) {
   try {
 
     bool ifCurve = (tabBools.find("plotStored")->second ||
@@ -173,7 +176,8 @@ bool ALFCustomInstrumentModel::extractTubeConditon(std::map<std::string, bool> t
   }
 }
 
-bool ALFCustomInstrumentModel::averageTubeConditon(std::map<std::string, bool> tabBools) {
+bool ALFCustomInstrumentModel::averageTubeConditon(
+    std::map<std::string, bool> tabBools) {
   try {
 
     bool ifCurve = (tabBools.find("plotStored")->second ||

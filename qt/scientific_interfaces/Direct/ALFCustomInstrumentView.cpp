@@ -15,7 +15,8 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-ALFCustomInstrumentView::ALFCustomInstrumentView(const std::string &instrument, QWidget *parent)
+ALFCustomInstrumentView::ALFCustomInstrumentView(const std::string &instrument,
+                                                 QWidget *parent)
     : MantidWidgets::BaseCustomInstrumentView(instrument, parent),
       m_extractSingleTubeObservable(nullptr), m_averageTubeObservable(nullptr),
       m_extractAction(nullptr), m_averageAction(nullptr),
@@ -72,7 +73,8 @@ void ALFCustomInstrumentView::observeAverageTube(Observer *listner) {
   m_averageTubeObservable->attach(listner);
 }
 
-void ALFCustomInstrumentView::addObserver(std::tuple<std::string, Observer *> &listener) {
+void ALFCustomInstrumentView::addObserver(
+    std::tuple<std::string, Observer *> &listener) {
   if (std::get<0>(listener) == "singleTube") {
     observeExtractSingleTube(std::get<1>(listener));
   } else if (std::get<0>(listener) == "averageTube") {
@@ -80,7 +82,8 @@ void ALFCustomInstrumentView::addObserver(std::tuple<std::string, Observer *> &l
   }
 }
 
-void ALFCustomInstrumentView::setupAnalysisPane(MantidWidgets::PlotFitAnalysisPaneView *analysis) {
+void ALFCustomInstrumentView::setupAnalysisPane(
+    MantidWidgets::PlotFitAnalysisPaneView *analysis) {
   // keep a copy here so we can use a custom class
   m_analysisPane = analysis;
   // just adds it to the view

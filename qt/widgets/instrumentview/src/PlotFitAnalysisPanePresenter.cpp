@@ -15,7 +15,7 @@ namespace MantidWidgets {
 
 PlotFitAnalysisPanePresenter::PlotFitAnalysisPanePresenter(
     PlotFitAnalysisPaneView *view, PlotFitAnalysisPaneModel *model)
-    : m_fitObserver(nullptr), m_view(view), m_model(model), m_currentName(""){
+    : m_fitObserver(nullptr), m_view(view), m_model(model), m_currentName("") {
 
   m_fitObserver = new VoidObserver();
   m_view->observeFitButton(m_fitObserver);

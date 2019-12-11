@@ -7,8 +7,8 @@
 #include "ALFCustomInstrumentPresenter.h"
 #include "ALFCustomInstrumentModel.h"
 #include "ALFCustomInstrumentView.h"
-#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h"
 #include "MantidAPI/FileFinder.h"
+#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h"
 
 #include <functional>
 #include <tuple>
@@ -16,8 +16,9 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-ALFCustomInstrumentPresenter::ALFCustomInstrumentPresenter(ALFCustomInstrumentView *view, ALFCustomInstrumentModel *model,
-                                     MantidWidgets::PlotFitAnalysisPanePresenter *analysisPane)
+ALFCustomInstrumentPresenter::ALFCustomInstrumentPresenter(
+    ALFCustomInstrumentView *view, ALFCustomInstrumentModel *model,
+    MantidWidgets::PlotFitAnalysisPanePresenter *analysisPane)
     : BaseCustomInstrumentPresenter(view, model, analysisPane->getView()),
       m_view(view), m_model(model), m_analysisPane(analysisPane),
       m_extractSingleTubeObserver(nullptr), m_averageTubeObserver(nullptr) {
@@ -35,7 +36,9 @@ void ALFCustomInstrumentPresenter::setUpInstrumentAnalysisSplitter() {
   m_view->setupAnalysisPane(m_analysisPane->getView());
 }
 
-void ALFCustomInstrumentPresenter::loadSideEffects() { m_analysisPane->clearCurrentWS(); }
+void ALFCustomInstrumentPresenter::loadSideEffects() {
+  m_analysisPane->clearCurrentWS();
+}
 
 typedef std::pair<std::string,
                   std::vector<std::function<bool(std::map<std::string, bool>)>>>
@@ -75,7 +78,8 @@ ALFCustomInstrumentPresenter::setupALFInstrument() {
 
   // set up single tube extract
   std::function<void()> extractSingleTubeBinder =
-      std::bind(&ALFCustomInstrumentPresenter::extractSingleTube, this); // binder for slot
+      std::bind(&ALFCustomInstrumentPresenter::extractSingleTube,
+                this); // binder for slot
   m_extractSingleTubeObserver->setSlot(
       extractSingleTubeBinder); // add slot to observer
   std::tuple<std::string, Observer *> tmp = std::make_tuple(

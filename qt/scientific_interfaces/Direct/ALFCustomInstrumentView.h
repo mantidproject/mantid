@@ -7,10 +7,10 @@
 #ifndef MANTIDQT_CUSTOMINTERFACES_ALFCustomInstrumentView_H_
 #define MANTIDQT_CUSTOMINTERFACES_ALFCustomInstrumentView_H_
 
-#include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentView.h"
 #include "DllConfig.h"
 #include "MantidQtWidgets/Common/MWRunFiles.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
+#include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentView.h"
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneView.h"
 
 #include <QObject>
@@ -26,7 +26,7 @@ class ALFCustomInstrumentView : public MantidWidgets::BaseCustomInstrumentView {
 
 public:
   explicit ALFCustomInstrumentView(const std::string &instrument,
-                        QWidget *parent = nullptr);
+                                   QWidget *parent = nullptr);
   void observeExtractSingleTube(Observer *listner);
   void observeAverageTube(Observer *listner);
 

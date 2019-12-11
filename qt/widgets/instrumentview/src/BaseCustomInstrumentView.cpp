@@ -7,7 +7,7 @@
 #include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentView.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h"
-// change to BaseCustomInstrumentView etc. 
+// change to BaseCustomInstrumentView etc.
 #include <QMessageBox>
 #include <QSizePolicy>
 #include <QSpacerItem>
@@ -17,8 +17,8 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-BaseCustomInstrumentView::BaseCustomInstrumentView(const std::string &instrument,
-                                       QWidget *parent)
+BaseCustomInstrumentView::BaseCustomInstrumentView(
+    const std::string &instrument, QWidget *parent)
     : QSplitter(Qt::Vertical, parent), m_helpPage(""),
       m_loadRunObservable(nullptr), m_files(nullptr),
       m_instrument(QString::fromStdString(instrument)),

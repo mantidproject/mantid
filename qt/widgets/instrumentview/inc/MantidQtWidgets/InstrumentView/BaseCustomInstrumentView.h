@@ -21,12 +21,13 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW BaseCustomInstrumentView : public QSplitter {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW BaseCustomInstrumentView
+    : public QSplitter {
   Q_OBJECT
 
 public:
   explicit BaseCustomInstrumentView(const std::string &instrument,
-                              QWidget *parent = nullptr);
+                                    QWidget *parent = nullptr);
   std::string getFile();
   void setRunQuietly(const std::string &runNumber);
   void observeLoadRun(Observer *listener) {

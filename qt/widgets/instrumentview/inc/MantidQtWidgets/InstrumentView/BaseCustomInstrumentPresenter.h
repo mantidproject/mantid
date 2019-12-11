@@ -7,9 +7,9 @@
 #ifndef MANTIDQT_INSTRUMENTVIEW_BASECUSTOMINSTRUMENTPRESENTER_H_
 #define MANTIDQT_INSTRUMENTVIEW_BASECUSTOMINSTRUMENTPRESENTER_H_
 #include "DllOption.h"
+#include "MantidQtWidgets/Common/ObserverPattern.h"
 #include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentModel.h"
 #include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentView.h"
-#include "MantidQtWidgets/Common/ObserverPattern.h"
 
 #include <string>
 
@@ -23,7 +23,7 @@ class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW BaseCustomInstrumentPresenter
 public:
   BaseCustomInstrumentPresenter(BaseCustomInstrumentView *view,
                                 BaseCustomInstrumentModel *model,
-                          QWidget *analysisView);
+                                QWidget *analysisView);
   ~BaseCustomInstrumentPresenter() { delete m_loadRunObserver; };
 
   typedef std::pair<
