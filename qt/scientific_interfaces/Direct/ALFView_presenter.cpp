@@ -18,7 +18,7 @@ namespace CustomInterfaces {
 
 ALFView_presenter::ALFView_presenter(ALFView_view *view, ALFView_model *model,
                                      MantidWidgets::PlotFitAnalysisPanePresenter *analysisPane)
-    : BaseInstrumentPresenter(view, model, analysisPane->getView()),
+    : BaseCustomInstrumentPresenter(view, model, analysisPane->getView()),
       m_view(view), m_model(model), m_analysisPane(analysisPane),
       m_extractSingleTubeObserver(nullptr), m_averageTubeObserver(nullptr) {
   addInstrument();

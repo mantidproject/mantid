@@ -6,9 +6,9 @@ set(
   SRC_FILES
   src/BankRenderingHelpers.cpp
   src/BankTextureBuilder.cpp
-  src/BaseInstrumentModel.cpp
-  src/BaseInstrumentView.cpp
-  src/BaseInstrumentPresenter.cpp
+  src/BaseCustomInstrumentModel.cpp
+  src/BaseCustomInstrumentView.cpp
+  src/BaseCustomInstrumentPresenter.cpp
   src/BinDialog.cpp
   src/CollapsiblePanel.cpp
   src/DetXMLFile.cpp
@@ -58,8 +58,8 @@ set(QT5_SRC_FILES src/MiniPlotMpl.cpp)
 set(
   MOC_FILES
   inc/MantidQtWidgets/InstrumentView/BinDialog.h
-  inc/MantidQtWidgets/InstrumentView/BaseInstrumentPresenter.h
-  inc/MantidQtWidgets/InstrumentView/BaseInstrumentView.h
+  inc/MantidQtWidgets/InstrumentView/BaseCustomInstrumentPresenter.h
+  inc/MantidQtWidgets/InstrumentView/BaseCustomInstrumentView.h
   inc/MantidQtWidgets/InstrumentView/CollapsiblePanel.h
   inc/MantidQtWidgets/InstrumentView/InstrumentActor.h
   inc/MantidQtWidgets/InstrumentView/InstrumentTreeModel.h
@@ -91,9 +91,9 @@ set(
   INC_FILES
   inc/MantidQtWidgets/InstrumentView/BankRenderingHelpers.h
   inc/MantidQtWidgets/InstrumentView/BankTextureBuilder.h
-  inc/MantidQtWidgets/InstrumentView/BaseInstrumentModel.h
-  inc/MantidQtWidgets/InstrumentView/BaseInstrumentPresenter.h
-  inc/MantidQtWidgets/InstrumentView/BaseInstrumentView.h
+  inc/MantidQtWidgets/InstrumentView/BaseCustomInstrumentModel.h
+  inc/MantidQtWidgets/InstrumentView/BaseCustomInstrumentPresenter.h
+  inc/MantidQtWidgets/InstrumentView/BaseCustomInstrumentView.h
   inc/MantidQtWidgets/InstrumentView/BinDialog.h
   inc/MantidQtWidgets/InstrumentView/CollapsiblePanel.h
   inc/MantidQtWidgets/InstrumentView/ColorMap.h

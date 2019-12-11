@@ -16,7 +16,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 ALFView_view::ALFView_view(const std::string &instrument, QWidget *parent)
-    : BaseInstrumentView(instrument, parent),
+    : MantidWidgets::BaseCustomInstrumentView(instrument, parent),
       m_extractSingleTubeObservable(nullptr), m_averageTubeObservable(nullptr),
       m_extractAction(nullptr), m_averageAction(nullptr),
       m_analysisPane(nullptr) {
@@ -84,7 +84,7 @@ void ALFView_view::setupAnalysisPane(MantidWidgets::PlotFitAnalysisPaneView *ana
   // keep a copy here so we can use a custom class
   m_analysisPane = analysis;
   // just adds it to the view
-  BaseInstrumentView::setupInstrumentAnalysisSplitters(analysis);
+  BaseCustomInstrumentView::setupInstrumentAnalysisSplitters(analysis);
 }
 
 void ALFView_view::addSpectrum(std::string wsName) {

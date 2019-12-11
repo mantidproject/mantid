@@ -7,7 +7,7 @@
 #ifndef MANTIDQT_CUSTOMINTERFACES_ALFVIEWPRESENTER_H_
 #define MANTIDQT_CUSTOMINTERFACES_ALFVIEWPRESENTER_H_
 
-#include "MantidQtWidgets/InstrumentView/BaseInstrumentPresenter.h"
+#include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentPresenter.h"
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h"
 
 #include "ALFView_model.h"
@@ -20,7 +20,8 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_DIRECT_DLL ALFView_presenter : public MantidWidgets::BaseInstrumentPresenter {
+class MANTIDQT_DIRECT_DLL ALFView_presenter
+    : public MantidWidgets::BaseCustomInstrumentPresenter {
   Q_OBJECT
 
 public:

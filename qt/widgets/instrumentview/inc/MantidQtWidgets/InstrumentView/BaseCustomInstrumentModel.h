@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_INSTRUMENTVIEW_BASEINSTRUMENTMODEL_H_
-#define MANTIDQT_INSTRUMENTVIEW_BASEINSTRUMENTMODEL_H_
+#ifndef MANTIDQT_INSTRUMENTVIEW_BASECUSTOMINSTRUMENTMODEL_H_
+#define MANTIDQT_INSTRUMENTVIEW_BASECUSTOMINSTRUMENTMODEL_H_
 
 #include "DllOption.h"
 
@@ -15,11 +15,11 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW BaseInstrumentModel {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW BaseCustomInstrumentModel {
 
 public:
-  BaseInstrumentModel();
-  ~BaseInstrumentModel(){};
+  BaseCustomInstrumentModel();
+  ~BaseCustomInstrumentModel(){};
   virtual void loadEmptyInstrument();
   virtual std::pair<int, std::string> loadData(const std::string &name);
   void setCurrentRun(int &run) { m_currentRun = run; };

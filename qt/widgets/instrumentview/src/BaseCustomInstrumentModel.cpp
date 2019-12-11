@@ -5,7 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "MantidQtWidgets/InstrumentView/BaseInstrumentModel.h"
+#include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentModel.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -24,11 +24,11 @@ using namespace Mantid::API;
 namespace MantidQt {
 namespace MantidWidgets {
 
-BaseInstrumentModel::BaseInstrumentModel()
+BaseCustomInstrumentModel::BaseCustomInstrumentModel()
     : m_currentRun(0), m_tmpName("tmp"), m_instrumentName("MUSR"),
       m_wsName("testData") {}
 
-void BaseInstrumentModel::loadEmptyInstrument() {
+void BaseCustomInstrumentModel::loadEmptyInstrument() {
   auto alg =
       Mantid::API::AlgorithmManager::Instance().create("LoadEmptyInstrument");
   alg->initialize();
@@ -43,7 +43,7 @@ void BaseInstrumentModel::loadEmptyInstrument() {
  * @return std::pair<int,std::string>:: the run number and status
  */
 std::pair<int, std::string>
-BaseInstrumentModel::loadData(const std::string &name) {
+BaseCustomInstrumentModel::loadData(const std::string &name) {
   auto alg = AlgorithmManager::Instance().create("Load");
   alg->initialize();
   alg->setProperty("Filename", name);
@@ -58,16 +58,16 @@ BaseInstrumentModel::loadData(const std::string &name) {
   return std::make_pair(runNumber, message);
 }
 
-void BaseInstrumentModel::rename() {
+void BaseCustomInstrumentModel::rename() {
   AnalysisDataService::Instance().rename(m_tmpName, m_wsName);
 }
-void BaseInstrumentModel::remove() {
+void BaseCustomInstrumentModel::remove() {
   AnalysisDataService::Instance().remove(m_tmpName);
 }
 
-std::string BaseInstrumentModel::dataFileName() { return m_wsName; }
+std::string BaseCustomInstrumentModel::dataFileName() { return m_wsName; }
 
-int BaseInstrumentModel::currentRun() {
+int BaseCustomInstrumentModel::currentRun() {
   try {
 
     auto ws =
@@ -78,7 +78,7 @@ int BaseInstrumentModel::currentRun() {
   }
 }
 
-bool BaseInstrumentModel::isErrorCode(const int run) {
+bool BaseCustomInstrumentModel::isErrorCode(const int run) {
   return (run == ERRORCODE);
 }
 

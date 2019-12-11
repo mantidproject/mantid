@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_INSTRUMENTVIEW_BASEINSTRUMENTVIEW_H_
-#define MANTIDQT_INSTRUMENTVIEW_BASEINSTRUMENTVIEW_H_
+#ifndef MANTIDQT_INSTRUMENTVIEW_BASECUSTOMINSTRUMENTVIEW_H_
+#define MANTIDQT_INSTRUMENTVIEW_BASECUSTOMINSTRUMENTVIEW_H_
 
 #include "DllOption.h"
 #include "MantidQtWidgets/Common/MWRunFiles.h"
@@ -21,11 +21,11 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW BaseInstrumentView : public QSplitter {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW BaseCustomInstrumentView : public QSplitter {
   Q_OBJECT
 
 public:
-  explicit BaseInstrumentView(const std::string &instrument,
+  explicit BaseCustomInstrumentView(const std::string &instrument,
                               QWidget *parent = nullptr);
   std::string getFile();
   void setRunQuietly(const std::string &runNumber);
@@ -67,4 +67,4 @@ private:
 } // namespace MantidWidgets
 } // namespace MantidQt
 
-#endif /* MANTIDQT_INSTRUMENTVIEW_BASEINSTRUMENTVIEW_H_ */
+#endif /* MANTIDQT_INSTRUMENTVIEW_BASECUSTOMINSTRUMENTVIEW_H_ */

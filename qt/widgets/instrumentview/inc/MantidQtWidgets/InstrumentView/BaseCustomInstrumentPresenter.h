@@ -4,11 +4,11 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_INSTRUMENTVIEW_BASEINSTRUMENTPRESENTER_H_
-#define MANTIDQT_INSTRUMENTVIEW_BASEINSTRUMENTPRESENTER_H_
+#ifndef MANTIDQT_INSTRUMENTVIEW_BASECUSTOMINSTRUMENTPRESENTER_H_
+#define MANTIDQT_INSTRUMENTVIEW_BASECUSTOMINSTRUMENTPRESENTER_H_
 #include "DllOption.h"
-#include "MantidQtWidgets/InstrumentView/BaseInstrumentModel.h"
-#include "MantidQtWidgets/InstrumentView/BaseInstrumentView.h"
+#include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentModel.h"
+#include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentView.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
 
 #include <string>
@@ -16,14 +16,15 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW BaseInstrumentPresenter
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW BaseCustomInstrumentPresenter
     : public QObject {
   Q_OBJECT
 
 public:
-  BaseInstrumentPresenter(BaseInstrumentView *view, BaseInstrumentModel *model,
+  BaseCustomInstrumentPresenter(BaseCustomInstrumentView *view,
+                                BaseCustomInstrumentModel *model,
                           QWidget *analysisView);
-  ~BaseInstrumentPresenter() { delete m_loadRunObserver; };
+  ~BaseCustomInstrumentPresenter() { delete m_loadRunObserver; };
 
   typedef std::pair<
       std::string,
@@ -49,8 +50,8 @@ private:
   virtual void setUpInstrumentAnalysisSplitter();
   std::pair<instrumentSetUp, instrumentObserverOptions> setupInstrument();
 
-  BaseInstrumentView *m_view;
-  BaseInstrumentModel *m_model;
+  BaseCustomInstrumentView *m_view;
+  BaseCustomInstrumentModel *m_model;
   int m_currentRun;
   std::string m_currentFile;
   VoidObserver *m_loadRunObserver;
@@ -59,4 +60,4 @@ private:
 } // namespace MantidWidgets
 } // namespace MantidQt
 
-#endif /* MANTIDQT_INSTRUMENTVIEW_BASEINSTRUMENTPRESENTER_H_ */
+#endif /* MANTIDQT_INSTRUMENTVIEW_BaseCustomInstrumentPresenter_H_ */
