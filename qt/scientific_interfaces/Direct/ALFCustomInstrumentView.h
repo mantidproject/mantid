@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_CUSTOMINTERFACES_ALFVIEW_VIEW_H_
-#define MANTIDQT_CUSTOMINTERFACES_ALFVIEW_VIEW_H_
+#ifndef MANTIDQT_CUSTOMINTERFACES_ALFCustomInstrumentView_H_
+#define MANTIDQT_CUSTOMINTERFACES_ALFCustomInstrumentView_H_
 
 #include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentView.h"
 #include "DllConfig.h"
@@ -21,11 +21,11 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class ALFView_view : public MantidWidgets::BaseCustomInstrumentView {
+class ALFCustomInstrumentView : public MantidWidgets::BaseCustomInstrumentView {
   Q_OBJECT
 
 public:
-  explicit ALFView_view(const std::string &instrument,
+  explicit ALFCustomInstrumentView(const std::string &instrument,
                         QWidget *parent = nullptr);
   void observeExtractSingleTube(Observer *listner);
   void observeAverageTube(Observer *listner);
@@ -53,4 +53,4 @@ private:
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif /* MANTIDQT_CUSTOMINTERFACES_ALFVIEW_VIEW_H_ */
+#endif /* MANTIDQT_CUSTOMINTERFACES_ALFCustomInstrumentView_H_ */

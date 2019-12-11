@@ -17,11 +17,11 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class ALFView_model : public MantidWidgets::BaseCustomInstrumentModel {
+class ALFCustomInstrumentModel : public MantidWidgets::BaseCustomInstrumentModel {
 
 public:
-  ALFView_model();
-  virtual ~ALFView_model(){};
+  ALFCustomInstrumentModel();
+  virtual ~ALFCustomInstrumentModel(){};
   std::pair<int, std::string> loadData(const std::string &name) override;
   std::map<std::string, bool> isDataValid();
   void transformData();

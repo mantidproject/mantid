@@ -1,13 +1,13 @@
 set(SRC_FILES
     ALFView.cpp
-    ALFView_view.cpp
-    ALFView_presenter.cpp
-    ALFView_model.cpp)
+    ALFCustomInstrumentView.cpp
+    ALFCustomInstrumentPresenter.cpp
+    ALFCustomInstrumentModel.cpp)
     
 set(MOC_FILES
     ALFView.h
-    ALFView_view.h
-    ALFView_presenter.h)
+    ALFCustomInstrumentView.h
+    ALFCustomInstrumentPresenter.h)
     
 set(INC_FILES
     DllConfig.h)

@@ -5,7 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "ALFView_model.h"
+#include "ALFCustomInstrumentModel.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -25,7 +25,7 @@ using namespace Mantid::API;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-ALFView_model::ALFView_model() : m_numberOfTubesInAverage(0) {
+ALFCustomInstrumentModel::ALFCustomInstrumentModel() : m_numberOfTubesInAverage(0) {
   m_tmpName = "ALF_tmp";
   m_instrumentName = "ALF";
   m_wsName = "ALFData";
@@ -38,7 +38,7 @@ ALFView_model::ALFView_model() : m_numberOfTubesInAverage(0) {
  * @param name:: string name for ALF data
  * @return std::pair<int,std::string>:: the run number and status
  */
-std::pair<int, std::string> ALFView_model::loadData(const std::string &name) {
+std::pair<int, std::string> ALFCustomInstrumentModel::loadData(const std::string &name) {
   auto alg = AlgorithmManager::Instance().create("Load");
   alg->initialize();
   alg->setProperty("Filename", name);
@@ -67,7 +67,7 @@ std::pair<int, std::string> ALFView_model::loadData(const std::string &name) {
  * Loads data, normalise to current and then converts to d spacing
  * @return pair<bool,bool>:: If the instrument is ALF, if it is d-spacing
  */
-std::map<std::string, bool> ALFView_model::isDataValid() {
+std::map<std::string, bool> ALFCustomInstrumentModel::isDataValid() {
   auto ws =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_tmpName);
   bool isItALF = false;
@@ -88,7 +88,7 @@ std::map<std::string, bool> ALFView_model::isDataValid() {
  * Transforms ALF data; normalise to current and then converts to d spacing
  * If already d-space does nothing.
  */
-void ALFView_model::transformData() {
+void ALFCustomInstrumentModel::transformData() {
   auto normAlg = AlgorithmManager::Instance().create("NormaliseByCurrent");
   normAlg->initialize();
   normAlg->setProperty("InputWorkspace", m_wsName);
@@ -103,7 +103,7 @@ void ALFView_model::transformData() {
   dSpacingAlg->execute();
 }
 
-void ALFView_model::storeSingleTube(const std::string &name) {
+void ALFCustomInstrumentModel::storeSingleTube(const std::string &name) {
   auto alg = AlgorithmManager::Instance().create("ScaleX");
   alg->initialize();
   alg->setProperty("InputWorkspace", CURVES);
@@ -120,12 +120,12 @@ void ALFView_model::storeSingleTube(const std::string &name) {
   AnalysisDataService::Instance().remove(CURVES);
 }
 
-std::string ALFView_model::WSName() {
+std::string ALFCustomInstrumentModel::WSName() {
   std::string name = m_instrumentName + std::to_string(getCurrentRun());
   return EXTRACTEDWS + name;
 }
 
-void ALFView_model::averageTube() {
+void ALFCustomInstrumentModel::averageTube() {
   const std::string name = m_instrumentName + std::to_string(getCurrentRun());
   const int oldTotalNumber = m_numberOfTubesInAverage;
   // multiply up current average
@@ -158,11 +158,11 @@ void ALFView_model::averageTube() {
   m_numberOfTubesInAverage++;
 }
 
-bool ALFView_model::hasTubeBeenExtracted(const std::string &name) {
+bool ALFCustomInstrumentModel::hasTubeBeenExtracted(const std::string &name) {
   return AnalysisDataService::Instance().doesExist(EXTRACTEDWS + name);
 }
 
-bool ALFView_model::extractTubeConditon(std::map<std::string, bool> tabBools) {
+bool ALFCustomInstrumentModel::extractTubeConditon(std::map<std::string, bool> tabBools) {
   try {
 
     bool ifCurve = (tabBools.find("plotStored")->second ||
@@ -173,7 +173,7 @@ bool ALFView_model::extractTubeConditon(std::map<std::string, bool> tabBools) {
   }
 }
 
-bool ALFView_model::averageTubeConditon(std::map<std::string, bool> tabBools) {
+bool ALFCustomInstrumentModel::averageTubeConditon(std::map<std::string, bool> tabBools) {
   try {
 
     bool ifCurve = (tabBools.find("plotStored")->second ||
@@ -186,12 +186,12 @@ bool ALFView_model::averageTubeConditon(std::map<std::string, bool> tabBools) {
     return false;
   }
 }
-void ALFView_model::extractSingleTube() {
+void ALFCustomInstrumentModel::extractSingleTube() {
   storeSingleTube(m_instrumentName + std::to_string(getCurrentRun()));
   m_numberOfTubesInAverage = 1;
 }
 
-CompositeFunction_sptr ALFView_model::getDefaultFunction() {
+CompositeFunction_sptr ALFCustomInstrumentModel::getDefaultFunction() {
 
   CompositeFunction_sptr composite =
       boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(
