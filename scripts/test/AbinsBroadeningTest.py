@@ -2,6 +2,8 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 import numpy as np
+from numpy.testing import assert_array_almost_equal
+from scipy.stats import norm as spnorm
 
 from AbinsModules.Instruments import Broadening
 
@@ -10,7 +12,64 @@ class AbinsBroadeningTest(unittest.TestCase):
     Test Abins broadening functions
     """
 
-    def test_broadening_values(self):
+    def test_gaussian(self):
+        """Benchmark Gaussian against (slower) Scipy norm.pdf"""
+        x = np.linspace(-10, 10, 101)
+        diff = np.abs(spnorm.pdf(x) - Broadening.gaussian(sigma=1, points=x, center=0))
+
+        self.assertLess(max(diff), 1e-8)
+
+        sigma, offset = 1.5, 4
+        diff = np.abs(spnorm.pdf((x - offset) / sigma) / (sigma)
+                      - Broadening.gaussian(sigma=sigma, points=x, center=offset))
+        self.assertLess(max(diff), 1e-8)
+
+    def test_mesh_gaussian_value(self):
+        """Check reference values and empty cases for mesh_gaussian"""
+        # Numerical values were not checked against an external reference
+        # so they are only useful for detecting if the results have _changed_.
+
+        self.assertEqual(Broadening.mesh_gaussian(sigma=5, points=[], center=1).shape,
+                         (0,))
+
+        zero_result = Broadening.mesh_gaussian(sigma=np.array([[5]]),
+                                               points=np.array([0,]),
+                                               center=np.array([[3]]))
+        self.assertEqual(zero_result.shape, (1, 1))
+        self.assertFalse(zero_result.any())
+
+        assert_array_almost_equal(Broadening.mesh_gaussian(sigma=2,
+                                                           points=np.array([0, 1]),
+                                                           center=0),
+                                  np.array([0.199471, 0.176033]))
+        assert_array_almost_equal(Broadening.mesh_gaussian(sigma=np.array([[2], [2]]),
+                                                           points=np.array([0, 1, 2]),
+                                                           center=np.array([[0], [1]])),
+                                  np.array([[0.199471, 0.176033, 0.120985],
+                                            [0.176033, 0.199471, 0.176033]]))
+
+    def test_mesh_gaussian_sum(self):
+        """Check sum of mesh_gaussian is correctly adapted to bin width"""
+        # Note that larger bin widths will not sum to 1 with this theoretical normalisation factor; this is a
+        # consequence of directly evaluating the Gaussian function. For coarse bins, consider using the "normal" kernel
+        # which does not have this error.
+        for bin_width in 0.1, 0.35:
+            points = np.arange(-20, 20, bin_width)
+            curve = Broadening.mesh_gaussian(sigma=0.4, points=points)
+
+            self.assertAlmostEqual(sum(curve), 1)
+
+    def test_noraml_sum(self):
+        """Check that normally-distributed kernel sums to unity"""
+        # Note that unlike Gaussian kernel, this totals intensity 1 even with absurdly large bins
+
+        for bin_width in 0.1, 0.35, 3.1, 5:
+            bins = np.arange(-20, 20, bin_width)
+            curve = Broadening.normal(sigma=0.4, bins=bins)
+
+            self.assertAlmostEqual(sum(curve), 1)
+
+    def test_broaden_spectrum_values(self):
         """Check broadening implementations give similar values"""
 
         # Use dense bins with a single peak for fair comparison
@@ -98,7 +157,7 @@ class AbinsBroadeningTest(unittest.TestCase):
 
         # truncated forms will be a little off but shouldn't be _too_ off
         for scheme in ('gaussian_truncated', 'normal_truncated'):
-                       
+
             freq_points, trunc_spectrum = Broadening.broaden_spectrum(frequencies=frequencies,
                                                                       bins=bins,
                                                                       s_dft=s_dft,

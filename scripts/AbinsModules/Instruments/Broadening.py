@@ -174,10 +174,11 @@ def mesh_gaussian(sigma=None, points=None, center=0):
 
     if len(points) < 2:
         return(np.zeros_like(points * sigma))
-        
+
     bin_width = points[1] - points[0]
     return(gaussian(sigma=sigma, points=points, center=center) * bin_width)
-    
+
+
 def gaussian(sigma=None, points=None, center=0):
     """Evaluate a Gaussian function over a given mesh
 
@@ -187,7 +188,7 @@ def gaussian(sigma=None, points=None, center=0):
     :param center: center of Gaussian
     :type center: float or array
     :param normalized:
-    If True, scale the output so that the sum of all values 
+    If True, scale the output so that the sum of all values
     equals 1 (i.e. make a suitable kernel for convolution of a histogram.)
     This will not be reliable if the function extends beyond the provided set of points.
     :type normalized: bool
@@ -280,7 +281,7 @@ def trunc_function(function=None, sigma=None, points=None, center=None, limit=3)
 
     distances = abs(points_matrix - center_matrix)
     points_close_to_peaks = distances < (limit * sigma_matrix)
-    
+
     results = np.zeros((len(center), len(points)))
     results[points_close_to_peaks] = function(sigma=sigma_matrix[points_close_to_peaks],
                                               points=points_matrix[points_close_to_peaks],
