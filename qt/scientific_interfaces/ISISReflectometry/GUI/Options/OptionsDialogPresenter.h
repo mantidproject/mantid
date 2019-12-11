@@ -25,8 +25,7 @@ Implements a presenter for the options dialog.
 class MANTIDQT_ISISREFLECTOMETRY_DLL OptionsDialogPresenter
     : public OptionsDialogSubscriber {
 public:
-  OptionsDialogPresenter(IOptionsDialogView *view,
-                         IMainWindowPresenter *mainPresenter);
+  OptionsDialogPresenter(IOptionsDialogView *view);
   ~OptionsDialogPresenter() = default;
 
   void notifyInitOptions();

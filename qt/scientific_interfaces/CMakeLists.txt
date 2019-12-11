@@ -68,6 +68,7 @@ set(TEST_FILES
     test/ISISReflectometry/Runs/CatalogRunNotifierTest.h
     test/ISISReflectometry/Runs/RunsPresenterTest.h
     test/ISISReflectometry/MainWindow/MainWindowPresenterTest.h
+    test/ISISReflectometry/Options/OptionsDialogTest.h
     test/ISISReflectometry/Runs/SearchResultTest.h
     test/ISISReflectometry/Save/SavePresenterTest.h
     test/ISISReflectometry/Common/ClipboardTest.h
@@ -119,6 +120,7 @@ set(QT5_TEST_FILES
     test/ISISReflectometry/Batch/BatchPresenterTest.h
     test/ISISReflectometry/Batch/GroupProcessingAlgorithmTest.h
     test/ISISReflectometry/Batch/RowProcessingAlgorithmTest.h
+    test/ISISReflectometry/Options/OptionsDialogTest.h
     test/ISISReflectometry/Reduction/GroupTest.h
     test/ISISReflectometry/Reduction/ValidateRowTest.h
     test/ISISReflectometry/Reduction/ParseReflectometryStringsTest.h

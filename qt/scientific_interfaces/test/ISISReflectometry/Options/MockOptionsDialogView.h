@@ -4,15 +4,18 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_MOCKOPTIONSDIALOG_H
-#define MANTID_ISISREFLECTOMETRY_MOCKOPTIONSDIALOG_H
+#ifndef MANTID_ISISREFLECTOMETRY_MOCKOPTIONSDIALOGVIEW_H
+#define MANTID_ISISREFLECTOMETRY_MOCKOPTIONSDIALOGVIEW_H
 
-#include "IOptionsDialog.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include "GUI/Options/IOptionsDialogView.h"
 #include <QVariant>
 #include <gmock/gmock.h>
 #include <map>
 
-class MockOptionsDialog : public MantidQt::CustomInterfaces::ISISReflectometry::IOptionsDialog {
+using namespace MantidQt::CustomInterfaces::ISISReflectometry;
+
+class MockOptionsDialogView : public IOptionsDialogView {
 public:
   GNU_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_METHOD2(getOptions, void(std::map<std::string, bool> &boolOptions,
@@ -21,9 +24,9 @@ public:
                                 std::map<std::string, int> &intOptions));
   MOCK_METHOD1(
       subscribe,
-      void(MantidQt::MantidWidgets::OptionsDialogSubscriber *notifyee));
+      void(OptionsDialogSubscriber *notifyee));
   MOCK_METHOD0(show, void());
   GNU_DIAG_ON_SUGGEST_OVERRIDE
 };
 
-#endif /* MANTID_ISISREFLECTOMETRY_MOCKOPTIONSDIALOG_H */
+#endif /* MANTID_ISISREFLECTOMETRY_MOCKOPTIONSDIALOGVIEW_H */

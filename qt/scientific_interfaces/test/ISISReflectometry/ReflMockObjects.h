@@ -73,10 +73,15 @@ public:
   MOCK_METHOD0(notifyUpdateInstrumentRequested, void());
   MOCK_METHOD0(notifyRestoreDefaultsRequested, void());
   MOCK_METHOD0(notifySettingsChanged, void());
+  MOCK_METHOD1(notifySetRoundPrecision, void(int &));
+  MOCK_METHOD0(notifyResetRoundPrecision, void());
   MOCK_CONST_METHOD0(isProcessing, bool());
   MOCK_CONST_METHOD0(isAutoreducing, bool());
   MOCK_CONST_METHOD0(isAnyBatchProcessing, bool());
   MOCK_CONST_METHOD0(isAnyBatchAutoreducing, bool());
+  MOCK_CONST_METHOD0(isOperationPrevented, bool());
+  MOCK_CONST_METHOD0(getUnsavedBatchFlag, bool());
+  MOCK_METHOD1(setUnsavedBatchFlag, void(bool));
   MOCK_CONST_METHOD0(percentComplete, int());
   MOCK_CONST_METHOD0(rowProcessingProperties, AlgorithmRuntimeProps());
   MOCK_CONST_METHOD0(requestClose, bool());
@@ -108,12 +113,16 @@ public:
   MOCK_METHOD0(notifyAnyBatchAutoreductionPaused, void());
   MOCK_METHOD0(notifyAnyBatchAutoreductionResumed, void());
   MOCK_METHOD1(notifyInstrumentChanged, void(std::string const &));
+  MOCK_METHOD1(notifySetUnsavedBatch, void(bool));
   MOCK_METHOD0(settingsChanged, void());
   MOCK_CONST_METHOD0(isAnyBatchProcessing, bool());
   MOCK_CONST_METHOD0(isAnyBatchAutoreducing, bool());
+  MOCK_CONST_METHOD0(isOperationPrevented, bool());
   MOCK_CONST_METHOD0(isProcessing, bool());
   MOCK_CONST_METHOD0(isAutoreducing, bool());
   MOCK_CONST_METHOD0(percentComplete, int());
+  MOCK_METHOD1(setRoundPrecision, void(int &));
+  MOCK_METHOD0(resetRoundPrecision, void());
   MOCK_METHOD0(notifySearchComplete, void());
 };
 
@@ -290,6 +299,8 @@ public:
   MOCK_METHOD0(getAlgorithms,
                std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>());
   MOCK_CONST_METHOD0(rowProcessingProperties, AlgorithmRuntimeProps());
+  MOCK_CONST_METHOD0(getProcessPartial, bool());
+  MOCK_CONST_METHOD0(getProcessAll, bool());
 };
 
 class MockBatchJobAlgorithm : public IBatchJobAlgorithm,

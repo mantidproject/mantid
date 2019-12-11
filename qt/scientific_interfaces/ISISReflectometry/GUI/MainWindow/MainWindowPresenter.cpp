@@ -53,7 +53,7 @@ MainWindowPresenter::MainWindowPresenter(
     : m_view(view), m_messageHandler(messageHandler), m_instrument(),
       m_slitCalculator(std::move(slitCalculator)),
       m_optionsDialogPresenter(
-          new OptionsDialogPresenter(optionsDialogView, this)),
+          new OptionsDialogPresenter(optionsDialogView)),
       m_batchPresenterFactory(std::move(batchPresenterFactory)) {
   m_optionsDialogPresenter->notifyInitOptions();
   m_optionsDialogPresenter->notifySubscribe();

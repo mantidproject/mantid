@@ -18,8 +18,8 @@ namespace ISISReflectometry {
  * @param model :: a handle to a model for this presenter
  */
 OptionsDialogPresenter::OptionsDialogPresenter(
-    IOptionsDialogView *view, IMainWindowPresenter *mainPresenter)
-    : m_view(view), m_mainPresenter(mainPresenter),
+    IOptionsDialogView *view)
+    : m_view(view), m_mainPresenter(),
       m_model(OptionsDialogModel()){}
 
 /** Accept a main presenter
