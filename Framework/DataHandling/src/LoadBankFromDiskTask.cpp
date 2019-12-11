@@ -9,10 +9,15 @@
 #include "MantidDataHandling/DefaultEventLoader.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/ProcessBankData.h"
+#include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/Unit.h"
+#include "MantidTypes/Core/DateAndTime.h"
 #include <algorithm>
 
 #include "MantidNexus/NexusIOHelper.h"
+
+using namespace Mantid::Types::Core;
+using Mantid::Kernel::NexusDescriptor;
 
 namespace Mantid {
 namespace DataHandling {
@@ -60,7 +65,13 @@ void LoadBankFromDiskTask::loadPulseTimes(::NeXus::File &file) {
   }
   std::string thisStartTime;
   size_t thisNumPulses = 0;
-  file.getAttr("offset", thisStartTime);
+  if (file.hasAttr("offset"))
+    file.getAttr("offset", thisStartTime);
+  else {
+    auto epoch = DateAndTime(DateAndTime::UNIX_EPOCH);
+    thisStartTime = epoch.toISO8601String();
+  }
+
   if (!file.getInfo().dims.empty())
     thisNumPulses = file.getInfo().dims[0];
   file.closeData();
@@ -222,10 +233,12 @@ LoadBankFromDiskTask::loadEventId(::NeXus::File &file) {
     m_max_id =
         *(std::max_element(event_id.get(), event_id.get() + m_loadSize[0]));
 
-    if (m_min_id > static_cast<uint32_t>(m_loader.eventid_max)) {
-      // All the detector IDs in the bank are higher than the highest 'known'
-      // (from the IDF)
-      // ID. Setting this will abort the loading of the bank.
+    auto offset_min_id = m_min_id + m_loader.pixelID_to_wi_offset;
+    if (offset_min_id >=
+        static_cast<uint32_t>(m_loader.pixelID_to_wi_vector.size())) {
+      // All the detector IDs in the bank are higher than the highest
+      // 'known' (from the IDF) ID. Setting this will abort the loading of
+      // the bank.
       m_loadError = true;
     }
     // fixup the minimum pixel id in the case that it's lower than the lowest
@@ -277,8 +290,16 @@ std::unique_ptr<float[]> LoadBankFromDiskTask::loadTof(::NeXus::File &file) {
   // skipped.
   auto vec = NeXus::NeXusIOHelper::readNexusSlab<float>(file, key, m_loadStart,
                                                         m_loadSize);
-  file.getAttr("units", tof_unit);
-  file.closeData();
+  if (file.hasAttr("units")) {
+    file.getAttr("units", tof_unit);
+    file.closeData();
+  } else {
+    file.closeData();
+    file.openData("event_time_zero");
+    file.getAttr("units", tof_unit);
+    file.closeData();
+  }
+
   // Convert Tof to microseconds
   Kernel::Units::timeConversionVector(vec, tof_unit, "microseconds");
   std::copy(vec.begin(), vec.end(), event_time_of_flight.get());
@@ -355,7 +376,8 @@ void LoadBankFromDiskTask::run() {
     // Navigate into the file
     file.openGroup(m_loader.alg->m_top_entry_name, "NXentry");
     // Open the bankN_event group
-    file.openGroup(entry_name, entry_type);
+    if (NexusDescriptor::findAndOpenParentGroup(file, entry_type, entry_name))
+      file.openGroup(entry_name, entry_type);
 
     // Load the event_index field.
     event_index = this->loadEventIndex(file);

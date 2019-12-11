@@ -10,6 +10,8 @@ const uint32_t DateAndTime::EPOCH_DIFF = 631152000;
 /// The epoch for GPS times.
 const boost::posix_time::ptime
     DateAndTime::GPS_EPOCH(boost::gregorian::date(1990, 1, 1));
+const boost::posix_time::ptime
+    DateAndTime::UNIX_EPOCH(boost::gregorian::date(1970, 1, 1));
 
 /// Const of one second time duration
 const time_duration DateAndTime::ONE_SECOND =
