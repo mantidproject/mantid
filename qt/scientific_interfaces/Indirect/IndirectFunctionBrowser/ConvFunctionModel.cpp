@@ -627,6 +627,10 @@ std::string ConvFunctionModel::buildTeixeiraFunctionString() const {
   return "name=TeixeiraWaterSQE";
 }
 
+std::string ConvFunctionModel::buildStretchExpFTFunctionString() const {
+  return "name=StretchedExpFT";
+}
+
 std::string ConvFunctionModel::buildPeaksFunctionString() const {
   std::string functions;
   if (m_fitType == FitType::OneLorentzian) {
@@ -638,6 +642,8 @@ std::string ConvFunctionModel::buildPeaksFunctionString() const {
     functions.append(lorentzian);
   } else if (m_fitType == FitType::TeixeiraWater) {
     functions.append(buildTeixeiraFunctionString());
+  } else if (m_fitType == FitType::StretchedExpFT) {
+    functions.append(buildStretchExpFTFunctionString());
   }
   return functions;
 }

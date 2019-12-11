@@ -26,7 +26,12 @@ std::map<ParamID, QString> g_paramName{
     {ParamID::FLAT_BG_A0, "A0"},
     {ParamID::LINEAR_BG_A0, "A0"},
     {ParamID::LINEAR_BG_A1, "A1"},
-    {ParamID::DELTA_HEIGHT, "Height"}};
+    {ParamID::DELTA_HEIGHT, "Height"},
+    {ParamID::SE_HEIGHT, "Height"},
+    {ParamID::SE_TAU, "Tau"},
+    {ParamID::SE_BETA, "Beta"},
+    {ParamID::SE_CENTRE, "Centre"},
+};
 
 template <>
 std::map<FitType, TemplateSubTypeDescriptor>
@@ -45,7 +50,10 @@ std::map<FitType, TemplateSubTypeDescriptor>
          {"Teixeira Water",
           "TeixeiraWaterSQE",
           {ParamID::TW_HEIGHT, ParamID::TW_CENTRE}}},
-    };
+        {FitType::StretchedExpFT,
+         {"StretchedExpFT",
+          "StretchedExpFT",
+          {ParamID::SE_HEIGHT, ParamID::SE_CENTRE}}}};
 
 template <>
 std::map<BackgroundType, TemplateSubTypeDescriptor>

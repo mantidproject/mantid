@@ -22,7 +22,13 @@ namespace ConvTypes {
 
 using namespace Mantid::API;
 
-enum class FitType { None, OneLorentzian, TwoLorentzians, TeixeiraWater };
+enum class FitType {
+  None,
+  OneLorentzian,
+  TwoLorentzians,
+  TeixeiraWater,
+  StretchedExpFT
+};
 enum class BackgroundType { None, Flat, Linear };
 
 enum class ParamID {
@@ -41,6 +47,10 @@ enum class ParamID {
   TW_TAU,
   TW_CENTRE,
   DELTA_HEIGHT,
+  SE_HEIGHT,
+  SE_TAU,
+  SE_BETA,
+  SE_CENTRE,
   FLAT_BG_A0,
   LINEAR_BG_A0,
   LINEAR_BG_A1,
