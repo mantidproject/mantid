@@ -7,11 +7,11 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-from mantid.simpleapi import CalculateSelfScatteringCorrection, Load
+from mantid.simpleapi import TotScatCalculateSelfScattering, Load
 from isis_powder import SampleDetails
 
 
-class CalculateSelfScatteringCorrectionTest(unittest.TestCase):
+class TotScatCalculateSelfScatteringTest(unittest.TestCase):
 
     def setUp(self):
         sample_details = SampleDetails(height=4.0, radius=0.2985, center=[0, 0, 0], shape='cylinder')
@@ -33,12 +33,12 @@ class CalculateSelfScatteringCorrectionTest(unittest.TestCase):
 
         self.cal_file_path = "polaris_grouping_file.cal"
 
-    def test_CalculateSelfScatteringCorrection_executes(self):
+    def test_TotScatCalculateSelfScattering_executes(self):
         raw_ws = Load(Filename='POLARIS98533.nxs')
-        correction_ws = CalculateSelfScatteringCorrection(RawWorkspace=raw_ws,
-                                                          CalFileName=self.cal_file_path,
-                                                          SampleGeometry=self.geometry,
-                                                          SampleMaterial=self.material)
+        correction_ws = TotScatCalculateSelfScattering(RawWorkspace=raw_ws,
+                                                       CalFileName=self.cal_file_path,
+                                                       SampleGeometry=self.geometry,
+                                                       SampleMaterial=self.material)
         self.assertEqual(correction_ws.getNumberHistograms(), 5)
 
 

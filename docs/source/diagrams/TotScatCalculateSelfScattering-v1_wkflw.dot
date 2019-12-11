@@ -1,11 +1,11 @@
-digraph CalculateSelfScatteringCorrection {
-label = "CalculateSelfScatteringCorrection Workflow Diagram"
+digraph TotScatCalculateSelfScattering {
+label = "TotScatCalculateSelfScattering Workflow Diagram"
 $global_style
 
 subgraph params {
   $param_style
-  inputWorkspace    [label="RawWorkspace"]
-  outputWorkspace   [label="CorrectionsWorkspace"]
+  inputWorkspace    [label="InputWorkspace"]
+  outputWorkspace   [label="OutputWorkspace"]
   calFileName       [label="CalFileName"]
   sampleGeometry    [label="SampleGeometry"]
   sampleMaterial    [label="SampleMaterial"]

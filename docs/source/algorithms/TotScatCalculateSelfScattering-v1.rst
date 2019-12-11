@@ -28,4 +28,4 @@ sub-algorithms as listed below.
 Workflow
 ########
 
-.. diagram:: CalculateSelfScatteringCorrection-v1_wkflw.dot
+.. diagram:: TotScatCalculateSelfScattering-v1_wkflw.dot

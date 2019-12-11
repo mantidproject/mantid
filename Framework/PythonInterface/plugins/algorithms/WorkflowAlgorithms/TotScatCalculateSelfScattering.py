@@ -9,19 +9,15 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import (CalculatePlaczekSelfScattering, ConvertToDistribution, ConvertUnits, CreateWorkspace,
                               DeleteWorkspace, DiffractionFocussing, Divide, ExtractSpectra, FitIncidentSpectrum,
                               LoadCalFile, SetSample)
-from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, WorkspaceProperty)
+from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, FileProperty, WorkspaceProperty)
 from mantid.kernel import Direction
 import numpy as np
 
 
-class CalculateSelfScatteringCorrection(DataProcessorAlgorithm):
-
-    def __init__(self):
-        """Initialize an instance of the algorithm."""
-        DataProcessorAlgorithm.__init__(self)
+class TotScatCalculateSelfScattering(DataProcessorAlgorithm):
 
     def name(self):
-        return 'CalculateSelfScatteringCorrection'
+        return 'TotScatCalculateSelfScattering  CalculateSelfScatteringCorrection'
 
     def category(self):
         return "Workflow\\Diffraction"
@@ -39,16 +35,18 @@ class CalculateSelfScatteringCorrection(DataProcessorAlgorithm):
         return 1
 
     def PyInit(self):
-        self.declareProperty(WorkspaceProperty('RawWorkspace', '', direction=Direction.Input),
-                             doc='Raw workspace')
-        self.declareProperty(WorkspaceProperty('CorrectionWorkspace', '', direction=Direction.Output),
-                             doc='Focused corrected workspace')
-        self.declareProperty(name='CalFileName', defaultValue='',
-                             doc='Chemical formula for the sample material')
+        self.declareProperty(WorkspaceProperty('InputWorkspace', '', direction=Direction.Input),
+                             doc='Raw workspace.')
+        self.declareProperty(WorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
+                             doc='Focused corrected workspace.')
+        self.declareProperty(FileProperty(name="CalFileName", defaultValue="",
+                                          direction=Direction.Input,
+                                          action=FileAction.Load),
+                             doc='File path for the instrument calibration file.')
         self.declareProperty(name='SampleGeometry', defaultValue={},
-                             doc='Geometry of the sample material')
+                             doc='Geometry of the sample material.')
         self.declareProperty(name='SampleMaterial', defaultValue={},
-                             doc='Chemical formula for the sample material')
+                             doc='Chemical formula for the sample material.')
 
     def PyExec(self):
         raw_ws = self.getProperty('RawWorkspace').value
@@ -106,8 +104,8 @@ class CalculateSelfScatteringCorrection(DataProcessorAlgorithm):
         DeleteWorkspace(fit_spectra)
         DeleteWorkspace(monitor)
         DeleteWorkspace(raw_ws)
-        self.setProperty('CorrectionWorkspace', self_scattering_correction)
+        self.setProperty('OutputWorkspace', self_scattering_correction)
 
 
 # Register algorithm with Mantid
-AlgorithmFactory.subscribe(CalculateSelfScatteringCorrection)
+AlgorithmFactory.subscribe(TotScatCalculateSelfScattering)
