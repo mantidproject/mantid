@@ -16,6 +16,7 @@
 
 #include <cstring>
 #include <string>
+#include <algorithm>
 
 namespace Mantid {
 namespace Kernel {
