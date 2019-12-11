@@ -188,6 +188,8 @@ class MantidAxes(Axes):
         self.tracked_workspaces = dict()
         self.creation_args = []
         self.interactive_markers = []
+        # flag to indicate if a function has been set to replace data
+        self.data_replaced = False
 
     def add_artist_correctly(self, artist):
         """
@@ -321,9 +323,10 @@ class MantidAxes(Axes):
         name = workspace.name()
         if name:
             if data_replace_cb is None:
-
-                def data_replace_cb(_, __):
+                def data_replace_cb(*args):
                     logger.warning("Updating data on this plot type is not yet supported")
+            else:
+                self.data_replaced = True
 
             artist_info = self.tracked_workspaces.setdefault(name, [])
 
@@ -752,7 +755,7 @@ class MantidAxes(Axes):
 
         For keywords related to workspaces, see :func:`plotfunctions.pcolor`
         """
-        return self._pcolor_func('pcolor', *args, **kwargs)
+        return self._plot_2d_func('pcolor', *args, **kwargs)
 
     @plot_decorator
     def pcolorfast(self, *args, **kwargs):
@@ -774,7 +777,7 @@ class MantidAxes(Axes):
 
         For keywords related to workspaces, see :func:`plotfunctions.pcolorfast`
         """
-        return self._pcolor_func('pcolorfast', *args, **kwargs)
+        return self._plot_2d_func('pcolorfast', *args, **kwargs)
 
     @plot_decorator
     def pcolormesh(self, *args, **kwargs):
@@ -796,7 +799,7 @@ class MantidAxes(Axes):
 
         For keywords related to workspaces, see :func:`plotfunctions.pcolormesh`
         """
-        return self._pcolor_func('pcolormesh', *args, **kwargs)
+        return self._plot_2d_func('pcolormesh', *args, **kwargs)
 
     @plot_decorator
     def imshow(self, *args, **kwargs):
@@ -818,20 +821,9 @@ class MantidAxes(Axes):
 
         For keywords related to workspaces, see :func:`plotfunctions.imshow`
         """
-        if helperfunctions.validate_args(*args):
-            logger.debug('using plotfunctions')
+        return self._plot_2d_func('imshow', *args, **kwargs)
 
-            def _update_data(artists, workspace):
-                return self._redraw_colorplot(plotfunctions.imshow, artists, workspace, **kwargs)
-
-            workspace = args[0]
-            return self.track_workspace_artist(workspace,
-                                               plotfunctions.imshow(self, *args,
-                                                                    **kwargs), _update_data)
-        else:
-            return Axes.imshow(self, *args, **kwargs)
-
-    def _pcolor_func(self, name, *args, **kwargs):
+    def _plot_2d_func(self, name, *args, **kwargs):
         """
         Implementation of pcolor-style methods
         :param name: The name of the method
@@ -850,10 +842,12 @@ class MantidAxes(Axes):
                 return self._redraw_colorplot(plotfunctions_func, artists, workspace, **kwargs)
 
             workspace = args[0]
+            normalize_by_bin_width, _ = get_normalize_by_bin_width(workspace, self, **kwargs)
+            is_normalized = normalize_by_bin_width or workspace.isDistribution()
             # We return the last mesh so the return type is a single artist like the standard Axes
             artists = self.track_workspace_artist(workspace,
                                                   plotfunctions_func(self, *args, **kwargs),
-                                                  _update_data)
+                                                  _update_data, is_normalized=is_normalized)
             try:
                 return artists[-1]
             except TypeError:
@@ -863,20 +857,39 @@ class MantidAxes(Axes):
 
     def _redraw_colorplot(self, colorfunc, artists_orig, workspace, **kwargs):
         """
-        Redraw a pcolor* or imshow type plot bsaed on a new workspace
+        Redraw a pcolor*, imshow or contour type plot based on a new workspace
         :param colorfunc: The Axes function to use to draw the new artist
         :param artists_orig: A reference to an iterable of existing artists
         :param workspace: A reference to the workspace object
         :param kwargs: Any kwargs passed to the original call
         """
         for artist_orig in artists_orig:
-            artist_orig.remove()
+            if hasattr(artist_orig, 'remove'):
+                artist_orig.remove()
+            else: # for contour plots remove the collections
+                for col in artist_orig.collections:
+                    col.remove()
             if hasattr(artist_orig, 'colorbar_cid'):
                 artist_orig.callbacksSM.disconnect(artist_orig.colorbar_cid)
-        artists_new = colorfunc(self, workspace, **kwargs)
+        if artist_orig.norm.vmin == 0:  # avoid errors with log 0
+            artist_orig.norm.vmin += 1e-6
+        artists_new = colorfunc(self, workspace, norm=artist_orig.norm,  **kwargs)
+
+        artists_new.set_cmap(artist_orig.cmap)
+        if hasattr(artist_orig, 'interpolation'):
+            artists_new.set_interpolation(artist_orig.get_interpolation())
+
+        artists_new.autoscale()
+        artists_new.set_norm(
+            type(artist_orig.norm)(vmin=artists_new.norm.vmin, vmax=artists_new.norm.vmax))
+
         if not isinstance(artists_new, Iterable):
             artists_new = [artists_new]
-        plotfunctions.update_colorplot_datalimits(self, artists_new)
+
+        try:
+            plotfunctions.update_colorplot_datalimits(self, artists_new)
+        except ValueError:
+            pass
         # the type of plot can mutate back to single image from a multi collection
         if len(artists_orig) == len(artists_new):
             for artist_orig, artist_new in zip(artists_orig, artists_new):
@@ -911,13 +924,7 @@ class MantidAxes(Axes):
 
         For keywords related to workspaces, see :func:`plotfunctions.contour`
         """
-        if helperfunctions.validate_args(*args):
-            logger.debug('using plotfunctions')
-            workspace = args[0]
-            return self.track_workspace_artist(workspace,
-                                               plotfunctions.contour(self, *args, **kwargs))
-        else:
-            return Axes.contour(self, *args, **kwargs)
+        return self._plot_2d_func('contour', *args, **kwargs)
 
     @plot_decorator
     def contourf(self, *args, **kwargs):
@@ -939,13 +946,7 @@ class MantidAxes(Axes):
 
         For keywords related to workspaces, see :func:`plotfunctions.contourf`
         """
-        if helperfunctions.validate_args(*args):
-            logger.debug('using plotfunctions')
-            workspace = args[0]
-            return self.track_workspace_artist(workspace,
-                                               plotfunctions.contourf(self, *args, **kwargs))
-        else:
-            return Axes.contourf(self, *args, **kwargs)
+        return self._plot_2d_func('contourf', *args, **kwargs)
 
     @plot_decorator
     def tripcolor(self, *args, **kwargs):
@@ -967,13 +968,7 @@ class MantidAxes(Axes):
 
         For keywords related to workspaces, see :func:`plotfunctions.tripcolor`
         """
-        if helperfunctions.validate_args(*args):
-            logger.debug('using plotfunctions')
-            workspace = args[0]
-            return self.track_workspace_artist(workspace,
-                                               plotfunctions.tripcolor(self, *args, **kwargs))
-        else:
-            return Axes.tripcolor(self, *args, **kwargs)
+        return self._plot_2d_func('tripcolor', *args, **kwargs)
 
     @plot_decorator
     def tricontour(self, *args, **kwargs):
@@ -995,13 +990,7 @@ class MantidAxes(Axes):
 
         For keywords related to workspaces, see :func:`plotfunctions.tricontour`
         """
-        if helperfunctions.validate_args(*args):
-            logger.debug('using plotfunctions')
-            workspace = args[0]
-            return self.track_workspace_artist(workspace,
-                                               plotfunctions.tricontour(self, *args, **kwargs))
-        else:
-            return Axes.tricontour(self, *args, **kwargs)
+        return self._plot_2d_func('tricontour', *args, **kwargs)
 
     @plot_decorator
     def tricontourf(self, *args, **kwargs):
@@ -1023,13 +1012,7 @@ class MantidAxes(Axes):
 
         For keywords related to workspaces, see :func:`plotfunctions.tricontourf`
         """
-        if helperfunctions.validate_args(*args):
-            logger.debug('using plotfunctions')
-            workspace = args[0]
-            return self.track_workspace_artist(workspace,
-                                               plotfunctions.tricontourf(self, *args, **kwargs))
-        else:
-            return Axes.tricontourf(self, *args, **kwargs)
+        return self._plot_2d_func('tricontourf', *args, **kwargs)
 
     # ------------------ Private api --------------------------------------------------------
 

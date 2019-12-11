@@ -19,6 +19,8 @@ from matplotlib.container import ErrorbarContainer
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QCursor
 from qtpy.QtWidgets import QActionGroup, QMenu, QApplication
+from matplotlib.colors import LogNorm, Normalize
+from matplotlib.collections import Collection
 
 # third party imports
 from mantid.api import AnalysisDataService as ads
@@ -38,7 +40,8 @@ from workbench.plotting.toolbar import ToolbarStateManager
 AXES_SCALE_MENU_OPTS = OrderedDict(
     [("Lin x/Lin y", ("linear", "linear")), ("Log x/Log y", ("log", "log")),
      ("Lin x/Log y", ("linear", "log")), ("Log x/Lin y", ("log", "linear"))])
-
+COLORBAR_SCALE_MENU_OPTS = OrderedDict(
+    [("Linear", Normalize), ("Log", LogNorm)])
 VALID_LINE_STYLE = ['solid', 'dashed', 'dotted', 'dashdot']
 VALID_COLORS = {
     'blue': '#1f77b4',
@@ -283,21 +286,26 @@ class FigureInteraction(object):
             return
 
         fig_type = figure_type(self.canvas.figure)
-        if fig_type == FigureType.Empty or fig_type == FigureType.Image:
-            # Fitting or changing scale types does not make sense in
-            # these cases
+        if fig_type == FigureType.Empty:
+            # Fitting or changing scale types does not make sense in this case
             return
 
         menu = QMenu()
 
-        if self.fit_browser.tool is not None:
-            self.fit_browser.add_to_menu(menu)
-            menu.addSeparator()
-        self._add_axes_scale_menu(menu, event.inaxes)
-        if isinstance(event.inaxes, MantidAxes):
-            self._add_normalization_option_menu(menu, event.inaxes)
-        self.add_error_bars_menu(menu, event.inaxes)
-        self._add_marker_option_menu(menu, event)
+        if fig_type == FigureType.Image:
+            if isinstance(event.inaxes, MantidAxes):
+                self._add_axes_scale_menu(menu, event.inaxes)
+                self._add_normalization_option_menu(menu, event.inaxes)
+                self._add_colorbar_axes_scale_menu(menu, event.inaxes)
+        else:
+            if self.fit_browser.tool is not None:
+                self.fit_browser.add_to_menu(menu)
+                menu.addSeparator()
+            self._add_axes_scale_menu(menu, event.inaxes)
+            if isinstance(event.inaxes, MantidAxes):
+                self._add_normalization_option_menu(menu, event.inaxes)
+            self.add_error_bars_menu(menu, event.inaxes)
+            self._add_marker_option_menu(menu, event)
 
         menu.exec_(QCursor.pos())
 
@@ -338,6 +346,19 @@ class FigureInteraction(object):
             none_action.setChecked(True)
 
         menu.addMenu(norm_menu)
+
+    def _add_colorbar_axes_scale_menu(self, menu, ax):
+        """Add the Axes scale options menu to the given menu"""
+        axes_menu = QMenu("Color bar", menu)
+        axes_actions = QActionGroup(axes_menu)
+        images = ax.get_images() + [col for col in ax.collections if isinstance(col, Collection)]
+        for label, scale_type in iteritems(COLORBAR_SCALE_MENU_OPTS):
+            action = axes_menu.addAction(label, partial(self._change_colorbar_axes, scale_type))
+            if type(images[0].norm) == scale_type:
+                action.setCheckable(True)
+                action.setChecked(True)
+            axes_actions.addAction(action)
+        menu.addMenu(axes_menu)
 
     def add_error_bars_menu(self, menu, ax):
         """
@@ -618,7 +639,7 @@ class FigureInteraction(object):
                 arg_set_copy = copy(arg_set)
                 [
                     arg_set_copy.pop(key)
-                    for key in ['function', 'workspaces', 'autoscale_on_update']
+                    for key in ['function', 'workspaces', 'autoscale_on_update', 'norm']
                     if key in arg_set_copy.keys()
                 ]
                 if 'specNum' not in arg_set:
@@ -628,25 +649,30 @@ class FigureInteraction(object):
                     else:
                         raise RuntimeError("No spectrum number associated with plot of "
                                            "workspace '{}'".format(workspace.name()))
+                # 2D plots have no spec number so remove it
+                if figure_type(self.canvas.figure) == FigureType.Image:
+                    arg_set_copy.pop('specNum')
                 for ws_artist in ax.tracked_workspaces[workspace.name()]:
                     if ws_artist.spec_num == arg_set.get('specNum'):
                         ws_artist.is_normalized = not is_normalized
                         ws_artist.replace_data(workspace, arg_set_copy)
-        ax.relim()
+        if ax.lines:  # Relim causes issues with colour plots, which have no lines.
+            ax.relim()
         ax.autoscale()
         self.canvas.draw()
 
     def _can_toggle_normalization(self, ax):
         """
-        Return True if no plotted workspaces are distributions and all curves
-        on the figure are either distributions or non-distributions. Return
+        Return True if no plotted workspaces are distributions, all curves
+        on the figure are either distributions or non-distributions,
+        and the data_replace_cb method was set when plotting . Return
         False otherwise.
         :param ax: A MantidAxes object
         :return: bool
         """
         plotted_normalized = []
         for workspace_name, artists in ax.tracked_workspaces.items():
-            if not ads.retrieve(workspace_name).isDistribution():
+            if not ads.retrieve(workspace_name).isDistribution() and ax.data_replaced:
                 plotted_normalized += [a.is_normalized for a in artists]
             else:
                 return False
@@ -668,4 +694,14 @@ class FigureInteraction(object):
         ax.set_xscale(scale_types[0])
         ax.set_yscale(scale_types[1])
 
+        self.canvas.draw_idle()
+
+    def _change_colorbar_axes(self, scale_type):
+        for ax in self.canvas.figure.get_axes():
+            images = ax.get_images() + [col for col in ax.collections if isinstance(col, Collection)]
+            for image in images:
+                image.set_norm(scale_type())
+                if image.colorbar:
+                    image.colorbar.remove()
+                    self.canvas.figure.colorbar(image)
         self.canvas.draw_idle()
