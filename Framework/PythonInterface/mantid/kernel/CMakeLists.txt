@@ -131,10 +131,6 @@ add_library(PythonKernelModule
             ${PYTHON_INSTALL_FILES})
 set_python_properties(PythonKernelModule _kernel)
 
-# GCC 8 onwards needs to disable functional casting at the Python interface
-target_compile_options( PythonKernelModule PRIVATE 
-  $<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,8.0>>:-Wno-cast-function-type> )
-
 target_include_directories(PythonKernelModule PUBLIC inc)
 
 # Add the required dependencies
