@@ -414,12 +414,12 @@ void TimeSeriesProperty<TYPE>::filterByTimes(
  * property according to number of distinct splitters' indexes, such as 0 and 1
  *
  * NOTE: If the input TSP has a single value, it is assumed to be a constant
- *  and so is not split, but simply copied to all outputs.
+ *  and so is not split, but simply copied to all output.
  *
  * @param splitter :: a TimeSplitterType object containing the list of intervals
  *                     and destinations.
- * @param outputs  :: A vector of output TimeSeriesProperty pointers of the same
- *                    type.
+ * @param outputs  :: A vector of output TimeSeriesProperty
+ * pointers of the same type.
  * @param isPeriodic :: whether the log (this TSP) is periodic. For example
  *                    proton-charge is periodic log.
  */
@@ -541,209 +541,136 @@ void TimeSeriesProperty<TYPE>::splitByTime(
 }
 
 /// Split this TimeSeriresProperty by a vector of time with N entries,
-/// and by the target workspace index defined by target_vec
+/// and by the wsIndex workspace index defined by inputWorkspaceIndicies
 /// Requirements:
-/// vector outputs must be defined before this method is called
+/// vector output must be defined before this method is called
 template <typename TYPE>
 void TimeSeriesProperty<TYPE>::splitByTimeVector(
-    std::vector<DateAndTime> &splitter_time_vec, std::vector<int> &target_vec,
-    std::vector<TimeSeriesProperty *> outputs) {
-
-  // check target vector to make it a set
-  std::set<int> target_set;
-  for (auto target : target_vec)
-    target_set.insert(target);
+    const std::vector<DateAndTime> &timeToFilterTo,
+    const std::vector<int> &inputWorkspaceIndicies,
+    const std::vector<TimeSeriesProperty *> &output) {
 
   // check inputs
-  if (splitter_time_vec.size() != target_vec.size() + 1) {
-    std::stringstream errss;
-    errss << "Try to split TSP " << this->m_name
-          << ": Input time vector's size " << splitter_time_vec.size()
-          << " does not match (one more larger than) taget "
-             "workspace index vector's size "
-          << target_vec.size() << "\n";
-    throw std::runtime_error(errss.str());
+  if (timeToFilterTo.size() != inputWorkspaceIndicies.size() + 1) {
+    throw std::runtime_error(
+        "Input time vector's size does not match(one more larger than) target "
+        "workspace index vector's size inputWorkspaceIndicies.size() \n");
   }
+
   // return if the output vector TimeSeriesProperties is not defined
-  if (outputs.empty())
+  if (output.empty())
     return;
 
-  // sort if necessary
   sortIfNecessary();
 
   // work on m_values, m_size, and m_time
-  std::vector<Types::Core::DateAndTime> tsp_time_vec = this->timesAsVector();
-
-  // go over both filter time vector and time series property time vector
+  auto currentTimes = timesAsVector();
   size_t index_splitter = 0;
-  size_t index_tsp_time = 0;
-
-  // tsp_time is start time of time series property
-  DateAndTime tsp_time = tsp_time_vec[index_tsp_time];
-  DateAndTime split_start_time = splitter_time_vec[index_splitter];
-  DateAndTime split_stop_time = splitter_time_vec[index_splitter + 1];
 
   // move splitter index such that the first entry of TSP is before the stop
   // time of a splitter
-  bool continue_search = true;
-  bool no_entry_in_range = false;
-
-  std::vector<DateAndTime>::iterator splitter_iter;
-  splitter_iter = std::lower_bound(splitter_time_vec.begin(),
-                                   splitter_time_vec.end(), tsp_time);
-  if (splitter_iter == splitter_time_vec.begin()) {
+  DateAndTime firstPropTime = currentTimes[0];
+  auto firstFilterTime = std::lower_bound(timeToFilterTo.begin(),
+                                          timeToFilterTo.end(), firstPropTime);
+  if (firstFilterTime == timeToFilterTo.end()) {
     // do nothing as the first TimeSeriesProperty entry's time is before any
     // splitters
-    ;
-  } else if (splitter_iter == splitter_time_vec.end()) {
-    // already search to the last splitter which is still earlier than first TSP
-    // entry
-    no_entry_in_range = true;
-  } else {
+    return;
+  } else if (firstFilterTime != timeToFilterTo.begin()) {
     // calculate the splitter's index (now we check the stop time)
-    index_splitter = splitter_iter - splitter_time_vec.begin() - 1;
-    split_start_time = splitter_time_vec[index_splitter];
-    split_stop_time = splitter_time_vec[index_splitter + 1];
+    index_splitter = firstFilterTime - timeToFilterTo.begin() - 1;
   }
+
+  DateAndTime filterStartTime = timeToFilterTo[index_splitter];
+  DateAndTime filterEndTime = timeToFilterTo[index_splitter + 1];
 
   // move along the entries to find the entry inside the current splitter
-  bool first_splitter_after_last_entry(false);
-  if (!no_entry_in_range) {
-    std::vector<DateAndTime>::iterator tsp_time_iter;
-    tsp_time_iter = std::lower_bound(tsp_time_vec.begin(), tsp_time_vec.end(),
-                                     split_start_time);
-    if (tsp_time_iter == tsp_time_vec.end()) {
-      // the first splitter's start time is LATER than the last TSP entry, then
-      // there won't be any
-      // TSP entry to be split into any target splitter.
-      no_entry_in_range = true;
-      first_splitter_after_last_entry = true;
-    } else {
-      // first splitter start time is between tsp_time_iter and the one before
-      // it.
-      // so the index for tsp_time_iter is the first TSP entry in the splitter
-      index_tsp_time = tsp_time_iter - tsp_time_vec.begin();
-      tsp_time = *tsp_time_iter;
-    }
-  } else {
-    // no entry in range is true, which corresponding to the previous case
-    // "already search to the last splitter which is still earlier than first
-    // TSP
-    // entry"
-    ;
-  }
-
-  if (no_entry_in_range && first_splitter_after_last_entry) {
-    // initialize all the splitters with the last value
+  auto firstEntryInSplitter = std::lower_bound(
+      currentTimes.begin(), currentTimes.end(), filterStartTime);
+  if (firstEntryInSplitter == currentTimes.end()) {
+    // the first splitter's start time is LATER than the last TSP entry, then
+    // there won't be any
+    // TSP entry to be split into any wsIndex splitter.
     DateAndTime last_entry_time = this->lastTime();
     TYPE last_entry_value = this->lastValue();
-    for (size_t i = 0; i < outputs.size(); ++i)
-      outputs[i]->addValue(last_entry_time, last_entry_value);
+    for (auto &i : output) {
+      i->addValue(last_entry_time, last_entry_value);
+    }
+    return;
   }
 
-  // now it is the time to put TSP's entries to corresponding
-  continue_search = !no_entry_in_range;
-  size_t outer_while_counter = 0;
-  bool partial_target_filled(false);
-  while (continue_search) {
-    // get next target
-    int target = target_vec[index_splitter];
+  // first splitter start time is between firstEntryInSplitter and the one
+  // before it. so the index for firstEntryInSplitter is the first TSP entry
+  // in the splitter
+  size_t timeIndex = firstEntryInSplitter - currentTimes.begin();
+  firstPropTime = *firstEntryInSplitter;
+
+  bool destinationPartiallyFilled(false);
+  for (; index_splitter != timeToFilterTo.size() - 1; index_splitter++) {
+    int wsIndex = inputWorkspaceIndicies[index_splitter];
+
+    filterStartTime = timeToFilterTo[index_splitter];
+    filterEndTime = timeToFilterTo[index_splitter + 1];
 
     // get the first entry index (overlap)
-    if (index_tsp_time > 0)
-      --index_tsp_time;
+    if (timeIndex > 0)
+      --timeIndex;
 
-    // add the continous entries to same target time series property
-    const size_t tspTimeVecSize = tsp_time_vec.size();
-    bool continue_add = true;
-    while (continue_add) {
-      size_t inner_while_counter = 0;
-      if (index_tsp_time == tspTimeVecSize) {
-        // last entry. quit all loops
-        continue_add = false;
-        continue_search = false;
-        partial_target_filled = true;
+    // add the continuous entries to same wsIndex time series property
+    const size_t numEntries = currentTimes.size();
+
+    // Put TSP's entries into the corresponding ws index
+    for (; timeIndex < numEntries; timeIndex++) {
+      if (output[wsIndex]->size() == 0 ||
+          output[wsIndex]->lastTime() < currentTimes[timeIndex]) {
+        // avoid to add duplicate entry
+        output[wsIndex]->addValue(m_values[timeIndex].time(),
+                                  m_values[timeIndex].value());
+      }
+
+      const size_t nextEntryIndex = timeIndex + 1;
+      if (nextEntryIndex < numEntries &&
+          currentTimes[nextEntryIndex] > filterEndTime) {
+        // We are beyond the final filter time
+        if (output[wsIndex]->lastTime() < m_values[nextEntryIndex].time()) {
+          // avoid the duplicate cases occurred in fast frequency issue
+          output[wsIndex]->addValue(m_values[nextEntryIndex].time(),
+                                    m_values[nextEntryIndex].value());
+        }
+        ++timeIndex;
         break;
       }
+    } // End of adding properties to current ws index
 
-      // add current entry
-      if (outputs[target]->size() == 0 ||
-          outputs[target]->lastTime() < tsp_time_vec[index_tsp_time]) {
-        // avoid to add duplicate entry
-        outputs[target]->addValue(m_values[index_tsp_time].time(),
-                                  m_values[index_tsp_time].value());
-      }
-
-      const size_t nextTspIndex = index_tsp_time + 1;
-      if (nextTspIndex < tspTimeVecSize) {
-        if (tsp_time_vec[nextTspIndex] > split_stop_time) {
-          // next entry is out of this splitter: add the next one and quit
-          if (outputs[target]->lastTime() < m_values[nextTspIndex].time()) {
-            // avoid the duplicate cases occurred in fast frequency issue
-            outputs[target]->addValue(m_values[nextTspIndex].time(),
-                                      m_values[nextTspIndex].value());
-          }
-          // FIXME - in future, need to find out WHETHER there is way to
-          // skip the
-          // rest without going through the whole sequence
-          continue_add = false;
-        }
-      }
-
-      // advance to next entry
-      ++index_tsp_time;
-
-      ++inner_while_counter;
-    } // END-WHILE continue add
-
-    // make splitters to advance to next
-    ++index_splitter;
-    if (index_splitter == splitter_time_vec.size() - 1) {
-      // already last splitters
-      continue_search = false;
-    } else {
-      split_start_time = split_stop_time;
-      split_stop_time = splitter_time_vec[index_splitter + 1];
+    if (timeIndex == numEntries) {
+      destinationPartiallyFilled = true;
     }
-
-    ++outer_while_counter;
-  } // END-OF-WHILE
+  }
 
   // Still in 'continue search'-while-loop.  But the TSP runs over before
   // splitters.
   // Therefore, the rest of the chopper must have one more entry added!
-  if (partial_target_filled) {
-    // fill the target
-    std::set<int> fill_target_set;
+  if (destinationPartiallyFilled) {
     for (size_t isplitter = index_splitter;
-         isplitter < splitter_time_vec.size() - 1; ++isplitter) {
-      int target_i = target_vec[isplitter];
-      if (fill_target_set.find(target_i) == fill_target_set.end()) {
-        if (outputs[target_i]->size() == 0 ||
-            outputs[target_i]->lastTime() != m_values.back().time())
-          outputs[target_i]->addValue(m_values.back().time(),
-                                      m_values.back().value());
-        fill_target_set.insert(target_i);
-        // quit loop if it goes over all the targets
-        if (fill_target_set.size() == target_set.size())
-          break;
-      }
+         isplitter < timeToFilterTo.size() - 1; ++isplitter) {
+
+      const size_t targetWsIndex = inputWorkspaceIndicies[isplitter];
+      if (output[targetWsIndex]->size() == 0 ||
+          output[targetWsIndex]->lastTime() != m_values.back().time())
+        output[targetWsIndex]->addValue(m_values.back().time(),
+                                        m_values.back().value());
     }
   }
 
   // Add a debugging check such that there won't be any time entry with zero log
-  for (size_t i = 0; i < outputs.size(); ++i) {
-    if (outputs[i]->size() == 0) {
+  for (size_t i = 0; i < output.size(); ++i) {
+    if (output[i]->size() == 0) {
       std::stringstream errss;
-      errss << i << "-th split-out term (out of " << outputs.size()
-            << " total output TSP) of '" << m_name << "'' has "
-            << outputs[i]->size() << " size, whose first entry is at "
+      errss << "entry " << m_name << " has 0 size, whose first entry is at "
             << this->firstTime().toSimpleString();
-      g_log.debug(errss.str());
+      g_log.warning(errss.str());
     }
   }
-
-  return;
 }
 
 // The makeFilterByValue & expandFilterToRange methods generate a bunch of
