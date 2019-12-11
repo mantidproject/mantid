@@ -28,7 +28,7 @@ void NotificationService::showMessage(const QString &title,
       try {
         windowIcon = QIcon(":/images/MantidIcon.ico");
       } catch (std::exception) {
-				// if we cannot use the embedded icon, use a blank one
+        // if we cannot use the embedded icon, use a blank one
         windowIcon = QIcon(QPixmap(32, 32));
       }
     }
@@ -46,11 +46,11 @@ bool NotificationService::isEnabled() {
   bool retVal = false;
   try {
     retVal = Mantid::Kernel::ConfigService::Instance()
-      .getValue<bool>(NOTIFICATIONSENABLEDKEY)
-      .get_value_or(true);
+                 .getValue<bool>(NOTIFICATIONSENABLEDKEY)
+                 .get_value_or(true);
   } catch (Mantid::Kernel::Exception::FileError) {
     // The Config Service could not find the properties file
-	// Disable notifications
+    // Disable notifications
     retVal = false;
   } catch (Poco::ExistsException) {
     // The Config Service could not find the properties file
