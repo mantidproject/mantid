@@ -360,7 +360,34 @@ void PredictFractionalPeaks::init() {
                             std::move(includeInRangeEqOne),
                             std::move(reflConditionNotEmpty), Kernel::OR));
   }
-
+  // group offset/modulations options together
+  for (const auto &name : {PropertyNames::HOFFSET, PropertyNames::KOFFSET,
+                           PropertyNames::LOFFSET}) {
+    setPropertyGroup(name, "Separate Offsets");
+  }
+  for (const auto &name :
+       {ModulationProperties::ModVector1, ModulationProperties::ModVector2,
+        ModulationProperties::ModVector3, ModulationProperties::MaxOrder,
+        ModulationProperties::CrossTerms}) {
+    setPropertyGroup(name, "Modulation Vectors");
+  }
+  // enable/disable offsets & modulation vectors appropriately
+  for (const auto &offsetName : {PropertyNames::HOFFSET, PropertyNames::KOFFSET,
+                                 PropertyNames::LOFFSET}) {
+    EnabledWhenProperty modVectorOneIsDefault{ModulationProperties::ModVector1,
+                                              Kernel::IS_DEFAULT};
+    EnabledWhenProperty modVectorTwoIsDefault{ModulationProperties::ModVector2,
+                                              Kernel::IS_DEFAULT};
+    EnabledWhenProperty modVectorThreeIsDefault{
+        ModulationProperties::ModVector3, Kernel::IS_DEFAULT};
+    EnabledWhenProperty modVectorOneAndTwoIsDefault{
+        std::move(modVectorOneIsDefault), std::move(modVectorTwoIsDefault),
+        Kernel::AND};
+    setPropertySettings(offsetName,
+                        std::make_unique<Kernel::EnabledWhenProperty>(
+                            std::move(modVectorOneAndTwoIsDefault),
+                            std::move(modVectorThreeIsDefault), Kernel::AND));
+  }
   // Outputs
   declareProperty(
       std::make_unique<WorkspaceProperty<PeaksWorkspace_sptr::element_type>>(
