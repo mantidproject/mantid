@@ -4,13 +4,13 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_OPTIONSDIALOG_H
-#define MANTID_ISISREFLECTOMETRY_OPTIONSDIALOG_H
+#ifndef MANTID_ISISREFLECTOMETRY_QTOPTIONSDIALOGVIEW_H
+#define MANTID_ISISREFLECTOMETRY_QTOPTIONSDIALOGVIEW_H
 
-#include "IOptionsDialog.h"
+#include "IOptionsDialogView.h"
 
 #include "Common/DllConfig.h"
-#include "ui_OptionsDialog.h"
+#include "ui_QtOptionsDialogView.h"
 #include <map>
 #include <QDialog>
 #include <QVariant>
@@ -22,12 +22,12 @@ namespace ISISReflectometry {
 /** OptionsDialog : Provides a dialog for setting options.
  */
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL OptionsDialog : public QDialog,
-                                                 public IOptionsDialog {
+class MANTIDQT_ISISREFLECTOMETRY_DLL QtOptionsDialogView : public QDialog,
+                                                 public IOptionsDialogView {
   Q_OBJECT
 public:
-  OptionsDialog(QWidget *parent);
-  ~OptionsDialog() override;
+  QtOptionsDialogView(QWidget *parent);
+  ~QtOptionsDialogView() override;
   void getOptions(std::map<std::string, bool> &boolOptions,
                   std::map<std::string, int> &intOptions) override;
   void setOptions(std::map<std::string, bool> &boolOptions,
@@ -45,7 +45,7 @@ private:
   void initBindings();
 
 private:
-  Ui::OptionsDialog m_ui;
+  Ui::QtOptionsDialogView m_ui;
   // subscribe updates from view
   OptionsDialogSubscriber *m_notifyee;
   // maps option names to widget names
@@ -56,4 +56,4 @@ private:
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif /* MANTID_ISISREFLECTOMETRY_OPTIONSDIALOG_H */
+#endif /* MANTID_ISISREFLECTOMETRY_QTOPTIONSDIALOGVIEW_H */

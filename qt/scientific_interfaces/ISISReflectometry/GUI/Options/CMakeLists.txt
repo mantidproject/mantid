@@ -1,5 +1,5 @@
 set(OPTIONS_SRC_FILES
-	OptionsDialog.cpp
+	QtOptionsDialogView.cpp
 	OptionsDialogPresenter.cpp
 	OptionsDialogModel.cpp
 )
@@ -8,15 +8,15 @@ set(OPTIONS_SRC_FILES
 # IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to
 # find it.
 set(OPTIONS_INC_FILES
-    IOptionsDialog.h
-    OptionsDialog.h
+    IOptionsDialogView.h
+    QtOptionsDialogView.h
     OptionsDialogPresenter.h
     OptionsDialogModel.h
 )
 
-set(OPTIONS_MOC_FILES OptionsDialog.h)
+set(OPTIONS_MOC_FILES QtOptionsDialogView.h)
 
-set(OPTIONS_UI_FILES OptionsDialog.ui)
+set(OPTIONS_UI_FILES QtOptionsDialogView.ui)
 
 prepend(OPTIONS_SRC_FILES GUI/Options ${OPTIONS_SRC_FILES})
 prepend(OPTIONS_INC_FILES GUI/Options ${OPTIONS_INC_FILES})

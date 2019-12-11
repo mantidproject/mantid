@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "OptionsDialogPresenter.h"
-#include "IOptionsDialog.h"
+#include "IOptionsDialogView.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -18,7 +18,7 @@ namespace ISISReflectometry {
  * @param model :: a handle to a model for this presenter
  */
 OptionsDialogPresenter::OptionsDialogPresenter(
-    IOptionsDialog *view, IMainWindowPresenter *mainPresenter)
+    IOptionsDialogView *view, IMainWindowPresenter *mainPresenter)
     : m_view(view), m_mainPresenter(mainPresenter),
       m_model(OptionsDialogModel()){}
 

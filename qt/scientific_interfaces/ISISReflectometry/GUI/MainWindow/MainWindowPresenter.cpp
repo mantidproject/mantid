@@ -9,7 +9,7 @@
 #include "GUI/Common/Decoder.h"
 #include "GUI/Common/Encoder.h"
 #include "GUI/Common/IMessageHandler.h"
-#include "GUI/Options/IOptionsDialog.h"
+#include "GUI/Options/IOptionsDialogView.h"
 #include "GUI/Options/OptionsDialogPresenter.h"
 #include "GUI/Runs/IRunsPresenter.h"
 #include "IMainWindowView.h"
@@ -41,19 +41,19 @@ Mantid::Kernel::Logger g_log("Reflectometry GUI");
  * @param messageHandler :: Interface to a class that displays messages to
  * the user
  * @param slitCalculator :: Interface to the Slit Calculator dialog
- * @param optionsDialog :: Interface to the Options dialog
+ * @param optionsDialogView :: Interface to the Options dialog view
  * @param batchPresenterFactory :: [input] A factory to create the batches
  * we will manage
  */
 MainWindowPresenter::MainWindowPresenter(
     IMainWindowView *view, IMessageHandler *messageHandler,
     std::unique_ptr<ISlitCalculator> slitCalculator,
-    IOptionsDialog *optionsDialog,
+    IOptionsDialogView *optionsDialogView,
     std::unique_ptr<IBatchPresenterFactory> batchPresenterFactory)
     : m_view(view), m_messageHandler(messageHandler), m_instrument(),
       m_slitCalculator(std::move(slitCalculator)),
       m_optionsDialogPresenter(
-          new OptionsDialogPresenter(optionsDialog, this)),
+          new OptionsDialogPresenter(optionsDialogView, this)),
       m_batchPresenterFactory(std::move(batchPresenterFactory)) {
   m_optionsDialogPresenter->notifyInitOptions();
   m_optionsDialogPresenter->notifySubscribe();

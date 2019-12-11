@@ -4,7 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "OptionsDialog.h"
+#include "QtOptionsDialogView.h"
 #include "OptionsDialogModel.h"
 #include "OptionsDialogPresenter.h"
 #include <QCloseEvent>
@@ -15,17 +15,17 @@ namespace CustomInterfaces {
 namespace ISISReflectometry {
 
 /** Constructor */
-OptionsDialog::OptionsDialog(QWidget *parent) {
+QtOptionsDialogView::QtOptionsDialogView(QWidget *parent) {
   Q_UNUSED(parent);
   initLayout();
   initBindings();
 }
 
 /** Destructor */
-OptionsDialog::~OptionsDialog() {}
+QtOptionsDialogView::~QtOptionsDialogView() {}
 
 /** Initialise the ui */
-void OptionsDialog::initLayout() {
+void QtOptionsDialogView::initLayout() {
   m_ui.setupUi(this);
   connect(m_ui.buttonBox->button(QDialogButtonBox::Ok), SIGNAL(clicked()), this,
           SLOT(notifySaveOptions()));
@@ -34,7 +34,7 @@ void OptionsDialog::initLayout() {
 }
 
 /** Bind options to their widgets */
-void OptionsDialog::initBindings() {
+void QtOptionsDialogView::initBindings() {
   m_bindings.clear();
 
   // Check all the widgets for the "reflOptionName" property.
@@ -48,7 +48,7 @@ void OptionsDialog::initBindings() {
 }
 
 /** This saves the currently configured options to the presenter */
-void OptionsDialog::getOptions(std::map<std::string, bool> &boolOptions,
+void QtOptionsDialogView::getOptions(std::map<std::string, bool> &boolOptions,
                                std::map<std::string, int> &intOptions) {
   // Iterate through all our bound widgets, pushing their value into the options
   // map
@@ -72,7 +72,7 @@ void OptionsDialog::getOptions(std::map<std::string, bool> &boolOptions,
 }
 
 /** This sets the ui to match the presenter's options */
-void OptionsDialog::setOptions(std::map<std::string, bool> &boolOptions,
+void QtOptionsDialogView::setOptions(std::map<std::string, bool> &boolOptions,
                                std::map<std::string, int> &intOptions) {
   // Set the values from the options
   for (auto &boolOption : boolOptions) {
@@ -99,20 +99,20 @@ void OptionsDialog::setOptions(std::map<std::string, bool> &boolOptions,
   }
 }
 
-void OptionsDialog::subscribe(OptionsDialogSubscriber *notifyee) {
+void QtOptionsDialogView::subscribe(OptionsDialogSubscriber *notifyee) {
   m_notifyee = notifyee;
   notifyLoadOptions();
 }
 
-void OptionsDialog::notifyLoadOptions() { m_notifyee->loadOptions(); }
-void OptionsDialog::notifySaveOptions() { m_notifyee->saveOptions(); }
+void QtOptionsDialogView::notifyLoadOptions() { m_notifyee->loadOptions(); }
+void QtOptionsDialogView::notifySaveOptions() { m_notifyee->saveOptions(); }
 
-void OptionsDialog::closeEvent(QCloseEvent *event) {
+void QtOptionsDialogView::closeEvent(QCloseEvent *event) {
   notifyLoadOptions();
   this->reject();
 }
 
-void OptionsDialog::show() { QDialog::exec(); }
+void QtOptionsDialogView::show() { QDialog::exec(); }
 
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

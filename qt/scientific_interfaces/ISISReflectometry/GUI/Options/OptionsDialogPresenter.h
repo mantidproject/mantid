@@ -8,7 +8,7 @@
 #define MANTID_ISISREFLECTOMETRY_OPTIONSDIALOGPRESENTER_H
 
 #include "GUI/MainWindow/IMainWindowPresenter.h"
-#include "OptionsDialog.h"
+#include "QtOptionsDialogView.h"
 #include "OptionsDialogModel.h"
 
 #include "Common/DllConfig.h"
@@ -25,7 +25,7 @@ Implements a presenter for the options dialog.
 class MANTIDQT_ISISREFLECTOMETRY_DLL OptionsDialogPresenter
     : public OptionsDialogSubscriber {
 public:
-  OptionsDialogPresenter(IOptionsDialog *view,
+  OptionsDialogPresenter(IOptionsDialogView *view,
                          IMainWindowPresenter *mainPresenter);
   ~OptionsDialogPresenter() = default;
 
@@ -47,7 +47,7 @@ private:
 
 private:
   // Handle to the view for this presenter
-  IOptionsDialog *m_view;
+  IOptionsDialogView *m_view;
   // Handle to the model for this presenter
   OptionsDialogModel m_model;
   IMainWindowPresenter *m_mainPresenter;

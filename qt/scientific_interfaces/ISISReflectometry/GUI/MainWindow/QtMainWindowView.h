@@ -22,7 +22,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-class OptionsDialog;
+class QtOptionsDialogView;
 
 /** @class QtMainWindowView
 
@@ -88,7 +88,7 @@ private:
   std::unique_ptr<MainWindowPresenter> m_presenter;
   std::vector<IBatchView *> m_batchViews;
   int m_batchIndex;
-  std::unique_ptr<OptionsDialog> m_optionsDialog;
+  std::unique_ptr<QtOptionsDialogView> m_optionsDialogView;
 
   friend class Encoder;
   friend class Decoder;

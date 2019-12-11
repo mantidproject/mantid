@@ -24,7 +24,7 @@ namespace ISISReflectometry {
 class IBatchPresenterFactory;
 class IMainWindowView;
 class IMessageHandler;
-class IOptionsDialog;
+class IOptionsDialogView;
 class OptionsDialogPresenter;
 
 /** @class MainWindowPresenter
@@ -40,7 +40,7 @@ public:
   MainWindowPresenter(
       IMainWindowView *view, IMessageHandler *messageHandler,
       std::unique_ptr<MantidWidgets::ISlitCalculator> slitCalculator,
-      IOptionsDialog *optionsDialog,
+      IOptionsDialogView *optionsDialogView,
       std::unique_ptr<IBatchPresenterFactory> batchPresenterFactory);
   ~MainWindowPresenter();
   MainWindowPresenter(MainWindowPresenter const &) = delete;
