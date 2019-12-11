@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/NotificationService.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Exception.h"
 #include <QApplication>
 
 namespace MantidQt {
@@ -22,9 +23,14 @@ void NotificationService::showMessage(const QString &title,
     QSystemTrayIcon sysTrayIcon(qApp);
     // get the window icon for the app
     QIcon windowIcon = qApp->windowIcon();
-    // if no icon is set then use a blank icon
+    // if no icon is set then use the mantid icon
     if (windowIcon.isNull()) {
-      windowIcon = QIcon(":/images/MantidIcon.ico");
+      try {
+        windowIcon = QIcon(":/images/MantidIcon.ico");
+      } catch (std::exception) {
+				// if we cannot use the embedded icon, use a blank one
+        windowIcon = QIcon(QPixmap(32, 32));
+      }
     }
     // set this as the window icon otherwise you get a warning on the console
     sysTrayIcon.setIcon(windowIcon);
@@ -37,9 +43,21 @@ void NotificationService::showMessage(const QString &title,
 }
 
 bool NotificationService::isEnabled() {
-  return Mantid::Kernel::ConfigService::Instance()
+  bool retVal = false;
+  try {
+    retVal = Mantid::Kernel::ConfigService::Instance()
       .getValue<bool>(NOTIFICATIONSENABLEDKEY)
       .get_value_or(true);
+  } catch (Mantid::Kernel::Exception::FileError) {
+    // The Config Service could not find the properties file
+	// Disable notifications
+    retVal = false;
+  } catch (Poco::ExistsException) {
+    // The Config Service could not find the properties file
+    // Disable notifications
+    retVal = false;
+  }
+  return retVal;
 }
 
 bool NotificationService::isSupportedByOS() {
