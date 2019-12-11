@@ -7,16 +7,12 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.simpleapi import (ConjoinWorkspaces, CropWorkspaceRagged, DeleteWorkspace, MatchSpectra, Rebin, SumSpectra)
-from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, WorkspaceProperty, )
+from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, WorkspaceProperty, WorkspaceGroupProperty)
 from mantid.kernel import (Direction, FloatArrayProperty)
 import numpy as np
 
 
 class MergeWorkspacesWithLimits(DataProcessorAlgorithm):
-
-    def __init__(self):
-        """Initialize an instance of the algorithm."""
-        DataProcessorAlgorithm.__init__(self)
 
     def name(self):
         return 'MergeWorkspacesWithLimits'
@@ -50,17 +46,17 @@ class MergeWorkspacesWithLimits(DataProcessorAlgorithm):
         return issues
 
     def PyInit(self):
-        self.declareProperty(WorkspaceProperty('WorkspaceGroup', '', direction=Direction.Input),
-                             doc='Workspace group for merging')
-        self.declareProperty(WorkspaceProperty('MergedWorkspace', '', direction=Direction.Output),
-                             doc='The weighted merged workspace')
+        self.declareProperty(WorkspaceGroupProperty('InputWorkspaces', '', direction=Direction.Input),
+                             doc='The group workspace containing workspaces to be merged.')
+        self.declareProperty(WorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
+                             doc='The merged workspace')
         self.declareProperty(FloatArrayProperty('XMin', [],),
                              doc='Array of minimum X values for each workspace')
         self.declareProperty(FloatArrayProperty('XMax', [],),
                              doc='Array of maximum X values for each workspace')
 
     def PyExec(self):
-        ws_group = self.getProperty('WorkspaceGroup').value
+        ws_group = self.getProperty('InputWorkspaces').value
         x_min = self.getProperty('XMin').value
         x_max = self.getProperty('XMax').value
         largest_range_spectrum, rebin_param = self.get_common_bin_range_and_largest_spectra(ws_group)
@@ -82,9 +78,10 @@ class MergeWorkspacesWithLimits(DataProcessorAlgorithm):
         merged_ws = SumSpectra(InputWorkspace=ws_conjoined, WeightedSum=True, MultiplyBySpectra=False, StoreInADS=False)
         DeleteWorkspace(ws_group)
         DeleteWorkspace(ws_conjoined)
-        self.setProperty('MergedWorkspace', merged_ws)
+        self.setProperty('OutputWorkspace ', merged_ws)
 
-    def get_common_bin_range_and_largest_spectra(self, ws_group):
+    @staticmethod
+    def get_common_bin_range_and_largest_spectra(ws_group):
         x_min = np.inf
         x_max = -np.inf
         x_num = -np.inf
@@ -103,7 +100,8 @@ class MergeWorkspacesWithLimits(DataProcessorAlgorithm):
             raise AttributeError("Workspace x range contains an infinite value.")
         return largest_range_spectrum, [x_min, (x_max - x_min) / x_num, x_max]
 
-    def fit_x_lims_to_match_histogram_bins(self, ws_conjoined, x_min, x_max):
+    @staticmethod
+    def fit_x_lims_to_match_histogram_bins(ws_conjoined, x_min, x_max):
         bin_width = np.inf
         for i in range(x_min.size):
             pdf_x_array = ws_conjoined.readX(i)
