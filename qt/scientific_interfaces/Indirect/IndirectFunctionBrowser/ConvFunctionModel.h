@@ -118,6 +118,7 @@ private:
   std::string buildTeixeiraFunctionString() const;
   std::string buildPeaksFunctionString() const;
   std::string buildBackgroundFunctionString() const;
+  std::string buildStretchExpFTFunctionString() const;
   void addGlobal(const QString &parName);
   void removeGlobal(const QString &parName);
   QStringList makeGlobalList() const;
