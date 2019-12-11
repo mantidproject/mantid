@@ -114,6 +114,18 @@ void ConvTemplateBrowser::boolChanged(QtProperty *prop) {
   }
 }
 
+void ConvTemplateBrowser::addDeltaFunction() {
+  m_deltaFunctionOn->addSubProperty(m_deltaFunctionHeight);
+  ScopedFalse _false(m_emitBoolChange);
+  m_boolManager->setValue(m_deltaFunctionOn, true);
+}
+
+void ConvTemplateBrowser::removeDeltaFunction() {
+  m_deltaFunctionOn->removeSubProperty(m_deltaFunctionHeight);
+  ScopedFalse _false(m_emitBoolChange);
+  m_boolManager->setValue(m_deltaFunctionOn, false);
+}
+
 void ConvTemplateBrowser::enumChanged(QtProperty *prop) {
   auto const index = m_enumManager->value(prop);
   auto propIt =
@@ -249,6 +261,13 @@ void ConvTemplateBrowser::createFunctionParameterProperties() {
 
 void ConvTemplateBrowser::createDeltaFunctionProperties() {
   m_deltaFunctionOn = m_boolManager->addProperty("Delta Function");
+  m_deltaFunctionHeight =
+      m_parameterManager->addProperty("DeltaFunctionHeight");
+  m_parameterManager->setDecimals(m_deltaFunctionHeight, 6);
+  m_parameterManager->setDescription(m_deltaFunctionHeight,
+                                     "Delta Function Height");
+  m_parameterMap[m_deltaFunctionHeight] = ParamID::DELTA_HEIGHT;
+  m_parameterReverseMap[ParamID::DELTA_HEIGHT] = m_deltaFunctionHeight;
 }
 
 void ConvTemplateBrowser::setSubType(size_t subTypeIndex, int typeIndex) {

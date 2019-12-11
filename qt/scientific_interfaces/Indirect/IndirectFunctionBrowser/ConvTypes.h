@@ -40,9 +40,10 @@ enum class ParamID {
   TW_DIFFCOEFF,
   TW_TAU,
   TW_CENTRE,
+  DELTA_HEIGHT,
   FLAT_BG_A0,
   LINEAR_BG_A0,
-  LINEAR_BG_A1
+  LINEAR_BG_A1,
 };
 
 QString paramName(ParamID id);
@@ -140,10 +141,15 @@ struct BackgroundSubType : public TemplateSubTypeImpl<BackgroundType> {
   QString name() const override { return "Background"; }
 };
 
+struct DeltaSubType : public TemplateSubTypeImpl<bool> {
+  QString name() const override { return "Delta"; }
+};
+
 void applyToFitType(FitType fitType,
                     const std::function<void(ParamID)> &paramFun);
 void applyToBackground(BackgroundType bgType,
                        const std::function<void(ParamID)> &paramFun);
+void applyToDelta(bool deltaType, const std::function<void(ParamID)> &paramFun);
 
 } // namespace ConvTypes
 } // namespace IDA

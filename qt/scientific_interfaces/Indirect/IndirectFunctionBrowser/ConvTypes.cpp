@@ -25,7 +25,8 @@ std::map<ParamID, QString> g_paramName{
     {ParamID::TW_CENTRE, "Centre"},
     {ParamID::FLAT_BG_A0, "A0"},
     {ParamID::LINEAR_BG_A0, "A0"},
-    {ParamID::LINEAR_BG_A1, "A1"}};
+    {ParamID::LINEAR_BG_A1, "A1"},
+    {ParamID::DELTA_HEIGHT, "Height"}};
 
 template <>
 std::map<FitType, TemplateSubTypeDescriptor>
@@ -60,6 +61,15 @@ std::map<BackgroundType, TemplateSubTypeDescriptor>
           {ParamID::LINEAR_BG_A0, ParamID::LINEAR_BG_A1}}},
     };
 
+template <>
+std::map<bool, TemplateSubTypeDescriptor> TemplateSubTypeImpl<bool>::g_typeMap{
+    {false, {"None", "", {ParamID::NONE, ParamID::NONE}}},
+    {true,
+     {"DeltaFunction",
+      "DeltaFunction",
+      {ParamID::DELTA_HEIGHT, ParamID::DELTA_HEIGHT}}},
+};
+
 QString paramName(ParamID id) { return g_paramName.at(id); }
 
 void applyToFitType(FitType fitType,
@@ -72,6 +82,13 @@ void applyToBackground(BackgroundType bgType,
                        const std::function<void(ParamID)> &paramFun) {
   applyToParamIDRange(BackgroundSubType::g_typeMap[bgType].blocks.front(),
                       BackgroundSubType::g_typeMap[bgType].blocks.back(),
+                      paramFun);
+}
+
+void applyToDelta(bool hasDeltaFunction,
+                  const std::function<void(ParamID)> &paramFun) {
+  applyToParamIDRange(DeltaSubType::g_typeMap[hasDeltaFunction].blocks.front(),
+                      DeltaSubType::g_typeMap[hasDeltaFunction].blocks.back(),
                       paramFun);
 }
 
