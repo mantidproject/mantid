@@ -56,6 +56,8 @@ public:
                      TableDatasetIndex const &index) override;
   void
   setResolution(const std::vector<std::pair<std::string, int>> &fitResolutions);
+  void addDeltaFunction();
+  void removeDeltaFunction();
 
 protected slots:
   void intChanged(QtProperty *) override;
@@ -83,6 +85,7 @@ private:
   std::vector<QtProperty *> m_subTypeProperties;
 
   QtProperty *m_deltaFunctionOn;
+  QtProperty *m_deltaFunctionHeight;
 
   QMap<QtProperty *, ParamID> m_parameterMap;
   QMap<ParamID, QtProperty *> m_parameterReverseMap;
@@ -92,6 +95,7 @@ private:
 private:
   ConvTemplatePresenter m_presenter;
   bool m_emitParameterValueChange = true;
+  bool m_emitBoolChange = true;
   friend class ConvTemplatePresenter;
 };
 

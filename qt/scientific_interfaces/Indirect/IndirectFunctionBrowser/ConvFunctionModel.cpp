@@ -556,6 +556,8 @@ ConvFunctionModel::getParameterDescription(ParamID name) const {
 boost::optional<QString> ConvFunctionModel::getPrefix(ParamID name) const {
   if (name >= ParamID::FLAT_BG_A0) {
     return m_model.backgroundPrefix();
+  } else if (name == ParamID::DELTA_HEIGHT) {
+    return m_model.deltaFunctionPrefix();
   } else {
     auto const prefixes = m_model.peakPrefixes();
     if (!prefixes)
@@ -603,6 +605,7 @@ void ConvFunctionModel::applyParameterFunction(
     std::function<void(ParamID)> paramFun) const {
   applyToFitType(m_fitType, paramFun);
   applyToBackground(m_backgroundType, paramFun);
+  applyToDelta(m_hasDeltaFunction, paramFun);
 }
 
 boost::optional<ParamID>
