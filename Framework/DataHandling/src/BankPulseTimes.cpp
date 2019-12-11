@@ -28,6 +28,8 @@ BankPulseTimes::BankPulseTimes(::NeXus::File &file,
   // Read the offset (time zero)
   if (file.hasAttr("offset"))
     file.getAttr("offset", startTime);
+  else if (file.hasAttr("start"))
+    file.getAttr("start", startTime);
   else {
     auto epoch = DateAndTime(DateAndTime::UNIX_EPOCH);
     startTime = epoch.toISO8601String();
