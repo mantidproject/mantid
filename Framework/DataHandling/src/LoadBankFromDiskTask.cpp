@@ -67,6 +67,8 @@ void LoadBankFromDiskTask::loadPulseTimes(::NeXus::File &file) {
   size_t thisNumPulses = 0;
   if (file.hasAttr("offset"))
     file.getAttr("offset", thisStartTime);
+  else if (file.hasAttr("start"))
+    file.getAttr("start", thisStartTime);
   else {
     auto epoch = DateAndTime(DateAndTime::UNIX_EPOCH);
     thisStartTime = epoch.toISO8601String();
