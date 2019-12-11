@@ -420,6 +420,16 @@ std::map<std::string, std::string> PredictFractionalPeaks::validateInputs() {
   validateRange(PropertyNames::KMIN, PropertyNames::KMAX);
   validateRange(PropertyNames::LMIN, PropertyNames::LMAX);
 
+  // If a modulation vector is provided then maxOrder is needed
+  const auto modVectors =
+      validModulationVectors(getProperty(ModulationProperties::ModVector1),
+                             getProperty(ModulationProperties::ModVector2),
+                             getProperty(ModulationProperties::ModVector3));
+  const int maxOrder = getProperty(ModulationProperties::MaxOrder);
+  if (maxOrder == 0 && !modVectors.empty()) {
+    helpMessages[ModulationProperties::MaxOrder] =
+        "Maxorder required when specifying a modulation vector.";
+  }
   return helpMessages;
 }
 

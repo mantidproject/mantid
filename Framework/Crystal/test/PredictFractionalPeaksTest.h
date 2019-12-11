@@ -297,6 +297,17 @@ public:
     doInvalidRangeTest("L");
   }
 
+  void test_modulation_vector_requires_maxOrder_gt_0() {
+    PredictFractionalPeaks alg;
+    alg.initialize();
+    alg.setProperty("Peaks", WorkspaceCreationHelper::createPeaksWorkspace(0));
+    alg.setProperty("ModVector1", "0.5,0,0.5");
+
+    auto helpMsgs = alg.validateInputs();
+
+    TS_ASSERT(helpMsgs.find("MaxOrder") != helpMsgs.cend())
+  }
+
 private:
   void doInvalidRangeTest(const std::string &dimension) {
     PredictFractionalPeaks alg;
