@@ -48,6 +48,10 @@ def fetch_correction_workspaces(vanadium_path, instrument):
     return integ_workspace, curves_workspace
 
 
+def check_workspaces_exist():
+    return Ads.doesExist(CURVES_WORKSPACE_NAME) and Ads.doesExist(INTEGRATED_WORKSPACE_NAME)
+
+
 def _calculate_vanadium_correction(vanadium_path):
     """
     Runs the vanadium correction algorithm.

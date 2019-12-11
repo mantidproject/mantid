@@ -8,21 +8,32 @@ from __future__ import (absolute_import, division, print_function)
 
 from qtpy import QtWidgets
 import Muon.GUI.Common.message_box as message_box
+from matplotlib.figure import Figure
+from mantidqt.plotting.functions import get_plot_fig
+from matplotlib.backends.qt_compat import is_pyqt5
+if is_pyqt5():
+    from matplotlib.backends.backend_qt5agg import (
+        FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
+else:
+    from matplotlib.backends.backend_qt4agg import (
+        FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
 
 
-class HomePlotWidgetView(QtWidgets.QWidget):
+class PlotWidgetView(QtWidgets.QWidget):
 
     @staticmethod
     def warning_popup(message):
         message_box.warning(str(message))
 
     def __init__(self, parent=None):
-        super(HomePlotWidgetView, self).__init__(parent)
+        super(PlotWidgetView, self).__init__(parent)
         self.plot_label = None
         self.plot_selector = None
         self.plot_button = None
         self.horizontal_layout = None
         self.vertical_layout = None
+        self.fig = None
+        self.toolBar = None
         self.group = None
         self.widget_layout = None
 
@@ -89,8 +100,21 @@ class HomePlotWidgetView(QtWidgets.QWidget):
 
         self.group.setLayout(self.vertical_layout)
 
+        # create the figure
+        self.fig = Figure()
+        self.fig.canvas = FigureCanvas(self.fig)
+        self.toolBar = NavigationToolbar(self.fig.canvas, self)
+        # set size policy
+        self.toolBar.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+
+        # Create a set of mantid axis for the figure
+        self.fig, axes = get_plot_fig(overplot=False, ax_properties=None, axes_num=1,
+                                      fig=self.fig)
+
         self.widget_layout = QtWidgets.QVBoxLayout(self)
         self.widget_layout.addWidget(self.group)
+        self.vertical_layout.addWidget(self.toolBar)
+        self.vertical_layout.addWidget(self.fig.canvas)
 
         self.setLayout(self.widget_layout)
 
@@ -124,3 +148,9 @@ class HomePlotWidgetView(QtWidgets.QWidget):
 
     def addItem(self, plot_type):
         self.plot_selector.addItem(plot_type)
+
+    def get_fig(self):
+        return self.fig
+
+    def close(self):
+        self.fig.canvas.close()
