@@ -18,7 +18,7 @@ FOCUSED_OUTPUT_WORKSPACE_NAME = "engggui_focusing_output_ws_bank_"
 
 
 class FocusModel(object):
-    def focus_run(self, sample_path, banks, plot_output, instrument, rb_number, current_calib):
+    def focus_run(self, sample_path, banks, plot_output, instrument, rb_number):
         """
         Focus some data using the current calibration.
         :param sample_path: The path to the data to be focused.
@@ -26,13 +26,12 @@ class FocusModel(object):
         :param plot_output: True if the output should be plotted.
         :param instrument: The instrument that the data came from.
         :param rb_number: The experiment number, used to create directories. Can be None
-        :param current_calib: The current calibration loaded in the calibration tab.
         """
-        vanadium_path = current_calib["vanadium_path"]
-        if vanadium_path is None:
+        if not Ads.doesExist(vanadium_corrections.INTEGRATED_WORKSPACE_NAME) and not Ads.doesExist(
+                vanadium_corrections.CURVES_WORKSPACE_NAME):
             return
-        integration_workspace, curves_workspace = vanadium_corrections.fetch_correction_workspaces(
-            vanadium_path, instrument)
+        integration_workspace = Ads.retrieve(vanadium_corrections.INTEGRATED_WORKSPACE_NAME)
+        curves_workspace = Ads.retrieve(vanadium_corrections.CURVES_WORKSPACE_NAME)
         sample_workspace = self._load_focus_sample_run(sample_path)
         for name in banks:
             output_workspace_name = FOCUSED_OUTPUT_WORKSPACE_NAME + str(name)

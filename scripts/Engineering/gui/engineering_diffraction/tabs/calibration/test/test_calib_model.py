@@ -118,61 +118,51 @@ class CalibrationModelTest(unittest.TestCase):
         'Engineering.gui.engineering_diffraction.tabs.calibration.model.write_ENGINX_GSAS_iparam_file'
     )
     def test_create_output_files(self, write_file, make_dirs, output_name):
-        ceria_run = "20"
-        vanadium_run = "10"
+        ceria_path = "test2/test3/ENGINX20.nxs"
+        vanadium_path = "test4/ENGINX0010.nxs"
         filename = "output"
-        output_name.return_value = filename, vanadium_run, ceria_run
+        output_name.return_value = filename
 
-        self.model.create_output_files("test/", [0, 0], [1, 1], "test2/test3", "test4/test5",
+        self.model.create_output_files("test/", [0, 0], [1, 1], ceria_path, vanadium_path,
                                        "ENGINX")
 
         self.assertEqual(make_dirs.call_count, 1)
         self.assertEqual(write_file.call_count, 3)
         write_file.assert_called_with("test/" + filename, [0], [1],
                                       bank_names=['South'],
-                                      ceria_run=ceria_run,
+                                      ceria_run=ceria_path,
                                       template_file="template_ENGINX_241391_236516_South_bank.prm",
-                                      vanadium_run=vanadium_run)
+                                      vanadium_run=vanadium_path)
 
     def test_generate_table_workspace_name(self):
         self.assertEqual(self.model._generate_table_workspace_name(20),
                          "engggui_calibration_bank_21")
 
     def test_generate_output_file_name_for_valid_bank(self):
-        filename, vanadium, ceria = self.model._generate_output_file_name(
+        filename = self.model._generate_output_file_name(
             "test/20.raw", "test/10.raw", "ENGINX", "north")
         self.assertEqual(filename, "ENGINX_20_10_bank_North.prm")
-        self.assertEqual(vanadium, '20')
-        self.assertEqual(ceria, '10')
 
-        filename, vanadium, ceria = self.model._generate_output_file_name(
+        filename = self.model._generate_output_file_name(
             "test/20.raw", "test/10.raw", "ENGINX", "south")
         self.assertEqual(filename, "ENGINX_20_10_bank_South.prm")
-        self.assertEqual(vanadium, '20')
-        self.assertEqual(ceria, '10')
 
-        filename, vanadium, ceria = self.model._generate_output_file_name(
+        filename = self.model._generate_output_file_name(
             "test/20.raw", "test/10.raw", "ENGINX", "all")
         self.assertEqual(filename, "ENGINX_20_10_all_banks.prm")
-        self.assertEqual(vanadium, '20')
-        self.assertEqual(ceria, '10')
 
     def test_generate_output_file_name_for_invalid_bank(self):
         self.assertRaises(ValueError, self.model._generate_output_file_name, "test/20.raw",
                           "test/10.raw", "ENGINX", "INVALID")
 
     def test_generate_output_file_name_for_unconventional_filename(self):
-        filename, vanadium, ceria = self.model._generate_output_file_name(
+        filename = self.model._generate_output_file_name(
             "test/20", "test/10.raw", "ENGINX", "north")
         self.assertEqual(filename, "ENGINX_20_10_bank_North.prm")
-        self.assertEqual(vanadium, '20')
-        self.assertEqual(ceria, '10')
 
-        filename, vanadium, ceria = self.model._generate_output_file_name(
+        filename = self.model._generate_output_file_name(
             "20", "test/10.raw", "ENGINX", "north")
         self.assertEqual(filename, "ENGINX_20_10_bank_North.prm")
-        self.assertEqual(vanadium, '20')
-        self.assertEqual(ceria, '10')
 
     @patch("Engineering.gui.engineering_diffraction.tabs.calibration.model.Ads")
     def test_update_calibration_params_table_retrieves_workspace(self, ads):
