@@ -410,7 +410,7 @@ Custom Colors
 Custom Color Cycle (Line / 1D plots)
 ####################################
 
-The Default Color Cycle doesn't have to be used. Here is an example where a Custom Color Cycle is chosen. Make sure to fill the list `custom_colors` with either the HTML codes or recognised names for the desired colours. 
+The Default Color Cycle doesn't have to be used. Here is an example where a Custom Color Cycle is chosen. Make sure to fill the list `custom_colors` with either the HTML hex codes (eg. #b3457f) or recognised names for the desired colours. 
 Both can be found `online <https://www.rapidtables.com/web/color/html-color-codes.html>`_.
 
 .. plot::
