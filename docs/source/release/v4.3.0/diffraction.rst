@@ -25,6 +25,8 @@ Engineering Diffraction
 Single Crystal Diffraction
 --------------------------
 
+- :ref:`PredictFractionalPeaks <algm-PredictFractionalPeaks-v1>` now accepts the same set of modulation vector properties as :ref:`IndexPeaks <algm-IndexPeaks-v1>`.
+
 Imaging
 -------
 
