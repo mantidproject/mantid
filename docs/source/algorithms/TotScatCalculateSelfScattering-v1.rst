@@ -10,7 +10,7 @@ Description
 -----------
 
 This is a workflow algorithm that calculates the placzek self scattering
-factor focused by into detector banks. This is done by executing several
+factor focused into detector banks. This is done by executing several
 sub-algorithms as listed below.
 
 #. :ref:`algm-SetSample` Sets sample data for the run that is to be corrected to the raw workspace.
