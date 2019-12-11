@@ -47,20 +47,6 @@ class ImagesTabWidgetView(QWidget):
             spin_box = getattr(self, '%s_value_spin_box' % bound)
             spin_box.setRange(0, np.finfo(np.float32).max)
 
-        # Make sure min scale value always less than max
-        self.min_value_spin_box.valueChanged.connect(self._check_max_min_consistency_min_changed)
-        self.max_value_spin_box.valueChanged.connect(self._check_max_min_consistency_max_changed)
-
-    def _check_max_min_consistency_min_changed(self):
-        """Check min value smaller than max value after min_value changed"""
-        if self.get_min_value() >= self.get_max_value():
-            self.set_max_value(self.get_min_value() + 0.01)
-
-    def _check_max_min_consistency_max_changed(self):
-        """Check min value smaller than max value after max value changed"""
-        if self.get_min_value() >= self.get_max_value():
-            self.set_min_value(self.get_max_value() - 0.01)
-
     def _populate_colormap_combo_box(self):
         for cmap_name in get_colormap_names():
             qt_img = create_colormap_img(cmap_name)
