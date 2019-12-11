@@ -48,6 +48,19 @@ class ImagesTabWidgetPresenter:
 
         self.fig.colorbar(image)
 
+        if props.vmin > props.vmax:
+            self.view.max_min_value_warning.setVisible(True)
+            self.view.max_min_value_warning.setText("<html> <head/> <body> <p> <span style=\"color:#ff0000;\">Max "
+                                                    "value is less than min value so they have been "
+                                                    "swapped.</span></p></body></html>")
+        elif props.vmin == props.vmax:
+            self.view.max_min_value_warning.setVisible(True)
+            self.view.max_min_value_warning.setText("<html><head/><body><p><span style=\"color:#ff0000;\">Min and max "
+                                                    "value are the same so they have been "
+                                                    "adjusted.</span></p></body></html>")
+        else:
+            self.view.max_min_value_warning.setVisible(False)
+
     def get_selected_image(self):
         return self.image_names_dict[self.view.get_selected_image_name()]
 

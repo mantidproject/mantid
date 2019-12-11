@@ -47,6 +47,8 @@ class ImagesTabWidgetView(QWidget):
             spin_box = getattr(self, '%s_value_spin_box' % bound)
             spin_box.setRange(0, np.finfo(np.float32).max)
 
+        self.max_min_value_warning.setVisible(False)
+
     def _populate_colormap_combo_box(self):
         for cmap_name in get_colormap_names():
             qt_img = create_colormap_img(cmap_name)
