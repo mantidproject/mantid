@@ -7,7 +7,7 @@
 # pylint: disable=no-init,too-many-instance-attributes
 from __future__ import (absolute_import, division, print_function)
 
-import mantid.simpleapi as s_api
+from mantid.simpleapi import *
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceGroupProperty, \
     PropertyMode, MatrixWorkspace, Progress, WorkspaceGroup
 from mantid.kernel import Direction, logger
@@ -29,6 +29,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
     _sample_ws_wavelength = None
     _rebin_container_ws = False
     _factors = []
+
 
     def category(self):
         return "Workflow\\MIDAS"
@@ -95,10 +96,10 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                 correction_type = 'sample_corrections_only'
                 # Add corrections filename to log values
                 prog_corr.report('Correcting sample')
-                s_api.AddSampleLog(Workspace=output_workspace,
-                                   LogName='corrections_filename',
-                                   LogType='String',
-                                   LogText=self._corrections_ws_name)
+                AddSampleLog(Workspace=output_workspace,
+                             LogName='corrections_filename',
+                             LogType='String',
+                             LogText=self._corrections_ws_name)
         else:
             # Do simple subtraction
             output_workspace = self._subtract(sample_ws_wavelength, container_ws_wavelength)
@@ -107,34 +108,34 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
             can_base = self.getPropertyValue("CanWorkspace")
             can_base = can_base[:can_base.index('_')]
             prog_corr.report('Adding container filename')
-            s_api.AddSampleLog(Workspace=output_workspace,
-                               LogName='container_filename',
-                               LogType='String',
-                               LogText=can_base)
+            AddSampleLog(Workspace=output_workspace,
+                         LogName='container_filename',
+                         LogType='String',
+                         LogText=can_base)
 
         prog_wrkflow = Progress(self, 0.6, 1.0, nreports=5)
         # Record the container scale factor
         if self._use_can and self._scale_can:
             prog_wrkflow.report('Adding container scaling')
-            s_api.AddSampleLog(Workspace=output_workspace,
-                               LogName='container_scale',
-                               LogType='Number',
-                               LogText=str(self._can_scale_factor))
+            AddSampleLog(Workspace=output_workspace,
+                         LogName='container_scale',
+                         LogType='Number',
+                         LogText=str(self._can_scale_factor))
 
         # Record the container shift amount
         if self._use_can and self._shift_can:
             prog_wrkflow.report('Adding container shift')
-            s_api.AddSampleLog(Workspace=output_workspace,
-                               LogName='container_shift',
-                               LogType='Number',
-                               LogText=str(self._can_shift_factor))
+            AddSampleLog(Workspace=output_workspace,
+                         LogName='container_shift',
+                         LogType='Number',
+                         LogText=str(self._can_shift_factor))
 
         # Record the type of corrections applied
         prog_wrkflow.report('Adding correction type')
-        s_api.AddSampleLog(Workspace=output_workspace,
-                           LogName='corrections_type',
-                           LogType='String',
-                           LogText=correction_type)
+        AddSampleLog(Workspace=output_workspace,
+                     LogName='corrections_type',
+                     LogType='String',
+                     LogText=correction_type)
 
         # Add original sample as log entry
         sam_base = self.getPropertyValue("SampleWorkspace")
@@ -142,17 +143,18 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         if '_' in sam_base:
             sam_base = sam_base[:sam_base.index('_')]
             prog_wrkflow.report('Adding sample filename')
-            s_api.AddSampleLog(Workspace=output_workspace,
-                               LogName='sample_filename',
-                               LogType='String',
-                               LogText=sam_base)
+            AddSampleLog(Workspace=output_workspace,
+                         LogName='sample_filename',
+                         LogType='String',
+                         LogText=sam_base)
 
         # Convert Units back to original
         emode = str(output_workspace.getEMode())
         efixed = 0.0
         if emode == "Indirect":
             efixed = self._get_e_fixed(output_workspace)
-        output_workspace = self._convert_units(output_workspace, sample_unit, emode, efixed)
+        if sample_unit != 'Label':
+            output_workspace = self._convert_units(output_workspace, sample_unit, emode, efixed)
 
         self.setProperty('OutputWorkspace', output_workspace)
         prog_wrkflow.report('Algorithm Complete')
@@ -188,15 +190,18 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                 if corrections_issues:
                     issues['CorrectionsWorkspace'] = "\n".join(corrections_issues)
 
-        sample_ws = self.getProperty("SampleWorkspace").value
-        if isinstance(sample_ws, MatrixWorkspace):
-            sample_unit_id = sample_ws.getAxis(0).getUnit().unitID()
+
+        if isinstance(self._sample_workspace, WorkspaceGroup):
+            issues['SampleWorkspace'] = 'WorkspaceGroups are not supported'
+        elif isinstance(self._sample_workspace, MatrixWorkspace):
+            sample_unit_id = self._sample_workspace.getAxis(0).getUnit().unitID()
 
             # Check sample and container X axis units match
             if self._use_can:
-                can_ws = self.getProperty("CanWorkspace").value
-                if isinstance(can_ws, MatrixWorkspace):
-                    can_unit_id = can_ws.getAxis(0).getUnit().unitID()
+                if isinstance(self._container_workspace, WorkspaceGroup):
+                    issues['CanWorkspace'] = 'WorkspaceGroups are not supported'
+                elif isinstance(self._container_workspace, MatrixWorkspace):
+                    can_unit_id = self._container_workspace.getAxis(0).getUnit().unitID()
                     if can_unit_id != sample_unit_id:
                         issues['CanWorkspace'] = 'X axis unit must match SampleWorkspace'
                 else:
@@ -243,10 +248,10 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                 self._corrections_approximation = self._three_factor_corrections_approximation
 
     def _shift_workspace(self, workspace, shift_factor):
-        return s_api.ScaleX(InputWorkspace=workspace,
-                            Factor=shift_factor,
-                            OutputWorkspace="__shifted",
-                            Operation="Add", StoreInADS=False)
+        return ScaleX(InputWorkspace=workspace,
+                      Factor=shift_factor,
+                      OutputWorkspace="__shifted",
+                      Operation="Add", StoreInADS=False)
 
     def _convert_units_wavelength(self, workspace):
         unit = workspace.getAxis(0).getUnit().unitID()
@@ -261,14 +266,17 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                     emode = 'Indirect'
                     efixed = self._get_e_fixed(workspace)
                 return self._convert_units(workspace, "Wavelength", emode, efixed)
+            else:
+                # for fixed window scans the unit might be empty (e.g. temperature)
+                return workspace
         else:
             return workspace
 
     def _convert_units(self, workspace, target, emode, efixed):
-        return s_api.ConvertUnits(InputWorkspace=workspace,
-                                  OutputWorkspace="__units_converted",
-                                  Target=target, EMode=emode,
-                                  EFixed=efixed, StoreInADS=False)
+        return ConvertUnits(InputWorkspace=workspace,
+                            OutputWorkspace="__units_converted",
+                            Target=target, EMode=emode,
+                            EFixed=efixed, StoreInADS=False)
 
     def _get_e_fixed(self, workspace):
         from IndirectCommon import getEfixed
@@ -328,10 +336,10 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
 
         if self._rebin_container_ws:
             logger.information('Rebining container to ensure Minus')
-            subtrahend_workspace = s_api.RebinToWorkspace(WorkspaceToRebin=subtrahend_workspace,
-                                                          WorkspaceToMatch=minuend_workspace,
-                                                          OutputWorkspace="__rebinned",
-                                                          StoreInADS=False)
+            subtrahend_workspace = RebinToWorkspace(WorkspaceToRebin=subtrahend_workspace,
+                                                    WorkspaceToMatch=minuend_workspace,
+                                                    OutputWorkspace="__rebinned",
+                                                    StoreInADS=False)
         return minuend_workspace - subtrahend_workspace
 
     def _clone(self, workspace):
@@ -340,9 +348,9 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         :param workspace:   The workspace to clone.
         :return:            A clone of the specified workspace.
         """
-        return s_api.CloneWorkspace(InputWorkspace=workspace,
-                                    OutputWorkspace="cloned",
-                                    StoreInADS=False)
+        return CloneWorkspace(InputWorkspace=workspace,
+                              OutputWorkspace="cloned",
+                              StoreInADS=False)
 
     def _correct_sample(self, sample_workspace, a_ss_workspace):
         """
@@ -363,10 +371,10 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                                         in factor_workspaces.items()}
 
         if self._rebin_container_ws:
-            container_workspace = s_api.RebinToWorkspace(WorkspaceToRebin=container_workspace,
-                                                         WorkspaceToMatch=factor_workspaces_wavelength['acc'],
-                                                         OutputWorkspace="rebinned",
-                                                         StoreInADS=False)
+            container_workspace = RebinToWorkspace(WorkspaceToRebin=container_workspace,
+                                                   WorkspaceToMatch=factor_workspaces_wavelength['acc'],
+                                                   OutputWorkspace="rebinned",
+                                                   StoreInADS=False)
         return self._corrections_approximation(sample_workspace, container_workspace, factor_workspaces_wavelength)
 
     def _three_factor_corrections_approximation(self, sample_workspace, container_workspace, factor_workspaces):
