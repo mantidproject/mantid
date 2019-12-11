@@ -7,6 +7,7 @@
 # pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
 
+from Muon.GUI.Common.plotting_widget.plotting_widget import PlottingWidget
 from qtpy import QtWidgets, QtCore
 
 from mantid.kernel import ConfigServiceImpl
@@ -78,10 +79,22 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
                                    fitting_context=self.fitting_context,
                                    workspace_suffix=' MA')
 
-        # construct all the widgets.
+        # create the dockable widget
+        self.dockable_plot_widget_window = QtWidgets.QDockWidget("Plotting window")
+        self.dockable_plot_widget_window.setMinimumWidth(550)
+        self.dockable_plot_widget_window.setFeatures(
+            QtWidgets.QDockWidget.DockWidgetFloatable | QtWidgets.QDockWidget.DockWidgetMovable)
+        self.dockable_plot_widget_window.setAllowedAreas(QtCore.Qt.RightDockWidgetArea | QtCore.Qt.LeftDockWidgetArea)
+        # create the widget to be stored in the dock
+        self.dockable_plot_widget = PlottingWidget(self.context)
+        # add dock widget to main muon analysis window
+        self.dockable_plot_widget_window.setWidget(self.dockable_plot_widget.view)
+        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.dockable_plot_widget_window)
+
+        # set up other widgets
         self.load_widget = LoadWidget(self.loaded_data, self.context, self)
-        self.grouping_tab_widget = GroupingTabWidget(self.context)
         self.home_tab = HomeTabWidget(self.context, self)
+        self.grouping_tab_widget = GroupingTabWidget(self.context)
         self.phase_tab = PhaseTabWidget(self.context, self)
         self.fitting_tab = FittingTabWidget(self.context, self)
         self.results_tab = ResultsTabWidget(self.context.fitting_context, self.context, self)
@@ -167,7 +180,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
             self.fitting_tab.fitting_tab_presenter.selected_group_pair_observer)
 
         self.home_tab.group_widget.selected_group_pair_changed_notifier.add_subscriber(
-            self.home_tab.plot_widget.group_pair_observer)
+           self.dockable_plot_widget.presenter.group_pair_observer)
 
     def setup_alpha_recalculated_observers(self):
         self.home_tab.group_widget.pairAlphaNotifier.add_subscriber(
@@ -194,7 +207,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
             self.phase_tab.phase_table_presenter.instrument_changed_observer)
 
         self.context.data_context.instrumentNotifier.add_subscriber(
-            self.home_tab.plot_widget.instrument_observer)
+            self.dockable_plot_widget.presenter.instrument_observer)
 
     def setup_group_calculation_enable_notifer(self):
         self.grouping_tab_widget.group_tab_presenter.enable_editing_notifier.add_subscriber(
@@ -241,10 +254,10 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
             self.fitting_tab.fitting_tab_presenter.input_workspace_observer)
 
         self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
-            self.home_tab.plot_widget.input_workspace_observer)
+            self.dockable_plot_widget.presenter.input_workspace_observer)
 
         self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
-            self.home_tab.plot_widget.rebin_options_set_observer)
+            self.dockable_plot_widget.presenter.rebin_options_set_observer)
 
     def setup_phase_quad_changed_notifer(self):
         pass
@@ -257,11 +270,14 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.fitting_context.new_fit_notifier.add_subscriber(
             self.results_tab.results_tab_presenter.new_fit_performed_observer)
 
-        self.fitting_context.new_fit_notifier.add_subscriber(self.home_tab.plot_widget.fit_observer)
+        self.fitting_context.new_fit_notifier.add_subscriber(self.dockable_plot_widget.presenter.fit_observer)
 
-        self.fitting_context.plot_guess_notifier.add_subscriber(self.home_tab.plot_widget.plot_guess_observer)
+        self.fitting_context.plot_guess_notifier.add_subscriber(
+            self.dockable_plot_widget.presenter.plot_guess_observer)
 
     def closeEvent(self, event):
         self.tabs.closeEvent(event)
+        self.dockable_plot_widget_window.widget().close()
+        self.removeDockWidget(self.dockable_plot_widget_window)
         self.context.ads_observer = None
         super(MuonAnalysisGui, self).closeEvent(event)

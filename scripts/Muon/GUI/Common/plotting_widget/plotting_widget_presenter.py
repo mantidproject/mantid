@@ -7,18 +7,17 @@
 from __future__ import (absolute_import, division, print_function)
 
 from Muon.GUI.Common.home_tab.home_tab_presenter import HomeTabSubWidget
-from mantidqt.utils.observer_pattern import GenericObservable, GenericObserver
+from mantidqt.utils.observer_pattern import GenericObservable, GenericObserver, GenericObserverWithArgPassing
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 from Muon.GUI.FrequencyDomainAnalysis.frequency_context import FREQUENCY_EXTENSIONS
-
 
 COUNTS_PLOT_TYPE = 'Counts'
 ASYMMETRY_PLOT_TYPE = 'Asymmetry'
 FREQ_PLOT_TYPE = "Frequency "
 
 
-class HomePlotWidgetPresenter(HomeTabSubWidget):
+class PlotWidgetPresenter(HomeTabSubWidget):
 
     def __init__(self, view, model, context):
         """
@@ -39,13 +38,16 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         self.plot_type_observer = GenericObserver(self.handle_group_pair_to_plot_changed)
         self.rebin_options_set_observer = GenericObserver(self.handle_rebin_options_set)
         self.plot_guess_observer = GenericObserver(self.handle_plot_guess_changed)
+        self.workspace_deleted_from_ads_observer = GenericObserverWithArgPassing(self.handle_workspace_deleted_from_ads)
+        self.workspace_replaced_in_ads_observer = GenericObserverWithArgPassing(self.handle_workspace_replaced_in_ads)
+
         self.plot_type_changed_notifier = GenericObservable()
 
         self._force_redraw = False
         if self.context._frequency_context:
             for ext in FREQUENCY_EXTENSIONS.keys():
-                self._view.addItem(FREQ_PLOT_TYPE+FREQUENCY_EXTENSIONS[ext])
-            self._view.addItem(FREQ_PLOT_TYPE+"All")
+                self._view.addItem(FREQ_PLOT_TYPE + FREQUENCY_EXTENSIONS[ext])
+            self._view.addItem(FREQ_PLOT_TYPE + "All")
         self.instrument_observer = GenericObserver(self.handle_instrument_changed)
         self.keep = False
 
@@ -75,6 +77,15 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
 
         self.plot_standard_workspaces()
 
+    def handle_workspace_deleted_from_ads(self, workspace):
+        if workspace in self._model.plotted_workspaces:
+            self._model.remove_workspace_from_plot_by_name(workspace)
+
+    def handle_workspace_replaced_in_ads(self, workspace):
+        if not self._view.if_raw():
+            if workspace in self._model.plotted_workspaces:
+                self.plot_standard_workspaces()
+
     def handle_use_raw_workspaces_changed(self):
         """
         Handles the use raw workspaces being changed. If
@@ -93,7 +104,6 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         current_group_pair = self.context.group_pair_context[
             self.context.group_pair_context.selected]
         current_plot_type = self._view.get_selected()
-
         if isinstance(current_group_pair, MuonPair) and current_plot_type == COUNTS_PLOT_TYPE:
             self._view.plot_selector.blockSignals(True)
             self._view.plot_selector.setCurrentText(ASYMMETRY_PLOT_TYPE)
@@ -131,37 +141,48 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         workspace_list = self.get_workspaces_to_plot(
             self.context.group_pair_context.selected, self._view.if_raw(),
             self._view.get_selected())
-        self._model.plot(workspace_list, self.get_plot_title(), self.get_domain(), self._force_redraw, self.context.window_title)
+
+        self._model.plot(workspace_list, self.get_plot_title(), self.get_domain(),
+                         self.context.window_title)
+
+        # if we are redrawing, keep previous fit
+        if self._force_redraw:
+            self.handle_fit_completed()
+        else:
+            self.context.fitting_context.clear()
+        self.handle_plot_guess_changed()
+        # reset redraw flag
         self._force_redraw = False
 
-        self._model.plotted_workspaces_inverse_binning = {workspace: self.context.group_pair_context.get_equivalent_group_pair(workspace)
-                                                          for workspace in workspace_list
-                                                          if self.context.group_pair_context.get_equivalent_group_pair(workspace)}
-
-        if self.context.fitting_context.fit_list:
-            self.handle_fit_completed()
-
-        self.handle_plot_guess_changed()
+        self._model.plotted_workspaces_inverse_binning = {
+            workspace: self.context.group_pair_context.get_equivalent_group_pair(workspace)
+            for workspace in workspace_list
+            if self.context.group_pair_context.get_equivalent_group_pair(workspace)}
 
     def handle_fit_completed(self):
         """
         When a new fit is done adds the fit to the plotted workspaces if appropriate
         :return:
         """
+
         if self._model.plot_figure is None:
             return
+
+        label = self._model.plot_figure.gca().get_ylabel()
 
         if self.context.fitting_context.number_of_fits <= 1:
             for workspace_name in self._model.plotted_fit_workspaces:
                 self._model.remove_workpace_from_plot(workspace_name)
+            self._model.plot_figure.gca().legend(prop=dict(size=7))
 
         if self.context.fitting_context.fit_list:
             current_fit = self.context.fitting_context.fit_list[-1]
-            combined_ws_list = self._model.plotted_workspaces + list(self._model.plotted_workspaces_inverse_binning.values())
+            combined_ws_list = self._model.plotted_workspaces + list(
+                self._model.plotted_workspaces_inverse_binning.values())
             list_of_output_workspaces_to_plot = [output for output, input in
                                                  zip(current_fit.output_workspace_names, current_fit.input_workspaces)
                                                  if input in combined_ws_list]
-            list_of_output_workspaces_to_plot = list_of_output_workspaces_to_plot if list_of_output_workspaces_to_plot\
+            list_of_output_workspaces_to_plot = list_of_output_workspaces_to_plot if list_of_output_workspaces_to_plot \
                 else [current_fit.output_workspace_names[-1]]
         else:
             list_of_output_workspaces_to_plot = []
@@ -169,6 +190,7 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         for workspace_name in list_of_output_workspaces_to_plot:
             self._model.add_workspace_to_plot(workspace_name, 1, workspace_name + ': Fit')
             self._model.add_workspace_to_plot(workspace_name, 2, workspace_name + ': Diff')
+        self._model.plot_figure.gca().set_ylabel(label)
 
         self._model.force_redraw()
 
@@ -203,7 +225,7 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         except AttributeError:
             return []
 
-    def get_time_workspaces_to_plot(self,current_group_pair, is_raw, plot_type):
+    def get_time_workspaces_to_plot(self, current_group_pair, is_raw, plot_type):
         """
         :param current_group_pair: The group/pair currently selected
         :param is_raw: Whether to use raw or rebinned data
@@ -215,7 +237,8 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
                 workspace_list = self.context.group_pair_context[current_group_pair].get_asymmetry_workspace_names(
                     self.context.data_context.current_runs)
             else:
-                workspace_list = self.context.group_pair_context[current_group_pair].get_asymmetry_workspace_names_rebinned(
+                workspace_list = self.context.group_pair_context[
+                    current_group_pair].get_asymmetry_workspace_names_rebinned(
                     self.context.data_context.current_runs)
 
             if plot_type == COUNTS_PLOT_TYPE:
@@ -259,10 +282,11 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
 
         for guess in [ws for ws in self._model.plotted_fit_workspaces if '_guess' in ws]:
             self._model.remove_workpace_from_plot(guess)
+            # refresh legend
+            self._model.plot_figure.gca().legend(prop=dict(size=7))
 
         if self.context.fitting_context.plot_guess and self.context.fitting_context.guess_ws is not None:
             self._model.add_workspace_to_plot(self.context.fitting_context.guess_ws,
                                               workspace_index=1,
                                               label='Fit Function Guess')
-
         self._model.force_redraw()

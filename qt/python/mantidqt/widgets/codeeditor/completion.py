@@ -206,6 +206,10 @@ def get_module_import_alias(import_name, text):
         text = text.encode(detect_encoding(BytesIO(text.encode()).readline)[0])
     except UnicodeEncodeError:  # Script contains unicode symbol. Cannot run detect_encoding as it requires ascii.
         text = text.encode('utf-8')
+    try:
+        ast.parse(text)
+    except SyntaxError:  # Script contains syntax errors so cannot parse text
+        return import_name
     for node in ast.walk(ast.parse(text)):
         if isinstance(node, ast.alias) and node.name == import_name:
             return node.asname
