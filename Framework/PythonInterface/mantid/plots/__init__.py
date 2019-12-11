@@ -22,7 +22,7 @@ except ImportError:
    from collections import Iterable   
 from matplotlib.axes import Axes
 from matplotlib.collections import Collection, PolyCollection
-from matplotlib.colors import Colormap, to_rgba
+from matplotlib.colors import Colormap
 from matplotlib.container import Container, ErrorbarContainer
 from matplotlib.image import AxesImage
 from matplotlib.lines import Line2D
