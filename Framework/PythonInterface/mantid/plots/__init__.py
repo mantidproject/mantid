@@ -40,6 +40,7 @@ from mantid.plots.utility import autoscale_on_update
 from mantid.plots.helperfunctions import get_normalize_by_bin_width
 from mantid.plots.scales import PowerScale, SquareScale
 from mantid.plots.utility import artists_hidden, MantidAxType, legend_set_draggable
+from mantidqt.widgets.plotconfigdialog.colorselector import convert_color_to_hex
 from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
 
 
@@ -1222,9 +1223,9 @@ class MantidAxes(Axes):
         # Check that for each line, the fill area is the same colour as the line.
         for collection in self.collections:
             if isinstance(collection, PolyCollection):
-                line_colour = asarray(to_rgba(self.get_lines()[i].get_color()))
-                poly_colour = collection.get_facecolor()
-                if (line_colour != poly_colour).any():
+                line_colour = self.get_lines()[i].get_color()
+                poly_colour = convert_color_to_hex(collection.get_facecolor()[0])
+                if line_colour != poly_colour:
                     return False
                 i = i + 1
         return True
@@ -1258,7 +1259,7 @@ class MantidAxes(Axes):
         # all set to the same colour and so the list of colours is extended with the same colour for each new curve.
         if len(poly_collections) > len(colours):
             for i in range(len(colours)-1):
-                if (colours[i] != asarray(to_rgba(self.get_lines()[i].get_color()))).any():
+                if convert_color_to_hex(colours[i][0]) != self.get_lines()[i].get_color():
                     line_colours = False
                     break
 
