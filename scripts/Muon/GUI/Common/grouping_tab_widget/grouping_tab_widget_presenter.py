@@ -184,11 +184,13 @@ class GroupingTabPresenter(object):
 
     def handle_default_grouping_button_clicked(self):
         self._model.reset_groups_and_pairs_to_default()
+        self._model.reset_selected_groups_and_pairs()
         self.grouping_table_widget.update_view_from_model()
         self.pairing_table_widget.update_view_from_model()
         self.update_description_text()
         self.groupingNotifier.notify_subscribers()
         self.handle_update_all_clicked()
+        self.plot_default_groups_or_pairs()
 
     def on_clear_requested(self):
         self._model.clear()
@@ -203,6 +205,7 @@ class GroupingTabPresenter(object):
             self.pairing_table_widget.update_view_from_model()
             self.update_description_text()
             self.handle_update_all_clicked()
+            self.plot_default_groups_or_pairs()
         else:
             self.on_clear_requested()
 
@@ -214,6 +217,14 @@ class GroupingTabPresenter(object):
     def create_update_thread(self):
         self._update_model = ThreadModelWrapper(self.calculate_all_data)
         return thread_model.ThreadModel(self._update_model)
+
+    def plot_default_groups_or_pairs(self):
+        # if we have no pairs or groups selected, generate a default plot
+        if len(self._model.selected_pairs + self._model.selected_groups) == 0:
+            if len(self._model.pairs) > 0:  # if we have pairs - then plot all pairs
+                self.pairing_table_widget.plot_default_case()
+            else:  # else plot groups
+                self.grouping_table_widget.plot_default_case()
 
     # ------------------------------------------------------------------------------------------------------------------
     # Observer / Observable

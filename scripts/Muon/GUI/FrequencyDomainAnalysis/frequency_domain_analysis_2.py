@@ -32,6 +32,7 @@ from Muon.GUI.Common.phase_table_widget.phase_table_widget import PhaseTabWidget
 from Muon.GUI.Common.results_tab_widget.results_tab_widget import ResultsTabWidget
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_widget import FittingTabWidget
 from Muon.GUI.Common.plotting_widget.plotting_widget import PlottingWidget
+from Muon.GUI.Common.plotting_dock_widget.plotting_dock_widget import PlottingDockWidget
 
 SUPPORTED_FACILITIES = ["ISIS", "SmuS"]
 
@@ -50,10 +51,10 @@ def check_facility():
 
 
 class FrequencyAnalysisGui(QtWidgets.QMainWindow):
-
     """
     The Frequency Domain Analaysis 2.0 interface.
     """
+
     @staticmethod
     def warning_popup(message):
         message_box.warning(str(message))
@@ -87,15 +88,12 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
             workspace_suffix=' FD', frequency_context=self.frequency_context)
 
         # create the dockable widget
-        self.dockable_plot_widget_window = QtWidgets.QDockWidget()
-        self.dockable_plot_widget_window.setMinimumWidth(550)
-        self.dockable_plot_widget_window.setFeatures(
-            QtWidgets.QDockWidget.DockWidgetFloatable | QtWidgets.QDockWidget.DockWidgetMovable)
-        self.dockable_plot_widget_window.setAllowedAreas(QtCore.Qt.RightDockWidgetArea | QtCore.Qt.LeftDockWidgetArea)
-        # create the widget to be stored in the dock
         self.dockable_plot_widget = PlottingWidget(self.context)
-        # add dock widget to main muon analysis window
-        self.dockable_plot_widget_window.setWidget(self.dockable_plot_widget.view)
+        self.dockable_plot_widget_window = PlottingDockWidget(parent=self,
+                                                              plotting_widget=self.dockable_plot_widget.view)
+        self.dockable_plot_widget_window.setMinimumWidth(575)
+
+        # # add dock widget to main Muon analysis window
         self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.dockable_plot_widget_window)
 
         # construct all the widgets.
@@ -129,8 +127,6 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
         self.setup_gui_variable_observers()
 
-        self.setup_alpha_recalculated_observers()
-
         self.setup_grouping_changed_observers()
 
         self.setup_instrument_changed_notifier()
@@ -158,7 +154,8 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.transform.new_data_observer(
             self.dockable_plot_widget.presenter.input_workspace_observer)
 
-        self.context.data_context.message_notifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.message_observer)
+        self.context.data_context.message_notifier.add_subscriber(
+            self.grouping_tab_widget.group_tab_presenter.message_observer)
 
     def setup_tabs(self):
         """
@@ -204,18 +201,20 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.context.gui_context.gui_variable_non_calulation_notifier.add_subscriber(
             self.fitting_tab.fitting_tab_presenter.gui_context_observer)
 
-        self.home_tab.group_widget.selected_group_pair_changed_notifier.add_subscriber(
+        self.grouping_tab_widget.pairing_table_widget.selected_pair_changed_notifier.add_subscriber(
             self.fitting_tab.fitting_tab_presenter.selected_group_pair_observer)
+
+        self.grouping_tab_widget.pairing_table_widget.selected_pair_changed_notifier.add_subscriber(
+            self.dockable_plot_widget.presenter.added_group_or_pair_observer)
+
+        self.grouping_tab_widget.grouping_table_widget.selected_group_changed_notifier.add_subscriber(
+            self.fitting_tab.fitting_tab_presenter.selected_group_pair_observer)
+
+        self.grouping_tab_widget.grouping_table_widget.selected_group_changed_notifier.add_subscriber(
+            self.dockable_plot_widget.presenter.added_group_or_pair_observer)
 
         self.dockable_plot_widget.presenter.plot_type_changed_notifier.add_subscriber(
             self.fitting_tab.fitting_tab_presenter.selected_plot_type_observer)
-
-        self.home_tab.group_widget.selected_group_pair_changed_notifier.add_subscriber(
-            self.dockable_plot_widget.presenter.group_pair_observer)
-
-    def setup_alpha_recalculated_observers(self):
-        self.home_tab.group_widget.pairAlphaNotifier.add_subscriber(
-            self.grouping_tab_widget.group_tab_presenter.loadObserver)
 
     def setup_grouping_changed_observers(self):
         self.grouping_tab_widget.group_tab_presenter.groupingNotifier.add_subscriber(

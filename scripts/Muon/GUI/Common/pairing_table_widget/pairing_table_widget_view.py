@@ -12,7 +12,7 @@ from qtpy.QtCore import Signal
 from Muon.GUI.Common import message_box
 from Muon.GUI.Common.utilities import table_utils
 
-pair_columns = {0: 'pair_name', 1: 'group_1', 2: 'group_2', 3: 'alpha', 4: 'guess_alpha'}
+pair_columns = {0: 'pair_name', 1: 'to_analyse', 2: 'group_1', 3: 'group_2', 4: 'alpha', 5: 'guess_alpha'}
 
 
 class PairingTableView(QtWidgets.QWidget):
@@ -89,14 +89,16 @@ class PairingTableView(QtWidgets.QWidget):
         self.setLayout(self.vertical_layout)
 
     def set_up_table(self):
-        self.pairing_table.setColumnCount(5)
-        self.pairing_table.setHorizontalHeaderLabels(["Pair Name", "Group 1", " Group 2", "Alpha", "Guess Alpha"])
+        self.pairing_table.setColumnCount(6)
+        self.pairing_table.setHorizontalHeaderLabels(["Pair Name", "Analyse", "Group 1", " Group 2",
+                                                      "Alpha", "Guess Alpha"])
         header = self.pairing_table.horizontalHeader()
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(4, QtWidgets.QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(5, QtWidgets.QHeaderView.ResizeToContents)
         vertical_headers = self.pairing_table.verticalHeader()
         vertical_headers.setSectionsMovable(False)
         vertical_headers.setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
@@ -109,7 +111,9 @@ class PairingTableView(QtWidgets.QWidget):
         self.pairing_table.horizontalHeaderItem(2).setToolTip("Group 2 of the pair, selected from the grouping table")
         self.pairing_table.horizontalHeaderItem(3).setToolTip("The value of Alpha for the pair asymmetry:"
                                                               "\n   - The number must be >= 0.0")
-        self.pairing_table.horizontalHeaderItem(4).setToolTip("Replace the current value of Alpha with one estimated"
+
+        self.pairing_table.horizontalHeaderItem(4).setToolTip("Whether to include this pair in the analysis")
+        self.pairing_table.horizontalHeaderItem(5).setToolTip("Replace the current value of Alpha with one estimated"
                                                               " from the data.")
 
     def num_rows(self):
@@ -167,11 +171,16 @@ class PairingTableView(QtWidgets.QWidget):
                 alpha_widget = table_utils.ValidatedTableItem(self._validate_alpha)
                 alpha_widget.setText(entry)
                 self.pairing_table.setItem(row_position, i, alpha_widget)
+            if pair_columns[i] == 'to_analyse':
+                if entry:
+                    item.setCheckState(QtCore.Qt.Checked)
+                else:
+                    item.setCheckState(QtCore.Qt.Unchecked)
             self.pairing_table.setItem(row_position, i, item)
         # guess alpha button
         guess_alpha_widget = self._guess_alpha_button()
         guess_alpha_widget.clicked.connect(lambda: self.guess_alpha_clicked_from_row(row_position))
-        self.pairing_table.setCellWidget(row_position, 4, guess_alpha_widget)
+        self.pairing_table.setCellWidget(row_position, 5, guess_alpha_widget)
 
     def _group_selection_cell_widget(self):
         # The widget for the group selection columns
@@ -196,15 +205,18 @@ class PairingTableView(QtWidgets.QWidget):
         ret = [[None for _ in range(self.num_cols())] for _ in range(self.num_rows())]
         for row in range(self.num_rows()):
             for col in range(self.num_cols()):
-                if col == 1 or col == 2:
+                if pair_columns[col] == "group_1" or pair_columns[col] == "group_2":
                     # columns with widgets
                     ret[row][col] = str(self.pairing_table.cellWidget(row, col).currentText())
-                elif col == 4:
+                elif pair_columns[col] == "guess_alpha":
                     ret[row][col] = "Guess"
                 else:
                     # columns without widgets
                     ret[row][col] = str(self.pairing_table.item(row, col).text())
         return ret
+
+    def get_table_item(self, row, col):
+        return self.pairing_table.item(row, col)
 
     def get_table_item_text(self, row, col):
         return self.pairing_table.item(row, col).text()
@@ -332,7 +344,8 @@ class PairingTableView(QtWidgets.QWidget):
     def _disable_all_table_items(self):
         for row in range(self.num_rows()):
             for col in range(self.num_cols()):
-                if col == 1 or col == 2 or col == 4:
+                column_name = pair_columns[col]
+                if column_name == 'group_1' or column_name == 'group_2' or column_name == 'guess_alpha':
                     item = self.pairing_table.cellWidget(row, col)
                     item.setEnabled(False)
                 else:
@@ -342,17 +355,16 @@ class PairingTableView(QtWidgets.QWidget):
     def _enable_all_table_items(self):
         for row in range(self.num_rows()):
             for col in range(self.num_cols()):
-                if col == 1 or col == 2 or col == 4:
+                column_name = pair_columns[col]
+                if column_name == 'group_1' or column_name == 'group_2' or column_name == 'guess_alpha':
                     item = self.pairing_table.cellWidget(row, col)
                     item.setEnabled(True)
-                elif col == 0:
+                elif column_name == 'pair_name' or column_name == 'alpha':
                     item = self.pairing_table.item(row, col)
                     item.setFlags(QtCore.Qt.ItemIsSelectable)
-                else:
+                elif column_name == 'to_analyse':
                     item = self.pairing_table.item(row, col)
-                    item.setFlags(QtCore.Qt.ItemIsSelectable |
-                                  QtCore.Qt.ItemIsEditable |
-                                  QtCore.Qt.ItemIsEnabled)
+                    item.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
 
     def _enable_all_buttons(self):
         self.add_pair_button.setEnabled(True)
@@ -361,3 +373,15 @@ class PairingTableView(QtWidgets.QWidget):
     def _disable_all_buttons(self):
         self.add_pair_button.setEnabled(False)
         self.remove_pair_button.setEnabled(False)
+
+    def set_to_analyse_state(self, row, state):
+        checked_state = QtCore.Qt.Checked if state is True else QtCore.Qt.Unchecked
+        item = self.get_table_item(row, 1)
+        item.setCheckState(checked_state)
+
+    def set_to_analyse_state_quietly(self, row, state):
+        checked_state = QtCore.Qt.Checked if state is True else QtCore.Qt.Unchecked
+        item = self.get_table_item(row, 1)
+        self.pairing_table.blockSignals(True)
+        item.setCheckState(checked_state)
+        self.pairing_table.blockSignals(False)

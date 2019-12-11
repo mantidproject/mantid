@@ -12,7 +12,7 @@ import sys
 from Muon.GUI.Common.utilities import table_utils
 from Muon.GUI.Common import message_box
 
-group_table_columns = {0: 'group_name', 1: 'detector_ids', 2: 'number_of_detectors'}
+group_table_columns = {0: 'group_name', 1: 'to_analyse', 2: 'detector_ids', 3: 'number_of_detectors'}
 
 
 class GroupingTableView(QtWidgets.QWidget):
@@ -115,12 +115,13 @@ class GroupingTableView(QtWidgets.QWidget):
         self.setLayout(self.vertical_layout)
 
     def set_up_table(self):
-        self.grouping_table.setColumnCount(3)
-        self.grouping_table.setHorizontalHeaderLabels(["Group Name", "Detector IDs", "N Detectors"])
+        self.grouping_table.setColumnCount(4)
+        self.grouping_table.setHorizontalHeaderLabels(["Group Name", "Analyse", "Detector IDs", "N Detectors"])
         header = self.grouping_table.horizontalHeader()
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(2, QtWidgets.QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(3, QtWidgets.QHeaderView.ResizeToContents)
         vertical_headers = self.grouping_table.verticalHeader()
         vertical_headers.setSectionsMovable(False)
         vertical_headers.setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
@@ -129,12 +130,14 @@ class GroupingTableView(QtWidgets.QWidget):
         self.grouping_table.horizontalHeaderItem(0).setToolTip("The name of the group :"
                                                                "\n    - The name must be unique across all groups/pairs"
                                                                "\n    - The name can only use digits, characters and _")
-        self.grouping_table.horizontalHeaderItem(1).setToolTip("The sorted list of detectors :"
+        self.grouping_table.horizontalHeaderItem(1).setToolTip("Whether to include this group in the analysis.")
+
+        self.grouping_table.horizontalHeaderItem(2).setToolTip("The sorted list of detectors :"
                                                                "\n  - The list can only contain integers."
                                                                "\n  - , is used to separate detectors or ranges."
                                                                "\n  - \"-\" denotes a range, i,e \"1-5\" is the same as"
                                                                " \"1,2,3,4,5\" ")
-        self.grouping_table.horizontalHeaderItem(2).setToolTip("The number of detectors in the group.")
+        self.grouping_table.horizontalHeaderItem(3).setToolTip("The number of detectors in the group.")
 
     def num_rows(self):
         return self.grouping_table.rowCount()
@@ -149,15 +152,13 @@ class GroupingTableView(QtWidgets.QWidget):
     # ------------------------------------------------------------------------------------------------------------------
     # Adding / removing table entries
     # ------------------------------------------------------------------------------------------------------------------
-
     def add_entry_to_table(self, row_entries):
         assert len(row_entries) == self.grouping_table.columnCount()
-
         row_position = self.grouping_table.rowCount()
         self.grouping_table.insertRow(row_position)
         for i, entry in enumerate(row_entries):
             item = QtWidgets.QTableWidgetItem(entry)
-            if group_table_columns[i] == group_table_columns[0]:
+            if group_table_columns[i] == 'group_name':
                 # column 0 : group name
                 group_name_widget = table_utils.ValidatedTableItem(self._validate_group_name_entry)
                 group_name_widget.setText(entry)
@@ -165,15 +166,21 @@ class GroupingTableView(QtWidgets.QWidget):
                 self.grouping_table.item(row_position, 0).setToolTip(entry)
                 item.setFlags(QtCore.Qt.ItemIsEnabled)
                 item.setFlags(QtCore.Qt.ItemIsSelectable)
-            if group_table_columns[i] == group_table_columns[1]:
-                # column 1 : detector IDs
+            if group_table_columns[i] == 'to_analyse':
+                # columns 1 : whether to analyse this group
+                if entry:
+                    item.setCheckState(QtCore.Qt.Checked)
+                else:
+                    item.setCheckState(QtCore.Qt.Unchecked)
+            if group_table_columns[i] == 'detector_ids':
+                # column 2 : detector IDs
                 detector_widget = table_utils.ValidatedTableItem()
                 detector_widget.setText(entry)
-                self.grouping_table.setItem(row_position, 1, detector_widget)
-                self.grouping_table.item(row_position, 1).setToolTip(entry)
+                self.grouping_table.setItem(row_position, 2, detector_widget)
+                self.grouping_table.item(row_position, 2).setToolTip(entry)
                 detector_widget.set_validator(self._validate_detector_ID_entry)
-            if group_table_columns[i] == group_table_columns[2]:
-                # column 2 : number of detectors
+            if group_table_columns[i] == 'number_of_detectors':
+                # column 3 : number of detector
                 item.setFlags(QtCore.Qt.ItemIsEnabled)
                 item.setFlags(QtCore.Qt.ItemIsSelectable)
             self.grouping_table.setItem(row_position, i, item)
@@ -294,6 +301,21 @@ class GroupingTableView(QtWidgets.QWidget):
     def get_table_item_text(self, row, col):
         return self.grouping_table.item(row, col).text()
 
+    def get_table_item(self, row, col):
+        return self.grouping_table.item(row, col)
+
+    def set_to_analyse_state(self, row, state):
+        checked_state = QtCore.Qt.Checked if state is True else QtCore.Qt.Unchecked
+        item = self.get_table_item(row, 1)
+        item.setCheckState(checked_state)
+
+    def set_to_analyse_state_quietly(self, row, state):
+        checked_state = QtCore.Qt.Checked if state is True else QtCore.Qt.Unchecked
+        item = self.get_table_item(row, 1)
+        self.grouping_table.blockSignals(True)
+        item.setCheckState(checked_state)
+        self.grouping_table.blockSignals(False)
+
     def get_table_contents(self):
         if self._updating:
             return []
@@ -376,6 +398,9 @@ class GroupingTableView(QtWidgets.QWidget):
                     item.setFlags(QtCore.Qt.ItemIsSelectable |
                                   QtCore.Qt.ItemIsEditable |
                                   QtCore.Qt.ItemIsEnabled)
+
+                if group_table_columns[col] == 'to_analyse':
+                    item.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
                 else:
                     # Group name and number of detectors should remain un-editable
                     item.setFlags(QtCore.Qt.ItemIsSelectable)

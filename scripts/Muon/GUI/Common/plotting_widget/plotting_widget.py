@@ -17,7 +17,7 @@ class PlottingWidget(object):
         # view
         self.view = PlotWidgetView(parent=None)
         # model
-        self.model = PlotWidgetModel(self.view.get_fig())
+        self.model = PlotWidgetModel()
         # presenter
         self.presenter = PlotWidgetPresenter(self.view,
                                              self.model,
