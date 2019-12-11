@@ -46,6 +46,11 @@ void ConvTemplatePresenter::setDeltaFunction(bool on) {
   if (on == m_model.hasDeltaFunction())
     return;
   m_model.setDeltaFunction(on);
+  if (on)
+    m_view->addDeltaFunction();
+  else
+    m_view->removeDeltaFunction();
+
   setErrorsEnabled(false);
   updateViewParameterNames();
   updateViewParameters();
