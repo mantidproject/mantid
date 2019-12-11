@@ -22,7 +22,7 @@ except ImportError:
    from collections import Iterable   
 from matplotlib.axes import Axes
 from matplotlib.collections import Collection, PolyCollection
-from matplotlib.colors import Colormap, to_rgba_array
+from matplotlib.colors import Colormap, to_rgba
 from matplotlib.container import Container, ErrorbarContainer
 from matplotlib.image import AxesImage
 from matplotlib.lines import Line2D
@@ -31,6 +31,7 @@ from matplotlib.projections import register_projection
 from matplotlib.scale import register_scale
 from matplotlib.table import Table
 from mpl_toolkits.mplot3d.axes3d import Axes3D
+from numpy import asarray
 
 from mantid.api import AnalysisDataService as ads
 from mantid.kernel import logger
@@ -1221,7 +1222,7 @@ class MantidAxes(Axes):
         # Check that for each line, the fill area is the same colour as the line.
         for collection in self.collections:
             if isinstance(collection, PolyCollection):
-                line_colour = to_rgba_array(self.get_lines()[i].get_color())
+                line_colour = asarray(to_rgba(self.get_lines()[i].get_color()))
                 poly_colour = collection.get_facecolor()
                 if (line_colour != poly_colour).any():
                     return False
@@ -1257,7 +1258,7 @@ class MantidAxes(Axes):
         # all set to the same colour and so the list of colours is extended with the same colour for each new curve.
         if len(poly_collections) > len(colours):
             for i in range(len(colours)-1):
-                if (colours[i] != to_rgba_array(self.get_lines()[i].get_color())).any():
+                if (colours[i] != asarray(to_rgba(self.get_lines()[i].get_color()))).any():
                     line_colours = False
                     break
 
