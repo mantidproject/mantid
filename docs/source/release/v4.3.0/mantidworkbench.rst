@@ -9,6 +9,7 @@ Improvements
 ############
 
 - Normalization option have been added to 2d plots.
+- The images tab in figure options no longer forces the max value to be greater than the min value.
 
 Bugfixes
 ########
