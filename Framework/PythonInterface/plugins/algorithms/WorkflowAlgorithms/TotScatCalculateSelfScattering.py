@@ -39,7 +39,7 @@ class TotScatCalculateSelfScattering(DataProcessorAlgorithm):
                              doc='Raw workspace.')
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='Focused corrected workspace.')
-        self.declareProperty(FileProperty(name="CalFileName", defaultValue="",
+        self.declareProperty(FileProperty("CalFileName", "",
                                           direction=Direction.Input,
                                           action=FileAction.Load),
                              doc='File path for the instrument calibration file.')
@@ -49,7 +49,7 @@ class TotScatCalculateSelfScattering(DataProcessorAlgorithm):
                              doc='Chemical formula for the sample material.')
 
     def PyExec(self):
-        raw_ws = self.getProperty('RawWorkspace').value
+        raw_ws = self.getProperty('InputWorkspace').value
         sample_geometry = self.getPropertyValue('SampleGeometry')
         sample_material = self.getPropertyValue('SampleMaterial')
         cal_file_name = self.getPropertyValue('CalFileName')

@@ -36,7 +36,7 @@ class MergeWorkspacesWithLimits(DataProcessorAlgorithm):
         # given workspaces must exist
         # and must be public of ExperimentInfo
         issues = dict()
-        ws_group = self.getProperty('WorkspaceGroup').value
+        ws_group = self.getProperty('InputWorkspaces').value
         x_min = self.getProperty('XMin').value
         x_max = self.getProperty('XMax').value
         if not x_min.size == ws_group.size():
@@ -78,7 +78,7 @@ class MergeWorkspacesWithLimits(DataProcessorAlgorithm):
         merged_ws = SumSpectra(InputWorkspace=ws_conjoined, WeightedSum=True, MultiplyBySpectra=False, StoreInADS=False)
         DeleteWorkspace(ws_group)
         DeleteWorkspace(ws_conjoined)
-        self.setProperty('OutputWorkspace ', merged_ws)
+        self.setProperty('OutputWorkspace', merged_ws)
 
     @staticmethod
     def get_common_bin_range_and_largest_spectra(ws_group):

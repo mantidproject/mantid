@@ -35,7 +35,7 @@ class TotScatCalculateSelfScatteringTest(unittest.TestCase):
 
     def test_TotScatCalculateSelfScattering_executes(self):
         raw_ws = Load(Filename='POLARIS98533.nxs')
-        correction_ws = TotScatCalculateSelfScattering(RawWorkspace=raw_ws,
+        correction_ws = TotScatCalculateSelfScattering(InputWorkspace=raw_ws,
                                                        CalFileName=self.cal_file_path,
                                                        SampleGeometry=self.geometry,
                                                        SampleMaterial=self.material)

@@ -87,7 +87,7 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None,
     raw_ws = mantid.Load(Filename='POLARIS'+str(run_number)+'.nxs')
     sample_geometry = common.generate_sample_geometry(sample_details)
     sample_material = common.generate_sample_material(sample_details)
-    self_scattering_correction = mantid.TotScatCalculateSelfScattering(RawWorkspace=raw_ws,
+    self_scattering_correction = mantid.TotScatCalculateSelfScattering(InputWorkspace=raw_ws,
                                                                        CalFileName=cal_file_name,
                                                                        SampleGeometry=sample_geometry,
                                                                        SampleMaterial=sample_material)
@@ -105,7 +105,7 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None,
 
     if merge_banks:
         q_min, q_max = _load_qlims(q_lims)
-        merged_ws = mantid.MergeWorkspacesWithLimits(focused_ws, q_min, q_max)
+        merged_ws = mantid.MergeWorkspacesWithLimits(InputWorkspaces=focused_ws, XMin=q_min, XMax=q_max)
         pdf_output = mantid.PDFFourierTransform(Inputworkspace=merged_ws, InputSofQType="S(Q)-1", PDFType="G(r)",
                                                 Filter=True)
     else:
