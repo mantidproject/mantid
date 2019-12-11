@@ -128,6 +128,7 @@ public:
 
   /// The epoch for GPS times.
   static const boost::posix_time::ptime GPS_EPOCH;
+  static const boost::posix_time::ptime UNIX_EPOCH;
 
   /// Const of one second time duration
   static const time_duration ONE_SECOND;

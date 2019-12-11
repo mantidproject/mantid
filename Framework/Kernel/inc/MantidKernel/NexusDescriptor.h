@@ -90,6 +90,11 @@ public:
   std::string pathOfType(const std::string &type) const;
   /// Query if a given type exists somewhere in the file
   bool classTypeExists(const std::string &classType) const;
+  // Recursively search for the first group which contains a class of type
+  // classType
+  static bool findAndOpenParentGroup(::NeXus::File &file,
+                                     const std::string &classType,
+                                     const std::string &className = "");
 
 private:
   /// Initialize object with filename

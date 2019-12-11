@@ -7,6 +7,7 @@
 #include "MantidDataHandling/BankPulseTimes.h"
 
 using namespace Mantid::Kernel;
+using namespace Mantid::Types::Core;
 //===============================================================================================
 // BankPulseTimes
 //===============================================================================================
@@ -25,7 +26,12 @@ BankPulseTimes::BankPulseTimes(::NeXus::File &file,
     : periodNumbers(pNumbers) {
   file.openData("event_time_zero");
   // Read the offset (time zero)
-  file.getAttr("offset", startTime);
+  if (file.hasAttr("offset"))
+    file.getAttr("offset", startTime);
+  else {
+    auto epoch = DateAndTime(DateAndTime::UNIX_EPOCH);
+    startTime = epoch.toISO8601String();
+  }
   Mantid::Types::Core::DateAndTime start(startTime);
   // Load the seconds offsets
 

@@ -257,7 +257,9 @@ void NexusDescriptor::walkFile(::NeXus::File &file, const std::string &rootPath,
     const std::string &entryClass = it->second;
     const std::string entryPath =
         std::string(rootPath).append("/").append(entryName);
-    if (entryClass == "SDS" || entryClass == "ILL_data_scan_vars") {
+    if (entryClass.empty())
+      continue;
+    else if (entryClass == "SDS" || entryClass == "ILL_data_scan_vars") {
       pmap.emplace(entryPath, entryClass);
     } else if (entryClass == "CDF0.0") {
       // Do nothing with this
@@ -269,6 +271,38 @@ void NexusDescriptor::walkFile(::NeXus::File &file, const std::string &rootPath,
     }
   }
   file.closeGroup();
+}
+
+bool NexusDescriptor::findAndOpenParentGroup(::NeXus::File &file,
+                                             const std::string &classType,
+                                             const std::string &className) {
+  const auto entries = file.getEntries();
+  if (!entries.empty()) {
+    auto foundItem =
+        std::find_if(entries.cbegin(), entries.cend(),
+                     [&className, &classType](const auto &entry) {
+                       const auto &[name, type] = entry;
+                       if (className.empty())
+                         return type == classType;
+                       return name == className && type == classType;
+                     });
+
+    if (foundItem != entries.cend()) {
+      return true;
+    } else {
+      for (const auto &[name, type] : entries) {
+        try {
+          file.openGroup(name, type);
+        } catch (const std::exception &) {
+          continue;
+        }
+        if (findAndOpenParentGroup(file, className, classType))
+          return true;
+      }
+      file.closeGroup();
+    }
+  }
+  return false;
 }
 
 } // namespace Kernel

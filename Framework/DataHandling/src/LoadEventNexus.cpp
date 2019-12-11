@@ -420,24 +420,37 @@ void LoadEventNexus::exec() {
   }
 }
 
-std::pair<DateAndTime, DateAndTime>
-firstLastPulseTimes(::NeXus::File &file, Kernel::Logger &logger) {
+DateAndTime firstPulseTime(::NeXus::File &file, Kernel::Logger &logger) {
   file.openData("event_time_zero");
+  auto info = file.getInfo();
+  if (info.dims[0] == 0) {
+    std::string message =
+        "event_time_zero has zero dimension. Cannot establish run "
+        "start.";
+    logger.warning(message);
+    throw std::runtime_error(message);
+  }
 
-  if (!file.hasAttr("offset"))
-    throw std::runtime_error("No ISO8601 offset attribute provided");
-
-  const auto heldTimeZeroType = file.getInfo().type;
-  // Nexus only requires event_time_zero to be a NXNumber, we support two
-  // possibilities for held type
-
+  DateAndTime offset;
   std::string isooffset; // ISO8601 offset
-  file.getAttr("offset", isooffset);
-  DateAndTime offset(isooffset);
-  std::string units; // time units
+
+  if (file.hasAttr("offset")) {
+    file.getAttr("offset", isooffset);
+    offset = DateAndTime(isooffset);
+  } else if (file.hasAttr("start")) {
+    file.getAttr("start", isooffset);
+    offset = DateAndTime(isooffset);
+  } else
+    offset = DateAndTime(DateAndTime::UNIX_EPOCH);
+
+  std::string units;
   if (file.hasAttr("units"))
     file.getAttr("units", units);
+
+  const auto heldTimeZeroType = file.getInfo().type;
   file.closeData();
+  // Nexus only requires event_time_zero to be a NXNumber, we support two
+  // possibilities for held type
 
   // TODO. Logic here is similar to BankPulseTimes (ctor) should be consolidated
   if (heldTimeZeroType == ::NeXus::UINT64) {
@@ -447,14 +460,9 @@ firstLastPulseTimes(::NeXus::File &file, Kernel::Logger &logger) {
           units);
     std::vector<uint64_t> nanoseconds;
     file.readData("event_time_zero", nanoseconds);
-    if (nanoseconds.empty())
-      throw std::runtime_error(
-          "No event time zeros. Cannot establish run start or end");
     auto absoluteFirst = DateAndTime(int64_t(0), int64_t(nanoseconds.front())) +
                          offset.totalNanoseconds();
-    auto absoluteLast = DateAndTime(int64_t(0), int64_t(nanoseconds.back())) +
-                        offset.totalNanoseconds();
-    return std::make_pair(absoluteFirst, absoluteLast);
+    return absoluteFirst;
   } else if (heldTimeZeroType == ::NeXus::FLOAT64) {
     if (units != "second")
       logger.warning("event_time_zero is double_t, but units not in seconds. "
@@ -462,18 +470,13 @@ firstLastPulseTimes(::NeXus::File &file, Kernel::Logger &logger) {
                      units);
     std::vector<double> seconds;
     file.readData("event_time_zero", seconds);
-    if (seconds.empty())
-      throw std::runtime_error(
-          "No event time zeros. Cannot establish run start or end");
     auto absoluteFirst =
         DateAndTime(seconds.front(), double(0)) + offset.totalNanoseconds();
-    auto absoluteLast =
-        DateAndTime(seconds.back(), double(0)) + offset.totalNanoseconds();
-    return std::make_pair(absoluteFirst, absoluteLast);
-  }
-
-  else {
-    throw std::runtime_error("Unrecognised type for event_time_zero");
+    return absoluteFirst;
+  } else {
+    std::string message = "Unrecognised type for event_time_zero";
+    logger.warning(message);
+    throw std::runtime_error(message);
   }
 } // namespace DataHandling
 
@@ -821,8 +824,16 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   bool hasTotalCounts(true);
   bool haveWeights = false;
   auto firstPulseT = DateAndTime::maximum();
+
+  if (!NexusDescriptor::findAndOpenParentGroup(*m_file, classType))
+    g_log.warning()
+        << "LoadEventNexus cannot find NXevent_data group. No event "
+           "data will be loaded."
+        << std::endl;
+
   while (true) { // should be broken when entry name is set
     const auto entry = m_file->getNextEntry();
+
     const std::string entry_name(entry.first);
     const std::string entry_class(entry.second);
     if (entry_name == NULL_STR && entry_class == NULL_STR)
@@ -837,8 +848,13 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
          * the run_start from the proton_charge log. We are going to get this
          * from our event_time_zero instead
          */
-        auto localFirstLast = firstLastPulseTimes(*m_file, this->g_log);
-        firstPulseT = std::min(firstPulseT, localFirstLast.first);
+        try {
+          auto localFirst = firstPulseTime(*m_file, this->g_log);
+          firstPulseT = std::min(firstPulseT, localFirst);
+        } catch (std::runtime_error &) {
+          m_file->closeGroup();
+          continue;
+        }
       }
       // get the number of events
       std::size_t num = numEvents(*m_file, hasTotalCounts, oldNeXusFileNames);
