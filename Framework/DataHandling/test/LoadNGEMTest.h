@@ -136,7 +136,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MinEventsPerFrame", 20));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxEventsPerFrame", 10));
 
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
   }
 
   void test_MinEventsPerFrame_removes_low_values() {

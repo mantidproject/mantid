@@ -477,7 +477,8 @@ public:
     IndexPeaks alg;
     alg.initialize();
 
-    TS_ASSERT_THROWS(alg.setProperty("MaxOrder", -1), std::invalid_argument)
+    TS_ASSERT_THROWS(alg.setProperty("MaxOrder", -1),
+                     const std::invalid_argument &)
   }
 
   void test_modvector_with_list_length_not_three_throws() {
@@ -485,10 +486,11 @@ public:
     alg.initialize();
 
     for (const auto &propName : {"ModVector1", "ModVector2", "ModVector3"}) {
-      TS_ASSERT_THROWS(alg.setProperty(propName, "0"), std::invalid_argument)
-      TS_ASSERT_THROWS(alg.setProperty(propName, "0,0"), std::invalid_argument)
+      TS_ASSERT_THROWS(alg.setProperty(propName, "0"), std::invalid_argument &)
+      TS_ASSERT_THROWS(alg.setProperty(propName, "0,0"),
+                       std::invalid_argument &)
       TS_ASSERT_THROWS(alg.setProperty(propName, "0,0,0,0"),
-                       std::invalid_argument)
+                       std::invalid_argument &)
     }
   }
 

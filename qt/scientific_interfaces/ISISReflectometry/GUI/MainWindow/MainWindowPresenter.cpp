@@ -204,7 +204,7 @@ void MainWindowPresenter::notifyLoadBatchRequested(int tabIndex) {
   QMap<QString, QVariant> map;
   try {
     map = MantidQt::API::loadJSONFromFile(filename);
-  } catch (const std::runtime_error) {
+  } catch (const std::runtime_error &) {
     m_messageHandler->giveUserCritical(
         "Unable to load requested file. Please load a file of "
         "appropriate format saved from the GUI.",

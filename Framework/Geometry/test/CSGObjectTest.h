@@ -439,7 +439,7 @@ public:
     dir.normalize();
     Track track(V3D(-10, 0, 0), dir);
 
-    TS_ASSERT_THROWS(geom_obj->distance(track), std::runtime_error)
+    TS_ASSERT_THROWS(geom_obj->distance(track), const std::runtime_error &)
   }
 
   void testTrackTwoIsolatedCubes()

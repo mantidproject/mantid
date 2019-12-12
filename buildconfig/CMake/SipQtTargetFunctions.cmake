@@ -81,6 +81,11 @@ function ( mtd_add_sip_module )
   )
 
   add_library ( ${PARSED_TARGET_NAME} MODULE ${_sip_generated_cpp} ${_sip_include_deps} )
+  # Suppress Warnings about sip bindings have PyObject -> PyFunc casts which
+  # is a valid pattern GCC8 onwards detects
+  # GCC 8 onwards needs to disable functional casting at the Python interface
+  target_compile_options( ${PARSED_TARGET_NAME} PRIVATE 
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,8.0>>:-Wno-cast-function-type> )
   target_include_directories ( ${PARSED_TARGET_NAME} SYSTEM PRIVATE ${SIP_INCLUDE_DIR} )
   target_include_directories ( ${PARSED_TARGET_NAME} PRIVATE ${PARSED_INCLUDE_DIRS} )
   target_include_directories ( ${PARSED_TARGET_NAME} SYSTEM PRIVATE ${PARSED_SYSTEM_INCLUDE_DIRS} )
