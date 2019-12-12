@@ -16,6 +16,7 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -60,13 +61,49 @@ const std::string ConvertSCDtoMDE::summary() const {
 std::map<std::string, std::string> ConvertSCDtoMDE::validateInputs() {
   std::map<std::string, std::string> result;
 
+  API::IMDHistoWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
+  std::stringstream inputWSmsg;
+  if (inputWS->getNumDims() != 3) {
+    inputWSmsg << "Incorrect number of dimensions";
+  } else if (inputWS->getDimension(0)->getName() != "y" ||
+             inputWS->getDimension(1)->getName() != "x" ||
+             inputWS->getDimension(2)->getName() != "scanIndex") {
+    inputWSmsg << "Wrong dimensions";
+  } else if (inputWS->getNumExperimentInfo() == 0) {
+    inputWSmsg << "Missing experiment info";
+  } else if (inputWS->getExperimentInfo(0)->getInstrument()->getName() !=
+                 "HB3A" &&
+             inputWS->getExperimentInfo(0)->getInstrument()->getName() !=
+                 "WAND") {
+    inputWSmsg << "This only works for DEMAND (HB3A) or WAND (HB2C)";
+  } else {
+    std::string instrument =
+        inputWS->getExperimentInfo(0)->getInstrument()->getName();
+    const auto run = inputWS->getExperimentInfo(0)->run();
+    size_t number_of_runs = inputWS->getDimension(2)->getNBins();
+    std::vector<std::string> logs;
+    if (instrument == "HB3A")
+      logs = {"omega", "chi", "phi", "monitor", "time"};
+    else
+      logs = {"duration", "monitor_count", "s1"};
+    for (auto log : logs) {
+      if (run.hasProperty(log)) {
+        if (static_cast<size_t>(run.getLogData(log)->size()) != number_of_runs)
+          inputWSmsg << "Log " << log << " has incorrect lenght, ";
+      } else {
+        inputWSmsg << "Missing required log " << log << ", ";
+      }
+    }
+  }
+  if (!inputWSmsg.str().empty())
+    result["InputWorkspace"] = inputWSmsg.str();
+
   std::vector<double> minVals = this->getProperty("MinValues");
   std::vector<double> maxVals = this->getProperty("MaxValues");
 
-  if (minVals.size() != maxVals.size()) {
+  if (minVals.size() != 3 || maxVals.size() != 3) {
     std::stringstream msg;
-    msg << "Rank of MinValues != MaxValues (" << minVals.size()
-        << "!=" << maxVals.size() << ")";
+    msg << "Must provide 3 values, 1 for every dimension";
     result["MinValues"] = msg.str();
     result["MaxValues"] = msg.str();
   } else {
@@ -98,45 +135,47 @@ std::map<std::string, std::string> ConvertSCDtoMDE::validateInputs() {
  */
 void ConvertSCDtoMDE::init() {
 
-  // Box controller properties. These are the defaults
-  this->initBoxControllerProps("5" /*SplitInto*/, 1000 /*SplitThreshold*/,
-                               20 /*MaxRecursionDepth*/);
   declareProperty(std::make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input workspace.");
+  declareProperty(
+      std::make_unique<PropertyWithValue<double>>(
+          "Wavelength", DBL_MAX,
+          boost::make_shared<BoundedValidator<double>>(0.0, 100.0, true),
+          Direction::Input),
+      "Wavelength");
+  declareProperty(
+      std::make_unique<ArrayProperty<double>>("MinValues", "-10,-10,-10"),
+      "It has to be 3 comma separated values, one for each dimension in "
+      "q_sample."
+      "Values smaller then specified here will not be added to "
+      "workspace.");
+  declareProperty(
+      std::make_unique<ArrayProperty<double>>("MaxValues", "10,10,10"),
+      "A list of the same size and the same units as MinValues "
+      "list. Values higher or equal to the specified by "
+      "this list will be ignored");
+  // Box controller properties. These are the defaults
+  this->initBoxControllerProps("5" /*SplitInto*/, 1000 /*SplitThreshold*/,
+                               20 /*MaxRecursionDepth*/);
   declareProperty(std::make_unique<WorkspaceProperty<API::IMDEventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
-  declareProperty(std::make_unique<PropertyWithValue<double>>(
-                      "wavelength", Mantid::EMPTY_DBL(), Direction::Input),
-                  "wavelength");
-  declareProperty(std::make_unique<ArrayProperty<double>>("MinValues"),
-                  "It has to be N comma separated values, where N is the "
-                  "number of dimensions of the target workspace. Values "
-                  "smaller then specified here will not be added to "
-                  "workspace.\n Number N is defined by properties 4,6 and 7 "
-                  "and "
-                  "described on *MD Transformation factory* page. See also "
-                  ":ref:`algm-ConvertToMDMinMaxLocal`");
-  declareProperty(std::make_unique<ArrayProperty<double>>("MaxValues"),
-                  "A list of the same size and the same units as MinValues "
-                  "list. Values higher or equal to the specified by "
-                  "this list will be ignored");
 }
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void ConvertSCDtoMDE::exec() {
-  double wavelength = this->getProperty("wavelength");
+  double wavelength = this->getProperty("Wavelength");
   if (wavelength == Mantid::EMPTY_DBL()) {
-    throw std::invalid_argument("wavelength not entered!");
+    throw std::invalid_argument("Wavelength not entered!");
   }
 
   API::IMDHistoWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
   auto &expInfo = *(inputWS->getExperimentInfo(static_cast<uint16_t>(0)));
   std::string instrument = expInfo.getInstrument()->getName();
-  g_log.notice() << instrument << "\n";
+
   std::vector<double> twotheta, azimuthal;
   std::vector<double> s1, omega, chi, phi;
   if (instrument == "HB3A") {
