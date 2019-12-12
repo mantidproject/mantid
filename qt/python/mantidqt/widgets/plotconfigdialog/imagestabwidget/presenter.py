@@ -7,6 +7,7 @@
 #  This file is part of the mantid workbench.
 
 from __future__ import (absolute_import, unicode_literals)
+from numpy import arange
 
 from matplotlib.colors import LogNorm
 from matplotlib.ticker import LogLocator
@@ -52,7 +53,7 @@ class ImagesTabWidgetPresenter:
 
         locator = None
         if SCALES[props.scale] == LogNorm:
-            locator = LogLocator(subs='all')
+            locator = LogLocator(subs=arange(1, 10))
             if locator.tick_values(vmin=props.vmin,  vmax=props.vmax).size == 0:
                 locator = LogLocator()
                 logger.warning("Minor ticks on colorbar scale cannot be shown "
