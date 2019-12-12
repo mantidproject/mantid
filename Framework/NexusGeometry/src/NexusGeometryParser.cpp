@@ -30,6 +30,7 @@
 #include <sstream>
 #include <tuple>
 #include <type_traits>
+#include <tbb/parallel_sort.h>
 
 namespace Mantid {
 namespace NexusGeometry {
@@ -822,6 +823,7 @@ public:
       builder.addBank(bankName, bankPos, bankRotation);
       // Get the pixel detIds
       auto detectorIds = getDetectorIds(detectorGroup);
+      tbb::parallel_sort(detectorIds.begin(), detectorIds.end());
 
       // We preferentially deal with DETECTOR_SHAPE type shapes. Pixel offsets
       // not needed for this processing
