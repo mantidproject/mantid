@@ -1434,11 +1434,12 @@ bool Algorithm::processGroups() {
           } else {
             // This can happen when one has more than one input group
             // workspaces, having different sizes. For example one workspace
-            // group is the corrections which has N parts (e.g. weights for polarized measurement)
-            // while the other one is the actual input workspace group, where each item needs to be
-            // corrected together with all N inputs of the second group. In this
-            // case processGroup needs to be overridden, which is currently not
-            // possible in python.
+            // group is the corrections which has N parts (e.g. weights for
+            // polarized measurement) while the other one is the actual input
+            // workspace group, where each item needs to be corrected together
+            // with all N inputs of the second group. In this case processGroup
+            // needs to be overridden, which is currently not possible in
+            // python.
             throw std::runtime_error(
                 "Unable to process over groups; consider passing workspaces "
                 "one-by-one or override processGroup method of the algorithm.");

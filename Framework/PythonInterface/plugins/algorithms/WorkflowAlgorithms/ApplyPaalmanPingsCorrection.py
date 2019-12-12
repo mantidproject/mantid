@@ -30,7 +30,6 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
     _rebin_container_ws = False
     _factors = []
 
-
     def category(self):
         return "Workflow\\MIDAS"
 
@@ -386,7 +385,6 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         acc = factor_workspaces['acc']
         ass = factor_workspaces['ass']
         return (sample_workspace / ass) - (container_workspace / acc)
-
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(ApplyPaalmanPingsCorrection)
