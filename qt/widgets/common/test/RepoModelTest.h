@@ -29,6 +29,11 @@ public:
   static void destroySuite(RepoModelTest *suite) { delete suite; }
 
   void setUp() override {
+    if (Mantid::API::ScriptRepositoryFactory::Instance().exists(
+            "ScriptRepositoryImpl")) {
+      Mantid::API::ScriptRepositoryFactory::Instance().unsubscribe(
+          "ScriptRepositoryImpl");
+    }
     Mantid::API::ScriptRepositoryFactory::Instance()
         .subscribe<testing::NiceMock<MockScriptRepositoryImpl>>(
             "ScriptRepositoryImpl");
