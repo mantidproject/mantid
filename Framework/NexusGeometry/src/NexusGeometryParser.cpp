@@ -28,9 +28,9 @@
 #include <boost/regex.hpp>
 #include <numeric>
 #include <sstream>
+#include <tbb/parallel_sort.h>
 #include <tuple>
 #include <type_traits>
-#include <tbb/parallel_sort.h>
 
 namespace Mantid {
 namespace NexusGeometry {
