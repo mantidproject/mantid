@@ -21,6 +21,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/WarningSuppressions.h"
 
+#include <boost/iterator/iterator_facade.hpp>
 #include <boost/math/special_functions/round.hpp>
 
 using Mantid::API::Algorithm;
@@ -32,6 +33,7 @@ using Mantid::Geometry::HKLFilter;
 using Mantid::Geometry::HKLFilter_uptr;
 using Mantid::Geometry::HKLGenerator;
 using Mantid::Geometry::Instrument_const_sptr;
+using Mantid::Geometry::OrientedLattice;
 using Mantid::Geometry::ReflectionCondition_sptr;
 using Mantid::Kernel::DblMatrix;
 using Mantid::Kernel::V3D;
@@ -152,91 +154,133 @@ private:
 };
 
 /**
+ * Create the output PeaksWorkspace
+ * @param inputPeaks The input workspace provided by the user
+ * @param modulationProps The set of modulation properties
+ * @return A new PeaksWorkspace
+ */
+boost::shared_ptr<Mantid::API::IPeaksWorkspace> createOutputWorkspace(
+    const PeaksWorkspace &inputPeaks,
+    const Mantid::Crystal::ModulationProperties &modulationProps) {
+  using Mantid::API::WorkspaceFactory;
+  auto outPeaks = WorkspaceFactory::Instance().createPeaks();
+  outPeaks->setInstrument(inputPeaks.getInstrument());
+  if (modulationProps.saveOnLattice) {
+    auto lattice = std::make_unique<Mantid::Geometry::OrientedLattice>();
+    lattice->setMaxOrder(modulationProps.maxOrder);
+    lattice->setCrossTerm(modulationProps.crossTerms);
+    const auto &offsets = modulationProps.offsets;
+    // there should be a maximum of 3 modulation vectors. Store the
+    // order=(1,0,0),(0,1,0), (0,0,1) vectors
+    for (const auto &offset : offsets) {
+      const V3D &modVector{std::get<3>(offset)};
+      const double m{std::get<0>(offset)}, n{std::get<1>(offset)},
+          p{std::get<2>(offset)};
+      int modNum(-1);
+      if (m == 1 && n == 0 && p == 0)
+        modNum = 1;
+      else if (m == 0 && n == 1 && p == 0)
+        modNum = 2;
+      else if (m == 0 && n == 0 && p == 1)
+        modNum = 3;
+      switch (modNum) {
+      case 1:
+        lattice->setModVec1(modVector);
+        break;
+      case 2:
+        lattice->setModVec2(modVector);
+        break;
+      case 3:
+        lattice->setModVec3(modVector);
+        break;
+      }
+    }
+    outPeaks->mutableSample().setOrientedLattice(std::move(lattice));
+  }
+  return outPeaks;
+}
+
+/**
  * Predict fractional peaks in the range specified by [hklMin, hklMax] and
  * add them to a new PeaksWorkspace
  * @param alg The host algorithm pointer
- * @param hOffsets Offsets to apply to HKL in H direction
- * @param kOffsets Offsets to apply to HKL in K direction
- * @param lOffsets Offsets to apply to HKL in L direction
- * @param requirePeaksOnDetector If true the peaks is required to hit a detector
+ * @param requirePeaksOnDetector If true the peaks is required to hit a
+ * detector
  * @param inputPeaks A peaks workspace used to created new peaks. Defines the
  * instrument and metadata for the search
+ * @param modVectors The set of modulation vectors to use in the search
  * @param strategy An object defining were to start the search and how to
  * advance to the next HKL
  * @return A new PeaksWorkspace containing the predicted fractional peaks
  */
 template <typename SearchStrategy>
-IPeaksWorkspace_sptr
-predictPeaks(Algorithm *const alg, const std::vector<double> &hOffsets,
-             const std::vector<double> &kOffsets,
-             const std::vector<double> &lOffsets,
-             const bool requirePeaksOnDetector,
-             const PeaksWorkspace &inputPeaks, SearchStrategy strategy) {
-  using Mantid::API::WorkspaceFactory;
-  auto outPeaks = WorkspaceFactory::Instance().createPeaks();
-  const auto instrument = inputPeaks.getInstrument();
-  outPeaks->setInstrument(instrument);
-
+IPeaksWorkspace_sptr predictFractionalPeaks(
+    Algorithm *const alg, const bool requirePeaksOnDetector,
+    const PeaksWorkspace &inputPeaks,
+    const Mantid::Crystal::ModulationProperties &modulationProps,
+    SearchStrategy searchStrategy) {
   using Mantid::Geometry::InstrumentRayTracer;
-  const InstrumentRayTracer tracer(instrument);
+
+  const InstrumentRayTracer tracer(inputPeaks.getInstrument());
   const auto &UB = inputPeaks.sample().getOrientedLattice().getUB();
+  const auto &offsets = modulationProps.offsets;
+  auto outPeaks = createOutputWorkspace(inputPeaks, modulationProps);
   using PeakHash = std::array<int, 4>;
   std::vector<PeakHash> alreadyDonePeaks;
 
   V3D currentHKL;
   DblMatrix gonioMatrix;
   int runNumber{0};
-  strategy.initialHKL(&currentHKL, &gonioMatrix, &runNumber);
-  auto progressReporter = strategy.createProgressReporter(alg);
+  searchStrategy.initialHKL(&currentHKL, &gonioMatrix, &runNumber);
+  auto progressReporter = searchStrategy.createProgressReporter(alg);
   while (true) {
-    for (double hOffset : hOffsets) {
-      for (double kOffset : kOffsets) {
-        for (double lOffset : lOffsets) {
-          const V3D candidateHKL(currentHKL[0] + hOffset,
-                                 currentHKL[1] + kOffset,
-                                 currentHKL[2] + lOffset);
-          const V3D qLab = (gonioMatrix * UB * candidateHKL) * 2 * M_PI;
-          if (qLab[2] <= 0)
-            continue;
+    for (const auto &mnpOffset : offsets) {
+      const V3D candidateHKL{currentHKL + std::get<3>(mnpOffset)};
+      const V3D qLab = (gonioMatrix * UB * candidateHKL) * 2 * M_PI;
+      if (qLab[2] <= 0)
+        continue;
 
-          using Mantid::Geometry::IPeak;
-          std::unique_ptr<IPeak> peak;
-          try {
-            peak = inputPeaks.createPeak(qLab);
-          } catch (...) {
-            // If we can't create a valid peak we have no choice but to skip it
-            continue;
-          }
-
-          peak->setGoniometerMatrix(gonioMatrix);
-          if (requirePeaksOnDetector && peak->getDetectorID() < 0)
-            continue;
-          GNU_DIAG_OFF("missing-braces")
-          PeakHash savedPeak{runNumber,
-                             boost::math::iround(1000.0 * candidateHKL[0]),
-                             boost::math::iround(1000.0 * candidateHKL[1]),
-                             boost::math::iround(1000.0 * candidateHKL[2])};
-          GNU_DIAG_ON("missing-braces")
-          auto it =
-              find(alreadyDonePeaks.begin(), alreadyDonePeaks.end(), savedPeak);
-          if (it == alreadyDonePeaks.end())
-            alreadyDonePeaks.emplace_back(std::move(savedPeak));
-          else
-            continue;
-
-          peak->setHKL(candidateHKL);
-          peak->setRunNumber(runNumber);
-          outPeaks->addPeak(*peak);
-        }
+      using Mantid::Geometry::IPeak;
+      std::unique_ptr<IPeak> peak;
+      try {
+        peak = inputPeaks.createPeak(qLab);
+      } catch (...) {
+        // If we can't create a valid peak we have no choice but to skip
+        // it
+        continue;
       }
+
+      peak->setGoniometerMatrix(gonioMatrix);
+      if (requirePeaksOnDetector && peak->getDetectorID() < 0)
+        continue;
+      GNU_DIAG_OFF("missing-braces")
+      PeakHash savedPeak{runNumber,
+                         boost::math::iround(1000.0 * candidateHKL[0]),
+                         boost::math::iround(1000.0 * candidateHKL[1]),
+                         boost::math::iround(1000.0 * candidateHKL[2])};
+      GNU_DIAG_ON("missing-braces")
+      auto it =
+          find(alreadyDonePeaks.begin(), alreadyDonePeaks.end(), savedPeak);
+      if (it == alreadyDonePeaks.end())
+        alreadyDonePeaks.emplace_back(std::move(savedPeak));
+      else
+        continue;
+
+      peak->setHKL(candidateHKL);
+      const double m{std::get<0>(mnpOffset)}, n{std::get<1>(mnpOffset)},
+          p{std::get<2>(mnpOffset)};
+      if (fabs(m) > 0. || fabs(n) > 0. || fabs(p) > 0.)
+        peak->setIntMNP(V3D(m, n, p));
+      peak->setRunNumber(runNumber);
+      outPeaks->addPeak(*peak);
     }
     progressReporter.report();
-    if (!strategy.nextHKL(&currentHKL, &gonioMatrix, &runNumber))
+    if (!searchStrategy.nextHKL(&currentHKL, &gonioMatrix, &runNumber))
       break;
   }
 
   return outPeaks;
-} // namespace
+}
 
 } // namespace
 
@@ -300,6 +344,7 @@ void PredictFractionalPeaks::init() {
                   "If true then the predicted peaks are required to hit a "
                   "detector pixel. Default=true",
                   Direction::Input);
+  ModulationProperties::appendTo(this);
 
   // enable range properties if required
   using Kernel::EnabledWhenProperty;
@@ -315,7 +360,34 @@ void PredictFractionalPeaks::init() {
                             std::move(includeInRangeEqOne),
                             std::move(reflConditionNotEmpty), Kernel::OR));
   }
-
+  // group offset/modulations options together
+  for (const auto &name : {PropertyNames::HOFFSET, PropertyNames::KOFFSET,
+                           PropertyNames::LOFFSET}) {
+    setPropertyGroup(name, "Separate Offsets");
+  }
+  for (const auto &name :
+       {ModulationProperties::ModVector1, ModulationProperties::ModVector2,
+        ModulationProperties::ModVector3, ModulationProperties::MaxOrder,
+        ModulationProperties::CrossTerms}) {
+    setPropertyGroup(name, "Modulation Vectors");
+  }
+  // enable/disable offsets & modulation vectors appropriately
+  for (const auto &offsetName : {PropertyNames::HOFFSET, PropertyNames::KOFFSET,
+                                 PropertyNames::LOFFSET}) {
+    EnabledWhenProperty modVectorOneIsDefault{ModulationProperties::ModVector1,
+                                              Kernel::IS_DEFAULT};
+    EnabledWhenProperty modVectorTwoIsDefault{ModulationProperties::ModVector2,
+                                              Kernel::IS_DEFAULT};
+    EnabledWhenProperty modVectorThreeIsDefault{
+        ModulationProperties::ModVector3, Kernel::IS_DEFAULT};
+    EnabledWhenProperty modVectorOneAndTwoIsDefault{
+        std::move(modVectorOneIsDefault), std::move(modVectorTwoIsDefault),
+        Kernel::AND};
+    setPropertySettings(offsetName,
+                        std::make_unique<Kernel::EnabledWhenProperty>(
+                            std::move(modVectorOneAndTwoIsDefault),
+                            std::move(modVectorThreeIsDefault), Kernel::AND));
+  }
   // Outputs
   declareProperty(
       std::make_unique<WorkspaceProperty<PeaksWorkspace_sptr::element_type>>(
@@ -323,6 +395,10 @@ void PredictFractionalPeaks::init() {
       "Workspace of Peaks with peaks with fractional h,k, and/or l values");
 }
 
+/**
+ * Validate the input once all values are set
+ * @return A map<string,string> containting an help messages for the user
+ */
 std::map<std::string, std::string> PredictFractionalPeaks::validateInputs() {
   std::map<std::string, std::string> helpMessages;
   const PeaksWorkspace_sptr peaks = getProperty(PropertyNames::PEAKS);
@@ -344,20 +420,23 @@ std::map<std::string, std::string> PredictFractionalPeaks::validateInputs() {
   validateRange(PropertyNames::KMIN, PropertyNames::KMAX);
   validateRange(PropertyNames::LMIN, PropertyNames::LMAX);
 
+  // If a modulation vector is provided then maxOrder is needed
+  const auto modVectors =
+      validModulationVectors(getProperty(ModulationProperties::ModVector1),
+                             getProperty(ModulationProperties::ModVector2),
+                             getProperty(ModulationProperties::ModVector3));
+  const int maxOrder = getProperty(ModulationProperties::MaxOrder);
+  if (maxOrder == 0 && !modVectors.empty()) {
+    helpMessages[ModulationProperties::MaxOrder] =
+        "Maxorder required when specifying a modulation vector.";
+  }
   return helpMessages;
 }
 
+/// Execute the algorithm
 void PredictFractionalPeaks::exec() {
   PeaksWorkspace_sptr inputPeaks = getProperty(PropertyNames::PEAKS);
-  std::vector<double> hOffsets = getProperty(PropertyNames::HOFFSET);
-  std::vector<double> kOffsets = getProperty(PropertyNames::KOFFSET);
-  std::vector<double> lOffsets = getProperty(PropertyNames::LOFFSET);
-  if (hOffsets.empty())
-    hOffsets.emplace_back(0.0);
-  if (kOffsets.empty())
-    kOffsets.emplace_back(0.0);
-  if (lOffsets.empty())
-    lOffsets.emplace_back(0.0);
+  auto modulationInfo = getModulationInfo();
   const bool includePeaksInRange = getProperty("IncludeAllPeaksInRange");
   const V3D hklMin{getProperty(PropertyNames::HMIN),
                    getProperty(PropertyNames::KMIN),
@@ -386,16 +465,43 @@ void PredictFractionalPeaks::exec() {
       using Mantid::Geometry::HKLFilterNone;
       filter = std::make_unique<HKLFilterNone>();
     }
-    outPeaks = predictPeaks(
-        this, hOffsets, kOffsets, lOffsets, requirePeakOnDetector, *inputPeaks,
+    outPeaks = predictFractionalPeaks(
+        this, requirePeakOnDetector, *inputPeaks, std::move(modulationInfo),
         PeaksInRangeStrategy(hklMin, hklMax, filter.get(), inputPeaks.get()));
-
   } else {
-    outPeaks =
-        predictPeaks(this, hOffsets, kOffsets, lOffsets, requirePeakOnDetector,
-                     *inputPeaks, PeaksFromIndexedStrategy(inputPeaks.get()));
+    outPeaks = predictFractionalPeaks(
+        this, requirePeakOnDetector, *inputPeaks, std::move(modulationInfo),
+        PeaksFromIndexedStrategy(inputPeaks.get()));
   }
   setProperty(PropertyNames::FRACPEAKS, outPeaks);
+}
+
+/**
+ * @return The list of modulation vectors based on the user input. Anything
+ * specified by the modulation vector parameters takes precedence over the
+ * offsets
+ */
+ModulationProperties PredictFractionalPeaks::getModulationInfo() {
+  // Input validation ensures that we have either specified offests or
+  // modulation vectors
+  const int maxOrder = getProperty(ModulationProperties::MaxOrder);
+
+  if (maxOrder == 0) {
+    std::vector<double> hOffsets = getProperty(PropertyNames::HOFFSET);
+    std::vector<double> kOffsets = getProperty(PropertyNames::KOFFSET);
+    std::vector<double> lOffsets = getProperty(PropertyNames::LOFFSET);
+    if (hOffsets.empty())
+      hOffsets.emplace_back(0.0);
+    if (kOffsets.empty())
+      kOffsets.emplace_back(0.0);
+    if (lOffsets.empty())
+      lOffsets.emplace_back(0.0);
+    const bool crossTerms{false}, saveOnLattice{false};
+    return {generateOffsetVectors(hOffsets, kOffsets, lOffsets), maxOrder,
+            crossTerms, saveOnLattice};
+  } else {
+    return ModulationProperties::create(*this);
+  }
 }
 
 } // namespace Crystal
