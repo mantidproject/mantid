@@ -267,9 +267,8 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             self.plot_all_selected_workspaces()
 
     def handle_instrument_changed(self):
-        if self._model.plot_figure is not None:
-            from matplotlib import pyplot as plt
-            plt.close(self._model.plot_figure)
+        # generate a new blank plot_figure
+        self._view.new_plot_figure(1)
 
     def handle_plot_guess_changed(self):
 
@@ -346,7 +345,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
     def get_workspaces_to_plot(self, is_raw, plot_type):
         """
         :param is_raw: Whether to use raw or rebinned data
-        :param plot_type: Whether to plot counts or asymmetry
+        :param plot_type: plotting type, e.g Counts, Frequency Re
         :return: a list of workspace names
         """
         currently_selected_groups = self.context.group_pair_context.selected_groups

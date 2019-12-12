@@ -33,62 +33,70 @@ class PlottingWidgetPresenterFreqTest(unittest.TestCase):
         self.presenter.get_plot_title = mock.MagicMock(return_value='MUSR62260-62261 bottom')
 
     def test_time_plot_in_FDA(self):
-        self.presenter.get_workspaces_to_plot = mock.MagicMock(return_value=[self.workspace_list[0],self.workspace_list[1]])
+        self.presenter.get_workspace_list_to_plot = mock.MagicMock(
+            return_value=[self.workspace_list[0], self.workspace_list[1]])
         self.presenter.get_plot_title = mock.MagicMock(return_value='MUSR62260-62261 bottom')
+        self.presenter.get_workspace_legend_label = mock.MagicMock(return_value='Label')
+        self.presenter.get_workspace_plot_axis = mock.MagicMock()
 
         self.presenter.handle_use_raw_workspaces_changed()
+        self.model.add_workspace_to_plot.assert_any_call(self.presenter.get_workspace_plot_axis(),
+                                                         self.workspace_list[0],
+                                                         0, 'Label')
 
-        self.model.plot.assert_called_once_with(['MUSR62260; Group; bottom; Asymmetry; FD',
-                                                 'MUSR62261; Group; bottom; Asymmetry; FD'], 'MUSR62260-62261 bottom', 'Time', "Frequency Domain Analysis")
-
+        self.model.add_workspace_to_plot.assert_any_call(self.presenter.get_workspace_plot_axis(),
+                                                         self.workspace_list[1],
+                                                         0, 'Label')
 
     def test_plot_type_changed(self):
-        self.view.get_selected.return_value =  "Asymmetry"
-        self.assertEquals(self.view.get_selected(),"Asymmetry")
+        self.view.get_selected.return_value = "Asymmetry"
+        self.assertEquals(self.view.get_selected(), "Asymmetry")
 
-        self.view.get_selected.return_value =  "Frequency Re"
+        self.view.get_selected.return_value = "Frequency Re"
         self.presenter.handle_plot_type_changed()
         self.assertEquals(self.context._frequency_context.plot_type, "Re")
 
     def test_plot_type_changed_to_time(self):
-        self.view.get_selected.return_value =  "Frequency Re"
+        self.view.get_selected.return_value = "Frequency Re"
 
-        self.view.get_selected.return_value =  "Asymmetry"
+        self.view.get_selected.return_value = "Asymmetry"
         self.presenter.handle_plot_type_changed()
         self.assertEquals(self.context._frequency_context.plot_type, "")
 
     def test_get_workspace_to_plot(self):
-        self.view.get_selected.return_value =  "Frequency Re"
-        self.presenter.get_freq_workspaces_to_plot = mock.Mock()
+        self.view.get_selected.return_value = "Frequency Re"
+        self.presenter.get_freq_workspaces_to_plot = mock.Mock(return_value=["62260;fwd"])
+        self.context.group_pair_context._selected_groups = ["fwd"]
+        self.presenter.get_workspaces_to_plot(True, self.view.get_selected())
 
-        self.presenter.get_workspaces_to_plot("fwd",True, self.view.get_selected() )
         self.assertEquals(self.presenter.get_freq_workspaces_to_plot.call_count, 1)
 
     def test_get_workspaces_to_plot_freq(self):
-        self.view.get_selected.return_value =  "Frequency Re"
+        self.view.get_selected.return_value = "Frequency Re"
         self.context.data_context.current_runs = [[62260]]
         self.context.get_names_of_frequency_domain_workspaces_to_fit = mock.Mock()
-        self.presenter.get_freq_workspaces_to_plot("fwd", self.view.get_selected() )
+        self.presenter.get_freq_workspaces_to_plot("fwd", self.view.get_selected())
 
         self.assertEquals(self.context.get_names_of_frequency_domain_workspaces_to_fit.call_count, 1)
         self.context.get_names_of_frequency_domain_workspaces_to_fit.assert_called_once_with("62260", "fwd", True, "Re")
 
     def test_get_2_workspaces_to_plot_freq(self):
-        self.view.get_selected.return_value =  "Frequency Re"
-        self.context.data_context.current_runs = [[62260],[ 62261]]
+        self.view.get_selected.return_value = "Frequency Re"
+        self.context.data_context.current_runs = [[62260], [62261]]
         self.context.get_names_of_frequency_domain_workspaces_to_fit = mock.Mock()
-        self.presenter.get_freq_workspaces_to_plot("fwd", self.view.get_selected() )
+        self.presenter.get_freq_workspaces_to_plot("fwd", self.view.get_selected())
 
         self.assertEquals(self.context.get_names_of_frequency_domain_workspaces_to_fit.call_count, 1)
-        self.context.get_names_of_frequency_domain_workspaces_to_fit.assert_called_once_with("62260, 62261", "fwd", True, "Re")
+        self.context.get_names_of_frequency_domain_workspaces_to_fit.assert_called_once_with("62260, 62261", "fwd",
+                                                                                             True, "Re")
 
     def test_get_domain_freq(self):
-        self.view.get_selected.return_value =  "Frequency Re"
-        self.assertEquals(self.presenter.get_domain(),"Frequency")
+        self.view.get_selected.return_value = "Frequency Re"
+        self.assertEquals(self.presenter.get_domain(), "Frequency")
 
     def test_get_domain_time(self):
-        self.view.get_selected.return_value =  "Asymmetry"
-        self.assertEquals(self.presenter.get_domain(),"Time")
+        self.view.get_selected.return_value = "Asymmetry"
+        self.assertEquals(self.presenter.get_domain(), "Time")
 
 
 if __name__ == '__main__':
