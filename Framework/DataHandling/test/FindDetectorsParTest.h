@@ -544,8 +544,8 @@ private:
     std::string azim_pattern("0,0,0,");
     std::string pol_pattern("170.565,169.565,168.565,");
     std::string sfp_pattern("1,1,1,");
-    std::string polw_pattern("0.804071,0.804258,0.804442,");
-    std::string azw_pattern("5.72472,5.72472,5.72472,");
+    std::string polw_pattern("0.803981,0.804169,0.804354,");
+    std::string azw_pattern("5.72481,5.72481,5.72481,");
 
     std::array<std::stringstream, 5> bufs;
     for (int j = 0; j < 5; j++) {
