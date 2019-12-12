@@ -267,7 +267,10 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             self.plot_all_selected_workspaces()
 
     def handle_instrument_changed(self):
-        # generate a new blank plot_figure
+        # Clear old model information
+        self._model.clear_plot_model(self._view.get_fig().axes)
+        self.context.fitting_context.clear()
+        # generate a plot window
         self._view.new_plot_figure(1)
 
     def handle_plot_guess_changed(self):

@@ -267,7 +267,8 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.view.grouping_table.item(0, 1).setText("20-25,10,5,4,3,2,1")
 
         self.assertEqual(self.view.get_table_item_text(0, 1), "1-5,10,20-25")
-        self.assertEqual(self.model._context.group_pair_context["group_0"].detectors, [1, 2, 3, 4, 5, 10, 20, 21, 22, 23, 24, 25])
+        self.assertEqual(self.model._context.group_pair_context["group_0"].detectors,
+                         [1, 2, 3, 4, 5, 10, 20, 21, 22, 23, 24, 25])
 
     def test_that_if_detector_list_changed_that_number_of_detectors_updates(self):
         self.presenter.handle_add_group_button_clicked()
@@ -308,7 +309,8 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.view.group_range_use_first_good_data.setChecked(False)
 
         self.assertEqual(self.gui_context['GroupRangeMin'], float(number))
-        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, {'GroupRangeMin': 1.12})
+        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier,
+                                                                  {'GroupRangeMin': 1.12})
 
     def test_disabling_range_min_editing_removes_context_variable(self):
         number = '1.12'
@@ -316,7 +318,8 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.view.group_range_use_first_good_data.setChecked(False)
 
         self.assertEqual(self.gui_context['GroupRangeMin'], float(number))
-        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, {'GroupRangeMin': 1.12})
+        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier,
+                                                                  {'GroupRangeMin': 1.12})
 
         self.view.group_range_use_first_good_data.setChecked(True)
 
@@ -329,7 +332,8 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.view.group_range_use_last_data.setChecked(False)
 
         self.assertEqual(self.gui_context['GroupRangeMax'], float(number))
-        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, {'GroupRangeMax': 1.12})
+        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier,
+                                                                  {'GroupRangeMax': 1.12})
 
     def test_disabling_range_max_editing_removes_context_variable(self):
         number = '1.12'
@@ -337,7 +341,8 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.view.group_range_use_last_data.setChecked(False)
 
         self.assertEqual(self.gui_context['GroupRangeMax'], float(number))
-        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, {'GroupRangeMax': 1.12})
+        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier,
+                                                                  {'GroupRangeMax': 1.12})
 
         self.view.group_range_use_last_data.setChecked(True)
 

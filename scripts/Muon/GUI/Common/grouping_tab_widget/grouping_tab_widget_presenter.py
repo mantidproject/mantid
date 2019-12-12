@@ -13,6 +13,7 @@ import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
 from Muon.GUI.Common import thread_model
 from Muon.GUI.Common.run_selection_dialog import RunSelectionDialog
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
+from Muon.GUI.Common.utilities.run_string_utils import run_string_to_list
 
 
 class GroupingTabPresenter(object):
@@ -20,6 +21,13 @@ class GroupingTabPresenter(object):
     The grouping tab presenter is responsible for synchronizing the group and pair tables. It also maintains
     functionality which covers both groups/pairs ; e.g. loading/saving/updating data.
     """
+
+    @staticmethod
+    def string_to_list(text):
+        # if text == "":
+        #     return []
+        # return [int(i) for i in text.split(",")]
+        return run_string_to_list(text)
 
     def __init__(self, view, model,
                  grouping_table_widget=None,
@@ -40,6 +48,10 @@ class GroupingTabPresenter(object):
         self._view.on_load_grouping_button_clicked(self.handle_load_grouping_from_file)
         self._view.on_save_grouping_button_clicked(self.handle_save_grouping_file)
         self._view.on_default_grouping_button_clicked(self.handle_default_grouping_button_clicked)
+
+        # multi period
+        self._view.on_summed_periods_changed(self.handle_periods_changed)
+        self._view.on_subtracted_periods_changed(self.handle_periods_changed)
 
         # monitors for loaded data changing
         self.loadObserver = GroupingTabPresenter.LoadObserver(self)
@@ -65,6 +77,9 @@ class GroupingTabPresenter(object):
     def update_view_from_model(self):
         self.grouping_table_widget.update_view_from_model()
         self.pairing_table_widget.update_view_from_model()
+        self.hide_multiperiod_widget_if_data_single_period()
+        n_periods = self._model.number_of_periods()
+        self._view.set_period_number_in_period_label(n_periods)
 
     def show(self):
         self._view.show()
@@ -97,7 +112,8 @@ class GroupingTabPresenter(object):
         Calculate alpha for the pair for which "Guess Alpha" button was clicked.
         """
         if len(self._model._data.current_runs) > 1:
-            run, index, ok_clicked = RunSelectionDialog.get_run(self._model._data.current_runs, self._model._data.instrument, self._view)
+            run, index, ok_clicked = RunSelectionDialog.get_run(self._model._data.current_runs,
+                                                                self._model._data.instrument, self._view)
             if not ok_clicked:
                 return
             run_to_use = self._model._data.current_runs[index]
@@ -201,18 +217,58 @@ class GroupingTabPresenter(object):
     def handle_new_data_loaded(self):
         if self._model.is_data_loaded():
             self._model._context.show_raw_data()
-            self.grouping_table_widget.update_view_from_model()
-            self.pairing_table_widget.update_view_from_model()
+            self.update_view_from_model()
             self.update_description_text()
             self.handle_update_all_clicked()
             self.plot_default_groups_or_pairs()
         else:
             self.on_clear_requested()
 
+    def hide_multiperiod_widget_if_data_single_period(self):
+        if self._model.is_data_multi_period():
+            self._view.multi_period_widget_hidden(False)
+        else:
+            self._view.multi_period_widget_hidden(True)
+
+    def update_period_edits(self):
+        summed_periods = self._model.get_summed_periods()
+        subtracted_periods = self._model.get_subtracted_periods()
+
+        self._view.set_summed_periods(",".join([str(p) for p in summed_periods]))
+        self._view.set_subtracted_periods(",".join([str(p) for p in subtracted_periods]))
+
+    def handle_periods_changed(self):
+        self._view.summed_period_edit.blockSignals(True)
+        self._view.subtracted_period_edit.blockSignals(True)
+        summed = self.string_to_list(self._view.get_summed_periods())
+        subtracted = self.string_to_list(self._view.get_subtracted_periods())
+
+        subtracted = [i for i in subtracted if i not in summed]
+
+        n_periods = self._model.number_of_periods()
+        bad_periods = [period for period in summed if (period > n_periods) or period == 0] + \
+                      [period for period in subtracted if (period > n_periods) or period == 0]
+        if len(bad_periods) > 0:
+            self._view.warning_popup(
+                "The following periods are invalid : " + ",".join([str(period) for period in bad_periods]))
+
+        summed = [p for p in summed if (p <= n_periods) and p > 0 and p not in bad_periods]
+        if not summed:
+            summed = [1]
+
+        subtracted = [p for p in subtracted if (p <= n_periods) and p > 0 and p not in bad_periods]
+
+        self._model.update_periods(summed, subtracted)
+
+        self.update_period_edits()
+        self._view.summed_period_edit.blockSignals(False)
+        self._view.subtracted_period_edit.blockSignals(False)
+
     def handle_save_grouping_file(self):
         filename = self._view.show_file_save_browser_and_return_selection()
         if filename != "":
-            xml_utils.save_grouping_to_XML(self._model.groups, self._model.pairs, filename, description=self._view.get_description_text())
+            xml_utils.save_grouping_to_XML(self._model.groups, self._model.pairs, filename,
+                                           description=self._view.get_description_text())
 
     def create_update_thread(self):
         self._update_model = ThreadModelWrapper(self.calculate_all_data)

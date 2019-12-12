@@ -178,3 +178,26 @@ class GroupingTabModel(object):
             return self._data.get_loaded_data_for_run(self._data.current_runs[-1])["FirstGoodData"]
         else:
             return 0.0
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Periods
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def is_data_multi_period(self):
+        return self._data.is_multi_period()
+
+    def number_of_periods(self):
+        if self.is_data_multi_period():
+            return len(self._data.current_data["OutputWorkspace"])
+        else:
+            return 1
+
+    def update_periods(self, summed_periods, subtracted_periods):
+        self._context.gui_context.update_and_send_signal(SubtractedPeriods=subtracted_periods,
+                                                         SummedPeriods=summed_periods)
+
+    def get_summed_periods(self):
+        return self._context.gui_context["SummedPeriods"]
+
+    def get_subtracted_periods(self):
+        return self._context.gui_context["SubtractedPeriods"]

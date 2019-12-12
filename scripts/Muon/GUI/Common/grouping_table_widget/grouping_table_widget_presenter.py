@@ -141,9 +141,9 @@ class GroupingTablePresenter(object):
         changed_item = self._view.get_table_item(row, col)
         group_name = self._view.get_table_item(row, 0).text()
         update_model = True
-        if col == 0 and not self.validate_group_name(changed_item.name()):
+        if col == 0 and not self.validate_group_name(changed_item.text()):
             update_model = False
-        if col == 2 and not self.validate_detector_ids(changed_item.name()):
+        if col == 2 and not self.validate_detector_ids(changed_item.text()):
             update_model = False
         if col == 1:
             update_model = False
