@@ -225,5 +225,18 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
         DeleteWorkspace(sample_1)
         DeleteWorkspace(container_1)
 
+    def test_fixed_window_scan(self):
+
+        Load(Filename='ILL/IN16B/mc-abs-corr-q.nxs', OutputWorkspace='fws_corrections_ass')
+        GroupWorkspaces(InputWorkspaces=['fws_corrections_ass'], OutputWorkspace='fws_corrections')
+        in_ws = Load(Filename='ILL/IN16B/fapi-fws-q.nxs', OutputWorkspace='fapi')
+        out_ws = ApplyPaalmanPingsCorrection(SampleWorkspace=in_ws[0], CorrectionsWorkspace='fws_corrections',
+                                             OutputWorkspace='wsfapicorr')
+        self.assertTrue(out_ws)
+        self.assertTrue(isinstance(out_ws, MatrixWorkspace))
+        self.assertEquals(out_ws.blocksize(), in_ws[0].blocksize())
+        self.assertEquals(out_ws.getNumberHistograms(), in_ws[0].getNumberHistograms())
+        self.assertEquals(out_ws.getAxis(0).getUnit().unitID(), in_ws[0].getAxis(0).getUnit().unitID())
+
 if __name__=="__main__":
     unittest.main()
