@@ -64,6 +64,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
 
     # pylint: disable=too-many-branches
     def PyExec(self):
+        self._setup()
         if not self._use_corrections:
             logger.information('Not using corrections')
         if not self._use_can:
@@ -156,6 +157,8 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         if sample_unit != 'Label':
             output_workspace = self._convert_units(output_workspace, sample_unit, emode, efixed)
 
+        if output_workspace.name():
+            RenameWorkspace(InputWorkspace=output_workspace, OutputWorkspace=self.getPropertyValue('OutputWorkspace'))
         self.setProperty('OutputWorkspace', output_workspace)
         prog_wrkflow.report('Algorithm Complete')
 
@@ -190,17 +193,12 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                 if corrections_issues:
                     issues['CorrectionsWorkspace'] = "\n".join(corrections_issues)
 
-
-        if isinstance(self._sample_workspace, WorkspaceGroup):
-            issues['SampleWorkspace'] = 'WorkspaceGroups are not supported'
-        elif isinstance(self._sample_workspace, MatrixWorkspace):
+        if isinstance(self._sample_workspace, MatrixWorkspace):
             sample_unit_id = self._sample_workspace.getAxis(0).getUnit().unitID()
 
             # Check sample and container X axis units match
             if self._use_can:
-                if isinstance(self._container_workspace, WorkspaceGroup):
-                    issues['CanWorkspace'] = 'WorkspaceGroups are not supported'
-                elif isinstance(self._container_workspace, MatrixWorkspace):
+                if isinstance(self._container_workspace, MatrixWorkspace):
                     can_unit_id = self._container_workspace.getAxis(0).getUnit().unitID()
                     if can_unit_id != sample_unit_id:
                         issues['CanWorkspace'] = 'X axis unit must match SampleWorkspace'
@@ -357,7 +355,9 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         Correct for sample only (when no container is given).
         """
         logger.information('Correcting sample')
-        return sample_workspace / self._convert_units_wavelength(a_ss_workspace)
+        correction_in_lambda = self._convert_units_wavelength(a_ss_workspace)
+        corrected = Divide(LHSWorkspace=sample_workspace, RHSWorkspace=correction_in_lambda)
+        return corrected
 
     def _correct_sample_can(self, sample_workspace, container_workspace, factor_workspaces):
         """
