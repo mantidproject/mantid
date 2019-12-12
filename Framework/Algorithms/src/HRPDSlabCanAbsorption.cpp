@@ -180,6 +180,7 @@ API::MatrixWorkspace_sptr HRPDSlabCanAbsorption::runFlatPlateAbsorption() {
   childAlg->setProperty<int64_t>("NumberOfWavelengthPoints",
                                  getProperty("NumberOfWavelengthPoints"));
   childAlg->setProperty<std::string>("ExpMethod", getProperty("ExpMethod"));
+  childAlg->setProperty<double>("ElementSize", getProperty("ElementSize"));
   // The height and width of the sample holder are standard for HRPD
   const double HRPDCanHeight = 2.3;
   const double HRPDCanWidth = 1.8;
