@@ -174,10 +174,11 @@ class SliceViewerModelTest(unittest.TestCase):
         model = SliceViewerModel(self.ws2d_histo)
         self.assertFalse(model.can_normalize_workspace())
 
-    def test_3d_workspaces_cannot_be_normalized(self):
+    def test_MD_workspaces_cannot_be_normalized(self):
         model = SliceViewerModel(self.ws_MD_3D)
         self.assertFalse(model.can_normalize_workspace())
 
+    def test_MDE_workspaces_cannot_be_normalized(self):
         model = SliceViewerModel(self.ws_MDE_3D)
         self.assertFalse(model.can_normalize_workspace())
 
