@@ -112,9 +112,9 @@ void CreateMDHistoWorkspace::init() {
  */
 void CreateMDHistoWorkspace::exec() {
   MDHistoWorkspace_sptr ws = this->createEmptyOutputWorkspace();
-  Mantid::signal_t *signals = ws->getSignalArray();
-  Mantid::signal_t *errors = ws->getErrorSquaredArray();
-  Mantid::signal_t *nEvents = ws->getNumEventsArray();
+  auto signals = ws->mutableSignalArray();
+  auto errors = ws->mutableErrorSquaredArray();
+  auto nEvents = ws->mutableNumEventsArray();
 
   std::vector<double> signalValues = getProperty("SignalInput");
   std::vector<double> errorValues = getProperty("ErrorInput");

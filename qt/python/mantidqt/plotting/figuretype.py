@@ -13,7 +13,7 @@ Provides facilities to check plot types
 from __future__ import absolute_import
 
 # third party
-from mantid.py3compat import Enum
+from enum import Enum
 from matplotlib.container import ErrorbarContainer
 
 

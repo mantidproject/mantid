@@ -23,6 +23,18 @@ Algorithms
 Data Objects
 ------------
 
+
+
+Geometry
+--------
+
+Improvements
+############
+
+- Increased numerical accuracy when calculating the bounding box of mili-meter sized cylindrical detector pixels.
+
+
+
 Python
 ------
 

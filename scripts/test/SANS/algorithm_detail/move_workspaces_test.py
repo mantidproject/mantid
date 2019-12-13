@@ -38,7 +38,7 @@ def calculate_new_pos_rel_to_rear(ws, move_info, offset):
 
 
 def get_rear_detector_pos(move_info, ws):
-    lab_detector = move_info.detectors[DetectorType.to_string(DetectorType.LAB)]
+    lab_detector = move_info.detectors[DetectorType.LAB.value]
     detector_name = lab_detector.detector_name
     comp_info = ws.componentInfo()
     lab_detector_index = comp_info.indexOfAny(detector_name)

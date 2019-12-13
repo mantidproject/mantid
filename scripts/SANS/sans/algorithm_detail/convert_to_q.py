@@ -32,7 +32,7 @@ def convert_workspace(workspace, state_convert_to_q, output_summed_parts=False,
 
     # Perform either a 1D reduction or a 2D reduction
     reduction_dimensionality = state_convert_to_q.reduction_dimensionality
-    if reduction_dimensionality is ReductionDimensionality.OneDim:
+    if reduction_dimensionality is ReductionDimensionality.ONE_DIM:
         output_workspace, sum_of_counts_workspace, sum_of_norms_workspace = \
             _run_q_1d(workspace, output_summed_parts, conv_to_q_state=state_convert_to_q,
                       pixel_adj_ws=pixel_adj_workspace, wavelength_adj_ws=wavelength_adj_workspace,
@@ -112,7 +112,7 @@ def _run_q_2d(workspace, output_summed_parts, state_convert_to_q,
 
     # Extract relevant settings
     max_q_xy = state_convert_to_q.q_xy_max
-    log_binning = True if state_convert_to_q.q_xy_step_type is RangeStepType.Log else False
+    log_binning = True if state_convert_to_q.q_xy_step_type is RangeStepType.LOG else False
     delta_q = state_convert_to_q.q_xy_step
     radius_cutoff = state_convert_to_q.radius_cutoff / 1000.  # Qxy expects the radius cutoff to be in mm
     wavelength_cutoff = state_convert_to_q.wavelength_cutoff

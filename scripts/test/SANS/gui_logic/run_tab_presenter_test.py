@@ -9,53 +9,50 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
-from mantid.kernel import config
 from mantid.kernel import PropertyManagerDataService
+from mantid.kernel import config
 from mantid.py3compat import mock
-
-from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
-from sans.common.enums import (SANSFacility, ReductionDimensionality, SaveType, ISISReductionMode,
-                               RangeStepType, FitType, SANSInstrument, RowState)
-from sans.test_helper.user_file_test_helper import (create_user_file, sample_user_file, sample_user_file_gravity_OFF,
-                                                    sample_user_file_with_instrument)
-from sans.test_helper.mock_objects import (create_mock_view)
-from sans.test_helper.common import (remove_file)
 from sans.common.enums import BatchReductionEntry, SANSInstrument
+from sans.common.enums import (SANSFacility, ReductionDimensionality, SaveType, ReductionMode,
+                               RangeStepType, FitType, RowState)
 from sans.gui_logic.models.table_model import TableModel, TableIndexModel
+from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
+from sans.test_helper.common import (remove_file)
 from sans.test_helper.file_information_mock import SANSFileInformationMock
+from sans.test_helper.mock_objects import (create_mock_view)
+from sans.test_helper.user_file_test_helper import (create_user_file, sample_user_file, sample_user_file_gravity_OFF)
 
+BATCH_FILE_TEST_CONTENT_1 = [{BatchReductionEntry.SAMPLE_SCATTER: 1, BatchReductionEntry.SAMPLE_TRANSMISSION: 2,
+                              BatchReductionEntry.SAMPLE_DIRECT: 3, BatchReductionEntry.OUTPUT: 'test_file',
+                              BatchReductionEntry.USER_FILE: 'user_test_file'},
+                             {BatchReductionEntry.SAMPLE_SCATTER: 1, BatchReductionEntry.CAN_SCATTER: 2,
+                              BatchReductionEntry.OUTPUT: 'test_file2'}]
 
-BATCH_FILE_TEST_CONTENT_1 = [{BatchReductionEntry.SampleScatter: 1, BatchReductionEntry.SampleTransmission: 2,
-                              BatchReductionEntry.SampleDirect: 3, BatchReductionEntry.Output: 'test_file',
-                              BatchReductionEntry.UserFile: 'user_test_file'},
-                             {BatchReductionEntry.SampleScatter: 1, BatchReductionEntry.CanScatter: 2,
-                              BatchReductionEntry.Output: 'test_file2'}]
+BATCH_FILE_TEST_CONTENT_2 = [{BatchReductionEntry.SAMPLE_SCATTER: 'SANS2D00022024',
+                              BatchReductionEntry.SAMPLE_TRANSMISSION: 'SANS2D00022048',
+                              BatchReductionEntry.SAMPLE_DIRECT: 'SANS2D00022048',
+                              BatchReductionEntry.OUTPUT: 'test_file'},
+                             {BatchReductionEntry.SAMPLE_SCATTER: 'SANS2D00022024',
+                              BatchReductionEntry.OUTPUT: 'test_file2'}]
 
-BATCH_FILE_TEST_CONTENT_2 = [{BatchReductionEntry.SampleScatter: 'SANS2D00022024',
-                              BatchReductionEntry.SampleTransmission: 'SANS2D00022048',
-                              BatchReductionEntry.SampleDirect: 'SANS2D00022048',
-                              BatchReductionEntry.Output: 'test_file'},
-                             {BatchReductionEntry.SampleScatter: 'SANS2D00022024',
-                              BatchReductionEntry.Output: 'test_file2'}]
+BATCH_FILE_TEST_CONTENT_3 = [{BatchReductionEntry.SAMPLE_SCATTER: 'SANS2D00022024',
+                              BatchReductionEntry.SAMPLE_SCATTER_PERIOD: '3',
+                              BatchReductionEntry.OUTPUT: 'test_file'}]
 
-BATCH_FILE_TEST_CONTENT_3 = [{BatchReductionEntry.SampleScatter: 'SANS2D00022024',
-                              BatchReductionEntry.SampleScatterPeriod: '3',
-                              BatchReductionEntry.Output: 'test_file'}]
+BATCH_FILE_TEST_CONTENT_4 = [{BatchReductionEntry.SAMPLE_SCATTER: 'SANS2D00022024',
+                              BatchReductionEntry.SAMPLE_TRANSMISSION: 'SANS2D00022048',
+                              BatchReductionEntry.SAMPLE_DIRECT: 'SANS2D00022048',
+                              BatchReductionEntry.OUTPUT: 'test_file'},
+                             {BatchReductionEntry.SAMPLE_SCATTER: 'SANS2D00022024',
+                              BatchReductionEntry.OUTPUT: 'test_file2'}]
 
-BATCH_FILE_TEST_CONTENT_4 = [{BatchReductionEntry.SampleScatter: 'SANS2D00022024',
-                              BatchReductionEntry.SampleTransmission: 'SANS2D00022048',
-                              BatchReductionEntry.SampleDirect: 'SANS2D00022048',
-                              BatchReductionEntry.Output: 'test_file'},
-                             {BatchReductionEntry.SampleScatter: 'SANS2D00022024',
-                              BatchReductionEntry.Output: 'test_file2'}]
-
-BATCH_FILE_TEST_CONTENT_5 = [{BatchReductionEntry.SampleScatter: 'SANS2D00022024',
-                              BatchReductionEntry.SampleTransmission: 'SANS2D00022048',
-                              BatchReductionEntry.SampleDirect: 'SANS2D00022048',
-                              BatchReductionEntry.Output: 'test_file',
-                              BatchReductionEntry.SampleThickness: '5',
-                              BatchReductionEntry.SampleHeight: '2',
-                              BatchReductionEntry.SampleWidth: '8'}]
+BATCH_FILE_TEST_CONTENT_5 = [{BatchReductionEntry.SAMPLE_SCATTER: 'SANS2D00022024',
+                              BatchReductionEntry.SAMPLE_TRANSMISSION: 'SANS2D00022048',
+                              BatchReductionEntry.SAMPLE_DIRECT: 'SANS2D00022048',
+                              BatchReductionEntry.OUTPUT: 'test_file',
+                              BatchReductionEntry.SAMPLE_THICKNESS: '5',
+                              BatchReductionEntry.SAMPLE_HEIGHT: '2',
+                              BatchReductionEntry.SAMPLE_WIDTH: '8'}]
 
 
 def get_non_empty_row_mock(value):
@@ -116,17 +113,17 @@ class RunTabPresenterTest(unittest.TestCase):
         # Assert
         # Note that the event slices are not set in the user file
         self.assertFalse(view.event_slices)
-        self.assertEqual(view.reduction_dimensionality, ReductionDimensionality.OneDim)
-        self.assertEqual(view.save_types[0], SaveType.NXcanSAS)
+        self.assertEqual(view.reduction_dimensionality, ReductionDimensionality.ONE_DIM)
+        self.assertEqual(view.save_types[0], SaveType.NX_CAN_SAS)
         self.assertTrue(view.zero_error_free)
         self.assertTrue(view.use_optimizations)
-        self.assertEqual(view.reduction_mode, ISISReductionMode.LAB)
+        self.assertEqual(view.reduction_mode, ReductionMode.LAB)
         self.assertEqual(view.merge_scale, 1.)
         self.assertEqual(view.merge_shift, 0.)
         self.assertFalse(view.merge_scale_fit)
         self.assertFalse(view.merge_shift_fit)
         self.assertEqual(view.event_binning, "7000.0,500.0,60000.0")
-        self.assertEqual(view.wavelength_step_type, RangeStepType.Lin)
+        self.assertEqual(view.wavelength_step_type, RangeStepType.LIN)
         self.assertEqual(view.wavelength_min, 1.5)
         self.assertEqual(view.wavelength_max, 12.5)
         self.assertEqual(view.wavelength_step, 0.125)
@@ -142,7 +139,7 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertEqual(view.transmission_monitor, 4)
         self.assertEqual(view.transmission_mn_4_shift, -70)
         self.assertTrue(view.transmission_sample_use_fit)
-        self.assertEqual(view.transmission_sample_fit_type, FitType.Logarithmic)
+        self.assertEqual(view.transmission_sample_fit_type, FitType.LOGARITHMIC)
         self.assertEqual(view.transmission_sample_polynomial_order, 2)
         self.assertEqual(view.transmission_sample_wavelength_min, 1.5)
         self.assertEqual(view.transmission_sample_wavelength_max, 12.5)
@@ -154,7 +151,7 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertEqual(view.q_1d_min_or_rebin_string, "0.001,0.001,0.0126,-0.08,0.2")
         self.assertEqual(view.q_xy_max, 0.05)
         self.assertEqual(view.q_xy_step, 0.001)
-        self.assertEqual(view.q_xy_step_type, RangeStepType.Lin)
+        self.assertEqual(view.q_xy_step_type, RangeStepType.LIN)
         self.assertTrue(view.gravity_on_off)
         self.assertTrue(view.use_q_resolution)
         self.assertEqual(view.q_resolution_sample_a, 14.)
@@ -340,7 +337,7 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertEqual(state0.slice.start_time, None)
         self.assertEqual(state0.slice.end_time, None)
 
-        self.assertEqual(state0.reduction.reduction_dimensionality, ReductionDimensionality.OneDim)
+        self.assertEqual(state0.reduction.reduction_dimensionality, ReductionDimensionality.ONE_DIM)
         self.assertEqual(state0.move.detectors['LAB'].sample_centre_pos1, 0.15544999999999998)
 
         # Clean up
@@ -890,7 +887,7 @@ class RunTabPresenterTest(unittest.TestCase):
 
         presenter.notify_progress(0, [0.0], [1.0])
 
-        self.assertEqual(presenter._table_model.get_table_entry(0).row_state, RowState.Processed)
+        self.assertEqual(presenter._table_model.get_table_entry(0).row_state, RowState.PROCESSED)
         self.assertEqual(presenter._table_model.get_table_entry(0).options_column_model.get_options_string(),
                          'MergeScale=1.0, MergeShift=0.0')
 
@@ -917,7 +914,7 @@ class RunTabPresenterTest(unittest.TestCase):
 
         presenter.notify_progress(0, [], [])
 
-        self.assertEqual(presenter._table_model.get_table_entry(0).row_state, RowState.Processed)
+        self.assertEqual(presenter._table_model.get_table_entry(0).row_state, RowState.PROCESSED)
         self.assertEqual(presenter._table_model.get_table_entry(0).tool_tip, '')
 
     def test_that_process_selected_does_nothing_if_no_states_selected(self):
@@ -1135,7 +1132,7 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter = RunTabPresenter(SANSFacility.ISIS)
         view = mock.MagicMock()
 
-        view.save_types = [SaveType.NoType]
+        view.save_types = [SaveType.NO_TYPE]
 
         view.output_mode_memory_radio_button.isChecked = mock.MagicMock(return_value=False)
         view.output_mode_file_radio_button.isChecked = mock.MagicMock(return_value=True)
@@ -1148,7 +1145,7 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter = RunTabPresenter(SANSFacility.ISIS)
         view = mock.MagicMock()
 
-        view.save_types = [SaveType.NoType]
+        view.save_types = [SaveType.NO_TYPE]
 
         view.output_mode_memory_radio_button.isChecked = mock.MagicMock(return_value=False)
         view.output_mode_file_radio_button.isChecked = mock.MagicMock(return_value=False)
@@ -1160,7 +1157,7 @@ class RunTabPresenterTest(unittest.TestCase):
     def test_that_validate_output_modes_does_not_raise_if_no_file_types_selected_for_memory_mode(self):
         presenter = RunTabPresenter(SANSFacility.ISIS)
         view = mock.MagicMock()
-        view.save_types = [SaveType.NoType]
+        view.save_types = [SaveType.NO_TYPE]
 
         view.output_mode_memory_radio_button.isChecked = mock.Mock(return_value=True)
         view.output_mode_file_radio_button.isChecked = mock.Mock(return_value=False)
@@ -1262,7 +1259,7 @@ class RunTabPresenterTest(unittest.TestCase):
 
     def _get_files_and_mock_presenter(self, content, is_multi_period=True, row_user_file_path=""):
         if row_user_file_path:
-            content[1].update({BatchReductionEntry.UserFile : row_user_file_path})
+            content[1].update({BatchReductionEntry.USER_FILE : row_user_file_path})
 
         batch_parser = mock.MagicMock()
         batch_parser.parse_batch_file = mock.MagicMock(return_value=content)

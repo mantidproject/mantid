@@ -5,26 +5,24 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
+
 import unittest
-import mantid
 
-from sans.state.state import (State)
-from sans.state.data import (StateData)
-from sans.state.move import (StateMove)
-from sans.state.reduction_mode import (StateReductionMode)
-from sans.state.slice_event import (StateSliceEvent)
-from sans.state.mask import (StateMask)
-from sans.state.wavelength import (StateWavelength)
-from sans.state.save import (StateSave)
-from sans.state.normalize_to_monitor import (StateNormalizeToMonitor)
-from sans.state.scale import (StateScale)
-from sans.state.calculate_transmission import (StateCalculateTransmission)
-from sans.state.wavelength_and_pixel_adjustment import (StateWavelengthAndPixelAdjustment)
-from sans.state.adjustment import (StateAdjustment)
-from sans.state.convert_to_q import (StateConvertToQ)
-
-from state_test_helper import assert_validate_error, assert_raises_nothing
 from sans.common.enums import (SANSInstrument, SANSFacility)
+from sans.state.adjustment import (StateAdjustment)
+from sans.state.calculate_transmission import (StateCalculateTransmission)
+from sans.state.convert_to_q import (StateConvertToQ)
+from sans.state.data import (StateData)
+from sans.state.mask import (StateMask)
+from sans.state.move import (StateMove)
+from sans.state.normalize_to_monitor import (StateNormalizeToMonitor)
+from sans.state.reduction_mode import (StateReductionMode)
+from sans.state.save import (StateSave)
+from sans.state.scale import (StateScale)
+from sans.state.slice_event import (StateSliceEvent)
+from sans.state.state import (State)
+from sans.state.wavelength import (StateWavelength)
+from sans.state.wavelength_and_pixel_adjustment import (StateWavelengthAndPixelAdjustment)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -125,11 +123,12 @@ class StateTest(unittest.TestCase):
     def check_bad_and_good_values(self, bad_state, good_state):
         # Bad values
         state = self._get_state(bad_state)
-        assert_validate_error(self, ValueError, state)
+        with self.assertRaises(ValueError):
+            state.validate()
 
         # Good values
         state = self._get_state(good_state)
-        assert_raises_nothing(self, state)
+        self.assertIsNone(state.validate())
 
     def test_that_raises_when_move_has_not_been_set(self):
         self.check_bad_and_good_values({"move": None}, {"move": MockStateMove()})

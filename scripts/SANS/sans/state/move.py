@@ -13,9 +13,9 @@ from __future__ import (absolute_import, division, print_function)
 import copy
 import json
 
-from sans.common.enums import (Coordinates, CanonicalCoordinates, SANSInstrument, DetectorType)
+from sans.common.enums import (CanonicalCoordinates, SANSInstrument, DetectorType)
 from sans.state.automatic_setters import automatic_setters
-from sans.state.state_base import (StateBase, FloatParameter, DictParameter, ClassTypeParameter,
+from sans.state.state_base import (StateBase, FloatParameter, DictParameter,
                                    StringWithNoneParameter, rename_descriptor_names)
 from sans.state.state_functions import (validation_message, set_detector_names, set_monitor_names)
 
@@ -83,9 +83,10 @@ class StateMoveDetector(StateBase):
 @rename_descriptor_names
 class StateMove(StateBase):
     sample_offset = FloatParameter()
-    sample_offset_direction = ClassTypeParameter(Coordinates)
     detectors = DictParameter()
     monitor_names = DictParameter()
+
+    sample_offset_direction = CanonicalCoordinates.Z
 
     def __init__(self):
         super(StateMove, self).__init__()
@@ -119,8 +120,8 @@ class StateMoveLOQ(StateMove):
         self.monitor_names = {}
 
         # Setup the detectors
-        self.detectors = {DetectorType.to_string(DetectorType.LAB): StateMoveDetector(),
-                          DetectorType.to_string(DetectorType.HAB): StateMoveDetector()}
+        self.detectors = {DetectorType.LAB.value: StateMoveDetector(),
+                          DetectorType.HAB.value: StateMoveDetector()}
 
     def validate(self):
         # No validation of the descriptors on this level, let potential exceptions from detectors "bubble" up
@@ -165,8 +166,8 @@ class StateMoveSANS2D(StateMove):
         self.monitor_4_offset = 0.0
 
         # Setup the detectors
-        self.detectors = {DetectorType.to_string(DetectorType.LAB): StateMoveDetector(),
-                          DetectorType.to_string(DetectorType.HAB): StateMoveDetector()}
+        self.detectors = {DetectorType.LAB.value: StateMoveDetector(),
+                          DetectorType.HAB.value: StateMoveDetector()}
 
     def validate(self):
         super(StateMoveSANS2D, self).validate()
@@ -186,7 +187,7 @@ class StateMoveLARMOR(StateMove):
         self.monitor_names = {}
 
         # Setup the detectors
-        self.detectors = {DetectorType.to_string(DetectorType.LAB): StateMoveDetector()}
+        self.detectors = {DetectorType.LAB.value: StateMoveDetector()}
 
     def validate(self):
         super(StateMoveLARMOR, self).validate()
@@ -210,7 +211,7 @@ class StateMoveZOOM(StateMove):
         self.monitor_5_offset = 0.0
 
         # Setup the detectors
-        self.detectors = {DetectorType.to_string(DetectorType.LAB): StateMoveDetector()}
+        self.detectors = {DetectorType.LAB.value: StateMoveDetector()}
 
     def validate(self):
         super(StateMoveZOOM, self).validate()
@@ -329,6 +330,7 @@ def get_move_builder(data_info):
     # The data state has most of the information that we require to define the move. For the factory method, only
     # the instrument is of relevance.
     instrument = data_info.instrument
+
     if instrument is SANSInstrument.LOQ:
         return StateMoveLOQBuilder(data_info)
     elif instrument is SANSInstrument.SANS2D:

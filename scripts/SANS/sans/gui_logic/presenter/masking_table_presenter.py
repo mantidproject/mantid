@@ -54,9 +54,9 @@ def load_workspace(state, workspace_name):
 def run_mask_workspace(state, workspace_to_mask):
     mask_info = state.mask
 
-    detectors = [DetectorType.to_string(DetectorType.LAB), DetectorType.to_string(DetectorType.HAB)] \
-                if DetectorType.to_string(DetectorType.HAB) in mask_info.detectors else\
-                [DetectorType.to_string(DetectorType.LAB)]  # noqa
+    detectors = [DetectorType.LAB.value, DetectorType.HAB.value] \
+                if DetectorType.HAB.value in mask_info.detectors else\
+                [DetectorType.LAB.value]  # noqa
 
     for detector in detectors:
         mask_workspace(component_as_string=detector, workspace=workspace_to_mask, state=state)
@@ -402,8 +402,8 @@ class MaskingTablePresenter(object):
         mask_info = state.mask
         masks = []
 
-        mask_info_lab = mask_info.detectors[DetectorType.to_string(DetectorType.LAB)]
-        mask_info_hab = mask_info.detectors[DetectorType.to_string(DetectorType.HAB)] if DetectorType.to_string(DetectorType.HAB) in mask_info.detectors else None  # noqa
+        mask_info_lab = mask_info.detectors[DetectorType.LAB.value]
+        mask_info_hab = mask_info.detectors[DetectorType.HAB.value] if DetectorType.HAB.value in mask_info.detectors else None  # noqa
 
         # Add the radius mask
         radius_mask = self._get_radius(mask_info)

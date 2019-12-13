@@ -5,14 +5,13 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-import unittest
-import mantid
 
+import unittest
+
+from sans.common.enums import (RangeStepType, DetectorType, SANSFacility, SANSInstrument)
+from sans.state.data import get_data_builder
 from sans.state.wavelength_and_pixel_adjustment import (StateWavelengthAndPixelAdjustment,
                                                         get_wavelength_and_pixel_adjustment_builder)
-from sans.state.data import get_data_builder
-from sans.common.enums import (RebinType, RangeStepType, DetectorType, SANSFacility, SANSInstrument)
-from state_test_helper import assert_validate_error, assert_raises_nothing
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
@@ -23,23 +22,32 @@ class StateWavelengthAndPixelAdjustmentTest(unittest.TestCase):
     def test_that_raises_when_wavelength_entry_is_missing(self):
         # Arrange
         state = StateWavelengthAndPixelAdjustment()
-        assert_validate_error(self, ValueError, state)
+        with self.assertRaises(ValueError):
+            state.validate()
+
         state.wavelength_low = [1.]
-        assert_validate_error(self, ValueError, state)
+        with self.assertRaises(ValueError):
+            state.validate()
+
         state.wavelength_high = [2.]
-        assert_validate_error(self, ValueError, state)
+        with self.assertRaises(ValueError):
+            state.validate()
+
         state.wavelength_step = 2.
-        assert_validate_error(self, ValueError, state)
-        state.wavelength_step_type = RangeStepType.Lin
-        assert_raises_nothing(self, state)
+        with self.assertRaises(ValueError):
+            state.validate()
+
+        state.wavelength_step_type = RangeStepType.LIN
+        self.assertIsNone(state.validate())
 
     def test_that_raises_when_lower_wavelength_is_smaller_than_high_wavelength(self):
         state = StateWavelengthAndPixelAdjustment()
         state.wavelength_low = [2.]
         state.wavelength_high = [1.]
         state.wavelength_step = 2.
-        state.wavelength_step_type = RangeStepType.Lin
-        assert_validate_error(self, ValueError, state)
+        state.wavelength_step_type = RangeStepType.LIN
+        with self.assertRaises(ValueError):
+            state.validate()
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -63,19 +71,17 @@ class StateWavelengthAndPixelAdjustmentBuilderTest(unittest.TestCase):
         builder.set_wavelength_low([1.5])
         builder.set_wavelength_high([2.7])
         builder.set_wavelength_step(0.5)
-        builder.set_wavelength_step_type(RangeStepType.Lin)
+        builder.set_wavelength_step_type(RangeStepType.LIN)
 
         state = builder.build()
 
         # Assert
-        self.assertTrue(state.adjustment_files[DetectorType.to_string(
-                                                                     DetectorType.HAB)].pixel_adjustment_file == "test")
-        self.assertTrue(state.adjustment_files[DetectorType.to_string(
-                                                              DetectorType.HAB)].wavelength_adjustment_file == "test2")
+        self.assertTrue(state.adjustment_files[DetectorType.HAB.value].pixel_adjustment_file == "test")
+        self.assertTrue(state.adjustment_files[DetectorType.HAB.value].wavelength_adjustment_file == "test2")
         self.assertEqual(state.wavelength_low,  [1.5])
         self.assertEqual(state.wavelength_high,  [2.7])
         self.assertEqual(state.wavelength_step,  0.5)
-        self.assertEqual(state.wavelength_step_type, RangeStepType.Lin)
+        self.assertEqual(state.wavelength_step_type, RangeStepType.LIN)
 
 
 if __name__ == '__main__':

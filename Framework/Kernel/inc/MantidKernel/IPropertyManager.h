@@ -67,6 +67,132 @@ public:
   virtual void declareOrReplaceProperty(std::unique_ptr<Property> p,
                                         const std::string &doc = "") = 0;
 
+  /** Add a property of the template type to the list of managed properties
+   *  @param name :: The name to assign to the property
+   *  @param value :: The initial value to assign to the property
+   *  @param validator :: Pointer to the (optional) validator.
+   *  @param doc :: The (optional) documentation string
+   *  @param direction :: The (optional) direction of the property, in, out or
+   * inout
+   *  @throw Exception::ExistsError if a property with the given name already
+   * exists
+   *  @throw std::invalid_argument  if the name argument is empty
+   */
+  template <typename T>
+  void declareProperty(
+      const std::string &name, T value,
+      IValidator_sptr validator = boost::make_shared<NullValidator>(),
+      const std::string &doc = "",
+      const unsigned int direction = Direction::Input) {
+    std::unique_ptr<PropertyWithValue<T>> p =
+        std::make_unique<PropertyWithValue<T>>(name, value, validator,
+                                               direction);
+    declareProperty(std::move(p), doc);
+  }
+
+  /** Add a property to the list of managed properties with no validator
+   *  @param name :: The name to assign to the property
+   *  @param value :: The initial value to assign to the property
+   *  @param doc :: The documentation string
+   *  @param direction :: The (optional) direction of the property, in
+   * (default), out or inout
+   *  @throw Exception::ExistsError if a property with the given name already
+   * exists
+   *  @throw std::invalid_argument  if the name argument is empty
+   */
+  template <typename T>
+  void declareProperty(const std::string &name, T value, const std::string &doc,
+                       const unsigned int direction = Direction::Input) {
+    std::unique_ptr<PropertyWithValue<T>> p =
+        std::make_unique<PropertyWithValue<T>>(
+            name, value, boost::make_shared<NullValidator>(), direction);
+    declareProperty(std::move(p), doc);
+  }
+
+  /** Add a property of the template type to the list of managed properties
+   *  @param name :: The name to assign to the property
+   *  @param value :: The initial value to assign to the property
+   *  @param direction :: The direction of the property, in, out or inout
+   *  @throw Exception::ExistsError if a property with the given name already
+   * exists
+   *  @throw std::invalid_argument  if the name argument is empty
+   */
+  template <typename T>
+  void declareProperty(const std::string &name, T value,
+                       const unsigned int direction) {
+    std::unique_ptr<PropertyWithValue<T>> p =
+        std::make_unique<PropertyWithValue<T>>(
+            name, value, boost::make_shared<NullValidator>(), direction);
+    declareProperty(std::move(p));
+  }
+
+  /** Specialised version of declareProperty template method to prevent the
+   * creation of a
+   *  PropertyWithValue of type const char* if an argument in quotes is passed
+   * (it will be
+   *  converted to a string). The validator, if provided, needs to be a string
+   * validator.
+   *  @param name :: The name to assign to the property
+   *  @param value :: The initial value to assign to the property
+   *  @param validator :: Pointer to the (optional) validator. Ownership will be
+   * taken over.
+   *  @param doc :: The (optional) documentation string
+   *  @param direction :: The (optional) direction of the property, in, out or
+   * inout
+   *  @throw Exception::ExistsError if a property with the given name already
+   * exists
+   *  @throw std::invalid_argument  if the name argument is empty
+   */
+  void declareProperty(
+      const std::string &name, const char *value,
+      IValidator_sptr validator = boost::make_shared<NullValidator>(),
+      const std::string &doc = std::string(),
+      const unsigned int direction = Direction::Input) {
+    // Simply call templated method, converting character array to a string
+    declareProperty(name, std::string(value), std::move(validator), doc,
+                    direction);
+  }
+
+  /** Specialised version of declareProperty template method to prevent the
+   * creation of a
+   *  PropertyWithValue of type const char* if an argument in quotes is passed
+   * (it will be
+   *  converted to a string). The validator, if provided, needs to be a string
+   * validator.
+   *  @param name :: The name to assign to the property
+   *  @param value :: The initial value to assign to the property
+   *  @param doc :: The (optional) documentation string
+   *  @param validator :: Pointer to the (optional) validator. Ownership will be
+   * taken over.
+   *  @param direction :: The (optional) direction of the property, in, out or
+   * inout
+   *  @throw Exception::ExistsError if a property with the given name already
+   * exists
+   *  @throw std::invalid_argument  if the name argument is empty
+   */
+  void declareProperty(
+      const std::string &name, const char *value, const std::string &doc,
+      IValidator_sptr validator = boost::make_shared<NullValidator>(),
+      const unsigned int direction = Direction::Input) {
+    // Simply call templated method, converting character array to a string
+    declareProperty(name, std::string(value), std::move(validator), doc,
+                    direction);
+  }
+
+  /** Add a property of string type to the list of managed properties
+   *  @param name :: The name to assign to the property
+   *  @param value :: The initial value to assign to the property
+   *  @param direction :: The direction of the property, in, out or inout
+   *  @throw Exception::ExistsError if a property with the given name already
+   * exists
+   *  @throw std::invalid_argument  if the name argument is empty
+   */
+  void declareProperty(const std::string &name, const char *value,
+                       const unsigned int direction) {
+    declareProperty(name, std::string(value),
+                    boost::make_shared<NullValidator>(), "", direction);
+  }
+
   /// Removes the property from management
   virtual void removeProperty(const std::string &name,
                               const bool delproperty = true) = 0;
@@ -226,132 +352,6 @@ public:
   virtual void filterByProperty(const TimeSeriesProperty<bool> & /*filte*/) = 0;
 
 protected:
-  /** Add a property of the template type to the list of managed properties
-   *  @param name :: The name to assign to the property
-   *  @param value :: The initial value to assign to the property
-   *  @param validator :: Pointer to the (optional) validator.
-   *  @param doc :: The (optional) documentation string
-   *  @param direction :: The (optional) direction of the property, in, out or
-   * inout
-   *  @throw Exception::ExistsError if a property with the given name already
-   * exists
-   *  @throw std::invalid_argument  if the name argument is empty
-   */
-  template <typename T>
-  void declareProperty(
-      const std::string &name, T value,
-      IValidator_sptr validator = boost::make_shared<NullValidator>(),
-      const std::string &doc = "",
-      const unsigned int direction = Direction::Input) {
-    std::unique_ptr<PropertyWithValue<T>> p =
-        std::make_unique<PropertyWithValue<T>>(name, value, validator,
-                                               direction);
-    declareProperty(std::move(p), doc);
-  }
-
-  /** Add a property to the list of managed properties with no validator
-   *  @param name :: The name to assign to the property
-   *  @param value :: The initial value to assign to the property
-   *  @param doc :: The documentation string
-   *  @param direction :: The (optional) direction of the property, in
-   * (default), out or inout
-   *  @throw Exception::ExistsError if a property with the given name already
-   * exists
-   *  @throw std::invalid_argument  if the name argument is empty
-   */
-  template <typename T>
-  void declareProperty(const std::string &name, T value, const std::string &doc,
-                       const unsigned int direction = Direction::Input) {
-    std::unique_ptr<PropertyWithValue<T>> p =
-        std::make_unique<PropertyWithValue<T>>(
-            name, value, boost::make_shared<NullValidator>(), direction);
-    declareProperty(std::move(p), doc);
-  }
-
-  /** Add a property of the template type to the list of managed properties
-   *  @param name :: The name to assign to the property
-   *  @param value :: The initial value to assign to the property
-   *  @param direction :: The direction of the property, in, out or inout
-   *  @throw Exception::ExistsError if a property with the given name already
-   * exists
-   *  @throw std::invalid_argument  if the name argument is empty
-   */
-  template <typename T>
-  void declareProperty(const std::string &name, T value,
-                       const unsigned int direction) {
-    std::unique_ptr<PropertyWithValue<T>> p =
-        std::make_unique<PropertyWithValue<T>>(
-            name, value, boost::make_shared<NullValidator>(), direction);
-    declareProperty(std::move(p));
-  }
-
-  /** Specialised version of declareProperty template method to prevent the
-   * creation of a
-   *  PropertyWithValue of type const char* if an argument in quotes is passed
-   * (it will be
-   *  converted to a string). The validator, if provided, needs to be a string
-   * validator.
-   *  @param name :: The name to assign to the property
-   *  @param value :: The initial value to assign to the property
-   *  @param validator :: Pointer to the (optional) validator. Ownership will be
-   * taken over.
-   *  @param doc :: The (optional) documentation string
-   *  @param direction :: The (optional) direction of the property, in, out or
-   * inout
-   *  @throw Exception::ExistsError if a property with the given name already
-   * exists
-   *  @throw std::invalid_argument  if the name argument is empty
-   */
-  void declareProperty(
-      const std::string &name, const char *value,
-      IValidator_sptr validator = boost::make_shared<NullValidator>(),
-      const std::string &doc = std::string(),
-      const unsigned int direction = Direction::Input) {
-    // Simply call templated method, converting character array to a string
-    declareProperty(name, std::string(value), std::move(validator), doc,
-                    direction);
-  }
-
-  /** Specialised version of declareProperty template method to prevent the
-   * creation of a
-   *  PropertyWithValue of type const char* if an argument in quotes is passed
-   * (it will be
-   *  converted to a string). The validator, if provided, needs to be a string
-   * validator.
-   *  @param name :: The name to assign to the property
-   *  @param value :: The initial value to assign to the property
-   *  @param doc :: The (optional) documentation string
-   *  @param validator :: Pointer to the (optional) validator. Ownership will be
-   * taken over.
-   *  @param direction :: The (optional) direction of the property, in, out or
-   * inout
-   *  @throw Exception::ExistsError if a property with the given name already
-   * exists
-   *  @throw std::invalid_argument  if the name argument is empty
-   */
-  void declareProperty(
-      const std::string &name, const char *value, const std::string &doc,
-      IValidator_sptr validator = boost::make_shared<NullValidator>(),
-      const unsigned int direction = Direction::Input) {
-    // Simply call templated method, converting character array to a string
-    declareProperty(name, std::string(value), std::move(validator), doc,
-                    direction);
-  }
-
-  /** Add a property of string type to the list of managed properties
-   *  @param name :: The name to assign to the property
-   *  @param value :: The initial value to assign to the property
-   *  @param direction :: The direction of the property, in, out or inout
-   *  @throw Exception::ExistsError if a property with the given name already
-   * exists
-   *  @throw std::invalid_argument  if the name argument is empty
-   */
-  void declareProperty(const std::string &name, const char *value,
-                       const unsigned int direction) {
-    declareProperty(name, std::string(value),
-                    boost::make_shared<NullValidator>(), "", direction);
-  }
-
   /// Get a property by an index
   virtual Property *getPointerToPropertyOrdinal(const int &index) const = 0;
 

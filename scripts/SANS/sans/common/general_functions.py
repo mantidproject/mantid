@@ -20,8 +20,8 @@ from sans.common.constant_containers import (SANSInstrument_enum_list, SANSInstr
 from sans.common.constants import (SANS_FILE_TAG, ALL_PERIODS, SANS2D, EMPTY_NAME,
                                    REDUCED_CAN_TAG)
 from sans.common.log_tagger import (get_tag, has_tag, set_tag, has_hash, get_hash_value, set_hash)
-from sans.common.enums import (DetectorType, RangeStepType, ReductionDimensionality, OutputParts, ISISReductionMode,
-                               SANSInstrument, SANSFacility, DataType, TransmissionType)
+from sans.common.enums import (DetectorType, RangeStepType, ReductionDimensionality, OutputParts, ReductionMode,
+                               SANSFacility, DataType, TransmissionType, SANSInstrument)
 
 # -------------------------------------------
 # Constants
@@ -614,7 +614,7 @@ def get_bins_for_rebin_setting(min_value, max_value, step_value, step_type):
 
         bins.append(lower_bound)
         # We can either have linear or logarithmic steps. The logarithmic step depends on the lower bound.
-        if step_type is RangeStepType.Lin:
+        if step_type is RangeStepType.LIN:
             step = step_value
         else:
             step = lower_bound * step_value
@@ -658,7 +658,7 @@ def get_ranges_for_rebin_array(rebin_array):
     min_value = rebin_array[0]
     step_value = rebin_array[1]
     max_value = rebin_array[2]
-    step_type = RangeStepType.Lin if step_value >= 0. else RangeStepType.Log
+    step_type = RangeStepType.LIN if step_value >= 0. else RangeStepType.LOG
     step_value = abs(step_value)
     return get_ranges_for_rebin_setting(min_value, max_value, step_value, step_type)
 
@@ -705,13 +705,13 @@ def get_standard_output_workspace_name(state, reduction_data_type,
     # 3. Detector name
     move = state.move
     detectors = move.detectors
-    if reduction_data_type is ISISReductionMode.Merged:
+    if reduction_data_type is ReductionMode.MERGED:
         detector_name_short = "merged"
-    elif reduction_data_type is ISISReductionMode.HAB:
-        det_name = detectors[DetectorType.to_string(DetectorType.HAB)].detector_name_short
+    elif reduction_data_type is ReductionMode.HAB:
+        det_name = detectors[DetectorType.HAB.value].detector_name_short
         detector_name_short = det_name if det_name is not None else "hab"
-    elif reduction_data_type is ISISReductionMode.LAB:
-        det_name = detectors[DetectorType.to_string(DetectorType.LAB)].detector_name_short
+    elif reduction_data_type is ReductionMode.LAB:
+        det_name = detectors[DetectorType.LAB.value].detector_name_short
         detector_name_short = det_name if det_name is not None else "lab"
     else:
         raise RuntimeError("SANSStateFunctions: Unknown reduction data type {0} cannot be used to "
@@ -719,7 +719,7 @@ def get_standard_output_workspace_name(state, reduction_data_type,
 
     # 4. Dimensionality
     reduction = state.reduction
-    if reduction.reduction_dimensionality is ReductionDimensionality.OneDim:
+    if reduction.reduction_dimensionality is ReductionDimensionality.ONE_DIM:
         dimensionality_as_string = "_1D"
     else:
         dimensionality_as_string = "_2D"
@@ -730,7 +730,7 @@ def get_standard_output_workspace_name(state, reduction_data_type,
 
     # 6. Phi Limits
     mask = state.mask
-    if reduction.reduction_dimensionality is ReductionDimensionality.OneDim:
+    if reduction.reduction_dimensionality is ReductionDimensionality.ONE_DIM:
         if mask.phi_min and mask.phi_max and (abs(mask.phi_max - mask.phi_min) != 180.0):
             phi_limits_as_string = 'Phi' + str(mask.phi_min) + '_' + str(mask.phi_max)
         else:
@@ -760,7 +760,7 @@ def get_standard_output_workspace_name(state, reduction_data_type,
     return output_workspace_name, output_workspace_base_name
 
 
-def get_transmission_output_name(state, data_type=DataType.Sample, multi_reduction_type=None, fitted=True):
+def get_transmission_output_name(state, data_type=DataType.SAMPLE, multi_reduction_type=None, fitted=True):
     user_specified_output_name = state.save.user_specified_output_name
 
     data = state.data
@@ -768,10 +768,10 @@ def get_transmission_output_name(state, data_type=DataType.Sample, multi_reducti
     short_run_number_as_string = str(short_run_number)
 
     calculated_transmission_state = state.adjustment.calculate_transmission
-    fit = calculated_transmission_state.fit[DataType.to_string(DataType.Sample)]
+    fit = calculated_transmission_state.fit[DataType.SAMPLE]
     wavelength_range_string = "_" + str(fit.wavelength_low) + "_" + str(fit.wavelength_high)
 
-    trans_suffix = "_trans_Sample" if data_type == DataType.Sample else "_trans_Can"
+    trans_suffix = "_trans_Sample" if data_type == DataType.SAMPLE else "_trans_Can"
     trans_suffix = trans_suffix + '_unfitted' if not fitted else trans_suffix
 
     if user_specified_output_name:
@@ -880,7 +880,7 @@ def get_facility(instrument):
     if instrument in SANSInstrument_enum_list:
         return SANSFacility.ISIS
     else:
-        return SANSFacility.NoFacility
+        return SANSFacility.NO_FACILITY
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -937,22 +937,22 @@ def get_state_hash_for_can_reduction(state, reduction_mode, partial_type=None):
 
     # Add a tag for the reduction mode
     state_string = str(new_state_serialized)
-    if reduction_mode is ISISReductionMode.LAB:
+    if reduction_mode is ReductionMode.LAB:
         state_string += "LAB"
-    elif reduction_mode is ISISReductionMode.HAB:
+    elif reduction_mode is ReductionMode.HAB:
         state_string += "HAB"
     else:
         raise RuntimeError("Only LAB and HAB reduction modes are allowed at this point."
                            " {} was provided".format(reduction_mode))
 
     # If we are dealing with a partial output workspace, then mark it as such
-    if partial_type is OutputParts.Count:
+    if partial_type is OutputParts.COUNT:
         state_string += "counts"
-    elif partial_type is OutputParts.Norm:
+    elif partial_type is OutputParts.NORM:
         state_string += "norm"
-    elif partial_type is TransmissionType.Calculated:
+    elif partial_type is TransmissionType.CALCULATED:
         state_string += "calculated_transmission"
-    elif partial_type is TransmissionType.Unfitted:
+    elif partial_type is TransmissionType.UNFITTED:
         state_string += "unfitted_transmission"
     return str(get_hash_value(state_string))
 
@@ -978,9 +978,9 @@ def get_reduced_can_workspace_from_ads(state, output_parts, reduction_mode):
     reduced_can_count = None
     reduced_can_norm = None
     if output_parts:
-        hashed_state_count = get_state_hash_for_can_reduction(state, reduction_mode, OutputParts.Count)
+        hashed_state_count = get_state_hash_for_can_reduction(state, reduction_mode, OutputParts.COUNT)
         reduced_can_count = get_workspace_from_ads_based_on_hash(hashed_state_count)
-        hashed_state_norm = get_state_hash_for_can_reduction(state, reduction_mode, OutputParts.Norm)
+        hashed_state_norm = get_state_hash_for_can_reduction(state, reduction_mode, OutputParts.NORM)
         reduced_can_norm = get_workspace_from_ads_based_on_hash(hashed_state_norm)
     return reduced_can, reduced_can_count, reduced_can_norm
 
@@ -993,9 +993,9 @@ def get_transmission_workspaces_from_ads(state, reduction_mode):
         :param reduction_mode: the reduction mode which at this point is either HAB or LAB
         :return: a reduced transmission can object or None.
         """
-    hashed_state = get_state_hash_for_can_reduction(state, reduction_mode, TransmissionType.Calculated)
+    hashed_state = get_state_hash_for_can_reduction(state, reduction_mode, TransmissionType.CALCULATED)
     calculated_transmission = get_workspace_from_ads_based_on_hash(hashed_state)
-    hashed_state = get_state_hash_for_can_reduction(state, reduction_mode, TransmissionType.Unfitted)
+    hashed_state = get_state_hash_for_can_reduction(state, reduction_mode, TransmissionType.UNFITTED)
     unfitted_transmission = get_workspace_from_ads_based_on_hash(hashed_state)
     return calculated_transmission, unfitted_transmission
 
@@ -1043,6 +1043,7 @@ def get_bank_for_spectrum_number(spectrum_number, instrument):
     :returns: either LAB or HAB
     """
     detector = DetectorType.LAB
+
     if instrument is SANSInstrument.LOQ:
         if 16387 <= spectrum_number <= 17784:
             detector = DetectorType.HAB

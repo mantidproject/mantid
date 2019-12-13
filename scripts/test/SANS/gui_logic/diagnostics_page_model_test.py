@@ -5,11 +5,13 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
+
 import unittest
+
 from sans.common.enums import SANSFacility
 from sans.gui_logic.models.diagnostics_page_model import create_state
-from sans.test_helper.user_file_test_helper import sample_user_file, create_user_file
 from sans.gui_logic.models.state_gui_model import StateGuiModel
+from sans.test_helper.user_file_test_helper import sample_user_file, create_user_file
 from sans.user_file.user_file_reader import UserFileReader
 
 

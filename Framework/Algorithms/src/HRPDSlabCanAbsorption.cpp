@@ -42,14 +42,9 @@ void HRPDSlabCanAbsorption::init() {
   declareProperty("SampleNumberDensity", EMPTY_DBL(), mustBePositive,
                   "The number density of the sample in number of atoms per "
                   "cubic angstrom if not set with SetSampleMaterial");
-
-  std::vector<std::string> thicknesses(4);
-  thicknesses[0] = "0.2";
-  thicknesses[1] = "0.5";
-  thicknesses[2] = "1.0";
-  thicknesses[3] = "1.5";
-  declareProperty("Thickness", "0.2",
-                  boost::make_shared<StringListValidator>(thicknesses));
+  declareProperty("Thickness", 0.2, mustBePositive,
+                  "The thickness of the sample in cm. Common values are 0.2, "
+                  "0.5, 1.0, 1.5");
 
   auto positiveInt = boost::make_shared<BoundedValidator<int64_t>>();
   positiveInt->setLower(1);
@@ -185,15 +180,14 @@ API::MatrixWorkspace_sptr HRPDSlabCanAbsorption::runFlatPlateAbsorption() {
   childAlg->setProperty<int64_t>("NumberOfWavelengthPoints",
                                  getProperty("NumberOfWavelengthPoints"));
   childAlg->setProperty<std::string>("ExpMethod", getProperty("ExpMethod"));
+  childAlg->setProperty<double>("ElementSize", getProperty("ElementSize"));
   // The height and width of the sample holder are standard for HRPD
   const double HRPDCanHeight = 2.3;
   const double HRPDCanWidth = 1.8;
   childAlg->setProperty("SampleHeight", HRPDCanHeight);
   childAlg->setProperty("SampleWidth", HRPDCanWidth);
-  // Valid values are 0.2,0.5,1.0 & 1.5 - would be nice to have a numeric list
-  // validator
-  const std::string thickness = getPropertyValue("Thickness");
-  childAlg->setPropertyValue("SampleThickness", thickness);
+  const double thickness = getProperty("Thickness");
+  childAlg->setProperty("SampleThickness", thickness);
   childAlg->executeAsChildAlg();
   return childAlg->getProperty("OutputWorkspace");
 }

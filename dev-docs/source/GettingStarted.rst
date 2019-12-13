@@ -73,10 +73,13 @@ Red Hat/Cent OS/Fedora
 
 Ubuntu
 ~~~~~~
-Follow the `Ubuntu instructions <http://download.mantidproject.org/ubuntu.html>`_ to add the
-stable release repository and mantid ppa. Download the latest
-`mantid-developer <https://sourceforge.net/projects/mantid/files/developer>`_
-package and install it:
+- Setup the Kitware APT repository to get a recent version of CMake by
+  following `these instructions <https://apt.kitware.com/>`_
+- Follow the `Ubuntu instructions <http://download.mantidproject.org/ubuntu.html>`_
+  to add the stable release repository and mantid ppa.
+- Download the latest
+  `mantid-developer <https://sourceforge.net/projects/mantid/files/developer>`_
+  package and install it:
 
 .. code-block:: sh
 

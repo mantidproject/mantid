@@ -9,22 +9,22 @@
 """ Finds the beam centre."""
 
 from __future__ import (absolute_import, division, print_function)
+
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress,
                         IEventWorkspace)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator)
-
 from sans.algorithm_detail.CreateSANSAdjustmentWorkspaces import CreateSANSAdjustmentWorkspaces
 from sans.algorithm_detail.convert_to_q import convert_workspace
-from sans.algorithm_detail.scale_sans_workspace import scale_workspace
 from sans.algorithm_detail.crop_helper import get_component_name
 from sans.algorithm_detail.mask_sans_workspace import mask_workspace
 from sans.algorithm_detail.move_sans_instrument_component import move_component, MoveTypes
+from sans.algorithm_detail.scale_sans_workspace import scale_workspace
 from sans.algorithm_detail.slice_sans_event import slice_sans_event
+from sans.algorithm_detail.xml_shapes import quadrant_xml
 from sans.common.constants import EMPTY_NAME
+from sans.common.enums import (DetectorType, DataType, MaskingQuadrant)
 from sans.common.general_functions import create_child_algorithm, append_to_sans_file_tag
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
-from sans.common.enums import (DetectorType, DataType, MaskingQuadrant, RangeStepType, RebinType)
-from sans.algorithm_detail.xml_shapes import quadrant_xml
 
 
 class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
@@ -65,16 +65,16 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         self.setPropertyGroup("TransmissionWorkspace", 'Data')
         self.setPropertyGroup("DirectWorkspace", 'Data')
 
-        allowed_detectors = StringListValidator([DetectorType.to_string(DetectorType.LAB),
-                                                 DetectorType.to_string(DetectorType.HAB)])
-        self.declareProperty("Component", DetectorType.to_string(DetectorType.LAB),
+        allowed_detectors = StringListValidator([DetectorType.LAB.value,
+                                                 DetectorType.HAB.value])
+        self.declareProperty("Component", DetectorType.LAB.value,
                              validator=allowed_detectors, direction=Direction.Input,
                              doc="The component of the instrument which is to be reduced.")
 
         # The data type
-        allowed_data = StringListValidator([DataType.to_string(DataType.Sample),
-                                            DataType.to_string(DataType.Can)])
-        self.declareProperty("DataType", DataType.to_string(DataType.Sample),
+        allowed_data = StringListValidator([DataType.SAMPLE.value,
+                                            DataType.CAN.value])
+        self.declareProperty("DataType", DataType.SAMPLE.value,
                              validator=allowed_data, direction=Direction.Input,
                              doc="The component of the instrument which is to be reduced.")
 
@@ -123,9 +123,9 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         # state.compatibility.use_compatibility_mode = self.getProperty('CompatibilityMode').value
 
         # Set test centre
-        state.move.detectors[DetectorType.to_string(DetectorType.LAB)].sample_centre_pos1 = \
+        state.move.detectors[DetectorType.LAB.value].sample_centre_pos1 = \
             self.getProperty("Centre1").value
-        state.move.detectors[DetectorType.to_string(DetectorType.LAB)].sample_centre_pos2 = \
+        state.move.detectors[DetectorType.LAB.value].sample_centre_pos2 = \
             self.getProperty("Centre2").value
 
         component_as_string = self.getProperty("Component").value
@@ -241,7 +241,7 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         # ------------------------------------------------------------
         # 10. Split workspace into 4 quadrant workspaces
         # ------------------------------------------------------------
-        quadrants = [MaskingQuadrant.Left, MaskingQuadrant.Right, MaskingQuadrant.Top, MaskingQuadrant.Bottom]
+        quadrants = [MaskingQuadrant.LEFT, MaskingQuadrant.RIGHT, MaskingQuadrant.TOP, MaskingQuadrant.BOTTOM]
         quadrant_scatter_reduced = {}
         centre = [0, 0, 0]
         r_min = self.getProperty("RMin").value
@@ -263,10 +263,10 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         # # ------------------------------------------------------------
         # # Populate the output
         # # ------------------------------------------------------------
-        self.setProperty("OutputWorkspaceLeft", quadrant_scatter_reduced[MaskingQuadrant.Left])
-        self.setProperty("OutputWorkspaceRight", quadrant_scatter_reduced[MaskingQuadrant.Right])
-        self.setProperty("OutputWorkspaceTop", quadrant_scatter_reduced[MaskingQuadrant.Top])
-        self.setProperty("OutputWorkspaceBottom", quadrant_scatter_reduced[MaskingQuadrant.Bottom])
+        self.setProperty("OutputWorkspaceLeft", quadrant_scatter_reduced[MaskingQuadrant.LEFT])
+        self.setProperty("OutputWorkspaceRight", quadrant_scatter_reduced[MaskingQuadrant.RIGHT])
+        self.setProperty("OutputWorkspaceTop", quadrant_scatter_reduced[MaskingQuadrant.TOP])
+        self.setProperty("OutputWorkspaceBottom", quadrant_scatter_reduced[MaskingQuadrant.BOTTOM])
 
     def _mask_quadrants(self, workspace, shape):
         mask_name = "MaskDetectorsInShape"
@@ -279,7 +279,7 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         scatter_workspace = self.getProperty("ScatterWorkspace").value
         alg_name = "CropToComponent"
 
-        component_to_crop = DetectorType.from_string(component)
+        component_to_crop = DetectorType(component)
         component_to_crop = get_component_name(scatter_workspace, component_to_crop)
 
         crop_options = {"InputWorkspace": scatter_workspace,
@@ -323,9 +323,8 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
                               "WavelengthLow": wavelength_state.wavelength_low[0],
                               "WavelengthHigh": wavelength_state.wavelength_high[0],
                               "WavelengthStep": wavelength_state.wavelength_step,
-                              "WavelengthStepType": RangeStepType.to_string(
-                                  wavelength_state.wavelength_step_type),
-                              "RebinMode": RebinType.to_string(wavelength_state.rebin_type)}
+                              "WavelengthStepType": wavelength_state.wavelength_step_type.value,
+                              "RebinMode": wavelength_state.rebin_type.value}
 
         wavelength_alg = create_child_algorithm(self, wavelength_name, **wavelength_options)
         wavelength_alg.execute()

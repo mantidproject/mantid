@@ -15,7 +15,7 @@ import mantid  # noqa
 from mantid.api import AlgorithmManager
 from sans.user_file.state_director import StateDirectorISIS
 from sans.state.data import get_data_builder
-from sans.common.enums import (SANSFacility, ISISReductionMode, ReductionDimensionality, FitModeForMerge)
+from sans.common.enums import (SANSFacility, ReductionMode, ReductionDimensionality, FitModeForMerge)
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_unmanaged_algorithm
 from sans.common.file_information import SANSFileInformationFactory
@@ -162,7 +162,7 @@ class SANSSingleReductionTest(SingleReductionTest):
         user_file_director = StateDirectorISIS(data_info, file_information)
         user_file_director.set_user_file("USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt")
         # Set the reduction mode to LAB
-        user_file_director.set_reduction_builder_reduction_mode(ISISReductionMode.LAB)
+        user_file_director.set_reduction_builder_reduction_mode(ReductionMode.LAB)
 
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         # COMPATIBILITY BEGIN -- Remove when appropriate
@@ -231,7 +231,7 @@ class SANSSingleReductionTest(SingleReductionTest):
         user_file_director = StateDirectorISIS(data_info, file_information)
         user_file_director.set_user_file("USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt")
         # Set the reduction mode to LAB
-        user_file_director.set_reduction_builder_reduction_mode(ISISReductionMode.HAB)
+        user_file_director.set_reduction_builder_reduction_mode(ReductionMode.HAB)
 
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         # COMPATIBILITY BEGIN -- Remove when appropriate
@@ -285,8 +285,8 @@ class SANSSingleReductionTest(SingleReductionTest):
         user_file_director = StateDirectorISIS(data_info, file_information)
         user_file_director.set_user_file("USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt")
         # Set the reduction mode to LAB
-        user_file_director.set_reduction_builder_reduction_mode(ISISReductionMode.Merged)
-        user_file_director.set_reduction_builder_merge_fit_mode(FitModeForMerge.Both)
+        user_file_director.set_reduction_builder_reduction_mode(ReductionMode.MERGED)
+        user_file_director.set_reduction_builder_merge_fit_mode(FitModeForMerge.BOTH)
         user_file_director.set_reduction_builder_merge_scale(1.0)
         user_file_director.set_reduction_builder_merge_shift(0.0)
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -350,9 +350,9 @@ class SANSSingleReductionTest(SingleReductionTest):
         user_file_director = StateDirectorISIS(data_info, file_information)
         user_file_director.set_user_file("USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt")
         # Set the reduction mode to LAB
-        user_file_director.set_reduction_builder_reduction_mode(ISISReductionMode.LAB)
-        user_file_director.set_reduction_builder_reduction_dimensionality(ReductionDimensionality.TwoDim)
-        user_file_director.set_convert_to_q_builder_reduction_dimensionality(ReductionDimensionality.TwoDim)
+        user_file_director.set_reduction_builder_reduction_mode(ReductionMode.LAB)
+        user_file_director.set_reduction_builder_reduction_dimensionality(ReductionDimensionality.TWO_DIM)
+        user_file_director.set_convert_to_q_builder_reduction_dimensionality(ReductionDimensionality.TWO_DIM)
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         # COMPATIBILITY BEGIN -- Remove when appropriate
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -417,7 +417,7 @@ class SANSSingleReduction2Test(SingleReductionTest):
         user_file_director = StateDirectorISIS(data_info, file_information)
         user_file_director.set_user_file("USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt")
         # Set the reduction mode to HAB
-        user_file_director.set_reduction_builder_reduction_mode(ISISReductionMode.HAB)
+        user_file_director.set_reduction_builder_reduction_mode(ReductionMode.HAB)
         user_file_director.set_compatibility_builder_use_compatibility_mode(False)
 
         # Add some event slices
@@ -542,7 +542,7 @@ class SANSSingleReduction2Test(SingleReductionTest):
         user_file_director = StateDirectorISIS(data_info, file_information)
         user_file_director.set_user_file("USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt")
         # Set the reduction mode to LAB
-        user_file_director.set_reduction_builder_reduction_mode(ISISReductionMode.LAB)
+        user_file_director.set_reduction_builder_reduction_mode(ReductionMode.LAB)
         user_file_director.set_compatibility_builder_use_compatibility_mode(False)
 
         # Add some event slices

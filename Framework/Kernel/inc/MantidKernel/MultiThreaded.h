@@ -127,6 +127,7 @@ void AtomicOp(std::atomic<T> &f, T d, BinaryOp op) {
 // compiler.
 #ifdef _OPENMP
 
+#include "MantidKernel/ConfigService.h"
 #include <omp.h>
 
 /** Includes code to add OpenMP commands to run the next for loop in parallel.
@@ -135,14 +136,18 @@ void AtomicOp(std::atomic<T> &f, T d, BinaryOp op) {
  *   code to be executed in parallel
  */
 #define PARALLEL_FOR_IF(condition)                                             \
-    PRAGMA(omp parallel for if (condition) )
+  setMaxCoresToConfig();                                                       \
+  PARALLEL_SET_DYNAMIC(false);                                                 \
+  PRAGMA(omp parallel for if (condition) )
 
 /** Includes code to add OpenMP commands to run the next for loop in parallel.
  *   This includes no checks to see if workspaces are suitable
  *   and therefore should not be used in any loops that access workspaces.
  */
 #define PARALLEL_FOR_NO_WSP_CHECK()                                            \
-    PRAGMA(omp parallel for)
+  setMaxCoresToConfig();                                                       \
+  PARALLEL_SET_DYNAMIC(false);                                                 \
+  PRAGMA(omp parallel for)
 
 /** Includes code to add OpenMP commands to run the next for loop in parallel.
  *  and declare the variables to be firstprivate.
@@ -150,9 +155,13 @@ void AtomicOp(std::atomic<T> &f, T d, BinaryOp op) {
  *  and therefore should not be used in any loops that access workspace.
  */
 #define PARALLEL_FOR_NOWS_CHECK_FIRSTPRIVATE(variable)                         \
+  setMaxCoresToConfig();                                                       \
+  PARALLEL_SET_DYNAMIC(false);                                                 \
   PRAGMA(omp parallel for firstprivate(variable) )
 
 #define PARALLEL_FOR_NO_WSP_CHECK_FIRSTPRIVATE2(variable1, variable2)          \
+  setMaxCoresToConfig();                                                       \
+  PARALLEL_SET_DYNAMIC(false);                                                 \
   PRAGMA(omp parallel for firstprivate(variable1, variable2) )
 
 /** Ensures that the next execution line or block is only executed if
@@ -195,6 +204,14 @@ void AtomicOp(std::atomic<T> &f, T d, BinaryOp op) {
 #define PARALLEL_SECTIONS PRAGMA(omp sections nowait)
 
 #define PARALLEL_SECTION PRAGMA(omp section)
+
+inline void setMaxCoresToConfig() {
+  const auto maxCores = Mantid::Kernel::ConfigService::Instance().getValue<int>(
+      "MultiThreaded.MaxCores");
+  if (maxCores.get_value_or(0) > 0) {
+    PARALLEL_SET_NUM_THREADS(maxCores.get());
+  }
+}
 
 /** General purpose define for OpenMP, becomes the equivalent of
  * #pragma omp EXPRESSION

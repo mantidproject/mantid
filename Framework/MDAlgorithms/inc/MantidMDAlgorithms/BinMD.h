@@ -64,10 +64,6 @@ private:
   /// Run the algorithm
   void exec() override;
 
-  //    /// Helper method
-  //    template<typename MDE, size_t nd>
-  //    void do_centerpointBin(typename MDEventWorkspace<MDE, nd>::sptr ws);
-
   /// Helper method
   template <typename MDE, size_t nd>
   void binByIterating(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
@@ -82,10 +78,10 @@ private:
   /// Progress reporting
   std::unique_ptr<Mantid::API::Progress> prog = nullptr;
   /// ImplicitFunction used
-  Mantid::Geometry::MDImplicitFunction *implicitFunction;
+  std::unique_ptr<Mantid::Geometry::MDImplicitFunction> implicitFunction;
 
   /// Cached values for speed up
-  size_t *indexMultiplier;
+  std::vector<size_t> indexMultiplier;
   signal_t *signals;
   signal_t *errors;
   signal_t *numEvents;

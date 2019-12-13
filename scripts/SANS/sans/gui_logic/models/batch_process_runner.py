@@ -8,7 +8,7 @@ from qtpy.QtCore import Slot, QThreadPool, Signal, QObject
 from sans.sans_batch import SANSBatchReduction
 from sans.algorithm_detail.batch_execution import load_workspaces_from_states
 from ui.sans_isis.worker import Worker
-from sans.common.enums import ISISReductionMode
+from sans.common.enums import ReductionMode
 
 
 class BatchProcessRunner(QObject):
@@ -67,7 +67,7 @@ class BatchProcessRunner(QObject):
             try:
                 out_scale_factors, out_shift_factors = \
                     self.batch_processor([state], use_optimizations, output_mode, plot_results, output_graph, save_can)
-                if state.reduction.reduction_mode == ISISReductionMode.Merged:
+                if state.reduction.reduction_mode == ReductionMode.MERGED:
                     out_shift_factors = out_shift_factors[0]
                     out_scale_factors = out_scale_factors[0]
                 else:

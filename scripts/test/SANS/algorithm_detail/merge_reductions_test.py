@@ -5,18 +5,17 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-import unittest
-import mantid
-from sans.algorithm_detail.merge_reductions import (MergeFactory, ISIS1DMerger)
-from sans.algorithm_detail.bundles import OutputPartsBundle
 
+import unittest
+
+from sans.algorithm_detail.bundles import OutputPartsBundle
+from sans.algorithm_detail.merge_reductions import (MergeFactory, ISIS1DMerger)
+from sans.common.constants import EMPTY_NAME
+from sans.common.enums import (DataType, ReductionMode)
+from sans.common.enums import (ReductionDimensionality, FitModeForMerge)
+from sans.common.general_functions import create_unmanaged_algorithm
 from sans.state.reduction_mode import StateReductionMode
 from sans.test_helper.test_director import TestDirector
-
-from sans.common.enums import (ISISReductionMode, ReductionDimensionality, FitModeForMerge)
-from sans.common.general_functions import create_unmanaged_algorithm
-from sans.common.constants import EMPTY_NAME
-from sans.common.enums import (DataType, ISISReductionMode)
 
 
 class MergeReductionsTest(unittest.TestCase):
@@ -33,11 +32,11 @@ class MergeReductionsTest(unittest.TestCase):
         return create_alg.getProperty('OutputWorkspace').value
 
     @staticmethod
-    def _get_simple_state(fit_type=FitModeForMerge.NoFit, scale=1.0, shift=0.0):
+    def _get_simple_state(fit_type=FitModeForMerge.NO_FIT, scale=1.0, shift=0.0):
         # Set the reduction parameters
         reduction_info = StateReductionMode()
-        reduction_info.reduction_mode = ISISReductionMode.Merged
-        reduction_info.dimensionality = ReductionDimensionality.TwoDim
+        reduction_info.reduction_mode = ReductionMode.MERGED
+        reduction_info.dimensionality = ReductionDimensionality.TWO_DIM
         reduction_info.merge_shift = shift
         reduction_info.merge_scale = scale
         reduction_info.merge_fit_mode = fit_type
@@ -52,12 +51,12 @@ class MergeReductionsTest(unittest.TestCase):
                            data_x_hab, data_y_hab_count, data_y_hab_norm):
         lab_count = MergeReductionsTest.create_1D_workspace(data_x_lab, data_y_lab_count)
         lab_norm = MergeReductionsTest.create_1D_workspace(data_x_lab, data_y_lab_norm)
-        lab_bundle = OutputPartsBundle(state=state, data_type=data_type, reduction_mode=ISISReductionMode.LAB,
+        lab_bundle = OutputPartsBundle(state=state, data_type=data_type, reduction_mode=ReductionMode.LAB,
                                        output_workspace_count=lab_count, output_workspace_norm=lab_norm)
 
         hab_count = MergeReductionsTest.create_1D_workspace(data_x_hab, data_y_hab_count)
         hab_norm = MergeReductionsTest.create_1D_workspace(data_x_hab, data_y_hab_norm)
-        hab_bundle = OutputPartsBundle(state=state, data_type=data_type, reduction_mode=ISISReductionMode.HAB,
+        hab_bundle = OutputPartsBundle(state=state, data_type=data_type, reduction_mode=ReductionMode.HAB,
                                        output_workspace_count=hab_count, output_workspace_norm=hab_norm)
         return lab_bundle, hab_bundle
 
@@ -71,7 +70,7 @@ class MergeReductionsTest(unittest.TestCase):
         data_x_hab = list(range(0, 10))
         data_y_hab_count = [3.] * 10
         data_y_hab_norm = [4.] * 10
-        sample_lab, sample_hab = MergeReductionsTest._create_workspaces(state, DataType.Sample, data_x_lab,
+        sample_lab, sample_hab = MergeReductionsTest._create_workspaces(state, DataType.SAMPLE, data_x_lab,
                                                                         data_y_lab_count, data_y_lab_norm,
                                                                         data_x_hab, data_y_hab_count, data_y_hab_norm)
 
@@ -83,7 +82,7 @@ class MergeReductionsTest(unittest.TestCase):
         data_x_hab = list(range(0, 10))
         data_y_hab_count = [7.] * 10
         data_y_hab_norm = [8.] * 10
-        can_lab, can_hab = MergeReductionsTest._create_workspaces(state, DataType.Can, data_x_lab,
+        can_lab, can_hab = MergeReductionsTest._create_workspaces(state, DataType.CAN, data_x_lab,
                                                                   data_y_lab_count, data_y_lab_norm,
                                                                   data_x_hab, data_y_hab_count, data_y_hab_norm)
         return sample_lab, sample_hab, can_lab, can_hab
@@ -101,7 +100,7 @@ class MergeReductionsTest(unittest.TestCase):
 
     def test_that_can_merge_without_fitting(self):
         # Arrange
-        fit_type = FitModeForMerge.NoFit
+        fit_type = FitModeForMerge.NO_FIT
         scale_input = 32.0
         shift_input = 12.65
         state = self._get_simple_state(fit_type, scale_input, shift_input)
@@ -110,8 +109,8 @@ class MergeReductionsTest(unittest.TestCase):
 
         sample_lab, sample_hab, can_lab, can_hab = self._provide_data(state)
 
-        bundles = {ISISReductionMode.LAB: [sample_lab, can_lab],
-                   ISISReductionMode.HAB: [sample_hab, can_hab]}
+        bundles = {ReductionMode.LAB: [sample_lab, can_lab],
+                   ReductionMode.HAB: [sample_hab, can_hab]}
 
         # Act
         result = merger.merge(bundles)
@@ -127,7 +126,7 @@ class MergeReductionsTest(unittest.TestCase):
 
     def test_that_can_merge_fitting(self):
         # Arrange
-        fit_type = FitModeForMerge.Both
+        fit_type = FitModeForMerge.BOTH
         scale_input = 1.67
         shift_input = 2.7
         state = self._get_simple_state(fit_type, scale_input, shift_input)
@@ -135,8 +134,8 @@ class MergeReductionsTest(unittest.TestCase):
         merger = merge_factory.create_merger(state)
 
         sample_lab, sample_hab, can_lab, can_hab = self._provide_data(state)
-        bundles = {ISISReductionMode.LAB: [sample_lab, can_lab],
-                   ISISReductionMode.HAB: [sample_hab, can_hab]}
+        bundles = {ReductionMode.LAB: [sample_lab, can_lab],
+                   ReductionMode.HAB: [sample_hab, can_hab]}
 
         # Act
         result = merger.merge(bundles)
@@ -153,7 +152,7 @@ class MergeReductionsTest(unittest.TestCase):
 
     def test_that_can_merge_with_shift_only_fitting(self):
         # Arrange
-        fit_type = FitModeForMerge.ShiftOnly
+        fit_type = FitModeForMerge.SHIFT_ONLY
         scale_input = 1.67
         shift_input = 2.7
         state = self._get_simple_state(fit_type, scale_input, shift_input)
@@ -161,8 +160,8 @@ class MergeReductionsTest(unittest.TestCase):
         merger = merge_factory.create_merger(state)
 
         sample_lab, sample_hab, can_lab, can_hab = self._provide_data(state)
-        bundles = {ISISReductionMode.LAB: [sample_lab, can_lab],
-                   ISISReductionMode.HAB: [sample_hab, can_hab]}
+        bundles = {ReductionMode.LAB: [sample_lab, can_lab],
+                   ReductionMode.HAB: [sample_hab, can_hab]}
 
         # Act
         result = merger.merge(bundles)
@@ -179,7 +178,7 @@ class MergeReductionsTest(unittest.TestCase):
 
     def test_that_can_merge_with_scale_only_fitting(self):
         # Arrange
-        fit_type = FitModeForMerge.ScaleOnly
+        fit_type = FitModeForMerge.SCALE_ONLY
         scale_input = 1.67
         shift_input = 2.7
         state = self._get_simple_state(fit_type, scale_input, shift_input)
@@ -187,8 +186,8 @@ class MergeReductionsTest(unittest.TestCase):
         merger = merge_factory.create_merger(state)
 
         sample_lab, sample_hab, can_lab, can_hab = self._provide_data(state)
-        bundles = {ISISReductionMode.LAB: [sample_lab, can_lab],
-                   ISISReductionMode.HAB: [sample_hab, can_hab]}
+        bundles = {ReductionMode.LAB: [sample_lab, can_lab],
+                   ReductionMode.HAB: [sample_hab, can_hab]}
 
         # Act
         result = merger.merge(bundles)

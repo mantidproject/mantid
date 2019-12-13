@@ -1,5 +1,6 @@
-# CMake version check. Require CMake 3.5, required by ParaView 5.1.0
-cmake_minimum_required(VERSION 3.5)
+# CMake version check. Require CMake 3.13 - Required for add_link_options
+# 3.15 is required on Windows, but is not available to RHEL yet
+cmake_minimum_required(VERSION 3.13)
 
 # Define the project name.
 project(Mantid)
@@ -384,7 +385,7 @@ if(ENABLE_CPACK)
       "nexus >= 4.3.1,gsl,glibc,muParser,numpy,h5py >= 2.3.1,PyCifRW >= 4.2.1,tbb,librdkafka,"
       "${CPACK_RPM_PACKAGE_REQUIRES},OCE-draw,OCE-foundation,OCE-modeling,OCE-ocaf,OCE-visualization,"
       "poco-crypto,poco-data,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation,"
-      "sip >= 4.18,"
+      "sip >= 4.18,python-enum34,"
       "python-six,python-ipython >= 1.1.0,python-ipython-notebook,PyYAML,"
       "python-requests,"
       "scipy,"

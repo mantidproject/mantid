@@ -99,24 +99,31 @@ public:
         m_indexedPeaks,
         {{"HOffset", "-0.5,0,0.5"}, {"KOffset", "0.0"}, {"LOffset", "0.2"}});
 
-    TS_ASSERT_EQUALS(117, fracPeaks->getNumberPeaks())
-    const auto &peak0 = fracPeaks->getPeak(0);
-    TS_ASSERT_DELTA(peak0.getH(), -5.5, .0001)
-    TS_ASSERT_DELTA(peak0.getK(), 7.0, .0001)
-    TS_ASSERT_DELTA(peak0.getL(), -3.8, .0001)
-    TS_ASSERT_EQUALS(peak0.getDetectorID(), 1146353)
+    auto nPeaks = fracPeaks->getNumberPeaks();
+    TS_ASSERT_EQUALS(117, nPeaks)
+    if (nPeaks > 0) {
+      const auto &peak0 = fracPeaks->getPeak(0);
+      TS_ASSERT_DELTA(peak0.getH(), -5.5, .0001)
+      TS_ASSERT_DELTA(peak0.getK(), 7.0, .0001)
+      TS_ASSERT_DELTA(peak0.getL(), -3.8, .0001)
+      TS_ASSERT_EQUALS(peak0.getDetectorID(), 1146353)
+    }
 
-    const auto &peak3 = fracPeaks->getPeak(3);
-    TS_ASSERT_DELTA(peak3.getH(), -5.5, .0001)
-    TS_ASSERT_DELTA(peak3.getK(), 3.0, .0001)
-    TS_ASSERT_DELTA(peak3.getL(), -2.8, .0001)
-    TS_ASSERT_EQUALS(peak3.getDetectorID(), 1747163)
+    if (nPeaks > 3) {
+      const auto &peak3 = fracPeaks->getPeak(3);
+      TS_ASSERT_DELTA(peak3.getH(), -5.5, .0001)
+      TS_ASSERT_DELTA(peak3.getK(), 3.0, .0001)
+      TS_ASSERT_DELTA(peak3.getL(), -2.8, .0001)
+      TS_ASSERT_EQUALS(peak3.getDetectorID(), 1747163)
+    }
 
-    const auto &peak6 = fracPeaks->getPeak(6);
-    TS_ASSERT_DELTA(peak6.getH(), -6.5, .0001)
-    TS_ASSERT_DELTA(peak6.getK(), 4.0, .0001)
-    TS_ASSERT_DELTA(peak6.getL(), -3.8, .0001)
-    TS_ASSERT_EQUALS(peak6.getDetectorID(), 1737894)
+    if (nPeaks > 6) {
+      const auto &peak6 = fracPeaks->getPeak(6);
+      TS_ASSERT_DELTA(peak6.getH(), -6.5, .0001)
+      TS_ASSERT_DELTA(peak6.getK(), 4.0, .0001)
+      TS_ASSERT_DELTA(peak6.getL(), -3.8, .0001)
+      TS_ASSERT_EQUALS(peak6.getDetectorID(), 1737894)
+    }
   }
 
   void test_exec_with_include_in_range_and_hit_detector() {
@@ -229,6 +236,50 @@ public:
     TS_ASSERT_EQUALS(fracPeaks->getPeak(24).getDetectorID(), 3157981)
   }
 
+  void test_providing_modulation_vector_saves_properties_to_lattice() {
+    const auto fracPeaks = runPredictFractionalPeaks(
+        m_indexedPeaks, {{"ModVector1", "-0.5,0,0.5"},
+                         {"ModVector2", "0.0,0.5,0.5"},
+                         {"MaxOrder", "1"},
+                         {"CrossTerms", "0"}});
+
+    TS_ASSERT_EQUALS(124, fracPeaks->getNumberPeaks())
+
+    // check lattice
+    const auto &lattice = fracPeaks->sample().getOrientedLattice();
+    TS_ASSERT_EQUALS(1, lattice.getMaxOrder())
+    TS_ASSERT_EQUALS(false, lattice.getCrossTerm())
+    const auto mod1 = lattice.getModVec(0);
+    TS_ASSERT_EQUALS(-0.5, mod1.X())
+    TS_ASSERT_EQUALS(0.0, mod1.Y())
+    TS_ASSERT_EQUALS(0.5, mod1.Z())
+    const auto mod2 = lattice.getModVec(1);
+    TS_ASSERT_EQUALS(0.0, mod2.X())
+    TS_ASSERT_EQUALS(0.5, mod2.Y())
+    TS_ASSERT_EQUALS(0.5, mod2.Z())
+
+    // check a couple of peaks
+    const auto &peak0 = fracPeaks->getPeak(0);
+    TS_ASSERT_DELTA(peak0.getH(), -4.5, .0001)
+    TS_ASSERT_DELTA(peak0.getK(), 7.0, .0001)
+    TS_ASSERT_DELTA(peak0.getL(), -4.5, .0001)
+    TS_ASSERT_EQUALS(peak0.getDetectorID(), 1129591)
+    const auto mnp0 = peak0.getIntMNP();
+    TS_ASSERT_DELTA(mnp0.X(), -1., 1e-08)
+    TS_ASSERT_DELTA(mnp0.Y(), 0., 1e-08)
+    TS_ASSERT_DELTA(mnp0.Z(), 0., 1e-08)
+
+    const auto &peak34 = fracPeaks->getPeak(34);
+    TS_ASSERT_DELTA(peak34.getH(), -7, .0001)
+    TS_ASSERT_DELTA(peak34.getK(), 7.5, .0001)
+    TS_ASSERT_DELTA(peak34.getL(), -2.5, .0001)
+    TS_ASSERT_EQUALS(peak34.getDetectorID(), 1812163)
+    const auto mnp34 = peak34.getIntMNP();
+    TS_ASSERT_DELTA(mnp34.X(), 0., 1e-08)
+    TS_ASSERT_DELTA(mnp34.Y(), 1., 1e-08)
+    TS_ASSERT_DELTA(mnp34.Z(), 0., 1e-08)
+  }
+
   // ---------------- Failure tests -----------------------------
   void test_empty_peaks_workspace_is_not_allowed() {
     PredictFractionalPeaks alg;
@@ -251,6 +302,17 @@ public:
 
   void test_inconsistent_L_range_gives_validation_error() {
     doInvalidRangeTest("L");
+  }
+
+  void test_modulation_vector_requires_maxOrder_gt_0() {
+    PredictFractionalPeaks alg;
+    alg.initialize();
+    alg.setProperty("Peaks", WorkspaceCreationHelper::createPeaksWorkspace(0));
+    alg.setProperty("ModVector1", "0.5,0,0.5");
+
+    auto helpMsgs = alg.validateInputs();
+
+    TS_ASSERT(helpMsgs.find("MaxOrder") != helpMsgs.cend())
   }
 
 private:

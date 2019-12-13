@@ -11,7 +11,6 @@
 from __future__ import (absolute_import, division, print_function)
 
 from abc import ABCMeta, abstractmethod
-from inspect import isclass
 from qtpy import PYQT4
 from qtpy.QtCore import QRegExp
 from qtpy.QtGui import (QDoubleValidator, QIntValidator, QRegExpValidator)
@@ -24,9 +23,10 @@ from mantidqt.widgets import jobtreeview, manageuserdirectories
 from six import with_metaclass
 
 from mantid.kernel import (Logger, UsageService, FeatureType)
+from mantid.py3compat import Enum
 from reduction_gui.reduction.scripter import execute_script
-from sans.common.enums import (BinningType, ReductionDimensionality, OutputMode, SaveType, SANSInstrument,
-                               RangeStepType, ReductionMode, FitType)
+from sans.common.enums import (BinningType, ReductionDimensionality, OutputMode, SaveType, RangeStepType, ReductionMode,
+                               FitType, SANSInstrument)
 from sans.common.file_information import SANSFileInformationFactory
 from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection,
                                        get_reduction_mode_strings_for_gui,
@@ -47,6 +47,7 @@ if PYQT4:
     IN_MANTIDPLOT = False
     try:
         from pymantidplot import proxies
+
         IN_MANTIDPLOT = True
     except ImportError:
         # We are not in MantidPlot e.g. testing
@@ -76,9 +77,9 @@ class RunSelectorPresenterFactory(object):
 
 def _make_run_summation_settings_presenter(summation_settings_view, parent_view, instrument):
     if instrument != "LOQ":
-        binning_type = BinningType.SaveAsEventData
+        binning_type = BinningType.SAVE_AS_EVENT_DATA
     else:
-        binning_type = BinningType.Custom
+        binning_type = BinningType.CUSTOM
     summation_settings = SummationSettings(binning_type)
     summation_settings.bin_settings = DEFAULT_BIN_SETTINGS
     return SummationSettingsPresenter(summation_settings,
@@ -217,13 +218,12 @@ class SANSDataProcessorGui(QMainWindow,
         self._has_monitor_5 = False
 
         # Instrument
-        SANSDataProcessorGui.INSTRUMENTS = ",".join([SANSInstrument.to_string(item)
-                                                     for item in [SANSInstrument.SANS2D,
-                                                                  SANSInstrument.LOQ,
-                                                                  SANSInstrument.LARMOR,
-                                                                  SANSInstrument.ZOOM]])
+        SANSDataProcessorGui.INSTRUMENTS = ",".join(item.value for item in [SANSInstrument.SANS2D,
+                                                                            SANSInstrument.LOQ,
+                                                                            SANSInstrument.LARMOR,
+                                                                            SANSInstrument.ZOOM])
 
-        self.instrument = SANSInstrument.NoInstrument
+        self.instrument = SANSInstrument.NO_INSTRUMENT
 
         self.paste_button.setIcon(icons.get_icon("mdi.content-paste"))
         self.copy_button.setIcon(icons.get_icon("mdi.content-copy"))
@@ -409,16 +409,16 @@ class SANSDataProcessorGui(QMainWindow,
         return True
 
     def _on_wavelength_step_type_changed(self):
-        if self.wavelength_step_type == RangeStepType.RangeLin:
+        if self.wavelength_step_type == RangeStepType.RANGE_LIN:
             self.wavelength_stacked_widget.setCurrentIndex(1)
             self.wavelength_step_label.setText(u'Step [\u00c5^-1]')
-        elif self.wavelength_step_type == RangeStepType.RangeLog:
+        elif self.wavelength_step_type == RangeStepType.RANGE_LOG:
             self.wavelength_stacked_widget.setCurrentIndex(1)
             self.wavelength_step_label.setText(u'Step [d\u03BB/\u03BB]')
-        elif self.wavelength_step_type == RangeStepType.Log:
+        elif self.wavelength_step_type == RangeStepType.LOG:
             self.wavelength_stacked_widget.setCurrentIndex(0)
             self.wavelength_step_label.setText(u'Step [d\u03BB/\u03BB]')
-        elif self.wavelength_step_type == RangeStepType.Lin:
+        elif self.wavelength_step_type == RangeStepType.LIN:
             self.wavelength_stacked_widget.setCurrentIndex(0)
             self.wavelength_step_label.setText(u'Step [\u00c5^-1]')
 
@@ -491,22 +491,22 @@ class SANSDataProcessorGui(QMainWindow,
         """
         Process runs
         """
-        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Process Selected"], False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Process Selected"], False)
         self._call_settings_listeners(lambda listener: listener.on_process_selected_clicked())
 
     def _process_all_clicked(self):
         """
         Process All button clicked
         """
-        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Process All"], False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Process All"], False)
         self._call_settings_listeners(lambda listener: listener.on_process_all_clicked())
 
     def _load_clicked(self):
-        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Load"], False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Load"], False)
         self._call_settings_listeners(lambda listener: listener.on_load_clicked())
 
     def _export_table_clicked(self):
-        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Export Table"], False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Export Table"], False)
         self._call_settings_listeners(lambda listener: listener.on_export_table_clicked())
 
     def _processing_finished(self):
@@ -543,23 +543,23 @@ class SANSDataProcessorGui(QMainWindow,
 
     def _remove_rows_requested_from_button(self):
         rows = self.get_selected_rows()
-        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Rows removed button"], False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Rows removed button"], False)
         self._call_settings_listeners(lambda listener: listener.on_rows_removed(rows))
 
     def _copy_rows_requested(self):
-        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Copy rows button"], False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Copy rows button"], False)
         self._call_settings_listeners(lambda listener: listener.on_copy_rows_requested())
 
     def _erase_rows(self):
-        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Erase rows button"], False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Erase rows button"], False)
         self._call_settings_listeners(lambda listener: listener.on_erase_rows())
 
     def _cut_rows(self):
-        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Cut rows button"], False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Cut rows button"], False)
         self._call_settings_listeners(lambda listener: listener.on_cut_rows())
 
     def _paste_rows_requested(self):
-        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Paste rows button"], False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Paste rows button"], False)
         self._call_settings_listeners(lambda listener: listener.on_paste_rows_requested())
 
     def _instrument_changed(self):
@@ -596,7 +596,7 @@ class SANSDataProcessorGui(QMainWindow,
 
     def _on_save_can_clicked(self, value):
         self.save_can_checkBox.setChecked(value)
-        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Save Can Toggled"], False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Save Can Toggled"], False)
         set_setting(self.__generic_settings, self.__save_can_key, value)
 
     def _on_reduction_dimensionality_changed(self, is_1d):
@@ -632,8 +632,8 @@ class SANSDataProcessorGui(QMainWindow,
 
     def set_out_default_output_mode(self):
         try:
-            default_output_mode = OutputMode.from_string(load_property(self.__generic_settings, self.__output_mode_key))
-        except RuntimeError:
+            default_output_mode = OutputMode(load_property(self.__generic_settings, self.__output_mode_key))
+        except ValueError:
             pass
         else:
             self._check_output_mode(default_output_mode)
@@ -646,11 +646,11 @@ class SANSDataProcessorGui(QMainWindow,
         2. Via the presenter, from state
         :param value: An OutputMode (SANS enum) object
         """
-        if value is OutputMode.PublishToADS:
+        if value is OutputMode.PUBLISH_TO_ADS:
             self.output_mode_memory_radio_button.setChecked(True)
-        elif value is OutputMode.SaveToFile:
+        elif value is OutputMode.SAVE_TO_FILE:
             self.output_mode_file_radio_button.setChecked(True)
-        elif value is OutputMode.Both:
+        elif value is OutputMode.BOTH:
             self.output_mode_both_radio_button.setChecked(True)
 
         # Notify the presenter
@@ -669,7 +669,7 @@ class SANSDataProcessorGui(QMainWindow,
         Load the batch file
         """
 
-        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Loaded Batch File"], False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Loaded Batch File"], False)
         load_file(self.batch_line_edit, "*.*", self.__generic_settings, self.__batch_file_key,
                   self.get_batch_file_path)
         self._call_settings_listeners(lambda listener: listener.on_batch_file_load())
@@ -775,7 +775,11 @@ class SANSDataProcessorGui(QMainWindow,
 
     def _on_reduction_mode_selection_has_changed(self):
         selection = self.reduction_mode_combo_box.currentText()
-        is_merged = selection == ReductionMode.to_string(ReductionMode.Merged)
+        try:
+            is_merged = ReductionMode(selection) is ReductionMode.MERGED
+        except ValueError:
+            is_merged = False
+
         self.merged_settings.setEnabled(is_merged)
         self._call_settings_listeners(lambda listener: listener.on_reduction_mode_selection_has_changed(selection))
 
@@ -864,15 +868,15 @@ class SANSDataProcessorGui(QMainWindow,
 
     def _on_transmission_fit_type_has_changed(self):
         # Check the sample settings
-        fit_type_sample_as_string = self.fit_sample_fit_type_combo_box.currentText().encode('utf-8')
-        fit_type_sample = FitType.from_string(fit_type_sample_as_string)
-        is_sample_polynomial = fit_type_sample is FitType.Polynomial
+        fit_type_sample_as_string = self.fit_sample_fit_type_combo_box.currentText()
+        fit_type_sample = FitType(fit_type_sample_as_string)
+        is_sample_polynomial = fit_type_sample is FitType.POLYNOMIAL
         self.fit_sample_polynomial_order_spin_box.setEnabled(is_sample_polynomial)
 
         # Check the can settings
-        fit_type_can_as_string = self.fit_can_fit_type_combo_box.currentText().encode('utf-8')
-        fit_type_can = FitType.from_string(fit_type_can_as_string)
-        is_can_polynomial = fit_type_can is FitType.Polynomial
+        fit_type_can_as_string = self.fit_can_fit_type_combo_box.currentText()
+        fit_type_can = FitType(fit_type_can_as_string)
+        is_can_polynomial = fit_type_can is FitType.POLYNOMIAL
         self.fit_can_polynomial_order_spin_box.setEnabled(is_can_polynomial)
 
     def _on_transmission_target_has_changed(self):
@@ -932,12 +936,12 @@ class SANSDataProcessorGui(QMainWindow,
         self._call_settings_listeners(lambda listener: listener.on_mask_file_add())
 
     def _on_multi_period_selection(self):
-        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Multiple Period Toggled"], False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Multiple Period Toggled"], False)
         self._call_settings_listeners(
             lambda listener: listener.on_multi_period_selection(self.is_multi_period_view()))
 
     def _on_sample_geometry_selection(self):
-        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Sample Geometry Toggled"], False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Sample Geometry Toggled"], False)
         self._call_settings_listeners(lambda listener: listener.on_sample_geometry_selection(self.is_sample_geometry()))
 
     def _on_manage_directories(self):
@@ -960,11 +964,9 @@ class SANSDataProcessorGui(QMainWindow,
         if isinstance(value, list):
             gui_element.clear()
             for element in value:
-                self._add_list_element_to_combo_box(gui_element=gui_element, element=element,
-                                                    expected_type=expected_type)
-        elif expected_type.has_member(value):
-            self._set_enum_as_element_in_combo_box(gui_element=gui_element, element=value,
-                                                   expected_type=expected_type)
+                self._add_list_element_to_combo_box(gui_element=gui_element, element=element)
+        elif isinstance(value, Enum):
+            self._set_enum_as_element_in_combo_box(gui_element=gui_element, element=value)
         elif isinstance(value, str):
             index = gui_element.findText(value)
             if index != -1:
@@ -972,22 +974,21 @@ class SANSDataProcessorGui(QMainWindow,
         else:
             raise RuntimeError("Expected an input of type {}, but got {}".format(expected_type, type(value)))
 
-    def _add_list_element_to_combo_box(self, gui_element, element, expected_type=None):
-        if expected_type is not None and isclass(element) and issubclass(element, expected_type):
-            self._add_enum_as_element_in_combo_box(gui_element=gui_element, element=element,
-                                                   expected_type=expected_type)
+    def _add_list_element_to_combo_box(self, gui_element, element):
+        if isinstance(element, Enum):
+            self._add_enum_as_element_in_combo_box(gui_element=gui_element, element=element)
         else:
             gui_element.addItem(element)
 
     @staticmethod
-    def _set_enum_as_element_in_combo_box(gui_element, element, expected_type):
-        value_as_string = expected_type.to_string(element)
+    def _set_enum_as_element_in_combo_box(gui_element, element):
+        value_as_string = element.value
         index = gui_element.findText(value_as_string)
         if index != -1:
             gui_element.setCurrentIndex(index)
 
-    def _add_enum_as_element_in_combo_box(self, gui_element, element, expected_type):
-        value_as_string = expected_type.to_string(element)
+    def _add_enum_as_element_in_combo_box(self, gui_element, element):
+        value_as_string = element.value
         gui_element.addItem(value_as_string)
 
     def get_simple_line_edit_field(self, expected_type, line_edit):
@@ -1031,22 +1032,22 @@ class SANSDataProcessorGui(QMainWindow,
     def save_types(self):
         checked_save_types = []
         if self.can_sas_checkbox.isChecked():
-            checked_save_types.append(SaveType.CanSAS)
+            checked_save_types.append(SaveType.CAN_SAS)
         if self.nx_can_sas_checkbox.isChecked():
-            checked_save_types.append(SaveType.NXcanSAS)
+            checked_save_types.append(SaveType.NX_CAN_SAS)
         if self.rkh_checkbox.isChecked():
             checked_save_types.append(SaveType.RKH)
         # If empty, provide the NoType type
         if not checked_save_types:
-            checked_save_types = [SaveType.NoType]
+            checked_save_types = [SaveType.NO_TYPE]
         return checked_save_types
 
     @save_types.setter
     def save_types(self, values):
         for value in values:
-            if value is SaveType.CanSAS:
+            if value is SaveType.CAN_SAS:
                 self.can_sas_checkbox.setChecked(True)
-            elif value is SaveType.NXcanSAS:
+            elif value is SaveType.NX_CAN_SAS:
                 self.nx_can_sas_checkbox.setChecked(True)
             elif value is SaveType.RKH:
                 self.rkh_checkbox.setChecked(True)
@@ -1113,21 +1114,21 @@ class SANSDataProcessorGui(QMainWindow,
     @property
     def output_mode(self):
         if self.output_mode_memory_radio_button.isChecked():
-            return OutputMode.PublishToADS
+            return OutputMode.PUBLISH_TO_ADS
         elif self.output_mode_file_radio_button.isChecked():
-            return OutputMode.SaveToFile
+            return OutputMode.SAVE_TO_FILE
         elif self.output_mode_both_radio_button.isChecked():
-            return OutputMode.Both
+            return OutputMode.BOTH
         else:
             self.gui_logger.warning(
                 "The output format was not specified. Defaulting to saving to memory only.")
-            return OutputMode.PublishToADS
+            return OutputMode.PUBLISH_TO_ADS
 
     @output_mode.setter
     def output_mode(self, value):
         self._check_output_mode(value)
         try:
-            set_setting(self.__generic_settings, self.__output_mode_key, OutputMode.to_string(value))
+            set_setting(self.__generic_settings, self.__output_mode_key, value.value)
         except RuntimeError:
             pass
 
@@ -1153,7 +1154,8 @@ class SANSDataProcessorGui(QMainWindow,
 
     @instrument.setter
     def instrument(self, value):
-        instrument_string = SANSInstrument.to_string(value)
+        assert (isinstance(value, Enum))
+        instrument_string = value.value
         self.instrument_type.setText("{}".format(instrument_string))
         self._instrument_changed()
 
@@ -1168,12 +1170,12 @@ class SANSDataProcessorGui(QMainWindow,
     # ------------------------------------------------------------------------------------------------------------------
     @property
     def reduction_dimensionality(self):
-        return ReductionDimensionality.OneDim if self.reduction_dimensionality_1D.isChecked() \
-            else ReductionDimensionality.TwoDim
+        return ReductionDimensionality.ONE_DIM if self.reduction_dimensionality_1D.isChecked() \
+            else ReductionDimensionality.TWO_DIM
 
     @reduction_dimensionality.setter
     def reduction_dimensionality(self, value):
-        is_1d = value is ReductionDimensionality.OneDim
+        is_1d = value is ReductionDimensionality.ONE_DIM
         self.reduction_dimensionality_1D.setChecked(is_1d)
         self.reduction_dimensionality_2D.setChecked(not is_1d)
 
@@ -1319,8 +1321,8 @@ class SANSDataProcessorGui(QMainWindow,
     # ------------------------------------------------------------------------------------------------------------------
     @property
     def wavelength_step_type(self):
-        step_type_as_string = self.wavelength_step_type_combo_box.currentText().encode('utf-8')
-        return RangeStepType.from_string(step_type_as_string)
+        step_type_as_string = self.wavelength_step_type_combo_box.currentText()
+        return RangeStepType(step_type_as_string)
 
     @wavelength_step_type.setter
     def wavelength_step_type(self, value):
@@ -1505,8 +1507,8 @@ class SANSDataProcessorGui(QMainWindow,
 
     @property
     def transmission_sample_fit_type(self):
-        fit_type_as_string = self.fit_sample_fit_type_combo_box.currentText().encode('utf-8')
-        return FitType.from_string(fit_type_as_string)
+        fit_type_as_string = self.fit_sample_fit_type_combo_box.currentText()
+        return FitType(fit_type_as_string)
 
     @transmission_sample_fit_type.setter
     def transmission_sample_fit_type(self, value):
@@ -1518,8 +1520,8 @@ class SANSDataProcessorGui(QMainWindow,
 
     @property
     def transmission_can_fit_type(self):
-        fit_type_as_string = self.fit_can_fit_type_combo_box.currentText().encode('utf-8')
-        return FitType.from_string(fit_type_as_string)
+        fit_type_as_string = self.fit_can_fit_type_combo_box.currentText()
+        return FitType(fit_type_as_string)
 
     @transmission_can_fit_type.setter
     def transmission_can_fit_type(self, value):
@@ -1671,7 +1673,7 @@ class SANSDataProcessorGui(QMainWindow,
         try:
             value = float(value_as_string)
         except ValueError:
-            value = value_as_string.encode('utf-8')
+            value = value_as_string
         return value
 
     @q_1d_min_or_rebin_string.setter
@@ -1696,10 +1698,10 @@ class SANSDataProcessorGui(QMainWindow,
 
     @property
     def q_1d_step_type(self):
-        q_1d_step_type_as_string = self.q_1d_step_type_combo_box.currentText().encode('utf-8')
+        q_1d_step_type_as_string = self.q_1d_step_type_combo_box.currentText()
         # Hedge for trying to read out
         try:
-            return RangeStepType.from_string(q_1d_step_type_as_string)
+            return RangeStepType(q_1d_step_type_as_string)
         except RuntimeError:
             return None
 
@@ -1717,8 +1719,7 @@ class SANSDataProcessorGui(QMainWindow,
                 gui_element.clear()
                 value.append(self.VARIABLE)
                 for element in value:
-                    self._add_list_element_to_combo_box(gui_element=gui_element, element=element,
-                                                        expected_type=RangeStepType)
+                    self._add_list_element_to_combo_box(gui_element=gui_element, element=element)
 
     @property
     def q_xy_max(self):
@@ -1738,9 +1739,9 @@ class SANSDataProcessorGui(QMainWindow,
 
     @property
     def q_xy_step_type(self):
-        q_xy_step_type_as_string = self.q_xy_step_type_combo_box.currentText().encode('utf-8')
+        q_xy_step_type_as_string = self.q_xy_step_type_combo_box.currentText()
         try:
-            return RangeStepType.from_string(q_xy_step_type_as_string)
+            return RangeStepType(q_xy_step_type_as_string)
         except RuntimeError:
             return None
 
@@ -1757,8 +1758,7 @@ class SANSDataProcessorGui(QMainWindow,
                 gui_element = self.q_xy_step_type_combo_box
                 gui_element.clear()
                 for element in value:
-                    self._add_list_element_to_combo_box(gui_element=gui_element, element=element,
-                                                        expected_type=RangeStepType)
+                    self._add_list_element_to_combo_box(gui_element=gui_element, element=element)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Gravity

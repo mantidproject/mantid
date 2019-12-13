@@ -10,6 +10,7 @@ from __future__ import (absolute_import, division, print_function)
 from qtpy.QtWidgets import QMessageBox
 
 from Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT
+from Engineering.gui.engineering_diffraction.tabs.common.vanadium_corrections import check_workspaces_exist
 from mantidqt.utils.asynchronous import AsyncTask
 from mantidqt.utils.observer_pattern import Observer
 from mantid.simpleapi import logger
@@ -46,11 +47,10 @@ class FocusPresenter(object):
         :param plot_output: True if the output should be plotted.
         :param rb_num: The rb_number from the main window (often an experiment id)
         """
-        self.worker = AsyncTask(
-            self.model.focus_run,
-            (focus_path, banks, plot_output, self.instrument, rb_num, self.current_calibration),
-            error_cb=self._on_worker_error,
-            finished_cb=self.emit_enable_button_signal)
+        self.worker = AsyncTask(self.model.focus_run,
+                                (focus_path, banks, plot_output, self.instrument, rb_num),
+                                error_cb=self._on_worker_error,
+                                finished_cb=self.emit_enable_button_signal)
         self.set_focus_controls_enabled(False)
         self.worker.start()
 
@@ -70,7 +70,7 @@ class FocusPresenter(object):
         """
         if not self.view.get_focus_valid():
             return False
-        if self.current_calibration["vanadium_path"] is None:
+        if self.current_calibration["vanadium_path"] is None or not check_workspaces_exist():
             self._create_error_message(
                 "Load a calibration from the Calibration tab before focusing.")
             return False

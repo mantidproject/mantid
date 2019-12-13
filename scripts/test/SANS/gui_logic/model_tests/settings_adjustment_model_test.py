@@ -12,19 +12,19 @@ class SettingsTransmissionModelTest(unittest.TestCase):
         return model_under_test
 
     def test_monitor_5_reported_for_zoom(self):
-        user_file = {DetectorId.instrument: [SANSInstrument.ZOOM]}
+        user_file = {DetectorId.INSTRUMENT: [SANSInstrument.ZOOM]}
         model_under_test = self.create_model(user_file)
 
         self.assertTrue(model_under_test.does_instrument_support_monitor_5())
 
     def test_monitor_5_disabled_for_no_inst(self):
-        user_file = {DetectorId.instrument: [SANSInstrument.NoInstrument]}
+        user_file = {DetectorId.INSTRUMENT: [SANSInstrument.NO_INSTRUMENT]}
         model_under_test = self.create_model(user_file)
 
         self.assertFalse(model_under_test.does_instrument_support_monitor_5())
 
     def test_monitor_5_disabled_for_sans(self):
-        user_file = {DetectorId.instrument: [SANSInstrument.SANS2D]}
+        user_file = {DetectorId.INSTRUMENT: [SANSInstrument.SANS2D]}
         model_under_test = self.create_model(user_file)
 
         self.assertFalse(model_under_test.does_instrument_support_monitor_5())
@@ -116,19 +116,19 @@ class SettingsTransmissionModelTest(unittest.TestCase):
 
     def test_transmission_fit_defaults(self):
         state_gui_model = self.create_model()
-        self.assertEqual(state_gui_model.transmission_sample_fit_type, FitType.NoFit)
-        self.assertEqual(state_gui_model.transmission_can_fit_type, FitType.NoFit)
+        self.assertEqual(state_gui_model.transmission_sample_fit_type, FitType.NO_FIT)
+        self.assertEqual(state_gui_model.transmission_can_fit_type, FitType.NO_FIT)
         self.assertEqual(state_gui_model.transmission_sample_polynomial_order, 2)
         self.assertEqual(state_gui_model.transmission_can_polynomial_order, 2)
 
     def test_that_can_set_transmission_fit_options(self):
         state_gui_model = self.create_model()
-        state_gui_model.transmission_sample_fit_type = FitType.Logarithmic
-        state_gui_model.transmission_can_fit_type = FitType.Linear
+        state_gui_model.transmission_sample_fit_type = FitType.LOGARITHMIC
+        state_gui_model.transmission_can_fit_type = FitType.LINEAR
         state_gui_model.transmission_sample_polynomial_order = 2
         state_gui_model.transmission_can_polynomial_order = 2
-        self.assertEqual(state_gui_model.transmission_sample_fit_type, FitType.Logarithmic)
-        self.assertEqual(state_gui_model.transmission_can_fit_type, FitType.Linear)
+        self.assertEqual(state_gui_model.transmission_sample_fit_type, FitType.LOGARITHMIC)
+        self.assertEqual(state_gui_model.transmission_can_fit_type, FitType.LINEAR)
         self.assertEqual(state_gui_model.transmission_sample_polynomial_order, 2)
         self.assertEqual(state_gui_model.transmission_can_polynomial_order, 2)
 

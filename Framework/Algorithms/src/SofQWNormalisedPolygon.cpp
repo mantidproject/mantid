@@ -399,19 +399,6 @@ void SofQWNormalisedPolygon::exec() {
   const auto &inputIndices = inputWS->indexInfo();
   const auto &spectrumInfo = inputWS->spectrumInfo();
 
-  /*
-    On linux, the value value that is set at startup for the number of allowed
-    threads when mulitprocessing is not carried over to new execution threads.
-    As a result, mantid can segfault due to accessing workspaces that are
-    created in the main thread, as they have too few indexes that are supposed
-    to match the number of threads.
-
-    Resetting the number of threads here to what is set in the config file is a
-    temporary solution.
-    */
-  // TODO: Do this via a MultiThreaded.h macro via:
-  // https://github.com/mantidproject/mantid/issues/27375#issuecomment-553799284
-  FrameworkManager::Instance().setNumOMPThreadsToConfigValue();
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int64_t i = 0; i < static_cast<int64_t>(nHistos); ++i) {
     PARALLEL_START_INTERUPT_REGION

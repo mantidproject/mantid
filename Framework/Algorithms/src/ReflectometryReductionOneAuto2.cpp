@@ -1016,8 +1016,9 @@ auto ReflectometryReductionOneAuto2::getOutputNamesForGroups(
   std::string informativeName = "TOF" + runNumber + "_";
 
   WorkspaceNames outputNames;
-  if (equal(informativeName.begin(), informativeName.end(),
-            inputName.begin())) {
+  if ((informativeName.length() < inputName.length()) &&
+      (equal(informativeName.begin(), informativeName.end(),
+             inputName.begin()))) {
     auto informativeTest = inputName.substr(informativeName.length());
     outputNames.iVsQ = output.iVsQ + "_" + informativeTest;
     outputNames.iVsQBinned = output.iVsQBinned + "_" + informativeTest;

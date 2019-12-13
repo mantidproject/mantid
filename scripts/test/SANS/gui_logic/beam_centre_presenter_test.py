@@ -9,9 +9,9 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 
 from mantid.py3compat import mock
-from sans.test_helper.mock_objects import create_mock_beam_centre_tab
 from sans.common.enums import SANSInstrument
 from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
+from sans.test_helper.mock_objects import create_mock_beam_centre_tab
 from sans.test_helper.mock_objects import (create_run_tab_presenter_mock)
 
 
@@ -84,7 +84,6 @@ class BeamCentrePresenterTest(unittest.TestCase):
         self.presenter._beam_centre_model.scale_2 = 1000
         self.presenter._beam_centre_model.update_lab = True
         self.presenter._beam_centre_model.update_hab = True
-
 
         self.presenter.on_processing_finished_centre_finder(result)
         self.assertEqual(result['pos1'], self.presenter._beam_centre_model.lab_pos_1)

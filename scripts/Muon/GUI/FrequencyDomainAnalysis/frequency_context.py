@@ -42,7 +42,7 @@ class FrequencyContext(object):
     """
     A simple class for identifing the current run
     and it can return the name, run and instrument.
-    The current run is the same as the one in MonAnalysis
+    The current run is the same as the one in MuonAnalysis
     """
 
     def __init__(self):

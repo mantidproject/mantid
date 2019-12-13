@@ -12,7 +12,7 @@ from __future__ import (absolute_import, division, print_function)
 import math
 
 from sans.common.constants import EMPTY_NAME
-from sans.common.enums import SANSInstrument, SampleShape
+from sans.common.enums import SampleShape, SANSInstrument
 
 from sans.common.general_functions import append_to_sans_file_tag, create_unmanaged_algorithm
 
@@ -79,15 +79,15 @@ def _get_volume(scale_info):
     shape = scale_info.shape if scale_info.shape is not None else scale_info.shape_from_file
 
     # Now we calculate the volume
-    if shape is SampleShape.Cylinder:
+    if shape is SampleShape.CYLINDER:
         # Volume = circle area * height
         volume = height * math.pi
         radius = width / 2.0
         volume *= math.pow(radius, 2)
-    elif shape is SampleShape.FlatPlate:
+    elif shape is SampleShape.FLAT_PLATE:
         # Flat plate sample
         volume = width * height * thickness
-    elif shape is SampleShape.Disc:
+    elif shape is SampleShape.DISC:
         # Factor of four comes from radius = width/2
         # Disc - where height is not used
         volume = thickness * math.pi
