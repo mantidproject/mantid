@@ -29,8 +29,8 @@ has to be given manually.
 **Normalisation** selects whether the dataset is normalized on counting time or
 monitor counts.
 
-**Detector efficiency correction** corrects for different detector efficiency,
- angular coverage and Lorentz factor by  normalisation to vanadium data.
+**Detector efficiency correction** corrects for different detector efficiency, 
+angular coverage and Lorentz factor by  normalisation to vanadium data.
 It is further possible to **Sum Vanadium over detector positions**, sum SF and
 NSF channels and ignore the fields in the vanadium files. 
 
