@@ -295,8 +295,8 @@ size_t ProcessBankData::getWorkspaceIndexFromPixelID(const detid_t pixID) {
   if (offset_pixID < 0 ||
       offset_pixID >= static_cast<int32_t>(pixelID_to_wi_vector.size())) {
     std::stringstream msg;
-    msg << "Error finding workspace index; pixelID " << pixID << " with offset "
-        << pixelID_to_wi_offset
+    msg << " Error finding workspace index; pixelID " << pixID
+        << " with offset " << pixelID_to_wi_offset
         << " is out of range (length=" << pixelID_to_wi_vector.size() << ")";
     throw std::runtime_error(msg.str());
   }
