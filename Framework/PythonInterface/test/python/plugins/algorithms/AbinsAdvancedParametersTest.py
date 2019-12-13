@@ -44,7 +44,7 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
             "pkt_per_peak": 50,
             "max_wavenumber": 4100.0,
             "min_wavenumber": 0.0,
-            "broadening_scheme": "legacy",
+            "broadening_scheme": "auto",
             "frequencies_threshold": 0.0,
             "s_relative_threshold": 0.001,
             "s_absolute_threshold": 1e-7}
