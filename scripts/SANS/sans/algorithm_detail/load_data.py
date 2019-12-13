@@ -59,7 +59,7 @@ from sans.common.file_information import (SANSFileInformationFactory, FileType, 
 from sans.common.constants import (EMPTY_NAME, SANS_SUFFIX, TRANS_SUFFIX, MONITOR_SUFFIX, CALIBRATION_WORKSPACE_TAG,
                                    SANS_FILE_TAG, OUTPUT_WORKSPACE_GROUP, OUTPUT_MONITOR_WORKSPACE,
                                    OUTPUT_MONITOR_WORKSPACE_GROUP)
-from sans.common.enums import (SANSFacility, SANSInstrument, SANSDataType)
+from sans.common.enums import (SANSFacility, SANSDataType, SANSInstrument)
 from sans.common.general_functions import (create_child_algorithm)
 from sans.common.log_tagger import (set_tag, has_tag, get_tag)
 from sans.state.data import (StateData)
@@ -86,28 +86,28 @@ def get_file_and_period_information_from_data(data):
     period_information = dict()
     if data.sample_scatter:
         update_file_information(file_information, file_information_factory,
-                                SANSDataType.SampleScatter, data.sample_scatter)
-        period_information.update({SANSDataType.SampleScatter: data.sample_scatter_period})
+                                SANSDataType.SAMPLE_SCATTER, data.sample_scatter)
+        period_information.update({SANSDataType.SAMPLE_SCATTER: data.sample_scatter_period})
     if data.sample_transmission:
         update_file_information(file_information, file_information_factory,
-                                SANSDataType.SampleTransmission, data.sample_transmission)
-        period_information.update({SANSDataType.SampleTransmission: data.sample_transmission_period})
+                                SANSDataType.SAMPLE_TRANSMISSION, data.sample_transmission)
+        period_information.update({SANSDataType.SAMPLE_TRANSMISSION: data.sample_transmission_period})
     if data.sample_direct:
         update_file_information(file_information, file_information_factory,
-                                SANSDataType.SampleDirect, data.sample_direct)
-        period_information.update({SANSDataType.SampleDirect: data.sample_direct_period})
+                                SANSDataType.SAMPLE_DIRECT, data.sample_direct)
+        period_information.update({SANSDataType.SAMPLE_DIRECT: data.sample_direct_period})
     if data.can_scatter:
         update_file_information(file_information, file_information_factory,
-                                SANSDataType.CanScatter, data.can_scatter)
-        period_information.update({SANSDataType.CanScatter: data.can_scatter_period})
+                                SANSDataType.CAN_SCATTER, data.can_scatter)
+        period_information.update({SANSDataType.CAN_SCATTER: data.can_scatter_period})
     if data.can_transmission:
         update_file_information(file_information, file_information_factory,
-                                SANSDataType.CanTransmission, data.can_transmission)
-        period_information.update({SANSDataType.CanTransmission: data.can_transmission_period})
+                                SANSDataType.CAN_TRANSMISSION, data.can_transmission)
+        period_information.update({SANSDataType.CAN_TRANSMISSION: data.can_transmission_period})
     if data.can_direct:
         update_file_information(file_information, file_information_factory,
-                                SANSDataType.CanDirect, data.can_direct)
-        period_information.update({SANSDataType.CanDirect: data.can_direct_period})
+                                SANSDataType.CAN_DIRECT, data.can_direct)
+        period_information.update({SANSDataType.CAN_DIRECT: data.can_direct_period})
     return file_information, period_information
 
 
@@ -119,8 +119,8 @@ def is_transmission_type(to_check):
     :param to_check: A SANSDataType object.
     :return: true if the SANSDataType object is a transmission object (transmission or direct) else false.
     """
-    return ((to_check is SANSDataType.SampleTransmission) or (to_check is SANSDataType.SampleDirect) or
-            (to_check is SANSDataType.CanTransmission) or (to_check is SANSDataType.CanDirect))
+    return ((to_check is SANSDataType.SAMPLE_TRANSMISSION) or (to_check is SANSDataType.SAMPLE_DIRECT) or
+            (to_check is SANSDataType.CAN_TRANSMISSION) or (to_check is SANSDataType.CAN_DIRECT))
 
 
 def get_expected_file_tags(file_information, is_transmission, period):
@@ -637,11 +637,11 @@ def get_loader_strategy(file_information):
     :param file_information: a SANSFileInformation object.
     :return: a handle to the correct loading function/strategy.
     """
-    if file_information.get_type() == FileType.ISISNexus:
+    if file_information.get_type() == FileType.ISIS_NEXUS:
         loader = loader_for_isis_nexus
-    elif file_information.get_type() == FileType.ISISRaw:
+    elif file_information.get_type() == FileType.ISIS_RAW:
         loader = loader_for_raw
-    elif file_information.get_type() == FileType.ISISNexusAdded:
+    elif file_information.get_type() == FileType.ISIS_NEXUS_ADDED:
         loader = loader_for_added_isis_nexus
     else:
         raise RuntimeError("SANSLoad: Cannot load SANS file of type {0}".format(str(file_information.get_type())))
@@ -709,6 +709,7 @@ class SANSLoadData(with_metaclass(ABCMeta, object)):
 
 class SANSLoadDataISIS(SANSLoadData):
     """Load implementation of SANSLoad for ISIS data"""
+
     def do_execute(self, data_info, use_cached, publish_to_ads, progress, parent_alg):
         # Get all entries from the state file
         file_infos, period_infos = get_file_and_period_information_from_data(data_info)
@@ -728,7 +729,7 @@ class SANSLoadDataISIS(SANSLoadData):
 
         for key, value in list(file_infos.items()):
             # Loading
-            report_message = "Loading {0}".format(SANSDataType.to_string(key))
+            report_message = "Loading {0}".format(key.value)
             progress.report(report_message)
 
             workspace_pack, workspace_monitors_pack = load_isis(key, value, period_infos[key],
@@ -755,6 +756,7 @@ class SANSLoadDataISIS(SANSLoadData):
 
 class SANSLoadDataFactory(object):
     """ A factory for SANSLoadData."""
+
     def __init__(self):
         super(SANSLoadDataFactory, self).__init__()
 
@@ -764,7 +766,7 @@ class SANSLoadDataFactory(object):
         # Get the correct loader based on the sample scatter file from the data sub state
         data.validate()
         file_info, _ = get_file_and_period_information_from_data(data)
-        sample_scatter_info = file_info[SANSDataType.SampleScatter]
+        sample_scatter_info = file_info[SANSDataType.SAMPLE_SCATTER]
         return sample_scatter_info.get_facility()
 
     @staticmethod
@@ -836,6 +838,7 @@ class LOQTransmissionCorrection(TransmissionCorrection):
 
 def get_transmission_correction(data_info):
     instrument_type = data_info.instrument
+
     if instrument_type is SANSInstrument.LOQ:
         return LOQTransmissionCorrection()
     else:

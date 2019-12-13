@@ -37,11 +37,11 @@ class SettingsAdjustmentModel(ModelCommon):
         return True if self.instrument is SANSInstrument.ZOOM else False
 
     def has_transmission_fit_got_separate_settings_for_sample_and_can(self):
-        if FitId.general in self._user_file_items:
-            settings = self._user_file_items[FitId.general]
+        if FitId.GENERAL in self._user_file_items:
+            settings = self._user_file_items[FitId.GENERAL]
             if settings:
-                settings_sample = [setting for setting in settings if setting.data_type is DataType.Sample]
-                settings_can = [setting for setting in settings if setting.data_type is DataType.Can]
+                settings_sample = [setting for setting in settings if setting.data_type is DataType.SAMPLE]
+                settings_can = [setting for setting in settings if setting.data_type is DataType.CAN]
                 # If we have either one or the other
                 if settings_sample or settings_can:
                     return True
@@ -50,8 +50,8 @@ class SettingsAdjustmentModel(ModelCommon):
     # =================== Property helper methods ================
 
     def _get_transmission_fit(self, data_type, attribute, default_value):
-        if FitId.general in self._user_file_items:
-            settings = self._user_file_items[FitId.general]
+        if FitId.GENERAL in self._user_file_items:
+            settings = self._user_file_items[FitId.GENERAL]
             # Check first if there are data type specific settings, else check if there are general settings
             extracted_settings = [setting for setting in settings if setting.data_type is data_type]
             if not extracted_settings:
@@ -62,9 +62,9 @@ class SettingsAdjustmentModel(ModelCommon):
         return default_value
 
     def _set_transmission_fit(self, data_type, start=None, stop=None, fit_type=None, polynomial_order=None):
-        if FitId.general in self._user_file_items:
+        if FitId.GENERAL in self._user_file_items:
             # Gather all settings which correspond to the data type and where the data type is none
-            settings = self._user_file_items[FitId.general]
+            settings = self._user_file_items[FitId.GENERAL]
             settings_general = [setting for setting in settings if setting.data_type is None]
             settings_for_data_type = [setting for setting in settings if setting.data_type is data_type]
             # We check if there are data-type specific settings.
@@ -79,10 +79,10 @@ class SettingsAdjustmentModel(ModelCommon):
                                                 polynomial_order=setting_general.polynomial_order))
                 else:
                     settings.append(fit_general(start=None, stop=None, data_type=data_type,
-                                                fit_type=FitType.NoFit, polynomial_order=2))
+                                                fit_type=FitType.NO_FIT, polynomial_order=2))
         else:
             settings = [fit_general(start=None, stop=None, data_type=data_type,
-                                    fit_type=FitType.NoFit, polynomial_order=2)]
+                                    fit_type=FitType.NO_FIT, polynomial_order=2)]
 
         new_settings = []
         for setting in settings:
@@ -97,7 +97,7 @@ class SettingsAdjustmentModel(ModelCommon):
                                                 data_type=setting.data_type, polynomial_order=new_polynomial_order))
             else:
                 new_settings.append(setting)
-        self._user_file_items.update({FitId.general: new_settings})
+        self._user_file_items.update({FitId.GENERAL: new_settings})
 
     # ------------------------------------------------------------------------------------------------------------------
     # Wavelength- and pixel-adjustment files
@@ -141,39 +141,39 @@ class SettingsAdjustmentModel(ModelCommon):
 
     @property
     def pixel_adjustment_det_1(self):
-        return self._get_adjustment_file_setting(element_id=MonId.flat, detector_type=DetectorType.LAB,
+        return self._get_adjustment_file_setting(element_id=MonId.FLAT, detector_type=DetectorType.LAB,
                                                  default_value="")
 
     @pixel_adjustment_det_1.setter
     def pixel_adjustment_det_1(self, value):
-        self._set_adjustment_file_setting(element_id=MonId.flat, detector_type=DetectorType.LAB, file_path=value)
+        self._set_adjustment_file_setting(element_id=MonId.FLAT, detector_type=DetectorType.LAB, file_path=value)
 
     @property
     def pixel_adjustment_det_2(self):
-        return self._get_adjustment_file_setting(element_id=MonId.flat, detector_type=DetectorType.HAB,
+        return self._get_adjustment_file_setting(element_id=MonId.FLAT, detector_type=DetectorType.HAB,
                                                  default_value="")
 
     @pixel_adjustment_det_2.setter
     def pixel_adjustment_det_2(self, value):
-        self._set_adjustment_file_setting(element_id=MonId.flat, detector_type=DetectorType.HAB, file_path=value)
+        self._set_adjustment_file_setting(element_id=MonId.FLAT, detector_type=DetectorType.HAB, file_path=value)
 
     @property
     def wavelength_adjustment_det_1(self):
-        return self._get_adjustment_file_setting(element_id=MonId.direct, detector_type=DetectorType.LAB,
+        return self._get_adjustment_file_setting(element_id=MonId.DIRECT, detector_type=DetectorType.LAB,
                                                  default_value="")
 
     @wavelength_adjustment_det_1.setter
     def wavelength_adjustment_det_1(self, value):
-        self._set_adjustment_file_setting(element_id=MonId.direct, detector_type=DetectorType.LAB, file_path=value)
+        self._set_adjustment_file_setting(element_id=MonId.DIRECT, detector_type=DetectorType.LAB, file_path=value)
 
     @property
     def wavelength_adjustment_det_2(self):
-        return self._get_adjustment_file_setting(element_id=MonId.direct, detector_type=DetectorType.HAB,
+        return self._get_adjustment_file_setting(element_id=MonId.DIRECT, detector_type=DetectorType.HAB,
                                                  default_value="")
 
     @wavelength_adjustment_det_2.setter
     def wavelength_adjustment_det_2(self, value):
-        self._set_adjustment_file_setting(element_id=MonId.direct, detector_type=DetectorType.HAB, file_path=value)
+        self._set_adjustment_file_setting(element_id=MonId.DIRECT, detector_type=DetectorType.HAB, file_path=value)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Transmission Fitting
@@ -181,69 +181,69 @@ class SettingsAdjustmentModel(ModelCommon):
 
     @property
     def transmission_sample_fit_type(self):
-        return self._get_transmission_fit(data_type=DataType.Sample, attribute="fit_type", default_value=FitType.NoFit)
+        return self._get_transmission_fit(data_type=DataType.SAMPLE, attribute="fit_type", default_value=FitType.NO_FIT)
 
     @transmission_sample_fit_type.setter
     def transmission_sample_fit_type(self, value):
-        self._set_transmission_fit(data_type=DataType.Sample, fit_type=value)
+        self._set_transmission_fit(data_type=DataType.SAMPLE, fit_type=value)
 
     @property
     def transmission_can_fit_type(self):
-        return self._get_transmission_fit(data_type=DataType.Can, attribute="fit_type", default_value=FitType.NoFit)
+        return self._get_transmission_fit(data_type=DataType.CAN, attribute="fit_type", default_value=FitType.NO_FIT)
 
     @transmission_can_fit_type.setter
     def transmission_can_fit_type(self, value):
-        self._set_transmission_fit(data_type=DataType.Can, fit_type=value)
+        self._set_transmission_fit(data_type=DataType.CAN, fit_type=value)
 
     @property
     def transmission_sample_polynomial_order(self):
-        return self._get_transmission_fit(data_type=DataType.Sample, attribute="polynomial_order",
+        return self._get_transmission_fit(data_type=DataType.SAMPLE, attribute="polynomial_order",
                                           default_value=2)
 
     @transmission_sample_polynomial_order.setter
     def transmission_sample_polynomial_order(self, value):
-        self._set_transmission_fit(data_type=DataType.Sample, polynomial_order=value)
+        self._set_transmission_fit(data_type=DataType.SAMPLE, polynomial_order=value)
 
     @property
     def transmission_can_polynomial_order(self):
-        return self._get_transmission_fit(data_type=DataType.Can, attribute="polynomial_order",
+        return self._get_transmission_fit(data_type=DataType.CAN, attribute="polynomial_order",
                                           default_value=2)
 
     @transmission_can_polynomial_order.setter
     def transmission_can_polynomial_order(self, value):
-        self._set_transmission_fit(data_type=DataType.Can, polynomial_order=value)
+        self._set_transmission_fit(data_type=DataType.CAN, polynomial_order=value)
 
     @property
     def transmission_sample_wavelength_min(self):
-        return self._get_transmission_fit(data_type=DataType.Sample, attribute="start", default_value="")
+        return self._get_transmission_fit(data_type=DataType.SAMPLE, attribute="start", default_value="")
 
     @transmission_sample_wavelength_min.setter
     def transmission_sample_wavelength_min(self, value):
-        self._set_transmission_fit(data_type=DataType.Sample, start=value)
+        self._set_transmission_fit(data_type=DataType.SAMPLE, start=value)
 
     @property
     def transmission_sample_wavelength_max(self):
-        return self._get_transmission_fit(data_type=DataType.Sample, attribute="stop", default_value="")
+        return self._get_transmission_fit(data_type=DataType.SAMPLE, attribute="stop", default_value="")
 
     @transmission_sample_wavelength_max.setter
     def transmission_sample_wavelength_max(self, value):
-        self._set_transmission_fit(data_type=DataType.Sample, stop=value)
+        self._set_transmission_fit(data_type=DataType.SAMPLE, stop=value)
 
     @property
     def transmission_can_wavelength_min(self):
-        return self._get_transmission_fit(data_type=DataType.Can, attribute="start", default_value="")
+        return self._get_transmission_fit(data_type=DataType.CAN, attribute="start", default_value="")
 
     @transmission_can_wavelength_min.setter
     def transmission_can_wavelength_min(self, value):
-        self._set_transmission_fit(data_type=DataType.Can, start=value)
+        self._set_transmission_fit(data_type=DataType.CAN, start=value)
 
     @property
     def transmission_can_wavelength_max(self):
-        return self._get_transmission_fit(data_type=DataType.Can, attribute="stop", default_value="")
+        return self._get_transmission_fit(data_type=DataType.CAN, attribute="stop", default_value="")
 
     @transmission_can_wavelength_max.setter
     def transmission_can_wavelength_max(self, value):
-        self._set_transmission_fit(data_type=DataType.Can, stop=value)
+        self._set_transmission_fit(data_type=DataType.CAN, stop=value)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Monitor normalization
@@ -287,52 +287,52 @@ class SettingsAdjustmentModel(ModelCommon):
 
     @property
     def transmission_roi_files(self):
-        return self.get_simple_element(element_id=TransId.roi, default_value="")
+        return self.get_simple_element(element_id=TransId.ROI, default_value="")
 
     @transmission_roi_files.setter
     def transmission_roi_files(self, value):
-        self.set_simple_element(element_id=TransId.roi, value=value)
+        self.set_simple_element(element_id=TransId.ROI, value=value)
 
     @property
     def transmission_mask_files(self):
-        return self.get_simple_element(element_id=TransId.mask, default_value="")
+        return self.get_simple_element(element_id=TransId.MASK, default_value="")
 
     @transmission_mask_files.setter
     def transmission_mask_files(self, value):
-        self.set_simple_element(element_id=TransId.mask, value=value)
+        self.set_simple_element(element_id=TransId.MASK, value=value)
 
     @property
     def transmission_radius(self):
-        return self.get_simple_element(element_id=TransId.radius, default_value="")
+        return self.get_simple_element(element_id=TransId.RADIUS, default_value="")
 
     @transmission_radius.setter
     def transmission_radius(self, value):
-        self.set_simple_element(element_id=TransId.radius, value=value)
+        self.set_simple_element(element_id=TransId.RADIUS, value=value)
 
     @property
     def transmission_monitor(self):
-        return self.get_simple_element(element_id=TransId.spec, default_value=3)
+        return self.get_simple_element(element_id=TransId.SPEC, default_value=3)
 
     @transmission_monitor.setter
     def transmission_monitor(self, value):
-        self.set_simple_element(element_id=TransId.spec, value=value)
+        self.set_simple_element(element_id=TransId.SPEC, value=value)
 
     @property
     def transmission_mn_4_shift(self):
         # Note that this is actually part of the move operation, but is conceptually part of transmission
-        return self.get_simple_element(element_id=TransId.spec_4_shift, default_value="")
+        return self.get_simple_element(element_id=TransId.SPEC_4_SHIFT, default_value="")
 
     @transmission_mn_4_shift.setter
     def transmission_mn_4_shift(self, value):
         # Note that this is actually part of the move operation, but is conceptually part of transmission
-        self.set_simple_element(element_id=TransId.spec_4_shift, value=value)
+        self.set_simple_element(element_id=TransId.SPEC_4_SHIFT, value=value)
 
     @property
     def transmission_mn_5_shift(self):
         # Note that this is actually part of the move operation, but is conceptually part of transmission
-        return self.get_simple_element(element_id=TransId.spec_5_shift, default_value="")
+        return self.get_simple_element(element_id=TransId.SPEC_5_SHIFT, default_value="")
 
     @transmission_mn_5_shift.setter
     def transmission_mn_5_shift(self, value):
         # Note that this is actually part of the move operation, but is conceptually part of transmission
-        self.set_simple_element(element_id=TransId.spec_5_shift, value=value)
+        self.set_simple_element(element_id=TransId.SPEC_5_SHIFT, value=value)

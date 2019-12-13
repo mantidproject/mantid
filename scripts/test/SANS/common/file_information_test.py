@@ -30,14 +30,14 @@ class SANSFileInformationTest(unittest.TestCase):
         self.assertEqual(file_information.get_number_of_periods(),  1)
         self.assertEqual(file_information.get_date(),  DateAndTime("2013-10-25T14:21:19"))
         self.assertEqual(file_information.get_instrument(),  SANSInstrument.SANS2D)
-        self.assertEqual(file_information.get_type(),  FileType.ISISNexus)
+        self.assertEqual(file_information.get_type(), FileType.ISIS_NEXUS)
         self.assertEqual(file_information.get_run_number(),  22024)
         self.assertFalse(file_information.is_event_mode())
         self.assertFalse(file_information.is_added_data())
         self.assertEqual(file_information.get_width(),  8.0)
         self.assertEqual(file_information.get_height(),  8.0)
         self.assertEqual(file_information.get_thickness(),  1.0)
-        self.assertEqual(file_information.get_shape(), SampleShape.Disc)
+        self.assertEqual(file_information.get_shape(), SampleShape.DISC)
 
     def test_that_can_extract_information_from_file_for_LOQ_single_period_and_raw_format(self):
         # Arrange
@@ -52,13 +52,13 @@ class SANSFileInformationTest(unittest.TestCase):
         self.assertEqual(file_information.get_number_of_periods(),  1)
         self.assertEqual(file_information.get_date(),  DateAndTime("2008-12-18T11:20:58"))
         self.assertEqual(file_information.get_instrument(),  SANSInstrument.LOQ)
-        self.assertEqual(file_information.get_type(),  FileType.ISISRaw)
+        self.assertEqual(file_information.get_type(), FileType.ISIS_RAW)
         self.assertEqual(file_information.get_run_number(),  48094)
         self.assertFalse(file_information.is_added_data())
         self.assertEqual(file_information.get_width(),  8.0)
         self.assertEqual(file_information.get_height(),  8.0)
         self.assertEqual(file_information.get_thickness(),  1.0)
-        self.assertEqual(file_information.get_shape(), SampleShape.Disc)
+        self.assertEqual(file_information.get_shape(), SampleShape.DISC)
 
     def test_that_can_extract_information_from_file_for_SANS2D_multi_period_event_and_nexus_format(self):
         # Arrange
@@ -73,14 +73,14 @@ class SANSFileInformationTest(unittest.TestCase):
         self.assertEqual(file_information.get_number_of_periods(),  4)
         self.assertEqual(file_information.get_date(),  DateAndTime("2015-06-05T14:43:49"))
         self.assertEqual(file_information.get_instrument(),  SANSInstrument.LARMOR)
-        self.assertEqual(file_information.get_type(),  FileType.ISISNexus)
+        self.assertEqual(file_information.get_type(), FileType.ISIS_NEXUS)
         self.assertEqual(file_information.get_run_number(),  3368)
         self.assertTrue(file_information.is_event_mode())
         self.assertFalse(file_information.is_added_data())
         self.assertEqual(file_information.get_width(),  8.0)
         self.assertEqual(file_information.get_height(),  8.0)
         self.assertEqual(file_information.get_thickness(),  2.0)
-        self.assertEqual(file_information.get_shape(), SampleShape.FlatPlate)
+        self.assertEqual(file_information.get_shape(), SampleShape.FLAT_PLATE)
 
     def test_that_can_extract_information_for_added_histogram_data_and_nexus_format(self):
         # Arrange
@@ -95,14 +95,14 @@ class SANSFileInformationTest(unittest.TestCase):
         self.assertEqual(file_information.get_number_of_periods(),  1)
         self.assertEqual(file_information.get_date(),  DateAndTime("2013-10-25T14:21:19"))
         self.assertEqual(file_information.get_instrument(),  SANSInstrument.SANS2D)
-        self.assertEqual(file_information.get_type(),  FileType.ISISNexusAdded)
+        self.assertEqual(file_information.get_type(), FileType.ISIS_NEXUS_ADDED)
         self.assertEqual(file_information.get_run_number(),  22024)
         self.assertFalse(file_information.is_event_mode())
         self.assertTrue(file_information.is_added_data())
         self.assertEqual(file_information.get_width(),  8.0)
         self.assertEqual(file_information.get_height(),  8.0)
         self.assertEqual(file_information.get_thickness(),  1.0)
-        self.assertEqual(file_information.get_shape(), SampleShape.Disc)
+        self.assertEqual(file_information.get_shape(), SampleShape.DISC)
 
     def test_that_can_extract_information_for_LARMOR_added_event_data_and_multi_period_and_nexus_format(self):
         # Arrange
@@ -117,14 +117,14 @@ class SANSFileInformationTest(unittest.TestCase):
         self.assertEqual(file_information.get_number_of_periods(),  4)
         self.assertEqual(file_information.get_date(),  DateAndTime("2016-10-12T04:33:47"))
         self.assertEqual(file_information.get_instrument(),  SANSInstrument.LARMOR)
-        self.assertEqual(file_information.get_type(),  FileType.ISISNexusAdded)
+        self.assertEqual(file_information.get_type(), FileType.ISIS_NEXUS_ADDED)
         self.assertEqual(file_information.get_run_number(),  13065)
         self.assertTrue(file_information.is_event_mode())
         self.assertTrue(file_information.is_added_data())
         self.assertEqual(file_information.get_width(),  6.0)
         self.assertEqual(file_information.get_height(),  8.0)
         self.assertEqual(file_information.get_thickness(),  1.0)
-        self.assertEqual(file_information.get_shape(), SampleShape.FlatPlate)
+        self.assertEqual(file_information.get_shape(), SampleShape.FLAT_PLATE)
 
     def test_that_can_find_data_with_numbers_but_no_instrument(self):
         # Arrange

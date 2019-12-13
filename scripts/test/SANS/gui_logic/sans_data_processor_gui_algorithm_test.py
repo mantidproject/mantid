@@ -8,9 +8,9 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
+from sans.common.enums import (SANSFacility)
 from sans.gui_logic.sans_data_processor_gui_algorithm import (create_properties, create_option_column_properties,
                                                               get_gui_algorithm_name, get_white_list, get_black_list)
-from sans.common.enums import (SANSFacility)
 
 
 class SANSGuiDataProcessorAlgorithmTest(unittest.TestCase):

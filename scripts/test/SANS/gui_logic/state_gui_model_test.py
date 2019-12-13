@@ -5,11 +5,13 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
+
 import unittest
+
+from sans.common.enums import (ReductionDimensionality, ReductionMode, RangeStepType, SampleShape, SaveType,
+                               SANSInstrument)
 from sans.gui_logic.models.state_gui_model import StateGuiModel
-from sans.user_file.settings_tags import (OtherId, event_binning_string_values, DetectorId, det_fit_range)
-from sans.common.enums import (ReductionDimensionality, ISISReductionMode, RangeStepType, SampleShape, SaveType,
-                               FitType, SANSInstrument)
+from sans.user_file.settings_tags import (OtherId, event_binning_string_values, DetectorId)
 from sans.user_file.settings_tags import (det_fit_range)
 
 
@@ -21,7 +23,7 @@ class StateGuiModelTest(unittest.TestCase):
     # ==================================================================================================================
     def test_that_default_instrument_is_NoInstrument(self):
         state_gui_model = StateGuiModel({"test": [1]})
-        self.assertEqual(state_gui_model.instrument, SANSInstrument.NoInstrument)
+        self.assertEqual(state_gui_model.instrument, SANSInstrument.NO_INSTRUMENT)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Compatibility Mode
@@ -52,18 +54,18 @@ class StateGuiModelTest(unittest.TestCase):
         self.assertTrue(state_gui_model.zero_error_free)
 
     def test_that_can_zero_error_free_saving_can_be_changed(self):
-        state_gui_model = StateGuiModel({OtherId.save_as_zero_error_free: [True]})
+        state_gui_model = StateGuiModel({OtherId.SAVE_AS_ZERO_ERROR_FREE: [True]})
         state_gui_model.zero_error_free = False
         self.assertFalse(state_gui_model.zero_error_free)
 
     def test_that_default_save_type_is_NXcanSAS(self):
         state_gui_model = StateGuiModel({"test": [1]})
-        self.assertEqual(state_gui_model.save_types, [SaveType.NXcanSAS])
+        self.assertEqual(state_gui_model.save_types, [SaveType.NX_CAN_SAS])
 
     def test_that_can_select_multiple_save_types(self):
         state_gui_model = StateGuiModel({"test": [1]})
-        state_gui_model.save_types = [SaveType.RKH, SaveType.NXcanSAS]
-        self.assertEqual(state_gui_model.save_types, [SaveType.RKH, SaveType.NXcanSAS])
+        state_gui_model.save_types = [SaveType.RKH, SaveType.NX_CAN_SAS]
+        self.assertEqual(state_gui_model.save_types, [SaveType.RKH, SaveType.NX_CAN_SAS])
 
     # ==================================================================================================================
     # ==================================================================================================================
@@ -79,11 +81,11 @@ class StateGuiModelTest(unittest.TestCase):
         self.assertEqual(state_gui_model.event_slices, "")
 
     def test_that_slice_event_can_be_retrieved_if_it_exists(self):
-        state_gui_model = StateGuiModel({OtherId.event_slices: [event_binning_string_values(value="test")]})
+        state_gui_model = StateGuiModel({OtherId.EVENT_SLICES: [event_binning_string_values(value="test")]})
         self.assertEqual(state_gui_model.event_slices, "test")
 
     def test_that_slice_event_can_be_updated(self):
-        state_gui_model = StateGuiModel({OtherId.event_slices: [event_binning_string_values(value="test")]})
+        state_gui_model = StateGuiModel({OtherId.EVENT_SLICES: [event_binning_string_values(value="test")]})
         state_gui_model.event_slices = "test2"
         self.assertEqual(state_gui_model.event_slices, "test2")
 
@@ -92,12 +94,12 @@ class StateGuiModelTest(unittest.TestCase):
     # ------------------------------------------------------------------------------------------------------------------
     def test_that_is_1D_reduction_by_default(self):
         state_gui_model = StateGuiModel({"test": [1]})
-        self.assertEqual(state_gui_model.reduction_dimensionality, ReductionDimensionality.OneDim)
+        self.assertEqual(state_gui_model.reduction_dimensionality, ReductionDimensionality.ONE_DIM)
 
     def test_that_is_set_to_2D_reduction(self):
         state_gui_model = StateGuiModel({"test": [1]})
-        state_gui_model.reduction_dimensionality = ReductionDimensionality.TwoDim
-        self.assertEqual(state_gui_model.reduction_dimensionality, ReductionDimensionality.TwoDim)
+        state_gui_model.reduction_dimensionality = ReductionDimensionality.TWO_DIM
+        self.assertEqual(state_gui_model.reduction_dimensionality, ReductionDimensionality.TWO_DIM)
 
     def test_that_raises_when_not_setting_with_reduction_dim_enum(self):
         def red_dim_wrapper():
@@ -106,10 +108,10 @@ class StateGuiModelTest(unittest.TestCase):
         self.assertRaises(ValueError, red_dim_wrapper)
 
     def test_that_can_update_reduction_dimensionality(self):
-        state_gui_model = StateGuiModel({OtherId.reduction_dimensionality: [ReductionDimensionality.OneDim]})
-        self.assertEqual(state_gui_model.reduction_dimensionality, ReductionDimensionality.OneDim)
-        state_gui_model.reduction_dimensionality = ReductionDimensionality.TwoDim
-        self.assertEqual(state_gui_model.reduction_dimensionality, ReductionDimensionality.TwoDim)
+        state_gui_model = StateGuiModel({OtherId.REDUCTION_DIMENSIONALITY: [ReductionDimensionality.ONE_DIM]})
+        self.assertEqual(state_gui_model.reduction_dimensionality, ReductionDimensionality.ONE_DIM)
+        state_gui_model.reduction_dimensionality = ReductionDimensionality.TWO_DIM
+        self.assertEqual(state_gui_model.reduction_dimensionality, ReductionDimensionality.TWO_DIM)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Event binning for compatibility mode
@@ -128,12 +130,12 @@ class StateGuiModelTest(unittest.TestCase):
     # ------------------------------------------------------------------------------------------------------------------
     def test_that_is_set_to_lab_by_default(self):
         state_gui_model = StateGuiModel({"test": [1]})
-        self.assertEqual(state_gui_model.reduction_mode, ISISReductionMode.LAB)
+        self.assertEqual(state_gui_model.reduction_mode, ReductionMode.LAB)
 
     def test_that_can_be_set_to_something_else(self):
         state_gui_model = StateGuiModel({"test": [1]})
-        state_gui_model.reduction_mode = ISISReductionMode.Merged
-        self.assertEqual(state_gui_model.reduction_mode, ISISReductionMode.Merged)
+        state_gui_model.reduction_mode = ReductionMode.MERGED
+        self.assertEqual(state_gui_model.reduction_mode, ReductionMode.MERGED)
 
     def test_that_raises_when_setting_with_wrong_input(self):
         def red_mode_wrapper():
@@ -142,10 +144,10 @@ class StateGuiModelTest(unittest.TestCase):
         self.assertRaises(ValueError, red_mode_wrapper)
 
     def test_that_can_update_reduction_mode(self):
-        state_gui_model = StateGuiModel({DetectorId.reduction_mode: [ISISReductionMode.HAB]})
-        self.assertEqual(state_gui_model.reduction_mode, ISISReductionMode.HAB)
-        state_gui_model.reduction_mode = ISISReductionMode.All
-        self.assertEqual(state_gui_model.reduction_mode, ISISReductionMode.All)
+        state_gui_model = StateGuiModel({DetectorId.REDUCTION_MODE: [ReductionMode.HAB]})
+        self.assertEqual(state_gui_model.reduction_mode, ReductionMode.HAB)
+        state_gui_model.reduction_mode = ReductionMode.ALL
+        self.assertEqual(state_gui_model.reduction_mode, ReductionMode.ALL)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Merge range
@@ -173,7 +175,7 @@ class StateGuiModelTest(unittest.TestCase):
         self.assertEqual(state_gui_model.merge_min, 78.9)
 
     def test_that_merge_range_set_correctly(self):
-        state_gui_model = StateGuiModel({DetectorId.merge_range: [det_fit_range(use_fit=True, start=0.13, stop=0.15)]})
+        state_gui_model = StateGuiModel({DetectorId.MERGE_RANGE: [det_fit_range(use_fit=True, start=0.13, stop=0.15)]})
         self.assertEqual(state_gui_model.merge_min, 0.13)
         self.assertEqual(state_gui_model.merge_max, 0.15)
         self.assertTrue(state_gui_model.merge_mask)
@@ -191,10 +193,10 @@ class StateGuiModelTest(unittest.TestCase):
         self.assertEqual(state_gui_model.merge_q_range_stop, "")
 
     def test_that_can_set_and_reset_merged_settings(self):
-        state_gui_model = StateGuiModel({DetectorId.shift_fit: [det_fit_range(start=1., stop=2., use_fit=True)],
-                                         DetectorId.rescale_fit: [det_fit_range(start=1.4, stop=7., use_fit=False)],
-                                         DetectorId.rescale: [12.],
-                                         DetectorId.shift: [234.]})
+        state_gui_model = StateGuiModel({DetectorId.SHIFT_FIT: [det_fit_range(start=1., stop=2., use_fit=True)],
+                                         DetectorId.RESCALE_FIT: [det_fit_range(start=1.4, stop=7., use_fit=False)],
+                                         DetectorId.RESCALE: [12.],
+                                         DetectorId.SHIFT: [234.]})
         self.assertEqual(state_gui_model.merge_scale, 12.)
         self.assertEqual(state_gui_model.merge_shift, 234.)
         self.assertFalse(state_gui_model.merge_scale_fit)
@@ -227,19 +229,19 @@ class StateGuiModelTest(unittest.TestCase):
 
     def test_that_default_wavelength_step_type_is_linear(self):
         state_gui_model = StateGuiModel({"test": [1]})
-        self.assertEqual(state_gui_model.wavelength_step_type,  RangeStepType.Lin)
+        self.assertEqual(state_gui_model.wavelength_step_type, RangeStepType.LIN)
 
     def test_that_can_set_wavelength(self):
         state_gui_model = StateGuiModel({"test": [1]})
         state_gui_model.wavelength_min = 1.
         state_gui_model.wavelength_max = 2.
         state_gui_model.wavelength_step = .5
-        state_gui_model.wavelength_step_type = RangeStepType.Lin
-        state_gui_model.wavelength_step_type = RangeStepType.Log
+        state_gui_model.wavelength_step_type = RangeStepType.LIN
+        state_gui_model.wavelength_step_type = RangeStepType.LOG
         self.assertEqual(state_gui_model.wavelength_min, 1.)
         self.assertEqual(state_gui_model.wavelength_max, 2.)
         self.assertEqual(state_gui_model.wavelength_step, .5)
-        self.assertEqual(state_gui_model.wavelength_step_type, RangeStepType.Log)
+        self.assertEqual(state_gui_model.wavelength_step_type, RangeStepType.LOG)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Scale
@@ -270,12 +272,12 @@ class StateGuiModelTest(unittest.TestCase):
         state_gui_model.sample_height = 1.6
         state_gui_model.sample_thickness = 1.8
         state_gui_model.z_offset = 1.78
-        state_gui_model.sample_shape = SampleShape.FlatPlate
+        state_gui_model.sample_shape = SampleShape.FLAT_PLATE
         self.assertEqual(state_gui_model.sample_width, 1.2)
         self.assertEqual(state_gui_model.sample_height, 1.6)
         self.assertEqual(state_gui_model.sample_thickness, 1.8)
         self.assertEqual(state_gui_model.z_offset, 1.78)
-        self.assertEqual(state_gui_model.sample_shape, SampleShape.FlatPlate)
+        self.assertEqual(state_gui_model.sample_shape, SampleShape.FLAT_PLATE)
 
     # ==================================================================================================================
     # ==================================================================================================================
@@ -301,14 +303,14 @@ class StateGuiModelTest(unittest.TestCase):
         state_gui_model.q_1d_rebin_string = "test"
         state_gui_model.q_xy_max = 1.
         state_gui_model.q_xy_step = 122.
-        state_gui_model.q_xy_step_type = RangeStepType.Log
+        state_gui_model.q_xy_step_type = RangeStepType.LOG
         state_gui_model.r_cut = 45.
         state_gui_model.w_cut = 890.
 
         self.assertEqual(state_gui_model.q_1d_rebin_string, "test")
         self.assertEqual(state_gui_model.q_xy_max, 1.)
         self.assertEqual(state_gui_model.q_xy_step, 122.)
-        self.assertEqual(state_gui_model.q_xy_step_type, RangeStepType.Log)
+        self.assertEqual(state_gui_model.q_xy_step_type, RangeStepType.LOG)
         self.assertEqual(state_gui_model.r_cut, 45.)
         self.assertEqual(state_gui_model.w_cut, 890.)
 

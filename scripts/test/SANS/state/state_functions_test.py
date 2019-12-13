@@ -5,14 +5,14 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-import unittest
-import mantid
 
+import unittest
+
+from sans.common.enums import (ReductionDimensionality)
+from sans.state.data import StateData
 from sans.state.state_functions import (is_pure_none_or_not_none, one_is_none,
                                         validation_message, is_not_none_and_first_larger_than_second)
 from sans.test_helper.test_director import TestDirector
-from sans.state.data import StateData
-from sans.common.enums import (ReductionDimensionality, ISISReductionMode, OutputParts)
 
 
 class StateFunctionsTest(unittest.TestCase):
@@ -24,7 +24,7 @@ class StateFunctionsTest(unittest.TestCase):
         state.data.sample_scatter_run_number = 12345
         state.data.sample_scatter_period = StateData.ALL_PERIODS 
 
-        state.reduction.dimensionality = ReductionDimensionality.OneDim
+        state.reduction.dimensionality = ReductionDimensionality.ONE_DIM
 
         state.wavelength.wavelength_low = 12.0
         state.wavelength.wavelength_high = 34.0

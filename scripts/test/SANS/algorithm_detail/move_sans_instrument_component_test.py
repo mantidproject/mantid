@@ -98,8 +98,8 @@ def check_that_sets_to_zero(instance, workspace, move_info, comp_name=None):
     # Get the components to compare
     if comp_name is None:
         component_names = list(move_info.monitor_names.values())
-        hab_name = DetectorType.to_string(DetectorType.HAB)
-        lab_name = DetectorType.to_string(DetectorType.LAB),
+        hab_name = DetectorType.HAB.value
+        lab_name = DetectorType.LAB.value,
         _get_components_to_compare(hab_name, move_info, component_names)
         _get_components_to_compare(lab_name, move_info, component_names)
         component_names.append("some-sample-holder")
@@ -160,7 +160,7 @@ class LOQMoveTest(unittest.TestCase):
         lab_x_translation_correction = 123.
         beam_coordinates = [45, 25]
         component = "main-detector-bank"
-        component_key = DetectorType.to_string(DetectorType.LAB)
+        component_key = DetectorType.LAB.value
 
         workspace = load_empty_instrument("LOQ")
         move_info = _get_state_move_obj(SANSInstrument.LOQ, lab_x_translation_correction)
@@ -179,7 +179,7 @@ class LOQMoveTest(unittest.TestCase):
 
         # Elementary Move
         component_elementary_move = "HAB"
-        component_elementary_move_key = DetectorType.to_string(DetectorType.HAB)
+        component_elementary_move_key = DetectorType.HAB.value
 
         beam_coordinates_elementary_move = [120, 135]
         check_elementry_displacement_with_translation(self, workspace, move_info,
@@ -221,7 +221,7 @@ class SANS2DMoveTest(unittest.TestCase):
 
         # Assert for initial move for low angle bank
         # These values are on the workspace and in the sample logs,
-        component_to_investigate = DetectorType.to_string(DetectorType.LAB)
+        component_to_investigate = DetectorType.LAB.value
         initial_z_position = 23.281
         rear_det_z = 11.9989755859
         offset = 4.
@@ -235,7 +235,7 @@ class SANS2DMoveTest(unittest.TestCase):
 
         # Assert for initial move for high angle bank
         # These values are on the workspace and in the sample logs
-        component_to_investigate = DetectorType.to_string(DetectorType.HAB)
+        component_to_investigate = DetectorType.HAB.value
         initial_x_position = 1.1
         x_correction = -0.187987540973
         initial_z_position = 23.281
@@ -250,7 +250,7 @@ class SANS2DMoveTest(unittest.TestCase):
 
         # Act + Assert for elementary move
         component_elementary_move = "rear-detector"
-        component_elementary_move_key = DetectorType.to_string(DetectorType.LAB)
+        component_elementary_move_key = DetectorType.LAB.value
         beam_coordinates_elementary_move = [120, 135]
         check_elementry_displacement_with_translation(self, workspace, move_info,
                                                       beam_coordinates_elementary_move,
@@ -268,8 +268,8 @@ class SANS2DMoveTest(unittest.TestCase):
                                         z_translation=lab_z_translation_correction)
 
         # These values should be used instead of an explicitly specified beam centre
-        move_info.detectors[DetectorType.to_string(DetectorType.HAB)].sample_centre_pos1 = 26.
-        move_info.detectors[DetectorType.to_string(DetectorType.HAB)].sample_centre_pos2 = 98.
+        move_info.detectors[DetectorType.HAB.value].sample_centre_pos1 = 26.
+        move_info.detectors[DetectorType.HAB.value].sample_centre_pos2 = 98.
 
         # The component input is not relevant for SANS2D's initial move. All detectors are moved
         component = "front-detector"
@@ -277,7 +277,7 @@ class SANS2DMoveTest(unittest.TestCase):
                        move_type=MoveTypes.INITIAL_MOVE)
 
         # These values are on the workspace and in the sample logs
-        component_to_investigate = DetectorType.to_string(DetectorType.HAB)
+        component_to_investigate = DetectorType.HAB.value
         initial_x_position = 1.1
         x_correction = -0.187987540973
         initial_z_position = 23.281
@@ -300,8 +300,8 @@ class SANS2DMoveTest(unittest.TestCase):
         # These values should be used instead of an explicitly specified beam centre
         x_offset = 26.
         y_offset = 98.
-        move_info.detectors[DetectorType.to_string(DetectorType.LAB)].sample_centre_pos1 = x_offset
-        move_info.detectors[DetectorType.to_string(DetectorType.LAB)].sample_centre_pos2 = y_offset
+        move_info.detectors[DetectorType.LAB.value].sample_centre_pos1 = x_offset
+        move_info.detectors[DetectorType.LAB.value].sample_centre_pos2 = y_offset
 
         # The component input is not relevant for SANS2D's initial move. All detectors are moved
         component = None
@@ -310,7 +310,7 @@ class SANS2DMoveTest(unittest.TestCase):
 
         # Assert for initial move for low angle bank
         # These values are on the workspace and in the sample logs,
-        component_to_investigate = DetectorType.to_string(DetectorType.LAB)
+        component_to_investigate = DetectorType.LAB.value
         initial_z_position = 23.281
         rear_det_z = 11.9989755859
         offset = 4.
@@ -344,7 +344,7 @@ class LARMORMoveTest(unittest.TestCase):
 
         # Assert low angle bank for initial move
         # These values are on the workspace and in the sample logs
-        component_to_investigate = DetectorType.to_string(DetectorType.LAB)
+        component_to_investigate = DetectorType.LAB.value
 
         # The rotation couples the movements, hence we just insert absolute value, to have a type of regression test.
         expected_position = V3D(0, -38, 25.3)
@@ -359,7 +359,7 @@ class ZOOMMoveTest(unittest.TestCase):
     def test_that_ZOOM_can_perform_move(self):
         beam_coordinates = [45, 25]
         component = "main-detector-bank"
-        component_key = DetectorType.to_string(DetectorType.LAB)
+        component_key = DetectorType.LAB.value
 
         workspace = load_empty_instrument("ZOOM")
         move_info = _get_state_move_obj(SANSInstrument.ZOOM)
@@ -377,7 +377,7 @@ class ZOOMMoveTest(unittest.TestCase):
 
         # Elementary Move
         component_elementary_move = "LAB"
-        component_elementary_move_key = DetectorType.to_string(DetectorType.LAB)
+        component_elementary_move_key = DetectorType.LAB.value
 
         beam_coordinates_elementary_move = [120, 135]
         check_elementry_displacement_with_translation(self, workspace, move_info,

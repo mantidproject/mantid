@@ -30,7 +30,7 @@ def slice_sans_event(state_slice, input_ws, input_ws_monitor, data_type_str="Sam
              'OutputWorkspaceMonitor' : The output monitor workspace which has the correct slice factor applied to it.
     """
 
-    data_type = DataType.from_string(data_type_str)
+    data_type = DataType(data_type_str)
 
     # This should be removed in the future when cycle 19/1 data is unlikely to be processed by users
     # This prevents time slicing falling over, since we wrap around and get -0
@@ -77,7 +77,7 @@ def _create_slice(workspace, slice_info, data_type):
     total_charge, total_time = get_charge_and_time(workspace)
 
     # If we are dealing with a Can reduction then the slice times are -1
-    if data_type is DataType.Can:
+    if data_type is DataType.CAN:
         start_time = -1.
         end_time = -1.
 

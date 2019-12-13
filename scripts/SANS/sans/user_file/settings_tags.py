@@ -5,9 +5,10 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-from collections import namedtuple
-from sans.common.enums import serializable_enum
 
+from collections import namedtuple
+
+from mantid.py3compat import Enum
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Named tuples for passing around data in a structured way, a bit like a plain old c-struct.
@@ -51,99 +52,147 @@ monitor_file = namedtuple('monitor_file', 'file_path, detector_type')
 det_fit_range = namedtuple('det_fit_range', 'start, stop, use_fit')
 
 
-# ------------------------------------------------------------------
-# --- State director keys ------------------------------------------
-# ------------------------------------------------------------------
+class DetectorId(Enum):
+    CORRECTION_X = "correction_x"
+    CORRECTION_X_TILT = "correction_x_tilt"
+    CORRECTION_Y = "correction_y"
+    CORRECTION_Y_TILT = "correction_y_tilt"
+    CORRECTION_Z = "correction_z"
+    CORRECTION_RADIUS = "correction_radius"
+    CORRECTION_ROTATION = "correction_rotation"
+    CORRECTION_TRANSLATION = "correction_translation"
+    MERGE_RANGE = "merge_range"
+    INSTRUMENT = "instrument"
+    REDUCTION_MODE = "reduction_mode"
+    RESCALE = "rescale"
+    RESCALE_FIT = "rescale_fit"
+    SHIFT = "shift"
+    SHIFT_FIT = "shift_fit"
 
 
-# --- DET
-@serializable_enum("reduction_mode", "rescale", "shift", "rescale_fit", "shift_fit", "correction_x", "correction_y",
-                   "correction_z", "correction_rotation", "correction_radius", "correction_translation",
-                   "correction_x_tilt", "correction_y_tilt", "merge_range", "instrument")
-class DetectorId(object):
-    pass
+class LimitsId(Enum):
+    ANGLE = "angle"
+    EVENTS_BINNING = "events_binning"
+    EVENTS_BINNING_RANGE = "events_binning_range"
+    RADIUS = "radius"
+    RADIUS_CUT = "radius_cut"
+    Q = "q"
+    QXY = "qxy"
+    WAVELENGTH = "wavelength"
+    WAVELENGTH_CUT = "wavelength_cut"
 
 
-# --- LIMITS
-@serializable_enum("angle", "events_binning", "events_binning_range", "radius_cut", "wavelength_cut", "radius", "q",
-                   "qxy", "wavelength")
-class LimitsId(object):
-    pass
+class MaskId(Enum):
+    BLOCK = "block"
+    BLOCK_CROSS = "block_cross"
+    CLEAR_DETECTOR_MASK = "clear_detector_mask"
+    CLEAR_TIME_MASK = "clear_time_mask"
+    FILE = "file"
+    LINE = "line"
+    HORIZONTAL_SINGLE_STRIP_MASK = "horizontal_single_strip_mask"
+    HORIZONTAL_RANGE_STRIP_MASK = "horizontal_range_strip_mask"
+    TIME = "time"
+    TIME_DETECTOR = "time_detector"
+    SINGLE_SPECTRUM_MASK = "single_spectrum_mask"
+    SPECTRUM_RANGE_MASK = "spectrum_range_mask"
+    VERTICAL_SINGLE_STRIP_MASK = "vertical_single_strip_mask"
+    VERTICAL_RANGE_STRIP_MASK = "vertical_range_strip_mask"
 
 
-# --- MASK
-@serializable_enum("line", "time", "time_detector", "clear_detector_mask", "clear_time_mask", "single_spectrum_mask",
-                   "spectrum_range_mask", "vertical_single_strip_mask", "vertical_range_strip_mask", "file",
-                   "horizontal_single_strip_mask", "horizontal_range_strip_mask", "block", "block_cross")
-class MaskId(object):
-    pass
+class SampleId(Enum):
+    PATH = "path"
+    OFFSET = "offset"
 
 
-# --- SAMPLE
-@serializable_enum("path", "offset")
-class SampleId(object):
-    pass
+class SetId(Enum):
+    CENTRE = "centre"
+    CENTRE_HAB = "centre_HAB"
+    SCALES = "scales"
 
 
-# --- SET
-@serializable_enum("scales", "centre", "centre_HAB")
-class SetId(object):
-    pass
+class TransId(Enum):
+    CAN_WORKSPACE = "can_workspace"
+    RADIUS = "radius"
+    ROI = "roi"
+    MASK = "mask"
+    SAMPLE_WORKSPACE = "sample_workspace"
+    SPEC = "spec"
+    SPEC_4_SHIFT = "spec_4_shift"
+    SPEC_5_SHIFT = "spec_5_shift"
 
 
-# --- TRANS
-@serializable_enum("spec", "spec_4_shift", "spec_5_shift", "radius", "roi", "mask", "sample_workspace", "can_workspace")
-class TransId(object):
-    pass
+class TubeCalibrationFileId(Enum):
+    FILE = "file"
 
 
-# --- TUBECALIBFILE
-@serializable_enum("file")
-class TubeCalibrationFileId(object):
-    pass
+class QResolutionId(Enum):
+    A1 = "a1"
+    A2 = "a2"
+    COLLIMATION_LENGTH = "collimation_length"
+    DELTA_R = "delta_r"
+    H1 = "h1"
+    H2 = "h2"
+    MODERATOR = "moderator"
+    ON = "on"
+    W1 = "w1"
+    W2 = "w2"
 
 
-# -- QRESOLUTION
-@serializable_enum("on", "delta_r", "collimation_length", "a1", "a2", "h1", "w1", "h2", "w2", "moderator")
-class QResolutionId(object):
-    pass
+class FitId(Enum):
+    CLEAR = "clear"
+    GENERAL = "general"
+    MONITOR_TIMES = "monitor_times"
 
 
-# --- FIT
-@serializable_enum("clear", "monitor_times", "general")
-class FitId(object):
-    pass
+class GravityId(Enum):
+    EXTRA_LENGTH = "extra_length"
+    ON_OFF = "on_off"
 
 
-# --- GRAVITY
-@serializable_enum("on_off", "extra_length")
-class GravityId(object):
-    pass
+class MonId(Enum):
+    DIRECT = "direct"
+    FLAT = "flat"
+    HAB = "hab"
+    INTERPOLATE = "interpolate"
+    LENGTH = "length"
+    SPECTRUM = "spectrum"
+    SPECTRUM_TRANS = "spectrum_trans"
 
 
-# --- MON
-@serializable_enum("length", "direct", "flat", "hab", "spectrum", "spectrum_trans", "interpolate")
-class MonId(object):
-    pass
+class PrintId(Enum):
+    PRINT_LINE = "print_line"
 
 
-# --- PRINT
-@serializable_enum("print_line")
-class PrintId(object):
-    pass
+class BackId(Enum):
+    ALL_MONITORS = "all_monitors"
+    MONITOR_OFF = "monitor_off"
+    SINGLE_MONITORS = "single_monitors"
+    TRANS = "trans"
 
 
-# -- BACK
-@serializable_enum("all_monitors", "single_monitors", "monitor_off", "trans")
-class BackId(object):
-    pass
+class OtherId(Enum):
+    EVENT_SLICES = "event_slices"
 
+    MERGE_MASK = "merge_mask"
+    MERGE_MIN = "merge_min"
+    MERGE_MAX = "merge_max"
 
-# -- OTHER - not settable in user file
-@serializable_enum("reduction_dimensionality", "use_full_wavelength_range", "event_slices",
-                   "use_compatibility_mode", "save_types", "save_as_zero_error_free", "user_specified_output_name",
-                   "user_specified_output_name_suffix", "use_reduction_mode_as_suffix", "sample_width", "sample_height",
-                   "sample_thickness", "sample_shape", "merge_mask", "merge_min", "merge_max", "wavelength_range",
-                   "use_event_slice_optimisation")
-class OtherId(object):
-    pass
+    REDUCTION_DIMENSIONALITY = "reduction_dimensionality"
+
+    SAVE_AS_ZERO_ERROR_FREE = "save_as_zero_error_free"
+    SAVE_TYPES = "save_types"
+
+    SAMPLE_HEIGHT = "sample_height"
+    SAMPLE_WIDTH = "sample_width"
+    SAMPLE_THICKNESS = "sample_thickness"
+    SAMPLE_SHAPE = "sample_shape"
+
+    USE_COMPATIBILITY_MODE = "use_compatibility_mode"
+    USE_EVENT_SLICE_OPTIMISATION = "use_event_slice_optimisation"
+    USE_FULL_WAVELENGTH_RANGE = "use_full_wavelength_range"
+    USE_REDUCTION_MODE_AS_SUFFIX = "use_reduction_mode_as_suffix"
+
+    USER_SPECIFIED_OUTPUT_NAME = "user_specified_output_name"
+    USER_SPECIFIED_OUTPUT_NAME_SUFFIX = "user_specified_output_name_suffix"
+
+    WAVELENGTH_RANGE = "wavelength_range"

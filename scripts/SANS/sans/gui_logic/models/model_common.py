@@ -26,15 +26,15 @@ class ModelCommon(with_metaclass(ABCMeta)):
 
     @property
     def instrument(self):
-        return self.get_simple_element(element_id=DetectorId.instrument, default_value=SANSInstrument.NoInstrument)
+        return self.get_simple_element(element_id=DetectorId.INSTRUMENT, default_value=SANSInstrument.NO_INSTRUMENT)
 
     @instrument.setter
     def instrument(self, value):
-        self.set_simple_element(element_id=DetectorId.instrument, value=value)
+        self.set_simple_element(element_id=DetectorId.INSTRUMENT, value=value)
 
     def _get_incident_spectrum_info(self, default_value, attribute, is_trans):
-        if MonId.spectrum in self._user_file_items:
-            settings = self._user_file_items[MonId.spectrum]
+        if MonId.SPECTRUM in self._user_file_items:
+            settings = self._user_file_items[MonId.SPECTRUM]
             if is_trans:
                 settings = [setting for setting in settings if setting.is_trans]
             else:
@@ -45,8 +45,8 @@ class ModelCommon(with_metaclass(ABCMeta)):
             return default_value
 
     def _update_incident_spectrum_info(self, spectrum=None, interpolate=False, is_trans=False):
-        if MonId.spectrum in self._user_file_items:
-            settings = self._user_file_items[MonId.spectrum]
+        if MonId.SPECTRUM in self._user_file_items:
+            settings = self._user_file_items[MonId.SPECTRUM]
         else:
             # If the entry does not already exist, then add it.
             settings = [monitor_spectrum(spectrum=spectrum, is_trans=is_trans, interpolate=interpolate)]
@@ -63,7 +63,7 @@ class ModelCommon(with_metaclass(ABCMeta)):
                 new_settings.append(new_setting)
             else:
                 new_settings.append(setting)
-        self._user_file_items.update({MonId.spectrum: new_settings})
+        self._user_file_items.update({MonId.SPECTRUM: new_settings})
 
     def get_simple_element(self, element_id, default_value):
         return self.get_simple_element_with_attribute(element_id, default_value)
