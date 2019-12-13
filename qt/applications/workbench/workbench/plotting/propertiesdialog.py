@@ -204,7 +204,6 @@ class ColorbarAxisEditor(AxisEditor):
             cb.colorbar.locator = locator
             cb.colorbar.update_ticks()
 
-
     def create_model(self):
         memento = AxisEditorModel()
         self._memento = memento
