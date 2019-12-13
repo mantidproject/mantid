@@ -27,8 +27,13 @@ class GroupingTabView(QtWidgets.QWidget):
         self.vertical_layout = None
         self.horizontal_layout_base = None
         self.horizontal_layout_description = None
+        self.horizontal_layout_1 = None
         self.description_label = None
         self.description_edit = None
+        self.summed_period_edit = None
+        self.period_label = None
+        self.subtracted_period_edit = None
+        self.minus_label = None
 
         self._grouping_table = grouping_table
         self._pairing_table = pairing_table
@@ -98,16 +103,16 @@ class GroupingTabView(QtWidgets.QWidget):
         period_validator = QtGui.QRegExpValidator(reg_ex, self.subtracted_period_edit)
         self.subtracted_period_edit.setValidator(period_validator)
 
-        self.horizontal_layout_2 = QtWidgets.QHBoxLayout()
-        self.horizontal_layout_2.setObjectName("horizontalLayout2")
-        self.horizontal_layout_2.addWidget(self.period_label)
-        self.horizontal_layout_2.addStretch(0)
-        self.horizontal_layout_2.addWidget(self.summed_period_edit)
-        self.horizontal_layout_2.addSpacing(10)
-        self.horizontal_layout_2.addWidget(self.minus_label)
-        self.horizontal_layout_2.addSpacing(10)
-        self.horizontal_layout_2.addWidget(self.subtracted_period_edit)
-        self.vertical_layout.addItem(self.horizontal_layout_2)
+        self.horizontal_layout_1 = QtWidgets.QHBoxLayout()
+        self.horizontal_layout_1.setObjectName("horizontalLayout2")
+        self.horizontal_layout_1.addWidget(self.period_label)
+        self.horizontal_layout_1.addStretch(0)
+        self.horizontal_layout_1.addWidget(self.summed_period_edit)
+        self.horizontal_layout_1.addSpacing(10)
+        self.horizontal_layout_1.addWidget(self.minus_label)
+        self.horizontal_layout_1.addSpacing(10)
+        self.horizontal_layout_1.addWidget(self.subtracted_period_edit)
+        self.vertical_layout.addItem(self.horizontal_layout_1)
 
         self.setLayout(self.vertical_layout)
 

@@ -31,9 +31,13 @@ class PlotWidgetView(QtWidgets.QWidget):
         self.plot_label = None
         self.plot_selector = None
         self.plot_button = None
+        self.tile_type_selector = None
+        self.tiled_type_label = None
+        self.plot_type_selector = None
         self.group_selector = None
         self.horizontal_layout = None
         self.vertical_layout = None
+        self.raw = None
         self.fig = None
         self.toolBar = None
         self.group = None
@@ -58,6 +62,8 @@ class PlotWidgetView(QtWidgets.QWidget):
         self.plot_selector = QtWidgets.QComboBox(self)
         self.plot_selector.setObjectName("plotSelector")
         self.plot_selector.addItems(["Asymmetry", "Counts"])
+        self.plot_selector.setSizePolicy(QtWidgets.QSizePolicy.Fixed,
+                                         QtWidgets.QSizePolicy.Fixed)
 
         self.plot_type_selector = QtWidgets.QCheckBox(parent=self)
         self.plot_type_selector.setChecked(False)
@@ -65,15 +71,12 @@ class PlotWidgetView(QtWidgets.QWidget):
         self.plot_type_selector.setSizePolicy(QtWidgets.QSizePolicy.Fixed,
                                               QtWidgets.QSizePolicy.Fixed)
 
-        self.plot_button = QtWidgets.QPushButton(self)
-        self.plot_button.setObjectName("PlotButton")
-        self.plot_button.setText("Plot")
-
-        self.plot_label.setBuddy(self.plot_button)
-        self.plot_selector.setSizePolicy(QtWidgets.QSizePolicy.Fixed,
-                                         QtWidgets.QSizePolicy.Fixed)
-        self.plot_button.setSizePolicy(QtWidgets.QSizePolicy.Fixed,
-                                       QtWidgets.QSizePolicy.Fixed)
+        # self.plot_button = QtWidgets.QPushButton(self)
+        # self.plot_button.setObjectName("PlotButton")
+        # self.plot_button.setText("Plot")
+        # self.plot_label.setBuddy(self.plot_button)
+        # self.plot_button.setSizePolicy(QtWidgets.QSizePolicy.Fixed,
+        #                                QtWidgets.QSizePolicy.Fixed)
 
         self.tile_type_selector = QtWidgets.QComboBox(self)
         self.tile_type_selector.setObjectName("tileTypeSelector")
@@ -83,14 +86,16 @@ class PlotWidgetView(QtWidgets.QWidget):
         self.horizontal_layout.setObjectName("horizontalLayout")
         self.horizontal_layout.addWidget(self.plot_label)
         self.horizontal_layout.addWidget(self.plot_selector)
+        self.horizontal_layout.addSpacing(15)
         self.horizontal_layout.addStretch(0)
         self.horizontal_layout.addWidget(self.plot_type_selector)
         self.horizontal_layout.addWidget(self.tiled_type_label)
         self.horizontal_layout.addWidget(self.tile_type_selector)
+        self.horizontal_layout.addSpacing(15)
         self.horizontal_layout.addStretch(0)
         self.horizontal_layout.addWidget(self.raw)
         self.horizontal_layout.addStretch(0)
-        self.horizontal_layout.addWidget(self.plot_button)
+        # self.horizontal_layout.addWidget(self.plot_button)
         self.horizontal_layout.addSpacing(50)
 
         self.vertical_layout = QtWidgets.QVBoxLayout()
@@ -160,7 +165,8 @@ class PlotWidgetView(QtWidgets.QWidget):
         return self.plot_selector.currentText()
 
     def on_plot_button_clicked(self, slot):
-        self.plot_button.clicked.connect(slot)
+        pass
+        # self.plot_button.clicked.connect(slot)
 
     def on_rebin_options_changed(self, slot):
         self.raw.stateChanged.connect(slot)

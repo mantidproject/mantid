@@ -63,22 +63,23 @@ class PairingTablePresenter(object):
     def handle_data_change(self, row, col):
         table = self._view.get_table_contents()
         changed_item = self._view.get_table_item(row, col)
+        changed_item_text = self._view.get_table_item_text(row,col)
         pair_name = self._view.get_table_item_text(row, 0)
         update_model = True
-        if pair_columns[col] == 'pair_name' and not self.validate_pair_name(changed_item):
+        if pair_columns[col] == 'pair_name' and not self.validate_pair_name(changed_item_text):
             update_model = False
         if pair_columns[col] == 'group_1':
-            if changed_item == self._view.get_table_item_text(row, pair_columns.index('group_2')):
+            if changed_item_text == self._view.get_table_item_text(row, pair_columns.index('group_2')):
                 table[row][pair_columns.index('group_2')] = self._model.pairs[row].forward_group
         if pair_columns[col] == 'group_2':
-            if changed_item == self._view.get_table_item_text(row, pair_columns.index('group_1')):
+            if changed_item_text == self._view.get_table_item_text(row, pair_columns.index('group_1')):
                 table[row][pair_columns.index('group_1')] = self._model.pairs[row].backward_group
         if pair_columns[col] == 'alpha':
-            if not self.validate_alpha(changed_item):
+            if not self.validate_alpha(changed_item_text):
                 update_model = False
             else:
-                rounded_item = '{:.3f}'.format(float(changed_item)) if '{:.3f}'.format(float(changed_item)) != '0.000' \
-                    else '{:.3g}'.format(float(changed_item))
+                rounded_item = '{:.3f}'.format(float(changed_item_text)) if '{:.3f}'.format(float(changed_item_text)) != '0.000' \
+                    else '{:.3g}'.format(float(changed_item_text))
                 table[row][col] = rounded_item
         if pair_columns[col] == 'to_analyse':
             update_model = False

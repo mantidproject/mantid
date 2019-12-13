@@ -11,7 +11,6 @@ set ( TEST_PY_FILES
    fit_information_test.py
    fit_parameters_test.py
    fitting_context_test.py
-   home_grouping_widget_test.py
    home_instrument_widget_test.py
    plotting_widget_test.py
    plotting_widget_freq_test.py
@@ -89,7 +88,6 @@ set ( TEST_PY_FILES_QT4
    fit_information_test.py
    fit_parameters_test.py
    fitting_context_test.py
-   home_grouping_widget_test.py
    home_instrument_widget_test.py
    plotting_widget_test.py
    plotting_widget_freq_test.py

@@ -25,12 +25,14 @@ def setup_context_for_tests(parent_object):
     parent_object.group_context = MuonGroupPairContext(parent_object.data_context.check_group_contains_valid_detectors)
     parent_object.phase_table_context = PhaseTableContext()
     parent_object.fitting_context = FittingContext()
-    parent_object.context = MuonContext(muon_data_context=parent_object.data_context, muon_group_context=parent_object.group_context,
-                                        muon_gui_context=parent_object.gui_context, muon_phase_context=parent_object.phase_table_context,
+    parent_object.context = MuonContext(muon_data_context=parent_object.data_context,
+                                        muon_group_context=parent_object.group_context,
+                                        muon_gui_context=parent_object.gui_context,
+                                        muon_phase_context=parent_object.phase_table_context,
                                         fitting_context=parent_object.fitting_context)
 
 
-def setup_context(freq = False):
+def setup_context(freq=False):
     loaded_data = MuonLoadData()
     loaded_data.get_main_field_direction = mock.MagicMock(return_value='transverse')
     data_context = MuonDataContext(load_data=loaded_data)
@@ -46,4 +48,4 @@ def setup_context(freq = False):
                        muon_gui_context=gui_context,
                        muon_phase_context=phase_table_context,
                        fitting_context=fitting_context,
-                       frequency_context = freq_context)
+                       frequency_context=freq_context)

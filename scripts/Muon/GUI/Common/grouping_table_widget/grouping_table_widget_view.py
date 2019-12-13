@@ -179,6 +179,10 @@ class GroupingTableView(QtWidgets.QWidget):
                 self.grouping_table.setItem(row_position, 2, detector_widget)
                 self.grouping_table.item(row_position, 2).setToolTip(entry)
                 detector_widget.set_validator(self._validate_detector_ID_entry)
+                item.setFlags(QtCore.Qt.ItemIsSelectable |
+                              QtCore.Qt.ItemIsEditable |
+                              QtCore.Qt.ItemIsEnabled)
+                item.setFlags(QtCore.Qt.ItemIsEditable)
             if group_table_columns[i] == 'number_of_detectors':
                 # column 3 : number of detector
                 item.setFlags(QtCore.Qt.ItemIsEnabled)
@@ -395,9 +399,8 @@ class GroupingTableView(QtWidgets.QWidget):
             for col in range(self.num_cols()):
                 item = self.grouping_table.item(row, col)
                 if group_table_columns[col] == 'detector_ids':
-                    item.setFlags(QtCore.Qt.ItemIsSelectable |
-                                  QtCore.Qt.ItemIsEditable |
-                                  QtCore.Qt.ItemIsEnabled)
+                    print("got in here ")
+                   # item.setFlags(QtCore.Qt.ItemIsEditable)
 
                 if group_table_columns[col] == 'to_analyse':
                     item.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)

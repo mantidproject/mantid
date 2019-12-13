@@ -156,14 +156,14 @@ class PairingTableView(QtWidgets.QWidget):
             if pair_columns[i] == 'group_1':
                 group1_selector_widget = self._group_selection_cell_widget()
                 # ensure changing the selection sends an update signal
-                group1_selector_widget.currentIndexChanged.connect(lambda: self.on_cell_changed(row_position, 1))
+                group1_selector_widget.currentIndexChanged.connect(lambda: self.on_cell_changed(row_position, 2))
                 index = self.get_index_of_text(group1_selector_widget, entry)
                 group1_selector_widget.setCurrentIndex(index)
                 self.pairing_table.setCellWidget(row_position, i, group1_selector_widget)
             if pair_columns[i] == 'group_2':
                 group2_selector_widget = self._group_selection_cell_widget()
                 # ensure changing the selection sends an update signal
-                group2_selector_widget.currentIndexChanged.connect(lambda: self.on_cell_changed(row_position, 2))
+                group2_selector_widget.currentIndexChanged.connect(lambda: self.on_cell_changed(row_position, 3))
                 index = self.get_index_of_text(group2_selector_widget, entry)
                 group2_selector_widget.setCurrentIndex(index)
                 self.pairing_table.setCellWidget(row_position, i, group2_selector_widget)
@@ -219,7 +219,12 @@ class PairingTableView(QtWidgets.QWidget):
         return self.pairing_table.item(row, col)
 
     def get_table_item_text(self, row, col):
-        return self.pairing_table.item(row, col).text()
+        if pair_columns[col] == "group_1" or pair_columns[col] == "group_2":
+            return str(self.pairing_table.cellWidget(row, col).currentText())
+        elif pair_columns[col] == "guess_alpha":
+            return "Guess"
+        else: # columns without widgets
+            return str(self.pairing_table.item(row, col).text())
 
     # ------------------------------------------------------------------------------------------------------------------
     # Signal / Slot connections
