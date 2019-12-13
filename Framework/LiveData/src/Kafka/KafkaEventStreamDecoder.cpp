@@ -133,7 +133,7 @@ KafkaEventStreamDecoder::KafkaEventStreamDecoder(
  * Destructor.
  * Stops capturing from the stream
  */
-KafkaEventStreamDecoder::~KafkaEventStreamDecoder() {}
+KafkaEventStreamDecoder::~KafkaEventStreamDecoder() { stopCapture(); }
 
 /**
  * Check if there is data available to extract
@@ -586,16 +586,19 @@ void KafkaEventStreamDecoder::initLocalCaches(
         spDetMsg->spectrum()->data(), spDetMsg->detector_id()->data(), nudet);
   }
 
-  // Load the instrument if possible but continue if we can't
-  if (!instName.empty()) {
-    loadInstrument<DataObjects::EventWorkspace>(instName, eventBuffer,
-                                                jsonGeometry);
-    if (rawMsgBuffer.empty()) {
-      eventBuffer->rebuildSpectraMapping();
+  auto instrument = eventBuffer->getInstrument();
+  if (instrument->getNumberDetectors() != eventBuffer->getNumberHistograms()) {
+    // Load the instrument if possible but continue if we can't
+    if (!instName.empty()) {
+      loadInstrument<DataObjects::EventWorkspace>(instName, eventBuffer,
+                                                  jsonGeometry);
+      if (rawMsgBuffer.empty()) {
+        eventBuffer->rebuildSpectraMapping();
+      }
+    } else {
+      g_log.warning(
+          "Empty instrument name received. Continuing without instrument");
     }
-  } else {
-    g_log.warning(
-        "Empty instrument name received. Continuing without instrument");
   }
 
   auto &mutableRun = eventBuffer->mutableRun();
@@ -613,14 +616,15 @@ void KafkaEventStreamDecoder::initLocalCaches(
 
   // Cache spec->index mapping. We assume it is the same across all periods
   m_specToIdx =
-      eventBuffer->getSpectrumToWorkspaceIndexVector(m_specToIdxOffset);
+      eventBuffer->getDetectorIDToWorkspaceIndexVector(m_specToIdxOffset);
 
   // Buffers for each period
-  const size_t nperiods = runStartData.nPeriods;
+  size_t nperiods = runStartData.nPeriods;
   if (nperiods == 0) {
-    throw std::runtime_error(
-        "KafkaEventStreamDecoder - Message has n_periods==0. This is "
-        "an error by the data producer");
+    g_log.warning(
+        "KafkaEventStreamDecoder - Stream reports 0 periods. This is "
+        "an error by the data producer. Number of periods being set to 1.");
+    nperiods = 1;
   }
   {
     std::lock_guard<std::mutex> workspaceLock(m_mutex);

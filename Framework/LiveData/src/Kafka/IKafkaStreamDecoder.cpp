@@ -65,7 +65,7 @@ IKafkaStreamDecoder::IKafkaStreamDecoder(std::shared_ptr<IKafkaBroker> broker,
  * Destructor.
  * Stops capturing from the stream
  */
-IKafkaStreamDecoder::~IKafkaStreamDecoder() { stopCapture(); }
+IKafkaStreamDecoder::~IKafkaStreamDecoder() = default;
 
 /**
  * Start capturing from the stream on a separate thread. This is a non-blocking
@@ -82,9 +82,9 @@ void IKafkaStreamDecoder::startCapture(bool startNow) {
     auto runStartData = getRunStartMessage(rawMsgBuffer);
     joinStreamAtTime(runStartData);
   } else {
-    m_dataStream =
-        m_broker->subscribe({m_streamTopic, m_runInfoTopic, m_sampleEnvTopic},
-                            SubscribeAtOption::LATEST);
+    m_dataStream = m_broker->subscribe(
+        {m_streamTopic, m_monitorTopic, m_runInfoTopic, m_sampleEnvTopic},
+        SubscribeAtOption::LATEST);
   }
 
   try {

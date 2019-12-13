@@ -508,22 +508,26 @@ void JSONGeometryParser::extractMonitorContent() {
   if (m_jsonMonitors.empty())
     return;
 
+  int monitorID = 1;
   for (const auto &monitor : m_jsonMonitors) {
     const auto &children = (*monitor)[CHILDREN];
     auto name = (*monitor)[NAME].asString();
     if (children.empty())
       throw std::invalid_argument("Full monitor definition for " + name +
                                   " missing in json provided.");
-
     Monitor mon;
+
     mon.componentName = name;
+    mon.detectorID = -monitorID;
+    ++monitorID;
     for (const auto &child : children) {
       const auto &val = child[VALUES];
       if (child[NAME] == NAME)
         mon.name = val.asString();
-      else if (child[NAME] == DETECTOR_ID || child[NAME] == "detector_number")
+      else if (child[NAME] == DETECTOR_ID || child[NAME] == "detector_number") {
         mon.detectorID = val.asInt();
-      else if (child[NAME] == "events")
+        --monitorID; // ids stay continuous.
+      } else if (child[NAME] == "events")
         extractMonitorEventStream(child, mon);
       else if (child[NAME] == "waveforms")
         extractMonitorWaveformStream(child, mon);
