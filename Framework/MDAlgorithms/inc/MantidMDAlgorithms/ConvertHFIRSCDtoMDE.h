@@ -13,9 +13,9 @@
 namespace Mantid {
 namespace MDAlgorithms {
 
-/** ConvertSCDtoMDE : TODO: DESCRIPTION
+/** ConvertHFIRSCDtoMDE : TODO: DESCRIPTION
 */
-class MANTID_MDALGORITHMS_DLL ConvertSCDtoMDE
+class MANTID_MDALGORITHMS_DLL ConvertHFIRSCDtoMDE
     : public BoxControllerSettingsAlgorithm {
 public:
   const std::string name() const override;

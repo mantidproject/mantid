@@ -5,7 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "MantidMDAlgorithms/ConvertSCDtoMDE.h"
+#include "MantidMDAlgorithms/ConvertHFIRSCDtoMDE.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
@@ -37,28 +37,28 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(ConvertSCDtoMDE)
+DECLARE_ALGORITHM(ConvertHFIRSCDtoMDE)
 
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string ConvertSCDtoMDE::name() const { return "ConvertSCDtoMDE"; }
+const std::string ConvertHFIRSCDtoMDE::name() const { return "ConvertHFIRSCDtoMDE"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int ConvertSCDtoMDE::version() const { return 1; }
+int ConvertHFIRSCDtoMDE::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string ConvertSCDtoMDE::category() const {
+const std::string ConvertHFIRSCDtoMDE::category() const {
   return "MDAlgorithm\\Creation";
 }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string ConvertSCDtoMDE::summary() const {
+const std::string ConvertHFIRSCDtoMDE::summary() const {
   return "Convert from the detector vs scan index MDHistoWorkspace into a "
          "MDEventWorkspace with units in Q_sample.";
 }
 
-std::map<std::string, std::string> ConvertSCDtoMDE::validateInputs() {
+std::map<std::string, std::string> ConvertHFIRSCDtoMDE::validateInputs() {
   std::map<std::string, std::string> result;
 
   API::IMDHistoWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
@@ -133,7 +133,7 @@ std::map<std::string, std::string> ConvertSCDtoMDE::validateInputs() {
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
-void ConvertSCDtoMDE::init() {
+void ConvertHFIRSCDtoMDE::init() {
 
   declareProperty(std::make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
@@ -166,7 +166,7 @@ void ConvertSCDtoMDE::init() {
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
-void ConvertSCDtoMDE::exec() {
+void ConvertHFIRSCDtoMDE::exec() {
   double wavelength = this->getProperty("Wavelength");
   if (wavelength == Mantid::EMPTY_DBL()) {
     throw std::invalid_argument("Wavelength not entered!");

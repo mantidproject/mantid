@@ -14,23 +14,23 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
-#include "MantidMDAlgorithms/ConvertSCDtoMDE.h"
+#include "MantidMDAlgorithms/ConvertHFIRSCDtoMDE.h"
 #include "MantidMDAlgorithms/LoadMD.h"
 
 using namespace Mantid::API;
 using namespace Mantid::MDAlgorithms;
 
-class ConvertSCDtoMDETest : public CxxTest::TestSuite {
+class ConvertHFIRSCDtoMDETest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ConvertSCDtoMDETest *createSuite() {
-    return new ConvertSCDtoMDETest();
+  static ConvertHFIRSCDtoMDETest *createSuite() {
+    return new ConvertHFIRSCDtoMDETest();
   }
-  static void destroySuite(ConvertSCDtoMDETest *suite) { delete suite; }
+  static void destroySuite(ConvertHFIRSCDtoMDETest *suite) { delete suite; }
 
   void test_Init() {
-    ConvertSCDtoMDE alg;
+    ConvertHFIRSCDtoMDE alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
   }
@@ -42,20 +42,20 @@ public:
     loader.setPropertyValue(
         "Filename",
         Mantid::API::FileFinder::Instance().getFullPath("HB3A_data.nxs"));
-    loader.setPropertyValue("OutputWorkspace", "ConvertSCDtoMDETest_data");
+    loader.setPropertyValue("OutputWorkspace", "ConvertHFIRSCDtoMDETest_data");
     loader.setProperty("FileBackEnd", false);
     loader.execute();
     auto inputWS = Mantid::API::AnalysisDataService::Instance()
                        .retrieveWS<Mantid::API::IMDHistoWorkspace>(
-                           "ConvertSCDtoMDETest_data");
+                           "ConvertHFIRSCDtoMDETest_data");
 
-    ConvertSCDtoMDE alg;
+    ConvertHFIRSCDtoMDE alg;
     // Don't put output in ADS by default
     alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("InputWorkspace", "ConvertSCDtoMDETest_data"));
+        alg.setProperty("InputWorkspace", "ConvertHFIRSCDtoMDETest_data"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Wavelength", "1.008"));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", "_unused_for_child"));
