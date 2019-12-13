@@ -101,14 +101,12 @@ Testing
 
 Tests for Abins are located in a few places:
 
-Algorithm tests
-~~~~~~~~~~~~~~~
-
 Unit tests
 ~~~~~~~~~~
-Unit tests for the AbinsModules Python library are in *scripts/test/Abins*.
+Unit tests for the Python AbinsModules are in *scripts/test/Abins*.
 These are set up with the other unit tests (``cmake --build . --target AllTests``)
 and can be run by filtering for Abins (``ctest -R Abins``).
+This will also run the Algorithm tests (next section).
 
 Some of these tests load input data and check that the
 structure/vibration data has been read correctly. There is a
@@ -125,9 +123,17 @@ Loader and pass it to *save_ab_initio_test_data*. This takes two lines of Python
 which will write the necessary *my_new_test_data.txt* file and
 *my_new_test_atomic_displacements_data_{k}.txt* files for each phonon wavevector.
 
+Algorithm tests
+~~~~~~~~~~~~~~~
+Tests of the main Abins algorithm and of the advanced parameter
+settings are in
+*Framework/PythonInterface/test/python/plugins/algorithms*. These
+mostly cover input sanity-checking, and check the consistency of
+result scaling and splitting into atomic contributions.
 
 System tests
 ~~~~~~~~~~~~
-
+System tests are defined in *Testing/SystemTests/tests/analysis/AbinsTest.py*.
+These tests compare the output workspaces of Abins runs with reference Nexus files.
 
 .. categories:: Concepts
