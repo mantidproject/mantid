@@ -8,8 +8,8 @@
 DNS script generator for elastic powder data
 """
 from __future__ import (absolute_import, division, print_function)
+import os
 import numpy as np
-
 from DNSReduction.script_generator.common_script_generator_presenter import DNSScriptGenerator_presenter
 from DNSReduction.script_generator.common_script_generator_presenter import list_to_multirange
 from DNSReduction.data_structures.field_names import field_dict
@@ -39,8 +39,14 @@ class DNSElasticPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
             else:
                 datatype = entry['samplename'].strip(' _')
             field = field_dict.get(entry['field'], entry['field'])
-            datapath = entry['filename'].replace(
+            proposal = entry['filename'].replace(
                 '_{}.d_dat'.format(entry['filenumber']), '')
+            if sample:
+                path = self.param_dict['paths']['data_dir']
+            else:
+                path = self.param_dict['paths']['standards_dir']
+            datapath = os.path.join(path, proposal)
+
             if datatype in dataset.keys():
                 if field in dataset[datatype].keys():
                     dataset[datatype][field].append(entry['filenumber'])
@@ -58,7 +64,7 @@ class DNSElasticPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
         return dataset
 
     def create_plotlist(self, sample_data):
-        plotlist= []
+        plotlist = []
         for sample, workspacelist in sample_data.items():
             for workspace in workspacelist:
                 if workspace != 'path':
@@ -67,7 +73,7 @@ class DNSElasticPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
 
     def format_dataset(self, dataset):
         """Formating the dictionary to a nicely indented string"""
-        llens = max([len(a) for a in dataset.keys()] +[0])+6+4
+        llens = max([len(a) for a in dataset.keys()])+6+4
         dataset_string = '{\n'
         for samplename, fields in dataset.items():
             lmax = max([len(key) for key in fields.keys()] +[0])
@@ -146,7 +152,7 @@ class DNSElasticPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
         ## loop over multiple or single samples, spac is indention for rest
         if len(sample_data.keys()) == 1:
             loop = "for workspace in wss_sample['{}']:"\
-                   "".format(sample_data.keys()[0])
+                   "".format(list(sample_data.keys())[0])  # list for py 3 vs 2
             spac = "\n" + " "*4
         else:
             loop = "for sample, workspacelist in wss_sample.items(): "\

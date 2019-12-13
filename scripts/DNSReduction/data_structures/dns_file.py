@@ -8,38 +8,25 @@
 Class which loads and stores a single DNS datafile in a dictionary
 """
 from __future__ import (absolute_import, division, print_function)
+import os
 import numpy as np
 
+from DNSReduction.data_structures.object_dict import ObjectDict
 
-class DNSFile(dict):
+
+class DNSFile(ObjectDict):
     """
     class for storing data of a single dns datafile
-    this is a dictionary but you can access also as object
+    this is a dictionary  but can also be accessed like atributes
     """
-    def __init__(self, filename):
+    def __init__(self, datapath, filename):
         super(DNSFile, self).__init__()
-        self.info = {}
-        self.read(filename)
+        self.read(datapath, filename)
 
-    def __getattr__(self, name):
-        if name in self:
-            return self[name]
-        else:
-            raise AttributeError("No such attribute: {}".format(name))
-
-    def __setattr__(self, name, value):
-        self[name] = value
-
-    def __delattr__(self, name):
-        if name in self:
-            del self[name]
-        else:
-            raise AttributeError("No such attribute: {}".format(name))
-
-    def write(self, filename):
+    def write(self, datapath, filename):
         # mostly stolen form nicos
         separator = "#" + "-" * 74 + "\n"
-        myfile = open(filename, 'w')
+        myfile = open(os.path.join(datapath, filename), 'w')
         w = myfile.write
         wavelength = self['wavelength'] / 10.0  ## written in nm
         w("# DNS Data userid={},exp={},file={},sample={}\n".format(
@@ -179,8 +166,8 @@ class DNSFile(dict):
             w("\n")
         myfile.close()
 
-    def read(self, filename):
-        with open(filename, 'r') as f:
+    def read(self, datapath, filename):
+        with open(os.path.join(datapath, filename), 'r') as f:
             txt = f.readlines()
         del f
         self['filename'] = filename
@@ -221,7 +208,7 @@ class DNSFile(dict):
         self['monitor'] = int(txt[57][15:-1])
         self['starttime'] = txt[59][21:-1]
         self['endtime'] = txt[60][21:-1]
-        self['scannumber'] = txt[63][15:-1]
+        self['scannumber'] = txt[63][15:-1].strip()
         self['scancommand'] = txt[64][28:-1]
         self['scanposition'] = txt[65][15:-1].strip()
         self['pol_trans_x'] = float(txt[66][15:-4])
@@ -234,7 +221,7 @@ class DNSFile(dict):
         else:
             self['scanpoints'] = ''
         self.counts = np.zeros((24, self['tofchannels']),
-                               dtype=long)  ### for python 2 use long
+                               dtype=int)  ### for python 2 use long
         for ch in range(24):
             self.counts[ch, :] = txt[74 + ch].split()[1:]
         del txt

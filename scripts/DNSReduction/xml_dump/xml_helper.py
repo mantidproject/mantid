@@ -84,10 +84,10 @@ def dict_to_xml(dictionary, node=None):
         #dictionary = dictionary['document']
     for key, value in dictionary.items():
         if isinstance(value, dict):
-            sub = etree.SubElement(parent=node, tag=key)
+            sub = etree.SubElement(node, key)
             dict_to_xml(value, node=sub)
         else:
-            sub = etree.SubElement(parent=node, tag=key)
+            sub = etree.SubElement(node, key)
             sub.text = str(value)
             sub.set('type', return_type(value))
     return node

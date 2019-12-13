@@ -12,41 +12,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from DNSReduction.script_generator.common_script_generator_presenter import DNSScriptGenerator_presenter
 from DNSReduction.script_generator.common_script_generator_presenter import list_to_multirange
-
-
-def create_dataset(data):
-    dataset = {}
-    rounding_limit = 0.05
-    for entry in data:
-        if entry['samplename'] == 'leer':  ## compatibility with old names
-            datatype = 'empty'
-        else:
-            datatype = entry['samplename']
-        det_rot = entry['det_rot']
-        datapath = entry['filename'].replace(
-            '_' + str(entry['filenumber']) + '.d_dat', '')
-        if datatype in dataset.keys():
-            for compare in [
-                    x for x in dataset[datatype].keys() if x != 'path'
-            ]:
-                if abs(compare - det_rot) < rounding_limit:
-                    inside = True
-                    break
-                else:
-                    inside = False
-            if inside:
-                dataset[datatype][compare].append(entry['filenumber'])
-            else:
-                dataset[datatype][det_rot] = [entry['filenumber']]
-        else:
-            dataset[datatype] = {}
-            dataset[datatype][det_rot] = [entry['filenumber']]
-            dataset[datatype]['path'] = datapath
-    for sample_typ, det_rots in dataset.items():
-        for det_rot, filenumbers in det_rots.items():
-            if det_rot != 'path':
-                dataset[sample_typ][det_rot] = list_to_multirange(filenumbers)
-    return dataset
+import os
 
 
 def format_dataset(dataset):
@@ -107,6 +73,45 @@ class DNSTofPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
             samplefilename = samplefilename[0]
         return samplefilename
 
+    def create_dataset(self, data, sample=False):
+        dataset = {}
+        rounding_limit = 0.05
+        for entry in data:
+            if entry['samplename'] == 'leer':  ## compatibility with old names
+                datatype = 'empty'
+            else:
+                datatype = entry['samplename']
+            det_rot = entry['det_rot']
+            proposal = entry['filename'].replace(
+                    '_{}.d_dat'.format(entry['filenumber']), '')
+            if sample:
+                path = self.param_dict['paths']['data_dir']
+            else:
+                path = self.param_dict['paths']['standards_dir']
+            datapath = os.path.join(path, proposal)
+            if datatype in dataset.keys():
+                for compare in [
+                        x for x in dataset[datatype].keys() if x != 'path'
+                ]:
+                    if abs(compare - det_rot) < rounding_limit:
+                        inside = True
+                        break
+                    else:
+                        inside = False
+                if inside:
+                    dataset[datatype][compare].append(entry['filenumber'])
+                else:
+                    dataset[datatype][det_rot] = [entry['filenumber']]
+            else:
+                dataset[datatype] = {}
+                dataset[datatype][det_rot] = [entry['filenumber']]
+                dataset[datatype]['path'] = datapath
+        for sample_typ, det_rots in dataset.items():
+            for det_rot, filenumbers in det_rots.items():
+                if det_rot != 'path':
+                    dataset[sample_typ][det_rot] = list_to_multirange(filenumbers)
+        return dataset
+
     def check_vanadium_correction(self, tof_opt):
         if (self.number_of_vana_banks > 0
                 and tof_opt['corrections']
@@ -153,11 +158,11 @@ class DNSTofPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
             self.script += [line]
 
         paths = self.param_dict['paths']
-        sample_data = create_dataset(
-            self.param_dict['file_selector']['full_data'])
+        sample_data = self.create_dataset(
+            self.param_dict['file_selector']['full_data'], sample=True)
         tof_opt = self.param_dict['tof_powder_options']
 
-        standard_data = create_dataset(
+        standard_data = self.create_dataset(
             self.param_dict['file_selector']['standard_data'])
         vanafilename = self.get_vana_filename(standard_data)
         emptyfilename = self.get_empty_filename(standard_data)

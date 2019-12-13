@@ -17,6 +17,7 @@ from DNSReduction.data_structures.dns_file import DNSFile
 from DNSReduction.file_selector.file_selector_view import DNSFileSelector_view
 from DNSReduction.helpers.file_processing import filter_filenames
 from DNSReduction.helpers.file_processing import return_filelist
+from DNSReduction.data_structures.object_dict import ObjectDict
 
 
 class DNSFileSelector_presenter(DNSObserver):
@@ -222,6 +223,44 @@ class DNSFileSelector_presenter(DNSObserver):
         if was:
             view.combo_changed(0)
 
+    def load_saved_filelist(self):
+        """
+        we save the list of loaed files so we have to read the files only once
+        """
+        path = self.param_dict['paths']['data_dir']
+        loaded = {}
+        try:
+            with open(path + '/last_filelist.txt', 'r') as the_file:
+                txt = the_file.readlines()
+        except IOError:
+            return loaded
+        for line in txt:
+            dnsfile = ObjectDict()
+            data = line[0:-1].split(' ; ')
+            dnsfile.filenumber = data[0]
+            dnsfile.det_rot = float(data[1])
+            dnsfile.sample_rot = float(data[2])
+            dnsfile.field = data[3]
+            dnsfile.temp_samp = float(data[4])
+            dnsfile.sample = data[5]
+            dnsfile.endtime = data[6]
+            dnsfile.tofchannels = int(data[7])
+            dnsfile.channelwidth = float(data[8])
+            dnsfile.filename = data[9]
+            dnsfile.wavelength = float(data[10])
+            dnsfile.selector_speed = float(data[11])
+            dnsfile.scannumber = data[12]
+            dnsfile.scancommand = data[13]
+            dnsfile.scanpoints = data[14]
+            loaded[dnsfile.filename] = dnsfile
+        return loaded
+
+    def save_filelist(self):
+        txt = self.model.get_txt()
+        datapath = self.param_dict['paths']['data_dir']
+        with open(datapath + '/last_filelist.txt', 'w') as the_file:
+            the_file.writelines(txt)
+
     def read_all(self, filtered=False, watcher=False):
         """
         Reading of new files, if filtered is True, only the files in the
@@ -230,15 +269,19 @@ class DNSFileSelector_presenter(DNSObserver):
         view = self.view
         model = self.model
         self.loading_canceled = False
-        alldatafiles = return_filelist(self.param_dict['paths']['data_dir'])
+        datapath = self.param_dict['paths']['data_dir']
+        alldatafiles = return_filelist(datapath)
+        datafiles = alldatafiles
         if watcher:  #sequential load called
             datafiles = [
                 dfile for dfile in alldatafiles
                 if dfile not in self.old_data_set
             ]  #
+            loaded = {}
         else:  # load all called manually
             model.clearScans()
             datafiles = alldatafiles
+            loaded = self.load_saved_filelist()
         if filtered:
             start, end = view.get_start_end_filenumbers()
             datafiles = filter_filenames(datafiles, start, end)
@@ -250,16 +293,19 @@ class DNSFileSelector_presenter(DNSObserver):
                 self.view.set_progress(i + 1)
                 if self.loading_canceled:
                     break
-            dnsfile = DNSFile(filename)
+            dnsfile = loaded.get(filename, False)
+            if not dnsfile:
+                dnsfile = DNSFile(datapath, filename)
             model.setupModelData([dnsfile])
         if not filtered and datafiles:
             view.set_start_end_filenumbers(datafiles)
+        self.old_data_set = set(alldatafiles)
         total_files = model.add_number_of_childs()
         view.set_first_column_spanned(model.scanRange())
         self.filter_scans()
-        self.old_data_set = set(alldatafiles)
         if model.numberOfScans() == 1:
             self.view.expand(alle=True)
+        self.save_filelist()
         self.view.show_statusmessage("{} files loaded".format(total_files))
 
     def read_standard(self):
@@ -271,10 +317,11 @@ class DNSFileSelector_presenter(DNSObserver):
             return
         view = self.view
         model = self.standard_data
-        datafiles = return_filelist(self.param_dict['paths']['standards_dir'])
+        datapath = self.param_dict['paths']['standards_dir']
+        datafiles = return_filelist(datapath)
         model.clearScans()
         for filename in datafiles:
-            dnsfile = DNSFile(filename)
+            dnsfile = DNSFile(datapath, filename)
             model.setupModelData([dnsfile])
         model.add_number_of_childs()
         view.set_first_column_spanned(model.scanRange())

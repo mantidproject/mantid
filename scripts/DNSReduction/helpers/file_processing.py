@@ -27,7 +27,6 @@ def return_filelist(datadir):
     """
     Return list of names of dnsfiles in datadir
     """
-    filelist = glob.glob(datadir + "/*_[0-9][0-9][0-9][0-9][0-9][0-9].d_dat")
-    for i in range(len(filelist)):
-        filelist[i] = filelist[i].replace('\\', '/')
+    filelist = sorted(glob.glob1(datadir,
+                                 "*_[0-9][0-9][0-9][0-9][0-9][0-9].d_dat"))
     return filelist

@@ -192,6 +192,16 @@ class DNSTreeModel(QAbstractItemModel):
                     nchecked.append(int(item.data(0)))
         return nchecked
 
+    def get_filenames(self):
+        mylist = []
+        for row in range(self.numberOfScans()):
+            scan = self.scanFromRow(row)
+            #txt += scan.data(0) + "\n"
+            for crow in range(scan.childCount()):
+                child = scan.child(crow)
+                mylist.append(child.data[9])
+        return mylist
+
 ### setting stuff
     def setData(self, index, value, role=Qt.EditRole):
         """
@@ -279,7 +289,8 @@ class DNSTreeModel(QAbstractItemModel):
                 dnsfile.filenumber, dnsfile.det_rot, dnsfile.sample_rot,
                 dnsfile.field, dnsfile.temp_samp, dnsfile.sample,
                 dnsfile.endtime, dnsfile.tofchannels, dnsfile.channelwidth,
-                dnsfile.filename, dnsfile.wavelength, dnsfile.selector_speed
+                dnsfile.filename, dnsfile.wavelength, dnsfile.selector_speed,
+                dnsfile.scannumber, dnsfile.scancommand, dnsfile.scanpoints
             ]
             self.last_tof = dnsfile.tofchannels
             self.last_tof_time = dnsfile.channelwidth
@@ -307,3 +318,12 @@ class DNSTreeModel(QAbstractItemModel):
                 '{} #{}/{}'.format(prefix, scan.childCount(), postfix), 0)
             total_files += scan.childCount()
         return total_files
+
+    def get_txt(self):
+        txt = []
+        for row in range(self.numberOfScans()):
+            scan = self.scanFromRow(row)
+            for crow in range(scan.childCount()):
+                child = scan.child(crow)
+                txt.append(" ; ".join([str(x) for x in child.data()]) + "\n")
+        return txt

@@ -8,10 +8,10 @@
 """
 GUI for reduction of elastic and TOF data at the DNS instrumentat MLZ
 """
-from __future__ import (absolute_import, division, print_function)
+from __future__ import (absolute_import, division, print_function, generators)
 import sys
 
-from qtpy import QtGui
+from qtpy import QtWidgets
 
 from mantidqt.gui_helper import get_qapplication
 
@@ -21,7 +21,8 @@ app, within_mantid = get_qapplication()
 
 reducer = DNSReductionGUI_view()
 reducer.setWindowTitle('DNS Reduction GUI')
-app.setWindowIcon(QtGui.QIcon('DNSReduction/dns_icon.png'))
+screenShape = QtWidgets.QDesktopWidget().screenGeometry()
+reducer.resize(screenShape.width()*0.6, screenShape.height()*0.6)
 reducer.show()
 if not within_mantid:
     sys.exit(app.exec_())
