@@ -57,7 +57,7 @@ whole number of *bin_width*.
 The histogram of data sampled in these N bins has N-1 "points", which
 should be aligned with the corresponding bin centres if plotted as a
 line. In the code this array of frequency coordinates is generally
-named _freq_points_.
+named *freq_points*.
 
 Broadening
 ----------
@@ -81,9 +81,9 @@ samples falls into each bin.
     :align: center
 
 The safest way to avoid such trouble is for all broadening methods to
-output onto the regular _freq_points_ grid. A number of broadening
+output onto the regular *freq_points* grid. A number of broadening
 implementations have been provided in
-_AbinsModules.Instruments.Broadening_. It is up to the Instrument
+``AbinsModules.Instruments.Broadening``. It is up to the Instrument
 logic to dispatch broadening calls to the requested implementation,
 and it is up to specific Instruments to select an appropriate scheme
 for their needs.
@@ -92,6 +92,42 @@ is made available so that this can be overruled, but it is up to the
 Instrument to interpret this information. 'auto' should select an
 intelligent scheme and inappropriate methods can be forbidden.
 
-A fast, possibly-novel method of frequency-dependent broadening has been implemented as the 'interpolate' method. For notes on this method and its limitations see  :ref:`AbinsInterpolatedBroadening`.
+A fast, possibly-novel method of frequency-dependent broadening has
+been implemented as the 'interpolate' method. For notes on this method
+and its limitations see :ref:`AbinsInterpolatedBroadening`.
+
+Testing
+-------
+
+Tests for Abins are located in a few places:
+
+Algorithm tests
+~~~~~~~~~~~~~~~
+
+Unit tests
+~~~~~~~~~~
+Unit tests for the AbinsModules Python library are in *scripts/test/Abins*.
+These are set up with the other unit tests (``cmake --build . --target AllTests``)
+and can be run by filtering for Abins (``ctest -R Abins``).
+
+Some of these tests load input data and check that the
+structure/vibration data has been read correctly. There is a
+consistent framework for this type of test established in
+``AbinsModules.GeneralLoadAbiInitioTester`` and inherited by
+code-specific tests e.g. *AbinsLoadGAUSSIANTest*.  To create a new
+reference data file with a specific build of Abins, instantiate a
+Loader and pass it to *save_ab_initio_test_data*. This takes two lines of Python, e.g.:
+
+:: python
+   reader = AbinsModules.LoadCRYSTAL(ab_initio_filename='my_calc.out')
+   AbinsModules.GeneralLoadAbInitioTester.save_ab_initio_test_data(reader, 'my_new_test')
+
+which will write the necessary *my_new_test_data.txt* file and
+*my_new_test_atomic_displacements_data_{k}.txt* files for each phonon wavevector.
+
+
+System tests
+~~~~~~~~~~~~
+
 
 .. categories:: Concepts
