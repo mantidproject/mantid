@@ -42,7 +42,9 @@ DECLARE_ALGORITHM(ConvertHFIRSCDtoMDE)
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string ConvertHFIRSCDtoMDE::name() const { return "ConvertHFIRSCDtoMDE"; }
+const std::string ConvertHFIRSCDtoMDE::name() const {
+  return "ConvertHFIRSCDtoMDE";
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
 int ConvertHFIRSCDtoMDE::version() const { return 1; }

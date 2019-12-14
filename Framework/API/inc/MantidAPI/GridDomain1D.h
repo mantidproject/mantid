@@ -15,9 +15,6 @@
 #include <stdexcept>
 #include <string>
 
-#include <stdexcept>
-#include <string>
-
 namespace Mantid {
 namespace API {
 /*Base class that represents a one dimensional grid domain,

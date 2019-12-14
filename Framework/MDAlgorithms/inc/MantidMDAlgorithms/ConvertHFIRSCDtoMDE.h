@@ -14,7 +14,7 @@ namespace Mantid {
 namespace MDAlgorithms {
 
 /** ConvertHFIRSCDtoMDE : TODO: DESCRIPTION
-*/
+ */
 class MANTID_MDALGORITHMS_DLL ConvertHFIRSCDtoMDE
     : public BoxControllerSettingsAlgorithm {
 public:
