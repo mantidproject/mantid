@@ -6,6 +6,7 @@ set(TEST_PY_FILES
     # Settings
     engineering_diffraction/settings/test/test_settings_helper.py
     engineering_diffraction/settings/test/test_settings_model.py
+    engineering_diffraction/settings/test/test_settings_presenter.py
     # Calibration
     engineering_diffraction/tabs/calibration/test/test_calib_model.py
     engineering_diffraction/tabs/calibration/test/test_calib_presenter.py
