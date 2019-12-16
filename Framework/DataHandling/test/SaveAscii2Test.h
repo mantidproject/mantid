@@ -882,8 +882,7 @@ public:
     uint32_t testUInt;
     double firstData;
     std::string header1, header2, header3, header4, header5, header6, header7,
-        header8, header9, separator,
-        comment;
+        header8, header9, separator, comment;
 
     // Test that the first few column headers, separator and first two bins are
     // as expected
@@ -905,7 +904,6 @@ public:
     TS_ASSERT_EQUALS(header9, "V3D");
     TS_ASSERT_EQUALS(testInt, -1);
     TS_ASSERT_EQUALS(testUInt, static_cast<uint32_t>(0));
-
 
     in.close();
 
@@ -939,8 +937,7 @@ private:
     AnalysisDataService::Instance().add(m_name, wsToSave);
   }
 
-  ITableWorkspace_sptr
-  writeTableWS() {
+  ITableWorkspace_sptr writeTableWS() {
     auto table = WorkspaceFactory::Instance().createTable();
     // One column of each type
     table->addColumn("int", "int");
@@ -967,10 +964,8 @@ private:
          << static_cast<size_t>(0) << -99.0f << 0.0 << false << "!"
          << Mantid::Kernel::V3D(1, 6, 10);
 
-		
     AnalysisDataService::Instance().add(m_name, table);
     return table;
-
   }
 
   void writeInelasticWS(MatrixWorkspace_sptr &wsToSave) {

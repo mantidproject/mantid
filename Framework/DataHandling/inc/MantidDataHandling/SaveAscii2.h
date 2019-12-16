@@ -12,8 +12,8 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -72,8 +72,10 @@ private:
   void init() override;
   /// Overwrites Algorithm method
   void exec() override;
-  void writeTableWorkspace(API::ITableWorkspace_const_sptr tws, const std::string& filename, bool appendToFile, bool writeHeader, int prec,
-                      bool scientific, const std::string& comment);
+  void writeTableWorkspace(API::ITableWorkspace_const_sptr tws,
+                           const std::string &filename, bool appendToFile,
+                           bool writeHeader, int prec, bool scientific,
+                           const std::string &comment);
   /// Writes a spectrum to the file using a workspace index
   void writeSpectrum(const int &wsIndex, std::ofstream &file);
   std::vector<std::string> stringListToVector(std::string &inputString);
