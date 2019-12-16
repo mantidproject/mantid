@@ -43,11 +43,11 @@ class MuonContextADSObserver(AnalysisDataServiceObserver):
     def deleteHandle(self, workspace_name, workspace):
         """
         Called when the ADS has deleted a workspace. Removes that workspace from the context and cleans up.
-        :param workspace_name: The name of the workspace
-        :param workspace: not used
+        :param workspace_name: The name of the workspace (not used)
+        :param workspace: The workspace object
         """
         if not isinstance(workspace, WorkspaceGroup):
-            self.delete_callback(workspace_name)
+            self.delete_callback(workspace)
 
     @_catch_exceptions
     def renameHandle(self, old_workspace_name, new_workspace_name):

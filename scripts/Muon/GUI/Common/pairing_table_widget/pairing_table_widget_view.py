@@ -364,12 +364,17 @@ class PairingTableView(QtWidgets.QWidget):
                 if column_name == 'group_1' or column_name == 'group_2' or column_name == 'guess_alpha':
                     item = self.pairing_table.cellWidget(row, col)
                     item.setEnabled(True)
-                elif column_name == 'pair_name' or column_name == 'alpha':
+                elif column_name == 'pair_name':
                     item = self.pairing_table.item(row, col)
                     item.setFlags(QtCore.Qt.ItemIsSelectable)
+                elif column_name == 'alpha':
+                    item = self.pairing_table.item(row, col)
+                    item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled)
                 elif column_name == 'to_analyse':
                     item = self.pairing_table.item(row, col)
                     item.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
+                else:
+                    return
 
     def _enable_all_buttons(self):
         self.add_pair_button.setEnabled(True)

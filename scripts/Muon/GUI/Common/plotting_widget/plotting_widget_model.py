@@ -145,7 +145,7 @@ class PlotWidgetModel(object):
 
     def remove_workspace_from_plot(self, workspace_name, axes):
         """
-        Remo
+        Remove workspace from plot
         :param workspace_name: Name of workspace to remove from plot
         :param axes: the axes which may contain the workspace
         :return:
@@ -154,6 +154,7 @@ class PlotWidgetModel(object):
             workspace = AnalysisDataService.Instance().retrieve(workspace_name)
         except RuntimeError:
             return
+
         for i in range(self.number_of_axes):
             ax = axes[i]
             ax.remove_workspace_artists(workspace)
@@ -163,6 +164,39 @@ class PlotWidgetModel(object):
         self.plotted_fit_workspaces = [item for item in self.plotted_fit_workspaces if item != workspace_name]
         if workspace_name in self.plotted_workspaces_inverse_binning:
             self.plotted_workspaces_inverse_binning.pop(workspace_name)
+
+    def workspace_deleted_from_ads(self, workspace, axes):
+        """
+        Remove a workspace which was deleted in the ads from the plot
+        :param workspace: Workspace to remove from plot
+        :param axes: the axes which may contain the workspace
+        :return:
+        """
+        for i in range(self.number_of_axes):
+            ax = axes[i]
+            ax.remove_workspace_artists(workspace)
+            self._update_legend(ax)
+
+        workspace_name = workspace.name()
+
+        self.plotted_workspaces = [item for item in self.plotted_workspaces if item != workspace_name]
+        self.plotted_fit_workspaces = [item for item in self.plotted_fit_workspaces if item != workspace_name]
+        if workspace_name in self.plotted_workspaces_inverse_binning:
+            self.plotted_workspaces_inverse_binning.pop(workspace_name)
+
+    def replace_workspace_plot(self, workspace_name, axis):
+        """
+        Replace workspace from plot
+        :param workspace_name: Name of workspace to update in plot
+        :param axis: the axis that contains the workspace
+        :return:
+        """
+        try:
+            workspace = AnalysisDataService.Instance().retrieve(workspace_name)
+        except RuntimeError:
+            return
+
+        axis.replace_workspace_artists(workspace)
 
     def clear_plot_model(self, axes):
         self._remove_all_data_workspaces_from_plot(axes)

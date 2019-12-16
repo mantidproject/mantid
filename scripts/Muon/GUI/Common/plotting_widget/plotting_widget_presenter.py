@@ -91,26 +91,35 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         """
         Handles the workspace being deleted from ads
         """
-        if workspace in self._model.plotted_workspaces:
-            self._model.remove_workspaces_from_plotted_workspaces(workspace)
 
-        self.plot_all_selected_workspaces()
+        if self._view.is_tiled_plot():
+            self.update_model_tile_plot_positions(self._view.get_tiled_by_type())
+            # update view based on number of axis
+            self._view.new_plot_figure(self._model.number_of_axes)
+            self.plot_all_selected_workspaces()
+
+        if workspace.name() in self._model.plotted_workspaces:
+            self._model.workspace_deleted_from_ads(workspace, self._view.get_fig().axes)
+            self._view.set_fig_titles(self.get_plot_title(self._view.is_tiled_plot(), self._view.get_tiled_by_type()))
+            self._model.set_x_lim(self.get_domain(), self._view.get_fig().axes)
+            self._view.force_redraw()
 
     def handle_workspace_replaced_in_ads(self, workspace):
         """
         Handles the use raw workspaces being changed (e.g rebinned) in ads
         """
-        if not self._view.if_raw():
-            if workspace in self._model.plotted_workspaces:
-                # if one of the plotted_workspaces has been changed
-                # we should plot everything again (ONCE)
-                self._model.remove_workspace_from_plot(workspace, self._view.get_fig().axes)
-                ax = self.get_workspace_plot_axis(workspace)
-                label = self.get_workspace_legend_label(workspace)
-                self._model.add_workspace_to_plot(ax, workspace, workspace_index, label)
-                # add workspace to tracked workspaces
-                self._model.add_workspace_to_plotted_workspaces(workspace)
-                self._view.force_redraw()
+
+        if workspace in self._model.plotted_workspaces:
+            # if one of the plotted_workspaces has been changed
+            # we should plot that workspace again
+            self._model.remove_workspace_from_plot(workspace, self._view.get_fig().axes)
+            ax = self.get_workspace_plot_axis(workspace)
+            self._model.replace_workspace_plot(workspace, ax)
+            replaced_workspace_in_plot = True
+
+            # If we replaced a workspace, rescale axis
+            if replaced_workspace_in_plot:
+                self._model.set_x_lim(self.get_domain(), self._view.get_fig().axes)
 
     def handle_use_raw_workspaces_changed(self):
         """
@@ -171,6 +180,14 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         """
         Handles a group or pair being added from the view
         """
+        # make sure we are not plotting pairs and counts
+        if len(self.context.group_pair_context.selected_pairs) != 0 and self._view.get_selected() == COUNTS_PLOT_TYPE:
+            self._view.plot_selector.blockSignals(True)
+            self._view.plot_selector.setCurrentText(ASYMMETRY_PLOT_TYPE)
+            self._view.plot_selector.blockSignals(False)
+            self._view.warning_popup(
+                'Pair workspaces have no counts workspace, plotting Asymmetry')
+
         # if tiled by group, we will need to recreate the tiles
         if self._view.is_tiled_plot() and self._view.get_tiled_by_type() == 'group':
             self.update_model_tile_plot_positions(self._view.get_tiled_by_type())
@@ -196,6 +213,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
                     # add workspace to tracked workspaces
                     self._model.add_workspace_to_plotted_workspaces(ws)
 
+        self._model.set_x_lim(self.get_domain(), self._view.get_fig().axes)
         self._view.force_redraw()
 
     def handle_removed_group_or_pair_to_plot(self):
@@ -215,6 +233,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             if ws not in workspace_list:
                 self._model.remove_workspace_from_plot(ws, self._view.get_fig().axes)
 
+        self._model.set_x_lim(self.get_domain(), self._view.get_fig().axes)
         self._view.force_redraw()
 
     def handle_fit_completed(self):
@@ -300,8 +319,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         # clear previous plots and fitting
         self._model.clear_plot_model(self._view.get_fig().axes)
         self.context.fitting_context.clear()
-        # plot new workspaces
-        workspace_titles = self.get_plot_title(tiled, self._view.get_tiled_by_type())
+
         for workspace in workspace_list:
             ax = self.get_workspace_plot_axis(workspace)
             label = self.get_workspace_legend_label(workspace)
@@ -309,7 +327,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             self._model.add_workspace_to_plotted_workspaces(workspace)
 
         # scale the axis and set title
-        self._view.set_fig_titles(workspace_titles)
+        self._view.set_fig_titles(self.get_plot_title(tiled, self._view.get_tiled_by_type()))
         self._model.set_x_lim(self.get_domain(), self._view.get_fig().axes)
         self._view.force_redraw()
 

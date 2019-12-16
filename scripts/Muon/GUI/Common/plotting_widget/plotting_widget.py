@@ -23,8 +23,8 @@ class PlottingWidget(object):
                                              self.model,
                                              context)
 
-        context.update_view_from_model_notifier.add_subscriber(self.presenter.workspace_deleted_from_ads_observer)
         context.update_plots_notifier.add_subscriber(self.presenter.workspace_replaced_in_ads_observer)
+        context.deleted_plots_notifier.add_subscriber(self.presenter.workspace_deleted_from_ads_observer)
 
     def close(self):
         self.view.close()
