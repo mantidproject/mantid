@@ -1,19 +1,21 @@
-digraph MergeWorkspacesWithLimits {
-label = "MergeWorkspacesWithLimits Workflow Diagram"
+digraph MatchAndMergeWorkspaces {
+label = "MatchAndMergeWorkspaces Workflow Diagram"
 $global_style
 
 subgraph params {
   $param_style
-  inputWorkspace            [label="WorkspaceGroup"]
+  inputWorkspace            [label="InputWorkspaces"]
   outputWorkspace           [label="OutputWorkspace"]
   xMin                      [label="XMin"]
   xMax                      [label="XMax"]
+  calculateScale            [label="CalculateScale"]
+  calculateOffset           [label="CalculateOffset"]
   matchSpectraIndex         [label="Index of spectra with largest X range"]
 }
 
 subgraph decisions {
   $decision_style
-  isGroupWsNotConjoined     [label="Are there\n un-conjoined workspaces\n in the WorkspaceGroup"]
+  isGroupWsNotConjoined     [label="Are there\n un-conjoined workspaces\n in the workspace list"]
 }
 
 subgraph algorithms {
@@ -39,6 +41,8 @@ isGroupWsNotConjoined       -> ConjoinWorkspaces        [label="Yes"]
 isGroupWsNotConjoined       -> MatchSpectra             [label="No"]
 ConjoinWorkspaces           -> isGroupWsNotConjoined
 matchSpectraIndex           -> MatchSpectra
+calculateScale              -> MatchSpectra
+calculateOffset             -> MatchSpectra
 MatchSpectra                -> CropWorkspaceRagged
 xMin                        -> CropWorkspaceRagged
 xMax                        -> CropWorkspaceRagged

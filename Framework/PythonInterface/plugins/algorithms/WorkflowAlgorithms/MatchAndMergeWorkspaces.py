@@ -7,18 +7,17 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.simpleapi import (AnalysisDataService, CloneWorkspace, ConjoinWorkspaces, CropWorkspaceRagged,
-                              DeleteWorkspace, GroupWorkspaces, MatchSpectra, Rebin, SumSpectra)
-from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, WorkspaceProperty, WorkspaceGroup,
-                        WorkspaceGroupProperty, ADSValidator)
+                              DeleteWorkspace, MatchSpectra, Rebin, SumSpectra)
+from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, WorkspaceProperty, WorkspaceGroup, ADSValidator)
 from mantid.dataobjects import Workspace2D
 from mantid.kernel import (Direction, FloatArrayProperty, StringArrayProperty)
 import numpy as np
 
 
-class MergeWorkspacesWithLimits(DataProcessorAlgorithm):
+class MatchAndMergeWorkspaces(DataProcessorAlgorithm):
 
     def name(self):
-        return 'MergeWorkspacesWithLimits'
+        return 'MatchAndMergeWorkspaces'
 
     def category(self):
         return 'Workflow\\Diffraction'
@@ -114,7 +113,8 @@ class MergeWorkspacesWithLimits(DataProcessorAlgorithm):
         DeleteWorkspace(ws_conjoined)
         self.setProperty('OutputWorkspace', merged_ws)
 
-    def unwrap_groups(self, inputs):
+    @staticmethod
+    def unwrap_groups(inputs):
         output = []
         for name_in_list in inputs:
             ws_in_list = AnalysisDataService.retrieve(name_in_list)
@@ -160,4 +160,4 @@ class MergeWorkspacesWithLimits(DataProcessorAlgorithm):
 
 
 # Register algorithm with Mantid
-AlgorithmFactory.subscribe(MergeWorkspacesWithLimits)
+AlgorithmFactory.subscribe(MatchAndMergeWorkspaces)

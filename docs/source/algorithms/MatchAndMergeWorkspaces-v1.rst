@@ -9,8 +9,9 @@
 Description
 -----------
 
-This is a workflow algorithm that merges down a workspace group
-and sums the spectra using weighted mean and Ranges for each
+This is a workflow algorithm that merges down a workspace, workspace
+group, or list of workspaces, `MatchSpectra <algm-MatchSpectra>`
+and sums the spectra using weighted mean from ranges for each
 spectra. For each workspace an XMin and XMax is supplied, the
 workspace is then cropped to that range and all workspaces are
 Rebinned to have common bin edges. The output is the mean value
@@ -49,7 +50,7 @@ Usage
     polaris.create_total_scattering_pdf(run_number="98533", merge_banks=False)
     x_min = np.array([0.5, 3, 4, 6, 7])
     x_max = np.array([3.5, 5, 7, 11, 20])
-    merged_ws = MergeWorkspacesWithLimits(WorkspaceGroup='focused_ws', XMin=x_min, XMax=x_max)
+    merged_ws = MatchAndMergeWorkspaces(WorkspaceGroup='focused_ws', XMin=x_min, XMax=x_max, CalculateScale=False)
 
     fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
     ax.plot(merged_ws)
@@ -58,9 +59,9 @@ Usage
 
 This will produce a plot that looks like this:
 
-.. figure:: images/MergeWorkspacesWithLimits.png
+.. figure:: ../images/MatchAndMergeWorkspaces.png
 
 Workflow
 ########
 
-.. diagram:: MergeWorkspacesWithLimits-v1_wkflw.dot
+.. diagram:: MatchAndMergeWorkspaces-v1_wkflw.dot

@@ -19,7 +19,7 @@ Algorithms
 ----------
 
 - :ref:`TotScatCalculateSelfScattering <algm-TotScatCalculateSelfScattering>` will calculate a normalized self scattering correction for foccues total scattering data.
-- :ref:`MergeWorkspacesWithLimits <algm-MergeWorkspacesWithLimits>` will merge workspaces in a workspace group withing weighting from a set of limits for each workspace.
+- :ref:`MatchAndMergeWorkspaces <algm-MatchAndMergeWorkspaces>` will merge workspaces in a workspace group withing weighting from a set of limits for each workspace and using `MatchSpectra <algm-MatchSpectra>`.
 
 Data Objects
 ------------
