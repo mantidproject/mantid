@@ -143,7 +143,7 @@ public:
 
 protected:
   Mantid::API::IAlgorithm_sptr getFittingAlgorithm(FittingMode mode) const;
-  virtual Mantid::API::IAlgorithm_sptr
+  Mantid::API::IAlgorithm_sptr
   createSequentialFit(Mantid::API::IFunction_sptr function) const;
   Mantid::API::IAlgorithm_sptr
   createSimultaneousFit(Mantid::API::MultiDomainFunction_sptr function) const;
