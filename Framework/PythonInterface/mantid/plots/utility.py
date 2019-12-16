@@ -54,23 +54,28 @@ def autoscale_on_update(ax, state, axis='both'):
     """
     original_state = ax.get_autoscale_on()
     try:
-        if axis == 'both':
-            original_state = ax.get_autoscale_on()
-            ax.set_autoscale_on(state)
-        elif axis == 'x':
-            original_state = ax.get_autoscalex_on()
-            ax.set_autoscalex_on(state)
-        elif axis == 'y':
-            original_state = ax.get_autoscaley_on()
-            ax.set_autoscaley_on(state)
+        # If we are making the first plot on an axes object
+        # i.e. ax.lines is empty, axes has default ylim values.
+        # Therefore we need to autoscale regardless of state parameter.
+        if ax.lines:
+            if axis == 'both':
+                original_state = ax.get_autoscale_on()
+                ax.set_autoscale_on(state)
+            elif axis == 'x':
+                original_state = ax.get_autoscalex_on()
+                ax.set_autoscalex_on(state)
+            elif axis == 'y':
+                original_state = ax.get_autoscaley_on()
+                ax.set_autoscaley_on(state)
         yield
     finally:
-        if axis == 'both':
-            ax.set_autoscale_on(original_state)
-        elif axis == 'x':
-            ax.set_autoscalex_on(original_state)
-        elif axis == 'y':
-            ax.set_autoscaley_on(original_state)
+        if ax.lines:
+            if axis == 'both':
+                ax.set_autoscale_on(original_state)
+            elif axis == 'x':
+                ax.set_autoscalex_on(original_state)
+            elif axis == 'y':
+                ax.set_autoscaley_on(original_state)
 
 
 def find_errorbar_container(line, containers):
