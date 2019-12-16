@@ -144,6 +144,10 @@ void ConvTemplatePresenter::setBackgroundA0(double value) {
   updateViewParameters();
 };
 
+void ConvTemplatePresenter::setQValues(const std::vector<double> &qValues) {
+  m_model.setQValues(qValues);
+}
+
 void ConvTemplatePresenter::setErrorsEnabled(bool enabled) {
   m_view->setErrorsEnabled(enabled);
 }

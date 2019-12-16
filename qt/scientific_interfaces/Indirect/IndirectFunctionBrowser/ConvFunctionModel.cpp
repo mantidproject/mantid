@@ -10,7 +10,6 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
-#include <map>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -32,7 +31,8 @@ void ConvFunctionModel::clearData() {
 
 void ConvFunctionModel::setModel() {
   m_model.setModel(buildBackgroundFunctionString(), m_fitResolutions,
-                   buildPeaksFunctionString(), m_hasDeltaFunction);
+                   buildPeaksFunctionString(), m_hasDeltaFunction, m_qValues,
+                   m_isQDependentFunction);
   m_model.setGlobalParameters(makeGlobalList());
 }
 
@@ -44,6 +44,7 @@ void ConvFunctionModel::setFunction(IFunction_sptr fun) {
     auto const name = fun->name();
     if (name == "Lorentzian") {
       m_fitType = FitType::OneLorentzian;
+      m_isQDependentFunction = false;
     } else if (name == "DeltaFunction") {
       m_hasDeltaFunction = true;
     } else if (name == "FlatBackground") {
@@ -102,6 +103,7 @@ void ConvFunctionModel::checkConvolution(IFunction_sptr fun) {
         throw std::runtime_error("Function has wrong structure.");
       }
       m_fitType = FitType::OneLorentzian;
+      m_isQDependentFunction = false;
       isFitTypeSet = true;
 
     } else if (name == "TeixeiraWaterSQE") {
@@ -109,6 +111,7 @@ void ConvFunctionModel::checkConvolution(IFunction_sptr fun) {
         throw std::runtime_error("Function has wrong structure.");
       }
       m_fitType = FitType::TeixeiraWater;
+      m_isQDependentFunction = true;
       isFitTypeSet = true;
     } else if (name == "DeltaFunction") {
       m_hasDeltaFunction = true;
@@ -133,7 +136,7 @@ void ConvFunctionModel::checkComposite(IFunction_sptr fun) {
         m_fitType = FitType::TwoLorentzians;
       else
         m_fitType = FitType::OneLorentzian;
-
+      m_isQDependentFunction = false;
       isFitTypeSet = true;
 
     } else if (name == "TeixeiraWaterSQE") {
@@ -141,6 +144,7 @@ void ConvFunctionModel::checkComposite(IFunction_sptr fun) {
         throw std::runtime_error("Function has wrong structure.");
       }
       m_fitType = FitType::TeixeiraWater;
+      m_isQDependentFunction = true;
       isFitTypeSet = true;
     } else if (name == "DeltaFunction") {
       m_hasDeltaFunction = true;
@@ -154,6 +158,10 @@ void ConvFunctionModel::checkComposite(IFunction_sptr fun) {
 IFunction_sptr ConvFunctionModel::getFitFunction() const {
   return m_model.getFitFunction();
 }
+
+void ConvFunctionModel::setQValues(const std::vector<double> &qValues) {
+  m_qValues = qValues;
+};
 
 FitType ConvFunctionModel::getFitType() const { return m_fitType; };
 BackgroundType ConvFunctionModel::getBackgroundType() const {
@@ -392,6 +400,10 @@ QStringList ConvFunctionModel::makeGlobalList() const {
 
 void ConvFunctionModel::setFitType(FitType fitType) {
   m_fitType = fitType;
+  if (FitTypeQDepends[m_fitType])
+    m_isQDependentFunction = true;
+  else
+    m_isQDependentFunction = false;
   setModel();
 }
 
@@ -631,6 +643,10 @@ std::string ConvFunctionModel::buildStretchExpFTFunctionString() const {
   return "name=StretchedExpFT";
 }
 
+std::string ConvFunctionModel::buildElasticDiffSphereFunctionString() const {
+  return "name=ElasticDiffSphere";
+}
+
 std::string ConvFunctionModel::buildPeaksFunctionString() const {
   std::string functions;
   if (m_fitType == FitType::OneLorentzian) {
@@ -644,9 +660,11 @@ std::string ConvFunctionModel::buildPeaksFunctionString() const {
     functions.append(buildTeixeiraFunctionString());
   } else if (m_fitType == FitType::StretchedExpFT) {
     functions.append(buildStretchExpFTFunctionString());
+  } else if (m_fitType == FitType::ElasticDiffSphere) {
+    functions.append(buildElasticDiffSphereFunctionString());
   }
   return functions;
-}
+} // namespace IDA
 
 std::string ConvFunctionModel::buildBackgroundFunctionString() const {
   if (m_backgroundType == BackgroundType::None)

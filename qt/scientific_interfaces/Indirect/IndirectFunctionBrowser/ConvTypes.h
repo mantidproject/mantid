@@ -27,8 +27,12 @@ enum class FitType {
   OneLorentzian,
   TwoLorentzians,
   TeixeiraWater,
-  StretchedExpFT
+  StretchedExpFT,
+  ElasticDiffSphere,
 };
+
+extern std::map<FitType, bool> FitTypeQDepends;
+
 enum class BackgroundType { None, Flat, Linear };
 
 enum class ParamID {
@@ -51,6 +55,9 @@ enum class ParamID {
   SE_TAU,
   SE_BETA,
   SE_CENTRE,
+  EDP_HEIGHT,
+  EDP_CENTRE,
+  EDP_RADIUS,
   FLAT_BG_A0,
   LINEAR_BG_A0,
   LINEAR_BG_A1,

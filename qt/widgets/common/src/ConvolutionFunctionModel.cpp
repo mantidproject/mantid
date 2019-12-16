@@ -67,13 +67,23 @@ void ConvolutionFunctionModel::setModel(const std::string &background,
 void ConvolutionFunctionModel::setModel(
     const std::string &background,
     const std::vector<std::pair<std::string, int>> &resolutionWorkspaces,
-    const std::string &peaks, bool hasDeltaFunction) {
-  std::string resolution, convolution, function;
-  auto const model = hasDeltaFunction ? "name=DeltaFunction;" + peaks : peaks;
+    const std::string &peaks, bool hasDeltaFunction,
+    const std::vector<double> &qValues, const bool isQDependent) {
+  std::string resolution, convolution, function, modifiedPeaks;
   auto fitFunction = boost::make_shared<MultiDomainFunction>();
 
   auto const nf = m_numberDomains > 0 ? static_cast<int>(m_numberDomains) : 1;
   for (int i = 0; i < nf; ++i) {
+    if (isQDependent) {
+      IFunction::Attribute attr(qValues[i]);
+      auto peaksFunction = FunctionFactory::Instance().createInitialized(peaks);
+      peaksFunction->setAttribute("Q", attr);
+      modifiedPeaks = peaksFunction->asString();
+    } else {
+      modifiedPeaks = peaks;
+    }
+    auto const model = hasDeltaFunction ? "name=DeltaFunction;" + modifiedPeaks
+                                        : modifiedPeaks;
     auto workspace = resolutionWorkspaces[i].first;
     resolution = workspace.empty()
                      ? "name=Resolution"
@@ -85,6 +95,7 @@ void ConvolutionFunctionModel::setModel(
                                   : background + ";(" + convolution + ")";
     auto domainFunction =
         FunctionFactory::Instance().createInitialized(function);
+
     fitFunction->addFunction(domainFunction);
     fitFunction->setDomainIndex(i, i);
   }

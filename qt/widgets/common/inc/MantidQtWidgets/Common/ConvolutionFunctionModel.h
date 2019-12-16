@@ -28,7 +28,8 @@ public:
   void
   setModel(const std::string &background,
            const std::vector<std::pair<std::string, int>> &resolutionWorkspaces,
-           const std::string &peaks, bool hasDeltaFunction);
+           const std::string &peaks, bool hasDeltaFunction,
+           const std::vector<double> &qValues, const bool isQDependent);
   boost::optional<QString> backgroundPrefix() const {
     return m_backgroundPrefix;
   }
