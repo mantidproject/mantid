@@ -186,10 +186,8 @@ class Abins(PythonAlgorithm):
         prog_reporter.report("Input data from the user has been collected.")
 
         # 2) read ab initio data
-        ab_initio_loaders = {"CASTEP": AbinsModules.LoadCASTEP, "CRYSTAL": AbinsModules.LoadCRYSTAL,
-                             "DMOL3": AbinsModules.LoadDMOL3, "GAUSSIAN": AbinsModules.LoadGAUSSIAN}
-        rdr = ab_initio_loaders[self._ab_initio_program](input_ab_initio_filename=self._vibrational_or_phonon_data_file)
-        ab_initio_data = rdr.get_formatted_data()
+        ab_initio_data = AbinsModules.AbinsData.from_calculation_data(self._vibrational_or_phonon_data_file,
+                                                                      self._ab_initio_program)
         prog_reporter.report("Vibrational/phonon data has been read.")
 
         # 3) calculate S
@@ -939,5 +937,6 @@ class Abins(PythonAlgorithm):
         start = AbinsParameters.sampling['min_wavenumber']
         stop = AbinsParameters.sampling['max_wavenumber'] + step
         self._bins = np.arange(start=start, stop=stop, step=step, dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
+
 
 AlgorithmFactory.subscribe(Abins)
