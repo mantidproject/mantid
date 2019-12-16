@@ -9,9 +9,11 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/SaveAscii2.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <Poco/File.h>
@@ -863,6 +865,54 @@ public:
     AnalysisDataService::Instance().remove(m_name);
   }
 
+  void test_TableWorkspace() {
+    Workspace_sptr wsToSave = writeTableWS();
+
+    SaveAscii2 save;
+    std::string filename = initSaveAscii2(save);
+
+    TS_ASSERT_THROWS_NOTHING(save.execute());
+
+    // has the algorithm written a file to disk?
+    TS_ASSERT(Poco::File(filename).exists());
+
+    // Now make some checks on the content of the file
+    std::ifstream in(filename.c_str());
+    int testInt;
+    uint32_t testUInt;
+    double firstData;
+    std::string header1, header2, header3, header4, header5, header6, header7,
+        header8, header9, separator,
+        comment;
+
+    // Test that the first few column headers, separator and first two bins are
+    // as expected
+    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >>
+        separator >> header4 >> separator >> header5 >> separator >> header6 >>
+        separator >> header7 >> separator >> header8 >> separator >> header9 >>
+        testInt >> testUInt;
+
+    TS_ASSERT_EQUALS(comment, "#");
+    TS_ASSERT_EQUALS(separator, ",");
+    TS_ASSERT_EQUALS(header1, "int");
+    TS_ASSERT_EQUALS(header2, "uint");
+    TS_ASSERT_EQUALS(header3, "int64");
+    TS_ASSERT_EQUALS(header4, "size_t");
+    TS_ASSERT_EQUALS(header5, "float");
+    TS_ASSERT_EQUALS(header6, "double");
+    TS_ASSERT_EQUALS(header7, "bool");
+    TS_ASSERT_EQUALS(header8, "string");
+    TS_ASSERT_EQUALS(header9, "V3D");
+    TS_ASSERT_EQUALS(testInt, -1);
+    TS_ASSERT_EQUALS(testUInt, static_cast<uint32_t>(0));
+
+
+    in.close();
+
+    Poco::File(filename).remove();
+    AnalysisDataService::Instance().remove(m_name);
+  }
+
 private:
   void writeSampleWS(Mantid::DataObjects::Workspace2D_sptr &wsToSave,
                      const bool &isSpectra = true) {
@@ -887,6 +937,40 @@ private:
     }
 
     AnalysisDataService::Instance().add(m_name, wsToSave);
+  }
+
+  ITableWorkspace_sptr
+  writeTableWS() {
+    auto table = WorkspaceFactory::Instance().createTable();
+    // One column of each type
+    table->addColumn("int", "int");
+    table->addColumn("uint", "uint");
+    table->addColumn("long64", "int64");
+    table->addColumn("size_t", "size_t");
+    table->addColumn("float", "float");
+    table->addColumn("double", "double");
+    table->addColumn("bool", "bool");
+    table->addColumn("str", "string");
+    table->addColumn("V3D", "V3D");
+
+    // A few rows
+    TableRow row1 = table->appendRow();
+    row1 << -1 << static_cast<uint32_t>(0) << static_cast<int64_t>(1)
+         << static_cast<size_t>(10) << 5.5f << -9.9 << true << "Hello"
+         << Mantid::Kernel::V3D();
+    TableRow row2 = table->appendRow();
+    row2 << 1 << static_cast<uint32_t>(2) << static_cast<int64_t>(-2)
+         << static_cast<size_t>(100) << 0.0f << 101.0 << false << "World"
+         << Mantid::Kernel::V3D(-1, 3, 4);
+    TableRow row3 = table->appendRow();
+    row3 << 6 << static_cast<uint32_t>(3) << static_cast<int64_t>(0)
+         << static_cast<size_t>(0) << -99.0f << 0.0 << false << "!"
+         << Mantid::Kernel::V3D(1, 6, 10);
+
+		
+    AnalysisDataService::Instance().add(m_name, table);
+    return table;
+
   }
 
   void writeInelasticWS(MatrixWorkspace_sptr &wsToSave) {
