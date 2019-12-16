@@ -878,18 +878,15 @@ public:
 
     // Now make some checks on the content of the file
     std::ifstream in(filename.c_str());
-    int testInt;
-    uint32_t testUInt;
-    double firstData;
     std::string header1, header2, header3, header4, header5, header6, header7,
-        header8, header9, separator, comment;
+        header8, header9, separator, comment, type1, type2;
 
-    // Test that the first few column headers, separator and first two bins are
+    // Test that the first few column headers, separator and first two types are
     // as expected
     in >> comment >> header1 >> separator >> header2 >> separator >> header3 >>
         separator >> header4 >> separator >> header5 >> separator >> header6 >>
         separator >> header7 >> separator >> header8 >> separator >> header9 >>
-        testInt >> testUInt;
+        separator >> type1 >> separator >> type2;
 
     TS_ASSERT_EQUALS(comment, "#");
     TS_ASSERT_EQUALS(separator, ",");
@@ -902,8 +899,8 @@ public:
     TS_ASSERT_EQUALS(header7, "bool");
     TS_ASSERT_EQUALS(header8, "string");
     TS_ASSERT_EQUALS(header9, "V3D");
-    TS_ASSERT_EQUALS(testInt, -1);
-    TS_ASSERT_EQUALS(testUInt, static_cast<uint32_t>(0));
+    TS_ASSERT_EQUALS(type1, "int");
+    TS_ASSERT_EQUALS(type2, "uint");
 
     in.close();
 
