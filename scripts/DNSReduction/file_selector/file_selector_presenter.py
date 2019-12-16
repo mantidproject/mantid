@@ -252,6 +252,7 @@ class DNSFileSelector_presenter(DNSObserver):
             dnsfile.scannumber = data[12]
             dnsfile.scancommand = data[13]
             dnsfile.scanpoints = data[14]
+            dnsfile.new_format = True
             loaded[dnsfile.filename] = dnsfile
         return loaded
 
@@ -296,7 +297,8 @@ class DNSFileSelector_presenter(DNSObserver):
             dnsfile = loaded.get(filename, False)
             if not dnsfile:
                 dnsfile = DNSFile(datapath, filename)
-            model.setupModelData([dnsfile])
+            if dnsfile.new_format:
+                model.setupModelData([dnsfile])
         if not filtered and datafiles:
             view.set_start_end_filenumbers(datafiles)
         self.old_data_set = set(alldatafiles)

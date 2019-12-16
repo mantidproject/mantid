@@ -8,7 +8,7 @@
 DNS Path Configuration Widget = View - Tab of DNS Reduction GUI
 """
 from __future__ import (absolute_import, division, print_function)
-
+import os
 from qtpy.QtWidgets import QSizePolicy
 from qtpy.QtGui import QIcon
 
@@ -71,16 +71,10 @@ class DNSTofPowderPlot_view(DNSView):
         self.minimum = None
         self.maximum = None
         self.hasplot = False
+        plotdir = os.path.dirname(__file__)
         for m in colormaps:
-            if self.within_mantid:
-                self._mapping['colormap'].addItem(
-                    QIcon("scripts/DNSReduction/plot/colormaps/"
-                          "{}.png".format(m)),
-                    m)
-            else:
-                self._mapping['colormap'].addItem(
-                    QIcon("DNSReduction/plot/colormaps/{}.png".format(m)),
-                    m)
+            self._mapping['colormap'].addItem(
+                QIcon("{}/colormaps/{}.png".format(plotdir, m)), m)
 
         self._mapping['colormap'].setCurrentIndex(colormaps.index('viridis'))
         self._mapping['colormap'].currentIndexChanged.connect(

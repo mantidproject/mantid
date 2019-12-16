@@ -53,7 +53,7 @@ class DNSPath_view(DNSView):
         self._content.pB_file_script.clicked.connect(self.filedialog)
         self._content.pB_clear.clicked.connect(self.clear_directories)
         self._content.pB_file_export.clicked.connect(self.filedialog)
-
+        self._content.pB_clear_cache.clicked.connect(self.clear_cache)
     ### for testing
     #    self._content.lE_data_dir.setText('C:/Daten/mantid_test')
     #    self._content.lE_standards_dir.setText('C:/Daten/mantid_test/standards')
@@ -64,6 +64,7 @@ class DNSPath_view(DNSView):
 
 ##Signals
     sig_data_path_set = Signal(str)
+    sig_clear_cache = Signal()
 
     def filedialog(self):
         """
@@ -103,6 +104,9 @@ class DNSPath_view(DNSView):
             elif sender == 'pB_file_export':
                 self.set_path('export_dir', dir_name)
         return dir_name
+
+    def clear_cache(self):
+        self.sig_clear_cache.emit()
 
     def clear_directories(self):
         self.set_user('')

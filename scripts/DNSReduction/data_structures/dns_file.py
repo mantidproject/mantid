@@ -21,7 +21,7 @@ class DNSFile(ObjectDict):
     """
     def __init__(self, datapath, filename):
         super(DNSFile, self).__init__()
-        self.read(datapath, filename)
+        self.new_format = self.read(datapath, filename)
 
     def write(self, datapath, filename):
         # mostly stolen form nicos
@@ -170,6 +170,9 @@ class DNSFile(ObjectDict):
         with open(os.path.join(datapath, filename), 'r') as f:
             txt = f.readlines()
         del f
+        if len(txt) < 138 or not txt[0].startswith('# DNS Data'):
+            del txt
+            return False
         self['filename'] = filename
         line = txt[0].split(',')
         self['users'] = line[0][18:]
@@ -225,4 +228,4 @@ class DNSFile(ObjectDict):
         for ch in range(24):
             self.counts[ch, :] = txt[74 + ch].split()[1:]
         del txt
-        return
+        return True
