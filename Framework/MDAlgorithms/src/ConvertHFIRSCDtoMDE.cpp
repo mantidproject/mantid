@@ -91,7 +91,7 @@ std::map<std::string, std::string> ConvertHFIRSCDtoMDE::validateInputs() {
     for (auto log : logs) {
       if (run.hasProperty(log)) {
         if (static_cast<size_t>(run.getLogData(log)->size()) != number_of_runs)
-          inputWSmsg << "Log " << log << " has incorrect lenght, ";
+          inputWSmsg << "Log " << log << " has incorrect length, ";
       } else {
         inputWSmsg << "Missing required log " << log << ", ";
       }
