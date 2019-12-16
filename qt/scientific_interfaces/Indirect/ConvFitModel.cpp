@@ -504,34 +504,6 @@ std::string ConvFitModel::singleFitOutputName(TableDatasetIndex index,
                                    index, spectrum);
 }
 
-Mantid::API::IAlgorithm_sptr
-ConvFitModel::createSequentialFit(Mantid::API::IFunction_sptr function) const {
-  auto resolutionWorkspaceName = constructSequentialResolutionWorkspace();
-  auto functionCopy = function->clone();
-  IFunction::Attribute attr(resolutionWorkspaceName);
-  setResolutionAttribute(
-      boost::dynamic_pointer_cast<CompositeFunction>(functionCopy), attr);
-  return IndirectFittingModel::createSequentialFit(functionCopy);
-}
-
-std::string ConvFitModel::constructSequentialResolutionWorkspace() const {
-  auto resolutionWorkspaceName = "__ConvFitSequential";
-  auto resolutionWorkspaces = getResolutionsForFit();
-  auto resolutionWS = extractSingleSpectrum(resolutionWorkspaces[0].first,
-                                            resolutionWorkspaceName,
-                                            resolutionWorkspaces[0].second);
-  for (size_t index = 1; index < resolutionWorkspaces.size(); index++) {
-    auto extractedSpectra = extractSingleSpectrum(
-        resolutionWorkspaces[index].first, "__indirectResolutionCreationTemp",
-        resolutionWorkspaces[index].second);
-    resolutionWS = appendWorkspace(resolutionWS, extractedSpectra, 1,
-                                   resolutionWorkspaceName);
-  }
-  deleteWorkspace("__indirectResolutionCreationTemp");
-
-  return resolutionWorkspaceName;
-}
-
 Mantid::API::MultiDomainFunction_sptr ConvFitModel::getFittingFunction() const {
   // auto function = shallowCopy(IndirectFittingModel::getFittingFunction());
   // auto composite = boost::dynamic_pointer_cast<CompositeFunction>(function);
