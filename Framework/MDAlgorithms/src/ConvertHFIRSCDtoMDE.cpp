@@ -170,9 +170,6 @@ void ConvertHFIRSCDtoMDE::init() {
  */
 void ConvertHFIRSCDtoMDE::exec() {
   double wavelength = this->getProperty("Wavelength");
-  if (wavelength == Mantid::EMPTY_DBL()) {
-    throw std::invalid_argument("Wavelength not entered!");
-  }
 
   API::IMDHistoWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
   auto &expInfo = *(inputWS->getExperimentInfo(static_cast<uint16_t>(0)));
