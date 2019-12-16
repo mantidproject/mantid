@@ -505,8 +505,8 @@ void SaveAscii2::writeTableWorkspace(ITableWorkspace_const_sptr tws,
         file << m_sep << " ";
       }
     }
-    file << '\n'; 
-		// write the column types
+    file << '\n';
+    // write the column types
     file << comment << " ";
     for (size_t colIndex = 0; colIndex < columnCount; colIndex++) {
       file << tws->getColumn(colIndex)->type() << " ";
@@ -518,7 +518,7 @@ void SaveAscii2::writeTableWorkspace(ITableWorkspace_const_sptr tws,
   } else {
     g_log.warning("Please note that files written without headers cannot be "
                   "reloaded back into Mantid with LoadAscii.");
-	}
+  }
 
   // write the data
   const auto rowCount = tws->rowCount();
