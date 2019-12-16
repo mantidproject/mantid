@@ -141,6 +141,8 @@ public:
   DataForParameterEstimationCollection
   getDataForParameterEstimation(EstimationDataSelector selector) const;
 
+  std::vector<double> getQValuesForData() const;
+
 protected:
   Mantid::API::IAlgorithm_sptr getFittingAlgorithm(FittingMode mode) const;
   Mantid::API::IAlgorithm_sptr

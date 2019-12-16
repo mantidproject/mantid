@@ -950,6 +950,10 @@ IndirectFittingModel::getDataForParameterEstimation(
   return dataCollection;
 }
 
+std::vector<double> IndirectFittingModel::getQValuesForData() const {
+  return m_fittingData[TableDatasetIndex{0}]->getQValues();
+}
+
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

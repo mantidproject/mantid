@@ -92,6 +92,7 @@ public:
   void setResolution(std::string const &name, TableDatasetIndex const &index);
   void
   setResolution(const std::vector<std::pair<std::string, int>> &fitResolutions);
+  void setQValues(const std::vector<double> &qValues);
 
   QMap<ParamID, double> getCurrentValues() const;
   QMap<ParamID, double> getCurrentErrors() const;
@@ -119,6 +120,7 @@ private:
   std::string buildPeaksFunctionString() const;
   std::string buildBackgroundFunctionString() const;
   std::string buildStretchExpFTFunctionString() const;
+  std::string buildElasticDiffSphereFunctionString() const;
   void addGlobal(const QString &parName);
   void removeGlobal(const QString &parName);
   QStringList makeGlobalList() const;
@@ -137,6 +139,8 @@ private:
   std::string m_resolutionName;
   TableDatasetIndex m_resolutionIndex;
   std::vector<std::pair<std::string, int>> m_fitResolutions;
+  std::vector<double> m_qValues;
+  bool m_isQDependentFunction = false;
 };
 
 } // namespace IDA
