@@ -9,6 +9,7 @@ Improvements
 ############
 
 - Normalization option have been added to 2d plots.
+- You can now save Table Workspaces to Ascii using the `SaveAscii <algm-SaveAscii>` algorithm, and the Ascii Save option on the workspaces toolbox.
 
 Bugfixes
 ########
