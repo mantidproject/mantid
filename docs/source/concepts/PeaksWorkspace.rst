@@ -82,7 +82,7 @@ PeaksWorkspace Python Interface
 .. code-block:: python
 
     pws = mtd['name_of_peaks_workspace']
-    pws.getNumberOfPeaks()
+    pws.getNumberPeaks()
     p = pws.getPeak(12)
     pws.removePeak(34) 
 
