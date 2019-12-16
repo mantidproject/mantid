@@ -187,7 +187,7 @@ void MainWindowPresenter::showHelp() {
 }
 
 void MainWindowPresenter::notifySaveBatchRequested(int tabIndex) {
-  auto filename = m_messageHandler->askUserForFileName("JSON (*.json)");
+  auto filename = m_messageHandler->askUserForSaveFileName("JSON (*.json)");
   if (filename == "")
     return;
   auto map = m_encoder->encodeBatch(m_view, tabIndex, false);
@@ -195,7 +195,7 @@ void MainWindowPresenter::notifySaveBatchRequested(int tabIndex) {
 }
 
 void MainWindowPresenter::notifyLoadBatchRequested(int tabIndex) {
-  auto filename = m_messageHandler->askUserForFileName("JSON (*.json)");
+  auto filename = m_messageHandler->askUserForLoadFileName("JSON (*.json)");
   if (filename == "")
     return;
   QMap<QString, QVariant> map;

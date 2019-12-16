@@ -215,7 +215,17 @@ bool QtMainWindowView::askUserYesNo(const std::string &prompt,
   return false;
 }
 
-std::string QtMainWindowView::askUserForFileName(std::string const &filter) {
+std::string
+QtMainWindowView::askUserForLoadFileName(std::string const &filter) {
+  auto filterQString = QString::fromStdString(filter);
+  auto filename =
+      QFileDialog::getOpenFileName(nullptr, QString(), QString(), filterQString,
+                                   nullptr, QFileDialog::DontResolveSymlinks);
+  return filename.toStdString();
+}
+
+std::string
+QtMainWindowView::askUserForSaveFileName(std::string const &filter) {
   auto filterQString = QString::fromStdString(filter);
   auto filename =
       QFileDialog::getSaveFileName(nullptr, QString(), QString(), filterQString,

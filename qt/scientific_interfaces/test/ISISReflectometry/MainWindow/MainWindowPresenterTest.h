@@ -320,7 +320,7 @@ public:
     auto const filename = std::string("test.json");
     auto const map = QMap<QString, QVariant>();
     auto const batchIndex = 1;
-    EXPECT_CALL(m_messageHandler, askUserForFileName("JSON (*.json)"))
+    EXPECT_CALL(m_messageHandler, askUserForSaveFileName("JSON (*.json)"))
         .Times(1)
         .WillOnce(Return(filename));
     EXPECT_CALL(*m_encoder, encodeBatch(&m_view, batchIndex, false))
@@ -336,7 +336,7 @@ public:
     auto const filename = std::string("test.json");
     auto const map = QMap<QString, QVariant>();
     auto const batchIndex = 1;
-    EXPECT_CALL(m_messageHandler, askUserForFileName("JSON (*.json)"))
+    EXPECT_CALL(m_messageHandler, askUserForLoadFileName("JSON (*.json)"))
         .Times(1)
         .WillOnce(Return(filename));
     EXPECT_CALL(m_fileHandler, loadJSONFromFile(filename))

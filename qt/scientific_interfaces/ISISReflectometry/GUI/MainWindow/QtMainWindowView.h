@@ -58,7 +58,8 @@ public:
                     const std::string &title) override;
   bool askUserYesNo(const std::string &prompt,
                     const std::string &title) override;
-  std::string askUserForFileName(std::string const &filter) override;
+  std::string askUserForLoadFileName(std::string const &filter) override;
+  std::string askUserForSaveFileName(std::string const &filter) override;
 
   void disableSaveAndLoadBatch() override;
   void enableSaveAndLoadBatch() override;

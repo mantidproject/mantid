@@ -240,7 +240,8 @@ public:
                void(const std::string &, const std::string &));
   MOCK_METHOD2(giveUserInfo, void(const std::string &, const std::string &));
   MOCK_METHOD2(askUserYesNo, bool(const std::string &, const std::string &));
-  MOCK_METHOD1(askUserForFileName, std::string(const std::string &));
+  MOCK_METHOD1(askUserForLoadFileName, std::string(const std::string &));
+  MOCK_METHOD1(askUserForSaveFileName, std::string(const std::string &));
 };
 
 class MockFileHandler : public IFileHandler {
