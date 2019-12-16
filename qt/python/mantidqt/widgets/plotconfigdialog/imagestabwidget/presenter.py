@@ -7,7 +7,12 @@
 #  This file is part of the mantid workbench.
 
 from __future__ import (absolute_import, unicode_literals)
+from numpy import arange
 
+from matplotlib.colors import LogNorm
+from matplotlib.ticker import LogLocator
+
+from mantid.kernel import logger
 from mantidqt.utils.qt import block_signals
 from mantidqt.widgets.plotconfigdialog import generate_ax_name, get_images_from_fig
 from mantidqt.widgets.plotconfigdialog.imagestabwidget import ImageProperties
@@ -46,7 +51,15 @@ class ImagesTabWidgetPresenter:
         if current_axis_images.colorbar:
             current_axis_images.colorbar.remove()
 
-        self.fig.colorbar(image)
+        locator = None
+        if SCALES[props.scale] == LogNorm:
+            locator = LogLocator(subs=arange(1, 10))
+            if locator.tick_values(vmin=props.vmin,  vmax=props.vmax).size == 0:
+                locator = LogLocator()
+                logger.warning("Minor ticks on colorbar scale cannot be shown "
+                               "as the range between min value and max value is too large")
+
+        self.fig.colorbar(image, ticks=locator)
 
     def get_selected_image(self):
         return self.image_names_dict[self.view.get_selected_image_name()]
