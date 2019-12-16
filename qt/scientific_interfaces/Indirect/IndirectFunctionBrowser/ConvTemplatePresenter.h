@@ -55,6 +55,7 @@ public:
   void
   setResolution(const std::vector<std::pair<std::string, int>> &fitResolutions);
   void setBackgroundA0(double value);
+  void setQValues(const std::vector<double> &qValues);
 
 signals:
   void functionStructureChanged();

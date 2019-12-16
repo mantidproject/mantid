@@ -71,6 +71,7 @@ public:
       DataForParameterEstimationCollection &&data) override;
   void setBackgroundA0(double value) override;
   void setResolution(std::string const &, TableDatasetIndex const &) override {}
+  void setQValues(const std::vector<double> &qValues) override {}
 
 protected slots:
   void intChanged(QtProperty *) override;

@@ -6,7 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitData.h"
 
+#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitConversion.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
@@ -18,6 +23,47 @@ using namespace Mantid::API;
 namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
 using namespace Mantid::Kernel::Strings;
+
+/**
+ * @brief Extract Q values from vertical dimension of the workspace, or compute
+ * them.
+ * @param workspace workspace possibly containing Q values.
+ */
+std::vector<double> extractQValues(const MatrixWorkspace_sptr workspace,
+                                   const Spectra &spectra) {
+  std::vector<double> qs;
+  // Check if the vertical axis has units of momentum transfer, then extract Q
+  // values...
+  auto axis_ptr =
+      dynamic_cast<Mantid::API::NumericAxis *>(workspace->getAxis(1));
+  if (axis_ptr) {
+    const boost::shared_ptr<Mantid::Kernel::Unit> &unit_ptr = axis_ptr->unit();
+    if (unit_ptr->unitID() == "MomentumTransfer") {
+      for (auto spectrum : spectra) {
+        qs.emplace_back(axis_ptr->operator()(spectrum.value));
+        // qs = axis_ptr->getValues();
+      }
+    }
+  }
+  // ...otherwise, compute the momentum transfer for each spectrum, if possible
+  else {
+    const auto &spectrumInfo = workspace->spectrumInfo();
+    for (auto spectrum : spectra) {
+      if (spectrumInfo.hasDetectors(spectrum.value)) {
+        const auto detID = spectrumInfo.detector(spectrum.value).getID();
+        double efixed = workspace->getEFixed(detID);
+        double usignTheta = 0.5 * spectrumInfo.twoTheta(spectrum.value);
+        double q = Mantid::Kernel::UnitConversion::convertToElasticQ(usignTheta,
+                                                                     efixed);
+        qs.emplace_back(q);
+      } else {
+        qs.clear();
+        break;
+      }
+    }
+  }
+  return qs;
+}
 
 std::string constructSpectraString(std::vector<int> const &spectras) {
   return joinCompress(spectras.begin(), spectras.end());
@@ -332,6 +378,10 @@ std::string IndirectFitData::getExcludeRegion(WorkspaceIndex spectrum) const {
 std::vector<double>
 IndirectFitData::excludeRegionsVector(WorkspaceIndex spectrum) const {
   return vectorFromString<double>(getExcludeRegion(spectrum));
+}
+
+std::vector<double> IndirectFitData::getQValues() const {
+  return extractQValues(m_workspace, m_spectra);
 }
 
 void IndirectFitData::setSpectra(std::string const &spectra) {

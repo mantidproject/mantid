@@ -58,6 +58,7 @@ public:
   setResolution(const std::vector<std::pair<std::string, int>> &fitResolutions);
   void addDeltaFunction();
   void removeDeltaFunction();
+  void setQValues(const std::vector<double> &qValues) override;
 
 protected slots:
   void intChanged(QtProperty *) override;

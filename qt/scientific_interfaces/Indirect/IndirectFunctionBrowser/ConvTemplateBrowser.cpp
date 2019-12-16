@@ -114,6 +114,10 @@ void ConvTemplateBrowser::boolChanged(QtProperty *prop) {
   }
 }
 
+void ConvTemplateBrowser::setQValues(const std::vector<double> &qValues) {
+  m_presenter.setQValues(qValues);
+}
+
 void ConvTemplateBrowser::addDeltaFunction() {
   m_deltaFunctionOn->addSubProperty(m_deltaFunctionHeight);
   ScopedFalse _false(m_emitBoolChange);

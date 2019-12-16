@@ -69,6 +69,7 @@ public:
                              TableDatasetIndex const &index) = 0;
   virtual void
   setResolution(const std::vector<std::pair<std::string, int>> &){};
+  virtual void setQValues(const std::vector<double> &qValues) = 0;
 
 signals:
   void functionStructureChanged();

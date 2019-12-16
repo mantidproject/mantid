@@ -9,6 +9,14 @@ namespace ConvTypes {
 
 using namespace Mantid::API;
 
+std::map<FitType, bool> FitTypeQDepends =
+    std::map<FitType, bool>({{FitType::None, false},
+                             {FitType::OneLorentzian, false},
+                             {FitType::TwoLorentzians, false},
+                             {FitType::TeixeiraWater, true},
+                             {FitType::StretchedExpFT, true},
+                             {FitType::ElasticDiffSphere, true}});
+
 std::map<ParamID, QString> g_paramName{
     {ParamID::LOR1_AMPLITUDE, "Amplitude"},
     {ParamID::LOR1_PEAKCENTRE, "PeakCentre"},
@@ -31,6 +39,9 @@ std::map<ParamID, QString> g_paramName{
     {ParamID::SE_TAU, "Tau"},
     {ParamID::SE_BETA, "Beta"},
     {ParamID::SE_CENTRE, "Centre"},
+    {ParamID::EDP_HEIGHT, "Centre"},
+    {ParamID::EDP_CENTRE, "Centre"},
+    {ParamID::EDP_RADIUS, "Centre"},
 };
 
 template <>
@@ -53,7 +64,12 @@ std::map<FitType, TemplateSubTypeDescriptor>
         {FitType::StretchedExpFT,
          {"StretchedExpFT",
           "StretchedExpFT",
-          {ParamID::SE_HEIGHT, ParamID::SE_CENTRE}}}};
+          {ParamID::SE_HEIGHT, ParamID::SE_CENTRE}}},
+        {FitType::ElasticDiffSphere,
+         {"ElasticDiffSphere",
+          "ElasticDiffSphere",
+          {ParamID::EDP_HEIGHT, ParamID::EDP_RADIUS}}},
+    };
 
 template <>
 std::map<BackgroundType, TemplateSubTypeDescriptor>
