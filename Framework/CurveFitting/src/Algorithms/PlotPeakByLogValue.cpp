@@ -23,6 +23,7 @@
 #include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
@@ -205,22 +206,28 @@ void PlotPeakByLogValue::exec() {
   }
   // Create an instance of the fitting function to obtain the names of fitting
   // parameters
-  IFunction_sptr ifun = FunctionFactory::Instance().createInitialized(fun);
-  if (!ifun) {
+  IFunction_sptr inputFunction =
+      FunctionFactory::Instance().createInitialized(fun);
+  if (!inputFunction) {
     throw std::invalid_argument("Fitting function failed to initialize");
   }
+  bool isMultiDomainFunction = boost::dynamic_pointer_cast<MultiDomainFunction>(
+                                   inputFunction) != nullptr;
+
+  IFunction_sptr ifunSingle =
+      isMultiDomainFunction ? inputFunction->getFunction(0) : inputFunction;
 
   // for inidividual fittings store the initial parameters
-  std::vector<double> initialParams(ifun->nParams());
+  std::vector<double> initialParams(ifunSingle->nParams());
   if (individual) {
     for (size_t i = 0; i < initialParams.size(); ++i) {
-      initialParams[i] = ifun->getParameter(i);
+      initialParams[i] = ifunSingle->getParameter(i);
     }
   }
 
-  for (size_t iPar = 0; iPar < ifun->nParams(); ++iPar) {
-    result->addColumn("double", ifun->parameterName(iPar));
-    result->addColumn("double", ifun->parameterName(iPar) + "_Err");
+  for (size_t iPar = 0; iPar < ifunSingle->nParams(); ++iPar) {
+    result->addColumn("double", ifunSingle->parameterName(iPar));
+    result->addColumn("double", ifunSingle->parameterName(iPar) + "_Err");
   }
   result->addColumn("double", "Chi_squared");
 
@@ -262,10 +269,12 @@ void PlotPeakByLogValue::exec() {
     }
 
     dProg /= abs(jend - j);
+    IFunction_sptr ifun;
     for (; j < jend; ++j) {
-
-      // Find the log value: it is either a log-file value or simply the
-      // workspace number
+      ifun =
+          isMultiDomainFunction ? inputFunction->getFunction(j) : inputFunction;
+      // Find the log value: it is either a log-file value or
+      // simply the workspace number
       double logValue = 0;
       if (logName.empty() || logName == "axis-1") {
         API::Axis *axis = data.ws->getAxis(1);
