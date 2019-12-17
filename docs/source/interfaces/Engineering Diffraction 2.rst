@@ -73,3 +73,32 @@ Calibration Sample Number
 
 Path
     The path to the GSAS parameter file to be loaded.
+
+Focus
+-----
+
+This tab allows for the focusing of data files, by providing a run number or selecting the files
+manually using the browse button, by making use of the :ref:`EnggFocus<algm-EnggFocus>` algorithm.
+
+In order to use the tab, a new or existing calibration must be created or loaded.
+
+Currently, the focusing tab only supports one focusing mode:
+
+- **Normal Focusing:**
+    The user is able to select which banks they want to focus, and all the spectra from those banks will be considered.
+    The output workspaces will have a suffix denoting which bank they are for.
+
+The focused data files are saved in NeXus format to:
+
+`Engineering_Mantid/Focus/`
+
+If an RB number has been specified the files will also be saved to a user directory
+in the base directory:
+
+`Engineering_Mantid/User/RBNumber/Focus/`
+
+Parameters
+^^^^^^^^^^
+
+Sample Run Number
+    The run number or file path to the data file to be focused.
