@@ -22,15 +22,18 @@ class SettingsPresenter(object):
     def __init__(self, model, view):
         self.model = model
         self.view = view
-        self.load_existing_settings()
+        self.settings = {}
 
         # Connect view signals
         self.view.set_on_apply_clicked(self.save_new_settings)
         self.view.set_on_ok_clicked(self.save_and_close_dialog)
         self.view.set_on_cancel_clicked(self.close_dialog)
 
+    def show(self):
+        self.view.show()
+
     def load_existing_settings(self):
-        self._load_settings_from_file()
+        self.load_settings_from_file_or_default()
         self._show_settings_in_view()
 
     def close_dialog(self):
@@ -59,7 +62,7 @@ class SettingsPresenter(object):
         if self._validate_settings(self.settings):
             self.model.set_settings_dict(self.settings)
 
-    def _load_settings_from_file(self):
+    def load_settings_from_file_or_default(self):
         self.settings = self.model.get_settings_dict(SETTINGS_LIST)
         if not self._validate_settings(self.settings):
             self.settings = DEFAULT_SETTINGS.copy()
@@ -67,4 +70,8 @@ class SettingsPresenter(object):
 
     @staticmethod
     def _validate_settings(settings):
-        return settings.keys() == SETTINGS_LIST
+        all_keys = settings.keys() == SETTINGS_LIST
+        save_location = str(settings["save_location"])
+        save_valid = save_location is not "" and save_location is not None
+        recalc_valid = settings["recalc_vanadium"] is not None
+        return all_keys and save_valid and recalc_valid

@@ -44,12 +44,20 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
 
         self.set_on_settings_clicked(self.open_settings)
         self.btn_settings.setIcon(get_icon("mdi.settings", "black", 1.2))
-        # Setup Tabs
+
+        # Setup Elements
+        self.setup_settings()
         self.setup_calibration()
         self.setup_focus()
 
         # Setup notifiers
         self.setup_calibration_notifier()
+
+    def setup_settings(self):
+        model = SettingsModel()
+        view = SettingsView(self)
+        self.settings_presenter = SettingsPresenter(model, view)
+        self.settings_presenter.load_settings_from_file_or_default()
 
     def setup_calibration(self):
         cal_model = CalibrationModel()
@@ -87,10 +95,8 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         InterfaceManager().showCustomInterfaceHelp(self.doc)
 
     def open_settings(self):
-        settings_view = SettingsView(self)
-        settings_model = SettingsModel()
-        self.settings_presenter = SettingsPresenter(settings_model, settings_view)
-        settings_view.show()
+        self.settings_presenter.load_existing_settings()
+        self.settings_presenter.show()
 
     def get_rb_no(self):
         return self.lineEdit_RBNumber.text()
