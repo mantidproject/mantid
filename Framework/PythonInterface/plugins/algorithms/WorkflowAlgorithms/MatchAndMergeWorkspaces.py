@@ -39,14 +39,12 @@ class MatchAndMergeWorkspaces(DataProcessorAlgorithm):
         # and must be public of ExperimentInfo
         issues = dict()
         ws_list = self.getProperty('InputWorkspaces').value
-        if not self.validate_ws(ws_list):
-            issues['InputWorkspaces'] = 'InputWorkspaces is not a list of workspaces or group workspace'
         spectra_count = 0
         for name_in_list in ws_list:
             ws_in_list = AnalysisDataService.retrieve(name_in_list)
-            if type(ws_in_list) == Workspace2D:
+            if isinstance(ws_in_list, Workspace2D):
                 spectra_count += ws_in_list.getNumberHistograms()
-            if type(ws_in_list) == WorkspaceGroup:
+            if isinstance(ws_in_list, WorkspaceGroup):
                 for ws_in_group in ws_in_list:
                     spectra_count += ws_in_group.getNumberHistograms()
 
@@ -59,15 +57,6 @@ class MatchAndMergeWorkspaces(DataProcessorAlgorithm):
             issues['XMax'] = 'XMax entries does not match size of workspace group'
 
         return issues
-
-    @staticmethod
-    def validate_ws(ws_in):
-        for ws in ws_in:
-            try:
-                AnalysisDataService.retrieve(ws)
-            except KeyError:
-                return False
-        return True
 
     def PyInit(self):
         self.declareProperty(StringArrayProperty('InputWorkspaces', direction=Direction.Input, validator=ADSValidator()),
@@ -118,9 +107,9 @@ class MatchAndMergeWorkspaces(DataProcessorAlgorithm):
         output = []
         for name_in_list in inputs:
             ws_in_list = AnalysisDataService.retrieve(name_in_list)
-            if type(ws_in_list) == Workspace2D:
+            if isinstance(ws_in_list, Workspace2D):
                 output.append(ws_in_list)
-            if type(ws_in_list) == WorkspaceGroup:
+            if isinstance(ws_in_list, WorkspaceGroup):
                 for ws_in_group in ws_in_list:
                     output.append(ws_in_group)
         return output
