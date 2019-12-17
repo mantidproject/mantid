@@ -27,7 +27,7 @@ public:
   // expected integration results are obtained using either fixed size
   // ellipsoids, or using ellipsoids with axis half-lengths set to
   // three standard deviations.
-  void test_1() {
+  void test_integrateMainPeaksWithFixedRadiiandDefaultScaledRadii() {
     double inti_all[] = {755, 704, 603};
     double sigi_all[] = {27.4773, 26.533, 24.5561};
 
@@ -59,37 +59,37 @@ public:
     std::vector<std::pair<std::pair<double, double>, V3D>> event_Qs;
     for (int i = -100; i <= 100; i++) {
       event_Qs.emplace_back(std::make_pair(
-          std::make_pair(1., 1.), V3D(peak_1 + V3D((double)i / 100.0, 0, 0))));
+          std::make_pair(2., 1.), V3D(peak_1 + V3D((double)i / 100.0, 0, 0))));
       event_Qs.emplace_back(std::make_pair(
-          std::make_pair(1., 1.), V3D(peak_2 + V3D((double)i / 100.0, 0, 0))));
+          std::make_pair(2., 1.), V3D(peak_2 + V3D((double)i / 100.0, 0, 0))));
       event_Qs.emplace_back(std::make_pair(
-          std::make_pair(1., 1.), V3D(peak_3 + V3D((double)i / 100.0, 0, 0))));
+          std::make_pair(2., 1.), V3D(peak_3 + V3D((double)i / 100.0, 0, 0))));
 
       event_Qs.emplace_back(std::make_pair(
-          std::make_pair(1., 1.), V3D(peak_1 + V3D(0, (double)i / 200.0, 0))));
+          std::make_pair(2., 1.), V3D(peak_1 + V3D(0, (double)i / 200.0, 0))));
       event_Qs.emplace_back(std::make_pair(
-          std::make_pair(1., 1.), V3D(peak_2 + V3D(0, (double)i / 200.0, 0))));
+          std::make_pair(2., 1.), V3D(peak_2 + V3D(0, (double)i / 200.0, 0))));
       event_Qs.emplace_back(std::make_pair(
-          std::make_pair(1., 1.), V3D(peak_3 + V3D(0, (double)i / 200.0, 0))));
+          std::make_pair(2., 1.), V3D(peak_3 + V3D(0, (double)i / 200.0, 0))));
 
       event_Qs.emplace_back(std::make_pair(
-          std::make_pair(1., 1.), V3D(peak_1 + V3D(0, 0, (double)i / 300.0))));
+          std::make_pair(2., 1.), V3D(peak_1 + V3D(0, 0, (double)i / 300.0))));
       event_Qs.emplace_back(std::make_pair(
-          std::make_pair(1., 1.), V3D(peak_2 + V3D(0, 0, (double)i / 300.0))));
+          std::make_pair(2., 1.), V3D(peak_2 + V3D(0, 0, (double)i / 300.0))));
       event_Qs.emplace_back(std::make_pair(
-          std::make_pair(1., 1.), V3D(peak_3 + V3D(0, 0, (double)i / 300.0))));
+          std::make_pair(2., 1.), V3D(peak_3 + V3D(0, 0, (double)i / 300.0))));
     }
 
     for (int i = -50; i <= 50; i++) {
       event_Qs.emplace_back(std::make_pair(
-          std::make_pair(1., 1.), V3D(peak_1 + V3D(0, (double)i / 147.0, 0))));
+          std::make_pair(2., 1.), V3D(peak_1 + V3D(0, (double)i / 147.0, 0))));
       event_Qs.emplace_back(std::make_pair(
-          std::make_pair(1., 1.), V3D(peak_2 + V3D(0, (double)i / 147.0, 0))));
+          std::make_pair(2., 1.), V3D(peak_2 + V3D(0, (double)i / 147.0, 0))));
     }
 
     for (int i = -25; i <= 25; i++) {
       event_Qs.emplace_back(std::make_pair(
-          std::make_pair(1., 1.), V3D(peak_1 + V3D(0, 0, (double)i / 61.0))));
+          std::make_pair(2., 1.), V3D(peak_1 + V3D(0, 0, (double)i / 61.0))));
     }
 
     double radius = 1.3;
@@ -111,7 +111,7 @@ public:
       auto shape = integrator.ellipseIntegrateEvents(
           E1Vec, peak_q_list[i].second, specify_size, peak_radius,
           back_inner_radius, back_outer_radius, new_sigma, inti, sigi);
-      TS_ASSERT_DELTA(inti, inti_all[i], 0.1);
+      TS_ASSERT_DELTA(inti, 2*inti_all[i], 0.1);
       TS_ASSERT_DELTA(sigi, sigi_all[i], 0.01);
 
       auto ellipsoid_shape = boost::dynamic_pointer_cast<
@@ -127,7 +127,7 @@ public:
       integrator.ellipseIntegrateEvents(
           E1Vec, peak_q_list[i].second, specify_size, peak_radius,
           back_inner_radius, back_outer_radius, new_sigma, inti, sigi);
-      TS_ASSERT_DELTA(inti, inti_some[i], 0.1);
+      TS_ASSERT_DELTA(inti, 2*inti_some[i], 0.1);
       TS_ASSERT_DELTA(sigi, sigi_some[i], 0.01);
     }
   }
