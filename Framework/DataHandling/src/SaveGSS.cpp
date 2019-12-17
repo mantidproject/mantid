@@ -119,7 +119,7 @@ void writeBankHeader(std::stringstream &out, const std::string &bintype,
 //----------------------------------------------------------------------------------------------
 // Initialise the algorithm
 void SaveGSS::init() {
-  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Kernel::Direction::Input),
                   "The input workspace");
 
@@ -715,7 +715,11 @@ std::map<std::string, std::string> SaveGSS::validateInputs() {
   std::map<std::string, std::string> result;
 
   API::MatrixWorkspace_const_sptr input_ws = getProperty("InputWorkspace");
-
+  if (!input_ws) {
+    result.emplace("InputWorkspace",
+                   "The input workspace cannot be a GroupWorkspace.");
+    return result;
+  }
   // Check the number of histogram/spectra < 99
   const auto nHist = static_cast<int>(input_ws->getNumberHistograms());
   const bool split = getProperty("SplitFiles");
