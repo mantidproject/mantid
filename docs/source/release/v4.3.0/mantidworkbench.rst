@@ -9,6 +9,7 @@ Improvements
 ############
 
 - Normalization options have been added to 2d plots and sliceviewer.
+- The images tab in figure options no longer forces the max value to be greater than the min value.
 
 Bugfixes
 ########
