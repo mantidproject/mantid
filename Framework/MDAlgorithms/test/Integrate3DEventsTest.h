@@ -540,8 +540,9 @@ private:
     for (double i = lower; i < upper; i += step) {
       for (double j = lower; j < upper; j += step) {
         for (double k = lower; k < upper; k += step) {
+          double cts = counts + d(gen);
           event_Qs.emplace_back(
-              std::make_pair(counts + d(gen), 1.),
+              std::make_pair(cts, cts),
               V3D(i, j, k)); // is it right to add 1. error here?
         }
       }

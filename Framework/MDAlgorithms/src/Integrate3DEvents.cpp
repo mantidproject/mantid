@@ -566,9 +566,10 @@ std::pair<double, double> Integrate3DEvents::numInEllipsoid(
       double comp = event.second.scalar_prod(directions[k]) / sizes[k];
       sum += comp * comp;
     }
-    if (sum <= 1)
-      count.first += event.first.first; // count
-    count.second += event.first.second; // error squared (add in quadrature)
+    if (sum <= 1) {
+      count.first += event.first.first;   // count
+      count.second += event.first.second; // error squared (add in quadrature)
+    }
   }
 
   return count;
