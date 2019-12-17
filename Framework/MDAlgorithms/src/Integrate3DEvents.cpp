@@ -614,10 +614,10 @@ std::pair<double, double> Integrate3DEvents::numInEllipsoidBkg(
   auto endIndex = eventVec.size();
   if (useOnePercentBackgroundCorrection) {
     // Remove top 1% of background
-    std::sort(eventVec.begin(), eventVec.end(),
-              [](std::pair<double, double> a, std::pair<double, double> b) {
-                return a.first < b.first;
-              });
+    std::sort(
+        eventVec.begin(), eventVec.end(),
+        [](const std::pair<double, double> &a,
+           const std::pair<double, double> &b) { return a.first < b.first; });
     endIndex = static_cast<size_t>(0.99 * static_cast<double>(endIndex));
   }
 
