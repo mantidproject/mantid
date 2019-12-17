@@ -8,12 +8,10 @@
 from __future__ import (absolute_import, division, print_function)
 
 from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting, set_setting
+from Engineering.gui.engineering_diffraction.tabs.common import path_handling
 
 
 class SettingsModel(object):
-    INTERFACES_SETTINGS_GROUP = "CustomInterfaces"
-    ENGINEERING_PREFIX = "EngineeringDiffraction2/"
-
     def get_settings_dict(self, keys):
         settings = {}
         for setting_name in keys:
@@ -24,8 +22,10 @@ class SettingsModel(object):
         for key in settings:
             self.set_setting(key, settings[key])
 
-    def get_setting(self, name):
-        return get_setting(self.INTERFACES_SETTINGS_GROUP, self.ENGINEERING_PREFIX, name)
+    @staticmethod
+    def get_setting(name):
+        return get_setting(path_handling.INTERFACES_SETTINGS_GROUP, path_handling.ENGINEERING_PREFIX, name)
 
-    def set_setting(self, name, value):
-        set_setting(self.INTERFACES_SETTINGS_GROUP, self.ENGINEERING_PREFIX, name, value)
+    @staticmethod
+    def set_setting(name, value):
+        set_setting(path_handling.INTERFACES_SETTINGS_GROUP, path_handling.ENGINEERING_PREFIX, name, value)

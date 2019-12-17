@@ -24,8 +24,6 @@ CURVES_WORKSPACE_NAME = "engggui_vanadium_curves"
 INTEGRATED_WORKSPACE_NAME = "engggui_vanadium_integration"
 CALIB_PARAMS_WORKSPACE_NAME = "engggui_calibration_banks_parameters"
 
-CALIBRATION_DIR = path.join(path_handling.OUT_FILES_ROOT_DIR, "Calibration", "")
-
 NORTH_BANK_TEMPLATE_FILE = "template_ENGINX_241391_236516_North_bank.prm"
 SOUTH_BANK_TEMPLATE_FILE = "template_ENGINX_241391_236516_South_bank.prm"
 
@@ -64,10 +62,10 @@ class CalibrationModel(object):
             params_table.append([i, difc[i], 0.0, tzero[i]])
         self.update_calibration_params_table(params_table)
 
-        self.create_output_files(CALIBRATION_DIR, difc, tzero, sample_path, vanadium_path,
-                                 instrument)
+        calib_dir = path.join(path_handling.get_output_path(), "Calibration", "")
+        self.create_output_files(calib_dir, difc, tzero, sample_path, vanadium_path, instrument)
         if rb_num:
-            user_calib_dir = path.join(path_handling.OUT_FILES_ROOT_DIR, "User", rb_num,
+            user_calib_dir = path.join(path_handling.get_output_path(), "User", rb_num,
                                        "Calibration", "")
             self.create_output_files(user_calib_dir, difc, tzero, sample_path, vanadium_path,
                                      instrument)

@@ -104,36 +104,36 @@ class FocusModel(object):
     def _save_focused_output_files_as_gss(self, instrument, sample_path, bank, sample_workspace,
                                           rb_num):
         gss_output_path = path.join(
-            path_handling.OUT_FILES_ROOT_DIR, "Focus",
+            path_handling.get_output_path(), "Focus",
             self._generate_output_file_name(instrument, sample_path, bank, ".gss"))
         SaveGSS(InputWorkspace=sample_workspace, Filename=gss_output_path)
         if rb_num is not None:
             gss_output_path = path.join(
-                path_handling.OUT_FILES_ROOT_DIR, "User", rb_num, "Focus",
+                path_handling.get_output_path(), "User", rb_num, "Focus",
                 self._generate_output_file_name(instrument, sample_path, bank, ".gss"))
             SaveGSS(InputWorkspace=sample_workspace, Filename=gss_output_path)
 
     def _save_focused_output_files_as_nexus(self, instrument, sample_path, bank, sample_workspace,
                                             rb_num):
         nexus_output_path = path.join(
-            path_handling.OUT_FILES_ROOT_DIR, "Focus",
+            path_handling.get_output_path(), "Focus",
             self._generate_output_file_name(instrument, sample_path, bank, ".nxs"))
         SaveNexus(InputWorkspace=sample_workspace, Filename=nexus_output_path)
         if rb_num is not None:
             nexus_output_path = path.join(
-                path_handling.OUT_FILES_ROOT_DIR, "User", rb_num, "Focus",
+                path_handling.get_output_path(), "User", rb_num, "Focus",
                 self._generate_output_file_name(instrument, sample_path, bank, ".nxs"))
             SaveNexus(InputWorkspace=sample_workspace, Filename=nexus_output_path)
 
     def _save_focused_output_files_as_xye(self, instrument, sample_path, bank, sample_workspace,
                                           rb_num):
         xye_output_path = path.join(
-            path_handling.OUT_FILES_ROOT_DIR, "Focus",
+            path_handling.get_output_path(), "Focus",
             self._generate_output_file_name(instrument, sample_path, bank, ".dat"))
         SaveFocusedXYE(InputWorkspace=sample_workspace, Filename=xye_output_path, SplitFiles=False)
         if rb_num is not None:
             xye_output_path = path.join(
-                path_handling.OUT_FILES_ROOT_DIR, "User", rb_num, "Focus",
+                path_handling.get_output_path(), "User", rb_num, "Focus",
                 self._generate_output_file_name(instrument, sample_path, bank, ".dat"))
             SaveFocusedXYE(InputWorkspace=sample_workspace,
                            Filename=xye_output_path,

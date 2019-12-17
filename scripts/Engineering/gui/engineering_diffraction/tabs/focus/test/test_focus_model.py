@@ -83,7 +83,7 @@ class FocusModelTest(unittest.TestCase):
     @patch(file_path + ".SaveNexus")
     def test_save_output_files_with_no_RB_number(self, nexus, gss, xye):
         mocked_workspace = "mocked-workspace"
-        output_file = path.join(path_handling.OUT_FILES_ROOT_DIR, "Focus",
+        output_file = path.join(path_handling.get_output_path(), "Focus",
                                 "ENGINX_123_bank_North.nxs")
 
         self.model._save_output("ENGINX", "Path/To/ENGINX000123.whatever", "North",

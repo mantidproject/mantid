@@ -70,8 +70,11 @@ class SettingsPresenter(object):
 
     @staticmethod
     def _validate_settings(settings):
-        all_keys = settings.keys() == SETTINGS_LIST
-        save_location = str(settings["save_location"])
-        save_valid = save_location is not "" and save_location is not None
-        recalc_valid = settings["recalc_vanadium"] is not None
-        return all_keys and save_valid and recalc_valid
+        try:
+            all_keys = settings.keys() == SETTINGS_LIST
+            save_location = str(settings["save_location"])
+            save_valid = save_location is not "" and save_location is not None
+            recalc_valid = settings["recalc_vanadium"] is not None
+            return all_keys and save_valid and recalc_valid
+        except KeyError:  # Settings contained invalid key.
+            return False

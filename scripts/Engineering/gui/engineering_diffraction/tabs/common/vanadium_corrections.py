@@ -113,10 +113,10 @@ def _generate_saved_workspace_file_paths(vanadium_number, rb_num=""):
     integrated_filename = vanadium_number + SAVED_FILE_INTEG_SUFFIX
     curves_filename = vanadium_number + SAVED_FILE_CURVE_SUFFIX
     if rb_num:
-        vanadium_dir = path.join(path_handling.OUT_FILES_ROOT_DIR, "User", rb_num,
+        vanadium_dir = path.join(path_handling.get_output_path(), "User", rb_num,
                                  VANADIUM_DIRECTORY_NAME)
     else:
-        vanadium_dir = path.join(path_handling.OUT_FILES_ROOT_DIR, VANADIUM_DIRECTORY_NAME)
+        vanadium_dir = path.join(path_handling.get_output_path(), VANADIUM_DIRECTORY_NAME)
     if not path.exists(vanadium_dir):
         makedirs(vanadium_dir)
     return path.join(vanadium_dir, integrated_filename), path.join(vanadium_dir, curves_filename)
