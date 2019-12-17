@@ -8,7 +8,7 @@ MantidWorkbench Changes
 Improvements
 ############
 
-- Normalization option have been added to 2d plots.
+- Normalization options have been added to 2d plots and sliceviewer.
 
 Bugfixes
 ########
