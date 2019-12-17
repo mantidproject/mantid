@@ -69,6 +69,26 @@ class MatchAndMergeWorkspacesTest(unittest.TestCase):
         self.assertAlmostEqual(min(ws_merged.dataX(0)), 2, places=0)
         self.assertAlmostEqual(max(ws_merged.dataX(0)), 45, places=0)
 
+    def test_MatchAndMergeWorkspaces_fails_with_wrong_number_min_limits(self):
+        x_min = np.array([0])
+        x_max = np.array([10, 20, 30, 40, 50])
+        self.assertRaises(RuntimeError, MatchAndMergeWorkspaces, InputWorkspaces='ws_group', XMin=x_min, XMax=x_max)
+
+    def test_MatchAndMergeWorkspaces_fails_with_wrong_number_max_limits(self):
+        x_min = np.array([0, 5, 10, 15, 20])
+        x_max = np.array([10])
+        self.assertRaises(RuntimeError, MatchAndMergeWorkspaces, InputWorkspaces='ws_group', XMin=x_min, XMax=x_max)
+
+    def test_MatchAndMergeWorkspaces_fails_with_wrong_ws_input(self):
+        x_min = np.array([0, 5, 10, 15, 20])
+        x_max = np.array([10, 20, 30, 40, 50])
+        self.assertRaises(ValueError, MatchAndMergeWorkspaces, InputWorkspaces='fake_group', XMin=x_min, XMax=x_max)
+
+    def test_MatchAndMergeWorkspaces_fails_with_min_larger_than_max(self):
+        x_min = np.array([10, 20, 30, 40, 50])
+        x_max = np.array([0, 5, 10, 15, 20])
+        self.assertRaises(ValueError, MatchAndMergeWorkspaces, InputWorkspaces='fake_group', XMin=x_min, XMax=x_max)
+
 
 if __name__ == "__main__":
     unittest.main()
