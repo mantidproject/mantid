@@ -12,7 +12,9 @@
 #include "GUI/Common/Encoder.h"
 #include "GUI/Common/Plotter.h"
 #include "MantidKernel/UsageService.h"
+#include "MantidQtWidgets/Common/QtJSONUtils.h"
 #include "MantidQtWidgets/Common/SlitCalculator.h"
+#include <QFileDialog>
 #include <QMessageBox>
 #include <QToolButton>
 
@@ -83,6 +85,7 @@ void QtMainWindowView::initLayout() {
       instruments, thetaTolerance, std::move(plotter));
 
   auto messageHandler = this;
+  auto fileHandler = this;
   auto makeRunsPresenter =
       RunsPresenterFactory(std::move(makeRunsTablePresenter), thetaTolerance,
                            instruments, messageHandler);
@@ -100,7 +103,8 @@ void QtMainWindowView::initLayout() {
   // Create the presenter
   auto slitCalculator = std::make_unique<SlitCalculator>(this);
   m_presenter = std::make_unique<MainWindowPresenter>(
-      this, messageHandler, std::move(slitCalculator),
+      this, messageHandler, fileHandler, std::make_unique<Encoder>(),
+      std::make_unique<Decoder>(), std::move(slitCalculator),
       std::move(makeBatchPresenter));
 
   m_notifyee->notifyNewBatchRequested();
@@ -211,6 +215,24 @@ bool QtMainWindowView::askUserYesNo(const std::string &prompt,
   return false;
 }
 
+std::string
+QtMainWindowView::askUserForLoadFileName(std::string const &filter) {
+  auto filterQString = QString::fromStdString(filter);
+  auto filename =
+      QFileDialog::getOpenFileName(nullptr, QString(), QString(), filterQString,
+                                   nullptr, QFileDialog::DontResolveSymlinks);
+  return filename.toStdString();
+}
+
+std::string
+QtMainWindowView::askUserForSaveFileName(std::string const &filter) {
+  auto filterQString = QString::fromStdString(filter);
+  auto filename =
+      QFileDialog::getSaveFileName(nullptr, QString(), QString(), filterQString,
+                                   nullptr, QFileDialog::DontResolveSymlinks);
+  return filename.toStdString();
+}
+
 void QtMainWindowView::disableSaveAndLoadBatch() {
   m_ui.saveBatch->setEnabled(false);
   m_ui.loadBatch->setEnabled(false);
@@ -219,6 +241,17 @@ void QtMainWindowView::disableSaveAndLoadBatch() {
 void QtMainWindowView::enableSaveAndLoadBatch() {
   m_ui.saveBatch->setEnabled(true);
   m_ui.loadBatch->setEnabled(true);
+}
+
+void QtMainWindowView::saveJSONToFile(std::string const &filename,
+                                      QMap<QString, QVariant> const &map) {
+  auto filenameQString = QString::fromStdString(filename);
+  MantidQt::API::saveJSONToFile(filenameQString, map);
+}
+
+QMap<QString, QVariant>
+QtMainWindowView::loadJSONFromFile(std::string const &filename) {
+  return MantidQt::API::loadJSONFromFile(QString::fromStdString(filename));
 }
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

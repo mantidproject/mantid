@@ -186,7 +186,7 @@ public:
     mwv.initLayout();
     auto gui = dynamic_cast<QtBatchView *>(mwv.batches()[0]);
     Decoder decoder;
-    decoder.decodeBatch(gui, &mwv, map);
+    decoder.decodeBatch(&mwv, 0, map);
 
     tester.testBatch(gui, &mwv, map);
   }
