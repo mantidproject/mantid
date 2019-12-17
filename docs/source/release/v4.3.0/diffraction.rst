@@ -43,6 +43,8 @@ Powder Diffraction
 Engineering Diffraction
 -----------------------
 
+- Fixed a bug where `SaveGSS <algm-SaveGSS-v1>` could crash when attempting to pass a group workspace into it.
+
 Single Crystal Diffraction
 --------------------------
 
