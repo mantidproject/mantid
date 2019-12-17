@@ -14,9 +14,15 @@ namespace ISISReflectometry {
 
 using namespace MantidQt::MantidWidgets::QSettingsHelper;
 
-/** Constructor */
 OptionsDialogModel::OptionsDialogModel() {}
 
+/** Applies default options to specified settings
+ *
+ * @param boolOptions A map to store bool options
+ * @param intOptions A map to store int options
+ * @return void
+ *
+ */
 void OptionsDialogModel::applyDefaultOptions(
     std::map<std::string, bool> &boolOptions,
     std::map<std::string, int> &intOptions) {
@@ -27,14 +33,26 @@ void OptionsDialogModel::applyDefaultOptions(
   intOptions["RoundPrecision"] = 3;
 }
 
-/* Loads the settings saved by the user */
+/** Loads the settings saved by the user
+ *
+ * @param boolOptions A map to store bool options
+ * @param intOptions A map to store int options
+ * @return void
+ *
+ */
 void OptionsDialogModel::loadSettings(std::map<std::string, bool> &boolOptions,
                                       std::map<std::string, int> &intOptions) {
   boolOptions = getSettingsAsMap<bool>(REFLECTOMETRY_SETTINGS_GROUP);
   intOptions = getSettingsAsMap<int>(REFLECTOMETRY_SETTINGS_GROUP);
 }
 
-/* Saves the settings specified by the user */
+/** Saves the settings specified by the user
+ *
+ * @param boolOptions A map containing values for bool options
+ * @param intOptions A map containing values for int options
+ * @return void
+ *
+ */
 void OptionsDialogModel::saveSettings(
     const std::map<std::string, bool> &boolOptions,
     const std::map<std::string, int> &intOptions) {

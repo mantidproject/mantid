@@ -235,9 +235,7 @@ bool MainWindowPresenter::isProcessPartialGroupPrevented() const {
   return false;
 }
 
-/**
-  Checks whether there are any unsaved changed in the specified batch
-*/
+/** Checks whether there are any unsaved changed in the specified batch */
 bool MainWindowPresenter::isBatchUnsaved(int batchIndex) const {
   return m_batchPresenters[batchIndex]->getUnsavedBatchFlag();
 }
@@ -265,6 +263,7 @@ void MainWindowPresenter::setUnsavedFlag(bool isUnsaved) {
 }
 
 void MainWindowPresenter::notifyOptionsChanged() const {
+  // Set or reset the rounding precision of all batches accordingly
   if (isRoundChecked()) {
     for (auto &batchPresenter : m_batchPresenters)
       batchPresenter->notifySetRoundPrecision(getRoundPrecision());

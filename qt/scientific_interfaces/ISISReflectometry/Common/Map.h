@@ -36,6 +36,12 @@ boost::optional<Out> map(boost::optional<In> const &in, Transform transform) {
     return boost::none;
 }
 
+/** Converts an optional value to string
+ *
+ * @param maybeValue optional value
+ * @return The value as a string or an empty string
+ *
+ */
 template <typename T>
 std::string optionalToString(boost::optional<T> maybeValue) {
   return map(maybeValue,
@@ -45,6 +51,13 @@ std::string optionalToString(boost::optional<T> maybeValue) {
       .get_value_or(std::string());
 }
 
+/** Converts value to string with specified precision
+ *
+ * @param value input value
+ * @param precision desired precision
+ * @return The value as a string with specified precision
+ *
+ */
 template <typename T> std::string valueToString(T value, int precision) {
   std::ostringstream result;
   result.precision(precision);
@@ -52,12 +65,26 @@ template <typename T> std::string valueToString(T value, int precision) {
   return result.str();
 }
 
+/** Converts value to string with optional precision
+ *
+ * @param value input value
+ * @param precision optional precision
+ * @return The value as a string (with specified precision if given)
+ *
+ */
 template <typename T> std::string valueToString(T value, boost::optional<int> precision) {
   if (precision.is_initialized())
     return valueToString(value, precision.get());
   return std::to_string(value);
 }
 
+/** Converts optional value to string with optional precision
+ *
+ * @param maybeValue optional input value
+ * @param precision optional output precision
+ * @return The value as a string (with specified precision if given) or empty string
+ *
+ */
 template <typename T>
 std::string optionalToString(boost::optional<T> maybeValue, boost::optional<int> precision) {
   if (maybeValue.is_initialized())

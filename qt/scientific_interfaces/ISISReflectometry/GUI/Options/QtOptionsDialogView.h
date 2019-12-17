@@ -19,9 +19,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-/** OptionsDialog : Provides a dialog for setting options.
- */
-
+/// OptionsDialog : Provides a dialog for setting options.
 class MANTIDQT_ISISREFLECTOMETRY_DLL QtOptionsDialogView : public QDialog,
                                                  public IOptionsDialogView {
   Q_OBJECT

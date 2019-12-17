@@ -14,14 +14,12 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-/** Constructor */
 QtOptionsDialogView::QtOptionsDialogView(QWidget *parent) {
   Q_UNUSED(parent);
   initLayout();
   initBindings();
 }
 
-/** Destructor */
 QtOptionsDialogView::~QtOptionsDialogView() {}
 
 /** Initialise the ui */
@@ -47,7 +45,13 @@ void QtOptionsDialogView::initBindings() {
   }
 }
 
-/** This saves the currently configured options to the presenter */
+/** Saves the currently configured options to the presenter
+ *
+ * @param boolOptions A map containing bool options
+ * @param intOptions A map containing int options
+ * @return void
+ *
+ */
 void QtOptionsDialogView::getOptions(std::map<std::string, bool> &boolOptions,
                                std::map<std::string, int> &intOptions) {
   // Iterate through all our bound widgets, pushing their value into the options
@@ -71,7 +75,13 @@ void QtOptionsDialogView::getOptions(std::map<std::string, bool> &boolOptions,
   }
 }
 
-/** This sets the ui to match the presenter's options */
+/** Sets the ui to match the presenter's options
+ *
+ * @param boolOptions A map to store bool options
+ * @param intOptions A map to store int options
+ * @return void
+ *
+ */
 void QtOptionsDialogView::setOptions(std::map<std::string, bool> &boolOptions,
                                std::map<std::string, int> &intOptions) {
   // Set the values from the options

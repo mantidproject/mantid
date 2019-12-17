@@ -35,8 +35,7 @@ void OptionsDialogPresenter::acceptMainPresenter(
  */
 void OptionsDialogPresenter::notifyInitOptions() { initOptions(); }
 
-/** Subscribe the view to this presenter
- */
+/** Subscribe the view to this presenter */
 void OptionsDialogPresenter::notifySubscribe() { m_view->subscribe(this); }
 
 /** Load options from disk if possible, or set to defaults */

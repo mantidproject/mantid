@@ -29,10 +29,6 @@ public:
                          IMainWindowPresenter *mainPresenter);
   ~OptionsDialogPresenter() = default;
 
-  // OptionsDialogSubscriber overrides
-  void loadOptions() override;
-  void saveOptions() override;
-
   void notifyInitOptions();
   void notifySubscribe();
   void acceptMainPresenter(IMainWindowPresenter *mainPresenter);
@@ -40,15 +36,17 @@ public:
   int& getIntOption(std::string &optionName);
   void showView();
 
+  // OptionsDialogSubscriber overrides
+  void loadOptions() override;
+  void saveOptions() override;
+
 private:
   void initOptions();
   void notifyApplyDefaultOptions(std::map<std::string, bool> &boolOptions,
                                  std::map<std::string, int> &intOptions);
 
 private:
-  // Handle to the view for this presenter
   IOptionsDialogView *m_view;
-  // Handle to the model for this presenter
   OptionsDialogModel m_model;
   IMainWindowPresenter *m_mainPresenter;
   // stores the user options for the presenter

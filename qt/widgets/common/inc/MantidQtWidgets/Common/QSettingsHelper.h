@@ -20,7 +20,13 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace QSettingsHelper {
 
-/* Load an individual setting from disk */
+/** Loads an individual setting from disk
+ *
+ * @param settingGroup The name of the setting group
+ * @param settingName The name of the setting
+ * @return The value stored for the requested setting
+ *
+ */
 template <typename T>
 T getSetting(std::string const &settingGroup, std::string const &settingName) {
   QSettings settings;
@@ -31,7 +37,13 @@ T getSetting(std::string const &settingGroup, std::string const &settingName) {
   return settingValue.value<T>();
 }
 
-/* Load a map of settings with the same type */
+/** Loads a map of settings with the same type. This comparison is required
+ *  as QVariant types are not properly encoded inini files
+ *
+ * @param settingGroup The name of the setting group
+ * @return A map of the values stored for all settings matching the given type
+ *
+ */
 template <typename T>
 std::map<std::string, T> getSettingsAsMap(std::string const &settingGroup) {
   std::map<std::string, T> settingsMap;
@@ -58,6 +70,14 @@ std::map<std::string, T> getSettingsAsMap(std::string const &settingGroup) {
   return settingsMap;
 }
 
+/** Sets the value of a specified setting
+ *
+ * @param settingGroup The name of the setting group
+ * @param settingName The name of the setting
+ * @param value The value of the named setting
+ * @return void
+ *
+ */
 template <typename T>
 void setSetting(std::string const &settingGroup, std::string const &settingName,
                 T const &value) {

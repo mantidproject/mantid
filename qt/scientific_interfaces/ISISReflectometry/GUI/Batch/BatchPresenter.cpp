@@ -334,14 +334,10 @@ bool BatchPresenter::isOperationPrevented() const {
   return m_mainPresenter->isOperationPrevented();
 }
 
-/**
-  Returns whether there are any unsaved changes in the current batch
- */
+/** Returns whether there are any unsaved changes in the current batch */
 bool BatchPresenter::getUnsavedBatchFlag() const { return m_unsavedBatchFlag; }
 
-/**
-  Set the state of unsaved changes in the current batch
-*/
+/** Set the state of unsaved changes in the current batch */
 void BatchPresenter::setUnsavedBatchFlag(bool isUnsaved) { m_unsavedBatchFlag = isUnsaved; }
 
 void BatchPresenter::notifySetRoundPrecision(int &precision) {
