@@ -42,9 +42,9 @@ int LoadTBL::confidence(Kernel::FileDescriptor &descriptor) const {
 
   // Avoid some known file types that have different loaders
   int confidence(0);
-  if (filePath.compare(filenameLength - 12, 12, "_runinfo.xml") == 0 ||
-      filePath.compare(filenameLength - 6, 6, ".peaks") == 0 ||
-      filePath.compare(filenameLength - 10, 10, ".integrate") == 0) {
+  if (filenameLength>12?(filePath.compare(filenameLength - 12, 12, "_runinfo.xml") == 0):false ||
+      filenameLength>6?(filePath.compare(filenameLength - 6, 6, ".peaks") == 0):false ||
+      filenameLength>10?(filePath.compare(filenameLength - 10, 10, ".integrate") == 0):false ) {
     confidence = 0;
   } else if (descriptor.isAscii()) {
     std::istream &stream = descriptor.data();
