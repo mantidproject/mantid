@@ -20,13 +20,17 @@ def num_modulation_vectors(workspace):
     :params: workspace :: the workspace to check
     :returns: The number of stored modulation vectors
     """
-    lattice = workspace.sample().getOrientedLattice()
-    count = 0
-    for i in range(3):
-        vec = lattice.getModVec(i)
-        if abs(vec.X()) > 0 or abs(vec.Y()) or abs(vec.Z()):
-            count += 1
-    return count
+    sample = workspace.sample()
+    if sample.hasOrientedLattice():
+        lattice = workspace.sample().getOrientedLattice()
+        count = 0
+        for i in range(3):
+            vec = lattice.getModVec(i)
+            if abs(vec.X()) > 0 or abs(vec.Y()) or abs(vec.Z()):
+                count += 1
+        return count
+    else:
+        return 0
 
 
 def get_two_theta(dspacing, wavelength):
@@ -195,7 +199,7 @@ class JanaFormat(object):
         def build_headers(self):
             headers = self._headers
             sample = self._workspace.sample()
-            lattice = sample.getOrientedLattice()
+            lattice = sample.getOrientedLattice() if sample.hasOrientedLattice() else None
 
             def append_mod_vector(index, col_num):
                 vec = lattice.getModVec(index)
@@ -205,30 +209,31 @@ class JanaFormat(object):
                         col_num, x, y, z))
 
             # propagation vector information if required
-            if self._num_mod_vec > 0:
-                headers.append("# Structural propagation vectors used\n")
-                if self._modulation_col_num is not None:
-                    headers.append("           1\n")
-                    append_mod_vector(self._modulation_col_num - 1, 1)
-                    headers.append("# Linear combination table used\n")
-                    headers.append("           2\n")
-                    headers.append("       1       1\n")
-                    headers.append("       2      -1\n")
-                else:
-                    headers.append("           {}\n".format(self._num_mod_vec))
-                    for mod_vec_index in range(3):
-                        append_mod_vector(mod_vec_index, mod_vec_index + 1)
-            # lattice parameters
-            lattice_params = [
-                lattice.a(),
-                lattice.b(),
-                lattice.c(),
-                lattice.alpha(),
-                lattice.beta(),
-                lattice.gamma()
-            ]
-            lattice_params = "".join(["{: >10.4f}".format(value) for value in lattice_params])
-            headers.append("# Lattice parameters   {}\n".format(lattice_params))
+            if lattice is not None:
+                if self._num_mod_vec > 0:
+                    headers.append("# Structural propagation vectors used\n")
+                    if self._modulation_col_num is not None:
+                        headers.append("           1\n")
+                        append_mod_vector(self._modulation_col_num - 1, 1)
+                        headers.append("# Linear combination table used\n")
+                        headers.append("           2\n")
+                        headers.append("       1       1\n")
+                        headers.append("       2      -1\n")
+                    else:
+                        headers.append("           {}\n".format(self._num_mod_vec))
+                        for mod_vec_index in range(3):
+                            append_mod_vector(mod_vec_index, mod_vec_index + 1)
+                # lattice parameters
+                lattice_params = [
+                    lattice.a(),
+                    lattice.b(),
+                    lattice.c(),
+                    lattice.alpha(),
+                    lattice.beta(),
+                    lattice.gamma()
+                ]
+                lattice_params = "".join(["{: >10.4f}".format(value) for value in lattice_params])
+                headers.append("# Lattice parameters   {}\n".format(lattice_params))
             headers.append("(3i5,2f12.2,i5,4f10.4)\n")
             # column headers
             column_names = ["h", "k", "l"]

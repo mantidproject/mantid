@@ -161,6 +161,15 @@ class SaveReflectionsTest(unittest.TestCase):
         self._assert_file_content_equal(reference_results[1],
                                         os.path.join(self._test_dir, "test_jana_modulated-m2.hkl"))
 
+    def test_save_jana_with_no_lattice_information(self):
+        peaks = CloneWorkspace(self._workspace)
+        peaks.sample().clearOrientedLattice()
+        file_name = os.path.join(self._test_dir, "test_jana_no_lattice.hkl")
+
+        # Act
+        SaveReflections(InputWorkspace=peaks, Filename=file_name,
+                        Format="Jana", SplitFiles=False)
+
     def test_save_GSAS_format(self):
         # Arrange
         reference_result = self._get_reference_result("gsas_format.hkl")
