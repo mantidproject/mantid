@@ -237,7 +237,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         for workspace_name in list_of_output_workspaces_to_plot:
             label = self.get_workspace_legend_label(workspace_name)
             ax = self.get_workspace_plot_axis(workspace_name)
-            fit_function = workspace_name.rsplit(';')[6]
+            fit_function = current_fit.fit_function_name
             # add fit workspace to tracked workspaces in model
             self._model.add_workspace_to_plotted_fit_workspaces(workspace_name)
             # plot fit and diff workspaces
