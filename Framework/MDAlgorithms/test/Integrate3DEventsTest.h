@@ -111,7 +111,7 @@ public:
       auto shape = integrator.ellipseIntegrateEvents(
           E1Vec, peak_q_list[i].second, specify_size, peak_radius,
           back_inner_radius, back_outer_radius, new_sigma, inti, sigi);
-      TS_ASSERT_DELTA(inti, 2*inti_all[i], 0.1);
+      TS_ASSERT_DELTA(inti, 2 * inti_all[i], 0.1);
       TS_ASSERT_DELTA(sigi, sigi_all[i], 0.01);
 
       auto ellipsoid_shape = boost::dynamic_pointer_cast<
@@ -127,7 +127,7 @@ public:
       integrator.ellipseIntegrateEvents(
           E1Vec, peak_q_list[i].second, specify_size, peak_radius,
           back_inner_radius, back_outer_radius, new_sigma, inti, sigi);
-      TS_ASSERT_DELTA(inti, 2*inti_some[i], 0.1);
+      TS_ASSERT_DELTA(inti, 2 * inti_some[i], 0.1);
       TS_ASSERT_DELTA(sigi, sigi_some[i], 0.01);
     }
   }
@@ -541,9 +541,7 @@ private:
       for (double j = lower; j < upper; j += step) {
         for (double k = lower; k < upper; k += step) {
           double cts = counts + d(gen);
-          event_Qs.emplace_back(
-              std::make_pair(cts, cts),
-              V3D(i, j, k)); // is it right to add 1. error here?
+          event_Qs.emplace_back(std::make_pair(cts, cts), V3D(i, j, k));
         }
       }
     }
