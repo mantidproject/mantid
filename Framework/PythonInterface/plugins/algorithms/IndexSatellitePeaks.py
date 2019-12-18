@@ -99,14 +99,15 @@ class IndexSatellitePeaks(PythonAlgorithm):
             distance, index = peak_map.query(q, k=1)
             hklm[i, 3:] = indices[index]
 
-        indexed = self.create_indexed_peaksworkspace(satellites, hklm)
+        indexed = self.create_indexed_peaksworkspace(satellites, qs, hklm)
         self.setProperty("OutputWorkspace", indexed)
 
-    def create_indexed_peaksworkspace(self, fractional_peaks, hklm):
+    def create_indexed_peaksworkspace(self, fractional_peaks, qs, hklm):
         """Create a PeaksWorkspace that contains indexed peak data.
 
         :param fractional_peaks: the peaks workspace containing peaks with
             fractional HKL values.
+        :param qs: The set of modulation vectors determined
         :param hklm: the new higher dimensional miller indices to add.
         :returns: a peaks workspace with the indexed peak data
         """
@@ -114,6 +115,14 @@ class IndexSatellitePeaks(PythonAlgorithm):
         hklm = np.pad(hklm, pad_width=(0, 6 - hklm.shape[1]), mode='constant',
                       constant_values=0)
         indexed = api.CloneWorkspace(fractional_peaks, StoreInADS=False)
+        # save modulation vectors. ensure qs has 3 rows
+        qs = np.pad(qs, pad_width=((0, 3 - qs.shape[0]), (0, 0)), mode='constant',
+                    constant_values=0)
+        lattice = fractional_peaks.sample().getOrientedLattice()
+        lattice.setModVec1(V3D(*qs[0]))
+        lattice.setModVec2(V3D(*qs[1]))
+        lattice.setModVec3(V3D(*qs[2]))
+        # save indices
         for row, peak in enumerate(indexed):
             row_indices = hklm[row]
             peak.setHKL(*row_indices[:3])
