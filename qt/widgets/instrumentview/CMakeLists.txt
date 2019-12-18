@@ -219,7 +219,7 @@ mtd_add_qt_library(TARGET_NAME MantidQtWidgetsInstrumentView
                      Qt5::OpenGL
                    MTD_QT_LINK_LIBS
                      MantidQtWidgetsCommon
-					 MantidQtWidgetsPlotting
+                     MantidQtWidgetsPlotting
                      MantidQtWidgetsMplCpp
                    INSTALL_DIR
                      ${WORKBENCH_LIB_DIR}
