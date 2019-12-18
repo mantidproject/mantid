@@ -116,7 +116,7 @@ class GroupingTableView(QtWidgets.QWidget):
 
     def set_up_table(self):
         self.grouping_table.setColumnCount(4)
-        self.grouping_table.setHorizontalHeaderLabels(["Group Name", "Analyse", "Detector IDs", "N Detectors"])
+        self.grouping_table.setHorizontalHeaderLabels(["Group Name", "Analyse (plot/fit)", "Detector IDs", "N Detectors"])
         header = self.grouping_table.horizontalHeader()
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)

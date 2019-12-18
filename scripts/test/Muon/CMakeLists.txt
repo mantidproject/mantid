@@ -13,6 +13,7 @@ set ( TEST_PY_FILES
    fitting_context_test.py
    home_instrument_widget_test.py
    plotting_widget_test.py
+   plotting_widget_tiled_test.py
    plotting_widget_freq_test.py
    plotting_widget_model_test.py
    home_runinfo_presenter_test.py
@@ -90,6 +91,7 @@ set ( TEST_PY_FILES_QT4
    fitting_context_test.py
    home_instrument_widget_test.py
    plotting_widget_test.py
+   plotting_widget_tiled_test.py
    plotting_widget_freq_test.py
    home_runinfo_presenter_test.py
    list_selector/list_selector_view_test.py

@@ -197,6 +197,9 @@ class PlotWidgetView(QtWidgets.QWidget):
     def get_fig(self):
         return self.fig
 
+    def get_axes(self):
+        return self.fig.axes
+
     def set_fig_titles(self, titles):
         for i, title in enumerate(titles):
             self.fig.axes[i].set_title(title)

@@ -15,20 +15,11 @@ legend_text_size = 7
 
 class PlotWidgetModel(object):
 
-    @staticmethod
-    def do_single_plot(ax, workspaces, errors, nums, kw, plot_kwargs):
-        plot_fn = ax.errorbar if errors else ax.plot
-        for ws in workspaces:
-            for num in nums:
-                plot_kwargs[kw] = num
-                plot_fn(ws, **plot_kwargs)
-
     def __init__(self):
         self._plotted_workspaces = []
         self._plotted_workspaces_inverse_binning = {}
         self._plotted_fit_workspaces = []
         self.tiled_plot_positions = {}
-        self.plotted_group = ''
         self._number_of_axes = 1
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -108,39 +99,29 @@ class PlotWidgetModel(object):
     # ------------------------------------------------------------------------------------------------------------------
     # Plotting
     # ------------------------------------------------------------------------------------------------------------------
+    def plot_workspace_list(self, ax, workspace_names, workspace_indicies, labels):
+        pass
 
-    def plot_workspace(self, workspace, wksp_indices, ax, errors, plot_kwargs):
+    def add_workspace_to_plot(self, ax, workspace_name, workspace_indices, errors, plot_kwargs):
         """
-            Plot workspace
-            :param workspace: Workspace to plot
-            :param ax: Axis to plot the workspace on
-            :param wksp_indices: Indices to plot
-            :param errors: Whether to plot errors ( true or false)
-            :param plot_kwargs: Keywords to the mantid axis plotting
-            :return:
-            """
-        kw, nums = 'wkspIndex', wksp_indices
-        self.do_single_plot(ax, workspace, errors, nums, kw, plot_kwargs)
-        ax.legend(prop=dict(size=legend_text_size))
-
-    def add_workspace_to_plot(self, ax, workspace_name, workspace_index, label):
-        """
-            Adds a plot line to the specified subplot
+            Adds a plot line to the specified axis
             :param ax: Axis to plot the workspace on
             :param workspace_name: Name of workspace to get plot data from
-            :param workspace_index: workspace index to plot from workspace
-            :param label: Legend label for workspace, if none use default generated label
+            :param workspace_indices: workspace indices to plot from workspace
+            :param errors: Plotting workspace errors
+            :param plot_kwargs, arguments to Mantid axis plotting
             :return:
             """
-        # check workspace exists
+        # check workspace exists -
+        # retrieveWorkspaces expects a list of workspace names
         try:
             workspaces = AnalysisDataService.Instance().retrieveWorkspaces([workspace_name], unrollGroups=True)
         except RuntimeError:
             return
 
-        self.plot_workspace(workspaces, [workspace_index], ax, False,
-                            plot_kwargs={'distribution': True, 'zorder': 4,
-                                         'autoscale_on_update': False, 'label': label})
+        self._do_single_plot(ax, workspaces, workspace_indices, errors,
+                             plot_kwargs)
+
         self._update_legend(ax)
 
     def remove_workspace_from_plot(self, workspace_name, axes):
@@ -183,6 +164,13 @@ class PlotWidgetModel(object):
         self.plotted_fit_workspaces = [item for item in self.plotted_fit_workspaces if item != workspace_name]
         if workspace_name in self.plotted_workspaces_inverse_binning:
             self.plotted_workspaces_inverse_binning.pop(workspace_name)
+
+    def _do_single_plot(self, ax, workspaces, indices, errors, plot_kwargs):
+        plot_fn = ax.errorbar if errors else ax.plot
+        for ws in workspaces:
+            for index in indices:
+                plot_kwargs['wkspIndex'] = index
+                plot_fn(ws, **plot_kwargs)
 
     def replace_workspace_plot(self, workspace_name, axis):
         """

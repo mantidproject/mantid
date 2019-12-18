@@ -19,7 +19,6 @@ from Muon.GUI.Common.test_helpers.context_setup import setup_context
 class PlottingWidgetPresenterFreqTest(unittest.TestCase):
     def setUp(self):
         self.context = setup_context(True)
-        self.plotting_window_model = mock.MagicMock()
         self.view = mock.MagicMock()
         self.model = mock.MagicMock()
         self.workspace_list = ['MUSR62260; Group; bottom; Asymmetry; FD',
@@ -38,15 +37,17 @@ class PlottingWidgetPresenterFreqTest(unittest.TestCase):
         self.presenter.get_plot_title = mock.MagicMock(return_value='MUSR62260-62261 bottom')
         self.presenter.get_workspace_legend_label = mock.MagicMock(return_value='Label')
         self.presenter.get_workspace_plot_axis = mock.MagicMock()
+        plot_kwargs = {'distribution': True, 'autoscale_on_update': False,
+                       'label': 'Label'}
 
         self.presenter.handle_use_raw_workspaces_changed()
         self.model.add_workspace_to_plot.assert_any_call(self.presenter.get_workspace_plot_axis(),
-                                                         self.workspace_list[0],
-                                                         0, 'Label')
+                                                         self.workspace_list[0], [0], errors=True,
+                                                         plot_kwargs=plot_kwargs)
 
         self.model.add_workspace_to_plot.assert_any_call(self.presenter.get_workspace_plot_axis(),
-                                                         self.workspace_list[1],
-                                                         0, 'Label')
+                                                         self.workspace_list[1], [0], errors=True,
+                                                         plot_kwargs=plot_kwargs)
 
     def test_plot_type_changed(self):
         self.view.get_selected.return_value = "Asymmetry"

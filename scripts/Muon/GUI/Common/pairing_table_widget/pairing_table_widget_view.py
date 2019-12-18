@@ -90,11 +90,11 @@ class PairingTableView(QtWidgets.QWidget):
 
     def set_up_table(self):
         self.pairing_table.setColumnCount(6)
-        self.pairing_table.setHorizontalHeaderLabels(["Pair Name", "Analyse", "Group 1", " Group 2",
+        self.pairing_table.setHorizontalHeaderLabels(["Pair Name", "Analyse (plot/fit)", "Group 1", " Group 2",
                                                       "Alpha", "Guess Alpha"])
         header = self.pairing_table.horizontalHeader()
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeToContents)
         header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(4, QtWidgets.QHeaderView.ResizeToContents)
