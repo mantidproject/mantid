@@ -45,7 +45,8 @@ using Mantid::Kernel::V3D;
  *                       correction should be used.
  */
 Integrate3DEvents::Integrate3DEvents(
-    const std::vector<std::pair<std::pair<double, double>, V3D>> &peak_q_list,
+    const std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>>
+        &peak_q_list,
     Kernel::DblMatrix const &UBinv, double radius,
     const bool useOnePercentBackgroundCorrection)
     : m_UBinv(UBinv), m_radius(radius), maxOrder(0), crossterm(0),
@@ -80,7 +81,8 @@ Integrate3DEvents::Integrate3DEvents(
  *                       correction should be used.
  */
 Integrate3DEvents::Integrate3DEvents(
-    const std::vector<std::pair<std::pair<double, double>, V3D>> &peak_q_list,
+    const std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>>
+        &peak_q_list,
     std::vector<V3D> const &hkl_list, std::vector<V3D> const &mnp_list,
     Kernel::DblMatrix const &UBinv, Kernel::DblMatrix const &ModHKL,
     double radius_m, double radius_s, int MaxO, const bool CrossT,
@@ -1123,7 +1125,8 @@ void Integrate3DEvents::addModEvent(
  */
 PeakShapeEllipsoid_const_sptr Integrate3DEvents::ellipseIntegrateEvents(
     std::vector<V3D> E1Vec, V3D const &peak_q,
-    std::vector<std::pair<std::pair<double, double>, V3D>> const &ev_list,
+    std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>> const
+        &ev_list,
     std::vector<V3D> const &directions, std::vector<double> const &sigmas,
     bool specify_size, double peak_radius, double back_inner_radius,
     double back_outer_radius, std::vector<double> &axes_radii, double &inti,
