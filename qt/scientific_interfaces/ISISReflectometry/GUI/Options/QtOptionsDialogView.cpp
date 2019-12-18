@@ -109,7 +109,7 @@ void QtOptionsDialogView::setOptions(std::map<std::string, bool> &boolOptions,
   }
 }
 
-void QtOptionsDialogView::subscribe(OptionsDialogSubscriber *notifyee) {
+void QtOptionsDialogView::subscribe(OptionsDialogViewSubscriber *notifyee) {
   m_notifyee = notifyee;
   notifyLoadOptions();
 }

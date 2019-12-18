@@ -9,6 +9,7 @@ set(OPTIONS_SRC_FILES
 # find it.
 set(OPTIONS_INC_FILES
     IOptionsDialogView.h
+    IOptionsDialogPresenter.h
     QtOptionsDialogView.h
     OptionsDialogPresenter.h
     OptionsDialogModel.h

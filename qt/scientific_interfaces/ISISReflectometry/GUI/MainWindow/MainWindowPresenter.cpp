@@ -41,22 +41,22 @@ Mantid::Kernel::Logger g_log("Reflectometry GUI");
  * @param messageHandler :: Interface to a class that displays messages to
  * the user
  * @param slitCalculator :: Interface to the Slit Calculator dialog
- * @param optionsDialogView :: Interface to the Options dialog view
+ * @param optionsDialogPresenter :: Interface to the Options dialog presenter
  * @param batchPresenterFactory :: [input] A factory to create the batches
  * we will manage
  */
 MainWindowPresenter::MainWindowPresenter(
     IMainWindowView *view, IMessageHandler *messageHandler,
     std::unique_ptr<ISlitCalculator> slitCalculator,
-    IOptionsDialogView *optionsDialogView,
+    std::unique_ptr<IOptionsDialogPresenter> optionsDialogPresenter,
     std::unique_ptr<IBatchPresenterFactory> batchPresenterFactory)
     : m_view(view), m_messageHandler(messageHandler), m_instrument(),
       m_slitCalculator(std::move(slitCalculator)),
-      m_optionsDialogPresenter(
-          new OptionsDialogPresenter(optionsDialogView)),
+      m_optionsDialogPresenter(std::move(optionsDialogPresenter)),
       m_batchPresenterFactory(std::move(batchPresenterFactory)) {
+  m_optionsDialogPresenter->subscribe(this);
   m_optionsDialogPresenter->notifyInitOptions();
-  m_optionsDialogPresenter->notifySubscribe();
+  m_optionsDialogPresenter->notifySubscribeView();
   view->subscribe(this);
   for (auto *batchView : m_view->batches())
     addNewBatch(batchView);
@@ -187,6 +187,7 @@ bool MainWindowPresenter::isCloseEventPrevented() {
            isAnyBatchUnsaved()) {
     return !m_messageHandler->askUserDiscardChanges();
   }
+  return false;
 }
 
 bool MainWindowPresenter::isCloseBatchPrevented(int batchIndex) const {
@@ -262,7 +263,7 @@ void MainWindowPresenter::setUnsavedFlag(bool isUnsaved) {
   m_isUnsaved = isUnsaved;
 }
 
-void MainWindowPresenter::notifyOptionsChanged() const {
+void MainWindowPresenter::optionsChanged() const {
   // Set or reset the rounding precision of all batches accordingly
   if (isRoundChecked()) {
     for (auto &batchPresenter : m_batchPresenters)

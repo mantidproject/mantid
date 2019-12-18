@@ -19,24 +19,20 @@ namespace ISISReflectometry {
  */
 OptionsDialogPresenter::OptionsDialogPresenter(
     IOptionsDialogView *view)
-    : m_view(view), m_mainPresenter(),
+    : m_view(view), m_notifyee(),
       m_model(OptionsDialogModel()){}
-
-/** Accept a main presenter
- * @param mainPresenter :: [input] A main presenter
- */
-void OptionsDialogPresenter::acceptMainPresenter(
-    IMainWindowPresenter *mainPresenter) {
-  m_mainPresenter = mainPresenter;
-}
 
 /** Allow options to be initialised once the main presenter
     is constructed (necessary due to rounding impl)
  */
 void OptionsDialogPresenter::notifyInitOptions() { initOptions(); }
 
+void OptionsDialogPresenter::notifyOptionsChanged() {
+  m_notifyee->optionsChanged();
+}
+
 /** Subscribe the view to this presenter */
-void OptionsDialogPresenter::notifySubscribe() { m_view->subscribe(this); }
+void OptionsDialogPresenter::notifySubscribeView() { m_view->subscribe(this); }
 
 /** Load options from disk if possible, or set to defaults */
 void OptionsDialogPresenter::initOptions() {
@@ -59,14 +55,14 @@ void OptionsDialogPresenter::notifyApplyDefaultOptions(
 void OptionsDialogPresenter::loadOptions() {
   m_model.loadSettings(m_boolOptions, m_intOptions);
   m_view->setOptions(m_boolOptions, m_intOptions);
-  m_mainPresenter->notifyOptionsChanged();
+  notifyOptionsChanged();
 }
 
 /** Saves the options selected in the view */
 void OptionsDialogPresenter::saveOptions() {
   m_view->getOptions(m_boolOptions, m_intOptions);
   m_model.saveSettings(m_boolOptions, m_intOptions);
-  m_mainPresenter->notifyOptionsChanged();
+  notifyOptionsChanged();
 }
 
 /* Get a bool option state */
@@ -80,6 +76,11 @@ int& OptionsDialogPresenter::getIntOption(std::string &optionName) {
 }
 
 void OptionsDialogPresenter::showView() { m_view->show(); }
+
+void OptionsDialogPresenter::subscribe(
+    OptionsDialogMainWindowSubscriber *notifyee) {
+  m_notifyee = notifyee;
+}
 
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

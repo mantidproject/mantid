@@ -31,7 +31,7 @@ public:
   void setOptions(std::map<std::string, bool> &boolOptions,
                   std::map<std::string, int> &intOptions) override;
   void show() override;
-  void subscribe(OptionsDialogSubscriber *notifyee) override;
+  void subscribe(OptionsDialogViewSubscriber *notifyee) override;
 
 public slots:
   void notifyLoadOptions();
@@ -45,7 +45,7 @@ private:
 private:
   Ui::QtOptionsDialogView m_ui;
   // subscribe updates from view
-  OptionsDialogSubscriber *m_notifyee;
+  OptionsDialogViewSubscriber *m_notifyee;
   // maps option names to widget names
   std::map<QString, QString> m_bindings;
 };

@@ -11,6 +11,7 @@
 #include "GUI/Common/Decoder.h"
 #include "GUI/Common/Encoder.h"
 #include "GUI/Common/Plotter.h"
+#include "GUI/Options/OptionsDialogPresenter.h"
 #include "GUI/Options/QtOptionsDialogView.h"
 #include "MantidKernel/UsageService.h"
 #include "MantidQtWidgets/Common/SlitCalculator.h"
@@ -105,9 +106,11 @@ void QtMainWindowView::initLayout() {
   // Create the presenter
   auto slitCalculator = std::make_unique<SlitCalculator>(this);
   m_optionsDialogView = std::make_unique<QtOptionsDialogView>(this);
-  QtOptionsDialogView *optionsDialogView = m_optionsDialogView.get();
+  auto optionsDialogPresenter =
+      std::make_unique<OptionsDialogPresenter>(m_optionsDialogView.get());
   m_presenter = std::make_unique<MainWindowPresenter>(
-      this, messageHandler, std::move(slitCalculator), optionsDialogView,
+      this, messageHandler, std::move(slitCalculator),
+      std::move(optionsDialogPresenter),
       std::move(makeBatchPresenter));
 
   m_notifyee->notifyNewBatchRequested();

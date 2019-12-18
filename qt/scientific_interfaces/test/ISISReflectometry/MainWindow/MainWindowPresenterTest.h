@@ -13,9 +13,10 @@
 #include "../ReflMockObjects.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidGeometry/Instrument_fwd.h"
-#include "test/ISISReflectometry/Options/MockOptionsDialogView.h"
 #include "MantidQtWidgets/Common/MockSlitCalculator.h"
 #include "MockMainWindowView.h"
+#include "test/ISISReflectometry/Options/MockOptionsDialogView.h"
+#include "test/ISISReflectometry/Options/MockOptionsDialogPresenter.h"
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -26,12 +27,12 @@ using namespace MantidQt::CustomInterfaces::ISISReflectometry::
     ModelCreationHelper;
 using MantidQt::API::IConfiguredAlgorithm_sptr;
 using MantidQt::MantidWidgets::ISlitCalculator;
+using testing::_;
 using testing::AtLeast;
 using testing::Mock;
 using testing::NiceMock;
 using testing::Return;
 using testing::ReturnRef;
-using testing::_;
 
 class MainWindowPresenterTest : public CxxTest::TestSuite {
 public:
@@ -158,7 +159,7 @@ public:
 
   void testShowOptionsOpensDialog() {
     auto presenter = makePresenter();
-    EXPECT_CALL(*m_optionsDialogView, show()).Times(1);
+    EXPECT_CALL(*m_optionsDialogPresenter, showView()).Times(1);
     presenter.notifyShowOptionsRequested();
     verifyAndClear();
   }
@@ -288,7 +289,7 @@ private:
   std::vector<IBatchView *> m_batchViews;
   std::vector<NiceMock<MockBatchPresenter> *> m_batchPresenters;
   NiceMock<MockBatchPresenterFactory> *m_makeBatchPresenter;
-  std::unique_ptr<NiceMock<MockOptionsDialogView>> m_optionsDialogView;
+  std::unique_ptr<NiceMock<MockOptionsDialogPresenter>> m_optionsDialogPresenter;
   NiceMock<MockSlitCalculator> *m_slitCalculator;
 
   class MainWindowPresenterFriend : public MainWindowPresenter {
@@ -298,15 +299,14 @@ private:
     MainWindowPresenterFriend(
         IMainWindowView *view, IMessageHandler *messageHandler,
         std::unique_ptr<ISlitCalculator> slitCalculator,
-        IOptionsDialogView *optionsDialogView,
+        std::unique_ptr<IOptionsDialogPresenter> optionsDialogPresenter,
         std::unique_ptr<IBatchPresenterFactory> makeBatchPresenter)
         : MainWindowPresenter(view, messageHandler, std::move(slitCalculator),
-                              optionsDialogView, std::move(makeBatchPresenter)) {}
+                              std::move(optionsDialogPresenter),
+                              std::move(makeBatchPresenter)) {}
   };
 
   MainWindowPresenterFriend makePresenter() {
-    m_optionsDialogView = std::make_unique<NiceMock<MockOptionsDialogView>>();
-    IOptionsDialogView *optionsDialogView = m_optionsDialogView.get();
     auto slitCalculator = std::make_unique<NiceMock<MockSlitCalculator>>();
     m_slitCalculator = slitCalculator.get();
     auto makeBatchPresenter =
@@ -321,9 +321,11 @@ private:
           .WillByDefault(Return(batchPresenter));
     }
     // Make the presenter
-    auto presenter = MainWindowPresenterFriend(&m_view, &m_messageHandler,
-                                               std::move(slitCalculator), optionsDialogView,
-                                               std::move(makeBatchPresenter));
+    auto optionsDialogPresenter =
+        std::make_unique<NiceMock<MockOptionsDialogPresenter>>();
+    auto presenter = MainWindowPresenterFriend(
+        &m_view, &m_messageHandler, std::move(slitCalculator),
+        std::move(optionsDialogPresenter), std::move(makeBatchPresenter));
     return presenter;
   }
 

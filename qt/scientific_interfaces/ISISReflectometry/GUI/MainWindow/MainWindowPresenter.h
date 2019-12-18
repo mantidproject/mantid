@@ -11,6 +11,7 @@
 #include "GUI/Batch/IBatchPresenter.h"
 #include "IMainWindowPresenter.h"
 #include "IMainWindowView.h"
+#include "GUI/Options/IOptionsDialogPresenter.h"
 #include "MantidGeometry/Instrument.h"
 #include <memory>
 
@@ -25,7 +26,6 @@ class IBatchPresenterFactory;
 class IMainWindowView;
 class IMessageHandler;
 class IOptionsDialogView;
-class OptionsDialogPresenter;
 
 /** @class MainWindowPresenter
 
@@ -34,13 +34,14 @@ functionality defined by the interface IMainWindowPresenter.
 */
 class MANTIDQT_ISISREFLECTOMETRY_DLL MainWindowPresenter
     : public MainWindowSubscriber,
-      public IMainWindowPresenter {
+      public IMainWindowPresenter,
+      public OptionsDialogMainWindowSubscriber {
 public:
   /// Constructor
   MainWindowPresenter(
       IMainWindowView *view, IMessageHandler *messageHandler,
       std::unique_ptr<MantidWidgets::ISlitCalculator> slitCalculator,
-      IOptionsDialogView *optionsDialogView,
+      std::unique_ptr<IOptionsDialogPresenter> optionsDialogPresenter,
       std::unique_ptr<IBatchPresenterFactory> batchPresenterFactory);
   ~MainWindowPresenter();
   MainWindowPresenter(MainWindowPresenter const &) = delete;
@@ -67,7 +68,6 @@ public:
   bool isAnyBatchUnsaved() override;
   bool getUnsavedFlag() const override;
   void setUnsavedFlag(bool isUnsaved) override;
-  void notifyOptionsChanged() const;
   void notifyAnyBatchAutoreductionResumed() override;
   void notifyAnyBatchAutoreductionPaused() override;
   void notifyAnyBatchReductionResumed() override;
@@ -87,6 +87,9 @@ public:
   void notifyShowOptionsRequested() override;
   void notifyShowSlitCalculatorRequested() override;
 
+  // OptionsDialogMainWindowSubscriber overrides
+  void optionsChanged() const override;
+
 protected:
   IMainWindowView *m_view;
   IMessageHandler *m_messageHandler;
@@ -95,7 +98,7 @@ protected:
 
 private:
   std::unique_ptr<MantidWidgets::ISlitCalculator> m_slitCalculator;
-  std::unique_ptr<OptionsDialogPresenter>
+  std::unique_ptr<IOptionsDialogPresenter>
       m_optionsDialogPresenter;
   std::unique_ptr<IBatchPresenterFactory> m_batchPresenterFactory;
   bool m_isUnsaved;
