@@ -13,6 +13,7 @@
 #include <boost/none.hpp>
 #include <boost/optional.hpp>
 #include <boost/python/class.hpp>
+#include <boost/python/iterator.hpp>
 #include <boost/python/manage_new_object.hpp>
 #include <boost/python/return_internal_reference.hpp>
 
@@ -217,13 +218,10 @@ struct IPeaksWorkspaceIterator {
   IPeak *next() {
     ++m_rowIndex;
     if (m_rowIndex >= m_numPeaks) {
-      PyErr_SetString(PyExc_StopIteration, "No more peaks.");
-      boost::python::throw_error_already_set();
+      objects::stop_iteration_error();
     }
     return m_workspace->getPeakPtr(m_rowIndex);
   }
-
-  inline static object passThrough(object const &o) { return o; }
 
 private:
   IPeaksWorkspace *const m_workspace;
@@ -232,7 +230,7 @@ private:
 };
 
 // Create an iterator from the given workspace
-IPeaksWorkspaceIterator iter(IPeaksWorkspace &self) {
+IPeaksWorkspaceIterator makePyIterator(IPeaksWorkspace &self) {
   return IPeaksWorkspaceIterator(&self);
 }
 
@@ -240,9 +238,16 @@ IPeaksWorkspaceIterator iter(IPeaksWorkspace &self) {
 
 void export_IPeaksWorkspaceIterator() {
   class_<IPeaksWorkspaceIterator>("IPeaksWorkspaceIterator", no_init)
-      .def("next", &IPeaksWorkspaceIterator::next,
-           return_value_policy<reference_existing_object>())
-      .def("__iter__", IPeaksWorkspaceIterator::passThrough);
+      .def(
+#if PY_VERSION_HEX >= 0x03000000
+          "__next__"
+#else
+          "next"
+#endif
+          ,
+          &IPeaksWorkspaceIterator::next,
+          return_value_policy<reference_existing_object>())
+      .def("__iter__", objects::identity_function());
 }
 
 void export_IPeaksWorkspace() {
@@ -283,7 +288,7 @@ void export_IPeaksWorkspace() {
            "Sets the value of a given cell. If the row_or_column argument is a "
            "number then it is interpreted as a row otherwise it "
            "is interpreted as a column name.")
-      .def("__iter__", &iter);
+      .def("__iter__", makePyIterator);
   //-------------------------------------------------------------------------------------------------
 
   RegisterWorkspacePtrToPython<IPeaksWorkspace>();
