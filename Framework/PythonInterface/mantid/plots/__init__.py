@@ -866,7 +866,8 @@ class MantidAxes(Axes):
 
             workspace = args[0]
             normalize_by_bin_width, _ = get_normalize_by_bin_width(workspace, self, **kwargs)
-            is_normalized = normalize_by_bin_width or workspace.isDistribution()
+            is_normalized = normalize_by_bin_width or \
+                            (hasattr(workspace, 'isDistribution') and workspace.isDistribution())
             # We return the last mesh so the return type is a single artist like the standard Axes
             artists = self.track_workspace_artist(workspace,
                                                   plotfunctions_func(self, *args, **kwargs),

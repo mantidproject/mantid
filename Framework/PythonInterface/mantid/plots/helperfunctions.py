@@ -17,7 +17,7 @@ from scipy.interpolate import interp1d
 
 import mantid.api
 import mantid.kernel
-from mantid.api import MultipleExperimentInfos
+from mantid.api import MultipleExperimentInfos, MatrixWorkspace
 from mantid.dataobjects import EventWorkspace, MDHistoWorkspace, Workspace2D
 from mantid.plots.utility import MantidAxType
 
@@ -572,7 +572,7 @@ def get_data_uneven_flag(workspace, **kwargs):
 
 
 def check_resample_to_regular_grid(ws, **kwargs):
-    if not isinstance(ws, MDHistoWorkspace):
+    if isinstance(ws, MatrixWorkspace):
         aligned = kwargs.pop('axisaligned', False)
         if not ws.isCommonBins() or aligned:
             return True, kwargs
