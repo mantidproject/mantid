@@ -12,6 +12,7 @@ from matplotlib import gridspec
 import matplotlib.pyplot as plt
 
 from Engineering.gui.engineering_diffraction.tabs.common import vanadium_corrections, path_handling
+from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from mantid.simpleapi import EnggFocus, Load, logger, AnalysisDataService as Ads, SaveNexus, SaveGSS, SaveFocusedXYE
 
 SAMPLE_RUN_WORKSPACE_NAME = "engggui_focusing_input_ws"
@@ -35,10 +36,16 @@ class FocusModel(object):
         curves_workspace = Ads.retrieve(vanadium_corrections.CURVES_WORKSPACE_NAME)
         sample_workspace = self._load_focus_sample_run(sample_path)
         output_workspaces = []
+        full_calib_path = get_setting(path_handling.INTERFACES_SETTINGS_GROUP,
+                                      path_handling.ENGINEERING_PREFIX, "full_calibration")
+        if full_calib_path is not None and path.exists(full_calib_path):
+            full_calib_workspace = self._load_focus_sample_run(full_calib_path)
+        else:
+            full_calib_workspace = None
         for name in banks:
             output_workspace_name = FOCUSED_OUTPUT_WORKSPACE_NAME + str(name)
             self._run_focus(sample_workspace, output_workspace_name, integration_workspace,
-                            curves_workspace, name)
+                            curves_workspace, name, full_calib_workspace)
             output_workspaces.append(output_workspace_name)
             # Save the output to the file system.
             self._save_output(instrument, sample_path, name, output_workspace_name, rb_num)
@@ -47,14 +54,26 @@ class FocusModel(object):
             self._plot_focused_workspaces(output_workspaces)
 
     @staticmethod
-    def _run_focus(input_workspace, output_workspace, vanadium_integration_ws, vanadium_curves_ws,
-                   bank):
+    def _run_focus(input_workspace,
+                   output_workspace,
+                   vanadium_integration_ws,
+                   vanadium_curves_ws,
+                   bank,
+                   full_calib_ws=None):
         try:
-            return EnggFocus(InputWorkspace=input_workspace,
-                             OutputWorkspace=output_workspace,
-                             VanIntegrationWorkspace=vanadium_integration_ws,
-                             VanCurvesWorkspace=vanadium_curves_ws,
-                             Bank=bank)
+            if full_calib_ws is not None:
+                return EnggFocus(InputWorkspace=input_workspace,
+                                 OutputWorkspace=output_workspace,
+                                 VanIntegrationWorkspace=vanadium_integration_ws,
+                                 VanCurvesWorkspace=vanadium_curves_ws,
+                                 Bank=bank,
+                                 DetectorPositions=full_calib_ws)
+            else:
+                return EnggFocus(InputWorkspace=input_workspace,
+                                 OutputWorkspace=output_workspace,
+                                 VanIntegrationWorkspace=vanadium_integration_ws,
+                                 VanCurvesWorkspace=vanadium_curves_ws,
+                                 Bank=bank)
         except RuntimeError as e:
             logger.error(
                 "Error in focusing, Could not run the EnggFocus algorithm successfully for bank " +

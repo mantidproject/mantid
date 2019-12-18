@@ -45,7 +45,7 @@ class FocusModelTest(unittest.TestCase):
         self.assertEqual(len(banks), run_focus.call_count)
         run_focus.assert_called_with("mocked_sample",
                                      model.FOCUSED_OUTPUT_WORKSPACE_NAME + banks[-1], "test_wsp",
-                                     "test_wsp", banks[-1])
+                                     "test_wsp", banks[-1], None)
 
     @patch(file_path + ".Ads")
     @patch(file_path + ".FocusModel._save_output")

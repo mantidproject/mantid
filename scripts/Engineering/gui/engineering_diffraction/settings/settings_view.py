@@ -25,6 +25,9 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
 
         self.finder_fullCalib.setLabelText("Full Calibration")
         self.finder_fullCalib.isForRunFiles(False)
+        # TODO: Once it becomes possible to load the .csv containing the full calibration into mantid,
+        #  this can be used. Until then, this option is hidden from the user.
+        self.finder_fullCalib.hide()
 
     # ===============
     # Slot Connectors
