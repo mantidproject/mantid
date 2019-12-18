@@ -124,7 +124,6 @@ void ConvFunctionModel::checkConvolution(IFunction_sptr fun) {
 
 void ConvFunctionModel::checkComposite(IFunction_sptr fun) {
   bool isFitTypeSet = false;
-  int numberLorentzians = 0;
   for (size_t i = 0; i < fun->nFunctions(); ++i) {
     auto f = fun->getFunction(i);
     auto const name = f->name();
@@ -161,12 +160,12 @@ IFunction_sptr ConvFunctionModel::getFitFunction() const {
 
 void ConvFunctionModel::setQValues(const std::vector<double> &qValues) {
   m_qValues = qValues;
-};
+}
 
-FitType ConvFunctionModel::getFitType() const { return m_fitType; };
+FitType ConvFunctionModel::getFitType() const { return m_fitType; }
 BackgroundType ConvFunctionModel::getBackgroundType() const {
   return m_backgroundType;
-};
+}
 
 bool ConvFunctionModel::hasFunction() const { return m_model.hasFunction(); }
 

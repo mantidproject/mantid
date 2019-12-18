@@ -54,8 +54,8 @@ public:
   void setBackgroundA0(double value) override;
   void setResolution(std::string const &name,
                      TableDatasetIndex const &index) override;
-  void
-  setResolution(const std::vector<std::pair<std::string, int>> &fitResolutions);
+  void setResolution(
+      const std::vector<std::pair<std::string, int>> &fitResolutions) override;
   void addDeltaFunction();
   void removeDeltaFunction();
   void setQValues(const std::vector<double> &qValues) override;

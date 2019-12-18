@@ -218,20 +218,6 @@ MatrixWorkspace_sptr appendWorkspace(MatrixWorkspace_sptr leftWS,
   return getADSMatrixWorkspace(outputName);
 }
 
-MatrixWorkspace_sptr extractSingleSpectrum(const std::string &inputWS,
-                                           const std::string &outputWS,
-                                           int index) {
-  auto extractAlg =
-      AlgorithmManager::Instance().create("ExtractSingleSpectrum");
-  extractAlg->setLogging(false);
-  extractAlg->initialize();
-  extractAlg->setProperty("InputWorkspace", inputWS);
-  extractAlg->setProperty("WorkspaceIndex", index);
-  extractAlg->setProperty("OutputWorkspace", outputWS);
-  extractAlg->execute();
-  return getADSMatrixWorkspace(outputWS);
-}
-
 void renameWorkspace(std::string const &name, std::string const &newName) {
   auto renamer = AlgorithmManager::Instance().create("RenameWorkspace");
   renamer->setLogging(false);

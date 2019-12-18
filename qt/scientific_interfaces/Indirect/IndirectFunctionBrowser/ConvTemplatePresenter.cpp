@@ -142,7 +142,7 @@ void ConvTemplatePresenter::setDatasetNames(const QStringList &names) {
 void ConvTemplatePresenter::setBackgroundA0(double value) {
   m_model.setBackgroundA0(value);
   updateViewParameters();
-};
+}
 
 void ConvTemplatePresenter::setQValues(const std::vector<double> &qValues) {
   m_model.setQValues(qValues);
