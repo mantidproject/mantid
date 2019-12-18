@@ -17,9 +17,9 @@ def set_setting(group, prefix, setting_name, value):
     settings.endGroup()
 
 
-def get_setting(group, prefix, setting_name):
+def get_setting(group, prefix, setting_name, return_type=str):
     settings = QSettings()
     settings.beginGroup(group)
-    setting = settings.value(prefix + setting_name)
+    setting = settings.value(prefix + setting_name, type=return_type)
     settings.endGroup()
     return setting

@@ -37,7 +37,7 @@ def fetch_correction_workspaces(vanadium_path, instrument, rb_num=""):
     vanadium_number = path_handling.get_run_number_from_path(vanadium_path, instrument)
     integ_path, curves_path = _generate_saved_workspace_file_paths(vanadium_number)
     force_recalc = get_setting(path_handling.INTERFACES_SETTINGS_GROUP,
-                               path_handling.ENGINEERING_PREFIX, "recalc_vanadium")
+                               path_handling.ENGINEERING_PREFIX, "recalc_vanadium", return_type=bool)
     if path.exists(curves_path) and path.exists(integ_path) and not force_recalc:  # Check if the cached files exist.
         try:
             integ_workspace = Load(Filename=integ_path, OutputWorkspace=INTEGRATED_WORKSPACE_NAME)

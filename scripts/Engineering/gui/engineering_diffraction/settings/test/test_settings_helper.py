@@ -40,7 +40,7 @@ class SettingsHelperTest(unittest.TestCase):
 
         settings = QSettings()
         settings.beginGroup("CustomInterfaces")
-        returned = settings.value("EngineeringDiffraction2/" + "something")
+        returned = settings.value("EngineeringDiffraction2/" + "something", type=bool)
         settings.endGroup()
         self.assertEqual(returned, False)
 
@@ -49,7 +49,7 @@ class SettingsHelperTest(unittest.TestCase):
 
         settings = QSettings()
         settings.beginGroup(GROUP)
-        returned = settings.value(PREFIX + "something")
+        returned = settings.value(PREFIX + "something", type=int)
         settings.endGroup()
         self.assertEqual(returned, 10)
 
@@ -58,6 +58,7 @@ class SettingsHelperTest(unittest.TestCase):
         settings.beginGroup(GROUP)
         settings.setValue(PREFIX + "something", "value")
         settings.endGroup()
+
         self.assertEqual(get_setting(GROUP, PREFIX, "something"), "value")
 
     def test_get_setting_with_bool(self):
@@ -65,17 +66,19 @@ class SettingsHelperTest(unittest.TestCase):
         settings.beginGroup(GROUP)
         settings.setValue(PREFIX + "something", False)
         settings.endGroup()
-        self.assertEqual(get_setting(GROUP, PREFIX, "something"), False)
+
+        self.assertEqual(get_setting(GROUP, PREFIX, "something", return_type=bool), False)
 
     def test_get_setting_with_int(self):
         settings = QSettings()
         settings.beginGroup(GROUP)
-        settings.setValue(PREFIX + "something", "value")
+        settings.setValue(PREFIX + "something", 10)
         settings.endGroup()
-        self.assertEqual(get_setting(GROUP, PREFIX, "something"), "value")
+
+        self.assertEqual(get_setting(GROUP, PREFIX, "something", return_type=int), 10)
 
     def test_get_setting_with_invalid(self):
-        self.assertEqual(get_setting(GROUP, PREFIX, "something"), None)
+        self.assertEqual(get_setting(GROUP, PREFIX, "something"), "")
 
 
 if __name__ == '__main__':

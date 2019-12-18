@@ -12,10 +12,10 @@ from Engineering.gui.engineering_diffraction.tabs.common import path_handling
 
 
 class SettingsModel(object):
-    def get_settings_dict(self, keys):
+    def get_settings_dict(self, names_and_types):
         settings = {}
-        for setting_name in keys:
-            settings[setting_name] = self.get_setting(setting_name)
+        for setting_name in names_and_types.keys():
+            settings[setting_name] = self.get_setting(setting_name, return_type=names_and_types[setting_name])
         return settings
 
     def set_settings_dict(self, settings):
@@ -23,8 +23,9 @@ class SettingsModel(object):
             self.set_setting(key, settings[key])
 
     @staticmethod
-    def get_setting(name):
-        return get_setting(path_handling.INTERFACES_SETTINGS_GROUP, path_handling.ENGINEERING_PREFIX, name)
+    def get_setting(name, return_type=str):
+        return get_setting(path_handling.INTERFACES_SETTINGS_GROUP, path_handling.ENGINEERING_PREFIX, name,
+                           return_type=return_type)
 
     @staticmethod
     def set_setting(name, value):
