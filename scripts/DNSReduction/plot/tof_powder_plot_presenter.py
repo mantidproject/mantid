@@ -32,7 +32,6 @@ class DNSTofPowderPlot_presenter(DNSObserver):
     def plot(self):
         try:
             if mtd['data1_sqw'].id() == 'WorkspaceGroup':
-                ## I have no idear why sometimes you get a group
                 self.view.set_plot(mtd['data1_sqw'].getItem(0))
             else:
                 self.view.set_plot(mtd['data1_sqw'])
@@ -41,8 +40,8 @@ class DNSTofPowderPlot_presenter(DNSObserver):
             self.raise_error('No processed data found, generate script first.')
 
     def tab_got_focus(self):
-        if self.param_dict['tof_powder_script_generator'][
-                'script_number'] != self.plotted_script_number:
+        if (self.param_dict['tof_powder_script_generator']['script_number']
+                != self.plotted_script_number):
             self.plot()
             self.plotted_script_number = self.param_dict[
                 'tof_powder_script_generator']['script_number']

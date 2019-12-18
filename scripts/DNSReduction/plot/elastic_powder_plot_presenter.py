@@ -29,55 +29,61 @@ class DNSElasticPowderPlot_presenter(DNSObserver):
         self.plotted_script_number = 0
         self.script_plotted = False
 
-    def plot(self, checked_workspaces):
-        if self.param_dict['elastic_powder_options']['norm_monitor']:
-            norm = 'normed to monitor'
-        else:
-            norm = 'Counts/s'
-        self.view.create_plot(norm=norm)
-        xaxis = self.view.get_xaxis()
+    def get_maximum_intensity_of_workspaces(self, workspaces):
+        workspaces = [ws for ws in workspaces if ws != 'simulation']
+        return max([max(mtd['mat_{}'.format(ws)].extractY()[0])
+                    for ws in workspaces])
+
+    def get_x_y_yerr(self, ws, xaxis, max_int):
         wavelength = self.param_dict['elastic_powder_options']["wavelength"]
-        max_int = 0
+        x = mtd['mat_{}'.format(ws)].extractX()[0] * 2
+        x = (abs(x[1] - x[0])/2 + x)[0:-1]
+        y = mtd['mat_{}'.format(ws)].extractY()[0]
+        yerr = mtd['mat_{}'.format(ws)].extractE()[0]
+        if ws == 'simulation':
+            x = x / 2.0
+            y = y / max(y) * max_int
+        if xaxis == 'd':
+            x = wavelength / (2 * np.sin(np.deg2rad(x / 2.0)))
+        elif xaxis == 'q':
+            x = np.pi * 4 * np.sin(np.deg2rad(x / 2.0)) / wavelength
+        return [x, y, yerr]
+
+    def get_y_norm(self):
+        if self.param_dict['elastic_powder_options']['norm_monitor']:
+            return 'normed to monitor'
+        return 'Counts/s'
+
+    def plot(self, checked_workspaces):
+        xaxis = self.view.get_xaxis()
+        self.view.create_plot(norm=self.get_y_norm())
+        max_int = self.get_maximum_intensity_of_workspaces(checked_workspaces)
         for ws in checked_workspaces:
-            if ws != 'simulation':
-                maxy = max(mtd['mat_{}'.format(ws)].extractY()[0])
-                if maxy > max_int:
-                    max_int = maxy
-        for ws in checked_workspaces:
-            x = mtd['mat_{}'.format(ws)].extractX()[0] * 2
-            x = (abs(x[1] - x[0])/2 + x)[0:-1]
-            y = mtd['mat_{}'.format(ws)].extractY()[0]
-            yerr = mtd['mat_{}'.format(ws)].extractE()[0]
-            if ws == 'simulation':
-                x = x / 2.0
-                y = y / max(y) * max_int
-            if xaxis == 'd':
-                x = wavelength / (2 * np.sin(np.deg2rad(x / 2.0)))
-            elif xaxis == 'q':
-                x = np.pi * 4 * np.sin(np.deg2rad(x / 2.0)) / wavelength
+            x, y, yerr = self.get_x_y_yerr(ws, xaxis, max_int)
             self.view.single_plot(x,
                                   y,
                                   yerr,
                                   label='{}'.format(ws).strip(' _'))
         self.view.finish_plot(xaxis)
 
+    def datalist_updated(self, workspaces):
+        compare = ['mat_{}'.format(x) for x in self.view.get_datalist()]
+        return (self.param_dict['elastic_powder_script_generator']['script_number']
+                != self.plotted_script_number
+                or workspaces != compare) # check is nesesary for simulation
+
+    def auto_select_curve(self):
+        if self.param_dict['elastic_powder_options']["separation"]:
+            self.view.check_seperated()
+        else:
+            self.view.check_first()
+
     def tab_got_focus(self):
-#        workspaces = [
-#            workspace for workspace in mtd.getObjectNames()
-#            if (mtd[workspace].id() == 'Workspace2D'
-#                and workspace.startswith('mat_'))
-#        ]
         workspaces = sorted(self.param_dict['elastic_powder'
                                             '_script_generator']['plotlist'])
-        compare = ['mat_{}'.format(x) for x in self.view.get_datalist()]
-        if (self.param_dict['elastic_powder_script_generator']['script_number']
-                != self.plotted_script_number
-                or workspaces != compare):
+        if self.datalist_updated(workspaces):
             self.view.set_datalist([x[4:] for x in workspaces])
-            if self.param_dict['elastic_powder_options']["separation"]:
-                self.view.check_seperated()
-            else:
-                self.view.check_first()
+            self.auto_select_curve()
             self.plotted_script_number = self.param_dict[
                 'elastic_powder_script_generator']['script_number']
 

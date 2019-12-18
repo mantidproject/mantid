@@ -33,7 +33,7 @@ class DNSXMLDump_presenter(DNSObserver):
         return options
 
     def save_as_xml(self):
-        """Save of DNS GUI options to xml file """
+        """Save of DNS GUI options to xml file asking for name"""
         xml_file_path = self.view.get_save_filename()
         if xml_file_path:
             options = self.param_dict

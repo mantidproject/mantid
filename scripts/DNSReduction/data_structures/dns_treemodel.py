@@ -101,7 +101,22 @@ class DNSTreeModel(QAbstractItemModel):
         if 'empty' in sample or 'leer' in sample:
             return 'empty'
         return sample
+
 ### complex getting
+
+    def get_scan_rows(self):
+        return [row for row in self.scanRange()
+                if 'scan' in self.scanCommandFromRow(row)]
+
+    def is_scan_complete(self, row):
+        return (self.scanFromRow(row).childCount()
+                >= self.scanExpectedPointsFromRow(row))
+
+    def text_in_scan(self, row, text):
+        return text in  self.scanCommandFromRow(row)
+
+    def get_last_row(self):
+        return self.numberOfScans() - 1
 
     def data(self, index, role):
         """
@@ -196,7 +211,6 @@ class DNSTreeModel(QAbstractItemModel):
         mylist = []
         for row in range(self.numberOfScans()):
             scan = self.scanFromRow(row)
-            #txt += scan.data(0) + "\n"
             for crow in range(scan.childCount()):
                 child = scan.child(crow)
                 mylist.append(child.data[9])
@@ -251,6 +265,10 @@ class DNSTreeModel(QAbstractItemModel):
             self.dataChanged.emit(parentindex, parentindex)
         return
 
+    def uncheck_all_scans(self):
+        for row in self.scanRange():
+            self.setCheckedScan(row, 0)
+
     def clearScans(self):
         """
         Removing of all scans from model
@@ -260,38 +278,47 @@ class DNSTreeModel(QAbstractItemModel):
         self.endRemoveRows()
         self.lastscan_number = None
 
+    def new_scan_check(self, dnsfile):
+        ## seperates scans and measurements with different tof-channels
+        ## or samplenames
+        return (dnsfile.scannumber != self.lastscan_number
+                or self.last_tof != dnsfile.tofchannels
+                or self.last_tof_time != dnsfile.channelwidth
+                or self.last_sample != dnsfile.sample)
+
+    def get_scantext(self, dnsfile):
+        return ['{} {} {} #{}'.format(dnsfile.scannumber, dnsfile.sample,
+                                      dnsfile.scancommand,
+                                      dnsfile.scanpoints)] + 9*['']
+
+    def get_data_from_dnsfile(self, dnsfile):
+        return [dnsfile.filenumber, dnsfile.det_rot, dnsfile.sample_rot,
+                dnsfile.field, dnsfile.temp_samp, dnsfile.sample,
+                dnsfile.endtime, dnsfile.tofchannels, dnsfile.channelwidth,
+                dnsfile.filename, dnsfile.wavelength, dnsfile.selector_speed,
+                dnsfile.scannumber, dnsfile.scancommand, dnsfile.scanpoints
+                ]
+
+    def check_child_if_scan_is_checked(self, scan, child):
+        if scan.isChecked():
+            child.setChecked()
+
     def setupModelData(self, dnsfiles):
         """
-        Addinhg data to the model accepts a list of dnsfile objects
+        Adding data to the model accepts a list of dnsfile objects
         """
 
         rootitem = self.rootItem
         for dnsfile in dnsfiles:
-            ## seperates scans and measurements with different tof-channels
-            if (dnsfile.scannumber != self.lastscan_number
-                    or self.last_tof != dnsfile.tofchannels
-                    or self.last_tof_time != dnsfile.channelwidth
-                    or self.last_sample != dnsfile.sample):
-                scantext = [
-                    '{} {} {} #{}'.format(dnsfile.scannumber, dnsfile.sample,
-                                          dnsfile.scancommand,
-                                          dnsfile.scanpoints), '', '', '', '',
-                    '', '', '', '', ''
-                ]
-                self.scan = DNSTreeItem(scantext, rootitem)
+            if self.new_scan_check(dnsfile):
+                self.scan = DNSTreeItem(self.get_scantext(dnsfile), rootitem)
                 self.beginInsertRows(QModelIndex(),
                                      self.numberOfScans(),
                                      self.numberOfScans())
                 rootitem.appendChild(self.scan)
                 self.endInsertRows()
                 self.lastscan_number = dnsfile.scannumber
-            file_data = [
-                dnsfile.filenumber, dnsfile.det_rot, dnsfile.sample_rot,
-                dnsfile.field, dnsfile.temp_samp, dnsfile.sample,
-                dnsfile.endtime, dnsfile.tofchannels, dnsfile.channelwidth,
-                dnsfile.filename, dnsfile.wavelength, dnsfile.selector_speed,
-                dnsfile.scannumber, dnsfile.scancommand, dnsfile.scanpoints
-            ]
+            file_data = self.get_data_from_dnsfile(dnsfile)
             self.last_tof = dnsfile.tofchannels
             self.last_tof_time = dnsfile.channelwidth
             self.last_sample = dnsfile.sample
@@ -299,9 +326,8 @@ class DNSTreeModel(QAbstractItemModel):
                                  self.scan.childCount(),
                                  self.scan.childCount())
             child = self.scan.appendChild(DNSTreeItem(file_data, self.scan))
+            self.check_child_if_scan_is_checked(self.scan, child)
             self.endInsertRows()
-            if self.scan.isChecked():
-                child.setChecked()
 
     def add_number_of_childs(self):
         """
@@ -320,6 +346,9 @@ class DNSTreeModel(QAbstractItemModel):
         return total_files
 
     def get_txt(self):
+        """
+        return a list of dnsdatfiles used for quick loading
+        """
         txt = []
         for row in range(self.numberOfScans()):
             scan = self.scanFromRow(row)
@@ -327,3 +356,18 @@ class DNSTreeModel(QAbstractItemModel):
                 child = scan.child(crow)
                 txt.append(" ; ".join([str(x) for x in child.data()]) + "\n")
         return txt
+
+    def get_filenumber_dict(self):
+        """
+        return a dictionary with  filnumbers as keys and modelindex as value
+        used to mark loaded filenumbers are in the model
+        """
+        filenb_dict = {}
+        for scannb in self.scanRange():
+            scan = self.scanFromRow(scannb)
+            scanindex = self.IndexFromScan(scan)
+            for row in range(scan.childCount()):
+                filenb = int(scan.child(row).data(0))
+                index = self.index(row, 0, scanindex)
+                filenb_dict[filenb] = index
+        return filenb_dict

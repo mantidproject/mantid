@@ -81,7 +81,6 @@ def dict_to_xml(dictionary, node=None):
     """
     if node is None:
         node = etree.Element('document')
-        #dictionary = dictionary['document']
     for key, value in dictionary.items():
         if isinstance(value, dict):
             sub = etree.SubElement(node, key)

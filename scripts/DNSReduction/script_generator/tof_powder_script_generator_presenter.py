@@ -188,7 +188,7 @@ class DNSTofPowderScriptGenerator_presenter(DNSScriptGenerator_presenter):
         l("from mantid.simpleapi import MonitorEfficiencyCorUser, FindEPP")
         l("from mantid.simpleapi import ComputeCalibrationCoefVan, Divide,"
           "CorrectTOF")
-        l('from mantid.simpleapi import SaveAscii, SaveNexus')
+        l('from mantid.simpleapi import SaveAscii, SaveNexus, MaskDetectors')
 
         l("from DNSReduction.scripts.dnstof import convert_to_dE, get_sqw, "
           "load_data")

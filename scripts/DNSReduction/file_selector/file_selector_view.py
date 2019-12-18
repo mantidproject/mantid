@@ -74,14 +74,14 @@ class DNSFileSelector_view(DNSView):
             self.filter_scans_checked)
         self._content.pB_expand_all.clicked.connect(self.expand)
         self._content.pB_expand_none.clicked.connect(self.expand)
-        self._content.pB_check_all.clicked.connect(self.check_buttons_clicked)
-        self._content.pB_check_none.clicked.connect(self.check_buttons_clicked)
+        self._content.pB_check_all.clicked.connect(self.check_all)
+        self._content.pB_check_none.clicked.connect(self.uncheck_all)
         self._content.pB_check_last_scan.clicked.connect(
-            self.check_buttons_clicked)
+            self.check_last)
         self._content.pB_check_last_complete_scan.clicked.connect(
-            self.check_buttons_clicked)
+            self.check_last)
         self._content.pB_check_selected.clicked.connect(
-            self.check_buttons_clicked)
+            self.check_selected)
 
         ## checkboxes
         self._mapping['filter_vanadium'].stateChanged.connect(
@@ -105,7 +105,12 @@ class DNSFileSelector_view(DNSView):
     #### SIGNALS
     sig_read_all = Signal(bool)
     sig_filters_clicked = Signal()
-    sig_checked_clicked = Signal(str)
+
+    sig_check_all = Signal()
+    sig_uncheck_all = Signal()
+    sig_check_selected = Signal()
+    sig_check_last = Signal(str)
+
     sig_progress_canceled = Signal()
     sig_autoload_clicked = Signal(int)
     sig_dataset_changed = Signal(int)
@@ -114,9 +119,18 @@ class DNSFileSelector_view(DNSView):
     def autoload_checked(self, state):
         self.sig_autoload_clicked.emit(state)
 
-    def check_buttons_clicked(self):
+    def check_all(self):
+        self.sig_check_all.emit()
+
+    def uncheck_all(self):
+        self.sig_uncheck_all.emit()
+
+    def check_selected(self):
+        self.sig_check_selected.emit()
+
+    def check_last(self):
         sender_name = self.sender().objectName()
-        self.sig_checked_clicked.emit(sender_name)
+        self.sig_check_last.emit(sender_name)
 
     def combo_changed(self, index):
         self._content.groupBox_filter.setHidden(index)
@@ -201,6 +215,9 @@ class DNSFileSelector_view(DNSView):
     def hide_scan(self, row, hidden=True):
         self.treeview.setRowHidden(row, self.treeview.rootIndex(), hidden)
 
+    def show_scan(self, row):
+        self.treeview.setRowHidden(row, self.treeview.rootIndex(), False)
+
     def hide_tof(self, hidden=True):
         self.standard_treeview.setColumnHidden(7, hidden)
         self.standard_treeview.setColumnHidden(8, hidden)
@@ -214,14 +231,15 @@ class DNSFileSelector_view(DNSView):
         return self.treeview.isRowHidden(row, self.treeview.rootIndex())
 
     def open_progress_dialog(self, numofsteps):
-        self.progress = QProgressDialog(
-            "Loading {} files...".format(numofsteps),
-            "Abort Loading",
-            0,
-            numofsteps)
-        self.progress.setWindowModality(Qt.WindowModal)
-        self.progress.setMinimumDuration(200)
-        self.progress.open(self.progress_canceled)
+        if numofsteps:
+            self.progress = QProgressDialog(
+                "Loading {} files...".format(numofsteps),
+                "Abort Loading",
+                0,
+                numofsteps)
+            self.progress.setWindowModality(Qt.WindowModal)
+            self.progress.setMinimumDuration(200)
+            self.progress.open(self.progress_canceled)
 
     def progress_canceled(self):
         self.sig_progress_canceled.emit()

@@ -67,8 +67,8 @@ class DNSSimulation_model(DNSObsModel):
         return surface
 
     def create_powder_profile(self, tth_start, tth_end, tth_step, shift):
-        u = 0.1791
-        v = -0.4503
+        u = 0.1791 ## thats what icsd has for neutrons
+        v = -0.4503 ## should be in options dialog at later step
         w = 0.4
         tth = np.arange(tth_start, tth_end, tth_step)
         x = tth

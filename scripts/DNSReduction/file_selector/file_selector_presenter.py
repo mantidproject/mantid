@@ -41,7 +41,11 @@ class DNSFileSelector_presenter(DNSObserver):
         self.view.sig_read_all.connect(self.read_all)
         self.view.sig_filters_clicked.connect(self.filter_scans)
         self.view.sig_standard_filters_clicked.connect(self.filter_standard)
-        self.view.sig_checked_clicked.connect(self.check_buttons)
+        self.view.sig_check_all.connect(self.check_all_scans)
+        self.view.sig_uncheck_all.connect(self.uncheck_all_scans)
+        self.view.sig_check_last.connect(self.check_last_scans)
+        self.view.sig_check_selected.connect(self.check_selected_scans)
+
         self.view.sig_progress_canceled.connect(self.cancel_loading)
         self.view.sig_autoload_clicked.connect(self.autoload)
         self.sig_modus_changed.connect(self.modus_changed)
@@ -61,48 +65,38 @@ class DNSFileSelector_presenter(DNSObserver):
             if datadir:
                 self.fs_watcher.directoryChanged.disconnect()
 
-    def check_buttons(self, sender_name):
-        """
-        Processing of the button clicks to check All None, Last scan, Last
-        complete Scan and selected
-        """
-        view = self.view
-        model = self.active_model
-        for row in model.scanRange():  ## deselect all also hidden
-            model.setCheckedScan(row, 0)
-        if 'all' in sender_name:
-            for row in model.scanRange():
-                if not view.is_scan_hidden(row):
-                    model.setCheckedScan(row, 2)
-        if 'last' in sender_name:
-            row = model.numberOfScans() - 1
-            number_of_scans_to_check = view.get_nb_scans_to_check()
-            if number_of_scans_to_check > model.numberOfScans():
-                return
-            for i in range(number_of_scans_to_check):
-                while ((row - i) >= 0
-                       and (view.is_scan_hidden(row - i)
-                            or 'scan' not in model.scanCommandFromRow(row - i)
-                            )
-                       ):
-                    row += -1  # do not check hidden rows
-                while ((row - i) >= 0
-                       and ('scan' not in model.scanCommandFromRow(row - i)
-                            or view.is_scan_hidden(row - i)
-                            or ('complete' in sender_name
-                                and (row - i > 0)
-                                and (model.scanFromRow(row - i).childCount()
-                                     < model.scanExpectedPointsFromRow(row
-                                                                       - i))
-                                )
-                            )
-                       ):
-                    row += -1
-                model.setCheckedScan(row - i, 2)
-        elif 'selected' in sender_name:
-            for index in view.get_selected_indexes():
-                model.setCheckedFromIndex(index, 2)
-        return
+    def uncheck_all_scans(self):
+        self.model.uncheck_all_scans()
+
+    def check_all_scans(self):
+        for row in self.model.scanRange():
+            if not self.view.is_scan_hidden(row):
+                self.model.setCheckedScan(row, 2)
+
+    def get_non_hidden_scan_rows(self):
+        scan_rows = self.model.get_scan_rows()
+        return [row for row in scan_rows
+                if not self.view.is_scan_hidden(row)]
+
+    def get_complete_scan_rows(self):
+        scan_rows = self.get_non_hidden_scan_rows()
+        return [row for row in scan_rows
+                if self.model.is_scan_complete(row)]
+
+    def check_last_scans(self, sender_name):
+        self.uncheck_all_scans()
+        number_of_scans_to_check = self.view.get_nb_scans_to_check()
+        if 'complete' in sender_name:
+            scans = self.get_complete_scan_rows()
+        else:
+            scans = self.get_non_hidden_scan_rows()
+        for row in scans[-number_of_scans_to_check:]:
+            self.model.setCheckedScan(row, 2)
+
+    def check_selected_scans(self):
+        self.model.uncheck_all_scans()
+        for index in self.view.get_selected_indexes():
+            self.model.setCheckedFromIndex(index, 2)
 
     def cancel_loading(self):
         self.loading_canceled = True
@@ -124,25 +118,33 @@ class DNSFileSelector_presenter(DNSObserver):
             self.active_model = self.model
             self.filter_scans()
 
+    def is_modus_tof(self):
+        return '_tof' in self.modus
+
+    def switch_tof_scans(self):
+        for row in self.active_model.scanRange():
+            if self.is_modus_tof() != self.active_model.is_scan_tof(row):
+                self.view.hide_scan(row)
+                self.active_model.setCheckedScan(row, 0)
+            else:
+                self.view.show_scan(row)
+
+    def filter_scans_for_boxes(self):
+        model = self.model
+        view = self.view
+        for row in model.scanRange():
+            for text, filter_condition in view.get_filters().items():
+                if (filter_condition and not model.text_in_scan(row, text)):
+                    view.hide_scan(row, hidden=True)
+                    model.setCheckedScan(row, 0)
+
     def filter_scans(self):
         """
         Hide and uncheck the scans in the treeview which do not
         match filters from get_filters
         """
-        tofmode = '_tof' in self.modus
-        model = self.model
-        filters = self.view.get_filters()
-        for row in model.scanRange():
-            self.view.hide_scan(row, hidden=False)
-            ### filtering for selected filters
-            if tofmode != model.is_scan_tof(row):
-                self.view.hide_scan(row, hidden=True)
-                model.setCheckedScan(row, 0)
-            for text, filter_condition in filters.items():
-                if (filter_condition
-                        and text not in model.scanCommandFromRow(row)):
-                    self.view.hide_scan(row, hidden=True)
-                    model.setCheckedScan(row, 0)
+        self.switch_tof_scans()
+        self.filter_scans_for_boxes()
         return
 
     def files_changed(self):
@@ -151,44 +153,25 @@ class DNSFileSelector_presenter(DNSObserver):
         if not self.autoload_timer.isActive():
             self.autoload_timer.start(5000)
 
+    def standard_filter_active(self):
+        filters = self.view.get_standard_filters()
+        return filters['vanadium'] or filters['empty'] or filters['nicr']
+
+    def filter_standard_types(self):
+        filters = self.view.get_standard_filters()
+        for row in self.active_model.scanRange():
+            scan = self.active_model.scanFromRow(row)
+            hidden = [filters[sampletype] and scan.is_type(sampletype)
+                      for sampletype in ['vanadium', 'nicr', 'empty']]
+            if not any(hidden) and self.standard_filter_active():
+                self.view.hide_scan(row)
+
     def filter_standard(self):
         """
         Hide and uncheck the standard files which do not match filters
         """
-        tofmode = '_tof' in self.modus
-        model = self.standard_data
-        filters = self.view.get_standard_filters()
-        for row in model.scanRange():
-            scan = model.scanFromRow(row)
-            scanindex = model.IndexFromScan(scan)
-            self.view.hide_scan(row, hidden=False)
-            unhiddenchild = False
-            if tofmode != model.is_scan_tof(row):
-                self.view.hide_scan(row, hidden=True)
-                model.setCheckedScan(row, 0)
-            for child in scan.get_childs():
-                if not filters['vanadium'] and not filters[
-                        'empty'] and not filters['nicr']:
-                    self.view.hide_file(child, scanindex, hidden=False)
-                else:
-                    self.view.hide_file(child, scanindex, hidden=True)
-                sample = child.data()[5]
-                if (filters['vanadium']
-                        and ('vanadium' in sample
-                             or 'vana' in sample)):
-                    self.view.hide_file(child, scanindex, hidden=False)
-                if (filters['nicr']
-                        and ('nicr' in sample
-                             or 'NiCr' in sample)):
-                    self.view.hide_file(child, scanindex, hidden=False)
-                if (filters['empty']
-                        and ('empty' in sample
-                             or 'leer' in sample)):
-                    self.view.hide_file(child, scanindex, hidden=False)
-                if not self.view.is_file_hidden(child, scanindex):
-                    unhiddenchild = True
-            if not unhiddenchild:
-                self.view.hide_scan(row, hidden=True)
+        self.switch_tof_scans()
+        self.filter_standard_types()
         return
 
     def get_option_dict(self):
@@ -204,24 +187,28 @@ class DNSFileSelector_presenter(DNSObserver):
     def modus_changed(self):
         self.filter_scans()
         self.filter_standard()
-        self.view.hide_tof(hidden='_tof' not in self.modus)
+        self.view.hide_tof(self.is_modus_tof())
+
+    def check_all_vissible_scans(self):
+        for row in self.active_model.scanRange():
+            if not self.view.is_scan_hidden(row):
+                self.active_model.setCheckedScan(row, 2)
+
+    def automatic_select_all_standard_files(self):
+        was = self.active_model != self.standard_data
+        if was: # if view is not standard we change to it and change back
+            self.view.combo_changed(1)
+        self.read_standard()
+        self.check_all_vissible_scans()
+        self.view.show_statusmessage(
+            'automatically loaded all standard files', 30)
+        if was:
+            self.view.combo_changed(0)
 
     def process_request(self):
         own_options = self.get_option_dict()
-        view = self.view
-        was = self.active_model != self.standard_data
-        if was:
-            view.combo_changed(1)
-        model = self.standard_data
         if own_options['auto_standard'] and not own_options['standard_data']:
-            self.read_standard()
-            for row in model.scanRange():
-                if not view.is_scan_hidden(row):
-                    model.setCheckedScan(row, 2)
-            self.view.show_statusmessage(
-                'automatically loaded all standard files', 30)
-        if was:
-            view.combo_changed(0)
+            self.automatic_select_all_standard_files()
 
     def load_saved_filelist(self):
         """
@@ -262,6 +249,45 @@ class DNSFileSelector_presenter(DNSObserver):
         with open(datapath + '/last_filelist.txt', 'w') as the_file:
             the_file.writelines(txt)
 
+    def filter_out_files_already_loaded(self, alldatafiles, watcher):
+        if watcher:
+            datafiles = [dfile for dfile in alldatafiles
+                         if dfile not in self.old_data_set]
+        else:
+            datafiles = alldatafiles
+        return datafiles
+
+    def filter_range(self, datafiles, filtered=False):
+        if filtered:
+            start, end = self.view.get_start_end_filenumbers()
+            datafiles = filter_filenames(datafiles, start, end)
+        elif datafiles:
+            self.view.set_start_end_filenumbers(datafiles)
+        return datafiles
+
+    def get_list_of_loaded_files(self, watcher):
+        if watcher:
+            return {}
+        return self.load_saved_filelist()
+
+    def clear_scans_if_not_sequential(self, watcher):
+        if not watcher:
+            self.model.clearScans()
+
+    def update_progress(self, i, end):
+        if i % 100 == 0 or i == end - 1:
+            self.view.set_progress(i + 1)
+
+    def load_file_from_chache_or_new(self, loaded, filename, datapath):
+        dnsfile = loaded.get(filename, False)
+        if not dnsfile:
+            dnsfile = DNSFile(datapath, filename)
+        return dnsfile
+
+    def add_number_of_files_per_scan(self):
+        total_files = self.model.add_number_of_childs()
+        self.view.show_statusmessage("{} files loaded".format(total_files))
+
     def read_all(self, filtered=False, watcher=False):
         """
         Reading of new files, if filtered is True, only the files in the
@@ -272,43 +298,27 @@ class DNSFileSelector_presenter(DNSObserver):
         self.loading_canceled = False
         datapath = self.param_dict['paths']['data_dir']
         alldatafiles = return_filelist(datapath)
-        datafiles = alldatafiles
-        if watcher:  #sequential load called
-            datafiles = [
-                dfile for dfile in alldatafiles
-                if dfile not in self.old_data_set
-            ]  #
-            loaded = {}
-        else:  # load all called manually
-            model.clearScans()
-            datafiles = alldatafiles
-            loaded = self.load_saved_filelist()
-        if filtered:
-            start, end = view.get_start_end_filenumbers()
-            datafiles = filter_filenames(datafiles, start, end)
-        if datafiles:
-            self.view.open_progress_dialog(len(datafiles))
+        datafiles = self.filter_out_files_already_loaded(alldatafiles, watcher)
+        self.clear_scans_if_not_sequential(watcher)
+        loaded = self.get_list_of_loaded_files(watcher)
+        datafiles = self.filter_range(datafiles, filtered)
+        number_of_datafiles = len(datafiles)
+        self.view.open_progress_dialog(number_of_datafiles)
         for i, filename in enumerate(datafiles):
-            ### update progressbar every 100 files
-            if i % 100 == 0 or i == len(datafiles) - 1:
-                self.view.set_progress(i + 1)
-                if self.loading_canceled:
-                    break
-            dnsfile = loaded.get(filename, False)
-            if not dnsfile:
-                dnsfile = DNSFile(datapath, filename)
+            self.update_progress(i, number_of_datafiles)
+            if self.loading_canceled:
+                break
+            dnsfile = self.load_file_from_chache_or_new(loaded,
+                                                        filename, datapath)
             if dnsfile.new_format:
                 model.setupModelData([dnsfile])
-        if not filtered and datafiles:
-            view.set_start_end_filenumbers(datafiles)
         self.old_data_set = set(alldatafiles)
-        total_files = model.add_number_of_childs()
+        self.add_number_of_files_per_scan()
         view.set_first_column_spanned(model.scanRange())
         self.filter_scans()
         if model.numberOfScans() == 1:
             self.view.expand(alle=True)
         self.save_filelist()
-        self.view.show_statusmessage("{} files loaded".format(total_files))
 
     def read_standard(self):
         """
@@ -331,22 +341,14 @@ class DNSFileSelector_presenter(DNSObserver):
 
     def set_view_from_param(self):
         """
-        Settin of the fields defined in mapping from the parameter dictionary
+        Setting of the fields defined in mapping from the parameter dictionary
         and checks scans checked in the dict
         """
-        filenumbers = self.param_dict.get(self.name,
-                                          {}).get('selected_filenumbers', [])
-        self.param_dict[self.name].pop('selected_filenumbers', None)
+        filenumbers = self.param_dict[self.name].pop('selected_filenumbers',
+                                                     [])
         self.view.set_state(self.param_dict.get(self.name, {}))
-        filenb_dict = {}
+        filenb_dict = self.model.get_filenumber_dict()
         notfound = 0
-        for scannb in self.model.scanRange():
-            scan = self.model.scanFromRow(scannb)
-            scanindex = self.model.IndexFromScan(scan)
-            for row in range(scan.childCount()):
-                filenb = int(scan.child(row).data(0))
-                index = self.model.index(row, 0, scanindex)
-                filenb_dict[filenb] = index
         for filenb in filenumbers:
             try:
                 self.model.setCheckedFromIndex(filenb_dict[filenb])

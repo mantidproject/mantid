@@ -1,8 +1,11 @@
-# -*- coding: utf-8 -*-
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """
-Created on Fri Nov 15 15:11:24 2019
-
-@author: thomasm
+List of workspaces for Plotting
 """
 from qtpy.QtGui import QStandardItemModel, QStandardItem
 
@@ -45,6 +48,10 @@ class DNSPlotListModel(QStandardItemModel):
         return numbers
 
     def down(self):
+        """
+        checking the item below the the previously checked item
+        taking care of borders
+        """
         numbers = self.get_checked_item_numbers()
         if len(numbers) == 1:
             i = numbers[0]
@@ -57,6 +64,10 @@ class DNSPlotListModel(QStandardItemModel):
             self.item(i + 1).setCheckState(2)
 
     def up(self):
+        """
+        checking the item above the previously checked item
+        taking care of borders
+        """
         numbers = self.get_checked_item_numbers()
         if len(numbers) == 1:
             i = numbers[0]
@@ -72,6 +83,9 @@ class DNSPlotListModel(QStandardItemModel):
         self.item(0).setCheckState(2)
 
     def check_seperated(self):
+        """
+        Cheing data speparated using sum rules
+        """
         self.uncheck_items()
         items = self.get_items()
         for item in items:
@@ -82,6 +96,9 @@ class DNSPlotListModel(QStandardItemModel):
                 item.setCheckState(2)
 
     def check_raw(self):
+        """
+        Checking the processed but not seperated data
+        """
         self.uncheck_items()
         items = self.get_items()
         for item in items:

@@ -52,6 +52,24 @@ class DNSTreeItem(object):
         else:
             return self.item_data
 
+    def get_sample(self):
+        if self.hasChildren(): ## if its a scan get sample from first datafile
+            return self.child(0).data(5)
+        return self.data(5)
+
+    def get_sample_type(self):
+        sample = self.get_sample()
+        if 'vanadium' in sample or 'vana' in sample:
+            return 'vanadium'
+        if  'nicr' in sample or 'NiCr' in sample:
+            return 'nicr'
+        if 'empty' in sample or 'leer' in sample:
+            return 'empty'
+        return 'sample'
+
+    def is_type(self, sampletype):
+        return sampletype  == self.get_sample_type()
+
     def hasChildren(self):
         return bool(self.childCount() > 0)
 
