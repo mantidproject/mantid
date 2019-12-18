@@ -46,15 +46,19 @@ LoadAscii2::LoadAscii2()
  * be used
  */
 int LoadAscii2::confidence(Kernel::FileDescriptor &descriptor) const {
-		  const std::string &filePath = descriptor.filename();
+  const std::string &filePath = descriptor.filename();
   const size_t filenameLength = filePath.size();
 
   // Avoid some known file types that have different loaders
   int confidence(0);
-  if (filenameLength>12?(filePath.compare(filenameLength - 12, 12, "_runinfo.xml") ==
-          0):false ||
-      filenameLength>6?(filePath.compare(filenameLength - 6, 6, ".peaks") == 0):false ||
-      filenameLength>10?(filePath.compare(filenameLength - 10, 10, ".integrate") == 0):false) {
+  if (filenameLength > 12
+          ? (filePath.compare(filenameLength - 12, 12, "_runinfo.xml") == 0)
+          : false || filenameLength > 6
+                ? (filePath.compare(filenameLength - 6, 6, ".peaks") == 0)
+                : false || filenameLength > 10
+                      ? (filePath.compare(filenameLength - 10, 10,
+                                          ".integrate") == 0)
+                      : false) {
     confidence = 0;
   } else if (descriptor.isAscii()) {
     confidence = 10; // Low so that others may try
