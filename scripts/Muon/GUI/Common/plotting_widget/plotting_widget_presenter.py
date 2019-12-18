@@ -91,7 +91,6 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         """
         Handles the workspace being deleted from ads
         """
-
         if self._view.is_tiled_plot():
             self.update_model_tile_plot_positions(self._view.get_tiled_by_type())
             # update view based on number of axis
@@ -108,7 +107,6 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         """
         Handles the use raw workspaces being changed (e.g rebinned) in ads
         """
-
         if workspace in self._model.plotted_workspaces:
             # if one of the plotted_workspaces has been changed
             # we should plot that workspace again
@@ -300,8 +298,14 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         """
 
         tiled = self._view.is_tiled_plot()
+
         # get the workspace list, formed from the selected groups / pairs
         workspace_list = self.get_workspace_list_to_plot()
+        # remove workspaces not in workspace_list
+        for ws in self._model.plotted_workspaces:
+            if ws not in workspace_list:
+                self._model.remove_workspace_from_plot(ws, self._view.get_axes())
+
         for workspace in workspace_list:
             if workspace not in self._model.plotted_workspaces:
                 ax = self.get_workspace_plot_axis(workspace)
@@ -448,9 +452,18 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             if self._view.get_tiled_by_type() == 'group':
                 label = self.context.data_context.instrument + self._get_run_number_from_workspace(workspace_name)
             else:
-                label = self._get_group_or_pair_from_name_workspace(workspace_name)
+                label = self._get_group_or_pair_from_workspace_name(workspace_name)
         else:
+            label = self.context.data_context.instrument + self._get_run_number_from_workspace(workspace_name) +\
+                    '; ' + self._get_group_or_pair_from_workspace_name(workspace_name)
+
+        if not self._view.if_raw():
+            label = label + '; Rebin'
+
+        # if frequency domain analysis keep label as workspace name, which describes component, and imaginary workspace
+        if FREQ_PLOT_TYPE in self._view.get_selected():
             label = workspace_name
+
         return label
 
     def get_workspace_plot_axis(self, workspace_name):
@@ -460,7 +473,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         """
         if self._view.is_tiled_plot():
             if self._view.get_tiled_by_type() == 'group':
-                tiled_key = self._get_group_or_pair_from_name_workspace(workspace_name)
+                tiled_key = self._get_group_or_pair_from_workspace_name(workspace_name)
             else:
                 tiled_key = self.context.data_context.instrument + self._get_run_number_from_workspace(workspace_name)
             position = self._model.tiled_plot_positions[tiled_key]
@@ -476,15 +489,16 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             return "Time"
 
     # Note: These methods should be implemented as lower level properties
-    # as currently they are specialised methods dependent on the workspace name format
-    # the number following the instrument name is the run
+    # as currently they are specialised methods dependent on the workspace name format.
+
+    # The number following the instrument name is the run
     def _get_run_number_from_workspace(self, workspace_name):
         instrument = self.context.data_context.instrument
         run = re.findall(r'%s(\d+)' % instrument, workspace_name)
         return run[0]
 
     # the string following either 'Pair Asym; %s' or  Group; "
-    def _get_group_or_pair_from_name_workspace(self, workspace_name):
+    def _get_group_or_pair_from_workspace_name(self, workspace_name):
         for grppair in self.context.group_pair_context.selected_groups + self.context.group_pair_context.selected_pairs:
             grp = re.findall(r'%s' % grppair, workspace_name)
             if len(grp) > 0:
