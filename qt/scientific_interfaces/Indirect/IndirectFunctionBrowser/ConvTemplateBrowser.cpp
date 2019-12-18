@@ -106,7 +106,7 @@ void ConvTemplateBrowser::setGlobalParameters(const QStringList &globals) {
   m_presenter.setGlobalParameters(globals);
 }
 
-void ConvTemplateBrowser::intChanged(QtProperty *prop) {}
+void ConvTemplateBrowser::intChanged(QtProperty *) {}
 
 void ConvTemplateBrowser::boolChanged(QtProperty *prop) {
   if (prop == m_deltaFunctionOn) {
@@ -141,7 +141,7 @@ void ConvTemplateBrowser::enumChanged(QtProperty *prop) {
   }
 }
 
-void ConvTemplateBrowser::globalChanged(QtProperty *prop, const QString &name,
+void ConvTemplateBrowser::globalChanged(QtProperty *, const QString &name,
                                         bool on) {
   std::cerr << "Global " << name.toStdString() << ' ' << on << std::endl;
 }
@@ -297,7 +297,7 @@ void ConvTemplateBrowser::setParameterValueQuiet(ParamID id, double value,
 }
 
 void ConvTemplateBrowser::updateParameterEstimationData(
-    DataForParameterEstimationCollection &&data) {}
+    DataForParameterEstimationCollection &&) {}
 
 void ConvTemplateBrowser::setBackgroundA0(double value) {
   m_presenter.setBackgroundA0(value);
