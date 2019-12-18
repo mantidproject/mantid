@@ -121,7 +121,6 @@ class PlotWidgetModel(object):
 
         self._do_single_plot(ax, workspaces, workspace_indices, errors,
                              plot_kwargs)
-
         self._update_legend(ax)
 
     def remove_workspace_from_plot(self, workspace_name, axes):
@@ -131,6 +130,9 @@ class PlotWidgetModel(object):
         :param axes: the axes which may contain the workspace
         :return:
         """
+        if workspace_name not in self.plotted_workspaces + self.plotted_fit_workspaces:
+            return
+
         try:
             workspace = AnalysisDataService.Instance().retrieve(workspace_name)
         except RuntimeError:
@@ -149,16 +151,19 @@ class PlotWidgetModel(object):
     def workspace_deleted_from_ads(self, workspace, axes):
         """
         Remove a workspace which was deleted in the ads from the plot
-        :param workspace: Workspace to remove from plot
+        :param workspace: Workspace object to remove from plot
         :param axes: the axes which may contain the workspace
         :return:
         """
+        workspace_name = workspace.name()
+
+        if workspace_name not in self.plotted_workspaces + self.plotted_fit_workspaces:
+            return
+
         for i in range(self.number_of_axes):
             ax = axes[i]
             ax.remove_workspace_artists(workspace)
             self._update_legend(ax)
-
-        workspace_name = workspace.name()
 
         self.plotted_workspaces = [item for item in self.plotted_workspaces if item != workspace_name]
         self.plotted_fit_workspaces = [item for item in self.plotted_fit_workspaces if item != workspace_name]
