@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 
 from Engineering.gui.engineering_diffraction.tabs.common import vanadium_corrections, path_handling
 from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
-from mantid.simpleapi import EnggFocus, Load, logger, AnalysisDataService as Ads, SaveNexus, SaveGSS, SaveFocusedXYE
+from mantid.simpleapi import EnggFocus, logger, AnalysisDataService as Ads, SaveNexus, SaveGSS, SaveFocusedXYE
 
 SAMPLE_RUN_WORKSPACE_NAME = "engggui_focusing_input_ws"
 FOCUSED_OUTPUT_WORKSPACE_NAME = "engggui_focusing_output_ws_bank_"
@@ -34,12 +34,12 @@ class FocusModel(object):
             return
         integration_workspace = Ads.retrieve(vanadium_corrections.INTEGRATED_WORKSPACE_NAME)
         curves_workspace = Ads.retrieve(vanadium_corrections.CURVES_WORKSPACE_NAME)
-        sample_workspace = self._load_focus_sample_run(sample_path)
+        sample_workspace = path_handling.load_workspace(sample_path)
         output_workspaces = []
         full_calib_path = get_setting(path_handling.INTERFACES_SETTINGS_GROUP,
                                       path_handling.ENGINEERING_PREFIX, "full_calibration")
         if full_calib_path is not None and path.exists(full_calib_path):
-            full_calib_workspace = self._load_focus_sample_run(full_calib_path)
+            full_calib_workspace = path_handling.load_workspace(full_calib_path)
         else:
             full_calib_workspace = None
         for name in banks:
@@ -79,16 +79,6 @@ class FocusModel(object):
                 "Error in focusing, Could not run the EnggFocus algorithm successfully for bank " +
                 str(bank) + ". Error Description: " + str(e))
             raise RuntimeError()
-
-    @staticmethod
-    def _load_focus_sample_run(sample_path):
-        try:
-            return Load(Filename=sample_path, OutputWorkspace=SAMPLE_RUN_WORKSPACE_NAME)
-        except RuntimeError as e:
-            logger.error(
-                "Error while loading sample data for focusing. Could not load the sample with filename: "
-                + sample_path + ". Error Description: " + str(e))
-            raise RuntimeError
 
     @staticmethod
     def _plot_focused_workspaces(focused_workspaces):

@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 
 from mantid.api import AnalysisDataService as Ads
 from mantid.kernel import logger
-from mantid.simpleapi import Load, EnggCalibrate, DeleteWorkspace, CloneWorkspace, \
+from mantid.simpleapi import EnggCalibrate, DeleteWorkspace, CloneWorkspace, \
     CreateWorkspace, AppendSpectra, CreateEmptyTableWorkspace
 from Engineering.EnggUtils import write_ENGINX_GSAS_iparam_file
 from Engineering.gui.engineering_diffraction.tabs.common import vanadium_corrections
@@ -46,11 +46,11 @@ class CalibrationModel(object):
         """
         van_integration, van_curves = vanadium_corrections.fetch_correction_workspaces(
             vanadium_path, instrument, rb_num=rb_num)
-        sample_workspace = self.load_workspace(sample_path)
+        sample_workspace = path_handling.load_workspace(sample_path)
         full_calib_path = get_setting(path_handling.INTERFACES_SETTINGS_GROUP,
                                       path_handling.ENGINEERING_PREFIX, "full_calibration")
         if full_calib_path is not None and path.exists(full_calib_path):
-            full_calib = self.load_workspace(full_calib_path)
+            full_calib = path_handling.load_workspace(full_calib_path)
             output = self.run_calibration(sample_workspace, van_integration, van_curves, full_calib_ws=full_calib)
         else:
             output = self.run_calibration(sample_workspace, van_integration, van_curves)
@@ -184,17 +184,6 @@ class CalibrationModel(object):
             ax.legend(("Peaks Fitted", "DifC/TZero Fitted Straight Line"))
             ax.set_xlabel("Expected Peaks Centre(dSpacing, A)")
         fig.show()
-
-    @staticmethod
-    def load_workspace(sample_run_no):
-        try:
-            return Load(Filename=sample_run_no, OutputWorkspace="engggui_calibration_sample_ws")
-        except Exception as e:
-            logger.error("Error while loading workspace. "
-                         "Could not run the algorithm Load successfully for the data file "
-                         "(path: " + str(sample_run_no) + "). Error description: " + str(e) +
-                         " Please check also the previous log messages for details.")
-            raise RuntimeError
 
     def run_calibration(self, sample_ws, van_integration, van_curves, full_calib_ws=None):
         """
