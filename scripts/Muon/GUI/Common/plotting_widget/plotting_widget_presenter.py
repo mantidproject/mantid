@@ -48,6 +48,9 @@ class PlotWidgetPresenter(HomeTabSubWidget):
 
         # plotting options
         self._view.get_plot_options().connect_errors_changed(self.handle_error_selection_changed)
+        self._view.get_plot_options().connect_x_range_changed(self.handle_xlim_changed_in_view)
+        self._view.get_plot_options().connect_y_range_changed(self.handle_ylim_changed_in_view)
+        self._view.get_plot_options().connect_autoscale_changed(self.handle_autoscale_requested_by_view)
 
         if self.context._frequency_context:
             for ext in FREQUENCY_EXTENSIONS.keys():
@@ -67,14 +70,28 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         axis limits
         plot checkbox
         """
-        self._view.get_plot_options().set_plot_x_range([10, 20])
-        self._view.get_plot_options().set_plot_y_range([15, 20])
+        # if its on all, its autoscaled so we just have to return one of he axis limits
+        xmin, xmax = self.get_x_lim(0)
+        ymin, ymax = self.get_y_lim(0)
+        self._view.get_plot_options().set_plot_x_range([xmin, xmax])
+
+        self._view.get_plot_options().set_plot_y_range([ymin, ymax])
 
         # update combo box
         self._view.get_plot_options().clear_subplots()
-        titles = self._model.get_axes_titles(self._view.get_axes())
-        for title in titles:
-            self._view.get_plot_options().add_subplot(title)
+        for i in range(self._model.number_of_axes):
+            self._view.get_plot_options().add_subplot(str(i + 1))
+
+    def update_model_from_view(self):
+        """
+        Updates the view from the model, which includes
+        axis limits
+        plot checkbox
+        """
+
+    def update_options_view_from_model(self, index):
+        if index == 0:
+            pass
 
     # ------------------------------------------------------------------------------------------------------------------
     # Handle user making plotting related changes from GUI
@@ -165,6 +182,43 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         # scale the axis and set title
         self._model.set_x_lim(self.get_domain(), self._view.get_axes())
         self._view.force_redraw()
+
+    def handle_xlim_changed_in_view(self, xlim):
+        # loop over all subplots selected in combo box
+        subplots = self._view.get_plot_options().get_selection()
+        for subplot in subplots:
+            index = int(subplot) - 1
+            self._model.set_axis_xlim(self._view.get_axes()[index], xlim[0], xlim[1])
+
+        self._view.force_redraw()
+
+    def handle_ylim_changed_in_view(self, ylim):
+        # loop over all subplots selected in combo box
+        subplots = self._view.get_plot_options().get_selection()
+        for subplot in subplots:
+            index = int(subplot) - 1
+            self._model.set_axis_ylim(self._view.get_axes()[index], ylim[0], ylim[1])
+        self._view.force_redraw()
+
+    def handle_autoscale_requested_by_view(self):
+        # loop over all subplots selected in combo box
+        subplots = self._view.get_plot_options().get_selection()
+        xlims = self._view.get_plot_options().get_plot_x_range()
+        self._view.update_toolbar()
+        for subplot in subplots:
+            index = int(subplot) - 1
+            self._model.set_axis_xlim(self._view.get_axes()[index], xlims[0], xlims[1])
+            self._model.autoscale_y_axis(self._view.get_axes()[index])
+            ymin, ymax = self.get_y_lim(index)
+
+        self._view.get_plot_options().set_plot_y_range([ymin, ymax])
+        self._view.force_redraw()
+
+    def handle_subplot_choice_changed_in_view(self, index):
+        if index == 0:  # this is all
+            pass
+        else:
+            pass
 
     def handle_plot_tiled_changed(self, state):
         """
@@ -501,12 +555,12 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             return "Time"
 
     def get_x_lim(self, subplot):
-        left, right = self._view.get_axes()[subplot].xlim()
-        print(left, right)
+        left, right = self._view.get_axes()[subplot].get_xlim()
+        return left, right
 
     def get_y_lim(self, subplot):
-        left, right = self._view.get_axes()[subplot].ylim()
-        print(left, right)
+        left, right = self._view.get_axes()[subplot].get_ylim()
+        return left, right
 
     # Note: These methods should be implemented as lower level properties
     # as currently they are specialised methods dependent on the workspace name format.

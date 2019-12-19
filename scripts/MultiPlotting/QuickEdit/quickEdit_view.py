@@ -82,6 +82,9 @@ class QuickEditView(QtWidgets.QWidget):
     def set_plot_x_range(self, range):
         self.x_axis_changer.set_bounds(range)
 
+    def get_x_bounds(self):
+        return self.x_axis_changer.get_bounds()
+
     """ y axis selection """
 
     def connect_y_range_changed(self, slot):
