@@ -53,7 +53,6 @@ class ProjectRecoveryTest(unittest.TestCase):
         modTime = time.mktime(dateoffset.timetuple())
         os.utime(self.secondPath, (modTime, modTime))
 
-
     def tearDown(self):
         ADS.clear()
         if os.path.exists(self.pr.recovery_directory_hostname):
