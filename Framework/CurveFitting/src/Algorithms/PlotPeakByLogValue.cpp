@@ -20,6 +20,7 @@
 #include "MantidAPI/CostFunctionFactory.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -76,10 +77,9 @@ void PlotPeakByLogValue::init() {
   declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The output TableWorkspace");
-  declareProperty("Function", "",
-                  boost::make_shared<MandatoryValidator<std::string>>(),
-                  "The fitting function, common for all workspaces in the "
-                  "input WorkspaceGroup");
+  declareProperty(
+      std::make_unique<API::FunctionProperty>("Function", Direction::InOut),
+      "Parameters defining the fitting function and its initial values");
   declareProperty("LogValue", "",
                   "Name of the log value to plot the "
                   "parameters against. Default: use spectra "
@@ -179,8 +179,6 @@ void PlotPeakByLogValue::exec() {
   const std::vector<InputData> wsNames = makeNames();
 
   const std::vector<double> exclude = getProperty("Exclude");
-  std::string fun = getPropertyValue("Function");
-  // int wi = getProperty("WorkspaceIndex");
   std::string logName = getProperty("LogValue");
   bool individual = getPropertyValue("FitType") == "Individual";
   bool passWSIndexToFunction = getProperty("PassWSIndexToFunction");
@@ -206,8 +204,7 @@ void PlotPeakByLogValue::exec() {
   }
   // Create an instance of the fitting function to obtain the names of fitting
   // parameters
-  IFunction_sptr inputFunction =
-      FunctionFactory::Instance().createInitialized(fun);
+  IFunction_sptr inputFunction = getProperty("Function");
   if (!inputFunction) {
     throw std::invalid_argument("Fitting function failed to initialize");
   }
