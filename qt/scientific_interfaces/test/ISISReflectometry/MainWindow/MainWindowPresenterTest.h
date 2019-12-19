@@ -141,6 +141,26 @@ public:
     verifyAndClear();
   }
 
+  void testWarningGivenIfRemoveUnsavedBatch() {
+    auto presenter = makePresenter();
+    auto const batchIndex = 0;
+    m_batchPresenters[batchIndex]->setUnsavedBatchFlag(true);
+    expectBatchIsNotAutoreducing(batchIndex);
+    expectBatchIsNotProcessing(batchIndex);
+    EXPECT_CALL(m_messageHandler, askUserDiscardChanges()).Times(1);
+    presenter.notifyCloseBatchRequested(batchIndex);
+  }
+
+  void testNoWarningIfRemoveSavedBatch() {
+    auto presenter = makePresenter();
+    auto const batchIndex = 0;
+    m_batchPresenters[batchIndex]->setUnsavedBatchFlag(false);
+    expectBatchIsNotAutoreducing(batchIndex);
+    expectBatchIsNotProcessing(batchIndex);
+    EXPECT_CALL(m_messageHandler, askUserDiscardChanges()).Times(0);
+    presenter.notifyCloseBatchRequested(batchIndex);
+  }
+
   void testReductionResumedNotifiesAllBatchPresenters() {
     auto presenter = makePresenter();
     for (auto batchPresenter : m_batchPresenters)
@@ -281,6 +301,44 @@ public:
     auto presenter = makePresenter();
     TS_ASSERT_THROWS_ANYTHING(presenter.notifyUpdateInstrumentRequested());
     verifyAndClear();
+  }
+
+  void testWarningGivenIfLoadBatchOverUnsavedBatch() {
+    auto presenter = makePresenter();
+    auto const batchIndex = 1;
+    m_batchPresenters[batchIndex]->setUnsavedBatchFlag(true);
+    EXPECT_CALL(m_messageHandler, askUserDiscardChanges()).Times(1);
+    presenter.notifyLoadBatchRequested(batchIndex);
+    verifyAndClear();
+  }
+
+  void testLoadBatchDiscardChanges() {
+    auto presenter = makePresenter();
+    auto const filename = std::string("test.json");
+    auto const map = QMap<QString, QVariant>();
+    auto const batchIndex = 1;
+    m_batchPresenters[batchIndex]->setUnsavedBatchFlag(true);
+    EXPECT_CALL(m_messageHandler, askUserDiscardChanges())
+        .Times(1)
+        .WillOnce(Return(true));
+    // will work when merged
+    //EXPECT_CALL(m_messageHandler, askUserForLoadFileName("JSON (*.json)"))
+    //    .Times(1)
+    //    .WillOnce(Return(filename));
+    //EXPECT_CALL(m_fileHandler, loadJSONFromFile(filename))
+    //    .Times(1)
+    //    .WillOnce(Return(map));
+    //EXPECT_CALL(*m_decoder, decodeBatch(&m_view, batchIndex, map)).Times(1);
+    presenter.notifyLoadBatchRequested(batchIndex);
+    verifyAndClear();
+  }
+
+  void testWarningGivenCloseGUIWithUnsavedChanges() { auto presenter = makePresenter();
+    EXPECT_CALL(*m_optionsDialogPresenter,
+                getBoolOption(std::string("WarnDiscardChanges")))
+        .Times(1);
+    EXPECT_CALL(m_messageHandler, askUserDiscardChanges()).Times(1);
+    presenter.isCloseEventPrevented();
   }
 
 private:

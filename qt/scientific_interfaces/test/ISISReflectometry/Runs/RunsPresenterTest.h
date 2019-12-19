@@ -205,6 +205,26 @@ public:
     verifyAndClear();
   }
 
+  void testWarningGivenIfUnsavedBatchAutoreductionResumed() {
+    auto presenter = makePresenter();
+    m_mainPresenter.setUnsavedBatchFlag(true);
+    EXPECT_CALL(m_mainPresenter, notifyResumeAutoreductionRequested());
+    EXPECT_CALL(m_mainPresenter, getUnsavedBatchFlag()).Times(1);
+    EXPECT_CALL(m_messageHandler, askUserDiscardChanges()).Times(1);
+    presenter.notifyResumeAutoreductionRequested();
+    verifyAndClear();
+  }
+
+  void testNoWarningGivenIfSavedBatchAutoreductionResumed() {
+    auto presenter = makePresenter();
+    m_mainPresenter.setUnsavedBatchFlag(false);
+    EXPECT_CALL(m_mainPresenter, notifyResumeAutoreductionRequested());
+    EXPECT_CALL(m_mainPresenter, getUnsavedBatchFlag()).Times(1);
+    EXPECT_CALL(m_messageHandler, askUserDiscardChanges()).Times(0);
+    presenter.notifyResumeAutoreductionRequested();
+    verifyAndClear();
+  }
+
   const std::string autoReductionSearch = "1120015";
 
   void testResumeAutoreductionWithNewSettings() {
