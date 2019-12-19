@@ -59,7 +59,7 @@ public:
 
   void testOptionsDialogPresenterSubscribesToMainWindow() {
     EXPECT_CALL(*m_optionsDialogPresenter, subscribe(_)).Times(1);
-    auto presenter = makePresenter;
+    auto presenter = makePresenter();
     verifyAndClear();
   }
 
