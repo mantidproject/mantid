@@ -35,9 +35,10 @@ class ISISReflectometryWorkflowSlicingTest(systemtesting.MantidSystemTest,
         self.setupTest()
         reduceRun(self.run_numbers[0], 0.5, self.first_transmission_runs,
                   self.second_transmission_runs, time_interval=60)
-        # Delete the interim sliced TOF workspaces and IvsQ workspaces
-        DeleteWorkspace('TOF_45222_sliced')
-        DeleteWorkspace('45222_IvsQ')
+        # Delete the interim transmission workspaces. These are currently output
+        # for input groups (i.e. when we're slicing) even when Debug is not on.
+        DeleteWorkspace('TRANS_LAM_45226')
+        DeleteWorkspace('TRANS_LAM_45227')
         self.finaliseResults()
 
     @staticmethod
