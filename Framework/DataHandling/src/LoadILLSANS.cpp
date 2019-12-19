@@ -44,7 +44,8 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLSANS)
 /** Constructor
  */
 LoadILLSANS::LoadILLSANS()
-    : m_supportedInstruments{"D11", "D22", "D33"}, m_defaultBinning{0, 0},
+    : m_supportedInstruments{"D11", "D22", "D33", "D16"}, m_defaultBinning{0,
+                                                                           0},
       m_resMode("nominal"), m_isTOF(false), m_sourcePos(0.) {}
 
 //----------------------------------------------------------------------------------------------
@@ -74,10 +75,11 @@ const std::string LoadILLSANS::summary() const {
  */
 int LoadILLSANS::confidence(Kernel::NexusDescriptor &descriptor) const {
   // fields existent only at the ILL for SANS machines
-  if (descriptor.pathExists("/entry0/reactor_power") &&
-      descriptor.pathExists("/entry0/instrument_name") &&
-      descriptor.pathExists("/entry0/mode")) {
-    return 80;
+  if (descriptor.pathExists("/entry0/mode") &&
+      ((descriptor.pathExists("/entry0/reactor_power") &&
+        descriptor.pathExists("/entry0/instrument_name")) ||
+       descriptor.pathExists("/entry0/instrument/name"))) {
+    return 85;
   } else {
     return 0;
   }
@@ -106,9 +108,8 @@ void LoadILLSANS::exec() {
       m_loader.findInstrumentNexusPath(firstEntry);
   setInstrumentName(firstEntry, instrumentPath);
   Progress progress(this, 0.0, 1.0, 4);
-
+  progress.report("Initializing the workspace for " + m_instrumentName);
   if (m_instrumentName == "D33") {
-    progress.report("Initializing the workspace for " + m_instrumentName);
     initWorkSpaceD33(firstEntry, instrumentPath);
     progress.report("Loading the instrument " + m_instrumentName);
     runLoadInstrument();
@@ -120,8 +121,12 @@ void LoadILLSANS::exec() {
       adjustTOF();
       moveSource();
     }
+  } else if (m_instrumentName == "D16") {
+    initWorkSpaceD16(firstEntry, instrumentPath);
+    progress.report("Loading the instrument " + m_instrumentName);
+    runLoadInstrument();
+
   } else {
-    progress.report("Initializing the workspace for " + m_instrumentName);
     initWorkSpace(firstEntry, instrumentPath);
     progress.report("Loading the instrument " + m_instrumentName);
     runLoadInstrument();
@@ -163,7 +168,7 @@ void LoadILLSANS::setInstrumentName(const NeXus::NXEntry &firstEntry,
   if (inst == m_supportedInstruments.end()) {
     throw std::runtime_error(
         "Instrument " + m_instrumentName +
-        " is not supported. Only D11, D22 and D33 are supported");
+        " is not supported. Only D11, D16, D22 and D33 are supported");
   }
   g_log.debug() << "Instrument name set to: " + m_instrumentName << '\n';
 }
@@ -220,6 +225,36 @@ void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry,
   if (data.dim1() == 128) {
     m_resMode = "low";
   }
+}
+
+/**
+ * Loads data for D16
+ * @param firstEntry
+ * @param instrumentPath
+ */
+void LoadILLSANS::initWorkSpaceD16(NeXus::NXEntry &firstEntry,
+                                   const std::string &instrumentPath) {
+  g_log.debug("Fetching data ...");
+
+  NXData dataGroup = firstEntry.openNXData("data/");
+  g_log.debug("D16 open data");
+
+  NXInt data = dataGroup.openIntData();
+  data.load();
+  const size_t numberOfHistograms =
+      static_cast<size_t>(data.dim0() * data.dim1()) + N_MONITORS;
+  createEmptyWorkspace(numberOfHistograms, 1);
+  g_log.debug("Load meta data");
+  // loadMetaData(firstEntry, instrumentPath);
+  // cannot load metadata using the function : no wavelength
+  // for now, no load at all
+
+  g_log.debug("Meta data loaded");
+
+  // not quite sure of what this is used for ...
+  size_t nextIndex =
+      loadDataIntoWorkspaceFromVerticalTubes(data, m_defaultBinning, 0);
+  nextIndex = loadDataIntoWorkspaceFromMonitors(firstEntry, nextIndex);
 }
 
 /**

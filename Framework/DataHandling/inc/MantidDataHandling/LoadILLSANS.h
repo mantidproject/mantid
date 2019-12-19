@@ -60,6 +60,7 @@ private:
 
   void initWorkSpace(NeXus::NXEntry &, const std::string &);
   void initWorkSpaceD33(NeXus::NXEntry &, const std::string &);
+  void initWorkSpaceD16(NeXus::NXEntry &, const std::string &);
   void createEmptyWorkspace(const size_t, const size_t);
 
   size_t loadDataIntoWorkspaceFromMonitors(NeXus::NXEntry &firstEntry,
