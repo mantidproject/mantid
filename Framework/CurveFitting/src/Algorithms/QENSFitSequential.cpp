@@ -731,12 +731,13 @@ ITableWorkspace_sptr QENSFitSequential::performFit(const std::string &input,
   const bool passWsIndex = getProperty("PassWSIndexToFunction");
   const bool passInputIndex = getProperty("PassInputIndexToFunction");
   const bool ignoreInvalidData = getProperty("IgnoreInvalidData");
+  IFunction_sptr inputFunction = getProperty("Function");
 
   // Run PlotPeaksByLogValue
   auto plotPeaks = createChildAlgorithm("PlotPeakByLogValue", 0.05, 0.90, true);
   plotPeaks->setProperty("Input", input);
   plotPeaks->setProperty("OutputWorkspace", output);
-  plotPeaks->setPropertyValue("Function", getPropertyValue("Function"));
+  plotPeaks->setProperty("Function", inputFunction);
   plotPeaks->setProperty("StartX", getPropertyValue("StartX"));
   plotPeaks->setProperty("EndX", getPropertyValue("EndX"));
   plotPeaks->setProperty("Exclude", exclude);
