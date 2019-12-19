@@ -15,9 +15,9 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 class MockOptionsDialogPresenter : public IOptionsDialogPresenter {
 public:
-  GNU_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_METHOD0(notifyInitOptions, void());
   MOCK_METHOD0(notifyOptionsChanged, void());
   MOCK_METHOD0(notifySubscribeView, void());
@@ -27,8 +27,14 @@ public:
   MOCK_METHOD1(subscribe, void(OptionsDialogMainWindowSubscriber *));
 
   ~MockOptionsDialogPresenter() override{};
-  GNU_DIAG_ON_SUGGEST_OVERRIDE
 };
+
+class MockOptionsDialogMainWindowSubscriber
+  : public OptionsDialogMainWindowSubscriber {
+public:
+  MOCK_CONST_METHOD0(optionsChanged, void());
+};
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

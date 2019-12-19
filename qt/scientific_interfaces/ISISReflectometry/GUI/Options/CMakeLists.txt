@@ -10,6 +10,7 @@ set(OPTIONS_SRC_FILES
 set(OPTIONS_INC_FILES
     IOptionsDialogView.h
     IOptionsDialogPresenter.h
+    IOptionsDialogModel.h
     QtOptionsDialogView.h
     OptionsDialogPresenter.h
     OptionsDialogModel.h

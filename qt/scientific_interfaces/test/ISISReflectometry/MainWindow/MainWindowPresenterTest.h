@@ -57,6 +57,12 @@ public:
     verifyAndClear();
   }
 
+  void testOptionsDialogPresenterSubscribesToMainWindow() {
+    EXPECT_CALL(*m_optionsDialogPresenter, subscribe(_)).Times(1);
+    auto presenter = makePresenter;
+    verifyAndClear();
+  }
+
   void testConstructorAddsBatchPresenterForAllBatchViews() {
     EXPECT_CALL(m_view, batches()).Times(1);
     for (auto batchPresenter : m_batchPresenters)

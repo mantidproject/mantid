@@ -7,6 +7,7 @@
 #ifndef MANTID_ISISREFLECTOMETRY_OPTIONSDIALOGMODEL_H
 #define MANTID_ISISREFLECTOMETRY_OPTIONSDIALOGMODEL_H
 
+#include "IOptionsDialogModel.h"
 #include <map>
 #include <string>
 
@@ -14,16 +15,16 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-class OptionsDialogModel {
+class MANTIDQT_ISISREFLECTOMETRY_DLL OptionsDialogModel: public IOptionsDialogModel {
 public:
   OptionsDialogModel();
   ~OptionsDialogModel() = default;
   void applyDefaultOptions(std::map<std::string, bool> &boolOptions,
-                           std::map<std::string, int> &intOptions);
+                           std::map<std::string, int> &intOptions) override;
   void loadSettings(std::map<std::string, bool> &boolOptions,
-                    std::map<std::string, int> &intOptions);
+                    std::map<std::string, int> &intOptions) override;
   void saveSettings(const std::map<std::string, bool> &boolOptions,
-                    const std::map<std::string, int> &intOptions);
+                    const std::map<std::string, int> &intOptions) override;
 
 private:
   const std::string REFLECTOMETRY_SETTINGS_GROUP = "ISISReflectometryUI";
