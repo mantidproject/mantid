@@ -951,7 +951,13 @@ IndirectFittingModel::getDataForParameterEstimation(
 }
 
 std::vector<double> IndirectFittingModel::getQValuesForData() const {
-  return m_fittingData[TableDatasetIndex{0}]->getQValues();
+  std::vector<double> qValues;
+  for (auto &fitData : m_fittingData) {
+    auto indexQValues = fitData->getQValues();
+    qValues.insert(std::end(qValues), std::begin(indexQValues),
+                   std::end(indexQValues));
+  }
+  return qValues;
 }
 
 } // namespace IDA
