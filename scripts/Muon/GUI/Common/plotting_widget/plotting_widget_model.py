@@ -8,6 +8,7 @@ from __future__ import (absolute_import, division, print_function)
 import numpy as np
 
 from mantid.api import AnalysisDataService
+from matplotlib.container import ErrorbarContainer
 import matplotlib.pyplot as plt
 
 legend_text_size = 7
@@ -98,7 +99,7 @@ class PlotWidgetModel(object):
     # ------------------------------------------------------------------------------------------------------------------
     # Plotting
     # ------------------------------------------------------------------------------------------------------------------
-    def plot_workspace_list(self, ax, workspace_names, workspace_indicies, labels):
+    def plot_workspace_list(self, ax, workspace_names, workspace_indices, labels):
         pass
 
     def add_workspace_to_plot(self, ax, workspace_name, workspace_indices, errors, plot_kwargs):
@@ -190,6 +191,31 @@ class PlotWidgetModel(object):
 
         axis.replace_workspace_artists(workspace)
 
+    def replot_workspace(self, workspace_name, axis, errors, plot_kwargs):
+        """
+        Replot a workspace with different kwargs, and error flag
+        with the intention of keeping the rest of the model unchanged
+        :param workspace_name: Name of workspace to update in plot
+        :param axis: the axis that contains the workspace
+        :param errors: Plotting with errors
+        :param plot_kwargs: kwargs to the plotting
+        :return:
+        """
+        artist_info = axis.tracked_workspaces[workspace_name]
+        for ws_artist in artist_info:
+            for artist in ws_artist._artists:
+                # if the artist in an errorbarCotainer, the first object
+                # in the tuple will contain the matplotlib line object
+                if isinstance(artist, ErrorbarContainer):
+                    color = artist[0].get_color()
+                else:
+                    color = artist.get_color()
+
+                plot_kwargs["color"] = color
+                axis.replot_artist(artist, errors, **plot_kwargs)
+
+        self._update_legend(axis)
+
     def clear_plot_model(self, axes):
         self._remove_all_data_workspaces_from_plot(axes)
         self.plotted_workspaces = []
@@ -241,3 +267,10 @@ class PlotWidgetModel(object):
             ax.legend(prop=dict(size=legend_text_size))
         else:
             ax.legend("")
+
+    # getters
+    def get_axes_titles(self, axes):
+        titles = []
+        for i in range(self.number_of_axes):
+            titles[i] = axes[i].title()
+        return titles

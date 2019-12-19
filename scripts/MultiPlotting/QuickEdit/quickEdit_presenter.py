@@ -37,6 +37,9 @@ class QuickEditPresenter(object):
         index = self._view.find_index(current)
         self._view.set_index(index)
 
+    def clear_subplots(self):
+        self._view.clear_subplots()
+
     def all(self):
         return [self._view.plot_at_index(index) for index in range(1, self._view.number_of_plots())]
 
@@ -54,6 +57,9 @@ class QuickEditPresenter(object):
         if previous == state:
             return
         self._view.set_errors(state)
+
+    def get_errors(self):
+        return self._view.get_errors()
 
     def rm_subplot(self, name):
         current = self._view.current_selection()

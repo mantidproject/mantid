@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import absolute_import, print_function
 
-
 from MultiPlotting.QuickEdit.quickEdit_view import QuickEditView
 from MultiPlotting.QuickEdit.quickEdit_presenter import QuickEditPresenter
 
@@ -20,6 +19,7 @@ class QuickEditWidget(object):
     @property
     def widget(self):
         return self._presenter.widget
+
     """ connect statements"""
 
     def connect_autoscale_changed(self, slot):
@@ -36,16 +36,20 @@ class QuickEditWidget(object):
 
     def connect_plot_selection(self, slot):
         self._presenter.connect_plot_selection(slot)
+
     # add subplot
 
     def add_subplot(self, name):
         self._presenter.add_subplot(name)
 
-    def rm_subplot(self,name):
+    def rm_subplot(self, name):
         self._presenter.rm_subplot(name)
 
+    def clear_subplots(self):
+        self._presenter.clear_subplots()
+
     def get_subplots(self):
-            return self._presenter.all()
+        return self._presenter.all()
 
     def get_selection(self):
         name = self._presenter.widget.current_selection()
@@ -62,5 +66,8 @@ class QuickEditWidget(object):
     def set_errors(self, state):
         self._presenter.set_errors(state)
 
-    def set_mock(self,mock_presenter):
+    def get_errors(self):
+        return self._presenter.get_errors()
+
+    def set_mock(self, mock_presenter):
         self._presenter = mock_presenter

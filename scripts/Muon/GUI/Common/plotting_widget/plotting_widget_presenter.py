@@ -46,6 +46,9 @@ class PlotWidgetPresenter(HomeTabSubWidget):
 
         self.plot_type_changed_notifier = GenericObservable()
 
+        # plotting options
+        self._view.get_plot_options().connect_errors_changed(self.handle_error_selection_changed)
+
         if self.context._frequency_context:
             for ext in FREQUENCY_EXTENSIONS.keys():
                 self._view.addItem(FREQ_PLOT_TYPE + FREQUENCY_EXTENSIONS[ext])
@@ -60,9 +63,18 @@ class PlotWidgetPresenter(HomeTabSubWidget):
 
     def update_view_from_model(self):
         """
-        This is required in order for this presenter to match the base class interface
+        Updates the view from the model, which includes
+        axis limits
+        plot checkbox
         """
-        pass
+        self._view.get_plot_options().set_plot_x_range([10, 20])
+        self._view.get_plot_options().set_plot_y_range([15, 20])
+
+        # update combo box
+        self._view.get_plot_options().clear_subplots()
+        titles = self._model.get_axes_titles(self._view.get_axes())
+        for title in titles:
+            self._view.get_plot_options().add_subplot(title)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Handle user making plotting related changes from GUI
@@ -73,8 +85,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         Handles the group, pair calculation finishing. Checks whether the list of workspaces has changed before doing
         anything as workspaces being modified in place is handled by the ADS handler observer.
         """
-        if self._model.plotted_workspaces == self.get_workspaces_to_plot(self._view.if_raw(),
-                                                                         self._view.get_selected()):
+        if self._model.plotted_workspaces == self.get_workspace_list_to_plot():
             # If the workspace names have not changed the ADS observer should
             # handle any updates
             return
@@ -139,6 +150,21 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         self.plot_type_changed_notifier.notify_subscribers()
         self._model.clear_plot_model(self._view.get_axes())
         self.plot_all_selected_workspaces()
+
+    def handle_error_selection_changed(self, error_state):
+        """
+        Handles error checkbox being changed on the view
+        """
+        for workspace in self._model.plotted_workspaces:
+            ax = self.get_workspace_plot_axis(workspace)
+            label = self.get_workspace_legend_label(workspace)
+            plot_kwargs = {'distribution': True, 'autoscale_on_update': False,
+                           'label': label}
+            self._model.replot_workspace(workspace, ax, error_state, plot_kwargs)
+
+        # scale the axis and set title
+        self._model.set_x_lim(self.get_domain(), self._view.get_axes())
+        self._view.force_redraw()
 
     def handle_plot_tiled_changed(self, state):
         """
@@ -287,6 +313,8 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         """
 
         tiled = self._view.is_tiled_plot()
+        errors = self._view.get_plot_options().get_errors()
+        # get the workspace list, formed from the selected groups / pairs
         workspace_list = self.get_workspace_list_to_plot()
 
         for ws in self._model.plotted_workspaces:
@@ -297,13 +325,14 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             if workspace not in self._model.plotted_workspaces:
                 ax = self.get_workspace_plot_axis(workspace)
                 label = self.get_workspace_legend_label(workspace)
-                self._model.add_workspace_to_plot(ax, workspace, [0], errors=True,
+                self._model.add_workspace_to_plot(ax, workspace, [0], errors=errors,
                                                   plot_kwargs={'distribution': True, 'autoscale_on_update': False,
                                                                'label': label})
                 self._model.add_workspace_to_plotted_workspaces(workspace)
 
         self._view.set_fig_titles(self.get_plot_title(tiled, self._view.get_tiled_by_type()))
         self._model.set_x_lim(self.get_domain(), self._view.get_axes())
+        self.update_view_from_model()
         self._view.force_redraw()
 
         self._model.plotted_workspaces_inverse_binning = {
@@ -470,6 +499,14 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             return "Frequency"
         else:
             return "Time"
+
+    def get_x_lim(self, subplot):
+        left, right = self._view.get_axes()[subplot].xlim()
+        print(left, right)
+
+    def get_y_lim(self, subplot):
+        left, right = self._view.get_axes()[subplot].ylim()
+        print(left, right)
 
     # Note: These methods should be implemented as lower level properties
     # as currently they are specialised methods dependent on the workspace name format.

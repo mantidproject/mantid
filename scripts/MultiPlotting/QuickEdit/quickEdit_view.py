@@ -67,6 +67,10 @@ class QuickEditView(QtWidgets.QWidget):
     def rm_subplot(self, index):
         self.plot_selector.removeItem(index)
 
+    def clear_subplots(self):
+        self.plot_selector.clear()
+        self.plot_selector.addItem("All")
+
     def connect_plot_selection(self, slot):
         self.plot_selector.currentIndexChanged.connect(slot)
 

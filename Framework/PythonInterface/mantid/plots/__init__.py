@@ -466,7 +466,6 @@ class MantidAxes(Axes):
         :func:`plotfunctions.errorbar`
         """
         kwargs['distribution'] = not self.get_artist_normalization_state(artist)
-
         workspace, spec_num = self.get_artists_workspace_and_spec_num(artist)
         self.remove_artists_if(lambda art: art == artist)
         workspace_index = workspace.getIndexFromSpectrumNumber(spec_num)

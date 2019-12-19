@@ -11,6 +11,7 @@ import Muon.GUI.Common.message_box as message_box
 from matplotlib.figure import Figure
 from mantidqt.plotting.functions import get_plot_fig
 from matplotlib.backends.qt_compat import is_pyqt5
+from MultiPlotting.QuickEdit.quickEdit_widget import QuickEditWidget
 
 if is_pyqt5():
     from matplotlib.backends.backend_qt5agg import (
@@ -89,6 +90,10 @@ class PlotWidgetView(QtWidgets.QWidget):
         self.horizontal_layout.addStretch(0)
         self.horizontal_layout.addSpacing(50)
 
+        # plotting options
+        self.plot_options = QuickEditWidget(self)
+        self.plot_options.widget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+
         self.vertical_layout = QtWidgets.QVBoxLayout()
         self.vertical_layout.setObjectName("verticalLayout")
         self.vertical_layout.addItem(self.horizontal_layout)
@@ -123,6 +128,8 @@ class PlotWidgetView(QtWidgets.QWidget):
         self.vertical_layout.addWidget(self.toolBar)
         self.vertical_layout.addWidget(self.fig.canvas)
 
+        self.vertical_layout.addWidget(self.plot_options.widget)
+
         self.setLayout(self.widget_layout)
 
     # for docking
@@ -135,6 +142,9 @@ class PlotWidgetView(QtWidgets.QWidget):
 
     def if_overlay(self):
         return self.overlay.isChecked()
+
+    def get_plot_options(self):
+        return self.plot_options
 
     def if_keep(self):
         return self.keep.isChecked()
@@ -191,10 +201,13 @@ class PlotWidgetView(QtWidgets.QWidget):
             self.fig.axes[i].set_title(title)
 
     def force_redraw(self):
-        toolbar = self.fig.canvas.toolbar
-        toolbar.update()
+        self.update_toolbar()
         self.fig.tight_layout()
         self.fig.canvas.draw()
+
+    def update_toolbar(self):
+        toolbar = self.fig.canvas.toolbar
+        toolbar.update()
 
     def set_tiled_checkbox_state(self, state):
         self.plot_type_selector.setChecked(state)
