@@ -118,6 +118,24 @@ public:
     verifyAndClear();
   }
 
+  void testWarnProcessAllWhenReductionResumed() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_jobRunner, notifyReductionResumed()).Times(1);
+    presenter->notifyResumeReductionRequested();
+    EXPECT_CALL(*m_jobRunner, getProcessAll()).Times(1);
+    EXPECT_CALL(m_mainPresenter, isProcessAllPrevented()).Times(1);
+    verifyAndClear();
+  }
+
+  void testWarnProcessPartialGroupWhenReductionResumed() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_jobRunner, notifyReductionResumed()).Times(1);
+    presenter->notifyResumeReductionRequested();
+    EXPECT_CALL(*m_jobRunner, getProcessPartial()).Times(1);
+    EXPECT_CALL(m_mainPresenter, isProcessPartialGroupPrevented()).Times(1);
+    verifyAndClear();
+  }
+
   void testChildPresentersUpdatedWhenAnyBatchReductionResumed() {
     auto presenter = makePresenter();
     EXPECT_CALL(*m_runsPresenter, notifyAnyBatchReductionResumed()).Times(1);

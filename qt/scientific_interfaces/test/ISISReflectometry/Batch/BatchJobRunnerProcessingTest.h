@@ -36,6 +36,7 @@ public:
     TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
     TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, hasSelection);
     TS_ASSERT_EQUALS(jobRunner.m_processAll, !hasSelection);
+    TS_ASSERT_EQUALS(jobRunner.m_processPartial, hasSelection);
     verifyAndClear();
   }
 
@@ -53,6 +54,7 @@ public:
     TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), true);
     TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, true);
     TS_ASSERT_EQUALS(jobRunner.m_processAll, true);
+    TS_ASSERT_EQUALS(jobRunner.m_processPartial, false);
     verifyAndClear();
   }
 
@@ -67,6 +69,140 @@ public:
     auto jobRunner = makeJobRunner();
     jobRunner.setReprocessFailedItems(true);
     TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, true);
+    verifyAndClear();
+  }
+
+  void testReductionResumedWithNoSelection() {
+    auto jobRunner = makeJobRunner();
+    jobRunner.notifyAutoreductionResumed();
+    auto groupOne = makeGroupWithOneRow();
+    auto groupTwo = makeGroupWithOneRow();
+    TS_ASSERT_EQUALS(jobRunner.isProcessing(), true);
+    TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
+    TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, false);
+    TS_ASSERT_EQUALS(jobRunner.m_processAll, true);
+    TS_ASSERT_EQUALS(jobRunner.m_processPartial, false);
+    verifyAndClear();
+  }
+
+  void testReductionResumedWithBothGroupsSelected() {
+    auto jobRunner = makeJobRunner();
+    jobRunner.notifyAutoreductionResumed();
+    auto groupOne = makeGroupWithOneRow();
+    auto groupTwo = makeGroupWithOneRow();
+    selectGroup(jobRunner, 0);
+    selectGroup(jobRunner, 1);
+    TS_ASSERT_EQUALS(jobRunner.isProcessing(), true);
+    TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
+    TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, true);
+    TS_ASSERT_EQUALS(jobRunner.m_processAll, true);
+    TS_ASSERT_EQUALS(jobRunner.m_processPartial, false);
+    verifyAndClear();
+  }
+
+  void testReductionResumedWithBothGroupsSelectedAndEmptyGroupNotSelected() {
+    auto jobRunner = makeJobRunner();
+    jobRunner.notifyAutoreductionResumed();
+    auto groupOne = makeGroupWithOneRow();
+    auto groupTwo = makeGroupWithOneRow();
+    auto emptyGroup = makeEmptyGroup();
+    selectGroup(jobRunner, 0);
+    selectGroup(jobRunner, 1);
+    TS_ASSERT_EQUALS(jobRunner.isProcessing(), true);
+    TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
+    TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, true);
+    TS_ASSERT_EQUALS(jobRunner.m_processAll, true);
+    TS_ASSERT_EQUALS(jobRunner.m_processPartial, false);
+    verifyAndClear();
+  }
+
+  void testReductionResumedWithGroupAndRowSelected() {
+    auto jobRunner = makeJobRunner();
+    jobRunner.notifyAutoreductionResumed();
+    auto groupOne = makeGroupWithOneRow();
+    auto groupTwo = makeGroupWithOneRow();
+    selectGroup(jobRunner, 0);
+    selectRow(jobRunner, 1, 0);
+    TS_ASSERT_EQUALS(jobRunner.isProcessing(), true);
+    TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
+    TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, true);
+    TS_ASSERT_EQUALS(jobRunner.m_processAll, true);
+    TS_ASSERT_EQUALS(jobRunner.m_processPartial, false);
+    verifyAndClear();
+  }
+
+  void testReductionResumedWithGroupAndNonEmptyRowSelected() {
+    auto jobRunner = makeJobRunner();
+    jobRunner.notifyAutoreductionResumed();
+    auto groupOne = makeGroupWithOneRow();
+    auto groupTwo = makeGroupWithOneRowAndOneEmptyRow();
+    selectGroup(jobRunner, 0);
+    selectRow(jobRunner, 1, 0);
+    TS_ASSERT_EQUALS(jobRunner.isProcessing(), true);
+    TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
+    TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, true);
+    TS_ASSERT_EQUALS(jobRunner.m_processAll, true);
+    TS_ASSERT_EQUALS(jobRunner.m_processPartial, false);
+    verifyAndClear();
+  }
+
+  void testReductionResumedWithAllRowsSelected() {
+    auto jobRunner = makeJobRunner();
+    jobRunner.notifyAutoreductionResumed();
+    auto groupOne = makeGroupWithOneRow();
+    auto groupTwo = makeGroupWithOneRow();
+    selectRow(jobRunner, 0, 0);
+    selectRow(jobRunner, 1, 0);
+    TS_ASSERT_EQUALS(jobRunner.isProcessing(), true);
+    TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
+    TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, true);
+    TS_ASSERT_EQUALS(jobRunner.m_processAll, true);
+    TS_ASSERT_EQUALS(jobRunner.m_processPartial, false);
+    verifyAndClear();
+  }
+
+  void testReductionResumedWithAllNonEmptyRowsSelected() {
+    auto jobRunner = makeJobRunner();
+    jobRunner.notifyAutoreductionResumed();
+    auto groupOne = makeGroupWithOneRowAndOneEmptyRow();
+    auto groupTwo = makeGroupWithOneRowAndOneEmptyRow();
+    selectRow(jobRunner, 0, 0);
+    selectRow(jobRunner, 1, 0);
+    TS_ASSERT_EQUALS(jobRunner.isProcessing(), true);
+    TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
+    TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, true);
+    TS_ASSERT_EQUALS(jobRunner.m_processAll, true);
+    TS_ASSERT_EQUALS(jobRunner.m_processPartial, false);
+    verifyAndClear();
+  }
+
+  void testReductionResumedWithSomeRowsSelected() {
+    auto jobRunner = makeJobRunner();
+    jobRunner.notifyAutoreductionResumed();
+    auto groupOne = makeGroupWithTwoRows();
+    auto groupTwo = makeGroupWithTwoRows();
+    selectRow(jobRunner, 0, 1);
+    selectRow(jobRunner, 1, 0);
+    TS_ASSERT_EQUALS(jobRunner.isProcessing(), true);
+    TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
+    TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, true);
+    TS_ASSERT_EQUALS(jobRunner.m_processAll, false);
+    TS_ASSERT_EQUALS(jobRunner.m_processPartial, true);
+    verifyAndClear();
+  }
+
+  void testReductionResumedWithGroupAndSomeRowsSelected() {
+    auto jobRunner = makeJobRunner();
+    jobRunner.notifyAutoreductionResumed();
+    auto groupOne = makeGroupWithTwoRows();
+    auto groupTwo = makeGroupWithTwoRows();
+    selectGroup(jobRunner, 0);
+    selectRow(jobRunner, 1, 0);
+    TS_ASSERT_EQUALS(jobRunner.isProcessing(), true);
+    TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
+    TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, true);
+    TS_ASSERT_EQUALS(jobRunner.m_processAll, false);
+    TS_ASSERT_EQUALS(jobRunner.m_processPartial, true);
     verifyAndClear();
   }
 
