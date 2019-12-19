@@ -16,6 +16,7 @@ import sys
 import tempfile
 import time
 import unittest
+import datetime
 
 from mantid.api import AnalysisDataService as ADS
 from mantid.kernel import ConfigService
@@ -36,12 +37,22 @@ class ProjectRecoveryTest(unittest.TestCase):
         self.multifileinterpreter = mock.MagicMock()
         self.pr = ProjectRecovery(self.multifileinterpreter)
         self.working_directory = tempfile.mkdtemp()
-        # Make sure there is actually a different modified time on the files by using sleeps
+        # Make sure there is actually a different modified time on the files
         self.firstPath = tempfile.mkdtemp()
-        time.sleep(0.5)
         self.secondPath = tempfile.mkdtemp()
-        time.sleep(0.5)
         self.thirdPath = tempfile.mkdtemp()
+
+        # offset the date modified stamps in the past in case future modified dates
+        # cause any problems
+        finalFileDateTime = datetime.datetime.fromtimestamp(os.path.getmtime(self.thirdPath))
+
+        dateoffset = finalFileDateTime - datetime.timedelta(hours=2)
+        modTime = time.mktime(dateoffset.timetuple())
+        os.utime(self.firstPath, (modTime, modTime))
+        dateoffset = finalFileDateTime - datetime.timedelta(hours=1)
+        modTime = time.mktime(dateoffset.timetuple())
+        os.utime(self.secondPath, (modTime, modTime))
+
 
     def tearDown(self):
         ADS.clear()
@@ -50,6 +61,15 @@ class ProjectRecoveryTest(unittest.TestCase):
 
         if os.path.exists(self.working_directory):
             shutil.rmtree(self.working_directory)
+
+        if os.path.exists(self.firstPath):
+            shutil.rmtree(self.firstPath)
+
+        if os.path.exists(self.secondPath):
+            shutil.rmtree(self.secondPath)
+
+        if os.path.exists(self.thirdPath):
+            shutil.rmtree(self.thirdPath)
 
     def test_constructor_settings_are_set(self):
         # Test the paths set in the constructor that are generated.
