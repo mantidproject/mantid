@@ -32,6 +32,8 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         self._view.on_plot_type_changed(self.handle_plot_type_changed)
         self._view.on_tiled_by_type_changed(self.handle_tiled_by_changed_on_view)
         self._view.on_plot_tiled_changed(self.handle_plot_tiled_changed)
+        self._view.on_x_lims_changed_in_view(self.handle_x_axis_limits_changed_in_view)
+        self._view.on_y_lims_changed_in_view(self.handle_y_axis_limits_changed_in_view)
 
         self.input_workspace_observer = GenericObserver(self.handle_data_updated)
         self.added_group_or_pair_observer = GenericObserverWithArgPassing(
@@ -214,11 +216,20 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         self._view.get_plot_options().set_plot_y_range([ymin, ymax])
         self._view.force_redraw()
 
-    def handle_subplot_choice_changed_in_view(self, index):
-        if index == 0:  # this is all
-            pass
-        else:
-            pass
+    def handle_x_axis_limits_changed_in_view(self, axes):
+        print("GOT HERE")
+        subplots = self._view.get_plot_options().get_selection()
+        figure_axes = [self._view.get_axes()[int(index)-1] for index in subplots]
+        if axes in figure_axes:
+            xmin, xmax = axes.get_xlim()
+            self._view.get_plot_options().set_plot_x_range([xmin, xmax])
+
+    def handle_y_axis_limits_changed_in_view(self, axes):
+        subplots = self._view.get_plot_options().get_selection()
+        figure_axes = [self._view.get_axes()[int(index)-1] for index in subplots]
+        if axes in figure_axes:
+            ymin, ymax = axes.get_ylim()
+            self._view.get_plot_options().set_plot_y_range([ymin, ymax])
 
     def handle_plot_tiled_changed(self, state):
         """

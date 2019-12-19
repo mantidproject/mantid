@@ -224,5 +224,13 @@ class PlotWidgetView(QtWidgets.QWidget):
         elif state == 2:
             return True
 
+    def on_x_lims_changed_in_view(self, slot):
+        self.get_axes()[0].callbacks.connect('xlim_changed', slot)
+
+    def on_y_lims_changed_in_view(self, slot):
+        self.get_axes()[0].callbacks.connect('ylim_changed', slot)
+
+
+
     def close(self):
         self.fig.canvas.close()
