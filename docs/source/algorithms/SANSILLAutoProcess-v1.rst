@@ -146,7 +146,6 @@ Output:
     ax.set_ylabel('d$\sigma$/d$\Omega$ ($cm^{-1}$)')
 
     #fig.show()
-    mtd.clear()
 
 .. categories::
 
