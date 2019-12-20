@@ -540,7 +540,7 @@ void TimeSeriesProperty<TYPE>::splitByTime(
   }
 }
 
-/// Split this TimeSeriresProperty by a vector of time with N entries,
+/// Split this TimeSeriesProperty by a vector of time with N entries,
 /// and by the wsIndex workspace index defined by inputWorkspaceIndicies
 /// Requirements:
 /// vector output must be defined before this method is called
@@ -564,15 +564,15 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
   sortIfNecessary();
 
   // work on m_values, m_size, and m_time
-  auto const currentTimes = timesAsVector();
-  auto const currentValues = valuesAsVector();
+  auto const propertyTimes = timesAsVector();
+  auto const propertyValues = valuesAsVector();
   size_t index_splitter = 0;
 
   // move splitter index such that the first entry of TSP is before the stop
   // time of a splitter
-  DateAndTime firstPropTime = currentTimes[0];
-  auto firstFilterTime = std::lower_bound(timeToFilterTo.begin(),
-                                          timeToFilterTo.end(), firstPropTime);
+  auto const firstPropertyTime = propertyTimes[0];
+  auto firstFilterTime = std::lower_bound(
+      timeToFilterTo.begin(), timeToFilterTo.end(), firstPropertyTime);
   if (firstFilterTime == timeToFilterTo.end()) {
     // do nothing as the first TimeSeriesProperty entry's time is before any
     // splitters
@@ -582,13 +582,11 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
     index_splitter = firstFilterTime - timeToFilterTo.begin() - 1;
   }
 
-  DateAndTime filterStartTime = timeToFilterTo[index_splitter];
-  DateAndTime filterEndTime = timeToFilterTo[index_splitter + 1];
-
   // move along the entries to find the entry inside the current splitter
-  auto firstEntryInSplitter = std::lower_bound(
-      currentTimes.begin(), currentTimes.end(), filterStartTime);
-  if (firstEntryInSplitter == currentTimes.end()) {
+  auto const filterStartTime = timeToFilterTo[index_splitter];
+  auto firstPropertyInSplitter = std::upper_bound(
+      propertyTimes.begin(), propertyTimes.end(), filterStartTime);
+  if (firstPropertyInSplitter == propertyTimes.end()) {
     // the first splitter's start time is LATER than the last TSP entry, then
     // there won't be any
     // TSP entry to be split into any wsIndex splitter.
@@ -600,47 +598,56 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
     return;
   }
 
-  // first splitter start time is between firstEntryInSplitter and the one
-  // before it. so the index for firstEntryInSplitter is the first TSP entry
+  // first splitter start time is between firstPropertyInSplitter and the one
+  // before it. so the index for firstPropertyInSplitter is the first TSP entry
   // in the splitter
-  size_t timeIndex = firstEntryInSplitter - currentTimes.begin();
-  firstPropTime = *firstEntryInSplitter;
+  auto firstPropertyIndex = firstPropertyInSplitter - propertyTimes.begin();
+  if (firstPropertyIndex > 0)
+    --firstPropertyIndex;
+  // We may add the same time series values to multiple workspace groups, so
+  // this map keeps track of the current property index for each workspace
+  // index. Initialise them all to firstPropertyIndex.
+  std::map<int, size_t> propertyIndexPerWorkspaceIndex;
+  std::for_each(inputWorkspaceIndicies.cbegin(), inputWorkspaceIndicies.cend(),
+                [&](int wsIndex) {
+                  propertyIndexPerWorkspaceIndex[wsIndex] = firstPropertyIndex;
+                });
 
+  // Loop through the splitters
   for (; index_splitter < timeToFilterTo.size() - 1; ++index_splitter) {
-    int wsIndex = inputWorkspaceIndicies[index_splitter];
+    const int wsIndex = inputWorkspaceIndicies[index_splitter];
+    auto &propertyIndex = propertyIndexPerWorkspaceIndex[wsIndex];
+    auto currentOutput = output[wsIndex];
 
-    filterStartTime = timeToFilterTo[index_splitter];
-    filterEndTime = timeToFilterTo[index_splitter + 1];
+    // Check if we have run out of TSP values
+    if (propertyIndex >= propertyTimes.size()) {
+      // Add the last TSP value to the current output (unless it already exists)
+      auto currentTime = propertyTimes.back();
+      if (currentOutput->size() == 0 || currentOutput->lastTime() < currentTime)
+        currentOutput->addValue(currentTime, propertyValues.back());
+      // Proceed to the next output
+      continue;
+    }
 
-    // get the first entry index (overlap)
-    if (timeIndex > 0)
-      --timeIndex;
-
-    // add the continuous entries to same wsIndex time series property
-    const size_t numEntries = currentTimes.size();
-
-    // Add properties to the current wsIndex.
-    if (timeIndex >= numEntries) {
-      // We have run out of TSP entries, so use the last TSP value
-      // for all remaining outputs
-      auto currentTime = currentTimes.back();
-      if (output[wsIndex]->size() == 0 ||
-          output[wsIndex]->lastTime() != currentTime) {
-        output[wsIndex]->addValue(currentTime, currentValues.back());
+    // Add TSP values until we run out or go past the current filter range
+    const auto filterStartTime = timeToFilterTo[index_splitter];
+    const auto filterEndTime = timeToFilterTo[index_splitter + 1];
+    for (; propertyIndex < propertyTimes.size(); ++propertyIndex) {
+      // If the property time is past our splitter range then we won't find any
+      // more so quit
+      auto const currentTime = propertyTimes[propertyIndex];
+      if (currentTime >= filterEndTime)
+        break;
+      // If the splitter is in or beyond the next TSP's range, then skip this
+      // one
+      if (propertyIndex < propertyTimes.size() - 1) {
+        auto const nextTime = propertyTimes[propertyIndex + 1];
+        if (nextTime <= filterStartTime)
+          continue;
       }
-    } else {
-      // Add TSP values until we run out or go past the current filter
-      // end time.
-      for (; timeIndex < numEntries; ++timeIndex) {
-        auto currentTime = currentTimes[timeIndex];
-        if (output[wsIndex]->size() == 0 ||
-            output[wsIndex]->lastTime() < currentTime) {
-          // avoid to add duplicate entry
-          output[wsIndex]->addValue(currentTime, currentValues[timeIndex]);
-        }
-        if (currentTime > filterEndTime)
-          break;
-      }
+      // Add this TSP value (unless it already exists)
+      if (currentOutput->size() == 0 || currentOutput->lastTime() < currentTime)
+        currentOutput->addValue(currentTime, propertyValues[propertyIndex]);
     }
   }
 

@@ -845,23 +845,20 @@ public:
     // Exam the split entries
     TimeSeriesProperty<int> *out_0 = outputs[0];
     // FIXME - Check whether out_0 is correct!
-    TS_ASSERT_EQUALS(out_0->size(), 3);
+    TS_ASSERT_EQUALS(out_0->size(), 2);
     TS_ASSERT_EQUALS(out_0->nthValue(0), 2);
     TS_ASSERT_EQUALS(out_0->nthValue(1), 3);
-    TS_ASSERT_EQUALS(out_0->nthValue(2), 4);
 
     TimeSeriesProperty<int> *out_1 = outputs[1];
-    TS_ASSERT_EQUALS(out_1->size(), 5);
+    TS_ASSERT_EQUALS(out_1->size(), 4);
     TS_ASSERT_EQUALS(out_1->nthValue(0), 1);
     TS_ASSERT_EQUALS(out_1->nthValue(1), 2);
     TS_ASSERT_EQUALS(out_1->nthValue(2), 3);
     TS_ASSERT_EQUALS(out_1->nthValue(3), 4);
-    TS_ASSERT_EQUALS(out_1->nthValue(4), 5);
 
     TimeSeriesProperty<int> *out_2 = outputs[2];
-    TS_ASSERT_EQUALS(out_2->size(), 2);
+    TS_ASSERT_EQUALS(out_2->size(), 1);
     TS_ASSERT_EQUALS(out_2->nthValue(0), 2);
-    TS_ASSERT_EQUALS(out_2->nthValue(1), 3);
 
     TimeSeriesProperty<int> *out_3 = outputs[3];
     TS_ASSERT_EQUALS(out_3->size(), 7);
@@ -1027,9 +1024,11 @@ public:
     // split time series property
     log.splitByTimeVector(vec_split_times, vec_split_target, outputs);
 
-    // test
+    // test - all splitters are a fraction above 16:17:00 so lie entirely
+    // inside the first log range
     for (auto &it : outputs) {
-      TS_ASSERT_EQUALS(it->size(), 2);
+      TS_ASSERT_EQUALS(it->size(), 1);
+      TS_ASSERT_EQUALS(it->nthValue(0), 1);
       delete it;
       it = nullptr;
     }

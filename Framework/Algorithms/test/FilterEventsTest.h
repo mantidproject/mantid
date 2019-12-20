@@ -110,14 +110,32 @@ public:
    *      events
    *
    *  Splitter-log test: each output workspace should have a sample log named
-   *"splitter", which
-   *  is created by FilterEvents to record the splitters for the corresponding
-   *workspace
+   * "splitter", which is created by FilterEvents to record the splitters for
+   * the corresponding workspace
    *  1: 20000000000, 20035000000, 0
    *  2: 20035000000, 20195000000, 1
    *  3: 20200000000, 20265000000, 2
    *  4: 20300000000, 20365000000, 2
    *  5: 20400000000, 20465000000, 2
+   *
+   * Proton charge: the input workspace has this proton charge time series:
+   *  1: Time=20000000000, proton_charge=1
+   *  2: Time=20100000000, proton_charge=1
+   *  3: Time=20200000000, proton_charge=1
+   *  4: Time=20300000000, proton_charge=1
+   *  5: Time=20400000000, proton_charge=1
+   *
+   * These times overlap the splitter ranges as follows:
+   *  Splitter 1: TSP 1
+   *  Splitter 2: TSP 1 and TSP 2
+   *  Splitter 3: TSP 3
+   *  Splitter 4: TSP 4
+   *  Splitter 5: TSP 5
+   *
+   * Summing the proton_charge from these TSPs over the splitter groups gives:
+   *  Group 0: 1
+   *  Group 1: 2
+   *  Group 2: 3
    */
   void test_FilterNoCorrection() {
     // Create EventWorkspace and SplittersWorkspace
@@ -158,7 +176,7 @@ public:
     TS_ASSERT(filteredws0);
     TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
     TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 4);
-    TS_ASSERT_EQUALS(filteredws0->run().getProtonCharge(), 2);
+    TS_ASSERT_EQUALS(filteredws0->run().getProtonCharge(), 1);
 
     // check splitter log
     TS_ASSERT(filteredws0->run().hasProperty("splitter"));
@@ -180,7 +198,7 @@ public:
             AnalysisDataService::Instance().retrieve("FilteredWS01_1"));
     TS_ASSERT(filteredws1);
     TS_ASSERT_EQUALS(filteredws1->getSpectrum(1).getNumberEvents(), 16);
-    TS_ASSERT_EQUALS(filteredws1->run().getProtonCharge(), 3);
+    TS_ASSERT_EQUALS(filteredws1->run().getProtonCharge(), 2);
 
     // check splitter log
     TS_ASSERT(filteredws0->run().hasProperty("splitter"));
