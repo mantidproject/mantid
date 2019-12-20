@@ -113,6 +113,20 @@ void ConvFunctionModel::checkConvolution(IFunction_sptr fun) {
       m_fitType = FitType::TeixeiraWater;
       m_isQDependentFunction = true;
       isFitTypeSet = true;
+    } else if (name == "StretchedExpFT") {
+      if (isFitTypeSet) {
+        throw std::runtime_error("Function has wrong structure.");
+      }
+      m_fitType = FitType::StretchedExpFT;
+      m_isQDependentFunction = false;
+      isFitTypeSet = true;
+    } else if (name == "ElasticDiffSphere") {
+      if (isFitTypeSet) {
+        throw std::runtime_error("Function has wrong structure.");
+      }
+      m_fitType = FitType::ElasticDiffSphere;
+      m_isQDependentFunction = true;
+      isFitTypeSet = true;
     } else if (name == "DeltaFunction") {
       m_hasDeltaFunction = true;
     } else {
@@ -138,11 +152,25 @@ void ConvFunctionModel::checkComposite(IFunction_sptr fun) {
       m_isQDependentFunction = false;
       isFitTypeSet = true;
 
+    } else if (name == "StretchedExpFT") {
+      if (isFitTypeSet) {
+        throw std::runtime_error("Function has wrong structure.");
+      }
+      m_fitType = FitType::StretchedExpFT;
+      m_isQDependentFunction = false;
+      isFitTypeSet = true;
     } else if (name == "TeixeiraWaterSQE") {
       if (isFitTypeSet) {
         throw std::runtime_error("Function has wrong structure.");
       }
       m_fitType = FitType::TeixeiraWater;
+      m_isQDependentFunction = true;
+      isFitTypeSet = true;
+    } else if (name == "ElasticDiffSphere") {
+      if (isFitTypeSet) {
+        throw std::runtime_error("Function has wrong structure.");
+      }
+      m_fitType = FitType::ElasticDiffSphere;
       m_isQDependentFunction = true;
       isFitTypeSet = true;
     } else if (name == "DeltaFunction") {
