@@ -262,7 +262,7 @@ public:
     fitResolutions.emplace_back(pair1);
     fitResolutions.emplace_back(pair2);
 
-    model.setModel("", fitResolutions, "", false);
+    model.setModel("", fitResolutions, "", false, std::vector<double>(), false);
 
     auto fitFunctionAsString = model.getFitFunction()->asString();
     TS_ASSERT_EQUALS(
