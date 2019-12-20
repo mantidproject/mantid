@@ -158,27 +158,27 @@ API::Workspace_sptr LoadAscii2::readTable(std::ifstream &file) {
   // the first with column names
   // the second with column types
   // Then we need data, with the same number of columns as the first two lines
-  size_t colNames = 0;
-  size_t colTypes = 0;
-  size_t colData = 0;
-  std::string line;
-  std::list<std::string> names;
-  std::list<std::string> types;
-  std::list<std::string> data;
+
+
   try {
+		size_t colNames = 0;
+		size_t colTypes = 0;
+		std::string line;
+		std::list<std::string> names;
+		std::list<std::string> types;
+		std::list<std::string> data;
 
     while (getline(file, line)) {
       boost::trim(line);
 
       std::list<std::string> columns;
-      size_t lineCols = 0;
 
       if (!line.empty()) {
         // if line starts with a comment
         if (line.at(0) == m_comment.at(0)) {
           // remove the comment character
           line.erase(0, 1);
-          lineCols = this->splitIntoColumns(columns, line);
+          size_t lineCols = this->splitIntoColumns(columns, line);
           if (colNames == 0) {
             colNames = lineCols;
             names = columns;
@@ -196,7 +196,7 @@ API::Workspace_sptr LoadAscii2::readTable(std::ifstream &file) {
           break;
         }
 
-        colData = this->splitIntoColumns(data, line);
+        size_t colData = this->splitIntoColumns(data, line);
         if (colNames > 0 && colNames == colTypes && colTypes == colData) {
           // we seem to have a table workspace
           // if we have no already created a workspace
