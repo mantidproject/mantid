@@ -564,7 +564,8 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
   sortIfNecessary();
 
   // work on m_values, m_size, and m_time
-  auto currentTimes = timesAsVector();
+  auto const currentTimes = timesAsVector();
+  auto const currentValues = valuesAsVector();
   size_t index_splitter = 0;
 
   // move splitter index such that the first entry of TSP is before the stop
@@ -605,8 +606,7 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
   size_t timeIndex = firstEntryInSplitter - currentTimes.begin();
   firstPropTime = *firstEntryInSplitter;
 
-  bool destinationPartiallyFilled(false);
-  for (; index_splitter != timeToFilterTo.size() - 1; index_splitter++) {
+  for (; index_splitter < timeToFilterTo.size() - 1; ++index_splitter) {
     int wsIndex = inputWorkspaceIndicies[index_splitter];
 
     filterStartTime = timeToFilterTo[index_splitter];
@@ -619,46 +619,28 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
     // add the continuous entries to same wsIndex time series property
     const size_t numEntries = currentTimes.size();
 
-    // Put TSP's entries into the corresponding ws index
-    for (; timeIndex < numEntries; timeIndex++) {
+    // Add properties to the current wsIndex.
+    if (timeIndex >= numEntries) {
+      // We have run out of TSP entries, so use the last TSP value
+      // for all remaining outputs
+      auto currentTime = currentTimes.back();
       if (output[wsIndex]->size() == 0 ||
-          output[wsIndex]->lastTime() < currentTimes[timeIndex]) {
-        // avoid to add duplicate entry
-        output[wsIndex]->addValue(m_values[timeIndex].time(),
-                                  m_values[timeIndex].value());
+          output[wsIndex]->lastTime() != currentTime) {
+        output[wsIndex]->addValue(currentTime, currentValues.back());
       }
-
-      const size_t nextEntryIndex = timeIndex + 1;
-      if (nextEntryIndex < numEntries &&
-          currentTimes[nextEntryIndex] > filterEndTime) {
-        // We are beyond the final filter time
-        if (output[wsIndex]->lastTime() < m_values[nextEntryIndex].time()) {
-          // avoid the duplicate cases occurred in fast frequency issue
-          output[wsIndex]->addValue(m_values[nextEntryIndex].time(),
-                                    m_values[nextEntryIndex].value());
+    } else {
+      // Add TSP values until we run out or go past the current filter
+      // end time.
+      for (; timeIndex < numEntries; ++timeIndex) {
+        auto currentTime = currentTimes[timeIndex];
+        if (output[wsIndex]->size() == 0 ||
+            output[wsIndex]->lastTime() < currentTime) {
+          // avoid to add duplicate entry
+          output[wsIndex]->addValue(currentTime, currentValues[timeIndex]);
         }
-        ++timeIndex;
-        break;
+        if (currentTime > filterEndTime)
+          break;
       }
-    } // End of adding properties to current ws index
-
-    if (timeIndex == numEntries) {
-      destinationPartiallyFilled = true;
-    }
-  }
-
-  // Still in 'continue search'-while-loop.  But the TSP runs over before
-  // splitters.
-  // Therefore, the rest of the chopper must have one more entry added!
-  if (destinationPartiallyFilled) {
-    for (size_t isplitter = index_splitter;
-         isplitter < timeToFilterTo.size() - 1; ++isplitter) {
-
-      const size_t targetWsIndex = inputWorkspaceIndicies[isplitter];
-      if (output[targetWsIndex]->size() == 0 ||
-          output[targetWsIndex]->lastTime() != m_values.back().time())
-        output[targetWsIndex]->addValue(m_values.back().time(),
-                                        m_values.back().value());
     }
   }
 
