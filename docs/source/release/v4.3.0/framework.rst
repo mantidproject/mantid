@@ -9,6 +9,9 @@ Framework Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+* Fixed an uncaught exception when plotting logs on single spectrum workspaces in mantidworkbench
+* Save the units for single value logs in :ref:`SaveNexusProcessed <algm-SaveNexusProcessed>`
+
 Concepts
 --------
 
