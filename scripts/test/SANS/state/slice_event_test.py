@@ -5,13 +5,12 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-import unittest
-import mantid
 
-from sans.state.slice_event import (StateSliceEvent, get_slice_event_builder)
-from sans.state.data import get_data_builder
+import unittest
+
 from sans.common.enums import (SANSFacility, SANSInstrument)
-from state_test_helper import (assert_validate_error)
+from sans.state.data import get_data_builder
+from sans.state.slice_event import (StateSliceEvent, get_slice_event_builder)
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
@@ -22,7 +21,8 @@ class StateSliceEventTest(unittest.TestCase):
     def test_that_raises_when_only_one_time_is_set(self):
         state = StateSliceEvent()
         state.start_time = [1.0, 2.0]
-        assert_validate_error(self, ValueError, state)
+        with self.assertRaises(ValueError):
+            state.validate()
         state.end_time = [2.0, 3.0]
 
     def test_validate_method_raises_value_error_for_mismatching_start_and_end_time_length(self):

@@ -58,13 +58,13 @@ using namespace DataObjects;
 using DataObjects::EventList;
 using DataObjects::EventWorkspace;
 using DataObjects::EventWorkspace_sptr;
-using Types::Core::DateAndTime;
-using Types::Event::TofEvent;
 using std::ifstream;
 using std::runtime_error;
 using std::string;
 using std::stringstream;
 using std::vector;
+using Types::Core::DateAndTime;
+using Types::Event::TofEvent;
 
 //------------------------------------------------------------------------------------------------
 // constants for locating the parameters to use in execution
@@ -243,11 +243,6 @@ LoadEventPreNexus2::LoadEventPreNexus2()
       spectraLoadMap(), longest_tof(0), shortest_tof(0),
       parallelProcessing(false), pulsetimesincreasing(false), m_dbOutput(false),
       m_dbOpBlockNumber(0), m_dbOpNumEvents(0), m_dbOpNumPulses(0) {}
-
-//----------------------------------------------------------------------------------------------
-/** Desctructor
- */
-LoadEventPreNexus2::~LoadEventPreNexus2() { delete this->eventfile; }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm, i.e, declare properties
@@ -1261,7 +1256,7 @@ void LoadEventPreNexus2::loadPixelMap(const std::string &filename) {
  */
 void LoadEventPreNexus2::openEventFile(const std::string &filename) {
   // Open the file
-  eventfile = new BinaryFile<DasEvent>(filename);
+  eventfile = std::make_unique<BinaryFile<DasEvent>>(filename);
   num_events = eventfile->getNumElements();
   g_log.debug() << "File contains " << num_events << " event records.\n";
 

@@ -10,6 +10,7 @@
 from __future__ import (absolute_import, division, print_function)
 from .model import SliceViewerModel, WS_TYPE
 from .view import SliceViewerView
+import mantid.api
 
 
 class SliceViewer(object):
@@ -27,7 +28,13 @@ class SliceViewer(object):
             self.new_plot = self.new_plot_matrix
             self.update_plot_data = self.update_plot_data_matrix
 
-        self.view = view if view else SliceViewerView(self, self.model.get_dimensions_info(), parent)
+        self.normalization = mantid.api.MDNormalization.NoNormalization
+
+        self.view = view if view else SliceViewerView(self, self.model.get_dimensions_info(),
+                                                      self.model.can_normalize_workspace(), parent)
+        if self.model.can_normalize_workspace():
+            self.view.norm_opts.currentTextChanged.connect(self.normalization_changed)
+            self.view.set_normalization(ws)
 
         self.new_plot()
 
@@ -39,7 +46,7 @@ class SliceViewer(object):
                                              bin_params=self.view.dimensions.get_bin_params()))
 
     def new_plot_matrix(self):
-        self.view.plot_matrix(self.model.get_ws())
+        self.view.plot_matrix(self.model.get_ws(), normalize=self.normalization)
 
     def update_plot_data_MDH(self):
         self.view.update_plot_data(self.model.get_data(self.view.dimensions.get_slicepoint(), self.view.dimensions.transpose))
@@ -55,4 +62,11 @@ class SliceViewer(object):
 
     def line_plots(self):
         self.view.create_axes()
+        self.new_plot()
+
+    def normalization_changed(self, norm_type):
+        if norm_type == "By bin width":
+            self.normalization = mantid.api.MDNormalization.VolumeNormalization
+        else:
+            self.normalization = mantid.api.MDNormalization.NoNormalization
         self.new_plot()

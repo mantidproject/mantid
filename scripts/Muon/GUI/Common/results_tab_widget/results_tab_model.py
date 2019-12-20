@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, unicode_literals)
 
 from mantid.api import AnalysisDataService as ads, WorkspaceFactory
 from mantid.kernel import FloatTimeSeriesProperty
-from mantid.py3compat import Enum
+from enum import Enum
 
 from mantidqt.utils.observer_pattern import GenericObserver
 

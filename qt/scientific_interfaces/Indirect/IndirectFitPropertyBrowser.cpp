@@ -209,7 +209,7 @@ IndirectFitPropertyBrowser::getFittingFunction() const {
       }
       return multiDomainFunction;
     }
-  } catch (std::invalid_argument) {
+  } catch (const std::invalid_argument &) {
     return boost::make_shared<MultiDomainFunction>();
   }
 }

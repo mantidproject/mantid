@@ -37,8 +37,8 @@ public:
         "X", "X", frame, static_cast<coord_t>(0), static_cast<coord_t>(10),
         static_cast<size_t>(nBins));
     MDHistoWorkspace_sptr histo = boost::make_shared<MDHistoWorkspace>(dim);
-    signal_t *signals = histo->getSignalArray();
-    signal_t *errorsSQ = histo->getErrorSquaredArray();
+    auto signals = histo->mutableSignalArray();
+    auto errorsSQ = histo->mutableErrorSquaredArray();
     for (int i = 0; i < nBins; ++i) {
       signals[i] = signal;
       errorsSQ[i] = errorSQ;

@@ -78,8 +78,6 @@ class DLLExport LoadEventPreNexus2
 public:
   /// Constructor
   LoadEventPreNexus2();
-  /// Virtual destructor
-  ~LoadEventPreNexus2() override;
   /// Algorithm's name
   const std::string name() const override { return "LoadEventPreNexus"; }
   /// Algorithm's version
@@ -130,7 +128,7 @@ private:
   Mantid::detid_t detid_max;
 
   /// Handles loading from the event file
-  Mantid::Kernel::BinaryFile<DasEvent> *eventfile;
+  std::unique_ptr<Mantid::Kernel::BinaryFile<DasEvent>> eventfile;
   std::size_t num_events; ///< The number of events in the file
   std::size_t num_pulses; ///< the number of pulses
   uint32_t numpixel;      ///< the number of pixels
@@ -219,6 +217,6 @@ private:
   /// Processing the input properties for purpose of investigation
   void processInvestigationInputs();
 };
-}
+} // namespace DataHandling
 } // namespace Mantid
 #endif /*LOADEVENTPRENEXUS_H_*/

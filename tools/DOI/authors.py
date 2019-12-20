@@ -211,7 +211,27 @@ _translations = {
     'Adam J. Jackson'         : 'Jackson, Adam J.',
     'LolloB'                  : 'Basso, Lorenzo',
     'Lorenzo Basso'           : 'Basso, Lorenzo',
-    'SOKOLOVA'                : 'Sokolova, Anna'
+    'SOKOLOVA'                : 'Sokolova, Anna',
+    'Conor Finn'              : 'Finn, Conor',
+    'StephenSmith25'           : 'Smith, Stephen',
+    'Stephen'                 : 'Smith, Stephen',
+    'Stephen Smith'           : 'Smith, Stephen',
+    'Gabriele Sala'           : 'Sala, Gabriele',
+    'Hank Wu'                 : 'Wu, Hank',
+    'hankwustfc'              : 'Wu, Hank',
+    'Wu'                      : 'Wu, Hank',
+    'PhilColebrooke'          : 'Colebrooke, Phil',
+    'Phil'                    : 'Colebrooke, Phil',
+    'DanielMurphy22'          : 'Murphy, Daniel',
+    'RichardWaiteSTFC'        : 'Waite, Richard',
+    'Richard Waite'           : 'Waite, Richard',
+    'Ciara Nightingale'       : 'Nightingale, Ciara',
+    'ciaranightingale'        : 'Nightingale, Ciara',
+    'Danny Hindson'           : 'Hindson, Danny',
+    'Fahima-Islam'            : 'Islam, Fahima',
+    'giovannidisiena'         : 'Di Siena, Giovanni',
+    'Giovanni Di Siena'       : 'Di Siena, Giovanni',
+    'Takudzwa Makoni'         : 'Makoni, Takudzwa'
 }
 
 # Used to ensure a Git author does not appear in any of the DOIs.  This is NOT

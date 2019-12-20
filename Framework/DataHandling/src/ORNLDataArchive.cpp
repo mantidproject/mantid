@@ -25,8 +25,8 @@ using boost::algorithm::ends_with;
 
 using Mantid::Catalog::Exception::CatalogError;
 using Mantid::Catalog::ONCat::ONCat;
-using Mantid::Catalog::ONCat::ONCatEntity;
 using Mantid::Catalog::ONCat::ONCat_uptr;
+using Mantid::Catalog::ONCat::ONCatEntity;
 using Mantid::Catalog::ONCat::QueryParameter;
 using Mantid::Catalog::ONCat::QueryParameters;
 

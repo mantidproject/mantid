@@ -96,9 +96,9 @@ Output:
 .. testoutput:: ExHistSimple
 
   Size of workspace 'PG3_Resolution' =  1000
-  Estimated resolution of detector of spectrum 0 =  0.00323913250277
-  Estimated resolution of detector of spectrum 100 =  0.00323608373204
-  Estimated resolution of detector of spectrum 999 =  0.00354849279137
+  Estimated resolution of detector of spectrum 0 =  0.00323913137315
+  Estimated resolution of detector of spectrum 100 =  0.00323608260137
+  Estimated resolution of detector of spectrum 999 =  0.00354849176520
 
 .. seealso :: Algorithms :ref:`algm-EstimateDivergence`, :ref:`algm-CalibrateRectangularDetectors` and
    :ref:`algm-GetDetOffsetsMultiPeaks`

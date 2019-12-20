@@ -8,17 +8,13 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
-from matplotlib.axes import ErrorbarContainer
-from matplotlib.lines import Line2D
-
-from mantid.plots import MantidAxes
-from mantid.plots.helperfunctions import get_data_from_errorbar_container, set_errorbars_hidden
 from mantidqt.utils.qt import block_signals
 from mantidqt.widgets.plotconfigdialog import get_axes_names_dict, curve_in_ax
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import (
     CurveProperties, curve_has_errors, remove_curve_from_ax)
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.view import CurvesTabWidgetView
 from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
+from workbench.plotting.figureerrorsmanager import FigureErrorsManager
 
 
 class CurvesTabWidgetPresenter:
@@ -74,23 +70,10 @@ class CurvesTabWidgetPresenter:
         curve = self.get_selected_curve()
         # Set the curve's new name in the names dict and combo box
         self.set_new_curve_name_in_dict_and_combo_box(curve, view_props.label)
-        self.toggle_errors(curve, view_props)
+        FigureErrorsManager.toggle_errors(curve, view_props)
         self.current_view_properties = view_props
 
-        self.update_limits_and_legend(ax, self.legend_props)
-
-    @staticmethod
-    def update_limits_and_legend(ax, legend_props=None):
-        ax.relim()
-        ax.autoscale()
-        if legend_props:
-            LegendProperties.create_legend(legend_props, ax)
-
-    @staticmethod
-    def toggle_errors(curve, view_props):
-        hide_errors = view_props.hide_errors or view_props.hide
-        setattr(curve, 'hide_errors', hide_errors)
-        set_errorbars_hidden(curve, hide_errors)
+        FigureErrorsManager.update_limits_and_legend(ax, self.legend_props)
 
     def close_tab(self):
         """Close the tab and set the view to None"""
@@ -119,49 +102,12 @@ class CurvesTabWidgetPresenter:
         """Get top level properties from view"""
         return self.view.get_properties()
 
-    @staticmethod
-    def _replot_mpl_curve(ax, curve, plot_kwargs):
-        """
-        Replot the given matplotlib curve with new kwargs
-        :param ax: The axis that the curve will be plotted on
-        :param curve: The curve that will be replotted
-        :param plot_kwargs: Kwargs for the plot that will be passed onto matplotlib
-        """
-        remove_curve_from_ax(curve)
-        if isinstance(curve, Line2D):
-            [plot_kwargs.pop(arg, None) for arg in
-             ['capsize', 'capthick', 'ecolor', 'elinewidth', 'errorevery']]
-            new_curve = ax.plot(curve.get_xdata(), curve.get_ydata(),
-                                **plot_kwargs)[0]
-        elif isinstance(curve, ErrorbarContainer):
-            # Because of "error every" option, we need to store the original
-            # error bar data on the curve or we will lose data on re-plotting
-            x, y, xerr, yerr = getattr(curve, 'errorbar_data',
-                                       get_data_from_errorbar_container(curve))
-            new_curve = ax.errorbar(x, y, xerr=xerr, yerr=yerr, **plot_kwargs)
-            setattr(new_curve, 'errorbar_data', [x, y, xerr, yerr])
-        else:
-            raise ValueError("Curve must have type 'Line2D' or 'ErrorbarContainer'. Found '{}'".format(type(curve)))
-        return new_curve
-
     def _replot_selected_curve(self, plot_kwargs):
         """Replot the selected curve with the given plot kwargs"""
         ax = self.get_selected_ax()
         curve = self.get_selected_curve()
-        new_curve = self.replot_curve(ax, curve, plot_kwargs)
+        new_curve = FigureErrorsManager.replot_curve(ax, curve, plot_kwargs)
         self.curve_names_dict[self.view.get_selected_curve_name()] = new_curve
-
-    @classmethod
-    def replot_curve(cls, ax, curve, plot_kwargs):
-        if isinstance(ax, MantidAxes):
-            try:
-                new_curve = ax.replot_artist(curve, errorbars=True, **plot_kwargs)
-            except ValueError:  # ValueError raised if Artist not tracked by Axes
-                new_curve = cls._replot_mpl_curve(ax, curve, plot_kwargs)
-        else:
-            new_curve = cls._replot_mpl_curve(ax, curve, plot_kwargs)
-        setattr(new_curve, 'errorevery', plot_kwargs.get('errorevery', 1))
-        return new_curve
 
     def populate_curve_combo_box_and_update_view(self):
         """
@@ -200,7 +146,7 @@ class CurvesTabWidgetPresenter:
 
         ax = self.get_selected_ax()
         # Update the legend and redraw
-        self.update_limits_and_legend(ax, self.legend_props)
+        FigureErrorsManager.update_limits_and_legend(ax, self.legend_props)
         ax.figure.canvas.draw()
 
         # Remove the curve from the curve selection combo box
@@ -265,11 +211,7 @@ class CurvesTabWidgetPresenter:
     def _get_selected_ax_errorbars(self):
         """Get all errorbar containers in selected axes"""
         ax = self.get_selected_ax()
-        return self.get_errorbars_from_ax(ax)
-
-    @staticmethod
-    def get_errorbars_from_ax(ax):
-        return [cont for cont in ax.containers if isinstance(cont, ErrorbarContainer)]
+        return FigureErrorsManager.get_errorbars_from_ax(ax)
 
     def _populate_select_curve_combo_box(self):
         """
@@ -284,17 +226,13 @@ class CurvesTabWidgetPresenter:
             self.view.close()
             return False
 
-        active_lines = self.get_curves_from_ax(selected_ax)
+        active_lines = FigureErrorsManager.get_curves_from_ax(selected_ax)
         for line in active_lines:
             self._update_selected_curve_name(line)
 
         self.view.populate_select_curve_combo_box(
             sorted(self.curve_names_dict.keys(), key=lambda s: s.lower()))
         return True
-
-    @staticmethod
-    def get_curves_from_ax(ax):
-        return ax.get_lines() + CurvesTabWidgetPresenter.get_errorbars_from_ax(ax)
 
     def _update_selected_curve_name(self, curve):
         """Update the selected curve's name in the curve_names_dict"""

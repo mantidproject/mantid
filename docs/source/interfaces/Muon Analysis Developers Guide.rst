@@ -10,7 +10,6 @@ Introduction
 ^^^^^^^^^^^^
 This document is intended for Mantid developers as a guide to the architecture of the Muon Analysis custom interface.
 User documentation for this interface can be found at :ref:`Muon_Analysis-ref`.
-There is also an unscripted testing guide for developers at :ref:`Muon_Analysis_TestGuide-ref`.
 
 There will be a particular focus on the *Data Analysis* tab, which has been significantly changed for Mantid 3.8.
 
@@ -83,7 +82,7 @@ Data is loaded into the interface as NeXus files. This is the only file type sup
 
 .. note:: Converters exist to translate most other formats (e.g. older ISIS files) to NeXus. PSI have a program called ``any2many`` that will convert their ``BIN`` files to NeXus.
 
-Muon NeXus files come in two versions, v1 and v2, and there are two versions of the :ref:`algm-LoadMuonNexus` algorithm to handle them. 
+Muon NeXus files come in two versions, v1 and v2, and there are two versions of the :ref:`algm-LoadMuonNexus` algorithm to handle them.
 Both v1 and v2 are in active use (in fact most ISIS data is v1 at the moment).
 The schema can be found on the `muon group website <http://www.isis.stfc.ac.uk/groups/muons/muons3385.html>`_, and Steve Cottrell is the best person to ask about NeXus-related questions at ISIS.
 Version 2 files support multiple detectors per spectrum, which version 1 files don't. This isn't used on any instruments at ISIS at the time of writing.

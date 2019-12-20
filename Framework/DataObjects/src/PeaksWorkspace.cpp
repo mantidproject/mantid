@@ -81,7 +81,7 @@ PeaksWorkspace::PeaksWorkspace(const PeaksWorkspace &other)
 //=====================================================================================
 /** Comparator class for sorting peaks by one or more criteria
  */
-class PeakComparator : public std::binary_function<Peak, Peak, bool> {
+class PeakComparator {
 public:
   std::vector<std::pair<std::string, bool>> &criteria;
 

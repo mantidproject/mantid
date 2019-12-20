@@ -14,7 +14,7 @@ from sans.algorithm_detail.bundles import (EventSliceSettingBundle, OutputBundle
 from sans.algorithm_detail.merge_reductions import (MergeFactory, is_sample, is_can)
 from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
 from sans.common.constants import EMPTY_NAME
-from sans.common.enums import (DataType, DetectorType, ISISReductionMode, OutputParts, TransmissionType)
+from sans.common.enums import (DetectorType, ReductionMode, OutputParts, TransmissionType)
 from sans.common.general_functions import (create_child_algorithm, get_reduced_can_workspace_from_ads,
                                            get_transmission_workspaces_from_ads,
                                            write_hash_into_reduced_can_workspace)
@@ -37,7 +37,7 @@ def run_initial_event_slice_reduction(reduction_alg, reduction_setting_bundle):
     reduction_alg.setProperty("Component", component)
     reduction_alg.setProperty("ScatterWorkspace", reduction_setting_bundle.scatter_workspace)
     reduction_alg.setProperty("ScatterMonitorWorkspace", reduction_setting_bundle.scatter_monitor_workspace)
-    reduction_alg.setProperty("DataType", DataType.to_string(reduction_setting_bundle.data_type))
+    reduction_alg.setProperty("DataType", reduction_setting_bundle.data_type.value)
 
     reduction_alg.setProperty("OutputWorkspace", EMPTY_NAME)
     reduction_alg.setProperty("OutputMonitorWorkspace", EMPTY_NAME)
@@ -83,7 +83,7 @@ def run_core_event_slice_reduction(reduction_alg, reduction_setting_bundle):
     reduction_alg.setProperty("DummyMaskWorkspace", reduction_setting_bundle.dummy_mask_workspace)
     reduction_alg.setProperty("ScatterMonitorWorkspace", reduction_setting_bundle.scatter_monitor_workspace)
 
-    reduction_alg.setProperty("DataType", DataType.to_string(reduction_setting_bundle.data_type))
+    reduction_alg.setProperty("DataType", reduction_setting_bundle.data_type.value)
 
     reduction_alg.setProperty("OutputWorkspace", EMPTY_NAME)
     reduction_alg.setProperty("SumOfCounts", EMPTY_NAME)
@@ -138,7 +138,7 @@ def run_core_reduction(reduction_alg, reduction_setting_bundle):
     reduction_alg.setProperty("Component", component)
     reduction_alg.setProperty("ScatterWorkspace", reduction_setting_bundle.scatter_workspace)
     reduction_alg.setProperty("ScatterMonitorWorkspace", reduction_setting_bundle.scatter_monitor_workspace)
-    reduction_alg.setProperty("DataType", DataType.to_string(reduction_setting_bundle.data_type))
+    reduction_alg.setProperty("DataType", reduction_setting_bundle.data_type.value)
 
     if reduction_setting_bundle.transmission_workspace is not None:
         reduction_alg.setProperty("TransmissionWorkspace", reduction_setting_bundle.transmission_workspace)
@@ -302,10 +302,10 @@ def get_component_to_reduce(reduction_setting_bundle):
     # Get the reduction mode
     reduction_mode = reduction_setting_bundle.reduction_mode
 
-    if reduction_mode is ISISReductionMode.LAB:
-        reduction_mode_setting = DetectorType.to_string(DetectorType.LAB)
-    elif reduction_mode is ISISReductionMode.HAB:
-        reduction_mode_setting = DetectorType.to_string(DetectorType.HAB)
+    if reduction_mode is ReductionMode.LAB:
+        reduction_mode_setting = DetectorType.LAB.value
+    elif reduction_mode is ReductionMode.HAB:
+        reduction_mode_setting = DetectorType.HAB.value
     else:
         raise RuntimeError("SingleExecution: An unknown reduction mode was selected: {}. "
                            "Currently only HAB and LAB are supported.".format(reduction_mode))
@@ -384,22 +384,22 @@ def run_optimized_for_can(reduction_alg, reduction_setting_bundle, event_slice_o
                 output_transmission_bundle.unfitted_transmission_workspace is not None:
             write_hash_into_reduced_can_workspace(state=output_transmission_bundle.state,
                                                   workspace=output_transmission_bundle.calculated_transmission_workspace,
-                                                  partial_type=TransmissionType.Calculated,
+                                                  partial_type=TransmissionType.CALCULATED,
                                                   reduction_mode=reduction_mode)
             write_hash_into_reduced_can_workspace(state=output_transmission_bundle.state,
                                                   workspace=output_transmission_bundle.unfitted_transmission_workspace,
-                                                  partial_type=TransmissionType.Unfitted,
+                                                  partial_type=TransmissionType.UNFITTED,
                                                   reduction_mode=reduction_mode)
         if (output_parts_bundle.output_workspace_count is not None and
                 output_parts_bundle.output_workspace_norm is not None):
             write_hash_into_reduced_can_workspace(state=output_parts_bundle.state,
                                                   workspace=output_parts_bundle.output_workspace_count,
-                                                  partial_type=OutputParts.Count,
+                                                  partial_type=OutputParts.COUNT,
                                                   reduction_mode=reduction_mode)
 
             write_hash_into_reduced_can_workspace(state=output_parts_bundle.state,
                                                   workspace=output_parts_bundle.output_workspace_norm,
-                                                  partial_type=OutputParts.Norm,
+                                                  partial_type=OutputParts.NORM,
                                                   reduction_mode=reduction_mode)
 
     return output_bundle, output_parts_bundle, output_transmission_bundle

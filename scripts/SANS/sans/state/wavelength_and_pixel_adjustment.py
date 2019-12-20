@@ -12,7 +12,7 @@ from __future__ import (absolute_import, division, print_function)
 import json
 import copy
 from sans.state.state_base import (StateBase, rename_descriptor_names, StringParameter,
-                                   ClassTypeParameter, PositiveFloatParameter, DictParameter, PositiveFloatListParameter)
+                                   PositiveFloatParameter, DictParameter, PositiveFloatListParameter)
 from sans.state.state_functions import (is_not_none_and_first_larger_than_second, one_is_none, validation_message)
 from sans.common.enums import (RangeStepType, DetectorType, SANSFacility)
 from sans.state.automatic_setters import (automatic_setters)
@@ -44,7 +44,7 @@ class StateWavelengthAndPixelAdjustment(StateBase):
     wavelength_low = PositiveFloatListParameter()
     wavelength_high = PositiveFloatListParameter()
     wavelength_step = PositiveFloatParameter()
-    wavelength_step_type = ClassTypeParameter(RangeStepType)
+    wavelength_step_type = RangeStepType.NOT_SET
 
     adjustment_files = DictParameter()
 
@@ -52,8 +52,8 @@ class StateWavelengthAndPixelAdjustment(StateBase):
 
     def __init__(self):
         super(StateWavelengthAndPixelAdjustment, self).__init__()
-        self.adjustment_files = {DetectorType.to_string(DetectorType.LAB): StateAdjustmentFiles(),
-                                 DetectorType.to_string(DetectorType.HAB): StateAdjustmentFiles()}
+        self.adjustment_files = {DetectorType.LAB.value: StateAdjustmentFiles(),
+                                 DetectorType.HAB.value: StateAdjustmentFiles()}
 
     def validate(self):
         is_invalid = {}
@@ -67,6 +67,12 @@ class StateWavelengthAndPixelAdjustment(StateBase):
                                         "wavelength_step_type": self.wavelength_step_type})
             is_invalid.update(entry)
 
+        if self.wavelength_step_type is RangeStepType.NOT_SET:
+            entry = validation_message("A wavelength entry has not been set.",
+                                       "Make sure that all entries are set.",
+                                       {"wavelength_step_type": self.wavelength_step_type})
+            is_invalid.update(entry)
+
         if is_not_none_and_first_larger_than_second([self.wavelength_low, self.wavelength_high]):
             entry = validation_message("Incorrect wavelength bounds.",
                                        "Make sure that lower wavelength bound is smaller then upper bound.",
@@ -75,8 +81,8 @@ class StateWavelengthAndPixelAdjustment(StateBase):
             is_invalid.update(entry)
 
         try:
-            self.adjustment_files[DetectorType.to_string(DetectorType.LAB)].validate()
-            self.adjustment_files[DetectorType.to_string(DetectorType.HAB)].validate()
+            self.adjustment_files[DetectorType.LAB.value].validate()
+            self.adjustment_files[DetectorType.HAB.value].validate()
         except ValueError as e:
             is_invalid.update({"adjustment_files": str(e)})
 
@@ -99,6 +105,9 @@ class StateWavelengthAndPixelAdjustmentBuilder(object):
     def build(self):
         self.state.validate()
         return copy.copy(self.state)
+
+    def set_wavelength_step_type(self, val):
+        self.state.wavelength_step_type = val
 
 
 def get_wavelength_and_pixel_adjustment_builder(data_info):

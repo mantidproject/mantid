@@ -102,8 +102,8 @@ public:
   void test_Multiple_Period_Event_Stream() {
     using namespace ::testing;
     using namespace KafkaTesting;
-    using Mantid::API::WorkspaceGroup;
     using Mantid::API::Workspace_sptr;
+    using Mantid::API::WorkspaceGroup;
     using Mantid::DataObjects::EventWorkspace;
     using namespace Mantid::LiveData;
 
@@ -151,8 +151,8 @@ public:
      */
     using namespace ::testing;
     using namespace KafkaTesting;
-    using Mantid::API::WorkspaceGroup;
     using Mantid::API::Workspace_sptr;
+    using Mantid::API::WorkspaceGroup;
     using Mantid::DataObjects::EventWorkspace;
     using namespace Mantid::LiveData;
 
@@ -552,7 +552,7 @@ private:
   createTestDecoder(std::shared_ptr<Mantid::LiveData::IKafkaBroker> broker) {
     using namespace Mantid::LiveData;
     return std::make_unique<KafkaEventStreamDecoder>(broker, "", "", "", "", "",
-                                                     0);
+                                                     "", 0);
   }
 
   void

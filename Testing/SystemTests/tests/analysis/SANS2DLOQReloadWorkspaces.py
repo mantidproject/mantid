@@ -21,12 +21,12 @@ In order to protect the system, it is suggested the following integration tests
 to ensure that allowing workspaces as input to the reduction will not disturb the
 reduction itself, and it is safe.
 
-LOQReductionShouldAcceptLoadedWorkspace ensure some requirements for the reloading.
+SANSLOQReductionShouldAcceptLoadedWorkspace ensure some requirements for the reloading.
 SANS2DReductionShouldAcceptLoadedWorkspace and SANS2DReductionShouldAcceptLoadedWorkspaceRawFile
 apply the same requirements for SANS2D instruments.
 
 
-LOQReductionShouldAcceptLoadedWorkspaceSystemTest, SANS2DReductionShouldAcceptLoadedWorkspaceSystemTest
+SANSLOQReductionShouldAcceptLoadedWorkspaceSystemTest, SANS2DReductionShouldAcceptLoadedWorkspaceSystemTest
 and SANS2DReductionShouldAcceptLoadedWorkspace are wrappers to make unittest.TestCase to fit the systemtesting
 framework.
 
@@ -36,7 +36,7 @@ from files.
 """
 
 
-class LOQReductionShouldAcceptLoadedWorkspace(unittest.TestCase):
+class SANSLOQReductionShouldAcceptLoadedWorkspace(unittest.TestCase):
     """
     The following tests is to ensure that the reload obeys the following requirement:
      * If reload is True the real data will be always reloaded from the file
@@ -107,7 +107,7 @@ class LOQReductionShouldAcceptLoadedWorkspace(unittest.TestCase):
         self.assertRaises(RuntimeError, AssignSample, my_workspace, False)
 
 
-class SANS2DReductionShouldAcceptLoadedWorkspace(LOQReductionShouldAcceptLoadedWorkspace):
+class SANS2DReductionShouldAcceptLoadedWorkspace(SANSLOQReductionShouldAcceptLoadedWorkspace):
     def setUp(self):
         self.load_run = '2500.nxs'
         config["default.instrument"] = "SANS2D"
@@ -124,8 +124,8 @@ class SANS2DReductionShouldAcceptLoadedWorkspaceRawFile(SANS2DReductionShouldAcc
         self.control_name = '5547front_1D_4.6_12.85'
 
 
-class LOQReductionShouldAcceptLoadedWorkspaceSystemTest(systemtesting.MantidSystemTest):
-    cl = LOQReductionShouldAcceptLoadedWorkspace
+class SANSLOQReductionShouldAcceptLoadedWorkspaceSystemTest(systemtesting.MantidSystemTest):
+    cl = SANSLOQReductionShouldAcceptLoadedWorkspace
 
     def runTest(self):
         self._success = False
@@ -142,15 +142,15 @@ class LOQReductionShouldAcceptLoadedWorkspaceSystemTest(systemtesting.MantidSyst
         return self._success
 
 
-class SANS2DReductionShouldAcceptLoadedWorkspaceSystemTest(LOQReductionShouldAcceptLoadedWorkspaceSystemTest):
+class SANS2DReductionShouldAcceptLoadedWorkspaceSystemTest(SANSLOQReductionShouldAcceptLoadedWorkspaceSystemTest):
     cl = SANS2DReductionShouldAcceptLoadedWorkspace
 
 
-class SANS2DReductionShouldAcceptLoadedWorkspaceSystemTest2(LOQReductionShouldAcceptLoadedWorkspaceSystemTest):
+class SANS2DReductionShouldAcceptLoadedWorkspaceSystemTest2(SANSLOQReductionShouldAcceptLoadedWorkspaceSystemTest):
     cl = SANS2DReductionShouldAcceptLoadedWorkspaceRawFile
 
 
-class LOQTransFitWorkspace2DWithLoadedWorkspace(systemtesting.MantidSystemTest):
+class SANSLOQTransFitWorkspace2DWithLoadedWorkspace(systemtesting.MantidSystemTest):
     def runTest(self):
         config["default.instrument"] = "LOQ"
         LOQ()
@@ -182,8 +182,8 @@ class LOQTransFitWorkspace2DWithLoadedWorkspace(systemtesting.MantidSystemTest):
         return '54431main_2D_3.0_4.0_suff','LOQTransFitWorkspace2D.nxs'
 
 
-class LOQReductionOnLoadedWorkspaceMustProduceTheSameResult_1(systemtesting.MantidSystemTest):
-    """ It will repeat the test done at LOQCentreNoGrav but using
+class SANSLOQReductionOnLoadedWorkspaceMustProduceTheSameResult_1(systemtesting.MantidSystemTest):
+    """ It will repeat the test done at SANSLOQCentreNoGrav but using
     loaded workspaces
     """
 
@@ -220,9 +220,9 @@ class LOQReductionOnLoadedWorkspaceMustProduceTheSameResult_1(systemtesting.Mant
         return '54431main_1D_3.0_9.0','LOQCentreNoGravSearchCentreFixed.nxs'
 
 
-class LOQReductionOnLoadedWorkspaceMustProduceTheSameResult_2(systemtesting.MantidSystemTest):
-    """Before ticket #8461 test LOQReductionOnLoadedWorkspaceMustProduceTheSameResult_1 used
-    to produce a workspace that matches LOQCentreNoGrav.nxs. This test is created to ensure
+class SANSLOQReductionOnLoadedWorkspaceMustProduceTheSameResult_2(systemtesting.MantidSystemTest):
+    """Before ticket #8461 test SANSLOQReductionOnLoadedWorkspaceMustProduceTheSameResult_1 used
+    to produce a workspace that matches SANSLOQCentreNoGrav.nxs. This test is created to ensure
     that if we put the same centre that was produced before, we finish in the same result
     for the reduction"""
 

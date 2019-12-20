@@ -472,8 +472,7 @@ bool CompositePeaksPresenter::getShowBackground(
 
 namespace {
 // Helper comparitor type.
-class MatchWorkspaceName
-    : public std::unary_function<SetPeaksWorkspaces::value_type, bool> {
+class MatchWorkspaceName {
 private:
   const QString m_wsName;
 
@@ -552,7 +551,7 @@ void CompositePeaksPresenter::performUpdate() {
 
 namespace {
 // Private helper class
-class MatchPointer : public std::unary_function<bool, PeaksPresenter_sptr> {
+class MatchPointer {
 private:
   PeaksPresenter *m_toFind;
 

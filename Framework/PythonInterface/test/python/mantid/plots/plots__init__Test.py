@@ -174,6 +174,26 @@ class Plots__init__Test(unittest.TestCase):
         # try deleting
         self.ax.remove_workspace_artists(plot_data)
 
+    def test_replace_workspace_data_plot_with_fewer_spectra(self):
+        plot_data = CreateWorkspace(DataX=[10, 20, 30, 10, 20, 30, 10, 20, 30],
+                                    DataY=[3, 4, 5, 3, 4, 5],
+                                    DataE=[1, 2, 3, 4, 1, 1],
+                                    NSpec=3)
+        line_ws2d_histo_spec_1 = self.ax.plot(plot_data, specNum=1, color='r')[0]
+        line_ws2d_histo_spec_2 = self.ax.plot(plot_data, specNum=2, color='r')[0]
+        line_ws2d_histo_spec_3 = self.ax.plot(plot_data, specNum=3, color='r')[0]
+
+        plot_data = CreateWorkspace(DataX=[20, 30, 40, 20, 30, 40],
+                                    DataY=[3, 4, 3, 4],
+                                    DataE=[1, 2, 1, 2],
+                                    NSpec=2)
+        self.ax.replace_workspace_artists(plot_data)
+        self.assertAlmostEqual(25, line_ws2d_histo_spec_2.get_xdata()[0])
+        self.assertAlmostEqual(35, line_ws2d_histo_spec_2.get_xdata()[-1])
+        self.assertEqual('r', line_ws2d_histo_spec_2.get_color())
+        # try deleting
+        self.ax.remove_workspace_artists(plot_data)
+
     def test_replace_workspace_data_errorbar(self):
         eb_data = CreateWorkspace(DataX=[10, 20, 30, 10, 20, 30, 10, 20, 30],
                                   DataY=[3, 4, 5, 3, 4, 5],
@@ -280,6 +300,99 @@ class Plots__init__Test(unittest.TestCase):
         auto_dist = (config['graph1d.autodistribution'] == 'On')
         self.assertEqual(auto_dist, self.ax.tracked_workspaces[non_dist_ws.name()][0].is_normalized)
         del self.ax.tracked_workspaces[non_dist_ws.name()]
+
+    def test_artists_normalization_state_labeled_correctly_for_non_dist_workspace_with_uneven_spectra(self):
+        non_dist_ws = CreateWorkspace(DataX=[10, 20, 25, 30],
+                                      DataY=[2, 3, 4, 5],
+                                      DataE=[1, 2, 1, 2],
+                                      NSpec=1,
+                                      Distribution=False,
+                                      OutputWorkspace='non_dist_workpace')
+        self.ax.plot(non_dist_ws, specNum=1)
+        config['graph1d.autodistribution'] = 'Off'
+        self.assertTrue(self.ax.tracked_workspaces[non_dist_ws.name()][0].is_normalized)
+        del self.ax.tracked_workspaces[non_dist_ws.name()]
+
+    def test_artists_normalization_state_labeled_correctly_for_2d_plots_of_dist_workspace(self):
+        plot_funcs = ['imshow', 'pcolor', 'pcolormesh', 'pcolorfast', 'tripcolor',
+                      'contour', 'contourf', 'tricontour', 'tricontourf']
+        dist_2d_ws = CreateWorkspace(DataX=[10, 20, 10, 20],
+                                     DataY=[2, 3, 2, 3],
+                                     DataE=[1, 2, 1, 2],
+                                     NSpec=2,
+                                     Distribution=True,
+                                     OutputWorkspace='non_dist_workpace')
+        for plot_func in plot_funcs:
+            func = getattr(self.ax, plot_func)
+            func(dist_2d_ws, distribution=False)
+            func(dist_2d_ws, distribution=True)
+            func(dist_2d_ws)
+            ws_artists = self.ax.tracked_workspaces[dist_2d_ws.name()]
+            self.assertTrue(ws_artists[0].is_normalized)
+            self.assertTrue(ws_artists[1].is_normalized)
+            self.assertTrue(ws_artists[2].is_normalized)
+
+    def test_artists_normalization_labeled_correctly_for_2d_plots_of_non_dist_workspace_and_dist_argument_false(self):
+        plot_funcs = ['imshow', 'pcolor', 'pcolormesh', 'pcolorfast', 'tripcolor',
+                        'contour', 'contourf', 'tricontour', 'tricontourf']
+        non_dist_2d_ws = CreateWorkspace(DataX=[10, 20, 10, 20],
+                                         DataY=[2, 3, 2, 3],
+                                         DataE=[1, 2, 1, 2],
+                                         NSpec=2,
+                                         Distribution=False,
+                                         OutputWorkspace='non_dist_workpace')
+        for plot_func in plot_funcs:
+            func = getattr(self.ax, plot_func)
+            func(non_dist_2d_ws, distribution=False)
+            self.assertTrue(self.ax.tracked_workspaces[non_dist_2d_ws.name()][0].is_normalized)
+            del self.ax.tracked_workspaces[non_dist_2d_ws.name()]
+
+    def test_artists_normalization_labeled_correctly_for_2d_plots_of_non_dist_workspace_and_dist_argument_true(self):
+        plot_funcs = ['imshow', 'pcolor', 'pcolormesh', 'pcolorfast', 'tripcolor',
+                      'contour', 'contourf', 'tricontour', 'tricontourf']
+        non_dist_2d_ws = CreateWorkspace(DataX=[10, 20, 10, 20],
+                                         DataY=[2, 3, 2, 3],
+                                         DataE=[1, 2, 1, 2],
+                                         NSpec=2,
+                                         Distribution=False,
+                                         OutputWorkspace='non_dist_workpace')
+        for plot_func in plot_funcs:
+            func = getattr(self.ax, plot_func)
+            func(non_dist_2d_ws, distribution=True)
+            self.assertFalse(self.ax.tracked_workspaces[non_dist_2d_ws.name()][0].is_normalized)
+            del self.ax.tracked_workspaces[non_dist_2d_ws.name()]
+
+    def test_artists_normalization_labeled_correctly_for_2d_plots_of_non_dist_workspace_and_global_setting_on(self):
+        plot_funcs = ['imshow', 'pcolor', 'pcolormesh', 'pcolorfast', 'tripcolor',
+                      'contour', 'contourf', 'tricontour', 'tricontourf']
+        non_dist_2d_ws = CreateWorkspace(DataX=[10, 20, 10, 20],
+                                         DataY=[2, 3, 2, 3],
+                                         DataE=[1, 2, 1, 2],
+                                         NSpec=2,
+                                         Distribution=False,
+                                         OutputWorkspace='non_dist_workpace')
+        for plot_func in plot_funcs:
+            func = getattr(self.ax, plot_func)
+            func(non_dist_2d_ws)
+            auto_dist = (config['graph1d.autodistribution'] == 'On')
+            self.assertEqual(auto_dist, self.ax.tracked_workspaces[non_dist_2d_ws.name()][0].is_normalized)
+            del self.ax.tracked_workspaces[non_dist_2d_ws.name()]
+
+    def test_artists_normalization_state_labeled_correctly_for_2d_plots_of_non_dist_workspace_with_uneven_spectra(self):
+        plot_funcs = ['imshow', 'pcolor', 'pcolormesh', 'pcolorfast', 'tripcolor',
+                      'contour', 'contourf', 'tricontour', 'tricontourf']
+        non_dist_2d_ws = CreateWorkspace(DataX=[10, 20, 25, 30, 10, 20, 25, 30],
+                                         DataY=[2, 3, 4, 5, 2, 3, 4, 5],
+                                         DataE=[1, 2, 1, 2, 1, 2, 1, 2],
+                                         NSpec=2,
+                                         Distribution=False,
+                                         OutputWorkspace='non_dist_workpace')
+        for plot_func in plot_funcs:
+            func = getattr(self.ax, plot_func)
+            func(non_dist_2d_ws)
+            config['graph1d.autodistribution'] = 'Off'
+            self.assertTrue(self.ax.tracked_workspaces[non_dist_2d_ws.name()][0].is_normalized)
+            del self.ax.tracked_workspaces[non_dist_2d_ws.name()]
 
     def test_check_axes_distribution_consistency_mixed_normalization(self):
         mock_logger = self._run_check_axes_distribution_consistency([True, False, True])

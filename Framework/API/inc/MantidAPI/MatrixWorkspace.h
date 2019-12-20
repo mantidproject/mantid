@@ -445,6 +445,7 @@ public:
   void flagMasked(const size_t &index, const size_t &binIndex,
                   const double &weight = 1.0);
   bool hasMaskedBins(const size_t &workspaceIndex) const;
+  bool hasAnyMaskedBins() const;
   /// Masked bins for each spectrum are stored as a set of pairs containing <bin
   /// index, weight>
   using MaskList = std::map<size_t, double>;

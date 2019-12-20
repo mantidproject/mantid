@@ -334,11 +334,12 @@ void LoadMD::loadHisto() {
   if (m_saveMDVersion == 2)
     m_file->openGroup("data", "NXdata");
   // Load each data slab
-  this->loadSlab("signal", ws->getSignalArray(), ws, ::NeXus::FLOAT64);
-  this->loadSlab("errors_squared", ws->getErrorSquaredArray(), ws,
+  this->loadSlab("signal", ws->mutableSignalArray(), ws, ::NeXus::FLOAT64);
+  this->loadSlab("errors_squared", ws->mutableErrorSquaredArray(), ws,
                  ::NeXus::FLOAT64);
-  this->loadSlab("num_events", ws->getNumEventsArray(), ws, ::NeXus::FLOAT64);
-  this->loadSlab("mask", ws->getMaskArray(), ws, ::NeXus::INT8);
+  this->loadSlab("num_events", ws->mutableNumEventsArray(), ws,
+                 ::NeXus::FLOAT64);
+  this->loadSlab("mask", ws->mutableMaskArray(), ws, ::NeXus::INT8);
 
   m_file->close();
 

@@ -29,8 +29,8 @@ using namespace WorkspaceCreationHelper;
 using namespace std;
 
 using Mantid::CurveFitting::Algorithms::LeBailFit;
-using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::Points;
 
 namespace {

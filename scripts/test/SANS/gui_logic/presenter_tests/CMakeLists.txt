@@ -1,4 +1,5 @@
 set(TEST_PY_FILES
+    presenter_common_test.py
     settings_adjustment_presenter_test.py
     )
 

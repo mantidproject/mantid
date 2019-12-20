@@ -11,6 +11,9 @@
 #include "GUI/Batch/IBatchJobRunner.h"
 #include "GUI/Batch/IBatchPresenter.h"
 #include "GUI/Batch/IBatchPresenterFactory.h"
+#include "GUI/Common/IDecoder.h"
+#include "GUI/Common/IEncoder.h"
+#include "GUI/Common/IFileHandler.h"
 #include "GUI/Common/IMessageHandler.h"
 #include "GUI/Common/IPlotter.h"
 #include "GUI/Common/IPythonRunner.h"
@@ -34,6 +37,9 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/Hint.h"
+#include <QMap>
+#include <QString>
+#include <QVariant>
 #include <boost/shared_ptr.hpp>
 #include <gmock/gmock.h>
 
@@ -244,6 +250,27 @@ public:
   MOCK_METHOD2(giveUserInfo, void(const std::string &, const std::string &));
   MOCK_METHOD2(askUserYesNo, bool(const std::string &, const std::string &));
   MOCK_METHOD0(askUserDiscardChanges, bool());
+  MOCK_METHOD1(askUserForLoadFileName, std::string(const std::string &));
+  MOCK_METHOD1(askUserForSaveFileName, std::string(const std::string &));
+};
+
+class MockFileHandler : public IFileHandler {
+public:
+  MOCK_METHOD2(saveJSONToFile,
+               void(std::string const &, QMap<QString, QVariant> const &));
+  MOCK_METHOD1(loadJSONFromFile, QMap<QString, QVariant>(const std::string &));
+};
+
+class MockEncoder : public IEncoder {
+public:
+  MOCK_METHOD3(encodeBatch,
+               QMap<QString, QVariant>(const IMainWindowView *, int, bool));
+};
+
+class MockDecoder : public IDecoder {
+public:
+  MOCK_METHOD3(decodeBatch, void(const IMainWindowView *, int,
+                                 const QMap<QString, QVariant> &));
 };
 
 class MockPythonRunner : public IPythonRunner {

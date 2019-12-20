@@ -15,6 +15,7 @@ from __future__ import (absolute_import, division, print_function)
 import os
 import re
 
+from mantid.py3compat import Enum
 from mantid.kernel import Logger
 from sans.common.constants import ALL_PERIODS
 from sans.common.enums import RowState, SampleShape
@@ -125,7 +126,7 @@ class TableModel(object):
 
     def update_table_entry(self, row, column, value):
         self._table_entries[row].update_attribute(self.column_name_converter[column], value)
-        self._table_entries[row].update_attribute('row_state', RowState.Unprocessed)
+        self._table_entries[row].update_attribute('row_state', RowState.UNPROCESSED)
         self._table_entries[row].update_attribute('tool_tip', '')
         self.notify_subscribers()
 
@@ -147,16 +148,16 @@ class TableModel(object):
         return SampleShapeColumnModel.get_hint_strategy()
 
     def set_row_to_processed(self, row, tool_tip):
-        self._table_entries[row].update_attribute('row_state', RowState.Processed)
+        self._table_entries[row].update_attribute('row_state', RowState.PROCESSED)
         self._table_entries[row].update_attribute('tool_tip', tool_tip)
         self.notify_subscribers()
 
     def reset_row_state(self, row):
-        self._table_entries[row].update_attribute('row_state', RowState.Unprocessed)
+        self._table_entries[row].update_attribute('row_state', RowState.UNPROCESSED)
         self._table_entries[row].update_attribute('tool_tip', '')
 
     def set_row_to_error(self, row, tool_tip):
-        self._table_entries[row].update_attribute('row_state', RowState.Error)
+        self._table_entries[row].update_attribute('row_state', RowState.ERROR)
         self._table_entries[row].update_attribute('tool_tip', tool_tip)
         self.notify_subscribers()
 
@@ -319,7 +320,7 @@ class TableIndexModel(object):
         self.sample_shape_model = SampleShapeColumnModel()
         self.sample_shape = sample_shape
 
-        self.row_state = RowState.Unprocessed
+        self.row_state = RowState.UNPROCESSED
 
         self.tool_tip = ''
         self.file_information = None
@@ -498,26 +499,30 @@ class SampleShapeColumnModel(object):
         self.sample_shape_string = ""
 
     def __call__(self, original_value):
-        self._get_sample_shape(original_value)
+        self._set_sample_shape(original_value)
 
-    def _get_sample_shape(self, original_value):
-        try:
-            original_value = SampleShape.to_string(original_value)
-        except RuntimeError as e:
-            if not isinstance(original_value, str):
-                raise ValueError(str(e))
+    def _set_sample_shape(self, original_value):
+        if isinstance(original_value, Enum):
+            self.sample_shape = original_value
+            self.sample_shape_string = original_value.value
+            return
 
-        value = original_value.strip().lower()
-        if value == "":
-            self.sample_shape = ""
-            self.sample_shape_string = ""
-        else:
-            for shape in SampleShapeColumnModel.SAMPLE_SHAPES:
-                if shape.startswith(value):
-                    shape_enum_string = SampleShapeColumnModel.SAMPLE_SHAPES_DICT[shape]
-                    self.sample_shape = SampleShape.from_string(shape_enum_string)
-                    self.sample_shape_string = shape_enum_string
-                    break
+        user_val = original_value.strip().lower()
+
+        # Set it to none as our fallback
+        self.sample_shape = SampleShape.NOT_SET
+        self.sample_shape_string = ""
+
+        if not user_val:
+            return  # If we don't return here an empty string will match with the first shape
+
+        for shape in SampleShape:
+            # Case insensitive lookup
+            value = str(shape.value)
+            if user_val in value.lower() :
+                self.sample_shape = shape
+                self.sample_shape_string = shape.value
+                return
 
     @staticmethod
     def get_hint_strategy():

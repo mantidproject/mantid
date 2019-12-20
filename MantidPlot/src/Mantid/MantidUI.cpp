@@ -4045,9 +4045,9 @@ void MantidUI::memoryImage2() {
 }
 
 #endif
-  //=======================================================================
-  // End of Windows specific stuff
-  //=======================================================================
+//=======================================================================
+// End of Windows specific stuff
+//=======================================================================
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"

@@ -571,11 +571,11 @@ PARALLEL_CHECK_INTERUPT_REGION
 if (m_accumulate) {
   std::transform(
       signalArray.cbegin(), signalArray.cend(), m_normWS->getSignalArray(),
-      m_normWS->getSignalArray(),
+      m_normWS->mutableSignalArray(),
       [](const std::atomic<signal_t> &a, const signal_t &b) { return a + b; });
 } else {
   std::copy(signalArray.cbegin(), signalArray.cend(),
-            m_normWS->getSignalArray());
+            m_normWS->mutableSignalArray());
 }
 }
 

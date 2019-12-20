@@ -130,15 +130,13 @@ void FindUBUsingMinMaxD::exec() {
             num_indexed, n_peaks, tolerance);
     g_log.notice(std::string(logInfo));
 
-    OrientedLattice o_lattice;
-    o_lattice.setUB(UB);
-    o_lattice.setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4],
-                       sigabc[5]);
-
+    auto lattice = std::make_unique<OrientedLattice>();
+    lattice->setUB(UB);
+    lattice->setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4],
+                      sigabc[5]);
     // Show the modified lattice parameters
-    g_log.notice() << o_lattice << "\n";
-
-    ws->mutableSample().setOrientedLattice(&o_lattice);
+    g_log.notice() << *lattice << "\n";
+    ws->mutableSample().setOrientedLattice(std::move(lattice));
   }
 }
 

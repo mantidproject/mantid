@@ -87,24 +87,19 @@ void export_Material() {
            "Returns True if any of the scattering values are non-zero")
 #endif
       .def("cohScatterXSection",
-           (double (Material::*)(double) const)(&Material::cohScatterXSection),
-           (arg("self"),
-            arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
+           (double (Material::*)() const)(&Material::cohScatterXSection),
+           (arg("self")),
            "Coherent Scattering Cross-Section for the given wavelength in "
            "barns")
-      .def(
-          "incohScatterXSection",
-          (double (Material::*)(double) const)(&Material::incohScatterXSection),
-          (arg("self"),
-           arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
-          "Incoherent Scattering Cross-Section for the given wavelength in "
-          "barns")
-      .def(
-          "totalScatterXSection",
-          (double (Material::*)(double) const)(&Material::totalScatterXSection),
-          (arg("self"),
-           arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
-          "Total Scattering Cross-Section for the given wavelength in barns")
+      .def("incohScatterXSection",
+           (double (Material::*)() const)(&Material::incohScatterXSection),
+           (arg("self")),
+           "Incoherent Scattering Cross-Section for the given wavelength in "
+           "barns")
+      .def("totalScatterXSection",
+           (double (Material::*)() const)(&Material::totalScatterXSection),
+           (arg("self")),
+           "Total Scattering Cross-Section for the given wavelength in barns")
       .def("absorbXSection",
            (double (Material::*)(double) const)(&Material::absorbXSection),
            (arg("self"),
@@ -154,6 +149,7 @@ void export_Material() {
            "Imaginary part of Incoherent Scattering Length for the given "
            "wavelength "
            "in fm")
+
       .def(
           "cohScatterLengthSqrd",
           (double (Material::*)(double) const)(&Material::cohScatterLengthSqrd),

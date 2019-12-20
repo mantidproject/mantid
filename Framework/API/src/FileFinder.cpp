@@ -163,20 +163,18 @@ FileFinderImpl::getInstrument(const string &hint) const {
     } else {
       // go forwards looking for the run number to start
       {
-        string::const_iterator it = std::find_if(
-            instrName.begin(), instrName.end(), std::ptr_fun(isdigit));
-        std::string::size_type nChars = std::distance(
-            static_cast<string::const_iterator>(instrName.begin()), it);
+        const auto it =
+            std::find_if(instrName.begin(), instrName.end(), isdigit);
+        const auto nChars = std::distance(instrName.begin(), it);
         instrName = instrName.substr(0, nChars);
       }
 
       // go backwards looking for the instrument name to end - gets around
       // delimiters
       if (!instrName.empty()) {
-        string::const_reverse_iterator it = std::find_if(
-            instrName.rbegin(), instrName.rend(), std::ptr_fun(isalpha));
-        string::size_type nChars = std::distance(
-            it, static_cast<string::const_reverse_iterator>(instrName.rend()));
+        const auto it =
+            std::find_if(instrName.rbegin(), instrName.rend(), isalpha);
+        const auto nChars = std::distance(it, instrName.rend());
         instrName = instrName.substr(0, nChars);
       }
     }
@@ -207,8 +205,8 @@ FileFinderImpl::toInstrumentAndNumber(const std::string &hint) const {
     runPart = hint;
   } else {
     /// Find the last non-digit as the instrument name can contain numbers
-    std::string::const_reverse_iterator it = std::find_if(
-        hint.rbegin(), hint.rend(), std::not1(std::ptr_fun(isdigit)));
+    std::string::const_reverse_iterator it =
+        std::find_if(hint.rbegin(), hint.rend(), std::not_fn(isdigit));
     // No non-digit or all non-digits
     if (it == hint.rend() || it == hint.rbegin()) {
       throw std::invalid_argument(

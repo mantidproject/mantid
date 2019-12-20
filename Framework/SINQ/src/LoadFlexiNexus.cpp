@@ -223,8 +223,8 @@ void LoadFlexiNexus::loadMD(NeXus::File *fin) {
 
   auto ws = boost::make_shared<MDHistoWorkspace>(dimensions);
 
-  signal_t *dd = ws->getSignalArray();
-  signal_t *ddE = ws->getErrorSquaredArray();
+  auto dd = ws->mutableSignalArray();
+  signal_t *ddE = ws->mutableErrorSquaredArray();
 
   // assign data
   for (size_t i = 0; i < data.size(); i++) {

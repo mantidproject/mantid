@@ -123,7 +123,6 @@ ISISRAW::ISISRAW() : m_crpt(nullptr), dat1(nullptr) {
   logsect.nlines = 1;
   logsect.lines = new LOG_LINE[logsect.nlines];
   for (i = 0; i < logsect.nlines; i++) {
-    // logsect.lines[i].data = "test log line"; //Deprecated
     logsect.lines[i].data = reinterpret_cast<char *>(malloc(16));
     strcpy(logsect.lines[i].data, "test log line");
     logsect.lines[i].len = static_cast<int>(strlen(logsect.lines[i].data));
@@ -800,6 +799,7 @@ int ISISRAW::ioRAW(FILE *file, float *s, int len, bool from_file) {
 int ISISRAW::ioRAW(FILE *file, char **s, int len, bool from_file) {
   if (from_file) {
     if (len > 0) {
+      delete[] * s;
       *s = new char[len];
       ioRAW(file, *s, len, from_file);
     } else {
@@ -817,6 +817,7 @@ int ISISRAW::ioRAW(FILE *file, char **s, int len, bool from_file) {
 int ISISRAW::ioRAW(FILE *file, int **s, int len, bool from_file) {
   if (from_file) {
     if (len > 0) {
+      delete[] * s;
       *s = new int[len];
       ioRAW(file, *s, len, from_file);
     } else {
@@ -834,6 +835,7 @@ int ISISRAW::ioRAW(FILE *file, int **s, int len, bool from_file) {
 int ISISRAW::ioRAW(FILE *file, uint32_t **s, int len, bool from_file) {
   if (from_file) {
     if (len > 0) {
+      delete[] * s;
       *s = new uint32_t[len];
       ioRAW(file, *s, len, from_file);
     } else {
@@ -851,6 +853,7 @@ int ISISRAW::ioRAW(FILE *file, uint32_t **s, int len, bool from_file) {
 int ISISRAW::ioRAW(FILE *file, float **s, int len, bool from_file) {
   if (from_file) {
     if (len > 0) {
+      delete[] * s;
       *s = new float[len];
       ioRAW(file, *s, len, from_file);
     } else {
@@ -868,6 +871,7 @@ int ISISRAW::ioRAW(FILE *file, float **s, int len, bool from_file) {
 int ISISRAW::ioRAW(FILE *file, SE_STRUCT **s, int len, bool from_file) {
   if (from_file) {
     if (len > 0) {
+      delete[] * s;
       *s = new SE_STRUCT[len];
       ioRAW(file, *s, len, from_file);
     } else {
@@ -885,6 +889,7 @@ int ISISRAW::ioRAW(FILE *file, SE_STRUCT **s, int len, bool from_file) {
 int ISISRAW::ioRAW(FILE *file, DDES_STRUCT **s, int len, bool from_file) {
   if (from_file) {
     if (len > 0) {
+      delete[] * s;
       *s = new DDES_STRUCT[len];
       ioRAW(file, *s, len, from_file);
     } else {
@@ -902,6 +907,7 @@ int ISISRAW::ioRAW(FILE *file, DDES_STRUCT **s, int len, bool from_file) {
 int ISISRAW::ioRAW(FILE *file, LOG_LINE **s, int len, bool from_file) {
   if (from_file) {
     if (len > 0) {
+      delete[] * s;
       *s = new LOG_LINE[len];
       ioRAW(file, *s, len, from_file);
     } else {

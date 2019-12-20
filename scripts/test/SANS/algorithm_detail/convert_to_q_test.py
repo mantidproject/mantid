@@ -38,9 +38,9 @@ class ConvertToQTest(unittest.TestCase):
         return workspace
 
     @staticmethod
-    def _get_sample_state(q_min=1., q_max=2., q_step=0.1, q_step_type=RangeStepType.Lin,
+    def _get_sample_state(q_min=1., q_max=2., q_step=0.1, q_step_type=RangeStepType.LIN,
                           q_xy_max=None, q_xy_step=None, q_xy_step_type=None,
-                          use_gravity=False, dim=ReductionDimensionality.OneDim):
+                          use_gravity=False, dim=ReductionDimensionality.ONE_DIM):
         facility = SANSFacility.ISIS
         file_information = SANSFileInformationMock(instrument=SANSInstrument.LOQ, run_number=74044)
         data_builder = get_data_builder(facility, file_information)
@@ -54,7 +54,7 @@ class ConvertToQTest(unittest.TestCase):
         convert_to_q_builder.set_wavelength_cutoff(2.)
         convert_to_q_builder.set_q_min(q_min)
         convert_to_q_builder.set_q_max(q_max)
-        prefix = 1. if q_step_type is RangeStepType.Lin else -1.
+        prefix = 1. if q_step_type is RangeStepType.LIN else -1.
         q_step *= prefix
         rebin_string = str(q_min) + "," + str(q_step) + "," + str(q_max)
         convert_to_q_builder.set_q_1d_rebin_string(rebin_string)
@@ -77,7 +77,7 @@ class ConvertToQTest(unittest.TestCase):
         workspace = self._get_workspace(is_adjustment=False)
         adj_workspace = self._get_workspace(is_adjustment=True)
 
-        state = self._get_sample_state(q_min=1., q_max=2., q_step=0.1, q_step_type=RangeStepType.Lin)
+        state = self._get_sample_state(q_min=1., q_max=2., q_step=0.1, q_step_type=RangeStepType.LIN)
 
         # Act
         output_dict = convert_workspace(workspace=workspace, output_summed_parts=True,
@@ -108,8 +108,8 @@ class ConvertToQTest(unittest.TestCase):
         workspace = self._get_workspace(is_adjustment=False)
         adj_workspace = self._get_workspace(is_adjustment=True)
 
-        state = self._get_sample_state(q_xy_max=2., q_xy_step=0.5, q_xy_step_type=RangeStepType.Lin,
-                                       dim=ReductionDimensionality.TwoDim)
+        state = self._get_sample_state(q_xy_max=2., q_xy_step=0.5, q_xy_step_type=RangeStepType.LIN,
+                                       dim=ReductionDimensionality.TWO_DIM)
 
         output_dict = convert_workspace(workspace=workspace, output_summed_parts=True,
                                         state_convert_to_q=state.convert_to_q, wavelength_adj_workspace=adj_workspace)

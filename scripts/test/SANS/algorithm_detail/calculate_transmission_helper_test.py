@@ -5,12 +5,13 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-import unittest
-import mantid
+
 import os
+import unittest
+
+from mantid.api import AnalysisDataService
 from mantid.kernel import config
 from mantid.simpleapi import (CreateSampleWorkspace, MaskDetectors, DeleteWorkspace, LoadNexusProcessed, Load, Rebin)
-from mantid.api import AnalysisDataService
 from sans.algorithm_detail.calculate_transmission_helper import (get_masked_det_ids,
                                                                  get_idf_path_from_workspace,
                                                                  get_workspace_indices_for_monitors,

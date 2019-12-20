@@ -189,8 +189,8 @@ void LoadVTK::execMDHisto(vtkUnsignedShortArray *signals,
       boost::make_shared<MDHistoWorkspace>(dimX, dimY, dimZ);
 
   // cppcheck-suppress unreadVariable
-  double *destinationSignals = outputWS->getSignalArray();
-  double *destinationErrorsSQ = outputWS->getErrorSquaredArray();
+  double *destinationSignals = outputWS->mutableSignalArray();
+  double *destinationErrorsSQ = outputWS->mutableErrorSquaredArray();
 
   if (errorsSQ) {
     PARALLEL_FOR_NO_WSP_CHECK()

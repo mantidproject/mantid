@@ -16,7 +16,7 @@ from mantid.simpleapi import CreateEmptyTableWorkspace
 # Functions for the execution of a single batch iteration
 # ----------------------------------------------------------------------------------------------------------------------
 def centre_finder_new(state, r_min = 0.06, r_max = 0.26, iterations = 10, position_1_start = 0.0, position_2_start = 0.0
-                      , tolerance = 0.0001251, find_direction = FindDirectionEnum.All, verbose=False, component=DetectorType.LAB):
+                      , tolerance = 0.0001251, find_direction = FindDirectionEnum.ALL, verbose=False, component=DetectorType.LAB):
     """
     Finds the beam centre from a good initial guess.
 
@@ -35,15 +35,15 @@ def centre_finder_new(state, r_min = 0.06, r_max = 0.26, iterations = 10, positi
     # ------------------------------------------------------------------------------------------------------------------
     # Load the data
     # ------------------------------------------------------------------------------------------------------------------
-    workspace_to_name = {SANSDataType.SampleScatter: "SampleScatterWorkspace",
-                         SANSDataType.SampleTransmission: "SampleTransmissionWorkspace",
-                         SANSDataType.SampleDirect: "SampleDirectWorkspace",
-                         SANSDataType.CanScatter: "CanScatterWorkspace",
-                         SANSDataType.CanTransmission: "CanTransmissionWorkspace",
-                         SANSDataType.CanDirect: "CanDirectWorkspace"}
+    workspace_to_name = {SANSDataType.SAMPLE_SCATTER: "SampleScatterWorkspace",
+                         SANSDataType.SAMPLE_TRANSMISSION: "SampleTransmissionWorkspace",
+                         SANSDataType.SAMPLE_DIRECT: "SampleDirectWorkspace",
+                         SANSDataType.CAN_SCATTER: "CanScatterWorkspace",
+                         SANSDataType.CAN_TRANSMISSION: "CanTransmissionWorkspace",
+                         SANSDataType.CAN_DIRECT: "CanDirectWorkspace"}
 
-    workspace_to_monitor = {SANSDataType.SampleScatter: "SampleScatterMonitorWorkSpace",
-                            SANSDataType.CanScatter: "CanScatterMonitorWorkspace"}
+    workspace_to_monitor = {SANSDataType.SAMPLE_SCATTER: "SampleScatterMonitorWorkSpace",
+                            SANSDataType.CAN_SCATTER: "CanScatterMonitorWorkspace"}
 
     workspaces, monitors = provide_loaded_data(state, False, workspace_to_name, workspace_to_monitor)
 
@@ -61,8 +61,8 @@ def centre_finder_new(state, r_min = 0.06, r_max = 0.26, iterations = 10, positi
     beam_centre_finder = "SANSBeamCentreFinder"
     beam_centre_finder_options = {"Iterations": iterations, "RMin": r_min/1000, "RMax": r_max/1000,
                                   "Position1Start": position_1_start, "Position2Start": position_2_start,
-                                  "Tolerance": tolerance, "Direction" : FindDirectionEnum.to_string(find_direction),
-                                  "Verbose": verbose, "Component": DetectorType.to_string(component)}
+                                  "Tolerance": tolerance, "Direction" : find_direction.value,
+                                  "Verbose": verbose, "Component": component.value}
     beam_centre_alg = create_managed_non_child_algorithm(beam_centre_finder, **beam_centre_finder_options)
     beam_centre_alg.setChild(False)
     set_properties_for_beam_centre_algorithm(beam_centre_alg, reduction_package,
@@ -98,9 +98,9 @@ def centre_finder_mass(state, r_min = 0.06, max_iter=10, position_1_start = 0.0,
     # ------------------------------------------------------------------------------------------------------------------
     # Load the data
     # ------------------------------------------------------------------------------------------------------------------
-    workspace_to_name = {SANSDataType.SampleScatter: "SampleScatterWorkspace"}
+    workspace_to_name = {SANSDataType.SAMPLE_SCATTER: "SampleScatterWorkspace"}
 
-    workspace_to_monitor = {SANSDataType.SampleScatter: "SampleScatterMonitorWorkSpace"}
+    workspace_to_monitor = {SANSDataType.SAMPLE_SCATTER: "SampleScatterMonitorWorkSpace"}
 
     workspaces, monitors = provide_loaded_data(state, False, workspace_to_name, workspace_to_monitor)
 
@@ -116,7 +116,7 @@ def centre_finder_mass(state, r_min = 0.06, max_iter=10, position_1_start = 0.0,
     # ------------------------------------------------------------------------------------------------------------------
     beam_centre_finder = "SANSBeamCentreFinderMassMethod"
     beam_centre_finder_options = {"RMin": r_min/1000, "Centre1": position_1_start,
-                                  "Centre2": position_2_start, "Tolerance": tolerance, "Component": DetectorType.to_string(component)}
+                                  "Centre2": position_2_start, "Tolerance": tolerance, "Component": component.value}
     beam_centre_alg = create_managed_non_child_algorithm(beam_centre_finder, **beam_centre_finder_options)
     beam_centre_alg.setChild(False)
 

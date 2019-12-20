@@ -16,6 +16,7 @@ class SamplingImage(mimage.AxesImage):
                  filternorm=1,
                  filterrad=4.0,
                  resample=False,
+                 normalize=mantid.api.MDNormalization.NoNormalization,
                  **kwargs):
         super(SamplingImage, self).__init__(
             ax,
@@ -30,6 +31,7 @@ class SamplingImage(mimage.AxesImage):
             **kwargs)
         self.ws = workspace
         self.transpose = transpose
+        self.normalization = normalize
 
     def _xlim_changed(self, ax):
         if self._update_extent():
@@ -56,7 +58,7 @@ class SamplingImage(mimage.AxesImage):
             xy = np.vstack((Y.ravel(),X.ravel())).T
         else:
             xy = np.vstack((X.ravel(),Y.ravel())).T
-        data = self.ws.getSignalAtCoord(xy, mantid.api.MDNormalization.NoNormalization).reshape(X.shape)
+        data = self.ws.getSignalAtCoord(xy, self.normalization).reshape(X.shape)
         self.set_data(data)
 
     def _update_extent(self):

@@ -18,11 +18,11 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
-using Mantid::API::AlgorithmManager;
-using Mantid::API::Algorithm_sptr;
-using Mantid::API::MatrixWorkspace_sptr;
-using Mantid::Algorithms::CalculatePlaczekSelfScattering;
 using Mantid::MantidVec;
+using Mantid::Algorithms::CalculatePlaczekSelfScattering;
+using Mantid::API::Algorithm_sptr;
+using Mantid::API::AlgorithmManager;
+using Mantid::API::MatrixWorkspace_sptr;
 
 // generate incident spectrum data
 std::vector<double>
@@ -156,7 +156,7 @@ public:
     alg->setProperty("IncidentSpecta", IncidentSpecta);
     alg->setProperty("InputWorkspace", InputWorkspace);
     alg->setProperty("OutputWorkspace", "correction_ws");
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error)
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &)
   }
 
   void testCalculatePlaczekSelfScatteringDoesNotRunWithNoSample() {
@@ -170,7 +170,7 @@ public:
     alg->setProperty("IncidentSpecta", IncidentSpecta);
     alg->setProperty("InputWorkspace", InputWorkspace);
     alg->setProperty("OutputWorkspace", "correction_ws");
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error)
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &)
   }
 
 private:

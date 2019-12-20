@@ -82,7 +82,7 @@ std::map<std::string, std::string> GroupWorkspaces::validateInputs() {
 
   for (auto it = globExpression.begin(); it < globExpression.end(); ++it) {
     if (*it == '\\') {
-      it = globExpression.erase(it, it + 2);
+      it = globExpression.erase(it, it + 1);
     }
   }
 

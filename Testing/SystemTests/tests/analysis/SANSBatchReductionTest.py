@@ -13,7 +13,7 @@ from mantid.api import AnalysisDataService
 from sans.sans_batch import SANSBatchReduction
 from sans.user_file.state_director import StateDirectorISIS
 from sans.state.data import get_data_builder
-from sans.common.enums import (SANSFacility, ISISReductionMode, OutputMode)
+from sans.common.enums import (SANSFacility, ReductionMode, OutputMode)
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_unmanaged_algorithm
 from sans.common.file_information import SANSFileInformationFactory
@@ -26,7 +26,7 @@ class SANSBatchReductionTest(unittest.TestCase):
 
     def _run_batch_reduction(self, states, use_optimizations=False):
         batch_reduction_alg = SANSBatchReduction()
-        batch_reduction_alg(states, use_optimizations, OutputMode.PublishToADS)
+        batch_reduction_alg(states, use_optimizations, OutputMode.PUBLISH_TO_ADS)
 
     def _compare_workspace(self, workspace, reference_file_name):
         # Load the reference file
@@ -81,7 +81,7 @@ class SANSBatchReductionTest(unittest.TestCase):
         user_file_director = StateDirectorISIS(data_info, file_information)
         user_file_director.set_user_file("USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt")
         # Set the reduction mode to LAB
-        user_file_director.set_reduction_builder_reduction_mode(ISISReductionMode.LAB)
+        user_file_director.set_reduction_builder_reduction_mode(ReductionMode.LAB)
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         # COMPATIBILITY BEGIN -- Remove when appropriate
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -96,7 +96,7 @@ class SANSBatchReductionTest(unittest.TestCase):
         # Act
         states = [state]
         self._run_batch_reduction(states, use_optimizations=False)
-        workspace_name = "34484rear_1D_1.75_16.5"
+        workspace_name = "34484_rear_1D_1.75_16.5"
         output_workspace = AnalysisDataService.retrieve(workspace_name)
 
         # Evaluate it up to a defined point
@@ -120,7 +120,7 @@ class SANSBatchReductionTest(unittest.TestCase):
         user_file_director = StateDirectorISIS(data_info, file_information)
         user_file_director.set_user_file("MASKSANS2Doptions.091A")
         # Set the reduction mode to LAB
-        user_file_director.set_reduction_builder_reduction_mode(ISISReductionMode.LAB)
+        user_file_director.set_reduction_builder_reduction_mode(ReductionMode.LAB)
         state = user_file_director.construct()
 
         # Act
@@ -129,15 +129,10 @@ class SANSBatchReductionTest(unittest.TestCase):
 
         # Assert
         # We only assert that the expected workspaces exist on the ADS
-        expected_workspaces = ["5512p1rear_1D_2.0_14.0Phi-45.0_45.0", "5512p2rear_1D_2.0_14.0Phi-45.0_45.0",
-                               "5512p3rear_1D_2.0_14.0Phi-45.0_45.0", "5512p4rear_1D_2.0_14.0Phi-45.0_45.0",
-                               "5512p5rear_1D_2.0_14.0Phi-45.0_45.0", "5512p6rear_1D_2.0_14.0Phi-45.0_45.0",
-                               "5512p7rear_1D_2.0_14.0Phi-45.0_45.0", "5512p8rear_1D_2.0_14.0Phi-45.0_45.0",
-                               "5512p9rear_1D_2.0_14.0Phi-45.0_45.0", "5512p10rear_1D_2.0_14.0Phi-45.0_45.0",
-                               "5512p11rear_1D_2.0_14.0Phi-45.0_45.0", "5512p12rear_1D_2.0_14.0Phi-45.0_45.0",
-                               "5512p13rear_1D_2.0_14.0Phi-45.0_45.0"]
+        expected_workspaces = ["5512_p{0}rear_1D_2.0_14.0Phi-45.0_45.0".format(i) for i in range(1, 14)]
         for element in expected_workspaces:
-            self.assertTrue(AnalysisDataService.doesExist(element))
+            does_exist = AnalysisDataService.doesExist(element)
+            self.assertTrue(does_exist, msg="{0} was not found".format(element))
 
         # Clean up
         for element in expected_workspaces:
@@ -165,7 +160,7 @@ class SANSBatchReductionTest(unittest.TestCase):
         user_file_director = StateDirectorISIS(data_info, file_information)
         user_file_director.set_user_file("USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt")
         # Set the reduction mode to LAB
-        user_file_director.set_reduction_builder_reduction_mode(ISISReductionMode.LAB)
+        user_file_director.set_reduction_builder_reduction_mode(ReductionMode.LAB)
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         # COMPATIBILITY BEGIN -- Remove when appropriate
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -184,7 +179,7 @@ class SANSBatchReductionTest(unittest.TestCase):
         states = [state]
         self._run_batch_reduction(states, use_optimizations=False)
 
-        expected_workspaces = ["34484rear_1D_1.75_16.5_t1.00_T3.00", "34484rear_1D_1.75_16.5_t3.00_T5.00"]
+        expected_workspaces = ["34484_rear_1D_1.75_16.5_t1.00_T3.00", "34484_rear_1D_1.75_16.5_t3.00_T5.00"]
         reference_file_names = ["SANS2D_event_slice_referance_t1.00_T3.00.nxs", "SANS2D_event_slice_referance_t3.00_T5.00.nxs"]
 
         for element, reference_file in zip(expected_workspaces, reference_file_names):
@@ -218,7 +213,7 @@ class SANSBatchReductionTest(unittest.TestCase):
         user_file_director = StateDirectorISIS(data_info, file_information)
         user_file_director.set_user_file("USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt")
         # Set the reduction mode to LAB
-        user_file_director.set_reduction_builder_reduction_mode(ISISReductionMode.LAB)
+        user_file_director.set_reduction_builder_reduction_mode(ReductionMode.LAB)
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         # COMPATIBILITY BEGIN -- Remove when appropriate
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -248,7 +243,7 @@ class SANSBatchReductionTest(unittest.TestCase):
         states = [state]
         self._run_batch_reduction(states, use_optimizations=False)
 
-        expected_workspaces = ["34484rear_1D_1.0_2.0", "34484rear_1D_2.0_3.0"]
+        expected_workspaces = ["34484_rear_1D_1.0_2.0", "34484_rear_1D_2.0_3.0"]
         reference_file_names = ["SANS2D_wavelength_range_1.0_2.0.nxs",
                                 "SANS2D_wavelength_range_2.0_3.0.nxs"]
 
@@ -277,7 +272,7 @@ class SANSBatchReductionTest(unittest.TestCase):
         user_file_director = StateDirectorISIS(data_info, file_information)
         user_file_director.set_user_file("MASKSANS2Doptions.091A")
         # Set the reduction mode to LAB
-        user_file_director.set_reduction_builder_reduction_mode(ISISReductionMode.LAB)
+        user_file_director.set_reduction_builder_reduction_mode(ReductionMode.LAB)
 
         user_file_director.set_slice_event_builder_start_time([1.0, 3.0])
         user_file_director.set_slice_event_builder_end_time([3.0, 5.0])
@@ -304,8 +299,8 @@ class SANSBatchReductionTest(unittest.TestCase):
 
         # Assert
         # We only assert that the expected workspaces exist on the ADS
-        expected_workspaces = ["5512p1rear_1D_1.0_2.0Phi-45.0_45.0_t1.00_T3.00", "5512p1rear_1D_1.0_2.0Phi-45.0_45.0_t3.00_T5.00",
-                               "5512p1rear_1D_1.0_3.0Phi-45.0_45.0_t1.00_T3.00", "5512p1rear_1D_1.0_3.0Phi-45.0_45.0_t3.00_T5.00"
+        expected_workspaces = ["5512_p1rear_1D_1.0_2.0Phi-45.0_45.0_t1.00_T3.00", "5512_p1rear_1D_1.0_2.0Phi-45.0_45.0_t3.00_T5.00",
+                               "5512_p1rear_1D_1.0_3.0Phi-45.0_45.0_t1.00_T3.00", "5512_p1rear_1D_1.0_3.0Phi-45.0_45.0_t3.00_T5.00"
                                ]
         for element in expected_workspaces:
             self.assertTrue(AnalysisDataService.doesExist(element))

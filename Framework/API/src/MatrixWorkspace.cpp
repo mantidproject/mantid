@@ -1200,6 +1200,11 @@ bool MatrixWorkspace::hasMaskedBins(const size_t &workspaceIndex) const {
   return m_masks.find(workspaceIndex) != m_masks.end();
 }
 
+/** Does this workspace contain any masked bins
+ *  @return True if there are masked bins somewhere in this workspace
+ */
+bool MatrixWorkspace::hasAnyMaskedBins() const { return !m_masks.empty(); }
+
 /** Returns the list of masked bins for a spectrum.
  *  @param  workspaceIndex
  *  @return A const reference to the list of masked bins

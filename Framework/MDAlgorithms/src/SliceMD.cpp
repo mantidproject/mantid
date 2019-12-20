@@ -12,7 +12,6 @@
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/ThreadPool.h"
 #include "MantidKernel/ThreadScheduler.h"
 
@@ -179,12 +178,11 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
   // Function defining which events (in the input dimensions) to place in the
   // output
-  MDImplicitFunction *function =
-      this->getImplicitFunctionForChunk(nullptr, nullptr);
+  auto function = this->getImplicitFunctionForChunk(nullptr, nullptr);
 
   std::vector<API::IMDNode *> boxes;
   // Leaf-only; no depth limit; with the implicit function passed to it.
-  ws->getBox()->getBoxes(boxes, 1000, true, function);
+  ws->getBox()->getBoxes(boxes, 1000, true, function.get());
   // Sort boxes by file position IF file backed. This reduces seeking time,
   // hopefully.
   bool fileBackedWS = bc->isFileBacked();

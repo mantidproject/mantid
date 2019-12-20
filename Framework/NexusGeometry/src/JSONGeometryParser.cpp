@@ -127,6 +127,9 @@ void extractDatasetValues(const Json::Value &datasetParent,
   auto shape = datadesc["size"];
   auto values = datasetParent[VALUES];
 
+  if (shape.isNull())
+    return addSingleValue(values, data);
+
   std::vector<uint32_t> dims(shape.size());
 
   size_t nValues = 1;
@@ -279,7 +282,7 @@ Json::Value getRoot(const std::string &jsonGeometry) {
     throw std::invalid_argument("Empty geometry json string provided.");
 
   Json::CharReaderBuilder rbuilder;
-  auto reader = rbuilder.newCharReader();
+  auto reader = std::unique_ptr<Json::CharReader>(rbuilder.newCharReader());
   Json::Value root;
   std::string errors;
 
@@ -337,16 +340,19 @@ void JSONGeometryParser::validateAndRetrieveGeometry(
   if (sample.isNull())
     throw std::invalid_argument("No sample found in json.");
 
-  auto source = get(entryChildren, NX_SOURCE);
-  if (source.isNull())
-    g_log.notice() << "No source information found in json instrument."
-                   << std::endl;
-
   auto instrument = get(entryChildren, NX_INSTRUMENT);
   if (instrument.isNull())
     throw std::invalid_argument("No instrument found in json.");
 
   m_name = extractInstrumentName(instrument);
+
+  auto instrumentChildren = instrument[CHILDREN];
+
+  auto source = get(instrumentChildren, NX_SOURCE);
+
+  if (source.isNull())
+    g_log.notice() << "No source information found in json instrument."
+                   << std::endl;
 
   auto jsonDetectorBanks = getAllDetectors(instrument);
   if (jsonDetectorBanks.empty())
@@ -376,7 +382,7 @@ void JSONGeometryParser::extractSampleContent() {
       Eigen::Quaterniond(Eigen::AngleAxisd(0, Eigen::Vector3d(1, 0, 0)));
   m_sampleName = (*m_sample)[NAME].asString();
   for (const auto &child : children) {
-    if (child[NAME] == TRANSFORMATIONS)
+    if (validateNXAttribute(child[ATTRIBUTES], NX_TRANSFORMATIONS))
       extractTransformations(child, m_samplePosition, m_sampleOrientation);
   }
 }
@@ -390,7 +396,7 @@ void JSONGeometryParser::extractSourceContent() {
     m_sourceName = (*m_source)[NAME].asCString();
     const auto &children = (*m_source)[CHILDREN];
     for (const auto &child : children) {
-      if (child[NAME] == TRANSFORMATIONS)
+      if (validateNXAttribute(child[ATTRIBUTES], NX_TRANSFORMATIONS))
         extractTransformations(child, m_sourcePosition, m_sourceOrientation);
     }
   }
@@ -413,7 +419,7 @@ void JSONGeometryParser::extractTransformations(
     Eigen::Quaterniond &orientation) {
   Eigen::Vector3d location(0, 0, 0);
   Eigen::Vector3d beamDirectionOffset(0, 0, 0);
-  Eigen::Vector3d orientationVector(0, 0, 0);
+  Eigen::Vector3d orientationVector(0, 0, 1);
   double angle = 0.0;
 
   auto &children = transformations[CHILDREN];
@@ -426,8 +432,9 @@ void JSONGeometryParser::extractTransformations(
     } else if (transformation[NAME] == "beam_direction_offset") {
       extractTransformationDataset(transformation, value, beamDirectionOffset);
       beamDirectionOffset *= value;
-    } else if (transformation[NAME] == "orientation")
+    } else if (transformation[NAME] == "orientation") {
       extractTransformationDataset(transformation, angle, orientationVector);
+    }
   }
   translation = location + beamDirectionOffset;
   orientation = Eigen::AngleAxisd(degreesToRadians(angle),
@@ -520,7 +527,7 @@ void JSONGeometryParser::extractMonitorContent() {
         extractMonitorEventStream(child, mon);
       else if (child[NAME] == "waveforms")
         extractMonitorWaveformStream(child, mon);
-      else if (child[NAME] == "transformations")
+      else if (validateNXAttribute(child[ATTRIBUTES], NX_TRANSFORMATIONS))
         extractTransformations(child, mon.translation, mon.orientation);
       else if (child[NAME] == SHAPE)
         extractShapeInformation(child, mon.cylinders, mon.faces, mon.vertices,

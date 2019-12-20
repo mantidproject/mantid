@@ -26,8 +26,8 @@
 #include <numpy/arrayobject.h>
 
 using namespace Mantid::API;
-using Mantid::Kernel::Unit_sptr;
 using Mantid::specnum_t;
+using Mantid::Kernel::Unit_sptr;
 using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(Axis)

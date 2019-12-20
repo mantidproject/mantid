@@ -149,22 +149,22 @@ class CalculateSansTransmissionTest(unittest.TestCase):
             calculate_transmission_builder.set_background_TOF_roi_stop(background_TOF_roi_stop)
 
         if sample_fit_type:
-            calculate_transmission_builder.set_Sample_fit_type(sample_fit_type)
+            calculate_transmission_builder.set_sample_fit_type(sample_fit_type)
         if sample_polynomial_order:
-            calculate_transmission_builder.set_Sample_polynomial_order(sample_polynomial_order)
+            calculate_transmission_builder.set_sample_polynomial_order(sample_polynomial_order)
         if sample_wavelength_low:
-            calculate_transmission_builder.set_Sample_wavelength_low(sample_wavelength_low)
+            calculate_transmission_builder.set_sample_wavelength_low(sample_wavelength_low)
         if sample_wavelength_high:
-            calculate_transmission_builder.set_Sample_wavelength_high(sample_wavelength_high)
+            calculate_transmission_builder.set_sample_wavelength_high(sample_wavelength_high)
 
         if can_fit_type:
-            calculate_transmission_builder.set_Can_fit_type(can_fit_type)
+            calculate_transmission_builder.set_can_fit_type(can_fit_type)
         if can_polynomial_order:
-            calculate_transmission_builder.set_Can_polynomial_order(can_polynomial_order)
+            calculate_transmission_builder.set_can_polynomial_order(can_polynomial_order)
         if can_wavelength_low:
-            calculate_transmission_builder.set_Can_wavelength_low(can_wavelength_low)
+            calculate_transmission_builder.set_can_wavelength_low(can_wavelength_low)
         if can_wavelength_high:
-            calculate_transmission_builder.set_Can_wavelength_high(can_wavelength_high)
+            calculate_transmission_builder.set_can_wavelength_high(can_wavelength_high)
         calculate_transmission = calculate_transmission_builder.build()
         state.adjustment.calculate_transmission = calculate_transmission
         return state
@@ -234,12 +234,12 @@ class CalculateSansTransmissionTest(unittest.TestCase):
 
     def test_that_calculates_transmission_for_general_background_and_no_prompt_peak(self):
         # Arrange
-        state = CalculateSansTransmissionTest._get_state(rebin_type=RebinType.Rebin, wavelength_low=2.,
+        state = CalculateSansTransmissionTest._get_state(rebin_type=RebinType.REBIN, wavelength_low=2.,
                                                          wavelength_high=8., wavelength_step=2.,
-                                                         wavelength_step_type=RangeStepType.Lin,
+                                                         wavelength_step_type=RangeStepType.LIN,
                                                          background_TOF_general_start=5000.,
                                                          background_TOF_general_stop=10000., incident_monitor=1,
-                                                         transmission_monitor=3, sample_fit_type=FitType.Linear,
+                                                         transmission_monitor=3, sample_fit_type=FitType.LINEAR,
                                                          sample_polynomial_order=0, sample_wavelength_low=2.,
                                                          sample_wavelength_high=8.)
         # Get a test monitor workspace with 4 bins where the first bin is the back ground
@@ -270,16 +270,16 @@ class CalculateSansTransmissionTest(unittest.TestCase):
         fix_for_remove_bins = 1e-6
         background_TOF_monitor_start = {str(incident_spectrum): 5000., str(transmission_spectrum): 5000.}
         background_TOF_monitor_stop = {str(incident_spectrum): 10000., str(transmission_spectrum): 10000.}
-        state = CalculateSansTransmissionTest._get_state(rebin_type=RebinType.Rebin, wavelength_low=2.,
+        state = CalculateSansTransmissionTest._get_state(rebin_type=RebinType.REBIN, wavelength_low=2.,
                                                          wavelength_high=8., wavelength_step=2.,
-                                                         wavelength_step_type=RangeStepType.Lin,
+                                                         wavelength_step_type=RangeStepType.LIN,
                                                          prompt_peak_correction_min=15000. + fix_for_remove_bins,
                                                          prompt_peak_correction_max=20000.,
                                                          background_TOF_monitor_start=background_TOF_monitor_start,
                                                          background_TOF_monitor_stop=background_TOF_monitor_stop,
                                                          incident_monitor=incident_spectrum,
                                                          transmission_monitor=transmission_spectrum,
-                                                         can_fit_type=FitType.Linear,
+                                                         can_fit_type=FitType.LINEAR,
                                                          can_polynomial_order=0, can_wavelength_low=2.,
                                                          can_wavelength_high=8.)
         # Get a test monitor workspace with 4 bins where the first bin is the back ground
@@ -312,13 +312,13 @@ class CalculateSansTransmissionTest(unittest.TestCase):
         # This test picks the monitor detector ids based on a radius around the centre of the detector. This is much
         # more tricky to test here and in principle the main tests should be happening in the actual
         # CalculateTransmission algorithm.
-        state = CalculateSansTransmissionTest._get_state(rebin_type=RebinType.Rebin, wavelength_low=2.,
+        state = CalculateSansTransmissionTest._get_state(rebin_type=RebinType.REBIN, wavelength_low=2.,
                                                          wavelength_high=8., wavelength_step=2.,
-                                                         wavelength_step_type=RangeStepType.Lin,
+                                                         wavelength_step_type=RangeStepType.LIN,
                                                          background_TOF_general_start=5000.,
                                                          background_TOF_general_stop=10000., incident_monitor=1,
                                                          transmission_radius_on_detector=0.01,
-                                                         sample_fit_type=FitType.Linear,
+                                                         sample_fit_type=FitType.LINEAR,
                                                          sample_polynomial_order=0, sample_wavelength_low=2.,
                                                          sample_wavelength_high=8.)
         # Gets the full workspace

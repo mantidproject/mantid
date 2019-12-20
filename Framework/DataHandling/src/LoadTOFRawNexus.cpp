@@ -30,8 +30,8 @@ using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
 using HistogramData::BinEdges;
-using HistogramData::CountStandardDeviations;
 using HistogramData::Counts;
+using HistogramData::CountStandardDeviations;
 
 LoadTOFRawNexus::LoadTOFRawNexus()
     : m_numPixels(0), m_signalNo(0), pulseTimes(0), m_numBins(0), m_spec_min(0),

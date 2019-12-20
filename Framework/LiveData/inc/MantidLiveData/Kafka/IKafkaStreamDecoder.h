@@ -60,7 +60,8 @@ public:
                       const std::string &runInfoTopic,
                       const std::string &spDetTopic,
                       const std::string &sampleEnvTopic,
-                      const std::string &chopperTopic);
+                      const std::string &chopperTopic,
+                      const std::string &monitorTopic);
   virtual ~IKafkaStreamDecoder();
   IKafkaStreamDecoder(const IKafkaStreamDecoder &) = delete;
   IKafkaStreamDecoder &operator=(const IKafkaStreamDecoder &) = delete;
@@ -139,6 +140,7 @@ protected:
   const std::string m_spDetTopic;
   const std::string m_sampleEnvTopic;
   const std::string m_chopperTopic;
+  const std::string m_monitorTopic;
   /// Flag indicating if user interruption has been requested
   std::atomic<bool> m_interrupt;
   /// Subscriber for the data stream

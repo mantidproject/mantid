@@ -7,14 +7,14 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
+from qtpy.QtCore import QCoreApplication
 
 from mantid.py3compat import mock
+from sans.common.enums import (SANSInstrument, SANSFacility, SaveType)
 from sans.gui_logic.models.create_state import (create_states, create_gui_state_from_userfile)
-from sans.common.enums import (SANSInstrument, ISISReductionMode, SANSFacility, SaveType)
 from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.gui_logic.models.table_model import TableModel, TableIndexModel
 from sans.state.state import State
-from qtpy.QtCore import QCoreApplication
 
 
 class GuiCommonTest(unittest.TestCase):
@@ -81,7 +81,7 @@ class GuiCommonTest(unittest.TestCase):
 
     def test_create_gui_state_from_userfile_adds_save_format_from_gui(self):
         gui_state = StateGuiModel({})
-        gui_state.save_types = [SaveType.NXcanSAS]
+        gui_state.save_types = [SaveType.NX_CAN_SAS]
 
         row_state = create_gui_state_from_userfile('MaskLOQData.txt', gui_state)
 

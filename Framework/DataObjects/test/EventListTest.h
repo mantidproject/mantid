@@ -297,14 +297,12 @@ public:
     this->fake_data();
     TS_ASSERT_EQUALS(el.getEvents().size(), NUMEVENTS);
     TS_ASSERT_EQUALS(el.getNumberEvents(), NUMEVENTS);
-    TS_ASSERT_THROWS(el.getWeightedEvents().size(), const std::runtime_error &);
-    TS_ASSERT_THROWS(el.getWeightedEventsNoTime().size(),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(el.getWeightedEvents(), const std::runtime_error &);
+    TS_ASSERT_THROWS(el.getWeightedEventsNoTime(), const std::runtime_error &);
 
     el.switchTo(WEIGHTED);
-    TS_ASSERT_THROWS(el.getEvents().size(), const std::runtime_error &);
-    TS_ASSERT_THROWS(el.getWeightedEventsNoTime().size(),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(el.getEvents(), const std::runtime_error &);
+    TS_ASSERT_THROWS(el.getWeightedEventsNoTime(), const std::runtime_error &);
     TS_ASSERT_EQUALS(el.getWeightedEvents().size(), NUMEVENTS);
     TS_ASSERT_EQUALS(el.getNumberEvents(), NUMEVENTS);
     TS_ASSERT_EQUALS(el.getEvent(0).weight(), 1.0);
@@ -316,8 +314,8 @@ public:
     // Start with a bit of fake data
     this->fake_data();
     el.switchTo(WEIGHTED_NOTIME);
-    TS_ASSERT_THROWS(el.getEvents().size(), const std::runtime_error &);
-    TS_ASSERT_THROWS(el.getWeightedEvents().size(), const std::runtime_error &);
+    TS_ASSERT_THROWS(el.getEvents(), const std::runtime_error &);
+    TS_ASSERT_THROWS(el.getWeightedEvents(), const std::runtime_error &);
     TS_ASSERT_EQUALS(el.getWeightedEventsNoTime().size(), NUMEVENTS);
     TS_ASSERT_EQUALS(el.getNumberEvents(), NUMEVENTS);
     TS_ASSERT_EQUALS(el.getWeightedEventsNoTime()[0].weight(), 1.0);
@@ -1505,7 +1503,6 @@ public:
     }
   }
 
-  //-----------------------------------------------------------------------------------------------
   void test_addPulseTime_allTypes() {
     // Go through each possible EventType as the input
     for (int this_type = 0; this_type < 3; this_type++) {
@@ -1517,6 +1514,45 @@ public:
         TS_ASSERT_THROWS_ANYTHING(this->el.addPulsetime(123e-9);)
       } else {
         this->el.addPulsetime(123e-9);
+        // Unchanged size
+        TS_ASSERT_EQUALS(old_num, this->el.getNumberEvents());
+        // original times were 0, 1, etc. nansoeconds
+        TSM_ASSERT_EQUALS(this_type,
+                          this->el.getEvent(0).pulseTime().totalNanoseconds(),
+                          123);
+        TSM_ASSERT_EQUALS(this_type,
+                          this->el.getEvent(1).pulseTime().totalNanoseconds(),
+                          124);
+        TSM_ASSERT_EQUALS(this_type,
+                          this->el.getEvent(2).pulseTime().totalNanoseconds(),
+                          125);
+      }
+    }
+  }
+
+  void test_addPulseTimes_vector_throws_if_size_not_match_number_events() {
+    // Go through each possible EventType as the input
+    const std::vector<double> offsets = {1, 2, 3, 4, 5, 6};
+    for (int this_type = 0; this_type < 3; this_type++) {
+      this->fake_uniform_time_data();
+      el.switchTo(static_cast<EventType>(this_type));
+      // Do convert
+      TS_ASSERT_THROWS(this->el.addPulsetimes(offsets), std::runtime_error);
+    }
+  }
+
+  void test_addPulseTimes_vector_allTypes() {
+    // Go through each possible EventType as the input
+    for (int this_type = 0; this_type < 3; this_type++) {
+      this->fake_uniform_time_data();
+      el.switchTo(static_cast<EventType>(this_type));
+      const size_t old_num = this->el.getNumberEvents();
+      std::vector<double> offsets(old_num, 123e-9);
+      // Do convert
+      if (static_cast<EventType>(this_type) == WEIGHTED_NOTIME) {
+        TS_ASSERT_THROWS_ANYTHING(this->el.addPulsetimes(offsets))
+      } else {
+        this->el.addPulsetimes(offsets);
         // Unchanged size
         TS_ASSERT_EQUALS(old_num, this->el.getNumberEvents());
         // original times were 0, 1, etc. nansoeconds

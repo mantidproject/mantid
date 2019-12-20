@@ -76,6 +76,19 @@
 #define GNU_DIAG_ON(x)
 #endif
 
+// Similar macros for MSVC
+#if defined(_MSC_VER)
+// clang-format off
+#define MSVC_DIAG_OFF(id)                                                        \
+  __pragma(warning(push))                                                        \
+  __pragma(warning(disable : id))
+#define MSVC_DIAG_ON() __pragma(warning(pop))
+// clang-format on
+#else
+#define MSVC_DIAG_OFF(x)
+#define MSVC_DIAG_ON(x)
+#endif
+
 // Defining this macro separately since clang-tidy tries to add spaces around
 // the hyphen and we use it in a lot of test files.
 // clang-format off

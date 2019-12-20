@@ -11,8 +11,11 @@
 from __future__ import (absolute_import, division, print_function)
 import json
 import copy
+import abc
+import six
+
 from sans.state.state_base import (StateBase, rename_descriptor_names, PositiveIntegerParameter, BoolParameter,
-                                   PositiveFloatParameter, ClassTypeParameter, FloatParameter, DictParameter,
+                                   PositiveFloatParameter, FloatParameter, DictParameter,
                                    StringListParameter, PositiveFloatWithNoneParameter, PositiveFloatListParameter)
 from sans.common.enums import (RebinType, RangeStepType, FitType, DataType, SANSInstrument)
 from sans.common.configurations import Configurations
@@ -27,19 +30,19 @@ from sans.common.xml_parsing import get_named_elements_from_ipf_file
 # ----------------------------------------------------------------------------------------------------------------------
 @rename_descriptor_names
 class StateTransmissionFit(StateBase):
-    fit_type = ClassTypeParameter(FitType)
+    fit_type = FitType.LOGARITHMIC
     polynomial_order = PositiveIntegerParameter()
     wavelength_low = PositiveFloatWithNoneParameter()
     wavelength_high = PositiveFloatWithNoneParameter()
 
     def __init__(self):
         super(StateTransmissionFit, self).__init__()
-        self.fit_type = FitType.Logarithmic
+        self.fit_type = FitType.LOGARITHMIC
         self.polynomial_order = 0
 
-    def validate(self):  # noqa
+    def validate(self):
         is_invalid = {}
-        if self.fit_type is FitType.Polynomial and self.polynomial_order == 0:
+        if self.fit_type is FitType.POLYNOMIAL and self.polynomial_order == 0:
             entry = validation_message("You can only select a polynomial fit if you set a polynomial order (2 to 6).",
                                        "Make sure that you select a polynomial order.",
                                        {"fit_type": self.fit_type,
@@ -89,11 +92,11 @@ class StateCalculateTransmission(StateBase):
     # ----------------
     # Wavelength rebin
     # ----------------
-    rebin_type = ClassTypeParameter(RebinType)
     wavelength_low = PositiveFloatListParameter()
     wavelength_high = PositiveFloatListParameter()
     wavelength_step = PositiveFloatParameter()
-    wavelength_step_type = ClassTypeParameter(RangeStepType)
+    rebin_type = RebinType.REBIN
+    wavelength_step_type = RangeStepType.NOT_SET
 
     use_full_wavelength_range = BoolParameter()
     wavelength_full_range_low = PositiveFloatParameter()
@@ -109,23 +112,18 @@ class StateCalculateTransmission(StateBase):
     background_TOF_roi_start = FloatParameter()
     background_TOF_roi_stop = FloatParameter()
 
-    # -----------------------
-    # Fit
-    # ----------------------
-    fit = DictParameter()
+    fit = {DataType.CAN : StateTransmissionFit(),
+           DataType.SAMPLE : StateTransmissionFit()}
 
     def __init__(self):
         super(StateCalculateTransmission, self).__init__()
         # The keys of this dictionaries are the spectrum number of the monitors (as a string)
         self.background_TOF_monitor_start = {}
         self.background_TOF_monitor_stop = {}
-
-        self.fit = {DataType.to_string(DataType.Sample): StateTransmissionFit(),
-                    DataType.to_string(DataType.Can): StateTransmissionFit()}
         self.use_full_wavelength_range = False
 
         # Default rebin type is a standard Rebin
-        self.rebin_type = RebinType.Rebin
+        self.rebin_type = RebinType.REBIN
 
         self.prompt_peak_correction_enabled = False
 
@@ -177,8 +175,7 @@ class StateCalculateTransmission(StateBase):
         # -----------------
         # Wavelength rebin
         # -----------------
-        if one_is_none([self.wavelength_low, self.wavelength_high, self.wavelength_step, self.wavelength_step_type,
-                        self.wavelength_step_type, self.rebin_type]):
+        if one_is_none([self.wavelength_low, self.wavelength_high, self.wavelength_step, self.rebin_type]):
             entry = validation_message("A wavelength entry has not been set.",
                                        "Make sure that all entries are set.",
                                        {"wavelength_low": self.wavelength_low,
@@ -186,6 +183,12 @@ class StateCalculateTransmission(StateBase):
                                         "wavelength_step": self.wavelength_step,
                                         "wavelength_step_type": self.wavelength_step_type,
                                         "rebin_type": self.rebin_type})
+            is_invalid.update(entry)
+
+        if self.wavelength_step_type is RangeStepType.NOT_SET:
+            entry = validation_message("A wavelength entry has not been set.",
+                                       "Make sure that all entries are set.",
+                                       {"wavelength_step_type" : self.wavelength_step_type})
             is_invalid.update(entry)
 
         if is_not_none_and_first_larger_than_second([self.wavelength_low, self.wavelength_high]):
@@ -273,11 +276,8 @@ class StateCalculateTransmission(StateBase):
                                                     "background_TOF_monitor_stop": self.background_TOF_monitor_stop})
                         is_invalid.update(entry)
 
-        # -----
-        # Fit
-        # -----
-        self.fit[DataType.to_string(DataType.Sample)].validate()
-        self.fit[DataType.to_string(DataType.Can)].validate()
+        for fit_type in six.itervalues(self.fit):
+            fit_type.validate()
 
         if is_invalid:
             raise ValueError("StateCalculateTransmission: The provided inputs are illegal. "
@@ -298,6 +298,9 @@ class StateCalculateTransmissionLOQ(StateCalculateTransmission):
 
     def validate(self):
         super(StateCalculateTransmissionLOQ, self).validate()
+
+    def set_rebin_type(self, val):
+        self.state.rebin_type = val
 
 
 class StateCalculateTransmissionSANS2D(StateCalculateTransmission):
@@ -356,12 +359,47 @@ def set_default_monitors(calculate_transmission_info, data_info):
 # ---------------------------------------
 # State builders
 # ---------------------------------------
-class StateCalculateTransmissionBuilderLOQ(object):
+@six.add_metaclass(abc.ABCMeta)
+class StateCalculateTransmissionBuilderCommon(object):
+    def __init__(self, state):
+        self.state = state
+
+    def set_wavelength_step_type(self, val):
+        self.state.wavelength_step_type = val
+
+    def set_rebin_type(self, val):
+        self.state.rebin_type = val
+
+    def set_can_fit_type(self, val):
+        self.state.fit[DataType.CAN].fit_type = val
+
+    def set_can_polynomial_order(self, val):
+        self.state.fit[DataType.CAN].polynomial_order = val
+
+    def set_can_wavelength_low(self, val):
+        self.state.fit[DataType.CAN].wavelength_low = val
+
+    def set_can_wavelength_high(self, val):
+        self.state.fit[DataType.CAN].wavelength_high = val
+
+    def set_sample_fit_type(self, val):
+        self.state.fit[DataType.SAMPLE].fit_type = val
+
+    def set_sample_polynomial_order(self, val):
+        self.state.fit[DataType.SAMPLE].polynomial_order = val
+
+    def set_sample_wavelength_low(self, val):
+        self.state.fit[DataType.SAMPLE].wavelength_low = val
+
+    def set_sample_wavelength_high(self, val):
+        self.state.fit[DataType.SAMPLE].wavelength_high = val
+
+
+class StateCalculateTransmissionBuilderLOQ(StateCalculateTransmissionBuilderCommon):
     @automatic_setters(StateCalculateTransmissionLOQ)
     def __init__(self, data_info):
-        super(StateCalculateTransmissionBuilderLOQ, self).__init__()
+        super(StateCalculateTransmissionBuilderLOQ, self).__init__(state=StateCalculateTransmissionLOQ())
         self._data = data_info
-        self.state = StateCalculateTransmissionLOQ()
         set_default_monitors(self.state, self._data)
 
     def build(self):
@@ -369,12 +407,11 @@ class StateCalculateTransmissionBuilderLOQ(object):
         return copy.copy(self.state)
 
 
-class StateCalculateTransmissionBuilderSANS2D(object):
+class StateCalculateTransmissionBuilderSANS2D(StateCalculateTransmissionBuilderCommon):
     @automatic_setters(StateCalculateTransmissionSANS2D)
     def __init__(self, data_info):
-        super(StateCalculateTransmissionBuilderSANS2D, self).__init__()
+        super(StateCalculateTransmissionBuilderSANS2D, self).__init__(state=StateCalculateTransmissionSANS2D())
         self._data = data_info
-        self.state = StateCalculateTransmissionSANS2D()
         set_default_monitors(self.state, self._data)
 
     def build(self):
@@ -382,12 +419,11 @@ class StateCalculateTransmissionBuilderSANS2D(object):
         return copy.copy(self.state)
 
 
-class StateCalculateTransmissionBuilderLARMOR(object):
+class StateCalculateTransmissionBuilderLARMOR(StateCalculateTransmissionBuilderCommon):
     @automatic_setters(StateCalculateTransmissionLARMOR)
     def __init__(self, data_info):
-        super(StateCalculateTransmissionBuilderLARMOR, self).__init__()
+        super(StateCalculateTransmissionBuilderLARMOR, self).__init__(state=StateCalculateTransmissionLARMOR())
         self._data = data_info
-        self.state = StateCalculateTransmissionLARMOR()
         set_default_monitors(self.state, self._data)
 
     def build(self):
@@ -395,12 +431,11 @@ class StateCalculateTransmissionBuilderLARMOR(object):
         return copy.copy(self.state)
 
 
-class StateCalculateTransmissionBuilderZOOM(object):
+class StateCalculateTransmissionBuilderZOOM(StateCalculateTransmissionBuilderCommon):
     @automatic_setters(StateCalculateTransmissionZOOM)
     def __init__(self, data_info):
-        super(StateCalculateTransmissionBuilderZOOM, self).__init__()
+        super(StateCalculateTransmissionBuilderZOOM, self).__init__(state=StateCalculateTransmissionZOOM())
         self._data = data_info
-        self.state = StateCalculateTransmissionZOOM()
         set_default_monitors(self.state, self._data)
 
     def build(self):
@@ -413,6 +448,7 @@ class StateCalculateTransmissionBuilderZOOM(object):
 # ------------------------------------------
 def get_calculate_transmission_builder(data_info):
     instrument = data_info.instrument
+
     if instrument is SANSInstrument.LARMOR:
         return StateCalculateTransmissionBuilderLARMOR(data_info)
     elif instrument is SANSInstrument.SANS2D:

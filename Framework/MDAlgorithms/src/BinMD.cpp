@@ -38,7 +38,7 @@ using namespace Mantid::DataObjects;
 /** Constructor
  */
 BinMD::BinMD()
-    : outWS(), implicitFunction(nullptr), indexMultiplier(nullptr),
+    : SlicingAlgorithm(), outWS(), implicitFunction(), indexMultiplier(),
       signals(nullptr), errors(nullptr), numEvents(nullptr) {}
 
 //----------------------------------------------------------------------------------------------
@@ -103,7 +103,7 @@ template <typename MDE, size_t nd>
 inline void BinMD::binMDBox(MDBox<MDE, nd> *box, const size_t *const chunkMin,
                             const size_t *const chunkMax) {
   // An array to hold the rotated/transformed coordinates
-  auto outCenter = new coord_t[m_outD];
+  auto outCenter = std::vector<coord_t>(m_outD);
 
   // Evaluate whether the entire box is in the same bin
   if (box->getNPoints() > (1 << nd) * 2) {
@@ -121,9 +121,7 @@ inline void BinMD::binMDBox(MDBox<MDE, nd> *box, const size_t *const chunkMin,
       const coord_t *inCenter = vertexes.get() + i * nd;
 
       // Now transform to the output dimensions
-      m_transform->apply(inCenter, outCenter);
-      // std::cout << "Input coord " << VMD(nd,inCenter) << " transformed to "
-      // <<  VMD(nd,outCenter) << '\n';
+      m_transform->apply(inCenter, outCenter.data());
 
       // To build up the linear index
       size_t linearIndex = 0;
@@ -174,7 +172,6 @@ inline void BinMD::binMDBox(MDBox<MDE, nd> *box, const size_t *const chunkMin,
 
       // And don't bother looking at each event. This may save lots of time
       // loading from disk.
-      delete[] outCenter;
       return;
     }
   }
@@ -188,7 +185,7 @@ inline void BinMD::binMDBox(MDBox<MDE, nd> *box, const size_t *const chunkMin,
     const coord_t *inCenter = it->getCenter();
 
     // Now transform to the output dimensions
-    m_transform->apply(inCenter, outCenter);
+    m_transform->apply(inCenter, outCenter.data());
 
     // To build up the linear index
     size_t linearIndex = 0;
@@ -222,8 +219,6 @@ inline void BinMD::binMDBox(MDBox<MDE, nd> *box, const size_t *const chunkMin,
   }
   // Done with the events list
   box->releaseEvents();
-
-  delete[] outCenter;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -242,16 +237,16 @@ void BinMD::binByIterating(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // bc->setCacheParameters(1,0);
 
   // Cache some data to speed up accessing them a bit
-  indexMultiplier = new size_t[m_outD];
+  indexMultiplier.resize(m_outD);
   for (size_t d = 0; d < m_outD; d++) {
     if (d > 0)
       indexMultiplier[d] = outWS->getIndexMultiplier()[d - 1];
     else
       indexMultiplier[d] = 1;
   }
-  signals = outWS->getSignalArray();
-  errors = outWS->getErrorSquaredArray();
-  numEvents = outWS->getNumEventsArray();
+  signals = outWS->mutableSignalArray();
+  errors = outWS->mutableErrorSquaredArray();
+  numEvents = outWS->mutableNumEventsArray();
 
   if (!m_accumulate) {
     // Start with signal/error/numEvents at 0.0
@@ -311,13 +306,13 @@ void BinMD::binByIterating(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
       // Build an implicit function (it needs to be in the space of the
       // MDEventWorkspace)
-      MDImplicitFunction *function =
+      auto function =
           this->getImplicitFunctionForChunk(chunkMin.data(), chunkMax.data());
 
       // Use getBoxes() to get an array with a pointer to each box
       std::vector<API::IMDNode *> boxes;
       // Leaf-only; no depth limit; with the implicit function passed to it.
-      ws->getBox()->getBoxes(boxes, 1000, true, function);
+      ws->getBox()->getBoxes(boxes, 1000, true, function.get());
 
       // Sort boxes by file position IF file backed. This reduces seeking time,
       // hopefully.
@@ -357,11 +352,8 @@ void BinMD::binByIterating(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       if (prog)
         prog->report("Applying implicit function.");
       signal_t nan = std::numeric_limits<signal_t>::quiet_NaN();
-      outWS->applyImplicitFunction(implicitFunction, nan, nan);
+      outWS->applyImplicitFunction(implicitFunction.get(), nan, nan);
     }
-
-    // return the size of the input workspace write buffer to its initial value
-    // bc->setCacheParameters(sizeof(MDE),writeBufSize);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -378,9 +370,9 @@ void BinMD::exec() {
   std::string ImplicitFunctionXML = getPropertyValue("ImplicitFunctionXML");
   implicitFunction = nullptr;
   if (!ImplicitFunctionXML.empty())
-    implicitFunction =
+    implicitFunction = std::unique_ptr<MDImplicitFunction>(
         Mantid::API::ImplicitFunctionFactory::Instance().createUnwrapped(
-            ImplicitFunctionXML);
+            ImplicitFunctionXML));
 
   // This gets deleted by the thread pool; don't delete it in here.
   prog = std::make_unique<Progress>(this, 0.0, 1.0, 1);
@@ -396,8 +388,8 @@ void BinMD::exec() {
   }
 
   // Saves the geometry transformation from original to binned in the workspace
-  outWS->setTransformFromOriginal(this->m_transformFromOriginal, 0);
-  outWS->setTransformToOriginal(this->m_transformToOriginal, 0);
+  outWS->setTransformFromOriginal(this->m_transformFromOriginal.release(), 0);
+  outWS->setTransformToOriginal(this->m_transformToOriginal.release(), 0);
   for (size_t i = 0; i < m_bases.size(); i++)
     outWS->setBasisVector(i, m_bases[i]);
   outWS->setOrigin(this->m_translation);
@@ -406,8 +398,8 @@ void BinMD::exec() {
   // And the intermediate WS one too, if any
   if (m_intermediateWS) {
     outWS->setOriginalWorkspace(m_intermediateWS, 1);
-    outWS->setTransformFromOriginal(m_transformFromIntermediate, 1);
-    outWS->setTransformToOriginal(m_transformToIntermediate, 1);
+    outWS->setTransformFromOriginal(m_transformFromIntermediate.release(), 1);
+    outWS->setTransformToOriginal(m_transformToIntermediate.release(), 1);
   }
 
   // Wrapper to cast to MDEventWorkspace then call the function

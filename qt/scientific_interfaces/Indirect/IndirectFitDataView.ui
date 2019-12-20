@@ -35,24 +35,11 @@
    <attribute name="title">
     <string>Single Input</string>
    </attribute>
-   <layout class="QGridLayout" name="gridLayout" columnstretch="0,0">
-    <item row="1" column="1">
-     <widget class="MantidQt::MantidWidgets::DataSelector" name="dsResolution" native="true">
-      <property name="autoLoad" stdset="0">
-       <bool>true</bool>
-      </property>
-      <property name="ShowGroups" stdset="0">
-       <bool>false</bool>
-      </property>
-      <property name="showLoad" stdset="0">
-       <bool>false</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="0">
-     <widget class="QLabel" name="lbResolution">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <widget class="QLabel" name="lbSample">
       <property name="text">
-       <string>Resolution</string>
+       <string>Sample</string>
       </property>
      </widget>
     </item>
@@ -69,14 +56,14 @@
       </property>
      </widget>
     </item>
-    <item row="0" column="0">
-     <widget class="QLabel" name="lbSample">
+    <item row="2" column="0">
+     <widget class="QLabel" name="lbResolution">
       <property name="text">
-       <string>Sample</string>
+       <string>Resolution</string>
       </property>
      </widget>
     </item>
-    <item row="2" column="0">
+    <item row="3" column="1">
      <widget class="QWidget" name="wgtStartEnd" native="true">
       <property name="enabled">
        <bool>true</bool>
@@ -142,6 +129,19 @@
         </spacer>
        </item>
       </layout>
+     </widget>
+    </item>
+    <item row="2" column="1">
+     <widget class="MantidQt::MantidWidgets::DataSelector" name="dsResolution" native="true">
+      <property name="autoLoad" stdset="0">
+       <bool>true</bool>
+      </property>
+      <property name="ShowGroups" stdset="0">
+       <bool>false</bool>
+      </property>
+      <property name="showLoad" stdset="0">
+       <bool>false</bool>
+      </property>
      </widget>
     </item>
    </layout>

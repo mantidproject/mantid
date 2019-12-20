@@ -59,6 +59,8 @@ Bug Fixes
   save directory if no instrument was selected.
 - A bug causing large batch files (1000+ runs) to take minutes to load into the
   ISIS SANS GUI has been fixed. Large batch files will now load within seconds.
+- Processing data with a custom output name will append the same details to
+  the final output workspace name as those without a custom name.
 - Workspace names and output files use the run number from the table, rather
   than the run number in the nxs file. If there is no run number it will
   continue to use the run number from the nxs file, but emit a warning.

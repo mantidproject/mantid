@@ -16,7 +16,7 @@ import gc
 # 3rd party imports
 import six
 
-from mantid.py3compat import Enum
+from enum import Enum
 from .observabledictionary import DictionaryAction, ObservableDictionary
 
 

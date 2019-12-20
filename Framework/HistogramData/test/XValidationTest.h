@@ -17,8 +17,8 @@
 
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::HistogramX;
-using Mantid::HistogramData::Points;
 using Mantid::HistogramData::isValid;
+using Mantid::HistogramData::Points;
 
 class XValidationTest : public CxxTest::TestSuite {
 public:

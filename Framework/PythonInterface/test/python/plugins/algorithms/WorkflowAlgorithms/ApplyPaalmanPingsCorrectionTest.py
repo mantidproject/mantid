@@ -53,7 +53,6 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
 
         self._corrections_ws = corrections
 
-
     def tearDown(self):
         """
         Remove workspaces from ADS.
@@ -62,7 +61,6 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
         DeleteWorkspace(self._sample_ws)
         DeleteWorkspace(mtd['can_ws'])
         DeleteWorkspace(self._corrections_ws)
-
 
     def _verify_workspace(self, ws, correction_type):
         """
@@ -85,11 +83,10 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
             log_correction_type = logs['corrections_type'].value
             self.assertEqual(log_correction_type, correction_type)
 
-
     def _create_group_of_factors(self, corrections, factors):
         def is_factor(workspace, factor):
             if factor == "ass":
-                return factor in workspace.name() and not 'assc' in workspace.name()
+                return factor in workspace.name() and 'assc' not in workspace.name()
             else:
                 return factor in workspace.name()
 
@@ -103,13 +100,11 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
         correction_names = [correction.name() for correction in cloned_corr]
         return GroupWorkspaces(InputWorkspaces=correction_names, OutputWorkspace="factor_group")
 
-
     def test_can_subtraction(self):
         corr = ApplyPaalmanPingsCorrection(SampleWorkspace=self._sample_ws,
                                            CanWorkspace=self._can_ws)
 
         self._verify_workspace(corr, 'can_subtraction')
-
 
     def test_can_subtraction_with_can_scale(self):
         corr = ApplyPaalmanPingsCorrection(SampleWorkspace=self._sample_ws,
@@ -125,13 +120,11 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
 
         self._verify_workspace(corr, 'can_subtraction')
 
-
     def test_sample_corrections_only(self):
         corr = ApplyPaalmanPingsCorrection(SampleWorkspace=self._sample_ws,
                                            CorrectionsWorkspace=self._corrections_ws)
 
         self._verify_workspace(corr, 'sample_corrections_only')
-
 
     def test_sample_and_can_corrections(self):
         corr = ApplyPaalmanPingsCorrection(SampleWorkspace=self._sample_ws,
@@ -139,7 +132,6 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
                                            CanWorkspace=self._can_ws)
 
         self._verify_workspace(corr, 'sample_and_can_corrections')
-
 
     def test_sample_and_can_corrections_with_can_scale(self):
         corr = ApplyPaalmanPingsCorrection(SampleWorkspace=self._sample_ws,
@@ -224,6 +216,30 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
         self.assertRaises(RuntimeError, ApplyPaalmanPingsCorrection, **kwargs)
         DeleteWorkspace(sample_1)
         DeleteWorkspace(container_1)
+
+    def test_fixed_window_scan(self):
+        Load(Filename='ILL/IN16B/mc-abs-corr-q.nxs', OutputWorkspace='fws_corrections_ass')
+        GroupWorkspaces(InputWorkspaces=['fws_corrections_ass'], OutputWorkspace='fws_corrections')
+        in_ws = Load(Filename='ILL/IN16B/fapi-fws-q.nxs', OutputWorkspace='fapi')
+        out_ws = ApplyPaalmanPingsCorrection(SampleWorkspace=in_ws[0], CorrectionsWorkspace='fws_corrections',
+                                             OutputWorkspace='wsfapicorr')
+        self.assertTrue(out_ws)
+        self.assertTrue(isinstance(out_ws, MatrixWorkspace))
+        self.assertEquals(out_ws.blocksize(), in_ws[0].blocksize())
+        self.assertEquals(out_ws.getNumberHistograms(), in_ws[0].getNumberHistograms())
+        self.assertEquals(out_ws.getAxis(0).getUnit().unitID(), in_ws[0].getAxis(0).getUnit().unitID())
+
+    def test_group_raise(self):
+        Load(Filename='ILL/IN16B/mc-abs-corr-q.nxs', OutputWorkspace='fws_corrections_ass')
+        GroupWorkspaces(InputWorkspaces=['fws_corrections_ass'], OutputWorkspace='fws_corrections')
+        in_ws = Load(Filename='ILL/IN16B/fapi-fws-q.nxs', OutputWorkspace='fapi')
+        kwargs = {
+            'SampleWorkspace': in_ws,
+            'CorrectionsWorkspace': 'fws_corrections',
+            'OutputWorkspaced': 'wsfapicorr'
+        }
+        self.assertRaises(RuntimeError, ApplyPaalmanPingsCorrection, **kwargs)
+
 
 if __name__=="__main__":
     unittest.main()

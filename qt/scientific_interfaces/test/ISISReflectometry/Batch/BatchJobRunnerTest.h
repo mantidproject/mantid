@@ -26,11 +26,11 @@ using MantidQt::API::IConfiguredAlgorithm;
 using MantidQt::API::IConfiguredAlgorithm_sptr;
 using WorkspaceCreationHelper::MockAlgorithm;
 
+using testing::_;
 using testing::AtLeast;
 using testing::Mock;
 using testing::NiceMock;
 using testing::Return;
-using testing::_;
 
 class BatchJobRunnerTest {
 public:

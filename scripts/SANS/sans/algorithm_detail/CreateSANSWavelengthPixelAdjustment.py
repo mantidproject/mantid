@@ -160,7 +160,7 @@ class CreateSANSWavelengthPixelAdjustment(object):
 
             # Crop to the required detector
             crop_name = "CropToComponent"
-            component_to_crop = DetectorType.from_string(component)
+            component_to_crop = DetectorType(component)
             component_to_crop = get_component_name(output_workspace, component_to_crop)
             crop_options = {"InputWorkspace": output_workspace,
                             "OutputWorkspace": EMPTY_NAME,
@@ -179,7 +179,7 @@ class CreateSANSWavelengthPixelAdjustment(object):
         wavelength_high = wavelength_and_pixel_adjustment_state.wavelength_high[0]
         wavelength_step = wavelength_and_pixel_adjustment_state.wavelength_step
         wavelength_step_type = -1.0 if wavelength_and_pixel_adjustment_state.wavelength_step_type \
-                                       is RangeStepType.Log else 1.0  # noqa
+                                       is RangeStepType.LOG else 1.0  # noqa
 
         # Create a rebin string from the wavelength information
         wavelength_step *= wavelength_step_type

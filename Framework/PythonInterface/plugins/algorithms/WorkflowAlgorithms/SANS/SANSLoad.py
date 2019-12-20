@@ -9,15 +9,15 @@
 """ SANSLoad algorithm which handles loading SANS files"""
 
 from __future__ import (absolute_import, division, print_function)
-from mantid.kernel import (Direction, PropertyManagerProperty, FloatArrayProperty)
+
 from mantid.api import (ParallelDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
                         Progress,
                         WorkspaceProperty)
-from sans.algorithm_detail.move_sans_instrument_component import move_component, MoveTypes
-
-from sans.state.state_base import create_deserialized_sans_state_from_property_manager
-from sans.common.enums import SANSDataType
+from mantid.kernel import (Direction, PropertyManagerProperty, FloatArrayProperty)
 from sans.algorithm_detail.load_data import SANSLoadDataFactory
+from sans.algorithm_detail.move_sans_instrument_component import move_component, MoveTypes
+from sans.common.enums import SANSDataType
+from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 
 
 class SANSLoad(ParallelDataProcessorAlgorithm):
@@ -263,25 +263,25 @@ class SANSLoad(ParallelDataProcessorAlgorithm):
         return errors
 
     def set_output_for_workspaces(self, workspace_type, workspaces):
-        if workspace_type is SANSDataType.SampleScatter:
+        if workspace_type is SANSDataType.SAMPLE_SCATTER:
             self.set_property_with_number_of_workspaces("SampleScatterWorkspace", workspaces)
-        elif workspace_type is SANSDataType.SampleTransmission:
+        elif workspace_type is SANSDataType.SAMPLE_TRANSMISSION:
             self.set_property_with_number_of_workspaces("SampleTransmissionWorkspace", workspaces)
-        elif workspace_type is SANSDataType.SampleDirect:
+        elif workspace_type is SANSDataType.SAMPLE_DIRECT:
             self.set_property_with_number_of_workspaces("SampleDirectWorkspace", workspaces)
-        elif workspace_type is SANSDataType.CanScatter:
+        elif workspace_type is SANSDataType.CAN_SCATTER:
             self.set_property_with_number_of_workspaces("CanScatterWorkspace", workspaces)
-        elif workspace_type is SANSDataType.CanTransmission:
+        elif workspace_type is SANSDataType.CAN_TRANSMISSION:
             self.set_property_with_number_of_workspaces("CanTransmissionWorkspace", workspaces)
-        elif workspace_type is SANSDataType.CanDirect:
+        elif workspace_type is SANSDataType.CAN_DIRECT:
             self.set_property_with_number_of_workspaces("CanDirectWorkspace", workspaces)
         else:
             raise RuntimeError("SANSLoad: Unknown data output workspace format: {0}".format(str(workspace_type)))
 
     def set_output_for_monitor_workspaces(self, workspace_type, workspaces):
-        if workspace_type is SANSDataType.SampleScatter:
+        if workspace_type is SANSDataType.SAMPLE_SCATTER:
             self.set_property("SampleScatterMonitorWorkspace", workspaces)
-        elif workspace_type is SANSDataType.CanScatter:
+        elif workspace_type is SANSDataType.CAN_SCATTER:
             self.set_property("CanScatterMonitorWorkspace", workspaces)
         else:
             raise RuntimeError("SANSLoad: Unknown data output workspace format: {0}".format(str(workspace_type)))
@@ -328,8 +328,8 @@ class SANSLoad(ParallelDataProcessorAlgorithm):
 
         # The workspaces are stored in a dict: workspace_names (sample_scatter, etc) : ListOfWorkspaces
         for key, workspace_list in workspaces.items():
-            is_trans = SANSDataType.to_string(key) in \
-                       ("SampleTransmission", "CanTransmission", "CanDirect", "SampleDirect")
+            is_trans = key in [SANSDataType.CAN_DIRECT, SANSDataType.CAN_TRANSMISSION,
+                               SANSDataType.SAMPLE_TRANSMISSION, SANSDataType.SAMPLE_DIRECT]
 
             for workspace in workspace_list:
                 move_component(component_name="", move_info=state.move,

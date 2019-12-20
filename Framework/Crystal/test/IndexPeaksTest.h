@@ -37,10 +37,10 @@ createPeaksWorkspace(const MinimalPeaksList<NPeaks> &testPeaksInfo,
                      const std::vector<V3D> &modVectors = std::vector<V3D>(),
                      const bool crossTerms = false) {
   auto peaksWS = WorkspaceCreationHelper::createPeaksWorkspace(NPeaks);
-  OrientedLattice lattice;
-  lattice.setUB(ub);
+  auto lattice = std::make_unique<OrientedLattice>();
+  lattice->setUB(ub);
   if (maxOrder > 0) {
-    lattice.setMaxOrder(maxOrder);
+    lattice->setMaxOrder(maxOrder);
     if (modVectors.empty() || modVectors.size() > 3)
       throw std::runtime_error("Only <= 3 modulation vectors can be provided.");
     auto modVecOrDefault = [&modVectors](const size_t index) {
@@ -49,12 +49,12 @@ createPeaksWorkspace(const MinimalPeaksList<NPeaks> &testPeaksInfo,
       else
         return V3D();
     };
-    lattice.setModVec1(modVecOrDefault(0));
-    lattice.setModVec2(modVecOrDefault(1));
-    lattice.setModVec3(modVecOrDefault(2));
-    lattice.setCrossTerm(crossTerms);
+    lattice->setModVec1(modVecOrDefault(0));
+    lattice->setModVec2(modVecOrDefault(1));
+    lattice->setModVec3(modVecOrDefault(2));
+    lattice->setCrossTerm(crossTerms);
   }
-  peaksWS->mutableSample().setOrientedLattice(&lattice);
+  peaksWS->mutableSample().setOrientedLattice(std::move(lattice));
 
   int peakCount{0};
   for (const auto &testPeakInfo : testPeaksInfo) {
@@ -139,8 +139,8 @@ public:
 
   void test_empty_peaks_workspace_indexes_nothing() {
     auto peaksWS = WorkspaceCreationHelper::createPeaksWorkspace(0);
-    OrientedLattice lattice;
-    peaksWS->mutableSample().setOrientedLattice(&lattice);
+    peaksWS->mutableSample().setOrientedLattice(
+        std::make_unique<OrientedLattice>());
 
     auto alg = indexPeaks(peaksWS, {{"Tolerance", "0.1"}});
 
@@ -477,7 +477,8 @@ public:
     IndexPeaks alg;
     alg.initialize();
 
-    TS_ASSERT_THROWS(alg.setProperty("MaxOrder", -1), std::invalid_argument)
+    TS_ASSERT_THROWS(alg.setProperty("MaxOrder", -1),
+                     const std::invalid_argument &)
   }
 
   void test_modvector_with_list_length_not_three_throws() {
@@ -485,10 +486,11 @@ public:
     alg.initialize();
 
     for (const auto &propName : {"ModVector1", "ModVector2", "ModVector3"}) {
-      TS_ASSERT_THROWS(alg.setProperty(propName, "0"), std::invalid_argument)
-      TS_ASSERT_THROWS(alg.setProperty(propName, "0,0"), std::invalid_argument)
+      TS_ASSERT_THROWS(alg.setProperty(propName, "0"), std::invalid_argument &)
+      TS_ASSERT_THROWS(alg.setProperty(propName, "0,0"),
+                       std::invalid_argument &)
       TS_ASSERT_THROWS(alg.setProperty(propName, "0,0,0,0"),
-                       std::invalid_argument)
+                       std::invalid_argument &)
     }
   }
 

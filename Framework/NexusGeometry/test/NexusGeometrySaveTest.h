@@ -109,7 +109,7 @@ used.
     TS_ASSERT_THROWS(NexusGeometrySave::saveInstrument(
                          instr, destinationFile, DEFAULT_ROOT_ENTRY_NAME,
                          logger, false /*append*/),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&logger));
   }
 

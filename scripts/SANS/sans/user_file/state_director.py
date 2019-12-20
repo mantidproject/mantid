@@ -48,9 +48,9 @@ def log_non_existing_field(field):
 
 def convert_detector(detector_type):
     if detector_type is DetectorType.HAB:
-        detector_type_as_string = DetectorType.to_string(DetectorType.HAB)
+        detector_type_as_string = DetectorType.HAB.value
     elif detector_type is DetectorType.LAB:
-        detector_type_as_string = DetectorType.to_string(DetectorType.LAB)
+        detector_type_as_string = DetectorType.LAB.value
     else:
         raise RuntimeError("UserFileStateDirector: Cannot convert detector {0}".format(detector_type))
     return detector_type_as_string
@@ -86,10 +86,10 @@ def convert_mm_to_m(value):
 
 def set_background_tof_general(builder, user_file_items):
     # The general background settings
-    if BackId.all_monitors in user_file_items:
-        back_all_monitors = user_file_items[BackId.all_monitors]
+    if BackId.ALL_MONITORS in user_file_items:
+        back_all_monitors = user_file_items[BackId.ALL_MONITORS]
         # Should the user have chosen several values, then the last element is selected
-        check_if_contains_only_one_element(back_all_monitors, BackId.all_monitors)
+        check_if_contains_only_one_element(back_all_monitors, BackId.ALL_MONITORS)
         back_all_monitors = back_all_monitors[-1]
         builder.set_background_TOF_general_start(back_all_monitors.start)
         builder.set_background_TOF_general_stop(back_all_monitors.stop)
@@ -98,16 +98,16 @@ def set_background_tof_general(builder, user_file_items):
 def set_background_tof_monitor(builder, user_file_items):
     # The monitor off switches. Get all monitors which should not have an individual background setting
     monitor_exclusion_list = []
-    if BackId.monitor_off in user_file_items:
-        back_monitor_off = user_file_items[BackId.monitor_off]
+    if BackId.MONITOR_OFF in user_file_items:
+        back_monitor_off = user_file_items[BackId.MONITOR_OFF]
         monitor_exclusion_list = list(back_monitor_off.values())
 
     # Get all individual monitor background settings. But ignore those settings where there was an explicit
     # off setting. Those monitors were collected in the monitor_exclusion_list collection
-    if BackId.single_monitors in user_file_items:
+    if BackId.SINGLE_MONITORS in user_file_items:
         background_tof_monitor_start = {}
         background_tof_monitor_stop = {}
-        back_single_monitors = user_file_items[BackId.single_monitors]
+        back_single_monitors = user_file_items[BackId.SINGLE_MONITORS]
         for element in back_single_monitors:
             monitor = element.monitor
             if monitor not in monitor_exclusion_list:
@@ -119,21 +119,21 @@ def set_background_tof_monitor(builder, user_file_items):
 
 
 def set_wavelength_limits(builder, user_file_items):
-    if LimitsId.wavelength in user_file_items:
-        wavelength_limits = user_file_items[LimitsId.wavelength]
-        check_if_contains_only_one_element(wavelength_limits, LimitsId.wavelength)
+    if LimitsId.WAVELENGTH in user_file_items:
+        wavelength_limits = user_file_items[LimitsId.WAVELENGTH]
+        check_if_contains_only_one_element(wavelength_limits, LimitsId.WAVELENGTH)
         wavelength_limits = wavelength_limits[-1]
 
-        if wavelength_limits.step_type in [RangeStepType.RangeLin, RangeStepType.RangeLog]:
-            wavelength_range = user_file_items[OtherId.wavelength_range]
-            check_if_contains_only_one_element(wavelength_range, OtherId.wavelength_range)
+        if wavelength_limits.step_type in [RangeStepType.RANGE_LIN, RangeStepType.RANGE_LOG]:
+            wavelength_range = user_file_items[OtherId.WAVELENGTH_RANGE]
+            check_if_contains_only_one_element(wavelength_range, OtherId.WAVELENGTH_RANGE)
             wavelength_range = wavelength_range[-1]
             wavelength_start, wavelength_stop = get_ranges_from_event_slice_setting(wavelength_range)
             wavelength_start = [min(wavelength_start)] + wavelength_start
             wavelength_stop = [max(wavelength_stop)] + wavelength_stop
 
-            wavelength_step_type = RangeStepType.Lin if wavelength_limits.step_type is RangeStepType.RangeLin \
-                else RangeStepType.Log
+            wavelength_step_type = RangeStepType.LIN if wavelength_limits.step_type is RangeStepType.RANGE_LIN \
+                else RangeStepType.LOG
 
             builder.set_wavelength_low(wavelength_start)
             builder.set_wavelength_high(wavelength_stop)
@@ -147,10 +147,10 @@ def set_wavelength_limits(builder, user_file_items):
 
 
 def set_prompt_peak_correction(builder, user_file_items):
-    if FitId.monitor_times in user_file_items:
-        fit_monitor_times = user_file_items[FitId.monitor_times]
+    if FitId.MONITOR_TIMES in user_file_items:
+        fit_monitor_times = user_file_items[FitId.MONITOR_TIMES]
         # Should the user have chosen several values, then the last element is selected
-        check_if_contains_only_one_element(fit_monitor_times, FitId.monitor_times)
+        check_if_contains_only_one_element(fit_monitor_times, FitId.MONITOR_TIMES)
         fit_monitor_times = fit_monitor_times[-1]
         builder.set_prompt_peak_correction_min(fit_monitor_times.start)
         builder.set_prompt_peak_correction_max(fit_monitor_times.stop)
@@ -369,8 +369,8 @@ class StateDirectorISIS(object):
         # ---------------------------
         # Correction for X, Y, Z
         # ---------------------------
-        if DetectorId.correction_x in user_file_items:
-            corrections_in_x = user_file_items[DetectorId.correction_x]
+        if DetectorId.CORRECTION_X in user_file_items:
+            corrections_in_x = user_file_items[DetectorId.CORRECTION_X]
             for correction_x in corrections_in_x:
                 if correction_x.detector_type is DetectorType.HAB:
                     self._move_builder.set_HAB_x_translation_correction(convert_mm_to_m(correction_x.entry))
@@ -380,8 +380,8 @@ class StateDirectorISIS(object):
                     raise RuntimeError("UserFileStateDirector: An unknown detector {0} was used for the"
                                        " x correction.".format(correction_x.detector_type))
 
-        if DetectorId.correction_y in user_file_items:
-            corrections_in_y = user_file_items[DetectorId.correction_y]
+        if DetectorId.CORRECTION_Y in user_file_items:
+            corrections_in_y = user_file_items[DetectorId.CORRECTION_Y]
             for correction_y in corrections_in_y:
                 if correction_y.detector_type is DetectorType.HAB:
                     self._move_builder.set_HAB_y_translation_correction(convert_mm_to_m(correction_y.entry))
@@ -391,8 +391,8 @@ class StateDirectorISIS(object):
                     raise RuntimeError("UserFileStateDirector: An unknown detector {0} was used for the"
                                        " y correction.".format(correction_y.detector_type))
 
-        if DetectorId.correction_z in user_file_items:
-            corrections_in_z = user_file_items[DetectorId.correction_z]
+        if DetectorId.CORRECTION_Z in user_file_items:
+            corrections_in_z = user_file_items[DetectorId.CORRECTION_Z]
             for correction_z in corrections_in_z:
                 if correction_z.detector_type is DetectorType.HAB:
                     self._move_builder.set_HAB_z_translation_correction(convert_mm_to_m(correction_z.entry))
@@ -405,10 +405,10 @@ class StateDirectorISIS(object):
         # ---------------------------
         # Correction for Rotation
         # ---------------------------
-        if DetectorId.correction_rotation in user_file_items:
-            rotation_correction = user_file_items[DetectorId.correction_rotation]
+        if DetectorId.CORRECTION_ROTATION in user_file_items:
+            rotation_correction = user_file_items[DetectorId.CORRECTION_ROTATION]
             # Should the user have chosen several values, then the last element is selected
-            check_if_contains_only_one_element(rotation_correction, DetectorId.correction_rotation)
+            check_if_contains_only_one_element(rotation_correction, DetectorId.CORRECTION_ROTATION)
             rotation_correction = rotation_correction[-1]
             if rotation_correction.detector_type is DetectorType.HAB:
                 self._move_builder.set_HAB_rotation_correction(rotation_correction.entry)
@@ -421,8 +421,8 @@ class StateDirectorISIS(object):
         # ---------------------------
         # Correction for Radius
         # ---------------------------
-        if DetectorId.correction_radius in user_file_items:
-            radius_corrections = user_file_items[DetectorId.correction_radius]
+        if DetectorId.CORRECTION_RADIUS in user_file_items:
+            radius_corrections = user_file_items[DetectorId.CORRECTION_RADIUS]
             for radius_correction in radius_corrections:
                 if radius_correction.detector_type is DetectorType.HAB:
                     self._move_builder.set_HAB_radius_correction(convert_mm_to_m(radius_correction.entry))
@@ -435,8 +435,8 @@ class StateDirectorISIS(object):
         # ---------------------------
         # Correction for Translation
         # ---------------------------
-        if DetectorId.correction_translation in user_file_items:
-            side_corrections = user_file_items[DetectorId.correction_translation]
+        if DetectorId.CORRECTION_TRANSLATION in user_file_items:
+            side_corrections = user_file_items[DetectorId.CORRECTION_TRANSLATION]
             for side_correction in side_corrections:
                 if side_correction.detector_type is DetectorType.HAB:
                     self._move_builder.set_HAB_side_correction(convert_mm_to_m(side_correction.entry))
@@ -449,8 +449,8 @@ class StateDirectorISIS(object):
         # ---------------------------
         # Tilt
         # ---------------------------
-        if DetectorId.correction_x_tilt in user_file_items:
-            tilt_correction = user_file_items[DetectorId.correction_x_tilt]
+        if DetectorId.CORRECTION_X_TILT in user_file_items:
+            tilt_correction = user_file_items[DetectorId.CORRECTION_X_TILT]
             tilt_correction = tilt_correction[-1]
             if tilt_correction.detector_type is DetectorType.HAB:
                 self._move_builder.set_HAB_x_tilt_correction(tilt_correction.entry)
@@ -460,8 +460,8 @@ class StateDirectorISIS(object):
                 raise RuntimeError("UserFileStateDirector: An unknown detector {0} was used for the"
                                    " titlt correction.".format(tilt_correction.detector_type))
 
-        if DetectorId.correction_y_tilt in user_file_items:
-            tilt_correction = user_file_items[DetectorId.correction_y_tilt]
+        if DetectorId.CORRECTION_Y_TILT in user_file_items:
+            tilt_correction = user_file_items[DetectorId.CORRECTION_Y_TILT]
             tilt_correction = tilt_correction[-1]
             if tilt_correction.detector_type is DetectorType.HAB:
                 self._move_builder.set_HAB_y_tilt_correction(tilt_correction.entry)
@@ -474,7 +474,7 @@ class StateDirectorISIS(object):
         # ---------------------------
         # Sample offset
         # ---------------------------
-        set_single_entry(self._move_builder, "set_sample_offset", SampleId.offset,
+        set_single_entry(self._move_builder, "set_sample_offset", SampleId.OFFSET,
                          user_file_items, apply_to_value=convert_mm_to_m)
 
         # ---------------------------
@@ -498,17 +498,17 @@ class StateDirectorISIS(object):
             else:
                 log_non_existing_field("set_monitor_{0}_offset".format(spec_num))
 
-        if TransId.spec_4_shift in user_file_items:
-            parse_shift(key_to_parse=TransId.spec_4_shift, spec_num=4)
+        if TransId.SPEC_4_SHIFT in user_file_items:
+            parse_shift(key_to_parse=TransId.SPEC_4_SHIFT, spec_num=4)
 
-        if TransId.spec_5_shift in user_file_items:
-            parse_shift(key_to_parse=TransId.spec_5_shift, spec_num=5)
+        if TransId.SPEC_5_SHIFT in user_file_items:
+            parse_shift(key_to_parse=TransId.SPEC_5_SHIFT, spec_num=5)
 
         # ---------------------------
         # Beam Centre, this can be for HAB and LAB
         # ---------------------------
-        if SetId.centre in user_file_items:
-            beam_centres = user_file_items[SetId.centre]
+        if SetId.CENTRE in user_file_items:
+            beam_centres = user_file_items[SetId.CENTRE]
             beam_centres_for_hab = [beam_centre for beam_centre in beam_centres if beam_centre.detector_type
                                     is DetectorType.HAB]
             beam_centres_for_lab = [beam_centre for beam_centre in beam_centres if beam_centre.detector_type
@@ -538,13 +538,13 @@ class StateDirectorISIS(object):
         # ------------------------
         # Reduction mode
         # ------------------------
-        set_single_entry(self._reduction_builder, "set_reduction_mode", DetectorId.reduction_mode, user_file_items)
+        set_single_entry(self._reduction_builder, "set_reduction_mode", DetectorId.REDUCTION_MODE, user_file_items)
 
         # -------------------------------
         # Shift and rescale
         # -------------------------------
-        set_single_entry(self._reduction_builder, "set_merge_scale", DetectorId.rescale, user_file_items)
-        set_single_entry(self._reduction_builder, "set_merge_shift", DetectorId.shift, user_file_items)
+        set_single_entry(self._reduction_builder, "set_merge_scale", DetectorId.RESCALE, user_file_items)
+        set_single_entry(self._reduction_builder, "set_merge_shift", DetectorId.SHIFT, user_file_items)
 
         # -------------------------------
         # User masking
@@ -552,10 +552,10 @@ class StateDirectorISIS(object):
         merge_min = None
         merge_max = None
         merge_mask = False
-        if DetectorId.merge_range in user_file_items:
-            merge_range = user_file_items[DetectorId.merge_range]
+        if DetectorId.MERGE_RANGE in user_file_items:
+            merge_range = user_file_items[DetectorId.MERGE_RANGE]
             # Should the user have chosen several values, then the last element is selected
-            check_if_contains_only_one_element(merge_range, DetectorId.rescale_fit)
+            check_if_contains_only_one_element(merge_range, DetectorId.RESCALE_FIT)
             merge_range = merge_range[-1]
             merge_min = merge_range.start
             merge_max = merge_range.stop
@@ -571,10 +571,10 @@ class StateDirectorISIS(object):
         q_range_min_scale = None
         q_range_max_scale = None
         has_rescale_fit = False
-        if DetectorId.rescale_fit in user_file_items:
-            rescale_fits = user_file_items[DetectorId.rescale_fit]
+        if DetectorId.RESCALE_FIT in user_file_items:
+            rescale_fits = user_file_items[DetectorId.RESCALE_FIT]
             # Should the user have chosen several values, then the last element is selected
-            check_if_contains_only_one_element(rescale_fits, DetectorId.rescale_fit)
+            check_if_contains_only_one_element(rescale_fits, DetectorId.RESCALE_FIT)
             rescale_fit = rescale_fits[-1]
             q_range_min_scale = rescale_fit.start
             q_range_max_scale = rescale_fit.stop
@@ -583,17 +583,17 @@ class StateDirectorISIS(object):
         q_range_min_shift = None
         q_range_max_shift = None
         has_shift_fit = False
-        if DetectorId.shift_fit in user_file_items:
-            shift_fits = user_file_items[DetectorId.shift_fit]
+        if DetectorId.SHIFT_FIT in user_file_items:
+            shift_fits = user_file_items[DetectorId.SHIFT_FIT]
             # Should the user have chosen several values, then the last element is selected
-            check_if_contains_only_one_element(shift_fits, DetectorId.shift_fit)
+            check_if_contains_only_one_element(shift_fits, DetectorId.SHIFT_FIT)
             shift_fit = shift_fits[-1]
             q_range_min_shift = shift_fit.start
             q_range_max_shift = shift_fit.stop
             has_shift_fit = shift_fit.use_fit
 
         if has_rescale_fit and has_shift_fit:
-            self._reduction_builder.set_merge_fit_mode(FitModeForMerge.Both)
+            self._reduction_builder.set_merge_fit_mode(FitModeForMerge.BOTH)
             min_q = get_min_q_boundary(q_range_min_scale, q_range_min_shift)
             max_q = get_max_q_boundary(q_range_max_scale, q_range_max_shift)
             if min_q:
@@ -601,24 +601,24 @@ class StateDirectorISIS(object):
             if max_q:
                 self._reduction_builder.set_merge_range_max(max_q)
         elif has_rescale_fit and not has_shift_fit:
-            self._reduction_builder.set_merge_fit_mode(FitModeForMerge.ScaleOnly)
+            self._reduction_builder.set_merge_fit_mode(FitModeForMerge.SCALE_ONLY)
             if q_range_min_scale:
                 self._reduction_builder.set_merge_range_min(q_range_min_scale)
             if q_range_max_scale:
                 self._reduction_builder.set_merge_range_max(q_range_max_scale)
         elif not has_rescale_fit and has_shift_fit:
-            self._reduction_builder.set_merge_fit_mode(FitModeForMerge.ShiftOnly)
+            self._reduction_builder.set_merge_fit_mode(FitModeForMerge.SHIFT_ONLY)
             if q_range_min_shift:
                 self._reduction_builder.set_merge_range_min(q_range_min_shift)
             if q_range_max_shift:
                 self._reduction_builder.set_merge_range_max(q_range_max_shift)
         else:
-            self._reduction_builder.set_merge_fit_mode(FitModeForMerge.NoFit)
+            self._reduction_builder.set_merge_fit_mode(FitModeForMerge.NO_FIT)
 
         # ------------------------
         # Reduction Dimensionality
         # ------------------------
-        set_single_entry(self._reduction_builder, "set_reduction_dimensionality", OtherId.reduction_dimensionality,
+        set_single_entry(self._reduction_builder, "set_reduction_dimensionality", OtherId.REDUCTION_DIMENSIONALITY,
                          user_file_items)
 
     def _set_up_mask_state(self, user_file_items):  # noqa
@@ -643,10 +643,10 @@ class StateDirectorISIS(object):
         # ---------------------------------
         # 1. Line Mask
         # ---------------------------------
-        if MaskId.line in user_file_items:
-            mask_lines = user_file_items[MaskId.line]
+        if MaskId.LINE in user_file_items:
+            mask_lines = user_file_items[MaskId.LINE]
             # If there were several arms specified then we take only the last
-            check_if_contains_only_one_element(mask_lines, MaskId.line)
+            check_if_contains_only_one_element(mask_lines, MaskId.LINE)
             mask_line = mask_lines[-1]
             # We need the width and the angle
             angle = mask_line.angle
@@ -669,8 +669,8 @@ class StateDirectorISIS(object):
         # ---------------------------------
         # 2. General time mask
         # ---------------------------------
-        if MaskId.time in user_file_items:
-            mask_time_general = user_file_items[MaskId.time]
+        if MaskId.TIME in user_file_items:
+            mask_time_general = user_file_items[MaskId.TIME]
             start_time = []
             stop_time = []
             for times in mask_time_general:
@@ -686,8 +686,8 @@ class StateDirectorISIS(object):
         # ---------------------------------
         # 3. Detector-bound time mask
         # ---------------------------------
-        if MaskId.time_detector in user_file_items:
-            mask_times = user_file_items[MaskId.time_detector]
+        if MaskId.TIME_DETECTOR in user_file_items:
+            mask_times = user_file_items[MaskId.TIME_DETECTOR]
             start_times_hab = []
             stop_times_hab = []
             start_times_lab = []
@@ -718,9 +718,9 @@ class StateDirectorISIS(object):
         # ---------------------------------
         # 4. Clear detector
         # ---------------------------------
-        if MaskId.clear_detector_mask in user_file_items:
-            clear_detector_mask = user_file_items[MaskId.clear_detector_mask]
-            check_if_contains_only_one_element(clear_detector_mask, MaskId.clear_detector_mask)
+        if MaskId.CLEAR_DETECTOR_MASK in user_file_items:
+            clear_detector_mask = user_file_items[MaskId.CLEAR_DETECTOR_MASK]
+            check_if_contains_only_one_element(clear_detector_mask, MaskId.CLEAR_DETECTOR_MASK)
             # We select the entry which was added last.
             clear_detector_mask = clear_detector_mask[-1]
             self._mask_builder.set_clear(clear_detector_mask)
@@ -728,9 +728,9 @@ class StateDirectorISIS(object):
         # ---------------------------------
         # 5. Clear time
         # ---------------------------------
-        if MaskId.clear_time_mask in user_file_items:
-            clear_time_mask = user_file_items[MaskId.clear_time_mask]
-            check_if_contains_only_one_element(clear_time_mask, MaskId.clear_time_mask)
+        if MaskId.CLEAR_TIME_MASK in user_file_items:
+            clear_time_mask = user_file_items[MaskId.CLEAR_TIME_MASK]
+            check_if_contains_only_one_element(clear_time_mask, MaskId.CLEAR_TIME_MASK)
             # We select the entry which was added last.
             clear_time_mask = clear_time_mask[-1]
             self._mask_builder.set_clear_time(clear_time_mask)
@@ -738,16 +738,16 @@ class StateDirectorISIS(object):
         # ---------------------------------
         # 6. Single Spectrum
         # ---------------------------------
-        if MaskId.single_spectrum_mask in user_file_items:
-            single_spectra = user_file_items[MaskId.single_spectrum_mask]
+        if MaskId.SINGLE_SPECTRUM_MASK in user_file_items:
+            single_spectra = user_file_items[MaskId.SINGLE_SPECTRUM_MASK]
             # Note that we are using an unusual setter here. Check mask.py for why we are doing this.
             self._mask_builder.set_single_spectra_on_detector(single_spectra)
 
         # ---------------------------------
         # 7. Spectrum Range
         # ---------------------------------
-        if MaskId.spectrum_range_mask in user_file_items:
-            spectrum_ranges = user_file_items[MaskId.spectrum_range_mask]
+        if MaskId.SPECTRUM_RANGE_MASK in user_file_items:
+            spectrum_ranges = user_file_items[MaskId.SPECTRUM_RANGE_MASK]
             start_range = []
             stop_range = []
             for spectrum_range in spectrum_ranges:
@@ -763,8 +763,8 @@ class StateDirectorISIS(object):
         # ---------------------------------
         # 8. Vertical single strip
         # ---------------------------------
-        if MaskId.vertical_single_strip_mask in user_file_items:
-            single_vertical_strip_masks = user_file_items[MaskId.vertical_single_strip_mask]
+        if MaskId.VERTICAL_SINGLE_STRIP_MASK in user_file_items:
+            single_vertical_strip_masks = user_file_items[MaskId.VERTICAL_SINGLE_STRIP_MASK]
             entry_hab = []
             entry_lab = []
             for single_vertical_strip_mask in single_vertical_strip_masks:
@@ -785,8 +785,8 @@ class StateDirectorISIS(object):
         # ---------------------------------
         # 9. Vertical range strip
         # ---------------------------------
-        if MaskId.vertical_range_strip_mask in user_file_items:
-            range_vertical_strip_masks = user_file_items[MaskId.vertical_range_strip_mask]
+        if MaskId.VERTICAL_RANGE_STRIP_MASK in user_file_items:
+            range_vertical_strip_masks = user_file_items[MaskId.VERTICAL_RANGE_STRIP_MASK]
             start_hab = []
             stop_hab = []
             start_lab = []
@@ -815,8 +815,8 @@ class StateDirectorISIS(object):
         # ---------------------------------
         # 10. Horizontal single strip
         # ---------------------------------
-        if MaskId.horizontal_single_strip_mask in user_file_items:
-            single_horizontal_strip_masks = user_file_items[MaskId.horizontal_single_strip_mask]
+        if MaskId.HORIZONTAL_SINGLE_STRIP_MASK in user_file_items:
+            single_horizontal_strip_masks = user_file_items[MaskId.HORIZONTAL_SINGLE_STRIP_MASK]
             entry_hab = []
             entry_lab = []
             for single_horizontal_strip_mask in single_horizontal_strip_masks:
@@ -837,8 +837,8 @@ class StateDirectorISIS(object):
         # ---------------------------------
         # 11. Horizontal range strip
         # ---------------------------------
-        if MaskId.horizontal_range_strip_mask in user_file_items:
-            range_horizontal_strip_masks = user_file_items[MaskId.horizontal_range_strip_mask]
+        if MaskId.HORIZONTAL_RANGE_STRIP_MASK in user_file_items:
+            range_horizontal_strip_masks = user_file_items[MaskId.HORIZONTAL_RANGE_STRIP_MASK]
             start_hab = []
             stop_hab = []
             start_lab = []
@@ -867,8 +867,8 @@ class StateDirectorISIS(object):
         # ---------------------------------
         # 12. Block
         # ---------------------------------
-        if MaskId.block in user_file_items:
-            blocks = user_file_items[MaskId.block]
+        if MaskId.BLOCK in user_file_items:
+            blocks = user_file_items[MaskId.BLOCK]
             horizontal_start_hab = []
             horizontal_stop_hab = []
             vertical_start_hab = []
@@ -910,8 +910,8 @@ class StateDirectorISIS(object):
         # ---------------------------------
         # 13. Block cross
         # ---------------------------------
-        if MaskId.block_cross in user_file_items:
-            block_crosses = user_file_items[MaskId.block_cross]
+        if MaskId.BLOCK_CROSS in user_file_items:
+            block_crosses = user_file_items[MaskId.BLOCK_CROSS]
             horizontal_hab = []
             vertical_hab = []
             horizontal_lab = []
@@ -939,10 +939,10 @@ class StateDirectorISIS(object):
         # ------------------------------------------------------------
         # 14. Angles --> they are specified in L/Phi
         # -----------------------------------------------------------
-        if LimitsId.angle in user_file_items:
-            angles = user_file_items[LimitsId.angle]
+        if LimitsId.ANGLE in user_file_items:
+            angles = user_file_items[LimitsId.ANGLE]
             # Should the user have chosen several values, then the last element is selected
-            check_if_contains_only_one_element(angles, LimitsId.angle)
+            check_if_contains_only_one_element(angles, LimitsId.ANGLE)
             angle = angles[-1]
             self._mask_builder.set_phi_min(angle.min)
             self._mask_builder.set_phi_max(angle.max)
@@ -951,17 +951,17 @@ class StateDirectorISIS(object):
         # ------------------------------------------------------------
         # 15. Maskfiles
         # -----------------------------------------------------------
-        if MaskId.file in user_file_items:
-            mask_files = user_file_items[MaskId.file]
+        if MaskId.FILE in user_file_items:
+            mask_files = user_file_items[MaskId.FILE]
             self._mask_builder.set_mask_files(mask_files)
 
         # ------------------------------------------------------------
         # 16. Radius masks
         # -----------------------------------------------------------
-        if LimitsId.radius in user_file_items:
-            radii = user_file_items[LimitsId.radius]
+        if LimitsId.RADIUS in user_file_items:
+            radii = user_file_items[LimitsId.RADIUS]
             # Should the user have chosen several values, then the last element is selected
-            check_if_contains_only_one_element(radii, LimitsId.radius)
+            check_if_contains_only_one_element(radii, LimitsId.RADIUS)
             radius = radii[-1]
             if radius.start > radius.stop > 0:
                 raise RuntimeError("UserFileStateDirector: The inner radius {0} appears to be larger that the outer"
@@ -976,9 +976,9 @@ class StateDirectorISIS(object):
 
     def _set_up_slice_event_state(self, user_file_items):
         # Setting up the slice limits is current
-        if OtherId.event_slices in user_file_items:
-            event_slices = user_file_items[OtherId.event_slices]
-            check_if_contains_only_one_element(event_slices, OtherId.event_slices)
+        if OtherId.EVENT_SLICES in user_file_items:
+            event_slices = user_file_items[OtherId.EVENT_SLICES]
+            check_if_contains_only_one_element(event_slices, OtherId.EVENT_SLICES)
             event_slices = event_slices[-1]
             # The events binning can come in three forms.
             # 1. As a simple range object
@@ -997,60 +997,60 @@ class StateDirectorISIS(object):
     def _set_up_scale_state(self, user_file_items):
         # We only extract the first entry here, ie the s entry. Although there are other entries which a user can
         # specify such as a, b, c, d they seem to be
-        if SetId.scales in user_file_items:
-            scales = user_file_items[SetId.scales]
-            check_if_contains_only_one_element(scales, SetId.scales)
+        if SetId.SCALES in user_file_items:
+            scales = user_file_items[SetId.SCALES]
+            check_if_contains_only_one_element(scales, SetId.SCALES)
             scales = scales[-1]
             self._scale_builder.set_scale(scales.s)
 
         # We can also have settings for the sample geometry (Note that at the moment this is not settable via the
         # user file nor the command line interface
-        if OtherId.sample_shape in user_file_items:
-            sample_shape = user_file_items[OtherId.sample_shape]
-            check_if_contains_only_one_element(sample_shape, OtherId.sample_shape)
+        if OtherId.SAMPLE_SHAPE in user_file_items:
+            sample_shape = user_file_items[OtherId.SAMPLE_SHAPE]
+            check_if_contains_only_one_element(sample_shape, OtherId.SAMPLE_SHAPE)
             sample_shape = sample_shape[-1]
             self._scale_builder.set_shape(sample_shape)
 
-        if OtherId.sample_width in user_file_items:
-            sample_width = user_file_items[OtherId.sample_width]
-            check_if_contains_only_one_element(sample_width, OtherId.sample_width)
+        if OtherId.SAMPLE_WIDTH in user_file_items:
+            sample_width = user_file_items[OtherId.SAMPLE_WIDTH]
+            check_if_contains_only_one_element(sample_width, OtherId.SAMPLE_WIDTH)
             sample_width = sample_width[-1]
             self._scale_builder.set_width(sample_width)
 
-        if OtherId.sample_height in user_file_items:
-            sample_height = user_file_items[OtherId.sample_height]
-            check_if_contains_only_one_element(sample_height, OtherId.sample_height)
+        if OtherId.SAMPLE_HEIGHT in user_file_items:
+            sample_height = user_file_items[OtherId.SAMPLE_HEIGHT]
+            check_if_contains_only_one_element(sample_height, OtherId.SAMPLE_HEIGHT)
             sample_height = sample_height[-1]
             self._scale_builder.set_height(sample_height)
 
-        if OtherId.sample_thickness in user_file_items:
-            sample_thickness = user_file_items[OtherId.sample_thickness]
-            check_if_contains_only_one_element(sample_thickness, OtherId.sample_thickness)
+        if OtherId.SAMPLE_THICKNESS in user_file_items:
+            sample_thickness = user_file_items[OtherId.SAMPLE_THICKNESS]
+            check_if_contains_only_one_element(sample_thickness, OtherId.SAMPLE_THICKNESS)
             sample_thickness = sample_thickness[-1]
             self._scale_builder.set_thickness(sample_thickness)
 
     def _set_up_convert_to_q_state(self, user_file_items):
         # Get the radius cut off if any is present
-        set_single_entry(self._convert_to_q_builder, "set_radius_cutoff", LimitsId.radius_cut, user_file_items,
+        set_single_entry(self._convert_to_q_builder, "set_radius_cutoff", LimitsId.RADIUS_CUT, user_file_items,
                          apply_to_value=convert_mm_to_m)
 
         # Get the wavelength cut off if any is present
-        set_single_entry(self._convert_to_q_builder, "set_wavelength_cutoff", LimitsId.wavelength_cut,
+        set_single_entry(self._convert_to_q_builder, "set_wavelength_cutoff", LimitsId.WAVELENGTH_CUT,
                          user_file_items)
 
         # Get the 1D q values
-        if LimitsId.q in user_file_items:
-            limits_q = user_file_items[LimitsId.q]
-            check_if_contains_only_one_element(limits_q, LimitsId.q)
+        if LimitsId.Q in user_file_items:
+            limits_q = user_file_items[LimitsId.Q]
+            check_if_contains_only_one_element(limits_q, LimitsId.Q)
             limits_q = limits_q[-1]
             self._convert_to_q_builder.set_q_min(limits_q.min)
             self._convert_to_q_builder.set_q_max(limits_q.max)
             self._convert_to_q_builder.set_q_1d_rebin_string(limits_q.rebin_string)
 
         # Get the 2D q values
-        if LimitsId.qxy in user_file_items:
-            limits_qxy = user_file_items[LimitsId.qxy]
-            check_if_contains_only_one_element(limits_qxy, LimitsId.qxy)
+        if LimitsId.QXY in user_file_items:
+            limits_qxy = user_file_items[LimitsId.QXY]
+            check_if_contains_only_one_element(limits_qxy, LimitsId.QXY)
             limits_qxy = limits_qxy[-1]
             # Now we have to check if we have a simple pattern or a more complex pattern at hand
             is_complex = isinstance(limits_qxy, complex_range)
@@ -1064,50 +1064,50 @@ class StateDirectorISIS(object):
                 self._convert_to_q_builder.set_q_xy_step_type(limits_qxy.step_type)
 
         # Get the Gravity settings
-        set_single_entry(self._convert_to_q_builder, "set_use_gravity", GravityId.on_off, user_file_items)
-        set_single_entry(self._convert_to_q_builder, "set_gravity_extra_length", GravityId.extra_length,
+        set_single_entry(self._convert_to_q_builder, "set_use_gravity", GravityId.ON_OFF, user_file_items)
+        set_single_entry(self._convert_to_q_builder, "set_gravity_extra_length", GravityId.EXTRA_LENGTH,
                          user_file_items)
 
         # Get the QResolution settings set_q_resolution_delta_r
-        set_single_entry(self._convert_to_q_builder, "set_use_q_resolution", QResolutionId.on, user_file_items)
-        set_single_entry(self._convert_to_q_builder, "set_q_resolution_delta_r", QResolutionId.delta_r,
+        set_single_entry(self._convert_to_q_builder, "set_use_q_resolution", QResolutionId.ON, user_file_items)
+        set_single_entry(self._convert_to_q_builder, "set_q_resolution_delta_r", QResolutionId.DELTA_R,
                          user_file_items, apply_to_value=convert_mm_to_m)
         set_single_entry(self._convert_to_q_builder, "set_q_resolution_collimation_length",
-                         QResolutionId.collimation_length, user_file_items)
-        set_single_entry(self._convert_to_q_builder, "set_q_resolution_a1", QResolutionId.a1, user_file_items,
+                         QResolutionId.COLLIMATION_LENGTH, user_file_items)
+        set_single_entry(self._convert_to_q_builder, "set_q_resolution_a1", QResolutionId.A1, user_file_items,
                          apply_to_value=convert_mm_to_m)
-        set_single_entry(self._convert_to_q_builder, "set_q_resolution_a2", QResolutionId.a2, user_file_items,
+        set_single_entry(self._convert_to_q_builder, "set_q_resolution_a2", QResolutionId.A2, user_file_items,
                          apply_to_value=convert_mm_to_m)
-        set_single_entry(self._convert_to_q_builder, "set_moderator_file", QResolutionId.moderator,
+        set_single_entry(self._convert_to_q_builder, "set_moderator_file", QResolutionId.MODERATOR,
                          user_file_items)
-        set_single_entry(self._convert_to_q_builder, "set_q_resolution_h1", QResolutionId.h1, user_file_items,
+        set_single_entry(self._convert_to_q_builder, "set_q_resolution_h1", QResolutionId.H1, user_file_items,
                          apply_to_value=convert_mm_to_m)
-        set_single_entry(self._convert_to_q_builder, "set_q_resolution_h2", QResolutionId.h2, user_file_items,
+        set_single_entry(self._convert_to_q_builder, "set_q_resolution_h2", QResolutionId.H2, user_file_items,
                          apply_to_value=convert_mm_to_m)
-        set_single_entry(self._convert_to_q_builder, "set_q_resolution_w1", QResolutionId.w1, user_file_items,
+        set_single_entry(self._convert_to_q_builder, "set_q_resolution_w1", QResolutionId.W1, user_file_items,
                          apply_to_value=convert_mm_to_m)
-        set_single_entry(self._convert_to_q_builder, "set_q_resolution_w2", QResolutionId.w2, user_file_items,
+        set_single_entry(self._convert_to_q_builder, "set_q_resolution_w2", QResolutionId.W2, user_file_items,
                          apply_to_value=convert_mm_to_m)
 
         # ------------------------
         # Reduction Dimensionality
         # ------------------------
-        set_single_entry(self._convert_to_q_builder, "set_reduction_dimensionality", OtherId.reduction_dimensionality,
+        set_single_entry(self._convert_to_q_builder, "set_reduction_dimensionality", OtherId.REDUCTION_DIMENSIONALITY,
                          user_file_items)
 
     def _set_up_adjustment_state(self, user_file_items):
         # Get the wide angle correction setting
-        set_single_entry(self._adjustment_builder, "set_wide_angle_correction", SampleId.path, user_file_items)
+        set_single_entry(self._adjustment_builder, "set_wide_angle_correction", SampleId.PATH, user_file_items)
 
     def _set_up_normalize_to_monitor_state(self, user_file_items):
         # Extract the incident monitor and which type of rebinning to use (interpolating or normal)
-        if MonId.spectrum in user_file_items:
-            mon_spectrum = user_file_items[MonId.spectrum]
+        if MonId.SPECTRUM in user_file_items:
+            mon_spectrum = user_file_items[MonId.SPECTRUM]
             mon_spec = [spec for spec in mon_spectrum if not spec.is_trans]
 
             if mon_spec:
                 mon_spec = mon_spec[-1]
-                rebin_type = RebinType.InterpolatingRebin if mon_spec.interpolate else RebinType.Rebin
+                rebin_type = RebinType.INTERPOLATING_REBIN if mon_spec.interpolate else RebinType.REBIN
                 self._normalize_to_monitor_builder.set_rebin_type(rebin_type)
 
                 #  We have to check if the spectrum is None, this can be the case when the user wants to use the
@@ -1129,37 +1129,37 @@ class StateDirectorISIS(object):
 
     def _set_up_calculate_transmission(self, user_file_items):
         # Transmission radius
-        set_single_entry(self._calculate_transmission_builder, "set_transmission_radius_on_detector", TransId.radius,
+        set_single_entry(self._calculate_transmission_builder, "set_transmission_radius_on_detector", TransId.RADIUS,
                          user_file_items, apply_to_value=convert_mm_to_m)
 
         # List of transmission roi files
-        if TransId.roi in user_file_items:
-            trans_roi = user_file_items[TransId.roi]
+        if TransId.ROI in user_file_items:
+            trans_roi = user_file_items[TransId.ROI]
             self._calculate_transmission_builder.set_transmission_roi_files(trans_roi)
 
         # List of transmission mask files
-        if TransId.mask in user_file_items:
-            trans_mask = user_file_items[TransId.mask]
+        if TransId.MASK in user_file_items:
+            trans_mask = user_file_items[TransId.MASK]
             self._calculate_transmission_builder.set_transmission_mask_files(trans_mask)
 
         # The prompt peak correction values
         set_prompt_peak_correction(self._calculate_transmission_builder, user_file_items)
 
         # The transmission spectrum
-        if TransId.spec in user_file_items:
-            trans_spec = user_file_items[TransId.spec]
+        if TransId.SPEC in user_file_items:
+            trans_spec = user_file_items[TransId.SPEC]
             # Should the user have chosen several values, then the last element is selected
-            check_if_contains_only_one_element(trans_spec, TransId.spec)
+            check_if_contains_only_one_element(trans_spec, TransId.SPEC)
             trans_spec = trans_spec[-1]
             self._calculate_transmission_builder.set_transmission_monitor(trans_spec)
 
         # The incident monitor spectrum for transmission calculation
-        if MonId.spectrum in user_file_items:
-            mon_spectrum = user_file_items[MonId.spectrum]
+        if MonId.SPECTRUM in user_file_items:
+            mon_spectrum = user_file_items[MonId.SPECTRUM]
             mon_spec = [spec for spec in mon_spectrum if spec.is_trans]
             if mon_spec:
                 mon_spec = mon_spec[-1]
-                rebin_type = RebinType.InterpolatingRebin if mon_spec.interpolate else RebinType.Rebin
+                rebin_type = RebinType.INTERPOLATING_REBIN if mon_spec.interpolate else RebinType.REBIN
                 self._calculate_transmission_builder.set_rebin_type(rebin_type)
 
                 # We have to check if the spectrum is None, this can be the case when the user wants to use the
@@ -1174,17 +1174,17 @@ class StateDirectorISIS(object):
         set_background_tof_monitor(self._calculate_transmission_builder, user_file_items)
 
         # The roi-specific background settings
-        if BackId.trans in user_file_items:
-            back_trans = user_file_items[BackId.trans]
+        if BackId.TRANS in user_file_items:
+            back_trans = user_file_items[BackId.TRANS]
             # Should the user have chosen several values, then the last element is selected
-            check_if_contains_only_one_element(back_trans, BackId.trans)
+            check_if_contains_only_one_element(back_trans, BackId.TRANS)
             back_trans = back_trans[-1]
             self._calculate_transmission_builder.set_background_TOF_roi_start(back_trans.start)
             self._calculate_transmission_builder.set_background_TOF_roi_stop(back_trans.stop)
 
         # Set the fit settings
-        if FitId.general in user_file_items:
-            fit_general = user_file_items[FitId.general]
+        if FitId.GENERAL in user_file_items:
+            fit_general = user_file_items[FitId.GENERAL]
             # We can have settings for both the sample or the can or individually
             # There can be three types of settings:
             # 1. Clearing the fit setting
@@ -1195,64 +1195,64 @@ class StateDirectorISIS(object):
             # As usual if there are multiple settings for a specific case, then the last in the list is used.
 
             # 1 Fit type settings
-            clear_settings = [item for item in fit_general if item.data_type is None and item.fit_type is FitType.NoFit]
+            clear_settings = [item for item in fit_general if item.data_type is None and item.fit_type is FitType.NO_FIT]
 
             if clear_settings:
-                check_if_contains_only_one_element(clear_settings, FitId.general)
+                check_if_contains_only_one_element(clear_settings, FitId.GENERAL)
                 clear_settings = clear_settings[-1]
                 # Will set the fitting to NoFit
-                self._calculate_transmission_builder.set_Sample_fit_type(clear_settings.fit_type)
-                self._calculate_transmission_builder.set_Can_fit_type(clear_settings.fit_type)
+                self._calculate_transmission_builder.set_sample_fit_type(clear_settings.fit_type)
+                self._calculate_transmission_builder.set_can_fit_type(clear_settings.fit_type)
 
             # 2. General settings
             general_settings = [item for item in fit_general if item.data_type is None and
-                                item.fit_type is not FitType.NoFit]
+                                item.fit_type is not FitType.NO_FIT]
             if general_settings:
-                check_if_contains_only_one_element(general_settings, FitId.general)
+                check_if_contains_only_one_element(general_settings, FitId.GENERAL)
                 general_settings = general_settings[-1]
-                self._calculate_transmission_builder.set_Sample_fit_type(general_settings.fit_type)
-                self._calculate_transmission_builder.set_Sample_polynomial_order(general_settings.polynomial_order)
-                self._calculate_transmission_builder.set_Sample_wavelength_low(general_settings.start)
-                self._calculate_transmission_builder.set_Sample_wavelength_high(general_settings.stop)
-                self._calculate_transmission_builder.set_Can_fit_type(general_settings.fit_type)
-                self._calculate_transmission_builder.set_Can_polynomial_order(general_settings.polynomial_order)
-                self._calculate_transmission_builder.set_Can_wavelength_low(general_settings.start)
-                self._calculate_transmission_builder.set_Can_wavelength_high(general_settings.stop)
+                self._calculate_transmission_builder.set_sample_fit_type(general_settings.fit_type)
+                self._calculate_transmission_builder.set_sample_polynomial_order(general_settings.polynomial_order)
+                self._calculate_transmission_builder.set_sample_wavelength_low(general_settings.start)
+                self._calculate_transmission_builder.set_sample_wavelength_high(general_settings.stop)
+                self._calculate_transmission_builder.set_can_fit_type(general_settings.fit_type)
+                self._calculate_transmission_builder.set_can_polynomial_order(general_settings.polynomial_order)
+                self._calculate_transmission_builder.set_can_wavelength_low(general_settings.start)
+                self._calculate_transmission_builder.set_can_wavelength_high(general_settings.stop)
 
             # 3. Sample settings
-            sample_settings = [item for item in fit_general if item.data_type is DataType.Sample]
+            sample_settings = [item for item in fit_general if item.data_type is DataType.SAMPLE]
             if sample_settings:
-                check_if_contains_only_one_element(sample_settings, FitId.general)
+                check_if_contains_only_one_element(sample_settings, FitId.GENERAL)
                 sample_settings = sample_settings[-1]
-                self._calculate_transmission_builder.set_Sample_fit_type(sample_settings.fit_type)
-                self._calculate_transmission_builder.set_Sample_polynomial_order(sample_settings.polynomial_order)
-                self._calculate_transmission_builder.set_Sample_wavelength_low(sample_settings.start)
-                self._calculate_transmission_builder.set_Sample_wavelength_high(sample_settings.stop)
+                self._calculate_transmission_builder.set_sample_fit_type(sample_settings.fit_type)
+                self._calculate_transmission_builder.set_sample_polynomial_order(sample_settings.polynomial_order)
+                self._calculate_transmission_builder.set_sample_wavelength_low(sample_settings.start)
+                self._calculate_transmission_builder.set_sample_wavelength_high(sample_settings.stop)
 
             # 4. Can settings
-            can_settings = [item for item in fit_general if item.data_type is DataType.Can]
+            can_settings = [item for item in fit_general if item.data_type is DataType.CAN]
             if can_settings:
-                check_if_contains_only_one_element(can_settings, FitId.general)
+                check_if_contains_only_one_element(can_settings, FitId.GENERAL)
                 can_settings = can_settings[-1]
-                self._calculate_transmission_builder.set_Can_fit_type(can_settings.fit_type)
-                self._calculate_transmission_builder.set_Can_polynomial_order(can_settings.polynomial_order)
-                self._calculate_transmission_builder.set_Can_wavelength_low(can_settings.start)
-                self._calculate_transmission_builder.set_Can_wavelength_high(can_settings.stop)
+                self._calculate_transmission_builder.set_can_fit_type(can_settings.fit_type)
+                self._calculate_transmission_builder.set_can_polynomial_order(can_settings.polynomial_order)
+                self._calculate_transmission_builder.set_can_wavelength_low(can_settings.start)
+                self._calculate_transmission_builder.set_can_wavelength_high(can_settings.stop)
 
         # Set the wavelength default configuration
         set_wavelength_limits(self._calculate_transmission_builder, user_file_items)
 
         # Set the full wavelength range. Note that this can currently only be set from the ISISCommandInterface
-        if OtherId.use_full_wavelength_range in user_file_items:
-            use_full_wavelength_range = user_file_items[OtherId.use_full_wavelength_range]
-            check_if_contains_only_one_element(use_full_wavelength_range, OtherId.use_full_wavelength_range)
+        if OtherId.USE_FULL_WAVELENGTH_RANGE in user_file_items:
+            use_full_wavelength_range = user_file_items[OtherId.USE_FULL_WAVELENGTH_RANGE]
+            check_if_contains_only_one_element(use_full_wavelength_range, OtherId.USE_FULL_WAVELENGTH_RANGE)
             use_full_wavelength_range = use_full_wavelength_range[-1]
             self._calculate_transmission_builder.set_use_full_wavelength_range(use_full_wavelength_range)
 
     def _set_up_wavelength_and_pixel_adjustment(self, user_file_items):
         # Get the flat/flood files. There can be entries for LAB and HAB.
-        if MonId.flat in user_file_items:
-            mon_flat = user_file_items[MonId.flat]
+        if MonId.FLAT in user_file_items:
+            mon_flat = user_file_items[MonId.FLAT]
             hab_flat_entries = [item for item in mon_flat if item.detector_type is DetectorType.HAB]
             lab_flat_entries = [item for item in mon_flat if item.detector_type is DetectorType.LAB]
             if hab_flat_entries:
@@ -1264,8 +1264,8 @@ class StateDirectorISIS(object):
                 self._wavelength_and_pixel_adjustment_builder.set_LAB_pixel_adjustment_file(lab_flat_entry.file_path)
 
         # Get the direct files. There can be entries for LAB and HAB.
-        if MonId.direct in user_file_items:
-            mon_direct = user_file_items[MonId.direct]
+        if MonId.DIRECT in user_file_items:
+            mon_direct = user_file_items[MonId.DIRECT]
             hab_direct_entries = [item for item in mon_direct if item.detector_type is DetectorType.HAB]
             lab_direct_entries = [item for item in mon_direct if item.detector_type is DetectorType.LAB]
             if hab_direct_entries:
@@ -1282,63 +1282,63 @@ class StateDirectorISIS(object):
         set_wavelength_limits(self._wavelength_and_pixel_adjustment_builder, user_file_items)
 
     def _set_up_compatibility(self, user_file_items):
-        if LimitsId.events_binning in user_file_items:
-            events_binning = user_file_items[LimitsId.events_binning]
-            check_if_contains_only_one_element(events_binning, LimitsId.events_binning)
+        if LimitsId.EVENTS_BINNING in user_file_items:
+            events_binning = user_file_items[LimitsId.EVENTS_BINNING]
+            check_if_contains_only_one_element(events_binning, LimitsId.EVENTS_BINNING)
             events_binning = events_binning[-1]
             self._compatibility_builder.set_time_rebin_string(events_binning)
 
-        if OtherId.use_compatibility_mode in user_file_items:
-            use_compatibility_mode = user_file_items[OtherId.use_compatibility_mode]
-            check_if_contains_only_one_element(use_compatibility_mode, OtherId.use_compatibility_mode)
+        if OtherId.USE_COMPATIBILITY_MODE in user_file_items:
+            use_compatibility_mode = user_file_items[OtherId.USE_COMPATIBILITY_MODE]
+            check_if_contains_only_one_element(use_compatibility_mode, OtherId.USE_COMPATIBILITY_MODE)
             use_compatibility_mode = use_compatibility_mode[-1]
             self._compatibility_builder.set_use_compatibility_mode(use_compatibility_mode)
 
-        if OtherId.use_event_slice_optimisation in user_file_items:
-            use_event_slice_optimisation = user_file_items[OtherId.use_event_slice_optimisation]
-            check_if_contains_only_one_element(use_event_slice_optimisation, OtherId.use_event_slice_optimisation)
+        if OtherId.USE_EVENT_SLICE_OPTIMISATION in user_file_items:
+            use_event_slice_optimisation = user_file_items[OtherId.USE_EVENT_SLICE_OPTIMISATION]
+            check_if_contains_only_one_element(use_event_slice_optimisation, OtherId.USE_EVENT_SLICE_OPTIMISATION)
             use_event_slice_optimisation = use_event_slice_optimisation[-1]
             self._compatibility_builder.set_use_event_slice_optimisation(use_event_slice_optimisation)
 
     def _set_up_save(self, user_file_items):
-        if OtherId.save_types in user_file_items:
-            save_types = user_file_items[OtherId.save_types]
-            check_if_contains_only_one_element(save_types, OtherId.save_types)
+        if OtherId.SAVE_TYPES in user_file_items:
+            save_types = user_file_items[OtherId.SAVE_TYPES]
+            check_if_contains_only_one_element(save_types, OtherId.SAVE_TYPES)
             save_types = save_types[-1]
             self._save_builder.set_file_format(save_types)
 
-        if OtherId.save_as_zero_error_free in user_file_items:
-            save_as_zero_error_free = user_file_items[OtherId.save_as_zero_error_free]
-            check_if_contains_only_one_element(save_as_zero_error_free, OtherId.save_as_zero_error_free)
+        if OtherId.SAVE_AS_ZERO_ERROR_FREE in user_file_items:
+            save_as_zero_error_free = user_file_items[OtherId.SAVE_AS_ZERO_ERROR_FREE]
+            check_if_contains_only_one_element(save_as_zero_error_free, OtherId.SAVE_AS_ZERO_ERROR_FREE)
             save_as_zero_error_free = save_as_zero_error_free[-1]
             self._save_builder.set_zero_free_correction(save_as_zero_error_free)
 
-        if OtherId.user_specified_output_name in user_file_items:
-            user_specified_output_name = user_file_items[OtherId.user_specified_output_name]
-            check_if_contains_only_one_element(user_specified_output_name, OtherId.user_specified_output_name)
+        if OtherId.USER_SPECIFIED_OUTPUT_NAME in user_file_items:
+            user_specified_output_name = user_file_items[OtherId.USER_SPECIFIED_OUTPUT_NAME]
+            check_if_contains_only_one_element(user_specified_output_name, OtherId.USER_SPECIFIED_OUTPUT_NAME)
             user_specified_output_name = user_specified_output_name[-1]
             self._save_builder.set_user_specified_output_name(user_specified_output_name)
 
-        if OtherId.user_specified_output_name_suffix in user_file_items:
-            user_specified_output_name_suffix = user_file_items[OtherId.user_specified_output_name_suffix]
+        if OtherId.USER_SPECIFIED_OUTPUT_NAME_SUFFIX in user_file_items:
+            user_specified_output_name_suffix = user_file_items[OtherId.USER_SPECIFIED_OUTPUT_NAME_SUFFIX]
             check_if_contains_only_one_element(user_specified_output_name_suffix,
-                                               OtherId.user_specified_output_name_suffix)
+                                               OtherId.USER_SPECIFIED_OUTPUT_NAME_SUFFIX)
             user_specified_output_name_suffix = user_specified_output_name_suffix[-1]
             self._save_builder.set_user_specified_output_name_suffix(user_specified_output_name_suffix)
 
-        if OtherId.use_reduction_mode_as_suffix in user_file_items:
-            use_reduction_mode_as_suffix = user_file_items[OtherId.use_reduction_mode_as_suffix]
+        if OtherId.USE_REDUCTION_MODE_AS_SUFFIX in user_file_items:
+            use_reduction_mode_as_suffix = user_file_items[OtherId.USE_REDUCTION_MODE_AS_SUFFIX]
             check_if_contains_only_one_element(use_reduction_mode_as_suffix,
-                                               OtherId.use_reduction_mode_as_suffix)
+                                               OtherId.USE_REDUCTION_MODE_AS_SUFFIX)
             use_reduction_mode_as_suffix = use_reduction_mode_as_suffix[-1]
             self._save_builder.set_use_reduction_mode_as_suffix(use_reduction_mode_as_suffix)
 
     def _add_information_to_data_state(self, user_file_items):
         # The only thing that should be set on the data is the tube calibration file which is specified in
         # the user file.
-        if TubeCalibrationFileId.file in user_file_items:
-            tube_calibration = user_file_items[TubeCalibrationFileId.file]
-            check_if_contains_only_one_element(tube_calibration, TubeCalibrationFileId.file)
+        if TubeCalibrationFileId.FILE in user_file_items:
+            tube_calibration = user_file_items[TubeCalibrationFileId.FILE]
+            check_if_contains_only_one_element(tube_calibration, TubeCalibrationFileId.FILE)
             tube_calibration = tube_calibration[-1]
             self._data.calibration = tube_calibration
 

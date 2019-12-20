@@ -12,7 +12,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from qtpy import QtGui
 from qtpy.QtCore import QVariant, Qt, QAbstractTableModel
-from mantid.py3compat import Enum
+from enum import Enum
 
 
 class MatrixWorkspaceTableViewModelType(Enum):
@@ -84,27 +84,32 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
             raise ValueError("Unknown model type {0}".format(self.type))
 
     def _makeVerticalHeader(self, section, role):
+        def _numeric_axis_value_unit(axis):
+            # binned/point data
+            if axis.length() == self.ws.getNumberHistograms() + 1:
+                value = 0.5 * (float(axis.label(section)) + float(axis.label(section + 1)))
+            else:
+                value = float(axis.label(section))
+            return value, axis.getUnit().symbol().utf8()
+
         axis_index = 1
         # check that the vertical axis actually exists in the workspace
         if self.ws.axes() > axis_index:
+            axis = self.ws.getAxis(axis_index)
             if role == Qt.DisplayRole:
-                if not self.ws.getAxis(axis_index).isNumeric():
+                if not axis.isNumeric():
                     return self.VERTICAL_HEADER_DISPLAY_STRING.format(
-                        section, self.ws.getAxis(axis_index).label(section))
+                        section, axis.label(section))
                 else:
-                    bin_center = (float(self.ws.getAxis(axis_index).label(section)) +
-                                  float(self.ws.getAxis(axis_index).label(section+1)))/2.0
-                    unit = self.ws.getAxis(axis_index).getUnit().symbol().utf8()
-                    return self.VERTICAL_HEADER_DISPLAY_STRING_FOR_NUMERIC_AXIS.format(section, bin_center, unit)
+                    display_value, unit = _numeric_axis_value_unit(axis)
+                    return self.VERTICAL_HEADER_DISPLAY_STRING_FOR_NUMERIC_AXIS.format(section, display_value, unit)
             else:
-                if not self.ws.getAxis(axis_index).isNumeric():
+                if not axis.isNumeric():
                     spectrum_number = self.ws.getSpectrum(section).getSpectrumNo()
                     return self.VERTICAL_HEADER_TOOLTIP_STRING.format(section, spectrum_number)
                 else:
-                    bin_center = (float(self.ws.getAxis(axis_index).label(section)) +
-                                  float(self.ws.getAxis(axis_index).label(section+1)))/2.0
-                    unit = self.ws.getAxis(axis_index).getUnit().symbol().utf8()
-                    return self.VERTICAL_HEADER_TOOLTIP_STRING_FOR_NUMERIC_AXIS.format(section, bin_center, unit)
+                    display_value, unit = _numeric_axis_value_unit(axis)
+                    return self.VERTICAL_HEADER_TOOLTIP_STRING_FOR_NUMERIC_AXIS.format(section, display_value, unit)
         else:
             raise NotImplementedError("What do we do here? Handle if the vertical axis does NOT exist")
 

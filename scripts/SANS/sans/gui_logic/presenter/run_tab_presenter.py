@@ -24,7 +24,7 @@ from mantid.kernel import Logger, ConfigService, ConfigPropertyObserver
 from mantid.py3compat import csv_open_type
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
-from sans.common.enums import (BatchReductionEntry, ISISReductionMode, RangeStepType, RowState, SampleShape,
+from sans.common.enums import (BatchReductionEntry, ReductionMode, RangeStepType, RowState, SampleShape,
                                SaveType, SANSInstrument)
 from sans.gui_logic.gui_common import (add_dir_to_datasearch, get_reduction_mode_from_gui_selection,
                                        get_reduction_mode_strings_for_gui, get_string_for_gui_from_instrument,
@@ -59,8 +59,8 @@ if PYQT4:
 else:
     from mantidqt.plotting.functions import get_plot_fig
 
-row_state_to_colour_mapping = {RowState.Unprocessed: '#FFFFFF', RowState.Processed: '#d0f4d0',
-                               RowState.Error: '#accbff'}
+row_state_to_colour_mapping = {RowState.UNPROCESSED: '#FFFFFF', RowState.PROCESSED: '#d0f4d0',
+                               RowState.ERROR: '#accbff'}
 
 
 def log_times(func):
@@ -247,24 +247,24 @@ class RunTabPresenter(PresenterCommon):
         self._view.set_reduction_modes(reduction_mode_list)
 
         # Set the step type options for wavelength
-        range_step_types = [RangeStepType.to_string(RangeStepType.Lin),
-                            RangeStepType.to_string(RangeStepType.Log),
-                            RangeStepType.to_string(RangeStepType.RangeLog),
-                            RangeStepType.to_string(RangeStepType.RangeLin)]
+        range_step_types = [RangeStepType.LIN.value,
+                            RangeStepType.LOG.value,
+                            RangeStepType.RANGE_LOG.value,
+                            RangeStepType.RANGE_LIN.value]
         self._view.wavelength_step_type = range_step_types
 
         # Set the geometry options. This needs to include the option to read the sample shape from file.
         sample_shape = ["Read from file",
-                        SampleShape.Cylinder,
-                        SampleShape.FlatPlate,
-                        SampleShape.Disc]
+                        SampleShape.CYLINDER,
+                        SampleShape.FLAT_PLATE,
+                        SampleShape.DISC]
         self._view.sample_shape = sample_shape
 
         # Set the q range
-        self._view.q_1d_step_type = [RangeStepType.to_string(RangeStepType.Lin),
-                                     RangeStepType.to_string(RangeStepType.Log)]
-        self._view.q_xy_step_type = [RangeStepType.to_string(RangeStepType.Lin),
-                                     RangeStepType.to_string(RangeStepType.Log)]
+        self._view.q_1d_step_type = [RangeStepType.LIN.value,
+                                     RangeStepType.LOG.value]
+        self._view.q_xy_step_type = [RangeStepType.LIN.value,
+                                     RangeStepType.LOG.value]
 
     def _handle_output_directory_changed(self, new_directory):
         """
@@ -384,7 +384,7 @@ class RunTabPresenter(PresenterCommon):
                     self._workspace_diagnostic_presenter.on_user_file_load(user_file_path)
 
                     # 6. Warning if user file did not contain a recognised instrument
-                    if self._view.instrument == SANSInstrument.NoInstrument:
+                    if self._view.instrument == SANSInstrument.NO_INSTRUMENT:
                         raise RuntimeError("User file did not contain a SANS Instrument.")
 
                 except RuntimeError as instrument_e:
@@ -398,8 +398,8 @@ class RunTabPresenter(PresenterCommon):
                                                     use_error_name=True)
 
     def _on_user_file_load_failure(self, e, message, use_error_name=False):
-        self._setup_instrument_specific_settings(SANSInstrument.NoInstrument)
-        self._view.instrument = SANSInstrument.NoInstrument
+        self._setup_instrument_specific_settings(SANSInstrument.NO_INSTRUMENT)
+        self._view.instrument = SANSInstrument.NO_INSTRUMENT
         self._view.on_user_file_load_failure()
         self.display_errors(e, message, use_error_name)
 
@@ -462,33 +462,33 @@ class RunTabPresenter(PresenterCommon):
 
         # ----Pull out the entries----
         # Run numbers
-        sample_scatter = get_string_entry(BatchReductionEntry.SampleScatter, row)
+        sample_scatter = get_string_entry(BatchReductionEntry.SAMPLE_SCATTER, row)
         sample_scatter_period = get_string_period(
-            get_string_entry(BatchReductionEntry.SampleScatterPeriod, row))
-        sample_transmission = get_string_entry(BatchReductionEntry.SampleTransmission, row)
+            get_string_entry(BatchReductionEntry.SAMPLE_SCATTER_PERIOD, row))
+        sample_transmission = get_string_entry(BatchReductionEntry.SAMPLE_TRANSMISSION, row)
         sample_transmission_period = \
-            get_string_period(get_string_entry(BatchReductionEntry.SampleTransmissionPeriod, row))
-        sample_direct = get_string_entry(BatchReductionEntry.SampleDirect, row)
+            get_string_period(get_string_entry(BatchReductionEntry.SAMPLE_TRANSMISSION_PERIOD, row))
+        sample_direct = get_string_entry(BatchReductionEntry.SAMPLE_DIRECT, row)
         sample_direct_period = get_string_period(
-            get_string_entry(BatchReductionEntry.SampleDirectPeriod, row))
-        can_scatter = get_string_entry(BatchReductionEntry.CanScatter, row)
+            get_string_entry(BatchReductionEntry.SAMPLE_DIRECT_PERIOD, row))
+        can_scatter = get_string_entry(BatchReductionEntry.CAN_SCATTER, row)
         can_scatter_period = get_string_period(
-            get_string_entry(BatchReductionEntry.CanScatterPeriod, row))
-        can_transmission = get_string_entry(BatchReductionEntry.CanTransmission, row)
+            get_string_entry(BatchReductionEntry.CAN_SCATTER_PERIOD, row))
+        can_transmission = get_string_entry(BatchReductionEntry.CAN_TRANSMISSION, row)
         can_transmission_period = get_string_period(
-            get_string_entry(BatchReductionEntry.CanScatterPeriod, row))
-        can_direct = get_string_entry(BatchReductionEntry.CanDirect, row)
+            get_string_entry(BatchReductionEntry.CAN_SCATTER_PERIOD, row))
+        can_direct = get_string_entry(BatchReductionEntry.CAN_DIRECT, row)
         can_direct_period = get_string_period(
-            get_string_entry(BatchReductionEntry.CanDirectPeriod, row))
+            get_string_entry(BatchReductionEntry.CAN_DIRECT_PERIOD, row))
 
         # Other information
-        output_name = get_string_entry(BatchReductionEntry.Output, row)
-        user_file = get_string_entry(BatchReductionEntry.UserFile, row)
+        output_name = get_string_entry(BatchReductionEntry.OUTPUT, row)
+        user_file = get_string_entry(BatchReductionEntry.USER_FILE, row)
 
         # Sample geometries
-        sample_thickness = get_string_entry(BatchReductionEntry.SampleThickness, row)
-        sample_height = get_string_entry(BatchReductionEntry.SampleHeight, row)
-        sample_width = get_string_entry(BatchReductionEntry.SampleWidth, row)
+        sample_thickness = get_string_entry(BatchReductionEntry.SAMPLE_THICKNESS, row)
+        sample_height = get_string_entry(BatchReductionEntry.SAMPLE_HEIGHT, row)
+        sample_width = get_string_entry(BatchReductionEntry.SAMPLE_WIDTH, row)
 
         # ----Form a row----
         row_entry = [sample_scatter, sample_scatter_period, sample_transmission,
@@ -528,7 +528,7 @@ class RunTabPresenter(PresenterCommon):
 
     def on_data_changed(self, row, column, new_value, old_value):
         self._table_model.update_table_entry(row, column, new_value)
-        self._view.change_row_color(row_state_to_colour_mapping[RowState.Unprocessed], row)
+        self._view.change_row_color(row_state_to_colour_mapping[RowState.UNPROCESSED], row)
         self._view.set_row_tooltip('', row)
         self._beam_centre_presenter.on_update_rows()
         self._masking_table_presenter.on_update_rows()
@@ -629,7 +629,7 @@ class RunTabPresenter(PresenterCommon):
         """
         if (self._view.output_mode_file_radio_button.isChecked() or
                 self._view.output_mode_both_radio_button.isChecked()):
-            if self._view.save_types == [SaveType.NoType]:
+            if self._view.save_types == [SaveType.NO_TYPE]:
                 raise RuntimeError("You have selected an output mode which saves to file, "
                                    "but no file types have been selected.")
 
@@ -903,9 +903,9 @@ class RunTabPresenter(PresenterCommon):
         if not selection:
             return
         mode = get_reduction_mode_from_gui_selection(selection)
-        if mode == ISISReductionMode.HAB:
+        if mode == ReductionMode.HAB:
             self._beam_centre_presenter.update_hab_selected()
-        elif mode == ISISReductionMode.LAB:
+        elif mode == ReductionMode.LAB:
             self._beam_centre_presenter.update_lab_selected()
         else:
             self._beam_centre_presenter.update_all_selected()
@@ -1076,7 +1076,7 @@ class RunTabPresenter(PresenterCommon):
         if len(elements) == 3:
             step_element = float(elements[1])
             step = abs(step_element)
-            step_type = RangeStepType.Lin if step_element >= 0 else RangeStepType.Log
+            step_type = RangeStepType.LIN if step_element >= 0 else RangeStepType.LOG
 
             # Set on the view
             self._view.q_1d_min_or_rebin_string = float(elements[0])
@@ -1182,7 +1182,7 @@ class RunTabPresenter(PresenterCommon):
             q_1d_step = self._view.q_1d_step
             if q_1d_min and q_1d_max and q_1d_step and q_1d_step_type:
                 q_1d_rebin_string = str(q_1d_min) + ","
-                q_1d_step_type_factor = -1. if q_1d_step_type is RangeStepType.Log else 1.
+                q_1d_step_type_factor = -1. if q_1d_step_type is RangeStepType.LOG else 1.
                 q_1d_rebin_string += str(q_1d_step_type_factor * q_1d_step) + ","
                 q_1d_rebin_string += str(q_1d_max)
                 state_model.q_1d_rebin_string = q_1d_rebin_string
@@ -1227,14 +1227,19 @@ class RunTabPresenter(PresenterCommon):
     # Settings
     # ------------------------------------------------------------------------------------------------------------------
     def _setup_instrument_specific_settings(self, instrument=None):
+        if ConfigService["default.facility"] != self._facility.value:
+            ConfigService["default.facility"] = self._facility.value
+            self.sans_logger.notice("Facility changed to ISIS.")
+
         if not instrument:
             instrument = self._view.instrument
 
-        if instrument == SANSInstrument.NoInstrument:
+        if instrument == SANSInstrument.NO_INSTRUMENT:
             self._view.disable_process_buttons()
         else:
             instrument_string = get_string_for_gui_from_instrument(instrument)
             ConfigService["default.instrument"] = instrument_string
+            self.sans_logger.notice("Instrument changed to {}.".format(instrument_string))
             self._view.enable_process_buttons()
 
         self._view.set_instrument_settings(instrument)

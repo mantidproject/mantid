@@ -10,7 +10,7 @@ from qtpy.QtWidgets import QFileDialog
 
 from sans.common.constant_containers import (SANSInstrument_enum_as_key, SANSInstrument_string_as_key_NoInstrument,
                                              SANSInstrument_string_list)
-from sans.common.enums import SANSInstrument, ISISReductionMode, DetectorType
+from sans.common.enums import ReductionMode, DetectorType, SANSInstrument
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -48,15 +48,16 @@ LAB_STRINGS = {SANSInstrument.SANS2D: "rear",
                SANSInstrument.LOQ: "main-detector",
                SANSInstrument.LARMOR: "DetectorBench",
                SANSInstrument.ZOOM: "rear-detector",
-               SANSInstrument.NoInstrument: ISISReductionMode.to_string(ISISReductionMode.LAB)
+               SANSInstrument.NO_INSTRUMENT: ReductionMode.LAB.value
                }
 
 HAB_STRINGS = {SANSInstrument.SANS2D: "front",
                SANSInstrument.LOQ: "Hab",
-               SANSInstrument.NoInstrument: ISISReductionMode.to_string(ISISReductionMode.HAB)}
+               SANSInstrument.NO_INSTRUMENT: ReductionMode.HAB.value}
 
-MERGED = "Merged"
-ALL = "All"
+ALL = ReductionMode.ALL.value
+DEFAULT_HAB = ReductionMode.HAB.value
+MERGED = ReductionMode.MERGED.value
 
 GENERIC_SETTINGS = "Mantid/ISISSANS"
 
@@ -71,8 +72,8 @@ def get_detector_strings_for_gui(instrument=None):
         return [LAB_STRINGS[instrument]]
 
     else:
-        return [LAB_STRINGS[SANSInstrument.NoInstrument],
-                HAB_STRINGS[SANSInstrument.NoInstrument]]
+        return [LAB_STRINGS[SANSInstrument.NO_INSTRUMENT],
+                HAB_STRINGS[SANSInstrument.NO_INSTRUMENT]]
 
 
 def get_detector_strings_for_diagnostic_page(instrument=None):
@@ -83,8 +84,8 @@ def get_detector_strings_for_diagnostic_page(instrument=None):
         return [LAB_STRINGS[instrument]]
 
     else:
-        return [LAB_STRINGS[SANSInstrument.NoInstrument],
-                HAB_STRINGS[SANSInstrument.NoInstrument]]
+        return [LAB_STRINGS[SANSInstrument.NO_INSTRUMENT],
+                HAB_STRINGS[SANSInstrument.NO_INSTRUMENT]]
 
 
 def get_reduction_mode_strings_for_gui(instrument=None):
@@ -98,8 +99,8 @@ def get_reduction_mode_strings_for_gui(instrument=None):
         return [LAB_STRINGS[instrument]]
 
     else:
-        return [LAB_STRINGS[SANSInstrument.NoInstrument],
-                HAB_STRINGS[SANSInstrument.NoInstrument],
+        return [LAB_STRINGS[SANSInstrument.NO_INSTRUMENT],
+                HAB_STRINGS[SANSInstrument.NO_INSTRUMENT],
                 MERGED, ALL]
 
 
@@ -108,19 +109,19 @@ def get_instrument_strings_for_gui():
 
 
 def get_reduction_selection(instrument):
-    selection = {ISISReductionMode.Merged: MERGED,
-                 ISISReductionMode.All: ALL}
+    selection = {ReductionMode.MERGED: MERGED,
+                 ReductionMode.ALL: ALL}
 
     if any (instrument is x for x in [SANSInstrument.SANS2D, SANSInstrument.LOQ]):
-        selection.update({ISISReductionMode.LAB: LAB_STRINGS[instrument],
-                          ISISReductionMode.HAB: HAB_STRINGS[instrument]})
+        selection.update({ReductionMode.LAB: LAB_STRINGS[instrument],
+                          ReductionMode.HAB: HAB_STRINGS[instrument]})
 
     elif any(instrument is x for x in [SANSInstrument.LARMOR, SANSInstrument.ZOOM]):
-        selection = {ISISReductionMode.LAB: LAB_STRINGS[instrument]}
+        selection = {ReductionMode.LAB: LAB_STRINGS[instrument]}
 
     else:
-        selection.update({ISISReductionMode.LAB: LAB_STRINGS[SANSInstrument.NoInstrument],
-                          ISISReductionMode.HAB: HAB_STRINGS[SANSInstrument.NoInstrument]})
+        selection.update({ReductionMode.LAB: LAB_STRINGS[SANSInstrument.NO_INSTRUMENT],
+                          ReductionMode.HAB: HAB_STRINGS[SANSInstrument.NO_INSTRUMENT]})
     return selection
 
 
@@ -143,16 +144,16 @@ def get_reduction_mode_from_gui_selection(gui_selection):
     # TODO when we hit only Python 3 this should use casefold rather than lower
     case_folded_selection = gui_selection.lower()
     if case_folded_selection == MERGED.lower():
-        return ISISReductionMode.Merged
+        return ReductionMode.MERGED
 
     elif case_folded_selection == ALL.lower():
-        return ISISReductionMode.All
+        return ReductionMode.ALL
 
     elif any(case_folded_selection == lab.lower() for lab in LAB_STRINGS.values()):
-        return ISISReductionMode.LAB
+        return ReductionMode.LAB
 
     elif any(case_folded_selection == hab.lower() for hab in HAB_STRINGS.values()):
-        return ISISReductionMode.HAB
+        return ReductionMode.HAB
     else:
         raise RuntimeError("Reduction mode selection {0} is not valid.".format(gui_selection))
 

@@ -16,8 +16,8 @@ class PropertyManagerHelper : public Mantid::Kernel::PropertyManager {
 public:
   PropertyManagerHelper() : PropertyManager() {}
 
-  using IPropertyManager::TypedValue;
   using IPropertyManager::getValue;
+  using IPropertyManager::TypedValue;
   using PropertyManager::declareProperty;
   using PropertyManager::setProperty;
 };

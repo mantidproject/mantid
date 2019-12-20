@@ -4,22 +4,28 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=too-few-public-methods, invalid-name
+# pylint: disable=too-few-public-methods, invalid-name
 
 """ Fundamental classes and Descriptors for the State mechanism."""
 from __future__ import (absolute_import, division, print_function)
-from abc import (ABCMeta, abstractmethod)
+
 import copy
 import inspect
+from abc import (ABCMeta, abstractmethod)
 from functools import (partial)
+from importlib import import_module
+
 from six import string_types, with_metaclass
 
 from mantid.kernel import (PropertyManager, std_vector_dbl, std_vector_str, std_vector_int, std_vector_long)
+from mantid.py3compat import Enum
 
 
 # ---------------------------------------------------------------
 # Validator functions
 # ---------------------------------------------------------------
+
+
 def is_not_none(value):
     return value is not None
 
@@ -209,24 +215,6 @@ class DictFloatsParameter(TypedParameter):
                                                                                value, type(value)))
 
 
-class ClassTypeParameter(TypedParameter):
-    """
-    This TypedParameter variant allows for storing a class type.
-
-    This could be for example something from the SANSType module, e.g. CanonicalCoordinates.X
-    It is something that is used frequently with the main of moving away from using strings where types
-    should be used instead.
-    """
-    def __init__(self, class_type):
-        super(ClassTypeParameter, self).__init__(class_type, is_not_none)
-
-    def _type_check(self, value):
-        if not issubclass(value, self.parameter_type):
-            raise TypeError("Trying to set {0} which expects a value of type {1}."
-                            " Got a value of {2} which is of type: {3}".format(self.name, self.parameter_type,
-                                                                               value, type(value)))
-
-
 class FloatWithNoneParameter(TypedParameter):
     def __init__(self):
         super(FloatWithNoneParameter, self).__init__(float)
@@ -276,7 +264,6 @@ class PositiveFloatListParameter(TypedParameter):
         super(PositiveFloatListParameter, self).__init__(list, all_list_elements_are_float_and_positive_and_not_empty)
 
     def _type_check(self, value):
-
         if not isinstance(value, self.parameter_type) or not all_list_elements_are_float_and_not_empty(value):
             raise TypeError("Trying to set {0} which expects a value of type {1}."
                             " Got a value of {2} which is of type: {3}".format(self.name, self.parameter_type,
@@ -306,12 +293,6 @@ class PositiveIntegerListParameter(TypedParameter):
                                                                                value, type(value)))
 
 
-class ClassTypeListParameter(TypedParameter):
-    def __init__(self, class_type):
-        typed_comparison = partial(all_list_elements_are_of_class_type_and_not_empty, comparison_type=class_type)
-        super(ClassTypeListParameter, self).__init__(list, typed_comparison)
-
-
 # ------------------------------------------------
 # StateBase
 # ------------------------------------------------
@@ -329,6 +310,9 @@ class StateBase(with_metaclass(ABCMeta, object)):
     @abstractmethod
     def validate(self):
         pass
+
+    def convert_to_dict(self):
+        return convert_state_to_dict(self)
 
 
 def rename_descriptor_names(cls):
@@ -355,12 +339,13 @@ def rename_descriptor_names(cls):
 #
 # During serialization we place identifier tags into the serialized object, e.g. we add a specifier if the item
 # is a State type at all and if so which state it is.
+ENUM_TYPE_TAG = "EnumTag#"
 
+INT_TAG = "int"
 
 STATE_NAME = "state_name"
 STATE_MODULE = "state_module"
 SEPARATOR_SERIAL = "#"
-class_type_parameter_id = "ClassTypeParameterID#"
 MODULE = "__module__"
 
 
@@ -389,19 +374,7 @@ def get_module_and_class_name(instance):
 
 
 def provide_class_from_module_and_class_name(module_name, class_name):
-    # Importlib seems to be missing on RHEL6, hence we resort to __import__
-    try:
-        from importlib import import_module
-        module = import_module(module_name)
-    except ImportError:
-        if "." in module_name:
-            _, mod_name = module_name.rsplit(".", 1)
-        else:
-            mod_name = None
-        if not mod_name:
-            module = __import__(module_name)
-        else:
-            module = __import__(module_name, fromlist=[mod_name])
+    module = import_module(module_name)
     return getattr(module, class_name)
 
 
@@ -411,29 +384,23 @@ def provide_class(instance):
     return provide_class_from_module_and_class_name(module_name, class_name)
 
 
-def is_class_type_parameter(value):
-    return isinstance(value, string_types) and class_type_parameter_id in value
+def is_enum_type_parameter(value):
+    return isinstance(value, string_types) and ENUM_TYPE_TAG in value
 
 
-def is_vector_with_class_type_parameter(value):
-    is_vector_with_class_type = True
-    contains_str = is_string_vector(value)
-    if contains_str:
-        for element in value:
-            if not is_class_type_parameter(element):
-                is_vector_with_class_type = False
-    else:
-        is_vector_with_class_type = False
-    return is_vector_with_class_type
+def is_enum_list_parameter(value):
+    if isinstance(value, string_types):
+        return False
+
+    try:
+        return all(ENUM_TYPE_TAG in s for s in value)
+    except TypeError:
+        return False
 
 
 def get_module_and_class_name_from_encoded_string(encoder, value):
     without_encoder = value.replace(encoder, "")
     return without_encoder.split(SEPARATOR_SERIAL)
-
-
-def create_module_and_class_name_from_encoded_string(class_type_id, module_name, class_name):
-    return class_type_id + module_name + SEPARATOR_SERIAL + class_name
 
 
 def create_sub_state(value):
@@ -446,22 +413,27 @@ def create_sub_state(value):
 
 
 def get_descriptor_values(instance):
-    # Get all descriptor names which are TypedParameter of instance's type
-    descriptor_names = []
-    descriptor_types = {}
-    for descriptor_name, descriptor_object in inspect.getmembers(type(instance)):
-        if inspect.isdatadescriptor(descriptor_object) and isinstance(descriptor_object, TypedParameter):
-            descriptor_names.append(descriptor_name)
-            descriptor_types.update({descriptor_name: descriptor_object})
+    # Get all user defined attributes
+    member_variables = inspect.getmembers(type(instance), lambda x: not(inspect.isroutine(x)))
+    # Remove anything starting with a '_' or '__' - i.e. private attributes such as weak ref
+    member_variables = [item for item in member_variables if not item[0].startswith('_')]
+
+    # Property manager is a fake property that wraps the serializing method (i.e. this)
+    # so trying to pack it causes inf recursion
+    member_variables = [item for item in member_variables if "property_manager" not in item[0]]
+
+    # We only need names
+    member_variables = [item[0] for item in member_variables]
 
     # Get the descriptor values from the instance
     descriptor_values = {}
-    for key in descriptor_names:
+    for key in member_variables:
         if hasattr(instance, key):
             value = getattr(instance, key)
             if value is not None:
                 descriptor_values.update({key: value})
-    return descriptor_values, descriptor_types
+
+    return descriptor_values
 
 
 def get_class_descriptor_types(instance):
@@ -480,45 +452,51 @@ def convert_state_to_dict(instance):
     :param instance: the instance which is to be converted
     :return: a serialized state object in the form of a dict
     """
-    descriptor_values, descriptor_types = get_descriptor_values(instance)
+    attribute = get_descriptor_values(instance)
     # Add the descriptors to a dict
     state_dict = dict()
-    for key, value in list(descriptor_values.items()):
-        # If the value is a SANSBaseState then create a dict from it
-        # If the value is a dict, then we need to check what the sub types are
-        # If the value is a ClassTypeParameter, then we need to encode it
-        # If the value is a list of ClassTypeParameters, then we need to encode each element in the list
-        if isinstance(value, StateBase):
-            sub_state_dict = value.property_manager
-            value = sub_state_dict
-        elif isinstance(value, dict):
-            # If we have a dict, then we need to watch out since a value in the dict might be a State
-            sub_dictionary = {}
-            for key_sub, val_sub in list(value.items()):
-                if isinstance(val_sub, StateBase):
-                    sub_dictionary_value = val_sub.property_manager
-                else:
-                    sub_dictionary_value = val_sub
-                sub_dictionary.update({key_sub: sub_dictionary_value})
-            value = sub_dictionary
-        elif isinstance(descriptor_types[key], ClassTypeParameter):
-            value = get_serialized_class_type_parameter(value)
-        elif isinstance(descriptor_types[key], ClassTypeListParameter):
-            if value:
-                # If there are entries in the list, then convert them individually and place them into a list.
-                # The list will contain a sequence of serialized ClassTypeParameters
-                serialized_value = []
-                for element in value:
-                    serialized_element = get_serialized_class_type_parameter(element)
-                    serialized_value.append(serialized_element)
-                value = serialized_value
 
-        state_dict.update({key: value})
+    # Don't do anything if primitive type that Mantid can serialize
+    primative_types = (int, str, bool, float, TypedParameter)
+
+    for attr_name, attr_val in attribute.items():
+        if isinstance(attr_val, StateBase):
+            # If the value is a SANSBaseState then create a dict from it
+            attr_val = attr_val.property_manager
+        elif isinstance(attr_val, dict):
+            attr_val = serialize_dict(attr_val)
+        elif isinstance(attr_val, Enum) or isinstance(attr_val, list) and all(isinstance(x, Enum) for x in attr_val):
+            attr_val = serialize_enum(attr_val)
+        elif isinstance(attr_val, primative_types) \
+                or isinstance(attr_val, list) and all(isinstance(x, primative_types) for x in attr_val):
+            pass  # A primative type or list of primitives don't need anything special
+        else:
+            raise ValueError("Cannot serialize {0}".format(attr_val))
+
+        state_dict.update({attr_name: attr_val})
     # Add information about the current state object, such as in which module it lives and what its name is
     module_name, class_name = get_module_and_class_name(instance)
     state_dict.update({STATE_MODULE: module_name})
     state_dict.update({STATE_NAME: class_name})
     return state_dict
+
+
+def serialize_dict(value):
+    # If we have a dict, then we need to watch out since a value in the dict might be a State
+    sub_dictionary = {}
+    for key_sub, val_sub in list(value.items()):
+        # We have to handle the key being an enum too
+        if isinstance(key_sub, Enum):
+            key_sub = serialize_enum(key_sub)
+
+        if isinstance(val_sub, StateBase):
+            val_sub = val_sub.property_manager
+        elif isinstance(val_sub, Enum):
+            val_sub = serialize_enum(val_sub)
+
+        sub_dictionary.update({key_sub: val_sub})
+
+    return sub_dictionary
 
 
 def set_state_from_property_manager(instance, property_manager):
@@ -528,6 +506,7 @@ def set_state_from_property_manager(instance, property_manager):
     :param instance: the instance which is to be set with a values of the property manager
     :param property_manager: the property manager with the stored setting
     """
+
     def _set_element(inst, k_element, v_element):
         if k_element != STATE_NAME and k_element != STATE_MODULE:
             setattr(inst, k_element, v_element)
@@ -535,46 +514,20 @@ def set_state_from_property_manager(instance, property_manager):
     keys = list(property_manager.keys())
     for key in keys:
         value = property_manager.getProperty(key).value
-        # There are four scenarios that need to be considered
+        # There are some special scenarios that need to be considered
         # 1. ParameterManager 1: This indicates (most often) that we are dealing with a new state -> create it and
         #                      apply recursion
         # 2. ParameterManager 2: In some cases the ParameterManager object is actually a map rather than a state ->
         #                         populate the state
-        # 3. String with special meaning: Admittedly this is a hack, but we are limited by the input property types
-        #                                 of Mantid algorithms, which can be string, int, float and containers of these
-        #                                 types (and PropertyManagerProperties). We need a wider range of types, such
-        #                                 as ClassTypeParameters. These are encoded (as good as possible) in a string
-        # 4. Vector of strings with special meaning: See point 3)
-        # 5. Vector for float: This needs to handle Mantid's float array
-        # 6. Vector for string: This needs to handle Mantid's string array
-        # 7. Vector for int: This needs to handle Mantid's integer array
-        # 8. Normal values: all is fine, just populate them
+
         if type(value) is PropertyManager and is_state(value):
             sub_state = create_sub_state(value)
             setattr(instance, key, sub_state)
         elif type(value) is PropertyManager:
-            # We must be dealing with an actual dict descriptor
-            sub_dict_keys = list(value.keys())
-            dict_element = {}
-            # We need to watch out if a value of the dictionary is a sub state
-            for sub_dict_key in sub_dict_keys:
-                sub_dict_value = value.getProperty(sub_dict_key).value
-                if type(sub_dict_value) == PropertyManager and is_state(sub_dict_value):
-                    sub_state = create_sub_state(sub_dict_value)
-                    sub_dict_value_to_insert = sub_state
-                else:
-                    sub_dict_value_to_insert = sub_dict_value
-                dict_element.update({sub_dict_key: sub_dict_value_to_insert})
-            setattr(instance, key, dict_element)
-        elif is_class_type_parameter(value):
-            class_type_parameter = get_deserialized_class_type_parameter(value)
-            _set_element(instance, key, class_type_parameter)
-        elif is_vector_with_class_type_parameter(value):
-            class_type_list = []
-            for element in value:
-                class_type_parameter = get_deserialized_class_type_parameter(element)
-                class_type_list.append(class_type_parameter)
-            _set_element(instance, key, class_type_list)
+            deserialize_dict(instance, key, value)
+        elif is_enum_type_parameter(value) or is_enum_list_parameter(value):
+            enum_type_parameter = deserialize_enum(value)
+            _set_element(instance, key, enum_type_parameter)
         elif is_float_vector(value):
             float_list_value = list(value)
             _set_element(instance, key, float_list_value)
@@ -588,24 +541,60 @@ def set_state_from_property_manager(instance, property_manager):
             _set_element(instance, key, value)
 
 
-def get_serialized_class_type_parameter(value):
-    # The module will only know about the outer class name, therefore we need
-    # 1. The module name
-    # 2. The name of the outer class
-    # 3. The name of the actual class
-    module_name, class_name = get_module_and_class_name(value)
-    outer_class_name = value.outer_class_name
-    class_name = outer_class_name + SEPARATOR_SERIAL + class_name
-    return create_module_and_class_name_from_encoded_string(class_type_parameter_id, module_name, class_name)
+def deserialize_dict(instance, key, value):
+    # We must be dealing with an actual dict descriptor
+    sub_dict_keys = list(value.keys())
+    dict_element = {}
+    # We need to watch out if a value of the dictionary is a sub state
+    for sub_dict_key in sub_dict_keys:
+        sub_dict_value = value.getProperty(sub_dict_key).value
+        if type(sub_dict_value) == PropertyManager and is_state(sub_dict_value):
+            sub_state = create_sub_state(sub_dict_value)
+            sub_dict_value_to_insert = sub_state
+        elif is_enum_type_parameter(sub_dict_value):
+            sub_dict_value_to_insert = deserialize_enum(sub_dict_value)
+        else:
+            sub_dict_value_to_insert = sub_dict_value
+
+        if is_enum_type_parameter(sub_dict_key):
+            sub_dict_key = deserialize_enum(sub_dict_key)
+
+        dict_element.update({sub_dict_key: sub_dict_value_to_insert})
+    setattr(instance, key, dict_element)
 
 
-def get_deserialized_class_type_parameter(value):
-    # We need to first get the outer class from the module
-    module_name, outer_class_name, class_name = \
-        get_module_and_class_name_from_encoded_string(class_type_parameter_id, value)
-    outer_class_type_parameter = provide_class_from_module_and_class_name(module_name, outer_class_name)
-    # From the outer class we can then retrieve the inner class which normally defines the users selection
-    return getattr(outer_class_type_parameter, class_name)
+def serialize_enum(value):
+    to_parse = value if isinstance(value, list) else [value]
+    serialized = []
+    for val in to_parse:
+        assert (isinstance(val, Enum))
+        module_name, class_name = get_module_and_class_name(val)
+        selected_val = val.value
+
+        # Some devs use int for enums too so handle that
+        if isinstance(selected_val, int):
+            selected_val = INT_TAG + str(selected_val)
+
+        serialized.append(ENUM_TYPE_TAG + module_name + SEPARATOR_SERIAL + class_name + SEPARATOR_SERIAL + selected_val)
+
+    return serialized[0] if len(serialized) == 1 else serialized
+
+
+def deserialize_enum(value):
+    # Mantid returns a std::vec type which needs to decay to a list
+    to_parse = [value] if isinstance(value, string_types) else [i for i in value]
+    parsed = []
+
+    for serialized_str in to_parse:
+        module_name, class_name, selection = get_module_and_class_name_from_encoded_string(ENUM_TYPE_TAG,
+                                                                                           serialized_str)
+        enum_class = provide_class_from_module_and_class_name(module_name, class_name)
+
+        selection = int(selection.replace(INT_TAG, '')) if INT_TAG in selection else selection
+        parsed_val = enum_class(selection)
+        parsed.append(parsed_val)
+
+    return parsed[0] if len(parsed) == 1 else parsed
 
 
 def create_deserialized_sans_state_from_property_manager(property_manager):

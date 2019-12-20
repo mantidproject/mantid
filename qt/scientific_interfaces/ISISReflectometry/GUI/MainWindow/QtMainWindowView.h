@@ -7,6 +7,7 @@
 #ifndef MANTID_ISISREFLECTOMETRY_QTMAINWINDOWVIEW_H
 #define MANTID_ISISREFLECTOMETRY_QTMAINWINDOWVIEW_H
 
+#include "GUI/Common/IFileHandler.h"
 #include "GUI/Common/IMessageHandler.h"
 #include "GUI/Common/IPythonRunner.h"
 #include "IMainWindowPresenter.h"
@@ -33,6 +34,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL QtMainWindowView
     : public MantidQt::API::UserSubWindow,
       public IMainWindowView,
       public IMessageHandler,
+      public IFileHandler,
       public IPythonRunner {
   Q_OBJECT
 public:
@@ -45,6 +47,7 @@ public:
 
   void subscribe(MainWindowSubscriber *notifyee) override;
 
+  // cppcheck-suppress returnTempReference
   static std::string name() { return "ISIS Reflectometry"; }
   static QString categoryInfo() { return "Reflectometry"; }
   std::string runPythonAlgorithm(const std::string &pythonCode) override;
@@ -63,8 +66,18 @@ public:
   bool askUserYesNo(const std::string &prompt,
                     const std::string &title) override;
   bool askUserDiscardChanges() override;
+  std::string askUserForLoadFileName(std::string const &filter) override;
+  std::string askUserForSaveFileName(std::string const &filter) override;
+
   void disableSaveAndLoadBatch() override;
   void enableSaveAndLoadBatch() override;
+
+  // TODO Remove Qt types from this interface - conversion should be done in
+  // QtJSONUtils if possible
+  void saveJSONToFile(std::string const &filename,
+                      QMap<QString, QVariant> const &map) override;
+  QMap<QString, QVariant>
+  loadJSONFromFile(std::string const &filename) override;
 
 public slots:
   void helpPressed();

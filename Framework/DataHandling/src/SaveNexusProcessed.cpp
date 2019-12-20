@@ -20,7 +20,6 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidNexus/NexusFileIO.h"
-#include <Poco/File.h>
 #include <boost/shared_ptr.hpp>
 
 using namespace Mantid::API;
@@ -288,16 +287,11 @@ void SaveNexusProcessed::doExec(
   // get the workspace name to write to file
   const std::string wsName = inputWorkspace->getName();
 
-  // If we don't want to append then remove the file if it already exists
+  // If not append, openNexusWrite will open with _CREATES perm and overwrite
   const bool append_to_file = getProperty("Append");
-  if (!append_to_file && !keepFile) {
-    Poco::File file(filename);
-    if (file.exists())
-      file.remove();
-  }
 
   nexusFile->resetProgress(&prog_init);
-  nexusFile->openNexusWrite(filename, entryNumber);
+  nexusFile->openNexusWrite(filename, entryNumber, append_to_file || keepFile);
 
   // Equivalent C++ API handle
   ::NeXus::File cppFile(nexusFile->fileID);
@@ -582,18 +576,6 @@ bool SaveNexusProcessed::processGroups() {
   // Then immediately open the file
   auto nexusFile = boost::make_shared<Mantid::NeXus::NexusFileIO>();
 
-  /* Unless we have explicity been asked to append to the file. We should assume
-  that we can remove any existing
-  files of the same name prior to processing. */
-  bool append_to_file = this->getProperty("Append");
-  if (!append_to_file) {
-    const std::string filename = getPropertyValue("Filename");
-    Poco::File file(filename);
-    if (file.exists()) {
-      file.remove();
-    }
-  }
-
   // If we have arrived here then a WorkspaceGroup was passed to the
   // InputWorkspace property. Pull out the unrolled workspaces and append an
   // entry for each one. We only have a single input workspace property declared
@@ -606,7 +588,7 @@ bool SaveNexusProcessed::processGroups() {
         throw std::runtime_error("SaveNexusProcessed: NeXus files do not "
                                  "support nested groups of groups");
       }
-      this->doExec(ws, nexusFile, true /*keepFile*/, entry);
+      this->doExec(ws, nexusFile, entry > 0 /*keepFile*/, entry);
       g_log.information() << "Saving group index " << entry << "\n";
     }
   }

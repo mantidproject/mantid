@@ -7,6 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
+
 from mantid.api import MatrixWorkspace, WorkspaceGroup
 from mantid.simpleapi import SANSILLIntegration, SANSILLReduction, config, mtd
 
@@ -17,13 +18,15 @@ class SANSILLIntegrationTest(unittest.TestCase):
 
     def setUp(self):
         self._facility = config['default.facility']
+        self._data_search_dirs = config.getDataSearchDirs()
         config.appendDataSearchSubDir('ILL/D11/')
         config.appendDataSearchSubDir('ILL/D33/')
-        config['default.facility'] = 'ILL'
+        config.setFacility("ILL")
         SANSILLReduction(Run='010569', ProcessAs='Sample', OutputWorkspace='sample')
 
     def tearDown(self):
-        config['default.facility'] = self._facility
+        config.setFacility(self._facility)
+        config.setDataSearchDirs(self._data_search_dirs)
         mtd.clear()
 
     def test_monochromatic(self):

@@ -8,8 +8,8 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
-from mantid.simpleapi import CreateSampleWorkspace
 from mantid.py3compat import mock
+from mantid.simpleapi import CreateSampleWorkspace
 from sans.algorithm_detail.batch_execution import (get_all_names_to_save, get_transmission_names_to_save,
                                                    ReductionPackage, select_reduction_alg, save_workspace_to_file)
 from sans.common.enums import SaveType
@@ -268,7 +268,7 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         ws_name = "wsName"
         filename = "fileName"
         additional_run_numbers = {}
-        file_types = [SaveType.Nexus, SaveType.CanSAS, SaveType.NXcanSAS, SaveType.NistQxy, SaveType.RKH, SaveType.CSV]
+        file_types = [SaveType.NEXUS, SaveType.CAN_SAS, SaveType.NX_CAN_SAS, SaveType.NIST_QXY, SaveType.RKH, SaveType.CSV]
 
         save_workspace_to_file(ws_name, file_types, filename, additional_run_numbers)
 

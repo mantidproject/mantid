@@ -21,11 +21,11 @@
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 using MantidQt::MantidWidgets::Batch::Cell;
+using testing::_;
 using testing::AtLeast;
 using testing::Mock;
 using testing::NiceMock;
 using testing::Return;
-using testing::_;
 
 class RunsTablePresenterTest {
 public:

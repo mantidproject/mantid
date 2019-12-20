@@ -7,19 +7,19 @@
 import os
 import unittest
 
+from assert_called import assert_called
+from fake_signal import FakeSignal
 from mantid.kernel import ConfigService
 from mantid.py3compat import mock
-from sans.gui_logic.models.run_summation import RunSummation
 from sans.gui_logic.models.run_file import SummableRunFile
 from sans.gui_logic.models.run_selection import RunSelection
+from sans.gui_logic.models.run_summation import RunSummation
 from sans.gui_logic.models.summation_settings import SummationSettings
 from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter, AddRunsFilenameManager
 from sans.gui_logic.presenter.run_selector_presenter import RunSelectorPresenter
 from sans.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
 from ui.sans_isis.add_runs_page import AddRunsPage
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
-from fake_signal import FakeSignal
-from assert_called import assert_called
 
 
 class MockedOutAddRunsFilenameManager(AddRunsFilenameManager):

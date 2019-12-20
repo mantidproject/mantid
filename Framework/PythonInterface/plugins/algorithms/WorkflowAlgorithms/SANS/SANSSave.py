@@ -11,11 +11,12 @@
 """ SANSSave algorithm performs saving of SANS reduction data."""
 
 from __future__ import (absolute_import, division, print_function)
-from mantid.kernel import (Direction)
+
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
                         FileProperty, FileAction, Progress)
-from sans.common.enums import (SaveType)
+from mantid.kernel import (Direction)
 from sans.algorithm_detail.save_workspace import (save_to_file, get_zero_error_free_workspace, file_format_with_append)
+from sans.common.enums import (SaveType)
 
 
 class SANSSave(DataProcessorAlgorithm):
@@ -115,7 +116,7 @@ class SANSSave(DataProcessorAlgorithm):
 
         progress = Progress(self, start=0.0, end=1.0, nreports=len(file_formats) + 1)
         for file_format in file_formats:
-            progress_message = "Saving to {0}.".format(SaveType.to_string(file_format.file_format))
+            progress_message = "Saving to {0}.".format(file_format.file_format.value)
             progress.report(progress_message)
             progress.report(progress_message)
             save_to_file(workspace, file_format, file_name, transmission_workspaces, additional_run_numbers)
@@ -151,10 +152,10 @@ class SANSSave(DataProcessorAlgorithm):
 
     def _get_file_formats(self):
         file_types = []
-        self._check_file_types(file_types, "Nexus", SaveType.Nexus)
-        self._check_file_types(file_types, "CanSAS", SaveType.CanSAS)
-        self._check_file_types(file_types, "NXcanSAS", SaveType.NXcanSAS)
-        self._check_file_types(file_types, "NistQxy", SaveType.NistQxy)
+        self._check_file_types(file_types, "Nexus", SaveType.NEXUS)
+        self._check_file_types(file_types, "CanSAS", SaveType.CAN_SAS)
+        self._check_file_types(file_types, "NXcanSAS", SaveType.NX_CAN_SAS)
+        self._check_file_types(file_types, "NistQxy", SaveType.NIST_QXY)
         self._check_file_types(file_types, "RKH", SaveType.RKH)
         self._check_file_types(file_types, "CSV", SaveType.CSV)
 
@@ -163,20 +164,20 @@ class SANSSave(DataProcessorAlgorithm):
         file_formats = []
 
         # SaveNexusProcessed clashes with SaveNXcanSAS, but we only alter NXcanSAS data
-        self.add_file_format_with_appended_name_requirement(file_formats, SaveType.Nexus, file_types, [])
+        self.add_file_format_with_appended_name_requirement(file_formats, SaveType.NEXUS, file_types, [])
 
         # SaveNXcanSAS clashes with SaveNexusProcessed
-        self.add_file_format_with_appended_name_requirement(file_formats, SaveType.NXcanSAS, file_types,
+        self.add_file_format_with_appended_name_requirement(file_formats, SaveType.NX_CAN_SAS, file_types,
                                                             [])
 
         # SaveNISTDAT clashes with SaveRKH, both can save to .dat
-        self.add_file_format_with_appended_name_requirement(file_formats, SaveType.NistQxy, file_types, [SaveType.RKH])
+        self.add_file_format_with_appended_name_requirement(file_formats, SaveType.NIST_QXY, file_types, [SaveType.RKH])
 
         # SaveRKH clashes with SaveNISTDAT, but we alter SaveNISTDAT
         self.add_file_format_with_appended_name_requirement(file_formats, SaveType.RKH, file_types, [])
 
         # SaveCanSAS1D does not clash with anyone
-        self.add_file_format_with_appended_name_requirement(file_formats, SaveType.CanSAS, file_types, [])
+        self.add_file_format_with_appended_name_requirement(file_formats, SaveType.CAN_SAS, file_types, [])
 
         # SaveCSV does not clash with anyone
         self.add_file_format_with_appended_name_requirement(file_formats, SaveType.CSV, file_types, [])

@@ -24,8 +24,11 @@ namespace ISISReflectometry {
 
 class IBatchPresenterFactory;
 class IMainWindowView;
+class IFileHandler;
 class IMessageHandler;
 class IOptionsDialogView;
+class IEncoder;
+class IDecoder;
 
 /** @class MainWindowPresenter
 
@@ -40,6 +43,8 @@ public:
   /// Constructor
   MainWindowPresenter(
       IMainWindowView *view, IMessageHandler *messageHandler,
+      IFileHandler *fileHandler, std::unique_ptr<IEncoder> encoder,
+      std::unique_ptr<IDecoder> decoder,
       std::unique_ptr<MantidWidgets::ISlitCalculator> slitCalculator,
       std::unique_ptr<IOptionsDialogPresenter> optionsDialogPresenter,
       std::unique_ptr<IBatchPresenterFactory> batchPresenterFactory);
@@ -93,10 +98,13 @@ public:
 protected:
   IMainWindowView *m_view;
   IMessageHandler *m_messageHandler;
+  IFileHandler *m_fileHandler;
   std::vector<std::unique_ptr<IBatchPresenter>> m_batchPresenters;
   Mantid::Geometry::Instrument_const_sptr m_instrument;
 
 private:
+  std::unique_ptr<IEncoder> m_encoder;
+  std::unique_ptr<IDecoder> m_decoder;
   std::unique_ptr<MantidWidgets::ISlitCalculator> m_slitCalculator;
   std::unique_ptr<IOptionsDialogPresenter>
       m_optionsDialogPresenter;
@@ -108,6 +116,7 @@ private:
   void initNewBatch(IBatchPresenter *batchPresenter,
                     std::string const &instrument, boost::optional<int> precision);
   void updateInstrument(const std::string &instrumentName);
+  void setDefaultInstrument(const std::string &newInstrument);
 
   void disableSaveAndLoadBatch();
   void enableSaveAndLoadBatch();

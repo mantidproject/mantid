@@ -116,9 +116,9 @@ void vax_to_local_ints(fort_int *ia, const fort_int *n) {
   (void)n; // Avoid compiler warning
 }
 
-  /*
-   * determine a few things we need to know to write machine independent data
-   */
+/*
+ * determine a few things we need to know to write machine independent data
+ */
 
 #ifndef __VMS
 #define IEEEFP 1

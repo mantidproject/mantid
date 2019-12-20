@@ -16,8 +16,8 @@
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
-using Mantid::Algorithms::MuonRemoveExpDecay;
 using Mantid::MantidVec;
+using Mantid::Algorithms::MuonRemoveExpDecay;
 
 const std::string outputName = "MuonRemoveExpDecay_Output";
 

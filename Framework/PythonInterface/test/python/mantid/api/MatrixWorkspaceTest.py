@@ -443,6 +443,12 @@ class MatrixWorkspaceTest(unittest.TestCase):
         self.assertTrue(ws.hasMaskedBins(0))
         self.assertFalse(ws.hasMaskedBins(1))
 
+    def test_hasAnyMaskedBins(self):
+        numBins = 10
+        numHist=11
+        ws = WorkspaceCreationHelper.create2DWorkspace123WithMaskedBin(numHist, numBins, 0, 1)
+        self.assertTrue(ws.hasAnyMaskedBins())
+
     def test_maskedBinsIndices(self):
         numBins = 10
         numHist=11

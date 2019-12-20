@@ -6,46 +6,41 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CRYSTAL_PREDICTFRACTIONALPEAKS_H_
 #define MANTID_CRYSTAL_PREDICTFRACTIONALPEAKS_H_
-
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidCrystal/PeakAlgorithmHelpers.h"
+#include <tuple>
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Kernel {
+class V3D;
+}
+
+namespace Mantid::Crystal {
 
 /**
- *
+ * Using a set of offset vectors, either provided as separate lists or as a set
+ * of vectors, predict whether
  */
 class DLLExport PredictFractionalPeaks : public API::Algorithm {
 public:
-  /// Algorithm's name for identification
   const std::string name() const override { return "PredictFractionalPeaks"; }
-  /// Summary of algorithms purpose
   const std::string summary() const override {
     return "The offsets can be from hkl values in a range of hkl values or "
            "from peaks in the input PeaksWorkspace";
   }
-
-  /// Algorithm's version for identification
-  int version() const override { return 1; };
+  int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override {
     return {"PredictPeaks"};
   }
-
-  /// Algorithm's category for identification
   const std::string category() const override { return "Crystal\\Peaks"; }
-  /// Return any errors in cross-property validation
   std::map<std::string, std::string> validateInputs() override;
 
 private:
-  /// Initialise the properties
   void init() override;
-
-  /// Run the algorithm
   void exec() override;
+
+  ModulationProperties getModulationInfo();
 };
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal
 
 #endif /* MANTID_CRYSTAL_PREDICTFRACTIONALPEAKS */
