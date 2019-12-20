@@ -908,8 +908,8 @@ public:
     AnalysisDataService::Instance().remove(m_name);
   }
 
-	//public as it is used in LoadAsciiTest as well.
-	static ITableWorkspace_sptr writeTableWS(const std::string &name) {
+  // public as it is used in LoadAsciiTest as well.
+  static ITableWorkspace_sptr writeTableWS(const std::string &name) {
     auto table = WorkspaceFactory::Instance().createTable();
     // One column of each type
     table->addColumn("int", "int");
@@ -965,8 +965,6 @@ private:
 
     AnalysisDataService::Instance().add(m_name, wsToSave);
   }
-
-
 
   void writeInelasticWS(MatrixWorkspace_sptr &wsToSave) {
     const std::vector<double> l2{1, 2, 3, 4, 5};

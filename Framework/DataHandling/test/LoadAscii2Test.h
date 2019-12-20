@@ -16,8 +16,8 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/SaveAscii2.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Unit.h"
 
 #include <Poco/File.h>
@@ -376,8 +376,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         loader.setPropertyValue("OutputWorkspace", outputName));
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Separator", "Tab"));
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("CustomSeparator", ""));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("CustomSeparator", ""));
 
     TS_ASSERT_THROWS_NOTHING(loader.execute());
 
@@ -423,7 +422,7 @@ private:
 
     const std::string name = "SaveTableAsciiWS";
     auto wsToSave = SaveAscii2Test::writeTableWS(name);
-		
+
     save.initialize();
     save.isInitialized();
     save.setPropertyValue("InputWorkspace", name);
@@ -526,7 +525,8 @@ private:
       save.setPropertyValue("Separator", sep);
       save.setPropertyValue("CustomSeparator", custsep);
       save.execute();
-      TSM_ASSERT("Failed to save test data using SaveAscii2.",save.isExecuted());
+      TSM_ASSERT("Failed to save test data using SaveAscii2.",
+                 save.isExecuted());
       AnalysisDataService::Instance().remove(name);
     }
 

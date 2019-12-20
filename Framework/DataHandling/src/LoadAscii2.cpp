@@ -268,11 +268,12 @@ API::Workspace_sptr LoadAscii2::readTable(std::ifstream &file) {
       file.clear(file.eofbit);
     }
   } catch (std::exception &ex) {
-		// log and squash the error, so we can still try to load the file as a matrix workspace
-    g_log.warning() <<
-			"Error while trying to read ascii file as table, continuing to load as matrix workspace.\n"
-			<< ex.what() << "\n";
-		// clear any workspace that we started loading
+    // log and squash the error, so we can still try to load the file as a
+    // matrix workspace
+    g_log.warning() << "Error while trying to read ascii file as table, "
+                       "continuing to load as matrix workspace.\n"
+                    << ex.what() << "\n";
+    // clear any workspace that we started loading
     ws.reset();
   }
 
