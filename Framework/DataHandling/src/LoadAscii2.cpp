@@ -159,14 +159,13 @@ API::Workspace_sptr LoadAscii2::readTable(std::ifstream &file) {
   // the second with column types
   // Then we need data, with the same number of columns as the first two lines
 
-
   try {
-		size_t colNames = 0;
-		size_t colTypes = 0;
-		std::string line;
-		std::list<std::string> names;
-		std::list<std::string> types;
-		std::list<std::string> data;
+    size_t colNames = 0;
+    size_t colTypes = 0;
+    std::string line;
+    std::list<std::string> names;
+    std::list<std::string> types;
+    std::list<std::string> data;
 
     while (getline(file, line)) {
       boost::trim(line);
