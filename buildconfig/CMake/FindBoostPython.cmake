@@ -5,7 +5,7 @@
 #  - windows: boost_python (python2), ????? (python3)
 #  - others?
 if ( MSVC )
-  find_package ( Boost ${BOOST_VERSION_REQUIRED} COMPONENTS python27 REQUIRED )
+  find_package ( Boost ${BOOST_VERSION_REQUIRED} COMPONENTS python${PYTHON_MAJOR_VERSION}${PYTHON_MINOR_VERSION} REQUIRED )
 else ()
   if ( PYTHON_VERSION_MAJOR GREATER 2 )
     # Try a known set of suffixes plus a user-defined set

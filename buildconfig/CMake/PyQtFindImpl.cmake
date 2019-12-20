@@ -29,6 +29,10 @@ function (find_pyqt major_version)
   endif()
   execute_process (COMMAND ${PYTHON_EXECUTABLE} ${_find_pyqt_py} ${major_version}
     OUTPUT_VARIABLE _pyqt_config ERROR_VARIABLE _pyqt_config_err)
+  if(CMAKE_HOST_WIN32 AND major_version EQUAL 4 AND _pyqt_config_err MATCHES "Qt: Untested Windows version 10.0 detected!")
+    # Known warning on Windows 10 with Qt4 and Python 3
+    set(_pyqt_config_err "")
+  endif()
   if (_pyqt_config AND NOT _pyqt_config_err)
     string (REGEX MATCH "^pyqt_version:([^\n]+).*$" _dummy ${_pyqt_config})
     set (PYQT${major_version}_VERSION "${CMAKE_MATCH_1}" CACHE STRING "PyQt${major_version}'s version as a 6-digit hexadecimal number")
