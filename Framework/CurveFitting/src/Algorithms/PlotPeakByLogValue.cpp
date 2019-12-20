@@ -269,7 +269,7 @@ void PlotPeakByLogValue::exec() {
     IFunction_sptr ifun;
     for (; j < jend; ++j) {
       ifun =
-          isMultiDomainFunction ? inputFunction->getFunction(j) : inputFunction;
+          isMultiDomainFunction ? inputFunction->getFunction(i) : inputFunction;
       // Find the log value: it is either a log-file value or
       // simply the workspace number
       double logValue = 0;
