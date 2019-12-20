@@ -14,7 +14,7 @@ std::map<FitType, bool> FitTypeQDepends =
                              {FitType::OneLorentzian, false},
                              {FitType::TwoLorentzians, false},
                              {FitType::TeixeiraWater, true},
-                             {FitType::StretchedExpFT, true},
+                             {FitType::StretchedExpFT, false},
                              {FitType::ElasticDiffSphere, true}});
 
 std::map<ParamID, QString> g_paramName{
