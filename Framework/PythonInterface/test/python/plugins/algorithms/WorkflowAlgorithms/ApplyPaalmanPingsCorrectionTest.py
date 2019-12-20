@@ -240,5 +240,6 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
         }
         self.assertRaises(RuntimeError, ApplyPaalmanPingsCorrection, **kwargs)
 
+
 if __name__=="__main__":
     unittest.main()
