@@ -866,7 +866,7 @@ public:
   }
 
   void test_TableWorkspace() {
-    Workspace_sptr wsToSave = writeTableWS();
+    Workspace_sptr wsToSave = writeTableWS(m_name);
 
     SaveAscii2 save;
     std::string filename = initSaveAscii2(save);
@@ -908,33 +908,8 @@ public:
     AnalysisDataService::Instance().remove(m_name);
   }
 
-private:
-  void writeSampleWS(Mantid::DataObjects::Workspace2D_sptr &wsToSave,
-                     const bool &isSpectra = true) {
-    wsToSave = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
-        WorkspaceFactory::Instance().create("Workspace2D", 2, 3, 3));
-    for (int i = 0; i < 2; i++) {
-      auto &X = wsToSave->mutableX(i);
-      auto &Y = wsToSave->mutableY(i);
-      auto &E = wsToSave->mutableE(i);
-      for (int j = 0; j < 3; j++) {
-        X[j] = 1.5 * j / 0.9;
-        Y[j] = (i + 1) * (2. + 4. * X[j]);
-        E[j] = 1.;
-      }
-    }
-
-    if (!isSpectra) {
-      auto textAxis = std::make_unique<TextAxis>(2);
-      textAxis->setLabel(0, "Test Axis 1");
-      textAxis->setLabel(1, "Test Axis 2");
-      wsToSave->replaceAxis(1, std::move(textAxis));
-    }
-
-    AnalysisDataService::Instance().add(m_name, wsToSave);
-  }
-
-  ITableWorkspace_sptr writeTableWS() {
+	//public as it is used in LoadAsciiTest as well.
+	static ITableWorkspace_sptr writeTableWS(const std::string &name) {
     auto table = WorkspaceFactory::Instance().createTable();
     // One column of each type
     table->addColumn("int", "int");
@@ -961,9 +936,37 @@ private:
          << static_cast<size_t>(0) << -99.0f << 0.0 << false << "!"
          << Mantid::Kernel::V3D(1, 6, 10);
 
-    AnalysisDataService::Instance().add(m_name, table);
+    AnalysisDataService::Instance().add(name, table);
     return table;
   }
+
+private:
+  void writeSampleWS(Mantid::DataObjects::Workspace2D_sptr &wsToSave,
+                     const bool &isSpectra = true) {
+    wsToSave = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+        WorkspaceFactory::Instance().create("Workspace2D", 2, 3, 3));
+    for (int i = 0; i < 2; i++) {
+      auto &X = wsToSave->mutableX(i);
+      auto &Y = wsToSave->mutableY(i);
+      auto &E = wsToSave->mutableE(i);
+      for (int j = 0; j < 3; j++) {
+        X[j] = 1.5 * j / 0.9;
+        Y[j] = (i + 1) * (2. + 4. * X[j]);
+        E[j] = 1.;
+      }
+    }
+
+    if (!isSpectra) {
+      auto textAxis = std::make_unique<TextAxis>(2);
+      textAxis->setLabel(0, "Test Axis 1");
+      textAxis->setLabel(1, "Test Axis 2");
+      wsToSave->replaceAxis(1, std::move(textAxis));
+    }
+
+    AnalysisDataService::Instance().add(m_name, wsToSave);
+  }
+
+
 
   void writeInelasticWS(MatrixWorkspace_sptr &wsToSave) {
     const std::vector<double> l2{1, 2, 3, 4, 5};

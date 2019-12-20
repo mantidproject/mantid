@@ -20,6 +20,12 @@ Improvements
 Algorithms
 ----------
 
+Improvements
+############
+
+- :ref:`SaveAscii <algm-SaveAscii>` can now save table workspaces, and :ref:`LoadAscii <algm-LoadAscii>` can load them again.
+
+
 Data Objects
 ------------
 

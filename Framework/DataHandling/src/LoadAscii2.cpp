@@ -10,7 +10,9 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidHistogramData/HistogramMath.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -83,6 +85,12 @@ API::Workspace_sptr LoadAscii2::readData(std::ifstream &file) {
   // there is still flexibility, but the format should just make more sense in
   // general
 
+  // if the file appears to be a table workspace then read it as such
+  auto ws = readTable(file);
+  if (ws) {
+    return ws;
+  }
+
   m_baseCols = 0;
   m_specNo = 0;
   m_lastBins = 0;
@@ -137,6 +145,140 @@ API::Workspace_sptr LoadAscii2::readData(std::ifstream &file) {
   }
   m_curSpectra.reset();
   return localWorkspace;
+}
+
+/// Attempts to read a table workspace from the file.
+/// Failing early if the format does not match.
+/// @param file the file handle to load from
+/// @returns a populated table workspace or an empty shared pointer
+API::Workspace_sptr LoadAscii2::readTable(std::ifstream &file) {
+
+  DataObjects::TableWorkspace_sptr ws;
+  // We need to see two rows commented out
+  // the first with column names
+  // the second with column types
+  // Then we need data, with the same number of columns as the first two lines
+  size_t colNames = 0;
+  size_t colTypes = 0;
+  size_t colData = 0;
+  std::string line;
+  std::list<std::string> names;
+  std::list<std::string> types;
+  std::list<std::string> data;
+  try {
+
+    while (getline(file, line)) {
+      boost::trim(line);
+
+      std::list<std::string> columns;
+      size_t lineCols = 0;
+
+      if (!line.empty()) {
+        // if line starts with a comment
+        if (line.at(0) == m_comment.at(0)) {
+          // remove the comment character
+          line.erase(0, 1);
+          lineCols = this->splitIntoColumns(columns, line);
+          if (colNames == 0) {
+            colNames = lineCols;
+            names = columns;
+            continue;
+          }
+          if (colTypes == 0) {
+            colTypes = lineCols;
+            types = columns;
+            continue;
+          }
+        }
+
+        if (colTypes != colNames) {
+          // no point going further, the types and names differ in quantity
+          break;
+        }
+
+        colData = this->splitIntoColumns(data, line);
+        if (colNames > 0 && colNames == colTypes && colTypes == colData) {
+          // we seem to have a table workspace
+          // if we have no already created a workspace
+          if (!ws) {
+            ws = boost::make_shared<DataObjects::TableWorkspace>();
+            // create the columns
+            auto itName = names.begin();
+            auto itTypes = types.begin();
+            for (size_t i = 0; i < colNames; i++) {
+              std::string name = *itName;
+              std::string type = *itTypes;
+              // trim the strings
+              boost::trim(name);
+              boost::trim(type);
+              ws->addColumn(std::move(type), std::move(name));
+              itName++;
+              itTypes++;
+            }
+          }
+          // add the data
+          TableRow row = ws->appendRow();
+          auto itTypes = types.begin();
+          for (auto itData = data.begin(); itData != data.end(); itData++) {
+            // direct assignment only works for strings, we ill need to handle
+            // the other data types here
+            std::string type = *itTypes;
+            boost::trim(type);
+            if (type == "str") {
+              row << *itData;
+            } else if (type == "int") {
+              int num = boost::lexical_cast<int>(*itData);
+              row << std::move(num);
+            } else if (type == "uint") {
+              uint32_t num = boost::lexical_cast<uint32_t>(*itData);
+              row << std::move(num);
+            } else if (type == "long64") {
+              long long num = boost::lexical_cast<long long>(*itData);
+              row << std::move(num);
+            } else if (type == "size_t") {
+              size_t num = boost::lexical_cast<size_t>(*itData);
+              row << std::move(num);
+            } else if (type == "float") {
+              float num = boost::lexical_cast<float>(*itData);
+              row << std::move(num);
+            } else if (type == "double") {
+              double num = boost::lexical_cast<double>(*itData);
+              row << std::move(num);
+            } else if (type == "bool") {
+              bool val = (itData->at(0) == 't');
+              row << std::move(val);
+            } else if (type == "V3D") {
+              V3D val;
+              std::stringstream ss(*itData);
+              val.readPrinted(ss);
+              row << std::move(val);
+            } else {
+              throw std::runtime_error("unknown column data type " + type);
+            }
+            itTypes++;
+          }
+        }
+      }
+    }
+    // if the file does not have more than rowsToCheck, it will
+    // stop
+    // and raise the EndOfFile, this may cause problems for small workspaces.
+    // In this case clear the flag
+    if (file.eof()) {
+      file.clear(file.eofbit);
+    }
+  } catch (std::exception &ex) {
+		// log and squash the error, so we can still try to load the file as a matrix workspace
+    g_log.warning() <<
+			"Error while trying to read ascii file as table, continuing to load as matrix workspace.\n"
+			<< ex.what() << "\n";
+		// clear any workspace that we started loading
+    ws.reset();
+  }
+
+  // Seek the file pointer back to the start.
+  file.seekg(0, std::ios::beg);
+  return ws;
 }
 
 /**
