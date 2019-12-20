@@ -116,6 +116,16 @@ public:
                              Cell(""),     Cell(""),    Cell("")};
   }
 
+  std::vector<Cell>
+  cellsArrayWithQValues(std::string const &run = "12345", std::string const &theta = "0.5",
+             std::string const &trans1 = "", std::string const &trans2 = "",
+             std::string const &qMin = "", std::string const &step = "",
+             std::string const &qMax = "") {
+    return std::vector<Cell>{Cell(run),    Cell(theta), Cell(trans1),
+                             Cell(trans2), Cell(qMin),    Cell(step),
+                             Cell(qMax),     Cell(""),    Cell("")};
+  }
+
   void expectIsProcessing() {
     EXPECT_CALL(m_mainPresenter, isProcessing())
         .Times(AtLeast(1))

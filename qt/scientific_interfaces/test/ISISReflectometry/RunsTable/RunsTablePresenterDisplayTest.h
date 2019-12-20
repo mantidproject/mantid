@@ -239,6 +239,25 @@ public:
     verifyAndClearExpectations();
   }
 
+  void testNotifyRowOutputsChangedRounding() {
+    auto presenter = makePresenter(
+        m_view, oneGroupWithARowWithInputQRangeModelMixedPrecision());
+    auto precision = 2;
+    presenter.setTablePrecision(precision);
+    auto rowLocation = location(0, 0);
+    selectedRowLocationsAre(m_jobs, {location(0, 0)});
+    auto cells = m_jobs.cellsAt(location(0, 0));
+    updatedCellsAre(location(0, 0),
+                    cellsArrayWithQValues("12345", "0.56", "Trans A", "Trans B", "0.56",
+                               "0.01", "0.90"));
+    EXPECT_CALL(m_jobs, setCellsAt(location(0, 0), cells));
+    presenter.notifyRowOutputsChanged();
+    TS_ASSERT_EQUALS(
+        *getRow(presenter, rowLocation),
+        makeRow("12345", 0.56, "Trans A", "Trans B", 0.56, 0.01, 0.90));
+    verifyAndClearExpectations();
+  }
+
 private:
   ReductionJobs oneGroupWithTwoRowsWithSrcAndDestTransRuns() {
     auto reductionJobs = ReductionJobs();

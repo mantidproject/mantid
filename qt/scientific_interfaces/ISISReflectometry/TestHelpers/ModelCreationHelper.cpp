@@ -203,6 +203,18 @@ ReductionJobs oneGroupWithARowWithOutputQRangeModel() {
   return reductionJobs;
 }
 
+ReductionJobs oneGroupWithARowWithInputQRangeModelMixedPrecision() {
+  auto reductionJobs = ReductionJobs();
+  auto group1 = Group("Test group 1");
+  auto row = Row({"12345"}, 0.555555, TransmissionRunPair({"Trans A", "Trans B"}),
+                 RangeInQ(0.55567, 0.012, 0.9), boost::none, ReductionOptionsMap(),
+                 ReductionWorkspaces(
+                     {"12345"}, TransmissionRunPair({"Trans A", "Trans B"})));
+  group1.appendRow(row);
+  reductionJobs.appendGroup(group1);
+  return reductionJobs;
+}
+
 ReductionJobs oneGroupWithAnotherRowModel() {
   auto reductionJobs = ReductionJobs();
   auto group1 = Group("Test group 1");

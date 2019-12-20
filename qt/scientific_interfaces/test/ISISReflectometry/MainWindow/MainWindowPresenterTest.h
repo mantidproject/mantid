@@ -345,6 +345,58 @@ public:
         .Times(1);
     EXPECT_CALL(m_messageHandler, askUserDiscardChanges()).Times(1);
     presenter.isCloseEventPrevented();
+    verifyAndClear();
+  }
+
+  void testBatchPresentersNotifySetRoundPrecisionOnOptionsChanged() {
+    auto presenter = makePresenter();
+    auto optionOne = std::string("Round");
+    auto optionTwo = std::string("RoundPrecision");
+    auto prec = 2;
+    EXPECT_CALL(*m_optionsDialogPresenter, getBoolOption(optionOne))
+        .Times(1)
+        .WillOnce(Return(true));
+    EXPECT_CALL(*m_optionsDialogPresenter, getIntOption(optionTwo))
+        .Times(1)
+        .WillOnce(ReturnRef(prec));
+    for (auto batchPresenter : m_batchPresenters) {
+      EXPECT_CALL(*batchPresenter, notifySetRoundPrecision(prec));
+    }
+    presenter.optionsChanged();
+    verifyAndClear();
+  }
+
+  void testBatchPresentersNotifyResetRoundPrecisionOnOptionsChanged() {
+    auto presenter = makePresenter();
+    auto option = std::string("Round");
+    EXPECT_CALL(*m_optionsDialogPresenter, getBoolOption(option))
+        .Times(1)
+        .WillOnce(Return(false));
+    for (auto batchPresenter : m_batchPresenters) {
+      EXPECT_CALL(*batchPresenter, notifyResetRoundPrecision());
+    }
+    presenter.optionsChanged();
+    verifyAndClear();
+  }
+
+  void testBatchReturnsUnsavedBatchFlag() {
+    auto presenter = makePresenter();
+    m_batchPresenters[0]->setUnsavedBatchFlag(true);
+    EXPECT_CALL(*m_batchPresenters[0], getUnsavedBatchFlag())
+        .Times(1)
+        .WillOnce(Return(true));
+    TS_ASSERT(presenter.isBatchUnsaved(0), true);
+    verifyAndClear();
+  }
+
+  void testAnyBatchReturnsUnsavedBatchFlag() {
+    auto presenter = makePresenter();
+    m_batchPresenters[0]->setUnsavedBatchFlag(true);
+    for (auto batchPresenter : m_batchPresenters)
+    EXPECT_CALL(*batchPresenter, getUnsavedBatchFlag())
+        .Times(1);
+    TS_ASSERT(presenter.isAnyBatchUnsaved(), true);
+    verifyAndClear();
   }
 
 private:
