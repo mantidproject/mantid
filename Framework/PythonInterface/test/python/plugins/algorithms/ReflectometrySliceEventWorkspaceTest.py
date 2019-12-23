@@ -114,9 +114,54 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
         self._assert_delta(first_slice.dataY(3)[51], 2)
         self._assert_delta(first_slice.dataY(3)[99], 2)
 
+    def test_setting_multiple_time_intervals(self):
+        args = self._default_args
+        args['TimeInterval'] = '600, 1200'
+        args['StopTime'] = '3600'
+        output = self._assert_run_algorithm_succeeds(args)
+        # Output is 4 slices alternating between the two intervals:
+        #   0_600, 600_1800, 1800_2400, 2400_3600
+        self.assertEqual(output.getNumberOfEntries(), 4)
+        self.assertEqual(output[0].dataX(0).size, 101)
+        self._assert_delta(output[0].dataY(3)[0], 2)
+        self._assert_delta(output[0].dataY(3)[51], 6)
+        self._assert_delta(output[0].dataY(3)[99], 1)
+        self.assertEqual(output[1].dataX(0).size, 101)
+        self._assert_delta(output[1].dataY(3)[0], 2)
+        self._assert_delta(output[1].dataY(3)[51], 6)
+        self._assert_delta(output[1].dataY(3)[99], 2)
+        self.assertEqual(output[2].dataX(0).size, 101)
+        self._assert_delta(output[2].dataY(3)[0], 4)
+        self._assert_delta(output[2].dataY(3)[51], 2)
+        self._assert_delta(output[2].dataY(3)[99], 2)
+        self.assertEqual(output[3].dataX(0).size, 101)
+        self._assert_delta(output[3].dataY(3)[0], 6)
+        self._assert_delta(output[3].dataY(3)[51], 2)
+        self._assert_delta(output[3].dataY(3)[99], 3)
+
+    def test_setting_multiple_time_intervals_is_not_implemented_for_FilterByTime(self):
+        args = self._default_args
+        args['TimeInterval'] = '600, 1200'
+        args['StopTime'] = '3600'
+        args['UseNewFilterAlgorithm'] = False
+        output = self._assert_run_algorithm_fails(args)
+
     def test_setting_log_interval_without_log_name_produces_single_slice(self):
         args = self._default_args
         args['LogValueInterval'] = 600
+        output = self._assert_run_algorithm_succeeds(args)
+        self.assertEqual(output.getNumberOfEntries(), 1)
+        first_slice = output[0]
+        self.assertEqual(first_slice.getNumberHistograms(), 5)
+        self.assertEqual(first_slice.dataX(0).size, 101)
+        self._assert_delta(first_slice.dataY(3)[0], 14)
+        self._assert_delta(first_slice.dataY(3)[51], 16)
+        self._assert_delta(first_slice.dataY(3)[99], 8)
+
+    def test_setting_log_interval_without_log_name_produces_single_slice_FilterByLogValue(self):
+        args = self._default_args
+        args['LogValueInterval'] = 600
+        args['UseNewFilterAlgorithm'] = False
         output = self._assert_run_algorithm_succeeds(args)
         self.assertEqual(output.getNumberOfEntries(), 1)
         first_slice = output[0]
@@ -139,6 +184,21 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
         self._assert_delta(first_slice.dataY(3)[0], 4)
         self._assert_delta(first_slice.dataY(3)[51], 5)
         self._assert_delta(first_slice.dataY(3)[99], 2)
+
+    def test_setting_log_interval_and_limits_FilterByLogValue(self):
+        args = self._default_args
+        args['LogName'] = 'proton_charge'
+        args['LogValueInterval'] = 20
+        args['MinimumLogValue'] = '75'
+        args['MaximumLogValue'] = '110'
+        args['UseNewFilterAlgorithm'] = False
+        output = self._assert_run_algorithm_succeeds(args)
+        self.assertEqual(output.getNumberOfEntries(), 2)
+        first_slice = output[0]
+        self.assertEqual(first_slice.dataX(0).size, 101)
+        self._assert_delta(first_slice.dataY(3)[0], 0)
+        self._assert_delta(first_slice.dataY(3)[51], 3)
+        self._assert_delta(first_slice.dataY(3)[99], 0)
 
     def test_when_input_is_a_workspace_group(self):
         args = self._default_args
@@ -232,7 +292,7 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
 
     def _create_monitor_workspace(self):
         monitor_ws = CreateSampleWorkspace(OutputWorkspace='monitor_ws', NumBanks=0, NumMonitors=3,
-                                           BankPixelWidth=1, NumEvents=10000, Random=True)
+                                           BankPixelWidth=1, NumEvents=10000, Random=False)
         return monitor_ws
 
     def _create_monitor_workspace_group(self):

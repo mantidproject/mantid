@@ -27,7 +27,7 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
         # Add properties from child algorithm
         self._filter_properties = [
             'InputWorkspace', 'StartTime', 'StopTime','TimeInterval',
-            'LogName','MinimumLogValue','MaximumLogValue', 'LogValueInterval']
+            'LogName','MinimumLogValue','MaximumLogValue', 'LogValueInterval','LogBoundary']
         self.copyProperties('GenerateEventsFilter', self._filter_properties)
 
         # Add our own properties
@@ -53,8 +53,18 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
     def _slice_input_workspace(self):
         if self.getProperty("UseNewFilterAlgorithm").value:
             return self._slice_input_workspace_with_filter_events()
+        elif self._slice_by_log():
+            return self._slice_input_workspace_with_filter_by_log_value()
         else:
             return self._slice_input_workspace_with_filter_by_time()
+
+    def _slice_by_log(self):
+        """Return true if we are slicing by log value"""
+        return self._property_set("LogName")
+
+    def _property_set(self, property_name):
+        """Return true if the given property is set"""
+        return not self.getProperty(property_name).isDefault
 
     def _slice_input_workspace_with_filter_events(self):
         """Perform the slicing of the input workspace"""
@@ -102,8 +112,8 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
                                                               relative_start=run_start)
 
         total_interval = (stop_time - start_time).total_seconds()
-        time_interval = int(self._get_property_or_default("TimeInterval",
-                                                          total_interval))
+        time_interval = self._get_interval_as_float("TimeInterval",
+                                                    total_interval)
         slice_names = list()
         first_slice_start_time = (start_time - run_start).total_seconds()
         last_slice_start_time = first_slice_start_time + total_interval
@@ -122,6 +132,41 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
             mtd.addOrReplace(slice_name, sliced_workspace)
             # Proceed to the next interval
             slice_start_time = slice_stop_time
+
+        # Group the sliced workspaces
+        group = self._group_workspaces(slice_names, self._output_ws_group_name)
+        mtd.addOrReplace(self._output_ws_group_name, group)
+        # Ensure the run number for the child workspaces is stored in the
+        # sample logs as a string (FilterEvents converts it to a double).
+        for ws in group:
+            self._copy_run_number_to_sample_log(ws, ws)
+        return group
+
+    def _slice_input_workspace_with_filter_by_log_value(self):
+        log_name = self.getProperty("LogName").value
+        run_log_start = self._input_ws.run().getProperty(log_name)
+        run_log_stop = self._input_ws.run().getProperty(log_name)
+        log_min = self._get_property_or_default("MinimumLogValue", run_log_start)
+        log_max = self._get_property_or_default("MaximumLogValue", run_log_stop)
+        log_interval = self._get_interval_as_float("LogValueInterval", log_max - log_min)
+        slice_names = list()
+        slice_start_value = log_min
+        while slice_start_value < log_max:
+            slice_stop_value = slice_start_value + log_interval
+            slice_name = self._output_ws_group_name + '_' + str(slice_start_value) + '_' + str(slice_stop_value)
+            slice_names.append(slice_name)
+            alg = self.createChildAlgorithm("FilterByLogValue")
+            alg.setProperty("InputWorkspace", self._input_ws)
+            alg.setProperty("OutputWorkspace", slice_name)
+            alg.setProperty("LogName", log_name)
+            alg.setProperty("LogBoundary", self.getProperty("LogBoundary").value)
+            alg.setProperty("MinimumValue", slice_start_value)
+            alg.setProperty("MaximumValue", slice_stop_value)
+            alg.execute()
+            sliced_workspace = alg.getProperty("OutputWorkspace").value
+            mtd.addOrReplace(slice_name, sliced_workspace)
+            # Proceed to the next interval
+            slice_start_value = slice_stop_value
 
         # Group the sliced workspaces
         group = self._group_workspaces(slice_names, self._output_ws_group_name)
@@ -237,5 +282,20 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
             run_number = int(ws_with_run_number.run()['run_number'].value)
             AddSampleLog(Workspace=ws_to_update, LogName='run_number', LogType='String',
                          LogText=str(run_number))
+
+    def _get_interval_as_float(self, property_name, default_value):
+        """Get an interval property value (could be time interval or log value interval)
+        as a float. Checks if the user has entered a list of floats and for now throws
+        if this is the case (this is only used in backwards compatibility mode and multiple
+        intervals are not currently supported in that mode)"""
+        if self.getProperty(property_name).isDefault:
+            return float(default_value)
+        value_as_string = self.getPropertyValue(property_name)
+        value_as_list = value_as_string.split(',')
+        if len(value_as_list) > 1:
+            raise RuntimeError("Multiple intervals are not currently supported if UseNewFilterAlgorithm is False")
+        if len(value_as_list) < 1:
+            raise RuntimeError("Interval was not specified")
+        return float(value_as_list[0])
 
 AlgorithmFactory.subscribe(ReflectometrySliceEventWorkspace())
