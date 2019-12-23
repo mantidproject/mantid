@@ -14,7 +14,7 @@ from mantid.simpleapi import *
 from testhelpers import (assertRaisesNothing, create_algorithm)
 
 
-class ReflectometrySliceEventWorkspace(unittest.TestCase):
+class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
     def setUp(self):
         self.__class__._input_ws = self._create_test_workspace()
         self.__class__._input_ws_group = self._create_test_workspace_group()
@@ -23,7 +23,8 @@ class ReflectometrySliceEventWorkspace(unittest.TestCase):
         self._default_args = {
             'InputWorkspace' : 'input_ws',
             'MonitorWorkspace' : 'monitor_ws',
-            'OutputWorkspace': 'output'
+            'OutputWorkspace': 'output',
+            'UseNewFilterAlgorithm': True
         }
 
     def tearDown(self):
@@ -49,11 +50,37 @@ class ReflectometrySliceEventWorkspace(unittest.TestCase):
         self._assert_delta(first_slice.dataY(3)[51], 16)
         self._assert_delta(first_slice.dataY(3)[99], 8)
 
+    def test_default_inputs_return_single_slice_FilterByTime(self):
+        args = self._default_args
+        args['UseNewFilterAlgorithm'] = False
+        output = self._assert_run_algorithm_succeeds(args)
+        self.assertEqual(output.getNumberOfEntries(), 1)
+        first_slice = output[0]
+        self.assertEqual(first_slice.getNumberHistograms(), 5)
+        self.assertEqual(first_slice.dataX(0).size, 101)
+        self._assert_delta(first_slice.dataY(3)[0], 14)
+        self._assert_delta(first_slice.dataY(3)[51], 16)
+        self._assert_delta(first_slice.dataY(3)[99], 8)
+
     def test_setting_time_interval(self):
         args = self._default_args
         args['TimeInterval'] = 600
         output = self._assert_run_algorithm_succeeds(args)
+        # FilterEvents outputs slices up to 3600_4200
         self.assertEqual(output.getNumberOfEntries(), 7)
+        first_slice = output[0]
+        self.assertEqual(first_slice.dataX(0).size, 101)
+        self._assert_delta(first_slice.dataY(3)[0], 2)
+        self._assert_delta(first_slice.dataY(3)[51], 6)
+        self._assert_delta(first_slice.dataY(3)[99], 1)
+
+    def test_setting_time_interval_FilterByTime(self):
+        args = self._default_args
+        args['TimeInterval'] = 600
+        args['UseNewFilterAlgorithm'] = False
+        output = self._assert_run_algorithm_succeeds(args)
+        # FilterByTime outputs slices up to 3000_3600
+        self.assertEqual(output.getNumberOfEntries(), 6)
         first_slice = output[0]
         self.assertEqual(first_slice.dataX(0).size, 101)
         self._assert_delta(first_slice.dataY(3)[0], 2)
@@ -65,6 +92,20 @@ class ReflectometrySliceEventWorkspace(unittest.TestCase):
         args['TimeInterval'] = 600
         args['StartTime'] = '1800'
         args['StopTime'] = '3300'
+        output = self._assert_run_algorithm_succeeds(args)
+        self.assertEqual(output.getNumberOfEntries(), 3)
+        first_slice = output[0]
+        self.assertEqual(first_slice.dataX(0).size, 101)
+        self._assert_delta(first_slice.dataY(3)[0], 4)
+        self._assert_delta(first_slice.dataY(3)[51], 2)
+        self._assert_delta(first_slice.dataY(3)[99], 2)
+
+    def test_setting_time_interval_and_limits_FilterByTime(self):
+        args = self._default_args
+        args['TimeInterval'] = 600
+        args['StartTime'] = '1800'
+        args['StopTime'] = '3300'
+        args['UseNewFilterAlgorithm'] = False
         output = self._assert_run_algorithm_succeeds(args)
         self.assertEqual(output.getNumberOfEntries(), 3)
         first_slice = output[0]
@@ -113,6 +154,21 @@ class ReflectometrySliceEventWorkspace(unittest.TestCase):
         self._assert_delta(first_slice.dataY(3)[51], 6)
         self._assert_delta(first_slice.dataY(3)[99], 1)
 
+    def test_when_input_is_a_workspace_group_FilterByTime(self):
+        args = self._default_args
+        args['TimeInterval'] = 600
+        args['InputWorkspace'] = 'input_ws_group'
+        args['UseNewFilterAlgorithm'] = False
+        output = self._assert_run_algorithm_succeeds(args)
+        self.assertEqual(output.getNumberOfEntries(), 3)
+        first_subgroup = output[0]
+        self.assertEqual(first_subgroup.getNumberOfEntries(), 6)
+        first_slice = first_subgroup[0]
+        self.assertEqual(first_slice.dataX(0).size, 101)
+        self._assert_delta(first_slice.dataY(3)[0], 2)
+        self._assert_delta(first_slice.dataY(3)[51], 6)
+        self._assert_delta(first_slice.dataY(3)[99], 1)
+
     def test_when_input_and_monitors_are_both_workspace_groups(self):
         args = self._default_args
         args['TimeInterval'] = 600
@@ -122,6 +178,22 @@ class ReflectometrySliceEventWorkspace(unittest.TestCase):
         self.assertEqual(output.getNumberOfEntries(), 3)
         first_subgroup = output[0]
         self.assertEqual(first_subgroup.getNumberOfEntries(), 7)
+        first_slice = first_subgroup[0]
+        self.assertEqual(first_slice.dataX(0).size, 101)
+        self._assert_delta(first_slice.dataY(3)[0], 2)
+        self._assert_delta(first_slice.dataY(3)[51], 6)
+        self._assert_delta(first_slice.dataY(3)[99], 1)
+
+    def test_when_input_and_monitors_are_both_workspace_groups_FilterByTime(self):
+        args = self._default_args
+        args['TimeInterval'] = 600
+        args['InputWorkspace'] = 'input_ws_group'
+        args['MonitorWorkspace'] = 'monitor_ws_group'
+        args['UseNewFilterAlgorithm'] = False
+        output = self._assert_run_algorithm_succeeds(args)
+        self.assertEqual(output.getNumberOfEntries(), 3)
+        first_subgroup = output[0]
+        self.assertEqual(first_subgroup.getNumberOfEntries(), 6)
         first_slice = first_subgroup[0]
         self.assertEqual(first_slice.dataX(0).size, 101)
         self._assert_delta(first_slice.dataY(3)[0], 2)

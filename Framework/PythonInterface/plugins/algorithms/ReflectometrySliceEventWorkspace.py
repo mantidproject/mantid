@@ -94,16 +94,21 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
         self._info_ws = alg.getProperty("InformationWorkspace").value
 
     def _slice_input_workspace_with_filter_by_time(self):
-        start_time = DateAndTime(self._get_property_or_default("StartTime",
-                                                               self._input_ws.run().startTime()))
-        stop_time = DateAndTime(self._get_property_or_default("StopTime",
-                                                              self._input_ws.run().endTime()))
+        run_start = DateAndTime(self._input_ws.run().startTime())
+        run_stop = DateAndTime(self._input_ws.run().endTime())
+        start_time = self._get_property_or_default_as_datetime("StartTime", default_value=run_start,
+                                                               relative_start=run_start)
+        stop_time = self._get_property_or_default_as_datetime("StopTime", default_value=run_stop,
+                                                              relative_start=run_start)
+
         total_interval = (stop_time - start_time).total_seconds()
         time_interval = int(self._get_property_or_default("TimeInterval",
                                                           total_interval))
         slice_names = list()
-        slice_start_time = 0
-        while slice_start_time < total_interval:
+        first_slice_start_time = (start_time - run_start).total_seconds()
+        last_slice_start_time = first_slice_start_time + total_interval
+        slice_start_time = first_slice_start_time
+        while slice_start_time < last_slice_start_time:
             slice_stop_time = slice_start_time + time_interval
             slice_name = self._output_ws_group_name + '_' + str(slice_start_time) + '_' + str(slice_stop_time)
             slice_names.append(slice_name)
@@ -206,10 +211,26 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
             mtd.remove(ws_name)
 
     def _get_property_or_default(self, property_name, default_value):
+        """Get a property value. Return the given default value if the property is not set."""
         if self.getProperty(property_name).isDefault:
             return default_value
         else:
             return self.getProperty(property_name).value
+
+    def _get_property_or_default_as_datetime(self, property_name, default_value, relative_start):
+        """Get a property value as a DateAndTime. Return the given default value if the property is not set.
+        If the property is in datetime format, return it directly. Otherwise if it is in seconds, then convert
+        it to a datetime by adding it to the given relative_start time."""
+        if self.getProperty(property_name).isDefault:
+            return default_value
+        else:
+            value = self.getProperty(property_name).value
+            try:
+                result = DateAndTime(value)
+            except:
+                value_ns = int(value) * 1000000000
+                result = relative_start + value_ns
+            return result
 
     def _copy_run_number_to_sample_log(self, ws_with_run_number, ws_to_update):
         if ws_with_run_number.run().hasProperty('run_number'):
