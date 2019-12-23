@@ -516,6 +516,7 @@ public:
   // The __need_increase_size variants are currently disabled due to a suspected bug in the MSVC
   // compiler producing warnings such as:
   //   warning C4717: 'operator_amp<128, ?? :: ?? >': recursive on all control paths, function will cause runtime stack overflow
+  // `class = __need_increase_size<Bits2, Signed2>>` should fail substitution when Bits2 == Bits - the arguments have the same width, but it doesn't.  
   // Mantid only uses a single type of wide integer so these functions are not currently required.
   // clang-format on
 
