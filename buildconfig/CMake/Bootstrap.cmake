@@ -10,7 +10,7 @@ if( MSVC )
   include ( ExternalProject )
   set( EXTERNAL_ROOT ${PROJECT_SOURCE_DIR}/external CACHE PATH "Location to clone third party dependencies to" )
   set( THIRD_PARTY_GIT_URL "https://github.com/mantidproject/thirdparty-msvc2015.git" )
-  set ( THIRD_PARTY_GIT_SHA1 df6c47608066dc639d9313df5b15e7fd493895ac )
+  set ( THIRD_PARTY_GIT_SHA1 622c6d0aa7d4480cd4d338e153f1f09e52b8fb09 )
   set ( THIRD_PARTY_DIR ${EXTERNAL_ROOT}/src/ThirdParty )
   # Generates a script to do the clone/update in tmp
   set ( _project_name ThirdParty )
