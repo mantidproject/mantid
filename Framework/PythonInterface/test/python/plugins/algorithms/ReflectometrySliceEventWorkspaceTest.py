@@ -42,50 +42,44 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
 
     def test_default_inputs_return_single_slice(self):
         output = self._assert_run_algorithm_succeeds(self._default_args)
-        self.assertEqual(output.getNumberOfEntries(), 1)
-        first_slice = output[0]
-        self.assertEqual(first_slice.getNumberHistograms(), 5)
-        self.assertEqual(first_slice.dataX(0).size, 101)
-        self._assert_delta(first_slice.dataY(3)[0], 14)
-        self._assert_delta(first_slice.dataY(3)[51], 16)
-        self._assert_delta(first_slice.dataY(3)[99], 8)
+        self._check_slices(output, ["output_0_4200"])
+        self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[14, 16, 8])
 
     def test_default_inputs_return_single_slice_FilterByTime(self):
         args = self._default_args
         args['UseNewFilterAlgorithm'] = False
         output = self._assert_run_algorithm_succeeds(args)
-        self.assertEqual(output.getNumberOfEntries(), 1)
-        first_slice = output[0]
-        self.assertEqual(first_slice.getNumberHistograms(), 5)
-        self.assertEqual(first_slice.dataX(0).size, 101)
-        self._assert_delta(first_slice.dataY(3)[0], 14)
-        self._assert_delta(first_slice.dataY(3)[51], 16)
-        self._assert_delta(first_slice.dataY(3)[99], 8)
+        self._check_slices(output, ["output_0_3600.0"])
+        self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[14, 16, 8])
 
     def test_setting_time_interval(self):
         args = self._default_args
         args['TimeInterval'] = 600
         output = self._assert_run_algorithm_succeeds(args)
-        # FilterEvents outputs slices up to 3600_4200
-        self.assertEqual(output.getNumberOfEntries(), 7)
-        first_slice = output[0]
-        self.assertEqual(first_slice.dataX(0).size, 101)
-        self._assert_delta(first_slice.dataY(3)[0], 2)
-        self._assert_delta(first_slice.dataY(3)[51], 6)
-        self._assert_delta(first_slice.dataY(3)[99], 1)
+        self._check_slices(output, ["output_0_600", "output_600_1200", "output_1200_1800",
+                                    "output_1800_2400", "output_2400_3000", "output_3000_3600",
+                                    "output_3600_4200"])
+        self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[2, 6, 1])
+        self._check_y(output, child=1, spec=3, expected_bins=101, expected_values=[2, 3, 2])
+        self._check_y(output, child=2, spec=3, expected_bins=101, expected_values=[0, 3, 0])
+        self._check_y(output, child=3, spec=3, expected_bins=101, expected_values=[4, 2, 2])
+        self._check_y(output, child=4, spec=3, expected_bins=101, expected_values=[4, 1, 2])
+        self._check_y(output, child=5, spec=3, expected_bins=101, expected_values=[2, 1, 1])
+        self._check_y(output, child=6, spec=3, expected_bins=101, expected_values=[0, 0, 0])
 
     def test_setting_time_interval_FilterByTime(self):
         args = self._default_args
         args['TimeInterval'] = 600
         args['UseNewFilterAlgorithm'] = False
         output = self._assert_run_algorithm_succeeds(args)
-        # FilterByTime outputs slices up to 3000_3600
-        self.assertEqual(output.getNumberOfEntries(), 6)
-        first_slice = output[0]
-        self.assertEqual(first_slice.dataX(0).size, 101)
-        self._assert_delta(first_slice.dataY(3)[0], 2)
-        self._assert_delta(first_slice.dataY(3)[51], 6)
-        self._assert_delta(first_slice.dataY(3)[99], 1)
+        self._check_slices(output, ["output_0_600.0", "output_600.0_1200.0", "output_1200.0_1800.0",
+                                    "output_1800.0_2400.0", "output_2400.0_3000.0", "output_3000.0_3600.0"])
+        self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[2, 6, 1])
+        self._check_y(output, child=1, spec=3, expected_bins=101, expected_values=[2, 3, 2])
+        self._check_y(output, child=2, spec=3, expected_bins=101, expected_values=[0, 3, 0])
+        self._check_y(output, child=3, spec=3, expected_bins=101, expected_values=[4, 2, 2])
+        self._check_y(output, child=4, spec=3, expected_bins=101, expected_values=[4, 1, 2])
+        self._check_y(output, child=5, spec=3, expected_bins=101, expected_values=[2, 1, 1])
 
     def test_setting_time_interval_and_limits(self):
         args = self._default_args
@@ -93,12 +87,10 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
         args['StartTime'] = '1800'
         args['StopTime'] = '3300'
         output = self._assert_run_algorithm_succeeds(args)
-        self.assertEqual(output.getNumberOfEntries(), 3)
-        first_slice = output[0]
-        self.assertEqual(first_slice.dataX(0).size, 101)
-        self._assert_delta(first_slice.dataY(3)[0], 4)
-        self._assert_delta(first_slice.dataY(3)[51], 2)
-        self._assert_delta(first_slice.dataY(3)[99], 2)
+        self._check_slices(output, ["output_1800_2400", "output_2400_3000", "output_3000_3300"])
+        self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[4, 2, 2])
+        self._check_y(output, child=1, spec=3, expected_bins=101, expected_values=[4, 1, 2])
+        self._check_y(output, child=2, spec=3, expected_bins=101, expected_values=[1, 1, 0])
 
     def test_setting_time_interval_and_limits_FilterByTime(self):
         args = self._default_args
@@ -107,37 +99,23 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
         args['StopTime'] = '3300'
         args['UseNewFilterAlgorithm'] = False
         output = self._assert_run_algorithm_succeeds(args)
-        self.assertEqual(output.getNumberOfEntries(), 3)
-        first_slice = output[0]
-        self.assertEqual(first_slice.dataX(0).size, 101)
-        self._assert_delta(first_slice.dataY(3)[0], 4)
-        self._assert_delta(first_slice.dataY(3)[51], 2)
-        self._assert_delta(first_slice.dataY(3)[99], 2)
+        # This filters up to 3600, which looks less correct than the new algorithm which cuts
+        # off at the requested 3300
+        self._check_slices(output, ["output_1800_2400.0", "output_2400.0_3000.0", "output_3000.0_3600.0"])
+        self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[4, 2, 2])
+        self._check_y(output, child=1, spec=3, expected_bins=101, expected_values=[4, 1, 2])
+        self._check_y(output, child=2, spec=3, expected_bins=101, expected_values=[2, 1, 1])
 
     def test_setting_multiple_time_intervals(self):
         args = self._default_args
         args['TimeInterval'] = '600, 1200'
         args['StopTime'] = '3600'
         output = self._assert_run_algorithm_succeeds(args)
-        # Output is 4 slices alternating between the two intervals:
-        #   0_600, 600_1800, 1800_2400, 2400_3600
-        self.assertEqual(output.getNumberOfEntries(), 4)
-        self.assertEqual(output[0].dataX(0).size, 101)
-        self._assert_delta(output[0].dataY(3)[0], 2)
-        self._assert_delta(output[0].dataY(3)[51], 6)
-        self._assert_delta(output[0].dataY(3)[99], 1)
-        self.assertEqual(output[1].dataX(0).size, 101)
-        self._assert_delta(output[1].dataY(3)[0], 2)
-        self._assert_delta(output[1].dataY(3)[51], 6)
-        self._assert_delta(output[1].dataY(3)[99], 2)
-        self.assertEqual(output[2].dataX(0).size, 101)
-        self._assert_delta(output[2].dataY(3)[0], 4)
-        self._assert_delta(output[2].dataY(3)[51], 2)
-        self._assert_delta(output[2].dataY(3)[99], 2)
-        self.assertEqual(output[3].dataX(0).size, 101)
-        self._assert_delta(output[3].dataY(3)[0], 6)
-        self._assert_delta(output[3].dataY(3)[51], 2)
-        self._assert_delta(output[3].dataY(3)[99], 3)
+        self._check_slices(output, ["output_0_600", "output_600_1800", "output_1800_2400", "output_2400_3600"])
+        self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[2, 6, 1])
+        self._check_y(output, child=1, spec=3, expected_bins=101, expected_values=[2, 6, 2])
+        self._check_y(output, child=2, spec=3, expected_bins=101, expected_values=[4, 2, 2])
+        self._check_y(output, child=3, spec=3, expected_bins=101, expected_values=[6, 2, 3])
 
     def test_setting_multiple_time_intervals_is_not_implemented_for_FilterByTime(self):
         args = self._default_args
@@ -150,26 +128,93 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
         args = self._default_args
         args['LogValueInterval'] = 600
         output = self._assert_run_algorithm_succeeds(args)
-        self.assertEqual(output.getNumberOfEntries(), 1)
-        first_slice = output[0]
-        self.assertEqual(first_slice.getNumberHistograms(), 5)
-        self.assertEqual(first_slice.dataX(0).size, 101)
-        self._assert_delta(first_slice.dataY(3)[0], 14)
-        self._assert_delta(first_slice.dataY(3)[51], 16)
-        self._assert_delta(first_slice.dataY(3)[99], 8)
+        self._check_slices(output, ["output_0_4200"])
+        self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[14, 16, 8])
 
     def test_setting_log_interval_without_log_name_produces_single_slice_FilterByLogValue(self):
         args = self._default_args
         args['LogValueInterval'] = 600
         args['UseNewFilterAlgorithm'] = False
         output = self._assert_run_algorithm_succeeds(args)
-        self.assertEqual(output.getNumberOfEntries(), 1)
-        first_slice = output[0]
-        self.assertEqual(first_slice.getNumberHistograms(), 5)
-        self.assertEqual(first_slice.dataX(0).size, 101)
-        self._assert_delta(first_slice.dataY(3)[0], 14)
-        self._assert_delta(first_slice.dataY(3)[51], 16)
-        self._assert_delta(first_slice.dataY(3)[99], 8)
+        self._check_slices(output, ["output_0_3600.0"])
+        self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[14, 16, 8])
+
+    def test_setting_log_interval(self):
+        args = self._default_args
+        args['LogName'] = 'proton_charge'
+        args['LogValueInterval'] = 20
+        output = self._assert_run_algorithm_succeeds(args)
+        # Note that default tolerance is half the interval, so we slice +/-10 either side.
+        # Also note that empty slices are not included in the output.
+        self._check_slices(output, ["output_Log.proton_charge.From.10.To.30.Value-change-direction:both",
+                                    "output_Log.proton_charge.From.70.To.90.Value-change-direction:both",
+                                    "output_Log.proton_charge.From.90.To.110.Value-change-direction:both"])
+        self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[4, 1, 2])
+        self._check_y(output, child=1, spec=3, expected_bins=101, expected_values=[4, 5, 2])
+        self._check_y(output, child=2, spec=3, expected_bins=101, expected_values=[6, 10, 4])
+
+    def test_setting_log_tolerance(self):
+        args = self._default_args
+        args['LogName'] = 'proton_charge'
+        args['LogValueInterval'] = 20
+        # Set tolerance to zero to give similar behaviour to FilterByLogValue, although
+        # note that empty slices are not output so we have fewer workspaces.
+        args['LogValueTolerance'] = 0
+        output = self._assert_run_algorithm_succeeds(args)
+        self._check_slices(output, ["output_Log.proton_charge.From.0.To.20.Value-change-direction:both",
+                                    "output_Log.proton_charge.From.80.To.100.Value-change-direction:both"])
+        self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[4, 1, 2])
+        self._check_y(output, child=1, spec=3, expected_bins=101, expected_values=[4, 5, 2])
+
+    def test_setting_log_interval_FilterByLogValue(self):
+        args = self._default_args
+        args['LogName'] = 'proton_charge'
+        args['LogValueInterval'] = 20
+        args['MinimumLogValue'] = 0
+        args['MaximumLogValue'] = 100
+        args['UseNewFilterAlgorithm'] = False
+        output = self._assert_run_algorithm_succeeds(args)
+        self._check_slices(output, ["output_0.0_20.0", "output_20.0_40.0", "output_40.0_60.0",
+                                    "output_60.0_80.0", "output_80.0_100.0"])
+        self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[0, 0, 0])
+        self._check_y(output, child=1, spec=3, expected_bins=101, expected_values=[0, 0, 0])
+        self._check_y(output, child=2, spec=3, expected_bins=101, expected_values=[0, 0, 0])
+        self._check_y(output, child=3, spec=3, expected_bins=101, expected_values=[0, 3, 0])
+        self._check_y(output, child=4, spec=3, expected_bins=101, expected_values=[4, 12, 3])
+
+    def test_setting_log_without_interval_produces_single_slice(self):
+        args = self._default_args
+        args['LogName'] = 'proton_charge'
+        output = self._assert_run_algorithm_succeeds(args)
+        self._check_slices(output, ["output_Log.proton_charge.From.0.To.100.Value-change-direction:both"])
+        # Note that the min/max log value are 0->100 (taken from the sample logs) but this is
+        # exclusive of values at 100 so excludes quite a few counts
+        self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[8, 6, 4])
+
+    def test_setting_log_limits_without_interval_produces_single_slice(self):
+        args = self._default_args
+        args['LogName'] = 'proton_charge'
+        args['MinimumLogValue'] = 0
+        args['MaximumLogValue'] = 101
+        output = self._assert_run_algorithm_succeeds(args)
+        # We set the max to be over 100 to be inclusive of the values up to 100 so this includes all
+        # of the counts from the input workspace
+        self._check_slices(output, ["output_Log.proton_charge.From.0.To.101.Value-change-direction:both"])
+        self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[14, 16, 8])
+
+    def test_setting_log_limits_without_interval_produces_single_slice_FilterByLogValue(self):
+        args = self._default_args
+        args['LogName'] = 'proton_charge'
+        args['MinimumLogValue'] = 0
+        args['MaximumLogValue'] = 101
+        args['UseNewFilterAlgorithm'] = False
+        output = self._assert_run_algorithm_succeeds(args)
+        self._check_slices(output, ["output_0.0_101.0"])
+        # These values don't seem right - I think they should contain all the counts from the
+        # input workspace, i.e. [14, 16, 8]. Adding this test though to confirm the current
+        # behaviour so we can check against it if we fix this in future. We may be phasing this
+        # algorithm out though so this is not currently a high priority.
+        self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[12, 15, 7])
 
     def test_setting_log_interval_and_limits(self):
         args = self._default_args
@@ -178,12 +223,10 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
         args['MinimumLogValue'] = '75'
         args['MaximumLogValue'] = '110'
         output = self._assert_run_algorithm_succeeds(args)
-        self.assertEqual(output.getNumberOfEntries(), 2)
-        first_slice = output[0]
-        self.assertEqual(first_slice.dataX(0).size, 101)
-        self._assert_delta(first_slice.dataY(3)[0], 4)
-        self._assert_delta(first_slice.dataY(3)[51], 5)
-        self._assert_delta(first_slice.dataY(3)[99], 2)
+        self._check_slices(output, ["output_Log.proton_charge.From.65.To.85.Value-change-direction:both",
+                                    "output_Log.proton_charge.From.85.To.105.Value-change-direction:both"])
+        self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[4, 5, 2])
+        self._check_y(output, child=1, spec=3, expected_bins=101, expected_values=[6, 10, 4])
 
     def test_setting_log_interval_and_limits_FilterByLogValue(self):
         args = self._default_args
@@ -193,56 +236,75 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
         args['MaximumLogValue'] = '110'
         args['UseNewFilterAlgorithm'] = False
         output = self._assert_run_algorithm_succeeds(args)
-        self.assertEqual(output.getNumberOfEntries(), 2)
-        first_slice = output[0]
-        self.assertEqual(first_slice.dataX(0).size, 101)
-        self._assert_delta(first_slice.dataY(3)[0], 0)
-        self._assert_delta(first_slice.dataY(3)[51], 3)
-        self._assert_delta(first_slice.dataY(3)[99], 0)
+        self._check_slices(output, ["output_75.0_95.0", "output_95.0_115.0"])
+        self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[0, 3, 0])
+        self._check_y(output, child=1, spec=3, expected_bins=101, expected_values=[2, 6, 1])
 
     def test_when_input_is_a_workspace_group(self):
         args = self._default_args
         args['TimeInterval'] = 600
         args['InputWorkspace'] = 'input_ws_group'
-        output = self._assert_run_algorithm_succeeds(args)
-        self.assertEqual(output.getNumberOfEntries(), 3)
-        first_subgroup = output[0]
-        self.assertEqual(first_subgroup.getNumberOfEntries(), 7)
-        first_slice = first_subgroup[0]
-        self.assertEqual(first_slice.dataX(0).size, 101)
-        self._assert_delta(first_slice.dataY(3)[0], 2)
-        self._assert_delta(first_slice.dataY(3)[51], 6)
-        self._assert_delta(first_slice.dataY(3)[99], 1)
+        group = self._assert_run_algorithm_succeeds(args)
+        self.assertEqual(group.getNumberOfEntries(), 3)
+        output = group[0]
+        self._check_slices(output, ["ws1_monitor_ws_output_0_600",
+                                    "ws1_monitor_ws_output_600_1200",
+                                    "ws1_monitor_ws_output_1200_1800",
+                                    "ws1_monitor_ws_output_1800_2400",
+                                    "ws1_monitor_ws_output_2400_3000",
+                                    "ws1_monitor_ws_output_3000_3600",
+                                    "ws1_monitor_ws_output_3600_4200"])
+        self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[2, 6, 1])
+        self._check_y(output, child=1, spec=3, expected_bins=101, expected_values=[2, 3, 2])
+        self._check_y(output, child=2, spec=3, expected_bins=101, expected_values=[0, 3, 0])
+        self._check_y(output, child=3, spec=3, expected_bins=101, expected_values=[4, 2, 2])
+        self._check_y(output, child=4, spec=3, expected_bins=101, expected_values=[4, 1, 2])
+        self._check_y(output, child=5, spec=3, expected_bins=101, expected_values=[2, 1, 1])
+        self._check_y(output, child=6, spec=3, expected_bins=101, expected_values=[0, 0, 0])
 
     def test_when_input_is_a_workspace_group_FilterByTime(self):
         args = self._default_args
         args['TimeInterval'] = 600
         args['InputWorkspace'] = 'input_ws_group'
         args['UseNewFilterAlgorithm'] = False
-        output = self._assert_run_algorithm_succeeds(args)
-        self.assertEqual(output.getNumberOfEntries(), 3)
-        first_subgroup = output[0]
-        self.assertEqual(first_subgroup.getNumberOfEntries(), 6)
-        first_slice = first_subgroup[0]
-        self.assertEqual(first_slice.dataX(0).size, 101)
-        self._assert_delta(first_slice.dataY(3)[0], 2)
-        self._assert_delta(first_slice.dataY(3)[51], 6)
-        self._assert_delta(first_slice.dataY(3)[99], 1)
+        group = self._assert_run_algorithm_succeeds(args)
+        self.assertEqual(group.getNumberOfEntries(), 3)
+        output = group[0]
+        self._check_slices(output, ["ws1_monitor_ws_output_0_600.0",
+                                    "ws1_monitor_ws_output_600.0_1200.0",
+                                    "ws1_monitor_ws_output_1200.0_1800.0",
+                                    "ws1_monitor_ws_output_1800.0_2400.0",
+                                    "ws1_monitor_ws_output_2400.0_3000.0",
+                                    "ws1_monitor_ws_output_3000.0_3600.0"])
+        self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[2, 6, 1])
+        self._check_y(output, child=1, spec=3, expected_bins=101, expected_values=[2, 3, 2])
+        self._check_y(output, child=2, spec=3, expected_bins=101, expected_values=[0, 3, 0])
+        self._check_y(output, child=3, spec=3, expected_bins=101, expected_values=[4, 2, 2])
+        self._check_y(output, child=4, spec=3, expected_bins=101, expected_values=[4, 1, 2])
+        self._check_y(output, child=5, spec=3, expected_bins=101, expected_values=[2, 1, 1])
 
     def test_when_input_and_monitors_are_both_workspace_groups(self):
         args = self._default_args
         args['TimeInterval'] = 600
         args['InputWorkspace'] = 'input_ws_group'
         args['MonitorWorkspace'] = 'monitor_ws_group'
-        output = self._assert_run_algorithm_succeeds(args)
-        self.assertEqual(output.getNumberOfEntries(), 3)
-        first_subgroup = output[0]
-        self.assertEqual(first_subgroup.getNumberOfEntries(), 7)
-        first_slice = first_subgroup[0]
-        self.assertEqual(first_slice.dataX(0).size, 101)
-        self._assert_delta(first_slice.dataY(3)[0], 2)
-        self._assert_delta(first_slice.dataY(3)[51], 6)
-        self._assert_delta(first_slice.dataY(3)[99], 1)
+        group = self._assert_run_algorithm_succeeds(args)
+        self.assertEqual(group.getNumberOfEntries(), 3)
+        output = group[0]
+        self._check_slices(output, ["ws1_mon1_output_0_600",
+                                    "ws1_mon1_output_600_1200",
+                                    "ws1_mon1_output_1200_1800",
+                                    "ws1_mon1_output_1800_2400",
+                                    "ws1_mon1_output_2400_3000",
+                                    "ws1_mon1_output_3000_3600",
+                                    "ws1_mon1_output_3600_4200"])
+        self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[2, 6, 1])
+        self._check_y(output, child=1, spec=3, expected_bins=101, expected_values=[2, 3, 2])
+        self._check_y(output, child=2, spec=3, expected_bins=101, expected_values=[0, 3, 0])
+        self._check_y(output, child=3, spec=3, expected_bins=101, expected_values=[4, 2, 2])
+        self._check_y(output, child=4, spec=3, expected_bins=101, expected_values=[4, 1, 2])
+        self._check_y(output, child=5, spec=3, expected_bins=101, expected_values=[2, 1, 1])
+        self._check_y(output, child=6, spec=3, expected_bins=101, expected_values=[0, 0, 0])
 
     def test_when_input_and_monitors_are_both_workspace_groups_FilterByTime(self):
         args = self._default_args
@@ -250,15 +312,21 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
         args['InputWorkspace'] = 'input_ws_group'
         args['MonitorWorkspace'] = 'monitor_ws_group'
         args['UseNewFilterAlgorithm'] = False
-        output = self._assert_run_algorithm_succeeds(args)
-        self.assertEqual(output.getNumberOfEntries(), 3)
-        first_subgroup = output[0]
-        self.assertEqual(first_subgroup.getNumberOfEntries(), 6)
-        first_slice = first_subgroup[0]
-        self.assertEqual(first_slice.dataX(0).size, 101)
-        self._assert_delta(first_slice.dataY(3)[0], 2)
-        self._assert_delta(first_slice.dataY(3)[51], 6)
-        self._assert_delta(first_slice.dataY(3)[99], 1)
+        group = self._assert_run_algorithm_succeeds(args)
+        self.assertEqual(group.getNumberOfEntries(), 3)
+        output = group[0]
+        self._check_slices(output, ["ws1_mon1_output_0_600.0",
+                                    "ws1_mon1_output_600.0_1200.0",
+                                    "ws1_mon1_output_1200.0_1800.0",
+                                    "ws1_mon1_output_1800.0_2400.0",
+                                    "ws1_mon1_output_2400.0_3000.0",
+                                    "ws1_mon1_output_3000.0_3600.0"])
+        self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[2, 6, 1])
+        self._check_y(output, child=1, spec=3, expected_bins=101, expected_values=[2, 3, 2])
+        self._check_y(output, child=2, spec=3, expected_bins=101, expected_values=[0, 3, 0])
+        self._check_y(output, child=3, spec=3, expected_bins=101, expected_values=[4, 2, 2])
+        self._check_y(output, child=4, spec=3, expected_bins=101, expected_values=[4, 1, 2])
+        self._check_y(output, child=5, spec=3, expected_bins=101, expected_values=[2, 1, 1])
 
     def test_fails_when_input_groups_are_different_sizes(self):
         group = self._create_monitor_workspace_group_with_two_members()
@@ -337,6 +405,20 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
         except:
             throws = True
         self.assertEqual(throws, True)
+
+    def _check_slices(self, workspace_group, expected_names):
+        number_of_slices = workspace_group.getNumberOfEntries()
+        self.assertEqual(number_of_slices, len(expected_names))
+        for child in range(number_of_slices):
+            self.assertEqual(workspace_group[child].name(), expected_names[child])
+
+    def _check_y(self, workspace_group, child, spec, expected_bins, expected_values):
+        """Check Y values for bins 0, 51 and 99 match the list of expected values"""
+        ws = workspace_group[child]
+        self.assertEqual(ws.dataX(spec).size, expected_bins)
+        self._assert_delta(ws.dataY(spec)[0], expected_values[0])
+        self._assert_delta(ws.dataY(spec)[51], expected_values[1])
+        self._assert_delta(ws.dataY(spec)[99], expected_values[2])
 
     def _assert_delta(self, value1, value2):
         self.assertEqual(round(value1, 6), round(value2, 6))
