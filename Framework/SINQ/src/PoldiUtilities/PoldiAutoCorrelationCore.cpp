@@ -10,7 +10,6 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiThreaded.h"
-#include "boost/bind.hpp"
 #include <algorithm>
 #include <numeric>
 #include <utility>
@@ -25,6 +24,7 @@ namespace Mantid {
 namespace Poldi {
 
 using namespace API;
+using namespace std::placeholders;
 
 PoldiAutoCorrelationCore::PoldiAutoCorrelationCore(Kernel::Logger &g_log)
     : m_detector(), m_chopper(), m_wavelengthRange(), m_deltaT(), m_deltaD(),
@@ -210,11 +210,10 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(
 
     m_logger.information() << "  Correcting intensities...\n";
     std::vector<double> correctedCorrelatedIntensities(dValues.size());
-    std::transform(rawCorrelatedIntensities.begin(),
-                   rawCorrelatedIntensities.end(), m_weightsForD.begin(),
-                   correctedCorrelatedIntensities.rbegin(),
-                   boost::bind(&PoldiAutoCorrelationCore::correctedIntensity,
-                               this, _1, _2));
+    std::transform(
+        rawCorrelatedIntensities.begin(), rawCorrelatedIntensities.end(),
+        m_weightsForD.begin(), correctedCorrelatedIntensities.rbegin(),
+        std::bind(&PoldiAutoCorrelationCore::correctedIntensity, this, _1, _2));
 
     /* The algorithm performs some finalization. In the default case the
      * spectrum is
@@ -315,8 +314,8 @@ PoldiAutoCorrelationCore::getRawCorrelatedIntensity(double dValue,
        */
       std::vector<UncertainValue> cmess(m_detector->elementCount());
       std::transform(m_indices.begin(), m_indices.end(), cmess.begin(),
-                     boost::bind(&PoldiAutoCorrelationCore::getCMessAndCSigma,
-                                 this, dValue, slitOffset, _1));
+                     std::bind(&PoldiAutoCorrelationCore::getCMessAndCSigma,
+                               this, dValue, slitOffset, _1));
 
       UncertainValue sum =
           std::accumulate(cmess.begin(), cmess.end(), UncertainValue(0.0, 0.0),
@@ -594,7 +593,7 @@ std::vector<double> PoldiAutoCorrelationCore::getTofsFor1Angstrom(
   // Map element indices to 2Theta-Values
   std::vector<double> twoThetas(elements.size());
   std::transform(elements.begin(), elements.end(), twoThetas.begin(),
-                 boost::bind(&PoldiAbstractDetector::twoTheta, m_detector, _1));
+                 std::bind(&PoldiAbstractDetector::twoTheta, m_detector, _1));
 
   // We will need sin(Theta) anyway, so we might just calculate those as well
   std::vector<double> sinThetas;
@@ -612,7 +611,7 @@ std::vector<double> PoldiAutoCorrelationCore::getTofsFor1Angstrom(
   std::vector<double> tofFor1Angstrom(elements.size());
   std::transform(distances.begin(), distances.end(), sinThetas.begin(),
                  tofFor1Angstrom.begin(),
-                 boost::bind(&Conversions::dtoTOF, 1.0, _1, _2));
+                 std::bind(&Conversions::dtoTOF, 1.0, _1, _2));
 
   return tofFor1Angstrom;
 }

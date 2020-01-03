@@ -16,8 +16,6 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/VMD.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
-#include <boost/bind.hpp>
-#include <boost/function.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <cmath>
 #include <cxxtest/TestSuite.h>

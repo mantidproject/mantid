@@ -17,8 +17,6 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include <boost/bind.hpp>
-#include <boost/function.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <limits>
@@ -45,7 +43,7 @@ using OptionalIMDHistoWorkspace_const_sptr =
     boost::optional<IMDHistoWorkspace_const_sptr>;
 
 // Typedef for a smoothing function
-using SmoothFunction = boost::function<IMDHistoWorkspace_sptr(
+using SmoothFunction = std::function<IMDHistoWorkspace_sptr(
     IMDHistoWorkspace_const_sptr, const WidthVector &,
     OptionalIMDHistoWorkspace_const_sptr)>;
 
@@ -59,11 +57,12 @@ namespace {
  * @return function map
  */
 SmoothFunctionMap makeFunctionMap(Mantid::MDAlgorithms::SmoothMD *instance) {
+  using namespace std::placeholders;
   return {
-      {"Hat", boost::bind(&Mantid::MDAlgorithms::SmoothMD::hatSmooth, instance,
-                          _1, _2, _3)},
-      {"Gaussian", boost::bind(&Mantid::MDAlgorithms::SmoothMD::gaussianSmooth,
-                               instance, _1, _2, _3)}};
+      {"Hat", std::bind(&Mantid::MDAlgorithms::SmoothMD::hatSmooth, instance,
+                        _1, _2, _3)},
+      {"Gaussian", std::bind(&Mantid::MDAlgorithms::SmoothMD::gaussianSmooth,
+                             instance, _1, _2, _3)}};
 }
 } // namespace
 

@@ -21,7 +21,6 @@
 #include "MantidGeometry/Crystal/ReflectionGenerator.h"
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
 
-#include <boost/bind.hpp>
 #include <stdexcept>
 
 using namespace Mantid::Poldi;
@@ -29,6 +28,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
+using namespace std::placeholders;
 
 class PoldiPeakCollectionTest;
 
@@ -359,9 +359,8 @@ public:
     std::vector<PoldiPeak_sptr> poldiPeaks = p.peaks();
 
     // sort peak list and check that all peaks are within the limits
-    std::sort(
-        poldiPeaks.begin(), poldiPeaks.end(),
-        boost::bind<bool>(&PoldiPeak::greaterThan, _1, _2, &PoldiPeak::d));
+    std::sort(poldiPeaks.begin(), poldiPeaks.end(),
+              std::bind(&PoldiPeak::greaterThan, _1, _2, &PoldiPeak::d));
 
     TS_ASSERT_LESS_THAN_EQUALS(poldiPeaks[0]->d(), 5.0);
     TS_ASSERT_LESS_THAN_EQUALS(0.55, poldiPeaks[68]->d());
