@@ -796,6 +796,7 @@ def subplots(**kwargs):
     """
     figure, axes = pyplot.subplots(subplot_kw=_mantidsubplotsetup(), **kwargs)
     figure.set_tight_layout(True)
+    axes.tick_params(direction='in', top=True, right=True)
     return figure, axes
 
 
