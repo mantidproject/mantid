@@ -227,9 +227,10 @@ SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth,
       // We've already checked in the validator that the doubles we have are odd
       // integer values and well below max int
       std::vector<int> widthVectorInt;
-      widthVectorInt.reserve(widthVector.size());
-      std::copy(widthVector.cbegin(), widthVector.cend(),
-                std::back_inserter(widthVectorInt));
+      widthVectorInt.resize(widthVector.size());
+      std::transform(widthVector.cbegin(), widthVector.cend(),
+                     widthVectorInt.begin(),
+                     [](double w) -> int { return static_cast<int>(w); });
 
       std::vector<size_t> neighbourIndexes =
           iterator->findNeighbourIndexesByWidth(widthVectorInt);

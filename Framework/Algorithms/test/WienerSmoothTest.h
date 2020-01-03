@@ -647,8 +647,9 @@ private:
       Y.assign(y, y + ny);
       E.assign(e, e + ny);
       using std::placeholders::_1;
-      std::transform(Y.begin(), Y.end(), Y.begin(),
-                     std::bind(std::multiplies<double>(), _1, i + 1));
+      std::transform(
+          Y.begin(), Y.end(), Y.begin(),
+          std::bind(std::multiplies<double>(), _1, static_cast<double>(i + 1)));
     }
 
     return dataWS;
