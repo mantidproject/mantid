@@ -134,6 +134,14 @@ result scaling and splitting into atomic contributions.
 System tests
 ~~~~~~~~~~~~
 System tests are defined in *Testing/SystemTests/tests/analysis/AbinsTest.py*.
-These tests compare the output workspaces of Abins runs with reference Nexus files.
+These tests compare the output workspaces of Abins runs with reference Nexus files,
+using the standard setup described in
+`the main developer docs <http://developer.mantidproject.org/SystemTests.html>`_.
+The reference data will need to be changed when major updates to Abins
+impact the output results; the simplest way to obtain the new
+reference files is to run the system tests, which will save Nexus
+files from the failed system tests. These should be inspected to
+verify that all changes were expected and understood as consequences
+of changes to Abins.
 
 .. categories:: Concepts
