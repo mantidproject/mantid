@@ -115,6 +115,13 @@ private:
   void connectSettingsChange(QRadioButton &edit);
   void connectSaveSettingsWidgets() override;
 
+  void onSettingsChanged();
+  void connectSettingsChange(QLineEdit &edit);
+  void connectSettingsChange(QComboBox &edit);
+  void connectSettingsChange(QCheckBox &edit);
+  void connectSettingsChange(QRadioButton &edit);
+  void connectInstrumentSettingsWidgets();
+
   /// The widget
   Ui::SaveWidget m_ui;
   SaveViewSubscriber *m_notifyee;

@@ -61,6 +61,11 @@ public:
   bool isOverwriteBatchPrevented(int tabIndex) const override;
   bool isProcessAllPrevented() const override;
   bool isProcessPartialGroupPrevented() const override;
+  bool isOperationPrevented(int tabIndex) const override;
+  bool isBatchUnsaved(int batchIndex) const override;
+  bool isAnyBatchUnsaved() override;
+  bool getUnsavedFlag() const override;
+  void setUnsavedFlag(bool isUnsaved) override;
   void notifyAnyBatchAutoreductionResumed() override;
   void notifyAnyBatchAutoreductionPaused() override;
   void notifyAnyBatchReductionResumed() override;

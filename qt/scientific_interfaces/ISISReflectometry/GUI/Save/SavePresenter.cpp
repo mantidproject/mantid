@@ -50,6 +50,10 @@ void SavePresenter::notifySettingsChanged() {
   m_mainPresenter->setBatchUnsaved();
 }
 
+void SavePresenter::notifySettingsChanged() {
+  m_mainPresenter->notifySettingsChanged();
+}
+
 void SavePresenter::notifyPopulateWorkspaceList() { populateWorkspaceList(); }
 
 void SavePresenter::notifyFilterWorkspaceList() { filterWorkspaceNames(); }

@@ -255,6 +255,8 @@ void RunsPresenter::notifyInstrumentChanged(std::string const &instrumentName) {
 
 void RunsPresenter::notifyTableChanged() { m_mainPresenter->setBatchUnsaved(); }
 
+}
+
 void RunsPresenter::settingsChanged() { tablePresenter()->settingsChanged(); }
 
 /** Searches for runs that can be used
@@ -313,6 +315,10 @@ bool RunsPresenter::isAnyBatchProcessing() const {
 
 bool RunsPresenter::isAnyBatchAutoreducing() const {
   return m_mainPresenter->isAnyBatchAutoreducing();
+}
+
+bool RunsPresenter::isOperationPrevented() const {
+  return m_mainPresenter->isOperationPrevented();
 }
 
 bool RunsPresenter::isOverwritingTablePrevented() const {
