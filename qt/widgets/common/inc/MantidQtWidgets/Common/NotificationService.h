@@ -11,7 +11,7 @@
 #include <QObject>
 #include <QSystemTrayIcon>
 
-/** The ase class from which mantid custom widgets are derived it contains
+/** The base class from which mantid custom widgets are derived contains
  *  some useful functions
  */
 namespace MantidQt {
