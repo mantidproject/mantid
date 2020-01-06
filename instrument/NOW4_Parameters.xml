@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<parameter-file instrument="HYSPEC" valid-from="2011-10-10T00:00:00">
+<parameter-file instrument="NOW4" valid-from="2011-10-10T00:00:00">
 
-	<component-link name="HYSPEC">
+	<component-link name="NOW4">
 
 		<parameter name="deltaE-mode" type="string">
 			<value val="direct" />
@@ -13,10 +13,6 @@
 
 		<parameter name="ei-mon2-spec">
 			<value val="3" />
-		</parameter>
-
-		<parameter name="TS_mapping_file" type="string">
-			<value val="HYS_TS_2011_10_04.dat" />
 		</parameter>
 
 		<!-- TODO: Update with real vanadium mass -->
@@ -134,7 +130,7 @@
 			<value val="1.2" />
 		</parameter>
 
-		<!-- All the following parameters are taken directly from the MARI definition 
+		<!-- All the following parameters are taken directly from the MARI definition
 			and are WRONG! They are only here for now to get things working -->
 
 		<parameter name="wb-scale-factor">
@@ -188,15 +184,15 @@
 		<parameter name="abs-median-signif">
 			<value val="3.3" />
 		</parameter>
-		
+
 		<!--   formula for t0 calculation. See http://muparser.sourceforge.net/mup_features.html#idDef2 for available operators-->
 		<parameter name="t0_formula" type="string">
 			<value val="4.0 + (107.0 / (1.0 + (incidentEnergy / 31.0)^3))" />
 		</parameter>
-		
+
 		<parameter name="treat-background-as-events" type="string">
 			<value val="yes" />
 		</parameter>
-		
+
 	</component-link>
 </parameter-file>
