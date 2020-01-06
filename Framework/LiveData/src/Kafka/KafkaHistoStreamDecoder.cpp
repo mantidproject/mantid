@@ -67,7 +67,7 @@ KafkaHistoStreamDecoder::KafkaHistoStreamDecoder(
  * Destructor.
  * Stops capturing from the stream
  */
-KafkaHistoStreamDecoder::~KafkaHistoStreamDecoder() { stopCapture(); }
+KafkaHistoStreamDecoder::~KafkaHistoStreamDecoder() = default;
 
 /**
  * Check if there is data available to extract

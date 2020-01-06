@@ -133,7 +133,26 @@ KafkaEventStreamDecoder::KafkaEventStreamDecoder(
  * Destructor.
  * Stops capturing from the stream
  */
-KafkaEventStreamDecoder::~KafkaEventStreamDecoder() { stopCapture(); }
+KafkaEventStreamDecoder::~KafkaEventStreamDecoder() {
+  /*
+   * IKafkaStreamDecoder::stopCapture is called again here as capture must be
+   * terminated before the KafkaEventStreamDecoder is destruced.
+   *
+   * Without this, a race condition occurs (over threads 1 and 2):
+   *  - KafkaEventStreamDecoder::~KafkaEventStreamDecoder is called and members
+   *    immediately destructed [1]
+   *  - IKafkaStreamDecoder::~IKafkaStreamDecoder is called [1]
+   *    - IKafkaStreamDecoder::m_interrupt set [on 1, visible to 2]
+   *    - Capture loop iteration completes and calls
+   *      KafkaEventStreamDecoder::flushIntermediateBuffer [2]
+   *      (this function attempts to access already deleted members of
+   *      KafkaEventStreamDecoder)
+   *
+   * By calling IKafkaStreamDecoder::stopCapture here it ensures that the
+   * capture has fully completed before local state is deleted.
+   */
+  stopCapture();
+}
 
 /**
  * Check if there is data available to extract

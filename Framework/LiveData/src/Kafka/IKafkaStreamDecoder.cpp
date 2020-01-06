@@ -65,7 +65,7 @@ IKafkaStreamDecoder::IKafkaStreamDecoder(std::shared_ptr<IKafkaBroker> broker,
  * Destructor.
  * Stops capturing from the stream
  */
-IKafkaStreamDecoder::~IKafkaStreamDecoder() = default;
+IKafkaStreamDecoder::~IKafkaStreamDecoder() { stopCapture(); }
 
 /**
  * Start capturing from the stream on a separate thread. This is a non-blocking
