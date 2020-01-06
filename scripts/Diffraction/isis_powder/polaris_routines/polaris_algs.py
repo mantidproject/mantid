@@ -116,7 +116,10 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None,
                                              PreserveEvents=True)
     common.remove_intermediate_workspace('self_scattering_correction')
     if output_binning is not None:
-        pdf_output = mantid.Rebin(InputWorkspace=pdf_output, Params=output_binning)
+        try:
+            pdf_output = mantid.Rebin(InputWorkspace=pdf_output, Params=output_binning)
+        except RuntimeError:
+            return pdf_output
     return pdf_output
 
 
