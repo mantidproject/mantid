@@ -60,7 +60,7 @@ public:
     std::vector<std::string> convertibleUnits;
 
     for (const auto &unitKey : getKeys()) {
-      auto unit_sptr = create(unitKey);
+      const auto unit_sptr = create(unitKey);
       if (unit_sptr->isConvertible()) {
         convertibleUnits.emplace_back(unitKey);
       }
