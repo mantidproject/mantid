@@ -43,7 +43,7 @@ python.plugins.directories = @PYTHONPLUGIN_DIRS@
 
 # Where to load instrument definition files from
 instrumentDefinition.directory = @MANTID_ROOT@/instrument
-# Controls wether Mantid Workbench will use system notifications for important messages (On/Off)
+# Controls whether Mantid Workbench will use system notifications for important messages (On/Off)
 Notifications.Enabled = On
 
 # Whether to check for updated instrument definitions on startup of Mantid
