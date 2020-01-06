@@ -92,7 +92,36 @@ void BatchJobRunner::notifyReductionResumed() {
     // autoreducing). Also reprocess failed items.
     m_processAll = m_isAutoreducing;
     m_processPartial = false;
-    m_reprocessFailed = !m_isAutoreducing;
+    // the group's rows to determine if it will be partially processed.
+    if (!m_processAll) {
+      // This comparator is needed to facilitate constructing a map with
+      // user-defined key types
+      auto comp = [](const Group &lhs, const Group &rhs) {
+        return lhs.rows().size() < rhs.rows().size();
+      };
+      // If a group is selected then it won't be partially processed so we
+      // only need to check those with selected rows
+      std::map<std::reference_wrapper<const Group>, size_t, decltype(comp)>
+          groupsWithSelectedRows(comp);
+      for (auto it = m_rowLocationsToProcess.begin();
+           it != m_rowLocationsToProcess.end(); ++it) {
+        if (isGroupLocation(*it)) {
+          std::advance(
+              it, getNumberOfInitialisedRowsInGroup(getGroupFromPath(*it)) - 1);
+          continue;
+        } else
+          ++groupsWithSelectedRows[getParentGroupFromPath(*it)];
+      }
+      for (const auto &groupCountPair : groupsWithSelectedRows) {
+        m_processPartial =
+            groupCountPair.second <
+            getNumberOfInitialisedRowsInGroup(groupCountPair.first.get());
+        if (m_processPartial)
+          break;
+      }
+      if (groupsWithSelectedRows.empty())
+        m_processPartial = false;
+      m_reprocessFailed = !m_isAutoreducing;
     if (!m_processAll) {
       // Check whether a given group is in the selection. If not then check
       // the group's rows to determine whether it will be partially processed,
@@ -122,7 +151,7 @@ void BatchJobRunner::notifyReductionResumed() {
         }
       }
     }
-  }
+    }
   m_batch.resetSkippedItems();
 }
 
