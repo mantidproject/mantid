@@ -232,8 +232,8 @@ API::Workspace_sptr LoadAscii2::readTable(std::ifstream &file) {
               uint32_t num = boost::lexical_cast<uint32_t>(*itData);
               row << std::move(num);
             } else if (type == "long64") {
-              long long num = boost::lexical_cast<long long>(*itData);
-              row << std::move(num);
+              auto num = boost::lexical_cast<int64_t>(*itData);
+              row << num;
             } else if (type == "size_t") {
               size_t num = boost::lexical_cast<size_t>(*itData);
               row << std::move(num);
