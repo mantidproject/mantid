@@ -141,7 +141,6 @@ class CurvesTabWidgetPresenter:
 
             ax.set_waterfall_fill_visible(curve_index)
 
-
     def populate_curve_combo_box_and_update_view(self):
         """
         Populate curve combo box and update the view with the curve's
