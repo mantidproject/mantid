@@ -279,19 +279,17 @@ class JanaFormat(object):
                     # no modulated structure information
                     modulation_indices = []
                 self._peaks.append(
-                    self.create_peak_line(peak.getH(), peak.getK(), peak.getL(), modulation_indices,
+                    self.create_peak_line(peak.getIntHKL(), modulation_indices,
                                           peak.getIntensity(), peak.getSigmaIntensity(),
                                           peak.getWavelength(),
                                           get_two_theta(peak.getDSpacing(), peak.getWavelength())))
 
-        def create_peak_line(self, h, k, l, mnp, intensity, sig_int, wavelength, two_theta):
+        def create_peak_line(self, hkl, mnp, intensity, sig_int, wavelength, two_theta):
             """
             Write the raw peak data to a file.
 
             :param f_handle: handle to the file to write to.
-            :param h: H index
-            :param k: K index
-            :param l: L index
+            :param hkl: Integer HKL indices
             :param mnp: List of mnp values
             :param intensity: Intensity of the peak
             :param sig_int: Signal value
@@ -300,7 +298,7 @@ class JanaFormat(object):
             """
             template = "{: >5.0f}{: >5.0f}{: >5.0f}{}{: >12.2f}{: >12.2f}{: >5.0f}{: >10.4f}{: >10.4f}{: >10.4f}{: >10.4f}{: >10.4f}\n"
             mod_indices = "".join(["{: >5.0f}".format(value) for value in mnp])
-            return template.format(h, k, l, mod_indices, intensity, sig_int, 1, wavelength,
+            return template.format(hkl[0], hkl[1], hkl[2], mod_indices, intensity, sig_int, 1, wavelength,
                                    two_theta, 1.0, 0.0, 0.0)
 
         def write(self):
