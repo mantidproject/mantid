@@ -51,6 +51,8 @@ class Polaris(AbstractInst):
     def create_total_scattering_pdf(self, **kwargs):
         if 'q_lims' not in kwargs:
             kwargs['q_lims'] = None
+        if 'output_binning' not in kwargs:
+            kwargs['output_binning'] = None
         self._inst_settings.update_attributes(kwargs=kwargs)
         # Generate pdf
         run_details = self._get_run_details(self._inst_settings.run_number)
@@ -61,7 +63,8 @@ class Polaris(AbstractInst):
                                                   merge_banks=self._inst_settings.merge_banks,
                                                   q_lims=self._inst_settings.q_lims,
                                                   cal_file_name=cal_file_name,
-                                                  sample_details=self._sample_details)
+                                                  sample_details=self._sample_details,
+                                                  output_binning=self._inst_settings.output_binning)
         return pdf_output
 
     def set_sample_details(self, **kwargs):
