@@ -11,6 +11,7 @@
 #include "GUI/Common/IFileHandler.h"
 #include "GUI/Common/IMessageHandler.h"
 #include "GUI/Options/IOptionsDialogPresenter.h"
+#include "GUI/Options/OptionsDialogPresenter.h"
 #include "GUI/Runs/IRunsPresenter.h"
 #include "IMainWindowView.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -59,6 +60,8 @@ MainWindowPresenter::MainWindowPresenter(
       m_optionsDialogPresenter(std::move(optionsDialogPresenter)),
       m_batchPresenterFactory(std::move(batchPresenterFactory)) {
   m_optionsDialogPresenter->subscribe(this);
+  m_optionsDialogPresenter->notifyInitOptions();
+  m_optionsDialogPresenter->notifySubscribeView();
   view->subscribe(this);
   for (auto *batchView : m_view->batches())
     addNewBatch(batchView);
