@@ -75,7 +75,8 @@ void ConvolutionFunctionModel::setModel(
   auto const nf = m_numberDomains > 0 ? static_cast<int>(m_numberDomains) : 1;
   for (int i = 0; i < nf; ++i) {
     if (isQDependent) {
-      IFunction::Attribute attr(qValues[i]);
+      auto qValue = qValues.empty() ? 0.0 : qValues[i];
+      IFunction::Attribute attr(qValue);
       auto peaksFunction = FunctionFactory::Instance().createInitialized(peaks);
       peaksFunction->setAttribute("Q", attr);
       modifiedPeaks = peaksFunction->asString();
@@ -84,7 +85,8 @@ void ConvolutionFunctionModel::setModel(
     }
     auto const model = hasDeltaFunction ? "name=DeltaFunction;" + modifiedPeaks
                                         : modifiedPeaks;
-    auto workspace = resolutionWorkspaces[i].first;
+    auto workspace =
+        resolutionWorkspaces.empty() ? "" : resolutionWorkspaces[i].first;
     resolution = workspace.empty()
                      ? "name=Resolution"
                      : "name=Resolution,Workspace=\"" + workspace +

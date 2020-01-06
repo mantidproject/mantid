@@ -138,7 +138,14 @@ void ConvFunctionModel::checkConvolution(IFunction_sptr fun) {
       if (isFitTypeSet) {
         throw std::runtime_error("Function has wrong structure.");
       }
-      m_fitType = FitType::InelasticDiffRotDiscreteCirclef;
+      m_fitType = FitType::InelasticDiffRotDiscreteCircle;
+      m_isQDependentFunction = true;
+      isFitTypeSet = true;
+    } else if (name == "ElasticDiffRotDiscreteCircle") {
+      if (isFitTypeSet) {
+        throw std::runtime_error("Function has wrong structure.");
+      }
+      m_fitType = FitType::ElasticDiffRotDiscreteCircle;
       m_isQDependentFunction = true;
       isFitTypeSet = true;
     } else if (name == "DeltaFunction") {
@@ -198,7 +205,14 @@ void ConvFunctionModel::checkComposite(IFunction_sptr fun) {
       if (isFitTypeSet) {
         throw std::runtime_error("Function has wrong structure.");
       }
-      m_fitType = FitType::InelasticDiffRotDiscreteCirclef;
+      m_fitType = FitType::InelasticDiffRotDiscreteCircle;
+      m_isQDependentFunction = true;
+      isFitTypeSet = true;
+    } else if (name == "ElasticDiffRotDiscreteCircle") {
+      if (isFitTypeSet) {
+        throw std::runtime_error("Function has wrong structure.");
+      }
+      m_fitType = FitType::ElasticDiffRotDiscreteCircle;
       m_isQDependentFunction = true;
       isFitTypeSet = true;
     } else if (name == "DeltaFunction") {
@@ -711,6 +725,11 @@ ConvFunctionModel::buildInelasticDiffRotDiscreteCircleFunctionString() const {
   return "name=InelasticDiffRotDiscreteCircle";
 }
 
+std::string
+ConvFunctionModel::buildElasticDiffRotDiscreteCircleFunctionString() const {
+  return "name=ElasticDiffRotDiscreteCircle";
+}
+
 std::string ConvFunctionModel::buildPeaksFunctionString() const {
   std::string functions;
   if (m_fitType == FitType::OneLorentzian) {
@@ -730,6 +749,8 @@ std::string ConvFunctionModel::buildPeaksFunctionString() const {
     functions.append(buildInelasticDiffSphereFunctionString());
   } else if (m_fitType == FitType::InelasticDiffRotDiscreteCircle) {
     functions.append(buildInelasticDiffRotDiscreteCircleFunctionString());
+  } else if (m_fitType == FitType::ElasticDiffRotDiscreteCircle) {
+    functions.append(buildElasticDiffRotDiscreteCircleFunctionString());
   }
   return functions;
 } // namespace IDA

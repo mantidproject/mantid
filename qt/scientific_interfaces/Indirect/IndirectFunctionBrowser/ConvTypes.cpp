@@ -17,7 +17,8 @@ std::map<FitType, bool> FitTypeQDepends =
                              {FitType::StretchedExpFT, false},
                              {FitType::ElasticDiffSphere, true},
                              {FitType::InelasticDiffSphere, true},
-                             {FitType::InelasticDiffRotDiscreteCircle, true}});
+                             {FitType::InelasticDiffRotDiscreteCircle, true},
+                             {FitType::ElasticDiffRotDiscreteCircle, true}});
 
 std::map<ParamID, QString> g_paramName{
     {ParamID::LOR1_AMPLITUDE, "Amplitude"},
@@ -49,6 +50,9 @@ std::map<ParamID, QString> g_paramName{
     {ParamID::IDRDC_RADIUS, "Radius"},
     {ParamID::IDRDC_DECAY, "Decay"},
     {ParamID::IDRDC_SHIFT, "Shift"},
+    {ParamID::EDRDC_HEIGHT, "Height"},
+    {ParamID::EDRDC_CENTRE, "Centre"},
+    {ParamID::EDRDC_RADIUS, "Radius"},
     {ParamID::FLAT_BG_A0, "A0"},
     {ParamID::LINEAR_BG_A0, "A0"},
     {ParamID::LINEAR_BG_A1, "A1"},
@@ -84,9 +88,13 @@ std::map<FitType, TemplateSubTypeDescriptor>
           "InelasticDiffSphere",
           {ParamID::IDP_INTENSITY, ParamID::IDP_SHIFT}}},
         {FitType::InelasticDiffRotDiscreteCircle,
-         {"InelasticDiffSphere",
-          "InelasticDiffSphere",
+         {"InelasticDiffRotDiscreteCircle",
+          "InelasticDiffRotDiscreteCircle",
           {ParamID::IDRDC_INTENSITY, ParamID::IDRDC_SHIFT}}},
+        {FitType::ElasticDiffRotDiscreteCircle,
+         {"ElasticDiffRotDiscreteCircle",
+          "ElasticDiffRotDiscreteCircle",
+          {ParamID::EDRDC_HEIGHT, ParamID::EDRDC_RADIUS}}},
     };
 
 template <>
