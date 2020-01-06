@@ -558,16 +558,18 @@ def interpolated_broadening(sigma=None, points=None, bins=None,
     spectra = np.array([convolve(hist, kernel, mode='same') for kernel in kernels])
 
     # Interpolate with parametrised relationship
-    sigma_locations = np.searchsorted(sigma, sigma_samples) # locations in full sigma of sampled values
+    sigma_locations = np.searchsorted(sigma_samples, sigma) # locations in sampled values of points from sigma
     spectrum = np.zeros_like(points)
-    for sample_i, left_sigma_i, right_sigma_i in zip(range(len(sigma_samples)),
-                                                     sigma_locations[:-1],
-                                                     sigma_locations[1:]):
-        sigma_chunk = sigma[left_sigma_i:right_sigma_i]
+    # Samples with sigma == min(sigma) are a special case: copy directly from spectrum
+    spectrum[sigma_locations==0] = spectra[0, sigma_locations==0]
 
-        sigma_factors = sigma_chunk / sigma_chunk[0]
-        left_mix = np.polyval(mix_functions[function][spacing]['lower'], sigma_factors)
-        right_mix = np.polyval(mix_functions[function][spacing]['upper'], sigma_factors)
-        spectrum[left_sigma_i:right_sigma_i] = (left_mix * spectra[sample_i, left_sigma_i:right_sigma_i]
-                                                + right_mix * spectra[sample_i + 1, left_sigma_i:right_sigma_i])
+    for i in range(1, len(sigma_samples)):
+        masked_block = (sigma_locations == i)
+        sigma_factors = sigma[masked_block] / sigma_samples[i - 1]
+        lower_mix = np.polyval(mix_functions[function][spacing]['lower'], sigma_factors)
+        upper_mix = np.polyval(mix_functions[function][spacing]['upper'], sigma_factors)
+
+        spectrum[masked_block] = (lower_mix * spectra[i-1, masked_block]
+                                  + upper_mix * spectra[i, masked_block])
+
     return points, spectrum
