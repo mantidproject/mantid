@@ -15,7 +15,9 @@ std::map<FitType, bool> FitTypeQDepends =
                              {FitType::TwoLorentzians, false},
                              {FitType::TeixeiraWater, true},
                              {FitType::StretchedExpFT, false},
-                             {FitType::ElasticDiffSphere, true}});
+                             {FitType::ElasticDiffSphere, true},
+                             {FitType::InelasticDiffSphere, true},
+                             {FitType::InelasticDiffRotDiscreteCircle, true}});
 
 std::map<ParamID, QString> g_paramName{
     {ParamID::LOR1_AMPLITUDE, "Amplitude"},
@@ -31,17 +33,25 @@ std::map<ParamID, QString> g_paramName{
     {ParamID::TW_DIFFCOEFF, "DiffCoeff"},
     {ParamID::TW_TAU, "Tau"},
     {ParamID::TW_CENTRE, "Centre"},
-    {ParamID::FLAT_BG_A0, "A0"},
-    {ParamID::LINEAR_BG_A0, "A0"},
-    {ParamID::LINEAR_BG_A1, "A1"},
     {ParamID::DELTA_HEIGHT, "Height"},
     {ParamID::SE_HEIGHT, "Height"},
     {ParamID::SE_TAU, "Tau"},
     {ParamID::SE_BETA, "Beta"},
     {ParamID::SE_CENTRE, "Centre"},
-    {ParamID::EDP_HEIGHT, "Centre"},
+    {ParamID::EDP_HEIGHT, "Height"},
     {ParamID::EDP_CENTRE, "Centre"},
-    {ParamID::EDP_RADIUS, "Centre"},
+    {ParamID::EDP_RADIUS, "Radius"},
+    {ParamID::IDP_INTENSITY, "Intensity"},
+    {ParamID::IDP_RADIUS, "Radius"},
+    {ParamID::IDP_DIFFUSION, "Diffusion"},
+    {ParamID::IDP_SHIFT, "Shift"},
+    {ParamID::IDRDC_INTENSITY, "Intensity"},
+    {ParamID::IDRDC_RADIUS, "Radius"},
+    {ParamID::IDRDC_DECAY, "Decay"},
+    {ParamID::IDRDC_SHIFT, "Shift"},
+    {ParamID::FLAT_BG_A0, "A0"},
+    {ParamID::LINEAR_BG_A0, "A0"},
+    {ParamID::LINEAR_BG_A1, "A1"},
 };
 
 template <>
@@ -69,6 +79,14 @@ std::map<FitType, TemplateSubTypeDescriptor>
          {"ElasticDiffSphere",
           "ElasticDiffSphere",
           {ParamID::EDP_HEIGHT, ParamID::EDP_RADIUS}}},
+        {FitType::InelasticDiffSphere,
+         {"InelasticDiffSphere",
+          "InelasticDiffSphere",
+          {ParamID::IDP_INTENSITY, ParamID::IDP_SHIFT}}},
+        {FitType::InelasticDiffRotDiscreteCircle,
+         {"InelasticDiffSphere",
+          "InelasticDiffSphere",
+          {ParamID::IDRDC_INTENSITY, ParamID::IDRDC_SHIFT}}},
     };
 
 template <>

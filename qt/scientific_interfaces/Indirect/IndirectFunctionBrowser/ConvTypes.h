@@ -29,6 +29,8 @@ enum class FitType {
   TeixeiraWater,
   StretchedExpFT,
   ElasticDiffSphere,
+  InelasticDiffSphere,
+  InelasticDiffRotDiscreteCircle,
 };
 
 extern std::map<FitType, bool> FitTypeQDepends;
@@ -58,6 +60,14 @@ enum class ParamID {
   EDP_HEIGHT,
   EDP_CENTRE,
   EDP_RADIUS,
+  IDP_INTENSITY,
+  IDP_RADIUS,
+  IDP_DIFFUSION,
+  IDP_SHIFT,
+  IDRDC_INTENSITY,
+  IDRDC_RADIUS,
+  IDRDC_DECAY,
+  IDRDC_SHIFT,
   FLAT_BG_A0,
   LINEAR_BG_A0,
   LINEAR_BG_A1,
