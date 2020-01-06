@@ -421,7 +421,9 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         ax.lines.reverse()
         ax.collections.reverse()
         ax.update_waterfall_plot(x, y)
-        ax.make_legend()
+
+        if ax.get_legend():
+            ax.make_legend()
 
     def launch_waterfall_offset_options(self):
         WaterfallPlotOffsetDialogPresenter(self.canvas.figure, parent=self.window)
