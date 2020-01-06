@@ -10,6 +10,8 @@
 #include "GUI/Common/IEncoder.h"
 #include "GUI/Common/IFileHandler.h"
 #include "GUI/Common/IMessageHandler.h"
+#include "GUI/Options/IOptionsDialogView.h"
+#include "GUI/Options/OptionsDialogPresenter.h"
 #include "GUI/Runs/IRunsPresenter.h"
 #include "IMainWindowView.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -40,6 +42,7 @@ Mantid::Kernel::Logger g_log("Reflectometry GUI");
  * @param encoder :: Interface for encoding a batch for saving to file
  * @param decoder :: Interface for decoding a batch loaded from file
  * @param slitCalculator :: Interface to the Slit Calculator dialog
+ * @param optionsDialogPresenter :: Interface to the Options dialog presenter
  * @param batchPresenterFactory :: [input] A factory to create the batches
  * we will manage
  */
@@ -48,12 +51,17 @@ MainWindowPresenter::MainWindowPresenter(
     IFileHandler *fileHandler, std::unique_ptr<IEncoder> encoder,
     std::unique_ptr<IDecoder> decoder,
     std::unique_ptr<ISlitCalculator> slitCalculator,
+    std::unique_ptr<IOptionsDialogPresenter> optionsDialogPresenter,
     std::unique_ptr<IBatchPresenterFactory> batchPresenterFactory)
     : m_view(view), m_messageHandler(messageHandler),
       m_fileHandler(fileHandler), m_instrument(), m_encoder(std::move(encoder)),
       m_decoder(std::move(decoder)),
       m_slitCalculator(std::move(slitCalculator)),
+      m_optionsDialogPresenter(std::move(optionsDialogPresenter)),
       m_batchPresenterFactory(std::move(batchPresenterFactory)) {
+  m_optionsDialogPresenter->subscribe(this);
+  m_optionsDialogPresenter->notifyInitOptions();
+  m_optionsDialogPresenter->notifySubscribeView();
   view->subscribe(this);
   for (auto *batchView : m_view->batches())
     addNewBatch(batchView);
@@ -87,7 +95,7 @@ void MainWindowPresenter::notifyCloseBatchRequested(int batchIndex) {
 }
 
 void MainWindowPresenter::notifyShowOptionsRequested() {
-  // TODO Show the options dialog when it is implemented
+  m_optionsDialogPresenter->showView();
 }
 
 void MainWindowPresenter::notifyShowSlitCalculatorRequested() {
@@ -154,6 +162,10 @@ bool MainWindowPresenter::isAnyBatchAutoreducing() const {
       return true;
   }
   return false;
+}
+
+void MainWindowPresenter::optionsChanged() const {
+  // TODO implement with round precision
 }
 
 void MainWindowPresenter::addNewBatch(IBatchView *batchView) {

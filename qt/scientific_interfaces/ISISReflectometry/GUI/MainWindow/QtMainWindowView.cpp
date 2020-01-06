@@ -11,6 +11,8 @@
 #include "GUI/Common/Decoder.h"
 #include "GUI/Common/Encoder.h"
 #include "GUI/Common/Plotter.h"
+#include "GUI/Options/OptionsDialogPresenter.h"
+#include "GUI/Options/QtOptionsDialogView.h"
 #include "MantidKernel/UsageService.h"
 #include "MantidQtWidgets/Common/QtJSONUtils.h"
 #include "MantidQtWidgets/Common/SlitCalculator.h"
@@ -32,6 +34,8 @@ DECLARE_SUBWINDOW_AND_CODERS(QtMainWindowView, Encoder, Decoder,
 
 QtMainWindowView::QtMainWindowView(QWidget *parent)
     : UserSubWindow(parent), m_notifyee(nullptr), m_batchIndex(1) {}
+
+QtMainWindowView::~QtMainWindowView() = default;
 
 IBatchView *QtMainWindowView::newBatch() {
   auto *newTab = new QtBatchView(this);
@@ -69,6 +73,8 @@ void QtMainWindowView::initLayout() {
           SLOT(onLoadBatchRequested(bool)));
   connect(m_ui.saveBatch, SIGNAL(triggered(bool)), this,
           SLOT(onSaveBatchRequested(bool)));
+  connect(m_ui.showOptions, SIGNAL(triggered(bool)), this,
+          SLOT(onShowOptionsRequested(bool)));
   connect(m_ui.showSlitCalculator, SIGNAL(triggered(bool)), this,
           SLOT(onShowSlitCalculatorRequested(bool)));
 
@@ -102,10 +108,13 @@ void QtMainWindowView::initLayout() {
 
   // Create the presenter
   auto slitCalculator = std::make_unique<SlitCalculator>(this);
+  auto optionsDialogView = std::make_unique<QtOptionsDialogView>(this);
+  auto optionsDialogPresenter =
+      std::make_unique<OptionsDialogPresenter>(optionsDialogView.get());
   m_presenter = std::make_unique<MainWindowPresenter>(
       this, messageHandler, fileHandler, std::make_unique<Encoder>(),
       std::make_unique<Decoder>(), std::move(slitCalculator),
-      std::move(makeBatchPresenter));
+      std::move(optionsDialogPresenter), std::move(makeBatchPresenter));
 
   m_notifyee->notifyNewBatchRequested();
   m_notifyee->notifyNewBatchRequested();

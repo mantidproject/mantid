@@ -23,6 +23,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
+class QtOptionsDialogView;
+
 /** @class QtMainWindowView
 
 MainWindowView is the concrete main window view implementing the
@@ -37,6 +39,11 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL QtMainWindowView
   Q_OBJECT
 public:
   explicit QtMainWindowView(QWidget *parent = nullptr);
+  ~QtMainWindowView();
+  QtMainWindowView(QtMainWindowView const &) = delete;
+  QtMainWindowView(QtMainWindowView &&) = delete;
+  QtMainWindowView &operator=(QtMainWindowView const &) = delete;
+  QtMainWindowView &operator=(QtMainWindowView &&) = delete;
 
   void subscribe(MainWindowSubscriber *notifyee) override;
 
