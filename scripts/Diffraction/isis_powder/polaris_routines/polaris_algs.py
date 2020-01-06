@@ -83,7 +83,14 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None,
                     sample_details=None):
     focused_ws = _obtain_focused_run(run_number, focus_file_path)
     focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, Target="MomentumTransfer", EMode='Elastic')
-    self_scattering_correction = _calculate_self_scattering_correction(run_number, cal_file_name, sample_details)
+
+    raw_ws = mantid.Load(Filename='POLARIS'+str(run_number)+'.nxs')
+    sample_geometry = common.generate_sample_geometry(sample_details)
+    sample_material = common.generate_sample_material(sample_details)
+    self_scattering_correction = mantid.TotScatCalculateSelfScattering(InputWorkspace=raw_ws,
+                                                                       CalFileName=cal_file_name,
+                                                                       SampleGeometry=sample_geometry,
+                                                                       SampleMaterial=sample_material)
 
     ws_group_list = []
     for i in range(self_scattering_correction.getNumberHistograms()):
@@ -97,7 +104,9 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None,
     focused_ws = mantid.Subtract(LHSWorkspace=focused_ws, RHSWorkspace=self_scattering_correction)
 
     if merge_banks:
-        merged_ws = _merge_workspace_with_limits(focused_ws, q_lims)
+        q_min, q_max = _load_qlims(q_lims)
+        merged_ws = mantid.MatchAndMergeWorkspaces(InputWorkspaces=focused_ws, XMin=q_min, XMax=q_max,
+                                                   CalculateScale=False)
         pdf_output = mantid.PDFFourierTransform(Inputworkspace=merged_ws, InputSofQType="S(Q)-1", PDFType="G(r)",
                                                 Filter=True)
     else:
@@ -135,53 +144,6 @@ def _obtain_focused_run(run_number, focus_file_path):
     return focused_ws
 
 
-def _merge_workspace_with_limits(focused_ws, q_lims):
-    min_x = np.inf
-    max_x = -np.inf
-    num_x = -np.inf
-    ws_max_range = 0
-    largest_range_spectrum = 0
-    for i in range(focused_ws.size()):
-        x_data = focused_ws[i].dataX(0)
-        min_x = min(np.min(x_data), min_x)
-        max_x = max(np.max(x_data), max_x)
-        num_x = max(x_data.size, num_x)
-        ws_range = np.max(x_data)-np.min(x_data)
-        if ws_range > ws_max_range:
-            largest_range_spectrum = i + 1
-            ws_max_range = ws_range
-    if min_x == -np.inf or max_x == np.inf:
-        raise AttributeError("Workspace x range contains an infinite value.")
-    focused_ws = mantid.Rebin(InputWorkspace=focused_ws, Params=[min_x, (max_x-min_x)/num_x, max_x])
-    while focused_ws.size() > 1:
-        mantid.ConjoinWorkspaces(InputWorkspace1=focused_ws[0],
-                                 InputWorkspace2=focused_ws[1])
-    focused_ws_conjoined = focused_ws[0]
-    mantid.MatchSpectra(InputWorkspace=focused_ws_conjoined, OutputWorkspace=focused_ws_conjoined,
-                        ReferenceSpectrum=largest_range_spectrum)
-
-    q_min, q_max = _load_qlims(q_lims)
-    bin_width = np.inf
-    for i in range(q_min.size):
-        pdf_x_array = focused_ws_conjoined.readX(i)
-        tmp1 = np.where(pdf_x_array >= q_min[i])
-        tmp2 = np.amin(tmp1)
-        q_min[i] = pdf_x_array[tmp2]
-        q_max[i] = pdf_x_array[np.amax(np.where(pdf_x_array <= q_max[i]))]
-        bin_width = min(pdf_x_array[1] - pdf_x_array[0], bin_width)
-
-    if min_x == -np.inf or max_x == np.inf:
-        raise AttributeError("Q lims contains an infinite value.")
-    focused_data_combined = mantid.CropWorkspaceRagged(InputWorkspace=focused_ws_conjoined, XMin=q_min, XMax=q_max)
-    focused_data_combined = mantid.Rebin(InputWorkspace=focused_data_combined,
-                                         Params=[min(q_min), bin_width, max(q_max)])
-    focused_data_combined = mantid.SumSpectra(InputWorkspace=focused_data_combined,
-                                              WeightedSum=True,
-                                              MultiplyBySpectra=False)
-    common.remove_intermediate_workspace(focused_ws_conjoined)
-    return focused_data_combined
-
-
 def _load_qlims(q_lims):
     if type(q_lims) == str or type(q_lims) == unicode:
         q_min = []
@@ -203,60 +165,6 @@ def _load_qlims(q_lims):
     else:
         raise RuntimeError("q_lims type is not valid")
     return q_min, q_max
-
-
-def _calculate_self_scattering_correction(run_number, cal_file_name, sample_details):
-    raw_ws = mantid.Load(Filename='POLARIS'+str(run_number)+'.nxs')
-    mantid.SetSample(InputWorkspace=raw_ws,
-                     Geometry=common.generate_sample_geometry(sample_details),
-                     Material=common.generate_sample_material(sample_details))
-    # find the closest monitor to the sample for incident spectrum
-    raw_spec_info = raw_ws.spectrumInfo()
-    incident_index = None
-    for i in range(raw_spec_info.size()):
-        if raw_spec_info.isMonitor(i):
-            l2 = raw_spec_info.position(i)[2]
-            if not incident_index:
-                incident_index = i
-            else:
-                if raw_spec_info.position(incident_index)[2] < l2 < 0:
-                    incident_index = i
-    monitor = mantid.ExtractSpectra(InputWorkspace=raw_ws, WorkspaceIndexList=[incident_index])
-    monitor = mantid.ConvertUnits(InputWorkspace=monitor, Target="Wavelength")
-    x_data = monitor.dataX(0)
-    min_x = np.min(x_data)
-    max_x = np.max(x_data)
-    width_x = (max_x - min_x) / x_data.size
-    fit_spectra = mantid.FitIncidentSpectrum(InputWorkspace=monitor,
-                                             BinningForCalc=[min_x, 1 * width_x, max_x],
-                                             BinningForFit=[min_x, 10 * width_x, max_x],
-                                             FitSpectrumWith="CubicSpline")
-    self_scattering_correction = mantid.CalculatePlaczekSelfScattering(InputWorkspace=raw_ws,
-                                                                       IncidentSpecta=fit_spectra)
-    cal_workspace = mantid.LoadCalFile(InputWorkspace=self_scattering_correction,
-                                       CalFileName=cal_file_name,
-                                       Workspacename='cal_workspace',
-                                       MakeOffsetsWorkspace=False,
-                                       MakeMaskWorkspace=False)
-    self_scattering_correction = mantid.DiffractionFocussing(InputWorkspace=self_scattering_correction,
-                                                             GroupingFilename=cal_file_name)
-    n_pixel = np.zeros(self_scattering_correction.getNumberHistograms())
-    for i in range(cal_workspace.getNumberHistograms()):
-        grouping = cal_workspace.dataY(i)
-        if grouping[0] > 0:
-            n_pixel[int(grouping[0] - 1)] += 1
-    correction_ws = mantid.CreateWorkspace(DataY=n_pixel, DataX=[0, 1],
-                                           NSpec=self_scattering_correction.getNumberHistograms())
-    self_scattering_correction = mantid.Divide(LHSWorkspace=self_scattering_correction, RHSWorkspace=correction_ws)
-    mantid.ConvertToDistribution(Workspace=self_scattering_correction)
-    self_scattering_correction = mantid.ConvertUnits(InputWorkspace=self_scattering_correction,
-                                                     Target="MomentumTransfer", EMode='Elastic')
-    common.remove_intermediate_workspace('cal_workspace_group')
-    common.remove_intermediate_workspace(correction_ws)
-    common.remove_intermediate_workspace(fit_spectra)
-    common.remove_intermediate_workspace(monitor)
-    common.remove_intermediate_workspace(raw_ws)
-    return self_scattering_correction
 
 
 def _determine_chopper_mode(ws):
