@@ -34,6 +34,7 @@ public:
   Slicing const &slicing() const;
 
   std::vector<MantidWidgets::Batch::RowLocation> selectedRowLocations() const;
+  std::vector<Group> selectedGroups() const;
   template <typename T>
   bool isInSelection(T const &item,
                      std::vector<MantidWidgets::Batch::RowLocation> const

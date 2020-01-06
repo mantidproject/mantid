@@ -220,6 +220,24 @@ bool MainWindowPresenter::isProcessPartialGroupPrevented() const {
   return false;
 }
 
+bool MainWindowPresenter::isProcessAllPrevented() const {
+  if (isWarnProcessAllChecked()) {
+    return !m_messageHandler->askUserYesNo(
+        "This will process all rows in the table. Continue?",
+        "Process all rows?");
+  }
+  return false;
+}
+
+bool MainWindowPresenter::isProcessPartialGroupPrevented() const {
+  if (isWarnProcessAllChecked()) {
+    return !m_messageHandler->askUserYesNo(
+        "Some groups will not be fully processed. Continue?",
+        "Process partial group?");
+  }
+  return false;
+}
+
 /** Checks whether there are any unsaved changed in the specified batch */
 bool MainWindowPresenter::isBatchUnsaved(int batchIndex) const {
   return m_batchPresenters[batchIndex]->isBatchUnsaved();
