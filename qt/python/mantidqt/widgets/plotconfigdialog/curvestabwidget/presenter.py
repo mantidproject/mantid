@@ -139,6 +139,9 @@ class CurvesTabWidgetPresenter:
                 # the curve has been reset to its original position so for a waterfall plot it needs to be re-offset.
                 ax.convert_single_line_to_waterfall(curve_index)
 
+            ax.set_waterfall_fill_visible(curve_index)
+
+
     def populate_curve_combo_box_and_update_view(self):
         """
         Populate curve combo box and update the view with the curve's

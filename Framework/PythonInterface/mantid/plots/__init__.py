@@ -1175,11 +1175,8 @@ class MantidAxes(Axes):
         self.waterfall_remove_fill()
 
     def convert_single_line_to_waterfall(self, index, need_to_update_fill=False):
-        # If the curve index is 0 then nothing needs to change.
-        if index == 0:
-            return
-
         line = self.get_lines()[index]
+
         amount_to_move_x = index * self.width * (self.waterfall_x_offset / 500)
         line.set_xdata(line.get_xdata() + amount_to_move_x)
         amount_to_move_y = index * self.height * (self.waterfall_y_offset / 500)
@@ -1211,6 +1208,19 @@ class MantidAxes(Axes):
                         collection.set_color(line.get_color())
                         break
                     i = i + 1
+
+    def set_waterfall_fill_visible(self, index):
+        if not self.waterfall_has_fill():
+            return
+
+        line = self.get_lines()[index]
+        i = 0
+        for collection in self.collections:
+            if isinstance(collection, PolyCollection):
+                if i == index:
+                    collection.set_visible(line.get_visible())
+                    break
+                i = i + 1
 
     def waterfall_has_fill(self):
         if any(isinstance(collection, PolyCollection) for collection in self.collections):

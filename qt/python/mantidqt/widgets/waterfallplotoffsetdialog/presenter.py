@@ -44,9 +44,7 @@ class WaterfallPlotOffsetDialogPresenter:
                 self.keep_proportion_on = False
                 return
 
-            proportion = float(prev_x) / float(new_x)
-
-            self.view.set_y_offset(self.view.get_y_offset() / proportion)
+            self.view.set_y_offset(self.view.get_x_offset() / self.proportion)
 
     def update_y_offset(self):
         prev_y = self.ax.waterfall_y_offset
@@ -59,12 +57,11 @@ class WaterfallPlotOffsetDialogPresenter:
                 self.keep_proportion_on = False
                 return
 
-            proportion = float(prev_y) / float(new_y)
-
-            self.view.set_x_offset(self.view.get_x_offset() / proportion)
+            self.view.set_x_offset(self.view.get_y_offset() * self.proportion)
 
     def keep_proportion(self, enabled):
         if enabled:
             self.keep_proportion_on = True
+            self.proportion = float(self.view.get_x_offset()) / float(self.view.get_y_offset())
         else:
             self.keep_proportion_on = False
