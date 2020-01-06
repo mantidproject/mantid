@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MANTIDWIDGETS_OPTIONSDIALOGPRESENTERTEST_H
-#define MANTID_MANTIDWIDGETS_OPTIONSDIALOGPRESENTERTEST_H
+#ifndef MANTID_MANTIDWIDGETS_OPTIONSDIALOGTEST_H
+#define MANTID_MANTIDWIDGETS_OPTIONSDIALOGTEST_H
 
 #include "GUI/Options/OptionsDialogPresenter.h"
 #include "MockOptionsDialogModel.h"
@@ -23,213 +23,132 @@ using testing::Return;
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 
-class OptionsDialogPresenterTest : public CxxTest::TestSuite {
+class OptionsDialogTest : public CxxTest::TestSuite {
 public:
-  static OptionsDialogPresenterTest *createSuite() {
-    return new OptionsDialogPresenterTest();
-  }
-  static void destroySuite(OptionsDialogPresenterTest *suite) { delete suite; }
+  static OptionsDialogTest *createSuite() { return new OptionsDialogTest(); }
+  static void destroySuite(OptionsDialogTest *suite) { delete suite; }
 
-  OptionsDialogPresenterTest() : m_view(), m_model() {}
-
-  void setUp() override {}
-
-  void tearDown() override {}
+  OptionsDialogTest()
+      : m_view(), m_model(), m_boolOptions{{"WarnDiscardChanges", true},
+                                           {"WarnProcessAll", true},
+                                           {"WarnProcessPartialGroup ", true},
+                                           {"Round", false}},
+        m_intOptions{{"RoundPrecision", 3}} {}
 
   void testPresenterSubscribesToView() {
-    EXPECT_CALL(m_view, subscribe(_)).Times(1);
     auto presenter = makePresenter();
+    EXPECT_CALL(m_view, subscribe(_)).Times(1);
+    presenter.notifySubscribeView();
     verifyAndClear();
   }
 
   void testInitOptionsClearsVariables() {
-    auto model =
-        std::make_unique<NiceMock<MockOptionsDialogModelUnsuccessfulLoad>>();
-    auto presenter = makePresenter(std::move(model));
-    presenter.initOptions();
-    TS_ASSERT_EQUALS(presenter.m_boolOptions.size(), 0);
-    TS_ASSERT_EQUALS(presenter.m_intOptions.size(), 0);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_modelUnsuccessfulLoad));
+    auto presenter = makePresenter();
+    EXPECT_EQ(m_boolOptions.size(), 0);
+    EXPECT_EQ(m_intOptions.size(), 0);
+    presenter.notifyInitOptions();
+    verifyAndClear();
   }
 
   void testInitOptionsAttemptsToLoadFromModel() {
     auto presenter = makePresenter();
-    auto mainWindowSubscriber =
-        std::make_unique<NiceMock<MockOptionsDialogPresenterSubscriber>>();
-    presenter.subscribe(mainWindowSubscriber.get());
-    presenter.notifySaveOptions();
-    EXPECT_CALL(*m_model, loadSettingsProxy(presenter.m_boolOptions,
-                                            presenter.m_intOptions))
+    EXPECT_CALL(m_model, loadSettingsProxy(m_boolOptions, m_intOptions))
+        .Times(1)
         .WillOnce(Return());
-    presenter.initOptions();
-    assertLoadOptions(presenter);
+    presenter.notifyInitOptions();
+    assertLoadOptions();
     verifyAndClear();
   }
 
   void testInitOptionsAppliesDefaultOptionsIfLoadUnsuccessful() {
-    auto model = std::make_unique<
-        NiceMock<MockOptionsDialogModelUnsuccessfulDefaults>>();
-    auto presenter = makePresenter(std::move(model));
-    EXPECT_CALL(*m_modelUnsuccessfulDefaults, loadSettings(_, _))
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_model, loadSettingsProxy(m_boolOptions, m_intOptions))
+        .Times(1)
         .WillOnce(Return());
-    EXPECT_CALL(*m_modelUnsuccessfulDefaults, applyDefaultOptionsProxy(_, _))
+    EXPECT_CALL(m_model, applyDefaultOptionsProxy(m_boolOptions, m_intOptions))
+        .Times(1)
         .WillOnce(Return());
-    presenter.initOptions();
-    assertDefaultOptions(presenter);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_modelUnsuccessfulDefaults));
+    presenter.notifyInitOptions();
+    assertDefaultOptions();
+    verifyAndClear();
   }
 
   void testLoadOptionsQueriesModel() {
     auto presenter = makePresenter();
-    auto mainWindowSubscriber =
-        std::make_unique<NiceMock<MockOptionsDialogPresenterSubscriber>>();
-    presenter.subscribe(mainWindowSubscriber.get());
-    presenter.notifySaveOptions();
-    EXPECT_CALL(*m_model, loadSettingsProxy(presenter.m_boolOptions,
-                                            presenter.m_intOptions))
-        .Times(AtLeast(1));
-    EXPECT_CALL(*mainWindowSubscriber.get(), notifyOptionsChanged())
-        .Times(AtLeast(1));
-    presenter.notifyLoadOptions();
-    assertLoadOptions(presenter);
-    verifyAndClear(std::move(mainWindowSubscriber));
+    EXPECT_CALL(m_model, loadSettingsProxy(m_boolOptions, m_intOptions))
+        .Times(1)
+        .WillOnce(Return());
+    assertLoadOptions();
+    presenter.loadOptions();
+    verifyAndClear();
   }
 
   void testLoadOptionsUpdatesView() {
     auto presenter = makePresenter();
-    auto mainWindowSubscriber =
-        std::make_unique<NiceMock<MockOptionsDialogPresenterSubscriber>>();
-    presenter.subscribe(mainWindowSubscriber.get());
-    presenter.notifySaveOptions();
-    EXPECT_CALL(m_view,
-                setOptions(presenter.m_boolOptions, presenter.m_intOptions))
-        .Times(AtLeast(1));
-    EXPECT_CALL(*mainWindowSubscriber.get(), notifyOptionsChanged())
-        .Times(AtLeast(1));
-    presenter.notifyLoadOptions();
-    assertLoadOptions(presenter);
-    verifyAndClear(std::move(mainWindowSubscriber));
+    EXPECT_CALL(m_view, setOptions(m_boolOptions, m_intOptions)).Times(1);
+    presenter.loadOptions();
+    verifyAndClear();
   }
 
   void testLoadOptionsNotifiesMainWindow() {
     auto presenter = makePresenter();
-    auto mainWindowSubscriber =
-        std::make_unique<NiceMock<MockOptionsDialogPresenterSubscriber>>();
-    EXPECT_CALL(*mainWindowSubscriber.get(), notifyOptionsChanged())
-        .Times(AtLeast(1));
-    presenter.subscribe(mainWindowSubscriber.get());
-    presenter.notifyLoadOptions();
-    assertLoadOptions(presenter);
-    verifyAndClear(std::move(mainWindowSubscriber));
+    EXPECT_CALL(m_notifyee, optionsChanged()).Times(1);
+    presenter.loadOptions();
+    verifyAndClear();
   }
 
   void testSaveOptionsUpdatesModel() {
     auto presenter = makePresenter();
-    auto mainWindowSubscriber =
-        std::make_unique<NiceMock<MockOptionsDialogPresenterSubscriber>>();
-    presenter.subscribe(mainWindowSubscriber.get());
-    presenter.notifyLoadOptions();
-    EXPECT_CALL(*m_model,
-                saveSettings(presenter.m_boolOptions, presenter.m_intOptions))
-        .Times(AtLeast(1));
-    presenter.notifySaveOptions();
+    EXPECT_CALL(m_model, saveSettings(m_boolOptions, m_intOptions)).Times(1);
+    presenter.saveOptions();
     verifyAndClear();
   }
 
   void testSaveOptionsNotifiesMainWindow() {
     auto presenter = makePresenter();
-    auto mainWindowSubscriber =
-        std::make_unique<NiceMock<MockOptionsDialogPresenterSubscriber>>();
-    EXPECT_CALL(*mainWindowSubscriber.get(), notifyOptionsChanged())
-        .Times(AtLeast(1));
-    presenter.subscribe(mainWindowSubscriber.get());
-    presenter.notifySaveOptions();
-    verifyAndClear(std::move(mainWindowSubscriber));
+    EXPECT_CALL(m_notifyee, optionsChanged()).Times(1);
+    presenter.saveOptions();
+    verifyAndClear();
   }
 
   void testSaveOptionsQueriesView() {
     auto presenter = makePresenter();
-    auto mainWindowSubscriber =
-        std::make_unique<NiceMock<MockOptionsDialogPresenterSubscriber>>();
-
-    presenter.subscribe(mainWindowSubscriber.get());
-    presenter.notifyLoadOptions();
-    EXPECT_CALL(m_view,
-                getOptions(presenter.m_boolOptions, presenter.m_intOptions))
-        .Times(AtLeast(1));
-    presenter.notifySaveOptions();
+    EXPECT_CALL(m_view, getOptions(m_boolOptions, m_intOptions)).Times(1);
+    presenter.saveOptions();
     verifyAndClear();
   }
 
 private:
-  class OptionsDialogPresenterFriend : public OptionsDialogPresenter {
-    friend class OptionsDialogPresenterTest;
-
-  public:
-    OptionsDialogPresenterFriend() = default;
-    OptionsDialogPresenterFriend(IOptionsDialogView *view,
-                                 std::unique_ptr<IOptionsDialogModel> model)
-        : OptionsDialogPresenter(view, std::move(model)) {}
-  };
-
   NiceMock<MockOptionsDialogView> m_view;
-  NiceMock<MockOptionsDialogModel> *m_model;
-  NiceMock<MockOptionsDialogModelUnsuccessfulLoad> *m_modelUnsuccessfulLoad;
-  NiceMock<MockOptionsDialogModelUnsuccessfulDefaults>
-      *m_modelUnsuccessfulDefaults;
+  NiceMock<MockOptionsDialogModel> m_model;
+  NiceMock<MockOptionsDialogMainWindowSubscriber> m_notifyee;
+  std::map<std::string, bool> m_boolOptions;
+  std::map<std::string, int> m_intOptions;
 
-  OptionsDialogPresenterFriend makePresenter() {
-    auto model = std::make_unique<NiceMock<MockOptionsDialogModel>>();
-    m_model = model.get();
-    auto presenter = OptionsDialogPresenterFriend(&m_view, std::move(model));
+  OptionsDialogPresenter makePresenter() {
+    auto presenter = OptionsDialogPresenter(&m_view);
     return presenter;
   }
 
-  OptionsDialogPresenterFriend makePresenter(
-      std::unique_ptr<NiceMock<MockOptionsDialogModelUnsuccessfulLoad>> model) {
-    m_modelUnsuccessfulLoad = model.get();
-    auto presenter = OptionsDialogPresenterFriend(&m_view, std::move(model));
-    return presenter;
+  void assertLoadOptions() {
+    TS_ASSERT_EQUALS(m_boolOptions["WarnProcessAll"], false);
+    TS_ASSERT_EQUALS(m_boolOptions["WarnDiscardChanges"], true);
+    TS_ASSERT_EQUALS(m_boolOptions["WarnProcessPartialGroup"], false);
+    TS_ASSERT_EQUALS(m_boolOptions["Round"], true);
+    TS_ASSERT_EQUALS(m_intOptions["RoundPrecision"], 2);
   }
 
-  OptionsDialogPresenterFriend makePresenter(
-      std::unique_ptr<NiceMock<MockOptionsDialogModelUnsuccessfulDefaults>>
-          model) {
-    m_modelUnsuccessfulDefaults = model.get();
-    auto presenter = OptionsDialogPresenterFriend(&m_view, std::move(model));
-    presenter.m_boolOptions["WarnDiscardChanges"] = true;
-    presenter.m_boolOptions["WarnProcessAll"] = true;
-    presenter.m_boolOptions["WarnProcessPartialGroup"] = true;
-    presenter.m_boolOptions["Round"] = false;
-    presenter.m_intOptions["RoundPrecision"] = 3;
-    return presenter;
+  void assertDefaultOptions() {
+    TS_ASSERT_EQUALS(m_boolOptions["WarnProcessAll"], false);
+    TS_ASSERT_EQUALS(m_boolOptions["WarnDiscardChanges"], false);
+    TS_ASSERT_EQUALS(m_boolOptions["WarnProcessPartialGroup"], false);
+    TS_ASSERT_EQUALS(m_boolOptions["Round"], true);
+    TS_ASSERT_EQUALS(m_intOptions["RoundPrecision"], 5);
   }
 
-  void assertLoadOptions(OptionsDialogPresenterFriend &presenter) {
-    TS_ASSERT_EQUALS(presenter.m_boolOptions["WarnProcessAll"], false);
-    TS_ASSERT_EQUALS(presenter.m_boolOptions["WarnDiscardChanges"], true);
-    TS_ASSERT_EQUALS(presenter.m_boolOptions["WarnProcessPartialGroup"], false);
-    TS_ASSERT_EQUALS(presenter.m_boolOptions["Round"], true);
-    TS_ASSERT_EQUALS(presenter.m_intOptions["RoundPrecision"], 2);
-  }
-
-  void assertDefaultOptions(OptionsDialogPresenterFriend &presenter) {
-    TS_ASSERT_EQUALS(presenter.m_boolOptions["WarnProcessAll"], false);
-    TS_ASSERT_EQUALS(presenter.m_boolOptions["WarnDiscardChanges"], false);
-    TS_ASSERT_EQUALS(presenter.m_boolOptions["WarnProcessPartialGroup"], false);
-    TS_ASSERT_EQUALS(presenter.m_boolOptions["Round"], true);
-    TS_ASSERT_EQUALS(presenter.m_intOptions["RoundPrecision"], 5);
-  }
-
-  void
-  verifyAndClear(std::unique_ptr<NiceMock<MockOptionsDialogPresenterSubscriber>>
-                     mainWindowSubscriber = std::make_unique<
-                         NiceMock<MockOptionsDialogPresenterSubscriber>>()) {
+  void verifyAndClear() {
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_model));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mainWindowSubscriber));
   }
 };
-#endif // MANTID_MANTIDWIDGETS_OPTIONSDIALOGPRESENTERTEST_H
+#endif // MANTID_MANTIDWIDGETS_OPTIONSDIALOGTEST_H
