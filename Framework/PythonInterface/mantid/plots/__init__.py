@@ -1165,6 +1165,9 @@ class MantidAxes(Axes):
         if self.is_waterfall_plot():
             return
 
+        if not hasattr(self, 'width'):
+            self.set_initial_dimensions(self.get_xlim(), self.get_ylim())
+
         self.update_waterfall_plot(10, 20)
 
     def convert_from_waterfall(self):
@@ -1200,27 +1203,28 @@ class MantidAxes(Axes):
         # If the curves are filled and the fill has been set to match the line colour and the line colour has changed
         # then the fill's colour is updated.
         if need_to_update_fill:
-            # Finds the fill that corresponds to the line being updated.
-            i = 0
-            for collection in self.collections:
-                if isinstance(collection, PolyCollection):
-                    if i == index:
-                        collection.set_color(line.get_color())
-                        break
-                    i = i + 1
+            fill = self.get_waterfall_fill_for_curve(index)
+            fill.set_color(line.get_color())
 
     def set_waterfall_fill_visible(self, index):
         if not self.waterfall_has_fill():
             return
 
         line = self.get_lines()[index]
+        fill = self.get_waterfall_fill_for_curve(index)
+        fill.set_visible(line.get_visible())
+
+    def get_waterfall_fill_for_curve(self, index):
+        # Takes the index of a curve and returns that curve's filled area.
         i = 0
         for collection in self.collections:
             if isinstance(collection, PolyCollection):
                 if i == index:
-                    collection.set_visible(line.get_visible())
+                    fill = collection
                     break
                 i = i + 1
+
+        return fill
 
     def waterfall_has_fill(self):
         if any(isinstance(collection, PolyCollection) for collection in self.collections):

@@ -280,6 +280,25 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         self.assertEqual(presenter.view.errorbars.set_error_every.call_count, 0)
         self.assertEqual(mock_apply_properties.call_count, 3)
 
+    def test_hiding_a_curve_on_a_waterfall_plot_also_hides_its_filled_area(self):
+        fig = self.make_figure_with_multiple_curves()
+
+        mock_view = Mock(get_selected_ax_name=lambda: "Axes 0: (0, 0)",
+                         get_selected_curve_name=lambda: "Workspace")
+        mock_view.select_curve_combo_box.currentIndex.return_value = 0
+
+        ax = fig.get_axes()[0]
+        ax.set_waterfall_toolbar_options_enabled = Mock()
+        ax.convert_to_waterfall()
+        ax.waterfall_create_fill()
+
+        presenter = self._generate_presenter(fig=fig, mock_view=mock_view)
+
+        new_plot_kwargs = {'visible': False}
+        presenter._replot_selected_curve(new_plot_kwargs)
+
+        self.assertEqual(ax.get_waterfall_fill_for_curve(0).get_visible(), False)
+
 
 if __name__ == '__main__':
     unittest.main()
