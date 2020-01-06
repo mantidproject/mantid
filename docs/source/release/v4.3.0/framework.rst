@@ -19,6 +19,7 @@ Improvements
 ############
 
 - Fixed a bug in :ref:`LoadNGEM <algm-LoadNGEM>` where precision was lost due to integer arithmetic.
+- Prevent units that are not suitable for :ref:`ConvertUnits <algm-ConvertUnits>` being entered as the target unit.
 
 Algorithms
 ----------
