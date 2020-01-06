@@ -227,30 +227,30 @@ API::Workspace_sptr LoadAscii2::readTable(std::ifstream &file) {
               row << *itData;
             } else if (type == "int") {
               int num = boost::lexical_cast<int>(*itData);
-              row << std::move(num);
+              row << num;
             } else if (type == "uint") {
               uint32_t num = boost::lexical_cast<uint32_t>(*itData);
-              row << std::move(num);
+              row << num;
             } else if (type == "long64") {
               auto num = boost::lexical_cast<int64_t>(*itData);
               row << num;
             } else if (type == "size_t") {
               size_t num = boost::lexical_cast<size_t>(*itData);
-              row << std::move(num);
+              row << num;
             } else if (type == "float") {
               float num = boost::lexical_cast<float>(*itData);
-              row << std::move(num);
+              row << num;
             } else if (type == "double") {
               double num = boost::lexical_cast<double>(*itData);
-              row << std::move(num);
+              row << num;
             } else if (type == "bool") {
               bool val = (itData->at(0) == 't');
-              row << std::move(val);
+              row << val;
             } else if (type == "V3D") {
               V3D val;
               std::stringstream ss(*itData);
               val.readPrinted(ss);
-              row << std::move(val);
+              row << val;
             } else {
               throw std::runtime_error("unknown column data type " + type);
             }

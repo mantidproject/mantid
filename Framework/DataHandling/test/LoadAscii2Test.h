@@ -442,12 +442,12 @@ private:
     TS_ASSERT_EQUALS(outputWS->columnCount(), wsToCompare->columnCount());
     TS_ASSERT_EQUALS(outputWS->rowCount(), wsToCompare->rowCount());
 
-    for (auto colIndex = 0; colIndex < outputWS->columnCount(); colIndex++) {
+    for (size_t colIndex = 0; colIndex < outputWS->columnCount(); colIndex++) {
       auto outputCol = outputWS->getColumn(colIndex);
       auto compareCol = wsToCompare->getColumn(colIndex);
       TS_ASSERT_EQUALS(outputCol->name(), compareCol->name());
       TS_ASSERT_EQUALS(outputCol->type(), compareCol->type());
-      for (auto rowIndex = 0; rowIndex < outputWS->rowCount(); rowIndex++) {
+      for (size_t rowIndex = 0; rowIndex < outputWS->rowCount(); rowIndex++) {
 
         std::stringstream ssOutput;
         std::stringstream ssCompare;
