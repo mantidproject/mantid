@@ -11,17 +11,18 @@
 
 #include "Common/DllConfig.h"
 #include "ui_QtOptionsDialogView.h"
-#include <map>
 #include <QDialog>
 #include <QVariant>
+#include <map>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
 /// OptionsDialog : Provides a dialog for setting options.
-class MANTIDQT_ISISREFLECTOMETRY_DLL QtOptionsDialogView : public QDialog,
-                                                 public IOptionsDialogView {
+class MANTIDQT_ISISREFLECTOMETRY_DLL QtOptionsDialogView
+    : public QDialog,
+      public IOptionsDialogView {
   Q_OBJECT
 public:
   QtOptionsDialogView(QWidget *parent);

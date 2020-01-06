@@ -17,10 +17,8 @@ namespace ISISReflectometry {
  * @param view :: a handle to a view for this presenter
  * @param model :: a handle to a model for this presenter
  */
-OptionsDialogPresenter::OptionsDialogPresenter(
-    IOptionsDialogView *view)
-    : m_view(view), m_notifyee(),
-      m_model(OptionsDialogModel()){}
+OptionsDialogPresenter::OptionsDialogPresenter(IOptionsDialogView *view)
+    : m_view(view), m_notifyee(), m_model(OptionsDialogModel()) {}
 
 /** Allow options to be initialised once the main presenter
     is constructed (necessary due to rounding impl)
@@ -71,7 +69,7 @@ bool OptionsDialogPresenter::getBoolOption(std::string &optionName) {
 }
 
 /* Get an int option state */
-int& OptionsDialogPresenter::getIntOption(std::string &optionName) {
+int &OptionsDialogPresenter::getIntOption(std::string &optionName) {
   return m_intOptions[optionName];
 }
 

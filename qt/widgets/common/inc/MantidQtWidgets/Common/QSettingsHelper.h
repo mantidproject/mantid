@@ -7,14 +7,14 @@
 #ifndef MANTID_QSETTINGSHELPER_H
 #define MANTID_QSETTINGSHELPER_H
 
-#include <map>
-#include <string>
-#include <typeinfo>
 #include <QMetaType>
 #include <QSettings>
 #include <QString>
 #include <QStringList>
 #include <QVariant>
+#include <map>
+#include <string>
+#include <typeinfo>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -54,8 +54,7 @@ std::map<std::string, T> getSettingsAsMap(std::string const &settingGroup) {
   for (auto &settingName : settingNames) {
     std::string settingTypeName;
     if (settingName.endsWith("/type")) {
-      settingTypeName =
-          settings.value(settingName).toString().toStdString();
+      settingTypeName = settings.value(settingName).toString().toStdString();
       if (settingTypeName == templateTypeName) {
         auto settingValueName =
             settingName.replace(QString("/type"), QString("/value"));
@@ -83,8 +82,10 @@ void setSetting(std::string const &settingGroup, std::string const &settingName,
                 T const &value) {
   QSettings settings;
   settings.beginGroup(QString::fromStdString(settingGroup));
-  settings.setValue(QString::fromStdString(settingName).append("/value"), value);
-  settings.setValue(QString::fromStdString(settingName).append("/type"), typeid(value).name());
+  settings.setValue(QString::fromStdString(settingName).append("/value"),
+                    value);
+  settings.setValue(QString::fromStdString(settingName).append("/type"),
+                    typeid(value).name());
   settings.endGroup();
 }
 

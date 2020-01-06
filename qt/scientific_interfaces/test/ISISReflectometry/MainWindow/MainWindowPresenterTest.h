@@ -16,8 +16,8 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/MockSlitCalculator.h"
 #include "MockMainWindowView.h"
-#include "test/ISISReflectometry/Options/MockOptionsDialogView.h"
 #include "test/ISISReflectometry/Options/MockOptionsDialogPresenter.h"
+#include "test/ISISReflectometry/Options/MockOptionsDialogView.h"
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -393,18 +393,19 @@ public:
         .Times(1)
         .WillOnce(Return(true));
     // will work when merged
-    //EXPECT_CALL(m_messageHandler, askUserForLoadFileName("JSON (*.json)"))
+    // EXPECT_CALL(m_messageHandler, askUserForLoadFileName("JSON (*.json)"))
     //    .Times(1)
     //    .WillOnce(Return(filename));
-    //EXPECT_CALL(m_fileHandler, loadJSONFromFile(filename))
+    // EXPECT_CALL(m_fileHandler, loadJSONFromFile(filename))
     //    .Times(1)
     //    .WillOnce(Return(map));
-    //EXPECT_CALL(*m_decoder, decodeBatch(&m_view, batchIndex, map)).Times(1);
+    // EXPECT_CALL(*m_decoder, decodeBatch(&m_view, batchIndex, map)).Times(1);
     presenter.notifyLoadBatchRequested(batchIndex);
     verifyAndClear();
   }
 
-  void testWarningGivenCloseGUIWithUnsavedChanges() { auto presenter = makePresenter();
+  void testWarningGivenCloseGUIWithUnsavedChanges() {
+    auto presenter = makePresenter();
     EXPECT_CALL(*m_optionsDialogPresenter,
                 getBoolOption(std::string("WarnDiscardChanges")))
         .Times(1);
@@ -458,8 +459,7 @@ public:
     auto presenter = makePresenter();
     m_batchPresenters[0]->setUnsavedBatchFlag(true);
     for (auto batchPresenter : m_batchPresenters)
-    EXPECT_CALL(*batchPresenter, getUnsavedBatchFlag())
-        .Times(1);
+      EXPECT_CALL(*batchPresenter, getUnsavedBatchFlag()).Times(1);
     TS_ASSERT(presenter.isAnyBatchUnsaved(), true);
     verifyAndClear();
   }
@@ -473,7 +473,8 @@ private:
   std::vector<IBatchView *> m_batchViews;
   std::vector<NiceMock<MockBatchPresenter> *> m_batchPresenters;
   NiceMock<MockBatchPresenterFactory> *m_makeBatchPresenter;
-  std::unique_ptr<NiceMock<MockOptionsDialogPresenter>> m_optionsDialogPresenter;
+  std::unique_ptr<NiceMock<MockOptionsDialogPresenter>>
+      m_optionsDialogPresenter;
   NiceMock<MockSlitCalculator> *m_slitCalculator;
 
   class MainWindowPresenterFriend : public MainWindowPresenter {

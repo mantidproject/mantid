@@ -69,9 +69,7 @@ void QtSaveView::connectSettingsChange(QRadioButton &edit) {
   connect(&edit, SIGNAL(clicked()), this, SLOT(onSettingsChanged()));
 }
 
-void QtSaveView::onSettingsChanged() {
-  m_notifyee->notifySettingsChanged();
-}
+void QtSaveView::onSettingsChanged() { m_notifyee->notifySettingsChanged(); }
 
 void QtSaveView::connectInstrumentSettingsWidgets() {
   connectSettingsChange(*m_ui.savePathEdit);

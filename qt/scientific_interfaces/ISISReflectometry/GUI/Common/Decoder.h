@@ -71,7 +71,8 @@ private:
                   boost::optional<int> precision);
   void decodeRunsTable(QtRunsTableView *gui, ReductionJobs *redJobs,
                        RunsTablePresenter *presenter,
-                       const QMap<QString, QVariant> &map, boost::optional<int> precision);
+                       const QMap<QString, QVariant> &map,
+                       boost::optional<int> precision);
   void decodeRunsTableModel(ReductionJobs *jobs, const QList<QVariant> &list);
   MantidQt::CustomInterfaces::ISISReflectometry::Group
   decodeGroup(const QMap<QString, QVariant> &map);

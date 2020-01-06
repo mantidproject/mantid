@@ -72,7 +72,8 @@ template <typename T> std::string valueToString(T value, int precision) {
  * @return The value as a string (with specified precision if given)
  *
  */
-template <typename T> std::string valueToString(T value, boost::optional<int> precision) {
+template <typename T>
+std::string valueToString(T value, boost::optional<int> precision) {
   if (precision.is_initialized())
     return valueToString(value, precision.get());
   return std::to_string(value);
@@ -82,11 +83,13 @@ template <typename T> std::string valueToString(T value, boost::optional<int> pr
  *
  * @param maybeValue optional input value
  * @param precision optional output precision
- * @return The value as a string (with specified precision if given) or empty string
+ * @return The value as a string (with specified precision if given) or empty
+ * string
  *
  */
 template <typename T>
-std::string optionalToString(boost::optional<T> maybeValue, boost::optional<int> precision) {
+std::string optionalToString(boost::optional<T> maybeValue,
+                             boost::optional<int> precision) {
   if (maybeValue.is_initialized())
     if (precision.is_initialized())
       return valueToString(maybeValue.get(), precision.get());

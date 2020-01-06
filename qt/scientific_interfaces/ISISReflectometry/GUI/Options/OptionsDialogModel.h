@@ -15,7 +15,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL OptionsDialogModel: public IOptionsDialogModel {
+class MANTIDQT_ISISREFLECTOMETRY_DLL OptionsDialogModel
+    : public IOptionsDialogModel {
 public:
   OptionsDialogModel();
   ~OptionsDialogModel() = default;

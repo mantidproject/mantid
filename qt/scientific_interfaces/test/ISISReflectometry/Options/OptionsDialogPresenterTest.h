@@ -8,9 +8,9 @@
 #define MANTID_MANTIDWIDGETS_OPTIONSDIALOGTEST_H
 
 #include "GUI/Options/OptionsDialogPresenter.h"
+#include "MockOptionsDialogModel.h"
 #include "MockOptionsDialogPresenter.h"
 #include "MockOptionsDialogView.h"
-#include "MockOptionsDialogModel.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -30,9 +30,9 @@ public:
 
   OptionsDialogTest()
       : m_view(), m_model(), m_boolOptions{{"WarnDiscardChanges", true},
-                                {"WarnProcessAll", true},
-                                {"WarnProcessPartialGroup ", true},
-                                {"Round", false}},
+                                           {"WarnProcessAll", true},
+                                           {"WarnProcessPartialGroup ", true},
+                                           {"Round", false}},
         m_intOptions{{"RoundPrecision", 3}} {}
 
   void testPresenterSubscribesToView() {
@@ -75,8 +75,8 @@ public:
 
   void testLoadOptionsQueriesModel() {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_model,
-                loadSettingsProxy(m_boolOptions, m_intOptions)).Times(1)
+    EXPECT_CALL(m_model, loadSettingsProxy(m_boolOptions, m_intOptions))
+        .Times(1)
         .WillOnce(Return());
     assertLoadOptions();
     presenter.loadOptions();

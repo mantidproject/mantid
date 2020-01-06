@@ -53,7 +53,7 @@ void QtOptionsDialogView::initBindings() {
  *
  */
 void QtOptionsDialogView::getOptions(std::map<std::string, bool> &boolOptions,
-                               std::map<std::string, int> &intOptions) {
+                                     std::map<std::string, int> &intOptions) {
   // Iterate through all our bound widgets, pushing their value into the options
   // map
   for (const auto &binding : m_bindings) {
@@ -83,7 +83,7 @@ void QtOptionsDialogView::getOptions(std::map<std::string, bool> &boolOptions,
  *
  */
 void QtOptionsDialogView::setOptions(std::map<std::string, bool> &boolOptions,
-                               std::map<std::string, int> &intOptions) {
+                                     std::map<std::string, int> &intOptions) {
   // Set the values from the options
   for (auto &boolOption : boolOptions) {
     QString widgetName = m_bindings[QString::fromStdString(boolOption.first)];

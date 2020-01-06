@@ -81,7 +81,8 @@ void MainWindowPresenter::notifyNewBatchRequested() {
 }
 
 void MainWindowPresenter::notifyCloseBatchRequested(int batchIndex) {
-  if(!isCloseBatchPrevented(batchIndex) && m_batchPresenters[batchIndex]->requestClose()) {
+  if (!isCloseBatchPrevented(batchIndex) &&
+      m_batchPresenters[batchIndex]->requestClose()) {
     m_batchPresenters.erase(m_batchPresenters.begin() + batchIndex);
     m_view->removeBatch(batchIndex);
   }
@@ -175,7 +176,7 @@ bool MainWindowPresenter::isRoundChecked() const {
   return m_optionsDialogPresenter->getBoolOption(std::string("Round"));
 }
 
-int& MainWindowPresenter::getRoundPrecision() const {
+int &MainWindowPresenter::getRoundPrecision() const {
   return m_optionsDialogPresenter->getIntOption(std::string("RoundPrecision"));
 }
 
@@ -188,8 +189,7 @@ boost::optional<int> MainWindowPresenter::roundPrecision() const {
 bool MainWindowPresenter::isCloseEventPrevented() {
   if (isAnyBatchProcessing() || isAnyBatchAutoreducing())
     return true;
-  else if (isWarnDiscardChangesChecked() &&
-           isAnyBatchUnsaved()) {
+  else if (isWarnDiscardChangesChecked() && isAnyBatchUnsaved()) {
     return !m_messageHandler->askUserDiscardChanges();
   }
   return false;
@@ -202,8 +202,7 @@ bool MainWindowPresenter::isCloseBatchPrevented(int batchIndex) const {
         "Cannot close batch while processing or autoprocessing is in progress",
         "Error");
     return true;
-  } else if (isWarnDiscardChangesChecked() &&
-             isBatchUnsaved(batchIndex)) {
+  } else if (isWarnDiscardChangesChecked() && isBatchUnsaved(batchIndex)) {
     return !m_messageHandler->askUserDiscardChanges();
   }
   return false;
@@ -289,7 +288,8 @@ void MainWindowPresenter::addNewBatch(IBatchView *batchView) {
 }
 
 void MainWindowPresenter::initNewBatch(IBatchPresenter *batchPresenter,
-                                       std::string const &instrument, boost::optional<int> precision) {
+                                       std::string const &instrument,
+                                       boost::optional<int> precision) {
 
   batchPresenter->initInstrumentList();
   batchPresenter->notifyInstrumentChanged(instrument);

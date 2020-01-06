@@ -9,9 +9,9 @@
 
 #include "Common/DllConfig.h"
 #include "GUI/Batch/IBatchPresenter.h"
+#include "GUI/Options/IOptionsDialogPresenter.h"
 #include "IMainWindowPresenter.h"
 #include "IMainWindowView.h"
-#include "GUI/Options/IOptionsDialogPresenter.h"
 #include "MantidGeometry/Instrument.h"
 #include <memory>
 
@@ -61,7 +61,7 @@ public:
   bool isWarnProcessPartialGroupChecked() const override;
   bool isWarnDiscardChangesChecked() const override;
   bool isRoundChecked() const override;
-  int& getRoundPrecision() const override;
+  int &getRoundPrecision() const override;
   boost::optional<int> roundPrecision() const override;
   bool isCloseEventPrevented() override;
   bool isCloseBatchPrevented(int batchIndex) const override;
@@ -106,15 +106,15 @@ private:
   std::unique_ptr<IEncoder> m_encoder;
   std::unique_ptr<IDecoder> m_decoder;
   std::unique_ptr<MantidWidgets::ISlitCalculator> m_slitCalculator;
-  std::unique_ptr<IOptionsDialogPresenter>
-      m_optionsDialogPresenter;
+  std::unique_ptr<IOptionsDialogPresenter> m_optionsDialogPresenter;
   std::unique_ptr<IBatchPresenterFactory> m_batchPresenterFactory;
   bool m_isUnsaved;
 
   void showHelp();
   void addNewBatch(IBatchView *batchView);
   void initNewBatch(IBatchPresenter *batchPresenter,
-                    std::string const &instrument, boost::optional<int> precision);
+                    std::string const &instrument,
+                    boost::optional<int> precision);
   void updateInstrument(const std::string &instrumentName);
   void setDefaultInstrument(const std::string &newInstrument);
 

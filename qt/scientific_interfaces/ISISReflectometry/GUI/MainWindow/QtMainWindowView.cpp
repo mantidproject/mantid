@@ -114,8 +114,7 @@ void QtMainWindowView::initLayout() {
   m_presenter = std::make_unique<MainWindowPresenter>(
       this, messageHandler, fileHandler, std::make_unique<Encoder>(),
       std::make_unique<Decoder>(), std::move(slitCalculator),
-      std::move(optionsDialogPresenter),
-      std::move(makeBatchPresenter));
+      std::move(optionsDialogPresenter), std::move(makeBatchPresenter));
 
   m_notifyee->notifyNewBatchRequested();
   m_notifyee->notifyNewBatchRequested();
@@ -225,8 +224,7 @@ bool QtMainWindowView::askUserYesNo(const std::string &prompt,
 }
 
 bool QtMainWindowView::askUserDiscardChanges() {
-  return askUserYesNo(
-      "There are unsaved changes. Continue?", "Warning");
+  return askUserYesNo("There are unsaved changes. Continue?", "Warning");
 }
 
 std::string

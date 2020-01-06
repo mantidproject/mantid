@@ -30,7 +30,7 @@ public:
 };
 
 class MockOptionsDialogMainWindowSubscriber
-  : public OptionsDialogMainWindowSubscriber {
+    : public OptionsDialogMainWindowSubscriber {
 public:
   MOCK_CONST_METHOD0(optionsChanged, void());
 };

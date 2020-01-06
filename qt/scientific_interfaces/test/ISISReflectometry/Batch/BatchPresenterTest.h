@@ -118,12 +118,12 @@ public:
     verifyAndClear();
   }
 
-  void testJobRunnerGetProcessAll() { auto presenter = makePresenter();
+  void testJobRunnerGetProcessAll() {
+    auto presenter = makePresenter();
     presenter->notifyResumeReductionRequested();
     auto processAll = true;
     // need to check m_jobRunner->m_processAll somehow
-    ON_CALL(*m_jobRunner, getProcessAll())
-        .WillByDefault(Return(processAll));
+    ON_CALL(*m_jobRunner, getProcessAll()).WillByDefault(Return(processAll));
   }
 
   void testJobRunnerqetProcessPartial() {
@@ -131,7 +131,8 @@ public:
     presenter->notifyResumeReductionRequested();
     auto processPartial = false;
     // need to check m_jobRunner->m_processPartial somehow
-    ON_CALL(*m_jobRunner, getProcessAll()).WillByDefault(Return(processPartial));
+    ON_CALL(*m_jobRunner, getProcessAll())
+        .WillByDefault(Return(processPartial));
   }
 
   void testWarnProcessAllWhenReductionResumed() {
@@ -477,7 +478,7 @@ public:
   void testRunsPresenterNotifiesSetRoundPrecision() {
     auto presenter = makePresenter();
     auto prec = 2;
-    EXPECT_CALL(*m_runsPresenter,setRoundPrecision(prec));
+    EXPECT_CALL(*m_runsPresenter, setRoundPrecision(prec));
     presenter->notifySetRoundPrecision(prec);
     verifyAndClear();
   }
