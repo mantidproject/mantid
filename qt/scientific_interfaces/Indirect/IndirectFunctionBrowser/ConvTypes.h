@@ -29,6 +29,7 @@ enum class FitType {
   TeixeiraWater,
   StretchedExpFT,
   ElasticDiffSphere,
+  ElasticDiffRotDiscreteCircle,
   InelasticDiffSphere,
   InelasticDiffRotDiscreteCircle,
 };
@@ -68,6 +69,9 @@ enum class ParamID {
   IDRDC_RADIUS,
   IDRDC_DECAY,
   IDRDC_SHIFT,
+  EDRDC_HEIGHT,
+  EDRDC_CENTRE,
+  EDRDC_RADIUS,
   FLAT_BG_A0,
   LINEAR_BG_A0,
   LINEAR_BG_A1,
