@@ -38,7 +38,7 @@ public:
   /// Is the notification service enabled through the config service?
   static bool isEnabled();
 
-  static const std::string NOTIFICATIONSENABLEDKEY;
+  static const std::string NOTIFICATIONS_ENABLED_KEY;
 
   /// Are notifications supported by this OS?
   static bool isSupportedByOS();
