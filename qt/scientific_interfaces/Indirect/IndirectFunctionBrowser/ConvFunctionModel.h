@@ -121,6 +121,8 @@ private:
   std::string buildBackgroundFunctionString() const;
   std::string buildStretchExpFTFunctionString() const;
   std::string buildElasticDiffSphereFunctionString() const;
+  std::string buildInelasticDiffSphereFunctionString() const;
+  std::string buildInelasticDiffRotDiscreteCircleFunctionString() const;
   void addGlobal(const QString &parName);
   void removeGlobal(const QString &parName);
   QStringList makeGlobalList() const;
