@@ -123,6 +123,7 @@ private:
   std::string buildElasticDiffSphereFunctionString() const;
   std::string buildInelasticDiffSphereFunctionString() const;
   std::string buildInelasticDiffRotDiscreteCircleFunctionString() const;
+  std::string buildElasticDiffRotDiscreteCircleFunctionString() const;
   void addGlobal(const QString &parName);
   void removeGlobal(const QString &parName);
   QStringList makeGlobalList() const;
