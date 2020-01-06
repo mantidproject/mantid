@@ -11,7 +11,6 @@
 #include "GUI/Common/IFileHandler.h"
 #include "GUI/Common/IMessageHandler.h"
 #include "GUI/Options/IOptionsDialogPresenter.h"
-#include "GUI/Options/OptionsDialogPresenter.h"
 #include "GUI/Runs/IRunsPresenter.h"
 #include "IMainWindowView.h"
 #include "MantidAPI/AlgorithmManager.h"
