@@ -116,6 +116,7 @@ def _plot_impl(axes, workspace, args, kwargs):
         if kwargs.pop('update_axes_labels', True):
             _setLabels1D(axes, workspace, indices,
                          normalize_by_bin_width=normalize_by_bin_width, axis=axis)
+    kwargs.pop('normalize_by_bin_width', None)
     return x, y, args, kwargs
 
 
@@ -137,6 +138,9 @@ def plot(axes, workspace, *args, **kwargs):
     :param normalization: ``None`` (default) ask the workspace. Applies to MDHisto workspaces. It can override
                           the value from displayNormalizationHisto. It checks only if
                           the normalization is mantid.api.MDNormalization.NumEventsNormalization
+    :param normalize_by_bin_width: ``None`` (default) ask the workspace. It can override
+                          the value from distribution. Is implemented so get_normalize_by_bin_width
+                          only need to be run once.
     :param LogName:   if specified, it will plot the corresponding sample log. The x-axis
                       of the plot is the time difference between the log time and the first
                       value of the `proton_charge` log (if available) or the sample log's

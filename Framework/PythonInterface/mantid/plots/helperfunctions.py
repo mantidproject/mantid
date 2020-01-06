@@ -62,6 +62,9 @@ def get_normalize_by_bin_width(workspace, axes, **kwargs):
     :param workspace: :class:`mantid.api.MatrixWorkspace` workspace being plotted
     :param axes: The axes being plotted on
     """
+    normalize_by_bin_width = kwargs.get('normalize_by_bin_width', None)
+    if normalize_by_bin_width is not None:
+        return normalize_by_bin_width, kwargs
     distribution = kwargs.get('distribution', None)
     aligned, _ = check_resample_to_regular_grid(workspace, **kwargs)
     if distribution or (hasattr(workspace, 'isDistribution') and workspace.isDistribution()):
@@ -77,11 +80,10 @@ def get_normalize_by_bin_width(workspace, axes, **kwargs):
         if current_artists:
             current_normalization = any(
                 [artist[0].is_normalized for artist in current_artists])
-            normalize_by_bin_width = current_normalization
+            normalization = current_normalization
         else:
-            normalize_by_bin_width = mantid.kernel.config[
-                                         'graph1d.autodistribution'].lower() == 'on'
-    return normalize_by_bin_width, kwargs
+            normalization = mantid.kernel.config['graph1d.autodistribution'].lower() == 'on'
+    return normalization, kwargs
 
 
 def get_normalization(md_workspace, **kwargs):
@@ -574,12 +576,12 @@ def get_data_uneven_flag(workspace, **kwargs):
 def check_resample_to_regular_grid(ws, **kwargs):
     if isinstance(ws, MatrixWorkspace):
         aligned = kwargs.pop('axisaligned', False)
-        if not ws.isCommonBins() or aligned:
+        if aligned or not ws.isCommonBins():
             return True, kwargs
 
-        x = ws.dataX(0)
+        x = ws.readX(0)
         difference = np.diff(x)
-        if x.size > 1 and not np.all(np.isclose(difference[:-1], difference[0])):
+        if x.size > 1 and not np.allclose(difference[:-1], difference[0]):
             return True, kwargs
     return False, kwargs
 
