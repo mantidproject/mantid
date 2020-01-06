@@ -70,6 +70,8 @@ public:
   void notifyInstrumentChanged(const std::string &instrumentName) override;
   void notifyUpdateInstrumentRequested() override;
   void notifySettingsChanged() override;
+  void notifySetRoundPrecision(int &precision) override;
+  void notifyResetRoundPrecision() override;
   void notifyAnyBatchReductionResumed() override;
   void notifyAnyBatchReductionPaused() override;
   void notifyAnyBatchAutoreductionResumed() override;

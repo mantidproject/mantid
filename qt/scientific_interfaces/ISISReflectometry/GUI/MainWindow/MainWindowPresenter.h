@@ -106,8 +106,8 @@ private:
   void showHelp();
   void addNewBatch(IBatchView *batchView);
   void initNewBatch(IBatchPresenter *batchPresenter,
-                    std::string const &instrument);
-  void changeInstrument(std::string const &instrumentName);
+                    std::string const &instrument,
+                    boost::optional<int> precision);
   void updateInstrument(const std::string &instrumentName);
   void setDefaultInstrument(const std::string &newInstrument);
 
