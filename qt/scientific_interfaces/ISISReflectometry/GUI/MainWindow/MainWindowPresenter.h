@@ -9,6 +9,7 @@
 
 #include "Common/DllConfig.h"
 #include "GUI/Batch/IBatchPresenter.h"
+#include "GUI/Options/IOptionsDialogPresenter.h"
 #include "IMainWindowPresenter.h"
 #include "IMainWindowView.h"
 #include "MantidGeometry/Instrument.h"
@@ -25,6 +26,7 @@ class IBatchPresenterFactory;
 class IMainWindowView;
 class IFileHandler;
 class IMessageHandler;
+class IOptionsDialogView;
 class IEncoder;
 class IDecoder;
 
@@ -35,7 +37,8 @@ functionality defined by the interface IMainWindowPresenter.
 */
 class MANTIDQT_ISISREFLECTOMETRY_DLL MainWindowPresenter
     : public MainWindowSubscriber,
-      public IMainWindowPresenter {
+      public IMainWindowPresenter,
+      public OptionsDialogMainWindowSubscriber {
 public:
   /// Constructor
   MainWindowPresenter(
@@ -43,6 +46,7 @@ public:
       IFileHandler *fileHandler, std::unique_ptr<IEncoder> encoder,
       std::unique_ptr<IDecoder> decoder,
       std::unique_ptr<MantidWidgets::ISlitCalculator> slitCalculator,
+      std::unique_ptr<IOptionsDialogPresenter> optionsDialogPresenter,
       std::unique_ptr<IBatchPresenterFactory> batchPresenterFactory);
   ~MainWindowPresenter();
   MainWindowPresenter(MainWindowPresenter const &) = delete;
@@ -72,6 +76,9 @@ public:
   void notifyShowOptionsRequested() override;
   void notifyShowSlitCalculatorRequested() override;
 
+  // OptionsDialogMainWindowSubscriber overrides
+  void optionsChanged() const override;
+
 protected:
   IMainWindowView *m_view;
   IMessageHandler *m_messageHandler;
@@ -83,6 +90,7 @@ private:
   std::unique_ptr<IEncoder> m_encoder;
   std::unique_ptr<IDecoder> m_decoder;
   std::unique_ptr<MantidWidgets::ISlitCalculator> m_slitCalculator;
+  std::unique_ptr<IOptionsDialogPresenter> m_optionsDialogPresenter;
   std::unique_ptr<IBatchPresenterFactory> m_batchPresenterFactory;
 
   void showHelp();
