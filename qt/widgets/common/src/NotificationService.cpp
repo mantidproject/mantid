@@ -46,7 +46,7 @@ bool NotificationService::isEnabled() {
   bool retVal = false;
   try {
     retVal = Mantid::Kernel::ConfigService::Instance()
-                 .getValue<bool>(NOTIFICATIONSENABLEDKEY)
+                 .getValue<bool>(NOTIFICATIONS_ENABLED_KEY)
                  .get_value_or(true);
   } catch (Mantid::Kernel::Exception::FileError) {
     // The Config Service could not find the properties file
