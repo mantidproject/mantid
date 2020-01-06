@@ -10,6 +10,7 @@
 #include "GUI/MainWindow/IMainWindowPresenter.h"
 #include "IOptionsDialogModel.h"
 #include "IOptionsDialogPresenter.h"
+#include "OptionsDialogModel.h"
 #include "QtOptionsDialogView.h"
 
 #include "Common/DllConfig.h"
@@ -27,10 +28,15 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL OptionsDialogPresenter
     : public IOptionsDialogPresenter,
       public OptionsDialogViewSubscriber {
 public:
-  explicit OptionsDialogPresenter(IOptionsDialogView *view,
-                                  std::unique_ptr<IOptionsDialogModel> model);
+  explicit OptionsDialogPresenter(IOptionsDialogView *view);
+  ~OptionsDialogPresenter() = default;
+
   // IOptionsDialogPresenter overrides
+  void notifyInitOptions() override;
+  void notifyOptionsChanged() override;
   void notifySubscribeView() override;
+  bool getBoolOption(std::string &optionName) override;
+  int &getIntOption(std::string &optionName) override;
   bool getBoolOption(const std::string &optionName) override;
   int &getIntOption(const std::string &optionName) override;
   void showView() override;
