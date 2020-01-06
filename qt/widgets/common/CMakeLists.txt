@@ -254,6 +254,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/pixmaps.h
     inc/MantidQtWidgets/Common/ProgressableView.h
     inc/MantidQtWidgets/Common/PropertyWidgetFactory.h
+    inc/MantidQtWidgets/Common/QSettingsHelper.h
     inc/MantidQtWidgets/Common/QtJSONUtils.h
     inc/MantidQtWidgets/Common/SequentialFitDialog.h
     inc/MantidQtWidgets/Common/UserInputValidator.h
@@ -624,6 +625,7 @@ set(
   inc/MantidQtWidgets/Common/PluginLibraries.h
   inc/MantidQtWidgets/Common/PropertyWidgetFactory.h
   inc/MantidQtWidgets/Common/QScienceSpinBox.h
+  inc/MantidQtWidgets/Common/QSettingsHelper.h
   inc/MantidQtWidgets/Common/QStringUtils.h
   inc/MantidQtWidgets/Common/QtJSONUtils.h
   inc/MantidQtWidgets/Common/ScriptRepositoryView.h
