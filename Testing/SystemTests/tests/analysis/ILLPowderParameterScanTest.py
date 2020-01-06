@@ -25,7 +25,7 @@ class ILLPowderParameterScanTest(systemtesting.MantidSystemTest):
     def requiredFiles(self):
         return ['967087.nxs', '967088.nxs']
 
-    def tearDown(self):
+    def cleanup(self):
         mtd.clear()
 
     def runTest(self):

@@ -9,10 +9,8 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 
 from mantid.py3compat import mock
+from sans.common.enums import FindDirectionEnum, SANSInstrument, DetectorType
 from sans.gui_logic.models.beam_centre_model import BeamCentreModel
-from sans.common.enums import FindDirectionEnum, SANSInstrument, DetectorType, SANSFacility
-from sans.test_helper.test_director import TestDirector
-from sans.state.data import get_data_builder
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
@@ -75,7 +73,7 @@ class BeamCentreModelTest(unittest.TestCase):
                                                                    x_start=self.beam_centre_model.lab_pos_1,
                                                                    y_start=self.beam_centre_model.lab_pos_2,
                                                                    tolerance=self.beam_centre_model.tolerance,
-                                                                   find_direction=FindDirectionEnum.All,
+                                                                   find_direction=FindDirectionEnum.ALL,
                                                                    reduction_method=True,
                                                                    verbose=False, component=DetectorType.LAB)
 
@@ -93,7 +91,7 @@ class BeamCentreModelTest(unittest.TestCase):
                                                               x_start=self.result['pos1'],
                                                               y_start=self.result['pos2'],
                                                               tolerance=self.beam_centre_model.tolerance,
-                                                              find_direction=FindDirectionEnum.All,
+                                                              find_direction=FindDirectionEnum.ALL,
                                                               reduction_method=True,
                                                               verbose=False, component=DetectorType.LAB)
 
@@ -103,7 +101,7 @@ class BeamCentreModelTest(unittest.TestCase):
                                                            x_start=self.beam_centre_model.lab_pos_1,
                                                            y_start=self.beam_centre_model.lab_pos_2,
                                                            tolerance=self.beam_centre_model.tolerance,
-                                                           find_direction=FindDirectionEnum.All,
+                                                           find_direction=FindDirectionEnum.ALL,
                                                            reduction_method=False, component=DetectorType.LAB)
 
 

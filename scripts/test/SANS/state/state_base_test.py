@@ -7,23 +7,16 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-import mantid
 
-from mantid.kernel import (PropertyManagerProperty, PropertyManager)
 from mantid.api import Algorithm
-
+from mantid.kernel import (PropertyManagerProperty, PropertyManager)
+from mantid.py3compat import Enum
 from sans.state.state_base import (StringParameter, BoolParameter, FloatParameter, PositiveFloatParameter,
-                                   PositiveIntegerParameter, DictParameter, ClassTypeParameter,
-                                   FloatWithNoneParameter, PositiveFloatWithNoneParameter, FloatListParameter,
-                                   StringListParameter, PositiveIntegerListParameter, ClassTypeListParameter,
-                                   StateBase, rename_descriptor_names, TypedParameter, validator_sub_state,
+                                   PositiveIntegerParameter, DictParameter, FloatWithNoneParameter,
+                                   PositiveFloatWithNoneParameter, FloatListParameter,
+                                   StringListParameter, PositiveIntegerListParameter, StateBase,
+                                   rename_descriptor_names, TypedParameter, validator_sub_state,
                                    create_deserialized_sans_state_from_property_manager)
-from sans.common.enums import serializable_enum
-
-
-@serializable_enum("TypeA", "TypeB")
-class TestType(object):
-    pass
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -44,14 +37,26 @@ class StateBaseTestClass(StateBase):
     float_list_parameter = FloatListParameter()
     string_list_parameter = StringListParameter()
     positive_integer_list_parameter = PositiveIntegerListParameter()
-    class_type_parameter = ClassTypeParameter(TestType)
-    class_type_list_parameter = ClassTypeListParameter(TestType)
 
     def __init__(self):
         super(StateBaseTestClass, self).__init__()
 
     def validate(self):
         pass
+
+
+class FakeEnumClass(Enum):
+    FOO = 1
+    BAR = "2"
+
+
+class ExampleWrapper(StateBase):
+    # This has to be at the top module level, else the module name finding will fail
+    _foo = FakeEnumClass.FOO
+    bar = FakeEnumClass.BAR
+
+    def validate(self):
+        return True
 
 
 class TypedParameterTest(unittest.TestCase):
@@ -81,8 +86,6 @@ class TypedParameterTest(unittest.TestCase):
             test_class.float_list_parameter = [12., -123., 2355.]
             test_class.string_list_parameter = ["test", "test"]
             test_class.positive_integer_list_parameter = [1, 2, 4]
-            test_class.class_type_parameter = TestType.TypeA
-            test_class.class_type_list_parameter = [TestType.TypeA, TestType.TypeB]
 
         except ValueError:
             self.fail()
@@ -100,8 +103,6 @@ class TypedParameterTest(unittest.TestCase):
         self._check_that_raises(TypeError, test_class, "float_list_parameter", [1.23, "test"])
         self._check_that_raises(TypeError, test_class, "string_list_parameter", ["test", "test", 123.])
         self._check_that_raises(TypeError, test_class, "positive_integer_list_parameter", [1, "test"])
-        self._check_that_raises(TypeError, test_class, "class_type_parameter", "test")
-        self._check_that_raises(TypeError, test_class, "class_type_list_parameter", ["test", TestType.TypeA])
 
     def test_that_will_raise_if_set_with_wrong_value(self):
         # Note that this check does not apply to all parameter, it checks the validator
@@ -180,9 +181,6 @@ class SimpleState(StateBase):
     float_list_parameter = FloatListParameter()
     string_list_parameter = StringListParameter()
     positive_integer_list_parameter = PositiveIntegerListParameter()
-    class_type_parameter = ClassTypeParameter(TestType)
-    class_type_list_parameter = ClassTypeListParameter(TestType)
-
     sub_state_very_simple = TypedParameter(VerySimpleState, validator_sub_state)
 
     def __init__(self):
@@ -198,8 +196,6 @@ class SimpleState(StateBase):
         self.float_list_parameter = [123., 234.]
         self.string_list_parameter = ["test1", "test2"]
         self.positive_integer_list_parameter = [1, 2, 3]
-        self.class_type_parameter = TestType.TypeA
-        self.class_type_list_parameter = [TestType.TypeA, TestType.TypeB]
         self.sub_state_very_simple = VerySimpleState()
 
     def validate(self):
@@ -225,6 +221,13 @@ class ComplexState(StateBase):
 
 
 class TestStateBase(unittest.TestCase):
+    class FakeAlgorithm(Algorithm):
+        def PyInit(self):
+            self.declareProperty(PropertyManagerProperty("Args"))
+
+        def PyExec(self):
+            pass
+
     def _assert_simple_state(self, state):
         self.assertEqual(state.string_parameter,  "String_in_SimpleState")
         self.assertFalse(state.bool_parameter)
@@ -249,27 +252,54 @@ class TestStateBase(unittest.TestCase):
         self.assertEqual(state.positive_integer_list_parameter[1],  2)
         self.assertEqual(state.positive_integer_list_parameter[2],  3)
 
-        self.assertEqual(state.class_type_parameter, TestType.TypeA)
-        self.assertEqual(len(state.class_type_list_parameter),  2)
-        self.assertEqual(state.class_type_list_parameter[0],  TestType.TypeA)
-        self.assertEqual(state.class_type_list_parameter[1],  TestType.TypeB)
-
         self.assertEqual(state.sub_state_very_simple.string_parameter,  "test_in_very_simple")
-        
+
+    def test_that_enum_can_be_serialized(self):
+        original_obj = ExampleWrapper()
+
+        # Serializing test
+        serialized = original_obj.property_manager
+        self.assertTrue("bar" in serialized)
+        self.assertFalse("_foo" in serialized)
+        self.assertTrue(isinstance(serialized["bar"], str), "The type was not converted to a string")
+
+        # Deserializing Test
+        fake = TestStateBase.FakeAlgorithm()
+        fake.initialize()
+        fake.setProperty("Args", serialized)
+        property_manager = fake.getProperty("Args").value
+
+        new_obj = create_deserialized_sans_state_from_property_manager(property_manager)
+        self.assertEqual(FakeEnumClass.BAR, new_obj.bar)
+        self.assertEqual(FakeEnumClass.FOO, new_obj._foo)
+
+    def test_that_enum_list_can_be_serialized(self):
+        original_obj = ExampleWrapper()
+        original_obj.bar = [FakeEnumClass.BAR, FakeEnumClass.BAR]
+
+        # Serializing test
+        serialized = original_obj.property_manager
+        self.assertTrue("bar" in serialized)
+        self.assertFalse("_foo" in serialized)
+        self.assertTrue(isinstance(serialized["bar"], list), "The type was not converted to a list of strings")
+
+        # Deserializing Test
+        fake = TestStateBase.FakeAlgorithm()
+        fake.initialize()
+        fake.setProperty("Args", serialized)
+        property_manager = fake.getProperty("Args").value
+
+        new_obj = create_deserialized_sans_state_from_property_manager(property_manager)
+        self.assertEqual(original_obj.bar, new_obj.bar)
+        self.assertEqual(original_obj._foo, new_obj._foo)
+
     def test_that_sans_state_can_be_serialized_and_deserialized_when_going_through_an_algorithm(self):
-        class FakeAlgorithm(Algorithm):
-            def PyInit(self):
-                self.declareProperty(PropertyManagerProperty("Args"))
-
-            def PyExec(self):
-                pass
-
         # Arrange
         state = ComplexState()
 
         # Act
         serialized = state.property_manager
-        fake = FakeAlgorithm()
+        fake = TestStateBase.FakeAlgorithm()
         fake.initialize()
         fake.setProperty("Args", serialized)
         property_manager = fake.getProperty("Args").value

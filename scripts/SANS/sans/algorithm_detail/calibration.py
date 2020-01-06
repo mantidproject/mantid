@@ -37,20 +37,20 @@ def apply_calibration(calibration_file_name, workspaces, monitor_workspaces, use
 
     # Check for the sample scatter and the can scatter workspaces
     workspaces_to_calibrate = {}
-    if SANSDataType.SampleScatter in workspaces:
-        workspaces_to_calibrate.update({SANSDataType.SampleScatter: workspaces[SANSDataType.SampleScatter]})
-    if SANSDataType.CanScatter in workspaces:
-        workspaces_to_calibrate.update({SANSDataType.CanScatter: workspaces[SANSDataType.CanScatter]})
+    if SANSDataType.SAMPLE_SCATTER in workspaces:
+        workspaces_to_calibrate.update({SANSDataType.SAMPLE_SCATTER: workspaces[SANSDataType.SAMPLE_SCATTER]})
+    if SANSDataType.CAN_SCATTER in workspaces:
+        workspaces_to_calibrate.update({SANSDataType.CAN_SCATTER: workspaces[SANSDataType.CAN_SCATTER]})
     do_apply_calibration(full_file_path, workspaces_to_calibrate, use_loaded, publish_to_ads, parent_alg)
 
     # Check for the sample scatter and the can scatter workspaces monitors
     workspace_monitors_to_calibrate = {}
-    if SANSDataType.SampleScatter in monitor_workspaces:
-        workspace_monitors_to_calibrate.update({SANSDataType.SampleScatter:
-                                                monitor_workspaces[SANSDataType.SampleScatter]})
-    if SANSDataType.CanScatter in monitor_workspaces:
-        workspace_monitors_to_calibrate.update({SANSDataType.CanScatter:
-                                                monitor_workspaces[SANSDataType.CanScatter]})
+    if SANSDataType.SAMPLE_SCATTER in monitor_workspaces:
+        workspace_monitors_to_calibrate.update({SANSDataType.SAMPLE_SCATTER:
+                                                monitor_workspaces[SANSDataType.SAMPLE_SCATTER]})
+    if SANSDataType.CAN_SCATTER in monitor_workspaces:
+        workspace_monitors_to_calibrate.update({SANSDataType.CAN_SCATTER:
+                                                monitor_workspaces[SANSDataType.CAN_SCATTER]})
     do_apply_calibration(full_file_path, workspace_monitors_to_calibrate,
                          use_loaded, publish_to_ads, parent_alg)
 

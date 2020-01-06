@@ -9,12 +9,12 @@
 """ SANSReductionCore algorithm runs the sequence of reduction steps which are necessary to reduce a data set."""
 
 from __future__ import (absolute_import, division, print_function)
-from mantid.api import AlgorithmFactory, Progress
-
-from sans.algorithm_detail.mask_workspace import mask_bins
-from sans.common.enums import DetectorType
 
 from SANSReductionCoreBase import SANSReductionCoreBase
+
+from mantid.api import AlgorithmFactory, Progress
+from sans.algorithm_detail.mask_workspace import mask_bins
+from sans.common.enums import DetectorType
 
 
 class SANSReductionCore(SANSReductionCoreBase):
@@ -96,7 +96,7 @@ class SANSReductionCore(SANSReductionCoreBase):
         # Convert and rebin the dummy workspace to get correct bin flags
         if use_dummy_workspace:
             dummy_mask_workspace = mask_bins(state.mask, dummy_mask_workspace,
-                                             DetectorType.from_string(component_as_string))
+                                             DetectorType(component_as_string))
             dummy_mask_workspace = self._convert_to_wavelength(state=state, workspace=dummy_mask_workspace)
 
         # --------------------------------------------------------------------------------------------------------------

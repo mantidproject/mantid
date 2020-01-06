@@ -36,11 +36,11 @@ class SummationSettingsPresenter(object):
     @staticmethod
     def _binning_type_index_to_type(index):
         if index == 0:
-            return BinningType.Custom
+            return BinningType.CUSTOM
         elif index == 1:
-            return BinningType.FromMonitors
+            return BinningType.FROM_MONITORS
         elif index == 2:
-            return BinningType.SaveAsEventData
+            return BinningType.SAVE_AS_EVENT_DATA
 
     def _switch_binning_type(self, type_of_binning):
         self._summation_settings.set_histogram_binning_type(type_of_binning)

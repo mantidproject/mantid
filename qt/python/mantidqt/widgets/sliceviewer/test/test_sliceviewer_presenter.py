@@ -13,6 +13,7 @@ import matplotlib
 matplotlib.use('Agg') # noqa: E402
 import unittest
 
+import mantid.api
 from mantid.py3compat import mock
 from mantidqt.widgets.sliceviewer.model import SliceViewerModel, WS_TYPE
 from mantidqt.widgets.sliceviewer.presenter import SliceViewer
@@ -24,6 +25,7 @@ class SliceViewerTest(unittest.TestCase):
     def setUp(self):
         self.view = mock.Mock(spec=SliceViewerView)
         self.view.dimensions = mock.Mock()
+        self.view.norm_opts = mock.Mock()
 
         self.model = mock.Mock(spec=SliceViewerModel)
         self.model.get_ws = mock.Mock()
@@ -107,6 +109,15 @@ class SliceViewerTest(unittest.TestCase):
         self.assertEqual(self.model.get_ws.call_count, 1)
         self.assertEqual(self.view.dimensions.get_slicepoint.call_count, 0)
         self.assertEqual(self.view.plot_matrix.call_count, 1)
+
+    def test_normalization_change_set_correct_normalization(self):
+        self.model.get_ws_type = mock.Mock(return_value=WS_TYPE.MATRIX)
+        self.view.plot_matrix = mock.Mock()
+
+        presenter = SliceViewer(None, model=self.model, view=self.view)
+        presenter.normalization_changed("By bin width")
+        self.view.plot_matrix.assert_called_with(self.model.get_ws(),
+                                                 normalize=mantid.api.MDNormalization.VolumeNormalization)
 
 
 if __name__ == '__main__':

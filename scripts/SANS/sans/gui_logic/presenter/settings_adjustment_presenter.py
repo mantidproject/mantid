@@ -25,9 +25,9 @@ class SettingsAdjustmentPresenter(PresenterCommon):
 
     def default_gui_setup(self):
         # Set the fit options
-        fit_types = [FitType.to_string(FitType.Linear),
-                     FitType.to_string(FitType.Logarithmic),
-                     FitType.to_string(FitType.Polynomial)]
+        fit_types = [FitType.LINEAR.value,
+                     FitType.LOGARITHMIC.value,
+                     FitType.POLYNOMIAL.value]
 
         self._view.transmission_sample_fit_type = fit_types
         self._view.transmission_can_fit_type = fit_types
@@ -91,8 +91,8 @@ class SettingsAdjustmentPresenter(PresenterCommon):
             use_fit = self._view.transmission_sample_use_fit
             fit_type = self._view.transmission_sample_fit_type
             polynomial_order = self._view.transmission_sample_polynomial_order
-            state_model.transmission_sample_fit_type = fit_type if use_fit else FitType.NoFit
-            state_model.transmission_can_fit_type = fit_type if use_fit else FitType.NoFit
+            state_model.transmission_sample_fit_type = fit_type if use_fit else FitType.NO_FIT
+            state_model.transmission_can_fit_type = fit_type if use_fit else FitType.NO_FIT
             state_model.transmission_sample_polynomial_order = polynomial_order
             state_model.transmission_can_polynomial_order = polynomial_order
 
@@ -109,7 +109,7 @@ class SettingsAdjustmentPresenter(PresenterCommon):
             use_fit_sample = self._view.transmission_sample_use_fit
             fit_type_sample = self._view.transmission_sample_fit_type
             polynomial_order_sample = self._view.transmission_sample_polynomial_order
-            state_model.transmission_sample_fit_type = fit_type_sample if use_fit_sample else FitType.NoFit
+            state_model.transmission_sample_fit_type = fit_type_sample if use_fit_sample else FitType.NO_FIT
             state_model.transmission_sample_polynomial_order = polynomial_order_sample
 
             # Wavelength settings
@@ -123,7 +123,7 @@ class SettingsAdjustmentPresenter(PresenterCommon):
             use_fit_can = self._view.transmission_can_use_fit
             fit_type_can = self._view.transmission_can_fit_type
             polynomial_order_can = self._view.transmission_can_polynomial_order
-            state_model.transmission_can_fit_type = fit_type_can if use_fit_can else FitType.NoFit
+            state_model.transmission_can_fit_type = fit_type_can if use_fit_can else FitType.NO_FIT
             state_model.transmission_can_polynomial_order = polynomial_order_can
 
             # Wavelength settings
@@ -136,15 +136,15 @@ class SettingsAdjustmentPresenter(PresenterCommon):
     def _set_on_view_transmission_fit_sample_settings(self):
         # Set transmission_sample_use_fit
         fit_type = self._model.transmission_sample_fit_type
-        use_fit = fit_type is not FitType.NoFit
+        use_fit = fit_type is not FitType.NO_FIT
         self._view.transmission_sample_use_fit = use_fit
 
         # Set the polynomial order for sample
-        polynomial_order = self._model.transmission_sample_polynomial_order if fit_type is FitType.Polynomial else 2  # noqa
+        polynomial_order = self._model.transmission_sample_polynomial_order if fit_type is FitType.POLYNOMIAL else 2  # noqa
         self._view.transmission_sample_polynomial_order = polynomial_order
 
         # Set the fit type for the sample
-        fit_type = fit_type if fit_type is not FitType.NoFit else FitType.Linear
+        fit_type = fit_type if fit_type is not FitType.NO_FIT else FitType.LINEAR
         self._view.transmission_sample_fit_type = fit_type
 
         # Set the wavelength
@@ -167,15 +167,15 @@ class SettingsAdjustmentPresenter(PresenterCommon):
 
             # Set transmission_sample_can_fit
             fit_type_can = self._model.transmission_can_fit_type()
-            use_can_fit = fit_type_can is FitType.NoFit
+            use_can_fit = fit_type_can is FitType.NO_FIT
             self._view.transmission_can_use_fit = use_can_fit
 
             # Set the polynomial order for can
-            polynomial_order_can = self._model.transmission_can_polynomial_order if fit_type_can is FitType.Polynomial else 2  # noqa
+            polynomial_order_can = self._model.transmission_can_polynomial_order if fit_type_can is FitType.POLYNOMIAL else 2  # noqa
             self._view.transmission_can_polynomial_order = polynomial_order_can
 
             # Set the fit type for the can
-            fit_type_can = fit_type_can if fit_type_can is not FitType.NoFit else FitType.Linear
+            fit_type_can = fit_type_can if fit_type_can is not FitType.NO_FIT else FitType.LINEAR
             self.transmission_can_fit_type = fit_type_can
 
             # Set the wavelength

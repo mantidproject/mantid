@@ -8,15 +8,13 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
-import mantid
-from mantid.kernel import PropertyManagerDataService, PropertyManagerProperty
 from mantid.api import Algorithm
-
+from mantid.kernel import PropertyManagerDataService, PropertyManagerProperty
+from sans.common.enums import SANSFacility, SANSInstrument
 from sans.gui_logic.presenter.property_manager_service import PropertyManagerService
 from sans.state.data import get_data_builder
-from sans.test_helper.test_director import TestDirector
-from sans.common.enums import SANSFacility, SANSInstrument
 from sans.test_helper.file_information_mock import SANSFileInformationMock
+from sans.test_helper.test_director import TestDirector
 
 
 class FakeAlgorithm(Algorithm):

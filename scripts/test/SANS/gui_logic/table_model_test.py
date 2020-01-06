@@ -60,7 +60,7 @@ class TableModelTest(unittest.TestCase):
         sample_shape_enum = table_index_model.sample_shape
         sample_shape_text = table_index_model.sample_shape_string
 
-        self.assertEqual(sample_shape_enum, SampleShape.FlatPlate)
+        self.assertEqual(sample_shape_enum, SampleShape.FLAT_PLATE)
         self.assertEqual(sample_shape_text, "FlatPlate")
 
     def test_that_sample_shape_can_be_set_as_enum(self):
@@ -68,21 +68,21 @@ class TableModelTest(unittest.TestCase):
         # So SampleShapeColumnModel must be able to parse this.
         table_index_model = TableIndexModel('0', "", "", "", "", "", "",
                                             "", "", "", "", "", "", "", "",
-                                            sample_shape=SampleShape.FlatPlate)
+                                            sample_shape=SampleShape.FLAT_PLATE)
         sample_shape_enum = table_index_model.sample_shape
         sample_shape_text = table_index_model.sample_shape_string
 
-        self.assertEqual(sample_shape_enum, SampleShape.FlatPlate)
+        self.assertEqual(sample_shape_enum, SampleShape.FLAT_PLATE)
         self.assertEqual(sample_shape_text, "FlatPlate")
 
-    def test_that_incorrect_sample_shape_reverts_to_previous_sampleshape(self):
+    def test_that_incorrect_sample_shape_turns_to_not_set(self):
         table_index_model = TableIndexModel('0', "", "", "", "", "", "",
                                             "", "", "", "", "", "", "", "",
                                             sample_shape="Disc")
         table_index_model.sample_shape = "not a sample shape"
-        self.assertEqual("Disc", table_index_model.sample_shape_string)
+        self.assertEqual("", table_index_model.sample_shape_string)
 
-    def test_that_empty_string_is_acceptable_sample_shape(self):
+    def test_that_empty_string_turns_to_not_set(self):
         table_index_model = TableIndexModel('0', "", "", "", "", "", "",
                                             "", "", "", "", "", "", "", "",
                                             sample_shape="Disc")
@@ -91,8 +91,8 @@ class TableModelTest(unittest.TestCase):
         sample_shape_enum = table_index_model.sample_shape
         sample_shape_text = table_index_model.sample_shape_string
 
-        self.assertEqual(sample_shape_enum, "")
-        self.assertEqual(sample_shape_text, "")
+        self.assertEqual(SampleShape.NOT_SET, sample_shape_enum)
+        self.assertEqual('', sample_shape_text)
 
     def test_that_table_model_completes_partial_sample_shape(self):
         table_index_model = TableIndexModel('0', "", "", "", "", "", "",
@@ -102,7 +102,7 @@ class TableModelTest(unittest.TestCase):
         sample_shape_enum = table_index_model.sample_shape
         sample_shape_text = table_index_model.sample_shape_string
 
-        self.assertEqual(sample_shape_enum, SampleShape.Cylinder)
+        self.assertEqual(sample_shape_enum, SampleShape.CYLINDER)
         self.assertEqual(sample_shape_text, "Cylinder")
 
     def test_that_querying_nonexistent_row_index_raises_IndexError_exception(self):
@@ -311,7 +311,7 @@ class TableModelTest(unittest.TestCase):
         table_index_model = TableIndexModel(0, "", "", "", "", "", "",
                                             "", "", "", "", "", "")
 
-        self.assertEqual(table_index_model.row_state, RowState.Unprocessed)
+        self.assertEqual(table_index_model.row_state, RowState.UNPROCESSED)
         self.assertEqual(table_index_model.tool_tip, '')
 
     def test_that_set_processed_sets_state_to_processed(self):
@@ -324,7 +324,7 @@ class TableModelTest(unittest.TestCase):
 
         table_model.set_row_to_processed(row, tool_tip)
 
-        self.assertEqual(table_index_model.row_state, RowState.Processed)
+        self.assertEqual(table_index_model.row_state, RowState.PROCESSED)
         self.assertEqual(table_index_model.tool_tip, tool_tip)
 
     def test_that_reset_row_state_sets_row_to_unproceesed_and_sets_tool_tip_to_empty(self):
@@ -338,7 +338,7 @@ class TableModelTest(unittest.TestCase):
 
         table_model.reset_row_state(row)
 
-        self.assertEqual(table_index_model.row_state, RowState.Unprocessed)
+        self.assertEqual(table_index_model.row_state, RowState.UNPROCESSED)
         self.assertEqual(table_index_model.tool_tip, '')
 
     def test_that_set_row_to_error_sets_row_to_error_and_tool_tip(self):
@@ -351,7 +351,7 @@ class TableModelTest(unittest.TestCase):
 
         table_model.set_row_to_error(row, tool_tip)
 
-        self.assertEqual(table_index_model.row_state, RowState.Error)
+        self.assertEqual(table_index_model.row_state, RowState.ERROR)
         self.assertEqual(table_index_model.tool_tip, tool_tip)
 
     def test_serialise_options_dict_correctly(self):

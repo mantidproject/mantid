@@ -1,20 +1,23 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-from sans.common.enums import (serializable_enum, DataType)
-from sans.user_file.state_director import StateDirectorISIS
+
+from mantid.py3compat import Enum
+from sans.common.enums import DataType
+from sans.common.file_information import SANSFileInformationFactory
 from sans.state.data import get_data_builder
-from sans.user_file.user_file_parser import (UserFileParser)
-from sans.user_file.user_file_reader import (UserFileReader)
 from sans.user_file.settings_tags import (MonId, monitor_spectrum, OtherId, SampleId, GravityId, SetId, position_entry,
                                           fit_general, FitId, monitor_file, mask_angle_entry, LimitsId, range_entry,
                                           simple_range, DetectorId, event_binning_string_values, det_fit_range,
                                           single_entry_with_detector)
-from sans.common.file_information import SANSFileInformationFactory
+from sans.user_file.state_director import StateDirectorISIS
+from sans.user_file.user_file_parser import (UserFileParser)
+from sans.user_file.user_file_reader import (UserFileReader)
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Commands
@@ -24,26 +27,42 @@ from sans.common.file_information import SANSFileInformationFactory
 # ------------------
 # IDs for commands. We use here serializable_enum since enum is not available in the current Python configuration.
 # ------------------
-@serializable_enum("sample_scatter", "sample_transmission", "sample_direct", "can_scatter", "can_transmission",
-                   "can_direct")
-class DataCommandId(object):
-    pass
+class DataCommandId(Enum):
+    CAN_DIRECT = "can_direct"
+    CAN_SCATTER = "can_scatter"
+    CAN_TRANSMISSION = "can_transmission"
+
+    SAMPLE_SCATTER = "sample_scatter"
+    SAMPLE_TRANSMISSION = "sample_transmission"
+    SAMPLE_DIRECT = "sample_direct"
 
 
-@serializable_enum("clean", "reduction_dimensionality", "compatibility_mode",  # Null Parameter commands
-                   "user_file", "mask", "sample_offset", "detector", "event_slices",  # Single parameter commands
-                   "flood_file", "wavelength_correction_file",  # Single parameter commands
-                   "user_specified_output_name", "user_specified_output_name_suffix",  # Single parameter commands
-                   "use_reduction_mode_as_suffix",  # Single parameter commands
-                   "incident_spectrum", "gravity",  # Double parameter commands
-                   "centre", "save",   # Three parameter commands
-                   "trans_fit", "phi_limit", "mask_radius", "wavelength_limit", "qxy_limit",  # Four parameter commands
-                   "wavrange_settings",  # Five parameter commands
-                   "front_detector_rescale",  # Six parameter commands
-                   "detector_offsets"  # Nine parameter commands
-                   )
 class NParameterCommandId(object):
-    pass
+    CENTRE = "centre"
+    CLEAN = "clean"
+    COMPATIBILITY_MODE = "compatibility_mode"
+    DETECTOR = "detector"
+    DETECTOR_OFFSETS = "detector_offsets"
+    EVENT_SLICES = "event_slices"
+    FLOOD_FILE = "flood_file"
+    FRONT_DETECTOR_RESCALE = "front_detector_rescale"
+    GRAVITY = "gravity"
+    INCIDENT_SPECTRUM = "incident_spectrum"
+    MASK = "mask"
+    MASK_RADIUS = "mask_radius"
+    REDUCTION_DIMENSIONALITY = "reduction_dimensionality"
+    PHI_LIMIT = "phi_limit"
+    QXY_LIMIT = "qxy_limit"
+    SAMPLE_OFFSET = "sample_offset"
+    SAVE = "save"
+    TRANS_FIT = "trans_fit"
+    USER_FILE = "user_file"
+    USE_REDUCTION_MODE_AS_SUFFIX = "use_reduction_mode_as_suffix"
+    USER_SPECIFIED_OUTPUT_NAME = "user_specified_output_name"
+    USER_SPECIFIED_OUTPUT_NAME_SUFFIX = "user_specified_output_name_suffix"
+    WAVELENGTH_CORRECTION_FILE = "wavelength_correction_file"
+    WAVELENGTH_LIMIT = "wavelength_limit"
+    WAV_RANGE_SETTINGS = "wavrange_settings"
 
 
 class Command(object):
@@ -147,7 +166,7 @@ class CommandInterfaceStateDirector(object):
     def _get_data_state(self):
         # Get the data commands
         data_commands = self._get_data_commands()
-        data_elements = self._get_elements_with_key(DataCommandId.sample_scatter, data_commands)
+        data_elements = self._get_elements_with_key(DataCommandId.SAMPLE_SCATTER, data_commands)
         data_element = data_elements[-1]
         file_name = data_element.file_name
         file_information_factory = SANSFileInformationFactory()
@@ -156,17 +175,17 @@ class CommandInterfaceStateDirector(object):
         # Build the state data
         data_builder = get_data_builder(self._facility, file_information)
         self._set_data_element(data_builder.set_sample_scatter, data_builder.set_sample_scatter_period,
-                               DataCommandId.sample_scatter, data_commands)
+                               DataCommandId.SAMPLE_SCATTER, data_commands)
         self._set_data_element(data_builder.set_sample_transmission, data_builder.set_sample_transmission_period,
-                               DataCommandId.sample_transmission, data_commands)
+                               DataCommandId.SAMPLE_TRANSMISSION, data_commands)
         self._set_data_element(data_builder.set_sample_direct, data_builder.set_sample_direct_period,
-                               DataCommandId.sample_direct, data_commands)
+                               DataCommandId.SAMPLE_DIRECT, data_commands)
         self._set_data_element(data_builder.set_can_scatter, data_builder.set_can_scatter_period,
-                               DataCommandId.can_scatter, data_commands)
+                               DataCommandId.CAN_SCATTER, data_commands)
         self._set_data_element(data_builder.set_can_transmission, data_builder.set_can_transmission_period,
-                               DataCommandId.can_transmission, data_commands)
+                               DataCommandId.CAN_TRANSMISSION, data_commands)
         self._set_data_element(data_builder.set_can_direct, data_builder.set_can_direct_period,
-                               DataCommandId.can_direct, data_commands)
+                               DataCommandId.CAN_DIRECT, data_commands)
 
         return data_builder.build()
 
@@ -253,32 +272,32 @@ class CommandInterfaceStateDirector(object):
         """
         Sets up a mapping between command ids and the adequate processing methods which can handle the command.
         """
-        self._method_map = {NParameterCommandId.user_file: self._process_user_file,
-                            NParameterCommandId.mask: self._process_mask,
-                            NParameterCommandId.incident_spectrum: self._process_incident_spectrum,
-                            NParameterCommandId.clean: self._process_clean,
-                            NParameterCommandId.reduction_dimensionality: self._process_reduction_dimensionality,
-                            NParameterCommandId.sample_offset: self._process_sample_offset,
-                            NParameterCommandId.detector: self._process_detector,
-                            NParameterCommandId.gravity: self._process_gravity,
-                            NParameterCommandId.centre: self._process_centre,
-                            NParameterCommandId.trans_fit: self._process_trans_fit,
-                            NParameterCommandId.front_detector_rescale: self._process_front_detector_rescale,
-                            NParameterCommandId.event_slices: self._process_event_slices,
-                            NParameterCommandId.flood_file: self._process_flood_file,
-                            NParameterCommandId.phi_limit: self._process_phi_limit,
-                            NParameterCommandId.wavelength_correction_file: self._process_wavelength_correction_file,
-                            NParameterCommandId.mask_radius: self._process_mask_radius,
-                            NParameterCommandId.wavelength_limit: self._process_wavelength_limit,
-                            NParameterCommandId.qxy_limit: self._process_qxy_limit,
-                            NParameterCommandId.wavrange_settings: self._process_wavrange,
-                            NParameterCommandId.compatibility_mode: self._process_compatibility_mode,
-                            NParameterCommandId.detector_offsets: self._process_detector_offsets,
-                            NParameterCommandId.save: self._process_save,
-                            NParameterCommandId.user_specified_output_name: self._process_user_specified_output_name,
-                            NParameterCommandId.user_specified_output_name_suffix:
+        self._method_map = {NParameterCommandId.USER_FILE: self._process_user_file,
+                            NParameterCommandId.MASK: self._process_mask,
+                            NParameterCommandId.INCIDENT_SPECTRUM: self._process_incident_spectrum,
+                            NParameterCommandId.CLEAN: self._process_clean,
+                            NParameterCommandId.REDUCTION_DIMENSIONALITY: self._process_reduction_dimensionality,
+                            NParameterCommandId.SAMPLE_OFFSET: self._process_sample_offset,
+                            NParameterCommandId.DETECTOR: self._process_detector,
+                            NParameterCommandId.GRAVITY: self._process_gravity,
+                            NParameterCommandId.CENTRE: self._process_centre,
+                            NParameterCommandId.TRANS_FIT: self._process_trans_fit,
+                            NParameterCommandId.FRONT_DETECTOR_RESCALE: self._process_front_detector_rescale,
+                            NParameterCommandId.EVENT_SLICES: self._process_event_slices,
+                            NParameterCommandId.FLOOD_FILE: self._process_flood_file,
+                            NParameterCommandId.PHI_LIMIT: self._process_phi_limit,
+                            NParameterCommandId.WAVELENGTH_CORRECTION_FILE: self._process_wavelength_correction_file,
+                            NParameterCommandId.MASK_RADIUS: self._process_mask_radius,
+                            NParameterCommandId.WAVELENGTH_LIMIT: self._process_wavelength_limit,
+                            NParameterCommandId.QXY_LIMIT: self._process_qxy_limit,
+                            NParameterCommandId.WAV_RANGE_SETTINGS: self._process_wavrange,
+                            NParameterCommandId.COMPATIBILITY_MODE: self._process_compatibility_mode,
+                            NParameterCommandId.DETECTOR_OFFSETS: self._process_detector_offsets,
+                            NParameterCommandId.SAVE: self._process_save,
+                            NParameterCommandId.USER_SPECIFIED_OUTPUT_NAME: self._process_user_specified_output_name,
+                            NParameterCommandId.USER_SPECIFIED_OUTPUT_NAME_SUFFIX:
                                 self._process_user_specified_output_name_suffix,
-                            NParameterCommandId.use_reduction_mode_as_suffix:
+                            NParameterCommandId.USE_REDUCTION_MODE_AS_SUFFIX:
                                 self._process_use_reduction_mode_as_suffix
                             }
 
@@ -351,7 +370,7 @@ class CommandInterfaceStateDirector(object):
         incident_monitor = command.values[0]
         interpolate = command.values[1]
         is_trans = command.values[2]
-        new_state_entries = {MonId.spectrum: monitor_spectrum(spectrum=incident_monitor,
+        new_state_entries = {MonId.SPECTRUM: monitor_spectrum(spectrum=incident_monitor,
                                                               is_trans=is_trans,
                                                               interpolate=interpolate)}
         self.add_to_processed_state_settings(new_state_entries)
@@ -365,7 +384,7 @@ class CommandInterfaceStateDirector(object):
         index_first_clean_command = None
         for index in reversed(list(range(0, len(self._commands)))):
             element = self._commands[index]
-            if element.command_id == NParameterCommandId.clean:
+            if element.command_id == NParameterCommandId.CLEAN:
                 index_first_clean_command = index
                 break
         if index_first_clean_command is not None:
@@ -380,36 +399,36 @@ class CommandInterfaceStateDirector(object):
     def _process_reduction_dimensionality(self, command):
         _ = command  # noqa
         reduction_dimensionality = command.values[0]
-        new_state_entries = {OtherId.reduction_dimensionality: reduction_dimensionality}
+        new_state_entries = {OtherId.REDUCTION_DIMENSIONALITY: reduction_dimensionality}
         self.add_to_processed_state_settings(new_state_entries)
 
     def _process_sample_offset(self, command):
         sample_offset = command.values[0]
-        new_state_entries = {SampleId.offset: sample_offset}
+        new_state_entries = {SampleId.OFFSET: sample_offset}
         self.add_to_processed_state_settings(new_state_entries)
 
     def _process_detector(self, command):
         reduction_mode = command.values[0]
-        new_state_entries = {DetectorId.reduction_mode: reduction_mode}
+        new_state_entries = {DetectorId.REDUCTION_MODE: reduction_mode}
         self.add_to_processed_state_settings(new_state_entries)
 
     def _process_gravity(self, command):
         use_gravity = command.values[0]
         extra_length = command.values[1]
-        new_state_entries = {GravityId.on_off: use_gravity,
-                             GravityId.extra_length: extra_length}
+        new_state_entries = {GravityId.ON_OFF: use_gravity,
+                             GravityId.EXTRA_LENGTH: extra_length}
         self.add_to_processed_state_settings(new_state_entries)
 
     def _process_centre(self, command):
         pos1 = command.values[0]
         pos2 = command.values[1]
         detector_type = command.values[2]
-        new_state_entries = {SetId.centre: position_entry(pos1=pos1, pos2=pos2, detector_type=detector_type)}
+        new_state_entries = {SetId.CENTRE: position_entry(pos1=pos1, pos2=pos2, detector_type=detector_type)}
         self.add_to_processed_state_settings(new_state_entries)
 
     def _process_trans_fit(self, command):
         def fit_type_to_data_type(fit_type_to_convert):
-            return DataType.Can if fit_type_to_convert is FitData.Can else DataType.Sample
+            return DataType.CAN if fit_type_to_convert is FitData.Can else DataType.SAMPLE
 
         fit_data = command.values[0]
         wavelength_low = command.values[1]
@@ -424,7 +443,7 @@ class CommandInterfaceStateDirector(object):
         new_state_entries = {}
         for element in data_to_fit:
             data_type = fit_type_to_data_type(element)
-            new_state_entries.update({FitId.general: fit_general(start=wavelength_low, stop=wavelength_high,
+            new_state_entries.update({FitId.GENERAL: fit_general(start=wavelength_low, stop=wavelength_high,
                                                                  fit_type=fit_type, data_type=data_type,
                                                                  polynomial_order=polynomial_order)})
         self.add_to_processed_state_settings(new_state_entries)
@@ -438,44 +457,44 @@ class CommandInterfaceStateDirector(object):
         q_max = command.values[5]
 
         # Set the scale and the shift
-        new_state_entries = {DetectorId.rescale: scale, DetectorId.shift: shift}
+        new_state_entries = {DetectorId.RESCALE: scale, DetectorId.SHIFT: shift}
 
         # Set the fit for the scale
-        new_state_entries.update({DetectorId.rescale_fit: det_fit_range(start=q_min, stop=q_max, use_fit=fit_scale)})
+        new_state_entries.update({DetectorId.RESCALE_FIT: det_fit_range(start=q_min, stop=q_max, use_fit=fit_scale)})
 
         # Set the fit for shift
-        new_state_entries.update({DetectorId.shift_fit: det_fit_range(start=q_min, stop=q_max, use_fit=fit_shift)})
+        new_state_entries.update({DetectorId.SHIFT_FIT: det_fit_range(start=q_min, stop=q_max, use_fit=fit_shift)})
 
         self.add_to_processed_state_settings(new_state_entries)
 
     def _process_event_slices(self, command):
         event_slice_value = command.values
-        new_state_entries = {OtherId.event_slices: event_binning_string_values(value=event_slice_value)}
+        new_state_entries = {OtherId.EVENT_SLICES: event_binning_string_values(value=event_slice_value)}
         self.add_to_processed_state_settings(new_state_entries)
 
     def _process_flood_file(self, command):
         file_path = command.values[0]
         detector_type = command.values[1]
-        new_state_entries = {MonId.flat: monitor_file(file_path=file_path, detector_type=detector_type)}
+        new_state_entries = {MonId.FLAT: monitor_file(file_path=file_path, detector_type=detector_type)}
         self.add_to_processed_state_settings(new_state_entries)
 
     def _process_phi_limit(self, command):
         phi_min = command.values[0]
         phi_max = command.values[1]
         use_phi_mirror = command.values[2]
-        new_state_entries = {LimitsId.angle: mask_angle_entry(min=phi_min, max=phi_max, use_mirror=use_phi_mirror)}
+        new_state_entries = {LimitsId.ANGLE: mask_angle_entry(min=phi_min, max=phi_max, use_mirror=use_phi_mirror)}
         self.add_to_processed_state_settings(new_state_entries)
 
     def _process_wavelength_correction_file(self, command):
         file_path = command.values[0]
         detector_type = command.values[1]
-        new_state_entries = {MonId.direct: monitor_file(file_path=file_path, detector_type=detector_type)}
+        new_state_entries = {MonId.DIRECT: monitor_file(file_path=file_path, detector_type=detector_type)}
         self.add_to_processed_state_settings(new_state_entries)
 
     def _process_mask_radius(self, command):
         radius_min = command.values[0]
         radius_max = command.values[1]
-        new_state_entries = {LimitsId.radius: range_entry(start=radius_min, stop=radius_max)}
+        new_state_entries = {LimitsId.RADIUS: range_entry(start=radius_min, stop=radius_max)}
         self.add_to_processed_state_settings(new_state_entries)
 
     def _process_wavelength_limit(self, command):
@@ -483,7 +502,7 @@ class CommandInterfaceStateDirector(object):
         wavelength_high = command.values[1]
         wavelength_step = command.values[2]
         wavelength_step_type = command.values[3]
-        new_state_entries = {LimitsId.wavelength: simple_range(start=wavelength_low, stop=wavelength_high,
+        new_state_entries = {LimitsId.WAVELENGTH: simple_range(start=wavelength_low, stop=wavelength_high,
                                                                step=wavelength_step, step_type=wavelength_step_type)}
         self.add_to_processed_state_settings(new_state_entries)
 
@@ -498,8 +517,8 @@ class CommandInterfaceStateDirector(object):
         # is not nice but the command interface forces us to do so. We take a copy of the last LimitsId.wavelength
         # entry, we copy it and then change the desired settings. This means it has to be set at this point, else
         # something is wrong
-        if LimitsId.wavelength in self._processed_state_settings:
-            last_entry = self._processed_state_settings[LimitsId.wavelength][-1]
+        if LimitsId.WAVELENGTH in self._processed_state_settings:
+            last_entry = self._processed_state_settings[LimitsId.WAVELENGTH][-1]
 
             new_wavelength_low = wavelength_low if wavelength_low is not None else last_entry.start
             new_wavelength_high = wavelength_high if wavelength_high is not None else last_entry.stop
@@ -507,18 +526,18 @@ class CommandInterfaceStateDirector(object):
                                      step_type=last_entry.step_type)
 
             if wavelength_low is not None or wavelength_high is not None:
-                copied_entry = {LimitsId.wavelength: new_range}
+                copied_entry = {LimitsId.WAVELENGTH: new_range}
                 self.add_to_processed_state_settings(copied_entry)
         else:
             raise RuntimeError("CommandInterfaceStateDirector: Setting the lower and upper wavelength bounds is not"
                                " possible. We require also a step and step range")
 
         if full_wavelength_range is not None:
-            full_wavelength_range_entry = {OtherId.use_full_wavelength_range: full_wavelength_range}
+            full_wavelength_range_entry = {OtherId.USE_FULL_WAVELENGTH_RANGE: full_wavelength_range}
             self.add_to_processed_state_settings(full_wavelength_range_entry)
 
         if reduction_mode is not None:
-            reduction_mode_entry = {DetectorId.reduction_mode: reduction_mode}
+            reduction_mode_entry = {DetectorId.REDUCTION_MODE: reduction_mode}
             self.add_to_processed_state_settings(reduction_mode_entry)
 
     def _process_qxy_limit(self, command):
@@ -526,12 +545,12 @@ class CommandInterfaceStateDirector(object):
         q_max = command.values[1]
         q_step = command.values[2]
         q_step_type = command.values[3]
-        new_state_entries = {LimitsId.qxy: simple_range(start=q_min, stop=q_max, step=q_step, step_type=q_step_type)}
+        new_state_entries = {LimitsId.QXY: simple_range(start=q_min, stop=q_max, step=q_step, step_type=q_step_type)}
         self.add_to_processed_state_settings(new_state_entries)
 
     def _process_compatibility_mode(self, command):
         use_compatibility_mode = command.values[0]
-        new_state_entries = {OtherId.use_compatibility_mode: use_compatibility_mode}
+        new_state_entries = {OtherId.USE_COMPATIBILITY_MODE: use_compatibility_mode}
         self.add_to_processed_state_settings(new_state_entries)
 
     def _process_detector_offsets(self, command):
@@ -546,18 +565,18 @@ class CommandInterfaceStateDirector(object):
         y_tilt = command.values[8]
 
         # Set the offsets
-        new_state_entries = {DetectorId.correction_x: single_entry_with_detector(entry=x, detector_type=detector_type),
-                             DetectorId.correction_y: single_entry_with_detector(entry=y, detector_type=detector_type),
-                             DetectorId.correction_z: single_entry_with_detector(entry=z, detector_type=detector_type),
-                             DetectorId.correction_rotation:
+        new_state_entries = {DetectorId.CORRECTION_X: single_entry_with_detector(entry=x, detector_type=detector_type),
+                             DetectorId.CORRECTION_Y: single_entry_with_detector(entry=y, detector_type=detector_type),
+                             DetectorId.CORRECTION_Z: single_entry_with_detector(entry=z, detector_type=detector_type),
+                             DetectorId.CORRECTION_ROTATION:
                                  single_entry_with_detector(entry=rotation, detector_type=detector_type),
-                             DetectorId.correction_radius:
+                             DetectorId.CORRECTION_RADIUS:
                                  single_entry_with_detector(entry=radius, detector_type=detector_type),
-                             DetectorId.correction_translation:
+                             DetectorId.CORRECTION_TRANSLATION:
                                  single_entry_with_detector(entry=side, detector_type=detector_type),
-                             DetectorId.correction_x_tilt:
+                             DetectorId.CORRECTION_X_TILT:
                                  single_entry_with_detector(entry=x_tilt, detector_type=detector_type),
-                             DetectorId.correction_y_tilt:
+                             DetectorId.CORRECTION_Y_TILT:
                                  single_entry_with_detector(entry=y_tilt, detector_type=detector_type),
                              }
         self.add_to_processed_state_settings(new_state_entries)
@@ -565,23 +584,23 @@ class CommandInterfaceStateDirector(object):
     def _process_save(self, command):
         save_algorithms = command.values[0]
         save_as_zero_error_free = command.values[1]
-        new_state_entries = {OtherId.save_types: save_algorithms,
-                             OtherId.save_as_zero_error_free: save_as_zero_error_free}
+        new_state_entries = {OtherId.SAVE_TYPES: save_algorithms,
+                             OtherId.SAVE_AS_ZERO_ERROR_FREE: save_as_zero_error_free}
         self.add_to_processed_state_settings(new_state_entries,  treat_list_as_element=True)
 
     def _process_user_specified_output_name(self, command):
         user_specified_output_name = command.values[0]
-        new_state_entry = {OtherId.user_specified_output_name: user_specified_output_name}
+        new_state_entry = {OtherId.USER_SPECIFIED_OUTPUT_NAME: user_specified_output_name}
         self.add_to_processed_state_settings(new_state_entry)
 
     def _process_user_specified_output_name_suffix(self, command):
         user_specified_output_name_suffix = command.values[0]
-        new_state_entry = {OtherId.user_specified_output_name_suffix: user_specified_output_name_suffix}
+        new_state_entry = {OtherId.USER_SPECIFIED_OUTPUT_NAME_SUFFIX: user_specified_output_name_suffix}
         self.add_to_processed_state_settings(new_state_entry)
 
     def _process_use_reduction_mode_as_suffix(self, command):
         use_reduction_mode_as_suffix = command.values[0]
-        new_state_entry = {OtherId.use_reduction_mode_as_suffix: use_reduction_mode_as_suffix}
+        new_state_entry = {OtherId.USE_REDUCTION_MODE_AS_SUFFIX: use_reduction_mode_as_suffix}
         self.add_to_processed_state_settings(new_state_entry)
 
     def remove_last_user_file(self):
@@ -590,7 +609,7 @@ class CommandInterfaceStateDirector(object):
 
         See _remove_last_element for further explanation.
         """
-        self._remove_last_element(NParameterCommandId.user_file)
+        self._remove_last_element(NParameterCommandId.USER_FILE)
 
     def remove_last_scatter_sample(self):
         """
@@ -598,7 +617,7 @@ class CommandInterfaceStateDirector(object):
 
         See _remove_last_element for further explanation.
         """
-        self._remove_last_element(DataCommandId.sample_scatter)
+        self._remove_last_element(DataCommandId.SAMPLE_SCATTER)
 
     def remove_last_sample_transmission_and_direct(self):
         """
@@ -606,8 +625,8 @@ class CommandInterfaceStateDirector(object):
 
         See _remove_last_element for further explanation.
         """
-        self._remove_last_element(DataCommandId.sample_transmission)
-        self._remove_last_element(DataCommandId.sample_direct)
+        self._remove_last_element(DataCommandId.SAMPLE_TRANSMISSION)
+        self._remove_last_element(DataCommandId.SAMPLE_DIRECT)
 
     def remove_last_scatter_can(self):
         """
@@ -615,7 +634,7 @@ class CommandInterfaceStateDirector(object):
 
         See _remove_last_element for further explanation.
         """
-        self._remove_last_element(DataCommandId.can_scatter)
+        self._remove_last_element(DataCommandId.CAN_SCATTER)
 
     def remove_last_can_transmission_and_direct(self):
         """
@@ -623,8 +642,8 @@ class CommandInterfaceStateDirector(object):
 
         See _remove_last_element for further explanation.
         """
-        self._remove_last_element(DataCommandId.can_transmission)
-        self._remove_last_element(DataCommandId.can_direct)
+        self._remove_last_element(DataCommandId.CAN_TRANSMISSION)
+        self._remove_last_element(DataCommandId.CAN_DIRECT)
 
     def _remove_last_element(self, command_id):
         """

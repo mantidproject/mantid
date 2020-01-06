@@ -29,7 +29,7 @@ findAndSortTubes(const Mantid::Geometry::IObject &detShape,
                  const std::vector<Mantid::detid_t> &detIDs);
 MANTID_NEXUSGEOMETRY_DLL std::vector<Mantid::detid_t>
 notInTubes(const std::vector<detail::TubeBuilder> &tubes,
-           const std::vector<Mantid::detid_t> &detIDs);
+           std::vector<Mantid::detid_t> detIDs);
 } // namespace TubeHelpers
 } // namespace NexusGeometry
 } // namespace Mantid

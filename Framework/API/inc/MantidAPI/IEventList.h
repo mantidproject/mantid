@@ -75,6 +75,8 @@ public:
   virtual void addTof(const double offset) = 0;
   /// Add a value to the pulse time values
   virtual void addPulsetime(const double seconds) = 0;
+  /// Add a separate value to each of the pulse time values
+  virtual void addPulsetimes(const std::vector<double> &seconds) = 0;
   /// Mask a given TOF range
   virtual void maskTof(const double tofMin, const double tofMax) = 0;
   /// Mask the events by the condition vector

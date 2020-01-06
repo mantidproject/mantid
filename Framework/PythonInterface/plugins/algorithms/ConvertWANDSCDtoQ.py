@@ -19,7 +19,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
         return 'DataHandling\\Nexus'
 
     def seeAlso(self):
-        return [ "LoadWANDSCD" ]
+        return [ "LoadWANDSCD", "ConvertHFIRSCDtoMDE" ]
 
     def name(self):
         return 'ConvertWANDSCDtoQ'

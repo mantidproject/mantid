@@ -9,18 +9,19 @@
 """ Finds the beam centre for SANS"""
 
 from __future__ import (absolute_import, division, print_function)
+
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress,
                         IEventWorkspace)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator)
-from sans.algorithm_detail.scale_sans_workspace import scale_workspace
 from sans.algorithm_detail.crop_helper import get_component_name
 from sans.algorithm_detail.mask_sans_workspace import mask_workspace
 from sans.algorithm_detail.move_sans_instrument_component import move_component, MoveTypes
+from sans.algorithm_detail.scale_sans_workspace import scale_workspace
 from sans.algorithm_detail.slice_sans_event import slice_sans_event
 from sans.common.constants import EMPTY_NAME
+from sans.common.enums import (DetectorType)
 from sans.common.general_functions import create_child_algorithm, append_to_sans_file_tag
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
-from sans.common.enums import (DetectorType, RangeStepType, RebinType)
 
 
 class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
@@ -55,9 +56,9 @@ class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
 
         self.declareProperty('Iterations', 10, direction=Direction.Input)
 
-        allowed_detectors = StringListValidator([DetectorType.to_string(DetectorType.LAB),
-                                                 DetectorType.to_string(DetectorType.HAB)])
-        self.declareProperty("Component", DetectorType.to_string(DetectorType.LAB),
+        allowed_detectors = StringListValidator([DetectorType.LAB.value,
+                                                 DetectorType.HAB.value])
+        self.declareProperty("Component", DetectorType.LAB.value,
                              validator=allowed_detectors, direction=Direction.Input,
                              doc="The component of the instrument which is to be reduced.")
 
@@ -193,7 +194,7 @@ class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
         scatter_workspace = self.getProperty("SampleScatterWorkspace").value
         alg_name = "CropToComponent"
 
-        component_to_crop = DetectorType.from_string(component)
+        component_to_crop = DetectorType(component)
         component_to_crop = get_component_name(scatter_workspace, component_to_crop)
 
         crop_options = {"InputWorkspace": scatter_workspace,
@@ -238,9 +239,8 @@ class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
                               "WavelengthLow": wavelength_state.wavelength_low[0],
                               "WavelengthHigh": wavelength_state.wavelength_high[0],
                               "WavelengthStep": wavelength_state.wavelength_step,
-                              "WavelengthStepType": RangeStepType.to_string(
-                                  wavelength_state.wavelength_step_type),
-                              "RebinMode": RebinType.to_string(wavelength_state.rebin_type)}
+                              "WavelengthStepType": wavelength_state.wavelength_step_type.value,
+                              "RebinMode": wavelength_state.rebin_type.value}
 
         wavelength_alg = create_child_algorithm(self, wavelength_name, **wavelength_options)
         wavelength_alg.execute()

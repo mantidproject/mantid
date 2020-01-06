@@ -14,6 +14,9 @@ contains the X-values, followed by pairs of Y and E values. Columns are
 separated by commas. The resulting file can normally be loaded into a
 workspace by the :ref:`algm-LoadAscii` algorithm.
 
+As far as we are aware, this algorithm is only used by the ISIS Indirect group (including within the Indirect Diffraction GUI).
+Please see the new version: :ref:`algm-SaveAscii`.
+
 Limitations
 ###########
 

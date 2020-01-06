@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/IndexPeaks.h"
 #include "MantidAPI/Sample.h"
+#include "MantidCrystal/PeakAlgorithmHelpers.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -40,11 +41,6 @@ const std::string TOLERANCE{"Tolerance"};
 const std::string SATE_TOLERANCE{"ToleranceForSatellite"};
 const std::string ROUNDHKLS{"RoundHKLs"};
 const std::string COMMONUB{"CommonUBForAll"};
-const std::string MAXORDER{"MaxOrder"};
-const std::string MODVECTOR1{"ModVector1"};
-const std::string MODVECTOR2{"ModVector2"};
-const std::string MODVECTOR3{"ModVector3"};
-const std::string CROSSTERMS{"CrossTerms"};
 const std::string SAVEMODINFO{"SaveModulationInfo"};
 const std::string AVERAGE_ERR{"AverageError"};
 const std::string NUM_INDEXED{"NumIndexed"};
@@ -63,13 +59,7 @@ struct SatelliteIndexingArgs {
 struct IndexPeaksArgs {
   static IndexPeaksArgs parse(const API::Algorithm &alg) {
     const PeaksWorkspace_sptr peaksWS = alg.getProperty(PEAKSWORKSPACE);
-    const int maxOrderFromAlg = alg.getProperty(Prop::MAXORDER);
-
-    auto addIfNonZero = [](const auto &modVec, std::vector<V3D> &modVectors) {
-      if (std::fabs(modVec[0]) > 0 || std::fabs(modVec[1]) > 0 ||
-          std::fabs(modVec[2]) > 0)
-        modVectors.emplace_back(V3D(modVec[0], modVec[1], modVec[2]));
-    };
+    const int maxOrderFromAlg = alg.getProperty(ModulationProperties::MaxOrder);
 
     int maxOrderToUse{0};
     std::vector<V3D> modVectorsToUse;
@@ -78,21 +68,18 @@ struct IndexPeaksArgs {
     if (maxOrderFromAlg > 0) {
       // Use inputs from algorithm
       maxOrderToUse = maxOrderFromAlg;
-      crossTermToUse = alg.getProperty(Prop::CROSSTERMS);
-      std::vector<double> modVector = alg.getProperty(Prop::MODVECTOR1);
-      addIfNonZero(std::move(modVector), modVectorsToUse);
-      modVector = alg.getProperty(Prop::MODVECTOR2);
-      addIfNonZero(std::move(modVector), modVectorsToUse);
-      modVector = alg.getProperty(Prop::MODVECTOR3);
-      addIfNonZero(std::move(modVector), modVectorsToUse);
+      crossTermToUse = alg.getProperty(ModulationProperties::CrossTerms);
+      modVectorsToUse = validModulationVectors(
+          alg.getProperty(ModulationProperties::ModVector1),
+          alg.getProperty(ModulationProperties::ModVector2),
+          alg.getProperty(ModulationProperties::ModVector3));
     } else {
       // Use lattice definitions if they exist
       const auto &lattice = peaksWS->sample().getOrientedLattice();
       maxOrderToUse = lattice.getMaxOrder();
       if (maxOrderToUse > 0) {
-        for (auto i = 0; i < 3; ++i) {
-          addIfNonZero(lattice.getModVec(i), modVectorsToUse);
-        }
+        modVectorsToUse = validModulationVectors(
+            lattice.getModVec(0), lattice.getModVec(1), lattice.getModVec(2));
       }
       crossTermToUse = lattice.getCrossTerm();
     }
@@ -207,81 +194,6 @@ DblMatrix optimizeUBMatrix(const DblMatrix &ubOrig,
   return optimizedUB;
 }
 
-/// Tie together a modulated peak number with its offset
-using MNPOffset = std::tuple<double, double, double, V3D>;
-
-/**
- * Calculate a list of HKL offsets from the given modulation vectors.
- * @param maxOrder Integer specifying the multiples of the modulation vector.
- * @param modVectors A list of modulation vectors form the user
- * @param crossTerms If true then compute products of the modulation vectors
- * @return A list of (m, n, p, V3D) were m,n,p specifies the modulation
- * structure number and V3D specifies the offset to be tested
- */
-std::vector<MNPOffset>
-calculateOffsetsToTest(const int maxOrder, const std::vector<V3D> &modVectors,
-                       const bool crossTerms) {
-  assert(modVectors.size() <= 3);
-
-  std::vector<MNPOffset> offsets;
-  if (crossTerms && modVectors.size() > 1) {
-    const auto &modVector0{modVectors[0]}, modVector1{modVectors[1]};
-    if (modVectors.size() == 2) {
-      // Calculate m*mod_vec1 + n*mod_vec2 for combinations of m, n in
-      // [-maxOrder,maxOrder]
-      offsets.reserve(2 * maxOrder);
-      for (auto m = -maxOrder; m <= maxOrder; ++m) {
-        for (auto n = -maxOrder; n <= maxOrder; ++n) {
-          if (m == 0 && n == 0)
-            continue;
-          offsets.emplace_back(
-              std::make_tuple(m, n, 0, modVector0 * m + modVector1 * n));
-        }
-      }
-    } else {
-      // Calculate m*mod_vec1 + n*mod_vec2 + p*mod_vec3 for combinations of m,
-      // n, p in
-      // [-maxOrder,maxOrder]
-      const auto &modVector2{modVectors[2]};
-      offsets.reserve(3 * maxOrder);
-      for (auto m = -maxOrder; m <= maxOrder; ++m) {
-        for (auto n = -maxOrder; n <= maxOrder; ++n) {
-          for (auto p = -maxOrder; p <= maxOrder; ++p) {
-            if (m == 0 && n == 0 && p == 0)
-              continue;
-            offsets.emplace_back(std::make_tuple(
-                m, n, p, modVector0 * m + modVector1 * n + modVector2 * p));
-          }
-        }
-      }
-    }
-  } else {
-    // No cross terms: Compute coeff*mod_vec_i for each modulation vector
-    // separately for coeff in [-maxOrder, maxOrder]
-    for (auto i = 0u; i < modVectors.size(); ++i) {
-      const auto &modVector = modVectors[i];
-      for (int order = -maxOrder; order <= maxOrder; ++order) {
-        if (order == 0)
-          continue;
-        V3D offset{modVector * order};
-        switch (i) {
-        case 0:
-          offsets.emplace_back(std::make_tuple(order, 0, 0, std::move(offset)));
-          break;
-        case 1:
-          offsets.emplace_back(std::make_tuple(0, order, 0, std::move(offset)));
-          break;
-        case 2:
-          offsets.emplace_back(std::make_tuple(0, 0, order, std::move(offset)));
-          break;
-        }
-      }
-    }
-  }
-
-  return offsets;
-}
-
 /// <IntHKL, IntMNP, error>
 using IndexedSatelliteInfo = std::tuple<V3D, V3D, double>;
 
@@ -312,7 +224,7 @@ boost::optional<IndexedSatelliteInfo>
 indexSatellite(const V3D &mainHKL, const int maxOrder,
                const std::vector<V3D> &modVectors, const double tolerance,
                const bool crossTerms) {
-  const auto offsets = calculateOffsetsToTest(maxOrder, modVectors, crossTerms);
+  const auto offsets = generateOffsetVectors(modVectors, maxOrder, crossTerms);
   bool foundSatellite{false};
   V3D indexedIntHKL, indexedMNP;
   for (const auto &mnpOffset : offsets) {
@@ -457,28 +369,7 @@ void IndexPeaks::init() {
                         "Round H, K and L values to integers");
   this->declareProperty(Prop::COMMONUB, false,
                         "Index all orientations with a common UB");
-  auto mustBeLengthThree = boost::make_shared<ArrayLengthValidator<double>>(3);
-  this->declareProperty(std::make_unique<ArrayProperty<double>>(
-                            Prop::MODVECTOR1, "0.0,0.0,0.0", mustBeLengthThree),
-                        "Modulation Vector 1: dh, dk, dl");
-  this->declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
-                            Prop::MODVECTOR2, "0.0,0.0,0.0", mustBeLengthThree),
-                        "Modulation Vector 2: dh, dk, dl");
-  this->declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
-                            Prop::MODVECTOR3, "0.0,0.0,0.0", mustBeLengthThree),
-                        "Modulation Vector 3: dh, dk, dl");
-  auto mustBePositiveOrZero = boost::make_shared<BoundedValidator<int>>();
-  mustBePositiveOrZero->setLower(0);
-  this->declareProperty(
-      Prop::MAXORDER, 0, mustBePositiveOrZero,
-      "Maximum order to apply Modulation Vectors. Default = 0",
-      Direction::Input);
-
-  this->declareProperty(
-      Prop::CROSSTERMS, false,
-      "Include combinations of modulation vectors in satellite search",
-      Direction::Input);
-
+  ModulationProperties::appendTo(this);
   this->declareProperty(
       Prop::SAVEMODINFO, false,
       "If true, update the OrientedLattice with the maxOrder, "

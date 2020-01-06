@@ -75,6 +75,7 @@ class ExportExperimentLogTest(unittest.TestCase):
         self.assertAlmostEqual(avgpcharge, v4)
 
         # Remove generated files
+
         os.remove(outfilename)
         AnalysisDataService.remove("TestMatrixWS")
 
@@ -696,7 +697,8 @@ class ExportExperimentLogTest(unittest.TestCase):
         self.assertAlmostEqual(avgpcharge, v5)
 
         # Remove generated files
-        # os.remove(outfilename)
+        os.remove(outfilename)
+
         AnalysisDataService.remove("TestMatrixWS")
 
         return

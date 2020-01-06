@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from qtpy.QtCore import QThreadPool
 import unittest
+from qtpy.QtCore import QThreadPool
 
 from mantid.py3compat import mock
 from sans.common.enums import (OutputMode)
@@ -50,7 +50,7 @@ class BatchProcessRunnerTest(unittest.TestCase):
         self.batch_process_runner.process_states(self.states,
                                                  get_thickness_for_rows_func=mock.MagicMock,
                                                  get_states_func=get_states_mock,
-                                                 use_optimizations=False, output_mode=OutputMode.Both,
+                                                 use_optimizations=False, output_mode=OutputMode.BOTH,
                                                  plot_results=False, output_graph='')
         QThreadPool.globalInstance().waitForDone()
 
@@ -69,7 +69,7 @@ class BatchProcessRunnerTest(unittest.TestCase):
         self.batch_process_runner.process_states(self.states,
                                                  get_thickness_for_rows_func=mock.MagicMock,
                                                  get_states_func=get_states_mock,
-                                                 use_optimizations=False, output_mode=OutputMode.Both,
+                                                 use_optimizations=False, output_mode=OutputMode.BOTH,
                                                  plot_results=False, output_graph='')
         QThreadPool.globalInstance().waitForDone()
 
@@ -94,7 +94,7 @@ class BatchProcessRunnerTest(unittest.TestCase):
         self.batch_process_runner.process_states(self.states,
                                                  get_thickness_for_rows_func=mock.MagicMock,
                                                  get_states_func=get_states_mock,
-                                                 use_optimizations=False, output_mode=OutputMode.Both,
+                                                 use_optimizations=False, output_mode=OutputMode.BOTH,
                                                  plot_results=False, output_graph='')
         QThreadPool.globalInstance().waitForDone()
 

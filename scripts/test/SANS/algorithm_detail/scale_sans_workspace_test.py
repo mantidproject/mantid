@@ -60,7 +60,7 @@ class SANSScaleTest(unittest.TestCase):
         height = 2.0
         scale = 7.2
         state = self._get_sample_state(width=width, height=height, thickness=3.0, scale=scale,
-                                       shape=SampleShape.Cylinder)
+                                       shape=SampleShape.CYLINDER)
 
         output_workspace = scale_workspace(workspace=workspace,
                                            instrument=SANSInstrument.LOQ, state_scale=state.scale)
@@ -75,7 +75,7 @@ class SANSScaleTest(unittest.TestCase):
         # Arrange
         facility = SANSFacility.ISIS
         file_information = SANSFileInformationMock(instrument=SANSInstrument.SANS2D, run_number=22024, height=8.0,
-                                                   width=8.0, thickness=1.0, shape=SampleShape.Disc)
+                                                   width=8.0, thickness=1.0, shape=SampleShape.DISC)
         data_builder = get_data_builder(facility, file_information)
         data_builder.set_sample_scatter("SANS2D00022024")
         data_state = data_builder.build()
@@ -116,7 +116,7 @@ class SANSScaleTest(unittest.TestCase):
         width = 10.
         height = 5.
         thickness = 2.
-        scale_builder.set_shape(SampleShape.Disc)
+        scale_builder.set_shape(SampleShape.DISC)
         scale_builder.set_thickness(thickness)
         scale_builder.set_width(width)
         scale_builder.set_height(height)
