@@ -335,6 +335,14 @@ void RunsTablePresenter::notifyInstrumentChanged(
   m_view->setInstrumentName(instrumentName);
 }
 
+void RunsTablePresenter::setTablePrecision(int &precision) {
+  m_jobViewUpdater.setPrecision(precision);
+}
+
+void RunsTablePresenter::resetTablePrecision() {
+  m_jobViewUpdater.resetPrecision();
+}
+
 void RunsTablePresenter::settingsChanged() {
   m_model.resetState();
   notifyTableChanged();

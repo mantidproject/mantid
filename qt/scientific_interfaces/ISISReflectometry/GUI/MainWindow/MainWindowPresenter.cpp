@@ -174,6 +174,20 @@ bool MainWindowPresenter::isWarnDiscardChangesChecked() const {
       std::string("WarnDiscardChanges"));
 }
 
+bool MainWindowPresenter::isRoundChecked() const {
+  return m_optionsDialogPresenter->getBoolOption(std::string("Round"));
+}
+
+int &MainWindowPresenter::getRoundPrecision() const {
+  return m_optionsDialogPresenter->getIntOption(std::string("RoundPrecision"));
+}
+
+boost::optional<int> MainWindowPresenter::roundPrecision() const {
+  if (isRoundChecked())
+    return getRoundPrecision();
+  return boost::none;
+}
+
 bool MainWindowPresenter::isCloseEventPrevented() {
   if (isAnyBatchProcessing() || isAnyBatchAutoreducing())
     return true;
@@ -263,14 +277,17 @@ void MainWindowPresenter::addNewBatch(IBatchView *batchView) {
   auto const instrument = instrumentName();
   m_batchPresenters.emplace_back(m_batchPresenterFactory->make(batchView));
   m_batchPresenters.back()->acceptMainPresenter(this);
-  initNewBatch(m_batchPresenters.back().get(), instrument);
+  initNewBatch(m_batchPresenters.back().get(), instrument, roundPrecision());
 }
 
 void MainWindowPresenter::initNewBatch(IBatchPresenter *batchPresenter,
-                                       std::string const &instrument) {
+                                       std::string const &instrument,
+                                       boost::optional<int> precision) {
 
   batchPresenter->initInstrumentList();
   batchPresenter->notifyInstrumentChanged(instrument);
+  if (precision.is_initialized())
+    batchPresenter->notifySetRoundPrecision(precision.get());
 
   // starts in the paused state
   batchPresenter->notifyReductionPaused();
