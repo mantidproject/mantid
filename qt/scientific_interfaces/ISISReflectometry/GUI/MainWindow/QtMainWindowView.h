@@ -102,6 +102,7 @@ private:
   std::unique_ptr<QtOptionsDialogView> m_optionsDialogView;
   std::vector<IBatchView *> m_batchViews;
   int m_batchIndex;
+  std::unique_ptr<QtOptionsDialogView> m_optionsDialogView;
 
   friend class Encoder;
   friend class Decoder;
