@@ -127,6 +127,20 @@ void ConvFunctionModel::checkConvolution(IFunction_sptr fun) {
       m_fitType = FitType::ElasticDiffSphere;
       m_isQDependentFunction = true;
       isFitTypeSet = true;
+    } else if (name == "InelasticDiffSphere") {
+      if (isFitTypeSet) {
+        throw std::runtime_error("Function has wrong structure.");
+      }
+      m_fitType = FitType::InelasticDiffSphere;
+      m_isQDependentFunction = true;
+      isFitTypeSet = true;
+    } else if (name == "InelasticDiffRotDiscreteCircle") {
+      if (isFitTypeSet) {
+        throw std::runtime_error("Function has wrong structure.");
+      }
+      m_fitType = FitType::InelasticDiffRotDiscreteCirclef;
+      m_isQDependentFunction = true;
+      isFitTypeSet = true;
     } else if (name == "DeltaFunction") {
       m_hasDeltaFunction = true;
     } else {
@@ -171,6 +185,20 @@ void ConvFunctionModel::checkComposite(IFunction_sptr fun) {
         throw std::runtime_error("Function has wrong structure.");
       }
       m_fitType = FitType::ElasticDiffSphere;
+      m_isQDependentFunction = true;
+      isFitTypeSet = true;
+    } else if (name == "InelasticDiffSphere") {
+      if (isFitTypeSet) {
+        throw std::runtime_error("Function has wrong structure.");
+      }
+      m_fitType = FitType::InelasticDiffSphere;
+      m_isQDependentFunction = true;
+      isFitTypeSet = true;
+    } else if (name == "InelasticDiffRotDiscreteCircle") {
+      if (isFitTypeSet) {
+        throw std::runtime_error("Function has wrong structure.");
+      }
+      m_fitType = FitType::InelasticDiffRotDiscreteCirclef;
       m_isQDependentFunction = true;
       isFitTypeSet = true;
     } else if (name == "DeltaFunction") {
@@ -674,6 +702,15 @@ std::string ConvFunctionModel::buildElasticDiffSphereFunctionString() const {
   return "name=ElasticDiffSphere";
 }
 
+std::string ConvFunctionModel::buildInelasticDiffSphereFunctionString() const {
+  return "name=InelasticDiffSphere";
+}
+
+std::string
+ConvFunctionModel::buildInelasticDiffRotDiscreteCircleFunctionString() const {
+  return "name=InelasticDiffRotDiscreteCircle";
+}
+
 std::string ConvFunctionModel::buildPeaksFunctionString() const {
   std::string functions;
   if (m_fitType == FitType::OneLorentzian) {
@@ -689,6 +726,10 @@ std::string ConvFunctionModel::buildPeaksFunctionString() const {
     functions.append(buildStretchExpFTFunctionString());
   } else if (m_fitType == FitType::ElasticDiffSphere) {
     functions.append(buildElasticDiffSphereFunctionString());
+  } else if (m_fitType == FitType::InelasticDiffSphere) {
+    functions.append(buildInelasticDiffSphereFunctionString());
+  } else if (m_fitType == FitType::InelasticDiffRotDiscreteCircle) {
+    functions.append(buildInelasticDiffRotDiscreteCircleFunctionString());
   }
   return functions;
 } // namespace IDA
