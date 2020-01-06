@@ -62,6 +62,7 @@ MainWindowPresenter::MainWindowPresenter(
   view->subscribe(this);
   for (auto *batchView : m_view->batches())
     addNewBatch(batchView);
+  m_isUnsaved = false;
 }
 
 MainWindowPresenter::~MainWindowPresenter() = default;
@@ -77,15 +78,8 @@ void MainWindowPresenter::notifyNewBatchRequested() {
 }
 
 void MainWindowPresenter::notifyCloseBatchRequested(int batchIndex) {
-  if (m_batchPresenters[batchIndex]->isAutoreducing() ||
-      m_batchPresenters[batchIndex]->isProcessing()) {
-    m_messageHandler->giveUserCritical(
-        "Cannot close batch while processing or autoprocessing is in progress",
-        "Error");
-    return;
-  }
-
-  if (m_batchPresenters[batchIndex]->requestClose()) {
+  if (!isCloseBatchPrevented(batchIndex) &&
+      m_batchPresenters[batchIndex]->requestClose()) {
     m_batchPresenters.erase(m_batchPresenters.begin() + batchIndex);
     m_view->removeBatch(batchIndex);
   }
@@ -165,6 +159,74 @@ void MainWindowPresenter::notifyOptionsChanged() const {
   // TODO implement with round precision
 }
 
+bool MainWindowPresenter::isWarnDiscardChangesChecked() const {
+  return m_optionsDialogPresenter->getBoolOption(
+      std::string("WarnDiscardChanges"));
+}
+
+bool MainWindowPresenter::isCloseEventPrevented() {
+  if (isAnyBatchProcessing() || isAnyBatchAutoreducing())
+    return true;
+  else if (isWarnDiscardChangesChecked() && isAnyBatchUnsaved()) {
+    return !m_messageHandler->askUserDiscardChanges();
+  }
+  return false;
+}
+
+bool MainWindowPresenter::isCloseBatchPrevented(int batchIndex) const {
+  if (m_batchPresenters[batchIndex]->isAutoreducing() ||
+      m_batchPresenters[batchIndex]->isProcessing()) {
+    m_messageHandler->giveUserCritical(
+        "Cannot close batch while processing or autoprocessing is in progress",
+        "Error");
+    return true;
+  } else if (isWarnDiscardChangesChecked() && isBatchUnsaved(batchIndex)) {
+    return !m_messageHandler->askUserDiscardChanges();
+  }
+  return false;
+}
+
+bool MainWindowPresenter::isOperationPrevented() const {
+  if (isWarnDiscardChangesChecked()) {
+    return !m_messageHandler->askUserDiscardChanges();
+  }
+  return false;
+}
+
+bool MainWindowPresenter::isOperationPrevented(int tabIndex) const {
+  if (isWarnDiscardChangesChecked() && isBatchUnsaved(tabIndex)) {
+    return !m_messageHandler->askUserDiscardChanges();
+  }
+  return false;
+}
+
+/** Checks whether there are any unsaved changed in the specified batch */
+bool MainWindowPresenter::isBatchUnsaved(int batchIndex) const {
+  return m_batchPresenters[batchIndex]->getUnsavedBatchFlag();
+}
+
+/**
+     Checks whether there are unsaved changes in any batch
+     * @return : Bool on whether there are changes
+*/
+bool MainWindowPresenter::isAnyBatchUnsaved() {
+  for (auto it = m_batchPresenters.begin(); it != m_batchPresenters.end();
+       ++it) {
+    int batchIndex = std::distance(m_batchPresenters.begin(), it);
+    if (isBatchUnsaved(batchIndex)) {
+      setUnsavedFlag(true);
+      return true;
+    }
+  }
+  return false;
+}
+
+bool MainWindowPresenter::getUnsavedFlag() const { return m_isUnsaved; }
+
+void MainWindowPresenter::setUnsavedFlag(bool isUnsaved) {
+  m_isUnsaved = isUnsaved;
+}
+
 void MainWindowPresenter::addNewBatch(IBatchView *batchView) {
   // Remember the instrument name so we can re-set it (it will otherwise
   // get overridden by the instrument list default in the new batch)
@@ -201,9 +263,12 @@ void MainWindowPresenter::notifySaveBatchRequested(int tabIndex) {
     return;
   auto map = m_encoder->encodeBatch(m_view, tabIndex, false);
   m_fileHandler->saveJSONToFile(filename, map);
+  batchPresenter->setUnsavedBatchFlag(false);
 }
 
 void MainWindowPresenter::notifyLoadBatchRequested(int tabIndex) {
+  if (isOperationPrevented(tabIndex))
+    return;
   auto filename = m_messageHandler->askUserForLoadFileName("JSON (*.json)");
   if (filename == "")
     return;
@@ -218,6 +283,7 @@ void MainWindowPresenter::notifyLoadBatchRequested(int tabIndex) {
     return;
   }
   m_decoder->decodeBatch(m_view, tabIndex, map);
+  batchPresenter->setUnsavedBatchFlag(false);
 }
 
 void MainWindowPresenter::disableSaveAndLoadBatch() {

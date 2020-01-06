@@ -197,12 +197,9 @@ bool RunsPresenter::resumeAutoreduction() {
   if (m_searcher->searchSettingsChanged(searchString, instrument,
                                         ISearcher::SearchType::AUTO)) {
     // If there are unsaved changes, ask the user first
-    auto ok = true;
-    if (hasGroupsWithContent(runsTable().reductionJobs())) {
-      ok = m_messageHandler->askUserYesNo(
-          "There are unsaved changes in the table. Continue?", "Warning");
-      if (!ok)
-        return false;
+    if (m_mainPresenter->getUnsavedBatchFlag() &&
+        !m_messageHandler->askUserDiscardChanges()) {
+      return false;
     }
     m_searcher->reset();
     tablePresenter()->notifyRemoveAllRowsAndGroupsRequested();
@@ -255,6 +252,10 @@ void RunsPresenter::notifyInstrumentChanged(std::string const &instrumentName) {
   m_searcher->reset();
   m_view->setSearchInstrument(instrumentName);
   tablePresenter()->notifyInstrumentChanged(instrumentName);
+}
+
+void RunsPresenter::notifySetUnsavedBatch(bool isUnsaved) {
+  m_mainPresenter->setUnsavedBatchFlag(isUnsaved);
 }
 
 void RunsPresenter::settingsChanged() { tablePresenter()->settingsChanged(); }
@@ -315,6 +316,10 @@ bool RunsPresenter::isAnyBatchProcessing() const {
 
 bool RunsPresenter::isAnyBatchAutoreducing() const {
   return m_mainPresenter->isAnyBatchAutoreducing();
+}
+
+bool RunsPresenter::isOperationPrevented() const {
+  return m_mainPresenter->isOperationPrevented();
 }
 
 bool RunsPresenter::searchInProgress() const {

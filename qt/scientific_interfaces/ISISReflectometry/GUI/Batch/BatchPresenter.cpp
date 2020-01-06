@@ -57,6 +57,8 @@ BatchPresenter::BatchPresenter(
   m_instrumentPresenter->acceptMainPresenter(this);
   m_runsPresenter->acceptMainPresenter(this);
 
+  m_unsavedBatchFlag = false;
+
   observePostDelete();
   observeRename();
   observeADSClear();
@@ -316,6 +318,23 @@ bool BatchPresenter::isAnyBatchProcessing() const {
    */
 bool BatchPresenter::isAnyBatchAutoreducing() const {
   return m_mainPresenter->isAnyBatchAutoreducing();
+}
+
+/**
+    Checks whether the requested operation is prevented by unsaved
+    * changes and user input to avoid losing them
+    * @return : Bool on whether the calling function should continue
+    */
+bool BatchPresenter::isOperationPrevented() const {
+  return m_mainPresenter->isOperationPrevented();
+}
+
+/** Returns whether there are any unsaved changes in the current batch */
+bool BatchPresenter::getUnsavedBatchFlag() const { return m_unsavedBatchFlag; }
+
+/** Set the state of unsaved changes in the current batch */
+void BatchPresenter::setUnsavedBatchFlag(bool isUnsaved) {
+  m_unsavedBatchFlag = isUnsaved;
 }
 
 /** Get the percent of jobs that have been completed out of the current

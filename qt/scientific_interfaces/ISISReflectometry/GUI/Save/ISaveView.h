@@ -17,6 +17,7 @@ namespace ISISReflectometry {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL SaveViewSubscriber {
 public:
+  virtual void notifySettingsChanged() = 0;
   virtual void notifyPopulateWorkspaceList() = 0;
   virtual void notifyFilterWorkspaceList() = 0;
   virtual void notifyPopulateParametersList() = 0;

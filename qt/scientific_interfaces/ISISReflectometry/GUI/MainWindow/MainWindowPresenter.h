@@ -57,6 +57,15 @@ public:
   // IMainWindowPresenter overrides
   bool isAnyBatchProcessing() const override;
   bool isAnyBatchAutoreducing() const override;
+  bool isWarnDiscardChangesChecked() const override;
+  bool isCloseEventPrevented() override;
+  bool isCloseBatchPrevented(int batchIndex) const override;
+  bool isOperationPrevented() const override;
+  bool isOperationPrevented(int tabIndex) const override;
+  bool isBatchUnsaved(int batchIndex) const override;
+  bool isAnyBatchUnsaved() override;
+  bool getUnsavedFlag() const override;
+  void setUnsavedFlag(bool isUnsaved) override;
   void notifyAnyBatchAutoreductionResumed() override;
   void notifyAnyBatchAutoreductionPaused() override;
   void notifyAnyBatchReductionResumed() override;
@@ -92,6 +101,7 @@ private:
   std::unique_ptr<MantidWidgets::ISlitCalculator> m_slitCalculator;
   std::unique_ptr<IOptionsDialogPresenter> m_optionsDialogPresenter;
   std::unique_ptr<IBatchPresenterFactory> m_batchPresenterFactory;
+  bool m_isUnsaved;
 
   void showHelp();
   void addNewBatch(IBatchView *batchView);
