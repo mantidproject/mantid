@@ -21,7 +21,7 @@ class ILL_D11_Test(systemtesting.MantidSystemTest):
         config['default.instrument'] = 'D11'
         config.appendDataSearchSubDir('ILL/D11/')
 
-    def tearDown(self):
+    def cleanup(self):
         mtd.clear()
 
     def validate(self):
@@ -81,7 +81,7 @@ class ILL_D22_Test(systemtesting.MantidSystemTest):
         config['default.instrument'] = 'D22'
         config.appendDataSearchSubDir('ILL/D22/')
 
-    def tearDown(self):
+    def cleanup(self):
         mtd.clear()
 
     def validate(self):
@@ -142,7 +142,7 @@ class ILL_D33_VTOF_Test(systemtesting.MantidSystemTest):
         config['default.instrument'] = 'D33'
         config.appendDataSearchSubDir('ILL/D33/')
 
-    def tearDown(self):
+    def cleanup(self):
         mtd.clear()
 
     def validate(self):
@@ -186,7 +186,7 @@ class ILL_D33_LTOF_Test(systemtesting.MantidSystemTest):
         config['default.instrument'] = 'D33'
         config.appendDataSearchSubDir('ILL/D33/')
 
-    def tearDown(self):
+    def cleanup(self):
         mtd.clear()
 
     def validate(self):
@@ -231,7 +231,7 @@ class ILL_D33_Test(systemtesting.MantidSystemTest):
         config['default.instrument'] = 'D33'
         config.appendDataSearchSubDir('ILL/D33/')
 
-    def tearDown(self):
+    def cleanup(self):
         mtd.clear()
 
     def validate(self):

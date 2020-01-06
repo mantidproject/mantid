@@ -1,0 +1,54 @@
+digraph TotScatCalculateSelfScattering {
+label = "TotScatCalculateSelfScattering Workflow Diagram"
+$global_style
+
+subgraph params {
+  $param_style
+  inputWorkspace    [label="InputWorkspace"]
+  outputWorkspace   [label="OutputWorkspace"]
+  calFileName       [label="CalFileName"]
+  sampleGeometry    [label="SampleGeometry"]
+  sampleMaterial    [label="SampleMaterial"]
+}
+
+subgraph algorithms {
+  $algorithm_style
+  SetSample                         [label="SetSample v1"]
+  ExtractSpectra                    [label="ExtractSpectra v1"]
+  ConvertUnits1                     [label="ConvertUnits v1"]
+  FitIncidentSpectrum               [label="FitIncidentSpectrum v1"]
+  CalculatePlaczekSelfScattering    [label="CalculatePlaczekSelfScattering v1"]
+  LoadCalFile                       [label="LoadCalFile v1"]
+  DiffractionFocussing              [label="DiffractionFocussing v2"]
+  CreateWorkspace                   [label="CreateWorkspace v1"]
+  Divide                            [label="Divide v1"]
+  ConvertToDistribution             [label="ConvertToDistribution v1"]
+  ConvertUnits2                     [label="ConvertUnits v1"]
+}
+
+subgraph process  {
+  $process_style
+  FindMonitorSpectra          [label="Find the Monitor\n spectra closest to the sample"]
+  GetPixelNumberInDetector    [label="Count the number\n of pixels in each detector"]
+}
+
+inputWorkspace                  -> SetSample
+sampleGeometry                  -> SetSample
+sampleMaterial                  -> SetSample
+SetSample                       -> FindMonitorSpectra
+SetSample                       -> ExtractSpectra
+FindMonitorSpectra              -> ExtractSpectra
+ExtractSpectra                  -> ConvertUnits1
+ConvertUnits1                   -> FitIncidentSpectrum
+FitIncidentSpectrum             -> CalculatePlaczekSelfScattering
+calFileName                     -> LoadCalFile
+LoadCalFile                     -> DiffractionFocussing
+CalculatePlaczekSelfScattering  -> DiffractionFocussing
+LoadCalFile                     -> GetPixelNumberInDetector
+GetPixelNumberInDetector        -> CreateWorkspace
+CreateWorkspace                 -> Divide
+DiffractionFocussing            -> Divide
+Divide                          -> ConvertToDistribution
+ConvertToDistribution           -> ConvertUnits2
+ConvertUnits2                   -> outputWorkspace
+}

@@ -84,7 +84,7 @@ Ubuntu
 .. code-block:: sh
 
    apt install gdebi-core
-   apt install ~/Downloads/mantid-developer.X.Y.Z.deb
+   gdebi ~/Downloads/mantid-developer.X.Y.Z.deb
 
 where ``X.Y.Z`` should be replaced with the version that was downloaded.
 
