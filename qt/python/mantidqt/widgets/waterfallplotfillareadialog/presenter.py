@@ -46,7 +46,7 @@ class WaterfallPlotFillAreaDialogPresenter:
                 self.view.use_solid_colour_radio_button.setChecked(True)
                 poly = next(poly_collection for poly_collection in self.ax.collections
                             if isinstance(poly_collection, PolyCollection))
-                self.view.colour_selector_widget.set_color(convert_color_to_hex(poly.get_facecolor()))
+                self.view.colour_selector_widget.set_color(convert_color_to_hex(poly.get_facecolor().tolist()[0]))
 
     def set_fill_enabled(self):
         if self.view.enable_fill_group_box.isChecked():

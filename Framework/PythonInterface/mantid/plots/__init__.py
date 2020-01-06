@@ -31,7 +31,6 @@ from matplotlib.projections import register_projection
 from matplotlib.scale import register_scale
 from matplotlib.table import Table
 from mpl_toolkits.mplot3d.axes3d import Axes3D
-from numpy import asarray
 
 from mantid.api import AnalysisDataService as ads
 from mantid.kernel import logger
