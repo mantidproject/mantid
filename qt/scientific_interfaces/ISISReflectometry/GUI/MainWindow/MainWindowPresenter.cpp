@@ -160,6 +160,15 @@ bool MainWindowPresenter::isAnyBatchAutoreducing() const {
   return false;
 }
 
+bool MainWindowPresenter::isWarnProcessAllChecked() const {
+  return m_optionsDialogPresenter->getBoolOption(std::string("WarnProcessAll"));
+}
+
+bool MainWindowPresenter::isWarnProcessPartialGroupChecked() const {
+  return m_optionsDialogPresenter->getBoolOption(
+      std::string("WarnProcessPartialGroup"));
+}
+
 bool MainWindowPresenter::isWarnDiscardChangesChecked() const {
   return m_optionsDialogPresenter->getBoolOption(
       std::string("WarnDiscardChanges"));
@@ -190,6 +199,24 @@ bool MainWindowPresenter::isCloseBatchPrevented(int batchIndex) const {
 bool MainWindowPresenter::isOverwriteBatchPrevented(int tabIndex) const {
   if (isWarnDiscardChangesChecked() && isBatchUnsaved(tabIndex)) {
     return !m_messageHandler->askUserDiscardChanges();
+  }
+  return false;
+}
+
+bool MainWindowPresenter::isProcessAllPrevented() const {
+  if (isWarnProcessAllChecked()) {
+    return !m_messageHandler->askUserYesNo(
+        "This will process all rows in the table. Continue?",
+        "Process all rows?");
+  }
+  return false;
+}
+
+bool MainWindowPresenter::isProcessPartialGroupPrevented() const {
+  if (isWarnProcessAllChecked()) {
+    return !m_messageHandler->askUserYesNo(
+        "Some groups will not be fully processed. Continue?",
+        "Process partial group?");
   }
   return false;
 }

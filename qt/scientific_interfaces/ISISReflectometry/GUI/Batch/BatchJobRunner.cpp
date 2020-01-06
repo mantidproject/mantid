@@ -39,7 +39,7 @@ using API::IConfiguredAlgorithm_sptr;
 
 BatchJobRunner::BatchJobRunner(Batch batch)
     : m_batch(std::move(batch)), m_isProcessing(false), m_isAutoreducing(false),
-      m_reprocessFailed(false), m_processAll(false) {}
+      m_reprocessFailed(false), m_processAll(false), m_processPartial(false) {}
 
 bool BatchJobRunner::isProcessing() const { return m_isProcessing; }
 
@@ -84,14 +84,45 @@ void BatchJobRunner::notifyReductionResumed() {
   if (m_rowLocationsToProcess.empty()) {
     // Nothing selected so process everything. Skip failed rows.
     m_processAll = true;
+    m_processPartial = false;
     m_reprocessFailed = false;
   } else {
     // User has manually selected items so only process the selection (unless
     // autoreducing). Also reprocess failed items.
     m_processAll = m_isAutoreducing;
-    m_reprocessFailed = !m_isAutoreducing;
+    // Check whether a given group is in the selection. If not then check
+    // the group's rows to determine if it will be partially processed.
+    if (!m_processAll) {
+      // This comparator is needed to facilitate constructing a map with
+      // user-defined key types
+      auto comp = [](const Group &lhs, const Group &rhs) {
+        return lhs.rows().size() < rhs.rows().size();
+      };
+      // If a group is selected then it won't be partially processed so we
+      // only need to check those with selected rows
+      std::map<std::reference_wrapper<const Group>, size_t, decltype(comp)>
+          groupsWithSelectedRows(comp);
+      for (auto it = m_rowLocationsToProcess.begin();
+           it != m_rowLocationsToProcess.end(); ++it) {
+        if (isGroupLocation(*it)) {
+          std::advance(
+              it, getNumberOfInitialisedRowsInGroup(getGroupFromPath(*it)) - 1);
+          continue;
+        } else
+          ++groupsWithSelectedRows[getParentGroupFromPath(*it)];
+      }
+      for (const auto &groupCountPair : groupsWithSelectedRows) {
+        m_processPartial =
+            groupCountPair.second <
+            getNumberOfInitialisedRowsInGroup(groupCountPair.first.get());
+        if (m_processPartial)
+          break;
+      }
+      if (groupsWithSelectedRows.empty())
+        m_processPartial = false;
+      m_reprocessFailed = !m_isAutoreducing;
+    }
   }
-
   m_batch.resetSkippedItems();
 }
 
@@ -104,6 +135,7 @@ void BatchJobRunner::notifyAutoreductionResumed() {
   m_isAutoreducing = true;
   m_reprocessFailed = true;
   m_processAll = true;
+  m_processPartial = false;
   m_batch.resetSkippedItems();
 }
 
@@ -266,6 +298,23 @@ BatchJobRunner::getWorkspacesToSave(Row const &row) const {
   return workspaces;
 }
 
+const Group &BatchJobRunner::getGroupFromPath(
+    MantidWidgets::Batch::RowLocation rowLocation) const {
+  return m_batch.runsTable().reductionJobs().getGroupFromPath(rowLocation);
+}
+
+const Group &BatchJobRunner::getParentGroupFromPath(
+    MantidWidgets::Batch::RowLocation rowLocation) const {
+  return m_batch.runsTable().reductionJobs().groups()[groupOf(rowLocation)];
+}
+
+const int
+BatchJobRunner::getNumberOfInitialisedRowsInGroup(const Group &group) const {
+  return std::count_if(
+      group.rows().cbegin(), group.rows().cend(),
+      [](const boost::optional<Row> &row) { return row.is_initialized(); });
+}
+
 boost::optional<Item const &>
 BatchJobRunner::notifyWorkspaceDeleted(std::string const &wsName) {
   // Reset the state for the relevant row if the workspace was one of our
@@ -299,6 +348,11 @@ BatchJobRunner::notifyWorkspaceRenamed(std::string const &oldName,
 void BatchJobRunner::notifyAllWorkspacesDeleted() {
   // All output workspaces will be deleted so reset all rows and groups
   m_batch.resetState();
+}
+
+bool BatchJobRunner::getProcessPartial() const { return m_processPartial; }
+bool BatchJobRunner::getProcessAll() const {
+  return m_processAll && !m_isAutoreducing;
 }
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
