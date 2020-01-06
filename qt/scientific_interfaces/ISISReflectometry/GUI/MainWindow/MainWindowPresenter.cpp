@@ -62,6 +62,7 @@ MainWindowPresenter::MainWindowPresenter(
   view->subscribe(this);
   for (auto *batchView : m_view->batches())
     addNewBatch(batchView);
+  m_isUnsaved = false;
 }
 
 MainWindowPresenter::~MainWindowPresenter() = default;

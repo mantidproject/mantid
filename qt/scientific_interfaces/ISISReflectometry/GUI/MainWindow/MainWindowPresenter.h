@@ -94,6 +94,7 @@ private:
   std::unique_ptr<MantidWidgets::ISlitCalculator> m_slitCalculator;
   std::unique_ptr<IOptionsDialogPresenter> m_optionsDialogPresenter;
   std::unique_ptr<IBatchPresenterFactory> m_batchPresenterFactory;
+  bool m_isUnsaved;
 
   bool isWarnDiscardChangesChecked() const override;
   bool isCloseBatchPrevented(int batchIndex) const override;

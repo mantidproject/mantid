@@ -57,6 +57,8 @@ BatchPresenter::BatchPresenter(
   m_instrumentPresenter->acceptMainPresenter(this);
   m_runsPresenter->acceptMainPresenter(this);
 
+  m_unsavedBatchFlag = false;
+
   observePostDelete();
   observeRename();
   observeADSClear();
