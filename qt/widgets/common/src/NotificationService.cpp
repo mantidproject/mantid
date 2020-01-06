@@ -13,7 +13,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 // Key for the "normalize data to bin width" plot option
-const std::string NotificationService::NOTIFICATIONSENABLEDKEY =
+const std::string NotificationService::NOTIFICATIONS_ENABLED_KEY =
     "Notifications.Enabled";
 
 void NotificationService::showMessage(const QString &title,
