@@ -100,12 +100,6 @@ void ConvFit::setupFitTab() {
 }
 
 void ConvFit::setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
-  // if (boolSettingValue("UseTempCorrection"))
-  //   m_convFittingModel->setTemperature(doubleSettingValue("TempCorrection"));
-  // else
-  //   m_convFittingModel->setTemperature(boost::none);
-  // fitAlgorithm->setProperty("ExtractMembers",
-  //                          boolSettingValue("ExtractMembers"));
   IndirectFitAnalysisTab::setupFit(fitAlgorithm);
 }
 

@@ -28,49 +28,6 @@ bool doesExistInADS(std::string const &workspaceName) {
   return AnalysisDataService::Instance().doesExist(workspaceName);
 }
 
-// boost::optional<std::size_t>
-// getFirstInCategory(CompositeFunction_const_sptr composite,
-//                   const std::string &category) {
-//  if (!composite)
-//    return boost::none;
-//
-//  for (auto i = 0u; i < composite->nFunctions(); ++i) {
-//    if (composite->getFunction(i)->category() == category)
-//      return i;
-//  }
-//  return boost::none;
-//}
-
-// IFunction_sptr removeFunction(CompositeFunction_sptr composite,
-//                              std::size_t index) {
-//  auto function = composite->getFunction(index);
-//  composite->removeFunction(index);
-//  return function;
-//}
-
-// CompositeFunction_sptr shallowCopy(CompositeFunction_sptr composite) {
-//  CompositeFunction_sptr copy(new CompositeFunction);
-//  for (auto i = 0u; i < composite->nFunctions(); ++i)
-//    copy->addFunction(composite->getFunction(i));
-//  copy->addTies(composite->writeTies());
-//  return copy;
-//}
-//
-// IFunction_sptr shallowCopy(IFunction_sptr function) {
-//  auto composite = boost::dynamic_pointer_cast<CompositeFunction>(function);
-//  if (composite)
-//    return shallowCopy(composite);
-//  return function;
-//}
-
-// IFunction_sptr createResolutionFunction(const std::string &resolutionName) {
-//  auto func = FunctionFactory::Instance().createFunction("Resolution");
-//  // add resolution file
-//  IFunction::Attribute attr(resolutionName);
-//  func->setAttribute("Workspace", attr);
-//  return func;
-//}
-
 // CompositeFunction_sptr applyTemperatureCorrection(IFunction_sptr function,
 //                                                  IFunction_sptr correction,
 //                                                  double value) {
@@ -390,56 +347,6 @@ getNames(const MantidQt::CustomInterfaces::IDA::ResolutionCollectionType
   return names;
 }
 
-// std::string backgroundString(IFunction_sptr function) {
-//  const auto functionName = function->name();
-//
-//  if (functionName == "FlatBackground") {
-//    if (function->isFixed(0))
-//      return "FixF";
-//    return "FitF";
-//  } else if (functionName == "LinearBackground")
-//    return "FitL";
-//  return "";
-//}
-
-// IFunction_sptr createConvolutionFitModel(IFunction_sptr model,
-//                                         IFunction_sptr background,
-//                                         boost::optional<double> temperature)
-//                                         {
-//  CompositeFunction_sptr comp(new CompositeFunction);
-//
-//  if (!(model &&
-//        AnalysisDataService::Instance().doesExist("__ConvFitResolution0")))
-//    return model ? model : comp;
-//
-//  if (auto compModel = boost::dynamic_pointer_cast<CompositeFunction>(model))
-//  {
-//    if (compModel->nFunctions() == 1) {
-//      model = compModel->getFunction(0);
-//    }
-//  }
-//
-//  auto conv = boost::dynamic_pointer_cast<CompositeFunction>(
-//      FunctionFactory::Instance().createFunction("Convolution"));
-//  conv->addFunction(createResolutionFunction("__ConvFitResolution0"));
-//
-//  if (temperature) {
-//    auto compositeModel =
-//    boost::dynamic_pointer_cast<CompositeFunction>(model); if (compositeModel)
-//      model = addTemperatureCorrection(compositeModel, *temperature);
-//    else
-//      model = addTemperatureCorrection(model, *temperature);
-//  }
-//  conv->addFunction(model);
-//
-//  if (background) {
-//    comp->addFunction(background);
-//    comp->addFunction(conv);
-//  } else
-//    comp = conv;
-//  return comp;
-//}
-
 void setResolutionAttribute(CompositeFunction_sptr convolutionModel,
                             const IFunction::Attribute &attr) {
   if (convolutionModel->name() == "Convolution")
@@ -491,13 +398,6 @@ std::string ConvFitModel::singleFitOutputName(TableDatasetIndex index,
 }
 
 Mantid::API::MultiDomainFunction_sptr ConvFitModel::getFittingFunction() const {
-  // auto function = shallowCopy(IndirectFittingModel::getFittingFunction());
-  // auto composite = boost::dynamic_pointer_cast<CompositeFunction>(function);
-
-  // IFunction_sptr background(nullptr);
-  // if (composite && m_backgroundIndex)
-  //  background = removeFunction(composite, *m_backgroundIndex);
-  // return createConvolutionFitModel(function, background, m_temperature);
   return IndirectFittingModel::getFittingFunction();
 }
 
@@ -536,16 +436,6 @@ std::vector<std::string> ConvFitModel::getSpectrumDependentAttributes() const {
 }
 
 void ConvFitModel::setFitFunction(MultiDomainFunction_sptr function) {
-  // auto const composite =
-  //    boost::dynamic_pointer_cast<CompositeFunction>(function);
-  // m_backgroundIndex = getFirstInCategory(composite, "Background");
-  // setParameterNameChanges(*function, m_backgroundIndex);
-
-  // IFunction_sptr background(nullptr);
-  // if (composite && m_backgroundIndex)
-  //  background = composite->getFunction(*m_backgroundIndex);
-  // m_backgroundString = background ? backgroundString(background) : "";
-
   IndirectFittingModel::setFitFunction(function);
 }
 
