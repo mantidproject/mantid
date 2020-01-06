@@ -282,6 +282,17 @@ void MainWindowPresenter::optionsChanged() const {
   }
 }
 
+void MainWindowPresenter::optionsChanged() const {
+  // Set or reset the rounding precision of all batches accordingly
+  if (isRoundChecked()) {
+    for (auto &batchPresenter : m_batchPresenters)
+      batchPresenter->notifySetRoundPrecision(getRoundPrecision());
+  } else {
+    for (auto &batchPresenter : m_batchPresenters)
+      batchPresenter->notifyResetRoundPrecision();
+  }
+}
+
 void MainWindowPresenter::addNewBatch(IBatchView *batchView) {
   // Remember the instrument name so we can re-set it (it will otherwise
   // get overridden by the instrument list default in the new batch)

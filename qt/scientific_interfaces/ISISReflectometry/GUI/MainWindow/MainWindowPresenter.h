@@ -59,6 +59,9 @@ public:
   bool isAnyBatchAutoreducing() const override;
   bool isWarnProcessAllChecked() const override;
   bool isWarnProcessPartialGroupChecked() const override;
+  bool isRoundChecked() const override;
+  int &getRoundPrecision() const override;
+  boost::optional<int> roundPrecision() const override;
   bool isCloseEventPrevented() override;
   bool isOverwriteBatchPrevented(int tabIndex) const override;
   bool isProcessAllPrevented() const override;
