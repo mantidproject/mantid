@@ -5,7 +5,7 @@
 %endif
 
 Name:           mantid-developer
-Version:        1.38
+Version:        1.39
 Release:        1%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
@@ -109,6 +109,7 @@ Requires: python%{python3_pkgversion}-scipy
 Requires: python%{python3_pkgversion}-setuptools
 Requires: python%{python3_pkgversion}-sphinx
 Requires: python%{python3_pkgversion}-sphinx-bootstrap-theme
+Requires: python%{python3_pkgversion}-toml
 Requires: python%{python3_pkgversion}-PyYAML
 %endif
 
@@ -133,6 +134,9 @@ required for Mantid development.
 %files
 
 %changelog
+* Mon Jan 28 2020 David Fairbrother <david.fairbrother@stfc.ac.uk>
+- Added Python TOML library
+
 * Fri Jan 24 2020 Martyn Gigg <martyn.gigg@stfc.ac.uk>
 - Att matplotlib backend for Python 3
 
