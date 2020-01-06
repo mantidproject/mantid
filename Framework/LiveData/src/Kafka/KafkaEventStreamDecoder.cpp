@@ -616,7 +616,7 @@ void KafkaEventStreamDecoder::initLocalCaches(
 
   // Cache spec->index mapping. We assume it is the same across all periods
   m_specToIdx =
-      eventBuffer->getDetectorIDToWorkspaceIndexVector(m_specToIdxOffset);
+      eventBuffer->getSpectrumToWorkspaceIndexVector(m_specToIdxOffset);
 
   // Buffers for each period
   size_t nperiods = runStartData.nPeriods;
