@@ -474,10 +474,10 @@ void QENSFitSequential::init() {
   declareProperty(
       "FitType", "Sequential",
       Kernel::IValidator_sptr(new Kernel::ListValidator<std::string>(fitTypes)),
-      "Defines the way of setting initial values. If set to ‘Sequential’ every "
+      "Defines the way of setting initial values. If set to Sequential every "
       "next fit starts with parameters returned by the previous fit. If set to "
-      "‘Individual’ each fit starts with the same initial values defined in "
-      "the Function property. Allowed values: [‘Sequential’, ‘Individual’]",
+      "Individual each fit starts with the same initial values defined in "
+      "the Function property. Allowed values: [Sequential, Individual]",
       Kernel::Direction::Input);
 
   declareProperty(std::make_unique<ArrayProperty<double>>("Exclude", ""),
