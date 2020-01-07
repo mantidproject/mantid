@@ -131,13 +131,13 @@ void CreateTransmissionWorkspace2::exec() {
 
   MatrixWorkspace_sptr secondTransWS = getProperty("SecondTransmissionRun");
   if (secondTransWS) {
-    storeTransitionRun(1, firstTransWS);
+    outputTransmissionRun(1, firstTransWS);
 
     convertProcessingInstructions(secondTransWS);
 
     secondTransWS = normalizeDetectorsByMonitors(secondTransWS);
     secondTransWS = cropWavelength(secondTransWS);
-    storeTransitionRun(2, secondTransWS);
+    outputTransmissionRun(2, secondTransWS);
 
     // Stitch the results.
     auto stitch = createChildAlgorithm("Stitch1D");
@@ -226,10 +226,10 @@ CreateTransmissionWorkspace2::getRunNumber(std::string const &propertyName) {
  * @param which Which of the runs to store: 1 - first, 2 - second.
  * @param ws A workspace to store.
  */
-void CreateTransmissionWorkspace2::storeTransitionRun(int which,
-                                                      MatrixWorkspace_sptr ws) {
+void CreateTransmissionWorkspace2::outputTransmissionRun(
+    int which, MatrixWorkspace_sptr ws) {
   bool const isDebug = getProperty("Debug");
-  if (!isDebug)
+  if (!isDebug && !isChild())
     return;
 
   if (which < 1 || which > 2) {
@@ -238,10 +238,20 @@ void CreateTransmissionWorkspace2::storeTransitionRun(int which,
   auto const &runNumber =
       which == 1 ? m_firstTransmissionRunNumber : m_secondTransmissionRunNumber;
 
-  if (!runNumber.empty()) {
-    auto const name = TRANS_LAM_PREFIX + runNumber;
-    AnalysisDataService::Instance().addOrReplace(name, ws);
-  }
+  if (runNumber.empty())
+    return;
+
+  // Declare an on-the-fly property to return this output workspace
+  auto const name = TRANS_LAM_PREFIX + runNumber;
+  auto const runDescription =
+      which == 1 ? "FirstTransmission" : "SecondTransmission";
+  auto const propertyName = std::string("OutputWorkspace") + runDescription;
+  declareProperty(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          propertyName, "", Direction::Output, PropertyMode::Optional),
+      std::string("Output workspace in wavelength for ") + runDescription);
+  setPropertyValue(propertyName, name);
+  setProperty(propertyName, ws);
 }
 
 /** Store the stitched transition workspace run in ADS

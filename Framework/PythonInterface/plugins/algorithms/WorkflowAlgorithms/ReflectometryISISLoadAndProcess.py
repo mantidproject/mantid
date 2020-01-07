@@ -35,7 +35,11 @@ class Prop:
     OUTPUT_WS_LAM = 'OutputWorkspaceWavelength'
     OUTPUT_WS_TOF = 'OutputWorkspaceTOF'
     OUTPUT_WS_TOF_SLICED = 'OutputWorkspaceTOFSliced'
-    OUTPUT_WS_TRANS = 'OutputWorkspaceTransmission'
+    OUTPUT_WS_FIRST_TRANS = 'OutputWorkspaceFirstTransmission'
+    OUTPUT_WS_SECOND_TRANS = 'OutputWorkspaceSecondTransmission'
+    OUTPUT_WS_FIRST_TRANS_LAM = 'OutputWorkspaceFirstTransmissionLam'
+    OUTPUT_WS_SECOND_TRANS_LAM = 'OutputWorkspaceSecondTransmissionLam'
+    OUTPUT_WS_TRANS_LAM = 'OutputWorkspaceTransmissionLam'
 
 
 class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
@@ -111,9 +115,13 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         inputRuns = self.getProperty(Prop.RUNS).value
         inputWorkspaces = self._getInputWorkspaces(inputRuns, False)
         firstTransRuns = self.getProperty(Prop.FIRST_TRANS_RUNS).value
-        firstTransWorkspaces = self._getInputWorkspaces(firstTransRuns, True)
+        firstTransWorkspaces = self._getInputWorkspaces(firstTransRuns, True,
+                                                        Prop.OUTPUT_WS_FIRST_TRANS,
+                                                        'The first transmission run in TOF')
         secondTransRuns = self.getProperty(Prop.SECOND_TRANS_RUNS).value
-        secondTransWorkspaces = self._getInputWorkspaces(secondTransRuns, True)
+        secondTransWorkspaces = self._getInputWorkspaces(secondTransRuns, True,
+                                                         Prop.OUTPUT_WS_SECOND_TRANS,
+                                                         'The second transmission run in TOF')
         # Combine multiple input runs, if required
         input_workspace = self._sumWorkspaces(inputWorkspaces, False)
         first_trans_workspace = self._sumWorkspaces(firstTransWorkspaces, True)
@@ -175,14 +183,14 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             'FloodWorkspace', 'Debug']
         self.copyProperties('ReflectometryReductionOneAuto', self._reduction_properties)
 
-    def _getInputWorkspaces(self, runs, isTrans):
+    def _getInputWorkspaces(self, runs, isTrans, output_property = None, doc_string = ''):
         """Convert the given run numbers into real workspace names. Uses workspaces from
         the ADS if they exist, or loads them otherwise."""
         workspaces = list()
         for run in runs:
             ws = self._getRunFromADSOrNone(run, isTrans)
             if not ws:
-                ws = self._loadRun(run, isTrans)
+                ws = self._loadRun(run, isTrans, output_property, doc_string)
             if not ws:
                 raise RuntimeError('Error loading run ' + run)
             workspaces.append(ws)
@@ -311,7 +319,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
                                 OutputWorkspace=_monitorWorkspace(new_name))
         return new_name
 
-    def _loadRun(self, run, isTrans):
+    def _loadRun(self, run, isTrans, output_property, doc_string):
         """Load a run as an event workspace if slicing is requested, or a histogram
         workspace otherwise. Transmission runs are always loaded as histogram workspaces."""
         workspace_name = self._prefixedName(run, isTrans)
@@ -321,9 +329,17 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
                                                           LoadMonitors=True)
             _throwIfNotValidReflectometryEventWorkspace(workspace_name)
             self.log().information('Loaded event workspace ' + workspace_name)
+            # Set the monitor workspace output property. Note that although this function
+            # is called in a loop we know there is only one TOF workspace if we are slicing.
+            self._declareAndSetWorkspaceProperty(Prop.OUTPUT_WS_TOF_MONITORS,
+                                                 _monitorWorkspace(workspace_name),
+                                                 monitor_workspace,
+                                                 'The loaded monitor workspace in TOF')
         else:
             workspace = LoadNexus(Filename=run, OutputWorkspace=workspace_name)
             self.log().information('Loaded workspace ' + workspace_name)
+        if output_property:
+            self._declareAndSetWorkspaceProperty(output_property, workspace_name, workspace, doc_string)
         workspace_name = self._renameWorkspaceBasedOnRunNumber(workspace_name, isTrans)
         return workspace_name
 
@@ -438,16 +454,27 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         else:
             return workspace
 
+    def _hasTransmissionRuns(self):
+        return not self.getProperty(Prop.FIRST_TRANS_RUNS).isDefault
+
     def _finalize(self, child_alg):
         """Set our output properties from the results in the given child algorithm"""
+        # Set the main workspace outputs
         self._setOutputProperty(Prop.OUTPUT_WS, child_alg)
         self._setOutputProperty(Prop.OUTPUT_WS_BINNED, child_alg)
         self._setOutputProperty(Prop.OUTPUT_WS_LAM, child_alg)
+        # Set the Q params as outputs if they were not specified as inputs
         self._setOutputPropertyIfInputNotSet(Prop.QMIN, child_alg)
         self._setOutputPropertyIfInputNotSet(Prop.QSTEP, child_alg)
         self._setOutputPropertyIfInputNotSet(Prop.QMAX, child_alg)
-        self._declareAndSetWorkspacePropertyFromChild(Prop.OUTPUT_WS_TRANS,
-            'The final transmission workspace in lambda', child_alg)
+        # Set the transmission workspace outputs
+        self._declareAndSetWorkspacePropertyFromChild(Prop.OUTPUT_WS_TRANS_LAM,
+            'Output transmission workspace in wavelength', child_alg)
+        self._declareAndSetWorkspacePropertyFromChild(Prop.OUTPUT_WS_FIRST_TRANS_LAM,
+            'First transmission workspace in wavelength', child_alg)
+        if not self.getProperty(Prop.SECOND_TRANS_RUNS).isDefault:
+            self._declareAndSetWorkspacePropertyFromChild(Prop.OUTPUT_WS_SECOND_TRANS_LAM,
+                'Second transmission workspace in wavelength', child_alg)
 
     def _declareAndSetWorkspaceProperty(self, property_name, workspace_name, workspace, doc_string):
         """Declare an on-the-fly property to set an output workspace"""
@@ -459,6 +486,8 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
     def _declareAndSetWorkspacePropertyFromChild(self, property_name, doc_string, child_alg):
         """Declare and set the given output workspace property from the result in
         the given child algorithm, if it exists in the child algorithm's outputs"""
+        if not child_alg.existsProperty(property_name) or child_alg.getProperty(property_name).isDefault:
+            return
         workspace_name = child_alg.getPropertyValue(property_name)
         if workspace_name:
             workspace = child_alg.getProperty(property_name).value
@@ -477,10 +506,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         if it was not set as an input to this algorithm and if it exists in the
         child algorithm's outputs"""
         if self.getProperty(property_name).isDefault:
-            value = child_alg.getPropertyValue(property_name)
-            if value:
-                self.setPropertyValue(property_name, value)
-                self.setProperty(property_name, child_alg.getProperty(property_name).value)
+            self._setOutputProperty(property_name, child_alg)
 
 
 def _throwIfNotValidReflectometryEventWorkspace(workspace_name):

@@ -42,7 +42,7 @@ private:
   /// Get the run number of a given workspace
   std::string getRunNumber(std::string const &propertyName);
   /// Store a transition run in ADS
-  void storeTransitionRun(int which, API::MatrixWorkspace_sptr ws);
+  void outputTransmissionRun(int which, API::MatrixWorkspace_sptr ws);
   /// Store the stitched transition workspace run in ADS
   void storeOutputWorkspace(API::MatrixWorkspace_sptr ws);
 

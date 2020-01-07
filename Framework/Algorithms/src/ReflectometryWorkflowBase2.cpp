@@ -908,5 +908,32 @@ void ReflectometryWorkflowBase2::convertProcessingInstructions(
       convertProcessingInstructionsToWorkspaceIndices(m_processingInstructions,
                                                       inputWS);
 }
+
+// Create an on-the-fly property to set an output workspace (e.g. for interim
+// outputs that the user doesn't care about)
+void ReflectometryWorkflowBase2::declareAndSetOutputWorkspaceProperty(
+    std::string const &propertyName, std::string const &workspaceName,
+    Workspace_sptr workspace, std::string const &docString) {
+  declareProperty(std::make_unique<WorkspaceProperty<>>(propertyName, "",
+                                                        Direction::Output,
+                                                        PropertyMode::Optional),
+                  docString);
+  setPropertyValue(propertyName, workspaceName);
+  setProperty(propertyName, workspace);
+}
+
+// Create an on-the-fly property to set an output workspace from a child
+// algorithm, if the child has that output value set
+void ReflectometryWorkflowBase2::declareAndSetOutputWorkspaceProperty(
+    Algorithm_sptr alg, std::string const &propertyName,
+    std::string const &docString) {
+  if (!alg->existsProperty(propertyName) || alg->isDefault(propertyName))
+    return;
+
+  std::string const workspaceName = alg->getPropertyValue(propertyName);
+  MatrixWorkspace_sptr workspace = alg->getProperty(propertyName);
+  declareAndSetOutputWorkspaceProperty(propertyName, workspaceName, workspace,
+                                       docString);
+}
 } // namespace Algorithms
 } // namespace Mantid

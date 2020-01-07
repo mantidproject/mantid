@@ -352,8 +352,9 @@ void ReflectometryReductionOneAuto3::exec() {
 
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   auto instrument = inputWS->getInstrument();
+  bool const isDebug = getProperty("Debug");
 
-  IAlgorithm_sptr alg = createChildAlgorithm("ReflectometryReductionOne");
+  Algorithm_sptr alg = createChildAlgorithm("ReflectometryReductionOne");
   alg->initialize();
   // Mandatory properties
   alg->setProperty("SummationType", getPropertyValue("SummationType"));
@@ -361,7 +362,7 @@ void ReflectometryReductionOneAuto3::exec() {
   alg->setProperty("IncludePartialBins",
                    getPropertyValue("IncludePartialBins"));
   alg->setProperty("Diagnostics", getPropertyValue("Diagnostics"));
-  alg->setProperty("Debug", getPropertyValue("Debug"));
+  alg->setProperty("Debug", isDebug);
   double wavMin = checkForMandatoryInstrumentDefault<double>(
       this, "WavelengthMin", instrument, "LambdaMin");
   alg->setProperty("WavelengthMin", wavMin);
@@ -437,23 +438,21 @@ void ReflectometryReductionOneAuto3::exec() {
   }
 
   // Set the output workspace in wavelength, if debug outputs are enabled
-  const bool isDebug = getProperty("Debug");
   if (isDebug || isChild()) {
     MatrixWorkspace_sptr IvsLam = alg->getProperty("OutputWorkspaceWavelength");
     setProperty("OutputWorkspaceWavelength", IvsLam);
   }
 
-  // Create an on-the-fly property to set the output transmission workspace
-  MatrixWorkspace_sptr transLam =
-      alg->getProperty("OutputWorkspaceTransmission");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("OutputWorkspaceTransmission", "",
-                                            Direction::Output,
-                                            PropertyMode::Optional),
-      "Output Transmisison Workspace in Lambda. Intermediate workspace.");
-  setPropertyValue("OutputWorkspaceTransmission",
-                   alg->getPropertyValue("OutputWorkspaceTransmission"));
-  setProperty("OutputWorkspaceTransmission", transLam);
+  // Set the output transmission workspaces
+  declareAndSetOutputWorkspaceProperty(
+      alg, "OutputWorkspaceTransmission",
+      "Output transmisison workspace in wavelength");
+  declareAndSetOutputWorkspaceProperty(
+      alg, "OutputWorkspaceFirstTransmission",
+      "First transmisison workspace in wavelength");
+  declareAndSetOutputWorkspaceProperty(
+      alg, "OutputWorkspaceSecondTransmission",
+      "Second transmisison workspace in wavelength");
 
   // Set other properties so they can be updated in the Reflectometry interface
   setProperty("ThetaIn", theta);
