@@ -52,10 +52,10 @@ class MuonContextADSObserver(AnalysisDataServiceObserver):
     @_catch_exceptions
     def renameHandle(self, old_workspace_name, new_workspace_name):
         """
-                Called when the ADS has renamed a workspace. Currently treats this the same as deletion.
-                :param workspace_name: The name of the workspace
-                :param workspace: not used
-                """
+        Called when the ADS has renamed a workspace. Currently treats this the same as deletion.
+        :param workspace_name: The name of the workspace
+        :param workspace: not used
+        """
         self.delete_callback(old_workspace_name)
 
     @_catch_exceptions
@@ -68,11 +68,11 @@ class MuonContextADSObserver(AnalysisDataServiceObserver):
     @_catch_exceptions
     def replaceHandle(self, name, workspace):
         """
-                Called when the ADS has replaced a workspace with one of the same name.
-                If this workspace is attached to this figure then its data is updated
-                :param name: The name of the workspace.
-                :param workspace: A reference to the new workspace (Unused)
-                """
+        Called when the ADS has replaced a workspace with one of the same name.
+        If this workspace is attached to this figure then its data is updated
+        :param name: The name of the workspace.
+        :param workspace: A reference to the new workspace (Unused)
+        """
         self.replace_callback(name)
 
     def unsubscribe(self):

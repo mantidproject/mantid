@@ -30,6 +30,7 @@ def pair_name():
         name.append("pair_" + str(i + 1))
     return name
 
+
 #
 def perform_musr_file_finder(self):
     ConfigService['default.instrument'] = 'MUSR'
@@ -55,10 +56,6 @@ class GroupingTabPresenterTest(unittest.TestCase):
         self.loaded_data = MuonLoadData()
 
         setup_context_for_tests(self)
-
-        # self.data_context = self.context.data_context
-        # self.gui_context = self.context.gui_context
-        # self.group_context = self.context.group_pair_context
 
         self.model = GroupingTabModel(context=self.context)
 

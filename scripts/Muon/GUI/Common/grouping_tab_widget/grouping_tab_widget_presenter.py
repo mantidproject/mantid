@@ -24,9 +24,6 @@ class GroupingTabPresenter(object):
 
     @staticmethod
     def string_to_list(text):
-        # if text == "":
-        #     return []
-        # return [int(i) for i in text.split(",")]
         return run_string_to_list(text)
 
     def __init__(self, view, model,

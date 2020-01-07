@@ -93,7 +93,6 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         """
         if self._view.is_tiled_plot():
             self.update_model_tile_plot_positions(self._view.get_tiled_by_type())
-            # update view based on number of axis
             self._view.new_plot_figure(self._model.number_of_axes)
             self.plot_all_selected_workspaces()
 
@@ -108,8 +107,6 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         Handles the use raw workspaces being changed (e.g rebinned) in ads
         """
         if workspace in self._model.plotted_workspaces:
-            # if one of the plotted_workspaces has been changed
-            # we should plot that workspace again
             ax = self.get_workspace_plot_axis(workspace)
             self._model.replace_workspace_plot(workspace, ax)
             self._model.set_x_lim(self.get_domain(), self._view.get_axes())
@@ -123,7 +120,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             self._view.set_raw_checkbox_state(True)
             self._view.warning_popup('No rebin options specified')
             return
-        # plot workspaces
+
         self.plot_all_selected_workspaces()
 
     def handle_plot_type_changed(self):
@@ -138,7 +135,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             self._view.warning_popup(
                 'Pair workspaces have no counts workspace, remove pairs from analysis and retry')
             return
-        # force the plot to update
+
         if self.context._frequency_context:
             self.context._frequency_context.plot_type = self._view.get_selected()[len(FREQ_PLOT_TYPE):]
         self.plot_type_changed_notifier.notify_subscribers()
@@ -149,7 +146,6 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         """
         Handles the plot tiled checkbox being changed in the view
         """
-        # get the number of groups from groups and pair selector
         if state == 2:  # tiled plot
             self.update_model_tile_plot_positions(self._view.get_tiled_by_type())
             self._view.new_plot_figure(self._model.number_of_axes)
@@ -188,7 +184,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             self.update_model_tile_plot_positions(self._view.get_tiled_by_type())
             self._view.new_plot_figure(self._model.number_of_axes)
             self.plot_all_selected_workspaces()
-        else:  # add plots to existing axes
+        else:
             self.plot_all_selected_workspaces()
 
         return
@@ -197,7 +193,6 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         """
         Handles a group or pair being removed in grouping widget analysis table
         """
-
         # if tiled by group, we will need to recreate the tiles
         if self._view.is_tiled_plot() and self._view.get_tiled_by_type():
             self.update_model_tile_plot_positions(self._view.get_tiled_by_type())
@@ -236,9 +231,8 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             label = self.get_workspace_legend_label(workspace_name)
             ax = self.get_workspace_plot_axis(workspace_name)
             fit_function = current_fit.fit_function_name
-            # add fit workspace to tracked workspaces in model
+
             self._model.add_workspace_to_plotted_fit_workspaces(workspace_name)
-            # plot fit and diff workspaces
             self._model.add_workspace_to_plot(ax, workspace_name, [1],
                                               errors=False,
                                               plot_kwargs={'distribution': True, 'autoscale_on_update': False,
@@ -256,7 +250,6 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             self._view.set_raw_checkbox_state(True)
 
     def handle_tiled_by_changed_on_view(self, index):
-        # make sure we are currently a tiled plot -  else do nothing
         if self._view.is_tiled_plot():
             if index == 0:
                 self.update_model_tile_plot_positions('group')
@@ -267,10 +260,8 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             self.plot_all_selected_workspaces()
 
     def handle_instrument_changed(self):
-        # Clear old model information
         self._model.clear_plot_model(self._view.get_axes())
         self.context.fitting_context.clear()
-        # generate a plot window
         self._view.new_plot_figure(1)
 
     def handle_plot_guess_changed(self):
@@ -298,10 +289,8 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         """
 
         tiled = self._view.is_tiled_plot()
-
-        # get the workspace list, formed from the selected groups / pairs
         workspace_list = self.get_workspace_list_to_plot()
-        # remove workspaces not in workspace_list
+
         for ws in self._model.plotted_workspaces:
             if ws not in workspace_list:
                 self._model.remove_workspace_from_plot(ws, self._view.get_axes())
@@ -315,7 +304,6 @@ class PlotWidgetPresenter(HomeTabSubWidget):
                                                                'label': label})
                 self._model.add_workspace_to_plotted_workspaces(workspace)
 
-        # scale the axis and set title
         self._view.set_fig_titles(self.get_plot_title(tiled, self._view.get_tiled_by_type()))
         self._model.set_x_lim(self.get_domain(), self._view.get_axes())
         self._view.force_redraw()
@@ -344,14 +332,13 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             for i, grppair in enumerate(self.context.group_pair_context.selected_groups +
                                         self.context.group_pair_context.selected_pairs):
                 self._model.tiled_plot_positions[grppair] = i
-        # update number of axis in model
+
         self._model.number_of_axes = len(self._model.tiled_plot_positions)
 
     def get_workspace_list_to_plot(self):
         """
          :return: a list of workspace names to plot
          """
-        # get the list of workspaces to plot
         workspace_list = self.get_workspaces_to_plot(self._view.if_raw(), self._view.get_selected())
         return workspace_list
 
@@ -428,7 +415,6 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         instrument = self.context.data_context.instrument
 
         plot_titles = []
-        # if tiled we need to create a plot title for each plot
         if tiled:
             if tiled_type == 'run':
                 for run in flattened_run_list:
@@ -454,13 +440,12 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             else:
                 label = self._get_group_or_pair_from_workspace_name(workspace_name)
         else:
-            label = self.context.data_context.instrument + self._get_run_number_from_workspace(workspace_name) +\
+            label = self.context.data_context.instrument + self._get_run_number_from_workspace(workspace_name) + \
                     '; ' + self._get_group_or_pair_from_workspace_name(workspace_name)
 
         if not self._view.if_raw():
             label = label + '; Rebin'
 
-        # if frequency domain analysis keep label as workspace name, which describes component, and imaginary workspace
         if FREQ_PLOT_TYPE in self._view.get_selected():
             label = workspace_name
 
@@ -468,7 +453,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
 
     def get_workspace_plot_axis(self, workspace_name):
         """
-        Gets the axis from the view, which is the model with then use to plot the workspace onto
+        Retrieve the axis from the view, which the model will then use to plot the workspace
         :return: axis
         """
         if self._view.is_tiled_plot():
