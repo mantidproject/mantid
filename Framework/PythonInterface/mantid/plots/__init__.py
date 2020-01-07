@@ -268,6 +268,8 @@ class MantidAxes(Axes):
             # If wanting to plot a spectrum
             elif MantidAxes.is_axis_of_type(MantidAxType.SPECTRUM, kwargs):
                 return MantidAxes.get_spec_num_from_wksp_index(workspace, kwargs['wkspIndex'])
+        elif kwargs.get('LogName', None) is not None:
+            return None
         elif getattr(workspace, 'getNumberHistograms', lambda: -1)() == 1:
             # If the workspace has one histogram, just plot that
             kwargs['wkspIndex'] = 0
