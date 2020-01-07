@@ -7,6 +7,9 @@
 """ The elements of this module define typed enums which are used in the SANS reduction framework."""
 
 from __future__ import (absolute_import, division, print_function)
+
+from enum import auto
+
 from mantid.py3compat import Enum
 
 
@@ -42,6 +45,20 @@ class CanonicalCoordinates(Enum):
     X = "X"
     Y = "Y"
     Z = "Z"
+
+
+class CorrectionType(Enum):
+    X = auto()
+    Y = auto()
+    Z = auto()
+
+    X_TILT = auto()
+    Y_TILT = auto()
+
+    RADIUS = auto()
+    ROTATION = auto()
+    SIDE = auto()
+    TRANSLATION = auto()
 
 
 class ReductionMode(Enum):
@@ -97,6 +114,7 @@ class DetectorType(Enum):
     """
     Defines the detector type
     """
+    BOTH = "BOTH"
     HAB = "HAB"
     LAB = "LAB"
 

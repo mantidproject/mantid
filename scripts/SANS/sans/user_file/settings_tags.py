@@ -14,7 +14,6 @@ from mantid.py3compat import Enum
 #  Named tuples for passing around data in a structured way, a bit like a plain old c-struct.
 # ----------------------------------------------------------------------------------------------------------------------
 # General
-range_entry = namedtuple('range_entry', 'start, stop')
 range_entry_with_detector = namedtuple('range_entry_with_detector', 'start, stop, detector_type')
 single_entry_with_detector = namedtuple('range_entry_with_detector', 'entry, detector_type')
 
