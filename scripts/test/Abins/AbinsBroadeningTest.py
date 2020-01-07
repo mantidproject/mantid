@@ -59,7 +59,7 @@ class AbinsBroadeningTest(unittest.TestCase):
 
             self.assertAlmostEqual(sum(curve), 1)
 
-    def test_noraml_sum(self):
+    def test_normal_sum(self):
         """Check that normally-distributed kernel sums to unity"""
         # Note that unlike Gaussian kernel, this totals intensity 1 even with absurdly large bins
 
