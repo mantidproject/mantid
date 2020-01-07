@@ -18,7 +18,6 @@ Improvements
 ############
 
 - In Abins the instrumental broadening implementation has been overhauled.
-
   - Output spectra from Abins should now be smooth and free of artefacts.
   - A fast approximate scheme is implemented and automatically applied
     when appropriate for simulations of TOSCA spectra. Alternative
@@ -28,6 +27,7 @@ Improvements
     values correspond to frequencies at the mid-points of the
     histogram bins. (Previously the values would correspond to one
     bin-edge.)
+
 
 BugFixes
 ########
