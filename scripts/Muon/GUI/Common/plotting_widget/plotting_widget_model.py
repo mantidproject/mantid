@@ -12,8 +12,6 @@ from matplotlib.container import ErrorbarContainer
 import matplotlib.pyplot as plt
 
 legend_text_size = 7
-x_max_freq = 50
-x_max_time = 15
 
 
 class PlotWidgetModel(object):
@@ -222,6 +220,14 @@ class PlotWidgetModel(object):
         self.plotted_workspaces_inverse_binning = {}
         self.plotted_fit_workspaces = []
 
+    def _remove_all_data_workspaces_from_plot(self, axes):
+        workspaces_to_remove = self.plotted_workspaces
+        for i, workspace in enumerate(workspaces_to_remove):
+            self.remove_workspace_from_plot(workspace, axes)
+        workspaces_to_remove = self.plotted_fit_workspaces
+        for workspace in workspaces_to_remove:
+            self.remove_workspace_from_plot(workspace, axes)
+
     def autoscale_axes(self, axes, xmax):
         ymin, ymax = self._get_autoscale_y_limits(axes, 0, xmax)
         plt.setp(axes, xlim=[0, xmax], ylim=[ymin, ymax])
@@ -231,9 +237,6 @@ class PlotWidgetModel(object):
 
     def set_axis_ylim(self, axis, ymin, ymax):
         axis.set_ylim(ymin, ymax)
-
-    def autoscale_y_axis(self, axis):
-        self._autoscale_y_axis(axis)
 
     def _get_autoscale_y_limits(self, axes, xmin, xmax):
         new_bottom = 1e9
@@ -256,26 +259,6 @@ class PlotWidgetModel(object):
                 new_top = new_top_i
 
         return new_bottom, new_top
-
-    def _autoscale_y_axis(self, axis):
-        xlim = axis.get_xlim()
-        ylim = np.inf, -np.inf
-        for line in axis.lines:
-            x, y = line.get_data()
-            start, stop = np.searchsorted(x, xlim)
-            y_within_range = y[max(start - 1, 0):(stop + 1)]
-            ylim = min(ylim[0], np.nanmin(y_within_range)), max(ylim[1], np.nanmax(y_within_range))
-        ymin = ylim[0] * 1.3 if ylim[0] < 0.0 else ylim[0] * 0.7
-        ymax = ylim[1] * 1.3 if ylim[1] > 0.0 else ylim[1] * 0.7
-        axis.set_ylim(ymin, ymax)
-
-    def _remove_all_data_workspaces_from_plot(self, axes):
-        workspaces_to_remove = self.plotted_workspaces
-        for workspace in workspaces_to_remove:
-            self.remove_workspace_from_plot(workspace, axes)
-        workspaces_to_remove = self.plotted_fit_workspaces
-        for workspace in workspaces_to_remove:
-            self.remove_workspace_from_plot(workspace, axes)
 
     def _update_legend(self, ax):
         handles, _ = ax.get_legend_handles_labels()
