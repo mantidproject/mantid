@@ -33,6 +33,7 @@ class Prop:
     OUTPUT_WS = 'OutputWorkspace'
     OUTPUT_WS_BINNED = 'OutputWorkspaceBinned'
     OUTPUT_WS_LAM = 'OutputWorkspaceWavelength'
+    OUTPUT_WS_TOF = 'OutputWorkspaceTOF'
 
 
 class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
@@ -277,6 +278,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         if not workspaces:
             return
 
+        ws_group = None
         if AnalysisDataService.doesExist(output_ws_name):
             ws_group = AnalysisDataService.retrieve(output_ws_name)
             if not isinstance(ws_group, WorkspaceGroup):
@@ -291,7 +293,9 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             alg.setProperty("OutputWorkspace", output_ws_name)
             alg.execute()
             ws_group = alg.getProperty("OutputWorkspace").value
-        AnalysisDataService.addOrReplace(output_ws_name, ws_group)
+
+        self._declareAndSetProperty(Prop.OUTPUT_WS_TOF, output_ws_name, ws_group,
+            'The loaded workspace(s) in TOF')
         return ws_group
 
     def _renameWorkspaceBasedOnRunNumber(self, workspace_name, isTrans):
@@ -310,11 +314,13 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         workspace otherwise. Transmission runs are always loaded as histogram workspaces."""
         workspace_name = self._prefixedName(run, isTrans)
         if not isTrans and self._slicingEnabled():
-            LoadEventNexus(Filename=run, OutputWorkspace=workspace_name, LoadMonitors=True)
+            workspace, monitor_workspace = LoadEventNexus(Filename=run,
+                                                          OutputWorkspace=workspace_name,
+                                                          LoadMonitors=True)
             _throwIfNotValidReflectometryEventWorkspace(workspace_name)
             self.log().information('Loaded event workspace ' + workspace_name)
         else:
-            LoadNexus(Filename=run, OutputWorkspace=workspace_name)
+            workspace = LoadNexus(Filename=run, OutputWorkspace=workspace_name)
             self.log().information('Loaded workspace ' + workspace_name)
         workspace_name = self._renameWorkspaceBasedOnRunNumber(workspace_name, isTrans)
         return workspace_name
@@ -435,6 +441,13 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         self._setOutputPropertyIfInputNotSet(Prop.QMIN, child_alg)
         self._setOutputPropertyIfInputNotSet(Prop.QSTEP, child_alg)
         self._setOutputPropertyIfInputNotSet(Prop.QMAX, child_alg)
+
+    def _declareAndSetProperty(self, property_name, workspace_name, workspace, doc_string):
+        """Declare an on-the-fly property to set an output workspace"""
+        self.declareProperty(WorkspaceProperty(property_name, '', direction=Direction.Output),
+                             doc=doc_string)
+        self.setPropertyValue(property_name, workspace_name)
+        self.setProperty(property_name, workspace)
 
     def _setOutputProperty(self, property_name, child_alg):
         """Set the given output property from the result in the given child algorithm,
