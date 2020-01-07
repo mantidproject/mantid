@@ -443,6 +443,18 @@ void ReflectometryReductionOneAuto3::exec() {
     setProperty("OutputWorkspaceWavelength", IvsLam);
   }
 
+  // Create an on-the-fly property to set the output transmission workspace
+  MatrixWorkspace_sptr transLam =
+      alg->getProperty("OutputWorkspaceTransmission");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<>>("OutputWorkspaceTransmission", "",
+                                            Direction::Output,
+                                            PropertyMode::Optional),
+      "Output Transmisison Workspace in Lambda. Intermediate workspace.");
+  setPropertyValue("OutputWorkspaceTransmission",
+                   alg->getPropertyValue("OutputWorkspaceTransmission"));
+  setProperty("OutputWorkspaceTransmission", transLam);
+
   // Set other properties so they can be updated in the Reflectometry interface
   setProperty("ThetaIn", theta);
   setProperty("MomentumTransferMin", params.qMin);
