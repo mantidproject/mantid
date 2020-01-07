@@ -1153,7 +1153,7 @@ class MantidAxes(Axes):
                 if i == index:
                     fill = collection
                     break
-                i = i + 1
+                i += 1
 
         return fill
 
@@ -1172,7 +1172,7 @@ class MantidAxes(Axes):
                 poly_colour = convert_color_to_hex(collection.get_facecolor()[0])
                 if line_colour != poly_colour:
                     return False
-                i = i + 1
+                i += 1
         return True
 
     def waterfall_create_fill(self):

@@ -231,12 +231,9 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
     else:
         if isinstance(overplot, MantidAxes):
             ax = overplot
-            x, y = 0, 0
-            if ax.is_waterfall_plot():
-                x, y = ax.waterfall_x_offset, ax.waterfall_y_offset
-                ax.update_waterfall_plot(0, 0)
         else:
             ax = axes[0]
+
         ax.axis('on')
         _do_single_plot(ax, workspaces, errors, not overplot, nums, kw, plot_kwargs)
 
@@ -251,11 +248,13 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
     if waterfall:
         ax.convert_to_waterfall()
 
-    if isinstance(overplot, MantidAxes) and x != 0 and y != 0:
-        ax.update_waterfall_plot(x, y)
-
     if not overplot:
         fig.canvas.set_window_title(figure_title(workspaces, fig.number))
+    else:
+        if ax.is_waterfall_plot():
+            for i in range(len(nums)):
+                ax.convert_single_line_to_waterfall(len(ax.get_lines())-(i+1))
+
     # This updates the toolbar so the home button now takes you back to this point.
     # The try catch is in case the manager does not have a toolbar attached.
     try:
