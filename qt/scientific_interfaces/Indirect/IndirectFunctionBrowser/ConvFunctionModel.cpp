@@ -40,31 +40,14 @@ void ConvFunctionModel::setFunction(IFunction_sptr fun) {
   clearData();
   if (!fun)
     return;
-  if (fun->nFunctions() == 0) {
-    auto const name = fun->name();
-    if (name == "Lorentzian") {
-      m_fitType = FitType::OneLorentzian;
-      m_isQDependentFunction = false;
-    } else if (name == "DeltaFunction") {
-      m_hasDeltaFunction = true;
-    } else if (name == "FlatBackground") {
-      m_backgroundType = BackgroundType::Flat;
-    } else if (name == "LinearBackground") {
-      m_backgroundType = BackgroundType::Linear;
-    } else {
-      throw std::runtime_error("Cannot set function " + name);
-    }
-    m_model.setFunction(fun);
-    return;
-  }
 
   bool isBackgroundSet = false;
   if (fun->name() == "Convolution") {
     checkConvolution(fun);
   } else if (fun->name() == "CompositeFunction") {
     for (size_t i = 0; i < fun->nFunctions(); ++i) {
-      auto f = fun->getFunction(i);
-      auto const name = f->name();
+      auto innerFunction = fun->getFunction(i);
+      auto const name = innerFunction->name();
       if (name == "FlatBackground") {
         if (isBackgroundSet) {
           throw std::runtime_error("Function has wrong structure.");
@@ -78,7 +61,7 @@ void ConvFunctionModel::setFunction(IFunction_sptr fun) {
         m_backgroundType = BackgroundType::Linear;
         isBackgroundSet = true;
       } else if (name == "Convolution") {
-        checkConvolution(f);
+        checkConvolution(innerFunction);
       }
     }
   }
@@ -89,64 +72,21 @@ void ConvFunctionModel::checkConvolution(IFunction_sptr fun) {
   bool isFitTypeSet = false;
   bool isResolutionSet = false;
   for (size_t i = 0; i < fun->nFunctions(); ++i) {
-    auto f = fun->getFunction(i);
-    auto const name = f->name();
+    auto innerFunction = fun->getFunction(i);
+    auto const name = innerFunction->name();
     if (name == "Resolution") {
       if (isResolutionSet) {
         throw std::runtime_error("Function has wrong structure.");
       }
       isResolutionSet = true;
     } else if (name == "CompositeFunction") {
-      checkComposite(f);
-    } else if (name == "Lorentzian") {
+      checkComposite(innerFunction);
+    } else if (FitTypeStringToEnum.count(name) == 1) {
       if (isFitTypeSet) {
         throw std::runtime_error("Function has wrong structure.");
       }
-      m_fitType = FitType::OneLorentzian;
-      m_isQDependentFunction = false;
-      isFitTypeSet = true;
-
-    } else if (name == "TeixeiraWaterSQE") {
-      if (isFitTypeSet) {
-        throw std::runtime_error("Function has wrong structure.");
-      }
-      m_fitType = FitType::TeixeiraWater;
-      m_isQDependentFunction = true;
-      isFitTypeSet = true;
-    } else if (name == "StretchedExpFT") {
-      if (isFitTypeSet) {
-        throw std::runtime_error("Function has wrong structure.");
-      }
-      m_fitType = FitType::StretchedExpFT;
-      m_isQDependentFunction = false;
-      isFitTypeSet = true;
-    } else if (name == "ElasticDiffSphere") {
-      if (isFitTypeSet) {
-        throw std::runtime_error("Function has wrong structure.");
-      }
-      m_fitType = FitType::ElasticDiffSphere;
-      m_isQDependentFunction = true;
-      isFitTypeSet = true;
-    } else if (name == "InelasticDiffSphere") {
-      if (isFitTypeSet) {
-        throw std::runtime_error("Function has wrong structure.");
-      }
-      m_fitType = FitType::InelasticDiffSphere;
-      m_isQDependentFunction = true;
-      isFitTypeSet = true;
-    } else if (name == "InelasticDiffRotDiscreteCircle") {
-      if (isFitTypeSet) {
-        throw std::runtime_error("Function has wrong structure.");
-      }
-      m_fitType = FitType::InelasticDiffRotDiscreteCircle;
-      m_isQDependentFunction = true;
-      isFitTypeSet = true;
-    } else if (name == "ElasticDiffRotDiscreteCircle") {
-      if (isFitTypeSet) {
-        throw std::runtime_error("Function has wrong structure.");
-      }
-      m_fitType = FitType::ElasticDiffRotDiscreteCircle;
-      m_isQDependentFunction = true;
+      m_fitType = FitTypeStringToEnum[name];
+      m_isQDependentFunction = FitTypeQDepends[m_fitType];
       isFitTypeSet = true;
     } else if (name == "DeltaFunction") {
       m_hasDeltaFunction = true;
@@ -160,8 +100,8 @@ void ConvFunctionModel::checkConvolution(IFunction_sptr fun) {
 void ConvFunctionModel::checkComposite(IFunction_sptr fun) {
   bool isFitTypeSet = false;
   for (size_t i = 0; i < fun->nFunctions(); ++i) {
-    auto f = fun->getFunction(i);
-    auto const name = f->name();
+    auto innerFunction = fun->getFunction(i);
+    auto const name = innerFunction->name();
     if (name == "Lorentzian") {
       if (isFitTypeSet && m_fitType != FitType::OneLorentzian) {
         throw std::runtime_error("Function has wrong structure.");
@@ -173,47 +113,12 @@ void ConvFunctionModel::checkComposite(IFunction_sptr fun) {
       m_isQDependentFunction = false;
       isFitTypeSet = true;
 
-    } else if (name == "StretchedExpFT") {
+    } else if (FitTypeStringToEnum.count(name) == 1) {
       if (isFitTypeSet) {
         throw std::runtime_error("Function has wrong structure.");
       }
-      m_fitType = FitType::StretchedExpFT;
-      m_isQDependentFunction = false;
-      isFitTypeSet = true;
-    } else if (name == "TeixeiraWaterSQE") {
-      if (isFitTypeSet) {
-        throw std::runtime_error("Function has wrong structure.");
-      }
-      m_fitType = FitType::TeixeiraWater;
-      m_isQDependentFunction = true;
-      isFitTypeSet = true;
-    } else if (name == "ElasticDiffSphere") {
-      if (isFitTypeSet) {
-        throw std::runtime_error("Function has wrong structure.");
-      }
-      m_fitType = FitType::ElasticDiffSphere;
-      m_isQDependentFunction = true;
-      isFitTypeSet = true;
-    } else if (name == "InelasticDiffSphere") {
-      if (isFitTypeSet) {
-        throw std::runtime_error("Function has wrong structure.");
-      }
-      m_fitType = FitType::InelasticDiffSphere;
-      m_isQDependentFunction = true;
-      isFitTypeSet = true;
-    } else if (name == "InelasticDiffRotDiscreteCircle") {
-      if (isFitTypeSet) {
-        throw std::runtime_error("Function has wrong structure.");
-      }
-      m_fitType = FitType::InelasticDiffRotDiscreteCircle;
-      m_isQDependentFunction = true;
-      isFitTypeSet = true;
-    } else if (name == "ElasticDiffRotDiscreteCircle") {
-      if (isFitTypeSet) {
-        throw std::runtime_error("Function has wrong structure.");
-      }
-      m_fitType = FitType::ElasticDiffRotDiscreteCircle;
-      m_isQDependentFunction = true;
+      m_fitType = FitTypeStringToEnum[name];
+      m_isQDependentFunction = FitTypeQDepends[m_fitType];
       isFitTypeSet = true;
     } else if (name == "DeltaFunction") {
       m_hasDeltaFunction = true;
@@ -701,7 +606,8 @@ ConvFunctionModel::getParameterId(const QString &parName) {
 }
 
 std::string ConvFunctionModel::buildLorentzianFunctionString() const {
-  return "name=Lorentzian,Amplitude=1,FWHM=1,constraints=(Amplitude>0,FWHM>0)";
+  return "name=Lorentzian,Amplitude=1,FWHM=1,constraints=(Amplitude>0,FWHM>"
+         "0)";
 }
 
 std::string ConvFunctionModel::buildTeixeiraFunctionString() const {
