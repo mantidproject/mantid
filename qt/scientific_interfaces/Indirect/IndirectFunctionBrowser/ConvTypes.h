@@ -35,6 +35,8 @@ enum class FitType {
 };
 
 extern std::map<FitType, bool> FitTypeQDepends;
+extern std::unordered_map<FitType, std::string> FitTypeEnumToString;
+extern std::unordered_map<std::string, FitType> FitTypeStringToEnum;
 
 enum class BackgroundType { None, Flat, Linear };
 

@@ -20,6 +20,27 @@ std::map<FitType, bool> FitTypeQDepends =
                              {FitType::InelasticDiffRotDiscreteCircle, true},
                              {FitType::ElasticDiffRotDiscreteCircle, true}});
 
+std::unordered_map<FitType, std::string> FitTypeEnumToString(
+    {{FitType::OneLorentzian, "Lorentzian"},
+     {FitType::TwoLorentzians, "Lorentzian"},
+     {FitType::TeixeiraWater, "TeixeiraWaterSQE"},
+     {FitType::StretchedExpFT, "StretchedExpFT"},
+     {FitType::ElasticDiffSphere, "ElasticDiffSphere"},
+     {FitType::InelasticDiffSphere, "InelasticDiffSphere"},
+     {FitType::InelasticDiffRotDiscreteCircle,
+      "InelasticDiffRotDiscreteCircle"},
+     {FitType::ElasticDiffRotDiscreteCircle, "ElasticDiffRotDiscreteCircle"}});
+
+std::unordered_map<std::string, FitType> FitTypeStringToEnum(
+    {{"Lorentzian", FitType::OneLorentzian},
+     {"TeixeiraWaterSQE", FitType::TeixeiraWater},
+     {"StretchedExpFT", FitType::StretchedExpFT},
+     {"ElasticDiffSphere", FitType::ElasticDiffSphere},
+     {"InelasticDiffSphere", FitType::InelasticDiffSphere},
+     {"InelasticDiffRotDiscreteCircle",
+      FitType::InelasticDiffRotDiscreteCircle},
+     {"ElasticDiffRotDiscreteCircle", FitType::ElasticDiffRotDiscreteCircle}});
+
 std::map<ParamID, QString> g_paramName{
     {ParamID::LOR1_AMPLITUDE, "Amplitude"},
     {ParamID::LOR1_PEAKCENTRE, "PeakCentre"},
