@@ -37,8 +37,6 @@ class QuickEditWidget(object):
     def connect_plot_selection(self, slot):
         self._presenter.connect_plot_selection(slot)
 
-    # add subplot
-
     def add_subplot(self, name):
         self._presenter.add_subplot(name)
 

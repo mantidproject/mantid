@@ -14,7 +14,9 @@ from Muon.GUI.FrequencyDomainAnalysis.frequency_context import FREQUENCY_EXTENSI
 COUNTS_PLOT_TYPE = 'Counts'
 ASYMMETRY_PLOT_TYPE = 'Asymmetry'
 FREQ_PLOT_TYPE = "Frequency "
+TIME_PLOT_TYPE = 'Time'
 workspace_index = 0
+x_limits = {FREQ_PLOT_TYPE: 50, TIME_PLOT_TYPE: 15}
 
 
 class PlotWidgetPresenter(HomeTabSubWidget):
@@ -50,9 +52,9 @@ class PlotWidgetPresenter(HomeTabSubWidget):
 
         # plotting options
         self._view.get_plot_options().connect_errors_changed(self.handle_error_selection_changed)
-        self._view.get_plot_options().connect_x_range_changed(self.handle_xlim_changed_in_view)
-        self._view.get_plot_options().connect_y_range_changed(self.handle_ylim_changed_in_view)
-        self._view.get_plot_options().connect_autoscale_changed(self.handle_autoscale_requested_by_view)
+        self._view.get_plot_options().connect_x_range_changed(self.handle_xlim_changed_in_options_view)
+        self._view.get_plot_options().connect_y_range_changed(self.handle_ylim_changed_in_options_view)
+        self._view.get_plot_options().connect_autoscale_changed(self.handle_autoscale_requested_in_view)
         self._view.get_plot_options().connect_plot_selection(self.handle_subplot_changed_in_options_view)
 
         if self.context._frequency_context:
@@ -69,36 +71,20 @@ class PlotWidgetPresenter(HomeTabSubWidget):
 
     def update_view_from_model(self):
         """
-        Updates the view from the model, which includes
-        axis limits
-        plot checkbox
+        Needed so we can match the base class interface
         """
-        # if its on all, its autoscaled so we just have to return one of he axis limits
-        xmin, xmax = self.get_x_lim(0)
-        ymin, ymax = self.get_y_lim(0)
-        self._view.get_plot_options().set_plot_x_range([xmin, xmax])
+        pass
 
-        self._view.get_plot_options().set_plot_y_range([ymin, ymax])
-
-        # update combo box
-        self._view.get_plot_options().clear_subplots()
-        for i in range(self._model.number_of_axes):
-            self._view.get_plot_options().add_subplot(str(i + 1))
-
-    def update_options_view_from_model(self, index):
+    def update_options_view_from_model(self):
         """
         Updates the view from the model, which includes
         axis limits
         plot checkbox
         """
-        # if its on all, its autoscaled so we just have to return one of he axis limits
         xmin, xmax = self.get_x_lim(0)
         ymin, ymax = self.get_y_lim(0)
         self._view.get_plot_options().set_plot_x_range([xmin, xmax])
-
         self._view.get_plot_options().set_plot_y_range([ymin, ymax])
-
-        # update combo box
         self._view.get_plot_options().clear_subplots()
         for i in range(self._model.number_of_axes):
             self._view.get_plot_options().add_subplot(str(i + 1))
@@ -119,9 +105,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
 
         if self._view.is_tiled_plot():
             self.update_model_tile_plot_positions(self._view.get_tiled_by_type())
-            self._view.new_plot_figure(self._model.number_of_axes)
-            self.connect_xlim_changed_in_figure_view(self.handle_x_axis_limits_changed_in_figure_view)
-            self.connect_ylim_changed_in_figure_view(self.handle_y_axis_limits_changed_in_figure_view)
+            self.new_plot_figure(self._model.number_of_axes)
 
         self.plot_all_selected_workspaces()
 
@@ -131,16 +115,14 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         """
         if self._view.is_tiled_plot():
             self.update_model_tile_plot_positions(self._view.get_tiled_by_type())
-            self._view.new_plot_figure(self._model.number_of_axes)
-            self.connect_xlim_changed_in_figure_view(self.handle_x_axis_limits_changed_in_figure_view)
-            self.connect_ylim_changed_in_figure_view(self.handle_y_axis_limits_changed_in_figure_view)
+            self.new_plot_figure(self._model.number_of_axes)
 
             self.plot_all_selected_workspaces()
 
         if workspace.name() in self._model.plotted_workspaces:
             self._model.workspace_deleted_from_ads(workspace, self._view.get_axes())
             self._view.set_fig_titles(self.get_plot_title(self._view.is_tiled_plot(), self._view.get_tiled_by_type()))
-            self._model.set_x_lim(self.get_domain(), self._view.get_axes())
+            self._model.autoscale_axes(self._view.get_axes(), x_limits[self.get_domain()])
             self._view.force_redraw()
 
     def handle_workspace_replaced_in_ads(self, workspace):
@@ -150,7 +132,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         if workspace in self._model.plotted_workspaces:
             ax = self.get_workspace_plot_axis(workspace)
             self._model.replace_workspace_plot(workspace, ax)
-            self._model.set_x_lim(self.get_domain(), self._view.get_axes())
+            self._model.autoscale_axes(self._view.get_axes(), x_limits[self.get_domain()])
             self._view.force_redraw()
 
     def handle_use_raw_workspaces_changed(self):
@@ -176,7 +158,6 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             self._view.warning_popup(
                 'Pair workspaces have no counts workspace, remove pairs from analysis and retry')
             return
-
         if self.context._frequency_context:
             self.context._frequency_context.plot_type = self._view.get_selected()[len(FREQ_PLOT_TYPE):]
         self.plot_type_changed_notifier.notify_subscribers()
@@ -194,12 +175,10 @@ class PlotWidgetPresenter(HomeTabSubWidget):
                            'label': label}
             self._model.replot_workspace(workspace, ax, error_state, plot_kwargs)
 
-        # scale the axis and set title
-        self._model.set_x_lim(self.get_domain(), self._view.get_axes())
+        self._model.autoscale_axes(self._view.get_axes(),x_limits[self.get_domain()])
         self._view.force_redraw()
 
-    def handle_xlim_changed_in_view(self, xlim):
-        # loop over all subplots selected in combo box
+    def handle_xlim_changed_in_options_view(self, xlim):
         subplots = self._view.get_plot_options().get_selection()
         for subplot in subplots:
             index = int(subplot) - 1
@@ -207,32 +186,27 @@ class PlotWidgetPresenter(HomeTabSubWidget):
 
         self._view.force_redraw()
 
-    def handle_ylim_changed_in_view(self, ylim):
-        # loop over all subplots selected in combo box
+    def handle_ylim_changed_in_options_view(self, ylim):
         subplots = self._view.get_plot_options().get_selection()
         for subplot in subplots:
             index = int(subplot) - 1
             self._model.set_axis_ylim(self._view.get_axes()[index], ylim[0], ylim[1])
         self._view.force_redraw()
 
-    def handle_autoscale_requested_by_view(self):
-        # loop over all subplots selected in combo box
+    def handle_autoscale_requested_in_view(self):
         subplots = self._view.get_plot_options().get_selection()
-        xlims = self._view.get_plot_options().get_plot_x_range()
         self._view.update_toolbar()
-        for subplot in subplots:
-            index = int(subplot) - 1
-            self._model.set_axis_xlim(self._view.get_axes()[index], xlims[0], xlims[1])
-            self._model.autoscale_y_axis(self._view.get_axes()[index])
-            ymin, ymax = self.get_y_lim(index)
-
-        self._view.get_plot_options().set_plot_y_range([ymin, ymax])
-        self._view.force_redraw()
+        if len(subplots) > 0:
+            xlims = self._view.get_plot_options().get_plot_x_range()
+            indices = [ix - 1 for ix in list(map(int, subplots))]
+            axes = [self._view.get_axes()[index] for index in indices]
+            self._model.autoscale_axes(axes, xlims[1])
+            ymin,  ymax = self.get_y_lim()
+            self._view.get_plot_options().set_plot_y_range([ymin, ymax])
+            self._view.force_redraw()
 
     def handle_x_axis_limits_changed_in_figure_view(self, axes):
         subplots = self._view.get_plot_options().get_selection()
-
-        # if "all" is selected, do not axis bounds
         if len(subplots) > 1 or len(subplots) == 0:
             return
         if subplots[0].isdigit():
@@ -242,8 +216,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
 
     def handle_y_axis_limits_changed_in_figure_view(self, axes):
         subplots = self._view.get_plot_options().get_selection()
-        # if "all" is selected, do not axis bounds
-        if len(subplots) > 1:
+        if len(subplots) > 1 or len(subplots) == 0:
             return
         if subplots[0].isdigit():
             if axes == self._view.get_axes()[int(subplots[0]) - 1]:
@@ -252,6 +225,8 @@ class PlotWidgetPresenter(HomeTabSubWidget):
 
     def handle_subplot_changed_in_options_view(self):
         subplots = self._view.get_plot_options().get_selection()
+        if len(subplots) == 0:
+            return
         if subplots[0].isdigit():
             if len(subplots) > 1:  # all is selected (get x and y lims from first subplot)
                 xmin, xmax = self.get_x_lim(0)
@@ -271,17 +246,11 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         """
         if state == 2:  # tiled plot
             self.update_model_tile_plot_positions(self._view.get_tiled_by_type())
-            self._view.new_plot_figure(self._model.number_of_axes)
-            self.connect_xlim_changed_in_figure_view(self.handle_x_axis_limits_changed_in_figure_view)
-            self.connect_ylim_changed_in_figure_view(self.handle_y_axis_limits_changed_in_figure_view)
+            self.new_plot_figure(self._model.number_of_axes)
             self.plot_all_selected_workspaces()
         if state == 0:  # not tiled plot
-            self._view.new_plot_figure(num_axes=1)
-            self.connect_xlim_changed_in_figure_view(self.handle_x_axis_limits_changed_in_figure_view)
-            self.connect_ylim_changed_in_figure_view(self.handle_y_axis_limits_changed_in_figure_view)
+            self.new_plot_figure(num_axes=1)
             self._model.number_of_axes = 1
-            self._model.clear_plot_model(self._view.get_axes())
-            self.context.fitting_context.clear()
             self.plot_all_selected_workspaces()
 
     def handle_added_or_removed_group_or_pair_to_plot(self, is_added):
@@ -298,7 +267,6 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         """
         Handles a group or pair being added from the view
         """
-        # make sure we are not plotting pairs and counts
         if len(self.context.group_pair_context.selected_pairs) != 0 and self._view.get_selected() == COUNTS_PLOT_TYPE:
             self._view.plot_selector.blockSignals(True)
             self._view.plot_selector.setCurrentText(ASYMMETRY_PLOT_TYPE)
@@ -309,9 +277,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         # if tiled by group, we will need to recreate the tiles
         if self._view.is_tiled_plot() and self._view.get_tiled_by_type() == 'group':
             self.update_model_tile_plot_positions(self._view.get_tiled_by_type())
-            self._view.new_plot_figure(self._model.number_of_axes)
-            self.connect_xlim_changed_in_figure_view(self.handle_x_axis_limits_changed_in_figure_view)
-            self.connect_ylim_changed_in_figure_view(self.handle_y_axis_limits_changed_in_figure_view)
+            self.new_plot_figure(self._model.number_of_axes)
             self.plot_all_selected_workspaces()
         else:
             self.plot_all_selected_workspaces()
@@ -322,12 +288,9 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         """
         Handles a group or pair being removed in grouping widget analysis table
         """
-        # if tiled by group, we will need to recreate the tiles
         if self._view.is_tiled_plot() and self._view.get_tiled_by_type():
             self.update_model_tile_plot_positions(self._view.get_tiled_by_type())
-            self._view.new_plot_figure(self._model.number_of_axes)
-            self.connect_xlim_changed_in_figure_view(self.handle_x_axis_limits_changed_in_figure_view)
-            self.connect_ylim_changed_in_figure_view(self.handle_y_axis_limits_changed_in_figure_view)
+            self.new_plot_figure(self._model.number_of_axes)
             self.plot_all_selected_workspaces()
             return
 
@@ -336,7 +299,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             if ws not in workspace_list:
                 self._model.remove_workspace_from_plot(ws, self._view.get_axes())
 
-        self._model.set_x_lim(self.get_domain(), self._view.get_axes())
+        self._model.autoscale_axes(self._view.get_axes(),x_limits[self.get_domain()])
         self._view.force_redraw()
 
     def handle_fit_completed(self):
@@ -386,18 +349,11 @@ class PlotWidgetPresenter(HomeTabSubWidget):
                 self.update_model_tile_plot_positions('group')
             else:
                 self.update_model_tile_plot_positions('run')
-
-            self._view.new_plot_figure(self._model.number_of_axes)
-            self.connect_xlim_changed_in_figure_view(self.handle_x_axis_limits_changed_in_figure_view)
-            self.connect_ylim_changed_in_figure_view(self.handle_y_axis_limits_changed_in_figure_view)
+            self.new_plot_figure(self._model.number_of_axes)
             self.plot_all_selected_workspaces()
 
     def handle_instrument_changed(self):
-        self._model.clear_plot_model(self._view.get_axes())
-        self.context.fitting_context.clear()
-        self._view.new_plot_figure(1)
-        self.connect_xlim_changed_in_figure_view(self.handle_x_axis_limits_changed_in_figure_view)
-        self.connect_ylim_changed_in_figure_view(self.handle_y_axis_limits_changed_in_figure_view)
+        self.new_plot_figure(1)
 
     def handle_plot_guess_changed(self):
 
@@ -413,7 +369,9 @@ class PlotWidgetPresenter(HomeTabSubWidget):
                                                                'label': 'Fit Function Guess'})
         self._view.force_redraw()
 
-    # connect to view figure view axis signals
+    # Connect to figure axis signals.
+    # Every time a new figure is generated these signals will have
+    # to be reconnected.
     def connect_xlim_changed_in_figure_view(self, slot):
         self._view.on_x_lims_changed_in_view(slot)
 
@@ -449,8 +407,8 @@ class PlotWidgetPresenter(HomeTabSubWidget):
                 self._model.add_workspace_to_plotted_workspaces(workspace)
 
         self._view.set_fig_titles(self.get_plot_title(tiled, self._view.get_tiled_by_type()))
-        self._model.set_x_lim(self.get_domain(), self._view.get_axes())
-        self.update_view_from_model()
+        self._model.autoscale_axes(self._view.get_axes(),x_limits[self.get_domain()])
+        self.update_options_view_from_model()
         self._view.force_redraw()
 
         self._model.plotted_workspaces_inverse_binning = {
@@ -479,6 +437,13 @@ class PlotWidgetPresenter(HomeTabSubWidget):
                 self._model.tiled_plot_positions[grppair] = i
 
         self._model.number_of_axes = len(self._model.tiled_plot_positions)
+
+    def new_plot_figure(self, num_axes):
+        self._model.clear_plot_model(self._view.get_axes())
+        self.context.fitting_context.clear()
+        self._view.new_plot_figure(num_axes)
+        self.connect_xlim_changed_in_figure_view(self.handle_x_axis_limits_changed_in_figure_view)
+        self.connect_ylim_changed_in_figure_view(self.handle_y_axis_limits_changed_in_figure_view)
 
     def get_workspace_list_to_plot(self):
         """
@@ -623,8 +588,8 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         return left, right
 
     def get_y_lim(self, subplot):
-        left, right = self._view.get_axes()[subplot].get_ylim()
-        return left, right
+        bottom, top = self._view.get_axes()[subplot].get_ylim()
+        return bottom, top
 
     # Note: These methods should be implemented as lower level properties
     # as currently they are specialised methods dependent on the workspace name format.

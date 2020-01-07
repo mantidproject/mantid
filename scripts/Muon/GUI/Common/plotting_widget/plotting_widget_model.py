@@ -12,6 +12,8 @@ from matplotlib.container import ErrorbarContainer
 import matplotlib.pyplot as plt
 
 legend_text_size = 7
+x_max_freq = 50
+x_max_time = 15
 
 
 class PlotWidgetModel(object):
@@ -99,8 +101,6 @@ class PlotWidgetModel(object):
     # ------------------------------------------------------------------------------------------------------------------
     # Plotting
     # ------------------------------------------------------------------------------------------------------------------
-    def plot_workspace_list(self, ax, workspace_names, workspace_indices, labels):
-        pass
 
     def add_workspace_to_plot(self, ax, workspace_name, workspace_indices, errors, plot_kwargs):
         """
@@ -222,13 +222,9 @@ class PlotWidgetModel(object):
         self.plotted_workspaces_inverse_binning = {}
         self.plotted_fit_workspaces = []
 
-    def set_x_lim(self, domain, axes):
-        if domain == "Time":
-            ymin, ymax = self._get_autoscale_y_limits(axes, 0, 15)
-            plt.setp(axes, xlim=[0, 15.0], ylim=[ymin, ymax])
-        if domain == "Frequency":
-            ymin, ymax = self._get_autoscale_y_limits(axes, 0, 50)
-            plt.setp(axes, xlim=[0, 50.0], ylim=[ymin, ymax])
+    def autoscale_axes(self, axes, xmax):
+        ymin, ymax = self._get_autoscale_y_limits(axes, 0, xmax)
+        plt.setp(axes, xlim=[0, xmax], ylim=[ymin, ymax])
 
     def set_axis_xlim(self, axis, xmin, xmax):
         axis.set_xlim(left=xmin, right=xmax)
@@ -242,8 +238,7 @@ class PlotWidgetModel(object):
     def _get_autoscale_y_limits(self, axes, xmin, xmax):
         new_bottom = 1e9
         new_top = -1e9
-        for i in range(self.number_of_axes):
-            axis = axes[i]
+        for axis in axes:
             axis.set_xlim(left=xmin, right=xmax)
             xlim = axis.get_xlim()
             ylim = np.inf, -np.inf
@@ -289,10 +284,8 @@ class PlotWidgetModel(object):
         else:
             ax.legend("")
 
-    # getters
     def get_axes_titles(self, axes):
         titles = [None] * self.number_of_axes
-        print(axes[0].title)
         for i in range(self.number_of_axes):
             titles[i] = axes[i].get_title()
         return titles
