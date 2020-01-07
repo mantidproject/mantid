@@ -35,7 +35,7 @@ class WaterfallPlotOffsetDialogPresenter:
 
     def update_x_offset(self):
         new_x = self.view.get_x_offset()
-        self.ax.set_waterfall_x_offset(new_x)
+        self.ax.update_waterfall_plot(new_x, self.ax.waterfall_y_offset)
 
         if self.view.x_offset_spin_box.hasFocus() and self.keep_proportion_on:
             if new_x == 0:
@@ -47,7 +47,7 @@ class WaterfallPlotOffsetDialogPresenter:
 
     def update_y_offset(self):
         new_y = self.view.get_y_offset()
-        self.ax.set_waterfall_y_offset(new_y)
+        self.ax.update_waterfall_plot(self.ax.waterfall_x_offset, new_y)
 
         if self.view.y_offset_spin_box.hasFocus() and self.keep_proportion_on:
             if new_y == 0:

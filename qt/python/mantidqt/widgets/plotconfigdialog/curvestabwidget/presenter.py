@@ -120,10 +120,14 @@ class CurvesTabWidgetPresenter:
         if waterfall and ax.waterfall_has_fill() and ax.waterfall_fill_is_line_colour():
             check_line_colour = True
 
+        if isinstance(curve, Line2D):
+            curve_index = ax.get_lines().index(curve)
+        else:
+            curve_index = ax.get_lines().index(curve[0])
+
         new_curve = FigureErrorsManager.replot_curve(ax, curve, plot_kwargs)
         self.curve_names_dict[self.view.get_selected_curve_name()] = new_curve
 
-        curve_index = self.view.select_curve_combo_box.currentIndex()
         line = ax.lines.pop()
         ax.lines.insert(curve_index, line)
         if waterfall:
@@ -134,7 +138,7 @@ class CurvesTabWidgetPresenter:
                     update_fill = curve.get_color() != new_curve[0].get_color()
                 else:
                     update_fill = curve[0].get_color() != new_curve[0].get_color()
-                ax.convert_single_line_to_waterfall(curve_index, update_fill)
+                ax.convert_single_line_to_waterfall(curve_index, need_to_update_fill=update_fill)
             else:
                 # the curve has been reset to its original position so for a waterfall plot it needs to be re-offset.
                 ax.convert_single_line_to_waterfall(curve_index)

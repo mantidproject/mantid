@@ -1060,90 +1060,12 @@ class MantidAxes(Axes):
         return self.waterfall_x_offset != 0 or self.waterfall_y_offset != 0
 
     def update_waterfall_plot(self, x_offset, y_offset):
-        # Return each curve to its original position and then apply the new offset.
-        self.set_waterfall_x_offset(x_offset)
-        self.set_waterfall_y_offset(y_offset)
+        for i in range(len(self.get_lines())):
+            self.convert_single_line_to_waterfall(i, x_offset, y_offset)
 
-    def set_waterfall_x_offset(self, x_offset):
-        # No need to return the curves to their original position if they already are.
-        if self.waterfall_x_offset != 0:
-            for i, line in enumerate(self.get_lines()):
-                # Shift the x points for each curve.
-                amount_to_move = i * self.width * (self.waterfall_x_offset / 500)
-                line.set_xdata(line.get_xdata() - amount_to_move)
-
-                for container in self.containers:
-                    # Find the errorbars associated with the current line
-                    if isinstance(container, ErrorbarContainer) and container[0] == line:
-                        for bar_line_col in container[2]:
-                            # Shift all of the x points on each errorbar
-                            segments = bar_line_col.get_segments()
-                            for point in segments:
-                                point[0][0] -= amount_to_move
-                                point[1][0] -= amount_to_move
-                            bar_line_col.set_segments(segments)
-                        break
-
-        # Now set the new offset
+        # Now set the new offsets
         self.waterfall_x_offset = x_offset
-
-        # If the offset has been set to zero then the curves don't need to be shifted.
-        if self.waterfall_x_offset != 0:
-            for i, line in enumerate(self.get_lines()):
-                amount_to_move = i * self.width * (self.waterfall_x_offset / 500)
-                line.set_xdata(line.get_xdata() + amount_to_move)
-
-                for container in self.containers:
-                    if isinstance(container, ErrorbarContainer) and container[0] == line:
-                        for bar_line_col in container[2]:
-                            segments = bar_line_col.get_segments()
-                            for point in segments:
-                                point[0][0] += amount_to_move
-                                point[1][0] += amount_to_move
-                            bar_line_col.set_segments(segments)
-                        break
-
-        if any(isinstance(collection, PolyCollection) for collection in self.collections):
-            self.waterfall_update_fill()
-
-        self.set_waterfall_toolbar_options_enabled()
-        self.get_figure().canvas.draw()
-
-    def set_waterfall_y_offset(self, y_offset):
-        # All of this is the same as setting the x waterfall offset.
-        if self.waterfall_y_offset != 0:
-            for i, line in enumerate(self.get_lines()):
-                amount_to_move = i * self.height * (self.waterfall_y_offset / 500)
-                line.set_ydata(line.get_ydata() - amount_to_move)
-
-                for container in self.containers:
-                    if isinstance(container, ErrorbarContainer) and container[0] == line:
-                        for bar_line_col in container[2]:
-                            segments = bar_line_col.get_segments()
-                            for point in segments:
-                                point[0][1] -= amount_to_move
-                                point[1][1] -= amount_to_move
-                            bar_line_col.set_segments(segments)
-                        break
-
         self.waterfall_y_offset = y_offset
-
-        if self.waterfall_y_offset != 0:
-            for i, line in enumerate(self.get_lines()):
-                amount_to_move = i * self.height * (self.waterfall_y_offset / 500)
-                line.set_ydata(line.get_ydata() + amount_to_move)
-                line.set_zorder(len(self.get_lines())-i)
-
-                for container in self.containers:
-                    if isinstance(container, ErrorbarContainer) and container[0] == line:
-                        for bar_line_col in container[2]:
-                            segments = bar_line_col.get_segments()
-                            for point in segments:
-                                point[0][1] += amount_to_move
-                                point[1][1] += amount_to_move
-                            bar_line_col.set_segments(segments)
-                        bar_line_col.set_zorder((len(self.get_lines())-i)+1)
-                        break
 
         if any(isinstance(collection, PolyCollection) for collection in self.collections):
             self.waterfall_update_fill()
@@ -1176,16 +1098,7 @@ class MantidAxes(Axes):
         self.update_waterfall_plot(0, 0)
         self.waterfall_remove_fill()
 
-    def convert_single_line_to_waterfall(self, index, need_to_update_fill=False):
-        line = self.get_lines()[index]
-
-        amount_to_move_x = index * self.width * (self.waterfall_x_offset / 500)
-        line.set_xdata(line.get_xdata() + amount_to_move_x)
-        amount_to_move_y = index * self.height * (self.waterfall_y_offset / 500)
-        line.set_ydata(line.get_ydata() + amount_to_move_y)
-        line.set_zorder(len(self.get_lines()) - index)
-
-        # If the curve has errorbars then these also need to be moved.
+    def apply_waterfall_offset_to_errorbars(self, line, amount_to_move_x, amount_to_move_y, index):
         for container in self.containers:
             if isinstance(container, ErrorbarContainer) and container[0] == line:
                 for bar_line_col in container[2]:
@@ -1198,6 +1111,25 @@ class MantidAxes(Axes):
                     bar_line_col.set_segments(segments)
                 bar_line_col.set_zorder((len(self.get_lines()) - index)+1)
                 break
+
+    def convert_single_line_to_waterfall(self, index, x=None, y=None, need_to_update_fill=False):
+        line = self.get_lines()[index]
+
+        if x is None:
+            amount_to_move_x = index * self.width * (self.waterfall_x_offset / 500)
+        else:
+            amount_to_move_x = index * self.width * ((x - self.waterfall_x_offset) / 500)
+
+        if y is None:
+            amount_to_move_y = index * self.height * (self.waterfall_y_offset / 500)
+        else:
+            amount_to_move_y = index * self.height * ((y - self.waterfall_y_offset) / 500)
+
+        line.set_xdata(line.get_xdata() + amount_to_move_x)
+        line.set_ydata(line.get_ydata() + amount_to_move_y)
+        line.set_zorder(len(self.get_lines()) - index)
+
+        self.apply_waterfall_offset_to_errorbars(line, amount_to_move_x, amount_to_move_y, index)
 
         # If the curves are filled and the fill has been set to match the line colour and the line colour has changed
         # then the fill's colour is updated.
