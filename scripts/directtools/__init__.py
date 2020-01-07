@@ -234,7 +234,7 @@ def _plotsinglehistogram(workspaces, labels, style, xscale, yscale):
     for ws, label in zip(workspaces, labels):
         if 'm' in style:
             markerStyle, markerIndex = _choosemarker(markers, markerIndex)
-        axes.errorbar(ws, wkspIndex=0, linestyle=lineStyle, marker=markerStyle, label=label, distribution=True)
+        axes.errorbar(ws, wkspIndex=0, linestyle=lineStyle, marker=markerStyle, label=label, distribution=True, capsize=4, linewidth=1)
     axes.set_xscale(xscale)
     axes.set_yscale(yscale)
     if axes.get_yscale() == 'linear':
@@ -627,7 +627,7 @@ def plotcuts(direction, workspaces, cuts, widths, quantity, unit, style='l', kee
                 realCutCentre, realCutWidth = _cutcentreandwidth(line)
                 label = _label(ws, realCutCentre, realCutWidth, len(workspaces) == 1, len(cuts) == 1, len(widths) == 1, quantity, unit)
                 axes.errorbar(line, wkspIndex=0, linestyle=lineStyle, marker=markerStyle, label=label,
-                              distribution=True, capsize=4, linewidth=1.25)
+                              distribution=True, capsize=4, linewidth=1)
     axes.set_xscale(xscale)
     axes.set_yscale(yscale)
     if axes.get_yscale() == 'linear':
