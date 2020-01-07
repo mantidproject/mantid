@@ -5,7 +5,7 @@
 %endif
 
 Name:           mantid-developer
-Version:        1.35
+Version:        1.36
 Release:        1%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
@@ -16,20 +16,23 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %{?fedora:Requires: rpmfusion-nonfree-release}
 %{?rhel:Requires: epel-release}
-Requires: clang
 %{?fedora:Requires: cmake-gui}
 %{?rhel:Requires: cmake3-gui}
+%{?fedora:Requires: python2-qtconsole}
 Requires: boost169-devel
 Requires: boost169-python2-devel
+Requires: clang
 Requires: doxygen
+Requires: dvipng
+Requires: gcc-c++
+Requires: git
+Requires: git-all
 Requires: gperftools-devel
 Requires: gperftools-libs
-Requires: gcc-c++
-Requires: git-all
+Requires: graphviz
 Requires: gsl-devel
-Requires: hdf-devel
 Requires: hdf5-devel
-Requires: h5py >= 2.3.1
+Requires: hdf-devel
 Requires: jsoncpp-devel >= 0.7.0
 Requires: librdkafka-devel
 Requires: muParser-devel
@@ -39,44 +42,29 @@ Requires: nexus-devel >= 4.2
 Requires: ninja-build
 Requires: numpy
 Requires: OCE-devel
+Requires: openssl-devel
 Requires: poco-devel >= 1.4.6
 Requires: PyQt4-devel
-Requires: python2-qt5-devel
-Requires: python-QtPy
-Requires: python-requests
-Requires: python-devel
-Requires: python-setuptools
-Requires: python-ipython >= 1.1
+Requires: python2-h5py >= 2.3.1
 Requires: python2-matplotlib
 Requires: python2-matplotlib-qt4
 Requires: python2-matplotlib-qt4
-Requires: python-pip
-%{?fedora:Requires: python2-qtconsole}
-Requires: python-sphinx
-Requires: python2-sphinx-bootstrap-theme
-Requires: PyYAML
 Requires: python2-mock
 Requires: python2-psutil
+Requires: python2-qt5-devel
+%{?fedora:Requires: python2-qtconsole}
+Requires: python2-sphinx-bootstrap-theme
+Requires: python-devel
 Requires: python-enum34
+Requires: python-ipython >= 1.1
+Requires: python-pip
+Requires: python-QtPy
+Requires: python-requests
+Requires: python-setuptools
+Requires: python-sphinx
+Requires: PyYAML
 Requires: qscintilla-devel
-Requires: qt-devel >= 4.6
-Requires: qwt5-qt4-devel
-Requires: qwtplot3d-qt4-devel
-Requires: redhat-lsb
-Requires: rpmdevtools
-Requires: scipy
-Requires: sip-devel
-Requires: tbb
-Requires: tbb-devel
-Requires: git
-Requires: openssl-devel
-Requires: texlive-latex
-Requires: texlive-latex-bin
-Requires: texlive-was
-Requires: tex-preview
-Requires: dvipng
-Requires: qt-devel
-Requires: qtwebkit-devel
+Requires: qscintilla-qt5-devel
 Requires: qt5-qtbase-devel
 Requires: qt5-qtbase-gui
 Requires: qt5-qtimageformats
@@ -86,8 +74,22 @@ Requires: qt5-qttools-libs-designer
 Requires: qt5-qtwebkit-devel
 Requires: qt5-qtx11extras
 Requires: qt5-qtx11extras-devel
-Requires: qscintilla-qt5-devel
-Requires: graphviz
+Requires: qt-devel >= 4.6
+Requires: qtwebkit-devel
+Requires: qwt5-qt4-devel
+Requires: qwtplot3d-qt4-devel
+Requires: redhat-lsb
+Requires: rpmdevtools
+Requires: scipy
+Requires: sip-devel
+Requires: tbb
+Requires: tbb-devel
+Requires: texlive-latex
+Requires: texlive-latex-bin
+Requires: texlive-was
+Requires: tex-preview
+Requires: zeromq
+
 %if %{with_python3}
 Requires: python3-setuptools
 Requires: python3-sip-devel
@@ -96,7 +98,6 @@ Requires: python3-qt5-devel
 Requires: python3-QtPy
 Requires: python3-numpy
 Requires: python3-scipy
-Requires: python3-scikit-image
 Requires: python3-sphinx
 Requires: python3-sphinx-bootstrap-theme
 Requires: python3-dateutil
@@ -105,24 +106,29 @@ Requires: python3-ipython-gui
 Requires: python3-matplotlib
 %{?fedora:Requires: python3-qtconsole}
 Requires: python3-PyYAML
-Requires: python3-mock
 %{?fedora:Requires: python3-psutil}
 %{?fedora:Requires: python3-requests}
 Requires: boost-python3-devel
 %endif
 
 %if 0%{?el7}
-Requires: python36-setuptools
-Requires: python36-qt5-devel
-Requires: python36-numpy
-Requires: python36-scipy
-Requires: python36-sphinx
-Requires: python36-dateutil
-Requires: python36-PyYAML
-Requires: python36-mock
-Requires: python36-psutil
-Requires: python36-requests
 Requires: boost169-python3-devel
+Requires: python36-dateutil
+Requires: python36-h5py
+Requires: python36-ipython
+Requires: python36-ipython-gui
+Requires: python36-matplotlib-qt5
+Requires: python36-numpy
+Requires: python36-psutil
+Requires: python36-PyQt4-devel
+Requires: python36-PyYAML
+Requires: python36-qt5-devel
+Requires: python36-QtPy
+Requires: python36-requests
+Requires: python36-scipy
+Requires: python36-setuptools
+Requires: python36-sphinx
+Requires: python36-sphinx-bootstrap-theme
 %endif
 
 BuildArch: noarch
@@ -146,6 +152,8 @@ required for Mantid development.
 %files
 
 %changelog
+* Tue Jan 07 2020 Martyn Gigg <martyn.gigg@stfc.ac.uk>
+- Add remaining python36 packages required for mantid.
 
 * Tue Dec 03 2019 David Fairbrother <david.fairbrother@stfc.ac.uk>
 - Added Python Enum34 back-port to the required Python dependencies
