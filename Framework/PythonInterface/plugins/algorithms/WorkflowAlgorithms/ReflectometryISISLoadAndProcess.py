@@ -34,6 +34,7 @@ class Prop:
     OUTPUT_WS_BINNED = 'OutputWorkspaceBinned'
     OUTPUT_WS_LAM = 'OutputWorkspaceWavelength'
     OUTPUT_WS_TOF = 'OutputWorkspaceTOF'
+    OUTPUT_WS_TOF_SLICED = 'OutputWorkspaceTOFSliced'
 
 
 class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
@@ -388,6 +389,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         self._setUniformNumberOfSlices(alg, input_workspace)
         self._setSliceStartStopTimes(alg, input_workspace)
         alg.execute()
+        return alg.getProperty("OutputWorkspace").value
 
     def _sliceWorkspace(self, workspace):
         """If slicing has been requested, slice the input workspace, otherwise
@@ -396,7 +398,9 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             return workspace
         sliced_workspace_name = self._getSlicedWorkspaceGroupName(workspace)
         self.log().information('Slicing workspace ' + workspace + ' into ' + sliced_workspace_name)
-        self._runSliceAlgorithm(workspace, sliced_workspace_name)
+        workspace = self._runSliceAlgorithm(workspace, sliced_workspace_name)
+        self._declareAndSetProperty(Prop.OUTPUT_WS_TOF_SLICED, sliced_workspace_name, workspace,
+            'The sliced TOF workspace(s)')
         return sliced_workspace_name
 
     def _getSlicedWorkspaceGroupName(self, workspace):
