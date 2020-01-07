@@ -35,6 +35,7 @@ class Prop:
     OUTPUT_WS_LAM = 'OutputWorkspaceWavelength'
     OUTPUT_WS_TOF = 'OutputWorkspaceTOF'
     OUTPUT_WS_TOF_SLICED = 'OutputWorkspaceTOFSliced'
+    OUTPUT_WS_TRANS = 'OutputWorkspaceTransmission'
 
 
 class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
@@ -295,7 +296,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             alg.execute()
             ws_group = alg.getProperty("OutputWorkspace").value
 
-        self._declareAndSetProperty(Prop.OUTPUT_WS_TOF, output_ws_name, ws_group,
+        self._declareAndSetWorkspaceProperty(Prop.OUTPUT_WS_TOF, output_ws_name, ws_group,
             'The loaded workspace(s) in TOF')
         return ws_group
 
@@ -399,7 +400,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         sliced_workspace_name = self._getSlicedWorkspaceGroupName(workspace)
         self.log().information('Slicing workspace ' + workspace + ' into ' + sliced_workspace_name)
         workspace = self._runSliceAlgorithm(workspace, sliced_workspace_name)
-        self._declareAndSetProperty(Prop.OUTPUT_WS_TOF_SLICED, sliced_workspace_name, workspace,
+        self._declareAndSetWorkspaceProperty(Prop.OUTPUT_WS_TOF_SLICED, sliced_workspace_name, workspace,
             'The sliced TOF workspace(s)')
         return sliced_workspace_name
 
@@ -445,13 +446,23 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         self._setOutputPropertyIfInputNotSet(Prop.QMIN, child_alg)
         self._setOutputPropertyIfInputNotSet(Prop.QSTEP, child_alg)
         self._setOutputPropertyIfInputNotSet(Prop.QMAX, child_alg)
+        self._declareAndSetWorkspacePropertyFromChild(Prop.OUTPUT_WS_TRANS,
+            'The final transmission workspace in lambda', child_alg)
 
-    def _declareAndSetProperty(self, property_name, workspace_name, workspace, doc_string):
+    def _declareAndSetWorkspaceProperty(self, property_name, workspace_name, workspace, doc_string):
         """Declare an on-the-fly property to set an output workspace"""
         self.declareProperty(WorkspaceProperty(property_name, '', direction=Direction.Output),
                              doc=doc_string)
         self.setPropertyValue(property_name, workspace_name)
         self.setProperty(property_name, workspace)
+
+    def _declareAndSetWorkspacePropertyFromChild(self, property_name, doc_string, child_alg):
+        """Declare and set the given output workspace property from the result in
+        the given child algorithm, if it exists in the child algorithm's outputs"""
+        workspace_name = child_alg.getPropertyValue(property_name)
+        if workspace_name:
+            workspace = child_alg.getProperty(property_name).value
+            self._declareAndSetWorkspaceProperty(property_name, workspace_name, workspace, doc_string)
 
     def _setOutputProperty(self, property_name, child_alg):
         """Set the given output property from the result in the given child algorithm,
