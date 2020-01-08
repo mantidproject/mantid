@@ -158,6 +158,9 @@ private:
 
   void groupOutputWorkspace();
 
+  /// calculate split-workspace's duration according to splitter time series property
+  double calculate_duration(std::unique_ptr<Kernel::TimeSeriesProperty<int> > &splitter_tsp);
+
   DataObjects::EventWorkspace_sptr m_eventWS;
   DataObjects::SplittersWorkspace_sptr m_splittersWorkspace;
   DataObjects::TableWorkspace_sptr m_splitterTableWorkspace;
