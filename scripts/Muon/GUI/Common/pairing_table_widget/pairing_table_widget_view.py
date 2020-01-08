@@ -13,6 +13,7 @@ from Muon.GUI.Common import message_box
 from Muon.GUI.Common.utilities import table_utils
 
 pair_columns = {0: 'pair_name', 1: 'to_analyse', 2: 'group_1', 3: 'group_2', 4: 'alpha', 5: 'guess_alpha'}
+inverse_pair_columns = {'pair_name': 0, 'to_analyse': 1, 'group_1': 2, 'group_2': 3, 'alpha': 4, 'guess_alpha': 5}
 
 
 class PairingTableView(QtWidgets.QWidget):
@@ -386,7 +387,7 @@ class PairingTableView(QtWidgets.QWidget):
 
     def set_to_analyse_state(self, row, state):
         checked_state = QtCore.Qt.Checked if state is True else QtCore.Qt.Unchecked
-        item = self.get_table_item(row, 1)
+        item = self.get_table_item(row, inverse_pair_columns['to_analyse'])
         item.setCheckState(checked_state)
 
     def set_to_analyse_state_quietly(self, row, state):

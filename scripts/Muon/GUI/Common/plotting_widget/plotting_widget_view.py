@@ -30,7 +30,6 @@ class PlotWidgetView(QtWidgets.QWidget):
         super(PlotWidgetView, self).__init__(parent)
         self.plot_label = None
         self.plot_selector = None
-        self.plot_button = None
         self.tile_type_selector = None
         self.tiled_type_label = None
         self.plot_type_selector = None
@@ -71,13 +70,6 @@ class PlotWidgetView(QtWidgets.QWidget):
         self.plot_type_selector.setSizePolicy(QtWidgets.QSizePolicy.Fixed,
                                               QtWidgets.QSizePolicy.Fixed)
 
-        # self.plot_button = QtWidgets.QPushButton(self)
-        # self.plot_button.setObjectName("PlotButton")
-        # self.plot_button.setText("Plot")
-        # self.plot_label.setBuddy(self.plot_button)
-        # self.plot_button.setSizePolicy(QtWidgets.QSizePolicy.Fixed,
-        #                                QtWidgets.QSizePolicy.Fixed)
-
         self.tile_type_selector = QtWidgets.QComboBox(self)
         self.tile_type_selector.setObjectName("tileTypeSelector")
         self.tile_type_selector.addItems(["Group/Pair", "Run"])
@@ -95,7 +87,6 @@ class PlotWidgetView(QtWidgets.QWidget):
         self.horizontal_layout.addStretch(0)
         self.horizontal_layout.addWidget(self.raw)
         self.horizontal_layout.addStretch(0)
-        # self.horizontal_layout.addWidget(self.plot_button)
         self.horizontal_layout.addSpacing(50)
 
         self.vertical_layout = QtWidgets.QVBoxLayout()
@@ -164,10 +155,6 @@ class PlotWidgetView(QtWidgets.QWidget):
     def get_selected(self):
         return self.plot_selector.currentText()
 
-    def on_plot_button_clicked(self, slot):
-        pass
-        # self.plot_button.clicked.connect(slot)
-
     def on_rebin_options_changed(self, slot):
         self.raw.stateChanged.connect(slot)
 
@@ -183,7 +170,6 @@ class PlotWidgetView(QtWidgets.QWidget):
     def new_plot_figure(self, num_axes):
         # clear old plot
         self.fig.clf()
-        # prevents the plot from being empty when either no pairs or groups are present
         if num_axes < 1:
             num_axes = 1
         self.fig, axes = get_plot_fig(overplot=False, ax_properties=None, axes_num=num_axes,

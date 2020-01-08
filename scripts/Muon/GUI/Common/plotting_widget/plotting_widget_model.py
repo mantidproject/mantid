@@ -41,7 +41,6 @@ class PlotWidgetModel(object):
         """
         return self._plotted_workspaces
 
-    # NOTE: Not sure if this property is necessary, or used for anything
     @property
     def plotted_workspaces_inverse_binning(self):
         return self._plotted_workspaces_inverse_binning
@@ -230,7 +229,7 @@ class PlotWidgetModel(object):
 
     def _remove_all_data_workspaces_from_plot(self, axes):
         workspaces_to_remove = self.plotted_workspaces
-        for i, workspace in enumerate(workspaces_to_remove):
+        for workspace in workspaces_to_remove:
             self.remove_workspace_from_plot(workspace, axes)
         workspaces_to_remove = self.plotted_fit_workspaces
         for workspace in workspaces_to_remove:

@@ -13,6 +13,7 @@ from Muon.GUI.Common.utilities import table_utils
 from Muon.GUI.Common import message_box
 
 group_table_columns = {0: 'group_name', 1: 'to_analyse', 2: 'detector_ids', 3: 'number_of_detectors'}
+inverse_group_table_columns = {'group_name': 0, 'to_analyse': 1,  'detector_ids': 2,  'number_of_detectors': 3}
 
 
 class GroupingTableView(QtWidgets.QWidget):
@@ -162,8 +163,8 @@ class GroupingTableView(QtWidgets.QWidget):
                 # column 0 : group name
                 group_name_widget = table_utils.ValidatedTableItem(self._validate_group_name_entry)
                 group_name_widget.setText(entry)
-                self.grouping_table.setItem(row_position, 0, group_name_widget)
-                self.grouping_table.item(row_position, 0).setToolTip(entry)
+                self.grouping_table.setItem(row_position, i, group_name_widget)
+                self.grouping_table.item(row_position, i).setToolTip(entry)
             if group_table_columns[i] == 'to_analyse':
                 # columns 1 : whether to analyse this group
                 if entry:
@@ -174,8 +175,8 @@ class GroupingTableView(QtWidgets.QWidget):
                 # column 2 : detector IDs
                 detector_widget = table_utils.ValidatedTableItem()
                 detector_widget.setText(entry)
-                self.grouping_table.setItem(row_position, 2, detector_widget)
-                self.grouping_table.item(row_position, 2).setToolTip(entry)
+                self.grouping_table.setItem(row_position, i, detector_widget)
+                self.grouping_table.item(row_position, i).setToolTip(entry)
                 detector_widget.set_validator(self._validate_detector_ID_entry)
                 item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEnabled)
 
@@ -306,12 +307,12 @@ class GroupingTableView(QtWidgets.QWidget):
 
     def set_to_analyse_state(self, row, state):
         checked_state = QtCore.Qt.Checked if state is True else QtCore.Qt.Unchecked
-        item = self.get_table_item(row, 1)
+        item = self.get_table_item(row, inverse_group_table_columns['to_analyse'])
         item.setCheckState(checked_state)
 
     def set_to_analyse_state_quietly(self, row, state):
         checked_state = QtCore.Qt.Checked if state is True else QtCore.Qt.Unchecked
-        item = self.get_table_item(row, 1)
+        item = self.get_table_item(row, inverse_group_table_columns['to_analyse'])
         self.grouping_table.blockSignals(True)
         item.setCheckState(checked_state)
         self.grouping_table.blockSignals(False)

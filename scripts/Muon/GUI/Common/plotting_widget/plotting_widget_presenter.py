@@ -28,7 +28,6 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         self._view = view
         self._model = model
         self.context = context
-        self._view.on_plot_button_clicked(self.handle_data_updated)
         self._view.on_rebin_options_changed(self.handle_use_raw_workspaces_changed)
         self._view.on_plot_type_changed(self.handle_plot_type_changed)
         self._view.on_tiled_by_type_changed(self.handle_tiled_by_changed_on_view)
@@ -82,7 +81,6 @@ class PlotWidgetPresenter(HomeTabSubWidget):
 
         if self._view.is_tiled_plot():
             self.update_model_tile_plot_positions(self._view.get_tiled_by_type())
-            # update view based on number of axis
             self._view.new_plot_figure(self._model.number_of_axes)
 
         self.plot_all_selected_workspaces()
