@@ -524,7 +524,7 @@ void SumSpectra::doFractionalSum(MatrixWorkspace_sptr outputWorkspace,
   RebinnedOutput_sptr outWS =
       boost::dynamic_pointer_cast<RebinnedOutput>(outputWorkspace);
 
-  // Check finalize state prior to the sum process, at the completion 
+  // Check finalize state prior to the sum process, at the completion
   // the output is unfinalized
   auto isFinalized = inWS->isFinalized();
 
