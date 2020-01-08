@@ -186,11 +186,11 @@ void FilterEvents::init() {
                   "If selected, the names of the output workspaces will "
                   "include information about each slice.");
 
-//  declareProperty("KeepEvents", true,
-//                  "If true, the output workspaces shall be EventWorkspaces;"
-//                  "Otherwise, the output workspaces will be MatrixWorkspaces,"
-//                  "each spectrum of which contains 1 value.");
-
+  //  declareProperty("KeepEvents", true,
+  //                  "If true, the output workspaces shall be EventWorkspaces;"
+  //                  "Otherwise, the output workspaces will be
+  //                  MatrixWorkspaces," "each spectrum of which contains 1
+  //                  value.");
 }
 
 std::map<std::string, std::string> FilterEvents::validateInputs() {
@@ -1977,56 +1977,57 @@ void FilterEvents::mapSplitterTSPtoWorkspaces(
 
   for (int itarget = 0; itarget < static_cast<int>(split_tsp_vec.size());
        ++itarget) {
-      // use itarget to find the workspace that is mapped
-      std::map<int, DataObjects::EventWorkspace_sptr>::iterator ws_iter;
-      ws_iter = m_outputWorkspacesMap.find(itarget);
+    // use itarget to find the workspace that is mapped
+    std::map<int, DataObjects::EventWorkspace_sptr>::iterator ws_iter;
+    ws_iter = m_outputWorkspacesMap.find(itarget);
 
-      // skip if an itarget does not have matched workspace
-      if (ws_iter == m_outputWorkspacesMap.end()) {
-        g_log.warning() << "iTarget " << itarget
-                          << " does not have any workspace associated.\n";
-        continue;
-      }
+    // skip if an itarget does not have matched workspace
+    if (ws_iter == m_outputWorkspacesMap.end()) {
+      g_log.warning() << "iTarget " << itarget
+                      << " does not have any workspace associated.\n";
+      continue;
+    }
 
-      // get the workspace and add property
-      DataObjects::EventWorkspace_sptr outws = ws_iter->second;
-      outws->mutableRun().addProperty(std::move(split_tsp_vec[itarget]), true);
+    // get the workspace and add property
+    DataObjects::EventWorkspace_sptr outws = ws_iter->second;
+    outws->mutableRun().addProperty(std::move(split_tsp_vec[itarget]), true);
   }
 
-//  if (m_useSplittersWorkspace) {
-//    // Splitter TSP (for all splitters) are associated SplittersWorkspace
-//    std::map<int, DataObjects::EventWorkspace_sptr>::iterator miter;
-//    for (miter = m_outputWorkspacesMap.begin();
-//         miter != m_outputWorkspacesMap.end(); ++miter) {
-//      g_log.debug() << "Output workspace index: " << miter->first << "\n";
-//      if (0 <= miter->first &&
-//          miter->first < static_cast<int>(split_tsp_vec.size())) {
-//        DataObjects::EventWorkspace_sptr outws = miter->second;
-//        outws->mutableRun().addProperty(std::move(split_tsp_vec[miter->first]),
-//                                        true);
-//      }
-//    }
-//  } else {
-//    // Either Table-type or Matrix-type splitters
-//    for (int itarget = 0; itarget < static_cast<int>(split_tsp_vec.size());
-//         ++itarget) {
-//      // use itarget to find the workspace that is mapped
-//      std::map<int, DataObjects::EventWorkspace_sptr>::iterator ws_iter;
-//      ws_iter = m_outputWorkspacesMap.find(itarget);
+  //  if (m_useSplittersWorkspace) {
+  //    // Splitter TSP (for all splitters) are associated SplittersWorkspace
+  //    std::map<int, DataObjects::EventWorkspace_sptr>::iterator miter;
+  //    for (miter = m_outputWorkspacesMap.begin();
+  //         miter != m_outputWorkspacesMap.end(); ++miter) {
+  //      g_log.debug() << "Output workspace index: " << miter->first << "\n";
+  //      if (0 <= miter->first &&
+  //          miter->first < static_cast<int>(split_tsp_vec.size())) {
+  //        DataObjects::EventWorkspace_sptr outws = miter->second;
+  //        outws->mutableRun().addProperty(std::move(split_tsp_vec[miter->first]),
+  //                                        true);
+  //      }
+  //    }
+  //  } else {
+  //    // Either Table-type or Matrix-type splitters
+  //    for (int itarget = 0; itarget < static_cast<int>(split_tsp_vec.size());
+  //         ++itarget) {
+  //      // use itarget to find the workspace that is mapped
+  //      std::map<int, DataObjects::EventWorkspace_sptr>::iterator ws_iter;
+  //      ws_iter = m_outputWorkspacesMap.find(itarget);
 
-//      // skip if an itarget does not have matched workspace
-//      if (ws_iter == m_outputWorkspacesMap.end()) {
-//        g_log.warning() << "iTarget " << itarget
-//                        << " does not have any workspace associated.\n";
-//        continue;
-//      }
+  //      // skip if an itarget does not have matched workspace
+  //      if (ws_iter == m_outputWorkspacesMap.end()) {
+  //        g_log.warning() << "iTarget " << itarget
+  //                        << " does not have any workspace associated.\n";
+  //        continue;
+  //      }
 
-//      // get the workspace and add property
-//      DataObjects::EventWorkspace_sptr outws = ws_iter->second;
-//      outws->mutableRun().addProperty(std::move(split_tsp_vec[itarget]), true);
-//    }
+  //      // get the workspace and add property
+  //      DataObjects::EventWorkspace_sptr outws = ws_iter->second;
+  //      outws->mutableRun().addProperty(std::move(split_tsp_vec[itarget]),
+  //      true);
+  //    }
 
-//  } // END-IF-ELSE (splitter-type)
+  //  } // END-IF-ELSE (splitter-type)
 
   return;
 }
