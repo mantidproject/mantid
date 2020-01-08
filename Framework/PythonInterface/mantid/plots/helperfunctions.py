@@ -66,10 +66,9 @@ def get_normalize_by_bin_width(workspace, axes, **kwargs):
     if normalize_by_bin_width is not None:
         return normalize_by_bin_width, kwargs
     distribution = kwargs.get('distribution', None)
-    aligned, _ = check_resample_to_regular_grid(workspace, **kwargs)
     if distribution or (hasattr(workspace, 'isDistribution') and workspace.isDistribution()):
         return False, kwargs
-    elif distribution is False or aligned:
+    elif distribution is False:
         return True, kwargs
     else:
         try:
@@ -82,7 +81,10 @@ def get_normalize_by_bin_width(workspace, axes, **kwargs):
                 [artist[0].is_normalized for artist in current_artists])
             normalization = current_normalization
         else:
-            normalization = mantid.kernel.config['graph1d.autodistribution'].lower() == 'on'
+            if mantid.kernel.config['graph1d.autodistribution'].lower() == 'on':
+                normalization = True
+            else:
+                normalization, _ = check_resample_to_regular_grid(workspace, **kwargs)
     return normalization, kwargs
 
 
