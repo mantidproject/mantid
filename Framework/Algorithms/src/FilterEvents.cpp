@@ -2018,28 +2018,11 @@ void FilterEvents::mapSplitterTSPtoWorkspaces(
  * @return
  */
 double FilterEvents::calculate_duration(std::unique_ptr<Kernel::TimeSeriesProperty<int>> &splitter_tsp){
-    double duration = 0.;
-    /*
-     *             splitter_times = runObj.getProperty('splitter').times.astype(float) * 1E-9
-            splitter_value = runObj.getProperty('splitter').value
-
-            if splitter_value[0] == 0:
-                splitter_times = splitter_times[1:]
-            assert len(splitter_times) % 2 == 0, 'If splitter starts from 0, there will be odd number of ' \
-                'splitter times; otherwise, even number'
-
-            sub_split_durations = splitter_times[1::2] - splitter_times[::2]
-
-            duration = numpy.sum(sub_split_durations)
-     */
-
-    if (splitter_tsp->size() == 0) {
-        g_log.warning("size 0....");
-    }
-
+    // Get the times and values
     std::vector<int> split_values = splitter_tsp->valuesAsVector();
     std::vector<DateAndTime> split_time = splitter_tsp->timesAsVector();
 
+    double duration = 0.;
     for (size_t i = 0; i < split_values.size() - 1; ++i) {
         // for splitter's value == 1 (from this till 0 will be counted in the duration)
         if (split_values[i] == 1) {
