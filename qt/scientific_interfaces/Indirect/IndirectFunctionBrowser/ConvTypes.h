@@ -14,6 +14,7 @@
 #include <QMap>
 #include <QStringList>
 #include <boost/optional.hpp>
+#include <unordered_map>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -102,6 +103,7 @@ struct TemplateSubType {
   virtual QList<ParamID> getParameterIDs(int typeIndex) const = 0;
   virtual QStringList getParameterNames(int typeIndex) const = 0;
   virtual QList<std::string> getParameterDescriptions(int typeIndex) const = 0;
+  virtual ~TemplateSubType() {}
 };
 
 struct TemplateSubTypeDescriptor {
