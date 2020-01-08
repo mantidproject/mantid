@@ -685,6 +685,16 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
   }
 }
 
+/**
+ * Called at the completion of the fractional rebinning loop
+ * to the set the finalize flag in the output workspace.
+ * @param outputWS Reference to the rebinned output workspace
+ */
+void finalizeFractionalRebin(RebinnedOutput &outputWS) {
+  // rebinToFractionalOutput() leaves the data in an unfinalized state
+  outputWS.setFinalized(false);
+}
+
 } // namespace FractionalRebinning
 
 } // namespace DataObjects
