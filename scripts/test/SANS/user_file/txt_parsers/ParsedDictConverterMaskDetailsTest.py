@@ -6,14 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from sans.common.Containers.FloatRange import FloatRange
 from sans.common.enums import DetectorType
 from sans.user_file.settings_tags import mask_block, MaskId, mask_block_cross, mask_line, range_entry_with_detector, \
-    single_entry_with_detector
-from user_file.txt_parsers.ParserAdapterTestCommon import ParserAdapterTestCommon
+    single_entry_with_detector, range_entry
+from test.SANS.user_file.txt_parsers.ParsedDictConverterTestCommon import ParsedDictConverterTestCommon
 
 
-class ParserAdapterMaskDetailsTest(ParserAdapterTestCommon, unittest.TestCase):
+class ParsedDictConverterMaskDetailsTest(ParsedDictConverterTestCommon, unittest.TestCase):
     def test_block_masks(self):
         input_val = mask_block(horizontal1=1, horizontal2=2,
                                vertical1=3, vertical2=4,
@@ -172,7 +171,7 @@ class ParserAdapterMaskDetailsTest(ParserAdapterTestCommon, unittest.TestCase):
     def test_spectra_nums_range(self):
         expected_val = [10, 11, 12]
 
-        self.set_return_val({MaskId.SPECTRUM_RANGE_MASK: FloatRange(10, 12)})
+        self.set_return_val({MaskId.SPECTRUM_RANGE_MASK: range_entry(10, 12)})
 
         returned = self.instance.get_mask_details()
 
@@ -183,7 +182,7 @@ class ParserAdapterMaskDetailsTest(ParserAdapterTestCommon, unittest.TestCase):
         expected_val = [123, 10, 11, 12]
 
         self.set_return_val({MaskId.SINGLE_SPECTRUM_MASK: 123,
-                             MaskId.SPECTRUM_RANGE_MASK: FloatRange(10, 12)})
+                             MaskId.SPECTRUM_RANGE_MASK: range_entry(10, 12)})
 
         returned = self.instance.get_mask_details()
 

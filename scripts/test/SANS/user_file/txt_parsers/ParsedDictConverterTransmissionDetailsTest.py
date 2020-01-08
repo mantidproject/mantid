@@ -8,10 +8,10 @@ import unittest
 
 from sans.common.Containers.MonitorID import MonitorID
 from sans.user_file.settings_tags import TransId
-from user_file.txt_parsers.ParserAdapterTestCommon import ParserAdapterTestCommon
+from test.SANS.user_file.txt_parsers.ParsedDictConverterTestCommon import ParsedDictConverterTestCommon
 
 
-class ParserAdapterTransmissionDetailsTest(ParserAdapterTestCommon, unittest.TestCase):
+class ParsedDictConverterTransmissionDetailsTest(ParsedDictConverterTestCommon, unittest.TestCase):
     def test_shift_spectrum(self):
         attr_map = {TransId.SPEC_4_SHIFT: 4, TransId.SPEC_5_SHIFT: 5}
         for key, spec_num in attr_map.items():

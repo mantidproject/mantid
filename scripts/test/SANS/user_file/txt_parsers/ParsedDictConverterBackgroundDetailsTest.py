@@ -8,14 +8,14 @@ import unittest
 
 from sans.common.Containers.FloatRange import FloatRange
 from sans.common.Containers.MonitorID import MonitorID
-from sans.user_file.settings_tags import BackId, back_single_monitor_entry
-from user_file.txt_parsers.ParserAdapterTestCommon import ParserAdapterTestCommon
+from sans.user_file.settings_tags import BackId, back_single_monitor_entry, range_entry
+from test.SANS.user_file.txt_parsers.ParsedDictConverterTestCommon import ParsedDictConverterTestCommon
 
 
-class ParserAdapterTestBackgroundDetailsTest(ParserAdapterTestCommon, unittest.TestCase):
+class ParsedDictConverterBackgroundDetailsTest(ParsedDictConverterTestCommon, unittest.TestCase):
     def test_tof_window_all_monitors(self):
         expected_float_range = FloatRange(100, 200)
-        self.set_return_val({BackId.ALL_MONITORS: expected_float_range})
+        self.set_return_val({BackId.ALL_MONITORS: range_entry(100, 200)})
 
         returned = self.instance.get_background_details()
 
@@ -24,7 +24,7 @@ class ParserAdapterTestBackgroundDetailsTest(ParserAdapterTestCommon, unittest.T
 
     def test_transmission_tof_range(self):
         expected_float_range = FloatRange(200, 300)
-        self.set_return_val({BackId.TRANS: expected_float_range})
+        self.set_return_val({BackId.TRANS: range_entry(200, 300)})
 
         returned = self.instance.get_background_details()
 

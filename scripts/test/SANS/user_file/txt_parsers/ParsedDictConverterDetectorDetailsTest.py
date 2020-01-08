@@ -8,11 +8,11 @@ import unittest
 
 from sans.common.Containers.FloatRange import FloatRange
 from sans.common.enums import ReductionMode, CorrectionType
-from sans.user_file.settings_tags import DetectorId
-from user_file.txt_parsers.ParserAdapterTestCommon import ParserAdapterTestCommon
+from sans.user_file.settings_tags import DetectorId, range_entry
+from test.SANS.user_file.txt_parsers.ParsedDictConverterTestCommon import ParsedDictConverterTestCommon
 
 
-class ParserAdapterTestDetectorDetailsTest(ParserAdapterTestCommon, unittest.TestCase):
+class ParsedDictConverterDetectorDetailsTest(ParsedDictConverterTestCommon, unittest.TestCase):
 
     def test_reduction_mode(self):
         expected_val = ReductionMode.ALL
@@ -56,7 +56,7 @@ class ParserAdapterTestDetectorDetailsTest(ParserAdapterTestCommon, unittest.Tes
 
     def test_merge_rescale_fit(self):
         expected_range = FloatRange(3.1, 4.1)
-        self.set_return_val({DetectorId.RESCALE_FIT: expected_range})
+        self.set_return_val({DetectorId.RESCALE_FIT: range_entry(3.1, 4.1)})
 
         returned = self.instance.get_detector_details()
 
@@ -65,7 +65,7 @@ class ParserAdapterTestDetectorDetailsTest(ParserAdapterTestCommon, unittest.Tes
 
     def test_merge_shift_fit(self):
         expected_range = FloatRange(3.2, 4.2)
-        self.set_return_val({DetectorId.SHIFT_FIT: expected_range})
+        self.set_return_val({DetectorId.SHIFT_FIT: range_entry(3.2, 4.2)})
 
         returned = self.instance.get_detector_details()
 

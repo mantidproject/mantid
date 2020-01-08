@@ -4,6 +4,8 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+import abc
+
 from sans.common.Containers.FloatRange import FloatRange
 from sans.common.Containers.MonitorID import MonitorID
 from sans.common.Containers.Position import XYPosition
@@ -21,19 +23,28 @@ from sans.user_file.parsed_containers.SetPositionDetails import SetPositionDetai
 from sans.user_file.parsed_containers.TransmissionDetails import TransmissionDetails
 from sans.user_file.settings_tags import BackId, DetectorId, FitId, GravityId, LimitsId, MaskId, MonId, QResolutionId, \
     SampleId, SetId, TransId, TubeCalibrationFileId, OtherId
-from sans.user_file.user_file_reader import UserFileReader
 
 
-class ParserAdapter(IUserFileParser):
-    def __init__(self, filename, txt_user_file_reader: UserFileReader = None):
-        if not txt_user_file_reader:
-            txt_user_file_reader = UserFileReader(filename)
+class ParsedDictConverter(IUserFileParser, abc.ABC):
+    def __init__(self):
+        super(ParsedDictConverter, self).__init__()
+        self._cached_result = None
 
-        self._adapted_parser = txt_user_file_reader
-        output = self._adapted_parser.read_user_file()
+    @property
+    def _output(self):
+        if not self._cached_result:
+            self._cached_result = self._get_input_dict()
+            # Ensure we always have a dict
+            self._cached_result = self._cached_result if self._cached_result else {}
+        return self._cached_result
 
-        # Ensure key lookups keep working if None is returned
-        self._output = output if output is not None else {}
+    @abc.abstractmethod
+    def _get_input_dict(self) -> dict:
+        """
+        Gets the dictionary to translate as an input dictionary
+        :return: Dictionary to translate
+        """
+        pass
 
     @staticmethod
     def _convert_to_monitor_id(val):
@@ -45,9 +56,8 @@ class ParserAdapter(IUserFileParser):
 
     @staticmethod
     def _convert_to_float_range(val):
-        if not val:
-            return None
-        return FloatRange(start=val.start, end=val.stop)
+        if val:
+            return FloatRange(start=val.start, end=val.stop)
 
     @staticmethod
     def _wrap_in_list(val):
@@ -57,6 +67,8 @@ class ParserAdapter(IUserFileParser):
         return [val] if val else val
 
     def get_background_details(self) -> BackgroundDetails:
+        all_monitors = self._convert_to_float_range(self._output.get(BackId.ALL_MONITORS))
+        transmission_ids = self._convert_to_float_range(self._output.get(BackId.TRANS))
         monitor_with_bck_off = self._convert_to_monitor_id(self._output.get(BackId.MONITOR_OFF))
         monitor_with_bck_off = self._wrap_in_list(monitor_with_bck_off)
 
@@ -67,8 +79,8 @@ class ParserAdapter(IUserFileParser):
             tof_single_mon = self._wrap_in_list(monitor_tuple)
 
         return BackgroundDetails(monitors_with_background_off=monitor_with_bck_off,
-                                 transmission_tof_range=self._output.get(BackId.TRANS),
-                                 tof_window_all_monitors=self._output.get(BackId.ALL_MONITORS),
+                                 transmission_tof_range=transmission_ids,
+                                 tof_window_all_monitors=all_monitors,
                                  tof_window_single_monitor=tof_single_mon)
 
     def get_detector_details(self) -> DetectorDetails:
@@ -87,10 +99,13 @@ class ParserAdapter(IUserFileParser):
             if self._output.get(old_name):
                 adjustment_list[new_name] = self._output.get(old_name)
 
+        rescale_range = self._convert_to_float_range(self._output.get(DetectorId.RESCALE_FIT))
+        shift_range = self._convert_to_float_range(self._output.get(DetectorId.SHIFT_FIT))
+
         return DetectorDetails(detector_adjustment=adjustment_list,
                                reduction_mode=self._output.get(DetectorId.REDUCTION_MODE),
-                               merge_fitted_rescale=self._output.get(DetectorId.RESCALE_FIT),
-                               merge_fitted_shift=self._output.get(DetectorId.SHIFT_FIT),
+                               merge_fitted_rescale=rescale_range,
+                               merge_fitted_shift=shift_range,
                                merge_rescale=self._output.get(DetectorId.RESCALE),
                                merge_shift=self._output.get(DetectorId.SHIFT))
 
@@ -99,7 +114,7 @@ class ParserAdapter(IUserFileParser):
         transmission_fit_enabled = True if transmission_fit and transmission_fit.fit_type != FitType.NO_FIT \
             else False
 
-        monitor_fit = self._output.get(FitId.MONITOR_TIMES)
+        monitor_fit = self._convert_to_float_range(self._output.get(FitId.MONITOR_TIMES))
         monitor_fit_enabled = True if monitor_fit else False
 
         return FitDetails(transmission_fit=(transmission_fit_enabled, transmission_fit),
@@ -124,6 +139,7 @@ class ParserAdapter(IUserFileParser):
         radius_cut_limit = self._output.get(LimitsId.RADIUS_CUT)
         wavelength_cut_limit = self._output.get(LimitsId.WAVELENGTH_CUT)
 
+        radius_range = self._convert_to_float_range(self._output.get(LimitsId.RADIUS))
         cuts = []
         if radius_cut_limit:
             radius_cut_tuple = (LimitsId.RADIUS_CUT, radius_cut_limit)
@@ -136,7 +152,7 @@ class ParserAdapter(IUserFileParser):
         return LimitDetails(angle_limit=self._output.get(LimitsId.ANGLE),
                             event_binning=self._output.get(LimitsId.EVENTS_BINNING),
                             cut_limit=cuts,
-                            radius_range=self._output.get(LimitsId.RADIUS),
+                            radius_range=radius_range,
                             q_limits=self._output.get(LimitsId.Q),
                             qxy_limit=self._output.get(LimitsId.QXY),
                             wavelength_limit=self._output.get(LimitsId.WAVELENGTH))
@@ -177,7 +193,7 @@ class ParserAdapter(IUserFileParser):
             mask_spectra_nums.append(mask_spectra_single)
 
         if mask_spectra_range:
-            for i in range(mask_spectra_range.start, mask_spectra_range.end + 1):
+            for i in range(mask_spectra_range.start, mask_spectra_range.stop + 1):
                 mask_spectra_nums.append(int(i))
 
         return MaskDetails(block_masks=block_masks,

@@ -6,35 +6,15 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from sans.common.Containers.FloatRange import FloatRange
-from sans.common.enums import ReductionMode, SANSInstrument
-from sans.user_file.settings_tags import BackId, DetectorId, GravityId, TubeCalibrationFileId, OtherId
-from sans.user_file.txt_parsers.ParserAdapter import ParserAdapter
-from user_file.txt_parsers.ParserAdapterTestCommon import ParserAdapterTestCommon
+from sans.common.enums import SANSInstrument
+from sans.user_file.settings_tags import DetectorId, GravityId, TubeCalibrationFileId, OtherId
+from test.SANS.user_file.txt_parsers.ParsedDictConverterTestCommon import ParsedDictConverterTestCommon
 
 
-class ParserAdapterTestTest(ParserAdapterTestCommon, unittest.TestCase):
+class ParsedDictConverterConverterTest(ParsedDictConverterTestCommon, unittest.TestCase):
 
-    def test_handles_none_being_passed(self):
-        self.assertIsNotNone(ParserAdapter(filename="ABC"))
-
-    def test_parses_on_creation(self):
-        self.set_return_val(None)
-        self.mocked_adapted.read_user_file.assert_called_once()
-
-    def test_missing_vals_return_none(self):
+    def test_missing_vals_returns_something(self):
         self.set_return_val({})
-        self.assertIsNone(self.instance.get_fit_details())
-
-    def test_multiple_gets_packed_properly(self):
-        return_val = {BackId.ALL_MONITORS: FloatRange(1, 2),  # From background parser
-                      DetectorId.REDUCTION_MODE: ReductionMode.MERGED  # From detector ID parser
-                      }
-        self.mocked_adapted.read_user_file.return_value = return_val
-
-        self.assertIsNotNone(self.instance.get_background_details())
-        self.assertIsNotNone(self.instance.get_detector_details())
-
         self.assertIsNotNone(self.instance.get_fit_details())
 
     # Interface definitions which do not return objects tested below

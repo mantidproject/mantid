@@ -83,7 +83,7 @@ def load_ui(caller_filename, ui_relfilename, baseinstance=None):
     that becomes the base class rather than a new widget being created.
     :return: A new instance of the form class if baseinstance is given, otherwise
     return a tuple that contains the Ui_Form and an instance: (Ui_Form, Instance).
-    If inheriting, inherit the form, then the instance - class ParserAdapter(Ui_Form, Instance)
+    If inheriting, inherit the form, then the instance - class MyClass(Ui_Form, Instance)
     """
     filepath = osp.join(osp.dirname(caller_filename), ui_relfilename)
     if not osp.exists(filepath):
