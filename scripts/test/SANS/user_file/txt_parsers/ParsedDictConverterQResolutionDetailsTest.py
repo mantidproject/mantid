@@ -7,10 +7,10 @@
 import unittest
 
 from sans.user_file.settings_tags import QResolutionId
-from user_file.txt_parsers.ParserAdapterTestCommon import ParserAdapterTestCommon
+from test.SANS.user_file.txt_parsers.ParsedDictConverterTestCommon import ParsedDictConverterTestCommon
 
 
-class ParserAdapterQResolutionDetailsTest(ParserAdapterTestCommon, unittest.TestCase):
+class ParsedDictConverterQResolutionDetailsTest(ParsedDictConverterTestCommon, unittest.TestCase):
     def test_use_q_resolution_calculator_on(self):
         self.set_return_val({QResolutionId.ON: True})
 

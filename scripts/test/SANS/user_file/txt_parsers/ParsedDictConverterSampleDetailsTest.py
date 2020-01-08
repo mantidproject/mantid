@@ -7,10 +7,10 @@
 import unittest
 
 from sans.user_file.settings_tags import SampleId
-from user_file.txt_parsers.ParserAdapterTestCommon import ParserAdapterTestCommon
+from test.SANS.user_file.txt_parsers.ParsedDictConverterTestCommon import ParsedDictConverterTestCommon
 
 
-class ParserAdapterSampleDetailsTest(ParserAdapterTestCommon, unittest.TestCase):
+class ParsedDictConverterSampleDetailsTest(ParsedDictConverterTestCommon, unittest.TestCase):
 
     def test_wide_angle_corrections_on(self):
         self.set_return_val({SampleId.PATH: True})

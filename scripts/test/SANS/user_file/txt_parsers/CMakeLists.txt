@@ -1,15 +1,16 @@
 set(TEST_PY_FILES
-    ParserAdapterTest.py
-    ParserAdapterBackgroundDetailsTest.py
-    ParserAdapterDetectorDetailsTest.py
-    ParserAdapterFitDetailsTest.py
-    ParserAdapterLimitDetailsTest.py
-    ParserAdapterMaskDetailsTest.py
-    ParserAdapterMonitorDetailsTest.py
-    ParserAdapterQResolutionDetailsTest.py
-    ParserAdapterSampleDetailsTest.py
-    ParserAdapterSetPositionDetailsTest.py
-    ParserAdapterTransmissionDetailsTest.py
+    ParsedDictConverterTest.py
+    ParsedDictConverterBackgroundDetailsTest.py
+    ParsedDictConverterDetectorDetailsTest.py
+    ParsedDictConverterFitDetailsTest.py
+    ParsedDictConverterLimitDetailsTest.py
+    ParsedDictConverterMaskDetailsTest.py
+    ParsedDictConverterMonitorDetailsTest.py
+    ParsedDictConverterQResolutionDetailsTest.py
+    ParsedDictConverterSampleDetailsTest.py
+    ParsedDictConverterSetPositionDetailsTest.py
+    ParsedDictConverterTransmissionDetailsTest.py
+    UserFileParserAdapterTest.py
 )
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})

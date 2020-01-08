@@ -10,3 +10,10 @@ from typing import NamedTuple
 class FloatRange(NamedTuple):
     start: float
     end: float
+
+    def __eq__(self, other):
+        # Ensures a range_entry != FloatRange
+        if isinstance(other, FloatRange):
+            return self.start == other.start and \
+                   self.end == other.end
+        return False

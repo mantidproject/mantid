@@ -8,11 +8,11 @@ import unittest
 
 from sans.common.Containers.FloatRange import FloatRange
 from sans.common.enums import FitType, DataType
-from sans.user_file.settings_tags import fit_general, FitId
-from user_file.txt_parsers.ParserAdapterTestCommon import ParserAdapterTestCommon
+from sans.user_file.settings_tags import fit_general, FitId, range_entry
+from test.SANS.user_file.txt_parsers.ParsedDictConverterTestCommon import ParsedDictConverterTestCommon
 
 
-class ParserAdapterTestFitDetailsTest(ParserAdapterTestCommon, unittest.TestCase):
+class ParsedDictConverterFitDetailsTest(ParsedDictConverterTestCommon, unittest.TestCase):
 
     def test_transmission_fit(self):
         expected_val = fit_general(start=1, stop=2, fit_type=FitType.LOGARITHMIC,
@@ -38,7 +38,7 @@ class ParserAdapterTestFitDetailsTest(ParserAdapterTestCommon, unittest.TestCase
 
     def test_monitor_times(self):
         expected_val = FloatRange(1.1, 2.3)
-        self.set_return_val({FitId.MONITOR_TIMES: expected_val})
+        self.set_return_val({FitId.MONITOR_TIMES: range_entry(1.1, 2.3)})
 
         returned = self.instance.get_fit_details()
 

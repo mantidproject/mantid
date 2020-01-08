@@ -7,11 +7,11 @@
 import unittest
 
 from sans.common.Containers.FloatRange import FloatRange
-from sans.user_file.settings_tags import mask_angle_entry, LimitsId, q_rebin_values, simple_range
-from user_file.txt_parsers.ParserAdapterTestCommon import ParserAdapterTestCommon
+from sans.user_file.settings_tags import mask_angle_entry, LimitsId, q_rebin_values, simple_range, range_entry
+from test.SANS.user_file.txt_parsers.ParsedDictConverterTestCommon import ParsedDictConverterTestCommon
 
 
-class ParserAdapterTestLimitDetailsTest(ParserAdapterTestCommon, unittest.TestCase):
+class ParsedDictConverterLimitDetailsTest(ParsedDictConverterTestCommon, unittest.TestCase):
     def test_angle_limit(self):
         expected_val = mask_angle_entry(min=1, max=2, use_mirror=False)
         self.set_return_val({LimitsId.ANGLE: expected_val})
@@ -60,7 +60,7 @@ class ParserAdapterTestLimitDetailsTest(ParserAdapterTestCommon, unittest.TestCa
 
     def test_radius_range(self):
         expected_val = FloatRange(1, 2)
-        self.set_return_val({LimitsId.RADIUS: expected_val})
+        self.set_return_val({LimitsId.RADIUS: range_entry(1, 2)})
 
         returned = self.instance.get_limit_details()
 

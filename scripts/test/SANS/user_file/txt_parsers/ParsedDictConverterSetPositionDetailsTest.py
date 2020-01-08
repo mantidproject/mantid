@@ -9,10 +9,10 @@ import unittest
 from sans.common.Containers.Position import XYPosition
 from sans.common.enums import DetectorType
 from sans.user_file.settings_tags import SetId, position_entry, set_scales_entry
-from user_file.txt_parsers.ParserAdapterTestCommon import ParserAdapterTestCommon
+from test.SANS.user_file.txt_parsers.ParsedDictConverterTestCommon import ParsedDictConverterTestCommon
 
 
-class ParserAdapterSetPositionDetailsTest(ParserAdapterTestCommon, unittest.TestCase):
+class ParsedDictConverterSetPositionDetailsTest(ParsedDictConverterTestCommon, unittest.TestCase):
     def test_centre(self):
         for det_type in [DetectorType.HAB, DetectorType.LAB]:
             input_vals = position_entry(pos1=1, pos2=2, detector_type=det_type)

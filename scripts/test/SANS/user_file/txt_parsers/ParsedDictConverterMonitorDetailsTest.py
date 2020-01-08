@@ -8,10 +8,10 @@ import unittest
 
 from sans.common.enums import DetectorType
 from sans.user_file.settings_tags import MonId, monitor_file, monitor_length, monitor_spectrum
-from user_file.txt_parsers.ParserAdapterTestCommon import ParserAdapterTestCommon
+from test.SANS.user_file.txt_parsers.ParsedDictConverterTestCommon import ParsedDictConverterTestCommon
 
 
-class ParserAdapterMonitorDetailsTest(ParserAdapterTestCommon, unittest.TestCase):
+class ParsedDictConverterMonitorDetailsTest(ParsedDictConverterTestCommon, unittest.TestCase):
 
     def test_direct_filename(self):
         input_val = "ABC.xml"

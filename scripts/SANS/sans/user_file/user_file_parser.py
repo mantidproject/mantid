@@ -11,9 +11,9 @@ import abc
 import re
 from math import copysign
 
-from sans.common.Containers.FloatRange import FloatRange
+
 from sans.common.enums import (ReductionMode, DetectorType, RangeStepType, FitType, DataType, SANSInstrument)
-from sans.user_file.settings_tags import (DetectorId, BackId, back_single_monitor_entry,
+from sans.user_file.settings_tags import (DetectorId, BackId, range_entry, back_single_monitor_entry,
                                           single_entry_with_detector, mask_angle_entry, LimitsId,
                                           simple_range, complex_range, MaskId, mask_block, mask_block_cross,
                                           mask_line, range_entry_with_detector, SampleId, SetId, set_scales_entry,
@@ -219,7 +219,7 @@ class BackParser(UserFileComponentParser):
     def _extract_all_mon(self, line):
         all_mons_string = re.sub(self._all_mons, "", line)
         time_range = extract_float_range(all_mons_string)
-        return {BackId.ALL_MONITORS: FloatRange(start=time_range[0], end=time_range[1])}
+        return {BackId.ALL_MONITORS: range_entry(start=time_range[0], stop=time_range[1])}
 
     def _extract_single_mon(self, line):
         monitor_number = self._get_monitor_number(line)
@@ -236,7 +236,7 @@ class BackParser(UserFileComponentParser):
     def _extract_trans(self, line):
         trans_string = re.sub(self._trans, "", line)
         time_range = extract_float_range(trans_string)
-        return {BackId.TRANS: FloatRange(start=time_range[0], end=time_range[1])}
+        return {BackId.TRANS: range_entry(start=time_range[0], stop=time_range[1])}
 
     def _get_monitor_number(self, line):
         monitor_selection = re.search(self._single_monitor, line).group(0)
@@ -696,7 +696,7 @@ class LimitParser(UserFileComponentParser):
     def _extract_radius_limit(self, line):
         radius_range_string = re.sub(self._radius, "", line)
         radius_range = extract_float_list(radius_range_string, separator=" ")
-        return {LimitsId.RADIUS: FloatRange(start=radius_range[0], end=radius_range[1])}
+        return {LimitsId.RADIUS: range_entry(start=radius_range[0], stop=radius_range[1])}
 
     def _extract_q_limit(self, line):
         q_range = re.sub(self._q, "", line)
@@ -1049,7 +1049,7 @@ class MaskParser(UserFileComponentParser):
         min_and_max_time_range = re.sub("\s*/\s*", "", min_and_max_time_range)
         min_and_max_time_range = re.sub(self._time_or_t, "", min_and_max_time_range)
         min_and_max_time = extract_float_range(min_and_max_time_range)
-        return {key: range_entry_with_detector(start=min_and_max_time[0], end=min_and_max_time[1],
+        return {key: range_entry_with_detector(start=min_and_max_time[0], stop=min_and_max_time[1],
                                                detector_type=detector_type)}
 
     def _extract_clear_mask(self, line):
@@ -1066,7 +1066,7 @@ class MaskParser(UserFileComponentParser):
         spectrum_range_string = re.sub(self._spectrum, "", line)
         spectrum_range_string = re.sub(self._range, " ", spectrum_range_string)
         spectrum_range = extract_int_range(spectrum_range_string)
-        return {MaskId.SPECTRUM_RANGE_MASK: FloatRange(start=spectrum_range[0], end=spectrum_range[1])}
+        return {MaskId.SPECTRUM_RANGE_MASK: range_entry(start=spectrum_range[0], stop=spectrum_range[1])}
 
     def _extract_vertical_single_strip_mask(self, line):
         detector_type = DetectorType.HAB if re.search(self._hab, line) is not None else DetectorType.LAB
@@ -1766,7 +1766,7 @@ class FitParser(UserFileComponentParser):
     def _extract_monitor(self, line):
         values_string = re.sub(self._monitor, "", line)
         values = extract_float_range(values_string)
-        return {FitId.MONITOR_TIMES: FloatRange(start=values[0], end=values[1])}
+        return {FitId.MONITOR_TIMES: range_entry(start=values[0], stop=values[1])}
 
     def _extract_general_fit(self, line):
         fit_type = self._get_fit_type(line)
