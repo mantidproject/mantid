@@ -31,7 +31,6 @@ from mantid.plots import MantidAxes
 from mantidqt.plotting.figuretype import figure_type, FigureType
 from mantid.py3compat import is_text_string, string_types
 from mantidqt.dialogs.spectraselectorutils import get_spectra_selection
-
 # -----------------------------------------------------------------------------
 # Constants
 # -----------------------------------------------------------------------------
@@ -206,7 +205,6 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
     if plot_kwargs is None:
         plot_kwargs = {}
     _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices, tiled, overplot)
-
     if spectrum_nums is not None:
         kw, nums = 'specNum', spectrum_nums
     else:
@@ -235,14 +233,21 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
 
     if not overplot:
         fig.canvas.set_window_title(figure_title(workspaces, fig.number))
-    # This updates the toolbar so the home button now takes you back to this point, the try catch is in case the manager does not
-    # have a toolbar attatched.
+    # This updates the toolbar so the home button now takes you back to this point.
+    # The try catch is in case the manager does not have a toolbar attached.
     try:
         fig.canvas.manager.toolbar.update()
     except AttributeError:
         pass
+
     fig.canvas.draw()
-    fig.show()
+    # This displays the figure, but only works if a manager is attached to the figure.
+    # The try catch is in case a figure manager is not present
+    try:
+        fig.show()
+    except AttributeError:
+        pass
+
     return fig
 
 
@@ -253,7 +258,6 @@ def _do_single_plot(ax, workspaces, errors, set_title, nums, kw, plot_kwargs):
         for num in nums:
             plot_kwargs[kw] = num
             plot_fn(ws, **plot_kwargs)
-
     ax.make_legend()
     if set_title:
         title = workspaces[0].name()

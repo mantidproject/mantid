@@ -23,11 +23,19 @@ class FocusView(QtWidgets.QWidget, Ui_focus):
         self.finder_focus.setLabelText("Sample Run #")
         self.finder_focus.setInstrumentOverride(instrument)
 
+    # =================
+    # Slot Connectors
+    # =================
+
     def set_on_focus_clicked(self, slot):
         self.button_focus.clicked.connect(slot)
 
     def set_enable_controls_connection(self, slot):
         self.sig_enable_controls.connect(slot)
+
+    # =================
+    # Component Setters
+    # =================
 
     def set_instrument_override(self, instrument):
         self.finder_focus.setInstrumentOverride(instrument)
@@ -38,14 +46,15 @@ class FocusView(QtWidgets.QWidget, Ui_focus):
     def set_plot_output_enabled(self, enabled):
         self.check_plotOutput.setEnabled(enabled)
 
+    # =================
+    # Component Getters
+    # =================
+
     def get_focus_filename(self):
         return self.finder_focus.getFirstFilename()
 
     def get_focus_valid(self):
         return self.finder_focus.isValid()
-
-    def is_searching(self):
-        return self.finder_focus.isSearching()
 
     def get_north_bank(self):
         return self.check_northBank.isChecked()
@@ -55,3 +64,10 @@ class FocusView(QtWidgets.QWidget, Ui_focus):
 
     def get_plot_output(self):
         return self.check_plotOutput.isChecked()
+
+    # =================
+    # State Getters
+    # =================
+
+    def is_searching(self):
+        return self.finder_focus.isSearching()

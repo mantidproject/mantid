@@ -282,7 +282,7 @@ Json::Value getRoot(const std::string &jsonGeometry) {
     throw std::invalid_argument("Empty geometry json string provided.");
 
   Json::CharReaderBuilder rbuilder;
-  auto reader = rbuilder.newCharReader();
+  auto reader = std::unique_ptr<Json::CharReader>(rbuilder.newCharReader());
   Json::Value root;
   std::string errors;
 

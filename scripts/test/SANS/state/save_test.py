@@ -5,12 +5,12 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-import unittest
-import mantid
 
-from sans.state.save import (get_save_builder)
-from sans.state.data import (get_data_builder)
+import unittest
+
 from sans.common.enums import (SANSFacility, SaveType, SANSInstrument)
+from sans.state.data import (get_data_builder)
+from sans.state.save import (get_save_builder)
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
@@ -38,7 +38,7 @@ class StateReductionBuilderTest(unittest.TestCase):
 
         user_specified_output_name = "test_file_name"
         zero_free_correction = True
-        file_format = [SaveType.Nexus, SaveType.CanSAS]
+        file_format = [SaveType.NEXUS, SaveType.CAN_SAS]
 
         builder.set_user_specified_output_name(user_specified_output_name)
         builder.set_zero_free_correction(zero_free_correction)

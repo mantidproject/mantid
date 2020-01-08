@@ -87,7 +87,7 @@ void EvaluateMDFunction::exec() {
 
   double *data = values.getPointerToCalculated(0);
   size_t length = values.size();
-  double *outputData = output->getSignalArray();
+  auto outputData = output->mutableSignalArray();
   std::copy(data, data + length, outputData);
 
   setProperty("OutputWorkspace", output);

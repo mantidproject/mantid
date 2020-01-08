@@ -4,14 +4,12 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-# pylint: disable=invalid-name
 
 """ SANSNormalizeToMonitor algorithm calculates the normalization to the monitor."""
 
 from __future__ import (absolute_import, division, print_function)
 
 from sans.common.constants import EMPTY_NAME
-from sans.common.enums import RebinType, RangeStepType
 from sans.common.general_functions import create_unmanaged_algorithm
 
 
@@ -167,8 +165,8 @@ def _convert_to_wavelength(workspace, normalize_to_monitor_state):
                        "WavelengthLow": wavelength_low,
                        "WavelengthHigh": wavelength_high,
                        "WavelengthStep": wavelength_step,
-                       "WavelengthStepType": RangeStepType.to_string(wavelength_step_type),
-                       "RebinMode": RebinType.to_string(wavelength_rebin_mode)}
+                       "WavelengthStepType": wavelength_step_type.value,
+                       "RebinMode": wavelength_rebin_mode.value}
 
     convert_alg = create_unmanaged_algorithm(convert_name, **convert_options)
     convert_alg.setPropertyValue("OutputWorkspace", EMPTY_NAME)

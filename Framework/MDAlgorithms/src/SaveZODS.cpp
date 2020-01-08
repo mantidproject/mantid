@@ -65,7 +65,7 @@ void SaveZODS::exec() {
                        "Saving anyway...\n";
 
   // Create a HDF5 file
-  auto file = new ::NeXus::File(Filename, NXACC_CREATE5);
+  auto file = std::make_unique<::NeXus::File>(Filename, NXACC_CREATE5);
 
   // ----------- Coordinate system -----------
   uint32_t isLocal = 1;
@@ -126,7 +126,7 @@ void SaveZODS::exec() {
   file->writeData("size", size_field);
 
   // Copy data into a vector
-  signal_t *signal = ws->getSignalArray();
+  const auto signal = ws->getSignalArray();
   std::vector<double> data;
 
   for (int i = 0; i < size_field[0]; i++)
@@ -139,7 +139,7 @@ void SaveZODS::exec() {
   file->writeData("Data", data, size);
 
   // Copy errors (not squared) into a vector called sigma
-  signal_t *errorSquared = ws->getErrorSquaredArray();
+  const auto errorSquared = ws->getErrorSquaredArray();
   std::vector<double> sigma;
   sigma.reserve(numPoints);
   for (int i = 0; i < size_field[0]; i++)

@@ -58,7 +58,7 @@ class SANSReductionCoreTest(unittest.TestCase):
         return sample_scatter, sample_scatter_monitor_workspace, transmission_workspace, direct_workspace
 
     def _run_reduction_core(self, state, workspace, monitor, transmission=None, direct=None,
-                            detector_type=DetectorType.LAB, component=DataType.Sample):
+                            detector_type=DetectorType.LAB, component=DataType.SAMPLE):
         reduction_core_alg = AlgorithmManager.createUnmanaged("SANSReductionCore")
         reduction_core_alg.setChild(True)
         reduction_core_alg.initialize()
@@ -74,8 +74,8 @@ class SANSReductionCoreTest(unittest.TestCase):
         if direct:
             reduction_core_alg.setProperty("DirectWorkspace", direct)
 
-        reduction_core_alg.setProperty("Component", DetectorType.to_string(detector_type))
-        reduction_core_alg.setProperty("DataType", DataType.to_string(component))
+        reduction_core_alg.setProperty("Component", detector_type.value)
+        reduction_core_alg.setProperty("DataType", component.value)
 
         reduction_core_alg.setProperty("OutputWorkspace", EMPTY_NAME)
 

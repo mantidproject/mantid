@@ -20,7 +20,7 @@ from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
 from sans.common.file_information import (find_sans_file, find_full_file_path)
 from sans.common.enums import (DetectorType, FitType, RangeStepType, ReductionDimensionality,
-                               ISISReductionMode, SANSFacility, SaveType, BatchReductionEntry, OutputMode, FindDirectionEnum)
+                               ReductionMode, SANSFacility, SaveType, BatchReductionEntry, OutputMode, FindDirectionEnum)
 from sans.common.general_functions import (convert_bank_name_to_detector_type_isis, get_output_name,
                                            is_part_of_reduced_output_workspace_group)
 
@@ -172,7 +172,7 @@ def AssignSample(sample_run, reload=True, period=ALL_PERIODS):
     file_name = find_sans_file(sample_run)
 
     # Set the command
-    data_command = DataCommand(command_id=DataCommandId.sample_scatter, file_name=file_name, period=period)
+    data_command = DataCommand(command_id=DataCommandId.SAMPLE_SCATTER, file_name=file_name, period=period)
     director.add_command(data_command)
 
 
@@ -200,7 +200,7 @@ def AssignCan(can_run, reload=True, period=ALL_PERIODS):
     file_name = find_sans_file(can_run)
 
     # Set the command
-    data_command = DataCommand(command_id=DataCommandId.can_scatter, file_name=file_name, period=period)
+    data_command = DataCommand(command_id=DataCommandId.CAN_SCATTER, file_name=file_name, period=period)
     director.add_command(data_command)
 
 
@@ -229,9 +229,9 @@ def TransmissionSample(sample, direct, reload=True,
     direct_file_name = find_sans_file(direct)
 
     # Set the command
-    trans_command = DataCommand(command_id=DataCommandId.sample_transmission, file_name=trans_file_name,
+    trans_command = DataCommand(command_id=DataCommandId.SAMPLE_TRANSMISSION, file_name=trans_file_name,
                                 period=period_t)
-    direct_command = DataCommand(command_id=DataCommandId.sample_direct, file_name=direct_file_name, period=period_d)
+    direct_command = DataCommand(command_id=DataCommandId.SAMPLE_DIRECT, file_name=direct_file_name, period=period_d)
     director.add_command(trans_command)
     director.add_command(direct_command)
 
@@ -259,8 +259,8 @@ def TransmissionCan(can, direct, reload=True, period_t=-1, period_d=-1):
     direct_file_name = find_sans_file(direct)
 
     # Set the command
-    trans_command = DataCommand(command_id=DataCommandId.can_transmission, file_name=trans_file_name, period=period_t)
-    direct_command = DataCommand(command_id=DataCommandId.can_direct, file_name=direct_file_name, period=period_d)
+    trans_command = DataCommand(command_id=DataCommandId.CAN_TRANSMISSION, file_name=trans_file_name, period=period_t)
+    direct_command = DataCommand(command_id=DataCommandId.CAN_DIRECT, file_name=direct_file_name, period=period_d)
     director.add_command(trans_command)
     director.add_command(direct_command)
 
@@ -277,7 +277,7 @@ def Clean():
     """
     Removes all previous settings.
     """
-    clean_command = NParameterCommand(command_id=NParameterCommandId.clean, values=[])
+    clean_command = NParameterCommand(command_id=NParameterCommandId.CLEAN, values=[])
     director.add_command(clean_command)
 
 
@@ -286,8 +286,8 @@ def Set1D():
     Sets the reduction dimensionality to 1D
     """
     print_message('Set1D()')
-    set_1d_command = NParameterCommand(command_id=NParameterCommandId.reduction_dimensionality,
-                                       values=[ReductionDimensionality.OneDim])
+    set_1d_command = NParameterCommand(command_id=NParameterCommandId.REDUCTION_DIMENSIONALITY,
+                                       values=[ReductionDimensionality.ONE_DIM])
     director.add_command(set_1d_command)
 
 
@@ -296,8 +296,8 @@ def Set2D():
     Sets the reduction dimensionality to 2D
     """
     print_message('Set2D()')
-    set_2d_command = NParameterCommand(command_id=NParameterCommandId.reduction_dimensionality,
-                                       values=[ReductionDimensionality.TwoDim])
+    set_2d_command = NParameterCommand(command_id=NParameterCommandId.REDUCTION_DIMENSIONALITY,
+                                       values=[ReductionDimensionality.TWO_DIM])
     director.add_command(set_2d_command)
 
 
@@ -305,7 +305,7 @@ def UseCompatibilityMode():
     """
     Sets the compatibility mode to True
     """
-    set_2d_command = NParameterCommand(command_id=NParameterCommandId.compatibility_mode,
+    set_2d_command = NParameterCommand(command_id=NParameterCommandId.COMPATIBILITY_MODE,
                                        values=[True])
     director.add_command(set_2d_command)
 
@@ -323,7 +323,7 @@ def MaskFile(file_name):
 
     # Get the full file path
     file_name_full = find_full_file_path(file_name)
-    user_file_command = NParameterCommand(command_id=NParameterCommandId.user_file, values=[file_name_full])
+    user_file_command = NParameterCommand(command_id=NParameterCommandId.USER_FILE, values=[file_name_full])
     director.add_command(user_file_command)
 
 
@@ -334,7 +334,7 @@ def Mask(details):
     @param details: a string that specifies masking as it would appear in a mask file
     """
     print_message('Mask("' + details + '")')
-    mask_command = NParameterCommand(command_id=NParameterCommandId.mask, values=[details])
+    mask_command = NParameterCommand(command_id=NParameterCommandId.MASK, values=[details])
     director.add_command(mask_command)
 
 
@@ -345,7 +345,7 @@ def SetSampleOffset(value):
     @param value: the offset in mm
     """
     value = float(value)
-    sample_offset_command = NParameterCommand(command_id=NParameterCommandId.sample_offset, values=[value])
+    sample_offset_command = NParameterCommand(command_id=NParameterCommandId.SAMPLE_OFFSET, values=[value])
     director.add_command(sample_offset_command)
 
 
@@ -359,8 +359,8 @@ def Detector(det_name):
     """
     print_message('Detector("' + det_name + '")')
     detector_type = convert_bank_name_to_detector_type_isis(det_name)
-    reduction_mode = ISISReductionMode.HAB if detector_type is DetectorType.HAB else ISISReductionMode.LAB
-    detector_command = NParameterCommand(command_id=NParameterCommandId.detector, values=[reduction_mode])
+    reduction_mode = ReductionMode.HAB if detector_type is DetectorType.HAB else ReductionMode.LAB
+    detector_command = NParameterCommand(command_id=NParameterCommandId.DETECTOR, values=[reduction_mode])
     director.add_command(detector_command)
 
 
@@ -368,7 +368,7 @@ def SetEventSlices(input_str):
     """
     Sets the events slices
     """
-    event_slices_command = NParameterCommand(command_id=NParameterCommandId.event_slices, values=input_str)
+    event_slices_command = NParameterCommand(command_id=NParameterCommandId.EVENT_SLICES, values=input_str)
     director.add_command(event_slices_command)
 
 
@@ -384,7 +384,7 @@ def SetMonitorSpectrum(specNum, interp=False):
     """
     specNum = int(specNum)
     is_trans = False
-    monitor_spectrum_command = NParameterCommand(command_id=NParameterCommandId.incident_spectrum, values=[specNum,
+    monitor_spectrum_command = NParameterCommand(command_id=NParameterCommandId.INCIDENT_SPECTRUM, values=[specNum,
                                                                                                            interp,
                                                                                                            is_trans])
     director.add_command(monitor_spectrum_command)
@@ -400,7 +400,7 @@ def SetTransSpectrum(specNum, interp=False):
     """
     specNum = int(specNum)
     is_trans = True
-    transmission_spectrum_command = NParameterCommand(command_id=NParameterCommandId.incident_spectrum,
+    transmission_spectrum_command = NParameterCommand(command_id=NParameterCommandId.INCIDENT_SPECTRUM,
                                                       values=[specNum, interp, is_trans])
     director.add_command(transmission_spectrum_command)
 
@@ -414,7 +414,7 @@ def Gravity(flag, extra_length=0.0):
     """
     extra_length = float(extra_length)
     print_message('Gravity(' + str(flag) + ', ' + str(extra_length) + ')')
-    gravity_command = NParameterCommand(command_id=NParameterCommandId.gravity, values=[flag, extra_length])
+    gravity_command = NParameterCommand(command_id=NParameterCommandId.GRAVITY, values=[flag, extra_length])
     director.add_command(gravity_command)
 
 
@@ -427,7 +427,7 @@ def SetDetectorFloodFile(filename, detector_name="REAR"):
     """
     file_name = find_full_file_path(filename)
     detector_name = convert_bank_name_to_detector_type_isis(detector_name)
-    flood_command = NParameterCommand(command_id=NParameterCommandId.flood_file, values=[file_name, detector_name])
+    flood_command = NParameterCommand(command_id=NParameterCommandId.FLOOD_FILE, values=[file_name, detector_name])
     director.add_command(flood_command)
 
 
@@ -445,7 +445,7 @@ def SetCorrectionFile(bank, filename):
     print_message("SetCorrectionFile(" + str(bank) + ', ' + filename + ')')
     detector_type = convert_bank_name_to_detector_type_isis(bank)
     file_name = find_full_file_path(filename)
-    flood_command = NParameterCommand(command_id=NParameterCommandId.wavelength_correction_file,
+    flood_command = NParameterCommand(command_id=NParameterCommandId.WAVELENGTH_CORRECTION_FILE,
                                       values=[file_name, detector_type])
     director.add_command(flood_command)
 
@@ -468,7 +468,7 @@ def SetCentre(xcoord, ycoord, bank='rear'):
     ycoord = float(ycoord)
     print_message('SetCentre(' + str(xcoord) + ', ' + str(ycoord) + ')')
     detector_type = convert_bank_name_to_detector_type_isis(bank)
-    centre_command = NParameterCommand(command_id=NParameterCommandId.centre, values=[xcoord, ycoord, detector_type])
+    centre_command = NParameterCommand(command_id=NParameterCommandId.CENTRE, values=[xcoord, ycoord, detector_type])
     director.add_command(centre_command)
 
 
@@ -486,7 +486,7 @@ def SetPhiLimit(phimin, phimax, use_mirror=True):
     # a beam centre of [0,0,0] makes sense if the detector has been moved such that beam centre is at [0,0,0]
     phimin = float(phimin)
     phimax = float(phimax)
-    centre_command = NParameterCommand(command_id=NParameterCommandId.phi_limit, values=[phimin, phimax, use_mirror])
+    centre_command = NParameterCommand(command_id=NParameterCommandId.PHI_LIMIT, values=[phimin, phimax, use_mirror])
     director.add_command(centre_command)
 
 
@@ -497,7 +497,7 @@ def set_save(save_algorithms, save_as_zero_error_free):
     @param save_algorithms: A list of SaveType enums.
     @param save_as_zero_error_free: True if a zero error correction should be performed.
     """
-    save_command = NParameterCommand(command_id=NParameterCommandId.save, values=[save_algorithms,
+    save_command = NParameterCommand(command_id=NParameterCommandId.SAVE, values=[save_algorithms,
                                                                                   save_as_zero_error_free])
     director.add_command(save_command)
 
@@ -531,14 +531,14 @@ def TransFit(mode, lambdamin=None, lambdamax=None, selector='BOTH'):
     mode = str(mode).strip().upper()
 
     if mode == "LINEAR" or mode == "STRAIGHT" or mode == "LIN":
-        fit_type = FitType.Linear
+        fit_type = FitType.LINEAR
     elif mode == "LOGARITHMIC" or mode == "LOG" or mode == "YLOG":
-        fit_type = FitType.Logarithmic
+        fit_type = FitType.LOGARITHMIC
     elif does_pattern_match(polynomial_pattern, mode):
-        fit_type = FitType.Polynomial
+        fit_type = FitType.POLYNOMIAL
         polynomial_order = extract_polynomial_order(mode)
     else:
-        fit_type = FitType.NoFit
+        fit_type = FitType.NO_FIT
 
     # Get the selected detector to which the fit settings apply
     selector = str(selector).strip().upper()
@@ -565,7 +565,7 @@ def TransFit(mode, lambdamin=None, lambdamax=None, selector='BOTH'):
 
     # Configure fit settings
     polynomial_order = polynomial_order if polynomial_order is not None else 0
-    fit_command = NParameterCommand(command_id=NParameterCommandId.centre, values=[fit_data, lambdamin, lambdamax,
+    fit_command = NParameterCommand(command_id=NParameterCommandId.CENTRE, values=[fit_data, lambdamin, lambdamax,
                                                                                    fit_type, polynomial_order])
     director.add_command(fit_command)
 
@@ -586,7 +586,7 @@ def LimitsR(rmin, rmax, quiet=False, reducer=None):
         print_message('LimitsR(' + str(rmin) + ', ' + str(rmax) + ')', reducer)
     rmin /= 1000.
     rmax /= 1000.
-    radius_command = NParameterCommand(command_id=NParameterCommandId.mask_radius, values=[rmin, rmax])
+    radius_command = NParameterCommand(command_id=NParameterCommandId.MASK_RADIUS, values=[rmin, rmax])
     director.add_command(radius_command)
 
 
@@ -606,9 +606,9 @@ def LimitsWav(lmin, lmax, step, bin_type):
     print_message('LimitsWav(' + str(lmin) + ', ' + str(lmax) + ', ' + str(step) + ', ' + bin_type + ')')
 
     rebin_string = bin_type.strip().upper()
-    rebin_type = RangeStepType.Log if rebin_string == "LOGARITHMIC" else RangeStepType.Lin
+    rebin_type = RangeStepType.LOG if rebin_string == "LOGARITHMIC" else RangeStepType.LIN
 
-    wavelength_command = NParameterCommand(command_id=NParameterCommandId.wavelength_limit,
+    wavelength_command = NParameterCommand(command_id=NParameterCommandId.WAVELENGTH_LIMIT,
                                            values=[lmin, lmax, step, rebin_type])
     director.add_command(wavelength_command)
 
@@ -628,10 +628,10 @@ def LimitsQXY(qmin, qmax, step, type):
     print_message('LimitsQXY(' + str(qmin) + ', ' + str(qmax) + ', ' + str(step) + ', ' + str(type) + ')')
     step_type_string = type.strip().upper()
     if step_type_string == "LOGARITHMIC" or step_type_string == "LOG":
-        step_type = RangeStepType.Log
+        step_type = RangeStepType.LOG
     else:
-        step_type = RangeStepType.Lin
-    qxy_command = NParameterCommand(command_id=NParameterCommandId.qxy_limit, values=[qmin, qmax, step, step_type])
+        step_type = RangeStepType.LIN
+    qxy_command = NParameterCommand(command_id=NParameterCommandId.QXY_LIMIT, values=[qmin, qmax, step, step_type])
     director.add_command(qxy_command)
 
 
@@ -660,7 +660,7 @@ def SetFrontDetRescaleShift(scale=1.0, shift=0.0, fitScale=False, fitShift=False
         qMax = float(qMax)
 
     print_message('Set front detector rescale/shift values to {0} and {1}'.format(scale, shift))
-    front_command = NParameterCommand(command_id=NParameterCommandId.front_detector_rescale, values=[scale, shift,
+    front_command = NParameterCommand(command_id=NParameterCommandId.FRONT_DETECTOR_RESCALE, values=[scale, shift,
                                                                                                      fitScale, fitShift,
                                                                                                      qMin, qMax])
     director.add_command(front_command)
@@ -702,7 +702,7 @@ def SetDetectorOffsets(bank, x, y, z, rot, radius, side, xtilt=0.0, ytilt=0.0):
                   + ',' + str(y) + ',' + str(z) + ',' + str(rot)
                   + ',' + str(radius) + ',' + str(side) + ',' + str(xtilt) + ',' + str(ytilt) + ')')
     detector_type = convert_bank_name_to_detector_type_isis(bank)
-    detector_offsets = NParameterCommand(command_id=NParameterCommandId.detector_offsets, values=[detector_type,
+    detector_offsets = NParameterCommand(command_id=NParameterCommandId.DETECTOR_OFFSETS, values=[detector_type,
                                                                                                   x, y, z,
                                                                                                   rot, radius, side,
                                                                                                   xtilt, ytilt])
@@ -713,7 +713,7 @@ def SetDetectorOffsets(bank, x, y, z, rot, radius, side, xtilt=0.0, ytilt=0.0):
 # Commands which actually kick off a reduction
 # --------------------------------------------
 def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_suffix=None, combineDet=None,
-                      resetSetup=True, out_fit_settings=None, output_name=None, output_mode=OutputMode.PublishToADS,
+                      resetSetup=True, out_fit_settings=None, output_name=None, output_mode=OutputMode.PUBLISH_TO_ADS,
                       use_reduction_mode_as_suffix=False):
     """
         Run reduction from loading the raw data to calculating Q. Its optional arguments allows specifics
@@ -753,13 +753,13 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
     if combineDet is None:
         reduction_mode = None
     elif combineDet == 'rear':
-        reduction_mode = ISISReductionMode.LAB
+        reduction_mode = ReductionMode.LAB
     elif combineDet == "front":
-        reduction_mode = ISISReductionMode.HAB
+        reduction_mode = ReductionMode.HAB
     elif combineDet == "merged":
-        reduction_mode = ISISReductionMode.Merged
+        reduction_mode = ReductionMode.MERGED
     elif combineDet == "both":
-        reduction_mode = ISISReductionMode.All
+        reduction_mode = ReductionMode.ALL
     else:
         raise RuntimeError("WavRangeReduction: The combineDet input parameter was given a value of {0}. rear, front,"
                            " both, merged and no input are allowed".format(combineDet))
@@ -770,19 +770,19 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
     if wav_end is not None:
         wav_end = float(wav_end)
 
-    wavelength_command = NParameterCommand(command_id=NParameterCommandId.wavrange_settings,
+    wavelength_command = NParameterCommand(command_id=NParameterCommandId.WAV_RANGE_SETTINGS,
                                            values=[wav_start, wav_end, full_trans_wav, reduction_mode])
     director.add_command(wavelength_command)
 
     # Save options
     if output_name is not None:
-        director.add_command(NParameterCommand(command_id=NParameterCommandId.user_specified_output_name,
+        director.add_command(NParameterCommand(command_id=NParameterCommandId.USER_SPECIFIED_OUTPUT_NAME,
                                                values=[output_name]))
     if name_suffix is not None:
-        director.add_command(NParameterCommand(command_id=NParameterCommandId.user_specified_output_name_suffix,
+        director.add_command(NParameterCommand(command_id=NParameterCommandId.USER_SPECIFIED_OUTPUT_NAME_SUFFIX,
                                                values=[name_suffix]))
     if use_reduction_mode_as_suffix:
-        director.add_command(NParameterCommand(command_id=NParameterCommandId.use_reduction_mode_as_suffix,
+        director.add_command(NParameterCommand(command_id=NParameterCommandId.USE_REDUCTION_MODE_AS_SUFFIX,
                                                values=[use_reduction_mode_as_suffix]))
 
     # Get the states
@@ -797,11 +797,11 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
     # -----------------------------------------------------------
     reduction_mode = state.reduction.reduction_mode
     is_group = is_part_of_reduced_output_workspace_group(state)
-    if reduction_mode != ISISReductionMode.All:
+    if reduction_mode != ReductionMode.ALL:
         _, output_workspace_base_name = get_output_name(state, reduction_mode, is_group)
     else:
-        _, output_workspace_base_name_hab = get_output_name(state, ISISReductionMode.HAB, is_group)
-        _, output_workspace_base_name_lab = get_output_name(state, ISISReductionMode.LAB, is_group)
+        _, output_workspace_base_name_hab = get_output_name(state, ReductionMode.HAB, is_group)
+        _, output_workspace_base_name_lab = get_output_name(state, ReductionMode.LAB, is_group)
         output_workspace_base_name = [output_workspace_base_name_lab, output_workspace_base_name_hab]
     return output_workspace_base_name
 
@@ -842,20 +842,20 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs=None, verbose=Fals
             if key == "SaveRKH":
                 save_algs.append(SaveType.RKH)
             elif key == "SaveNexus":
-                save_algs.append(SaveType.Nexus)
+                save_algs.append(SaveType.NEXUS)
             elif key == "SaveNistQxy":
-                save_algs.append(SaveType.NistQxy)
+                save_algs.append(SaveType.NIST_QXY)
             elif key == "SaveCanSAS" or key == "SaveCanSAS1D":
-                save_algs.append(SaveType.CanSAS)
+                save_algs.append(SaveType.CAN_SAS)
             elif key == "SaveCSV":
                 save_algs.append(SaveType.CSV)
             elif key == "SaveNXcanSAS":
-                save_algs.append(SaveType.NXcanSAS)
+                save_algs.append(SaveType.NX_CAN_SAS)
             else:
                 raise RuntimeError("The save format {0} is not known.".format(key))
-        output_mode = OutputMode.Both
+        output_mode = OutputMode.BOTH
     else:
-        output_mode = OutputMode.PublishToADS
+        output_mode = OutputMode.PUBLISH_TO_ADS
 
     # Get the information from the csv file
     batch_csv_parser = BatchCsvParser(filename)
@@ -865,43 +865,43 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs=None, verbose=Fals
     for parsed_batch_entry in parsed_batch_entries:
         # A new user file. If a new user file is provided then this will overwrite all other settings from,
         # otherwise we might have cross-talk between user files.
-        if BatchReductionEntry.UserFile in list(parsed_batch_entry.keys()):
-            user_file = parsed_batch_entry[BatchReductionEntry.UserFile]
+        if BatchReductionEntry.USER_FILE in list(parsed_batch_entry.keys()):
+            user_file = parsed_batch_entry[BatchReductionEntry.USER_FILE]
             MaskFile(user_file)
 
         # Sample scatter
-        sample_scatter = parsed_batch_entry[BatchReductionEntry.SampleScatter]
-        sample_scatter_period = parsed_batch_entry[BatchReductionEntry.SampleScatterPeriod]
+        sample_scatter = parsed_batch_entry[BatchReductionEntry.SAMPLE_SCATTER]
+        sample_scatter_period = parsed_batch_entry[BatchReductionEntry.SAMPLE_SCATTER_PERIOD]
         AssignSample(sample_run=sample_scatter, period=sample_scatter_period)
 
         # Sample transmission
-        if (BatchReductionEntry.SampleTransmission in list(parsed_batch_entry.keys()) and
-           BatchReductionEntry.SampleDirect in list(parsed_batch_entry.keys())):
-            sample_transmission = parsed_batch_entry[BatchReductionEntry.SampleTransmission]
-            sample_transmission_period = parsed_batch_entry[BatchReductionEntry.SampleTransmissionPeriod]
-            sample_direct = parsed_batch_entry[BatchReductionEntry.SampleDirect]
-            sample_direct_period = parsed_batch_entry[BatchReductionEntry.SampleDirectPeriod]
+        if (BatchReductionEntry.SAMPLE_TRANSMISSION in list(parsed_batch_entry.keys()) and
+                BatchReductionEntry.SAMPLE_DIRECT in list(parsed_batch_entry.keys())):
+            sample_transmission = parsed_batch_entry[BatchReductionEntry.SAMPLE_TRANSMISSION]
+            sample_transmission_period = parsed_batch_entry[BatchReductionEntry.SAMPLE_TRANSMISSION_PERIOD]
+            sample_direct = parsed_batch_entry[BatchReductionEntry.SAMPLE_DIRECT]
+            sample_direct_period = parsed_batch_entry[BatchReductionEntry.SAMPLE_DIRECT_PERIOD]
             TransmissionSample(sample=sample_transmission, direct=sample_direct,
                                period_t=sample_transmission_period, period_d=sample_direct_period)
 
         # Can scatter
-        if BatchReductionEntry.CanScatter in list(parsed_batch_entry.keys()):
-            can_scatter = parsed_batch_entry[BatchReductionEntry.CanScatter]
-            can_scatter_period = parsed_batch_entry[BatchReductionEntry.CanScatterPeriod]
+        if BatchReductionEntry.CAN_SCATTER in list(parsed_batch_entry.keys()):
+            can_scatter = parsed_batch_entry[BatchReductionEntry.CAN_SCATTER]
+            can_scatter_period = parsed_batch_entry[BatchReductionEntry.CAN_SCATTER_PERIOD]
             AssignCan(can_run=can_scatter, period=can_scatter_period)
 
         # Can transmission
-        if (BatchReductionEntry.CanTransmission in list(parsed_batch_entry.keys()) and
-           BatchReductionEntry.CanDirect in list(parsed_batch_entry.keys())):
-            can_transmission = parsed_batch_entry[BatchReductionEntry.CanTransmission]
-            can_transmission_period = parsed_batch_entry[BatchReductionEntry.CanTransmissionPeriod]
-            can_direct = parsed_batch_entry[BatchReductionEntry.CanDirect]
-            can_direct_period = parsed_batch_entry[BatchReductionEntry.CanDirectPeriod]
+        if (BatchReductionEntry.CAN_TRANSMISSION in list(parsed_batch_entry.keys()) and
+                BatchReductionEntry.CAN_DIRECT in list(parsed_batch_entry.keys())):
+            can_transmission = parsed_batch_entry[BatchReductionEntry.CAN_TRANSMISSION]
+            can_transmission_period = parsed_batch_entry[BatchReductionEntry.CAN_TRANSMISSION_PERIOD]
+            can_direct = parsed_batch_entry[BatchReductionEntry.CAN_DIRECT]
+            can_direct_period = parsed_batch_entry[BatchReductionEntry.CAN_DIRECT_PERIOD]
             TransmissionCan(can=can_transmission, direct=can_direct,
                             period_t=can_transmission_period, period_d=can_direct_period)
 
         # Name of the output. We need to modify the name according to the setup of the old reduction mechanism
-        output_name = parsed_batch_entry[BatchReductionEntry.Output]
+        output_name = parsed_batch_entry[BatchReductionEntry.OUTPUT]
 
         # In addition to the output name the user can specify with combineDet an additional suffix (in addition to the
         # suffix that the user can set already -- was there previously, so we have to provide that)
@@ -922,19 +922,19 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs=None, verbose=Fals
         # 3. The last scatter transmission and direct entry (if any were set)
         # 4. The last can scatter ( if any was set)
         # 5. The last can transmission and direct entry (if any were set)
-        if BatchReductionEntry.UserFile in list(parsed_batch_entry.keys()):
+        if BatchReductionEntry.USER_FILE in list(parsed_batch_entry.keys()):
             director.remove_last_user_file()
         director.remove_last_scatter_sample()
 
-        if (BatchReductionEntry.SampleTransmission in list(parsed_batch_entry.keys()) and
-            BatchReductionEntry.SampleDirect in list(parsed_batch_entry.keys())):  # noqa
+        if (BatchReductionEntry.SAMPLE_TRANSMISSION in list(parsed_batch_entry.keys()) and
+            BatchReductionEntry.SAMPLE_DIRECT in list(parsed_batch_entry.keys())):  # noqa
             director.remove_last_sample_transmission_and_direct()
 
-        if BatchReductionEntry.CanScatter in list(parsed_batch_entry.keys()):
+        if BatchReductionEntry.CAN_SCATTER in list(parsed_batch_entry.keys()):
             director.remove_last_scatter_can()
 
-        if (BatchReductionEntry.CanTransmission in list(parsed_batch_entry.keys()) and
-           BatchReductionEntry.CanDirect in list(parsed_batch_entry.keys())):
+        if (BatchReductionEntry.CAN_TRANSMISSION in list(parsed_batch_entry.keys()) and
+                BatchReductionEntry.CAN_DIRECT in list(parsed_batch_entry.keys())):
             director.remove_last_can_transmission_and_direct()
 
         # Plot the results if that was requested, the flag 1 is from the old version.
@@ -1017,7 +1017,7 @@ def PhiRanges(phis, plot=True):
 
 
 def FindBeamCentre(rlow, rupp, MaxIter=10, xstart=None, ystart=None, tolerance=1.251e-4,
-                   find_direction=FindDirectionEnum.All, reduction_method=True):
+                   find_direction=FindDirectionEnum.ALL, reduction_method=True):
     state = director.process_commands()
     """
     Finds the beam centre position.

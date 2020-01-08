@@ -32,7 +32,7 @@ public:
   }
 
   void test_constructor_fail_invalid_instrument() {
-    TS_ASSERT_THROWS(JSONInstrumentBuilder(""), std::invalid_argument);
+    TS_ASSERT_THROWS(JSONInstrumentBuilder(""), const std::invalid_argument &);
   }
 
   void test_build_geometry() {

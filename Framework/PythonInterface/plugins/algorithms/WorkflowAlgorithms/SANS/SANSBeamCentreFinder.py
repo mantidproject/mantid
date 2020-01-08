@@ -76,9 +76,9 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
                              doc='The can direct data')
 
         # The component, i.e. HAB or LAB
-        allowed_detectors = StringListValidator([DetectorType.to_string(DetectorType.LAB),
-                                                 DetectorType.to_string(DetectorType.HAB)])
-        self.declareProperty("Component", DetectorType.to_string(DetectorType.LAB),
+        allowed_detectors = StringListValidator([DetectorType.LAB.value,
+                                                 DetectorType.HAB.value])
+        self.declareProperty("Component", DetectorType.LAB.value,
                              validator=allowed_detectors, direction=Direction.Input,
                              doc="The component of the instrument which is to be reduced.")
 
@@ -94,7 +94,7 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
 
         self.declareProperty('Tolerance', 0.0001251, direction=Direction.Input, doc="The search tolerance")
 
-        self.declareProperty('Direction', FindDirectionEnum.to_string(FindDirectionEnum.All), direction=Direction.Input,
+        self.declareProperty('Direction', FindDirectionEnum.ALL.value, direction=Direction.Input,
                              doc="The search direction is an enumerable which can be either All, LeftRight or UpDown")
 
         self.declareProperty('Verbose', False, direction=Direction.Input,
@@ -153,9 +153,9 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
             position_2_step = position_1_step
 
         find_direction = self.getProperty("Direction").value
-        if find_direction == FindDirectionEnum.to_string(FindDirectionEnum.Left_Right):
+        if find_direction == FindDirectionEnum.LEFT_RIGHT.value:
             position_2_step = 0.0
-        elif find_direction == FindDirectionEnum.to_string(FindDirectionEnum.Up_Down):
+        elif find_direction == FindDirectionEnum.UP_DOWN.value:
             position_1_step = 0.0
         centre1 = x_start
         centre2 = y_start
@@ -188,10 +188,10 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
                 if verbose:
                     self._rename_and_group_workspaces(j, output_workspaces)
 
-            residueLR.append(self._calculate_residuals(sample_quartiles[MaskingQuadrant.Left],
-                                                       sample_quartiles[MaskingQuadrant.Right]))
-            residueTB.append(self._calculate_residuals(sample_quartiles[MaskingQuadrant.Top],
-                                                       sample_quartiles[MaskingQuadrant.Bottom]))
+            residueLR.append(self._calculate_residuals(sample_quartiles[MaskingQuadrant.LEFT],
+                                                       sample_quartiles[MaskingQuadrant.RIGHT]))
+            residueTB.append(self._calculate_residuals(sample_quartiles[MaskingQuadrant.TOP],
+                                                       sample_quartiles[MaskingQuadrant.BOTTOM]))
             if j == 0:
                 self.logger.notice("Itr {0}: ( {1:.3f}, {2:.3f} )  SX={3:.5f}  SY={4:.5f}".
                                    format(j, self.scale_1 * centre1,
@@ -307,12 +307,12 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
         out_right = strip_end_nans(alg.getProperty("OutputWorkspaceRight").value, self)
         out_top = strip_end_nans(alg.getProperty("OutputWorkspaceTop").value, self)
         out_bottom = strip_end_nans(alg.getProperty("OutputWorkspaceBottom").value, self)
-        return {MaskingQuadrant.Left: out_left, MaskingQuadrant.Right: out_right, MaskingQuadrant.Top: out_top,
-                MaskingQuadrant.Bottom: out_bottom}
+        return {MaskingQuadrant.LEFT: out_left, MaskingQuadrant.RIGHT: out_right, MaskingQuadrant.TOP: out_top,
+                MaskingQuadrant.BOTTOM: out_bottom}
 
     def _get_component(self, workspace):
         component_as_string = self.getProperty("Component").value
-        component = DetectorType.from_string(component_as_string)
+        component = DetectorType(component_as_string)
         return get_component_name(workspace, component)
 
     def _get_state(self):

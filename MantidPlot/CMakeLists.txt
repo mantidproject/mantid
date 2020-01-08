@@ -813,6 +813,10 @@ target_include_directories(MantidPlot
                                    ../qt/widgets/factory/inc
                                    ../Framework/PythonInterface/inc)
 
+# GCC 8 onwards needs to disable functional casting at the Python interface
+target_compile_options( MantidPlot PRIVATE 
+  $<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,8.0>>:-Wno-cast-function-type> )
+
 # Library dependencies
 target_link_libraries(MantidPlot
                       LINK_PRIVATE

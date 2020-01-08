@@ -5,7 +5,6 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-import sys
 
 from sans.common.enums import BinningType
 from sans.gui_logic.models.summation_settings import SummationSettings
@@ -16,7 +15,7 @@ class SummationSettingsTestCase(unittest.TestCase):
         self.summation_settings = SummationSettings(initial_type)
 
     def setUp(self):
-        self.setUpWithInitialType(BinningType.Custom)
+        self.setUpWithInitialType(BinningType.CUSTOM)
 
 
 class SummationSettingsOverlayEventWorkspaceTestCase(unittest.TestCase):
@@ -46,15 +45,15 @@ class SummationSettingsBinSettingsTest(SummationSettingsTestCase):
         self.assertEqual(bin_settings, self.summation_settings.bin_settings)
 
     def test_custom_binning_has_bin_settings(self):
-        self.setUpWithInitialType(BinningType.Custom)
+        self.setUpWithInitialType(BinningType.CUSTOM)
         self.assertHasBinSettings()
 
     def test_save_as_event_data_does_not_have_bin_settings(self):
-        self.setUpWithInitialType(BinningType.SaveAsEventData)
+        self.setUpWithInitialType(BinningType.SAVE_AS_EVENT_DATA)
         self.assertDoesNotHaveBinSettings()
 
     def test_from_monitors_does_not_have_bin_settings(self):
-        self.setUpWithInitialType(BinningType.FromMonitors)
+        self.setUpWithInitialType(BinningType.FROM_MONITORS)
         self.assertDoesNotHaveBinSettings()
 
 
@@ -67,11 +66,11 @@ class SummationSettingsAdditionalTimeShiftsTest(SummationSettingsTestCase, \
         self.assertFalse(self.summation_settings.has_additional_time_shifts())
 
     def test_custom_binning_does_not_have_additional_time_shifts(self):
-        self.setUpWithInitialType(BinningType.Custom)
+        self.setUpWithInitialType(BinningType.CUSTOM)
         self.assertDoesNotHaveAdditionalTimeShifts()
 
     def test_save_as_event_data_has_additional_time_shifts_if_overlay_event_workspaces_enabled(self):
-        self.setUpWithInitialType(BinningType.SaveAsEventData)
+        self.setUpWithInitialType(BinningType.SAVE_AS_EVENT_DATA)
         self.assertDoesNotHaveAdditionalTimeShifts()
         self.summation_settings.enable_overlay_event_workspaces()
         self.assertHasAdditionalTimeShifts()
@@ -79,11 +78,11 @@ class SummationSettingsAdditionalTimeShiftsTest(SummationSettingsTestCase, \
         self.assertDoesNotHaveAdditionalTimeShifts()
 
     def test_from_monitors_does_not_have_additional_time_shifts(self):
-        self.setUpWithInitialType(BinningType.FromMonitors)
+        self.setUpWithInitialType(BinningType.FROM_MONITORS)
         self.assertDoesNotHaveAdditionalTimeShifts()
 
     def test_can_set_additional_time_shifts_when_available(self):
-        self.setUpWithInitialType(BinningType.SaveAsEventData)
+        self.setUpWithInitialType(BinningType.SAVE_AS_EVENT_DATA)
         self.summation_settings.enable_overlay_event_workspaces()
         additional_time_shifts = '1,24,545,23'
         self.summation_settings.additional_time_shifts = additional_time_shifts
@@ -92,42 +91,42 @@ class SummationSettingsAdditionalTimeShiftsTest(SummationSettingsTestCase, \
     def test_stores_additional_time_shifts_between_mode_switches(self):
         bin_settings = '232,2132,123'
         additional_time_shifts = '32,252,12'
-        self.setUpWithInitialType(BinningType.Custom)
+        self.setUpWithInitialType(BinningType.CUSTOM)
         self.summation_settings.bin_settings = bin_settings
-        self.summation_settings.set_histogram_binning_type(BinningType.SaveAsEventData)
+        self.summation_settings.set_histogram_binning_type(BinningType.SAVE_AS_EVENT_DATA)
         self.summation_settings.additional_time_shifts = additional_time_shifts
-        self.summation_settings.set_histogram_binning_type(BinningType.Custom)
+        self.summation_settings.set_histogram_binning_type(BinningType.CUSTOM)
         self.assertEqual(bin_settings, self.summation_settings.bin_settings)
-        self.summation_settings.set_histogram_binning_type(BinningType.SaveAsEventData)
+        self.summation_settings.set_histogram_binning_type(BinningType.SAVE_AS_EVENT_DATA)
         self.assertEqual(additional_time_shifts, self.summation_settings.additional_time_shifts)
 
 
 class SummationSettingsOverlayEventWorkspace(SummationSettingsTestCase, \
                                              SummationSettingsOverlayEventWorkspaceTestCase):
     def test_custom_binning_does_not_have_overlay_event_workspaces(self):
-        self.setUpWithInitialType(BinningType.Custom)
+        self.setUpWithInitialType(BinningType.CUSTOM)
         self.assertDoesNotHaveOverlayEventWorkspaces()
 
     def test_save_as_event_data_has_overlay_event_workspaces(self):
-        self.setUpWithInitialType(BinningType.SaveAsEventData)
+        self.setUpWithInitialType(BinningType.SAVE_AS_EVENT_DATA)
         self.assertHasOverlayEventWorkspaces()
 
     def test_from_monitors_does_not_have_overlay_event_workspaces(self):
-        self.setUpWithInitialType(BinningType.FromMonitors)
+        self.setUpWithInitialType(BinningType.FROM_MONITORS)
         self.assertDoesNotHaveOverlayEventWorkspaces()
 
     def test_switching_to_save_as_event_data_enables_overlay_event_workspaces_option(self):
-        self.setUpWithInitialType(BinningType.FromMonitors)
-        self.summation_settings.set_histogram_binning_type(BinningType.SaveAsEventData)
+        self.setUpWithInitialType(BinningType.FROM_MONITORS)
+        self.summation_settings.set_histogram_binning_type(BinningType.SAVE_AS_EVENT_DATA)
         self.assertHasOverlayEventWorkspaces()
 
     def test_can_enable_overlay_event_workspaces_when_available(self):
-        self.setUpWithInitialType(BinningType.SaveAsEventData)
+        self.setUpWithInitialType(BinningType.SAVE_AS_EVENT_DATA)
         self.summation_settings.enable_overlay_event_workspaces()
         self.assertOverlayEventWorkspacesEnabled()
 
     def test_can_disable_overlay_event_workspaces_when_available(self):
-        self.setUpWithInitialType(BinningType.SaveAsEventData)
+        self.setUpWithInitialType(BinningType.SAVE_AS_EVENT_DATA)
         self.summation_settings.enable_overlay_event_workspaces()
         self.summation_settings.disable_overlay_event_workspaces()
         self.assertOverlayEventWorkspacesDisabled()

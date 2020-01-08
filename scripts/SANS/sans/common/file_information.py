@@ -128,9 +128,9 @@ def get_extension_for_file_type(file_info):
     :param file_info: a SANSFileInformation object.
     :return: the extension a string. This can be either nxs or raw.
     """
-    if file_info.get_type() is FileType.ISISNexus or file_info.get_type() is FileType.ISISNexusAdded:
+    if file_info.get_type() is FileType.ISIS_NEXUS or file_info.get_type() is FileType.ISIS_NEXUS_ADDED:
         extension = NXS_EXTENSION
-    elif file_info.get_type() is FileType.ISISRaw:
+    elif file_info.get_type() is FileType.ISIS_RAW:
         extension = RAW_EXTENSION
     else:
         raise RuntimeError("The file extension type for a file of type {0} is unknown"
@@ -236,7 +236,7 @@ def get_instrument_paths_for_sans_file(file_name=None, file_information=None):
 
     # Get the instrument
     instrument = file_information.get_instrument()
-    instrument_as_string = SANSInstrument.to_string(instrument)
+    instrument_as_string = instrument.value
 
     # Get the idf file path
     # IMPORTANT NOTE: I profiled the call to ExperimentInfo.getInstrumentFilename and it dominates
@@ -282,11 +282,11 @@ def convert_to_shape(shape_flag):
     :return: a shape object
     """
     if shape_flag == 1:
-        shape = SampleShape.Cylinder
+        shape = SampleShape.CYLINDER
     elif shape_flag == 2:
-        shape = SampleShape.FlatPlate
+        shape = SampleShape.FLAT_PLATE
     elif shape_flag == 3:
-        shape = SampleShape.Disc
+        shape = SampleShape.DISC
     else:
         shape = None
     return shape
@@ -412,11 +412,11 @@ def get_geometry_information_isis_nexus(file_name):
         thickness = float(sample[THICKNESS][0])
         shape_as_string = sample[SHAPE][0].upper().decode("utf-8")
         if shape_as_string == CYLINDER:
-            shape = SampleShape.Cylinder
+            shape = SampleShape.CYLINDER
         elif shape_as_string == FLAT_PLATE:
-            shape = SampleShape.FlatPlate
+            shape = SampleShape.FLAT_PLATE
         elif shape_as_string == DISC:
-            shape = SampleShape.Disc
+            shape = SampleShape.DISC
         else:
             shape = None
     return height, width, thickness, shape
@@ -885,7 +885,7 @@ class SANSFileInformationISISNexus(SANSFileInformation):
         super(SANSFileInformationISISNexus, self).__init__(file_name)
         # Setup instrument name
         instrument_name = get_instrument_name_for_isis_nexus(self._full_file_name)
-        self._instrument = SANSInstrument.from_string(instrument_name)
+        self._instrument = SANSInstrument[instrument_name]
 
         # Setup the facility
         self._facility = get_facility(self._instrument)
@@ -904,7 +904,7 @@ class SANSFileInformationISISNexus(SANSFileInformation):
         self._height = height if height is not None else 1.
         self._width = width if width is not None else 1.
         self._thickness = thickness if thickness is not None else 1.
-        self._shape = shape if shape is not None else SampleShape.Disc
+        self._shape = shape if shape is not None else SampleShape.DISC
 
     def get_file_name(self):
         return self._full_file_name
@@ -922,7 +922,7 @@ class SANSFileInformationISISNexus(SANSFileInformation):
         return self._number_of_periods
 
     def get_type(self):
-        return FileType.ISISNexus
+        return FileType.ISIS_NEXUS
 
     def is_event_mode(self):
         return self._is_event_mode
@@ -967,7 +967,7 @@ class SANSFileInformationISISAdded(SANSFileInformation):
         self._height = height if height is not None else 1.
         self._width = width if width is not None else 1.
         self._thickness = thickness if thickness is not None else 1.
-        self._shape = shape if shape is not None else SampleShape.Disc
+        self._shape = shape if shape is not None else SampleShape.DISC
 
     def get_file_name(self):
         return self._full_file_name
@@ -985,7 +985,7 @@ class SANSFileInformationISISAdded(SANSFileInformation):
         return self._number_of_periods
 
     def get_type(self):
-        return FileType.ISISNexusAdded
+        return FileType.ISIS_NEXUS_ADDED
 
     def is_event_mode(self):
         return self._is_event_mode
@@ -1029,7 +1029,7 @@ class SANSFileInformationRaw(SANSFileInformation):
         super(SANSFileInformationRaw, self).__init__(file_name)
         # Setup instrument name
         instrument_name = get_instrument_name_for_raw(self._full_file_name)
-        self._instrument = SANSInstrument.from_string(instrument_name)
+        self._instrument = SANSInstrument[instrument_name]
 
         # Setup the facility
         self._facility = get_facility(self._instrument)
@@ -1046,7 +1046,7 @@ class SANSFileInformationRaw(SANSFileInformation):
         self._height = height if height is not None else 1.
         self._width = width if width is not None else 1.
         self._thickness = thickness if thickness is not None else 1.
-        self._shape = shape if shape is not None else SampleShape.Disc
+        self._shape = shape if shape is not None else SampleShape.DISC
 
     def get_file_name(self):
         return self._full_file_name
@@ -1064,7 +1064,7 @@ class SANSFileInformationRaw(SANSFileInformation):
         return self._number_of_periods
 
     def get_type(self):
-        return FileType.ISISRaw
+        return FileType.ISIS_RAW
 
     def is_event_mode(self):
         return False

@@ -542,11 +542,10 @@ public:
       return;
 
     // Round-trip transform
-    coord_t originalPoint[3] = {1.0, 2.0, 3.0};
-    coord_t *transformedPoint = new coord_t[3];
-    coord_t *originalBack = new coord_t[3];
-    ctFrom->apply(originalPoint, transformedPoint);
-    ctTo->apply(transformedPoint, originalBack);
+    std::vector<coord_t> originalPoint = {1.0, 2.0, 3.0};
+    std::vector<coord_t> transformedPoint(3), originalBack(3);
+    ctFrom->apply(originalPoint.data(), transformedPoint.data());
+    ctTo->apply(transformedPoint.data(), originalBack.data());
     for (size_t d = 0; d < 3; d++) {
       TS_ASSERT_DELTA(originalPoint[d], originalBack[d], 1e-5);
     }

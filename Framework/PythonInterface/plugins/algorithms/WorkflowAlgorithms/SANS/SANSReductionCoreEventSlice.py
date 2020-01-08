@@ -11,12 +11,12 @@ for which data must be event sliced. These steps are: slicing, adjustment, conve
 
 from __future__ import (absolute_import, division, print_function)
 
+from SANSReductionCoreBase import SANSReductionCoreBase
+
 from mantid.api import (MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
                         Progress)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator)
 from sans.common.enums import (DetectorType, DataType)
-
-from SANSReductionCoreBase import SANSReductionCoreBase
 
 
 class SANSReductionCoreEventSlice(SANSReductionCoreBase):
@@ -62,16 +62,16 @@ class SANSReductionCoreEventSlice(SANSReductionCoreBase):
         self.setPropertyGroup("TransmissionWorkspace", 'Data')
 
         # The component
-        allowed_detectors = StringListValidator([DetectorType.to_string(DetectorType.LAB),
-                                                 DetectorType.to_string(DetectorType.HAB)])
-        self.declareProperty("Component", DetectorType.to_string(DetectorType.LAB),
+        allowed_detectors = StringListValidator([DetectorType.LAB.value,
+                                                 DetectorType.HAB.value])
+        self.declareProperty("Component", DetectorType.LAB.value,
                              validator=allowed_detectors, direction=Direction.Input,
                              doc="The component of the instrument which is to be reduced.")
 
         # The data type
-        allowed_data = StringListValidator([DataType.to_string(DataType.Sample),
-                                            DataType.to_string(DataType.Can)])
-        self.declareProperty("DataType", DataType.to_string(DataType.Sample),
+        allowed_data = StringListValidator([DataType.SAMPLE.value,
+                                            DataType.CAN.value])
+        self.declareProperty("DataType", DataType.SAMPLE.value,
                              validator=allowed_data, direction=Direction.Input,
                              doc="The component of the instrument which is to be reduced.")
 

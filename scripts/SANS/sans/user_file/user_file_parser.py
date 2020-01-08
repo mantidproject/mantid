@@ -12,7 +12,7 @@ import re
 from math import copysign
 
 
-from sans.common.enums import (ISISReductionMode, DetectorType, RangeStepType, FitType, DataType, SANSInstrument)
+from sans.common.enums import (ReductionMode, DetectorType, RangeStepType, FitType, DataType, SANSInstrument)
 from sans.user_file.settings_tags import (DetectorId, BackId, range_entry, back_single_monitor_entry,
                                           single_entry_with_detector, mask_angle_entry, LimitsId,
                                           simple_range, complex_range, MaskId, mask_block, mask_block_cross,
@@ -219,24 +219,24 @@ class BackParser(UserFileComponentParser):
     def _extract_all_mon(self, line):
         all_mons_string = re.sub(self._all_mons, "", line)
         time_range = extract_float_range(all_mons_string)
-        return {BackId.all_monitors: range_entry(start=time_range[0], stop=time_range[1])}
+        return {BackId.ALL_MONITORS: range_entry(start=time_range[0], stop=time_range[1])}
 
     def _extract_single_mon(self, line):
         monitor_number = self._get_monitor_number(line)
         single_string = re.sub(self._times, "", line)
         all_mons_string = re.sub(self._single_monitor, "", single_string)
         time_range = extract_float_range(all_mons_string)
-        return {BackId.single_monitors: back_single_monitor_entry(monitor=monitor_number, start=time_range[0],
+        return {BackId.SINGLE_MONITORS: back_single_monitor_entry(monitor=monitor_number, start=time_range[0],
                                                                   stop=time_range[1])}
 
     def _extract_off(self, line):
         monitor_number = self._get_monitor_number(line)
-        return {BackId.monitor_off: monitor_number}
+        return {BackId.MONITOR_OFF: monitor_number}
 
     def _extract_trans(self, line):
         trans_string = re.sub(self._trans, "", line)
         time_range = extract_float_range(trans_string)
-        return {BackId.trans: range_entry(start=time_range[0], stop=time_range[1])}
+        return {BackId.TRANS: range_entry(start=time_range[0], stop=time_range[1])}
 
     def _get_monitor_number(self, line):
         monitor_selection = re.search(self._single_monitor, line).group(0)
@@ -278,7 +278,7 @@ class InstrParser(object):
             raise RuntimeError("InstrParser: Unknown command for INSTR: {0}".format(line))
         else:
             # If no exception raised
-            return {DetectorId.instrument: ret_val}
+            return {DetectorId.INSTRUMENT: ret_val}
 
     @staticmethod
     def get_type():
@@ -404,13 +404,13 @@ class DetParser(UserFileComponentParser):
     def _extract_reduction_mode(self, line):
         line_capital = line.upper()
         if line_capital in self._HAB:
-            return {DetectorId.reduction_mode: ISISReductionMode.HAB}
+            return {DetectorId.REDUCTION_MODE: ReductionMode.HAB}
         elif line_capital in self._LAB:
-            return {DetectorId.reduction_mode: ISISReductionMode.LAB}
+            return {DetectorId.REDUCTION_MODE: ReductionMode.LAB}
         elif line_capital in self._BOTH:
-            return {DetectorId.reduction_mode: ISISReductionMode.All}
+            return {DetectorId.REDUCTION_MODE: ReductionMode.ALL}
         elif line_capital in self._MERGE:
-            return {DetectorId.reduction_mode: ISISReductionMode.Merged}
+            return {DetectorId.REDUCTION_MODE: ReductionMode.MERGED}
         else:
             raise RuntimeError("DetParser:  Could not extract line: {0}".format(line))
 
@@ -429,28 +429,28 @@ class DetParser(UserFileComponentParser):
     def _extract_detector_setting(self, qualifier, detector_type):
         if self._x_pattern.match(qualifier):
             value_string = re.sub(self._x, "", qualifier)
-            key = DetectorId.correction_x
+            key = DetectorId.CORRECTION_X
         elif self._y_pattern.match(qualifier):
             value_string = re.sub(self._y, "", qualifier)
-            key = DetectorId.correction_y
+            key = DetectorId.CORRECTION_Y
         elif self._z_pattern.match(qualifier):
             value_string = re.sub(self._z, "", qualifier)
-            key = DetectorId.correction_z
+            key = DetectorId.CORRECTION_Z
         elif self._rotation_pattern.match(qualifier):
             value_string = re.sub(self._rotation, "", qualifier)
-            key = DetectorId.correction_rotation
+            key = DetectorId.CORRECTION_ROTATION
         elif self._translation_pattern.match(qualifier):
             value_string = re.sub(self._translation, "", qualifier)
-            key = DetectorId.correction_translation
+            key = DetectorId.CORRECTION_TRANSLATION
         elif self._radius_pattern.match(qualifier):
             value_string = re.sub(self._radius, "", qualifier)
-            key = DetectorId.correction_radius
+            key = DetectorId.CORRECTION_RADIUS
         elif self._x_tilt_pattern.match(qualifier):
             value_string = re.sub(self._x_tilt, "", qualifier)
-            key = DetectorId.correction_x_tilt
+            key = DetectorId.CORRECTION_X_TILT
         elif self._y_tilt_pattern.match(qualifier):
             value_string = re.sub(self._y_tilt, "", qualifier)
-            key = DetectorId.correction_y_tilt
+            key = DetectorId.CORRECTION_Y_TILT
         else:
             raise RuntimeError("DetParser: Unknown qualifier encountered: {0}".format(qualifier))
 
@@ -463,11 +463,11 @@ class DetParser(UserFileComponentParser):
         if self._rescale_pattern.match(line) is not None:
             rescale_string = re.sub(self._rescale, "", line)
             rescale = convert_string_to_float(rescale_string)
-            return {DetectorId.rescale: rescale}
+            return {DetectorId.RESCALE: rescale}
         elif self._shift_pattern.match(line) is not None:
             shift_string = re.sub(self._shift, "", line)
             shift = convert_string_to_float(shift_string)
-            return {DetectorId.shift: shift}
+            return {DetectorId.SHIFT: shift}
         elif self._rescale_fit_pattern.match(line) is not None:
             rescale_fit_string = re.sub(self._rescale_fit, "", line)
             if rescale_fit_string:
@@ -475,7 +475,7 @@ class DetParser(UserFileComponentParser):
                 value = det_fit_range(start=rescale_fit[0], stop=rescale_fit[1], use_fit=True)
             else:
                 value = det_fit_range(start=None, stop=None, use_fit=True)
-            return {DetectorId.rescale_fit: value}
+            return {DetectorId.RESCALE_FIT: value}
         elif self._shift_fit_pattern.match(line) is not None:
             shift_fit_string = re.sub(self._shift_fit, "", line)
             if shift_fit_string:
@@ -483,7 +483,7 @@ class DetParser(UserFileComponentParser):
                 value = det_fit_range(start=shift_fit[0], stop=shift_fit[1], use_fit=True)
             else:
                 value = det_fit_range(start=None, stop=None, use_fit=True)
-            return {DetectorId.shift_fit: value}
+            return {DetectorId.SHIFT_FIT: value}
         elif self._merge_range_pattern.match(line) is not None:
             merge_range_string = re.sub(self._merge_range, "", line)
             if merge_range_string:
@@ -491,7 +491,7 @@ class DetParser(UserFileComponentParser):
                 value = det_fit_range(start=merge_range[0], stop=merge_range[1], use_fit=True)
             else:
                 raise RuntimeError("DetParser: Could not extract line: {0}".format(line))
-            return {DetectorId.merge_range: value}
+            return {DetectorId.MERGE_RANGE: value}
         else:
             raise RuntimeError("DetParser: Could not extract line: {0}".format(line))
 
@@ -667,7 +667,7 @@ class LimitParser(UserFileComponentParser):
         use_mirror = re.search(self._phi_no_mirror, line) is None
         angles_string = re.sub(self._phi, "", line)
         angles = extract_float_range(angles_string)
-        return {LimitsId.angle: mask_angle_entry(min=angles[0], max=angles[1], use_mirror=use_mirror)}
+        return {LimitsId.ANGLE: mask_angle_entry(min=angles[0], max=angles[1], use_mirror=use_mirror)}
 
     def _extract_event_binning(self, line):
         event_binning = re.sub(self._events_time, "", line)
@@ -675,44 +675,44 @@ class LimitParser(UserFileComponentParser):
             rebin_values = extract_float_list(event_binning, separator=" ")
             binning_string = ",".join([str(val) for val in rebin_values])
         else:
-            simple_pattern = self._extract_simple_pattern(event_binning, LimitsId.events_binning)
-            rebin_values = simple_pattern[LimitsId.events_binning]
-            prefix = -1. if rebin_values.step_type is RangeStepType.Log else 1.
+            simple_pattern = self._extract_simple_pattern(event_binning, LimitsId.EVENTS_BINNING)
+            rebin_values = simple_pattern[LimitsId.EVENTS_BINNING]
+            prefix = -1. if rebin_values.step_type is RangeStepType.LOG else 1.
             binning_string = str(rebin_values.start) + "," + str(prefix*rebin_values.step) + "," + \
                              str(rebin_values.stop)  # noqa
 
-        output = {LimitsId.events_binning: binning_string}
+        output = {LimitsId.EVENTS_BINNING: binning_string}
         return output
 
     def _extract_cut_limit(self, line):
         if self._radius_cut_pattern.match(line) is not None:
-            key = LimitsId.radius_cut
+            key = LimitsId.RADIUS_CUT
             limit_value = re.sub(self._radius_cut, "", line)
         else:
-            key = LimitsId.wavelength_cut
+            key = LimitsId.WAVELENGTH_CUT
             limit_value = re.sub(self._wavelength_cut, "", line)
         return {key: convert_string_to_float(limit_value)}
 
     def _extract_radius_limit(self, line):
         radius_range_string = re.sub(self._radius, "", line)
         radius_range = extract_float_list(radius_range_string, separator=" ")
-        return {LimitsId.radius: range_entry(start=radius_range[0], stop=radius_range[1])}
+        return {LimitsId.RADIUS: range_entry(start=radius_range[0], stop=radius_range[1])}
 
     def _extract_q_limit(self, line):
         q_range = re.sub(self._q, "", line)
         if does_pattern_match(self._q_simple_pattern, line):
-            simple_output = self._extract_simple_pattern(q_range, LimitsId.q)
-            simple_output = simple_output[LimitsId.q]
-            prefix = -1.0 if simple_output.step_type is RangeStepType.Log else 1.0
+            simple_output = self._extract_simple_pattern(q_range, LimitsId.Q)
+            simple_output = simple_output[LimitsId.Q]
+            prefix = -1.0 if simple_output.step_type is RangeStepType.LOG else 1.0
             q_limit_output = [simple_output.start]
             if simple_output.step:
                 q_limit_output.append(prefix*simple_output.step)
             q_limit_output.append(simple_output.stop)
         elif does_pattern_match(self._q_complex_pattern, line):
-            complex_output = self._extract_complex_pattern(q_range, LimitsId.q)
-            complex_output = complex_output[LimitsId.q]
-            prefix1 = -1.0 if complex_output.step_type1 is RangeStepType.Log else 1.0
-            prefix2 = -1.0 if complex_output.step_type2 is RangeStepType.Log else 1.0
+            complex_output = self._extract_complex_pattern(q_range, LimitsId.Q)
+            complex_output = complex_output[LimitsId.Q]
+            prefix1 = -1.0 if complex_output.step_type1 is RangeStepType.LOG else 1.0
+            prefix2 = -1.0 if complex_output.step_type2 is RangeStepType.LOG else 1.0
             q_limit_output = [complex_output.start, prefix1*complex_output.step1, complex_output.mid,
                               prefix2*complex_output.step2, complex_output.stop]
         else:
@@ -721,13 +721,13 @@ class LimitParser(UserFileComponentParser):
         # The output is a q_rebin_values object with q_min, q_max and the rebin string.
         rebinning_string = ",".join([str(element) for element in q_limit_output])
         q_rebin = q_rebin_values(min=q_limit_output[0], max=q_limit_output[-1], rebin_string=rebinning_string)
-        output = {LimitsId.q: q_rebin}
+        output = {LimitsId.Q: q_rebin}
         return output
 
     def _extract_qxy_limit(self, line):
         qxy_range = re.sub(self._qxy, "", line)
         if does_pattern_match(self._qxy_simple_pattern, line):
-            output = self._extract_simple_pattern(qxy_range, LimitsId.qxy)
+            output = self._extract_simple_pattern(qxy_range, LimitsId.QXY)
         else:
             # v2 GUI cannot currently support complex QXY ranges
             #output = self._extract_complex_pattern(qxy_range, LimitsId.qxy)
@@ -738,7 +738,7 @@ class LimitParser(UserFileComponentParser):
     def _extract_wavelength_limit(self, line):
         wavelength_range = re.sub(self._wavelength, "", line)
         if does_pattern_match(self._wavelength_simple_pattern, line):
-            output = self._extract_simple_pattern(wavelength_range, LimitsId.wavelength)
+            output = self._extract_simple_pattern(wavelength_range, LimitsId.WAVELENGTH)
         else:
             # This is not implemented in the old parser, hence disable here
             # output = self._extract_complex_pattern(wavelength_range, LimitsId.wavelength)
@@ -784,8 +784,8 @@ class LimitParser(UserFileComponentParser):
 
         # Check if there is a sign on the individual steps, this shows if something had been marked as linear or log.
         # If there is an explicit LOG/LIN command, then this overwrites the sign
-        step_type1 = RangeStepType.Log if copysign(1, range_with_steps[1]) == -1 else RangeStepType.Lin
-        step_type2 = RangeStepType.Log if copysign(1, range_with_steps[3]) == -1 else RangeStepType.Lin
+        step_type1 = RangeStepType.LOG if copysign(1, range_with_steps[1]) == -1 else RangeStepType.LIN
+        step_type2 = RangeStepType.LOG if copysign(1, range_with_steps[3]) == -1 else RangeStepType.LIN
         if step_type is not None:
             step_type1 = step_type
             step_type2 = step_type
@@ -807,17 +807,17 @@ class LimitParser(UserFileComponentParser):
         range_with_steps = extract_float_list(range_with_steps_string, " ")
 
         if step_type is not None:
-            prefix = -1.0 if step_type is RangeStepType.Log else 1.0
+            prefix = -1.0 if step_type is RangeStepType.LOG else 1.0
             for index in range(1, len(range_with_steps), 2):
                 range_with_steps[index] *= prefix
         return range_with_steps
 
-    def _get_step_type(self, range_string, default=RangeStepType.Lin):
+    def _get_step_type(self, range_string, default=RangeStepType.LIN):
         range_type = default
         if re.search(self._log, range_string):
-            range_type = RangeStepType.Log
+            range_type = RangeStepType.LOG
         elif re.search(self._lin, range_string):
-            range_type = RangeStepType.Lin
+            range_type = RangeStepType.LIN
         return range_type
 
     @staticmethod
@@ -990,15 +990,15 @@ class MaskParser(UserFileComponentParser):
                 if self._is_vertical_range_strip_mask(block):
                     prelim_range = self._extract_vertical_range_strip_mask(block)
                     # Note we use the lab key word since the extraction defaults to lab
-                    vertical_part = prelim_range[MaskId.vertical_range_strip_mask]
+                    vertical_part = prelim_range[MaskId.VERTICAL_RANGE_STRIP_MASK]
                 elif self._is_horizontal_range_strip_mask(block):
                     prelim_range = self._extract_horizontal_range_strip_mask(block)
                     # Note we use the lab key word since the extraction defaults to lab
-                    horizontal_part = prelim_range[MaskId.horizontal_range_strip_mask]
+                    horizontal_part = prelim_range[MaskId.HORIZONTAL_RANGE_STRIP_MASK]
                 else:
                     raise RuntimeError("MaskParser: Cannot handle part of block mask: {0}".format(block))
             # Now that we have both parts we can assemble the output
-            output = {MaskId.block: mask_block(horizontal1=horizontal_part.start, horizontal2=horizontal_part.stop,
+            output = {MaskId.BLOCK: mask_block(horizontal1=horizontal_part.start, horizontal2=horizontal_part.stop,
                                                vertical1=vertical_part.start, vertical2=vertical_part.stop,
                                                detector_type=detector_type)}
         else:
@@ -1006,14 +1006,14 @@ class MaskParser(UserFileComponentParser):
                 if self._is_vertical_single_strip_mask(block):
                     prelim_single = self._extract_vertical_single_strip_mask(block)
                     # Note we use the lab key word since the extraction defaults to lab
-                    vertical_part = prelim_single[MaskId.vertical_single_strip_mask]
+                    vertical_part = prelim_single[MaskId.VERTICAL_SINGLE_STRIP_MASK]
                 elif self._is_horizontal_single_strip_mask(block):
                     prelim_single = self._extract_horizontal_single_strip_mask(block)
                     # Note we use the lab key word since the extraction defaults to lab
-                    horizontal_part = prelim_single[MaskId.horizontal_single_strip_mask]
+                    horizontal_part = prelim_single[MaskId.HORIZONTAL_SINGLE_STRIP_MASK]
                 else:
                     raise RuntimeError("MaskParser: Cannot handle part of block cross mask: {0}".format(block))
-            output = {MaskId.block_cross: mask_block_cross(horizontal=horizontal_part.entry,
+            output = {MaskId.BLOCK_CROSS: mask_block_cross(horizontal=horizontal_part.entry,
                                                            vertical=vertical_part.entry,
                                                            detector_type=detector_type)}
         return output
@@ -1023,10 +1023,10 @@ class MaskParser(UserFileComponentParser):
         line_values = extract_float_list(line_string, " ")
         length_values = len(line_values)
         if length_values == 2:
-            output = {MaskId.line: mask_line(width=line_values[0], angle=line_values[1],
+            output = {MaskId.LINE: mask_line(width=line_values[0], angle=line_values[1],
                                              x=None, y=None)}
         elif length_values == 4:
-            output = {MaskId.line: mask_line(width=line_values[0], angle=line_values[1],
+            output = {MaskId.LINE: mask_line(width=line_values[0], angle=line_values[1],
                                              x=line_values[2], y=line_values[3])}
         else:
             raise ValueError("MaskParser: Line mask accepts wither 2 or 4 parameters,"
@@ -1038,12 +1038,12 @@ class MaskParser(UserFileComponentParser):
         has_hab = re.search(self._hab, line)
         has_lab = re.search(self._lab, line)
         if has_hab is not None or has_lab is not None:
-            key = MaskId.time_detector
+            key = MaskId.TIME_DETECTOR
             detector_type = DetectorType.HAB if has_hab is not None else DetectorType.LAB
             regex_string = "\s*(" + self._hab + ")\s*" if has_hab else "\s*(" + self._lab + ")\s*"
             min_and_max_time_range = re.sub(regex_string, "", line)
         else:
-            key = MaskId.time
+            key = MaskId.TIME
             detector_type = None
             min_and_max_time_range = line
         min_and_max_time_range = re.sub("\s*/\s*", "", min_and_max_time_range)
@@ -1054,26 +1054,26 @@ class MaskParser(UserFileComponentParser):
 
     def _extract_clear_mask(self, line):
         clear_removed = re.sub(self._clear, "", line)
-        return {MaskId.clear_detector_mask: True} if clear_removed == "" else \
-            {MaskId.clear_time_mask: True}
+        return {MaskId.CLEAR_DETECTOR_MASK: True} if clear_removed == "" else \
+            {MaskId.CLEAR_TIME_MASK: True}
 
     def _extract_single_spectrum_mask(self, line):
         single_spectrum_string = re.sub(self._spectrum, "", line)
         single_spectrum = convert_string_to_integer(single_spectrum_string)
-        return {MaskId.single_spectrum_mask: single_spectrum}
+        return {MaskId.SINGLE_SPECTRUM_MASK: single_spectrum}
 
     def _extract_spectrum_range_mask(self, line):
         spectrum_range_string = re.sub(self._spectrum, "", line)
         spectrum_range_string = re.sub(self._range, " ", spectrum_range_string)
         spectrum_range = extract_int_range(spectrum_range_string)
-        return {MaskId.spectrum_range_mask: range_entry(start=spectrum_range[0], stop=spectrum_range[1])}
+        return {MaskId.SPECTRUM_RANGE_MASK: range_entry(start=spectrum_range[0], stop=spectrum_range[1])}
 
     def _extract_vertical_single_strip_mask(self, line):
         detector_type = DetectorType.HAB if re.search(self._hab, line) is not None else DetectorType.LAB
         single_vertical_strip_string = re.sub(self._detector, "", line)
         single_vertical_strip_string = re.sub(self._v, "", single_vertical_strip_string)
         single_vertical_strip = convert_string_to_integer(single_vertical_strip_string)
-        return {MaskId.vertical_single_strip_mask: single_entry_with_detector(entry=single_vertical_strip,
+        return {MaskId.VERTICAL_SINGLE_STRIP_MASK: single_entry_with_detector(entry=single_vertical_strip,
                                                                               detector_type=detector_type)}
 
     def _extract_vertical_range_strip_mask(self, line):
@@ -1082,7 +1082,7 @@ class MaskParser(UserFileComponentParser):
         range_vertical_strip_string = re.sub(self._v, "", range_vertical_strip_string)
         range_vertical_strip_string = re.sub(self._range, " ", range_vertical_strip_string)
         range_vertical_strip = extract_int_range(range_vertical_strip_string)
-        return {MaskId.vertical_range_strip_mask: range_entry_with_detector(start=range_vertical_strip[0],
+        return {MaskId.VERTICAL_RANGE_STRIP_MASK: range_entry_with_detector(start=range_vertical_strip[0],
                                                                             stop=range_vertical_strip[1],
                                                                             detector_type=detector_type)}
 
@@ -1091,7 +1091,7 @@ class MaskParser(UserFileComponentParser):
         single_horizontal_strip_string = re.sub(self._detector, "", line)
         single_horizontal_strip_string = re.sub(self._h, "", single_horizontal_strip_string)
         single_horizontal_strip = convert_string_to_integer(single_horizontal_strip_string)
-        return {MaskId.horizontal_single_strip_mask: single_entry_with_detector(entry=single_horizontal_strip,
+        return {MaskId.HORIZONTAL_SINGLE_STRIP_MASK: single_entry_with_detector(entry=single_horizontal_strip,
                                                                                 detector_type=detector_type)}
 
     def _extract_horizontal_range_strip_mask(self, line):
@@ -1100,7 +1100,7 @@ class MaskParser(UserFileComponentParser):
         range_horizontal_strip_string = re.sub(self._h, "", range_horizontal_strip_string)
         range_horizontal_strip_string = re.sub(self._range, " ", range_horizontal_strip_string)
         range_horizontal_strip = extract_int_range(range_horizontal_strip_string)
-        return {MaskId.horizontal_range_strip_mask: range_entry_with_detector(start=range_horizontal_strip[0],
+        return {MaskId.HORIZONTAL_RANGE_STRIP_MASK: range_entry_with_detector(start=range_horizontal_strip[0],
                                                                               stop=range_horizontal_strip[1],
                                                                               detector_type=detector_type)}
 
@@ -1157,12 +1157,12 @@ class SampleParser(UserFileComponentParser):
 
     def _extract_sample_path(self, line):
         value = False if re.search(self._off, line) is not None else True
-        return {SampleId.path: value}
+        return {SampleId.PATH: value}
 
     def _extract_sample_offset(self, line):
         offset_string = re.sub(self._offset, "", line)
         offset = convert_string_to_float(offset_string)
-        return {SampleId.offset: offset}
+        return {SampleId.OFFSET: offset}
 
     @staticmethod
     def get_type():
@@ -1240,7 +1240,7 @@ class SetParser(UserFileComponentParser):
         scales = extract_float_list(scales_string, separator=" ")
         if len(scales) != 5:
             raise ValueError("SetParser: Expected 5 entries for the SCALES setting, but got {0}.".format(len(scales)))
-        return {SetId.scales: set_scales_entry(s=scales[0], a=scales[1], b=scales[2], c=scales[3], d=scales[4])}
+        return {SetId.SCALES: set_scales_entry(s=scales[0], a=scales[1], b=scales[2], c=scales[3], d=scales[4])}
 
     def _extract_centre(self, line):
         detector_type = DetectorType.HAB if re.search(self._hab, line) is not None else DetectorType.LAB
@@ -1248,7 +1248,7 @@ class SetParser(UserFileComponentParser):
         centre_string = re.sub("/" + self._lab, "", centre_string)
         centre_string = ' '.join(centre_string.split())
         centre = extract_float_list(centre_string, separator=" ")
-        return {SetId.centre: position_entry(pos1=centre[0], pos2=centre[1], detector_type=detector_type)}
+        return {SetId.CENTRE: position_entry(pos1=centre[0], pos2=centre[1], detector_type=detector_type)}
 
     def _extract_centre_HAB(self, line):
         detector_type = DetectorType.HAB if re.search(self._hab, line) is not None else DetectorType.LAB
@@ -1256,7 +1256,7 @@ class SetParser(UserFileComponentParser):
         centre_string = re.sub("/" + self._hab, "", centre_string)
         centre_string = ' '.join(centre_string.split())
         centre = extract_float_list(centre_string, separator=" ")
-        return {SetId.centre_HAB: position_entry(pos1=centre[0], pos2=centre[1], detector_type=detector_type)}
+        return {SetId.CENTRE_HAB: position_entry(pos1=centre[0], pos2=centre[1], detector_type=detector_type)}
 
     @staticmethod
     def get_type():
@@ -1392,20 +1392,20 @@ class TransParser(UserFileComponentParser):
         dist, monitor = int(split_vars[0]), int(split_vars[1])
 
         if monitor == 5:
-            return {TransId.spec_5_shift: dist}
+            return {TransId.SPEC_5_SHIFT: dist}
         elif monitor >= 0:
             # Some instruments (i.e. LOQ) do not have monitor 4 on spectrum 4, as ZOOM
             # is currently the only one with monitor 5 at spectrum 5 we can make it an edge case
             # If a future instrument wants to use monitor 5 at a different spectrum number or
             # uses monitor 4 at spectrum 5 this should be updated
-            return {TransId.spec_4_shift: dist}
+            return {TransId.SPEC_4_SHIFT: dist}
         else:
             raise RuntimeError("Monitor {0} cannot be shifted".format(monitor))
 
     def _extract_trans_spec(self, line):
         trans_spec_string = re.sub(self._trans_spec, "", line)
         trans_spec = convert_string_to_integer(trans_spec_string)
-        return {TransId.spec: trans_spec}
+        return {TransId.SPEC: trans_spec}
 
     def _extract_trans_spec_shift(self, line):
         # Get the transpec
@@ -1423,36 +1423,36 @@ class TransParser(UserFileComponentParser):
         trans_spec_shift = convert_string_to_float(trans_spec_shift_string)
 
         if trans_spec == 5:
-            return {TransId.spec_5_shift: trans_spec_shift, TransId.spec: trans_spec}
+            return {TransId.SPEC_5_SHIFT: trans_spec_shift, TransId.SPEC: trans_spec}
         elif trans_spec >= 0:
             # Some instruments (i.e. LOQ) do not have monitor 4 on spectrum 4, as ZOOM
             # is currently the only one with monitor 5 at spectrum 5 we can make it an edge case
             # If a future instrument wants to use monitor 5 at a different spectrum number or
             # uses monitor 4 at spectrum 5 this should be updated
-            return {TransId.spec_4_shift: trans_spec_shift, TransId.spec: trans_spec}
+            return {TransId.SPEC_4_SHIFT: trans_spec_shift, TransId.SPEC: trans_spec}
         else:
             raise RuntimeError("Monitor {0} cannot be shifted".format(trans_spec))
 
     def _extract_radius(self, line):
         radius_string = re.sub(self._radius, "", line)
         radius = convert_string_to_float(radius_string)
-        return {TransId.radius: radius}
+        return {TransId.RADIUS: radius}
 
     def _extract_roi(self, line, original_line):
         file_names = TransParser.extract_file_names(line, original_line, self._roi)
-        return {TransId.roi: file_names}
+        return {TransId.ROI: file_names}
 
     def _extract_mask(self, line, original_line):
         file_names = TransParser.extract_file_names(line, original_line, self._mask)
-        return {TransId.mask: file_names}
+        return {TransId.MASK: file_names}
 
     def _extract_sample_workspace(self, line, original_line):
         sample_workspace = TransParser.extract_workspace(line, original_line, self._sample_workspace)
-        return {TransId.sample_workspace:  sample_workspace}
+        return {TransId.SAMPLE_WORKSPACE:  sample_workspace}
 
     def _extract_can_workspace(self, line, original_line):
         can_workspace = TransParser.extract_workspace(line, original_line, self._can_workspace)
-        return {TransId.can_workspace:  can_workspace}
+        return {TransId.CAN_WORKSPACE:  can_workspace}
 
     @staticmethod
     def extract_workspace(line, original_line, to_remove):
@@ -1507,7 +1507,7 @@ class TubeCalibFileParser(UserFileComponentParser):
     def _extract_tube_calib_file(line, original_line):
         file_name_capital = line.strip()
         file_name = re.search(file_name_capital, original_line, re.IGNORECASE).group(0)
-        return {TubeCalibrationFileId.file: file_name}
+        return {TubeCalibrationFileId.FILE: file_name}
 
     @staticmethod
     def get_type():
@@ -1644,38 +1644,38 @@ class QResolutionParser(UserFileComponentParser):
 
     def _extract_on_off(self, line):
         value = False if re.search(self._off, line) is not None else True
-        return {QResolutionId.on: value}
+        return {QResolutionId.ON: value}
 
     def _extract_delta_r(self, line):
-        return {QResolutionId.delta_r: QResolutionParser.extract_float(line, self._delta_r)}
+        return {QResolutionId.DELTA_R: QResolutionParser.extract_float(line, self._delta_r)}
 
     def _extract_collimation_length(self, line):
-        return {QResolutionId.collimation_length: QResolutionParser.extract_float(line, self._collimation_length)}
+        return {QResolutionId.COLLIMATION_LENGTH: QResolutionParser.extract_float(line, self._collimation_length)}
 
     def _extract_a1(self, line):
-        return {QResolutionId.a1: QResolutionParser.extract_float(line, self._a1)}
+        return {QResolutionId.A1: QResolutionParser.extract_float(line, self._a1)}
 
     def _extract_a2(self, line):
-        return {QResolutionId.a2: QResolutionParser.extract_float(line, self._a2)}
+        return {QResolutionId.A2: QResolutionParser.extract_float(line, self._a2)}
 
     def _extract_h1(self, line):
-        return {QResolutionId.h1: QResolutionParser.extract_float(line, self._h1)}
+        return {QResolutionId.H1: QResolutionParser.extract_float(line, self._h1)}
 
     def _extract_w1(self, line):
-        return {QResolutionId.w1: QResolutionParser.extract_float(line, self._w1)}
+        return {QResolutionId.W1: QResolutionParser.extract_float(line, self._w1)}
 
     def _extract_h2(self, line):
-        return {QResolutionId.h2: QResolutionParser.extract_float(line, self._h2)}
+        return {QResolutionId.H2: QResolutionParser.extract_float(line, self._h2)}
 
     def _extract_w2(self, line):
-        return {QResolutionId.w2: QResolutionParser.extract_float(line, self._w2)}
+        return {QResolutionId.W2: QResolutionParser.extract_float(line, self._w2)}
 
     def _extract_moderator(self, line, original_line):
         moderator_capital = re.sub(self._moderator, "", line)
         moderator_capital = re.sub("\"", "", moderator_capital)
         moderator = re.search(moderator_capital, original_line, re.IGNORECASE).group(0)
         # Remove quotation marks
-        return {QResolutionId.moderator: moderator}
+        return {QResolutionId.MODERATOR: moderator}
 
     @staticmethod
     def extract_float(line, to_remove):
@@ -1766,14 +1766,14 @@ class FitParser(UserFileComponentParser):
     def _extract_monitor(self, line):
         values_string = re.sub(self._monitor, "", line)
         values = extract_float_range(values_string)
-        return {FitId.monitor_times: range_entry(start=values[0], stop=values[1])}
+        return {FitId.MONITOR_TIMES: range_entry(start=values[0], stop=values[1])}
 
     def _extract_general_fit(self, line):
         fit_type = self._get_fit_type(line)
         ws_type = self._get_workspace_type(line)
         wavelength_min, wavelength_max = self._get_wavelength(line)
         polynomial_order = self._get_polynomial_order(fit_type, line)
-        return {FitId.general: fit_general(start=wavelength_min, stop=wavelength_max, fit_type=fit_type,
+        return {FitId.GENERAL: fit_general(start=wavelength_min, stop=wavelength_max, fit_type=fit_type,
                                            data_type=ws_type, polynomial_order=polynomial_order)}
 
     def _get_wavelength(self, line):
@@ -1781,7 +1781,7 @@ class FitParser(UserFileComponentParser):
         return wavelength_min, wavelength_max
 
     def _get_polynomial_order(self, fit_type, line):
-        if fit_type != FitType.Polynomial:
+        if fit_type != FitType.POLYNOMIAL:
             poly_order = 0
         else:
             poly_order, _, _ = self._get_wavelength_and_polynomial(line)
@@ -1824,20 +1824,20 @@ class FitParser(UserFileComponentParser):
 
     def _get_fit_type(self, line):
         if re.search(self._log, line) is not None:
-            fit_type = FitType.Logarithmic
+            fit_type = FitType.LOGARITHMIC
         elif re.search(self._lin, line) is not None:
-            fit_type = FitType.Linear
+            fit_type = FitType.LINEAR
         elif re.search(self._polynomial, line) is not None:
-            fit_type = FitType.Polynomial
+            fit_type = FitType.POLYNOMIAL
         else:
             raise RuntimeError("FitParser: Encountered unknown fit function: {0}".format(line))
         return fit_type
 
     def _get_workspace_type(self, line):
         if re.search(self._sample, line) is not None:
-            ws_type = DataType.Sample
+            ws_type = DataType.SAMPLE
         elif re.search(self._can, line) is not None:
-            ws_type = DataType.Can
+            ws_type = DataType.CAN
         else:
             ws_type = None
         return ws_type
@@ -1847,7 +1847,7 @@ class FitParser(UserFileComponentParser):
         """
         With this we want to clear the fit type settings.
         """
-        return {FitId.general: fit_general(start=None, stop=None, fit_type=FitType.NoFit,
+        return {FitId.GENERAL: fit_general(start=None, stop=None, fit_type=FitType.NO_FIT,
                                            data_type=None, polynomial_order=None)}
 
     @staticmethod
@@ -1902,12 +1902,12 @@ class GravityParser(UserFileComponentParser):
 
     def _extract_on_off(self, line):
         value = re.sub(self._on, "", line).strip() == ""
-        return {GravityId.on_off: value}
+        return {GravityId.ON_OFF: value}
 
     def _extract_extra_length(self, line):
         extra_length_string = re.sub(self._extra_length, "", line)
         extra_length = convert_string_to_float(extra_length_string)
-        return {GravityId.extra_length: extra_length}
+        return {GravityId.EXTRA_LENGTH: extra_length}
 
     @staticmethod
     def get_type():
@@ -1951,7 +1951,7 @@ class CompatibilityParser(UserFileComponentParser):
 
     def _extract_on_off(self, line):
         value = re.sub(self._on, "", line).strip() == ""
-        return {OtherId.use_compatibility_mode: value}
+        return {OtherId.USE_COMPATIBILITY_MODE: value}
 
     @staticmethod
     def get_type():
@@ -1996,7 +1996,7 @@ class MaskFileParser(UserFileComponentParser):
     def extract_mask_file(line, original_line):
         elements_capital = extract_string_list(line)
         elements = [re.search(element, original_line, re.IGNORECASE).group(0) for element in elements_capital]
-        return {MaskId.file: elements}
+        return {MaskId.FILE: elements}
 
     @staticmethod
     def get_type():
@@ -2106,7 +2106,7 @@ class MonParser(UserFileComponentParser):
         if len(length_entries) != 2:
             raise RuntimeError("MonParser: Length setting needs 2 numeric parameters, "
                                "but received {0}.".format(len(length_entries)))
-        return {MonId.length: monitor_length(length=length_entries[0], spectrum=length_entries[1],
+        return {MonId.LENGTH: monitor_length(length=length_entries[0], spectrum=length_entries[1],
                                              interpolate=interpolate)}
 
     def _extract_direct(self, line, original_line):
@@ -2125,7 +2125,7 @@ class MonParser(UserFileComponentParser):
             output.append(monitor_file(file_path=file_path, detector_type=DetectorType.HAB))
         if is_lab:
             output.append(monitor_file(file_path=file_path, detector_type=DetectorType.LAB))
-        return {MonId.direct: output}
+        return {MonId.DIRECT: output}
 
     def _extract_flat(self, line, original_line):
         # If we have a HAB specified then select HAB
@@ -2133,12 +2133,12 @@ class MonParser(UserFileComponentParser):
         # If nothing is specified then select LAB
         detector_type = DetectorType.HAB if re.search(self._hab, line, re.IGNORECASE) else DetectorType.LAB
         file_path = self._extract_file_path(line, original_line, self._flat)
-        return {MonId.flat: monitor_file(file_path=file_path, detector_type=detector_type)}
+        return {MonId.FLAT: monitor_file(file_path=file_path, detector_type=detector_type)}
 
     def _extract_hab(self, line, original_line):
         # This is the same as direct/front
         file_path = self._extract_file_path(line, original_line, self._hab_file)
-        return {MonId.direct: [monitor_file(file_path=file_path, detector_type=DetectorType.HAB)]}
+        return {MonId.DIRECT: [monitor_file(file_path=file_path, detector_type=DetectorType.HAB)]}
 
     def _extract_file_path(self, line, original_line, to_remove):
         direct = re.sub(self._detector, "", line)
@@ -2177,7 +2177,7 @@ class MonParser(UserFileComponentParser):
         line = re.sub(self._spectrum, "", line)
         line = re.sub(self._equal, "", line)
         spectrum = convert_string_to_integer(line)
-        return {MonId.spectrum: monitor_spectrum(spectrum=spectrum, is_trans=is_trans, interpolate=interpolate)}
+        return {MonId.SPECTRUM: monitor_spectrum(spectrum=spectrum, is_trans=is_trans, interpolate=interpolate)}
 
     @staticmethod
     def get_type():
@@ -2210,7 +2210,7 @@ class PrintParser(UserFileComponentParser):
         else:
             raise RuntimeError("PrintParser: Failed to extract line {} it does not start with {}".format(line, PrintParser.Type))
 
-        return {PrintId.print_line: setting}
+        return {PrintId.PRINT_LINE: setting}
 
     @staticmethod
     def get_type():

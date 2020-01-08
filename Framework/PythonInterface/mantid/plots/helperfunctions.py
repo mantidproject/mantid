@@ -17,7 +17,7 @@ from scipy.interpolate import interp1d
 
 import mantid.api
 import mantid.kernel
-from mantid.api import MultipleExperimentInfos
+from mantid.api import MultipleExperimentInfos, MatrixWorkspace
 from mantid.dataobjects import EventWorkspace, MDHistoWorkspace, Workspace2D
 from mantid.plots.utility import MantidAxType
 
@@ -61,12 +61,15 @@ def get_normalize_by_bin_width(workspace, axes, **kwargs):
     setting.
     :param workspace: :class:`mantid.api.MatrixWorkspace` workspace being plotted
     :param axes: The axes being plotted on
-    :param pop: Bool. Set to True to remove 'normalize_by_bin_width' from 'kwargs'
     """
+    normalize_by_bin_width = kwargs.get('normalize_by_bin_width', None)
+    if normalize_by_bin_width is not None:
+        return normalize_by_bin_width, kwargs
     distribution = kwargs.get('distribution', None)
+    aligned, _ = check_resample_to_regular_grid(workspace, **kwargs)
     if distribution or (hasattr(workspace, 'isDistribution') and workspace.isDistribution()):
         return False, kwargs
-    elif distribution is False:
+    elif distribution is False or aligned:
         return True, kwargs
     else:
         try:
@@ -77,11 +80,10 @@ def get_normalize_by_bin_width(workspace, axes, **kwargs):
         if current_artists:
             current_normalization = any(
                 [artist[0].is_normalized for artist in current_artists])
-            normalize_by_bin_width = current_normalization
+            normalization = current_normalization
         else:
-            normalize_by_bin_width = mantid.kernel.config[
-                                         'graph1d.autodistribution'].lower() == 'on'
-    return normalize_by_bin_width, kwargs
+            normalization = mantid.kernel.config['graph1d.autodistribution'].lower() == 'on'
+    return normalization, kwargs
 
 
 def get_normalization(md_workspace, **kwargs):
@@ -228,9 +230,15 @@ def _get_wksp_index_and_spec_num(workspace, axis, **kwargs):
 
     # convert the spectrum number to a workspace index and vice versa
     if spectrum_number is not None:
-        workspace_index = workspace.getIndexFromSpectrumNumber(int(spectrum_number))
+        try:
+            workspace_index = workspace.getIndexFromSpectrumNumber(int(spectrum_number))
+        except RuntimeError:
+            raise RuntimeError('Spectrum Number {0} not found in workspace {1}'.format(spectrum_number,workspace.name()))
     elif axis == MantidAxType.SPECTRUM:  # Only get a spectrum number if we're traversing the spectra
-        spectrum_number = workspace.getSpectrum(workspace_index).getSpectrumNo()
+        try:
+            spectrum_number = workspace.getSpectrum(workspace_index).getSpectrumNo()
+        except RuntimeError:
+            raise RuntimeError('Workspace index {0} not found in workspace {1}'.format(workspace_index,workspace.name()))
 
     return workspace_index, spectrum_number, kwargs
 
@@ -406,7 +414,7 @@ def common_x(arr):
     return np.all(arr == arr[0, :], axis=(1, 0))
 
 
-def get_matrix_2d_ragged(workspace, distribution, histogram2D=False, transpose=False):
+def get_matrix_2d_ragged(workspace, normalize_by_bin_width, histogram2D=False, transpose=False):
     num_hist = workspace.getNumberHistograms()
     delta = np.finfo(np.float64).max
     min_value = np.finfo(np.float64).max
@@ -429,7 +437,7 @@ def get_matrix_2d_ragged(workspace, distribution, histogram2D=False, transpose=F
     z = np.empty([num_hist, num_edges], dtype=np.float64)
     for i in range(num_hist):
         centers, ztmp, _, _ = mantid.plots.helperfunctions.get_spectrum(
-            workspace, i, normalize_by_bin_width=distribution, withDy=False, withDx=False)
+            workspace, i, normalize_by_bin_width=normalize_by_bin_width, withDy=False, withDx=False)
         f = interp1d(centers, ztmp, kind='nearest', bounds_error=False, fill_value=np.nan)
         z[i] = f(x_centers)
     if histogram2D:
@@ -565,16 +573,17 @@ def get_data_uneven_flag(workspace, **kwargs):
     return aligned, kwargs
 
 
-def check_resample_to_regular_grid(ws):
-    if not ws.isCommonBins():
-        return True
+def check_resample_to_regular_grid(ws, **kwargs):
+    if isinstance(ws, MatrixWorkspace):
+        aligned = kwargs.pop('axisaligned', False)
+        if aligned or not ws.isCommonBins():
+            return True, kwargs
 
-    x = ws.dataX(0)
-    difference = np.diff(x)
-    if not np.all(np.isclose(difference[:-1], difference[0])):
-        return True
-
-    return False
+        x = ws.readX(0)
+        difference = np.diff(x)
+        if x.size > 1 and not np.allclose(difference[:-1], difference[0]):
+            return True, kwargs
+    return False, kwargs
 
 
 # ====================================================

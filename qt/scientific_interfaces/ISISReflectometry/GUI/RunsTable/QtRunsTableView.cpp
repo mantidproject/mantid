@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtRunsTableView.h"
 #include "Common/IndexOf.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/UsageService.h"
 #include "MantidQtIcons/Icon.h"
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"

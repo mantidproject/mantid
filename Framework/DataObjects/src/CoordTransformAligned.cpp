@@ -6,8 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/CoordTransformAligned.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -35,24 +33,18 @@ CoordTransformAligned::CoordTransformAligned(const size_t inD,
                                              const size_t *dimensionToBinFrom,
                                              const coord_t *origin,
                                              const coord_t *scaling)
-    : CoordTransform(inD, outD) {
+    : CoordTransform(inD, outD), m_dimensionToBinFrom(outD), m_origin(outD),
+      m_scaling(outD) {
   if (!origin || !scaling || !dimensionToBinFrom)
     throw std::runtime_error("CoordTransformAligned::ctor(): at least one of "
                              "the input arrays is a NULL pointer.");
-  m_dimensionToBinFrom = new size_t[outD];
-  m_origin = new coord_t[outD];
-  m_scaling = new coord_t[outD];
   for (size_t d = 0; d < outD; d++) {
     m_dimensionToBinFrom[d] = dimensionToBinFrom[d];
     if (m_dimensionToBinFrom[d] >= inD) {
-      delete[] m_dimensionToBinFrom;
-      delete[] m_origin;
-      delete[] m_scaling;
       throw std::runtime_error(
           "CoordTransformAligned::ctor(): invalid entry in "
           "dimensionToBinFrom[" +
-          Mantid::Kernel::Strings::toString(d) +
-          "]. Cannot build the coordinate transformation.");
+          std::to_string(d) + "]. Cannot build the coordinate transformation.");
     }
     m_origin[d] = origin[d];
     m_scaling[d] = scaling[d];
@@ -75,31 +67,22 @@ CoordTransformAligned::CoordTransformAligned(const size_t inD,
  *
  */
 CoordTransformAligned::CoordTransformAligned(
-    const size_t inD, const size_t outD,
-    const std::vector<size_t> dimensionToBinFrom,
-    const std::vector<coord_t> origin, const std::vector<coord_t> scaling)
-    : CoordTransform(inD, outD) {
-  if (dimensionToBinFrom.size() != outD || origin.size() != outD ||
-      scaling.size() != outD)
+    const size_t inD, const size_t outD, std::vector<size_t> dimensionToBinFrom,
+    std::vector<coord_t> origin, std::vector<coord_t> scaling)
+    : CoordTransform(inD, outD),
+      m_dimensionToBinFrom(std::move(dimensionToBinFrom)),
+      m_origin(std::move(origin)), m_scaling(std::move(scaling)) {
+  if (m_dimensionToBinFrom.size() != outD || m_origin.size() != outD ||
+      m_scaling.size() != outD)
     throw std::runtime_error("CoordTransformAligned::ctor(): at least one of "
                              "the input vectors is the wrong size.");
-  m_dimensionToBinFrom = new size_t[outD];
-  m_origin = new coord_t[outD];
-  m_scaling = new coord_t[outD];
   for (size_t d = 0; d < outD; d++) {
-    m_dimensionToBinFrom[d] = dimensionToBinFrom[d];
     if (m_dimensionToBinFrom[d] >= inD) {
-      delete[] m_dimensionToBinFrom;
-      delete[] m_origin;
-      delete[] m_scaling;
       throw std::runtime_error(
           "CoordTransformAligned::ctor(): invalid entry in "
           "dimensionToBinFrom[" +
-          Mantid::Kernel::Strings::toString(d) +
-          "]. Cannot build the coordinate transformation.");
+          std::to_string(d) + "]. Cannot build the coordinate transformation.");
     }
-    m_origin[d] = origin[d];
-    m_scaling[d] = scaling[d];
   }
 }
 
@@ -107,18 +90,8 @@ CoordTransformAligned::CoordTransformAligned(
 /** Virtual cloner
  * @return a copy of this object  */
 CoordTransform *CoordTransformAligned::clone() const {
-  auto out = new CoordTransformAligned(inD, outD, m_dimensionToBinFrom,
-                                       m_origin, m_scaling);
-  return out;
-}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CoordTransformAligned::~CoordTransformAligned() {
-  delete[] m_dimensionToBinFrom;
-  delete[] m_origin;
-  delete[] m_scaling;
+  return new CoordTransformAligned(inD, outD, m_dimensionToBinFrom, m_origin,
+                                   m_scaling);
 }
 
 //----------------------------------------------------------------------------------------------

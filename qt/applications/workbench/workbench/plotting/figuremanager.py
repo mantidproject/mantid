@@ -122,7 +122,7 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
                 continue
             redraw = redraw | redraw_this
         if redraw:
-            self.canvas.draw_idle()
+            self.canvas.draw()
 
     @_catch_exceptions
     def renameHandle(self, oldName, newName):

@@ -11,12 +11,12 @@ which can be performed before event slicing."""
 
 from __future__ import (absolute_import, division, print_function)
 
+from SANSReductionCoreBase import SANSReductionCoreBase
+
 from mantid.api import MatrixWorkspaceProperty, AlgorithmFactory, Progress
 from mantid.kernel import Direction
 from sans.algorithm_detail.mask_workspace import mask_bins
 from sans.common.enums import DetectorType
-
-from SANSReductionCoreBase import SANSReductionCoreBase
 
 
 class SANSReductionCorePreprocess(SANSReductionCoreBase):
@@ -98,7 +98,7 @@ class SANSReductionCorePreprocess(SANSReductionCoreBase):
         # Convert and rebin the dummy workspace to get correct bin flags
         if use_dummy_workspace:
             dummy_mask_workspace = mask_bins(state.mask, dummy_mask_workspace,
-                                             DetectorType.from_string(component_as_string))
+                                             DetectorType(component_as_string))
             dummy_mask_workspace = self._convert_to_wavelength(state=state, workspace=dummy_mask_workspace)
 
         # --------------------------------------------------------------------------------------------------------------

@@ -11,11 +11,12 @@
 """
 
 from __future__ import (absolute_import, division, print_function)
-from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator, CompositeValidator)
+
 from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
                         WorkspaceUnitValidator)
-from sans.algorithm_detail.normalize_to_sans_monitor import normalize_to_monitor
+from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator, CompositeValidator)
 from sans.algorithm_detail.calculate_sans_transmission import calculate_transmission
+from sans.algorithm_detail.normalize_to_sans_monitor import normalize_to_monitor
 from sans.common.constants import EMPTY_NAME
 from sans.common.enums import (DataType, DetectorType)
 from sans.common.general_functions import create_unmanaged_algorithm
@@ -58,16 +59,16 @@ class SANSCreateAdjustmentWorkspaces(DistributedDataProcessorAlgorithm):
                                  'This used to verify the solid angle. The workspace is not modified, just inspected.')
 
         # The component
-        allowed_detector_types = StringListValidator([DetectorType.to_string(DetectorType.HAB),
-                                                      DetectorType.to_string(DetectorType.LAB)])
-        self.declareProperty("Component", DetectorType.to_string(DetectorType.LAB),
+        allowed_detector_types = StringListValidator([DetectorType.HAB.value,
+                                                      DetectorType.LAB.value])
+        self.declareProperty("Component", DetectorType.LAB.value,
                              validator=allowed_detector_types, direction=Direction.Input,
                              doc="The component of the instrument which is currently being investigated.")
 
         # The data type
-        allowed_data = StringListValidator([DataType.to_string(DataType.Sample),
-                                            DataType.to_string(DataType.Can)])
-        self.declareProperty("DataType", DataType.to_string(DataType.Sample),
+        allowed_data = StringListValidator([DataType.SAMPLE.value,
+                                            DataType.CAN.value])
+        self.declareProperty("DataType", DataType.SAMPLE.value,
                              validator=allowed_data, direction=Direction.Input,
                              doc="The component of the instrument which is to be reduced.")
 

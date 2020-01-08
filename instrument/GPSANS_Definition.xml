@@ -433,7 +433,7 @@
   <component type="double-flat-panel" idlist="pixel_ids" name="detector1">
     <location>
       <parameter name="x">
-        <logfile id="detector_trans" eq="-0.001*value"/>
+        <logfile id="detector_trans_Readback" eq="-0.001*value"/>
       </parameter>
       <parameter name="z">
         <logfile id="sample_detector_distance" eq="value"/>

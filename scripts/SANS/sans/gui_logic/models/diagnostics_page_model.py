@@ -31,10 +31,10 @@ def run_integral(integral_ranges, mask, integral, detector, state):
         input_workspace_name = input_workspace.name()
         if is_multi_range:
             AnalysisDataService.remove(input_workspace_name + '_ranges')
-        input_workspace = crop_workspace(DetectorType.to_string(detector), input_workspace)
+        input_workspace = crop_workspace(detector.value, input_workspace)
 
         if mask:
-            input_workspace = apply_mask(state, input_workspace, DetectorType.to_string(detector))
+            input_workspace = apply_mask(state, input_workspace, detector.value)
 
         x_dim, y_dim = get_detector_size_from_sans_file(state, detector)
 
@@ -69,24 +69,24 @@ def parse_range(range):
 
 
 def load_workspace(state):
-    workspace_to_name = {SANSDataType.SampleScatter: "SampleScatterWorkspace",
-                         SANSDataType.SampleTransmission: "SampleTransmissionWorkspace",
-                         SANSDataType.SampleDirect: "SampleDirectWorkspace",
-                         SANSDataType.CanScatter: "CanScatterWorkspace",
-                         SANSDataType.CanTransmission: "CanTransmissionWorkspace",
-                         SANSDataType.CanDirect: "CanDirectWorkspace"}
+    workspace_to_name = {SANSDataType.SAMPLE_SCATTER: "SampleScatterWorkspace",
+                         SANSDataType.SAMPLE_TRANSMISSION: "SampleTransmissionWorkspace",
+                         SANSDataType.SAMPLE_DIRECT: "SampleDirectWorkspace",
+                         SANSDataType.CAN_SCATTER: "CanScatterWorkspace",
+                         SANSDataType.CAN_TRANSMISSION: "CanTransmissionWorkspace",
+                         SANSDataType.CAN_DIRECT: "CanDirectWorkspace"}
 
-    workspace_to_monitor = {SANSDataType.SampleScatter: "SampleScatterMonitorWorkspace",
-                            SANSDataType.CanScatter: "CanScatterMonitorWorkspace"}
+    workspace_to_monitor = {SANSDataType.SAMPLE_SCATTER: "SampleScatterMonitorWorkspace",
+                            SANSDataType.CAN_SCATTER: "CanScatterMonitorWorkspace"}
 
     workspaces, monitors = provide_loaded_data(state, False, workspace_to_name, workspace_to_monitor)
 
-    return workspaces[SANSDataType.SampleScatter]
+    return workspaces[SANSDataType.SAMPLE_SCATTER]
 
 
 def crop_workspace(component, workspace):
     crop_name = "CropToComponent"
-    component_to_crop = DetectorType.from_string(component)
+    component_to_crop = DetectorType(component)
     component_to_crop = get_component_name(workspace, component_to_crop)
     crop_options = {"InputWorkspace": workspace,
                     "OutputWorkspace": EMPTY_NAME,
@@ -121,8 +121,8 @@ def run_algorithm(input_workspace, range, integral, output_workspace, x_dim, y_d
 
 
 def generate_output_workspace_name(range, integral, mask, detector, input_workspace_name):
-    integral_string = IntegralEnum.to_string(integral)
-    detector_string = DetectorType.to_string(detector)
+    integral_string = integral.value
+    detector_string = detector.value
 
     return 'Run:{}, Range:{}, Direction:{}, Detector:{}, Mask:{}'.format(input_workspace_name, range,
                                                                          integral_string,

@@ -7,9 +7,9 @@
 # pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
 
-from qtpy.QtWidgets import QMessageBox
-
-from Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT
+from Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT, create_error_message
+from Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
+from Engineering.gui.engineering_diffraction.tabs.common.vanadium_corrections import check_workspaces_exist
 from mantidqt.utils.asynchronous import AsyncTask
 from mantidqt.utils.observer_pattern import Observer
 from mantid.simpleapi import logger
@@ -27,7 +27,7 @@ class FocusPresenter(object):
         self.view.set_enable_controls_connection(self.set_focus_controls_enabled)
 
         # Variables from other GUI tabs.
-        self.current_calibration = {"vanadium_path": None, "ceria_path": None}
+        self.current_calibration = CalibrationInfo()
         self.instrument = "ENGINX"
         self.rb_num = None
 
@@ -44,13 +44,12 @@ class FocusPresenter(object):
         :param focus_path: The path to the file containing the data to focus.
         :param banks: A list of banks that are to be focused.
         :param plot_output: True if the output should be plotted.
-        :param rb_num: The rb_number from the main window (often an experiment id)
+        :param rb_num: The RB Number from the main window (often an experiment id)
         """
-        self.worker = AsyncTask(
-            self.model.focus_run,
-            (focus_path, banks, plot_output, self.instrument, rb_num, self.current_calibration),
-            error_cb=self._on_worker_error,
-            finished_cb=self.emit_enable_button_signal)
+        self.worker = AsyncTask(self.model.focus_run,
+                                (focus_path, banks, plot_output, self.instrument, rb_num),
+                                error_cb=self._on_worker_error,
+                                finished_cb=self.emit_enable_button_signal)
         self.set_focus_controls_enabled(False)
         self.worker.start()
 
@@ -59,8 +58,8 @@ class FocusPresenter(object):
         self.view.set_instrument_override(instrument)
         self.instrument = instrument
 
-    def set_rb_number(self, rb_number):
-        self.rb_num = rb_number
+    def set_rb_num(self, rb_num):
+        self.rb_num = rb_num
 
     def _validate(self, banks):
         """
@@ -68,21 +67,27 @@ class FocusPresenter(object):
         :param banks: A list of banks to focus.
         :return: True if the worker can be started safely.
         """
-        if not self.view.get_focus_valid():
-            return False
-        if self.current_calibration["vanadium_path"] is None:
-            self._create_error_message(
-                "Load a calibration from the Calibration tab before focusing.")
-            return False
         if self.view.is_searching():
+            create_error_message(self.view, "Mantid is searching for data files. Please wait.")
+            return False
+        if not self.view.get_focus_valid():
+            create_error_message(self.view, "Check run numbers/path is valid.")
+            return False
+        if not check_workspaces_exist() or not self.current_calibration.is_valid():
+            create_error_message(
+                self.view, "Create or Load a calibration via the Calibration tab before focusing.")
+            return False
+        if self.current_calibration.get_instrument() != self.instrument:
+            create_error_message(
+                self.view,
+                "Please make sure the selected instrument matches instrument for the current calibration.\n"
+                "The instrument for the current calibration is: " +
+                self.current_calibration.get_instrument())
             return False
         if len(banks) == 0:
-            self._create_error_message("Please select at least one bank.")
+            create_error_message(self.view, "Please select at least one bank.")
             return False
         return True
-
-    def _create_error_message(self, message):
-        QMessageBox.warning(self.view, "Engineering Diffraction - Error", str(message))
 
     def _on_worker_error(self, failure_info):
         logger.warning(str(failure_info))

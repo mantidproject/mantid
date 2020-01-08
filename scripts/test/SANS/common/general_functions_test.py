@@ -12,7 +12,7 @@ from mantid.api import AnalysisDataService, FrameworkManager
 from mantid.kernel import (V3D, Quat)
 from mantid.py3compat import mock
 from sans.common.constants import (SANS2D, LOQ, LARMOR)
-from sans.common.enums import (ISISReductionMode, ReductionDimensionality, OutputParts,
+from sans.common.enums import (ReductionMode, ReductionDimensionality, OutputParts,
                                SANSInstrument, DetectorType, SANSFacility, DataType)
 from sans.common.general_functions import (quaternion_to_angle_and_axis, create_managed_non_child_algorithm,
                                            create_unmanaged_algorithm, add_to_sample_log,
@@ -85,7 +85,7 @@ class SANSFunctionsTest(unittest.TestCase):
         state.data.sample_scatter_run_number = 12345
         state.data.sample_scatter_period = StateData.ALL_PERIODS
 
-        state.reduction.dimensionality = ReductionDimensionality.OneDim
+        state.reduction.dimensionality = ReductionDimensionality.ONE_DIM
 
         state.wavelength.wavelength_low = [12.0]
         state.wavelength.wavelength_high = [34.0]
@@ -169,7 +169,7 @@ class SANSFunctionsTest(unittest.TestCase):
 
         # Act + Assert
         try:
-            get_standard_output_workspace_name(state, ISISReductionMode.All)
+            get_standard_output_workspace_name(state, ReductionMode.ALL)
             did_raise = False
         except RuntimeError:
             did_raise = True
@@ -179,7 +179,7 @@ class SANSFunctionsTest(unittest.TestCase):
         # Arrange
         state = SANSFunctionsTest._get_state()
         # Act
-        output_workspace, _ = get_standard_output_workspace_name(state, ISISReductionMode.LAB)
+        output_workspace, _ = get_standard_output_workspace_name(state, ReductionMode.LAB)
         # Assert
         self.assertEqual("12345_rear_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37", output_workspace)
 
@@ -187,7 +187,7 @@ class SANSFunctionsTest(unittest.TestCase):
         # Arrange
         state = SANSFunctionsTest._get_state()
         # Act
-        output_workspace, _ = get_standard_output_workspace_name(state, ISISReductionMode.LAB,
+        output_workspace, _ = get_standard_output_workspace_name(state, ReductionMode.LAB,
                                                                  include_slice_limits=False)
         # Assert
         self.assertTrue("12345_rear_1D_12.0_34.0Phi12.0_56.0" == output_workspace)
@@ -215,7 +215,7 @@ class SANSFunctionsTest(unittest.TestCase):
     def test_that_get_transmission_output_name_returns_correct_name_for_wavelength_slices_with_user_specified(self):
         state = self._get_state()
         state.save.user_specified_output_name = 'user_output_name'
-        state.reduction.reduction_mode = ISISReductionMode.Merged
+        state.reduction.reduction_mode = ReductionMode.MERGED
         multi_reduction_type = {"period": False,
                                 "event_slice": False,
                                 "wavelength_range": True}
@@ -228,7 +228,7 @@ class SANSFunctionsTest(unittest.TestCase):
     def test_that_get_transmission_output_name_returns_correct_name_for_wavelength_slices(self):
         state = self._get_state()
         state.save.user_specified_output_name = ''
-        state.reduction.reduction_mode = ISISReductionMode.Merged
+        state.reduction.reduction_mode = ReductionMode.MERGED
         multi_reduction_type = {"period": False,
                                 "event_slice": False,
                                 "wavelength_range": True}
@@ -243,7 +243,7 @@ class SANSFunctionsTest(unittest.TestCase):
         state = SANSFunctionsTest._get_state()
         state.save.user_specified_output_name = "test_output"
         # Act
-        output_workspace, group_output_name = get_transmission_output_name(state, data_type=DataType.Can)
+        output_workspace, group_output_name = get_transmission_output_name(state, data_type=DataType.CAN)
         # Assert
         self.assertEqual(output_workspace, "test_output_trans_Can")
         self.assertEqual(group_output_name, 'test_output_trans')
@@ -253,7 +253,7 @@ class SANSFunctionsTest(unittest.TestCase):
         state = SANSFunctionsTest._get_state()
         state.save.user_specified_output_name = ''
         # Act
-        output_workspace, group_output_name = get_transmission_output_name(state, data_type=DataType.Can)
+        output_workspace, group_output_name = get_transmission_output_name(state, data_type=DataType.CAN)
         # Assert
         self.assertEqual(output_workspace, "12345_trans_Can_1.0_10.0")
         self.assertEqual(group_output_name, '12345_trans_1.0_10.0')
@@ -261,14 +261,14 @@ class SANSFunctionsTest(unittest.TestCase):
     def test_that_get_transmission_output_name_returns_correct_name_for_wavelength_slices_for_CAN(self):
         state = self._get_state()
         state.save.user_specified_output_name = ''
-        state.reduction.reduction_mode = ISISReductionMode.Merged
+        state.reduction.reduction_mode = ReductionMode.MERGED
         multi_reduction_type = {"period": False,
                                 "event_slice": False,
                                 "wavelength_range": True}
 
         output_name, group_output_name = get_transmission_output_name(state,
                                                                       multi_reduction_type=multi_reduction_type,
-                                                                      data_type=DataType.Can)
+                                                                      data_type=DataType.CAN)
 
         self.assertEqual(output_name, '12345_trans_Can_1.0_10.0_12.0_34.0')
         self.assertEqual(group_output_name, '12345_trans_1.0_10.0')
@@ -276,14 +276,14 @@ class SANSFunctionsTest(unittest.TestCase):
     def test_that_get_transmission_output_name_returns_correct_name_for_wavelength_slices_for_CAN_unfitted(self):
         state = self._get_state()
         state.save.user_specified_output_name = ''
-        state.reduction.reduction_mode = ISISReductionMode.Merged
+        state.reduction.reduction_mode = ReductionMode.MERGED
         multi_reduction_type = {"period": False,
                                 "event_slice": False,
                                 "wavelength_range": True}
 
         output_name, group_output_name = get_transmission_output_name(state,
                                                                       multi_reduction_type=multi_reduction_type,
-                                                                      data_type=DataType.Can, fitted=False)
+                                                                      data_type=DataType.CAN, fitted=False)
 
         self.assertEqual(output_name, '12345_trans_Can_unfitted_1.0_10.0')
         self.assertEqual(group_output_name, '12345_trans_1.0_10.0')
@@ -306,15 +306,15 @@ class SANSFunctionsTest(unittest.TestCase):
         test_director = TestDirector()
         state = test_director.construct()
         tagged_workspace_names = {None: "test_ws",
-                                  OutputParts.Count: "test_ws_count",
-                                  OutputParts.Norm: "test_ws_norm"}
+                                  OutputParts.COUNT: "test_ws_count",
+                                  OutputParts.NORM: "test_ws_norm"}
         SANSFunctionsTest._prepare_workspaces(number_of_workspaces=4,
                                               tagged_workspace_names=tagged_workspace_names,
                                               state=state,
-                                              reduction_mode=ISISReductionMode.LAB)
+                                              reduction_mode=ReductionMode.LAB)
         # Act
         workspace, workspace_count, workspace_norm = get_reduced_can_workspace_from_ads(state, output_parts=True,
-                                                                                        reduction_mode=ISISReductionMode.LAB)  # noqa
+                                                                                        reduction_mode=ReductionMode.LAB)  # noqa
 
         # Assert
         self.assertNotEqual(workspace, None)
@@ -337,11 +337,11 @@ class SANSFunctionsTest(unittest.TestCase):
         test_director = TestDirector()
         state = test_director.construct()
         SANSFunctionsTest._prepare_workspaces(number_of_workspaces=4, tagged_workspace_names=None,
-                                              state=state, reduction_mode=ISISReductionMode.LAB)
+                                              state=state, reduction_mode=ReductionMode.LAB)
 
         # Act
         workspace, workspace_count, workspace_norm = \
-            get_reduced_can_workspace_from_ads(state, output_parts=False, reduction_mode=ISISReductionMode.LAB)
+            get_reduced_can_workspace_from_ads(state, output_parts=False, reduction_mode=ReductionMode.LAB)
 
         # Assert
         self.assertEqual(workspace, None)
@@ -381,7 +381,7 @@ class SANSFunctionsTest(unittest.TestCase):
         self.assertEqual(get_facility(SANSInstrument.LOQ), SANSFacility.ISIS)
         self.assertEqual(get_facility(SANSInstrument.LARMOR), SANSFacility.ISIS)
         self.assertEqual(get_facility(SANSInstrument.ZOOM), SANSFacility.ISIS)
-        self.assertEqual(get_facility(SANSInstrument.NoInstrument), SANSFacility.NoFacility)
+        self.assertEqual(get_facility(SANSInstrument.NO_INSTRUMENT), SANSFacility.NO_FACILITY)
 
     def test_that_diagnostic_parser_produces_correct_list(self):
         string_to_parse = '8-11, 12:15, 5, 7:9'
@@ -395,7 +395,7 @@ class SANSFunctionsTest(unittest.TestCase):
         state = self._get_state()
         state.save.user_specified_output_name = ''
 
-        output_name, group_output_name = get_output_name(state, ISISReductionMode.LAB, False)
+        output_name, group_output_name = get_output_name(state, ReductionMode.LAB, False)
 
         expected = "12345_rear_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37"
 
@@ -406,9 +406,9 @@ class SANSFunctionsTest(unittest.TestCase):
         state = self._get_state()
         custom_user_name = 'user_output_name'
         state.save.user_specified_output_name = custom_user_name
-        state.reduction.reduction_mode = ISISReductionMode.LAB
+        state.reduction.reduction_mode = ReductionMode.LAB
 
-        output_name, group_output_name = get_output_name(state, ISISReductionMode.LAB, False)
+        output_name, group_output_name = get_output_name(state, ReductionMode.LAB, False)
 
         reduction_settings = "_rear_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37"
 
@@ -421,9 +421,9 @@ class SANSFunctionsTest(unittest.TestCase):
         state = self._get_state()
         custom_user_name = 'user_output_name'
         state.save.user_specified_output_name = custom_user_name
-        state.reduction.reduction_mode = ISISReductionMode.HAB
+        state.reduction.reduction_mode = ReductionMode.HAB
 
-        output_name, group_output_name = get_output_name(state, ISISReductionMode.HAB, False)
+        output_name, group_output_name = get_output_name(state, ReductionMode.HAB, False)
         reduction_settings = "_front_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37"
 
         expected = custom_user_name + reduction_settings
@@ -434,14 +434,14 @@ class SANSFunctionsTest(unittest.TestCase):
     def test_get_output_name_replaces_name_with_user_specified_name_with_appended_detector_for_All_reduction(self):
         state = self._get_state()
         custom_user_name = 'user_output_name'
-        state.reduction.reduction_mode = ISISReductionMode.All
+        state.reduction.reduction_mode = ReductionMode.ALL
         state.save.user_specified_output_name = custom_user_name
 
         reduction_settings = "rear_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37"
 
         expected = custom_user_name + '_' + reduction_settings
 
-        output_name, group_output_name = get_output_name(state, ISISReductionMode.LAB, False)
+        output_name, group_output_name = get_output_name(state, ReductionMode.LAB, False)
 
         self.assertEqual(expected, output_name)
         self.assertEqual(expected, group_output_name)
@@ -450,12 +450,14 @@ class SANSFunctionsTest(unittest.TestCase):
         state = self._get_state()
         custom_name = 'user_output_name'
         state.save.user_specified_output_name = custom_name
-        state.reduction.reduction_mode = ISISReductionMode.Merged
+        state.reduction.reduction_mode = ReductionMode.MERGED
 
         reduction_settings = "_merged_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37"
-        output_name, group_output_name = get_output_name(state, ISISReductionMode.Merged, False)
 
         expected = custom_name + reduction_settings
+
+        output_name, group_output_name = get_output_name(state, ReductionMode.MERGED, False)
+
         self.assertEqual(expected, output_name)
         self.assertEqual(expected, group_output_name)
 
@@ -463,12 +465,11 @@ class SANSFunctionsTest(unittest.TestCase):
         state = self._get_state()
         custom_name = 'user_output_name'
         state.save.user_specified_output_name = custom_name
-        state.reduction.reduction_mode = ISISReductionMode.Merged
         multi_reduction_type = {"period": False,
                                 "event_slice": True,
                                 "wavelength_range": False}
 
-        output_name, group_output_name = get_output_name(state, ISISReductionMode.Merged, True,
+        output_name, group_output_name = get_output_name(state, ReductionMode.MERGED, True,
                                                          multi_reduction_type=multi_reduction_type)
 
         single_ws_name = custom_name + '_merged_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37_t4.57_T12.37'
@@ -481,12 +482,11 @@ class SANSFunctionsTest(unittest.TestCase):
         state = self._get_state()
         custom_name = 'user_output_name'
         state.save.user_specified_output_name = custom_name
-        state.reduction.reduction_mode = ISISReductionMode.Merged
         multi_reduction_type = {"period": False,
                                 "event_slice": False,
                                 "wavelength_range": True}
 
-        output_name, group_output_name = get_output_name(state, ISISReductionMode.Merged, True,
+        output_name, group_output_name = get_output_name(state, ReductionMode.MERGED, True,
                                                          multi_reduction_type=multi_reduction_type)
 
         single_ws_name = custom_name + '_merged_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37_12.0_34.0'
@@ -499,12 +499,11 @@ class SANSFunctionsTest(unittest.TestCase):
         state = self._get_state()
         custom_name = 'user_output_name'
         state.save.user_specified_output_name = custom_name
-        state.reduction.reduction_mode = ISISReductionMode.Merged
         multi_reduction_type = {"period": True,
                                 "event_slice": False,
                                 "wavelength_range": False}
 
-        output_name, group_output_name = get_output_name(state, ISISReductionMode.Merged, True,
+        output_name, group_output_name = get_output_name(state, ReductionMode.MERGED, True,
                                                          multi_reduction_type=multi_reduction_type)
 
         single_ws_name = custom_name + '_merged_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37_p0'
@@ -517,12 +516,11 @@ class SANSFunctionsTest(unittest.TestCase):
         state = self._get_state()
         custom_name = 'user_output_name'
         state.save.user_specified_output_name = custom_name
-        state.reduction.reduction_mode = ISISReductionMode.Merged
         multi_reduction_type = {"period": True,
                                 "event_slice": True,
                                 "wavelength_range": True}
 
-        output_name, group_output_name = get_output_name(state, ISISReductionMode.Merged, True,
+        output_name, group_output_name = get_output_name(state, ReductionMode.MERGED, True,
                                                          multi_reduction_type=multi_reduction_type)
 
         single_ws_name = custom_name + "_merged_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37_p0_t4.57_T12.37_12.0_34.0"
@@ -535,12 +533,11 @@ class SANSFunctionsTest(unittest.TestCase):
         state = self._get_state()
         custom_name = 'user_output_name'
         state.save.user_specified_output_name = custom_name
-        state.reduction.reduction_mode = ISISReductionMode.LAB
         multi_reduction_type = {"period": True,
                                 "event_slice": True,
                                 "wavelength_range": True}
 
-        output_name, group_output_name = get_output_name(state, ISISReductionMode.LAB, True,
+        output_name, group_output_name = get_output_name(state, ReductionMode.LAB, True,
                                                          multi_reduction_type=multi_reduction_type)
 
         single_ws_name = custom_name + "_rear_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37_p0_t4.57_T12.37_12.0_34.0"
@@ -552,12 +549,12 @@ class SANSFunctionsTest(unittest.TestCase):
     def test_returned_name_for_time_sliced_merged_reduction_without_user_specified_name_correct(self):
         state = self._get_state()
         state.save.user_specified_output_name = ''
-        state.reduction.reduction_mode = ISISReductionMode.Merged
+        state.reduction.reduction_mode = ReductionMode.MERGED
         multi_reduction_type = {"period": False,
                                 "event_slice": True,
                                 "wavelength_range": False}
 
-        output_name, group_output_name = get_output_name(state, ISISReductionMode.Merged, True,
+        output_name, group_output_name = get_output_name(state, ReductionMode.MERGED, True,
                                                          multi_reduction_type=multi_reduction_type)
 
         self.assertEqual(output_name, '12345_merged_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37')
@@ -566,12 +563,12 @@ class SANSFunctionsTest(unittest.TestCase):
     def test_returned_name_for_all_multi_reduction_without_user_specified_name_correct(self):
         state = self._get_state()
         state.save.user_specified_output_name = ''
-        state.reduction.reduction_mode = ISISReductionMode.Merged
+        state.reduction.reduction_mode = ReductionMode.MERGED
         multi_reduction_type = {"period": True,
                                 "event_slice": True,
                                 "wavelength_range": True}
 
-        output_name, group_output_name = get_output_name(state, ISISReductionMode.Merged, True,
+        output_name, group_output_name = get_output_name(state, ReductionMode.MERGED, True,
                                                          multi_reduction_type=multi_reduction_type)
 
         self.assertEqual(output_name, '12345_merged_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37')
@@ -580,12 +577,12 @@ class SANSFunctionsTest(unittest.TestCase):
     def test_returned_name_for_all_multi_reduction_without_user_specified_name_correct_LAB_reduction(self):
         state = self._get_state()
         state.save.user_specified_output_name = ''
-        state.reduction.reduction_mode = ISISReductionMode.LAB
+        state.reduction.reduction_mode = ReductionMode.LAB
         multi_reduction_type = {"period": True,
                                 "event_slice": True,
                                 "wavelength_range": True}
 
-        output_name, group_output_name = get_output_name(state, ISISReductionMode.LAB, True,
+        output_name, group_output_name = get_output_name(state, ReductionMode.LAB, True,
                                                          multi_reduction_type=multi_reduction_type)
 
         self.assertEqual(output_name, '12345_rear_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37')

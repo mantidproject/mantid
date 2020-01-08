@@ -51,15 +51,14 @@ public:
   }
 
   void test_Execute() {
-    auto lattice = new Mantid::Geometry::OrientedLattice;
+    auto lattice = std::make_unique<Mantid::Geometry::OrientedLattice>();
     Mantid::Kernel::DblMatrix UB(3, 3, true);
     UB.identityMatrix();
     lattice->setUB(UB);
 
     auto ws = WorkspaceCreationHelper::createPeaksWorkspace(10);
-    ws->mutableSample().setOrientedLattice(lattice);
+    ws->mutableSample().setOrientedLattice(std::move(lattice));
 
-    delete lattice;
     Mantid::API::AnalysisDataService::Instance().addOrReplace("ws", ws);
 
     CalculatePeaksHKL alg;
@@ -82,16 +81,14 @@ public:
 
   // Don't index peaks that are already indexed.
   void test_SkipIndexing() {
-    auto lattice = new Mantid::Geometry::OrientedLattice;
+    auto lattice = std::make_unique<Mantid::Geometry::OrientedLattice>();
     Mantid::Kernel::DblMatrix UB(3, 3, true);
     UB.identityMatrix();
     lattice->setUB(UB);
 
     auto ws = WorkspaceCreationHelper::createPeaksWorkspace(10);
-    ws->mutableSample().setOrientedLattice(lattice);
+    ws->mutableSample().setOrientedLattice(std::move(lattice));
     ws->getPeak(0).setHKL(1, 1, 1); // First peak is already indexed now.
-
-    delete lattice;
 
     Mantid::API::AnalysisDataService::Instance().addOrReplace("ws", ws);
 
@@ -108,16 +105,14 @@ public:
 
   // Don't index peaks that are already indexed.
   void test_OverwriteIndexed() {
-    auto lattice = new Mantid::Geometry::OrientedLattice;
+    auto lattice = std::make_unique<Mantid::Geometry::OrientedLattice>();
     Mantid::Kernel::DblMatrix UB(3, 3, true);
     UB.identityMatrix();
     lattice->setUB(UB);
 
     auto ws = WorkspaceCreationHelper::createPeaksWorkspace(10);
-    ws->mutableSample().setOrientedLattice(lattice);
+    ws->mutableSample().setOrientedLattice(std::move(lattice));
     ws->getPeak(0).setHKL(1, 1, 1); // First peak is already indexed now.
-
-    delete lattice;
 
     Mantid::API::AnalysisDataService::Instance().addOrReplace("ws", ws);
 

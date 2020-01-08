@@ -150,6 +150,7 @@ class _WorkspaceArtists(object):
         else:
             new_artists = self._data_replace_cb(self._artists, workspace)
         self._set_artists(new_artists)
+        return len(self._artists) == 0
 
     def _set_artists(self, artists):
         """Ensure the stored artists is an iterable"""
@@ -188,6 +189,8 @@ class MantidAxes(Axes):
         self.tracked_workspaces = dict()
         self.creation_args = []
         self.interactive_markers = []
+        # flag to indicate if a function has been set to replace data
+        self.data_replaced = False
 
     def add_artist_correctly(self, artist):
         """
@@ -265,6 +268,8 @@ class MantidAxes(Axes):
             # If wanting to plot a spectrum
             elif MantidAxes.is_axis_of_type(MantidAxType.SPECTRUM, kwargs):
                 return MantidAxes.get_spec_num_from_wksp_index(workspace, kwargs['wkspIndex'])
+        elif kwargs.get('LogName', None) is not None:
+            return None
         elif getattr(workspace, 'getNumberHistograms', lambda: -1)() == 1:
             # If the workspace has one histogram, just plot that
             kwargs['wkspIndex'] = 0
@@ -321,9 +326,10 @@ class MantidAxes(Axes):
         name = workspace.name()
         if name:
             if data_replace_cb is None:
-
-                def data_replace_cb(_, __):
+                def data_replace_cb(*args):
                     logger.warning("Updating data on this plot type is not yet supported")
+            else:
+                self.data_replaced = True
 
             artist_info = self.tracked_workspaces.setdefault(name, [])
 
@@ -418,10 +424,7 @@ class MantidAxes(Axes):
         :param unary_predicate: A predicate taking a single matplotlib artist object
         :return: True if the artist_info is empty, false if artist_info remain
         """
-        is_empty_list = []
-        for workspace_artist in artist_info:
-            empty = workspace_artist.remove_if(self, unary_predicate)
-            is_empty_list.append(empty)
+        is_empty_list = [workspace_artist.remove_if(self, unary_predicate) for workspace_artist in artist_info]
 
         for index, empty in reversed(list(enumerate(is_empty_list))):
             if empty:
@@ -441,8 +444,12 @@ class MantidAxes(Axes):
         except KeyError:
             return False
 
-        for workspace_artist in artist_info:
-            workspace_artist.replace_data(workspace)
+        is_empty_list = [workspace_artist.replace_data(workspace) for workspace_artist in artist_info]
+
+        for index, empty in reversed(list(enumerate(is_empty_list))):
+            if empty:
+                artist_info.pop(index)
+
         return True
 
     def replot_artist(self, artist, errorbars=False, **kwargs):
@@ -589,16 +596,37 @@ class MantidAxes(Axes):
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
 
-            autoscale = kwargs.pop("autoscale_on_update", self.get_autoscale_on())
+            autoscale_on = kwargs.pop("autoscale_on_update", self.get_autoscale_on())
 
             def _data_update(artists, workspace, new_kwargs=None):
                 # It's only possible to plot 1 line at a time from a workspace
+                try:
+                    if new_kwargs:
+                        x, y, _, _ = plotfunctions._plot_impl(self, workspace, args, new_kwargs)
+                    else:
+                        x, y, _, _ = plotfunctions._plot_impl(self, workspace, args, kwargs)
+                    artists[0].set_data(x, y)
+                except RuntimeError as ex:
+                    # if curve couldn't be plotted then remove it - can happen if the workspace doesn't contain the
+                    # spectrum any more following execution of an algorithm
+                    logger.information('Curve not plotted: {0}'.format(ex.args[0]))
+
+                    # remove the curve using similar to logic that in _WorkspaceArtists._remove
+                    artists[0].remove()
+
+                    # blank out list that will be returned
+                    artists = []
+
+                    # also remove the curve from the legend
+                    if (not self.is_empty(self)) and self.legend_ is not None:
+                        self.legend().draggable()
+
                 if new_kwargs:
-                    x, y, _, __ = plotfunctions._plot_impl(self, workspace, args, new_kwargs)
+                    _autoscale_on = new_kwargs.pop("autoscale_on_update", self.get_autoscale_on())
                 else:
-                    x, y, _, __ = plotfunctions._plot_impl(self, workspace, args, kwargs)
-                artists[0].set_data(x, y)
-                if new_kwargs and new_kwargs.pop('autoscale_on_update', self.get_autoscale_on()):
+                    _autoscale_on = self.get_autoscale_on()
+
+                if _autoscale_on:
                     self.relim()
                     self.autoscale()
                 return artists
@@ -608,16 +636,10 @@ class MantidAxes(Axes):
             normalize_by_bin_width, kwargs = get_normalize_by_bin_width(workspace, self, **kwargs)
             is_normalized = normalize_by_bin_width or workspace.isDistribution()
 
-            # If we are making the first plot on an axes object
-            # i.e. self.lines is empty, axes has default ylim values.
-            # Therefore we need to autoscale regardless of autoscale_on_update.
-            if self.lines:
-                # Otherwise set autoscale to autoscale_on_update.
-                self.set_autoscaley_on(autoscale_on_update)
-
-            with autoscale_on_update(self, autoscale):
+            with autoscale_on_update(self, autoscale_on):
                 artist = self.track_workspace_artist(workspace,
-                                                     plotfunctions.plot(self, *args, **kwargs),
+                                                     plotfunctions.plot(self, normalize_by_bin_width = is_normalized,
+                                                                        *args, **kwargs),
                                                      _data_update, spec_num, is_normalized,
                                                      MantidAxes.is_axis_of_type(MantidAxType.SPECTRUM, kwargs))
             return artist
@@ -672,13 +694,13 @@ class MantidAxes(Axes):
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
 
-            autoscale = kwargs.pop("autoscale_on_update", self.get_autoscale_on())
+            autoscale_on = kwargs.pop("autoscale_on_update", self.get_autoscale_on())
 
             def _data_update(artists, workspace, new_kwargs=None):
                 if new_kwargs:
-                    _autoscale = new_kwargs.pop("autoscale_on_update", self.get_autoscale_on())
+                    _autoscale_on = new_kwargs.pop("autoscale_on_update", self.get_autoscale_on())
                 else:
-                    _autoscale = self.get_autoscale_on()
+                    _autoscale_on = self.get_autoscale_on()
                 # errorbar with workspaces can only return a single container
                 container_orig = artists[0]
                 # It is not possible to simply reset the error bars so
@@ -691,28 +713,38 @@ class MantidAxes(Axes):
                     self.containers.remove(container_orig)
                 except ValueError:
                     pass
-                with autoscale_on_update(self, _autoscale):
-                    # this gets pushed back onto the containers list
-                    if new_kwargs:
-                        container_new = plotfunctions.errorbar(self, workspace, **new_kwargs)
-                    else:
-                        container_new = plotfunctions.errorbar(self, workspace, **kwargs)
-                self.containers.insert(orig_idx, container_new)
-                self.containers.pop()
+                # this gets pushed back onto the containers list
+                try:
+                    with autoscale_on_update(self, _autoscale_on):
+                        # this gets pushed back onto the containers list
+                        if new_kwargs:
+                            container_new = plotfunctions.errorbar(self, workspace, **new_kwargs)
+                        else:
+                            container_new = plotfunctions.errorbar(self, workspace, **kwargs)
 
-                # Update joining line
-                if container_new[0] and container_orig[0]:
-                    container_new[0].update_from(container_orig[0])
-                # Update caps
-                for orig_caps, new_caps in zip(container_orig[1], container_new[1]):
-                    new_caps.update_from(orig_caps)
-                # Update bars
-                for orig_bars, new_bars in zip(container_orig[2], container_new[2]):
-                    new_bars.update_from(orig_bars)
+                    self.containers.insert(orig_idx, container_new)
+                    self.containers.pop()
+                    # Update joining line
+                    if container_new[0] and container_orig[0]:
+                        container_new[0].update_from(container_orig[0])
+                    # Update caps
+                    for orig_caps, new_caps in zip(container_orig[1], container_new[1]):
+                        new_caps.update_from(orig_caps)
+                    # Update bars
+                    for orig_bars, new_bars in zip(container_orig[2], container_new[2]):
+                        new_bars.update_from(orig_bars)
+                    # Re-plotting in the config dialog will assign this attr
+                    if hasattr(container_orig, 'errorevery'):
+                        setattr(container_new, 'errorevery', container_orig.errorevery)
 
-                # Re-plotting in the config dialog will assign this attr
-                if hasattr(container_orig, 'errorevery'):
-                    setattr(container_new, 'errorevery', container_orig.errorevery)
+                    # ax.relim does not support collections...
+                    self._update_line_limits(container_new[0])
+                except RuntimeError as ex:
+                    logger.information('Error bar not plotted: {0}'.format(ex.args[0]))
+                    container_new = []
+                    # also remove the curve from the legend
+                    if (not self.is_empty(self)) and self.legend_ is not None:
+                        self.legend().draggable()
 
                 return container_new
 
@@ -720,10 +752,7 @@ class MantidAxes(Axes):
             spec_num = self.get_spec_number_or_bin(workspace, kwargs)
             is_normalized, kwargs = get_normalize_by_bin_width(workspace, self, **kwargs)
 
-            if self.lines:
-                self.set_autoscaley_on(autoscale_on_update)
-
-            with autoscale_on_update(self, autoscale):
+            with autoscale_on_update(self, autoscale_on):
                 artist = self.track_workspace_artist(workspace,
                                                      plotfunctions.errorbar(self, *args, **kwargs),
                                                      _data_update, spec_num, is_normalized,
@@ -752,7 +781,7 @@ class MantidAxes(Axes):
 
         For keywords related to workspaces, see :func:`plotfunctions.pcolor`
         """
-        return self._pcolor_func('pcolor', *args, **kwargs)
+        return self._plot_2d_func('pcolor', *args, **kwargs)
 
     @plot_decorator
     def pcolorfast(self, *args, **kwargs):
@@ -774,7 +803,7 @@ class MantidAxes(Axes):
 
         For keywords related to workspaces, see :func:`plotfunctions.pcolorfast`
         """
-        return self._pcolor_func('pcolorfast', *args, **kwargs)
+        return self._plot_2d_func('pcolorfast', *args, **kwargs)
 
     @plot_decorator
     def pcolormesh(self, *args, **kwargs):
@@ -796,7 +825,7 @@ class MantidAxes(Axes):
 
         For keywords related to workspaces, see :func:`plotfunctions.pcolormesh`
         """
-        return self._pcolor_func('pcolormesh', *args, **kwargs)
+        return self._plot_2d_func('pcolormesh', *args, **kwargs)
 
     @plot_decorator
     def imshow(self, *args, **kwargs):
@@ -818,20 +847,9 @@ class MantidAxes(Axes):
 
         For keywords related to workspaces, see :func:`plotfunctions.imshow`
         """
-        if helperfunctions.validate_args(*args):
-            logger.debug('using plotfunctions')
+        return self._plot_2d_func('imshow', *args, **kwargs)
 
-            def _update_data(artists, workspace):
-                return self._redraw_colorplot(plotfunctions.imshow, artists, workspace, **kwargs)
-
-            workspace = args[0]
-            return self.track_workspace_artist(workspace,
-                                               plotfunctions.imshow(self, *args,
-                                                                    **kwargs), _update_data)
-        else:
-            return Axes.imshow(self, *args, **kwargs)
-
-    def _pcolor_func(self, name, *args, **kwargs):
+    def _plot_2d_func(self, name, *args, **kwargs):
         """
         Implementation of pcolor-style methods
         :param name: The name of the method
@@ -850,10 +868,13 @@ class MantidAxes(Axes):
                 return self._redraw_colorplot(plotfunctions_func, artists, workspace, **kwargs)
 
             workspace = args[0]
+            normalize_by_bin_width, _ = get_normalize_by_bin_width(workspace, self, **kwargs)
+            is_normalized = normalize_by_bin_width or \
+                            (hasattr(workspace, 'isDistribution') and workspace.isDistribution())
             # We return the last mesh so the return type is a single artist like the standard Axes
             artists = self.track_workspace_artist(workspace,
                                                   plotfunctions_func(self, *args, **kwargs),
-                                                  _update_data)
+                                                  _update_data, is_normalized=is_normalized)
             try:
                 return artists[-1]
             except TypeError:
@@ -863,20 +884,39 @@ class MantidAxes(Axes):
 
     def _redraw_colorplot(self, colorfunc, artists_orig, workspace, **kwargs):
         """
-        Redraw a pcolor* or imshow type plot bsaed on a new workspace
+        Redraw a pcolor*, imshow or contour type plot based on a new workspace
         :param colorfunc: The Axes function to use to draw the new artist
         :param artists_orig: A reference to an iterable of existing artists
         :param workspace: A reference to the workspace object
         :param kwargs: Any kwargs passed to the original call
         """
         for artist_orig in artists_orig:
-            artist_orig.remove()
+            if hasattr(artist_orig, 'remove'):
+                artist_orig.remove()
+            else: # for contour plots remove the collections
+                for col in artist_orig.collections:
+                    col.remove()
             if hasattr(artist_orig, 'colorbar_cid'):
                 artist_orig.callbacksSM.disconnect(artist_orig.colorbar_cid)
-        artists_new = colorfunc(self, workspace, **kwargs)
+        if artist_orig.norm.vmin == 0:  # avoid errors with log 0
+            artist_orig.norm.vmin += 1e-6
+        artists_new = colorfunc(self, workspace, norm=artist_orig.norm,  **kwargs)
+
+        artists_new.set_cmap(artist_orig.cmap)
+        if hasattr(artist_orig, 'interpolation'):
+            artists_new.set_interpolation(artist_orig.get_interpolation())
+
+        artists_new.autoscale()
+        artists_new.set_norm(
+            type(artist_orig.norm)(vmin=artists_new.norm.vmin, vmax=artists_new.norm.vmax))
+
         if not isinstance(artists_new, Iterable):
             artists_new = [artists_new]
-        plotfunctions.update_colorplot_datalimits(self, artists_new)
+
+        try:
+            plotfunctions.update_colorplot_datalimits(self, artists_new)
+        except ValueError:
+            pass
         # the type of plot can mutate back to single image from a multi collection
         if len(artists_orig) == len(artists_new):
             for artist_orig, artist_new in zip(artists_orig, artists_new):
@@ -911,13 +951,7 @@ class MantidAxes(Axes):
 
         For keywords related to workspaces, see :func:`plotfunctions.contour`
         """
-        if helperfunctions.validate_args(*args):
-            logger.debug('using plotfunctions')
-            workspace = args[0]
-            return self.track_workspace_artist(workspace,
-                                               plotfunctions.contour(self, *args, **kwargs))
-        else:
-            return Axes.contour(self, *args, **kwargs)
+        return self._plot_2d_func('contour', *args, **kwargs)
 
     @plot_decorator
     def contourf(self, *args, **kwargs):
@@ -939,13 +973,7 @@ class MantidAxes(Axes):
 
         For keywords related to workspaces, see :func:`plotfunctions.contourf`
         """
-        if helperfunctions.validate_args(*args):
-            logger.debug('using plotfunctions')
-            workspace = args[0]
-            return self.track_workspace_artist(workspace,
-                                               plotfunctions.contourf(self, *args, **kwargs))
-        else:
-            return Axes.contourf(self, *args, **kwargs)
+        return self._plot_2d_func('contourf', *args, **kwargs)
 
     @plot_decorator
     def tripcolor(self, *args, **kwargs):
@@ -967,13 +995,7 @@ class MantidAxes(Axes):
 
         For keywords related to workspaces, see :func:`plotfunctions.tripcolor`
         """
-        if helperfunctions.validate_args(*args):
-            logger.debug('using plotfunctions')
-            workspace = args[0]
-            return self.track_workspace_artist(workspace,
-                                               plotfunctions.tripcolor(self, *args, **kwargs))
-        else:
-            return Axes.tripcolor(self, *args, **kwargs)
+        return self._plot_2d_func('tripcolor', *args, **kwargs)
 
     @plot_decorator
     def tricontour(self, *args, **kwargs):
@@ -995,13 +1017,7 @@ class MantidAxes(Axes):
 
         For keywords related to workspaces, see :func:`plotfunctions.tricontour`
         """
-        if helperfunctions.validate_args(*args):
-            logger.debug('using plotfunctions')
-            workspace = args[0]
-            return self.track_workspace_artist(workspace,
-                                               plotfunctions.tricontour(self, *args, **kwargs))
-        else:
-            return Axes.tricontour(self, *args, **kwargs)
+        return self._plot_2d_func('tricontour', *args, **kwargs)
 
     @plot_decorator
     def tricontourf(self, *args, **kwargs):
@@ -1023,13 +1039,7 @@ class MantidAxes(Axes):
 
         For keywords related to workspaces, see :func:`plotfunctions.tricontourf`
         """
-        if helperfunctions.validate_args(*args):
-            logger.debug('using plotfunctions')
-            workspace = args[0]
-            return self.track_workspace_artist(workspace,
-                                               plotfunctions.tricontourf(self, *args, **kwargs))
-        else:
-            return Axes.tricontourf(self, *args, **kwargs)
+        return self._plot_2d_func('tricontourf', *args, **kwargs)
 
     # ------------------ Private api --------------------------------------------------------
 

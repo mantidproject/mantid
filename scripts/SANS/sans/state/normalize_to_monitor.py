@@ -12,7 +12,7 @@ from __future__ import (absolute_import, division, print_function)
 import json
 import copy
 from sans.state.state_base import (StateBase, rename_descriptor_names, PositiveIntegerParameter,
-                                   PositiveFloatParameter, FloatParameter, ClassTypeParameter, DictParameter,
+                                   PositiveFloatParameter, FloatParameter, DictParameter,
                                    PositiveFloatWithNoneParameter, BoolParameter, PositiveFloatListParameter)
 from sans.state.automatic_setters import (automatic_setters)
 from sans.common.enums import (RebinType, RangeStepType, SANSInstrument)
@@ -30,11 +30,11 @@ class StateNormalizeToMonitor(StateBase):
     prompt_peak_correction_max = PositiveFloatWithNoneParameter()
     prompt_peak_correction_enabled = BoolParameter()
 
-    rebin_type = ClassTypeParameter(RebinType)
+    rebin_type = RebinType.REBIN
     wavelength_low = PositiveFloatListParameter()
     wavelength_high = PositiveFloatListParameter()
     wavelength_step = PositiveFloatParameter()
-    wavelength_step_type = ClassTypeParameter(RangeStepType)
+    wavelength_step_type = RangeStepType.NOT_SET
 
     background_TOF_general_start = FloatParameter()
     background_TOF_general_stop = FloatParameter()
@@ -50,7 +50,7 @@ class StateNormalizeToMonitor(StateBase):
         self.prompt_peak_correction_enabled = False
 
         # Default rebin type is a standard Rebin
-        self.rebin_type = RebinType.Rebin
+        self.rebin_type = RebinType.REBIN
 
     def validate(self):
         is_invalid = {}
@@ -192,6 +192,12 @@ class StateNormalizeToMonitorBuilder(object):
         self.state.validate()
         return copy.copy(self.state)
 
+    def set_wavelength_step_type(self, val):
+        self.state.wavelength_step_type = val
+
+    def set_rebin_type(self, val):
+        self.state.rebin_type = val
+
 
 class StateNormalizeToMonitorBuilderLOQ(object):
     @automatic_setters(StateNormalizeToMonitorLOQ)
@@ -205,9 +211,16 @@ class StateNormalizeToMonitorBuilderLOQ(object):
         self.state.validate()
         return copy.copy(self.state)
 
+    def set_wavelength_step_type(self, val):
+        self.state.wavelength_step_type = val
+
+    def set_rebin_type(self, val):
+        self.state.rebin_type = val
+
 
 def get_normalize_to_monitor_builder(data_info):
     instrument = data_info.instrument
+
     if instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.SANS2D or instrument is SANSInstrument.ZOOM:
         return StateNormalizeToMonitorBuilder(data_info)
     elif instrument is SANSInstrument.LOQ:

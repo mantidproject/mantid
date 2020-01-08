@@ -4,13 +4,6 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-/*
- * FilterByTimeTest.h
- *
- *  Created on: Sep 14, 2010
- *      Author: janik
- */
-
 #ifndef FILTERBYTIMETEST_H_
 #define FILTERBYTIMETEST_H_
 
@@ -52,35 +45,34 @@ public:
         WorkspaceCreationHelper::createEventWorkspace(1, 1);
     AnalysisDataService::Instance().addOrReplace("eventWS", ws);
 
-    // Do the filtering now.
-    FilterByTime2 *alg = new FilterByTime2();
-    alg->initialize();
-    alg->setPropertyValue("InputWorkspace", "eventWS");
-    alg->setPropertyValue("OutputWorkspace", "out");
-    alg->setPropertyValue("StopTime", "120");
-    alg->setPropertyValue("AbsoluteStartTime", "2010");
-    alg->execute();
-    TS_ASSERT(!alg->isExecuted());
+    FilterByTime2 algStopTime;
+    algStopTime.initialize();
+    algStopTime.setPropertyValue("InputWorkspace", "eventWS");
+    algStopTime.setPropertyValue("OutputWorkspace", "out");
+    algStopTime.setPropertyValue("StopTime", "120");
+    algStopTime.setPropertyValue("AbsoluteStartTime", "2010");
+    algStopTime.execute();
+    TS_ASSERT(!algStopTime.isExecuted());
 
-    alg = new FilterByTime2();
-    alg->initialize();
-    alg->setPropertyValue("InputWorkspace", "eventWS");
-    alg->setPropertyValue("OutputWorkspace", "out");
-    alg->setPropertyValue("StartTime", "60");
-    alg->setPropertyValue("StopTime", "120");
-    alg->setPropertyValue("AbsoluteStartTime", "2010");
-    alg->execute();
-    TS_ASSERT(!alg->isExecuted());
+    FilterByTime2 algStartStopTime;
+    algStartStopTime.initialize();
+    algStartStopTime.setPropertyValue("InputWorkspace", "eventWS");
+    algStartStopTime.setPropertyValue("OutputWorkspace", "out");
+    algStartStopTime.setPropertyValue("StartTime", "60");
+    algStartStopTime.setPropertyValue("StopTime", "120");
+    algStartStopTime.setPropertyValue("AbsoluteStartTime", "2010");
+    algStartStopTime.execute();
+    TS_ASSERT(!algStartStopTime.isExecuted());
 
-    alg = new FilterByTime2();
-    alg->initialize();
-    alg->setPropertyValue("InputWorkspace", "eventWS");
-    alg->setPropertyValue("OutputWorkspace", "out");
-    alg->setPropertyValue("StopTime", "120");
-    alg->setPropertyValue("AbsoluteStartTime", "2010");
-    alg->setPropertyValue("AbsoluteStopTime", "2010-03");
-    alg->execute();
-    TS_ASSERT(!alg->isExecuted());
+    FilterByTime2 algStopAbsStartAbsStopTime;
+    algStopAbsStartAbsStopTime.initialize();
+    algStopAbsStartAbsStopTime.setPropertyValue("InputWorkspace", "eventWS");
+    algStopAbsStartAbsStopTime.setPropertyValue("OutputWorkspace", "out");
+    algStopAbsStartAbsStopTime.setPropertyValue("StopTime", "120");
+    algStopAbsStartAbsStopTime.setPropertyValue("AbsoluteStartTime", "2010");
+    algStopAbsStartAbsStopTime.setPropertyValue("AbsoluteStopTime", "2010-03");
+    algStopAbsStartAbsStopTime.execute();
+    TS_ASSERT(!algStopAbsStartAbsStopTime.isExecuted());
 
     return;
   }
@@ -96,18 +88,19 @@ public:
     TS_ASSERT(WS); // workspace is loaded
 
     // Do the filtering now.
-    FilterByTime2 *alg = new FilterByTime2();
-    alg->initialize();
-    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("InputWorkspace", inputWS));
+    FilterByTime2 algRelative;
+    algRelative.initialize();
+    TS_ASSERT_THROWS_NOTHING(
+        algRelative.setPropertyValue("InputWorkspace", inputWS));
     outputWS = "eventWS_relative";
     TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("OutputWorkspace", outputWS));
+        algRelative.setPropertyValue("OutputWorkspace", outputWS));
     // Get 1 minute worth
-    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("StartTime", "60"));
-    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("StopTime", "120"));
+    TS_ASSERT_THROWS_NOTHING(algRelative.setPropertyValue("StartTime", "60"));
+    TS_ASSERT_THROWS_NOTHING(algRelative.setPropertyValue("StopTime", "120"));
 
-    alg->execute();
-    TS_ASSERT(alg->isExecuted());
+    algRelative.execute();
+    TS_ASSERT(algRelative.isExecuted());
 
     // Retrieve Workspace changed
     EventWorkspace_sptr outWS;
@@ -125,19 +118,20 @@ public:
                         WS->run().getProtonCharge());
 
     //-------------- Absolute time filtering --------------------
-    alg = new FilterByTime2();
-    alg->initialize();
-    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("InputWorkspace", inputWS));
+    FilterByTime2 algAbs;
+    algAbs.initialize();
+    TS_ASSERT_THROWS_NOTHING(
+        algAbs.setPropertyValue("InputWorkspace", inputWS));
     outputWS = "eventWS_absolute";
     TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("OutputWorkspace", outputWS));
+        algAbs.setPropertyValue("OutputWorkspace", outputWS));
     // Get 1 minutes worth, starting at minute 1
     TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("AbsoluteStartTime", "2010-03-25T16:09:37.46"));
+        algAbs.setPropertyValue("AbsoluteStartTime", "2010-03-25T16:09:37.46"));
     TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("AbsoluteStopTime", "2010-03-25T16:10:37.46"));
-    alg->execute();
-    TS_ASSERT(alg->isExecuted());
+        algAbs.setPropertyValue("AbsoluteStopTime", "2010-03-25T16:10:37.46"));
+    algAbs.execute();
+    TS_ASSERT(algAbs.isExecuted());
 
     EventWorkspace_sptr outWS2;
     outWS2 =

@@ -14,7 +14,7 @@ from sans.common.general_functions import append_to_sans_file_tag
 
 def mask_workspace(state, component_as_string, workspace):
     assert (state is not dict)
-    component = DetectorType.from_string(component_as_string)
+    component = DetectorType(component_as_string)
 
     # Get the correct SANS masking strategy from create_masker
     masker = create_masker(state, component)

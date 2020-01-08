@@ -39,6 +39,7 @@ set(SRC_FILES
     src/NormaliseVanadium.cpp
     src/OptimizeCrystalPlacement.cpp
     src/OptimizeLatticeForCellType.cpp
+    src/PeakAlgorithmHelpers.cpp
     src/PeakBackground.cpp
     src/PeakClusterProjection.cpp
     src/PeakHKLErrors.cpp
@@ -115,6 +116,7 @@ set(INC_FILES
     inc/MantidCrystal/NormaliseVanadium.h
     inc/MantidCrystal/OptimizeCrystalPlacement.h
     inc/MantidCrystal/OptimizeLatticeForCellType.h
+    inc/MantidCrystal/PeakAlgorithmHelpers.h
     inc/MantidCrystal/PeakBackground.h
     inc/MantidCrystal/PeakClusterProjection.h
     inc/MantidCrystal/PeakHKLErrors.h

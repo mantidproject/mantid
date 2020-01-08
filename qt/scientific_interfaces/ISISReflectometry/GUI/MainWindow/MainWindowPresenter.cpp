@@ -6,8 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MainWindowPresenter.h"
 #include "GUI/Batch/IBatchPresenterFactory.h"
-#include "GUI/Common/Decoder.h"
-#include "GUI/Common/Encoder.h"
+#include "GUI/Common/IDecoder.h"
+#include "GUI/Common/IEncoder.h"
+#include "GUI/Common/IFileHandler.h"
 #include "GUI/Common/IMessageHandler.h"
 #include "GUI/Runs/IRunsPresenter.h"
 #include "IMainWindowView.h"
@@ -16,10 +17,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/ISlitCalculator.h"
-#include "MantidQtWidgets/Common/QtJSONUtils.h"
 #include "Reduction/Batch.h"
-
-#include <QFileDialog>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -38,15 +36,22 @@ Mantid::Kernel::Logger g_log("Reflectometry GUI");
  * @param view :: [input] The view we are managing
  * @param messageHandler :: Interface to a class that displays messages to
  * the user
+ * @param fileHandler :: Interface to a class that loads/saves files
+ * @param encoder :: Interface for encoding a batch for saving to file
+ * @param decoder :: Interface for decoding a batch loaded from file
  * @param slitCalculator :: Interface to the Slit Calculator dialog
  * @param batchPresenterFactory :: [input] A factory to create the batches
  * we will manage
  */
 MainWindowPresenter::MainWindowPresenter(
     IMainWindowView *view, IMessageHandler *messageHandler,
+    IFileHandler *fileHandler, std::unique_ptr<IEncoder> encoder,
+    std::unique_ptr<IDecoder> decoder,
     std::unique_ptr<ISlitCalculator> slitCalculator,
     std::unique_ptr<IBatchPresenterFactory> batchPresenterFactory)
-    : m_view(view), m_messageHandler(messageHandler), m_instrument(),
+    : m_view(view), m_messageHandler(messageHandler),
+      m_fileHandler(fileHandler), m_instrument(), m_encoder(std::move(encoder)),
+      m_decoder(std::move(decoder)),
       m_slitCalculator(std::move(slitCalculator)),
       m_batchPresenterFactory(std::move(batchPresenterFactory)) {
   view->subscribe(this);
@@ -182,37 +187,28 @@ void MainWindowPresenter::showHelp() {
 }
 
 void MainWindowPresenter::notifySaveBatchRequested(int tabIndex) {
-  const QString jsonFilter = QString("JSON (*.json)");
-  auto filename =
-      QFileDialog::getSaveFileName(nullptr, QString(), QString(), jsonFilter,
-                                   nullptr, QFileDialog::DontResolveSymlinks);
+  auto filename = m_messageHandler->askUserForSaveFileName("JSON (*.json)");
   if (filename == "")
     return;
-  Encoder encoder;
-  IBatchPresenter *batchPresenter = m_batchPresenters[tabIndex].get();
-  auto map = encoder.encodeBatch(batchPresenter, m_view, false);
-  MantidQt::API::saveJSONToFile(filename, map);
+  auto map = m_encoder->encodeBatch(m_view, tabIndex, false);
+  m_fileHandler->saveJSONToFile(filename, map);
 }
 
 void MainWindowPresenter::notifyLoadBatchRequested(int tabIndex) {
-  const QString jsonFilter = QString("JSON (*.json)");
-  auto filename =
-      QFileDialog::getOpenFileName(nullptr, QString(), QString(), jsonFilter,
-                                   nullptr, QFileDialog::DontResolveSymlinks);
+  auto filename = m_messageHandler->askUserForLoadFileName("JSON (*.json)");
   if (filename == "")
     return;
   QMap<QString, QVariant> map;
   try {
-    map = MantidQt::API::loadJSONFromFile(filename);
+    map = m_fileHandler->loadJSONFromFile(filename);
   } catch (const std::runtime_error) {
     m_messageHandler->giveUserCritical(
         "Unable to load requested file. Please load a file of "
         "appropriate format saved from the GUI.",
         "Error:");
+    return;
   }
-  IBatchPresenter *batchPresenter = m_batchPresenters[tabIndex].get();
-  Decoder decoder;
-  decoder.decodeBatch(batchPresenter, m_view, map);
+  m_decoder->decodeBatch(m_view, tabIndex, map);
 }
 
 void MainWindowPresenter::disableSaveAndLoadBatch() {
@@ -236,9 +232,7 @@ std::string MainWindowPresenter::instrumentName() const {
 }
 
 void MainWindowPresenter::updateInstrument(const std::string &instrumentName) {
-  Mantid::Kernel::ConfigService::Instance().setString("default.instrument",
-                                                      instrumentName);
-  g_log.information() << "Instrument changed to " << instrumentName;
+  setDefaultInstrument(instrumentName);
 
   // Load a workspace for this instrument so we can get the actual instrument
   auto loadAlg =
@@ -259,6 +253,24 @@ void MainWindowPresenter::updateInstrument(const std::string &instrumentName) {
   // Notify the slit calculator
   m_slitCalculator->setCurrentInstrumentName(instrumentName);
   m_slitCalculator->processInstrumentHasBeenChanged();
+}
+
+void MainWindowPresenter::setDefaultInstrument(
+    const std::string &requiredInstrument) {
+  auto &config = Mantid::Kernel::ConfigService::Instance();
+
+  auto currentFacility = config.getString("default.facility");
+  auto requiredFacility = "ISIS";
+  if (currentFacility != requiredFacility) {
+    config.setString("default.facility", requiredFacility);
+    g_log.notice() << "Facility changed to " << requiredFacility;
+  }
+
+  auto currentInstrument = config.getString("default.instrument");
+  if (currentInstrument != requiredInstrument) {
+    config.setString("default.instrument", requiredInstrument);
+    g_log.notice() << "Instrument changed to " << requiredInstrument;
+  }
 }
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

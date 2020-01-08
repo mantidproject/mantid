@@ -112,8 +112,10 @@ void SelectCellWithForm::exec() {
     throw std::runtime_error("Could not read the peaks workspace");
   }
 
-  OrientedLattice o_lattice = ws->mutableSample().getOrientedLattice();
-  Matrix<double> UB = o_lattice.getUB();
+  // copy current lattice
+  auto o_lattice = std::make_unique<OrientedLattice>(
+      ws->mutableSample().getOrientedLattice());
+  Matrix<double> UB = o_lattice->getUB();
 
   bool allowPermutations = this->getProperty("AllowPermutations");
 
@@ -147,14 +149,12 @@ void SelectCellWithForm::exec() {
     //                       least squares optimization
 
     //----------------------------------------------
-    o_lattice.setUB(newUB);
+    o_lattice->setUB(newUB);
     std::vector<double> sigabc(6);
     DetermineErrors(sigabc, newUB, ws, tolerance);
 
-    o_lattice.setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4],
-                       sigabc[5]);
-
-    ws->mutableSample().setOrientedLattice(&o_lattice);
+    o_lattice->setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4],
+                        sigabc[5]);
 
     std::vector<Peak> &peaks = ws->getPeaks();
     size_t n_peaks = ws->getNumberPeaks();
@@ -162,7 +162,7 @@ void SelectCellWithForm::exec() {
     int num_indexed = 0;
     double average_error = 0.0;
 
-    if (o_lattice.getMaxOrder() == 0) {
+    if (o_lattice->getMaxOrder() == 0) {
       std::vector<V3D> miller_indices;
       std::vector<V3D> q_vectors;
       for (size_t i = 0; i < n_peaks; i++) {
@@ -183,6 +183,7 @@ void SelectCellWithForm::exec() {
         peaks[i].setHKL(T * peaks[i].getHKL());
       }
     }
+    ws->mutableSample().setOrientedLattice(std::move(o_lattice));
 
     // Tell the user what happened.
     g_log.notice() << "Re-indexed the peaks with the new UB. \n";

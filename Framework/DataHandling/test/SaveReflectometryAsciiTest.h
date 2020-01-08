@@ -90,6 +90,8 @@ public:
         TS_ASSERT_EQUALS(fullline, *(it++));
     }
     TS_ASSERT(in.eof())
+    in.close();
+    Poco::File(filename).remove();
   }
 
   void test_histogram_data() {
@@ -127,6 +129,8 @@ public:
         TS_ASSERT_EQUALS(fullline, *(it++))
     }
     TS_ASSERT(in.eof())
+    in.close();
+    Poco::File(filename).remove();
   }
 
   void test_empty_workspace() {
@@ -168,6 +172,8 @@ public:
                                 std::istreambuf_iterator<char>(),
                                 in.widen('\n')),
                      25)
+    in.close();
+    Poco::File(filename).remove();
   }
 
   void test_dx_values() {
@@ -208,6 +214,8 @@ public:
       if (fullline.find(" : ") == std::string::npos)
         TS_ASSERT_EQUALS(fullline, *(it++))
     }
+    in.close();
+    Poco::File(filename).remove();
   }
 
   void test_txt() {
@@ -243,6 +251,9 @@ public:
       TS_ASSERT_EQUALS(fullline, *(it++))
     }
     TS_ASSERT(in.eof())
+
+    in.close();
+    Poco::File(filename).remove();
   }
 
   void test_override_existing_file_txt() {
@@ -287,6 +298,9 @@ public:
       TS_ASSERT_EQUALS(fullline, *(it++));
     }
     TS_ASSERT(in.eof())
+
+    in.close();
+    Poco::File(filename).remove();
   }
 
   void test_more_than_nine_logs() {
@@ -342,6 +356,9 @@ public:
     TS_ASSERT_EQUALS(line, "Number of file format : 40")
     std::getline(in, line);
     TS_ASSERT_EQUALS(line, "Number of data points : 2")
+
+    in.close();
+    Poco::File(filename).remove();
   }
 
   void test_user_log() {
@@ -403,6 +420,9 @@ public:
     TS_ASSERT_EQUALS(line, "Number of file format : 40")
     std::getline(in, line);
     TS_ASSERT_EQUALS(line, "Number of data points : 2")
+
+    in.close();
+    Poco::File(filename).remove();
   }
 
   void test_user_log_overrides_fixed_log() {
@@ -465,6 +485,9 @@ public:
     TS_ASSERT_EQUALS(line, "Number of file format : 40")
     std::getline(in, line);
     TS_ASSERT_EQUALS(line, "Number of data points : 2")
+
+    in.close();
+    Poco::File(filename).remove();
   }
 
   void test_automatic_log_filling() {
@@ -519,6 +542,9 @@ public:
     TS_ASSERT_EQUALS(line, "Number of file format : 40")
     std::getline(in, line);
     TS_ASSERT_EQUALS(line, "Number of data points : 2")
+
+    in.close();
+    Poco::File(filename).remove();
   }
 
   void test_group_workspaces() {
@@ -582,6 +608,11 @@ public:
       TS_ASSERT_EQUALS(fullline, *(it2++));
     }
     TS_ASSERT(in2.eof())
+
+    in1.close();
+    Poco::File(f1).remove();
+    in2.close();
+    Poco::File(f2).remove();
   }
 
   void test_point_data_dat() {
@@ -616,6 +647,9 @@ public:
       TS_ASSERT_EQUALS(fullline, *(it++));
     }
     TS_ASSERT(in.eof())
+
+    in.close();
+    Poco::File(filename).remove();
   }
 
   void test_dx_values_with_header_custom() {
@@ -658,6 +692,9 @@ public:
       if (fullline.find(" : ") == std::string::npos)
         TS_ASSERT_EQUALS(fullline, *(it++))
     }
+
+    in.close();
+    Poco::File(filename).remove();
   }
 
   void test_dx_values_no_header_custom() {
@@ -694,6 +731,9 @@ public:
     while (std::getline(in, fullline)) {
       TS_ASSERT_EQUALS(fullline, *(it++))
     }
+
+    in.close();
+    Poco::File(filename).remove();
   }
 
   void test_no_header_no_resolution_separator_custom() {
@@ -730,6 +770,8 @@ public:
     while (std::getline(in, fullline)) {
       TS_ASSERT_EQUALS(fullline, *(it++))
     }
+    in.close();
+    Poco::File(filename).remove();
   }
 
 private:

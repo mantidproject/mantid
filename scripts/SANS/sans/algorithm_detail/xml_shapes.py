@@ -144,16 +144,16 @@ def quadrant_xml(centre,rmin,rmax,quadrant):
     xmlstring+= infinite_cylinder(centre, rmax, [0,0,1], cout_id)
     plane1Axis=None
     plane2Axis=None
-    if quadrant is MaskingQuadrant.Left:
+    if quadrant is MaskingQuadrant.LEFT:
         plane1Axis = [-1,1,0]
         plane2Axis = [-1,-1,0]
-    elif quadrant is MaskingQuadrant.Right:
+    elif quadrant is MaskingQuadrant.RIGHT:
         plane1Axis = [1,-1,0]
         plane2Axis = [1,1,0]
-    elif quadrant is MaskingQuadrant.Top:
+    elif quadrant is MaskingQuadrant.TOP:
         plane1Axis = [1,1,0]
         plane2Axis = [-1,1,0]
-    elif quadrant is MaskingQuadrant.Bottom:
+    elif quadrant is MaskingQuadrant.BOTTOM:
         plane1Axis = [-1,-1,0]
         plane2Axis = [1,-1,0]
     else:

@@ -10,6 +10,7 @@
 #include "MantidPythonInterface/core/Policies/VectorToNumpy.h"
 #include <boost/python/class.hpp>
 #include <boost/python/enum.hpp>
+#include <boost/python/make_function.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 #include <vector>
 
@@ -25,10 +26,15 @@ using namespace boost::python;
 GET_POINTER_SPECIALIZATION(IEventList)
 
 namespace {
+void addPulsetimes(IEventList &self, const NDArray &data) {
+  self.addPulsetimes(Converters::NDArrayToVector<double>(data)());
+}
+
 void maskCondition(IEventList &self, const NDArray &data) {
   self.maskCondition(Converters::NDArrayToVector<bool>(data)());
 }
 } // namespace
+
 /// return_value_policy for copied numpy array
 using return_clone_numpy = return_value_policy<Policies::VectorToNumpy>;
 
@@ -70,6 +76,9 @@ void export_IEventList() {
       .def("addPulsetime", &IEventList::addPulsetime, args("self", "seconds"),
            "Add an offset to the pulsetime (wall-clock time) of each event in "
            "the list.")
+      .def("addPulsetimes", &addPulsetimes, args("self", "seconds"),
+           "Add offsets to the pulsetime (wall-clock time) of each event in "
+           "the list.")
       .def("maskTof", &IEventList::maskTof, args("self", "tofMin", "tofMax"),
            "Mask out events that have a tof between tofMin and tofMax "
            "(inclusively)")
@@ -91,6 +100,10 @@ void export_IEventList() {
            args("self"), return_clone_numpy(),
            "Get a vector of the weights of the events")
       .def("getPulseTimes", &IEventList::getPulseTimes, args("self"),
+           "Get a vector of the pulse times of the events")
+      .def("getPulseTimesAsNumpy",
+           make_function(&IEventList::getPulseTimes,
+                         return_value_policy<Policies::VectorToNumpy>()),
            "Get a vector of the pulse times of the events")
       .def("getPulseTimeMax", &IEventList::getPulseTimeMax, args("self"),
            "The maximum pulse time for the list of the events.")

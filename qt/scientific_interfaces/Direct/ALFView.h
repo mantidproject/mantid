@@ -7,15 +7,13 @@
 #ifndef MANTIDQT_CUSTOMINTERFACES_ALFVIEW_H_
 #define MANTIDQT_CUSTOMINTERFACES_ALFVIEW_H_
 
-#include "ALFView_model.h"
-#include "ALFView_presenter.h"
-#include "ALFView_view.h"
+#include "ALFCustomInstrumentModel.h"
+#include "ALFCustomInstrumentPresenter.h"
+#include "ALFCustomInstrumentView.h"
 #include "DllConfig.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
-
-#include "PlotFitAnalysisPanePresenter.h"
-#include "PlotFitAnalysisPaneView.h"
+#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -34,10 +32,10 @@ protected:
   void initLayout() override;
 
 private:
-  ALFView_view *m_view;
-  ALFView_model *m_model;
-  ALFView_presenter *m_presenter;
-  PlotFitAnalysisPanePresenter *m_analysisPane;
+  ALFCustomInstrumentView *m_view;
+  ALFCustomInstrumentModel *m_model;
+  ALFCustomInstrumentPresenter *m_presenter;
+  MantidWidgets::PlotFitAnalysisPanePresenter *m_analysisPane;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

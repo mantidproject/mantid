@@ -28,13 +28,15 @@ def _catch_exceptions(func):
 
 
 class MuonContextADSObserver(AnalysisDataServiceObserver):
-    def __init__(self, delete_callback, clear_callback):
+    def __init__(self, delete_callback, clear_callback, replace_callback):
         super(MuonContextADSObserver, self).__init__()
         self.delete_callback = delete_callback
         self.clear_callback = clear_callback
+        self.replace_callback = replace_callback
 
         self.observeDelete(True)
         self.observeRename(True)
+        self.observeReplace(True)
         self.observeClear(True)
 
     @_catch_exceptions
@@ -62,6 +64,16 @@ class MuonContextADSObserver(AnalysisDataServiceObserver):
         Called when the ADS has been cleared, removes all data and rests the GUI
         """
         self.clear_callback()
+
+    @_catch_exceptions
+    def replaceHandle(self, name, workspace):
+        """
+                Called when the ADS has replaced a workspace with one of the same name.
+                If this workspace is attached to this figure then its data is updated
+                :param name: The name of the workspace.
+                :param workspace: A reference to the new workspace (Unused)
+                """
+        self.replace_callback(name)
 
     def unsubscribe(self):
         self.observeDelete(False)

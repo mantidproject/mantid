@@ -159,10 +159,10 @@ public:
                    bool isPeriodic) const override;
 
   /// New split method
-  void
-  splitByTimeVector(std::vector<Types::Core::DateAndTime> &splitter_time_vec,
-                    std::vector<int> &target_vec,
-                    std::vector<TimeSeriesProperty *> outputs);
+  void splitByTimeVector(
+      const std::vector<Types::Core::DateAndTime> &splitter_time_vec,
+      const std::vector<int> &target_vec,
+      const std::vector<TimeSeriesProperty *> &outputs);
 
   /// Fill a TimeSplitterType that will filter the events by matching
   void makeFilterByValue(std::vector<SplittingInterval> &split, double min,

@@ -164,7 +164,7 @@ public:
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
 
-    TS_ASSERT_THROWS(alg.executeAsChildAlg(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.executeAsChildAlg(), const std::runtime_error &);
   }
 };
 

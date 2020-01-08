@@ -173,23 +173,24 @@ void OptimizeLatticeForCellType::exec() {
     ub_alg->setProperty("gamma", refinedCell.gamma());
     ub_alg->executeAsChildAlg();
     DblMatrix UBnew = peakWS->mutableSample().getOrientedLattice().getUB();
-    OrientedLattice o_lattice;
-    o_lattice.setUB(UBnew);
+    auto o_lattice = std::make_unique<OrientedLattice>();
+    o_lattice->setUB(UBnew);
     if (maxOrder > 0) {
-      o_lattice.setModUB(modUB);
-      o_lattice.setMaxOrder(maxOrder);
-      o_lattice.setCrossTerm(crossTerms);
+      o_lattice->setModUB(modUB);
+      o_lattice->setMaxOrder(maxOrder);
+      o_lattice->setCrossTerm(crossTerms);
     }
-    o_lattice.set(refinedCell.a(), refinedCell.b(), refinedCell.c(),
-                  refinedCell.alpha(), refinedCell.beta(), refinedCell.gamma());
-    o_lattice.setError(refinedCell.errora(), refinedCell.errorb(),
-                       refinedCell.errorc(), refinedCell.erroralpha(),
-                       refinedCell.errorbeta(), refinedCell.errorgamma());
+    o_lattice->set(refinedCell.a(), refinedCell.b(), refinedCell.c(),
+                   refinedCell.alpha(), refinedCell.beta(),
+                   refinedCell.gamma());
+    o_lattice->setError(refinedCell.errora(), refinedCell.errorb(),
+                        refinedCell.errorc(), refinedCell.erroralpha(),
+                        refinedCell.errorbeta(), refinedCell.errorgamma());
 
     // Show the modified lattice parameters
-    g_log.notice() << i_run->getName() << "  " << o_lattice << "\n";
+    g_log.notice() << i_run->getName() << "  " << *o_lattice << "\n";
 
-    i_run->mutableSample().setOrientedLattice(&o_lattice);
+    i_run->mutableSample().setOrientedLattice(std::move(o_lattice));
 
     setProperty("OutputChi2", chisq);
 

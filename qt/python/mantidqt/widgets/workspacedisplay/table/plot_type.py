@@ -1,4 +1,4 @@
-from mantid.py3compat import Enum
+from enum import Enum
 
 
 class PlotType(Enum):

@@ -1825,9 +1825,9 @@ void DetectorPlotController::addPeak(double x, double y) {
     // if data WS has UB copy it to the new peaks workspace
     if (newPeaksWorkspace && ws->sample().hasOrientedLattice()) {
       auto UB = ws->sample().getOrientedLattice().getUB();
-      auto lattice = new Mantid::Geometry::OrientedLattice;
+      auto lattice = std::make_unique<Mantid::Geometry::OrientedLattice>();
       lattice->setUB(UB);
-      tw->mutableSample().setOrientedLattice(lattice);
+      tw->mutableSample().setOrientedLattice(std::move(lattice));
     }
 
     // if there is a UB available calculate HKL for the new peak

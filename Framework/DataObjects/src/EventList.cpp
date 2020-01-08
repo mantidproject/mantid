@@ -2632,6 +2632,23 @@ void EventList::addPulsetimeHelper(std::vector<T> &events,
   }
 }
 
+/** Add an offset per event to the pulsetime (wall-clock time) of each event in
+ * the list. It is assumed that the vector sizes match.
+ *
+ * @param events :: reference to a vector of events to change.
+ * @param seconds :: The set of values to shift the pulsetime by, in seconds
+ */
+template <class T>
+void EventList::addPulsetimesHelper(std::vector<T> &events,
+                                    const std::vector<double> &seconds) {
+  auto eventIterEnd{events.end()};
+  auto secondsIter{seconds.cbegin()};
+  for (auto eventIter = events.begin(); eventIter < eventIterEnd;
+       ++eventIter, ++secondsIter) {
+    eventIter->m_pulsetime += *secondsIter;
+  }
+}
+
 // --------------------------------------------------------------------------
 /** Add an offset to the pulsetime (wall-clock time) of each event in the list.
  *
@@ -2648,6 +2665,34 @@ void EventList::addPulsetime(const double seconds) {
     break;
   case WEIGHTED:
     this->addPulsetimeHelper(this->weightedEvents, seconds);
+    break;
+  case WEIGHTED_NOTIME:
+    throw std::runtime_error("EventList::addPulsetime() called on an event "
+                             "list with no pulse times. You must call this "
+                             "algorithm BEFORE CompressEvents.");
+    break;
+  }
+}
+
+// --------------------------------------------------------------------------
+/** Add an offset to the pulsetime (wall-clock time) of each event in the list.
+ *
+ * @param seconds :: A set of values to shift the pulsetime by, in seconds
+ */
+void EventList::addPulsetimes(const std::vector<double> &seconds) {
+  if (this->getNumberEvents() <= 0)
+    return;
+  if (this->getNumberEvents() != seconds.size()) {
+    throw std::runtime_error("");
+  }
+
+  // Convert the list
+  switch (eventType) {
+  case TOF:
+    this->addPulsetimesHelper(this->events, seconds);
+    break;
+  case WEIGHTED:
+    this->addPulsetimesHelper(this->weightedEvents, seconds);
     break;
   case WEIGHTED_NOTIME:
     throw std::runtime_error("EventList::addPulsetime() called on an event "

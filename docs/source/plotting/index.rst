@@ -1,11 +1,14 @@
 .. _plotting:
 
+====================
+Matplotlib in Mantid
+====================
+
 .. contents:: Table of contents
     :local:
 
-====================================
-Introduction to Matplotlib in Mantid
-====================================
+Introduction
+------------
 
 Mantid can now use `Matplotlib <https://matplotlib.org/>`_ to produce figures.
 There are several advantages of using this software package:
@@ -173,9 +176,8 @@ Here are some of the highlights:
   One can have multiple Axes objects in one Figure
 * **Axis** is the container for the ticks and labels for the x and y axis of the plot
 
-======================
 Showing/saving figures
-======================
+----------------------
 
 There are two main ways that one can visualize images produced by matplotlib. The first one
 is to pop up a window with the required graph. For that, we use the `show()` function of the figure.
@@ -221,9 +223,9 @@ Sometimes one wants to save a multi-page pdf document. Here is how to do this:
        pdf.savefig(fig)
 
 
-============
+
 Simple plots
-============
+------------
 
 For matrix workspaces, if we use the `mantid` projection, one can plot the data in a similar
 fashion as the plotting of arrays in matplotlib. Moreover, one can combine the two in the same figure
@@ -402,10 +404,299 @@ One can do twin axes as well:
    fig.tight_layout()
    #fig.show()
 
+Custom Colors
+-------------
 
-====================
+Custom Color Cycle (Line / 1D plots)
+####################################
+
+The Default Color Cycle doesn't have to be used. Here is an example where a Custom Color Cycle is chosen. Make sure to fill the list `custom_colors` with either the HTML hex codes (eg. #b3457f) or recognised names for the desired colours. 
+Both can be found `online <https://www.rapidtables.com/web/color/html-color-codes.html>`_.
+
+.. plot::
+   :include-source:
+
+   from __future__ import (absolute_import, division, print_function, unicode_literals)
+   import matplotlib.pyplot as plt
+   from mantid import plots
+   from mantid.simpleapi import *
+
+   ws=Load('GEM40979.raw')
+   Number = 12 # How many Spectra to Plot
+
+   prop_cycle = plt.rcParams['axes.prop_cycle']
+   colors = prop_cycle.by_key()['color'] # 10 colors in default cycle
+
+   '''Change the following two parameters as you wish'''
+   custom_colors = ['#0000ffff', 'salmon','#00ff00ff'] # I've chosen Blue, Salmon, Green
+   
+   fig = plt.figure(figsize = (10,10))
+   ax1 = plt.subplot(211,projection='mantid')
+   for i in range(Number):
+      ax1.plot(ws, specNum = i+1, color=colors[i%len(colors)])
+   ax1.set_title('Default')
+   ax1.legend()
+
+   ax2 = plt.subplot(212,projection='mantid')
+   for i in range(Number):
+      ax2.plot(ws, specNum= i+1, color=custom_colors[i%len(custom_colors)])
+   ax2.set_title('Custom')
+   ax2.legend()
+
+   fig.suptitle('Line Plots: Color Cycle', fontsize='x-large')
+   #fig.show()
+
+Custom Colormap (MantidPlot)
+############################
+
+In MantidPlot, a Custom Colormap (256 entries of Red, Green and Blue values [0-255 for each]) can be created and saved with:
+
+.. code-block:: python
+
+   from __future__ import (absolute_import, division, print_function, unicode_literals)
+   from mantid.simpleapi import *
+   import matplotlib.pyplot as plt
+   import numpy as np
+
+   r = np.zeros(256)
+   g = np.zeros(256)
+   b = np.zeros(256)
+   for i in range(256):
+      '''Control how the RGB values change throughout the Colormap'''
+      r[i] = i          #linear increase in Red
+      g[i] = 255 - i    #linear decrease in Green
+
+   f = open("C:\MantidInstall\colormaps\GreenRed.map","w+") #Change the .map filename as you wish!
+   for i in range(256):
+      f.write(str(int(r[i])))
+      f.write(' ')
+      f.write(str(int(g[i])))
+      f.write(' ')
+      f.write(str(int(b[i])))
+      f.write('\n')
+   f.close()
+
+Then open up any dataset (such as EMU00020884.nxs from the `TrainingCourseData <https://sourceforge.net/projects/mantid/files/Sample%20Data/TrainingCourseData.zip/download>`_) and produce a Colorfill plot. Change the Colormap by following `these instructions <https://docs.mantidproject.org/nightly/tutorials/mantid_basic_course/loading_and_displaying_data/04_displaying_2D_data.html#changing-the-colour-map>`_ and selecting the newly created `Greenred.map`.
+
+.. figure:: ../images/ColorMapCustomPlot.PNG
+   :class: screenshot
+   :width: 500px
+   :align: center
+
+This New Colormap is saved within the MantidInstall folder so it can be used without re-running this script!
+
+   
+Custom Colormap (MantidWorkbench)
+#################################
+
+You can view the premade Colormaps `here <https://matplotlib.org/2.2.3/gallery/color/colormap_reference.html?highlight=colormap>`_.
+These Colormaps can be registered and remain for the current session, but need to be rerun if Mantid has been reopened. Choose the location to Save your Colormap file wisely, outside of your MantidInstall folder!
+
+The following methods show how to Load, Convert from MantidPlot format, Create from Scratch and Visualise a Custom Colormap.
+
+- If you already have a Colormap file in an (N by 4) format, with all values between 0 and 1, then use:
+
+*1a. Load Colormap and Register*
+
+.. code-block:: python
+
+  import matplotlib.pyplot as plt
+  import numpy as np
+  from matplotlib.colors import ListedColormap, LinearSegmentedColormap
+
+  Cmap_Name = 'Beach' # Colormap name
+  Loaded_Cmap = np.loadtxt("C:\Path\to\File\Filename.txt")
+  # Register the Loaded Colormap
+  Listed_CustomCmap = ListedColormap(Loaded_Cmap, name=Cmap_Name)
+  plt.register_cmap(name=Cmap_Name, cmap= Listed_CustomCmap)
+
+  # Create and register the reverse colormap
+  Res = len(Loaded_Cmap)
+  Reverse = np.zeros((Res,4))
+  for i in range(Res):
+    for j in range(4):
+        Reverse[i][j] = Loaded_Cmap[Res-(i+1)][j]
+
+  Listed_CustomCmap_r = ListedColormap(Reverse, name=(Cmap_Name + '_r') )
+  plt.register_cmap(name=(Cmap_Name + '_r'), cmap= Listed_CustomCmap_r)
+
+- If you have a Colormap file in a MantidPlot format (N by 3) with all values between 0 and 255, firstly **rename the file extension from .map to .txt**, then use:
+
+*1b. Convert MantidPlot Colormap and Register*
+
+.. code-block:: python
+
+  import matplotlib.pyplot as plt
+  import numpy as np
+  from matplotlib.colors import ListedColormap, LinearSegmentedColormap
+
+  Cmap_Name = 'Beach'
+  Loaded_Cmap = np.loadtxt("/Path/to/file/Beach.txt")
+
+  Res = len(Loaded_Cmap)
+  Cmap = np.zeros((Res,4))
+  for i in range(Res): 
+    '''Normalise RGB values, Add 4th column alpha set to 1'''
+    for j in range(3):
+      Cmap[i][j] = float(Loaded_Cmap[i][j]) / 255
+    Cmap[i][3] = 1
+    '''Checks all values b/w 0 and 1'''
+    for j in range(4):
+        if Cmap[i][j] > 1:
+            print Cmap[i]
+            raise ValueError('Values must be between 0 and 1, one of the above is > 1')
+        if Cmap[i][j] < 0:
+            print Cmap[i]
+            raise ValueError('Values must be between 0 and 1, one of the above is negative')
+        else:
+            pass
+
+  #np.savetxt("C:\Path\to\File\Filename.txt",Cmap) #uncomment to save to file
+
+  # Register the Loaded Colormap
+  Listed_CustomCmap = ListedColormap(Cmap, name=Cmap_Name)
+  plt.register_cmap(name=Cmap_Name, cmap= Listed_CustomCmap)
+
+  # Create and register the reverse colormap
+  Reverse = np.zeros((Res,4))
+  for i in range(Res):
+    for j in range(4):
+        Reverse[i][j] = Cmap[Res-(i+1)][j]
+
+  Listed_CustomCmap_r = ListedColormap(Reverse, name=(Cmap_Name + '_r') )
+  plt.register_cmap(name=(Cmap_Name + '_r'), cmap= Listed_CustomCmap_r)
+
+- To Create a Colormap from scratch, use:
+
+*1c. Create and Register*
+
+.. code-block:: python
+
+  import matplotlib.pyplot as plt
+  from matplotlib.colors import ListedColormap, LinearSegmentedColormap
+  import numpy as np
+
+  Cmap_Name = 'Beach' # Colormap name
+  Res = 500 # Resolution of your Colormap (number of steps in colormap)
+
+  Re = Res-1
+  Cmap = np.zeros((Res,4))
+  for i in range(Res): 
+    '''Input functions inside float(), Divide by Res to normalise'''
+    Cmap[i][0] = float(Res)   / Res       #Red   #just 1
+    Cmap[i][1] = float(i)     / Re        #Green #+ve i divisible by Res-1 = Re
+    Cmap[i][2] = float(Res-i)**2 / Res**2 #Blue  #Make sure Norm_factor correct
+    Cmap[i][3] = 1
+    '''Checks all values b/w 0 and 1'''
+    for j in range(4):
+        if Cmap[i][j] > 1:
+            print Cmap[i]
+            raise ValueError('Values must be between 0 and 1, one of the above is > 1')
+        if Cmap[i][j] < 0:
+            print Cmap[i]
+            raise ValueError('Values must be between 0 and 1, one of the above is Negative')
+        else:
+            pass
+
+  #np.savetxt("C:\Path\to\File\Filename.txt",Cmap) #uncomment to save to file
+
+  Listed_CustomCmap = ListedColormap(Cmap, name = Cmap_Name)
+  plt.register_cmap(name = Cmap_Name, cmap = Listed_CustomCmap)
+
+  # Create and register the reverse colormap
+  Reverse = np.zeros((Res,4))
+  for i in range(Res):
+    for j in range(4):
+        Reverse[i][j] = Cmap[Res-(i+1)][j]
+
+  Listed_CustomCmap_r = ListedColormap(Reverse, name=(Cmap_Name + '_r') )
+  plt.register_cmap(name=(Cmap_Name + '_r'), cmap= Listed_CustomCmap_r)
+
+Now the Custom Colormap has been registered, right-click on a workspace and produce a colorfill plot. In Figure Options (Gear Icon in Plot Figure), under the Images Tab, you can use the drop down-menu to select the new Colormap, and use the check-box to select its Reverse! 
+
+- Otherwise, use a script like this (from above in Section "Simple Plots") to plot with your new Colormap:
+
+*2. Plot New Colormap* (change the "cmap" name in line 12 accordingly)
+
+.. code-block:: python
+
+   from mantid.simpleapi import Load, ConvertToMD, BinMD, ConvertUnits, Rebin
+   from mantid import plots
+   import matplotlib.pyplot as plt
+   from matplotlib.colors import LogNorm
+   data = Load('CNCS_7860')
+   data = ConvertUnits(InputWorkspace=data,Target='DeltaE', EMode='Direct', EFixed=3)
+   data = Rebin(InputWorkspace=data, Params='-3,0.025,3', PreserveEvents=False)
+   md = ConvertToMD(InputWorkspace=data,QDimensions='|Q|',dEAnalysisMode='Direct')
+   sqw = BinMD(InputWorkspace=md,AlignedDim0='|Q|,0,3,100',AlignedDim1='DeltaE,-3,3,100') 
+
+   fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
+   c = ax.pcolormesh(sqw, cmap='Beach', norm=LogNorm())
+   cbar=fig.colorbar(c)
+   cbar.set_label('Intensity (arb. units)') #add text to colorbar
+   #fig.show()
+
+.. plot::
+
+  import matplotlib.pyplot as plt
+  from matplotlib.colors import ListedColormap, LinearSegmentedColormap
+  import numpy as np
+
+  Cmap_Name = 'Beach' # Colormap name
+  Res = 500 # Resolution of your Colormap (number of steps in colormap)
+
+  Re = Res-1
+  Cmap = np.zeros((Res,4))
+  for i in range(Res): 
+    '''Input functions inside float(), Divide by Res to normalise'''
+    Cmap[i][0] = float(Res)   / Res       #Red   #just 1
+    Cmap[i][1] = float(i)     / Re        #Green #+ve i divisible by Res-1 = Re
+    Cmap[i][2] = float(Res-i)**2 / Res**2 #Blue  #Make sure Norm_factor correct
+    Cmap[i][3] = 1
+    '''Checks all values b/w 0 and 1'''
+    for j in range(4):
+        if Cmap[i][j] > 1:
+            print Cmap[i]
+            raise ValueError('Values must be between 0 and 1, one of the above is > 1')
+        if Cmap[i][j] < 0:
+            print Cmap[i]
+            raise ValueError('Values must be between 0 and 1, one of the above is Negative')
+        else:
+            pass
+
+  #np.savetxt("C:\Path\to\File\Filename.txt",Cmap) #uncomment to save to file
+
+  Listed_CustomCmap = ListedColormap(Cmap, name = Cmap_Name)
+  plt.register_cmap(name = Cmap_Name, cmap = Listed_CustomCmap)
+
+  # Create and register the reverse colormap
+  Reverse = np.zeros((Res,4))
+  for i in range(Res):
+    for j in range(4):
+        Reverse[i][j] = Cmap[Res-(i+1)][j]
+
+  Listed_CustomCmap_r = ListedColormap(Reverse, name=(Cmap_Name + '_r') )
+  plt.register_cmap(name=(Cmap_Name + '_r'), cmap= Listed_CustomCmap_r)
+   
+  from mantid.simpleapi import Load, ConvertToMD, BinMD, ConvertUnits, Rebin
+  from mantid import plots
+  from matplotlib.colors import LogNorm
+  data = Load('CNCS_7860')
+  data = ConvertUnits(InputWorkspace=data,Target='DeltaE', EMode='Direct', EFixed=3)
+  data = Rebin(InputWorkspace=data, Params='-3,0.025,3', PreserveEvents=False)
+  md = ConvertToMD(InputWorkspace=data,QDimensions='|Q|',dEAnalysisMode='Direct')
+  sqw = BinMD(InputWorkspace=md,AlignedDim0='|Q|,0,3,100',AlignedDim1='DeltaE,-3,3,100') 
+
+  fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
+  c = ax.pcolormesh(sqw, cmap='Beach', norm=LogNorm())
+  cbar=fig.colorbar(c)
+  cbar.set_label('Intensity (arb. units)') #add text to colorbar
+  #fig.show()
+
+Colormaps can also be created with the `colormap package <https://colormap.readthedocs.io/en/latest/>`_ or by `concatenating existing colormaps <https://matplotlib.org/3.1.0/tutorials/colors/colormap-manipulation.html>`_.
+
 Plotting Sample Logs
-====================
+--------------------
 
 The :func:`mantid.plots.MantidAxes.plot<mantid.plots.MantidAxes.plot>` function can show sample logs. By default,
 the time axis represents the time since the first proton charge pulse (the
@@ -446,10 +737,8 @@ So one needs to use :func:`mantid.plots.plotfunctions.plot<mantid.plots.plotfunc
    plots.plotfunctions.plot(axt,w,LogName='ChopperStatus5', FullTime=True)
    #fig.show()
 
-
-=============
 Complex plots
-=============
+-------------
 
 One common type of a slightly more complex figure involves drawing an inset.
 
@@ -599,9 +888,8 @@ Plotting dispersion curves  on multiple panels can also be done using matplotlib
 
 .. _mplDefaults:
 
-==========================
 Change Matplotlib Defaults
-==========================
+--------------------------
 
 It is possible to alter the default appearance of Matplotlib plots, e.g. linewidths, label sizes,
 colour cycles etc. This is most readily achieved by setting the ``rcParams`` at the start of a
