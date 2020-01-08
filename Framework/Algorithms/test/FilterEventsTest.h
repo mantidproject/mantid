@@ -255,17 +255,24 @@ public:
     TS_ASSERT_EQUALS(splitter2->nthValue(6), 0);
 
     // verify the log: duration
-     std::string duration0str = filteredws0->run().getProperty("duration")->value();
-     double duration0 = std::stod(duration0str);
-     TS_ASSERT_DELTA(duration0, 35000000 * 1.E-9, 1.E-9);
+    std::string duration0str =
+        filteredws0->run().getProperty("duration")->value();
+    double duration0 = std::stod(duration0str);
+    TS_ASSERT_DELTA(duration0, 35000000 * 1.E-9, 1.E-9);
 
-     std::string duration1str = filteredws1->run().getProperty("duration")->value();
-     double duration1 = std::stod(duration1str);
-     TS_ASSERT_DELTA(duration1, (20195000000 - 20035000000) * 1.E-9, 1.E-9);
+    std::string duration1str =
+        filteredws1->run().getProperty("duration")->value();
+    double duration1 = std::stod(duration1str);
+    TS_ASSERT_DELTA(duration1, (20195000000 - 20035000000) * 1.E-9, 1.E-9);
 
-     std::string duration2str = filteredws2->run().getProperty("duration")->value();
-     double duration2 = std::stod(duration2str);
-     TS_ASSERT_DELTA(duration2, (20265000000 - 20200000000 + 20365000000 - 20300000000 + 20465000000 - 20400000000) * 1.E-9, 1.E-9);
+    std::string duration2str =
+        filteredws2->run().getProperty("duration")->value();
+    double duration2 = std::stod(duration2str);
+    TS_ASSERT_DELTA(duration2,
+                    (20265000000 - 20200000000 + 20365000000 - 20300000000 +
+                     20465000000 - 20400000000) *
+                        1.E-9,
+                    1.E-9);
 
     // Clean up
     AnalysisDataService::Instance().remove("Test02");
@@ -1339,7 +1346,7 @@ public:
         new Kernel::PropertyWithValue<std::string>("Title",
                                                    "Testing EventWorkspace"));
     eventWS->mutableRun().addProperty(
-                new Kernel::PropertyWithValue<double>("duration", 1000.));
+        new Kernel::PropertyWithValue<double>("duration", 1000.));
 
     // add an integer slow log
     auto int_tsp =

@@ -26,10 +26,10 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/LogFilter.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
 #include <memory>
@@ -1972,14 +1972,15 @@ void FilterEvents::mapSplitterTSPtoWorkspaces(
     std::vector<std::unique_ptr<Kernel::TimeSeriesProperty<int>>>
         &split_tsp_vec) {
   g_log.debug() << "There are " << split_tsp_vec.size()
-                 << " TimeSeriesPropeties.\n"
-                 << "There are " << m_outputWorkspacesMap.size()
-                 << " Output worskpaces.\n";
+                << " TimeSeriesPropeties.\n"
+                << "There are " << m_outputWorkspacesMap.size()
+                << " Output worskpaces.\n";
 
   if (split_tsp_vec.size() != m_outputWorkspacesMap.size()) {
-      g_log.warning() << "Number of Splitter vector (" << split_tsp_vec.size()
-                      << ") does not match number of output workspace ("
-                      << m_outputWorkspacesMap.size() << ")" << "\n";
+    g_log.warning() << "Number of Splitter vector (" << split_tsp_vec.size()
+                    << ") does not match number of output workspace ("
+                    << m_outputWorkspacesMap.size() << ")"
+                    << "\n";
   }
 
   for (int itarget = 0; itarget < static_cast<int>(split_tsp_vec.size());
@@ -2002,38 +2003,44 @@ void FilterEvents::mapSplitterTSPtoWorkspaces(
     double duration = calculate_duration(split_tsp_vec[itarget]);
 
     // add property
-    PropertyWithValue<double> *duration_property = new PropertyWithValue<double>("duration", duration);
+    PropertyWithValue<double> *duration_property =
+        new PropertyWithValue<double>("duration", duration);
     outws->mutableRun().addProperty(duration_property, true);
-    // note: split_tps_vec[i], the shared pointer, will be destroyed by std::move()
+    // note: split_tps_vec[i], the shared pointer, will be destroyed by
+    // std::move()
     outws->mutableRun().addProperty(std::move(split_tsp_vec[itarget]), true);
-
   }
 
   return;
 }
 
-/** Calculate split-workspace's duration according to splitter time series property
+/** Calculate split-workspace's duration according to splitter time series
+ * property
  * @brief FilterEvents::calculate_duration
  * @param splitter_tsp :: TimeSeriesProperty for splitter
  * @return
  */
-double FilterEvents::calculate_duration(std::unique_ptr<Kernel::TimeSeriesProperty<int>> &splitter_tsp){
-    // Get the times and values
-    std::vector<int> split_values = splitter_tsp->valuesAsVector();
-    std::vector<DateAndTime> split_time = splitter_tsp->timesAsVector();
+double FilterEvents::calculate_duration(
+    std::unique_ptr<Kernel::TimeSeriesProperty<int>> &splitter_tsp) {
+  // Get the times and values
+  std::vector<int> split_values = splitter_tsp->valuesAsVector();
+  std::vector<DateAndTime> split_time = splitter_tsp->timesAsVector();
 
-    double duration = 0.;
-    for (size_t i = 0; i < split_values.size() - 1; ++i) {
-        // for splitter's value == 1 (from this till 0 will be counted in the duration)
-        if (split_values[i] == 1) {
-            // difference in nanosecond and then converted to second
-            double sub_duration = 1.E-9 * static_cast<double>(split_time[i+1].totalNanoseconds() - split_time[i].totalNanoseconds());
-            // increment
-            duration += sub_duration;
-        }
+  double duration = 0.;
+  for (size_t i = 0; i < split_values.size() - 1; ++i) {
+    // for splitter's value == 1 (from this till 0 will be counted in the
+    // duration)
+    if (split_values[i] == 1) {
+      // difference in nanosecond and then converted to second
+      double sub_duration =
+          1.E-9 * static_cast<double>(split_time[i + 1].totalNanoseconds() -
+                                      split_time[i].totalNanoseconds());
+      // increment
+      duration += sub_duration;
     }
+  }
 
-    return duration;
+  return duration;
 }
 
 /** Get all filterable logs' names (double and integer)
