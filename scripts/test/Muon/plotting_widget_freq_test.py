@@ -9,13 +9,12 @@ import unittest
 from mantid.py3compat import mock
 from mantidqt.utils.qt.testing import start_qapplication
 from Muon.GUI.Common.plotting_widget.plotting_widget_presenter import PlotWidgetPresenter
-from Muon.GUI.Common.test_helpers.context_setup import setup_context
 
 
 @start_qapplication
 class PlottingWidgetPresenterFreqTest(unittest.TestCase):
     def setUp(self):
-        self.context = setup_context(True)
+        self.context = mock.MagicMock()
         self.view = mock.MagicMock()
         self.model = mock.MagicMock()
         self.workspace_list = ['MUSR62260; Group; bottom; Asymmetry; FD',
@@ -29,6 +28,7 @@ class PlottingWidgetPresenterFreqTest(unittest.TestCase):
 
         self.view.plot_options.get_errors = mock.MagicMock(return_value=True)
         self.presenter.get_plot_title = mock.MagicMock(return_value='MUSR62260-62261 bottom')
+        self.presenter.get_x_limits = mock.MagicMock(return_value=[0, 15])
         self.presenter.get_x_lim_from_subplot = mock.MagicMock(return_value=[0, 15])
         self.presenter.get_y_lim_from_subplot = mock.MagicMock(return_value=[-1, 1])
 

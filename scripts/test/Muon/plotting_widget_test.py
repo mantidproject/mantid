@@ -31,6 +31,7 @@ class PlottingWidgetPresenterTest(unittest.TestCase):
         self.presenter.get_plot_title = mock.MagicMock(return_value='MUSR62260-62261 bottom')
         self.view.is_tiled_plot = mock.MagicMock(return_value=False)
         self.view.plot_options.get_errors = mock.MagicMock(return_value=True)
+        self.presenter.get_x_limits = mock.MagicMock(return_value=[0, 15])
         self.presenter.get_x_lim_from_subplot = mock.MagicMock(return_value=[0, 15])
         self.presenter.get_y_lim_from_subplot = mock.MagicMock(return_value=[-1, 1])
 
