@@ -27,6 +27,7 @@ class QuickEditView(QtWidgets.QWidget):
                 QtCore.Qt.MatchContains)
 
         self.plot_selector.addItem("All")
+        self.plot_selector.setEditable(False)
         self.x_axis_changer = AxisChangerPresenter(AxisChangerView("X"))
 
         self.autoscale = QtWidgets.QPushButton("Autoscale y")
@@ -62,14 +63,19 @@ class QuickEditView(QtWidgets.QWidget):
         return self.plot_selector.count()
 
     def add_subplot(self, name):
+        self.plot_selector.blockSignals(True)
         self.plot_selector.addItem(name)
+        self.plot_selector.blockSignals(False)
 
     def rm_subplot(self, index):
+
         self.plot_selector.removeItem(index)
 
     def clear_subplots(self):
+        self.plot_selector.blockSignals(True)
         self.plot_selector.clear()
         self.plot_selector.addItem("All")
+        self.plot_selector.blockSignals(False)
 
     def connect_plot_selection(self, slot):
         self.plot_selector.currentIndexChanged.connect(slot)

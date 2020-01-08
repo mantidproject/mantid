@@ -42,6 +42,7 @@ class PlotWidgetView(QtWidgets.QWidget):
         self.toolBar = None
         self.group = None
         self.widget_layout = None
+
         self.setup_interface()
 
     def setup_interface(self):
@@ -178,7 +179,6 @@ class PlotWidgetView(QtWidgets.QWidget):
         self.plot_type_selector.stateChanged.connect(slot)
 
     def new_plot_figure(self, num_axes):
-        # clear old plot
         self.fig.clf()
         if num_axes < 1:
             num_axes = 1
@@ -225,14 +225,12 @@ class PlotWidgetView(QtWidgets.QWidget):
             return True
 
     def on_x_lims_changed_in_view(self, slot):
-        for ax in self.get_axes():
+        for i, ax in enumerate(self.get_axes()):
             ax.callbacks.connect('xlim_changed', slot)
 
     def on_y_lims_changed_in_view(self, slot):
-        for ax in self.get_axes():
+        for i, ax in enumerate(self.get_axes()):
             ax.callbacks.connect('ylim_changed', slot)
-
-
 
     def close(self):
         self.fig.canvas.close()

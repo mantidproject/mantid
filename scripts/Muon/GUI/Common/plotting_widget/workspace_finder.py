@@ -32,6 +32,7 @@ class WorkspaceFinder(object):
         currently_selected_groups = self.context.group_pair_context.selected_groups
         currently_selected_pairs = self.context.group_pair_context.selected_pairs
         workspace_list = []
+
         if FREQ_PLOT_TYPE in plot_type:
             for grouppair in currently_selected_groups + currently_selected_pairs:
                 workspace_list += self.get_freq_workspaces_to_plot(grouppair, plot_type)

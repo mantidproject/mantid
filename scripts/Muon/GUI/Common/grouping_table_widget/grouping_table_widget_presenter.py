@@ -199,7 +199,9 @@ class GroupingTablePresenter(object):
 
     def plot_default_case(self):
         for row in range(self._view.num_rows()):
-            self._view.set_to_analyse_state(row, True)
+            self._view.set_to_analyse_state_quietly(row, True)
+            group_name = self._view.get_table_item(row, 0).text()
+            self._model.add_group_to_analysis(group_name)
 
     def first_good_data_checkbox_changed(self):
         if self._view.group_range_use_first_good_data.isChecked():
