@@ -107,6 +107,54 @@ class SettingsHelperTest(unittest.TestCase):
     def test_get_setting_with_invalid(self):
         self.assertEqual(get_setting(GROUP, PREFIX, "something"), "")
 
+    def test_get_setting_int_without_specifying_type(self):
+        settings = QSettings()
+        settings.beginGroup(GROUP)
+        settings.setValue(PREFIX + "something", 10)
+        settings.endGroup()
+
+        self.assertEqual(get_setting(GROUP, PREFIX, "something"), "10")
+
+    def test_get_setting_bool_without_specifying_type(self):
+        settings = QSettings()
+        settings.beginGroup(GROUP)
+        settings.setValue(PREFIX + "something", True)
+        settings.endGroup()
+
+        self.assertEqual(get_setting(GROUP, PREFIX, "something"), "true")
+
+    def test_get_setting_bool_specifying_int(self):
+        settings = QSettings()
+        settings.beginGroup(GROUP)
+        settings.setValue(PREFIX + "something", True)
+        settings.endGroup()
+
+        self.assertEqual(get_setting(GROUP, PREFIX, "something", return_type=int), 1)
+
+    def test_get_setting_int_specifying_bool(self):
+        settings = QSettings()
+        settings.beginGroup(GROUP)
+        settings.setValue(PREFIX + "something", 10)
+        settings.endGroup()
+
+        self.assertRaises(TypeError, get_setting, GROUP, PREFIX, "something", return_type=bool)
+
+    def test_get_setting_string_specifying_int(self):
+        settings = QSettings()
+        settings.beginGroup(GROUP)
+        settings.setValue(PREFIX + "something", "some setting")
+        settings.endGroup()
+
+        self.assertRaises(TypeError, get_setting, GROUP, PREFIX, "something", return_type=int)
+
+    def test_get_setting_string_specifying_bool(self):
+        settings = QSettings()
+        settings.beginGroup(GROUP)
+        settings.setValue(PREFIX + "something", "a")
+        settings.endGroup()
+
+        self.assertRaises(TypeError, get_setting, GROUP, PREFIX, "something", return_type=bool)
+
 
 if __name__ == '__main__':
     unittest.main()
