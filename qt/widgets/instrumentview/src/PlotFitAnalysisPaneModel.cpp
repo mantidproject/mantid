@@ -5,13 +5,13 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "PlotFitAnalysisPaneModel.h"
+#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneModel.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 
 using namespace Mantid::API;
 namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidWidgets {
 
 IFunction_sptr
 PlotFitAnalysisPaneModel::doFit(const std::string &wsName,
@@ -29,5 +29,5 @@ PlotFitAnalysisPaneModel::doFit(const std::string &wsName,
   return alg->getProperty("Function");
 }
 
-} // namespace CustomInterfaces
+} // namespace MantidWidgets
 } // namespace MantidQt

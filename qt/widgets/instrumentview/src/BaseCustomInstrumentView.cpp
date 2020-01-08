@@ -4,10 +4,10 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "BaseInstrumentView.h"
+#include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentView.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h"
-
+// change to BaseCustomInstrumentView etc.
 #include <QMessageBox>
 #include <QSizePolicy>
 #include <QSpacerItem>
@@ -15,10 +15,10 @@
 #include <QVBoxLayout>
 
 namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidWidgets {
 
-BaseInstrumentView::BaseInstrumentView(const std::string &instrument,
-                                       QWidget *parent)
+BaseCustomInstrumentView::BaseCustomInstrumentView(
+    const std::string &instrument, QWidget *parent)
     : QSplitter(Qt::Vertical, parent), m_helpPage(""),
       m_loadRunObservable(nullptr), m_files(nullptr),
       m_instrument(QString::fromStdString(instrument)),
@@ -27,18 +27,18 @@ BaseInstrumentView::BaseInstrumentView(const std::string &instrument,
   this->addWidget(loadWidget);
 }
 
-void MantidQt::CustomInterfaces::BaseInstrumentView::setUpInstrument(
+void BaseCustomInstrumentView::setUpInstrument(
     const std::string &fileName,
     std::vector<std::function<bool(std::map<std::string, bool>)>> &instrument) {
 
   (void)instrument;
   auto instrumentWidget =
-      new MantidWidgets::InstrumentWidget(QString::fromStdString(fileName));
+      new InstrumentWidget(QString::fromStdString(fileName));
   instrumentWidget->hideHelp();
   setInstrumentWidget(instrumentWidget);
 }
 
-QWidget *BaseInstrumentView::generateLoadWidget() {
+QWidget *BaseCustomInstrumentView::generateLoadWidget() {
   m_loadRunObservable = new Observable();
 
   m_files = new API::MWRunFiles(this);
@@ -60,7 +60,7 @@ QWidget *BaseInstrumentView::generateLoadWidget() {
   return loadWidget;
 }
 
-void BaseInstrumentView::setupInstrumentAnalysisSplitters(
+void BaseCustomInstrumentView::setupInstrumentAnalysisSplitters(
     QWidget *analysisPane) {
   QSplitter *split = new QSplitter(Qt::Horizontal);
   split->addWidget(m_instrumentWidget);
@@ -68,7 +68,7 @@ void BaseInstrumentView::setupInstrumentAnalysisSplitters(
   this->addWidget(split);
 }
 
-void BaseInstrumentView::setupHelp() {
+void BaseCustomInstrumentView::setupHelp() {
   QWidget *helpWidget = new QWidget();
   m_help = new QPushButton("?");
   m_help->setMaximumWidth(25);
@@ -81,7 +81,7 @@ void BaseInstrumentView::setupHelp() {
   connect(m_help, SIGNAL(clicked()), this, SLOT(openHelp()));
 }
 
-void BaseInstrumentView::openHelp() {
+void BaseCustomInstrumentView::openHelp() {
   if (m_helpPage == "") {
     return;
   }
@@ -89,18 +89,18 @@ void BaseInstrumentView::openHelp() {
       nullptr, QString::fromStdString(m_helpPage));
 }
 
-std::string BaseInstrumentView::getFile() {
+std::string BaseCustomInstrumentView::getFile() {
   auto name = m_files->getFilenames();
   if (name.size() > 0)
     return name[0].toStdString();
   return "";
 }
 
-void BaseInstrumentView::setRunQuietly(const std::string &runNumber) {
+void BaseCustomInstrumentView::setRunQuietly(const std::string &runNumber) {
   m_files->setText(QString::fromStdString(runNumber));
 }
 
-void BaseInstrumentView::fileLoaded() {
+void BaseCustomInstrumentView::fileLoaded() {
   if (m_files->getText().isEmpty())
     return;
 
@@ -111,13 +111,13 @@ void BaseInstrumentView::fileLoaded() {
   m_loadRunObservable->notify();
 }
 
-void BaseInstrumentView::warningBox(const std::string &message) {
+void BaseCustomInstrumentView::warningBox(const std::string &message) {
   warningBox(QString::fromStdString(message));
 }
 
-void BaseInstrumentView::warningBox(const QString &message) {
+void BaseCustomInstrumentView::warningBox(const QString &message) {
   QMessageBox::warning(this, m_instrument + " view", message);
 }
 
-} // namespace CustomInterfaces
+} // namespace MantidWidgets
 } // namespace MantidQt

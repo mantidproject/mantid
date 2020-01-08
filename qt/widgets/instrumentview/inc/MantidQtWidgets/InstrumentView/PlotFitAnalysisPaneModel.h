@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_CUSTOMINTERFACES_PLOTFITANALYSISPANEMODEL_H_
-#define MANTIDQT_CUSTOMINTERFACES_PLOTFITANALYSISPANEMODEL_H_
+#ifndef MANTIDQT_INSTRUMENTVIEW_PLOTFITANALYSISPANEMODEL_H_
+#define MANTIDQT_INSTRUMENTVIEW_PLOTFITANALYSISPANEMODEL_H_
 
 #include "MantidAPI/IFunction.h"
 
@@ -13,7 +13,7 @@
 #include <string>
 using namespace Mantid::API;
 namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidWidgets {
 
 class PlotFitAnalysisPaneModel {
 
@@ -23,7 +23,7 @@ public:
                        const IFunction_sptr func);
 };
 
-} // namespace CustomInterfaces
+} // namespace MantidWidgets
 } // namespace MantidQt
 
-#endif /* MANTIDQT_CUSTOMINTERFACES_PLOTFITANALYSISPANEMODEL_H_ */
+#endif /* MANTIDQT_INSTRUMENTVIEW_PLOTFITANALYSISPANEMODEL_H_ */

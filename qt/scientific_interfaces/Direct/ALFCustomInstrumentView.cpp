@@ -4,7 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "ALFView_view.h"
+#include "ALFCustomInstrumentView.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h"
 
 #include <QMessageBox>
@@ -15,15 +15,16 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-ALFView_view::ALFView_view(const std::string &instrument, QWidget *parent)
-    : BaseInstrumentView(instrument, parent),
+ALFCustomInstrumentView::ALFCustomInstrumentView(const std::string &instrument,
+                                                 QWidget *parent)
+    : MantidWidgets::BaseCustomInstrumentView(instrument, parent),
       m_extractSingleTubeObservable(nullptr), m_averageTubeObservable(nullptr),
       m_extractAction(nullptr), m_averageAction(nullptr),
       m_analysisPane(nullptr) {
   m_helpPage = "ALF View";
 }
 
-void ALFView_view::setUpInstrument(
+void ALFCustomInstrumentView::setUpInstrument(
     const std::string &fileName,
     std::vector<std::function<bool(std::map<std::string, bool>)>> &binders) {
 
@@ -52,27 +53,28 @@ void ALFView_view::setUpInstrument(
   setInstrumentWidget(instrumentWidget);
 }
 
-void ALFView_view::extractSingleTube() {
+void ALFCustomInstrumentView::extractSingleTube() {
   MantidWidgets::InstrumentWidget *instrumentView = getInstrumentView();
   instrumentView->getPickTab()->savePlotToWorkspace();
 
   m_extractSingleTubeObservable->notify();
 }
 
-void ALFView_view::averageTube() {
+void ALFCustomInstrumentView::averageTube() {
   MantidWidgets::InstrumentWidget *instrumentView = getInstrumentView();
   instrumentView->getPickTab()->savePlotToWorkspace();
   m_averageTubeObservable->notify();
 }
 
-void ALFView_view::observeExtractSingleTube(Observer *listner) {
+void ALFCustomInstrumentView::observeExtractSingleTube(Observer *listner) {
   m_extractSingleTubeObservable->attach(listner);
 }
-void ALFView_view::observeAverageTube(Observer *listner) {
+void ALFCustomInstrumentView::observeAverageTube(Observer *listner) {
   m_averageTubeObservable->attach(listner);
 }
 
-void ALFView_view::addObserver(std::tuple<std::string, Observer *> &listener) {
+void ALFCustomInstrumentView::addObserver(
+    std::tuple<std::string, Observer *> &listener) {
   if (std::get<0>(listener) == "singleTube") {
     observeExtractSingleTube(std::get<1>(listener));
   } else if (std::get<0>(listener) == "averageTube") {
@@ -80,14 +82,15 @@ void ALFView_view::addObserver(std::tuple<std::string, Observer *> &listener) {
   }
 }
 
-void ALFView_view::setupAnalysisPane(PlotFitAnalysisPaneView *analysis) {
+void ALFCustomInstrumentView::setupAnalysisPane(
+    MantidWidgets::PlotFitAnalysisPaneView *analysis) {
   // keep a copy here so we can use a custom class
   m_analysisPane = analysis;
   // just adds it to the view
-  BaseInstrumentView::setupInstrumentAnalysisSplitters(analysis);
+  BaseCustomInstrumentView::setupInstrumentAnalysisSplitters(analysis);
 }
 
-void ALFView_view::addSpectrum(std::string wsName) {
+void ALFCustomInstrumentView::addSpectrum(std::string wsName) {
   m_analysisPane->addSpectrum(wsName);
 }
 
