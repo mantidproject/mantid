@@ -144,9 +144,6 @@ class PlotWidgetView(QtWidgets.QWidget):
     def if_overlay(self):
         return self.overlay.isChecked()
 
-    def get_plot_options(self):
-        return self.plot_options
-
     def if_keep(self):
         return self.keep.isChecked()
 

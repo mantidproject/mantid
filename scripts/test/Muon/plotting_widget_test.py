@@ -9,7 +9,6 @@ import unittest
 from mantid.py3compat import mock
 from mantidqt.utils.qt.testing import start_qapplication
 from Muon.GUI.Common.plotting_widget.plotting_widget_presenter import PlotWidgetPresenter
-from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.contexts.fitting_context import FitInformation
 from mantid.simpleapi import CreateWorkspace
@@ -25,10 +24,15 @@ class PlottingWidgetPresenterTest(unittest.TestCase):
         self.workspace_list = ['MUSR62260; Group; bottom; Asymmetry; MA',
                                'MUSR62261; Group; bottom; Asymmetry; MA']
         self.context.data_context.instrument = "MUSR"
+        self.context.group_pair_context.selected_groups = ['bottom']
+        self.context.group_pair_context.selected_pairs = []
 
         self.presenter = PlotWidgetPresenter(self.view, self.model, self.context)
         self.presenter.get_plot_title = mock.MagicMock(return_value='MUSR62260-62261 bottom')
         self.view.is_tiled_plot = mock.MagicMock(return_value=False)
+        self.view.plot_options.get_errors = mock.MagicMock(return_value=True)
+        self.presenter.get_x_lim_from_subplot = mock.MagicMock(return_value=[0, 15])
+        self.presenter.get_y_lim_from_subplot = mock.MagicMock(return_value=[-1, 1])
 
     def create_workspace(self, name):
         x_range = range(1, 100)
@@ -58,7 +62,7 @@ class PlottingWidgetPresenterTest(unittest.TestCase):
         self.view.warning_popup.assert_called_once_with('No rebin options specified')
 
     def test_use_rebin_changed_replots_figure_with_appropriate_data(self):
-        self.presenter.get_workspaces_to_plot = mock.MagicMock(return_value=self.workspace_list)
+        self.presenter.workspace_finder.get_workspaces_to_plot = mock.MagicMock(return_value=self.workspace_list)
         self.presenter.get_workspace_legend_label = mock.MagicMock(return_value='label')
         workspace_indices = [0]
         errors = True
@@ -77,7 +81,7 @@ class PlottingWidgetPresenterTest(unittest.TestCase):
                                                             plot_kwargs=plot_kwargs)
 
     def test_handle_data_updated_does_nothing_if_workspace_list_has_not_changed(self):
-        self.presenter.get_workspaces_to_plot = mock.MagicMock(return_value=self.workspace_list)
+        self.presenter.workspace_finder.get_workspaces_to_plot = mock.MagicMock(return_value=self.workspace_list)
         self.model.plotted_workspaces = self.workspace_list
 
         self.presenter.handle_data_updated()
@@ -85,7 +89,7 @@ class PlottingWidgetPresenterTest(unittest.TestCase):
         self.model.add_workspace_to_plot.assert_not_called()
 
     def test_add_workspace_to_plot_called_by_handle_data_updated_if_run_list_changed(self):
-        self.presenter.get_workspaces_to_plot = mock.MagicMock(return_value=self.workspace_list)
+        self.presenter.workspace_finder.get_workspaces_to_plot = mock.MagicMock(return_value=self.workspace_list)
         self.model.plotted_workspaces = []
         self.presenter.get_workspace_legend_label = mock.MagicMock(return_value='label')
         workspace_indices = [0]
@@ -117,7 +121,7 @@ class PlottingWidgetPresenterTest(unittest.TestCase):
 
     def test_handle_plot_type_changed_calls_add_workspace_to_plot(self):
         self.context.group_pair_context.__getitem__.return_value = MuonGroup('bottom', [])
-        self.presenter.get_workspaces_to_plot = mock.MagicMock(return_value=self.workspace_list)
+        self.presenter.workspace_finder.get_workspaces_to_plot = mock.MagicMock(return_value=self.workspace_list)
         self.presenter.get_workspace_legend_label = mock.MagicMock(return_value='label')
         self.view.get_selected.return_value = 'Counts'
         plot_kwargs = {'distribution': True, 'autoscale_on_update': False,
@@ -132,14 +136,13 @@ class PlottingWidgetPresenterTest(unittest.TestCase):
 
     def test_handle_added_group_or_pair_to_plot_does_nothing_if_selected_groups_or_pairs_not_changed(self):
         self.model.plotted_workspaces = ['bottom']
-        self.context.group_pair_context.selected_groups = ['bottom']
         self.presenter.handle_added_or_removed_group_or_pair_to_plot(is_added=True)
 
         self.model.add_workspace_to_plot.assert_not_called()
 
     def test_handle_added_group_or_pair_to_plot_calls_add_workspace_to_plot(self):
         self.model.plotted_workspaces = []
-        self.presenter.get_workspaces_to_plot = mock.MagicMock(return_value=[self.workspace_list[0]])
+        self.presenter.workspace_finder.get_workspaces_to_plot = mock.MagicMock(return_value=[self.workspace_list[0]])
         self.presenter.get_workspace_legend_label = mock.MagicMock(return_value='label')
         plot_kwargs = {'distribution': True, 'autoscale_on_update': False,
                        'label': 'label'}
@@ -152,7 +155,7 @@ class PlottingWidgetPresenterTest(unittest.TestCase):
         self.model.plotted_workspaces = ['bottom', 'fwd']
 
         # handle fwd group being removed from the workspaces to plot
-        self.presenter.get_workspaces_to_plot = mock.MagicMock(return_value=['bottom'])
+        self.presenter.workspace_finder.get_workspaces_to_plot = mock.MagicMock(return_value=['bottom'])
         self.presenter.handle_added_or_removed_group_or_pair_to_plot(is_added=False)
 
         self.model.remove_workspace_from_plot.assert_called_once_with('fwd', self.view.get_axes())
@@ -160,8 +163,6 @@ class PlottingWidgetPresenterTest(unittest.TestCase):
     def test_handle_fit_completed_adds_appropriate_fits_to_plot(self):
         self.model.plotted_workspaces = self.workspace_list
         self.model.plotted_workspaces_inverse_binning = {}
-        self.context.group_pair_context.selected_groups = ['bottom']
-        self.context.group_pair_context.selected_pairs = []
 
         fit_information = FitInformation(mock.MagicMock(),
                                          'GaussOsc',

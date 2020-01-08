@@ -24,7 +24,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
     def __init__(self, view, model, context):
         """
         :param view: A reference to the QWidget object for plotting
-        :param model: A refence to a model which contains the plotting logic
+        :param model: A reference to a model which contains the plotting logic
         :param context: A reference to the Muon context object
         """
         self._view = view
@@ -50,11 +50,11 @@ class PlotWidgetPresenter(HomeTabSubWidget):
 
         self.connect_xlim_changed_in_figure_view(self.handle_x_axis_limits_changed_in_figure_view)
         self.connect_ylim_changed_in_figure_view(self.handle_y_axis_limits_changed_in_figure_view)
-        self._view.get_plot_options().connect_errors_changed(self.handle_error_selection_changed)
-        self._view.get_plot_options().connect_x_range_changed(self.handle_xlim_changed_in_options_view)
-        self._view.get_plot_options().connect_y_range_changed(self.handle_ylim_changed_in_options_view)
-        self._view.get_plot_options().connect_autoscale_changed(self.handle_autoscale_requested_in_view)
-        self._view.get_plot_options().connect_plot_selection(self.handle_subplot_changed_in_options_view)
+        self._view.plot_options.connect_errors_changed(self.handle_error_selection_changed)
+        self._view.plot_options.connect_x_range_changed(self.handle_xlim_changed_in_options_view)
+        self._view.plot_options.connect_y_range_changed(self.handle_ylim_changed_in_options_view)
+        self._view.plot_options.connect_autoscale_changed(self.handle_autoscale_requested_in_view)
+        self._view.plot_options.connect_plot_selection(self.handle_subplot_changed_in_options_view)
 
         if self.context._frequency_context:
             for ext in FREQUENCY_EXTENSIONS.keys():
@@ -81,12 +81,12 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         """
         xmin, xmax = self.get_x_lim_from_subplot(0)
         ymin, ymax = self.get_y_lim_from_subplot(0)
-        self._view.get_plot_options().set_plot_x_range([xmin, xmax])
-        self._view.get_plot_options().set_plot_y_range([ymin, ymax])
+        self._view.plot_options.set_plot_x_range([xmin, xmax])
+        self._view.plot_options.set_plot_y_range([ymin, ymax])
 
-        self._view.get_plot_options().clear_subplots()
+        self._view.plot_options.clear_subplots()
         for i in range(self._model.number_of_axes):
-            self._view.get_plot_options().add_subplot(str(i + 1))
+            self._view.plot_options.add_subplot(str(i + 1))
 
     # ------------------------------------------------------------------------------------------------------------------
     # Handle user making plotting related changes from GUI
@@ -179,7 +179,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         self._view.force_redraw()
 
     def handle_xlim_changed_in_options_view(self, xlim):
-        subplots = self._view.get_plot_options().get_selection()
+        subplots = self._view.plot_options.get_selection()
         for subplot in subplots:
             index = int(subplot) - 1
             self._model.set_axis_xlim(self._view.get_axes()[index], xlim[0], xlim[1])
@@ -187,7 +187,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         self._view.force_redraw()
 
     def handle_ylim_changed_in_options_view(self, ylim):
-        subplots = self._view.get_plot_options().get_selection()
+        subplots = self._view.plot_options.get_selection()
         for subplot in subplots:
             index = int(subplot) - 1
             self._model.set_axis_ylim(self._view.get_axes()[index], ylim[0], ylim[1])
@@ -195,38 +195,38 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         self._view.force_redraw()
 
     def handle_autoscale_requested_in_view(self):
-        subplots = self._view.get_plot_options().get_selection()
+        subplots = self._view.plot_options.get_selection()
         self._view.update_toolbar()
         if len(subplots) > 0:
-            xlims = self._view.get_plot_options().get_plot_x_range()
+            xlims = self._view.plot_options.get_plot_x_range()
             indices = [ix - 1 for ix in list(map(int, subplots))]
             axes = [self._view.get_axes()[index] for index in indices]
 
             self._model.autoscale_axes(axes, xlims)
             ymin, ymax = self.get_y_lim_from_subplot(0)
-            self._view.get_plot_options().set_plot_y_range([ymin, ymax])
+            self._view.plot_options.set_plot_y_range([ymin, ymax])
             self._view.force_redraw()
 
     def handle_x_axis_limits_changed_in_figure_view(self, axes):
-        subplots = self._view.get_plot_options().get_selection()
+        subplots = self._view.plot_options.get_selection()
         if len(subplots) > 1 or len(subplots) == 0:
             return
         if subplots[0].isdigit():
             if axes == self._view.get_axes()[int(subplots[0]) - 1]:
                 xmin, xmax = axes.get_xlim()
-                self._view.get_plot_options().set_plot_x_range([xmin, xmax])
+                self._view.plot_options.set_plot_x_range([xmin, xmax])
 
     def handle_y_axis_limits_changed_in_figure_view(self, axes):
-        subplots = self._view.get_plot_options().get_selection()
+        subplots = self._view.plot_options.get_selection()
         if len(subplots) > 1 or len(subplots) == 0:
             return
         if subplots[0].isdigit():
             if axes == self._view.get_axes()[int(subplots[0]) - 1]:
                 ymin, ymax = axes.get_ylim()
-                self._view.get_plot_options().set_plot_y_range([ymin, ymax])
+                self._view.plot_options.set_plot_y_range([ymin, ymax])
 
     def handle_subplot_changed_in_options_view(self):
-        subplots = self._view.get_plot_options().get_selection()
+        subplots = self._view.plot_options.get_selection()
         if len(subplots) == 0 or len(subplots) > 1:
             return
         if subplots[0].isdigit():
@@ -234,8 +234,8 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             xmin, xmax = self.get_x_lim_from_subplot(index)
             ymin, ymax = self.get_y_lim_from_subplot(index)
 
-            self._view.get_plot_options().set_plot_x_range([xmin, xmax])
-            self._view.get_plot_options().set_plot_y_range([ymin, ymax])
+            self._view.plot_options.set_plot_x_range([xmin, xmax])
+            self._view.plot_options.set_plot_y_range([ymin, ymax])
 
     def handle_plot_tiled_changed(self, state):
         """
@@ -394,7 +394,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         clearing any previous plots
         """
 
-        errors = self._view.get_plot_options().get_errors()
+        errors = self._view.plot_options.get_errors()
         workspace_list = self.workspace_finder.get_workspace_list_to_plot(self._view.if_raw(),
                                                                           self._view.get_selected())
 
@@ -529,7 +529,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         return bottom, top
 
     def get_x_limits(self):
-        xlims = self._view.get_plot_options().get_plot_x_range()
+        xlims = self._view.plot_options.get_plot_x_range()
         if xlims[1] - xlims[0] > 0:
             return xlims
         else:
