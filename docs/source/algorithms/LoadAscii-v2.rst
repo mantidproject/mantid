@@ -10,14 +10,14 @@ Description
 -----------
 
 The LoadAscii2 algorithm reads in spectra data from a text file and
-stores it in a :ref:`Workspace2D <Workspace2D>` as data points. The data in
+stores it in a :ref:`Workspace2D <Workspace2D>` as data points, or a Table Workspace if it is table data. The data in
 the file must be organized in columns separated by commas, tabs, spaces,
 colons or semicolons. Only one separator type can be used throughout the
 file; use the "Separator" property to tell the algorithm which to use.
 The algorithm :ref:`SaveAscii2 <algm-SaveAscii-v2>` is normally able to produce
 such a file.
 
-The format must be:
+The format must be (Workspace 2D):
 
 -  A single integer or blank line to denote a new spectra
 -  For each bin, between two and four columns of delimited data in the
@@ -39,6 +39,21 @@ no X error::
     2.00000000,3.00000000,1.00000000 4.00000000,0.00000000,0.00000000 4
     2.00000000,0.00000000,0.00000000 4.00000000,0.00000000,0.00000000
 
+The format must be (Table Workspace):
+
+-  Two commented header lines
+-  The first containing the column names
+-  The second containing the column types (str, int, unit, long64, size_t, float, double, bool, V3D)
+-  The number of column names, types and data items must match
+
+
+The following is an example valid file of two columns::
+
+	# Instrument Name , Run Number 
+	# str , int 
+	MUSR,10245
+	IRIS,8465
+	SANS2D,20462
 
 Usage
 -----
