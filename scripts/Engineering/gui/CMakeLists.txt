@@ -3,6 +3,8 @@
 set(TEST_PY_FILES
     # Common
     engineering_diffraction/tabs/common/test/test_vanadium_corrections.py
+    # Cropping
+    engineering_diffraction/tabs/common/cropping/test/test_cropping_model.py
     # Settings
     engineering_diffraction/settings/test/test_settings_helper.py
     engineering_diffraction/settings/test/test_settings_model.py
