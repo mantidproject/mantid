@@ -376,7 +376,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         self._view.force_redraw()
 
     # Every time a new figure is generated these signals will have
-    # to be reconnected.
+    # to be reconnected (e.g switching to tiled plotting).
     def connect_xlim_changed_in_figure_view(self, slot):
         self._view.on_x_lims_changed_in_view(slot)
 

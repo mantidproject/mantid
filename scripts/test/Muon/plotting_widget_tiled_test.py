@@ -25,6 +25,8 @@ class PlottingWidgetPresenterTestTiled(unittest.TestCase):
         self.presenter.get_plot_title = mock.MagicMock(return_value='MUSR62260-62261 bottom')
         self.view.is_tiled_plot = mock.MagicMock(return_value=True)
         self.context.data_context.instrument = "MUSR"
+        axes = [mock.MagicMock(), mock.MagicMock, mock.MagicMock, mock.MagicMock]
+        self.view.get_axes = mock.MagicMock(return_value=axes)
 
         # workspaces and corresponding tiled by group and run indices
         self.group_workspace_list = self.create_workspace_group_list()
@@ -288,6 +290,62 @@ class PlottingWidgetPresenterTestTiled(unittest.TestCase):
             self.model.add_workspace_to_plot.assert_any_call(self.view.get_axes()[i],
                                                              fit_information.output_workspace_names[i], [2],
                                                              errors=False, plot_kwargs=mock.ANY)
+
+    def test_handle_subplot_changed_in_options_retrieves_correct_axis_limits(self):
+        subplot = '3'
+        index = int(subplot) - 1
+        xlims = [0, 10]
+        ylims = [-2, 2]
+        self.view.plot_options.get_selection.return_value = [subplot]
+        self.presenter.get_x_lim_from_subplot = mock.MagicMock(return_value=xlims)
+        self.presenter.get_y_lim_from_subplot = mock.MagicMock(return_value=ylims)
+
+        self.presenter.handle_subplot_changed_in_options()
+
+        self.presenter.get_x_lim_from_subplot.assert_called_with(index)
+        self.presenter.get_y_lim_from_subplot.assert_called_with(index)
+
+    def test_handle_x_lims_changed_in_figure_view_updates_axis_if_subplot_selected_in_options(self):
+        subplot = '3'
+        index = int(subplot) - 1
+        xlims = [0, 10]
+        axis = self.view.get_axes()[index]
+        axis.get_xlim = mock.MagicMock(return_value=xlims)
+        self.view.plot_options.get_selection.return_value = [subplot]
+
+        self.presenter.handle_x_axis_limits_changed_in_figure_view(axis)
+
+        self.view.plot_options.set_plot_x_range.assert_called_once_with(xlims)
+
+    def test_handle_x_lims_changed_in_figure_view_does_not_update_if_subplot_not_selected(self):
+        subplot = '3'
+        axis = self.view.get_axes()[0]
+        self.view.plot_options.get_selection.return_value = [subplot]
+
+        self.presenter.handle_x_axis_limits_changed_in_figure_view(axis)
+
+        self.view.plot_options.set_plot_x_range.assert_not_called()
+
+    def test_handle_y_lims_changed_in_figure_view_updates_axis_if_subplot_selected_in_options(self):
+        subplot = '3'
+        index = int(subplot) - 1
+        ylims = [-2, 2]
+        axis = self.view.get_axes()[index]
+        axis.get_ylim = mock.MagicMock(return_value=ylims)
+        self.view.plot_options.get_selection.return_value = [subplot]
+
+        self.presenter.handle_y_axis_limits_changed_in_figure_view(axis)
+
+        self.view.plot_options.set_plot_y_range.assert_called_once_with(ylims)
+
+    def test_handle_y_lims_changed_in_figure_view_does_not_update_if_correct_subplot_not_selected(self):
+        subplot = '3'
+        axis = self.view.get_axes()[0]
+        self.view.plot_options.get_selection.return_value = [subplot]
+
+        self.presenter.handle_y_axis_limits_changed_in_figure_view(axis)
+
+        self.view.plot_options.set_plot_y_range.assert_not_called()
 
 
 if __name__ == '__main__':
