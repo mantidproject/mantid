@@ -59,11 +59,6 @@ QListView::item {
         <property name="currentRow">
          <number>-1</number>
         </property>
-        <item>
-         <property name="text">
-          <string>General</string>
-         </property>
-        </item>
        </widget>
       </item>
       <item>
@@ -145,7 +140,7 @@ QListView::item {
      <x>0</x>
      <y>0</y>
      <width>726</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>
