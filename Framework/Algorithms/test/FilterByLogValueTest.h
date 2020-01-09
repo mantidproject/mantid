@@ -230,7 +230,8 @@ public:
     // Things that haven't changed
     TS_ASSERT_EQUALS(outWS->blocksize(), start_blocksize);
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 50);
-    TS_ASSERT_EQUALS(outWS->run().getProperties().size(), num_sample_logs + 1);  // expect new log 'duration'
+    TS_ASSERT_EQUALS(outWS->run().getProperties().size(),
+                     num_sample_logs + 1); // expect new log 'duration'
 
     // Proton charge is lower
     if (add_proton_charge) {
