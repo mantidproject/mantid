@@ -39,6 +39,7 @@ Powder Diffraction
 ------------------
 
 - A bug has been fixed that prevented unicode strings being given as a lim file directory in polaris create_total_scattering_pdf merging banks.
+- A bug has been fixed that caused Polaris.focus to fail with `do_absorption_Corrections=True`.
 
 Engineering Diffraction
 -----------------------
