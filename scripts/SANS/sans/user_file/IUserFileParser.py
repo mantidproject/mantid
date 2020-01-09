@@ -15,6 +15,7 @@ from sans.user_file.parsed_containers.MaskDetails import MaskDetails
 from sans.user_file.parsed_containers.MonitorDetails import MonitorDetails
 from sans.user_file.parsed_containers.QResolutionDetails import QResolutionDetails
 from sans.user_file.parsed_containers.SampleDetails import SampleDetails
+from sans.user_file.parsed_containers.SaveDetails import SaveDetails
 from sans.user_file.parsed_containers.SetPositionDetails import SetPositionDetails
 from sans.user_file.parsed_containers.TransmissionDetails import TransmissionDetails
 
@@ -62,6 +63,10 @@ class IUserFileParser(ABC):
 
     @abstractmethod
     def get_sample_details(self) -> SampleDetails:
+        pass
+
+    @abstractmethod
+    def get_save_details(self) -> SaveDetails:
         pass
 
     @abstractmethod

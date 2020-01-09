@@ -347,7 +347,7 @@ class CommandInterfaceStateDirector(object):
 
     def _process_user_file(self, command):
         """
-        Processes a user file and retain the parased tags
+        Processes a user file and retain the parsed tags
 
         @param command: the command with the user file path
         """

@@ -12,10 +12,10 @@ from sans.user_file.settings_tags import mask_angle_entry, LimitsId, q_rebin_val
 
 class LimitDetails(NamedTuple):
     angle_limit: mask_angle_entry
-    event_binning: str
-
     cut_limit: List[Tuple[LimitsId, float]]
-    radius_range: FloatRange
+    event_binning: str
     q_limits: q_rebin_values
     qxy_limit: simple_range
+    radius_range: FloatRange
+    use_full_wavelength: bool
     wavelength_limit: simple_range

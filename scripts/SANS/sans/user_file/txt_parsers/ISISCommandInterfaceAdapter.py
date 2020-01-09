@@ -4,12 +4,8 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from typing import NamedTuple, Tuple
-
-from sans.common.Containers.FloatRange import FloatRange
-from sans.user_file.settings_tags import fit_general
+from sans.user_file.txt_parsers.ParsedDictConverter import ParsedDictConverter
 
 
-class FitDetails(NamedTuple):
-    monitor_times: Tuple[bool, FloatRange]
-    transmission_fit: Tuple[bool, fit_general]
+class ISISCommandInterfaceAdapter(ParsedDictConverter):
+    pass

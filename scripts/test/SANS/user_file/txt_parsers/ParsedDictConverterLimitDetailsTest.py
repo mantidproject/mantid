@@ -7,7 +7,7 @@
 import unittest
 
 from sans.common.Containers.FloatRange import FloatRange
-from sans.user_file.settings_tags import mask_angle_entry, LimitsId, q_rebin_values, simple_range, range_entry
+from sans.user_file.settings_tags import mask_angle_entry, LimitsId, q_rebin_values, simple_range, range_entry, OtherId
 from test.SANS.user_file.txt_parsers.ParsedDictConverterTestCommon import ParsedDictConverterTestCommon
 
 
@@ -93,6 +93,14 @@ class ParsedDictConverterLimitDetailsTest(ParsedDictConverterTestCommon, unittes
 
         self.assertIsNotNone(returned)
         self.assertEqual(expected_val, returned.wavelength_limit)
+
+    def test_use_full_wavelength(self):
+        self.set_return_val({OtherId.USE_FULL_WAVELENGTH_RANGE: True})
+
+        returned = self.instance.get_limit_details()
+
+        self.assertIsNotNone(returned)
+        self.assertTrue(returned.use_full_wavelength)
 
 
 if __name__ == '__main__':

@@ -8,6 +8,7 @@ set(TEST_PY_FILES
     ParsedDictConverterMonitorDetailsTest.py
     ParsedDictConverterQResolutionDetailsTest.py
     ParsedDictConverterSampleDetailsTest.py
+    ParsedDictConverterSaveDetailsTest.py
     ParsedDictConverterSetPositionDetailsTest.py
     ParsedDictConverterTransmissionDetailsTest.py
     UserFileParserAdapterTest.py

@@ -6,7 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from sans.user_file.settings_tags import SampleId
+from sans.common.enums import ReductionDimensionality
+from sans.user_file.settings_tags import SampleId, OtherId, event_binning_string_values
 from test.SANS.user_file.txt_parsers.ParsedDictConverterTestCommon import ParsedDictConverterTestCommon
 
 
@@ -37,6 +38,26 @@ class ParsedDictConverterSampleDetailsTest(ParsedDictConverterTestCommon, unitte
 
         self.assertIsNotNone(returned)
         self.assertEqual(expected_val, returned.z_offset)
+
+    def test_selected_dimension(self):
+        expected_val = ReductionDimensionality.TWO_DIM
+
+        self.set_return_val({OtherId.REDUCTION_DIMENSIONALITY: expected_val})
+
+        returned = self.instance.get_sample_details()
+
+        self.assertIsNotNone(returned)
+        self.assertEqual(expected_val, returned.selected_dimension)
+
+    def test_event_slices(self):
+        expected_val = event_binning_string_values(value="1,2,3")
+
+        self.set_return_val({OtherId.EVENT_SLICES: expected_val})
+
+        returned = self.instance.get_sample_details()
+
+        self.assertIsNotNone(returned)
+        self.assertEqual(expected_val, returned.event_slices)
 
 
 if __name__ == '__main__':
