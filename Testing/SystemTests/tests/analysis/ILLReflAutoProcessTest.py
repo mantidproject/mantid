@@ -122,3 +122,61 @@ class D17Cycle192CoherentDanTest(systemtesting.MantidSystemTest):
             WavelengthUpperBound=[27., 25.],
             GlobalScaleFactor=0.13
         )
+
+
+"""
+    @brief Tests with RoundRobin sample at 3 angles with the data from cycle #181
+    Uses incoherent summation with sample angle option.
+"""
+class D17Cycle181RoundRobinTest(systemtesting.MantidSystemTest):
+
+    def __init__(self):
+        super(D17Cycle181RoundRobinTest, self).__init__()
+        self.setUp()
+
+    def setUp(self):
+        config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'D17'
+        config['logging.loggers.root.level'] = 'Warning'
+        config.appendDataSearchSubDir('ILL/D17/')
+
+    def cleanup(self):
+        mtd.clear()
+
+    def validate(self):
+        self.tolerance = 1e-6
+        self.tolerance_is_rel_err = True
+        self.disableChecking = ['Instrument', 'Sample']
+        return ['Thick_HR_5', 'D17_Thick_HR_5.nxs']
+
+    def runTest(self):
+        name = 'Thick_HR_5'
+        directBeams = '397812,397806,397808'
+        reflectedBeams = '397826+397827,397828,397829+397830+397831+397832'
+        foregroundWidth = [4,5,8]
+        wavelengthLower = [3., 1.6, 2.]
+        wavelengthUpper = [27., 25., 25.]
+        angleOffset = 2
+        angleWidth = 10
+        ReflectometryILLAutoProcess(
+            Run=reflectedBeams,
+            DirectRun=directBeams,
+            OutputWorkspace=name,
+            SummationType='Incoherent',
+            AngleOption='SampleAngle',
+            DirectLowAngleFrgHalfWidth=foregroundWidth,
+            DirectHighAngleFrgHalfWidth=foregroundWidth,
+            DirectLowAngleBkgOffset=angleOffset,
+            DirectLowAngleBkgWidth=angleWidth,
+            DirectHighAngleBkgOffset=angleOffset,
+            DirectHighAngleBkgWidth=angleWidth,
+            ReflLowAngleFrgHalfWidth=foregroundWidth,
+            ReflHighAngleFrgHalfWidth=foregroundWidth,
+            ReflLowAngleBkgOffset=angleOffset,
+            ReflLowAngleBkgWidth=angleWidth,
+            ReflHighAngleBkgOffset=angleOffset,
+            ReflHighAngleBkgWidth=angleWidth,
+            WavelengthLowerBound=wavelengthLower,
+            WavelengthUpperBound=wavelengthUpper,
+            DeltaQFractionBinning=0.5
+        )
