@@ -529,7 +529,7 @@ std::vector<double> LoadILLReflectometry::getXValues() {
         POFF = doubleFromRun(m_offsetFrom + ".poff");
       } catch (std::runtime_error &) {
         try {
-          doubleFromRun(m_offsetFrom + ".pickup_offset");
+          POFF = doubleFromRun(m_offsetFrom + ".pickup_offset");
         } catch (std::runtime_error &) {
           throw std::runtime_error(
               "Unable to find VirtualChopper pickup offset");
@@ -982,18 +982,20 @@ double LoadILLReflectometry::sampleHorizontalOffset() const {
 double LoadILLReflectometry::sourceSampleDistance() const {
   if (m_instrument != Supported::FIGARO) {
     double pairCentre;
+    double pairSeparation;
     try {
       pairCentre = doubleFromRun("VirtualChopper.dist_chop_samp");
+      pairSeparation = doubleFromRun("Distance.ChopperGap") / 100;
     } catch (std::runtime_error &) {
       try {
         pairCentre = mmToMeter(
             doubleFromRun("VirtualChopper.MidChopper_Sample_distance"));
+        pairSeparation = doubleFromRun("Distance.ChopperGap");
       } catch (std::runtime_error &) {
         throw std::runtime_error(
             "Unable to extract chopper to sample distance");
       }
     }
-    const double pairSeparation = doubleFromRun("Distance.ChopperGap") / 100;
     return pairCentre - 0.5 * pairSeparation;
   } else {
     const double chopperDist =
