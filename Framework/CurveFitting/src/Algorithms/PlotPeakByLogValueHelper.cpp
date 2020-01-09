@@ -133,12 +133,12 @@ InputData getWorkspace(const InputData &data, API::IAlgorithm_sptr load) {
       return data;
     }
   } else {
-    std::ifstream fil(data.name.c_str());
-    if (!fil) {
-      g_log.warning() << "File " << data.name << " does not exist\n";
-      return data;
-    }
-    fil.close();
+    // std::ifstream fil(data.name.c_str());
+    // if (!fil) {
+    //   g_log.warning() << "File " << data.name << " does not exist\n";
+    //   return data;
+    // }
+    // fil.close();
     std::string::size_type i = data.name.find_last_of('.');
     if (i == std::string::npos) {
       g_log.warning() << "Cannot open file " << data.name << "\n";
