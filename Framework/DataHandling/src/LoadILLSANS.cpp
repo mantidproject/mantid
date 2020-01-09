@@ -146,6 +146,11 @@ void LoadILLSANS::exec() {
           firstEntry, instrumentPath + "/detector/dan_actual");
       rotateD22(angle, "detector");*/
     }
+
+    if (m_instrumentName == "D16") {
+      const double angle = firstEntry.getFloat(instrumentPath + "/Gamma/value");
+      rotateInstrument(angle, "detector");
+    }
   }
 
   progress.report("Setting sample logs");
@@ -524,7 +529,8 @@ void LoadILLSANS::moveDetectorDistance(double distance,
  * @param angle : the angle to rotate [degree]
  * @param componentName : "detector"
  */
-void LoadILLSANS::rotateD22(double angle, const std::string &componentName) {
+void LoadILLSANS::rotateInstrument(double angle,
+                                   const std::string &componentName) {
   API::IAlgorithm_sptr rotater =
       createChildAlgorithm("RotateInstrumentComponent");
   rotater->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);

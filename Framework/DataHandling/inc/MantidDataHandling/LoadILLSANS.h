@@ -76,7 +76,7 @@ private:
   Kernel::V3D getComponentPosition(const std::string &componentName);
   void loadMetaData(const NeXus::NXEntry &, const std::string &);
   std::string getInstrumentFilePath(const std::string &) const;
-  void rotateD22(double, const std::string &);
+  void rotateInstrument(double, const std::string &);
   void adjustTOF();
   void moveSource();
 
