@@ -344,6 +344,7 @@ set(TEST_FILES
     Algorithms/NormaliseByPeakAreaTest.h
     Algorithms/PawleyFitTest.h
     Algorithms/PlotPeakByLogValueTest.h
+    Algorithms/PlotPeakByLogValueHelperTest.h
     Algorithms/QENSFitSequentialTest.h
     Algorithms/QENSFitSimultaneousTest.h
     Algorithms/RefinePowderInstrumentParameters3Test.h
