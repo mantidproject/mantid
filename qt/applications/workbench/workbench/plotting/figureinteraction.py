@@ -662,6 +662,11 @@ class FigureInteraction(object):
         self._toggle_normalization(ax)
 
     def _toggle_normalization(self, ax):
+        waterfall = isinstance(ax, MantidAxes) and ax.is_waterfall_plot()
+        if waterfall:
+            x, y = ax.waterfall_x_offset, ax.waterfall_y_offset
+            ax.update_waterfall_plot(0,0)
+
         is_normalized = self._is_normalized(ax)
         for arg_set in ax.creation_args:
             if arg_set['workspaces'] in ax.tracked_workspaces:
@@ -689,7 +694,13 @@ class FigureInteraction(object):
                         ws_artist.replace_data(workspace, arg_set_copy)
         if ax.lines:  # Relim causes issues with colour plots, which have no lines.
             ax.relim()
+
         ax.autoscale()
+
+        if waterfall:
+            ax.set_initial_dimensions(ax.get_xlim(), ax.get_ylim())
+            ax.update_waterfall_plot(x, y)
+
         self.canvas.draw()
 
     def _can_toggle_normalization(self, ax):
