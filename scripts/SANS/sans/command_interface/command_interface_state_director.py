@@ -15,6 +15,7 @@ from sans.user_file.settings_tags import (MonId, monitor_spectrum, OtherId, Samp
                                           simple_range, DetectorId, event_binning_string_values, det_fit_range,
                                           single_entry_with_detector)
 from sans.user_file.state_director import StateDirectorISIS
+from sans.user_file.txt_parsers.CommandInterfaceStateDirectorAdapter import CommandInterfaceStateDirectorAdapter
 from sans.user_file.user_file_parser import (UserFileParser)
 from sans.user_file.user_file_reader import (UserFileReader)
 
@@ -153,6 +154,9 @@ class CommandInterfaceStateDirector(object):
 
         # 2. Go through
         state = self._process_command_queue(data_state)
+
+        # Inject the adapter shim
+        CommandInterfaceStateDirectorAdapter(self._processed_state_settings)
 
         # 3. Leave commands in place put clear the list of processed commands, else they will be reused.
         self._processed_state_settings = {}
