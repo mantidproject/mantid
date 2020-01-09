@@ -8,8 +8,10 @@
 #define MANTID_CURVEFITTING_PLOTPEAKBULOGVALUEHELPER_H_
 #include "MantidAPI/DllConfig.h"
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/Workspace_fwd.h"
 
 #include <string>
 #include <vector>
@@ -39,8 +41,11 @@ struct InputData {
   std::vector<int> indx; ///< a list of ws indices to fit if i and spec < 0
 };
 /// Get a workspace
-DLLExport InputData getWorkspace(const InputData &data,
-                                 API::IAlgorithm_sptr load);
+DLLExport std::vector<int>
+getWorkspaceIndicesFromAxes(API::MatrixWorkspace_sptr, int workspaceIndex,
+                            int spectrumNumber, double start, double end);
+DLLExport std::optional<API::Workspace_sptr>
+getWorkspace(const std::string &name, int period);
 
 /// Create a list of input workspace names
 DLLExport std::vector<InputData> makeNames(std::string inputList,

@@ -242,8 +242,7 @@ void PlotPeakByLogValue::exec() {
   double dProg = 1. / static_cast<double>(wsNames.size());
   double Prog = 0.;
   for (int i = 0; i < static_cast<int>(wsNames.size()); ++i) {
-    API::IAlgorithm_sptr load = createChildAlgorithm("Load");
-    InputData data = getWorkspace(wsNames[i], load);
+    InputData data = wsNames[i];
 
     if (!data.ws) {
       g_log.warning() << "Cannot access workspace " << wsNames[i].name << '\n';
