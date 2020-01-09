@@ -13,11 +13,8 @@ from Muon.GUI.Common.plotting_widget.plotting_widget_model import PlotWidgetMode
 
 class PlottingWidget(object):
     def __init__(self, context=None):
-        # initialise the view, presenter and model.
         self.view = PlotWidgetView(parent=None)
-        # model
         self.model = PlotWidgetModel()
-        # presenter
         self.presenter = PlotWidgetPresenter(self.view,
                                              self.model,
                                              context)

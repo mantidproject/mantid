@@ -231,12 +231,13 @@ class PlotWidgetModel(object):
     def autoscale_axes(self, axes, xlimits):
         ymin, ymax = self._get_autoscale_y_limits(axes, xlimits[0], xlimits[1])
         plt.setp(axes, xlim=xlimits, ylim=[ymin, ymax])
+        return ymin, ymax
 
-    def set_axis_xlim(self, axis, xmin, xmax):
-        axis.set_xlim(left=xmin, right=xmax)
+    def set_axis_xlim(self, axis, xlims):
+        axis.set_xlim(left=xlims[0], right=xlims[1])
 
-    def set_axis_ylim(self, axis, ymin, ymax):
-        axis.set_ylim(ymin, ymax)
+    def set_axis_ylim(self, axis, ylims):
+        axis.set_ylim(ylims[0], ylims[1])
 
     def _get_autoscale_y_limits(self, axes, xmin, xmax):
         new_bottom = 1e9
