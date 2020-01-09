@@ -10,11 +10,11 @@ import systemtesting
 from mantid.simpleapi import ReflectometryILLAutoProcess, config, mtd
 
 
-"""
-    @brief Tests with VoS11 sample at 2 angles with the data from cycle #192
-    Uses incoherent summation with sample angle option.
-"""
 class D17Cycle192IncoherentSanTest(systemtesting.MantidSystemTest):
+    """
+        @brief Tests with VoS11 sample at 2 angles with the data from cycle #192
+        Uses incoherent summation with sample angle option.
+    """
 
     def __init__(self):
         super(D17Cycle192IncoherentSanTest, self).__init__()
@@ -67,11 +67,11 @@ class D17Cycle192IncoherentSanTest(systemtesting.MantidSystemTest):
         )
 
 
-"""
-    @brief Tests with SiO2 sample at 2 angles with the data from cycle #192
-    Uses coherent summation with detector angle option.
-"""
 class D17Cycle192CoherentDanTest(systemtesting.MantidSystemTest):
+    """
+        @brief Tests with SiO2 sample at 2 angles with the data from cycle #192
+        Uses coherent summation with detector angle option.
+    """
 
     def __init__(self):
         super(D17Cycle192CoherentDanTest, self).__init__()
@@ -124,11 +124,11 @@ class D17Cycle192CoherentDanTest(systemtesting.MantidSystemTest):
         )
 
 
-"""
-    @brief Tests with RoundRobin sample at 3 angles with the data from cycle #181
-    Uses incoherent summation with sample angle option.
-"""
 class D17Cycle181RoundRobinTest(systemtesting.MantidSystemTest):
+    """
+        @brief Tests with RoundRobin sample at 3 angles with the data from cycle #181
+        Uses incoherent summation with sample angle option.
+    """
 
     def __init__(self):
         super(D17Cycle181RoundRobinTest, self).__init__()
