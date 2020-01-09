@@ -34,9 +34,10 @@ class Prop:
     OUTPUT_WS = 'OutputWorkspace'
     OUTPUT_WS_BINNED = 'OutputWorkspaceBinned'
     OUTPUT_WS_LAM = 'OutputWorkspaceWavelength'
-    OUTPUT_WS_TOF = 'OutputWorkspaceTOF'
+    OUTPUT_WS_TOF_SUMMED = 'OutputWorkspaceTOFSummed'
+    OUTPUT_WS_FIRST_TRANS_SUMMED = 'OutputWorkspaceFirstTransmissionSummed'
+    OUTPUT_WS_SECOND_TRANS_SUMMED = 'OutputWorkspaceSecondTransmissionSummed'
     OUTPUT_WS_TOF_SLICED = 'OutputWorkspaceTOFSliced'
-    OUTPUT_WS_TOF_TRANS = 'OutputWorkspaceTOFTransmission'
     OUTPUT_WS_FIRST_TRANS = 'OutputWorkspaceFirstTransmission'
     OUTPUT_WS_SECOND_TRANS = 'OutputWorkspaceSecondTransmission'
     OUTPUT_WS_TRANS = 'OutputWorkspaceTransmission'
@@ -119,9 +120,14 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         secondTransRuns = self.getProperty(Prop.SECOND_TRANS_RUNS).value
         secondTransWorkspaces = self._getInputWorkspaces(secondTransRuns, True)
         # Combine multiple input runs, if required
-        inputWorkspace = self._sumWorkspaces(inputWorkspaces, False)
-        firstTransWorkspace = self._sumWorkspaces(firstTransWorkspaces, True)
-        secondTransWorkspace = self._sumWorkspaces(secondTransWorkspaces, True)
+        inputWorkspace = self._sumWorkspaces(inputWorkspaces, False, Prop.OUTPUT_WS_TOF_SUMMED,
+                                             'The summed input workspaces in TOF')
+        firstTransWorkspace = self._sumWorkspaces(firstTransWorkspaces, True,
+            Prop.OUTPUT_WS_FIRST_TRANS_SUMMED,
+            'The summed input workspaces for the first transmission, in TOF')
+        secondTransWorkspace = self._sumWorkspaces(secondTransWorkspaces, True,
+            Prop.OUTPUT_WS_SECOND_TRANS_SUMMED,
+            'The summed input workspaces for the second transmission, in TOF')
         # Slice the input workspace, if required
         inputWorkspace = self._sliceWorkspace(inputWorkspace)
         # Perform the reduction
@@ -136,16 +142,14 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         # input run when slicing)
         if self._slicingEnabled():
             tofWorkspaces.add(_monitorWorkspace(inputWorkspaces[0]))
-        self._group_workspaces(tofWorkspaces, "TOF", Prop.OUTPUT_WS_TOF,
-                               'The loaded workspace(s) in TOF')
+        self._group_workspaces(tofWorkspaces, "TOF")
         # Group the TRANS TOF workspaces
         transWorkspaces = set(firstTransWorkspaces + secondTransWorkspaces)
         if firstTransWorkspace:
             transWorkspaces.add(firstTransWorkspace)
         if secondTransWorkspace:
             transWorkspaces.add(secondTransWorkspace)
-        self._group_workspaces(transWorkspaces, "TRANS_TOF",
-                               Prop.OUTPUT_WS_TOF_TRANS, 'The transmission workspace(s) in TOF')
+        self._group_workspaces(transWorkspaces, "TRANS_TOF")
 
     def validateInputs(self):
         """Return a dictionary containing issues found in properties."""
@@ -287,7 +291,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
                     delete_ws_group_flag = False
         return ungrouped_workspaces
 
-    def _group_workspaces(self, workspaces, output_ws_name, output_property, doc_string):
+    def _group_workspaces(self, workspaces, output_ws_name):
         """
         Groups all the given workspaces into a group with the given name. If the group
         already exists it will add them to that group.
@@ -308,18 +312,16 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
                 for ws in workspaces:
                     if ws not in ws_group:
                         ws_group.add(ws)
-                        # As the group already exists we need to add each individual workspace
-                        # as an output property in order to output it properly
-                        self._declareAndSetWorkspaceProperty(
-                            ws, ws, AnalysisDataService.retrieve(ws), doc_string)
         else:
             alg = self.createChildAlgorithm("GroupWorkspaces")
             alg.setProperty("InputWorkspaces", list(workspaces))
             alg.setProperty("OutputWorkspace", output_ws_name)
             alg.execute()
             ws_group = alg.getProperty("OutputWorkspace").value
-            # We need to add the group as an output property
-            self._declareAndSetWorkspaceProperty(output_property, output_ws_name, ws_group, doc_string)
+            # We can't add the group as an output property or it will duplicate
+            # the history for the contained workspaces, so add it directly to
+            # the ADS
+            AnalysisDataService.addOrReplace(output_ws_name, ws_group)
 
     def _renameWorkspaceBasedOnRunNumber(self, workspace_name, isTrans):
         """Rename the given workspace based on its run number and a standard prefix"""
@@ -337,16 +339,21 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         workspace otherwise. Transmission runs are always loaded as histogram workspaces."""
         workspace_name = self._prefixedName(run, isTrans)
         if not isTrans and self._slicingEnabled():
-            workspace = LoadEventNexus(Filename=run, OutputWorkspace=workspace_name, LoadMonitors=True)
+            workspace, monitor_workspace = LoadEventNexus(Filename=run, OutputWorkspace=workspace_name, LoadMonitors=True)
             _throwIfNotValidReflectometryEventWorkspace(workspace_name)
             self.log().information('Loaded event workspace ' + workspace_name)
+            self._declareAndSetWorkspaceProperty(_monitorWorkspace(workspace_name),
+                                                 _monitorWorkspace(workspace_name), monitor_workspace,
+                                                 'The input monitor workspace in TOF')
         else:
             workspace = LoadNexus(Filename=run, OutputWorkspace=workspace_name)
             self.log().information('Loaded workspace ' + workspace_name)
         workspace_name = self._renameWorkspaceBasedOnRunNumber(workspace_name, isTrans)
+        doc_string = 'The TRANS workspace in TOF' if isTrans else 'The input workspace in TOF'
+        self._declareAndSetWorkspaceProperty(workspace_name, workspace_name, workspace, doc_string)
         return workspace_name
 
-    def _sumWorkspaces(self, workspaces, isTrans):
+    def _sumWorkspaces(self, workspaces, isTrans, property_name, doc_string):
         """If there are multiple input workspaces, sum them and return the result. Otherwise
         just return the single input workspace, or None if the list is empty."""
         if len(workspaces) < 1:
@@ -355,20 +362,20 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             return workspaces[0]
         workspaces_without_prefixes = [self._removePrefix(ws, isTrans) for ws in workspaces]
         concatenated_names = "+".join(workspaces_without_prefixes)
-        summed = self._prefixedName(concatenated_names, isTrans)
-        self.log().information('Summing workspaces' + " ".join(workspaces) + ' into ' + summed)
-        MergeRuns(InputWorkspaces=", ".join(workspaces), OutputWorkspace=summed)
+        summed_name = self._prefixedName(concatenated_names, isTrans)
+        self.log().information('Summing workspaces' + " ".join(workspaces) + ' into ' + summed_name)
+        summed_ws = MergeRuns(InputWorkspaces=", ".join(workspaces), OutputWorkspace=summed_name)
+        self._declareAndSetWorkspaceProperty(property_name, summed_name, summed_ws, doc_string)
         # The reduction algorithm sets the output workspace names from the run number,
         # which by default is just the first run. Set it to the concatenated name,
         # e.g. 13461+13462
-        ws = AnalysisDataService.retrieve(summed)
-        if isinstance(ws, WorkspaceGroup):
-            for workspaceName in ws.getNames():
+        if isinstance(summed_ws, WorkspaceGroup):
+            for workspaceName in summed_ws.getNames():
                 grouped_ws = AnalysisDataService.retrieve(workspaceName)
                 grouped_ws.run().addProperty('run_number', concatenated_names, True)
         else:
-            ws.run().addProperty('run_number', concatenated_names, True)
-        return summed
+            summed_ws.run().addProperty('run_number', concatenated_names, True)
+        return summed_name
 
     def _slicingEnabled(self):
         return self.getProperty(Prop.SLICE).value
