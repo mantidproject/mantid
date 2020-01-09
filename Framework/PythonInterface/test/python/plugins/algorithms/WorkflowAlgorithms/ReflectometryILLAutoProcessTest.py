@@ -99,6 +99,40 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
         assertRaisesNothing(self, alg.execute)
         self.checkOutput(mtd['outWS'], 3)
 
+    def testNexus2019(self):
+        directBeams = '541838,541839'
+        reflectedBeams = '541882,541883'
+        foregroundWidth = [3, 15]
+        angleOffset = [2, 5]
+        angleWidth = 5
+        braggAngles = [0.8, 3.5]
+        args = {
+            'Run': reflectedBeams,
+            'DirectRun': directBeams,
+            'OutputWorkspace': 'outWS',
+            'Theta': braggAngles,
+            'DeltaQFractionBinning': 0.5,
+            'DirectLowAngleFrgHalfWidth': foregroundWidth,
+            'DirectHighAngleFrgHalfWidth': foregroundWidth,
+            'DirectLowAngleBkgOffset': angleOffset,
+            'DirectLowAngleBkgWidth': angleWidth,
+            'DirectHighAngleBkgOffset': angleOffset,
+            'DirectHighAngleBkgWidth': angleWidth,
+            'ReflLowAngleFrgHalfWidth': foregroundWidth,
+            'ReflHighAngleFrgHalfWidth': foregroundWidth,
+            'ReflLowAngleBkgOffset': angleOffset,
+            'ReflLowAngleBkgWidth': angleWidth,
+            'ReflHighAngleBkgOffset': angleOffset,
+            'ReflHighAngleBkgWidth': angleWidth,
+            'WavelengthLowerBound': [3., 3.],
+            'WavelengthUpperBound': [27., 25.],
+            'GlobalScaleFactor': 0.13,
+            'rethrow': True
+        }
+        alg = create_algorithm('ReflectometryILLAutoProcess', **args)
+        assertRaisesNothing(self, alg.execute)
+        self.checkOutput(mtd['outWS'], 3)
+
     def testDefaultValues(self):
         args = {
             'Run': '317370',
