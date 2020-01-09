@@ -1060,6 +1060,8 @@ class MantidAxes(Axes):
         return self.waterfall_x_offset != 0 or self.waterfall_y_offset != 0
 
     def update_waterfall_plot(self, x_offset, y_offset):
+        errorbar_cap_lines = self.remove_and_return_errorbar_cap_lines()
+
         for i in range(len(self.get_lines())):
             self.convert_single_line_to_waterfall(i, x_offset, y_offset)
 
@@ -1069,6 +1071,8 @@ class MantidAxes(Axes):
 
         if any(isinstance(collection, PolyCollection) for collection in self.collections):
             self.waterfall_update_fill()
+
+        self.lines += errorbar_cap_lines
 
         self.set_waterfall_toolbar_options_enabled()
         self.get_figure().canvas.draw()
@@ -1101,6 +1105,13 @@ class MantidAxes(Axes):
     def apply_waterfall_offset_to_errorbars(self, line, amount_to_move_x, amount_to_move_y, index):
         for container in self.containers:
             if isinstance(container, ErrorbarContainer) and container[0] == line:
+                # Shift the data line and the errorbar caps
+                for line in (container[0],) + container[1]:
+                    line.set_xdata(line.get_xdata() + amount_to_move_x)
+                    line.set_ydata(line.get_ydata() + amount_to_move_y)
+                    line.set_zorder(len(self.get_lines()) - index)
+
+                # Shift the errorbars
                 for bar_line_col in container[2]:
                     segments = bar_line_col.get_segments()
                     for point in segments:
@@ -1125,11 +1136,12 @@ class MantidAxes(Axes):
         else:
             amount_to_move_y = index * self.height * ((y - self.waterfall_y_offset) / 500)
 
-        line.set_xdata(line.get_xdata() + amount_to_move_x)
-        line.set_ydata(line.get_ydata() + amount_to_move_y)
-        line.set_zorder(len(self.get_lines()) - index)
-
-        self.apply_waterfall_offset_to_errorbars(line, amount_to_move_x, amount_to_move_y, index)
+        if line.get_label() == "_nolegend_":
+            self.apply_waterfall_offset_to_errorbars(line, amount_to_move_x, amount_to_move_y, index)
+        else:
+            line.set_xdata(line.get_xdata() + amount_to_move_x)
+            line.set_ydata(line.get_ydata() + amount_to_move_y)
+            line.set_zorder(len(self.get_lines()) - index)
 
         # If the curves are filled and the fill has been set to match the line colour and the line colour has changed
         # then the fill's colour is updated.
@@ -1176,10 +1188,14 @@ class MantidAxes(Axes):
         return True
 
     def waterfall_create_fill(self):
+        errorbar_cap_lines = self.remove_and_return_errorbar_cap_lines()
+
         for i, line in enumerate(self.get_lines()):
             bottom_line = [min(line.get_ydata())-((i*self.height)/100)] * len(line.get_ydata())
             fill = self.fill_between(line.get_xdata(), line.get_ydata(), bottom_line)
             fill.set_zorder((len(self.get_lines())-i)+1)
+
+        self.lines += errorbar_cap_lines
 
     def waterfall_remove_fill(self):
         self.collections[:] = filter(lambda x: not isinstance(x, PolyCollection), self.collections)
@@ -1218,6 +1234,27 @@ class MantidAxes(Axes):
 
         for i, collection in enumerate(poly_collections):
             collection.set_color(colours[i])
+
+    def remove_and_return_errorbar_cap_lines(self):
+        # Matplotlib holds the line objects representing errorbar caps in the same list as the actual curves on a plot.
+        # This causes problems for waterfall plots so here they are removed from the list and placed into a different
+        # list, which is returned so they can be readded later.
+        errorbar_cap_lines = []
+        for line in self.get_lines():
+            # The lines with the label "_nolegend_" are either actual curves with errorbars, or errorbar cap lines.
+            # To check if it is an actual curve, we attempt to find the ErrorbarContainer that matches the line object.
+            if line.get_label() == "_nolegend_":
+                for container in self.containers:
+                    if isinstance(container, ErrorbarContainer):
+                        line_is_errorbar_cap = True
+                        if container[0] == line:
+                            line_is_errorbar_cap = False
+                            break
+
+                if line_is_errorbar_cap:
+                    errorbar_cap_lines.append(self.lines.pop(self.lines.index(line)))
+
+        return errorbar_cap_lines
 
     # ------------------ Private api --------------------------------------------------------
 

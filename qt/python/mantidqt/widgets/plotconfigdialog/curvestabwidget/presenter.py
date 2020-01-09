@@ -122,18 +122,25 @@ class CurvesTabWidgetPresenter:
 
         if isinstance(curve, Line2D):
             curve_index = ax.get_lines().index(curve)
+            errorbar = False
         else:
             curve_index = ax.get_lines().index(curve[0])
+            errorbar = True
 
         new_curve = FigureErrorsManager.replot_curve(ax, curve, plot_kwargs)
         self.curve_names_dict[self.view.get_selected_curve_name()] = new_curve
 
-        line = ax.lines.pop()
-        ax.lines.insert(curve_index, line)
+        errorbar_cap_lines = ax.remove_and_return_errorbar_cap_lines()
+
+        # When a curve is redrawn it is moved to the back of the list of curves so here it is moved back to its previous
+        # position. This is so that the correct offset is applied to the curve if the plot is a waterfall plot, but it
+        # also just makes sense for the curve order to remain unchanged.
+        ax.lines.insert(curve_index, ax.lines.pop())
+
         if waterfall:
             if check_line_colour:
                 # curve can be either a Line2D or an ErrorContainer and the colour is accessed differently for each.
-                if isinstance(curve, Line2D):
+                if not errorbar:
                     # if the line colour hasn't changed then the fill colour doesn't need to be updated.
                     update_fill = curve.get_color() != new_curve[0].get_color()
                 else:
@@ -144,6 +151,8 @@ class CurvesTabWidgetPresenter:
                 ax.convert_single_line_to_waterfall(curve_index)
 
             ax.set_waterfall_fill_visible(curve_index)
+
+        ax.lines += errorbar_cap_lines
 
     def populate_curve_combo_box_and_update_view(self):
         """

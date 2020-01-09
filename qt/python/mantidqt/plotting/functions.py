@@ -253,7 +253,13 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
     else:
         if ax.is_waterfall_plot():
             for i in range(len(nums)):
+                errorbar_cap_lines = ax.remove_and_return_errorbar_cap_lines()
                 ax.convert_single_line_to_waterfall(len(ax.get_lines())-(i+1))
+
+                if ax.waterfall_has_fill():
+                    ax.waterfall_update_fill()
+
+                ax.lines += errorbar_cap_lines
 
     # This updates the toolbar so the home button now takes you back to this point.
     # The try catch is in case the manager does not have a toolbar attached.

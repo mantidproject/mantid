@@ -50,11 +50,13 @@ class FigureErrorsManager(object):
         plot_kwargs = curve_props.get_plot_kwargs()
         new_curve = cls.replot_curve(ax, curve, plot_kwargs)
 
-        line = ax.lines.pop()
-        ax.lines.insert(curve_index, line)
+        errorbar_cap_lines = ax.remove_and_return_errorbar_cap_lines()
+        ax.lines.insert(curve_index, ax.lines.pop())
 
         if isinstance(ax, MantidAxes) and ax.is_waterfall_plot():
             ax.convert_single_line_to_waterfall(curve_index)
+
+        ax.lines += errorbar_cap_lines
 
         # Inverts either the current state of hide_errors
         # or the make_visible kwarg that forces a state:

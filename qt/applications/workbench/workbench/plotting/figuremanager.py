@@ -418,7 +418,11 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         ax = self.canvas.figure.get_axes()[0]
         x, y = ax.waterfall_x_offset, ax.waterfall_y_offset
         ax.update_waterfall_plot(0,0)
+
+        errorbar_cap_lines = ax.remove_and_return_errorbar_cap_lines()
+
         ax.lines.reverse()
+        ax.lines += errorbar_cap_lines
         ax.collections.reverse()
         ax.update_waterfall_plot(x, y)
 
