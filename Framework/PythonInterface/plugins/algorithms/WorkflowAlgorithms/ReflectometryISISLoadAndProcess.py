@@ -30,16 +30,16 @@ class Prop:
     QMAX = 'MomentumTransferMax'
     GROUP_TOF = 'GroupTOFWorkspaces'
     RELOAD = 'ReloadInvalidWorkspaces'
+    DEBUG = 'Debug'
     OUTPUT_WS = 'OutputWorkspace'
     OUTPUT_WS_BINNED = 'OutputWorkspaceBinned'
     OUTPUT_WS_LAM = 'OutputWorkspaceWavelength'
     OUTPUT_WS_TOF = 'OutputWorkspaceTOF'
     OUTPUT_WS_TOF_SLICED = 'OutputWorkspaceTOFSliced'
+    OUTPUT_WS_TOF_TRANS = 'OutputWorkspaceTOFTransmission'
     OUTPUT_WS_FIRST_TRANS = 'OutputWorkspaceFirstTransmission'
     OUTPUT_WS_SECOND_TRANS = 'OutputWorkspaceSecondTransmission'
-    OUTPUT_WS_FIRST_TRANS_LAM = 'OutputWorkspaceFirstTransmissionLam'
-    OUTPUT_WS_SECOND_TRANS_LAM = 'OutputWorkspaceSecondTransmissionLam'
-    OUTPUT_WS_TRANS_LAM = 'OutputWorkspaceTransmissionLam'
+    OUTPUT_WS_TRANS = 'OutputWorkspaceTransmission'
 
 
 class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
@@ -115,26 +115,37 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         inputRuns = self.getProperty(Prop.RUNS).value
         inputWorkspaces = self._getInputWorkspaces(inputRuns, False)
         firstTransRuns = self.getProperty(Prop.FIRST_TRANS_RUNS).value
-        firstTransWorkspaces = self._getInputWorkspaces(firstTransRuns, True,
-                                                        Prop.OUTPUT_WS_FIRST_TRANS,
-                                                        'The first transmission run in TOF')
+        firstTransWorkspaces = self._getInputWorkspaces(firstTransRuns, True)
         secondTransRuns = self.getProperty(Prop.SECOND_TRANS_RUNS).value
-        secondTransWorkspaces = self._getInputWorkspaces(secondTransRuns, True,
-                                                         Prop.OUTPUT_WS_SECOND_TRANS,
-                                                         'The second transmission run in TOF')
+        secondTransWorkspaces = self._getInputWorkspaces(secondTransRuns, True)
         # Combine multiple input runs, if required
-        input_workspace = self._sumWorkspaces(inputWorkspaces, False)
-        first_trans_workspace = self._sumWorkspaces(firstTransWorkspaces, True)
-        second_trans_workspace = self._sumWorkspaces(secondTransWorkspaces, True)
+        inputWorkspace = self._sumWorkspaces(inputWorkspaces, False)
+        firstTransWorkspace = self._sumWorkspaces(firstTransWorkspaces, True)
+        secondTransWorkspace = self._sumWorkspaces(secondTransWorkspaces, True)
         # Slice the input workspace, if required
-        input_workspace = self._sliceWorkspace(input_workspace)
+        inputWorkspace = self._sliceWorkspace(inputWorkspace)
         # Perform the reduction
-        alg = self._reduce(input_workspace, first_trans_workspace, second_trans_workspace)
+        alg = self._reduce(inputWorkspace, firstTransWorkspace, secondTransWorkspace)
         # Set outputs and tidy TOF workspaces into a group
         self._finalize(alg)
         if len(inputWorkspaces) >= 2:
-            inputWorkspaces.append(input_workspace)
-        self._group_workspaces(inputWorkspaces, "TOF")
+            inputWorkspaces.append(inputWorkspace)
+        # Group the TOF workspaces to hide some noise for the user
+        tofWorkspaces = inputWorkspaces
+        # If slicing, also group the monitor workspace (note that there is only one
+        # input run when slicing)
+        if self._slicingEnabled():
+            tofWorkspaces.append(_monitorWorkspace(inputWorkspaces[0]))
+        self._group_workspaces(tofWorkspaces, "TOF", Prop.OUTPUT_WS_TOF,
+                               'The loaded workspace(s) in TOF')
+        # Group the TRANS TOF workspaces
+        transWorkspaceList = firstTransWorkspaces + secondTransWorkspaces
+        if firstTransWorkspace:
+            transWorkspaceList.append(firstTransWorkspace)
+        if secondTransWorkspace:
+            transWorkspaceList.append(secondTransWorkspace)
+        self._group_workspaces(transWorkspaceList, "TRANS_TOF",
+                               Prop.OUTPUT_WS_TOF_TRANS, 'The transmission workspace(s) in TOF')
 
     def validateInputs(self):
         """Return a dictionary containing issues found in properties."""
@@ -183,14 +194,14 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             'FloodWorkspace', 'Debug']
         self.copyProperties('ReflectometryReductionOneAuto', self._reduction_properties)
 
-    def _getInputWorkspaces(self, runs, isTrans, output_property = None, doc_string = ''):
+    def _getInputWorkspaces(self, runs, isTrans):
         """Convert the given run numbers into real workspace names. Uses workspaces from
         the ADS if they exist, or loads them otherwise."""
         workspaces = list()
         for run in runs:
             ws = self._getRunFromADSOrNone(run, isTrans)
             if not ws:
-                ws = self._loadRun(run, isTrans, output_property, doc_string)
+                ws = self._loadRun(run, isTrans)
             if not ws:
                 raise RuntimeError('Error loading run ' + run)
             workspaces.append(ws)
@@ -275,12 +286,12 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
                     delete_ws_group_flag = False
         return ungrouped_workspaces
 
-    def _group_workspaces(self, workspaces, output_ws_name):
+    def _group_workspaces(self, workspaces, output_ws_name, output_property, doc_string):
         """
         Groups all the given workspaces into a group with the given name. If the group
         already exists it will add them to that group.
         """
-        if not self.getProperty(Prop.GROUP_TOF).value:
+        if len(workspaces) < 1 or not self.getProperty(Prop.GROUP_TOF).value:
             return
 
         workspaces = self._collapse_workspace_groups(workspaces)
@@ -304,8 +315,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             alg.execute()
             ws_group = alg.getProperty("OutputWorkspace").value
 
-        self._declareAndSetWorkspaceProperty(Prop.OUTPUT_WS_TOF, output_ws_name, ws_group,
-            'The loaded workspace(s) in TOF')
+        self._declareAndSetWorkspaceProperty(output_property, output_ws_name, ws_group, doc_string)
         return ws_group
 
     def _renameWorkspaceBasedOnRunNumber(self, workspace_name, isTrans):
@@ -319,27 +329,17 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
                                 OutputWorkspace=_monitorWorkspace(new_name))
         return new_name
 
-    def _loadRun(self, run, isTrans, output_property, doc_string):
+    def _loadRun(self, run, isTrans):
         """Load a run as an event workspace if slicing is requested, or a histogram
         workspace otherwise. Transmission runs are always loaded as histogram workspaces."""
         workspace_name = self._prefixedName(run, isTrans)
         if not isTrans and self._slicingEnabled():
-            workspace, monitor_workspace = LoadEventNexus(Filename=run,
-                                                          OutputWorkspace=workspace_name,
-                                                          LoadMonitors=True)
+            workspace = LoadEventNexus(Filename=run, OutputWorkspace=workspace_name, LoadMonitors=True)
             _throwIfNotValidReflectometryEventWorkspace(workspace_name)
             self.log().information('Loaded event workspace ' + workspace_name)
-            # Set the monitor workspace output property. Note that although this function
-            # is called in a loop we know there is only one TOF workspace if we are slicing.
-            self._declareAndSetWorkspaceProperty(Prop.OUTPUT_WS_TOF_MONITORS,
-                                                 _monitorWorkspace(workspace_name),
-                                                 monitor_workspace,
-                                                 'The loaded monitor workspace in TOF')
         else:
             workspace = LoadNexus(Filename=run, OutputWorkspace=workspace_name)
             self.log().information('Loaded workspace ' + workspace_name)
-        if output_property:
-            self._declareAndSetWorkspaceProperty(output_property, workspace_name, workspace, doc_string)
         workspace_name = self._renameWorkspaceBasedOnRunNumber(workspace_name, isTrans)
         return workspace_name
 
@@ -457,6 +457,9 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
     def _hasTransmissionRuns(self):
         return not self.getProperty(Prop.FIRST_TRANS_RUNS).isDefault
 
+    def _isDebug(self):
+        return not self.getProperty(Prop.DEBUG).isDefault
+
     def _finalize(self, child_alg):
         """Set our output properties from the results in the given child algorithm"""
         # Set the main workspace outputs
@@ -468,13 +471,14 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         self._setOutputPropertyIfInputNotSet(Prop.QSTEP, child_alg)
         self._setOutputPropertyIfInputNotSet(Prop.QMAX, child_alg)
         # Set the transmission workspace outputs
-        self._declareAndSetWorkspacePropertyFromChild(Prop.OUTPUT_WS_TRANS_LAM,
+        self._declareAndSetWorkspacePropertyFromChild(Prop.OUTPUT_WS_TRANS,
             'Output transmission workspace in wavelength', child_alg)
-        self._declareAndSetWorkspacePropertyFromChild(Prop.OUTPUT_WS_FIRST_TRANS_LAM,
-            'First transmission workspace in wavelength', child_alg)
-        if not self.getProperty(Prop.SECOND_TRANS_RUNS).isDefault:
-            self._declareAndSetWorkspacePropertyFromChild(Prop.OUTPUT_WS_SECOND_TRANS_LAM,
-                'Second transmission workspace in wavelength', child_alg)
+        if self.isChild() or self._isDebug():
+            self._declareAndSetWorkspacePropertyFromChild(Prop.OUTPUT_WS_FIRST_TRANS,
+                'First transmission workspace in wavelength', child_alg)
+            if not self.getProperty(Prop.SECOND_TRANS_RUNS).isDefault:
+                self._declareAndSetWorkspacePropertyFromChild(Prop.OUTPUT_WS_SECOND_TRANS,
+                    'Second transmission workspace in wavelength', child_alg)
 
     def _declareAndSetWorkspaceProperty(self, property_name, workspace_name, workspace, doc_string):
         """Declare an on-the-fly property to set an output workspace"""
