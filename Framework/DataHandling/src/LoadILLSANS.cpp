@@ -62,7 +62,7 @@ const std::string LoadILLSANS::category() const {
 
 /// Algorithm's summary. @see Algorithm::summery
 const std::string LoadILLSANS::summary() const {
-  return "Loads ILL nexus files for SANS instruments D11, D22, D33.";
+  return "Loads ILL nexus files for SANS instruments D11, D16, D22, D33.";
 }
 
 //----------------------------------------------------------------------------------------------
@@ -123,7 +123,7 @@ void LoadILLSANS::exec() {
       moveSource();
     }
   } else if (m_instrumentName == "D16") {
-    initWorkSpaceD16(firstEntry, instrumentPath);
+    initWorkSpace(firstEntry, instrumentPath);
     progress.report("Loading the instrument " + m_instrumentName);
     runLoadInstrument();
 
@@ -147,6 +147,7 @@ void LoadILLSANS::exec() {
   }
 
   progress.report("Setting sample logs");
+  g_log.debug() << "Final properties" << '\n';
   setFinalProperties(filename);
   setPixelSize();
   setProperty("OutputWorkspace", m_localWorkspace);
@@ -246,9 +247,7 @@ void LoadILLSANS::initWorkSpaceD16(NeXus::NXEntry &firstEntry,
       static_cast<size_t>(data.dim0() * data.dim1()) + N_MONITORS;
   createEmptyWorkspace(numberOfHistograms, 1);
   g_log.debug("Load meta data");
-  // loadMetaData(firstEntry, instrumentPath);
-  // cannot load metadata using the function : no wavelength
-  // for now, no load at all
+  loadMetaData(firstEntry, instrumentPath);
 
   g_log.debug("Meta data loaded");
 
@@ -631,14 +630,19 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
   g_log.debug("Loading metadata...");
   API::Run &runDetails = m_localWorkspace->mutableRun();
 
-  if (entry.getFloat("mode") == 0.0) { // Not TOF
+  if ((entry.getFloat("mode") == 0.0) ||
+      (m_instrumentName == "D16")) { // Not TOF
     runDetails.addProperty<std::string>("tof_mode", "Non TOF");
   } else {
     runDetails.addProperty<std::string>("tof_mode", "TOF");
   }
 
-  double wavelength =
-      entry.getFloat(instrumentNamePath + "/selector/wavelength");
+  double wavelength;
+  if (m_instrumentName == "D16") {
+    wavelength = entry.getFloat(instrumentNamePath + "/wavelength");
+  } else {
+    wavelength = entry.getFloat(instrumentNamePath + "/selector/wavelength");
+  }
   g_log.debug() << "Wavelength found in the nexus file: " << wavelength << '\n';
   // round the wavelength to avoid unnecessary rebinning during merge runs
   wavelength = std::round(wavelength * 100) / 100.;
@@ -687,10 +691,13 @@ void LoadILLSANS::setFinalProperties(const std::string &filename) {
   runDetails.addProperty("is_frame_skipping", 0);
   NXhandle nxHandle;
   NXstatus nxStat = NXopen(filename.c_str(), NXACC_READ, &nxHandle);
+
   if (nxStat != NX_ERROR) {
     m_loader.addNexusFieldsToWsRun(nxHandle, runDetails);
     NXclose(&nxHandle);
   }
+  g_log.debug() << "Into final properties"
+                << "\n\n\n";
 }
 
 /**
