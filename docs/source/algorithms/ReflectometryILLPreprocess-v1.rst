@@ -87,7 +87,6 @@ The following figure exemplifies the foreground and background for the D17 instr
    theta0 = numpy.rad2deg(ws.detectorSignedTwoTheta(det0))
    theta1 = numpy.rad2deg(ws.detectorSignedTwoTheta(det1))
    fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
-   ax.pcolor(ws, cmap='Oranges')
    ax.set_xlim(xmin=3, xmax=27)
    ax.set_ylim(ymin=0, ymax=ws.getNumberHistograms())
    ax.set_ylabel('Pixel (workspace index)')
