@@ -235,12 +235,29 @@ void ReflectometryWorkflowBase2::initTransmissionProperties() {
       "These processing instructions will be passed to the transmission "
       "workspace algorithm");
 
+  // Set up the output transmission workspaces
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspaceTransmission", "", Direction::Output,
+                      PropertyMode::Optional),
+                  "Output transmissison workspace in wavelength");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspaceFirstTransmission", "", Direction::Output,
+                      PropertyMode::Optional),
+                  "First transmissison workspace in wavelength");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspaceSecondTransmission", "",
+                      Direction::Output, PropertyMode::Optional),
+                  "Second transmissison workspace in wavelength");
+
   setPropertyGroup("FirstTransmissionRun", "Transmission");
   setPropertyGroup("SecondTransmissionRun", "Transmission");
   setPropertyGroup("Params", "Transmission");
   setPropertyGroup("StartOverlap", "Transmission");
   setPropertyGroup("EndOverlap", "Transmission");
   setPropertyGroup("ScaleRHSWorkspace", "Transmission");
+  setPropertyGroup("OutputWorkspaceTransmission", "Transmission");
+  setPropertyGroup("OutputWorkspaceFirstTransmission", "Transmission");
+  setPropertyGroup("OutputWorkspaceSecondTransmission", "Transmission");
 }
 
 /** Initialize properties used for stitching transmission runs
@@ -909,31 +926,17 @@ void ReflectometryWorkflowBase2::convertProcessingInstructions(
                                                       inputWS);
 }
 
-// Create an on-the-fly property to set an output workspace (e.g. for interim
-// outputs that the user doesn't care about)
-void ReflectometryWorkflowBase2::declareAndSetOutputWorkspaceProperty(
-    std::string const &propertyName, std::string const &workspaceName,
-    Workspace_sptr workspace, std::string const &docString) {
-  declareProperty(std::make_unique<WorkspaceProperty<>>(propertyName, "",
-                                                        Direction::Output,
-                                                        PropertyMode::Optional),
-                  docString);
-  setPropertyValue(propertyName, workspaceName);
-  setProperty(propertyName, workspace);
-}
-
 // Create an on-the-fly property to set an output workspace from a child
 // algorithm, if the child has that output value set
-void ReflectometryWorkflowBase2::declareAndSetOutputWorkspaceProperty(
-    Algorithm_sptr alg, std::string const &propertyName,
-    std::string const &docString) {
-  if (!alg->existsProperty(propertyName) || alg->isDefault(propertyName))
+void ReflectometryWorkflowBase2::setWorkspacePropertyFromChild(
+    Algorithm_sptr alg, std::string const &propertyName) {
+  if (alg->isDefault(propertyName))
     return;
 
   std::string const workspaceName = alg->getPropertyValue(propertyName);
   MatrixWorkspace_sptr workspace = alg->getProperty(propertyName);
-  declareAndSetOutputWorkspaceProperty(propertyName, workspaceName, workspace,
-                                       docString);
+  setPropertyValue(propertyName, workspaceName);
+  setProperty(propertyName, workspace);
 }
 } // namespace Algorithms
 } // namespace Mantid

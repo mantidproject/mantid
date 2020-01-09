@@ -572,12 +572,8 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
     transmissionWSName = alg->getPropertyValue("OutputWorkspace");
 
     // Set interim workspace outputs
-    declareAndSetOutputWorkspaceProperty(
-        alg, "OutputWorkspaceFirstTransmission",
-        "First transmisison workspace in wavelength");
-    declareAndSetOutputWorkspaceProperty(
-        alg, "OutputWorkspaceSecondTransmission",
-        "Second transmisison workspace in wavelength");
+    setWorkspacePropertyFromChild(alg, "OutputWorkspaceFirstTransmission");
+    setWorkspacePropertyFromChild(alg, "OutputWorkspaceSecondTransmission");
   }
 
   // Rebin the transmission run to be the same as the input.
@@ -587,10 +583,10 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
   rebinToWorkspaceAlg->setProperty("WorkspaceToRebin", transmissionWS);
   rebinToWorkspaceAlg->execute();
   transmissionWS = rebinToWorkspaceAlg->getProperty("OutputWorkspace");
-  if (!transmissionWSName.empty())
-    declareAndSetOutputWorkspaceProperty(
-        "OutputWorkspaceTransmission", transmissionWSName, transmissionWS,
-        "Output transmisison workspace in wavelength");
+  if (!transmissionWSName.empty()) {
+    setPropertyValue("OutputWorkspaceTransmission", transmissionWSName);
+    setProperty("OutputWorkspaceTransmission", transmissionWS);
+  }
 
   // If the detector workspace has been reduced then the spectrum maps
   // should match AFTER reducing the transmission workspace

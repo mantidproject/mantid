@@ -444,15 +444,9 @@ void ReflectometryReductionOneAuto3::exec() {
   }
 
   // Set the output transmission workspaces
-  declareAndSetOutputWorkspaceProperty(
-      alg, "OutputWorkspaceTransmission",
-      "Output transmisison workspace in wavelength");
-  declareAndSetOutputWorkspaceProperty(
-      alg, "OutputWorkspaceFirstTransmission",
-      "First transmisison workspace in wavelength");
-  declareAndSetOutputWorkspaceProperty(
-      alg, "OutputWorkspaceSecondTransmission",
-      "Second transmisison workspace in wavelength");
+  setWorkspacePropertyFromChild(alg, "OutputWorkspaceTransmission");
+  setWorkspacePropertyFromChild(alg, "OutputWorkspaceFirstTransmission");
+  setWorkspacePropertyFromChild(alg, "OutputWorkspaceSecondTransmission");
 
   // Set other properties so they can be updated in the Reflectometry interface
   setProperty("ThetaIn", theta);

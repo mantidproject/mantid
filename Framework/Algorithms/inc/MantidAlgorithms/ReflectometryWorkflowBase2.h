@@ -101,13 +101,8 @@ protected:
       const std::string &instructions,
       Mantid::API::MatrixWorkspace_const_sptr ws) const;
 
-  void declareAndSetOutputWorkspaceProperty(std::string const &propertyName,
-                                            std::string const &workspaceName,
-                                            Workspace_sptr workspace,
-                                            std::string const &docString);
-  void declareAndSetOutputWorkspaceProperty(Algorithm_sptr alg,
-                                            std::string const &propertyName,
-                                            std::string const &docString);
+  void setWorkspacePropertyFromChild(Algorithm_sptr alg,
+                                     std::string const &propertyName);
 };
 } // namespace Algorithms
 } // namespace Mantid

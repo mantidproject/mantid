@@ -56,7 +56,7 @@ void CreateTransmissionWorkspace2::init() {
                       "FirstTransmissionRun", "", Direction::Input,
                       PropertyMode::Mandatory, inputValidator->clone()),
                   "First transmission run. Corresponds to the low wavelength "
-                  "transmision run if a SecondTransmissionRun is also "
+                  "transmission run if a SecondTransmissionRun is also "
                   "provided.");
 
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
@@ -96,6 +96,16 @@ void CreateTransmissionWorkspace2::init() {
       std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "OutputWorkspace", "", Direction::Output, PropertyMode::Optional),
       "Output workspace in wavelength.");
+
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspaceFirstTransmission", "", Direction::Output,
+                      PropertyMode::Optional),
+                  "Output workspace in wavelength for first transmission run");
+
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspaceSecondTransmission", "",
+                      Direction::Output, PropertyMode::Optional),
+                  "Output workspace in wavelength for second transmission run");
 }
 
 /** Validate inputs
@@ -241,15 +251,11 @@ void CreateTransmissionWorkspace2::outputTransmissionRun(
   if (runNumber.empty())
     return;
 
-  // Declare an on-the-fly property to return this output workspace
+  // Set the output property
   auto const name = TRANS_LAM_PREFIX + runNumber;
   auto const runDescription =
       which == 1 ? "FirstTransmission" : "SecondTransmission";
   auto const propertyName = std::string("OutputWorkspace") + runDescription;
-  declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          propertyName, "", Direction::Output, PropertyMode::Optional),
-      std::string("Output workspace in wavelength for ") + runDescription);
   setPropertyValue(propertyName, name);
   setProperty(propertyName, ws);
 }
@@ -262,7 +268,8 @@ void CreateTransmissionWorkspace2::storeOutputWorkspace(
   // If the output name is not set, attempt to set a sensible
   // default based on the run number. If a required run number
   // is missing, then there's not much we can do so leave it empty.
-  if (isDefault("OutputWorkspace") && !m_missingRunNumber) {
+  if (!m_missingRunNumber && (isDefault("OutputWorkspace") ||
+                              getPropertyValue("OutputWorkspace").empty())) {
     std::string name = TRANS_LAM_PREFIX;
     if (!m_firstTransmissionRunNumber.empty()) {
       name.append(m_firstTransmissionRunNumber);
