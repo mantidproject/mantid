@@ -308,14 +308,19 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
                 for ws in workspaces:
                     if ws not in ws_group:
                         ws_group.add(ws)
+                        # As the group already exists we need to add each individual workspace
+                        # as an output property in order to output it properly
+                        self._declareAndSetWorkspaceProperty(
+                            ws, ws, AnalysisDataService.retrieve(ws), doc_string)
         else:
             alg = self.createChildAlgorithm("GroupWorkspaces")
             alg.setProperty("InputWorkspaces", workspaces)
             alg.setProperty("OutputWorkspace", output_ws_name)
             alg.execute()
             ws_group = alg.getProperty("OutputWorkspace").value
+            # We need to add the group as an output property
+            self._declareAndSetWorkspaceProperty(output_property, output_ws_name, ws_group, doc_string)
 
-        self._declareAndSetWorkspaceProperty(output_property, output_ws_name, ws_group, doc_string)
         return ws_group
 
     def _renameWorkspaceBasedOnRunNumber(self, workspace_name, isTrans):
