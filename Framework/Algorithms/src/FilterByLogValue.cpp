@@ -11,6 +11,7 @@
 #include "MantidKernel/ITimeSeriesProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/PropertyWithValue.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -25,6 +26,7 @@ using DataObjects::EventWorkspace;
 using DataObjects::EventWorkspace_const_sptr;
 using DataObjects::EventWorkspace_sptr;
 using Types::Core::DateAndTime;
+using Types::Core::time_duration;
 
 std::string CENTRE("Centre");
 std::string LEFT("Left");
@@ -243,6 +245,25 @@ void FilterByLogValue::exec() {
     // Cast the outputWS to the matrixOutputWS and save it
     this->setProperty("OutputWorkspace", outputWS);
   }
+
+  calculateDuration(outputWS, splitter);
+}
+
+/**Calculate duration and splitter
+ * @brief FilterByLogValue::calculateDuration
+ */
+void FilterByLogValue::calculateDuration(EventWorkspace_sptr outputWS, TimeSplitterType &splitter){
+    // calculate duration
+    double duration(0);
+    for (size_t i = 0; i < splitter.size(); ++i) {
+        // note: stop time wont go beyond run_stop.  it is guaranteed by how run_stop is calculated.
+        time_duration di = splitter[i].stop() - splitter[i].start();
+        duration += static_cast<double>(di.total_microseconds()) * 1.E-9;
+    }
+
+    // add to sample logs
+    PropertyWithValue<double> *dp = new PropertyWithValue<double>("duration", duration);
+    outputWS->mutableRun().addProperty(dp, true);
 }
 
 } // namespace Algorithms

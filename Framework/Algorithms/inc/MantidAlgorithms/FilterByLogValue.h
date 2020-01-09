@@ -42,6 +42,8 @@ private:
   // Implement abstract Algorithm methods
   void init() override;
   void exec() override;
+
+  void calculateDuration(DataObjects::EventWorkspace_sptr outputWS, Kernel::TimeSplitterType &splitter);
 };
 
 } // namespace Algorithms
