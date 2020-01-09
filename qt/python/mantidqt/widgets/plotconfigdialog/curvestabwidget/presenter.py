@@ -130,7 +130,10 @@ class CurvesTabWidgetPresenter:
         new_curve = FigureErrorsManager.replot_curve(ax, curve, plot_kwargs)
         self.curve_names_dict[self.view.get_selected_curve_name()] = new_curve
 
-        errorbar_cap_lines = ax.remove_and_return_errorbar_cap_lines()
+        if isinstance(ax, MantidAxes):
+            errorbar_cap_lines = ax.remove_and_return_errorbar_cap_lines()
+        else:
+            errorbar_cap_lines = []
 
         # When a curve is redrawn it is moved to the back of the list of curves so here it is moved back to its previous
         # position. This is so that the correct offset is applied to the curve if the plot is a waterfall plot, but it
