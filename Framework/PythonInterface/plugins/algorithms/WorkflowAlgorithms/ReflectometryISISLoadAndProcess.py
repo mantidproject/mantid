@@ -131,20 +131,20 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         if len(inputWorkspaces) >= 2:
             inputWorkspaces.append(inputWorkspace)
         # Group the TOF workspaces to hide some noise for the user
-        tofWorkspaces = inputWorkspaces
+        tofWorkspaces = set(inputWorkspaces)
         # If slicing, also group the monitor workspace (note that there is only one
         # input run when slicing)
         if self._slicingEnabled():
-            tofWorkspaces.append(_monitorWorkspace(inputWorkspaces[0]))
+            tofWorkspaces.add(_monitorWorkspace(inputWorkspaces[0]))
         self._group_workspaces(tofWorkspaces, "TOF", Prop.OUTPUT_WS_TOF,
                                'The loaded workspace(s) in TOF')
         # Group the TRANS TOF workspaces
-        transWorkspaceList = firstTransWorkspaces + secondTransWorkspaces
+        transWorkspaces = set(firstTransWorkspaces + secondTransWorkspaces)
         if firstTransWorkspace:
-            transWorkspaceList.append(firstTransWorkspace)
+            transWorkspaces.add(firstTransWorkspace)
         if secondTransWorkspace:
-            transWorkspaceList.append(secondTransWorkspace)
-        self._group_workspaces(transWorkspaceList, "TRANS_TOF",
+            transWorkspaces.add(secondTransWorkspace)
+        self._group_workspaces(transWorkspaces, "TRANS_TOF",
                                Prop.OUTPUT_WS_TOF_TRANS, 'The transmission workspace(s) in TOF')
 
     def validateInputs(self):
@@ -270,17 +270,18 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
     def _collapse_workspace_groups(self, workspaces):
         """Given a list of workspaces, which themselves could be groups of workspaces,
         return a new list of workspaces which are TOF"""
-        ungrouped_workspaces = []
+        ungrouped_workspaces = set([])
         delete_ws_group_flag = True
         for ws_name in workspaces:
             ws = AnalysisDataService.retrieve(ws_name)
             if isinstance(ws, WorkspaceGroup):
-                ungrouped_workspaces += self._collapse_workspace_groups(ws.getNames())
+                ungrouped_workspaces = ungrouped_workspaces.union(
+                    self._collapse_workspace_groups(ws.getNames()))
                 if delete_ws_group_flag is True:
                     AnalysisDataService.remove(ws_name)
             else:
                 if (ws.getAxis(0).getUnit().unitID()) == 'TOF':
-                    ungrouped_workspaces.append(ws_name)
+                    ungrouped_workspaces.add(ws_name)
                 else:
                     # Do not remove the workspace group from the ADS if a non-TOF workspace exists
                     delete_ws_group_flag = False
@@ -299,7 +300,6 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         if not workspaces:
             return
 
-        ws_group = None
         if AnalysisDataService.doesExist(output_ws_name):
             ws_group = AnalysisDataService.retrieve(output_ws_name)
             if not isinstance(ws_group, WorkspaceGroup):
@@ -314,14 +314,12 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
                             ws, ws, AnalysisDataService.retrieve(ws), doc_string)
         else:
             alg = self.createChildAlgorithm("GroupWorkspaces")
-            alg.setProperty("InputWorkspaces", workspaces)
+            alg.setProperty("InputWorkspaces", list(workspaces))
             alg.setProperty("OutputWorkspace", output_ws_name)
             alg.execute()
             ws_group = alg.getProperty("OutputWorkspace").value
             # We need to add the group as an output property
             self._declareAndSetWorkspaceProperty(output_property, output_ws_name, ws_group, doc_string)
-
-        return ws_group
 
     def _renameWorkspaceBasedOnRunNumber(self, workspace_name, isTrans):
         """Rename the given workspace based on its run number and a standard prefix"""
