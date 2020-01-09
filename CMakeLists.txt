@@ -127,8 +127,14 @@ if(ENABLE_MANTIDPLOT)
     message(FATAL_ERROR "Qwt version 5 is required, found: ${QWT5_VERSION}")
   endif()
 
-  find_package(PyQt4 REQUIRED)
-  find_package(SIP REQUIRED)
+  if(PYTHON_VERSION_MAJOR EQUAL 3 AND
+     UNIX_DIST MATCHES "RedHatEnterprise" AND UNIX_RELEASE MATCHES "7\..*")
+    set(USE_PRIVATE_SIPPYQT4 ON)
+    include(ExternalSipPyQt4)
+  else()
+    find_package(PyQt4 REQUIRED)
+    find_package(SIP REQUIRED)
+  endif()
   separate_arguments(PYQT4_SIP_FLAGS)
 endif()
 
