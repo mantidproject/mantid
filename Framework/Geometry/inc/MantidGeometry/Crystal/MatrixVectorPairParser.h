@@ -12,13 +12,7 @@
 #include "MantidGeometry/DllConfig.h"
 
 #include "MantidKernel/Exception.h"
-#if defined(_MSC_VER)
-#define _SILENCE_FPOS_SEEKPOS_DEPRECATION_WARNING
-#endif
 #include <boost/spirit/include/qi.hpp>
-#if defined(_MSC_VER)
-#undef _SILENCE_FPOS_SEEKPOS_DEPRECATION_WARNING
-#endif
 #include <functional>
 #include <map>
 
