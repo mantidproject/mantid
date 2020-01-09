@@ -26,7 +26,6 @@ class WaterfallPlotOffsetDialogPresenter:
         self.view.show()
 
         self.view.close_push_button.clicked.connect(self.view.close)
-
         self.view.y_offset_spin_box.valueChanged.connect(lambda: self.update_y_offset())
         self.view.x_offset_spin_box.valueChanged.connect(lambda: self.update_x_offset())
         self.view.keep_proportion_check_box.clicked.connect(self.keep_proportion)

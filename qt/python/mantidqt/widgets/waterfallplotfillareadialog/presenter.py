@@ -59,7 +59,7 @@ class WaterfallPlotFillAreaDialogPresenter:
 
     def line_colour_fill(self):
         # Add the fill areas if there aren't any already.
-        if not any(isinstance(collection, PolyCollection) for collection in self.ax.collections):
+        if not self.ax.waterfall_has_fill():
             self.create_fill()
 
         i = 0
@@ -80,7 +80,7 @@ class WaterfallPlotFillAreaDialogPresenter:
             self.view.use_solid_colour_radio_button.setChecked(True)
 
         # Add the fill areas if there aren't any already.
-        if not any(isinstance(collection, PolyCollection) for collection in self.ax.collections):
+        if not self.ax.waterfall_has_fill():
             self.create_fill()
 
         colour = self.view.colour_selector_widget.get_color()

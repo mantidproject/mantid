@@ -294,7 +294,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
                    for ax in self.canvas.figure.get_axes()) or self.canvas.figure.get_axes()[0].is_waterfall_plot():
             self.toolbar.set_generate_plot_script_enabled(False)
 
-        # Only show options specific to waterfall plots if the axes is a waterfall plot.
+        # Only show options specific to waterfall plots if the axes is a MantidAxes and is a waterfall plot.
         if not isinstance(self.canvas.figure.get_axes()[0], MantidAxes) or not self.canvas.figure.get_axes()[0].is_waterfall_plot():
             self.toolbar.set_waterfall_options_enabled(False)
 

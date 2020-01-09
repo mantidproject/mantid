@@ -1090,9 +1090,12 @@ class MantidAxes(Axes):
         if self.is_waterfall_plot():
             return
 
+        # Plots made from a script may not have the width and height attributes needed to create a waterfall plot, so
+        # they are set here.
         if not hasattr(self, 'width'):
             self.set_initial_dimensions(self.get_xlim(), self.get_ylim())
 
+        # 10 and 20 are the default x and y offset.
         self.update_waterfall_plot(10, 20)
 
     def convert_from_waterfall(self):
@@ -1104,6 +1107,7 @@ class MantidAxes(Axes):
 
     def apply_waterfall_offset_to_errorbars(self, line, amount_to_move_x, amount_to_move_y, index):
         for container in self.containers:
+            # Find the ErrorbarContainer that corresponds to the current line.
             if isinstance(container, ErrorbarContainer) and container[0] == line:
                 # Shift the data line and the errorbar caps
                 for line in (container[0],) + container[1]:
@@ -1120,21 +1124,17 @@ class MantidAxes(Axes):
                         for column in range(2):
                             point[column][0] += amount_to_move_x
                     bar_line_col.set_segments(segments)
-                bar_line_col.set_zorder((len(self.get_lines()) - index)+1)
+                bar_line_col.set_zorder((len(self.get_lines()) - index) + 1)
                 break
 
     def convert_single_line_to_waterfall(self, index, x=None, y=None, need_to_update_fill=False):
         line = self.get_lines()[index]
 
-        if x is None:
-            amount_to_move_x = index * self.width * (self.waterfall_x_offset / 500)
-        else:
-            amount_to_move_x = index * self.width * ((x - self.waterfall_x_offset) / 500)
+        amount_to_move_x = index * self.width * (self.waterfall_x_offset / 500) if x is None else \
+            index * self.width * ((x - self.waterfall_x_offset) / 500)
 
-        if y is None:
-            amount_to_move_y = index * self.height * (self.waterfall_y_offset / 500)
-        else:
-            amount_to_move_y = index * self.height * ((y - self.waterfall_y_offset) / 500)
+        amount_to_move_y = index * self.height * (self.waterfall_y_offset / 500) if y is None else \
+            index * self.height * ((y - self.waterfall_y_offset) / 500)
 
         if line.get_label() == "_nolegend_":
             self.apply_waterfall_offset_to_errorbars(line, amount_to_move_x, amount_to_move_y, index)
@@ -1153,6 +1153,7 @@ class MantidAxes(Axes):
         if not self.waterfall_has_fill():
             return
 
+        # Sets the filled area to match the visibility of the line it belongs to.
         line = self.get_lines()[index]
         fill = self.get_waterfall_fill_for_curve(index)
         fill.set_visible(line.get_visible())
@@ -1191,9 +1192,9 @@ class MantidAxes(Axes):
         errorbar_cap_lines = self.remove_and_return_errorbar_cap_lines()
 
         for i, line in enumerate(self.get_lines()):
-            bottom_line = [min(line.get_ydata())-((i*self.height)/100)] * len(line.get_ydata())
+            bottom_line = [min(line.get_ydata()) - ((i * self.height) / 100)] * len(line.get_ydata())
             fill = self.fill_between(line.get_xdata(), line.get_ydata(), bottom_line)
-            fill.set_zorder((len(self.get_lines())-i)+1)
+            fill.set_zorder((len(self.get_lines()) - i) + 1)
 
         self.lines += errorbar_cap_lines
 
@@ -1219,7 +1220,7 @@ class MantidAxes(Axes):
         # to. If so, the list of colours is appended to with the colours of the new lines. Otherwise the fills are
         # all set to the same colour and so the list of colours is extended with the same colour for each new curve.
         if len(poly_collections) > len(colours):
-            for i in range(len(colours)-1):
+            for i in range(len(colours) - 1):
                 if convert_color_to_hex(colours[i][0]) != self.get_lines()[i].get_color():
                     line_colours = False
                     break

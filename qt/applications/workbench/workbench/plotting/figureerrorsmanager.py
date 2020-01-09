@@ -50,7 +50,11 @@ class FigureErrorsManager(object):
         plot_kwargs = curve_props.get_plot_kwargs()
         new_curve = cls.replot_curve(ax, curve, plot_kwargs)
 
-        errorbar_cap_lines = ax.remove_and_return_errorbar_cap_lines()
+        if isinstance(ax, MantidAxes):
+            errorbar_cap_lines = ax.remove_and_return_errorbar_cap_lines()
+        else:
+            errorbar_cap_lines = []
+
         ax.lines.insert(curve_index, ax.lines.pop())
 
         if isinstance(ax, MantidAxes) and ax.is_waterfall_plot():
