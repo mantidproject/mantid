@@ -20,7 +20,7 @@ Usage
 
 **Example - Saving Some Pre-existing Data**
 
-.. include:: ../usagedata-note.txt
+.. include:: ../trainingdata-note.txt
 
 .. testcode:: ExSaveRoundtrip
 
@@ -28,13 +28,17 @@ Usage
 
    # Load in some data which is already in a form that SaveNISTDAT expects,
    # then save it back out to a file.
-   data = Load("saveNISTDAT_data.nxs")
+   data = Load("SANSLOQCan2D.nxs")
    file_path = os.path.join(config["defaultsave.directory"], "example.dat")
    SaveNISTDAT(data, file_path)
 
    # Load it back in and inspect what we have.
    reloaded_data = LoadAscii(file_path)
    print("The data read back in is " + str(reloaded_data.readY(0)))
+   # N.B. Mantid does not properly support reloading files output from 'SaveNISTDAT'
+   # Above, the reloaded file is vastly altered from the original
+   # due to the conversion performed upon running 'SaveNISTDAT'.
+   # To see this, 'Show Data' on the data and reloaded_data workspaces.
 
 .. testcleanup:: ExSaveRoundtrip
 
@@ -44,7 +48,7 @@ Output:
 
 .. testoutput:: ExSaveRoundtrip
 
-   The data read back in is [-0.0735 -0.0735 -0.0735 ...,  0.0685  0.0685  0.0685]
+   The data read back in is [-0.099 -0.099 -0.099 ...  0.099  0.099  0.099]
 
 .. categories::
 
