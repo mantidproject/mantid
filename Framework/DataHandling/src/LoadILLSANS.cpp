@@ -122,17 +122,19 @@ void LoadILLSANS::exec() {
       adjustTOF();
       moveSource();
     }
-  } else if (m_instrumentName == "D16") {
-    initWorkSpace(firstEntry, instrumentPath);
-    progress.report("Loading the instrument " + m_instrumentName);
-    runLoadInstrument();
 
   } else {
     initWorkSpace(firstEntry, instrumentPath);
     progress.report("Loading the instrument " + m_instrumentName);
     runLoadInstrument();
-    double distance = m_loader.getDoubleFromNexusPath(
-        firstEntry, instrumentPath + "/detector/det_calc");
+    double distance;
+    if (m_instrumentName == "D16") {
+      distance = firstEntry.getFloat(instrumentPath + "/Det/value") /
+                 1000; // mm to metre
+    } else {
+      distance = m_loader.getDoubleFromNexusPath(
+          firstEntry, instrumentPath + "/detector/det_calc");
+    }
     progress.report("Moving detectors");
     moveDetectorDistance(distance, "detector");
     if (m_instrumentName == "D22") {
@@ -147,7 +149,6 @@ void LoadILLSANS::exec() {
   }
 
   progress.report("Setting sample logs");
-  g_log.debug() << "Final properties" << '\n';
   setFinalProperties(filename);
   setPixelSize();
   setProperty("OutputWorkspace", m_localWorkspace);
@@ -227,34 +228,6 @@ void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry,
   if (data.dim1() == 128) {
     m_resMode = "low";
   }
-}
-
-/**
- * Loads data for D16
- * @param firstEntry
- * @param instrumentPath
- */
-void LoadILLSANS::initWorkSpaceD16(NeXus::NXEntry &firstEntry,
-                                   const std::string &instrumentPath) {
-  g_log.debug("Fetching data ...");
-
-  NXData dataGroup = firstEntry.openNXData("data/");
-  g_log.debug("D16 open data");
-
-  NXInt data = dataGroup.openIntData();
-  data.load();
-  const size_t numberOfHistograms =
-      static_cast<size_t>(data.dim0() * data.dim1()) + N_MONITORS;
-  createEmptyWorkspace(numberOfHistograms, 1);
-  g_log.debug("Load meta data");
-  loadMetaData(firstEntry, instrumentPath);
-
-  g_log.debug("Meta data loaded");
-
-  // not quite sure of what this is used for ...
-  size_t nextIndex =
-      loadDataIntoWorkspaceFromVerticalTubes(data, m_defaultBinning, 0);
-  nextIndex = loadDataIntoWorkspaceFromMonitors(firstEntry, nextIndex);
 }
 
 /**
@@ -696,8 +669,6 @@ void LoadILLSANS::setFinalProperties(const std::string &filename) {
     m_loader.addNexusFieldsToWsRun(nxHandle, runDetails);
     NXclose(&nxHandle);
   }
-  g_log.debug() << "Into final properties"
-                << "\n\n\n";
 }
 
 /**
