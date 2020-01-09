@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_PLOTPEAKBULOGVALUEHELPER_H_
 #define MANTID_CURVEFITTING_PLOTPEAKBULOGVALUEHELPER_H_
+#include "MantidAPI/DllConfig.h"
 
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -38,11 +39,12 @@ struct InputData {
   std::vector<int> indx; ///< a list of ws indices to fit if i and spec < 0
 };
 /// Get a workspace
-InputData getWorkspace(const InputData &data, API::IAlgorithm_sptr load);
+DLLExport InputData getWorkspace(const InputData &data,
+                                 API::IAlgorithm_sptr load);
 
 /// Create a list of input workspace names
-std::vector<InputData> makeNames(std::string inputList, int default_wi,
-                                 int default_spec);
+DLLExport std::vector<InputData> makeNames(std::string inputList,
+                                           int default_wi, int default_spec);
 
 } // namespace Algorithms
 } // namespace CurveFitting

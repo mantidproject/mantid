@@ -82,14 +82,8 @@ private:
   void init() override;
   void exec() override;
 
-  /// Get a workspace
-  // InputData getWorkspace(const InputData &data);
-
   /// Set any WorkspaceIndex attributes in the fitting function
   void setWorkspaceIndexAttribute(API::IFunction_sptr fun, int wsIndex) const;
-
-  /// Create a list of input workspace names
-  // std::vector<InputData> makeNames() const;
 
   /// Create a minimizer string based on template string provided
   std::string getMinimizerString(const std::string &wsName,
