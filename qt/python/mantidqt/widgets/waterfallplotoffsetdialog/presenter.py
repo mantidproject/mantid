@@ -59,7 +59,12 @@ class WaterfallPlotOffsetDialogPresenter:
 
     def keep_proportion(self, enabled):
         if enabled:
+            x, y = float(self.view.get_x_offset()), float(self.view.get_y_offset())
+            if x == 0 or y == 0:
+                self.view.keep_proportion_check_box.setChecked(False)
+                return
+
+            self.proportion = x / y
             self.keep_proportion_on = True
-            self.proportion = float(self.view.get_x_offset()) / float(self.view.get_y_offset())
         else:
             self.keep_proportion_on = False
