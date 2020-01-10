@@ -8,6 +8,7 @@ from __future__ import (absolute_import, division, print_function)
 import numpy as np
 
 import mantid.simpleapi as mantid
+from six import string_types
 
 from isis_powder.routines import absorb_corrections, common
 from isis_powder.routines.common_enums import WORKSPACE_UNITS
@@ -145,7 +146,7 @@ def _obtain_focused_run(run_number, focus_file_path):
 
 
 def _load_qlims(q_lims):
-    if type(q_lims) == str or type(q_lims) == unicode:
+    if isinstance(q_lims, string_types):
         q_min = []
         q_max = []
         try:
@@ -157,13 +158,13 @@ def _load_qlims(q_lims):
                     q_max.append(float(value_list[3]))
             q_min = np.array(q_min)
             q_max = np.array(q_max)
-        except IOError:
-            raise RuntimeError("q_lims directory is not valid")
-    elif type(q_lims) == list or type(q_lims) == np.ndarray:
+        except IOError as exc:
+            raise RuntimeError("q_lims path is not valid: {}".format(exc))
+    elif isinstance(q_lims, (list, tuple)) or isinstance(q_lims, np.ndarray):
         q_min = q_lims[0, :]
         q_max = q_lims[1, :]
     else:
-        raise RuntimeError("q_lims type is not valid")
+        raise RuntimeError("q_lims type is not valid. Expected a string filename or an array.")
     return q_min, q_max
 
 

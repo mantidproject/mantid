@@ -4,47 +4,49 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "BaseInstrumentPresenter.h"
-#include "BaseInstrumentView.h"
+#include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentPresenter.h"
 #include "MantidAPI/FileFinder.h"
+#include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentModel.h"
+#include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentView.h"
 
 #include <functional>
 #include <tuple>
 
 namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidWidgets {
 
-BaseInstrumentPresenter::BaseInstrumentPresenter(BaseInstrumentView *view,
-                                                 BaseInstrumentModel *model,
-                                                 QWidget *analysisPaneView)
+BaseCustomInstrumentPresenter::BaseCustomInstrumentPresenter(
+    BaseCustomInstrumentView *view, BaseCustomInstrumentModel *model,
+    QWidget *analysisPaneView)
     : m_view(view), m_model(model), m_currentRun(0), m_currentFile(""),
       m_loadRunObserver(nullptr), m_analysisPaneView(analysisPaneView) {
   m_loadRunObserver = new VoidObserver();
   m_model->loadEmptyInstrument();
 }
 
-void BaseInstrumentPresenter::addInstrument() {
+void BaseCustomInstrumentPresenter::addInstrument() {
   auto setUp = setupInstrument();
   initLayout(&setUp);
 }
 
-void BaseInstrumentPresenter::initLayout(
+void BaseCustomInstrumentPresenter::initLayout(
     std::pair<instrumentSetUp, instrumentObserverOptions> *setUp) {
   // connect to new run
   m_view->observeLoadRun(m_loadRunObserver);
   std::function<void()> loadBinder =
-      std::bind(&BaseInstrumentPresenter::loadRunNumber, this);
+      std::bind(&BaseCustomInstrumentPresenter::loadRunNumber, this);
   m_loadRunObserver->setSlot(loadBinder);
   initInstrument(setUp);
   setUpInstrumentAnalysisSplitter();
   m_view->setupHelp();
 }
 
-void BaseInstrumentPresenter::setUpInstrumentAnalysisSplitter() {
+void BaseCustomInstrumentPresenter::setUpInstrumentAnalysisSplitter() {
   m_view->setupInstrumentAnalysisSplitters(m_analysisPaneView);
 }
 
-void BaseInstrumentPresenter::loadAndAnalysis(const std::string &pathToRun) {
+void BaseCustomInstrumentPresenter::loadAndAnalysis(
+    const std::string &pathToRun) {
   try {
     auto loadedResult = m_model->loadData(pathToRun);
 
@@ -65,7 +67,7 @@ void BaseInstrumentPresenter::loadAndAnalysis(const std::string &pathToRun) {
   }
 }
 
-void BaseInstrumentPresenter::loadRunNumber() {
+void BaseCustomInstrumentPresenter::loadRunNumber() {
   auto pathToRun = m_view->getFile();
   if (pathToRun == "" || m_currentFile == pathToRun) {
     return;
@@ -73,9 +75,7 @@ void BaseInstrumentPresenter::loadRunNumber() {
   loadAndAnalysis(pathToRun);
 }
 
-// All of the below are specific to ALF
-
-void BaseInstrumentPresenter::initInstrument(
+void BaseCustomInstrumentPresenter::initInstrument(
     std::pair<instrumentSetUp, instrumentObserverOptions> *setUp) {
   if (!setUp) {
     return;
@@ -98,7 +98,7 @@ typedef std::vector<std::tuple<std::string, Observer *>>
     instrumentObserverOptions;
 std::pair<instrumentSetUp, instrumentObserverOptions>
 
-BaseInstrumentPresenter::setupInstrument() {
+BaseCustomInstrumentPresenter::setupInstrument() {
   instrumentSetUp setUpContextConditions;
 
   // set up the slots for the custom context menu
@@ -110,5 +110,5 @@ BaseInstrumentPresenter::setupInstrument() {
   return std::make_pair(setUpContextConditions, customInstrumentOptions);
 }
 
-} // namespace CustomInterfaces
+} // namespace MantidWidgets
 } // namespace MantidQt

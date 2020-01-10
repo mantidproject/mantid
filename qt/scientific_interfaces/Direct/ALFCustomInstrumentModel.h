@@ -4,12 +4,12 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_CUSTOMINTERFACES_ALFVIEWMODEL_H_
-#define MANTIDQT_CUSTOMINTERFACES_ALFVIEWMODEL_H_
+#ifndef MANTIDQT_CUSTOMINTERFACES_ALFCUSTOMINSTRUMENTMODEL_H_
+#define MANTIDQT_CUSTOMINTERFACES_ALFCUSTOMINSTRUMENTMODEL_H_
 
-#include "BaseInstrumentModel.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentModel.h"
 
 #include <map>
 #include <string>
@@ -17,11 +17,12 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class ALFView_model : public BaseInstrumentModel {
+class ALFCustomInstrumentModel
+    : public MantidWidgets::BaseCustomInstrumentModel {
 
 public:
-  ALFView_model();
-  virtual ~ALFView_model(){};
+  ALFCustomInstrumentModel();
+  virtual ~ALFCustomInstrumentModel(){};
   std::pair<int, std::string> loadData(const std::string &name) override;
   std::map<std::string, bool> isDataValid();
   void transformData();
@@ -41,4 +42,4 @@ private:
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif /* MANTIDQT_CUSTOMINTERFACES_ALFVIEWMODEL_H_ */
+#endif /* MANTIDQT_CUSTOMINTERFACES_ALFCUSTOMINSTRUMENTMODEL_H_ */

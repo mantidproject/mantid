@@ -4,7 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "PlotFitAnalysisPaneView.h"
+#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneView.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 
@@ -16,7 +16,7 @@
 #include <QSplitter>
 #include <QVBoxLayout>
 namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidWidgets {
 
 PlotFitAnalysisPaneView::PlotFitAnalysisPaneView(const double &start,
                                                  const double &end,
@@ -115,5 +115,5 @@ void PlotFitAnalysisPaneView::fitWarning(const std::string &message) {
   QMessageBox::warning(this, "Fit error", message.c_str());
 }
 
-} // namespace CustomInterfaces
+} // namespace MantidWidgets
 } // namespace MantidQt

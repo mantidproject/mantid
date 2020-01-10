@@ -24,11 +24,13 @@ boost::shared_ptr<UnitLabel>
 createLabel(const object &ascii, const object &utf8, const object &latex) {
   using Utf8Char = UnitLabel::Utf8String::value_type;
   if (PyUnicode_Check(utf8.ptr())) {
-    auto length = PyUnicode_GetSize(utf8.ptr());
-    boost::scoped_array<Utf8Char> buffer(new Utf8Char[length]);
 #if PY_MAJOR_VERSION >= 3
+    auto length = PyUnicode_GetLength(utf8.ptr());
+    boost::scoped_array<Utf8Char> buffer(new Utf8Char[length]);
     PyUnicode_AsWideChar(utf8.ptr(), buffer.get(), length);
 #else
+    auto length = PyUnicode_GetSize(utf8.ptr());
+    boost::scoped_array<Utf8Char> buffer(new Utf8Char[length]);
     PyUnicode_AsWideChar(reinterpret_cast<PyUnicodeObject *>(utf8.ptr()),
                          buffer.get(), length);
 #endif

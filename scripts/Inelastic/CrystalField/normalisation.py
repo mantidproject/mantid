@@ -212,7 +212,7 @@ def split2range(*args, **kwargs):
         Nlm[bname] = splitting_factor
     ranges = norm2stev(IonNum=nre, **Nlm)
 
-    if argin['Output'].lower() is 'constraints':
+    if argin['Output'].lower() == 'constraints':
         constr = ''
         for bname in ranges.keys():
             constr += '%.4g<%s<%.4g,' % (-ranges[bname], bname, ranges[bname])

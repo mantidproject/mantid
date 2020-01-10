@@ -4,15 +4,14 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_CUSTOMINTERFACES_ALFVIEW_VIEW_H_
-#define MANTIDQT_CUSTOMINTERFACES_ALFVIEW_VIEW_H_
+#ifndef MANTIDQT_CUSTOMINTERFACES_ALFCustomInstrumentView_H_
+#define MANTIDQT_CUSTOMINTERFACES_ALFCustomInstrumentView_H_
 
-#include "BaseInstrumentView.h"
 #include "DllConfig.h"
 #include "MantidQtWidgets/Common/MWRunFiles.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
-#include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
-#include "PlotFitAnalysisPaneView.h"
+#include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentView.h"
+#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneView.h"
 
 #include <QObject>
 #include <QSplitter>
@@ -22,12 +21,12 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class ALFView_view : public BaseInstrumentView {
+class ALFCustomInstrumentView : public MantidWidgets::BaseCustomInstrumentView {
   Q_OBJECT
 
 public:
-  explicit ALFView_view(const std::string &instrument,
-                        QWidget *parent = nullptr);
+  explicit ALFCustomInstrumentView(const std::string &instrument,
+                                   QWidget *parent = nullptr);
   void observeExtractSingleTube(Observer *listner);
   void observeAverageTube(Observer *listner);
 
@@ -38,7 +37,7 @@ public:
 
   void addObserver(std::tuple<std::string, Observer *> &listener) override;
   void addSpectrum(std::string wsName);
-  void setupAnalysisPane(PlotFitAnalysisPaneView *analysis);
+  void setupAnalysisPane(MantidWidgets::PlotFitAnalysisPaneView *analysis);
 
 public slots:
   void extractSingleTube();
@@ -49,9 +48,9 @@ private:
   Observable *m_averageTubeObservable;
   QAction *m_extractAction;
   QAction *m_averageAction;
-  PlotFitAnalysisPaneView *m_analysisPane;
+  MantidWidgets::PlotFitAnalysisPaneView *m_analysisPane;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif /* MANTIDQT_CUSTOMINTERFACES_ALFVIEW_VIEW_H_ */
+#endif /* MANTIDQT_CUSTOMINTERFACES_ALFCustomInstrumentView_H_ */

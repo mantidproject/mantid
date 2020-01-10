@@ -408,12 +408,12 @@ public:
     std::vector<coord_t> min;
     std::vector<coord_t> max;
 
-    min.emplace_back(0);
-    min.emplace_back(0);
-    min.emplace_back(0);
-    max.emplace_back(1.5);
-    max.emplace_back(1.5);
-    max.emplace_back(1.5);
+    min.emplace_back(0.f);
+    min.emplace_back(0.f);
+    min.emplace_back(0.f);
+    max.emplace_back(1.5f);
+    max.emplace_back(1.5f);
+    max.emplace_back(1.5f);
 
     // Create a function to mask some of the workspace.
     auto function = std::make_unique<MDBoxImplicitFunction>(min, max);
@@ -570,12 +570,12 @@ public:
     std::vector<coord_t> min;
     std::vector<coord_t> max;
 
-    min.emplace_back(0);
-    min.emplace_back(0);
-    min.emplace_back(0);
-    max.emplace_back(10);
-    max.emplace_back(10);
-    max.emplace_back(10);
+    min.emplace_back(0.f);
+    min.emplace_back(0.f);
+    min.emplace_back(0.f);
+    max.emplace_back(10.f);
+    max.emplace_back(10.f);
+    max.emplace_back(10.f);
 
     // Create an function that encompases 1/4 of the total bins.
     auto function = std::make_unique<MDBoxImplicitFunction>(min, max);
@@ -593,9 +593,9 @@ public:
     std::vector<coord_t> max;
 
     // Make the box lay over a non-intersecting region of space.
-    min.emplace_back(-1);
-    min.emplace_back(-1);
-    min.emplace_back(-1);
+    min.emplace_back(-1.f);
+    min.emplace_back(-1.f);
+    min.emplace_back(-1.f);
     max.emplace_back(-0.01f);
     max.emplace_back(-0.01f);
     max.emplace_back(-0.01f);
@@ -611,11 +611,11 @@ public:
     std::vector<coord_t> max;
 
     // Make the box that covers half the bins in the workspace.
-    min.emplace_back(0);
-    min.emplace_back(0);
-    min.emplace_back(0);
-    max.emplace_back(10);
-    max.emplace_back(10);
+    min.emplace_back(0.f);
+    min.emplace_back(0.f);
+    min.emplace_back(0.f);
+    max.emplace_back(10.f);
+    max.emplace_back(10.f);
     max.emplace_back(4.99f);
 
     // Create an function that encompases 1/4 of the total bins.
@@ -628,12 +628,12 @@ public:
     // Create a function that masks everything.
     std::vector<coord_t> min;
     std::vector<coord_t> max;
-    min.emplace_back(0);
-    min.emplace_back(0);
-    min.emplace_back(0);
-    max.emplace_back(10);
-    max.emplace_back(10);
-    max.emplace_back(10);
+    min.emplace_back(0.f);
+    min.emplace_back(0.f);
+    min.emplace_back(0.f);
+    max.emplace_back(10.f);
+    max.emplace_back(10.f);
+    max.emplace_back(10.f);
     auto function = std::make_unique<MDBoxImplicitFunction>(min, max);
 
     MDEventWorkspace3Lean::sptr ws =

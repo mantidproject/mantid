@@ -4,15 +4,13 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_CUSTOMINTERFACES_BASEINSTRUMENTVIEW_H_
-#define MANTIDQT_CUSTOMINTERFACES_BASEINSTRUMENTVIEW_H_
+#ifndef MANTIDQT_INSTRUMENTVIEW_BASECUSTOMINSTRUMENTVIEW_H_
+#define MANTIDQT_INSTRUMENTVIEW_BASECUSTOMINSTRUMENTVIEW_H_
 
-#include "DllConfig.h"
-#include "MantidQtWidgets/Common/FunctionBrowser.h"
+#include "DllOption.h"
 #include "MantidQtWidgets/Common/MWRunFiles.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
-#include "MantidQtWidgets/Plotting/PreviewPlot.h"
 
 #include <QObject>
 #include <QPushButton>
@@ -21,14 +19,15 @@
 #include <string>
 
 namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidWidgets {
 
-class BaseInstrumentView : public QSplitter {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW BaseCustomInstrumentView
+    : public QSplitter {
   Q_OBJECT
 
 public:
-  explicit BaseInstrumentView(const std::string &instrument,
-                              QWidget *parent = nullptr);
+  explicit BaseCustomInstrumentView(const std::string &instrument,
+                                    QWidget *parent = nullptr);
   std::string getFile();
   void setRunQuietly(const std::string &runNumber);
   void observeLoadRun(Observer *listener) {
@@ -66,7 +65,7 @@ private:
   MantidWidgets::InstrumentWidget *m_instrumentWidget;
   QPushButton *m_help;
 };
-} // namespace CustomInterfaces
+} // namespace MantidWidgets
 } // namespace MantidQt
 
-#endif /* MANTIDQT_CUSTOMINTERFACES_BASEINSTRUMENTVIEW_H_ */
+#endif /* MANTIDQT_INSTRUMENTVIEW_BASECUSTOMINSTRUMENTVIEW_H_ */

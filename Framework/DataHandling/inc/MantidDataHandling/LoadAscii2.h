@@ -40,7 +40,7 @@ public:
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Loads data from a text file and stores it in a 2D workspace "
-           "(Workspace2D class).";
+           "or Table Workspace.";
   }
 
   /// The version number
@@ -56,6 +56,8 @@ public:
 protected:
   /// Read the data from the file
   virtual API::Workspace_sptr readData(std::ifstream &file);
+  /// Read the data from the file into a table workspace
+  virtual API::Workspace_sptr readTable(std::ifstream &file);
   /// Return true if the line is to be skipped
   bool skipLine(const std::string &line, bool header = false) const;
   /// Return true if the line doesn't start with a valid character

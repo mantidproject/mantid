@@ -512,16 +512,24 @@ public:
     }
   }
 
-  template <size_t Bits2, typename Signed2,
-            class = __need_increase_size<Bits2, Signed2>>
-  constexpr static wide_integer<Bits2, Signed>
-  operator_plus(const wide_integer<Bits, Signed> &lhs,
-                const wide_integer<Bits2, Signed2>
-                    &rhs) noexcept(is_same<Signed, unsigned>::value) {
-    return std::common_type_t<wide_integer<Bits, Signed>,
-                              wide_integer<Bits2, Signed2>>::_impl::
-        operator_plus(wide_integer<Bits2, Signed>(lhs), rhs);
-  }
+  // clang-format off
+  // The __need_increase_size variants are currently disabled due to a suspected bug in the MSVC
+  // compiler producing warnings such as:
+  //   warning C4717: 'operator_amp<128, ?? :: ?? >': recursive on all control paths, function will cause runtime stack overflow
+  // `class = __need_increase_size<Bits2, Signed2>>` should fail substitution when Bits2 == Bits - the arguments have the same width, but it doesn't.  
+  // Mantid only uses a single type of wide integer so these functions are not currently required.
+  // clang-format on
+
+  // template <size_t Bits2, typename Signed2,
+  // class = __need_increase_size<Bits2, Signed2>>
+  // constexpr static typename std::enable_if<Bits2==Bits,wide_integer<Bits2,
+  // Signed>>::type operator_plus(const wide_integer<Bits, Signed> &lhs, const
+  // wide_integer<Bits2, Signed2> &rhs) noexcept(is_same<Signed,
+  // unsigned>::value) {
+  // return std::common_type_t<wide_integer<Bits, Signed>,
+  // wide_integer<Bits2, Signed2>>::_impl::
+  // operator_plus(wide_integer<Bits2, Signed>(lhs), rhs);
+  // }
 
   template <typename T, class = __keep_size<T>>
   constexpr static wide_integer<Bits, Signed>
@@ -535,16 +543,16 @@ public:
     }
   }
 
-  template <size_t Bits2, typename Signed2,
-            class = __need_increase_size<Bits2, Signed2>>
-  constexpr static wide_integer<Bits2, Signed>
-  operator_minus(const wide_integer<Bits, Signed> &lhs,
-                 const wide_integer<Bits2, Signed2>
-                     &rhs) noexcept(is_same<Signed, unsigned>::value) {
-    return std::common_type_t<wide_integer<Bits, Signed>,
-                              wide_integer<Bits2, Signed2>>::_impl::
-        operator_minus(wide_integer<Bits2, Signed>(lhs), rhs);
-  }
+  // template <size_t Bits2, typename Signed2,
+  // class = __need_increase_size<Bits2, Signed2>>
+  // constexpr static typename std::enable_if<Bits2==Bits,wide_integer<Bits2,
+  // Signed>>::type operator_minus(const wide_integer<Bits, Signed> &lhs, const
+  // wide_integer<Bits2, Signed2> &rhs) noexcept(is_same<Signed,
+  // unsigned>::value) {
+  // return std::common_type_t<wide_integer<Bits, Signed>,
+  // wide_integer<Bits2, Signed2>>::_impl::
+  // operator_minus(wide_integer<Bits2, Signed>(lhs), rhs);
+  // }
 
 private:
   constexpr static wide_integer<Bits, Signed> _operator_minus_wide_integer(
@@ -623,15 +631,15 @@ public:
     return res;
   }
 
-  template <size_t Bits2, typename Signed2,
-            class = __need_increase_size<Bits2, Signed2>>
-  constexpr static wide_integer<Bits2, Signed2>
-  operator_star(const wide_integer<Bits, Signed> &lhs,
-                const wide_integer<Bits2, Signed2> &rhs) {
-    return std::common_type_t<wide_integer<Bits, Signed>,
-                              wide_integer<Bits2, Signed2>>::_impl::
-        operator_star(wide_integer<Bits2, Signed2>(lhs), rhs);
-  }
+  // template <size_t Bits2, typename Signed2,
+  // class = __need_increase_size<Bits2, Signed2>>
+  // constexpr static typename std::enable_if<Bits == Bits2, wide_integer<Bits2,
+  // Signed2>>::type operator_star(const wide_integer<Bits, Signed> &lhs, const
+  // wide_integer<Bits2, Signed2> &rhs) {
+  // return std::common_type_t<wide_integer<Bits, Signed>,
+  // wide_integer<Bits2, Signed2>>::_impl::
+  // operator_star(wide_integer<Bits2, Signed2>(lhs), rhs);
+  // }
 
   template <typename T, class = __keep_size<T>>
   constexpr static bool operator_more(const wide_integer<Bits, Signed> &lhs,
@@ -656,14 +664,14 @@ public:
     return false;
   }
 
-  template <size_t Bits2, class = __need_increase_size<Bits2, Signed>>
-  constexpr static bool
-  operator_more(const wide_integer<Bits, Signed> &lhs,
-                const wide_integer<Bits2, Signed> &rhs) noexcept {
-    return std::common_type_t<wide_integer<Bits, Signed>,
-                              wide_integer<Bits2, Signed>>::_impl::
-        operator_more(wide_integer<Bits2, Signed>(lhs), rhs);
-  }
+  // template <size_t Bits2, class = __need_increase_size<Bits2, Signed>>
+  // constexpr static bool
+  // operator_more(const wide_integer<Bits, Signed> &lhs,
+  // const wide_integer<Bits2, Signed> &rhs) noexcept {
+  // return std::common_type_t<wide_integer<Bits, Signed>,
+  // wide_integer<Bits2, Signed>>::_impl::
+  // operator_more(wide_integer<Bits2, Signed>(lhs), rhs);
+  // }
 
   template <typename T, class = __keep_size<T>>
   constexpr static bool operator_less(const wide_integer<Bits, Signed> &lhs,
@@ -688,14 +696,14 @@ public:
     return false;
   }
 
-  template <size_t Bits2, class = __need_increase_size<Bits2, Signed>>
-  constexpr static bool
-  operator_less(const wide_integer<Bits, Signed> &lhs,
-                const wide_integer<Bits2, Signed> &rhs) noexcept {
-    return std::common_type_t<wide_integer<Bits, Signed>,
-                              wide_integer<Bits2, Signed>>::_impl::
-        operator_less(wide_integer<Bits2, Signed>(lhs), rhs);
-  }
+  // template <size_t Bits2, class = __need_increase_size<Bits2, Signed>>
+  // constexpr static bool
+  // operator_less(const wide_integer<Bits, Signed> &lhs,
+  // const wide_integer<Bits2, Signed> &rhs) noexcept {
+  // return std::common_type_t<wide_integer<Bits, Signed>,
+  // wide_integer<Bits2, Signed>>::_impl::
+  // operator_less(wide_integer<Bits2, Signed>(lhs), rhs);
+  // }
 
   template <typename T, class = __keep_size<T>>
   constexpr static bool operator_eq(const wide_integer<Bits, Signed> &lhs,
@@ -711,14 +719,14 @@ public:
     return true;
   }
 
-  template <size_t Bits2, class = __need_increase_size<Bits2, Signed>>
-  constexpr static bool
-  operator_eq(const wide_integer<Bits, Signed> &lhs,
-              const wide_integer<Bits2, Signed> &rhs) noexcept {
-    return std::common_type_t<wide_integer<Bits, Signed>,
-                              wide_integer<Bits2, Signed>>::_impl::
-        operator_eq(wide_integer<Bits2, Signed>(lhs), rhs);
-  }
+  // template <size_t Bits2, class = __need_increase_size<Bits2, Signed>>
+  // constexpr static bool
+  // operator_eq(const wide_integer<Bits, Signed> &lhs,
+  // const wide_integer<Bits2, Signed> &rhs) noexcept {
+  // return std::common_type_t<wide_integer<Bits, Signed>,
+  // wide_integer<Bits2, Signed>>::_impl::
+  // operator_eq(wide_integer<Bits2, Signed>(lhs), rhs);
+  // }
 
   template <typename T, class = __keep_size<T>>
   constexpr static wide_integer<Bits, Signed>
@@ -733,14 +741,16 @@ public:
     return res;
   }
 
-  template <size_t Bits2, class = __need_increase_size<Bits2, Signed>>
-  constexpr static wide_integer<Bits2, Signed>
-  operator_pipe(const wide_integer<Bits, Signed> &lhs,
-                const wide_integer<Bits2, Signed> &rhs) noexcept {
-    return std::common_type_t<wide_integer<Bits, Signed>,
-                              wide_integer<Bits2, Signed>>::_impl::
-        operator_pipe(wide_integer<Bits2, Signed>(lhs), rhs);
-  }
+  // template <size_t Bits2, class = __need_increase_size<Bits2, Signed>>
+  // constexpr static typename std::enable_if<Bits == Bits2, wide_integer<Bits2,
+  // Signed>>::type operator_pipe(const wide_integer<Bits, Signed> &lhs, const
+  // wide_integer<Bits2, Signed> &rhs) noexcept {
+  // static_assert(!std::is_same_v<wide_integer<Bits, Signed>,
+  // std::common_type_t<wide_integer<Bits, Signed>, wide_integer<Bits2,
+  // Signed>>>); return std::common_type_t<wide_integer<Bits, Signed>,
+  // wide_integer<Bits2, Signed>>::_impl::
+  // operator_pipe(wide_integer<Bits2, Signed>(lhs), rhs);
+  // }
 
   template <typename T, class = __keep_size<T>>
   constexpr static wide_integer<Bits, Signed>
@@ -755,14 +765,14 @@ public:
     return res;
   }
 
-  template <size_t Bits2, class = __need_increase_size<Bits2, Signed>>
-  constexpr static wide_integer<Bits2, Signed>
-  operator_amp(const wide_integer<Bits, Signed> &lhs,
-               const wide_integer<Bits2, Signed> &rhs) noexcept {
-    return std::common_type_t<wide_integer<Bits, Signed>,
-                              wide_integer<Bits2, Signed>>::_impl::
-        operator_amp(wide_integer<Bits2, Signed>(lhs), rhs);
-  }
+  // template <size_t Bits2, class = __need_increase_size<Bits2, Signed>>
+  // constexpr static typename std::enable_if<Bits == Bits2, wide_integer<Bits2,
+  // Signed>>::type operator_amp(const wide_integer<Bits, Signed> &lhs, const
+  // wide_integer<Bits2, Signed> &rhs) noexcept {
+  // return std::common_type_t<wide_integer<Bits, Signed>,
+  // wide_integer<Bits2, Signed>>::_impl::
+  // operator_amp(wide_integer<Bits2, Signed>(lhs), rhs);
+  // }
 
 private:
   template <typename T>
@@ -821,15 +831,15 @@ public:
     return quotient;
   }
 
-  template <size_t Bits2, typename Signed2,
-            class = __need_increase_size<Bits2, Signed2>>
-  constexpr static wide_integer<Bits2, Signed2>
-  operator_slash(const wide_integer<Bits, Signed> &lhs,
-                 const wide_integer<Bits2, Signed2> &rhs) {
-    return std::common_type_t<wide_integer<Bits, Signed>,
-                              wide_integer<Bits2, Signed>>::
-        operator_slash(wide_integer<Bits2, Signed2>(lhs), rhs);
-  }
+  // template <size_t Bits2, typename Signed2,
+  // class = __need_increase_size<Bits2, Signed2>>
+  // constexpr static wide_integer<Bits2, Signed2>
+  // operator_slash(const wide_integer<Bits, Signed> &lhs,
+  // const wide_integer<Bits2, Signed2> &rhs) {
+  // return std::common_type_t<wide_integer<Bits, Signed>,
+  // wide_integer<Bits2, Signed>>::
+  // operator_slash(wide_integer<Bits2, Signed2>(lhs), rhs);
+  // }
 
   template <typename T, class = __keep_size<T>>
   constexpr static wide_integer<Bits, Signed>
@@ -843,15 +853,15 @@ public:
     return remainder;
   }
 
-  template <size_t Bits2, typename Signed2,
-            class = __need_increase_size<Bits2, Signed2>>
-  constexpr static wide_integer<Bits2, Signed2>
-  operator_percent(const wide_integer<Bits, Signed> &lhs,
-                   const wide_integer<Bits2, Signed2> &rhs) {
-    return std::common_type_t<wide_integer<Bits, Signed>,
-                              wide_integer<Bits2, Signed>>::
-        operator_percent(wide_integer<Bits2, Signed2>(lhs), rhs);
-  }
+  // template <size_t Bits2, typename Signed2,
+  // class = __need_increase_size<Bits2, Signed2>>
+  // constexpr static wide_integer<Bits2, Signed2>
+  // operator_percent(const wide_integer<Bits, Signed> &lhs,
+  // const wide_integer<Bits2, Signed2> &rhs) {
+  // return std::common_type_t<wide_integer<Bits, Signed>,
+  // wide_integer<Bits2, Signed>>::
+  // operator_percent(wide_integer<Bits2, Signed2>(lhs), rhs);
+  // }
 
   // ^
   template <typename T, class = __keep_size<T>>
@@ -868,14 +878,14 @@ public:
     return res;
   }
 
-  template <size_t Bits2, typename Signed2,
-            class = __need_increase_size<Bits2, Signed2>>
-  constexpr static wide_integer<Bits2, Signed2>
-  operator_circumflex(const wide_integer<Bits, Signed> &lhs,
-                      const wide_integer<Bits2, Signed2> &rhs) noexcept {
-    return wide_integer<Bits2, Signed2>::operator_circumflex(
-        wide_integer<Bits2, Signed2>(lhs), rhs);
-  }
+  // template <size_t Bits2, typename Signed2,
+  // class = __need_increase_size<Bits2, Signed2>>
+  // constexpr static wide_integer<Bits2, Signed2>
+  // operator_circumflex(const wide_integer<Bits, Signed> &lhs,
+  // const wide_integer<Bits2, Signed2> &rhs) noexcept {
+  // return wide_integer<Bits2, Signed2>::operator_circumflex(
+  // wide_integer<Bits2, Signed2>(lhs), rhs);
+  // }
 
   constexpr static wide_integer<Bits, Signed> from_str(const char *c) {
     wide_integer<Bits, Signed> res = 0;

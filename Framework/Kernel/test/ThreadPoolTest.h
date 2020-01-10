@@ -18,7 +18,6 @@
 
 #include <Poco/Thread.h>
 
-#include <boost/bind.hpp>
 #include <boost/make_shared.hpp>
 #include <cstdlib>
 
@@ -133,7 +132,7 @@ public:
       double cost = i; // time is exactly i
       // Bind to a member function of mywaster
       p.schedule(std::make_shared<FunctionTask>(
-          boost::bind(&TimeWaster::waste_time_with_lock, &mywaster, i), cost));
+          std::bind(&TimeWaster::waste_time_with_lock, &mywaster, i), cost));
     }
 
     Timer overall;
@@ -281,7 +280,7 @@ public:
     for (int i = 0; i < 10; i++) {
       double cost = i;
       p.schedule(std::make_shared<FunctionTask>(
-          boost::bind(threadpooltest_adding_stuff, i), cost));
+          std::bind(threadpooltest_adding_stuff, i), cost));
     }
     TS_ASSERT_THROWS_NOTHING(p.joinAll());
     TS_ASSERT_EQUALS(threadpooltest_vec.size(), 10);
@@ -300,7 +299,7 @@ public:
     for (int i = 0; i < 10; i++) {
       double cost = i;
       p.schedule(std::make_shared<FunctionTask>(
-          boost::bind(threadpooltest_adding_stuff, i), cost));
+          std::bind(threadpooltest_adding_stuff, i), cost));
     }
     TS_ASSERT_THROWS_NOTHING(p.joinAll());
     TS_ASSERT_EQUALS(threadpooltest_vec.size(), 10);
@@ -318,7 +317,7 @@ public:
     for (int i = 0; i < 10; i++) {
       double cost = i;
       p.schedule(std::make_shared<FunctionTask>(
-          boost::bind(threadpooltest_adding_stuff, i), cost));
+          std::bind(threadpooltest_adding_stuff, i), cost));
     }
     TS_ASSERT_THROWS_NOTHING(p.joinAll());
     TS_ASSERT_EQUALS(threadpooltest_vec.size(), 10);
@@ -342,7 +341,7 @@ public:
     boost::shared_ptr<std::mutex> lastMutex;
     for (size_t i = 0; i <= num; i++) {
       auto task = std::make_shared<FunctionTask>(
-          boost::bind(&TimeWaster::add_to_number, &mywaster, i),
+          std::bind(&TimeWaster::add_to_number, &mywaster, i),
           static_cast<double>(i));
       // Create a new mutex every 1000 tasks. This is more relevant to the
       // ThreadSchedulerMutexes; others ignore it.

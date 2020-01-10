@@ -567,6 +567,11 @@
     </livedata>
   </instrument>
 
+  <instrument name="NOW4" shortname="NOW4" beamline="14Q">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>TOF Direct Geometry Spectroscopy</technique>
+  </instrument>
+
   <instrument name="VISION" shortname="VIS" beamline="16B">
     <technique>Neutron Spectroscopy</technique>
     <technique>TOF Indirect Geometry Spectroscopy</technique>
@@ -902,7 +907,7 @@
 <!-- HZB -->
 <facility name="HZB" FileExtensions=".nxs">
    <timezone>Europe/Berlin</timezone>
-   
+
    <instrument name="TEST" shortname="TEST">
 	<zeropadding size="8" />
     <technique>ESS Test Beamline</technique>
@@ -946,14 +951,14 @@
 <!--  Test Facility to allow example usage of Live listeners against "Fake" instrument sources -->
 <facility name="TEST_LIVE" FileExtensions=".nxs,.raw">
   <timezone>UTC</timezone>
-  
+
   <instrument name="LOKI">
     <technique>SANS Test</technique>
     <livedata>
       <connection name="event" address="hinata:9092" listener="KafkaEventListener" />
     </livedata>
   </instrument>
-  
+
   <instrument name="ISIS_Histogram">
     <technique>Test Listener</technique>
     <livedata>

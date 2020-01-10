@@ -10,9 +10,11 @@ the Indirect scripts depending on platform and numpy package version.
 
 We also deal with importing the mantidplot module outside of MantidPlot here.
 """
-
 from __future__ import (absolute_import, division, print_function)
+
+from contextlib import contextmanager
 import numpy.core.setup_common as numpy_cfg
+import os
 import platform
 import sys
 from mantid import logger
@@ -106,9 +108,23 @@ def import_f2py(lib_base_name):
     # Only proceed if we are indeed on one of the supported platforms.
     assert is_supported_f2py_platform()
 
-    lib_name = lib_base_name + _lib_suffix()
+    @contextmanager
+    def in_syspath(directory):
+        sys.path.insert(0, directory)
+        yield
+        sys.path.pop(0)
 
-    return __import__(lib_name)
+    lib_name = lib_base_name + _lib_suffix()
+    # In Python 3 f2py produces a filename properly tagged with the ABI compatability
+    # information and Python can import this without issue but it will take an untagged
+    # filename in preference so we cannot keep the Python2/Python3 ones in the same
+    # directory. We manipulate the sys.path temporarily to get the correct library.
+    version = sys.version_info
+    if version.major >= 3:
+        return __import__(lib_name)
+    else:
+        with in_syspath(os.path.join(os.path.dirname(__file__), 'cp27')):
+            return __import__(lib_name)
 
 
 def run_f2py_compatibility_test():
