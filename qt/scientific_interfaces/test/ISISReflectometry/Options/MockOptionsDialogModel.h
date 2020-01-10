@@ -26,6 +26,7 @@ public:
     boolOptions["WarnProcessPartialGroup"] = false;
     boolOptions["Round"] = true;
     intOptions["RoundPrecision"] = 5;
+    applyDefaultOptionsProxy(boolOptions, intOptions);
   }
   MOCK_METHOD2(loadSettingsProxy, void(std::map<std::string, bool> &,
                                        std::map<std::string, int> &));
@@ -36,19 +37,53 @@ public:
     boolOptions["WarnProcessPartialGroup"] = false;
     boolOptions["Round"] = true;
     intOptions["RoundPrecision"] = 2;
-    return loadSettingsProxy(boolOptions, intOptions);
-  }
-  void loadSettingsUnsuccessful(std::map<std::string, bool> &boolOptions,
-                                std::map<std::string, int> &intOptions) {
-    boolOptions.clear();
-    intOptions.clear();
-    return loadSettingsProxy(boolOptions, intOptions);
+    loadSettingsProxy(boolOptions, intOptions);
   }
   MOCK_METHOD2(saveSettings, void(const std::map<std::string, bool> &,
                                   const std::map<std::string, int> &));
-  ~MockOptionsDialogModel() override{};
-  GNU_DIAG_ON_SUGGEST_OVERRIDE
 };
+
+class MockOptionsDialogModelUnsuccessfulLoad : public IOptionsDialogModel {
+public:
+  MOCK_METHOD2(applyDefaultOptionsProxy, void(std::map<std::string, bool> &,
+                                              std::map<std::string, int> &));
+  void applyDefaultOptions(std::map<std::string, bool> &boolOptions,
+                           std::map<std::string, int> &intOptions) {
+    applyDefaultOptionsProxy(boolOptions, intOptions);
+  }
+  MOCK_METHOD2(loadSettingsProxy, void(std::map<std::string, bool> &,
+                                       std::map<std::string, int> &));
+  void loadSettings(std::map<std::string, bool> &boolOptions,
+                    std::map<std::string, int> &intOptions) {
+    loadSettingsProxy(boolOptions, intOptions);
+  }
+  MOCK_METHOD2(saveSettings, void(const std::map<std::string, bool> &,
+                                  const std::map<std::string, int> &));
+};
+
+class MockOptionsDialogModelUnsuccessfulDefaults : public IOptionsDialogModel {
+public:
+  MOCK_METHOD2(applyDefaultOptionsProxy, void(std::map<std::string, bool> &,
+                                              std::map<std::string, int> &));
+  void applyDefaultOptions(std::map<std::string, bool> &boolOptions,
+                           std::map<std::string, int> &intOptions) {
+    boolOptions["WarnProcessAll"] = false;
+    boolOptions["WarnDiscardChanges"] = false;
+    boolOptions["WarnProcessPartialGroup"] = false;
+    boolOptions["Round"] = true;
+    intOptions["RoundPrecision"] = 5;
+    applyDefaultOptionsProxy(boolOptions, intOptions);
+  }
+  MOCK_METHOD2(loadSettingsProxy, void(std::map<std::string, bool> &,
+                                       std::map<std::string, int> &));
+  void loadSettings(std::map<std::string, bool> &boolOptions,
+                    std::map<std::string, int> &intOptions) {
+    loadSettingsProxy(boolOptions, intOptions);
+  }
+  MOCK_METHOD2(saveSettings, void(const std::map<std::string, bool> &,
+                                  const std::map<std::string, int> &));
+};
+  GNU_DIAG_ON_SUGGEST_OVERRIDE
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
