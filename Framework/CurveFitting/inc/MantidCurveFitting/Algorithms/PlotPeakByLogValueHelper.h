@@ -30,10 +30,7 @@ struct InputData {
       : name(data.name), i(data.i), period(data.period), ws(data.ws) {}
   std::string name; ///< Name of a workspace or file
   int i;            ///< Workspace index of the spectra to fit
-  // int spec;         ///< Spectrum number to fit
-  int period; ///< Period, needed if a file contains several periods
-  // double start;     ///< starting axis value
-  // double end;       ///< ending axis value
+  int period;       ///< Period, needed if a file contains several periods
   API::MatrixWorkspace_sptr ws; ///< shared pointer to the workspace
 };
 /// Get a workspace
