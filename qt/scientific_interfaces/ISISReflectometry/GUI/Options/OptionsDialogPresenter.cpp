@@ -77,6 +77,7 @@ void OptionsDialogPresenter::showView() { m_view->show(); }
 void OptionsDialogPresenter::subscribe(
     OptionsDialogMainWindowSubscriber *notifyee) {
   m_mainWindowNotifyee = notifyee;
+  loadOptions();
 }
 
 } // namespace ISISReflectometry

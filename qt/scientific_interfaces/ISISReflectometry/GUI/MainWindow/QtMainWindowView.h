@@ -98,6 +98,7 @@ private:
   /// instantiated this is currently necessary for QtMainWindowView. Direct use
   /// of m_presenter should be avoided - use m_notifyee instead.
   std::unique_ptr<MainWindowPresenter> m_presenter;
+  std::unique_ptr<QtOptionsDialogView> m_optionsDialogView;
   std::vector<IBatchView *> m_batchViews;
   int m_batchIndex;
   std::unique_ptr<QtOptionsDialogView> m_optionsDialogView;

@@ -18,6 +18,7 @@ public:
   MOCK_METHOD1(settingsChanged, void(int));
   MOCK_CONST_METHOD0(isAnyBatchProcessing, bool());
   MOCK_CONST_METHOD0(isAnyBatchAutoreducing, bool());
+  MOCK_CONST_METHOD0(optionsChanged, void());
   MOCK_METHOD0(notifyAnyBatchAutoreductionResumed, void());
   MOCK_METHOD0(notifyAnyBatchAutoreductionPaused, void());
   MOCK_METHOD0(notifyAnyBatchReductionResumed, void());

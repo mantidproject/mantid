@@ -10,6 +10,7 @@
 #include "../../../ISISReflectometry/GUI/MainWindow/MainWindowPresenter.h"
 #include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
 #include "../Batch/MockBatchView.h"
+#include "../Options/MockOptionsDialogPresenter.h"
 #include "../ReflMockObjects.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidGeometry/Instrument_fwd.h"
@@ -54,6 +55,8 @@ public:
     auto &config = Mantid::Kernel::ConfigService::Instance();
     backup_facility = config.getString("default.facility");
     backup_instrument = config.getString("default.instrument");
+    m_optionsDialogPresenter =
+        std::make_unique<NiceMock<MockOptionsDialogPresenter>>().get();
   }
 
   void tearDown() override {
@@ -64,6 +67,12 @@ public:
 
   void testPresenterSubscribesToView() {
     EXPECT_CALL(m_view, subscribe(_)).Times(1);
+    auto presenter = makePresenter();
+    verifyAndClear();
+  }
+
+  void testOptionsDialogPresenterSubscribesToMainWindow() {
+    EXPECT_CALL(*m_optionsDialogPresenter, subscribe(_)).Times(1);
     auto presenter = makePresenter();
     verifyAndClear();
   }
@@ -169,9 +178,8 @@ public:
   }
 
   void testShowOptionsOpensDialog() {
+    EXPECT_CALL(*m_optionsDialogPresenter, showView()).Times(1);
     auto presenter = makePresenter();
-    // TODO Add test when options dialog is impelemented
-    // EXPECT_CALL(*m_optionsDialog, show()).Times(1);
     presenter.notifyShowOptionsRequested();
     verifyAndClear();
   }
@@ -356,6 +364,7 @@ private:
   std::vector<IBatchView *> m_batchViews;
   std::vector<NiceMock<MockBatchPresenter> *> m_batchPresenters;
   NiceMock<MockBatchPresenterFactory> *m_makeBatchPresenter;
+  NiceMock<MockOptionsDialogPresenter> *m_optionsDialogPresenter;
   NiceMock<MockSlitCalculator> *m_slitCalculator;
 
   class MainWindowPresenterFriend : public MainWindowPresenter {
@@ -367,10 +376,12 @@ private:
         IFileHandler *fileHandler, std::unique_ptr<IEncoder> encoder,
         std::unique_ptr<IDecoder> decoder,
         std::unique_ptr<ISlitCalculator> slitCalculator,
+        std::unique_ptr<IOptionsDialogPresenter> optionsDialogPresenter,
         std::unique_ptr<IBatchPresenterFactory> makeBatchPresenter)
         : MainWindowPresenter(view, messageHandler, fileHandler,
                               std::move(encoder), std::move(decoder),
                               std::move(slitCalculator),
+                              std::move(optionsDialogPresenter),
                               std::move(makeBatchPresenter)) {}
   };
 
@@ -381,6 +392,9 @@ private:
     m_decoder = decoder.get();
     auto slitCalculator = std::make_unique<NiceMock<MockSlitCalculator>>();
     m_slitCalculator = slitCalculator.get();
+    auto optionsDialogPresenter =
+        std::make_unique<NiceMock<MockOptionsDialogPresenter>>();
+    m_optionsDialogPresenter = optionsDialogPresenter.get();
     auto makeBatchPresenter =
         std::make_unique<NiceMock<MockBatchPresenterFactory>>();
     m_makeBatchPresenter = makeBatchPresenter.get();
@@ -396,13 +410,14 @@ private:
     auto presenter = MainWindowPresenterFriend(
         &m_view, &m_messageHandler, &m_fileHandler, std::move(encoder),
         std::move(decoder), std::move(slitCalculator),
-        std::move(makeBatchPresenter));
+        std::move(optionsDialogPresenter), std::move(makeBatchPresenter));
     return presenter;
   }
 
   void verifyAndClear() {
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_messageHandler));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_optionsDialogPresenter));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_fileHandler));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_encoder));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_decoder));
