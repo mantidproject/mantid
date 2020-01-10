@@ -12,12 +12,27 @@ migration strategy for Mantid.
 Building Against Python 3
 #########################
 
-This is currently only possible on a Linux system with a pre-installed version of python 3 and you will need to have
-the latest version of the `mantid-developer` package installed. Once installed run cmake as standard but with the additional option ``-DPYTHON_EXECUTABLE=/usr/bin/python3``. Please note that
-reconfiguring an existing Python 2 build is not supported - a build in a fresh build directory is required.
+This is currently possible on Ubuntu or Windows.
+Please note that reconfiguring an existing Python 2 build is not supported - a build in a fresh build directory is required.
+
+Ubuntu
+^^^^^^
+
+Install the latest version of the `mantid-developer` package. Once installed run cmake as standard but with the additional option ``-DPYTHON_EXECUTABLE=/usr/bin/python3``.
 
 .. warning::
    Do not install python packages via ``pip``. Install packages only from the system repositories.
+
+Windows
+^^^^^^^
+
+All of the required packages are in the third-party bundle that will be fetched for you.
+
+To build from the command line run cmake as standard but with the additional option ``-DWITH_PYTHON3=ON``.
+
+To build from the GUI ensure the previous cache has been deleted, set the source and build directories as usual
+but before clicking configure click "Add Entry" and add an entry with the name ``WITH_PYTHON3`` of type ``BOOL``
+and ensure the Value is checked. Now proceed to configure and generate as usual.
 
 Supporting Python 2 and 3
 #########################
