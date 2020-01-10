@@ -295,7 +295,7 @@ private:
     TS_ASSERT_EQUALS(gui->m_ui.tabRadioButton->isChecked(),
                      map[QString("tabRadioButton")].toBool())
     TS_ASSERT_EQUALS(gui->m_ui.fileFormatComboBox->currentIndex(),
-                     map[QString("fileFormatComboBox")].toBool())
+                     map[QString("fileFormatComboBox")].toInt())
     TS_ASSERT_EQUALS(gui->m_ui.filterEdit->text(),
                      map[QString("filterEdit")].toString())
     TS_ASSERT_EQUALS(gui->m_ui.regexCheckBox->isChecked(),

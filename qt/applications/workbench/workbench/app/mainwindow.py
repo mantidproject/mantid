@@ -727,11 +727,19 @@ class MainWindow(QMainWindow):
 
 
 def initialize():
-    """Perform an initialization of the application instance. Most notably
-    this patches sys.exit so that it does nothing.
+    """Perform an initialization of the application instance.
+
+        - Patches sys.exit so that it does nothing.
+        - Uses WindowsSelectorEventLoop required by Tornado
 
     :return: A reference to the existing application instance
     """
+    if sys.version_info.major >= 3 and sys.platform == 'win32':
+        # Tornado requires WindowsSelectorEventLoop
+        # https://www.tornadoweb.org/en/stable/#installation
+        import asyncio
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
     app = qapplication()
 
     # Monkey patching sys.exit so users can't kill

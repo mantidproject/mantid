@@ -15,7 +15,11 @@ Functionality for unpacking mantid objects for plotting with matplotlib.
 # of the main package.
 from __future__ import (absolute_import, division, print_function)
 
-from collections import Iterable
+try:
+   from collections.abc import Iterable
+except ImportError:
+   # check Python 2 location
+   from collections import Iterable   
 from matplotlib.axes import Axes
 from matplotlib.collections import Collection
 from matplotlib.colors import Colormap

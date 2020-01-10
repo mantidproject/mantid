@@ -18,6 +18,7 @@ if(CXXTEST_FOUND)
       ../../TestHelpers/src/LoggingCleaner.cpp)
 
   cxxtest_add_test(GeometryTest ${TEST_FILES} ${GMOCK_TEST_FILES})
+  target_compile_definitions(GeometryTest PRIVATE -D_SILENCE_FPOS_SEEKPOS_DEPRECATION_WARNING)
   target_link_libraries(GeometryTest
                         LINK_PRIVATE
                         ${TCMALLOC_LIBRARIES_LINKTIME}

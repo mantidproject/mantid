@@ -99,7 +99,8 @@ to_dateandtime(const boost::python::api::object &value) {
 
   boost::python::extract<double> converter_dbl(value);
   if (converter_dbl.check()) {
-    return boost::make_shared<DateAndTime>(converter_dbl());
+    return boost::make_shared<DateAndTime>(
+        static_cast<int64_t>(converter_dbl()));
   }
 
   boost::python::extract<int64_t> converter_int64(value);
