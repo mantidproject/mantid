@@ -9,7 +9,6 @@
 #include "MantidQtWidgets/Common/EditLocalParameterDialog.h"
 
 #include <cmath>
-#include <iostream>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -245,6 +244,7 @@ void ConvTemplatePresenter::editLocalParameterFinish(int result) {
     auto values = m_editLocalParameterDialog->getValues();
     auto fixes = m_editLocalParameterDialog->getFixes();
     auto ties = m_editLocalParameterDialog->getTies();
+    auto constraints = m_editLocalParameterDialog->getConstraints();
     assert(values.size() == getNumberOfDatasets());
     for (int i = 0; i < values.size(); ++i) {
       setLocalParameterValue(parName, i, values[i]);
@@ -255,6 +255,7 @@ void ConvTemplatePresenter::editLocalParameterFinish(int result) {
       } else {
         setLocalParameterTie(parName, i, "");
       }
+      m_model.setLocalParameterConstraint(parName, i, constraints[i]);
     }
   }
   m_editLocalParameterDialog = nullptr;
