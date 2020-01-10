@@ -10,8 +10,8 @@ Mantid Basic Course
    :maxdepth: 2
 
    getting_started/getting_started
-   algorithms_workspaces_and_histories/index
    loading_and_displaying_data/index
+   algorithms_workspaces_and_histories/index
    connecting_data_to_instruments/index
    fitting_data/index
    using_workbench/index
