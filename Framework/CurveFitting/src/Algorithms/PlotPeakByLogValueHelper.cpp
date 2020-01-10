@@ -146,8 +146,12 @@ std::vector<InputData> makeNames(std::string inputList, int default_wi,
 }
 
 /** Get a workspace identified by an InputData structure.
- * @param data :: InputData with name and either spec or i fields defined.
- * @return InputData structure with the ws field set if everything was OK.
+ * @param ws :: Workspace to fit required to work out indices
+ * @param workspaceIndex :: workspace index to use
+ * @param spectrumNumber :: spectrum number to use
+ * @param start :: Start of range for value based spectrum range
+ * @param end :: End of range for value based spectrum range
+ * @return Vector of workspace indices to fit
  */
 std::vector<int> getWorkspaceIndicesFromAxes(API::MatrixWorkspace_sptr ws,
                                              int workspaceIndex,

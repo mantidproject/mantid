@@ -175,6 +175,7 @@ template <class Type> struct TemplateSubTypeImpl : public TemplateSubType {
   static std::map<Type, TemplateSubTypeDescriptor> g_typeMap;
 };
 GNU_DIAG_ON("undefined-var-template")
+
 struct FitSubType : public TemplateSubTypeImpl<FitType> {
   QString name() const override { return "Fit Type"; }
 };
