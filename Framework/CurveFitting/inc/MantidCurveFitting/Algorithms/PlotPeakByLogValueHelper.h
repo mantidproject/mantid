@@ -22,23 +22,18 @@ namespace Algorithms {
 
 struct InputData {
   /// Constructor
-  InputData(const std::string &nam, int ix, int s, int p, double st = 0,
-            double en = 0)
-      : name(nam), i(ix), spec(s), period(p), start(st), end(en) {}
+  InputData(const std::string &nam, int ix, int p)
+      : name(nam), i(ix), period(p) {}
   /// Copy constructor
   InputData(const InputData &data)
-      : name(data.name), i(data.i), spec(data.spec), period(data.period),
-        start(data.start), end(data.end), ws(data.ws) {
-    indx.assign(data.indx.begin(), data.indx.end());
-  }
+      : name(data.name), i(data.i), period(data.period), ws(data.ws) {}
   std::string name; ///< Name of a workspace or file
   int i;            ///< Workspace index of the spectra to fit
-  int spec;         ///< Spectrum number to fit
-  int period;       ///< Period, needed if a file contains several periods
-  double start;     ///< starting axis value
-  double end;       ///< ending axis value
+  // int spec;         ///< Spectrum number to fit
+  int period; ///< Period, needed if a file contains several periods
+  // double start;     ///< starting axis value
+  // double end;       ///< ending axis value
   API::MatrixWorkspace_sptr ws; ///< shared pointer to the workspace
-  std::vector<int> indx; ///< a list of ws indices to fit if i and spec < 0
 };
 /// Get a workspace
 DLLExport std::vector<int>

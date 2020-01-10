@@ -119,7 +119,7 @@ std::vector<InputData> makeNames(std::string inputList, int default_wi,
             getWorkspaceIndicesFromAxes(workspace, wi, spec, start, end);
 
         for (auto workspaceIndex : workspaceIndices) {
-          nameList.emplace_back(wsName, workspaceIndex, -1, period, start, end);
+          nameList.emplace_back(wsName, workspaceIndex, period);
           if (workspace) {
             nameList.back().ws = workspace;
           }
@@ -136,25 +136,7 @@ std::vector<InputData> makeNames(std::string inputList, int default_wi,
         getWorkspaceIndicesFromAxes(wsMatrix, wi, spec, start, end);
 
     for (auto workspaceIndex : workspaceIndices) {
-      // if (API::AnalysisDataService::Instance().doesExist(name)) {
-      //   API::Workspace_sptr ws =
-      //       API::AnalysisDataService::Instance().retrieve(name);
-      //   API::WorkspaceGroup_sptr wsg =
-      //       boost::dynamic_pointer_cast<API::WorkspaceGroup>(ws);
-      //   if (wsg) {
-      //     std::cout << "Treated as group" << std::endl;
-      //     const std::vector<std::string> wsNames = wsg->getNames();
-      //     for (const auto &wsName : wsNames) {
-      //       nameList.emplace_back(wsName, workspaceIndex, -1, period, start,
-      //                             end);
-      //       if (workspaceOptional) {
-      //         nameList.back().ws = workspaceOptional.value();
-      //       }
-      //     }
-      //     continue;
-      //   }
-      // }
-      nameList.emplace_back(name, workspaceIndex, spec, period, start, end);
+      nameList.emplace_back(name, workspaceIndex, period);
       if (workspaceOptional) {
         nameList.back().ws = wsMatrix;
       }
@@ -219,11 +201,6 @@ std::optional<API::Workspace_sptr>
 getWorkspace(const std::string &workspaceName, int period) {
   if (API::AnalysisDataService::Instance().doesExist(workspaceName)) {
     return API::AnalysisDataService::Instance().retrieve(workspaceName);
-    // if (ws) {
-    //   return ws;
-    // } else {
-    //   return {};
-    // }
   } else {
     std::string::size_type i = workspaceName.find_last_of('.');
     if (i == std::string::npos) {
