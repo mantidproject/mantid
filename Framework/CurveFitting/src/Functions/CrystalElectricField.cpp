@@ -639,7 +639,7 @@ void diagonalise(const ComplexFortranMatrix &hamiltonian,
   eigenvalues += -eshift;
 }
 
-GNU_DIAG_OFF("missing-braces")
+GNU_DIAG_ON("missing-braces")
 
 } // anonymous namespace
 
