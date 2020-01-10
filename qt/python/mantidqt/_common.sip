@@ -887,6 +887,7 @@ public:
     QString getText();
     QString getFirstFilename() const;
     void isForRunFiles(bool /*mode*/);
+    void isForDirectory(bool /*mode*/);
     bool isSearching() const;
     bool isValid();
     void liveButtonSetChecked(bool);

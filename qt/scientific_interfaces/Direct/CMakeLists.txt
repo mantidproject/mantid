@@ -1,24 +1,13 @@
 set(SRC_FILES
     ALFView.cpp
-    ALFView_view.cpp
-    ALFView_presenter.cpp
-    ALFView_model.cpp
-    BaseInstrumentModel.cpp
-    BaseInstrumentView.cpp
-    BaseInstrumentPresenter.cpp
-    PlotFitAnalysisPaneView.cpp
-    PlotFitAnalysisPanePresenter.cpp
-    PlotFitAnalysisPaneModel.cpp)
+    ALFCustomInstrumentView.cpp
+    ALFCustomInstrumentPresenter.cpp
+    ALFCustomInstrumentModel.cpp)
     
 set(MOC_FILES
     ALFView.h
-    ALFView_view.h
-    ALFView_presenter.h
-    BaseInstrumentView.h
-    BaseInstrumentView.h
-    BaseInstrumentPresenter.h
-    PlotFitAnalysisPaneView.h
-    PlotFitAnalysisPanePresenter.h)
+    ALFCustomInstrumentView.h
+    ALFCustomInstrumentPresenter.h)
     
 set(INC_FILES
     DllConfig.h)
@@ -49,8 +38,8 @@ mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesDirect
                      Qwt5
                    MTD_QT_LINK_LIBS
                      MantidQtWidgetsCommon
-                     MantidQtWidgetsPlotting
                      MantidQtWidgetsInstrumentView
+                     MantidQtWidgetsPlotting
                    INSTALL_DIR_BASE
                      ${PLUGINS_DIR}
                    OSX_INSTALL_RPATH
@@ -84,7 +73,7 @@ mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesDirect
                    MTD_QT_LINK_LIBS
                      MantidQtWidgetsCommon
                      MantidQtWidgetsInstrumentView
-					 MantidQtWidgetsPlotting
+                     MantidQtWidgetsPlotting
                      MantidQtWidgetsMplCpp
                    INSTALL_DIR_BASE
                      ${WORKBENCH_PLUGINS_DIR}

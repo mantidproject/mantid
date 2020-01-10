@@ -4,10 +4,10 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_CUSTOMINTERFACES_PLOTFITPANEVIEW_H_
-#define MANTIDQT_CUSTOMINTERFACES_PLOTFITPANEVIEW_H_
+#ifndef MANTIDQT_INSTRUMENTVIEW_PLOTFITPANEVIEW_H_
+#define MANTIDQT_INSTRUMENTVIEW_PLOTFITPANEVIEW_H_
 
-#include "DllConfig.h"
+#include "DllOption.h"
 #include "MantidQtWidgets/Common/FunctionBrowser.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
 #include "MantidQtWidgets/Plotting/PreviewPlot.h"
@@ -21,9 +21,10 @@
 #include <string>
 
 namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidWidgets {
 
-class PlotFitAnalysisPaneView : public QWidget {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW PlotFitAnalysisPaneView
+    : public QWidget {
   Q_OBJECT
 
 public:
@@ -55,7 +56,7 @@ private:
   QPushButton *m_fitButton;
   Observable *m_fitObservable;
 };
-} // namespace CustomInterfaces
+} // namespace MantidWidgets
 } // namespace MantidQt
 
-#endif /* MANTIDQT_CUSTOMINTERFACES_PLOTFITPANEVIEW_H_ */
+#endif /* MANTIDQT_INSTRUMENTVIEW_PLOTFITPANEVIEW_H_ */

@@ -4,30 +4,27 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_CUSTOMINTERFACES_BASEINSTRUMENTPRESENTER_H_
-#define MANTIDQT_CUSTOMINTERFACES_BASEINSTRUMENTPRESENTER_H_
-
-#include "BaseInstrumentModel.h"
-#include "BaseInstrumentView.h"
-#include "PlotFitAnalysisPaneView.h"
-
-#include "ALFView_view.h"
-#include "DllConfig.h"
+#ifndef MANTIDQT_INSTRUMENTVIEW_BASECUSTOMINSTRUMENTPRESENTER_H_
+#define MANTIDQT_INSTRUMENTVIEW_BASECUSTOMINSTRUMENTPRESENTER_H_
+#include "DllOption.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
-#include "MantidQtWidgets/Common/UserSubWindow.h"
+#include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentModel.h"
+#include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentView.h"
 
 #include <string>
 
 namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidWidgets {
 
-class BaseInstrumentPresenter : public QObject {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW BaseCustomInstrumentPresenter
+    : public QObject {
   Q_OBJECT
 
 public:
-  BaseInstrumentPresenter(BaseInstrumentView *view, BaseInstrumentModel *model,
-                          QWidget *analysisView);
-  ~BaseInstrumentPresenter() { delete m_loadRunObserver; };
+  BaseCustomInstrumentPresenter(BaseCustomInstrumentView *view,
+                                BaseCustomInstrumentModel *model,
+                                QWidget *analysisView);
+  ~BaseCustomInstrumentPresenter() { delete m_loadRunObserver; };
 
   typedef std::pair<
       std::string,
@@ -53,14 +50,14 @@ private:
   virtual void setUpInstrumentAnalysisSplitter();
   std::pair<instrumentSetUp, instrumentObserverOptions> setupInstrument();
 
-  BaseInstrumentView *m_view;
-  BaseInstrumentModel *m_model;
+  BaseCustomInstrumentView *m_view;
+  BaseCustomInstrumentModel *m_model;
   int m_currentRun;
   std::string m_currentFile;
   VoidObserver *m_loadRunObserver;
   QWidget *m_analysisPaneView;
 };
-} // namespace CustomInterfaces
+} // namespace MantidWidgets
 } // namespace MantidQt
 
-#endif /* MANTIDQT_CUSTOMINTERFACES_BASEINSTRUMENTPRESENTER_H_ */
+#endif /* MANTIDQT_INSTRUMENTVIEW_BaseCustomInstrumentPresenter_H_ */

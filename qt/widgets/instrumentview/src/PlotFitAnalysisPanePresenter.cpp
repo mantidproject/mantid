@@ -4,18 +4,14 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "PlotFitAnalysisPanePresenter.h"
-
-#include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/FileFinder.h"
-#include "MantidAPI/FunctionFactory.h"
+#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h"
 
 #include <exception>
 #include <functional>
 #include <tuple>
 
 namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidWidgets {
 
 PlotFitAnalysisPanePresenter::PlotFitAnalysisPanePresenter(
     PlotFitAnalysisPaneView *view, PlotFitAnalysisPaneModel *model)
@@ -54,5 +50,5 @@ void PlotFitAnalysisPanePresenter::addSpectrum(const std::string &wsName) {
   m_view->addSpectrum(wsName);
 }
 
-} // namespace CustomInterfaces
+} // namespace MantidWidgets
 } // namespace MantidQt

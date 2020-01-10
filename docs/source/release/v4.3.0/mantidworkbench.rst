@@ -20,6 +20,7 @@ Improvements
    :width: 500px
    :align: left
 
+- You can now save Table Workspaces to Ascii using the `SaveAscii <algm-SaveAscii>` algorithm, and the Ascii Save option on the workspaces toolbox.
 - Normalization options have been added to 2d plots and sliceviewer.
 - The images tab in figure options no longer forces the max value to be greater than the min value.
 

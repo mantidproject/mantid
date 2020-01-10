@@ -15,7 +15,11 @@ Functionality for unpacking mantid objects for plotting with matplotlib.
 # of the main package.
 from __future__ import (absolute_import, division, print_function)
 
-from collections import Iterable
+try:
+   from collections.abc import Iterable
+except ImportError:
+   # check Python 2 location
+   from collections import Iterable   
 from matplotlib.axes import Axes
 from matplotlib.collections import Collection
 from matplotlib.colors import Colormap
@@ -268,6 +272,8 @@ class MantidAxes(Axes):
             # If wanting to plot a spectrum
             elif MantidAxes.is_axis_of_type(MantidAxType.SPECTRUM, kwargs):
                 return MantidAxes.get_spec_num_from_wksp_index(workspace, kwargs['wkspIndex'])
+        elif kwargs.get('LogName', None) is not None:
+            return None
         elif getattr(workspace, 'getNumberHistograms', lambda: -1)() == 1:
             # If the workspace has one histogram, just plot that
             kwargs['wkspIndex'] = 0
@@ -636,7 +642,8 @@ class MantidAxes(Axes):
 
             with autoscale_on_update(self, autoscale_on):
                 artist = self.track_workspace_artist(workspace,
-                                                     plotfunctions.plot(self, *args, **kwargs),
+                                                     plotfunctions.plot(self, normalize_by_bin_width = is_normalized,
+                                                                        *args, **kwargs),
                                                      _data_update, spec_num, is_normalized,
                                                      MantidAxes.is_axis_of_type(MantidAxType.SPECTRUM, kwargs))
             return artist

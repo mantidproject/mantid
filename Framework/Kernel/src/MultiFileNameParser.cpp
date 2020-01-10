@@ -17,7 +17,6 @@
 #include <sstream>
 
 #include <boost/algorithm/string.hpp>
-#include <boost/bind.hpp>
 #include <boost/regex.hpp>
 
 namespace Mantid {

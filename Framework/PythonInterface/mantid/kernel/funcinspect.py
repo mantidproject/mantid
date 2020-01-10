@@ -40,11 +40,16 @@ def replace_signature(func, varnames):
     else:
         code_attr = '__code__'
         f = func.__code__
-        c = f.__new__(f.__class__, f.co_argcount, f.co_kwonlyargcount,
-                      f.co_nlocals, f.co_stacksize, f.co_flags, f.co_code, 
-                      f.co_consts, f.co_names, varnames, 
-                      f.co_filename, f.co_name, f.co_firstlineno,
-                      f.co_lnotab, f.co_freevars)
+        new_args = [f.__class__, f.co_argcount, f.co_kwonlyargcount,
+                    f.co_nlocals, f.co_stacksize, f.co_flags, f.co_code, 
+                    f.co_consts, f.co_names, varnames, 
+                    f.co_filename, f.co_name, f.co_firstlineno,
+                    f.co_lnotab, f.co_freevars]
+        # Python 3.8 supports positional-only arguments and has an extra
+        # keyword in the constructor
+        if hasattr(f, 'co_posonlyargcount'):
+            new_args.insert(2, f.co_posonlyargcount)
+        c = f.__new__(*new_args)
     #endif
     setattr(func, code_attr, c)
 

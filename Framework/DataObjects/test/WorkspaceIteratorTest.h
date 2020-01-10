@@ -8,7 +8,6 @@
 #define TRIPLEITERATORTEST_
 
 #include <algorithm>
-#include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 

@@ -370,7 +370,7 @@ class FunctionWrapper(object):
         # to pass InputWorkspace into EvaluateFunction before Function.
         # As a special case has been made for this. This case can be removed
         # with ordered kwargs change in Python 3.6.
-        if name is 'EvaluateFunction':
+        if name == 'EvaluateFunction':
             alg.setProperty('Function', kwargs['Function'])
             del kwargs['Function']
             alg.setProperty('InputWorkspace', kwargs['InputWorkspace'])

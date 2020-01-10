@@ -19,7 +19,6 @@
 #include <algorithm>
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/trim.hpp>
-#include <boost/bind.hpp>
 
 #include <json/json.h>
 

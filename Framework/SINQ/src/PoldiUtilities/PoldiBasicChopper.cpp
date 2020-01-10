@@ -7,7 +7,6 @@
 #include "MantidSINQ/PoldiUtilities/PoldiBasicChopper.h"
 
 #include "MantidGeometry/ICompAssembly.h"
-#include "boost/bind.hpp"
 
 namespace Mantid {
 namespace Poldi {
@@ -80,9 +79,10 @@ void PoldiBasicChopper::initializeVariableParameters(double rotationSpeed) {
   m_zeroOffset = m_rawt0 * m_cycleTime + m_rawt0const;
 
   m_slitTimes.resize(m_slitPositions.size());
+  using namespace std::placeholders;
   std::transform(
       m_slitPositions.begin(), m_slitPositions.end(), m_slitTimes.begin(),
-      boost::bind(&PoldiBasicChopper::slitPositionToTimeFraction, this, _1));
+      std::bind(&PoldiBasicChopper::slitPositionToTimeFraction, this, _1));
 }
 
 double PoldiBasicChopper::slitPositionToTimeFraction(double slitPosition) {
