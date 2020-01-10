@@ -178,16 +178,13 @@ std::vector<int> getWorkspaceIndicesFromAxes(API::MatrixWorkspace_sptr ws,
   API::Axis *axis = ws->getAxis(1);
   if (axis->isSpectra()) { // spectra axis
     if (spectrumNumber < 0) {
-      if (workspaceIndex >= 0) {
-        spectrumNumber = axis->spectraNo(workspaceIndex);
-      } else { // i < 0 && spec < 0 => use start and end
-        for (size_t i = 0; i < axis->length(); ++i) {
-          auto s = double(axis->spectraNo(i));
-          if (s >= start && s <= end) {
-            out.emplace_back(static_cast<int>(i));
-          }
+      for (size_t i = 0; i < axis->length(); ++i) {
+        auto s = double(axis->spectraNo(i));
+        if (s >= start && s <= end) {
+          out.emplace_back(static_cast<int>(i));
         }
       }
+
     } else {
       for (size_t i = 0; i < axis->length(); ++i) {
         int j = axis->spectraNo(i);
