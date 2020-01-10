@@ -37,7 +37,6 @@ void OptionsDialogPresenter::initOptions() {
   if (m_boolOptions.empty() || m_intOptions.empty())
     m_model->applyDefaultOptions(m_boolOptions, m_intOptions);
 }
-
 /** Loads the options used into the view */
 void OptionsDialogPresenter::notifyLoadOptions() {
   m_model->loadSettings(m_boolOptions, m_intOptions);
