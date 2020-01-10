@@ -55,8 +55,6 @@ public:
     auto &config = Mantid::Kernel::ConfigService::Instance();
     backup_facility = config.getString("default.facility");
     backup_instrument = config.getString("default.instrument");
-    m_optionsDialogPresenter =
-        std::make_unique<NiceMock<MockOptionsDialogPresenter>>().get();
   }
 
   void tearDown() override {
@@ -370,7 +368,6 @@ private:
   std::vector<IBatchView *> m_batchViews;
   std::vector<NiceMock<MockBatchPresenter> *> m_batchPresenters;
   NiceMock<MockBatchPresenterFactory> *m_makeBatchPresenter;
-  NiceMock<MockOptionsDialogPresenter> *m_optionsDialogPresenter;
   NiceMock<MockSlitCalculator> *m_slitCalculator;
 
   class MainWindowPresenterFriend : public MainWindowPresenter {
@@ -401,9 +398,6 @@ private:
     m_decoder = decoder.get();
     auto slitCalculator = std::make_unique<NiceMock<MockSlitCalculator>>();
     m_slitCalculator = slitCalculator.get();
-    auto optionsDialogPresenter =
-        std::make_unique<NiceMock<MockOptionsDialogPresenter>>();
-    m_optionsDialogPresenter = optionsDialogPresenter.get();
     auto makeBatchPresenter =
         std::make_unique<NiceMock<MockBatchPresenterFactory>>();
     m_makeBatchPresenter = makeBatchPresenter.get();
