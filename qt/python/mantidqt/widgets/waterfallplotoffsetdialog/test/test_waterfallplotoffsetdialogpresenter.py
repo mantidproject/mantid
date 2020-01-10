@@ -28,35 +28,41 @@ class WaterfallPlotOffsetDialogPresenterTest(unittest.TestCase):
         self.ax.set_waterfall_toolbar_options_enabled = Mock()
         self.ax.convert_to_waterfall()
 
-        self.presenter = WaterfallPlotOffsetDialogPresenter(fig=self.fig, view=Mock())
+        view = Mock()
+        view.get_x_offset.return_value = 10
+        view.get_y_offset.return_value = 20
+
+        self.presenter = WaterfallPlotOffsetDialogPresenter(fig=self.fig, view=view)
 
     def test_changing_x_offset_updates_plot(self):
-        self.ax.set_waterfall_x_offset = Mock()
+        self.ax.update_waterfall_plot = Mock()
         self.presenter.update_x_offset()
 
-        self.assertTrue(self.ax.set_waterfall_x_offset.called)
+        self.ax.update_waterfall_plot.assert_called_once_with(10, 20)
 
     def test_changing_y_offset_updates_plot(self):
-        self.ax.set_waterfall_y_offset = Mock()
+        self.ax.update_waterfall_plot = Mock()
         self.presenter.update_y_offset()
 
-        self.assertTrue(self.ax.set_waterfall_y_offset.called)
+        self.ax.update_waterfall_plot.assert_called_once_with(10, 20)
 
     def test_changing_x_offset_also_changes_y_offset_if_kept_in_proportion(self):
-        self.presenter.keep_proportion_on = True
-        self.presenter.view.get_x_offset.return_value = 10
-        self.presenter.proportion = 2
+        self.presenter.keep_proportion(True)
+        # Double the x offset value
+        self.presenter.view.get_x_offset.return_value = 20
         self.presenter.update_x_offset()
 
-        self.presenter.view.set_y_offset.assert_called_once_with(5)
+        # The y offset value should also have doubled
+        self.presenter.view.set_y_offset.assert_called_with(40)
 
     def test_changing_y_offset_also_changes_x_offset_if_kept_in_proportion(self):
-        self.presenter.keep_proportion_on = True
+        self.presenter.keep_proportion(True)
+        # Half the y offset value
         self.presenter.view.get_y_offset.return_value = 10
-        self.presenter.proportion = 2
         self.presenter.update_y_offset()
 
-        self.presenter.view.set_y_offset.assert_called_once_with(20)
+        # The x offset value should also have halved
+        self.presenter.view.set_x_offset.assert_called_with(5)
 
 
 if __name__ == '__main__':
