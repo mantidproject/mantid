@@ -236,8 +236,8 @@ void PlotPeakByLogValue::exec() {
   double dProg = 1. / static_cast<double>(wsNames.size());
   double Prog = 0.;
   IFunction_sptr ifun;
+  bool firstInteration = true;
   for (int i = 0; i < static_cast<int>(wsNames.size()); ++i) {
-    bool firstInteration = true;
     InputData data = wsNames[i];
 
     if (!data.ws) {
@@ -245,7 +245,7 @@ void PlotPeakByLogValue::exec() {
       continue;
     }
 
-    if (data.i < 0 && data.indx.empty()) {
+    if (data.i < 0) {
       g_log.warning() << "Zero spectra selected for fitting in workspace "
                       << wsNames[i].name << '\n';
       continue;
@@ -423,123 +423,6 @@ void PlotPeakByLogValue::exec() {
   }
 }
 
-/** Get a workspace identified by an InputData structure.
- * @param data :: InputData with name and either spec or i fields defined.
- * @return InputData structure with the ws field set if everything was OK.
- */
-// PlotPeakByLogValue::InputData
-// PlotPeakByLogValue::getWorkspace(const InputData &data) {
-//   InputData out(data);
-//   if (API::AnalysisDataService::Instance().doesExist(data.name)) {
-//     DataObjects::Workspace2D_sptr ws =
-//         boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
-//             API::AnalysisDataService::Instance().retrieve(data.name));
-//     if (ws) {
-//       out.ws = ws;
-//     } else {
-//       return data;
-//     }
-//   } else {
-//     std::ifstream fil(data.name.c_str());
-//     if (!fil) {
-//       g_log.warning() << "File " << data.name << " does not exist\n";
-//       return data;
-//     }
-//     fil.close();
-//     std::string::size_type i = data.name.find_last_of('.');
-//     if (i == std::string::npos) {
-//       g_log.warning() << "Cannot open file " << data.name << "\n";
-//       return data;
-//     }
-//     try {
-//       API::IAlgorithm_sptr load = createChildAlgorithm("Load");
-//       load->initialize();
-//       load->setPropertyValue("FileName", data.name);
-//       load->execute();
-//       if (load->isExecuted()) {
-//         API::Workspace_sptr rws = load->getProperty("OutputWorkspace");
-//         if (rws) {
-//           DataObjects::Workspace2D_sptr ws =
-//               boost::dynamic_pointer_cast<DataObjects::Workspace2D>(rws);
-//           if (ws) {
-//             out.ws = ws;
-//           } else {
-//             API::WorkspaceGroup_sptr gws =
-//                 boost::dynamic_pointer_cast<API::WorkspaceGroup>(rws);
-//             if (gws) {
-//               std::string propName =
-//                   "OUTPUTWORKSPACE_" + std::to_string(data.period);
-//               if (load->existsProperty(propName)) {
-//                 Workspace_sptr rws1 = load->getProperty(propName);
-//                 out.ws =
-//                     boost::dynamic_pointer_cast<DataObjects::Workspace2D>(rws1);
-//               }
-//             }
-//           }
-//         }
-//       }
-//     } catch (std::exception &e) {
-//       g_log.error(e.what());
-//       return data;
-//     }
-//   }
-
-//   if (!out.ws)
-//     return data;
-
-//   API::Axis *axis = out.ws->getAxis(1);
-//   if (axis->isSpectra()) { // spectra axis
-//     if (out.spec < 0) {
-//       if (out.i >= 0) {
-//         out.spec = axis->spectraNo(out.i);
-//       } else { // i < 0 && spec < 0 => use start and end
-//         for (size_t i = 0; i < axis->length(); ++i) {
-//           auto s = double(axis->spectraNo(i));
-//           if (s >= out.start && s <= out.end) {
-//             out.indx.emplace_back(static_cast<int>(i));
-//           }
-//         }
-//       }
-//     } else {
-//       for (size_t i = 0; i < axis->length(); ++i) {
-//         int j = axis->spectraNo(i);
-//         if (j == out.spec) {
-//           out.i = static_cast<int>(i);
-//           break;
-//         }
-//       }
-//     }
-//     if (out.i < 0 && out.indx.empty()) {
-//       return data;
-//     }
-//   } else { // numeric axis
-//     out.spec = -1;
-//     if (out.i >= 0) {
-//       out.indx.clear();
-//     } else {
-//       if (out.i < -1) {
-//         out.start = (*axis)(0);
-//         out.end = (*axis)(axis->length() - 1);
-//       }
-//       for (size_t i = 0; i < axis->length(); ++i) {
-//         double s = (*axis)(i);
-//         if (s >= out.start && s <= out.end) {
-//           out.indx.emplace_back(static_cast<int>(i));
-//         }
-//       }
-//     }
-//   }
-
-//   return out;
-// }
-
-/**
- * Set any WorkspaceIndex attributes in the fitting function. If the function
- * is composite
- * try all its members.
- * @param fun :: The fitting function
- * @param wsIndex :: Value for WorkspaceIndex attributes to set.
- */
 void PlotPeakByLogValue::setWorkspaceIndexAttribute(IFunction_sptr fun,
                                                     int wsIndex) const {
   const std::string attName = "WorkspaceIndex";
@@ -556,111 +439,6 @@ void PlotPeakByLogValue::setWorkspaceIndexAttribute(IFunction_sptr fun,
   }
 }
 
-/// Create a list of input workspace names
-// std::vector<PlotPeakByLogValue::InputData>
-// PlotPeakByLogValue::makeNames() const {
-//   std::vector<InputData> nameList;
-//   std::string inputList = getPropertyValue("Input");
-//   int default_wi = getProperty("WorkspaceIndex");
-//   int default_spec = getProperty("Spectrum");
-//   double start = 0;
-//   double end = 0;
-
-//   using tokenizer = Mantid::Kernel::StringTokenizer;
-//   tokenizer names(inputList, ";",
-//                   tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
-//   for (const auto &input : names) {
-//     tokenizer params(input, ",", tokenizer::TOK_TRIM);
-//     std::string name = params[0];
-//     int wi = default_wi;
-//     int spec = default_spec;
-//     if (params.count() > 1) {
-//       std::string index =
-//           params[1]; // spectrum or workspace index with a prefix
-//       if (index.size() > 2 && index.substr(0, 2) == "sp") { // spectrum
-//       number
-//         spec = boost::lexical_cast<int>(index.substr(2));
-//         wi = -1;                                        // undefined yet
-//       } else if (index.size() > 1 && index[0] == 'i') { // workspace index
-//         wi = boost::lexical_cast<int>(index.substr(1));
-//         spec = -1; // undefined yet
-//       } else if (!index.empty() && index[0] == 'v') {
-//         if (index.size() > 1) { // there is some text after 'v'
-//           tokenizer range(index.substr(1), ":",
-//                           tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
-//           if (range.count() < 1) {
-//             wi = -2; // means use the whole range
-//           } else if (range.count() == 1) {
-//             try {
-//               start = boost::lexical_cast<double>(range[0]);
-//             } catch (boost::bad_lexical_cast &) {
-//               throw std::runtime_error(
-//                   std::string("Provided incorrect range values. Range is "
-//                               "specfifed by start_value:stop_value, but "
-//                               "provided ") +
-//                   range[0]);
-//             }
-
-//             end = start;
-//             wi = -1;
-//             spec = -1;
-//           } else if (range.count() > 1) {
-//             try {
-//               start = boost::lexical_cast<double>(range[0]);
-//               end = boost::lexical_cast<double>(range[1]);
-//             } catch (boost::bad_lexical_cast &) {
-//               throw std::runtime_error(
-//                   std::string("Provided incorrect range values. Range is "
-//                               "specfifed by start_value:stop_value, but "
-//                               "provided ") +
-//                   range[0] + std::string(" and ") + range[1]);
-//             }
-//             if (start > end)
-//               std::swap(start, end);
-//             wi = -1;
-//             spec = -1;
-//           }
-//         } else {
-//           wi = -2;
-//         }
-//       } else {
-//         wi = default_wi;
-//       }
-//     }
-//     int period = 1;
-//     try {
-//       if (params.count() > 2 && !params[2].empty()) {
-//         period = boost::lexical_cast<int>(params[2]);
-//       }
-//     } catch (boost::bad_lexical_cast &) {
-//       throw std::runtime_error("Incorrect value for a period: " + params[2]);
-//     }
-//     if (API::AnalysisDataService::Instance().doesExist(name)) {
-//       API::Workspace_sptr ws =
-//           API::AnalysisDataService::Instance().retrieve(name);
-//       API::WorkspaceGroup_sptr wsg =
-//           boost::dynamic_pointer_cast<API::WorkspaceGroup>(ws);
-//       if (wsg) {
-//         const std::vector<std::string> wsNames = wsg->getNames();
-//         for (const auto &wsName : wsNames) {
-//           nameList.emplace_back(InputData(wsName, wi, -1, period, start,
-//           end));
-//         }
-//         continue;
-//       }
-//     }
-//     nameList.emplace_back(name, wi, spec, period, start, end);
-//   }
-//   return nameList;
-// }
-
-/**
- * Formats the minimizer string for a given spectrum from a given workspace.
- *
- * @param wsName Name of workspace being fitted
- * @param wsIndex Index of spectrum being fitted
- * @return Formatted minimizer string
- */
 std::string PlotPeakByLogValue::getMinimizerString(const std::string &wsName,
                                                    const std::string &wsIndex) {
   std::string format = getPropertyValue("Minimizer");
