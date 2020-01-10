@@ -17,7 +17,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class ALFCustomInstrumentModel
+class DLLExport ALFCustomInstrumentModel
     : public MantidWidgets::BaseCustomInstrumentModel {
 
 public:

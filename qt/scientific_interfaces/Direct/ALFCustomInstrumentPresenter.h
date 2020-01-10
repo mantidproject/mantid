@@ -20,7 +20,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_DIRECT_DLL ALFCustomInstrumentPresenter
+class  MANTIDQT_DIRECT_DLL ALFCustomInstrumentPresenter
     : public MantidWidgets::BaseCustomInstrumentPresenter {
   Q_OBJECT
 

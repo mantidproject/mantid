@@ -56,7 +56,7 @@ ALFCustomInstrumentModel::loadData(const std::string &name) {
     m_numberOfTubesInAverage = 0;
   } else {
     // reset to the previous data
-    message = "Not the corrct instrument, expected " + m_instrumentName;
+    message = "Not the correct instrument, expected " + m_instrumentName;
     remove();
   }
   if (bools["IsValidInstrument"] && !bools["IsItDSpace"]) {
