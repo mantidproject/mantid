@@ -9,8 +9,8 @@
 #include "MantidQtWidgets/Common/MantidTreeWidget.h"
 #include "MantidQtWidgets/Common/MantidTreeWidgetItem.h"
 
-#include "MantidAPI/Axis.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
