@@ -16,6 +16,12 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
+
+class MockOptionsDialogMainWindowSubscriber
+    : public OptionsDialogMainWindowSubscriber {
+public:
+  MOCK_CONST_METHOD0(optionsChanged, void());
+};
 class MockOptionsDialogPresenter : public IOptionsDialogPresenter {
 public:
   MOCK_METHOD0(notifyInitOptions, void());
@@ -25,12 +31,6 @@ public:
   MOCK_METHOD1(getIntOption, int &(std::string &));
   MOCK_METHOD0(showView, void());
   MOCK_METHOD1(subscribe, void(OptionsDialogMainWindowSubscriber *));
-};
-
-class MockOptionsDialogMainWindowSubscriber
-    : public OptionsDialogMainWindowSubscriber {
-public:
-  MOCK_CONST_METHOD0(optionsChanged, void());
 };
 GNU_DIAG_ON_SUGGEST_OVERRIDE
 } // namespace ISISReflectometry

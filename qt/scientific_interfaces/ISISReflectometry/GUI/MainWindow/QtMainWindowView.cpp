@@ -11,6 +11,7 @@
 #include "GUI/Common/Decoder.h"
 #include "GUI/Common/Encoder.h"
 #include "GUI/Common/Plotter.h"
+#include "GUI/Options/OptionsDialogModel.h"
 #include "GUI/Options/OptionsDialogPresenter.h"
 #include "GUI/Options/QtOptionsDialogView.h"
 #include "MantidKernel/UsageService.h"
@@ -110,8 +111,9 @@ void QtMainWindowView::initLayout() {
   auto slitCalculator = std::make_unique<SlitCalculator>(this);
   m_optionsDialogView = std::make_unique<QtOptionsDialogView>(this);
   auto optionsDialogView = m_optionsDialogView.get();
-  auto optionsDialogPresenter =
-      std::make_unique<OptionsDialogPresenter>(optionsDialogView);
+  auto optionsDialogModel = std::make_unique<OptionsDialogModel>();
+  auto optionsDialogPresenter = std::make_unique<OptionsDialogPresenter>(
+      optionsDialogView, std::move(optionsDialogModel));
   m_presenter = std::make_unique<MainWindowPresenter>(
       this, messageHandler, fileHandler, std::make_unique<Encoder>(),
       std::make_unique<Decoder>(), std::move(slitCalculator),
