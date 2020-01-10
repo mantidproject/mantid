@@ -8,8 +8,8 @@
 #define MANTID_ISISREFLECTOMETRY_OPTIONSDIALOGPRESENTER_H
 
 #include "GUI/MainWindow/IMainWindowPresenter.h"
+#include "IOptionsDialogModel.h"
 #include "IOptionsDialogPresenter.h"
-#include "OptionsDialogModel.h"
 #include "QtOptionsDialogView.h"
 
 #include "Common/DllConfig.h"
@@ -27,9 +27,8 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL OptionsDialogPresenter
     : public IOptionsDialogPresenter,
       public OptionsDialogViewSubscriber {
 public:
-  explicit OptionsDialogPresenter(IOptionsDialogView *view);
-  ~OptionsDialogPresenter() = default;
-
+  explicit OptionsDialogPresenter(IOptionsDialogView *view,
+                                  std::unique_ptr<IOptionsDialogModel> model);
   // IOptionsDialogPresenter overrides
   void notifyInitOptions() override;
   void notifyOptionsChanged() override;
@@ -45,17 +44,19 @@ public:
 
 private:
   void initOptions();
+
+protected:
+  // stores the user options for the presenter
+  std::map<std::string, bool> m_boolOptions;
+  std::map<std::string, int> m_intOptions;
   void notifyApplyDefaultOptions(std::map<std::string, bool> &boolOptions,
                                  std::map<std::string, int> &intOptions);
 
 private:
   IOptionsDialogView *m_view;
-  OptionsDialogModel m_model;
+  std::unique_ptr<IOptionsDialogModel> m_model;
   // subscribe updates from presenter
   OptionsDialogMainWindowSubscriber *m_mainWindowNotifyee;
-  // stores the user options for the presenter
-  std::map<std::string, bool> m_boolOptions;
-  std::map<std::string, int> m_intOptions;
 };
 
 } // namespace ISISReflectometry
