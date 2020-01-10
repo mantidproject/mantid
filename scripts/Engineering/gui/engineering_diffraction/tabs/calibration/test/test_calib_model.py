@@ -34,7 +34,7 @@ class CalibrationModelTest(unittest.TestCase):
     @patch(class_path + '.update_calibration_params_table')
     @patch(class_path + '.create_output_files')
     @patch(class_path + '.run_calibration')
-    @patch(class_path + '.load_sample')
+    @patch(file_path + ".path_handling.load_workspace")
     @patch(file_path + '.vanadium_corrections.fetch_correction_workspaces')
     def test_EnggVanadiumCorrections_algorithm_is_called(self, van, load_sample, calib,
                                                          output_files, update_table):
@@ -44,7 +44,7 @@ class CalibrationModelTest(unittest.TestCase):
 
     @patch(class_path + '.update_calibration_params_table')
     @patch(class_path + '.create_output_files')
-    @patch(class_path + '.load_sample')
+    @patch(file_path + ".path_handling.load_workspace")
     @patch(class_path + '.run_calibration')
     @patch(file_path + '.vanadium_corrections.fetch_correction_workspaces')
     def test_fetch_vanadium_is_called(self, van_corr, calibrate_alg, load_sample, output_files,
@@ -53,9 +53,26 @@ class CalibrationModelTest(unittest.TestCase):
         self.model.create_new_calibration(VANADIUM_NUMBER, CERIUM_NUMBER, False, "ENGINX")
         self.assertEqual(van_corr.call_count, 1)
 
+    @patch(file_path + '.path.exists')
+    @patch(file_path + '.get_setting')
     @patch(class_path + '.update_calibration_params_table')
     @patch(class_path + '.create_output_files')
-    @patch(class_path + '.load_sample')
+    @patch(file_path + ".path_handling.load_workspace")
+    @patch(class_path + '.run_calibration')
+    @patch(file_path + '.vanadium_corrections.fetch_correction_workspaces')
+    def test_having_full_calib_set_uses_file(self, van_corr, calibrate_alg, load_workspace, output_files,
+                                             update_table, setting, path):
+        path.return_value = True
+        setting.return_value = "mocked/out/path"
+        van_corr.return_value = ("mocked_integration", "mocked_curves")
+        load_workspace.return_value = "mocked_workspace"
+        self.model.create_new_calibration(VANADIUM_NUMBER, CERIUM_NUMBER, False, "ENGINX")
+        calibrate_alg.assert_called_with("mocked_workspace", "mocked_integration", "mocked_curves",
+                                         full_calib_ws="mocked_workspace")
+
+    @patch(class_path + '.update_calibration_params_table')
+    @patch(class_path + '.create_output_files')
+    @patch(file_path + ".path_handling.load_workspace")
     @patch(file_path + '.vanadium_corrections.fetch_correction_workspaces')
     @patch(class_path + '._plot_vanadium_curves')
     @patch(class_path + '._generate_difc_tzero_workspace')
@@ -75,7 +92,7 @@ class CalibrationModelTest(unittest.TestCase):
 
     @patch(class_path + '.update_calibration_params_table')
     @patch(class_path + '.create_output_files')
-    @patch(class_path + '.load_sample')
+    @patch(file_path + ".path_handling.load_workspace")
     @patch(file_path + '.vanadium_corrections.fetch_correction_workspaces')
     @patch(class_path + '._plot_vanadium_curves')
     @patch(class_path + '._plot_difc_tzero')
@@ -93,7 +110,7 @@ class CalibrationModelTest(unittest.TestCase):
 
     @patch(class_path + '.update_calibration_params_table')
     @patch(class_path + '.create_output_files')
-    @patch(class_path + '.load_sample')
+    @patch(file_path + ".path_handling.load_workspace")
     @patch(file_path + '.vanadium_corrections.fetch_correction_workspaces')
     @patch(class_path + '._plot_vanadium_curves')
     @patch(class_path + '._plot_difc_tzero')
@@ -107,7 +124,7 @@ class CalibrationModelTest(unittest.TestCase):
 
     @patch(class_path + '.update_calibration_params_table')
     @patch(class_path + '.create_output_files')
-    @patch(class_path + '.load_sample')
+    @patch(file_path + ".path_handling.load_workspace")
     @patch(file_path + '.vanadium_corrections.fetch_correction_workspaces')
     @patch(class_path + '.run_calibration')
     def test_calibration_params_table_is_updated(self, calibrate_alg, vanadium_alg, load_sample,

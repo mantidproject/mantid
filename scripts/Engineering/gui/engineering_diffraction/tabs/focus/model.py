@@ -12,7 +12,8 @@ from matplotlib import gridspec
 import matplotlib.pyplot as plt
 
 from Engineering.gui.engineering_diffraction.tabs.common import vanadium_corrections, path_handling
-from mantid.simpleapi import EnggFocus, Load, logger, AnalysisDataService as Ads, SaveNexus, SaveGSS, SaveFocusedXYE
+from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
+from mantid.simpleapi import EnggFocus, logger, AnalysisDataService as Ads, SaveNexus, SaveGSS, SaveFocusedXYE
 
 SAMPLE_RUN_WORKSPACE_NAME = "engggui_focusing_input_ws"
 FOCUSED_OUTPUT_WORKSPACE_NAME = "engggui_focusing_output_ws_bank_"
@@ -33,12 +34,18 @@ class FocusModel(object):
             return
         integration_workspace = Ads.retrieve(vanadium_corrections.INTEGRATED_WORKSPACE_NAME)
         curves_workspace = Ads.retrieve(vanadium_corrections.CURVES_WORKSPACE_NAME)
-        sample_workspace = self._load_focus_sample_run(sample_path)
+        sample_workspace = path_handling.load_workspace(sample_path)
         output_workspaces = []
+        full_calib_path = get_setting(path_handling.INTERFACES_SETTINGS_GROUP,
+                                      path_handling.ENGINEERING_PREFIX, "full_calibration")
+        if full_calib_path is not None and path.exists(full_calib_path):
+            full_calib_workspace = path_handling.load_workspace(full_calib_path)
+        else:
+            full_calib_workspace = None
         for name in banks:
             output_workspace_name = FOCUSED_OUTPUT_WORKSPACE_NAME + str(name)
             self._run_focus(sample_workspace, output_workspace_name, integration_workspace,
-                            curves_workspace, name)
+                            curves_workspace, name, full_calib_workspace)
             output_workspaces.append(output_workspace_name)
             # Save the output to the file system.
             self._save_output(instrument, sample_path, name, output_workspace_name, rb_num)
@@ -47,29 +54,31 @@ class FocusModel(object):
             self._plot_focused_workspaces(output_workspaces)
 
     @staticmethod
-    def _run_focus(input_workspace, output_workspace, vanadium_integration_ws, vanadium_curves_ws,
-                   bank):
+    def _run_focus(input_workspace,
+                   output_workspace,
+                   vanadium_integration_ws,
+                   vanadium_curves_ws,
+                   bank,
+                   full_calib_ws=None):
         try:
-            return EnggFocus(InputWorkspace=input_workspace,
-                             OutputWorkspace=output_workspace,
-                             VanIntegrationWorkspace=vanadium_integration_ws,
-                             VanCurvesWorkspace=vanadium_curves_ws,
-                             Bank=bank)
+            if full_calib_ws is not None:
+                return EnggFocus(InputWorkspace=input_workspace,
+                                 OutputWorkspace=output_workspace,
+                                 VanIntegrationWorkspace=vanadium_integration_ws,
+                                 VanCurvesWorkspace=vanadium_curves_ws,
+                                 Bank=bank,
+                                 DetectorPositions=full_calib_ws)
+            else:
+                return EnggFocus(InputWorkspace=input_workspace,
+                                 OutputWorkspace=output_workspace,
+                                 VanIntegrationWorkspace=vanadium_integration_ws,
+                                 VanCurvesWorkspace=vanadium_curves_ws,
+                                 Bank=bank)
         except RuntimeError as e:
             logger.error(
                 "Error in focusing, Could not run the EnggFocus algorithm successfully for bank " +
                 str(bank) + ". Error Description: " + str(e))
             raise RuntimeError()
-
-    @staticmethod
-    def _load_focus_sample_run(sample_path):
-        try:
-            return Load(Filename=sample_path, OutputWorkspace=SAMPLE_RUN_WORKSPACE_NAME)
-        except RuntimeError as e:
-            logger.error(
-                "Error while loading sample data for focusing. Could not load the sample with filename: "
-                + sample_path + ". Error Description: " + str(e))
-            raise RuntimeError
 
     @staticmethod
     def _plot_focused_workspaces(focused_workspaces):
@@ -104,36 +113,36 @@ class FocusModel(object):
     def _save_focused_output_files_as_gss(self, instrument, sample_path, bank, sample_workspace,
                                           rb_num):
         gss_output_path = path.join(
-            path_handling.OUT_FILES_ROOT_DIR, "Focus",
+            path_handling.get_output_path(), "Focus",
             self._generate_output_file_name(instrument, sample_path, bank, ".gss"))
         SaveGSS(InputWorkspace=sample_workspace, Filename=gss_output_path)
         if rb_num is not None:
             gss_output_path = path.join(
-                path_handling.OUT_FILES_ROOT_DIR, "User", rb_num, "Focus",
+                path_handling.get_output_path(), "User", rb_num, "Focus",
                 self._generate_output_file_name(instrument, sample_path, bank, ".gss"))
             SaveGSS(InputWorkspace=sample_workspace, Filename=gss_output_path)
 
     def _save_focused_output_files_as_nexus(self, instrument, sample_path, bank, sample_workspace,
                                             rb_num):
         nexus_output_path = path.join(
-            path_handling.OUT_FILES_ROOT_DIR, "Focus",
+            path_handling.get_output_path(), "Focus",
             self._generate_output_file_name(instrument, sample_path, bank, ".nxs"))
         SaveNexus(InputWorkspace=sample_workspace, Filename=nexus_output_path)
         if rb_num is not None:
             nexus_output_path = path.join(
-                path_handling.OUT_FILES_ROOT_DIR, "User", rb_num, "Focus",
+                path_handling.get_output_path(), "User", rb_num, "Focus",
                 self._generate_output_file_name(instrument, sample_path, bank, ".nxs"))
             SaveNexus(InputWorkspace=sample_workspace, Filename=nexus_output_path)
 
     def _save_focused_output_files_as_xye(self, instrument, sample_path, bank, sample_workspace,
                                           rb_num):
         xye_output_path = path.join(
-            path_handling.OUT_FILES_ROOT_DIR, "Focus",
+            path_handling.get_output_path(), "Focus",
             self._generate_output_file_name(instrument, sample_path, bank, ".dat"))
         SaveFocusedXYE(InputWorkspace=sample_workspace, Filename=xye_output_path, SplitFiles=False)
         if rb_num is not None:
             xye_output_path = path.join(
-                path_handling.OUT_FILES_ROOT_DIR, "User", rb_num, "Focus",
+                path_handling.get_output_path(), "User", rb_num, "Focus",
                 self._generate_output_file_name(instrument, sample_path, bank, ".dat"))
             SaveFocusedXYE(InputWorkspace=sample_workspace,
                            Filename=xye_output_path,

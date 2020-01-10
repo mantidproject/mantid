@@ -14,6 +14,7 @@ from mantid.simpleapi import logger, Load, EnggVanadiumCorrections, SaveNexus
 from mantid.simpleapi import AnalysisDataService as Ads
 
 from Engineering.gui.engineering_diffraction.tabs.common import path_handling
+from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 
 VANADIUM_INPUT_WORKSPACE_NAME = "engggui_vanadium_ws"
 CURVES_WORKSPACE_NAME = "engggui_vanadium_curves"
@@ -35,7 +36,9 @@ def fetch_correction_workspaces(vanadium_path, instrument, rb_num=""):
     """
     vanadium_number = path_handling.get_run_number_from_path(vanadium_path, instrument)
     integ_path, curves_path = _generate_saved_workspace_file_paths(vanadium_number)
-    if path.exists(curves_path) and path.exists(integ_path):  # Check if the cached files exist.
+    force_recalc = get_setting(path_handling.INTERFACES_SETTINGS_GROUP,
+                               path_handling.ENGINEERING_PREFIX, "recalc_vanadium", return_type=bool)
+    if path.exists(curves_path) and path.exists(integ_path) and not force_recalc:  # Check if the cached files exist.
         try:
             integ_workspace = Load(Filename=integ_path, OutputWorkspace=INTEGRATED_WORKSPACE_NAME)
             curves_workspace = Load(Filename=curves_path, OutputWorkspace=CURVES_WORKSPACE_NAME)
@@ -48,7 +51,7 @@ def fetch_correction_workspaces(vanadium_path, instrument, rb_num=""):
             return integ_workspace, curves_workspace
         except RuntimeError as e:
             logger.error(
-                "Problem loading existing vanadium calculations. Creating new cached files. Description: "
+                "Problem loading existing vanadium calculations. Creating new files. Description: "
                 + str(e))
     integ_workspace, curves_workspace = _calculate_vanadium_correction(vanadium_path)
     _save_correction_files(integ_workspace, integ_path, curves_workspace, curves_path)
@@ -113,10 +116,10 @@ def _generate_saved_workspace_file_paths(vanadium_number, rb_num=""):
     integrated_filename = vanadium_number + SAVED_FILE_INTEG_SUFFIX
     curves_filename = vanadium_number + SAVED_FILE_CURVE_SUFFIX
     if rb_num:
-        vanadium_dir = path.join(path_handling.OUT_FILES_ROOT_DIR, "User", rb_num,
+        vanadium_dir = path.join(path_handling.get_output_path(), "User", rb_num,
                                  VANADIUM_DIRECTORY_NAME)
     else:
-        vanadium_dir = path.join(path_handling.OUT_FILES_ROOT_DIR, VANADIUM_DIRECTORY_NAME)
+        vanadium_dir = path.join(path_handling.get_output_path(), VANADIUM_DIRECTORY_NAME)
     if not path.exists(vanadium_dir):
         makedirs(vanadium_dir)
     return path.join(vanadium_dir, integrated_filename), path.join(vanadium_dir, curves_filename)
