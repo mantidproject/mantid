@@ -10,6 +10,7 @@
 #include "DllConfig.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include <QMap>
 #include <QStringList>
@@ -112,6 +113,12 @@ struct TemplateSubTypeDescriptor {
   std::vector<ParamID> blocks;
 };
 
+// This warning is complaining that the static type g_typeMap does not have
+// explicit instantiations in this translation unit. We have explcict
+// instantions of all the template specialisations we require in the cpp file
+// and if someone adds one later it will lead to a linker error so think we are
+// ok to disable this warning.
+GNU_DIAG_OFF("undefined-var-template")
 template <class Type> struct TemplateSubTypeImpl : public TemplateSubType {
   QStringList getTypeNames() const override {
     QStringList out;
@@ -167,7 +174,7 @@ template <class Type> struct TemplateSubTypeImpl : public TemplateSubType {
 
   static std::map<Type, TemplateSubTypeDescriptor> g_typeMap;
 };
-
+GNU_DIAG_ON("undefined-var-template")
 struct FitSubType : public TemplateSubTypeImpl<FitType> {
   QString name() const override { return "Fit Type"; }
 };
