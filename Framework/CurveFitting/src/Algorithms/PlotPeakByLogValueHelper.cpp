@@ -197,7 +197,7 @@ std::vector<int> getWorkspaceIndicesFromAxes(API::MatrixWorkspace_sptr ws,
   return out;
 }
 
-std::optional<API::Workspace_sptr>
+boost::optional<API::Workspace_sptr>
 getWorkspace(const std::string &workspaceName, int period) {
   if (API::AnalysisDataService::Instance().doesExist(workspaceName)) {
     return API::AnalysisDataService::Instance().retrieve(workspaceName);
@@ -218,10 +218,8 @@ getWorkspace(const std::string &workspaceName, int period) {
       if (load->isExecuted()) {
         API::Workspace_sptr rws = load->getProperty("OutputWorkspace");
         if (rws) {
-          DataObjects::Workspace2D_sptr ws =
-              boost::dynamic_pointer_cast<DataObjects::Workspace2D>(rws);
-          if (ws) {
-            return ws;
+          if (boost::dynamic_pointer_cast<DataObjects::Workspace2D>(rws)) {
+            return rws;
           } else {
             API::WorkspaceGroup_sptr gws =
                 boost::dynamic_pointer_cast<API::WorkspaceGroup>(rws);
@@ -230,8 +228,7 @@ getWorkspace(const std::string &workspaceName, int period) {
                   "OUTPUTWORKSPACE_" + std::to_string(period);
               if (load->existsProperty(propName)) {
                 API::Workspace_sptr rws1 = load->getProperty(propName);
-                return boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
-                    rws1);
+                return rws1;
               }
             }
           }

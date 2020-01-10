@@ -13,6 +13,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
 
+#include <boost/optional.hpp>
 #include <string>
 #include <vector>
 
@@ -39,7 +40,7 @@ struct InputData {
 DLLExport std::vector<int>
 getWorkspaceIndicesFromAxes(API::MatrixWorkspace_sptr, int workspaceIndex,
                             int spectrumNumber, double start, double end);
-DLLExport std::optional<API::Workspace_sptr>
+DLLExport boost::optional<API::Workspace_sptr>
 getWorkspace(const std::string &name, int period);
 
 /// Create a list of input workspace names
