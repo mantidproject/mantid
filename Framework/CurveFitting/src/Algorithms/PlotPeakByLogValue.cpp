@@ -109,11 +109,6 @@ void PlotPeakByLogValue::init() {
                   "functions that"
                   "have attribute WorkspaceIndex.");
 
-  declareProperty("PassInputIndexToFunction", false,
-                  "For each spectrum in Input pass its workspace index to all "
-                  "functions that"
-                  "have attribute WorkspaceIndex.");
-
   declareProperty("Minimizer", "Levenberg-Marquardt",
                   "Minimizer to use for fitting. Minimizers available are "
                   "'Levenberg-Marquardt', 'Simplex', 'FABADA',\n"
@@ -187,7 +182,6 @@ void PlotPeakByLogValue::exec() {
   std::string logName = getProperty("LogValue");
   bool individual = getPropertyValue("FitType") == "Individual";
   bool passWSIndexToFunction = getProperty("PassWSIndexToFunction");
-  bool passInputIndexToFunction = getProperty("PassInputIndexToFunction");
   bool createFitOutput = getProperty("CreateOutput");
   bool outputCompositeMembers = getProperty("OutputCompositeMembers");
   bool outputConvolvedMembers = getProperty("ConvolveMembers");
@@ -241,7 +235,9 @@ void PlotPeakByLogValue::exec() {
 
   double dProg = 1. / static_cast<double>(wsNames.size());
   double Prog = 0.;
+  IFunction_sptr ifun;
   for (int i = 0; i < static_cast<int>(wsNames.size()); ++i) {
+    bool firstInteration = true;
     InputData data = wsNames[i];
 
     if (!data.ws) {
@@ -255,150 +251,145 @@ void PlotPeakByLogValue::exec() {
       continue;
     }
 
-    int j, jend;
-    if (data.i >= 0) {
-      j = data.i;
-      jend = j + 1;
-    } else { // no need to check data.indx.empty()
-      j = data.indx.front();
-      jend = data.indx.back() + 1;
-    }
-
     if (createFitOutput) {
-      covarianceWorkspaces.reserve(covarianceWorkspaces.size() + jend);
-      fitWorkspaces.reserve(fitWorkspaces.size() + jend);
-      parameterWorkspaces.reserve(parameterWorkspaces.size() + jend);
+      covarianceWorkspaces.reserve(covarianceWorkspaces.size() + data.i + 1);
+      fitWorkspaces.reserve(fitWorkspaces.size() + data.i + 1);
+      parameterWorkspaces.reserve(parameterWorkspaces.size() + data.i + 1);
     }
 
-    dProg /= abs(jend - j);
-    IFunction_sptr ifun;
-    for (; j < jend; ++j) {
-      ifun =
-          isMultiDomainFunction ? inputFunction->getFunction(i) : inputFunction;
-      // Find the log value: it is either a log-file value or
-      // simply the workspace number
-      double logValue = 0;
-      if (logName.empty() || logName == "axis-1") {
-        API::Axis *axis = data.ws->getAxis(1);
-        if (dynamic_cast<BinEdgeAxis *>(axis)) {
-          double lowerEdge((*axis)(j));
-          double upperEdge((*axis)(j + 1));
-          logValue = lowerEdge + (upperEdge - lowerEdge) / 2;
-        } else
-          logValue = (*axis)(j);
-      } else if (logName != "SourceName") {
-        Kernel::Property *prop = data.ws->run().getLogData(logName);
-        if (!prop) {
-          throw std::invalid_argument("Log value " + logName +
-                                      " does not exist");
-        }
-        auto *logp = dynamic_cast<TimeSeriesProperty<double> *>(prop);
-        if (!logp) {
-          throw std::runtime_error("Failed to cast " + logName +
-                                   " to TimeSeriesProperty");
-        }
-        logValue = logp->lastValue();
-      }
-
-      double chi2;
-
-      try {
-        if (passWSIndexToFunction) {
-          setWorkspaceIndexAttribute(ifun, j);
-        } else if (passInputIndexToFunction) {
-          setWorkspaceIndexAttribute(ifun, i);
-        }
-
-        g_log.debug() << "Fitting " << data.ws->getName() << " index " << j
-                      << " with \n";
-        g_log.debug() << ifun->asString() << '\n';
-
-        const std::string spectrum_index = std::to_string(j);
-        std::string wsBaseName;
-
-        if (createFitOutput)
-          wsBaseName = wsNames[i].name + "_" + spectrum_index;
-
-        bool histogramFit = getPropertyValue("EvaluationType") == "Histogram";
-        bool ignoreInvalidData = getProperty("IgnoreInvalidData");
-
-        // Fit the function
-        auto fit = this->createChildAlgorithm("Fit");
-        fit->initialize();
-        fit->setPropertyValue("EvaluationType",
-                              getPropertyValue("EvaluationType"));
-        fit->setProperty("Function", ifun);
-        fit->setProperty("InputWorkspace", data.ws);
-        fit->setProperty("WorkspaceIndex", j);
-        fit->setPropertyValue("StartX", getPropertyValue("StartX"));
-        fit->setPropertyValue("EndX", getPropertyValue("EndX"));
-        fit->setProperty("IgnoreInvalidData", ignoreInvalidData);
-        fit->setPropertyValue(
-            "Minimizer", getMinimizerString(wsNames[i].name, spectrum_index));
-        fit->setPropertyValue("CostFunction", getPropertyValue("CostFunction"));
-        fit->setPropertyValue("MaxIterations",
-                              getPropertyValue("MaxIterations"));
-        fit->setPropertyValue("PeakRadius", getPropertyValue("PeakRadius"));
-        fit->setProperty("CalcErrors", true);
-        fit->setProperty("CreateOutput", createFitOutput);
-        if (!histogramFit) {
-          fit->setProperty("OutputCompositeMembers", outputCompositeMembers);
-          fit->setProperty("ConvolveMembers", outputConvolvedMembers);
-          fit->setProperty("Exclude", exclude);
-        }
-        fit->setProperty("Output", wsBaseName);
-        fit->execute();
-
-        if (!fit->isExecuted()) {
-          throw std::runtime_error("Fit child algorithm failed: " +
-                                   data.ws->getName());
-        }
-
-        ifun = fit->getProperty("Function");
-        chi2 = fit->getProperty("OutputChi2overDoF");
-
-        if (createFitOutput) {
-          MatrixWorkspace_sptr outputFitWorkspace =
-              fit->getProperty("OutputWorkspace");
-          ITableWorkspace_sptr outputParamWorkspace =
-              fit->getProperty("OutputParameters");
-          ITableWorkspace_sptr outputCovarianceWorkspace =
-              fit->getProperty("OutputNormalisedCovarianceMatrix");
-          fitWorkspaces.emplace_back(outputFitWorkspace);
-          parameterWorkspaces.emplace_back(outputParamWorkspace);
-          covarianceWorkspaces.emplace_back(outputCovarianceWorkspace);
-        }
-        g_log.debug() << "Fit result " << fit->getPropertyValue("OutputStatus")
-                      << ' ' << chi2 << '\n';
-      } catch (...) {
-        g_log.error("Error in Fit ChildAlgorithm");
-        throw;
-      }
-
-      // Extract the fitted parameters and put them into the result table
-      TableRow row = result->appendRow();
-      if (isDataName) {
-        row << wsNames[i].name;
-      } else {
-        row << logValue;
-      }
-
-      for (size_t iPar = 0; iPar < ifun->nParams(); ++iPar) {
-        row << ifun->getParameter(iPar) << ifun->getError(iPar);
-      }
-      row << chi2;
-
-      Prog += dProg;
-      std::string current = std::to_string(i);
-      progress(Prog, ("Fitting Workspace: (" + current + ") - "));
-      interruption_point();
-
-      if (individual) {
-        for (size_t k = 0; k < initialParams.size(); ++k) {
-          ifun->setParameter(k, initialParams[k]);
+    dProg /= abs(1);
+    if (isMultiDomainFunction) {
+      ifun = inputFunction->getFunction(i);
+      if (!individual && !firstInteration) {
+        IFunction_sptr prevFunction = inputFunction->getFunction(i - 1);
+        for (size_t k = 0; k < ifun->nParams(); ++k) {
+          ifun->setParameter(k, prevFunction->getParameter(k));
         }
       }
-    } // for(;j < jend;++j)
+
+    } else {
+      ifun = inputFunction;
+    }
+    firstInteration = false;
+    // Find the log value: it is either a log-file value or
+    // simply the workspace number
+    double logValue = 0;
+    if (logName.empty() || logName == "axis-1") {
+      API::Axis *axis = data.ws->getAxis(1);
+      if (dynamic_cast<BinEdgeAxis *>(axis)) {
+        double lowerEdge((*axis)(data.i));
+        double upperEdge((*axis)(data.i + 1));
+        logValue = lowerEdge + (upperEdge - lowerEdge) / 2;
+      } else
+        logValue = (*axis)(data.i);
+    } else if (logName != "SourceName") {
+      Kernel::Property *prop = data.ws->run().getLogData(logName);
+      if (!prop) {
+        throw std::invalid_argument("Log value " + logName + " does not exist");
+      }
+      auto *logp = dynamic_cast<TimeSeriesProperty<double> *>(prop);
+      if (!logp) {
+        throw std::runtime_error("Failed to cast " + logName +
+                                 " to TimeSeriesProperty");
+      }
+      logValue = logp->lastValue();
+    }
+
+    double chi2;
+
+    try {
+      if (passWSIndexToFunction) {
+        setWorkspaceIndexAttribute(ifun, data.i);
+      }
+
+      g_log.debug() << "Fitting " << data.ws->getName() << " index " << data.i
+                    << " with \n";
+      g_log.debug() << ifun->asString() << '\n';
+
+      const std::string spectrum_index = std::to_string(data.i);
+      std::string wsBaseName;
+
+      if (createFitOutput)
+        wsBaseName = wsNames[i].name + "_" + spectrum_index;
+
+      bool histogramFit = getPropertyValue("EvaluationType") == "Histogram";
+      bool ignoreInvalidData = getProperty("IgnoreInvalidData");
+
+      // Fit the function
+      auto fit = this->createChildAlgorithm("Fit");
+      fit->initialize();
+      fit->setPropertyValue("EvaluationType",
+                            getPropertyValue("EvaluationType"));
+      fit->setProperty("Function", ifun);
+      fit->setProperty("InputWorkspace", data.ws);
+      fit->setProperty("WorkspaceIndex", data.i);
+      fit->setPropertyValue("StartX", getPropertyValue("StartX"));
+      fit->setPropertyValue("EndX", getPropertyValue("EndX"));
+      fit->setProperty("IgnoreInvalidData", ignoreInvalidData);
+      fit->setPropertyValue(
+          "Minimizer", getMinimizerString(wsNames[i].name, spectrum_index));
+      fit->setPropertyValue("CostFunction", getPropertyValue("CostFunction"));
+      fit->setPropertyValue("MaxIterations", getPropertyValue("MaxIterations"));
+      fit->setPropertyValue("PeakRadius", getPropertyValue("PeakRadius"));
+      fit->setProperty("CalcErrors", true);
+      fit->setProperty("CreateOutput", createFitOutput);
+      if (!histogramFit) {
+        fit->setProperty("OutputCompositeMembers", outputCompositeMembers);
+        fit->setProperty("ConvolveMembers", outputConvolvedMembers);
+        fit->setProperty("Exclude", exclude);
+      }
+      fit->setProperty("Output", wsBaseName);
+      fit->execute();
+
+      if (!fit->isExecuted()) {
+        throw std::runtime_error("Fit child algorithm failed: " +
+                                 data.ws->getName());
+      }
+
+      ifun = fit->getProperty("Function");
+      chi2 = fit->getProperty("OutputChi2overDoF");
+
+      if (createFitOutput) {
+        MatrixWorkspace_sptr outputFitWorkspace =
+            fit->getProperty("OutputWorkspace");
+        ITableWorkspace_sptr outputParamWorkspace =
+            fit->getProperty("OutputParameters");
+        ITableWorkspace_sptr outputCovarianceWorkspace =
+            fit->getProperty("OutputNormalisedCovarianceMatrix");
+        fitWorkspaces.emplace_back(outputFitWorkspace);
+        parameterWorkspaces.emplace_back(outputParamWorkspace);
+        covarianceWorkspaces.emplace_back(outputCovarianceWorkspace);
+      }
+      g_log.debug() << "Fit result " << fit->getPropertyValue("OutputStatus")
+                    << ' ' << chi2 << '\n';
+    } catch (...) {
+      g_log.error("Error in Fit ChildAlgorithm");
+      throw;
+    }
+
+    // Extract the fitted parameters and put them into the result table
+    TableRow row = result->appendRow();
+    if (isDataName) {
+      row << wsNames[i].name;
+    } else {
+      row << logValue;
+    }
+
+    for (size_t iPar = 0; iPar < ifun->nParams(); ++iPar) {
+      row << ifun->getParameter(iPar) << ifun->getError(iPar);
+    }
+    row << chi2;
+
+    Prog += dProg;
+    std::string current = std::to_string(i);
+    progress(Prog, ("Fitting Workspace: (" + current + ") - "));
+    interruption_point();
+
+    if (individual) {
+      for (size_t k = 0; k < initialParams.size(); ++k) {
+        ifun->setParameter(k, initialParams[k]);
+      }
+    }
   }
 
   if (createFitOutput) {
