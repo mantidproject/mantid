@@ -63,6 +63,8 @@ ${_lib_site_packages}
 import sys; new = sys.path[sys.__plen:]; del sys.path[sys.__plen:]; p = getattr(sys, '__egginsert', 0); sys.path[p:p] = new; sys.__egginsert = p + len(new)
 ")
 
-# Package PyQt
+# Package PyQt. We assume this is for Python 3
 install(DIRECTORY ${_lib_site_packages}/PyQt4
-        DESTINATION ${LIB_DIR})
+        DESTINATION ${LIB_DIR} 
+        PATTERN "__pycache__" EXCLUDE
+        PATTERN "port_v2" EXCLUDE)
