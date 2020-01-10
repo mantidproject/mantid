@@ -35,10 +35,8 @@ public:
 
     TS_ASSERT_EQUALS(namesList.size(), 1);
     TS_ASSERT_EQUALS(inputWithWorkspace.i, 0);
-    // TS_ASSERT_EQUALS(inputWithWorkspace.spec, 1);
     TS_ASSERT(inputWithWorkspace.ws);
     TS_ASSERT_EQUALS(inputWithWorkspace.name, "irs26176_graphite002_red.nxs");
-    TS_ASSERT(inputWithWorkspace.indx.empty());
   }
 
   void testWorkspaceSpectrumSpecified() {
@@ -49,10 +47,8 @@ public:
 
     TS_ASSERT_EQUALS(namesList.size(), 1);
     TS_ASSERT_EQUALS(inputWithWorkspace.i, 0);
-    // TS_ASSERT_EQUALS(inputWithWorkspace.spec, 1);
     TS_ASSERT(inputWithWorkspace.ws);
     TS_ASSERT_EQUALS(inputWithWorkspace.name, "irs26176_graphite002_red.nxs");
-    TS_ASSERT(inputWithWorkspace.indx.empty());
   }
 
   void testWorkspaceRangeSpecifiedSpectrumAxis() {
@@ -64,10 +60,8 @@ public:
     TS_ASSERT_EQUALS(namesList.size(), 2);
     TS_ASSERT_EQUALS(inputWithWorkspace.i, 1);
     TS_ASSERT_EQUALS(namesList[1].i, 2);
-    // TS_ASSERT_EQUALS(inputWithWorkspace.spec, -1);
     TS_ASSERT(inputWithWorkspace.ws);
     TS_ASSERT_EQUALS(inputWithWorkspace.name, "irs26176_graphite002_red.nxs");
-    TS_ASSERT_EQUALS(inputWithWorkspace.indx, std::vector<int>({}));
   }
 
   void testWorkspaceIndexNumericAxis() {
@@ -78,10 +72,8 @@ public:
 
     TS_ASSERT_EQUALS(namesList.size(), 1);
     TS_ASSERT_EQUALS(inputWithWorkspace.i, 0);
-    TS_ASSERT_EQUALS(inputWithWorkspace.spec, -1);
     TS_ASSERT(inputWithWorkspace.ws);
     TS_ASSERT_EQUALS(inputWithWorkspace.name, "saveNISTDAT_data.nxs");
-    TS_ASSERT_EQUALS(inputWithWorkspace.indx, std::vector<int>({}));
   }
 
   void testWorkspaceSpectrumNumericAxis() {
@@ -92,10 +84,8 @@ public:
 
     TS_ASSERT_EQUALS(namesList.size(), 1);
     TS_ASSERT_EQUALS(inputWithWorkspace.i, 160);
-    // TS_ASSERT_EQUALS(inputWithWorkspace.spec, -1);
     TS_ASSERT(inputWithWorkspace.ws);
     TS_ASSERT_EQUALS(inputWithWorkspace.name, "saveNISTDAT_data.nxs");
-    TS_ASSERT_EQUALS(inputWithWorkspace.indx, std::vector<int>({}));
   }
 
   void testWorkspaceRangeSpecifiedNumericAxisAll() {
@@ -107,10 +97,8 @@ public:
     TS_ASSERT_EQUALS(namesList.size(), 321);
     TS_ASSERT_EQUALS(inputWithWorkspace.i, 0);
     TS_ASSERT_EQUALS(namesList[200].i, 200);
-    // TS_ASSERT_EQUALS(inputWithWorkspace.spec, -1);
     TS_ASSERT(inputWithWorkspace.ws);
     TS_ASSERT_EQUALS(inputWithWorkspace.name, "saveNISTDAT_data.nxs");
-    TS_ASSERT_EQUALS(inputWithWorkspace.indx, std::vector<int>({}));
   }
 
   void testWorkspaceRangeSpecifiedNumericAxis() {
@@ -122,12 +110,8 @@ public:
     TS_ASSERT_EQUALS(namesList.size(), 19);
     TS_ASSERT_EQUALS(inputWithWorkspace.i, 151);
     TS_ASSERT_EQUALS(namesList[15].i, 166);
-    // TS_ASSERT_EQUALS(inputWithWorkspace.spec, -1);
-    TS_ASSERT_EQUALS(inputWithWorkspace.start, -0.01);
-    TS_ASSERT_EQUALS(inputWithWorkspace.end, 0.01);
     TS_ASSERT(inputWithWorkspace.ws);
     TS_ASSERT_EQUALS(inputWithWorkspace.name, "saveNISTDAT_data.nxs");
-    TS_ASSERT_EQUALS(inputWithWorkspace.indx, std::vector<int>({}));
   }
 };
 
