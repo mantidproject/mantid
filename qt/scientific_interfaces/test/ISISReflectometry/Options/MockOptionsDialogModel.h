@@ -83,7 +83,7 @@ public:
   MOCK_METHOD2(saveSettings, void(const std::map<std::string, bool> &,
                                   const std::map<std::string, int> &));
 };
-  GNU_DIAG_ON_SUGGEST_OVERRIDE
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
