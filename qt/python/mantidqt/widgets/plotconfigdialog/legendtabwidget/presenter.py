@@ -8,8 +8,8 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
+from mantid.plots.legend import LegendProperties
 from mantidqt.widgets.plotconfigdialog.legendtabwidget.view import LegendTabWidgetView
-from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
 
 import matplotlib
 import matplotlib.font_manager
