@@ -16,9 +16,10 @@ from matplotlib import axis, ticker  # noqa
 
 from mantid import logger
 from mantid.api import AnalysisDataService as ADS
+from mantid.plots.legend import LegendProperties
 # Constants set in workbench.plotting.functions but would cause backwards reliability
 from mantidqt.plotting.functions import pcolormesh
-from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
+
 
 SUBPLOT_WSPACE = 0.5
 SUBPLOT_HSPACE = 0.5

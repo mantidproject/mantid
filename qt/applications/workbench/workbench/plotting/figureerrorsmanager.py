@@ -13,8 +13,8 @@ from matplotlib.lines import Line2D
 
 from mantid.plots import MantidAxes
 from mantid.plots.helperfunctions import get_data_from_errorbar_container, set_errorbars_hidden
+from mantid.plots.legend import LegendProperties
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import curve_has_errors, CurveProperties, remove_curve_from_ax
-from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
 
 
 class FigureErrorsManager(object):

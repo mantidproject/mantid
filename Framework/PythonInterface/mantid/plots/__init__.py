@@ -19,7 +19,7 @@ try:
    from collections.abc import Iterable
 except ImportError:
    # check Python 2 location
-   from collections import Iterable   
+   from collections import Iterable
 from matplotlib.axes import Axes
 from matplotlib.collections import Collection, PolyCollection
 from matplotlib.colors import Colormap
@@ -35,12 +35,11 @@ from mpl_toolkits.mplot3d.axes3d import Axes3D
 from mantid.api import AnalysisDataService as ads
 from mantid.kernel import logger
 from mantid.plots import helperfunctions, plotfunctions, plotfunctions3D
-from mantid.plots.utility import autoscale_on_update
+from mantid.plots.legend import convert_color_to_hex, LegendProperties
 from mantid.plots.helperfunctions import get_normalize_by_bin_width
 from mantid.plots.scales import PowerScale, SquareScale
-from mantid.plots.utility import artists_hidden, MantidAxType, legend_set_draggable
-from mantidqt.widgets.plotconfigdialog.colorselector import convert_color_to_hex
-from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
+from mantid.plots.utility import (artists_hidden, autoscale_on_update,
+                                  legend_set_draggable, MantidAxType)
 
 
 def plot_decorator(func):

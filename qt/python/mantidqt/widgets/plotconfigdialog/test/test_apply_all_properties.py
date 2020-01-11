@@ -16,12 +16,12 @@ from matplotlib.colors import LogNorm
 from matplotlib.patches import BoxStyle
 from matplotlib.pyplot import figure
 
+from mantid.plots.legend import LegendProperties
 from mantid.py3compat.mock import Mock, patch
 from mantidqt.widgets.plotconfigdialog.colorselector import convert_color_to_hex
 from mantidqt.widgets.plotconfigdialog.axestabwidget import AxProperties
 from mantidqt.widgets.plotconfigdialog.imagestabwidget import ImageProperties
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import CurveProperties
-from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
 from mantidqt.widgets.plotconfigdialog.presenter import PlotConfigDialogPresenter
 
 AX_VIEW = 'mantidqt.widgets.plotconfigdialog.axestabwidget.presenter.AxesTabWidgetView'
