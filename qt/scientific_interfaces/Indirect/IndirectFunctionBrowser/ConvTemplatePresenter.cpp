@@ -56,6 +56,21 @@ void ConvTemplatePresenter::setDeltaFunction(bool on) {
   emit functionStructureChanged();
 }
 
+void ConvTemplatePresenter::setTempCorrection(bool on) {
+  if (on == m_model.hasTempCorrection())
+    return;
+  m_model.setTempCorrection(on);
+  if (on)
+    m_view->addTempCorrection();
+  else
+    m_view->removeTempCorrection();
+
+  setErrorsEnabled(false);
+  updateViewParameterNames();
+  updateViewParameters();
+  emit functionStructureChanged();
+}
+
 void ConvTemplatePresenter::setNumberOfDatasets(int n) {
   m_model.setNumberDomains(n);
 }

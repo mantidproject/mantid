@@ -225,6 +225,17 @@ void ConvFunctionModel::setDeltaFunction(bool on) {
   setCurrentValues(oldValues);
 }
 
+void ConvFunctionModel::setTempCorrection(bool on) {
+  auto oldValues = getCurrentValues();
+  m_hasTempCorrection = on;
+  setModel();
+  setCurrentValues(oldValues);
+}
+
+bool ConvFunctionModel::hasTempCorrection() const {
+  return m_hasTempCorrection;
+}
+
 bool ConvFunctionModel::hasDeltaFunction() const { return m_hasDeltaFunction; }
 
 void ConvFunctionModel::setBackground(BackgroundType bgType) {

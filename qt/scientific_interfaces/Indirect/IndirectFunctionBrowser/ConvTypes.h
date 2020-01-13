@@ -44,6 +44,7 @@ enum class BackgroundType { None, Flat, Linear };
 
 enum class ParamID {
   NONE,
+  TEMPERATURE,
   LOR1_AMPLITUDE,
   LOR1_PEAKCENTRE,
   LOR1_FWHM,

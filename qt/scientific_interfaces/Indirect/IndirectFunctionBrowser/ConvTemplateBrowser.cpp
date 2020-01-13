@@ -57,9 +57,11 @@ void ConvTemplateBrowser::createProperties() {
 
   createFunctionParameterProperties();
   createDeltaFunctionProperties();
+  createTempCorrectionProperties();
 
   m_browser->addProperty(m_subTypeProperties[0]);
   m_browser->addProperty(m_deltaFunctionOn);
+  m_browser->addProperty(m_tempCorrectionOn);
   m_browser->addProperty(m_subTypeProperties[1]);
 
   m_parameterManager->blockSignals(false);
@@ -113,6 +115,8 @@ void ConvTemplateBrowser::intChanged(QtProperty *) {}
 void ConvTemplateBrowser::boolChanged(QtProperty *prop) {
   if (prop == m_deltaFunctionOn) {
     m_presenter.setDeltaFunction(m_boolManager->value(prop));
+  } else if (prop == m_tempCorrectionOn) {
+    m_presenter.setTempCorrection(m_boolManager->value(prop));
   }
 }
 
@@ -130,6 +134,18 @@ void ConvTemplateBrowser::removeDeltaFunction() {
   m_deltaFunctionOn->removeSubProperty(m_deltaFunctionHeight);
   ScopedFalse _false(m_emitBoolChange);
   m_boolManager->setValue(m_deltaFunctionOn, false);
+}
+
+void ConvTemplateBrowser::addTempCorrection() {
+  m_tempCorrectionOn->addSubProperty(m_temperature);
+  ScopedFalse _false(m_emitBoolChange);
+  m_boolManager->setValue(m_tempCorrectionOn, true);
+}
+
+void ConvTemplateBrowser::removeTempCorrection() {
+  m_tempCorrectionOn->removeSubProperty(m_temperature);
+  ScopedFalse _false(m_emitBoolChange);
+  m_boolManager->setValue(m_tempCorrectionOn, false);
 }
 
 void ConvTemplateBrowser::enumChanged(QtProperty *prop) {
@@ -269,6 +285,13 @@ void ConvTemplateBrowser::createDeltaFunctionProperties() {
                                      "Delta Function Height");
   m_parameterMap[m_deltaFunctionHeight] = ParamID::DELTA_HEIGHT;
   m_parameterReverseMap[ParamID::DELTA_HEIGHT] = m_deltaFunctionHeight;
+}
+
+void ConvTemplateBrowser::createTempCorrectionProperties() {
+  m_tempCorrectionOn = m_boolManager->addProperty("Temp Correction");
+  m_temperature = m_parameterManager->addProperty("Temperature");
+  m_parameterMap[m_temperature] = ParamID::TEMPERATURE;
+  m_parameterReverseMap[ParamID::TEMPERATURE] = m_temperature;
 }
 
 void ConvTemplateBrowser::setSubType(size_t subTypeIndex, int typeIndex) {

@@ -58,6 +58,8 @@ public:
       const std::vector<std::pair<std::string, int>> &fitResolutions) override;
   void addDeltaFunction();
   void removeDeltaFunction();
+  void addTempCorrection();
+  void removeTempCorrection();
   void setQValues(const std::vector<double> &qValues) override;
 
 protected slots:
@@ -75,6 +77,7 @@ private:
   void setGlobalParametersQuiet(const QStringList &globals);
   void createFunctionParameterProperties();
   void createDeltaFunctionProperties();
+  void createTempCorrectionProperties();
   void setSubType(size_t subTypeIndex, int typeIndex);
   void setParameterValueQuiet(ParamID id, double value, double error);
 
@@ -87,6 +90,9 @@ private:
 
   QtProperty *m_deltaFunctionOn;
   QtProperty *m_deltaFunctionHeight;
+
+  QtProperty *m_tempCorrectionOn;
+  QtProperty *m_temperature;
 
   QMap<QtProperty *, ParamID> m_parameterMap;
   QMap<ParamID, QtProperty *> m_parameterReverseMap;

@@ -35,6 +35,7 @@ public:
   explicit ConvTemplatePresenter(ConvTemplateBrowser *view);
   void setSubType(size_t subTypeIndex, int typeIndex);
   void setDeltaFunction(bool);
+  void setTempCorrection(bool);
   void setNumberOfDatasets(int);
   int getNumberOfDatasets() const;
   int getCurrentDataset();

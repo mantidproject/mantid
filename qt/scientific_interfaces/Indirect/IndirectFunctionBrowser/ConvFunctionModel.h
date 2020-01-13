@@ -84,6 +84,8 @@ public:
   void setFitType(FitType fitType);
   void setDeltaFunction(bool);
   bool hasDeltaFunction() const;
+  void setTempCorrection(bool);
+  bool hasTempCorrection() const;
   void setBackground(BackgroundType bgType);
   void removeBackground();
   bool hasBackground() const;
@@ -135,6 +137,7 @@ private:
   FitType m_fitType = FitType::None;
   BackgroundType m_backgroundType = BackgroundType::None;
   bool m_hasDeltaFunction = false;
+  bool m_hasTempCorrection = false;
   DataForParameterEstimationCollection m_estimationData;
   QList<ParamID> m_globals;
   FitSubType m_fitSubType;
