@@ -136,16 +136,30 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         alg = self._reduce(inputWorkspace, firstTransWorkspace, secondTransWorkspace)
         # Set outputs and tidy TOF workspaces into a group
         self._finalize(alg)
-        if len(inputWorkspaces) >= 2:
-            inputWorkspaces.append(inputWorkspace)
-        # Group the TOF workspaces to hide some noise for the user
+        self._groupTOFWorkspaces(inputWorkspaces, inputWorkspace,
+                                 firstTransWorkspaces, secondTransWorkspaces,
+                                 firstTransWorkspace, secondTransWorkspace)
+
+    def _groupTOFWorkspaces(self, inputWorkspaces, inputWorkspace,
+                            firstTransWorkspaces, secondTransWorkspaces,
+                            firstTransWorkspace, secondTransWorkspace):
+        """Put all of the TOF workspaces into a group called 'TOF' to hide some noise
+        for the user."""
+        if not self.getProperty(Prop.GROUP_TOF).value:
+            return
         tofWorkspaces = set(inputWorkspaces)
+        # Add inputWorkspace to the set, if not already there, to ensure any
+        # summed TOF workspaces are included
+        tofWorkspaces.add(inputWorkspace)
         # If slicing, also group the monitor workspace (note that there is only one
         # input run when slicing)
         if self._slicingEnabled():
             tofWorkspaces.add(_monitorWorkspace(inputWorkspaces[0]))
+        # Create the group
         self._group_workspaces(tofWorkspaces, "TOF")
-        # Group the TRANS TOF workspaces
+
+        # Also create a group for the TRANS TOF workspaces. Ensure we include
+        # any summed inputs
         transWorkspaces = set(firstTransWorkspaces + secondTransWorkspaces)
         if firstTransWorkspace:
             transWorkspaces.add(firstTransWorkspace)
@@ -298,7 +312,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         Groups all the given workspaces into a group with the given name. If the group
         already exists it will add them to that group.
         """
-        if len(workspaces) < 1 or not self.getProperty(Prop.GROUP_TOF).value:
+        if len(workspaces) < 1:
             return
 
         workspaces = self._collapse_workspace_groups(workspaces)

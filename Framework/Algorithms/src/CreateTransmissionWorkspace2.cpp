@@ -131,40 +131,41 @@ CreateTransmissionWorkspace2::validateInputs() {
 void CreateTransmissionWorkspace2::exec() {
   getRunNumbers();
 
-  MatrixWorkspace_sptr outWS;
-
+  // Process the first run
   MatrixWorkspace_sptr firstTransWS = getProperty("FirstTransmissionRun");
   convertProcessingInstructions(firstTransWS);
-
   firstTransWS = normalizeDetectorsByMonitors(firstTransWS);
   firstTransWS = cropWavelength(firstTransWS);
 
-  MatrixWorkspace_sptr secondTransWS = getProperty("SecondTransmissionRun");
-  if (secondTransWS) {
-    outputTransmissionRun(1, firstTransWS);
-
-    convertProcessingInstructions(secondTransWS);
-
-    secondTransWS = normalizeDetectorsByMonitors(secondTransWS);
-    secondTransWS = cropWavelength(secondTransWS);
-    outputTransmissionRun(2, secondTransWS);
-
-    // Stitch the results.
-    auto stitch = createChildAlgorithm("Stitch1D");
-    stitch->initialize();
-    stitch->setProperty("LHSWorkspace", firstTransWS);
-    stitch->setProperty("RHSWorkspace", secondTransWS);
-    stitch->setPropertyValue("StartOverlap", getPropertyValue("StartOverlap"));
-    stitch->setPropertyValue("EndOverlap", getPropertyValue("EndOverlap"));
-    stitch->setPropertyValue("Params", getPropertyValue("Params"));
-    stitch->setProperty("ScaleRHSWorkspace",
-                        getPropertyValue("ScaleRHSWorkspace"));
-    stitch->execute();
-    outWS = stitch->getProperty("OutputWorkspace");
-  } else {
-    outWS = firstTransWS;
+  // If we only have one run, set it as the output and finish
+  if (isDefault("SecondTransmissionRun")) {
+    setOutputWorkspace(firstTransWS);
+    return;
   }
-  storeOutputWorkspace(outWS);
+
+  // Process the second run
+  MatrixWorkspace_sptr secondTransWS = getProperty("SecondTransmissionRun");
+  convertProcessingInstructions(secondTransWS);
+  secondTransWS = normalizeDetectorsByMonitors(secondTransWS);
+  secondTransWS = cropWavelength(secondTransWS);
+
+  // Stitch the processed runs
+  auto stitch = createChildAlgorithm("Stitch1D");
+  stitch->initialize();
+  stitch->setProperty("LHSWorkspace", firstTransWS);
+  stitch->setProperty("RHSWorkspace", secondTransWS);
+  stitch->setPropertyValue("StartOverlap", getPropertyValue("StartOverlap"));
+  stitch->setPropertyValue("EndOverlap", getPropertyValue("EndOverlap"));
+  stitch->setPropertyValue("Params", getPropertyValue("Params"));
+  stitch->setProperty("ScaleRHSWorkspace",
+                      getPropertyValue("ScaleRHSWorkspace"));
+  stitch->execute();
+  MatrixWorkspace_sptr stitchedWS = stitch->getProperty("OutputWorkspace");
+
+  // Set the outputs
+  setOutputWorkspace(stitchedWS);
+  setOutputTransmissionRun(1, firstTransWS);
+  setOutputTransmissionRun(2, secondTransWS);
 }
 
 /** Normalize detectors by monitors
@@ -236,7 +237,7 @@ CreateTransmissionWorkspace2::getRunNumber(std::string const &propertyName) {
  * @param which Which of the runs to store: 1 - first, 2 - second.
  * @param ws A workspace to store.
  */
-void CreateTransmissionWorkspace2::outputTransmissionRun(
+void CreateTransmissionWorkspace2::setOutputTransmissionRun(
     int which, MatrixWorkspace_sptr ws) {
   bool const isDebug = getProperty("Debug");
   if (!isDebug && !isChild())
@@ -263,7 +264,7 @@ void CreateTransmissionWorkspace2::outputTransmissionRun(
 /** Store the stitched transition workspace run in ADS
  * @param ws A workspace to store.
  */
-void CreateTransmissionWorkspace2::storeOutputWorkspace(
+void CreateTransmissionWorkspace2::setOutputWorkspace(
     API::MatrixWorkspace_sptr ws) {
   // If the output name is not set, attempt to set a sensible
   // default based on the run number. If a required run number
@@ -282,6 +283,5 @@ void CreateTransmissionWorkspace2::storeOutputWorkspace(
   }
   setProperty("OutputWorkspace", ws);
 }
-
 } // namespace Algorithms
 } // namespace Mantid

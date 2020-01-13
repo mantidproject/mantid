@@ -585,7 +585,7 @@ private:
   void check_output_not_set(CreateTransmissionWorkspace2 const &alg,
                             std::string const &propertyName,
                             std::string const &name) {
-    TS_ASSERT(alg.isDefault("OutputWorkspaceFirstTransmission"));
+    TS_ASSERT(alg.isDefault(propertyName));
     TS_ASSERT(!AnalysisDataService::Instance().doesExist(name));
   }
 };
