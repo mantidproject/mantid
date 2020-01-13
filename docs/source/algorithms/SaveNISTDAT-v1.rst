@@ -20,7 +20,7 @@ Usage
 
 **Example - Saving Some Pre-existing Data**
 
-.. include:: ../trainingdata-note.txt
+.. include:: ../usagedata-note.txt
 
 .. testcode:: ExSaveRoundtrip
 
@@ -28,7 +28,7 @@ Usage
 
    # Load in some data which is already in a form that SaveNISTDAT expects,
    # then save it back out to a file.
-   data = Load("SANSLOQCan2D.nxs")
+   data = Load("saveNISTDAT_data.nxs")
    file_path = os.path.join(config["defaultsave.directory"], "example.dat")
    SaveNISTDAT(data, file_path)
 
@@ -48,7 +48,7 @@ Output:
 
 .. testoutput:: ExSaveRoundtrip
 
-   The data read back in is [-0.099 -0.099 -0.099 ...  0.099  0.099  0.099]
+   The data read back in is [-0.0735 -0.0735 -0.0735 ...,  0.0685  0.0685  0.0685]
 
 .. categories::
 
