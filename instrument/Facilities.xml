@@ -50,6 +50,14 @@
       <connection name="event" address="NDXENGINX:10000" listener="ISISLiveEventDataListener" />
     </livedata>
   </instrument>
+  
+  <instrument name="DENEX" shortname="DENEX" >
+    <zeropadding size="8" />
+    <technique>Neutron Diffraction</technique>
+    <livedata default="event">
+      <connection name="event" address="sakura:9092" listener="KafkaEventListener" />
+    </livedata>
+  </instrument>
 
   <instrument name="GEM">
     <technique>Neutron Diffraction</technique>

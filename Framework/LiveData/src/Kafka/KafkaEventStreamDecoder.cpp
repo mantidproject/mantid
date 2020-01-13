@@ -609,7 +609,7 @@ void KafkaEventStreamDecoder::initLocalCaches(
   if (!loadInstrument<DataObjects::EventWorkspace>(instName, eventBuffer,
                                                    jsonGeometry))
     g_log.warning(
-        "Instrument could not be loaded.Continuing without instrument "");
+        "Instrument could not be loaded.Continuing without instrument");
 
   auto &mutableRun = eventBuffer->mutableRun();
   // Run start. Cache locally for computing frame times
