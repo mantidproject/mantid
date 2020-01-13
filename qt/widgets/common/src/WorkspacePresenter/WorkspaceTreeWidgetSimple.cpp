@@ -10,6 +10,7 @@
 #include "MantidQtWidgets/Common/MantidTreeWidgetItem.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -115,7 +116,8 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
       menu->addAction(m_showInstrument);
       m_showInstrument->setEnabled(
           matrixWS->getInstrument() &&
-          !matrixWS->getInstrument()->getName().empty());
+          !matrixWS->getInstrument()->getName().empty() &&
+          matrixWS->getAxis(1)->isSpectra());
       menu->addAction(m_sampleLogs);
       menu->addAction(m_sliceViewer);
       menu->addAction(m_showDetectors);
