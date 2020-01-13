@@ -9,6 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 import matplotlib
 matplotlib.use('AGG')  # noqa
 import matplotlib.pyplot as plt
+from matplotlib.collections import PolyCollection
 from matplotlib.container import ErrorbarContainer
 import numpy as np
 import unittest
@@ -518,26 +519,26 @@ class Plots__init__Test(unittest.TestCase):
     def test_converting_from_1d_plot_to_waterfall_plot(self):
         MantidAxes.set_waterfall_toolbar_options_enabled = Mock()
         fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
-        # Plot the same line twice
+        # Plot the same line twice.
         ax.plot([0, 1], [0, 1])
         ax.plot([0, 1], [0, 1])
 
-        # Make a waterfall plot
+        # Make a waterfall plot.
         ax.convert_to_waterfall()
 
         self.assertTrue(ax.is_waterfall_plot())
-        # Check the lines' data are different now that it is a waterfall plot
+        # Check the lines' data are different now that it is a waterfall plot.
         self.assertNotEqual(ax.get_lines()[0].get_xdata()[0], ax.get_lines()[1].get_xdata()[0])
         self.assertNotEqual(ax.get_lines()[0].get_ydata()[0], ax.get_lines()[1].get_ydata()[0])
 
     def test_converting_from_waterfall_plot_to_1d_plot(self):
         MantidAxes.set_waterfall_toolbar_options_enabled = Mock()
         fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
-        # Plot the same line twice
+        # Plot the same line twice.
         ax.plot([0, 1], [0, 1])
         ax.plot([0, 1], [0, 1])
 
-        # Make a waterfall plot
+        # Make a waterfall plot.
         ax.convert_to_waterfall()
         # Make the plot non-waterfall again.
         ax.convert_from_waterfall()
@@ -546,6 +547,73 @@ class Plots__init__Test(unittest.TestCase):
         # Check that the lines have the same x and y data.
         self.assertEqual(ax.get_lines()[0].get_xdata()[0], ax.get_lines()[1].get_xdata()[0])
         self.assertEqual(ax.get_lines()[0].get_ydata()[0], ax.get_lines()[1].get_ydata()[0])
+
+    def test_create_fill_creates_fills_for_waterfall_plot(self):
+        MantidAxes.set_waterfall_toolbar_options_enabled = Mock()
+        fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+        ax.plot([0, 1], [0, 1])
+        ax.plot([0, 1], [0, 1])
+
+        # Make a waterfall plot.
+        ax.convert_to_waterfall()
+        # Add filled areas.
+        ax.waterfall_create_fill()
+
+        fills = [collection for collection in ax.collections if isinstance(collection, PolyCollection)]
+        self.assertEqual(len(fills), 2)
+
+    def test_remove_fill_removes_fills_for_waterfall_plots(self):
+        MantidAxes.set_waterfall_toolbar_options_enabled = Mock()
+        fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+        ax.plot([0, 1], [0, 1])
+        ax.plot([0, 1], [0, 1])
+
+        # Make a waterfall plot.
+        ax.convert_to_waterfall()
+        # Add filled areas.
+        ax.waterfall_create_fill()
+        # Remove filled areas.
+        ax.waterfall_remove_fill()
+
+        self.assertFalse(ax.waterfall_has_fill())
+
+    def test_converting_from_waterfall_to_1d_plot_removes_filled_areas(self):
+        MantidAxes.set_waterfall_toolbar_options_enabled = Mock()
+        fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+        ax.plot([0, 1], [0, 1])
+        ax.plot([0, 1], [0, 1])
+
+        # Make a waterfall plot.
+        ax.convert_to_waterfall()
+        # Add filled areas.
+        ax.waterfall_create_fill()
+        # Make the plot non-waterfall again.
+        ax.convert_from_waterfall()
+
+        self.assertFalse(ax.waterfall_has_fill())
+
+    def test_overplotting_onto_waterfall_plot_with_line_colour_filled_areas_adds_another_filled_area_with_new_line_colour(self):
+        MantidAxes.set_waterfall_toolbar_options_enabled = Mock()
+        fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+        ax.plot([0, 1], [0, 1])
+        ax.plot([0, 1], [0, 1])
+
+        # Make a waterfall plot.
+        ax.convert_to_waterfall()
+        # Add filled areas.
+        ax.waterfall_create_fill()
+        # Set the fills to be the same colour as their lines.
+        ax.collections[0].set_facecolor([0.122, 0.467, 0.706, 1])
+        ax.collections[1].set_facecolor([1, 0.498, 0.055, 1])
+
+        # Plot another line and make it join the waterfall.
+        ax.plot([0, 1], [0,1], color=[1, 0.102, 0, 1])
+        ax.convert_single_line_to_waterfall(2)
+
+        ax.waterfall_update_fill()
+
+        # Check that there are now three filled areas and the new line colour matches the new fill colour.
+        self.assertTrue((ax.collections[2].get_facecolor() == ax.lines[2].get_color()).all())
 
     def _run_check_axes_distribution_consistency(self, normalization_states):
         mock_tracked_workspaces = {

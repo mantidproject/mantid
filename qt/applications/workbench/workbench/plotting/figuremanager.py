@@ -215,6 +215,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.toolbar.sig_waterfall_reverse_order_triggered.connect(self.waterfall_reverse_line_order)
             self.toolbar.sig_waterfall_offset_amount_triggered.connect(self.launch_waterfall_offset_options)
             self.toolbar.sig_waterfall_fill_area_triggered.connect(self.launch_waterfall_fill_area_options)
+            self.toolbar.sig_waterfall_conversion.connect(self.update_toolbar_waterfall_plot)
             self.toolbar.setFloatable(False)
             tbs_height = self.toolbar.sizeHint().height()
         else:
@@ -434,6 +435,10 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
     def launch_waterfall_fill_area_options(self):
         WaterfallPlotFillAreaDialogPresenter(self.canvas.figure, parent=self.window)
+
+    def update_toolbar_waterfall_plot(self, is_waterfall):
+        self.toolbar.set_waterfall_options_enabled(is_waterfall)
+        self.toolbar.set_generate_plot_script_enabled(not is_waterfall)
 
 # -----------------------------------------------------------------------------
 # Figure control

@@ -243,7 +243,8 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
 
     # The plot's initial xlim and ylim are used to offset each curve in a waterfall plot.
     # Need to do this whether the current curve is a waterfall plot or not because it may be converted later.
-    ax.set_initial_dimensions(ax.get_xlim(), ax.get_ylim())
+    if not overplot:
+        ax.set_initial_dimensions()
 
     if waterfall:
         ax.convert_to_waterfall()

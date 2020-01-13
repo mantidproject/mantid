@@ -1049,10 +1049,11 @@ class MantidAxes(Axes):
         """
         return self._plot_2d_func('tricontourf', *args, **kwargs)
 
-    def set_initial_dimensions(self, x_lim, y_lim):
+    def set_initial_dimensions(self):
         # Set the width and height which are used to calculate the offset percentage for waterfall plots.
         # This means that the curves in a waterfall plot are always offset by the same amount, even if the
         # plot limits change.
+        x_lim, y_lim = self.get_xlim(), self.get_ylim()
         self.width = x_lim[1] - x_lim[0]
         self.height = y_lim[1] - y_lim[0]
 
@@ -1079,12 +1080,7 @@ class MantidAxes(Axes):
 
     def set_waterfall_toolbar_options_enabled(self):
         toolbar = self.get_figure().canvas.toolbar
-        if self.is_waterfall_plot():
-            toolbar.set_waterfall_options_enabled(True)
-            toolbar.set_generate_plot_script_enabled(False)
-        else:
-            toolbar.set_waterfall_options_enabled(False)
-            toolbar.set_generate_plot_script_enabled(True)
+        toolbar.waterfall_conversion(self.is_waterfall_plot())
 
     def convert_to_waterfall(self):
         if self.is_waterfall_plot():
@@ -1093,7 +1089,7 @@ class MantidAxes(Axes):
         # Plots made from a script may not have the width and height attributes needed to create a waterfall plot, so
         # they are set here.
         if not hasattr(self, 'width'):
-            self.set_initial_dimensions(self.get_xlim(), self.get_ylim())
+            self.set_initial_dimensions()
 
         # 10 and 20 are the default x and y offset.
         self.update_waterfall_plot(10, 20)
@@ -1113,7 +1109,11 @@ class MantidAxes(Axes):
                 for line in (container[0],) + container[1]:
                     line.set_xdata(line.get_xdata() + amount_to_move_x)
                     line.set_ydata(line.get_ydata() + amount_to_move_y)
-                    line.set_zorder(len(self.get_lines()) - index)
+
+                    if index == 0:
+                        line.set_zorder(len(self.get_lines()))
+                    else:
+                        line.set_zorder(self.get_lines()[index - 1].get_zorder() - 1)
 
                 # Shift the errorbars
                 for bar_line_col in container[2]:
@@ -1141,7 +1141,12 @@ class MantidAxes(Axes):
         else:
             line.set_xdata(line.get_xdata() + amount_to_move_x)
             line.set_ydata(line.get_ydata() + amount_to_move_y)
-            line.set_zorder(len(self.get_lines()) - index)
+
+            # Ensures the more offset lines are drawn behind the less offset ones
+            if index == 0:
+                line.set_zorder(len(self.get_lines()))
+            else:
+                line.set_zorder(self.get_lines()[index-1].get_zorder() - 1)
 
         # If the curves are filled and the fill has been set to match the line colour and the line colour has changed
         # then the fill's colour is updated.

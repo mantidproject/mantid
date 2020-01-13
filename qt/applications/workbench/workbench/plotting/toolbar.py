@@ -29,6 +29,7 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
     sig_waterfall_reverse_order_triggered = QtCore.Signal()
     sig_waterfall_offset_amount_triggered = QtCore.Signal()
     sig_waterfall_fill_area_triggered = QtCore.Signal()
+    sig_waterfall_conversion = QtCore.Signal(bool)
 
     toolitems = (
         ('Home', 'Center display on contents', 'mdi.home', 'on_home_clicked', None),
@@ -135,6 +136,9 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
     def on_home_clicked(self):
         self.sig_home_clicked.emit()
         self.push_current()
+
+    def waterfall_conversion(self, is_waterfall):
+        self.sig_waterfall_conversion.emit(is_waterfall)
 
     def set_waterfall_options_enabled(self, on):
         for action in ['waterfall_offset_amount', 'waterfall_reverse_order', 'waterfall_fill_area']:
