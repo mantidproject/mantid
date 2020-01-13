@@ -122,10 +122,12 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         # Combine multiple input runs, if required
         inputWorkspace = self._sumWorkspaces(inputWorkspaces, False, Prop.OUTPUT_WS_TOF_SUMMED,
                                              'The summed input workspaces in TOF')
-        firstTransWorkspace = self._sumWorkspaces(firstTransWorkspaces, True,
+        firstTransWorkspace = self._sumWorkspaces(
+            firstTransWorkspaces, True,
             Prop.OUTPUT_WS_FIRST_TRANS_SUMMED,
             'The summed input workspaces for the first transmission, in TOF')
-        secondTransWorkspace = self._sumWorkspaces(secondTransWorkspaces, True,
+        secondTransWorkspace = self._sumWorkspaces(
+            secondTransWorkspaces, True,
             Prop.OUTPUT_WS_SECOND_TRANS_SUMMED,
             'The summed input workspaces for the second transmission, in TOF')
         # Slice the input workspace, if required
@@ -426,7 +428,8 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         sliced_workspace_name = self._getSlicedWorkspaceGroupName(workspace)
         self.log().information('Slicing workspace ' + workspace + ' into ' + sliced_workspace_name)
         workspace = self._runSliceAlgorithm(workspace, sliced_workspace_name)
-        self._declareAndSetWorkspaceProperty(Prop.OUTPUT_WS_TOF_SLICED, sliced_workspace_name, workspace,
+        self._declareAndSetWorkspaceProperty(
+            Prop.OUTPUT_WS_TOF_SLICED, sliced_workspace_name, workspace,
             'The sliced TOF workspace(s)')
         return sliced_workspace_name
 
@@ -481,13 +484,16 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         self._setOutputPropertyIfInputNotSet(Prop.QSTEP, child_alg)
         self._setOutputPropertyIfInputNotSet(Prop.QMAX, child_alg)
         # Set the transmission workspace outputs
-        self._declareAndSetWorkspacePropertyFromChild(Prop.OUTPUT_WS_TRANS,
+        self._declareAndSetWorkspacePropertyFromChild(
+            Prop.OUTPUT_WS_TRANS,
             'Output transmission workspace in wavelength', child_alg)
         if self.isChild() or self._isDebug():
-            self._declareAndSetWorkspacePropertyFromChild(Prop.OUTPUT_WS_FIRST_TRANS,
+            self._declareAndSetWorkspacePropertyFromChild(
+                Prop.OUTPUT_WS_FIRST_TRANS,
                 'First transmission workspace in wavelength', child_alg)
             if not self.getProperty(Prop.SECOND_TRANS_RUNS).isDefault:
-                self._declareAndSetWorkspacePropertyFromChild(Prop.OUTPUT_WS_SECOND_TRANS,
+                self._declareAndSetWorkspacePropertyFromChild(
+                    Prop.OUTPUT_WS_SECOND_TRANS,
                     'Second transmission workspace in wavelength', child_alg)
 
     def _declareAndSetWorkspaceProperty(self, property_name, workspace_name, workspace, doc_string):
