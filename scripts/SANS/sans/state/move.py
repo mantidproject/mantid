@@ -13,55 +13,41 @@ from __future__ import (absolute_import, division, print_function)
 import copy
 import json
 
+from six import with_metaclass
+
 from sans.common.enums import (CanonicalCoordinates, SANSInstrument, DetectorType)
+from sans.state.JsonSerializable import JsonSerializable
 from sans.state.automatic_setters import automatic_setters
-from sans.state.state_base import (StateBase, FloatParameter, DictParameter,
-                                   StringWithNoneParameter, rename_descriptor_names)
 from sans.state.state_functions import (validation_message, set_detector_names, set_monitor_names)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
 # State
 # ----------------------------------------------------------------------------------------------------------------------
-@rename_descriptor_names
-class StateMoveDetector(StateBase):
-    x_translation_correction = FloatParameter()
-    y_translation_correction = FloatParameter()
-    z_translation_correction = FloatParameter()
 
-    rotation_correction = FloatParameter()
-    side_correction = FloatParameter()
-    radius_correction = FloatParameter()
-
-    x_tilt_correction = FloatParameter()
-    y_tilt_correction = FloatParameter()
-    z_tilt_correction = FloatParameter()
-
-    sample_centre_pos1 = FloatParameter()
-    sample_centre_pos2 = FloatParameter()
-
-    # Name of the detector
-    detector_name = StringWithNoneParameter()
-    detector_name_short = StringWithNoneParameter()
-
+class StateMoveDetector(with_metaclass(JsonSerializable)):
     def __init__(self):
         super(StateMoveDetector, self).__init__()
         # Translation correction
-        self.x_translation_correction = 0.0
-        self.y_translation_correction = 0.0
-        self.z_translation_correction = 0.0
+        self.x_translation_correction = 0.0  # : Float
+        self.y_translation_correction = 0.0  # : Float
+        self.z_translation_correction = 0.0  # : Float
 
-        self.rotation_correction = 0.0
-        self.side_correction = 0.0
-        self.radius_correction = 0.0
+        self.rotation_correction = 0.0  # : Float
+        self.side_correction = 0.0  # : Float
+        self.radius_correction = 0.0  # : Float
 
-        self.x_tilt_correction = 0.0
-        self.y_tilt_correction = 0.0
-        self.z_tilt_correction = 0.0
+        self.x_tilt_correction = 0.0  # : Float
+        self.y_tilt_correction = 0.0  # : Float
+        self.z_tilt_correction = 0.0  # : Float
 
         # Sample centre Pos 1 + Pos 2
-        self.sample_centre_pos1 = 0.0
-        self.sample_centre_pos2 = 0.0
+        self.sample_centre_pos1 = 0.0  # : Float
+        self.sample_centre_pos2 = 0.0  # : Float
+
+        # Name of the detector
+        self.detector_name = None  # : Str
+        self.detector_name_short = None  # : Str
 
     def validate(self):
         is_invalid = {}
@@ -80,19 +66,13 @@ class StateMoveDetector(StateBase):
                              "Please see: {0}".format(json.dumps(is_invalid)))
 
 
-@rename_descriptor_names
-class StateMove(StateBase):
-    sample_offset = FloatParameter()
-    detectors = DictParameter()
-    monitor_names = DictParameter()
-
-    sample_offset_direction = CanonicalCoordinates.Z
-
+class StateMove(with_metaclass(JsonSerializable)):
     def __init__(self):
         super(StateMove, self).__init__()
 
-        # Setup the sample offset
-        self.sample_offset = 0.0
+        self.sample_offset = 0.0  # : Float
+        self.detectors = None  # : Dict
+        self.monitor_names = None  # : Dict
 
         # The sample offset direction is Z for the ISIS instruments
         self.sample_offset_direction = CanonicalCoordinates.Z
@@ -107,14 +87,11 @@ class StateMove(StateBase):
             self.detectors[key].validate()
 
 
-@rename_descriptor_names
 class StateMoveLOQ(StateMove):
-    center_position = FloatParameter()
-
     def __init__(self):
         super(StateMoveLOQ, self).__init__()
         # Set the center_position in meter
-        self.center_position = 317.5 / 1000.
+        self.center_position = 317.5 / 1000.  # : Float
 
         # Set the monitor names
         self.monitor_names = {}
@@ -128,42 +105,25 @@ class StateMoveLOQ(StateMove):
         super(StateMoveLOQ, self).validate()
 
 
-@rename_descriptor_names
 class StateMoveSANS2D(StateMove):
-    hab_detector_radius = FloatParameter()
-    hab_detector_default_sd_m = FloatParameter()
-    hab_detector_default_x_m = FloatParameter()
-
-    lab_detector_default_sd_m = FloatParameter()
-
-    hab_detector_x = FloatParameter()
-    hab_detector_z = FloatParameter()
-
-    hab_detector_rotation = FloatParameter()
-
-    lab_detector_x = FloatParameter()
-    lab_detector_z = FloatParameter()
-
-    monitor_4_offset = FloatParameter()
-
     def __init__(self):
         super(StateMoveSANS2D, self).__init__()
         # Set the descriptors which corresponds to information which we gain through the IPF
-        self.hab_detector_radius = 306.0 / 1000.
-        self.hab_detector_default_sd_m = 4.0
-        self.hab_detector_default_x_m = 1.1
-        self.lab_detector_default_sd_m = 4.0
+        self.hab_detector_radius = 306.0 / 1000.  # : Float
+        self.hab_detector_default_sd_m = 4.0  # : Float
+        self.hab_detector_default_x_m = 1.1  # : Float
+        self.lab_detector_default_sd_m = 4.0  # : Float
 
         # The actual values are found on the workspace and should be used from there. This is only a fall back.
-        self.hab_detector_x = 0.0
-        self.hab_detector_z = 0.0
-        self.hab_detector_rotation = 0.0
-        self.lab_detector_x = 0.0
-        self.lab_detector_z = 0.0
+        self.hab_detector_x = 0.0  # : Float
+        self.hab_detector_z = 0.0  # : Float
+        self.hab_detector_rotation = 0.0  # : Float
+        self.lab_detector_x = 0.0  # : Float
+        self.lab_detector_z = 0.0  # : Float
 
         # Set the monitor names
         self.monitor_names = {}
-        self.monitor_4_offset = 0.0
+        self.monitor_4_offset = 0.0  # : Float
 
         # Setup the detectors
         self.detectors = {DetectorType.LAB.value: StateMoveDetector(),
@@ -173,15 +133,12 @@ class StateMoveSANS2D(StateMove):
         super(StateMoveSANS2D, self).validate()
 
 
-@rename_descriptor_names
 class StateMoveLARMOR(StateMove):
-    bench_rotation = FloatParameter()
-
     def __init__(self):
         super(StateMoveLARMOR, self).__init__()
 
         # Set a default for the bench rotation
-        self.bench_rotation = 0.0
+        self.bench_rotation = 0.0  # : Float
 
         # Set the monitor names
         self.monitor_names = {}
@@ -193,22 +150,16 @@ class StateMoveLARMOR(StateMove):
         super(StateMoveLARMOR, self).validate()
 
 
-@rename_descriptor_names
 class StateMoveZOOM(StateMove):
-
-    lab_detector_default_sd_m = FloatParameter()
-    monitor_4_offset = FloatParameter()
-    monitor_5_offset = FloatParameter()
-
     def __init__(self):
         super(StateMoveZOOM, self).__init__()
-        self.lab_detector_default_sd_m = 0.0
+        self.lab_detector_default_sd_m = 0.0  # : Float
 
         # Set the monitor names
         self.monitor_names = {}
 
-        self.monitor_4_offset = 0.0
-        self.monitor_5_offset = 0.0
+        self.monitor_4_offset = 0.0  # : Float
+        self.monitor_5_offset = 0.0  # : Float
 
         # Setup the detectors
         self.detectors = {DetectorType.LAB.value: StateMoveDetector()}

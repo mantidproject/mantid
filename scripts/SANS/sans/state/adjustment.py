@@ -9,30 +9,25 @@
 """State describing the adjustment workspace creation of the SANS reduction."""
 
 from __future__ import (absolute_import, division, print_function)
-import json
+
 import copy
-from sans.state.state_base import (StateBase, TypedParameter, rename_descriptor_names, BoolParameter,
-                                   validator_sub_state)
-from sans.state.calculate_transmission import StateCalculateTransmission
-from sans.state.normalize_to_monitor import StateNormalizeToMonitor
-from sans.state.wavelength_and_pixel_adjustment import StateWavelengthAndPixelAdjustment
-from sans.state.automatic_setters import (automatic_setters)
+import json
+
+from six import with_metaclass
+
 from sans.common.enums import SANSFacility
+from sans.state.JsonSerializable import JsonSerializable
+from sans.state.automatic_setters import automatic_setters
 
 
-# ----------------------------------------------------------------------------------------------------------------------
-# State
-# ----------------------------------------------------------------------------------------------------------------------
-@rename_descriptor_names
-class StateAdjustment(StateBase):
-    calculate_transmission = TypedParameter(StateCalculateTransmission, validator_sub_state)
-    normalize_to_monitor = TypedParameter(StateNormalizeToMonitor, validator_sub_state)
-    wavelength_and_pixel_adjustment = TypedParameter(StateWavelengthAndPixelAdjustment, validator_sub_state)
-    wide_angle_correction = BoolParameter()
+class StateAdjustment(with_metaclass(JsonSerializable)):
 
     def __init__(self):
         super(StateAdjustment, self).__init__()
-        self.wide_angle_correction = False
+        self.calculate_transmission = None  # : StateCalculateTransmission
+        self.normalize_to_monitor = None  # : StateNormalizeToMonitor
+        self.wavelength_and_pixel_adjustment = None  # : StateWavelengthAndPixelAdjustment
+        self.wide_angle_correction = False  # : Bool
 
     def validate(self):
         is_invalid = {}

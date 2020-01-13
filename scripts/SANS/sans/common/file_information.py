@@ -108,9 +108,7 @@ def find_sans_file(file_name):
             # TODO: If we only provide a run number for example 98843 for LOQ measurments, but have LARMOR specified as the
             #       Mantid instrument, then the FileFinder will search itself to death. This is a general Mantid issue.
             #       One way to handle this graceful would be a timeout option.
-            file_name_as_bytes = str.encode(file_name)
-            assert (type(file_name_as_bytes) == bytes)
-            runs = FileFinder.findRuns(file_name_as_bytes)
+            runs = FileFinder.findRuns(file_name)
             if runs:
                 full_path = runs[0]
     except RuntimeError:

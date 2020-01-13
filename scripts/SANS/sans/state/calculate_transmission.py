@@ -12,33 +12,25 @@ from __future__ import (absolute_import, division, print_function)
 import json
 import copy
 import abc
-import six
+from six import with_metaclass, itervalues, add_metaclass
 
-from sans.state.state_base import (StateBase, rename_descriptor_names, PositiveIntegerParameter, BoolParameter,
-                                   PositiveFloatParameter, FloatParameter, DictParameter,
-                                   StringListParameter, PositiveFloatWithNoneParameter, PositiveFloatListParameter)
+from sans.state.JsonSerializable import JsonSerializable
 from sans.common.enums import (RebinType, RangeStepType, FitType, DataType, SANSInstrument)
 from sans.common.configurations import Configurations
+from sans.state.automatic_setters import automatic_setters
 from sans.state.state_functions import (is_pure_none_or_not_none, validation_message,
                                         is_not_none_and_first_larger_than_second, one_is_none)
-from sans.state.automatic_setters import (automatic_setters)
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
 
 
-# ----------------------------------------------------------------------------------------------------------------------
-# State
-# ----------------------------------------------------------------------------------------------------------------------
-@rename_descriptor_names
-class StateTransmissionFit(StateBase):
-    fit_type = FitType.LOGARITHMIC
-    polynomial_order = PositiveIntegerParameter()
-    wavelength_low = PositiveFloatWithNoneParameter()
-    wavelength_high = PositiveFloatWithNoneParameter()
+class StateTransmissionFit(with_metaclass(JsonSerializable)):
 
     def __init__(self):
         super(StateTransmissionFit, self).__init__()
         self.fit_type = FitType.LOGARITHMIC
-        self.polynomial_order = 0
+        self.polynomial_order = 0  # : Int (Positive)
+        self.wavelength_low = None  # : Float (Optional)
+        self.wavelength_high = None  # : Float (Optional)
 
     def validate(self):
         is_invalid = {}
@@ -67,65 +59,54 @@ class StateTransmissionFit(StateBase):
                              "Please see: {0}".format(json.dumps(is_invalid)))
 
 
-@rename_descriptor_names
-class StateCalculateTransmission(StateBase):
-    # -----------------------
-    # Transmission
-    # -----------------------
-    transmission_radius_on_detector = PositiveFloatParameter()
-    transmission_roi_files = StringListParameter()
-    transmission_mask_files = StringListParameter()
-
-    default_transmission_monitor = PositiveIntegerParameter()
-    transmission_monitor = PositiveIntegerParameter()
-
-    default_incident_monitor = PositiveIntegerParameter()
-    incident_monitor = PositiveIntegerParameter()
-
-    # ----------------------
-    # Prompt peak correction
-    # ----------------------
-    prompt_peak_correction_min = PositiveFloatParameter()
-    prompt_peak_correction_max = PositiveFloatParameter()
-    prompt_peak_correction_enabled = BoolParameter()
-
-    # ----------------
-    # Wavelength rebin
-    # ----------------
-    wavelength_low = PositiveFloatListParameter()
-    wavelength_high = PositiveFloatListParameter()
-    wavelength_step = PositiveFloatParameter()
-    rebin_type = RebinType.REBIN
-    wavelength_step_type = RangeStepType.NOT_SET
-
-    use_full_wavelength_range = BoolParameter()
-    wavelength_full_range_low = PositiveFloatParameter()
-    wavelength_full_range_high = PositiveFloatParameter()
-
-    # -----------------------
-    # Background correction
-    # ----------------------
-    background_TOF_general_start = FloatParameter()
-    background_TOF_general_stop = FloatParameter()
-    background_TOF_monitor_start = DictParameter()
-    background_TOF_monitor_stop = DictParameter()
-    background_TOF_roi_start = FloatParameter()
-    background_TOF_roi_stop = FloatParameter()
-
-    fit = {DataType.CAN : StateTransmissionFit(),
-           DataType.SAMPLE : StateTransmissionFit()}
-
+class StateCalculateTransmission(with_metaclass(JsonSerializable)):
     def __init__(self):
         super(StateCalculateTransmission, self).__init__()
-        # The keys of this dictionaries are the spectrum number of the monitors (as a string)
-        self.background_TOF_monitor_start = {}
-        self.background_TOF_monitor_stop = {}
-        self.use_full_wavelength_range = False
+        # -----------------------
+        # Transmission
+        # -----------------------
+        self.transmission_radius_on_detector = None  # : Float (Positive)
+        self.transmission_roi_files = None  # : List[Str]
+        self.transmission_mask_files = None  # : List[Str]
 
-        # Default rebin type is a standard Rebin
+        self.default_transmission_monitor = None  # : Int (Positive)
+        self.transmission_monitor = None  # : Int (Positive)
+
+        self.default_incident_monitor = None  # : Int (Positive)
+        self.incident_monitor = None  # : Int (Positive)
+
+        # ----------------------
+        # Prompt peak correction
+        # ----------------------
+        self.prompt_peak_correction_min = None  # : Float (Positive)
+        self.prompt_peak_correction_max = None  # : Float (Positive)
+        self.prompt_peak_correction_enabled = False  # : Bool
+
+        # ----------------
+        # Wavelength rebin
+        # ----------------
+        self.wavelength_low = None  # : List[Float] (Positive)
+        self.wavelength_high = None  # : List[Float] (Positive)
+        self.wavelength_step = None  # : Float (Positive)
         self.rebin_type = RebinType.REBIN
+        self.wavelength_step_type = RangeStepType.NOT_SET
 
-        self.prompt_peak_correction_enabled = False
+        self.use_full_wavelength_range = False  # : Bool
+        self.wavelength_full_range_low = None  # : Float (Positive)
+        self.wavelength_full_range_high = None  # : Float (Positive)
+
+        # -----------------------
+        # Background correction
+        # ----------------------
+        self.background_TOF_general_start = None  # : Float
+        self.background_TOF_general_stop = None  # : Float
+        self.background_TOF_monitor_start = {}  # : Dict
+        self.background_TOF_monitor_stop = {}  # : Dict
+        self.background_TOF_roi_start = None  # : Float
+        self.background_TOF_roi_stop = None  # : Float
+
+        self.fit = {DataType.CAN.value: StateTransmissionFit(),
+                    DataType.SAMPLE.value: StateTransmissionFit()}
 
     def validate(self):  # noqa
         is_invalid = {}
@@ -142,9 +123,9 @@ class StateCalculateTransmission(StateBase):
         # --------------
         # Transmission, either we need some ROI (ie radius, roi files /mask files) or a transmission monitor
         # --------------
-        has_no_transmission_monitor_setting = self.transmission_monitor is None and\
+        has_no_transmission_monitor_setting = self.transmission_monitor is None and \
                                               self.default_transmission_monitor is None  # noqa
-        has_no_transmission_roi_setting = self.transmission_radius_on_detector is None and\
+        has_no_transmission_roi_setting = self.transmission_radius_on_detector is None and \
                                           self.transmission_roi_files is None  # noqa
         if has_no_transmission_monitor_setting and has_no_transmission_roi_setting:
             entry = validation_message("No transmission settings were specified.",
@@ -188,7 +169,7 @@ class StateCalculateTransmission(StateBase):
         if self.wavelength_step_type is RangeStepType.NOT_SET:
             entry = validation_message("A wavelength entry has not been set.",
                                        "Make sure that all entries are set.",
-                                       {"wavelength_step_type" : self.wavelength_step_type})
+                                       {"wavelength_step_type": self.wavelength_step_type})
             is_invalid.update(entry)
 
         if is_not_none_and_first_larger_than_second([self.wavelength_low, self.wavelength_high]):
@@ -276,7 +257,7 @@ class StateCalculateTransmission(StateBase):
                                                     "background_TOF_monitor_stop": self.background_TOF_monitor_stop})
                         is_invalid.update(entry)
 
-        for fit_type in six.itervalues(self.fit):
+        for fit_type in itervalues(self.fit):
             fit_type.validate()
 
         if is_invalid:
@@ -359,7 +340,7 @@ def set_default_monitors(calculate_transmission_info, data_info):
 # ---------------------------------------
 # State builders
 # ---------------------------------------
-@six.add_metaclass(abc.ABCMeta)
+@add_metaclass(abc.ABCMeta)
 class StateCalculateTransmissionBuilderCommon(object):
     def __init__(self, state):
         self.state = state
@@ -371,28 +352,28 @@ class StateCalculateTransmissionBuilderCommon(object):
         self.state.rebin_type = val
 
     def set_can_fit_type(self, val):
-        self.state.fit[DataType.CAN].fit_type = val
+        self.state.fit[DataType.CAN.value].fit_type = val
 
     def set_can_polynomial_order(self, val):
-        self.state.fit[DataType.CAN].polynomial_order = val
+        self.state.fit[DataType.CAN.value].polynomial_order = val
 
     def set_can_wavelength_low(self, val):
-        self.state.fit[DataType.CAN].wavelength_low = val
+        self.state.fit[DataType.CAN.value].wavelength_low = val
 
     def set_can_wavelength_high(self, val):
-        self.state.fit[DataType.CAN].wavelength_high = val
+        self.state.fit[DataType.CAN.value].wavelength_high = val
 
     def set_sample_fit_type(self, val):
-        self.state.fit[DataType.SAMPLE].fit_type = val
+        self.state.fit[DataType.SAMPLE.value].fit_type = val
 
     def set_sample_polynomial_order(self, val):
-        self.state.fit[DataType.SAMPLE].polynomial_order = val
+        self.state.fit[DataType.SAMPLE.value].polynomial_order = val
 
     def set_sample_wavelength_low(self, val):
-        self.state.fit[DataType.SAMPLE].wavelength_low = val
+        self.state.fit[DataType.SAMPLE.value].wavelength_low = val
 
     def set_sample_wavelength_high(self, val):
-        self.state.fit[DataType.SAMPLE].wavelength_high = val
+        self.state.fit[DataType.SAMPLE.value].wavelength_high = val
 
 
 class StateCalculateTransmissionBuilderLOQ(StateCalculateTransmissionBuilderCommon):

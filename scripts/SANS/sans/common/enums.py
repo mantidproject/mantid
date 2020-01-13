@@ -8,8 +8,10 @@
 
 from __future__ import (absolute_import, division, print_function)
 from mantid.py3compat import Enum
+from sans.state.JsonSerializable import json_serializable
 
 
+@json_serializable
 class SANSInstrument(Enum):
     NO_INSTRUMENT = "No Instrument"
 
@@ -19,6 +21,7 @@ class SANSInstrument(Enum):
     ZOOM = "ZOOM"
 
 
+@json_serializable
 class SANSFacility(Enum):
     NO_FACILITY = "No Facility"
     ISIS = "ISIS"
@@ -38,12 +41,14 @@ class SANSDataType(Enum):
     SAMPLE_TRANSMISSION = "Sample Transmission"
 
 
+@json_serializable
 class CanonicalCoordinates(Enum):
     X = "X"
     Y = "Y"
     Z = "Z"
 
 
+@json_serializable
 class ReductionMode(Enum):
     NOT_SET = "Not Set"
     ALL = "All"
@@ -52,6 +57,7 @@ class ReductionMode(Enum):
     LAB = "LAB"
 
 
+@json_serializable
 class ReductionDimensionality(Enum):
     ONE_DIM = "OneDim"
     TWO_DIM = "TwoDim"
@@ -83,6 +89,7 @@ class OutputParts(Enum):
     NORM = "Norm"
 
 
+@json_serializable
 class FitModeForMerge(Enum):
     """
     Defines which fit operation to use during the merge of two reductions.
@@ -109,6 +116,7 @@ class TransmissionType(Enum):
     UNFITTED = "Unfitted"
 
 
+@json_serializable
 class RangeStepType(Enum):
     """
     Defines the step type of a range
@@ -120,11 +128,13 @@ class RangeStepType(Enum):
     RANGE_LOG = "RangeLog"
 
 
+@json_serializable
 class RebinType(Enum):
     INTERPOLATING_REBIN = "InterpolatingRebin"
     REBIN = "Rebin"
 
 
+@json_serializable
 class SaveType(Enum):
     CAN_SAS = "CanSAS"
     CSV = "CSV"
@@ -135,6 +145,7 @@ class SaveType(Enum):
     RKH = "RKH"
 
 
+@json_serializable
 class FitType(Enum):
     """
     Defines possible fit types for the transmission calculation
@@ -145,6 +156,7 @@ class FitType(Enum):
     NO_FIT = "NotFit"
 
 
+@json_serializable
 class SampleShape(Enum):
     """
     Defines the sample shape types
