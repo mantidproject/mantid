@@ -1278,13 +1278,14 @@ RebinnedOutput_sptr createRebinnedOutputWorkspace() {
   // Set representation
   outputWS->finalize();
 
-  // Make errors squared rooted
+  // Make errors squared rooted and set sqrd err flag
   for (int i = 0; i < numHist; ++i) {
     auto &mutableE = outputWS->mutableE(i);
     for (int j = 0; j < numX - 1; ++j) {
       mutableE[j] = std::sqrt(mutableE[j]);
     }
   }
+  outputWS->setSqrdErrors(false);
 
   return outputWS;
 }

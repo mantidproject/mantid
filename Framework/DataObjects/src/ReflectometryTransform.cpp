@@ -513,6 +513,7 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
       }
     }
   }
+  FractionalRebinning::finalizeFractionalRebin(*outWS);
   outWS->finalize();
   FractionalRebinning::normaliseOutput(outWS, inputWS);
   // Set the output spectrum-detector mapping
