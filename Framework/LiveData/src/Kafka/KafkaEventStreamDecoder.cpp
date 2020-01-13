@@ -631,19 +631,19 @@ void KafkaEventStreamDecoder::initLocalCaches(
   // Buffers for each period
   size_t nperiods = runStartData.nPeriods;
   if (nperiods == 0) {
-    g_log.warning(
-        "KafkaEventStreamDecoder - Stream reports 0 periods. This is "
-        "an error by the data producer. Number of periods being set to 1.");
-    nperiods = 1;
+      g_log.warning(
+          "KafkaEventStreamDecoder - Stream reports 0 periods. This is "
+          "an error by the data producer. Number of periods being set to 1.");
+      nperiods = 1;
   }
   {
-    std::lock_guard<std::mutex> workspaceLock(m_mutex);
-    m_localEvents.resize(nperiods);
-    m_localEvents[0] = eventBuffer;
-    for (size_t i = 1; i < nperiods; ++i) {
-      // A clone should be cheap here as there are no events yet
-      m_localEvents[i] = eventBuffer->clone();
-    }
+      std::lock_guard<std::mutex> workspaceLock(m_mutex);
+      m_localEvents.resize(nperiods);
+      m_localEvents[0] = eventBuffer;
+      for (size_t i = 1; i < nperiods; ++i) {
+        // A clone should be cheap here as there are no events yet
+        m_localEvents[i] = eventBuffer->clone();
+      }
   }
 
   // New caches so LoadLiveData's output workspace needs to be replaced
