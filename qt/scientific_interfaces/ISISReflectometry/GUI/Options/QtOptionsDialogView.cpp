@@ -117,6 +117,7 @@ void QtOptionsDialogView::notifyLoadOptions() { m_notifyee->loadOptions(); }
 void QtOptionsDialogView::notifySaveOptions() { m_notifyee->saveOptions(); }
 
 void QtOptionsDialogView::closeEvent(QCloseEvent *event) {
+  Q_UNUSED(event);
   notifyLoadOptions();
   this->reject();
 }
