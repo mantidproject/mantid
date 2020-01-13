@@ -399,58 +399,96 @@ public:
     }
   }
 
-  void test_one_run_sets_output_workspace() {
+  void test_one_run_stores_output_workspace() {
     CreateTransmissionWorkspace2 alg;
     setup_test_to_check_output_workspaces(alg);
     alg.setPropertyValue("OutputWorkspace", "outWS");
+    alg.execute();
+    check_stored_lambda_workspace("outWS");
+    check_output_not_set(alg, "OutputWorkspaceFirstTransmission",
+                         "TRANS_LAM_1234");
+  }
+
+  void test_one_run_sets_output_workspace_when_child() {
+    CreateTransmissionWorkspace2 alg;
+    setup_test_to_check_output_workspaces(alg);
+    alg.setPropertyValue("OutputWorkspace", "outWS");
+    alg.setChild(true);
     alg.execute();
     check_output_lambda_workspace(alg, "OutputWorkspace", "outWS");
     check_output_not_set(alg, "OutputWorkspaceFirstTransmission",
                          "TRANS_LAM_1234");
   }
 
-  void test_one_run_sets_output_workspace_with_default_name() {
+  void test_one_run_stores_output_workspace_with_default_name() {
     CreateTransmissionWorkspace2 alg;
     setup_test_to_check_output_workspaces(alg);
+    alg.execute();
+    check_stored_lambda_workspace("TRANS_LAM_1234");
+  }
+
+  void test_one_run_sets_output_workspace_with_default_name_when_child() {
+    CreateTransmissionWorkspace2 alg;
+    setup_test_to_check_output_workspaces(alg);
+    alg.setChild(true);
     alg.execute();
     check_output_lambda_workspace(alg, "OutputWorkspace", "TRANS_LAM_1234");
   }
 
-  void test_two_runs_sets_stitched_output_workspace() {
+  void test_two_runs_stores_stitched_output_workspace_only() {
     CreateTransmissionWorkspace2 alg;
     setup_test_to_check_output_workspaces_with_2_inputs(alg);
     alg.setPropertyValue("OutputWorkspace", "outWS");
     alg.execute();
+    check_stored_lambda_workspace("outWS");
+    check_output_not_set(alg, "OutputWorkspaceFirstTransmission",
+                         "TRANS_LAM_1234");
+    check_output_not_set(alg, "OutputWorkspaceSecondTransmission",
+                         "TRANS_LAM_4321");
+  }
+
+  void test_two_runs_sets_all_output_workspaces_when_child() {
+    CreateTransmissionWorkspace2 alg;
+    setup_test_to_check_output_workspaces_with_2_inputs(alg);
+    alg.setPropertyValue("OutputWorkspace", "outWS");
+    alg.setChild(true);
+    alg.execute();
     check_output_lambda_workspace(alg, "OutputWorkspace", "outWS");
-    check_output_not_set(alg, "OutputWorkspaceFirstTransmission",
-                         "TRANS_LAM_1234");
-    check_output_not_set(alg, "OutputWorkspaceSecondTransmission",
-                         "TRANS_LAM_4321");
-  }
-
-  void test_two_runs_sets_stitched_output_workspace_with_default_name() {
-    CreateTransmissionWorkspace2 alg;
-    setup_test_to_check_output_workspaces_with_2_inputs(alg);
-    alg.execute();
-    check_output_lambda_workspace(alg, "OutputWorkspace",
-                                  "TRANS_LAM_1234_4321");
-    check_output_not_set(alg, "OutputWorkspaceFirstTransmission",
-                         "TRANS_LAM_1234");
-    check_output_not_set(alg, "OutputWorkspaceSecondTransmission",
-                         "TRANS_LAM_4321");
-  }
-
-  void test_two_runs_sets_all_lambda_workspace_outputs_when_debug_enabled() {
-    CreateTransmissionWorkspace2 alg;
-    setup_test_to_check_output_workspaces_with_2_inputs(alg);
-    alg.setProperty("Debug", true);
-    alg.execute();
     check_output_lambda_workspace(alg, "OutputWorkspaceFirstTransmission",
                                   "TRANS_LAM_1234");
     check_output_lambda_workspace(alg, "OutputWorkspaceSecondTransmission",
                                   "TRANS_LAM_4321");
+  }
+
+  void test_two_runs_stores_stitched_output_workspace_with_default_name() {
+    CreateTransmissionWorkspace2 alg;
+    setup_test_to_check_output_workspaces_with_2_inputs(alg);
+    alg.execute();
+    check_stored_lambda_workspace("TRANS_LAM_1234_4321");
+    check_output_not_set(alg, "OutputWorkspaceFirstTransmission",
+                         "TRANS_LAM_1234");
+    check_output_not_set(alg, "OutputWorkspaceSecondTransmission",
+                         "TRANS_LAM_4321");
+  }
+
+  void
+  test_two_runs_sets_stitched_output_workspace_with_default_name_when_child() {
+    CreateTransmissionWorkspace2 alg;
+    setup_test_to_check_output_workspaces_with_2_inputs(alg);
+    alg.setChild(true);
+    alg.execute();
     check_output_lambda_workspace(alg, "OutputWorkspace",
                                   "TRANS_LAM_1234_4321");
+  }
+
+  void test_two_runs_sets_all_output_workspaces_when_debug_enabled() {
+    CreateTransmissionWorkspace2 alg;
+    setup_test_to_check_output_workspaces_with_2_inputs(alg);
+    alg.setProperty("Debug", true);
+    alg.execute();
+    check_stored_lambda_workspace("TRANS_LAM_1234_4321");
+    check_stored_lambda_workspace("TRANS_LAM_1234");
+    check_stored_lambda_workspace("TRANS_LAM_4321");
   }
 
   void test_two_runs_stores_no_lambda_workspaces_in_ADS_when_child() {
@@ -484,22 +522,26 @@ public:
   void test_two_runs_sets_interim_lambda_output_workspaces_when_debug() {
     CreateTransmissionWorkspace2 alg;
     setup_test_to_check_output_workspaces_with_2_inputs(alg);
-    alg.setChild(false);
     alg.setProperty("Debug", true);
     alg.execute();
-    check_output_lambda_workspace(alg, "OutputWorkspace",
-                                  "TRANS_LAM_1234_4321");
-    check_output_lambda_workspace(alg, "OutputWorkspaceFirstTransmission",
-                                  "TRANS_LAM_1234");
-    check_output_lambda_workspace(alg, "OutputWorkspaceSecondTransmission",
-                                  "TRANS_LAM_4321");
+    check_stored_lambda_workspace("TRANS_LAM_1234_4321");
+    check_stored_lambda_workspace("TRANS_LAM_1234");
+    check_stored_lambda_workspace("TRANS_LAM_4321");
   }
 
-  void test_first_trans_run_is_not_output_if_name_not_found() {
+  void test_throws_if_first_trans_name_not_found() {
     CreateTransmissionWorkspace2 alg;
     setup_test_to_check_output_workspaces_with_2_inputs(alg, false, true);
-    alg.setChild(false);
     alg.setProperty("Debug", true);
+    alg.execute();
+    TS_ASSERT_EQUALS(alg.isExecuted(), false);
+  }
+
+  void test_first_trans_run_is_not_output_if_name_not_found_when_child() {
+    CreateTransmissionWorkspace2 alg;
+    setup_test_to_check_output_workspaces_with_2_inputs(alg, false, true);
+    alg.setProperty("Debug", true);
+    alg.setChild(true);
     alg.execute();
     check_output_not_set(alg, "OutputWorkspaceFirstTransmission",
                          "TRANS_LAM_1234");
@@ -507,37 +549,64 @@ public:
                                   "TRANS_LAM_4321");
   }
 
-  void test_second_trans_run_is_not_output_if_name_not_found() {
+  void
+  test_second_trans_run_is_still_output_if_first_trans_run_name_not_found_when_child() {
+    CreateTransmissionWorkspace2 alg;
+    setup_test_to_check_output_workspaces_with_2_inputs(alg, false, true);
+    alg.setProperty("Debug", true);
+    alg.setChild(true);
+    alg.execute();
+    check_output_lambda_workspace(alg, "OutputWorkspaceSecondTransmission",
+                                  "TRANS_LAM_4321");
+  }
+
+  void
+  test_stitched_trans_run_is_still_output_if_first_run_name_not_found_when_child() {
+    CreateTransmissionWorkspace2 alg;
+    setup_test_to_check_output_workspaces_with_2_inputs(alg, false, true);
+    alg.setProperty("Debug", true);
+    alg.setChild(true);
+    alg.execute();
+    check_output_lambda_workspace(alg, "OutputWorkspace", "");
+  }
+
+  void test_throws_if_second_trans_name_not_found() {
     CreateTransmissionWorkspace2 alg;
     setup_test_to_check_output_workspaces_with_2_inputs(alg, true, false);
     alg.setProperty("Debug", true);
     alg.execute();
+    TS_ASSERT_EQUALS(alg.isExecuted(), false);
+  }
+
+  void test_second_trans_run_is_not_output_if_name_not_found_when_child() {
+    CreateTransmissionWorkspace2 alg;
+    setup_test_to_check_output_workspaces_with_2_inputs(alg, true, false);
+    alg.setProperty("Debug", true);
+    alg.setChild(true);
+    alg.execute();
     check_output_not_set(alg, "OutputWorkspaceSecondTransmission",
                          "TRANS_LAM_4321");
+  }
+
+  void
+  test_first_trans_run_is_still_output_if_second_run_name_not_found_when_child() {
+    CreateTransmissionWorkspace2 alg;
+    setup_test_to_check_output_workspaces_with_2_inputs(alg, true, false);
+    alg.setProperty("Debug", true);
+    alg.setChild(true);
+    alg.execute();
     check_output_lambda_workspace(alg, "OutputWorkspaceFirstTransmission",
                                   "TRANS_LAM_1234");
   }
 
-  void test_stitched_trans_run_is_not_output_if_first_name_not_found() {
-    CreateTransmissionWorkspace2 alg;
-    setup_test_to_check_output_workspaces_with_2_inputs(alg, false, true);
-    alg.execute();
-    check_output_not_set(alg, "OutputWorkspace", "TRANS_LAM_1234_4321");
-  }
-
-  void test_stitched_trans_run_is_not_output_if_second_name_not_found() {
+  void
+  test_stitched_trans_run_is_still_output_if_second_run_name_not_found_when_child() {
     CreateTransmissionWorkspace2 alg;
     setup_test_to_check_output_workspaces_with_2_inputs(alg, true, false);
+    alg.setProperty("Debug", true);
+    alg.setChild(true);
     alg.execute();
-    check_output_not_set(alg, "OutputWorkspace", "TRANS_LAM_1234_4321");
-  }
-
-  void test_output_workspace_is_still_returned_even_if_name_not_found() {
-    CreateTransmissionWorkspace2 alg;
-    setup_test_to_check_output_workspaces_with_2_inputs(alg, false, true);
-    alg.execute();
-    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
-    check_lambda_workspace(outWS);
+    check_output_lambda_workspace(alg, "OutputWorkspace", "");
   }
 
 private:
@@ -571,6 +640,16 @@ private:
     TS_ASSERT_EQUALS(alg.getPropertyValue(propertyName), name);
     MatrixWorkspace_sptr outWS = alg.getProperty(propertyName);
     check_lambda_workspace(outWS);
+  }
+
+  void check_stored_lambda_workspace(std::string const &name) {
+    auto exists = AnalysisDataService::Instance().doesExist(name);
+    TS_ASSERT(exists);
+    if (exists) {
+      auto ws =
+          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
+      check_lambda_workspace(ws);
+    }
   }
 
   void check_lambda_workspace(MatrixWorkspace_sptr ws) {

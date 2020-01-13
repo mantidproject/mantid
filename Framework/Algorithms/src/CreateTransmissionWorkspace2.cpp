@@ -233,7 +233,9 @@ CreateTransmissionWorkspace2::getRunNumber(std::string const &propertyName) {
   return runNumber;
 }
 
-/** Store a transition run in ADS
+/** Output an interim transmission run if in debug mode or if running as a
+ * child algorithm. Note that the workspace will only be output if a sensible
+ * name can be constructed, which requires the workspace to have a run number.
  * @param which Which of the runs to store: 1 - first, 2 - second.
  * @param ws A workspace to store.
  */
@@ -261,26 +263,47 @@ void CreateTransmissionWorkspace2::setOutputTransmissionRun(
   setProperty(propertyName, ws);
 }
 
-/** Store the stitched transition workspace run in ADS
+/** Output the final transmission workspace
  * @param ws A workspace to store.
+ * @throws If the output workspace does not have a name and a default could not
+ * be found
  */
 void CreateTransmissionWorkspace2::setOutputWorkspace(
     API::MatrixWorkspace_sptr ws) {
-  // If the output name is not set, attempt to set a sensible
-  // default based on the run number. If a required run number
-  // is missing, then there's not much we can do so leave it empty.
-  if (!m_missingRunNumber && (isDefault("OutputWorkspace") ||
-                              getPropertyValue("OutputWorkspace").empty())) {
-    std::string name = TRANS_LAM_PREFIX;
-    if (!m_firstTransmissionRunNumber.empty()) {
-      name.append(m_firstTransmissionRunNumber);
-    }
-    if (!m_secondTransmissionRunNumber.empty()) {
-      name.append("_");
-      name.append(m_secondTransmissionRunNumber);
-    }
-    setPropertyValue("OutputWorkspace", name);
+  // If the user provided an output name, just set the value
+  if (!isDefault("OutputWorkspace") &&
+      !getPropertyValue("OutputWorkspace").empty()) {
+    setProperty("OutputWorkspace", ws);
+    return;
   }
+
+  // Otherwise, we want to set a default name based on the run number. First
+  // check if we have one.
+  if (m_missingRunNumber) {
+    // If we're running as a child algorithm then we can return the output
+    // without a name; otherwise we can't do much so throw
+    if (isChild()) {
+      setProperty("OutputWorkspace", ws);
+      return;
+    } else {
+      throw std::runtime_error(
+          "Input workspace has no run number; cannot set default name for the "
+          "output workspace. Please specify a name using the OutputWorkspace "
+          "property.");
+    }
+  }
+
+  // Construct the default name
+  std::string outputName = TRANS_LAM_PREFIX;
+  if (!m_firstTransmissionRunNumber.empty()) {
+    outputName.append(m_firstTransmissionRunNumber);
+  }
+  if (!m_secondTransmissionRunNumber.empty()) {
+    outputName.append("_");
+    outputName.append(m_secondTransmissionRunNumber);
+  }
+
+  setPropertyValue("OutputWorkspace", outputName);
   setProperty("OutputWorkspace", ws);
 }
 } // namespace Algorithms
