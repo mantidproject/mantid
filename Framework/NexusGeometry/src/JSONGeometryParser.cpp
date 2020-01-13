@@ -518,7 +518,9 @@ void JSONGeometryParser::extractMonitorContent() {
     Monitor mon;
 
     mon.componentName = name;
-    mon.detectorID = -monitorID;
+    mon.detectorID =
+        -monitorID; // ensure unique IDs even if monitor data is never ingested
+                    // otherwise there are issues building the instrument.
     ++monitorID;
     for (const auto &child : children) {
       const auto &val = child[VALUES];
@@ -526,7 +528,7 @@ void JSONGeometryParser::extractMonitorContent() {
         mon.name = val.asString();
       else if (child[NAME] == DETECTOR_ID || child[NAME] == "detector_number") {
         mon.detectorID = val.asInt();
-        --monitorID; // ids stay continuous.
+        --monitorID; // ids stay continuous (and deterministic).
       } else if (child[NAME] == "events")
         extractMonitorEventStream(child, mon);
       else if (child[NAME] == "waveforms")

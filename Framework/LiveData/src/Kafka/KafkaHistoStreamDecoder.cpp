@@ -224,6 +224,12 @@ void KafkaHistoStreamDecoder::initLocalCaches(
     histoBuffer->getAxis(0)->unit() =
         Kernel::UnitFactory::Instance().create("TOF");
     histoBuffer->setYUnit("Counts");
+
+    /* Need a mapping with spectra numbers starting at zero */
+    histoBuffer->rebuildSpectraMapping(true, 0);
+    histoBuffer->getAxis(0)->unit() =
+        Kernel::UnitFactory::Instance().create("TOF");
+    histoBuffer->setYUnit("Counts");
   } else {
     auto spDetMsg = GetSpectraDetectorMapping(
         reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
@@ -245,15 +251,10 @@ void KafkaHistoStreamDecoder::initLocalCaches(
   }
 
   // Load the instrument if possible but continue if we can't
-  if (!instName.empty()) {
-    loadInstrument<DataObjects::Workspace2D>(instName, histoBuffer,
-                                             jsonGeometry);
-    if (rawMsgBuffer.empty()) {
-      histoBuffer->rebuildSpectraMapping();
-    }
-  } else
+  if (!loadInstrument<DataObjects::Workspace2D>(instName, histoBuffer,
+                                                jsonGeometry))
     g_log.warning(
-        "Empty instrument name received. Continuing without instrument");
+        "Instrument could not be loaded. Continuing without instrument");
 
   auto &mutableRun = histoBuffer->mutableRun();
   // Run start. Cache locally for computing frame times
