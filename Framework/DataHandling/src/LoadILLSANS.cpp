@@ -123,18 +123,23 @@ void LoadILLSANS::exec() {
       moveSource();
     }
 
+  } else if (m_instrumentName == "D16") {
+    initWorkSpace(firstEntry, instrumentPath);
+    progress.report("Loading the instrument " + m_instrumentName);
+    runLoadInstrument();
+
+    double distance = firstEntry.getFloat(instrumentPath + "/Det/value") /
+                      1000; // mm to metre
+    const double angle = firstEntry.getFloat(instrumentPath + "/Gamma/value");
+    placeD16(angle, distance, "detector");
+
   } else {
     initWorkSpace(firstEntry, instrumentPath);
     progress.report("Loading the instrument " + m_instrumentName);
     runLoadInstrument();
-    double distance;
-    if (m_instrumentName == "D16") {
-      distance = firstEntry.getFloat(instrumentPath + "/Det/value") /
-                 1000; // mm to metre
-    } else {
-      distance = m_loader.getDoubleFromNexusPath(
-          firstEntry, instrumentPath + "/detector/det_calc");
-    }
+    double distance = m_loader.getDoubleFromNexusPath(
+        firstEntry, instrumentPath + "/detector/det_calc");
+
     progress.report("Moving detectors");
     moveDetectorDistance(distance, "detector");
     if (m_instrumentName == "D22") {
@@ -146,18 +151,13 @@ void LoadILLSANS::exec() {
           firstEntry, instrumentPath + "/detector/dan_actual");
       rotateD22(angle, "detector");*/
     }
-
-    if (m_instrumentName == "D16") {
-      const double angle = firstEntry.getFloat(instrumentPath + "/Gamma/value");
-      rotateInstrument(angle, "detector");
-    }
   }
 
   progress.report("Setting sample logs");
   setFinalProperties(filename);
   setPixelSize();
   setProperty("OutputWorkspace", m_localWorkspace);
-}
+} // namespace DataHandling
 
 /**
  * Set member variable with the instrument name
@@ -215,7 +215,7 @@ LoadILLSANS::getDetectorPositionD33(const NeXus::NXEntry &firstEntry,
 }
 
 /**
- * Loads data for D11 and D22
+ * Loads data for D11, D16 and D22
  */
 void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry,
                                 const std::string &instrumentPath) {
@@ -525,7 +525,7 @@ void LoadILLSANS::moveDetectorDistance(double distance,
 }
 
 /**
- * Rotates D22 detector around y-axis
+ * Rotates instrument detector around y-axis in place
  * @param angle : the angle to rotate [degree]
  * @param componentName : "detector"
  */
@@ -543,6 +543,31 @@ void LoadILLSANS::rotateInstrument(double angle,
   rotater->executeAsChildAlg();
   g_log.debug() << "Rotating component '" << componentName
                 << "' to angle = " << angle << " degrees.\n";
+}
+
+/**
+ * @brief LoadILLSANS::placeD16 : place the D16 detector.
+ * @param angle : the angle between its center and the transmitted beam
+ * @param distance : the distance between its center and the sample
+ * @param componentName : "detector"
+ */
+void LoadILLSANS::placeD16(double angle, double distance,
+                           const std::string &componentName) {
+  API::IAlgorithm_sptr mover = createChildAlgorithm("MoveInstrumentComponent");
+  mover->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
+  mover->setProperty("ComponentName", componentName);
+  mover->setProperty("X", sin(angle * M_PI / 180) * distance);
+  mover->setProperty("Y", 0.);
+  mover->setProperty("Z", cos(angle * M_PI / 180) * distance);
+  mover->setProperty("RelativePosition", false);
+  mover->executeAsChildAlg();
+
+  // rotate the detector so it faces the sample.
+  rotateInstrument(angle, componentName);
+
+  g_log.debug() << "Moving component '" << componentName
+                << "' to angle = " << angle
+                << " degrees and distance = " << distance << "metres.\n";
 }
 
 /**

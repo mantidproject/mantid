@@ -77,6 +77,7 @@ private:
   void loadMetaData(const NeXus::NXEntry &, const std::string &);
   std::string getInstrumentFilePath(const std::string &) const;
   void rotateInstrument(double, const std::string &);
+  void placeD16(double, double, const std::string &);
   void adjustTOF();
   void moveSource();
 
