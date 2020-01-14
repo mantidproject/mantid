@@ -592,7 +592,7 @@ class Plots__init__Test(unittest.TestCase):
 
         self.assertFalse(ax.waterfall_has_fill())
 
-    def test_overplotting_onto_waterfall_plot_with_line_colour_filled_areas_adds_another_filled_area_with_new_line_colour(self):
+    def test_overplotting_onto_waterfall_plot_with_line_colour_fills_adds_another_filled_area_with_new_line_colour(self):
         MantidAxes.set_waterfall_toolbar_options_enabled = Mock()
         fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
         ax.plot([0, 1], [0, 1])
@@ -614,7 +614,7 @@ class Plots__init__Test(unittest.TestCase):
         # Check that there are now three filled areas and the new line colour matches the new fill colour.
         self.assertTrue((ax.collections[2].get_facecolor() == ax.lines[2].get_color()).all())
 
-    def test_overplotting_onto_waterfall_plot_with_custom_filled_areas_adds_a_filled_area_with_the_same_colour(self):
+    def test_overplotting_onto_waterfall_plot_with_solid_colour_fills_adds_a_filled_area_with_the_same_colour(self):
         MantidAxes.set_waterfall_toolbar_options_enabled = Mock()
         fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
         ax.plot([0, 1], [0, 1])

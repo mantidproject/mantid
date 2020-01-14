@@ -14,7 +14,9 @@ import unittest
 import matplotlib
 matplotlib.use("AGG")  # noqa
 import matplotlib.pyplot as plt
+from numpy import array_equal
 
+from mantid.py3compat.mock import Mock
 # Pulling in the MantidAxes registers the 'mantid' projection
 from mantid.simpleapi import CreateWorkspace
 from mantidqt.utils.qt.testing import start_qapplication
@@ -117,6 +119,27 @@ class FigureErrorsManagerTest(unittest.TestCase):
         new_curve = FigureErrorsManager._replot_mpl_curve(self.ax, new_curve, {'errorevery': 1})
         self.assertTrue(hasattr(new_curve, 'errorbar_data'))
         self.assertEqual(4, len(new_curve[2][0].get_segments()))
+
+    def test_show_all_errors_on_waterfall_plot_retains_waterfall(self):
+        self.ax.set_waterfall_toolbar_options_enabled = Mock()
+        self.ax.plot([0, 1], [0, 1])
+        self.ax.plot([0, 1], [0, 1])
+        self.ax.convert_to_waterfall()
+
+        self.errors_manager.toggle_all_errors(self.ax, make_visible=True)
+
+        self.assertFalse(array_equal(self.ax.get_lines()[0].get_data(), self.ax.get_lines()[1].get_data()))
+
+    def test_hide_all_errors_on_waterfall_plot_retains_waterfall(self):
+        self.ax.set_waterfall_toolbar_options_enabled = Mock()
+        self.ax.plot([0, 1], [0, 1])
+        self.ax.plot([0, 1], [0, 1])
+        self.ax.convert_to_waterfall()
+
+        self.errors_manager.toggle_all_errors(self.ax, make_visible=True)
+        self.errors_manager.toggle_all_errors(self.ax, make_visible=False)
+
+        self.assertFalse(array_equal(self.ax.get_lines()[0].get_data(), self.ax.get_lines()[1].get_data()))
 
 
 if __name__ == '__main__':

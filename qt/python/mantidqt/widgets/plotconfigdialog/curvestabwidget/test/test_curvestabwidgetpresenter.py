@@ -14,6 +14,7 @@ from matplotlib import use as mpl_use
 
 mpl_use('Agg')  # noqa
 from matplotlib.pyplot import figure
+from numpy import array_equal
 
 from mantid.simpleapi import CreateWorkspace
 from mantid.plots import MantidAxes  # register MantidAxes projection  # noqa
@@ -285,7 +286,6 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
 
         mock_view = Mock(get_selected_ax_name=lambda: "Axes 0: (0, 0)",
                          get_selected_curve_name=lambda: "Workspace")
-        mock_view.select_curve_combo_box.currentIndex.return_value = 0
 
         ax = fig.get_axes()[0]
         ax.set_waterfall_toolbar_options_enabled = Mock()
@@ -298,6 +298,55 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         presenter._replot_selected_curve(new_plot_kwargs)
 
         self.assertEqual(ax.get_waterfall_fill_for_curve(0).get_visible(), False)
+
+    def test_changing_line_colour_on_a_waterfall_plot_with_filled_areas_changes_fill_colour_to_match(self):
+        fig = self.make_figure_with_multiple_curves()
+
+        mock_view = Mock(get_selected_ax_name=lambda: "Axes 0: (0, 0)",
+                         get_selected_curve_name=lambda: "Workspace")
+
+        ax = fig.get_axes()[0]
+        ax.set_waterfall_toolbar_options_enabled = Mock()
+        # Create waterfall plot and add filled areas.
+        ax.convert_to_waterfall()
+        ax.waterfall_create_fill()
+
+        # Set the fills so they are the same colours as their lines.
+        ax.collections[0].set_facecolor([0.122, 0.467, 0.706, 1])
+        ax.collections[1].set_facecolor([1, 0.498, 0.055, 1])
+        ax.collections[2].set_facecolor([0.173, 0.627, 0.173, 1])
+
+        presenter = self._generate_presenter(fig=fig, mock_view=mock_view)
+        # Change the colour of one of the lines.
+        new_plot_kwargs = {'color': '#ffff00'}
+        presenter._replot_selected_curve(new_plot_kwargs)
+
+        # The fill for that line should be the new colour.
+        self.assertTrue((ax.collections[0].get_facecolor() == [1, 1, 0, 1]).all())
+
+    def test_adding_errorbars_to_waterfall_plot_maintains_waterfall(self):
+        fig = self.make_figure_with_multiple_curves()
+
+        mock_view = Mock(get_selected_ax_name=lambda: "Axes 0: (0, 0)",
+                         get_selected_curve_name=lambda: "Workspace")
+
+        ax = fig.get_axes()[0]
+        ax.set_waterfall_toolbar_options_enabled = Mock()
+        # Create waterfall plot
+        ax.convert_to_waterfall()
+
+        presenter = self._generate_presenter(fig=fig, mock_view=mock_view)
+        # Add errobars to the first two lines
+        for i in range(2):
+            if i == 1:
+                presenter.view.get_selected_curve_name = lambda: "Workspace 2"
+            new_plot_kwargs = {'capsize': 2}
+            presenter._replot_selected_curve(new_plot_kwargs)
+
+        # Check the errorbar lines and the errorbar cap lines are different.
+        # (They would be the same if it was a non-waterfall plot)
+        self.assertFalse(array_equal(ax.containers[0][2][0].get_segments(), ax.containers[1][2][0].get_segments()))
+        self.assertFalse(array_equal(ax.containers[0][1][0].get_data(), ax.containers[1][1][0].get_data()))
 
 
 if __name__ == '__main__':
