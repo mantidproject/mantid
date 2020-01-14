@@ -508,27 +508,28 @@ void JSONGeometryParser::extractMonitorContent() {
   if (m_jsonMonitors.empty())
     return;
 
-  int monitorID = 1;
+  int monitorID = -1;
   for (const auto &monitor : m_jsonMonitors) {
     const auto &children = (*monitor)[CHILDREN];
     auto name = (*monitor)[NAME].asString();
     if (children.empty())
       throw std::invalid_argument("Full monitor definition for " + name +
-                                  " missing in json provided.");
+                                  " missing in JSON provided.");
     Monitor mon;
-
     mon.componentName = name;
-    mon.detectorID =
-        -monitorID; // ensure unique IDs even if monitor data is never ingested
-                    // otherwise there are issues building the instrument.
-    ++monitorID;
+    /* For monitors with no detector ID we create dummy IDs starting from -1 and
+     * decreasing. */
+    mon.detectorID = monitorID--;
+
     for (const auto &child : children) {
       const auto &val = child[VALUES];
       if (child[NAME] == NAME)
         mon.name = val.asString();
       else if (child[NAME] == DETECTOR_ID || child[NAME] == "detector_number") {
         mon.detectorID = val.asInt();
-        --monitorID; // ids stay continuous (and deterministic).
+        /* If there is a detector ID for this monitor increment the dummy IDs to
+         * keep them contiguous. */
+        ++monitorID;
       } else if (child[NAME] == "events")
         extractMonitorEventStream(child, mon);
       else if (child[NAME] == "waveforms")
