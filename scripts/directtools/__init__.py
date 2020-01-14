@@ -234,7 +234,8 @@ def _plotsinglehistogram(workspaces, labels, style, xscale, yscale):
     for ws, label in zip(workspaces, labels):
         if 'm' in style:
             markerStyle, markerIndex = _choosemarker(markers, markerIndex)
-        axes.errorbar(ws, wkspIndex=0, linestyle=lineStyle, marker=markerStyle, label=label, distribution=True, capsize=4, linewidth=1)
+        axes.errorbar(ws, wkspIndex=0, linestyle=lineStyle, marker=markerStyle, label=label, distribution=True,
+                      capsize=4, linewidth=1)
     axes.set_xscale(xscale)
     axes.set_yscale(yscale)
     if axes.get_yscale() == 'linear':
@@ -554,8 +555,8 @@ def plotconstQ(workspaces, Q, dQ, style='l', keepCutWorkspaces=True, xscale='lin
     for ws in workspaces:
         if ws.getAxis(axisIndex).getUnit().unitID() != qID:
             raise RuntimeError("Cannot cut in const Q. The workspace '{}' is not in units of momentum transfer.".format(str(ws)))
-    figure, axes, cutWSList = plotcuts(direction, workspaces, Q, dQ, r'$Q$', r'$\mathrm{\AA}^{-1}$', style, keepCutWorkspaces,
-                                       xscale, yscale)
+    figure, axes, cutWSList = plotcuts(direction, workspaces, Q, dQ, r'$Q$', r'$\mathrm{\AA}^{-1}$', style,
+                                       keepCutWorkspaces, xscale, yscale)
     _profiletitle(workspaces, cutWSList, _singlecutinfo(Q, dQ), r'$Q$', r'$\mathrm{\AA}^{-1}$', axes)
     if len(cutWSList) > 1:
         axes.legend()
@@ -625,7 +626,8 @@ def plotcuts(direction, workspaces, cuts, widths, quantity, unit, style='l', kee
                 if 'm' in style:
                     markerStyle, markerIndex = _choosemarker(markers, markerIndex)
                 realCutCentre, realCutWidth = _cutcentreandwidth(line)
-                label = _label(ws, realCutCentre, realCutWidth, len(workspaces) == 1, len(cuts) == 1, len(widths) == 1, quantity, unit)
+                label = _label(ws, realCutCentre, realCutWidth, len(workspaces) == 1, len(cuts) == 1, len(widths) == 1,
+                               quantity, unit)
                 axes.errorbar(line, wkspIndex=0, linestyle=lineStyle, marker=markerStyle, label=label,
                               distribution=True, capsize=4, linewidth=1)
     axes.set_xscale(xscale)
