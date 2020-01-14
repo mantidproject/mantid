@@ -33,11 +33,6 @@
 #include <nexus/NeXusException.hpp>
 // clang-format on
 
-#include <Poco/Path.h>
-#include <Poco/DateTimeFormatter.h>
-#include <Poco/DateTimeParser.h>
-#include <Poco/DateTimeFormat.h>
-
 #include <algorithm>
 #include <cmath>
 #include <cctype>
@@ -985,33 +980,6 @@ void LoadISISNexus2::loadRunDetails(
       "nperiods", static_cast<int>(m_loadBlockInfo.getNumberOfPeriods()));
 
   LoadISISNexusHelper::loadRunDetails(runDetails, entry, m_hasVMSBlock);
-}
-
-/**
- * Parse an ISO formatted date-time string into separate date and time strings
- * @param datetime_iso :: The string containing the ISO formatted date-time
- * @param date :: An output parameter containing the date from the original
- * string or ??-??-???? if the format is unknown
- * @param time :: An output parameter containing the time from the original
- * string or ??-??-?? if the format is unknown
- */
-void LoadISISNexus2::parseISODateTime(const std::string &datetime_iso,
-                                      std::string &date,
-                                      std::string &time) const {
-  try {
-    Poco::DateTime datetime_output;
-    int timezone_diff(0);
-    Poco::DateTimeParser::parse(Poco::DateTimeFormat::ISO8601_FORMAT,
-                                datetime_iso, datetime_output, timezone_diff);
-    date = Poco::DateTimeFormatter::format(datetime_output, "%d-%m-%Y",
-                                           timezone_diff);
-    time = Poco::DateTimeFormatter::format(datetime_output, "%H:%M:%S",
-                                           timezone_diff);
-  } catch (Poco::SyntaxException &) {
-    date = R"(??-??-????)";
-    time = R"(??:??:??)";
-    g_log.warning() << "Cannot parse end time from entry in Nexus file.\n";
-  }
 }
 
 /**
