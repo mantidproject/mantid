@@ -288,7 +288,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.copyProperties('SANSILLIntegration',
                             ['OutputType', 'CalculateResolution', 'DefaultQBinning', 'BinningFactor', 'OutputBinning',
                              'NPixelDivision', 'NumberOfWedges', 'WedgeWorkspace', 'WedgeAngle', 'WedgeOffset',
-                             'AsymmetricWedges', 'MaxQxy', 'DeltaQ', 'IQxQyLogBinning'])
+                             'AsymmetricWedges', 'MaxQxy', 'DeltaQ', 'IQxQyLogBinning', 'PanelOutputWorkspaces'])
 
         self.setPropertyGroup('OutputType', 'Integration Options')
         self.setPropertyGroup('CalculateResolution', 'Integration Options')
@@ -297,10 +297,15 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         self.setUp()
         outputs = []
+        panel_outputs = self.getPropertyValue('PanelOutputWorkspaces')
+        panel_output_groups = []
         for i in range(self.dimensionality):
             if self.sample[i] != EMPTY_TOKEN:
                 self.reduce(i)
-                outputs.append(self.output+'_'+str(i+1))
+                outputs.append(self.output+ '_' + str(i + 1))
+                panel_ws_group = panel_outputs + '_' + str(i + 1)
+                if mtd.doesExist(panel_ws_group) and panel_outputs:
+                    panel_output_groups.append(panel_ws_group)
             else:
                 self.log().information('Skipping empty token run.')
 
@@ -308,6 +313,10 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.setProperty('OutputWorkspace', mtd[self.output])
         if self.reduction_type == 'ReduceWater':
             self.setProperty('SensitivityOutputWorkspace', mtd[self.output_sens])
+
+        if panel_outputs and len(panel_output_groups) != 0:
+            GroupWorkspaces(InputWorkspaces=panel_output_groups, OutputWorkspace=panel_outputs)
+            self.setProperty('PanelOutputWorkspaces', mtd[panel_outputs])
 
     def reduce(self, i):
 
@@ -454,6 +463,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                              NormaliseBy=self.normalise,
                              SampleThickness=self.getProperty('SampleThickness').value,
                              WaterCrossSection=self.getProperty('WaterCrossSection').value)
+            panel_outputs = self.getPropertyValue('PanelOutputWorkspaces')
+            panel_ws_group = panel_outputs + '_' + str(i + 1)
             SANSILLIntegration(InputWorkspace=sample_name,
                                OutputWorkspace=output,
                                OutputType=self.getPropertyValue('OutputType'),
@@ -465,7 +476,9 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                                NumberOfWedges=self.getProperty('NumberOfWedges').value,
                                WedgeAngle=self.getProperty('WedgeAngle').value,
                                WedgeOffset=self.getProperty('WedgeOffset').value,
-                               AsymmetricWedges=self.getProperty('AsymmetricWedges').value)
+                               AsymmetricWedges=self.getProperty('AsymmetricWedges').value,
+                               PanelOutputWorkspaces=panel_ws_group)
+
         elif self.reduction_type == 'ReduceWater':
             SANSILLReduction(Run=self.sample[i],
                              ProcessAs='Reference',

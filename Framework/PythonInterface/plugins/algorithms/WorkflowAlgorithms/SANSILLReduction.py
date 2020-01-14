@@ -529,7 +529,8 @@ class SANSILLReduction(PythonAlgorithm):
                             SolidAngle(InputWorkspace=ws, OutputWorkspace=solid_angle,
                                        Method=self._get_solid_angle_method(self._instrument))
                     else:
-                        SolidAngle(InputWorkspace=ws, OutputWorkspace=solid_angle)
+                        SolidAngle(InputWorkspace=ws, OutputWorkspace=solid_angle,
+                                   Method=self._get_solid_angle_method(self._instrument))
                     Divide(LHSWorkspace=ws, RHSWorkspace=solid_angle, OutputWorkspace=ws, WarnOnZeroDivide=False)
                     if not cache:
                         DeleteWorkspace(solid_angle)
