@@ -158,15 +158,6 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         # Create the group
         self._group_workspaces(tofWorkspaces, "TOF")
 
-        # Also create a group for the TRANS TOF workspaces. Ensure we include
-        # any summed inputs
-        transWorkspaces = set(firstTransWorkspaces + secondTransWorkspaces)
-        if firstTransWorkspace:
-            transWorkspaces.add(firstTransWorkspace)
-        if secondTransWorkspace:
-            transWorkspaces.add(secondTransWorkspace)
-        self._group_workspaces(transWorkspaces, "TRANS_TOF")
-
     def validateInputs(self):
         """Return a dictionary containing issues found in properties."""
         issues = dict()
@@ -501,14 +492,13 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         self._declareAndSetWorkspacePropertyFromChild(
             Prop.OUTPUT_WS_TRANS,
             'Output transmission workspace in wavelength', child_alg)
-        if self.isChild() or self._isDebug():
+        self._declareAndSetWorkspacePropertyFromChild(
+            Prop.OUTPUT_WS_FIRST_TRANS,
+            'First transmission workspace in wavelength', child_alg)
+        if not self.getProperty(Prop.SECOND_TRANS_RUNS).isDefault:
             self._declareAndSetWorkspacePropertyFromChild(
-                Prop.OUTPUT_WS_FIRST_TRANS,
-                'First transmission workspace in wavelength', child_alg)
-            if not self.getProperty(Prop.SECOND_TRANS_RUNS).isDefault:
-                self._declareAndSetWorkspacePropertyFromChild(
-                    Prop.OUTPUT_WS_SECOND_TRANS,
-                    'Second transmission workspace in wavelength', child_alg)
+                Prop.OUTPUT_WS_SECOND_TRANS,
+                'Second transmission workspace in wavelength', child_alg)
 
     def _declareAndSetWorkspaceProperty(self, property_name, workspace_name, workspace, doc_string):
         """Declare an on-the-fly property to set an output workspace"""

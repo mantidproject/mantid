@@ -180,9 +180,6 @@ ReflectometryReductionOne2::validateInputs() {
 
   std::map<std::string, std::string> results;
 
-  const auto background = validateBackgroundProperties();
-  results.insert(background.begin(), background.end());
-
   const auto reduction = validateReductionProperties();
   results.insert(reduction.begin(), reduction.end());
 
@@ -394,16 +391,9 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
     result = cropWavelength(result, true, wavelengthMin(), wavelengthMax());
     outputDebugWorkspace(result, wsName, "_cropped", debug, step);
   } else {
-    g_log.debug("Extracting ROI\n");
-    result = makeDetectorWS(result, false, false);
-    outputDebugWorkspace(result, wsName, "_lambda", debug, step);
-    // Background subtraction
-    result = backgroundSubtraction(result);
-    outputDebugWorkspace(result, wsName, "_lambda_subtracted_bkg", debug, step);
-    // Sum in lambda
     if (m_sum) {
       g_log.debug("Summing in wavelength\n");
-      result = makeDetectorWS(result, m_convertUnits, true);
+      result = makeDetectorWS(result, m_convertUnits);
       outputDebugWorkspace(result, wsName, "_summed", debug, step);
     }
     // Now the workspace is in wavelength, find the min/max wavelength
@@ -460,31 +450,6 @@ ReflectometryReductionOne2::monitorCorrection(MatrixWorkspace_sptr detectorWS) {
   }
 
   return IvsLam;
-}
-
-MatrixWorkspace_sptr ReflectometryReductionOne2::backgroundSubtraction(
-    MatrixWorkspace_sptr detectorWS) {
-  bool subtractBackground = getProperty("SubtractBackground");
-  if (!subtractBackground)
-    return detectorWS;
-  auto alg = this->createChildAlgorithm("ReflectometryBackgroundSubtraction");
-  alg->initialize();
-  alg->setProperty("InputWorkspace", detectorWS);
-  alg->setProperty("InputWorkspaceIndexType", "SpectrumNumber");
-  alg->setProperty("ProcessingInstructions",
-                   getPropertyValue("BackgroundProcessingInstructions"));
-  alg->setProperty("BackgroundCalculationMethod",
-                   getPropertyValue("BackgroundCalculationMethod"));
-  alg->setProperty("DegreeOfPolynomial",
-                   getPropertyValue("DegreeOfPolynomial"));
-  alg->setProperty("CostFunction", getPropertyValue("CostFunction"));
-  // For our case, the peak range is the same as the main processing
-  // instructions, and we do the summation separately so don't sum the peak
-  alg->setProperty("PeakRange", getPropertyValue("ProcessingInstructions"));
-  alg->setProperty("SumPeak", false);
-  alg->execute();
-  MatrixWorkspace_sptr corrected = alg->getProperty("OutputWorkspace");
-  return corrected;
 }
 
 /**

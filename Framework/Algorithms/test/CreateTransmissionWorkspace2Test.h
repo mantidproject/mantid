@@ -447,11 +447,25 @@ public:
                          "TRANS_LAM_4321");
   }
 
-  void test_two_runs_sets_all_output_workspaces_when_child() {
+  void test_two_runs_does_not_set_interim_output_workspaces_when_child() {
     CreateTransmissionWorkspace2 alg;
     setup_test_to_check_output_workspaces_with_2_inputs(alg);
     alg.setPropertyValue("OutputWorkspace", "outWS");
     alg.setChild(true);
+    alg.execute();
+    check_output_lambda_workspace(alg, "OutputWorkspace", "outWS");
+    check_output_not_set(alg, "OutputWorkspaceFirstTransmission",
+                         "TRANS_LAM_1234");
+    check_output_not_set(alg, "OutputWorkspaceSecondTransmission",
+                         "TRANS_LAM_4321");
+  }
+
+  void test_two_runs_sets_all_output_workspaces_when_child_with_debug() {
+    CreateTransmissionWorkspace2 alg;
+    setup_test_to_check_output_workspaces_with_2_inputs(alg);
+    alg.setPropertyValue("OutputWorkspace", "outWS");
+    alg.setChild(true);
+    alg.setProperty("Debug", true);
     alg.execute();
     check_output_lambda_workspace(alg, "OutputWorkspace", "outWS");
     check_output_lambda_workspace(alg, "OutputWorkspaceFirstTransmission",
@@ -537,37 +551,12 @@ public:
     TS_ASSERT_EQUALS(alg.isExecuted(), false);
   }
 
-  void test_first_trans_run_is_not_output_if_name_not_found_when_child() {
+  void test_throws_if_first_trans_name_not_found_when_child() {
     CreateTransmissionWorkspace2 alg;
     setup_test_to_check_output_workspaces_with_2_inputs(alg, false, true);
     alg.setProperty("Debug", true);
     alg.setChild(true);
-    alg.execute();
-    check_output_not_set(alg, "OutputWorkspaceFirstTransmission",
-                         "TRANS_LAM_1234");
-    check_output_lambda_workspace(alg, "OutputWorkspaceSecondTransmission",
-                                  "TRANS_LAM_4321");
-  }
-
-  void
-  test_second_trans_run_is_still_output_if_first_trans_run_name_not_found_when_child() {
-    CreateTransmissionWorkspace2 alg;
-    setup_test_to_check_output_workspaces_with_2_inputs(alg, false, true);
-    alg.setProperty("Debug", true);
-    alg.setChild(true);
-    alg.execute();
-    check_output_lambda_workspace(alg, "OutputWorkspaceSecondTransmission",
-                                  "TRANS_LAM_4321");
-  }
-
-  void
-  test_stitched_trans_run_is_still_output_if_first_run_name_not_found_when_child() {
-    CreateTransmissionWorkspace2 alg;
-    setup_test_to_check_output_workspaces_with_2_inputs(alg, false, true);
-    alg.setProperty("Debug", true);
-    alg.setChild(true);
-    alg.execute();
-    check_output_lambda_workspace(alg, "OutputWorkspace", "");
+    TS_ASSERT_THROWS_ANYTHING(alg.execute());
   }
 
   void test_throws_if_second_trans_name_not_found() {
@@ -578,35 +567,12 @@ public:
     TS_ASSERT_EQUALS(alg.isExecuted(), false);
   }
 
-  void test_second_trans_run_is_not_output_if_name_not_found_when_child() {
+  void test_throws_if_second_trans_name_not_found_when_child() {
     CreateTransmissionWorkspace2 alg;
     setup_test_to_check_output_workspaces_with_2_inputs(alg, true, false);
     alg.setProperty("Debug", true);
     alg.setChild(true);
-    alg.execute();
-    check_output_not_set(alg, "OutputWorkspaceSecondTransmission",
-                         "TRANS_LAM_4321");
-  }
-
-  void
-  test_first_trans_run_is_still_output_if_second_run_name_not_found_when_child() {
-    CreateTransmissionWorkspace2 alg;
-    setup_test_to_check_output_workspaces_with_2_inputs(alg, true, false);
-    alg.setProperty("Debug", true);
-    alg.setChild(true);
-    alg.execute();
-    check_output_lambda_workspace(alg, "OutputWorkspaceFirstTransmission",
-                                  "TRANS_LAM_1234");
-  }
-
-  void
-  test_stitched_trans_run_is_still_output_if_second_run_name_not_found_when_child() {
-    CreateTransmissionWorkspace2 alg;
-    setup_test_to_check_output_workspaces_with_2_inputs(alg, true, false);
-    alg.setProperty("Debug", true);
-    alg.setChild(true);
-    alg.execute();
-    check_output_lambda_workspace(alg, "OutputWorkspace", "");
+    TS_ASSERT_THROWS_ANYTHING(alg.execute());
   }
 
 private:

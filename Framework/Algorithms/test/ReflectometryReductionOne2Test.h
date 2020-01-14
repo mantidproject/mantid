@@ -847,7 +847,8 @@ public:
                                          false);
     runAlgorithmLam(alg);
 
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_LAM_1234"));
+    TS_ASSERT_EQUALS(alg.getPropertyValue("OutputWorkspaceTransmission"),
+                     "TRANS_LAM_1234");
 
     AnalysisDataService::Instance().clear();
   }
@@ -858,9 +859,12 @@ public:
                                          true);
     runAlgorithmLam(alg);
 
-    // stitched output is stored
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_LAM_1234_1234"));
-    // interim outputs are not
+    // stitched transmission output is set
+    TS_ASSERT_EQUALS(alg.getPropertyValue("OutputWorkspaceTransmission"),
+                     "TRANS_LAM_1234_1234");
+    // interim transmission outputs are not set
+    TS_ASSERT(alg.isDefault("OutputWorkspaceFirstTransmission"));
+    TS_ASSERT(alg.isDefault("OutputWorkspaceSecondTransmission"));
     TS_ASSERT(!AnalysisDataService::Instance().doesExist("TRANS_LAM_1234"));
 
     AnalysisDataService::Instance().clear();

@@ -9,6 +9,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 
 using namespace Mantid::API;
@@ -97,15 +98,23 @@ void CreateTransmissionWorkspace2::init() {
           "OutputWorkspace", "", Direction::Output, PropertyMode::Optional),
       "Output workspace in wavelength.");
 
+  // Declare Debug output workspaces
+
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspaceFirstTransmission", "", Direction::Output,
                       PropertyMode::Optional),
                   "Output workspace in wavelength for first transmission run");
+  setPropertySettings(
+      "OutputWorkspaceFirstTransmission",
+      std::make_unique<Kernel::EnabledWhenProperty>("Debug", IS_EQUAL_TO, "1"));
 
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspaceSecondTransmission", "",
                       Direction::Output, PropertyMode::Optional),
                   "Output workspace in wavelength for second transmission run");
+  setPropertySettings(
+      "OutputWorkspaceSecondTransmission",
+      std::make_unique<Kernel::EnabledWhenProperty>("Debug", IS_EQUAL_TO, "1"));
 }
 
 /** Validate inputs
@@ -242,24 +251,37 @@ CreateTransmissionWorkspace2::getRunNumber(std::string const &propertyName) {
 void CreateTransmissionWorkspace2::setOutputTransmissionRun(
     int which, MatrixWorkspace_sptr ws) {
   bool const isDebug = getProperty("Debug");
-  if (!isDebug && !isChild())
+  if (!isDebug)
     return;
 
   if (which < 1 || which > 2) {
     throw std::logic_error("There are only two runs: 1 and 2.");
   }
-  auto const &runNumber =
-      which == 1 ? m_firstTransmissionRunNumber : m_secondTransmissionRunNumber;
-
-  if (runNumber.empty())
-    return;
 
   // Set the output property
-  auto const name = TRANS_LAM_PREFIX + runNumber;
   auto const runDescription =
       which == 1 ? "FirstTransmission" : "SecondTransmission";
   auto const propertyName = std::string("OutputWorkspace") + runDescription;
-  setPropertyValue(propertyName, name);
+
+  // If the user provided an output name, just set the value
+  if (!isDefault(propertyName)) {
+    setProperty(propertyName, ws);
+    return;
+  }
+
+  // Otherwise try to set a default name based on the run number
+  auto const &runNumber =
+      which == 1 ? m_firstTransmissionRunNumber : m_secondTransmissionRunNumber;
+  if (runNumber.empty()) {
+    throw std::runtime_error(
+        std::string("Input workspace has no run number; cannot set default "
+                    "name for the "
+                    "output workspace. Please specify a name using the ") +
+        propertyName + std::string(" property."));
+  }
+
+  auto const defaultName = TRANS_LAM_PREFIX + runNumber;
+  setPropertyValue(propertyName, defaultName);
   setProperty(propertyName, ws);
 }
 
@@ -271,17 +293,13 @@ void CreateTransmissionWorkspace2::setOutputTransmissionRun(
 void CreateTransmissionWorkspace2::setOutputWorkspace(
     API::MatrixWorkspace_sptr ws) {
   // If the user provided an output name, just set the value
-  if (!isDefault("OutputWorkspace") &&
-      !getPropertyValue("OutputWorkspace").empty()) {
+  if (!isDefault("OutputWorkspace")) {
     setProperty("OutputWorkspace", ws);
     return;
   }
 
-  // Otherwise, we want to set a default name based on the run number. First
-  // check if we have one.
+  // Otherwise, we want to set a default name based on the run number
   if (m_missingRunNumber) {
-    // If we're running as a child algorithm then we can return the output
-    // without a name; otherwise we can't do much so throw
     if (isChild()) {
       setProperty("OutputWorkspace", ws);
       return;
@@ -293,7 +311,6 @@ void CreateTransmissionWorkspace2::setOutputWorkspace(
     }
   }
 
-  // Construct the default name
   std::string outputName = TRANS_LAM_PREFIX;
   if (!m_firstTransmissionRunNumber.empty()) {
     outputName.append(m_firstTransmissionRunNumber);
