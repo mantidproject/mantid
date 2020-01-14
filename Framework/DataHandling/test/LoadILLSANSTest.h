@@ -24,10 +24,12 @@ using Mantid::API::Axis;
 using Mantid::API::MatrixWorkspace_const_sptr;
 using Mantid::DataHandling::LoadILLSANS;
 using Mantid::Geometry::IComponent_const_sptr;
+using Mantid::Geometry::IDetector_const_sptr;
 using Mantid::Geometry::Instrument;
 using Mantid::Kernel::ConfigService;
 using Mantid::Kernel::Unit;
 using Mantid::Kernel::V3D;
+using detid2det_map = std::map<Mantid::detid_t, IDetector_const_sptr>;
 
 class LoadILLSANSTest : public CxxTest::TestSuite {
 public:
@@ -40,6 +42,7 @@ public:
     ConfigService::Instance().appendDataSearchSubDir("ILL/D11/");
     ConfigService::Instance().appendDataSearchSubDir("ILL/D22/");
     ConfigService::Instance().appendDataSearchSubDir("ILL/D33/");
+    ConfigService::Instance().appendDataSearchSubDir("ILL/D16/");
     ConfigService::Instance().setFacility("ILL");
   }
 
@@ -128,6 +131,61 @@ public:
     TS_ASSERT_DELTA(err6[0], sqrt(45), 1E-5)
     const auto unit = outputWS->getAxis(0)->unit()->unitID();
     TS_ASSERT_EQUALS(unit, "Wavelength");
+  }
+
+  void test_D16() {
+    LoadILLSANS alg;
+    alg.setChild(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "218356.nxs"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "__unused_for_child"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+    MatrixWorkspace_const_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS);
+
+    TS_ASSERT(outputWS->detectorInfo().isMonitor(320 * 320));
+    TS_ASSERT(outputWS->detectorInfo().isMonitor(320 * 320 + 1));
+
+    const auto &instrument = outputWS->getInstrument();
+    IComponent_const_sptr component =
+        instrument->getComponentByName("detector");
+    V3D pos = component->getPos();
+    V3D origin(0, 0, 0);
+    TS_ASSERT_DELTA(pos.distance(origin), 1, 1E-5);
+    TS_ASSERT_DELTA(pos.X(), 0.17365, 1E-5); // sin(10)
+    TS_ASSERT_DELTA(pos.Z(), 0.98481, 1E-5); // cos(10)
+
+    Mantid::detid_t bl_id, tr_id;
+    instrument->getMinMaxDetectorIDs(bl_id, tr_id);
+
+    detid2det_map det_map;
+    instrument->getDetectors(det_map);
+
+    IDetector_const_sptr bottom_left_pixel = det_map[bl_id];
+    IDetector_const_sptr top_right_pixel = det_map[320 * 320 - 1];
+
+    V3D bl_pos = bottom_left_pixel->getPos();
+    V3D tr_pos = top_right_pixel->getPos();
+
+    // check the detector has 10 degrees angle
+    TS_ASSERT_DELTA(bl_pos.distance(origin), 1.02512, 1E-5);
+    TS_ASSERT_DELTA(tr_pos.distance(origin), 1.02512, 1E-5);
+
+    TS_ASSERT_DELTA(bl_pos.X(), 0.33073, 1E-5);
+    TS_ASSERT_DELTA(bl_pos.Z(), 0.95711, 1E-5);
+    TS_ASSERT_DELTA(tr_pos.X(), 0.01657, 1E-5);
+    TS_ASSERT_DELTA(tr_pos.Z(), 1.01250, 1E-5);
+
+    const auto &xAxis = outputWS->x(0).rawData();
+    const auto &spec = outputWS->y(51972).rawData();
+    const auto &err = outputWS->e(51972).rawData();
+    TS_ASSERT_EQUALS(xAxis.size(), 2)
+    TS_ASSERT_DELTA(xAxis[0], 6.65, 1E-3)
+    TS_ASSERT_DELTA(xAxis[1], 7.35, 1E-3)
+    TS_ASSERT_EQUALS(spec[0], 17)
+    TS_ASSERT_DELTA(err[0], sqrt(17), 1E-5)
   }
 
   void test_D33() {
