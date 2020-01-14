@@ -436,7 +436,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
     def launch_waterfall_fill_area_options(self):
         WaterfallPlotFillAreaDialogPresenter(self.canvas.figure, parent=self.window)
 
-    def update_toolbar_waterfall_plot(self, is_waterfall):
+    def update_toolbar_waterfall_plot(self, is_waterfall: bool):
         self.toolbar.set_waterfall_options_enabled(is_waterfall)
         self.toolbar.set_generate_plot_script_enabled(not is_waterfall)
 

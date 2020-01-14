@@ -137,16 +137,16 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         self.sig_home_clicked.emit()
         self.push_current()
 
-    def waterfall_conversion(self, is_waterfall):
+    def waterfall_conversion(self, is_waterfall: bool):
         self.sig_waterfall_conversion.emit(is_waterfall)
 
-    def set_waterfall_options_enabled(self, on):
+    def set_waterfall_options_enabled(self, on: bool):
         for action in ['waterfall_offset_amount', 'waterfall_reverse_order', 'waterfall_fill_area']:
             toolbar_action = self._actions[action]
             toolbar_action.setEnabled(on)
             toolbar_action.setVisible(on)
 
-    def set_generate_plot_script_enabled(self, enabled):
+    def set_generate_plot_script_enabled(self, enabled: bool):
         action = self._actions['generate_plot_script']
         action.setEnabled(enabled)
         action.setVisible(enabled)

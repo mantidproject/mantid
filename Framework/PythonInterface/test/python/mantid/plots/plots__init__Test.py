@@ -609,11 +609,32 @@ class Plots__init__Test(unittest.TestCase):
         # Plot another line and make it join the waterfall.
         ax.plot([0, 1], [0,1], color=[1, 0.102, 0, 1])
         ax.convert_single_line_to_waterfall(2)
-
         ax.waterfall_update_fill()
 
         # Check that there are now three filled areas and the new line colour matches the new fill colour.
         self.assertTrue((ax.collections[2].get_facecolor() == ax.lines[2].get_color()).all())
+
+    def test_overplotting_onto_waterfall_plot_with_custom_filled_areas_adds_a_filled_area_with_the_same_colour(self):
+        MantidAxes.set_waterfall_toolbar_options_enabled = Mock()
+        fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+        ax.plot([0, 1], [0, 1])
+        ax.plot([0, 1], [0, 1])
+
+        # Make a waterfall plot.
+        ax.convert_to_waterfall()
+        # Add filled areas.
+        ax.waterfall_create_fill()
+        # Set the fills to be the same colour.
+        ax.collections[0].set_facecolor([1, 0, 0, 1])
+        ax.collections[1].set_facecolor([1, 0, 0, 1])
+
+        # Plot another line and make it join the waterfall.
+        ax.plot([0, 1], [0, 1])
+        ax.convert_single_line_to_waterfall(2)
+        ax.waterfall_update_fill()
+
+        # Check that there are now three filled areas and the new line colour matches the new fill colour.
+        self.assertTrue((ax.collections[2].get_facecolor() == [1, 0, 0, 1]).all())
 
     def _run_check_axes_distribution_consistency(self, normalization_states):
         mock_tracked_workspaces = {
