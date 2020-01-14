@@ -76,7 +76,6 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
                 if tooltip_text is not None:
                     a.setToolTip(tooltip_text)
 
-        self.buttons = {}
         # Add the x,y location widget at the right side of the toolbar
         # The stretch factor is 1 which means any resizing of the toolbar
         # will resize this label instead of the buttons.
@@ -87,9 +86,6 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
                 QtWidgets.QSizePolicy(QtWidgets.Expanding, QtWidgets.QSizePolicy.Ignored))
             labelAction = self.addWidget(self.locLabel)
             labelAction.setVisible(True)
-
-        # reference holder for subplots_adjust window
-        self.adj_window = None
 
         # Adjust icon size or they are too small in PyQt5 by default
         dpi_ratio = QtWidgets.QApplication.instance().desktop().physicalDpiX() / 100
