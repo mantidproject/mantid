@@ -215,7 +215,7 @@ void LoadILLTOF2::initWorkSpace(NeXus::NXEntry &entry,
       "Workspace2D", m_numberOfHistograms + numberOfMonitors,
       m_numberOfChannels + 1, m_numberOfChannels);
   if (entry.containsGroup("monitor/time_of_flight") ||
-      entry.containsGroup("monitor/time_of_flight")) {
+      entry.containsGroup("monitor1/time_of_flight")) {
     m_localWorkspace->getAxis(0)->unit() =
         UnitFactory::Instance().create("TOF");
     m_localWorkspace->setYUnitLabel("Counts");
@@ -264,9 +264,7 @@ void LoadILLTOF2::loadTimeDetails(NeXus::NXEntry &entry) {
     g_log.debug() << " Wavelength: " << m_wavelength << '\n';
   } else {
     // monochromatic case for PANTHER
-    g_log.debug("Monochromatic mode for PANTHER");
-    m_channelWidth = m_wavelength / 5;
-    m_timeOfFlightDelay = m_wavelength;
+    g_log.debug("Monochromatic mode for PANTHER. Nothing to do here.");
   }
 }
 
@@ -368,11 +366,17 @@ void LoadILLTOF2::loadDataIntoTheWorkSpace(
 
   // Put tof in an array
   auto &X0 = m_localWorkspace->mutableX(0);
-  for (size_t i = 0; i < m_numberOfChannels + 1; ++i) {
-    X0[i] = m_timeOfFlightDelay + m_channelWidth * static_cast<double>(i) -
-            m_channelWidth / 2; // to make sure the bin centre is correct
+  if (entry.containsGroup("monitor/time_of_flight") ||
+      entry.containsGroup("monitor1/time_of_flight")) {
+    for (size_t i = 0; i < m_numberOfChannels + 1; ++i) {
+      X0[i] = m_timeOfFlightDelay + m_channelWidth * static_cast<double>(i) -
+              m_channelWidth / 2; // to make sure the bin centre is correct
+    }
+  } else {
+    // Diffraction PANTHER
+    X0[0] = m_wavelength * 0.9;
+    X0[1] = m_wavelength * 1.1;
   }
-
   // The binning for monitors is considered the same as for detectors
   size_t spec = 0;
 
