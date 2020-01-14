@@ -35,8 +35,6 @@ public:
   void notifyInitOptions() override;
   void notifyOptionsChanged() override;
   void notifySubscribeView() override;
-  bool getBoolOption(std::string &optionName) override;
-  int &getIntOption(std::string &optionName) override;
   bool getBoolOption(const std::string &optionName) override;
   int &getIntOption(const std::string &optionName) override;
   void showView() override;
