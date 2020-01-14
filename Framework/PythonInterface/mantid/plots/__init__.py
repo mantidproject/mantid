@@ -1057,10 +1057,10 @@ class MantidAxes(Axes):
         self.width = x_lim[1] - x_lim[0]
         self.height = y_lim[1] - y_lim[0]
 
-    def is_waterfall_plot(self) -> bool:
+    def is_waterfall_plot(self):
         return self.waterfall_x_offset != 0 or self.waterfall_y_offset != 0
 
-    def update_waterfall_plot(self, x_offset: int, y_offset: int):
+    def update_waterfall_plot(self, x_offset, y_offset):
         errorbar_cap_lines = self.remove_and_return_errorbar_cap_lines()
 
         for i in range(len(self.get_lines())):
@@ -1101,8 +1101,7 @@ class MantidAxes(Axes):
         self.update_waterfall_plot(0, 0)
         self.waterfall_remove_fill()
 
-    def apply_waterfall_offset_to_errorbars\
-                    (self, line: Line2D, amount_to_move_x: int, amount_to_move_y: int, index: int):
+    def apply_waterfall_offset_to_errorbars(self, line, amount_to_move_x, amount_to_move_y, index):
         for container in self.containers:
             # Find the ErrorbarContainer that corresponds to the current line.
             if isinstance(container, ErrorbarContainer) and container[0] == line:
@@ -1128,7 +1127,7 @@ class MantidAxes(Axes):
                 bar_line_col.set_zorder((len(self.get_lines()) - index) + 1)
                 break
 
-    def convert_single_line_to_waterfall(self, index: int, x=None, y=None, need_to_update_fill=False):
+    def convert_single_line_to_waterfall(self, index, x=None, y=None, need_to_update_fill=False):
         line = self.get_lines()[index]
 
         amount_to_move_x = index * self.width * (self.waterfall_x_offset / 500) if x is None else \
@@ -1155,7 +1154,7 @@ class MantidAxes(Axes):
             fill = self.get_waterfall_fill_for_curve(index)
             fill.set_color(line.get_color())
 
-    def set_waterfall_fill_visible(self, index: int):
+    def set_waterfall_fill_visible(self, index):
         if not self.waterfall_has_fill():
             return
 
@@ -1164,7 +1163,7 @@ class MantidAxes(Axes):
         fill = self.get_waterfall_fill_for_curve(index)
         fill.set_visible(line.get_visible())
 
-    def get_waterfall_fill_for_curve(self, index: int):
+    def get_waterfall_fill_for_curve(self, index):
         # Takes the index of a curve and returns that curve's filled area.
         i = 0
         for collection in self.collections:
@@ -1176,10 +1175,10 @@ class MantidAxes(Axes):
 
         return fill
 
-    def waterfall_has_fill(self) -> bool:
+    def waterfall_has_fill(self):
         return any(isinstance(collection, PolyCollection) for collection in self.collections)
 
-    def waterfall_fill_is_line_colour(self) -> bool:
+    def waterfall_fill_is_line_colour(self):
         i = 0
         # Check that for each line, the fill area is the same colour as the line.
         for collection in self.collections:
@@ -1239,7 +1238,7 @@ class MantidAxes(Axes):
         for i, collection in enumerate(poly_collections):
             collection.set_color(colours[i])
 
-    def remove_and_return_errorbar_cap_lines(self) -> list:
+    def remove_and_return_errorbar_cap_lines(self):
         # Matplotlib holds the line objects representing errorbar caps in the same list as the actual curves on a plot.
         # This causes problems for waterfall plots so here they are removed from the list and placed into a different
         # list, which is returned so they can be readded later.
