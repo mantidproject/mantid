@@ -13,6 +13,7 @@ from mantid.py3compat.mock import patch, MagicMock
 from mantid.py3compat import mock
 from Engineering.gui.engineering_diffraction.tabs.calibration import model, view, presenter
 from Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
+from Engineering.gui.engineering_diffraction.tabs.common.cropping.cropping_widget import CroppingWidget
 
 tab_path = 'Engineering.gui.engineering_diffraction.tabs.calibration'
 
@@ -21,10 +22,12 @@ class CalibrationPresenterTest(unittest.TestCase):
     def setUp(self):
         self.view = mock.create_autospec(view.CalibrationView)
         self.model = mock.create_autospec(model.CalibrationModel)
+        self.view.get_cropping_widget.return_value = MagicMock()
         self.presenter = presenter.CalibrationPresenter(self.model, self.view)
 
     @patch(tab_path + ".presenter.CalibrationPresenter.start_calibration_worker")
     def test_worker_started_with_right_params(self, worker_method):
+        self.view.get_crop_checked.return_value = False
         self.view.get_vanadium_filename.return_value = "307521"
         self.view.get_sample_filename.return_value = "305738"
         self.view.get_plot_output.return_value = True
