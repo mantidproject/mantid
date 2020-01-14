@@ -10,6 +10,7 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 
 from mantid.py3compat.mock import patch
+from mantid.py3compat.mock import MagicMock
 from Engineering.gui.engineering_diffraction.tabs.calibration.model import CalibrationModel
 
 VANADIUM_NUMBER = "307521"
@@ -67,7 +68,7 @@ class CalibrationModelTest(unittest.TestCase):
         van_corr.return_value = ("mocked_integration", "mocked_curves")
         load_workspace.return_value = "mocked_workspace"
         self.model.create_new_calibration(VANADIUM_NUMBER, CERIUM_NUMBER, False, "ENGINX")
-        calibrate_alg.assert_called_with("mocked_workspace", "mocked_integration", "mocked_curves",
+        calibrate_alg.assert_called_with("mocked_workspace", "mocked_integration", "mocked_curves", None, None,
                                          full_calib_ws="mocked_workspace")
 
     @patch(class_path + '.update_calibration_params_table')
@@ -80,6 +81,7 @@ class CalibrationModelTest(unittest.TestCase):
     @patch(class_path + '.run_calibration')
     def test_plotting_check(self, calib, plot_difc_zero, gen_difc, plot_van, van, sample,
                             output_files, update_table):
+        calib.return_value = [MagicMock(), MagicMock()]
         van.return_value = ("A", "B")
         self.model.create_new_calibration(VANADIUM_NUMBER, CERIUM_NUMBER, False, "ENGINX")
         plot_van.assert_not_called()
@@ -145,7 +147,7 @@ class CalibrationModelTest(unittest.TestCase):
         output_name.return_value = filename
 
         self.model.create_output_files("test/", [0, 0], [1, 1], sample_path, vanadium_path,
-                                       "ENGINX")
+                                       "ENGINX", bank=None, spectrum_numbers=None)
 
         self.assertEqual(make_dirs.call_count, 1)
         self.assertEqual(write_file.call_count, 3)
@@ -157,7 +159,7 @@ class CalibrationModelTest(unittest.TestCase):
 
     def test_generate_table_workspace_name(self):
         self.assertEqual(self.model._generate_table_workspace_name(20),
-                         "engggui_calibration_bank_21")
+                         "engggui_calibration_bank_20")
 
     def test_generate_output_file_name_for_north_bank(self):
         filename = self.model._generate_output_file_name("test/20.raw", "test/10.raw", "ENGINX",
