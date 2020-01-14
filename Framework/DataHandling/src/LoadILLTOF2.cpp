@@ -214,8 +214,16 @@ void LoadILLTOF2::initWorkSpace(NeXus::NXEntry &entry,
   m_localWorkspace = WorkspaceFactory::Instance().create(
       "Workspace2D", m_numberOfHistograms + numberOfMonitors,
       m_numberOfChannels + 1, m_numberOfChannels);
-  m_localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
-  m_localWorkspace->setYUnitLabel("Counts");
+  if (entry.containsGroup("monitor/time_of_flight") ||
+      entry.containsGroup("monitor/time_of_flight")) {
+    m_localWorkspace->getAxis(0)->unit() =
+        UnitFactory::Instance().create("TOF");
+    m_localWorkspace->setYUnitLabel("Counts");
+  } else {
+    m_localWorkspace->getAxis(0)->unit() =
+        UnitFactory::Instance().create("Wavelength");
+    m_localWorkspace->setYUnitLabel("Counts");
+  }
 }
 
 /**
@@ -239,19 +247,27 @@ void LoadILLTOF2::loadTimeDetails(NeXus::NXEntry &entry) {
     throw std::runtime_error(message);
   }
 
-  NXFloat time_of_flight_data =
-      entry.openNXFloat(monitorName + "/time_of_flight");
-  time_of_flight_data.load();
+  if (entry.containsGroup(monitorName + "/time_of_flight")) {
 
-  // The entry "monitor/time_of_flight", has 3 fields:
-  // channel width , number of channels, Time of flight delay
-  m_channelWidth = time_of_flight_data[0];
-  m_timeOfFlightDelay = time_of_flight_data[2];
+    NXFloat time_of_flight_data =
+        entry.openNXFloat(monitorName + "/time_of_flight");
+    time_of_flight_data.load();
 
-  g_log.debug("Nexus Data:");
-  g_log.debug() << " ChannelWidth: " << m_channelWidth << '\n';
-  g_log.debug() << " TimeOfFlightDealy: " << m_timeOfFlightDelay << '\n';
-  g_log.debug() << " Wavelength: " << m_wavelength << '\n';
+    // The entry "monitor/time_of_flight", has 3 fields:
+    // channel width , number of channels, Time of flight delay
+    m_channelWidth = time_of_flight_data[0];
+    m_timeOfFlightDelay = time_of_flight_data[2];
+
+    g_log.debug("Nexus Data:");
+    g_log.debug() << " ChannelWidth: " << m_channelWidth << '\n';
+    g_log.debug() << " TimeOfFlightDealy: " << m_timeOfFlightDelay << '\n';
+    g_log.debug() << " Wavelength: " << m_wavelength << '\n';
+  } else {
+    // monochromatic case for PANTHER
+    g_log.debug("Monochromatic mode for PANTHER");
+    m_channelWidth = m_wavelength / 5;
+    m_timeOfFlightDelay = m_wavelength;
+  }
 }
 
 /**
