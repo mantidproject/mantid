@@ -5,6 +5,10 @@ MantidWorkbench Changes
 .. contents:: Table of Contents
    :local:
 
+New
+###
+- Waterfall Plots
+
 Improvements
 ############
 
