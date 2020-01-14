@@ -11,6 +11,9 @@ from mantid.simpleapi import SANSILLAutoProcess, config, mtd, GroupWorkspaces
 
 
 class D11_AutoProcess_Test(systemtesting.MantidSystemTest):
+    """
+    Tests auto process for D11 with 3 samples at 3 different distances
+    """
 
     def __init__(self):
         super(D11_AutoProcess_Test, self).__init__()
@@ -58,3 +61,55 @@ class D11_AutoProcess_Test(systemtesting.MantidSystemTest):
             )
 
         GroupWorkspaces(InputWorkspaces=['iq_s1', 'iq_s2', 'iq_s3'], OutputWorkspace='out')
+
+
+class D33_AutoProcess_Test(systemtesting.MantidSystemTest):
+    """
+    Tests auto process with D33 monochromatic data
+    One sample at one angle, with separation of the panels
+    Uses the measurement of Pluronic F127 D20 Anethol
+    """
+
+    def __init__(self):
+        super(D33_AutoProcess_Test, self).__init__()
+        self.setUp()
+
+    def setUp(self):
+        config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'D33'
+        config['logging.loggers.root.level'] = 'Warning'
+        config.appendDataSearchSubDir('ILL/D33/')
+
+    def cleanup(self):
+        mtd.clear()
+
+    def validate(self):
+        self.tolerance = 1e-3
+        self.tolerance_is_rel_err = True
+        return ['out', 'D33_AutoProcess_Reference.nxs']
+
+    def runTest(self):
+
+        absorber = '002227'
+        tr_beam = '002192'
+        can_tr = '002193'
+        empty_beam = '002219'
+        can = '002228'
+        mask = 'D33Mask2.nxs'
+
+        SANSILLAutoProcess(
+            SampleRuns='001464',
+            SampleTransmissionRuns='002197',
+            MaskFiles=mask,
+            AbsorberRuns=absorber,
+            BeamRuns=empty_beam,
+            ContainerRuns=can,
+            ContainerTransmissionRuns=can_tr,
+            TransmissionBeamRuns=tr_beam,
+            CalculateResolution='None',
+            OutputWorkspace='iq',
+            PanelOutputWorkspaces='panels'
+        )
+
+        GroupWorkspaces(InputWorkspaces=['iq', 'panels'], OutputWorkspace='out')
+
