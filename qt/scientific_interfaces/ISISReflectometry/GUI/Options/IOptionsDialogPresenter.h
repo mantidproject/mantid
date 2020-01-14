@@ -22,8 +22,8 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL IOptionsDialogPresenter {
 public:
   virtual ~IOptionsDialogPresenter() = default;
   virtual void notifySubscribeView() = 0;
-  virtual bool getBoolOption(std::string &optionName) = 0;
-  virtual int &getIntOption(std::string &optionName) = 0;
+  virtual bool getBoolOption(const std::string &optionName) = 0;
+  virtual int &getIntOption(const std::string &optionName) = 0;
   virtual void showView() = 0;
   virtual void subscribe(OptionsDialogPresenterSubscriber *notifyee) = 0;
 };

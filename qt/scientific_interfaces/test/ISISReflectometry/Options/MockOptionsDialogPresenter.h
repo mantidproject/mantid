@@ -25,8 +25,8 @@ public:
 class MockOptionsDialogPresenter : public IOptionsDialogPresenter {
 public:
   MOCK_METHOD0(notifySubscribeView, void());
-  MOCK_METHOD1(getBoolOption, bool(std::string &));
-  MOCK_METHOD1(getIntOption, int &(std::string &));
+  MOCK_METHOD1(getBoolOption, bool(const std::string &));
+  MOCK_METHOD1(getIntOption, int &(const std::string &));
   MOCK_METHOD0(showView, void());
   MOCK_METHOD1(subscribe, void(OptionsDialogPresenterSubscriber *));
 };

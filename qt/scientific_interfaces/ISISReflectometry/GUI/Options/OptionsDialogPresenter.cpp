@@ -53,12 +53,12 @@ void OptionsDialogPresenter::notifySaveOptions() {
 }
 
 /* Get a bool option state */
-bool OptionsDialogPresenter::getBoolOption(std::string &optionName) {
+bool OptionsDialogPresenter::getBoolOption(const std::string &optionName) {
   return m_boolOptions[optionName];
 }
 
 /* Get an int option state */
-int &OptionsDialogPresenter::getIntOption(std::string &optionName) {
+int &OptionsDialogPresenter::getIntOption(const std::string &optionName) {
   return m_intOptions[optionName];
 }
 

@@ -31,8 +31,8 @@ public:
                                   std::unique_ptr<IOptionsDialogModel> model);
   // IOptionsDialogPresenter overrides
   void notifySubscribeView() override;
-  bool getBoolOption(std::string &optionName) override;
-  int &getIntOption(std::string &optionName) override;
+  bool getBoolOption(const std::string &optionName) override;
+  int &getIntOption(const std::string &optionName) override;
   void showView() override;
   void subscribe(OptionsDialogPresenterSubscriber *notifyee) override;
 

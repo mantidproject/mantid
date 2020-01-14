@@ -95,6 +95,11 @@ void MainWindowPresenter::notifyShowSlitCalculatorRequested() {
   m_slitCalculator->show();
 }
 
+void MainWindowPresenter::notifyOptionsChanged() const {
+  // TODO Implement with round precision
+  return;
+}
+
 void MainWindowPresenter::notifyAnyBatchAutoreductionResumed() {
   for (const auto &batchPresenter : m_batchPresenters) {
     batchPresenter->notifyAnyBatchAutoreductionResumed();
@@ -155,10 +160,6 @@ bool MainWindowPresenter::isAnyBatchAutoreducing() const {
   return false;
 }
 
-void MainWindowPresenter::notifyOptionsChanged() const {
-  // TODO implement with round precision
-}
-
 bool MainWindowPresenter::isWarnDiscardChangesChecked() const {
   return m_optionsDialogPresenter->getBoolOption(
       std::string("WarnDiscardChanges"));
@@ -212,7 +213,8 @@ bool MainWindowPresenter::isBatchUnsaved(int batchIndex) const {
 bool MainWindowPresenter::isAnyBatchUnsaved() {
   for (auto it = m_batchPresenters.begin(); it != m_batchPresenters.end();
        ++it) {
-    int batchIndex = std::distance(m_batchPresenters.begin(), it);
+    auto batchIndex =
+        static_cast<int>(std::distance(m_batchPresenters.begin(), it));
     if (isBatchUnsaved(batchIndex)) {
       setUnsavedFlag(true);
       return true;
@@ -263,7 +265,7 @@ void MainWindowPresenter::notifySaveBatchRequested(int tabIndex) {
     return;
   auto map = m_encoder->encodeBatch(m_view, tabIndex, false);
   m_fileHandler->saveJSONToFile(filename, map);
-  batchPresenter->setUnsavedBatchFlag(false);
+  m_batchPresenters[tabIndex].get()->setUnsavedBatchFlag(false);
 }
 
 void MainWindowPresenter::notifyLoadBatchRequested(int tabIndex) {
@@ -283,7 +285,7 @@ void MainWindowPresenter::notifyLoadBatchRequested(int tabIndex) {
     return;
   }
   m_decoder->decodeBatch(m_view, tabIndex, map);
-  batchPresenter->setUnsavedBatchFlag(false);
+  m_batchPresenters[tabIndex].get()->setUnsavedBatchFlag(false);
 }
 
 void MainWindowPresenter::disableSaveAndLoadBatch() {
