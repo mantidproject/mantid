@@ -9,7 +9,7 @@ from __future__ import absolute_import, unicode_literals
 
 from unittest import TestCase
 
-from mantid.py3compat.mock import call, Mock
+from mantid.py3compat.mock import Mock
 from mantidqt.utils.testing.mocks.mock_qt import MockQButton, MockQWidget
 from mantidqt.utils.testing.strict_mock import StrictMock, StrictPropertyMock
 from workbench.widgets.settings.presenter import SettingsPresenter
@@ -39,11 +39,9 @@ class MockSettingsView(object):
         self.mock_current = MockQWidget()
         self.container = StrictPropertyMock(return_value=self.mock_container)
         self.current = StrictPropertyMock(return_value=self.mock_current)
-        self.sections = MockQWidget()
-        self.sections.addItems = Mock()
+        self.sections = FakeSectionsListWidget()
         self.general_settings = FakeMVP()
-        self.newtab_settings = FakeMVP()
-
+        self.categories_settings = FakeMVP()
         self.save_settings_button = MockQButton()
         self.help_button = MockQButton()
 
@@ -53,20 +51,20 @@ class SettingsPresenterTest(TestCase):
         mock_view = MockSettingsView()
         SettingsPresenter(None, view=mock_view,
                           general_settings=mock_view.general_settings,
-                          newtab_settings=mock_view.newtab_settings)
+                          categories_settings=mock_view.categories_settings)
 
-        expected_calls = [call(mock_view.general_settings.view), call(mock_view.newtab_settings.view)]
+        expected_calls = [call(mock_view.general_settings.view), call(mock_view.categories_settings.view)]
         mock_view.container.addWidget.assert_has_calls(expected_calls)
 
     def test_action_current_row_changed(self):
         mock_view = MockSettingsView()
-        presenter = SettingsPresenter(None, view=mock_view,
-                                      general_settings=mock_view.general_settings,
-                                      newtab_settings=mock_view.newtab_settings)
+        p = SettingsPresenter(None, view=mock_view,
+                              general_settings=mock_view.general_settings,
+                              categories_settings=mock_view.categories_settings)
 
         mock_view.sections.item = Mock()
         mock_view.sections.item().text = Mock(return_value = presenter.SETTINGS_TABS['categories_settings'])
         presenter.action_section_changed(1)
 
         self.assertEqual(1, mock_view.container.replaceWidget.call_count)
-        self.assertEqual(mock_view.newtab_settings.view, presenter.current)
+        self.assertEqual(mock_view.categories_settings.view, p.current)
