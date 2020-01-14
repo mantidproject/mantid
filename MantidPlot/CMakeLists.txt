@@ -685,7 +685,10 @@ qt4_add_resources(RES_FILES
 #
 # Add the dependencies
 #
-
+# This must come before ParaView so Python gets picked up from our third-party on Windows
+# and not the one Paraview is built with. Warnings from our external repo are all ignored
+# but the ones built by ParaView are not.
+include_directories(SYSTEM ${_sip_include_dir} ${PYTHON_INCLUDE_PATH})
 if(MAKE_VATES)
   include(${PARAVIEW_USE_FILE})
 endif()
@@ -797,8 +800,6 @@ add_executable(MantidPlot
 # Sip must be before Python for the case of our private sip module for RHEL
 # so that it gets picked up before the system one if it exists
 target_include_directories(MantidPlot SYSTEM PRIVATE
-  ${_sip_include_dir}
-  ${PYTHON_INCLUDE_PATH}
   ${MUPARSER_INCLUDE_DIR}
   ${ZLIB_INCLUDE_DIRS}
   ${QWT5_INCLUDE_DIR}
