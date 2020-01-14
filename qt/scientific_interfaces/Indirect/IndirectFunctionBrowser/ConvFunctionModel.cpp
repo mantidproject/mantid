@@ -10,6 +10,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
+#include <iostream>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -39,7 +40,7 @@ void ConvFunctionModel::setFunction(IFunction_sptr fun) {
   clearData();
   if (!fun)
     return;
-
+  std::cout << fun->asString() << std::endl;
   bool isBackgroundSet = false;
   if (fun->name() == "Convolution") {
     checkConvolution(fun);
@@ -78,7 +79,15 @@ void ConvFunctionModel::checkConvolution(IFunction_sptr fun) {
         throw std::runtime_error("Function has wrong structure.");
       }
       isResolutionSet = true;
-    } else if (name == "CompositeFunction") {
+    } else if (name == "ProductFunction") {
+      if (innerFunction->getFunction(0)->name() != "UserFunction") {
+        throw std::runtime_error("Function has wrong structure.");
+      }
+      m_hasTempCorrection = true;
+      checkConvolution(innerFunction->getFunction(1));
+    }
+
+    else if (name == "CompositeFunction") {
       checkComposite(innerFunction);
     } else if (FitTypeStringToEnum.count(name) == 1) {
       if (isFitTypeSet) {
@@ -127,6 +136,8 @@ void ConvFunctionModel::checkComposite(IFunction_sptr fun) {
     }
   }
 }
+
+// void ConvFunctionModel::checkProductFunction(IFunction_sptr fun) {}
 
 IFunction_sptr ConvFunctionModel::getFitFunction() const {
   return m_model.getFitFunction();

@@ -11,6 +11,7 @@
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
+#include <iostream>
 
 namespace {
 Mantid::Kernel::Logger g_log("ConvolutionFunctionModel");
@@ -74,10 +75,8 @@ void ConvolutionFunctionModel::setModel(
     const std::string &peaks, bool hasDeltaFunction,
     const std::vector<double> &qValues, const bool isQDependent,
     bool hasTempCorrection) {
-
   std::string resolution, convolution, function, modifiedPeaks;
   auto fitFunction = boost::make_shared<MultiDomainFunction>();
-
   auto const nf = m_numberDomains > 0 ? static_cast<int>(m_numberDomains) : 1;
   for (int i = 0; i < nf; ++i) {
     CompositeFunction_sptr domainFunction;
@@ -86,11 +85,14 @@ void ConvolutionFunctionModel::setModel(
                                          qValue, hasTempCorrection);
     auto workspace =
         resolutionWorkspaces.empty() ? "" : resolutionWorkspaces[i].first;
+    auto workspaceIndex =
+        resolutionWorkspaces.empty() ? 0 : resolutionWorkspaces[i].second;
     auto resolutionFunction =
-        createResolutionFunction(workspace, resolutionWorkspaces[i].second);
+        createResolutionFunction(workspace, workspaceIndex);
     domainFunction =
         createConvolutionFunction(resolutionFunction, domainFunction);
     domainFunction = addBackground(domainFunction, background);
+
     fitFunction->addFunction(domainFunction);
     fitFunction->setDomainIndex(i, i);
   }
@@ -138,7 +140,7 @@ CompositeFunction_sptr ConvolutionFunctionModel::createInnerFunction(
         FunctionFactory::Instance().createFunction("DeltaFunction");
     innerFunction->addFunction(deltaFunction);
   }
-  if (hasTempCorrection && (functionSpecified || hasDeltaFunction)) {
+  if (hasTempCorrection) {
     innerFunction = addTempCorrection(innerFunction);
   }
 
