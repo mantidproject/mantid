@@ -290,6 +290,7 @@ void ConvTemplateBrowser::createDeltaFunctionProperties() {
 void ConvTemplateBrowser::createTempCorrectionProperties() {
   m_tempCorrectionOn = m_boolManager->addProperty("Temp Correction");
   m_temperature = m_parameterManager->addProperty("Temperature");
+  m_parameterManager->setDescription(m_temperature, "Temperature");
   m_parameterMap[m_temperature] = ParamID::TEMPERATURE;
   m_parameterReverseMap[ParamID::TEMPERATURE] = m_temperature;
 }

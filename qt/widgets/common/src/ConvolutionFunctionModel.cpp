@@ -35,6 +35,10 @@ bool isDeltaFunction(const IFunction_sptr &fun) {
   return fun->name() == "DeltaFunction";
 }
 
+bool isProductFunction(const IFunction_sptr &fun) {
+  return fun->name() == "ProductFunction";
+}
+
 bool isBackground(const IFunction_sptr &fun) {
   return static_cast<bool>(
       boost::dynamic_pointer_cast<const IBackgroundFunction>(fun));
@@ -68,47 +72,133 @@ void ConvolutionFunctionModel::setModel(
     const std::string &background,
     const std::vector<std::pair<std::string, int>> &resolutionWorkspaces,
     const std::string &peaks, bool hasDeltaFunction,
-    const std::vector<double> &qValues, const bool isQDependent) {
+    const std::vector<double> &qValues, const bool isQDependent,
+    bool hasTempCorrection) {
+
   std::string resolution, convolution, function, modifiedPeaks;
   auto fitFunction = boost::make_shared<MultiDomainFunction>();
 
   auto const nf = m_numberDomains > 0 ? static_cast<int>(m_numberDomains) : 1;
   for (int i = 0; i < nf; ++i) {
-    if (isQDependent) {
-      auto qValue = qValues.empty() ? 0.0 : qValues[i];
-      IFunction::Attribute attr(qValue);
-      auto peaksFunction = FunctionFactory::Instance().createInitialized(peaks);
-      peaksFunction->setAttribute("Q", attr);
-      modifiedPeaks = peaksFunction->asString();
-    } else {
-      modifiedPeaks = peaks;
-    }
-    auto const model = hasDeltaFunction ? "name=DeltaFunction;" + modifiedPeaks
-                                        : modifiedPeaks;
+    CompositeFunction_sptr domainFunction;
+    auto qValue = qValues.empty() ? 0.0 : qValues[i];
+    domainFunction = createInnerFunction(peaks, hasDeltaFunction, isQDependent,
+                                         qValue, hasTempCorrection);
     auto workspace =
         resolutionWorkspaces.empty() ? "" : resolutionWorkspaces[i].first;
-    resolution = workspace.empty()
-                     ? "name=Resolution"
-                     : "name=Resolution,Workspace=\"" + workspace +
-                           "\",WorkspaceIndex=" +
-                           std::to_string(resolutionWorkspaces[i].second);
-    convolution = "composite=Convolution;" + resolution + ";" + model;
-    function = background.empty() ? convolution
-                                  : background + ";(" + convolution + ")";
-    auto domainFunction =
-        FunctionFactory::Instance().createInitialized(function);
-
+    auto resolutionFunction =
+        createResolutionFunction(workspace, resolutionWorkspaces[i].second);
+    domainFunction =
+        createConvolutionFunction(resolutionFunction, domainFunction);
+    domainFunction = addBackground(domainFunction, background);
     fitFunction->addFunction(domainFunction);
     fitFunction->setDomainIndex(i, i);
   }
-
   setFunction(fitFunction);
+}
+
+CompositeFunction_sptr
+ConvolutionFunctionModel::addBackground(CompositeFunction_sptr domainFunction,
+                                        std::string background) {
+  if (background.empty())
+    return domainFunction;
+
+  auto backgroundFunction =
+      FunctionFactory::Instance().createInitialized(background);
+  auto functionWithBackground = boost::make_shared<CompositeFunction>();
+  functionWithBackground->addFunction(backgroundFunction);
+  functionWithBackground->addFunction(domainFunction);
+
+  return functionWithBackground;
+}
+
+CompositeFunction_sptr ConvolutionFunctionModel::createInnerFunction(
+    std::string peaksFunction, bool hasDeltaFunction, bool isQDependent,
+    double qValue, bool hasTempCorrection) {
+  auto functionSpecified = !peaksFunction.empty();
+  CompositeFunction_sptr innerFunction =
+      boost::make_shared<CompositeFunction>();
+  if (functionSpecified) {
+    auto peakFunction =
+        FunctionFactory::Instance().createInitialized(peaksFunction);
+    auto peakFunctionComposite =
+        boost::dynamic_pointer_cast<CompositeFunction>(peakFunction);
+    if (peakFunctionComposite) {
+      innerFunction = peakFunctionComposite;
+    } else {
+      innerFunction->addFunction(peakFunction);
+    }
+    if (isQDependent) {
+      IFunction::Attribute attr(qValue);
+      innerFunction->setAttribute("Q", attr);
+    }
+  }
+  if (hasDeltaFunction) {
+    auto deltaFunction =
+        FunctionFactory::Instance().createFunction("DeltaFunction");
+    innerFunction->addFunction(deltaFunction);
+  }
+  if (hasTempCorrection && (functionSpecified || hasDeltaFunction)) {
+    innerFunction = addTempCorrection(innerFunction);
+  }
+
+  return innerFunction;
+}
+
+CompositeFunction_sptr ConvolutionFunctionModel::addTempCorrection(
+    CompositeFunction_sptr peaksFunction) {
+  CompositeFunction_sptr productFunction =
+      boost::dynamic_pointer_cast<CompositeFunction>(
+          FunctionFactory::Instance().createFunction("ProductFunction"));
+  auto tempFunction = createTemperatureCorrection(100.0);
+  productFunction->addFunction(tempFunction);
+  productFunction->addFunction(peaksFunction);
+  return productFunction;
+}
+
+IFunction_sptr
+ConvolutionFunctionModel::createTemperatureCorrection(double correction) {
+  // create user function for the exponential correction
+  // (x*temp) / 1-exp(-(x*temp))
+  auto tempFunc = FunctionFactory::Instance().createFunction("UserFunction");
+  // 11.606 is the conversion factor from meV to K
+  std::string formula = "((x*11.606)/Temp) / (1 - exp(-((x*11.606)/Temp)))";
+  IFunction::Attribute att(formula);
+  tempFunc->setAttribute("Formula", att);
+  tempFunc->setParameter("Temp", correction);
+  tempFunc->fixParameter("Temp", true);
+  return tempFunc;
+}
+
+CompositeFunction_sptr ConvolutionFunctionModel::createConvolutionFunction(
+    IFunction_sptr resolutionFunction, IFunction_sptr innerFunction) {
+  CompositeFunction_sptr convolution =
+      boost::dynamic_pointer_cast<CompositeFunction>(
+          FunctionFactory::Instance().createFunction("Convolution"));
+  convolution->addFunction(resolutionFunction);
+
+  if (innerFunction->nFunctions() > 0)
+    convolution->addFunction(innerFunction);
+
+  return convolution;
+}
+
+IFunction_sptr
+ConvolutionFunctionModel::createResolutionFunction(std::string workspaceName,
+                                                   int workspaceIndex) {
+  std::string resolution =
+      workspaceName.empty()
+          ? "name=Resolution"
+          : "name=Resolution,Workspace=\"" + workspaceName +
+                "\",WorkspaceIndex=" + std::to_string(workspaceIndex);
+  return FunctionFactory::Instance().createInitialized(resolution);
 }
 
 void ConvolutionFunctionModel::findComponentPrefixes() {
   m_backgroundPrefix.reset();
   m_convolutionPrefix.reset();
   m_deltaFunctionPrefix.reset();
+  m_tempFunctionPrefix.reset();
   m_peakPrefixes.reset();
   m_resolutionWorkspace.clear();
   m_resolutionWorkspaceIndex = 0;
@@ -163,10 +253,16 @@ void ConvolutionFunctionModel::findConvolutionPrefixes(
       resolution->getAttribute("WorkspaceIndex").asInt();
   if (nf == 1)
     return;
-  auto const model = fun->getFunction(1);
+  auto model = fun->getFunction(1);
+  QString convolutionPrefix = "f1.";
+  if (isProductFunction(model)) {
+    model = model->getFunction(1);
+    convolutionPrefix = "f1.f1.";
+    m_tempFunctionPrefix = *m_convolutionPrefix + "f1.f0.";
+  }
   auto const nm = model->nFunctions();
   if (nm == 0) {
-    auto const prefix = *m_convolutionPrefix + "f1.";
+    auto const prefix = *m_convolutionPrefix + convolutionPrefix;
     if (isDeltaFunction(model)) {
       m_deltaFunctionPrefix = prefix;
     } else {
@@ -175,7 +271,8 @@ void ConvolutionFunctionModel::findConvolutionPrefixes(
   } else {
     m_peakPrefixes = QStringList();
     for (size_t j = 0; j < model->nFunctions(); ++j) {
-      auto const prefix = *m_convolutionPrefix + QString("f1.f%1.").arg(j);
+      auto const prefix =
+          *m_convolutionPrefix + convolutionPrefix + QString("f%1.").arg(j);
       if (isDeltaFunction(model->getFunction(j))) {
         m_deltaFunctionPrefix = prefix;
       } else {

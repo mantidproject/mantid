@@ -23,6 +23,7 @@ ConvFunctionModel::ConvFunctionModel() {}
 void ConvFunctionModel::clearData() {
   m_fitType = FitType::None;
   m_hasDeltaFunction = false;
+  m_hasTempCorrection = false;
   m_backgroundType = BackgroundType::None;
   m_model.clear();
 }
@@ -30,7 +31,7 @@ void ConvFunctionModel::clearData() {
 void ConvFunctionModel::setModel() {
   m_model.setModel(buildBackgroundFunctionString(), m_fitResolutions,
                    buildPeaksFunctionString(), m_hasDeltaFunction, m_qValues,
-                   m_isQDependentFunction);
+                   m_isQDependentFunction, m_hasTempCorrection);
   m_model.setGlobalParameters(makeGlobalList());
 }
 
@@ -553,6 +554,8 @@ boost::optional<QString> ConvFunctionModel::getPrefix(ParamID name) const {
     return m_model.backgroundPrefix();
   } else if (name == ParamID::DELTA_HEIGHT) {
     return m_model.deltaFunctionPrefix();
+  } else if (name == ParamID::TEMPERATURE) {
+    return m_model.tempFunctionPrefix();
   } else {
     auto const prefixes = m_model.peakPrefixes();
     if (!prefixes)
@@ -601,6 +604,9 @@ void ConvFunctionModel::applyParameterFunction(
   applyToFitType(m_fitType, paramFun);
   applyToBackground(m_backgroundType, paramFun);
   applyToDelta(m_hasDeltaFunction, paramFun);
+  auto tempType = m_hasTempCorrection ? TempCorrectionType::Exponential
+                                      : TempCorrectionType::None;
+  applyToTemp(tempType, paramFun);
 }
 
 boost::optional<ParamID>

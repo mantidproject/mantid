@@ -29,7 +29,8 @@ public:
   setModel(const std::string &background,
            const std::vector<std::pair<std::string, int>> &resolutionWorkspaces,
            const std::string &peaks, bool hasDeltaFunction,
-           const std::vector<double> &qValues, const bool isQDependent);
+           const std::vector<double> &qValues, const bool isQDependent,
+           bool hasTempCorrection);
   boost::optional<QString> backgroundPrefix() const {
     return m_backgroundPrefix;
   }
@@ -39,6 +40,9 @@ public:
   boost::optional<QString> deltaFunctionPrefix() const {
     return m_deltaFunctionPrefix;
   }
+  boost::optional<QString> tempFunctionPrefix() const {
+    return m_tempFunctionPrefix;
+  }
   boost::optional<QStringList> peakPrefixes() const { return m_peakPrefixes; }
   std::string resolutionWorkspace() const { return m_resolutionWorkspace; }
   int resolutionWorkspaceIndex() const { return m_resolutionWorkspaceIndex; }
@@ -46,9 +50,24 @@ public:
 private:
   void findComponentPrefixes();
   void findConvolutionPrefixes(const IFunction_sptr &fun);
+  CompositeFunction_sptr createInnerFunction(std::string peaksFunction,
+                                             bool hasDeltaFunction,
+                                             bool isQDependent, double q,
+                                             bool hasTempCorrection);
+  CompositeFunction_sptr
+  addTempCorrection(CompositeFunction_sptr peaksFunction);
+  IFunction_sptr createTemperatureCorrection(double correction);
+  CompositeFunction_sptr
+  createConvolutionFunction(IFunction_sptr resolutionFunction,
+                            IFunction_sptr innerFunction);
+  IFunction_sptr createResolutionFunction(std::string workspaceName,
+                                          int workspaceIndex);
+  CompositeFunction_sptr addBackground(CompositeFunction_sptr domainFunction,
+                                       std::string background);
   boost::optional<QString> m_backgroundPrefix;
   boost::optional<QString> m_convolutionPrefix;
   boost::optional<QString> m_deltaFunctionPrefix;
+  boost::optional<QString> m_tempFunctionPrefix;
   boost::optional<QStringList> m_peakPrefixes;
   std::string m_resolutionWorkspace;
   int m_resolutionWorkspaceIndex;
