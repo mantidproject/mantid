@@ -281,7 +281,7 @@ class CalibrationPresenterTest(unittest.TestCase):
     def test_cropping_disabled_when_loading_calib(self):
         self.presenter.set_load_existing_enabled(True)
 
-        self.view.set_cropping_widget_hidden.assert_called_once()
+        self.assertEqual(self.view.set_cropping_widget_hidden.call_count, 1)
         self.view.set_check_cropping_enabled.assert_called_with(False)
         self.view.set_check_cropping_state.assert_called_with(0)
 
