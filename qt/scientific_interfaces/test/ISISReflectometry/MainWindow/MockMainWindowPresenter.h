@@ -19,9 +19,13 @@ public:
   MOCK_CONST_METHOD0(isAnyBatchProcessing, bool());
   MOCK_CONST_METHOD0(isAnyBatchAutoreducing, bool());
   MOCK_CONST_METHOD0(isWarnDiscardChangesChecked, bool());
+  MOCK_CONST_METHOD0(isWarnProcessAllChecked, bool());
+  MOCK_CONST_METHOD0(isWarnProcessPartialGroupChecked, bool());
   MOCK_METHOD0(isCloseEventPrevented, bool());
   MOCK_CONST_METHOD1(isCloseBatchPrevented, bool(int));
   MOCK_CONST_METHOD1(isOverwriteBatchPrevented, bool(int));
+  MOCK_CONST_METHOD0(isProcessAllPrevented, bool());
+  MOCK_CONST_METHOD0(isProcessPartialGroupPrevented, bool());
   MOCK_CONST_METHOD1(isBatchUnsaved, bool(int));
   MOCK_METHOD0(isAnyBatchUnsaved, bool());
 
