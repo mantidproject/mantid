@@ -28,11 +28,13 @@ revisiting when we move to Python 3.
 from __future__ import (absolute_import, unicode_literals)
 
 import ast
+from collections import namedtuple
+import contextlib
 import inspect
+from keyword import kwlist as python_keywords
 import re
 import sys
-from keyword import kwlist as python_keywords
-from collections import namedtuple
+import warnings
 
 from lib2to3.pgen2.tokenize import detect_encoding
 from io import BytesIO
@@ -46,6 +48,16 @@ else:  # noqa
 from mantidqt.widgets.codeeditor.editor import CodeEditor
 
 ArgSpec = namedtuple("ArgSpec", "args varargs keywords defaults")
+
+
+@contextlib.contextmanager
+def _ignore_matplotlib_deprecation_warnings():
+    """Context-manager to disable deprecation warnings from matplotlib while
+    generating the call tips"""
+    from matplotlib.cbook import MatplotlibDeprecationWarning
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", MatplotlibDeprecationWarning)
+        yield
 
 
 def get_builtin_argspec(builtin):
@@ -233,7 +245,8 @@ class CodeCompleter(object):
         if re.search("^#{0}import .*numpy( |,|$)", self.editor.text(), re.MULTILINE):
             self._add_to_completions(self._get_module_call_tips('numpy'))
         if re.search("^#{0}import .*pyplot( |,|$)", self.editor.text(), re.MULTILINE):
-            self._add_to_completions(self._get_module_call_tips('matplotlib.pyplot'))
+            with _ignore_matplotlib_deprecation_warnings():
+                self._add_to_completions(self._get_module_call_tips('matplotlib.pyplot'))
         self._add_to_completions(python_keywords)
 
         self.editor.enableAutoCompletion(CodeEditor.AcsAPIs)
@@ -251,7 +264,8 @@ class CodeCompleter(object):
             self._completions_dict[completion] = True
 
     def update_completion_api(self):
-        self._add_to_completions(self._get_completions_from_globals())
+        with _ignore_matplotlib_deprecation_warnings():
+            self._add_to_completions(self._get_completions_from_globals())
         self.editor.updateCompletionAPI(self.completions)
 
     def _get_module_call_tips(self, module):

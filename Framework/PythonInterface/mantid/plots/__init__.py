@@ -38,7 +38,7 @@ from mantid.plots import helperfunctions, plotfunctions, plotfunctions3D
 from mantid.plots.utility import autoscale_on_update
 from mantid.plots.helperfunctions import get_normalize_by_bin_width
 from mantid.plots.scales import PowerScale, SquareScale
-from mantid.plots.utility import artists_hidden, MantidAxType
+from mantid.plots.utility import artists_hidden, MantidAxType, legend_set_draggable
 from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
 
 
@@ -501,7 +501,7 @@ class MantidAxes(Axes):
 
     def make_legend(self):
         if self.legend_ is None:
-            self.legend().draggable()
+            legend_set_draggable(self.legend(), True)
         else:
             props = LegendProperties.from_legend(self.legend_)
             LegendProperties.create_legend(props, self)
@@ -623,7 +623,7 @@ class MantidAxes(Axes):
 
                     # also remove the curve from the legend
                     if (not self.is_empty(self)) and self.legend_ is not None:
-                        self.legend().draggable()
+                        legend_set_draggable(self.legend(), True)
 
                 if new_kwargs:
                     _autoscale_on = new_kwargs.pop("autoscale_on_update", self.get_autoscale_on())
@@ -748,7 +748,7 @@ class MantidAxes(Axes):
                     container_new = []
                     # also remove the curve from the legend
                     if (not self.is_empty(self)) and self.legend_ is not None:
-                        self.legend().draggable()
+                        legend_set_draggable(self.legend(), True)
 
                 return container_new
 

@@ -11,6 +11,7 @@ import unittest
 import matplotlib
 matplotlib.use("Agg")  # noqa
 from matplotlib.axes import Axes
+from matplotlib.legend import Legend
 
 from mantid.plots import MantidAxes
 from mantid.py3compat.mock import Mock, patch
@@ -120,7 +121,10 @@ class PlotScriptGeneratorTest(unittest.TestCase):
 
         mock_ax = self._gen_mock_axes(legend_=True)
         mock_fig = Mock(get_axes=lambda: [mock_ax])
-        self.assertIn('.legend().draggable()', generate_script(mock_fig))
+        if hasattr(Legend, "set_draggable"):
+            self.assertIn('.legend().set_draggable()', generate_script(mock_fig))
+        else:
+            self.assertIn('.legend().draggable()', generate_script(mock_fig))
 
     @patch(GET_AUTOSCALE_LIMITS)
     @patch(GEN_WS_RETRIEVAL_CMDS)
