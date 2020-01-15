@@ -12,7 +12,7 @@ from scipy.signal import convolve
 prebin_required_schemes = ['interpolate', 'interpolate_coarse']
 
 
-def broaden_spectrum(frequencies=None, bins=None, s_dft=None, sigma=None, scheme='gaussian_truncated'):
+def broaden_spectrum(frequencies, bins, s_dft, sigma, scheme='gaussian_truncated'):
     """Convert frequency/S data to broadened spectrum on a regular grid
 
     Several algorithms are implemented, for purposes of
@@ -28,13 +28,13 @@ def broaden_spectrum(frequencies=None, bins=None, s_dft=None, sigma=None, scheme
     :param s_dft: scattering values corresponding to *frequencies*
     :type s_dft: 1D array-like
     :param sigma:
-        width of broadening function. This may be a scalar used over the whole spectrum, or a series of values
+        width of broadening function. This should be a scalar used over the whole spectrum, or a series of values
         corresponding to *frequencies*.
     :type sigma: float or 1D array-like
     :param scheme:
         Name of broadening method used. Options:
 
-        - none: Return the input data
+        - none: Return the input data as a histogram, ignoring the value of sigma
         - gaussian: Evaluate a Gaussian on the output grid for every input point and sum them. Simple but slow, and
               recommended only for benchmarking and reference calculations.
         - normal: Generate histograms with appropriately-located normal distributions for every input point. In

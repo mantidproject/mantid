@@ -315,35 +315,27 @@ We can build on this by performing convolution of the full spectrum with each of
    ax1.plot(frequencies, intensities, 'k-', label='Unbroadened spectrum')
 
    # Narrow limit
-   freq_points, spectrum = Broadening.broaden_spectrum(frequencies=frequencies,
-                                                       bins=bins,
-                                                       s_dft=intensities,
-                                                       sigma=(peak1_sigma * np.ones_like(frequencies)),
-                                                       scheme='gaussian')
+   freq_points, spectrum = Broadening.broaden_spectrum(
+       frequencies, bins, intensities,
+       (peak1_sigma * np.ones_like(frequencies)),
+       scheme='gaussian')
    ax2.plot(freq_points, spectrum, label='Convolve with min(sigma)')
 
    # Broad limit
-   freq_points, spectrum = Broadening.broaden_spectrum(frequencies=frequencies,
-                                                       bins=bins,
-                                                       s_dft=intensities,
-                                                       sigma=(peak2_sigma * np.ones_like(frequencies)),
-                                                       scheme='gaussian')
+   freq_points, spectrum = Broadening.broaden_spectrum(
+       frequencies, bins, intensities,
+       (peak2_sigma * np.ones_like(frequencies)),
+       scheme='gaussian')
    ax2.plot(freq_points, spectrum, label='Convolve with max(sigma)')
 
    # Reference method: sum individually
-   freq_points, spectrum = Broadening.broaden_spectrum(frequencies=frequencies,
-                                                       bins=bins,
-                                                       s_dft=intensities,
-                                                       sigma=sigma,
-                                                       scheme='gaussian')
+   freq_points, spectrum = Broadening.broaden_spectrum(
+       frequencies, bins, intensities, sigma, scheme='gaussian')
    ax3.plot(freq_points, spectrum, 'k-', label='Sum individual peaks')
 
    # Interpolated
-   freq_points, spectrum = Broadening.broaden_spectrum(frequencies=frequencies,
-                                                       bins=bins,
-                                                       s_dft=intensities,
-                                                       sigma=sigma,
-                                                       scheme='interpolate')
+   freq_points, spectrum = Broadening.broaden_spectrum(
+       frequencies, bins, intensities, sigma, scheme='interpolate')
    ax2.plot(freq_points, spectrum, c='C2', linestyle='--', label='Interpolated', zorder=0.5)
    ax3.plot(freq_points, spectrum, c='C2', linestyle='--', label='Interpolated', zorder=0.5)
 

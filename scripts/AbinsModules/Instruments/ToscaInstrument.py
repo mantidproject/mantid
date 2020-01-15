@@ -105,9 +105,6 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
 
         sigma = self.get_sigma(frequencies)
 
-        points_freq, broadened_spectrum = broaden_spectrum(frequencies=frequencies,
-                                                           s_dft=s_dft,
-                                                           bins=bins,
-                                                           sigma=sigma,
-                                                           scheme=selected_scheme)
+        points_freq, broadened_spectrum = broaden_spectrum(frequencies, bins, s_dft,
+                                                           sigma, scheme=selected_scheme)
         return points_freq, broadened_spectrum

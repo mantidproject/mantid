@@ -86,11 +86,8 @@ class AbinsBroadeningTest(unittest.TestCase):
 
         results = {}
         for scheme in schemes:
-            _, results[scheme] = Broadening.broaden_spectrum(frequencies=freq_points,
-                                                             bins=bins,
-                                                             s_dft=s_dft,
-                                                             sigma=sigma,
-                                                             scheme=scheme)
+            _, results[scheme] = Broadening.broaden_spectrum(
+                freq_points, bins, s_dft, sigma, scheme)
 
         for scheme in schemes:
             # Interpolate scheme is approximate so just check a couple of sig.fig.
@@ -114,9 +111,7 @@ class AbinsBroadeningTest(unittest.TestCase):
                    'normal', 'normal_truncated']
 
         for scheme in schemes:
-            Broadening.broaden_spectrum(frequencies=frequencies,
-                                        bins=bins, s_dft=s_dft, sigma=sigma,
-                                        scheme=scheme)
+            Broadening.broaden_spectrum(frequencies, bins, s_dft, sigma, scheme=scheme)
 
     def test_broadening_normalisation(self):
         """Check broadening implementations do not change overall intensity"""
@@ -137,20 +132,14 @@ class AbinsBroadeningTest(unittest.TestCase):
 
         # Full Gaussian should reproduce null total
         for scheme in ('none', 'gaussian'):
-            freq_points, spectrum = Broadening.broaden_spectrum(frequencies=frequencies,
-                                                                bins=bins,
-                                                                s_dft=s_dft,
-                                                                sigma=sigma,
-                                                                scheme=scheme)
+            freq_points, spectrum = Broadening.broaden_spectrum(
+                frequencies, bins, s_dft, sigma, scheme=scheme)
             self.assertAlmostEqual(sum(spectrum),
                                    pre_broadening_total,)
 
         # Normal scheme reproduces area as well as total;
-        freq_points, full_spectrum = Broadening.broaden_spectrum(frequencies=frequencies,
-                                                                 bins=bins,
-                                                                 s_dft=s_dft,
-                                                                 sigma=sigma,
-                                                                 scheme='normal')
+        freq_points, full_spectrum = Broadening.broaden_spectrum(
+            frequencies, bins, s_dft, sigma, scheme='normal')
         self.assertAlmostEqual(np.trapz(spectrum, x=freq_points),
                                pre_broadening_total * (bins[1] - bins[0]),)
         self.assertAlmostEqual(sum(spectrum), pre_broadening_total)
@@ -158,22 +147,16 @@ class AbinsBroadeningTest(unittest.TestCase):
         # truncated forms will be a little off but shouldn't be _too_ off
         for scheme in ('gaussian_truncated', 'normal_truncated'):
 
-            freq_points, trunc_spectrum = Broadening.broaden_spectrum(frequencies=frequencies,
-                                                                      bins=bins,
-                                                                      s_dft=s_dft,
-                                                                      sigma=sigma,
-                                                                      scheme=scheme)
+            freq_points, trunc_spectrum = Broadening.broaden_spectrum(
+                frequencies, bins, s_dft, sigma, scheme)
             self.assertLess(abs(sum(full_spectrum) - sum(trunc_spectrum)) / sum(full_spectrum),
                                 0.03)
 
         # Interpolated methods need histogram input and smooth sigma
         hist_spec, _ = np.histogram(frequencies, bins, weights=s_dft)
         hist_sigma = sigma_func(freq_points)
-        freq_points, interp_spectrum = Broadening.broaden_spectrum(frequencies=freq_points,
-                                                                   bins=bins,
-                                                                   s_dft=hist_spec,
-                                                                   sigma=hist_sigma,
-                                                                   scheme='interpolate')
+        freq_points, interp_spectrum = Broadening.broaden_spectrum(
+            freq_points, bins, hist_spec, hist_sigma, scheme='interpolate')
         self.assertLess(abs(sum(interp_spectrum) - pre_broadening_total) / pre_broadening_total,
                             0.05)
 
