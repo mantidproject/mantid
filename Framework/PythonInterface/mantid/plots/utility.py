@@ -11,8 +11,15 @@ from contextlib import contextmanager
 
 from matplotlib import cm
 from matplotlib.container import ErrorbarContainer
+from matplotlib.legend import Legend
 
 from enum import Enum
+
+
+if hasattr(Legend, "set_draggable"):
+    SET_DRAGGABLE_METHOD = "set_draggable"
+else:
+    SET_DRAGGABLE_METHOD = "draggable"
 
 
 # Any changes here must be reflected in the definition in
@@ -115,6 +122,14 @@ def get_autoscale_limits(ax, axis):
     if not ax._tight:
         locator = getattr(ax, '{}axis'.format(axis)).get_major_locator()
         return locator.view_limits(axis_min, axis_max)
+
+
+def legend_set_draggable(legend, state, use_blit=False, update='loc'):
+    """Utility function to support varying Legend api around draggable status across
+    the versions of matplotlib we support. Function arguments match those from matplotlib.
+    See matplotlib documentation for argument descriptions
+    """
+    getattr(legend, SET_DRAGGABLE_METHOD)(state, use_blit, update)
 
 
 def zoom_axis(ax, coord, x_or_y, factor):
