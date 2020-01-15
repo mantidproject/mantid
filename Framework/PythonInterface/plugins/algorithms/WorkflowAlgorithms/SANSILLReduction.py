@@ -335,29 +335,27 @@ class SANSILLReduction(PythonAlgorithm):
         reference_ws = self.getProperty('ReferenceInputWorkspace').value
         coll_ws = None
         if reference_ws:
-            if not self._check_processed_flag(reference_ws, 'Reference'):
-                self.log().warning('Reference input workspace is not processed as reference.')
+            if not self._check_processed_flag(reference_ws, 'Sample'):
+                self.log().warning('Reference input workspace is not processed as sample.')
             Divide(LHSWorkspace=ws, RHSWorkspace=reference_ws, OutputWorkspace=ws, WarnOnZeroDivide=False)
             Scale(InputWorkspace=ws, Factor=self.getProperty('WaterCrossSection').value, OutputWorkspace=ws)
             self._mask(ws, reference_ws)
             coll_ws = reference_ws
-        else:
-            sensitivity_in = self.getProperty('SensitivityInputWorkspace').value
-            if sensitivity_in:
-                if not self._check_processed_flag(sensitivity_in, 'Sensitivity'):
-                    self.log().warning('Sensitivity input workspace is not processed as sensitivity.')
-                Divide(LHSWorkspace=ws, RHSWorkspace=sensitivity_in, OutputWorkspace=ws, WarnOnZeroDivide=False)
-                self._mask(ws, sensitivity_in)
-            flux_in = self.getProperty('FluxInputWorkspace').value
-            if flux_in:
-                coll_ws = flux_in
-                flux_ws = ws + '_flux'
-                if self._mode == 'TOF':
-                    RebinToWorkspace(WorkspaceToRebin=flux_in, WorkspaceToMatch=ws, OutputWorkspace=flux_ws)
-                    Divide(LHSWorkspace=ws, RHSWorkspace=flux_ws, OutputWorkspace=ws, WarnOnZeroDivide=False)
-                    DeleteWorkspace(flux_ws)
-                else:
-                    Divide(LHSWorkspace=ws, RHSWorkspace=flux_in, OutputWorkspace=ws, WarnOnZeroDivide=False)
+        sensitivity_in = self.getProperty('SensitivityInputWorkspace').value
+        if sensitivity_in:
+            if not self._check_processed_flag(sensitivity_in, 'Sensitivity'):
+                self.log().warning('Sensitivity input workspace is not processed as sensitivity.')
+            Divide(LHSWorkspace=ws, RHSWorkspace=sensitivity_in, OutputWorkspace=ws, WarnOnZeroDivide=False)
+            self._mask(ws, sensitivity_in)
+        flux_in = self.getProperty('FluxInputWorkspace').value
+        if flux_in:
+            flux_ws = ws + '_flux'
+            if self._mode == 'TOF':
+                RebinToWorkspace(WorkspaceToRebin=flux_in, WorkspaceToMatch=ws, OutputWorkspace=flux_ws)
+                Divide(LHSWorkspace=ws, RHSWorkspace=flux_ws, OutputWorkspace=ws, WarnOnZeroDivide=False)
+                DeleteWorkspace(flux_ws)
+            else:
+                Divide(LHSWorkspace=ws, RHSWorkspace=flux_in, OutputWorkspace=ws, WarnOnZeroDivide=False)
         if coll_ws:
             self._check_distances_match(mtd[ws], coll_ws)
             sample_coll = mtd[ws].getRun().getLogData('collimation.actual_position').value

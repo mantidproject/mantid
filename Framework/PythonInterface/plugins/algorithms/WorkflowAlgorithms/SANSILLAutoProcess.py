@@ -420,17 +420,14 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         sens_input = ''
         ref_input = ''
-        flux_input = ''
-        if not self.reference[0]:
-            flux_input = flux_name
-            if self.sensitivity:
-                sens = self.sensitivity[i] if len(self.sensitivity) == self.dimensionality else self.sensitivity[0]
-                [load_sensitivity, sensitivity_name] = needs_loading(sens, 'Sensitivity')
-                sens_input = sensitivity_name
-                self.progress.report('Loading sensitivity')
-                if load_sensitivity:
-                    LoadNexusProcessed(Filename=sens, OutputWorkspace=sensitivity_name)
-        else:
+        if self.sensitivity:
+            sens = self.sensitivity[i] if len(self.sensitivity) == self.dimensionality else self.sensitivity[0]
+            [load_sensitivity, sensitivity_name] = needs_loading(sens, 'Sensitivity')
+            sens_input = sensitivity_name
+            self.progress.report('Loading sensitivity')
+            if load_sensitivity:
+                LoadNexusProcessed(Filename=sens, OutputWorkspace=sensitivity_name)
+        if self.reference:
             reference = self.reference[i] if len(self.reference) == self.dimensionality else self.reference[0]
             [load_reference, reference_name] = needs_loading(reference, 'Reference')
             ref_input = reference_name
@@ -455,12 +452,12 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                          DefaultMaskedInputWorkspace=default_mask_name,
                          SensitivityInputWorkspace=sens_input,
                          SensitivityOutputWorkspace=self.output_sens,
-                         FluxInputWorkspace=flux_input,
+                         FluxInputWorkspace=flux_name,
                          NormaliseBy=self.normalise,
                          SampleThickness=self.getProperty('SampleThickness').value,
                          WaterCrossSection=self.getProperty('WaterCrossSection').value)
         panel_outputs = self.getPropertyValue('PanelOutputWorkspaces')
-        panel_ws_group = panel_outputs + '_' + str(i + 1)
+        panel_ws_group = panel_outputs + '_' + str(i + 1) if panel_outputs else ''
         SANSILLIntegration(InputWorkspace=sample_name,
                            OutputWorkspace=output,
                            OutputType=self.getPropertyValue('OutputType'),
