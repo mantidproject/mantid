@@ -150,6 +150,63 @@ public:
         ws->run().getLogAsSingleValue("pulse_interval");
     TS_ASSERT_DELTA(0.0060337892, pulseInterval, 1e-10)
   }
+
+  void test_PANTHER_diffraction_load() {
+    double wavelength = 7.;
+
+    // mostly the same code as loadDataFile, but some of the TOF features cant
+    // be called
+    LoadILLTOF2 loader;
+    loader.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(loader.initialize())
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", "001063.nxs"))
+
+    std::string outputSpace = "LoadILLTOFTest_out";
+    TS_ASSERT_THROWS_NOTHING(
+        loader.setPropertyValue("OutputWorkspace", outputSpace))
+    TS_ASSERT_THROWS_NOTHING(loader.execute())
+
+    MatrixWorkspace_sptr output =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            outputSpace);
+
+    TS_ASSERT_EQUALS(output->getNumberHistograms(), 73729)
+    const auto &spectrumInfo = output->spectrumInfo();
+    for (size_t wsIndex = 0; wsIndex != output->getNumberHistograms();
+         ++wsIndex) {
+      if (wsIndex < numberOfHistograms - numberOfMonitors) {
+        TS_ASSERT(!spectrumInfo.isMonitor(wsIndex))
+      } else {
+        TS_ASSERT(spectrumInfo.isMonitor(wsIndex))
+      }
+      const auto histogram = output->histogram(wsIndex);
+      TS_ASSERT_EQUALS(histogram.xMode(),
+                       Mantid::HistogramData::Histogram::XMode::BinEdges)
+      TS_ASSERT_EQUALS(histogram.yMode(),
+                       Mantid::HistogramData::Histogram::YMode::Counts)
+      TS_ASSERT_EQUALS(histogram.size(), 1)
+
+      const auto &xs = histogram.x();
+      TS_ASSERT_DELTA(xs[0], 0.9 * wavelength, 1E-5)
+      TS_ASSERT_DELTA(xs[1], 1.1 * wavelength, 1E-5)
+
+      const auto &ys = histogram.y();
+      const auto &es = histogram.e();
+      TS_ASSERT_EQUALS(es[0], std::sqrt(ys[0]))
+      TS_ASSERT_EQUALS(es[1], std::sqrt(ys[1]))
+    }
+    // Check all detectors have a defined detector ID >= 0
+    Mantid::detid2index_map detectorMap;
+    TS_ASSERT_THROWS_NOTHING(detectorMap =
+                                 output->getDetectorIDToWorkspaceIndexMap(true))
+
+    // Check all detectors have a unique detector ID
+    TS_ASSERT_EQUALS(detectorMap.size(), output->getNumberHistograms())
+
+    for (const auto value : detectorMap) {
+      TS_ASSERT(value.first >= 0)
+    }
+  }
 };
 
 //------------------------------------------------------------------------------
