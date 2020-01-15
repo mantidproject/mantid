@@ -166,6 +166,17 @@ void LoadILLTOF2::loadInstrumentDetails(NeXus::NXEntry &firstEntry) {
     throw std::runtime_error(message);
   }
 
+  // Monitor can be monitor (IN5, PANTHER) or monitor1 (IN6)
+  if (firstEntry.containsGroup("monitor"))
+    m_monitorName = "monitor";
+  else if (firstEntry.containsGroup("monitor1"))
+    m_monitorName = "monitor1";
+  else {
+    std::string message("Cannot find monitor[1] in the Nexus file!");
+    g_log.error(message);
+    throw std::runtime_error(message);
+  }
+
   g_log.debug() << "Instrument name set to: " + m_instrumentName << '\n';
 }
 
@@ -214,12 +225,14 @@ void LoadILLTOF2::initWorkSpace(NeXus::NXEntry &entry,
   m_localWorkspace = WorkspaceFactory::Instance().create(
       "Workspace2D", m_numberOfHistograms + numberOfMonitors,
       m_numberOfChannels + 1, m_numberOfChannels);
-  if (entry.containsGroup("monitor/time_of_flight") ||
-      entry.containsGroup("monitor1/time_of_flight")) {
+
+  NXClass monitor = entry.openNXGroup(m_monitorName);
+  if (monitor.containsDataSet("time_of_flight")) {
     m_localWorkspace->getAxis(0)->unit() =
         UnitFactory::Instance().create("TOF");
     m_localWorkspace->setYUnitLabel("Counts");
   } else {
+    g_log.debug("PANTHER diffraction mode");
     m_localWorkspace->getAxis(0)->unit() =
         UnitFactory::Instance().create("Wavelength");
     m_localWorkspace->setYUnitLabel("Counts");
@@ -235,22 +248,12 @@ void LoadILLTOF2::loadTimeDetails(NeXus::NXEntry &entry) {
 
   m_wavelength = entry.getFloat("wavelength");
 
-  // Monitor can be monitor (IN5) or monitor1 (IN6)
-  std::string monitorName;
-  if (entry.containsGroup("monitor"))
-    monitorName = "monitor";
-  else if (entry.containsGroup("monitor1"))
-    monitorName = "monitor1";
-  else {
-    std::string message("Cannot find monitor[1] in the Nexus file!");
-    g_log.error(message);
-    throw std::runtime_error(message);
-  }
+  NeXus::NXClass monitorEntry = entry.openNXGroup(m_monitorName);
 
-  if (entry.containsGroup(monitorName + "/time_of_flight")) {
+  if (monitorEntry.containsDataSet("time_of_flight")) {
 
     NXFloat time_of_flight_data =
-        entry.openNXFloat(monitorName + "/time_of_flight");
+        entry.openNXFloat(m_monitorName + "/time_of_flight");
     time_of_flight_data.load();
 
     // The entry "monitor/time_of_flight", has 3 fields:
@@ -262,10 +265,8 @@ void LoadILLTOF2::loadTimeDetails(NeXus::NXEntry &entry) {
     g_log.debug() << " ChannelWidth: " << m_channelWidth << '\n';
     g_log.debug() << " TimeOfFlightDealy: " << m_timeOfFlightDelay << '\n';
     g_log.debug() << " Wavelength: " << m_wavelength << '\n';
-  } else {
-    // monochromatic case for PANTHER
-    g_log.debug("Monochromatic mode for PANTHER. Nothing to do here.");
-  }
+  } // the other case is the diffraction mode for PANTHER, where nothing is
+    // needed here
 }
 
 /**
@@ -364,10 +365,11 @@ void LoadILLTOF2::loadDataIntoTheWorkSpace(
   // load the counts from the file into memory
   data.load();
 
+  NXClass monitor = entry.openNXGroup(m_monitorName);
+
   // Put tof in an array
   auto &X0 = m_localWorkspace->mutableX(0);
-  if (entry.containsGroup("monitor/time_of_flight") ||
-      entry.containsGroup("monitor1/time_of_flight")) {
+  if (monitor.containsDataSet("time_of_flight")) {
     for (size_t i = 0; i < m_numberOfChannels + 1; ++i) {
       X0[i] = m_timeOfFlightDelay + m_channelWidth * static_cast<double>(i) -
               m_channelWidth / 2; // to make sure the bin centre is correct
