@@ -19,6 +19,7 @@ from numpy import array_equal
 from mantid.simpleapi import CreateWorkspace
 from mantid.plots import MantidAxes  # register MantidAxes projection  # noqa
 from mantid.py3compat.mock import Mock, patch
+from mantidqt.widgets.plotconfigdialog.colorselector import convert_color_to_hex
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import CurveProperties
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.presenter import (
     CurvesTabWidgetPresenter, remove_curve_from_ax, curve_has_errors)
@@ -311,10 +312,14 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         ax.convert_to_waterfall()
         ax.waterfall_create_fill()
 
+        ax.lines[0].set_color('#ff9900')
+        ax.lines[1].set_color('#008fff')
+        ax.lines[2].set_color('#42ff00')
+
         # Set the fills so they are the same colours as their lines.
-        ax.collections[0].set_facecolor([0.122, 0.467, 0.706, 1])
-        ax.collections[1].set_facecolor([1, 0.498, 0.055, 1])
-        ax.collections[2].set_facecolor([0.173, 0.627, 0.173, 1])
+        ax.collections[0].set_facecolor(ax.lines[0].get_color())
+        ax.collections[1].set_facecolor(ax.lines[1].get_color())
+        ax.collections[2].set_facecolor(ax.lines[2].get_color())
 
         presenter = self._generate_presenter(fig=fig, mock_view=mock_view)
         # Change the colour of one of the lines.
@@ -322,7 +327,7 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         presenter._replot_selected_curve(new_plot_kwargs)
 
         # The fill for that line should be the new colour.
-        self.assertTrue((ax.collections[0].get_facecolor() == [1, 1, 0, 1]).all())
+        self.assertEqual(convert_color_to_hex(ax.collections[0].get_facecolor()[0]), ax.lines[0].get_color())
 
     def test_adding_errorbars_to_waterfall_plot_maintains_waterfall(self):
         fig = self.make_figure_with_multiple_curves()
