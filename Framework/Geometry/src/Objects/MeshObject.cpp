@@ -383,17 +383,18 @@ int MeshObject::getPointInObject(Kernel::V3D &point) const {
  * @param rng  A reference to a PseudoRandomNumberGenerator where
  * nextValue should return a flat random number between 0.0 & 1.0
  * @param maxAttempts The maximum number of attempts at generating a point
- * @return The generated point
+ * @param point The newly generated point
+ * @return Whether a point was generated or not
  */
-Kernel::V3D
-MeshObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                                  const size_t maxAttempts) const {
+bool MeshObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                       const size_t maxAttempts,
+                                       Kernel::V3D &point) const {
   const auto &bbox = getBoundingBox();
   if (bbox.isNull()) {
     throw std::runtime_error("Object::generatePointInObject() - Invalid "
                              "bounding box. Cannot generate new point.");
   }
-  return generatePointInObject(rng, bbox, maxAttempts);
+  return generatePointInObject(rng, bbox, maxAttempts, point);
 }
 
 /**
@@ -404,21 +405,23 @@ MeshObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
  * @param activeRegion Restrict point generation to this sub-region of the
  * object
  * @param maxAttempts The maximum number of attempts at generating a point
- * @return The newly generated point
+ * @param point The newly generated point
+ * @return Whether a point was generated or not
  */
-Kernel::V3D
-MeshObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                                  const BoundingBox &activeRegion,
-                                  const size_t maxAttempts) const {
+bool MeshObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                       const BoundingBox &activeRegion,
+                                       const size_t maxAttempts,
+                                       Kernel::V3D &point) const {
 
-  const auto point =
+  const auto pointGenerated =
       RandomPoint::bounded(*this, rng, activeRegion, maxAttempts);
-  if (!point) {
-    throw std::runtime_error("Object::generatePointInObject() - Unable to "
-                             "generate point in object after " +
-                             std::to_string(maxAttempts) + " attempts");
+
+  if (!pointGenerated) {
+    return false;
+  } else {
+    point = *pointGenerated;
+    return true;
   }
-  return *point;
 }
 
 /**

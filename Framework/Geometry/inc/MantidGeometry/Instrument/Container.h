@@ -79,14 +79,15 @@ public:
   int getPointInObject(Kernel::V3D &point) const override {
     return m_shape->getPointInObject(point);
   }
-  Kernel::V3D generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                                    const size_t i) const override {
-    return m_shape->generatePointInObject(rng, i);
+  bool generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                             const size_t i,
+                             Kernel::V3D &point) const override {
+    return m_shape->generatePointInObject(rng, i, point);
   }
-  Kernel::V3D generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                                    const BoundingBox &activeRegion,
-                                    const size_t i) const override {
-    return m_shape->generatePointInObject(rng, activeRegion, i);
+  bool generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                             const BoundingBox &activeRegion, const size_t i,
+                             Kernel::V3D &point) const override {
+    return m_shape->generatePointInObject(rng, activeRegion, i, point);
   }
 
   detail::ShapeInfo::GeometryShape shape() const override {

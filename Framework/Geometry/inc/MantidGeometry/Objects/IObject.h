@@ -69,13 +69,14 @@ public:
   virtual double volume() const = 0;
 
   virtual int getPointInObject(Kernel::V3D &point) const = 0;
-  virtual Kernel::V3D
-  generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                        const size_t) const = 0;
-  virtual Kernel::V3D
-  generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                        const BoundingBox &activeRegion,
-                        const size_t) const = 0;
+
+  virtual bool generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                     const size_t,
+                                     Kernel::V3D &point) const = 0;
+  virtual bool generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                     const BoundingBox &activeRegion,
+                                     const size_t,
+                                     Kernel::V3D &point) const = 0;
 
   virtual detail::ShapeInfo::GeometryShape shape() const = 0;
   virtual const detail::ShapeInfo &shapeInfo() const = 0;

@@ -11,6 +11,7 @@
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
+#include <iomanip>
 
 namespace Mantid {
 using Geometry::Track;
@@ -46,6 +47,10 @@ MCInteractionVolume::MCInteractionVolume(
   } catch (std::runtime_error &) {
     // swallow this as no defined environment from getEnvironment
   }
+
+  if (m_env) {
+    m_envScatterPoints.resize(m_env->nelements());
+  }
 }
 
 /**
@@ -54,6 +59,49 @@ MCInteractionVolume::MCInteractionVolume(
  */
 const Geometry::BoundingBox &MCInteractionVolume::getBoundingBox() const {
   return m_sample->getBoundingBox();
+}
+
+/**
+ * Generate point randomly across one of the components of the environment
+ * including the sample itself in the selection. The method first selects
+ * a random component and then selects a random point within that component
+ * using Object::generatePointObject
+ * @param rng A reference to a PseudoRandomNumberGenerator where
+ * nextValue should return a flat random number between 0.0 & 1.0
+ * @return The generated point
+ */
+Kernel::V3D MCInteractionVolume::generatePoint(
+    Kernel::PseudoRandomNumberGenerator &rng) const {
+  for (size_t i = 0; i < m_maxScatterAttempts; i++) {
+    Kernel::V3D point;
+    int componentIndex;
+    if (m_env) {
+      componentIndex = rng.nextInt(0, static_cast<int>(m_env->nelements())) - 1;
+    } else {
+      componentIndex = -1;
+    }
+
+    bool pointGenerated;
+    if (componentIndex == -1) {
+      pointGenerated =
+          m_sample->generatePointInObject(rng, m_activeRegion, 1, point);
+    } else {
+      pointGenerated =
+          m_env->getComponent(componentIndex)
+              .generatePointInObject(rng, m_activeRegion, 1, point);
+    }
+    if (pointGenerated) {
+      if (componentIndex == -1) {
+        m_sampleScatterPoints++;
+      } else {
+        m_envScatterPoints[componentIndex]++;
+      }
+      return point;
+    }
+  }
+  throw std::runtime_error("MCInteractionVolume::generatePoint() - Unable to "
+                           "generate point in object after " +
+                           std::to_string(m_maxScatterAttempts) + " attempts");
 }
 
 /**
@@ -78,14 +126,8 @@ double MCInteractionVolume::calculateAbsorption(
   // is calculated in reverse, i.e. defining the track from the scatter pt
   // backwards for simplicity with how the Track object works. This avoids
   // having to understand exactly which object the scattering occurred in.
-  V3D scatterPos;
-  if (m_env && (rng.nextValue() > 0.5)) {
-    scatterPos =
-        m_env->generatePoint(rng, m_activeRegion, m_maxScatterAttempts);
-  } else {
-    scatterPos = m_sample->generatePointInObject(rng, m_activeRegion,
-                                                 m_maxScatterAttempts);
-  }
+  V3D scatterPos = generatePoint(rng);
+
   const auto toStart = normalize(startPos - scatterPos);
   Track beforeScatter(scatterPos, toStart);
   int nlinks = m_sample->interceptSurface(beforeScatter);
@@ -118,6 +160,41 @@ double MCInteractionVolume::calculateAbsorption(
   }
   return calculateAttenuation(beforeScatter, lambdaBefore) *
          calculateAttenuation(afterScatter, lambdaAfter);
+}
+
+/**
+ * Generate a string summarising which parts of the environment
+ * the simulated scatter points occurred in
+ * @return The generated string
+ */
+std::string MCInteractionVolume::generateScatterPointStats() const {
+  std::stringstream scatterPointSummary;
+  scatterPointSummary << std::fixed;
+  scatterPointSummary << std::setprecision(2);
+
+  scatterPointSummary << "Scatter point counts:" << std::endl;
+
+  int totalScatterPoints = m_sampleScatterPoints;
+  for (std::vector<int>::size_type i = 0; i < m_envScatterPoints.size(); i++) {
+    totalScatterPoints += m_envScatterPoints[i];
+  }
+  scatterPointSummary << "Total scatter points: " << totalScatterPoints
+                      << std::endl;
+
+  double percentage =
+      static_cast<double>(m_sampleScatterPoints) / totalScatterPoints * 100;
+  scatterPointSummary << "Sample: " << m_sampleScatterPoints << " ("
+                      << percentage << "%)" << std::endl;
+
+  for (std::vector<int>::size_type i = 0; i < m_envScatterPoints.size(); i++) {
+    percentage =
+        static_cast<double>(m_envScatterPoints[i]) / totalScatterPoints * 100;
+    scatterPointSummary << "Environment part " << i << " ("
+                        << m_env->getComponent(i).id()
+                        << "): " << m_envScatterPoints[i] << " (" << percentage
+                        << "%)" << std::endl;
+  }
+  return scatterPointSummary.str();
 }
 
 } // namespace Algorithms

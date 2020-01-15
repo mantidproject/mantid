@@ -38,8 +38,8 @@ public:
                        size_t maxScatterPtAttempts);
   std::tuple<double, double> calculate(Kernel::PseudoRandomNumberGenerator &rng,
                                        const Kernel::V3D &finalPos,
-                                       double lambdaBefore,
-                                       double lambdaAfter) const;
+                                       double lambdaBefore, double lambdaAfter,
+                                       std::string &debugString) const;
 
 private:
   const IBeamProfile &m_beamProfile;

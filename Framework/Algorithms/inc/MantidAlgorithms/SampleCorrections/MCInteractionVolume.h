@@ -46,8 +46,12 @@ public:
                              const Kernel::V3D &startPos,
                              const Kernel::V3D &endPos, double lambdaBefore,
                              double lambdaAfter) const;
+  std::string generateScatterPointStats() const;
+  Kernel::V3D generatePoint(Kernel::PseudoRandomNumberGenerator &rng) const;
 
 private:
+  mutable int m_sampleScatterPoints = 0;
+  mutable std::vector<int> m_envScatterPoints;
   const boost::shared_ptr<Geometry::IObject> m_sample;
   const Geometry::SampleEnvironment *m_env;
   const Geometry::BoundingBox m_activeRegion;

@@ -57,8 +57,9 @@ public:
     const double lambdaBefore(2.5), lambdaAfter(3.5);
 
     double factor(0.0), error(0.0);
+    std::string debugString;
     std::tie(factor, error) =
-        mcabsorb.calculate(rng, endPos, lambdaBefore, lambdaAfter);
+        mcabsorb.calculate(rng, endPos, lambdaBefore, lambdaAfter, debugString);
     TS_ASSERT_DELTA(0.0043828472, factor, 1e-08);
     TS_ASSERT_DELTA(1.0 / std::sqrt(nevents), error, 1e-08);
   }
@@ -85,8 +86,10 @@ public:
     EXPECT_CALL(rng, nextValue()).WillRepeatedly(Return(0.5));
     const double lambdaBefore(2.5), lambdaAfter(3.5);
     const V3D endPos(0.7, 0.7, 1.4);
-    TS_ASSERT_THROWS(mcabs.calculate(rng, endPos, lambdaBefore, lambdaAfter),
-                     const std::runtime_error &)
+    std::string debugString;
+    TS_ASSERT_THROWS(
+        mcabs.calculate(rng, endPos, lambdaBefore, lambdaAfter, debugString),
+        const std::runtime_error &)
   }
 
 private:

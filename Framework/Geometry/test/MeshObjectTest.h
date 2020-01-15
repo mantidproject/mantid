@@ -848,7 +848,7 @@ public:
     size_t maxAttempts(1);
     V3D point;
     TS_ASSERT_THROWS_NOTHING(
-        point = geom_obj->generatePointInObject(rng, maxAttempts));
+        geom_obj->generatePointInObject(rng, maxAttempts, point));
 
     const double tolerance(1e-10);
     TS_ASSERT_DELTA(0.90, point.X(), tolerance);
@@ -870,8 +870,9 @@ public:
     //  which is outside the octahedron
     auto geom_obj = createOctahedron();
     size_t maxAttempts(1);
-    TS_ASSERT_THROWS(geom_obj->generatePointInObject(rng, maxAttempts),
-                     const std::runtime_error &);
+    V3D point;
+    TS_ASSERT_EQUALS(geom_obj->generatePointInObject(rng, maxAttempts, point),
+                     false);
   }
 
   void testVolumeOfCube() {
@@ -1086,16 +1087,18 @@ public:
   void test_generatePointInside_Convex_Solid() {
     const size_t npoints(6000);
     const size_t maxAttempts(500);
+    V3D point;
     for (size_t i = 0; i < npoints; ++i) {
-      octahedron->generatePointInObject(rng, maxAttempts);
+      octahedron->generatePointInObject(rng, maxAttempts, point);
     }
   }
 
   void test_generatePointInside_NonConvex_Solid() {
     const size_t npoints(6000);
     const size_t maxAttempts(500);
+    V3D point;
     for (size_t i = 0; i < npoints; ++i) {
-      lShape->generatePointInObject(rng, maxAttempts);
+      lShape->generatePointInObject(rng, maxAttempts, point);
     }
   }
 

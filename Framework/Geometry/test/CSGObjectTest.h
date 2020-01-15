@@ -731,8 +731,8 @@ public:
     auto shell = ComponentCreationHelper::createHollowShell(0.5, 1.0);
     constexpr size_t maxAttempts{1};
     V3D point;
-    TS_ASSERT_THROWS_NOTHING(
-        point = shell->generatePointInObject(rng, maxAttempts));
+    TS_ASSERT_EQUALS(shell->generatePointInObject(rng, maxAttempts, point),
+                     true);
 
     constexpr double tolerance{1e-10};
     TS_ASSERT_DELTA(-1. + 2. * 0.55, point.X(), tolerance);
@@ -760,8 +760,8 @@ public:
         ComponentCreationHelper::createCuboid(xLength, yLength, zLength);
     constexpr size_t maxAttempts{0};
     V3D point;
-    TS_ASSERT_THROWS_NOTHING(
-        point = cuboid->generatePointInObject(rng, maxAttempts));
+    TS_ASSERT_EQUALS(cuboid->generatePointInObject(rng, maxAttempts, point),
+                     true);
 
     constexpr double tolerance{1e-10};
     TS_ASSERT_DELTA(xLength - randX * 2. * xLength, point.X(), tolerance);
@@ -794,8 +794,8 @@ public:
         radius, height, bottomCentre, axis, "cyl");
     constexpr size_t maxAttempts{0};
     V3D point;
-    TS_ASSERT_THROWS_NOTHING(
-        point = cylinder->generatePointInObject(rng, maxAttempts));
+    TS_ASSERT_EQUALS(cylinder->generatePointInObject(rng, maxAttempts, point),
+                     true);
     // Global->cylinder local coordinates
     point -= bottomCentre;
     constexpr double tolerance{1e-10};
@@ -833,8 +833,8 @@ public:
         innerRadius, radius, height, bottomCentre, axis, "hol-cyl");
     constexpr size_t maxAttempts{0};
     V3D point;
-    TS_ASSERT_THROWS_NOTHING(
-        point = hollowCylinder->generatePointInObject(rng, maxAttempts));
+    TS_ASSERT_EQUALS(
+        hollowCylinder->generatePointInObject(rng, maxAttempts, point), true);
     // Global->cylinder local coordinates
     point -= bottomCentre;
     constexpr double tolerance{1e-10};
@@ -865,8 +865,8 @@ public:
     auto sphere = ComponentCreationHelper::createSphere(radius);
     constexpr size_t maxAttempts{0};
     V3D point;
-    TS_ASSERT_THROWS_NOTHING(
-        point = sphere->generatePointInObject(rng, maxAttempts));
+    TS_ASSERT_EQUALS(sphere->generatePointInObject(rng, maxAttempts, point),
+                     true);
     // Global->cylinder local coordinates
     constexpr double tolerance{1e-10};
     const double azimuthalAngle{2. * M_PI * randT};
@@ -893,8 +893,9 @@ public:
     // inside hole
     auto shell = ComponentCreationHelper::createHollowShell(0.5, 1.0);
     constexpr size_t maxAttempts{1};
-    TS_ASSERT_THROWS(shell->generatePointInObject(rng, maxAttempts),
-                     const std::runtime_error &);
+    V3D point;
+    TS_ASSERT_EQUALS(shell->generatePointInObject(rng, maxAttempts, point),
+                     false);
   }
 
   void testGeneratePointInsideRespectsActiveRegion() {
@@ -916,8 +917,9 @@ public:
     BoundingBox activeRegion(0.1, 0.1, 0.1, -0.1, -0.1, -0.1);
     constexpr size_t maxAttempts{1};
     V3D point;
-    TS_ASSERT_THROWS_NOTHING(
-        point = ball->generatePointInObject(rng, activeRegion, maxAttempts));
+    TS_ASSERT_EQUALS(
+        ball->generatePointInObject(rng, activeRegion, maxAttempts, point),
+        true);
     // We should get the point generated from the second 'random' triplet.
     constexpr double tolerance{1e-10};
     TS_ASSERT_DELTA(-0.1 + randX * 0.2, point.X(), tolerance)
@@ -1745,44 +1747,52 @@ public:
 
   void test_generatePointInside_Cuboid_With_ActiveRegion() {
     constexpr size_t maxAttempts{500};
+    V3D point;
     for (size_t i{0}; i < m_npoints; ++i) {
-      m_cuboid->generatePointInObject(m_rng, m_activeRegion, maxAttempts);
+      m_cuboid->generatePointInObject(m_rng, m_activeRegion, maxAttempts,
+                                      point);
     }
   }
 
   void test_generatePointInside_Cylinder_With_ActiveRegion() {
     constexpr size_t maxAttempts{500};
+    V3D point;
     for (size_t i{0}; i < m_npoints; ++i) {
-      m_cylinder->generatePointInObject(m_rng, m_activeRegion, maxAttempts);
+      m_cylinder->generatePointInObject(m_rng, m_activeRegion, maxAttempts,
+                                        point);
     }
   }
 
   void test_generatePointInside_Rotated_Cuboid() {
     constexpr size_t maxAttempts{500};
+    V3D point;
     for (size_t i = 0; i < m_npoints; ++i) {
-      m_rotatedCuboid->generatePointInObject(m_rng, maxAttempts);
+      m_rotatedCuboid->generatePointInObject(m_rng, maxAttempts, point);
     }
   }
 
   void test_generatePointInside_Rotated_Cuboid_With_ActiveRegion() {
     constexpr size_t maxAttempts{500};
+    V3D point;
     for (size_t i = 0; i < m_npoints; ++i) {
-      m_rotatedCuboid->generatePointInObject(m_rng, m_activeRegion,
-                                             maxAttempts);
+      m_rotatedCuboid->generatePointInObject(m_rng, m_activeRegion, maxAttempts,
+                                             point);
     }
   }
 
   void test_generatePointInside_Sphere() {
     constexpr size_t maxAttempts{500};
+    V3D point;
     for (size_t i = 0; i < m_npoints; ++i) {
-      m_sphere->generatePointInObject(m_rng, maxAttempts);
+      m_sphere->generatePointInObject(m_rng, maxAttempts, point);
     }
   }
 
   void test_generatePointInside_sphericalShell() {
     constexpr size_t maxAttempts{500};
+    V3D point;
     for (size_t i = 0; i < m_npoints; ++i) {
-      m_sphericalShell->generatePointInObject(m_rng, maxAttempts);
+      m_sphericalShell->generatePointInObject(m_rng, maxAttempts, point);
     }
   }
 
