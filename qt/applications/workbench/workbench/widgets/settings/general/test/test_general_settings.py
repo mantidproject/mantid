@@ -90,6 +90,12 @@ class GeneralSettingsTest(unittest.TestCase):
     def test_setup_checkbox_signals(self, _):
         presenter = GeneralSettings(None)
 
+        self.assert_connected_once(presenter.view.ignore_paraview,
+                                   presenter.view.ignore_paraview.stateChanged)
+
+        self.assert_connected_once(presenter.view.crystallography_convention,
+                                   presenter.view.crystallography_convention.stateChanged)
+
         self.assert_connected_once(presenter.view.show_invisible_workspaces,
                                    presenter.view.show_invisible_workspaces.stateChanged)
 
@@ -217,6 +223,34 @@ class GeneralSettingsTest(unittest.TestCase):
         new_instr = "apples"
         presenter.action_instrument_changed(new_instr)
         mock_ConfigService.setString.assert_called_once_with(GeneralSettings.INSTRUMENT, new_instr)
+
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
+    def test_action_ignore_paraview(self, mock_ConfigService):
+        presenter = GeneralSettings(None)
+        # reset any effects from the constructor
+        mock_ConfigService.setString.reset_mock()
+
+        presenter.action_ignore_paraview(True)
+        mock_ConfigService.setString.assert_called_once_with(GeneralSettings.IGNORE_PARAVIEW, "True")
+
+        mock_ConfigService.setString.reset_mock()
+
+        presenter.action_ignore_paraview(False)
+        mock_ConfigService.setString.assert_called_once_with(GeneralSettings.IGNORE_PARAVIEW, "False")
+
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
+    def test_action_crystallography_convention(self, mock_ConfigService):
+        presenter = GeneralSettings(None)
+        # reset any effects from the constructor
+        mock_ConfigService.setString.reset_mock()
+
+        presenter.action_crystallography_convention(True)
+        mock_ConfigService.setString.assert_called_once_with(GeneralSettings.CRYSTALLOGRAPY_CONV, "True")
+
+        mock_ConfigService.setString.reset_mock()
+
+        presenter.action_crystallography_convention(False)
+        mock_ConfigService.setString.assert_called_once_with(GeneralSettings.CRYSTALLOGRAPY_CONV, "False")
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_show_invisible_workspaces(self, mock_ConfigService):

@@ -13,6 +13,8 @@ from mantid.kernel import ConfigService
 from workbench.config import CONF
 from workbench.widgets.settings.general.view import GeneralSettingsView
 
+from qtpy.QtCore import Qt
+
 
 class GeneralSettings(object):
     """
@@ -23,6 +25,8 @@ class GeneralSettings(object):
     be handled here.
     """
 
+    CRYSTALLOGRAPY_CONV = "Q.convention"
+    IGNORE_PARAVIEW = "paraview.ignore"
     INSTRUMENT = "default.instrument"
     SHOW_INVISIBLE_WORKSPACES = "MantidOptions.InvisibleWorkspaces"
     PR_NUMBER_OF_CHECKPOINTS = "projectRecovery.numberOfCheckpoints"
@@ -75,6 +79,8 @@ class GeneralSettings(object):
         self.view.project_recovery_enabled.stateChanged.connect(self.action_project_recovery_enabled)
         self.view.time_between_recovery.valueChanged.connect(self.action_time_between_recovery)
         self.view.total_number_checkpoints.valueChanged.connect(self.action_total_number_checkpoints)
+        self.view.ignore_paraview.stateChanged.connect(self.action_ignore_paraview)
+        self.view.crystallography_convention.stateChanged.connect(self.action_crystallography_convention)
 
     def action_facility_changed(self, new_facility):
         """
@@ -111,11 +117,15 @@ class GeneralSettings(object):
         pr_time_between_recovery = int(ConfigService.getString(self.PR_TIME_BETWEEN_RECOVERY))
         pr_number_checkpoints = int(ConfigService.getString(self.PR_NUMBER_OF_CHECKPOINTS))
         use_notifications_setting = ("on" == ConfigService.getString(self.USE_NOTIFICATIONS).lower())
+        ignore_paraview_setting = bool(int(ConfigService.getString(self.IGNORE_PARAVIEW)))
+        crystallography_convention = ("Crystallography" == ConfigService.getString(self.CRYSTALLOGRAPY_CONV))
 
         self.view.project_recovery_enabled.setChecked(pr_enabled)
         self.view.time_between_recovery.setValue(pr_time_between_recovery)
         self.view.total_number_checkpoints.setValue(pr_number_checkpoints)
         self.view.use_notifications.setChecked(use_notifications_setting)
+        self.view.ignore_paraview.setChecked(ignore_paraview_setting)
+        self.view.crystallography_convention.setChecked(crystallography_convention)
 
     def action_project_recovery_enabled(self, state):
         ConfigService.setString(self.PR_RECOVERY_ENABLED, str(bool(state)))
@@ -125,6 +135,16 @@ class GeneralSettings(object):
 
     def action_total_number_checkpoints(self, value):
         ConfigService.setString(self.PR_NUMBER_OF_CHECKPOINTS, str(value))
+
+    def action_ignore_paraview(self, state):
+        ConfigService.setString(self.IGNORE_PARAVIEW, str(int(bool(state))))
+
+    def action_crystallography_convention(self, state):
+        if state == Qt.Checked:
+            value = "Crystallography"
+        else:
+            value = "Inelastic"
+        ConfigService.setString(self.CRYSTALLOGRAPY_CONV, value)
 
     def action_instrument_changed(self, new_instrument):
         ConfigService.setString(self.INSTRUMENT, new_instrument)
