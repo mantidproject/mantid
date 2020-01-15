@@ -126,6 +126,7 @@ class CalibrationPresenter(object):
             return False
         if not self.cropping_widget.is_valid():
             create_error_message(self.view, "Check cropping values are valid.")
+            return False
         return True
 
     def validate_run_numbers(self):
@@ -166,7 +167,6 @@ class CalibrationPresenter(object):
         if enabled:
             self.set_calibrate_button_text("Load")
             self.view.set_check_plot_output_enabled(False)
-            self.show_cropping(False)
             self.view.set_check_cropping_enabled(False)
             self.view.set_check_cropping_state(0)
 
