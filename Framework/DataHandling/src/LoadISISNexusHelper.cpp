@@ -8,7 +8,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 namespace {
-static constexpr size_t RUN_TIME_STRING_LENGTH = 19;
+static constexpr std::size_t RUN_TIME_STRING_LENGTH = 19;
 } // namespace
 
 namespace Mantid {
@@ -17,10 +17,8 @@ namespace DataHandling {
 
 namespace LoadISISNexusHelper {
 
-using namespace Kernel;
 using namespace API;
 using namespace NeXus;
-using std::size_t;
 
 /**
  * Find total number of spectra in the nexus file
@@ -76,7 +74,7 @@ findDetectorIDsAndSpectrumNumber(const NXEntry &entry, const bool hasVMSBlock) {
 
 /**
  * Load geometrical data about the sample from the nexus entry into a workspace
- *   @param Sample :: The sample which the geometrical data will be saved into
+ *   @param sample :: The sample which the geometrical data will be saved into
  *   @param entry :: The Nexus entry
  *   @param hasVMSBlock :: Whether the current nexus entry has a vms_compat
  * block
@@ -123,18 +121,19 @@ void loadSampleGeometry(Sample &sample, const NXEntry &entry,
 
 /**
  * Load data about the run
- *   @param Run :: The run where the information will be stored
+ *   @param run :: The run where the information will be stored
  *   @param entry :: The Nexus entry
+ *   @param hasVMSBlock :: Whether the current nexus entry has a vms_compat
  */
-void loadRunDetails(API::Run &runDetails, const NXEntry &entry,
+void loadRunDetails(API::Run &run, const NXEntry &entry,
                     const bool hasVMSBlock) {
 
   // Charge is stored as a float
   double proton_charge = static_cast<double>(entry.getFloat("proton_charge"));
-  runDetails.setProtonCharge(proton_charge);
+  run.setProtonCharge(proton_charge);
 
   std::string run_num = std::to_string(entry.getInt("run_number"));
-  runDetails.addProperty("run_number", run_num);
+  run.addProperty("run_number", run_num);
 
   // End date and time is stored separately in ISO format in the
   // "raw_data1/endtime" class
@@ -142,18 +141,16 @@ void loadRunDetails(API::Run &runDetails, const NXEntry &entry,
   char_data.load();
 
   std::string end_time_iso = std::string(char_data(), RUN_TIME_STRING_LENGTH);
-  runDetails.addProperty("run_end", end_time_iso);
+  run.addProperty("run_end", end_time_iso);
 
   char_data = entry.openNXChar("start_time");
   char_data.load();
 
   std::string start_time_iso = std::string(char_data(), RUN_TIME_STRING_LENGTH);
 
-  runDetails.addProperty("run_start", start_time_iso);
+  run.addProperty("run_start", start_time_iso);
 
-  // Some details are only stored in the VMS comparability block so we'll
-  // everything from there
-  // for consistency
+  // If we have a vms block, load details from there
   if (hasVMSBlock) {
 
     NXClass vms_compat = entry.openNXGroup("isis_vms_compat");
@@ -161,53 +158,50 @@ void loadRunDetails(API::Run &runDetails, const NXEntry &entry,
     // RPB struct info
     NXInt rpb_int = vms_compat.openNXInt("IRPB");
     rpb_int.load();
-    runDetails.addProperty(
-        "freq",
-        rpb_int[6]); // 2**k where source frequency = 50 / 2**k
+    run.addProperty("freq",
+                    rpb_int[6]); // 2**k where source frequency = 50 / 2**k
     // Now double data
     NXFloat rpb_dbl = vms_compat.openNXFloat("RRPB");
     rpb_dbl.load();
-    runDetails.addProperty(
+    run.addProperty(
         "gd_prtn_chrg",
         static_cast<double>(rpb_dbl[7])); // good proton charge (uA.hour)
-    runDetails.addProperty(
+    run.addProperty(
         "tot_prtn_chrg",
-        static_cast<double>(rpb_dbl[8])); // total proton charge (uA.hour)
-    runDetails.addProperty("goodfrm", rpb_int[9]);      // good frames
-    runDetails.addProperty("rawfrm", rpb_int[10]);      // raw frames
-    runDetails.addProperty("rb_proposal", rpb_int[21]); // RB (proposal)
+        static_cast<double>(rpb_dbl[8]));   // total proton charge (uA.hour)
+    run.addProperty("goodfrm", rpb_int[9]); // good frames
+    run.addProperty("rawfrm", rpb_int[10]); // raw frames
+    run.addProperty("rb_proposal", rpb_int[21]); // RB (proposal)
     vms_compat.close();
   } else {
 
     NXFloat floatData = entry.openNXFloat("duration");
     floatData.load();
-    runDetails.addProperty("dur", static_cast<double>(floatData[0]),
-                           floatData.attributes("units"), true);
+    run.addProperty("dur", static_cast<double>(floatData[0]),
+                    floatData.attributes("units"), true);
 
     // These variables have changed, gd_prtn_chrg is now proton_charge
     floatData = entry.openNXFloat("proton_charge");
     floatData.load();
-    runDetails.addProperty("gd_prtn_chrg", static_cast<double>(floatData[0]),
-                           floatData.attributes("units"), true);
+    run.addProperty("gd_prtn_chrg", static_cast<double>(floatData[0]),
+                    floatData.attributes("units"), true);
     // Total_proton_charge is now proton_charge_raw
     floatData = entry.openNXFloat("proton_charge_raw");
     floatData.load();
-    runDetails.addProperty("tot_prtn_chrg", static_cast<double>(floatData[0]),
-                           floatData.attributes("units"), true);
+    run.addProperty("tot_prtn_chrg", static_cast<double>(floatData[0]),
+                    floatData.attributes("units"), true);
 
     if (entry.containsGroup("instrument/source/frequency")) {
-      runDetails.addProperty("freq",
-                             entry.getFloat("instrument/source/frequency"));
+      run.addProperty("freq", entry.getFloat("instrument/source/frequency"));
     } else {
       // If no entry, assume 50hz source (suggested by Freddie Akeroyd)
-      runDetails.addProperty("freq", 50, "Hz", true);
+      run.addProperty("freq", 50, "Hz", true);
     }
 
-    runDetails.addProperty("goodfrm", entry.getInt("good_frames"));
-    runDetails.addProperty("rawfrm", entry.getInt("raw_frames"));
-    runDetails.addProperty(
-        "rb_proposal",
-        entry.getString("experiment_identifier")); // RB (proposal)
+    run.addProperty("goodfrm", entry.getInt("good_frames"));
+    run.addProperty("rawfrm", entry.getInt("raw_frames"));
+    run.addProperty("rb_proposal",
+                    entry.getString("experiment_identifier")); // RB (proposal)
   }
 }
 } // namespace LoadISISNexusHelper

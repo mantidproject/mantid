@@ -433,7 +433,7 @@ void LoadISISNexus2::exec() {
   m_spec.clear();
   m_monitors.clear();
   m_wsInd2specNum_map.clear();
-} // namespace DataHandling
+}
 
 // Function object for remove_if STL algorithm
 namespace {
