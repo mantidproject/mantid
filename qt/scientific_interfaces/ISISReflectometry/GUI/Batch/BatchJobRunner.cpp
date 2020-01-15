@@ -113,7 +113,7 @@ void BatchJobRunner::notifyReductionResumed() {
       }
       for (const auto &groupCountPair : groupsWithSelectedRows) {
         m_processPartial =
-            groupCountPair.second <
+            static_cast<int>(groupCountPair.second) <
             getNumberOfInitialisedRowsInGroup(groupCountPair.first.get());
         if (m_processPartial)
           break;
@@ -308,11 +308,11 @@ const Group &BatchJobRunner::getParentGroupFromPath(
   return m_batch.runsTable().reductionJobs().groups()[groupOf(rowLocation)];
 }
 
-const int
-BatchJobRunner::getNumberOfInitialisedRowsInGroup(const Group &group) const {
-  return std::count_if(
+int BatchJobRunner::getNumberOfInitialisedRowsInGroup(
+    const Group &group) const {
+  return static_cast<int>(std::count_if(
       group.rows().cbegin(), group.rows().cend(),
-      [](const boost::optional<Row> &row) { return row.is_initialized(); });
+      [](const boost::optional<Row> &row) { return row.is_initialized(); }));
 }
 
 boost::optional<Item const &>

@@ -78,7 +78,7 @@ private:
   getGroupFromPath(MantidWidgets::Batch::RowLocation rowLocation) const;
   const Group &
   getParentGroupFromPath(MantidWidgets::Batch::RowLocation rowLocation) const;
-  const int getNumberOfInitialisedRowsInGroup(const Group &group) const;
+  int getNumberOfInitialisedRowsInGroup(const Group &group) const;
 
   template <typename T> bool isSelected(T const &item);
   bool hasSelectedRowsRequiringProcessing(Group const &group);
