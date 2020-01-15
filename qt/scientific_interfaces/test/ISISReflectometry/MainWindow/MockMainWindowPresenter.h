@@ -18,9 +18,12 @@ public:
   MOCK_METHOD1(settingsChanged, void(int));
   MOCK_CONST_METHOD0(isAnyBatchProcessing, bool());
   MOCK_CONST_METHOD0(isAnyBatchAutoreducing, bool());
-  MOCK_CONST_METHOD0(isWarnDiscardChangesChecked, bool());
   MOCK_CONST_METHOD0(isWarnProcessAllChecked, bool());
   MOCK_CONST_METHOD0(isWarnProcessPartialGroupChecked, bool());
+  MOCK_CONST_METHOD0(isWarnDiscardChangesChecked, bool());
+  MOCK_CONST_METHOD0(isRoundChecked, bool());
+  MOCK_CONST_METHOD0(getRoundPrecision, int &());
+  MOCK_CONST_METHOD0(roundPrecision, boost::optional<int>());
   MOCK_METHOD0(isCloseEventPrevented, bool());
   MOCK_CONST_METHOD1(isCloseBatchPrevented, bool(int));
   MOCK_CONST_METHOD1(isOverwriteBatchPrevented, bool(int));
