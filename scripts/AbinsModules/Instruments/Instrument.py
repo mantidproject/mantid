@@ -20,7 +20,7 @@ class Instrument(object):
         :param  input_data: data from which Q2 should be calculated
         :returns:  numpy array with Q2 data
         """
-        return None
+        raise NotImplementedError()
 
     def convolve_with_resolution_function(self, frequencies=None, bins=None, s_dft=None, scheme='auto'):
         """
@@ -37,8 +37,8 @@ class Instrument(object):
             'auto' should select something sensible.
         :type scheme: str
 
-       """
-        return None
+        """
+        raise NotImplementedError()
 
     def __str__(self):
         return self._name

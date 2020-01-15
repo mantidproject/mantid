@@ -9,6 +9,7 @@ set ( TEST_PY_FILES
    AbinsCalculateSPowderTest.py
    AbinsDWSingleCrystalDataTest.py
    AbinsFrequencyPowderGeneratorTest.py
+   AbinsInstrumentTest.py
    AbinsIOmoduleTest.py
    AbinsKpointsDataTest.py
    AbinsLoadCASTEPTest.py
