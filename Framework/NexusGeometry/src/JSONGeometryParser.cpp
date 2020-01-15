@@ -514,7 +514,7 @@ void JSONGeometryParser::extractMonitorContent() {
     auto name = (*monitor)[NAME].asString();
     if (children.empty())
       throw std::invalid_argument("Full monitor definition for " + name +
-                                  " missing in JSON provided.");
+                                  " missing in json provided.");
     Monitor mon;
     mon.componentName = name;
     /* For monitors with no detector ID we create dummy IDs starting from -1 and
