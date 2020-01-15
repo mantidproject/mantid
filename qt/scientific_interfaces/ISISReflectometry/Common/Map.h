@@ -96,7 +96,8 @@ std::string optionalToString(boost::optional<T> maybeValue,
     }
     return optionalToString(maybeValue);
   }
-  return std::string();
+    return std::string();
+  }
 }
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

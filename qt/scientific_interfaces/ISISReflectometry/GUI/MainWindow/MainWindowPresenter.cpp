@@ -98,7 +98,6 @@ void MainWindowPresenter::notifyShowSlitCalculatorRequested() {
 }
 
 void MainWindowPresenter::notifyOptionsChanged() const { optionsChanged(); }
-
 void MainWindowPresenter::notifyAnyBatchAutoreductionResumed() {
   for (const auto &batchPresenter : m_batchPresenters) {
     batchPresenter->notifyAnyBatchAutoreductionResumed();
