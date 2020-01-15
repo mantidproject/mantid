@@ -87,7 +87,7 @@ class SANSILLReduction(PythonAlgorithm):
         self.declareProperty(MultipleFileProperty('Run', extensions=['nxs']),
                              doc='File path of run(s).')
 
-        options = ['Absorber', 'Beam', 'Transmission', 'Container', 'Reference', 'Sample']
+        options = ['Absorber', 'Beam', 'Transmission', 'Container', 'Sample']
 
         self.declareProperty(name='ProcessAs',
                              defaultValue='Sample',
@@ -107,8 +107,6 @@ class SANSILLReduction(PythonAlgorithm):
         transmission = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Transmission')
 
         not_beam = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsNotEqualTo, 'Beam')
-
-        reference = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Reference')
 
         container = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Container')
 
@@ -130,7 +128,7 @@ class SANSILLReduction(PythonAlgorithm):
 
         self.declareProperty('SampleThickness', 0.1, validator=FloatBoundedValidator(lower=0.), doc='Sample thickness [cm]')
 
-        self.setPropertySettings('SampleThickness', EnabledWhenProperty(sample, reference, LogicOperator.Or))
+        self.setPropertySettings('SampleThickness', sample)
 
         self.declareProperty(MatrixWorkspaceProperty('AbsorberInputWorkspace', '',
                                                      direction=Direction.Input,
@@ -153,17 +151,14 @@ class SANSILLReduction(PythonAlgorithm):
                              doc='The name of the transmission input workspace.')
 
         self.setPropertySettings('TransmissionInputWorkspace',
-                                 EnabledWhenProperty(container,
-                                                     EnabledWhenProperty(reference, sample, LogicOperator.Or),
-                                                     LogicOperator.Or))
+                                 EnabledWhenProperty(container, sample, LogicOperator.Or))
 
         self.declareProperty(MatrixWorkspaceProperty('ContainerInputWorkspace', '',
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Optional),
                              doc='The name of the container workspace.')
 
-        self.setPropertySettings('ContainerInputWorkspace',
-                                 EnabledWhenProperty(sample, reference, LogicOperator.Or))
+        self.setPropertySettings('ContainerInputWorkspace', sample)
 
         self.declareProperty(MatrixWorkspaceProperty('ReferenceInputWorkspace', '',
                                                      direction=Direction.Input,
@@ -188,14 +183,14 @@ class SANSILLReduction(PythonAlgorithm):
                                                      optional=PropertyMode.Optional),
                              doc='The name of the output sensitivity workspace.')
 
-        self.setPropertySettings('SensitivityOutputWorkspace', reference)
+        self.setPropertySettings('SensitivityOutputWorkspace', sample)
 
         self.declareProperty(MatrixWorkspaceProperty('MaskedInputWorkspace', '',
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Optional),
                              doc='Workspace to copy the mask from; for example, the beam stop')
 
-        self.setPropertySettings('MaskedInputWorkspace', EnabledWhenProperty(sample, reference, LogicOperator.Or))
+        self.setPropertySettings('MaskedInputWorkspace', sample)
 
         self.declareProperty(MatrixWorkspaceProperty('FluxInputWorkspace', '',
                                                      direction=Direction.Output,
@@ -221,7 +216,7 @@ class SANSILLReduction(PythonAlgorithm):
                                                      optional=PropertyMode.Optional),
                              doc='Workspace to copy the mask from; for example, the bad detector edges.')
 
-        self.setPropertySettings('DefaultMaskedInputWorkspace', EnabledWhenProperty(sample, reference, LogicOperator.Or))
+        self.setPropertySettings('DefaultMaskedInputWorkspace', sample)
 
     def _normalise(self, ws):
         """
@@ -486,7 +481,7 @@ class SANSILLReduction(PythonAlgorithm):
 
     def PyExec(self):
         process = self.getPropertyValue('ProcessAs')
-        processes = ['Absorber', 'Beam', 'Transmission', 'Container', 'Reference', 'Sample']
+        processes = ['Absorber', 'Beam', 'Transmission', 'Container', 'Sample']
         progress = Progress(self, start=0.0, end=1.0, nreports=processes.index(process) + 1)
         ws = '__' + self.getPropertyValue('OutputWorkspace')
         # we do not want the summing done by LoadAndMerge since it will be pair-wise and slow
@@ -504,7 +499,7 @@ class SANSILLReduction(PythonAlgorithm):
             if run.getLogData('tof_mode').value == 'TOF':
                 self._mode = 'TOF'
         progress.report()
-        if process in ['Beam', 'Transmission', 'Container', 'Reference', 'Sample']:
+        if process in ['Beam', 'Transmission', 'Container', 'Sample']:
             absorber_ws = self.getProperty('AbsorberInputWorkspace').value
             if absorber_ws:
                 self._apply_absorber(ws, absorber_ws)
@@ -535,7 +530,7 @@ class SANSILLReduction(PythonAlgorithm):
                     if not cache:
                         DeleteWorkspace(solid_angle)
                     progress.report()
-                    if process in ['Reference', 'Sample']:
+                    if process == 'Sample':
                         container_ws = self.getProperty('ContainerInputWorkspace').value
                         if container_ws:
                             self._apply_container(ws, container_ws)
@@ -546,13 +541,11 @@ class SANSILLReduction(PythonAlgorithm):
                         if self._instrument in ['D22', 'D22lr', 'D33']:
                             self._apply_parallax(ws)
                         progress.report()
-                        if process == 'Reference':
-                            sensitivity_out = self.getPropertyValue('SensitivityOutputWorkspace')
-                            if sensitivity_out:
-                                self._process_sensitivity(ws, sensitivity_out)
-                        elif process == 'Sample':
-                            self._process_sample(ws)
-                            progress.report()
+                        sensitivity_out = self.getPropertyValue('SensitivityOutputWorkspace')
+                        if sensitivity_out:
+                            self._process_sensitivity(ws, sensitivity_out)
+                        self._process_sample(ws)
+                        progress.report()
         self._finalize(ws, process)
 
 # Register algorithm with Mantid

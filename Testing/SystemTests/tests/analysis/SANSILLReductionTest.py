@@ -46,7 +46,7 @@ class ILL_D11_Test(systemtesting.MantidSystemTest):
         SANSILLReduction(Run='010445', ProcessAs='Transmission', AbsorberInputWorkspace='Cdw',
                          BeamInputWorkspace='Dbw', OutputWorkspace='w_tr')
         # Water
-        SANSILLReduction(Run='010453', ProcessAs='Reference', AbsorberInputWorkspace='Cdw', MaskedInputWorkspace='mask',
+        SANSILLReduction(Run='010453', ProcessAs='Sample', AbsorberInputWorkspace='Cdw', MaskedInputWorkspace='mask',
                          ContainerInputWorkspace='wc', BeamInputWorkspace='Dbw', TransmissionInputWorkspace='wc_tr',
                          SensitivityOutputWorkspace='sens', OutputWorkspace='water')
         # Process the dark current Cd/B4C for sample
@@ -113,7 +113,7 @@ class ILL_D22_Test(systemtesting.MantidSystemTest):
 
         # Reference
         # Actually this is not water, but a deuterated buffer, but is fine for the test
-        SANSILLReduction(Run='241261', ProcessAs='Reference', MaskedInputWorkspace='mask',
+        SANSILLReduction(Run='241261', ProcessAs='Sample', MaskedInputWorkspace='mask',
                          AbsorberInputWorkspace='Cd', BeamInputWorkspace='Db', ContainerInputWorkspace='can',
                          OutputWorkspace='ref', SensitivityOutputWorkspace='sens')
 
@@ -264,7 +264,7 @@ class ILL_D33_Test(systemtesting.MantidSystemTest):
                          AbsorberInputWorkspace='Cdw', BeamInputWorkspace='Dbw', OutputWorkspace='w_tr')
 
         # Water
-        SANSILLReduction(Run='027887', ProcessAs='Reference', MaskedInputWorkspace='mask',
+        SANSILLReduction(Run='027887', ProcessAs='Sample', MaskedInputWorkspace='mask',
                          AbsorberInputWorkspace='Cdw', ContainerInputWorkspace='wc',
                          BeamInputWorkspace='Dbw', TransmissionInputWorkspace='wc_tr',
                          SensitivityOutputWorkspace='sens', OutputWorkspace='water')
