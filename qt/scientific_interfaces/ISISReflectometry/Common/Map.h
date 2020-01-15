@@ -90,12 +90,14 @@ std::string valueToString(T value, boost::optional<int> precision) {
 template <typename T>
 std::string optionalToString(boost::optional<T> maybeValue,
                              boost::optional<int> precision) {
-  if (maybeValue.is_initialized())
-    if (precision.is_initialized())
+  if (maybeValue.is_initialized()) {
+    if (precision.is_initialized()) {
       return valueToString(maybeValue.get(), precision.get());
-    else
+    } else {
       return optionalToString(maybeValue);
-  return std::string();
+    }
+    return std::string();
+  }
 }
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
