@@ -40,7 +40,7 @@ class WaterfallPlotOffsetDialogPresenter:
                 self.view.keep_proportion_check_box.setChecked(False)
                 self.keep_proportion_on = False
             else:
-                self.view.set_y_offset(self.view.get_x_offset() / self.proportion)
+                self.view.set_y_offset(int(self.view.get_x_offset() / self.proportion))
 
         self.ax.update_waterfall_plot(new_x, self.view.get_y_offset())
 
@@ -52,7 +52,7 @@ class WaterfallPlotOffsetDialogPresenter:
                 self.view.keep_proportion_check_box.setChecked(False)
                 self.keep_proportion_on = False
             else:
-                self.view.set_x_offset(self.view.get_y_offset() * self.proportion)
+                self.view.set_x_offset(int(self.view.get_y_offset() * self.proportion))
 
         self.ax.update_waterfall_plot(self.view.get_x_offset(), new_y)
 
