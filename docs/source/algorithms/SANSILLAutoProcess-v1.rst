@@ -41,7 +41,7 @@ When multiple runs are summed, the run number of the first run is attributed to 
 
 .. testsetup:: ExSANSILLAutoProcess
 
-    config['default.facility'] = 'ILL'
+    config.setFacility('ILL')
     config.appendDataSearchSubDir('ILL/D11/')
 
 .. testcode:: ExSANSILLAutoProcess
@@ -96,7 +96,8 @@ Output:
     from mantid.simpleapi import *
     import matplotlib.pyplot as plt
 
-    config['default.facility'] = 'ILL'
+    config.setFacility('ILL')
+    config['default.instrument'] = 'D33'
     config.appendDataSearchSubDir('ILL/D33/')
 
     absorber = '002227'
