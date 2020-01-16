@@ -96,7 +96,14 @@ void ConvolutionFunctionModel::setModel(
     fitFunction->addFunction(domainFunction);
     fitFunction->setDomainIndex(i, i);
   }
-  setFunction(fitFunction);
+  // The two clones here are needed as the clone value of IFunction goes through
+  // a string serialisation and deserialisation. This can lead to the function
+  // structure subtly changeing. For exmaple composite functions of only one
+  // member are removed and uneeded brackets are removed from user defined
+  // functions. As function cloning is used later on in the workflow it seems
+  // safer to clone twice here to get the function in it's final state early on
+  // rather than have it change during the workflow.
+  setFunction(fitFunction->clone()->clone());
 }
 
 CompositeFunction_sptr
@@ -168,7 +175,7 @@ ConvolutionFunctionModel::createTemperatureCorrection(double correction) {
   IFunction::Attribute att(formula);
   tempFunc->setAttribute("Formula", att);
   tempFunc->setParameter("Temp", correction);
-  tempFunc->fixParameter("Temp", true);
+  tempFunc->fixParameter("Temp", false);
   return tempFunc;
 }
 

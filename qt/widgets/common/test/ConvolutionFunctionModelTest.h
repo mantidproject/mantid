@@ -400,20 +400,20 @@ public:
         "CompositeFunction,NumDeriv=false,$domains=i;name=FlatBackground,A0=0;("
         "composite=Convolution,FixResolution=true,NumDeriv=true;name="
         "Resolution,Workspace=abc,WorkspaceIndex=1,X=(),Y=();(composite="
-        "ProductFunction,NumDeriv=false;name=UserFunction,Formula=(x*11.606/"
-        "Temp)/(1-exp( "
+        "ProductFunction,NumDeriv=false;name=UserFunction,Formula=x*11.606/"
+        "Temp/(1-exp( "
         "-(x*11.606/"
-        "Temp))),Temp=100;(name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0;"
-        "name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0;name=DeltaFunction,"
-        "Height=1,Centre=0))));(composite=CompositeFunction,NumDeriv=false,$"
-        "domains=i;name=FlatBackground,A0=0;(composite=Convolution,"
-        "FixResolution=true,NumDeriv=true;name=Resolution,Workspace=abc,"
-        "WorkspaceIndex=2,X=(),Y=();(composite=ProductFunction,NumDeriv=false;"
-        "name=UserFunction,Formula=(x*11.606/Temp)/(1-exp( "
+        "Temp))),Temp=100,ties=(Temp=100);(name=Lorentzian,Amplitude=1,"
+        "PeakCentre=0,FWHM=0;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0;"
+        "name=DeltaFunction,Height=1,Centre=0))));(composite=CompositeFunction,"
+        "NumDeriv=false,$domains=i;name=FlatBackground,A0=0;(composite="
+        "Convolution,FixResolution=true,NumDeriv=true;name=Resolution,"
+        "Workspace=abc,WorkspaceIndex=2,X=(),Y=();(composite=ProductFunction,"
+        "NumDeriv=false;name=UserFunction,Formula=x*11.606/Temp/(1-exp( "
         "-(x*11.606/"
-        "Temp))),Temp=100;(name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0;"
-        "name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0;name=DeltaFunction,"
-        "Height=1,Centre=0))))");
+        "Temp))),Temp=100,ties=(Temp=100);(name=Lorentzian,Amplitude=1,"
+        "PeakCentre=0,FWHM=0;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0;"
+        "name=DeltaFunction,Height=1,Centre=0))))");
   }
 
   void test_component_prefixes_set_correctly_without_temp_correction() {
@@ -461,13 +461,11 @@ public:
     fitResolutions.emplace_back(pair2);
 
     model.setModel("name=FlatBackground", fitResolutions,
-                   "(name=Lorentzian;name=Lorentzian)", true,
+                   "(name=Lorentzian;name=Lorentzian)", false,
                    std::vector<double>(), false, true);
 
     TS_ASSERT_EQUALS(model.backgroundPrefix().value().toStdString(), "f0.");
     TS_ASSERT_EQUALS(model.convolutionPrefix().value().toStdString(), "f1.");
-    TS_ASSERT_EQUALS(model.deltaFunctionPrefix().value().toStdString(),
-                     "f1.f1.f1.f2.");
     TS_ASSERT_EQUALS(model.peakPrefixes().value()[0].toStdString(),
                      "f1.f1.f1.f0.");
     TS_ASSERT_EQUALS(model.peakPrefixes().value()[1].toStdString(),
@@ -493,10 +491,35 @@ public:
 
     model.setModel("", fitResolutions, "", false, std::vector<double>(), false,
                    true);
-    auto fitFunctionAsString = model.getFitFunction()->asString();
+
     TS_ASSERT_EQUALS(model.convolutionPrefix().value().toStdString(), "");
     TS_ASSERT_EQUALS(model.tempFunctionPrefix().value().toStdString(),
                      "f1.f0.");
+  }
+
+  void test_component_prefixes_one_lorenzian_temp_set() {
+    auto algo = FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
+    algo->initialize();
+    algo->setPropertyValue("DataX", "1,2,3");
+    algo->setPropertyValue("DataY", "1,2,3");
+    algo->setPropertyValue("OutputWorkspace", "abc");
+    algo->execute();
+    ConvolutionFunctionModel model;
+    model.setNumberDomains(2);
+    auto pair1 = std::make_pair<std::string, int>("abc", 1);
+    auto pair2 = std::make_pair<std::string, int>("abc", 2);
+    auto fitResolutions = std::vector<std::pair<std::string, int>>();
+    fitResolutions.emplace_back(pair1);
+    fitResolutions.emplace_back(pair2);
+
+    model.setModel("name=FlatBackground", fitResolutions, "name=Lorentzian",
+                   false, std::vector<double>(), false, true);
+    TS_ASSERT_EQUALS(model.backgroundPrefix().value().toStdString(), "f0.");
+    TS_ASSERT_EQUALS(model.convolutionPrefix().value().toStdString(), "f1.");
+    TS_ASSERT_EQUALS(model.peakPrefixes().value()[0].toStdString(),
+                     "f1.f1.f1.");
+    TS_ASSERT_EQUALS(model.tempFunctionPrefix().value().toStdString(),
+                     "f1.f1.f0.");
   }
 };
 

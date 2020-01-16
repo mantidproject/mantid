@@ -114,10 +114,22 @@ public:
     TS_ASSERT_THROWS(m_model->setFunction(fun), std::runtime_error &)
   }
 
-  void test_setFunction_does_not_throw_for_valid_temp_function() {
+  void test_setFunction_does_not_throw_for_valid_temperature_function() {
     m_model->setFitType(FitType::OneLorentzian);
     m_model->setTempCorrection(true);
-    auto func = m_model->getFitFunction()->clone()->clone();
+    auto func = m_model->getFitFunction();
+
+    m_model->setFunction(func);
+
+    TS_ASSERT_EQUALS(m_model->getCurrentFunction()->asString(),
+                     func->asString())
+  }
+
+  void
+  test_setFunction_does_not_throw_for_valid_two_lorenztian_temperature_function() {
+    m_model->setFitType(FitType::TwoLorentzians);
+    m_model->setTempCorrection(true);
+    auto func = m_model->getFitFunction();
 
     m_model->setFunction(func);
 

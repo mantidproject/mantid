@@ -40,7 +40,6 @@ void ConvFunctionModel::setFunction(IFunction_sptr fun) {
   clearData();
   if (!fun)
     return;
-  std::cout << fun->asString() << std::endl;
   bool isBackgroundSet = false;
   if (fun->name() == "Convolution") {
     checkConvolution(fun);
@@ -89,9 +88,21 @@ void ConvFunctionModel::checkConvolution(IFunction_sptr fun) {
 
     else if (name == "CompositeFunction") {
       checkComposite(innerFunction);
+    } else if (name == "Lorentzian") {
+      if (isFitTypeSet && m_fitType != FitType::OneLorentzian) {
+        throw std::runtime_error("Function has wrong structure.");
+      }
+      if (isFitTypeSet)
+        m_fitType = FitType::TwoLorentzians;
+      else
+        m_fitType = FitType::OneLorentzian;
+      m_isQDependentFunction = false;
+      isFitTypeSet = true;
+
     } else if (FitTypeStringToEnum.count(name) == 1) {
       if (isFitTypeSet) {
-        throw std::runtime_error("Function has wrong structure.");
+        throw std::runtime_error(
+            "Function has wrong structure. More than one fit type set");
       }
       m_fitType = FitTypeStringToEnum[name];
       m_isQDependentFunction = FitTypeQDepends[m_fitType];
@@ -100,7 +111,8 @@ void ConvFunctionModel::checkConvolution(IFunction_sptr fun) {
       m_hasDeltaFunction = true;
     } else {
       clear();
-      throw std::runtime_error("Function has wrong structure.");
+      throw std::runtime_error(
+          "Function has wrong structure. Function nor recognized");
     }
   }
 }
