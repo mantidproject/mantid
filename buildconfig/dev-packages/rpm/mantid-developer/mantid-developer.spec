@@ -1,11 +1,11 @@
-%if 0%{?fedora} || 0%{?rhel} >= 8
+%if 0%{?fedora} || 0%{?rhel} >= 7
   %global with_python3 1
 %else
   %global with_python3 0
 %endif
 
 Name:           mantid-developer
-Version:        1.36
+Version:        1.37
 Release:        1%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
@@ -91,44 +91,24 @@ Requires: tex-preview
 Requires: zeromq
 
 %if %{with_python3}
-Requires: python3-setuptools
-Requires: python3-sip-devel
-Requires: python3-PyQt4-devel
-Requires: python3-qt5-devel
-Requires: python3-QtPy
-Requires: python3-numpy
-Requires: python3-scipy
-Requires: python3-sphinx
-Requires: python3-sphinx-bootstrap-theme
-Requires: python3-dateutil
-Requires: python3-h5py
-Requires: python3-ipython-gui
-Requires: python3-matplotlib
-%{?fedora:Requires: python3-qtconsole}
-Requires: python3-PyYAML
-%{?fedora:Requires: python3-psutil}
-%{?fedora:Requires: python3-requests}
-Requires: boost-python3-devel
-%endif
-
-%if 0%{?el7}
 Requires: boost169-python3-devel
-Requires: python36-dateutil
-Requires: python36-h5py
-Requires: python36-ipython
-Requires: python36-ipython-gui
-Requires: python36-matplotlib-qt5
-Requires: python36-numpy
-Requires: python36-psutil
-Requires: python36-PyQt4-devel
-Requires: python36-PyYAML
-Requires: python36-qt5-devel
-Requires: python36-QtPy
-Requires: python36-requests
-Requires: python36-scipy
-Requires: python36-setuptools
-Requires: python36-sphinx
-Requires: python36-sphinx-bootstrap-theme
+Requires: python%{python3_pkgversion}-dateutil
+Requires: python%{python3_pkgversion}-h5py
+Requires: python%{python3_pkgversion}-ipython
+Requires: python%{python3_pkgversion}-ipython-gui
+Requires: python%{python3_pkgversion}-matplotlib-qt5
+Requires: python%{python3_pkgversion}-numpy
+Requires: python%{python3_pkgversion}-psutil
+Requires: python%{python3_pkgversion}-PyYAML
+Requires: python%{python3_pkgversion}-qt5-devel
+%{?fedora:Requires: python%{python3_pkgversion}-qtconsole}
+Requires: python%{python3_pkgversion}-QtPy
+Requires: python%{python3_pkgversion}-requests
+Requires: python%{python3_pkgversion}-scipy
+Requires: python%{python3_pkgversion}-setuptools
+Requires: python%{python3_pkgversion}-sphinx
+Requires: python%{python3_pkgversion}-sphinx-bootstrap-theme
+Requires: python3-PyYAML
 %endif
 
 BuildArch: noarch
@@ -152,6 +132,9 @@ required for Mantid development.
 %files
 
 %changelog
+* Thu Jan 16 2020 Martyn Gigg <martyn.gigg@stfc.ac.uk>
+- Merge fedora and rhel python 3 packages using python3_pkgversion
+
 * Tue Jan 07 2020 Martyn Gigg <martyn.gigg@stfc.ac.uk>
 - Add remaining python36 packages required for mantid.
 
