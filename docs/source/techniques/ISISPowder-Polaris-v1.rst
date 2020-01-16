@@ -168,9 +168,9 @@ The *create_total_scattering_pdf* method allows a user to create a Pair Distribu
 from focused POLARIS data, with a view performing further total scattering analysis.
 
 With no merging criteria specified, *merge_banks=False* a PDF will be generated for each bank within
-the focused_workspace. The type of PDF output can be set with the kayword argument `pdf_type`, with the
+the focused_workspace. The type of PDF output can be set with the keyword argument `pdf_type`, with the
 option of `G(r)`, `g(r)`, `RDF(r)` (defaults to `G(r)`). If run with *merge_banks=True* a PDF will be
-generated based on the wighted sum of the detector banks performed using supplied Q limits
+generated based on the weighted sum of the detector banks performed using supplied Q limits
 *q_lims=q_limits*, Q_limits can be in the form of a numpy array with shape (2, x) where x is the number
 of detectors, or a string containing the directory of an appropriately formatted `.lim` file.
 

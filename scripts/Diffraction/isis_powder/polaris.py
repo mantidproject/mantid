@@ -10,6 +10,7 @@ import os
 from isis_powder.routines import absorb_corrections, common, instrument_settings
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.polaris_routines import polaris_advanced_config, polaris_algs, polaris_param_mapping
+from mantid.kernel import logger
 
 
 class Polaris(AbstractInst):
@@ -53,7 +54,7 @@ class Polaris(AbstractInst):
             kwargs['q_lims'] = None
         if 'pdf_type' not in kwargs or not kwargs['pdf_type'] in ['G(r)', 'g(r)', 'RDF(r)']:
             kwargs['pdf_type'] = 'G(r)'
-            print('PDF type not specified or is invalid, defaulting to G(r)')
+            logger.warning('PDF type not specified or is invalid, defaulting to G(r)')
         self._inst_settings.update_attributes(kwargs=kwargs)
         # Generate pdf
         run_details = self._get_run_details(self._inst_settings.run_number)
