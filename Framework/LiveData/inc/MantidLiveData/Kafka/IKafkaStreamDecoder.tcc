@@ -102,27 +102,32 @@ void loadFromAlgorithm(const std::string &name,
  * @param parseJSON flag which will extract geometry from
  */
 template <typename T>
-void IKafkaStreamDecoder::loadInstrument(const std::string &name,
+bool IKafkaStreamDecoder::loadInstrument(const std::string &name,
                                          boost::shared_ptr<T> workspace,
                                          const std::string &jsonGeometry) {
-  if (name.empty()) {
-    logger.warning("Empty instrument name found");
-    return;
-  }
-  try {
-    if (jsonGeometry.empty())
-      loadFromAlgorithm<T>(name, workspace);
-    else {
-      NexusGeometry::JSONInstrumentBuilder builder(
-          "{\"nexus_structure\":" + jsonGeometry + "}");
-      workspace->setInstrument(builder.buildGeometry());
+  auto instrument = workspace->getInstrument();
+  if (instrument->getNumberDetectors() != 0) // instrument already loaded.
+    return true;
+
+  if (!name.empty()) {
+    try {
+      if (jsonGeometry.empty())
+        loadFromAlgorithm<T>(name, workspace);
+      else {
+        NexusGeometry::JSONInstrumentBuilder builder(
+            "{\"nexus_structure\":" + jsonGeometry + "}");
+        workspace->setInstrument(builder.buildGeometry());
+      }
+      return true;
+    } catch (std::exception &exc) {
+      logger.warning() << "Error loading instrument '" << name << "': \""
+                       << exc.what()
+                       << "\". The streamed data will have no associated "
+                          "instrument geometry. \n";
     }
-  } catch (std::exception &exc) {
-    logger.warning() << "Error loading instrument '" << name << "': \""
-                     << exc.what()
-                     << "\". The streamed data will have no associated "
-                        "instrument geometry. \n";
   }
+  logger.warning() << "Empty instrument name provided. \n";
+  return false;
 }
 
 /**
