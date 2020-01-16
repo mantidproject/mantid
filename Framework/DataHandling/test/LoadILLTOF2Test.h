@@ -195,7 +195,7 @@ public:
 
       const auto &ys = histogram.y();
       const auto &es = histogram.e();
-      TS_ASSERT_DELTA(es[0], std::sqrt(ys[0]), 1E-5)
+      TS_ASSERT_EQUALS(es[0], std::sqrt(ys[0]))
     }
     // Check all detectors have a defined detector ID >= 0
     Mantid::detid2index_map detectorMap;
