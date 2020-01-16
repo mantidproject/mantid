@@ -178,6 +178,11 @@ void export_Run() {
            "Return a log as a single float value. Time series values are "
            "averaged.")
 
+      .def("getTimeAveragedStd",
+           &Run::getTimeAveragedStd,
+           (arg("self"), arg("name")),
+           "Returns the time averaged standard deviation")
+
       .def("getProperties", &Run::getProperties, arg("self"),
            return_internal_reference<>(),
            "Return the list of run properties managed by this object.")

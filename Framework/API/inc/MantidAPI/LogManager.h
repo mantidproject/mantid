@@ -166,6 +166,9 @@ public:
     return getPropertyAsSingleValue(name, statistic);
   }
 
+  /// Get the time averaged standard deviation for a log
+  double getTimeAveragedStd(const std::string &name) const;
+
   /// Empty the values out of all TimeSeriesProperty logs
   void clearTimeSeriesLogs();
   /// Empty all but the last value out of all TimeSeriesProperty logs
@@ -179,7 +182,6 @@ public:
                          bool keepOpen = false);
   /// Clear the logs
   void clearLogs();
-
 protected:
   /// Load the run from a NeXus file with a given group name
   void loadNexus(::NeXus::File *file,

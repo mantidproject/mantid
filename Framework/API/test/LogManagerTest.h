@@ -407,6 +407,14 @@ public:
     TS_ASSERT_EQUALS(runInfo.getPropertyAsSingleValue(name), value);
   }
 
+  void test_getTimeAveragedStd() {
+    LogManager run;
+    const std::string name = "series";
+    addTestTimeSeries<double>(run, name);
+
+    TS_ASSERT_DELTA(run.getTimeAveragedStd(name),8.5239,0.001);
+  }
+
   void test_clear() {
     // Set up a Run object with 3 properties in it (1 time series, 2 single
     // value)

@@ -338,6 +338,22 @@ LogManager::getTimeSeriesProperty(const std::string &name) const {
 }
 
 /**
+ * Returns the time dependent standard deviation
+ * @param name :: The name of the property
+ * @return A single double value
+ */
+double LogManager::getTimeAveragedStd(const std::string &name) const {
+  auto prop=this->getProperty(name);
+  auto tsp = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(prop);
+  if (!tsp) {
+      throw std::runtime_error(
+          "Could not retrieve a double time series property for the property name " +
+          name);
+    }
+  return tsp->getStatistics().time_standard_deviation;
+}
+
+/**
  * Get the value of a property as the requested type. Throws if the type is not
  * correct
  * @param name :: The name of the property

@@ -9,8 +9,9 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 import copy
 from mantid.geometry import Goniometer
-from mantid.kernel import DateAndTime
+from mantid.kernel import DateAndTime, FloatTimeSeriesProperty
 from mantid.api import Run
+import numpy as np
 
 class RunTest(unittest.TestCase):
 
@@ -35,7 +36,7 @@ class RunTest(unittest.TestCase):
         run = self._run
         charge = run.getProtonCharge()
         self.assertEqual(type(charge), float)
-        self.assertAlmostEquals(charge, 10.05, 2)
+        self.assertAlmostEqual(charge, 10.05)
 
     def test_run_hasProperty(self):
         self.assertTrue(self._run.hasProperty('start_time'))
@@ -122,6 +123,22 @@ class RunTest(unittest.TestCase):
             runendstr, "2008-12-18T17:59:40 "
         )  # The space at the end is to get around an IPython bug (#8351)
         self.assertTrue(isinstance(runend, DateAndTime))
+
+    def test_timestd(self):
+        """
+        """
+        run = Run()
+        start_time = DateAndTime("2008-12-18T17:58:38")
+        nanosec = 1000000000
+        # === Float type ===
+        temp1 = FloatTimeSeriesProperty("TEMP1")
+        vals = np.arange(10) * 2.
+        for i in range(10):
+            temp1.addValue(start_time + i*nanosec, vals[i])
+        run.addProperty(temp1.name, temp1,True)
+        # ignore the last value
+        expected = vals[:-1].std()
+        self.assertEqual(run.getTimeAveragedStd("TEMP1"), expected)
 
     def do_test_copyable(self, copy_op):
         original = self._run
