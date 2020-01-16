@@ -170,7 +170,7 @@ void extractShapeInformation(const Json::Value &shape,
     }
 
     if (windingOrder.size() != verts.size() / 3)
-      throw std::invalid_argument("Invalid off geometry provided in json " +
+      throw std::invalid_argument("Invalid off geometry provided in JSON " +
                                   name + ".");
 
     isOffGeometry = true;
@@ -186,7 +186,7 @@ void extractShapeInformation(const Json::Value &shape,
 
     if (cylinders.size() != verts.size() / 3)
       throw std::invalid_argument(
-          "Invalid cylindrical geometry provided in json " + name + ".");
+          "Invalid cylindrical geometry provided in JSON " + name + ".");
   }
 
   vertices.reserve(vertices.size() + (verts.size() / 3));
@@ -227,7 +227,7 @@ void verifyDependency(const Json::Value &root, const Json::Value &dependency) {
   // Left over values suggests the dependency could not be found
   if (!values.empty())
     throw std::invalid_argument("Could not find dependency " + path +
-                                " in json provided.");
+                                " in JSON provided.");
 }
 
 Eigen::Vector3d getTransformationAxis(const Json::Value &root,
@@ -279,7 +279,7 @@ void extractMonitorWaveformStream(const Json::Value &waveform,
 
 Json::Value getRoot(const std::string &jsonGeometry) {
   if (jsonGeometry.empty())
-    throw std::invalid_argument("Empty geometry json string provided.");
+    throw std::invalid_argument("Empty geometry JSON string provided.");
 
   Json::CharReaderBuilder rbuilder;
   auto reader = std::unique_ptr<Json::CharReader>(rbuilder.newCharReader());
@@ -325,24 +325,24 @@ void JSONGeometryParser::validateAndRetrieveGeometry(
 
   if (nexusStructure.isNull())
     throw std::invalid_argument(
-        "Json geometry does not contain nexus_structure.");
+        "JSON geometry does not contain nexus_structure.");
 
   auto nexusChildren = nexusStructure[CHILDREN];
 
   auto entry = get(nexusChildren, NX_ENTRY); // expect children to be array type
   if (entry.isNull())
     throw std::invalid_argument(
-        "No nexus \"entry\" child found in nexus_structure json.");
+        "No nexus \"entry\" child found in nexus_structure JSON.");
 
   auto entryChildren = entry[CHILDREN];
 
   auto sample = get(entryChildren, NX_SAMPLE);
   if (sample.isNull())
-    throw std::invalid_argument("No sample found in json.");
+    throw std::invalid_argument("No sample found in JSON.");
 
   auto instrument = get(entryChildren, NX_INSTRUMENT);
   if (instrument.isNull())
-    throw std::invalid_argument("No instrument found in json.");
+    throw std::invalid_argument("No instrument found in JSON.");
 
   m_name = extractInstrumentName(instrument);
 
@@ -351,12 +351,12 @@ void JSONGeometryParser::validateAndRetrieveGeometry(
   auto source = get(instrumentChildren, NX_SOURCE);
 
   if (source.isNull())
-    g_log.notice() << "No source information found in json instrument."
+    g_log.notice() << "No source information found in JSON instrument."
                    << std::endl;
 
   auto jsonDetectorBanks = getAllDetectors(instrument);
   if (jsonDetectorBanks.empty())
-    throw std::invalid_argument("No detectors found in json.");
+    throw std::invalid_argument("No detectors found in JSON.");
   ;
   m_jsonDetectorBanks = moveToUniquePtrVec(jsonDetectorBanks);
 
@@ -514,7 +514,7 @@ void JSONGeometryParser::extractMonitorContent() {
     auto name = (*monitor)[NAME].asString();
     if (children.empty())
       throw std::invalid_argument("Full monitor definition for " + name +
-                                  " missing in json provided.");
+                                  " missing in JSON provided.");
     Monitor mon;
     mon.componentName = name;
     /* For monitors with no detector ID we create dummy IDs starting from -1 and
@@ -564,7 +564,7 @@ void JSONGeometryParser::extractChopperContent() {
 
     if (children.empty())
       throw std::invalid_argument(
-          "Full chopper definition missing in json provided.");
+          "Full chopper definition missing in JSON provided.");
     Chopper chop;
     chop.componentName = (*chopper)[NAME].asString();
     for (const auto &child : children) {
@@ -587,7 +587,7 @@ void JSONGeometryParser::extractChopperContent() {
   }
 }
 
-/** Parses instrument geometry which is formated in json corresponding to the
+/** Parses instrument geometry which is formated in JSON corresponding to the
 hdf5 nexus structure.
 @param jsonGeometry - JSON string representing the nexus style instrument
 @throws std::invalid_argument if the geometry string is invalid.
