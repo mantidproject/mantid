@@ -23,9 +23,9 @@ namespace CurveFitting {
 namespace Algorithms {
 
 /// Create a list of input workspace names
-std::vector<InputData> makeNames(std::string inputList, int default_wi,
-                                 int default_spec) {
-  std::vector<InputData> nameList;
+std::vector<InputSpectraToFit> makeNames(std::string inputList, int default_wi,
+                                         int default_spec) {
+  std::vector<InputSpectraToFit> nameList;
 
   double start = 0;
   double end = 0;
@@ -116,7 +116,7 @@ std::vector<InputData> makeNames(std::string inputList, int default_wi,
         if (!workspace)
           continue;
         auto workspaceIndices =
-            getWorkspaceIndicesFromAxes(workspace, wi, spec, start, end);
+            getWorkspaceIndicesFromAxes(*workspace, wi, spec, start, end);
 
         for (auto workspaceIndex : workspaceIndices) {
           nameList.emplace_back(wsName, workspaceIndex, period);
@@ -133,7 +133,7 @@ std::vector<InputData> makeNames(std::string inputList, int default_wi,
     if (!wsMatrix)
       continue;
     auto workspaceIndices =
-        getWorkspaceIndicesFromAxes(wsMatrix, wi, spec, start, end);
+        getWorkspaceIndicesFromAxes(*wsMatrix, wi, spec, start, end);
 
     for (auto workspaceIndex : workspaceIndices) {
       nameList.emplace_back(name, workspaceIndex, period);
@@ -145,7 +145,7 @@ std::vector<InputData> makeNames(std::string inputList, int default_wi,
   return nameList;
 }
 
-/** Get a workspace identified by an InputData structure.
+/** Get a workspace identified by an InputSpectraToFit structure.
  * @param ws :: Workspace to fit required to work out indices
  * @param workspaceIndex :: workspace index to use
  * @param spectrumNumber :: spectrum number to use
@@ -153,7 +153,7 @@ std::vector<InputData> makeNames(std::string inputList, int default_wi,
  * @param end :: End of range for value based spectrum range
  * @return Vector of workspace indices to fit
  */
-std::vector<int> getWorkspaceIndicesFromAxes(API::MatrixWorkspace_sptr ws,
+std::vector<int> getWorkspaceIndicesFromAxes(API::MatrixWorkspace &ws,
                                              int workspaceIndex,
                                              int spectrumNumber, double start,
                                              double end) {
@@ -161,7 +161,7 @@ std::vector<int> getWorkspaceIndicesFromAxes(API::MatrixWorkspace_sptr ws,
     return std::vector<int>({workspaceIndex});
   }
   std::vector<int> out;
-  API::Axis *axis = ws->getAxis(1);
+  API::Axis *axis = ws.getAxis(1);
   if (axis->isSpectra()) { // spectra axis
     if (spectrumNumber < 0) {
       for (size_t i = 0; i < axis->length(); ++i) {
