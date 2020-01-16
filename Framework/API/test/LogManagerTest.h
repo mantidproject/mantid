@@ -412,7 +412,7 @@ public:
     const std::string name = "series";
     addTestTimeSeries<double>(run, name);
 
-    TS_ASSERT_DELTA(run.getTimeAveragedStd(name),8.5239,0.001);
+    TS_ASSERT_DELTA(run.getTimeAveragedStd(name), 8.5239, 0.001);
   }
 
   void test_clear() {

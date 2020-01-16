@@ -182,6 +182,7 @@ public:
                          bool keepOpen = false);
   /// Clear the logs
   void clearLogs();
+
 protected:
   /// Load the run from a NeXus file with a given group name
   void loadNexus(::NeXus::File *file,

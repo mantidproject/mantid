@@ -178,8 +178,7 @@ void export_Run() {
            "Return a log as a single float value. Time series values are "
            "averaged.")
 
-      .def("getTimeAveragedStd",
-           &Run::getTimeAveragedStd,
+      .def("getTimeAveragedStd", &Run::getTimeAveragedStd,
            (arg("self"), arg("name")),
            "Returns the time averaged standard deviation")
 
