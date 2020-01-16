@@ -153,7 +153,7 @@ This example below performs a complete reduction for D11 data.
     print('Water transmission is {0:.3f}'.format(mtd['w_tr'].readY(0)[0]))
 
     # Water
-    SANSILLReduction(Run='010453.nxs', ProcessAs='Reference', MaskedInputWorkspace='mask',
+    SANSILLReduction(Run='010453.nxs', ProcessAs='Sample', MaskedInputWorkspace='mask',
                      AbsorberInputWorkspace='Cdw', ContainerInputWorkspace='wc',
                      BeamInputWorkspace='Dbw', TransmissionInputWorkspace='wc_tr',
                      SensitivityOutputWorkspace='sens', OutputWorkspace='water')
