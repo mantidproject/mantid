@@ -99,6 +99,7 @@ Requires: python%{python3_pkgversion}-ipython-gui
 Requires: python%{python3_pkgversion}-matplotlib-qt5
 Requires: python%{python3_pkgversion}-numpy
 Requires: python%{python3_pkgversion}-psutil
+%{?fedora:Requires: python%{python3_pkgversion}-PyQt4-devel}
 Requires: python%{python3_pkgversion}-PyYAML
 Requires: python%{python3_pkgversion}-qt5-devel
 %{?fedora:Requires: python%{python3_pkgversion}-qtconsole}
@@ -108,7 +109,7 @@ Requires: python%{python3_pkgversion}-scipy
 Requires: python%{python3_pkgversion}-setuptools
 Requires: python%{python3_pkgversion}-sphinx
 Requires: python%{python3_pkgversion}-sphinx-bootstrap-theme
-Requires: python3-PyYAML
+Requires: python%{python3_pkgversion}-PyYAML
 %endif
 
 BuildArch: noarch
