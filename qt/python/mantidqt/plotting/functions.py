@@ -75,7 +75,7 @@ def current_figure_or_none():
         return None
 
 
-def plot_from_names(names, errors, overplot, fig=None, show_colorfill_btn=False):
+def plot_from_names(names, errors, overplot, fig=None, show_colorfill_btn=False, advanced=False):
     """
     Given a list of names of workspaces, raise a dialog asking for the
     a selection of what to plot and then plot it.
@@ -85,11 +85,13 @@ def plot_from_names(names, errors, overplot, fig=None, show_colorfill_btn=False)
     :param overplot: If true then the add to the current figure if one
                      exists and it is a compatible figure
     :param fig: If not None then use this figure object to plot
+    :param advanced: If true then the advanced options will be shown in the spectra selector dialog.
     :return: The figure containing the plot or None if selection was cancelled
     """
     workspaces = AnalysisDataService.Instance().retrieveWorkspaces(names, unrollGroups=True)
     try:
-        selection = get_spectra_selection(workspaces, show_colorfill_btn=show_colorfill_btn, overplot=overplot)
+        selection = get_spectra_selection(workspaces, show_colorfill_btn=show_colorfill_btn, overplot=overplot,
+                                          advanced=advanced)
     except Exception as exc:
         LOGGER.warning(format(str(exc)))
         selection = None

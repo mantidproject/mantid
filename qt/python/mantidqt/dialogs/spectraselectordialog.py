@@ -9,7 +9,7 @@
 
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QIcon
-from qtpy.QtWidgets import QDialogButtonBox, QMessageBox
+from qtpy.QtWidgets import QDialogButtonBox, QMessageBox, QWidget
 
 from mantid.kernel import logger
 from mantid.api import MatrixWorkspace
@@ -60,7 +60,7 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
 
         return matrix_workspaces
 
-    def __init__(self, workspaces, parent=None, show_colorfill_btn=False, overplot=False):
+    def __init__(self, workspaces, parent=None, show_colorfill_btn=False, overplot=False, advanced=False):
         super(SpectraSelectionDialog, self).__init__(parent)
         self.icon = self.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
         self.setAttribute(Qt.WA_DeleteOnClose, True)
@@ -74,6 +74,7 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         self._show_colorfill_button = show_colorfill_btn
         self._overplot = overplot
         self._plottable_spectra = None
+        self._advanced = advanced
 
         self._init_ui()
         self._set_placeholder_text()
@@ -117,6 +118,12 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
     def _init_ui(self):
         ui = SpectraSelectionDialogUI()
         ui.setupUi(self)
+
+        if self._advanced:
+            ui.advanced_options_widget = AdvancedPlottingOptionsWidget(parent=self)
+            ui.layout.replaceWidget(ui.advanced_plots_dummy_widget, ui.advanced_options_widget)
+            self.setWindowTitle("Plot Advanced")
+
         self._ui = ui
         ui.colorfillButton.setVisible(self._show_colorfill_button)
         # overwrite the "Yes to All" button text
@@ -238,6 +245,24 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
 
     def _is_input_valid(self):
         return self.selection is not None
+
+
+AdvancedPlottingOptionsWidgetUI, AdvancedPlottingOptionsWidgetUIBase = load_ui(__file__, 'advancedplotswidget.ui')
+
+
+class AdvancedPlottingOptionsWidget(AdvancedPlottingOptionsWidgetUIBase):
+    def __init__(self, parent=None):
+        super(AdvancedPlottingOptionsWidget, self).__init__(parent=parent)
+        ui = AdvancedPlottingOptionsWidgetUI()
+        ui.setupUi(self)
+
+        ui.log_value_combo_box.currentTextChanged.connect(self.log_value_changed)
+
+        self._ui = ui
+
+    def log_value_changed(self, text):
+        self._ui.custom_log_line_edit.setEnabled(text == "Custom")
+        self._ui.plot_axis_label.setText(text)
 
 
 def parse_selection_str(txt, min_val=None, max_val=None, allowed_values=None):
