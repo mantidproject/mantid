@@ -1197,6 +1197,7 @@ class MantidAxes(Axes):
             bottom_line = [min(line.get_ydata()) - ((i * self.height) / 100)] * len(line.get_ydata())
             fill = self.fill_between(line.get_xdata(), line.get_ydata(), bottom_line)
             fill.set_zorder((len(self.get_lines()) - i) + 1)
+            self.set_waterfall_fill_visible(i)
 
         self.lines += errorbar_cap_lines
 
