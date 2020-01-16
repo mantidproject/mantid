@@ -93,11 +93,10 @@ std::string optionalToString(boost::optional<T> maybeValue,
   if (maybeValue.is_initialized()) {
     if (precision.is_initialized()) {
       return valueToString(maybeValue.get(), precision.get());
-    } else {
-      return optionalToString(maybeValue);
     }
-    return std::string();
+    return optionalToString(maybeValue);
   }
+  return std::string();
 }
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
