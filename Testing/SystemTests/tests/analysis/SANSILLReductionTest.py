@@ -317,10 +317,17 @@ class ILL_D11_AbsoluteScale_Test(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance = 1e-5
+        self.tolerance_is_rel_err = True
         self.disableChecking = ['Instrument']
-        return ['iq', 'ILL_SANS_D11_IQ.nxs']
+        return ['abs_scale_outputs', 'D11_AbsScaleReference.nxs']
 
     def runTest(self):
+        # Load the mask
+        LoadNexusProcessed(Filename='D11_mask.nxs', OutputWorkspace='mask')
+
+        # Process the dark current Cd/B4C for water
+        SANSILLReduction(Run='010455', ProcessAs='Absorber', OutputWorkspace='Cdw')
+
         # Process the empty beam for water
         SANSILLReduction(Run='010414', ProcessAs='Beam', AbsorberInputWorkspace='Cdw', OutputWorkspace='Dbw',
                          FluxOutputWorkspace='Flw')
@@ -345,3 +352,7 @@ class ILL_D11_AbsoluteScale_Test(systemtesting.MantidSystemTest):
         SANSILLReduction(Run='010453', ProcessAs='Sample', AbsorberInputWorkspace='Cdw', MaskedInputWorkspace='mask',
                          ContainerInputWorkspace='wc', BeamInputWorkspace='Dbw', TransmissionInputWorkspace='wc_tr',
                          ReferenceInputWorkspace='reference', OutputWorkspace='water_with_reference', FluxInputWorkspace='Flw')
+
+        # Group the worksaces
+        GroupWorkspaces(InputWorkspaces=['sens', 'reference', 'water_with_reference', 'water_with_sens_flux'],
+                        OutputWorkspace='abs_scale_outputs')
