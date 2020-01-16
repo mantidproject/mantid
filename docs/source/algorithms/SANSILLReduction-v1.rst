@@ -12,7 +12,8 @@ Description
 This algorithm performs SANS reduction for the instruments at the ILL.
 With each call, this algorithm processes one type of data which is a part of the whole experiment.
 The logic is resolved by the property **ProcessAs**, which governs the reduction steps based on the requested type.
-It can be one of the 6: absorber, beam, transmission, container, reference and sample.
+It can be one of the 5: absorber, beam, transmission, container, and sample.
+Note that in the following, the **reference** stands for the water run, that should be processed as sample, but with different configurations, in order to generate either the reference input or the sensitivity map for the subsequent sample measurements.
 The full data treatment of the complete experiment should be build up as a chain with multiple calls of this algorithm over various types of acquisitions.
 The sequence should be logical, typically as enumerated above, since the later processes need the outputs of earlier processes as input.
 The common mandatory input is a run file (numor), or a list of them, in which case they will be summed at raw level, so right after loading.
@@ -38,7 +39,7 @@ Different input properties can be specified depending on the value of **ProcessA
 |              | * BeamInputWorkspace          |                        |
 |              | * TransmissionInputWorkspace  |                        |
 +--------------+-------------------------------+------------------------+
-| Reference    | * AbsorberInputWorkspace      | * SampleThickness      |
+| Sample (Ref) | * AbsorberInputWorkspace      | * SampleThickness      |
 |              | * BeamInputWorkspace          |                        |
 |              | * TransmissionInputWorkspace  |                        |
 |              | * ContainerInputWorkspace     |                        |
@@ -57,6 +58,7 @@ All the input workspace properties above are optional.
 For example, if processing as sample, if a container input is specified, subtraction will be performed, if not, the step will be skipped.
 The only exception is when processing as transmission, when beam input workspace is mandatory.
 When processing as reference there is an additional optional output workspace for sensitivity.
+Note that when reducing the water run as sample for reference, it will also be normalised by flux, if the corresponding input is supplied.
 
 In the flowcharts below the yellow ovals represent the inputs, the grey parallelograms are the outputs for each process type.
 
