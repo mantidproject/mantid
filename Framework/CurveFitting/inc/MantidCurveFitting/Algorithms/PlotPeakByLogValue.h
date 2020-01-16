@@ -12,6 +12,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidCurveFitting/Algorithms/PlotPeakByLogValueHelper.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -64,6 +65,35 @@ private:
 
   /// Set any WorkspaceIndex attributes in the fitting function
   void setWorkspaceIndexAttribute(API::IFunction_sptr fun, int wsIndex) const;
+
+  boost::shared_ptr<Algorithm> runSingleFit(bool createFitOutput,
+                                            bool outputCompositeMembers,
+                                            bool outputConvolvedMembers,
+                                            const API::IFunction_sptr &ifun,
+                                            const InputSpectraToFit &data);
+
+  double calculateLogValue(std::string logName, const InputSpectraToFit &data);
+
+  API::ITableWorkspace_sptr
+  createResultsTable(const std::string &logName,
+                     const API::IFunction_sptr &ifunSingle, bool &isDataName);
+
+  void appendTableRow(bool isDataName, API::ITableWorkspace_sptr &result,
+                      const API::IFunction_sptr &ifun,
+                      const InputSpectraToFit &data, double logValue,
+                      double chi2) const;
+
+  void finaliseOutputWorkspaces(
+      bool createFitOutput,
+      const std::vector<API::MatrixWorkspace_sptr> &fitWorkspaces,
+      const std::vector<API::ITableWorkspace_sptr> &parameterWorkspaces,
+      const std::vector<API::ITableWorkspace_sptr> &covarianceWorkspaces);
+
+  API::IFunction_sptr setupFunction(bool individual, bool passWSIndexToFunction,
+                                    const API::IFunction_sptr &inputFunction,
+                                    const std::vector<double> &initialParams,
+                                    bool isMultiDomainFunction, int i,
+                                    const InputSpectraToFit &data) const;
 
   /// Create a minimizer string based on template string provided
   std::string getMinimizerString(const std::string &wsName,
