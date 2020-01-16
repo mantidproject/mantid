@@ -60,6 +60,7 @@ ExternalProject_Add(extern-pyqt4
 file(WRITE ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/private-pyqt4.pth
 "import sys; sys.__plen = len(sys.path)
 ${_lib_site_packages}
+${_pyqt4_lib_site_packages}
 import sys; new = sys.path[sys.__plen:]; del sys.path[sys.__plen:]; p = getattr(sys, '__egginsert', 0); sys.path[p:p] = new; sys.__egginsert = p + len(new)
 ")
 
