@@ -72,6 +72,7 @@ print(sc.get_python_lib(plat_specific=True))"
 
 file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.pth.install
   "${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\n"
+  "${CMAKE_INSTALL_PREFIX}/${LIB_DIR}\n"
 )
 
 install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/mantid.pth.install
