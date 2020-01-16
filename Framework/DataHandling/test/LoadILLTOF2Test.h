@@ -152,14 +152,17 @@ public:
   }
 
   void test_PANTHER_diffraction_load() {
-    double wavelength = 7.;
+    const double wavelength = 7.;
+    const size_t histogram_count = 73729;
+    const size_t monitor_count = 1;
 
     // mostly the same code as loadDataFile, but some of the TOF features cant
     // be called
     LoadILLTOF2 loader;
     loader.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(loader.initialize())
-    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", "001063.nxs"))
+    TS_ASSERT_THROWS_NOTHING(
+        loader.setPropertyValue("Filename", "ILL/PANTHER/001036.nxs"))
 
     std::string outputSpace = "LoadILLTOFTest_out";
     TS_ASSERT_THROWS_NOTHING(
@@ -170,11 +173,11 @@ public:
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             outputSpace);
 
-    TS_ASSERT_EQUALS(output->getNumberHistograms(), 73729)
+    TS_ASSERT_EQUALS(output->getNumberHistograms(), histogram_count)
     const auto &spectrumInfo = output->spectrumInfo();
     for (size_t wsIndex = 0; wsIndex != output->getNumberHistograms();
          ++wsIndex) {
-      if (wsIndex < numberOfHistograms - numberOfMonitors) {
+      if (wsIndex < histogram_count - monitor_count) {
         TS_ASSERT(!spectrumInfo.isMonitor(wsIndex))
       } else {
         TS_ASSERT(spectrumInfo.isMonitor(wsIndex))
@@ -192,8 +195,7 @@ public:
 
       const auto &ys = histogram.y();
       const auto &es = histogram.e();
-      TS_ASSERT_EQUALS(es[0], std::sqrt(ys[0]))
-      TS_ASSERT_EQUALS(es[1], std::sqrt(ys[1]))
+      TS_ASSERT_DELTA(es[0], std::sqrt(ys[0]), 1E-5)
     }
     // Check all detectors have a defined detector ID >= 0
     Mantid::detid2index_map detectorMap;
