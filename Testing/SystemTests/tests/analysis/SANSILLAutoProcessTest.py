@@ -112,4 +112,3 @@ class D33_AutoProcess_Test(systemtesting.MantidSystemTest):
         )
 
         GroupWorkspaces(InputWorkspaces=['iq', 'panels'], OutputWorkspace='out')
-
