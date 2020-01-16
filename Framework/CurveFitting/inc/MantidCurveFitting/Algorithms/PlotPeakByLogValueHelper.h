@@ -44,6 +44,11 @@ getWorkspace(const std::string &name, int period);
 DLLExport std::vector<InputSpectraToFit>
 makeNames(std::string inputList, int default_wi, int default_spec);
 
+enum SpecialIndex {
+  NOT_SET = -1,
+  WHOLE_RANGE = -2,
+};
+
 } // namespace Algorithms
 } // namespace CurveFitting
 } // namespace Mantid
