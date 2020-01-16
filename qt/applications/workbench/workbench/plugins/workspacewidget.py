@@ -9,7 +9,6 @@
 #
 from __future__ import (absolute_import, unicode_literals)
 
-import matplotlib.pyplot
 from functools import partial
 from qtpy.QtWidgets import QApplication, QMessageBox, QVBoxLayout
 
@@ -156,6 +155,8 @@ class WorkspaceWidget(PluginWidget):
                                "".format(ws.name()))
 
     def _do_show_data(self, names):
+        # local import to allow this module to be imported without pyplot being imported
+        import matplotlib.pyplot
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
             try:
                 MatrixWorkspaceDisplay.supports(ws)
@@ -194,9 +195,9 @@ class WorkspaceWidget(PluginWidget):
             except RuntimeError:
                 continue
             else:
-                successful_workspaces.append(ws.getName())
+                successful_workspaces.append(ws.name())
 
-        self._do_show_data(map(lambda x: x + "-Detectors", successful_workspaces))
+        self._do_show_data(list(map(lambda x: x + "-Detectors", successful_workspaces)))
 
     def _run_create_detector_table(self, ws):
         CreateDetectorTable(InputWorkspace=ws)
