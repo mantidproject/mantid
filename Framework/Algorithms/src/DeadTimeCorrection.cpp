@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/DeadTimeCorrection.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -15,6 +16,7 @@
 namespace Mantid {
 namespace Algorithms {
 
+using API::FileProperty;
 using API::MatrixWorkspace_sptr;
 using API::Progress;
 using API::WorkspaceProperty;
@@ -64,6 +66,12 @@ void DeadTimeCorrection::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                         Direction::Output),
                   "An output workspace.");
+
+  declareProperty(
+      std::make_unique<FileProperty>("MapFile", "", FileProperty::OptionalLoad,
+                                     std::vector<std::string>{".map", ".xml"}),
+      "A file that consists of lists of spectra numbers to group. See the "
+      "help of GroupDetectors for the file format");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -102,6 +110,18 @@ void DeadTimeCorrection::exec() {
     grouper->setProperty("KeepUngroupedSpectra", true);
     grouper->executeAsChildAlg();
     grouped = grouper->getProperty("OutputWorkspace");
+  } else {
+    const std::string filename = getProperty("MapFile");
+    if (!filename.empty()) {
+        auto grouper = createChildAlgorithm("GroupDetectors");
+        grouper->setProperty("InputWorkspace", integrated);
+        grouper->setPropertyValue("OutputWorkspace", "unused");
+        grouper->setPropertyValue("MapFile", filename);
+        grouper->setPropertyValue("Behaviour", "Sum");
+        grouper->setProperty("KeepUngroupedSpectra", true);
+        grouper->executeAsChildAlg();
+        grouped = grouper->getProperty("OutputWorkspace");
+    }
   }
   Progress progress(this, 0.0, 1.0, grouped->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWorkspace))
