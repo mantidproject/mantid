@@ -40,10 +40,10 @@ function run_with_xvfb {
 ###############################################################################
 if [ $(command -v xvfb-run) ]; then
     echo "Terminating existing Xvfb sessions"
-    
+
     # Kill Xvfb processes
     killall Xvfb || true
-    
+
     # Remove Xvfb X server lock files
     rm -f /tmp/.X${XVFB_SERVER_NUM}-lock
 fi
@@ -143,7 +143,7 @@ if [[ ${PRBUILD} == true ]]; then
     DO_BUILD_DEVDOCS=false
     DO_BUILD_PKG=${BUILD_PACKAGE:-false}
     DO_SYSTEMTESTS=false
-    
+
     if [[ ${ON_RHEL7} == true ]]; then
         # rhel does system testing
         if ! ${SCRIPT_DIR}/check_for_changes docs-gui-only; then
@@ -252,11 +252,11 @@ PY2_BUILD=false
 PY3_BUILD=false
 if [[ ${JOB_NAME} == *python3* ]]; then
     PY3_BUILD=true
-    PYTHON3_EXECUTABLE=$(which python3)
-    DIST_FLAGS="${DIST_FLAGS} -DPYTHON_EXECUTABLE=$PYTHON3_EXECUTABLE"
+    DIST_FLAGS="${DIST_FLAGS} -DWITH_PYTHON3=ON"
     PARAVIEW_DIR="${PARAVIEW_DIR}-python3"
 else
     PY2_BUILD=true
+    DIST_FLAGS="${DIST_FLAGS} -DWITH_PYTHON3=OFF"
 fi
 
 ###############################################################################
@@ -280,12 +280,12 @@ if [[ ${DO_BUILD_PKG} == true ]]; then
         else
             PACKAGE_SUFFIX="unstable"
         fi
-        
+
         if [[ ${PY3_BUILD} == true ]]; then
             # Add '-python3' to package name and install path
             PACKAGE_SUFFIX=${PACKAGE_SUFFIX}-python3
         fi
-        
+
         if [[ ${JOB_NAME} == *release* ]] && [[ ${PY2_BUILD} == true ]] && [[ -z "${PACKAGE_SUFFIX}" ]]; then
             # Traditional install path for python 2 release build
             PACKAGINGVARS="${PACKAGINGVARS} -DCMAKE_INSTALL_PREFIX=/opt/Mantid -DCPACK_PACKAGE_SUFFIX="
@@ -293,7 +293,7 @@ if [[ ${DO_BUILD_PKG} == true ]]; then
             # everything else uses lower-case values
             PACKAGINGVARS="${PACKAGINGVARS} -DCMAKE_INSTALL_PREFIX=/opt/mantid${PACKAGE_SUFFIX} -DCPACK_PACKAGE_SUFFIX=${PACKAGE_SUFFIX}"
         fi
-        
+
         if [[ ${ON_RHEL7} == true ]]; then
             if [[ -n "${RELEASE_NUMBER}" ]]; then
                 RELEASE_NUMBER="1"
@@ -430,7 +430,7 @@ fi
 if [[ ${DO_BUILD_PKG} == true ]]; then
     run_with_xvfb ${CMAKE_EXE} --build . --target docs-qthelp
     ${CPACK_EXE}
-    
+
     # Source tarball on clean build (arbitrarily choose rhel7)
     # Also, parcel up the documentation into a tar file that is easier to move around
     # and labelled by the commit id it was built with. This assumes the Jenkins git plugin

@@ -59,26 +59,8 @@ set(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem ")
 # Set Qt5 dir according to homebrew location
 set(Qt5_DIR /usr/local/opt/qt/lib/cmake/Qt5)
 
-# ##############################################################################
-# Use python libraries associated with PYTHON_EXECUTABLE If unspecified, use
-# first python executable in the PATH.
-# ##############################################################################
-
-# Find the python interpreter to get the version we're using (needed for install
-# commands below)
-find_package(PythonInterp)
-if(PYTHON_VERSION_MAJOR)
-  set(PY_VER "${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}")
-  message(
-    STATUS
-      "Python version is "
-      ${PY_VER}
-  )
-else()
-  # Older versions of CMake don't set these variables so just assume 2.7
-  set(PY_VER 2.7)
-endif()
-
+# Python flags
+set(PY_VER "${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}")
 execute_process(
   COMMAND
     python${PY_VER}-config
