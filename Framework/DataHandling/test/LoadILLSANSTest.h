@@ -117,7 +117,7 @@ public:
         instrument->getComponentByName("detector");
     V3D pos = component->getPos();
     TS_ASSERT_DELTA(pos.Z(), 8, 0.01)
-    TS_ASSERT_DELTA(pos.X(), 0.35, 0.01)
+    TS_ASSERT_DELTA(pos.X(), -0.35, 0.01)
     const auto &xAxis = outputWS->x(0).rawData();
     const auto &spec6 = outputWS->y(6).rawData();
     const auto &err6 = outputWS->e(6).rawData();

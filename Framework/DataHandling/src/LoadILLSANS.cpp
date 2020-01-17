@@ -132,7 +132,7 @@ void LoadILLSANS::exec() {
     if (m_instrumentName == "D22") {
       double offset = m_loader.getDoubleFromNexusPath(
           firstEntry, instrumentPath + "/detector/dtr_actual");
-      moveDetectorHorizontal(offset / 1000, "detector"); // mm to meter
+      moveDetectorHorizontal(- offset / 1000, "detector"); // mm to meter
       /*TODO: DO NOT ROTATE UNTIL CONFIRMED BY INSTRUMENT SCIENTIST
       double angle = m_loader.getDoubleFromNexusPath(
           firstEntry, instrumentPath + "/detector/dan_actual");
