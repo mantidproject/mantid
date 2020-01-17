@@ -100,10 +100,19 @@ if(MSVC)
     set(PYTHON_VERSION_MINOR 7)
   endif()
   # used in later parts for MSVC to bundle Python
-  set(MSVC_PYTHON_EXECUTABLE_DIR ${THIRD_PARTY_DIR}/lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
-  set(PYTHON_EXECUTABLE ${MSVC_PYTHON_EXECUTABLE_DIR}/python.exe CACHE FILEPATH "Location of python executable" FORCE)
-  set(PYTHONW_EXECUTABLE "${MSVC_PYTHON_EXECUTABLE_DIR}/pythonw.exe" CACHE FILEPATH
-      "The location of the pythonw executable. This suppresses the new terminal window on startup" FORCE )
+  set(MSVC_PYTHON_EXECUTABLE_DIR
+      ${THIRD_PARTY_DIR}/lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}
+  )
+  set(PYTHON_EXECUTABLE
+      ${THIRD_PARTY_DIR}/lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/python.exe
+  )
+  set(PYTHONW_EXECUTABLE
+      "${MSVC_PYTHON_EXECUTABLE_DIR}/pythonw.exe"
+      CACHE
+        FILEPATH
+        "The location of the pythonw executable. This suppresses the new terminal window on startup"
+        FORCE
+  )
   set(THIRD_PARTY_BIN
       "${THIRD_PARTY_DIR}/bin;${THIRD_PARTY_DIR}/lib/qt4/bin;${THIRD_PARTY_DIR}/lib/qt5/bin;${MSVC_PYTHON_EXECUTABLE_DIR}"
   )
@@ -171,12 +180,20 @@ endfunction()
 
 # Find python interpreter
 find_package(PythonInterp REQUIRED)
-message(STATUS "Python version is " ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}.${PYTHON_VERSION_PATCH})
+message(
+  STATUS "Python version is "
+         ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}.${PYTHON_VERSION_PATCH}
+)
 # Ensure FindPythonLibs finds the correct libraries
 set(Python_ADDITIONAL_VERSIONS ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
 
 # Handle switching between previously configured Python 2 & Python 3 builds
-if(PYTHON_INCLUDE_DIR AND NOT PYTHON_INCLUDE_DIR MATCHES ".*${PYTHON_VERSION_MAJOR}\.${PYTHON_VERSION_MINOR}.*" )
-  message(STATUS "Python version has changed. Clearing previous Python configuration." )
+if(PYTHON_INCLUDE_DIR
+   AND NOT PYTHON_INCLUDE_DIR MATCHES
+       ".*${PYTHON_VERSION_MAJOR}\.${PYTHON_VERSION_MINOR}.*"
+)
+  message(
+    STATUS "Python version has changed. Clearing previous Python configuration."
+  )
   unset_cached_python_variables()
 endif()
