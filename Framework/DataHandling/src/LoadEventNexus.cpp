@@ -294,7 +294,8 @@ void LoadEventNexus::init() {
 
   declareProperty("NumberOfBins", 500, mustBePositive,
                   "The number of bins intially defined. Use Rebin to change "
-                  "the binning later.  If there is no data loaded, or you select meta data only you will only get 1 bin.");
+                  "the binning later.  If there is no data loaded, or you "
+                  "select meta data only you will only get 1 bin.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1085,8 +1086,8 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
       binEdgesVec[binIndex] = binEdgesVec[0] + (binStep * binIndex);
     }
     m_ws->setAllX(HistogramData::BinEdges{binEdgesVec});
-  }
-  else m_ws->setAllX(HistogramData::BinEdges{0.0, 1.0});
+  } else
+    m_ws->setAllX(HistogramData::BinEdges{0.0, 1.0});
 
   // if there is time_of_flight load it
   adjustTimeOfFlightISISLegacy(*m_file, m_ws, m_top_entry_name, classType);

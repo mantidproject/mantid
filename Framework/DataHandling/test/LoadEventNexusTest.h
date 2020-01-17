@@ -242,9 +242,9 @@ public:
     }
   }
 
-	void test_NumberOfBins() {
+  void test_NumberOfBins() {
     const std::string file = "SANS2D00022048.nxs";
-          int nBins = 273;
+    int nBins = 273;
     LoadEventNexus alg;
     alg.setChild(true);
     alg.setRethrows(true);
