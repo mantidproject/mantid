@@ -108,7 +108,7 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
       plotSubMenu->addAction(m_plotSpectrumWithErrs);
       plotSubMenu->addAction(m_overplotSpectrumWithErrs);
 
-			// Don't plot 1D spectra if only one X value
+      // Don't plot 1D spectra if only one X value
       bool multipleBins = false;
       try {
         multipleBins = (matrixWS->blocksize() > 1);
