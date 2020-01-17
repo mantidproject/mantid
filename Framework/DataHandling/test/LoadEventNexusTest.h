@@ -268,6 +268,7 @@ public:
     alg.initialize();
     alg.setProperty("Filename", file);
     alg.setProperty("OutputWorkspace", "dummy_for_child");
+    alg.setProperty("NumberOfBins", 1);
     alg.execute();
     Workspace_sptr ws = alg.getProperty("OutputWorkspace");
     auto eventWS = boost::dynamic_pointer_cast<EventWorkspace>(ws);
@@ -336,6 +337,7 @@ public:
     ld.setPropertyValue("Filename", "CNCS_7860_event.nxs");
     ld.setPropertyValue("OutputWorkspace", outws_name);
     ld.setPropertyValue("Precount", "0");
+    ld.setProperty("NumberOfBins", 1);
     ld.setProperty<bool>("LoadLogs", false); // Time-saver
     ld.execute();
     TS_ASSERT(ld.isExecuted());
@@ -378,6 +380,7 @@ public:
     ld2.setPropertyValue("OutputWorkspace", outws_name2);
     ld2.setPropertyValue("Precount", "1");
     ld2.setProperty<bool>("LoadLogs", false); // Time-saver
+    ld2.setProperty("NumberOfBins", 1);
     ld2.execute();
     TS_ASSERT(ld2.isExecuted());
 
