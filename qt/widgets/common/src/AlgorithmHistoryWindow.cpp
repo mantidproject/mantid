@@ -662,7 +662,7 @@ void AlgHistoryTreeWidget::itemChecked(QTreeWidgetItem *item, int index) {
     // checked here are added to a list so we know which item's children need to
     // be copied.
     if (hadToCheck || currentItem == item) {
-      itemsChecked.emplace_back(item);
+      itemsChecked.emplace_back(currentItem);
     }
   }
 
@@ -674,12 +674,12 @@ void AlgHistoryTreeWidget::itemChecked(QTreeWidgetItem *item, int index) {
   // HistoryView, when an algorithm is unrolled a copy of its children is made,
   // added to the tree after the algorithm, and hidden.
   for (auto it = itemsChecked.rbegin(); it != itemsChecked.rend(); ++it) {
-    auto item{*it};
-    auto itemCopy{std::unique_ptr<QTreeWidgetItem>{item->clone()}};
+    auto currentItem{*it};
+    auto itemCopy{std::unique_ptr<QTreeWidgetItem>{currentItem->clone()}};
     auto children{itemCopy->takeChildren()};
-    modelIndex = indexFromItem(item, index);
+    modelIndex = indexFromItem(currentItem, index);
 
-    if (auto parent = item->parent()) {
+    if (auto parent = currentItem->parent()) {
       parent->insertChildren(modelIndex.row() + 1, children);
     } else {
       insertTopLevelItems(modelIndex.row() + 1, children);
