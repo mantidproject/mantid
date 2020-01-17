@@ -19,11 +19,9 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/CostFunctionFactory.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
-#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/IFunction.h"
-#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/Run.h"
@@ -235,8 +233,8 @@ void PlotPeakByLogValue::exec() {
     }
 
     IFunction_sptr ifun =
-        setupFunction(individual, passWSIndexToFunction, inputFunction, initialParams,
-                      isMultiDomainFunction, i, data);
+        setupFunction(individual, passWSIndexToFunction, inputFunction,
+                      initialParams, isMultiDomainFunction, i, data);
 
     auto fit = runSingleFit(createFitOutput, outputCompositeMembers,
                             outputConvolvedMembers, ifun, data);
@@ -274,7 +272,8 @@ void PlotPeakByLogValue::exec() {
 
 IFunction_sptr
 PlotPeakByLogValue::setupFunction(bool individual, bool passWSIndexToFunction,
-                                  const IFunction_sptr &inputFunction, const std::vector<double> &initialParams,
+                                  const IFunction_sptr &inputFunction,
+                                  const std::vector<double> &initialParams,
                                   bool isMultiDomainFunction, int i,
                                   const InputSpectraToFit &data) const {
   IFunction_sptr ifun;

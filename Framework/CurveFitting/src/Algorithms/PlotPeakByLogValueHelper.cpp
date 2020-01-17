@@ -25,7 +25,8 @@ namespace Algorithms {
 void parseValueRange(const std::string &index, double &start, double &end,
                      int &wi, int &spec);
 
-//Ideally this would use boost::try_lexical_cast in order to avoid too many exceptions
+// Ideally this would use boost::try_lexical_cast in order to avoid too many
+// exceptions
 // but we do not yet have the correct version of boost.
 template <class Type>
 Type lexCast(std::string input, const std::string &errorMessage) {
@@ -86,15 +87,12 @@ std::vector<InputSpectraToFit> makeNames(std::string inputList, int default_wi,
 
     auto wsg = boost::dynamic_pointer_cast<API::WorkspaceGroup>(
         workspaceOptional.value());
+    auto wsMatrix = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+        workspaceOptional.value());
     if (wsg) {
       addGroupWorkspace(nameList, start, end, wi, spec, period, wsg);
 
-    } else {
-
-      auto wsMatrix = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
-          workspaceOptional.value());
-      if (!wsMatrix)
-        continue;
+    } else if (wsMatrix) {
       addMatrixworkspace(nameList, start, end, name, wi, spec, period,
                          workspaceOptional, wsMatrix);
     }
@@ -162,9 +160,11 @@ void parseValueRange(const std::string &index, double &start, double &end,
       wi = NOT_SET;
       spec = NOT_SET;
     } else if (range.count() > 1) {
-      std::string errorMessage = std::string("Provided incorrect range values. Range is "
-                                             "specfifed by start_value:stop_value, but "
-                                             "provided ") + range[0] + std::string(" and ") + range[1];
+      std::string errorMessage =
+          std::string("Provided incorrect range values. Range is "
+                      "specfifed by start_value:stop_value, but "
+                      "provided ") +
+          range[0] + std::string(" and ") + range[1];
       start = lexCast<double>(range[0], errorMessage);
       end = lexCast<double>(range[1], errorMessage);
 
@@ -178,106 +178,102 @@ void parseValueRange(const std::string &index, double &start, double &end,
   }
 }
 
-  /** Get a workspace identified by an InputSpectraToFit structure.
-   * @param ws :: Workspace to fit required to work out indices
-   * @param workspaceIndex :: workspace index to use
-   * @param spectrumNumber :: spectrum number to use
-   * @param start :: Start of range for value based spectrum range
-   * @param end :: End of range for value based spectrum range
-   * @return Vector of workspace indices to fit
-   */
-  std::vector<int> getWorkspaceIndicesFromAxes(
-      API::MatrixWorkspace & ws, int workspaceIndex, int spectrumNumber,
-      double start, double end) {
+/** Get a workspace identified by an InputSpectraToFit structure.
+ * @param ws :: Workspace to fit required to work out indices
+ * @param workspaceIndex :: workspace index to use
+ * @param spectrumNumber :: spectrum number to use
+ * @param start :: Start of range for value based spectrum range
+ * @param end :: End of range for value based spectrum range
+ * @return Vector of workspace indices to fit
+ */
+std::vector<int> getWorkspaceIndicesFromAxes(API::MatrixWorkspace &ws,
+                                             int workspaceIndex,
+                                             int spectrumNumber, double start,
+                                             double end) {
+  if (workspaceIndex >= 0) {
+    return std::vector<int>({workspaceIndex});
+  }
+  std::vector<int> out;
+  API::Axis *axis = ws.getAxis(1);
+  if (axis->isSpectra()) {
+    if (spectrumNumber < 0) {
+      for (size_t i = 0; i < axis->length(); ++i) {
+        auto s = double(axis->spectraNo(i));
+        if (s >= start && s <= end) {
+          out.emplace_back(static_cast<int>(i));
+        }
+      }
+
+    } else {
+      for (size_t i = 0; i < axis->length(); ++i) {
+        int j = axis->spectraNo(i);
+        if (j == spectrumNumber) {
+          out.emplace_back(static_cast<int>(i));
+          break;
+        }
+      }
+    }
+  } else { // numeric axis
+    spectrumNumber = SpecialIndex::NOT_SET;
     if (workspaceIndex >= 0) {
-      return std::vector<int>({workspaceIndex});
-    }
-    std::vector<int> out;
-    API::Axis *axis = ws.getAxis(1);
-    if (axis->isSpectra()) { // spectra axis
-      if (spectrumNumber < 0) {
-        for (size_t i = 0; i < axis->length(); ++i) {
-          auto s = double(axis->spectraNo(i));
-          if (s >= start && s <= end) {
-            out.emplace_back(static_cast<int>(i));
-          }
-        }
-
-      } else {
-        for (size_t i = 0; i < axis->length(); ++i) {
-          int j = axis->spectraNo(i);
-          if (j == spectrumNumber) {
-            out.emplace_back(static_cast<int>(i));
-            break;
-          }
-        }
+      out.clear();
+    } else {
+      if (workspaceIndex <= SpecialIndex::WHOLE_RANGE) {
+        start = (*axis)(0);
+        end = (*axis)(axis->length() - 1);
       }
-    } else { // numeric axis
-      spectrumNumber = SpecialIndex::NOT_SET;
-      if (workspaceIndex >= 0) {
-        out.clear();
-      } else {
-        if (workspaceIndex <= SpecialIndex::WHOLE_RANGE) {
-          start = (*axis)(0);
-          end = (*axis)(axis->length() - 1);
-        }
-        for (size_t i = 0; i < axis->length(); ++i) {
-          double s = (*axis)(i);
-          if (s >= start && s <= end) {
-            out.emplace_back(static_cast<int>(i));
-          }
+      for (size_t i = 0; i < axis->length(); ++i) {
+        double s = (*axis)(i);
+        if (s >= start && s <= end) {
+          out.emplace_back(static_cast<int>(i));
         }
       }
     }
-
-    return out;
   }
 
-  boost::optional<API::Workspace_sptr> getWorkspace(
-      const std::string &workspaceName, int period) {
-    if (API::AnalysisDataService::Instance().doesExist(workspaceName)) {
-      return API::AnalysisDataService::Instance().retrieve(workspaceName);
-    } else {
-      std::string::size_type i = workspaceName.find_last_of('.');
-      if (i == std::string::npos) {
-        g_log.warning() << "Cannot open file " << workspaceName << "\n";
-        return {};
-      }
-      try {
-        auto load =
-            Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
-        load->setChild(true);
-        load->initialize();
-        load->setPropertyValue("FileName", workspaceName);
-        load->setProperty("OutputWorkspace", "__NotUsed");
-        load->execute();
-        if (load->isExecuted()) {
-          API::Workspace_sptr rws = load->getProperty("OutputWorkspace");
-          if (rws) {
-            if (boost::dynamic_pointer_cast<DataObjects::Workspace2D>(rws)) {
-              return rws;
-            } else {
-              API::WorkspaceGroup_sptr gws =
-                  boost::dynamic_pointer_cast<API::WorkspaceGroup>(rws);
-              if (gws) {
-                std::string propName =
-                    "OUTPUTWORKSPACE_" + std::to_string(period);
-                if (load->existsProperty(propName)) {
-                  API::Workspace_sptr rws1 = load->getProperty(propName);
-                  return rws1;
-                }
-              }
+  return out;
+}
+
+boost::optional<API::Workspace_sptr>
+getWorkspace(const std::string &workspaceName, int period) {
+  if (API::AnalysisDataService::Instance().doesExist(workspaceName)) {
+    return API::AnalysisDataService::Instance().retrieve(workspaceName);
+  } else {
+    std::string::size_type i = workspaceName.find_last_of('.');
+    if (i == std::string::npos) {
+      g_log.warning() << "Cannot open file " << workspaceName << "\n";
+      return {};
+    }
+    auto load =
+        Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
+    load->setChild(true);
+    load->initialize();
+    load->setPropertyValue("FileName", workspaceName);
+    load->setProperty("OutputWorkspace", "__NotUsed");
+    load->setRethrows(false);
+    load->execute();
+    if (load->isExecuted()) {
+      API::Workspace_sptr rws = load->getProperty("OutputWorkspace");
+      if (rws) {
+        if (boost::dynamic_pointer_cast<DataObjects::Workspace2D>(rws)) {
+          return rws;
+        } else {
+          API::WorkspaceGroup_sptr gws =
+              boost::dynamic_pointer_cast<API::WorkspaceGroup>(rws);
+          if (gws) {
+            std::string propName = "OUTPUTWORKSPACE_" + std::to_string(period);
+            if (load->existsProperty(propName)) {
+              API::Workspace_sptr rws1 = load->getProperty(propName);
+              return rws1;
             }
           }
         }
-      } catch (std::exception &e) {
-        g_log.error(e.what());
-        return {};
       }
     }
-    return {};
   }
+  return {};
+}
 
 } // namespace Algorithms
-} // namespace Algorithms
 } // namespace CurveFitting
+} // namespace Mantid

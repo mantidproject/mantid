@@ -12,6 +12,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidCurveFitting/Algorithms/PlotPeakByLogValueHelper.h"
 
 namespace Mantid {

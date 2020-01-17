@@ -28,54 +28,6 @@ bool doesExistInADS(std::string const &workspaceName) {
   return AnalysisDataService::Instance().doesExist(workspaceName);
 }
 
-// CompositeFunction_sptr applyTemperatureCorrection(IFunction_sptr function,
-//                                                  IFunction_sptr correction,
-//                                                  double value) {
-//  auto product = boost::dynamic_pointer_cast<CompositeFunction>(
-//      FunctionFactory::Instance().createFunction("ProductFunction"));
-//  product->addFunction(correction);
-//  product->addFunction(function);
-//  product->tie("f0.Temp", std::to_string(value));
-//  product->applyTies();
-//  return product;
-//}
-
-// IFunction_sptr createTemperatureCorrection(double correction) {
-//  // create temperature correction function to multiply with the lorentzians
-//  IFunction_sptr tempFunc;
-//
-//  // create user function for the exponential correction
-//  // (x*temp) / 1-exp(-(x*temp))
-//  tempFunc = FunctionFactory::Instance().createFunction("UserFunction");
-//  // 11.606 is the conversion factor from meV to K
-//  std::string formula = "((x*11.606)/Temp) / (1 - exp(-((x*11.606)/Temp)))";
-//  IFunction::Attribute att(formula);
-//  tempFunc->setAttribute("Formula", att);
-//  tempFunc->setParameter("Temp", correction);
-//  return tempFunc;
-//}
-
-// CompositeFunction_sptr addTemperatureCorrection(CompositeFunction_sptr model,
-//                                                double value) {
-//  auto correction = createTemperatureCorrection(value);
-//
-//  for (auto i = 0u; i < model->nFunctions(); ++i) {
-//    auto function = model->getFunction(i);
-//
-//    if (function->name() != "DeltaFunction") {
-//      auto corrected = applyTemperatureCorrection(function, correction,
-//      value); model->replaceFunction(i, corrected);
-//    }
-//  }
-//  return model;
-//}
-//
-// CompositeFunction_sptr addTemperatureCorrection(IFunction_sptr model,
-//                                                double value) {
-//  auto correction = createTemperatureCorrection(value);
-//  return applyTemperatureCorrection(model, correction, value);
-//}
-
 IAlgorithm_sptr loadParameterFileAlgorithm(std::string const &workspaceName,
                                            std::string const &filename) {
   auto loadParamFile = AlgorithmManager::Instance().create("LoadParameterFile");
@@ -614,7 +566,6 @@ void ConvFitModel::setParameterNameChanges(
 std::vector<std::pair<std::string, int>>
 ConvFitModel::getResolutionsForFit() const {
   std::vector<std::pair<std::string, int>> resolutionVector;
-  resolutionVector.reserve(20);
   for (TableDatasetIndex index = TableDatasetIndex{0};
        index < m_resolution.size(); ++index) {
 
