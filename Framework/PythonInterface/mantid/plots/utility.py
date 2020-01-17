@@ -7,15 +7,22 @@
 #  This file is part of the mantid package
 from __future__ import absolute_import
 
+from collections import namedtuple
 from contextlib import contextmanager
 
-from matplotlib import cm
+from matplotlib import cm, __version__ as mpl_version_str
 from matplotlib.container import ErrorbarContainer
 from matplotlib.legend import Legend
 
 from enum import Enum
 
 
+# matplotlib version information
+MPLVersionInfo = namedtuple("MPLVersionInfo", ("major", "minor", "patch"))
+MATPLOTLIB_VERSION_INFO = MPLVersionInfo._make(map(int, mpl_version_str.split(".")))
+
+
+# Use the correct draggable method based on the matplotlib version
 if hasattr(Legend, "set_draggable"):
     SET_DRAGGABLE_METHOD = "set_draggable"
 else:
@@ -130,6 +137,11 @@ def legend_set_draggable(legend, state, use_blit=False, update='loc'):
     See matplotlib documentation for argument descriptions
     """
     getattr(legend, SET_DRAGGABLE_METHOD)(state, use_blit, update)
+
+
+def mpl_version_info():
+    """Returns a namedtuple of (major,minor,patch)"""
+    return MATPLOTLIB_VERSION_INFO
 
 
 def zoom_axis(ax, coord, x_or_y, factor):
