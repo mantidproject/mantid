@@ -56,9 +56,15 @@ class CalibrationModel(object):
                                       path_handling.ENGINEERING_PREFIX, "full_calibration")
         if full_calib_path is not None and path.exists(full_calib_path):
             full_calib = path_handling.load_workspace(full_calib_path)
-            output = self.run_calibration(sample_workspace, van_integration, van_curves, bank, spectrum_numbers, full_calib_ws=full_calib)
+            output = self.run_calibration(sample_workspace,
+                                          van_integration,
+                                          van_curves,
+                                          bank,
+                                          spectrum_numbers,
+                                          full_calib_ws=full_calib)
         else:
-            output = self.run_calibration(sample_workspace, van_integration, van_curves, bank, spectrum_numbers)
+            output = self.run_calibration(sample_workspace, van_integration, van_curves, bank,
+                                          spectrum_numbers)
         if plot_output:
             self._plot_vanadium_curves()
             for i in range(len(output)):
@@ -74,9 +80,9 @@ class CalibrationModel(object):
             if bank is None and spectrum_numbers is None:
                 self._plot_difc_tzero()
             elif spectrum_numbers is None:
-                self._plot_difc_tzero_single_bank_or_custom(bank, False)
+                self._plot_difc_tzero_single_bank_or_custom(bank)
             else:
-                self._plot_difc_tzero_single_bank_or_custom("", True)
+                self._plot_difc_tzero_single_bank_or_custom("cropped")
         difc = [i.DIFC for i in output]
         tzero = [i.TZERO for i in output]
 
@@ -87,7 +93,8 @@ class CalibrationModel(object):
         self.update_calibration_params_table(params_table)
 
         calib_dir = path.join(path_handling.get_output_path(), "Calibration", "")
-        self.create_output_files(calib_dir, difc, tzero, sample_path, vanadium_path, instrument, bank, spectrum_numbers)
+        self.create_output_files(calib_dir, difc, tzero, sample_path, vanadium_path, instrument,
+                                 bank, spectrum_numbers)
         if rb_num:
             user_calib_dir = path.join(path_handling.get_output_path(), "User", rb_num,
                                        "Calibration", "")
@@ -203,12 +210,8 @@ class CalibrationModel(object):
         fig.show()
 
     @staticmethod
-    def _plot_difc_tzero_single_bank_or_custom(bank, custom):
-        if not custom:
-            bank_ws = Ads.retrieve("engggui_difc_zero_peaks_bank_" + str(bank))
-        else:
-            bank_ws = Ads.retrieve("engggui_difc_zero_peaks_bank_cropped")
-            bank = "Cropped"
+    def _plot_difc_tzero_single_bank_or_custom(bank):
+        bank_ws = Ads.retrieve("engggui_difc_zero_peaks_bank_" + str(bank))
 
         ax = plot([bank_ws], [0, 1],
                   plot_kwargs={
@@ -220,7 +223,13 @@ class CalibrationModel(object):
         ax.legend(("Peaks Fitted", "DifC/TZero Fitted Straight Line"))
         ax.set_xlabel("Expected Peaks Centre(dSpacing, A)")
 
-    def run_calibration(self, sample_ws, van_integration, van_curves, bank, spectrum_numbers, full_calib_ws=None):
+    def run_calibration(self,
+                        sample_ws,
+                        van_integration,
+                        van_curves,
+                        bank,
+                        spectrum_numbers,
+                        full_calib_ws=None):
         """
         Runs the main Engineering calibration algorithm.
         :param sample_ws: The workspace with the sample data.
@@ -231,49 +240,35 @@ class CalibrationModel(object):
         :param spectrum_numbers: The spectrum numbers to crop to, no crop if none.
         :return: The output of the algorithm.
         """
-        def run_engg_calibrate(calib_bank):
-            table_name = self._generate_table_workspace_name(calib_bank)
-            if full_calib_ws is not None:
-                return EnggCalibrate(InputWorkspace=sample_ws,
-                                     VanIntegrationWorkspace=van_integration,
-                                     VanCurvesWorkspace=van_curves,
-                                     Bank=calib_bank,
-                                     FittedPeaks=table_name,
-                                     DetectorPositions=full_calib_ws)
-            else:
-                return EnggCalibrate(InputWorkspace=sample_ws,
-                                     VanIntegrationWorkspace=van_integration,
-                                     VanCurvesWorkspace=van_curves,
-                                     Bank=calib_bank,
-                                     FittedPeaks=table_name)
+        kwargs = {
+            "InputWorkspace": sample_ws,
+            "VanIntegrationWorkspace": van_integration,
+            "VanCurvesWorkspace": van_curves
+        }
 
+        def run_engg_calibrate(kwargs_to_pass):
+            return EnggCalibrate(**kwargs_to_pass)
+
+        if full_calib_ws is not None:
+            kwargs["DetectorPositions"] = full_calib_ws
         if spectrum_numbers is None:
             if bank is None:
                 output = [None] * 2
                 for i in range(len(output)):
-                    output[i] = run_engg_calibrate(str(i + 1))
+                    kwargs["Bank"] = str(i+1)
+                    kwargs["FittedPeaks"] = self._generate_table_workspace_name(str(i+1))
+                    output[i] = run_engg_calibrate(kwargs)
             else:
                 output = [None]
-                output[0] = run_engg_calibrate(bank)
+                kwargs["Bank"] = bank
+                kwargs["FittedPeaks"] = self._generate_table_workspace_name(bank)
+                output[0] = run_engg_calibrate(kwargs)
 
         else:
-            if full_calib_ws is not None:
-                output = [None]
-                cropped_table_name = self._generate_table_workspace_name("cropped")
-                output[0] = EnggCalibrate(InputWorkspace=sample_ws,
-                                          VanIntegrationWorkspace=van_integration,
-                                          VanCurvesWorkspace=van_curves,
-                                          SpectrumNumbers=spectrum_numbers,
-                                          FittedPeaks=cropped_table_name,
-                                          DetectorPositions=full_calib_ws)
-            else:
-                output = [None]
-                cropped_table_name = self._generate_table_workspace_name("cropped")
-                output[0] = EnggCalibrate(InputWorkspace=sample_ws,
-                                          VanIntegrationWorkspace=van_integration,
-                                          VanCurvesWorkspace=van_curves,
-                                          SpectrumNumbers=spectrum_numbers,
-                                          FittedPeaks=cropped_table_name)
+            output = [None]
+            kwargs["SpectrumNumbers"] = spectrum_numbers
+            kwargs["FittedPeaks"] = self._generate_table_workspace_name("cropped")
+            output[0] = run_engg_calibrate(kwargs)
         return output
 
     def create_output_files(self, calibration_dir, difc, tzero, sample_path, vanadium_path,
