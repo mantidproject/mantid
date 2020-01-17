@@ -8,6 +8,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import unittest
+import sys
 
 from mantid.py3compat.mock import call, patch, Mock
 from mantidqt.utils.qt.testing import start_qapplication
@@ -157,10 +158,17 @@ class GeneralSettingsTest(unittest.TestCase):
         GeneralSettings(None)
 
         # calls().__int__() are the calls to int() on the retrieved value from ConfigService.getString
-        mock_CONF.get.assert_has_calls([call(GeneralSettings.PROMPT_SAVE_ON_CLOSE),
-                                        call().__index__(),
-                                        call(GeneralSettings.PROMPT_SAVE_EDITOR_MODIFIED),
-                                        call().__index__()])
+        # In python 3.8 it falls back to __index__() if __int__() is not defined
+        if sys.version_info < (3, 8):
+            mock_CONF.get.assert_has_calls([call(GeneralSettings.PROMPT_SAVE_ON_CLOSE),
+                                            call().__int__(),
+                                            call(GeneralSettings.PROMPT_SAVE_EDITOR_MODIFIED),
+                                            call().__int__()])
+        else:
+            mock_CONF.get.assert_has_calls([call(GeneralSettings.PROMPT_SAVE_ON_CLOSE),
+                                            call().__index__(),
+                                            call(GeneralSettings.PROMPT_SAVE_EDITOR_MODIFIED),
+                                            call().__index__()])
 
         mock_ConfigService.getString.assert_has_calls([call(GeneralSettings.PR_RECOVERY_ENABLED),
                                                        call(GeneralSettings.PR_TIME_BETWEEN_RECOVERY),
