@@ -20,6 +20,7 @@ Usage
 
 **Example - Saving Some Pre-existing Data**
 
+.. include:: ../usagedata-note.txt
 
 .. testcode:: ExSaveRoundtrip
 
