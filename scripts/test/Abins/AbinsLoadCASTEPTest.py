@@ -20,14 +20,13 @@ class AbinsLoadCASTEPTest(unittest.TestCase, AbinsModules.GeneralLoadAbInitioTes
 
         with self.assertRaises(ValueError):
             # noinspection PyUnusedLocal
-            poor_castep_reader = AbinsModules.LoadCASTEP(input_ab_initio_filename=1)
+            AbinsModules.LoadCASTEP(input_ab_initio_filename=1)
 
     def tearDown(self):
         AbinsModules.AbinsTestHelpers.remove_output_files(list_of_names=["LoadCASTEP"])
 
-
-#  *************************** USE CASES ********************************************
-# ===================================================================================
+    #  *************************** USE CASES ********************************************
+    # ===================================================================================
     # | Use case: Gamma point calculation and sum correction enabled during calculations|
     # ===================================================================================
     _gamma_sum = "squaricn_sum_LoadCASTEP"
@@ -44,7 +43,7 @@ class AbinsLoadCASTEPTest(unittest.TestCase, AbinsModules.GeneralLoadAbInitioTes
         self.check(name=self._gamma_no_sum, loader=AbinsModules.LoadCASTEP)
 
     # ===================================================================================
-    # | Use case: more than one k-point and sum correction       |
+    # | Use case: more than one k-point and sum correction                              |
     # ===================================================================================
     _many_k_sum = "Si2-phonon_LoadCASTEP"
 

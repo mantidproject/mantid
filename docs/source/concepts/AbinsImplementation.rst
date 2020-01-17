@@ -117,7 +117,7 @@ reference data file with a specific build of Abins, instantiate a
 Loader and pass it to *save_ab_initio_test_data*. This takes two lines of Python, e.g.:
 
 :: python
-   reader = AbinsModules.LoadCRYSTAL(ab_initio_filename='my_calc.out')
+   reader = AbinsModules.LoadCRYSTAL(input_ab_initio_filename='my_calc.out')
    AbinsModules.GeneralLoadAbInitioTester.save_ab_initio_test_data(reader, 'my_new_test')
 
 which will write the necessary *my_new_test_data.txt* file and

@@ -74,8 +74,8 @@ class GeneralLoadAbInitioTester(object):
         # advanced_parameters is stored as a str but we unpack/compare to dict
         # so comparison will tolerate unimportant formatting changes
 
-        # self.assertEqual(correct_data["attributes"]["advanced_parameters"],
-        #                  json.loads(data["attributes"]["advanced_parameters"]))
+        self.assertEqual(correct_data["attributes"]["advanced_parameters"],
+                         json.loads(data["attributes"]["advanced_parameters"]))
 
         try:
             self.assertEqual(AbinsModules.AbinsTestHelpers.find_file(filename + "." + extension),
