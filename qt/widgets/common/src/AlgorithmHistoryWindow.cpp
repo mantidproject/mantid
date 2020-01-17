@@ -737,22 +737,22 @@ void AlgHistoryTreeWidget::uncheckAllChildren(QTreeWidgetItem *item,
 }
 
 void AlgHistoryTreeWidget::removeHiddenChildren(QTreeWidgetItem *item) {
-  if (auto parent = item->parent()) {
-    int index{parent->indexOfChild(item)};
+  auto parent = item->parent();
 
-    for (int i = 0; i < item->childCount(); i++) {
-      if (item->child(i)->checkState(1) == Qt::Checked) {
-        removeHiddenChildren(item->child(i));
-      }
-      delete parent->child(index + 1);
+  for (int i = 0; i < item->childCount(); ++i) {
+    // Before removing the current item's hidden children, check if any of its
+    // children are unrolled and delete the hidden children for those.
+    if (item->child(i)->checkState(1) == Qt::Checked) {
+      removeHiddenChildren(item->child(i));
     }
-  } else {
-    int index{indexOfTopLevelItem(item)};
 
-    for (int i = 0; i < item->childCount(); ++i) {
-      if (item->child(i)->checkState(index) == Qt::Checked) {
-        removeHiddenChildren(item->child(i));
-      }
+    // Deleting an item is done differently depending on whether it is top-level
+    // or not.
+    if (parent) {
+      int index{parent->indexOfChild(item)};
+      delete parent->child(index + 1);
+    } else {
+      int index{indexOfTopLevelItem(item)};
       delete topLevelItem(index + 1);
     }
   }
