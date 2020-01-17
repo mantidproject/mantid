@@ -18,8 +18,6 @@ namespace IDA {
 using namespace MantidWidgets;
 using namespace Mantid::API;
 
-namespace {}
-
 ConvFunctionModel::ConvFunctionModel() {}
 
 void ConvFunctionModel::clearData() {
