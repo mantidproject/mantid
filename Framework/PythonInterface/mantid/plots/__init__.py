@@ -1248,9 +1248,9 @@ class MantidAxes(Axes):
             # The lines with the label "_nolegend_" are either actual curves with errorbars, or errorbar cap lines.
             # To check if it is an actual curve, we attempt to find the ErrorbarContainer that matches the line object.
             if line.get_label() == "_nolegend_":
+                line_is_errorbar_cap = True
                 for container in self.containers:
                     if isinstance(container, ErrorbarContainer):
-                        line_is_errorbar_cap = True
                         if container[0] == line:
                             line_is_errorbar_cap = False
                             break
