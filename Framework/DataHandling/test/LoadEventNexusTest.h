@@ -242,6 +242,24 @@ public:
     }
   }
 
+	void test_NumberOfBins() {
+    const std::string file = "SANS2D00022048.nxs";
+          int nBins = 273;
+    LoadEventNexus alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("Filename", file);
+    alg.setProperty("OutputWorkspace", "dummy_for_child");
+    alg.setProperty("NumberOfBins", nBins);
+    alg.execute();
+    Workspace_sptr ws = alg.getProperty("OutputWorkspace");
+    auto eventWS = boost::dynamic_pointer_cast<EventWorkspace>(ws);
+    TS_ASSERT(eventWS);
+
+    TS_ASSERT_EQUALS(eventWS->blocksize(), nBins);
+  }
+
   void test_load_event_nexus_sans2d_ess() {
     const std::string file = "SANS2D_ESS_example.nxs";
     LoadEventNexus alg;
