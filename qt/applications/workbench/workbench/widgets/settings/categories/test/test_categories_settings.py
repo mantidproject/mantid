@@ -9,14 +9,13 @@ from __future__ import absolute_import, unicode_literals
 
 import unittest
 
-from mantid.py3compat.mock import call, Mock, MagicMock, patch, ANY
+from mantid.py3compat.mock import call, Mock, patch, ANY
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.testing.mocks.mock_qt import MockQWidget
 from mantidqt.utils.testing.strict_mock import StrictMock
 from workbench.widgets.settings.categories.presenter import CategoriesSettings
 from mantid.api import AlgorithmFactoryImpl
 
-from qtpy.QtWidgets import QTreeWidgetItem
 from qtpy.QtCore import Qt
 
 
@@ -57,6 +56,7 @@ class MockQTreeWidget(MockQWidget):
         self.topLevelItem = StrictMock(return_value = MockQTreeWidgetParentItem())
         self.itemClicked = Mock()
         self.itemChanged = Mock()
+
 
 class MockCategoriesView(object):
     def __init__(self):

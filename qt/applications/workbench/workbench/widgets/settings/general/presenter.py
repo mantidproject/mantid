@@ -26,12 +26,15 @@ class GeneralSettings(object):
     """
 
     CRYSTALLOGRAPY_CONV = "Q.convention"
+    FONT = "MainWindow/font"
     IGNORE_PARAVIEW = "paraview.ignore"
     INSTRUMENT = "default.instrument"
+    OPENGL = "MantidOptions.InstrumentView.UseOpenGL"
     SHOW_INVISIBLE_WORKSPACES = "MantidOptions.InvisibleWorkspaces"
     PR_NUMBER_OF_CHECKPOINTS = "projectRecovery.numberOfCheckpoints"
     PR_TIME_BETWEEN_RECOVERY = "projectRecovery.secondsBetween"
     PR_RECOVERY_ENABLED = "projectRecovery.enabled"
+    PROMPT_ON_DELETING_WORKSPACE = 'project/prompt_on_deleting_workspace'
     PROMPT_SAVE_EDITOR_MODIFIED = 'project/prompt_save_editor_modified'
     PROMPT_SAVE_ON_CLOSE = 'project/prompt_save_on_close'
     USE_NOTIFICATIONS = 'Notifications.Enabled'
@@ -44,6 +47,7 @@ class GeneralSettings(object):
 
         self.setup_facilities_group()
         self.setup_checkbox_signals()
+        self.setup_general_group()
 
         self.setup_layout_options()
 
@@ -71,6 +75,16 @@ class GeneralSettings(object):
         self.action_instrument_changed(default_instrument)
         self.view.instrument.currentTextChanged.connect(self.action_instrument_changed)
 
+    def setup_general_group(self):
+        self.view.main_font.clicked.connect(self.action_main_font_button_clicked)
+
+    def action_main_font_button_clicked(self):
+        font_dialog = self.view.create_font_dialog(self.parent)
+        font_dialog.fontSelected.connect(self.action_font_selected)
+
+    def action_font_selected(self, font):
+        CONF.set(self.FONT, font.toString())
+
     def setup_checkbox_signals(self):
         self.view.show_invisible_workspaces.setChecked(
             "true" == ConfigService.getString(self.SHOW_INVISIBLE_WORKSPACES).lower())
@@ -81,6 +95,7 @@ class GeneralSettings(object):
         self.view.total_number_checkpoints.valueChanged.connect(self.action_total_number_checkpoints)
         self.view.ignore_paraview.stateChanged.connect(self.action_ignore_paraview)
         self.view.crystallography_convention.stateChanged.connect(self.action_crystallography_convention)
+        self.view.use_open_gl.stateChanged.connect(self.action_use_open_gl)
 
     def action_facility_changed(self, new_facility):
         """
@@ -96,6 +111,7 @@ class GeneralSettings(object):
     def setup_confirmations(self):
         self.view.prompt_save_on_close.stateChanged.connect(self.action_prompt_save_on_close)
         self.view.prompt_save_editor_modified.stateChanged.connect(self.action_prompt_save_editor_modified)
+        self.view.prompt_deleting_workspaces.stateChanged.connect(self.action_prompt_deleting_workspace)
         self.view.use_notifications.stateChanged.connect(self.action_use_notifications_modified)
 
     def action_prompt_save_on_close(self, state):
@@ -104,12 +120,16 @@ class GeneralSettings(object):
     def action_prompt_save_editor_modified(self, state):
         CONF.set(self.PROMPT_SAVE_EDITOR_MODIFIED, bool(state))
 
+    def action_prompt_deleting_workspace(self, state):
+        CONF.set(self.PROMPT_ON_DELETING_WORKSPACE, bool(state))
+
     def action_use_notifications_modified(self, state):
         ConfigService.setString(self.USE_NOTIFICATIONS, "On" if bool(state) else "Off")
 
     def load_current_setting_values(self):
         self.view.prompt_save_on_close.setChecked(bool(CONF.get(self.PROMPT_SAVE_ON_CLOSE)))
         self.view.prompt_save_editor_modified.setChecked(bool(CONF.get(self.PROMPT_SAVE_EDITOR_MODIFIED)))
+        self.view.prompt_deleting_workspaces.setChecked(bool(CONF.get(self.PROMPT_ON_DELETING_WORKSPACE)))
 
         # compare lower-case, because MantidPlot will save it as lower case,
         # but Python will have the bool's first letter capitalised
@@ -119,6 +139,7 @@ class GeneralSettings(object):
         use_notifications_setting = ("on" == ConfigService.getString(self.USE_NOTIFICATIONS).lower())
         ignore_paraview_setting = bool(int(ConfigService.getString(self.IGNORE_PARAVIEW)))
         crystallography_convention = ("Crystallography" == ConfigService.getString(self.CRYSTALLOGRAPY_CONV))
+        use_open_gl = ("on" == ConfigService.getString(self.OPENGL).lower())
 
         self.view.project_recovery_enabled.setChecked(pr_enabled)
         self.view.time_between_recovery.setValue(pr_time_between_recovery)
@@ -126,6 +147,7 @@ class GeneralSettings(object):
         self.view.use_notifications.setChecked(use_notifications_setting)
         self.view.ignore_paraview.setChecked(ignore_paraview_setting)
         self.view.crystallography_convention.setChecked(crystallography_convention)
+        self.view.use_open_gl.setChecked(use_open_gl)
 
     def action_project_recovery_enabled(self, state):
         ConfigService.setString(self.PR_RECOVERY_ENABLED, str(bool(state)))
@@ -140,17 +162,16 @@ class GeneralSettings(object):
         ConfigService.setString(self.IGNORE_PARAVIEW, str(int(bool(state))))
 
     def action_crystallography_convention(self, state):
-        if state == Qt.Checked:
-            value = "Crystallography"
-        else:
-            value = "Inelastic"
-        ConfigService.setString(self.CRYSTALLOGRAPY_CONV, value)
+        ConfigService.setString(self.CRYSTALLOGRAPY_CONV, "Crystallography" if state == Qt.Checked else "Inelastic")
 
     def action_instrument_changed(self, new_instrument):
         ConfigService.setString(self.INSTRUMENT, new_instrument)
 
     def action_show_invisible_workspaces(self, state):
         ConfigService.setString(self.SHOW_INVISIBLE_WORKSPACES, str(bool(state)))
+
+    def action_use_open_gl(self, state):
+        ConfigService.setString(self.OPENGL, "On" if bool(state) else "Off")
 
     def setup_layout_options(self):
         self.fill_layout_display()

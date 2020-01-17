@@ -45,7 +45,7 @@ requirements.check_qt()
 # Qt
 # -----------------------------------------------------------------------------
 from qtpy.QtCore import (QEventLoop, Qt, QCoreApplication, QPoint, QSize, qVersion)  # noqa
-from qtpy.QtGui import (QColor, QGuiApplication, QIcon, QPixmap)  # noqa
+from qtpy.QtGui import (QColor, QFontDatabase, QGuiApplication, QIcon, QPixmap)  # noqa
 from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog,
                             QMainWindow, QSplashScreen)  # noqa
 from mantidqt.algorithminputhistory import AlgorithmInputHistory  # noqa
@@ -239,6 +239,8 @@ class MainWindow(QMainWindow):
         from workbench.plugins.workspacewidget import WorkspaceWidget
         self.workspacewidget = WorkspaceWidget(self)
         self.workspacewidget.register_plugin()
+        prompt = CONF.get('project/prompt_on_deleting_workspace')
+        self.workspacewidget.workspacewidget.enableDeletePrompt(bool(prompt))
         self.widgets.append(self.workspacewidget)
 
         # Set up the project, recovery and interface manager objects
@@ -684,6 +686,11 @@ class MainWindow(QMainWindow):
         window_pos = settings.get('MainWindow/position')
         if not isinstance(window_pos, QPoint):
             window_pos = QPoint(*window_pos)
+
+        if settings.has('MainWindow/font'):
+            font_string = settings.get('MainWindow/font').split(',')
+            font = QFontDatabase().font(font_string[0], font_string[-1], int(font_string[1]))
+            qapp.setFont(font)
 
         # make sure main window is smaller than the desktop
         desktop = QDesktopWidget()

@@ -9,12 +9,10 @@ from __future__ import absolute_import, unicode_literals
 
 from unittest import TestCase
 
-from mantid.py3compat.mock import Mock
+from mantid.py3compat.mock import call, Mock
 from mantidqt.utils.testing.mocks.mock_qt import MockQButton, MockQWidget
-from mantidqt.utils.testing.strict_mock import StrictMock, StrictPropertyMock
+from mantidqt.utils.testing.strict_mock import StrictPropertyMock
 from workbench.widgets.settings.presenter import SettingsPresenter
-
-from qtpy.QtWidgets import QListWidgetItem
 
 
 class FakeMVP(object):
@@ -58,13 +56,13 @@ class SettingsPresenterTest(TestCase):
 
     def test_action_current_row_changed(self):
         mock_view = MockSettingsView()
-        p = SettingsPresenter(None, view=mock_view,
-                              general_settings=mock_view.general_settings,
-                              categories_settings=mock_view.categories_settings)
+        presenter = SettingsPresenter(None, view=mock_view,
+                                      general_settings=mock_view.general_settings,
+                                      categories_settings=mock_view.categories_settings)
 
         mock_view.sections.item = Mock()
         mock_view.sections.item().text = Mock(return_value = presenter.SETTINGS_TABS['categories_settings'])
         presenter.action_section_changed(1)
 
         self.assertEqual(1, mock_view.container.replaceWidget.call_count)
-        self.assertEqual(mock_view.categories_settings.view, p.current)
+        self.assertEqual(mock_view.categories_settings.view, presenter.current)
