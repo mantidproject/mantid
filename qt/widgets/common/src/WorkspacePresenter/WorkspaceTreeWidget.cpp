@@ -312,10 +312,13 @@ void WorkspaceTreeWidget::enableDeletePrompt(bool enable) {
 bool WorkspaceTreeWidget::isPromptDelete() const { return m_promptDelete; }
 
 bool WorkspaceTreeWidget::deleteConfirmation() const {
-  return askUserYesNo(
-      "Delete Workspaces",
-      "Are you sure you want to delete the selected Workspaces?\n\nThis "
-      "prompt can be disabled from:\nPreferences->General->Confirmations");
+  std::string message = "Are you sure you want to delete the selected Workspaces?";
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+  message += "\n\nThis prompt can be disabled from:\nFile->Settings->General";
+#else
+  message += "\n\nThis prompt can be disabled from:\nPreferences->General->Confirmations";
+#endif
+  return askUserYesNo("Delete Workspaces", message);
 }
 
 void WorkspaceTreeWidget::deleteWorkspaces(const StringList &wsNames) {

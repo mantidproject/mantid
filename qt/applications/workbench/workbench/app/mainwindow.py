@@ -239,6 +239,8 @@ class MainWindow(QMainWindow):
         from workbench.plugins.workspacewidget import WorkspaceWidget
         self.workspacewidget = WorkspaceWidget(self)
         self.workspacewidget.register_plugin()
+        prompt = CONF.get('project/prompt_on_deleting_workspace')
+        self.workspacewidget.workspacewidget.enableDeletePrompt(bool(prompt))
         self.widgets.append(self.workspacewidget)
 
         # Set up the project, recovery and interface manager objects

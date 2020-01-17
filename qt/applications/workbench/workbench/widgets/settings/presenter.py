@@ -20,7 +20,7 @@ class SettingsPresenter(object):
     ASK_BEFORE_CLOSE_TITLE = "Confirm exit"
     ASK_BEFORE_CLOSE_MESSAGE = "Are you sure you want to exit without applying the settings?"
     SETTINGS_TABS = {'general_settings' : "General",
-                     'categories_settings' : "Categories"}
+                     'categories_settings' : "Show/Hide Categories"}
 
     def __init__(self, parent, view=None, general_settings=None, categories_settings=None):
         self.view = view if view else SettingsView(parent, self)
