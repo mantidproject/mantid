@@ -363,7 +363,7 @@ class FittingTabPresenter(object):
         else:
             self._fit_function = [self.view.fit_object.clone() for _ in self.selected_data] \
                 if self.selected_data else [self.view.fit_object.clone()]
-        self.clear_fit_information()
+
         if self.automatically_update_fit_name:
             self.view.function_name = self.model.get_function_name(
                 self.view.fit_object)
