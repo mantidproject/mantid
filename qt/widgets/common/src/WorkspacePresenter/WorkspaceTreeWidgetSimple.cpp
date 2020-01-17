@@ -107,6 +107,25 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
       plotSubMenu->addAction(m_overplotSpectrum);
       plotSubMenu->addAction(m_plotSpectrumWithErrs);
       plotSubMenu->addAction(m_overplotSpectrumWithErrs);
+
+			// Don't plot 1D spectra if only one X value
+      bool multipleBins = false;
+      try {
+        multipleBins = (matrixWS->blocksize() > 1);
+      } catch (...) {
+        const size_t numHist = matrixWS->getNumberHistograms();
+        for (size_t i = 0; i < numHist; ++i) {
+          if (matrixWS->y(i).size() > 1) {
+            multipleBins = true;
+            break;
+          }
+        }
+      }
+      m_plotSpectrum->setEnabled(multipleBins);
+      m_overplotSpectrum->setEnabled(multipleBins);
+      m_plotSpectrumWithErrs->setEnabled(multipleBins);
+      m_overplotSpectrumWithErrs->setEnabled(multipleBins);
+
       plotSubMenu->addSeparator();
       plotSubMenu->addAction(m_plotColorfill);
       menu->addMenu(plotSubMenu);
