@@ -55,10 +55,10 @@ set ( Qt5_DIR ${THIRD_PARTY_DIR}/lib/qt5/lib/cmake/Qt5 )
 ###########################################################################
 # On Windows we want to bundle Python.
 ###########################################################################
-set ( PYTHON_DIR ${THIRD_PARTY_DIR}/lib/python${PYTHON_MAJOR_VERSION}.${PYTHON_MINOR_VERSION} )
+set ( PYTHON_DIR ${THIRD_PARTY_DIR}/lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR} )
 ## Set the variables that FindPythonLibs would set
 set ( PYTHON_INCLUDE_PATH "${PYTHON_DIR}/Include" )
-set ( PYTHON_LIBRARIES ${PYTHON_DIR}/libs/python${PYTHON_MAJOR_VERSION}${PYTHON_MINOR_VERSION}.lib )
+set ( PYTHON_LIBRARIES ${PYTHON_DIR}/libs/python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}.lib )
 
 ## The executable
 set ( PYTHON_EXECUTABLE "${PYTHON_DIR}/python.exe" CACHE FILEPATH "The location of the python executable" FORCE )
