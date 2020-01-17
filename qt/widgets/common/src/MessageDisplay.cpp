@@ -11,6 +11,7 @@
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
+#include "MantidQtWidgets/Common/NotificationService.h"
 
 #include <QAction>
 #include <QActionGroup>
@@ -238,8 +239,14 @@ void MessageDisplay::append(const Message &msg) {
     cursor.insertText(msg.text(), format(msg.priority()));
     moveCursorToEnd();
 
-    if (msg.priority() <= Message::Priority::PRIO_ERROR)
+    if (msg.priority() <= Message::Priority::PRIO_ERROR) {
+      NotificationService::showMessage(
+          "Mantid Workbench",
+          "Sorry, there was an error, please look at the message display for "
+          "details.",
+          NotificationService::MessageIcon::Critical);
       emit errorReceived(msg.text());
+    }
     if (msg.priority() <= Message::Priority::PRIO_WARNING)
       emit warningReceived(msg.text());
   }

@@ -101,7 +101,7 @@ void IntegrateEllipsoids::qListFromEventWS(Integrate3DEvents &integrator,
     double errorSq(1.); // ignorable garbage
     const std::vector<WeightedEventNoTime> &raw_events =
         events.getWeightedEventsNoTime();
-    std::vector<std::pair<double, V3D>> qList;
+    std::vector<std::pair<std::pair<double, double>, V3D>> qList;
     for (const auto &raw_event : raw_events) {
       double val = unitConverter.convertUnits(raw_event.tof());
       qConverter.calcMatrixCoord(val, locCoord, signal, errorSq);
@@ -111,7 +111,9 @@ void IntegrateEllipsoids::qListFromEventWS(Integrate3DEvents &integrator,
       V3D qVec(buffer[0], buffer[1], buffer[2]);
       if (hkl_integ)
         qVec = UBinv * qVec;
-      qList.emplace_back(raw_event.m_weight, qVec);
+      qList.emplace_back(std::pair<double, double>(raw_event.m_weight,
+                                                   raw_event.m_errorSquared),
+                         qVec);
     } // end of loop over events in list
     PARALLEL_CRITICAL(addEvents) { integrator.addEvents(qList, hkl_integ); }
 
@@ -155,6 +157,7 @@ void IntegrateEllipsoids::qListFromHistoWS(Integrate3DEvents &integrator,
     // get tof and y values
     const auto &xVals = wksp->points(i);
     const auto &yVals = wksp->y(i);
+    const auto &eVals = wksp->e(i);
 
     // update which pixel is being converted
     std::vector<Mantid::coord_t> locCoord(DIMS, 0.);
@@ -165,10 +168,11 @@ void IntegrateEllipsoids::qListFromHistoWS(Integrate3DEvents &integrator,
     double signal(1.);  // ignorable garbage
     double errorSq(1.); // ignorable garbage
 
-    std::vector<std::pair<double, V3D>> qList;
+    std::vector<std::pair<std::pair<double, double>, V3D>> qList;
 
     for (size_t j = 0; j < yVals.size(); ++j) {
       const double &yVal = yVals[j];
+      const double &esqVal = eVals[j] * eVals[j]; // error squared (variance)
       if (yVal > 0) // TODO, is this condition right?
       {
         double val = unitConverter.convertUnits(xVals[j]);
@@ -186,7 +190,7 @@ void IntegrateEllipsoids::qListFromHistoWS(Integrate3DEvents &integrator,
           continue;
         // Account for counts in histograms by increasing the qList with the
         // same q-point
-        qList.emplace_back(yVal, qVec);
+        qList.emplace_back(std::pair<double, double>(yVal, esqVal), qVec);
       }
     }
     PARALLEL_CRITICAL(addHisto) { integrator.addEvents(qList, hkl_integ); }
@@ -384,7 +388,7 @@ void IntegrateEllipsoids::exec() {
   size_t n_peaks = peak_ws->getNumberPeaks();
   size_t indexed_count = 0;
   std::vector<V3D> peak_q_list;
-  std::vector<std::pair<double, V3D>> qList;
+  std::vector<std::pair<std::pair<double, double>, V3D>> qList;
   std::vector<V3D> hkl_vectors;
   std::vector<V3D> mnp_vectors;
   int ModDim = 0;
@@ -403,7 +407,8 @@ void IntegrateEllipsoids::exec() {
     // use tolerance == 1 to just check for (0,0,0,0,0,0)
     if (Geometry::IndexingUtils::ValidIndex(hkl, 1.0)) {
       peak_q_list.emplace_back(peaks[i].getQLabFrame());
-      qList.emplace_back(1., V3D(peaks[i].getQLabFrame()));
+      qList.emplace_back(std::pair<double, double>(1., 1.),
+                         V3D(peaks[i].getQLabFrame()));
       hkl_vectors.emplace_back(hkl);
       mnp_vectors.emplace_back(mnp);
       indexed_count++;

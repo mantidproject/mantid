@@ -73,7 +73,7 @@ void MantidTreeWidget::dropEvent(QDropEvent *de) {
   for (int i = 0; i < filenames.size(); ++i) {
     try {
       QFileInfo fi(filenames[i]);
-      QString basename = fi.baseName();
+      QString basename = fi.completeBaseName();
       auto alg = m_mantidUI->createAlgorithm("Load");
       alg->initialize();
       alg->setProperty("Filename", filenames[i].toStdString());

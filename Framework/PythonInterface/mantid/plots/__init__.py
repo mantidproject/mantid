@@ -15,7 +15,11 @@ Functionality for unpacking mantid objects for plotting with matplotlib.
 # of the main package.
 from __future__ import (absolute_import, division, print_function)
 
-from collections import Iterable
+try:
+   from collections.abc import Iterable
+except ImportError:
+   # check Python 2 location
+   from collections import Iterable   
 from matplotlib.axes import Axes
 from matplotlib.collections import Collection
 from matplotlib.colors import Colormap
@@ -34,7 +38,7 @@ from mantid.plots import helperfunctions, plotfunctions, plotfunctions3D
 from mantid.plots.utility import autoscale_on_update
 from mantid.plots.helperfunctions import get_normalize_by_bin_width
 from mantid.plots.scales import PowerScale, SquareScale
-from mantid.plots.utility import artists_hidden, MantidAxType
+from mantid.plots.utility import artists_hidden, MantidAxType, legend_set_draggable
 from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
 
 
@@ -268,6 +272,8 @@ class MantidAxes(Axes):
             # If wanting to plot a spectrum
             elif MantidAxes.is_axis_of_type(MantidAxType.SPECTRUM, kwargs):
                 return MantidAxes.get_spec_num_from_wksp_index(workspace, kwargs['wkspIndex'])
+        elif kwargs.get('LogName', None) is not None:
+            return None
         elif getattr(workspace, 'getNumberHistograms', lambda: -1)() == 1:
             # If the workspace has one histogram, just plot that
             kwargs['wkspIndex'] = 0
@@ -495,7 +501,7 @@ class MantidAxes(Axes):
 
     def make_legend(self):
         if self.legend_ is None:
-            self.legend().draggable()
+            legend_set_draggable(self.legend(), True)
         else:
             props = LegendProperties.from_legend(self.legend_)
             LegendProperties.create_legend(props, self)
@@ -617,7 +623,7 @@ class MantidAxes(Axes):
 
                     # also remove the curve from the legend
                     if (not self.is_empty(self)) and self.legend_ is not None:
-                        self.legend().draggable()
+                        legend_set_draggable(self.legend(), True)
 
                 if new_kwargs:
                     _autoscale_on = new_kwargs.pop("autoscale_on_update", self.get_autoscale_on())
@@ -636,7 +642,8 @@ class MantidAxes(Axes):
 
             with autoscale_on_update(self, autoscale_on):
                 artist = self.track_workspace_artist(workspace,
-                                                     plotfunctions.plot(self, *args, **kwargs),
+                                                     plotfunctions.plot(self, normalize_by_bin_width = is_normalized,
+                                                                        *args, **kwargs),
                                                      _data_update, spec_num, is_normalized,
                                                      MantidAxes.is_axis_of_type(MantidAxType.SPECTRUM, kwargs))
             return artist
@@ -741,7 +748,7 @@ class MantidAxes(Axes):
                     container_new = []
                     # also remove the curve from the legend
                     if (not self.is_empty(self)) and self.legend_ is not None:
-                        self.legend().draggable()
+                        legend_set_draggable(self.legend(), True)
 
                 return container_new
 

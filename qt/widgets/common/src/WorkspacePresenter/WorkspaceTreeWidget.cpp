@@ -20,6 +20,7 @@
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspacePresenter.h"
 #include "MantidQtWidgets/Common/pixmaps.h"
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -949,9 +950,10 @@ void WorkspaceTreeWidget::addMatrixWorkspaceMenuItems(
   menu->addAction(m_showData);
   menu->addAction(m_showInst);
   // Disable the 'show instrument' option if a workspace doesn't have an
-  // instrument attached
+  // instrument attached or if it does not have a spectra axis
   m_showInst->setEnabled(matrixWS->getInstrument() &&
-                         !matrixWS->getInstrument()->getName().empty());
+                         !matrixWS->getInstrument()->getName().empty() &&
+                         matrixWS->getAxis(1)->isSpectra());
   menu->addSeparator();
   menu->addAction(m_plotSpec);
   menu->addAction(m_plotSpecErr);

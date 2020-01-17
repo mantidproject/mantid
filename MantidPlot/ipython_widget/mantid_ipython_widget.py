@@ -7,6 +7,7 @@
 from __future__ import (absolute_import, division,
                         print_function)
 
+import sys
 import threading
 import types
 import warnings
@@ -34,6 +35,13 @@ try:
 except ImportError:
     from IPython.qt.console.rich_ipython_widget import RichIPythonWidget
     from IPython.qt.inprocess import QtInProcessKernelManager
+
+
+if sys.version_info.major >= 3 and sys.platform == 'win32':
+    # Tornado requires WindowsSelectorEventLoop
+    # https://www.tornadoweb.org/en/stable/#installation
+    import asyncio
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 
 def our_run_code(self, code_obj, result=None, async_=False):

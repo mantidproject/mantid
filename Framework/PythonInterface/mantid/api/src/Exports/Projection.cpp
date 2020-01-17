@@ -9,7 +9,6 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/core/Converters/PyObjectToV3D.h"
-#include <boost/bind.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/copy_non_const_reference.hpp>
 #include <boost/python/exec.hpp>
@@ -103,6 +102,7 @@ Projection_sptr projCtor3(const object &d1, const object &d2,
 } // anonymous namespace
 
 void export_Projection() {
+  using namespace std::placeholders;
   class_<Projection>(
       "Projection",
       init<>("Default constructor creates a two dimensional projection"))
@@ -145,7 +145,7 @@ void export_Projection() {
               &Projection::U, return_internal_reference<>(),
               boost::mpl::vector2<Mantid::Kernel::V3D &, Projection &>()),
           make_function(
-              boost::bind(&Projection::setAxis, _1, 0, _2),
+              std::bind(&Projection::setAxis, _1, 0, _2),
               default_call_policies(),
               boost::mpl::vector3<void, Projection &, Mantid::Kernel::V3D>()))
       .add_property(
@@ -154,7 +154,7 @@ void export_Projection() {
               &Projection::V, return_internal_reference<>(),
               boost::mpl::vector2<Mantid::Kernel::V3D &, Projection &>()),
           make_function(
-              boost::bind(&Projection::setAxis, _1, 1, _2),
+              std::bind(&Projection::setAxis, _1, 1, _2),
               default_call_policies(),
               boost::mpl::vector3<void, Projection &, Mantid::Kernel::V3D>()))
       .add_property(
@@ -163,7 +163,7 @@ void export_Projection() {
               &Projection::W, return_internal_reference<>(),
               boost::mpl::vector2<Mantid::Kernel::V3D &, Projection &>()),
           make_function(
-              boost::bind(&Projection::setAxis, _1, 2, _2),
+              std::bind(&Projection::setAxis, _1, 2, _2),
               default_call_policies(),
               boost::mpl::vector3<void, Projection &, Mantid::Kernel::V3D>()))
       .add_property(
@@ -172,7 +172,7 @@ void export_Projection() {
               &Projection::U, return_internal_reference<>(),
               boost::mpl::vector2<Mantid::Kernel::V3D &, Projection &>()),
           make_function(
-              boost::bind(&projSetAxis, _1, 0, _2), default_call_policies(),
+              std::bind(&projSetAxis, _1, 0, _2), default_call_policies(),
               boost::mpl::vector3<void, Projection &, const object &>()))
       .add_property(
           "v",
@@ -180,7 +180,7 @@ void export_Projection() {
               &Projection::V, return_internal_reference<>(),
               boost::mpl::vector2<Mantid::Kernel::V3D &, Projection &>()),
           make_function(
-              boost::bind(&projSetAxis, _1, 1, _2), default_call_policies(),
+              std::bind(&projSetAxis, _1, 1, _2), default_call_policies(),
               boost::mpl::vector3<void, Projection &, const object &>()))
       .add_property(
           "w",
@@ -188,7 +188,7 @@ void export_Projection() {
               &Projection::W, return_internal_reference<>(),
               boost::mpl::vector2<Mantid::Kernel::V3D &, Projection &>()),
           make_function(
-              boost::bind(&projSetAxis, _1, 2, _2), default_call_policies(),
+              std::bind(&projSetAxis, _1, 2, _2), default_call_policies(),
               boost::mpl::vector3<void, Projection &, const object &>()))
       .def("createWorkspace", createWorkspace(),
            "Create a TableWorkspace representing the projection");

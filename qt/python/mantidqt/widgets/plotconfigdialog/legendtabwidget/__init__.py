@@ -8,6 +8,7 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
+from mantid.plots.utility import legend_set_draggable
 from mantidqt.widgets.plotconfigdialog.colorselector import convert_color_to_hex
 import matplotlib
 from matplotlib.patches import BoxStyle
@@ -157,4 +158,4 @@ class LegendProperties(dict):
 
         legend.set_visible(props['visible'])
 
-        legend.draggable(True)
+        legend_set_draggable(legend, True)

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>580</width>
-    <height>479</height>
+    <height>541</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -44,9 +44,9 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>-36</y>
-        <width>547</width>
-        <height>595</height>
+        <y>0</y>
+        <width>568</width>
+        <height>530</height>
        </rect>
       </property>
       <property name="sizePolicy">
@@ -173,7 +173,7 @@
             </sizepolicy>
            </property>
            <property name="title">
-            <string>Confirmations</string>
+            <string>Confirmations and Notifications</string>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_3">
             <item>
@@ -202,6 +202,22 @@
               </property>
               <property name="text">
                <string>Prompt to save project on closing the Workbench</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="use_notifications">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Use notifications for important events</string>
               </property>
               <property name="checked">
                <bool>true</bool>

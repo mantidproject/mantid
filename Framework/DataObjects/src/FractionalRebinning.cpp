@@ -663,6 +663,8 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
     if (inputRB->isFinalized()) {
       signal *= inF[j];
       error *= inF[j];
+      if (inputRB->hasSqrdErrors())
+        error *= inF[j];
     }
   }
 
@@ -681,6 +683,16 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
       outputWS.dataF(ai.wsIndex)[ai.binIndex] += weight * inputWeight;
     }
   }
+}
+
+/**
+ * Called at the completion of the fractional rebinning loop
+ * to the set the finalize flag in the output workspace.
+ * @param outputWS Reference to the rebinned output workspace
+ */
+void finalizeFractionalRebin(RebinnedOutput &outputWS) {
+  // rebinToFractionalOutput() leaves the data in an unfinalized state
+  outputWS.setFinalized(false);
 }
 
 } // namespace FractionalRebinning

@@ -13,18 +13,17 @@ import matplotlib.pyplot as plt
 
 from mantid.api import AnalysisDataService as Ads
 from mantid.kernel import logger
-from mantid.simpleapi import Load, EnggCalibrate, DeleteWorkspace, CloneWorkspace, \
+from mantid.simpleapi import EnggCalibrate, DeleteWorkspace, CloneWorkspace, \
     CreateWorkspace, AppendSpectra, CreateEmptyTableWorkspace
 from Engineering.EnggUtils import write_ENGINX_GSAS_iparam_file
 from Engineering.gui.engineering_diffraction.tabs.common import vanadium_corrections
 from Engineering.gui.engineering_diffraction.tabs.common import path_handling
+from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 
 VANADIUM_INPUT_WORKSPACE_NAME = "engggui_vanadium_ws"
 CURVES_WORKSPACE_NAME = "engggui_vanadium_curves"
 INTEGRATED_WORKSPACE_NAME = "engggui_vanadium_integration"
 CALIB_PARAMS_WORKSPACE_NAME = "engggui_calibration_banks_parameters"
-
-CALIBRATION_DIR = path.join(path_handling.OUT_FILES_ROOT_DIR, "Calibration", "")
 
 NORTH_BANK_TEMPLATE_FILE = "template_ENGINX_241391_236516_North_bank.prm"
 SOUTH_BANK_TEMPLATE_FILE = "template_ENGINX_241391_236516_South_bank.prm"
@@ -47,8 +46,14 @@ class CalibrationModel(object):
         """
         van_integration, van_curves = vanadium_corrections.fetch_correction_workspaces(
             vanadium_path, instrument, rb_num=rb_num)
-        sample_workspace = self.load_sample(sample_path)
-        output = self.run_calibration(sample_workspace, van_integration, van_curves)
+        sample_workspace = path_handling.load_workspace(sample_path)
+        full_calib_path = get_setting(path_handling.INTERFACES_SETTINGS_GROUP,
+                                      path_handling.ENGINEERING_PREFIX, "full_calibration")
+        if full_calib_path is not None and path.exists(full_calib_path):
+            full_calib = path_handling.load_workspace(full_calib_path)
+            output = self.run_calibration(sample_workspace, van_integration, van_curves, full_calib_ws=full_calib)
+        else:
+            output = self.run_calibration(sample_workspace, van_integration, van_curves)
         if plot_output:
             self._plot_vanadium_curves()
             for i in range(2):
@@ -64,10 +69,10 @@ class CalibrationModel(object):
             params_table.append([i, difc[i], 0.0, tzero[i]])
         self.update_calibration_params_table(params_table)
 
-        self.create_output_files(CALIBRATION_DIR, difc, tzero, sample_path, vanadium_path,
-                                 instrument)
+        calib_dir = path.join(path_handling.get_output_path(), "Calibration", "")
+        self.create_output_files(calib_dir, difc, tzero, sample_path, vanadium_path, instrument)
         if rb_num:
-            user_calib_dir = path.join(path_handling.OUT_FILES_ROOT_DIR, "User", rb_num,
+            user_calib_dir = path.join(path_handling.get_output_path(), "User", rb_num,
                                        "Calibration", "")
             self.create_output_files(user_calib_dir, difc, tzero, sample_path, vanadium_path,
                                      instrument)
@@ -180,33 +185,31 @@ class CalibrationModel(object):
             ax.set_xlabel("Expected Peaks Centre(dSpacing, A)")
         fig.show()
 
-    @staticmethod
-    def load_sample(sample_run_no):
-        try:
-            return Load(Filename=sample_run_no, OutputWorkspace="engggui_calibration_sample_ws")
-        except Exception as e:
-            logger.error("Error while loading calibration sample data. "
-                         "Could not run the algorithm Load successfully for the calibration sample "
-                         "(run number: " + str(sample_run_no) + "). Error description: " + str(e) +
-                         " Please check also the previous log messages for details.")
-            raise RuntimeError
-
-    def run_calibration(self, sample_ws, van_integration, van_curves):
+    def run_calibration(self, sample_ws, van_integration, van_curves, full_calib_ws=None):
         """
         Runs the main Engineering calibration algorithm.
         :param sample_ws: The workspace with the sample data.
         :param van_integration: The integration values from the vanadium corrections
         :param van_curves: The curves from the vanadium corrections.
+        :param full_calib_ws: Full pixel calibration of the detector (optional)
         :return: The output of the algorithm.
         """
         output = [None] * 2
         for i in range(2):
             table_name = self._generate_table_workspace_name(i)
-            output[i] = EnggCalibrate(InputWorkspace=sample_ws,
-                                      VanIntegrationWorkspace=van_integration,
-                                      VanCurvesWorkspace=van_curves,
-                                      Bank=str(i + 1),
-                                      FittedPeaks=table_name)
+            if full_calib_ws is not None:
+                output[i] = EnggCalibrate(InputWorkspace=sample_ws,
+                                          VanIntegrationWorkspace=van_integration,
+                                          VanCurvesWorkspace=van_curves,
+                                          Bank=str(i + 1),
+                                          FittedPeaks=table_name)
+            else:
+                output[i] = EnggCalibrate(InputWorkspace=sample_ws,
+                                          VanIntegrationWorkspace=van_integration,
+                                          VanCurvesWorkspace=van_curves,
+                                          Bank=str(i + 1),
+                                          FittedPeaks=table_name,
+                                          DetectorPositions=full_calib_ws)
         return output
 
     def create_output_files(self, calibration_dir, difc, tzero, sample_path, vanadium_path,

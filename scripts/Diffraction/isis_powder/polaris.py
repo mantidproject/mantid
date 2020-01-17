@@ -10,6 +10,7 @@ import os
 from isis_powder.routines import absorb_corrections, common, instrument_settings
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.polaris_routines import polaris_advanced_config, polaris_algs, polaris_param_mapping
+from mantid.kernel import logger
 
 
 class Polaris(AbstractInst):
@@ -53,6 +54,9 @@ class Polaris(AbstractInst):
             kwargs['q_lims'] = None
         if 'output_binning' not in kwargs:
             kwargs['output_binning'] = None
+        if 'pdf_type' not in kwargs or not kwargs['pdf_type'] in ['G(r)', 'g(r)', 'RDF(r)']:
+            kwargs['pdf_type'] = 'G(r)'
+            logger.warning('PDF type not specified or is invalid, defaulting to G(r)')
         self._inst_settings.update_attributes(kwargs=kwargs)
         # Generate pdf
         run_details = self._get_run_details(self._inst_settings.run_number)
@@ -64,7 +68,8 @@ class Polaris(AbstractInst):
                                                   q_lims=self._inst_settings.q_lims,
                                                   cal_file_name=cal_file_name,
                                                   sample_details=self._sample_details,
-                                                  output_binning=self._inst_settings.output_binning)
+                                                  output_binning=self._inst_settings.output_binning,
+                                                  pdf_type=self._inst_settings.pdf_type)
         return pdf_output
 
     def set_sample_details(self, **kwargs):

@@ -8,6 +8,7 @@ from __future__ import (absolute_import, division, print_function)
 import numpy as np
 
 import mantid.simpleapi as mantid
+from six import string_types
 
 from isis_powder.routines import absorb_corrections, common
 from isis_powder.routines.common_enums import WORKSPACE_UNITS
@@ -80,7 +81,7 @@ def save_unsplined_vanadium(vanadium_ws, output_path):
 
 
 def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None, cal_file_name=None,
-                    sample_details=None, output_binning=None):
+                    sample_details=None, output_binning=None, pdf_type="G(r)"):
     focused_ws = _obtain_focused_run(run_number, focus_file_path)
     focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, Target="MomentumTransfer", EMode='Elastic')
 
@@ -107,11 +108,11 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None,
         q_min, q_max = _load_qlims(q_lims)
         merged_ws = mantid.MatchAndMergeWorkspaces(InputWorkspaces=focused_ws, XMin=q_min, XMax=q_max,
                                                    CalculateScale=False)
-        pdf_output = mantid.PDFFourierTransform(Inputworkspace=merged_ws, InputSofQType="S(Q)-1", PDFType="G(r)",
+        pdf_output = mantid.PDFFourierTransform(Inputworkspace=merged_ws, InputSofQType="S(Q)-1", PDFType=pdf_type,
                                                 Filter=True)
     else:
         pdf_output = mantid.PDFFourierTransform(Inputworkspace='focused_ws', InputSofQType="S(Q)-1",
-                                                PDFType="G(r)", Filter=True)
+                                                PDFType=pdf_type, Filter=True)
         pdf_output = mantid.RebinToWorkspace(WorkspaceToRebin=pdf_output, WorkspaceToMatch=pdf_output[4],
                                              PreserveEvents=True)
     common.remove_intermediate_workspace('self_scattering_correction')
@@ -150,7 +151,7 @@ def _obtain_focused_run(run_number, focus_file_path):
 
 
 def _load_qlims(q_lims):
-    if type(q_lims) == str or type(q_lims) == unicode:
+    if isinstance(q_lims, string_types):
         q_min = []
         q_max = []
         try:
@@ -162,13 +163,13 @@ def _load_qlims(q_lims):
                     q_max.append(float(value_list[3]))
             q_min = np.array(q_min)
             q_max = np.array(q_max)
-        except IOError:
-            raise RuntimeError("q_lims directory is not valid")
-    elif type(q_lims) == list or type(q_lims) == np.ndarray:
+        except IOError as exc:
+            raise RuntimeError("q_lims path is not valid: {}".format(exc))
+    elif isinstance(q_lims, (list, tuple)) or isinstance(q_lims, np.ndarray):
         q_min = q_lims[0, :]
         q_max = q_lims[1, :]
     else:
-        raise RuntimeError("q_lims type is not valid")
+        raise RuntimeError("q_lims type is not valid. Expected a string filename or an array.")
     return q_min, q_max
 
 

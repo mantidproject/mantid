@@ -290,7 +290,7 @@ class DirectReductionHelpersTest(unittest.TestCase):
                     return attr
                 else:
                     attr_dic = object.__getattribute__(self,'__dict__')
-                    if name is '__dict__':
+                    if name == '__dict__':
                         return attr_dic
                     else:
                         return helpers.gen_getter(attr_dic,name)
@@ -346,7 +346,7 @@ class DirectReductionHelpersTest(unittest.TestCase):
             some_descriptor = SomeDescriptor()
 
             def __setattr__(self,name,val):
-                if name is 'special':
+                if name == 'special':
                     return
                 elif name in self.__class__.__dict__:
                     fp = self.__class__.__dict__[name]
@@ -356,7 +356,7 @@ class DirectReductionHelpersTest(unittest.TestCase):
 
 
             def __getattr__(self,name):
-                if name is 'special':
+                if name == 'special':
                     return self.__special
                 else:
                     tDict = object.__getattribute__(self,'__dict__')

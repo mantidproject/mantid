@@ -12,7 +12,6 @@
 #include "MantidCurveFitting/AugmentedLagrangianOptimizer.h"
 #include "MantidKernel/Matrix.h"
 
-#include <boost/bind.hpp>
 #include <boost/make_shared.hpp>
 
 class AugmentedLagrangianOptimizerTest : public CxxTest::TestSuite {
@@ -78,11 +77,12 @@ public:
 
   void test_minimizer_calls_user_function() {
     using Mantid::CurveFitting::AugmentedLagrangianOptimizer;
+    using namespace std::placeholders;
 
     bool userFuncCalled = false;
     TestUserFuncCall testFunc(userFuncCalled);
     AugmentedLagrangianOptimizer::ObjFunction userFunc =
-        boost::bind(&TestUserFuncCall::eval, testFunc, _1, _2);
+        std::bind(&TestUserFuncCall::eval, testFunc, _1, _2);
     AugmentedLagrangianOptimizer lsqmin(2, userFunc);
 
     std::vector<double> xv(2, 1);
