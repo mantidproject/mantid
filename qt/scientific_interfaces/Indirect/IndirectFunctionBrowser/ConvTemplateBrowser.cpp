@@ -33,6 +33,8 @@ class ScopedFalse {
   bool m_oldValue;
 
 public:
+  // this sets the input bool to false whilst this object is in scope and then
+  // resets it to its old value when this object drops out of scope.
   explicit ScopedFalse(bool &variable) : m_ref(variable), m_oldValue(variable) {
     m_ref = false;
   }
@@ -195,12 +197,7 @@ void ConvTemplateBrowser::setErrorsEnabled(bool enabled) {
   m_parameterManager->setErrorsEnabled(enabled);
 }
 
-void ConvTemplateBrowser::clear() {
-  // removeBackground();
-  // removeStretchExponential();
-  // removeExponentialTwo();
-  // removeExponentialOne();
-}
+void ConvTemplateBrowser::clear() {}
 
 void ConvTemplateBrowser::popupMenu(const QPoint &) {
   std::cerr << "Popup" << std::endl;

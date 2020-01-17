@@ -20,13 +20,6 @@ using namespace Mantid::API;
 class ConvolutionFunctionModelTest : public CxxTest::TestSuite {
 
 public:
-  static ConvolutionFunctionModelTest *createSuite() {
-    return new ConvolutionFunctionModelTest;
-  }
-  static void destroySuite(ConvolutionFunctionModelTest *suite) {
-    delete suite;
-  }
-
   ConvolutionFunctionModelTest() {
     // To make sure API is initialized properly
     FrameworkManager::Instance();
