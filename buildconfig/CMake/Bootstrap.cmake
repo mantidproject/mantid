@@ -1,7 +1,7 @@
 # ##############################################################################
 # Configure required dependencies if necessary
 # ##############################################################################
-option(WITH_PYTHON3 "If true build against Python 3, else use Python 2" OFF)
+option(WITH_PYTHON3 "If true build against Python 3, else use Python 2" ON)
 
 if(MSVC)
   # Git LFS does not work properly with <= 1.9

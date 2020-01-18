@@ -248,16 +248,8 @@ fi
 ###############################################################################
 # Check if this is a Python 3 build and set CMake arguments.
 ###############################################################################
-PY2_BUILD=false
-PY3_BUILD=false
-if [[ ${JOB_NAME} == *python3* ]]; then
-    PY3_BUILD=true
-    DIST_FLAGS="${DIST_FLAGS} -DWITH_PYTHON3=ON"
-    PARAVIEW_DIR="${PARAVIEW_DIR}-python3"
-else
-    PY2_BUILD=true
-    DIST_FLAGS="${DIST_FLAGS} -DWITH_PYTHON3=OFF"
-fi
+DIST_FLAGS="${DIST_FLAGS} -DWITH_PYTHON3=ON"
+PARAVIEW_DIR="${PARAVIEW_DIR}-python3"
 
 ###############################################################################
 # Packaging options
@@ -281,12 +273,7 @@ if [[ ${DO_BUILD_PKG} == true ]]; then
             PACKAGE_SUFFIX="unstable"
         fi
 
-        if [[ ${PY3_BUILD} == true ]]; then
-            # Add '-python3' to package name and install path
-            PACKAGE_SUFFIX=${PACKAGE_SUFFIX}-python3
-        fi
-
-        if [[ ${JOB_NAME} == *release* ]] && [[ ${PY2_BUILD} == true ]] && [[ -z "${PACKAGE_SUFFIX}" ]]; then
+        if [[ ${JOB_NAME} == *release* ]] && [[ -z "${PACKAGE_SUFFIX}" ]]; then
             # Traditional install path for python 2 release build
             PACKAGINGVARS="${PACKAGINGVARS} -DCMAKE_INSTALL_PREFIX=/opt/Mantid -DCPACK_PACKAGE_SUFFIX="
         else
