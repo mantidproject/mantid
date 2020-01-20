@@ -121,7 +121,7 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
           }
         }
       }
-      //disable the actions created so far if only one bin
+      // disable the actions created so far if only one bin
       for (auto action : plotSubMenu->actions()) {
         action->setEnabled(multipleBins);
       }
