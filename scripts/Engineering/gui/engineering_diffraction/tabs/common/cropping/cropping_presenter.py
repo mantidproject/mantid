@@ -26,12 +26,12 @@ class CroppingPresenter(object):
 
     # Signal Activated Functions
 
-    def on_combo_changed(self, index_or_string_i_dunno):  # TODO: Does this signal send and index or text?
-        if index_or_string_i_dunno == 0:
+    def on_combo_changed(self, index):
+        if index == 0:
             self.bank = 1
             self.custom_spectra_enabled = False
             self.set_custom_visibility(False)
-        elif index_or_string_i_dunno == 1:
+        elif index == 1:
             self.bank = 2
             self.custom_spectra_enabled = False
             self.set_custom_visibility(False)
@@ -64,7 +64,7 @@ class CroppingPresenter(object):
 
     def set_custom_visibility(self, visible):
         if visible:
-            self.custom_valid = False
+            self.on_spectra_changed(self.view.get_custom_spectra_text())
             self.view.set_custom_spectra_entry_visible()
         else:
             self.custom_valid = True  # Make custom valid if not used, makes validation easier.

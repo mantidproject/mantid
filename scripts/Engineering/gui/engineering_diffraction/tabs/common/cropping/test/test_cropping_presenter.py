@@ -36,6 +36,7 @@ class CroppingPresenterTest(unittest.TestCase):
         self.view.set_custom_spectra_entry_hidden.assert_called_with()
 
     def test_combo_changed_index_custom(self):
+        self.model.validate_and_clean_spectrum_numbers.return_value = ("", "1400")
         self.presenter.on_combo_changed(2)
 
         self.assertEqual(self.presenter.bank, 0)

@@ -295,7 +295,8 @@ class CalibrationModel(object):
             kwargs["bank_names"] = ["North"]
 
         def generate_output_file(difc_list, tzero_list, bank_name, kwargs_to_pass):
-            file_path = calibration_dir + self._generate_output_file_name(vanadium_path, sample_path, instrument, bank=bank_name)
+            file_path = calibration_dir + self._generate_output_file_name(vanadium_path, sample_path, instrument,
+                                                                          bank=bank_name)
             write_ENGINX_GSAS_iparam_file(file_path, difc_list, tzero_list, **kwargs_to_pass)
 
         if not path.exists(calibration_dir):

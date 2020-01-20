@@ -75,13 +75,14 @@ class CalibrationPresenter(object):
         :param bank: Optional parameter to crop by bank.
         :param spectrum_numbers: Optional parameter to crop by spectrum number.
         """
-        self.worker = AsyncTask(self.model.create_new_calibration, (vanadium_path, sample_path), {
-            "plot_output": plot_output,
-            "instrument": self.instrument,
-            "rb_num": rb_num,
-            "bank": bank,
-            "spectrum_numbers": spectrum_numbers
-        },
+        self.worker = AsyncTask(self.model.create_new_calibration, (vanadium_path, sample_path),
+                                {
+                                "plot_output": plot_output,
+                                "instrument": self.instrument,
+                                "rb_num": rb_num,
+                                "bank": bank,
+                                "spectrum_numbers": spectrum_numbers
+                                },
                                 error_cb=self._on_error,
                                 success_cb=self._on_success)
         self.pending_calibration.set_calibration(vanadium_path, sample_path, self.instrument)
