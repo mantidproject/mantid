@@ -21,7 +21,7 @@ Usage
 
 .. testcode:: ConvertToMatrixWorkspaceSimpleExample
 
-   event_ws = Load('CNCS_7860_event.nxs')
+   event_ws = Load('CNCS_7860_event.nxs',NumberO)
    # Run the conversion algorithm
    histo_ws = ConvertToMatrixWorkspace(event_ws)
    # Check that the original workspace and the converted workspace have the same shape
@@ -30,8 +30,8 @@ Usage
 
 .. testoutput:: ConvertToMatrixWorkspaceSimpleExample
 
-   51200 1
-   51200 1
+   51200 500
+   51200 500
 
 **Example - Conversion when blocksize > 1**
 
