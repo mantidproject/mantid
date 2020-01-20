@@ -81,7 +81,7 @@ def save_unsplined_vanadium(vanadium_ws, output_path):
 
 
 def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None, cal_file_name=None,
-                    sample_details=None, pdf_type="G(r)"):
+                    sample_details=None, output_binning=None, pdf_type="G(r)"):
     focused_ws = _obtain_focused_run(run_number, focus_file_path)
     focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, Target="MomentumTransfer", EMode='Elastic')
 
@@ -116,6 +116,11 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None,
         pdf_output = mantid.RebinToWorkspace(WorkspaceToRebin=pdf_output, WorkspaceToMatch=pdf_output[4],
                                              PreserveEvents=True)
     common.remove_intermediate_workspace('self_scattering_correction')
+    if output_binning is not None:
+        try:
+            pdf_output = mantid.Rebin(InputWorkspace=pdf_output, Params=output_binning)
+        except RuntimeError:
+            return pdf_output
     return pdf_output
 
 

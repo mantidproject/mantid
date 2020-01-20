@@ -193,6 +193,24 @@ class TotalScatteringMergedTest(systemtesting.MantidSystemTest):
         self.assertAlmostEqual(self.pdf_output.dataY(0)[37], 0.7376667, places=3)
 
 
+class TotalScatteringRebinTest(systemtesting.MantidSystemTest):
+
+    pdf_output = None
+
+    def runTest(self):
+        setup_mantid_paths()
+        # Load Focused ws
+        mantid.LoadNexus(Filename=total_scattering_input_file, OutputWorkspace='98533-Results-TOF-Grp')
+        q_lims = np.array([2.5, 3, 4, 6, 7, 3.5, 5, 7, 11, 40]).reshape((2, 5))
+        self.pdf_output = run_total_scattering('98533', True, q_lims=q_lims, output_binning=[0.07856, 0.07856, 10])
+
+    def validate(self):
+        # Whilst total scattering is in development, the validation will avoid using reference files as they will have
+        # to be updated very frequently. In the meantime, the rebin test will be done by testing the histogram size in
+        # a truncated WS
+        self.assertAlmostEqual(self.pdf_output.dataX(0).size, 128, places=3)
+
+
 class TotalScatteringPdfTypeTest(systemtesting.MantidSystemTest):
 
     pdf_output = None
@@ -211,11 +229,12 @@ class TotalScatteringPdfTypeTest(systemtesting.MantidSystemTest):
         self.assertAlmostEqual(self.pdf_output.dataY(0)[37], 1.0152123, places=3)
 
 
-def run_total_scattering(run_number, merge_banks, q_lims=None, pdf_type="G(r)"):
+def run_total_scattering(run_number, merge_banks, q_lims=None, output_binning=None, pdf_type="G(r)"):
     pdf_inst_obj = setup_inst_object(mode="PDF")
     return pdf_inst_obj.create_total_scattering_pdf(run_number=run_number,
                                                     merge_banks=merge_banks,
                                                     q_lims=q_lims,
+                                                    output_binning=output_binning,
                                                     pdf_type=pdf_type)
 
 

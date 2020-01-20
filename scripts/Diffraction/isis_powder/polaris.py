@@ -52,6 +52,8 @@ class Polaris(AbstractInst):
     def create_total_scattering_pdf(self, **kwargs):
         if 'q_lims' not in kwargs:
             kwargs['q_lims'] = None
+        if 'output_binning' not in kwargs:
+            kwargs['output_binning'] = None
         if 'pdf_type' not in kwargs or not kwargs['pdf_type'] in ['G(r)', 'g(r)', 'RDF(r)']:
             kwargs['pdf_type'] = 'G(r)'
             logger.warning('PDF type not specified or is invalid, defaulting to G(r)')
@@ -66,6 +68,7 @@ class Polaris(AbstractInst):
                                                   q_lims=self._inst_settings.q_lims,
                                                   cal_file_name=cal_file_name,
                                                   sample_details=self._sample_details,
+                                                  output_binning=self._inst_settings.output_binning,
                                                   pdf_type=self._inst_settings.pdf_type)
         return pdf_output
 

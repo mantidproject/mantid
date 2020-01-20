@@ -174,6 +174,9 @@ generated based on the weighted sum of the detector banks performed using suppli
 *q_lims=q_limits*, Q_limits can be in the form of a numpy array with shape (2, x) where x is the number
 of detectors, or a string containing the directory of an appropriately formatted `.lim` file.
 
+This function can also be called with the argument `output_binning` which will rebin the output PDF as
+with the rebin algorithm.
+
 This function applies the placzek self scattering correction from
 :ref:CalculatePlaczekSelfScattering <algm-CalculatePlaczekSelfScattering> before calculating the PDF
 
