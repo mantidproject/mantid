@@ -14,7 +14,7 @@ from sans.common.enums import (SANSInstrument, SANSFacility, SaveType)
 from sans.gui_logic.models.create_state import (create_states, create_gui_state_from_userfile)
 from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.gui_logic.models.table_model import TableModel, TableIndexModel
-from sans.state.state import State
+from sans.state.AllStates import AllStates
 
 
 class GuiCommonTest(unittest.TestCase):
@@ -30,7 +30,7 @@ class GuiCommonTest(unittest.TestCase):
         self.table_model.wait_for_file_finding_done()
         self.qApp.processEvents()
 
-        self.fake_state = mock.MagicMock(spec=State)
+        self.fake_state = mock.MagicMock(spec=AllStates)
         self.gui_state_director_instance = mock.MagicMock()
         self.gui_state_director_instance.create_state.return_value = self.fake_state
         self.patcher = mock.patch('sans.gui_logic.models.create_state.GuiStateDirector')

@@ -25,9 +25,9 @@ from sans.state.state_functions import (validation_message, set_detector_names, 
 # State
 # ----------------------------------------------------------------------------------------------------------------------
 
-class StateMoveDetector(with_metaclass(JsonSerializable)):
+class StateMoveDetectors(with_metaclass(JsonSerializable)):
     def __init__(self):
-        super(StateMoveDetector, self).__init__()
+        super(StateMoveDetectors, self).__init__()
         # Translation correction
         self.x_translation_correction = 0.0  # : Float
         self.y_translation_correction = 0.0  # : Float
@@ -97,8 +97,8 @@ class StateMoveLOQ(StateMove):
         self.monitor_names = {}
 
         # Setup the detectors
-        self.detectors = {DetectorType.LAB.value: StateMoveDetector(),
-                          DetectorType.HAB.value: StateMoveDetector()}
+        self.detectors = {DetectorType.LAB.value: StateMoveDetectors(),
+                          DetectorType.HAB.value: StateMoveDetectors()}
 
     def validate(self):
         # No validation of the descriptors on this level, let potential exceptions from detectors "bubble" up
@@ -126,8 +126,8 @@ class StateMoveSANS2D(StateMove):
         self.monitor_4_offset = 0.0  # : Float
 
         # Setup the detectors
-        self.detectors = {DetectorType.LAB.value: StateMoveDetector(),
-                          DetectorType.HAB.value: StateMoveDetector()}
+        self.detectors = {DetectorType.LAB.value: StateMoveDetectors(),
+                          DetectorType.HAB.value: StateMoveDetectors()}
 
     def validate(self):
         super(StateMoveSANS2D, self).validate()
@@ -144,7 +144,7 @@ class StateMoveLARMOR(StateMove):
         self.monitor_names = {}
 
         # Setup the detectors
-        self.detectors = {DetectorType.LAB.value: StateMoveDetector()}
+        self.detectors = {DetectorType.LAB.value: StateMoveDetectors()}
 
     def validate(self):
         super(StateMoveLARMOR, self).validate()
@@ -162,7 +162,7 @@ class StateMoveZOOM(StateMove):
         self.monitor_5_offset = 0.0  # : Float
 
         # Setup the detectors
-        self.detectors = {DetectorType.LAB.value: StateMoveDetector()}
+        self.detectors = {DetectorType.LAB.value: StateMoveDetectors()}
 
     def validate(self):
         super(StateMoveZOOM, self).validate()

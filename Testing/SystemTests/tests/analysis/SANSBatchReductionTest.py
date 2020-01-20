@@ -11,8 +11,10 @@ import systemtesting
 from mantid.api import AnalysisDataService
 
 from sans.sans_batch import SANSBatchReduction
-from sans.user_file.state_director import StateDirectorISIS
-from sans.state.data import get_data_builder
+from sans.state.RunDataStateBuilder import RunDataStateBuilder
+from sans.state.Serializer import Serializer
+from sans.state.StateBuilder import StateBuilder
+from sans.state.StateObjects.StateData import get_data_builder
 from sans.common.enums import (SANSFacility, ReductionMode, OutputMode)
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_unmanaged_algorithm
@@ -22,6 +24,9 @@ from sans.common.file_information import SANSFileInformationFactory
 # -----------------------------------------------
 # Tests for the SANSBatchReduction algorithm
 # -----------------------------------------------
+from sans.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapter
+
+
 class SANSBatchReductionTest(unittest.TestCase):
 
     def _run_batch_reduction(self, states, use_optimizations=False):
@@ -57,6 +62,7 @@ class SANSBatchReductionTest(unittest.TestCase):
         compare_alg.setChild(False)
         compare_alg.execute()
         result = compare_alg.getProperty("Result").value
+
         self.assertTrue(result)
 
     def test_that_batch_reduction_evaluates_LAB(self):
@@ -77,21 +83,20 @@ class SANSBatchReductionTest(unittest.TestCase):
 
         data_info = data_builder.build()
 
+        user_filename = "USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt"
+
+        user_file_director = StateBuilder.new_instance(file_information=file_information,
+                                                       data_information=data_info,
+                                                       user_filename=user_filename)
+
         # Get the rest of the state from the user file
-        user_file_director = StateDirectorISIS(data_info, file_information)
-        user_file_director.set_user_file("USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt")
+        state = user_file_director.get_all_states()
+
         # Set the reduction mode to LAB
-        user_file_director.set_reduction_builder_reduction_mode(ReductionMode.LAB)
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # COMPATIBILITY BEGIN -- Remove when appropriate
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        state.reduction.reduction_mode = ReductionMode.LAB
         # Since we are dealing with event based data but we want to compare it with histogram data from the
         # old reduction system we need to enable the compatibility mode
-        user_file_director.set_compatibility_builder_use_compatibility_mode(True)
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # COMPATIBILITY END
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        state = user_file_director.construct()
+        state.compatibility.use_compatibility_mode = True  # COMPATIBILITY BEGIN -- Remove when appropriate
 
         # Act
         states = [state]
@@ -117,11 +122,13 @@ class SANSBatchReductionTest(unittest.TestCase):
         data_info = data_builder.build()
 
         # Get the rest of the state from the user file
-        user_file_director = StateDirectorISIS(data_info, file_information)
-        user_file_director.set_user_file("MASKSANS2Doptions.091A")
+        user_filename = "MASKSANS2Doptions.091A"
+        user_file_parser = StateBuilder.new_instance(file_information=file_information,
+                                                     data_information=data_info,
+                                                     user_filename=user_filename)
+        state = user_file_parser.get_all_states()
         # Set the reduction mode to LAB
-        user_file_director.set_reduction_builder_reduction_mode(ReductionMode.LAB)
-        state = user_file_director.construct()
+        state.reduction.reduction_mode = ReductionMode.LAB
 
         # Act
         states = [state]
@@ -157,23 +164,17 @@ class SANSBatchReductionTest(unittest.TestCase):
         data_info = data_builder.build()
 
         # Get the rest of the state from the user file
-        user_file_director = StateDirectorISIS(data_info, file_information)
-        user_file_director.set_user_file("USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt")
-        # Set the reduction mode to LAB
-        user_file_director.set_reduction_builder_reduction_mode(ReductionMode.LAB)
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # COMPATIBILITY BEGIN -- Remove when appropriate
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # Since we are dealing with event based data but we want to compare it with histogram data from the
-        # old reduction system we need to enable the compatibility mode
-        user_file_director.set_compatibility_builder_use_compatibility_mode(True)
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # COMPATIBILITY END
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        user_file_director.set_slice_event_builder_start_time([1.0,3.0])
-        user_file_director.set_slice_event_builder_end_time([3.0,5.0])
+        user_filename = "USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt"
+        user_file_director = StateBuilder.new_instance(file_information=file_information,
+                                                       data_information=data_info,
+                                                       user_filename=user_filename)
 
-        state = user_file_director.construct()
+        state = user_file_director.get_all_states()
+        # Set the reduction mode to LAB
+        state.reduction.reduction_mode = ReductionMode.LAB
+        state.compatibility.use_compatibility_mode = True  # COMPATIBILITY BEGIN -- Remove when appropriate
+        state.slice.start_time = [1.0,3.0]
+        state.slice.end_time = [3.0,5.0]
 
         # Act
         states = [state]
@@ -210,21 +211,17 @@ class SANSBatchReductionTest(unittest.TestCase):
         data_info = data_builder.build()
 
         # Get the rest of the state from the user file
-        user_file_director = StateDirectorISIS(data_info, file_information)
-        user_file_director.set_user_file("USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt")
-        # Set the reduction mode to LAB
-        user_file_director.set_reduction_builder_reduction_mode(ReductionMode.LAB)
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # COMPATIBILITY BEGIN -- Remove when appropriate
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # Since we are dealing with event based data but we want to compare it with histogram data from the
-        # old reduction system we need to enable the compatibility mode
-        user_file_director.set_compatibility_builder_use_compatibility_mode(True)
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # COMPATIBILITY END
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        user_filename = "USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt"
+        user_file_director = StateBuilder.new_instance(file_information=file_information,
+                                                       data_information=data_info,
+                                                       user_filename=user_filename)
 
-        state = user_file_director.construct()
+        # Set the reduction mode to LAB
+        state = user_file_director.get_all_states()
+
+        state.reduction.reduction_mode = ReductionMode.LAB
+        state.compatibility.use_compatibility_mode = True  # COMPATIBILITY BEGIN -- Remove when appropriate
+
         start = [1.0,2.0]
         end = [2.0,3.0]
         state.wavelength.wavelength_low = start
@@ -269,15 +266,17 @@ class SANSBatchReductionTest(unittest.TestCase):
         data_info = data_builder.build()
 
         # Get the rest of the state from the user file
-        user_file_director = StateDirectorISIS(data_info, file_information)
-        user_file_director.set_user_file("MASKSANS2Doptions.091A")
+        user_filename = "MASKSANS2Doptions.091A"
+        user_file_director = StateBuilder.new_instance(file_information=file_information,
+                                                       data_information=data_info,
+                                                       user_filename=user_filename)
+
+        state = user_file_director.get_all_states()
         # Set the reduction mode to LAB
-        user_file_director.set_reduction_builder_reduction_mode(ReductionMode.LAB)
+        state.reduction.reduction_mode = ReductionMode.LAB
 
-        user_file_director.set_slice_event_builder_start_time([1.0, 3.0])
-        user_file_director.set_slice_event_builder_end_time([3.0, 5.0])
-
-        state = user_file_director.construct()
+        state.slice.start_time = [1.0, 3.0]
+        state.slice.end_time = [3.0, 5.0]
 
         start = [1.0, 1.0]
         end = [3.0, 2.0]

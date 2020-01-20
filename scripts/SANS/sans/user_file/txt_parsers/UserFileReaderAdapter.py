@@ -8,12 +8,12 @@ from sans.user_file.txt_parsers.ParsedDictConverter import ParsedDictConverter
 from sans.user_file.user_file_reader import UserFileReader
 
 
-class UserFileParserAdapter(ParsedDictConverter):
-    def __init__(self, filename, txt_user_file_reader: UserFileReader = None):
-        super(UserFileParserAdapter, self).__init__()
+class UserFileReaderAdapter(ParsedDictConverter):
+    def __init__(self, user_file_name, data_info, txt_user_file_reader: UserFileReader = None):
+        super(UserFileReaderAdapter, self).__init__(data_info=data_info)
 
         if not txt_user_file_reader:
-            txt_user_file_reader = UserFileReader(filename)
+            txt_user_file_reader = UserFileReader(user_file_name)
 
         self._adapted_parser = txt_user_file_reader
 

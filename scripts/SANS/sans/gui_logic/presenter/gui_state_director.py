@@ -16,8 +16,10 @@ import copy
 
 from sans.common.enums import (SANSInstrument)
 from sans.common.file_information import SANSFileInformationBlank
-from sans.state.data import get_data_builder
-from sans.user_file.state_director import StateDirectorISIS
+from sans.state.RunDataStateBuilder import RunDataStateBuilder
+from sans.state.StateBuilder import StateBuilder
+from sans.state.StateObjects.StateData import get_data_builder
+from sans.user_file.txt_parsers.CommandInterfaceAdapter import CommandInterfaceAdapter
 
 
 class GuiStateDirector(object):
@@ -29,8 +31,7 @@ class GuiStateDirector(object):
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
 
-    def create_state(self, row, file_lookup=True, instrument=SANSInstrument.SANS2D,
-                     user_file=""):
+    def create_state(self, row, file_lookup=True):
         # 1. Get the data settings, such as sample_scatter, etc... and create the data state.
         table_index_model = self._table_model.get_table_entry(row)
         if file_lookup:
@@ -38,7 +39,7 @@ class GuiStateDirector(object):
         else:
             file_information = SANSFileInformationBlank()
 
-        data_builder = get_data_builder(self._facility, file_information, user_file)
+        data_builder = get_data_builder(self._facility, file_information)
 
         self._set_data_entry(data_builder.set_sample_scatter, table_index_model.sample_scatter)
         self._set_data_period_entry(data_builder.set_sample_scatter_period, table_index_model.sample_scatter_period)
@@ -75,11 +76,12 @@ class GuiStateDirector(object):
             state_gui_model.sample_shape = table_index_model.sample_shape
 
         # 4. Create the rest of the state based on the builder.
-        user_file_state_director = StateDirectorISIS(data, file_information)
         settings = copy.deepcopy(state_gui_model.settings)
-        user_file_state_director.add_state_settings(settings)
+        command_interface = CommandInterfaceAdapter(data_info=data, processed_state=settings)
+        run_data_builder = RunDataStateBuilder(file_information=file_information)
 
-        return user_file_state_director.construct()
+        state = StateBuilder(run_data_builder=run_data_builder, user_file_parser=command_interface).get_all_states()
+        return state
 
     @staticmethod
     def _set_data_entry(func, entry):

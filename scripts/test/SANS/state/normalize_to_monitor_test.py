@@ -9,9 +9,9 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 
 from sans.common.enums import (RebinType, RangeStepType, SANSFacility, SANSInstrument)
-from sans.state.data import get_data_builder
-from sans.state.normalize_to_monitor import (StateNormalizeToMonitor, StateNormalizeToMonitorLOQ,
-                                             get_normalize_to_monitor_builder)
+from sans.state.StateObjects.StateData import get_data_builder
+from sans.state.StateObjects.StateNormalizeToMonitor import (StateNormalizeToMonitor, StateNormalizeToMonitorLOQ,
+                                                             get_normalize_to_monitor_builder)
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 

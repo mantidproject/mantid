@@ -4,16 +4,13 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-
 from sans.user_file.txt_parsers.ParsedDictConverter import ParsedDictConverter
 
 
-class ParsedDictConverterTestCommon(object):
+class CommandInterfaceAdapter(ParsedDictConverter):
+    def __init__(self, data_info, processed_state, ):
+        super(CommandInterfaceAdapter, self).__init__(data_info=data_info)
+        self._processed_state = processed_state
 
-    def set_return_val(self, val):
-
-        class AdapterShim(ParsedDictConverter):
-            def _get_input_dict(self) -> dict:
-                return val
-
-        self.instance = AdapterShim()
+    def _get_input_dict(self) -> dict:
+        return self._processed_state

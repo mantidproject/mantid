@@ -12,7 +12,7 @@ from mantid.dataobjects import Workspace2D
 from mantid.kernel import DateAndTime
 from mantid.simpleapi import AddTimeSeriesLog, CreateSampleWorkspace
 from sans.algorithm_detail.slice_sans_event import slice_sans_event
-from sans.state.slice_event import get_slice_event_builder
+from sans.state.StateObjects.StateSliceEvent import get_slice_event_builder
 from sans.test_helper.test_director import TestDirector
 
 

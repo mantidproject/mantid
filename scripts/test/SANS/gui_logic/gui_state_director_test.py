@@ -13,7 +13,7 @@ from sans.common.enums import SANSFacility
 from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.gui_logic.models.table_model import (TableModel, TableIndexModel)
 from sans.gui_logic.presenter.gui_state_director import GuiStateDirector
-from sans.state.state import State
+from sans.state.AllStates import AllStates
 from sans.test_helper.user_file_test_helper import create_user_file, sample_user_file
 from sans.user_file.user_file_reader import UserFileReader
 
@@ -42,7 +42,7 @@ class GuiStateDirectorTest(unittest.TestCase):
         state_model = self._get_state_gui_model()
         director = GuiStateDirector(table_model, state_model, SANSFacility.ISIS)
         state = director.create_state(0)
-        self.assertTrue(isinstance(state, State))
+        self.assertTrue(isinstance(state, AllStates))
         try:
             state.validate()
             has_raised = False
@@ -67,7 +67,7 @@ class GuiStateDirectorTest(unittest.TestCase):
         director = GuiStateDirector(table_model, state_model, SANSFacility.ISIS)
 
         state = director.create_state(0)
-        self.assertTrue(isinstance(state, State))
+        self.assertTrue(isinstance(state, AllStates))
         self.assertEqual(state.wavelength.wavelength_low,  [3.14])
         self.assertEqual(state.wavelength.wavelength_high,  [10.3])
 
@@ -77,7 +77,7 @@ class GuiStateDirectorTest(unittest.TestCase):
         director = GuiStateDirector(table_model, state_model, SANSFacility.ISIS)
 
         state = director.create_state(0)
-        self.assertTrue(isinstance(state, State))
+        self.assertTrue(isinstance(state, AllStates))
         self.assertEqual(state.reduction.merge_scale, 1.2)
         self.assertEqual(state.reduction.merge_shift, 0.5)
 

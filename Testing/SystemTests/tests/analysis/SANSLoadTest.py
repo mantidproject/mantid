@@ -23,7 +23,7 @@ from sans.common.constants import (CALIBRATION_WORKSPACE_TAG, SANS_FILE_TAG)
 from sans.state.Serializer import Serializer
 from sans.test_helper.test_director import TestDirector
 from sans.common.enums import SANSFacility
-from sans.state.data import get_data_builder
+from sans.state.StateObjects.StateData import get_data_builder
 from sans.common.file_information import SANSFileInformationFactory
 
 

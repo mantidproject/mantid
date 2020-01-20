@@ -9,12 +9,15 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.py3compat import Enum
 from sans.common.enums import DataType
 from sans.common.file_information import SANSFileInformationFactory
-from sans.state.data import get_data_builder
+from sans.state.RunDataStateBuilder import RunDataStateBuilder
+from sans.state.StateBuilder import StateBuilder
+from sans.state.StateObjects.StateData import get_data_builder
 from sans.user_file.settings_tags import (MonId, monitor_spectrum, OtherId, SampleId, GravityId, SetId, position_entry,
                                           fit_general, FitId, monitor_file, mask_angle_entry, LimitsId, range_entry,
                                           simple_range, DetectorId, event_binning_string_values, det_fit_range,
                                           single_entry_with_detector)
-from sans.user_file.state_director import StateDirectorISIS
+from sans.user_file.txt_parsers.CommandInterfaceAdapter import CommandInterfaceAdapter
+
 from sans.user_file.user_file_parser import (UserFileParser)
 from sans.user_file.user_file_reader import (UserFileReader)
 
@@ -250,8 +253,6 @@ class CommandInterfaceStateDirector(object):
         file_information_factory = SANSFileInformationFactory()
         file_information = file_information_factory.create_sans_file_information(file_name)
 
-        self._state_director = StateDirectorISIS(data_state, file_information)
-
         # If we have a clean instruction in there, then we should apply it to all commands
         self._apply_clean_if_required()
 
@@ -264,9 +265,12 @@ class CommandInterfaceStateDirector(object):
             process_function = self._method_map[command_id]
             process_function(command)
 
-        # The user file state director
-        self._state_director.add_state_settings(self._processed_state_settings)
-        return self._state_director.construct()
+        user_commands = CommandInterfaceAdapter(data_info=data_state,
+                                                 processed_state=self._processed_state_settings)
+        run_data_parser = RunDataStateBuilder(file_information=file_information)
+
+        self._state_director = StateBuilder(user_file_parser=user_commands, run_data_builder=run_data_parser)
+        return self._state_director.get_all_states()
 
     def _set_up_method_map(self):
         """

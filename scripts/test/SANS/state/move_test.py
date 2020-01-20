@@ -9,9 +9,9 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 
 from sans.common.enums import (CanonicalCoordinates, SANSFacility, DetectorType, SANSInstrument)
-from sans.state.data import get_data_builder
-from sans.state.move import (StateMoveLOQ, StateMoveSANS2D, StateMoveLARMOR, StateMoveZOOM, StateMove,
-                             StateMoveDetector, get_move_builder)
+from sans.state.StateObjects.StateData import get_data_builder
+from sans.state.StateObjects.StateMoveDetectors import (StateMoveLOQ, StateMoveSANS2D, StateMoveLARMOR, StateMoveZOOM, StateMove,
+                                                        StateMoveDetectors, get_move_builder)
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
@@ -21,8 +21,8 @@ from sans.test_helper.file_information_mock import SANSFileInformationMock
 class StateMoveWorkspaceTest(unittest.TestCase):
     def test_that_raises_if_the_detector_name_is_not_set_up(self):
         state = StateMove()
-        state.detectors = {DetectorType.LAB.value: StateMoveDetector(),
-                           DetectorType.HAB.value: StateMoveDetector()}
+        state.detectors = {DetectorType.LAB.value: StateMoveDetectors(),
+                           DetectorType.HAB.value: StateMoveDetectors()}
         state.detectors[DetectorType.LAB.value].detector_name = "test"
         state.detectors[DetectorType.HAB.value].detector_name_short = "test"
         state.detectors[DetectorType.LAB.value].detector_name_short = "test"
@@ -34,8 +34,8 @@ class StateMoveWorkspaceTest(unittest.TestCase):
 
     def test_that_raises_if_the_short_detector_name_is_not_set_up(self):
         state = StateMove()
-        state.detectors = {DetectorType.LAB.value: StateMoveDetector(),
-                           DetectorType.HAB.value: StateMoveDetector()}
+        state.detectors = {DetectorType.LAB.value: StateMoveDetectors(),
+                           DetectorType.HAB.value: StateMoveDetectors()}
         state.detectors[DetectorType.HAB.value].detector_name = "test"
         state.detectors[DetectorType.LAB.value].detector_name = "test"
         state.detectors[DetectorType.HAB.value].detector_name_short = "test"
@@ -47,8 +47,8 @@ class StateMoveWorkspaceTest(unittest.TestCase):
 
     def test_that_general_isis_default_values_are_set_up(self):
         state = StateMove()
-        state.detectors = {DetectorType.LAB.value: StateMoveDetector(),
-                           DetectorType.HAB.value: StateMoveDetector()}
+        state.detectors = {DetectorType.LAB.value: StateMoveDetectors(),
+                           DetectorType.HAB.value: StateMoveDetectors()}
         self.assertEqual(state.sample_offset,  0.0)
         self.assertEqual(state.sample_offset_direction, CanonicalCoordinates.Z)
         self.assertEqual(state.detectors[DetectorType.HAB.value].x_translation_correction,  0.0)

@@ -4,69 +4,197 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+import os
 import unittest
 
-from sans.common.enums import SANSInstrument
-from sans.user_file.settings_tags import DetectorId, GravityId, TubeCalibrationFileId, OtherId
-from test.SANS.user_file.txt_parsers.ParsedDictConverterTestCommon import ParsedDictConverterTestCommon
+from sans.common.configurations import Configurations
+from sans.common.enums import DetectorType, SANSInstrument, SANSFacility, ReductionMode, RangeStepType, RebinType, DataType, FitType
+from sans.state.StateObjects.StateData import get_data_builder
+from sans.test_helper.file_information_mock import SANSFileInformationMock
+from sans.test_helper.user_file_test_helper import create_user_file, sample_user_file
+from sans.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapter
 
 
-class ParsedDictConverterConverterTest(ParsedDictConverterTestCommon, unittest.TestCase):
+class ParsedDictConverterTest(unittest.TestCase):
+    def test_state_can_be_created_from_valid_user_file_with_data_information(self):
+        # Arrange
+        file_information = SANSFileInformationMock(instrument=SANSInstrument.SANS2D, run_number=22024)
+        data_builder = get_data_builder(SANSFacility.ISIS, file_information)
+        data_builder.set_sample_scatter("SANS2D00022024")
+        data_builder.set_sample_scatter_period(3)
+        data_state = data_builder.build()
 
-    def test_missing_vals_returns_something(self):
-        self.set_return_val({})
-        self.assertIsNotNone(self.instance.get_fit_details())
+        user_file_path = create_user_file(sample_user_file)
 
-    # Interface definitions which do not return objects tested below
-    def test_get_gravity_on_off(self):
-        self.set_return_val({GravityId.ON_OFF: True})
+        parser = UserFileReaderAdapter(user_file_name=user_file_path, data_info=data_state)
+        state = parser.get_all_states()
 
-        returned = self.instance.get_gravity_details()
-        self.assertIsNotNone(returned)
-        self.assertTrue(returned[0])
-        self.assertEqual(0, returned[1])
+        # Assert
+        self._assert_data(state)
+        self._assert_move(state)
+        self._assert_mask(state)
+        self._assert_reduction(state)
+        self._assert_wavelength(state)
+        self._assert_scale(state)
+        self._assert_adjustment(state)
+        self._assert_convert_to_q(state)
 
-    def test_get_instrument(self):
-        expected_val = SANSInstrument.LARMOR
-        self.set_return_val({DetectorId.INSTRUMENT: SANSInstrument.LARMOR})
+        # clean up
+        if os.path.exists(user_file_path):
+            os.remove(user_file_path)
 
-        returned = self.instance.get_instrument()
-        self.assertIsNotNone(returned)
-        self.assertEqual(expected_val, returned)
+    def _assert_data(self, state):
+        data = state.data
+        self.assertEqual(data.calibration,  "TUBE_SANS2D_BOTH_31681_25Sept15.nxs")
 
-    def test_no_instrument_handled(self):
-        expected_val = SANSInstrument.NO_INSTRUMENT
-        self.set_return_val({})
+    def _assert_move(self, state):
+        move = state.move
+        # Check the elements which were set on move
+        self.assertEqual(move.sample_offset,  53.0/1000.)
 
-        returned = self.instance.get_instrument()
-        self.assertIsNotNone(returned)
-        self.assertEqual(expected_val, returned)
+        # Detector specific
+        lab = move.detectors[DetectorType.LAB.value]
+        hab = move.detectors[DetectorType.HAB.value]
+        self.assertEqual(lab.x_translation_correction,  -16.0/1000.)
+        self.assertEqual(lab.z_translation_correction,  47.0/1000.)
+        self.assertEqual(hab.x_translation_correction,  -44.0/1000.)
+        self.assertEqual(hab.y_translation_correction,  -20.0/1000.)
+        self.assertEqual(hab.z_translation_correction,  47.0/1000.)
+        self.assertEqual(hab.rotation_correction,  0.0)
 
-    def test_no_instrument_forwarded(self):
-        expected_val = SANSInstrument.NO_INSTRUMENT
-        self.set_return_val({DetectorId.INSTRUMENT: SANSInstrument.NO_INSTRUMENT})
+        # SANS2D-specific
+        self.assertEqual(move.monitor_4_offset,  -70.0/1000.)
 
-        returned = self.instance.get_instrument()
-        self.assertIsNotNone(returned)
-        self.assertEqual(expected_val, returned)
+    def _assert_mask(self, state):
+        mask = state.mask
+        self.assertEqual(mask.radius_min,  12/1000.)
+        self.assertEqual(mask.radius_max,  15/1000.)
+        self.assertEqual(mask.clear, True)
+        self.assertEqual(mask.clear_time, True)
+        self.assertEqual(mask.detectors[DetectorType.LAB.value].single_horizontal_strip_mask,  [0])
+        self.assertEqual(mask.detectors[DetectorType.LAB.value].single_vertical_strip_mask,  [0, 191])
+        self.assertEqual(mask.detectors[DetectorType.HAB.value].single_horizontal_strip_mask,  [0])
+        self.assertEqual(mask.detectors[DetectorType.HAB.value].single_vertical_strip_mask,  [0, 191])
+        self.assertTrue(mask.detectors[DetectorType.LAB.value].range_horizontal_strip_start
+                        == [190, 167])
+        self.assertTrue(mask.detectors[DetectorType.LAB.value].range_horizontal_strip_stop
+                        == [191, 172])
+        self.assertTrue(mask.detectors[DetectorType.HAB.value].range_horizontal_strip_start
+                        == [190, 156])
+        self.assertTrue(mask.detectors[DetectorType.HAB.value].range_horizontal_strip_stop
+                        == [191, 159])
 
-    def test_get_tube_calibration_filename(self):
-        expected_val = "tube.xml"
-        self.set_return_val({TubeCalibrationFileId.FILE: expected_val})
+    def _assert_reduction(self, state):
+        reduction = state.reduction
+        self.assertEqual(reduction.reduction_mode, ReductionMode.LAB)
+        self.assertFalse(reduction.merge_mask)
+        self.assertEqual(reduction.merge_min,  None)
+        self.assertEqual(reduction.merge_max,  None)
 
-        returned = self.instance.get_tube_calibration_filename()
-        self.assertIsNotNone(returned)
-        self.assertEqual(expected_val, returned)
+    def _assert_scale(self, state):
+        scale = state.scale
+        self.assertEqual(scale.scale,  0.074)
 
-    def test_is_compatibility_mode_on(self):
-        self.set_return_val({OtherId.USE_COMPATIBILITY_MODE: True})
-        returned = self.instance.is_compatibility_mode_on()
-        self.assertTrue(returned)
+    def _assert_wavelength(self, state):
+        wavelength = state.wavelength
+        self.assertEqual(wavelength.wavelength_low,  [1.5])
+        self.assertEqual(wavelength.wavelength_high,  [12.5])
+        self.assertEqual(wavelength.wavelength_step,  0.125)
+        self.assertEqual(wavelength.wavelength_step_type, RangeStepType.LIN)
 
-    def test_is_compatibility_mode_default(self):
-        self.set_return_val(None)
-        returned = self.instance.is_compatibility_mode_on()
-        self.assertFalse(returned)
+    def _assert_convert_to_q(self, state):
+        convert_to_q = state.convert_to_q
+        self.assertEqual(convert_to_q.wavelength_cutoff,  8.0)
+        self.assertEqual(convert_to_q.radius_cutoff,  0.2)
+        self.assertEqual(convert_to_q.q_min,  .001)
+        self.assertEqual(convert_to_q.q_max,  .2)
+        self.assertEqual(convert_to_q.q_1d_rebin_string,  "0.001,0.001,0.0126,-0.08,0.2")
+        self.assertTrue(convert_to_q.use_gravity)
+
+        self.assertTrue(convert_to_q.use_q_resolution)
+        self.assertEqual(convert_to_q.q_resolution_a1,  13./1000.)
+        self.assertEqual(convert_to_q.q_resolution_a2,  14./1000.)
+        self.assertEqual(convert_to_q.q_resolution_delta_r,  11./1000.)
+        self.assertEqual(convert_to_q.moderator_file,  "moderator_rkh_file.txt")
+        self.assertEqual(convert_to_q.q_resolution_collimation_length,  12.)
+
+    def _assert_adjustment(self, state):
+        adjustment = state.adjustment
+
+        # Normalize to monitor settings
+        normalize_to_monitor = adjustment.normalize_to_monitor
+        self.assertEqual(normalize_to_monitor.prompt_peak_correction_min,  1000)
+        self.assertEqual(normalize_to_monitor.prompt_peak_correction_max,  2000)
+        self.assertEqual(normalize_to_monitor.rebin_type, RebinType.INTERPOLATING_REBIN)
+        self.assertEqual(normalize_to_monitor.wavelength_low,  [1.5])
+        self.assertEqual(normalize_to_monitor.wavelength_high,  [12.5])
+        self.assertEqual(normalize_to_monitor.wavelength_step,  0.125)
+        self.assertEqual(normalize_to_monitor.wavelength_step_type, RangeStepType.LIN)
+        self.assertEqual(normalize_to_monitor.background_TOF_general_start,  3500)
+        self.assertEqual(normalize_to_monitor.background_TOF_general_stop,  4500)
+        self.assertEqual(normalize_to_monitor.background_TOF_monitor_start["1"],  35000)
+        self.assertEqual(normalize_to_monitor.background_TOF_monitor_stop["1"],  65000)
+        self.assertEqual(normalize_to_monitor.background_TOF_monitor_start["2"],  85000)
+        self.assertEqual(normalize_to_monitor.background_TOF_monitor_stop["2"],  98000)
+        self.assertEqual(normalize_to_monitor.incident_monitor,  1)
+
+        # Calculate Transmission
+        calculate_transmission = adjustment.calculate_transmission
+        self.assertEqual(calculate_transmission.prompt_peak_correction_min,  1000)
+        self.assertEqual(calculate_transmission.prompt_peak_correction_max,  2000)
+        self.assertEqual(calculate_transmission.default_transmission_monitor,  3)
+        self.assertEqual(calculate_transmission.default_incident_monitor,  2)
+        self.assertEqual(calculate_transmission.incident_monitor,  1)
+        self.assertEqual(calculate_transmission.transmission_radius_on_detector,  0.007)  # This is in mm
+        self.assertEqual(calculate_transmission.transmission_roi_files,  ["test.xml", "test2.xml"])
+        self.assertEqual(calculate_transmission.transmission_mask_files,  ["test3.xml", "test4.xml"])
+        self.assertEqual(calculate_transmission.transmission_monitor,  4)
+        self.assertEqual(calculate_transmission.rebin_type, RebinType.INTERPOLATING_REBIN)
+        self.assertEqual(calculate_transmission.wavelength_low,  [1.5])
+        self.assertEqual(calculate_transmission.wavelength_high,  [12.5])
+        self.assertEqual(calculate_transmission.wavelength_step,  0.125)
+        self.assertEqual(calculate_transmission.wavelength_step_type, RangeStepType.LIN)
+        self.assertFalse(calculate_transmission.use_full_wavelength_range)
+        self.assertEqual(calculate_transmission.wavelength_full_range_low,
+                         Configurations.SANS2D.wavelength_full_range_low)
+        self.assertEqual(calculate_transmission.wavelength_full_range_high,
+                         Configurations.SANS2D.wavelength_full_range_high)
+        self.assertEqual(calculate_transmission.background_TOF_general_start,  3500)
+        self.assertEqual(calculate_transmission.background_TOF_general_stop,  4500)
+        self.assertEqual(calculate_transmission.background_TOF_monitor_start["1"],  35000)
+        self.assertEqual(calculate_transmission.background_TOF_monitor_stop["1"],  65000)
+        self.assertEqual(calculate_transmission.background_TOF_monitor_start["2"],  85000)
+        self.assertEqual(calculate_transmission.background_TOF_monitor_stop["2"],  98000)
+        self.assertEqual(calculate_transmission.background_TOF_roi_start,  123)
+        self.assertEqual(calculate_transmission.background_TOF_roi_stop,  466)
+        self.assertEqual(calculate_transmission.fit[DataType.SAMPLE.value].fit_type, FitType.LOGARITHMIC)
+        self.assertEqual(calculate_transmission.fit[DataType.SAMPLE.value].wavelength_low, 1.5)
+        self.assertEqual(calculate_transmission.fit[DataType.SAMPLE.value].wavelength_high, 12.5)
+        self.assertEqual(calculate_transmission.fit[DataType.SAMPLE.value].polynomial_order, 0)
+        self.assertEqual(calculate_transmission.fit[DataType.CAN.value].fit_type, FitType.LOGARITHMIC)
+        self.assertEqual(calculate_transmission.fit[DataType.CAN.value].wavelength_low, 1.5)
+        self.assertEqual(calculate_transmission.fit[DataType.CAN.value].wavelength_high, 12.5)
+        self.assertEqual(calculate_transmission.fit[DataType.CAN.value].polynomial_order, 0)
+
+        # Wavelength and Pixel Adjustment
+        wavelength_and_pixel_adjustment = adjustment.wavelength_and_pixel_adjustment
+        self.assertEqual(wavelength_and_pixel_adjustment.wavelength_low,  [1.5])
+        self.assertEqual(wavelength_and_pixel_adjustment.wavelength_high,  [12.5])
+        self.assertEqual(wavelength_and_pixel_adjustment.wavelength_step,  0.125)
+        self.assertEqual(wavelength_and_pixel_adjustment.wavelength_step_type, RangeStepType.LIN)
+        self.assertTrue(wavelength_and_pixel_adjustment.adjustment_files[
+                        DetectorType.LAB.value].wavelength_adjustment_file
+                        == "DIRECTM1_15785_12m_31Oct12_v12.dat")
+        self.assertTrue(wavelength_and_pixel_adjustment.adjustment_files[
+                        DetectorType.HAB.value].wavelength_adjustment_file
+                        == "DIRECTM1_15785_12m_31Oct12_v12.dat")
+
+        # Assert wide angle correction
+        self.assertTrue(state.adjustment.wide_angle_correction)
+
+
+
+
 
 
 if __name__ == '__main__':

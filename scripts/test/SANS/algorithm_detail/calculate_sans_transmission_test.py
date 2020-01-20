@@ -12,7 +12,7 @@ import unittest
 from mantid.simpleapi import CloneWorkspace, DeleteWorkspace, Load, Rebin
 from sans.algorithm_detail.calculate_sans_transmission import calculate_transmission
 from sans.common.enums import (RebinType, RangeStepType, FitType)
-from sans.state.calculate_transmission import get_calculate_transmission_builder
+from sans.state.StateObjects.StateCalculateTransmission import get_calculate_transmission_builder
 from sans.test_helper.test_director import TestDirector
 
 

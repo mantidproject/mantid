@@ -16,8 +16,8 @@ from sans.algorithm_detail.move_sans_instrument_component import move_component,
 from sans.algorithm_detail.move_workspaces import (create_mover, SANSMoveLOQ, SANSMoveSANS2D, SANSMoveLARMORNewStyle,
                                                    SANSMoveZOOM)
 from sans.common.enums import (SANSFacility, DetectorType, SANSInstrument)
-from sans.state.data import get_data_builder
-from sans.state.move import get_move_builder
+from sans.state.StateObjects.StateData import get_data_builder
+from sans.state.StateObjects.StateMoveDetectors import get_move_builder
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 

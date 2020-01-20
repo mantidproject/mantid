@@ -16,30 +16,40 @@ from sans.common.enums import SANSFacility
 from sans.state.JsonSerializable import JsonSerializable
 # Note that the compatibility state is not part of the new reduction chain, but allows us to accurately compare
 # results obtained via the old and new reduction chain
+from sans.state.StateObjects.StateAdjustment import StateAdjustment
+from sans.state.StateObjects.StateConvertToQ import StateConvertToQ
+from sans.state.StateObjects.StateData import StateData
+from sans.state.StateObjects.StateMaskDetectors import StateMask
+from sans.state.StateObjects.StateMoveDetectors import StateMove
+from sans.state.StateObjects.StateReductionMode import StateReductionMode
+from sans.state.StateObjects.StateSave import StateSave
+from sans.state.StateObjects.StateScale import StateScale
+from sans.state.StateObjects.StateSliceEvent import StateSliceEvent
+from sans.state.StateObjects.StateWavelength import StateWavelength
 from sans.state.automatic_setters import automatic_setters
-from sans.state.compatibility import get_compatibility_builder
+from sans.state.StateObjects.StateCompatibility import get_compatibility_builder, StateCompatibility
 
 
 # ----------------------------------------------------------------------------------------------------------------------
 # State
 # ----------------------------------------------------------------------------------------------------------------------
 
-class State(with_metaclass(JsonSerializable)):
+class AllStates(with_metaclass(JsonSerializable)):
 
     def __init__(self):
 
-        super(State, self).__init__()
-        self.data = None  # : StateData
-        self.move = None  # : StateMove
-        self.reduction = None  # : StateReductionMode
-        self.slice = None  # : StateSliceEvent
-        self.mask = None  # : StateMask
-        self.wavelength = None  # : StateWavelength
-        self.save = None  # : StateSave
-        self.scale = None  # : StateScale
-        self.adjustment = None  # : StateAdjustment
-        self.convert_to_q = None  # : StateConvertToQ
-        self.compatibility = None  # : StateCompatibility
+        super(AllStates, self).__init__()
+        self.data : StateData = None
+        self.move : StateMove = None
+        self.reduction : StateReductionMode = None
+        self.slice : StateSliceEvent = None
+        self.mask : StateMask = None
+        self.wavelength : StateWavelength = None
+        self.save : StateSave = None
+        self.scale : StateScale = None
+        self.adjustment : StateAdjustment = None
+        self.convert_to_q : StateConvertToQ = None
+        self.compatibility : StateCompatibility = None
 
     def validate(self):
         is_invalid = dict()
@@ -75,11 +85,11 @@ class State(with_metaclass(JsonSerializable)):
             raise ValueError("State: There is an issue with your input. See: {0}".format(json.dumps(is_invalid)))
 
 
-class StateBuilder(object):
-    @automatic_setters(State)
+class AllStatesBuilder(object):
+    @automatic_setters(AllStates)
     def __init__(self):
-        super(StateBuilder, self).__init__()
-        self.state = State()
+        super(AllStatesBuilder, self).__init__()
+        self.state = AllStates()
 
     def build(self):
         # Make sure that the product is in a valid state, ie not incomplete
@@ -90,10 +100,10 @@ class StateBuilder(object):
 # ------------------------------------------
 # Factory method for SANStateDataBuilder
 # ------------------------------------------
-def get_state_builder(data_info):
+def get_all_states_builder(data_info):
     facility = data_info.facility
     if facility is SANSFacility.ISIS:
-        return StateBuilder()
+        return AllStatesBuilder()
     else:
         raise NotImplementedError("SANSStateBuilder: Could not find any valid state builder for the "
                                   "specified SANSStateData object {0}".format(str(data_info)))

@@ -6,20 +6,20 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 """ A Test director """
 from __future__ import (absolute_import, division, print_function)
-from sans.state.data import get_data_builder
-from sans.state.move import get_move_builder
-from sans.state.reduction_mode import get_reduction_mode_builder
-from sans.state.slice_event import get_slice_event_builder
-from sans.state.mask import get_mask_builder
-from sans.state.state import get_state_builder
-from sans.state.wavelength import get_wavelength_builder
-from sans.state.save import get_save_builder
-from sans.state.normalize_to_monitor import get_normalize_to_monitor_builder
-from sans.state.scale import get_scale_builder
-from sans.state.calculate_transmission import get_calculate_transmission_builder
-from sans.state.wavelength_and_pixel_adjustment import get_wavelength_and_pixel_adjustment_builder
-from sans.state.adjustment import get_adjustment_builder
-from sans.state.convert_to_q import get_convert_to_q_builder
+from sans.state.StateObjects.StateData import get_data_builder
+from sans.state.StateObjects.StateMoveDetectors import get_move_builder
+from sans.state.StateObjects.StateReductionMode import get_reduction_mode_builder
+from sans.state.StateObjects.StateSliceEvent import get_slice_event_builder
+from sans.state.StateObjects.StateMaskDetectors import get_mask_builder
+from sans.state.AllStates import get_all_states_builder
+from sans.state.StateObjects.StateWavelength import get_wavelength_builder
+from sans.state.StateObjects.StateSave import get_save_builder
+from sans.state.StateObjects.StateNormalizeToMonitor import get_normalize_to_monitor_builder
+from sans.state.StateObjects.StateScale import get_scale_builder
+from sans.state.StateObjects.StateCalculateTransmission import get_calculate_transmission_builder
+from sans.state.StateObjects.StateWavelengthAndPixelAdjustment import get_wavelength_and_pixel_adjustment_builder
+from sans.state.StateObjects.StateAdjustment import get_adjustment_builder
+from sans.state.StateObjects.StateConvertToQ import get_convert_to_q_builder
 
 from sans.common.enums import (SANSFacility, ReductionMode, ReductionDimensionality,
                                FitModeForMerge, RebinType, RangeStepType, SaveType, FitType, SampleShape,
@@ -193,7 +193,7 @@ class TestDirector(object):
             self.convert_to_q_state = convert_to_q_builder.build()
 
         # Set the sub states on the SANSState
-        state_builder = get_state_builder(self.data_state)
+        state_builder = get_all_states_builder(self.data_state)
         state_builder.set_data(self.data_state)
         state_builder.set_move(self.move_state)
         state_builder.set_reduction(self.reduction_state)

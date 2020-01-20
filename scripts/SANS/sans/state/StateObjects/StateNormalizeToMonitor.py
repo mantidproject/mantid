@@ -136,7 +136,7 @@ class StateNormalizeToMonitor(with_metaclass(JsonSerializable)):
                         is_invalid.update(entry)
 
         if is_invalid:
-            raise ValueError("StateMoveDetector: The provided inputs are illegal. "
+            raise ValueError("StateMoveDetectors: The provided inputs are illegal. "
                              "Please see: {0}".format(json.dumps(is_invalid)))
 
 

@@ -14,9 +14,9 @@ from sans.algorithm_detail.mask_sans_workspace import mask_workspace
 from sans.common.enums import SANSFacility
 from sans.common.file_information import SANSFileInformationFactory
 from sans.state.Serializer import Serializer
-from sans.state.data import get_data_builder
-from sans.state.mask import get_mask_builder
-from sans.state.move import get_move_builder
+from sans.state.StateObjects.StateData import get_data_builder
+from sans.state.StateObjects.StateMaskDetectors import get_mask_builder
+from sans.state.StateObjects.StateMoveDetectors import get_move_builder
 from sans.test_helper.test_director import TestDirector
 
 

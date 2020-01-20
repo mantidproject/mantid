@@ -280,9 +280,6 @@ class StateCalculateTransmissionLOQ(StateCalculateTransmission):
     def validate(self):
         super(StateCalculateTransmissionLOQ, self).validate()
 
-    def set_rebin_type(self, val):
-        self.state.rebin_type = val
-
 
 class StateCalculateTransmissionSANS2D(StateCalculateTransmission):
     def __init__(self):

@@ -11,7 +11,7 @@ import math
 from mantid.api import MatrixWorkspace
 from six import with_metaclass
 from abc import (ABCMeta, abstractmethod)
-from sans.state.move import StateMove
+from sans.state.StateObjects.StateMoveDetectors import StateMove
 from sans.common.enums import CanonicalCoordinates, DetectorType, SANSInstrument
 from sans.common.general_functions import (create_unmanaged_algorithm, get_single_valued_logs_from_workspace,
                                            quaternion_to_angle_and_axis, sanitise_instrument_name)
@@ -500,6 +500,7 @@ class SANSMoveSANS2D(SANSMove):
                     hab_detector.side_correction*(1.0 - math.cos(rotation_in_radians)) +
                     (hab_detector_radius + hab_detector.radius_correction)*(math.sin(rotation_in_radians))) -
                    hab_detector_default_x_m - x)
+
         y_shift = hab_detector.y_translation_correction - y
         z_shift = (hab_detector_z + hab_detector.z_translation_correction +
                    (hab_detector_radius + hab_detector.radius_correction) * (1.0 - math.cos(rotation_in_radians)) -
