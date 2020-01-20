@@ -51,11 +51,10 @@ class PlottingWidgetPresenterFreqTest(unittest.TestCase):
                                                             plot_kwargs=plot_kwargs)
 
     def test_plot_type_changed(self):
-        self.view.get_selected.return_value = "Asymmetry"
-        self.assertEquals(self.view.get_selected(), "Asymmetry")
-
         self.view.get_selected.return_value = "Frequency Re"
+
         self.presenter.handle_plot_type_changed()
+
         self.assertEquals(self.context._frequency_context.plot_type, "Re")
 
     def test_plot_type_changed_to_time(self):

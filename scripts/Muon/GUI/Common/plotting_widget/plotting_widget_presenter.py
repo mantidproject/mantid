@@ -171,27 +171,21 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         for workspace in self._model.plotted_workspaces:
             ax = self.get_workspace_plot_axis(workspace)
             label = self.get_workspace_legend_label(workspace)
-            plot_kwargs = {'distribution': True, 'autoscale_on_update': False,
-                           'label': label}
+            plot_kwargs = {'distribution': True, 'autoscale_on_update': False, 'label': label}
             self._model.replot_workspace(workspace, ax, error_state, plot_kwargs)
 
-        self._model.autoscale_axes(self._view.get_axes(), self.get_x_limits())
         self._view.force_redraw()
 
     def handle_xlim_changed_in_options_view(self, xlims):
-        subplots = self._view.plot_options.get_selection()
-        for subplot in subplots:
-            index = int(subplot) - 1
-            self._model.set_axis_xlim(self._view.get_axes()[index], xlims)
-
+        selected_axes = self.get_selected_axes()
+        for ax in selected_axes:
+            self._model.set_axis_xlim(ax, xlims)
         self._view.force_redraw()
 
     def handle_ylim_changed_in_options_view(self, ylims):
-        subplots = self._view.plot_options.get_selection()
-        for subplot in subplots:
-            index = int(subplot) - 1
-            self._model.set_axis_ylim(self._view.get_axes()[index], ylims)
-
+        selected_axes = self.get_selected_axes()
+        for ax in selected_axes:
+            self._model.set_axis_ylim(ax, ylims)
         self._view.force_redraw()
 
     def handle_autoscale_requested_in_view(self):
@@ -533,6 +527,15 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             return xlims
         else:
             return default_xlimits[self.get_domain()]
+
+    def get_selected_axes(self):
+        subplots = self._view.plot_options.get_selection()
+        if len(subplots) > 0:
+            indices = [ix - 1 for ix in list(map(int, subplots))]
+            selected_axes = [self._view.get_axes()[index] for index in indices]
+            return selected_axes
+        else:
+            return []  # no subplots are avaiable
 
     # Note: These methods should be implemented as lower level properties
     # as currently they are specialised methods dependent on the workspace name format.
