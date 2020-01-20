@@ -17,12 +17,12 @@ import unittest
 
 from mantid.kernel import config
 from mantid.plots import MantidAxes
+from mantid.plots.legend import convert_color_to_hex
 from mantid.plots.plotfunctions import get_colorplot_extents
 from mantid.py3compat.mock import Mock, patch
 from mantid.simpleapi import (CreateWorkspace, CreateSampleWorkspace, DeleteWorkspace,
                               RemoveSpectra, AnalysisDataService as ADS)
 from mantidqt.plotting.markers import SingleMarker
-from mantidqt.widgets.plotconfigdialog.colorselector import convert_color_to_hex
 
 
 class Plots__init__Test(unittest.TestCase):
