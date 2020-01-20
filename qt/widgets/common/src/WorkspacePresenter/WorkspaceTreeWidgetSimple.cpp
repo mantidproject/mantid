@@ -121,10 +121,10 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
           }
         }
       }
-      m_plotSpectrum->setEnabled(multipleBins);
-      m_overplotSpectrum->setEnabled(multipleBins);
-      m_plotSpectrumWithErrs->setEnabled(multipleBins);
-      m_overplotSpectrumWithErrs->setEnabled(multipleBins);
+      //disable the actions created so far if only one bin
+      for (auto action : plotSubMenu->actions()) {
+        action->setEnabled(multipleBins);
+      }
 
       plotSubMenu->addSeparator();
       plotSubMenu->addAction(m_plotColorfill);
