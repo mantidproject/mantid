@@ -153,11 +153,12 @@ Integrate3DEvents::integrateStrongPeak(const IntegrationParameters &params,
   makeCovarianceMatrix(events, cov_matrix, params.regionRadius);
 
   std::vector<V3D> eigen_vectors;
-  getEigenVectors(cov_matrix, eigen_vectors);
+  std::vector<double> eigen_values;
+  getEigenVectors(cov_matrix, eigen_vectors,eigen_values);
 
   std::vector<double> sigmas(3);
   for (int i = 0; i < 3; i++) {
-    sigmas[i] = stdDev(events, eigen_vectors[i], params.regionRadius);
+    sigmas[i] = sqrt(eigen_values[i]);
   }
 
   bool invalid_peak =
@@ -303,11 +304,12 @@ double Integrate3DEvents::estimateSignalToNoiseRatio(
   makeCovarianceMatrix(events, cov_matrix, params.regionRadius);
 
   std::vector<V3D> eigen_vectors;
-  getEigenVectors(cov_matrix, eigen_vectors);
+  std::vector<double> eigen_values;
+  getEigenVectors(cov_matrix, eigen_vectors, eigen_values);
 
   std::vector<double> sigmas(3);
   for (int i = 0; i < 3; i++) {
-    sigmas[i] = stdDev(events, eigen_vectors[i], params.regionRadius);
+    sigmas[i] = sqrt(eigen_values[i]);
   }
 
   const auto max_sigma = *std::max_element(sigmas.begin(), sigmas.end());
@@ -462,11 +464,12 @@ Integrate3DEvents::ellipseIntegrateEvents(
   makeCovarianceMatrix(some_events, cov_matrix, m_radius);
 
   std::vector<V3D> eigen_vectors;
-  getEigenVectors(cov_matrix, eigen_vectors);
+  std::vector<double> eigen_values;
+  getEigenVectors(cov_matrix, eigen_vectors,eigen_values);
 
   std::vector<double> sigmas(3);
   for (int i = 0; i < 3; i++) {
-    sigmas[i] = stdDev(some_events, eigen_vectors[i], m_radius);
+    sigmas[i] = sqrt(eigen_values[i]);
   }
 
   bool invalid_peak =
@@ -523,11 +526,12 @@ Integrate3DEvents::ellipseIntegrateModEvents(
     makeCovarianceMatrix(some_events, cov_matrix, s_radius);
 
   std::vector<V3D> eigen_vectors;
-  getEigenVectors(cov_matrix, eigen_vectors);
+  std::vector<double> eigen_values;
+  getEigenVectors(cov_matrix, eigen_vectors,eigen_values);
 
   std::vector<double> sigmas(3);
   for (int i = 0; i < 3; i++)
-    sigmas[i] = stdDev(some_events, eigen_vectors[i], m_radius);
+    sigmas[i] = sqrt(eigen_values[i]);
 
   bool invalid_peak =
       std::any_of(sigmas.cbegin(), sigmas.cend(), [](const double sigma) {
@@ -686,7 +690,8 @@ void Integrate3DEvents::makeCovarianceMatrix(
  *                        in this list.
  */
 void Integrate3DEvents::getEigenVectors(DblMatrix const &cov_matrix,
-                                        std::vector<V3D> &eigen_vectors) {
+                                        std::vector<V3D> &eigen_vectors,
+                                        std::vector<double> &eigen_values) {
   unsigned int size = 3;
 
   gsl_matrix *matrix = gsl_matrix_alloc(size, size);
@@ -707,50 +712,13 @@ void Integrate3DEvents::getEigenVectors(DblMatrix const &cov_matrix,
     eigen_vectors.emplace_back(gsl_matrix_get(eigen_vec, 0, col),
                                gsl_matrix_get(eigen_vec, 1, col),
                                gsl_matrix_get(eigen_vec, 2, col));
+    eigen_values.emplace_back(gsl_vector_get(eigen_val, col));
   }
 
   gsl_matrix_free(matrix);
   gsl_vector_free(eigen_val);
   gsl_matrix_free(eigen_vec);
   gsl_eigen_symmv_free(wkspace);
-}
-
-/**
- *  Calculate the standard deviation of the given list of 3D events in
- *  the direction of the specified vector.  Only events that are within
- *  the specified radius of 0,0,0 will be considered.
- *
- *  @param  events      List of 3D events centered at 0,0,0
- *  @param  direction   Unit vector giving the direction vector on which
- *                      the 3D events will be projected.
- *  @param  radius      Maximun size of event vectors that will be used
- *                      in calculating the standard deviation.
- */
-double Integrate3DEvents::stdDev(
-    std::vector<std::pair<std::pair<double, double>, V3D>> const &events,
-    V3D const &direction, double radius) {
-  double sum = 0;
-  double sum_sq = 0;
-  double stdev = 0;
-  int count = 0;
-
-  for (const auto &value : events) {
-    const auto &event = value.second;
-    if (event.norm() <= radius) {
-      double dot_prod = event.scalar_prod(direction);
-      sum += dot_prod;
-      sum_sq += dot_prod * dot_prod;
-      count++;
-    }
-  }
-
-  if (count > 1) {
-    double ave = sum / count;
-    stdev = sqrt((sum_sq / count - ave * ave) * static_cast<double>(count) /
-                 (count - 1.0));
-  }
-
-  return stdev;
 }
 
 /**
