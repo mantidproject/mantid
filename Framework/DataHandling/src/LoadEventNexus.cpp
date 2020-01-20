@@ -1082,7 +1082,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     binEdgesVec[0] = shortest_tof - 1;
     binEdgesVec[nBins] = longest_tof + 1;
     double binStep = (binEdgesVec[nBins] - binEdgesVec[0]) / nBins;
-    for (size_t binIndex = 1; binIndex < nBins; binIndex++) {
+    for (int binIndex = 1; binIndex < nBins; binIndex++) {
       binEdgesVec[binIndex] = binEdgesVec[0] + (binStep * binIndex);
     }
     m_ws->setAllX(HistogramData::BinEdges{binEdgesVec});
