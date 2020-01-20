@@ -31,6 +31,11 @@ public:
     TS_ASSERT(!model.getFitFunction());
   }
 
+  void test_clear() {
+    ConvolutionFunctionModel model;
+    model.clear();
+  }
+
   void test_no_convolution() {
     ConvolutionFunctionModel model;
     TS_ASSERT_THROWS_EQUALS(
@@ -92,7 +97,7 @@ public:
     ConvolutionFunctionModel model;
     TS_ASSERT_THROWS_NOTHING(
         model.setFunctionString("name=LinearBackground;(composite=Convolution;"
-                                "name=Resolution;name=Gaussian)"));
+                                "name=Resolution;name=Lorentzian)"));
     TS_ASSERT_EQUALS(model.backgroundPrefix()->toStdString(), "f0.");
     TS_ASSERT_EQUALS(model.convolutionPrefix()->toStdString(), "f1.");
     TS_ASSERT_EQUALS(model.resolutionWorkspace(), "");
@@ -399,21 +404,21 @@ public:
         "composite=MultiDomainFunction,NumDeriv=true;(composite="
         "CompositeFunction,NumDeriv=false,$domains=i;name=FlatBackground,A0=0;("
         "composite=Convolution,FixResolution=true,NumDeriv=true;name="
-        "Resolution,Workspace=abc,WorkspaceIndex=1,X=(),Y=();(composite="
-        "ProductFunction,NumDeriv=false;name=UserFunction,Formula=x*11.606/"
-        "Temp/(1-exp( "
+        "Resolution,Workspace=abc,WorkspaceIndex=1,X=(),Y=();(name="
+        "DeltaFunction,Height=1,Centre=0;(composite=ProductFunction,NumDeriv="
+        "false;name=UserFunction,Formula=x*11.606/Temp/(1-exp( "
         "-(x*11.606/"
         "Temp))),Temp=100,ties=(Temp=100);(name=Lorentzian,Amplitude=1,"
-        "PeakCentre=0,FWHM=0;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0;"
-        "name=DeltaFunction,Height=1,Centre=0))));(composite=CompositeFunction,"
-        "NumDeriv=false,$domains=i;name=FlatBackground,A0=0;(composite="
-        "Convolution,FixResolution=true,NumDeriv=true;name=Resolution,"
-        "Workspace=abc,WorkspaceIndex=2,X=(),Y=();(composite=ProductFunction,"
+        "PeakCentre=0,FWHM=0;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0)))"
+        "));(composite=CompositeFunction,NumDeriv=false,$domains=i;name="
+        "FlatBackground,A0=0;(composite=Convolution,FixResolution=true,"
+        "NumDeriv=true;name=Resolution,Workspace=abc,WorkspaceIndex=2,X=(),Y=()"
+        ";(name=DeltaFunction,Height=1,Centre=0;(composite=ProductFunction,"
         "NumDeriv=false;name=UserFunction,Formula=x*11.606/Temp/(1-exp( "
         "-(x*11.606/"
         "Temp))),Temp=100,ties=(Temp=100);(name=Lorentzian,Amplitude=1,"
-        "PeakCentre=0,FWHM=0;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0;"
-        "name=DeltaFunction,Height=1,Centre=0))))");
+        "PeakCentre=0,FWHM=0;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0)))"
+        "))");
   }
 
   void test_component_prefixes_set_correctly_without_temp_correction() {
@@ -519,6 +524,33 @@ public:
     TS_ASSERT_EQUALS(model.peakPrefixes().value()[0].toStdString(),
                      "f1.f1.f1.");
     TS_ASSERT_EQUALS(model.tempFunctionPrefix().value().toStdString(),
+                     "f1.f1.f0.");
+  }
+
+  void test_component_prefixes_if_temp_and_delta_set() {
+    auto algo = FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
+    algo->initialize();
+    algo->setPropertyValue("DataX", "1,2,3");
+    algo->setPropertyValue("DataY", "1,2,3");
+    algo->setPropertyValue("OutputWorkspace", "abc");
+    algo->execute();
+    ConvolutionFunctionModel model;
+    model.setNumberDomains(2);
+    auto pair1 = std::make_pair<std::string, int>("abc", 1);
+    auto pair2 = std::make_pair<std::string, int>("abc", 2);
+    auto fitResolutions = std::vector<std::pair<std::string, int>>();
+    fitResolutions.emplace_back(pair1);
+    fitResolutions.emplace_back(pair2);
+
+    model.setModel("name=FlatBackground", fitResolutions, "name=Lorentzian",
+                   true, std::vector<double>(), false, true);
+    TS_ASSERT_EQUALS(model.backgroundPrefix().value().toStdString(), "f0.");
+    TS_ASSERT_EQUALS(model.convolutionPrefix().value().toStdString(), "f1.");
+    TS_ASSERT_EQUALS(model.peakPrefixes().value()[0].toStdString(),
+                     "f1.f1.f1.f1.");
+    TS_ASSERT_EQUALS(model.tempFunctionPrefix().value().toStdString(),
+                     "f1.f1.f1.f0.");
+    TS_ASSERT_EQUALS(model.deltaFunctionPrefix().value().toStdString(),
                      "f1.f1.f0.");
   }
 };

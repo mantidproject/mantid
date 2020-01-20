@@ -49,7 +49,10 @@ public:
 
 private:
   void findComponentPrefixes();
-  void findConvolutionPrefixes(const IFunction_sptr &fun);
+  //  void findConvolutionPrefixes(const IFunction_sptr &fun);
+  void iterateThroughFunction(IFunction *func,
+                              const QString &prefix);
+  void setPrefix(IFunction *func, const QString &prefix);
   CompositeFunction_sptr createInnerFunction(std::string peaksFunction,
                                              bool hasDeltaFunction,
                                              bool isQDependent, double q,

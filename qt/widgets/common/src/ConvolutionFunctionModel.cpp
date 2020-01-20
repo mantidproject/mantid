@@ -24,25 +24,28 @@ using namespace Mantid::API;
 
 namespace {
 
-bool isConvolution(const IFunction_sptr &fun) {
-  return fun->name() == "Convolution";
-}
+bool isConvolution(const IFunction *fun) { return fun->name() == "Convolution"; }
 
-bool isResolution(const IFunction_sptr &fun) {
-  return fun->name() == "Resolution";
-}
+bool isResolution(const IFunction *fun) { return fun->name() == "Resolution"; }
 
-bool isDeltaFunction(const IFunction_sptr &fun) {
+bool isDeltaFunction(const IFunction *fun) {
   return fun->name() == "DeltaFunction";
 }
 
-bool isProductFunction(const IFunction_sptr &fun) {
-  return fun->name() == "ProductFunction";
+bool isTempFunction(const IFunction *fun) {
+  return fun->name() == "UserFunction";
 }
 
-bool isBackground(const IFunction_sptr &fun) {
+bool isBackground(const IFunction *fun) {
   return static_cast<bool>(
-      boost::dynamic_pointer_cast<const IBackgroundFunction>(fun));
+      dynamic_cast<const IBackgroundFunction*>(fun));
+}
+
+bool isPeakFunction(const IFunction *fun) {
+  if(dynamic_cast<const CompositeFunction*>(fun)){
+    return false;
+  }
+  return true;
 }
 
 } // namespace
@@ -81,17 +84,17 @@ void ConvolutionFunctionModel::setModel(
   for (int i = 0; i < nf; ++i) {
     CompositeFunction_sptr domainFunction;
     auto qValue = qValues.empty() ? 0.0 : qValues[i];
-    domainFunction = createInnerFunction(peaks, hasDeltaFunction, isQDependent,
-                                         qValue, hasTempCorrection);
+    auto innerFunction = createInnerFunction(
+        peaks, hasDeltaFunction, isQDependent, qValue, hasTempCorrection);
     auto workspace =
         resolutionWorkspaces.empty() ? "" : resolutionWorkspaces[i].first;
     auto workspaceIndex =
         resolutionWorkspaces.empty() ? 0 : resolutionWorkspaces[i].second;
     auto resolutionFunction =
         createResolutionFunction(workspace, workspaceIndex);
-    domainFunction =
-        createConvolutionFunction(resolutionFunction, domainFunction);
-    domainFunction = addBackground(domainFunction, background);
+    auto convolutionFunction =
+        createConvolutionFunction(resolutionFunction, innerFunction);
+    domainFunction = addBackground(convolutionFunction, background);
 
     fitFunction->addFunction(domainFunction);
     fitFunction->setDomainIndex(i, i);
@@ -142,13 +145,23 @@ CompositeFunction_sptr ConvolutionFunctionModel::createInnerFunction(
       innerFunction->setAttribute("Q", attr);
     }
   }
+
+  if (hasTempCorrection) {
+    innerFunction = addTempCorrection(innerFunction);
+  }
+
   if (hasDeltaFunction) {
     auto deltaFunction =
         FunctionFactory::Instance().createFunction("DeltaFunction");
-    innerFunction->addFunction(deltaFunction);
-  }
-  if (hasTempCorrection) {
-    innerFunction = addTempCorrection(innerFunction);
+    if (!hasTempCorrection) {
+      innerFunction->addFunction(deltaFunction);
+    } else {
+      CompositeFunction_sptr innerFunctionNew =
+          boost::make_shared<CompositeFunction>();
+      innerFunctionNew->addFunction(deltaFunction);
+      innerFunctionNew->addFunction(innerFunction);
+      return innerFunctionNew;
+    }
   }
 
   return innerFunction;
@@ -208,92 +221,62 @@ void ConvolutionFunctionModel::findComponentPrefixes() {
   m_convolutionPrefix.reset();
   m_deltaFunctionPrefix.reset();
   m_tempFunctionPrefix.reset();
-  m_peakPrefixes.reset();
+  m_peakPrefixes = QStringList();
   m_resolutionWorkspace.clear();
   m_resolutionWorkspaceIndex = 0;
+
   auto function = getCurrentFunction();
-  if (!function)
+  if(!function)
     return;
-  if (function->nFunctions() == 0) {
-    if (!isConvolution(function)) {
-      throw std::runtime_error("Model doesn't contain a convolution.");
-    }
-    m_convolutionPrefix = "";
-    return;
-  }
-  if (isConvolution(function)) {
-    m_convolutionPrefix = "";
-    findConvolutionPrefixes(function);
-    return;
-  }
-  for (size_t i = 0; i < function->nFunctions(); ++i) {
-    auto const fun = function->getFunction(i);
-    if (isBackground(fun)) {
-      if (m_backgroundPrefix) {
-        throw std::runtime_error("Model cannot have more than one background.");
-      }
-      m_backgroundPrefix = QString("f%1.").arg(i);
-    } else if (isConvolution(fun)) {
-      if (m_convolutionPrefix) {
-        throw std::runtime_error(
-            "Model cannot have more than one convolution.");
-      }
-      m_convolutionPrefix = QString("f%1.").arg(i);
-      findConvolutionPrefixes(fun);
-    }
+  iterateThroughFunction(function.get(), QString());
+
+  if (m_peakPrefixes->isEmpty()) {
+    m_peakPrefixes.reset();
   }
   if (!m_convolutionPrefix) {
     throw std::runtime_error("Model doesn't contain a convolution.");
   }
 }
 
-void ConvolutionFunctionModel::findConvolutionPrefixes(
-    const IFunction_sptr &fun) {
-  auto const nf = fun->nFunctions();
-  if (nf == 0)
+void ConvolutionFunctionModel::iterateThroughFunction(IFunction *func,
+                                                      const QString &prefix) {
+  auto numberOfSubFunction = func->nFunctions();
+
+  setPrefix(func, prefix);
+  if (numberOfSubFunction == 0) {
     return;
-  auto const resolution = fun->getFunction(0);
-  if (!isResolution(resolution)) {
-    throw std::runtime_error(
-        "Model's resolution function must have type Resolution.");
   }
-  m_resolutionWorkspace = resolution->getAttribute("Workspace").asString();
-  m_resolutionWorkspaceIndex =
-      resolution->getAttribute("WorkspaceIndex").asInt();
-  if (nf == 1)
-    return;
-  auto model = fun->getFunction(1);
-  QString convolutionPrefix = "f1.";
-  if (isProductFunction(model)) {
-    model = model->getFunction(1);
-    convolutionPrefix = "f1.f1.";
-    m_tempFunctionPrefix = *m_convolutionPrefix + "f1.f0.";
+  for (size_t k = 0; k < numberOfSubFunction; ++k) {
+    iterateThroughFunction(func->getFunction(k).get(),
+                           prefix + QString("f%1.").arg(k));
   }
-  auto const nm = model->nFunctions();
-  if (nm == 0) {
-    auto const prefix = *m_convolutionPrefix + convolutionPrefix;
-    if (isDeltaFunction(model)) {
-      m_deltaFunctionPrefix = prefix;
-    } else {
-      m_peakPrefixes = QStringList(prefix);
+}
+
+void ConvolutionFunctionModel::setPrefix(IFunction *func,
+                                         const QString &prefix) {
+  if (isBackground(func)) {
+    if (m_backgroundPrefix) {
+      throw std::runtime_error("Model cannot have more than one background.");
     }
-  } else {
-    m_peakPrefixes = QStringList();
-    for (size_t j = 0; j < model->nFunctions(); ++j) {
-      auto const prefix =
-          *m_convolutionPrefix + convolutionPrefix + QString("f%1.").arg(j);
-      if (isDeltaFunction(model->getFunction(j))) {
-        m_deltaFunctionPrefix = prefix;
-      } else {
-        m_peakPrefixes->append(prefix);
-      }
+    m_backgroundPrefix = prefix;
+  } else if (isConvolution(func)) {
+    if (func->nFunctions() != 0 && func->getFunction(0)->name() != "Resolution") {
+      throw std::runtime_error(
+          "Model's resolution function must have type Resolution.");
+    } else if (func->nFunctions() == 0) {
+      m_resolutionWorkspace = "";
+      m_resolutionWorkspaceIndex = 0;
     }
-    if (m_peakPrefixes->isEmpty()) {
-      m_peakPrefixes.reset();
-    }
-  }
-  if (!m_convolutionPrefix) {
-    throw std::runtime_error("Model doesn't contain a convolution.");
+    m_convolutionPrefix = prefix;
+  } else if (isDeltaFunction(func)) {
+    m_deltaFunctionPrefix = prefix;
+  } else if (isTempFunction(func)) {
+    m_tempFunctionPrefix = prefix;
+  } else if (isResolution(func)) {
+    m_resolutionWorkspace = func->getAttribute("Workspace").asString();
+    m_resolutionWorkspaceIndex = func->getAttribute("WorkspaceIndex").asInt();
+  } else if (isPeakFunction(func)) {
+    m_peakPrefixes->append(prefix);
   }
 }
 
