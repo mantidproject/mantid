@@ -99,14 +99,14 @@ if(MSVC)
     set(PYTHON_VERSION_MAJOR 2)
     set(PYTHON_VERSION_MINOR 7)
   endif()
-  set(_python_dir ${THIRD_PARTY_DIR}/lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
-  set(PYTHON_EXECUTABLE ${_python_dir}/python.exe CACHE FILEPATH "Location of python executable" FORCE)
-  set(PYTHONW_EXECUTABLE "${_python_dir}/pythonw.exe" CACHE FILEPATH
+  # used in later parts for MSVC to bundle Python
+  set(MSVC_PYTHON_EXECUTABLE_DIR ${THIRD_PARTY_DIR}/lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
+  set(PYTHON_EXECUTABLE ${MSVC_PYTHON_EXECUTABLE_DIR}/python.exe CACHE FILEPATH "Location of python executable" FORCE)
+  set(PYTHONW_EXECUTABLE "${MSVC_PYTHON_EXECUTABLE_DIR}/pythonw.exe" CACHE FILEPATH
       "The location of the pythonw executable. This suppresses the new terminal window on startup" FORCE )
   set(THIRD_PARTY_BIN
-      "${THIRD_PARTY_DIR}/bin;${THIRD_PARTY_DIR}/lib/qt4/bin;${THIRD_PARTY_DIR}/lib/qt5/bin;${_python_dir}"
+      "${THIRD_PARTY_DIR}/bin;${THIRD_PARTY_DIR}/lib/qt4/bin;${THIRD_PARTY_DIR}/lib/qt5/bin;${MSVC_PYTHON_EXECUTABLE_DIR}"
   )
-  unset(_python_dir)
   message(STATUS "Third party dependencies are in ${THIRD_PARTY_DIR}")
   # Add to the path so that cmake can configure correctly without the user
   # having to do it
