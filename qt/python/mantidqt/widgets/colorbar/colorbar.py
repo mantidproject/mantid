@@ -8,22 +8,24 @@
 #
 #
 from __future__ import (absolute_import, division, print_function)
-from qtpy.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QComboBox, QCheckBox, QLabel
-from qtpy.QtCore import Signal
-from qtpy.QtGui import QDoubleValidator
+
+from mantid.plots.utility import mpl_version_info
+from mantidqt.MPLwidgets import FigureCanvas
 from matplotlib.colorbar import Colorbar
 from matplotlib.figure import Figure
-from mantidqt.MPLwidgets import FigureCanvas
 from matplotlib.colors import Normalize, SymLogNorm, PowerNorm
 from matplotlib import cm
 import numpy as np
+from qtpy.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QComboBox, QCheckBox, QLabel
+from qtpy.QtCore import Signal
+from qtpy.QtGui import QDoubleValidator
 
 
 NORM_OPTS = ["Linear", "SymmetricLog10", "Power"]
 
 
 class ColorbarWidget(QWidget):
-    colorbarChanged = Signal() # The parent should simply redraw their canvas
+    colorbarChanged = Signal()  # The parent should simply redraw their canvas
 
     def __init__(self, parent=None):
         super(ColorbarWidget, self).__init__(parent)
@@ -108,18 +110,21 @@ class ColorbarWidget(QWidget):
             except AttributeError: # else default
                 cmap = None
         self.colorbar = Colorbar(ax=self.ax, mappable=mappable)
-        self.cmin_value, self.cmax_value = self.colorbar.get_clim()
+        self.cmin_value, self.cmax_value = mappable.get_clim()
         self.update_clim_text()
         self.cmap_changed(cmap)
-        self.cmap.setCurrentIndex(sorted(cm.cmap_d.keys()).index(self.colorbar.get_cmap().name))
+        self.cmap.setCurrentIndex(sorted(cm.cmap_d.keys()).index(mappable.get_cmap().name))
         self.redraw()
 
     def cmap_index_changed(self):
         self.cmap_changed(self.cmap.currentText())
 
     def cmap_changed(self, name):
-        self.colorbar.set_cmap(name)
         self.colorbar.mappable.set_cmap(name)
+        if mpl_version_info() >= (3, 1):
+            self.colorbar.update_normal(self.colorbar.mappable)
+        else:
+            self.colorbar.set_cmap(name)
         self.redraw()
 
     def mappable_changed(self):
@@ -128,13 +133,11 @@ class ColorbarWidget(QWidget):
         when the plot changes via settings.
         """
         mappable_cmap = self.colorbar.mappable.get_cmap()
-        low,high = self.colorbar.mappable.get_clim()
-        self.colorbar.set_cmap(mappable_cmap)
-        self.colorbar.set_clim(low,high)
+        low, high = self.colorbar.mappable.get_clim()
         self.cmin_value = low
         self.cmax_value = high
         self.update_clim_text()
-        self.cmap.setCurrentIndex(sorted(cm.cmap_d.keys()).index(self.colorbar.get_cmap().name))
+        self.cmap.setCurrentIndex(sorted(cm.cmap_d.keys()).index(mappable_cmap.name))
         self.redraw()
 
     def norm_changed(self):
@@ -208,9 +211,9 @@ class ColorbarWidget(QWidget):
                 cmax = float(self.cmax.text())
                 if cmax > self.cmin_value:
                     self.cmax_value = cmax
-                else: #reset values back
+                else:  # reset values back
                     self.update_clim_text()
-        self.colorbar.set_clim(self.cmin_value, self.cmax_value)
+        self.colorbar.mappable.set_clim(self.cmin_value, self.cmax_value)
         self.redraw()
 
     def update_clim_text(self):
