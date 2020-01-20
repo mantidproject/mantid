@@ -284,46 +284,38 @@ class CalibrationModel(object):
         :param bank: Optional parameter to crop by bank
         :param spectrum_numbers: Optional parameter to crop using spectrum numbers.
         """
-        def generate_both_banks_file(difc_list, tzero_list):
-            file_path = calibration_dir + self._generate_output_file_name(
-                vanadium_path, sample_path, instrument, bank="all")
-            write_ENGINX_GSAS_iparam_file(file_path,
-                                          difc_list,
-                                          tzero_list,
-                                          ceria_run=sample_path,
-                                          vanadium_run=vanadium_path)
+        kwargs = {"ceria_run": sample_path, "vanadium_run": vanadium_path}
 
-        def generate_north_or_custom_bank_file(difc_north, tzero_north, bank_name="north"):
-            file_path = calibration_dir + self._generate_output_file_name(
-                vanadium_path, sample_path, instrument, bank=bank_name)
-            write_ENGINX_GSAS_iparam_file(file_path, [difc_north], [tzero_north],
-                                          ceria_run=sample_path,
-                                          vanadium_run=vanadium_path,
-                                          template_file=NORTH_BANK_TEMPLATE_FILE,
-                                          bank_names=["North"])
+        def south_kwargs():
+            kwargs["template_file"] = SOUTH_BANK_TEMPLATE_FILE
+            kwargs["bank_names"] = ["South"]
 
-        def generate_south_bank_file(difc_south, tzero_south):
-            file_path = calibration_dir + self._generate_output_file_name(
-                vanadium_path, sample_path, instrument, bank="south")
-            write_ENGINX_GSAS_iparam_file(file_path, [difc_south], [tzero_south],
-                                          ceria_run=sample_path,
-                                          vanadium_run=vanadium_path,
-                                          template_file=SOUTH_BANK_TEMPLATE_FILE,
-                                          bank_names=["South"])
+        def north_kwargs():
+            kwargs["template_file"] = NORTH_BANK_TEMPLATE_FILE
+            kwargs["bank_names"] = ["North"]
+
+        def generate_output_file(difc_list, tzero_list, bank_name, kwargs_to_pass):
+            file_path = calibration_dir + self._generate_output_file_name(vanadium_path, sample_path, instrument, bank=bank_name)
+            write_ENGINX_GSAS_iparam_file(file_path, difc_list, tzero_list, **kwargs_to_pass)
 
         if not path.exists(calibration_dir):
             makedirs(calibration_dir)
 
         if bank is None and spectrum_numbers is None:
-            generate_both_banks_file(difc, tzero)
-            generate_north_or_custom_bank_file(difc[0], tzero[0])
-            generate_south_bank_file(difc[1], tzero[1])
+            generate_output_file(difc, tzero, "all", kwargs)
+            north_kwargs()
+            generate_output_file([difc[0]], [tzero[0]], "north", kwargs)
+            south_kwargs()
+            generate_output_file([difc[1]], [tzero[1]], "south", kwargs)
         elif bank == "1":
-            generate_north_or_custom_bank_file(difc[0], tzero[0])
+            north_kwargs()
+            generate_output_file([difc[0]], [tzero[0]], "north", kwargs)
         elif bank == "2":
-            generate_south_bank_file(difc[0], tzero[0])
-        elif bank is None:
-            generate_north_or_custom_bank_file(difc[0], tzero[0], "cropped")
+            south_kwargs()
+            generate_output_file([difc[0]], [tzero[0]], "south", kwargs)
+        elif bank is None:  # Custom cropped files use the north bank template.
+            north_kwargs()
+            generate_output_file([difc[0]], [tzero[0]], "cropped", kwargs)
 
     @staticmethod
     def get_info_from_file(file_path):
