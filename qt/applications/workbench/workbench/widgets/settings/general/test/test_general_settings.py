@@ -157,18 +157,18 @@ class GeneralSettingsTest(unittest.TestCase):
         # load current setting is called automatically in the constructor
         GeneralSettings(None)
 
-        # calls().__int__() are the calls to int() on the retrieved value from ConfigService.getString
-        # In python 3.8 it falls back to __index__() if __int__() is not defined
-        if sys.version_info < (3, 8):
+        # calls().__bool__() are the calls to bool() on the retrieved value from ConfigService.getString
+        # In python 3 it __bool__ is called otherwise __nonzero__ is used
+        if sys.version_info < (3,):
             mock_CONF.get.assert_has_calls([call(GeneralSettings.PROMPT_SAVE_ON_CLOSE),
-                                            call().__int__(),
+                                            call().__nonzero__(),
                                             call(GeneralSettings.PROMPT_SAVE_EDITOR_MODIFIED),
-                                            call().__int__()])
+                                            call().__nonzero__()])
         else:
             mock_CONF.get.assert_has_calls([call(GeneralSettings.PROMPT_SAVE_ON_CLOSE),
-                                            call().__index__(),
+                                            call().__bool__(),
                                             call(GeneralSettings.PROMPT_SAVE_EDITOR_MODIFIED),
-                                            call().__index__()])
+                                            call().__bool__()])
 
         mock_ConfigService.getString.assert_has_calls([call(GeneralSettings.PR_RECOVERY_ENABLED),
                                                        call(GeneralSettings.PR_TIME_BETWEEN_RECOVERY),
