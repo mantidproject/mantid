@@ -73,10 +73,8 @@ public:
   }
 
   void testReductionResumedWithNoSelection() {
-    auto jobRunner = makeJobRunner();
-    jobRunner.notifyAutoreductionResumed();
-    auto groupOne = makeGroupWithOneRow();
-    auto groupTwo = makeGroupWithOneRow();
+    auto jobRunner = makeJobRunner(twoGroupsWithARowModel());
+    jobRunner.notifyReductionResumed();
     TS_ASSERT_EQUALS(jobRunner.isProcessing(), true);
     TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
     TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, false);
@@ -86,12 +84,10 @@ public:
   }
 
   void testReductionResumedWithBothGroupsSelected() {
-    auto jobRunner = makeJobRunner();
-    jobRunner.notifyAutoreductionResumed();
-    auto groupOne = makeGroupWithOneRow();
-    auto groupTwo = makeGroupWithOneRow();
+    auto jobRunner = makeJobRunner(twoGroupsWithARowModel());
     selectGroup(jobRunner, 0);
     selectGroup(jobRunner, 1);
+    jobRunner.notifyReductionResumed();
     TS_ASSERT_EQUALS(jobRunner.isProcessing(), true);
     TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
     TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, true);
@@ -101,13 +97,10 @@ public:
   }
 
   void testReductionResumedWithBothGroupsSelectedAndEmptyGroupNotSelected() {
-    auto jobRunner = makeJobRunner();
-    jobRunner.notifyAutoreductionResumed();
-    auto groupOne = makeGroupWithOneRow();
-    auto groupTwo = makeGroupWithOneRow();
-    auto emptyGroup = makeEmptyGroup();
+    auto jobRunner = makeJobRunner(twoGroupsWithTwoRowsAndOneEmptyGroupModel());
     selectGroup(jobRunner, 0);
     selectGroup(jobRunner, 1);
+    jobRunner.notifyReductionResumed();
     TS_ASSERT_EQUALS(jobRunner.isProcessing(), true);
     TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
     TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, true);
@@ -117,12 +110,10 @@ public:
   }
 
   void testReductionResumedWithGroupAndRowSelected() {
-    auto jobRunner = makeJobRunner();
-    jobRunner.notifyAutoreductionResumed();
-    auto groupOne = makeGroupWithOneRow();
-    auto groupTwo = makeGroupWithOneRow();
+    auto jobRunner = makeJobRunner(twoGroupsWithARowModel());
     selectGroup(jobRunner, 0);
     selectRow(jobRunner, 1, 0);
+    jobRunner.notifyReductionResumed();
     TS_ASSERT_EQUALS(jobRunner.isProcessing(), true);
     TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
     TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, true);
@@ -131,13 +122,12 @@ public:
     verifyAndClear();
   }
 
-  void testReductionResumedWithGroupAndNonEmptyRowSelected() {
-    auto jobRunner = makeJobRunner();
-    jobRunner.notifyAutoreductionResumed();
-    auto groupOne = makeGroupWithOneRow();
-    auto groupTwo = makeGroupWithOneRowAndOneEmptyRow();
+  void testReductionResumedWithGroupAndNonInvalidRowSelected() {
+    auto jobRunner = makeJobRunner(
+        oneGroupWithOneRowAndOneGroupWithOneRowAndOneInvalidRowModel());
     selectGroup(jobRunner, 0);
     selectRow(jobRunner, 1, 0);
+    jobRunner.notifyReductionResumed();
     TS_ASSERT_EQUALS(jobRunner.isProcessing(), true);
     TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
     TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, true);
@@ -147,12 +137,10 @@ public:
   }
 
   void testReductionResumedWithAllRowsSelected() {
-    auto jobRunner = makeJobRunner();
-    jobRunner.notifyAutoreductionResumed();
-    auto groupOne = makeGroupWithOneRow();
-    auto groupTwo = makeGroupWithOneRow();
+    auto jobRunner = makeJobRunner(twoGroupsWithARowModel());
     selectRow(jobRunner, 0, 0);
     selectRow(jobRunner, 1, 0);
+    jobRunner.notifyReductionResumed();
     TS_ASSERT_EQUALS(jobRunner.isProcessing(), true);
     TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
     TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, true);
@@ -161,13 +149,11 @@ public:
     verifyAndClear();
   }
 
-  void testReductionResumedWithAllNonEmptyRowsSelected() {
-    auto jobRunner = makeJobRunner();
-    jobRunner.notifyAutoreductionResumed();
-    auto groupOne = makeGroupWithOneRowAndOneEmptyRow();
-    auto groupTwo = makeGroupWithOneRowAndOneEmptyRow();
+  void testReductionResumedWithAllNonInvalidRowsSelected() {
+    auto jobRunner = makeJobRunner(twoGroupsWithOneRowAndOneInvalidRowModel());
     selectRow(jobRunner, 0, 0);
     selectRow(jobRunner, 1, 0);
+    jobRunner.notifyReductionResumed();
     TS_ASSERT_EQUALS(jobRunner.isProcessing(), true);
     TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
     TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, true);
@@ -177,12 +163,10 @@ public:
   }
 
   void testReductionResumedWithSomeRowsSelected() {
-    auto jobRunner = makeJobRunner();
-    jobRunner.notifyAutoreductionResumed();
-    auto groupOne = makeGroupWithTwoRows();
-    auto groupTwo = makeGroupWithTwoRows();
+    auto jobRunner = makeJobRunner(twoGroupsWithTwoRowsModel());
     selectRow(jobRunner, 0, 1);
     selectRow(jobRunner, 1, 0);
+    jobRunner.notifyReductionResumed();
     TS_ASSERT_EQUALS(jobRunner.isProcessing(), true);
     TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
     TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, true);
@@ -192,12 +176,10 @@ public:
   }
 
   void testReductionResumedWithGroupAndSomeRowsSelected() {
-    auto jobRunner = makeJobRunner();
-    jobRunner.notifyAutoreductionResumed();
-    auto groupOne = makeGroupWithTwoRows();
-    auto groupTwo = makeGroupWithTwoRows();
+    auto jobRunner = makeJobRunner(twoGroupsWithTwoRowsModel());
     selectGroup(jobRunner, 0);
     selectRow(jobRunner, 1, 0);
+    jobRunner.notifyReductionResumed();
     TS_ASSERT_EQUALS(jobRunner.isProcessing(), true);
     TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
     TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, true);

@@ -35,6 +35,8 @@ public:
 
   void setSelectedRowLocations(
       std::vector<MantidWidgets::Batch::RowLocation> selected);
+  void appendSelectedRowLocations(
+      MantidWidgets::Batch::RowLocation selectedRowLocation);
   template <typename T>
   bool isInSelection(T const &item,
                      std::vector<MantidWidgets::Batch::RowLocation> const

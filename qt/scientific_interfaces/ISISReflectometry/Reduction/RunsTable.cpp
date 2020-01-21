@@ -36,6 +36,10 @@ void RunsTable::setSelectedRowLocations(std::vector<RowLocation> selected) {
   m_selectedRowLocations = std::move(selected);
 }
 
+void RunsTable::appendSelectedRowLocations(RowLocation selectedRowLocation) {
+  m_selectedRowLocations.emplace_back(selectedRowLocation);
+}
+
 void RunsTable::resetState() { m_reductionJobs.resetState(); }
 
 void RunsTable::resetSkippedItems() { m_reductionJobs.resetSkippedItems(); }

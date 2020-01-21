@@ -207,21 +207,24 @@ public:
 
   void testWarningGivenIfUnsavedBatchAutoreductionResumed() {
     auto presenter = makePresenter();
-    m_mainPresenter.setUnsavedBatchFlag(true);
-    EXPECT_CALL(m_mainPresenter, notifyResumeAutoreductionRequested());
-    EXPECT_CALL(m_mainPresenter, getUnsavedBatchFlag()).Times(1);
-    EXPECT_CALL(m_messageHandler, askUserDiscardChanges()).Times(1);
-    presenter.notifyResumeAutoreductionRequested();
+    ON_CALL(m_view, getSearchString())
+        .WillByDefault(Return(autoReductionSearch));
+    ON_CALL(m_mainPresenter, getUnsavedBatchFlag()).WillByDefault(Return(true));
+    expectAutoreductionSettingsChanged();
+    expectUserRespondsYes();
+    presenter.resumeAutoreduction();
     verifyAndClear();
   }
 
   void testNoWarningGivenIfSavedBatchAutoreductionResumed() {
     auto presenter = makePresenter();
-    m_mainPresenter.setUnsavedBatchFlag(false);
-    EXPECT_CALL(m_mainPresenter, notifyResumeAutoreductionRequested());
-    EXPECT_CALL(m_mainPresenter, getUnsavedBatchFlag()).Times(1);
+    ON_CALL(m_view, getSearchString())
+        .WillByDefault(Return(autoReductionSearch));
+    ON_CALL(m_mainPresenter, getUnsavedBatchFlag())
+        .WillByDefault(Return(false));
+    expectAutoreductionSettingsChanged();
     EXPECT_CALL(m_messageHandler, askUserDiscardChanges()).Times(0);
-    presenter.notifyResumeAutoreductionRequested();
+    presenter.resumeAutoreduction();
     verifyAndClear();
   }
 
