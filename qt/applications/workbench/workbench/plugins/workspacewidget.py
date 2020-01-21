@@ -203,13 +203,17 @@ class WorkspaceWidget(PluginWidget):
         CreateDetectorTable(InputWorkspace=ws)
 
     def _action_double_click_workspace(self, name):
+        ws = self._ads.retrieve(name)
         try:
             # if this is a table workspace (or peaks workspace),
             # then it can't be plotted automatically, so the data is shown instead
-            TableWorkspaceDisplay.supports(self._ads.retrieve(name))
+            TableWorkspaceDisplay.supports(ws)
             self._do_show_data([name])
         except ValueError:
-            plot_from_names([name], errors=False, overplot=False, show_colorfill_btn=True)
+            if ws.blocksize() > 1:
+                plot_from_names([name], errors=False, overplot=False, show_colorfill_btn=True)
+            else:
+                self._do_show_data([name])
 
     def refresh_workspaces(self):
         self.workspacewidget.refreshWorkspaces()
