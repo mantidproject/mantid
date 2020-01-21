@@ -71,12 +71,6 @@ class FocusView(QtWidgets.QWidget, Ui_focus):
     def get_focus_valid(self):
         return self.finder_focus.isValid()
 
-    def get_north_bank(self):
-        return self.check_northBank.isChecked()
-
-    def get_south_bank(self):
-        return self.check_southBank.isChecked()
-
     def get_plot_output(self):
         return self.check_plotOutput.isChecked()
 

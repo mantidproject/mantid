@@ -38,22 +38,23 @@ class FocusPresenter(object):
         self.view.set_cropping_widget_hidden()
 
     def on_focus_clicked(self):
-        banks = self._get_banks()
-        if not self._validate(banks):
+        if not self._validate():
             return
+        banks, spectrum_numbers = self._get_banks()
         focus_path = self.view.get_focus_filename()
-        self.start_focus_worker(focus_path, banks, self.view.get_plot_output(), self.rb_num)
+        self.start_focus_worker(focus_path, banks, self.view.get_plot_output(), self.rb_num, spectrum_numbers)
 
-    def start_focus_worker(self, focus_path, banks, plot_output, rb_num):
+    def start_focus_worker(self, focus_path, banks, plot_output, rb_num, spectrum_numbers=None):
         """
         Focus data in a separate thread to stop the main GUI from hanging.
         :param focus_path: The path to the file containing the data to focus.
         :param banks: A list of banks that are to be focused.
         :param plot_output: True if the output should be plotted.
         :param rb_num: The RB Number from the main window (often an experiment id)
+        :param spectrum_numbers: Optional parameter to crop to a specific list of spectrum numbers.
         """
         self.worker = AsyncTask(self.model.focus_run,
-                                (focus_path, banks, plot_output, self.instrument, rb_num),
+                                (focus_path, banks, plot_output, self.instrument, rb_num, spectrum_numbers),
                                 error_cb=self._on_worker_error,
                                 finished_cb=self.emit_enable_button_signal)
         self.set_focus_controls_enabled(False)
@@ -67,7 +68,7 @@ class FocusPresenter(object):
     def set_rb_num(self, rb_num):
         self.rb_num = rb_num
 
-    def _validate(self, banks):
+    def _validate(self):
         """
         Ensure that the worker is ready to be started.
         :param banks: A list of banks to focus.
@@ -90,8 +91,8 @@ class FocusPresenter(object):
                 "The instrument for the current calibration is: " +
                 self.current_calibration.get_instrument())
             return False
-        if len(banks) == 0:
-            create_error_message(self.view, "Please select at least one bank.")
+        if self.view.get_crop_checked() and not self.cropping_widget.is_valid():
+            create_error_message(self.view, "Check cropping values are valid.")
             return False
         return True
 
@@ -104,12 +105,13 @@ class FocusPresenter(object):
         self.view.set_plot_output_enabled(enabled)
 
     def _get_banks(self):
-        banks = []
-        if self.view.get_north_bank():
-            banks.append("North")
-        if self.view.get_south_bank():
-            banks.append("South")
-        return banks
+        if self.view.get_crop_checked():
+            if self.cropping_widget.is_custom():
+                return None, self.cropping_widget.get_custom_spectra()
+            else:
+                return [self.cropping_widget.get_bank()], None
+        else:
+            return ["1", "2"], None
 
     def emit_enable_button_signal(self):
         self.view.sig_enable_controls.emit(True)
