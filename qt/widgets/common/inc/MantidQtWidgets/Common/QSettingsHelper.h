@@ -38,7 +38,7 @@ T getSetting(std::string const &settingGroup, std::string const &settingName) {
 }
 
 /** Loads a map of settings with the same type. This comparison is required
- *  as QVariant types are not properly encoded inini files
+ *  as QVariant types are not properly encoded in ini files
  *
  * @param settingGroup The name of the setting group
  * @return A map of the values stored for all settings matching the given type
@@ -52,9 +52,9 @@ std::map<std::string, T> getSettingsAsMap(std::string const &settingGroup) {
   QStringList settingNames = settings.allKeys();
   std::string templateTypeName = typeid(T).name();
   for (auto &settingName : settingNames) {
-    std::string settingTypeName;
     if (settingName.endsWith("/type")) {
-      settingTypeName = settings.value(settingName).toString().toStdString();
+      std::string settingTypeName =
+          settings.value(settingName).toString().toStdString();
       if (settingTypeName == templateTypeName) {
         auto settingValueName =
             settingName.replace(QString("/type"), QString("/value"));
@@ -93,4 +93,4 @@ void setSetting(std::string const &settingGroup, std::string const &settingName,
 } // namespace MantidWidgets
 } // namespace MantidQt
 
-#endif /* MANTID_INDIRECTSETTINGSHELPER_H */
+#endif /* MANTID_QSETTINGSHELPER_H */
