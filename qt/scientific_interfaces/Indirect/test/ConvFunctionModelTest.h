@@ -137,6 +137,19 @@ public:
                      func->asString())
   }
 
+  void
+  test_setFunction_does_not_throw_for_valid_two_lorenztian_temperature_function_with_delta() {
+    m_model->setFitType(FitType::TwoLorentzians);
+    m_model->setTempCorrection(true);
+    m_model->setDeltaFunction(true);
+    auto func = m_model->getFitFunction();
+
+    m_model->setFunction(func);
+
+    TS_ASSERT_EQUALS(m_model->getCurrentFunction()->asString(),
+                     func->asString())
+  }
+
 private:
   std::unique_ptr<MantidQt::CustomInterfaces::IDA::ConvFunctionModel> m_model;
 };

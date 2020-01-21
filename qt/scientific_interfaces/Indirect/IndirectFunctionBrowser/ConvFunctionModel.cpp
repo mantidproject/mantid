@@ -10,7 +10,6 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
-#include <iostream>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -87,7 +86,7 @@ void ConvFunctionModel::checkConvolution(IFunction_sptr fun) {
     }
 
     else if (name == "CompositeFunction") {
-      checkComposite(innerFunction);
+      checkConvolution(innerFunction);
     } else if (name == "Lorentzian") {
       if (isFitTypeSet && m_fitType != FitType::OneLorentzian) {
         throw std::runtime_error("Function has wrong structure.");
@@ -112,39 +111,7 @@ void ConvFunctionModel::checkConvolution(IFunction_sptr fun) {
     } else {
       clear();
       throw std::runtime_error(
-          "Function has wrong structure. Function nor recognized");
-    }
-  }
-}
-
-void ConvFunctionModel::checkComposite(IFunction_sptr fun) {
-  bool isFitTypeSet = false;
-  for (size_t i = 0; i < fun->nFunctions(); ++i) {
-    auto innerFunction = fun->getFunction(i);
-    auto const name = innerFunction->name();
-    if (name == "Lorentzian") {
-      if (isFitTypeSet && m_fitType != FitType::OneLorentzian) {
-        throw std::runtime_error("Function has wrong structure.");
-      }
-      if (isFitTypeSet)
-        m_fitType = FitType::TwoLorentzians;
-      else
-        m_fitType = FitType::OneLorentzian;
-      m_isQDependentFunction = false;
-      isFitTypeSet = true;
-
-    } else if (FitTypeStringToEnum.count(name) == 1) {
-      if (isFitTypeSet) {
-        throw std::runtime_error("Function has wrong structure.");
-      }
-      m_fitType = FitTypeStringToEnum[name];
-      m_isQDependentFunction = FitTypeQDepends[m_fitType];
-      isFitTypeSet = true;
-    } else if (name == "DeltaFunction") {
-      m_hasDeltaFunction = true;
-    } else {
-      clear();
-      throw std::runtime_error("Function has wrong structure.");
+          "Function has wrong structure. Function not recognized");
     }
   }
 }

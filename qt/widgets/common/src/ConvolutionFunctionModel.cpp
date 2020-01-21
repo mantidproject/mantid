@@ -24,7 +24,9 @@ using namespace Mantid::API;
 
 namespace {
 
-bool isConvolution(const IFunction *fun) { return fun->name() == "Convolution"; }
+bool isConvolution(const IFunction *fun) {
+  return fun->name() == "Convolution";
+}
 
 bool isResolution(const IFunction *fun) { return fun->name() == "Resolution"; }
 
@@ -37,12 +39,11 @@ bool isTempFunction(const IFunction *fun) {
 }
 
 bool isBackground(const IFunction *fun) {
-  return static_cast<bool>(
-      dynamic_cast<const IBackgroundFunction*>(fun));
+  return static_cast<bool>(dynamic_cast<const IBackgroundFunction *>(fun));
 }
 
 bool isPeakFunction(const IFunction *fun) {
-  if(dynamic_cast<const CompositeFunction*>(fun)){
+  if (dynamic_cast<const CompositeFunction *>(fun)) {
     return false;
   }
   return true;
@@ -78,7 +79,6 @@ void ConvolutionFunctionModel::setModel(
     const std::string &peaks, bool hasDeltaFunction,
     const std::vector<double> &qValues, const bool isQDependent,
     bool hasTempCorrection) {
-  std::string resolution, convolution, function, modifiedPeaks;
   auto fitFunction = boost::make_shared<MultiDomainFunction>();
   auto const nf = m_numberDomains > 0 ? static_cast<int>(m_numberDomains) : 1;
   for (int i = 0; i < nf; ++i) {
@@ -226,7 +226,7 @@ void ConvolutionFunctionModel::findComponentPrefixes() {
   m_resolutionWorkspaceIndex = 0;
 
   auto function = getCurrentFunction();
-  if(!function)
+  if (!function)
     return;
   iterateThroughFunction(function.get(), QString());
 
@@ -260,7 +260,8 @@ void ConvolutionFunctionModel::setPrefix(IFunction *func,
     }
     m_backgroundPrefix = prefix;
   } else if (isConvolution(func)) {
-    if (func->nFunctions() != 0 && func->getFunction(0)->name() != "Resolution") {
+    if (func->nFunctions() != 0 &&
+        func->getFunction(0)->name() != "Resolution") {
       throw std::runtime_error(
           "Model's resolution function must have type Resolution.");
     } else if (func->nFunctions() == 0) {
