@@ -502,8 +502,8 @@ class SANSILLReduction(PythonAlgorithm):
             MergeRuns(InputWorkspaces=ws, OutputWorkspace=tmp)
             DeleteWorkspaces(ws)
             RenameWorkspace(InputWorkspace=tmp, OutputWorkspace=ws)
-        self._normalise(ws)
         self._instrument = mtd[ws].getInstrument().getName()
+        self._normalise(ws)
         run = mtd[ws].getRun()
         if run.hasProperty('tof_mode'):
             if run.getLogData('tof_mode').value == 'TOF':
