@@ -245,16 +245,23 @@ public:
     auto precision = 2;
     presenter.setTablePrecision(precision);
     auto rowLocation = location(0, 0);
-    selectedRowLocationsAre(m_jobs, {location(0, 0)});
-    auto cells = m_jobs.cellsAt(location(0, 0));
-    updatedCellsAre(location(0, 0),
-                    cellsArrayWithQValues("12345", "0.56", "Trans A", "Trans B",
-                                          "0.56", "0.01", "0.90"));
-    EXPECT_CALL(m_jobs, setCellsAt(location(0, 0), cells));
+    auto reductionOptions = ReductionOptionsMap();
+    std::vector<MantidQt::MantidWidgets::Batch::Cell> roundedCells =
+        std::vector<MantidQt::MantidWidgets::Batch::Cell>(
+            {MantidQt::MantidWidgets::Batch::Cell("12345"),
+             MantidQt::MantidWidgets::Batch::Cell("0.56"),
+             MantidQt::MantidWidgets::Batch::Cell("Trans A"),
+             MantidQt::MantidWidgets::Batch::Cell("Trans B"),
+             MantidQt::MantidWidgets::Batch::Cell("0.56"),
+             MantidQt::MantidWidgets::Batch::Cell("0.90"),
+             MantidQt::MantidWidgets::Batch::Cell("0.01"),
+             MantidQt::MantidWidgets::Batch::Cell(""),
+             MantidQt::MantidWidgets::Batch::Cell(
+                 MantidQt::MantidWidgets::optionsToString(
+                     ReductionOptionsMap()))});
+    EXPECT_CALL(m_jobs, setCellsAt(rowLocation, roundedCells)).Times(1);
     presenter.notifyRowOutputsChanged();
-    TS_ASSERT_EQUALS(
-        *getRow(presenter, rowLocation),
-        makeRow("12345", 0.56, "Trans A", "Trans B", 0.56, 0.01, 0.90));
+
     verifyAndClearExpectations();
   }
 

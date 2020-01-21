@@ -120,36 +120,41 @@ public:
 
   void testJobRunnerGetProcessAll() {
     auto presenter = makePresenter();
-    presenter->notifyResumeReductionRequested();
-    auto processAll = true;
     // need to check m_jobRunner->m_processAll somehow
-    ON_CALL(*m_jobRunner, getProcessAll()).WillByDefault(Return(processAll));
+    EXPECT_EQ(m_jobRunner->getProcessAll(), false);
+    expectReductionResumed();
+    presenter->notifyResumeReductionRequested();
+    verifyAndClear();
   }
 
-  void testJobRunnerqetProcessPartial() {
+  void testJobRunnerGetProcessPartial() {
     auto presenter = makePresenter();
-    presenter->notifyResumeReductionRequested();
-    auto processPartial = false;
     // need to check m_jobRunner->m_processPartial somehow
-    ON_CALL(*m_jobRunner, getProcessAll())
-        .WillByDefault(Return(processPartial));
+    EXPECT_EQ(m_jobRunner->getProcessPartial(), false);
+    expectReductionResumed();
+    presenter->notifyResumeReductionRequested();
+    verifyAndClear();
   }
 
   void testWarnProcessAllWhenReductionResumed() {
     auto presenter = makePresenter();
+    ON_CALL(*m_jobRunner, getProcessAll()).WillByDefault(Return(true));
+    ON_CALL(m_mainPresenter, isWarnProcessAllChecked())
+        .WillByDefault(Return(true));
     EXPECT_CALL(*m_jobRunner, notifyReductionResumed()).Times(1);
-    presenter->notifyResumeReductionRequested();
-    EXPECT_CALL(*m_jobRunner, getProcessAll()).Times(1);
     EXPECT_CALL(m_mainPresenter, isProcessAllPrevented()).Times(1);
+    presenter->notifyResumeReductionRequested();
     verifyAndClear();
   }
 
   void testWarnProcessPartialGroupWhenReductionResumed() {
     auto presenter = makePresenter();
+    ON_CALL(*m_jobRunner, getProcessPartial()).WillByDefault(Return(true));
+    ON_CALL(m_mainPresenter, isWarnProcessPartialGroupChecked())
+        .WillByDefault(Return(true));
     EXPECT_CALL(*m_jobRunner, notifyReductionResumed()).Times(1);
-    presenter->notifyResumeReductionRequested();
-    EXPECT_CALL(*m_jobRunner, getProcessPartial()).Times(1);
     EXPECT_CALL(m_mainPresenter, isProcessPartialGroupPrevented()).Times(1);
+    presenter->notifyResumeReductionRequested();
     verifyAndClear();
   }
 
@@ -559,6 +564,8 @@ private:
     // The mock job runner should by default return our default algorithms list
     ON_CALL(*m_jobRunner, getAlgorithms())
         .WillByDefault(Return(m_mockAlgorithmsList));
+    ON_CALL(*m_jobRunner, getProcessAll()).WillByDefault(Return(false));
+    ON_CALL(*m_jobRunner, getProcessPartial()).WillByDefault(Return(false));
     // The mock runs presenter should by default return true when autoreduction
     // is resumed
     ON_CALL(*m_runsPresenter, resumeAutoreduction())
@@ -574,6 +581,7 @@ private:
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_instrumentPresenter));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_savePresenter));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_jobRunner));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_mainPresenter));
   }
 
   void expectReductionResumed() {

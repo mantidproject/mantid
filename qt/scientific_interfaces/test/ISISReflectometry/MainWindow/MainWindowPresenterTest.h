@@ -11,14 +11,13 @@
 #include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
 #include "../Batch/MockBatchView.h"
 #include "../Options/MockOptionsDialogPresenter.h"
+#include "../Options/MockOptionsDialogView.h"
 #include "../ReflMockObjects.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidGeometry/Instrument_fwd.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/MockSlitCalculator.h"
 #include "MockMainWindowView.h"
-#include "test/ISISReflectometry/Options/MockOptionsDialogPresenter.h"
-#include "test/ISISReflectometry/Options/MockOptionsDialogView.h"
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -165,23 +164,38 @@ public:
   }
 
   void testWarningGivenIfRemoveUnsavedBatch() {
-    auto presenter = makePresenter();
+    auto optionsDialogPresenter =
+        std::make_unique<NiceMock<MockOptionsDialogPresenter>>();
+    ON_CALL(*optionsDialogPresenter.get(),
+            getBoolOption(std::string("WarnDiscardChanges")))
+        .WillByDefault(Return(true));
+    auto presenter = makePresenter(std::move(optionsDialogPresenter));
     auto const batchIndex = 0;
-    m_batchPresenters[batchIndex]->setUnsavedBatchFlag(true);
+    ON_CALL(*m_batchPresenters[batchIndex], getUnsavedBatchFlag())
+        .WillByDefault(Return(true));
     expectBatchIsNotAutoreducing(batchIndex);
     expectBatchIsNotProcessing(batchIndex);
+    expectBatchUnsaved(batchIndex);
     EXPECT_CALL(m_messageHandler, askUserDiscardChanges()).Times(1);
     presenter.notifyCloseBatchRequested(batchIndex);
+    verifyAndClear();
   }
 
   void testNoWarningIfRemoveSavedBatch() {
-    auto presenter = makePresenter();
+    auto optionsDialogPresenter =
+        std::make_unique<NiceMock<MockOptionsDialogPresenter>>();
+    ON_CALL(*optionsDialogPresenter.get(),
+            getBoolOption(std::string("WarnDiscardChanges")))
+        .WillByDefault(Return(true));
+    auto presenter = makePresenter(std::move(optionsDialogPresenter));
     auto const batchIndex = 0;
-    m_batchPresenters[batchIndex]->setUnsavedBatchFlag(false);
+    ON_CALL(*m_batchPresenters[batchIndex], getUnsavedBatchFlag())
+        .WillByDefault(Return(false));
     expectBatchIsNotAutoreducing(batchIndex);
     expectBatchIsNotProcessing(batchIndex);
     EXPECT_CALL(m_messageHandler, askUserDiscardChanges()).Times(0);
     presenter.notifyCloseBatchRequested(batchIndex);
+    verifyAndClear();
   }
 
   void testReductionResumedNotifiesAllBatchPresenters() {
@@ -382,56 +396,89 @@ public:
   }
 
   void testWarningGivenIfLoadBatchOverUnsavedBatch() {
-    auto presenter = makePresenter();
+    auto optionsDialogPresenter =
+        std::make_unique<NiceMock<MockOptionsDialogPresenter>>();
+    ON_CALL(*optionsDialogPresenter.get(),
+            getBoolOption(std::string("WarnDiscardChanges")))
+        .WillByDefault(Return(true));
+    auto presenter = makePresenter(std::move(optionsDialogPresenter));
     auto const batchIndex = 1;
-    m_batchPresenters[batchIndex]->setUnsavedBatchFlag(true);
+    ON_CALL(*m_batchPresenters[batchIndex], getUnsavedBatchFlag())
+        .WillByDefault(Return(true));
     EXPECT_CALL(m_messageHandler, askUserDiscardChanges()).Times(1);
     presenter.notifyLoadBatchRequested(batchIndex);
     verifyAndClear();
   }
 
+  void testNoWarningGivenIfLoadBatchOverSavedBatch() {
+    auto optionsDialogPresenter =
+        std::make_unique<NiceMock<MockOptionsDialogPresenter>>();
+    ON_CALL(*optionsDialogPresenter.get(),
+            getBoolOption(std::string("WarnDiscardChanges")))
+        .WillByDefault(Return(true));
+    auto presenter = makePresenter(std::move(optionsDialogPresenter));
+    auto const batchIndex = 1;
+    ON_CALL(*m_batchPresenters[batchIndex], getUnsavedBatchFlag())
+        .WillByDefault(Return(false));
+    EXPECT_CALL(m_messageHandler, askUserDiscardChanges()).Times(0);
+    presenter.notifyLoadBatchRequested(batchIndex);
+    verifyAndClear();
+  }
+
   void testLoadBatchDiscardChanges() {
-    auto presenter = makePresenter();
+    auto optionsDialogPresenter =
+        std::make_unique<NiceMock<MockOptionsDialogPresenter>>();
+    ON_CALL(*optionsDialogPresenter.get(),
+            getBoolOption(std::string("WarnDiscardChanges")))
+        .WillByDefault(Return(true));
+    auto presenter = makePresenter(std::move(optionsDialogPresenter));
     auto const filename = std::string("test.json");
     auto const map = QMap<QString, QVariant>();
     auto const batchIndex = 1;
-    m_batchPresenters[batchIndex]->setUnsavedBatchFlag(true);
+    ON_CALL(*m_batchPresenters[batchIndex], getUnsavedBatchFlag())
+        .WillByDefault(Return(true));
     EXPECT_CALL(m_messageHandler, askUserDiscardChanges())
         .Times(1)
         .WillOnce(Return(true));
-    // will work when merged
-    // EXPECT_CALL(m_messageHandler, askUserForLoadFileName("JSON (*.json)"))
-    //    .Times(1)
-    //    .WillOnce(Return(filename));
-    // EXPECT_CALL(m_fileHandler, loadJSONFromFile(filename))
-    //    .Times(1)
-    //    .WillOnce(Return(map));
-    // EXPECT_CALL(*m_decoder, decodeBatch(&m_view, batchIndex, map)).Times(1);
+    EXPECT_CALL(m_messageHandler, askUserForLoadFileName("JSON (*.json)"))
+        .Times(1)
+        .WillOnce(Return(filename));
+    EXPECT_CALL(m_fileHandler, loadJSONFromFile(filename))
+        .Times(1)
+        .WillOnce(Return(map));
+    EXPECT_CALL(*m_decoder, decodeBatch(&m_view, batchIndex, map)).Times(1);
     presenter.notifyLoadBatchRequested(batchIndex);
     verifyAndClear();
   }
 
   void testWarningGivenCloseGUIWithUnsavedChanges() {
-    auto presenter = makePresenter();
-    EXPECT_CALL(*m_optionsDialogPresenter,
-                getBoolOption(std::string("WarnDiscardChanges")))
-        .Times(1);
+    auto optionsDialogPresenter =
+        std::make_unique<NiceMock<MockOptionsDialogPresenter>>();
+    ON_CALL(*optionsDialogPresenter.get(),
+            getBoolOption(std::string("WarnDiscardChanges")))
+        .WillByDefault(Return(true));
+    auto presenter = makePresenter(std::move(optionsDialogPresenter));
+    auto const batchIndex = 1;
+    ON_CALL(*m_batchPresenters[batchIndex], getUnsavedBatchFlag())
+        .WillByDefault(Return(true));
     EXPECT_CALL(m_messageHandler, askUserDiscardChanges()).Times(1);
     presenter.isCloseEventPrevented();
     verifyAndClear();
   }
 
   void testBatchPresentersNotifySetRoundPrecisionOnOptionsChanged() {
-    auto presenter = makePresenter();
-    auto optionOne = std::string("Round");
-    auto optionTwo = std::string("RoundPrecision");
+    auto optionsDialogPresenter =
+        std::make_unique<NiceMock<MockOptionsDialogPresenter>>();
+    ON_CALL(*optionsDialogPresenter.get(),
+            getBoolOption(std::string("WarnDiscardChanges")))
+        .WillByDefault(Return(true));
     auto prec = 2;
-    EXPECT_CALL(*m_optionsDialogPresenter, getBoolOption(optionOne))
-        .Times(1)
-        .WillOnce(Return(true));
-    EXPECT_CALL(*m_optionsDialogPresenter, getIntOption(optionTwo))
-        .Times(1)
-        .WillOnce(ReturnRef(prec));
+    ON_CALL(*optionsDialogPresenter.get(), getBoolOption(std::string("Round")))
+        .WillByDefault(Return(true));
+    ON_CALL(*optionsDialogPresenter.get(),
+            getIntOption(std::string("RoundPrecision")))
+        .WillByDefault(ReturnRef(prec));
+    auto presenter = makePresenter(std::move(optionsDialogPresenter));
     for (auto batchPresenter : m_batchPresenters) {
       EXPECT_CALL(*batchPresenter, notifySetRoundPrecision(prec));
     }
@@ -440,11 +487,11 @@ public:
   }
 
   void testBatchPresentersNotifyResetRoundPrecisionOnOptionsChanged() {
-    auto presenter = makePresenter();
-    auto option = std::string("Round");
-    EXPECT_CALL(*m_optionsDialogPresenter, getBoolOption(option))
-        .Times(1)
-        .WillOnce(Return(false));
+    auto optionsDialogPresenter =
+        std::make_unique<NiceMock<MockOptionsDialogPresenter>>();
+    ON_CALL(*optionsDialogPresenter.get(), getBoolOption(std::string("Round")))
+        .WillByDefault(Return(false));
+    auto presenter = makePresenter(std::move(optionsDialogPresenter));
     for (auto batchPresenter : m_batchPresenters) {
       EXPECT_CALL(*batchPresenter, notifyResetRoundPrecision());
     }
@@ -458,16 +505,15 @@ public:
     EXPECT_CALL(*m_batchPresenters[0], getUnsavedBatchFlag())
         .Times(1)
         .WillOnce(Return(true));
-    TS_ASSERT(presenter.isBatchUnsaved(0), true);
+    TS_ASSERT_EQUALS(presenter.isBatchUnsaved(0), true);
     verifyAndClear();
   }
 
   void testAnyBatchReturnsUnsavedBatchFlag() {
     auto presenter = makePresenter();
-    m_batchPresenters[0]->setUnsavedBatchFlag(true);
-    for (auto batchPresenter : m_batchPresenters)
-      EXPECT_CALL(*batchPresenter, getUnsavedBatchFlag()).Times(1);
-    TS_ASSERT(presenter.isAnyBatchUnsaved(), true);
+    ON_CALL(*m_batchPresenters[0], getUnsavedBatchFlag())
+        .WillByDefault(Return(true));
+    TS_ASSERT_EQUALS(presenter.isAnyBatchUnsaved(), true);
     verifyAndClear();
   }
 
@@ -524,8 +570,6 @@ private:
           .WillByDefault(Return(batchPresenter));
     }
     // Make the presenter
-    auto optionsDialogPresenter =
-        std::make_unique<NiceMock<MockOptionsDialogPresenter>>();
     auto presenter = MainWindowPresenterFriend(
         &m_view, &m_messageHandler, &m_fileHandler, std::move(encoder),
         std::move(decoder), std::move(slitCalculator),
@@ -589,6 +633,18 @@ private:
     EXPECT_CALL(*m_batchPresenters[batchIndex], isAutoreducing())
         .Times(1)
         .WillOnce(Return(false));
+  }
+
+  void expectBatchSaved(int batchIndex) {
+    EXPECT_CALL(*m_batchPresenters[batchIndex], getUnsavedBatchFlag())
+        .Times(1)
+        .WillOnce(Return(false));
+  }
+
+  void expectBatchUnsaved(int batchIndex) {
+    EXPECT_CALL(*m_batchPresenters[batchIndex], getUnsavedBatchFlag())
+        .Times(1)
+        .WillOnce(Return(true));
   }
 
   void expectBatchIsNotProcessing(int batchIndex) {

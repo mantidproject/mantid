@@ -55,7 +55,7 @@ Row makeRow(std::string const &run, double theta, std::string const &trans1,
             boost::optional<double> scale,
             ReductionOptionsMap const &optionsMap) {
   return Row({run}, theta, TransmissionRunPair({trans1, trans2}),
-             RangeInQ(qMin, qMax, qStep), scale, optionsMap,
+             RangeInQ(qMin, qStep, qMax), scale, optionsMap,
              ReductionWorkspaces({run}, TransmissionRunPair({trans1, trans2})));
 }
 
@@ -289,6 +289,51 @@ ReductionJobs twoGroupsWithTwoRowsModel() {
   auto group2 = Group("Test group 2");
   group2.appendRow(makeRow("22345", 0.5));
   group2.appendRow(makeRow("22346", 0.8));
+  reductionJobs.appendGroup(std::move(group2));
+
+  return reductionJobs;
+}
+
+ReductionJobs twoGroupsWithTwoRowsAndOneEmptyGroupModel() {
+  auto reductionJobs = ReductionJobs();
+  auto group1 = Group("Test group 1");
+  group1.appendRow(makeRow("12345", 0.5));
+  group1.appendRow(makeRow("12346", 0.8));
+  reductionJobs.appendGroup(std::move(group1));
+
+  auto group2 = Group("Test group 2");
+  group2.appendRow(makeRow("22345", 0.5));
+  group2.appendRow(makeRow("22346", 0.8));
+  reductionJobs.appendGroup(std::move(group2));
+
+  reductionJobs.appendGroup(Group("Test group 3"));
+
+  return reductionJobs;
+}
+
+ReductionJobs twoGroupsWithOneRowAndOneInvalidRowModel() {
+  auto reductionJobs = ReductionJobs();
+  auto group1 = Group("Test group 1");
+  group1.appendRow(boost::none);
+  reductionJobs.appendGroup(std::move(group1));
+
+  auto group2 = Group("Test group 2");
+  group2.appendRow(makeRow("22345", 0.5));
+  group2.appendRow(boost::none);
+  reductionJobs.appendGroup(std::move(group2));
+
+  return reductionJobs;
+}
+
+ReductionJobs oneGroupWithOneRowAndOneGroupWithOneRowAndOneInvalidRowModel() {
+  auto reductionJobs = ReductionJobs();
+  auto group1 = Group("Test group 1");
+  group1.appendRow(makeRow("12345", 0.5));
+  reductionJobs.appendGroup(std::move(group1));
+
+  auto group2 = Group("Test group 2");
+  group2.appendRow(makeRow("22345", 0.5));
+  group2.appendRow(boost::none);
   reductionJobs.appendGroup(std::move(group2));
 
   return reductionJobs;
