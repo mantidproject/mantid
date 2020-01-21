@@ -31,6 +31,7 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly,
                                                      QWidget *parent)
     : WorkspaceTreeWidget(new MantidTreeModel(), viewOnly, parent),
       m_plotSpectrum(new QAction("Spectrum...", this)),
+      m_plotBin(new QAction("Bin", this)),
       m_overplotSpectrum(new QAction("Overplot spectrum...", this)),
       m_plotSpectrumWithErrs(new QAction("Spectrum with errors...", this)),
       m_overplotSpectrumWithErrs(
@@ -50,6 +51,7 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly,
 
   connect(m_plotSpectrum, SIGNAL(triggered()), this,
           SLOT(onPlotSpectrumClicked()));
+  connect(m_plotBin, SIGNAL(triggered()), this, SLOT(onPlotBinClicked()));
   connect(m_overplotSpectrum, SIGNAL(triggered()), this,
           SLOT(onOverplotSpectrumClicked()));
   connect(m_plotSpectrumWithErrs, SIGNAL(triggered()), this,
@@ -103,10 +105,7 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
     if (auto matrixWS =
             boost::dynamic_pointer_cast<MatrixWorkspace>(workspace)) {
       QMenu *plotSubMenu(new QMenu("Plot", menu));
-      plotSubMenu->addAction(m_plotSpectrum);
-      plotSubMenu->addAction(m_overplotSpectrum);
-      plotSubMenu->addAction(m_plotSpectrumWithErrs);
-      plotSubMenu->addAction(m_overplotSpectrumWithErrs);
+      
 
       // Don't plot 1D spectra if only one X value
       bool multipleBins = false;
@@ -121,9 +120,14 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
           }
         }
       }
-      // disable the actions created so far if only one bin
-      for (auto action : plotSubMenu->actions()) {
-        action->setEnabled(multipleBins);
+
+      if (multipleBins) {
+        plotSubMenu->addAction(m_plotSpectrum);
+        plotSubMenu->addAction(m_overplotSpectrum);
+        plotSubMenu->addAction(m_plotSpectrumWithErrs);
+        plotSubMenu->addAction(m_overplotSpectrumWithErrs);
+      } else {
+        plotSubMenu->addAction(m_plotBin);
       }
 
       plotSubMenu->addSeparator();
@@ -168,6 +172,10 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
 
 void WorkspaceTreeWidgetSimple::onPlotSpectrumClicked() {
   emit plotSpectrumClicked(getSelectedWorkspaceNamesAsQList());
+}
+
+void WorkspaceTreeWidgetSimple::onPlotBinClicked() {
+  emit plotBinClicked(getSelectedWorkspaceNamesAsQList());
 }
 
 void WorkspaceTreeWidgetSimple::onOverplotSpectrumClicked() {
