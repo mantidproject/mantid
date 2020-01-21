@@ -13,7 +13,7 @@ import unittest
 from matplotlib.collections import PolyCollection
 from matplotlib.pyplot import figure
 
-from mantid.plots import MantidAxes # noqa
+from mantid.plots import helperfunctions
 from mantid.py3compat.mock import Mock
 from mantidqt.widgets.waterfallplotfillareadialog.presenter import WaterfallPlotFillAreaDialogPresenter
 
@@ -26,7 +26,6 @@ class WaterfallPlotFillAreaDialogPresenterTest(unittest.TestCase):
         self.ax.plot([0, 0], [1, 1])
         self.ax.plot([0, 1], [1, 2])
 
-        self.ax.set_waterfall_toolbar_options_enabled = Mock()
         self.ax.set_waterfall(True)
 
         view = Mock()
@@ -41,7 +40,7 @@ class WaterfallPlotFillAreaDialogPresenterTest(unittest.TestCase):
         self.presenter.view.use_line_colour_radio_button.isChecked.return_value = True
         self.presenter.set_fill_enabled()
 
-        self.assertTrue(self.ax.waterfall_fill_is_line_colour())
+        self.assertTrue(helperfunctions.waterfall_fill_is_line_colour(self.ax))
 
     def test_enabling_fill_with_solid_colour_creates_fills_with_one_colour(self):
         self.presenter.view.enable_fill_group_box.isChecked.return_value = True
@@ -54,11 +53,11 @@ class WaterfallPlotFillAreaDialogPresenterTest(unittest.TestCase):
         self.assertTrue(fill.get_facecolor() == "#ff9900" for fill in fills)
 
     def test_disabling_fill_removes_fill(self):
-        self.ax.waterfall_create_fill()
+        self.ax.set_fill(True)
         self.presenter.view.enable_fill_group_box.isChecked.return_value = False
         self.presenter.set_fill_enabled()
 
-        self.assertFalse(self.ax.waterfall_has_fill())
+        self.assertFalse(helperfunctions.waterfall_has_fill(self.ax))
 
 
 if __name__ == '__main__':

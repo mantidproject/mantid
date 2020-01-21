@@ -24,7 +24,7 @@ from matplotlib.collections import Collection
 
 # third party imports
 from mantid.api import AnalysisDataService as ads
-from mantid.plots import MantidAxes
+from mantid.plots import helperfunctions, MantidAxes
 from mantid.plots.utility import zoom
 from mantid.py3compat import iteritems
 from mantidqt.plotting.figuretype import FigureType, figure_type
@@ -698,7 +698,7 @@ class FigureInteraction(object):
         ax.autoscale()
 
         if waterfall:
-            ax.set_initial_dimensions()
+            helperfunctions.set_initial_dimensions(ax)
             ax.update_waterfall(x, y)
 
         self.canvas.draw()

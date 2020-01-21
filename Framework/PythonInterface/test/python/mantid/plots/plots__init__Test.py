@@ -16,7 +16,7 @@ import numpy as np
 import unittest
 
 from mantid.kernel import config
-from mantid.plots import MantidAxes
+from mantid.plots import helperfunctions
 from mantid.plots.legend import convert_color_to_hex
 from mantid.plots.plotfunctions import get_colorplot_extents
 from mantid.py3compat.mock import Mock, patch
@@ -519,7 +519,6 @@ class Plots__init__Test(unittest.TestCase):
         np.testing.assert_almost_equal((y_min, y_max), ax.get_ylim())
 
     def test_converting_from_1d_plot_to_waterfall_plot(self):
-        MantidAxes.set_waterfall_toolbar_options_enabled = Mock()
         fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
         # Plot the same line twice.
         ax.plot([0, 1], [0, 1])
@@ -534,7 +533,6 @@ class Plots__init__Test(unittest.TestCase):
         self.assertNotEqual(ax.get_lines()[0].get_ydata()[0], ax.get_lines()[1].get_ydata()[0])
 
     def test_converting_from_waterfall_plot_to_1d_plot(self):
-        MantidAxes.set_waterfall_toolbar_options_enabled = Mock()
         fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
         # Plot the same line twice.
         ax.plot([0, 1], [0, 1])
@@ -551,7 +549,6 @@ class Plots__init__Test(unittest.TestCase):
         self.assertEqual(ax.get_lines()[0].get_ydata()[0], ax.get_lines()[1].get_ydata()[0])
 
     def test_create_fill_creates_fills_for_waterfall_plot(self):
-        MantidAxes.set_waterfall_toolbar_options_enabled = Mock()
         fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
         ax.plot([0, 1], [0, 1])
         ax.plot([0, 1], [0, 1])
@@ -559,13 +556,12 @@ class Plots__init__Test(unittest.TestCase):
         # Make a waterfall plot.
         ax.set_waterfall(True)
         # Add filled areas.
-        ax.waterfall_create_fill()
+        ax.set_fill(True)
 
         fills = [collection for collection in ax.collections if isinstance(collection, PolyCollection)]
         self.assertEqual(len(fills), 2)
 
     def test_remove_fill_removes_fills_for_waterfall_plots(self):
-        MantidAxes.set_waterfall_toolbar_options_enabled = Mock()
         fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
         ax.plot([0, 1], [0, 1])
         ax.plot([0, 1], [0, 1])
@@ -573,14 +569,13 @@ class Plots__init__Test(unittest.TestCase):
         # Make a waterfall plot.
         ax.set_waterfall(True)
         # Add filled areas.
-        ax.waterfall_create_fill()
+        ax.set_fill(True)
         # Remove filled areas.
-        ax.waterfall_remove_fill()
+        ax.set_fill(False)
 
-        self.assertFalse(ax.waterfall_has_fill())
+        self.assertFalse(helperfunctions.waterfall_has_fill(ax))
 
     def test_converting_from_waterfall_to_1d_plot_removes_filled_areas(self):
-        MantidAxes.set_waterfall_toolbar_options_enabled = Mock()
         fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
         ax.plot([0, 1], [0, 1])
         ax.plot([0, 1], [0, 1])
@@ -588,14 +583,13 @@ class Plots__init__Test(unittest.TestCase):
         # Make a waterfall plot.
         ax.set_waterfall(True)
         # Add filled areas.
-        ax.waterfall_create_fill()
+        ax.set_fill(True)
         # Make the plot non-waterfall again.
         ax.set_waterfall(False)
 
-        self.assertFalse(ax.waterfall_has_fill())
+        self.assertFalse(helperfunctions.waterfall_has_fill(ax))
 
     def test_overplotting_onto_waterfall_plot_with_line_colour_fills_adds_another_filled_area_with_new_line_colour(self):
-        MantidAxes.set_waterfall_toolbar_options_enabled = Mock()
         fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
         ax.plot([0, 1], [0, 1], color="#ff9900")
         ax.plot([0, 1], [0, 1], color="#00d1ff")
@@ -603,21 +597,20 @@ class Plots__init__Test(unittest.TestCase):
         # Make a waterfall plot.
         ax.set_waterfall(True)
         # Add filled areas.
-        ax.waterfall_create_fill()
+        ax.set_fill(True)
         # Set the fills to be the same colour as their lines.
         ax.collections[0].set_facecolor(ax.lines[0].get_color())
         ax.collections[1].set_facecolor(ax.lines[0].get_color())
 
         # Plot another line and make it join the waterfall.
         ax.plot([0, 1], [0,1], color='#00fff0')
-        ax.convert_single_line_to_waterfall(2)
-        ax.waterfall_update_fill()
+        helperfunctions.convert_single_line_to_waterfall(ax, 2)
+        helperfunctions.waterfall_update_fill(ax)
 
         # Check that there are now three filled areas and the new line colour matches the new fill colour.
         self.assertEqual(convert_color_to_hex(ax.collections[2].get_facecolor()[0]), ax.lines[2].get_color())
 
     def test_overplotting_onto_waterfall_plot_with_solid_colour_fills_adds_a_filled_area_with_the_same_colour(self):
-        MantidAxes.set_waterfall_toolbar_options_enabled = Mock()
         fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
         ax.plot([0, 1], [0, 1])
         ax.plot([0, 1], [0, 1])
@@ -625,15 +618,15 @@ class Plots__init__Test(unittest.TestCase):
         # Make a waterfall plot.
         ax.set_waterfall(True)
         # Add filled areas.
-        ax.waterfall_create_fill()
+        ax.set_fill(True)
         # Set the fills to be the same colour.
         ax.collections[0].set_facecolor([1, 0, 0, 1])
         ax.collections[1].set_facecolor([1, 0, 0, 1])
 
         # Plot another line and make it join the waterfall.
         ax.plot([0, 1], [0, 1])
-        ax.convert_single_line_to_waterfall(2)
-        ax.waterfall_update_fill()
+        helperfunctions.convert_single_line_to_waterfall(ax, 2)
+        helperfunctions.waterfall_update_fill(ax)
 
         # Check that there are now three filled areas and the new fill colour matches the others.
         self.assertTrue((ax.collections[2].get_facecolor() == [1, 0, 0, 1]).all())

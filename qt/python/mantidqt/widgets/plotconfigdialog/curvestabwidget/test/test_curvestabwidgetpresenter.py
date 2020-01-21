@@ -17,7 +17,7 @@ from matplotlib.pyplot import figure
 from numpy import array_equal
 
 from mantid.simpleapi import CreateWorkspace
-from mantid.plots import MantidAxes  # register MantidAxes projection  # noqa
+from mantid.plots import helperfunctions
 from mantid.py3compat.mock import Mock, patch
 from mantidqt.widgets.plotconfigdialog.colorselector import convert_color_to_hex
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import CurveProperties
@@ -289,16 +289,15 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
                          get_selected_curve_name=lambda: "Workspace")
 
         ax = fig.get_axes()[0]
-        ax.set_waterfall_toolbar_options_enabled = Mock()
         ax.set_waterfall(True)
-        ax.waterfall_create_fill()
+        ax.set_fill(True)
 
         presenter = self._generate_presenter(fig=fig, mock_view=mock_view)
 
         new_plot_kwargs = {'visible': False}
         presenter._replot_selected_curve(new_plot_kwargs)
 
-        self.assertEqual(ax.get_waterfall_fill_for_curve(0).get_visible(), False)
+        self.assertEqual(helperfunctions.get_waterfall_fill_for_curve(ax, 0).get_visible(), False)
 
     def test_changing_line_colour_on_a_waterfall_plot_with_filled_areas_changes_fill_colour_to_match(self):
         fig = self.make_figure_with_multiple_curves()
@@ -307,19 +306,13 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
                          get_selected_curve_name=lambda: "Workspace")
 
         ax = fig.get_axes()[0]
-        ax.set_waterfall_toolbar_options_enabled = Mock()
-        # Create waterfall plot and add filled areas.
-        ax.set_waterfall(True)
-        ax.waterfall_create_fill()
-
         ax.lines[0].set_color('#ff9900')
         ax.lines[1].set_color('#008fff')
         ax.lines[2].set_color('#42ff00')
 
-        # Set the fills so they are the same colours as their lines.
-        ax.collections[0].set_facecolor(ax.lines[0].get_color())
-        ax.collections[1].set_facecolor(ax.lines[1].get_color())
-        ax.collections[2].set_facecolor(ax.lines[2].get_color())
+        # Create waterfall plot and add filled areas.
+        ax.set_waterfall(True)
+        ax.set_fill(True)
 
         presenter = self._generate_presenter(fig=fig, mock_view=mock_view)
         # Change the colour of one of the lines.
@@ -336,7 +329,6 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
                          get_selected_curve_name=lambda: "Workspace")
 
         ax = fig.get_axes()[0]
-        ax.set_waterfall_toolbar_options_enabled = Mock()
         # Create waterfall plot
         ax.set_waterfall(True)
 

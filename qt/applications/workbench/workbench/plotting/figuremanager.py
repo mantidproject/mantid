@@ -23,7 +23,7 @@ from qtpy.QtWidgets import QApplication, QLabel, QFileDialog
 
 from mantid.api import AnalysisDataService, AnalysisDataServiceObserver, ITableWorkspace, MatrixWorkspace
 from mantid.kernel import logger
-from mantid.plots import MantidAxes
+from mantid.plots import helperfunctions, MantidAxes
 from mantid.py3compat import text_type
 from mantidqt.io import open_a_file_dialog
 from mantidqt.plotting.figuretype import FigureType, figure_type
@@ -420,7 +420,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         x, y = ax.waterfall_x_offset, ax.waterfall_y_offset
         ax.update_waterfall(0, 0)
 
-        errorbar_cap_lines = ax.remove_and_return_errorbar_cap_lines()
+        errorbar_cap_lines = helperfunctions.remove_and_return_errorbar_cap_lines(ax)
 
         ax.lines.reverse()
         ax.lines += errorbar_cap_lines

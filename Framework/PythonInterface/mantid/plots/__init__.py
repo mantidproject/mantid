@@ -1053,29 +1053,44 @@ class MantidAxes(Axes):
         return self.waterfall_x_offset != 0 or self.waterfall_y_offset != 0
 
     def update_waterfall(self, x_offset, y_offset):
-        errorbar_cap_lines = self.remove_and_return_errorbar_cap_lines()
+        """
+        Changes the offset of a waterfall plot.
+        :param x_offset: The amount by which each line is shifted in the x axis.
+        :param y_offset: The amount by which each line is shifted in the y axis.
+        """
+        errorbar_cap_lines = helperfunctions.remove_and_return_errorbar_cap_lines(self)
 
         for i in range(len(self.get_lines())):
-            self.convert_single_line_to_waterfall(i, x_offset, y_offset)
+            helperfunctions.convert_single_line_to_waterfall(self, i, x_offset, y_offset)
 
-        # Now set the new offsets
+        if x_offset == 0 and y_offset == 0:
+            self.set_fill(False)
+
+        if any(isinstance(collection, PolyCollection) for collection in self.collections):
+            helperfunctions.waterfall_update_fill(self)
+
         self.waterfall_x_offset = x_offset
         self.waterfall_y_offset = y_offset
 
-        if any(isinstance(collection, PolyCollection) for collection in self.collections):
-            self.waterfall_update_fill()
-
         self.lines += errorbar_cap_lines
 
-        self.set_waterfall_toolbar_options_enabled()
+        helperfunctions.set_waterfall_toolbar_options_enabled(self)
         self.get_figure().canvas.draw()
 
-    def set_waterfall_toolbar_options_enabled(self):
-        toolbar = self.get_figure().canvas.toolbar
-        toolbar.waterfall_conversion(self.is_waterfall())
-
     def set_waterfall(self, state, x_offset=None, y_offset=None, fill=False):
+        """
+        Convert between a normal 1D plot and a waterfall plot.
+        :param state: If true convert the plot to a waterfall plot, otherwise convert to a 1D plot.
+        :param x_offset: The amount by which each line is shifted in the x axis. Optional, default is 10.
+        :param y_offset: The amount by which each line is shifted in the y axis. Optional, default is 20.
+        :param fill: If true the area under each line is filled.
+        :raises: RuntimeError if state is true but there are less than two lines on the plot, if state is true but
+                 x_offset and y_offset are 0, or if state is false but x_offset or y_offset is non-zero or fill is True.
+        """
         if state:
+            if len(self.get_lines()) < 2:
+                raise RuntimeError("Axis must have multiple lines to be converted to a waterfall plot.")
+
             if x_offset is None:
                 x_offset = WATERFALL_XOFFSET_DEFAULT
 
@@ -1083,7 +1098,7 @@ class MantidAxes(Axes):
                 y_offset = WATERFALL_YOFFSET_DEFAULT
 
             if x_offset == 0 and y_offset == 0:
-                raise Exception("You have set waterfall to true but have set the x and y offsets to zero.")
+                raise RuntimeError("You have set waterfall to true but have set the x and y offsets to zero.")
 
             if self.is_waterfall():
                 # If the plot is already a waterfall plot but the provided x or y offset value is different to the
@@ -1102,7 +1117,7 @@ class MantidAxes(Axes):
                 helperfunctions.set_initial_dimensions(self)
         else:
             if bool(x_offset) or bool(y_offset) or fill:
-                raise Exception("You have set waterfall to false but have given a non-zero value for the offset or "
+                raise RuntimeError("You have set waterfall to false but have given a non-zero value for the offset or "
                                 "set fill to true.")
 
             if not self.is_waterfall():
@@ -1115,166 +1130,30 @@ class MantidAxes(Axes):
         self.update_waterfall(x_offset, y_offset)
 
         if fill:
-            self.waterfall_create_fill()
+            self.set_fill(True)
 
-    def apply_waterfall_offset_to_errorbars(self, line, amount_to_move_x, amount_to_move_y, index):
-        for container in self.containers:
-            # Find the ErrorbarContainer that corresponds to the current line.
-            if isinstance(container, ErrorbarContainer) and container[0] == line:
-                # Shift the data line and the errorbar caps
-                for line in (container[0],) + container[1]:
-                    line.set_xdata(line.get_xdata() + amount_to_move_x)
-                    line.set_ydata(line.get_ydata() + amount_to_move_y)
+    def set_fill(self, enable, colour=None):
+        """
+        Toggle whether the area under each line on a waterfall plot is filled.
+        :param enable: If true, the filled areas are created, otherwise they are removed.
+        :param colour: Optional string for the colour of the filled areas. If None, the colour of each line is used.
+        :raises: RuntimeError if enable is false but colour is not None.
+        """
+        if not self.is_waterfall():
+            raise RuntimeError("Cannot toggle fill on non-waterfall plot.")
 
-                    if index == 0:
-                        line.set_zorder(len(self.get_lines()))
-                    else:
-                        line.set_zorder(self.get_lines()[index - 1].get_zorder() - 1)
+        if enable:
+            helperfunctions.waterfall_create_fill(self)
 
-                # Shift the errorbars
-                for bar_line_col in container[2]:
-                    segments = bar_line_col.get_segments()
-                    for point in segments:
-                        for row in range(2):
-                            point[row][1] += amount_to_move_y
-                        for column in range(2):
-                            point[column][0] += amount_to_move_x
-                    bar_line_col.set_segments(segments)
-                bar_line_col.set_zorder((len(self.get_lines()) - index) + 1)
-                break
-
-    def convert_single_line_to_waterfall(self, index, x=None, y=None, need_to_update_fill=False):
-        line = self.get_lines()[index]
-
-        amount_to_move_x = index * self.width * (self.waterfall_x_offset / 500) if x is None else \
-            index * self.width * ((x - self.waterfall_x_offset) / 500)
-
-        amount_to_move_y = index * self.height * (self.waterfall_y_offset / 500) if y is None else \
-            index * self.height * ((y - self.waterfall_y_offset) / 500)
-
-        if line.get_label() == "_nolegend_":
-            self.apply_waterfall_offset_to_errorbars(line, amount_to_move_x, amount_to_move_y, index)
+            if colour:
+                helperfunctions.solid_colour_fill(self, colour)
+            else:
+                helperfunctions.line_colour_fill(self)
         else:
-            line.set_xdata(line.get_xdata() + amount_to_move_x)
-            line.set_ydata(line.get_ydata() + amount_to_move_y)
+            if bool(colour):
+                raise RuntimeError("You have set fill to false but have given a colour.")
 
-            # Ensures the more offset lines are drawn behind the less offset ones
-            if index == 0:
-                line.set_zorder(len(self.get_lines()))
-            else:
-                line.set_zorder(self.get_lines()[index-1].get_zorder() - 1)
-
-        # If the curves are filled and the fill has been set to match the line colour and the line colour has changed
-        # then the fill's colour is updated.
-        if need_to_update_fill:
-            fill = self.get_waterfall_fill_for_curve(index)
-            fill.set_color(line.get_color())
-
-    def set_waterfall_fill_visible(self, index):
-        if not self.waterfall_has_fill():
-            return
-
-        # Sets the filled area to match the visibility of the line it belongs to.
-        line = self.get_lines()[index]
-        fill = self.get_waterfall_fill_for_curve(index)
-        fill.set_visible(line.get_visible())
-
-    def get_waterfall_fill_for_curve(self, index):
-        # Takes the index of a curve and returns that curve's filled area.
-        i = 0
-        for collection in self.collections:
-            if isinstance(collection, PolyCollection):
-                if i == index:
-                    fill = collection
-                    break
-                i += 1
-
-        return fill
-
-    def waterfall_has_fill(self):
-        return any(isinstance(collection, PolyCollection) for collection in self.collections)
-
-    def waterfall_fill_is_line_colour(self):
-        i = 0
-        # Check that for each line, the fill area is the same colour as the line.
-        for collection in self.collections:
-            if isinstance(collection, PolyCollection):
-                line_colour = self.get_lines()[i].get_color()
-                poly_colour = convert_color_to_hex(collection.get_facecolor()[0])
-                if line_colour != poly_colour:
-                    return False
-                i += 1
-        return True
-
-    def waterfall_create_fill(self):
-        errorbar_cap_lines = self.remove_and_return_errorbar_cap_lines()
-
-        for i, line in enumerate(self.get_lines()):
-            bottom_line = [min(line.get_ydata()) - ((i * self.height) / 100)] * len(line.get_ydata())
-            fill = self.fill_between(line.get_xdata(), line.get_ydata(), bottom_line)
-            fill.set_zorder((len(self.get_lines()) - i) + 1)
-            self.set_waterfall_fill_visible(i)
-
-        self.lines += errorbar_cap_lines
-
-    def waterfall_remove_fill(self):
-        self.collections[:] = filter(lambda x: not isinstance(x, PolyCollection), self.collections)
-        self.get_figure().canvas.draw()
-
-    def waterfall_update_fill(self):
-        # Get the colours of each fill so they can be reapplied after updating.
-        colours = []
-        for collection in self.collections:
-            if isinstance(collection, PolyCollection):
-                colours.append(collection.get_facecolor())
-
-        self.waterfall_remove_fill()
-        self.waterfall_create_fill()
-
-        poly_collections = [collection for collection in self.collections if isinstance(collection, PolyCollection)]
-        line_colours = True
-        # If there are more fill areas than colours, this means that new curves have been added to the plot
-        # (overplotting). In which case, we need to determine whether the fill colours are set to match the line
-        # colours by checking that the colour of each fill that existed previously is the same as the line it belongs
-        # to. If so, the list of colours is appended to with the colours of the new lines. Otherwise the fills are
-        # all set to the same colour and so the list of colours is extended with the same colour for each new curve.
-        if len(poly_collections) > len(colours):
-            for i in range(len(colours) - 1):
-                if convert_color_to_hex(colours[i][0]) != self.get_lines()[i].get_color():
-                    line_colours = False
-                    break
-
-            colours_length = len(colours)
-            if line_colours:
-                for i in range(colours_length, len(poly_collections)):
-                    colours.append(self.get_lines()[i].get_color())
-            else:
-                for i in range(colours_length, len(poly_collections)):
-                    colours.append(colours[0])
-
-        for i, collection in enumerate(poly_collections):
-            collection.set_color(colours[i])
-
-    def remove_and_return_errorbar_cap_lines(self):
-        # Matplotlib holds the line objects representing errorbar caps in the same list as the actual curves on a plot.
-        # This causes problems for waterfall plots so here they are removed from the list and placed into a different
-        # list, which is returned so they can be readded later.
-        errorbar_cap_lines = []
-        for line in self.get_lines():
-            # The lines with the label "_nolegend_" are either actual curves with errorbars, or errorbar cap lines.
-            # To check if it is an actual curve, we attempt to find the ErrorbarContainer that matches the line object.
-            if line.get_label() == "_nolegend_":
-                line_is_errorbar_cap = True
-                for container in self.containers:
-                    if isinstance(container, ErrorbarContainer):
-                        if container[0] == line:
-                            line_is_errorbar_cap = False
-                            break
-
-                if line_is_errorbar_cap:
-                    errorbar_cap_lines.append(self.lines.pop(self.lines.index(line)))
-
-        return errorbar_cap_lines
+            helperfunctions.waterfall_remove_fill(self)
 
     # ------------------ Private api --------------------------------------------------------
 

@@ -10,6 +10,7 @@ from __future__ import (absolute_import, unicode_literals)
 
 from matplotlib.collections import PolyCollection
 
+from mantid.plots import helperfunctions
 from mantidqt.widgets.plotconfigdialog.colorselector import convert_color_to_hex
 from mantidqt.widgets.waterfallplotfillareadialog.view import WaterfallPlotFillAreaDialogView
 
@@ -37,10 +38,10 @@ class WaterfallPlotFillAreaDialogPresenter:
     def init_view(self):
         # This function sets the correct values in the menu when it is first opened.
 
-        if self.ax.waterfall_has_fill():
+        if helperfunctions.waterfall_has_fill(self.ax):
             self.view.enable_fill_group_box.setChecked(True)
 
-            if self.ax.waterfall_fill_is_line_colour():
+            if helperfunctions.waterfall_fill_is_line_colour(self.ax):
                 self.view.use_line_colour_radio_button.setChecked(True)
             else:
                 self.view.use_solid_colour_radio_button.setChecked(True)
@@ -58,20 +59,7 @@ class WaterfallPlotFillAreaDialogPresenter:
             self.remove_fill()
 
     def line_colour_fill(self):
-        # Add the fill areas if there aren't any already.
-        if not self.ax.waterfall_has_fill():
-            self.create_fill()
-
-        i = 0
-        for collection in self.ax.collections:
-            if isinstance(collection, PolyCollection):
-                colour = self.ax.get_lines()[i].get_color()
-                collection.set_color(colour)
-                # Only want the counter to iterate if the current collection is a PolyCollection (the fill areas) since
-                # the axes may have other collections which can be ignored.
-                i = i + 1
-
-        self.fig.canvas.draw()
+        helperfunctions.line_colour_fill(self.ax)
 
     def solid_colour_fill(self):
         # If the colour selector has been changed then presumably the user wants to set a custom fill colour
@@ -79,26 +67,12 @@ class WaterfallPlotFillAreaDialogPresenter:
         if not self.view.use_solid_colour_radio_button.isChecked():
             self.view.use_solid_colour_radio_button.setChecked(True)
 
-        # Add the fill areas if there aren't any already.
-        if not self.ax.waterfall_has_fill():
-            self.create_fill()
-
         colour = self.view.colour_selector_widget.get_color()
 
-        for i, collection in enumerate(self.ax.collections):
-            if isinstance(collection, PolyCollection):
-                # This function is called every time the colour line edit is changed so it's possible
-                # that the current input is not a valid colour, such as if the user hasn't finished entering
-                # a colour. So if setting the colour fails, the function just stops.
-                try:
-                    collection.set_color(colour)
-                except:
-                    return
-
-        self.fig.canvas.draw()
+        helperfunctions.solid_colour_fill(self.ax, colour)
 
     def create_fill(self):
-        self.ax.waterfall_create_fill()
+        self.ax.set_fill(True)
 
     def remove_fill(self):
-        self.ax.waterfall_remove_fill()
+        self.ax.set_fill(False)

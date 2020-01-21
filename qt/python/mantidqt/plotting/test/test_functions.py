@@ -225,7 +225,6 @@ class FunctionsTest(TestCase):
             config['graph1d.autodistribution'] = auto_dist
 
     def test_setting_waterfall_to_true_makes_waterfall_plot(self):
-        MantidAxes.set_waterfall_toolbar_options_enabled = mock.Mock()
         fig = plt.figure()
         ws = self._test_ws
         plot([ws], wksp_indices=[0,1], fig=fig, waterfall=True)
@@ -242,7 +241,6 @@ class FunctionsTest(TestCase):
         self.assertFalse(ax.is_waterfall())
 
     def test_overplotting_onto_waterfall_plot_maintains_waterfall(self):
-        MantidAxes.set_waterfall_toolbar_options_enabled = mock.Mock()
         fig = plt.figure()
         ws = self._test_ws
         plot([ws], wksp_indices=[0,1], fig=fig, waterfall=True)
@@ -255,12 +253,11 @@ class FunctionsTest(TestCase):
         self.assertNotEqual(ax.get_lines()[0].get_ydata()[0], ax.get_lines()[2].get_ydata()[0])
 
     def test_overplotting_onto_waterfall_plot_with_filled_areas_adds_another_filled_area(self):
-        MantidAxes.set_waterfall_toolbar_options_enabled = mock.Mock()
         fig = plt.figure()
         ws = self._test_ws
         plot([ws], wksp_indices=[0, 1], fig=fig, waterfall=True)
         ax = plt.gca()
-        ax.waterfall_create_fill()
+        ax.set_fill(True)
         plot([ws], wksp_indices=[0], fig=fig, overplot=True)
 
         fills = [collection for collection in ax.collections

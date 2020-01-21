@@ -25,7 +25,6 @@ class WaterfallPlotOffsetDialogPresenterTest(unittest.TestCase):
         self.ax.plot([0, 0], [1, 1])
         self.ax.plot([0, 1], [1, 2])
 
-        self.ax.set_waterfall_toolbar_options_enabled = Mock()
         self.ax.set_waterfall(True)
 
         view = Mock()

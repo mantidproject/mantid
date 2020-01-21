@@ -27,7 +27,7 @@ from matplotlib.legend import Legend
 # local imports
 from mantid.api import AnalysisDataService, MatrixWorkspace
 from mantid.kernel import Logger
-from mantid.plots import MantidAxes, helperfunctions
+from mantid.plots import helperfunctions, MantidAxes
 from mantidqt.plotting.figuretype import figure_type, FigureType
 from mantid.py3compat import is_text_string, string_types
 from mantidqt.dialogs.spectraselectorutils import get_spectra_selection
@@ -254,11 +254,11 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
     else:
         if ax.is_waterfall():
             for i in range(len(nums)):
-                errorbar_cap_lines = ax.remove_and_return_errorbar_cap_lines()
-                ax.convert_single_line_to_waterfall(len(ax.get_lines())-(i+1))
+                errorbar_cap_lines = helperfunctions.remove_and_return_errorbar_cap_lines(ax)
+                helperfunctions.convert_single_line_to_waterfall(ax, len(ax.get_lines())-(i+1))
 
-                if ax.waterfall_has_fill():
-                    ax.waterfall_update_fill()
+                if helperfunctions.waterfall_has_fill(ax):
+                    helperfunctions.waterfall_update_fill(ax)
 
                 ax.lines += errorbar_cap_lines
 
