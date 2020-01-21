@@ -18,6 +18,7 @@ Improvements
 ############
 
 - In Abins the instrumental broadening implementation has been overhauled.
+
   - Output spectra from Abins should now be smooth and free of artefacts.
   - A fast approximate scheme is implemented and automatically applied
     when appropriate for simulations of TOSCA spectra. Alternative
