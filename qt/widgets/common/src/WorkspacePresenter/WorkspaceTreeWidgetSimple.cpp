@@ -105,7 +105,6 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
     if (auto matrixWS =
             boost::dynamic_pointer_cast<MatrixWorkspace>(workspace)) {
       QMenu *plotSubMenu(new QMenu("Plot", menu));
-      
 
       // Don't plot 1D spectra if only one X value
       bool multipleBins = false;

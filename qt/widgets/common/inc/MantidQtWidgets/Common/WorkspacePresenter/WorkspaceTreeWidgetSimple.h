@@ -74,10 +74,9 @@ private slots:
 
 private:
   QAction *m_plotSpectrum, *m_plotBin, *m_overplotSpectrum,
-      *m_plotSpectrumWithErrs,
-      *m_overplotSpectrumWithErrs, *m_plotColorfill, *m_sampleLogs,
-      *m_sliceViewer, *m_showInstrument, *m_showData, *m_showAlgorithmHistory,
-      *m_showDetectors;
+      *m_plotSpectrumWithErrs, *m_overplotSpectrumWithErrs, *m_plotColorfill,
+      *m_sampleLogs, *m_sliceViewer, *m_showInstrument, *m_showData,
+      *m_showAlgorithmHistory, *m_showDetectors;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
