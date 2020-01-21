@@ -113,14 +113,14 @@ void DeadTimeCorrection::exec() {
   } else {
     const std::string filename = getProperty("MapFile");
     if (!filename.empty()) {
-        auto grouper = createChildAlgorithm("GroupDetectors");
-        grouper->setProperty("InputWorkspace", integrated);
-        grouper->setPropertyValue("OutputWorkspace", "unused");
-        grouper->setPropertyValue("MapFile", filename);
-        grouper->setPropertyValue("Behaviour", "Sum");
-        grouper->setProperty("KeepUngroupedSpectra", true);
-        grouper->executeAsChildAlg();
-        grouped = grouper->getProperty("OutputWorkspace");
+      auto grouper = createChildAlgorithm("GroupDetectors");
+      grouper->setProperty("InputWorkspace", integrated);
+      grouper->setPropertyValue("OutputWorkspace", "unused");
+      grouper->setPropertyValue("MapFile", filename);
+      grouper->setPropertyValue("Behaviour", "Sum");
+      grouper->setProperty("KeepUngroupedSpectra", true);
+      grouper->executeAsChildAlg();
+      grouped = grouper->getProperty("OutputWorkspace");
     }
   }
   Progress progress(this, 0.0, 1.0, grouped->getNumberHistograms());
