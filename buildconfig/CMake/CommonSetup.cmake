@@ -105,9 +105,6 @@ else()
   )
 endif()
 
-find_package(PythonInterp)
-set(Python_ADDITIONAL_VERSIONS ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
-
 find_package(OpenSSL REQUIRED)
 
 # ##############################################################################

@@ -81,7 +81,7 @@ def save_unsplined_vanadium(vanadium_ws, output_path):
 
 
 def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None, cal_file_name=None,
-                    sample_details=None):
+                    sample_details=None, output_binning=None, pdf_type="G(r)"):
     focused_ws = _obtain_focused_run(run_number, focus_file_path)
     focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, Target="MomentumTransfer", EMode='Elastic')
 
@@ -108,14 +108,19 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None,
         q_min, q_max = _load_qlims(q_lims)
         merged_ws = mantid.MatchAndMergeWorkspaces(InputWorkspaces=focused_ws, XMin=q_min, XMax=q_max,
                                                    CalculateScale=False)
-        pdf_output = mantid.PDFFourierTransform(Inputworkspace=merged_ws, InputSofQType="S(Q)-1", PDFType="G(r)",
+        pdf_output = mantid.PDFFourierTransform(Inputworkspace=merged_ws, InputSofQType="S(Q)-1", PDFType=pdf_type,
                                                 Filter=True)
     else:
         pdf_output = mantid.PDFFourierTransform(Inputworkspace='focused_ws', InputSofQType="S(Q)-1",
-                                                PDFType="G(r)", Filter=True)
+                                                PDFType=pdf_type, Filter=True)
         pdf_output = mantid.RebinToWorkspace(WorkspaceToRebin=pdf_output, WorkspaceToMatch=pdf_output[4],
                                              PreserveEvents=True)
     common.remove_intermediate_workspace('self_scattering_correction')
+    if output_binning is not None:
+        try:
+            pdf_output = mantid.Rebin(InputWorkspace=pdf_output, Params=output_binning)
+        except RuntimeError:
+            return pdf_output
     return pdf_output
 
 

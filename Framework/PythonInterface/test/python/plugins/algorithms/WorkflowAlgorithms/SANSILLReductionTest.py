@@ -88,7 +88,7 @@ class SANSILLReductionTest(unittest.TestCase):
         self._check_output(mtd['beam'], True, 30, 256*256+2)
         self._check_process_flag(mtd['beam'], 'Beam')
         run = mtd['beam'].getRun()
-        self.assertAlmostEqual(run.getLogData('BeamCenterX').value, -0.0025, delta=1e-4)
+        self.assertAlmostEqual(run.getLogData('BeamCenterX').value, 0.0025, delta=1e-4)
         self.assertAlmostEqual(run.getLogData('BeamCenterY').value, 0.0009, delta=1e-4)
         self._check_output(mtd['flux'], False, 30, 256*256+2)
         self._check_process_flag(mtd['flux'], 'Beam')

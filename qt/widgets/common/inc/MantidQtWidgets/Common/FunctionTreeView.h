@@ -209,8 +209,8 @@ protected:
   /// Check if a parameter property has a upper bound
   bool hasUpperBound(QtProperty *prop) const;
   /// Get a constraint string
-  QString getConstraint(const QString &paramName, const QString &lowerBound,
-                        const QString &upperBound) const;
+  QString getConstraint(const QString &paramName, const double &lowerBound,
+                        const double &upperBound) const;
   /// Get a pair of function index (eg f0.f2.) and constraint expression given a
   /// parameter property
   std::pair<QString, QString> getFunctionAndConstraint(QtProperty *prop) const;
@@ -286,7 +286,7 @@ protected:
   /// Manager for function tie properties
   QtStringPropertyManager *m_tieManager;
   /// Manager for parameter constraint properties
-  QtStringPropertyManager *m_constraintManager;
+  QtDoublePropertyManager *m_constraintManager;
   /// Manager for file name attributes
   QtStringPropertyManager *m_filenameManager;
   /// Manager for Formula attributes

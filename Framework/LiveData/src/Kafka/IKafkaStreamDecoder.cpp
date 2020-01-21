@@ -82,9 +82,9 @@ void IKafkaStreamDecoder::startCapture(bool startNow) {
     auto runStartData = getRunStartMessage(rawMsgBuffer);
     joinStreamAtTime(runStartData);
   } else {
-    m_dataStream =
-        m_broker->subscribe({m_streamTopic, m_runInfoTopic, m_sampleEnvTopic},
-                            SubscribeAtOption::LATEST);
+    m_dataStream = m_broker->subscribe(
+        {m_streamTopic, m_monitorTopic, m_runInfoTopic, m_sampleEnvTopic},
+        SubscribeAtOption::LATEST);
   }
 
   try {

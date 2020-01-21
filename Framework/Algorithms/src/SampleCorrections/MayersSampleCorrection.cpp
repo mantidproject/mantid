@@ -127,7 +127,7 @@ void MayersSampleCorrection::exec() {
     PARALLEL_START_INTERUPT_REGION
 
     if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i) ||
-        spectrumInfo.isMasked(i)) {
+        spectrumInfo.isMasked(i) || spectrumInfo.l2(i) == 0) {
       continue;
     }
 

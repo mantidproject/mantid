@@ -136,7 +136,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         self.declareProperty(Prop.SLICE, False, doc='If true, slice the input workspace')
         whenSliceEnabled = EnabledWhenProperty(Prop.SLICE, PropertyCriterion.IsEqualTo, "1")
 
-        self._slice_properties = ['TimeInterval', 'LogName', 'LogValueInterval']
+        self._slice_properties = ['TimeInterval', 'LogName', 'LogValueInterval', 'UseNewFilterAlgorithm']
         self.copyProperties('ReflectometrySliceEventWorkspace', self._slice_properties)
         for property in self._slice_properties:
             self.setPropertySettings(property, whenSliceEnabled)
