@@ -10,6 +10,7 @@ from __future__ import (absolute_import, division, print_function)
 from Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT, create_error_message
 from Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
 from Engineering.gui.engineering_diffraction.tabs.common.vanadium_corrections import check_workspaces_exist
+from Engineering.gui.engineering_diffraction.tabs.common.cropping.cropping_widget import CroppingWidget
 from mantidqt.utils.asynchronous import AsyncTask
 from mantidqt.utils.observer_pattern import Observer
 from mantid.simpleapi import logger
@@ -25,11 +26,16 @@ class FocusPresenter(object):
         # Connect view signals to local methods.
         self.view.set_on_focus_clicked(self.on_focus_clicked)
         self.view.set_enable_controls_connection(self.set_focus_controls_enabled)
+        self.view.set_on_check_cropping_state_changed(self.show_cropping)
 
         # Variables from other GUI tabs.
         self.current_calibration = CalibrationInfo()
         self.instrument = "ENGINX"
         self.rb_num = None
+
+        # Cropping Options
+        self.cropping_widget = CroppingWidget(self.view, view=self.view.get_cropping_widget())
+        self.view.set_cropping_widget_hidden()
 
     def on_focus_clicked(self):
         banks = self._get_banks()
@@ -114,6 +120,12 @@ class FocusPresenter(object):
         :param calibration: The new current calibration.
         """
         self.current_calibration = calibration
+
+    def show_cropping(self, visible):
+        if visible:
+            self.view.set_cropping_widget_visible()
+        else:
+            self.view.set_cropping_widget_hidden()
 
     # -----------------------
     # Observers / Observables
