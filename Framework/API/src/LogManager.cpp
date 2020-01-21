@@ -343,7 +343,9 @@ LogManager::getTimeSeriesProperty(const std::string &name) const {
  * @return A single double value
  */
 double LogManager::getTimeAveragedStd(const std::string &name) const {
-  return getTimeSeriesProperty<double>(name)->getStatistics().time_standard_deviation;
+  return getTimeSeriesProperty<double>(name)
+      ->getStatistics()
+      .time_standard_deviation;
 }
 
 /**
