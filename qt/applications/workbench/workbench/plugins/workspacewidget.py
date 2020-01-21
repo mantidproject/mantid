@@ -15,6 +15,7 @@ from qtpy.QtWidgets import QApplication, QMessageBox, QVBoxLayout
 from mantid.api import AnalysisDataService, WorkspaceGroup
 from mantid.kernel import logger
 from mantidqt.plotting.functions import can_overplot, pcolormesh, plot, plot_from_names
+from mantid.plots.utility import MantidAxType
 from mantid.simpleapi import CreateDetectorTable
 from mantidqt.utils.asynchronous import BlockingAsyncTaskWithCallback
 from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
@@ -210,10 +211,12 @@ class WorkspaceWidget(PluginWidget):
             TableWorkspaceDisplay.supports(ws)
             self._do_show_data([name])
         except ValueError:
-            if ws.blocksize() > 1:
-                plot_from_names([name], errors=False, overplot=False, show_colorfill_btn=True)
+            if ws.blocksize() == 1:
+                #this is just single bin data, it makes more sense to plot the bin
+                plot_kwargs = {"axis": MantidAxType.BIN}
+                plot([ws],errors=False, overplot=False, wksp_indices=[0], plot_kwargs=plot_kwargs)
             else:
-                self._do_show_data([name])
+                plot_from_names([name], errors=False, overplot=False, show_colorfill_btn=True)
 
     def refresh_workspaces(self):
         self.workspacewidget.refreshWorkspaces()
