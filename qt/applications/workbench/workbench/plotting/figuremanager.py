@@ -292,11 +292,11 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         # For plot-to-script button to show, we must have a MantidAxes with lines in it
         # Plot-to-script currently doesn't work with waterfall plots so the button is hidden for that plot type.
         if not any((isinstance(ax, MantidAxes) and curve_in_ax(ax))
-                   for ax in self.canvas.figure.get_axes()) or self.canvas.figure.get_axes()[0].is_waterfall_plot():
+                   for ax in self.canvas.figure.get_axes()) or self.canvas.figure.get_axes()[0].is_waterfall():
             self.toolbar.set_generate_plot_script_enabled(False)
 
         # Only show options specific to waterfall plots if the axes is a MantidAxes and is a waterfall plot.
-        if not isinstance(self.canvas.figure.get_axes()[0], MantidAxes) or not self.canvas.figure.get_axes()[0].is_waterfall_plot():
+        if not isinstance(self.canvas.figure.get_axes()[0], MantidAxes) or not self.canvas.figure.get_axes()[0].is_waterfall():
             self.toolbar.set_waterfall_options_enabled(False)
 
     def destroy(self, *args):
@@ -418,14 +418,14 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
     def waterfall_reverse_line_order(self):
         ax = self.canvas.figure.get_axes()[0]
         x, y = ax.waterfall_x_offset, ax.waterfall_y_offset
-        ax.update_waterfall_plot(0,0)
+        ax.update_waterfall(0, 0)
 
         errorbar_cap_lines = ax.remove_and_return_errorbar_cap_lines()
 
         ax.lines.reverse()
         ax.lines += errorbar_cap_lines
         ax.collections.reverse()
-        ax.update_waterfall_plot(x, y)
+        ax.update_waterfall(x, y)
 
         if ax.get_legend():
             ax.make_legend()

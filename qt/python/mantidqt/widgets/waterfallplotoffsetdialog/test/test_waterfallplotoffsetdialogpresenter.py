@@ -26,7 +26,7 @@ class WaterfallPlotOffsetDialogPresenterTest(unittest.TestCase):
         self.ax.plot([0, 1], [1, 2])
 
         self.ax.set_waterfall_toolbar_options_enabled = Mock()
-        self.ax.convert_to_waterfall()
+        self.ax.set_waterfall(True)
 
         view = Mock()
         view.get_x_offset.return_value = 10
@@ -35,16 +35,16 @@ class WaterfallPlotOffsetDialogPresenterTest(unittest.TestCase):
         self.presenter = WaterfallPlotOffsetDialogPresenter(fig=self.fig, view=view)
 
     def test_changing_x_offset_updates_plot(self):
-        self.ax.update_waterfall_plot = Mock()
+        self.ax.update_waterfall = Mock()
         self.presenter.update_x_offset()
 
-        self.ax.update_waterfall_plot.assert_called_once_with(10, 20)
+        self.ax.update_waterfall.assert_called_once_with(10, 20)
 
     def test_changing_y_offset_updates_plot(self):
-        self.ax.update_waterfall_plot = Mock()
+        self.ax.update_waterfall = Mock()
         self.presenter.update_y_offset()
 
-        self.ax.update_waterfall_plot.assert_called_once_with(10, 20)
+        self.ax.update_waterfall.assert_called_once_with(10, 20)
 
     def test_changing_x_offset_also_changes_y_offset_if_kept_in_proportion(self):
         self.presenter.keep_proportion(True)

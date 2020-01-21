@@ -27,7 +27,7 @@ from matplotlib.legend import Legend
 # local imports
 from mantid.api import AnalysisDataService, MatrixWorkspace
 from mantid.kernel import Logger
-from mantid.plots import MantidAxes
+from mantid.plots import MantidAxes, helperfunctions
 from mantidqt.plotting.figuretype import figure_type, FigureType
 from mantid.py3compat import is_text_string, string_types
 from mantidqt.dialogs.spectraselectorutils import get_spectra_selection
@@ -244,15 +244,15 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
     # The plot's initial xlim and ylim are used to offset each curve in a waterfall plot.
     # Need to do this whether the current curve is a waterfall plot or not because it may be converted later.
     if not overplot:
-        ax.set_initial_dimensions()
+        helperfunctions.set_initial_dimensions(ax)
 
     if waterfall:
-        ax.convert_to_waterfall()
+        ax.set_waterfall(True)
 
     if not overplot:
         fig.canvas.set_window_title(figure_title(workspaces, fig.number))
     else:
-        if ax.is_waterfall_plot():
+        if ax.is_waterfall():
             for i in range(len(nums)):
                 errorbar_cap_lines = ax.remove_and_return_errorbar_cap_lines()
                 ax.convert_single_line_to_waterfall(len(ax.get_lines())-(i+1))

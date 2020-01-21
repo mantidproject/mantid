@@ -57,7 +57,7 @@ class FigureErrorsManager(object):
 
         ax.lines.insert(curve_index, ax.lines.pop())
 
-        if isinstance(ax, MantidAxes) and ax.is_waterfall_plot():
+        if isinstance(ax, MantidAxes) and ax.is_waterfall():
             ax.convert_single_line_to_waterfall(curve_index)
 
         ax.lines += errorbar_cap_lines

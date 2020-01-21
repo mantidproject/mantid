@@ -112,7 +112,7 @@ class CurvesTabWidgetPresenter:
 
         waterfall = False
         if isinstance(ax, MantidAxes):
-            waterfall = ax.is_waterfall_plot()
+            waterfall = ax.is_waterfall()
         check_line_colour = False
         # If the plot is a waterfall plot and the user has set it so the area under each line is filled, and the fill
         # colour for each line is set as the line colour, after the curve is updated we need to check if its colour has
@@ -190,12 +190,12 @@ class CurvesTabWidgetPresenter:
 
         waterfall = False
         if isinstance(ax, MantidAxes):
-            waterfall = ax.is_waterfall_plot()
+            waterfall = ax.is_waterfall()
 
         if waterfall:
             # Waterfall plots are reset so they can be reconverted after the curve is removed.
             x, y = ax.waterfall_x_offset, ax.waterfall_y_offset
-            ax.update_waterfall_plot(0,0)
+            ax.update_waterfall(0, 0)
 
             # If the curves have a fill, the one which corresponds to the curve being removed also needs to be removed.
             current_curve_index = self.view.select_curve_combo_box.currentIndex()
@@ -214,9 +214,9 @@ class CurvesTabWidgetPresenter:
 
         # If there is now only one curve on a waterfall plot, the plot becomes non-waterfall.
         if waterfall:
-            ax.update_waterfall_plot(x, y)
+            ax.update_waterfall(x, y)
             if len(ax.get_lines()) <= 1:
-                ax.convert_from_waterfall()
+                ax.set_waterfall(False)
 
         ax = self.get_selected_ax()
         # Update the legend and redraw

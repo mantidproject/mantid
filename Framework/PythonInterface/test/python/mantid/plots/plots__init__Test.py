@@ -526,9 +526,9 @@ class Plots__init__Test(unittest.TestCase):
         ax.plot([0, 1], [0, 1])
 
         # Make a waterfall plot.
-        ax.convert_to_waterfall()
+        ax.set_waterfall(True)
 
-        self.assertTrue(ax.is_waterfall_plot())
+        self.assertTrue(ax.is_waterfall())
         # Check the lines' data are different now that it is a waterfall plot.
         self.assertNotEqual(ax.get_lines()[0].get_xdata()[0], ax.get_lines()[1].get_xdata()[0])
         self.assertNotEqual(ax.get_lines()[0].get_ydata()[0], ax.get_lines()[1].get_ydata()[0])
@@ -541,11 +541,11 @@ class Plots__init__Test(unittest.TestCase):
         ax.plot([0, 1], [0, 1])
 
         # Make a waterfall plot.
-        ax.convert_to_waterfall()
+        ax.set_waterfall(True)
         # Make the plot non-waterfall again.
-        ax.convert_from_waterfall()
+        ax.set_waterfall(False)
 
-        self.assertFalse(ax.is_waterfall_plot())
+        self.assertFalse(ax.is_waterfall())
         # Check that the lines have the same x and y data.
         self.assertEqual(ax.get_lines()[0].get_xdata()[0], ax.get_lines()[1].get_xdata()[0])
         self.assertEqual(ax.get_lines()[0].get_ydata()[0], ax.get_lines()[1].get_ydata()[0])
@@ -557,7 +557,7 @@ class Plots__init__Test(unittest.TestCase):
         ax.plot([0, 1], [0, 1])
 
         # Make a waterfall plot.
-        ax.convert_to_waterfall()
+        ax.set_waterfall(True)
         # Add filled areas.
         ax.waterfall_create_fill()
 
@@ -571,7 +571,7 @@ class Plots__init__Test(unittest.TestCase):
         ax.plot([0, 1], [0, 1])
 
         # Make a waterfall plot.
-        ax.convert_to_waterfall()
+        ax.set_waterfall(True)
         # Add filled areas.
         ax.waterfall_create_fill()
         # Remove filled areas.
@@ -586,11 +586,11 @@ class Plots__init__Test(unittest.TestCase):
         ax.plot([0, 1], [0, 1])
 
         # Make a waterfall plot.
-        ax.convert_to_waterfall()
+        ax.set_waterfall(True)
         # Add filled areas.
         ax.waterfall_create_fill()
         # Make the plot non-waterfall again.
-        ax.convert_from_waterfall()
+        ax.set_waterfall(False)
 
         self.assertFalse(ax.waterfall_has_fill())
 
@@ -601,7 +601,7 @@ class Plots__init__Test(unittest.TestCase):
         ax.plot([0, 1], [0, 1], color="#00d1ff")
 
         # Make a waterfall plot.
-        ax.convert_to_waterfall()
+        ax.set_waterfall(True)
         # Add filled areas.
         ax.waterfall_create_fill()
         # Set the fills to be the same colour as their lines.
@@ -623,7 +623,7 @@ class Plots__init__Test(unittest.TestCase):
         ax.plot([0, 1], [0, 1])
 
         # Make a waterfall plot.
-        ax.convert_to_waterfall()
+        ax.set_waterfall(True)
         # Add filled areas.
         ax.waterfall_create_fill()
         # Set the fills to be the same colour.

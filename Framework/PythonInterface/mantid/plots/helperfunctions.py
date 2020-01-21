@@ -767,3 +767,16 @@ def set_errorbars_hidden(container, hide):
         if bar_lines:
             for line in bar_lines:
                 line.set_visible(not hide)
+
+# ====================================================
+# Waterfall plots
+# ====================================================
+
+
+def set_initial_dimensions(ax):
+    # Set the width and height which are used to calculate the offset percentage for waterfall plots.
+    # This means that the curves in a waterfall plot are always offset by the same amount, even if the
+    # plot limits change.
+    x_lim, y_lim = ax.get_xlim(), ax.get_ylim()
+    ax.width = x_lim[1] - x_lim[0]
+    ax.height = y_lim[1] - y_lim[0]

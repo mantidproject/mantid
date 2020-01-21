@@ -41,6 +41,7 @@ from mantid.plots.scales import PowerScale, SquareScale
 from mantid.plots.utility import (artists_hidden, autoscale_on_update,
                                   legend_set_draggable, MantidAxType)
 
+WATERFALL_XOFFSET_DEFAULT, WATERFALL_YOFFSET_DEFAULT = 10, 20
 
 def plot_decorator(func):
     def wrapper(self, *args, **kwargs):
@@ -1048,18 +1049,10 @@ class MantidAxes(Axes):
         """
         return self._plot_2d_func('tricontourf', *args, **kwargs)
 
-    def set_initial_dimensions(self):
-        # Set the width and height which are used to calculate the offset percentage for waterfall plots.
-        # This means that the curves in a waterfall plot are always offset by the same amount, even if the
-        # plot limits change.
-        x_lim, y_lim = self.get_xlim(), self.get_ylim()
-        self.width = x_lim[1] - x_lim[0]
-        self.height = y_lim[1] - y_lim[0]
-
-    def is_waterfall_plot(self):
+    def is_waterfall(self):
         return self.waterfall_x_offset != 0 or self.waterfall_y_offset != 0
 
-    def update_waterfall_plot(self, x_offset, y_offset):
+    def update_waterfall(self, x_offset, y_offset):
         errorbar_cap_lines = self.remove_and_return_errorbar_cap_lines()
 
         for i in range(len(self.get_lines())):
@@ -1079,26 +1072,50 @@ class MantidAxes(Axes):
 
     def set_waterfall_toolbar_options_enabled(self):
         toolbar = self.get_figure().canvas.toolbar
-        toolbar.waterfall_conversion(self.is_waterfall_plot())
+        toolbar.waterfall_conversion(self.is_waterfall())
 
-    def convert_to_waterfall(self):
-        if self.is_waterfall_plot():
-            return
+    def set_waterfall(self, state, x_offset=None, y_offset=None, fill=False):
+        if state:
+            if x_offset is None:
+                x_offset = WATERFALL_XOFFSET_DEFAULT
 
-        # Plots made from a script may not have the width and height attributes needed to create a waterfall plot, so
-        # they are set here.
-        if not hasattr(self, 'width'):
-            self.set_initial_dimensions()
+            if y_offset is None:
+                y_offset = WATERFALL_YOFFSET_DEFAULT
 
-        # 10 and 20 are the default x and y offset.
-        self.update_waterfall_plot(10, 20)
+            if x_offset == 0 and y_offset == 0:
+                raise Exception("You have set waterfall to true but have set the x and y offsets to zero.")
 
-    def convert_from_waterfall(self):
-        if not self.is_waterfall_plot():
-            return
+            if self.is_waterfall():
+                # If the plot is already a waterfall plot but the provided x or y offset value is different to the
+                # current value, the new values are applied but a message is written to the logger to tell the user
+                # that they can use the update_waterfall function to do this.
+                if x_offset != self.waterfall_x_offset or y_offset != self.waterfall_y_offset:
+                    logger.information("If your plot is already a waterfall plot you can use update_waterfall(x, y) to"
+                                       " change its offset values.")
+                else:
+                    # Nothing needs to be changed.
+                    logger.information("Plot is already a waterfall plot.")
+                    return
 
-        self.update_waterfall_plot(0, 0)
-        self.waterfall_remove_fill()
+            # Set the width and height attributes if they haven't been already.
+            if not hasattr(self, 'width'):
+                helperfunctions.set_initial_dimensions(self)
+        else:
+            if bool(x_offset) or bool(y_offset) or fill:
+                raise Exception("You have set waterfall to false but have given a non-zero value for the offset or "
+                                "set fill to true.")
+
+            if not self.is_waterfall():
+                # Nothing needs to be changed.
+                logger.information("Plot is already not a waterfall plot.")
+                return
+
+            x_offset = y_offset = 0
+
+        self.update_waterfall(x_offset, y_offset)
+
+        if fill:
+            self.waterfall_create_fill()
 
     def apply_waterfall_offset_to_errorbars(self, line, amount_to_move_x, amount_to_move_y, index):
         for container in self.containers:

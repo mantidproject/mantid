@@ -27,7 +27,7 @@ class WaterfallPlotFillAreaDialogPresenterTest(unittest.TestCase):
         self.ax.plot([0, 1], [1, 2])
 
         self.ax.set_waterfall_toolbar_options_enabled = Mock()
-        self.ax.convert_to_waterfall()
+        self.ax.set_waterfall(True)
 
         view = Mock()
         self.presenter = WaterfallPlotFillAreaDialogPresenter(fig=self.fig, view=view)

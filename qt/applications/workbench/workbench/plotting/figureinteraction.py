@@ -459,7 +459,7 @@ class FigureInteraction(object):
             plot_type_action_group.addAction(action)
             action.setCheckable(True)
 
-        if ax.is_waterfall_plot():
+        if ax.is_waterfall():
             waterfall.setChecked(True)
         else:
             standard.setChecked(True)
@@ -468,9 +468,9 @@ class FigureInteraction(object):
 
     def _change_plot_type(self, ax, action):
         if action.text() == "Waterfall":
-            ax.convert_to_waterfall()
+            ax.set_waterfall(True)
         else:
-            ax.convert_from_waterfall()
+            ax.set_waterfall(False)
 
     def _global_edit_markers(self):
         """Open a window that allows editing of all currently plotted markers"""
@@ -662,10 +662,10 @@ class FigureInteraction(object):
         self._toggle_normalization(ax)
 
     def _toggle_normalization(self, ax):
-        waterfall = isinstance(ax, MantidAxes) and ax.is_waterfall_plot()
+        waterfall = isinstance(ax, MantidAxes) and ax.is_waterfall()
         if waterfall:
             x, y = ax.waterfall_x_offset, ax.waterfall_y_offset
-            ax.update_waterfall_plot(0,0)
+            ax.update_waterfall(0, 0)
 
         is_normalized = self._is_normalized(ax)
         for arg_set in ax.creation_args:
@@ -699,7 +699,7 @@ class FigureInteraction(object):
 
         if waterfall:
             ax.set_initial_dimensions()
-            ax.update_waterfall_plot(x, y)
+            ax.update_waterfall(x, y)
 
         self.canvas.draw()
 

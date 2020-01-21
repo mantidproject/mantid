@@ -231,7 +231,7 @@ class FunctionsTest(TestCase):
         plot([ws], wksp_indices=[0,1], fig=fig, waterfall=True)
         ax = plt.gca()
 
-        self.assertTrue(ax.is_waterfall_plot())
+        self.assertTrue(ax.is_waterfall())
 
     def test_cannot_make_waterfall_plot_with_one_line(self):
         fig = plt.figure()
@@ -239,7 +239,7 @@ class FunctionsTest(TestCase):
         plot([ws], wksp_indices=[1], fig=fig, waterfall=True)
         ax = plt.gca()
 
-        self.assertFalse(ax.is_waterfall_plot())
+        self.assertFalse(ax.is_waterfall())
 
     def test_overplotting_onto_waterfall_plot_maintains_waterfall(self):
         MantidAxes.set_waterfall_toolbar_options_enabled = mock.Mock()

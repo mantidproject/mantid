@@ -124,7 +124,7 @@ class FigureErrorsManagerTest(unittest.TestCase):
         self.ax.set_waterfall_toolbar_options_enabled = Mock()
         self.ax.plot([0, 1], [0, 1])
         self.ax.plot([0, 1], [0, 1])
-        self.ax.convert_to_waterfall()
+        self.ax.set_waterfall(True)
 
         self.errors_manager.toggle_all_errors(self.ax, make_visible=True)
 
@@ -134,7 +134,7 @@ class FigureErrorsManagerTest(unittest.TestCase):
         self.ax.set_waterfall_toolbar_options_enabled = Mock()
         self.ax.plot([0, 1], [0, 1])
         self.ax.plot([0, 1], [0, 1])
-        self.ax.convert_to_waterfall()
+        self.ax.set_waterfall(True)
 
         self.errors_manager.toggle_all_errors(self.ax, make_visible=True)
         self.errors_manager.toggle_all_errors(self.ax, make_visible=False)

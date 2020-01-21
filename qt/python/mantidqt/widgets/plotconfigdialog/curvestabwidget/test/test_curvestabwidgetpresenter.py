@@ -290,7 +290,7 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
 
         ax = fig.get_axes()[0]
         ax.set_waterfall_toolbar_options_enabled = Mock()
-        ax.convert_to_waterfall()
+        ax.set_waterfall(True)
         ax.waterfall_create_fill()
 
         presenter = self._generate_presenter(fig=fig, mock_view=mock_view)
@@ -309,7 +309,7 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         ax = fig.get_axes()[0]
         ax.set_waterfall_toolbar_options_enabled = Mock()
         # Create waterfall plot and add filled areas.
-        ax.convert_to_waterfall()
+        ax.set_waterfall(True)
         ax.waterfall_create_fill()
 
         ax.lines[0].set_color('#ff9900')
@@ -338,7 +338,7 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         ax = fig.get_axes()[0]
         ax.set_waterfall_toolbar_options_enabled = Mock()
         # Create waterfall plot
-        ax.convert_to_waterfall()
+        ax.set_waterfall(True)
 
         presenter = self._generate_presenter(fig=fig, mock_view=mock_view)
         # Add errobars to the first two lines
