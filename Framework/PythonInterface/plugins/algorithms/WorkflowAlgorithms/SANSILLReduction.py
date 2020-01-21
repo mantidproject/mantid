@@ -11,6 +11,7 @@ from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator,
 from mantid.simpleapi import *
 from math import fabs
 import numpy as np
+import os
 
 
 class SANSILLReduction(PythonAlgorithm):
