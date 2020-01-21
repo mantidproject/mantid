@@ -77,32 +77,48 @@ class FittingTabPresenter(object):
         self.update_selected_workspace_guess()
 
     def update_selected_workspace_guess(self):
+        if self.view.fit_type == self.view.simultaneous_fit:
+            self.update_fit_selector_list()
         if self.manual_selection_made:
             guess_selection = self.selected_data
             self.selected_data = guess_selection
-
         elif self.context._frequency_context:
             self.update_selected_frequency_workspace_guess()
         else:
             self.update_selected_time_workspace_guess()
 
     def update_selected_frequency_workspace_guess(self):
+        runs = 'All'
+        groups_and_pairs = self.context.group_pair_context.selected
+        if self.view.fit_type == self.view.simultaneous_fit:
+            if self.view.simultaneous_fit_by == "Run":
+                runs = self.view.simultaneous_fit_by_specifier
+            else:
+                groups_and_pairs = self.view.simultaneous_fit_by_specifier
         guess_selection = self.context.get_names_of_workspaces_to_fit(
-            runs='All',
-            group_and_pair=self.context.group_pair_context.selected,
+            runs=runs,
+            group_and_pair=groups_and_pairs,
             phasequad=True,
             rebin=not self.view.fit_to_raw, freq=self.context._frequency_context.plot_type)
         self.selected_data = guess_selection
 
     def update_selected_time_workspace_guess(self):
-        group_and_pair = self._get_selected_groups_and_pairs()
+        runs = 'All'
+        groups_and_pairs = self._get_selected_groups_and_pairs()
+        if self.view.fit_type == self.view.simultaneous_fit:
+            if self.view.simultaneous_fit_by == "Run":
+                runs = self.view.simultaneous_fit_by_specifier
+            elif self.view.simultaneous_fit_by == "Group/Pair":
+                groups_and_pairs = [self.view.simultaneous_fit_by_specifier]
+
         guess_selection = []
-        for name in group_and_pair:
+        for grppair in groups_and_pairs:
             guess_selection += self.context.get_names_of_workspaces_to_fit(
-                runs='All',
-                group_and_pair=name,
-                phasequad=False,
-                rebin=not self.view.fit_to_raw)
+                    runs=runs,
+                    group_and_pair=grppair,
+                    phasequad=False,
+                    rebin=not self.view.fit_to_raw)
+
         guess_selection = list(set(self._check_data_exists(guess_selection)))
         self.selected_data = guess_selection
 
@@ -130,18 +146,17 @@ class FittingTabPresenter(object):
                 self.selected_data)
 
     def handle_fit_type_changed(self):
-        fit_type = self.view.fit_type
-
-        if fit_type == self.view.single_fit:
-            self.view.workspace_combo_box_label.setText('Select Workspace')
-        else:
+        if self.view.fit_type == self.view.simultaneous_fit:
             self.view.workspace_combo_box_label.setText(
                 'Display parameters for')
+            self.view.simul_fit_by_specifier.setVisible(True)
+            self.update_fit_selector_list()
+        else:
+            self.view.workspace_combo_box_label.setText('Select Workspace')
+            self.view.simul_fit_by_specifier.setVisible(False)
 
     def handle_plot_guess_changed(self):
-        if self.view.fit_type == self.view.single_fit:
-            parameters = self.get_parameters_for_single_fit()
-        else:
+        if self.view.fit_type == self.view.simultaneous_fit:
             parameters = self.get_multi_domain_fit_parameters()
             current_idx = self.view.get_index_for_start_end_times()
             if len(parameters['InputWorkspace']) > current_idx:
@@ -150,8 +165,8 @@ class FittingTabPresenter(object):
                 parameters['StartX'] = parameters['StartX'][current_idx]
             if len(parameters['EndX']) > current_idx:
                 parameters['EndX'] = parameters['EndX'][current_idx]
-            if self.view.fit_type != self.view.sequential_fit and parameters['Function'] is not None:
-                parameters['Function'] = parameters['Function'].createEquivalentFunctions()[current_idx]
+        else:
+            parameters = self.get_parameters_for_single_fit()
 
         self.model.change_plot_guess(self.view.plot_guess, parameters)
 
@@ -163,7 +178,8 @@ class FittingTabPresenter(object):
                 self.view.function_browser_multi.blockSignals(True)
                 self.view.function_browser_multi.setFunction(str(multi_domain_function))
                 self.view.function_browser_multi.blockSignals(False)
-                self._fit_function = [self.view.fit_object] * len(self.selected_data) if self.selected_data else [self.view.fit_object]
+                self._fit_function = [self.view.fit_object] * len(self.selected_data) if self.selected_data else [
+                    self.view.fit_object]
             else:
                 self._fit_function = [None] * len(self.selected_data) if self.selected_data else [None]
             self.view.switch_to_simultaneous()
@@ -192,14 +208,7 @@ class FittingTabPresenter(object):
         fit_type = self.view.fit_type
 
         try:
-            if fit_type == self.view.single_fit:
-                self._number_of_fits_cached = 1
-                single_fit_parameters = self.get_parameters_for_single_fit()
-                calculation_function = functools.partial(
-                    self.model.do_single_fit, single_fit_parameters)
-                self.calculation_thread = self.create_thread(
-                    calculation_function)
-            elif fit_type == self.view.simultaneous_fit:
+            if fit_type == self.view.simultaneous_fit:
                 self._number_of_fits_cached = 1
                 simultaneous_fit_parameters = self.get_multi_domain_fit_parameters()
                 global_parameters = self.view.get_global_parameters()
@@ -208,11 +217,13 @@ class FittingTabPresenter(object):
                     simultaneous_fit_parameters, global_parameters)
                 self.calculation_thread = self.create_thread(
                     calculation_function)
-            elif fit_type == self.view.sequential_fit:
-                self._number_of_fits_cached = len(self.selected_data)
-                sequential_fit_parameters = self.get_multi_domain_fit_parameters()
-                calculation_function = functools.partial(self.model.do_sequential_fit, sequential_fit_parameters)
-                self.calculation_thread = self.create_thread(calculation_function)
+            else:
+                self._number_of_fits_cached = 1
+                single_fit_parameters = self.get_parameters_for_single_fit()
+                calculation_function = functools.partial(
+                    self.model.do_single_fit, single_fit_parameters)
+                self.calculation_thread = self.create_thread(
+                    calculation_function)
 
             self.calculation_thread.threadWrapperSetUp(self.handle_started,
                                                        self.handle_finished,
@@ -226,22 +237,17 @@ class FittingTabPresenter(object):
         fit_type = self.view.fit_type
 
         try:
-            if fit_type == self.view.single_fit:
-                single_fit_parameters = self.get_parameters_for_tf_single_fit_calculation()
-                calculation_function = functools.partial(
-                    self.model.do_single_tf_fit, single_fit_parameters)
-                self.calculation_thread = self.create_thread(calculation_function)
-            elif fit_type == self.view.simultaneous_fit:
+            if fit_type == self.view.simultaneous_fit:
                 simultaneous_fit_parameters = self.get_multi_domain_tf_fit_parameters()
                 global_parameters = self.view.get_global_parameters()
                 calculation_function = functools.partial(
                     self.model.do_simultaneous_tf_fit,
                     simultaneous_fit_parameters, global_parameters)
                 self.calculation_thread = self.create_thread(calculation_function)
-            elif fit_type == self.view.sequential_fit:
-                sequential_fit_parameters = self.get_sequential_tf_fit_parameters()
+            else:
+                single_fit_parameters = self.get_parameters_for_tf_single_fit_calculation()
                 calculation_function = functools.partial(
-                    self.model.do_sequential_tf_fit, sequential_fit_parameters)
+                    self.model.do_single_tf_fit, single_fit_parameters)
                 self.calculation_thread = self.create_thread(calculation_function)
 
             self.calculation_thread.threadWrapperSetUp(self.handle_started,
@@ -269,31 +275,12 @@ class FittingTabPresenter(object):
     def get_multi_domain_tf_fit_parameters(self):
         workspace, workspace_directory = self.model.create_multi_domain_fitted_workspace_name(
             self.view.display_workspace, self.view.fit_object)
-
-        return {
-                   'InputFunction': self.view.fit_object,
-                   'ReNormalizedWorkspaceList': self.selected_data,
-                   'UnNormalizedWorkspaceList': self.context.group_pair_context.get_unormalisised_workspace_list(
-                       self.selected_data),
-                   'OutputFitWorkspace': workspace,
-                   'StartX': self.start_x[self.view.get_index_for_start_end_times()],
-                   'EndX': self.end_x[self.view.get_index_for_start_end_times()],
-                   'Minimizer': self.view.minimizer
-               }
-
-    def get_sequential_tf_fit_parameters(self):
-        workspace_name_list = []
-        for workspace in self.selected_data:
-            workspace_name, workspace_directory = self.model.create_fitted_workspace_name(workspace,
-                                                                                          self.view.fit_object)
-            workspace_name_list.append(workspace_name)
-
         return {
             'InputFunction': self.view.fit_object,
             'ReNormalizedWorkspaceList': self.selected_data,
             'UnNormalizedWorkspaceList': self.context.group_pair_context.get_unormalisised_workspace_list(
                 self.selected_data),
-            'OutputFitWorkspace': workspace_name_list,
+            'OutputFitWorkspace': workspace,
             'StartX': self.start_x[self.view.get_index_for_start_end_times()],
             'EndX': self.end_x[self.view.get_index_for_start_end_times()],
             'Minimizer': self.view.minimizer
@@ -313,15 +300,7 @@ class FittingTabPresenter(object):
             return
         index = self.view.get_index_for_start_end_times()
 
-        if self.view.fit_type == self.view.sequential_fit:
-            self._fit_function = fit_function
-            self._fit_status = fit_status
-            self._fit_chi_squared = fit_chi_squared
-        elif self.view.fit_type == self.view.single_fit:
-            self._fit_function[index] = fit_function
-            self._fit_status[index] = fit_status
-            self._fit_chi_squared[index] = fit_chi_squared
-        elif self.view.fit_type == self.view.simultaneous_fit:
+        if self.view.fit_type == self.view.simultaneous_fit:
             self._fit_function = [fit_function] * len(self.start_x)
             self._fit_status = [fit_status] * len(self.start_x)
             self._fit_chi_squared = [fit_chi_squared] * len(self.start_x)
@@ -382,7 +361,8 @@ class FittingTabPresenter(object):
         self.view.undo_fit_button.setEnabled(False)
 
         groups_only = self.check_workspaces_are_tf_asymmetry_compliant(self.selected_data)
-        if (not groups_only and self.view.tf_asymmetry_mode) or not self.view.fit_object and self.view.tf_asymmetry_mode:
+        if (
+                not groups_only and self.view.tf_asymmetry_mode) or not self.view.fit_object and self.view.tf_asymmetry_mode:
             self.view.tf_asymmetry_mode = False
 
             self.view.warning_popup('Can only fit groups in tf asymmetry mode and need a function defined')
@@ -422,7 +402,8 @@ class FittingTabPresenter(object):
             self._fit_function = [new_function.clone()] * len(self.selected_data)
             self.view.function_browser_multi.blockSignals(True)
             self.view.function_browser_multi.clear()
-            self.view.function_browser_multi.setFunction(str(self._fit_function[self.view.get_index_for_start_end_times()]))
+            self.view.function_browser_multi.setFunction(
+                str(self._fit_function[self.view.get_index_for_start_end_times()]))
             self.view.function_browser_multi.setGlobalParameters(new_global_parameters)
             self.view.function_browser_multi.blockSignals(False)
 
@@ -443,6 +424,31 @@ class FittingTabPresenter(object):
         self.view.undo_fit_button.setEnabled(False)
         self.context.fitting_context.remove_latest_fit(self._number_of_fits_cached)
 
+    def handle_fit_by_changed(self):
+        if self.view.fit_type == self.view.simultaneous_fit:
+            self.update_fit_selector_list()
+            self.update_selected_workspace_guess()
+            if self.view.simultaneous_fit_by == "Custom":
+                self.view.simul_fit_by_specifier.setVisible(False)
+                self.view.select_workspaces_to_fit_button.setVisible(True)
+            else:
+                self.view.simul_fit_by_specifier.setVisible(True)
+                self.view.select_workspaces_to_fit_button.setVisible(False)
+        else:
+            return
+
+    def handle_fit_specifier_changed(self):
+        self.update_selected_workspace_guess()
+
+    def update_fit_selector_list(self):
+        if self.view.simultaneous_fit_by == "Run":
+            flattened_run_list = [str(item) for sublist in self.context.data_context.current_runs for item in sublist]
+            simul_choices = flattened_run_list
+        else:
+            simul_choices = self._get_selected_groups_and_pairs()
+
+        self.view.setup_fit_by_specifier(simul_choices)
+
     def get_parameters_for_single_fit(self):
         params = self._get_shared_parameters()
 
@@ -454,12 +460,23 @@ class FittingTabPresenter(object):
 
     def get_multi_domain_fit_parameters(self):
         params = self._get_shared_parameters()
-
         params['InputWorkspace'] = self.selected_data
         params['StartX'] = self.start_x
         params['EndX'] = self.end_x
 
         return params
+
+    def get_simul_fit_workspaces(self):
+        selected_data = self.selected_data
+        fit_workspaces = []
+        if self.view.simultaneous_fit_by == "Run":
+            selected_run = self.view.simultaneous_fit_by_specifier
+            for workspace in selected_data:
+                if selected_run == self._get_run_number_from_workspace(workspace):
+                    fit_workspaces.append(workspace)
+        else:
+            pass
+        return fit_workspaces
 
     def _get_shared_parameters(self):
         """
@@ -535,7 +552,7 @@ class FittingTabPresenter(object):
         return self.context.first_good_data(run)
 
     def reset_start_time_to_first_good_data_value(self):
-        self._start_x = [self.retrieve_first_good_data_from_run_name(run_name) for run_name in self.selected_data] if\
+        self._start_x = [self.retrieve_first_good_data_from_run_name(run_name) for run_name in self.selected_data] if \
             self.selected_data else [0.0]
         self._end_x = [self.view.end_time] * len(
             self.selected_data) if self.selected_data else [15.0]
@@ -563,7 +580,8 @@ class FittingTabPresenter(object):
 
     def get_parameters_for_tf_function_calculation(self, fit_function):
         mode = 'Construct' if self.view.tf_asymmetry_mode else 'Extract'
-        workspace_list = [self.view.display_workspace] if self.view.fit_type == self.view.single_fit else self.selected_data
+        workspace_list = self.selected_data if self.view.fit_type == self.view.simultaneous_fit else [
+            self.view.display_workspace]
         return {'InputFunction': fit_function,
                 'WorkspaceList': workspace_list,
                 'Mode': mode}
@@ -583,3 +601,15 @@ class FittingTabPresenter(object):
 
     def _check_data_exists(self, guess_selection):
         return [item for item in guess_selection if AnalysisDataService.doesExist(item)]
+
+    def _get_run_number_from_workspace(self, workspace_name):
+        instrument = self.context.data_context.instrument
+        run = re.findall(r'%s(\d+)' % instrument, workspace_name)
+        return run[0]
+
+    # the string following either 'Pair Asym; %s' or  Group; "
+    def _get_group_or_pair_from_workspace_name(self, workspace_name):
+        for grppair in self.context.group_pair_context.selected_groups + self.context.group_pair_context.selected_pairs:
+            grp = re.findall(r'%s' % grppair, workspace_name)
+            if len(grp) > 0:
+                return grp[0]

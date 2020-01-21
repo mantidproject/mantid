@@ -13,7 +13,8 @@ from mantidqt.utils.qt import load_ui
 from mantidqt.widgets.functionbrowser import FunctionBrowser
 
 ui_fitting_tab, _ = load_ui(__file__, "fitting_tab.ui")
-allowed_minimizers = ['Levenberg-Marquardt', 'BFGS', 'Conjugate gradient (Fletcher-Reeves imp.)', 'Conjugate gradient (Polak-Ribiere imp.)',
+allowed_minimizers = ['Levenberg-Marquardt', 'BFGS', 'Conjugate gradient (Fletcher-Reeves imp.)',
+                      'Conjugate gradient (Polak-Ribiere imp.)',
                       'Damped GaussNewton', 'Levenberg-MarquardtMD', 'Simplex',
                       'SteepestDescent', 'Trust Region']
 
@@ -23,6 +24,7 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         super(FittingTabView, self).__init__(parent)
         self.setupUi(self)
         self.setup_fit_options_table()
+        self.setup_simul_fit_combo_box()
         self.undo_fit_button.setEnabled(False)
 
         self.function_browser = FunctionBrowser(self, False)
@@ -35,6 +37,8 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
 
         self.increment_parameter_display_button.clicked.connect(self.increment_display_combo_box)
         self.decrement_parameter_display_button.clicked.connect(self.decrement_display_combo_box)
+
+        self.select_workspaces_to_fit_button.setVisible(False)
 
     def update_displayed_data_combo_box(self, data_list):
         self.parameter_display_combo.blockSignals(True)
@@ -68,6 +72,12 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
             self.parameter_display_combo.setCurrentIndex(index - 1)
         else:
             self.parameter_display_combo.setCurrentIndex(count - 1)
+
+    def setup_simul_fit_combo_box(self):
+        self.simul_fit_by_combo.addItem("Run")
+        self.simul_fit_by_combo.addItem("Group/Pair")
+        self.simul_fit_by_combo.addItem("Custom")
+        self.simul_fit_by_specifier.setVisible(False)
 
     def set_datasets_in_function_browser(self, data_set_name_list):
         number_of_data_sets = self.function_browser.getNumberOfDatasets()
@@ -110,7 +120,7 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         self.fit_status_chi_squared.setText('Chi squared: {:.4g}'.format(output_chi_squared))
 
     def update_global_fit_state(self, output_list):
-        if self.fit_type == self.single_fit or self.fit_type == self.simultaneous_fit:
+        if self.fit_type == self.simultaneous_fit:
             indexed_fit = output_list[self.get_index_for_start_end_times()]
             boolean_list = [indexed_fit == 'success'] if indexed_fit else []
         else:
@@ -125,7 +135,8 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
             self.global_fit_status_label.setText('Fit Successful')
             self.global_fit_status_label.setStyleSheet('color: green')
         else:
-            self.global_fit_status_label.setText('{} of {} fits failed'.format(len(boolean_list) - sum(boolean_list), len(boolean_list)))
+            self.global_fit_status_label.setText(
+                '{} of {} fits failed'.format(len(boolean_list) - sum(boolean_list), len(boolean_list)))
             self.global_fit_status_label.setStyleSheet('color: red')
 
     def set_slot_for_select_workspaces_to_fit(self, slot):
@@ -138,9 +149,7 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         self.fit_to_raw_data_checkbox.stateChanged.connect(slot)
 
     def set_slot_for_fit_type_changed(self, slot):
-        self.single_fit_radio.toggled.connect(slot)
-        self.simul_fit_radio.toggled.connect(slot)
-        self.sequential_fit_radio.toggled.connect(slot)
+        self.simul_fit_checkbox.toggled.connect(slot)
 
     def set_slot_for_fit_button_clicked(self, slot):
         self.fit_button.clicked.connect(slot)
@@ -150,6 +159,12 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
 
     def set_slot_for_end_x_updated(self, slot):
         self.time_end.editingFinished.connect(slot)
+
+    def set_slot_for_simul_fit_by_changed(self, slot):
+        self.simul_fit_by_combo.currentIndexChanged.connect(slot)
+
+    def set_slot_for_simul_fit_specifier_changed(self, slot):
+        self.simul_fit_by_specifier.currentIndexChanged.connect(slot)
 
     @property
     def display_workspace(self):
@@ -188,24 +203,20 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
 
     @property
     def fit_type(self):
-        if self.single_fit_radio.isChecked():
-            return self.single_fit_radio.text()
-        if self.simul_fit_radio.isChecked():
-            return self.simul_fit_radio.text()
-        if self.sequential_fit_radio.isChecked():
-            return self.sequential_fit_radio.text()
-
-    @property
-    def single_fit(self):
-        return self.single_fit_radio.text()
+        if self.simul_fit_checkbox.isChecked():
+            return self.simul_fit_checkbox.text()
 
     @property
     def simultaneous_fit(self):
-        return self.simul_fit_radio.text()
+        return self.simul_fit_checkbox.text()
 
     @property
-    def sequential_fit(self):
-        return self.sequential_fit_radio.text()
+    def simultaneous_fit_by(self):
+        return self.simul_fit_by_combo.currentText()
+
+    @property
+    def simultaneous_fit_by_specifier(self):
+        return self.simul_fit_by_specifier.currentText()
 
     @property
     def fit_to_raw(self):
@@ -261,6 +272,12 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
     def switch_to_single(self):
         self.function_browser_multi.hide()
         self.function_browser.show()
+
+    def setup_fit_by_specifier(self, choices):
+        self.simul_fit_by_specifier.blockSignals(True)
+        self.simul_fit_by_specifier.clear()
+        self.simul_fit_by_specifier.addItems(choices)
+        self.simul_fit_by_specifier.blockSignals(False)
 
     def setup_fit_options_table(self):
         self.fit_options_table.setRowCount(6)
