@@ -90,6 +90,7 @@ void BatchJobRunner::notifyReductionResumed() {
     // User has manually selected items so only process the selection (unless
     // autoreducing). Also reprocess failed items.
     m_processAll = m_isAutoreducing;
+    m_reprocessFailed = !m_isAutoreducing;
     // Check whether a given group is in the selection. If not then check
     // the group's rows to determine if it will be partially processed.
     if (!m_processAll) {
@@ -115,12 +116,15 @@ void BatchJobRunner::notifyReductionResumed() {
         m_processPartial =
             static_cast<int>(groupCountPair.second) <
             getNumberOfInitialisedRowsInGroup(groupCountPair.first.get());
-        if (m_processPartial)
+        m_processAll = !m_processPartial;
+        if (m_processPartial) {
           break;
+        }
       }
-      if (groupsWithSelectedRows.empty())
-        m_processPartial = false;
-      m_reprocessFailed = !m_isAutoreducing;
+      if (groupsWithSelectedRows.empty()) {
+        m_processAll = true;
+        m_processPartial = !m_processAll;
+      }
     }
   }
   m_batch.resetSkippedItems();
