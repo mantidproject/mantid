@@ -71,7 +71,6 @@ class FocusPresenter(object):
     def _validate(self):
         """
         Ensure that the worker is ready to be started.
-        :param banks: A list of banks to focus.
         :return: True if the worker can be started safely.
         """
         if self.view.is_searching():
