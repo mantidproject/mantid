@@ -53,7 +53,6 @@ public:
 
     auto notInTubes = TubeHelpers::notInTubes(tubes, detIds);
     TS_ASSERT_EQUALS(notInTubes.size(), detIds.size());
-    TSM_ASSERT_EQUALS("Not in tubes should be all IDs", notInTubes, detIds);
   }
 
   void test_MixtureOfCoLinearAndNonCoLinearTubes() {
@@ -76,7 +75,7 @@ public:
     // outside of tubes
     auto notInTubes = TubeHelpers::notInTubes(tubes, detIds);
     TS_ASSERT_EQUALS(notInTubes.size(), detIds.size() - 2);
-    TS_ASSERT_EQUALS(notInTubes[0], detIds[2]);
-    TS_ASSERT_EQUALS(notInTubes[1], detIds[3]);
+    TS_ASSERT_EQUALS(notInTubes[0], 2);
+    TS_ASSERT_EQUALS(notInTubes[1], 3);
   }
 };

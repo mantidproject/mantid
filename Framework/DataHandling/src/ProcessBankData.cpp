@@ -22,8 +22,8 @@ ProcessBankData::ProcessBankData(
     boost::shared_array<float> event_weight, detid_t min_event_id,
     detid_t max_event_id)
     : Task(), m_loader(m_loader), entry_name(entry_name),
-      pixelID_to_wi_vector(m_loader.pixelID_to_wi_vector),
-      pixelID_to_wi_offset(m_loader.pixelID_to_wi_offset), prog(prog),
+      pixelID_to_wi_vector(m_loader.m_detIDtoIndexVector),
+      pixelID_to_wi_offset(m_loader.m_detIDtoIndexOffset), prog(prog),
       event_id(event_id), event_time_of_flight(event_time_of_flight),
       numEvents(numEvents), startAt(startAt), event_index(event_index),
       thisBankPulseTimes(thisBankPulseTimes), have_weight(have_weight),
@@ -75,8 +75,8 @@ void ProcessBankData::run() { // override {
   prog->report(entry_name + ": precount");
   // ---- Pre-counting events per pixel ID ----
   auto &outputWS = m_loader.m_ws;
-  auto *alg = m_loader.alg;
-  if (m_loader.precount) {
+  auto *alg = m_loader.m_loadAlgorithm;
+  if (m_loader.m_precount) {
 
     std::vector<size_t> counts(m_max_id - m_min_id + 1, 0);
     for (size_t i = 0; i < numEvents; i++) {
@@ -159,6 +159,7 @@ void ProcessBankData::run() { // override {
       // the event
       const detid_t detId = event_id[eventIndex];
       if (detId >= m_min_id && detId <= m_max_id) {
+        auto index = detId + m_loader.m_detIDtoIndexOffset;
         // Create the tofevent
         const auto tof = static_cast<double>(event_time_of_flight[eventIndex]);
         // this is fancy for check if value is in range
@@ -166,7 +167,7 @@ void ProcessBankData::run() { // override {
           // Handle simulated data if present
           if (have_weight) {
             auto *eventVector =
-                m_loader.weightedEventVectors[periodIndex][detId];
+                m_loader.m_weightedEventVectors[periodIndex][index];
             // NULL eventVector indicates a bad spectrum lookup
             if (eventVector) {
               const auto weight = static_cast<double>(event_weight[eventIndex]);
@@ -177,7 +178,7 @@ void ProcessBankData::run() { // override {
             }
           } else {
             // We have cached the vector of events for this detector ID
-            auto *eventVector = m_loader.eventVectors[periodIndex][detId];
+            auto *eventVector = m_loader.m_eventVectors[periodIndex][index];
             // NULL eventVector indicates a bad spectrum lookup
             if (eventVector) {
               eventVector->emplace_back(tof, pulsetime);

@@ -24,59 +24,59 @@ class MANTID_DATAHANDLING_DLL DefaultEventLoader {
 public:
   static void
   load(LoadEventNexus *alg, EventWorkspaceCollection &ws, bool haveWeights,
-       bool event_id_is_spec, std::vector<std::string> bankNames,
+       bool isEventIDSpec, std::vector<std::string> bankNames,
        const std::vector<int> &periodLog, const std::string &classType,
        std::vector<std::size_t> bankNumEvents, const bool oldNeXusFileNames,
        const bool precount, const int chunk, const int totalChunks);
 
+private:
   /// Flag for dealing with a simulated file
   bool m_haveWeights;
 
-  /// True if the event_id is spectrum no not pixel ID
-  bool event_id_is_spec;
+  /// True if the event ID is spectrum no not pixel ID
+  bool m_isEventIDSpec;
 
   /// whether or not to launch multiple ProcessBankData jobs per bank
-  bool splitProcessing;
+  bool m_splitProcessing;
 
   /// Do we pre-count the # of events in each pixel ID?
-  bool precount;
+  bool m_precount;
 
   /// Offset in the pixelID_to_wi_vector to use.
-  detid_t pixelID_to_wi_offset;
+  detid_t m_detIDtoIndexOffset;
 
   /// Maximum (inclusive) event ID possible for this instrument
-  int32_t eventid_max{0};
+  int32_t m_maxEventID{0};
 
   /// chunk number
-  int chunk;
+  int m_chunkNumber;
   /// number of chunks
-  int totalChunks;
+  int m_numberOfChunks;
   /// for multiple chunks per bank
-  int firstChunkForBank;
+  int m_firstChunkForBank;
   /// number of chunks per bank
-  size_t eventsPerChunk;
+  size_t m_eventsPerChunk;
 
-  LoadEventNexus *alg;
+  LoadEventNexus *m_loadAlgorithm;
   EventWorkspaceCollection &m_ws;
 
   /// Vector where index = event_id; value = ptr to std::vector<TofEvent> in the
   /// event list.
   std::vector<std::vector<std::vector<Mantid::Types::Event::TofEvent> *>>
-      eventVectors;
+      m_eventVectors;
 
   /// Vector where index = event_id; value = ptr to std::vector<WeightedEvent>
   /// in the event list.
   std::vector<std::vector<std::vector<Mantid::DataObjects::WeightedEvent> *>>
-      weightedEventVectors;
+      m_weightedEventVectors;
 
   /// Vector where (index = pixel ID+pixelID_to_wi_offset), value = workspace
   /// index)
-  std::vector<size_t> pixelID_to_wi_vector;
+  std::vector<size_t> m_detIDtoIndexVector;
 
   /// One entry of pulse times for each preprocessor
   std::vector<boost::shared_ptr<BankPulseTimes>> m_bankPulseTimes;
 
-private:
   DefaultEventLoader(LoadEventNexus *alg, EventWorkspaceCollection &ws,
                      bool haveWeights, bool event_id_is_spec,
                      const size_t numBanks, const bool precount,
@@ -87,6 +87,9 @@ private:
   /// Map detector IDs to event lists.
   template <class T>
   void makeMapToEventLists(std::vector<std::vector<T>> &vectors);
+
+  friend class ProcessBankData;
+  friend class LoadBankFromDiskTask;
 };
 
 /** Generate a look-up table where the index = the pixel ID of an event
@@ -97,7 +100,7 @@ template <class T>
 void DefaultEventLoader::makeMapToEventLists(
     std::vector<std::vector<T>> &vectors) {
   vectors.resize(m_ws.nPeriods());
-  if (event_id_is_spec) {
+  if (m_isEventIDSpec) {
     // Find max spectrum no
     auto *ax1 = m_ws.getAxis(1);
     specnum_t maxSpecNo =
@@ -113,7 +116,7 @@ void DefaultEventLoader::makeMapToEventLists(
     // The index of eventVectors is a spectrum number so it is simply resized to
     // the maximum
     // possible spectrum number
-    eventid_max = maxSpecNo;
+    m_maxEventID = maxSpecNo;
     for (size_t i = 0; i < vectors.size(); ++i) {
       vectors[i].resize(maxSpecNo + 1, nullptr);
     }
@@ -125,23 +128,22 @@ void DefaultEventLoader::makeMapToEventLists(
       }
     }
   } else {
-    // To avoid going out of range in the vector, this is the MAX INDEX that can
-    // go into it
-    eventid_max = static_cast<int32_t>(pixelID_to_wi_vector.size() - 1);
+    int32_t minEventID;
+    m_ws.getInstrument()->getMinMaxDetectorIDs(minEventID, m_maxEventID);
 
     // Make an array where index = pixel ID
     // Set the value to NULL by default
     for (size_t i = 0; i < vectors.size(); ++i) {
-      vectors[i].resize(eventid_max + 1, nullptr);
+      vectors[i].resize(m_maxEventID - minEventID + 1, nullptr);
     }
 
-    for (size_t j = 0; j < pixelID_to_wi_vector.size(); j++) {
-      size_t wi = pixelID_to_wi_vector[j];
+    for (int32_t j = minEventID; j <= m_maxEventID; ++j) {
+      auto index = j + m_detIDtoIndexOffset;
+      size_t wi = m_detIDtoIndexVector[index];
       // Save a POINTER to the vector
       if (wi < m_ws.getNumberHistograms()) {
         for (size_t period = 0; period < m_ws.nPeriods(); ++period) {
-          getEventsFrom(m_ws.getSpectrum(wi, period),
-                        vectors[period][j - pixelID_to_wi_offset]);
+          getEventsFrom(m_ws.getSpectrum(wi, period), vectors[period][index]);
         }
       }
     }

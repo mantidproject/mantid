@@ -823,7 +823,8 @@ public:
       builder.addBank(bankName, bankPos, bankRotation);
       // Get the pixel detIds
       auto detectorIds = getDetectorIds(detectorGroup);
-      tbb::parallel_sort(detectorIds.begin(), detectorIds.end());
+      std::vector<size_t> indices(detectorIds.size());
+      std::iota(indices.begin(), indices.end(), 0);
 
       // We preferentially deal with DETECTOR_SHAPE type shapes. Pixel offsets
       // not needed for this processing
@@ -849,9 +850,9 @@ public:
 
         // Even if tubes are searched, we do NOT guarantee all detectors will be
         // in tube formation, so must continue to process non-tube detectors
-        detectorIds = TubeHelpers::notInTubes(tubes, detectorIds);
+        indices = TubeHelpers::notInTubes(tubes, detectorIds);
       }
-      for (size_t i = 0; i < detectorIds.size(); ++i) {
+      for (auto i : indices) {
         auto index = static_cast<int>(i);
         std::string name = bankName + "_" + std::to_string(index);
 

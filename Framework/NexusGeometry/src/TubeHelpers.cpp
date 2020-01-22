@@ -8,6 +8,7 @@
 #include "MantidGeometry/Objects/IObject.h"
 #include <algorithm>
 #include <iterator>
+#include <tbb/parallel_sort.h>
 #include <tuple>
 #include <vector>
 
@@ -60,26 +61,29 @@ findAndSortTubes(const Mantid::Geometry::IObject &detShape,
 }
 
 /**
- * Establish detector ids for any detector that is NOT part of the tubes
+ * Establish detector ids for any detector that are NOT part of the tubes and
+ * return the correct indices
  *
  * @param tubes
- * @return vector of detector ids not part of tubes
+ * @return vector of indices which index the detIDs vector identifying detectors
+ * which are not part of tubes
  */
-std::vector<Mantid::detid_t>
+MANTID_NEXUSGEOMETRY_DLL std::vector<size_t>
 notInTubes(const std::vector<detail::TubeBuilder> &tubes,
-           std::vector<Mantid::detid_t> detIDs) {
-  std::vector<Mantid::detid_t> used;
+           const std::vector<Mantid::detid_t> &detIDs) {
+  std::vector<size_t> indices(detIDs.size());
+  std::iota(indices.begin(), indices.end(), 0);
   for (const auto &tube : tubes) {
-    for (const auto &id : tube.detIDs()) {
-      used.emplace_back(id);
-    }
+    const auto &tubeIDs = tube.detIDs();
+    indices.erase(std::remove_if(indices.begin(), indices.end(),
+                                 [&detIDs, &tubeIDs](auto index) {
+                                   return find(tubeIDs.begin(), tubeIDs.end(),
+                                               detIDs[index]) != tubeIDs.end();
+                                 }),
+                  indices.end());
   }
-  std::vector<Mantid::detid_t> diff;
-  std::sort(detIDs.begin(), detIDs.end());
-  std::sort(used.begin(), used.end());
-  std::set_difference(detIDs.begin(), detIDs.end(), used.begin(), used.end(),
-                      std::inserter(diff, diff.begin()));
-  return diff;
+
+  return indices;
 }
 } // namespace TubeHelpers
 } // namespace NexusGeometry
