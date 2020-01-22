@@ -864,6 +864,10 @@ def main():
         # about. Prints to stderr as we can't really count on anything
         # else
         traceback.print_exc(file=ORIGINAL_STDERR)
+        print_file_path = os.path.join(ConfigService.getAppDataDirectory(), 'workbench_stacktrace.txt')
+        print_file = open(print_file_path, 'w')
+        traceback.print_exc(file=print_file)
+        print_file.close()
         exit_value = -1
     finally:
         ORIGINAL_SYS_EXIT(exit_value)

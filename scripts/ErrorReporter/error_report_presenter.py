@@ -10,19 +10,28 @@ import os
 
 import requests
 
-from ErrorReporter.retrieve_recovery_files import zip_recovery_directory
 from mantid.kernel import ConfigService, ErrorReporter, Logger, UsageService
 
 
 class ErrorReporterPresenter(object):
     SENDING_ERROR_MESSAGE = 'There was an error when sending the report.\nPlease contact mantid-help@mantidproject.org directly'
 
-    def __init__(self, view, exit_code, application='mantidplot'):
+    def __init__(self, view, exit_code, application='mantidplot', traceback=''):
         self.error_log = Logger("error")
         self._view = view
         self._exit_code = exit_code
         self._application = application
+        self._traceback = traceback
         self._view.set_report_callback(self.error_handler)
+
+        if not traceback:
+            traceback_file_path = os.path.join(ConfigService.getAppDataDirectory(), '{}_stacktrace.txt'.format(application))
+            if os.path.isfile(traceback_file_path):
+                file = open(traceback_file_path, 'r')
+                self._traceback = file.readlines()
+                file.close()
+                new_workspace_name = os.path.join(ConfigService.getAppDataDirectory(), '{}_stacktrace_sent.txt'.format(application))
+                os.rename(traceback_file_path, new_workspace_name)
 
     def do_not_share(self, continue_working=True):
         self.error_log.notice("No information shared")
@@ -38,20 +47,9 @@ class ErrorReporterPresenter(object):
 
     def share_all_information(self, continue_working, name, email, text_box):
         uptime = UsageService.getUpTime()
-        try:
-            recovery_archive, file_hash = zip_recovery_directory()
-        except Exception as exc:
-            self.error_log.information("Error creating recovery archive: {}. No recovery information will be sent")
-            recovery_archive, file_hash = None, ""
         status = self._send_report_to_server(share_identifiable=True, uptime=uptime, name=name, email=email,
-                                             file_hash=file_hash, text_box=text_box)
+                                             text_box=text_box)
         self.error_log.notice("Sent full information")
-        if status == 201 and recovery_archive:
-            self._upload_recovery_file(recovery_archive=recovery_archive)
-            try:
-                os.remove(recovery_archive)
-            except OSError as exc:
-                self.error_log.information("Unable to remove zipped recovery information: {}".format(str(exc)))
 
         self._handle_exit(continue_working)
         return status
@@ -77,33 +75,10 @@ class ErrorReporterPresenter(object):
         else:
             self.error_log.error("Continue working.")
 
-    def _upload_recovery_file(self, recovery_archive):
-        url = ConfigService['errorreports.rooturl']
-        url = '{}/api/recovery'.format(url)
-        self.error_log.notice("Sending recovery file to address: {}".format(url))
-        files = {'file': open('{}'.format(recovery_archive), 'rb')}
-        try:
-            # timeout after 20 seconds to match the C++ error reporter timeout
-            response = requests.post(url, files=files, timeout=20)
-        except Exception as e:
-            self.error_log.error(
-                "Failed to send recovery data. Could not establish connection to URL: {}.\n\nFull trace:\n\n{}".format(
-                    url, e))
-            return
-
-        # if this is reached, the connection was successful and some response was received
-        if response.status_code == 201:
-            self.error_log.notice("Uploaded recovery file to server. HTTP response {}".format(response.status_code))
-        elif response.status_code == 413:
-            self.error_log.notice(
-                "Data was too large, and was not accepted by the server. HTTP response {}".format(response.status_code))
-        else:
-            self.error_log.error("Failed to send recovery data. HTTP response {}".format(response.status_code))
-
-    def _send_report_to_server(self, share_identifiable=False, name='', email='', file_hash='', uptime='', text_box=''):
+    def _send_report_to_server(self, share_identifiable=False, name='', email='', uptime='', text_box=''):
         errorReporter = ErrorReporter(
             self._application, uptime, self._exit_code, share_identifiable, str(name), str(email), str(text_box),
-            str(file_hash))
+            "".join(self._traceback))
         status = errorReporter.sendErrorReport()
 
         if status != 201:
