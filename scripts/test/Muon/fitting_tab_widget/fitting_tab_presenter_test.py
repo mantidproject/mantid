@@ -18,7 +18,7 @@ EXAMPLE_TF_ASYMMETRY_FUNCTION = '(composite=ProductFunction,NumDeriv=false;name=
                                 '(name=FlatBackground,A0=1,ties=(A0=1);name=ExpDecayOsc,A=0.2,Lambda=0.2,Frequency=0.1,Phi=0))' \
                                 ';name=ExpDecayMuon,A=0,Lambda=-2.19698,ties=(A=0,Lambda=-2.19698)'
 
-SIMUL_FIT_BY_COMBO_MAP = {"Run": 0, "Group/Pair": 1}
+SIMUL_FIT_BY_COMBO_MAP = {"Run": 0, "Group/Pair": 1, "Custom": 2}
 
 
 def retrieve_combobox_info(combo_box):
@@ -116,9 +116,11 @@ class FittingTabPresenterTest(unittest.TestCase):
 
     def test_fit_clicked_with_simultaneous_selected_and_no_globals(self):
         self.presenter.model.get_function_name.return_value = 'GausOsc'
-        self.presenter.selected_data = ['Input Workspace Name_1', 'Input Workspace Name 2']
+        self.presenter.get_workspace_selected_list = mock.MagicMock(
+            return_value=['Input Workspace Name_1', 'Input Workspace Name 2'])
         self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
         self.view.simul_fit_checkbox.setChecked(True)
+        print("FIT FUNCTION", self.view.function_browser_multi.getGlobalFunction())
         self.presenter.model.do_simultaneous_fit.return_value = (self.view.function_browser_multi.getGlobalFunction(),
                                                                  'Fit Suceeded', 0.5)
 
@@ -138,8 +140,8 @@ class FittingTabPresenterTest(unittest.TestCase):
 
     def test_fit_clicked_with_simultaneous_selected_with_global_parameters(self):
         self.presenter.model.get_function_name.return_value = 'GausOsc'
-
-        self.presenter.selected_data = ['Input Workspace Name_1', 'Input Workspace Name 2']
+        self.presenter.get_workspace_selected_list = mock.MagicMock(
+            return_value=['Input Workspace Name_1', 'Input Workspace Name 2'])
         self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
         self.view.simul_fit_checkbox.setChecked(True)
         self.view.function_browser_multi.setGlobalParameters(['A'])
@@ -493,6 +495,9 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.presenter.selected_data = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
                                         'MUSR22725; Group; fwd; Asymmetry']
         self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+        self.presenter.get_workspace_selected_list = mock.MagicMock(
+            return_value=['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
+                          'MUSR22725; Group; fwd; Asymmetry'])
 
         self.view.simul_fit_checkbox.setChecked(True)
 
@@ -510,7 +515,7 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.view.simul_fit_checkbox.setChecked(False)
 
         self.assertEqual([str(item) for item in self.presenter._fit_function], [
-            'name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0'] * 3)
+            'name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0'])
 
     def test_undo_fit_button_disabled_until_a_succesful_fit_is_performed(self):
         self.assertEqual(self.view.undo_fit_button.isEnabled(), False)
@@ -570,16 +575,10 @@ class FittingTabPresenterTest(unittest.TestCase):
 
     def test_update_selected_ws_guess(self):
         self.presenter.manual_selection_made = False
-        self.presenter.update_selected_time_workspace_guess = mock.Mock()
+        self.presenter.get_workspace_selected_list = mock.Mock()
+        self.presenter.clear_and_reset_gui_state = mock.Mock()
         self.presenter.update_selected_workspace_guess()
-        self.assertEquals(self.presenter.update_selected_time_workspace_guess.call_count, 1)
-
-    def test_update_selected_ws_guess_freq(self):
-        self.presenter.manual_selection_made = False
-        self.presenter.context._frequency_context = True
-        self.presenter.update_selected_frequency_workspace_guess = mock.Mock()
-        self.presenter.update_selected_workspace_guess()
-        self.assertEquals(self.presenter.update_selected_frequency_workspace_guess.call_count, 1)
+        self.assertEquals(self.presenter.get_workspace_selected_list.call_count, 1)
 
     def test_update_selected_ws_guess_non(self):
         self.presenter.manual_selection_made = True
@@ -600,14 +599,15 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.presenter._get_selected_groups_and_pairs = mock.Mock(return_value=["fwd", "bwd"])
         self.presenter.clear_and_reset_gui_state = mock.Mock()
         self.presenter._check_data_exists = mock.Mock(return_value=["test"])
-        output = self.presenter.update_selected_time_workspace_guess()
+
+        output = self.presenter.get_workspace_selected_list()
 
         self.context.get_names_of_workspaces_to_fit.assert_any_call(runs="All", group_and_pair="bwd", phasequad=False,
-                                                                    rebin=False)
+                                                                    rebin=False, freq='None')
         self.context.get_names_of_workspaces_to_fit.assert_any_call(runs="All", group_and_pair="fwd", phasequad=False,
-                                                                    rebin=False)
+                                                                    rebin=False, freq='None')
         self.assertEquals(self.presenter.context.get_names_of_workspaces_to_fit.call_count, 2)
-        self.assertEquals(self.presenter.selected_data, ["test"])
+        self.assertEquals(output, ["test"])
 
     def test_handle_plot_guess_changed_calls_correct_function(self):
         self.presenter.get_parameters_for_single_fit = mock.Mock(return_value={})
@@ -622,13 +622,13 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.view.setup_fit_options_table()
         self.assertEqual(-1, self.view.minimizer_combo.findText('FABADA'))
 
-    def test_simul_fit_by_selector_updates_correctly_when_fit_change_to_simultanenous(self):
+    def test_simul_fit_by_specifier_updates_correctly_when_fit_change_to_simultanenous(self):
         # test simul fit by Run
         self.view.simul_fit_by_combo.setCurrentIndex(SIMUL_FIT_BY_COMBO_MAP["Run"])
 
         self.view.simul_fit_checkbox.setChecked(True)
 
-        self.assertEqual(str(self.view.simul_fit_by_selector.itemText(0)), str(self.loaded_run))
+        self.assertEqual(str(self.view.simul_fit_by_specifier.itemText(0)), str(self.loaded_run))
 
         # simul fit by Group/Pair
         self.view.simul_fit_by_combo.setCurrentIndex(SIMUL_FIT_BY_COMBO_MAP["Group/Pair"])
@@ -636,18 +636,18 @@ class FittingTabPresenterTest(unittest.TestCase):
 
         self.presenter.handle_fit_type_changed()
 
-        self.assertEqual(str(self.view.simul_fit_by_selector.itemText(0)), "fwd")
-        self.assertEqual(str(self.view.simul_fit_by_selector.itemText(1)), "bwd")
+        self.assertEqual(str(self.view.simul_fit_by_specifier.itemText(0)), "fwd")
+        self.assertEqual(str(self.view.simul_fit_by_specifier.itemText(1)), "bwd")
 
-    def test_simul_fit_by_selector_updates_when_simul_fit_type_changes(self):
+    def test_simul_fit_by_specifier_updates_when_simul_fit_type_changes(self):
         self.view.simul_fit_checkbox.setChecked(True)
-        self.presenter.update_fit_selector_list = mock.MagicMock()
+        self.presenter.update_fit_specifier_list = mock.MagicMock()
 
         self.view.simul_fit_by_combo.setCurrentIndex(SIMUL_FIT_BY_COMBO_MAP["Group/Pair"])
 
-        self.presenter.update_fit_selector_list.assert_called_once()
+        self.presenter.update_fit_specifier_list.assert_called_once()
 
-    def test_simul_fit_by_selector_does_nothing_when_simul_fit_type_changes_but_not_doing_simul_fit(self):
+    def test_simul_fit_by_specifier_does_nothing_when_simul_fit_type_changes_but_not_doing_simul_fit(self):
         self.view.simul_fit_checkbox.setChecked(False)
         self.presenter.update_fit_selector_list = mock.MagicMock()
 
@@ -655,7 +655,7 @@ class FittingTabPresenterTest(unittest.TestCase):
 
         self.presenter.update_fit_selector_list.assert_not_called()
 
-    def test_simul_fit_by_selector_updates_list_correctly_when_simul_fit_type_changes(self):
+    def test_simul_fit_by_selector_updates_fit_specifier_correctly_when_simul_fit_type_changes(self):
         self.view.simul_fit_checkbox.setChecked(True)
         self.view.simul_fit_by_combo.setCurrentIndex(SIMUL_FIT_BY_COMBO_MAP["Run"])
         self.presenter._get_selected_groups_and_pairs = mock.Mock(return_value=["fwd", "bwd"])
@@ -663,8 +663,20 @@ class FittingTabPresenterTest(unittest.TestCase):
         # now switch to group/pair
         self.view.simul_fit_by_combo.setCurrentIndex(SIMUL_FIT_BY_COMBO_MAP["Group/Pair"])
 
-        self.assertEqual(str(self.view.simul_fit_by_selector.itemText(0)), "fwd")
-        self.assertEqual(str(self.view.simul_fit_by_selector.itemText(1)), "bwd")
+        self.assertEqual(str(self.view.simul_fit_by_specifier.itemText(0)), "fwd")
+        self.assertEqual(str(self.view.simul_fit_by_specifier.itemText(1)), "bwd")
+
+    def test_simul_fit_by_specifier_correctly_updates_display_combobox(self):
+        self.view.simul_fit_checkbox.setChecked(True)
+        self.presenter.get_workspace_selected_list = mock.MagicMock(return_value=['WS1', 'WS2'])
+
+        self.view.simul_fit_by_combo.setCurrentIndex(SIMUL_FIT_BY_COMBO_MAP["Group/Pair"])
+
+        self.assertEqual(str(self.view.parameter_display_combo.itemText(0)), "WS1")
+        self.assertEqual(str(self.view.parameter_display_combo.itemText(1)), "WS2")
+
+    def test_simul_fit_by_specifier_corretcly_selects_workspaces_for_fit(self):
+        pass
 
 
 if __name__ == '__main__':
