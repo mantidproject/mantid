@@ -38,7 +38,7 @@ class WaterfallPlotFillAreaDialogPresenter:
     def init_view(self):
         # This function sets the correct values in the menu when it is first opened.
 
-        if helperfunctions.waterfall_has_fill(self.ax):
+        if self.ax.waterfall_has_fill():
             self.view.enable_fill_group_box.setChecked(True)
 
             if helperfunctions.waterfall_fill_is_line_colour(self.ax):
@@ -72,7 +72,7 @@ class WaterfallPlotFillAreaDialogPresenter:
         helperfunctions.solid_colour_fill(self.ax, colour)
 
     def create_fill(self):
-        self.ax.set_fill(True)
+        self.ax.set_waterfall_fill(True)
 
     def remove_fill(self):
-        self.ax.set_fill(False)
+        self.ax.set_waterfall_fill(False)

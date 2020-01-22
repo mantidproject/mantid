@@ -117,7 +117,7 @@ class CurvesTabWidgetPresenter:
         # If the plot is a waterfall plot and the user has set it so the area under each line is filled, and the fill
         # colour for each line is set as the line colour, after the curve is updated we need to check if its colour has
         # changed so the fill can be updated accordingly.
-        if waterfall and helperfunctions.waterfall_has_fill(ax) and helperfunctions.waterfall_fill_is_line_colour(ax):
+        if waterfall and ax.waterfall_has_fill() and helperfunctions.waterfall_fill_is_line_colour(ax):
             check_line_colour = True
 
         if isinstance(curve, Line2D):

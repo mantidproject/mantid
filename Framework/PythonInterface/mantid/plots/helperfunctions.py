@@ -813,6 +813,10 @@ def set_waterfall_toolbar_options_enabled(ax):
         toolbar.waterfall_conversion(ax.is_waterfall())
 
 
+def get_waterfall_fills(ax):
+    return [collection for collection in ax.collections if isinstance(collection, PolyCollection)]
+
+
 def waterfall_update_fill(ax):
     # Get the colours of each fill so they can be reapplied after updating.
     colours = []
@@ -823,7 +827,7 @@ def waterfall_update_fill(ax):
     waterfall_remove_fill(ax)
     waterfall_create_fill(ax)
 
-    poly_collections = [collection for collection in ax.collections if isinstance(collection, PolyCollection)]
+    poly_collections = get_waterfall_fills(ax)
     line_colours = True
     # If there are more fill areas than colours, this means that new curves have been added to the plot
     # (overplotting). In which case, we need to determine whether the fill colours are set to match the line
@@ -904,7 +908,7 @@ def convert_single_line_to_waterfall(ax, index, x=None, y=None, need_to_update_f
 
 
 def set_waterfall_fill_visible(ax, index):
-    if not waterfall_has_fill(ax):
+    if not ax.waterfall_has_fill():
         return
 
     # Sets the filled area to match the visibility of the line it belongs to.
@@ -924,10 +928,6 @@ def get_waterfall_fill_for_curve(ax, index):
             i += 1
 
     return fill
-
-
-def waterfall_has_fill(ax):
-    return any(isinstance(collection, PolyCollection) for collection in ax.collections)
 
 
 def waterfall_fill_is_line_colour(ax):
@@ -962,7 +962,7 @@ def waterfall_remove_fill(ax):
 
 def solid_colour_fill(ax, colour):
     # Add the fill areas if there aren't any already.
-    if not waterfall_has_fill(ax):
+    if not ax.waterfall_has_fill():
         waterfall_create_fill(ax)
 
     for i, collection in enumerate(ax.collections):
@@ -980,7 +980,7 @@ def solid_colour_fill(ax, colour):
 
 def line_colour_fill(ax):
     # Add the fill areas if there aren't any already.
-    if not waterfall_has_fill(ax):
+    if not ax.waterfall_has_fill():
         waterfall_create_fill(ax)
 
     i = 0

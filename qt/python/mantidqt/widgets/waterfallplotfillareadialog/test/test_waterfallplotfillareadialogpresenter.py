@@ -53,11 +53,11 @@ class WaterfallPlotFillAreaDialogPresenterTest(unittest.TestCase):
         self.assertTrue(fill.get_facecolor() == "#ff9900" for fill in fills)
 
     def test_disabling_fill_removes_fill(self):
-        self.ax.set_fill(True)
+        self.ax.set_waterfall_fill(True)
         self.presenter.view.enable_fill_group_box.isChecked.return_value = False
         self.presenter.set_fill_enabled()
 
-        self.assertFalse(helperfunctions.waterfall_has_fill(self.ax))
+        self.assertFalse(self.ax.waterfall_has_fill())
 
 
 if __name__ == '__main__':

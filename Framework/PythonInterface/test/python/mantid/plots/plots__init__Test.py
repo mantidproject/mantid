@@ -556,9 +556,9 @@ class Plots__init__Test(unittest.TestCase):
         # Make a waterfall plot.
         ax.set_waterfall(True)
         # Add filled areas.
-        ax.set_fill(True)
+        ax.set_waterfall_fill(True)
 
-        fills = [collection for collection in ax.collections if isinstance(collection, PolyCollection)]
+        fills = helperfunctions.get_waterfall_fills(ax)
         self.assertEqual(len(fills), 2)
 
     def test_remove_fill_removes_fills_for_waterfall_plots(self):
@@ -569,11 +569,11 @@ class Plots__init__Test(unittest.TestCase):
         # Make a waterfall plot.
         ax.set_waterfall(True)
         # Add filled areas.
-        ax.set_fill(True)
+        ax.set_waterfall_fill(True)
         # Remove filled areas.
-        ax.set_fill(False)
+        ax.set_waterfall_fill(False)
 
-        self.assertFalse(helperfunctions.waterfall_has_fill(ax))
+        self.assertFalse(ax.waterfall_has_fill())
 
     def test_converting_from_waterfall_to_1d_plot_removes_filled_areas(self):
         fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
@@ -583,11 +583,11 @@ class Plots__init__Test(unittest.TestCase):
         # Make a waterfall plot.
         ax.set_waterfall(True)
         # Add filled areas.
-        ax.set_fill(True)
+        ax.set_waterfall_fill(True)
         # Make the plot non-waterfall again.
         ax.set_waterfall(False)
 
-        self.assertFalse(helperfunctions.waterfall_has_fill(ax))
+        self.assertFalse(ax.waterfall_has_fill())
 
     def test_overplotting_onto_waterfall_plot_with_line_colour_fills_adds_another_filled_area_with_new_line_colour(self):
         fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
@@ -597,7 +597,7 @@ class Plots__init__Test(unittest.TestCase):
         # Make a waterfall plot.
         ax.set_waterfall(True)
         # Add filled areas.
-        ax.set_fill(True)
+        ax.set_waterfall_fill(True)
         # Set the fills to be the same colour as their lines.
         ax.collections[0].set_facecolor(ax.lines[0].get_color())
         ax.collections[1].set_facecolor(ax.lines[0].get_color())
@@ -618,7 +618,7 @@ class Plots__init__Test(unittest.TestCase):
         # Make a waterfall plot.
         ax.set_waterfall(True)
         # Add filled areas.
-        ax.set_fill(True)
+        ax.set_waterfall_fill(True)
         # Set the fills to be the same colour.
         ax.collections[0].set_facecolor([1, 0, 0, 1])
         ax.collections[1].set_facecolor([1, 0, 0, 1])

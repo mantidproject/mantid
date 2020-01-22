@@ -418,12 +418,14 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
     def waterfall_reverse_line_order(self):
         ax = self.canvas.figure.get_axes()[0]
         x, y = ax.waterfall_x_offset, ax.waterfall_y_offset
+        fills = helperfunctions.get_waterfall_fills(ax)
         ax.update_waterfall(0, 0)
 
         errorbar_cap_lines = helperfunctions.remove_and_return_errorbar_cap_lines(ax)
 
         ax.lines.reverse()
         ax.lines += errorbar_cap_lines
+        ax.collections += fills
         ax.collections.reverse()
         ax.update_waterfall(x, y)
 

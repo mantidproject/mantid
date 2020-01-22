@@ -1058,15 +1058,19 @@ class MantidAxes(Axes):
         :param x_offset: The amount by which each line is shifted in the x axis.
         :param y_offset: The amount by which each line is shifted in the y axis.
         """
+        x_offset = int(x_offset)
+        y_offset = int(y_offset)
+
         errorbar_cap_lines = helperfunctions.remove_and_return_errorbar_cap_lines(self)
 
         for i in range(len(self.get_lines())):
             helperfunctions.convert_single_line_to_waterfall(self, i, x_offset, y_offset)
 
         if x_offset == 0 and y_offset == 0:
-            self.set_fill(False)
+            self.set_waterfall_fill(False)
+            logger.information("x and y offset have been set to zero so the plot is no longer a waterfall plot.")
 
-        if any(isinstance(collection, PolyCollection) for collection in self.collections):
+        if self.waterfall_has_fill():
             helperfunctions.waterfall_update_fill(self)
 
         self.waterfall_x_offset = x_offset
@@ -1130,9 +1134,12 @@ class MantidAxes(Axes):
         self.update_waterfall(x_offset, y_offset)
 
         if fill:
-            self.set_fill(True)
+            self.set_waterfall_fill(True)
 
-    def set_fill(self, enable, colour=None):
+    def waterfall_has_fill(self):
+        return any(isinstance(collection, PolyCollection) for collection in self.collections)
+
+    def set_waterfall_fill(self, enable, colour=None):
         """
         Toggle whether the area under each line on a waterfall plot is filled.
         :param enable: If true, the filled areas are created, otherwise they are removed.

@@ -290,7 +290,7 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
 
         ax = fig.get_axes()[0]
         ax.set_waterfall(True)
-        ax.set_fill(True)
+        ax.set_waterfall_fill(True)
 
         presenter = self._generate_presenter(fig=fig, mock_view=mock_view)
 
@@ -312,7 +312,7 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
 
         # Create waterfall plot and add filled areas.
         ax.set_waterfall(True)
-        ax.set_fill(True)
+        ax.set_waterfall_fill(True)
 
         presenter = self._generate_presenter(fig=fig, mock_view=mock_view)
         # Change the colour of one of the lines.

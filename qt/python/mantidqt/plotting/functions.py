@@ -257,7 +257,7 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
                 errorbar_cap_lines = helperfunctions.remove_and_return_errorbar_cap_lines(ax)
                 helperfunctions.convert_single_line_to_waterfall(ax, len(ax.get_lines())-(i+1))
 
-                if helperfunctions.waterfall_has_fill(ax):
+                if ax.waterfall_has_fill():
                     helperfunctions.waterfall_update_fill(ax)
 
                 ax.lines += errorbar_cap_lines

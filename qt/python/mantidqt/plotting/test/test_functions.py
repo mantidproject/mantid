@@ -257,7 +257,7 @@ class FunctionsTest(TestCase):
         ws = self._test_ws
         plot([ws], wksp_indices=[0, 1], fig=fig, waterfall=True)
         ax = plt.gca()
-        ax.set_fill(True)
+        ax.set_waterfall_fill(True)
         plot([ws], wksp_indices=[0], fig=fig, overplot=True)
 
         fills = [collection for collection in ax.collections
