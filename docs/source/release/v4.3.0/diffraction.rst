@@ -9,6 +9,10 @@ Diffraction Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+New
+############
+- New loader for PANTHER instrument in diffraction mode.
+
 
 Improvements
 ############
