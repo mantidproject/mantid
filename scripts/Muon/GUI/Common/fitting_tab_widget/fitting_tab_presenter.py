@@ -78,31 +78,19 @@ class FittingTabPresenter(object):
 
     def update_selected_workspace_guess(self):
         if self.view.fit_type == self.view.simultaneous_fit:
-            self.update_fit_selector_list()
+            self.update_fit_specifier_list()
         if self.manual_selection_made:
             guess_selection = self.selected_data
             self.selected_data = guess_selection
-        elif self.context._frequency_context:
-            self.update_selected_frequency_workspace_guess()
         else:
-            self.update_selected_time_workspace_guess()
+            self.selected_data = self.get_workspace_selected_list()
 
-    def update_selected_frequency_workspace_guess(self):
-        runs = 'All'
-        groups_and_pairs = self.context.group_pair_context.selected
-        if self.view.fit_type == self.view.simultaneous_fit:
-            if self.view.simultaneous_fit_by == "Run":
-                runs = self.view.simultaneous_fit_by_specifier
-            else:
-                groups_and_pairs = self.view.simultaneous_fit_by_specifier
-        guess_selection = self.context.get_names_of_workspaces_to_fit(
-            runs=runs,
-            group_and_pair=groups_and_pairs,
-            phasequad=True,
-            rebin=not self.view.fit_to_raw, freq=self.context._frequency_context.plot_type)
-        self.selected_data = guess_selection
+    def get_workspace_selected_list(self):
+        if self.context._frequency_context is not None:
+            freq = self.context._frequency_context.plot_type
+        else:
+            freq = 'None'
 
-    def update_selected_time_workspace_guess(self):
         runs = 'All'
         groups_and_pairs = self._get_selected_groups_and_pairs()
         if self.view.fit_type == self.view.simultaneous_fit:
@@ -114,13 +102,13 @@ class FittingTabPresenter(object):
         guess_selection = []
         for grppair in groups_and_pairs:
             guess_selection += self.context.get_names_of_workspaces_to_fit(
-                    runs=runs,
-                    group_and_pair=grppair,
-                    phasequad=False,
-                    rebin=not self.view.fit_to_raw)
+                runs=runs,
+                group_and_pair=grppair,
+                phasequad=False,
+                rebin=not self.view.fit_to_raw, freq=freq)
 
         guess_selection = list(set(self._check_data_exists(guess_selection)))
-        self.selected_data = guess_selection
+        return guess_selection
 
     def handle_display_workspace_changed(self):
         current_index = self.view.get_index_for_start_end_times()
@@ -149,11 +137,12 @@ class FittingTabPresenter(object):
         if self.view.fit_type == self.view.simultaneous_fit:
             self.view.workspace_combo_box_label.setText(
                 'Display parameters for')
-            self.view.simul_fit_by_specifier.setVisible(True)
-            self.update_fit_selector_list()
+            self.view.simul_fit_by_specifier.setEnabled(True)
+            self.update_fit_specifier_list()
         else:
+            self.update_selected_workspace_guess()
             self.view.workspace_combo_box_label.setText('Select Workspace')
-            self.view.simul_fit_by_specifier.setVisible(False)
+            self.view.simul_fit_by_specifier.setEnabled(False)
 
     def handle_plot_guess_changed(self):
         if self.view.fit_type == self.view.simultaneous_fit:
@@ -171,30 +160,31 @@ class FittingTabPresenter(object):
         self.model.change_plot_guess(self.view.plot_guess, parameters)
 
     def fitting_domain_type_changed(self):
+        # If the fit function has been removed we should remove clear both browsers and the fit information
+        # and return.
+        if self._fit_function[0] is None:
+            self.clear_fit_information()
+            self.view.function_browser.clear()
+            self.view.function_browser_multi.clear()
+
         if self.view.fit_type == self.view.simultaneous_fit:
-            multi_domain_function = self.create_multi_domain_function(self._fit_function)
-            self._multi_domain_function = multi_domain_function
-            if multi_domain_function:
-                self.view.function_browser_multi.blockSignals(True)
-                self.view.function_browser_multi.setFunction(str(multi_domain_function))
-                self.view.function_browser_multi.blockSignals(False)
-                self._fit_function = [self.view.fit_object] * len(self.selected_data) if self.selected_data else [
-                    self.view.fit_object]
-            else:
-                self._fit_function = [None] * len(self.selected_data) if self.selected_data else [None]
             self.view.switch_to_simultaneous()
-            self.clear_fit_information()
         else:
-            if self.view.fit_object:
-                function_list = self.view.function_browser_multi.getGlobalFunction().createEquivalentFunctions()
-                self._fit_function = function_list
-                self.view.function_browser.blockSignals(True)
-                self.view.function_browser.setFunction(str(self._fit_function[0]))
-                self.view.function_browser.blockSignals(False)
-            else:
-                self._fit_function = [None] * len(self.selected_data) if self.selected_data else [None]
             self.view.switch_to_single()
-            self.clear_fit_information()
+
+    def sync_single_domain_browser_with_multi_domain_browser(self):
+        multi_domain_function = self.create_multi_domain_function(self._fit_function)
+        if multi_domain_function:
+            self.view.function_browser_multi.blockSignals(True)
+            self.view.function_browser_multi.setFunction(str(multi_domain_function))
+            self.view.function_browser_multi.blockSignals(False)
+
+    def sync_multi_domain_browser_with_single_domain_browser(self):
+        single_domain_function = self._fit_function[0]
+        if single_domain_function:
+            self.view.function_browser.blockSignals(True)
+            self.view.function_browser.setFunction(str(single_domain_function))
+            self.view.function_browser.blockSignals(False)
 
     def handle_fit_clicked(self):
         self.context.fitting_context.number_of_fits = 0
@@ -212,6 +202,7 @@ class FittingTabPresenter(object):
                 self._number_of_fits_cached = 1
                 simultaneous_fit_parameters = self.get_multi_domain_fit_parameters()
                 global_parameters = self.view.get_global_parameters()
+                print(simultaneous_fit_parameters)
                 calculation_function = functools.partial(
                     self.model.do_simultaneous_fit,
                     simultaneous_fit_parameters, global_parameters)
@@ -347,6 +338,12 @@ class FittingTabPresenter(object):
                 self.view.fit_object)
             self.model.function_name = self.view.function_name
 
+        # resync browsers
+        if self.view.fit_type == self.view.simultaneous_fit:
+            self.sync_multi_domain_browser_with_single_domain_browser()
+        else:
+            self.sync_single_domain_browser_with_multi_domain_browser()
+
     def handle_tf_asymmetry_mode_changed(self):
         def calculate_tf_fit_function(original_fit_function):
             tf_asymmetry_parameters = self.get_parameters_for_tf_function_calculation(original_fit_function)
@@ -426,26 +423,27 @@ class FittingTabPresenter(object):
 
     def handle_fit_by_changed(self):
         if self.view.fit_type == self.view.simultaneous_fit:
-            self.update_fit_selector_list()
             self.update_selected_workspace_guess()
             if self.view.simultaneous_fit_by == "Custom":
-                self.view.simul_fit_by_specifier.setVisible(False)
-                self.view.select_workspaces_to_fit_button.setVisible(True)
+                self.view.simul_fit_by_specifier.setEnabled(False)
+                self.view.select_workspaces_to_fit_button.setEnabled(True)
             else:
-                self.view.simul_fit_by_specifier.setVisible(True)
-                self.view.select_workspaces_to_fit_button.setVisible(False)
+                self.view.simul_fit_by_specifier.setEnabled(True)
+                self.view.select_workspaces_to_fit_button.setEnabled(False)
         else:
             return
 
     def handle_fit_specifier_changed(self):
-        self.update_selected_workspace_guess()
+        self.selected_data = self.get_workspace_selected_list()
 
-    def update_fit_selector_list(self):
+    def update_fit_specifier_list(self):
         if self.view.simultaneous_fit_by == "Run":
             flattened_run_list = [str(item) for sublist in self.context.data_context.current_runs for item in sublist]
             simul_choices = flattened_run_list
-        else:
+        elif self.view.simultaneous_fit_by == "Group/Pair":
             simul_choices = self._get_selected_groups_and_pairs()
+        else:
+            simul_choices = self.selected_data
 
         self.view.setup_fit_by_specifier(simul_choices)
 

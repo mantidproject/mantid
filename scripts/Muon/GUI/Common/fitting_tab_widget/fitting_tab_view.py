@@ -38,7 +38,7 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         self.increment_parameter_display_button.clicked.connect(self.increment_display_combo_box)
         self.decrement_parameter_display_button.clicked.connect(self.decrement_display_combo_box)
 
-        self.select_workspaces_to_fit_button.setVisible(False)
+        self.select_workspaces_to_fit_button.setEnabled(False)
 
     def update_displayed_data_combo_box(self, data_list):
         self.parameter_display_combo.blockSignals(True)
@@ -77,7 +77,7 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         self.simul_fit_by_combo.addItem("Run")
         self.simul_fit_by_combo.addItem("Group/Pair")
         self.simul_fit_by_combo.addItem("Custom")
-        self.simul_fit_by_specifier.setVisible(False)
+        self.simul_fit_by_specifier.setEnabled(False)
 
     def set_datasets_in_function_browser(self, data_set_name_list):
         number_of_data_sets = self.function_browser.getNumberOfDatasets()
@@ -278,6 +278,7 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         self.simul_fit_by_specifier.clear()
         self.simul_fit_by_specifier.addItems(choices)
         self.simul_fit_by_specifier.blockSignals(False)
+        self.simul_fit_by_specifier.currentIndexChanged.emit(0)
 
     def setup_fit_options_table(self):
         self.fit_options_table.setRowCount(6)
