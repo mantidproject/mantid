@@ -59,8 +59,6 @@ MainWindowPresenter::MainWindowPresenter(
       m_optionsDialogPresenter(std::move(optionsDialogPresenter)),
       m_batchPresenterFactory(std::move(batchPresenterFactory)) {
   m_optionsDialogPresenter->subscribe(this);
-  m_optionsDialogPresenter->notifyInitOptions();
-  m_optionsDialogPresenter->notifySubscribeView();
   view->subscribe(this);
   for (auto *batchView : m_view->batches())
     addNewBatch(batchView);

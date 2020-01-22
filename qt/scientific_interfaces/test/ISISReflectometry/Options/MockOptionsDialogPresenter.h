@@ -24,15 +24,15 @@ public:
   MOCK_METHOD1(getBoolOption, bool(const std::string &));
   MOCK_METHOD1(getIntOption, int &(const std::string &));
   MOCK_METHOD0(showView, void());
-  MOCK_METHOD1(subscribe, void(OptionsDialogMainWindowSubscriber *));
+  MOCK_METHOD1(subscribe, void(OptionsDialogPresenterSubscriber *));
 
   ~MockOptionsDialogPresenter() override{};
 };
 
-class MockOptionsDialogMainWindowSubscriber
-    : public OptionsDialogMainWindowSubscriber {
+class MockOptionsDialogPresenterSubscriber
+    : public OptionsDialogPresenterSubscriber {
 public:
-  MOCK_CONST_METHOD0(optionsChanged, void());
+  MOCK_CONST_METHOD0(notifyOptionsChanged, void());
 };
 GNU_DIAG_ON_SUGGEST_OVERRIDE
 } // namespace ISISReflectometry

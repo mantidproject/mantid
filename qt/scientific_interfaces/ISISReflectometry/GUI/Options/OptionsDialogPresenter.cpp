@@ -23,6 +23,7 @@ OptionsDialogPresenter::OptionsDialogPresenter(
   initOptions();
   m_view->subscribe(this);
 }
+}
 
 /** Subscribe the view to this presenter */
 void OptionsDialogPresenter::notifySubscribeView() { m_view->subscribe(this); }
