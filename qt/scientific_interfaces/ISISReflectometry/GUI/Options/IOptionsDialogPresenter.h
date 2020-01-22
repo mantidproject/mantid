@@ -13,21 +13,19 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL OptionsDialogMainWindowSubscriber {
+class MANTIDQT_ISISREFLECTOMETRY_DLL OptionsDialogPresenterSubscriber {
 public:
-  virtual void optionsChanged() const = 0;
+  virtual void notifyOptionsChanged() const = 0;
 };
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL IOptionsDialogPresenter {
 public:
   virtual ~IOptionsDialogPresenter() = default;
-  virtual void notifyInitOptions() = 0;
-  virtual void notifyOptionsChanged() = 0;
   virtual void notifySubscribeView() = 0;
   virtual bool getBoolOption(std::string &optionName) = 0;
   virtual int &getIntOption(std::string &optionName) = 0;
   virtual void showView() = 0;
-  virtual void subscribe(OptionsDialogMainWindowSubscriber *notifyee) = 0;
+  virtual void subscribe(OptionsDialogPresenterSubscriber *notifyee) = 0;
 };
 
 } // namespace ISISReflectometry

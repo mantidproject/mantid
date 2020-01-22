@@ -19,15 +19,9 @@ namespace ISISReflectometry {
  */
 OptionsDialogPresenter::OptionsDialogPresenter(
     IOptionsDialogView *view, std::unique_ptr<IOptionsDialogModel> model)
-    : m_view(view), m_model(std::move(model)), m_mainWindowNotifyee() {}
-
-/** Allow options to be initialised once the main presenter
-    is constructed (necessary due to rounding impl)
- */
-void OptionsDialogPresenter::notifyInitOptions() { initOptions(); }
-
-void OptionsDialogPresenter::notifyOptionsChanged() {
-  m_mainWindowNotifyee->optionsChanged();
+    : m_view(view), m_model(std::move(model)), m_notifyee() {
+  initOptions();
+  m_view->subscribe(this);
 }
 
 /** Subscribe the view to this presenter */
@@ -41,27 +35,21 @@ void OptionsDialogPresenter::initOptions() {
   m_model->loadSettings(m_boolOptions, m_intOptions);
   // If unsuccessful, load defaults
   if (m_boolOptions.empty() || m_intOptions.empty())
-    notifyApplyDefaultOptions(m_boolOptions, m_intOptions);
-}
-
-void OptionsDialogPresenter::notifyApplyDefaultOptions(
-    std::map<std::string, bool> &boolOptions,
-    std::map<std::string, int> &intOptions) {
-  m_model->applyDefaultOptions(boolOptions, intOptions);
+    m_model->applyDefaultOptions(m_boolOptions, m_intOptions);
 }
 
 /** Loads the options used into the view */
-void OptionsDialogPresenter::loadOptions() {
+void OptionsDialogPresenter::notifyLoadOptions() {
   m_model->loadSettings(m_boolOptions, m_intOptions);
   m_view->setOptions(m_boolOptions, m_intOptions);
-  notifyOptionsChanged();
+  m_notifyee->notifyOptionsChanged();
 }
 
 /** Saves the options selected in the view */
-void OptionsDialogPresenter::saveOptions() {
+void OptionsDialogPresenter::notifySaveOptions() {
   m_view->getOptions(m_boolOptions, m_intOptions);
   m_model->saveSettings(m_boolOptions, m_intOptions);
-  notifyOptionsChanged();
+  m_notifyee->notifyOptionsChanged();
 }
 
 /* Get a bool option state */
@@ -77,9 +65,13 @@ int &OptionsDialogPresenter::getIntOption(std::string &optionName) {
 void OptionsDialogPresenter::showView() { m_view->show(); }
 
 void OptionsDialogPresenter::subscribe(
-    OptionsDialogMainWindowSubscriber *notifyee) {
-  m_mainWindowNotifyee = notifyee;
-  loadOptions();
+    OptionsDialogPresenterSubscriber *notifyee) {
+  m_notifyee = notifyee;
+  // the following call is required after m_notifyee is set, rather than
+  // in the constructor, in order to avoid a segfault since
+  // notifyLoadOptions() makes a call to m_notifyee->notifyOptionsChanges() but
+  // m_notifyee would be nullptr
+  notifyLoadOptions();
 }
 
 } // namespace ISISReflectometry

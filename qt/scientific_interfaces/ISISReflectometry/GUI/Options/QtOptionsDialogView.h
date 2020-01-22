@@ -35,8 +35,8 @@ public:
   void subscribe(OptionsDialogViewSubscriber *notifyee) override;
 
 public slots:
-  void notifyLoadOptions();
-  void notifySaveOptions();
+  void onLoadOptions();
+  void onSaveOptions();
   void closeEvent(QCloseEvent *event) override;
 
 private:

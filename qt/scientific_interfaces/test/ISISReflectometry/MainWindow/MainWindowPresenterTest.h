@@ -69,12 +69,13 @@ public:
     verifyAndClear();
   }
 
-  void testOptionsDialogPresenterSubscribesToMainWindow() {
+  void testMainWindowPresenterSubscribesToOptionsDialogPresenter() {
     auto optionsDialogPresenter =
         std::make_unique<NiceMock<MockOptionsDialogPresenter>>();
-    EXPECT_CALL(*optionsDialogPresenter.get(), subscribe(_)).Times(1);
+    auto optionsDialogPresenterRaw = optionsDialogPresenter.get();
+    EXPECT_CALL(*optionsDialogPresenterRaw, subscribe(_)).Times(1);
     auto presenter = makePresenter(std::move(optionsDialogPresenter));
-    verifyAndClear(std::move(optionsDialogPresenter));
+    verifyAndClear(optionsDialogPresenterRaw);
   }
 
   void testConstructorAddsBatchPresenterForAllBatchViews() {
@@ -180,10 +181,11 @@ public:
   void testShowOptionsOpensDialog() {
     auto optionsDialogPresenter =
         std::make_unique<NiceMock<MockOptionsDialogPresenter>>();
-    EXPECT_CALL(*optionsDialogPresenter.get(), showView()).Times(AtLeast(1));
+    auto optionsDialogPresenterRaw = optionsDialogPresenter.get();
+    EXPECT_CALL(*optionsDialogPresenterRaw, showView()).Times(AtLeast(1));
     auto presenter = makePresenter(std::move(optionsDialogPresenter));
     presenter.notifyShowOptionsRequested();
-    verifyAndClear(std::move(optionsDialogPresenter));
+    verifyAndClear(optionsDialogPresenterRaw);
   }
 
   void testShowSlitCalculatorSetsInstrument() {
@@ -416,12 +418,10 @@ private:
   }
 
   void verifyAndClear(
-      std::unique_ptr<NiceMock<MockOptionsDialogPresenter>>
-          optionsDialogPresenter =
-              std::make_unique<NiceMock<MockOptionsDialogPresenter>>()) {
+      NiceMock<MockOptionsDialogPresenter> *optionsDialogPresenter = nullptr) {
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_messageHandler));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&optionsDialogPresenter));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(optionsDialogPresenter));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_fileHandler));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_encoder));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_decoder));

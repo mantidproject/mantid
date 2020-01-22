@@ -30,33 +30,28 @@ public:
   explicit OptionsDialogPresenter(IOptionsDialogView *view,
                                   std::unique_ptr<IOptionsDialogModel> model);
   // IOptionsDialogPresenter overrides
-  void notifyInitOptions() override;
-  void notifyOptionsChanged() override;
   void notifySubscribeView() override;
   bool getBoolOption(std::string &optionName) override;
   int &getIntOption(std::string &optionName) override;
   void showView() override;
-  void subscribe(OptionsDialogMainWindowSubscriber *notifyee) override;
+  void subscribe(OptionsDialogPresenterSubscriber *notifyee) override;
 
   // OptionsDialogViewSubscriber overrides
-  void loadOptions() override;
-  void saveOptions() override;
+  void notifyLoadOptions() override;
+  void notifySaveOptions() override;
 
-private:
   void initOptions();
 
 protected:
   // stores the user options for the presenter
   std::map<std::string, bool> m_boolOptions;
   std::map<std::string, int> m_intOptions;
-  void notifyApplyDefaultOptions(std::map<std::string, bool> &boolOptions,
-                                 std::map<std::string, int> &intOptions);
 
 private:
   IOptionsDialogView *m_view;
   std::unique_ptr<IOptionsDialogModel> m_model;
   // subscribe updates from presenter
-  OptionsDialogMainWindowSubscriber *m_mainWindowNotifyee;
+  OptionsDialogPresenterSubscriber *m_notifyee;
 };
 
 } // namespace ISISReflectometry

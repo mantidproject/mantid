@@ -26,9 +26,9 @@ QtOptionsDialogView::~QtOptionsDialogView() {}
 void QtOptionsDialogView::initLayout() {
   m_ui.setupUi(this);
   connect(m_ui.buttonBox->button(QDialogButtonBox::Ok), SIGNAL(clicked()), this,
-          SLOT(notifySaveOptions()));
+          SLOT(onSaveOptions()));
   connect(m_ui.buttonBox->button(QDialogButtonBox::Cancel), SIGNAL(clicked()),
-          this, SLOT(notifyLoadOptions()));
+          this, SLOT(onLoadOptions()));
 }
 
 /** Bind options to their widgets */
@@ -113,12 +113,16 @@ void QtOptionsDialogView::subscribe(OptionsDialogViewSubscriber *notifyee) {
   m_notifyee = notifyee;
 }
 
-void QtOptionsDialogView::notifyLoadOptions() { m_notifyee->loadOptions(); }
-void QtOptionsDialogView::notifySaveOptions() { m_notifyee->saveOptions(); }
+void QtOptionsDialogView::onLoadOptions() { m_notifyee->notifyLoadOptions(); }
+void QtOptionsDialogView::onSaveOptions() { m_notifyee->notifySaveOptions(); }
 
 void QtOptionsDialogView::closeEvent(QCloseEvent *event) {
   Q_UNUSED(event);
-  notifyLoadOptions();
+  // if the dialog is closed by clicking 'X' then discard any changes by
+  // re-loading the previous options. This is required since there is only one
+  // instance of the options dialog which is constructed with the
+  // main window, so the changes will not automatically be discarded.
+  m_notifyee->notifyLoadOptions();
   this->reject();
 }
 
