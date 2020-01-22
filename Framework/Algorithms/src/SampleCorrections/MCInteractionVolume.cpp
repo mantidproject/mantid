@@ -40,6 +40,7 @@ MCInteractionVolume::MCInteractionVolume(
   }
   try {
     m_env = &sample.getEnvironment();
+    assert(m_env);
     if (m_env->nelements() == 0) {
       throw std::invalid_argument(
           "MCInteractionVolume() - Sample enviroment has zero components.");
@@ -62,6 +63,58 @@ const Geometry::BoundingBox &MCInteractionVolume::getBoundingBox() const {
 }
 
 /**
+ * Randomly select a component across the sample/environment
+ * @param rng A reference to a PseudoRandomNumberGenerator where
+ * nextValue should return a flat random number between 0.0 & 1.0
+ * @return The randomly selected component index
+ */
+int MCInteractionVolume::getComponentIndex(
+    Kernel::PseudoRandomNumberGenerator &rng) {
+  int componentIndex;
+  // the sample has componentIndex -1, env components are number 0 upwards
+  if (m_env) {
+    componentIndex = rng.nextInt(0, static_cast<int>(m_env->nelements())) - 1;
+  } else {
+    componentIndex = -1;
+  }
+  return componentIndex;
+}
+
+/**
+ * Generate a point in an object identified by an index
+ * @param componentIndex Index of the sample/environment component where
+ * the sample is -1
+ * @param rng A reference to a PseudoRandomNumberGenerator where
+ * nextValue should return a flat random number between 0.0 & 1.0
+ * @return The generated point
+ */
+
+boost::optional<Kernel::V3D> MCInteractionVolume::generatePointInObjectByIndex(
+    int componentIndex, Kernel::PseudoRandomNumberGenerator &rng) {
+  boost::optional<Kernel::V3D> pointGenerated;
+  if (componentIndex == -1) {
+    pointGenerated = m_sample->generatePointInObject(rng, m_activeRegion, 1);
+  } else {
+    pointGenerated = m_env->getComponent(componentIndex)
+                         .generatePointInObject(rng, m_activeRegion, 1);
+  }
+  return pointGenerated;
+}
+
+/**
+ * Update the scatter point counts
+ * @param componentIndex Index of the sample/environment component where
+ * the sample is -1
+ */
+void MCInteractionVolume::UpdateScatterPointCounts(int componentIndex) {
+  if (componentIndex == -1) {
+    m_sampleScatterPoints++;
+  } else {
+    m_envScatterPoints[componentIndex]++;
+  }
+}
+
+/**
  * Generate point randomly across one of the components of the environment
  * including the sample itself in the selection. The method first selects
  * a random component and then selects a random point within that component
@@ -70,33 +123,15 @@ const Geometry::BoundingBox &MCInteractionVolume::getBoundingBox() const {
  * nextValue should return a flat random number between 0.0 & 1.0
  * @return The generated point
  */
-Kernel::V3D MCInteractionVolume::generatePoint(
-    Kernel::PseudoRandomNumberGenerator &rng) const {
+Kernel::V3D
+MCInteractionVolume::generatePoint(Kernel::PseudoRandomNumberGenerator &rng) {
   for (size_t i = 0; i < m_maxScatterAttempts; i++) {
-    Kernel::V3D point;
-    int componentIndex;
-    if (m_env) {
-      componentIndex = rng.nextInt(0, static_cast<int>(m_env->nelements())) - 1;
-    } else {
-      componentIndex = -1;
-    }
-
-    bool pointGenerated;
-    if (componentIndex == -1) {
-      pointGenerated =
-          m_sample->generatePointInObject(rng, m_activeRegion, 1, point);
-    } else {
-      pointGenerated =
-          m_env->getComponent(componentIndex)
-              .generatePointInObject(rng, m_activeRegion, 1, point);
-    }
+    int componentIndex = getComponentIndex(rng);
+    boost::optional<Kernel::V3D> pointGenerated =
+        generatePointInObjectByIndex(componentIndex, rng);
     if (pointGenerated) {
-      if (componentIndex == -1) {
-        m_sampleScatterPoints++;
-      } else {
-        m_envScatterPoints[componentIndex]++;
-      }
-      return point;
+      UpdateScatterPointCounts(componentIndex);
+      return *pointGenerated;
     }
   }
   throw std::runtime_error("MCInteractionVolume::generatePoint() - Unable to "
@@ -119,7 +154,7 @@ Kernel::V3D MCInteractionVolume::generatePoint(
  */
 double MCInteractionVolume::calculateAbsorption(
     Kernel::PseudoRandomNumberGenerator &rng, const Kernel::V3D &startPos,
-    const Kernel::V3D &endPos, double lambdaBefore, double lambdaAfter) const {
+    const Kernel::V3D &endPos, double lambdaBefore, double lambdaAfter) {
   // Generate scatter point. If there is an environment present then
   // first select whether the scattering occurs on the sample or the
   // environment. The attenuation for the path leading to the scatter point
@@ -174,10 +209,10 @@ std::string MCInteractionVolume::generateScatterPointStats() const {
 
   scatterPointSummary << "Scatter point counts:" << std::endl;
 
-  int totalScatterPoints = m_sampleScatterPoints;
-  for (std::vector<int>::size_type i = 0; i < m_envScatterPoints.size(); i++) {
-    totalScatterPoints += m_envScatterPoints[i];
-  }
+  int totalScatterPoints =
+      std::accumulate(m_envScatterPoints.begin(), m_envScatterPoints.end(),
+                      m_sampleScatterPoints);
+
   scatterPointSummary << "Total scatter points: " << totalScatterPoints
                       << std::endl;
 

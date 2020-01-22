@@ -16,6 +16,9 @@
 #include <gmock/gmock.h>
 
 using Mantid::Algorithms::MCInteractionVolume;
+using namespace ::testing;
+using namespace Mantid::Kernel;
+using namespace MonteCarloTesting;
 
 class MCInteractionVolumeTest : public CxxTest::TestSuite {
 public:
@@ -30,7 +33,6 @@ public:
   // Success cases
   //----------------------------------------------------------------------------
   void test_Bounding_Volume_Matches_Sample() {
-    using namespace MonteCarloTesting;
     auto sample = createTestSample(TestSampleType::SolidSphere);
     const auto sampleBox = sample.getShape().getBoundingBox();
     MCInteractionVolume interactor(sample, sampleBox);
@@ -42,8 +44,6 @@ public:
 
   void test_Absorption_In_Solid_Sample_Gives_Expected_Answer() {
     using Mantid::Kernel::V3D;
-    using namespace MonteCarloTesting;
-    using namespace ::testing;
 
     // Testing inputs
     const V3D startPos(-2.0, 0.0, 0.0), endPos(0.7, 0.7, 1.4);
@@ -62,8 +62,6 @@ public:
 
   void test_Absorption_In_Sample_With_Hole_Container_Scatter_In_All_Segments() {
     using Mantid::Kernel::V3D;
-    using namespace MonteCarloTesting;
-    using namespace ::testing;
 
     // Testing inputs
     const V3D startPos(-2.0, 0.0, 0.0), endPos(2.0, 0.0, 0.0);
@@ -95,8 +93,6 @@ public:
   void
   test_Absorption_In_Sample_And_Environment_Container_Scatter_In_All_Segments() {
     using Mantid::Kernel::V3D;
-    using namespace MonteCarloTesting;
-    using namespace ::testing;
 
     // Testing inputs
     const V3D startPos(-2.0, 0.0, 0.0), endPos(2.0, 0.0, 0.0);
@@ -138,9 +134,7 @@ public:
   // Failure cases
   //----------------------------------------------------------------------------
   void test_Construction_With_Invalid_Sample_Shape_Throws_Error() {
-    using Mantid::API::Sample;
-
-    Sample sample;
+    Mantid::API::Sample sample;
     // nothing
     TS_ASSERT_THROWS(
         MCInteractionVolume mcv(sample, sample.getShape().getBoundingBox()),
@@ -152,9 +146,6 @@ public:
   }
 
   void test_Throws_If_Point_Cannot_Be_Generated() {
-    using namespace Mantid::Kernel;
-    using namespace MonteCarloTesting;
-    using namespace ::testing;
 
     // Testing inputs
     const V3D startPos(-2.0, 0.0, 0.0), endPos(2.0, 0.0, 0.0);
@@ -172,15 +163,11 @@ public:
   }
 
   void testGeneratePointConsidersAllComponents() {
-    using namespace ::testing;
-    using namespace Mantid::Kernel;
-    using namespace MonteCarloTesting;
 
     auto kit = createTestKit();
     size_t maxAttempts(1);
 
-    using Mantid::API::Sample;
-    Sample sample;
+    Mantid::API::Sample sample;
     sample.setShape(ComponentCreationHelper::createSphere(1));
     sample.setEnvironment(
         std::make_unique<Mantid::Geometry::SampleEnvironment>(*kit));
@@ -236,9 +223,6 @@ public:
   }
 
   void testGeneratePointRespectsActiveRegion() {
-    using namespace MonteCarloTesting;
-    using namespace ::testing;
-    using namespace Mantid::Kernel;
 
     auto kit = createTestKit();
     size_t maxAttempts(1);

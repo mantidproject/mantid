@@ -332,8 +332,8 @@ public:
     // plane
     auto mesh = makeSimpleTriangleMesh();
     testing::NiceMock<MockRNG> generator;
-    V3D point;
-    TS_ASSERT_THROWS(mesh.generatePointInObject(generator, 10, point),
+    boost::optional<V3D> point;
+    TS_ASSERT_THROWS(point = mesh.generatePointInObject(generator, 10),
                      std::runtime_error &);
   }
   // Characterisation test.
@@ -344,10 +344,10 @@ public:
     auto mesh = makeSimpleTriangleMesh();
     testing::NiceMock<MockRNG> generator;
     Mantid::Geometry::BoundingBox boundingBox;
-    V3D point;
-    TS_ASSERT_THROWS(
-        mesh.generatePointInObject(generator, boundingBox, 10, point),
-        std::runtime_error &);
+    boost::optional<V3D> point;
+    TS_ASSERT_THROWS(point =
+                         mesh.generatePointInObject(generator, boundingBox, 10),
+                     std::runtime_error &);
   }
 
   // Characterisation test.

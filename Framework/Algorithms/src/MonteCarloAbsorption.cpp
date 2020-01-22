@@ -276,10 +276,10 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
       } else {
         // elastic case already initialized
       }
-      std::string debugString;
+
       std::tie(outY[j], std::ignore) =
-          strategy.calculate(rng, detPos, lambdaIn, lambdaOut, debugString);
-      g_log.debug(debugString);
+          strategy.calculate(rng, detPos, lambdaIn, lambdaOut);
+      g_log.debug(strategy.getDebugString());
 
       // Ensure we have the last point for the interpolation
       if (lambdaStepSize > 1 && j + lambdaStepSize >= nbins && j + 1 != nbins) {

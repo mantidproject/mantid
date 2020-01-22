@@ -18,6 +18,8 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MockRNG.h"
 
+#include <boost/optional.hpp>
+
 #include <cxxtest/TestSuite.h>
 
 #include <Poco/DOM/AutoPtr.h>
@@ -846,14 +848,14 @@ public:
     //  Random sequence set up so as to give point (0.90, 1.10, 0.65)
     auto geom_obj = createLShape();
     size_t maxAttempts(1);
-    V3D point;
+    boost::optional<Kernel::V3D> point;
     TS_ASSERT_THROWS_NOTHING(
-        geom_obj->generatePointInObject(rng, maxAttempts, point));
+        point = geom_obj->generatePointInObject(rng, maxAttempts));
 
     const double tolerance(1e-10);
-    TS_ASSERT_DELTA(0.90, point.X(), tolerance);
-    TS_ASSERT_DELTA(1.10, point.Y(), tolerance);
-    TS_ASSERT_DELTA(0.65, point.Z(), tolerance);
+    TS_ASSERT_DELTA(0.90, point->X(), tolerance);
+    TS_ASSERT_DELTA(1.10, point->Y(), tolerance);
+    TS_ASSERT_DELTA(0.65, point->Z(), tolerance);
   }
 
   void testGeneratePointInsideRespectsMaxAttempts() {
@@ -870,9 +872,9 @@ public:
     //  which is outside the octahedron
     auto geom_obj = createOctahedron();
     size_t maxAttempts(1);
-    V3D point;
-    TS_ASSERT_EQUALS(geom_obj->generatePointInObject(rng, maxAttempts, point),
-                     false);
+    boost::optional<V3D> point;
+    point = geom_obj->generatePointInObject(rng, maxAttempts);
+    TS_ASSERT_EQUALS(!point, true);
   }
 
   void testVolumeOfCube() {
@@ -1087,18 +1089,18 @@ public:
   void test_generatePointInside_Convex_Solid() {
     const size_t npoints(6000);
     const size_t maxAttempts(500);
-    V3D point;
+    boost::optional<V3D> point;
     for (size_t i = 0; i < npoints; ++i) {
-      octahedron->generatePointInObject(rng, maxAttempts, point);
+      point = octahedron->generatePointInObject(rng, maxAttempts);
     }
   }
 
   void test_generatePointInside_NonConvex_Solid() {
     const size_t npoints(6000);
     const size_t maxAttempts(500);
-    V3D point;
+    boost::optional<V3D> point;
     for (size_t i = 0; i < npoints; ++i) {
-      lShape->generatePointInObject(rng, maxAttempts, point);
+      point = lShape->generatePointInObject(rng, maxAttempts);
     }
   }
 

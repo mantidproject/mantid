@@ -388,19 +388,18 @@ int MeshObject2D::getPointInObject(Kernel::V3D &point) const {
   return this->isValid(point) ? 1 : 0;
 }
 
-bool MeshObject2D::generatePointInObject(
-    Kernel::PseudoRandomNumberGenerator & /*rng*/, const size_t /*unused*/,
-    Kernel::V3D & /*unused*/) const {
+boost::optional<Kernel::V3D> MeshObject2D::generatePointInObject(
+    Kernel::PseudoRandomNumberGenerator & /*rng*/,
+    const size_t /*unused*/) const {
   // How this would work for a finite plane is not clear. Points within the
   // plane can of course be generated, but most implementations of this method
   // use the bounding box
   throw std::runtime_error("Not implemented.");
 }
 
-bool MeshObject2D::generatePointInObject(
+boost::optional<Kernel::V3D> MeshObject2D::generatePointInObject(
     Kernel::PseudoRandomNumberGenerator & /*rng*/,
-    const BoundingBox & /*activeRegion*/, const size_t /*unused*/,
-    Kernel::V3D & /*unused*/) const {
+    const BoundingBox & /*activeRegion*/, const size_t /*unused*/) const {
 
   // How this would work for a finite plane is not clear. Points within the
   // plane can of course be generated, but most implementations of this method

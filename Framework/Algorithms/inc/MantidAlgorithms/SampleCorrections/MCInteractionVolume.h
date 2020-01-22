@@ -9,6 +9,7 @@
 
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
+#include <boost/optional.hpp>
 
 namespace Mantid {
 namespace API {
@@ -45,13 +46,18 @@ public:
   double calculateAbsorption(Kernel::PseudoRandomNumberGenerator &rng,
                              const Kernel::V3D &startPos,
                              const Kernel::V3D &endPos, double lambdaBefore,
-                             double lambdaAfter) const;
+                             double lambdaAfter);
   std::string generateScatterPointStats() const;
-  Kernel::V3D generatePoint(Kernel::PseudoRandomNumberGenerator &rng) const;
+  Kernel::V3D generatePoint(Kernel::PseudoRandomNumberGenerator &rng);
 
 private:
-  mutable int m_sampleScatterPoints = 0;
-  mutable std::vector<int> m_envScatterPoints;
+  int getComponentIndex(Kernel::PseudoRandomNumberGenerator &rng);
+  boost::optional<Kernel::V3D>
+  generatePointInObjectByIndex(int componentIndex,
+                               Kernel::PseudoRandomNumberGenerator &rng);
+  void UpdateScatterPointCounts(int componentIndex);
+  int m_sampleScatterPoints = 0;
+  std::vector<int> m_envScatterPoints;
   const boost::shared_ptr<Geometry::IObject> m_sample;
   const Geometry::SampleEnvironment *m_env;
   const Geometry::BoundingBox m_activeRegion;
