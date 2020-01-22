@@ -1,4 +1,5 @@
 include(ExternalProject)
+include(ProcessorCount)
 
 set(_SIP_PYQT_DIR extern-pyt4-sip)
 set(_SIP_PYQT_INSTALL_DIR ${_SIP_PYQT_DIR}/install)
@@ -35,6 +36,12 @@ set(_pyqt4_lib_site_packages ${PRIVATE_PYQT_SITE_PACKAGES}/PyQt4)
 set(PYQT4_PYUIC "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/internal-pyuic.py" CACHE STRING "Location of the pyuic script" FORCE)
 configure_file(${CMAKE_MODULE_PATH}/internal-pyuic.py.in ${PYQT4_PYUIC} @ONLY)
 
+# Determine core count for make step
+ProcessorCount(NPROCESSORS)
+if(NPROCESSORS EQUAL 0)
+  set(NPROCESSORS 1)
+endif()
+
 ExternalProject_Add(extern-pyqt4
   PREFIX ${_SIP_PYQT_DIR}/pyqt4
   INSTALL_DIR ${_SIP_PYQT_INSTALL_DIR}
@@ -55,7 +62,7 @@ ExternalProject_Add(extern-pyqt4
     --no-deprecated
     --qmake=/usr/bin/qmake-qt4
     --no-qsci-api
-  BUILD_COMMAND make -j24 2> build.log
+  BUILD_COMMAND make -j${NPROCESSORS} 2> build.log
   DEPENDS extern-pyqt4-sip
 )
 
