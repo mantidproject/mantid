@@ -10,8 +10,7 @@
 #include "GUI/Common/IEncoder.h"
 #include "GUI/Common/IFileHandler.h"
 #include "GUI/Common/IMessageHandler.h"
-#include "GUI/Options/IOptionsDialogView.h"
-#include "GUI/Options/OptionsDialogPresenter.h"
+#include "GUI/Options/IOptionsDialogPresenter.h"
 #include "GUI/Runs/IRunsPresenter.h"
 #include "IMainWindowView.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -60,8 +59,6 @@ MainWindowPresenter::MainWindowPresenter(
       m_optionsDialogPresenter(std::move(optionsDialogPresenter)),
       m_batchPresenterFactory(std::move(batchPresenterFactory)) {
   m_optionsDialogPresenter->subscribe(this);
-  m_optionsDialogPresenter->notifyInitOptions();
-  m_optionsDialogPresenter->notifySubscribeView();
   view->subscribe(this);
   for (auto *batchView : m_view->batches())
     addNewBatch(batchView);
@@ -164,7 +161,7 @@ bool MainWindowPresenter::isAnyBatchAutoreducing() const {
   return false;
 }
 
-void MainWindowPresenter::optionsChanged() const {
+void MainWindowPresenter::notifyOptionsChanged() const {
   // TODO implement with round precision
 }
 

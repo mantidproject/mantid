@@ -45,18 +45,10 @@ public:
 
 class MockOptionsDialogModelUnsuccessfulLoad : public IOptionsDialogModel {
 public:
-  MOCK_METHOD2(applyDefaultOptionsProxy, void(std::map<std::string, bool> &,
-                                              std::map<std::string, int> &));
-  void applyDefaultOptions(std::map<std::string, bool> &boolOptions,
-                           std::map<std::string, int> &intOptions) {
-    applyDefaultOptionsProxy(boolOptions, intOptions);
-  }
-  MOCK_METHOD2(loadSettingsProxy, void(std::map<std::string, bool> &,
-                                       std::map<std::string, int> &));
-  void loadSettings(std::map<std::string, bool> &boolOptions,
-                    std::map<std::string, int> &intOptions) {
-    loadSettingsProxy(boolOptions, intOptions);
-  }
+  MOCK_METHOD2(applyDefaultOptions, void(std::map<std::string, bool> &,
+                                         std::map<std::string, int> &));
+  MOCK_METHOD2(loadSettings, void(std::map<std::string, bool> &,
+                                  std::map<std::string, int> &));
   MOCK_METHOD2(saveSettings, void(const std::map<std::string, bool> &,
                                   const std::map<std::string, int> &));
 };
@@ -74,12 +66,9 @@ public:
     intOptions["RoundPrecision"] = 5;
     applyDefaultOptionsProxy(boolOptions, intOptions);
   }
-  MOCK_METHOD2(loadSettingsProxy, void(std::map<std::string, bool> &,
-                                       std::map<std::string, int> &));
-  void loadSettings(std::map<std::string, bool> &boolOptions,
-                    std::map<std::string, int> &intOptions) {
-    loadSettingsProxy(boolOptions, intOptions);
-  }
+  MOCK_METHOD2(loadSettings, void(std::map<std::string, bool> &,
+                                  std::map<std::string, int> &));
+
   MOCK_METHOD2(saveSettings, void(const std::map<std::string, bool> &,
                                   const std::map<std::string, int> &));
 };

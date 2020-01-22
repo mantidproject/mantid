@@ -38,7 +38,7 @@ functionality defined by the interface IMainWindowPresenter.
 class MANTIDQT_ISISREFLECTOMETRY_DLL MainWindowPresenter
     : public MainWindowSubscriber,
       public IMainWindowPresenter,
-      public OptionsDialogMainWindowSubscriber {
+      public OptionsDialogPresenterSubscriber {
 public:
   /// Constructor
   MainWindowPresenter(
@@ -76,8 +76,8 @@ public:
   void notifyShowOptionsRequested() override;
   void notifyShowSlitCalculatorRequested() override;
 
-  // OptionsDialogMainWindowSubscriber overrides
-  void optionsChanged() const override;
+  // OptionsDialogPresenterSubscriber overrides
+  void notifyOptionsChanged() const override;
 
 protected:
   IMainWindowView *m_view;

@@ -110,10 +110,8 @@ void QtMainWindowView::initLayout() {
   // Create the presenter
   auto slitCalculator = std::make_unique<SlitCalculator>(this);
   m_optionsDialogView = std::make_unique<QtOptionsDialogView>(this);
-  auto optionsDialogView = m_optionsDialogView.get();
-  auto optionsDialogModel = std::make_unique<OptionsDialogModel>();
   auto optionsDialogPresenter = std::make_unique<OptionsDialogPresenter>(
-      optionsDialogView, std::move(optionsDialogModel));
+      m_optionsDialogView.get(), std::make_unique<OptionsDialogModel>());
   m_presenter = std::make_unique<MainWindowPresenter>(
       this, messageHandler, fileHandler, std::make_unique<Encoder>(),
       std::make_unique<Decoder>(), std::move(slitCalculator),

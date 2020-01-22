@@ -17,20 +17,18 @@ namespace CustomInterfaces {
 namespace ISISReflectometry {
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
-class MockOptionsDialogMainWindowSubscriber
-    : public OptionsDialogMainWindowSubscriber {
+class MockOptionsDialogPresenterSubscriber
+    : public OptionsDialogPresenterSubscriber {
 public:
-  MOCK_CONST_METHOD0(optionsChanged, void());
+  MOCK_CONST_METHOD0(notifyOptionsChanged, void());
 };
 class MockOptionsDialogPresenter : public IOptionsDialogPresenter {
 public:
-  MOCK_METHOD0(notifyInitOptions, void());
-  MOCK_METHOD0(notifyOptionsChanged, void());
   MOCK_METHOD0(notifySubscribeView, void());
   MOCK_METHOD1(getBoolOption, bool(std::string &));
   MOCK_METHOD1(getIntOption, int &(std::string &));
   MOCK_METHOD0(showView, void());
-  MOCK_METHOD1(subscribe, void(OptionsDialogMainWindowSubscriber *));
+  MOCK_METHOD1(subscribe, void(OptionsDialogPresenterSubscriber *));
 };
 GNU_DIAG_ON_SUGGEST_OVERRIDE
 } // namespace ISISReflectometry

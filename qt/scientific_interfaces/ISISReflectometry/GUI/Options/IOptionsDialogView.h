@@ -16,8 +16,8 @@ namespace ISISReflectometry {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL OptionsDialogViewSubscriber {
 public:
-  virtual void loadOptions() = 0;
-  virtual void saveOptions() = 0;
+  virtual void notifyLoadOptions() = 0;
+  virtual void notifySaveOptions() = 0;
 };
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL IOptionsDialogView {
