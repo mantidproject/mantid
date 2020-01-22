@@ -45,6 +45,8 @@ class SpectraSelection(object):
         self.spectra = None
         self.plot_type = SpectraSelection.Individual
 
+        self.errors = False
+
 
 class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
 
@@ -90,6 +92,9 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         selection = SpectraSelection(self._workspaces)
         selection.wksp_indices = range(self.wi_min, self.wi_max + 1)
         selection.plot_type = self._ui.plotType.currentIndex()
+
+        if self._advanced:
+            selection.errors = self._advanced.error_bars_check_box.isChecked()
         if self._check_number_of_plots(selection):
             self.selection = selection
             self.accept()
@@ -119,11 +124,6 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         ui = SpectraSelectionDialogUI()
         ui.setupUi(self)
 
-        if self._advanced:
-            ui.advanced_options_widget = AdvancedPlottingOptionsWidget(parent=self)
-            ui.layout.replaceWidget(ui.advanced_plots_dummy_widget, ui.advanced_options_widget)
-            self.setWindowTitle("Plot Advanced")
-
         self._ui = ui
         ui.colorfillButton.setVisible(self._show_colorfill_button)
         # overwrite the "Yes to All" button text
@@ -134,6 +134,11 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         # validity markers
         ui.wkspIndicesValid.setIcon(red_asterisk())
         ui.specNumsValid.setIcon(red_asterisk())
+
+        if self._advanced:
+            ui.advanced_options_widget = AdvancedPlottingOptionsWidget(parent=self)
+            ui.layout.replaceWidget(ui.advanced_plots_dummy_widget, ui.advanced_options_widget)
+            self.setWindowTitle("Plot Advanced")
 
     def _set_placeholder_text(self):
         """Sets placeholder text to indicate the ranges possible"""
@@ -229,6 +234,9 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
             selection = SpectraSelection(self._workspaces)
             selection.wksp_indices = wksp_indices
             selection.plot_type = self._ui.plotType.currentIndex()
+
+            if self._advanced:
+                selection.errors = self._ui.advanced_options_widget.ui.error_bars_check_box.isChecked()
         else:
             selection = None
         self.selection = selection
@@ -239,6 +247,9 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
             selection = SpectraSelection(self._workspaces)
             selection.spectra = spec_nums
             selection.plot_type = self._ui.plotType.currentIndex()
+
+            if self._advanced:
+                selection.errors = self._ui.advanced_options_widget.ui.error_bars_check_box.isChecked()
         else:
             selection = None
         self.selection = selection
@@ -256,13 +267,20 @@ class AdvancedPlottingOptionsWidget(AdvancedPlottingOptionsWidgetUIBase):
         ui = AdvancedPlottingOptionsWidgetUI()
         ui.setupUi(self)
 
-        ui.log_value_combo_box.currentTextChanged.connect(self.log_value_changed)
+        ui.log_value_combo_box.currentTextChanged.connect(self._log_value_changed)
+        ui.error_bars_check_box.clicked.connect(self._toggle_errors)
 
-        self._ui = ui
+        self.ui = ui
+        self._parent = parent
 
-    def log_value_changed(self, text):
-        self._ui.custom_log_line_edit.setEnabled(text == "Custom")
-        self._ui.plot_axis_label.setText(text)
+    def _log_value_changed(self, text):
+        self.ui.custom_log_line_edit.setEnabled(text == "Custom")
+        self.ui.plot_axis_label.setText(text)
+
+    def _toggle_errors(self, enable):
+        if self._parent.selection:
+            self._parent.selection.errors = enable
+
 
 
 def parse_selection_str(txt, min_val=None, max_val=None, allowed_values=None):

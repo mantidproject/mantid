@@ -101,6 +101,9 @@ def plot_from_names(names, errors, overplot, fig=None, show_colorfill_btn=False,
     elif selection == 'colorfill':
         return pcolormesh_from_names(names)
 
+    if advanced:
+        errors = selection.errors
+
     return plot(selection.workspaces, spectrum_nums=selection.spectra,
                 wksp_indices=selection.wksp_indices,
                 errors=errors, overplot=overplot, fig=fig, tiled=selection.plot_type==selection.Tiled,
