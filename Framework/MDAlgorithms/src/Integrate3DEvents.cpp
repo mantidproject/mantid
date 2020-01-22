@@ -154,7 +154,7 @@ Integrate3DEvents::integrateStrongPeak(const IntegrationParameters &params,
 
   std::vector<V3D> eigen_vectors;
   std::vector<double> eigen_values;
-  getEigenVectors(cov_matrix, eigen_vectors,eigen_values);
+  getEigenVectors(cov_matrix, eigen_vectors, eigen_values);
 
   std::vector<double> sigmas(3);
   for (int i = 0; i < 3; i++) {
@@ -465,7 +465,7 @@ Integrate3DEvents::ellipseIntegrateEvents(
 
   std::vector<V3D> eigen_vectors;
   std::vector<double> eigen_values;
-  getEigenVectors(cov_matrix, eigen_vectors,eigen_values);
+  getEigenVectors(cov_matrix, eigen_vectors, eigen_values);
 
   std::vector<double> sigmas(3);
   for (int i = 0; i < 3; i++) {
@@ -527,7 +527,7 @@ Integrate3DEvents::ellipseIntegrateModEvents(
 
   std::vector<V3D> eigen_vectors;
   std::vector<double> eigen_values;
-  getEigenVectors(cov_matrix, eigen_vectors,eigen_values);
+  getEigenVectors(cov_matrix, eigen_vectors, eigen_values);
 
   std::vector<double> sigmas(3);
   for (int i = 0; i < 3; i++)
@@ -665,17 +665,19 @@ std::pair<double, double> Integrate3DEvents::numInEllipsoidBkg(
 void Integrate3DEvents::makeCovarianceMatrix(
     std::vector<std::pair<std::pair<double, double>, V3D>> const &events,
     DblMatrix &matrix, double radius) {
+  double totalCounts;
   for (int row = 0; row < 3; row++) {
     for (int col = 0; col < 3; col++) {
+      totalCounts = 0;
       double sum = 0;
-      for (const auto &value : events) {
-        const auto &event = value.second;
-        if (event.norm() <= radius) {
-          sum += event[row] * event[col];
+      for (const auto &event : events) {
+        if (event.second.norm() <= radius) {
+          totalCounts += event.first.first;
+          sum += event.first.first * event.second[row] * event.second[col];
         }
       }
-      if (events.size() > 1)
-        matrix[row][col] = sum / static_cast<double>(events.size() - 1);
+      if (totalCounts > 1)
+        matrix[row][col] = sum / (totalCounts - 1);
       else
         matrix[row][col] = sum;
     }
