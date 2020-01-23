@@ -77,7 +77,8 @@ Usage
      Run='317370',
      DirectRun='317369',
      WavelengthLowerBound=3.5,
-     WavelengthUpperBound=24.5
+     WavelengthUpperBound=24.5,
+     DeltaQFractionBinning=0.1
     )
     print('The R(Q) workspace has {0} points'.format(ws.getItem(0).blocksize()))
 
