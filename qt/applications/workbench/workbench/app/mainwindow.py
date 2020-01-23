@@ -36,6 +36,7 @@ SYSCHECK_INTERVAL = 50
 ORIGINAL_SYS_EXIT = sys.exit
 ORIGINAL_STDOUT = sys.stdout
 ORIGINAL_STDERR = sys.stderr
+STACKTRACE_FILE = 'workbench_stacktrace.txt'
 
 from workbench import requirements  # noqa
 
@@ -864,10 +865,12 @@ def main():
         # about. Prints to stderr as we can't really count on anything
         # else
         traceback.print_exc(file=ORIGINAL_STDERR)
-        print_file_path = os.path.join(ConfigService.getAppDataDirectory(), 'workbench_stacktrace.txt')
-        print_file = open(print_file_path, 'w')
-        traceback.print_exc(file=print_file)
-        print_file.close()
+        try:
+            print_file_path = os.path.join(ConfigService.getAppDataDirectory(), STACKTRACE_FILE)
+            with open(print_file_path, 'w') as print_file:
+                traceback.print_exc(file=print_file)
+        except OSError:
+            pass
         exit_value = -1
     finally:
         ORIGINAL_SYS_EXIT(exit_value)

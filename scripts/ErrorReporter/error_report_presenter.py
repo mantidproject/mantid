@@ -8,8 +8,6 @@ from __future__ import (absolute_import, print_function)
 
 import os
 
-import requests
-
 from mantid.kernel import ConfigService, ErrorReporter, Logger, UsageService
 
 
@@ -26,12 +24,14 @@ class ErrorReporterPresenter(object):
 
         if not traceback:
             traceback_file_path = os.path.join(ConfigService.getAppDataDirectory(), '{}_stacktrace.txt'.format(application))
-            if os.path.isfile(traceback_file_path):
-                file = open(traceback_file_path, 'r')
-                self._traceback = file.readlines()
-                file.close()
-                new_workspace_name = os.path.join(ConfigService.getAppDataDirectory(), '{}_stacktrace_sent.txt'.format(application))
-                os.rename(traceback_file_path, new_workspace_name)
+            try:
+                if os.path.isfile(traceback_file_path):
+                    with open(traceback_file_path, 'r') as file:
+                        self._traceback = file.readlines()
+                    new_workspace_name = os.path.join(ConfigService.getAppDataDirectory(), '{}_stacktrace_sent.txt'.format(application))
+                    os.rename(traceback_file_path, new_workspace_name)
+            except OSError:
+                pass
 
     def do_not_share(self, continue_working=True):
         self.error_log.notice("No information shared")
