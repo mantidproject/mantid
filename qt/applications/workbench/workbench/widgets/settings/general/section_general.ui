@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>578</width>
-    <height>544</height>
+    <width>765</width>
+    <height>593</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -44,9 +44,9 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>-139</y>
-        <width>549</width>
-        <height>672</height>
+        <y>-174</y>
+        <width>736</width>
+        <height>756</height>
        </rect>
       </property>
       <property name="sizePolicy">
@@ -412,6 +412,16 @@
             <string>Layouts</string>
            </property>
            <layout class="QGridLayout" name="gridLayout">
+            <property name="verticalSpacing">
+             <number>3</number>
+            </property>
+            <item row="2" column="2" colspan="2">
+             <widget class="QPushButton" name="delete_layout">
+              <property name="text">
+               <string>Delete Layout</string>
+              </property>
+             </widget>
+            </item>
             <item row="3" column="3">
              <widget class="QPushButton" name="save_layout">
               <property name="text">
@@ -433,18 +443,113 @@
               </property>
              </widget>
             </item>
-            <item row="1" column="0" colspan="4">
-             <widget class="QListWidget" name="layout_display"/>
-            </item>
             <item row="3" column="1" colspan="2">
              <widget class="QLineEdit" name="new_layout_name"/>
             </item>
-            <item row="2" column="2" colspan="2">
-             <widget class="QPushButton" name="delete_layout">
-              <property name="text">
-               <string>Delete Layout</string>
-              </property>
-             </widget>
+            <item row="1" column="0" colspan="4">
+             <widget class="QListWidget" name="layout_display"/>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="Directories">
+           <property name="title">
+            <string>Directories</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_10">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_6">
+              <item>
+               <widget class="QLabel" name="translation_label">
+                <property name="minimumSize">
+                 <size>
+                  <width>110</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Translations</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="translation_file_path"/>
+              </item>
+              <item>
+               <widget class="QPushButton" name="translation_browse_button">
+                <property name="text">
+                 <string>Browse</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_5">
+              <item>
+               <widget class="QLabel" name="help_label">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>110</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Help</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="help_file_path"/>
+              </item>
+              <item>
+               <widget class="QPushButton" name="help_browse_button">
+                <property name="text">
+                 <string>Browse</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_2">
+              <item>
+               <widget class="QLabel" name="inst_definitions_label">
+                <property name="minimumSize">
+                 <size>
+                  <width>110</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Instrument definitions</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="inst_definitions_file_path"/>
+              </item>
+              <item>
+               <widget class="QPushButton" name="inst_definiton_browse_button">
+                <property name="text">
+                 <string>Browse</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </item>
            </layout>
           </widget>

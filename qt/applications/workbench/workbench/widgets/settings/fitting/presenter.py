@@ -72,18 +72,18 @@ class FittingSettings(object):
         self.view.findpeaks_tol.valueChanged.connect(self.action_find_peaks_tolerance_changed)
 
     def action_auto_background_changed(self, item_name):
-        if item_name is "None":
+        if item_name == "None":
             ConfigService.setString(self.AUTO_BACKGROUND, "")
             return
         background_string = item_name + " " + self.view.background_args.text()
-        ConfigService.setString(self.AUTO_BACKGROUND,  background_string)
+        ConfigService.setString(self.AUTO_BACKGROUND, background_string)
 
     def action_background_args_changed(self):
-        if self.view.auto_bkg.currentText() is "None":
+        if self.view.auto_bkg.currentText() == "None":
             ConfigService.setString(self.AUTO_BACKGROUND, "")
         else:
             background_string = self.view.auto_bkg.currentText() + " " + self.view.background_args.text()
-            ConfigService.setString(self.AUTO_BACKGROUND,  background_string)
+            ConfigService.setString(self.AUTO_BACKGROUND, background_string)
 
     def action_default_peak_changed(self, item_name):
         ConfigService.setString(self.DEFAULT_PEAK, item_name)

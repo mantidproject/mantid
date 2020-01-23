@@ -11,6 +11,7 @@ from qtpy.QtCore import Qt
 
 from mantid import ConfigService
 from mantidqt.interfacemanager import InterfaceManager
+from workbench.widgets.settings.application.presenter import ApplicationSettings
 from workbench.widgets.settings.categories.presenter import CategoriesSettings
 from workbench.widgets.settings.fitting.presenter import FittingSettings
 from workbench.widgets.settings.general.presenter import GeneralSettings
@@ -21,12 +22,15 @@ class SettingsPresenter(object):
     ASK_BEFORE_CLOSE_TITLE = "Confirm exit"
     ASK_BEFORE_CLOSE_MESSAGE = "Are you sure you want to exit without applying the settings?"
     SETTINGS_TABS = {'general_settings' : "General",
+                     'application_settings': "Application",
                      'categories_settings' : "Show/Hide Categories",
                      'fitting_settings' : "Fitting"}
 
-    def __init__(self, parent, view=None, general_settings=None, categories_settings=None, fitting_settings=None):
+    def __init__(self, parent, view=None, general_settings=None, application_settings=None,
+                 categories_settings=None, fitting_settings=None):
         self.view = view if view else SettingsView(parent, self)
         self.general_settings = general_settings if general_settings else GeneralSettings(parent)
+        self.application_settings = application_settings if application_settings else ApplicationSettings(parent)
         self.categories_settings = categories_settings if categories_settings else CategoriesSettings(parent)
         self.fitting_settings = fitting_settings if fitting_settings else FittingSettings(parent)
         self.parent = parent

@@ -51,6 +51,7 @@ class GeneralSettings(object):
         self.setup_layout_options()
 
         self.setup_confirmations()
+        #self.setup_directories()
 
     def setup_facilities_group(self):
         facilities = ConfigService.getFacilityNames()
@@ -103,6 +104,11 @@ class GeneralSettings(object):
         self.view.prompt_save_editor_modified.stateChanged.connect(self.action_prompt_save_editor_modified)
         self.view.prompt_deleting_workspaces.stateChanged.connect(self.action_prompt_deleting_workspace)
         self.view.use_notifications.stateChanged.connect(self.action_use_notifications_modified)
+
+    def setup_directories(self):
+        self.view.translation_file_path.textEdited.connect(self.action_translation_file_path_changed)
+        self.view.help_file_path.textEdited.connect(self.action_help_file_path_changed)
+        self.view.inst_definitions_file_path.textEdited.connect(self.action_inst_definitions_file_path_changed)
 
     def action_prompt_save_on_close(self, state):
         CONF.set(self.PROMPT_SAVE_ON_CLOSE, bool(state))
