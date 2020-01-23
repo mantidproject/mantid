@@ -29,7 +29,6 @@ from mantid.kernel import (
     IntArrayLengthValidator,
     IntArrayBoundedValidator,
     IntArrayProperty,
-    Property,
     PropertyCriterion,
     StringArrayLengthValidator,
     StringArrayProperty,
