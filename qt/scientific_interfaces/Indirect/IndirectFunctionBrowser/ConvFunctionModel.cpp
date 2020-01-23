@@ -93,7 +93,7 @@ void ConvFunctionModel::checkConvolution(IFunction_sptr fun) {
       throw std::runtime_error("Function has wrong structure.");
     }
   }
-} // namespace IDA
+}
 
 void ConvFunctionModel::checkComposite(IFunction_sptr fun) {
   bool isFitTypeSet = false;

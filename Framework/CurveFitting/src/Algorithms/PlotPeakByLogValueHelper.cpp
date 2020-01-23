@@ -22,9 +22,6 @@ namespace Mantid {
 namespace CurveFitting {
 namespace Algorithms {
 
-void parseValueRange(const std::string &index, double &start, double &end,
-                     int &wi, int &spec);
-
 // Ideally this would use boost::try_lexical_cast in order to avoid too many
 // exceptions
 // but we do not yet have the correct version of boost.
@@ -36,6 +33,49 @@ Type lexCast(std::string input, const std::string &errorMessage) {
     throw std::runtime_error(errorMessage + input);
   }
 }
+
+void parseValueRange(const std::string &index, double &start, double &end,
+                     int &wi, int &spec) {
+  if (index.size() > 1) { // there is some text after 'v'
+    Mantid::Kernel::StringTokenizer range(
+        index.substr(1), ":",
+        Kernel::StringTokenizer::TOK_IGNORE_EMPTY |
+            Kernel::StringTokenizer::TOK_TRIM);
+    if (range.count() < 1) {
+      wi = WHOLE_RANGE; // means use the whole range
+    } else if (range.count() == 1) {
+      try {
+        start = boost::lexical_cast<double>(range[0]);
+      } catch (boost::bad_lexical_cast &) {
+        throw std::runtime_error(
+            std::string("Provided incorrect range values. Range is "
+                        "specfifed by start_value:stop_value, but "
+                        "provided ") +
+            range[0]);
+      }
+
+      end = start;
+      wi = NOT_SET;
+      spec = NOT_SET;
+    } else if (range.count() > 1) {
+      std::string errorMessage =
+          std::string("Provided incorrect range values. Range is "
+                      "specfifed by start_value:stop_value, but "
+                      "provided ") +
+          range[0] + std::string(" and ") + range[1];
+      start = lexCast<double>(range[0], errorMessage);
+      end = lexCast<double>(range[1], errorMessage);
+
+      if (start > end)
+        std::swap(start, end);
+      wi = NOT_SET;
+      spec = NOT_SET;
+    }
+  } else {
+    wi = WHOLE_RANGE;
+  }
+}
+
 void addGroupWorkspace(std::vector<InputSpectraToFit> &nameList, double start,
                        double end, int wi, int spec, int period,
                        const boost::shared_ptr<API::WorkspaceGroup> &wsg);
@@ -133,48 +173,6 @@ void addGroupWorkspace(std::vector<InputSpectraToFit> &nameList, double start,
         nameList.back().ws = workspace;
       }
     }
-  }
-}
-
-void parseValueRange(const std::string &index, double &start, double &end,
-                     int &wi, int &spec) {
-  if (index.size() > 1) { // there is some text after 'v'
-    Mantid::Kernel::StringTokenizer range(
-        index.substr(1), ":",
-        Kernel::StringTokenizer::TOK_IGNORE_EMPTY |
-            Kernel::StringTokenizer::TOK_TRIM);
-    if (range.count() < 1) {
-      wi = WHOLE_RANGE; // means use the whole range
-    } else if (range.count() == 1) {
-      try {
-        start = boost::lexical_cast<double>(range[0]);
-      } catch (boost::bad_lexical_cast &) {
-        throw std::runtime_error(
-            std::string("Provided incorrect range values. Range is "
-                        "specfifed by start_value:stop_value, but "
-                        "provided ") +
-            range[0]);
-      }
-
-      end = start;
-      wi = NOT_SET;
-      spec = NOT_SET;
-    } else if (range.count() > 1) {
-      std::string errorMessage =
-          std::string("Provided incorrect range values. Range is "
-                      "specfifed by start_value:stop_value, but "
-                      "provided ") +
-          range[0] + std::string(" and ") + range[1];
-      start = lexCast<double>(range[0], errorMessage);
-      end = lexCast<double>(range[1], errorMessage);
-
-      if (start > end)
-        std::swap(start, end);
-      wi = NOT_SET;
-      spec = NOT_SET;
-    }
-  } else {
-    wi = WHOLE_RANGE;
   }
 }
 

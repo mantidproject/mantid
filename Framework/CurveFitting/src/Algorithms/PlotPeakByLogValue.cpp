@@ -259,7 +259,7 @@ void PlotPeakByLogValue::exec() {
     // Find the log value: it is either a log-file value or
     // simply the workspace number
     double logValue = calculateLogValue(logName, data);
-    appendTableRow(isDataName, result, ifun, data, logValue, chi2);
+    appendTableRow(isDataName, result, ifun.get(), data, logValue, chi2);
 
     Prog += dProg;
     std::string current = std::to_string(i);
@@ -340,7 +340,7 @@ void PlotPeakByLogValue::finaliseOutputWorkspaces(
 
 void PlotPeakByLogValue::appendTableRow(bool isDataName,
                                         ITableWorkspace_sptr &result,
-                                        const IFunction_sptr &ifun,
+                                        const IFunction *const ifun,
                                         const InputSpectraToFit &data,
                                         double logValue, double chi2)
     const { // Extract the fitted parameters and put them into the result table

@@ -80,7 +80,7 @@ private:
                      const API::IFunction_sptr &ifunSingle, bool &isDataName);
 
   void appendTableRow(bool isDataName, API::ITableWorkspace_sptr &result,
-                      const API::IFunction_sptr &ifun,
+                      const API::IFunction *const ifun,
                       const InputSpectraToFit &data, double logValue,
                       double chi2) const;
 
