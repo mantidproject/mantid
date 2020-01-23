@@ -9,7 +9,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import (AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm,
-                        PropertyMode, WorkspaceGroup, WorkspaceProperty)
+                        WorkspaceGroup)
 
 from mantid.simpleapi import (LoadEventNexus, LoadNexus, MergeRuns, RenameWorkspace)
 
@@ -34,10 +34,6 @@ class Prop:
     OUTPUT_WS = 'OutputWorkspace'
     OUTPUT_WS_BINNED = 'OutputWorkspaceBinned'
     OUTPUT_WS_LAM = 'OutputWorkspaceWavelength'
-    OUTPUT_WS_TOF_SUMMED = 'OutputWorkspaceTOFSummed'
-    OUTPUT_WS_FIRST_TRANS_SUMMED = 'OutputWorkspaceFirstTransmissionSummed'
-    OUTPUT_WS_SECOND_TRANS_SUMMED = 'OutputWorkspaceSecondTransmissionSummed'
-    OUTPUT_WS_TOF_SLICED = 'OutputWorkspaceTOFSliced'
     OUTPUT_WS_FIRST_TRANS = 'OutputWorkspaceFirstTransmission'
     OUTPUT_WS_SECOND_TRANS = 'OutputWorkspaceSecondTransmission'
     OUTPUT_WS_TRANS = 'OutputWorkspaceTransmission'
@@ -73,41 +69,12 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
 
     def PyInit(self):
         """Initialize the input and output properties of the algorithm."""
-        mandatoryInputRuns = CompositeValidator()
-        mandatoryInputRuns.add(StringArrayMandatoryValidator())
-        lenValidator = StringArrayLengthValidator()
-        lenValidator.setLengthMin(1)
-        mandatoryInputRuns.add(lenValidator)
-        self.declareProperty(StringArrayProperty(Prop.RUNS,
-                                                 values=[],
-                                                 validator=mandatoryInputRuns),
-                             doc='A list of run numbers or workspace names for the input runs. '
-                                 'Multiple runs will be summed before reduction.')
-        self.declareProperty(StringArrayProperty(Prop.FIRST_TRANS_RUNS,
-                                                 values=[]),
-                             doc='A list of run numbers or workspace names for the first transmission run. '
-                                 'Multiple runs will be summed before reduction.')
-        self.declareProperty(StringArrayProperty(Prop.SECOND_TRANS_RUNS,
-                                                 values=[]),
-                             doc='A list of run numbers or workspace names for the second transmission run. '
-                                 'Multiple runs will be summed before reduction.')
-        self._declareSliceAlgorithmProperties()
-        self._declareReductionAlgorithmProperties()
-        self.declareProperty(Prop.GROUP_TOF, True, doc='If true, group the input TOF workspace')
-        self.declareProperty(Prop.RELOAD, True,
-                             doc='If true, reload input workspaces if they are of the incorrect type')
-        self.declareProperty(WorkspaceProperty(Prop.OUTPUT_WS, '',
-                                               optional=PropertyMode.Optional,
-                                               direction=Direction.Output),
-                             doc='The output workspace, or workspace group if sliced.')
-        self.declareProperty(WorkspaceProperty(Prop.OUTPUT_WS_BINNED, '',
-                                               optional=PropertyMode.Optional,
-                                               direction=Direction.Output),
-                             doc='The binned output workspace, or workspace group if sliced.')
-        self.declareProperty(WorkspaceProperty(Prop.OUTPUT_WS_LAM, '',
-                                               optional=PropertyMode.Optional,
-                                               direction=Direction.Output),
-                             doc='The output workspace in wavelength, or workspace group if sliced.')
+        self._reduction_properties = [] # cached list of properties copied from child alg
+        self._declareRunProperties()
+        self._declareSlicingProperties()
+        self._declareReductionProperties()
+        self._declareTransmissionProperties()
+        self._declareOutputProperties()
 
     def PyExec(self):
         """Execute the algorithm."""
@@ -120,37 +87,23 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         secondTransRuns = self.getProperty(Prop.SECOND_TRANS_RUNS).value
         secondTransWorkspaces = self._getInputWorkspaces(secondTransRuns, True)
         # Combine multiple input runs, if required
-        inputWorkspace = self._sumWorkspaces(inputWorkspaces, False, Prop.OUTPUT_WS_TOF_SUMMED,
-                                             'The summed input workspaces in TOF')
-        firstTransWorkspace = self._sumWorkspaces(
-            firstTransWorkspaces, True,
-            Prop.OUTPUT_WS_FIRST_TRANS_SUMMED,
-            'The summed input workspaces for the first transmission, in TOF')
-        secondTransWorkspace = self._sumWorkspaces(
-            secondTransWorkspaces, True,
-            Prop.OUTPUT_WS_SECOND_TRANS_SUMMED,
-            'The summed input workspaces for the second transmission, in TOF')
+        inputWorkspace = self._sumWorkspaces(inputWorkspaces, False)
+        firstTransWorkspace = self._sumWorkspaces(firstTransWorkspaces, True)
+        secondTransWorkspace = self._sumWorkspaces(secondTransWorkspaces, True)
         # Slice the input workspace, if required
         inputWorkspace = self._sliceWorkspace(inputWorkspace)
         # Perform the reduction
         alg = self._reduce(inputWorkspace, firstTransWorkspace, secondTransWorkspace)
         # Set outputs and tidy TOF workspaces into a group
         self._finalize(alg)
-        self._groupTOFWorkspaces(inputWorkspaces, inputWorkspace,
-                                 firstTransWorkspaces, secondTransWorkspaces,
-                                 firstTransWorkspace, secondTransWorkspace)
+        self._groupTOFWorkspaces(inputWorkspaces)
 
-    def _groupTOFWorkspaces(self, inputWorkspaces, inputWorkspace,
-                            firstTransWorkspaces, secondTransWorkspaces,
-                            firstTransWorkspace, secondTransWorkspace):
+    def _groupTOFWorkspaces(self, inputWorkspaces):
         """Put all of the TOF workspaces into a group called 'TOF' to hide some noise
         for the user."""
         if not self.getProperty(Prop.GROUP_TOF).value:
             return
         tofWorkspaces = set(inputWorkspaces)
-        # Add inputWorkspace to the set, if not already there, to ensure any
-        # summed TOF workspaces are included
-        tofWorkspaces.add(inputWorkspace)
         # If slicing, also group the monitor workspace (note that there is only one
         # input run when slicing)
         if self._slicingEnabled():
@@ -165,10 +118,34 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             issues[Prop.SLICE] = "Cannot perform slicing when summing multiple input runs"
         return issues
 
-    def _declareSliceAlgorithmProperties(self):
+    def _declareRunProperties(self):
+        mandatoryInputRuns = CompositeValidator()
+        mandatoryInputRuns.add(StringArrayMandatoryValidator())
+        lenValidator = StringArrayLengthValidator()
+        lenValidator.setLengthMin(1)
+        mandatoryInputRuns.add(lenValidator)
+        # Add property for the input runs
+        self.declareProperty(StringArrayProperty(Prop.RUNS,
+                                                 values=[],
+                                                 validator=mandatoryInputRuns),
+                             doc='A list of run numbers or workspace names for the input runs. '
+                                 'Multiple runs will be summed before reduction.')
+        # Add properties from child algorithm
+        properties = [
+            'ThetaIn', 'ThetaLogName',
+        ]
+        self.copyProperties('ReflectometryReductionOneAuto', properties)
+        self._reduction_properties += properties
+        # Add properties for settings to apply to input runs
+        self.declareProperty(Prop.RELOAD, True,
+                             doc='If true, reload input workspaces if they are of the incorrect type')
+        self.declareProperty(Prop.GROUP_TOF, True, doc='If true, group the TOF workspaces')
+
+    def _declareSlicingProperties(self):
         """Copy properties from the child slicing algorithm and add our own custom ones"""
         self.declareProperty(Prop.SLICE, False, doc='If true, slice the input workspace')
         self.setPropertyGroup(Prop.SLICE, 'Slicing')
+        # Convenience variables for conditional properties
         whenSliceEnabled = EnabledWhenProperty(Prop.SLICE, PropertyCriterion.IsEqualTo, "1")
 
         self._slice_properties = ['TimeInterval', 'LogName', 'LogValueInterval', 'UseNewFilterAlgorithm']
@@ -185,25 +162,50 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         self.setPropertySettings(Prop.NUMBER_OF_SLICES, whenSliceEnabled)
         self.setPropertyGroup(Prop.NUMBER_OF_SLICES, 'Slicing')
 
-    def _declareReductionAlgorithmProperties(self):
-        """Copy properties from the child reduction algorithm"""
-        self._reduction_properties = [
-            'ThetaIn', 'ThetaLogName',
+    def _declareReductionProperties(self):
+        properties = [
             'SummationType', 'ReductionType', 'IncludePartialBins',
             'AnalysisMode', 'ProcessingInstructions', 'CorrectDetectors',
             'DetectorCorrectionType', 'WavelengthMin', 'WavelengthMax', 'I0MonitorIndex',
             'MonitorBackgroundWavelengthMin', 'MonitorBackgroundWavelengthMax',
             'MonitorIntegrationWavelengthMin', 'MonitorIntegrationWavelengthMax',
-            'NormalizeByIntegratedMonitors',
             'SubtractBackground', 'BackgroundProcessingInstructions', 'BackgroundCalculationMethod',
             'DegreeOfPolynomial', 'CostFunction',
-            'Params', 'StartOverlap', 'EndOverlap', 'ScaleRHSWorkspace',
-            'TransmissionProcessingInstructions',
-            'CorrectionAlgorithm', 'Polynomial', 'C0', 'C1',
-            'MomentumTransferMin', 'MomentumTransferStep', 'MomentumTransferMax', 'ScaleFactor',
-            'PolarizationAnalysis', 'FloodCorrection',
-            'FloodWorkspace', 'Debug']
-        self.copyProperties('ReflectometryReductionOneAuto', self._reduction_properties)
+            'NormalizeByIntegratedMonitors', 'PolarizationAnalysis',
+            'FloodCorrection', 'FloodWorkspace',
+            'CorrectionAlgorithm', 'Polynomial', 'C0', 'C1'
+        ]
+        self.copyProperties('ReflectometryReductionOneAuto', properties)
+        self._reduction_properties += properties
+
+    def _declareTransmissionProperties(self):
+        # Add input transmission run properties
+        self.declareProperty(StringArrayProperty(Prop.FIRST_TRANS_RUNS,
+                                                 values=[]),
+                             doc='A list of run numbers or workspace names for the first transmission run. '
+                                 'Multiple runs will be summed before reduction.')
+        self.setPropertyGroup(Prop.FIRST_TRANS_RUNS, 'Transmission')
+        self.declareProperty(StringArrayProperty(Prop.SECOND_TRANS_RUNS,
+                                                 values=[]),
+                             doc='A list of run numbers or workspace names for the second transmission run. '
+                                 'Multiple runs will be summed before reduction.')
+        self.setPropertyGroup(Prop.SECOND_TRANS_RUNS, 'Transmission')
+        # Add properties copied from child algorithm
+        properties = [
+            'Params', 'StartOverlap', 'EndOverlap',
+            'ScaleRHSWorkspace', 'TransmissionProcessingInstructions',
+            Prop.OUTPUT_WS_TRANS, Prop.OUTPUT_WS_FIRST_TRANS, Prop.OUTPUT_WS_SECOND_TRANS
+        ]
+        self.copyProperties('ReflectometryReductionOneAuto', properties)
+        self._reduction_properties += properties
+
+    def _declareOutputProperties(self):
+        properties = [Prop.DEBUG,
+                      'MomentumTransferMin', 'MomentumTransferStep', 'MomentumTransferMax',
+                      'ScaleFactor',
+                      Prop.OUTPUT_WS, Prop.OUTPUT_WS_BINNED, Prop.OUTPUT_WS_LAM]
+        self.copyProperties('ReflectometryReductionOneAuto', properties)
+        self._reduction_properties += properties
 
     def _getInputWorkspaces(self, runs, isTrans):
         """Convert the given run numbers into real workspace names. Uses workspaces from
@@ -346,21 +348,16 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         workspace otherwise. Transmission runs are always loaded as histogram workspaces."""
         workspace_name = self._prefixedName(run, isTrans)
         if not isTrans and self._slicingEnabled():
-            workspace, monitor_workspace = LoadEventNexus(Filename=run, OutputWorkspace=workspace_name, LoadMonitors=True)
+            LoadEventNexus(Filename=run, OutputWorkspace=workspace_name, LoadMonitors=True)
             _throwIfNotValidReflectometryEventWorkspace(workspace_name)
             self.log().information('Loaded event workspace ' + workspace_name)
-            self._declareAndSetWorkspaceProperty(_monitorWorkspace(workspace_name),
-                                                 _monitorWorkspace(workspace_name), monitor_workspace,
-                                                 'The input monitor workspace in TOF')
         else:
-            workspace = LoadNexus(Filename=run, OutputWorkspace=workspace_name)
+            LoadNexus(Filename=run, OutputWorkspace=workspace_name)
             self.log().information('Loaded workspace ' + workspace_name)
         workspace_name = self._renameWorkspaceBasedOnRunNumber(workspace_name, isTrans)
-        doc_string = 'The TRANS workspace in TOF' if isTrans else 'The input workspace in TOF'
-        self._declareAndSetWorkspaceProperty(workspace_name, workspace_name, workspace, doc_string)
         return workspace_name
 
-    def _sumWorkspaces(self, workspaces, isTrans, property_name, doc_string):
+    def _sumWorkspaces(self, workspaces, isTrans):
         """If there are multiple input workspaces, sum them and return the result. Otherwise
         just return the single input workspace, or None if the list is empty."""
         if len(workspaces) < 1:
@@ -372,7 +369,6 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         summed_name = self._prefixedName(concatenated_names, isTrans)
         self.log().information('Summing workspaces' + " ".join(workspaces) + ' into ' + summed_name)
         summed_ws = MergeRuns(InputWorkspaces=", ".join(workspaces), OutputWorkspace=summed_name)
-        self._declareAndSetWorkspaceProperty(property_name, summed_name, summed_ws, doc_string)
         # The reduction algorithm sets the output workspace names from the run number,
         # which by default is just the first run. Set it to the concatenated name,
         # e.g. 13461+13462
@@ -430,32 +426,23 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         return it unchanged"""
         if not self._slicingEnabled():
             return workspace
+        # Perform the slicing
         sliced_workspace_name = self._getSlicedWorkspaceGroupName(workspace)
         self.log().information('Slicing workspace ' + workspace + ' into ' + sliced_workspace_name)
         workspace = self._runSliceAlgorithm(workspace, sliced_workspace_name)
-        self._declareAndSetWorkspaceProperty(
-            Prop.OUTPUT_WS_TOF_SLICED, sliced_workspace_name, workspace,
-            'The sliced TOF workspace(s)')
         return sliced_workspace_name
 
     def _getSlicedWorkspaceGroupName(self, workspace):
         return workspace + '_sliced'
 
-    def _setChildAlgorithmPropertyIfProvided(self, alg, property_name):
-        """Set the given property on the given algorithm if it is set in our
-        inputs. Leave it unset otherwise."""
-        if not self.getProperty(property_name).isDefault:
-            alg.setProperty(property_name, self.getPropertyValue(property_name))
-
     def _reduce(self, input_workspace, first_trans_workspace, second_trans_workspace):
         """Run the child algorithm to do the reduction. Return the child algorithm."""
         self.log().information('Running ReflectometryReductionOneAuto on ' + input_workspace)
         alg = self.createChildAlgorithm("ReflectometryReductionOneAuto")
+        # Set properties that we copied directly from the child
         for property in self._reduction_properties:
             alg.setProperty(property, self.getPropertyValue(property))
-        self._setChildAlgorithmPropertyIfProvided(alg, Prop.OUTPUT_WS)
-        self._setChildAlgorithmPropertyIfProvided(alg, Prop.OUTPUT_WS_BINNED)
-        self._setChildAlgorithmPropertyIfProvided(alg, Prop.OUTPUT_WS_LAM)
+        # Set properties that we could not take directly from the child
         alg.setProperty("InputWorkspace", input_workspace)
         alg.setProperty("FirstTransmissionRun", first_trans_workspace)
         alg.setProperty("SecondTransmissionRun", second_trans_workspace)
@@ -489,33 +476,9 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         self._setOutputPropertyIfInputNotSet(Prop.QSTEP, child_alg)
         self._setOutputPropertyIfInputNotSet(Prop.QMAX, child_alg)
         # Set the transmission workspace outputs
-        self._declareAndSetWorkspacePropertyFromChild(
-            Prop.OUTPUT_WS_TRANS,
-            'Output transmission workspace in wavelength', child_alg)
-        self._declareAndSetWorkspacePropertyFromChild(
-            Prop.OUTPUT_WS_FIRST_TRANS,
-            'First transmission workspace in wavelength', child_alg)
-        if not self.getProperty(Prop.SECOND_TRANS_RUNS).isDefault:
-            self._declareAndSetWorkspacePropertyFromChild(
-                Prop.OUTPUT_WS_SECOND_TRANS,
-                'Second transmission workspace in wavelength', child_alg)
-
-    def _declareAndSetWorkspaceProperty(self, property_name, workspace_name, workspace, doc_string):
-        """Declare an on-the-fly property to set an output workspace"""
-        self.declareProperty(WorkspaceProperty(property_name, '', direction=Direction.Output),
-                             doc=doc_string)
-        self.setPropertyValue(property_name, workspace_name)
-        self.setProperty(property_name, workspace)
-
-    def _declareAndSetWorkspacePropertyFromChild(self, property_name, doc_string, child_alg):
-        """Declare and set the given output workspace property from the result in
-        the given child algorithm, if it exists in the child algorithm's outputs"""
-        if not child_alg.existsProperty(property_name) or child_alg.getProperty(property_name).isDefault:
-            return
-        workspace_name = child_alg.getPropertyValue(property_name)
-        if workspace_name:
-            workspace = child_alg.getProperty(property_name).value
-            self._declareAndSetWorkspaceProperty(property_name, workspace_name, workspace, doc_string)
+        self._setOutputProperty(Prop.OUTPUT_WS_TRANS, child_alg)
+        self._setOutputProperty(Prop.OUTPUT_WS_FIRST_TRANS, child_alg)
+        self._setOutputProperty(Prop.OUTPUT_WS_SECOND_TRANS, child_alg)
 
     def _setOutputProperty(self, property_name, child_alg):
         """Set the given output property from the result in the given child algorithm,
