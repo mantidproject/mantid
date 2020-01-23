@@ -12,6 +12,8 @@ Framework Changes
 New Features
 ############
 
+- Mantid is now built against Python 3. Windows/macOS bundle Python 3.8 & 3.7 respectively. Ubuntu & Red Hat use system Python 3.6.
+
 Concepts
 --------
 
