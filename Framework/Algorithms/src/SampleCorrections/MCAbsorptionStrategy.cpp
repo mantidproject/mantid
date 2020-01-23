@@ -23,6 +23,7 @@ namespace Algorithms {
  * @param sample A reference to the object defining details of the sample
  * @param nevents The number of Monte Carlo events used in the simulation
  * @param maxScatterPtAttempts The maximum number of tries to generate a random
+ * @param logger Logger from parent algorithm to write logging info
  * point within the object.
  */
 MCAbsorptionStrategy::MCAbsorptionStrategy(const IBeamProfile &beamProfile,
@@ -44,7 +45,6 @@ MCAbsorptionStrategy::MCAbsorptionStrategy(const IBeamProfile &beamProfile,
  * where it is detected
  * @param lambdaBefore Wavelength, in \f$\\A^-1\f$, before scattering
  * @param lambdaAfter Wavelength, in \f$\\A^-1\f$, after scattering
- * @param debugString String describing debug information from calculation
  * @return A tuple of the <correction factor, associated error>.
  */
 std::tuple<double, double>

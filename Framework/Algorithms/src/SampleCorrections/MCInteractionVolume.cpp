@@ -26,6 +26,7 @@ namespace Algorithms {
  * @param sample A reference to a sample object that defines a valid shape
  * & material
  * @param activeRegion Restrict scattering point sampling to this region
+ * @param logger Logger to write debug information on scatter pt stats
  * @param maxScatterAttempts The maximum number of tries to generate a random
  * point within the object. [Default=5000]
  */
