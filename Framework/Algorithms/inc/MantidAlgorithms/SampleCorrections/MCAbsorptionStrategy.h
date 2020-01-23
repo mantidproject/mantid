@@ -38,8 +38,8 @@ public:
                        size_t maxScatterPtAttempts);
   std::tuple<double, double> calculate(Kernel::PseudoRandomNumberGenerator &rng,
                                        const Kernel::V3D &finalPos,
-                                       double lambdaBefore, double lambdaAfter);
-  std::string getDebugString() const { return debugString; };
+                                       double lambdaBefore, double lambdaAfter,
+                                       std::string &debugString);
 
 private:
   const IBeamProfile &m_beamProfile;
@@ -47,7 +47,6 @@ private:
   const size_t m_nevents;
   const size_t m_maxScatterAttempts;
   const double m_error;
-  std::string debugString;
 };
 
 } // namespace Algorithms

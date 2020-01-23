@@ -91,7 +91,7 @@ int MCInteractionVolume::getComponentIndex(
 
 boost::optional<Kernel::V3D> MCInteractionVolume::generatePointInObjectByIndex(
     int componentIndex, Kernel::PseudoRandomNumberGenerator &rng) {
-  boost::optional<Kernel::V3D> pointGenerated;
+  boost::optional<Kernel::V3D> pointGenerated{boost::none};
   if (componentIndex == -1) {
     pointGenerated = m_sample->generatePointInObject(rng, m_activeRegion, 1);
   } else {
@@ -161,6 +161,7 @@ double MCInteractionVolume::calculateAbsorption(
   // is calculated in reverse, i.e. defining the track from the scatter pt
   // backwards for simplicity with how the Track object works. This avoids
   // having to understand exactly which object the scattering occurred in.
+
   V3D scatterPos = generatePoint(rng);
 
   const auto toStart = normalize(startPos - scatterPos);

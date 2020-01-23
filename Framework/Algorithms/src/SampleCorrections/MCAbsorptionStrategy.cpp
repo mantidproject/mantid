@@ -43,14 +43,15 @@ MCAbsorptionStrategy::MCAbsorptionStrategy(const IBeamProfile &beamProfile,
  * where it is detected
  * @param lambdaBefore Wavelength, in \f$\\A^-1\f$, before scattering
  * @param lambdaAfter Wavelength, in \f$\\A^-1\f$, after scattering
+ * @param debugString String describing debug information from calculation
  * @return A tuple of the <correction factor, associated error>.
  */
-std::tuple<double, double>
-MCAbsorptionStrategy::calculate(Kernel::PseudoRandomNumberGenerator &rng,
-                                const Kernel::V3D &finalPos,
-                                double lambdaBefore, double lambdaAfter) {
+std::tuple<double, double> MCAbsorptionStrategy::calculate(
+    Kernel::PseudoRandomNumberGenerator &rng, const Kernel::V3D &finalPos,
+    double lambdaBefore, double lambdaAfter, std::string &debugString) {
   const auto scatterBounds = m_scatterVol.getBoundingBox();
   double factor(0.0);
+
   for (size_t i = 0; i < m_nevents; ++i) {
     size_t attempts(0);
     do {
