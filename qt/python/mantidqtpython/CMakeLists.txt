@@ -113,7 +113,7 @@ mtd_add_sip_module(MODULE_NAME mantidqtpython
                    FOLDER Qt4
                    OSX_INSTALL_RPATH
                      @loader_path/../Contents/MacOS
-		     @loader_path/../Contents/Frameworks
+                     @loader_path/../Contents/Frameworks
                    LINUX_INSTALL_RPATH
                      "\$ORIGIN/../${LIB_DIR}")
 
@@ -123,9 +123,9 @@ if(MSVC)
   # the special PyQt4 debug build to the bin directory
   add_custom_command(
     TARGET mantidqtpython
-	POST_BUILD
+    POST_BUILD
     COMMAND if 1==$<CONFIG:Debug> ${CMAKE_COMMAND} -E copy_directory
-            ${PYTHON_DIR}/msvc-site-packages/debug/PyQt4
+            ${MSVC_PYTHON_EXECUTABLE_DIR}/msvc-site-packages/debug/PyQt4
             ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/PyQt4
     COMMENT "Copying debug PyQt4 to bin")
 endif()
