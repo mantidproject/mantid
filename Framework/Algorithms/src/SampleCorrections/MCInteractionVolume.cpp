@@ -31,9 +31,10 @@ namespace Algorithms {
  */
 MCInteractionVolume::MCInteractionVolume(
     const API::Sample &sample, const Geometry::BoundingBox &activeRegion,
-    const size_t maxScatterAttempts)
+    Kernel::Logger &logger, const size_t maxScatterAttempts)
     : m_sample(sample.getShape().clone()), m_env(nullptr),
-      m_activeRegion(activeRegion), m_maxScatterAttempts(maxScatterAttempts) {
+      m_activeRegion(activeRegion), m_maxScatterAttempts(maxScatterAttempts),
+      m_logger(logger) {
   if (!m_sample->hasValidShape()) {
     throw std::invalid_argument(
         "MCInteractionVolume() - Sample shape does not have a valid shape.");
@@ -203,34 +204,37 @@ double MCInteractionVolume::calculateAbsorption(
  * the simulated scatter points occurred in
  * @return The generated string
  */
-std::string MCInteractionVolume::generateScatterPointStats() const {
-  std::stringstream scatterPointSummary;
-  scatterPointSummary << std::fixed;
-  scatterPointSummary << std::setprecision(2);
+void MCInteractionVolume::generateScatterPointStats() {
+  if (m_logger.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
+    std::stringstream scatterPointSummary;
+    scatterPointSummary << std::fixed;
+    scatterPointSummary << std::setprecision(2);
 
-  scatterPointSummary << "Scatter point counts:" << std::endl;
+    scatterPointSummary << "Scatter point counts:" << std::endl;
 
-  int totalScatterPoints =
-      std::accumulate(m_envScatterPoints.begin(), m_envScatterPoints.end(),
-                      m_sampleScatterPoints);
+    int totalScatterPoints =
+        std::accumulate(m_envScatterPoints.begin(), m_envScatterPoints.end(),
+                        m_sampleScatterPoints);
 
-  scatterPointSummary << "Total scatter points: " << totalScatterPoints
-                      << std::endl;
+    scatterPointSummary << "Total scatter points: " << totalScatterPoints
+                        << std::endl;
 
-  double percentage =
-      static_cast<double>(m_sampleScatterPoints) / totalScatterPoints * 100;
-  scatterPointSummary << "Sample: " << m_sampleScatterPoints << " ("
-                      << percentage << "%)" << std::endl;
+    double percentage =
+        static_cast<double>(m_sampleScatterPoints) / totalScatterPoints * 100;
+    scatterPointSummary << "Sample: " << m_sampleScatterPoints << " ("
+                        << percentage << "%)" << std::endl;
 
-  for (std::vector<int>::size_type i = 0; i < m_envScatterPoints.size(); i++) {
-    percentage =
-        static_cast<double>(m_envScatterPoints[i]) / totalScatterPoints * 100;
-    scatterPointSummary << "Environment part " << i << " ("
-                        << m_env->getComponent(i).id()
-                        << "): " << m_envScatterPoints[i] << " (" << percentage
-                        << "%)" << std::endl;
+    for (std::vector<int>::size_type i = 0; i < m_envScatterPoints.size();
+         i++) {
+      percentage =
+          static_cast<double>(m_envScatterPoints[i]) / totalScatterPoints * 100;
+      scatterPointSummary << "Environment part " << i << " ("
+                          << m_env->getComponent(i).id()
+                          << "): " << m_envScatterPoints[i] << " ("
+                          << percentage << "%)" << std::endl;
+    }
+    m_logger.debug(scatterPointSummary.str());
   }
-  return scatterPointSummary.str();
 }
 
 } // namespace Algorithms

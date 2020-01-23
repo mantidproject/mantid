@@ -13,6 +13,7 @@
 #include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MonteCarloTesting.h"
 
@@ -42,7 +43,7 @@ public:
         .WillOnce(Return(testSampleSphere.getShape().getBoundingBox()));
     const size_t nevents(10), maxTries(100);
     MCAbsorptionStrategy mcabsorb(testBeamProfile, testSampleSphere, nevents,
-                                  maxTries);
+                                  maxTries, g_log);
     // 3 random numbers per event expected
     MockRNG rng;
     EXPECT_CALL(rng, nextValue())
@@ -57,9 +58,8 @@ public:
     const double lambdaBefore(2.5), lambdaAfter(3.5);
 
     double factor(0.0), error(0.0);
-    std::string debugString;
     std::tie(factor, error) =
-        mcabsorb.calculate(rng, endPos, lambdaBefore, lambdaAfter, debugString);
+        mcabsorb.calculate(rng, endPos, lambdaBefore, lambdaAfter);
     TS_ASSERT_DELTA(0.0043828472, factor, 1e-08);
     TS_ASSERT_DELTA(1.0 / std::sqrt(nevents), error, 1e-08);
   }
@@ -81,15 +81,13 @@ public:
         ReferenceFrame(Y, Z, Right, "source"), V3D(), 1, 1);
     const size_t nevents(10), maxTries(1);
     MCAbsorptionStrategy mcabs(testBeamProfile, testThinAnnulus, nevents,
-                               maxTries);
+                               maxTries, g_log);
     MockRNG rng;
     EXPECT_CALL(rng, nextValue()).WillRepeatedly(Return(0.5));
     const double lambdaBefore(2.5), lambdaAfter(3.5);
     const V3D endPos(0.7, 0.7, 1.4);
-    std::string debugString;
-    TS_ASSERT_THROWS(
-        mcabs.calculate(rng, endPos, lambdaBefore, lambdaAfter, debugString),
-        const std::runtime_error &)
+    TS_ASSERT_THROWS(mcabs.calculate(rng, endPos, lambdaBefore, lambdaAfter),
+                     const std::runtime_error &)
   }
 
 private:
@@ -106,6 +104,7 @@ private:
                                                const Mantid::API::Sample &));
     GNU_DIAG_ON_SUGGEST_OVERRIDE
   };
+  Mantid::Kernel::Logger g_log{"MCAbsorptionStrategyTest"};
 };
 
 #endif /* MANTID_ALGORITHMS_MCABSORPTIONSTRATEGYTEST_H_ */

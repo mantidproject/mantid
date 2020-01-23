@@ -28,10 +28,11 @@ namespace Algorithms {
 MCAbsorptionStrategy::MCAbsorptionStrategy(const IBeamProfile &beamProfile,
                                            const API::Sample &sample,
                                            size_t nevents,
-                                           size_t maxScatterPtAttempts)
+                                           size_t maxScatterPtAttempts,
+                                           Kernel::Logger &logger)
     : m_beamProfile(beamProfile),
-      m_scatterVol(
-          MCInteractionVolume(sample, beamProfile.defineActiveRegion(sample))),
+      m_scatterVol(MCInteractionVolume(
+          sample, beamProfile.defineActiveRegion(sample), logger)),
       m_nevents(nevents), m_maxScatterAttempts(maxScatterPtAttempts),
       m_error(1.0 / std::sqrt(m_nevents)) {}
 
@@ -46,9 +47,10 @@ MCAbsorptionStrategy::MCAbsorptionStrategy(const IBeamProfile &beamProfile,
  * @param debugString String describing debug information from calculation
  * @return A tuple of the <correction factor, associated error>.
  */
-std::tuple<double, double> MCAbsorptionStrategy::calculate(
-    Kernel::PseudoRandomNumberGenerator &rng, const Kernel::V3D &finalPos,
-    double lambdaBefore, double lambdaAfter, std::string &debugString) {
+std::tuple<double, double>
+MCAbsorptionStrategy::calculate(Kernel::PseudoRandomNumberGenerator &rng,
+                                const Kernel::V3D &finalPos,
+                                double lambdaBefore, double lambdaAfter) {
   const auto scatterBounds = m_scatterVol.getBoundingBox();
   double factor(0.0);
 
@@ -76,7 +78,7 @@ std::tuple<double, double> MCAbsorptionStrategy::calculate(
     } while (true);
   }
 
-  debugString += m_scatterVol.generateScatterPointStats();
+  m_scatterVol.generateScatterPointStats();
 
   using std::make_tuple;
   return make_tuple(factor / static_cast<double>(m_nevents), m_error);

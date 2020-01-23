@@ -18,6 +18,7 @@ class Sample;
 namespace Kernel {
 class PseudoRandomNumberGenerator;
 class V3D;
+class Logger;
 } // namespace Kernel
 namespace Algorithms {
 class IBeamProfile;
@@ -35,11 +36,10 @@ class MANTID_ALGORITHMS_DLL MCAbsorptionStrategy {
 public:
   MCAbsorptionStrategy(const IBeamProfile &beamProfile,
                        const API::Sample &sample, size_t nevents,
-                       size_t maxScatterPtAttempts);
+                       size_t maxScatterPtAttempts, Kernel::Logger &logger);
   std::tuple<double, double> calculate(Kernel::PseudoRandomNumberGenerator &rng,
                                        const Kernel::V3D &finalPos,
-                                       double lambdaBefore, double lambdaAfter,
-                                       std::string &debugString);
+                                       double lambdaBefore, double lambdaAfter);
 
 private:
   const IBeamProfile &m_beamProfile;

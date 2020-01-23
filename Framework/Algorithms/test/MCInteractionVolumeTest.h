@@ -10,6 +10,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/SampleCorrections/MCInteractionVolume.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MonteCarloTesting.h"
 
@@ -35,7 +36,7 @@ public:
   void test_Bounding_Volume_Matches_Sample() {
     auto sample = createTestSample(TestSampleType::SolidSphere);
     const auto sampleBox = sample.getShape().getBoundingBox();
-    MCInteractionVolume interactor(sample, sampleBox);
+    MCInteractionVolume interactor(sample, sampleBox, g_log);
 
     const auto interactionBox = interactor.getBoundingBox();
     TS_ASSERT_EQUALS(sampleBox.minPoint(), interactionBox.minPoint());
@@ -54,7 +55,8 @@ public:
         .WillRepeatedly(Return(0.25));
 
     auto sample = createTestSample(TestSampleType::SolidSphere);
-    MCInteractionVolume interactor(sample, sample.getShape().getBoundingBox());
+    MCInteractionVolume interactor(sample, sample.getShape().getBoundingBox(),
+                                   g_log);
     const double factor = interactor.calculateAbsorption(
         rng, startPos, endPos, lambdaBefore, lambdaAfter);
     TS_ASSERT_DELTA(0.0028357258, factor, 1e-8);
@@ -74,7 +76,8 @@ public:
         .Times(Exactly(3))
         .WillRepeatedly(Return(0.25));
 
-    MCInteractionVolume interactor(sample, sample.getShape().getBoundingBox());
+    MCInteractionVolume interactor(sample, sample.getShape().getBoundingBox(),
+                                   g_log);
     const double factorSeg1 = interactor.calculateAbsorption(
         rng, startPos, endPos, lambdaBefore, lambdaAfter);
     TS_ASSERT_DELTA(0.030489479, factorSeg1, 1e-8);
@@ -110,8 +113,8 @@ public:
         .WillOnce(Return(0.5))  // r2
         .WillOnce(Return(0.5)); // r3
 
-    MCInteractionVolume interactor(sample,
-                                   sample.getEnvironment().boundingBox());
+    MCInteractionVolume interactor(
+        sample, sample.getEnvironment().boundingBox(), g_log);
     const double factorContainer = interactor.calculateAbsorption(
         rng, startPos, endPos, lambdaBefore, lambdaAfter);
     TS_ASSERT_DELTA(0.69223681, factorContainer, 1e-8);
@@ -136,13 +139,13 @@ public:
   void test_Construction_With_Invalid_Sample_Shape_Throws_Error() {
     Mantid::API::Sample sample;
     // nothing
-    TS_ASSERT_THROWS(
-        MCInteractionVolume mcv(sample, sample.getShape().getBoundingBox()),
-        const std::invalid_argument &);
+    TS_ASSERT_THROWS(MCInteractionVolume mcv(
+                         sample, sample.getShape().getBoundingBox(), g_log),
+                     const std::invalid_argument &);
     // valid shape
     sample.setShape(ComponentCreationHelper::createSphere(1));
-    TS_ASSERT_THROWS_NOTHING(
-        MCInteractionVolume mcv(sample, sample.getShape().getBoundingBox()));
+    TS_ASSERT_THROWS_NOTHING(MCInteractionVolume mcv(
+        sample, sample.getShape().getBoundingBox(), g_log));
   }
 
   void test_Throws_If_Point_Cannot_Be_Generated() {
@@ -155,8 +158,9 @@ public:
     MersenneTwister rng;
     rng.setSeed(1);
     const size_t maxTries(1);
+    Mantid::Kernel::Logger g_log("MCInteractionVolumeTest");
     MCInteractionVolume interactor(sample, sample.getShape().getBoundingBox(),
-                                   maxTries);
+                                   g_log, maxTries);
     TS_ASSERT_THROWS(interactor.calculateAbsorption(rng, startPos, endPos,
                                                     lambdaBefore, lambdaAfter),
                      const std::runtime_error &);
@@ -172,8 +176,9 @@ public:
     sample.setEnvironment(
         std::make_unique<Mantid::Geometry::SampleEnvironment>(*kit));
 
+    Mantid::Kernel::Logger g_log("MCInteractionVolumeTest");
     MCInteractionVolume interactor(
-        sample, kit->getComponent(0).getBoundingBox(), maxAttempts);
+        sample, kit->getComponent(0).getBoundingBox(), g_log, maxAttempts);
 
     // Generate "random" sequence
     MockRNG rng;
@@ -191,7 +196,7 @@ public:
 
     // Selects second component
     MCInteractionVolume interactor2(
-        sample, kit->getComponent(1).getBoundingBox(), maxAttempts);
+        sample, kit->getComponent(1).getBoundingBox(), g_log, maxAttempts);
 
     EXPECT_CALL(rng, nextInt(_, _)).Times(Exactly(1)).WillOnce(Return(2));
     EXPECT_CALL(rng, nextValue())
@@ -207,7 +212,7 @@ public:
 
     // Selects third component
     MCInteractionVolume interactor3(
-        sample, kit->getComponent(2).getBoundingBox(), maxAttempts);
+        sample, kit->getComponent(2).getBoundingBox(), g_log, maxAttempts);
     EXPECT_CALL(rng, nextInt(_, _)).Times(Exactly(1)).WillOnce(Return(3));
     EXPECT_CALL(rng, nextValue())
         .Times(3)
@@ -240,11 +245,14 @@ public:
         std::make_unique<Mantid::Geometry::SampleEnvironment>(*kit));
 
     MCInteractionVolume interactor(sample, kit->getContainer().getBoundingBox(),
-                                   maxAttempts);
+                                   g_log, maxAttempts);
     // Restrict region to can
     TS_ASSERT_THROWS(interactor.generatePoint(rng), const std::runtime_error &);
     Mock::VerifyAndClearExpectations(&rng);
   }
+
+private:
+  Mantid::Kernel::Logger g_log{"MCInteractionVolumeTest"};
 };
 
 #endif /* MANTID_ALGORITHMS_MCINTERACTIONVOLUMETEST_H_ */
