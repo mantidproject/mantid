@@ -564,6 +564,8 @@ void LoadILLSANS::placeD16(double angle, double distance,
 
   // rotate the detector so it faces the sample.
   rotateInstrument(angle, componentName);
+  API::Run &runDetails = m_localWorkspace->mutableRun();
+  runDetails.addProperty<double>("L2", distance, true);
 
   g_log.debug() << "Moving component '" << componentName
                 << "' to angle = " << angle
