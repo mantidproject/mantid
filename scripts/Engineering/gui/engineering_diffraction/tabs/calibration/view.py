@@ -58,6 +58,9 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
     def set_update_fields_connection(self, slot):
         self.sig_update_fields.connect(slot)
 
+    def set_on_check_cropping_state_changed(self, slot):
+        self.check_cropCalib.stateChanged.connect(slot)
+
     # =================
     # Component Setters
     # =================
@@ -90,6 +93,18 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
     def set_calibrate_button_text(self, text):
         self.button_calibrate.setText(text)
 
+    def set_cropping_widget_visible(self):
+        self.widget_cropping.show()
+
+    def set_cropping_widget_hidden(self):
+        self.widget_cropping.hide()
+
+    def set_check_cropping_enabled(self, enabled):
+        self.check_cropCalib.setEnabled(enabled)
+
+    def set_check_cropping_state(self, state):
+        self.check_cropCalib.setCheckState(state)
+
     # =================
     # Component Getters
     # =================
@@ -120,6 +135,12 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
 
     def get_load_checked(self):
         return self.radio_loadCalib.isChecked()
+
+    def get_crop_checked(self):
+        return self.check_cropCalib.isChecked()
+
+    def get_cropping_widget(self):
+        return self.widget_cropping
 
     # =================
     # State Getters
