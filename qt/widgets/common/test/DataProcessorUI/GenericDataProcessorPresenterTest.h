@@ -175,7 +175,8 @@ private:
         std::vector<QString>{"IvsQ_binned_", "IvsQ_", "IvsLam_"}, 1,
         std::set<QString>{"ThetaIn", "ThetaOut", "InputWorkspace",
                           "OutputWorkspace", "OutputWorkspaceWavelength",
-                          "FirstTransmissionRun", "SecondTransmissionRun"});
+                          "FirstTransmissionRun", "SecondTransmissionRun"},
+        2);
   }
 
   PostprocessingAlgorithm createReflectometryPostprocessor() {

@@ -17,11 +17,14 @@ namespace DataProcessor {
  * @param postprocessedOutputPrefixIndex The zero based index of the prefix for
  * the workspace which should be postprocessed
  * @param blacklist : The list of properties we do not want to show
+ * @param version : The version of the algorithm to use. Defaults to -1 to
+ * indicate the most recent version.
  */
 ProcessingAlgorithm::ProcessingAlgorithm(
     QString name, std::vector<QString> prefix,
-    std::size_t postprocessedOutputPrefixIndex, std::set<QString> blacklist)
-    : ProcessingAlgorithmBase(std::move(name), std::move(blacklist)),
+    std::size_t postprocessedOutputPrefixIndex, std::set<QString> blacklist,
+    const int version)
+    : ProcessingAlgorithmBase(std::move(name), std::move(blacklist), version),
       m_postprocessedOutputPrefixIndex(postprocessedOutputPrefixIndex),
       m_prefix(std::move(prefix)) {
 
@@ -56,13 +59,16 @@ ProcessingAlgorithm::ProcessingAlgorithm(
  * @param postprocessedOutputPrefixIndex The zero based index of the prefix for
  * the workspace which should be postprocessed
  * @param blacklist : The list of properties we do not want to show, as a string
+ * @param version : The version of the algorithm to use. Defaults to -1 to
+ * indicate the most recent version.
  */
 ProcessingAlgorithm::ProcessingAlgorithm(
     QString name, QString const &prefix,
-    std::size_t postprocessedOutputPrefixIndex, QString const &blacklist)
+    std::size_t postprocessedOutputPrefixIndex, QString const &blacklist,
+    const int version)
     : ProcessingAlgorithm(std::move(name), convertStringToVector(prefix),
                           postprocessedOutputPrefixIndex,
-                          convertStringToSet(blacklist)) {}
+                          convertStringToSet(blacklist), version) {}
 
 /**
  * Constructor
