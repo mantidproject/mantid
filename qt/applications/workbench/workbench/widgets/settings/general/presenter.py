@@ -102,8 +102,8 @@ class GeneralSettings(object):
         ConfigService.setString(self.USE_NOTIFICATIONS, "On" if bool(state) else "Off")
 
     def load_current_setting_values(self):
-        self.view.prompt_save_on_close.setChecked(CONF.get(self.PROMPT_SAVE_ON_CLOSE))
-        self.view.prompt_save_editor_modified.setChecked(CONF.get(self.PROMPT_SAVE_EDITOR_MODIFIED))
+        self.view.prompt_save_on_close.setChecked(bool(CONF.get(self.PROMPT_SAVE_ON_CLOSE)))
+        self.view.prompt_save_editor_modified.setChecked(bool(CONF.get(self.PROMPT_SAVE_EDITOR_MODIFIED)))
 
         # compare lower-case, because MantidPlot will save it as lower case,
         # but Python will have the bool's first letter capitalised

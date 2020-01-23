@@ -10,7 +10,7 @@ import unittest
 from mantid.simpleapi import (CompareWorkspaces, ConvolutionFitSequential, ConvolutionFitSimultaneous, LoadNexus,
                               IndirectReplaceFitResult, RenameWorkspace)
 from mantid.api import (AnalysisDataService, MatrixWorkspace, WorkspaceGroup)
-import platform
+from mantid.buildconfig import GSL_VERSION
 
 
 def get_ads_workspace(workspace_name):
@@ -36,7 +36,7 @@ def get_sequential_input_string(workspace_name, number_of_histograms):
 
 def current_os_has_gslv2():
     """ Check whether the current OS is using GSLv2 """
-    return platform.linux_distribution()[0].lower() == 'ubuntu' or platform.mac_ver()[0] != ''
+    return int(GSL_VERSION[0]) >= 2
 
 
 class IndirectReplaceFitResultTest(unittest.TestCase):

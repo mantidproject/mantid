@@ -10,8 +10,11 @@
 from __future__ import (absolute_import)
 
 # system imports
-# import readline before QApplication starts to avoid segfault with IPython 5 and Python 3
-import readline  # noqa
+# import readline (if available) before QApplication starts to avoid segfault with IPython 5 and Python 3
+try:
+    import readline  # noqa
+except ImportError:
+    pass
 import unittest
 
 # third-party library imports

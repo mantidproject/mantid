@@ -32,7 +32,10 @@ class PyQtConfig(object):
       # default case where installation paths have not been changed in PyQt's
       # configuration process.
       if sys.platform == 'win32':
-          self.sip_dir = os.path.join(sys.prefix, 'sip', name)
+          if sys.version_info > (3,):
+              self.sip_dir = os.path.join(sys.prefix, 'share', 'sip', name)
+          else:
+              self.sip_dir = os.path.join(sys.prefix, 'sip', name)
       elif sys.platform == 'darwin':
           # hardcoded to homebrew Cellar
           cellar_prefix = '/usr/local/opt'

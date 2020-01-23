@@ -105,22 +105,23 @@ if platform.system() == "Windows":
 
             # Test values of contour
             contour_ws_0 = contour.getItem(0)
-            self.assertEqual(round(contour_ws_0.dataY(13)[11],49), 2.8026e-45)
-            self.assertEqual(round(contour_ws_0.dataY(14)[11],47), 7.41147e-42)
-            self.assertEqual(round(contour_ws_0.dataY(15)[11],49), 1.26117e-44)
-            self.assertEqual(round(contour_ws_0.dataY(15)[12],46), 2.49389e-41)
+            tol_places = 10
+            self.assertAlmostEqual(contour_ws_0.dataY(13)[11], 0., places=tol_places)
+            self.assertAlmostEqual(contour_ws_0.dataY(14)[11], 0., places=tol_places)
+            self.assertAlmostEqual(contour_ws_0.dataY(15)[11], 0., places=tol_places)
+            self.assertAlmostEqual(contour_ws_0.dataY(15)[12], 0., places=tol_places)
 
             # Test values of fit_group
             fit_ws_sigma = fit_group.getItem(0)
-            self.assertEqual(round(fit_ws_sigma.dataY(0)[13],49), 2.8026e-45)
-            self.assertEqual(round(fit_ws_sigma.dataY(0)[14],46), 7.4115e-42)
-            self.assertEqual(round(fit_ws_sigma.dataY(0)[48],39), 9.87282e-34)
-            self.assertEqual(round(fit_ws_sigma.dataY(0)[49],45), 1.74277e-40)
+            self.assertAlmostEqual(fit_ws_sigma.dataY(0)[13], 0., places=tol_places)
+            self.assertAlmostEqual(fit_ws_sigma.dataY(0)[14], 0., places=tol_places)
+            self.assertAlmostEqual(fit_ws_sigma.dataY(0)[48], 0., places=tol_places)
+            self.assertAlmostEqual(fit_ws_sigma.dataY(0)[49], 0., places=tol_places)
             fit_ws_beta = fit_group.getItem(1)
-            self.assertEqual(round(fit_ws_beta.dataY(0)[11],47), 7.16204e-42)
-            self.assertEqual(round(fit_ws_beta.dataY(0)[12],33), 1.3059e-29)
-            self.assertEqual(round(fit_ws_beta.dataY(0)[21],33), 1.15045e-28)
-            self.assertEqual(round(fit_ws_beta.dataY(0)[22],49), 8.96831e-44)
+            self.assertAlmostEqual(fit_ws_beta.dataY(0)[11], 0., places=tol_places)
+            self.assertAlmostEqual(fit_ws_beta.dataY(0)[12], 0., places=tol_places)
+            self.assertAlmostEqual(fit_ws_beta.dataY(0)[21], 0., places=tol_places)
+            self.assertAlmostEqual(fit_ws_beta.dataY(0)[22], 0., places=tol_places)
      
 
     if __name__=="__main__":
