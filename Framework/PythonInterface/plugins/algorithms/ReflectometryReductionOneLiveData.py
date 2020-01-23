@@ -57,7 +57,8 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
             'MomentumTransferMin', 'MomentumTransferStep', 'MomentumTransferMax',
             'ScaleFactor', 'PolarizationAnalysis',
             'FloodCorrection', 'FloodWorkspace', 'Debug',
-            'OutputWorkspace']
+            'TimeInterval', 'LogValueInterval', 'LogName', 'UseNewFilterAlgorithm',
+            'ReloadInvalidWorkspaces', 'GroupTOFWorkspaces', 'OutputWorkspace']
         self.copyProperties('ReflectometryISISLoadAndProcess', self._child_properties)
 
     def PyExec(self):
