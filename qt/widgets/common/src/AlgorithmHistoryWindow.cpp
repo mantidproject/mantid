@@ -40,6 +40,20 @@ namespace {
 Mantid::Kernel::Logger window_log("AlgorithmHistoryWindow");
 /// static tree widget logger
 Mantid::Kernel::Logger widget_log("AlgHistoryTreeWidget");
+
+int getNumberOfItemsInTree(QTreeWidgetItem *item) {
+  // item is the root of the tree
+  int count{1};
+  for (int i = 0; i < item->childCount(); i++) {
+    if (item->child(i)->checkState(1) == Qt::Checked) {
+      // recurse into unrolled algorithms
+      count += getNumberOfItemsInTree(item->child(i));
+    } else {
+      count++;
+    }
+  }
+  return count;
+}
 } // namespace
 
 AlgExecSummaryGrpBox::AlgExecSummaryGrpBox(QWidget *w)
@@ -638,89 +652,69 @@ void AlgHistoryTreeWidget::onItemChanged(QTreeWidgetItem *item, int index) {
   this->blockSignals(false);
 }
 
-void AlgHistoryTreeWidget::itemChecked(QTreeWidgetItem *item, int index) {
-  std::vector<int> indicies;
+void AlgHistoryTreeWidget::getItemIndex(QTreeWidgetItem *item, int &index) {
+  // Counts all of the algorithms which precede the given one, including child
+  // algorithms if an algorithm is unrolled.
   QModelIndex modelIndex;
+  if (item->parent()) {
+    index++;
+  }
+  modelIndex = indexFromItem(item, 1);
+  for (auto i = 0; i < modelIndex.row(); i++) {
+    // If an algorithm is unrolled, add all of its children to the index,
+    // otherwise just add one.
+    if (item->parent() &&
+        item->parent()->child(i)->checkState(1) == Qt::Checked) {
+      index += getNumberOfItemsInTree(item->parent()->child(i));
+    } else if (item->parent() == nullptr &&
+               topLevelItem(i)->checkState(1) == Qt::Checked) {
+      index += getNumberOfItemsInTree(topLevelItem(i));
+    } else {
+      index += 1;
+    }
+  }
+}
 
-  bool hadToCheck{false};
-  std::vector<QTreeWidgetItem *> itemsChecked;
+void AlgHistoryTreeWidget::itemChecked(QTreeWidgetItem *item, int index) {
+  std::vector<QTreeWidgetItem *> checkedItems;
+  std::vector<int> unrollIndices;
+  int unrollIndex{0};
 
-  // Iterates over the ancestors of the item the user checked and checks the
-  // item if it isn't checked already.
   for (auto currentItem = item; currentItem;
        currentItem = currentItem->parent()) {
-    modelIndex = indexFromItem(currentItem, index);
-    indicies.emplace_back(modelIndex.row() + 1);
-
-    if (currentItem->flags().testFlag(Qt::ItemIsUserCheckable) &&
-        currentItem->checkState(index) != Qt::Checked) {
+    // Check the item if it isn't already checked.
+    if (currentItem->checkState(index) != Qt::Checked) {
       currentItem->setCheckState(index, Qt::Checked);
-      hadToCheck = true;
     }
 
-    // The item the user checked and any of the ancestors that needed to be
-    // checked here are added to a list so we know which item's children need to
-    // be copied.
-    if (hadToCheck || currentItem == item) {
-      itemsChecked.emplace_back(currentItem);
-    }
+    checkedItems.emplace_back(currentItem);
   }
 
-  // The HistoryView class holds a flat list of all the algorithms in the
-  // history, as well as the children of any algorithms that have been unrolled.
-  // This function passes to that class the indices of the algorithms that have
-  // been checked so that they can be unrolled. In order for the index of an
-  // algorithm in this class to be the same as the index of that algorithm in
-  // HistoryView, when an algorithm is unrolled a copy of its children is made,
-  // added to the tree after the algorithm, and hidden.
-  for (auto it = itemsChecked.rbegin(); it != itemsChecked.rend(); ++it) {
-    auto currentItem{*it};
-    auto itemCopy{std::unique_ptr<QTreeWidgetItem>{currentItem->clone()}};
-    auto children{itemCopy->takeChildren()};
-    modelIndex = indexFromItem(currentItem, index);
+  for (auto it = checkedItems.rbegin(); it != checkedItems.rend(); ++it) {
+    auto currentItem = *it;
 
-    if (auto parent = currentItem->parent()) {
-      parent->insertChildren(modelIndex.row() + 1, children);
-    } else {
-      insertTopLevelItems(modelIndex.row() + 1, children);
-    }
+    // Find where we are in the tree.
+    getItemIndex(currentItem, unrollIndex);
 
-    for (auto child : children) {
-      child->setHidden(true);
-    }
+    unrollIndices.emplace_back(unrollIndex);
   }
-
-  indicies[indicies.size() - 1] -= 1;
-
-  // sum the indices to obtain the positions we must unroll
-  std::vector<int> unrollIndicies;
-  unrollIndicies.reserve(indicies.size());
-  std::partial_sum(indicies.rbegin(), indicies.rend(),
-                   std::back_inserter(unrollIndicies));
-
   this->blockSignals(false);
-  emit unrollAlgorithmHistory(unrollIndicies);
+  emit unrollAlgorithmHistory(unrollIndices);
   this->blockSignals(true);
 }
 
 void AlgHistoryTreeWidget::itemUnchecked(QTreeWidgetItem *item, int index) {
-  int rollIndex = 0;
-  QModelIndex modelIndex;
+  int rollIndex{0};
 
-  // The hidden copy of the algorithm's children which were made when the
-  // algorithm was unrolled are removed.
-  removeHiddenChildren(item);
   // disable any children
   uncheckAllChildren(item, index);
 
   // find where we are in the tree
-  do {
-    modelIndex = indexFromItem(item, index);
-    rollIndex += modelIndex.row() + 1;
-    item = item->parent();
-  } while (item);
+  for (auto currentItem = item; currentItem;
+       currentItem = currentItem->parent()) {
+    getItemIndex(currentItem, rollIndex);
+  }
 
-  --rollIndex;
   this->blockSignals(false);
   emit rollAlgorithmHistory(rollIndex);
   this->blockSignals(true);
@@ -732,28 +726,6 @@ void AlgHistoryTreeWidget::uncheckAllChildren(QTreeWidgetItem *item,
     item->setCheckState(index, Qt::Unchecked);
     for (int i = 0; i < item->childCount(); ++i) {
       uncheckAllChildren(item->child(i), index);
-    }
-  }
-}
-
-void AlgHistoryTreeWidget::removeHiddenChildren(QTreeWidgetItem *item) {
-  auto parent = item->parent();
-
-  for (int i = 0; i < item->childCount(); ++i) {
-    // Before removing the current item's hidden children, check if any of its
-    // children are unrolled and delete the hidden children for those.
-    if (item->child(i)->checkState(1) == Qt::Checked) {
-      removeHiddenChildren(item->child(i));
-    }
-
-    // Deleting an item is done differently depending on whether it is top-level
-    // or not.
-    if (parent) {
-      int index{parent->indexOfChild(item)};
-      delete parent->child(index + 1);
-    } else {
-      int index{indexOfTopLevelItem(item)};
-      delete topLevelItem(index + 1);
     }
   }
 }
