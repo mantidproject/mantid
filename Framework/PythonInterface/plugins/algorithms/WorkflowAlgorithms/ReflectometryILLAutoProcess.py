@@ -278,7 +278,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty(
             FloatArrayProperty(
                 PropertyNames.MANUAL_SCALE_FACTORS,
-                values=[Property.EMPTY_DBL]
+                values=[]
             ),
             doc='A list of manual scale factors for stitching (number of anlge configurations minus 1)'
         )
@@ -309,7 +309,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty(
             FloatArrayProperty(
                 PropertyNames.THETA,
-                values=[Property.EMPTY_DBL]
+                values=[-1.]
             ),
             doc='A user-defined angle theta in degree'
         )
@@ -341,7 +341,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty(
             FloatArrayProperty(
                 PropertyNames.GROUPING_FRACTION,
-                values=[Property.EMPTY_DBL],
+                values=[0.5],
                 validator=nonnegativeFloatArray,
             ),
             doc='If set, group the output by steps of this fraction multiplied by Q resolution'
@@ -434,13 +434,13 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         self.setPropertyGroup(PropertyNames.END_WS_INDEX_DIRECT, preProcessDirect)
         self.declareProperty(
             PropertyNames.XMIN_DIRECT,
-            defaultValue=Property.EMPTY_DBL,
+            defaultValue=-1.,
             doc='Minimum x value (unit wavelength) used for peak fitting.'
         )
         self.setPropertyGroup(PropertyNames.XMIN_DIRECT, preProcessDirect)
         self.declareProperty(
             PropertyNames.XMAX_DIRECT,
-            defaultValue=Property.EMPTY_DBL,
+            defaultValue=-1.,
             doc='Maximum x value (unit wavelength) used for peak fitting.'
         )
         self.setPropertyGroup(PropertyNames.XMAX_DIRECT, preProcessDirect)
@@ -527,8 +527,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty(
             FloatArrayProperty(
                 PropertyNames.XMIN,
-                values=[Property.EMPTY_DBL],
-                validator=nonnegativeFloatArray,
+                values=[-1.]
             ),
             doc='Minimum x value (unit wavelength) used for peak fitting'
         )
@@ -536,8 +535,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty(
             FloatArrayProperty(
                 PropertyNames.XMAX,
-                values=[Property.EMPTY_DBL],
-                validator=nonnegativeFloatArray,
+                values=[-1.]
             ),
             doc='Maximum x value (unit wavelength) used for peak fitting'
         )
@@ -642,10 +640,10 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         """Return the TwoTheta scattering angle depending on user input options."""
         theta = self.get_value(PropertyNames.THETA, angle_index)
         angle_option = self.get_value(PropertyNames.ANGLE_OPTION, angle_index)
-        if numpy.isclose(theta, Property.EMPTY_DBL):
+        if self.getProperty(PropertyNames.THETA).isDefault:
             if angle_option == PropertyNames.DAN:
                 self.log().information('Using DAN angle')
-                return Property.EMPTY_DBL
+                return -1.
             elif angle_option == PropertyNames.SAN:
                 theta = self.theta_from_sample_angle(self._rb[angle_index])
                 self.log().information('Using SAN angle : {} degree'.format(theta))
@@ -671,10 +669,12 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             HighAngleBkgOffset=int(self.get_value(PropertyNames.HIGH_BKG_OFFSET_DIRECT, angle_index)),
             HighAngleBkgWidth=int(self.get_value(PropertyNames.HIGH_BKG_WIDTH_DIRECT, angle_index)),
             FitStartWorkspaceIndex=int(self.get_value(PropertyNames.START_WS_INDEX_DIRECT, angle_index)),
-            FitEndWorkspaceIndex=int(self.get_value(PropertyNames.END_WS_INDEX_DIRECT, angle_index))
+            FitEndWorkspaceIndex=int(self.get_value(PropertyNames.END_WS_INDEX_DIRECT, angle_index)),
+            FitRangeLower=self.getProperty(PropertyNames.XMIN_DIRECT).value,
+            FitRangeUpper=self.getProperty(PropertyNames.XMAX_DIRECT).value
         )
 
-    def preprocess_reflected_beam(self, run, out_ws, angle_index, two_theta=Property.EMPTY_DBL, direct_line_ws=''):
+    def preprocess_reflected_beam(self, run, out_ws, angle_index, two_theta=-1., direct_line_ws=''):
         """Runs preprocess for the reflected beam"""
         ReflectometryILLPreprocess(
             Run=run,
@@ -693,7 +693,9 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             HighAngleBkgOffset=int(self.get_value(PropertyNames.HIGH_BKG_OFFSET, angle_index)),
             HighAngleBkgWidth=int(self.get_value(PropertyNames.HIGH_BKG_WIDTH, angle_index)),
             FitStartWorkspaceIndex=int(self.get_value(PropertyNames.START_WS_INDEX, angle_index)),
-            FitEndWorkspaceIndex=int(self.get_value(PropertyNames.END_WS_INDEX, angle_index))
+            FitEndWorkspaceIndex=int(self.get_value(PropertyNames.END_WS_INDEX, angle_index)),
+            FitRangeLower=self.get_value(PropertyNames.XMIN, angle_index),
+            FitRangeUpper=self.get_value(PropertyNames.XMAX, angle_index)
         )
 
     def sum_foreground(self, inputWorkspaceName, outputWorkspaceName, sumType, angle_index, directForegroundName = ''):

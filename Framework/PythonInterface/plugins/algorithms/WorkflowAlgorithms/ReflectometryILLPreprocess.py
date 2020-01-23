@@ -162,10 +162,10 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                                                      direction=Direction.Output),
                              doc='The preprocessed output workspace (unit wavelength), single histogram.')
         self.declareProperty(Prop.TWO_THETA,
-                             defaultValue=Property.EMPTY_DBL,
+                             defaultValue=-1.,
                              doc='A user-defined scattering angle 2 theta (unit degrees).')
         self.declareProperty(name=Prop.LINE_POSITION,
-                             defaultValue=Property.EMPTY_DBL,
+                             defaultValue=-1.,
                              doc='A fractional workspace index corresponding to the beam centre between 0 and 255.')
         self.declareProperty(MatrixWorkspaceProperty(Prop.DIRECT_LINE_WORKSPACE,
                                                      defaultValue='',
@@ -232,10 +232,10 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                              defaultValue=255,
                              doc='Last workspace index used for peak fitting.')
         self.declareProperty(Prop.XMIN,
-                             defaultValue=Property.EMPTY_DBL,
+                             defaultValue=-1.,
                              doc='Minimum x value (unit Angstrom) used for peak fitting.')
         self.declareProperty(Prop.XMAX,
-                             defaultValue=Property.EMPTY_DBL,
+                             defaultValue=-1.,
                              doc='Maximum x value (unit Angstrom) used for peak fitting.')
 
     def validateInputs(self):
@@ -395,11 +395,11 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         else:
             # Fit peak position
             peakWSName = self._names.withSuffix('peak')
-            xmin = self.getProperty(Prop.XMIN).value
-            if not xmin == Property.EMPTY_DBL:
+            xmin = Property.EMPTY_DBL
+            if not self.getProperty(Prop.XMIN).isDefault:
                 xmin = self.getProperty(Prop.XMIN).value
                 xmin = common.inTOF(xmin, l1, l2)
-            xmax = self.getProperty(Prop.XMAX).value
+            xmax = Property.EMPTY_DBL
             if not self.getProperty(Prop.XMAX).isDefault:
                 xmax = self.getProperty(Prop.XMAX).value
                 xmax = common.inTOF(xmax, l1, l2)
