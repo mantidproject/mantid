@@ -25,6 +25,8 @@ Powder Diffraction
 Engineering Diffraction
 -----------------------
 
+- :ref:`EnggCalibrateFull <algm-EnggCalibrateFull-v1>` now uses the new :ref:`SaveAscii <algm-SaveAscii-v2>` to save its output files as TSVs, allowing them to be loaded back into mantid. 
+
 Single Crystal Diffraction
 --------------------------
 
