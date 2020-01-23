@@ -8,9 +8,12 @@ from __future__ import (absolute_import)
 
 from functools import (partial)
 
+from six import with_metaclass
+
 from mantid.py3compat import mock
 from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
 from sans.common.enums import (RangeStepType, OutputMode, SANSFacility, SANSInstrument)
+from sans.state.JsonSerializable import JsonSerializable
 from sans.test_helper.test_director import TestDirector
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 from ui.sans_isis.settings_diagnostic_tab import SettingsDiagnosticTab
@@ -237,11 +240,10 @@ def create_mock_view2(user_file_path, batch_file_path=None):
     return view
 
 
-class FakeState(object):
-    dummy_state = "dummy_state"
-
+class FakeState(with_metaclass(JsonSerializable)):
     def __init__(self):
         super(FakeState, self).__init__()
+        self.dummy_state = "dummy_state"
 
     @property
     def property_manager(self):

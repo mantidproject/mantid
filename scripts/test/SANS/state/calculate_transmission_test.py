@@ -26,7 +26,7 @@ class StateCalculateTransmissionTest(unittest.TestCase):
                 value = custom_settings[key]
 
             if value is not None:  # If the value is None, then don't set it
-                setattr(state.fit[fit_key], key, value)
+                setattr(state.fit[fit_key.value], key, value)
 
     @staticmethod
     def _get_calculate_transmission_state(trans_entries, fit_entries):
@@ -274,15 +274,15 @@ class StateCalculateTransmissionBuilderTest(unittest.TestCase):
         self.assertEqual(state.background_TOF_roi_start,  1.4)
         self.assertEqual(state.background_TOF_roi_stop,  34.4)
 
-        self.assertEqual(state.fit[DataType.SAMPLE].fit_type, FitType.LINEAR)
-        self.assertEqual(state.fit[DataType.SAMPLE].polynomial_order, 0)
-        self.assertEqual(state.fit[DataType.SAMPLE].wavelength_low, 10.)
-        self.assertEqual(state.fit[DataType.SAMPLE].wavelength_high, 20.)
+        self.assertEqual(state.fit[DataType.SAMPLE.value].fit_type, FitType.LINEAR)
+        self.assertEqual(state.fit[DataType.SAMPLE.value].polynomial_order, 0)
+        self.assertEqual(state.fit[DataType.SAMPLE.value].wavelength_low, 10.)
+        self.assertEqual(state.fit[DataType.SAMPLE.value].wavelength_high, 20.)
 
-        self.assertEqual(state.fit[DataType.CAN].fit_type, FitType.POLYNOMIAL)
-        self.assertEqual(state.fit[DataType.CAN].polynomial_order, 3)
-        self.assertEqual(state.fit[DataType.CAN].wavelength_low, 10.)
-        self.assertEqual(state.fit[DataType.CAN].wavelength_high, 20.)
+        self.assertEqual(state.fit[DataType.CAN.value].fit_type, FitType.POLYNOMIAL)
+        self.assertEqual(state.fit[DataType.CAN.value].polynomial_order, 3)
+        self.assertEqual(state.fit[DataType.CAN.value].wavelength_low, 10.)
+        self.assertEqual(state.fit[DataType.CAN.value].wavelength_high, 20.)
 
 
 if __name__ == '__main__':

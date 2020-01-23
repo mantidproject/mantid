@@ -22,6 +22,7 @@ from sans.common.constants import (TRANS_SUFFIX, SANS_SUFFIX, ALL_PERIODS,
                                    CAN_AND_SAMPLE_WORKSPACE)
 from sans.common.file_information import (get_extension_for_file_type, SANSFileInformationFactory)
 from sans.gui_logic.plotting import get_plotting_module
+from sans.state.Serializer import Serializer
 from sans.state.data import StateData
 
 
@@ -443,7 +444,7 @@ def provide_loaded_data(state, use_optimizations, workspace_to_name, workspace_t
     :return: a list fo workspaces and a list of monitor workspaces
     """
     # Load the data
-    state_serialized = state.property_manager
+    state_serialized = Serializer.to_json(state)
     load_name = "SANSLoad"
     load_options = {"SANSState": state_serialized,
                     "PublishToCache": use_optimizations,
@@ -847,7 +848,7 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
     # Go through the elements of the reduction package and set them on the reduction algorithm
     # Set the SANSState
     state = reduction_package.state
-    state_dict = state.property_manager
+    state_dict = Serializer.to_json(state)
     reduction_alg.setProperty("SANSState", state_dict)
 
     # Set the input workspaces

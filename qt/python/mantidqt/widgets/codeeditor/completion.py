@@ -71,7 +71,7 @@ def get_builtin_argspec(builtin):
     if not doc_string:
         return None
     func_descriptor = doc_string.split('\n')[0].strip()
-    if re.search(builtin.__name__ + "\([\[\*a-zA-Z_].*\)", func_descriptor):
+    if re.search(builtin.__name__ + r"\([\[\*a-zA-Z_].*\)", func_descriptor):
         args_string = func_descriptor[func_descriptor.find('(') + 1:func_descriptor.rfind(')')]
         all_args_list = args_string.split(', ')
         args = []

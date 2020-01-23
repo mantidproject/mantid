@@ -5,53 +5,41 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 """ Defines the main State object."""
-
-# pylint: disable=too-few-public-methods
-
 from __future__ import (absolute_import, division, print_function)
-import json
-import pickle
-import inspect
-import copy
-from sans.common.enums import SANSFacility
-from sans.state.state_base import (StateBase, TypedParameter,
-                                   rename_descriptor_names, validator_sub_state)
-from sans.state.data import StateData
-from sans.state.move import StateMove
-from sans.state.reduction_mode import StateReductionMode
-from sans.state.slice_event import StateSliceEvent
-from sans.state.mask import StateMask
-from sans.state.wavelength import StateWavelength
-from sans.state.save import StateSave
-from sans.state.adjustment import StateAdjustment
-from sans.state.scale import StateScale
-from sans.state.convert_to_q import StateConvertToQ
-from sans.state.automatic_setters import (automatic_setters)
 
+import copy
+import json
+
+from six import with_metaclass
+
+from sans.common.enums import SANSFacility
+from sans.state.JsonSerializable import JsonSerializable
 # Note that the compatibility state is not part of the new reduction chain, but allows us to accurately compare
 # results obtained via the old and new reduction chain
-from sans.state.compatibility import (StateCompatibility, get_compatibility_builder)
+from sans.state.automatic_setters import automatic_setters
+from sans.state.compatibility import get_compatibility_builder
 
 
 # ----------------------------------------------------------------------------------------------------------------------
 # State
 # ----------------------------------------------------------------------------------------------------------------------
-@rename_descriptor_names
-class State(StateBase):
-    data = TypedParameter(StateData, validator_sub_state)
-    move = TypedParameter(StateMove, validator_sub_state)
-    reduction = TypedParameter(StateReductionMode, validator_sub_state)
-    slice = TypedParameter(StateSliceEvent, validator_sub_state)
-    mask = TypedParameter(StateMask, validator_sub_state)
-    wavelength = TypedParameter(StateWavelength, validator_sub_state)
-    save = TypedParameter(StateSave, validator_sub_state)
-    scale = TypedParameter(StateScale, validator_sub_state)
-    adjustment = TypedParameter(StateAdjustment, validator_sub_state)
-    convert_to_q = TypedParameter(StateConvertToQ, validator_sub_state)
-    compatibility = TypedParameter(StateCompatibility, validator_sub_state)
+
+class State(with_metaclass(JsonSerializable)):
 
     def __init__(self):
+
         super(State, self).__init__()
+        self.data = None  # : StateData
+        self.move = None  # : StateMove
+        self.reduction = None  # : StateReductionMode
+        self.slice = None  # : StateSliceEvent
+        self.mask = None  # : StateMask
+        self.wavelength = None  # : StateWavelength
+        self.save = None  # : StateSave
+        self.scale = None  # : StateScale
+        self.adjustment = None  # : StateAdjustment
+        self.convert_to_q = None  # : StateConvertToQ
+        self.compatibility = None  # : StateCompatibility
 
     def validate(self):
         is_invalid = dict()
@@ -84,25 +72,9 @@ class State(StateBase):
                 self.compatibility = get_compatibility_builder(self.data).build()
 
         if is_invalid:
-            raise ValueError("State: There is an issue with your in put. See: {0}".format(json.dumps(is_invalid)))
-
-        # Check the attributes themselves
-        is_invalid = {}
-        for descriptor_name, descriptor_object in inspect.getmembers(type(self)):
-            if inspect.isdatadescriptor(descriptor_object) and isinstance(descriptor_object, TypedParameter):
-                try:
-                    attr = getattr(self, descriptor_name)
-                    attr.validate()
-                except ValueError as err:
-                    is_invalid.update({descriptor_name: pickle.dumps(str(err))})
-
-        if is_invalid:
-            raise ValueError("State: There is an issue with your in put. See: {0}".format(json.dumps(is_invalid)))
+            raise ValueError("State: There is an issue with your input. See: {0}".format(json.dumps(is_invalid)))
 
 
-# ----------------------------------------------------------------------------------------------------------------------
-# Builder
-# ----------------------------------------------------------------------------------------------------------------------
 class StateBuilder(object):
     @automatic_setters(State)
     def __init__(self):

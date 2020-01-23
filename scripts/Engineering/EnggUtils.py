@@ -328,10 +328,9 @@ def crop_data(parent, ws, indices):
     @returns cropped workspace, with only the spectra corresponding to the indices requested
     """
     # Leave only spectra between min and max
-    alg = parent.createChildAlgorithm('CropWorkspace')
+    alg = parent.createChildAlgorithm('ExtractSpectra')
     alg.setProperty('InputWorkspace', ws)
-    alg.setProperty('StartWorkspaceIndex', min(indices))
-    alg.setProperty('EndWorkspaceIndex', max(indices))
+    alg.setProperty('WorkspaceIndexList', indices)
     alg.execute()
 
     return alg.getProperty('OutputWorkspace').value

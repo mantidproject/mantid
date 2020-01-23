@@ -30,6 +30,9 @@ if ( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )
   set ( CMAKE_INSTALL_PREFIX /opt/mantid${CPACK_PACKAGE_SUFFIX} CACHE PATH "Install path" FORCE )
 endif()
 
+# Tell rpm to use the appropriate python executable
+set(CPACK_RPM_SPEC_MORE_DEFINE "%define __python ${PYTHON_EXECUTABLE}")
+
 # Tell rpm that this package does not own /opt /usr/share/{applications,pixmaps}
 # Required for Fedora >= 18 and RHEL >= 7
 set ( CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION /opt /usr/share/applications /usr/share/pixmaps )
@@ -69,6 +72,7 @@ print(sc.get_python_lib(plat_specific=True))"
 
 file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.pth.install
   "${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\n"
+  "${CMAKE_INSTALL_PREFIX}/${LIB_DIR}\n"
 )
 
 install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/mantid.pth.install

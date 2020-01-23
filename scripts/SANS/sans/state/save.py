@@ -10,28 +10,24 @@
 
 from __future__ import (absolute_import, division, print_function)
 import copy
-from sans.state.state_base import (StateBase, BoolParameter, StringParameter, StringWithNoneParameter,
-                                   rename_descriptor_names)
+
+from six import with_metaclass
+
+from sans.state.JsonSerializable import JsonSerializable
 from sans.common.enums import (SaveType, SANSFacility)
-from sans.state.automatic_setters import (automatic_setters)
+from sans.state.automatic_setters import automatic_setters
 
 
-# ----------------------------------------------------------------------------------------------------------------------
-# State
-# ----------------------------------------------------------------------------------------------------------------------
-@rename_descriptor_names
-class StateSave(StateBase):
-    zero_free_correction = BoolParameter()
-    file_format = SaveType.NO_TYPE
-
-    # Settings for the output name
-    user_specified_output_name = StringWithNoneParameter()
-    user_specified_output_name_suffix = StringParameter()
-    use_reduction_mode_as_suffix = BoolParameter()
-
+class StateSave(with_metaclass(JsonSerializable)):
     def __init__(self):
         super(StateSave, self).__init__()
-        self.zero_free_correction = True
+        self.zero_free_correction = True  # : Bool
+        self.file_format = SaveType.NO_TYPE
+
+        # Settings for the output name
+        self.user_specified_output_name = None  # : Str
+        self.user_specified_output_name_suffix = None  # : Str()
+        self.use_reduction_mode_as_suffix = None  # : Bool
 
     def validate(self):
         pass

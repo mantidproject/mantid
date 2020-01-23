@@ -45,15 +45,18 @@ class PyQtConfig(object):
               raise RuntimeError("Unknown Qt version ({}) found. Unable to determine location of PyQt sip files."
                                  "Please update FindPyQt accordingly.".format(self.version_str[0]))
       else:
-          # RHEL has a separate python2-sip and python3-sip directory
+          # RH/Fedora have separate pythonX-sip or pythonXY-sip  directories
           prefix_share = os.path.join(sys.prefix, 'share')
-          possible_sip_dirs = (os.path.join(prefix_share, 'sip', name),
-                               os.path.join(prefix_share,
-                                           'python{}-sip'.format(sys.version_info.major),
-                                            name))
+          possible_sip_dirs = (
+              'python{}{}-sip'.format(sys.version_info.major, sys.version_info.minor),
+              'python{}-sip'.format(sys.version_info.major),
+              'sip'
+          )
           for sip_dir in possible_sip_dirs:
-              if os.path.exists(sip_dir):
-                  self.sip_dir = sip_dir
+              pyqt_sip_dir = os.path.join(prefix_share, sip_dir, name)
+              if os.path.exists(pyqt_sip_dir):
+                  self.sip_dir = pyqt_sip_dir
+                  break
 
       # Assume uic script is in uic submodule
       uic = __import__(name + '.uic', globals(), locals(), ['uic'], 0)

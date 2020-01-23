@@ -186,10 +186,8 @@ class Abins(PythonAlgorithm):
         prog_reporter.report("Input data from the user has been collected.")
 
         # 2) read ab initio data
-        ab_initio_loaders = {"CASTEP": AbinsModules.LoadCASTEP, "CRYSTAL": AbinsModules.LoadCRYSTAL,
-                             "DMOL3": AbinsModules.LoadDMOL3, "GAUSSIAN": AbinsModules.LoadGAUSSIAN}
-        rdr = ab_initio_loaders[self._ab_initio_program](input_ab_initio_filename=self._vibrational_or_phonon_data_file)
-        ab_initio_data = rdr.get_formatted_data()
+        ab_initio_data = AbinsModules.AbinsData.from_calculation_data(self._vibrational_or_phonon_data_file,
+                                                                      self._ab_initio_program)
         prog_reporter.report("Vibrational/phonon data has been read.")
 
         # 3) calculate S
@@ -737,10 +735,6 @@ class Abins(PythonAlgorithm):
         Checks rebinning parameters.
         :param message_end: closing part of the error message.
         """
-        pkt_per_peak = AbinsParameters.sampling['pkt_per_peak']
-        if not (isinstance(pkt_per_peak, six.integer_types) and 1 <= pkt_per_peak <= 1000):
-            raise RuntimeError("Invalid value of pkt_per_peak" + message_end)
-
         min_wavenumber = AbinsParameters.sampling['min_wavenumber']
         if not (isinstance(min_wavenumber, float) and min_wavenumber >= 0.0):
             raise RuntimeError("Invalid value of min_wavenumber" + message_end)
@@ -935,13 +929,13 @@ class Abins(PythonAlgorithm):
         self._out_ws_name = self.getPropertyValue('OutputWorkspace')
         self._calc_partial = (len(self._atoms) > 0)
 
-        # user defined interval is exclusive with respect to
+        # Sampling mesh is determined by
         # AbinsModules.AbinsParameters.sampling['min_wavenumber']
         # AbinsModules.AbinsParameters.sampling['max_wavenumber']
-        # with bin width AbinsModules.AbinsParameters.sampling['bin_width']
+        # and AbinsModules.AbinsParameters.sampling['bin_width']
         step = self._bin_width
-        start = AbinsParameters.sampling['min_wavenumber'] + step / 2.0
-        stop = AbinsParameters.sampling['max_wavenumber'] + step / 2.0
+        start = AbinsParameters.sampling['min_wavenumber']
+        stop = AbinsParameters.sampling['max_wavenumber'] + step
         self._bins = np.arange(start=start, stop=stop, step=step, dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
 
 

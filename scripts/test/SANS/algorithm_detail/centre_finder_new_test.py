@@ -11,11 +11,13 @@ import unittest
 from mantid.py3compat import mock
 from sans.algorithm_detail.centre_finder_new import centre_finder_new, centre_finder_mass
 from sans.common.enums import (SANSDataType, FindDirectionEnum, DetectorType)
+from sans.test_helper.test_director import TestDirector
 
 
 class CentreFinderNewTest(unittest.TestCase):
     def setUp(self):
-        self.state = mock.MagicMock()
+        state_builder = TestDirector()
+        self.state = state_builder.construct()
 
     @mock.patch('sans.algorithm_detail.centre_finder_new.provide_loaded_data')
     @mock.patch('sans.algorithm_detail.centre_finder_new.create_managed_non_child_algorithm')

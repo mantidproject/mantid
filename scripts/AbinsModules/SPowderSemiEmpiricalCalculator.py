@@ -107,13 +107,13 @@ class SPowderSemiEmpiricalCalculator(object):
                                  AbinsModules.AbinsConstants.QUANTUM_ORDER_THREE: self._calculate_order_three,
                                  AbinsModules.AbinsConstants.QUANTUM_ORDER_FOUR: self._calculate_order_four}
 
-        step = bin_width
-        self._bin_width = bin_width
-        start = AbinsParameters.sampling['min_wavenumber'] + step
-        stop = AbinsParameters.sampling['max_wavenumber'] + step
-        self._bins = np.arange(start=start, stop=stop, step=step, dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
+        self._bin_width = bin_width  # This is only here to store in s_data. Is that necessary/useful?
+        self._bins = np.arange(start=AbinsParameters.sampling['min_wavenumber'],
+                               stop=AbinsParameters.sampling['max_wavenumber'] + bin_width,
+                               step=bin_width,
+                               dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
+        self._frequencies = self._bins[:-1] + (bin_width / 2)
         self._freq_size = self._bins.size - 1
-        self._frequencies = self._bins[:-1]
 
         # set initial threshold for s for each atom
         self._num_atoms = len(self._abins_data.get_atoms_data().extract())
@@ -500,13 +500,11 @@ class SPowderSemiEmpiricalCalculator(object):
                                                      b_tensor=self._b_tensors[atom],
                                                      b_trace=self._b_traces[atom])
 
-            rebined_freq, rebined_spectrum = self._rebin_data_opt(array_x=local_freq, array_y=value_dft)
-
-            freq, broad_spectrum = self._instrument.convolve_with_resolution_function(frequencies=rebined_freq,
-                                                                                      s_dft=rebined_spectrum)
-
-            rebined_broad_spectrum = self._rebin_data_full(array_x=freq, array_y=broad_spectrum)
-            rebined_broad_spectrum = self._fix_empty_array(array_y=rebined_broad_spectrum)
+            broadening_scheme = AbinsParameters.sampling['broadening_scheme']
+            _, rebinned_broad_spectrum = self._instrument.convolve_with_resolution_function(frequencies=local_freq,
+                                                                                            bins=self._bins,
+                                                                                            s_dft=value_dft,
+                                                                                            scheme=broadening_scheme)
 
             local_freq, local_coeff = self._calculate_s_over_threshold(s=value_dft,
                                                                        freq=local_freq,
@@ -515,13 +513,13 @@ class SPowderSemiEmpiricalCalculator(object):
                                                                        order=order)
 
         else:
-            rebined_broad_spectrum = self._fix_empty_array()
+            rebinned_broad_spectrum = np.zeros_like(self._frequencies)
 
         # multiply by k-point weight and scaling constant
         # factor = self._weight / self._bin_width
         factor = self._weight
-        rebined_broad_spectrum = rebined_broad_spectrum * factor
-        return local_freq, local_coeff, rebined_broad_spectrum
+        rebinned_broad_spectrum = rebinned_broad_spectrum * factor
+        return local_freq, local_coeff, rebinned_broad_spectrum
 
     # noinspection PyUnusedLocal
     def _calculate_order_one(self, q2=None, frequencies=None, indices=None, a_tensor=None, a_trace=None,
@@ -644,47 +642,16 @@ class SPowderSemiEmpiricalCalculator(object):
 
     def _rebin_data_full(self, array_x=None, array_y=None):
         """
-        Rebins S data so that all quantum events have the same x-axis. The size of rebined data is equal to _bins.size.
+        Rebins S data so that all quantum events have the same x-axis. The size of rebinned data is equal to _bins.size.
         :param array_x: numpy array with frequencies
         :param array_y: numpy array with S
-        :returns: rebined frequencies
+        :returns: rebinned frequencies
         """
         indices = array_x != self._bins[-1]
         array_x = array_x[indices]
         array_y = array_y[indices]
         maximum_index = min(len(array_x), len(array_y))
         return np.histogram(array_x[:maximum_index], bins=self._bins, weights=array_y[:maximum_index])[0]
-
-    def _rebin_data_opt(self, array_x=None, array_y=None):
-        """
-        Rebins S data in optimised way: the size of rebined data may be smaller then _bins.size.
-        :param array_x: numpy array with frequencies
-        :param array_y: numpy array with S
-        :returns: rebined frequencies, rebined S
-        """
-        if self._bins.size > array_x.size:
-            return array_x, array_y
-        else:
-            output_array_y = self._rebin_data_full(array_x, array_y)
-            return self._frequencies, output_array_y
-
-    def _fix_empty_array(self, array_y=None):
-        """
-        Fixes empty numpy arrays which occur in case of heavier atoms.
-        :returns: numpy array filled with zeros of dimension _bins.size - AbinsConstants.FIRST_BIN_INDEX
-        """
-        if array_y is None:
-            # number of frequencies = self._bins.size - AbinsConstants.FIRST_BIN_INDEX
-            output_y = np.zeros(shape=self._bins.size - AbinsModules.AbinsConstants.FIRST_BIN_INDEX,
-                                dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
-        elif array_y.any():
-            output_y = self._rebin_data_full(array_x=self._bins[AbinsModules.AbinsConstants.FIRST_BIN_INDEX:],
-                                             array_y=array_y)
-        else:
-            output_y = np.zeros(shape=self._bins.size - AbinsModules.AbinsConstants.FIRST_BIN_INDEX,
-                                dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
-
-        return output_y
 
     def calculate_data(self):
         """

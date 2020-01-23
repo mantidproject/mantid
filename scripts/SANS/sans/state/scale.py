@@ -8,35 +8,37 @@
 
 from __future__ import (absolute_import, division, print_function)
 import copy
-from sans.state.state_base import (StateBase, rename_descriptor_names, PositiveFloatParameter)
-from sans.common.enums import (SampleShape, SANSFacility)
-from sans.state.automatic_setters import (automatic_setters)
+
+from six import with_metaclass
+
+from sans.state.JsonSerializable import JsonSerializable
+from sans.common.enums import SampleShape, SANSFacility
 
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  State
 # ----------------------------------------------------------------------------------------------------------------------
-@rename_descriptor_names
-class StateScale(StateBase):
-    shape = None
+from sans.state.automatic_setters import automatic_setters
 
-    thickness = PositiveFloatParameter()
-    width = PositiveFloatParameter()
-    height = PositiveFloatParameter()
-    scale = PositiveFloatParameter()
 
-    # Geometry from the file
-    shape_from_file = SampleShape.DISC
-    thickness_from_file = PositiveFloatParameter()
-    width_from_file = PositiveFloatParameter()
-    height_from_file = PositiveFloatParameter()
+class StateScale(with_metaclass(JsonSerializable)):
 
     def __init__(self):
         super(StateScale, self).__init__()
+        self.shape = None
+
+        self.thickness = None  # : Float (Positive)
+        self.width = None  # : Float (Positive)
+        self.height = None  # : Float (Positive)
+        self.scale = None  # : Float (Positive)
+
+        # Geometry from the file
+        self.shape_from_file = SampleShape.DISC
+
         # The default values are 1mm
-        self.thickness_from_file = 1.
-        self.width_from_file = 1.
-        self.height_from_file = 1.
+        self.thickness_from_file = 1.  # : Float (Positive)
+        self.width_from_file = 1.  # : Float (Positive)
+        self.height_from_file = 1.  # : Float (Positive)
 
     def validate(self):
         pass
@@ -54,7 +56,7 @@ def set_geometry_from_file(state, file_information):
 
 
 class StateScaleBuilder(object):
-    @automatic_setters(StateScale, exclusions=[])
+    @automatic_setters(StateScale)
     def __init__(self, file_information):
         super(StateScaleBuilder, self).__init__()
         self.state = StateScale()
