@@ -11,23 +11,20 @@
 from __future__ import (absolute_import, division, print_function)
 import json
 import copy
-from sans.state.state_base import (StateBase, rename_descriptor_names, StringParameter,
-                                   PositiveFloatParameter, DictParameter, PositiveFloatListParameter)
+
+from six import with_metaclass
+
+from sans.state.JsonSerializable import JsonSerializable
+from sans.state.automatic_setters import automatic_setters
 from sans.state.state_functions import (is_not_none_and_first_larger_than_second, one_is_none, validation_message)
 from sans.common.enums import (RangeStepType, DetectorType, SANSFacility)
-from sans.state.automatic_setters import (automatic_setters)
 
 
-# ----------------------------------------------------------------------------------------------------------------------
-# State
-# ----------------------------------------------------------------------------------------------------------------------
-@rename_descriptor_names
-class StateAdjustmentFiles(StateBase):
-    pixel_adjustment_file = StringParameter()
-    wavelength_adjustment_file = StringParameter()
-
+class StateAdjustmentFiles(with_metaclass(JsonSerializable)):
     def __init__(self):
         super(StateAdjustmentFiles, self).__init__()
+        self.pixel_adjustment_file = None  # : Str()
+        self.wavelength_adjustment_file = None  # : Str()
 
     def validate(self):
         is_invalid = {}
@@ -39,19 +36,16 @@ class StateAdjustmentFiles(StateBase):
                              "Please see: {0}".format(json.dumps(is_invalid)))
 
 
-@rename_descriptor_names
-class StateWavelengthAndPixelAdjustment(StateBase):
-    wavelength_low = PositiveFloatListParameter()
-    wavelength_high = PositiveFloatListParameter()
-    wavelength_step = PositiveFloatParameter()
-    wavelength_step_type = RangeStepType.NOT_SET
-
-    adjustment_files = DictParameter()
-
-    idf_path = StringParameter()
-
+class StateWavelengthAndPixelAdjustment(with_metaclass(JsonSerializable)):
     def __init__(self):
         super(StateWavelengthAndPixelAdjustment, self).__init__()
+        self.wavelength_low = None  # : List[Float] (Positive)
+        self.wavelength_high = None  # : List[Float] (Positive)
+        self.wavelength_step = None  # : Float (Positive)
+        self.wavelength_step_type = RangeStepType.NOT_SET
+
+        self.idf_path = None  # : Str()
+
         self.adjustment_files = {DetectorType.LAB.value: StateAdjustmentFiles(),
                                  DetectorType.HAB.value: StateAdjustmentFiles()}
 

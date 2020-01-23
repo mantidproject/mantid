@@ -20,6 +20,7 @@ from sans.common.constants import (CALIBRATION_WORKSPACE_TAG, SANS_FILE_TAG)
 # Not clear why the names in the module are not found by Pylint, but it seems to get confused. Hence this check
 # needs to be disabled here.
 # pylint: disable=no-name-in-module
+from sans.state.Serializer import Serializer
 from sans.test_helper.test_director import TestDirector
 from sans.common.enums import SANSFacility
 from sans.state.data import get_data_builder
@@ -200,7 +201,7 @@ class SANSLoadTest(unittest.TestCase):
         load_alg.setRethrows(True)
         load_alg.initialize()
 
-        state_dict = state.property_manager
+        state_dict = Serializer.to_json(state)
         load_alg.setProperty("SANSState", state_dict)
         load_alg.setProperty("PublishToCache", publish_to_cache)
         load_alg.setProperty("UseCached", use_cached)

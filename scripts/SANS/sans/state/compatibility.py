@@ -14,25 +14,26 @@
 
 from __future__ import (absolute_import, division, print_function)
 import copy
-from sans.state.state_base import (StateBase, rename_descriptor_names, BoolParameter, StringParameter)
-from sans.state.automatic_setters import (automatic_setters)
+
+from six import with_metaclass
+
+from sans.state.JsonSerializable import JsonSerializable
+
 from sans.common.enums import SANSFacility
 
 
 # ----------------------------------------------------------------------------------------------------------------------
 # State
 # ----------------------------------------------------------------------------------------------------------------------
-@rename_descriptor_names
-class StateCompatibility(StateBase):
-    use_compatibility_mode = BoolParameter()
-    time_rebin_string = StringParameter()
-    use_event_slice_optimisation = BoolParameter()
+from sans.state.automatic_setters import automatic_setters
 
+
+class StateCompatibility(with_metaclass(JsonSerializable)):
     def __init__(self):
         super(StateCompatibility, self).__init__()
-        self.use_compatibility_mode = False
-        self.use_event_slice_optimisation = False
-        self.time_rebin_string = ""
+        self.use_compatibility_mode = False  # : Bool
+        self.use_event_slice_optimisation = False  # : Bool
+        self.time_rebin_string = ""  # Str
 
     def validate(self):
         pass
