@@ -58,7 +58,8 @@ class IN4(systemtesting.MantidSystemTest):
         DirectILLSelfShielding(
             InputWorkspace='sample',
             OutputWorkspace='corrections',
-            NumberOfSimulatedWavelengths=10)
+            NumberOfSimulatedWavelengths=10,
+            EventsPerPoint=5000)
         DirectILLApplySelfShielding(
             InputWorkspace='sample',
             OutputWorkspace='corrected',
