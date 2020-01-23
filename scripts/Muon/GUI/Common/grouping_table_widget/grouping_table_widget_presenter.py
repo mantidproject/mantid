@@ -129,12 +129,15 @@ class GroupingTablePresenter(object):
 
     def remove_selected_rows_in_view_and_model(self, group_names):
         self._view.remove_selected_groups()
+        for group_name in group_names:
+            self._model.remove_group_from_analysis(group_name)
         self._model.remove_groups_by_name(group_names)
 
     def remove_last_row_in_view_and_model(self):
         if self._view.num_rows() > 0:
             name = self._view.get_table_contents()[-1][0]
             self._view.remove_last_row()
+            self._model.remove_group_from_analysis(name)
             self._model.remove_groups_by_name([name])
 
     def handle_data_change(self, row, col):

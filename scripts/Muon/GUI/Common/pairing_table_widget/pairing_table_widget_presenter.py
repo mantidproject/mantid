@@ -63,7 +63,7 @@ class PairingTablePresenter(object):
     def handle_data_change(self, row, col):
         table = self._view.get_table_contents()
         changed_item = self._view.get_table_item(row, col)
-        changed_item_text = self._view.get_table_item_text(row,col)
+        changed_item_text = self._view.get_table_item_text(row, col)
         pair_name = self._view.get_table_item_text(row, 0)
         update_model = True
         if pair_columns[col] == 'pair_name' and not self.validate_pair_name(changed_item_text):
@@ -78,7 +78,8 @@ class PairingTablePresenter(object):
             if not self.validate_alpha(changed_item_text):
                 update_model = False
             else:
-                rounded_item = '{:.3f}'.format(float(changed_item_text)) if '{:.3f}'.format(float(changed_item_text)) != '0.000' \
+                rounded_item = '{:.3f}'.format(float(changed_item_text)) if '{:.3f}'.format(
+                    float(changed_item_text)) != '0.000' \
                     else '{:.3g}'.format(float(changed_item_text))
                 table[row][col] = rounded_item
         if pair_columns[col] == 'to_analyse':
@@ -175,6 +176,8 @@ class PairingTablePresenter(object):
             self.remove_last_row_in_view_and_model()
         else:
             self._view.remove_selected_pairs()
+            for pair_name in pair_names:
+                self._model.remove_pair_from_analysis(pair_name)
             self._model.remove_pairs_by_name(pair_names)
         self.notify_data_changed()
 
@@ -182,6 +185,7 @@ class PairingTablePresenter(object):
         if self._view.num_rows() > 0:
             name = self._view.get_table_contents()[-1][0]
             self._view.remove_last_row()
+            self._model.remove_pair_from_analysis(name)
             self._model.remove_pairs_by_name([name])
 
     # ------------------------------------------------------------------------------------------------------------------

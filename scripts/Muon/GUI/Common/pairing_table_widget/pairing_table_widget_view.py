@@ -367,7 +367,7 @@ class PairingTableView(QtWidgets.QWidget):
                     item.setEnabled(True)
                 elif column_name == 'pair_name':
                     item = self.pairing_table.item(row, col)
-                    item.setFlags(QtCore.Qt.ItemIsSelectable)
+                    item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
                 elif column_name == 'alpha':
                     item = self.pairing_table.item(row, col)
                     item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled)

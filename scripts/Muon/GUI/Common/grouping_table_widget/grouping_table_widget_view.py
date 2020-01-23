@@ -402,7 +402,7 @@ class GroupingTableView(QtWidgets.QWidget):
                     item.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
                 else:
                     # Group name and number of detectors should remain un-editable
-                    item.setFlags(QtCore.Qt.ItemIsSelectable)
+                    item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
 
     def get_group_range(self):
         return str(self.group_range_min.text()), str(self.group_range_max.text())
