@@ -9,7 +9,6 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import matplotlib
-import platform
 import unittest
 
 from mantid.api import AnalysisDataService as ADS
@@ -33,11 +32,11 @@ class PlotsSaverTest(unittest.TestCase):
                                                         u'background_color': u'#ffffff',
                                                         u'edge_color': u'#000000',
                                                         u'transparency': 0.5,
-                                                        u'entries_font': u'Bitstream Vera Sans',
-                                                        u'entries_size': 10,
+                                                        u'entries_font': u'DejaVu Sans',
+                                                        u'entries_size': 10.0,
                                                         u'entries_color': u'#000000',
-                                                        u'title_font': u'Bitstream Vera Sans',
-                                                        u'title_size': 12,
+                                                        u'title_font': u'DejaVu Sans',
+                                                        u'title_size': 12.0,
                                                         u'title_color': u'#000000',
                                                         u'marker_size': 2.0,
                                                         u'box_visible': True,
@@ -128,11 +127,6 @@ class PlotsSaverTest(unittest.TestCase):
 
         self.loader_plot_dict[u'creationArguments'] = [[{u"specNum": 2, "function": "plot"}]]
 
-        # The original font isn't available on Windows so it has to be changed.
-        if platform.system() == "Windows":
-            self.loader_plot_dict[u'axes'][0][u'legend'][u'entries_font'] = 'DejaVu Sans'
-            self.loader_plot_dict[u'axes'][0][u'legend'][u'title_font'] = 'DejaVu Sans'
-
         self.maxDiff = None
         self.assertDictEqual(return_value, self.loader_plot_dict)
 
@@ -141,11 +135,6 @@ class PlotsSaverTest(unittest.TestCase):
         return_value = self.plot_saver.get_dict_for_axes(self.fig.axes[0])
 
         expected_value = self.loader_plot_dict["axes"][0]
-
-        # The original font isn't available on Windows so it has to be changed.
-        if platform.system() == "Windows":
-            self.loader_plot_dict[u'axes'][0][u'legend'][u'entries_font'] = 'DejaVu Sans'
-            self.loader_plot_dict[u'axes'][0][u'legend'][u'title_font'] = 'DejaVu Sans'
 
         self.maxDiff = None
         self.assertDictEqual(return_value, expected_value)
