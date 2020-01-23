@@ -260,6 +260,7 @@ set(SRC_FILES
     src/ReflectometrySumInQ.cpp
     src/ReflectometryWorkflowBase.cpp
     src/ReflectometryWorkflowBase2.cpp
+    src/ReflectometryWorkflowBase3.cpp
     src/Regroup.cpp
     src/RemoveBackground.cpp
     src/RemoveBins.cpp
@@ -609,6 +610,7 @@ set(INC_FILES
     inc/MantidAlgorithms/ReflectometrySumInQ.h
     inc/MantidAlgorithms/ReflectometryWorkflowBase.h
     inc/MantidAlgorithms/ReflectometryWorkflowBase2.h
+    inc/MantidAlgorithms/ReflectometryWorkflowBase3.h
     inc/MantidAlgorithms/Regroup.h
     inc/MantidAlgorithms/RemoveBackground.h
     inc/MantidAlgorithms/RemoveBins.h

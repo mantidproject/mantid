@@ -235,12 +235,6 @@ void ReflectometryWorkflowBase2::initTransmissionProperties() {
       "These processing instructions will be passed to the transmission "
       "workspace algorithm");
 
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspaceTransmission", "", Direction::Output,
-                      PropertyMode::Optional),
-                  "Output transmissison workspace in wavelength");
-
-  // Set up the output transmission workspaces
   setPropertyGroup("FirstTransmissionRun", "Transmission");
   setPropertyGroup("SecondTransmissionRun", "Transmission");
   setPropertyGroup("Params", "Transmission");
@@ -248,7 +242,6 @@ void ReflectometryWorkflowBase2::initTransmissionProperties() {
   setPropertyGroup("EndOverlap", "Transmission");
   setPropertyGroup("ScaleRHSWorkspace", "Transmission");
   setPropertyGroup("TransmissionProcessingInstructions", "Transmission");
-  setPropertyGroup("OutputWorkspaceTransmission", "Transmission");
 }
 
 /** Initialize properties used for stitching transmission runs
@@ -349,26 +342,6 @@ void ReflectometryWorkflowBase2::initDebugProperties() {
                   "Whether to enable the output of "
                   "interim workspaces for debugging "
                   "purposes.");
-
-  // Conditional output properties for when debug is on
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspaceFirstTransmission", "", Direction::Output,
-                      PropertyMode::Optional),
-                  "First transmissison workspace in wavelength");
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspaceSecondTransmission", "",
-                      Direction::Output, PropertyMode::Optional),
-                  "Second transmissison workspace in wavelength");
-
-  setPropertyGroup("OutputWorkspaceFirstTransmission", "Transmission");
-  setPropertyGroup("OutputWorkspaceSecondTransmission", "Transmission");
-
-  setPropertySettings(
-      "OutputWorkspaceFirstTransmission",
-      std::make_unique<Kernel::EnabledWhenProperty>("Debug", IS_EQUAL_TO, "1"));
-  setPropertySettings(
-      "OutputWorkspaceSecondTransmission",
-      std::make_unique<Kernel::EnabledWhenProperty>("Debug", IS_EQUAL_TO, "1"));
 }
 
 /** Validate background properties, if given

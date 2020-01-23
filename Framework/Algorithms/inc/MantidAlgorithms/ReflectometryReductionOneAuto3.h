@@ -8,7 +8,7 @@
 #define MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONEAUTO3_H_
 
 #include "MantidAPI/WorkspaceGroup_fwd.h"
-#include "ReflectometryWorkflowBase2.h"
+#include "ReflectometryWorkflowBase3.h"
 
 #include <boost/optional.hpp>
 
@@ -19,7 +19,7 @@ namespace Algorithms {
 attempting to pick instrument parameters for missing properties. Version 3.
 */
 class DLLExport ReflectometryReductionOneAuto3
-    : public ReflectometryWorkflowBase2 {
+    : public ReflectometryWorkflowBase3 {
 public:
   const std::string name() const override;
   int version() const override;
