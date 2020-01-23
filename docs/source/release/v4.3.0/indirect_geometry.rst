@@ -10,6 +10,21 @@ Indirect Geometry Changes
     improvements, followed by bug fixes.
 
 
+Improvements
+############
+
+- In Abins the instrumental broadening implementation has been overhauled.
+
+  - Output spectra from Abins should now be smooth and free of artefacts.
+  - A fast approximate scheme is implemented and automatically applied
+    when appropriate for simulations of TOSCA spectra. Alternative
+    broadening implementations may be selected through the
+    AbinsParameters system, including slow reference methods.
+  - Spectra now follow the broader Mantid convention for histograms:
+    values correspond to frequencies at the mid-points of the
+    histogram bins. (Previously the values would correspond to one
+    bin-edge.)
+
 BugFixes
 ########
 

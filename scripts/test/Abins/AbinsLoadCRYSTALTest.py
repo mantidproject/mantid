@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import unittest
-from mantid.simpleapi import logger
 import AbinsModules
 
 
@@ -15,7 +14,7 @@ class AbinsLoadCRYSTALTest(unittest.TestCase, AbinsModules.GeneralLoadAbInitioTe
     def tearDown(self):
         AbinsModules.AbinsTestHelpers.remove_output_files(list_of_names=["LoadCRYSTAL"])
 
-        #  *************************** USE CASES ********************************************
+    # *************************** USE CASES *********************************************
     # ===================================================================================
     # | Use cases: Gamma point calculation for CRYSTAL                                  |
     # ===================================================================================
