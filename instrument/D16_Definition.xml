@@ -41,7 +41,7 @@
   </defaults>
   <!--SOURCE-->
   <component type="monochromator">
-    <location x="0.0" y="0.0" z="2.8"/>
+    <location x="0.0" y="0.0" z="-2.8"/>
   </component>
   <type is="Source" name="monochromator"/>
   <!--Sample position-->
