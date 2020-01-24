@@ -173,10 +173,10 @@ public:
     TS_ASSERT_DELTA(bl_pos.distance(origin), 1.02512, 1E-5);
     TS_ASSERT_DELTA(tr_pos.distance(origin), 1.02512, 1E-5);
 
-    TS_ASSERT_DELTA(bl_pos.X(), 0.33073, 1E-5);
-    TS_ASSERT_DELTA(bl_pos.Z(), 0.95711, 1E-5);
-    TS_ASSERT_DELTA(tr_pos.X(), 0.01657, 1E-5);
-    TS_ASSERT_DELTA(tr_pos.Z(), 1.01250, 1E-5);
+    TS_ASSERT_DELTA(tr_pos.X(), 0.33073, 1E-5);
+    TS_ASSERT_DELTA(tr_pos.Z(), 0.95711, 1E-5);
+    TS_ASSERT_DELTA(bl_pos.X(), 0.01657, 1E-5);
+    TS_ASSERT_DELTA(bl_pos.Z(), 1.01250, 1E-5);
 
     const auto &xAxis = outputWS->x(0).rawData();
     const auto &spec = outputWS->y(51972).rawData();
