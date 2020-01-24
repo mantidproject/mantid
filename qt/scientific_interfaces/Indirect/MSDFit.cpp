@@ -5,6 +5,8 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MSDFit.h"
+#include "IndirectFunctionBrowser/MSDTemplateBrowser.h"
+
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include "MantidAPI/AnalysisDataService.h"
@@ -26,16 +28,18 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 MSDFit::MSDFit(QWidget *parent)
-    : IndirectFitAnalysisTabLegacy(new MSDFitModel, parent),
+    : IndirectFitAnalysisTab(new MSDFitModel, parent),
       m_uiForm(new Ui::MSDFit) {
   m_uiForm->setupUi(parent);
 
   m_msdFittingModel = dynamic_cast<MSDFitModel *>(fittingModel());
-  setFitDataPresenter(std::make_unique<IndirectFitDataPresenterLegacy>(
+  setFitDataPresenter(std::make_unique<IndirectFitDataPresenter>(
       m_msdFittingModel, m_uiForm->fitDataView));
   setPlotView(m_uiForm->pvFitPlotView);
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
+  auto templateBrowser = new MSDTemplateBrowser;
+  m_uiForm->fitPropertyBrowser->setFunctionTemplateBrowser(templateBrowser);
   setFitPropertyBrowser(m_uiForm->fitPropertyBrowser);
 
   setEditResultVisible(false);
@@ -46,9 +50,6 @@ void MSDFit::setupFitTab() {
   auto gaussian = functionFactory.createFunction("MSDGauss");
   auto peters = functionFactory.createFunction("MSDPeters");
   auto yi = functionFactory.createFunction("MSDYi");
-  addComboBoxFunctionGroup("Gaussian", {gaussian});
-  addComboBoxFunctionGroup("Peters", {peters});
-  addComboBoxFunctionGroup("Yi", {yi});
 
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(this, SIGNAL(functionChanged()), this,
@@ -66,6 +67,13 @@ void MSDFit::setRunIsRunning(bool running) {
 }
 
 void MSDFit::setRunEnabled(bool enable) { m_uiForm->pbRun->setEnabled(enable); }
+
+EstimationDataSelector MSDFit::getEstimationDataSelector() const {
+  return [](const std::vector<double> &,
+            const std::vector<double> &) -> DataForParameterEstimation {
+    return DataForParameterEstimation{};
+  };
+}
 
 } // namespace IDA
 } // namespace CustomInterfaces

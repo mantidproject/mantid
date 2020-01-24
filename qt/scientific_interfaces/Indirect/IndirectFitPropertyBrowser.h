@@ -15,7 +15,6 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #include <QDockWidget>
-
 #include <boost/optional.hpp>
 #include <unordered_map>
 
@@ -41,6 +40,7 @@ class MANTIDQT_INDIRECT_DLL IndirectFitPropertyBrowser : public QDockWidget {
 
 public:
   IndirectFitPropertyBrowser(QWidget *parent = nullptr);
+
   void init();
   void setFunctionTemplateBrowser(FunctionTemplateBrowser *templateBrowser);
   void setFunction(const QString &funStr);

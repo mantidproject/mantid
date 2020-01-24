@@ -7,7 +7,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_MSDFIT_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_MSDFIT_H_
 
-#include "IndirectFitAnalysisTabLegacy.h"
+#include "IndirectFitAnalysisTab.h"
 #include "MSDFitModel.h"
 #include "ui_MSDFit.h"
 
@@ -16,7 +16,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
-class DLLExport MSDFit : public IndirectFitAnalysisTabLegacy {
+class DLLExport MSDFit : public IndirectFitAnalysisTab {
   Q_OBJECT
 
 public:
@@ -36,7 +36,7 @@ protected:
 
 private:
   void setupFitTab() override;
-
+  EstimationDataSelector getEstimationDataSelector() const override;
   MSDFitModel *m_msdFittingModel;
   std::unique_ptr<Ui::MSDFit> m_uiForm;
 };
