@@ -111,7 +111,7 @@ class SaveReflections(PythonAlgorithm):
     def PyExec(self):
         """Execute the algorithm"""
         workspace = self.getProperty("InputWorkspace").value
-        output_format = ReflectionFormat(self.getPropertyValue("Format"))
+        output_format = ReflectionFormat[self.getPropertyValue("Format")]
         file_name = self.getPropertyValue("Filename")
         split_files = self.getProperty("SplitFiles").value
 
