@@ -7,202 +7,237 @@
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
 
-from mantidqt.plotting.functions import plot
 from mantid.api import AnalysisDataService
+import matplotlib.pyplot as plt
+
+legend_text_size = 7
 
 
 class PlotWidgetModel(object):
-    def __init__(self, dockable_plot_window=None):
-        """
-        :param plotting_window_model: This is the plotting manager class to use
-        """
-        self.plot_figure = dockable_plot_window
+
+    def __init__(self):
         self._plotted_workspaces = []
         self._plotted_workspaces_inverse_binning = {}
         self._plotted_fit_workspaces = []
-        self.plotted_group = ''
+        self.tiled_plot_positions = {}
+        self._number_of_axes = 1
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Properties
+    # ------------------------------------------------------------------------------------------------------------------
+
+    @property
+    def number_of_axes(self):
+        """
+        This property is needed as the view will generate an even number of axes, which can exceed the number of axes
+        required by the model
+        """
+        return self._number_of_axes
 
     @property
     def plotted_workspaces(self):
         """
-        This property is needed to check whether all the workspaces contained in the list are still on the graph. They can
-        be removed from the graph from the figure window without this class knowing.
-        :return:
+        A list of the plotted workspaces in the figure
         """
-        self._plotted_workspaces = [item for item in self._plotted_workspaces if item in
-                                    self.plot_figure.gca().tracked_workspaces.keys()]
         return self._plotted_workspaces
 
     @property
     def plotted_workspaces_inverse_binning(self):
-        self._plotted_workspaces_inverse_binning = {key: item for key, item in
-                                                    self._plotted_workspaces_inverse_binning.items()
-                                                    if key in self.plot_figure.gca().tracked_workspaces.keys()}
         return self._plotted_workspaces_inverse_binning
 
     @property
     def plotted_fit_workspaces(self):
-        self._plotted_fit_workspaces = [item for item in self._plotted_fit_workspaces if item in
-                                        self.plot_figure.gca().tracked_workspaces.keys()]
+        """
+        A list of the plotted fit workspaces in the figure
+        """
         return self._plotted_fit_workspaces
 
+    # ------------------------------------------------------------------------------------------------------------------
+    # Setters
+    # ------------------------------------------------------------------------------------------------------------------
+
+    @number_of_axes.setter
+    def number_of_axes(self, number_of_axes):
+        if number_of_axes > 1:
+            self._number_of_axes = number_of_axes
+        else:
+            self._number_of_axes = 1
+
     @plotted_workspaces.setter
-    def plotted_workspaces(self, value):
-        self._plotted_workspaces = value
+    def plotted_workspaces(self, workspaces):
+        self._plotted_workspaces = workspaces
 
     @plotted_workspaces_inverse_binning.setter
     def plotted_workspaces_inverse_binning(self, value):
         self._plotted_workspaces_inverse_binning = value
 
     @plotted_fit_workspaces.setter
-    def plotted_fit_workspaces(self, value):
-        self._plotted_fit_workspaces = value
+    def plotted_fit_workspaces(self, workspaces):
+        self._plotted_fit_workspaces = workspaces
 
-    def plot(self, workspace_list, title, domain, window_title):
+    # ------------------------------------------------------------------------------------------------------------------
+    # Helper to add and remove from stored workspace lists
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def add_workspace_to_plotted_workspaces(self, workspace_name):
+        if workspace_name not in self.plotted_workspaces:
+            self._plotted_workspaces.append(workspace_name)
+
+    def remove_workspaces_from_plotted_workspaces(self, workspace_name):
+        if workspace_name in self.plotted_workspaces:
+            self._plotted_workspaces.remove(workspace_name)
+
+    def add_workspace_to_plotted_fit_workspaces(self, workspace_name):
+        if workspace_name not in self.plotted_fit_workspaces:
+            self._plotted_fit_workspaces.append(workspace_name)
+
+    def remove_workspaces_from_plotted_fit_workspaces(self, workspace_name):
+        if workspace_name in self.plotted_fit_workspaces:
+            self._plotted_fit_workspaces.remove(workspace_name)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Plotting
+    # ------------------------------------------------------------------------------------------------------------------
+    def plot_workspace_list(self, ax, workspace_names, workspace_indicies, labels):
+        pass
+
+    def add_workspace_to_plot(self, ax, workspace_name, workspace_indices, errors, plot_kwargs):
         """
-        Plots a list of workspaces in a new plot window, closing any existing plot windows.
-        :param workspace_list: A list of workspace name to plot. They must be in the ADS
-        :param title: The name to give to the subplot created, currently only one subplot is ever created
-        :param domain: if frequency or time domain
-        :param force_redraw: if to force a redraw
-        :param window_title: title for the plot window
-        :return: A reference to the newly created plot window is passed back
-        """
-        if not workspace_list:
-            return
-        try:
-            workspaces = AnalysisDataService.Instance().retrieveWorkspaces(workspace_list, unrollGroups=True)
-        except RuntimeError:
-            return
-        # Clean up previous plot
-        self._remove_all_data_workspaces_from_plot()
-        # clear the figure
-        self.plotted_fit_workspaces = []
-        self.plotted_workspaces = []
-        self.plotted_workspaces_inverse_binning = {}
-
-        # plot new workspace
-        plot(workspaces, wksp_indices=[0], fig=self.plot_figure, window_title=title,
-             overplot=True,
-             plot_kwargs={'distribution': True, 'autoscale_on_update': False}, errors=True)
-        # set x and y limits
-        self.set_x_lim(domain)
-        # update the toolbar
-        toolbar = self.plot_figure.canvas.toolbar
-        toolbar.update()
-
-        # set title and adjust plot size, and legend scale
-        self.plot_figure.canvas.set_window_title(window_title)
-        self.plot_figure.gca().set_title(title)
-        self.plot_figure.tight_layout()
-        ax = self.plot_figure.gca()
-        ax.legend(prop=dict(size=7))
-        self.plot_figure.canvas.draw()
-
-        self.plotted_workspaces = workspace_list
-
-    def set_x_lim(self, domain):
-        if domain == "Time":
-            self.plot_figure.gca().set_xlim(left=0.0, right=15.0)
-            self.autoscale_y_to_data_in_view()
-            self.plot_figure.canvas.draw()
-        if domain == "Frequency":
-            self.plot_figure.gca().set_xlim(left=0.0, right=50.0)
-            self.autoscale_y_to_data_in_view()
-            self.plot_figure.canvas.draw()
-
-    def add_workspace_to_plot(self, workspace_name, workspace_index, label):
-        """
-        Adds a plot line to the specified subplot
-        :param workspace: Name of workspace to get plot data from
-        :param workspace_index: workspace index to plot from workspace
-        :return:
-        """
+            Adds a plot line to the specified axis
+            :param ax: Axis to plot the workspace on
+            :param workspace_name: Name of workspace to get plot data from
+            :param workspace_indices: workspace indices to plot from workspace
+            :param errors: Plotting workspace errors
+            :param plot_kwargs, arguments to Mantid axis plotting
+            :return:
+            """
+        # check workspace exists -
+        # retrieveWorkspaces expects a list of workspace names
         try:
             workspaces = AnalysisDataService.Instance().retrieveWorkspaces([workspace_name], unrollGroups=True)
         except RuntimeError:
             return
 
-        if all([workspace.getNumberHistograms() == 4 for workspace in workspaces]) and workspace_index == 1:
-            workspace_index = 3
+        self._do_single_plot(ax, workspaces, workspace_indices, errors,
+                             plot_kwargs)
+        self._update_legend(ax)
 
-        self.plot_figure = plot(workspaces, wksp_indices=[workspace_index], fig=self.plot_figure, overplot=True,
-                                plot_kwargs={'distribution': True, 'zorder': 4, 'autoscale_on_update': False,
-                                             'label': label})
-
-        if workspace_name not in self.plotted_fit_workspaces:
-            self.plotted_fit_workspaces.append(workspace_name)
-
-        # update the legend
-        ax = self.plot_figure.gca()
-        ax.legend(prop=dict(size=7))
-
-        self.plot_figure.canvas.draw()
-
-    def remove_workpace_from_plot(self, workspace_name):
+    def remove_workspace_from_plot(self, workspace_name, axes):
         """
+        Remove workspace from plot
         :param workspace_name: Name of workspace to remove from plot
+        :param axes: the axes which may contain the workspace
+        :return:
+        """
+        if workspace_name not in self.plotted_workspaces + self.plotted_fit_workspaces:
+            return
+
+        try:
+            workspace = AnalysisDataService.Instance().retrieve(workspace_name)
+        except RuntimeError:
+            return
+
+        for i in range(self.number_of_axes):
+            ax = axes[i]
+            ax.remove_workspace_artists(workspace)
+            self._update_legend(ax)
+
+        self.plotted_workspaces = [item for item in self.plotted_workspaces if item != workspace_name]
+        self.plotted_fit_workspaces = [item for item in self.plotted_fit_workspaces if item != workspace_name]
+        if workspace_name in self.plotted_workspaces_inverse_binning:
+            self.plotted_workspaces_inverse_binning.pop(workspace_name)
+
+    def workspace_deleted_from_ads(self, workspace, axes):
+        """
+        Remove a workspace which was deleted in the ads from the plot
+        :param workspace: Workspace object to remove from plot
+        :param axes: the axes which may contain the workspace
+        :return:
+        """
+        workspace_name = workspace.name()
+
+        if workspace_name not in self.plotted_workspaces + self.plotted_fit_workspaces:
+            return
+
+        for i in range(self.number_of_axes):
+            ax = axes[i]
+            ax.remove_workspace_artists(workspace)
+            self._update_legend(ax)
+
+        self.plotted_workspaces = [item for item in self.plotted_workspaces if item != workspace_name]
+        self.plotted_fit_workspaces = [item for item in self.plotted_fit_workspaces if item != workspace_name]
+        if workspace_name in self.plotted_workspaces_inverse_binning:
+            self.plotted_workspaces_inverse_binning.pop(workspace_name)
+
+    def _do_single_plot(self, ax, workspaces, indices, errors, plot_kwargs):
+        plot_fn = ax.errorbar if errors else ax.plot
+        for ws in workspaces:
+            for index in indices:
+                plot_kwargs['wkspIndex'] = index
+                plot_fn(ws, **plot_kwargs)
+
+    def replace_workspace_plot(self, workspace_name, axis):
+        """
+        Replace workspace from plot
+        :param workspace_name: Name of workspace to update in plot
+        :param axis: the axis that contains the workspace
         :return:
         """
         try:
             workspace = AnalysisDataService.Instance().retrieve(workspace_name)
         except RuntimeError:
             return
-        self.plot_figure.gca().remove_workspace_artists(workspace)
-        self.plotted_workspaces = [item for item in self.plotted_workspaces if item != workspace_name]
-        self.plotted_fit_workspaces = [item for item in self.plotted_fit_workspaces if item != workspace_name]
-        if workspace_name in self.plotted_workspaces_inverse_binning:
-            self.plotted_workspaces_inverse_binning.pop(workspace_name)
 
-    def remove_workspace_from_plot_by_name(self, workspace_name):
+        axis.replace_workspace_artists(workspace)
 
-        ax = self.plot_figure.gca()
-        artist_info = ax.tracked_workspaces.pop(workspace_name)
-        for workspace_artist in artist_info:
-            workspace_artist.remove(ax)
-
-        self.plotted_workspaces = [item for item in self.plotted_workspaces if item != workspace_name]
-        self.plotted_fit_workspaces = [item for item in self.plotted_fit_workspaces if item != workspace_name]
-        if workspace_name in self.plotted_workspaces_inverse_binning:
-            self.plotted_workspaces_inverse_binning.pop(workspace_name)
-
-        self.plot_figure.canvas.draw()
-
-    def _clear_plot_references(self):
-        """
-        callback to call when the plot window is closed. Removes the reference and resets plotted workspaces
-        :return:
-        """
-        self.plot_figure = None
+    def clear_plot_model(self, axes):
+        self._remove_all_data_workspaces_from_plot(axes)
         self.plotted_workspaces = []
         self.plotted_workspaces_inverse_binning = {}
         self.plotted_fit_workspaces = []
 
-    def force_redraw(self):
-        if not self.plot_figure:
-            return
+    def set_x_lim(self, domain, axes):
+        if domain == "Time":
+            ymin, ymax = self._get_autoscale_y_limits(axes, 0, 15)
+            plt.setp(axes, xlim=[0, 15.0], ylim=[ymin, ymax])
+        if domain == "Frequency":
+            ymin, ymax = self._get_autoscale_y_limits(axes, 0, 50)
+            plt.setp(axes, xlim=[0, 50.0], ylim=[ymin, ymax])
 
-        self.plot_figure.canvas.draw()
+    def _get_autoscale_y_limits(self, axes, xmin, xmax):
+        new_bottom = 1e9
+        new_top = -1e9
+        for i in range(self.number_of_axes):
+            axis = axes[i]
+            axis.set_xlim(left=xmin, right=xmax)
+            xlim = axis.get_xlim()
+            ylim = np.inf, -np.inf
+            for line in axis.lines:
+                x, y = line.get_data()
+                start, stop = np.searchsorted(x, xlim)
+                y_within_range = y[max(start - 1, 0):(stop + 1)]
+                ylim = min(ylim[0], np.nanmin(y_within_range)), max(ylim[1], np.nanmax(y_within_range))
 
-    def autoscale_y_to_data_in_view(self):
-        axis = self.plot_figure.gca()
-        xlim = axis.get_xlim()
-        ylim = np.inf, -np.inf
-        for line in axis.lines:
-            x, y = line.get_data()
-            start, stop = np.searchsorted(x, xlim)
-            y_within_range = y[max(start - 1, 0):(stop + 1)]
-            ylim = min(ylim[0], np.nanmin(y_within_range)), max(ylim[1], np.nanmax(y_within_range))
+            new_bottom_i = ylim[0] * 1.3 if ylim[0] < 0.0 else ylim[0] * 0.7
+            new_top_i = ylim[1] * 1.3 if ylim[1] > 0.0 else ylim[1] * 0.7
+            if new_bottom_i < new_bottom:
+                new_bottom = new_bottom_i
+            if new_top_i > new_top:
+                new_top = new_top_i
 
-        new_bottom = ylim[0] * 1.3 if ylim[0] < 0.0 else ylim[0] * 0.7
-        new_top = ylim[1] * 1.3 if ylim[1] > 0.0 else ylim[1] * 0.7
+        return new_bottom, new_top
 
-        axis.set_ylim(bottom=new_bottom, top=new_top)
-
-    def _remove_all_data_workspaces_from_plot(self):
+    def _remove_all_data_workspaces_from_plot(self, axes):
         workspaces_to_remove = self.plotted_workspaces
         for workspace in workspaces_to_remove:
-            self.remove_workpace_from_plot(workspace)
+            self.remove_workspace_from_plot(workspace, axes)
         workspaces_to_remove = self.plotted_fit_workspaces
         for workspace in workspaces_to_remove:
-            self.remove_workpace_from_plot(workspace)
+            self.remove_workspace_from_plot(workspace, axes)
+
+    def _update_legend(self, ax):
+        handles, _ = ax.get_legend_handles_labels()
+        if handles:
+            ax.legend(prop=dict(size=legend_text_size))
+        else:
+            ax.legend("")

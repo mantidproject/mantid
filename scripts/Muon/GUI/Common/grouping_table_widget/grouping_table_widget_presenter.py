@@ -10,6 +10,7 @@ import re
 
 from Muon.GUI.Common.utilities import run_string_utils as run_utils
 from Muon.GUI.Common.muon_group import MuonGroup
+from mantidqt.utils.observer_pattern import GenericObservable
 
 maximum_number_of_groups = 20
 
@@ -35,6 +36,8 @@ class GroupingTablePresenter(object):
         self._view.on_user_changes_group_range_min_text_edit(self.handle_group_range_min_updated)
 
         self._view.on_user_changes_group_range_max_text_edit(self.handle_group_range_max_updated)
+
+        self.selected_group_changed_notifier = GenericObservable()
 
         self._dataChangedNotifier = lambda: 0
 
@@ -66,7 +69,7 @@ class GroupingTablePresenter(object):
     def validate_detector_ids(self, text):
         try:
             if re.match(run_utils.run_string_regex, text) and run_utils.run_string_to_list(text, False) and \
-                max(run_utils.run_string_to_list(text, False)) <= self._model._data.num_detectors\
+                    max(run_utils.run_string_to_list(text, False)) <= self._model._data.num_detectors \
                     and min(run_utils.run_string_to_list(text, False)) > 0:
                 return True
         except OverflowError:
@@ -98,10 +101,10 @@ class GroupingTablePresenter(object):
     def add_group_to_model(self, group):
         self._model.add_group(group)
 
-    def add_group_to_view(self, group):
+    def add_group_to_view(self, group, state):
         self._view.disable_updates()
         assert isinstance(group, MuonGroup)
-        entry = [str(group.name), run_utils.run_list_to_string(group.detectors, False), str(group.n_detectors)]
+        entry = [str(group.name), state, run_utils.run_list_to_string(group.detectors, False), str(group.n_detectors)]
         self._view.add_entry_to_table(entry)
         self._view.enable_updates()
 
@@ -126,45 +129,56 @@ class GroupingTablePresenter(object):
 
     def remove_selected_rows_in_view_and_model(self, group_names):
         self._view.remove_selected_groups()
+        for group_name in group_names:
+            self._model.remove_group_from_analysis(group_name)
         self._model.remove_groups_by_name(group_names)
 
     def remove_last_row_in_view_and_model(self):
         if self._view.num_rows() > 0:
             name = self._view.get_table_contents()[-1][0]
             self._view.remove_last_row()
+            self._model.remove_group_from_analysis(name)
             self._model.remove_groups_by_name([name])
 
     def handle_data_change(self, row, col):
-        changed_item = self._view.get_table_item_text(row, col)
+        changed_item = self._view.get_table_item(row, col)
+        group_name = self._view.get_table_item(row, 0).text()
         update_model = True
-        if col == 0 and not self.validate_group_name(changed_item):
+        if col == 0 and not self.validate_group_name(changed_item.text()):
             update_model = False
-        if col == 1 and not self.validate_detector_ids(changed_item):
+        if col == 2 and not self.validate_detector_ids(changed_item.text()):
             update_model = False
+        if col == 1:
+            update_model = False
+            self.to_analyse_data_checkbox_changed(changed_item.checkState(), row, group_name)
+
         if update_model:
             try:
                 self.update_model_from_view()
             except ValueError as error:
                 self._view.warning_popup(error)
 
-        self.update_view_from_model()
-        self._view.notify_data_changed()
-        self.notify_data_changed()
+        # if the column containing the "to_analyse" flag is changed, then we don't need to update anything group related
+        if col != 1:
+            self.update_view_from_model()
+            self._view.notify_data_changed()
+            self.notify_data_changed()
 
     def update_model_from_view(self):
         table = self._view.get_table_contents()
         self._model.clear_groups()
         for entry in table:
-            detector_list = run_utils.run_string_to_list(str(entry[1]), False)
+            detector_list = run_utils.run_string_to_list(str(entry[2]), False)
             group = MuonGroup(group_name=str(entry[0]), detector_ids=detector_list)
             self._model.add_group(group)
 
     def update_view_from_model(self):
         self._view.disable_updates()
-
         self._view.clear()
+
         for group in self._model.groups:
-            self.add_group_to_view(group)
+            to_analyse = True if group.name in self._model.selected_groups else False
+            self.add_group_to_view(group, to_analyse)
 
         if self._view.group_range_use_last_data.isChecked():
             self._view.group_range_max.setText(str(self._model.get_last_data_from_file()))
@@ -173,6 +187,19 @@ class GroupingTablePresenter(object):
             self._view.group_range_min.setText(str(self._model.get_first_good_data_from_file()))
 
         self._view.enable_updates()
+
+    def to_analyse_data_checkbox_changed(self, state, row, group_name):
+        group_added = True if state == 2 else False
+        if group_added:
+            self._model.add_group_to_analysis(group_name)
+        else:
+            self._model.remove_group_from_analysis(group_name)
+
+        self.selected_group_changed_notifier.notify_subscribers(group_added)
+
+    def plot_default_case(self):
+        for row in range(self._view.num_rows()):
+            self._view.set_to_analyse_state(row, True)
 
     def first_good_data_checkbox_changed(self):
         if self._view.group_range_use_first_good_data.isChecked():
@@ -185,7 +212,8 @@ class GroupingTablePresenter(object):
                 self._model._context.gui_context.update_and_send_signal()
         else:
             self._view.group_range_min.setEnabled(True)
-            self._model._context.gui_context.update_and_send_signal(GroupRangeMin=float(self._view.group_range_min.text()))
+            self._model._context.gui_context.update_and_send_signal(
+                GroupRangeMin=float(self._view.group_range_min.text()))
 
     def from_file_checkbox_changed(self):
         if self._view.group_range_use_last_data.isChecked():
@@ -199,12 +227,13 @@ class GroupingTablePresenter(object):
 
         else:
             self._view.group_range_max.setEnabled(True)
-            self._model._context.gui_context.update_and_send_signal(GroupRangeMax=float(self._view.group_range_max.text()))
+            self._model._context.gui_context.update_and_send_signal(
+                GroupRangeMax=float(self._view.group_range_max.text()))
 
     def handle_group_range_min_updated(self):
         range_min_new = float(self._view.group_range_min.text())
-        range_max_current = self._model._context.gui_context['GroupRangeMax'] if 'GroupRangeMax' in\
-            self._model._context.gui_context \
+        range_max_current = self._model._context.gui_context['GroupRangeMax'] if 'GroupRangeMax' in \
+                                                                                 self._model._context.gui_context \
             else self._model.get_last_data_from_file()
         if range_min_new < range_max_current:
             self._model._context.gui_context.update_and_send_signal(GroupRangeMin=range_min_new)
@@ -214,8 +243,8 @@ class GroupingTablePresenter(object):
 
     def handle_group_range_max_updated(self):
         range_max_new = float(self._view.group_range_max.text())
-        range_min_current = self._model._context.gui_context['GroupRangeMin'] if 'GroupRangeMin' in\
-            self._model._context.gui_context \
+        range_min_current = self._model._context.gui_context['GroupRangeMin'] if 'GroupRangeMin' in \
+                                                                                 self._model._context.gui_context \
             else self._model.get_first_good_data_from_file()
         if range_max_new > range_min_current:
             self._model._context.gui_context.update_and_send_signal(GroupRangeMax=range_max_new)
