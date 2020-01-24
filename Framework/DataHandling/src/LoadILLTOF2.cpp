@@ -166,6 +166,16 @@ void LoadILLTOF2::loadInstrumentDetails(NeXus::NXEntry &firstEntry) {
     throw std::runtime_error(message);
   }
 
+  // Monitor can be monitor (IN5, PANTHER) or monitor1 (IN6)
+  if (firstEntry.containsGroup("monitor"))
+    m_monitorName = "monitor";
+  else if (firstEntry.containsGroup("monitor1"))
+    m_monitorName = "monitor1";
+  else {
+    std::string message("Cannot find monitor[1] in the Nexus file!");
+    throw std::runtime_error(message);
+  }
+
   g_log.debug() << "Instrument name set to: " + m_instrumentName << '\n';
 }
 
@@ -214,8 +224,18 @@ void LoadILLTOF2::initWorkSpace(NeXus::NXEntry &entry,
   m_localWorkspace = WorkspaceFactory::Instance().create(
       "Workspace2D", m_numberOfHistograms + numberOfMonitors,
       m_numberOfChannels + 1, m_numberOfChannels);
-  m_localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
-  m_localWorkspace->setYUnitLabel("Counts");
+
+  NXClass monitor = entry.openNXGroup(m_monitorName);
+  if (monitor.containsDataSet("time_of_flight")) {
+    m_localWorkspace->getAxis(0)->unit() =
+        UnitFactory::Instance().create("TOF");
+    m_localWorkspace->setYUnitLabel("Counts");
+  } else {
+    g_log.debug("PANTHER diffraction mode");
+    m_localWorkspace->getAxis(0)->unit() =
+        UnitFactory::Instance().create("Wavelength");
+    m_localWorkspace->setYUnitLabel("Counts");
+  }
 }
 
 /**
@@ -227,31 +247,25 @@ void LoadILLTOF2::loadTimeDetails(NeXus::NXEntry &entry) {
 
   m_wavelength = entry.getFloat("wavelength");
 
-  // Monitor can be monitor (IN5) or monitor1 (IN6)
-  std::string monitorName;
-  if (entry.containsGroup("monitor"))
-    monitorName = "monitor";
-  else if (entry.containsGroup("monitor1"))
-    monitorName = "monitor1";
-  else {
-    std::string message("Cannot find monitor[1] in the Nexus file!");
-    g_log.error(message);
-    throw std::runtime_error(message);
-  }
+  NeXus::NXClass monitorEntry = entry.openNXGroup(m_monitorName);
 
-  NXFloat time_of_flight_data =
-      entry.openNXFloat(monitorName + "/time_of_flight");
-  time_of_flight_data.load();
+  if (monitorEntry.containsDataSet("time_of_flight")) {
 
-  // The entry "monitor/time_of_flight", has 3 fields:
-  // channel width , number of channels, Time of flight delay
-  m_channelWidth = time_of_flight_data[0];
-  m_timeOfFlightDelay = time_of_flight_data[2];
+    NXFloat time_of_flight_data =
+        entry.openNXFloat(m_monitorName + "/time_of_flight");
+    time_of_flight_data.load();
 
-  g_log.debug("Nexus Data:");
-  g_log.debug() << " ChannelWidth: " << m_channelWidth << '\n';
-  g_log.debug() << " TimeOfFlightDealy: " << m_timeOfFlightDelay << '\n';
-  g_log.debug() << " Wavelength: " << m_wavelength << '\n';
+    // The entry "monitor/time_of_flight", has 3 fields:
+    // channel width , number of channels, Time of flight delay
+    m_channelWidth = time_of_flight_data[0];
+    m_timeOfFlightDelay = time_of_flight_data[2];
+
+    g_log.debug("Nexus Data:");
+    g_log.debug() << " ChannelWidth: " << m_channelWidth << '\n';
+    g_log.debug() << " TimeOfFlightDelay: " << m_timeOfFlightDelay << '\n';
+    g_log.debug() << " Wavelength: " << m_wavelength << '\n';
+  } // the other case is the diffraction mode for PANTHER, where nothing is
+    // needed here
 }
 
 /**
@@ -350,13 +364,20 @@ void LoadILLTOF2::loadDataIntoTheWorkSpace(
   // load the counts from the file into memory
   data.load();
 
+  NXClass monitor = entry.openNXGroup(m_monitorName);
+
   // Put tof in an array
   auto &X0 = m_localWorkspace->mutableX(0);
-  for (size_t i = 0; i < m_numberOfChannels + 1; ++i) {
-    X0[i] = m_timeOfFlightDelay + m_channelWidth * static_cast<double>(i) -
-            m_channelWidth / 2; // to make sure the bin centre is correct
+  if (monitor.containsDataSet("time_of_flight")) {
+    for (size_t i = 0; i < m_numberOfChannels + 1; ++i) {
+      X0[i] = m_timeOfFlightDelay + m_channelWidth * static_cast<double>(i) -
+              m_channelWidth / 2; // to make sure the bin centre is correct
+    }
+  } else {
+    // Diffraction PANTHER
+    X0[0] = m_wavelength * 0.9;
+    X0[1] = m_wavelength * 1.1;
   }
-
   // The binning for monitors is considered the same as for detectors
   size_t spec = 0;
 

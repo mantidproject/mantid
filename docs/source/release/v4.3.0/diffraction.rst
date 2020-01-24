@@ -13,6 +13,8 @@ Diffraction Changes
 Improvements
 ############
 
+- :ref:`LoadILLTOF2 <algm-LoadILLTOF-v2>` now supports data from PANTHER used in diffraction mode.
+
 Powder Diffraction
 ------------------
 
