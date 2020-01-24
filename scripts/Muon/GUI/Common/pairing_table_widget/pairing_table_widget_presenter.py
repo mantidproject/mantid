@@ -128,7 +128,9 @@ class PairingTablePresenter(object):
 
     def plot_default_case(self):
         for row in range(self._view.num_rows()):
-            self._view.set_to_analyse_state(row, True)
+            self._view.set_to_analyse_state_quietly(row, True)
+            pair_name = self._view.get_table_item(row, 0).text()
+            self._model.add_pair_to_analysis(pair_name)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Add / Remove pairs

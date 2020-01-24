@@ -8,6 +8,7 @@ from __future__ import (absolute_import, division, print_function)
 import numpy as np
 
 from mantid.api import AnalysisDataService
+from matplotlib.container import ErrorbarContainer
 import matplotlib.pyplot as plt
 
 legend_text_size = 7
@@ -98,8 +99,6 @@ class PlotWidgetModel(object):
     # ------------------------------------------------------------------------------------------------------------------
     # Plotting
     # ------------------------------------------------------------------------------------------------------------------
-    def plot_workspace_list(self, ax, workspace_names, workspace_indicies, labels):
-        pass
 
     def add_workspace_to_plot(self, ax, workspace_name, workspace_indices, errors, plot_kwargs):
         """
@@ -190,25 +189,60 @@ class PlotWidgetModel(object):
 
         axis.replace_workspace_artists(workspace)
 
+    def replot_workspace(self, workspace_name, axis, errors, plot_kwargs):
+        """
+        Replot a workspace with different kwargs, and error flag
+        with the intention of keeping the rest of the model unchanged
+        :param workspace_name: Name of workspace to update in plot
+        :param axis: the axis that contains the workspace
+        :param errors: Plotting with errors
+        :param plot_kwargs: kwargs to the plotting
+        :return:
+        """
+        artist_info = axis.tracked_workspaces[workspace_name]
+        for ws_artist in artist_info:
+            for artist in ws_artist._artists:
+                # if the artist in an errorbarCotainer, the first object
+                # in the tuple will contain the matplotlib line object
+                if isinstance(artist, ErrorbarContainer):
+                    color = artist[0].get_color()
+                else:
+                    color = artist.get_color()
+
+                plot_kwargs["color"] = color
+                axis.replot_artist(artist, errors, **plot_kwargs)
+
+        self._update_legend(axis)
+
     def clear_plot_model(self, axes):
         self._remove_all_data_workspaces_from_plot(axes)
         self.plotted_workspaces = []
         self.plotted_workspaces_inverse_binning = {}
         self.plotted_fit_workspaces = []
 
-    def set_x_lim(self, domain, axes):
-        if domain == "Time":
-            ymin, ymax = self._get_autoscale_y_limits(axes, 0, 15)
-            plt.setp(axes, xlim=[0, 15.0], ylim=[ymin, ymax])
-        if domain == "Frequency":
-            ymin, ymax = self._get_autoscale_y_limits(axes, 0, 50)
-            plt.setp(axes, xlim=[0, 50.0], ylim=[ymin, ymax])
+    def _remove_all_data_workspaces_from_plot(self, axes):
+        workspaces_to_remove = self.plotted_workspaces
+        for workspace in workspaces_to_remove:
+            self.remove_workspace_from_plot(workspace, axes)
+        workspaces_to_remove = self.plotted_fit_workspaces
+        for workspace in workspaces_to_remove:
+            self.remove_workspace_from_plot(workspace, axes)
+
+    def autoscale_axes(self, axes, xlimits):
+        ymin, ymax = self._get_autoscale_y_limits(axes, xlimits[0], xlimits[1])
+        plt.setp(axes, xlim=xlimits, ylim=[ymin, ymax])
+        return ymin, ymax
+
+    def set_axis_xlim(self, axis, xlims):
+        axis.set_xlim(left=xlims[0], right=xlims[1])
+
+    def set_axis_ylim(self, axis, ylims):
+        axis.set_ylim(ylims[0], ylims[1])
 
     def _get_autoscale_y_limits(self, axes, xmin, xmax):
         new_bottom = 1e9
         new_top = -1e9
-        for i in range(self.number_of_axes):
-            axis = axes[i]
+        for axis in axes:
             axis.set_xlim(left=xmin, right=xmax)
             xlim = axis.get_xlim()
             ylim = np.inf, -np.inf
@@ -227,17 +261,15 @@ class PlotWidgetModel(object):
 
         return new_bottom, new_top
 
-    def _remove_all_data_workspaces_from_plot(self, axes):
-        workspaces_to_remove = self.plotted_workspaces
-        for workspace in workspaces_to_remove:
-            self.remove_workspace_from_plot(workspace, axes)
-        workspaces_to_remove = self.plotted_fit_workspaces
-        for workspace in workspaces_to_remove:
-            self.remove_workspace_from_plot(workspace, axes)
-
     def _update_legend(self, ax):
         handles, _ = ax.get_legend_handles_labels()
         if handles:
             ax.legend(prop=dict(size=legend_text_size))
         else:
             ax.legend("")
+
+    def get_axes_titles(self, axes):
+        titles = [None] * self.number_of_axes
+        for i in range(self.number_of_axes):
+            titles[i] = axes[i].get_title()
+        return titles

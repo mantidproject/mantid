@@ -25,6 +25,8 @@ class PlottingWidgetPresenterTestTiled(unittest.TestCase):
         self.presenter.get_plot_title = mock.MagicMock(return_value='MUSR62260-62261 bottom')
         self.view.is_tiled_plot = mock.MagicMock(return_value=True)
         self.context.data_context.instrument = "MUSR"
+        axes = [mock.MagicMock(), mock.MagicMock, mock.MagicMock, mock.MagicMock]
+        self.view.get_axes = mock.MagicMock(return_value=axes)
 
         # workspaces and corresponding tiled by group and run indices
         self.group_workspace_list = self.create_workspace_group_list()
@@ -37,6 +39,10 @@ class PlottingWidgetPresenterTestTiled(unittest.TestCase):
         self.context.group_pair_context.selected_groups = ['bottom', 'top', 'bkwd', 'fwd']
         self.context.data_context.current_runs = [['62260'], ['62261'], ['62262'], ['62263'],
                                                   ['62264'], ['62265'], ['62266'], ['62267']]
+        self.view.plot_options.get_errors = mock.MagicMock(return_value=True)
+        self.presenter.get_x_limits = mock.MagicMock(return_value=[0, 15])
+        self.presenter.get_x_lim_from_subplot = mock.MagicMock(return_value=[0, 15])
+        self.presenter.get_y_lim_from_subplot = mock.MagicMock(return_value=[-1, 1])
 
     def create_workspace_group_list(self):
         return ['MUSR62260; Group; bottom; Asymmetry; MA',
@@ -88,17 +94,18 @@ class PlottingWidgetPresenterTestTiled(unittest.TestCase):
 
     def test_update_model_tile_plot_positions_updates_tiled_positions_correctly(self):
         self.model.tiled_plot_positions = {}
-        self.presenter.update_model_tile_plot_positions('run')
+        self.view.get_tiled_by_type.return_value = 'run'
+        self.presenter.update_model_tile_plot_positions()
 
         self.assertEqual(self.model.tiled_plot_positions, self.tiled_runs)
 
         self.model.tiled_plot_positions = {}
-        self.presenter.update_model_tile_plot_positions('Group')
+        self.view.get_tiled_by_type.return_value = 'group'
+        self.presenter.update_model_tile_plot_positions()
 
         self.assertEqual(self.model.tiled_plot_positions, self.tiled_group)
 
     def test_workspace_plot_axis_returns_correctly(self):
-
         # test tiled by group
         self.create_axis(len(self.tiled_group))
         self.view.get_tiled_by_type.return_value = 'group'
@@ -120,7 +127,7 @@ class PlottingWidgetPresenterTestTiled(unittest.TestCase):
         replace_index = 2
         workspace_list = self.group_workspace_list
         self.model.plotted_workspaces = workspace_list
-        self.presenter.get_workspaces_to_plot = mock.MagicMock(return_value=workspace_list)
+        self.presenter.workspace_finder.get_workspaces_to_plot = mock.MagicMock(return_value=workspace_list)
         self.model.tiled_plot_positions = self.tiled_group
         self.view.get_tiled_by_type.return_value = 'group'
 
@@ -169,7 +176,7 @@ class PlottingWidgetPresenterTestTiled(unittest.TestCase):
         workspace_list = self.group_workspace_list
         self.model.tiled_plot_positions = self.tiled_group
         self.view.get_tiled_by_type.return_value = 'group'
-        self.presenter.get_workspaces_to_plot = mock.MagicMock(return_value=workspace_list)
+        self.presenter.workspace_finder.get_workspaces_to_plot = mock.MagicMock(return_value=workspace_list)
         self.presenter.get_workspace_legend_label = mock.MagicMock(return_value='label')
         workspace_indices = [0]
         errors = True
@@ -193,7 +200,7 @@ class PlottingWidgetPresenterTestTiled(unittest.TestCase):
         workspace_list = self.group_workspace_list
         self.model.tiled_plot_positions = self.tiled_group
         self.view.get_tiled_by_type.return_value = 'group'
-        self.presenter.get_workspaces_to_plot = mock.MagicMock(return_value=workspace_list)
+        self.presenter.workspace_finder.get_workspaces_to_plot = mock.MagicMock(return_value=workspace_list)
         self.presenter.get_workspace_legend_label = mock.MagicMock(return_value='label')
         workspace_indices = [0]
         errors = True
@@ -232,7 +239,7 @@ class PlottingWidgetPresenterTestTiled(unittest.TestCase):
         self.model.plotted_workspaces = self.group_workspace_list[0:2]
         self.model.tiled_plot_positions = {}
         self.view.get_tiled_by_type.return_value = 'group'
-        self.presenter.get_workspaces_to_plot = mock.MagicMock(return_value=self.group_workspace_list)
+        self.presenter.workspace_finder.get_workspaces_to_plot = mock.MagicMock(return_value=self.group_workspace_list)
         workspace_indices = [0]
         errors = True
         plot_kwargs = {'distribution': True, 'autoscale_on_update': False, 'label': 'MUSR62260'}
@@ -283,6 +290,62 @@ class PlottingWidgetPresenterTestTiled(unittest.TestCase):
             self.model.add_workspace_to_plot.assert_any_call(self.view.get_axes()[i],
                                                              fit_information.output_workspace_names[i], [2],
                                                              errors=False, plot_kwargs=mock.ANY)
+
+    def test_handle_subplot_changed_in_options_retrieves_correct_axis_limits(self):
+        subplot = '3'
+        index = int(subplot) - 1
+        xlims = [0, 10]
+        ylims = [-2, 2]
+        self.view.plot_options.get_selection.return_value = [subplot]
+        self.presenter.get_x_lim_from_subplot = mock.MagicMock(return_value=xlims)
+        self.presenter.get_y_lim_from_subplot = mock.MagicMock(return_value=ylims)
+
+        self.presenter.handle_subplot_changed_in_options()
+
+        self.presenter.get_x_lim_from_subplot.assert_called_with(index)
+        self.presenter.get_y_lim_from_subplot.assert_called_with(index)
+
+    def test_handle_x_lims_changed_in_figure_view_updates_axis_if_subplot_selected_in_options(self):
+        subplot = '3'
+        index = int(subplot) - 1
+        xlims = [0, 10]
+        axis = self.view.get_axes()[index]
+        axis.get_xlim = mock.MagicMock(return_value=xlims)
+        self.view.plot_options.get_selection.return_value = [subplot]
+
+        self.presenter.handle_x_axis_limits_changed_in_figure_view(axis)
+
+        self.view.plot_options.set_plot_x_range.assert_called_once_with(xlims)
+
+    def test_handle_x_lims_changed_in_figure_view_does_not_update_if_subplot_not_selected(self):
+        subplot = '3'
+        axis = self.view.get_axes()[0]
+        self.view.plot_options.get_selection.return_value = [subplot]
+
+        self.presenter.handle_x_axis_limits_changed_in_figure_view(axis)
+
+        self.view.plot_options.set_plot_x_range.assert_not_called()
+
+    def test_handle_y_lims_changed_in_figure_view_updates_axis_if_subplot_selected_in_options(self):
+        subplot = '3'
+        index = int(subplot) - 1
+        ylims = [-2, 2]
+        axis = self.view.get_axes()[index]
+        axis.get_ylim = mock.MagicMock(return_value=ylims)
+        self.view.plot_options.get_selection.return_value = [subplot]
+
+        self.presenter.handle_y_axis_limits_changed_in_figure_view(axis)
+
+        self.view.plot_options.set_plot_y_range.assert_called_once_with(ylims)
+
+    def test_handle_y_lims_changed_in_figure_view_does_not_update_if_correct_subplot_not_selected(self):
+        subplot = '3'
+        axis = self.view.get_axes()[0]
+        self.view.plot_options.get_selection.return_value = [subplot]
+
+        self.presenter.handle_y_axis_limits_changed_in_figure_view(axis)
+
+        self.view.plot_options.set_plot_y_range.assert_not_called()
 
 
 if __name__ == '__main__':
