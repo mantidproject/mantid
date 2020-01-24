@@ -145,14 +145,16 @@ Output:
    print("Got details on the peaks fitted for {0:d} detector(s)".format(peaks_info.rowCount()))
    print("Was the file created? {}".format(os.path.exists(pos_filename)))
    with open(pos_filename) as csvf:
-      reader = csv.reader(csvf, dialect='excel')
+      reader = csv.reader(csvf, dialect='excel', delimiter="\t")
+      next(reader)  # Skip the two metadata lines
       next(reader)
       calibOK = True
       for i,row in enumerate(reader):
          cal_pos = pos_table.column(2)[i]
-         calibOK = calibOK and (abs(float(row[4]) - cal_pos.getX()) < 1e-6) and\
-                   (abs(float(row[5]) - cal_pos.getY()) < 1e-6) and\
-                   (abs(float(row[6]) - cal_pos.getZ()) < 1e-6)
+         detector_pos_list = row[2].strip("[]").split(',')
+         calibOK = calibOK and (float(detector_pos_list[0]) - cal_pos.getX()) < 1e-6 and\
+                               (float(detector_pos_list[1]) - cal_pos.getY()) < 1e-6 and\
+                               (float(detector_pos_list[2]) - cal_pos.getZ()) < 1e-6
          if not calibOK: break
    print("Does the calibration file have the expected values? {}".format(calibOK))
 
