@@ -173,7 +173,6 @@ void LoadILLTOF2::loadInstrumentDetails(NeXus::NXEntry &firstEntry) {
     m_monitorName = "monitor1";
   else {
     std::string message("Cannot find monitor[1] in the Nexus file!");
-    g_log.error(message);
     throw std::runtime_error(message);
   }
 
@@ -263,7 +262,7 @@ void LoadILLTOF2::loadTimeDetails(NeXus::NXEntry &entry) {
 
     g_log.debug("Nexus Data:");
     g_log.debug() << " ChannelWidth: " << m_channelWidth << '\n';
-    g_log.debug() << " TimeOfFlightDealy: " << m_timeOfFlightDelay << '\n';
+    g_log.debug() << " TimeOfFlightDelay: " << m_timeOfFlightDelay << '\n';
     g_log.debug() << " Wavelength: " << m_wavelength << '\n';
   } // the other case is the diffraction mode for PANTHER, where nothing is
     // needed here

@@ -9,13 +9,11 @@ Diffraction Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
-New
-############
-- New loader for PANTHER instrument in diffraction mode.
-
 
 Improvements
 ############
+
+- :ref:`LoadILLTOF2 <algm-LoadILLTOF-v2>` now supports data from PANTHER used in diffraction mode.
 
 Powder Diffraction
 ------------------
