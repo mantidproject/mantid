@@ -255,6 +255,7 @@ class JanaFormat(object):
             for peak in self._workspace:
                 if self._num_mod_vec > 0:
                     # if this is a main peak write it out. if not decide if it should be in this file
+                    hkl = peak.getIntHKL()
                     mnp = peak.getIntMNP()
                     if self._modulation_col_num is None:
                         # write all modulation indices
@@ -277,9 +278,10 @@ class JanaFormat(object):
                             continue
                 else:
                     # no modulated structure information
+                    hkl = peak.getHKL()
                     modulation_indices = []
                 self._peaks.append(
-                    self.create_peak_line(peak.getIntHKL(), modulation_indices,
+                    self.create_peak_line(hkl, modulation_indices,
                                           peak.getIntensity(), peak.getSigmaIntensity(),
                                           peak.getWavelength(),
                                           get_two_theta(peak.getDSpacing(), peak.getWavelength())))
