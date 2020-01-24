@@ -16,7 +16,6 @@ from mantid.kernel import Logger
 import isis_reduction_steps
 import isis_reducer
 from centre_finder import *
-# import SANSReduction
 from mantid.simpleapi import *
 from mantid.api import WorkspaceGroup, ExperimentInfo
 import copy
@@ -24,6 +23,15 @@ from SANSadd2 import *
 import SANSUtility as su
 from SANSUtility import deprecated
 import SANSUserFileParser as UserFileParser
+
+import warnings
+warnings.simplefilter("default", category=DeprecationWarning)
+warnings.warn("This ISIS Command Interface is deprecated.\n"
+              "Please change 'import ISISCommandInterface' or 'from ISISCommandInterface'"
+              "to use 'sans.command_interface.ISISCommandInterface' instead.", DeprecationWarning,
+              stacklevel=2)
+warnings.simplefilter("ignore", category=DeprecationWarning)
+
 sanslog = Logger("SANS")
 
 # disable plotting if running outside Mantidplot

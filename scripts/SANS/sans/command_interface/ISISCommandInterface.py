@@ -333,7 +333,7 @@ def MaskFile(file_name):
 
     file_path = file_name if os.path.exists(file_name) else find_full_file_path(file_name)
 
-    if not file_path or not os.path.isfile(file_name):
+    if not file_path or not os.path.isfile(file_path):
         raise FileNotFoundError("Could not find MaskFile: {0}".format(file_name))
 
     print_message('#Opening "' + file_path + '"')
