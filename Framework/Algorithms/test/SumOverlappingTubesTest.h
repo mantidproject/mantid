@@ -14,6 +14,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataHandling/LoadILLTOF2.h"
 #include "MantidDataObjects/ScanningWorkspaceBuilder.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
@@ -672,6 +673,82 @@ public:
 
     AnalysisDataService::Instance().remove("testWS");
     AnalysisDataService::Instance().remove("outWS");
+  }
+
+  void test_PANTHER_2d() {
+    Mantid::DataHandling::LoadILLTOF2 loader;
+    loader.setRethrows(true);
+    loader.initialize();
+    loader.setPropertyValue("Filename", "ILL/PANTHER/001036.nxs");
+
+    std::string inputSpace = "inWS";
+    loader.setPropertyValue("OutputWorkspace", inputSpace);
+    loader.execute();
+
+    SumOverlappingTubes alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspaces", inputSpace);
+    alg.setProperty("OutputWorkspace", "outWS");
+    alg.setProperty("ScatteringAngleBinning", "0.5180645");
+    alg.setProperty("Normalise", true);
+    alg.setProperty("OutputType", "2D");
+    alg.setProperty("MirrorScatteringAngles", false);
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    auto outWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve("outWS"));
+
+    const auto &xAxis = outWS->getAxis(0);
+    TS_ASSERT_EQUALS(xAxis->length(), 296)
+    const auto &yAxis = outWS->getAxis(1);
+    TS_ASSERT_EQUALS(yAxis->length(), 256)
+
+    for (size_t i = 0; i < 256; i++) {
+      TS_ASSERT_DELTA(yAxis->getValue(i), -0.5925 + 2.2 * double(i) / 255, 1e-6)
+    }
+
+    TS_ASSERT_EQUALS(outWS->getSpectrum(14).y()[0], 27)
+    TS_ASSERT_EQUALS(outWS->getSpectrum(13).y()[293], 22)
+    TS_ASSERT_EQUALS(outWS->getSpectrum(239).y()[278], 88.5)
+    TS_ASSERT_EQUALS(outWS->getSpectrum(236).y()[93], 296)
+  }
+
+  void test_PANTHER_2dTubes() {
+    Mantid::DataHandling::LoadILLTOF2 loader;
+    loader.setRethrows(true);
+    loader.initialize();
+    loader.setPropertyValue("Filename", "ILL/PANTHER/001036.nxs");
+
+    std::string inputSpace = "inWS";
+    loader.setPropertyValue("OutputWorkspace", inputSpace);
+    loader.execute();
+
+    SumOverlappingTubes alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspaces", inputSpace);
+    alg.setProperty("OutputWorkspace", "outWS");
+    alg.setProperty("ScatteringAngleBinning", "0.5180645");
+    alg.setProperty("Normalise", true);
+    alg.setProperty("OutputType", "2DTubes");
+    alg.setProperty("MirrorScatteringAngles", false);
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    auto outWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve("outWS"));
+
+    const auto &xAxis = outWS->getAxis(0);
+    TS_ASSERT_EQUALS(xAxis->length(), 296)
+    const auto &yAxis = outWS->getAxis(1);
+    TS_ASSERT_EQUALS(yAxis->length(), 256)
+
+    for (size_t i = 0; i < 256; i++) {
+      TS_ASSERT_DELTA(yAxis->getValue(i), -0.5925 + 2.2 * double(i) / 255, 1e-6)
+    }
+
+    TS_ASSERT_EQUALS(outWS->getSpectrum(14).y()[0], 40)
+    TS_ASSERT_EQUALS(outWS->getSpectrum(13).y()[293], 27)
+    TS_ASSERT_EQUALS(outWS->getSpectrum(239).y()[278], 95)
+    TS_ASSERT_EQUALS(outWS->getSpectrum(236).y()[93], 401)
   }
 };
 
