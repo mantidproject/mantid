@@ -752,10 +752,12 @@ class Abins(PythonAlgorithm):
         if not (isinstance(fwhm, float) and 0.0 < fwhm < 10.0):
             raise RuntimeError("Invalid value of fwhm" + message_end)
 
-        # check delta_width
-        delta_width = abins.parameters.instruments['TwoDMap']['delta_width']
-        if not (isinstance(delta_width, float) and 0.0 < delta_width < 1.0):
-            raise RuntimeError("Invalid value of delta_width" + message_end)
+        # check 2D resolution
+        resolution_2d = abins.parameters.instruments['TwoDMap']['resolution']
+        if not isinstance(resolution_2d, float):
+            raise RuntimeError("Invalid value of abins.instruments"
+                               "['TwoDMap']['resolution']"
+                               + message_end)
 
     def _check_tosca_parameters(self, message_end=None):
         """

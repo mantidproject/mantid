@@ -109,6 +109,18 @@ class SData(collections.abc.Sequence):
                     if not isinstance(item[S_LABEL][order], np.ndarray):
                         raise ValueError("Numpy array was expected.")
 
+            elif item == "frequencies":
+                step = self._bin_width
+                bins = np.arange(start=abins.parameters.sampling['min_wavenumber'],
+                                 stop=abins.parameters.sampling['max_wavenumber'] + step,
+                                 step=step,
+                                 dtype=FLOAT_TYPE)
+
+                freq_points = bins[:-1] + (step / 2)
+                if not np.array_equal(item, freq_points):
+                    raise ValueError("Invalid frequencies, these should correspond to the mid points of "
+                                     "the resampled bins.")
+
             else:
                 raise ValueError("Invalid keyword " + item)
 
