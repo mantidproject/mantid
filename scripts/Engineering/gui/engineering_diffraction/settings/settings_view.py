@@ -64,3 +64,13 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
 
     def set_van_recalc(self, checked):
         self.check_vanRecalc.setChecked(checked)
+
+    # =================
+    # Force Actions
+    # =================
+
+    def find_full_calibration(self):
+        self.finder_fullCalib.findFiles(True)
+
+    def find_save(self):
+        self.finder_save.findFiles(True)
