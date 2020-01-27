@@ -125,7 +125,7 @@ class CalibrationPresenter(object):
         if not self.validate_run_numbers():
             create_error_message(self.view, "Check run numbers/path is valid.")
             return False
-        if not self.cropping_widget.is_valid():
+        if self.view.get_crop_checked() and not self.cropping_widget.is_valid():
             create_error_message(self.view, "Check cropping values are valid.")
             return False
         return True
