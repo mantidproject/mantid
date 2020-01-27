@@ -111,7 +111,7 @@ class CalibrationModel(object):
         except RuntimeError:
             logger.error("Invalid file selected: ", file_path)
             return
-        vanadium_corrections.fetch_correction_workspaces(van_no, instrument)
+        vanadium_corrections.fetch_correction_workspaces(instrument+van_no, instrument)
         return instrument, van_no, sample_no
 
     @staticmethod
@@ -285,7 +285,8 @@ class CalibrationModel(object):
         :param bank: Optional parameter to crop by bank
         :param spectrum_numbers: Optional parameter to crop using spectrum numbers.
         """
-        kwargs = {"ceria_run": sample_path, "vanadium_run": vanadium_path}
+        kwargs = {"ceria_run": path_handling.get_run_number_from_path(sample_path, instrument),
+                  "vanadium_run": path_handling.get_run_number_from_path(vanadium_path, instrument)}
 
         def south_kwargs():
             kwargs["template_file"] = SOUTH_BANK_TEMPLATE_FILE
