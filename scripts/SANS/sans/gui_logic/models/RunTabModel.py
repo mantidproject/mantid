@@ -22,9 +22,9 @@ from sans.user_file.settings_tags import (OtherId, DetectorId, LimitsId, SetId, 
                                           q_rebin_values, mask_angle_entry, range_entry, position_entry)
 
 
-class StateGuiModel(ModelCommon):
+class RunTabModel(ModelCommon):
     def __init__(self, user_file_items):
-        super(StateGuiModel, self).__init__(user_file_items)
+        super(RunTabModel, self).__init__(user_file_items)
         self._user_file_items = user_file_items
 
     def __eq__(self, other):

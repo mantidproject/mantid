@@ -21,9 +21,9 @@ from sans.user_file.state_director import StateDirectorISIS
 
 
 class GuiStateDirector(object):
-    def __init__(self, table_model, state_gui_model, facility):
+    def __init__(self, table_model, run_tab_model, facility):
         self._table_model = table_model
-        self._state_gui_model = state_gui_model
+        self._run_tab_model = run_tab_model
         self._facility = facility
 
     def __eq__(self, other):
@@ -56,27 +56,27 @@ class GuiStateDirector(object):
         data = data_builder.build()
 
         # 2. Add elements from the options column
-        state_gui_model = copy.deepcopy(self._state_gui_model)
+        run_tab_model = copy.deepcopy(self._run_tab_model)
         options_column_model = table_index_model.options_column_model
-        self._apply_column_options_to_state(options_column_model, state_gui_model)
+        self._apply_column_options_to_state(options_column_model, run_tab_model)
 
         # 3. Add other columns
         output_name = table_index_model.output_name
         if output_name:
-            state_gui_model.output_name = output_name
+            run_tab_model.output_name = output_name
 
         if table_index_model.sample_thickness:
-            state_gui_model.sample_thickness = float(table_index_model.sample_thickness)
+            run_tab_model.sample_thickness = float(table_index_model.sample_thickness)
         if table_index_model.sample_height:
-            state_gui_model.sample_height = float(table_index_model.sample_height)
+            run_tab_model.sample_height = float(table_index_model.sample_height)
         if table_index_model.sample_width:
-            state_gui_model.sample_width = float(table_index_model.sample_width)
+            run_tab_model.sample_width = float(table_index_model.sample_width)
         if table_index_model.sample_shape:
-            state_gui_model.sample_shape = table_index_model.sample_shape
+            run_tab_model.sample_shape = table_index_model.sample_shape
 
         # 4. Create the rest of the state based on the builder.
         user_file_state_director = StateDirectorISIS(data, file_information)
-        settings = copy.deepcopy(state_gui_model.settings)
+        settings = copy.deepcopy(run_tab_model.settings)
         user_file_state_director.add_state_settings(settings)
 
         return user_file_state_director.construct()
@@ -98,38 +98,38 @@ class GuiStateDirector(object):
                 pass
 
     @staticmethod
-    def _apply_column_options_to_state(options_column_model, state_gui_model):
+    def _apply_column_options_to_state(options_column_model, run_tab_model):
         """
         Apply the column setting of the user to the state for that particular row.
 
         Note if you are extending the options functionality, then you will have to add the property here.
         :param options_column_model: the option column model with the row specific settings
-        :param state_gui_model: the state gui model
+        :param run_tab_model: the state gui model
         """
         options = options_column_model.get_options()
 
         # Here we apply the correction to the state depending on the settings in the options. This is not very nice,
         # but currently it is not clear how to solve this differently.
         if "WavelengthMin" in options.keys():
-            state_gui_model.wavelength_min = options["WavelengthMin"]
+            run_tab_model.wavelength_min = options["WavelengthMin"]
 
         if "WavelengthMax" in options.keys():
-            state_gui_model.wavelength_max = options["WavelengthMax"]
+            run_tab_model.wavelength_max = options["WavelengthMax"]
 
         if "EventSlices" in options.keys():
-            state_gui_model.event_slices = options["EventSlices"]
+            run_tab_model.event_slices = options["EventSlices"]
 
         if "MergeScale" in options.keys():
-            state_gui_model.merge_scale = options["MergeScale"]
+            run_tab_model.merge_scale = options["MergeScale"]
 
         if "MergeShift" in options.keys():
-            state_gui_model.merge_shift = options["MergeShift"]
+            run_tab_model.merge_shift = options["MergeShift"]
 
         if "PhiMin" in options.keys():
-            state_gui_model.phi_limit_min = options["PhiMin"]
+            run_tab_model.phi_limit_min = options["PhiMin"]
 
         if "PhiMax" in options.keys():
-            state_gui_model.phi_limit_max = options["PhiMax"]
+            run_tab_model.phi_limit_max = options["PhiMax"]
 
         if "UseMirror" in options.keys():
-            state_gui_model.phi_limit_use_mirror = options["UseMirror"]
+            run_tab_model.phi_limit_use_mirror = options["UseMirror"]

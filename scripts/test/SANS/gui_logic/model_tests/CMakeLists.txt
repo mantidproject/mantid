@@ -1,4 +1,5 @@
 set(TEST_PY_FILES
+    run_tab_model_test.py
     settings_adjustment_model_test.py
     )
 

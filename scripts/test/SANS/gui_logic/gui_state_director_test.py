@@ -10,7 +10,7 @@ import os
 import unittest
 
 from sans.common.enums import SANSFacility
-from sans.gui_logic.models.state_gui_model import StateGuiModel
+from sans.gui_logic.models.RunTabModel import RunTabModel
 from sans.gui_logic.models.table_model import (TableModel, TableIndexModel)
 from sans.gui_logic.presenter.gui_state_director import GuiStateDirector
 from sans.state.state import State
@@ -29,17 +29,17 @@ class GuiStateDirectorTest(unittest.TestCase):
         return table_model
 
     @staticmethod
-    def _get_state_gui_model():
+    def _get_run_tab_model():
         user_file_path = create_user_file(sample_user_file)
         user_file_reader = UserFileReader(user_file_path)
         user_file_items = user_file_reader.read_user_file()
         if os.path.exists(user_file_path):
             os.remove(user_file_path)
-        return StateGuiModel(user_file_items)
+        return RunTabModel(user_file_items)
 
     def test_that_can_construct_state_from_models(self):
         table_model = self._get_table_model()
-        state_model = self._get_state_gui_model()
+        state_model = self._get_run_tab_model()
         director = GuiStateDirector(table_model, state_model, SANSFacility.ISIS)
         state = director.create_state(0)
         self.assertTrue(isinstance(state, State))
@@ -57,13 +57,13 @@ class GuiStateDirectorTest(unittest.TestCase):
                                                "", "", "", "", "", "")
         table_model = TableModel()
         table_model.add_table_entry(0, table_index_model)
-        state_model = self._get_state_gui_model()
+        state_model = self._get_run_tab_model()
         director = GuiStateDirector(table_model, state_model, SANSFacility.ISIS)
         self.assertRaises(ValueError, director.create_state, 0)
 
     def test_that_column_options_are_set_on_state(self):
         table_model = self._get_table_model(option_string="WavelengthMin=3.14,WavelengthMax=10.3")
-        state_model = self._get_state_gui_model()
+        state_model = self._get_run_tab_model()
         director = GuiStateDirector(table_model, state_model, SANSFacility.ISIS)
 
         state = director.create_state(0)
@@ -73,7 +73,7 @@ class GuiStateDirectorTest(unittest.TestCase):
 
     def test_that_shift_and_scale_set_on_state_from_options_column(self):
         table_model = self._get_table_model(option_string="MergeScale=1.2,MergeShift=0.5")
-        state_model = self._get_state_gui_model()
+        state_model = self._get_run_tab_model()
         director = GuiStateDirector(table_model, state_model, SANSFacility.ISIS)
 
         state = director.create_state(0)

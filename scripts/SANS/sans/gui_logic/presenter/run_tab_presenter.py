@@ -34,7 +34,7 @@ from sans.gui_logic.models.beam_centre_model import BeamCentreModel
 from sans.gui_logic.models.create_state import create_states
 from sans.gui_logic.models.diagnostics_page_model import run_integral, create_state
 from sans.gui_logic.models.settings_adjustment_model import SettingsAdjustmentModel
-from sans.gui_logic.models.state_gui_model import StateGuiModel
+from sans.gui_logic.models.RunTabModel import RunTabModel
 from sans.gui_logic.models.table_model import TableModel, TableIndexModel
 from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
 from sans.gui_logic.presenter.diagnostic_presenter import DiagnosticsPagePresenter
@@ -372,7 +372,7 @@ class RunTabPresenter(PresenterCommon):
             else:
                 try:
                     # 4. Populate the model and update sub-presenters
-                    self._model = StateGuiModel(user_file_items)
+                    self._model = RunTabModel(user_file_items)
                     self._settings_adjustment_presenter.set_model(
                         SettingsAdjustmentModel(user_file_items=user_file_items))
                     # 5. Update the views.

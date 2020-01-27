@@ -775,8 +775,8 @@ pre-processes some of this input and passes the information via a user input dic
 Usage via GUI
 **************
 
-The GUI stores the user input dictionary in the *StateGuiModel* class
-in *state_gui_model.py* which is then consumed by the *GuiStateDirector* in
+The GUI stores the user input dictionary in the *RunTabModel* class
+in *run_tab_model.py* which is then consumed by the *GuiStateDirector* in
 *gui_state_directory.py*. The state model contains most of the information required
 for the state generation. Some further settings, especially regarding the data
 which is to be reduced, is stored in the *TableModel* in *table_model.py*.
