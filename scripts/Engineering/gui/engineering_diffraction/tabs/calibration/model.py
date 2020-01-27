@@ -202,7 +202,7 @@ class CalibrationModel(object):
         plot_bank_2 = fig.add_subplot(gs[1], projection="mantid")
 
         for ax, ws, bank in zip([plot_bank_1, plot_bank_2], [bank_1_ws, bank_2_ws], [1, 2]):
-            ax.plot(ws, wkspIndex=0, linestyle="--", marker="o", markersize="3")
+            ax.plot(ws, wkspIndex=0, linestyle="", marker="o", markersize="3")
             ax.plot(ws, wkspIndex=1, linestyle="--", marker="o", markersize="3")
             ax.set_title("Engg Gui Difc Zero Peaks Bank " + str(bank))
             ax.legend(("Peaks Fitted", "DifC/TZero Fitted Straight Line"))
@@ -213,12 +213,13 @@ class CalibrationModel(object):
     def _plot_difc_tzero_single_bank_or_custom(bank):
         bank_ws = Ads.retrieve("engggui_difc_zero_peaks_bank_" + str(bank))
 
-        ax = plot([bank_ws], [0, 1],
+        ax = plot([bank_ws], [0],
                   plot_kwargs={
-                      "linestyle": "--",
+                      "linestyle": "",
                       "marker": "o",
                       "markersize": "3"
                   }).gca()
+        ax.plot(bank_ws, wkspIndex=1, linestyle="--", marker="o", markersize="3")
         ax.set_title("Engg Gui Difc Zero Peaks Bank " + str(bank))
         ax.legend(("Peaks Fitted", "DifC/TZero Fitted Straight Line"))
         ax.set_xlabel("Expected Peaks Centre(dSpacing, A)")
