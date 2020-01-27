@@ -39,6 +39,9 @@ class SpectraSelection(object):
     Waterfall = 1
     Tiled = 2
 
+    Surface = 3
+    Contour = 4
+
     def __init__(self, workspaces):
         self.workspaces = workspaces
         self.wksp_indices = None
@@ -138,6 +141,9 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         if self._advanced:
             ui.advanced_options_widget = AdvancedPlottingOptionsWidget(parent=self)
             ui.layout.replaceWidget(ui.advanced_plots_dummy_widget, ui.advanced_options_widget)
+            if len(self._workspaces) > 2:
+                ui.plotType.addItem("Surface")
+                ui.plotType.addItem("Contour")
             self.setWindowTitle("Plot Advanced")
 
     def _set_placeholder_text(self):
@@ -225,8 +231,16 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         if self._overplot:
             self._ui.plotType.setCurrentIndex(0)
             return
+
         if self.selection:
             self.selection.plot_type = new_index
+
+        new_text = self._ui.plotType.itemText(new_index)
+        if new_text == "Surface" or new_text == "Contour":
+            self._ui.advanced_options_widget.ui.error_bars_check_box.setChecked(False)
+            self._ui.advanced_options_widget.ui.error_bars_check_box.setEnabled(False)
+        else:
+            self._ui.advanced_options_widget.ui.error_bars_check_box.setEnabled(True)
 
     def _parse_wksp_indices(self):
         wksp_indices = parse_selection_str(self._ui.wkspIndices.text(), self.wi_min, self.wi_max)
