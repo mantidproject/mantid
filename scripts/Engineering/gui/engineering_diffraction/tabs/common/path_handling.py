@@ -25,9 +25,9 @@ def get_output_path():
     return location if location is not None else ""
 
 
-def load_workspace(file_path, **kwargs):
+def load_workspace(file_path):
     try:
-        return Load(Filename=file_path, OutputWorkspace="engggui_calibration_sample_ws", **kwargs)
+        return Load(Filename=file_path, OutputWorkspace="engggui_calibration_sample_ws")
     except Exception as e:
         logger.error("Error while loading workspace. "
                      "Could not run the algorithm Load successfully for the data file "
