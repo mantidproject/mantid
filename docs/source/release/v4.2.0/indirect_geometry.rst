@@ -41,15 +41,12 @@ Algorithms
 Simulations Interface
 ---------------------
 
-Improvements
-############
-- Improved the output plotting options so that it is now possible to choose a list of spectra
-  for plotting for the relevant tabs.
-- Improved the output plotting options so that they now show the workspace currently selected.
-  The options have also been made more consistent across the interface.
 - Improved the format of Abins HDF5 files to include readable set of advanced parameters. Values
   in the AbinsParameters module have been re-organised into a logical heirarchy; user scripts
   may need to be modified to match this.
+
+BugFixes
+########
 
 - A bug has been fixed in :ref:`MatchPeaks <algm-MatchPeaks>` which was causing wrong alignment in :ref:`IndirectILLReductionQENS <algm-IndirectILLReductionQENS>` with unmirror option 7, when the peaks in the alignment run are too narrow to be fitted.
 - Fixed a bug where mantid could crash when using the S(Q,w) tab with a workspace created by the Energy Transfer Tab.
