@@ -103,11 +103,6 @@ def move_backstop_monitor(ws, move_info, monitor_offset, monitor_spectrum_number
     :param monitor_offset: Offset to shift by (m)
     :param monitor_spectrum_number: The spectrum number of the monitor to shift
     """
-    # Back out early so we don't shift the monitor from the IDF position to the
-    # rear detector position by accident
-    if monitor_offset == 0.0:
-        return
-
     monitor_spectrum_number_as_string = str(monitor_spectrum_number)
     # TODO we should pass the detector ID through, not the spec num
     monitor_n_name = move_info.monitor_names[monitor_spectrum_number_as_string]
