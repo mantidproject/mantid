@@ -19,4 +19,10 @@ Improved
   can copy the history of a workspace to their clipboard or a file and the data
   will be reproduced on that machine without requiring editing of the script.
 
+Fixed
+#####
+- The user's selected reduction mode in the GUI will be respected when a
+  custom user file is used in the GUI.
+
+
 :ref:`Release 4.3.0 <v4.3.0>`

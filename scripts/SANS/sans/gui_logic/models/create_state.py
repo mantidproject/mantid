@@ -7,7 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 import os
 from mantid.api import FileFinder
-from sans.gui_logic.models.state_gui_model import StateGuiModel
+from sans.gui_logic.models.RunTabModel import RunTabModel
 from sans.gui_logic.presenter.gui_state_director import (GuiStateDirector)
 from sans.user_file.user_file_reader import UserFileReader
 from mantid.kernel import Logger
@@ -84,9 +84,13 @@ def create_gui_state_from_userfile(row_user_file, state_model):
     if not os.path.exists(user_file_path):
         raise RuntimeError("The user path {} does not exist. Make sure a valid user file path"
                            " has been specified.".format(user_file_path))
-
     user_file_reader = UserFileReader(user_file_path)
     user_file_items = user_file_reader.read_user_file()
-    state_gui_model = StateGuiModel(user_file_items)
-    state_gui_model.save_types = state_model.save_types
-    return state_gui_model
+    run_tab_model = RunTabModel(user_file_items)
+
+    # Coming up with a hierarchy of which attributes should be copied when a user specifies their own
+    # custom user file is full of caveats. So we copy the two users "intuitively expect":- Save options and
+    # their selected reduction dimensionality
+    run_tab_model.reduction_dimensionality = state_model.reduction_dimensionality
+    run_tab_model.save_types = state_model.save_types
+    return run_tab_model
