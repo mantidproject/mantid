@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
-import platform
 import unittest
 
 import matplotlib
@@ -309,10 +308,7 @@ class ApplyAllPropertiesTest(unittest.TestCase):
                          self.new_legend.get_frame().get_alpha())
 
     def test_apply_properties_on_figure_with_legend_sets_entries_font(self):
-        if platform.system() == "Windows":
-            new_legend_props['entries_font'] = 'DejaVu Sans'
-        self.assertEqual(new_legend_props['entries_font'],
-                         self.new_legend.get_texts()[0].get_fontname())
+        self.assertTrue(self.new_legend.get_texts()[0].get_fontname().endswith('Sans'))
 
     def test_apply_properties_on_figure_with_legend_sets_entries_size(self):
         self.assertEqual(new_legend_props['entries_size'],
@@ -323,10 +319,7 @@ class ApplyAllPropertiesTest(unittest.TestCase):
                          self.new_legend.get_texts()[0].get_color())
 
     def test_apply_properties_on_figure_with_legend_sets_title_font(self):
-        if platform.system() == "Windows":
-            new_legend_props['title_font'] = 'DejaVu Sans'
-        self.assertEqual(new_legend_props['title_font'],
-                         self.new_legend.get_title().get_fontname())
+        self.assertTrue(self.new_legend.get_title().get_fontname().endswith('Sans'))
 
     def test_apply_properties_on_figure_with_legend_sets_title_size(self):
         self.assertEqual(new_legend_props['title_size'],

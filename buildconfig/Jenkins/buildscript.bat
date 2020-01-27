@@ -34,7 +34,7 @@ if !_grep_exe! == "" (
 @echo Using grep: !_grep_exe!
 
 :: ParaView version
-set PARAVIEW_DIR=%PARAVIEW_DIR%
+set PARAVIEW_DIR=%PARAVIEW_DIR%-python3
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Pre-processing steps on the workspace itself
@@ -185,7 +185,7 @@ if not "%JOB_NAME%"=="%JOB_NAME:debug=%" (
   set VATES_OPT_VAL=ON
 )
 
-call cmake.exe -G "%CM_GENERATOR%" -A %CM_ARCH% -DCMAKE_SYSTEM_VERSION=%SDK_VERS% -DCONSOLE=OFF -DENABLE_CPACK=ON -DWITH_PYTHON3=OFF -DMAKE_VATES=%VATES_OPT_VAL% -DParaView_DIR=%PARAVIEW_DIR% -DMANTID_DATA_STORE=!MANTID_DATA_STORE! -DUSE_PRECOMPILED_HEADERS=ON %PACKAGE_OPTS% ..
+call cmake.exe -G "%CM_GENERATOR%" -A %CM_ARCH% -DCMAKE_SYSTEM_VERSION=%SDK_VERS% -DCONSOLE=OFF -DENABLE_CPACK=ON -DWITH_PYTHON3=ON -DMAKE_VATES=%VATES_OPT_VAL% -DParaView_DIR=!PARAVIEW_DIR! -DMANTID_DATA_STORE=!MANTID_DATA_STORE! -DUSE_PRECOMPILED_HEADERS=ON %PACKAGE_OPTS% ..
 
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 

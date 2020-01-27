@@ -5,7 +5,7 @@
 %endif
 
 Name:           mantid-developer
-Version:        1.37
+Version:        1.38
 Release:        1%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
@@ -47,7 +47,6 @@ Requires: poco-devel >= 1.4.6
 Requires: PyQt4-devel
 Requires: python2-h5py >= 2.3.1
 Requires: python2-matplotlib
-Requires: python2-matplotlib-qt4
 Requires: python2-matplotlib-qt4
 Requires: python2-mock
 Requires: python2-psutil
@@ -97,6 +96,7 @@ Requires: python%{python3_pkgversion}-h5py
 Requires: python%{python3_pkgversion}-ipython
 Requires: python%{python3_pkgversion}-ipython-gui
 Requires: python%{python3_pkgversion}-matplotlib-qt5
+Requires: python%{python3_pkgversion}-matplotlib-qt4
 Requires: python%{python3_pkgversion}-numpy
 Requires: python%{python3_pkgversion}-psutil
 %{?fedora:Requires: python%{python3_pkgversion}-PyQt4-devel}
@@ -133,6 +133,9 @@ required for Mantid development.
 %files
 
 %changelog
+* Fri Jan 24 2020 Martyn Gigg <martyn.gigg@stfc.ac.uk>
+- Att matplotlib backend for Python 3
+
 * Thu Jan 16 2020 Martyn Gigg <martyn.gigg@stfc.ac.uk>
 - Merge fedora and rhel python 3 packages using python3_pkgversion
 
