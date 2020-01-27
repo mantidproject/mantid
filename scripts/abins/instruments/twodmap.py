@@ -5,7 +5,7 @@ import math
 import abins
 from abins.constants import FLOAT_TYPE, WAVENUMBER_TO_INVERSE_A
 from .instrument import Instrument
-from .broadening import broaden_spectrum
+from .broadening import broaden_spectrum, prebin_required_schemes
 
 
 class TwoDMap(Instrument):
@@ -53,22 +53,23 @@ class TwoDMap(Instrument):
         """
         Convolve discrete frequency spectrum with the resolution function for the TwoDMap instrument.
 
-        - The number of points using in the convolution kernel is set as abins.parameters.pkt_per_peak; setting this
-          value to 1 prevents any broadening.
-        - The resolution width is set as abins.parameters.direct_instrument_resolution
+        - The broadening parameters are set in abins.parameters.instruments['TwoDMap']
 
         :param frequencies: DFT frequencies for which resolution function should be calculated (frequencies in cm-1)
         :param s_dft:  discrete S calculated directly from DFT
         """
 
-        if abins.parameters.instruments['TwoDMap']['delta_width'] == 0:
-            points_freq = frequencies
-            broadened_spectrum = s_dft
+        if scheme == 'auto':
+            scheme = 'interpolate'
 
-        else:
-            sigma = np.full(frequencies.size, self._calculate_sigma(), dtype=FLOAT_TYPE)
-            points_freq, broadened_spectrum = broaden_spectrum(frequencies, bins, s_dft, sigma, scheme=scheme)
+        if scheme in prebin_required_schemes:
+            s_dft, _ = np.histogram(frequencies, bins=bins, weights=s_dft, density=False)
+            frequencies = (bins[1:] + bins[:-1]) / 2
 
+        sigma = np.full(frequencies.size, self._calculate_sigma(), dtype=FLOAT_TYPE)
+
+        points_freq, broadened_spectrum = broaden_spectrum(frequencies, bins, s_dft, sigma,
+                                                           scheme=scheme)
         return points_freq, broadened_spectrum
 
     def set_incident_energy(self, e_init=None):

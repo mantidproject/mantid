@@ -423,16 +423,13 @@ class SPowderSemiEmpiricalCalculator(object):
                                                                                             s_dft=value_dft,
                                                                                             scheme=broadening_scheme)
 
-            # local_freq, local_coeff = self._calculate_s_over_threshold(s=rebined_broad_spectrum,
-            #                                                            freq=local_freq,
-            #                                                            coeff=local_coeff)
         else:
             rebinned_broad_spectrum = np.zeros_like(self._frequencies)
 
         # multiply by k-point weight
         rebinned_broad_spectrum = rebinned_broad_spectrum * self._weight
 
-        return local_freq, local_coeff, rebined_broad_spectrum
+        return local_freq, local_coeff, rebinned_broad_spectrum
 
     def _helper_atom_angle(self, atom=None, local_freq=None, local_coeff=None, order=None, return_freq=True, q2=None):
         """
@@ -443,10 +440,10 @@ class SPowderSemiEmpiricalCalculator(object):
         :param local_freq: frequency from the previous transition
         :param local_coeff: coefficients from the previous transition
         :param order: order of quantum event
-        :param return_freq: if true frequencies and corresponding coefficients are returned together with rebined
-                            spectrum; otherwise only rebined spectrum is returned
+        :param return_freq: if true frequencies and corresponding coefficients are returned together with rebinned
+                            spectrum; otherwise only rebinned spectrum is returned
         :return: (optionally) frequencies and corresponding coefficients are returned together
-                 (always) with rebined spectrum
+                 (always) with rebinned spectrum
         """
         # calculate discrete S for the given quantum order event
         value_dft = self._calculate_order[order](q2=q2,
@@ -457,8 +454,8 @@ class SPowderSemiEmpiricalCalculator(object):
                                                  b_tensor=self._b_tensors[atom],
                                                  b_trace=self._b_traces[atom])
 
-        # rebin if necessary
-        rebined_freq, rebined_spectrum = self._rebin_data_opt(array_x=local_freq, array_y=value_dft)
+        # # rebin if necessary
+        # rebinned_freq, rebinned_spectrum = self._rebin_data_opt(array_x=local_freq, array_y=value_dft)
 
         # convolve with instrumental resolution
         broadening_scheme = abins.parameters.sampling['broadening_scheme']
