@@ -620,7 +620,9 @@ void MuonFitPropertyBrowser::populateFunctionNames() {
     const std::vector<std::string> categories = f->categories();
     bool muon = false;
     for (const auto &category : categories) {
-      if ((category == "Muon") || (category == "General") ||
+      if ((category == "MuonModelling") || (category == "MuonSpecific") ||
+          (category == "MuonGeneric") ||
+          (category == "General") ||
           (category == "Background"))
         muon = true;
     }
