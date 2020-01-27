@@ -112,7 +112,9 @@ public:
                     double &sigi);
 
   double estimateSignalToNoiseRatio(const IntegrationParameters &params,
-                                    const Mantid::Kernel::V3D &center);
+                                    const Mantid::Kernel::V3D &center,
+                                    bool forceSpherical = false,
+                                    double sphericityTol = 0.02);
 
 private:
   /// Get a list of events for a given Q

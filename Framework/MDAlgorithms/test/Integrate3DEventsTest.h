@@ -440,18 +440,16 @@ public:
   }
 
   void test_estimateSignalToNoiseRatioWithBackgroundAndOnePercentCulling() {
-    doTestSignalToNoiseRatio(true, 99.3898, 5.4788, 1.0597);
+    doTestSignalToNoiseRatio(true, 0.05);
   }
 
   void test_estimateSignalToNoiseRatioWithBackgroundAndNoOnePercentCulling() {
-    doTestSignalToNoiseRatio(false, 99.3417, 5.0972, 0.5821);
+    doTestSignalToNoiseRatio(false, 0.05);
   }
 
 private:
   void doTestSignalToNoiseRatio(const bool useOnePercentBackgroundCorrection,
-                                const double expectedRatio1,
-                                const double expectedRatio2,
-                                const double expectedRatio3) {
+                                const double expectedFractionalDifference) {
     V3D peak_1(20, 0, 0);
     V3D peak_2(0, 20, 0);
     V3D peak_3(0, 0, 20);
@@ -466,33 +464,74 @@ private:
     UBinv.setRow(1, V3D(0, .2, 0));
     UBinv.setRow(2, V3D(0, 0, .25));
 
-    std::vector<std::pair<std::pair<double, double>, V3D>> event_Qs;
-    const int numStrongEvents = 10000;
-    const int numWeakEvents = 100;
-    generatePeak(event_Qs, peak_1, 0.1, numStrongEvents, 1);   // strong peak
-    generatePeak(event_Qs, peak_2, 0.1, numWeakEvents, 1);     // weak peak
-    generatePeak(event_Qs, peak_3, 0.1, numWeakEvents / 2, 1); // very weak peak
-    generateUniformBackground(event_Qs, 10, -30, 30);
-
-    // Create integraton region + events & UB
-    Integrate3DEvents integrator(peak_q_list, UBinv, 1.5,
-                                 useOnePercentBackgroundCorrection);
-    integrator.addEvents(event_Qs, false);
-
+    // set integration parameters
     IntegrationParameters params;
     params.peakRadius = 0.5;
     params.backgroundInnerRadius = 0.5;
     params.backgroundOuterRadius = 0.8;
     params.regionRadius = 0.5;
     params.specifySize = true;
+    // calculate ratio of background shell to peak region
+    const auto volRatio =
+        pow(params.peakRadius, 3) / (pow(params.backgroundOuterRadius, 3) -
+                                     pow(params.backgroundInnerRadius, 3));
 
-    const auto ratio1 = integrator.estimateSignalToNoiseRatio(params, peak_1);
-    const auto ratio2 = integrator.estimateSignalToNoiseRatio(params, peak_2);
-    const auto ratio3 = integrator.estimateSignalToNoiseRatio(params, peak_3);
+    std::vector<std::pair<std::pair<double, double>, V3D>> event_Qs;
+    const int nPointsBg = 100000;   // counts in backgroundOuterRadius
+    const double ctsPerBgEvent = 1; // counts per bg event
+    const auto nBgEventsInPeakRegion =
+        nPointsBg *
+        (pow(params.peakRadius, 3) / pow(params.backgroundOuterRadius, 3));
+    const auto nBgEventsInShell = nBgEventsInPeakRegion / volRatio;
 
-    TS_ASSERT_DELTA(ratio1, expectedRatio1, 0.05);
-    TS_ASSERT_DELTA(ratio2, expectedRatio2, 0.05);
-    TS_ASSERT_DELTA(ratio3, expectedRatio3, 0.05);
+    std::vector<double> fracEvents{10, 1,
+                                   0.1}; // fraction of nBgEventsInPeakRegion
+    std::vector<int> nPeakEvents;
+    double ctsPerPeakEvent = 2;
+    for (size_t i = 0; i < peak_q_list.size(); i++) {
+      nPeakEvents.push_back(ceil(fracEvents[i] * nBgEventsInPeakRegion));
+      generatePeak(event_Qs, peak_q_list[i].second, 0.08, nPeakEvents.back(),
+                   ctsPerPeakEvent);
+      generateUniformBackgroundSpherical(
+          event_Qs, nPointsBg, peak_q_list[i].second,
+          params.backgroundOuterRadius, ctsPerBgEvent);
+    }
+
+    // Create integraton region + events & UB
+    Integrate3DEvents integrator(peak_q_list, UBinv, 1.5,
+                                 useOnePercentBackgroundCorrection);
+    integrator.addEvents(event_Qs, false);
+
+    // calculate signal-noise ratio
+    std::vector<double> fractionalDiff(peak_q_list.size());
+
+    for (size_t i = 0; i < peak_q_list.size(); i++) {
+
+      auto ratio = integrator.estimateSignalToNoiseRatio(
+          params, peak_q_list[i].second, true, 0.15);
+
+      // calculate the expected value
+      double ratioExpected;
+      if (useOnePercentBackgroundCorrection) {
+        auto sigi =
+            sqrt(nBgEventsInPeakRegion * ctsPerBgEvent * 0.99 +
+                 nPeakEvents[i] * ctsPerPeakEvent +
+                 pow(volRatio, 2) * nBgEventsInShell * ctsPerBgEvent * 0.99);
+        auto inti = nPeakEvents[i] * ctsPerPeakEvent +
+                    0.01 * nBgEventsInPeakRegion * ctsPerBgEvent;
+        ratioExpected = inti / sigi;
+      } else {
+        auto sigi = sqrt(nBgEventsInPeakRegion * ctsPerBgEvent +
+                         nPeakEvents[i] * ctsPerPeakEvent +
+                         pow(volRatio, 2) * nBgEventsInShell * ctsPerBgEvent);
+        ratioExpected = (nPeakEvents[i] * ctsPerPeakEvent) / sigi;
+      }
+
+      fractionalDiff[i] = abs(ratio - ratioExpected) / ratioExpected;
+    }
+    TS_ASSERT_LESS_THAN(fractionalDiff[0], expectedFractionalDifference)
+    TS_ASSERT_LESS_THAN(fractionalDiff[1], expectedFractionalDifference)
+    TS_ASSERT_LESS_THAN(fractionalDiff[2], expectedFractionalDifference)
   }
 
   /** Generate a symmetric Gaussian peak
@@ -506,7 +545,7 @@ private:
   void
   generatePeak(std::vector<std::pair<std::pair<double, double>, V3D>> &event_Qs,
                V3D center, double sigma = 5, size_t numSamples = 1000,
-               int seed = 1) {
+               double scale = 1.0, int seed = 1) {
 
     std::mt19937 gen;
     std::normal_distribution<> d(0, sigma);
@@ -515,7 +554,7 @@ private:
     for (size_t i = 0; i < numSamples; ++i) {
       V3D offset(d(gen), d(gen), d(gen));
       event_Qs.emplace_back(
-          std::make_pair(std::make_pair(1., 1.), center + offset));
+          std::make_pair(std::make_pair(scale, scale), center + offset));
     }
   }
 
@@ -545,6 +584,34 @@ private:
         }
       }
     }
+  }
+  /** Generate a randomly distributed uniform background in sphere
+   ** so as to maximise number of points relevant to integration
+   * @param event_Qs :: vector of event Qs
+   * @param npts :: number of events
+   * @param center :: center of sphere
+   * @param radius :: radius of sphere
+   * @param scale :: signal per event
+   * @param seed :: the random seed to use (default 1)
+   */
+  void generateUniformBackgroundSpherical(
+      std::vector<std::pair<std::pair<double, double>, V3D>> &event_Qs,
+      int npts, V3D center, const double radius = 1, const double scale = 1,
+      int seed = 1) {
+
+    std::mt19937 gen;
+    std::uniform_real_distribution<> d(-radius, radius);
+    gen.seed(seed);
+
+    V3D point;
+    int n = 0;
+    do {
+      V3D point(d(gen), d(gen), d(gen));
+      if (point.norm() <= radius) {
+        event_Qs.emplace_back(std::make_pair(scale, scale), center + point);
+        n++;
+      }
+    } while (n < npts);
   }
 };
 

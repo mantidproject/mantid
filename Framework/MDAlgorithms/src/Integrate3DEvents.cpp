@@ -290,7 +290,8 @@ Integrate3DEvents::integrateWeakPeak(
 }
 
 double Integrate3DEvents::estimateSignalToNoiseRatio(
-    const IntegrationParameters &params, const V3D &center) {
+    const IntegrationParameters &params, const V3D &center, bool forceSpherical,
+    double sphericityTol) {
 
   auto result = getEvents(center);
   if (!result)
@@ -313,19 +314,30 @@ double Integrate3DEvents::estimateSignalToNoiseRatio(
   }
 
   const auto max_sigma = *std::max_element(sigmas.begin(), sigmas.end());
+  const auto min_sigma = *std::min_element(sigmas.begin(), sigmas.end());
   if (max_sigma == 0)
     return .0;
 
   auto rValues = calculateRadiusFactors(params, max_sigma);
   auto &r1 = std::get<0>(rValues), r2 = std::get<1>(rValues),
        r3 = std::get<2>(rValues);
-
   std::vector<double> abcBackgroundOuterRadii, abcBackgroundInnerRadii;
   std::vector<double> peakRadii;
-  for (int i = 0; i < 3; i++) {
-    abcBackgroundOuterRadii.emplace_back(r3 * sigmas[i]);
-    abcBackgroundInnerRadii.emplace_back(r2 * sigmas[i]);
-    peakRadii.emplace_back(r1 * sigmas[i]);
+  if (forceSpherical) {
+    // test for spherically symmeteric peak (within tolerance)
+    if ((max_sigma - min_sigma) / max_sigma > sphericityTol)
+      return .0;
+    for (int i = 0; i < 3; i++) {
+      abcBackgroundOuterRadii.emplace_back(r3 * max_sigma);
+      abcBackgroundInnerRadii.emplace_back(r2 * max_sigma);
+      peakRadii.emplace_back(r1 * max_sigma);
+    }
+  } else {
+    for (int i = 0; i < 3; i++) {
+      abcBackgroundOuterRadii.emplace_back(r3 * sigmas[i]);
+      abcBackgroundInnerRadii.emplace_back(r2 * sigmas[i]);
+      peakRadii.emplace_back(r1 * sigmas[i]);
+    }
   }
 
   // Background / Peak / Background
