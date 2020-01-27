@@ -9,12 +9,10 @@ from __future__ import absolute_import, unicode_literals
 
 from unittest import TestCase
 
-from mantid.py3compat.mock import Mock
+from mantid.py3compat.mock import call, Mock
 from mantidqt.utils.testing.mocks.mock_qt import MockQButton, MockQWidget
-from mantidqt.utils.testing.strict_mock import StrictMock, StrictPropertyMock
+from mantidqt.utils.testing.strict_mock import StrictPropertyMock
 from workbench.widgets.settings.presenter import SettingsPresenter
-
-from qtpy.QtWidgets import QListWidgetItem
 
 
 class FakeMVP(object):

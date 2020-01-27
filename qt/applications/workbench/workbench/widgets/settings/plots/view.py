@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -11,17 +11,17 @@ from qtpy.QtCore import Qt
 
 from mantidqt.utils.qt import load_ui
 
-form, base = load_ui(__file__, "section_application.ui")
+form, base = load_ui(__file__, "section_plots.ui")
 
 
-class ApplicationSettingsView(base, form):
+class PlotsSettingsView(form, base):
     """
-    The view of the General settings. The layout is constructed inside the loaded UI file.
+    The view of the plots settings. The layout is constructed inside the loaded UI file.
     The connections are setup in the presenter. This view only sets up and deletes itself on close.
     """
 
     def __init__(self, parent=None, presenter=None):
-        super(ApplicationSettingsView, self).__init__(parent)
+        super(PlotsSettingsView, self).__init__(parent)
         self.setupUi(self)
         self.setVisible(False)
         self.presenter = presenter
@@ -29,4 +29,4 @@ class ApplicationSettingsView(base, form):
 
     def closeEvent(self, event):
         self.deleteLater()
-        super(ApplicationSettingsView, self).closeEvent(event)
+        super(PlotsSettingsView, self).closeEvent(event)

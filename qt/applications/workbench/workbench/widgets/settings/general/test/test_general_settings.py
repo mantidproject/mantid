@@ -123,7 +123,6 @@ class GeneralSettingsTest(unittest.TestCase):
         self.assert_connected_once(presenter.view.main_font,
                                    presenter.view.main_font.clicked)
 
-
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_facility_changed(self, mock_ConfigService):
         presenter = GeneralSettings(None)
@@ -197,8 +196,7 @@ class GeneralSettingsTest(unittest.TestCase):
                                                        call(GeneralSettings.USE_NOTIFICATIONS),
                                                        call(GeneralSettings.IGNORE_PARAVIEW),
                                                        call(GeneralSettings.CRYSTALLOGRAPY_CONV),
-                                                       call(GeneralSettings.OPENGL),
-                                                       call(GeneralSettings.NORMALIZATION)])
+                                                       call(GeneralSettings.OPENGL)])
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_project_recovery_enabled(self, mock_ConfigService):
@@ -285,20 +283,6 @@ class GeneralSettingsTest(unittest.TestCase):
 
         presenter.action_use_open_gl(Qt.Unchecked)
         mock_ConfigService.setString.assert_called_once_with(GeneralSettings.OPENGL, "Off")
-
-    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
-    def test_action_normalization_changed(self, mock_ConfigService):
-        presenter = GeneralSettings(None)
-        # reset any effects from the constructor
-        mock_ConfigService.setString.reset_mock()
-
-        presenter.action_normalization_changed(Qt.Checked)
-        mock_ConfigService.setString.assert_called_once_with(GeneralSettings.NORMALIZATION, "On")
-
-        mock_ConfigService.setString.reset_mock()
-
-        presenter.action_normalization_changed(Qt.Unchecked)
-        mock_ConfigService.setString.assert_called_once_with(GeneralSettings.NORMALIZATION, "Off")
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_use_notifications_modified(self, mock_ConfigService):

@@ -26,9 +26,9 @@ class GeneralSettings(object):
     """
 
     CRYSTALLOGRAPY_CONV = "Q.convention"
+    FONT = "MainWindow/font"
     IGNORE_PARAVIEW = "paraview.ignore"
     INSTRUMENT = "default.instrument"
-    NORMALIZATION = "graph1d.autodistribution"
     OPENGL = "MantidOptions.InstrumentView.UseOpenGL"
     SHOW_INVISIBLE_WORKSPACES = "MantidOptions.InvisibleWorkspaces"
     PR_NUMBER_OF_CHECKPOINTS = "projectRecovery.numberOfCheckpoints"
@@ -45,13 +45,14 @@ class GeneralSettings(object):
         self.parent = parent
         self.load_current_setting_values()
 
+        self.setup_general_group()
         self.setup_facilities_group()
         self.setup_checkbox_signals()
+        self.setup_general_group()
 
         self.setup_layout_options()
 
         self.setup_confirmations()
-        #self.setup_directories()
 
     def setup_facilities_group(self):
         facilities = ConfigService.getFacilityNames()
@@ -75,6 +76,16 @@ class GeneralSettings(object):
         self.action_instrument_changed(default_instrument)
         self.view.instrument.currentTextChanged.connect(self.action_instrument_changed)
 
+    def setup_general_group(self):
+        self.view.main_font.clicked.connect(self.action_main_font_button_clicked)
+
+    def action_main_font_button_clicked(self):
+        font_dialog = self.view.create_font_dialog(self.parent)
+        font_dialog.fontSelected.connect(self.action_font_selected)
+
+    def action_font_selected(self, font):
+        CONF.set(self.FONT, font.toString())
+
     def setup_checkbox_signals(self):
         self.view.show_invisible_workspaces.setChecked(
             "true" == ConfigService.getString(self.SHOW_INVISIBLE_WORKSPACES).lower())
@@ -86,7 +97,6 @@ class GeneralSettings(object):
         self.view.ignore_paraview.stateChanged.connect(self.action_ignore_paraview)
         self.view.crystallography_convention.stateChanged.connect(self.action_crystallography_convention)
         self.view.use_open_gl.stateChanged.connect(self.action_use_open_gl)
-        self.view.normalize_to_bin_width.stateChanged.connect(self.action_normalization_changed)
 
     def action_facility_changed(self, new_facility):
         """
@@ -104,11 +114,6 @@ class GeneralSettings(object):
         self.view.prompt_save_editor_modified.stateChanged.connect(self.action_prompt_save_editor_modified)
         self.view.prompt_deleting_workspaces.stateChanged.connect(self.action_prompt_deleting_workspace)
         self.view.use_notifications.stateChanged.connect(self.action_use_notifications_modified)
-
-    def setup_directories(self):
-        self.view.translation_file_path.textEdited.connect(self.action_translation_file_path_changed)
-        self.view.help_file_path.textEdited.connect(self.action_help_file_path_changed)
-        self.view.inst_definitions_file_path.textEdited.connect(self.action_inst_definitions_file_path_changed)
 
     def action_prompt_save_on_close(self, state):
         CONF.set(self.PROMPT_SAVE_ON_CLOSE, bool(state))
@@ -136,7 +141,6 @@ class GeneralSettings(object):
         ignore_paraview_setting = bool(int(ConfigService.getString(self.IGNORE_PARAVIEW)))
         crystallography_convention = ("Crystallography" == ConfigService.getString(self.CRYSTALLOGRAPY_CONV))
         use_open_gl = ("on" == ConfigService.getString(self.OPENGL).lower())
-        normalize_to_bin_width = ("on" == ConfigService.getString(self.NORMALIZATION).lower())
 
         self.view.project_recovery_enabled.setChecked(pr_enabled)
         self.view.time_between_recovery.setValue(pr_time_between_recovery)
@@ -145,7 +149,6 @@ class GeneralSettings(object):
         self.view.ignore_paraview.setChecked(ignore_paraview_setting)
         self.view.crystallography_convention.setChecked(crystallography_convention)
         self.view.use_open_gl.setChecked(use_open_gl)
-        self.view.normalize_to_bin_width.setChecked(normalize_to_bin_width)
 
     def action_project_recovery_enabled(self, state):
         ConfigService.setString(self.PR_RECOVERY_ENABLED, str(bool(state)))
@@ -170,9 +173,6 @@ class GeneralSettings(object):
 
     def action_use_open_gl(self, state):
         ConfigService.setString(self.OPENGL, "On" if bool(state) else "Off")
-
-    def action_normalization_changed(self, state):
-        ConfigService.setString(self.NORMALIZATION, "On" if bool(state) else "Off")
 
     def setup_layout_options(self):
         self.fill_layout_display()

@@ -84,21 +84,21 @@ list getDescriptors(AlgorithmFactoryImpl &self, bool includeHidden) {
  * A Python friendly version of getCategoriesWithState
  * Return the categories of the algorithms. This includes those within the
  * Factory itself and any cleanly constructed algorithms stored here.
-	* @param self :: Enables it to be called as a member function on the
-	* AlgorithmFactory class
+ * @param self :: Enables it to be called as a member function on the
+ * AlgorithmFactory class
  * @returns The map of the categories, together with a true false value
  * difining if they are hidden
  */
-dict getCategoriesandState(AlgorithmFactoryImpl& self) {
-	std::map<std::string, bool> categories = self.getCategoriesWithState();
-	dict pythonCategories;
-	for (auto& it : categories) {
-		object categoryName(
-			handle<>(to_python_value<const std::string&>()(it.first)));
-		pythonCategories[categoryName] = it.second;
-	}
+dict getCategoriesandState(AlgorithmFactoryImpl &self) {
+  std::map<std::string, bool> categories = self.getCategoriesWithState();
+  dict pythonCategories;
+  for (auto &it : categories) {
+    object categoryName(
+        handle<>(to_python_value<const std::string &>()(it.first)));
+    pythonCategories[categoryName] = it.second;
+  }
 
-	return pythonCategories;
+  return pythonCategories;
 }
 
 //------------------------------------------------------------------------------
@@ -188,9 +188,10 @@ void export_AlgorithmFactory() {
            (arg("self"), arg("include_hidden")),
            "Return a list of descriptors of registered algorithms. Each "
            "descriptor is a list: [name, version, category, alias].")
-		  .def("getCategoriesandState", &getCategoriesandState,
-						"Return the categories of the algorithms.This includes those within "
-						"the Factory itself and any cleanly constructed algorithms stored here")
+      .def("getCategoriesandState", &getCategoriesandState,
+           "Return the categories of the algorithms.This includes those within "
+           "the Factory itself and any cleanly constructed algorithms stored "
+           "here")
       .def("unsubscribe", &AlgorithmFactoryImpl::unsubscribe,
            (arg("self"), arg("name"), arg("version")),
            "Returns the highest version of the named algorithm. Throws "
