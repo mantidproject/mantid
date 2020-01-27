@@ -621,8 +621,7 @@ void MuonFitPropertyBrowser::populateFunctionNames() {
     bool muon = false;
     for (const auto &category : categories) {
       if ((category == "MuonModelling") || (category == "MuonSpecific") ||
-          (category == "MuonGeneric") ||
-          (category == "General") ||
+          (category == "MuonGeneric") || (category == "General") ||
           (category == "Background"))
         muon = true;
     }
