@@ -32,7 +32,7 @@ class CategoriesSettingsView(categories_base, categories_form):
         self.deleteLater()
         super(CategoriesSettingsView, self).closeEvent(event)
 
-    def add_checked_widget_item(self, name, is_hidden, parent=None):
+    def add_checked_widget_item(self, widget, name, is_hidden, parent=None):
         item = QTreeWidgetItem([name])
         item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
         state = Qt.Unchecked
@@ -42,5 +42,5 @@ class CategoriesSettingsView(categories_base, categories_form):
         if parent:
             parent.addChild(item)
         else:
-            self.algorithm_tree_widget.addTopLevelItem(item)
+            widget.addTopLevelItem(item)
         return item
