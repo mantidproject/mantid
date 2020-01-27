@@ -13,7 +13,6 @@ from Engineering.gui.engineering_diffraction.tabs.common.vanadium_corrections im
 from Engineering.gui.engineering_diffraction.tabs.common.cropping.cropping_widget import CroppingWidget
 from mantidqt.utils.asynchronous import AsyncTask
 from mantidqt.utils.observer_pattern import Observer
-from mantid.simpleapi import logger
 
 
 class FocusPresenter(object):
@@ -95,8 +94,7 @@ class FocusPresenter(object):
             return False
         return True
 
-    def _on_worker_error(self, failure_info):
-        logger.warning(str(failure_info))
+    def _on_worker_error(self, _):
         self.emit_enable_button_signal()
 
     def set_focus_controls_enabled(self, enabled):
