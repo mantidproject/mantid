@@ -9,8 +9,13 @@ set_property(CACHE USE_SANITIZER PROPERTY STRINGS
 string(TOLOWER "${USE_SANITIZER}" USE_SANITIZERS_LOWER)
 
 if(NOT ${USE_SANITIZERS_LOWER} MATCHES "off")
+    # Check we have a supported compiler
     if(WIN32)
         message(FATAL_ERROR "Windows does not support sanitizers")
+    endif()
+
+    if(CMAKE_COMPILER_IS_GNUCXX AND (NOT CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 8))
+        message(FATAL_ERROR "GCC 7 and below do not support sanitizers")
     endif()
 
     # Check and warn if we are not in a mode without debug symbols
@@ -35,22 +40,24 @@ if(NOT ${USE_SANITIZERS_LOWER} MATCHES "off")
 
     # Address
     add_compile_options(
-        $<$<STREQUAL:$<LOWER_CASE:${USE_SANITIZER}>,"address">:-fsanitize=address>)
+        $<$<STREQUAL:$<LOWER_CASE:"${USE_SANITIZER}">,"address">:-fsanitize=address>)
     add_link_options(
-        $<$<STREQUAL:$<LOWER_CASE:${USE_SANITIZER}>,"address">:-fsanitize=address>)
+        $<$<STREQUAL:$<LOWER_CASE:"${USE_SANITIZER}">,"address">:-fsanitize=address>)
 
     # Thread
     add_compile_options(
-        $<$<STREQUAL:$<LOWER_CASE:${USE_SANITIZER}>,"thread">:-fsanitize=thread>)
+        $<$<STREQUAL:$<LOWER_CASE:"${USE_SANITIZER}">,"thread">:-fsanitize=thread>)
     add_link_options(
-        $<$<STREQUAL:$<LOWER_CASE:${USE_SANITIZER}>,"thread">:-fsanitize=thread>)
+        $<$<STREQUAL:$<LOWER_CASE:"${USE_SANITIZER}">,"thread">:-fsanitize=thread>)
 
     # Undefined
     # RTTI information is not exported for some classes causing the
     # linker to fail whilst adding vptr instrumentation
     add_compile_options(
-        $<$<STREQUAL:$<LOWER_CASE:${USE_SANITIZER}>,"undefined">:-fsanitize=undefined -fno-sanitize=vptr>)
+        $<$<STREQUAL:$<LOWER_CASE:"${USE_SANITIZER}">,"undefined">:-fsanitize=undefined>
+        $<$<STREQUAL:$<LOWER_CASE:"${USE_SANITIZER}">,"undefined">:-fno-sanitize=vptr>)
+
     add_link_options(
-        $<$<STREQUAL:$<LOWER_CASE:${USE_SANITIZER}>,"undefined">:-fsanitize=undefined>)
+        $<$<STREQUAL:$<LOWER_CASE:"${USE_SANITIZER}">,"undefined">:-fsanitize=undefined>)
 
 endif()

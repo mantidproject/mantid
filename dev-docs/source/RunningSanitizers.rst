@@ -18,8 +18,8 @@ Pre-requisites
 
 The following tooling is required:
 
-- CMake 13.0 onwards (instructions for Ubuntu `here <https://apt.kitware.com/>`__)
 - GCC-8 onwards
+- Clang 3.2 onwards
 
 
 Switching to Sanitizer Build
@@ -28,7 +28,6 @@ Switching to Sanitizer Build
 The following sanitizers modes are available:
 
 - Address
-- Memory (Not implemented yet, requires clang support)
 - Thread
 - Undefined
 

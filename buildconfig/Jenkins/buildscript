@@ -317,13 +317,13 @@ SANITIZER_FLAGS=''
 if [[ ${JOB_NAME} == *address* ]]; then
     SANITIZER_FLAGS="-DUSE_SANITIZER=Address"
     
-    elif [[ ${JOB_NAME} == *memory* ]]; then
+elif [[ ${JOB_NAME} == *memory* ]]; then
     SANITIZER_FLAGS="-DUSE_SANITIZER=memory"
     
-    elif [[ ${JOB_NAME} == *thread* ]]; then
+elif [[ ${JOB_NAME} == *thread* ]]; then
     SANITIZER_FLAGS="-DUSE_SANITIZER=thread"
     
-    elif [[ ${JOB_NAME} == *undefined* ]]; then
+elif [[ ${JOB_NAME} == *undefined* ]]; then
     SANITIZER_FLAGS="-DUSE_SANITIZER=undefined"
 fi
 

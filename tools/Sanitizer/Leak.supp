@@ -1,2 +1,25 @@
+# NeXus has a known memory leak when reading attributes.
+# It is fixed upstream but not made it to distribution packages
+# Direct leak of 12114 byte(s) in 1346 object(s) allocated from:
+#     #0 0x7fb126db5538 in strdup (/usr/lib/x86_64-linux-gnu/libasan.so.4+0x77538)
+#     #1 0x7fb120a534cb  (/usr/lib/libNeXus.so.0+0xc4cb)
+#     #2 0x7fb100000000  (<unknown module>)
 leak:libNeXus
+
+# OpenCascade memory allocation seems to confuse ASAN
+# Direct leak of 544 byte(s) in 1 object(s) allocated from:
+#     #0 0x7f77eec3a618 in operator new[](unsigned long) (/usr/lib/x86_64-linux-gnu/libasan.so.4+0xe0618)
+#     #1 0x7f77e4141b08  (/usr/lib/x86_64-linux-gnu/libTKernel.so.11+0x7bb08)
 leak:libTKernel
+
+# TBB leaks some memory allocated in singleton depending on deinitialization order
+# Direct leak of 1560 byte(s) in 3 object(s) allocated from:
+#     #0 0x7f7ae72a80a0 in operator new[](unsigned long) (/usr/lib/x86_64-linux-gnu/libasan.so.3+0xc80a0)
+#     #1 0x7f7ae595d13e  (/usr/lib/x86_64-linux-gnu/libtbb.so.2+0x2213e)
+leak:libtbb
+
+# Python and associated libraries *appears* to leak memory.
+leak:libpython
+leak:umath
+leak:multiarray
+leak:_ctypes
