@@ -74,7 +74,19 @@ will be estimated via *observation*.
 Estimation of values of peak profiles
 #####################################
 
-Peak intensity and peak center are estimated by observing the maximum value within peak fit window.
+Peak height, center, and FWHM and peak center are estimated by
+observing the maximum value within peak fit window and calculating the
+first two moments.
+
+When using peak profiles that do not have a one-to-one mapping between
+effective and raw parameters, you may need to supply starting
+information for more of the parameters. This can be done by specifying
+``PeakParameterNames`` and ``PeakParameterValues`` for some or all of
+the parameters (e.g. ``Mixing`` for a :ref:`func-PseudoVoigt`) which
+will be used for the first peak fit in each spectrum. To supply *all*
+parameters, ``PeakParameterNames`` and ``PeakParameterValueTable`` can
+be used. **WARNING** Partially specifying peak parameters such as
+height and position will be overwritten by observed values.
 
 Subalgorithms used
 ##################
@@ -284,21 +296,21 @@ It is a :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` containing the pe
 OutputPeakParametersWorkspace
 =============================
 
-It is an output :py:obj:`MatrixWorkspace <mantid.api.ITableWorkspace>` containing function parameters' fitted values 
-for all peaks that are specified to fit. 
+It is an output :py:obj:`MatrixWorkspace <mantid.api.ITableWorkspace>` containing function parameters' fitted values
+for all peaks that are specified to fit.
 The order of the peaks will be exactly the sequence of peaks as the order of the given positions of peaks.
 
-If user specifies a subset of spectra to fit, this TableWorksapce will only contain function 
+If user specifies a subset of spectra to fit, this TableWorksapce will only contain function
 parameters' value that corresponds to the spectra that are fitted.
 
 OutputParameterFitErrorsWorkspace
 =================================
 
-It is an optional output :py:obj:`MatrixWorkspace <mantid.api.ITableWorkspace>` containing function parameters' fitting error, 
+It is an optional output :py:obj:`MatrixWorkspace <mantid.api.ITableWorkspace>` containing function parameters' fitting error,
 i.e., uncertainties, for all peaks that are specified to fit.
 The order of the peaks will be exactly the sequence of peaks as the order of the given positions of peaks.
 
-If user specifies a subset of spectra to fit, this TableWorksapce will only contain function 
+If user specifies a subset of spectra to fit, this TableWorksapce will only contain function
 parameters' uncertainties that corresponds to the spectra that are fitted.
 
 It has one less column than OutputPeakParametersWorkspace, which is chi2.
@@ -306,7 +318,7 @@ It has one less column than OutputPeakParametersWorkspace, which is chi2.
 FittedPeaksWorkspace
 ====================
 
-It is an optional output :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` containing the peaks 
+It is an optional output :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` containing the peaks
 calculated from fitting result.
 
 
