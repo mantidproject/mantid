@@ -106,13 +106,16 @@ def eventRef(run_number, angle, start=0, stop=0, DB='TRANS'):
     ReflectometryISISLoadAndProcess(InputRunList=slice_name, FirstTransmissionRunList=DB,
                                     OutputWorkspaceBinned=slice_name+'_ref_binned',
                                     OutputWorkspace=slice_name+'_ref',
-                                    OutputWorkspaceWavelength=slice_name+'_lam', Debug=True)
+                                    OutputWorkspaceWavelength=slice_name+'_lam',
+                                    OutputWorkspaceTransmission=DB+'_LAM',
+                                    Debug=True)
     # Delete interim workspaces
     DeleteWorkspace(slice_name+'_lam')
     DeleteWorkspace(slice_name)
     DeleteWorkspace(slice_name+'_ref')
     DeleteWorkspace('mon_slice')
     DeleteWorkspace('mon_rebin')
+    DeleteWorkspace(DB+'_LAM')
 
 
 def quickRef(run_numbers=[], trans_workspace_names=[], angles=[]):
@@ -122,11 +125,13 @@ def quickRef(run_numbers=[], trans_workspace_names=[], angles=[]):
     for run_index in range(len(run_numbers)):
         # Set up the reduction properties
         run_name=str(run_numbers[run_index])
+        trans_name = str(trans_workspace_names[run_index])
         properties = {'InputRunList': run_name+'.raw',
-                      'FirstTransmissionRunList': str(trans_workspace_names[run_index]),
+                      'FirstTransmissionRunList': trans_name,
                       'OutputWorkspaceBinned': run_name+'_IvsQ_binned',
                       'OutputWorkspace': run_name+'_IvsQ',
                       'OutputWorkspaceWavelength': run_name+'_IvsLam',
+                      'OutputWorkspaceTransmission': trans_name+'_LAM',
                       'Debug': True}
         # Set ThetaIn if the angles are given
         if angles:
@@ -137,6 +142,7 @@ def quickRef(run_numbers=[], trans_workspace_names=[], angles=[]):
                 properties['WavelengthMin']=2.6
         # Do the reduction
         ReflectometryISISLoadAndProcess(**properties)
+        DeleteWorkspace(trans_name+'_LAM')
         reduced_runs=reduced_runs+run_name+'_IvsQ_binned'
         if run_index < len(run_numbers)-1:
             reduced_runs=reduced_runs+','

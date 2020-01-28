@@ -193,8 +193,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         # Add properties copied from child algorithm
         properties = [
             'Params', 'StartOverlap', 'EndOverlap',
-            'ScaleRHSWorkspace', 'TransmissionProcessingInstructions',
-            Prop.OUTPUT_WS_TRANS, Prop.OUTPUT_WS_FIRST_TRANS, Prop.OUTPUT_WS_SECOND_TRANS
+            'ScaleRHSWorkspace', 'TransmissionProcessingInstructions'
         ]
         self.copyProperties('ReflectometryReductionOneAuto', properties)
         self._reduction_properties += properties
@@ -203,7 +202,8 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         properties = [Prop.DEBUG,
                       'MomentumTransferMin', 'MomentumTransferStep', 'MomentumTransferMax',
                       'ScaleFactor',
-                      Prop.OUTPUT_WS, Prop.OUTPUT_WS_BINNED, Prop.OUTPUT_WS_LAM]
+                      Prop.OUTPUT_WS_BINNED, Prop.OUTPUT_WS, Prop.OUTPUT_WS_LAM,
+                      Prop.OUTPUT_WS_TRANS, Prop.OUTPUT_WS_FIRST_TRANS, Prop.OUTPUT_WS_SECOND_TRANS]
         self.copyProperties('ReflectometryReductionOneAuto', properties)
         self._reduction_properties += properties
 

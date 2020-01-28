@@ -17,6 +17,7 @@
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Strings.h"
@@ -171,6 +172,11 @@ void ReflectometryReductionOne2::init() {
                       "OutputWorkspaceWavelength", "", Direction::Output,
                       PropertyMode::Optional),
                   "Output Workspace IvsLam. Intermediate workspace.");
+  setPropertySettings(
+      "OutputWorkspaceWavelength",
+      std::make_unique<Kernel::EnabledWhenProperty>("Debug", IS_EQUAL_TO, "1"));
+
+  initTransmissionOutputProperties();
 }
 
 /** Validate inputs
@@ -548,8 +554,7 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
   rebinToWorkspaceAlg->setProperty("WorkspaceToRebin", transmissionWS);
   rebinToWorkspaceAlg->execute();
   transmissionWS = rebinToWorkspaceAlg->getProperty("OutputWorkspace");
-  setProperty("OutputWorkspaceTransmission", transmissionWS);
-  if (!transmissionWSName.empty())
+  if (isDefault("OutputWorkspaceTransmission") && !transmissionWSName.empty())
     setPropertyValue("OutputWorkspaceTransmission", transmissionWSName);
 
   // If the detector workspace has been reduced then the spectrum maps

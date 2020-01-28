@@ -33,6 +33,7 @@ protected:
   void initBackgroundProperties();
   /// Initialize transmission properties
   void initTransmissionProperties();
+  void initTransmissionOutputProperties();
   /// Initialize properties for stitching transmission runs
   void initStitchProperties();
   /// Initialize corection algorithm properties

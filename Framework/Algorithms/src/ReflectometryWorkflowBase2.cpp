@@ -244,6 +244,32 @@ void ReflectometryWorkflowBase2::initTransmissionProperties() {
   setPropertyGroup("TransmissionProcessingInstructions", "Transmission");
 }
 
+/** Initialize output properties related to transmission normalization
+ */
+void ReflectometryWorkflowBase2::initTransmissionOutputProperties() {
+  // Add additional output workspace properties
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspaceTransmission", "", Direction::Output,
+                      PropertyMode::Optional),
+                  "Output transmissison workspace in wavelength");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspaceFirstTransmission", "", Direction::Output,
+                      PropertyMode::Optional),
+                  "First transmissison workspace in wavelength");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspaceSecondTransmission", "",
+                      Direction::Output, PropertyMode::Optional),
+                  "Second transmissison workspace in wavelength");
+
+  // Specify conditional output properties for when debug is on
+  setPropertySettings(
+      "OutputWorkspaceFirstTransmission",
+      std::make_unique<Kernel::EnabledWhenProperty>("Debug", IS_EQUAL_TO, "1"));
+  setPropertySettings(
+      "OutputWorkspaceSecondTransmission",
+      std::make_unique<Kernel::EnabledWhenProperty>("Debug", IS_EQUAL_TO, "1"));
+}
+
 /** Initialize properties used for stitching transmission runs
  */
 void ReflectometryWorkflowBase2::initStitchProperties() {
@@ -916,9 +942,11 @@ void ReflectometryWorkflowBase2::setWorkspacePropertyFromChild(
   if (alg->isDefault(propertyName))
     return;
 
-  std::string const workspaceName = alg->getPropertyValue(propertyName);
+  if (isDefault(propertyName)) {
+    std::string const workspaceName = alg->getPropertyValue(propertyName);
+    setPropertyValue(propertyName, workspaceName);
+  }
   MatrixWorkspace_sptr workspace = alg->getProperty(propertyName);
-  setPropertyValue(propertyName, workspaceName);
   setProperty(propertyName, workspace);
 }
 } // namespace Algorithms

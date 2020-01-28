@@ -342,6 +342,11 @@ void ReflectometryReductionOneAuto3::init() {
                       "OutputWorkspaceWavelength", "", Direction::Output,
                       PropertyMode::Optional),
                   "Output workspace in wavelength");
+  setPropertySettings(
+      "OutputWorkspaceWavelength",
+      std::make_unique<Kernel::EnabledWhenProperty>("Debug", IS_EQUAL_TO, "1"));
+
+  initTransmissionOutputProperties();
 }
 
 /** Execute the algorithm.
@@ -428,7 +433,7 @@ void ReflectometryReductionOneAuto3::exec() {
   }
 
   // Set the output workspace in wavelength, if debug outputs are enabled
-  if (isDebug || isChild()) {
+  if (!isDefault("OutputWorkspaceWavelength") || isChild()) {
     MatrixWorkspace_sptr IvsLam = alg->getProperty("OutputWorkspaceWavelength");
     setProperty("OutputWorkspaceWavelength", IvsLam);
   }
