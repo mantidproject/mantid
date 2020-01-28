@@ -19,6 +19,10 @@
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/ICostFunction.h"
 #include "MantidAPI/IFuncMinimizer.h"
+#include "MantidAPI/IFunction1DSpectrum.h"
+#include "MantidAPI/IFunctionGeneral.h"
+#include "MantidAPI/IFunctionMD.h"
+#include "MantidAPI/ILatticeFunction.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -216,7 +220,7 @@ void FitPropertyBrowser::init() {
 
   m_excludeRange = m_stringManager->addProperty("Exclude Range");
   m_excludeRange->setToolTip(
-    "A list of pairs of real numbers which define the region to exclude");
+      "A list of pairs of real numbers which define the region to exclude");
 
   m_plotCompositeMembers = m_boolManager->addProperty("Plot Composite Members");
   bool plotCompositeItems =
@@ -1678,7 +1682,8 @@ void FitPropertyBrowser::doFit(int maxIterations) {
     }
     m_fitActionUndoFit->setEnabled(true);
 
-    const std::string funStr = getFittingFunction()->asString();
+    auto function = getFittingFunction();
+    const std::string funStr = function->asString();
 
     Mantid::API::IAlgorithm_sptr alg =
         Mantid::API::AlgorithmManager::Instance().create("Fit");
@@ -1714,8 +1719,15 @@ void FitPropertyBrowser::doFit(int maxIterations) {
       if (alg->existsProperty("ConvolveMembers")) {
         alg->setProperty("ConvolveMembers", convolveMembers());
       }
-    } 
-    alg->setProperty("Exclude", getExcludeRange());
+    }
+    if (getExcludeRange() != "") {
+      if (alg->getPropertyValue("EvaluationType") != "Histogram")
+        alg->setProperty("Exclude", getExcludeRange());
+      else {
+        g_log.warning(
+            "Exclude property not avaliable when evaluating as a histogram.");
+      }
+    }
     observeFinish(alg);
     alg->executeAsync();
 
