@@ -21,6 +21,7 @@ from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 from qtpy.QtWidgets import QMainWindow, QApplication
 from workbench.plugins.workspacewidget import WorkspaceWidget
+from mantid.plots.utility import MantidAxType
 
 ALGORITHM_HISTORY_WINDOW_TYPE = "AlgorithmHistoryWindow"
 ALGORITHM_HISTORY_WINDOW = "mantidqt.widgets.workspacewidget." \
@@ -28,7 +29,7 @@ ALGORITHM_HISTORY_WINDOW = "mantidqt.widgets.workspacewidget." \
 MATRIXWORKSPACE_DISPLAY = "mantidqt.widgets.workspacedisplay.matrix." \
                           "presenter.MatrixWorkspaceDisplay"
 MATRIXWORKSPACE_DISPLAY_TYPE = "StatusBarView"
-
+PLOT_DISPLAY = "matplotlib.pyplot.Plot"
 app = QApplication([])
 
 
@@ -66,6 +67,21 @@ class WorkspaceWidgetTest(unittest.TestCase, QtWidgetFinder):
             self.ws_widget._do_show_detectors([self.ws_names[0]])
         self.assert_widget_type_exists(MATRIXWORKSPACE_DISPLAY_TYPE)
 
+    @mock.patch('workbench.plugins.workspacewidget.plot', autospec=True)
+    def test_plot_with_plot_bin(self,mock_plot):
+        self.ws_widget._do_plot_bin([self.ws_names[0]], False, False)
+        mock_plot.assert_called_once_with(unittest.mock.ANY,errors=False, overplot=False, wksp_indices=[0],
+            plot_kwargs={'axis': MantidAxType.BIN})
+
+    @mock.patch('workbench.plugins.workspacewidget.plot_from_names', autospec=True)
+    def test_plot_with_plot_spectrum(self,mock_plot_from_names):
+        self.ws_widget._do_plot_spectrum([self.ws_names[0]], False, False)
+        mock_plot_from_names.assert_called_once_with([self.ws_names[0]], False, False)
+
+    @mock.patch('workbench.plugins.workspacewidget.pcolormesh', autospec=True)
+    def test_plot_with_plot_colorfill(self,mock_plot_colorfill):
+        self.ws_widget._do_plot_colorfill([self.ws_names[0]])
+        mock_plot_colorfill.assert_called_once()
 
 if __name__ == '__main__':
     unittest.main()
