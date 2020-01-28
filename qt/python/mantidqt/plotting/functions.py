@@ -317,9 +317,9 @@ def _add_default_plot_kwargs_from_settings(plot_kwargs, errors):
         if 'capthick' not in plot_kwargs:
             plot_kwargs['capthick'] = float(ConfigService.getString("plots.errorbar.CapThickness"))
         if 'errorevery' not in plot_kwargs:
-            plot_kwargs['errorevery'] = float(ConfigService.getString("plots.errorbar.errorEvery"))
+            plot_kwargs['errorevery'] = int(ConfigService.getString("plots.errorbar.errorEvery"))
         if 'elinewidth' not in plot_kwargs:
-            plot_kwargs['elinewidth'] = int(ConfigService.getString("plots.errorbar.Width"))
+            plot_kwargs['elinewidth'] = float(ConfigService.getString("plots.errorbar.Width"))
 
 
 def _do_single_plot(ax, workspaces, errors, set_title, nums, kw, plot_kwargs):
