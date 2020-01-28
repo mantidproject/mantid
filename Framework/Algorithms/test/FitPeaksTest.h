@@ -407,6 +407,61 @@ public:
     return;
   }
 
+  void Ntest_singlePeakMultiSpectraPseudoVoigt() {
+    // Generate input workspace
+    // std::string input_ws_name = loadVulcanHighAngleData();
+
+    // Generate peak and background parameters
+    std::vector<string> peakparnames{ "Mixing" };
+    std::vector<double> peakparvalues{ 0.5 };
+
+    // Initialize FitPeak
+    FitPeaks fitpeaks;
+
+    fitpeaks.initialize();
+    TS_ASSERT(fitpeaks.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("InputWorkspace", m_inputWorkspaceName));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("StartWorkspaceIndex", 19990));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 20000));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("PeakFunction", "PseudoVoigt"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCenters", "1.0758"));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("FitWindowLeftBoundary", "1.05"));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("FitWindowRightBoundary", "1.15"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakRanges", "0.02"));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("PeakParameterValues", peakparvalues));
+
+    fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS3");
+    fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS3");
+    fitpeaks.setProperty("FittedPeaksWorkspace", "FittedPeaksWS3");
+
+    fitpeaks.execute();
+    TS_ASSERT(fitpeaks.isExecuted());
+
+    // check output workspaces
+    TS_ASSERT(
+        API::AnalysisDataService::Instance().doesExist("PeakPositionsWS3"));
+    TS_ASSERT(
+        API::AnalysisDataService::Instance().doesExist("PeakParametersWS3"));
+    TS_ASSERT(API::AnalysisDataService::Instance().doesExist("FittedPeaksWS3"));
+
+    // about the parameters
+    API::MatrixWorkspace_sptr peak_params_ws =
+        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve("PeakParametersWS3"));
+    TS_ASSERT(peak_params_ws);
+    TS_ASSERT_EQUALS(peak_params_ws->getNumberHistograms(), 5);
+    TS_ASSERT_EQUALS(peak_params_ws->histogram(0).x().size(), 10);
+
+    return;
+  }
+
   //----------------------------------------------------------------------------------------------
   /** Test on init and setup
    */
