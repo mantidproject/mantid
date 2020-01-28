@@ -19,6 +19,7 @@ class FocusView(QtWidgets.QWidget, Ui_focus):
     def __init__(self, parent=None, instrument="ENGINX"):
         super(FocusView, self).__init__(parent)
         self.setupUi(self)
+        self.setup_tabbing_order()
 
         self.finder_focus.setLabelText("Sample Run #")
         self.finder_focus.setInstrumentOverride(instrument)
@@ -77,3 +78,15 @@ class FocusView(QtWidgets.QWidget, Ui_focus):
 
     def is_searching(self):
         return self.finder_focus.isSearching()
+
+    # =================
+    # Internal Setup
+    # =================
+
+    def setup_tabbing_order(self):
+        self.finder_focus.focusProxy().setFocusPolicy(QtCore.Qt.StrongFocus)
+
+        self.setTabOrder(self.finder_focus.focusProxy(), self.check_cropFocus)
+        self.setTabOrder(self.check_cropFocus, self.widget_cropping)
+        self.setTabOrder(self.widget_cropping, self.check_plotOutput)
+        self.setTabOrder(self.check_plotOutput, self.button_focus)
