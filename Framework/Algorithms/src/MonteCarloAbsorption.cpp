@@ -228,20 +228,19 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
   // Cache information about the workspace that will be used repeatedly
   auto instrument = instrumentWS.getInstrument();
   const auto nhists = static_cast<int64_t>(instrumentWS.getNumberHistograms());
-  const auto nbins = static_cast<int>(simulationWS.blocksize());
 
   EFixedProvider efixed(instrumentWS);
   auto beamProfile = createBeamProfile(*instrument, inputWS.sample());
 
   // Configure progress
-  const int lambdaStepSize = nbins / nlambda;
-  Progress prog(this, 0.0, 1.0, nhists * nbins / lambdaStepSize);
+  Progress prog(this, 0.0, 1.0, nhists);
   prog.setNotifyStep(0.01);
   const std::string reportMsg = "Computing corrections";
 
   // Configure strategy
-  MCAbsorptionStrategy strategy(*beamProfile, inputWS.sample(), nevents,
-                                maxScatterPtAttempts, g_log);
+  MCAbsorptionStrategy strategy(
+      *beamProfile, inputWS.sample(), efixed.emode(), nevents, nlambda,
+      maxScatterPtAttempts, useSparseInstrument, interpolateOpt, false, g_log);
 
   const auto &spectrumInfo = simulationWS.spectrumInfo();
 
@@ -262,41 +261,14 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
         toWavelength(efixed.value(spectrumInfo.detector(i).getID()));
     MersenneTwister rng(seed);
 
-    auto &outY = simulationWS.mutableY(i);
     const auto lambdas = simulationWS.points(i);
-    // Simulation for each requested wavelength point
-    for (int j = 0; j < nbins; j += lambdaStepSize) {
-      prog.report(reportMsg);
-      const double lambdaStep = lambdas[j];
-      double lambdaIn(lambdaStep), lambdaOut(lambdaStep);
-      if (efixed.emode() == DeltaEMode::Direct) {
-        lambdaIn = lambdaFixed;
-      } else if (efixed.emode() == DeltaEMode::Indirect) {
-        lambdaOut = lambdaFixed;
-      } else {
-        // elastic case already initialized
-      }
 
-      std::tie(outY[j], std::ignore) =
-          strategy.calculate(rng, detPos, lambdaIn, lambdaOut);
+    strategy.calculate(rng, detPos, lambdas, lambdaFixed,
+                       simulationWS.getSpectrum(i));
+    prog.report(reportMsg);
 
-      // Ensure we have the last point for the interpolation
-      if (lambdaStepSize > 1 && j + lambdaStepSize >= nbins && j + 1 != nbins) {
-        j = nbins - lambdaStepSize - 1;
-      }
-    }
-
-    // Interpolate through points not simulated
-    if (!useSparseInstrument && lambdaStepSize > 1) {
-      auto histnew = simulationWS.histogram(i);
-      if (lambdaStepSize < nbins) {
-        interpolateOpt.applyInplace(histnew, lambdaStepSize);
-      } else {
-        std::fill(histnew.mutableY().begin() + 1, histnew.mutableY().end(),
-                  histnew.y()[0]);
-      }
-
-      outputWS->setHistogram(i, histnew);
+    if (!useSparseInstrument) {
+      outputWS->setHistogram(i, simulationWS.histogram(i));
     }
 
     PARALLEL_END_INTERUPT_REGION

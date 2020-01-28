@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 from mantid import mtd
 from mantid.simpleapi import (config, CropWorkspace, DeleteWorkspace, DirectILLApplySelfShielding, DirectILLCollectData,
                               DirectILLDiagnostics, DirectILLIntegrateVanadium, DirectILLReduction, DirectILLSelfShielding,
-                              DirectILLTubeBackground, SetSample, Subtract, Load)
+                              DirectILLTubeBackground, SetSample, Subtract, Load, SaveNexus)
 import systemtesting
 from testhelpers import (assertRaisesNothing, create_algorithm)
 
@@ -81,6 +81,7 @@ class IN4(systemtesting.MantidSystemTest):
         # We need to add it manually because Save/LoadNexus will do the same for
         # the reference file.
         mtd['cropped'].mutableRun().addProperty('run_title', '', True)
+        SaveNexus(InputWorkspace='cropped',Filename=r'd:\ILL_IN4_SofQW_new20200127.nxs')
 
     def validate(self):
         self.tolerance_is_rel_err = True
