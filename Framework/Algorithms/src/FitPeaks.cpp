@@ -1084,10 +1084,10 @@ void FitPeaks::fitSpectrumPeaks(
       std::pair<double, double> peak_window_i =
           getPeakFitWindow(wi, peak_index);
 
-      bool observe_peak_width_flag =
-          decideToEstimatePeakWidth(!foundAnyPeak, peakfunction);
+      bool observe_peak_params =
+          decideToEstimatePeakParams(!foundAnyPeak, peakfunction);
 
-      if (observe_peak_width_flag &&
+      if (observe_peak_params &&
           m_peakWidthEstimateApproach == EstimatePeakWidth::NoEstimation) {
         g_log.warning(
             "Peak width can be estimated as ZERO.  The result can be wrong");
@@ -1095,9 +1095,9 @@ void FitPeaks::fitSpectrumPeaks(
 
       // do fitting with peak and background function (no analysis at this
       // point)
-      cost = fitIndividualPeak(wi, peak_fitter, expected_peak_pos,
-                               peak_window_i, observe_peak_width_flag,
-                               peakfunction, bkgdfunction);
+      cost =
+          fitIndividualPeak(wi, peak_fitter, expected_peak_pos, peak_window_i,
+                            observe_peak_params, peakfunction, bkgdfunction);
       if (cost < 1e7) { // assume it worked and save out the result
         foundAnyPeak = true;
         for (size_t i = 0; i < lastGoodPeakParameters.size(); ++i)
@@ -1119,16 +1119,21 @@ void FitPeaks::fitSpectrumPeaks(
 }
 
 //----------------------------------------------------------------------------------------------
-/** Decide whether to estimate peak width.  If not, then set the width related
- * peak parameters from user specified starting value
+/** Decide whether to estimate peak parameters. If not, then set the peak
+ * parameters from
+ * user specified starting value
  * @param firstPeakInSpectrum :: flag whether the given peak is the first peak
  * in the spectrum
  * @param peak_function :: peak function to set parameter values to
  * @return :: flag whether the peak width shall be observed
  */
-bool FitPeaks::decideToEstimatePeakWidth(
-    const bool firstPeakInSpectrum, API::IPeakFunction_sptr peak_function) {
-  bool observe_peak_width(false);
+bool
+FitPeaks::decideToEstimatePeakParams(const bool firstPeakInSpectrum,
+                                     API::IPeakFunction_sptr peak_function) {
+  // should observe the peak width if the user didn't supply all of the peak
+  // function parameters
+  bool observe_peak_shape(m_initParamIndexes.size() !=
+                          peak_function->nParams());
 
   if (!m_initParamIndexes.empty()) {
     // user specifies starting value of peak parameters
@@ -1136,8 +1141,8 @@ bool FitPeaks::decideToEstimatePeakWidth(
       // set the parameter values in a vector and loop over it
       // first peak.  using the user-specified value
       for (size_t i = 0; i < m_initParamIndexes.size(); ++i) {
-        size_t param_index = m_initParamIndexes[i];
-        double param_value = m_initParamValues[i];
+        const size_t param_index = m_initParamIndexes[i];
+        const double param_value = m_initParamValues[i];
         peak_function->setParameter(param_index, param_value);
       }
     } else {
@@ -1146,10 +1151,10 @@ bool FitPeaks::decideToEstimatePeakWidth(
     }
   } else {
     // no previously defined peak parameters: observation is thus required
-    observe_peak_width = true;
+    observe_peak_shape = true;
   }
 
-  return observe_peak_width;
+  return observe_peak_shape;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1652,7 +1657,7 @@ bool FitPeaks::fitBackground(const size_t &ws_index,
 double FitPeaks::fitIndividualPeak(size_t wi, API::IAlgorithm_sptr fitter,
                                    const double expected_peak_center,
                                    const std::pair<double, double> &fitwindow,
-                                   const bool observe_peak_width,
+                                   const bool observe_peak_params,
                                    API::IPeakFunction_sptr peakfunction,
                                    API::IBackgroundFunction_sptr bkgdfunc) {
   double cost(DBL_MAX);
@@ -1666,12 +1671,12 @@ double FitPeaks::fitIndividualPeak(size_t wi, API::IAlgorithm_sptr fitter,
     // fit peak with high background!
     cost =
         fitFunctionHighBackground(fitter, fitwindow, wi, expected_peak_center,
-                                  observe_peak_width, peakfunction, bkgdfunc);
+                                  observe_peak_params, peakfunction, bkgdfunc);
   } else {
     // fit peak and background
     cost = fitFunctionSD(fitter, peakfunction, bkgdfunc, m_inputMatrixWS, wi,
                          fitwindow.first, fitwindow.second,
-                         expected_peak_center, observe_peak_width, true);
+                         expected_peak_center, observe_peak_params, true);
   }
 
   return cost;
@@ -1689,7 +1694,7 @@ double FitPeaks::fitFunctionSD(IAlgorithm_sptr fit,
                                API::MatrixWorkspace_sptr dataws, size_t wsindex,
                                double xmin, double xmax,
                                const double &expected_peak_center,
-                               bool observe_peak_width,
+                               bool observe_peak_shape,
                                bool estimate_background) {
   std::stringstream errorid;
   errorid << "(WorkspaceIndex=" << wsindex
@@ -1708,7 +1713,7 @@ double FitPeaks::fitFunctionSD(IAlgorithm_sptr fit,
   // Estimate peak profile parameter
   peak_function->setCentre(expected_peak_center); // set expected position first
   int result = estimatePeakParameters(histogram, peak_window, peak_function,
-                                      bkgd_function, observe_peak_width);
+                                      bkgd_function, observe_peak_shape);
   if (result != GOOD) {
     peak_function->setCentre(expected_peak_center);
     if (result == NOSIGNAL || result == LOWPEAK) {
@@ -1849,7 +1854,7 @@ double FitPeaks::fitFunctionMD(API::IFunction_sptr fit_function,
 double FitPeaks::fitFunctionHighBackground(
     IAlgorithm_sptr fit, const std::pair<double, double> &fit_window,
     const size_t &ws_index, const double &expected_peak_center,
-    bool observe_peak_width, API::IPeakFunction_sptr peakfunction,
+    bool observe_peak_shape, API::IPeakFunction_sptr peakfunction,
     API::IBackgroundFunction_sptr bkgdfunc) {
   // high background to reduce
   API::IBackgroundFunction_sptr high_bkgd_function(nullptr);
@@ -1876,7 +1881,7 @@ double FitPeaks::fitFunctionHighBackground(
   // Fit peak with background
   double cost = fitFunctionSD(fit, peakfunction, bkgdfunc, reduced_bkgd_ws, 0,
                               vec_x.front(), vec_x.back(), expected_peak_center,
-                              observe_peak_width, false);
+                              observe_peak_shape, false);
 
   // add the reduced background back
   bkgdfunc->setParameter(0, bkgdfunc->getParameter(0) +
