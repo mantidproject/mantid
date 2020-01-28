@@ -246,10 +246,18 @@ if [ -z "$MANTID_DATA_STORE" ]; then
 fi
 
 ###############################################################################
-# Check if this is a Python 3 build and set CMake arguments.
+# Check if this is a Python 2 build and set CMake arguments.
 ###############################################################################
-DIST_FLAGS="${DIST_FLAGS} -DWITH_PYTHON3=ON"
-PARAVIEW_DIR="${PARAVIEW_DIR}-python3"
+PY2_BUILD=false
+PY3_BUILD=false
+if [[ ${JOB_NAME} == *python2* ]]; then
+    PY2_BUILD=true
+    DIST_FLAGS="${DIST_FLAGS} -DWITH_PYTHON3=OFF"
+else
+    PY3_BUILD=true
+    DIST_FLAGS="${DIST_FLAGS} -DWITH_PYTHON3=ON"
+    PARAVIEW_DIR="${PARAVIEW_DIR}-python3"
+fi
 
 ###############################################################################
 # Packaging options
@@ -274,7 +282,7 @@ if [[ ${DO_BUILD_PKG} == true ]]; then
         fi
 
         if [[ ${JOB_NAME} == *release* ]] && [[ -z "${PACKAGE_SUFFIX}" ]]; then
-            # Traditional install path for python 2 release build
+            # Traditional install path for release build
             PACKAGINGVARS="${PACKAGINGVARS} -DCMAKE_INSTALL_PREFIX=/opt/Mantid -DCPACK_PACKAGE_SUFFIX="
         else
             # everything else uses lower-case values
