@@ -9,7 +9,7 @@
 #
 from __future__ import absolute_import, unicode_literals
 
-from mantid.api import FunctionFactory, IPeakFunction
+from mantid.api import FunctionFactory
 from mantid.kernel import ConfigService
 from workbench.widgets.settings.fitting.view import FittingSettingsView
 

@@ -21,6 +21,7 @@ MARKER_STYLES = ['None', 'point', 'pixel', "circle", "triangle_down", "triangle_
                  "tickdown", "caretleft", "caretright", "caretup", "caretdown", "caretleft (centered at base)",
                  "caretright (centered at base)", "caretup (centered at base)", "caretdown (centered at base)"]
 
+
 class MarkerTabWidgetView(QWidget):
 
     def __init__(self, parent=None):

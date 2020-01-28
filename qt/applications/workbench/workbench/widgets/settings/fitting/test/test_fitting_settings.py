@@ -78,7 +78,6 @@ class FittingSettingsTest(unittest.TestCase):
         # reset any effects from the constructor
         mock_ConfigService.setString.reset_mock()
 
-
         mock_view.background_args.text = Mock(return_value="n=3")
         presenter.action_background_args_changed()
         mock_ConfigService.setString.assert_called_once_with(FittingSettings.AUTO_BACKGROUND, "Polynomial n=3")
