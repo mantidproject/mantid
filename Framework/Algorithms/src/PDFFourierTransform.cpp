@@ -333,7 +333,8 @@ void PDFFourierTransform::exec() {
 
   // create the output workspace
   API::MatrixWorkspace_sptr outputWS = create<Workspace2D>(1, Points(sizer));
-  outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("AtomicDistance");
+  outputWS->getAxis(0)->unit() =
+      UnitFactory::Instance().create("AtomicDistance");
   outputWS->setYUnitLabel("PDF");
 
   outputWS->mutableRun().addProperty("Qmin", inputQ[qmin_index], "Angstroms^-1",
