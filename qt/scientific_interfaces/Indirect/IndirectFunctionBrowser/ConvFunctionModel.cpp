@@ -31,7 +31,10 @@ void ConvFunctionModel::clearData() {
 void ConvFunctionModel::setModel() {
   m_model.setModel(buildBackgroundFunctionString(), m_fitResolutions,
                    buildPeaksFunctionString(), m_hasDeltaFunction, m_qValues,
-                   m_isQDependentFunction, m_hasTempCorrection);
+                   m_isQDependentFunction, m_hasTempCorrection, m_tempValue);
+  if (m_hasTempCorrection && !m_globals.contains(ParamID::TEMPERATURE)) {
+    m_globals.push_back(ParamID::TEMPERATURE);
+  }
   m_model.setGlobalParameters(makeGlobalList());
 }
 
@@ -78,7 +81,9 @@ void ConvFunctionModel::checkConvolution(IFunction_sptr fun) {
       }
       isResolutionSet = true;
     } else if (name == "ProductFunction") {
-      if (innerFunction->getFunction(0)->name() != "UserFunction") {
+      if (innerFunction->getFunction(0)->name() != "UserFunction" ||
+          innerFunction->getFunction(0)->nParams() != 1 ||
+          !innerFunction->getFunction(0)->hasParameter("Temp")) {
         throw std::runtime_error("Function has wrong structure.");
       }
       m_hasTempCorrection = true;
@@ -216,9 +221,10 @@ void ConvFunctionModel::setDeltaFunction(bool on) {
   setCurrentValues(oldValues);
 }
 
-void ConvFunctionModel::setTempCorrection(bool on) {
+void ConvFunctionModel::setTempCorrection(bool on, double value) {
   auto oldValues = getCurrentValues();
   m_hasTempCorrection = on;
+  m_tempValue = value;
   setModel();
   setCurrentValues(oldValues);
 }
@@ -226,6 +232,8 @@ void ConvFunctionModel::setTempCorrection(bool on) {
 bool ConvFunctionModel::hasTempCorrection() const {
   return m_hasTempCorrection;
 }
+
+double ConvFunctionModel::getTempValue() const { return m_tempValue; }
 
 bool ConvFunctionModel::hasDeltaFunction() const { return m_hasDeltaFunction; }
 

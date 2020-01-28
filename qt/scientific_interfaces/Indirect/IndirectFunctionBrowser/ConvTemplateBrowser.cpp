@@ -136,10 +136,12 @@ void ConvTemplateBrowser::removeDeltaFunction() {
   m_boolManager->setValue(m_deltaFunctionOn, false);
 }
 
-void ConvTemplateBrowser::addTempCorrection() {
+void ConvTemplateBrowser::addTempCorrection(double value) {
   m_tempCorrectionOn->addSubProperty(m_temperature);
   ScopedFalse _false(m_emitBoolChange);
   m_boolManager->setValue(m_tempCorrectionOn, true);
+  m_parameterManager->setValue(m_temperature, value);
+  m_parameterManager->setGlobal(m_temperature, true);
 }
 
 void ConvTemplateBrowser::removeTempCorrection() {
@@ -159,10 +161,7 @@ void ConvTemplateBrowser::enumChanged(QtProperty *prop) {
   }
 }
 
-void ConvTemplateBrowser::globalChanged(QtProperty *, const QString &name,
-                                        bool on) {
-  std::cerr << "Global " << name.toStdString() << ' ' << on << std::endl;
-}
+void ConvTemplateBrowser::globalChanged(QtProperty *, const QString &, bool) {}
 
 void ConvTemplateBrowser::parameterChanged(QtProperty *prop) {
   auto isGlobal = m_parameterManager->isGlobal(prop);
@@ -215,9 +214,7 @@ void ConvTemplateBrowser::setErrorsEnabled(bool enabled) {
 
 void ConvTemplateBrowser::clear() {}
 
-void ConvTemplateBrowser::popupMenu(const QPoint &) {
-  std::cerr << "Popup" << std::endl;
-}
+void ConvTemplateBrowser::popupMenu(const QPoint &) {}
 
 void ConvTemplateBrowser::setParameterPropertyValue(QtProperty *prop,
                                                     double value,

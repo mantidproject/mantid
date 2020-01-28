@@ -30,7 +30,7 @@ public:
            const std::vector<std::pair<std::string, int>> &resolutionWorkspaces,
            const std::string &peaks, bool hasDeltaFunction,
            const std::vector<double> &qValues, const bool isQDependent,
-           bool hasTempCorrection);
+           bool hasTempCorrection, double tempValue);
   boost::optional<QString> backgroundPrefix() const {
     return m_backgroundPrefix;
   }
@@ -55,9 +55,10 @@ private:
   CompositeFunction_sptr createInnerFunction(std::string peaksFunction,
                                              bool hasDeltaFunction,
                                              bool isQDependent, double q,
-                                             bool hasTempCorrection);
-  CompositeFunction_sptr
-  addTempCorrection(CompositeFunction_sptr peaksFunction);
+                                             bool hasTempCorrection,
+                                             double tempValue);
+  CompositeFunction_sptr addTempCorrection(CompositeFunction_sptr peaksFunction,
+                                           double tempValue);
   IFunction_sptr createTemperatureCorrection(double correction);
   CompositeFunction_sptr
   createConvolutionFunction(IFunction_sptr resolutionFunction,

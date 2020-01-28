@@ -58,7 +58,7 @@ public:
       const std::vector<std::pair<std::string, int>> &fitResolutions) override;
   void addDeltaFunction();
   void removeDeltaFunction();
-  void addTempCorrection();
+  void addTempCorrection(double value);
   void removeTempCorrection();
   void setQValues(const std::vector<double> &qValues) override;
 

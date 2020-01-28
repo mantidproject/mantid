@@ -78,14 +78,15 @@ void ConvolutionFunctionModel::setModel(
     const std::vector<std::pair<std::string, int>> &resolutionWorkspaces,
     const std::string &peaks, bool hasDeltaFunction,
     const std::vector<double> &qValues, const bool isQDependent,
-    bool hasTempCorrection) {
+    bool hasTempCorrection, double tempValue) {
   auto fitFunction = boost::make_shared<MultiDomainFunction>();
   auto const nf = m_numberDomains > 0 ? static_cast<int>(m_numberDomains) : 1;
   for (int i = 0; i < nf; ++i) {
     CompositeFunction_sptr domainFunction;
     auto qValue = qValues.empty() ? 0.0 : qValues[i];
-    auto innerFunction = createInnerFunction(
-        peaks, hasDeltaFunction, isQDependent, qValue, hasTempCorrection);
+    auto innerFunction =
+        createInnerFunction(peaks, hasDeltaFunction, isQDependent, qValue,
+                            hasTempCorrection, tempValue);
     auto workspace =
         resolutionWorkspaces.empty() ? "" : resolutionWorkspaces[i].first;
     auto workspaceIndex =
@@ -126,7 +127,7 @@ ConvolutionFunctionModel::addBackground(CompositeFunction_sptr domainFunction,
 
 CompositeFunction_sptr ConvolutionFunctionModel::createInnerFunction(
     std::string peaksFunction, bool hasDeltaFunction, bool isQDependent,
-    double qValue, bool hasTempCorrection) {
+    double qValue, bool hasTempCorrection, double tempValue) {
   auto functionSpecified = !peaksFunction.empty();
   CompositeFunction_sptr innerFunction =
       boost::make_shared<CompositeFunction>();
@@ -147,7 +148,7 @@ CompositeFunction_sptr ConvolutionFunctionModel::createInnerFunction(
   }
 
   if (hasTempCorrection) {
-    innerFunction = addTempCorrection(innerFunction);
+    innerFunction = addTempCorrection(innerFunction, tempValue);
   }
 
   if (hasDeltaFunction) {
@@ -168,11 +169,11 @@ CompositeFunction_sptr ConvolutionFunctionModel::createInnerFunction(
 }
 
 CompositeFunction_sptr ConvolutionFunctionModel::addTempCorrection(
-    CompositeFunction_sptr peaksFunction) {
+    CompositeFunction_sptr peaksFunction, double tempValue) {
   CompositeFunction_sptr productFunction =
       boost::dynamic_pointer_cast<CompositeFunction>(
           FunctionFactory::Instance().createFunction("ProductFunction"));
-  auto tempFunction = createTemperatureCorrection(0.0);
+  auto tempFunction = createTemperatureCorrection(tempValue);
   productFunction->addFunction(tempFunction);
   productFunction->addFunction(peaksFunction);
   return productFunction;

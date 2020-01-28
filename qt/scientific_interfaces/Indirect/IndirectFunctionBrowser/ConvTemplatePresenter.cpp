@@ -7,6 +7,8 @@
 #include "ConvTemplatePresenter.h"
 #include "ConvTemplateBrowser.h"
 #include "MantidQtWidgets/Common/EditLocalParameterDialog.h"
+#include <QInputDialog>
+#include <float.h>
 
 #include <cmath>
 
@@ -59,9 +61,18 @@ void ConvTemplatePresenter::setDeltaFunction(bool on) {
 void ConvTemplatePresenter::setTempCorrection(bool on) {
   if (on == m_model.hasTempCorrection())
     return;
-  m_model.setTempCorrection(on);
+  double temp = m_model.getTempValue();
+  if (on) {
+    bool ok;
+    temp = QInputDialog::getDouble(m_view, "Temperature", "Set Temperature",
+                                   temp, 0.0,
+                                   std::numeric_limits<double>::max(), 3, &ok);
+    if (!ok)
+      return;
+  }
+  m_model.setTempCorrection(on, temp);
   if (on)
-    m_view->addTempCorrection();
+    m_view->addTempCorrection(temp);
   else
     m_view->removeTempCorrection();
 
@@ -111,9 +122,6 @@ QStringList ConvTemplatePresenter::getLocalParameters() const {
 
 void ConvTemplatePresenter::setGlobalParameters(const QStringList &globals) {
   m_model.setGlobalParameters(globals);
-  // if (m_model.hasStretchExponential()) {
-  //  m_view->setGlobalParametersQuiet(globals);
-  //}
 }
 
 void ConvTemplatePresenter::setGlobal(const QString &parName, bool on) {
