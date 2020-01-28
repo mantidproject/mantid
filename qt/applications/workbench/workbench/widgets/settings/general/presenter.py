@@ -45,7 +45,6 @@ class GeneralSettings(object):
         self.parent = parent
         self.load_current_setting_values()
 
-        self.setup_general_group()
         self.setup_facilities_group()
         self.setup_checkbox_signals()
         self.setup_general_group()
