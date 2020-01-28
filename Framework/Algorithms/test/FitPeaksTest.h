@@ -412,8 +412,8 @@ public:
     // std::string input_ws_name = loadVulcanHighAngleData();
 
     // Generate peak and background parameters
-    std::vector<string> peakparnames{ "Mixing" };
-    std::vector<double> peakparvalues{ 0.5 };
+    std::vector<string> peakparnames{"Mixing"};
+    std::vector<double> peakparvalues{0.5};
 
     // Initialize FitPeak
     FitPeaks fitpeaks;

@@ -262,12 +262,13 @@ void FitPeaks::init() {
                   "Last workspace index to fit (which is included)");
 
   // properties about peak positions to fit
-  declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::PEAK_CENTERS),
-                  "List of peak centers to fit against.");
   declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          PropertyNames::PEAK_CENTERS_WKSP, "", Direction::Input, PropertyMode::Optional),
-      "MatrixWorkspace containing peak centers");
+      std::make_unique<ArrayProperty<double>>(PropertyNames::PEAK_CENTERS),
+      "List of peak centers to fit against.");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      PropertyNames::PEAK_CENTERS_WKSP, "", Direction::Input,
+                      PropertyMode::Optional),
+                  "MatrixWorkspace containing peak centers");
 
   const std::string peakcentergrp("Peak Positions");
   setPropertyGroup(PropertyNames::PEAK_CENTERS, peakcentergrp);
@@ -313,9 +314,9 @@ void FitPeaks::init() {
   setPropertyGroup(PropertyNames::FIT_WINDOW_WKSP, fitrangeegrp);
 
   // properties about peak parameters' names and value
-  declareProperty(
-      std::make_unique<ArrayProperty<std::string>>(PropertyNames::PEAK_PARAM_NAMES),
-      "List of peak parameters' names");
+  declareProperty(std::make_unique<ArrayProperty<std::string>>(
+                      PropertyNames::PEAK_PARAM_NAMES),
+                  "List of peak parameters' names");
   declareProperty(
       std::make_unique<ArrayProperty<double>>(PropertyNames::PEAK_PARAM_VALUES),
       "List of peak parameters' value");
@@ -432,7 +433,8 @@ std::map<std::string, std::string> FitPeaks::validateInputs() {
   bool haveCommonPeakParameters(false);
   std::vector<string> suppliedParameterNames =
       getProperty(PropertyNames::PEAK_PARAM_NAMES);
-  std::vector<double> peakParamValues = getProperty(PropertyNames::PEAK_PARAM_VALUES);
+  std::vector<double> peakParamValues =
+      getProperty(PropertyNames::PEAK_PARAM_VALUES);
   if ((!suppliedParameterNames.empty()) || (!peakParamValues.empty())) {
     haveCommonPeakParameters = true;
     if (suppliedParameterNames.size() != peakParamValues.size()) {
@@ -454,7 +456,8 @@ std::map<std::string, std::string> FitPeaks::validateInputs() {
       issues[PropertyNames::PEAK_PARAM_NAMES] = msg;
       issues[PropertyNames::PEAK_PARAM_VALUES] = msg;
     } else {
-      m_profileStartingValueTable = getProperty(PropertyNames::PEAK_PARAM_TABLE);
+      m_profileStartingValueTable =
+          getProperty(PropertyNames::PEAK_PARAM_TABLE);
       suppliedParameterNames = m_profileStartingValueTable->getColumnNames();
     }
   }
@@ -635,7 +638,7 @@ void FitPeaks::processInputFunctions() {
     m_initParamValues = getProperty(PropertyNames::PEAK_PARAM_VALUES);
     // convert the parameter name in string to parameter name in integer index
     convertParametersNameToIndex();
-    //m_uniformProfileStartingValue = true;
+    // m_uniformProfileStartingValue = true;
   } else if ((!partablename.empty()) && m_peakParamNames.empty()) {
     // use non-uniform starting value of peak parameters
     m_profileStartingValueTable = getProperty(partablename);
@@ -1127,9 +1130,8 @@ void FitPeaks::fitSpectrumPeaks(
  * @param peak_function :: peak function to set parameter values to
  * @return :: flag whether the peak width shall be observed
  */
-bool
-FitPeaks::decideToEstimatePeakParams(const bool firstPeakInSpectrum,
-                                     API::IPeakFunction_sptr peak_function) {
+bool FitPeaks::decideToEstimatePeakParams(
+    const bool firstPeakInSpectrum, API::IPeakFunction_sptr peak_function) {
   // should observe the peak width if the user didn't supply all of the peak
   // function parameters
   bool observe_peak_shape(m_initParamIndexes.size() !=
