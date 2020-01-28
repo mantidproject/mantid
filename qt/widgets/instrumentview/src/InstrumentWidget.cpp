@@ -490,10 +490,6 @@ void InstrumentWidget::setSurfaceType(int type) {
     surface->setShowPeakRelativeIntensityFlag(showPeakRelativeIntensity);
     // set new surface
     setSurface(surface);
-    if (surfaceType == FULL3D) {
-      setViewDirection(
-          QString::fromStdString(getInstrumentActor().getDefaultAxis()));
-    }
 
     // init tabs with new surface
     foreach (InstrumentWidgetTab *tab, m_tabs) { tab->initSurface(); }
