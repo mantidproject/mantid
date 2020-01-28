@@ -69,7 +69,7 @@ class WorkspaceWidgetTest(unittest.TestCase, QtWidgetFinder):
     @mock.patch('workbench.plugins.workspacewidget.plot', autospec=True)
     def test_plot_with_plot_bin(self,mock_plot):
         self.ws_widget._do_plot_bin([self.ws_names[0]], False, False)
-        mock_plot.assert_called_once_with(unittest.mock.ANY,errors=False, overplot=False, wksp_indices=[0],
+        mock_plot.assert_called_once_with(mock.ANY,errors=False, overplot=False, wksp_indices=[0],
                                           plot_kwargs={'axis': MantidAxType.BIN})
 
     @mock.patch('workbench.plugins.workspacewidget.plot_from_names', autospec=True)
