@@ -29,7 +29,6 @@ ALGORITHM_HISTORY_WINDOW = "mantidqt.widgets.workspacewidget." \
 MATRIXWORKSPACE_DISPLAY = "mantidqt.widgets.workspacedisplay.matrix." \
                           "presenter.MatrixWorkspaceDisplay"
 MATRIXWORKSPACE_DISPLAY_TYPE = "StatusBarView"
-PLOT_DISPLAY = "matplotlib.pyplot.Plot"
 app = QApplication([])
 
 
