@@ -172,6 +172,8 @@ public:
   int maxIterations() const;
   /// Get the peak radius for peak functions
   int getPeakRadius() const;
+  /// Get the excluded range for the fit
+  std::string getExcludeRange() const;
   /// Get the X limits of the workspace
   QVector<double> getXRange();
 
@@ -512,6 +514,7 @@ protected:
   QtProperty *m_peakRadius;
   QtProperty *m_logValue;
   QtProperty *m_plotDiff;
+  QtProperty *m_excludeRange;
   QtProperty *m_plotCompositeMembers;
   QtProperty *m_convolveMembers;
   QtProperty *m_rawData;

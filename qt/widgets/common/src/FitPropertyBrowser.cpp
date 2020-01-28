@@ -82,9 +82,10 @@ FitPropertyBrowser::FitPropertyBrowser(QWidget *parent, QObject *mantidui)
       m_startX(nullptr), m_endX(nullptr), m_output(nullptr),
       m_minimizer(nullptr), m_ignoreInvalidData(nullptr),
       m_costFunction(nullptr), m_maxIterations(nullptr), m_peakRadius(nullptr),
-      m_logValue(nullptr), m_plotDiff(nullptr), m_plotCompositeMembers(nullptr),
-      m_convolveMembers(nullptr), m_rawData(nullptr), m_xColumn(nullptr),
-      m_yColumn(nullptr), m_errColumn(nullptr), m_showParamErrors(nullptr),
+      m_logValue(nullptr), m_plotDiff(nullptr), m_excludeRange(nullptr),
+      m_plotCompositeMembers(nullptr), m_convolveMembers(nullptr),
+      m_rawData(nullptr), m_xColumn(nullptr), m_yColumn(nullptr),
+      m_errColumn(nullptr), m_showParamErrors(nullptr),
       m_evaluationType(nullptr), m_compositeFunction(), m_browser(nullptr),
       m_fitActionUndoFit(nullptr), m_fitActionSeqFit(nullptr),
       m_fitActionFit(nullptr), m_fitActionEvaluate(nullptr),
@@ -213,6 +214,10 @@ void FitPropertyBrowser::init() {
   bool plotDiff = settings.value("Plot Difference", QVariant(true)).toBool();
   m_boolManager->setValue(m_plotDiff, plotDiff);
 
+  m_excludeRange = m_stringManager->addProperty("Exclude Range");
+  m_excludeRange->setToolTip(
+    "A list of pairs of real numbers which define the region to exclude");
+
   m_plotCompositeMembers = m_boolManager->addProperty("Plot Composite Members");
   bool plotCompositeItems =
       settings.value(m_plotCompositeMembers->propertyName(), QVariant(false))
@@ -259,6 +264,7 @@ void FitPropertyBrowser::init() {
   settingsGroup->addSubProperty(m_maxIterations);
   settingsGroup->addSubProperty(m_peakRadius);
   settingsGroup->addSubProperty(m_plotDiff);
+  settingsGroup->addSubProperty(m_excludeRange);
   settingsGroup->addSubProperty(m_plotCompositeMembers);
   settingsGroup->addSubProperty(m_convolveMembers);
   settingsGroup->addSubProperty(m_showParamErrors);
@@ -1298,6 +1304,11 @@ int FitPropertyBrowser::getPeakRadius() const {
   return m_intManager->value(m_peakRadius);
 }
 
+/// Get the excluded range
+std::string FitPropertyBrowser::getExcludeRange() const {
+  return m_stringManager->value(m_excludeRange).QString::toStdString();
+}
+
 /// Get the registered function names
 void FitPropertyBrowser::populateFunctionNames() {
   const std::vector<std::string> names =
@@ -1703,7 +1714,8 @@ void FitPropertyBrowser::doFit(int maxIterations) {
       if (alg->existsProperty("ConvolveMembers")) {
         alg->setProperty("ConvolveMembers", convolveMembers());
       }
-    }
+    } 
+    alg->setProperty("Exclude", getExcludeRange());
     observeFinish(alg);
     alg->executeAsync();
 
