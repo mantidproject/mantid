@@ -30,8 +30,8 @@ Usage
 
 .. testoutput:: ConvertToMatrixWorkspaceSimpleExample
 
-   51200 1
-   51200 1
+   51200 500
+   51200 500
 
 **Example - Conversion when blocksize > 1**
 
