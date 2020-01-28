@@ -79,6 +79,11 @@ FunctionMultiDomainPresenter::getFunctionByIndex(const QString &index) {
   return getFunctionWithPrefix(index, m_model->getCurrentFunction());
 }
 
+IFunction_sptr
+FunctionMultiDomainPresenter::getFunctionWithIndex(const int index) {
+  return m_model->getSingleFunction(index);
+}
+
 void FunctionMultiDomainPresenter::setParameter(const QString &paramName,
                                                 double value) {
   m_model->setParameter(paramName, value);
@@ -406,6 +411,20 @@ void FunctionMultiDomainPresenter::updateViewFromModel() {
     }
     m_view->setParameterConstraint(
         name, m_model->getLocalParameterConstraint(name, index));
+  }
+}
+
+void FunctionMultiDomainPresenter::hideGlobals() {
+  auto treeView = dynamic_cast<FunctionTreeView *>(m_view);
+  if (treeView) {
+    treeView->hideGlobals();
+  }
+}
+
+void FunctionMultiDomainPresenter::showGlobals() {
+  auto treeView = dynamic_cast<FunctionTreeView *>(m_view);
+  if (treeView) {
+    treeView->showGlobals();
   }
 }
 

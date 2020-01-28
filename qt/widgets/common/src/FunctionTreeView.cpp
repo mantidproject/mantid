@@ -1793,6 +1793,11 @@ void FunctionTreeView::setColumnSizes(int s0, int s1, int s2) {
   m_browser->setColumnSizes(s0, s1, s2);
 }
 
+/// Show global column
+void FunctionTreeView::hideGlobals() { m_browser->hideColumn(2); }
+// Hide global column
+void FunctionTreeView::showGlobals() { m_browser->showColumn(2); }
+
 /**
  * Emit a signal when any of the Global options change.
  */
