@@ -142,7 +142,7 @@ CompositeFunction_sptr ConvolutionFunctionModel::createInnerFunction(
     }
     if (isQDependent) {
       IFunction::Attribute attr(qValue);
-      innerFunction->setAttribute("Q", attr);
+      peakFunction->setAttribute("Q", attr);
     }
   }
 
@@ -172,7 +172,7 @@ CompositeFunction_sptr ConvolutionFunctionModel::addTempCorrection(
   CompositeFunction_sptr productFunction =
       boost::dynamic_pointer_cast<CompositeFunction>(
           FunctionFactory::Instance().createFunction("ProductFunction"));
-  auto tempFunction = createTemperatureCorrection(100.0);
+  auto tempFunction = createTemperatureCorrection(0.0);
   productFunction->addFunction(tempFunction);
   productFunction->addFunction(peaksFunction);
   return productFunction;
@@ -181,7 +181,7 @@ CompositeFunction_sptr ConvolutionFunctionModel::addTempCorrection(
 IFunction_sptr
 ConvolutionFunctionModel::createTemperatureCorrection(double correction) {
   // create user function for the exponential correction
-  // (x*temp) / 1-exp(-(x*temp))
+  // (x/temp) / (1-exp(-(x/temp)))
   auto tempFunc = FunctionFactory::Instance().createFunction("UserFunction");
   // 11.606 is the conversion factor from meV to K
   std::string formula = "((x*11.606)/Temp) / (1 - exp(-((x*11.606)/Temp)))";
