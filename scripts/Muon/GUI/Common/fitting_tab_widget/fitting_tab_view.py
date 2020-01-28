@@ -27,13 +27,10 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         self.setup_simul_fit_combo_box()
         self.undo_fit_button.setEnabled(False)
 
-        self.function_browser = FunctionBrowser(self, False)
-        self.function_browser_multi = FunctionBrowser(self, True)
-        self.function_browser_multi.hide()
+        self.function_browser = FunctionBrowser(self, True)
         self.function_browser_layout.addWidget(self.function_browser)
-        self.function_browser_layout.addWidget(self.function_browser_multi)
         self.function_browser.setErrorsEnabled(True)
-        self.function_browser_multi.setErrorsEnabled(True)
+        self.function_browser.hideGlobalCheckbox()
 
         self.increment_parameter_display_button.clicked.connect(self.increment_display_combo_box)
         self.decrement_parameter_display_button.clicked.connect(self.decrement_display_combo_box)
@@ -85,12 +82,6 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         self.function_browser.removeDatasets(index_list)
         self.function_browser.addDatasets(data_set_name_list)
 
-    def set_datasets_in_function_browser_multi(self, data_set_name_list):
-        number_of_data_sets = self.function_browser_multi.getNumberOfDatasets()
-        index_list = range(number_of_data_sets)
-        self.function_browser_multi.removeDatasets(index_list)
-        self.function_browser_multi.addDatasets(data_set_name_list)
-
     def update_with_fit_outputs(self, fit_function, output_status, output_chi_squared):
         if not fit_function:
             self.fit_status_success_failure.setText('No Fit')
@@ -98,14 +89,14 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
             self.fit_status_chi_squared.setText('Chi squared: {}'.format(output_chi_squared))
             return
 
-        if self.fit_type != self.simultaneous_fit:
+        if self.is_simul_fit():
             self.function_browser.blockSignals(True)
             self.function_browser.updateMultiDatasetParameters(fit_function)
             self.function_browser.blockSignals(False)
         else:
-            self.function_browser_multi.blockSignals(True)
-            self.function_browser_multi.updateMultiDatasetParameters(fit_function)
-            self.function_browser_multi.blockSignals(False)
+            self.function_browser.blockSignals(True)
+            self.function_browser.updateParameters(fit_function)
+            self.function_browser.blockSignals(False)
 
         if output_status == 'success':
             self.fit_status_success_failure.setText('Success')
@@ -172,10 +163,7 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
 
     @property
     def fit_object(self):
-        if self.fit_type != self.simultaneous_fit:
-            return self.function_browser.getGlobalFunction()
-        else:
-            return self.function_browser_multi.getGlobalFunction()
+        return self.function_browser.getGlobalFunction()
 
     @property
     def minimizer(self):
@@ -263,15 +251,16 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         return current_index if current_index != -1 else 0
 
     def get_global_parameters(self):
-        return self.function_browser_multi.getGlobalParameters()
+        return self.function_browser.getGlobalParameters()
 
     def switch_to_simultaneous(self):
-        self.function_browser_multi.show()
-        self.function_browser.hide()
+        self.function_browser.showGlobalCheckbox()
 
     def switch_to_single(self):
-        self.function_browser_multi.hide()
-        self.function_browser.show()
+        self.function_browser.hideGlobalCheckbox()
+
+    def is_simul_fit(self):
+        return self.simul_fit_checkbox.isChecked()
 
     def setup_fit_by_specifier(self, choices):
         self.simul_fit_by_specifier.blockSignals(True)

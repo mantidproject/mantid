@@ -36,6 +36,7 @@ public:
   QString getFunctionString() const;
   IFunction_sptr getFunction() const;
   IFunction_sptr getFunctionByIndex(const QString &index);
+  IFunction_sptr getFunctionWithIndex(const int index);
   IFunction_sptr getFitFunction() const;
   QString getFitFunctionString() const;
   bool hasFunction() const;
@@ -73,6 +74,8 @@ public:
 
   void setColumnSizes(int s0, int s1, int s2);
   void setErrorsEnabled(bool enabled);
+  void hideGlobals();
+  void showGlobals();
 signals:
   void functionStructureChanged();
   void parameterChanged(const QString &funcIndex, const QString &paramName);

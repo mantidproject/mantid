@@ -804,6 +804,9 @@ public:
     void removeDatasets(QList<int> indices);
     QStringList getDatasetNames() const;
     void setErrorsEnabled(bool enabled);
+    void hideGlobalCheckbox();
+    void showGlobalCheckbox();
+
     QStringList getGlobalParameters() const;
     void setGlobalParameters(const QStringList &globals);
     void clear();
@@ -854,6 +857,10 @@ public:
     SIP_PYOBJECT getFunctionByIndex(const QString &index);
     %MethodCode
       sipRes = boost::python::to_python_value<const Mantid::API::IFunction_sptr &>()(sipCpp->getFunctionByIndex(*a0));
+    %End
+    SIP_PYOBJECT getFunctionWithIndex(const int index);
+    %MethodCode
+      sipRes = boost::python::to_python_value<const Mantid::API::IFunction_sptr &>()(sipCpp->getFunctionWithIndex(a0));
     %End
 signals:
     void functionStructureChanged();

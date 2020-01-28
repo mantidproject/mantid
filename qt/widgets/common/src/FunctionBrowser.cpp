@@ -94,6 +94,14 @@ IFunction_sptr FunctionBrowser::getFunctionByIndex(const QString &index) {
 }
 
 /**
+ * Return function at specified function index (e.g. f0.)
+ * @param index :: Index of the function, or empty string for top-level function
+ * @return Function at index, or null pointer if not found
+ */
+IFunction_sptr FunctionBrowser::getFunctionWithIndex(const int index) {
+  return m_presenter->getFunctionWithIndex(index);
+}
+/**
  * Updates the function parameter value
  * @param paramName :: Fully qualified parameter name (includes function index)
  * @param value :: New value
@@ -343,6 +351,10 @@ QString FunctionBrowser::getFitFunctionString() const {
 void FunctionBrowser::setBackgroundA0(double value) {
   m_presenter->setBackgroundA0(value);
 }
+
+void FunctionBrowser::hideGlobalCheckbox() { m_presenter->hideGlobals(); }
+
+void FunctionBrowser::showGlobalCheckbox() { m_presenter->showGlobals(); }
 
 } // namespace MantidWidgets
 } // namespace MantidQt
