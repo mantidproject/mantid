@@ -39,6 +39,7 @@ public:
   virtual ~ISaveView() = default;
   virtual void subscribe(SaveViewSubscriber *notifyee) = 0;
 
+  virtual void connectSaveSettingsWidgets() = 0;
   virtual std::string getSavePath() const = 0;
   virtual void setSavePath(const std::string &path) const = 0;
   virtual std::string getPrefix() const = 0;

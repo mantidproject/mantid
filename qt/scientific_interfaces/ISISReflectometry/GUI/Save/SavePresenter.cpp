@@ -43,7 +43,7 @@ void SavePresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) {
 }
 
 void SavePresenter::notifySettingsChanged() {
-  m_mainPresenter->notifySettingsChanged();
+  m_mainPresenter->setBatchUnsaved();
 }
 
 void SavePresenter::notifyPopulateWorkspaceList() { populateWorkspaceList(); }

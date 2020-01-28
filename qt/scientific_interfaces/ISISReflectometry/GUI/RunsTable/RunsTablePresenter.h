@@ -156,6 +156,8 @@ private:
                             Item const &item);
   void updateProgressBar();
 
+  void notifyTableChanged();
+
   bool isProcessing() const;
   bool isAutoreducing() const;
   bool isAnyBatchProcessing() const;

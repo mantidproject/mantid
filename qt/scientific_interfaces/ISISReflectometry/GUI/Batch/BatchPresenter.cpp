@@ -46,7 +46,8 @@ BatchPresenter::BatchPresenter(
       m_experimentPresenter(std::move(experimentPresenter)),
       m_instrumentPresenter(std::move(instrumentPresenter)),
       m_savePresenter(std::move(savePresenter)),
-      m_jobRunner(new BatchJobRunner(std::move(model))) {
+      m_jobRunner(new BatchJobRunner(std::move(model))),
+      m_unsavedBatchFlag(false) {
 
   m_view->subscribe(this);
 
@@ -56,8 +57,6 @@ BatchPresenter::BatchPresenter(
   m_experimentPresenter->acceptMainPresenter(this);
   m_instrumentPresenter->acceptMainPresenter(this);
   m_runsPresenter->acceptMainPresenter(this);
-
-  m_unsavedBatchFlag = false;
 
   observePostDelete();
   observeRename();
@@ -325,15 +324,15 @@ bool BatchPresenter::isAnyBatchAutoreducing() const {
     * changes and user input to avoid losing them
     * @return : Bool on whether the calling function should continue
     */
-bool BatchPresenter::isOperationPrevented() const {
-  return m_mainPresenter->isOperationPrevented();
+bool BatchPresenter::isWarnDiscardChangesChecked() const {
+  return m_mainPresenter->isWarnDiscardChangesChecked();
 }
 
 /** Returns whether there are any unsaved changes in the current batch */
-bool BatchPresenter::getUnsavedBatchFlag() const { return m_unsavedBatchFlag; }
+bool BatchPresenter::isBatchUnsaved() const { return m_unsavedBatchFlag; }
 
 /** Set the state of unsaved changes in the current batch */
-void BatchPresenter::setUnsavedBatchFlag(bool isUnsaved) {
+void BatchPresenter::setBatchUnsaved(bool isUnsaved) {
   m_unsavedBatchFlag = isUnsaved;
 }
 

@@ -35,7 +35,7 @@ Initialize the Interface
 */
 void QtSaveView::initLayout() {
   m_ui.setupUi(this);
-
+  connectSaveSettingsWidgets();
   connect(m_ui.refreshButton, SIGNAL(clicked()), this,
           SLOT(populateListOfWorkspaces()));
   connect(m_ui.saveButton, SIGNAL(clicked()), this, SLOT(saveWorkspaces()));
@@ -71,7 +71,7 @@ void QtSaveView::connectSettingsChange(QRadioButton &edit) {
 
 void QtSaveView::onSettingsChanged() { m_notifyee->notifySettingsChanged(); }
 
-void QtSaveView::connectInstrumentSettingsWidgets() {
+void QtSaveView::connectSaveSettingsWidgets() {
   connectSettingsChange(*m_ui.savePathEdit);
   connectSettingsChange(*m_ui.prefixEdit);
   connectSettingsChange(*m_ui.filterEdit);

@@ -189,6 +189,7 @@ void RunsTablePresenter::notifyDeleteRowRequested() {
       removeRowsAndGroupsFromView(selected);
       removeRowsFromModel(selected);
       ensureAtLeastOneGroupExists();
+      notifyTableChanged();
       notifyRowStateChanged();
       notifySelectionChanged();
     } else {
@@ -209,6 +210,7 @@ void RunsTablePresenter::notifyDeleteGroupRequested() {
     removeGroupsFromModel(groupIndicesOrderedLowToHigh);
     removeGroupsFromView(groupIndicesOrderedLowToHigh);
     ensureAtLeastOneGroupExists();
+    notifyTableChanged();
     notifyRowStateChanged();
     notifySelectionChanged();
   } else {
@@ -250,6 +252,7 @@ void RunsTablePresenter::notifyInsertRowRequested() {
   } else {
     m_view->mustSelectGroupOrRow();
   }
+  notifyTableChanged();
   notifyRowStateChanged();
 }
 
@@ -334,6 +337,7 @@ void RunsTablePresenter::notifyInstrumentChanged(
 
 void RunsTablePresenter::settingsChanged() {
   m_model.resetState();
+  notifyTableChanged();
   notifyRowStateChanged();
 }
 
@@ -364,6 +368,7 @@ void RunsTablePresenter::notifyInsertGroupRequested() {
     appendEmptyGroupInView();
     appendEmptyGroupInModel();
   }
+  notifyTableChanged();
   notifyRowStateChanged();
 }
 
@@ -559,6 +564,7 @@ void RunsTablePresenter::notifyCellTextChanged(
     updateGroupName(itemIndex, column, oldValue, newValue);
   else
     updateRowField(itemIndex, column, oldValue, newValue);
+  notifyTableChanged();
   notifyRowStateChanged();
 }
 
@@ -586,6 +592,7 @@ void RunsTablePresenter::notifyRowInserted(
   } else if (isRowLocation(newRowLocation)) {
     insertEmptyRowInModel(groupOf(newRowLocation), rowOf(newRowLocation));
   }
+  notifyTableChanged();
   notifyRowStateChanged();
 }
 
@@ -705,6 +712,7 @@ void RunsTablePresenter::notifyPasteRowsRequested() {
       pasteRowsOntoGroup(replacementRoots);
     else
       pasteRowsOntoRows(replacementRoots);
+    notifyTableChanged();
     notifyRowStateChanged();
     notifySelectionChanged();
   }
@@ -826,6 +834,10 @@ void RunsTablePresenter::updateProgressBar() {
   m_view->setProgress(m_mainPresenter->percentComplete());
 }
 
+void RunsTablePresenter::notifyTableChanged() {
+  m_mainPresenter->notifyTableChanged();
+}
+
 void RunsTablePresenter::notifyRowStateChanged() {
   updateProgressBar();
 
@@ -848,7 +860,6 @@ void RunsTablePresenter::notifyRowStateChanged() {
     }
     ++groupIndex;
   }
-  m_mainPresenter->notifySetUnsavedBatch(true);
 }
 
 void RunsTablePresenter::notifyRowStateChanged(

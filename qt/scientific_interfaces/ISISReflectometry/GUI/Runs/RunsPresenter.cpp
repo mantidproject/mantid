@@ -197,8 +197,7 @@ bool RunsPresenter::resumeAutoreduction() {
   if (m_searcher->searchSettingsChanged(searchString, instrument,
                                         ISearcher::SearchType::AUTO)) {
     // If there are unsaved changes, ask the user first
-    if (m_mainPresenter->getUnsavedBatchFlag() &&
-        !m_messageHandler->askUserDiscardChanges()) {
+    if (isOverwritingTablePrevented()) {
       return false;
     }
     m_searcher->reset();
@@ -254,9 +253,7 @@ void RunsPresenter::notifyInstrumentChanged(std::string const &instrumentName) {
   tablePresenter()->notifyInstrumentChanged(instrumentName);
 }
 
-void RunsPresenter::notifySetUnsavedBatch(bool isUnsaved) {
-  m_mainPresenter->setUnsavedBatchFlag(isUnsaved);
-}
+void RunsPresenter::notifyTableChanged() { m_mainPresenter->setBatchUnsaved(); }
 
 void RunsPresenter::settingsChanged() { tablePresenter()->settingsChanged(); }
 
@@ -318,8 +315,13 @@ bool RunsPresenter::isAnyBatchAutoreducing() const {
   return m_mainPresenter->isAnyBatchAutoreducing();
 }
 
-bool RunsPresenter::isOperationPrevented() const {
-  return m_mainPresenter->isOperationPrevented();
+bool RunsPresenter::isOverwritingTablePrevented() const {
+  return m_mainPresenter->isBatchUnsaved() && isOverwriteBatchPrevented();
+}
+
+bool RunsPresenter::isOverwriteBatchPrevented() const {
+  return m_mainPresenter->isWarnDiscardChangesChecked() &&
+         !m_messageHandler->askUserDiscardChanges();
 }
 
 bool RunsPresenter::searchInProgress() const {

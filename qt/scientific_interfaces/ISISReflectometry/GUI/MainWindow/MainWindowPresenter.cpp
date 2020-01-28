@@ -62,7 +62,6 @@ MainWindowPresenter::MainWindowPresenter(
   view->subscribe(this);
   for (auto *batchView : m_view->batches())
     addNewBatch(batchView);
-  m_isUnsaved = false;
 }
 
 MainWindowPresenter::~MainWindowPresenter() = default;
@@ -187,14 +186,7 @@ bool MainWindowPresenter::isCloseBatchPrevented(int batchIndex) const {
   return false;
 }
 
-bool MainWindowPresenter::isOperationPrevented() const {
-  if (isWarnDiscardChangesChecked()) {
-    return !m_messageHandler->askUserDiscardChanges();
-  }
-  return false;
-}
-
-bool MainWindowPresenter::isOperationPrevented(int tabIndex) const {
+bool MainWindowPresenter::isOverwriteBatchPrevented(int tabIndex) const {
   if (isWarnDiscardChangesChecked() && isBatchUnsaved(tabIndex)) {
     return !m_messageHandler->askUserDiscardChanges();
   }
@@ -203,30 +195,20 @@ bool MainWindowPresenter::isOperationPrevented(int tabIndex) const {
 
 /** Checks whether there are any unsaved changed in the specified batch */
 bool MainWindowPresenter::isBatchUnsaved(int batchIndex) const {
-  return m_batchPresenters[batchIndex]->getUnsavedBatchFlag();
+  return m_batchPresenters[batchIndex]->isBatchUnsaved();
 }
 
-/**
-     Checks whether there are unsaved changes in any batch
-     * @return : Bool on whether there are changes
-*/
+/** Checks whether there are unsaved changes in any batch and returns a bool */
 bool MainWindowPresenter::isAnyBatchUnsaved() {
   for (auto it = m_batchPresenters.begin(); it != m_batchPresenters.end();
        ++it) {
     auto batchIndex =
         static_cast<int>(std::distance(m_batchPresenters.begin(), it));
     if (isBatchUnsaved(batchIndex)) {
-      setUnsavedFlag(true);
       return true;
     }
   }
   return false;
-}
-
-bool MainWindowPresenter::getUnsavedFlag() const { return m_isUnsaved; }
-
-void MainWindowPresenter::setUnsavedFlag(bool isUnsaved) {
-  m_isUnsaved = isUnsaved;
 }
 
 void MainWindowPresenter::addNewBatch(IBatchView *batchView) {
@@ -265,11 +247,11 @@ void MainWindowPresenter::notifySaveBatchRequested(int tabIndex) {
     return;
   auto map = m_encoder->encodeBatch(m_view, tabIndex, false);
   m_fileHandler->saveJSONToFile(filename, map);
-  m_batchPresenters[tabIndex].get()->setUnsavedBatchFlag(false);
+  m_batchPresenters[tabIndex].get()->setBatchUnsaved(false);
 }
 
 void MainWindowPresenter::notifyLoadBatchRequested(int tabIndex) {
-  if (isOperationPrevented(tabIndex))
+  if (isOverwriteBatchPrevented(tabIndex))
     return;
   auto filename = m_messageHandler->askUserForLoadFileName("JSON (*.json)");
   if (filename == "")
@@ -285,7 +267,7 @@ void MainWindowPresenter::notifyLoadBatchRequested(int tabIndex) {
     return;
   }
   m_decoder->decodeBatch(m_view, tabIndex, map);
-  m_batchPresenters[tabIndex].get()->setUnsavedBatchFlag(false);
+  m_batchPresenters[tabIndex].get()->setBatchUnsaved(false);
 }
 
 void MainWindowPresenter::disableSaveAndLoadBatch() {
