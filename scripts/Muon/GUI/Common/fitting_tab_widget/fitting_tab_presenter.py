@@ -213,7 +213,6 @@ class FittingTabPresenter(object):
             self._fit_function = [func.clone() for func in self._get_fit_function()]
 
         self.clear_fit_information()
-
         if self.automatically_update_fit_name:
             name = self._get_fit_function()[0]
             self.view.function_name = self.model.get_function_name(name)
@@ -262,8 +261,8 @@ class FittingTabPresenter(object):
             for index, fit_function in enumerate(self._fit_function):
                 fit_function = fit_function if fit_function else self.view.fit_object.clone()
                 new_function = calculate_tf_fit_function(fit_function)
-
                 self._fit_function[index] = new_function.clone()
+
             self.view.function_browser.blockSignals(True)
             self.view.function_browser.clear()
             self.view.function_browser.setFunction(str(self._fit_function[self.view.get_index_for_start_end_times()]))
@@ -271,11 +270,10 @@ class FittingTabPresenter(object):
             self.view.function_browser.blockSignals(False)
         else:
             new_function = calculate_tf_fit_function(self.view.fit_object)
-            self._fit_function = [new_function.clone()] * len(self.selected_data)
+            self._fit_function = [new_function.clone()]
             self.view.function_browser.blockSignals(True)
             self.view.function_browser.clear()
-            self.view.function_browser.setFunction(
-                str(self._fit_function[self.view.get_index_for_start_end_times()]))
+            self.view.function_browser.setFunction(str(self._fit_function[0]))
             self.view.function_browser.setGlobalParameters(new_global_parameters)
             self.view.function_browser.blockSignals(False)
 
@@ -455,6 +453,10 @@ class FittingTabPresenter(object):
                 rebin=not self.view.fit_to_raw, freq=freq)
 
         guess_selection = list(set(self._check_data_exists(guess_selection)))
+
+        if len(guess_selection) > 1:  # sort the list by runs
+            guess_selection.sort(key=self._get_run_number_from_workspace)
+
         return guess_selection
 
     def update_fit_specifier_list(self):
@@ -619,4 +621,3 @@ class FittingTabPresenter(object):
     @staticmethod
     def _check_data_exists(guess_selection):
         return [item for item in guess_selection if AnalysisDataService.doesExist(item)]
-
