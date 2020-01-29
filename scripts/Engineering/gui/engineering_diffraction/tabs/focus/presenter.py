@@ -34,7 +34,7 @@ class FocusPresenter(object):
 
         # Cropping Options
         self.cropping_widget = CroppingWidget(self.view, view=self.view.get_cropping_widget())
-        self.view.set_cropping_widget_hidden()
+        self.show_cropping(False)
 
     def on_focus_clicked(self):
         if not self._validate():
@@ -121,10 +121,7 @@ class FocusPresenter(object):
         self.current_calibration = calibration
 
     def show_cropping(self, visible):
-        if visible:
-            self.view.set_cropping_widget_visible()
-        else:
-            self.view.set_cropping_widget_hidden()
+        self.view.set_cropping_widget_visibility(visible)
 
     # -----------------------
     # Observers / Observables

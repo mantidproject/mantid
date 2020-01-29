@@ -49,17 +49,8 @@ class FocusView(QtWidgets.QWidget, Ui_focus):
     def set_plot_output_enabled(self, enabled):
         self.check_plotOutput.setEnabled(enabled)
 
-    def set_cropping_widget_hidden(self):
-        self.widget_cropping.hide()
-
-    def set_cropping_widget_visible(self):
-        self.widget_cropping.show()
-
-    def set_check_cropping_enabled(self, enabled):
-        self.check_cropFocus.setEnabled(enabled)
-
-    def set_check_cropping_state(self, state):
-        self.check_cropFocus.setCheckState(state)
+    def set_cropping_widget_visibility(self, visible):
+        self.widget_cropping.setVisible(visible)
 
     # =================
     # Component Getters
