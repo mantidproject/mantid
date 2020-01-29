@@ -28,6 +28,7 @@ Improvements
 - Normalization options have been added to 2d plots and sliceviewer.
 - The images tab in figure options no longer forces the max value to be greater than the min value.
 - All the relevant settings from manitdplot have been added to workbench
+- Double clicking on a workspace that only has a single bin of data (for example from a constant wavelength source) will now plot that bin, also for single bin workspaces a plot bin option has been added to the right click plot menu of the workspace.
 
 
 Bugfixes

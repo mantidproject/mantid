@@ -254,7 +254,8 @@ def attach_func_as_method(name, func_obj, self_param_name, workspace_types=None)
         signature = func_obj.__signature__.replace(parameters=func_parameters)
     else:
         signature = ['self']
-        signature = tuple(signature.extend(get_function_code(func_obj).co_varnames))
+        signature.extend(get_function_code(func_obj).co_varnames)
+        signature = tuple(signature)
     customise_func(_method_impl, func_obj.__name__,
                    signature, func_obj.__doc__)
 

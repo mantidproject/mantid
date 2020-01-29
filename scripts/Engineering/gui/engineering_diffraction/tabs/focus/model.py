@@ -13,7 +13,8 @@ import matplotlib.pyplot as plt
 
 from Engineering.gui.engineering_diffraction.tabs.common import vanadium_corrections, path_handling
 from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
-from mantid.simpleapi import EnggFocus, logger, AnalysisDataService as Ads, SaveNexus, SaveGSS, SaveFocusedXYE
+from mantid.simpleapi import EnggFocus, logger, AnalysisDataService as Ads, SaveNexus, SaveGSS, SaveFocusedXYE, \
+    LoadAscii
 
 SAMPLE_RUN_WORKSPACE_NAME = "engggui_focusing_input_ws"
 FOCUSED_OUTPUT_WORKSPACE_NAME = "engggui_focusing_output_ws_bank_"
@@ -39,7 +40,7 @@ class FocusModel(object):
         full_calib_path = get_setting(path_handling.INTERFACES_SETTINGS_GROUP,
                                       path_handling.ENGINEERING_PREFIX, "full_calibration")
         if full_calib_path is not None and path.exists(full_calib_path):
-            full_calib_workspace = path_handling.load_workspace(full_calib_path)
+            full_calib_workspace = LoadAscii(full_calib_path, OutputWorkspace="det_pos", Separator="Tab")
         else:
             full_calib_workspace = None
         for name in banks:

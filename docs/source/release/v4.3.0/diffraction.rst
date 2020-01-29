@@ -27,6 +27,9 @@ Powder Diffraction
 Engineering Diffraction
 -----------------------
 
+- :ref:`EnggCalibrateFull <algm-EnggCalibrateFull-v1>` now uses the new :ref:`SaveAscii <algm-SaveAscii-v2>` to save its output files as TSVs, allowing them to be loaded back into mantid.
+- :ref:`FitPeaks <algm-FitPeaks-v1>` allows for specifying some of the peak parameters (e.g. only ``Mixing`` for :ref:`func-PseudoVoigt`) and observing the other parameters. The new functionality allows for more automated execution for peak functions other than :ref:`func-Gaussian`.
+
 Single Crystal Diffraction
 --------------------------
 

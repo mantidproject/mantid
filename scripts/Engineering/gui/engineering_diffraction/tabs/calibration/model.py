@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 from mantid.api import AnalysisDataService as Ads
 from mantid.kernel import logger
 from mantid.simpleapi import EnggCalibrate, DeleteWorkspace, CloneWorkspace, \
-    CreateWorkspace, AppendSpectra, CreateEmptyTableWorkspace
+    CreateWorkspace, AppendSpectra, CreateEmptyTableWorkspace, LoadAscii
 from mantidqt.plotting.functions import plot
 from Engineering.EnggUtils import write_ENGINX_GSAS_iparam_file
 from Engineering.gui.engineering_diffraction.tabs.common import vanadium_corrections
@@ -55,7 +55,7 @@ class CalibrationModel(object):
         full_calib_path = get_setting(path_handling.INTERFACES_SETTINGS_GROUP,
                                       path_handling.ENGINEERING_PREFIX, "full_calibration")
         if full_calib_path is not None and path.exists(full_calib_path):
-            full_calib = path_handling.load_workspace(full_calib_path)
+            full_calib = LoadAscii(full_calib_path, OutputWorkspace="det_pos", Separator="Tab")
             output = self.run_calibration(sample_workspace,
                                           van_integration,
                                           van_curves,
