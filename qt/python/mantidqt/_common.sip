@@ -852,10 +852,6 @@ public:
     %MethodCode
       sipRes = boost::python::to_python_value<const Mantid::API::IFunction_sptr &>()(sipCpp->getFunctionByIndex(*a0));
     %End
-    SIP_PYOBJECT getFunctionWithIndex(const int index);
-    %MethodCode
-      sipRes = boost::python::to_python_value<const Mantid::API::IFunction_sptr &>()(sipCpp->getFunctionWithIndex(a0));
-    %End
 signals:
     void functionStructureChanged();
     void parameterChanged(const QString &funcIndex, const QString &paramName);

@@ -36,7 +36,6 @@ public:
   QString getFunctionString() const;
   IFunction_sptr getFunction() const;
   IFunction_sptr getFunctionByIndex(const QString &index);
-  IFunction_sptr getFunctionWithIndex(const int index);
   IFunction_sptr getFitFunction() const;
   QString getFitFunctionString() const;
   bool hasFunction() const;

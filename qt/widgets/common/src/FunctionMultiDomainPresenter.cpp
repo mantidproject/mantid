@@ -79,11 +79,6 @@ FunctionMultiDomainPresenter::getFunctionByIndex(const QString &index) {
   return getFunctionWithPrefix(index, m_model->getCurrentFunction());
 }
 
-IFunction_sptr
-FunctionMultiDomainPresenter::getFunctionWithIndex(const int index) {
-  return m_model->getSingleFunction(index);
-}
-
 void FunctionMultiDomainPresenter::setParameter(const QString &paramName,
                                                 double value) {
   m_model->setParameter(paramName, value);
