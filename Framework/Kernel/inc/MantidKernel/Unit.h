@@ -663,7 +663,7 @@ private:
 };
 
 //=================================================================================================
-/// Temperature in kelvin
+/// Atomic Distance in Angstroms
 class MANTID_KERNEL_DLL AtomicDistance : public Empty {
 public:
   AtomicDistance();
