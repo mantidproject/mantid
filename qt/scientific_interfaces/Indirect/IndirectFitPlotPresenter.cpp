@@ -15,19 +15,7 @@ using MantidQt::CustomInterfaces::IDA::IIndirectFitPlotView;
 using MantidQt::CustomInterfaces::IDA::Spectra;
 using MantidQt::CustomInterfaces::IDA::WorkspaceIndex;
 
-std::string createPlotString(const std::string &workspaceName,
-                             const std::string &spectra) {
-  std::string plotString = "from mantidplot import plotSpectrum\n";
-  return plotString + "plotSpectrum(['" + workspaceName + "'], " + spectra +
-         ")\n";
-}
-
-std::string createPlotString(const std::string &workspaceName,
-                             WorkspaceIndex spectrum) {
-  return createPlotString(workspaceName, std::to_string(spectrum.value));
-}
-
-struct UpdateAvailableSpectra {
+struct UpdateAvailableSpectra : public boost::static_visitor<> {
 public:
   explicit UpdateAvailableSpectra(IIndirectFitPlotView *view) : m_view(view) {}
 

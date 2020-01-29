@@ -391,7 +391,7 @@ MSDFunctionModel::getParameterDescription(ParamID name) const {
                    : boost::optional<QString>();
 }
 
-boost::optional<QString> MSDFunctionModel::getPrefix(ParamID name) const {
+boost::optional<QString> MSDFunctionModel::getPrefix(ParamID) const {
   return getFitTypePrefix();
 }
 
@@ -513,7 +513,7 @@ boost::optional<QString> MSDFunctionModel::getFitTypePrefix() const {
   return QString();
 }
 
-QString MSDFunctionModel::setBackgroundA0(double value) { return ""; }
+QString MSDFunctionModel::setBackgroundA0(double) { return ""; }
 
 } // namespace IDA
 } // namespace CustomInterfaces
