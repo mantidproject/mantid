@@ -92,15 +92,6 @@ void FunctionBrowser::setFunction(IFunction_sptr fun) {
 IFunction_sptr FunctionBrowser::getFunctionByIndex(const QString &index) {
   return m_presenter->getFunctionByIndex(index);
 }
-
-/**
- * Return function at specified function index (e.g. f0.)
- * @param index :: Index of the function, or empty string for top-level function
- * @return Function at index, or null pointer if not found
- */
-IFunction_sptr FunctionBrowser::getFunctionWithIndex(const int index) {
-  return m_presenter->getFunctionWithIndex(index);
-}
 /**
  * Updates the function parameter value
  * @param paramName :: Fully qualified parameter name (includes function index)

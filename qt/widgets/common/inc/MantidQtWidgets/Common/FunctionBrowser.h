@@ -63,8 +63,6 @@ public:
   bool hasFunction() const;
   /// Return a function with specified index
   IFunction_sptr getFunctionByIndex(const QString &index);
-  /// Return a function with specified index
-  IFunction_sptr getFunctionWithIndex(const int index);
   /// Return index of the current function, if one is selected
   boost::optional<QString> currentFunctionIndex();
   /// Update the function parameter value
