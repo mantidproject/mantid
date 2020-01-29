@@ -21,6 +21,7 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidQtWidgets/Common/SelectFunctionDialog.h"
 #include "MantidQtWidgets/Common/IWorkspaceFitControl.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
 
@@ -54,6 +55,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 class PropertyHandler;
+class SelectFunctionDialog;
 /**
  * Class FitPropertyBrowser implements QtPropertyBrowser to display
  * and control fitting function parameters and settings.
@@ -629,7 +631,7 @@ private:
   QLabel *m_status;
 
   // The widget for choosing the fit function.
-  QDialog *m_fitSelector;
+  SelectFunctionDialog *m_fitSelector;
   // The tree widget containing the fit functions.
   QTreeWidget *m_fitTree;
 
