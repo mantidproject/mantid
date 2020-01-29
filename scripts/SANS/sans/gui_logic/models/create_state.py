@@ -16,7 +16,7 @@ from sans.state.AllStates import AllStates
 sans_logger = Logger("SANS")
 
 
-def create_states(state_model, table_model, instrument, facility, row_index=None,
+def create_states(state_model, table_model, facility, row_index=None,
                   file_lookup=True, user_file=""):
     """
     Here we create the states based on the settings in the models
@@ -25,17 +25,16 @@ def create_states(state_model, table_model, instrument, facility, row_index=None
     :param row_index: the selected row, if None then all rows are generated
     :param user_file: the user file under which the data is reduced
     """
-    number_of_rows = table_model.get_number_of_rows()
-    rows = [x for x in row_index if x < number_of_rows]
+    rows = row_index if row_index else [x for x in range(start=1, stop=table_model.get_number_of_rows() + 1)]
+    assert max(rows) < table_model.get_number_of_rows()
 
     states = {}
     errors = {}
 
     gui_state_director = GuiStateDirector(table_model, state_model, facility)
     for row in rows:
-        if file_lookup:
-            table_model.wait_for_file_information(row)
-        state = _create_row_state(row, table_model, state_model, facility, file_lookup, gui_state_director)
+        state = _create_row_state(row, table_model, state_model, facility, file_lookup,
+                                  gui_state_director, user_file)
         if isinstance(state, AllStates):
             states.update({row: state})
         elif isinstance(state, str):
@@ -44,13 +43,12 @@ def create_states(state_model, table_model, instrument, facility, row_index=None
 
 
 def _create_row_state(row, table_model, state_model, facility, file_lookup,
-                      gui_state_director):
+                      gui_state_director, user_file):
     sans_logger.information("Generating state for row {}".format(row))
     state = None
 
     try:
-
-        table_entry = table_model.get_table_entry(row)
+        table_entry = table_model.get_row(row)
         if not table_entry.file_information and file_lookup:
             error_message = "Trying to find the SANS file {0}, but cannot find it. Make sure that " \
                             "the relevant paths are added and the correct instrument is selected."
@@ -61,9 +59,10 @@ def _create_row_state(row, table_model, state_model, facility, file_lookup,
             if row_user_file:
                 row_state_model = create_gui_state_from_userfile(row_user_file, state_model)
                 row_gui_state_director = GuiStateDirector(table_model, row_state_model, facility)
-                state = row_gui_state_director.create_state(row, file_lookup=file_lookup)
+                state = row_gui_state_director.create_state(row, file_lookup=file_lookup,
+                                                            user_file=row_user_file)
             else:
-                state = gui_state_director.create_state(row, file_lookup=file_lookup)
+                state = gui_state_director.create_state(row, file_lookup=file_lookup, user_file=user_file)
         return state
     except (ValueError, RuntimeError) as e:
         return "{}".format(str(e))

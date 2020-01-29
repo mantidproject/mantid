@@ -836,7 +836,7 @@ class SANSFileInformationBlank(SANSFileInformation):
     as we should not be creating blank information states
     """
     def __init__(self):
-        super(SANSFileInformationBlank, self).__init__(full_file_name="0")
+        super(SANSFileInformationBlank, self).__init__(full_file_name="00000")
 
     def get_file_name(self):
         raise NotImplementedError("Trying to use blank FileInformation")

@@ -10,8 +10,9 @@ import os
 import unittest
 
 from sans.common.enums import SANSFacility
+from sans.gui_logic.models.RowEntries import RowEntries
 from sans.gui_logic.models.state_gui_model import StateGuiModel
-from sans.gui_logic.models.table_model import (TableModel, TableIndexModel)
+from sans.gui_logic.models.table_model import TableModel
 from sans.gui_logic.presenter.gui_state_director import GuiStateDirector
 from sans.state.AllStates import AllStates
 from sans.test_helper.user_file_test_helper import create_user_file, sample_user_file
@@ -21,9 +22,10 @@ from sans.user_file.user_file_reader import UserFileReader
 class GuiStateDirectorTest(unittest.TestCase):
     @staticmethod
     def _get_table_model(option_string="", sample_thickness=8.0):
-        table_index_model = TableIndexModel("SANS2D00022024", "", "", "", "", "", "", "", "",
-                                            "", "", "",options_column_string=option_string,
-                                            sample_thickness=sample_thickness)
+        table_index_model = RowEntries(sample_scatter="SANS2D00022024",
+                                       sample_thickness=sample_thickness)
+        table_index_model.options.set_user_options(option_string)
+
         table_model = TableModel()
         table_model.add_table_entry_no_thread_or_signal(0, table_index_model)
         return table_model
@@ -53,10 +55,9 @@ class GuiStateDirectorTest(unittest.TestCase):
         self.assertEqual(state.wavelength.wavelength_high,  [12.5])
 
     def test_that_will_raise_when_models_are_incomplete(self):
-        table_index_model = TableIndexModel(0, "", "", "", "", "", "",
-                                               "", "", "", "", "", "")
+        table_index_model = RowEntries()
         table_model = TableModel()
-        table_model.add_table_entry(0, table_index_model)
+        table_model.replace_table_entry(0, table_index_model)
         state_model = self._get_state_gui_model()
         director = GuiStateDirector(table_model, state_model, SANSFacility.ISIS)
         self.assertRaises(ValueError, director.create_state, 0)

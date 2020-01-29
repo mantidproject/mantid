@@ -17,25 +17,26 @@ import csv
 import os
 import time
 import traceback
+
 from qtpy import PYQT4
 
 from mantid.api import (FileFinder)
 from mantid.kernel import Logger, ConfigService, ConfigPropertyObserver
 from mantid.py3compat import csv_open_type
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
-from sans.common.constants import ALL_PERIODS
-from sans.common.enums import (BatchReductionEntry, ReductionMode, RangeStepType, RowState, SampleShape,
+from sans.common.enums import (ReductionMode, RangeStepType, RowState, SampleShape,
                                SaveType, SANSInstrument)
 from sans.gui_logic.gui_common import (add_dir_to_datasearch, get_reduction_mode_from_gui_selection,
                                        get_reduction_mode_strings_for_gui, get_string_for_gui_from_instrument,
-                                       remove_dir_from_datasearch, SANSGuiPropertiesHandler)
+                                       SANSGuiPropertiesHandler)
+from sans.gui_logic.models.RowEntries import RowEntries
 from sans.gui_logic.models.batch_process_runner import BatchProcessRunner
 from sans.gui_logic.models.beam_centre_model import BeamCentreModel
 from sans.gui_logic.models.create_state import create_states
 from sans.gui_logic.models.diagnostics_page_model import run_integral, create_state
 from sans.gui_logic.models.settings_adjustment_model import SettingsAdjustmentModel
 from sans.gui_logic.models.state_gui_model import StateGuiModel
-from sans.gui_logic.models.table_model import TableModel, TableIndexModel
+from sans.gui_logic.models.table_model import TableModel
 from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
 from sans.gui_logic.presenter.diagnostic_presenter import DiagnosticsPagePresenter
 from sans.gui_logic.presenter.masking_table_presenter import (MaskingTablePresenter)
@@ -129,8 +130,8 @@ class RunTabPresenter(PresenterCommon):
         def on_output_mode_changed(self):
             self._presenter.on_output_mode_changed()
 
-        def on_data_changed(self, row, column, new_value, old_value):
-            self._presenter.on_data_changed(row, column, new_value, old_value)
+        def on_data_changed(self, index, row):
+            self._presenter.on_data_changed(index, row)
 
         def on_manage_directories(self):
             self._presenter.on_manage_directories()
@@ -138,8 +139,8 @@ class RunTabPresenter(PresenterCommon):
         def on_instrument_changed(self):
             self._presenter.on_instrument_changed()
 
-        def on_row_inserted(self, index, row):
-            self._presenter.on_row_inserted(index, row)
+        def on_row_inserted(self):
+            self._presenter.on_row_inserted()
 
         def on_rows_removed(self, rows):
             self._presenter.on_rows_removed(rows)
@@ -176,7 +177,7 @@ class RunTabPresenter(PresenterCommon):
         def on_processing_error(self, error):
             self._presenter.on_processing_error(error)
 
-    def __init__(self, facility, view=None):
+    def __init__(self, facility, model=None, view=None):
         # We don't have access to state model really at this point
         super(RunTabPresenter, self).__init__(view, None)
 
@@ -190,14 +191,9 @@ class RunTabPresenter(PresenterCommon):
         self.progress = 0
 
         # Models that are being used by the presenter
-        self._table_model = TableModel()
+        self._table_model = TableModel() if not model else model
         self._table_model.subscribe_to_model_changes(self)
 
-        # Any child presenters
-        self._setup_sub_presenters()
-
-        # Presenter needs to have a handle on the view since it delegates it
-        self.set_view(view)
         self._processing = False
         self.work_handler = WorkHandler()
         self.batch_process_runner = BatchProcessRunner(self.notify_progress,
@@ -207,6 +203,11 @@ class RunTabPresenter(PresenterCommon):
         # File information for the first input
         self._file_information = None
         self._clipboard = []
+
+        self._setup_sub_presenters()
+
+        # Presenter needs to have a handle on the view since it delegates it
+        self.set_view(view)
 
         # Check save dir for display
         self._save_directory_observer = \
@@ -438,81 +439,18 @@ class RunTabPresenter(PresenterCommon):
             self._table_model.clear_table_entries()
 
             self._add_multiple_rows_to_table_model(rows=parsed_rows)
-            self._table_model.remove_table_entries([len(parsed_rows)])
         except RuntimeError as e:
-            if batch_file_directory:
-                # Remove added directory from datasearch.directories
-                ConfigService["datasearch.directories"] = remove_dir_from_datasearch(batch_file_directory, datasearch_dirs)
-
             self.sans_logger.error("Loading of the batch file failed. {}".format(str(e)))
             self.display_warning_box('Warning', 'Loading of the batch file failed', str(e))
 
     def _add_multiple_rows_to_table_model(self, rows):
-        parsed_rows = []
-        for row in rows:
-            parsed_rows.append(self._parse_row_for_table_model(row=row))
+        self._table_model.add_multiple_table_entries(table_index_model_list=rows)
 
-        self._table_model.add_multiple_table_entries(table_index_model_list=parsed_rows)
-
-    @staticmethod
-    def _parse_row_for_table_model(row):
-        def get_string_entry(_tag, _row):
-            _element = ""
-            if _tag in _row:
-                _element = _row[_tag]
-            return _element
-
-        def get_string_period(_tag):
-            return "" if _tag == ALL_PERIODS else str(_tag)
-
-        # ----Pull out the entries----
-        # Run numbers
-        sample_scatter = get_string_entry(BatchReductionEntry.SAMPLE_SCATTER, row)
-        sample_scatter_period = get_string_period(
-            get_string_entry(BatchReductionEntry.SAMPLE_SCATTER_PERIOD, row))
-        sample_transmission = get_string_entry(BatchReductionEntry.SAMPLE_TRANSMISSION, row)
-        sample_transmission_period = \
-            get_string_period(get_string_entry(BatchReductionEntry.SAMPLE_TRANSMISSION_PERIOD, row))
-        sample_direct = get_string_entry(BatchReductionEntry.SAMPLE_DIRECT, row)
-        sample_direct_period = get_string_period(
-            get_string_entry(BatchReductionEntry.SAMPLE_DIRECT_PERIOD, row))
-        can_scatter = get_string_entry(BatchReductionEntry.CAN_SCATTER, row)
-        can_scatter_period = get_string_period(
-            get_string_entry(BatchReductionEntry.CAN_SCATTER_PERIOD, row))
-        can_transmission = get_string_entry(BatchReductionEntry.CAN_TRANSMISSION, row)
-        can_transmission_period = get_string_period(
-            get_string_entry(BatchReductionEntry.CAN_SCATTER_PERIOD, row))
-        can_direct = get_string_entry(BatchReductionEntry.CAN_DIRECT, row)
-        can_direct_period = get_string_period(
-            get_string_entry(BatchReductionEntry.CAN_DIRECT_PERIOD, row))
-
-        # Other information
-        output_name = get_string_entry(BatchReductionEntry.OUTPUT, row)
-        user_file = get_string_entry(BatchReductionEntry.USER_FILE, row)
-
-        # Sample geometries
-        sample_thickness = get_string_entry(BatchReductionEntry.SAMPLE_THICKNESS, row)
-        sample_height = get_string_entry(BatchReductionEntry.SAMPLE_HEIGHT, row)
-        sample_width = get_string_entry(BatchReductionEntry.SAMPLE_WIDTH, row)
-
-        # ----Form a row----
-        row_entry = [sample_scatter, sample_scatter_period, sample_transmission,
-                     sample_transmission_period,
-                     sample_direct, sample_direct_period, can_scatter, can_scatter_period,
-                     can_transmission, can_transmission_period,
-                     can_direct, can_direct_period,
-                     output_name, user_file,
-                     sample_thickness, sample_height, sample_width]
-
-        table_index_model = TableIndexModel(*row_entry)
-        return table_index_model
-
-    def _add_row_to_table_model(self, row, index):
+    def _replace_row_in_table_model(self, row, index):
         """
         Adds a row to the table
         """
-        table_index_model = self._parse_row_for_table_model(row=row)
-        self._table_model.add_table_entry(index, table_index_model)
+        self._table_model.replace_table_entry(index, row)
 
     def on_update_rows(self):
         self.update_view_from_table_model()
@@ -521,20 +459,23 @@ class RunTabPresenter(PresenterCommon):
         self._view.clear_table()
         self._view.hide_period_columns()
 
-        for row_index, row in enumerate(self._table_model._table_entries):
-            row_entry = [str(x) for x in row.to_list()]
-            self._view.add_row(row_entry)
-            self._view.change_row_color(row_state_to_colour_mapping[row.row_state], row_index + 1)
+        num_rows = self._table_model.get_number_of_rows()
+        for row_index in range(num_rows):
+            row = self._table_model.get_row(row_index)
+            self._view.add_row(row)
+            self._view.change_row_color(row_state_to_colour_mapping[row.state], row_index + 1)
             self._view.set_row_tooltip(row.tool_tip, row_index + 1)
-            if row.isMultiPeriod():
+            if row.is_multi_period():
                 self._view.show_period_columns()
         self._view.remove_rows([0])
         self._view.clear_selection()
 
-    def on_data_changed(self, row, column, new_value, old_value):
-        self._table_model.update_table_entry(row, column, new_value)
-        self._view.change_row_color(row_state_to_colour_mapping[RowState.UNPROCESSED], row)
-        self._view.set_row_tooltip('', row)
+    def on_data_changed(self, index, row_entries):
+        # TODO this is inefficient, but we should only be parsing the user input
+        # when they hit a button, not as they type
+        self._table_model.replace_table_entry(index, row_entries)
+        self._view.change_row_color(row_state_to_colour_mapping[RowState.UNPROCESSED], index)
+        self._view.set_row_tooltip('', index)
         self._beam_centre_presenter.on_update_rows()
         self._masking_table_presenter.on_update_rows()
 
@@ -574,7 +515,6 @@ class RunTabPresenter(PresenterCommon):
         """
         Processes a list of rows. Any errors cause the row to be coloured red.
         """
-
         self._set_progress_bar(current=0, number_steps=len(rows))
 
         try:
@@ -582,7 +522,8 @@ class RunTabPresenter(PresenterCommon):
             self._validate_output_modes()
 
             for row in rows:
-                self._table_model.reset_row_state(row)
+                row.reset_row_state()
+
             self.update_view_from_table_model()
 
             self._view.disable_buttons()
@@ -632,8 +573,8 @@ class RunTabPresenter(PresenterCommon):
         we want to raise an error here. (If we don't, an error will be raised on attempting
         to save after performing the reductions)
         """
-        if (self._view.output_mode_file_radio_button.isChecked() or
-                self._view.output_mode_both_radio_button.isChecked()):
+        if (self._view.output_mode_file_radio_button.isChecked()
+                or self._view.output_mode_both_radio_button.isChecked()):
             if self._view.save_types == [SaveType.NO_TYPE]:
                 raise RuntimeError("You have selected an output mode which saves to file, "
                                    "but no file types have been selected.")
@@ -656,19 +597,20 @@ class RunTabPresenter(PresenterCommon):
         """
         Process all entries in the table, regardless of selection.
         """
-        all_rows = range(self._table_model.get_number_of_rows())
-        all_rows = self._table_model.get_non_empty_rows(all_rows)
-        if all_rows:
-            self._process_rows(all_rows)
+        to_process = [row for row in self._table_model.get_all_rows() if not row.is_empty()]
+        if to_process:
+            self._process_rows(to_process)
 
     def on_process_selected_clicked(self):
         """
         Process selected table entries.
         """
         selected_rows = self._view.get_selected_rows()
-        selected_rows = self._table_model.get_non_empty_rows(selected_rows)
-        if selected_rows:
-            self._process_rows(selected_rows)
+        to_process = [self._table_model.get_row(i) for i in selected_rows]
+        to_process = [row for row in to_process if not row.is_empty()]
+
+        if to_process:
+            self._process_rows(to_process)
 
     def on_processing_error(self, row, error_msg):
         """
@@ -774,15 +716,17 @@ class RunTabPresenter(PresenterCommon):
         return filename
 
     def notify_progress(self, row, out_shift_factors, out_scale_factors):
-        self.increment_progress()
+        self.progress += 1
+        setattr(self._view, 'progress_bar_value', self.progress)
+
         if out_scale_factors and out_shift_factors:
-            self._table_model.set_option(row, 'MergeScale', round(out_scale_factors[0], 3))
-            self._table_model.set_option(row, 'MergeShift', round(out_shift_factors[0], 3))
+            self._table_model.get_row(row).options.set_developer_option('MergeScale', round(out_scale_factors[0], 3))
+            self._table_model.get_row(row).options.set_developer_option('MergeShift', round(out_shift_factors[0], 3))
 
         self._table_model.set_row_to_processed(row, '')
 
     def increment_progress(self):
-        self.progress = self.progress + 1
+        self.progress += 1
         setattr(self._view, 'progress_bar_value', self.progress)
 
     # ----------------------------------------------------------------------------------------------
@@ -792,12 +736,11 @@ class RunTabPresenter(PresenterCommon):
     def num_rows(self):
         return self._table_model.get_number_of_rows()
 
-    def on_row_inserted(self, index, row):
+    def on_row_inserted(self):
         """
         Insert a row at a selected point
         """
-        row_table_index = TableIndexModel(*row)
-        self._table_model.add_table_entry(index, row_table_index)
+        self._table_model.append_table_entry(RowEntries())
 
     def on_insert_row(self):
         """
@@ -807,8 +750,8 @@ class RunTabPresenter(PresenterCommon):
         selected_rows = self._view.get_selected_rows()
 
         selected_row = selected_rows[0] + 1 if selected_rows else self.num_rows()
-        empty_row = self._table_model.create_empty_row()
-        self._table_model.add_table_entry(selected_row, empty_row)
+        empty_row = RowEntries()
+        self._table_model.replace_table_entry(selected_row, empty_row)
 
     def on_erase_rows(self):
         """
@@ -816,35 +759,35 @@ class RunTabPresenter(PresenterCommon):
         """
         selected_rows = self._view.get_selected_rows()
         if len(selected_rows) == 1 and self._table_model.get_number_of_rows() == 1:
-            self._table_model.replace_table_entries(selected_rows, [])
+            self._table_model.clear_table_entries()
         else:
             for row in selected_rows:
-                empty_row = self._table_model.create_empty_row()
+                empty_row = RowEntries()
                 self._table_model.replace_table_entries([row], [empty_row])
 
-    def on_rows_removed(self, rows):
+    def on_rows_removed(self, row_indices):
         """
         Remove rows from the table
         """
-        self._table_model.remove_table_entries(rows)
+        self._table_model.remove_table_entries(row_indices)
 
     def on_copy_rows_requested(self):
         selected_rows = self._view.get_selected_rows()
         self._clipboard = []
         for row in selected_rows:
-            data_from_table_model = self._table_model.get_table_entry(row).to_list()
+            data_from_table_model = self._table_model.get_row(row)
             self._clipboard.append(data_from_table_model)
 
     def on_cut_rows_requested(self):
         self.on_copy_rows_requested()
-        rows = self._view.get_selected_rows()
-        self.on_rows_removed(rows)
+        row_indices = self._view.get_selected_rows()
+        self.on_rows_removed(row_indices)
 
     def on_paste_rows_requested(self):
         if self._clipboard:
             selected_rows = self._view.get_selected_rows()
             selected_rows = selected_rows if selected_rows else [self.num_rows()]
-            replacement_table_index_models = [TableIndexModel(*x) for x in self._clipboard]
+            replacement_table_index_models = self._clipboard
             self._table_model.replace_table_entries(selected_rows, replacement_table_index_models)
 
     def on_manage_directories(self):
@@ -961,9 +904,8 @@ class RunTabPresenter(PresenterCommon):
         # 3. Go through each row and construct a state object
         states, errors = None, None
         if table_model and state_model_with_view_update:
-            states, errors = create_states(state_model_with_view_update, table_model,
-                                           self._view.instrument,
-                                           self._facility,
+            states, errors = create_states(state_model_with_view_update, table_model=table_model,
+                                           facility=self._facility,
                                            row_index=row_index,
                                            file_lookup=file_lookup,
                                            user_file=self._view.get_user_file_path())
@@ -1192,19 +1134,14 @@ class RunTabPresenter(PresenterCommon):
                 q_1d_rebin_string += str(q_1d_max)
                 state_model.q_1d_rebin_string = q_1d_rebin_string
 
-    def get_cell_value(self, row, column):
-        return self._view.get_cell(row=row, column=self.table_index[column], convert_to=str)
-
     def _export_table(self, filewriter, rows):
         """
         Take the current table model, and create a comma delimited csv file
         :param filewriter: File object to be written to
-        :type filewrite: csv.writer object
         :param rows: list of indices for non-empty rows
-        :type rows: list of ints
         """
         for row in rows:
-            table_row = self._table_model.get_table_entry(row).to_batch_list()
+            table_row = self._table_model.get_row(row).to_batch_list()
             batch_file_row = self._create_batch_entry_from_row(table_row)
             filewriter.writerow(batch_file_row)
 
