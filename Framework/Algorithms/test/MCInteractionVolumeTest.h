@@ -93,7 +93,6 @@ public:
 
     // Testing inputs
     const V3D startPos(-2.0, 0.0, 0.0), endPos(2.0, 0.0, 0.0);
-    const double lambdaBefore(2.5), lambdaAfter(3.5);
     auto sample = createTestSample(TestSampleType::Annulus);
 
     MockRNG rng;
@@ -256,7 +255,6 @@ public:
 
     // Testing inputs
     const V3D startPos(-2.0, 0.0, 0.0), endPos(2.0, 0.0, 0.0);
-    const double lambdaBefore(2.5), lambdaAfter(3.5);
 
     auto sample = createTestSample(TestSampleType::ThinAnnulus);
     MersenneTwister rng;

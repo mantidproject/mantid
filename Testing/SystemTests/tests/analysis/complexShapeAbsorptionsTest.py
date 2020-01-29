@@ -143,14 +143,3 @@ class MultiPartEnvironmentRotate(SampleEnvironment):
 
     def validate(self):
         return "ws", "complexEnvironmentMultiPartRotated.nxs"
-
-
-class MultiPartSampleEnvironmentOverlap(SampleShapeBase):
-
-    def handleEnvironment(self):
-        mantid.LoadSampleEnvironment(InputWorkspace="ws", OutputWorkspace="ws",
-                                     Filename=os.path.join(data_dir, "cube.stl"), Scale="cm", SetMaterial=True,
-                                     ChemicalFormula="V", SampleNumberDensity=0.1)
-        mantid.LoadSampleEnvironment(InputWorkspace="ws", OutputWorkspace="ws",
-                                     Filename=os.path.join(data_dir, "cube.stl"), Scale="cm", SetMaterial=True,
-                                     ChemicalFormula="V", SampleNumberDensity=0.1, Add=True)
