@@ -10,6 +10,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidHistogramData/HistogramY.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/WarningSuppressions.h"
 
@@ -295,6 +296,35 @@ boost::python::tuple findY(MatrixWorkspace &self, double value, tuple start) {
   return make_tuple(idx.first, idx.second);
 }
 
+/**
+* Gets the bin edges from one matrix workspace and applies them to another workspace. 
+* @param self :: The MatrixWorkspace whose bin edges are being set.
+* @param ws :: The MatrixWorkspace from which the bin edges are retrieved.
+* @param get_index :: The index from which the bin edges are retrieved.
+* @param set_index :: The index at which the bin edges are being set.
+*/
+void applyBinEdgesFromAnotherWorkspace(MatrixWorkspace &self,
+                                       const MatrixWorkspace &ws,
+                                       const size_t &get_index,
+                                       const size_t &set_index) {
+  self.setBinEdges(set_index, ws.binEdges(get_index));
+}
+
+/**
+ * Gets the points from one matrix workspace and applies them to another
+ * workspace.
+ * @param self :: The MatrixWorkspace whose points are being set.
+ * @param ws :: The MatrixWorkspace from which the points are retrieved.
+ * @param get_index :: The index from which the points are retrieved.
+ * @param set_index :: The index at which the points are being set.
+ */
+void applyPointsFromAnotherWorkspace(MatrixWorkspace &self,
+                                     const MatrixWorkspace &ws,
+                                     const size_t &get_index,
+                                     const size_t &set_index) {
+  self.setPoints(set_index, ws.points(get_index));
+}
+
 } // namespace
 
 /** Python exports of the Mantid::API::MatrixWorkspace class. */
@@ -373,6 +403,10 @@ void export_MatrixWorkspace() {
            ":class:`~mantid.api.MatrixWorkspace.hasMaskedBins` MUST be called "
            "first to check if any bins are "
            "masked, otherwise an exception will be thrown")
+      .def("binEdges", &MatrixWorkspace::binEdges, (arg("self"), arg("index")),
+           "Returns the histogram's bin edges.")
+      .def("points", &MatrixWorkspace::points, (arg("self"), arg("index")),
+           "Returns the histogram's points.")
       .def("findY", &findY,
            (arg("self"), arg("value"), arg("start") = make_tuple(0, 0)),
            "Find first index in Y equal to value. Start may be specified to "
@@ -410,6 +444,14 @@ void export_MatrixWorkspace() {
       .def("replaceAxis", &pythonReplaceAxis,
            (arg("self"), arg("axisIndex"), arg("newAxis")),
            "Replaces one of the workspace's axes with the new one provided.")
+      .def("applyBinEdgesFromAnotherWorkspace",
+           &applyBinEdgesFromAnotherWorkspace,
+           (arg("self"), arg("ws"), arg("get_index"), arg("set_index")),
+           "Sets the bin edges at set_index to be the bin edges of ws at get_index.")
+      .def("applyPointsFromAnotherWorkspace",
+           &applyPointsFromAnotherWorkspace,
+           (arg("self"), arg("ws"), arg("get_index"), arg("set_index")),
+           "Sets the points at set_index to be the points of ws at get_index.")
 
       //--------------------------------------- Read spectrum data
       //-------------------------

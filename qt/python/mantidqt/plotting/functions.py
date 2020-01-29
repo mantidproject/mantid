@@ -104,10 +104,14 @@ def plot_from_names(names, errors, overplot, fig=None, show_colorfill_btn=False,
     if advanced:
         errors = selection.errors
 
-    return plot(selection.workspaces, spectrum_nums=selection.spectra,
-                wksp_indices=selection.wksp_indices,
-                errors=errors, overplot=overplot, fig=fig, tiled=selection.plot_type==selection.Tiled,
-                waterfall=selection.plot_type==selection.Waterfall)
+    if selection.plot_type == selection.Surface or selection.plot_type == selection.Contour:
+        plot_type = "surface" if selection.plot_type == selection.Surface else "contour"
+        return plot_contour_or_surface(plot_type, 0, "Workspace index", "Workspace index", [], workspaces)
+    else:
+        return plot(selection.workspaces, spectrum_nums=selection.spectra,
+                    wksp_indices=selection.wksp_indices,
+                    errors=errors, overplot=overplot, fig=fig, tiled=selection.plot_type == selection.Tiled,
+                    waterfall=selection.plot_type == selection.Waterfall)
 
 
 def pcolormesh_from_names(names, fig=None, ax=None):

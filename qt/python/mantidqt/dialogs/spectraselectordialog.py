@@ -13,6 +13,7 @@ from qtpy.QtWidgets import QDialogButtonBox, QMessageBox, QWidget
 
 from mantid.kernel import logger
 from mantid.api import MatrixWorkspace
+from mantid.simpleapi import AnalysisDataService as ads
 
 from mantidqt.icons import get_icon
 from mantidqt.utils.qt import load_ui
@@ -38,7 +39,6 @@ class SpectraSelection(object):
     Individual = 0
     Waterfall = 1
     Tiled = 2
-
     Surface = 3
     Contour = 4
 
@@ -97,7 +97,7 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         selection.plot_type = self._ui.plotType.currentIndex()
 
         if self._advanced:
-            selection.errors = self._advanced.error_bars_check_box.isChecked()
+            selection.errors = self._ui.advanced_options_widget.ui.error_bars_check_box.isChecked()
         if self._check_number_of_plots(selection):
             self.selection = selection
             self.accept()
@@ -236,11 +236,25 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
             self.selection.plot_type = new_index
 
         new_text = self._ui.plotType.itemText(new_index)
-        if new_text == "Surface" or new_text == "Contour":
+        contour_or_surface = new_text == "Surface" or new_text == "Contour"
+        if contour_or_surface:
             self._ui.advanced_options_widget.ui.error_bars_check_box.setChecked(False)
             self._ui.advanced_options_widget.ui.error_bars_check_box.setEnabled(False)
+            self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.setEnabled(True)
         else:
             self._ui.advanced_options_widget.ui.error_bars_check_box.setEnabled(True)
+            self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.setEnabled(False)
+
+        if new_text == "Tiled":
+            self._ui.advanced_options_widget.ui.log_value_combo_box.setEnabled(False)
+        else:
+            self._ui.advanced_options_widget.ui.log_value_combo_box.setEnabled(True)
+            if contour_or_surface:
+                self._ui.advanced_options_widget.ui.log_value_combo_box.setItemText(0, "Workspace index")
+                if self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.text() == "Workspace name":
+                    self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.setText("Workspace index")
+            else:
+                self._ui.advanced_options_widget.ui.log_value_combo_box.setItemText(0, "Workspace name")
 
     def _parse_wksp_indices(self):
         wksp_indices = parse_selection_str(self._ui.wkspIndices.text(), self.wi_min, self.wi_max)
@@ -281,19 +295,58 @@ class AdvancedPlottingOptionsWidget(AdvancedPlottingOptionsWidgetUIBase):
         ui = AdvancedPlottingOptionsWidgetUI()
         ui.setupUi(self)
 
+        ui.plot_axis_label_line_edit.setText(ui.log_value_combo_box.currentText())
+
         ui.log_value_combo_box.currentTextChanged.connect(self._log_value_changed)
         ui.error_bars_check_box.clicked.connect(self._toggle_errors)
 
         self.ui = ui
         self._parent = parent
+        self._populate_log_combo_box()
 
     def _log_value_changed(self, text):
         self.ui.custom_log_line_edit.setEnabled(text == "Custom")
-        self.ui.plot_axis_label.setText(text)
+        self.ui.custom_log_line_edit.clear()
+        self.ui.plot_axis_label_line_edit.setText(text)
 
     def _toggle_errors(self, enable):
         if self._parent.selection:
             self._parent.selection.errors = enable
+
+    def _populate_log_combo_box(self):
+        self.ui.log_value_combo_box.addItem("Workspace index")
+
+        usable_logs = {}
+        ws = self._parent._workspaces[0]
+        if ws:
+            run_object = ws.getRun()
+            log_data = run_object.getLogData()
+
+            for log in log_data:
+                name = log.name
+
+                try:
+                    value = run_object.getPropertyAsSingleValueWithTimeAveragedMean(name)
+                    usable_logs[name] = [value, True]
+                except:
+                    pass
+
+        for ws in self._parent._workspaces:
+            if ws:
+                run_object = ws.getRun()
+                for log_name in list(usable_logs):
+                    if run_object.hasProperty(log_name):
+                        if usable_logs[log_name][1]:
+                            value = run_object.getPropertyAsSingleValueWithTimeAveragedMean(log_name)
+                            usable_logs[log_name][1] = value == usable_logs[log_name][0]
+                    else:
+                        usable_logs.pop(log_name)
+
+        for log_name in usable_logs:
+            if not usable_logs[log_name][1]:
+                self.ui.log_value_combo_box.addItem(log_name)
+
+        self.ui.log_value_combo_box.addItem("Custom")
 
 
 
