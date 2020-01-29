@@ -118,22 +118,24 @@ class FittingTabPresenter(object):
                 self.selected_data)
 
     def handle_fit_type_changed(self):
-        if self.view.fit_type == self.view.simultaneous_fit:
+        self.view.undo_fit_button.setEnabled(False)
+
+        if self.view.is_simul_fit():
             self.view.workspace_combo_box_label.setText(
                 'Display parameters for')
-            self.view.simul_fit_by_specifier.setEnabled(True)
+            self.view.enable_simul_fit_options()
             self.view.switch_to_simultaneous()
             self._update_stored_fit_functions()
             self.update_fit_specifier_list()
         else:
-            self.update_selected_workspace_guess()
+            self.selected_data = self.get_workspace_selected_list()
             self.view.workspace_combo_box_label.setText('Select Workspace')
             self.view.switch_to_single()
             self._update_stored_fit_functions()
-            self.view.simul_fit_by_specifier.setEnabled(False)
+            self.view.disable_simul_fit_options()
 
     def handle_plot_guess_changed(self):
-        if self.view.fit_type == self.view.simultaneous_fit:
+        if self.view.is_simul_fit():
             parameters = self.get_multi_domain_fit_parameters()
             current_idx = self.view.get_index_for_start_end_times()
             if len(parameters['InputWorkspace']) > current_idx:
@@ -166,7 +168,6 @@ class FittingTabPresenter(object):
         fit_function, fit_status, fit_chi_squared = self.fitting_calculation_model.result
         if any([not fit_function, not fit_status, not fit_chi_squared]):
             return
-
         if self.view.is_simul_fit():
             self._fit_function[0] = fit_function
             self._fit_status = [fit_status] * len(self.start_x)
@@ -208,7 +209,10 @@ class FittingTabPresenter(object):
             self.view.function_browser.blockSignals(False)
             return
         if not self.view.fit_object:
-            self._fit_function = [None]
+            if self.view.is_simul_fit:
+                self._fit_function = [None]
+            else:
+                self._fit_function = [None] * len(self.selected_data)
         else:
             self._fit_function = [func.clone() for func in self._get_fit_function()]
 
@@ -293,9 +297,10 @@ class FittingTabPresenter(object):
         self.update_fit_status_information_in_view()
         self.view.undo_fit_button.setEnabled(False)
         self.context.fitting_context.remove_latest_fit(self._number_of_fits_cached)
+        self._number_of_fits_cached = 0
 
     def handle_fit_by_changed(self):
-        if self.view.fit_type == self.view.simultaneous_fit:
+        if self.view.is_simul_fit():
             self.update_selected_workspace_guess()
             if self.view.simultaneous_fit_by == "Custom":
                 self.view.simul_fit_by_specifier.setEnabled(False)
@@ -314,20 +319,20 @@ class FittingTabPresenter(object):
             return
 
         self._fit_function_cache = [func.clone() for func in self._fit_function]
-        fit_type = self.view.fit_type
 
         try:
-            if fit_type == self.view.simultaneous_fit:
-                self._number_of_fits_cached = 1
+            if self.view.is_simul_fit():
+                self._number_of_fits_cached += 1
                 simultaneous_fit_parameters = self.get_multi_domain_fit_parameters()
                 global_parameters = self.view.get_global_parameters()
                 calculation_function = functools.partial(
                     self.model.do_simultaneous_fit,
                     simultaneous_fit_parameters, global_parameters)
+
                 self.calculation_thread = self.create_thread(
                     calculation_function)
             else:
-                self._number_of_fits_cached = 1
+                self._number_of_fits_cached += 1
                 single_fit_parameters = self.get_parameters_for_single_fit()
                 calculation_function = functools.partial(
                     self.model.do_single_fit, single_fit_parameters)
@@ -338,15 +343,15 @@ class FittingTabPresenter(object):
                                                        self.handle_finished,
                                                        self.handle_error)
             self.calculation_thread.start()
+
         except ValueError as error:
             self.view.warning_popup(error)
 
     def perform_tf_asymmetry_fit(self):
         self._fit_function_cache = [item.clone() for item in self._fit_function if item]
-        fit_type = self.view.fit_type
 
         try:
-            if fit_type == self.view.simultaneous_fit:
+            if self.view.is_simul_fit():
                 simultaneous_fit_parameters = self.get_multi_domain_tf_fit_parameters()
                 global_parameters = self.view.get_global_parameters()
                 calculation_function = functools.partial(
@@ -405,7 +410,7 @@ class FittingTabPresenter(object):
         if self.view.fit_object:
             self._fit_function = [func.clone() for func in self._get_fit_function()]
         else:
-            self._fit_function = [None]
+            self._fit_function = [None] * len(self.selected_data) if self.selected_data else [None]
 
         self.view.undo_fit_button.setEnabled(False)
 
@@ -422,7 +427,7 @@ class FittingTabPresenter(object):
         self.view.undo_fit_button.setEnabled(False)
 
     def update_selected_workspace_guess(self):
-        if self.view.fit_type == self.view.simultaneous_fit:
+        if self.view.is_simul_fit():
             self.update_fit_specifier_list()
         if self.manual_selection_made:
             guess_selection = self.selected_data
@@ -438,7 +443,7 @@ class FittingTabPresenter(object):
 
         runs = 'All'
         groups_and_pairs = self._get_selected_groups_and_pairs()
-        if self.view.fit_type == self.view.simultaneous_fit:
+        if self.view.is_simul_fit():
             if self.view.simultaneous_fit_by == "Run":
                 runs = self.view.simultaneous_fit_by_specifier
             elif self.view.simultaneous_fit_by == "Group/Pair":
@@ -510,11 +515,11 @@ class FittingTabPresenter(object):
 
     def _update_stored_fit_functions(self):
         if self.view.is_simul_fit():
-            if self.view.fit_object:  # make sure there is a fit function in the browser
-                self._fit_function = [self.view.fit_object.clone()]  # return the fit function stored in the browser
+            if self.view.fit_object:
+                self._fit_function = [self.view.fit_object.clone()]
             else:
                 self._fit_function = [None]
-        else:  # we need to convert stored function into equiv
+        else:  # we need to convert stored function into equivalent function
             if self.view.fit_object:  # make sure there is a fit function in the browser
                 if isinstance(self.view.fit_object, MultiDomainFunction):
                     equiv_fit_function = self.view.fit_object.createEquivalentFunctions()
@@ -544,9 +549,9 @@ class FittingTabPresenter(object):
 
     def _fit_function_index(self):
         if self.view.is_simul_fit():
-            return 0  # if we are doing a single simulatenous fit, return index 0
-        else:
-            return self.view.get_index_for_start_end_times()  # else doing a single fit on displayed workspaces
+            return 0  # if we are doing a single simultaneous fit return 0
+        else:  # else fitting on one of the display workspaces
+            return self.view.get_index_for_start_end_times()
 
     def update_start_x(self, index, value):
         self._start_x[index] = value
@@ -577,7 +582,6 @@ class FittingTabPresenter(object):
 
     def update_fit_status_information_in_view(self):
         current_index = self._fit_function_index()
-
         self.view.update_with_fit_outputs(self._fit_function[current_index],
                                           self._fit_status[current_index],
                                           self._fit_chi_squared[current_index])
@@ -592,7 +596,7 @@ class FittingTabPresenter(object):
 
     def get_parameters_for_tf_function_calculation(self, fit_function):
         mode = 'Construct' if self.view.tf_asymmetry_mode else 'Extract'
-        workspace_list = self.selected_data if self.view.fit_type == self.view.simultaneous_fit else [
+        workspace_list = self.selected_data if self.view.is_simul_fit() else [
             self.view.display_workspace]
         return {'InputFunction': fit_function,
                 'WorkspaceList': workspace_list,

@@ -18,6 +18,8 @@ EXAMPLE_TF_ASYMMETRY_FUNCTION = '(composite=ProductFunction,NumDeriv=false;name=
                                 '(name=FlatBackground,A0=1,ties=(A0=1);name=ExpDecayOsc,A=0.2,Lambda=0.2,Frequency=0.1,Phi=0))' \
                                 ';name=ExpDecayMuon,A=0,Lambda=-2.19698,ties=(A=0,Lambda=-2.19698)'
 
+EXAMPLE_SINGLE_DOMAIN_FUNCTION = 'name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0'
+
 EXAMPLE_MULTI_DOMAIN_FUNCTION = 'composite=MultiDomainFunction,NumDeriv=true;name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,' \
                                 'Phi=0,$domains=i;name=GausOsc,A=0.2,Sigma=0.2,' \
                                 'Frequency=0.1,Phi=0,$domains=i;name=GausOsc,A=0.2,' \
@@ -300,27 +302,18 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.presenter.selected_data = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry']
 
         self.view.is_simul_fit = mock.MagicMock(return_value=True)
-        fit_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
-        multi_domain_function = create_multi_domain_function([fit_function] * 2)
-        self.view.function_browser.setFunction(str(multi_domain_function))
+        self.view.function_browser.setFunction(EXAMPLE_MULTI_DOMAIN_FUNCTION)
 
-        self.assertEqual(str(self.presenter._fit_function[0]),
-                         'composite=MultiDomainFunction,NumDeriv=true;name=GausOsc,'
-                         'A=0.2,Sigma=0.2,'
-                         'Frequency=0.1,Phi=0,$domains=i;'
-                         'name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0,$domains=i')
+        self.assertEqual(str(self.presenter._fit_function[0]), EXAMPLE_MULTI_DOMAIN_FUNCTION)
 
     def test_updating_function_parameters_updates_relevant_stored_function_for_single_fit(self):
         self.presenter.selected_data = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
                                         'MUSR22725; Group; fwd; Asymmetry']
         self.view.is_simul_fit = mock.MagicMock(return_value=False)
-        fit_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
-        multi_domain_function = create_multi_domain_function([fit_function] * 3)
-        self.view.function_browser.setFunction(str(multi_domain_function))
+        self.view.function_browser.setFunction(EXAMPLE_MULTI_DOMAIN_FUNCTION)
         self.view.parameter_display_combo.setCurrentIndex(2)
 
         self.view.function_browser.setParameter('A', 3)
-
         self.presenter.handle_function_parameter_changed()
 
         self.assertEqual(str(self.presenter._fit_function[0]), 'name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
@@ -333,7 +326,7 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.view.is_simul_fit = mock.MagicMock(return_value=True)
         fit_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
         multi_domain_function = create_multi_domain_function([fit_function] * 3)
-        self.view.function_browser.setFunction(str(multi_domain_function))
+        self.view.function_browser.setFunction(EXAMPLE_MULTI_DOMAIN_FUNCTION)
         self.view.parameter_display_combo.setCurrentIndex(1)
         self.view.function_browser.setParameter('A', 3)
 
@@ -382,13 +375,12 @@ class FittingTabPresenterTest(unittest.TestCase):
     def test_switching_from_simultaneous_to_single_fit_updates_fit_functions_appropriately(self):
         self.presenter.selected_data = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
                                         'MUSR22725; Group; fwd; Asymmetry']
-        self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+        self.view.function_browser.setFunction(EXAMPLE_MULTI_DOMAIN_FUNCTION)
 
-        self.view.simul_fit_checkbox.setChecked(True)
         self.view.simul_fit_checkbox.setChecked(False)
 
         self.assertEqual([str(item) for item in self.presenter._fit_function], [
-            'name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0'])
+            EXAMPLE_SINGLE_DOMAIN_FUNCTION for _ in self.presenter.selected_data])
 
     def test_undo_fit_button_disabled_until_a_succesful_fit_is_performed(self):
         self.assertEqual(self.view.undo_fit_button.isEnabled(), False)
@@ -401,11 +393,12 @@ class FittingTabPresenterTest(unittest.TestCase):
 
         self.assertEqual(self.view.undo_fit_button.isEnabled(), True)
 
-    def test_after_fit_fit_cache_is_populated(self):
+    def test_after_fit_fit_cache_is_populated_for_after_fit(self):
         self.presenter.selected_data = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
                                         'MUSR22725; Group; fwd; Asymmetry']
         self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
         fit_function = FunctionFactory.createInitialized('name=GausOsc,A=0.5,Sigma=0.5,Frequency=1,Phi=0')
+        self.view.is_simul_fit = mock.MagicMock(return_value=False)
         self.presenter.fitting_calculation_model = mock.MagicMock()
         self.presenter.model.do_single_fit.return_value = (fit_function, 'Fit Suceeded', 0.5)
 
@@ -414,6 +407,7 @@ class FittingTabPresenterTest(unittest.TestCase):
 
         self.assertEqual([str(item) for item in self.presenter._fit_function_cache],
                          ['name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0'] * 3)
+
 
     def test_undo_fit_resets_fit_in_view(self):
         self.presenter.selected_data = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
@@ -633,15 +627,12 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.assertEqual(str(self.view.fit_object), str(fit_function_2))
 
     def test_handle_asymmetry_mode_correctly_keeps_globals_for_simultaneous_fit(self):
-        fit_function = FunctionFactory.createInitialized('name=GausOsc,A=0.3,Sigma=0.2,Frequency=0.56,Phi=0')
-        multi_domain_function = create_multi_domain_function([fit_function] * 3)
-        self.view.function_browser.setFunction(str(multi_domain_function))
+        self.view.function_browser.setFunction(EXAMPLE_MULTI_DOMAIN_FUNCTION)
         self.view.simul_fit_checkbox.setChecked(True)
         new_workspace_list = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
                               'MUSR22725; Group; fwd; fwd']
         self.presenter.selected_data = new_workspace_list
         fit_function_2 = FunctionFactory.createInitialized(EXAMPLE_TF_ASYMMETRY_FUNCTION)
-
         self.presenter.model.calculate_tf_function.return_value = fit_function_2
         self.view.function_browser.setGlobalParameters(['A'])
 

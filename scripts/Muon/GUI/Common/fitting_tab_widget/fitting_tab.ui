@@ -151,7 +151,7 @@
      <item row="0" column="2">
       <widget class="QPushButton" name="undo_fit_button">
        <property name="text">
-        <string>Undo Latest Fit</string>
+        <string>Undo Fits</string>
        </property>
       </widget>
      </item>
