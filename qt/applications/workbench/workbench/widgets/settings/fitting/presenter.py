@@ -19,8 +19,8 @@ from qtpy.QtCore import Qt
 class FittingSettings(object):
     AUTO_BACKGROUND = "curvefitting.autoBackground"
     DEFAULT_PEAK = "curvefitting.defaultPeak"
-    FWHM = "curvefitting.findpeaksFWHM"
-    TOLERANCE = "curvefitting.findpeaksTolerance"
+    FWHM = "curvefitting.findPeaksFWHM"
+    TOLERANCE = "curvefitting.findPeaksTolerance"
 
     def __init__(self, parent, view=None):
         self.view = view if view else FittingSettingsView(parent, self)
