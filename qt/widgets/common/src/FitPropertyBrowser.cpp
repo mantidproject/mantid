@@ -19,10 +19,6 @@
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/ICostFunction.h"
 #include "MantidAPI/IFuncMinimizer.h"
-#include "MantidAPI/IFunction1DSpectrum.h"
-#include "MantidAPI/IFunctionGeneral.h"
-#include "MantidAPI/IFunctionMD.h"
-#include "MantidAPI/ILatticeFunction.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -1720,7 +1716,7 @@ void FitPropertyBrowser::doFit(int maxIterations) {
         alg->setProperty("ConvolveMembers", convolveMembers());
       }
     }
-    if (getExcludeRange() != "") {
+    if (!getExcludeRange().empty()) {
       if (alg->getPropertyValue("EvaluationType") != "Histogram")
         alg->setProperty("Exclude", getExcludeRange());
       else {
