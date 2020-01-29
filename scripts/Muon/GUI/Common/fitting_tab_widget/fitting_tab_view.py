@@ -35,7 +35,7 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         self.increment_parameter_display_button.clicked.connect(self.increment_display_combo_box)
         self.decrement_parameter_display_button.clicked.connect(self.decrement_display_combo_box)
 
-        self.select_workspaces_to_fit_button.setEnabled(False)
+        self.disable_simul_fit_options()
 
     def update_displayed_data_combo_box(self, data_list):
         self.parameter_display_combo.blockSignals(True)
@@ -74,7 +74,6 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         self.simul_fit_by_combo.addItem("Run")
         self.simul_fit_by_combo.addItem("Group/Pair")
         self.simul_fit_by_combo.addItem("Custom")
-        self.simul_fit_by_specifier.setEnabled(False)
 
     def set_datasets_in_function_browser(self, data_set_name_list):
         number_of_data_sets = self.function_browser.getNumberOfDatasets()
@@ -258,6 +257,15 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
 
     def switch_to_single(self):
         self.function_browser.hideGlobalCheckbox()
+
+    def disable_simul_fit_options(self):
+        self.simul_fit_by_combo.setEnabled(False)
+        self.simul_fit_by_specifier.setEnabled(False)
+        self.select_workspaces_to_fit_button.setEnabled(False)
+
+    def enable_simul_fit_options(self):
+        self.simul_fit_by_combo.setEnabled(True)
+        self.simul_fit_by_specifier.setEnabled(True)
 
     def is_simul_fit(self):
         return self.simul_fit_checkbox.isChecked()
