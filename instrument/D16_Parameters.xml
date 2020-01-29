@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<parameter-file instrument = "D16">
+
+    <component-link name="D16">
+      <!-- Logs to sum when merging the runs -->
+      <parameter name="sample_logs_sum" type="string">
+        <value val="time, duration" />
+      </parameter>
+      <!-- The pixel sizes used by SolidAngle -->
+      <parameter name="x-pixel-size" type="number">
+        <value val="1"/>
+      </parameter>
+      <parameter name="y-pixel-size" type="number">
+        <value val="1"/>
+      </parameter>
+    </component-link>
+
+</parameter-file>
