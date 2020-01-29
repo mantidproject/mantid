@@ -116,7 +116,7 @@ public:
 
   void test_setFunction_does_not_throw_for_valid_temperature_function() {
     m_model->setFitType(FitType::OneLorentzian);
-    m_model->setTempCorrection(true);
+    m_model->setTempCorrection(true, 100.0);
     auto func = m_model->getFitFunction();
 
     m_model->setFunction(func);
@@ -128,7 +128,7 @@ public:
   void
   test_setFunction_does_not_throw_for_valid_two_lorenztian_temperature_function() {
     m_model->setFitType(FitType::TwoLorentzians);
-    m_model->setTempCorrection(true);
+    m_model->setTempCorrection(true, 100.0);
     auto func = m_model->getFitFunction();
 
     m_model->setFunction(func);
@@ -140,7 +140,7 @@ public:
   void
   test_setFunction_does_not_throw_for_valid_two_lorenztian_temperature_function_with_delta() {
     m_model->setFitType(FitType::TwoLorentzians);
-    m_model->setTempCorrection(true);
+    m_model->setTempCorrection(true, 100.0);
     m_model->setDeltaFunction(true);
     auto func = m_model->getFitFunction();
 

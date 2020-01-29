@@ -262,7 +262,7 @@ public:
     fitResolutions.emplace_back(pair2);
 
     model.setModel("", fitResolutions, "", false, std::vector<double>(), false,
-                   false);
+                   false, 100.0);
 
     auto fitFunctionAsString = model.getFitFunction()->asString();
     TS_ASSERT_EQUALS(
@@ -290,7 +290,7 @@ public:
     fitResolutions.emplace_back(pair2);
 
     model.setModel("", fitResolutions, "", true, std::vector<double>(), false,
-                   false);
+                   false, 100.0);
 
     auto fitFunctionAsString = model.getFitFunction()->asString();
     std::cout << fitFunctionAsString << std::endl;
@@ -321,7 +321,7 @@ public:
 
     model.setModel("name=FlatBackground", fitResolutions,
                    "name=TeixeiraWaterSQE", true, std::vector<double>(), false,
-                   false);
+                   false, 100.0);
 
     auto fitFunctionAsString = model.getFitFunction()->asString();
     std::cout << fitFunctionAsString << std::endl;
@@ -358,10 +358,9 @@ public:
 
     model.setModel("name=FlatBackground", fitResolutions,
                    "(name=Lorentzian;name=Lorentzian)", true,
-                   std::vector<double>(), false, false);
+                   std::vector<double>(), false, false, 100.0);
 
     auto fitFunctionAsString = model.getFitFunction()->asString();
-    std::cout << fitFunctionAsString << std::endl;
     TS_ASSERT_EQUALS(
         fitFunctionAsString,
         "composite=MultiDomainFunction,NumDeriv=true;(composite="
@@ -395,10 +394,9 @@ public:
 
     model.setModel("name=FlatBackground", fitResolutions,
                    "(name=Lorentzian;name=Lorentzian)", true,
-                   std::vector<double>(), false, true);
+                   std::vector<double>(), false, true, 100.0);
 
     auto fitFunctionAsString = model.getFitFunction()->asString();
-    std::cout << fitFunctionAsString << std::endl;
     TS_ASSERT_EQUALS(
         fitFunctionAsString,
         "composite=MultiDomainFunction,NumDeriv=true;(composite="
@@ -438,7 +436,7 @@ public:
 
     model.setModel("name=FlatBackground", fitResolutions,
                    "(name=Lorentzian;name=Lorentzian)", true,
-                   std::vector<double>(), false, false);
+                   std::vector<double>(), false, false, 100.0);
 
     TS_ASSERT_EQUALS(model.backgroundPrefix().value().toStdString(), "f0.");
     TS_ASSERT_EQUALS(model.convolutionPrefix().value().toStdString(), "f1.");
@@ -467,7 +465,7 @@ public:
 
     model.setModel("name=FlatBackground", fitResolutions,
                    "(name=Lorentzian;name=Lorentzian)", false,
-                   std::vector<double>(), false, true);
+                   std::vector<double>(), false, true, 100.0);
 
     TS_ASSERT_EQUALS(model.backgroundPrefix().value().toStdString(), "f0.");
     TS_ASSERT_EQUALS(model.convolutionPrefix().value().toStdString(), "f1.");
@@ -495,7 +493,7 @@ public:
     fitResolutions.emplace_back(pair2);
 
     model.setModel("", fitResolutions, "", false, std::vector<double>(), false,
-                   true);
+                   true, 100.0);
 
     TS_ASSERT_EQUALS(model.convolutionPrefix().value().toStdString(), "");
     TS_ASSERT_EQUALS(model.tempFunctionPrefix().value().toStdString(),
@@ -518,7 +516,7 @@ public:
     fitResolutions.emplace_back(pair2);
 
     model.setModel("name=FlatBackground", fitResolutions, "name=Lorentzian",
-                   false, std::vector<double>(), false, true);
+                   false, std::vector<double>(), false, true, 100.0);
     TS_ASSERT_EQUALS(model.backgroundPrefix().value().toStdString(), "f0.");
     TS_ASSERT_EQUALS(model.convolutionPrefix().value().toStdString(), "f1.");
     TS_ASSERT_EQUALS(model.peakPrefixes().value()[0].toStdString(),
@@ -543,7 +541,7 @@ public:
     fitResolutions.emplace_back(pair2);
 
     model.setModel("name=FlatBackground", fitResolutions, "name=Lorentzian",
-                   true, std::vector<double>(), false, true);
+                   true, std::vector<double>(), false, true, 100.0);
     TS_ASSERT_EQUALS(model.backgroundPrefix().value().toStdString(), "f0.");
     TS_ASSERT_EQUALS(model.convolutionPrefix().value().toStdString(), "f1.");
     TS_ASSERT_EQUALS(model.peakPrefixes().value()[0].toStdString(),
