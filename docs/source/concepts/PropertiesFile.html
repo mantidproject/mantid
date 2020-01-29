@@ -1,0 +1,899 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.15.2: http://docutils.sourceforge.net/" />
+<title>Properties File</title>
+<style type="text/css">
+
+/*
+:Author: David Goodger (goodger@python.org)
+:Id: $Id: html4css1.css 7952 2016-07-26 18:15:59Z milde $
+:Copyright: This stylesheet has been placed in the public domain.
+
+Default cascading style sheet for the HTML output of Docutils.
+
+See http://docutils.sf.net/docs/howto/html-stylesheets.html for how to
+customize this style sheet.
+*/
+
+/* used to remove borders from tables and images */
+.borderless, table.borderless td, table.borderless th {
+  border: 0 }
+
+table.borderless td, table.borderless th {
+  /* Override padding for "table.docutils td" with "! important".
+     The right padding separates the table cells. */
+  padding: 0 0.5em 0 0 ! important }
+
+.first {
+  /* Override more specific margin styles with "! important". */
+  margin-top: 0 ! important }
+
+.last, .with-subtitle {
+  margin-bottom: 0 ! important }
+
+.hidden {
+  display: none }
+
+.subscript {
+  vertical-align: sub;
+  font-size: smaller }
+
+.superscript {
+  vertical-align: super;
+  font-size: smaller }
+
+a.toc-backref {
+  text-decoration: none ;
+  color: black }
+
+blockquote.epigraph {
+  margin: 2em 5em ; }
+
+dl.docutils dd {
+  margin-bottom: 0.5em }
+
+object[type="image/svg+xml"], object[type="application/x-shockwave-flash"] {
+  overflow: hidden;
+}
+
+/* Uncomment (and remove this text!) to get bold-faced definition list terms
+dl.docutils dt {
+  font-weight: bold }
+*/
+
+div.abstract {
+  margin: 2em 5em }
+
+div.abstract p.topic-title {
+  font-weight: bold ;
+  text-align: center }
+
+div.admonition, div.attention, div.caution, div.danger, div.error,
+div.hint, div.important, div.note, div.tip, div.warning {
+  margin: 2em ;
+  border: medium outset ;
+  padding: 1em }
+
+div.admonition p.admonition-title, div.hint p.admonition-title,
+div.important p.admonition-title, div.note p.admonition-title,
+div.tip p.admonition-title {
+  font-weight: bold ;
+  font-family: sans-serif }
+
+div.attention p.admonition-title, div.caution p.admonition-title,
+div.danger p.admonition-title, div.error p.admonition-title,
+div.warning p.admonition-title, .code .error {
+  color: red ;
+  font-weight: bold ;
+  font-family: sans-serif }
+
+/* Uncomment (and remove this text!) to get reduced vertical space in
+   compound paragraphs.
+div.compound .compound-first, div.compound .compound-middle {
+  margin-bottom: 0.5em }
+
+div.compound .compound-last, div.compound .compound-middle {
+  margin-top: 0.5em }
+*/
+
+div.dedication {
+  margin: 2em 5em ;
+  text-align: center ;
+  font-style: italic }
+
+div.dedication p.topic-title {
+  font-weight: bold ;
+  font-style: normal }
+
+div.figure {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+div.footer, div.header {
+  clear: both;
+  font-size: smaller }
+
+div.line-block {
+  display: block ;
+  margin-top: 1em ;
+  margin-bottom: 1em }
+
+div.line-block div.line-block {
+  margin-top: 0 ;
+  margin-bottom: 0 ;
+  margin-left: 1.5em }
+
+div.sidebar {
+  margin: 0 0 0.5em 1em ;
+  border: medium outset ;
+  padding: 1em ;
+  background-color: #ffffee ;
+  width: 40% ;
+  float: right ;
+  clear: right }
+
+div.sidebar p.rubric {
+  font-family: sans-serif ;
+  font-size: medium }
+
+div.system-messages {
+  margin: 5em }
+
+div.system-messages h1 {
+  color: red }
+
+div.system-message {
+  border: medium outset ;
+  padding: 1em }
+
+div.system-message p.system-message-title {
+  color: red ;
+  font-weight: bold }
+
+div.topic {
+  margin: 2em }
+
+h1.section-subtitle, h2.section-subtitle, h3.section-subtitle,
+h4.section-subtitle, h5.section-subtitle, h6.section-subtitle {
+  margin-top: 0.4em }
+
+h1.title {
+  text-align: center }
+
+h2.subtitle {
+  text-align: center }
+
+hr.docutils {
+  width: 75% }
+
+img.align-left, .figure.align-left, object.align-left, table.align-left {
+  clear: left ;
+  float: left ;
+  margin-right: 1em }
+
+img.align-right, .figure.align-right, object.align-right, table.align-right {
+  clear: right ;
+  float: right ;
+  margin-left: 1em }
+
+img.align-center, .figure.align-center, object.align-center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+table.align-center {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.align-left {
+  text-align: left }
+
+.align-center {
+  clear: both ;
+  text-align: center }
+
+.align-right {
+  text-align: right }
+
+/* reset inner alignment in figures */
+div.align-right {
+  text-align: inherit }
+
+/* div.align-center * { */
+/*   text-align: left } */
+
+.align-top    {
+  vertical-align: top }
+
+.align-middle {
+  vertical-align: middle }
+
+.align-bottom {
+  vertical-align: bottom }
+
+ol.simple, ul.simple {
+  margin-bottom: 1em }
+
+ol.arabic {
+  list-style: decimal }
+
+ol.loweralpha {
+  list-style: lower-alpha }
+
+ol.upperalpha {
+  list-style: upper-alpha }
+
+ol.lowerroman {
+  list-style: lower-roman }
+
+ol.upperroman {
+  list-style: upper-roman }
+
+p.attribution {
+  text-align: right ;
+  margin-left: 50% }
+
+p.caption {
+  font-style: italic }
+
+p.credits {
+  font-style: italic ;
+  font-size: smaller }
+
+p.label {
+  white-space: nowrap }
+
+p.rubric {
+  font-weight: bold ;
+  font-size: larger ;
+  color: maroon ;
+  text-align: center }
+
+p.sidebar-title {
+  font-family: sans-serif ;
+  font-weight: bold ;
+  font-size: larger }
+
+p.sidebar-subtitle {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+p.topic-title {
+  font-weight: bold }
+
+pre.address {
+  margin-bottom: 0 ;
+  margin-top: 0 ;
+  font: inherit }
+
+pre.literal-block, pre.doctest-block, pre.math, pre.code {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+pre.code .ln { color: grey; } /* line numbers */
+pre.code, code { background-color: #eeeeee }
+pre.code .comment, code .comment { color: #5C6576 }
+pre.code .keyword, code .keyword { color: #3B0D06; font-weight: bold }
+pre.code .literal.string, code .literal.string { color: #0C5404 }
+pre.code .name.builtin, code .name.builtin { color: #352B84 }
+pre.code .deleted, code .deleted { background-color: #DEB0A1}
+pre.code .inserted, code .inserted { background-color: #A3D289}
+
+span.classifier {
+  font-family: sans-serif ;
+  font-style: oblique }
+
+span.classifier-delimiter {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+span.interpreted {
+  font-family: sans-serif }
+
+span.option {
+  white-space: nowrap }
+
+span.pre {
+  white-space: pre }
+
+span.problematic {
+  color: red }
+
+span.section-subtitle {
+  /* font-size relative to parent (h1..h6 element) */
+  font-size: 80% }
+
+table.citation {
+  border-left: solid 1px gray;
+  margin-left: 1px }
+
+table.docinfo {
+  margin: 2em 4em }
+
+table.docutils {
+  margin-top: 0.5em ;
+  margin-bottom: 0.5em }
+
+table.footnote {
+  border-left: solid 1px black;
+  margin-left: 1px }
+
+table.docutils td, table.docutils th,
+table.docinfo td, table.docinfo th {
+  padding-left: 0.5em ;
+  padding-right: 0.5em ;
+  vertical-align: top }
+
+table.docutils th.field-name, table.docinfo th.docinfo-name {
+  font-weight: bold ;
+  text-align: left ;
+  white-space: nowrap ;
+  padding-left: 0 }
+
+/* "booktabs" style (no vertical lines) */
+table.docutils.booktabs {
+  border: 0px;
+  border-top: 2px solid;
+  border-bottom: 2px solid;
+  border-collapse: collapse;
+}
+table.docutils.booktabs * {
+  border: 0px;
+}
+table.docutils.booktabs th {
+  border-bottom: thin solid;
+  text-align: left;
+}
+
+h1 tt.docutils, h2 tt.docutils, h3 tt.docutils,
+h4 tt.docutils, h5 tt.docutils, h6 tt.docutils {
+  font-size: 100% }
+
+ul.auto-toc {
+  list-style-type: none }
+
+</style>
+</head>
+<body>
+<div class="document" id="id1">
+<span id="properties-file"></span>
+<h1 class="title">Properties File</h1>
+
+<div class="section" id="the-properties-files">
+<h1>The <tt class="docutils literal">*.properties</tt> Files</h1>
+<p>The Mantid framework is configured using up to three simple text <tt class="docutils literal">*.properties</tt> files that are read an interpreted every time the framework is started. These properties are not the same as the properties of algorithms. All three have the same format. The three files are read from first to last, with the values in subsequent <tt class="docutils literal">*.properties</tt> overriding those in previous ones.</p>
+<ol class="arabic simple">
+<li>Install directory <tt class="docutils literal">Mantid.properties</tt> defines the default configuration that the development team suggest as sensible defaults. This file should not be altered by users as it will be replaced with every new install or upgrade of Mantid.</li>
+<li><tt class="docutils literal">/etc/mantid.local.properties</tt> is an optional, linux only file that sets shared defaults on a shared system. This is commonly used for setting the <tt class="docutils literal">default.facility</tt>, <tt class="docutils literal">default.instrument</tt>, and <tt class="docutils literal">datasearch.searcharchive</tt> properties.</li>
+<li>Home directory <tt class="docutils literal">Mantid.user.properties</tt> is where users may override any property setting in Mantid. Any Property setting in this file will override anything set in the <tt class="docutils literal">Mantid.properties</tt> file. Simply either enter the property you wish to override in this file together with it's new value. The change will take effect the next time Mantid is started. Subsequent installs or upgrades of Mantid will never alter this file.</li>
+</ol>
+<p>The user properties file, <tt class="docutils literal">Mantid.user.properties</tt>, can be found</p>
+<ul class="simple">
+<li>windows: <tt class="docutils literal">$MantidInstallDirectory\bin\Mantid.user.properties</tt></li>
+<li>linux and mac-os: <tt class="docutils literal"><span class="pre">$HOME/.mantid/Mantid.user.properties</span></tt></li>
+</ul>
+</div>
+<div class="section" id="the-properties">
+<h1>The Properties</h1>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Use forward slash (<tt class="docutils literal">/</tt>) or double up on the number of backslash (<tt class="docutils literal">\</tt>) characters for all paths</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Boolean properties evaluate <tt class="docutils literal">true</tt>, <tt class="docutils literal">1</tt>, and <tt class="docutils literal">on</tt> (case insensitive) as <tt class="docutils literal">true</tt>, all other values as <tt class="docutils literal">false</tt>.</p>
+</div>
+<div class="section" id="general-properties">
+<h2>General properties</h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="31%" />
+<col width="46%" />
+<col width="22%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Property</th>
+<th class="head">Description</th>
+<th class="head">Example value</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><tt class="docutils literal">algorithms.categories.hidden</tt></td>
+<td>A comma separated list of any categories of
+algorithms that should be hidden in Mantid.</td>
+<td><tt class="docutils literal">Muons,Testing</tt></td>
+</tr>
+<tr><td><tt class="docutils literal">algorithms.retained</tt></td>
+<td>The Number of algorithms properties to retain in
+memory for reference in scripts.</td>
+<td><tt class="docutils literal">50</tt></td>
+</tr>
+<tr><td><tt class="docutils literal">curvefitting.guiExclude</tt></td>
+<td>A semicolon separated list of function names
+that should be hidden in Mantid.</td>
+<td><tt class="docutils literal">ExpDecay;Gaussian;</tt></td>
+</tr>
+<tr><td><tt class="docutils literal">MultiThreaded.MaxCores</tt></td>
+<td>Sets the maximum number of cores available to be
+used for threads for
+<a class="reference external" href="http://www.openmp.org/">OpenMP</a>. If zero it
+will use one thread per logical core available.</td>
+<td><tt class="docutils literal">0</tt></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="facility-and-instrument-properties">
+<h2>Facility and instrument properties</h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="29%" />
+<col width="50%" />
+<col width="20%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Property</th>
+<th class="head">Description</th>
+<th class="head">Example value</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><tt class="docutils literal">default.facility</tt></td>
+<td><p class="first">The name of the default facility. The facility
+must be defined within the facilities.xml file to
+be considered valid. The file is described
+<a href="#id2"><span class="problematic" id="id3">:ref:`here &lt;Facilities file&gt;`</span></a>.</p>
+<div class="last system-message" id="id2">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">C:/Users/fvv28776/mantid/docs/source/concepts/PropertiesFile.rst</tt>, line 58); <em><a href="#id3">backlink</a></em></p>
+Unknown interpreted text role &quot;ref&quot;.</div>
+</td>
+<td><tt class="docutils literal">ISIS</tt></td>
+</tr>
+<tr><td><tt class="docutils literal">default.instrument</tt></td>
+<td><p class="first">The name of the default instrument. The instrument
+must be defined within the facilities.xml file to
+be valid. The file is described
+<a href="#id4"><span class="problematic" id="id5">:ref:`here &lt;Facilities file&gt;`</span></a>.</p>
+<div class="last system-message" id="id4">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">C:/Users/fvv28776/mantid/docs/source/concepts/PropertiesFile.rst</tt>, line 63); <em><a href="#id5">backlink</a></em></p>
+Unknown interpreted text role &quot;ref&quot;.</div>
+</td>
+<td><tt class="docutils literal">WISH</tt></td>
+</tr>
+<tr><td><tt class="docutils literal">Q.convention</tt></td>
+<td>The convention for converting to Q. For
+<tt class="docutils literal">Inelastic</tt> the convention is ki-kf.  For
+<tt class="docutils literal">Crystallography</tt> the convention is kf-ki.</td>
+<td><tt class="docutils literal">Crystallography</tt>
+or <tt class="docutils literal">Inelastic</tt></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="directory-properties">
+<h2>Directory Properties</h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="30%" />
+<col width="40%" />
+<col width="29%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Property</th>
+<th class="head">Description</th>
+<th class="head">Example value</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><tt class="docutils literal">colormaps.directory</tt></td>
+<td>The directory where colormaps are located</td>
+<td><tt class="docutils literal">/opt/mantid/colormaps</tt></td>
+</tr>
+<tr><td><tt class="docutils literal">datasearch.directories</tt></td>
+<td>A semi-colon(<tt class="docutils literal">;</tt>) separated list of directories
+to use to search for data.</td>
+<td><tt class="docutils literal"><span class="pre">../data;\\\\isis\\isis$\\ndxgem</span></tt></td>
+</tr>
+<tr><td><tt class="docutils literal">datasearch.searcharchive</tt></td>
+<td><tt class="docutils literal">on</tt> (only the default facility), <tt class="docutils literal">off</tt>
+(none), <tt class="docutils literal">all</tt> (all archives), or a list of
+individual facilities to search for files in the
+data archive</td>
+<td><tt class="docutils literal">on</tt> or <tt class="docutils literal">hfir,sns</tt></td>
+</tr>
+<tr><td><tt class="docutils literal">defaultsave.directory</tt></td>
+<td>A default directory to use for saving files.
+the data archive</td>
+<td><tt class="docutils literal"><span class="pre">../data</span></tt></td>
+</tr>
+<tr><td><tt class="docutils literal">framework.plugins.directory</tt></td>
+<td>The path to the directory that contains the
+Mantid plugin libraries</td>
+<td><tt class="docutils literal"><span class="pre">../plugins</span></tt></td>
+</tr>
+<tr><td><tt class="docutils literal">framework.plugins.exclude</tt></td>
+<td>A list of substrings to allow libraries to be
+skipped</td>
+<td><tt class="docutils literal">Qt4;Qt5</tt></td>
+</tr>
+<tr><td><tt class="docutils literal">instrumentDefinition.directory</tt></td>
+<td>Where to load instrument definition files from</td>
+<td><tt class="docutils literal"><span class="pre">../Test/Instrument</span></tt></td>
+</tr>
+<tr><td><tt class="docutils literal">mantidqt.plugins.directory</tt></td>
+<td>The path to the directory containing the
+Mantid Qt-based plugin libraries</td>
+<td><tt class="docutils literal"><span class="pre">../plugins/qtX</span></tt></td>
+</tr>
+<tr><td><tt class="docutils literal">parameterDefinition.directory</tt></td>
+<td>Where to load parameter definition files from</td>
+<td><tt class="docutils literal"><span class="pre">../Test/Instrument</span></tt></td>
+</tr>
+<tr><td><tt class="docutils literal">pythonscripts.directories</tt></td>
+<td>Python will also search the listed directories
+when importing modules.</td>
+<td><tt class="docutils literal"><span class="pre">../scripts</span></tt> or <tt class="docutils literal"><span class="pre">C:/MyScripts</span></tt></td>
+</tr>
+<tr><td><tt class="docutils literal">pythonscripts.directory</tt></td>
+<td><strong>DEPRECATED:</strong> Use <tt class="docutils literal">pythonscripts.directories</tt>
+instead</td>
+<td>N/A</td>
+</tr>
+<tr><td><tt class="docutils literal">requiredpythonscript.directories</tt></td>
+<td>A list of directories containing Python scripts
+that Mantid requires to function correctly.
+<strong>WARNING:</strong> Do not alter the default value.</td>
+<td>N/A</td>
+</tr>
+<tr><td><tt class="docutils literal">requiredpythonscript.directories</tt></td>
+<td>A list of directories containing Python scripts
+that Mantid requires to function correctly.
+<strong>WARNING:</strong> Do not alter the default value.</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="logging-properties">
+<h2>Logging Properties</h2>
+<p>The details of configuring the logging functionality within Mantid will not be explained here. For those who want more
+details look into the <a class="reference external" href="https://pocoproject.org/docs/package-Foundation.Logging.html">POCO logging classes</a> and the
+<a class="reference external" href="https://logging.apache.org/log4j/">Log4J logging module</a> that it closely emulates. There are several comments in the
+properties file itself that explain the configuration we provide by default.  However there are some obvious areas that
+you may want to alter and those properties are detailed below.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="38%" />
+<col width="40%" />
+<col width="22%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Property</th>
+<th class="head">Description</th>
+<th class="head">Example value</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><tt class="docutils literal">logging.loggers.root.level</tt></td>
+<td>Defines the level of messages to be output
+by the system.
+The default is information, but
+this can be lowered to debug for more detailed
+feedback.</td>
+<td><tt class="docutils literal">debug</tt>, <tt class="docutils literal">information</tt>,
+<tt class="docutils literal">notice</tt>, <tt class="docutils literal">warning</tt>,
+<tt class="docutils literal">error</tt>, <tt class="docutils literal">critical</tt>
+or <tt class="docutils literal">fatal</tt></td>
+</tr>
+</tbody>
+</table>
+<p>The logging priority levels for the file logging and console logging can also be adjusted in python using the command:</p>
+<div class="system-message">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">C:/Users/fvv28776/mantid/docs/source/concepts/PropertiesFile.rst</tt>, line 143)</p>
+<p>Unknown directive type &quot;testcode&quot;.</p>
+<pre class="literal-block">
+.. testcode:: LoggingConfigExample
+
+  #Set the log to debug level or above (7=debug)
+  ConfigService.setLogLevel(7)
+  #Set the log to critical level (2=critical)
+  ConfigService.setLogLevel(2)
+
+
+
+</pre>
+</div>
+</div>
+<div class="section" id="mantid-graphical-user-interface-properties">
+<h2>Mantid Graphical User Interface Properties</h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="39%" />
+<col width="46%" />
+<col width="15%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Property</th>
+<th class="head">Description</th>
+<th class="head">Example value</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><tt class="docutils literal">Notifications.Enabled</tt></td>
+<td>Should Mantid use System Notifications for
+important messages?</td>
+<td><tt class="docutils literal">On</tt>, <tt class="docutils literal">Off</tt></td>
+</tr>
+<tr><td><tt class="docutils literal">cluster.submission</tt></td>
+<td>Enable cluster submission elements in GUIs</td>
+<td><tt class="docutils literal">On</tt>, <tt class="docutils literal">Off</tt></td>
+</tr>
+<tr><td><tt class="docutils literal">MantidOptions.InstrumentView.UseOpenGL</tt></td>
+<td>Controls the use of OpenGL in rendering the
+&quot;unwrapped&quot; (flat) instrument views.</td>
+<td><tt class="docutils literal">On</tt>, <tt class="docutils literal">Off</tt></td>
+</tr>
+<tr><td><tt class="docutils literal">MantidOptions.InvisibleWorkspaces</tt></td>
+<td>Do not show 'invisible' workspaces</td>
+<td><tt class="docutils literal">0</tt>, <tt class="docutils literal">1</tt></td>
+</tr>
+<tr><td><tt class="docutils literal">PeakColumn.hklPrec</tt></td>
+<td>Precision of hkl values shown in tables</td>
+<td><tt class="docutils literal">2</tt></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="network-properties">
+<h2>Network Properties</h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="34%" />
+<col width="40%" />
+<col width="26%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Property</th>
+<th class="head">Description</th>
+<th class="head">Example value</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><tt class="docutils literal">catalog.timeout.value</tt></td>
+<td>Network timeout for ICAT4 requests</td>
+<td><tt class="docutils literal">30</tt></td>
+</tr>
+<tr><td><tt class="docutils literal">CheckMantidVersion.OnStartup</tt></td>
+<td>Check if there is a newer version available and
+logs a message at <tt class="docutils literal">information</tt> level</td>
+<td><tt class="docutils literal">1</tt></td>
+</tr>
+<tr><td><tt class="docutils literal">ISISDAE.Timeout</tt></td>
+<td>Timeout for network requests when reading live
+data from ISIS (in seconds)</td>
+<td><tt class="docutils literal">100</tt></td>
+</tr>
+<tr><td><tt class="docutils literal">network.default.timeout</tt></td>
+<td>Defines the default timeout for all network
+operations (in seconds).</td>
+<td><tt class="docutils literal">30</tt></td>
+</tr>
+<tr><td><tt class="docutils literal">network.scriptrepo.timeout</tt></td>
+<td>The timeout for network operations in the script
+repository, this overrides the default timeout.</td>
+<td><tt class="docutils literal">5</tt></td>
+</tr>
+<tr><td><tt class="docutils literal">proxy.host</tt></td>
+<td>Allows the system proxy to be overridden, if not
+set mantid will use the system proxy</td>
+<td><tt class="docutils literal"><span class="pre">http://www.proxy.org</span></tt></td>
+</tr>
+<tr><td><tt class="docutils literal">proxy.port</tt></td>
+<td>Must be set if proxy.host is set</td>
+<td><tt class="docutils literal">8080</tt></td>
+</tr>
+<tr><td><tt class="docutils literal">proxy.httpsTargetUrl</tt></td>
+<td>A sample url used to determine the system proxy to
+use on windows.</td>
+<td><tt class="docutils literal"><span class="pre">http://www.google.com</span></tt></td>
+</tr>
+<tr><td><tt class="docutils literal">UpdateInstrumentDefinitions.OnStartup</tt></td>
+<td>Download new instrument definition files and
+<tt class="docutils literal">Facilities.xml</tt> to <tt class="docutils literal"><span class="pre">~/.mantid/instruments</span></tt>
+on linux or <tt class="docutils literal">APPDATA</tt> directory on windows. If
+this is disabled, previously downloaded
+instruments are ignored and only those in the
+installation are used.</td>
+<td><tt class="docutils literal">1</tt></td>
+</tr>
+<tr><td><tt class="docutils literal">usagereports.enabled</tt></td>
+<td>Enable usage reporting</td>
+<td><tt class="docutils literal">1</tt></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="scriptrepository-properties">
+<h2>ScriptRepository Properties</h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="19%" />
+<col width="32%" />
+<col width="48%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Property</th>
+<th class="head">Description</th>
+<th class="head">Example value</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><tt class="docutils literal">ScriptLocalRepository</tt></td>
+<td>Directory where ScriptRepository is Installed.</td>
+<td><tt class="docutils literal"><span class="pre">C:\\MantidInstall\\MyScriptRepository</span></tt></td>
+</tr>
+<tr><td><tt class="docutils literal">ScriptRepository</tt></td>
+<td>Base URL for the remote script repository.</td>
+<td><tt class="docutils literal"><span class="pre">https://download.mantidproject.org/scriptrepository/</span></tt></td>
+</tr>
+<tr><td><tt class="docutils literal">ScriptRepositoryIgnore</tt></td>
+<td>CSV patterns for paths that should not be
+listed at ScriptRepository.</td>
+<td><tt class="docutils literal">*pyc;</tt></td>
+</tr>
+<tr><td><tt class="docutils literal">UploaderWebServer</tt></td>
+<td>URL for uploading scripts.</td>
+<td><tt class="docutils literal"><span class="pre">https://upload.mantidproject.org/scriptrepository/payload/publish</span></tt></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="project-recovery">
+<h2>Project Recovery</h2>
+<p>See <a href="#id6"><span class="problematic" id="id7">:ref:`project recovery &lt;Project Recovery&gt;`</span></a> for more details.</p>
+<div class="system-message" id="id6">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">C:/Users/fvv28776/mantid/docs/source/concepts/PropertiesFile.rst</tt>, line 231); <em><a href="#id7">backlink</a></em></p>
+Unknown interpreted text role &quot;ref&quot;.</div>
+<table border="1" class="docutils">
+<colgroup>
+<col width="39%" />
+<col width="44%" />
+<col width="17%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Property</th>
+<th class="head">Description</th>
+<th class="head">Example value</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><tt class="docutils literal">projectRecovery.enabled</tt></td>
+<td>Whether project recovery is enabled</td>
+<td><tt class="docutils literal">On</tt>, <tt class="docutils literal">Off</tt></td>
+</tr>
+<tr><td><tt class="docutils literal">projectRecovery.numberOfCheckpoints</tt></td>
+<td>How many checkpoints/backups to keep</td>
+<td><tt class="docutils literal">5</tt></td>
+</tr>
+<tr><td><tt class="docutils literal">projectRecovery.secondsBetween</tt></td>
+<td>How often to save checkpoints in seconds</td>
+<td><tt class="docutils literal">60</tt></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="project-saving">
+<h2>Project Saving</h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="28%" />
+<col width="56%" />
+<col width="15%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Property</th>
+<th class="head">Description</th>
+<th class="head">Example value</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><tt class="docutils literal">projectSaving.warningSize</tt></td>
+<td>Size in bytes of a project before the user is warned when saving</td>
+<td><tt class="docutils literal">10737418240</tt></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="plotting-settings">
+<h2>Plotting Settings</h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="28%" />
+<col width="55%" />
+<col width="18%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Property</th>
+<th class="head">Description</th>
+<th class="head">Example value</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><tt class="docutils literal">plots.ShowTitle</tt></td>
+<td>Whether to show titles on plots</td>
+<td><tt class="docutils literal">On</tt>, <tt class="docutils literal">Off</tt></td>
+</tr>
+<tr><td><tt class="docutils literal">plots.xAxesScale</tt></td>
+<td>The default x scale on 1d plots</td>
+<td><tt class="docutils literal">Linear</tt>, <tt class="docutils literal">Log</tt></td>
+</tr>
+<tr><td><tt class="docutils literal">plots.yAxesScale</tt></td>
+<td>The default y scale on 1d plots</td>
+<td><tt class="docutils literal">Linear</tt>, <tt class="docutils literal">Log</tt></td>
+</tr>
+<tr><td><tt class="docutils literal">plots.line.Style</tt></td>
+<td>Default Line style on 1d plots</td>
+<td><tt class="docutils literal">solid</tt>, <tt class="docutils literal">dashed</tt></td>
+</tr>
+<tr><td><tt class="docutils literal">plots.line.Width</tt></td>
+<td>Default Line width on 1d plots</td>
+<td><tt class="docutils literal">1.5</tt></td>
+</tr>
+<tr><td><tt class="docutils literal">plots.marker.Style</tt></td>
+<td>Default marker style on 1d plots</td>
+<td><tt class="docutils literal">point</tt></td>
+</tr>
+<tr><td><tt class="docutils literal">plots.marker.Size</tt></td>
+<td>Default maker size on 1d plots</td>
+<td><tt class="docutils literal">6</tt></td>
+</tr>
+<tr><td><tt class="docutils literal">plots.errorbar.Capsize</tt></td>
+<td>Default cap size on error bars in 1d plots</td>
+<td><tt class="docutils literal">1.0</tt></td>
+</tr>
+<tr><td><tt class="docutils literal">plots.errorbar.CapThickness</tt></td>
+<td>Default cap thickness on error bars in 1d plots</td>
+<td><tt class="docutils literal">1.0</tt></td>
+</tr>
+<tr><td><tt class="docutils literal">plots.errorbar.errorEvery</tt></td>
+<td>Default number of error bars for every data point
+in 1d plots. Must be an integer</td>
+<td><tt class="docutils literal">1</tt></td>
+</tr>
+<tr><td><tt class="docutils literal">plots.errorbar.Width</tt></td>
+<td>Default width of error bars in 1d plots</td>
+<td><tt class="docutils literal">1.0</tt></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="getting-access-to-mantid-properties">
+<h2>Getting access to Mantid properties</h2>
+<p>To get access to, e.g. data saving path property from a C++ program one has to issue the following command:</p>
+<div class="system-message">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">C:/Users/fvv28776/mantid/docs/source/concepts/PropertiesFile.rst</tt>, line 288)</p>
+<p>Unknown directive type &quot;testcode&quot;.</p>
+<pre class="literal-block">
+.. testcode:: properties
+
+  path = ConfigService.getString(&quot;defaultsave.directory&quot;)
+
+</pre>
+</div>
+<div class="system-message">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">C:/Users/fvv28776/mantid/docs/source/concepts/PropertiesFile.rst</tt>, line 292)</p>
+<p>Unknown directive type &quot;categories&quot;.</p>
+<pre class="literal-block">
+.. categories:: Concepts
+</pre>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

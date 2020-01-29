@@ -269,14 +269,14 @@ Plotting Settings
 +---------------------------------+------------------------------------------------------------------+---------------------+
 |``plots.marker.Size``            |Default maker size on 1d plots                                    |``6``                |
 +---------------------------------+------------------------------------------------------------------+---------------------+
-|``plots.errorbar.Capsize``	      |Default cap size on error bars in 1d plots                        |``1.0``              |
+|``plots.errorbar.Capsize``       |Default cap size on error bars in 1d plots                        |``1.0``              |
 +---------------------------------+------------------------------------------------------------------+---------------------+
 |``plots.errorbar.CapThickness``  |Default cap thickness on error bars in 1d plots                   |``1.0``              |
 +---------------------------------+------------------------------------------------------------------+---------------------+
 |``plots.errorbar.errorEvery``    |Default number of error bars for every data point                 |``1``                |
 |                                 |in 1d plots. Must be an integer                                   |                     |
 +---------------------------------+------------------------------------------------------------------+---------------------+
-|``plots.errorbar.Width``	      |Default width of error bars in 1d plots                           |``1.0``              |
+|``plots.errorbar.Width``         |Default width of error bars in 1d plots                           |``1.0``              |
 +---------------------------------+------------------------------------------------------------------+---------------------+
 
 Getting access to Mantid properties
