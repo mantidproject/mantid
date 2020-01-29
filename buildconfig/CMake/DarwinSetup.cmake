@@ -152,7 +152,7 @@ if(NOT TARGET mantidpython)
     set(PARAVIEW_PYTHON_PATHS "")
   endif()
 
-  set(PYTHONHOME "\${INSTALLDIR}/Frameworks/Python.framework/Versions/2.7")
+  set(PYTHONHOME "\${INSTALLDIR}/Frameworks/Python.framework/Versions/${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}")
   configure_file(
     ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython.in
     ${CMAKE_BINARY_DIR}/mantidpython_osx_install
