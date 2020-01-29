@@ -39,7 +39,7 @@ class SANSILLReduction(PythonAlgorithm):
 
     @staticmethod
     def _get_solid_angle_method(instrument):
-        if instrument in ['D11', 'D11lr']:
+        if instrument in ['D11', 'D11lr', 'D16']:
             return 'Rectangle'
         else:
             return 'GenericShape'
@@ -271,6 +271,7 @@ class SANSILLReduction(PythonAlgorithm):
         run = mtd[ws].getRun()
         if run.hasProperty('attenuator.attenuation_coefficient'):
             att_coeff = run.getLogData('attenuator.attenuation_coefficient').value
+            self.log().information('Found attenuator coefficient/value: {0}'.format(att_coeff))
         elif run.hasProperty('attenuator.attenuation_value'):
             att_value = run.getLogData('attenuator.attenuation_value').value
             if float(att_value) < 10. and self._instrument == 'D33':
@@ -282,9 +283,10 @@ class SANSILLReduction(PythonAlgorithm):
                     raise RuntimeError('Unable to find the attenuation coefficient for D33 attenuator #'+str(int(att_value)))
             else:
                 att_coeff = att_value
+            self.log().information('Found attenuator coefficient/value: {0}'.format(att_coeff))
         else:
-            raise RuntimeError('Unable to process as beam: could not find attenuation coefficient nor value.')
-        self.log().information('Found attenuator coefficient/value: {0}'.format(att_coeff))
+            att_coeff = 1
+            self.log().notice('Unable to process as beam: could not find attenuation coefficient nor value. Assuming 1.')
         flux_out = self.getPropertyValue('FluxOutputWorkspace')
         if flux_out:
             flux = ws + '_flux'
@@ -365,11 +367,12 @@ class SANSILLReduction(PythonAlgorithm):
                     Divide(LHSWorkspace=ws, RHSWorkspace=flux_in, OutputWorkspace=ws, WarnOnZeroDivide=False)
         if coll_ws:
             self._check_distances_match(mtd[ws], coll_ws)
-            sample_coll = mtd[ws].getRun().getLogData('collimation.actual_position').value
-            ref_coll = coll_ws.getRun().getLogData('collimation.actual_position').value
-            flux_factor = (sample_coll ** 2) / (ref_coll ** 2)
-            self.log().notice('Flux factor is: ' + str(flux_factor))
-            Scale(InputWorkspace=ws, Factor=flux_factor, OutputWorkspace=ws)
+            if mtd[ws].getRun().hasProperty('collimation.actual_position') and coll_ws.getRun().hasProperty('collimation.actual_position'):
+                sample_coll = mtd[ws].getRun().getLogData('collimation.actual_position').value
+                ref_coll = coll_ws.getRun().getLogData('collimation.actual_position').value
+                flux_factor = (sample_coll ** 2) / (ref_coll ** 2)
+                self.log().notice('Flux factor is: ' + str(flux_factor))
+                Scale(InputWorkspace=ws, Factor=flux_factor, OutputWorkspace=ws)
             ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws,
                                  NaNValue=0., NaNError=0., InfinityValue=0., InfinityError=0.)
 
