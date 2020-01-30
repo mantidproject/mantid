@@ -526,8 +526,11 @@ class RunTabPresenter(PresenterCommon):
             # Trip up early if output modes are invalid
             self._validate_output_modes()
 
+            row_index_pair = []
+
             for row in rows:
                 row.reset_row_state()
+                row_index_pair.append((row, self._table_model.get_row_index(row)))
 
             self.update_view_from_table_model()
 
@@ -541,7 +544,7 @@ class RunTabPresenter(PresenterCommon):
             # MantidPlot and Workbench have different approaches to plotting
             output_graph = self.output_graph if PYQT4 else self.output_fig
 
-            self.batch_process_runner.process_states(rows, self.get_states,
+            self.batch_process_runner.process_states(row_index_pair, self.get_states,
                                                      self._table_model.get_thickness_for_rows,
                                                      self._view.use_optimizations,
                                                      self._view.output_mode,
@@ -550,7 +553,7 @@ class RunTabPresenter(PresenterCommon):
                                                      save_can)
 
         except Exception as e:
-            self.on_processing_finished(None)
+            self.on_processing_finished()
             self.sans_logger.error("Process halted due to: {}".format(str(e)))
             self.display_warning_box('Warning', 'Process halted', str(e))
 
@@ -606,24 +609,29 @@ class RunTabPresenter(PresenterCommon):
         if to_process:
             self._process_rows(to_process)
 
+    def _get_selected_non_empty_rows(self):
+        selected_rows = self._view.get_selected_rows()
+        to_process = [self._table_model.get_row(i) for i in selected_rows]
+        return [row for row in to_process if not row.is_empty()]
+
     def on_process_selected_clicked(self):
         """
         Process selected table entries.
         """
-        selected_rows = self._view.get_selected_rows()
-        to_process = [self._table_model.get_row(i) for i in selected_rows]
-        to_process = [row for row in to_process if not row.is_empty()]
+        to_process = self._get_selected_non_empty_rows()
 
         if to_process:
             self._process_rows(to_process)
 
-    def on_processing_error(self, row, error_msg):
+    def on_processing_error(self, row_index, error_msg):
         """
         An error occurs while processing the row with index row, error_msg is displayed as a
         tooltip on the row.
         """
         self.increment_progress()
-        self._table_model.set_row_to_error(row, error_msg)
+        row = self._table_model.get_row(row_index)
+        row.state = RowState.ERROR
+        row.tool_tip = error_msg
         self.update_view_from_table_model()
 
     def on_processing_finished(self, result):
@@ -635,15 +643,18 @@ class RunTabPresenter(PresenterCommon):
         self._processing = True
         self.sans_logger.information("Starting load of batch table.")
 
-        selected_rows = self._get_selected_rows()
+        selected_rows = self._get_selected_non_empty_rows()
+
+        row_index_pair = []
+
         for row in selected_rows:
-            self._table_model.reset_row_state(row)
+            row.reset_row_state()
+            row_index_pair.append((row, self._table_model.get_row_index(row)))
 
         self._set_progress_bar(current=0, number_steps=len(selected_rows))
-        selected_rows = self._table_model.get_non_empty_rows(selected_rows)
 
         try:
-            self.batch_process_runner.load_workspaces(selected_rows=selected_rows, get_states_func=self.get_states,
+            self.batch_process_runner.load_workspaces(row_index_pair=row_index_pair, get_states_func=self.get_states,
                                                       get_thickness_for_rows_func=self._table_model.get_thickness_for_rows)
         except Exception as e:
             self._view.enable_buttons()
@@ -720,15 +731,18 @@ class RunTabPresenter(PresenterCommon):
         filename = self._view.display_save_file_box(title, default_path, file_filter)
         return filename
 
-    def notify_progress(self, row, out_shift_factors, out_scale_factors):
+    def notify_progress(self, row_index, out_shift_factors, out_scale_factors):
         self.progress += 1
         setattr(self._view, 'progress_bar_value', self.progress)
 
-        if out_scale_factors and out_shift_factors:
-            self._table_model.get_row(row).options.set_developer_option('MergeScale', round(out_scale_factors[0], 3))
-            self._table_model.get_row(row).options.set_developer_option('MergeShift', round(out_shift_factors[0], 3))
+        row_entry = self._table_model.get_row(row_index)
 
-        self._table_model.set_row_to_processed(row, '')
+        if out_scale_factors and out_shift_factors:
+            row_entry.options.set_developer_option('MergeScale', round(out_scale_factors[0], 3))
+            row_entry.options.set_developer_option('MergeShift', round(out_shift_factors[0], 3))
+
+        row_entry.state = RowState.PROCESSED
+        row_entry.tool_tip = None
 
     def increment_progress(self):
         self.progress += 1
@@ -889,10 +903,10 @@ class RunTabPresenter(PresenterCommon):
         return selected_rows
 
     @log_times
-    def get_states(self, row_index=None, file_lookup=True, suppress_warnings=False):
+    def get_states(self, row_entries=None, file_lookup=True, suppress_warnings=False):
         """
         Gathers the state information for all rows.
-        :param row_index: if a single row is selected, then only this row is returned,
+        :param row_entries: if a single row is selected, then only this row is returned,
                           else all the state for all rows is returned.
         :param suppress_warnings: bool. If true don't propagate errors.
                                   This variable is introduced to stop repeated errors
@@ -909,9 +923,9 @@ class RunTabPresenter(PresenterCommon):
         # 3. Go through each row and construct a state object
         states, errors = None, None
         if table_model and state_model_with_view_update:
-            states, errors = create_states(state_model_with_view_update, table_model=table_model,
+            states, errors = create_states(state_model_with_view_update,
                                            facility=self._facility,
-                                           row_index=row_index,
+                                           row_entries=row_entries,
                                            file_lookup=file_lookup,
                                            user_file=self._view.get_user_file_path())
 
@@ -932,7 +946,8 @@ class RunTabPresenter(PresenterCommon):
                                   SANS calls get_states.
         :return: a state if the index is valid and there is a state else None
         """
-        states, errors = self.get_states(row_index=[row_index], file_lookup=file_lookup,
+        row_entry = self._table_model.get_row(row_index)
+        states, errors = self.get_states(row_entries=[row_entry], file_lookup=file_lookup,
                                          suppress_warnings=suppress_warnings)
         if states is None:
             if not suppress_warnings:

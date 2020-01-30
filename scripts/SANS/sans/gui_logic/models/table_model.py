@@ -37,7 +37,7 @@ class TableModel(object):
         self.work_handler = WorkHandler()
         self._subscriber_list = []
 
-        self._table_entries = None
+        self._table_entries = []
         self._default_entry_added = None
         self.clear_table_entries()
 
@@ -61,6 +61,9 @@ class TableModel(object):
 
     def get_row(self, index):
         return self._table_entries[index]
+
+    def get_row_index(self, row):
+        return self._table_entries.index(row)
 
     def replace_table_entry(self, row, table_index_model):
         self._add_single_table_entry(row=row, table_index_model=table_index_model)
