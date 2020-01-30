@@ -52,8 +52,11 @@ class WorkspaceSelectorView(QtWidgets.QDialog, ui_workspace_selector):
 
         self.time_domain_combo.currentIndexChanged.connect(self.time_or_freq)
         if self.context._frequency_context:
+            index = self.time_domain_combo.findText(plot_type)
+            if index == -1:
+                index = 0
             self.time_domain_combo.setEnabled(True)
-            self.time_domain_combo.setCurrentText(plot_type)
+            self.time_domain_combo.setCurrentIndex(index)
 
     def get_workspace_list(self):
         filtered_list = self.context.get_names_of_workspaces_to_fit(runs='All', group_and_pair='All', phasequad=True,
