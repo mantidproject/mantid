@@ -426,11 +426,11 @@ if [[ ${DO_BUILD_PKG} == true ]]; then
     run_with_xvfb ${CMAKE_EXE} --build . --target docs-qthelp
     ${CPACK_EXE}
 
-    # Source tarball on clean build (arbitrarily choose rhel7)
+    # Source tarball on clean build (arbitrarily choose Ubuntu)
     # Also, parcel up the documentation into a tar file that is easier to move around
     # and labelled by the commit id it was built with. This assumes the Jenkins git plugin
     # has set the GIT_COMMIT environment variable
-    if [[ ${CLEANBUILD} == true && ${ON_RHEL7} == true ]]; then
+    if [[ ${CLEANBUILD} == true && ${ON_UBUNTU} == true ]]; then
         run_with_xvfb ${CMAKE_EXE} --build . --target docs-html
         tar -cjf mantiddocs-g${GIT_COMMIT:0:7}.tar.bz2 --exclude='*.buildinfo' --exclude="MantidProject.q*" docs/html
         # The ..._PREFIX argument avoids opt/Mantid directories at the top of the tree
