@@ -45,9 +45,8 @@ BatchPresenter::BatchPresenter(
       m_eventPresenter(std::move(eventPresenter)),
       m_experimentPresenter(std::move(experimentPresenter)),
       m_instrumentPresenter(std::move(instrumentPresenter)),
-      m_savePresenter(std::move(savePresenter)),
-      m_jobRunner(new BatchJobRunner(std::move(model))),
-      m_unsavedBatchFlag(false) {
+      m_savePresenter(std::move(savePresenter)), m_unsavedBatchFlag(false),
+      m_jobRunner(new BatchJobRunner(std::move(model))) {
 
   m_view->subscribe(this);
 
