@@ -73,11 +73,11 @@ class FittingTabPresenterTest(unittest.TestCase):
                                      'MUSR62260; Group; fwd; Asymmetry; #1', 'MUSR62260; Group; top; Asymmetry; #1',
                                      'MUSR62260; Pair Asym; long; #1', 'MUSR62260; PhaseQuad; PhaseTable MUSR62260',
                                      'MUSR62260; PhaseQuad; PhaseTable MUSR62261'], True)
+        self.presenter._plot_type = "Time"
 
         self.presenter.handle_select_fit_data_clicked()
 
-        dialog_mock.assert_called_once_with([[62260]], 'MUSR', [], True, self.context, self.view)
-
+        dialog_mock.assert_called_once_with([[62260]], 'MUSR', [], True, "Time", self.context, self.view)
         self.assertEqual(retrieve_combobox_info(self.view.parameter_display_combo),
                          ['MUSR62260; Group; bkwd; Asymmetry; #1', 'MUSR62260; Group; bottom; Asymmetry; #1',
                           'MUSR62260; Group; fwd; Asymmetry; #1', 'MUSR62260; Group; top; Asymmetry; #1',

@@ -30,6 +30,7 @@ class FittingTabPresenter(object):
         self._fit_function = [None]
         self._tf_asymmetry_mode = False
         self._fit_function_cache = [None]
+        self._plot_type = None
         self._number_of_fits_cached = 0
         self._multi_domain_function = None
         self.manual_selection_made = False
@@ -41,7 +42,7 @@ class FittingTabPresenter(object):
             self.handle_gui_changes_made)
         self.selected_group_pair_observer = GenericObserver(
             self.handle_selected_group_pair_changed)
-        self.selected_plot_type_observer = GenericObserver(
+        self.selected_plot_type_observer = GenericObserverWithArgPassing(
             self.handle_selected_plot_type_changed)
         self.input_workspace_observer = GenericObserver(
             self.handle_new_data_loaded)
@@ -77,7 +78,7 @@ class FittingTabPresenter(object):
         selected_data, dialog_return = WorkspaceSelectorView.get_selected_data(
             self.context.data_context.current_runs,
             self.context.data_context.instrument, self.selected_data,
-            self.view.fit_to_raw, self.context, self.view)
+            self.view.fit_to_raw, self._plot_type, self.context, self.view)
 
         if dialog_return:
             self.selected_data = selected_data
@@ -95,7 +96,8 @@ class FittingTabPresenter(object):
     def handle_selected_group_pair_changed(self):
         self.update_selected_workspace_guess()
 
-    def handle_selected_plot_type_changed(self):
+    def handle_selected_plot_type_changed(self, plot_type):
+        self._plot_type = plot_type
         self.update_selected_workspace_guess()
 
     def handle_display_workspace_changed(self):
@@ -266,7 +268,6 @@ class FittingTabPresenter(object):
             for index, fit_function in enumerate(self._fit_function):
                 fit_function = fit_function if fit_function else self.view.fit_object.clone()
                 new_function = calculate_tf_fit_function(fit_function)
-                print(new_function)
                 self._fit_function[index] = new_function.clone()
 
             self.view.function_browser.blockSignals(True)
@@ -362,7 +363,6 @@ class FittingTabPresenter(object):
                 self.calculation_thread = self.create_thread(calculation_function)
             else:
                 single_fit_parameters = self.get_parameters_for_tf_single_fit_calculation()
-                print("SINGLE FIT PARAMETERS", single_fit_parameters)
                 calculation_function = functools.partial(
                     self.model.do_single_tf_fit, single_fit_parameters)
                 self.calculation_thread = self.create_thread(calculation_function)
@@ -627,7 +627,7 @@ class FittingTabPresenter(object):
 
         grp_pair_values = list(self._grppair_index.values())
         if len(self._grppair_index) > 1:
-            return ((self._grppair_index[grppair] - grp_pair_values[0]) / \
+            return ((self._grppair_index[grppair] - grp_pair_values[0]) /
                     (grp_pair_values[-1] - grp_pair_values[0])) * 0.99
         else:
             return 0.99

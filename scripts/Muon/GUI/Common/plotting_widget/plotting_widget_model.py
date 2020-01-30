@@ -113,11 +113,11 @@ class PlotWidgetModel(object):
         # check workspace exists -
         # retrieveWorkspaces expects a list of workspace names
         try:
-            workspaces = AnalysisDataService.Instance().retrieveWorkspaces([workspace_name], unrollGroups=True)
+            workspace = AnalysisDataService.Instance().retrieveWorkspaces([workspace_name], unrollGroups=True)
         except RuntimeError:
             return
 
-        self._do_single_plot(ax, workspaces, workspace_indices, errors,
+        self._do_single_plot(ax, workspace, workspace_indices, errors,
                              plot_kwargs)
         self._update_legend(ax)
 
