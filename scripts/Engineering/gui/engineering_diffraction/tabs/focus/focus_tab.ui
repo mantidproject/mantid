@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>617</width>
-    <height>153</height>
+    <height>197</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -73,37 +73,36 @@ QGroupBox:title {
        </property>
        <layout class="QGridLayout" name="gridLayout_2">
         <item row="1" column="0">
-         <layout class="QGridLayout" name="gridLayout" rowstretch="0,0,0,0,0" columnstretch="0,0,0">
+         <layout class="QGridLayout" name="gridLayout" rowstretch="0,0,0,0,0,0,0" columnstretch="0,0,0">
           <property name="sizeConstraint">
            <enum>QLayout::SetDefaultConstraint</enum>
           </property>
           <property name="verticalSpacing">
            <number>6</number>
           </property>
-          <item row="4" column="2">
+          <item row="1" column="0" colspan="3">
+           <spacer name="verticalSpacer">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>10</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="6" column="2">
            <widget class="QPushButton" name="button_focus">
             <property name="enabled">
              <bool>true</bool>
             </property>
             <property name="text">
              <string>Focus</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0" colspan="2">
-           <widget class="QCheckBox" name="check_plotOutput">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="text">
-             <string>Plot Focused Workspace</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0" colspan="3">
-           <widget class="Line" name="line">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
             </property>
            </widget>
           </item>
@@ -124,57 +123,57 @@ QGroupBox:title {
            </widget>
           </item>
           <item row="2" column="0" colspan="3">
-           <spacer name="verticalSpacer">
+           <widget class="Line" name="line">
             <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeType">
-             <enum>QSizePolicy::Fixed</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>10</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_banks">
-            <property name="text">
-             <string>Select Banks:</string>
+             <enum>Qt::Horizontal</enum>
             </property>
            </widget>
           </item>
-          <item row="1" column="1" colspan="2">
-           <layout class="QHBoxLayout" name="layout_banks">
-            <item>
-             <widget class="QCheckBox" name="check_northBank">
-              <property name="text">
-               <string>North - 1</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-              <property name="tristate">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="check_southBank">
-              <property name="text">
-               <string>South - 2</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-              <property name="tristate">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-           </layout>
+          <item row="6" column="0" colspan="2">
+           <widget class="QCheckBox" name="check_plotOutput">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="text">
+             <string>Plot Focused Workspace</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0" colspan="3">
+           <widget class="Line" name="line_2">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0" colspan="3">
+           <widget class="CroppingView" name="widget_cropping" native="true">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0" colspan="3">
+           <widget class="QCheckBox" name="check_cropFocus">
+            <property name="text">
+             <string>Crop Focus</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
@@ -203,6 +202,12 @@ QGroupBox:title {
    <class>FileFinder</class>
    <extends>QWidget</extends>
    <header>mantidqt.widgets.filefinder</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>CroppingView</class>
+   <extends>QWidget</extends>
+   <header>Engineering.gui.engineering_diffraction.tabs.common.cropping.cropping_view</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

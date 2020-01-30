@@ -241,7 +241,7 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
 
   // Configure strategy
   MCAbsorptionStrategy strategy(*beamProfile, inputWS.sample(), nevents,
-                                maxScatterPtAttempts);
+                                maxScatterPtAttempts, g_log);
 
   const auto &spectrumInfo = simulationWS.spectrumInfo();
 
@@ -276,6 +276,7 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
       } else {
         // elastic case already initialized
       }
+
       std::tie(outY[j], std::ignore) =
           strategy.calculate(rng, detPos, lambdaIn, lambdaOut);
 

@@ -28,7 +28,7 @@ namespace MplCpp {
 class MANTID_MPLCPP_DLL NormalizeBase : public Common::Python::InstanceHolder {
 public:
   /// Autoscale the limits to vmin, vmax, clamping any invalid values
-  std::tuple<double, double> autoscale(std::tuple<double, double> clim);
+  virtual std::tuple<double, double> autoscale(std::tuple<double, double> clim);
 
   /// Return an appropriate object to determine the tick locations
   /// The default returns None indicating that matplotlib should autoselect it
@@ -90,6 +90,8 @@ class MANTID_MPLCPP_DLL PowerNorm : public NormalizeBase {
 public:
   PowerNorm(double gamma);
   PowerNorm(double gamma, double vmin, double vmax);
+  virtual std::tuple<double, double>
+  autoscale(std::tuple<double, double> clim) override;
 };
 
 } // namespace MplCpp

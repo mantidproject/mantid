@@ -19,6 +19,11 @@ if [ -n "${PYTHONPATH}" ]; then
     LOCAL_PYTHONPATH=${LOCAL_PYTHONPATH}:${PYTHONPATH}
 fi
 
+# Find private sip module if it exists. Required by qtpy & IPython/external/qt_loader.py
+if [ -f "${INSTALLDIR}/lib/PyQt4/sip.so" ]; then
+    LOCAL_PYTHONPATH=$LOCAL_PYTHONPATH:${INSTALLDIR}/lib/PyQt4
+fi
+
 @GDB_DEFINITIONS@
 
 # Launch

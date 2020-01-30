@@ -114,7 +114,7 @@ def _perform_fit(transmission_workspace, direct_workspace,
         raise RuntimeError("No transmission monitor has been provided.")
 
     # Get the fit setting for the correct data type, ie either for the Sample of the Can
-    fit_type = calculate_transmission_state.fit[data_type].fit_type
+    fit_type = calculate_transmission_state.fit[data_type.value].fit_type
     if fit_type is FitType.LOGARITHMIC:
         fit_string = "Log"
     elif fit_type is FitType.POLYNOMIAL:
@@ -124,7 +124,7 @@ def _perform_fit(transmission_workspace, direct_workspace,
 
     trans_options.update({"FitMethod": fit_string})
     if fit_type is FitType.POLYNOMIAL:
-        polynomial_order = calculate_transmission_state.fit[data_type].polynomial_order
+        polynomial_order = calculate_transmission_state.fit[data_type.value].polynomial_order
         trans_options.update({"PolynomialOrder": polynomial_order})
 
     trans_alg = create_unmanaged_algorithm(trans_name, **trans_options)
@@ -256,7 +256,7 @@ def _get_corrected_wavelength_workspace(workspace, detector_ids, calculate_trans
         wavelength_low = calculate_transmission_state.wavelength_full_range_low
         wavelength_high = calculate_transmission_state.wavelength_full_range_high
     else:
-        fit_state = calculate_transmission_state.fit[data_type]
+        fit_state = calculate_transmission_state.fit[data_type.value]
         wavelength_low = fit_state.wavelength_low if fit_state.wavelength_low \
             else calculate_transmission_state.wavelength_low[0]
         wavelength_high = fit_state.wavelength_high if fit_state.wavelength_high \

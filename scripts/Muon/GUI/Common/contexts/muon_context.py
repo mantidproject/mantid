@@ -35,7 +35,7 @@ class MuonContext(object):
         self._frequency_context = frequency_context
 
         self.ads_observer = MuonContextADSObserver(
-            self.remove_workspace_by_name,
+            self.remove_workspace,
             self.clear_context,
             self.workspace_replaced)
 
@@ -46,6 +46,7 @@ class MuonContext(object):
 
         self.update_view_from_model_notifier = Observable()
         self.update_plots_notifier = Observable()
+        self.deleted_plots_notifier = Observable()
 
     def __del__(self):
         self.ads_observer.unsubscribe()
@@ -373,13 +374,15 @@ class MuonContext(object):
 
         return equivalent_list
 
-    def remove_workspace_by_name(self, workspace_name):
+    def remove_workspace(self, workspace):
+        workspace_name = workspace.name()
         self.data_context.remove_workspace_by_name(workspace_name)
         self.group_pair_context.remove_workspace_by_name(workspace_name)
         self.phase_context.remove_workspace_by_name(workspace_name)
         self.fitting_context.remove_workspace_by_name(workspace_name)
         self.gui_context.remove_workspace_by_name(workspace_name)
         self.update_view_from_model_notifier.notify_subscribers(workspace_name)
+        self.deleted_plots_notifier.notify_subscribers(workspace)
 
     def clear_context(self):
         self.data_context.clear()

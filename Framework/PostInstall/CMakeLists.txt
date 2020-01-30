@@ -12,7 +12,7 @@
 # ${DESTDIR}${CMAKE_INSTALL_PREFIX} but this should be evaluated at CPack time
 # so escape the $ to its written literally.
 set(PACKAGE_ROOT \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX})
-set(EXCLUDE_REGEX ".*_template|.*port_v3")
+set(EXCLUDE_REGEX ".*_template")
 
 set(COMPILE_SCRIPT "message ( \"Byte-compiling Python in ${PACKAGE_ROOT}\")")
 set(

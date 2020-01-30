@@ -15,6 +15,7 @@ from mantid.kernel import Logger
 from mantid.api import (AnalysisDataService)
 from sans.algorithm_detail.mask_sans_workspace import mask_workspace
 from sans.algorithm_detail.move_sans_instrument_component import move_component, MoveTypes
+from sans.state.Serializer import Serializer
 from ui.sans_isis.masking_table import MaskingTable
 from sans.common.enums import DetectorType
 from sans.common.constants import EMPTY_NAME
@@ -43,7 +44,7 @@ def load_workspace(state, workspace_name):
     prepare_to_load_scatter_sample_only(state)
     handle_multi_period_data(state)
 
-    serialized_state = state.property_manager
+    serialized_state = Serializer.to_json(state)
 
     workspace = perform_load(serialized_state)
     perform_move(state, workspace)

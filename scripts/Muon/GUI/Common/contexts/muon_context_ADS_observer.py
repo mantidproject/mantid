@@ -43,19 +43,19 @@ class MuonContextADSObserver(AnalysisDataServiceObserver):
     def deleteHandle(self, workspace_name, workspace):
         """
         Called when the ADS has deleted a workspace. Removes that workspace from the context and cleans up.
-        :param workspace_name: The name of the workspace
-        :param workspace: not used
+        :param workspace_name: The name of the workspace (not used)
+        :param workspace: The workspace object
         """
         if not isinstance(workspace, WorkspaceGroup):
-            self.delete_callback(workspace_name)
+            self.delete_callback(workspace)
 
     @_catch_exceptions
     def renameHandle(self, old_workspace_name, new_workspace_name):
         """
-                Called when the ADS has renamed a workspace. Currently treats this the same as deletion.
-                :param workspace_name: The name of the workspace
-                :param workspace: not used
-                """
+        Called when the ADS has renamed a workspace. Currently treats this the same as deletion.
+        :param workspace_name: The name of the workspace
+        :param workspace: not used
+        """
         self.delete_callback(old_workspace_name)
 
     @_catch_exceptions
@@ -68,11 +68,11 @@ class MuonContextADSObserver(AnalysisDataServiceObserver):
     @_catch_exceptions
     def replaceHandle(self, name, workspace):
         """
-                Called when the ADS has replaced a workspace with one of the same name.
-                If this workspace is attached to this figure then its data is updated
-                :param name: The name of the workspace.
-                :param workspace: A reference to the new workspace (Unused)
-                """
+        Called when the ADS has replaced a workspace with one of the same name.
+        If this workspace is attached to this figure then its data is updated
+        :param name: The name of the workspace.
+        :param workspace: A reference to the new workspace (Unused)
+        """
         self.replace_callback(name)
 
     def unsubscribe(self):

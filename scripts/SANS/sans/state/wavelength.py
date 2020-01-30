@@ -10,27 +10,22 @@ from __future__ import (absolute_import, division, print_function)
 import json
 import copy
 
-from sans.state.state_base import (StateBase, PositiveFloatParameter, rename_descriptor_names,
-                                   PositiveFloatListParameter)
+from six import with_metaclass
+
+from sans.state.JsonSerializable import JsonSerializable
 from sans.common.enums import (RebinType, RangeStepType, SANSFacility)
+from sans.state.automatic_setters import automatic_setters
 from sans.state.state_functions import (is_not_none_and_first_larger_than_second, one_is_none, validation_message)
-from sans.state.automatic_setters import (automatic_setters)
 
 
-# ----------------------------------------------------------------------------------------------------------------------
-# State
-# ----------------------------------------------------------------------------------------------------------------------
-@rename_descriptor_names
-class StateWavelength(StateBase):
-    rebin_type = RebinType.REBIN
-    wavelength_low = PositiveFloatListParameter()
-    wavelength_high = PositiveFloatListParameter()
-    wavelength_step = PositiveFloatParameter()
-    wavelength_step_type = RangeStepType.NOT_SET
-
+class StateWavelength(with_metaclass(JsonSerializable)):
     def __init__(self):
         super(StateWavelength, self).__init__()
         self.rebin_type = RebinType.REBIN
+        self.wavelength_low = None  # : List[Float] (Positive)
+        self.wavelength_high = None  # : List[Float] (Positive)
+        self.wavelength_step = None  # : Float (Positive)
+        self.wavelength_step_type = RangeStepType.NOT_SET
 
     def validate(self):
         is_invalid = dict()

@@ -730,14 +730,13 @@ public:
     // inside hole
     auto shell = ComponentCreationHelper::createHollowShell(0.5, 1.0);
     constexpr size_t maxAttempts{1};
-    V3D point;
-    TS_ASSERT_THROWS_NOTHING(
-        point = shell->generatePointInObject(rng, maxAttempts));
+    boost::optional<V3D> point = shell->generatePointInObject(rng, maxAttempts);
+    TS_ASSERT_EQUALS(!point, false);
 
     constexpr double tolerance{1e-10};
-    TS_ASSERT_DELTA(-1. + 2. * 0.55, point.X(), tolerance);
-    TS_ASSERT_DELTA(-1. + 2. * 0.65, point.Y(), tolerance);
-    TS_ASSERT_DELTA(-1. + 2. * 0.70, point.Z(), tolerance);
+    TS_ASSERT_DELTA(-1. + 2. * 0.55, point->X(), tolerance);
+    TS_ASSERT_DELTA(-1. + 2. * 0.65, point->Y(), tolerance);
+    TS_ASSERT_DELTA(-1. + 2. * 0.70, point->Z(), tolerance);
   }
 
   void testGeneratePointInsideCuboid() {
@@ -759,14 +758,14 @@ public:
     auto cuboid =
         ComponentCreationHelper::createCuboid(xLength, yLength, zLength);
     constexpr size_t maxAttempts{0};
-    V3D point;
-    TS_ASSERT_THROWS_NOTHING(
-        point = cuboid->generatePointInObject(rng, maxAttempts));
+    boost::optional<V3D> point =
+        cuboid->generatePointInObject(rng, maxAttempts);
+    TS_ASSERT_EQUALS(!point, false);
 
     constexpr double tolerance{1e-10};
-    TS_ASSERT_DELTA(xLength - randX * 2. * xLength, point.X(), tolerance);
-    TS_ASSERT_DELTA(-yLength + randY * 2. * yLength, point.Y(), tolerance);
-    TS_ASSERT_DELTA(-zLength + randZ * 2. * zLength, point.Z(), tolerance);
+    TS_ASSERT_DELTA(xLength - randX * 2. * xLength, point->X(), tolerance);
+    TS_ASSERT_DELTA(-yLength + randY * 2. * yLength, point->Y(), tolerance);
+    TS_ASSERT_DELTA(-zLength + randZ * 2. * zLength, point->Z(), tolerance);
   }
 
   void testGeneratePointInsideCylinder() {
@@ -793,18 +792,18 @@ public:
     auto cylinder = ComponentCreationHelper::createCappedCylinder(
         radius, height, bottomCentre, axis, "cyl");
     constexpr size_t maxAttempts{0};
-    V3D point;
-    TS_ASSERT_THROWS_NOTHING(
-        point = cylinder->generatePointInObject(rng, maxAttempts));
+    boost::optional<V3D> point =
+        cylinder->generatePointInObject(rng, maxAttempts);
+    TS_ASSERT_EQUALS(!point, false);
     // Global->cylinder local coordinates
-    point -= bottomCentre;
+    *point -= bottomCentre;
     constexpr double tolerance{1e-10};
     const double polarAngle{2. * M_PI * randT};
     const double radialLength{radius * std::sqrt(randR)};
     const double axisLength{height * randZ};
-    TS_ASSERT_DELTA(radialLength * std::cos(polarAngle), point.X(), tolerance);
-    TS_ASSERT_DELTA(radialLength * std::sin(polarAngle), point.Y(), tolerance);
-    TS_ASSERT_DELTA(axisLength, point.Z(), tolerance);
+    TS_ASSERT_DELTA(radialLength * std::cos(polarAngle), point->X(), tolerance);
+    TS_ASSERT_DELTA(radialLength * std::sin(polarAngle), point->Y(), tolerance);
+    TS_ASSERT_DELTA(axisLength, point->Z(), tolerance);
   }
 
   void testGeneratePointInsideHollowCylinder() {
@@ -832,20 +831,20 @@ public:
     auto hollowCylinder = ComponentCreationHelper::createHollowCylinder(
         innerRadius, radius, height, bottomCentre, axis, "hol-cyl");
     constexpr size_t maxAttempts{0};
-    V3D point;
-    TS_ASSERT_THROWS_NOTHING(
-        point = hollowCylinder->generatePointInObject(rng, maxAttempts));
+    boost::optional<V3D> point;
+    point = hollowCylinder->generatePointInObject(rng, maxAttempts);
+    TS_ASSERT_EQUALS(!point, false);
     // Global->cylinder local coordinates
-    point -= bottomCentre;
+    *point -= bottomCentre;
     constexpr double tolerance{1e-10};
     const double polarAngle{2. * M_PI * randT};
     const double c1 = std::pow(innerRadius, 2);
     const double c2 = std::pow(radius, 2);
     const double radialLength{std::sqrt(c1 + (c2 - c1) * randR)};
     const double axisLength{height * randZ};
-    TS_ASSERT_DELTA(radialLength * std::cos(polarAngle), point.X(), tolerance);
-    TS_ASSERT_DELTA(radialLength * std::sin(polarAngle), point.Y(), tolerance);
-    TS_ASSERT_DELTA(axisLength, point.Z(), tolerance);
+    TS_ASSERT_DELTA(radialLength * std::cos(polarAngle), point->X(), tolerance);
+    TS_ASSERT_DELTA(radialLength * std::sin(polarAngle), point->Y(), tolerance);
+    TS_ASSERT_DELTA(axisLength, point->Z(), tolerance);
   }
 
   void testGeneratePointInsideSphere() {
@@ -864,19 +863,19 @@ public:
     constexpr double radius{0.23};
     auto sphere = ComponentCreationHelper::createSphere(radius);
     constexpr size_t maxAttempts{0};
-    V3D point;
-    TS_ASSERT_THROWS_NOTHING(
-        point = sphere->generatePointInObject(rng, maxAttempts));
+    boost::optional<V3D> point;
+    point = sphere->generatePointInObject(rng, maxAttempts);
+    TS_ASSERT_EQUALS(!point, false);
     // Global->cylinder local coordinates
     constexpr double tolerance{1e-10};
     const double azimuthalAngle{2. * M_PI * randT};
     const double polarAngle{std::acos(2. * randF - 1.)};
     const double r{radius * randR};
     TS_ASSERT_DELTA(r * std::cos(azimuthalAngle) * std::sin(polarAngle),
-                    point.X(), tolerance);
+                    point->X(), tolerance);
     TS_ASSERT_DELTA(r * std::sin(azimuthalAngle) * std::sin(polarAngle),
-                    point.Y(), tolerance);
-    TS_ASSERT_DELTA(r * std::cos(polarAngle), point.Z(), tolerance);
+                    point->Y(), tolerance);
+    TS_ASSERT_DELTA(r * std::cos(polarAngle), point->Z(), tolerance);
   }
 
   void testGeneratePointInsideRespectsMaxAttempts() {
@@ -893,8 +892,8 @@ public:
     // inside hole
     auto shell = ComponentCreationHelper::createHollowShell(0.5, 1.0);
     constexpr size_t maxAttempts{1};
-    TS_ASSERT_THROWS(shell->generatePointInObject(rng, maxAttempts),
-                     const std::runtime_error &);
+    boost::optional<V3D> point = shell->generatePointInObject(rng, maxAttempts);
+    TS_ASSERT_EQUALS(!point, true);
   }
 
   void testGeneratePointInsideRespectsActiveRegion() {
@@ -915,14 +914,14 @@ public:
     // Create a thin infinite rectangular region to restrict point generation
     BoundingBox activeRegion(0.1, 0.1, 0.1, -0.1, -0.1, -0.1);
     constexpr size_t maxAttempts{1};
-    V3D point;
-    TS_ASSERT_THROWS_NOTHING(
-        point = ball->generatePointInObject(rng, activeRegion, maxAttempts));
+    boost::optional<V3D> point =
+        ball->generatePointInObject(rng, activeRegion, maxAttempts);
+    TS_ASSERT_EQUALS(!point, false);
     // We should get the point generated from the second 'random' triplet.
     constexpr double tolerance{1e-10};
-    TS_ASSERT_DELTA(-0.1 + randX * 0.2, point.X(), tolerance)
-    TS_ASSERT_DELTA(-0.1 + randY * 0.2, point.Y(), tolerance)
-    TS_ASSERT_DELTA(-0.1 + randZ * 0.2, point.Z(), tolerance)
+    TS_ASSERT_DELTA(-0.1 + randX * 0.2, point->X(), tolerance)
+    TS_ASSERT_DELTA(-0.1 + randY * 0.2, point->Y(), tolerance)
+    TS_ASSERT_DELTA(-0.1 + randZ * 0.2, point->Z(), tolerance)
   }
 
   void testSolidAngleSphere()

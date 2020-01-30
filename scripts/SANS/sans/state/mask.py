@@ -11,11 +11,13 @@
 from __future__ import (absolute_import, division, print_function)
 import json
 import copy
-from sans.state.state_base import (StateBase, BoolParameter, StringListParameter, StringParameter,
-                                   PositiveFloatParameter, FloatParameter, FloatListParameter, FloatWithNoneParameter,
-                                   DictParameter, PositiveIntegerListParameter, rename_descriptor_names)
+
+from six import with_metaclass
+
+from sans.state.JsonSerializable import JsonSerializable
+from sans.state.automatic_setters import automatic_setters
 from sans.state.state_functions import (is_pure_none_or_not_none, validation_message, set_detector_names)
-from sans.state.automatic_setters import (automatic_setters)
+
 from sans.common.file_information import find_full_file_path
 from sans.common.enums import (DetectorType, SANSInstrument)
 from sans.common.general_functions import get_bank_for_spectrum_number
@@ -80,45 +82,44 @@ def is_spectrum_range_all_on_one_detector(start, stop, invalid_dict, start_name,
 # ------------------------------------------------
 # StateData
 # ------------------------------------------------
-@rename_descriptor_names
-class StateMaskDetector(StateBase):
-    # Vertical strip masks
-    single_vertical_strip_mask = PositiveIntegerListParameter()
-    range_vertical_strip_start = PositiveIntegerListParameter()
-    range_vertical_strip_stop = PositiveIntegerListParameter()
 
-    # Horizontal strip masks
-    single_horizontal_strip_mask = PositiveIntegerListParameter()
-    range_horizontal_strip_start = PositiveIntegerListParameter()
-    range_horizontal_strip_stop = PositiveIntegerListParameter()
-
-    # Spectrum Block
-    block_horizontal_start = PositiveIntegerListParameter()
-    block_horizontal_stop = PositiveIntegerListParameter()
-    block_vertical_start = PositiveIntegerListParameter()
-    block_vertical_stop = PositiveIntegerListParameter()
-
-    # Spectrum block cross
-    block_cross_horizontal = PositiveIntegerListParameter()
-    block_cross_vertical = PositiveIntegerListParameter()
-
-    # Time/Bin mask
-    bin_mask_start = FloatListParameter()
-    bin_mask_stop = FloatListParameter()
-
-    # Name of the detector
-    detector_name = StringParameter()
-    detector_name_short = StringParameter()
-
-    # Single Spectra
-    single_spectra = PositiveIntegerListParameter()
-
-    # Spectrum Range
-    spectrum_range_start = PositiveIntegerListParameter()
-    spectrum_range_stop = PositiveIntegerListParameter()
-
+class StateMaskDetector(with_metaclass(JsonSerializable)):
     def __init__(self):
         super(StateMaskDetector, self).__init__()
+        # Vertical strip masks
+        self.single_vertical_strip_mask = None  # : List[Int] (Positive)
+        self.range_vertical_strip_start = None  # : List[Int] (Positive)
+        self.range_vertical_strip_stop = None  # : List[Int] (Positive)
+
+        # Horizontal strip masks
+        self.single_horizontal_strip_mask = None  # : List[Int] (Positive)
+        self.range_horizontal_strip_start = None  # : List[Int] (Positive)
+        self.range_horizontal_strip_stop = None  # : List[Int] (Positive)
+
+        # Spectrum Block
+        self.block_horizontal_start = None  # : List[Int] (Positive)
+        self.block_horizontal_stop = None  # : List[Int] (Positive)
+        self.block_vertical_start = None  # : List[Int] (Positive)
+        self.block_vertical_stop = None  # : List[Int] (Positive)
+
+        # Spectrum block cross
+        self.block_cross_horizontal = None  # : List[Int] (Positive)
+        self.block_cross_vertical = None  # : List[Int] (Positive)
+
+        # Time/Bin mask
+        self.bin_mask_start = None  # : List[Float]
+        self.bin_mask_stop = None  # : List[Float]
+
+        # Name of the detector
+        self.detector_name = None  # : Str()
+        self.detector_name_short = None  # : Str()
+
+        # Single Spectra
+        self.single_spectra = None  # : List[Int] (Positive)
+
+        # Spectrum Range
+        self.spectrum_range_start = None  # : List[Int] (Positive)
+        self.spectrum_range_stop = None  # : List[Int] (Positive)
 
     def validate(self):
         is_invalid = {}
@@ -170,47 +171,40 @@ class StateMaskDetector(StateBase):
                              "Please see: {0}".format(json.dumps(is_invalid)))
 
 
-@rename_descriptor_names
-class StateMask(StateBase):
-    # Radius Mask
-    radius_min = FloatParameter()
-    radius_max = FloatParameter()
-
-    # Bin mask
-    bin_mask_general_start = FloatListParameter()
-    bin_mask_general_stop = FloatListParameter()
-
-    # Mask files
-    mask_files = StringListParameter()
-
-    # Angle masking
-    phi_min = FloatWithNoneParameter()
-    phi_max = FloatWithNoneParameter()
-    use_mask_phi_mirror = BoolParameter()
-
-    # Beam stop
-    beam_stop_arm_width = PositiveFloatParameter()
-    beam_stop_arm_angle = FloatParameter()
-    beam_stop_arm_pos1 = FloatParameter()
-    beam_stop_arm_pos2 = FloatParameter()
-
-    # Clear commands
-    clear = BoolParameter()
-    clear_time = BoolParameter()
-
-    # The detector dependent masks
-    detectors = DictParameter()
-
-    # The idf path of the instrument
-    idf_path = StringParameter()
-
+class StateMask(with_metaclass(JsonSerializable)):
     def __init__(self):
         super(StateMask, self).__init__()
-        # IDF Path
-        self.idf_path = ""
+        # Radius Mask
+        self.radius_min = None  # : Float
+        self.radius_max = None  # : Float
+
+        # Bin mask
+        self.bin_mask_general_start = None  # : List[Float]
+        self.bin_mask_general_stop = None  # : List[Float]
+
+        # Mask files
+        self.mask_files = None  # : List[Str]
+
+        # Angle masking
         self.phi_min = -90.0
         self.phi_max = 90.0
         self.use_mask_phi_mirror = True
+
+        # Beam stop
+        self.beam_stop_arm_width = None  # : Float (Positive)
+        self.beam_stop_arm_angle = None  # : Float
+        self.beam_stop_arm_pos1 = None  # : Float
+        self.beam_stop_arm_pos2 = None  # : Float
+
+        # Clear commands
+        self.clear = None  # : Bool
+        self.clear_time = None  # : Bool
+
+        # The detector dependent masks
+        self.detectors = None  # : Dict
+
+        # The idf path of the instrument
+        self.idf_path = ""
 
     def validate(self):
         is_invalid = dict()
@@ -257,7 +251,6 @@ class StateMask(StateBase):
                              "Please see: {0}".format(json.dumps(is_invalid)))
 
 
-@rename_descriptor_names
 class StateMaskSANS2D(StateMask):
     def __init__(self):
         super(StateMaskSANS2D, self).__init__()
@@ -269,7 +262,6 @@ class StateMaskSANS2D(StateMask):
         super(StateMaskSANS2D, self).validate()
 
 
-@rename_descriptor_names
 class StateMaskLOQ(StateMask):
     def __init__(self):
         super(StateMaskLOQ, self).__init__()
@@ -281,7 +273,6 @@ class StateMaskLOQ(StateMask):
         super(StateMaskLOQ, self).validate()
 
 
-@rename_descriptor_names
 class StateMaskLARMOR(StateMask):
     def __init__(self):
         super(StateMaskLARMOR, self).__init__()
@@ -292,7 +283,6 @@ class StateMaskLARMOR(StateMask):
         super(StateMaskLARMOR, self).validate()
 
 
-@rename_descriptor_names
 class StateMaskZOOM(StateMask):
     def __init__(self):
         super(StateMaskZOOM, self).__init__()

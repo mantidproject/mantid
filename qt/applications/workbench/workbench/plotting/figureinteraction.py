@@ -24,7 +24,7 @@ from matplotlib.collections import Collection
 
 # third party imports
 from mantid.api import AnalysisDataService as ads
-from mantid.plots import MantidAxes
+from mantid.plots import helperfunctions, MantidAxes
 from mantid.plots.utility import zoom
 from mantid.py3compat import iteritems
 from mantidqt.plotting.figuretype import FigureType, figure_type
@@ -307,6 +307,12 @@ class FigureInteraction(object):
             self.add_error_bars_menu(menu, event.inaxes)
             self._add_marker_option_menu(menu, event)
 
+        # Able to change the plot type to waterfall if there is only one axes, it is a MantidAxes, and there is more
+        # than one line on the axes.
+        if len(event.inaxes.get_figure().get_axes()) == 1 and isinstance(event.inaxes, MantidAxes)\
+                and len(event.inaxes.get_lines()) > 1:
+            self._add_plot_type_option_menu(menu, event.inaxes)
+
         menu.exec_(QCursor.pos())
 
     def _add_axes_scale_menu(self, menu, ax):
@@ -440,6 +446,31 @@ class FigureInteraction(object):
             marker_action_group.addAction(action)
 
         menu.addMenu(marker_menu)
+
+    def _add_plot_type_option_menu(self, menu, ax):
+        plot_type_menu = QMenu("Plot Type", menu)
+        plot_type_action_group = QActionGroup(plot_type_menu)
+        standard = plot_type_menu.addAction("1D", lambda: self._change_plot_type(
+            ax, plot_type_action_group.checkedAction()))
+        waterfall = plot_type_menu.addAction("Waterfall", lambda: self._change_plot_type(
+            ax, plot_type_action_group.checkedAction()))
+
+        for action in [waterfall, standard]:
+            plot_type_action_group.addAction(action)
+            action.setCheckable(True)
+
+        if ax.is_waterfall():
+            waterfall.setChecked(True)
+        else:
+            standard.setChecked(True)
+
+        menu.addMenu(plot_type_menu)
+
+    def _change_plot_type(self, ax, action):
+        if action.text() == "Waterfall":
+            ax.set_waterfall(True)
+        else:
+            ax.set_waterfall(False)
 
     def _global_edit_markers(self):
         """Open a window that allows editing of all currently plotted markers"""
@@ -631,6 +662,11 @@ class FigureInteraction(object):
         self._toggle_normalization(ax)
 
     def _toggle_normalization(self, ax):
+        waterfall = isinstance(ax, MantidAxes) and ax.is_waterfall()
+        if waterfall:
+            x, y = ax.waterfall_x_offset, ax.waterfall_y_offset
+            ax.update_waterfall(0, 0)
+
         is_normalized = self._is_normalized(ax)
         for arg_set in ax.creation_args:
             if arg_set['workspaces'] in ax.tracked_workspaces:
@@ -658,7 +694,13 @@ class FigureInteraction(object):
                         ws_artist.replace_data(workspace, arg_set_copy)
         if ax.lines:  # Relim causes issues with colour plots, which have no lines.
             ax.relim()
+
         ax.autoscale()
+
+        if waterfall:
+            helperfunctions.set_initial_dimensions(ax)
+            ax.update_waterfall(x, y)
+
         self.canvas.draw()
 
     def _can_toggle_normalization(self, ax):

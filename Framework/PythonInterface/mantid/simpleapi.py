@@ -28,10 +28,11 @@ Importing this module starts the FrameworkManager instance.
 """
 from __future__ import (absolute_import, division, print_function)
 
+# std libs
+from collections import OrderedDict, namedtuple
+import inspect
 import os
 import sys
-# stdlib imports
-from collections import OrderedDict, namedtuple
 
 import six
 from six import iteritems
@@ -89,6 +90,44 @@ def extract_progress_kwargs(kwargs):
 
 
 def _create_generic_signature(algm_object):
+    """
+    Create a function signature appropriate for the given algorithm.
+    :param algm_object: An algorithm instance
+    :return: An inspect.Signature object if available else a 2 tuple
+             suitable for replacing co_varnames
+    """
+    # Calling help(...) on the wrapper function will produce a function
+    # signature along the lines of AlgorithmName(*args, **kwargs).
+    # We will replace the name "args" by the list of properties, and
+    # the name "kwargs" by "Version=X".
+    #   1 - Get the algorithm properties and build a string to list them,
+    #       taking care of giving no default values to mandatory parameters
+    #   2 - All output properties will be removed from the function
+    #       argument list
+    if hasattr(inspect, 'Signature'):
+        from inspect import Parameter, Signature
+        pos_or_keyword = Parameter.POSITIONAL_OR_KEYWORD
+        parameters = []
+        for name in algm_object.mandatoryProperties():
+            prop = algm_object.getProperty(name)
+            # Mandatory parameters are those for which the default value is not valid
+            if isinstance(prop.isValid, str):
+                valid_str = prop.isValid
+            else:
+                valid_str = prop.isValid()
+            if len(valid_str) > 0:
+                parameters.append(Parameter(name, pos_or_keyword))
+            else:
+                # None is not quite accurate here, but we are reproducing the
+                # behavior found in the C++ code for SimpleAPI.
+                parameters.append(Parameter(name, pos_or_keyword, default=None))
+        return Signature(parameters)
+    else:
+        return _create_generic_signature_legacy(algm_object)
+
+
+# Drop this when dropping Python 2
+def _create_generic_signature_legacy(algm_object):
     """
     Create a function signature appropriate for the given algorithm.
     :param algm_object: An algorithm instance

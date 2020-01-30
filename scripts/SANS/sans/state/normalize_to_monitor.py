@@ -11,46 +11,36 @@
 from __future__ import (absolute_import, division, print_function)
 import json
 import copy
-from sans.state.state_base import (StateBase, rename_descriptor_names, PositiveIntegerParameter,
-                                   PositiveFloatParameter, FloatParameter, DictParameter,
-                                   PositiveFloatWithNoneParameter, BoolParameter, PositiveFloatListParameter)
-from sans.state.automatic_setters import (automatic_setters)
+
+from six import with_metaclass
+
+from sans.state.JsonSerializable import JsonSerializable
 from sans.common.enums import (RebinType, RangeStepType, SANSInstrument)
+from sans.state.automatic_setters import automatic_setters
 from sans.state.state_functions import (is_pure_none_or_not_none, is_not_none_and_first_larger_than_second,
                                         one_is_none, validation_message)
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
 
 
-# ----------------------------------------------------------------------------------------------------------------------
-# State
-# ----------------------------------------------------------------------------------------------------------------------
-@rename_descriptor_names
-class StateNormalizeToMonitor(StateBase):
-    prompt_peak_correction_min = PositiveFloatWithNoneParameter()
-    prompt_peak_correction_max = PositiveFloatWithNoneParameter()
-    prompt_peak_correction_enabled = BoolParameter()
-
-    rebin_type = RebinType.REBIN
-    wavelength_low = PositiveFloatListParameter()
-    wavelength_high = PositiveFloatListParameter()
-    wavelength_step = PositiveFloatParameter()
-    wavelength_step_type = RangeStepType.NOT_SET
-
-    background_TOF_general_start = FloatParameter()
-    background_TOF_general_stop = FloatParameter()
-    background_TOF_monitor_start = DictParameter()
-    background_TOF_monitor_stop = DictParameter()
-
-    incident_monitor = PositiveIntegerParameter()
-
+class StateNormalizeToMonitor(with_metaclass(JsonSerializable)):
     def __init__(self):
         super(StateNormalizeToMonitor, self).__init__()
-        self.background_TOF_monitor_start = {}
-        self.background_TOF_monitor_stop = {}
-        self.prompt_peak_correction_enabled = False
+        self.prompt_peak_correction_min = None  # : Float (Optional)
+        self.prompt_peak_correction_max = None  # : Float (Optional)
+        self.prompt_peak_correction_enabled = False  # : Bool
 
-        # Default rebin type is a standard Rebin
         self.rebin_type = RebinType.REBIN
+        self.wavelength_low = None  # : List[Float] (Positive)
+        self.wavelength_high = None  # : List[Float] (Positive)
+        self.wavelength_step = None  # : Float (Positive)
+        self.wavelength_step_type = RangeStepType.NOT_SET
+
+        self.background_TOF_general_start = None  # : Float
+        self.background_TOF_general_stop = None  # : Float
+        self.background_TOF_monitor_start = {}  # : Dict
+        self.background_TOF_monitor_stop = {}  # : Dict
+
+        self.incident_monitor = None  # : Int (Positive)
 
     def validate(self):
         is_invalid = {}
@@ -150,7 +140,6 @@ class StateNormalizeToMonitor(StateBase):
                              "Please see: {0}".format(json.dumps(is_invalid)))
 
 
-@rename_descriptor_names
 class StateNormalizeToMonitorLOQ(StateNormalizeToMonitor):
     def __init__(self):
         super(StateNormalizeToMonitorLOQ, self).__init__()

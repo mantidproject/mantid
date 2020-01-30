@@ -4,17 +4,15 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import (absolute_import, unicode_literals)
+
+import six
 import sys
 import unittest
-import six
 
 from Muon.GUI.FrequencyDomainAnalysis.frequency_context import MaxEnt, FFT, FrequencyContext, FREQUENCY_EXTENSIONS
+from mantid.py3compat import mock
 from mantid.simpleapi import CreateWorkspace, AnalysisDataService
-
-if sys.version_info.major < 2:
-    from unittest import mock
-else:
-    import mock
 
 
 FFT_NAME_RE_2 = "FFT; Re MUSR62260; Group; fwd; Asymmmetry; FD_Re"
@@ -26,6 +24,7 @@ FFT_NAME_COMPLEX_MOD= "FFT; Re MUSR62260; Group; fwd; Asymmmetry; FD; Im MUSR622
 
 PHASEQUAD_NAME_IM = "FFT; Re MUSR62261; PhaseQuad FD MUSR62260; PhaseTable FD; top; bkwd; Im MUSR62261; PhaseQuad FD MUSR62260; PhaseTable FD; top; bkwd_Mod"
 PHASEQUAD_NAME_RE = "FFT; Re MUSR62261; PhaseQuad FD MUSR62260; PhaseTable FD; top; bkwd_Mod"
+
 
 class MuonFreqContextTest(unittest.TestCase):
     def setUp(self):

@@ -19,6 +19,27 @@ class AbinsData(AbinsModules.GeneralData):
         self._kpoints_data = None
         self._data = None
 
+    @staticmethod
+    def from_calculation_data(filename, ab_initio_program):
+        """
+        Get AbinsData from ab initio calculation output file.
+
+        :param filename: Path to vibration/phonon data file
+        :type filename: str
+        :param ab_initio_program: Program which generated data file; this should be a key in AbinsData.ab_initio_loaders
+        :type ab_initio_program: str
+        """
+        # This should live closer to the Loaders but for now it is the only place the dict is used.
+        ab_initio_loaders = {"CASTEP": AbinsModules.LoadCASTEP, "CRYSTAL": AbinsModules.LoadCRYSTAL,
+                             "DMOL3": AbinsModules.LoadDMOL3, "GAUSSIAN": AbinsModules.LoadGAUSSIAN}
+
+        if ab_initio_program.upper() not in ab_initio_loaders:
+            raise ValueError("No loader available for {}: unknown program. "
+                             "supported loaders: {}".format(ab_initio_program.upper(),
+                                                            ' '.join(ab_initio_loaders.keys())))
+        loader = ab_initio_loaders[ab_initio_program.upper()](input_ab_initio_filename=filename)
+        return loader.get_formatted_data()
+
     def set(self, k_points_data=None, atoms_data=None):
         """
 
@@ -39,10 +60,10 @@ class AbinsData(AbinsModules.GeneralData):
         self._data = {"k_points_data": k_points_data.extract(), "atoms_data": atoms_data.extract()}
 
     def get_kpoints_data(self):
-            return self._kpoints_data
+        return self._kpoints_data
 
     def get_atoms_data(self):
-            return self._atoms_data
+        return self._atoms_data
 
     def extract(self):
         for k in self._data["k_points_data"]["atomic_displacements"]:

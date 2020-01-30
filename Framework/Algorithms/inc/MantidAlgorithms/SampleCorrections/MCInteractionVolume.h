@@ -9,6 +9,8 @@
 
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidKernel/Logger.h"
+#include <boost/optional.hpp>
 
 namespace Mantid {
 namespace API {
@@ -35,23 +37,35 @@ class MANTID_ALGORITHMS_DLL MCInteractionVolume {
 public:
   MCInteractionVolume(const API::Sample &sample,
                       const Geometry::BoundingBox &activeRegion,
+                      Kernel::Logger &logger,
                       const size_t maxScatterAttempts = 5000);
   // No creation from temporaries as we store a reference to the object in
   // the sample
   MCInteractionVolume(const API::Sample &&sample,
-                      const Geometry::BoundingBox &&activeRegion) = delete;
+                      const Geometry::BoundingBox &&activeRegion,
+                      Kernel::Logger &logger) = delete;
 
   const Geometry::BoundingBox &getBoundingBox() const;
   double calculateAbsorption(Kernel::PseudoRandomNumberGenerator &rng,
                              const Kernel::V3D &startPos,
                              const Kernel::V3D &endPos, double lambdaBefore,
-                             double lambdaAfter) const;
+                             double lambdaAfter);
+  void generateScatterPointStats();
+  Kernel::V3D generatePoint(Kernel::PseudoRandomNumberGenerator &rng);
 
 private:
+  int getComponentIndex(Kernel::PseudoRandomNumberGenerator &rng);
+  boost::optional<Kernel::V3D>
+  generatePointInObjectByIndex(int componentIndex,
+                               Kernel::PseudoRandomNumberGenerator &rng);
+  void UpdateScatterPointCounts(int componentIndex);
+  int m_sampleScatterPoints = 0;
+  std::vector<int> m_envScatterPoints;
   const boost::shared_ptr<Geometry::IObject> m_sample;
   const Geometry::SampleEnvironment *m_env;
   const Geometry::BoundingBox m_activeRegion;
   const size_t m_maxScatterAttempts;
+  Kernel::Logger &m_logger;
 };
 
 } // namespace Algorithms

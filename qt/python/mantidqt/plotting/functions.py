@@ -27,7 +27,7 @@ from matplotlib.legend import Legend
 # local imports
 from mantid.api import AnalysisDataService, MatrixWorkspace
 from mantid.kernel import Logger
-from mantid.plots import MantidAxes
+from mantid.plots import helperfunctions, MantidAxes
 from mantidqt.plotting.figuretype import figure_type, FigureType
 from mantid.py3compat import is_text_string, string_types
 from mantidqt.dialogs.spectraselectorutils import get_spectra_selection
@@ -147,7 +147,8 @@ def plot_from_names(names, errors, overplot, fig=None, show_colorfill_btn=False)
 
     return plot(selection.workspaces, spectrum_nums=selection.spectra,
                 wksp_indices=selection.wksp_indices,
-                errors=errors, overplot=overplot, fig=fig, tiled=selection.plot_type==selection.Tiled)
+                errors=errors, overplot=overplot, fig=fig, tiled=selection.plot_type==selection.Tiled,
+                waterfall=selection.plot_type==selection.Waterfall)
 
 
 def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=1, fig=None):
@@ -183,7 +184,7 @@ def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=
 @manage_workspace_names
 def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
          overplot=False, fig=None, plot_kwargs=None, ax_properties=None,
-         window_title=None, tiled=False):
+         window_title=None, tiled=False, waterfall=False):
     """
     Create a figure with a single subplot and for each workspace/index add a
     line plot to the new axes. show() is called before returning the figure instance. A legend
@@ -200,6 +201,7 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
     :param ax_properties: A dict of axes properties. E.g. {'yscale': 'log'}
     :param window_title: A string denoting name of the GUI window which holds the graph
     :param tiled: An optional flag controlling whether to do a tiled or overlayed plot
+    :param waterfall: An optional flag controlling whether or not to do a waterfall plot
     :return: The figure containing the plots
     """
     if plot_kwargs is None:
@@ -227,12 +229,39 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
             else:
                 ax.axis('off')
     else:
-        ax = overplot if isinstance(overplot, MantidAxes) else axes[0]
+        if isinstance(overplot, MantidAxes):
+            ax = overplot
+        else:
+            ax = axes[0]
+
         ax.axis('on')
         _do_single_plot(ax, workspaces, errors, not overplot, nums, kw, plot_kwargs)
 
+    # Can't have a waterfall plot with only one line.
+    if len(nums) == 1 and waterfall:
+        waterfall = False
+
+    # The plot's initial xlim and ylim are used to offset each curve in a waterfall plot.
+    # Need to do this whether the current curve is a waterfall plot or not because it may be converted later.
+    if not overplot:
+        helperfunctions.set_initial_dimensions(ax)
+
+    if waterfall:
+        ax.set_waterfall(True)
+
     if not overplot:
         fig.canvas.set_window_title(figure_title(workspaces, fig.number))
+    else:
+        if ax.is_waterfall():
+            for i in range(len(nums)):
+                errorbar_cap_lines = helperfunctions.remove_and_return_errorbar_cap_lines(ax)
+                helperfunctions.convert_single_line_to_waterfall(ax, len(ax.get_lines())-(i+1))
+
+                if ax.waterfall_has_fill():
+                    helperfunctions.waterfall_update_fill(ax)
+
+                ax.lines += errorbar_cap_lines
+
     # This updates the toolbar so the home button now takes you back to this point.
     # The try catch is in case the manager does not have a toolbar attached.
     try:
@@ -355,7 +384,6 @@ def pcolormesh_on_axis(ax, ws):
         lbl.set_rotation(45)
 
     return pcm
-
 
 # ----------------- Compatability functions ---------------------
 

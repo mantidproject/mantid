@@ -2,6 +2,9 @@
 Python 3
 ========
 
+This is now the default configuration but we currently retain the ability to build against
+Python 2.
+
 Python 2 has an `end-of-life date set for 2020 <http://legacy.python.org/dev/peps/pep-0373/>`_
 and now that most third-party packages support both 2 and 3 we are starting to think about a
 migration strategy for Mantid.
@@ -12,7 +15,7 @@ migration strategy for Mantid.
 Building Against Python 3
 #########################
 
-This is currently possible on Ubuntu, Windows and macOS. For Ubuntu/macOS ensure dependencies are update to date.
+For Linux/macOS ensure dependencies are update to date.
 On Windows all of the required packages are in the third-party bundle that will be fetched for you.
 
 .. warning::

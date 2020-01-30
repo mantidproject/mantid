@@ -117,18 +117,18 @@ public:
     auto outputWS = runAlgorithm(wsProps);
 
     verifyDimensions(wsProps, outputWS);
-    const double delta(1e-05);
+    const double delta(1e-04);
     const size_t middle_index(4);
 
-    TS_ASSERT_DELTA(0.6245262704, outputWS->y(0).front(), delta);
-    TS_ASSERT_DELTA(0.2770105008, outputWS->y(0)[middle_index], delta);
-    TS_ASSERT_DELTA(0.1041517761, outputWS->y(0).back(), delta);
-    TS_ASSERT_DELTA(0.6282072570, outputWS->y(2).front(), delta);
-    TS_ASSERT_DELTA(0.2790911215, outputWS->y(2)[middle_index], delta);
-    TS_ASSERT_DELTA(0.1078704876, outputWS->y(2).back(), delta);
-    TS_ASSERT_DELTA(0.6267458002, outputWS->y(4).front(), delta);
-    TS_ASSERT_DELTA(0.2790655428, outputWS->y(4)[middle_index], delta);
-    TS_ASSERT_DELTA(0.1068945921, outputWS->y(4).back(), delta);
+    TS_ASSERT_DELTA(0.6243, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(0.2770, outputWS->y(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.1042, outputWS->y(0).back(), delta);
+    TS_ASSERT_DELTA(0.6280, outputWS->y(2).front(), delta);
+    TS_ASSERT_DELTA(0.2791, outputWS->y(2)[middle_index], delta);
+    TS_ASSERT_DELTA(0.1079, outputWS->y(2).back(), delta);
+    TS_ASSERT_DELTA(0.6265, outputWS->y(4).front(), delta);
+    TS_ASSERT_DELTA(0.2791, outputWS->y(4)[middle_index], delta);
+    TS_ASSERT_DELTA(0.1069, outputWS->y(4).back(), delta);
   }
 
   void test_Workspace_With_Just_Sample_For_Direct() {
@@ -138,12 +138,12 @@ public:
     auto outputWS = runAlgorithm(wsProps);
 
     verifyDimensions(wsProps, outputWS);
-    const double delta(1e-05);
+    const double delta(1e-04);
     const size_t middle_index(4);
 
-    TS_ASSERT_DELTA(0.5060586383, outputWS->y(0).front(), delta);
-    TS_ASSERT_DELTA(0.3389572854, outputWS->y(0)[middle_index], delta);
-    TS_ASSERT_DELTA(0.2186106403, outputWS->y(0).back(), delta);
+    TS_ASSERT_DELTA(0.5061, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(0.3390, outputWS->y(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.2186, outputWS->y(0).back(), delta);
   }
 
   void test_Workspace_With_Just_Sample_For_Indirect() {
@@ -153,12 +153,12 @@ public:
     auto outputWS = runAlgorithm(wsProps);
 
     verifyDimensions(wsProps, outputWS);
-    const double delta(1e-05);
+    const double delta(1e-04);
     const size_t middle_index(4);
 
-    TS_ASSERT_DELTA(0.3658064669, outputWS->y(0).front(), delta);
-    TS_ASSERT_DELTA(0.2277021116, outputWS->y(0)[middle_index], delta);
-    TS_ASSERT_DELTA(0.1383621690, outputWS->y(0).back(), delta);
+    TS_ASSERT_DELTA(0.3651, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(0.2277, outputWS->y(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.1384, outputWS->y(0).back(), delta);
   }
 
   void test_Workspace_With_Sample_And_Container() {
@@ -168,12 +168,12 @@ public:
     auto outputWS = runAlgorithm(wsProps);
 
     verifyDimensions(wsProps, outputWS);
-    const double delta(1e-05);
+    const double delta(1e-04);
     const size_t middle_index(4);
 
-    TS_ASSERT_DELTA(0.6028577409, outputWS->y(0).front(), delta);
-    TS_ASSERT_DELTA(0.2758029301, outputWS->y(0)[middle_index], delta);
-    TS_ASSERT_DELTA(0.1035877536, outputWS->y(0).back(), delta);
+    TS_ASSERT_DELTA(0.5995, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(0.2688, outputWS->y(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.0981, outputWS->y(0).back(), delta);
   }
 
   void test_Workspace_Beam_Size_Set() {
@@ -183,11 +183,11 @@ public:
     auto outputWS = runAlgorithm(wsProps);
 
     verifyDimensions(wsProps, outputWS);
-    const double delta(1e-05);
+    const double delta(1e-04);
     const size_t middle_index(4);
-    TS_ASSERT_DELTA(0.6279328067, outputWS->y(0).front(), delta);
-    TS_ASSERT_DELTA(0.2770103841, outputWS->y(0)[middle_index], delta);
-    TS_ASSERT_DELTA(0.1041522173, outputWS->y(0).back(), delta);
+    TS_ASSERT_DELTA(0.6243, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(0.2770, outputWS->y(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.1041, outputWS->y(0).back(), delta);
   }
 
   void test_Linear_Interpolation() {
@@ -199,11 +199,11 @@ public:
     auto outputWS = runAlgorithm(wsProps, nlambda, interpolation);
 
     verifyDimensions(wsProps, outputWS);
-    const double delta(1e-05);
-    TS_ASSERT_DELTA(0.6245262704, outputWS->y(0).front(), delta);
-    TS_ASSERT_DELTA(0.3455351271, outputWS->y(0)[3], delta);
-    TS_ASSERT_DELTA(0.2783583898, outputWS->y(0)[4], delta);
-    TS_ASSERT_DELTA(0.1168965453, outputWS->y(0).back(), delta);
+    const double delta(1e-04);
+    TS_ASSERT_DELTA(0.6243, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(0.3455, outputWS->y(0)[3], delta);
+    TS_ASSERT_DELTA(0.2784, outputWS->y(0)[4], delta);
+    TS_ASSERT_DELTA(0.1169, outputWS->y(0).back(), delta);
   }
 
   void test_CSpline_Interpolation() {
@@ -215,12 +215,12 @@ public:
     auto outputWS = runAlgorithm(wsProps, nlambda, interpolation);
 
     verifyDimensions(wsProps, outputWS);
-    const double delta(1e-05);
-    TS_ASSERT_DELTA(0.6245262704, outputWS->y(0).front(), delta);
+    const double delta(1e-04);
+    TS_ASSERT_DELTA(0.6243, outputWS->y(0).front(), delta);
     // Interpolation gives some negative value due to test setup
-    TS_ASSERT_DELTA(0.3368552576, outputWS->y(0)[3], delta);
-    TS_ASSERT_DELTA(0.2783583898, outputWS->y(0)[4], delta);
-    TS_ASSERT_DELTA(0.1168965453, outputWS->y(0).back(), delta);
+    TS_ASSERT_DELTA(0.3369, outputWS->y(0)[3], delta);
+    TS_ASSERT_DELTA(0.2784, outputWS->y(0)[4], delta);
+    TS_ASSERT_DELTA(0.1169, outputWS->y(0).back(), delta);
   }
 
   //---------------------------------------------------------------------------
@@ -283,17 +283,17 @@ public:
     auto outputWS = runAlgorithm(wsProps, 5, "Linear", true, 3, 3);
 
     verifyDimensions(wsProps, outputWS);
-    const double delta{1e-05};
+    const double delta{1e-04};
     const size_t middle_index{4};
-    TS_ASSERT_DELTA(0.6241295766, outputWS->y(0).front(), delta);
-    TS_ASSERT_DELTA(0.2830812429, outputWS->y(0)[middle_index], delta);
-    TS_ASSERT_DELTA(0.1055135467, outputWS->y(0).back(), delta);
-    TS_ASSERT_DELTA(0.6265926135, outputWS->y(2).front(), delta);
-    TS_ASSERT_DELTA(0.2829539939, outputWS->y(2)[middle_index], delta);
-    TS_ASSERT_DELTA(0.1078604888, outputWS->y(2).back(), delta);
-    TS_ASSERT_DELTA(0.6260645680, outputWS->y(4).front(), delta);
-    TS_ASSERT_DELTA(0.2829361634, outputWS->y(4)[middle_index], delta);
-    TS_ASSERT_DELTA(0.1073283604, outputWS->y(4).back(), delta);
+    TS_ASSERT_DELTA(0.6239, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(0.2831, outputWS->y(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.1055, outputWS->y(0).back(), delta);
+    TS_ASSERT_DELTA(0.6264, outputWS->y(2).front(), delta);
+    TS_ASSERT_DELTA(0.2830, outputWS->y(2)[middle_index], delta);
+    TS_ASSERT_DELTA(0.1079, outputWS->y(2).back(), delta);
+    TS_ASSERT_DELTA(0.6259, outputWS->y(4).front(), delta);
+    TS_ASSERT_DELTA(0.2829, outputWS->y(4)[middle_index], delta);
+    TS_ASSERT_DELTA(0.1073, outputWS->y(4).back(), delta);
   }
 
   void test_Sparse_Instrument_For_Direct() {
@@ -303,13 +303,12 @@ public:
     auto outputWS = runAlgorithm(wsProps, 5, "Linear", true, 3, 3);
 
     verifyDimensions(wsProps, outputWS);
-    const double delta(1e-05);
+    const double delta(1e-04);
     const size_t middle_index(4);
 
-    TS_ASSERT_DELTA(0.5055988099, outputWS->y(0).front(), delta);
-    TS_ASSERT_DELTA(0.3419146885, outputWS->y(0)[middle_index], delta);
-    const double delta2(1e-08);
-    TS_ASSERT_DELTA(0.2270203007, outputWS->y(0).back(), delta2);
+    TS_ASSERT_DELTA(0.5056, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(0.3419, outputWS->y(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.2270, outputWS->y(0).back(), delta);
   }
 
   void test_Sparse_Instrument_For_Indirect() {
@@ -319,12 +318,12 @@ public:
     auto outputWS = runAlgorithm(wsProps, 5, "Linear", true, 3, 3);
 
     verifyDimensions(wsProps, outputWS);
-    const double delta(1e-05);
+    const double delta(1e-04);
     const size_t middle_index(4);
 
-    TS_ASSERT_DELTA(0.3651989107, outputWS->y(0).front(), delta);
-    TS_ASSERT_DELTA(0.2308318553, outputWS->y(0)[middle_index], delta);
-    TS_ASSERT_DELTA(0.1385715148, outputWS->y(0).back(), delta);
+    TS_ASSERT_DELTA(0.3646, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(0.2308, outputWS->y(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.1386, outputWS->y(0).back(), delta);
   }
 
 private:

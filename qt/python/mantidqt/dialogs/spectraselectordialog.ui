@@ -34,6 +34,11 @@
        </item>
        <item>
         <property name="text">
+         <string>Waterfall</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
          <string>Tiled</string>
         </property>
        </item>

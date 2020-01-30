@@ -517,6 +517,7 @@ void InstrumentWidgetRenderTab::setScaleType(ColorMap::ScaleType type) {
 }
 
 void InstrumentWidgetRenderTab::setAxis(const QString &axisNameArg) {
+  mAxisCombo->setCurrentIndex(mAxisCombo->findText("Z+"));
   QString axisName = axisNameArg.toUpper();
   int axisInd = mAxisCombo->findText(axisName.toUpper());
   if (axisInd < 0)
