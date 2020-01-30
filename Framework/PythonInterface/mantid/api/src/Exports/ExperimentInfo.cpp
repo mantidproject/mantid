@@ -23,7 +23,6 @@
 #include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::API::ExperimentInfo;
-using Mantid::API::Sample;
 using Mantid::PythonInterface::Policies::RemoveConstSharedPtr;
 using namespace Mantid::PythonInterface;
 using namespace boost::python;
@@ -52,6 +51,9 @@ GNU_DIAG_ON("unused-local-typedef")
 namespace {
 void setSample(ExperimentInfo &expInfo, const Mantid::API::Sample &sample) {
   expInfo.mutableSample() = sample;
+}
+void setRun(ExperimentInfo &expInfo, const Mantid::API::Run &run) {
+  expInfo.mutableRun() = run;
 }
 } // namespace
 
@@ -121,11 +123,6 @@ void export_ExperimentInfo() {
            ":class:`~mantid.geometry.ComponentInfo` "
            "object.")
       .def("setSample", setSample, args("self", "sample"))
-      /*
-      .add_property("sample",
-      make_function(&ExperimentInfo::sample,return_value_policy<reference_existing_object>()),
-                     make_function(&ExperimentInfo::mutableSample,return_value_policy<reference_existing_object>())
-                      );
-      */
+      .def("setRun", setRun, args("self", "run"))
       ;
 }
