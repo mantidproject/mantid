@@ -30,7 +30,7 @@ class FittingDataPresenterTest(unittest.TestCase):
         self.presenter.on_load_clicked()
 
         mock_worker.assert_called_with("mocked model method",
-                                       "/a/file/to/load.txt, /another/one.nxs",
+                                       ("/a/file/to/load.txt, /another/one.nxs",),
                                        error_cb=self.presenter._on_worker_error,
                                        finished_cb=self.presenter._emit_enable_button_signal)
 
@@ -67,6 +67,62 @@ class FittingDataPresenterTest(unittest.TestCase):
         logger.error.assert_called_with("Error occurred when loading files.")
         self.assertEqual(1, self.view.sig_enable_load_button.emit.call_count)
         self.view.sig_enable_load_button.emit.called_with(True)
+
+    def test_remove_workspace_tracked(self):
+        model_dict = {"name1": "ws1", "name2": "ws2"}
+        self.model.get_loaded_workspaces.return_value = model_dict
+
+        self.presenter.remove_workspace("name1")
+
+        self.assertEqual({"name2": "ws2"}, model_dict)
+
+    def test_remove_workspace_not_tracked(self):
+        model_dict = {"name1": "ws1", "name2": "ws2"}
+        self.model.get_loaded_workspaces.return_value = model_dict
+
+        self.presenter.remove_workspace("name3")
+
+        self.assertEqual({"name1": "ws1", "name2": "ws2"}, model_dict)
+
+    def test_rename_workspace_tracked(self):
+        model_dict = {"name1": "ws1", "name2": "ws2"}
+        self.model.get_loaded_workspaces.return_value = model_dict
+
+        self.presenter.rename_workspace("name1", "new")
+
+        self.assertEqual({"new": "ws1", "name2": "ws2"}, model_dict)
+
+    def test_rename_workspace_not_tracked(self):
+        model_dict = {"name1": "ws1", "name2": "ws2"}
+        self.model.get_loaded_workspaces.return_value = model_dict
+
+        self.presenter.rename_workspace("name3", "new")
+
+        self.assertEqual({"name1": "ws1", "name2": "ws2"}, model_dict)
+
+    def test_clear_workspaces(self):
+        model_dict = {"name1": "ws1", "name2": "ws2"}
+        self.model.get_loaded_workspaces.return_value = model_dict
+
+        self.presenter.clear_workspaces()
+
+        self.assertEqual({}, model_dict)
+
+    def test_replace_workspace_tracked(self):
+        model_dict = {"name1": "ws1", "name2": "ws2"}
+        self.model.get_loaded_workspaces.return_value = model_dict
+
+        self.presenter.replace_workspace("name1", "new")
+
+        self.assertEqual({"name1": "new", "name2": "ws2"}, model_dict)
+
+    def test_replace_workspace_not_tracked(self):
+        model_dict = {"name1": "ws1", "name2": "ws2"}
+        self.model.get_loaded_workspaces.return_value = model_dict
+
+        self.presenter.replace_workspace("name3", "new")
+
+        self.assertEqual({"name1": "ws1", "name2": "ws2"}, model_dict)
 
 
 if __name__ == '__main__':
