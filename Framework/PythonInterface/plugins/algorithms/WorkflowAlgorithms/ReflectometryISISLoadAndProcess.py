@@ -25,6 +25,8 @@ class Prop:
     SECOND_TRANS_RUNS = 'SecondTransmissionRunList'
     SLICE = 'SliceWorkspace'
     NUMBER_OF_SLICES = 'NumberOfSlices'
+    SUBTRACT_BKG = 'SubtractBackground'
+    BKG_PROC_INSTR = 'BackgroundProcessingInstructions'
     QMIN = 'MomentumTransferMin'
     QSTEP = 'MomentumTransferStep'
     QMAX = 'MomentumTransferMax'
@@ -84,6 +86,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
                              doc='A list of run numbers or workspace names for the second transmission run. '
                                  'Multiple runs will be summed before reduction.')
         self._declareSliceAlgorithmProperties()
+        self._declareBkgAlgorithmProperties()
         self._declareReductionAlgorithmProperties()
         self.declareProperty(Prop.GROUP_TOF, True, doc='If true, group the input TOF workspace')
         self.declareProperty(Prop.RELOAD, True,
@@ -115,10 +118,13 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         input_workspace = self._sumWorkspaces(inputWorkspaces, False)
         first_trans_workspace = self._sumWorkspaces(firstTransWorkspaces, True)
         second_trans_workspace = self._sumWorkspaces(secondTransWorkspaces, True)
+        # Perform background subtraction
+        input_workspace = self._subtractBackground(input_workspace)
         # Slice the input workspace, if required
         input_workspace = self._sliceWorkspace(input_workspace)
         # Perform the reduction
         alg = self._reduce(input_workspace, first_trans_workspace, second_trans_workspace)
+        # Set outputs and tidy TOF workspaces into a group
         self._finalize(alg)
         if len(inputWorkspaces) >= 2:
             inputWorkspaces.append(input_workspace)
@@ -134,12 +140,14 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
     def _declareSliceAlgorithmProperties(self):
         """Copy properties from the child slicing algorithm and add our own custom ones"""
         self.declareProperty(Prop.SLICE, False, doc='If true, slice the input workspace')
+        self.setPropertyGroup(Prop.SLICE, 'Slicing')
         whenSliceEnabled = EnabledWhenProperty(Prop.SLICE, PropertyCriterion.IsEqualTo, "1")
 
         self._slice_properties = ['TimeInterval', 'LogName', 'LogValueInterval', 'UseNewFilterAlgorithm']
         self.copyProperties('ReflectometrySliceEventWorkspace', self._slice_properties)
         for property in self._slice_properties:
             self.setPropertySettings(property, whenSliceEnabled)
+            self.setPropertyGroup(property, 'Slicing')
 
         self.declareProperty(name=Prop.NUMBER_OF_SLICES,
                              defaultValue=Property.EMPTY_INT,
@@ -147,6 +155,24 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
                              direction=Direction.Input,
                              doc='The number of uniform-length slices to slice the input workspace into')
         self.setPropertySettings(Prop.NUMBER_OF_SLICES, whenSliceEnabled)
+        self.setPropertyGroup(Prop.NUMBER_OF_SLICES, 'Slicing')
+
+    def _declareBkgAlgorithmProperties(self):
+        """Copy properties from the child background subtraction algorithm"""
+        self.declareProperty(Prop.SUBTRACT_BKG, False, doc='If true, perform background subtraction')
+        self.setPropertyGroup(Prop.SUBTRACT_BKG, 'Background')
+        whenBkgEnabled = EnabledWhenProperty(Prop.SUBTRACT_BKG, PropertyCriterion.IsEqualTo, "1")
+
+        self.declareProperty(Prop.BKG_PROC_INSTR, '',
+                             doc='Grouping pattern of spectrum numbers for the background region. See GroupDetectors for syntax.')
+        self.setPropertySettings(Prop.BKG_PROC_INSTR, whenBkgEnabled)
+        self.setPropertyGroup(Prop.BKG_PROC_INSTR, 'Background')
+        self._bkg_properties = ['BackgroundCalculationMethod',
+                                'DegreeOfPolynomial', 'CostFunction', 'PeakRange', 'SumPeak']
+        self.copyProperties('ReflectometryBackgroundSubtraction', self._bkg_properties)
+        self.setPropertySettings('BackgroundCalculationMethod', whenBkgEnabled)
+        for property in self._bkg_properties:
+            self.setPropertyGroup(property, 'Background')
 
     def _declareReductionAlgorithmProperties(self):
         """Copy properties from the child reduction algorithm"""
@@ -387,6 +413,23 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
 
     def _getSlicedWorkspaceGroupName(self, workspace):
         return workspace + '_sliced'
+
+    def _subtractBackground(self, workspace):
+        """Perform background subtraction, if it has been requested. Otherwise leave
+        the workspace unchanged."""
+        if not self.getProperty(Prop.SUBTRACT_BKG).value:
+            return workspace
+        self.log().information('Running ReflectometryBackgroundSubtraction')
+        processingInstructions = self.getPropertyValue(Prop.BKG_PROC_INSTR)
+        alg = self.createChildAlgorithm('ReflectometryBackgroundSubtraction')
+        alg.setProperty("InputWorkspace", workspace)
+        alg.setProperty("OutputWorkspace", workspace)
+        alg.setProperty("InputWorkspaceIndexType", "SpectrumNumber")
+        alg.setProperty("ProcessingInstructions", processingInstructions)
+        for property in self._bkg_properties:
+            alg.setProperty(property, self.getPropertyValue(property))
+        alg.execute()
+        return workspace
 
     def _setChildAlgorithmPropertyIfProvided(self, alg, property_name):
         """Set the given property on the given algorithm if it is set in our
