@@ -1113,7 +1113,8 @@ class SANSDataProcessorGui(QMainWindow,
 
     @instrument.setter
     def instrument(self, value):
-        assert (isinstance(value, Enum))
+        assert (isinstance(value, Enum)), \
+            "Expected InstrumentEnum, got %r" % value
         instrument_string = value.value
         self.instrument_type.setText("{}".format(instrument_string))
         self._instrument_changed()

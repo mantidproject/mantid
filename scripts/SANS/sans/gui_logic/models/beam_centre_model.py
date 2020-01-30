@@ -13,21 +13,14 @@ from sans.common.xml_parsing import get_named_elements_from_ipf_file
 class BeamCentreModel(object):
     def __init__(self, SANSCentreFinder):
         super(BeamCentreModel, self).__init__()
-        self.reset_to_defaults_for_instrument()
+        self.reset_to_defaults_for_instrument(SANSInstrument.NO_INSTRUMENT)
         self.SANSCentreFinder = SANSCentreFinder
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
 
-    def reset_to_defaults_for_instrument(self, file_information = None):
+    def reset_to_defaults_for_instrument(self, instrument):
         r_range = {}
-        instrument = None
-
-        if file_information:
-            instrument_file_path = get_instrument_paths_for_sans_file(file_information=file_information)
-            r_range = get_named_elements_from_ipf_file(instrument_file_path[1],
-                                                       ["beam_centre_radius_min", "beam_centre_radius_max"], float)
-            instrument = file_information.get_instrument()
 
         self._max_iterations = 10
         self._r_min = r_range["beam_centre_radius_min"] if "beam_centre_radius_min" in r_range else 60

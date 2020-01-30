@@ -62,14 +62,7 @@ class BeamCentrePresenter(object):
         self._view.on_update_instrument(instrument)
 
     def on_update_rows(self):
-        # TODO this shouldn't be reaching across multiple internals and should just ask the
-        # presenter for the instrument
-        if not self._parent_presenter._table_model.get_row(0).sample_scatter:
-            return
-
-        file_information = self._parent_presenter._table_model.get_row(0).file_information
-        if file_information:
-            self._beam_centre_model.reset_to_defaults_for_instrument(file_information=file_information)
+        self._beam_centre_model.reset_to_defaults_for_instrument(self._parent_presenter.instrument)
         self._view.set_options(self._beam_centre_model)
 
     def on_processing_finished_centre_finder(self, result):

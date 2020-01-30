@@ -177,7 +177,7 @@ class RunTabPresenter(PresenterCommon):
         def on_processing_error(self, error):
             self._presenter.on_processing_error(error)
 
-    def __init__(self, facility, model=None, view=None):
+    def __init__(self, facility, model=None, table_model=None, view=None):
         # We don't have access to state model really at this point
         super(RunTabPresenter, self).__init__(view, None)
 
@@ -191,7 +191,8 @@ class RunTabPresenter(PresenterCommon):
         self.progress = 0
 
         # Models that are being used by the presenter
-        self._table_model = TableModel() if not model else model
+        self._model = model if model else StateGuiModel(user_file_items={})
+        self._table_model = table_model if table_model else TableModel()
         self._table_model.subscribe_to_model_changes(self)
 
         self._processing = False
@@ -342,6 +343,10 @@ class RunTabPresenter(PresenterCommon):
                                                             self._view.user_file_line_edit})
         if self._view.get_user_file_path() == '':
             self._view.gui_properties_handler.set_setting("user_file", '')
+
+    @property
+    def instrument(self):
+        return self._model.instrument
 
     def on_user_file_load(self):
         """

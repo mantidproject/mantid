@@ -122,7 +122,7 @@ class MaskingTablePresenter(object):
             self._presenter = presenter
 
         def on_row_changed(self):
-            self._presenter.on_row_changed()
+            pass
 
         def on_update_rows(self):
             self._presenter.on_update_rows()
@@ -146,12 +146,6 @@ class MaskingTablePresenter(object):
         self._parent_presenter = parent_presenter
         self._work_handler = WorkHandler()
         self._logger = Logger("SANS")
-
-    def on_row_changed(self):
-        row_index = self._view.get_current_row()
-        state = self.get_state(row_index, file_lookup=False, suppress_warnings=True)
-        if state:
-            self.display_masking_information(state)
 
     def on_display(self):
         # Get the state information for the selected row.
@@ -207,7 +201,6 @@ class MaskingTablePresenter(object):
 
         if new_row_index != -1:
             self.set_row(new_row_index)
-            self.on_row_changed()
 
     def set_row(self, index):
         self._view.set_row(index)
