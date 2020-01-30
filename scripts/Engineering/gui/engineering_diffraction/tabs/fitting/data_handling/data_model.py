@@ -26,6 +26,8 @@ class FittingDataModel(object):
                     format(filename, e))
 
     def get_loaded_workspaces(self):
+        # TODO: Remove debug line in next PR, when output is visible in the GUI. 
+        logger.debug("EngDiff2 Tracked Workspaces: {}".format(self._loaded_workspaces.keys()))
         return self._loaded_workspaces
 
     @staticmethod
