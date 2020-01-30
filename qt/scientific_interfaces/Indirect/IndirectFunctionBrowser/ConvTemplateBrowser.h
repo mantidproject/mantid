@@ -62,6 +62,8 @@ public:
   void removeTempCorrection();
   void setQValues(const std::vector<double> &qValues) override;
   void setEnum(size_t subTypeIndex, int fitType);
+  void updateTemperatureCorrectionAndDelta(bool tempCorrection,
+                                           bool deltaFunction);
 
 protected slots:
   void intChanged(QtProperty *) override;

@@ -128,7 +128,6 @@ void ConvTemplateBrowser::setQValues(const std::vector<double> &qValues) {
 
 void ConvTemplateBrowser::addDeltaFunction() {
   ScopedFalse _boolBlock(m_emitBoolChange);
-  ScopedFalse _paramBlock(m_emitParameterValueChange);
   m_deltaFunctionOn->addSubProperty(m_deltaFunctionHeight);
   m_boolManager->setValue(m_deltaFunctionOn, true);
 }
@@ -141,12 +140,27 @@ void ConvTemplateBrowser::removeDeltaFunction() {
 
 void ConvTemplateBrowser::addTempCorrection(double value) {
   ScopedFalse _boolBlock(m_emitBoolChange);
-  ScopedFalse _paramBlock(m_emitParameterValueChange);
 
   m_tempCorrectionOn->addSubProperty(m_temperature);
   m_boolManager->setValue(m_tempCorrectionOn, true);
   m_parameterManager->setValue(m_temperature, value);
   m_parameterManager->setGlobal(m_temperature, true);
+}
+
+void ConvTemplateBrowser::updateTemperatureCorrectionAndDelta(
+    bool tempCorrection, bool deltaFunction) {
+  ScopedFalse _boolBlock(m_emitBoolChange);
+  ScopedFalse _paramBlock(m_emitParameterValueChange);
+
+  if (tempCorrection)
+    addTempCorrection(100.0);
+  else
+    removeTempCorrection();
+
+  if (deltaFunction)
+    addDeltaFunction();
+  else
+    removeDeltaFunction();
 }
 
 void ConvTemplateBrowser::removeTempCorrection() {

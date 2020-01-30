@@ -92,15 +92,8 @@ int ConvTemplatePresenter::getNumberOfDatasets() const {
 void ConvTemplatePresenter::setFunction(const QString &funStr) {
   m_model.setFunctionString(funStr);
 
-  if (m_model.hasDeltaFunction())
-    m_view->addDeltaFunction();
-  else
-    m_view->removeDeltaFunction();
-
-  if (m_model.hasTempCorrection())
-    m_view->addTempCorrection(100.0);
-  else
-    m_view->removeTempCorrection();
+  m_view->updateTemperatureCorrectionAndDelta(m_model.hasTempCorrection(),
+                                              m_model.hasDeltaFunction());
 
   m_view->setSubType(SubTypeIndex::Fit, static_cast<int>(m_model.getFitType()));
   m_view->setSubType(SubTypeIndex::Background,
