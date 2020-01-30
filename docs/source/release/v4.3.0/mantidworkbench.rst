@@ -5,6 +5,10 @@ MantidWorkbench Changes
 .. contents:: Table of Contents
    :local:
 
+New
+###
+- Waterfall Plots
+
 Improvements
 ############
 
@@ -21,6 +25,7 @@ Improvements
    :align: left
 
 - You can now save Table Workspaces to Ascii using the `SaveAscii <algm-SaveAscii>` algorithm, and the Ascii Save option on the workspaces toolbox.
+- Fit functions can now be put into nested categories and into multiple categories.
 - Normalization options have been added to 2d plots and sliceviewer.
 - The images tab in figure options no longer forces the max value to be greater than the min value.
 

@@ -23,7 +23,7 @@ from qtpy.QtWidgets import QApplication, QLabel, QFileDialog
 
 from mantid.api import AnalysisDataService, AnalysisDataServiceObserver, ITableWorkspace, MatrixWorkspace
 from mantid.kernel import logger
-from mantid.plots import MantidAxes
+from mantid.plots import helperfunctions, MantidAxes
 from mantid.py3compat import text_type
 from mantidqt.io import open_a_file_dialog
 from mantidqt.plotting.figuretype import FigureType, figure_type
@@ -31,6 +31,8 @@ from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
 from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
 from mantidqt.widgets.plotconfigdialog import curve_in_ax
 from mantidqt.widgets.plotconfigdialog.presenter import PlotConfigDialogPresenter
+from mantidqt.widgets.waterfallplotfillareadialog.presenter import WaterfallPlotFillAreaDialogPresenter
+from mantidqt.widgets.waterfallplotoffsetdialog.presenter import WaterfallPlotOffsetDialogPresenter
 from workbench.plotting.figureinteraction import FigureInteraction
 from workbench.plotting.figurewindow import FigureWindow
 from workbench.plotting.plotscriptgenerator import generate_script
@@ -210,6 +212,10 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.toolbar.sig_generate_plot_script_file_triggered.connect(
                 self.generate_plot_script_file)
             self.toolbar.sig_home_clicked.connect(self.set_figure_zoom_to_display_all)
+            self.toolbar.sig_waterfall_reverse_order_triggered.connect(self.waterfall_reverse_line_order)
+            self.toolbar.sig_waterfall_offset_amount_triggered.connect(self.launch_waterfall_offset_options)
+            self.toolbar.sig_waterfall_fill_area_triggered.connect(self.launch_waterfall_fill_area_options)
+            self.toolbar.sig_waterfall_conversion.connect(self.update_toolbar_waterfall_plot)
             self.toolbar.setFloatable(False)
             tbs_height = self.toolbar.sizeHint().height()
         else:
@@ -284,9 +290,14 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self._set_fit_enabled(False)
 
         # For plot-to-script button to show, we must have a MantidAxes with lines in it
+        # Plot-to-script currently doesn't work with waterfall plots so the button is hidden for that plot type.
         if not any((isinstance(ax, MantidAxes) and curve_in_ax(ax))
-                   for ax in self.canvas.figure.get_axes()):
-            self._set_generate_plot_script_enabled(False)
+                   for ax in self.canvas.figure.get_axes()) or self.canvas.figure.get_axes()[0].is_waterfall():
+            self.toolbar.set_generate_plot_script_enabled(False)
+
+        # Only show options specific to waterfall plots if the axes is a MantidAxes and is a waterfall plot.
+        if not isinstance(self.canvas.figure.get_axes()[0], MantidAxes) or not self.canvas.figure.get_axes()[0].is_waterfall():
+            self.toolbar.set_waterfall_options_enabled(False)
 
     def destroy(self, *args):
         # check for qApp first, as PySide deletes it in its atexit handler
@@ -390,15 +401,6 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
                 logger.error("Could not write file: {}\n{}"
                              "".format(filepath, io_error))
 
-    def _set_generate_plot_script_enabled(self, enabled):
-        action = self.toolbar._actions['generate_plot_script']
-        action.setEnabled(enabled)
-        action.setVisible(enabled)
-        # Show/hide the separator between this button and the "Fit" button
-        for i, toolbar_action in enumerate(self.toolbar.actions()):
-            if toolbar_action == action:
-                self.toolbar.actions()[i+1].setVisible(enabled)
-
     def set_figure_zoom_to_display_all(self):
         axes = self.canvas.figure.get_axes()
         if axes:
@@ -413,10 +415,37 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
             self.canvas.draw()
 
+    def waterfall_reverse_line_order(self):
+        ax = self.canvas.figure.get_axes()[0]
+        x, y = ax.waterfall_x_offset, ax.waterfall_y_offset
+        fills = helperfunctions.get_waterfall_fills(ax)
+        ax.update_waterfall(0, 0)
+
+        errorbar_cap_lines = helperfunctions.remove_and_return_errorbar_cap_lines(ax)
+
+        ax.lines.reverse()
+        ax.lines += errorbar_cap_lines
+        ax.collections += fills
+        ax.collections.reverse()
+        ax.update_waterfall(x, y)
+
+        if ax.get_legend():
+            ax.make_legend()
+
+    def launch_waterfall_offset_options(self):
+        WaterfallPlotOffsetDialogPresenter(self.canvas.figure, parent=self.window)
+
+    def launch_waterfall_fill_area_options(self):
+        WaterfallPlotFillAreaDialogPresenter(self.canvas.figure, parent=self.window)
+
+    def update_toolbar_waterfall_plot(self, is_waterfall):
+        self.toolbar.set_waterfall_options_enabled(is_waterfall)
+        self.toolbar.set_generate_plot_script_enabled(not is_waterfall)
 
 # -----------------------------------------------------------------------------
 # Figure control
 # -----------------------------------------------------------------------------
+
 
 def new_figure_manager(num, *args, **kwargs):
     """Create a new figure manager instance"""

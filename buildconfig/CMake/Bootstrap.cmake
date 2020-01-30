@@ -1,7 +1,7 @@
 # ##############################################################################
 # Configure required dependencies if necessary
 # ##############################################################################
-option(WITH_PYTHON3 "If true build against Python 3, else use Python 2" OFF)
+option(WITH_PYTHON3 "If true build against Python 3, else use Python 2" ON)
 
 if(MSVC)
   # Git LFS does not work properly with <= 1.9
@@ -17,7 +17,7 @@ if(MSVC)
   set(THIRD_PARTY_GIT_URL
       "https://github.com/mantidproject/thirdparty-msvc2015.git"
   )
-  set(THIRD_PARTY_GIT_SHA1 dfaaaa4dbb5c90127e6b3e540710a29856227447)
+  set(THIRD_PARTY_GIT_SHA1 0df29c0aac6d8debb494af2279bc95772b585081)
   set(THIRD_PARTY_DIR ${EXTERNAL_ROOT}/src/ThirdParty)
   # Generates a script to do the clone/update in tmp
   set(_project_name ThirdParty)
@@ -100,10 +100,19 @@ if(MSVC)
     set(PYTHON_VERSION_MINOR 7)
   endif()
   # used in later parts for MSVC to bundle Python
-  set(MSVC_PYTHON_EXECUTABLE_DIR ${THIRD_PARTY_DIR}/lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
-  set(PYTHON_EXECUTABLE ${MSVC_PYTHON_EXECUTABLE_DIR}/python.exe CACHE FILEPATH "Location of python executable" FORCE)
-  set(PYTHONW_EXECUTABLE "${MSVC_PYTHON_EXECUTABLE_DIR}/pythonw.exe" CACHE FILEPATH
-      "The location of the pythonw executable. This suppresses the new terminal window on startup" FORCE )
+  set(MSVC_PYTHON_EXECUTABLE_DIR
+      ${THIRD_PARTY_DIR}/lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}
+  )
+  set(PYTHON_EXECUTABLE
+      ${THIRD_PARTY_DIR}/lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/python.exe
+  )
+  set(PYTHONW_EXECUTABLE
+      "${MSVC_PYTHON_EXECUTABLE_DIR}/pythonw.exe"
+      CACHE
+        FILEPATH
+        "The location of the pythonw executable. This suppresses the new terminal window on startup"
+        FORCE
+  )
   set(THIRD_PARTY_BIN
       "${THIRD_PARTY_DIR}/bin;${THIRD_PARTY_DIR}/lib/qt4/bin;${THIRD_PARTY_DIR}/lib/qt5/bin;${MSVC_PYTHON_EXECUTABLE_DIR}"
   )
@@ -171,12 +180,20 @@ endfunction()
 
 # Find python interpreter
 find_package(PythonInterp REQUIRED)
-message(STATUS "Python version is " ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}.${PYTHON_VERSION_PATCH})
+message(
+  STATUS "Python version is "
+         ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}.${PYTHON_VERSION_PATCH}
+)
 # Ensure FindPythonLibs finds the correct libraries
 set(Python_ADDITIONAL_VERSIONS ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
 
 # Handle switching between previously configured Python 2 & Python 3 builds
-if(PYTHON_INCLUDE_DIR AND NOT PYTHON_INCLUDE_DIR MATCHES ".*${PYTHON_VERSION_MAJOR}\.${PYTHON_VERSION_MINOR}.*" )
-  message(STATUS "Python version has changed. Clearing previous Python configuration." )
+if(PYTHON_INCLUDE_DIR
+   AND NOT PYTHON_INCLUDE_DIR MATCHES
+       ".*${PYTHON_VERSION_MAJOR}\.${PYTHON_VERSION_MINOR}.*"
+)
+  message(
+    STATUS "Python version has changed. Clearing previous Python configuration."
+  )
   unset_cached_python_variables()
 endif()

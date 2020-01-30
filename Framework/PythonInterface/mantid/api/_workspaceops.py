@@ -247,10 +247,16 @@ def attach_func_as_method(name, func_obj, self_param_name, workspace_types=None)
 
     # ------------------------------------------------------------------
     # Add correct meta-properties for the method
-    signature = ['self']
-    signature.extend(get_function_code(func_obj).co_varnames)
+    if hasattr(func_obj, '__signature__'):
+        from inspect import Parameter
+        func_parameters = list(func_obj.__signature__.parameters.values())
+        func_parameters.insert(0, Parameter("self", Parameter.POSITIONAL_ONLY))
+        signature = func_obj.__signature__.replace(parameters=func_parameters)
+    else:
+        signature = ['self']
+        signature = tuple(signature.extend(get_function_code(func_obj).co_varnames))
     customise_func(_method_impl, func_obj.__name__,
-                   tuple(signature), func_obj.__doc__)
+                   signature, func_obj.__doc__)
 
     if workspace_types or len(workspace_types) > 0:
         from mantid import api

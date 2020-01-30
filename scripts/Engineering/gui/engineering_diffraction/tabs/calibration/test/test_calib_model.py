@@ -58,22 +58,24 @@ class CalibrationModelTest(unittest.TestCase):
     @patch(file_path + '.get_setting')
     @patch(class_path + '.update_calibration_params_table')
     @patch(class_path + '.create_output_files')
+    @patch(file_path + '.LoadAscii')
     @patch(file_path + ".path_handling.load_workspace")
     @patch(class_path + '.run_calibration')
     @patch(file_path + '.vanadium_corrections.fetch_correction_workspaces')
-    def test_having_full_calib_set_uses_file(self, van_corr, calibrate_alg, load_workspace,
+    def test_having_full_calib_set_uses_file(self, van_corr, calibrate_alg, load_workspace, load_ascii,
                                              output_files, update_table, setting, path):
         path.return_value = True
         setting.return_value = "mocked/out/path"
         van_corr.return_value = ("mocked_integration", "mocked_curves")
         load_workspace.return_value = "mocked_workspace"
+        load_ascii.return_value = "mocked_det_pos"
         self.model.create_new_calibration(VANADIUM_NUMBER, CERIUM_NUMBER, False, "ENGINX")
         calibrate_alg.assert_called_with("mocked_workspace",
                                          "mocked_integration",
                                          "mocked_curves",
                                          None,
                                          None,
-                                         full_calib_ws="mocked_workspace")
+                                         full_calib_ws="mocked_det_pos")
 
     @patch(class_path + '.update_calibration_params_table')
     @patch(class_path + '.create_output_files')

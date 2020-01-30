@@ -22,7 +22,10 @@ if LooseVersion(sphinx_version) > LooseVersion("1.6"):
     def setup(app):
         """Called automatically by Sphinx when starting the build process
         """
-        app.add_stylesheet("custom.css")
+        if hasattr(app, 'add_css_file'):  # >=v1.8
+            app.add_css_file("custom.css")
+        else:
+            app.add_stylesheet("custom.css")  # v1.6-1.8
 
 
 # Add any Sphinx extension module names here, as strings. They can be

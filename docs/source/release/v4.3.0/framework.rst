@@ -12,6 +12,8 @@ Framework Changes
 New Features
 ############
 
+- Mantid is now built against Python 3. Windows/macOS bundle Python 3.8 & 3.7 respectively. Ubuntu & Red Hat use system Python 3.6.
+
 Concepts
 --------
 
@@ -29,6 +31,7 @@ Algorithms
 Improvements
 ############
 
+- :ref:`LoadEventNexus <algm-LoadEventNexus>` Now has a new propery NumberOfBins to select how many linear bins to intially apply to the data.  This allows event data to be plotted immediately without having to :ref:`Rebin <algm-Rebin>` it first.  This is a change from before where event data was initally loaded with a single bin, now by default it will be split into 500 linear bins.
 - :ref:`SaveAscii <algm-SaveAscii>` can now save table workspaces, and :ref:`LoadAscii <algm-LoadAscii>` can load them again.
 - :ref:`TotScatCalculateSelfScattering <algm-TotScatCalculateSelfScattering>` will calculate a normalized self scattering correction for foccues total scattering data.
 - :ref:`MatchAndMergeWorkspaces <algm-MatchAndMergeWorkspaces>` will merge workspaces in a workspace group withing weighting from a set of limits for each workspace and using `MatchSpectra <algm-MatchSpectra>`.

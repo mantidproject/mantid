@@ -41,6 +41,18 @@ class SettingsPresenterTest(unittest.TestCase):
         self.assertEqual(self.view.set_full_calibration.call_count, 1)
         self.assertEqual(self.view.set_van_recalc.call_count, 1)
 
+    def test_file_searched_on_opening(self):
+        self.model.get_settings_dict.return_value = {
+            "save_location": "result",
+            "full_calibration": "value",
+            "recalc_vanadium": False
+        }
+
+        self.presenter.load_existing_settings()
+
+        self.assertEqual(1, self.view.find_full_calibration.call_count)
+        self.assertEqual(1, self.view.find_save.call_count)
+
     def test_load_invalid_settings(self):
         self.model.get_settings_dict.return_value = {
             "foo": "dud",

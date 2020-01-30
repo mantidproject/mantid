@@ -36,7 +36,8 @@ SpectraSelectionDialogUI, SpectraSelectionDialogUIBase = load_ui(__file__, 'spec
 
 class SpectraSelection(object):
     Individual = 0
-    Tiled = 1
+    Waterfall = 1
+    Tiled = 2
 
     def __init__(self, workspaces):
         self.workspaces = workspaces

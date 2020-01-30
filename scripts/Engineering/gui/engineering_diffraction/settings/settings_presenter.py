@@ -57,6 +57,11 @@ class SettingsPresenter(object):
             self.view.set_save_location(self.settings["save_location"])
             self.view.set_full_calibration(self.settings["full_calibration"])
             self.view.set_van_recalc(self.settings["recalc_vanadium"])
+        self._find_files()
+
+    def _find_files(self):
+        self.view.find_full_calibration()
+        self.view.find_save()
 
     def _save_settings_to_file(self):
         if self._validate_settings(self.settings):
