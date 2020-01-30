@@ -93,17 +93,14 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
     def set_calibrate_button_text(self, text):
         self.button_calibrate.setText(text)
 
-    def set_cropping_widget_visible(self):
-        self.widget_cropping.show()
-
-    def set_cropping_widget_hidden(self):
-        self.widget_cropping.hide()
+    def set_cropping_widget_visibility(self, visible):
+        self.widget_cropping.setVisible(visible)
 
     def set_check_cropping_enabled(self, enabled):
         self.check_cropCalib.setEnabled(enabled)
 
-    def set_check_cropping_state(self, state):
-        self.check_cropCalib.setCheckState(state)
+    def set_check_cropping_checked(self, checked):
+        self.check_cropCalib.setChecked(checked)
 
     # =================
     # Component Getters

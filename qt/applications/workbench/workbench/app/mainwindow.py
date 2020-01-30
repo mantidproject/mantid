@@ -696,6 +696,11 @@ class MainWindow(QMainWindow):
             font = QFontDatabase().font(font_string[0], font_string[-1], int(font_string[1]))
             qapp.setFont(font)
 
+        if settings.has('MainWindow/font'):
+            font_string = settings.get('MainWindow/font').split(',')
+            font = QFontDatabase().font(font_string[0], font_string[-1], int(font_string[1]))
+            qapp.setFont(font)
+
         # make sure main window is smaller than the desktop
         desktop = QDesktopWidget()
 

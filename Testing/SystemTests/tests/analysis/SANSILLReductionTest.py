@@ -146,7 +146,7 @@ class ILL_D33_VTOF_Test(systemtesting.MantidSystemTest):
         mtd.clear()
 
     def validate(self):
-        self.tolerance = 1e-5
+        self.tolerance = 1e-4
         self.disableChecking = ['Instrument']
         return ['iq', 'ILL_SANS_D33_VTOF_IQ.nxs']
 
@@ -235,7 +235,7 @@ class ILL_D33_Test(systemtesting.MantidSystemTest):
         mtd.clear()
 
     def validate(self):
-        self.tolerance = 1e-5
+        self.tolerance = 1e-3
         self.disableChecking = ['Instrument']
         return ['iq', 'ILL_SANS_D33_IQ.nxs']
 
