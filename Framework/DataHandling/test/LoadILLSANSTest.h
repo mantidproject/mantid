@@ -154,8 +154,8 @@ public:
     V3D pos = component->getPos();
     V3D origin(0, 0, 0);
     TS_ASSERT_DELTA(pos.distance(origin), 1, 1E-5);
-    TS_ASSERT_DELTA(pos.X(), 0.17365, 1E-5); // sin(10)
-    TS_ASSERT_DELTA(pos.Z(), 0.98481, 1E-5); // cos(10)
+    TS_ASSERT_DELTA(pos.X(), -0.17365, 1E-5); // sin(10)
+    TS_ASSERT_DELTA(pos.Z(), 0.98481, 1E-5);  // cos(10)
 
     Mantid::detid_t bl_id, tr_id;
     instrument->getMinMaxDetectorIDs(bl_id, tr_id);
@@ -163,27 +163,27 @@ public:
     detid2det_map det_map;
     instrument->getDetectors(det_map);
 
-    IDetector_const_sptr bottom_left_pixel = det_map[bl_id];
-    IDetector_const_sptr top_right_pixel = det_map[320 * 320 - 1];
+    IDetector_const_sptr bottom_right_pixel = det_map[bl_id];
+    IDetector_const_sptr top_left_pixel = det_map[320 * 320 - 1];
 
-    V3D bl_pos = bottom_left_pixel->getPos();
-    V3D tr_pos = top_right_pixel->getPos();
+    V3D br_pos = bottom_right_pixel->getPos();
+    V3D tl_pos = top_left_pixel->getPos();
 
     // check the detector has 10 degrees angle
-    TS_ASSERT_DELTA(bl_pos.distance(origin), 1.02512, 1E-5);
-    TS_ASSERT_DELTA(tr_pos.distance(origin), 1.02512, 1E-5);
+    TS_ASSERT_DELTA(br_pos.distance(origin), 1.02512, 1E-5);
+    TS_ASSERT_DELTA(tl_pos.distance(origin), 1.02512, 1E-5);
 
-    TS_ASSERT_DELTA(tr_pos.X(), 0.33073, 1E-5);
-    TS_ASSERT_DELTA(tr_pos.Z(), 0.95711, 1E-5);
-    TS_ASSERT_DELTA(bl_pos.X(), 0.01657, 1E-5);
-    TS_ASSERT_DELTA(bl_pos.Z(), 1.01250, 1E-5);
+    TS_ASSERT_DELTA(tl_pos.X(), -0.33073, 1E-5);
+    TS_ASSERT_DELTA(tl_pos.Z(), 0.95711, 1E-5);
+    TS_ASSERT_DELTA(br_pos.X(), -0.01657, 1E-5);
+    TS_ASSERT_DELTA(br_pos.Z(), 1.01250, 1E-5);
 
     const auto &xAxis = outputWS->x(0).rawData();
     const auto &spec = outputWS->y(51972).rawData();
     const auto &err = outputWS->e(51972).rawData();
     TS_ASSERT_EQUALS(xAxis.size(), 2)
-    TS_ASSERT_DELTA(xAxis[0], 6.65, 1E-3)
-    TS_ASSERT_DELTA(xAxis[1], 7.35, 1E-3)
+    TS_ASSERT_DELTA(xAxis[0], 6.965, 1E-3)
+    TS_ASSERT_DELTA(xAxis[1], 7.035, 1E-3)
     TS_ASSERT_EQUALS(spec[0], 17)
     TS_ASSERT_DELTA(err[0], sqrt(17), 1E-5)
   }

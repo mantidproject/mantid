@@ -131,7 +131,7 @@ void LoadILLSANS::exec() {
     double distance = firstEntry.getFloat(instrumentPath + "/Det/value") /
                       1000; // mm to metre
     const double angle = firstEntry.getFloat(instrumentPath + "/Gamma/value");
-    placeD16(angle, distance, "detector");
+    placeD16(-angle, distance, "detector");
 
   } else {
     initWorkSpace(firstEntry, instrumentPath);
@@ -669,7 +669,10 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
       try {
         wavelengthRes = entry.getFloat(entryResolution + "wave_length_res");
       } catch (const std::runtime_error &) {
-        g_log.warning("Could not find wavelength resolution, assuming 10%");
+        if (m_instrumentName == "D16")
+          wavelengthRes = 1;
+        g_log.notice() << "Could not find wavelength resolution, assuming "
+                       << wavelengthRes << "%.\n";
       }
     }
     // round also the wavelength res to avoid unnecessary rebinning during merge
