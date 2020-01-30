@@ -46,7 +46,7 @@ class ILL_D11_Test(systemtesting.MantidSystemTest):
         SANSILLReduction(Run='010445', ProcessAs='Transmission', AbsorberInputWorkspace='Cdw',
                          BeamInputWorkspace='Dbw', OutputWorkspace='w_tr')
         # Water
-        SANSILLReduction(Run='010453', ProcessAs='Reference', AbsorberInputWorkspace='Cdw', MaskedInputWorkspace='mask',
+        SANSILLReduction(Run='010453', ProcessAs='Sample', AbsorberInputWorkspace='Cdw', MaskedInputWorkspace='mask',
                          ContainerInputWorkspace='wc', BeamInputWorkspace='Dbw', TransmissionInputWorkspace='wc_tr',
                          SensitivityOutputWorkspace='sens', OutputWorkspace='water')
         # Process the dark current Cd/B4C for sample
@@ -113,7 +113,7 @@ class ILL_D22_Test(systemtesting.MantidSystemTest):
 
         # Reference
         # Actually this is not water, but a deuterated buffer, but is fine for the test
-        SANSILLReduction(Run='241261', ProcessAs='Reference', MaskedInputWorkspace='mask',
+        SANSILLReduction(Run='241261', ProcessAs='Sample', MaskedInputWorkspace='mask',
                          AbsorberInputWorkspace='Cd', BeamInputWorkspace='Db', ContainerInputWorkspace='can',
                          OutputWorkspace='ref', SensitivityOutputWorkspace='sens')
 
@@ -264,7 +264,7 @@ class ILL_D33_Test(systemtesting.MantidSystemTest):
                          AbsorberInputWorkspace='Cdw', BeamInputWorkspace='Dbw', OutputWorkspace='w_tr')
 
         # Water
-        SANSILLReduction(Run='027887', ProcessAs='Reference', MaskedInputWorkspace='mask',
+        SANSILLReduction(Run='027887', ProcessAs='Sample', MaskedInputWorkspace='mask',
                          AbsorberInputWorkspace='Cdw', ContainerInputWorkspace='wc',
                          BeamInputWorkspace='Dbw', TransmissionInputWorkspace='wc_tr',
                          SensitivityOutputWorkspace='sens', OutputWorkspace='water')
@@ -299,3 +299,60 @@ class ILL_D33_Test(systemtesting.MantidSystemTest):
 
         # I(Q)
         SANSILLIntegration(InputWorkspace='sample_flux', OutputWorkspace='iq', CalculateResolution='None')
+
+
+class ILL_D11_AbsoluteScale_Test(systemtesting.MantidSystemTest):
+
+    def __init__(self):
+        super(ILL_D11_AbsoluteScale_Test, self).__init__()
+        self.setUp()
+
+    def setUp(self):
+        config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'D11'
+        config.appendDataSearchSubDir('ILL/D11/')
+
+    def cleanup(self):
+        mtd.clear()
+
+    def validate(self):
+        self.tolerance = 1e-5
+        self.tolerance_is_rel_err = True
+        self.disableChecking = ['Instrument']
+        return ['abs_scale_outputs', 'D11_AbsScaleReference.nxs']
+
+    def runTest(self):
+        # Load the mask
+        LoadNexusProcessed(Filename='D11_mask.nxs', OutputWorkspace='mask')
+
+        # Process the dark current Cd/B4C for water
+        SANSILLReduction(Run='010455', ProcessAs='Absorber', OutputWorkspace='Cdw')
+
+        # Process the empty beam for water
+        SANSILLReduction(Run='010414', ProcessAs='Beam', AbsorberInputWorkspace='Cdw', OutputWorkspace='Dbw',
+                         FluxOutputWorkspace='Flw')
+        # Water container transmission
+        SANSILLReduction(Run='010446', ProcessAs='Transmission', AbsorberInputWorkspace='Cdw',
+                         BeamInputWorkspace='Dbw', OutputWorkspace='wc_tr')
+        # Water container
+        SANSILLReduction(Run='010454', ProcessAs='Container', AbsorberInputWorkspace='Cdw',
+                         BeamInputWorkspace='Dbw', TransmissionInputWorkspace='wc_tr', OutputWorkspace='wc')
+        # Water transmission
+        SANSILLReduction(Run='010445', ProcessAs='Transmission', AbsorberInputWorkspace='Cdw',
+                         BeamInputWorkspace='Dbw', OutputWorkspace='w_tr')
+        # Water as reference
+        SANSILLReduction(Run='010453', ProcessAs='Sample', AbsorberInputWorkspace='Cdw', MaskedInputWorkspace='mask',
+                         ContainerInputWorkspace='wc', BeamInputWorkspace='Dbw', TransmissionInputWorkspace='wc_tr',
+                         SensitivityOutputWorkspace='sens', OutputWorkspace='reference', FluxInputWorkspace='Flw')
+        # Water as sample with sensitivity and flux
+        SANSILLReduction(Run='010453', ProcessAs='Sample', AbsorberInputWorkspace='Cdw', MaskedInputWorkspace='mask',
+                         ContainerInputWorkspace='wc', BeamInputWorkspace='Dbw', TransmissionInputWorkspace='wc_tr',
+                         SensitivityInputWorkspace='sens', OutputWorkspace='water_with_sens_flux', FluxInputWorkspace='Flw')
+        # Water with itself as reference and flux
+        SANSILLReduction(Run='010453', ProcessAs='Sample', AbsorberInputWorkspace='Cdw', MaskedInputWorkspace='mask',
+                         ContainerInputWorkspace='wc', BeamInputWorkspace='Dbw', TransmissionInputWorkspace='wc_tr',
+                         ReferenceInputWorkspace='reference', OutputWorkspace='water_with_reference', FluxInputWorkspace='Flw')
+
+        # Group the worksaces
+        GroupWorkspaces(InputWorkspaces=['sens', 'reference', 'water_with_reference', 'water_with_sens_flux'],
+                        OutputWorkspace='abs_scale_outputs')
