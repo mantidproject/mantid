@@ -1,4 +1,4 @@
 set(UI_FILES
     view.ui)
 
-UiToPy(UI_FILES CompileUIDrillRefl 5)
+UiToPy(UI_FILES CompileUIDrillRefl)
