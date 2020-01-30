@@ -61,11 +61,12 @@ class WISHSingleCrystalPeakPredictionTest(MantidSystemTest):
         # The peak at [-5 -1 -7] is known to fall between the gaps of WISH's tubes
         # Specifically check this one is predicted to exist because past bugs have
         # been found in the ray tracing.
-        Peak = namedtuple('Peak', ('DetID', 'BankName', 'h', 'k', 'l'))
-        expected = Peak(DetID=9202086, BankName='WISHpanel09', h=-5.0, k=-1.0, l=-7.0)
+        BasicPeak = namedtuple('Peak', ('DetID', 'BankName', 'h', 'k', 'l'))
+        expected = BasicPeak(DetID=9202086, BankName='WISHpanel09', h=-5.0, k=-1.0, l=-7.0)
         expected_peak_found = False
-        for row in self._filtered:
-            peak = Peak(DetID=row['DetID'], BankName=row['BankName'], h=row['h'], k=row['k'], l=row['l'])
+        for full_peak in self._filtered:
+            peak = BasicPeak(DetID=full_peak.getDetectorID(), BankName=full_peak.getBankName(),
+                             h=full_peak.getH(), k=full_peak.getK(), l=full_peak.getL())
             if peak == expected:
                 expected_peak_found = True
                 break
