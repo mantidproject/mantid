@@ -25,6 +25,7 @@ Improvements
    :align: left
 
 - You can now save Table Workspaces to Ascii using the `SaveAscii <algm-SaveAscii>` algorithm, and the Ascii Save option on the workspaces toolbox.
+- Fit functions can now be put into nested categories and into multiple categories.
 - Normalization options have been added to 2d plots and sliceviewer.
 - An exclude property has been added to the fit property browser
 - The images tab in figure options no longer forces the max value to be greater than the min value.
