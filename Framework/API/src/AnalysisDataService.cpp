@@ -204,7 +204,7 @@ std::vector<Workspace_sptr> AnalysisDataServiceImpl::retrieveWorkspaces(
         std::iterator_traits<WorkspacesVector::iterator>::difference_type;
 
     bool done{false};
-    int i{0};
+    size_t i{0};
     while (!done) {
       if (auto group =
               boost::dynamic_pointer_cast<WorkspaceGroup>(workspaces.at(i))) {
