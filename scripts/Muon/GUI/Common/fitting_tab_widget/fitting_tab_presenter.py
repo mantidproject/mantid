@@ -24,6 +24,7 @@ class FittingTabPresenter(object):
         self._selected_data = []
         self._start_x = [self.view.start_time]
         self._end_x = [self.view.end_time]
+        self._grppair_index = {}
         self._fit_status = [None]
         self._fit_chi_squared = [0.0]
         self._fit_function = [None]
@@ -209,7 +210,7 @@ class FittingTabPresenter(object):
             self.view.function_browser.blockSignals(False)
             return
         if not self.view.fit_object:
-            if self.view.is_simul_fit:
+            if self.view.is_simul_fit():
                 self._fit_function = [None]
             else:
                 self._fit_function = [None] * len(self.selected_data)
@@ -265,6 +266,7 @@ class FittingTabPresenter(object):
             for index, fit_function in enumerate(self._fit_function):
                 fit_function = fit_function if fit_function else self.view.fit_object.clone()
                 new_function = calculate_tf_fit_function(fit_function)
+                print(new_function)
                 self._fit_function[index] = new_function.clone()
 
             self.view.function_browser.blockSignals(True)
@@ -360,6 +362,7 @@ class FittingTabPresenter(object):
                 self.calculation_thread = self.create_thread(calculation_function)
             else:
                 single_fit_parameters = self.get_parameters_for_tf_single_fit_calculation()
+                print("SINGLE FIT PARAMETERS", single_fit_parameters)
                 calculation_function = functools.partial(
                     self.model.do_single_tf_fit, single_fit_parameters)
                 self.calculation_thread = self.create_thread(calculation_function)
@@ -376,7 +379,7 @@ class FittingTabPresenter(object):
                                                                                  self.view.fit_object)
 
         return {
-            'InputFunction': self.view.fit_object,
+            'InputFunction': self._current_fit_function(),
             'ReNormalizedWorkspaceList': self.view.display_workspace,
             'UnNormalizedWorkspaceList': self.context.group_pair_context.get_unormalisised_workspace_list(
                 [self.view.display_workspace])[0],
@@ -459,8 +462,8 @@ class FittingTabPresenter(object):
 
         guess_selection = list(set(self._check_data_exists(guess_selection)))
 
-        if len(guess_selection) > 1:  # sort the list by runs
-            guess_selection.sort(key=self._get_run_number_from_workspace)
+        if len(guess_selection) > 1:  # sort the list to preserve order
+            guess_selection.sort(key=self._workspace_list_sorter)
 
         return guess_selection
 
@@ -478,8 +481,8 @@ class FittingTabPresenter(object):
     def get_parameters_for_single_fit(self):
         params = self._get_shared_parameters()
         params['InputWorkspace'] = self.view.display_workspace
-        params['StartX'] = self.start_x[0]
-        params['EndX'] = self.end_x[0]
+        params['StartX'] = self.start_x[self._fit_function_index()]
+        params['EndX'] = self.end_x[self._fit_function_index()]
 
         return params
 
@@ -616,6 +619,23 @@ class FittingTabPresenter(object):
             grp = re.findall(r'%s' % grppair, workspace_name)
             if len(grp) > 0:
                 return grp[0]
+
+    def _get_integer_for_grp_or_pair(self, workspace_name):
+        grppair = self._get_group_or_pair_from_workspace_name(workspace_name)
+        if grppair not in self._grppair_index:
+            self._grppair_index[grppair] = len(self._grppair_index)
+
+        grp_pair_values = list(self._grppair_index.values())
+        if len(self._grppair_index) > 1:
+            return ((self._grppair_index[grppair] - grp_pair_values[0]) / \
+                    (grp_pair_values[-1] - grp_pair_values[0])) * 0.99
+        else:
+            return 0.99
+
+    def _workspace_list_sorter(self, workspace_name):
+        run_number = self._get_run_number_from_workspace(workspace_name)
+        grp_pair_number = self._get_integer_for_grp_or_pair(workspace_name)
+        return int(run_number) + grp_pair_number
 
     @staticmethod
     def check_workspaces_are_tf_asymmetry_compliant(workspace_list):
