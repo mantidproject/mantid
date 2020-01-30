@@ -43,7 +43,7 @@ class FittingDataPresenter(object):
     def get_loaded_workspaces(self):
         return self.model.get_loaded_workspaces()
 
-    def _start_load_worker(self, filenames: str):
+    def _start_load_worker(self, filenames):
         """
         Load one to many files into mantid that are tracked by the interface.
         :param filenames: Comma separated list of filenames to load
@@ -58,7 +58,7 @@ class FittingDataPresenter(object):
         logger.error("Error occurred when loading files.")
         self._emit_enable_button_signal()
 
-    def _enable_load_button(self, enabled: bool):
+    def _enable_load_button(self, enabled):
         self.view.set_load_button_enabled(enabled)
 
     def _emit_enable_button_signal(self):
@@ -73,7 +73,7 @@ class FittingDataPresenter(object):
     def _files_are_valid(self):
         return self.view.get_filenames_valid()
 
-    def _validate(self) -> bool:
+    def _validate(self):
         if self._is_searching():
             create_error_message(self.view, "Mantid is searching for files. Please wait.")
             return False

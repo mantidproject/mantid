@@ -69,6 +69,5 @@ class FittingDataPresenterTest(unittest.TestCase):
         self.view.sig_enable_load_button.emit.called_with(True)
 
 
-
 if __name__ == '__main__':
     unittest.main()

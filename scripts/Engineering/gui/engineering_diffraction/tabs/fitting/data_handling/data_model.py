@@ -14,7 +14,7 @@ class FittingDataModel(object):
     def __init__(self):
         self._loaded_workspaces = {}  # Map stores using {WorkspaceName: Workspace}
 
-    def load_files(self, filenames_string: str):
+    def load_files(self, filenames_string):
         filenames = [name.strip() for name in filenames_string.split(",")]
         for filename in filenames:
             ws_name = self._generate_workspace_name(filename)
@@ -26,7 +26,7 @@ class FittingDataModel(object):
                     format(filename, e))
 
     def get_loaded_workspaces(self):
-        # TODO: Remove debug line in next PR, when output is visible in the GUI. 
+        # TODO: Remove debug line in next PR, when output is visible in the GUI.
         logger.debug("EngDiff2 Tracked Workspaces: {}".format(self._loaded_workspaces.keys()))
         return self._loaded_workspaces
 
