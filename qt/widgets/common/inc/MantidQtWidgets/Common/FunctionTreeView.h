@@ -124,7 +124,6 @@ public:
 
   // Hide global boxes
   void hideGlobals();
-
   // Show global boxes
   void showGlobals();
 
