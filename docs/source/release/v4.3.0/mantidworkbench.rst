@@ -8,6 +8,7 @@ MantidWorkbench Changes
 New
 ###
 - Waterfall Plots
+- Mantid Workbench can now load all of the workspaces from a projects saved from Mantidplot.  Graphs and interface values are not imported from the project.
 
 Improvements
 ############
