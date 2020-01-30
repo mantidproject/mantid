@@ -203,7 +203,7 @@ std::vector<Workspace_sptr> AnalysisDataServiceImpl::retrieveWorkspaces(
     using IteratorDifference =
         std::iterator_traits<WorkspacesVector::iterator>::difference_type;
 
-    bool done{false};
+    bool done{workspaces.size() == 0};
     size_t i{0};
     while (!done) {
       if (auto group =

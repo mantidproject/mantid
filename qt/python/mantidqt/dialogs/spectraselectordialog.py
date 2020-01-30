@@ -53,15 +53,11 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
     def get_compatible_workspaces(workspaces):
         matrix_workspaces = []
         for ws in workspaces:
-            try:
-                if not isinstance(ws, MatrixWorkspace) :
-                    raise ValueError("{}: Expected MatrixWorkspace, found {}".format(ws.name(), ws.__class__.__name__))
-            except ValueError as e:
-                # Log the error but carry on so valid workspaces can be plotted.
-                logger.warning(str(e))
-                continue
-            else:
+            if isinstance(ws, MatrixWorkspace):
                 matrix_workspaces.append(ws)
+            else:
+                # Log an error but carry on so valid workspaces can be plotted.
+                logger.warning("{}: Expected MatrixWorkspace, found {}".format(ws.name(), ws.__class__.__name__))
 
         return matrix_workspaces
 

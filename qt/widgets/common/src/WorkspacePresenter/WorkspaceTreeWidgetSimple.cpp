@@ -157,11 +157,15 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
                    boost::dynamic_pointer_cast<WorkspaceGroup>(workspace)) {
       auto workspaces = wsGroup->getAllItems();
       bool containsMatrixWorkspace{false};
+      bool containsPeaksWorkspace{false};
 
       for (auto ws : workspaces) {
         if (auto matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws)) {
           containsMatrixWorkspace = true;
           break;
+        } else if (auto peaksWS =
+                       boost::dynamic_pointer_cast<IPeaksWorkspace>(ws)) {
+          containsPeaksWorkspace = true;
         }
       }
 
@@ -182,7 +186,9 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
         menu->addSeparator();
       }
 
-      menu->addAction(m_showDetectors);
+      if (containsMatrixWorkspace || containsPeaksWorkspace) {
+        menu->addAction(m_showDetectors);
+      }
     }
 
     menu->addSeparator();
