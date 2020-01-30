@@ -671,9 +671,9 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
         wavelengthRes = entry.getFloat(entryResolution + "wave_length_res");
       } catch (const std::runtime_error &) {
         if (m_instrumentName == "D16")
-          wavelengthRes = 0.01;
+          wavelengthRes = 1;
         g_log.notice() << "Could not find wavelength resolution, assuming "
-                       << wavelengthRes * 100 << "%.\n";
+                       << wavelengthRes << "%.\n";
       }
     }
     // round also the wavelength res to avoid unnecessary rebinning during merge
