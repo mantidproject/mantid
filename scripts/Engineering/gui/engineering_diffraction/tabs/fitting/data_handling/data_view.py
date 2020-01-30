@@ -21,6 +21,7 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
 
         self.finder_data.setLabelText("Focused Run Files")
         self.finder_data.isForRunFiles(False)
+        self.finder_data.allowMultipleFiles(True)
 
     # =================
     # Slot Connectors
