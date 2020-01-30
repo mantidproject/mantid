@@ -425,8 +425,8 @@ class SANSDataProcessorGui(QMainWindow,
         self.table_signals.pasteRowsRequested.connect(self._paste_rows_requested)
 
     def cell(self, text):
-        if not text:
-            text = ''
+        # Cell will only accept strings
+        text = str(text) if text else ''
 
         background_color = 'white'
         border_thickness = 1

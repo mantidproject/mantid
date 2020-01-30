@@ -36,10 +36,9 @@ class BatchProcessRunner(QObject):
     def on_error(self):
         self._worker = None
 
-    def process_states(self, rows, get_states_func, get_thickness_for_rows_func, use_optimizations, output_mode, plot_results, output_graph,
+    def process_states(self, rows, get_states_func, use_optimizations, output_mode, plot_results, output_graph,
                        save_can=False):
         self._worker = Worker(self._process_states_on_thread,
-                              get_thickness_for_rows_func=get_thickness_for_rows_func,
                               rows=rows, get_states_func=get_states_func, use_optimizations=use_optimizations,
                               output_mode=output_mode, plot_results=plot_results,
                               output_graph=output_graph, save_can=save_can)
@@ -48,20 +47,16 @@ class BatchProcessRunner(QObject):
 
         QThreadPool.globalInstance().start(self._worker)
 
-    def load_workspaces(self, row_index_pair, get_states_func, get_thickness_for_rows_func):
+    def load_workspaces(self, row_index_pair, get_states_func):
 
-        self._worker = Worker(self._load_workspaces_on_thread, row_index_pair,
-                              get_states_func, get_thickness_for_rows_func)
+        self._worker = Worker(self._load_workspaces_on_thread, row_index_pair, get_states_func)
         self._worker.signals.finished.connect(self.on_finished)
         self._worker.signals.error.connect(self.on_error)
 
         QThreadPool.globalInstance().start(self._worker)
 
-    def _process_states_on_thread(self, row_index_pair, get_states_func, get_thickness_for_rows_func, use_optimizations,
+    def _process_states_on_thread(self, row_index_pair, get_states_func, use_optimizations,
                                   output_mode, plot_results, output_graph, save_can=False):
-        get_thickness_for_rows_func()
-        # The above must finish before we can call get states
-
         for row, index in row_index_pair:
 
             # TODO update the get_states_func to support one per call
@@ -89,10 +84,7 @@ class BatchProcessRunner(QObject):
                     out_scale_factors = []
                 self.row_processed_signal.emit(index, out_shift_factors, out_scale_factors)
 
-    def _load_workspaces_on_thread(self, row_index_pair, get_states_func, get_thickness_for_rows_func):
-        get_thickness_for_rows_func()
-        # The above must finish before we can call get states
-
+    def _load_workspaces_on_thread(self, row_index_pair, get_states_func):
         for row, index in row_index_pair:
             states, errors = get_states_func(row_entries=[row])
 

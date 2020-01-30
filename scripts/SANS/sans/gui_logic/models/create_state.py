@@ -29,6 +29,8 @@ def create_states(state_model, facility, row_entries=None, file_lookup=True, use
 
     gui_state_director = GuiStateDirector(state_model, facility)
     for row in row_entries:
+        _get_thickness_for_row(row)
+
         state = _create_row_state(row, state_model, facility, file_lookup,
                                   gui_state_director, user_file)
         if isinstance(state, AllStates):
@@ -36,6 +38,33 @@ def create_states(state_model, facility, row_entries=None, file_lookup=True, use
         elif isinstance(state, str):
             errors.update({row: state})
     return states, errors
+
+
+def _get_thickness_for_row(row):
+    """
+    Read in the sample thickness for the given rows from the file and set it in the table.
+    :param row: Row to update with file information
+    """
+    if row.is_empty():
+        return
+
+    file_info = row.file_information
+
+    for attr in ["sample_thickness", "sample_height", "sample_width"]:
+        original_val = getattr(row, attr)
+        converted = float(original_val) if original_val else None
+        setattr(row, attr, converted)
+
+    thickness = float(row.sample_thickness) if row.sample_thickness \
+        else round(file_info.get_thickness(), 2)
+    height = float(row.sample_height) if row.sample_height else round(file_info.get_height(), 2)
+    width = float(row.sample_width) if row.sample_width else round(file_info.get_width(), 2)
+
+    row.sample_thickness = thickness
+    row.sample_height = height
+    row.sample_width = width
+    if not row.sample_shape:
+        row.sample_shape = file_info.get_shape()
 
 
 def _create_row_state(row_entry, state_model, facility, file_lookup,

@@ -545,7 +545,6 @@ class RunTabPresenter(PresenterCommon):
             output_graph = self.output_graph if PYQT4 else self.output_fig
 
             self.batch_process_runner.process_states(row_index_pair, self.get_states,
-                                                     self._table_model.get_thickness_for_rows,
                                                      self._view.use_optimizations,
                                                      self._view.output_mode,
                                                      self._view.plot_results,
@@ -637,13 +636,20 @@ class RunTabPresenter(PresenterCommon):
     def on_processing_finished(self, result):
         self._view.enable_buttons()
         self._processing = False
+        self.update_view_from_table_model()
 
     def on_load_clicked(self):
+        selected_rows = self._get_selected_non_empty_rows()
+        if len(selected_rows) == 0:
+            # Try to process all rows
+            selected_rows = self._table_model.get_non_empty_rows()
+
+        if len(selected_rows) == 0:
+            return
+
         self._view.disable_buttons()
         self._processing = True
         self.sans_logger.information("Starting load of batch table.")
-
-        selected_rows = self._get_selected_non_empty_rows()
 
         row_index_pair = []
 
@@ -654,8 +660,7 @@ class RunTabPresenter(PresenterCommon):
         self._set_progress_bar(current=0, number_steps=len(selected_rows))
 
         try:
-            self.batch_process_runner.load_workspaces(row_index_pair=row_index_pair, get_states_func=self.get_states,
-                                                      get_thickness_for_rows_func=self._table_model.get_thickness_for_rows)
+            self.batch_process_runner.load_workspaces(row_index_pair=row_index_pair, get_states_func=self.get_states)
         except Exception as e:
             self._view.enable_buttons()
             self.sans_logger.error("Process halted due to: {}".format(str(e)))
@@ -928,6 +933,8 @@ class RunTabPresenter(PresenterCommon):
                                            row_entries=row_entries,
                                            file_lookup=file_lookup,
                                            user_file=self._view.get_user_file_path())
+
+
 
         if errors and not suppress_warnings:
             self.sans_logger.warning("Errors in getting states...")

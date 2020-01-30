@@ -149,28 +149,7 @@ class TableModel(object):
         self._table_entries[row].tool_tip = msg
         self.notify_subscribers()
 
-    def get_thickness_for_rows(self, rows=None):
-        """
-        Read in the sample thickness for the given rows from the file and set it in the table.
-        :param rows: list of table rows
-        """
-        if not rows:
-            rows = range(len(self._table_entries))
-
-        for row in rows:
-            entry = self._table_entries[row]
-            if entry.is_empty():
-                continue
-
-            try:
-                file_info = entry.file_information
-            except RuntimeError:
-                continue
-
-            self.update_thickness_from_file_information(entry=entry, file_information=file_info)
-
     def failure_handler(self, entry, error):
-
         entry.file_information = None
         entry.sample_thickness = None
         entry.sample_height = None
@@ -178,27 +157,6 @@ class TableModel(object):
         entry.sample_shape = None
         self.set_row_to_error(entry, str(error[1]))
 
-    def update_thickness_from_file_information(self, entry, file_information):
-        for attr in ["sample_thickness", "sample_height", "sample_width"]:
-            original_val = getattr(entry, attr)
-            converted = float(original_val) if original_val else None
-            setattr(entry, attr, converted)
-            if converted is None and original_val:
-                self.logger.warning(
-                    "The {0} entered ({1}) could not be converted to a length. Using the one from the original sample."
-                    .format(attr.replace('_', ' '), original_val))
-
-        thickness = float(entry.sample_thickness) if entry.sample_thickness \
-            else round(file_information.get_thickness(), 2)
-        height = float(entry.sample_height) if entry.sample_height else round(file_information.get_height(), 2)
-        width = float(entry.sample_width) if entry.sample_width else round(file_information.get_width(), 2)
-
-        if file_information:
-            entry.sample_thickness = thickness
-            entry.sample_height = height
-            entry.sample_width = width
-            if not entry.sample_shape:
-                entry.sample_shape = file_information.get_shape()
 
     def subscribe_to_model_changes(self, subscriber):
         self._subscriber_list.append(subscriber)
@@ -206,13 +164,6 @@ class TableModel(object):
     def notify_subscribers(self):
         for subscriber in self._subscriber_list:
             subscriber.on_update_rows()
-
-    def add_table_entry_no_thread_or_signal(self, row, table_index_model):
-        self._add_single_table_entry(table_index_model=table_index_model, row=row)
-
-        entry = self._table_entries[row]
-        file_information = entry.file_information
-        self.update_thickness_from_file_information(entry=entry, file_information=file_information)
 
     def __eq__(self, other):
         return self.equal_dicts(self.__dict__, other.__dict__, ['work_handler'])
