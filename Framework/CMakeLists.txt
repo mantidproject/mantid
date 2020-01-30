@@ -212,8 +212,13 @@ foreach(_bundle ${BUNDLES})
 
     # Also ship mingw libraries for Inelastic fortran code. We need to do a
     # better job here and build things
-    file(GLOB MINGW_DLLS "${THIRD_PARTY_DIR}/bin/mingw/*.dll")
-    install(FILES ${MINGW_DLLS} DESTINATION ${_bundle}scripts/Inelastic)
+    if(WITH_PYTHON3)
+      install(FILES "${THIRD_PARTY_DIR}/bin/libquadmath-0.dll" "${THIRD_PARTY_DIR}/bin/libgcc_s_seh-1.dll"
+              DESTINATION ${_bundle}scripts/Inelastic)
+    else()
+      file(GLOB MINGW_DLLS "${THIRD_PARTY_DIR}/bin/mingw/*.dll")
+      install(FILES ${MINGW_DLLS} DESTINATION ${_bundle}scripts/Inelastic)
+    endif()
   else()
     install(DIRECTORY ../scripts/
             DESTINATION ${_bundle}scripts

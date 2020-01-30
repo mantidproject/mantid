@@ -26,10 +26,15 @@ using namespace boost::python;
 GET_POINTER_SPECIALIZATION(IEventList)
 
 namespace {
+void addPulsetimes(IEventList &self, const NDArray &data) {
+  self.addPulsetimes(Converters::NDArrayToVector<double>(data)());
+}
+
 void maskCondition(IEventList &self, const NDArray &data) {
   self.maskCondition(Converters::NDArrayToVector<bool>(data)());
 }
 } // namespace
+
 /// return_value_policy for copied numpy array
 using return_clone_numpy = return_value_policy<Policies::VectorToNumpy>;
 
@@ -70,6 +75,9 @@ void export_IEventList() {
            "Add an offset to the TOF of each event in the list.")
       .def("addPulsetime", &IEventList::addPulsetime, args("self", "seconds"),
            "Add an offset to the pulsetime (wall-clock time) of each event in "
+           "the list.")
+      .def("addPulsetimes", &addPulsetimes, args("self", "seconds"),
+           "Add offsets to the pulsetime (wall-clock time) of each event in "
            "the list.")
       .def("maskTof", &IEventList::maskTof, args("self", "tofMin", "tofMax"),
            "Mask out events that have a tof between tofMin and tofMax "

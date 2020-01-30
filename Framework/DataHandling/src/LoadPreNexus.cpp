@@ -62,7 +62,9 @@ const std::string LoadPreNexus::category() const {
  */
 int LoadPreNexus::confidence(Kernel::FileDescriptor &descriptor) const {
   const std::string &filename = descriptor.filename();
-  if (filename.compare(filename.size() - 12, 12, "_runinfo.xml") == 0)
+  if (filename.size() > 12
+          ? (filename.compare(filename.size() - 12, 12, "_runinfo.xml") == 0)
+          : false)
     return 80;
   else
     return 0;

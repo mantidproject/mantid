@@ -208,7 +208,7 @@ exec(compile(open(html_theme_cfg).read(), html_theme_cfg, 'exec'))
 # -- Link to other projects ----------------------------------------------------
 
 intersphinx_mapping = {
-    'h5py': ('https://docs.h5py.org/en/latest/', None),
+    'h5py': ('https://h5py.readthedocs.io/en/stable/', None),
     'matplotlib': ('https://matplotlib.org', None),
     'numpy': ('https://docs.scipy.org/doc/numpy/', None),
     'python': ('https://docs.python.org/3/', None),

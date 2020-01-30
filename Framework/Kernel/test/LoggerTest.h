@@ -94,7 +94,7 @@ public:
     ThreadPool tp;
     for (int i = 0; i < 1000; i++)
       tp.schedule(std::make_shared<FunctionTask>(
-          boost::bind(&LoggerTest::doLogInParallel, &*this, i)));
+          std::bind(&LoggerTest::doLogInParallel, &*this, i)));
     tp.joinAll();
   }
 };

@@ -60,11 +60,16 @@ mark_as_advanced(WINDOWS_DEPLOYMENT_TYPE)
 set ( BOOST_DIST_DLLS
     boost_date_time-mt.dll
     boost_filesystem-mt.dll
-    boost_python27-mt.dll
     boost_regex-mt.dll
     boost_serialization-mt.dll
     boost_system-mt.dll
 )
+if ( WITH_PYTHON3 )
+  list( APPEND BOOST_DIST_DLLS boost_python38-mt.dll )
+else ()
+  list( APPEND BOOST_DIST_DLLS boost_python27-mt.dll )
+endif ()
+
 set ( POCO_DIST_DLLS
     PocoCrypto64.dll
     PocoFoundation64.dll

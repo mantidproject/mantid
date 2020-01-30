@@ -89,12 +89,13 @@ find_package(Doxygen) # optional
 
 if(CMAKE_HOST_WIN32)
   find_package(ZLIB REQUIRED CONFIGS zlib-config.cmake)
-  set(HDF5_DIR "${THIRD_PARTY_DIR}/cmake")
+  set(HDF5_DIR "${THIRD_PARTY_DIR}/cmake/hdf5")
   find_package(
     HDF5
     COMPONENTS CXX HL
     REQUIRED CONFIGS hdf5-config.cmake
   )
+  set (HDF5_LIBRARIES hdf5::hdf5_cpp-shared hdf5::hdf5_hl-shared)
 else()
   find_package(ZLIB REQUIRED)
   find_package(
@@ -103,9 +104,6 @@ else()
     REQUIRED
   )
 endif()
-
-find_package(PythonInterp)
-set(Python_ADDITIONAL_VERSIONS ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
 
 find_package(OpenSSL REQUIRED)
 

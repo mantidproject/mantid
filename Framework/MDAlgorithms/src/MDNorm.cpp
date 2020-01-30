@@ -652,10 +652,10 @@ std::map<std::string, std::string> MDNorm::getBinParameters() {
       for (size_t j = 0; j < originalDimensionNames.size(); j++) {
         if (j == static_cast<size_t>(dimIndex)) {
           propertyValue << ",1";
-          transformation.emplace_back(1.);
+          transformation.emplace_back(1.f);
         } else {
           propertyValue << ",0";
-          transformation.emplace_back(0.);
+          transformation.emplace_back(0.f);
         }
       }
       parameters.emplace(property, propertyValue.str());

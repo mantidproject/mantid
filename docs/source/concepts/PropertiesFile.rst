@@ -149,12 +149,15 @@ The logging priority levels for the file logging and console logging can also be
 
 
 
-MantidPlot Properties
-*********************
+Mantid Graphical User Interface Properties
+******************************************
 
 +--------------------------------------------+---------------------------------------------------+-----------------+
 |Property                                    |Description                                        |Example value    |
 +============================================+===================================================+=================+
+| ``Notifications.Enabled``                  |Should Mantid use System Notifications for         | ``On``, ``Off`` |
+|                                            |important messages?                                |                 |
++--------------------------------------------+---------------------------------------------------+-----------------+
 | ``cluster.submission``                     |Enable cluster submission elements in GUIs         | ``On``, ``Off`` |
 +--------------------------------------------+---------------------------------------------------+-----------------+
 | ``MantidOptions.InstrumentView.UseOpenGL`` |Controls the use of OpenGL in rendering the        | ``On``, ``Off`` |

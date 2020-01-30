@@ -22,7 +22,7 @@ class D11_AutoProcess_Test(systemtesting.MantidSystemTest):
         config['logging.loggers.root.level'] = 'Warning'
         config.appendDataSearchSubDir('ILL/D11/')
 
-    def tearDown(self):
+    def cleanup(self):
         mtd.clear()
 
     def validate(self):

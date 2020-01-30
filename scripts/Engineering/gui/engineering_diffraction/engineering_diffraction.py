@@ -14,6 +14,10 @@ from .tabs.calibration.presenter import CalibrationPresenter
 from .tabs.focus.model import FocusModel
 from .tabs.focus.view import FocusView
 from .tabs.focus.presenter import FocusPresenter
+from .settings.settings_model import SettingsModel
+from .settings.settings_view import SettingsView
+from .settings.settings_presenter import SettingsPresenter
+from mantidqt.icons import get_icon
 
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt import load_ui
@@ -35,21 +39,32 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.calibration_presenter = None
         self.focus_presenter = None
+        self.settings_presenter = None
         self.set_on_help_clicked(self.open_help_window)
 
-        # Setup Tabs
+        self.set_on_settings_clicked(self.open_settings)
+        self.btn_settings.setIcon(get_icon("mdi.settings", "black", 1.2))
+
+        # Setup Elements
+        self.setup_settings()
         self.setup_calibration()
         self.setup_focus()
 
         # Setup notifiers
         self.setup_calibration_notifier()
 
+    def setup_settings(self):
+        model = SettingsModel()
+        view = SettingsView(self)
+        self.settings_presenter = SettingsPresenter(model, view)
+        self.settings_presenter.load_settings_from_file_or_default()
+
     def setup_calibration(self):
         cal_model = CalibrationModel()
         cal_view = CalibrationView(parent=self.tabs)
         self.calibration_presenter = CalibrationPresenter(cal_model, cal_view)
         self.set_on_instrument_changed(self.calibration_presenter.set_instrument_override)
-        self.set_on_rb_num_changed(self.calibration_presenter.set_rb_number)
+        self.set_on_rb_num_changed(self.calibration_presenter.set_rb_num)
         self.tabs.addTab(cal_view, "Calibration")
 
     def setup_focus(self):
@@ -57,14 +72,18 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         focus_view = FocusView()
         self.focus_presenter = FocusPresenter(focus_model, focus_view)
         self.set_on_instrument_changed(self.focus_presenter.set_instrument_override)
-        self.set_on_rb_num_changed(self.focus_presenter.set_rb_number)
+        self.set_on_rb_num_changed(self.focus_presenter.set_rb_num)
         self.tabs.addTab(focus_view, "Focus")
 
     def setup_calibration_notifier(self):
-        self.calibration_presenter.calibration_notifier.add_subscriber(self.focus_presenter.calibration_observer)
+        self.calibration_presenter.calibration_notifier.add_subscriber(
+            self.focus_presenter.calibration_observer)
 
     def set_on_help_clicked(self, slot):
         self.pushButton_help.clicked.connect(slot)
+
+    def set_on_settings_clicked(self, slot):
+        self.btn_settings.clicked.connect(slot)
 
     def set_on_rb_num_changed(self, slot):
         self.lineEdit_RBNumber.textChanged.connect(slot)
@@ -74,6 +93,10 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
 
     def open_help_window(self):
         InterfaceManager().showCustomInterfaceHelp(self.doc)
+
+    def open_settings(self):
+        self.settings_presenter.load_existing_settings()
+        self.settings_presenter.show()
 
     def get_rb_no(self):
         return self.lineEdit_RBNumber.text()

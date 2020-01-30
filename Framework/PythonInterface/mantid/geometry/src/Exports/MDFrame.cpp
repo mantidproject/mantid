@@ -22,5 +22,6 @@ void export_MDFrame() {
 
   class_<MDFrame, boost::noncopyable>("MDFrame", no_init)
       .def("getUnitLabel", &MDFrame::getUnitLabel, arg("self"))
-      .def("name", &MDFrame::name, arg("self"));
+      .def("name", &MDFrame::name, arg("self"))
+      .def("isQ", &MDFrame::isQ, arg("self"));
 }

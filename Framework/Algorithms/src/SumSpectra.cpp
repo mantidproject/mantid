@@ -165,6 +165,10 @@ void SumSpectra::init() {
   setPropertySettings(
       "MultiplyBySpectra",
       std::make_unique<EnabledWhenProperty>("WeightedSum", IS_EQUAL_TO, "1"));
+
+  declareProperty("UseFractionalArea", true,
+                  "Normalize the output workspace to the fractional area for "
+                  "RebinnedOutput workspaces.");
 }
 
 /*
@@ -520,6 +524,10 @@ void SumSpectra::doFractionalSum(MatrixWorkspace_sptr outputWorkspace,
   RebinnedOutput_sptr outWS =
       boost::dynamic_pointer_cast<RebinnedOutput>(outputWorkspace);
 
+  // Check finalize state prior to the sum process, at the completion
+  // the output is unfinalized
+  auto isFinalized = inWS->isFinalized();
+
   // Get references to the output workspaces's data vectors
   auto &outSpec = outputWorkspace->getSpectrum(0);
   auto &YSum = outSpec.mutableY();
@@ -548,21 +556,22 @@ void SumSpectra::doFractionalSum(MatrixWorkspace_sptr outputWorkspace,
     if (m_calculateWeightedSum) {
       for (size_t yIndex = 0; yIndex < m_yLength; ++yIndex) {
         const double yErrorsVal = YErrors[yIndex];
+        const double fracVal = (isFinalized ? FracArea[yIndex] : 1.0);
         if (std::isnormal(yErrorsVal)) { // is non-zero, nan, or infinity
-          const double errsq =
-              yErrorsVal * yErrorsVal * FracArea[yIndex] * FracArea[yIndex];
+          const double errsq = yErrorsVal * yErrorsVal * fracVal * fracVal;
           YErrorSum[yIndex] += errsq;
           Weight[yIndex] += 1. / errsq;
-          YSum[yIndex] += YValues[yIndex] * FracArea[yIndex] / errsq;
+          YSum[yIndex] += YValues[yIndex] * fracVal / errsq;
         } else {
           nZeros[yIndex]++;
         }
       }
     } else {
       for (size_t yIndex = 0; yIndex < m_yLength; ++yIndex) {
-        YSum[yIndex] += YValues[yIndex] * FracArea[yIndex];
-        YErrorSum[yIndex] += YErrors[yIndex] * YErrors[yIndex] *
-                             FracArea[yIndex] * FracArea[yIndex];
+        const double fracVal = (isFinalized ? FracArea[yIndex] : 1.0);
+        YSum[yIndex] += YValues[yIndex] * fracVal;
+        YErrorSum[yIndex] +=
+            YErrors[yIndex] * YErrors[yIndex] * fracVal * fracVal;
       }
     }
     // accumulation of fractional weight is the same
@@ -583,8 +592,11 @@ void SumSpectra::doFractionalSum(MatrixWorkspace_sptr outputWorkspace,
     numZeros = 0;
   }
 
-  // Create the correct representation
-  outWS->finalize();
+  // Create the correct representation if using fractional area
+  auto useFractionalArea = getProperty("UseFractionalArea");
+  if (useFractionalArea) {
+    outWS->finalize();
+  }
 }
 
 /** Executes the algorithm

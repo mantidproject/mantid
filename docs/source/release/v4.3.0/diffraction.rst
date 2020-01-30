@@ -18,6 +18,8 @@ Powder Diffraction
 
 - The create_total_scattering_pdf merging banks now matches spectra to the spectrum with the largest x range.
 - The create_total_scattering_pdf merging banks no longer matches spectra with scale, it now only matches with offset.
+- The Polaris create_total_scattering_pdf can now be given an parameter `output_binning` that will be used to rebin the output_pdf.
+- The polaris create_total_scattering_pdf function can now accept a `pdf_type` argument to set the pdf_output type.
 - :ref:`HRPDSlabCanAbsorption <algm-HRPDSlabCanAbsorption-v1>` now accepts any thickness parameter and not those in a specified list.
 
 Engineering Diffraction
@@ -39,9 +41,12 @@ Powder Diffraction
 ------------------
 
 - A bug has been fixed that prevented unicode strings being given as a lim file directory in polaris create_total_scattering_pdf merging banks.
+- A bug has been fixed that caused Polaris.focus to fail with `do_absorption_Corrections=True`.
 
 Engineering Diffraction
 -----------------------
+
+- Fixed a bug where `SaveGSS <algm-SaveGSS-v1>` could crash when attempting to pass a group workspace into it.
 
 Single Crystal Diffraction
 --------------------------

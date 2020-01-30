@@ -30,6 +30,7 @@ class GeneralSettings(object):
     PR_RECOVERY_ENABLED = "projectRecovery.enabled"
     PROMPT_SAVE_EDITOR_MODIFIED = 'project/prompt_save_editor_modified'
     PROMPT_SAVE_ON_CLOSE = 'project/prompt_save_on_close'
+    USE_NOTIFICATIONS = 'Notifications.Enabled'
     USER_LAYOUT = "MainWindow/user_layouts"
 
     def __init__(self, parent, view=None):
@@ -89,12 +90,16 @@ class GeneralSettings(object):
     def setup_confirmations(self):
         self.view.prompt_save_on_close.stateChanged.connect(self.action_prompt_save_on_close)
         self.view.prompt_save_editor_modified.stateChanged.connect(self.action_prompt_save_editor_modified)
+        self.view.use_notifications.stateChanged.connect(self.action_use_notifications_modified)
 
     def action_prompt_save_on_close(self, state):
         CONF.set(self.PROMPT_SAVE_ON_CLOSE, bool(state))
 
     def action_prompt_save_editor_modified(self, state):
         CONF.set(self.PROMPT_SAVE_EDITOR_MODIFIED, bool(state))
+
+    def action_use_notifications_modified(self, state):
+        ConfigService.setString(self.USE_NOTIFICATIONS, "On" if bool(state) else "Off")
 
     def load_current_setting_values(self):
         self.view.prompt_save_on_close.setChecked(CONF.get(self.PROMPT_SAVE_ON_CLOSE))
@@ -105,10 +110,12 @@ class GeneralSettings(object):
         pr_enabled = ("true" == ConfigService.getString(self.PR_RECOVERY_ENABLED).lower())
         pr_time_between_recovery = int(ConfigService.getString(self.PR_TIME_BETWEEN_RECOVERY))
         pr_number_checkpoints = int(ConfigService.getString(self.PR_NUMBER_OF_CHECKPOINTS))
+        use_notifications_setting = ("on" == ConfigService.getString(self.USE_NOTIFICATIONS).lower())
 
         self.view.project_recovery_enabled.setChecked(pr_enabled)
         self.view.time_between_recovery.setValue(pr_time_between_recovery)
         self.view.total_number_checkpoints.setValue(pr_number_checkpoints)
+        self.view.use_notifications.setChecked(use_notifications_setting)
 
     def action_project_recovery_enabled(self, state):
         ConfigService.setString(self.PR_RECOVERY_ENABLED, str(bool(state)))

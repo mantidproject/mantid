@@ -9,6 +9,7 @@
 #include "MantidIndexing/GlobalSpectrumIndex.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidIndexing/SpectrumNumber.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 namespace Mantid {
 namespace API {
@@ -73,6 +74,7 @@ Indexing::SpectrumIndexSet IndexProperty::getIndices() const {
             static_cast<Indexing::SpectrumNumber>(static_cast<int32_t>(max)));
       }
     } else {
+      MSVC_DIAG_OFF(4244);
       switch (type) {
       case IndexType::WorkspaceIndex:
         return indexInfo.makeIndexSet(
@@ -84,6 +86,7 @@ Indexing::SpectrumIndexSet IndexProperty::getIndices() const {
         return indexInfo.makeIndexSet(spectrumNumbers);
       }
       }
+      MSVC_DIAG_ON(4244);
     }
   }
 

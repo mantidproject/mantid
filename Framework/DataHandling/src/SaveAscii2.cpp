@@ -11,6 +11,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -42,8 +43,8 @@ SaveAscii2::SaveAscii2()
 /// Initialisation method.
 void SaveAscii2::init() {
   declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "",
-                                                           Direction::Input),
+      std::make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "",
+                                                     Direction::Input),
       "The name of the workspace containing the data you want to save to a "
       "Ascii file.");
 
@@ -56,26 +57,29 @@ void SaveAscii2::init() {
   mustBePositive->setLower(1);
   auto mustBeZeroGreater = boost::make_shared<BoundedValidator<int>>();
   mustBeZeroGreater->setLower(0);
-  declareProperty("WorkspaceIndexMin", EMPTY_INT(), mustBeZeroGreater,
-                  "The starting workspace index.");
+  declareProperty(
+      "WorkspaceIndexMin", EMPTY_INT(), mustBeZeroGreater,
+      "The starting workspace index. Ignored for Table Workspaces.");
   declareProperty("WorkspaceIndexMax", EMPTY_INT(), mustBeZeroGreater,
-                  "The ending workspace index.");
-  declareProperty(std::make_unique<ArrayProperty<int>>("SpectrumList"),
-                  "List of workspace indices to save.");
+                  "The ending workspace index. Ignored for Table Workspaces.");
+  declareProperty(
+      std::make_unique<ArrayProperty<int>>("SpectrumList"),
+      "List of workspace indices to save. Ignored for Table Workspaces.");
   declareProperty("Precision", EMPTY_INT(), mustBePositive,
                   "Precision of output double values.");
   declareProperty("ScientificFormat", false,
                   "If true, the values will be "
                   "written to the file in "
                   "scientific notation.");
+  declareProperty("WriteXError", false,
+                  "If true, the error on X will be written as the fourth "
+                  "column. Ignored for Table Workspaces.");
   declareProperty(
-      "WriteXError", false,
-      "If true, the error on X will be written as the fourth column.");
-  declareProperty("WriteSpectrumID", true,
-                  "If false, the spectrum No will not be written for "
-                  "single-spectrum workspaces. "
-                  "It is always written for workspaces with multiple spectra, "
-                  "unless spectrum axis value is written.");
+      "WriteSpectrumID", true,
+      "If false, the spectrum No will not be written for "
+      "single-spectrum workspaces. "
+      "It is always written for workspaces with multiple spectra, "
+      "unless spectrum axis value is written. Ignored for Table Workspaces.");
 
   declareProperty("CommentIndicator", "#",
                   "Character(s) to put in front of comment lines.");
@@ -113,18 +117,19 @@ void SaveAscii2::init() {
   declareProperty("SpectrumMetaData", "",
                   "A comma separated list that defines data that describes "
                   "each spectrum in a workspace. The valid options for this "
-                  "are: SpectrumNumber,Q,Angle");
+                  "are: SpectrumNumber,Q,Angle. Ignored for Table Workspaces.");
 
   declareProperty(
       "AppendToFile", false,
       "If true, don't overwrite the file. Append to the end of it. ");
 
-  declareProperty(
-      "RaggedWorkspace", true,
-      "If true, ensure that more than one xspectra is used. "); // in testing
+  declareProperty("RaggedWorkspace", true,
+                  "If true, ensure that more than one xspectra is used. "
+                  "Ignored for Table Workspaces."); // in testing
 
   declareProperty("WriteSpectrumAxisValue", false,
-                  "Write the spectrum axis value if requested");
+                  "Write the spectrum axis value if requested. Ignored for "
+                  "Table Workspaces.");
 }
 
 /**
@@ -132,10 +137,60 @@ void SaveAscii2::init() {
  */
 void SaveAscii2::exec() {
   // Get the workspace
-  m_ws = getProperty("InputWorkspace");
-  auto nSpectra = static_cast<int>(m_ws->getNumberHistograms());
-  m_nBins = static_cast<int>(m_ws->blocksize());
-  m_isCommonBins = m_ws->isCommonBins(); // checking for ragged workspace
+  Workspace_const_sptr ws = getProperty("InputWorkspace");
+  m_ws = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
+  ITableWorkspace_const_sptr tws =
+      boost::dynamic_pointer_cast<const ITableWorkspace>(ws);
+
+  // Get the properties valid for all workspaces
+  const bool writeHeader = getProperty("ColumnHeader");
+  const bool appendToFile = getProperty("AppendToFile");
+  std::string filename = getProperty("Filename");
+  int prec = getProperty("Precision");
+  bool scientific = getProperty("ScientificFormat");
+  std::string comment = getPropertyValue("CommentIndicator");
+
+  const std::string choice = getPropertyValue("Separator");
+  const std::string custom = getPropertyValue("CustomSeparator");
+  // If the custom separator property is not empty, then we use that under
+  // any circumstance.
+  if (!custom.empty()) {
+    m_sep = custom;
+  }
+  // Else if the separator drop down choice is not UserDefined then we use
+  // that.
+  else if (choice != "UserDefined") {
+    auto it = m_separatorIndex.find(choice);
+    m_sep = it->second;
+  }
+  // If we still have nothing, then we are forced to use a default.
+  if (m_sep.empty()) {
+    g_log.notice() << "\"UserDefined\" has been selected, but no custom "
+                      "separator has been entered."
+                      " Using default instead.";
+    m_sep = ",";
+  }
+
+  if (tws) {
+    writeTableWorkspace(tws, filename, appendToFile, writeHeader, prec,
+                        scientific, comment);
+    // return here as the rest of the class is all about matrix workspace saving
+    return;
+  }
+
+  if (!m_ws) {
+    throw std::runtime_error(
+        "SaveAscii does not now how to save this workspace type, " +
+        ws->getName());
+  }
+
+  // Get the properties valid for matrix workspaces
+  std::vector<int> spec_list = getProperty("SpectrumList");
+  const int spec_min = getProperty("WorkspaceIndexMin");
+  const int spec_max = getProperty("WorkspaceIndexMax");
+  m_writeSpectrumAxisValue = getProperty("WriteSpectrumAxisValue");
+  m_writeDX = getProperty("WriteXError");
+
   m_writeID = getProperty("WriteSpectrumID");
   std::string metaDataString = getPropertyValue("SpectrumMetaData");
   if (!metaDataString.empty()) {
@@ -161,14 +216,6 @@ void SaveAscii2::exec() {
     }
   }
 
-  // Get the properties
-  std::vector<int> spec_list = getProperty("SpectrumList");
-  const int spec_min = getProperty("WorkspaceIndexMin");
-  const int spec_max = getProperty("WorkspaceIndexMax");
-  const bool writeHeader = getProperty("ColumnHeader");
-  const bool appendToFile = getProperty("AppendToFile");
-  m_writeSpectrumAxisValue = getProperty("WriteSpectrumAxisValue");
-
   if (m_writeSpectrumAxisValue) {
     auto spectrumAxis = m_ws->getAxis(1);
     if (dynamic_cast<BinEdgeAxis *>(spectrumAxis)) {
@@ -180,29 +227,9 @@ void SaveAscii2::exec() {
   }
 
   // Check whether we need to write the fourth column
-  m_writeDX = getProperty("WriteXError");
   if (!m_ws->hasDx(0) && m_writeDX) {
     throw std::runtime_error(
         "x data errors have been requested but do not exist.");
-  }
-  const std::string choice = getPropertyValue("Separator");
-  const std::string custom = getPropertyValue("CustomSeparator");
-  // If the custom separator property is not empty, then we use that under any
-  // circumstance.
-  if (!custom.empty()) {
-    m_sep = custom;
-  }
-  // Else if the separator drop down choice is not UserDefined then we use that.
-  else if (choice != "UserDefined") {
-    auto it = m_separatorIndex.find(choice);
-    m_sep = it->second;
-  }
-  // If we still have nothing, then we are forced to use a default.
-  if (m_sep.empty()) {
-    g_log.notice() << "\"UserDefined\" has been selected, but no custom "
-                      "separator has been entered."
-                      " Using default instead.";
-    m_sep = ",";
   }
 
   // e + and - are included as they're part of the scientific notation
@@ -211,8 +238,6 @@ void SaveAscii2::exec() {
     throw std::invalid_argument("Separators cannot contain numeric characters, "
                                 "plus signs, hyphens or 'e'");
   }
-
-  std::string comment = getPropertyValue("CommentIndicator");
 
   if (comment.at(0) == m_sep.at(0) ||
       !boost::regex_match(
@@ -225,6 +250,10 @@ void SaveAscii2::exec() {
 
   // Create an spectra index list for output
   std::set<int> idx;
+
+  auto nSpectra = static_cast<int>(m_ws->getNumberHistograms());
+  m_nBins = static_cast<int>(m_ws->blocksize());
+  m_isCommonBins = m_ws->isCommonBins(); // checking for ragged workspace
 
   // Add spectra interval into the index list
   if (spec_max != EMPTY_INT() && spec_min != EMPTY_INT()) {
@@ -255,7 +284,6 @@ void SaveAscii2::exec() {
   if (m_nBins == 0 || nSpectra == 0) {
     throw std::runtime_error("Trying to save an empty workspace");
   }
-  std::string filename = getProperty("Filename");
   std::ofstream file(filename.c_str(),
                      (appendToFile ? std::ios::app : std::ios::out));
 
@@ -264,11 +292,9 @@ void SaveAscii2::exec() {
     throw Exception::FileError("Unable to create file: ", filename);
   }
   // Set the number precision
-  int prec = getProperty("Precision");
   if (prec != EMPTY_INT()) {
     file.precision(prec);
   }
-  bool scientific = getProperty("ScientificFormat");
   if (scientific) {
     file << std::scientific;
   }
@@ -446,6 +472,70 @@ void SaveAscii2::populateAllMetaData() {
 bool SaveAscii2::findElementInUnorderedStringVector(
     const std::vector<std::string> &vector, const std::string &toFind) {
   return std::find(vector.cbegin(), vector.cend(), toFind) != vector.cend();
+}
+
+void SaveAscii2::writeTableWorkspace(ITableWorkspace_const_sptr tws,
+                                     const std::string &filename,
+                                     bool appendToFile, bool writeHeader,
+                                     int prec, bool scientific,
+                                     const std::string &comment) {
+
+  std::ofstream file(filename.c_str(),
+                     (appendToFile ? std::ios::app : std::ios::out));
+
+  if (!file) {
+    g_log.error("Unable to create file: " + filename);
+    throw Exception::FileError("Unable to create file: ", filename);
+  }
+  // Set the number precision
+  if (prec != EMPTY_INT()) {
+    file.precision(prec);
+  }
+  if (scientific) {
+    file << std::scientific;
+  }
+
+  const auto columnCount = tws->columnCount();
+  if (writeHeader) {
+    // write the column names
+    file << comment << " ";
+    for (size_t colIndex = 0; colIndex < columnCount; colIndex++) {
+      file << tws->getColumn(colIndex)->name() << " ";
+      if (colIndex < columnCount - 1) {
+        file << m_sep << " ";
+      }
+    }
+    file << '\n';
+    // write the column types
+    file << comment << " ";
+    for (size_t colIndex = 0; colIndex < columnCount; colIndex++) {
+      file << tws->getColumn(colIndex)->type() << " ";
+      if (colIndex < columnCount - 1) {
+        file << m_sep << " ";
+      }
+    }
+    file << '\n';
+  } else {
+    g_log.warning("Please note that files written without headers cannot be "
+                  "reloaded back into Mantid with LoadAscii.");
+  }
+
+  // write the data
+  const auto rowCount = tws->rowCount();
+  Progress progress(this, 0.0, 1.0, rowCount);
+  for (size_t rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+    for (size_t colIndex = 0; colIndex < columnCount; colIndex++) {
+      tws->getColumn(colIndex)->print(rowIndex, file);
+      if (colIndex < columnCount - 1) {
+        file << m_sep;
+      }
+    }
+    file << "\n";
+    progress.report();
+  }
+
+  file.unsetf(std::ios_base::floatfield);
+  file.close();
 }
 
 } // namespace DataHandling

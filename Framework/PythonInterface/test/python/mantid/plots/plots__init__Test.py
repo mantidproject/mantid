@@ -332,7 +332,7 @@ class Plots__init__Test(unittest.TestCase):
             self.assertTrue(ws_artists[1].is_normalized)
             self.assertTrue(ws_artists[2].is_normalized)
 
-    def test_artists_normalization_state_labeled_correctly_for_2d_plots_of_non_dist_workspace(self):
+    def test_artists_normalization_labeled_correctly_for_2d_plots_of_non_dist_workspace_and_dist_argument_false(self):
         plot_funcs = ['imshow', 'pcolor', 'pcolormesh', 'pcolorfast', 'tripcolor',
                         'contour', 'contourf', 'tricontour', 'tricontourf']
         non_dist_2d_ws = CreateWorkspace(DataX=[10, 20, 10, 20],
@@ -347,10 +347,32 @@ class Plots__init__Test(unittest.TestCase):
             self.assertTrue(self.ax.tracked_workspaces[non_dist_2d_ws.name()][0].is_normalized)
             del self.ax.tracked_workspaces[non_dist_2d_ws.name()]
 
+    def test_artists_normalization_labeled_correctly_for_2d_plots_of_non_dist_workspace_and_dist_argument_true(self):
+        plot_funcs = ['imshow', 'pcolor', 'pcolormesh', 'pcolorfast', 'tripcolor',
+                      'contour', 'contourf', 'tricontour', 'tricontourf']
+        non_dist_2d_ws = CreateWorkspace(DataX=[10, 20, 10, 20],
+                                         DataY=[2, 3, 2, 3],
+                                         DataE=[1, 2, 1, 2],
+                                         NSpec=2,
+                                         Distribution=False,
+                                         OutputWorkspace='non_dist_workpace')
+        for plot_func in plot_funcs:
+            func = getattr(self.ax, plot_func)
             func(non_dist_2d_ws, distribution=True)
             self.assertFalse(self.ax.tracked_workspaces[non_dist_2d_ws.name()][0].is_normalized)
             del self.ax.tracked_workspaces[non_dist_2d_ws.name()]
 
+    def test_artists_normalization_labeled_correctly_for_2d_plots_of_non_dist_workspace_and_global_setting_on(self):
+        plot_funcs = ['imshow', 'pcolor', 'pcolormesh', 'pcolorfast', 'tripcolor',
+                      'contour', 'contourf', 'tricontour', 'tricontourf']
+        non_dist_2d_ws = CreateWorkspace(DataX=[10, 20, 10, 20],
+                                         DataY=[2, 3, 2, 3],
+                                         DataE=[1, 2, 1, 2],
+                                         NSpec=2,
+                                         Distribution=False,
+                                         OutputWorkspace='non_dist_workpace')
+        for plot_func in plot_funcs:
+            func = getattr(self.ax, plot_func)
             func(non_dist_2d_ws)
             auto_dist = (config['graph1d.autodistribution'] == 'On')
             self.assertEqual(auto_dist, self.ax.tracked_workspaces[non_dist_2d_ws.name()][0].is_normalized)

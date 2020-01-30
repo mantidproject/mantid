@@ -390,7 +390,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         Checks to ensure a calibration file has been given
         and if so performs AlignDetectors and DiffractionFocussing.
         """
-        if self._cal_file is not '':
+        if self._cal_file != '':
             for ws_name in self._workspace_names:
                 AlignDetectors(InputWorkspace=ws_name,
                                OutputWorkspace=ws_name,

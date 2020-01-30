@@ -1036,7 +1036,7 @@ class TestManager(object):
                 mod_attrs = dir(mod)
                 for key in mod_attrs:
                     value = getattr(mod, key)
-                    if key is "MantidSystemTest" or not inspect.isclass(value):
+                    if key == "MantidSystemTest" or not inspect.isclass(value):
                         continue
                     if self.isValidTestClass(value):
                         test_name = key

@@ -47,7 +47,7 @@ Guides
    Configure a doxygen build locally.
 
 :doc:`Python3`
-   Building with Python 3 (Linux only).
+   Building with Python 3 (Ubuntu/Windows).
 
 `C++ Introduction <https://www.mantidproject.org/New_Starter_C%2B%2B_introduction>`_
    Exercises for learning C++.
@@ -62,6 +62,7 @@ Development Process
    DevelopmentAndReleaseCycle
    Communication
    IssueTracking
+   UserSupport
    GitWorkflow
    AutomatedBuildProcess
    JenkinsConfiguration
@@ -78,6 +79,9 @@ Development Process
 
 :doc:`IssueTracking`
    Describes how issues are tracked over the project.
+
+:doc:`UserSupport`
+   Procedures for User Problems to be tested and passed to the Development Team.
 
 :doc:`GitWorkflow`
    Details the workflow used development with git and GitHub.
@@ -203,7 +207,7 @@ GUI Development
 
 :doc:`ISISReflectometryInterface`
    An example of a complex C++ interface that uses MVP.
-   
+
 =========
 Workbench
 =========

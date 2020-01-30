@@ -175,7 +175,7 @@ public:
     // throws so suppress the warning
     MSVC_DIAG_OFF(4834)
     TS_ASSERT_THROWS(h.dataX().at(nel), const std::out_of_range &);
-    MSVC_DIAG_ON()
+    MSVC_DIAG_ON(4834)
   }
   void testrangeexceptionY() {
     h.setCounts(y1);
@@ -183,7 +183,7 @@ public:
     // throws so suppress the warning
     MSVC_DIAG_OFF(4834)
     TS_ASSERT_THROWS(h.dataY().at(nel), const std::out_of_range &);
-    MSVC_DIAG_ON()
+    MSVC_DIAG_ON(4834)
   }
   void testrangeexceptionE() {
     h.setCounts(y1);
@@ -192,7 +192,7 @@ public:
     // throws so suppress the warning
     MSVC_DIAG_OFF(4834)
     TS_ASSERT_THROWS(h.dataE().at(nel), const std::out_of_range &);
-    MSVC_DIAG_ON()
+    MSVC_DIAG_ON(4834)
   }
 
   void test_copy_constructor() {
