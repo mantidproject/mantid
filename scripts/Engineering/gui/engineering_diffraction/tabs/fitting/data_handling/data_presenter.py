@@ -29,6 +29,17 @@ class FittingDataPresenter(object):
         if ws_name in self.model.get_loaded_workspaces():
             self.model.get_loaded_workspaces().pop(ws_name)
 
+    def rename_workspace(self, old_name, new_name):
+        if old_name in self.model.get_loaded_workspaces():
+            self.model.get_loaded_workspaces()[new_name] = self.model.get_loaded_workspaces().pop(old_name)
+
+    def clear_workspaces(self):
+        self.model.get_loaded_workspaces().clear()
+
+    def replace_workspace(self, name, workspace):
+        if name in self.model.get_loaded_workspaces():
+            self.model.get_loaded_workspaces()[name] = workspace
+
     def get_loaded_workspaces(self):
         return self.model.get_loaded_workspaces()
 
