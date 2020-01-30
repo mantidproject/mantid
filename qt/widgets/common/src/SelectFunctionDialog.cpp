@@ -112,15 +112,15 @@ void SelectFunctionDialog::constructFunctionTree(
         // go through the path and add the folders if they don't already exist
         QString currentPath = subCategories[0];
         QTreeWidgetItem *catItem = nullptr;
-        int n = subCategories.size();
+        int subCategoryNo = subCategories.size();
         bool show = false;
-        for (int j = 0; j < n; j++) {
+        for (int j = 0; j < subCategoryNo; ++j) {
           if (showCategory(subCategories[j].toStdString())) {
             show = true;
           }
         }
         if (show) {
-          for (int j = 0; j < n; j++) {
+          for (int j = 0; j < subCategoryNo; ++j) {
             if (categories.contains(currentPath)) {
               catItem = categories[currentPath];
             } else {
@@ -134,7 +134,7 @@ void SelectFunctionDialog::constructFunctionTree(
               }
               catItem = newCatItem;
             }
-            if (j != n - 1)
+            if (j != subCategoryNo - 1)
               currentPath += "\\" + subCategories[j + 1];
             else {
               // This is the end of the path so add the functions
