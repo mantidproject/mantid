@@ -11,6 +11,7 @@ from mantidqt.utils.observer_pattern import GenericObservable, GenericObserver, 
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 from Muon.GUI.FrequencyDomainAnalysis.frequency_context import FREQUENCY_EXTENSIONS
 from Muon.GUI.Common.plotting_widget.workspace_finder import WorkspaceFinder
+from Muon.GUI.Common.ADSHandler.workspace_naming import TF_ASYMMETRY_PREFIX
 
 COUNTS_PLOT_TYPE = 'Counts'
 ASYMMETRY_PLOT_TYPE = 'Asymmetry'
@@ -160,7 +161,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             return
         if self.context._frequency_context:
             self.context._frequency_context.plot_type = self._view.get_selected()[len(FREQ_PLOT_TYPE):]
-        self.plot_type_changed_notifier.notify_subscribers()
+        self.plot_type_changed_notifier.notify_subscribers(current_plot_type)
         self._model.clear_plot_model(self._view.get_axes())
         self.plot_all_selected_workspaces()
 
@@ -325,7 +326,13 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             fit_function = current_fit.fit_function_name
 
             self._model.add_workspace_to_plotted_fit_workspaces(workspace_name)
-            self._model.add_workspace_to_plot(ax, workspace_name, [1],
+
+            # handle tf asymmetry fits
+            first_fit_index = 1
+            if TF_ASYMMETRY_PREFIX in workspace_name:
+                first_fit_index = 3
+
+            self._model.add_workspace_to_plot(ax, workspace_name, [first_fit_index],
                                               errors=False,
                                               plot_kwargs={'distribution': True, 'autoscale_on_update': False,
                                                            'label': label + fit_function + ': Fit'})
