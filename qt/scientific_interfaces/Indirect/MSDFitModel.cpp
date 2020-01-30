@@ -12,15 +12,12 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-void MSDFitModel::setFitType(const std::string &fitType) {
-  m_fitType = fitType;
-}
-
 std::string MSDFitModel::sequentialFitOutputName() const {
   if (isMultiFit())
-    return "MultiMSDFit_" + m_fitType + "_Results";
-  return createOutputName("%1%_MSDFit_" + m_fitType + "_s%2%", "_to_",
-                          TableDatasetIndex{0});
+    return "MultiMSDFit_" + fitModeToName[getFittingMode()] + "_Results";
+  return createOutputName("%1%_MSDFit_" + fitModeToName[getFittingMode()] +
+                              "_s%2%",
+                          "_to_", TableDatasetIndex{0});
 }
 
 std::string MSDFitModel::simultaneousFitOutputName() const {
@@ -29,8 +26,9 @@ std::string MSDFitModel::simultaneousFitOutputName() const {
 
 std::string MSDFitModel::singleFitOutputName(TableDatasetIndex index,
                                              WorkspaceIndex spectrum) const {
-  return createSingleFitOutputName("%1%_MSDFit_" + m_fitType + "_s%2%_Results",
-                                   index, spectrum);
+  return createSingleFitOutputName(
+      "%1%_MSDFit_" + fitModeToName[getFittingMode()] + "_s%2%_Results", index,
+      spectrum);
 }
 
 std::vector<std::string> MSDFitModel::getSpectrumDependentAttributes() const {

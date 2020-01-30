@@ -43,6 +43,7 @@ MSDFit::MSDFit(QWidget *parent)
   setFitPropertyBrowser(m_uiForm->fitPropertyBrowser);
 
   setEditResultVisible(false);
+  m_uiForm->fitDataView->setStartAndEndHidden(false);
 }
 
 void MSDFit::setupFitTab() {
@@ -52,12 +53,6 @@ void MSDFit::setupFitTab() {
   auto yi = functionFactory.createFunction("MSDYi");
 
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-  connect(this, SIGNAL(functionChanged()), this,
-          SLOT(updateModelFitTypeString()));
-}
-
-void MSDFit::updateModelFitTypeString() {
-  m_msdFittingModel->setFitType(selectedFitType().toStdString());
 }
 
 void MSDFit::runClicked() { runTab(); }

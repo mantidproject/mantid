@@ -28,7 +28,6 @@ public:
 
 protected slots:
   void runClicked();
-  void updateModelFitTypeString();
 
 protected:
   void setRunIsRunning(bool running) override;
