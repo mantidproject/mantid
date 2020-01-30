@@ -22,7 +22,7 @@ def get_spectra_selection(workspaces, parent_widget=None, show_colorfill_btn=Fal
     the request was cancelled
     :raises ValueError: if the workspaces are not of type MatrixWorkspace
     """
-    SpectraSelectionDialog.raise_error_if_workspaces_not_compatible(workspaces)
+    workspaces = SpectraSelectionDialog.get_compatible_workspaces(workspaces)
     single_spectra_ws = [wksp.getNumberHistograms() for wksp in workspaces if wksp.getNumberHistograms() == 1]
 
     if len(workspaces) == len(single_spectra_ws):

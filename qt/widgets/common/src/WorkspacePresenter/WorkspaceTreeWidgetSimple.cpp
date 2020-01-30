@@ -153,7 +153,35 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
       menu->addAction(m_showAlgorithmHistory);
       menu->addAction(m_sampleLogs);
       menu->addAction(m_sliceViewer);
-    } else if (boost::dynamic_pointer_cast<WorkspaceGroup>(workspace)) {
+    } else if (auto wsGroup =
+                   boost::dynamic_pointer_cast<WorkspaceGroup>(workspace)) {
+      auto workspaces = wsGroup->getAllItems();
+      bool containsMatrixWorkspace{false};
+
+      for (auto ws : workspaces) {
+        if (auto matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws)) {
+          containsMatrixWorkspace = true;
+          break;
+        }
+      }
+
+      // Add plotting options if the group contains at least one matrix
+      // workspace.
+      if (containsMatrixWorkspace) {
+        QMenu *plotSubMenu(new QMenu("Plot", menu));
+
+        plotSubMenu->addAction(m_plotSpectrum);
+        plotSubMenu->addAction(m_overplotSpectrum);
+        plotSubMenu->addAction(m_plotSpectrumWithErrs);
+        plotSubMenu->addAction(m_overplotSpectrumWithErrs);
+
+        plotSubMenu->addSeparator();
+        plotSubMenu->addAction(m_plotColorfill);
+        menu->addMenu(plotSubMenu);
+
+        menu->addSeparator();
+      }
+
       menu->addAction(m_showDetectors);
     }
 
