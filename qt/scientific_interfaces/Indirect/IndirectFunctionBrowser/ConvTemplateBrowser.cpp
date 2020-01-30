@@ -113,6 +113,8 @@ void ConvTemplateBrowser::setGlobalParameters(const QStringList &globals) {
 void ConvTemplateBrowser::intChanged(QtProperty *) {}
 
 void ConvTemplateBrowser::boolChanged(QtProperty *prop) {
+  if (!m_emitBoolChange)
+    return;
   if (prop == m_deltaFunctionOn) {
     m_presenter.setDeltaFunction(m_boolManager->value(prop));
   } else if (prop == m_tempCorrectionOn) {
@@ -125,8 +127,9 @@ void ConvTemplateBrowser::setQValues(const std::vector<double> &qValues) {
 }
 
 void ConvTemplateBrowser::addDeltaFunction() {
+  ScopedFalse _boolBlock(m_emitBoolChange);
+  ScopedFalse _paramBlock(m_emitParameterValueChange);
   m_deltaFunctionOn->addSubProperty(m_deltaFunctionHeight);
-  ScopedFalse _false(m_emitBoolChange);
   m_boolManager->setValue(m_deltaFunctionOn, true);
 }
 
@@ -137,8 +140,10 @@ void ConvTemplateBrowser::removeDeltaFunction() {
 }
 
 void ConvTemplateBrowser::addTempCorrection(double value) {
+  ScopedFalse _boolBlock(m_emitBoolChange);
+  ScopedFalse _paramBlock(m_emitParameterValueChange);
+
   m_tempCorrectionOn->addSubProperty(m_temperature);
-  ScopedFalse _false(m_emitBoolChange);
   m_boolManager->setValue(m_tempCorrectionOn, true);
   m_parameterManager->setValue(m_temperature, value);
   m_parameterManager->setGlobal(m_temperature, true);
@@ -151,6 +156,8 @@ void ConvTemplateBrowser::removeTempCorrection() {
 }
 
 void ConvTemplateBrowser::enumChanged(QtProperty *prop) {
+  if (!m_emitEnumChange)
+    return;
   auto const index = m_enumManager->value(prop);
   auto propIt =
       std::find(m_subTypeProperties.begin(), m_subTypeProperties.end(), prop);
@@ -271,6 +278,11 @@ void ConvTemplateBrowser::createFunctionParameterProperties() {
                                 m_templateSubTypes[isub]->getTypeNames());
     m_subTypeProperties.push_back(subTypeProp);
   }
+}
+
+void ConvTemplateBrowser::setEnum(size_t subTypeIndex, int enumIndex) {
+  ScopedFalse _false(m_emitEnumChange);
+  m_enumManager->setValue(m_subTypeProperties[subTypeIndex], enumIndex);
 }
 
 void ConvTemplateBrowser::createDeltaFunctionProperties() {

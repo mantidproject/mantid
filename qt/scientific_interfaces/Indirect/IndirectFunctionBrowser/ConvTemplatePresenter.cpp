@@ -8,9 +8,8 @@
 #include "ConvTemplateBrowser.h"
 #include "MantidQtWidgets/Common/EditLocalParameterDialog.h"
 #include <QInputDialog>
-#include <float.h>
-
 #include <cmath>
+#include <float.h>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -31,7 +30,7 @@ ConvTemplatePresenter::ConvTemplatePresenter(ConvTemplateBrowser *view)
 }
 
 void ConvTemplatePresenter::setSubType(size_t subTypeIndex, int typeIndex) {
-  if (subTypeIndex == 0) {
+  if (subTypeIndex == SubTypeIndex::Fit) {
     m_model.setFitType(static_cast<FitType>(typeIndex));
   } else {
     m_model.setBackground(static_cast<BackgroundType>(typeIndex));
@@ -92,8 +91,24 @@ int ConvTemplatePresenter::getNumberOfDatasets() const {
 
 void ConvTemplatePresenter::setFunction(const QString &funStr) {
   m_model.setFunctionString(funStr);
-  m_view->setSubType(0, static_cast<int>(m_model.getFitType()));
-  m_view->setSubType(1, static_cast<int>(m_model.getBackgroundType()));
+
+  if (m_model.hasDeltaFunction())
+    m_view->addDeltaFunction();
+  else
+    m_view->removeDeltaFunction();
+
+  if (m_model.hasTempCorrection())
+    m_view->addTempCorrection(100.0);
+  else
+    m_view->removeTempCorrection();
+
+  m_view->setSubType(SubTypeIndex::Fit, static_cast<int>(m_model.getFitType()));
+  m_view->setSubType(SubTypeIndex::Background,
+                     static_cast<int>(m_model.getBackgroundType()));
+  m_view->setEnum(SubTypeIndex::Fit, static_cast<int>(m_model.getFitType()));
+  m_view->setEnum(SubTypeIndex::Background,
+                  static_cast<int>(m_model.getBackgroundType()));
+
   setErrorsEnabled(false);
   updateViewParameterNames();
   updateViewParameters();

@@ -123,6 +123,23 @@ public:
 
     TS_ASSERT_EQUALS(m_model->getCurrentFunction()->asString(),
                      func->asString())
+    TS_ASSERT_EQUALS(m_model->getBackgroundType(), BackgroundType::None);
+    TS_ASSERT_EQUALS(m_model->getFitType(), FitType::OneLorentzian);
+  }
+
+  void
+  test_setFunction_does_not_throw_for_valid_temperature_function_with_delta() {
+    m_model->setFitType(FitType::OneLorentzian);
+    m_model->setTempCorrection(true, 100.0);
+    m_model->setDeltaFunction(true);
+    auto func = m_model->getFitFunction();
+
+    m_model->setFunction(func);
+
+    TS_ASSERT_EQUALS(m_model->getCurrentFunction()->asString(),
+                     func->asString())
+    TS_ASSERT_EQUALS(m_model->getBackgroundType(), BackgroundType::None);
+    TS_ASSERT_EQUALS(m_model->getFitType(), FitType::OneLorentzian);
   }
 
   void
@@ -135,6 +152,8 @@ public:
 
     TS_ASSERT_EQUALS(m_model->getCurrentFunction()->asString(),
                      func->asString())
+    TS_ASSERT_EQUALS(m_model->getBackgroundType(), BackgroundType::None);
+    TS_ASSERT_EQUALS(m_model->getFitType(), FitType::TwoLorentzians);
   }
 
   void
@@ -147,7 +166,9 @@ public:
     m_model->setFunction(func);
 
     TS_ASSERT_EQUALS(m_model->getCurrentFunction()->asString(),
-                     func->asString())
+                     func->asString());
+    TS_ASSERT_EQUALS(m_model->getBackgroundType(), BackgroundType::None);
+    TS_ASSERT_EQUALS(m_model->getFitType(), FitType::TwoLorentzians);
   }
 
 private:

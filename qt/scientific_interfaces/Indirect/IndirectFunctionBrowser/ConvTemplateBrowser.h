@@ -61,6 +61,7 @@ public:
   void addTempCorrection(double value);
   void removeTempCorrection();
   void setQValues(const std::vector<double> &qValues) override;
+  void setEnum(size_t subTypeIndex, int fitType);
 
 protected slots:
   void intChanged(QtProperty *) override;
@@ -103,6 +104,7 @@ private:
   ConvTemplatePresenter m_presenter;
   bool m_emitParameterValueChange = true;
   bool m_emitBoolChange = true;
+  bool m_emitEnumChange = true;
   friend class ConvTemplatePresenter;
 };
 

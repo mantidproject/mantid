@@ -99,6 +99,11 @@ inline void applyToParamIDRange(ParamID from, ParamID to,
     fun(i);
 }
 
+enum SubTypeIndex {
+  Fit = 0,
+  Background = 1,
+};
+
 struct TemplateSubType {
   virtual QString name() const = 0;
   virtual QStringList getTypeNames() const = 0;

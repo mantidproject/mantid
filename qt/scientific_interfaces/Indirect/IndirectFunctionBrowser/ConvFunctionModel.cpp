@@ -87,37 +87,50 @@ void ConvFunctionModel::checkConvolution(IFunction_sptr fun) {
         throw std::runtime_error("Function has wrong structure.");
       }
       m_hasTempCorrection = true;
-      checkConvolution(innerFunction->getFunction(1));
+      if (boost::dynamic_pointer_cast<CompositeFunction>(
+              innerFunction->getFunction(1)))
+        checkConvolution(innerFunction->getFunction(1));
+      else
+        checkSingleFunction(innerFunction->getFunction(1), isFitTypeSet);
     }
 
     else if (name == "CompositeFunction") {
       checkConvolution(innerFunction);
-    } else if (name == "Lorentzian") {
-      if (isFitTypeSet && m_fitType != FitType::OneLorentzian) {
-        throw std::runtime_error("Function has wrong structure.");
-      }
-      if (isFitTypeSet)
-        m_fitType = FitType::TwoLorentzians;
-      else
-        m_fitType = FitType::OneLorentzian;
-      m_isQDependentFunction = false;
-      isFitTypeSet = true;
-
-    } else if (FitTypeStringToEnum.count(name) == 1) {
-      if (isFitTypeSet) {
-        throw std::runtime_error(
-            "Function has wrong structure. More than one fit type set");
-      }
-      m_fitType = FitTypeStringToEnum[name];
-      m_isQDependentFunction = FitTypeQDepends[m_fitType];
-      isFitTypeSet = true;
-    } else if (name == "DeltaFunction") {
-      m_hasDeltaFunction = true;
     } else {
-      clear();
-      throw std::runtime_error(
-          "Function has wrong structure. Function not recognized");
+      checkSingleFunction(innerFunction, isFitTypeSet);
     }
+  }
+}
+
+void ConvFunctionModel::checkSingleFunction(IFunction_sptr fun,
+                                            bool &isFitTypeSet) {
+  assert(fun->nFunctions() == 0);
+  auto const name = fun->name();
+  if (name == "Lorentzian") {
+    if (isFitTypeSet && m_fitType != FitType::OneLorentzian) {
+      throw std::runtime_error("Function has wrong structure.");
+    }
+    if (isFitTypeSet)
+      m_fitType = FitType::TwoLorentzians;
+    else
+      m_fitType = FitType::OneLorentzian;
+    m_isQDependentFunction = false;
+    isFitTypeSet = true;
+
+  } else if (FitTypeStringToEnum.count(name) == 1) {
+    if (isFitTypeSet) {
+      throw std::runtime_error(
+          "Function has wrong structure. More than one fit type set");
+    }
+    m_fitType = FitTypeStringToEnum[name];
+    m_isQDependentFunction = FitTypeQDepends[m_fitType];
+    isFitTypeSet = true;
+  } else if (name == "DeltaFunction") {
+    m_hasDeltaFunction = true;
+  } else {
+    clear();
+    throw std::runtime_error(
+        "Function has wrong structure. Function not recognized");
   }
 }
 
