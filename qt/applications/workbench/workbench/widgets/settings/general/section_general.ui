@@ -237,6 +237,9 @@
             </item>
             <item>
              <widget class="QCheckBox" name="prompt_deleting_workspaces">
+              <property name="toolTip">
+               <string>Give a prompt when a workspace is deleted. Note: this will only take effect once workbench has been restarted </string>
+              </property>
               <property name="text">
                <string>Prompt when deleting workspaces</string>
               </property>
@@ -377,6 +380,9 @@
              <layout class="QHBoxLayout" name="horizontalLayout_7">
               <item>
                <widget class="QLabel" name="main_font_label">
+                <property name="toolTip">
+                 <string/>
+                </property>
                 <property name="text">
                  <string>Main Font</string>
                 </property>
@@ -389,6 +395,9 @@
                   <width>202</width>
                   <height>16777215</height>
                  </size>
+                </property>
+                <property name="toolTip">
+                 <string>Change the font used by workbench. Note: This will not take effect until workbench has been restarted.</string>
                 </property>
                 <property name="text">
                  <string>Select Font</string>
