@@ -4,7 +4,7 @@
     <component-link name="D16">
       <!-- Logs to sum when merging the runs -->
       <parameter name="sample_logs_sum" type="string">
-        <value val="time, duration" />
+        <value val="time, duration, timer" />
       </parameter>
       <!-- The pixel sizes used by SolidAngle -->
       <parameter name="x-pixel-size" type="number">
