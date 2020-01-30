@@ -49,6 +49,16 @@ class ExperimentInfoTest(unittest.TestCase):
         # No instrument in test workspace, so size is 0.
         self.assertEqual(detInfo.size(), 0)
 
+    def test_setSample(self):
+        sample = Sample()
+        sample.setThickness(12.5)
+
+        self._expt_ws.setSample(sample)
+        held = self._expt_ws.sample()
+
+        self.assertNotEqual(id(held), id(sample))
+        self.assertEqual(held.getThickness(), sample.getThickness())
+
 #    def test_set_and_get_efixed(self):
 #      ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(1, 5, False, False)
 #        ws.setEFixed(1, pi)
