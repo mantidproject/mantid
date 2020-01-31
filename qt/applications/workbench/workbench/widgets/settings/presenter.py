@@ -12,7 +12,9 @@ from qtpy.QtCore import Qt
 from mantid import ConfigService
 from mantidqt.interfacemanager import InterfaceManager
 from workbench.widgets.settings.categories.presenter import CategoriesSettings
+from workbench.widgets.settings.fitting.presenter import FittingSettings
 from workbench.widgets.settings.general.presenter import GeneralSettings
+from workbench.widgets.settings.plots.presenter import PlotSettings
 from workbench.widgets.settings.view import SettingsView
 
 
@@ -20,18 +22,25 @@ class SettingsPresenter(object):
     ASK_BEFORE_CLOSE_TITLE = "Confirm exit"
     ASK_BEFORE_CLOSE_MESSAGE = "Are you sure you want to exit without applying the settings?"
     SETTINGS_TABS = {'general_settings' : "General",
-                     'categories_settings' : "Show/Hide Categories"}
+                     'categories_settings' : "Categories",
+                     'plot_settings': "Plots",
+                     'fitting_settings' : "Fitting"}
 
-    def __init__(self, parent, view=None, general_settings=None, categories_settings=None):
+    def __init__(self, parent, view=None, general_settings=None,
+                 categories_settings=None, plot_settings=None, fitting_settings=None):
         self.view = view if view else SettingsView(parent, self)
         self.general_settings = general_settings if general_settings else GeneralSettings(parent)
         self.categories_settings = categories_settings if categories_settings else CategoriesSettings(parent)
+        self.plot_settings = plot_settings if plot_settings else PlotSettings(parent)
+        self.fitting_settings = fitting_settings if fitting_settings else FittingSettings(parent)
         self.parent = parent
 
         self.view.sections.addItems(list(self.SETTINGS_TABS.values()))
         self.current = self.general_settings.view
         self.view.container.addWidget(self.general_settings.view)
         self.view.container.addWidget(self.categories_settings.view)
+        self.view.container.addWidget(self.plot_settings.view)
+        self.view.container.addWidget(self.fitting_settings.view)
 
         self.view.save_settings_button.clicked.connect(self.action_save_settings_button)
         self.view.help_button.clicked.connect(self.action_open_help_window)

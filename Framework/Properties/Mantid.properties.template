@@ -235,3 +235,34 @@ projectRecovery.numberOfCheckpoints = 5
 # The size of the project before a warning is given in bytes.
 # 10 GB = 10737418240 bytes
 projectSaving.warningSize = 10737418240
+
+# Whether to show titles on plots
+plots.ShowTitle = On
+
+# The default scale on 1d plots. Options are Linear or Log
+plots.xAxesScale = Linear
+plots.yAxesScale = Linear
+
+# Default Line style on 1d plots. Options are solid, dashed, dotted, dashdot
+plots.line.Style = solid
+
+# Default Line width on 1d plots
+plots.line.Width = 1.5
+
+# Default marker style on 1d plots
+plots.marker.Style = None
+
+# Default maker size on 1d plots
+plots.marker.Size = 6
+
+# Default cap size on error bars in 1d plots
+plots.errorbar.Capsize = 0.0
+
+# Default cap thickness on error bars in 1d plots
+plots.errorbar.CapThickness = 1.0
+
+# Default number of error bars for every data point in 1d plots
+plots.errorbar.errorEvery = 1
+
+# Default width of error bars in 1d plots
+plots.errorbar.Width = 1.0

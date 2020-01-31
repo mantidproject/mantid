@@ -34,7 +34,7 @@
         <x>0</x>
         <y>0</y>
         <width>728</width>
-        <height>651</height>
+        <height>631</height>
        </rect>
       </property>
       <property name="sizePolicy">
@@ -125,13 +125,6 @@
              <widget class="QCheckBox" name="crystallography_convention">
               <property name="text">
                <string>Crystallography Convention</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="ignore_paraview">
-              <property name="text">
-               <string>Ignore Paraview</string>
               </property>
              </widget>
             </item>
@@ -237,6 +230,9 @@
             </item>
             <item>
              <widget class="QCheckBox" name="prompt_deleting_workspaces">
+              <property name="toolTip">
+               <string>Give a prompt when a workspace is deleted. Note: this will only take effect once workbench has been restarted </string>
+              </property>
               <property name="text">
                <string>Prompt when deleting workspaces</string>
               </property>
@@ -377,6 +373,9 @@
              <layout class="QHBoxLayout" name="horizontalLayout_7">
               <item>
                <widget class="QLabel" name="main_font_label">
+                <property name="toolTip">
+                 <string/>
+                </property>
                 <property name="text">
                  <string>Main Font</string>
                 </property>
@@ -389,6 +388,9 @@
                   <width>202</width>
                   <height>16777215</height>
                  </size>
+                </property>
+                <property name="toolTip">
+                 <string>Change the font used by workbench. Note: This will not take effect until workbench has been restarted.</string>
                 </property>
                 <property name="text">
                  <string>Select Font</string>
