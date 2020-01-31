@@ -77,10 +77,9 @@ void MCAbsorptionStrategy::calculate(
     for (int j = 0; j < nbins; j += lambdaStepSize) {
       size_t attempts(0);
       do {
-        const auto neutron = m_beamProfile.generatePoint(rng, scatterBounds);
-
         bool success = false;
         if (m_regenerateTracksForEachLambda || j == 0) {
+          const auto neutron = m_beamProfile.generatePoint(rng, scatterBounds);
           success = m_scatterVol.calculateBeforeAfterTrack(
               rng, neutron.startPos, finalPos, beforeScatter, afterScatter);
         } else {
