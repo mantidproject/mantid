@@ -14,6 +14,7 @@ Improvements
 ############
 
 - :ref:`LoadILLTOF2 <algm-LoadILLTOF-v2>` now supports data from PANTHER used in diffraction mode.
+- A unit `AtomicDistance` measured in units of Angstrom has been added to the unit factory to describe atomic structure.
 
 Powder Diffraction
 ------------------

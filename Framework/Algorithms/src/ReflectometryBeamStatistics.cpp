@@ -168,13 +168,13 @@ void ReflectometryBeamStatistics::exec() {
   API::MatrixWorkspace_sptr reflectedWS = getProperty(Prop::REFLECTED_WS);
   API::MatrixWorkspace_sptr directWS = getProperty(Prop::DIRECT_WS);
   const auto setup = createSetup(*reflectedWS, *directWS);
-  Statistics statistics;
   const auto beamFWHM =
       beamRMSVariation(reflectedWS, setup.foregroundStart, setup.foregroundEnd);
   rmsVariationToLogs(*reflectedWS, beamFWHM);
   const auto directBeamFWHM = beamRMSVariation(
       directWS, setup.directForegroundStart, setup.directForegroundEnd);
   rmsVariationToLogs(*directWS, directBeamFWHM);
+  Statistics statistics;
   statistics.incidentAngularSpread = incidentAngularSpread(setup);
   statistics.sampleWaviness = sampleWaviness(setup, beamFWHM, directBeamFWHM,
                                              statistics.incidentAngularSpread);

@@ -40,6 +40,8 @@ class MockSettingsView(object):
         self.sections = FakeSectionsListWidget()
         self.general_settings = FakeMVP()
         self.categories_settings = FakeMVP()
+        self.plot_settings = FakeMVP()
+        self.fitting_settings = FakeMVP()
         self.save_settings_button = MockQButton()
         self.help_button = MockQButton()
 
@@ -49,7 +51,9 @@ class SettingsPresenterTest(TestCase):
         mock_view = MockSettingsView()
         SettingsPresenter(None, view=mock_view,
                           general_settings=mock_view.general_settings,
-                          categories_settings=mock_view.categories_settings)
+                          categories_settings=mock_view.categories_settings,
+                          plot_settings=mock_view.plot_settings,
+                          fitting_settings=mock_view.fitting_settings)
 
         expected_calls = [call(mock_view.general_settings.view), call(mock_view.categories_settings.view)]
         mock_view.container.addWidget.assert_has_calls(expected_calls)
@@ -58,7 +62,9 @@ class SettingsPresenterTest(TestCase):
         mock_view = MockSettingsView()
         presenter = SettingsPresenter(None, view=mock_view,
                                       general_settings=mock_view.general_settings,
-                                      categories_settings=mock_view.categories_settings)
+                                      categories_settings=mock_view.categories_settings,
+                                      plot_settings=mock_view.plot_settings,
+                                      fitting_settings=mock_view.fitting_settings)
 
         mock_view.sections.item = Mock()
         mock_view.sections.item().text = Mock(return_value = presenter.SETTINGS_TABS['categories_settings'])

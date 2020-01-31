@@ -470,6 +470,11 @@ public:
 %MethodCode
     sipCpp->setDefaultPeakType(TO_CSTRING(a0));
 %End
+SIP_PYOBJECT defaultBackgroundType();
+%MethodCode
+    auto f = sipCpp->defaultBackgroundType();
+    sipRes = FROM_CSTRING(f.c_str());
+%End
     QStringList registeredPeaks() const;
     QStringList registeredBackgrounds() const;
     QStringList registeredOthers() const;

@@ -6,7 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/IPeakFunction.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/api/PythonAlgorithm/AlgorithmAdapter.h"
 #include "MantidPythonInterface/core/GetPointer.h"
@@ -23,7 +25,9 @@
 
 using Mantid::API::FunctionFactory;
 using Mantid::API::FunctionFactoryImpl;
+using Mantid::API::IBackgroundFunction;
 using Mantid::API::IFunction;
+using Mantid::API::IPeakFunction;
 using Mantid::PythonInterface::PythonObjectInstantiator;
 
 using namespace boost::python;
@@ -85,6 +89,52 @@ PyObject *getFunctionNames(FunctionFactoryImpl &self) {
     PyObject *value = to_python_value<const std::string &>()(name);
     if (PyList_Append(registered, value))
       throw std::runtime_error("Failed to insert value into PyList");
+  }
+
+  return registered;
+}
+
+//------------------------------------------------------------------------------------------------------
+/**
+ * Something that returns the registered background functions as a list.
+ * @param self :: Enables it to be called as a member function on the
+ * FunctionFactory class
+ */
+PyObject *getBackgroundFunctionNames(FunctionFactoryImpl &self) {
+  const std::vector<std::string> &names =
+      self.getFunctionNames<Mantid::API::IFunction>();
+
+  PyObject *registered = PyList_New(0);
+  for (const auto &name : names) {
+    auto fun = self.createFunction(name);
+    if (dynamic_cast<IBackgroundFunction *>(fun.get())) {
+      PyObject *bkg_function = to_python_value<const std::string &>()(name);
+      if (PyList_Append(registered, bkg_function))
+        throw std::runtime_error("Failed to insert value into PyList");
+    }
+  }
+
+  return registered;
+}
+
+//------------------------------------------------------------------------------------------------------
+/**
+ * Something that returns the registered peak functions as a list.
+ * @param self :: Enables it to be called as a member function on the
+ * FunctionFactory class
+ */
+PyObject *getPeakFunctionNames(FunctionFactoryImpl &self) {
+  const std::vector<std::string> &names =
+      self.getFunctionNames<Mantid::API::IFunction>();
+
+  PyObject *registered = PyList_New(0);
+  for (const auto &name : names) {
+    auto fun = self.createFunction(name);
+    if (dynamic_cast<IPeakFunction *>(fun.get())) {
+      PyObject *peak_function = to_python_value<const std::string &>()(name);
+      if (PyList_Append(registered, peak_function))
+        throw std::runtime_error("Failed to insert value into PyList");
+    }
   }
 
   return registered;
@@ -180,5 +230,10 @@ void export_FunctionFactory() {
       .def("Instance", &FunctionFactory::Instance,
            return_value_policy<reference_existing_object>(),
            "Returns a reference to the FunctionFactory singleton")
+      .def("getBackgroundFunctionNames", &getBackgroundFunctionNames,
+           arg("self"),
+           "Returns a list of the currently available background functions")
+      .def("getPeakFunctionNames", &getPeakFunctionNames, arg("self"),
+           "Returns a list of the currently available peak functions")
       .staticmethod("Instance");
 }

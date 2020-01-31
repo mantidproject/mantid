@@ -27,7 +27,6 @@ class GeneralSettings(object):
 
     CRYSTALLOGRAPY_CONV = "Q.convention"
     FONT = "MainWindow/font"
-    IGNORE_PARAVIEW = "paraview.ignore"
     INSTRUMENT = "default.instrument"
     OPENGL = "MantidOptions.InstrumentView.UseOpenGL"
     SHOW_INVISIBLE_WORKSPACES = "MantidOptions.InvisibleWorkspaces"
@@ -93,7 +92,6 @@ class GeneralSettings(object):
         self.view.project_recovery_enabled.stateChanged.connect(self.action_project_recovery_enabled)
         self.view.time_between_recovery.valueChanged.connect(self.action_time_between_recovery)
         self.view.total_number_checkpoints.valueChanged.connect(self.action_total_number_checkpoints)
-        self.view.ignore_paraview.stateChanged.connect(self.action_ignore_paraview)
         self.view.crystallography_convention.stateChanged.connect(self.action_crystallography_convention)
         self.view.use_open_gl.stateChanged.connect(self.action_use_open_gl)
 
@@ -137,7 +135,6 @@ class GeneralSettings(object):
         pr_time_between_recovery = int(ConfigService.getString(self.PR_TIME_BETWEEN_RECOVERY))
         pr_number_checkpoints = int(ConfigService.getString(self.PR_NUMBER_OF_CHECKPOINTS))
         use_notifications_setting = ("on" == ConfigService.getString(self.USE_NOTIFICATIONS).lower())
-        ignore_paraview_setting = bool(int(ConfigService.getString(self.IGNORE_PARAVIEW)))
         crystallography_convention = ("Crystallography" == ConfigService.getString(self.CRYSTALLOGRAPY_CONV))
         use_open_gl = ("on" == ConfigService.getString(self.OPENGL).lower())
 
@@ -145,7 +142,6 @@ class GeneralSettings(object):
         self.view.time_between_recovery.setValue(pr_time_between_recovery)
         self.view.total_number_checkpoints.setValue(pr_number_checkpoints)
         self.view.use_notifications.setChecked(use_notifications_setting)
-        self.view.ignore_paraview.setChecked(ignore_paraview_setting)
         self.view.crystallography_convention.setChecked(crystallography_convention)
         self.view.use_open_gl.setChecked(use_open_gl)
 
@@ -157,9 +153,6 @@ class GeneralSettings(object):
 
     def action_total_number_checkpoints(self, value):
         ConfigService.setString(self.PR_NUMBER_OF_CHECKPOINTS, str(value))
-
-    def action_ignore_paraview(self, state):
-        ConfigService.setString(self.IGNORE_PARAVIEW, str(int(bool(state))))
 
     def action_crystallography_convention(self, state):
         ConfigService.setString(self.CRYSTALLOGRAPY_CONV, "Crystallography" if state == Qt.Checked else "Inelastic")

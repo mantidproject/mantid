@@ -26,7 +26,7 @@ from matplotlib.legend import Legend
 
 # local imports
 from mantid.api import AnalysisDataService, MatrixWorkspace
-from mantid.kernel import Logger
+from mantid.kernel import Logger, ConfigService
 from mantid.plots import helperfunctions, MantidAxes
 from mantidqt.plotting.figuretype import figure_type, FigureType
 from mantid.py3compat import is_text_string, string_types
@@ -39,6 +39,19 @@ PROJECTION = 'mantid'
 SUBPLOT_WSPACE = 0.5
 SUBPLOT_HSPACE = 0.5
 LOGGER = Logger("workspace.plotting.functions")
+
+MARKER_MAP = {'square': 's', 'plus (filled)': 'P', 'point': '.', 'tickdown': 3,
+              'triangle_right': '>', 'tickup': 2, 'hline': '_', 'vline': '|',
+              'pentagon': 'p', 'tri_left': '3', 'caretdown': 7,
+              'caretright (centered at base)': 9, 'tickright': 1,
+              'caretright': 5, 'caretleft': 4, 'tickleft': 0, 'tri_up': '2',
+              'circle': 'o', 'pixel': ',', 'caretleft (centered at base)': 8,
+              'diamond': 'D', 'star': '*', 'hexagon1': 'h', 'octagon': '8',
+              'hexagon2': 'H', 'tri_right': '4', 'x (filled)': 'X',
+              'thin_diamond': 'd', 'tri_down': '1', 'triangle_left': '<',
+              'plus': '+', 'triangle_down': 'v', 'triangle_up': '^', 'x': 'x',
+              'caretup': 6, 'caretup (centered at base)': 10,
+              'caretdown (centered at base)': 11, 'None': 'None'}
 
 
 # -----------------------------------------------------------------------------
@@ -172,6 +185,16 @@ def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=
     else:
         fig, _, _, _ = _create_subplots(axes_num)
 
+    if not ax_properties:
+        ax_properties = {}
+        if ConfigService.getString("plots.xAxesScale").lower() == 'log':
+            ax_properties['xscale'] = 'log'
+        else:
+            ax_properties['xscale'] = 'linear'
+        if ConfigService.getString("plots.yAxesScale").lower() == 'log':
+            ax_properties['yscale'] = 'log'
+        else:
+            ax_properties['yscale'] = 'linear'
     if ax_properties:
         for axis in fig.axes:
             axis.set(**ax_properties)
@@ -212,6 +235,8 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
     else:
         kw, nums = 'wkspIndex', wksp_indices
 
+    _add_default_plot_kwargs_from_settings(plot_kwargs, errors)
+
     num_axes = len(workspaces) * len(nums) if tiled else 1
 
     fig, axes = get_plot_fig(overplot, ax_properties, window_title, num_axes, fig)
@@ -229,13 +254,10 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
             else:
                 ax.axis('off')
     else:
-        if isinstance(overplot, MantidAxes):
-            ax = overplot
-        else:
-            ax = axes[0]
-
+        show_title = ("on" == ConfigService.getString("plots.ShowTitle").lower()) and not overplot
+        ax = overplot if isinstance(overplot, MantidAxes) else axes[0]
         ax.axis('on')
-        _do_single_plot(ax, workspaces, errors, not overplot, nums, kw, plot_kwargs)
+        _do_single_plot(ax, workspaces, errors, show_title, nums, kw, plot_kwargs)
 
     # Can't have a waterfall plot with only one line.
     if len(nums) == 1 and waterfall:
@@ -278,6 +300,26 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
         pass
 
     return fig
+
+
+def _add_default_plot_kwargs_from_settings(plot_kwargs, errors):
+    if 'linestyle' not in plot_kwargs:
+        plot_kwargs['linestyle'] = ConfigService.getString("plots.line.Style")
+    if 'linewidth' not in plot_kwargs:
+        plot_kwargs['linewidth'] = float(ConfigService.getString("plots.line.Width"))
+    if 'marker' not in plot_kwargs:
+        plot_kwargs['marker'] = MARKER_MAP[ConfigService.getString("plots.marker.Style")]
+    if 'markersize' not in plot_kwargs:
+        plot_kwargs['markersize'] = float(ConfigService.getString("plots.marker.Size"))
+    if errors:
+        if 'capsize' not in plot_kwargs:
+            plot_kwargs['capsize'] = float(ConfigService.getString("plots.errorbar.Capsize"))
+        if 'capthick' not in plot_kwargs:
+            plot_kwargs['capthick'] = float(ConfigService.getString("plots.errorbar.CapThickness"))
+        if 'errorevery' not in plot_kwargs:
+            plot_kwargs['errorevery'] = int(ConfigService.getString("plots.errorbar.errorEvery"))
+        if 'elinewidth' not in plot_kwargs:
+            plot_kwargs['elinewidth'] = float(ConfigService.getString("plots.errorbar.Width"))
 
 
 def _do_single_plot(ax, workspaces, errors, set_title, nums, kw, plot_kwargs):
