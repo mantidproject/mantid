@@ -100,7 +100,10 @@ class FunctionWrapper(object):
         if type(name) == type('string') and self.fun.hasAttribute(name):
             return self.fun.getAttributeValue(name)
         else:
-            return self.fun.getParameterValue(name)
+            if self.fun.hasParameter(name):
+                return self.fun.getParameterValue(name)
+            else:
+                raise AttributeError("Parameter not found")
 
     def __setitem__ (self, name, value):
         """
