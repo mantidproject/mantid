@@ -333,11 +333,8 @@ void PDFFourierTransform::exec() {
 
   // create the output workspace
   API::MatrixWorkspace_sptr outputWS = create<Workspace2D>(1, Points(sizer));
-  outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
-  Unit_sptr unit = outputWS->getAxis(0)->unit();
-  boost::shared_ptr<Units::Label> label =
-      boost::dynamic_pointer_cast<Units::Label>(unit);
-  label->setLabel("AtomicDistance", "Angstrom");
+  outputWS->getAxis(0)->unit() =
+      UnitFactory::Instance().create("AtomicDistance");
   outputWS->setYUnitLabel("PDF");
 
   outputWS->mutableRun().addProperty("Qmin", inputQ[qmin_index], "Angstroms^-1",

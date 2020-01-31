@@ -1253,6 +1253,42 @@ double Temperature::conversionTOFMax() const {
 
 Unit *Temperature::clone() const { return new Temperature(*this); }
 
+// =====================================================================================================
+/* Atomic Distance in units of Angstroms
+ * =====================================================================================================
+ *
+ * The distance from the center of an atom in Angstroms
+ */
+DECLARE_UNIT(AtomicDistance)
+
+AtomicDistance::AtomicDistance() : Empty(), m_label("Atomic Distance") {}
+
+const UnitLabel AtomicDistance::label() const { return Symbol::Angstrom; }
+
+void AtomicDistance::init() {}
+
+Unit *AtomicDistance::clone() const { return new AtomicDistance(*this); }
+
+double AtomicDistance::singleToTOF(const double x) const {
+  UNUSED_ARG(x);
+  throw std::runtime_error(
+      "Atomic Distance is not allowed to be converted to TOF. ");
+}
+
+double AtomicDistance::singleFromTOF(const double tof) const {
+  UNUSED_ARG(tof);
+  throw std::runtime_error(
+      "Atomic Distance is not allowed to be converted from TOF. ");
+}
+
+double AtomicDistance::conversionTOFMin() const {
+  return std::numeric_limits<double>::quiet_NaN();
+}
+
+double AtomicDistance::conversionTOFMax() const {
+  return std::numeric_limits<double>::quiet_NaN();
+}
+
 // ================================================================================
 
 double timeConversionValue(std::string input_unit, std::string output_unit) {
