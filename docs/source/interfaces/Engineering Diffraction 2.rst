@@ -105,8 +105,12 @@ In order to use the tab, a new or existing calibration must be created or loaded
 Currently, the focusing tab only supports one focusing mode:
 
 - **Normal Focusing:**
-    The user is able to select which banks they want to focus, and all the spectra from those banks will be considered.
+    A run number can be entered and both banks will be focused.
     The output workspaces will have a suffix denoting which bank they are for.
+
+- **Cropped Focusing:**
+    The entered workspace can be cropped to one of the two banks or to a user defined set of spectra.
+    Custom cropped workspaces will have the suffix "cropped".
 
 The focused data files are saved in NeXus format to:
 
@@ -122,6 +126,13 @@ Parameters
 
 Sample Run Number
     The run number or file path to the data file to be focused.
+    
+Bank/Spectra
+    Select which bank to restrict the focusing to or allow for the entry of custom spectra. 
+
+Custom Spectra
+    A comma separated list of spectra to restrict the calibration to. Can be provided as single spectrum numbers
+    or ranges using hyphens (e.g. 14-150, 405, 500-600).
 
 Fitting
 -------

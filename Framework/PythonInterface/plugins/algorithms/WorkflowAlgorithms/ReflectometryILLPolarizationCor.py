@@ -44,7 +44,7 @@ class ReflectometryILLPolarizationCor(DataProcessorAlgorithm):
 
     def seeAlso(self):
         """Return a list of related algorithm names."""
-        return ['ReflectometryILLConvertToQ', 'ReflectometryILLPreprocess', 'ReflectometryILLSumForeground']
+        return ['ReflectometryILLConvertToQ', 'ReflectometryILLPreprocess', 'ReflectometryILLSumForeground', 'ReflectometryILLAutoProcess']
 
     def version(self):
         """Return the version of the algorithm."""

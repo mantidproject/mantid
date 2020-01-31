@@ -126,6 +126,18 @@ else
     SCL_ENABLE="eval"
 fi
 
+# Check if this is a Python 2 build and set CMake arguments.
+PY2_BUILD=false
+PY3_BUILD=false
+if [[ ${JOB_NAME} == *python2* ]]; then
+    PY2_BUILD=true
+    DIST_FLAGS="${DIST_FLAGS} -DWITH_PYTHON3=OFF"
+else
+    PY3_BUILD=true
+    DIST_FLAGS="${DIST_FLAGS} -DWITH_PYTHON3=ON"
+    PARAVIEW_DIR="${PARAVIEW_DIR}-python3"
+fi
+
 # For pull requests decide on what to build based on changeset and Jenkins
 # parameters.
 DO_BUILD_CODE=true
@@ -147,8 +159,10 @@ if [[ ${PRBUILD} == true ]]; then
     if [[ ${ON_RHEL7} == true ]]; then
         # rhel does system testing
         if ! ${SCRIPT_DIR}/check_for_changes docs-gui-only; then
-            DO_BUILD_PKG=true
-            DO_SYSTEMTESTS=true
+            if [[ ${PY3_BUILD} == true ]]; then
+               DO_BUILD_PKG=true
+               DO_SYSTEMTESTS=true
+            fi
         fi
         elif [[ ${ON_UBUNTU} == true ]]; then
         # ubuntu does the docs build
@@ -246,12 +260,6 @@ if [ -z "$MANTID_DATA_STORE" ]; then
 fi
 
 ###############################################################################
-# Check if this is a Python 3 build and set CMake arguments.
-###############################################################################
-DIST_FLAGS="${DIST_FLAGS} -DWITH_PYTHON3=ON"
-PARAVIEW_DIR="${PARAVIEW_DIR}-python3"
-
-###############################################################################
 # Packaging options
 ###############################################################################
 if [[ ${DO_BUILD_PKG} == true ]]; then
@@ -274,7 +282,7 @@ if [[ ${DO_BUILD_PKG} == true ]]; then
         fi
 
         if [[ ${JOB_NAME} == *release* ]] && [[ -z "${PACKAGE_SUFFIX}" ]]; then
-            # Traditional install path for python 2 release build
+            # Traditional install path for release build
             PACKAGINGVARS="${PACKAGINGVARS} -DCMAKE_INSTALL_PREFIX=/opt/Mantid -DCPACK_PACKAGE_SUFFIX="
         else
             # everything else uses lower-case values

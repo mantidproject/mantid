@@ -15,6 +15,7 @@ from qtpy.QtWidgets import QApplication, QMessageBox, QVBoxLayout
 from mantid.api import AnalysisDataService, WorkspaceGroup
 from mantid.kernel import logger
 from mantidqt.plotting.functions import can_overplot, pcolormesh, plot, plot_from_names
+from mantid.plots.utility import MantidAxType
 from mantid.simpleapi import CreateDetectorTable
 from mantidqt.utils.asynchronous import BlockingAsyncTaskWithCallback
 from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
@@ -44,6 +45,8 @@ class WorkspaceWidget(PluginWidget):
         # behaviour
         self.workspacewidget.plotSpectrumClicked.connect(partial(self._do_plot_spectrum,
                                                                  errors=False, overplot=False))
+        self.workspacewidget.plotBinClicked.connect(partial(self._do_plot_bin,
+                                                            errors=False, overplot=False))
         self.workspacewidget.overplotSpectrumClicked.connect(partial(self._do_plot_spectrum,
                                                                      errors=False, overplot=True))
         self.workspacewidget.plotSpectrumWithErrorsClicked.connect(partial(self._do_plot_spectrum,
@@ -92,6 +95,24 @@ class WorkspaceWidget(PluginWidget):
                 return
 
         plot_from_names(names, errors, overplot)
+
+    def _do_plot_bin(self, names, errors, overplot):
+        """
+        Plot a single bin from the selected workspaces
+
+        :param names: A list of workspace names
+        :param errors: If true then error bars will be plotted on the points
+        :param overplot: If true then the add to the current figure if one
+                         exists and it is a compatible figure
+        """
+        if overplot:
+            compatible, error_msg = can_overplot()
+            if not compatible:
+                QMessageBox.warning(self, "", error_msg)
+                return
+        plot_kwargs = {"axis": MantidAxType.BIN}
+        plot(self._ads.retrieveWorkspaces(names, unrollGroups=True), errors=errors,
+             overplot=overplot,wksp_indices=[0], plot_kwargs=plot_kwargs)
 
     def _do_plot_colorfill(self, names):
         """
@@ -210,10 +231,12 @@ class WorkspaceWidget(PluginWidget):
             TableWorkspaceDisplay.supports(ws)
             self._do_show_data([name])
         except ValueError:
-            if ws.blocksize() > 1:
-                plot_from_names([name], errors=False, overplot=False, show_colorfill_btn=True)
+            if ws.blocksize() == 1:
+                #this is just single bin data, it makes more sense to plot the bin
+                plot_kwargs = {"axis": MantidAxType.BIN}
+                plot([ws],errors=False, overplot=False, wksp_indices=[0], plot_kwargs=plot_kwargs)
             else:
-                self._do_show_data([name])
+                plot_from_names([name], errors=False, overplot=False, show_colorfill_btn=True)
 
     def refresh_workspaces(self):
         self.workspacewidget.refreshWorkspaces()

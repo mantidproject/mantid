@@ -371,6 +371,7 @@ class WorkspaceTreeWidgetSimple : WorkspaceTreeWidget {
 public:
   WorkspaceTreeWidgetSimple(bool viewOnly=false, QWidget *parent /TransferThis/ = nullptr);
   void refreshWorkspaces();
+  void enableDeletePrompt(bool enable);
 
 signals:
   void plotSpectrumClicked(const QStringList & workspaceNames);

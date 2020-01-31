@@ -64,7 +64,7 @@ New Algorithms
 ##############
 
 - New algorithm :ref:`PredictSatellitePeaks <algm-PredictSatellitePeaks>` to predict satellite peaks using modulation vectors and maximum order of satellite from PeaksWorkspace or range of wavelength and DSpacing.
-- New algorithm :ref:`IndexPeaksWithSatellites <algm-IndexPeaksWithSatellites>` to index peaks with satellites and set modulation vectors and maximum order of satellite from input values.
+- New algorithm ``IndexPeaksWithSatellites`` to index peaks with satellites and set modulation vectors and maximum order of satellite from input values.
 
 
 Improvements

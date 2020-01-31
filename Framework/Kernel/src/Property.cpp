@@ -351,6 +351,7 @@ std::string getUnmangledTypeName(const std::type_info &type) {
     typestrings.emplace(typeid(string).name(), string("string"));
     typestrings.emplace(typeid(std::vector<string>).name(), string("str list"));
     typestrings.emplace(typeid(std::vector<int>).name(), string("int list"));
+    typestrings.emplace(typeid(std::vector<long>).name(), string("long list"));
     typestrings.emplace(typeid(std::vector<int64_t>).name(),
                         string("int list"));
     typestrings.emplace(typeid(std::vector<size_t>).name(),

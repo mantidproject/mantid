@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import re
 
-ENGINX_MAX_SPECTRA = 2513
+ENGINX_MAX_SPECTRA = 2400  # 2512 spectra appear in the ws. But from testing, anything > 2400 doesn't work.
 VALID_PUNCT = [",", " ", "-"]
 SPLITTING_REGEX = ",|-"
 
@@ -22,7 +22,7 @@ class CroppingModel(object):
                 numbers = self._clean_spectrum_numbers(numbers)
                 return "", numbers
             else:
-                return "Invalid spectrum numbers entered. Limits are 0-" + str(ENGINX_MAX_SPECTRA), ""
+                return "Invalid spectrum numbers entered. Limits are 1-" + str(ENGINX_MAX_SPECTRA), ""
         except ValueError as e:
             return str(e), ""
 
@@ -48,7 +48,7 @@ class CroppingModel(object):
     @staticmethod
     def validate_spectrum(number):
         number = number.strip()
-        return number.isdigit() and 0 <= int(number) <= ENGINX_MAX_SPECTRA
+        return number.isdigit() and 1 <= int(number) <= ENGINX_MAX_SPECTRA
 
     def _clean_spectrum_numbers(self, numbers):
         numbers = [word.strip() for word in numbers.split(",")]

@@ -9,7 +9,6 @@
 
 #include "MantidAPI/Sample.h"
 #include "MantidCrystal/IndexPeaks.h"
-#include "MantidCrystal/IndexPeaksWithSatellites.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
