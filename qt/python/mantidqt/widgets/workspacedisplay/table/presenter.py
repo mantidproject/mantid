@@ -27,13 +27,13 @@ class TableWorkspaceDataPresenter(object):
     Useful for other widgets wishing to embed just the table display"""
     __slots__ = ("model", "view")
 
-    def __init__(self, ws, parent=None, model=None, view=None, ):
+    def __init__(self, model=None, view=None):
         """
         :param model: A reference to the model holding the table information
         :param view: A reference to the view that is displayed to the user
         """
-        self.model = model if model is not None else TableWorkspaceDisplayModel(ws)
-        self.view = view if view else TableWorkspaceDisplayView(self, parent)
+        self.model = model
+        self.view = view
 
     def refresh(self):
         """Fully refresh the display. Updates column headers and reloads the data"""
@@ -128,7 +128,10 @@ class TableWorkspaceDisplay(TableWorkspaceDataPresenter, ObservingPresenter, Dat
         :param ads_observer: ADS observer to be used by the presenter. If not provided the default
                              one is used. Mainly intended for testing.
         """
-        TableWorkspaceDataPresenter.__init__(self, ws, parent, model, view)
+        model = model if model is not None else TableWorkspaceDisplayModel(ws)
+        view = view if view else TableWorkspaceDisplayView(self, parent)
+        TableWorkspaceDataPresenter.__init__(self, model, view)
+
         self.name = name if name else self.model.get_name()
         self.container = container if container else StatusBarView(parent, self.view, self.name,
                                                                    window_width=window_width,
