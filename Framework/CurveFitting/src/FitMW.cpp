@@ -342,6 +342,9 @@ FitMW::createOutputWorkspace(const std::string &baseName,
       auto &Y = mws.mutableY(ispec);
       std::transform(binWidths.begin() + 1, binWidths.end(), Y.begin(),
                      Y.begin(), std::multiplies<double>());
+      auto& E = mws.mutableE(ispec);
+      std::transform(binWidths.begin() + 1, binWidths.end(), E.begin(),
+        E.begin(), std::multiplies<double>());
     }
   }
   return ws;
