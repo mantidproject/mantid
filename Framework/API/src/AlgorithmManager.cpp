@@ -234,14 +234,13 @@ std::vector<IAlgorithm_const_sptr> AlgorithmManagerImpl::runningInstancesOf(
 
 /// Returns all running (& managed) occurances of any algorithm, oldest
 /// first
-std::vector<IAlgorithm_const_sptr> AlgorithmManagerImpl::runningInstances() const {
+std::vector<IAlgorithm_const_sptr>
+AlgorithmManagerImpl::runningInstances() const {
   std::vector<IAlgorithm_const_sptr> theRunningInstances;
   std::lock_guard<std::mutex> _lock(this->m_managedMutex);
   std::copy_if(m_managed_algs.cbegin(), m_managed_algs.cend(),
                std::back_inserter(theRunningInstances),
-               [](const auto &algorithm) {
-                 return algorithm->isRunning();
-               });
+               [](const auto &algorithm) { return algorithm->isRunning(); });
   return theRunningInstances;
 }
 
