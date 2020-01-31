@@ -448,10 +448,11 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.presenter.manual_selection_made = False
         self.presenter.get_workspace_selected_list = mock.Mock()
         self.presenter.clear_and_reset_gui_state = mock.Mock()
-        self.presenter.update_selected_workspace_guess()
+        self.presenter.update_selected_workspace_list_for_fit()
         self.assertEqual(self.presenter.get_workspace_selected_list.call_count, 1)
 
     def test_update_selected_ws_guess_non(self):
+        self.view.is_simul_fit = mock.MagicMock(return_value=True)
         self.presenter.manual_selection_made = True
         self.presenter.update_selected_time_workspace_guess = mock.Mock()
         self.presenter.update_selected_frequency_workspace_guess = mock.Mock()
@@ -460,7 +461,7 @@ class FittingTabPresenterTest(unittest.TestCase):
 
         self.presenter.selected_data = before
 
-        self.presenter.update_selected_workspace_guess()
+        self.presenter.update_selected_workspace_list_for_fit()
         self.assertEqual(self.presenter.update_selected_frequency_workspace_guess.call_count, 0)
         self.assertEqual(self.presenter.update_selected_time_workspace_guess.call_count, 0)
         self.assertEqual(self.presenter.selected_data, before)
