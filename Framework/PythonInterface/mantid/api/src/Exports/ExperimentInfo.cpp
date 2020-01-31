@@ -123,6 +123,5 @@ void export_ExperimentInfo() {
            ":class:`~mantid.geometry.ComponentInfo` "
            "object.")
       .def("setSample", setSample, args("self", "sample"))
-      .def("setRun", setRun, args("self", "run"))
-      ;
+      .def("setRun", setRun, args("self", "run"));
 }
