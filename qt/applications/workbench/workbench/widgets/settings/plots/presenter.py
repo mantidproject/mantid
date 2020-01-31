@@ -11,7 +11,7 @@ from __future__ import absolute_import, unicode_literals
 
 from mantid.kernel import ConfigService
 from workbench.widgets.settings.plots.view import PlotsSettingsView
-from workbench.plotting.figureinteraction import VALID_LINE_STYLE
+from workbench.plotting.style import VALID_LINE_STYLE
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.markertabwidget.view import MARKER_STYLES
 
 from qtpy.QtCore import Qt

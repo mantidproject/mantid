@@ -82,7 +82,7 @@ class CategoriesSettings(object):
 
     def set_interface_tree_categories(self):
         widget = self.view.interface_tree_widget
-        widget.setHeaderLabel("Show Interface Categories")
+        widget.setHeaderLabel("Show/Hide Interface Categories")
         interfaces = []
         if self.parent:
             interfaces = self.parent.interface_list
@@ -98,7 +98,7 @@ class CategoriesSettings(object):
 
     def set_algorithm_tree_categories(self):
         widget = self.view.algorithm_tree_widget
-        widget.setHeaderLabel("Show Algorithm Categories")
+        widget.setHeaderLabel("Show/Hide Algorithm Categories")
         category_map = AlgorithmFactory.Instance().getCategoriesandState()
         self._set_tree_categories(widget, category_map)
 

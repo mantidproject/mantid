@@ -90,9 +90,6 @@ class GeneralSettingsTest(unittest.TestCase):
     def test_setup_checkbox_signals(self):
         presenter = GeneralSettings(None)
 
-        self.assert_connected_once(presenter.view.ignore_paraview,
-                                   presenter.view.ignore_paraview.stateChanged)
-
         self.assert_connected_once(presenter.view.crystallography_convention,
                                    presenter.view.crystallography_convention.stateChanged)
 
@@ -194,7 +191,6 @@ class GeneralSettingsTest(unittest.TestCase):
                                                        call(GeneralSettings.PR_TIME_BETWEEN_RECOVERY),
                                                        call(GeneralSettings.PR_NUMBER_OF_CHECKPOINTS),
                                                        call(GeneralSettings.USE_NOTIFICATIONS),
-                                                       call(GeneralSettings.IGNORE_PARAVIEW),
                                                        call(GeneralSettings.CRYSTALLOGRAPY_CONV),
                                                        call(GeneralSettings.OPENGL)])
 
@@ -241,20 +237,6 @@ class GeneralSettingsTest(unittest.TestCase):
         new_instr = "apples"
         presenter.action_instrument_changed(new_instr)
         mock_ConfigService.setString.assert_called_once_with(GeneralSettings.INSTRUMENT, new_instr)
-
-    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
-    def test_action_ignore_paraview(self, mock_ConfigService):
-        presenter = GeneralSettings(None)
-        # reset any effects from the constructor
-        mock_ConfigService.setString.reset_mock()
-
-        presenter.action_ignore_paraview(Qt.Checked)
-        mock_ConfigService.setString.assert_called_once_with(GeneralSettings.IGNORE_PARAVIEW, "1")
-
-        mock_ConfigService.setString.reset_mock()
-
-        presenter.action_ignore_paraview(Qt.Unchecked)
-        mock_ConfigService.setString.assert_called_once_with(GeneralSettings.IGNORE_PARAVIEW, "0")
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_crystallography_convention(self, mock_ConfigService):

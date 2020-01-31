@@ -22,7 +22,7 @@ class SettingsPresenter(object):
     ASK_BEFORE_CLOSE_TITLE = "Confirm exit"
     ASK_BEFORE_CLOSE_MESSAGE = "Are you sure you want to exit without applying the settings?"
     SETTINGS_TABS = {'general_settings' : "General",
-                     'categories_settings' : "Show/Hide Categories",
+                     'categories_settings' : "Categories",
                      'plot_settings': "Plots",
                      'fitting_settings' : "Fitting"}
 
