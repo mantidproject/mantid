@@ -28,6 +28,7 @@ Improvements
 - Normalization options have been added to 2d plots and sliceviewer.
 - An exclude property has been added to the fit property browser
 - The images tab in figure options no longer forces the max value to be greater than the min value.
+- The algorithm progress details dialog now fills immediately with all running algorithms rather than waiting for a progress update for the algorithm to appear.
 - Double clicking on a workspace that only has a single bin of data (for example from a constant wavelength source) will now plot that bin, also for single bin workspaces a plot bin option has been added to the right click plot menu of the workspace.
 
 

@@ -41,9 +41,10 @@ protected:
   void closeEvent(QCloseEvent *event) override;
 
 private:
-  std::unique_ptr<AlgorithmProgressDialogPresenter> m_presenter;
   /// Owned by this dialog, will be deleted on close
   QTreeWidget *m_tree;
+  std::unique_ptr<AlgorithmProgressDialogPresenter> m_presenter;
+
 };
 
 /*
