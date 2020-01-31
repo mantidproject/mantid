@@ -265,7 +265,11 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
 
     def enable_simul_fit_options(self):
         self.simul_fit_by_combo.setEnabled(True)
-        self.simul_fit_by_specifier.setEnabled(True)
+        if self.simultaneous_fit_by == "Custom":
+            self.simul_fit_by_specifier.setEnabled(False)
+            self.select_workspaces_to_fit_button.setEnabled(True)
+        else:
+            self.simul_fit_by_specifier.setEnabled(True)
 
     def is_simul_fit(self):
         return self.simul_fit_checkbox.isChecked()

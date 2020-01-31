@@ -10,6 +10,7 @@ from Muon.GUI.Common.fitting_tab_widget.workspace_selector_view import Workspace
 from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
 from Muon.GUI.Common import thread_model
+from Muon.GUI.Common.ADSHandler.workspace_naming import get_run_number_from_workspace_name, get_group_or_pair_from_name
 from mantid.api import MultiDomainFunction, AnalysisDataService
 import functools
 import re
@@ -37,7 +38,7 @@ class FittingTabPresenter(object):
         self.automatically_update_fit_name = True
         self.thread_success = True
         self.fitting_calculation_model = None
-        self.update_selected_workspace_guess()
+        self.update_selected_workspace_list_for_fit()
         self.gui_context_observer = GenericObserverWithArgPassing(
             self.handle_gui_changes_made)
         self.selected_group_pair_observer = GenericObserver(
@@ -86,7 +87,7 @@ class FittingTabPresenter(object):
 
     def handle_new_data_loaded(self):
         self.manual_selection_made = False
-        self.update_selected_workspace_guess()
+        self.update_selected_workspace_list_for_fit()
 
     def handle_gui_changes_made(self, changed_values):
         for key in changed_values.keys():
@@ -94,11 +95,11 @@ class FittingTabPresenter(object):
                 self.reset_start_time_to_first_good_data_value()
 
     def handle_selected_group_pair_changed(self):
-        self.update_selected_workspace_guess()
+        self.update_selected_workspace_list_for_fit()
 
     def handle_selected_plot_type_changed(self, plot_type):
         self._plot_type = plot_type
-        self.update_selected_workspace_guess()
+        self.update_selected_workspace_list_for_fit()
 
     def handle_display_workspace_changed(self):
         current_index = self.view.get_index_for_start_end_times()
@@ -115,7 +116,7 @@ class FittingTabPresenter(object):
             return
 
         if not self.manual_selection_made:
-            self.update_selected_workspace_guess()
+            self.update_selected_workspace_list_for_fit()
         else:
             self.selected_data = self.context.get_list_of_binned_or_unbinned_workspaces_from_equivalents(
                 self.selected_data)
@@ -303,8 +304,9 @@ class FittingTabPresenter(object):
         self._number_of_fits_cached = 0
 
     def handle_fit_by_changed(self):
+        self.manual_selection_made = False  # reset manual selection flag
         if self.view.is_simul_fit():
-            self.update_selected_workspace_guess()
+            self.update_selected_workspace_list_for_fit()
             if self.view.simultaneous_fit_by == "Custom":
                 self.view.simul_fit_by_specifier.setEnabled(False)
                 self.view.select_workspaces_to_fit_button.setEnabled(True)
@@ -429,12 +431,11 @@ class FittingTabPresenter(object):
         self.update_fit_status_information_in_view()
         self.view.undo_fit_button.setEnabled(False)
 
-    def update_selected_workspace_guess(self):
+    def update_selected_workspace_list_for_fit(self):
         if self.view.is_simul_fit():
+            if self.manual_selection_made:
+                return  # if it is a manual selection then the data should not change
             self.update_fit_specifier_list()
-        if self.manual_selection_made:
-            guess_selection = self.selected_data
-            self.selected_data = guess_selection
         else:
             self.selected_data = self.get_workspace_selected_list()
 
@@ -444,32 +445,26 @@ class FittingTabPresenter(object):
         else:
             freq = 'None'
 
-        runs = 'All'
-        groups_and_pairs = self._get_selected_groups_and_pairs()
-        if self.view.is_simul_fit():
-            if self.view.simultaneous_fit_by == "Run":
-                runs = self.view.simultaneous_fit_by_specifier
-            elif self.view.simultaneous_fit_by == "Group/Pair":
-                groups_and_pairs = [self.view.simultaneous_fit_by_specifier]
-
-        guess_selection = []
-        for grppair in groups_and_pairs:
-            guess_selection += self.context.get_names_of_workspaces_to_fit(
-                runs=runs,
-                group_and_pair=grppair,
+        selected_runs, selected_groups_and_pairs = self._get_selected_runs_and_groups_for_fitting()
+        selected_workspaces = []
+        for grp_and_pair in selected_groups_and_pairs:
+            selected_workspaces += self.context.get_names_of_workspaces_to_fit(
+                runs=selected_runs,
+                group_and_pair=grp_and_pair,
                 phasequad=False,
                 rebin=not self.view.fit_to_raw, freq=freq)
 
-        guess_selection = list(set(self._check_data_exists(guess_selection)))
+        selected_workspaces = list(set(self._check_data_exists(selected_workspaces)))
+        if len(selected_workspaces) > 1:  # sort the list to preserve order
+            selected_workspaces.sort(key=self._workspace_list_sorter)
 
-        if len(guess_selection) > 1:  # sort the list to preserve order
-            guess_selection.sort(key=self._workspace_list_sorter)
-
-        return guess_selection
+        return selected_workspaces
 
     def update_fit_specifier_list(self):
         if self.view.simultaneous_fit_by == "Run":
+            # extract runs from run list of lists, which is in the format [ [run,...,runs],[runs],...,[runs] ]
             flattened_run_list = [str(item) for sublist in self.context.data_context.current_runs for item in sublist]
+            flattened_run_list.sort()
             simul_choices = flattened_run_list
         elif self.view.simultaneous_fit_by == "Group/Pair":
             simul_choices = self._get_selected_groups_and_pairs()
@@ -500,7 +495,7 @@ class FittingTabPresenter(object):
         if self.view.simultaneous_fit_by == "Run":
             selected_run = self.view.simultaneous_fit_by_specifier
             for workspace in selected_data:
-                if selected_run == self._get_run_number_from_workspace(workspace):
+                if selected_run == get_run_number_from_workspace_name(workspace, self.context.data_context.instrument):
                     fit_workspaces.append(workspace)
         else:
             pass
@@ -608,33 +603,33 @@ class FittingTabPresenter(object):
     def _get_selected_groups_and_pairs(self):
         return self.context.group_pair_context.selected_groups + self.context.group_pair_context.selected_pairs
 
-    def _get_run_number_from_workspace(self, workspace_name):
-        instrument = self.context.data_context.instrument
-        run = re.findall(r'%s(\d+)' % instrument, workspace_name)
-        return run[0]
+    def _get_selected_runs_and_groups_for_fitting(self):
+        runs = 'All'
+        groups_and_pairs = self._get_selected_groups_and_pairs()
+        if self.view.is_simul_fit():
+            if self.view.simultaneous_fit_by == "Run":
+                runs = self.view.simultaneous_fit_by_specifier
+            elif self.view.simultaneous_fit_by == "Group/Pair":
+                groups_and_pairs = [self.view.simultaneous_fit_by_specifier]
 
-    # the string following either 'Pair Asym; %s' or  Group; "
-    def _get_group_or_pair_from_workspace_name(self, workspace_name):
-        for grppair in self.context.group_pair_context.selected_groups + self.context.group_pair_context.selected_pairs:
-            grp = re.findall(r'%s' % grppair, workspace_name)
-            if len(grp) > 0:
-                return grp[0]
+        return runs, groups_and_pairs
 
-    def _get_integer_for_grp_or_pair(self, workspace_name):
-        grppair = self._get_group_or_pair_from_workspace_name(workspace_name)
-        if grppair not in self._grppair_index:
-            self._grppair_index[grppair] = len(self._grppair_index)
+    def _transform_grp_or_pair_to_float(self, workspace_name):
+        grp_or_pair_name = get_group_or_pair_from_name(workspace_name)
+        if grp_or_pair_name not in self._grppair_index:
+            self._grppair_index[grp_or_pair_name] = len(self._grppair_index)
 
         grp_pair_values = list(self._grppair_index.values())
         if len(self._grppair_index) > 1:
-            return ((self._grppair_index[grppair] - grp_pair_values[0]) /
+            return ((self._grppair_index[grp_or_pair_name] - grp_pair_values[0]) /
                     (grp_pair_values[-1] - grp_pair_values[0])) * 0.99
         else:
+
             return 0.99
 
     def _workspace_list_sorter(self, workspace_name):
-        run_number = self._get_run_number_from_workspace(workspace_name)
-        grp_pair_number = self._get_integer_for_grp_or_pair(workspace_name)
+        run_number = get_run_number_from_workspace_name(workspace_name, self.context.data_context.instrument)
+        grp_pair_number = self._transform_grp_or_pair_to_float(workspace_name)
         return int(run_number) + grp_pair_number
 
     @staticmethod
