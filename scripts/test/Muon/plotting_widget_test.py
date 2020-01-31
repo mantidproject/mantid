@@ -82,6 +82,14 @@ class PlottingWidgetPresenterTest(unittest.TestCase):
                                                             errors=errors,
                                                             plot_kwargs=plot_kwargs)
 
+    def test_get_legend_label_for_maxent_returns(self):
+        workspace_name = "EMU20884 MaXEnt"
+        self.presenter._view.get_selected = mock.MagicMock(return_value="Frequency MaxEnt")
+
+        label = self.presenter.get_workspace_legend_label(workspace_name)
+
+        self.assertEqual(label, workspace_name)
+
     def test_handle_data_updated_does_nothing_if_workspace_list_has_not_changed(self):
         self.presenter.workspace_finder.get_workspaces_to_plot = mock.MagicMock(return_value=self.workspace_list)
         self.model.plotted_workspaces = self.workspace_list
@@ -342,8 +350,8 @@ class PlottingWidgetPresenterTest(unittest.TestCase):
         self.presenter.handle_error_selection_changed(errors)
 
         self.assertEqual(self.model.replot_workspace.call_count, len(workspaces))
-        self.model.replot_workspace.assert_any_call(workspaces[0], self.view.get_axes()[0],  errors, mock.ANY)
-        self.model.replot_workspace.assert_called_with(workspaces[1],  self.view.get_axes()[0], errors, mock.ANY)
+        self.model.replot_workspace.assert_any_call(workspaces[0], self.view.get_axes()[0], errors, mock.ANY)
+        self.model.replot_workspace.assert_called_with(workspaces[1], self.view.get_axes()[0], errors, mock.ANY)
 
 
 if __name__ == '__main__':

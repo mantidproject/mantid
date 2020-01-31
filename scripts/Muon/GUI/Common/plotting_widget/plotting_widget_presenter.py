@@ -477,6 +477,9 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         Generates a label for the workspace which is used in the plot
         :return: workspace label
         """
+        if FREQ_PLOT_TYPE in self._view.get_selected():
+            return workspace_name
+
         if self._view.is_tiled_plot():
             if self._view.get_tiled_by_type() == 'group':
                 label = self.context.data_context.instrument + self._get_run_number_from_workspace(workspace_name)
@@ -488,9 +491,6 @@ class PlotWidgetPresenter(HomeTabSubWidget):
 
         if not self._view.if_raw():
             label = label + '; Rebin'
-
-        if FREQ_PLOT_TYPE in self._view.get_selected():
-            label = workspace_name
 
         return label
 
@@ -559,3 +559,4 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             grp = re.findall(r'%s' % grppair, workspace_name)
             if len(grp) > 0:
                 return grp[0]
+        return ''
