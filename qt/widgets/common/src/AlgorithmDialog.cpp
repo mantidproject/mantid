@@ -570,7 +570,7 @@ QWidget *AlgorithmDialog::tie(QWidget *widget, const QString &property,
 	// If the widget is a line edit and has no value then set the placeholder text
 	// to the default value.
 	QLineEdit *textfield = qobject_cast<QLineEdit *>(widget);
-  if ((textfield) && (textfield->text() == "")) {
+  if ((textfield)) {
 		if (prop) {
       PropertyWidget::setFieldPlaceholderText(prop, textfield);
     }
