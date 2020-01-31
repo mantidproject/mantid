@@ -151,15 +151,21 @@ void MonitorLiveData::exec() {
     // Exit if the user presses cancel
     this->interruption_point();
 
+    DateAndTime now = DateAndTime::getCurrentTime();
+    double seconds = DateAndTime::secondsFromDuration(now - lastTime);
+
+    // Report progress and exit if the user presses cancel
+    progress(0.0, "Live Waiting " + Strings::toString((int)seconds) +
+                      " of " + Strings::toString((int)UpdateEvery) + "s");
+
     // Sleep for 50 msec
     Poco::Thread::sleep(50);
 
-    DateAndTime now = DateAndTime::getCurrentTime();
-    double seconds = DateAndTime::secondsFromDuration(now - lastTime);
     if (seconds > UpdateEvery) {
       lastTime = now;
       g_log.notice() << "Loading live data chunk " << m_chunkNumber << " at "
                      << now.toFormattedString("%H:%M:%S") << '\n';
+      progress(0.0, "Live Data " + Strings::toString(m_chunkNumber));
 
       // Time to run LoadLiveData again
       Algorithm_sptr alg = createChildAlgorithm("LoadLiveData");
