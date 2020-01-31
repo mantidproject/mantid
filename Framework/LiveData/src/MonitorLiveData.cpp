@@ -155,8 +155,8 @@ void MonitorLiveData::exec() {
     double seconds = DateAndTime::secondsFromDuration(now - lastTime);
 
     // Report progress and exit if the user presses cancel
-    progress(0.0, "Live Waiting " + Strings::toString((int)seconds) + " of " 
-                      + Strings::toString((int)UpdateEvery) + "s");
+    progress(0.0, "Live Waiting " + Strings::toString((int)seconds) + " of " +
+                      Strings::toString((int)UpdateEvery) + "s");
 
     // Sleep for 50 msec
     Poco::Thread::sleep(50);
