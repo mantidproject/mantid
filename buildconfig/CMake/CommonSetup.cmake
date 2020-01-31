@@ -264,19 +264,13 @@ endif()
 include(VersionNumber)
 
 # ##############################################################################
-# Look for OpenMP and set compiler flags if found
+# Look for OpenMP
 # ##############################################################################
-
-find_package(OpenMP)
-if(OPENMP_FOUND)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-  if(NOT WIN32)
-    set(CMAKE_MODULE_LINKER_FLAGS
-        "${CMAKE_MODULE_LINKER_FLAGS} ${OpenMP_CXX_FLAGS}"
-    )
-  endif()
+find_package(OpenMP COMPONENTS CXX)
+if(OpenMP_CXX_FOUND)
+  link_libraries(OpenMP::OpenMP_CXX)
 endif()
+
 
 # ##############################################################################
 # Add linux-specific things
