@@ -1,0 +1,42 @@
+digraph ReflectometryILLPreprocess {
+  label = "High level diagram demonstrating the processing steps for each angle configuration."
+  $global_style
+
+  subgraph params {
+    $param_style
+    directRun       [label="DirectRun"]
+    reflectedRun    [label="ReflectedRun"]
+    method          [label="Coherent or Incoherent"]
+    output          [label="OutputWorkspace"]
+    reflectivity    [label="Reflectivity"]
+    polEfficiency   [label="PolarizationEfficiency"]
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    preProcessDirect                [label="ReflectometryILLPreProcess"]
+    preProcessReflected             [label="ReflectometryILLPreProcess"]
+    sumForeground                   [label="ReflectometryILLSumForeground"]
+    convertToQ                      [label="ReflectometryILLConvertToQ"]
+    polarization                    [label="ReflectometryILLPolarizationCor"]
+  }
+
+  subgraph decisions {
+    $decision_style
+    polarized                      [label="Polarized?"]
+  }
+
+  directRun->preProcessDirect
+  reflectedRun->preProcessReflected
+  preProcessDirect->sumForeground
+  preProcessReflected->sumForeground
+  method->sumForeground
+  sumForeground->reflectivity
+  reflectivity->polarized
+  polarized->polarization [label="Yes"]
+  polarized->convertToQ [label="No"]
+  polarization->convertToQ
+  polEfficiency->polarization
+  convertToQ->output
+
+}
