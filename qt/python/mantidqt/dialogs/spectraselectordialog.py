@@ -49,6 +49,9 @@ class SpectraSelection(object):
         self.plot_type = SpectraSelection.Individual
 
         self.errors = False
+        self.log_value = None
+        self.custom_log_values = None
+        self.label = None
 
 
 class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
@@ -97,7 +100,10 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         selection.plot_type = self._ui.plotType.currentIndex()
 
         if self._advanced:
-            selection.errors = self._ui.advanced_options_widget.ui.error_bars_check_box.isChecked()
+            advanced_selections = self._get_advanced_selections()
+            for option in advanced_selections:
+                selection.option = advanced_selections[option]
+
         if self._check_number_of_plots(selection):
             self.selection = selection
             self.accept()
@@ -257,33 +263,73 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
                 self._ui.advanced_options_widget.ui.log_value_combo_box.setItemText(0, "Workspace name")
 
     def _parse_wksp_indices(self):
-        wksp_indices = parse_selection_str(self._ui.wkspIndices.text(), self.wi_min, self.wi_max)
+        if self._ui.plotType.currentText() == "Contour" or self._ui.plotType.currentText() == "Surface":
+            text = self._ui.wkspIndices.text()
+            if text.isdigit() and self.wi_min <= int(text) <= self.wi_max:
+                wksp_indices = text
+            else:
+                wksp_indices = None
+        else:
+            wksp_indices = parse_selection_str(self._ui.wkspIndices.text(), self.wi_min, self.wi_max)
+
         if wksp_indices:
             selection = SpectraSelection(self._workspaces)
             selection.wksp_indices = wksp_indices
             selection.plot_type = self._ui.plotType.currentIndex()
 
             if self._advanced:
-                selection.errors = self._ui.advanced_options_widget.ui.error_bars_check_box.isChecked()
+                advanced_selections = self._get_advanced_selections()
+                for option in advanced_selections:
+                    selection.option = advanced_selections[option]
         else:
             selection = None
         self.selection = selection
 
     def _parse_spec_nums(self):
-        spec_nums = parse_selection_str(self._ui.specNums.text(), allowed_values=self._plottable_spectra)
+        if self._ui.plotType.currentText() == "Contour" or self._ui.plotType.currentText() == "Surface":
+            text = self._ui.specNums.text()
+            if text.isdigit() and int(text) in self._plottable_spectra:
+                spec_nums = text
+            else:
+                spec_nums = None
+        else:
+            spec_nums = parse_selection_str(self._ui.specNums.text(), allowed_values=self._plottable_spectra)
+
         if spec_nums:
             selection = SpectraSelection(self._workspaces)
             selection.spectra = spec_nums
             selection.plot_type = self._ui.plotType.currentIndex()
 
             if self._advanced:
-                selection.errors = self._ui.advanced_options_widget.ui.error_bars_check_box.isChecked()
+                advanced_selections = self._get_advanced_selections()
+                for option in advanced_selections:
+                    selection.option = advanced_selections[option]
         else:
             selection = None
         self.selection = selection
 
     def _is_input_valid(self):
         return self.selection is not None
+
+    def _get_advanced_selections(self):
+        selection = {'errors': self._ui.advanced_options_widget.ui.error_bars_check_box.isChecked()}
+
+        if self._ui.advanced_options_widget.ui.log_value_combo_box.isEnabled():
+            selection['log_value'] = self._ui.advanced_options_widget.ui.log_value_combo_box.currentText()
+        else:
+            selection['log_value'] = None
+
+        if self._ui.advanced_options_widget.ui.custom_log_line_edit.isEnabled():
+            selection['custom_log_values'] = self._ui.advanced_options_widget.ui.custom_log_line_edit.text()
+        else:
+            selection['custom_log_values'] = None
+
+        if self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.isEnabled():
+            selection['label'] = self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.text()
+        else:
+            selection['label'] = None
+
+        return selection
 
 
 AdvancedPlottingOptionsWidgetUI, AdvancedPlottingOptionsWidgetUIBase = load_ui(__file__, 'advancedplotswidget.ui')

@@ -27,6 +27,7 @@ from mantid.plots.plotfunctions import manage_workspace_names, figure_title, plo
                                        create_subplots,raise_if_not_sequence
 from mantidqt.plotting.figuretype import figure_type, FigureType
 from mantidqt.dialogs.spectraselectorutils import get_spectra_selection
+
 # -----------------------------------------------------------------------------
 # Constants
 # -----------------------------------------------------------------------------
@@ -106,7 +107,8 @@ def plot_from_names(names, errors, overplot, fig=None, show_colorfill_btn=False,
 
     if selection.plot_type == selection.Surface or selection.plot_type == selection.Contour:
         plot_type = "surface" if selection.plot_type == selection.Surface else "contour"
-        return plot_contour_or_surface(plot_type, 0, "Workspace index", "Workspace index", [], workspaces)
+        return plot_contour_or_surface(plot_type, 0, selection.label, selection.log_name, selection.custom_log_values,
+                                       workspaces)
     else:
         return plot(selection.workspaces, spectrum_nums=selection.spectra,
                     wksp_indices=selection.wksp_indices,
