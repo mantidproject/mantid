@@ -25,15 +25,18 @@ Improvements
    :align: left
 
 - You can now save Table Workspaces to Ascii using the `SaveAscii <algm-SaveAscii>` algorithm, and the Ascii Save option on the workspaces toolbox.
+- Fit functions can now be put into nested categories and into multiple categories.
 - Normalization options have been added to 2d plots and sliceviewer.
 - An exclude property has been added to the fit property browser
 - The images tab in figure options no longer forces the max value to be greater than the min value.
+- All the relevant settings from manitdplot have been added to workbench
 - Double clicking on a workspace that only has a single bin of data (for example from a constant wavelength source) will now plot that bin, also for single bin workspaces a plot bin option has been added to the right click plot menu of the workspace.
 - Default values for algorithm properties now appear as placeholder (greyed-out) text on custm algorithm dialogs.
-
+- The context menu for WorkspaceGroups now contains plotting options so you can plot all of the workspaces in the group.
 
 Bugfixes
 ########
+- Fixed an issue with Workspace History where unrolling consecutive workflow algorithms would result in only one of the algorithms being unrolled.
 
 - Colorbar scale no longer vanish on colorfill plots with a logarithmic scale
 - Figure options no longer causes a crash when using 2d plots created from a script.

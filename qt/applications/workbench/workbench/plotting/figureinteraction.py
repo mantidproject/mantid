@@ -34,6 +34,7 @@ from workbench.plotting.figureerrorsmanager import FigureErrorsManager
 from workbench.plotting.propertiesdialog import (LabelEditor, XAxisEditor, YAxisEditor,
                                                  SingleMarkerEditor, GlobalMarkerEditor,
                                                  ColorbarAxisEditor)
+from workbench.plotting.style import VALID_LINE_STYLE, VALID_COLORS
 from workbench.plotting.toolbar import ToolbarStateManager
 
 # Map canvas context-menu string labels to a pair of matplotlib scale-type strings
@@ -42,14 +43,6 @@ AXES_SCALE_MENU_OPTS = OrderedDict(
      ("Lin x/Log y", ("linear", "log")), ("Log x/Lin y", ("log", "linear"))])
 COLORBAR_SCALE_MENU_OPTS = OrderedDict(
     [("Linear", Normalize), ("Log", LogNorm)])
-VALID_LINE_STYLE = ['solid', 'dashed', 'dotted', 'dashdot']
-VALID_COLORS = {
-    'blue': '#1f77b4',
-    'orange': '#ff7f0e',
-    'green': '#2ca02c',
-    'red': '#d62728',
-    'purple': '#9467bd'
-}
 
 
 class FigureInteraction(object):

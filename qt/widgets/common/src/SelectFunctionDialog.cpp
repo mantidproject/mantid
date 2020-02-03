@@ -89,14 +89,62 @@ void SelectFunctionDialog::constructFunctionTree(
     }
   };
 
-  for (const auto &entry : categoryFunctionsMap) {
-    if (showCategory(entry.first)) {
-      QTreeWidgetItem *category = new QTreeWidgetItem(m_form->fitTree);
-      category->setText(0, QString::fromStdString(entry.first));
+  // keeps track of categories added to the tree
+  QMap<QString, QTreeWidgetItem *> categories;
 
-      for (const auto &function : entry.second) {
-        QTreeWidgetItem *fit = new QTreeWidgetItem(category);
-        fit->setText(0, QString::fromStdString(function));
+  for (const auto &entry : categoryFunctionsMap) {
+
+    QString categoryName = QString::fromStdString(entry.first);
+    QStringList subCategories = categoryName.split('\\');
+    if (!categories.contains(categoryName)) {
+      if (subCategories.size() == 1) {
+        if (showCategory(entry.first)) {
+          QTreeWidgetItem *catItem =
+              new QTreeWidgetItem(QStringList(categoryName));
+          categories.insert(categoryName, catItem);
+          m_form->fitTree->addTopLevelItem(catItem);
+          for (const auto &function : entry.second) {
+            QTreeWidgetItem *fit = new QTreeWidgetItem(catItem);
+            fit->setText(0, QString::fromStdString(function));
+          }
+        }
+      } else {
+        // go through the path and add the folders if they don't already exist
+        QString currentPath = subCategories[0];
+        QTreeWidgetItem *catItem = nullptr;
+        int subCategoryNo = subCategories.size();
+        bool show = false;
+        for (int j = 0; j < subCategoryNo; ++j) {
+          if (showCategory(subCategories[j].toStdString())) {
+            show = true;
+          }
+        }
+        if (show) {
+          for (int j = 0; j < subCategoryNo; ++j) {
+            if (categories.contains(currentPath)) {
+              catItem = categories[currentPath];
+            } else {
+              QTreeWidgetItem *newCatItem =
+                  new QTreeWidgetItem(QStringList(subCategories[j]));
+              categories.insert(currentPath, newCatItem);
+              if (!catItem) {
+                m_form->fitTree->addTopLevelItem(newCatItem);
+              } else {
+                catItem->addChild(newCatItem);
+              }
+              catItem = newCatItem;
+            }
+            if (j != subCategoryNo - 1)
+              currentPath += "\\" + subCategories[j + 1];
+            else {
+              // This is the end of the path so add the functions
+              for (const auto &function : entry.second) {
+                QTreeWidgetItem *fit = new QTreeWidgetItem(catItem);
+                fit->setText(0, QString::fromStdString(function));
+              }
+            }
+          }
+        }
       }
     }
   }
