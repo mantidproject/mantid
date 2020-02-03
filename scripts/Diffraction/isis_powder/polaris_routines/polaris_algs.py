@@ -7,6 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
 
+from mantid import AnalysisDataService as ADS
 import mantid.simpleapi as mantid
 from six import string_types
 
@@ -106,16 +107,10 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None,
 
     if merge_banks:
         q_min, q_max = _load_qlims(q_lims)
-        merged_ws = mantid.MatchAndMergeWorkspaces(InputWorkspaces=focused_ws, XMin=q_min, XMax=q_max,
-                                                   CalculateScale=False)
-        # This is a simple fourier filter using the FFTSmooth to get a WS with only the low radius components, then
-        # subtracting that from the merged WS
-        merge_x = merged_ws.dataX(0)
-        min_radius = 1.0
-        cut_off_index = round(2*np.pi*min_radius/(2*(merge_x[1] - merge_x[0])))
-        low_radius_ws = mantid.FFTSmooth(InputWorkspace=merged_ws, Filter="Zeroing", Params=str(cut_off_index))
-        merged_ws = mantid.Minus(LHSWorkspace=merged_ws, RHSWorkspace=low_radius_ws)
-        pdf_output = mantid.PDFFourierTransform(Inputworkspace=merged_ws, InputSofQType="S(Q)-1", PDFType=pdf_type,
+        mantid.MatchAndMergeWorkspaces(InputWorkspaces=focused_ws, OutputWorkspace="merged_ws", XMin=q_min, XMax=q_max,
+                                       CalculateScale=False)
+        fast_fourier_filter("merged_ws", 5.0, 15.0)
+        pdf_output = mantid.PDFFourierTransform(Inputworkspace="merged_ws", InputSofQType="S(Q)-1", PDFType=pdf_type,
                                                 Filter=True)
     else:
         pdf_output = mantid.PDFFourierTransform(Inputworkspace='focused_ws', InputSofQType="S(Q)-1",
@@ -192,3 +187,17 @@ def _determine_chopper_mode(ws):
             return 'PDF', polaris_advanced_config.pdf_focused_cropping_values
     else:
         raise ValueError("Chopper frequency not in log data. Please specify a chopper mode")
+
+
+def fast_fourier_filter(input_ws, lower_boundary=None, upper_boundary=None):
+    # This is a simple fourier filter using the FFTSmooth to get a WS with only the low radius components, then
+    # subtracting that from the merged WS
+
+    x_range = ADS.retrieve(input_ws).dataX(0)
+    if lower_boundary:
+        lower_index = round(2 * np.pi / (lower_boundary * 2 * (x_range[1] - x_range[0])))
+        tmp = mantid.FFTSmooth(InputWorkspace=input_ws, Filter="Zeroing", Params=str(lower_index))
+        mantid.Minus(LHSWorkspace=input_ws, RHSWorkspace=tmp, OutputWorkspace=input_ws)
+    if upper_boundary:
+        upper_index = round(2 * np.pi / (upper_boundary * 2 * (x_range[1] - x_range[0])))
+        mantid.FFTSmooth(InputWorkspace=input_ws, OutputWorkspace=input_ws, Filter="Zeroing", Params=str(upper_index))
