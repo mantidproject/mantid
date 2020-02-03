@@ -47,8 +47,9 @@ void showAsValid(QLineEdit &lineEdit) {
  */
 QtExperimentView::QtExperimentView(
     Mantid::API::IAlgorithm_sptr algorithmForTooltips, QWidget *parent)
-    : QWidget(parent) {
-  initLayout();
+    : QWidget(parent), m_stitchEdit(nullptr), m_deleteShortcut(),
+      m_notifyee(nullptr), m_columnToolTips() {
+  initLayout(algorithmForTooltips);
   registerSettingsWidgets(algorithmForTooltips);
 }
 
@@ -90,13 +91,14 @@ void QtExperimentView::subscribe(ExperimentViewSubscriber *notifyee) {
 /**
 Initialise the Interface
 */
-void QtExperimentView::initLayout() {
+void QtExperimentView::initLayout(
+    Mantid::API::IAlgorithm_sptr algorithmForTooltips) {
   m_ui.setupUi(this);
   m_deleteShortcut = std::make_unique<QShortcut>(QKeySequence(tr("Delete")),
                                                  m_ui.optionsTable);
   connect(m_deleteShortcut.get(), SIGNAL(activated()), this,
           SLOT(onRemovePerThetaDefaultsRequested()));
-  initOptionsTable();
+  initOptionsTable(algorithmForTooltips);
   initFloodControls();
 
   auto blacklist =
@@ -113,6 +115,23 @@ void QtExperimentView::initLayout() {
           SLOT(onNewPerThetaDefaultsRowRequested()));
 }
 
+void QtExperimentView::initializeTableColumns(
+    QTableWidget &table, Mantid::API::IAlgorithm_sptr algorithmForTooltips) {
+  for (auto column = 0; column < table.columnCount(); ++column) {
+    // Get the tooltip for this column based on the algorithm property
+    auto const propertyName = PerThetaDefaults::ColumnPropertyName[column];
+    auto const toolTip = QString::fromStdString(
+        algorithmForTooltips->getPointerToProperty(propertyName)
+            ->documentation());
+    // We could set the tooltip for the column header here using
+    // horizontalHeaderItem(column)->setToolTip(). However, then we lose the
+    // tooltip about the purpose of the table as a whole. So we set the tooltip
+    // on the table cells instead. They are created dynamically, so for now
+    // just cache the tooltip.
+    m_columnToolTips[column] = toolTip;
+  }
+}
+
 void QtExperimentView::initializeTableItems(QTableWidget &table) {
   for (auto row = 0; row < table.rowCount(); ++row)
     initializeTableRow(table, row);
@@ -120,28 +139,34 @@ void QtExperimentView::initializeTableItems(QTableWidget &table) {
 
 void QtExperimentView::initializeTableRow(QTableWidget &table, int row) {
   m_ui.optionsTable->blockSignals(true);
-  for (auto column = 0; column < table.columnCount(); ++column)
-    table.setItem(row, column, new QTableWidgetItem());
+  for (auto column = 0; column < table.columnCount(); ++column) {
+    auto item = new QTableWidgetItem();
+    table.setItem(row, column, item);
+    item->setToolTip(m_columnToolTips[column]);
+  }
   m_ui.optionsTable->blockSignals(false);
 }
 
 void QtExperimentView::initializeTableRow(
     QTableWidget &table, int row, PerThetaDefaults::ValueArray rowValues) {
   m_ui.optionsTable->blockSignals(true);
-  for (auto column = 0; column < table.columnCount(); ++column)
-    table.setItem(
-        row, column,
-        new QTableWidgetItem(QString::fromStdString(rowValues[column])));
+  for (auto column = 0; column < table.columnCount(); ++column) {
+    auto item = new QTableWidgetItem(QString::fromStdString(rowValues[column]));
+    table.setItem(row, column, item);
+    item->setToolTip(m_columnToolTips[column]);
+  }
   m_ui.optionsTable->blockSignals(false);
 }
 
-void QtExperimentView::initOptionsTable() {
+void QtExperimentView::initOptionsTable(
+    Mantid::API::IAlgorithm_sptr algorithmForTooltips) {
   auto table = m_ui.optionsTable;
 
   // Set angle and scale columns to a small width so everything fits
   table->resizeColumnsToContents();
   table->setColumnCount(PerThetaDefaults::OPTIONS_TABLE_COLUMN_COUNT);
   table->setRowCount(1);
+  initializeTableColumns(*table, algorithmForTooltips);
   initializeTableItems(*table);
 
   auto header = table->horizontalHeader();
