@@ -325,6 +325,20 @@ void export_UnitCell() {
            "Set the error in the :math:`\\gamma` angle of the unit cell using "
            "the "
            "``Unit`` parameter.")
+      .def("setModVec1",
+           (void (UnitCell::*)(const V3D &)) & UnitCell::setModVec1,
+           (arg("self"), arg("vec")),
+           "Set the first modulated structure vector")
+      .def("setModVec2",
+           (void (UnitCell::*)(const V3D &)) & UnitCell::setModVec2,
+           (arg("self"), arg("vec")),
+           "Set the second modulated structure vector")
+      .def("setModVec3",
+           (void (UnitCell::*)(const V3D &)) & UnitCell::setModVec3,
+           (arg("self"), arg("vec")),
+           "Set the third modulated structure vector")
+      .def("setMaxOrder", &UnitCell::setMaxOrder,
+           "Set the maximum order of modulated vectors searched")
       .def("volume", (double (UnitCell::*)() const) & UnitCell::volume,
            arg("self"),
            "Return the volume of the unit cell (in :math:`\\rm{\\AA}{^3}`)")
@@ -354,6 +368,8 @@ void export_UnitCell() {
       .def("getMaxOrder", &UnitCell::getMaxOrder, arg("self"),
            "Returns the number of modulation vectors. This will return an "
            "int.")
+      .def("getModVec", &UnitCell::getModVec, (arg("self"), arg("i")),
+           "Returns the ith modulation vector")
       .def("recalculateFromGstar", &recalculateFromGstar,
            (arg("self"), arg("NewGstar")),
            "Recalculate the unit cell parameters from a metric tensor. This "
