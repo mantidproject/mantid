@@ -11,7 +11,53 @@
 from typing import List
 
 from mantid.api import MatrixWorkspace, NumericAxis, Workspace, WorkspaceFactory
+from mantidqt.plotting.functions import pcolormesh
 
+
+def plot(plot_type, plot_index, axis_name, log_name, custom_log_values, workspaces):
+    if len(workspaces) > 0:
+        matrix_ws = create_workspace_for_group_plot(plot_type, workspaces, plot_index, log_name, custom_log_values)
+
+        title = "plot for {}, index {}".format([ws.name() for ws in workspaces], plot_index)
+
+        if plot_type == "surface":
+            import matplotlib.pyplot as plt
+            fig, ax = plt.subplots(subplot_kw={'projection': 'mantid3d'})
+            ax.plot_surface(matrix_ws)
+            ax.set_ylabel("Surface " + title)
+            ax.set_ylabel(axis_name)
+            fig.show()
+        elif plot_type == "contour":
+            # import matplotlib.pyplot as plt
+            # fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+            # ax.contourf(matrix_ws)
+            # fig.show()
+
+            fig = pcolormesh([matrix_ws])
+            ax = fig.get_axes()[0]
+
+            array = fig.get_axes()[1].collections[0].get_array()
+            from mantid.plots.helperfunctions import get_matrix_2d_data
+            (x, y, z) = get_matrix_2d_data(matrix_ws, distribution=False, histogram2D=False, transpose=False)
+
+            ax.set_title("Contour " + title)
+            ax.set_ylabel(axis_name)
+
+            levels = [z.max() * value for value in [0.2,0.4,0.6,0.8]]
+            ax.contour(x,y,z, levels=levels, colors='k', linewidths=0.5)
+
+            # this forces the lines to look more like they do in MantidPlot but I'm not sure if that's actually necessary?
+            for collection in ax.collections:
+                segments = collection.get_segments()
+                for point in segments:
+                    for pair in point:
+                        if 0.5 < pair[1] < 1:
+                            pair[1] = 0.5
+                        elif 1 < pair[1] < 1.5:
+                            pair[1] = 1.5
+                        else:
+                            pair[1] = round(pair[1]*2)/2
+                collection.set_segments(segments)
 
 def create_workspace_for_group_plot\
     (plot_type: str, workspaces: List[Workspace], plot_index: int, log_name: str, custom_log_values: List[float]) -> MatrixWorkspace:
@@ -23,7 +69,7 @@ def create_workspace_for_group_plot\
     first_blocksize = first_ws.blocksize()
 
     if plot_type == "contour":
-        x_size = first_blocksize +1
+        x_size = first_blocksize + 1
     else:
         x_size = first_blocksize
 

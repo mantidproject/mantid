@@ -49,9 +49,9 @@ class SpectraSelection(object):
         self.plot_type = SpectraSelection.Individual
 
         self.errors = False
-        self.log_value = None
+        self.log_name = None
         self.custom_log_values = None
-        self.label = None
+        self.axis_name = None
 
 
 class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
@@ -241,26 +241,33 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         if self.selection:
             self.selection.plot_type = new_index
 
-        new_text = self._ui.plotType.itemText(new_index)
-        contour_or_surface = new_text == "Surface" or new_text == "Contour"
-        if contour_or_surface:
-            self._ui.advanced_options_widget.ui.error_bars_check_box.setChecked(False)
-            self._ui.advanced_options_widget.ui.error_bars_check_box.setEnabled(False)
-            self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.setEnabled(True)
-        else:
-            self._ui.advanced_options_widget.ui.error_bars_check_box.setEnabled(True)
-            self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.setEnabled(False)
-
-        if new_text == "Tiled":
-            self._ui.advanced_options_widget.ui.log_value_combo_box.setEnabled(False)
-        else:
-            self._ui.advanced_options_widget.ui.log_value_combo_box.setEnabled(True)
+        if self._advanced:
+            new_text = self._ui.plotType.itemText(new_index)
+            contour_or_surface = new_text == "Surface" or new_text == "Contour"
             if contour_or_surface:
-                self._ui.advanced_options_widget.ui.log_value_combo_box.setItemText(0, "Workspace index")
-                if self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.text() == "Workspace name":
-                    self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.setText("Workspace index")
+                self._ui.advanced_options_widget.ui.error_bars_check_box.setChecked(False)
+                self._ui.advanced_options_widget.ui.error_bars_check_box.setEnabled(False)
+                self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.setEnabled(True)
+                self._ui.spec_num_label.setText("Spectrum Number")
+                self._ui.wksp_indices_label.setText("Workspace Index")
+                self._ui.buttonBox.button(QDialogButtonBox.YesToAll).setEnabled(False)
             else:
-                self._ui.advanced_options_widget.ui.log_value_combo_box.setItemText(0, "Workspace name")
+                self._ui.advanced_options_widget.ui.error_bars_check_box.setEnabled(True)
+                self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.setEnabled(False)
+                self._ui.spec_num_label.setText("Spectrum Numbers")
+                self._ui.wksp_indices_label.setText("Workspace Indices")
+                self._ui.buttonBox.button(QDialogButtonBox.YesToAll).setEnabled(True)
+
+            if new_text == "Tiled":
+                self._ui.advanced_options_widget.ui.log_value_combo_box.setEnabled(False)
+            else:
+                self._ui.advanced_options_widget.ui.log_value_combo_box.setEnabled(True)
+                if contour_or_surface:
+                    self._ui.advanced_options_widget.ui.log_value_combo_box.setItemText(0, "Workspace index")
+                    if self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.text() == "Workspace name":
+                        self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.setText("Workspace index")
+                else:
+                    self._ui.advanced_options_widget.ui.log_value_combo_box.setItemText(0, "Workspace name")
 
     def _parse_wksp_indices(self):
         if self._ui.plotType.currentText() == "Contour" or self._ui.plotType.currentText() == "Surface":
@@ -280,7 +287,7 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
             if self._advanced:
                 advanced_selections = self._get_advanced_selections()
                 for option in advanced_selections:
-                    selection.option = advanced_selections[option]
+                    setattr(selection, option, advanced_selections[option])
         else:
             selection = None
         self.selection = selection
@@ -303,7 +310,7 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
             if self._advanced:
                 advanced_selections = self._get_advanced_selections()
                 for option in advanced_selections:
-                    selection.option = advanced_selections[option]
+                    setattr(selection, option, advanced_selections[option])
         else:
             selection = None
         self.selection = selection
@@ -315,9 +322,9 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         selection = {'errors': self._ui.advanced_options_widget.ui.error_bars_check_box.isChecked()}
 
         if self._ui.advanced_options_widget.ui.log_value_combo_box.isEnabled():
-            selection['log_value'] = self._ui.advanced_options_widget.ui.log_value_combo_box.currentText()
+            selection['log_name'] = self._ui.advanced_options_widget.ui.log_value_combo_box.currentText()
         else:
-            selection['log_value'] = None
+            selection['log_name'] = None
 
         if self._ui.advanced_options_widget.ui.custom_log_line_edit.isEnabled():
             selection['custom_log_values'] = self._ui.advanced_options_widget.ui.custom_log_line_edit.text()
@@ -325,9 +332,9 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
             selection['custom_log_values'] = None
 
         if self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.isEnabled():
-            selection['label'] = self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.text()
+            selection['axis_name'] = self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.text()
         else:
-            selection['label'] = None
+            selection['axis_name'] = None
 
         return selection
 

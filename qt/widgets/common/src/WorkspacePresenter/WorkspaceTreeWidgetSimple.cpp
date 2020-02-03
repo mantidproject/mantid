@@ -182,6 +182,7 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
         plotSubMenu->addAction(m_overplotSpectrum);
         plotSubMenu->addAction(m_plotSpectrumWithErrs);
         plotSubMenu->addAction(m_overplotSpectrumWithErrs);
+        plotSubMenu->addAction(m_plotAdvanced);
 
         plotSubMenu->addSeparator();
         plotSubMenu->addAction(m_plotColorfill);

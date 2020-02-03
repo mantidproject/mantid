@@ -39,7 +39,7 @@ def get_spectra_selection(workspaces, parent_widget=None, show_colorfill_btn=Fal
             for sp_set in ws_spectra[1:]:
                 plottable = plottable.intersection(sp_set)
 
-    if len(single_spectra_ws) == len(workspaces) or len(plottable) == 0:
+    if (len(single_spectra_ws) == len(workspaces) or len(plottable) == 0) and not advanced:
         # At least 1 workspace contains only a single spectrum and these are no
         # common spectra
         selection = SpectraSelection(workspaces)

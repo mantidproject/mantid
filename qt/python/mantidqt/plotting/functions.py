@@ -107,8 +107,13 @@ def plot_from_names(names, errors, overplot, fig=None, show_colorfill_btn=False,
 
     if selection.plot_type == selection.Surface or selection.plot_type == selection.Contour:
         plot_type = "surface" if selection.plot_type == selection.Surface else "contour"
-        return plot_contour_or_surface(plot_type, 0, selection.label, selection.log_name, selection.custom_log_values,
-                                       workspaces)
+        if selection.spectra is not None:
+            # this sometimes fails because spectra can either be a list or a string? Investigate
+            plot_index = workspaces[0].getIndexFromSpectrumNumber(selection.spectra[0])
+        else:
+            plot_index = selection.wksp_indices[0]
+        return plot_contour_or_surface(plot_type, int(plot_index), selection.axis_name, selection.log_name,
+                                       selection.custom_log_values, workspaces)
     else:
         return plot(selection.workspaces, spectrum_nums=selection.spectra,
                     wksp_indices=selection.wksp_indices,
