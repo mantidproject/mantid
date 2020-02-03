@@ -702,6 +702,7 @@ void Integrate3DEvents::makeCovarianceMatrix(
  *  @param cov_matrix     3x3 real symmetric matrix.
  *  @param eigen_vectors  The eigen vectors for the matrix are returned
  *                        in this list.
+ *  @param eigen_values   3 eigenvalues of matrix
  */
 void Integrate3DEvents::getEigenVectors(DblMatrix const &cov_matrix,
                                         std::vector<V3D> &eigen_vectors,

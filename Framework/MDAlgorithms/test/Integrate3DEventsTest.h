@@ -489,7 +489,8 @@ private:
     std::vector<int> nPeakEvents;
     double ctsPerPeakEvent = 2;
     for (size_t i = 0; i < peak_q_list.size(); i++) {
-      nPeakEvents.push_back(ceil(fracEvents[i] * nBgEventsInPeakRegion));
+      nPeakEvents.push_back(static_cast<int>(
+          ceil(fracEvents[i] * static_cast<double>(nBgEventsInPeakRegion))));
       generatePeak(event_Qs, peak_q_list[i].second, 0.08, nPeakEvents.back(),
                    ctsPerPeakEvent);
       generateUniformBackgroundSpherical(
@@ -603,7 +604,6 @@ private:
     std::uniform_real_distribution<> d(-radius, radius);
     gen.seed(seed);
 
-    V3D point;
     int n = 0;
     do {
       V3D point(d(gen), d(gen), d(gen));
