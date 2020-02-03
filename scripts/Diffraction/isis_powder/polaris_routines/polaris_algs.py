@@ -108,6 +108,13 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None,
         q_min, q_max = _load_qlims(q_lims)
         merged_ws = mantid.MatchAndMergeWorkspaces(InputWorkspaces=focused_ws, XMin=q_min, XMax=q_max,
                                                    CalculateScale=False)
+        # This is a simple fourier filter using the FFTSmooth to get a WS with only the low radius components, then
+        # subtracting that from the merged WS
+        merge_x = merged_ws.dataX(0)
+        min_radius = 1.0
+        cut_off_index = round(2*np.pi*min_radius/(2*(merge_x[1] - merge_x[0])))
+        low_radius_ws = mantid.FFTSmooth(InputWorkspace=merged_ws, Filter="Zeroing", Params=str(cut_off_index))
+        merged_ws = mantid.Minus(LHSWorkspace=merged_ws, RHSWorkspace=low_radius_ws)
         pdf_output = mantid.PDFFourierTransform(Inputworkspace=merged_ws, InputSofQType="S(Q)-1", PDFType=pdf_type,
                                                 Filter=True)
     else:
