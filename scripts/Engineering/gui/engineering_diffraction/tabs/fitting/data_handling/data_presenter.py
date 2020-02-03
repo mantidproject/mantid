@@ -16,6 +16,8 @@ class FittingDataPresenter(object):
         self.view = view
         self.worker = None
 
+        self.row_numbers = {}  # {ws_name: table_row}
+
         # Connect view signals to local methods
         self.view.set_on_load_clicked(self.on_load_clicked)
         self.view.set_enable_button_connection(self._enable_load_button)
@@ -31,7 +33,8 @@ class FittingDataPresenter(object):
 
     def rename_workspace(self, old_name, new_name):
         if old_name in self.model.get_loaded_workspaces():
-            self.model.get_loaded_workspaces()[new_name] = self.model.get_loaded_workspaces().pop(old_name)
+            self.model.get_loaded_workspaces()[new_name] = self.model.get_loaded_workspaces().pop(
+                old_name)
 
     def clear_workspaces(self):
         self.model.get_loaded_workspaces().clear()
@@ -48,15 +51,22 @@ class FittingDataPresenter(object):
         Load one to many files into mantid that are tracked by the interface.
         :param filenames: Comma separated list of filenames to load
         """
-        self.worker = AsyncTask(self.model.load_files,
-                                (filenames,),
+        self.worker = AsyncTask(self.model.load_files, (filenames, ),
                                 error_cb=self._on_worker_error,
-                                finished_cb=self._emit_enable_button_signal)
+                                finished_cb=self._emit_enable_button_signal,
+                                success_cb=self._on_worker_success)
         self.worker.start()
 
     def _on_worker_error(self, _):
         logger.error("Error occurred when loading files.")
         self._emit_enable_button_signal()
+
+    def _on_worker_success(self, _):
+        self.view.remove_all()
+        self.row_numbers = {}
+        for i, name in enumerate(self.get_loaded_workspaces()):
+            self.row_numbers[name] = i
+            self._add_row_to_table(name)
 
     def _enable_load_button(self, enabled):
         self.view.set_load_button_enabled(enabled)
@@ -81,3 +91,14 @@ class FittingDataPresenter(object):
             create_error_message(self.view, "Entered files are not valid.")
             return False
         return True
+
+    def _add_row_to_table(self, ws_name):
+        words = ws_name.split("_")
+        if len(words) == 4 and words[2] == "bank":
+            self.view.add_table_row(words[1], words[3])
+        else:
+            self.remove_workspace(ws_name)
+            logger.warning(
+                "The workspace '{}' was not in the correct naming format. Files should be named in the following way: "
+                "INSTRUMENT_RUNNUMBER_bank_BANK.".format(ws_name)
+            )
