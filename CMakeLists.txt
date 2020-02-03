@@ -153,15 +153,6 @@ if(ENABLE_WORKBENCH)
   separate_arguments(PYQT5_SIP_FLAGS)
 endif()
 
-# gsl is currently needed by Geometry, Algorithms, Curvefitting, & MantidPlot
-if(WIN32 AND GSL_CBLAS_LIBRARY AND NOT EXISTS ${GSL_CBLAS_LIBRARY})
-  # The GSL cblas library changes its name between v1 and v2 on Windows. Workaround
-  # the fact that CMake has cached the old path to a non-existant library.
-  unset(GSL_CBLAS_LIBRARY CACHE)
-  unset(GSL_CBLAS_LIBRARY_DEBUG CACHE)
-endif()
-find_package(GSL REQUIRED)
-
 # Now add in all the components
 
 # Flag that this is a full build, i.e not framework only
