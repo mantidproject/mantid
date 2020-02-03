@@ -894,6 +894,7 @@ public:
     QString getFirstFilename() const;
     void isForRunFiles(bool /*mode*/);
     void isForDirectory(bool /*mode*/);
+    void allowMultipleFiles(bool /*allow*/);
     bool isSearching() const;
     bool isValid();
     void liveButtonSetChecked(bool);

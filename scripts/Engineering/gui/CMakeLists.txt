@@ -13,6 +13,9 @@ set(TEST_PY_FILES
     # Calibration
     engineering_diffraction/tabs/calibration/test/test_calib_model.py
     engineering_diffraction/tabs/calibration/test/test_calib_presenter.py
+    # Fitting
+    engineering_diffraction/tabs/fitting/data_handling/test/test_data_model.py
+    engineering_diffraction/tabs/fitting/data_handling/test/test_data_presenter.py
     # Focus
     engineering_diffraction/tabs/focus/test/test_focus_model.py
     engineering_diffraction/tabs/focus/test/test_focus_presenter.py
