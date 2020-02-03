@@ -25,7 +25,7 @@ AlgorithmProgressDialogPresenter::AlgorithmProgressDialogPresenter(
   auto runningAlgorithms =
       Mantid::API::AlgorithmManager::Instance().runningInstances();
 
-  for (auto alg : runningAlgorithms) {
+  for (const auto &alg : runningAlgorithms) {
     if ((alg) && (alg->isRunning())) {
       if (m_progressBars.count(alg->getAlgorithmID()) == 0) {
         algorithmStartedSlot(alg->getAlgorithmID());
