@@ -211,6 +211,10 @@ Final words of warning:
 
 .. testcode:: Iterative Deletion of Grouped Workspaces
 
+    ws1 = CreateSampleWorkspace()
+    ws2 = CreateSampleWorkspace()
+    wsGroup = GroupWorkspaces("ws1,ws2")
+
     for ws in list(wsGroup):
         DeleteWorkspace(ws)
 
@@ -220,6 +224,10 @@ otherwise indexing will be confused by each deletion.
 
 .. testcode:: Delete Entire Workspace
 
+    ws1 = CreateSampleWorkspace()
+    ws2 = CreateSampleWorkspace()
+    wsGroup = GroupWorkspaces("ws1,ws2")
+    
     DeleteWorkspace(wsGroup)
 
 .. include:: WorkspaceNavigation.txt
