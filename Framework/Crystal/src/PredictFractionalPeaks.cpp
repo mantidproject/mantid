@@ -166,7 +166,8 @@ boost::shared_ptr<Mantid::API::IPeaksWorkspace> createOutputWorkspace(
   auto outPeaks = WorkspaceFactory::Instance().createPeaks();
   outPeaks->setInstrument(inputPeaks.getInstrument());
   if (modulationProps.saveOnLattice) {
-    auto lattice = std::make_unique<Mantid::Geometry::OrientedLattice>();
+    auto lattice = std::make_unique<Mantid::Geometry::OrientedLattice>(
+        inputPeaks.sample().getOrientedLattice());
     lattice->setMaxOrder(modulationProps.maxOrder);
     lattice->setCrossTerm(modulationProps.crossTerms);
     const auto &offsets = modulationProps.offsets;
