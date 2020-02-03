@@ -230,6 +230,8 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
     if plot_kwargs is None:
         plot_kwargs = {}
     _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices, tiled, overplot)
+    workspaces = [ws for ws in workspaces if isinstance(ws, MatrixWorkspace)]
+
     if spectrum_nums is not None:
         kw, nums = 'specNum', spectrum_nums
     else:
@@ -379,6 +381,7 @@ def pcolormesh(workspaces, fig=None):
     """
     # check inputs
     _validate_pcolormesh_inputs(workspaces)
+    workspaces = [ws for ws in workspaces if isinstance(ws, MatrixWorkspace)]
 
     # create a subplot of the appropriate number of dimensions
     # extend in number of columns if the number of plottables is not a square number
@@ -479,7 +482,12 @@ def _raise_if_not_sequence(value, seq_name, element_type=None):
     if element_type is not None:
         def raise_if_not_type(x):
             if not isinstance(x, element_type):
-                raise ValueError("Unexpected type: '{}'".format(x.__class__.__name__))
+                if element_type == MatrixWorkspace:
+                    # If the workspace is the wrong type, log the error and remove it from the list so that the other
+                    # workspaces can still be plotted.
+                    LOGGER.warning("{} has unexpected type '{}'".format(x, x.__class__.__name__))
+                else:
+                    raise ValueError("Unexpected type: '{}'".format(x.__class__.__name__))
 
         # Map in Python3 is an iterator, so ValueError will not be raised unless the values are yielded.
         # converting to a list forces yielding

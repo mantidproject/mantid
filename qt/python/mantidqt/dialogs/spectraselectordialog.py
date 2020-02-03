@@ -13,6 +13,7 @@ from qtpy.QtCore import Qt
 from qtpy.QtGui import QIcon
 from qtpy.QtWidgets import QDialogButtonBox, QMessageBox
 
+from mantid.kernel import logger
 from mantid.api import MatrixWorkspace
 
 from mantidqt.icons import get_icon
@@ -49,16 +50,22 @@ class SpectraSelection(object):
 class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
 
     @staticmethod
-    def raise_error_if_workspaces_not_compatible(workspaces):
+    def get_compatible_workspaces(workspaces):
+        matrix_workspaces = []
         for ws in workspaces:
-            if not isinstance(ws, MatrixWorkspace):
-                raise ValueError("Expected MatrixWorkspace, found {}.".format(ws.__class__.__name__))
+            if isinstance(ws, MatrixWorkspace):
+                matrix_workspaces.append(ws)
+            else:
+                # Log an error but carry on so valid workspaces can be plotted.
+                logger.warning("{}: Expected MatrixWorkspace, found {}".format(ws.name(), ws.__class__.__name__))
+
+        return matrix_workspaces
 
     def __init__(self, workspaces, parent=None, show_colorfill_btn=False, overplot=False):
         super(SpectraSelectionDialog, self).__init__(parent)
         self.icon = self.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
         self.setAttribute(Qt.WA_DeleteOnClose, True)
-        self.raise_error_if_workspaces_not_compatible(workspaces)
+        workspaces = self.get_compatible_workspaces(workspaces)
 
         # attributes
         self._workspaces = workspaces
