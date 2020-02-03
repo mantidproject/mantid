@@ -39,17 +39,14 @@ The algorithm proceeds as follows. For each spectrum:
 
 #. find the associated efixed value (if applicable) & convert to wavelength (:math:`\lambda_{fixed}`)
 
-#. loop over the bins in steps defined by `NumberOfWavelengthPoints` and for each step (:math:`\lambda_{step}`)
+#. for each event in `NEvents`
 
-   * define :math:`\lambda_1` as the wavelength before scattering & :math:`\lambda_2` as wavelength after scattering:
-
-     - Direct: :math:`\lambda_1 = \lambda_1`, :math:`\lambda_2 = \lambda_{step}`
-
-     - Indirect: :math:`\lambda_1 = \lambda_{step}`, :math:`\lambda_2 = \lambda_{fixed}`
-
-     - Elastic: :math:`\lambda_1 = \lambda_2 = \lambda_{step}`
-
-   * for each event in `NEvents`:
+   * loop over the bins. 
+   
+     - If `SimulateTracksForEachWavelength` = True then generate tracks using the following procedure for each wavelength step,
+       where the size of each wavelength step is defined by `NumberOfWavelengthPoints`. If `SimulateTracksForEachWavelength` = false
+       generate one set of tracks and define a step size of 1 ie all bins are visited. At the moment there are no wavelength dependent effects in the simulation that affect the simulation of the track geometry so the default value for `SimulateTracksForEachWavelength` is false.
+       For each step (:math:`\lambda_{step}`)
 
      - generate a random point on the beam face defined by the input height & width. If the point is outside of the
        area defined by the face of the sample then it is pulled to the boundary of this area
@@ -66,17 +63,26 @@ The algorithm proceeds as follows. For each spectrum:
      - test for intersections of the track & sample/container objects, giving the number of subsections
        and corresponding distances within the object for each section, call them :math:`l_{2i}`
 
+
+     - define :math:`\lambda_1` as the wavelength before scattering & :math:`\lambda_2` as wavelength after scattering:
+
+        - Direct: :math:`\lambda_1 = \lambda_1`, :math:`\lambda_2 = \lambda_{step}`
+
+        - Indirect: :math:`\lambda_1 = \lambda_{step}`, :math:`\lambda_2 = \lambda_{fixed}`
+
+        - Elastic: :math:`\lambda_1 = \lambda_2 = \lambda_{step}`
+
      - compute the self-attenuation factor for all intersections as
        :math:`\prod\limits_{i} \exp(-(\rho_{1i}\sigma_{1i}(\lambda_{1i})l_{1i} + \rho_{2i}\sigma_{2i}(\lambda_{2i})l_{2i}))`
        where :math:`\rho` is the mass density of the material &
        :math:`\sigma` the absorption cross-section at a given wavelength
 
-     - accumulate this factor with the factor for all `NEvents`
+     - accumulate this wavelength-specific factor across all `NEvents`
 
-   * average the accumulated attentuation factors over `NEvents` and assign this as the correction factor for
-     this :math:`\lambda_{step}`.
+#. average the accumulated attentuation factors over `NEvents` and assign this as the correction factor for
+   this :math:`\lambda_{step}`.
 
-#. finally, interpolate through the unsimulated wavelength points using the selected method
+#. finally, if `SimulateTracksForEachWavelength` = True, interpolate through the unsimulated wavelength points using the selected method
 
 Interpolation
 #############
@@ -101,7 +107,7 @@ The sparse instrument consists of a grid of detectors covering the full instrume
 
 When the sparse instrument option is enabled, a sparse instrument corresponding to the instrument attached to the input workspace is created. The simulation is then run using the created instrument. Finally, the simulated absorption corrections are interpolated to the output workspace.
 
-The interpolation is a two step process: first a spatial interpolation is done from the detector grid of the sparse instrument to the actual detector positions of the full instrument. Then, the correction factors are interpolated over the missing wavelengths.
+The interpolation is a two step process: first a spatial interpolation is done from the detector grid of the sparse instrument to the actual detector positions of the full instrument. Then, if `SimulateTracksForEachWavelength` = True the correction factors are interpolated over the missing wavelengths.
 
 .. note:: Currently, the sparse instrument mode does not support instruments with varying *EFixed*.
 
@@ -153,10 +159,10 @@ Usage
                      'Center': [0.0,0.0,0.0]},
                    Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6', 'SampleNumberDensity': 0.07})
    # Simulating every data point can be slow. Use a smaller set and interpolate
-   abscor = MonteCarloAbsorption(data, NumberOfWavelengthPoints=50)
+   abscor = MonteCarloAbsorption(data)
    corrected = data/abscor
 
-**Example: A cylindrical sample with no container, interpolating with a CSpline**
+**Example: A cylindrical sample with no container, resimulating tracks for different wavelengths, interpolating with a CSpline**
 
 .. testcode:: ExCylinderSampleOnlyAndSpline
 
@@ -167,7 +173,7 @@ Usage
                      'Center': [0.0,0.0,0.0]},
                    Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6', 'SampleNumberDensity': 0.07})
    # Simulating every data point can be slow. Use a smaller set and interpolate
-   abscor = MonteCarloAbsorption(data, NumberOfWavelengthPoints=50,
+   abscor = MonteCarloAbsorption(data, SimulateTracksForEachWavelength=True, NumberOfWavelengthPoints=50,
                                  Interpolation='CSpline')
    corrected = data/abscor
 
@@ -216,10 +222,10 @@ default facility and instrument respectively. The definition can be found at
              Geometry={'Height': 4.0},
              Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6', 'SampleNumberDensity': 0.07})
    # Simulating every data point can be slow. Use a smaller set and interpolate
-   abscor = MonteCarloAbsorption(data, NumberOfWavelengthPoints=30)
+   abscor = MonteCarloAbsorption(data)
    corrected = data/abscor
 
-**Example: A cylindrical sample setting a beam size**
+**Example: A cylindrical sample using a sparse instrument description, interpolating with a CSpline**
 
 .. testcode:: ExSpatialInstrument
 
@@ -230,8 +236,9 @@ default facility and instrument respectively. The definition can be found at
                    Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6', 'SampleNumberDensity': 0.07},
             )
 
-   abscor = MonteCarloAbsorption(data, NumberOfWavelengthPoints=10,SparseInstrument=True,
-                                 NumberOfDetectorRows=5, NumberOfDetectorColumns=5)
+   abscor = MonteCarloAbsorption(data, SparseInstrument=True,
+                                 NumberOfDetectorRows=5, NumberOfDetectorColumns=5,
+                                 Interpolation='CSpline')
    corrected = data/abscor
 
 References

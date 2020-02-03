@@ -317,7 +317,7 @@ The above workflow would translate to this kind of Python script for IN4 and IN6
     DirectILLSelfShielding(
         InputWorkspace='sample',
         OutputWorkspace='corrections',
-        NumberOfSimulatedWavelengths=10
+        EventsPerPoint=10000
     )
     DirectILLApplySelfShielding(
         InputWorkspace='sample',
@@ -463,7 +463,7 @@ A corresponding Python script follows.
     DirectILLSelfShielding(
         InputWorkspace='sample',
         OutputWorkspace='sample-corrections',
-        NumberOfSimulatedWavelengths=10
+        EventsPerPoint=10000
     )
     DirectILLApplySelfShielding(
         InputWorkspace='sample',
@@ -646,7 +646,7 @@ Lets put it all together into a complex Python script. The script below reduces 
     DirectILLSelfShielding(
         InputWorkspace='sample_1.5K',
         OutputWorkspace='corrections',
-        NumberOfSimulatedWavelengths=10
+        EventsPerPoint=10000
     )
     DirectILLApplySelfShielding(
         InputWorkspace='sample_1.5K',
