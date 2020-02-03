@@ -28,7 +28,7 @@ Improvements
 - Normalization options have been added to 2d plots and sliceviewer.
 - The images tab in figure options no longer forces the max value to be greater than the min value.
 - Double clicking on a workspace that only has a single bin of data (for example from a constant wavelength source) will now plot that bin, also for single bin workspaces a plot bin option has been added to the right click plot menu of the workspace.
-
+- The context menu for WorkspaceGroups now contains plotting options so you can plot all of the workspaces in the group.
 
 Bugfixes
 ########
