@@ -48,6 +48,15 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(getInstrumentFilename_Overload,
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 
+namespace {
+void setSample(ExperimentInfo &expInfo, const Mantid::API::Sample &sample) {
+  expInfo.mutableSample() = sample;
+}
+void setRun(ExperimentInfo &expInfo, const Mantid::API::Run &run) {
+  expInfo.mutableRun() = run;
+}
+} // namespace
+
 void export_ExperimentInfo() {
   register_ptr_to_python<boost::shared_ptr<ExperimentInfo>>();
 
@@ -75,39 +84,30 @@ void export_ExperimentInfo() {
            getInstrumentFilename_Overload(
                "Returns IDF filename", (arg("instrument"), arg("date") = "")))
       .staticmethod("getInstrumentFilename")
-
       .def("sample", &ExperimentInfo::sample,
            return_value_policy<reference_existing_object>(), args("self"),
            "Return the :class:`~mantid.api.Sample` object. This cannot be "
            "modified, use mutableSample to modify.")
-
       .def("mutableSample", &ExperimentInfo::mutableSample,
            return_value_policy<reference_existing_object>(), args("self"),
            "Return a modifiable :class:`~mantid.api.Sample` object.")
-
       .def("run", &ExperimentInfo::run,
            return_value_policy<reference_existing_object>(), args("self"),
            "Return the :class:`~mantid.api.Run` object. This cannot be "
            "modified, use mutableRun to modify.")
-
       .def("mutableRun", &ExperimentInfo::mutableRun,
            return_value_policy<reference_existing_object>(), args("self"),
            "Return a modifiable :class:`~mantid.api.Run` object.")
-
       .def("getRunNumber", &ExperimentInfo::getRunNumber, args("self"),
            "Returns the run identifier for this run.")
-
       .def("getEFixed",
            (double (ExperimentInfo::*)(const Mantid::detid_t) const) &
                ExperimentInfo::getEFixed,
            args("self", "detId"))
-
       .def("setEFixed", &ExperimentInfo::setEFixed,
            args("self", "detId", "value"))
-
       .def("getEMode", &ExperimentInfo::getEMode, args("self"),
            "Returns the energy mode.")
-
       .def("detectorInfo", &ExperimentInfo::detectorInfo,
            return_value_policy<reference_existing_object>(), args("self"),
            "Return a const reference to the "
@@ -121,5 +121,7 @@ void export_ExperimentInfo() {
            return_value_policy<reference_existing_object>(), args("self"),
            "Return a const reference to the "
            ":class:`~mantid.geometry.ComponentInfo` "
-           "object.");
+           "object.")
+      .def("setSample", setSample, args("self", "sample"))
+      .def("setRun", setRun, args("self", "run"));
 }
