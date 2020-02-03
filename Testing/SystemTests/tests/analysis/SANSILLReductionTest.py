@@ -67,7 +67,7 @@ class ILL_D11_Test(systemtesting.MantidSystemTest):
                          BeamInputWorkspace='Db', SensitivityInputWorkspace='sens', MaskedInputWorkspace='mask',
                          TransmissionInputWorkspace='s_tr', OutputWorkspace='sample_flux', FluxInputWorkspace='fl')
         # Convert to I(Q)
-        SANSILLIntegration(InputWorkspace='sample_flux', OutputWorkspace='iq')
+        SANSILLIntegration(InputWorkspace='sample_flux', OutputWorkspace='iq', CalculateResolution='MildnerCarpenter')
 
 
 class ILL_D22_Test(systemtesting.MantidSystemTest):
@@ -128,7 +128,7 @@ class ILL_D22_Test(systemtesting.MantidSystemTest):
                          SensitivityInputWorkspace='sens', OutputWorkspace='sample', FluxInputWorkspace='fl')
 
         # Integration
-        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', CalculateResolution='None')
+        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq')
 
 
 class ILL_D33_VTOF_Test(systemtesting.MantidSystemTest):
@@ -171,7 +171,7 @@ class ILL_D33_VTOF_Test(systemtesting.MantidSystemTest):
         SANSILLReduction(Run='093410', ProcessAs='Sample', BeamInputWorkspace='beam', TransmissionInputWorkspace='str',
                          ContainerInputWorkspace='can', MaskedInputWorkspace='mask', OutputWorkspace='sample', FluxInputWorkspace='flux')
         # I(Q)
-        SANSILLIntegration(InputWorkspace='sample', CalculateResolution='None', OutputBinning='0.005,-0.1,1',
+        SANSILLIntegration(InputWorkspace='sample', OutputBinning='0.005,-0.1,1',
                            OutputWorkspace='iq', BinMaskingCriteria='x<1 || x>10')
 
 
@@ -216,7 +216,7 @@ class ILL_D33_LTOF_Test(systemtesting.MantidSystemTest):
                          ContainerInputWorkspace='can', MaskedInputWorkspace='mask', OutputWorkspace='sample', FluxInputWorkspace='flux')
 
         # I(Q)
-        SANSILLIntegration(InputWorkspace='sample', CalculateResolution='None', OutputBinning='0.005,-0.1,1',
+        SANSILLIntegration(InputWorkspace='sample', OutputBinning='0.005,-0.1,1',
                            OutputWorkspace='iq', BinMaskingCriteria='x<1 || x>10')
 
 
@@ -298,7 +298,7 @@ class ILL_D33_Test(systemtesting.MantidSystemTest):
                          TransmissionInputWorkspace='s_tr', OutputWorkspace='sample_flux', FluxInputWorkspace='flux')
 
         # I(Q)
-        SANSILLIntegration(InputWorkspace='sample_flux', OutputWorkspace='iq', CalculateResolution='None')
+        SANSILLIntegration(InputWorkspace='sample_flux', OutputWorkspace='iq')
 
 
 class ILL_D11_AbsoluteScale_Test(systemtesting.MantidSystemTest):
