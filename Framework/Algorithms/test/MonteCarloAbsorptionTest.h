@@ -196,7 +196,7 @@ public:
         1, 10, Environment::SampleOnly, DeltaEMode::Elastic, -1, -1};
     const int nlambda(5);
     const std::string interpolation("Linear");
-    auto outputWS = runAlgorithm(wsProps, nlambda, interpolation);
+    auto outputWS = runAlgorithm(wsProps, true, nlambda, interpolation);
 
     verifyDimensions(wsProps, outputWS);
     const double delta(1e-04);
@@ -212,7 +212,7 @@ public:
         1, 10, Environment::SampleOnly, DeltaEMode::Elastic, -1, -1};
     const int nlambda(5);
     const std::string interpolation("CSpline");
-    auto outputWS = runAlgorithm(wsProps, nlambda, interpolation);
+    auto outputWS = runAlgorithm(wsProps, true, nlambda, interpolation);
 
     verifyDimensions(wsProps, outputWS);
     const double delta(1e-04);
@@ -255,10 +255,10 @@ public:
     TestWorkspaceDescriptor wsProps = {
         1, 10, Environment::SampleOnly, DeltaEMode::Direct, -1, -1};
     int nlambda{1};
-    TS_ASSERT_THROWS(runAlgorithm(wsProps, nlambda, "Linear"),
+    TS_ASSERT_THROWS(runAlgorithm(wsProps, true, nlambda, "Linear"),
                      const std::runtime_error &)
     nlambda = 2;
-    TS_ASSERT_THROWS(runAlgorithm(wsProps, nlambda, "CSpline"),
+    TS_ASSERT_THROWS(runAlgorithm(wsProps, true, nlambda, "CSpline"),
                      const std::runtime_error &)
   }
 
@@ -280,7 +280,7 @@ public:
     using Mantid::Kernel::DeltaEMode;
     TestWorkspaceDescriptor wsProps = {
         5, 10, Environment::SampleOnly, DeltaEMode::Elastic, -1, -1};
-    auto outputWS = runAlgorithm(wsProps, 5, "Linear", true, 3, 3);
+    auto outputWS = runAlgorithm(wsProps, true, 5, "Linear", true, 3, 3);
 
     verifyDimensions(wsProps, outputWS);
     const double delta{1e-04};
@@ -300,7 +300,7 @@ public:
     using Mantid::Kernel::DeltaEMode;
     TestWorkspaceDescriptor wsProps = {
         1, 10, Environment::SampleOnly, DeltaEMode::Direct, -1, -1};
-    auto outputWS = runAlgorithm(wsProps, 5, "Linear", true, 3, 3);
+    auto outputWS = runAlgorithm(wsProps, true, 5, "Linear", true, 3, 3);
 
     verifyDimensions(wsProps, outputWS);
     const double delta(1e-04);
@@ -315,7 +315,7 @@ public:
     using Mantid::Kernel::DeltaEMode;
     TestWorkspaceDescriptor wsProps = {
         1, 10, Environment::SampleOnly, DeltaEMode::Indirect, -1, -1};
-    auto outputWS = runAlgorithm(wsProps, 5, "Linear", true, 3, 3);
+    auto outputWS = runAlgorithm(wsProps, true, 5, "Linear", true, 3, 3);
 
     verifyDimensions(wsProps, outputWS);
     const double delta(1e-04);
@@ -328,16 +328,21 @@ public:
 
 private:
   Mantid::API::MatrixWorkspace_const_sptr
-  runAlgorithm(const TestWorkspaceDescriptor &wsProps, int nlambda = -1,
-               const std::string &interpolate = "",
+  runAlgorithm(const TestWorkspaceDescriptor &wsProps,
+               const bool simulateTracksForEachWavelength = false,
+               int nlambda = -1, const std::string &interpolate = "",
                const bool sparseInstrument = false, const int sparseRows = 2,
                const int sparseColumns = 2) {
     auto inputWS = setUpWS(wsProps);
     auto mcabs = createAlgorithm();
     TS_ASSERT_THROWS_NOTHING(mcabs->setProperty("InputWorkspace", inputWS));
-    if (nlambda > 0) {
+    if (simulateTracksForEachWavelength) {
       TS_ASSERT_THROWS_NOTHING(
-          mcabs->setProperty("NumberOfWavelengthPoints", nlambda));
+          mcabs->setProperty("SimulateTracksForEachWavelength", true));
+      if (nlambda > 0) {
+        TS_ASSERT_THROWS_NOTHING(
+            mcabs->setProperty("NumberOfWavelengthPoints", nlambda));
+      }
     }
     if (!interpolate.empty()) {
       TS_ASSERT_THROWS_NOTHING(

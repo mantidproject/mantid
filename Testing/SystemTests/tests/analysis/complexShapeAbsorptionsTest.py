@@ -28,9 +28,10 @@ class SampleShapeBase(systemtesting.MantidSystemTest):
         mantid.LoadSampleShape(InputWorkspace="ws", OutputWorkspace="ws",
                                Filename=os.path.join(data_dir, "cylinder.stl"))
         mantid.SetSampleMaterial(InputWorkspace="ws", ChemicalFormula="V", SampleNumberDensity=0.1)
-        mantid.MonteCarloAbsorption(InputWorkspace="ws", OutputWorkspace="ws", NumberOfWavelengthPoints=50, EventsPerPoint=5000)
+        mantid.MonteCarloAbsorption(InputWorkspace="ws", OutputWorkspace="ws", EventsPerPoint=5000)
 
     def validate(self):
+        self.tolerance = 1e-3
         return "ws", "complexShapeAbsorb.nxs"
 
 
@@ -58,7 +59,7 @@ class SampleEnvironment(SampleShapeBase):
                                Filename=os.path.join(data_dir, "cylinder.stl"), scale="mm")
         mantid.SetSampleMaterial(InputWorkspace="ws", ChemicalFormula="V", SampleNumberDensity=0.1)
         self.handleEnvironment()
-        mantid.MonteCarloAbsorption(InputWorkspace="ws", OutputWorkspace="ws", NumberOfWavelengthPoints=50, EventsPerPoint=5000)
+        mantid.MonteCarloAbsorption(InputWorkspace="ws", OutputWorkspace="ws", EventsPerPoint=5000)
 
     def validate(self):
         self.tolerance = 1e-3
@@ -87,7 +88,7 @@ class RotatedSampleShapeAndSampleEnvironment(RotatedSampleShape):
         mantid.LoadSampleEnvironment(InputWorkspace="ws", OutputWorkspace="ws",
                                      Filename=os.path.join(data_dir, "cube.stl"), Scale="cm", SetMaterial=True,
                                      ChemicalFormula="V", SampleNumberDensity=0.1)
-        mantid.MonteCarloAbsorption(InputWorkspace="ws", OutputWorkspace="ws", NumberOfWavelengthPoints=50, EventsPerPoint=5000)
+        mantid.MonteCarloAbsorption(InputWorkspace="ws", OutputWorkspace="ws", EventsPerPoint=5000)
 
     def validate(self):
         self.tolerance = 1e-3

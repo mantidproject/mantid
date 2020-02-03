@@ -101,11 +101,18 @@ void MonteCarloAbsorption::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                         Direction::Output),
                   "The name to use for the output workspace.");
+
+  declareProperty("SimulateTracksForEachWavelength", false,
+                  "Resimulate tracks for each wavelength point.");
   auto positiveInt = boost::make_shared<Kernel::BoundedValidator<int>>();
   positiveInt->setLower(1);
   declareProperty("NumberOfWavelengthPoints", EMPTY_INT(), positiveInt,
                   "The number of wavelength points for which a simulation is "
                   "attempted (default: all points)");
+  setPropertySettings("NumberOfWavelengthPoints",
+                      std::make_unique<EnabledWhenProperty>(
+                          "SimulateTracksForEachWavelength",
+                          ePropertyCriterion::IS_NOT_DEFAULT));
   declareProperty(
       "EventsPerPoint", DEFAULT_NEVENTS, positiveInt,
       "The number of \"neutron\" events to generate per simulated point");
@@ -157,14 +164,16 @@ void MonteCarloAbsorption::init() {
 void MonteCarloAbsorption::exec() {
   const MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   const int nevents = getProperty("EventsPerPoint");
-  const int nlambda = getProperty("NumberOfWavelengthPoints");
+  const bool simulateTracksForEachWavelength =
+      getProperty("SimulateTracksForEachWavelength");
   const int seed = getProperty("SeedValue");
   InterpolationOption interpolateOpt;
   interpolateOpt.set(getPropertyValue("Interpolation"));
   const bool useSparseInstrument = getProperty("SparseInstrument");
   const int maxScatterPtAttempts = getProperty("MaxScatterPtAttempts");
-  auto outputWS = doSimulation(*inputWS, static_cast<size_t>(nevents), nlambda,
-                               seed, interpolateOpt, useSparseInstrument,
+  auto outputWS = doSimulation(*inputWS, static_cast<size_t>(nevents),
+                               simulateTracksForEachWavelength, seed,
+                               interpolateOpt, useSparseInstrument,
                                static_cast<size_t>(maxScatterPtAttempts));
   setProperty("OutputWorkspace", std::move(outputWS));
 }
@@ -175,13 +184,18 @@ void MonteCarloAbsorption::exec() {
  */
 std::map<std::string, std::string> MonteCarloAbsorption::validateInputs() {
   std::map<std::string, std::string> issues;
-  const int nlambda = getProperty("NumberOfWavelengthPoints");
-  InterpolationOption interpOpt;
-  const std::string interpValue = getPropertyValue("Interpolation");
-  interpOpt.set(interpValue);
-  const auto nlambdaIssue = interpOpt.validateInputSize(nlambda);
-  if (!nlambdaIssue.empty()) {
-    issues["NumberOfWavelengthPoints"] = nlambdaIssue;
+  const bool simulateTracksForEachWavelength =
+      getProperty("simulateTracksForEachWavelength");
+  // Only interpolate between wavelength points if resimulating tracks
+  if (simulateTracksForEachWavelength) {
+    const int nlambda = getProperty("NumberOfWavelengthPoints");
+    InterpolationOption interpOpt;
+    const std::string interpValue = getPropertyValue("Interpolation");
+    interpOpt.set(interpValue);
+    const auto nlambdaIssue = interpOpt.validateInputSize(nlambda);
+    if (!nlambdaIssue.empty()) {
+      issues["NumberOfWavelengthPoints"] = nlambdaIssue;
+    }
   }
   return issues;
 }
@@ -190,8 +204,8 @@ std::map<std::string, std::string> MonteCarloAbsorption::validateInputs() {
  * Run the simulation over the whole input workspace
  * @param inputWS A reference to the input workspace
  * @param nevents Number of MC events per wavelength point to simulate
- * @param nlambda Number of wavelength points to simulate. The remainder
- * are computed using interpolation
+ * @param simulateTracksForEachWavelength Whether to resimulate the tracks
+ * for each wavelength point
  * @param seed Seed value for the random number generator
  * @param interpolateOpt Method of interpolation to compute unsimulated points
  * @param useSparseInstrument If true, use sparse instrument in simulation
@@ -200,17 +214,26 @@ std::map<std::string, std::string> MonteCarloAbsorption::validateInputs() {
  * @return A new workspace containing the correction factors & errors
  */
 MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
-    const MatrixWorkspace &inputWS, const size_t nevents, int nlambda,
-    const int seed, const InterpolationOption &interpolateOpt,
-    const bool useSparseInstrument, const size_t maxScatterPtAttempts) {
+    const MatrixWorkspace &inputWS, const size_t nevents,
+    const bool simulateTracksForEachWavelength, const int seed,
+    const InterpolationOption &interpolateOpt, const bool useSparseInstrument,
+    const size_t maxScatterPtAttempts) {
   auto outputWS = createOutputWorkspace(inputWS);
   const auto inputNbins = static_cast<int>(inputWS.blocksize());
-  if (isEmpty(nlambda) || nlambda > inputNbins) {
-    if (!isEmpty(nlambda)) {
-      g_log.warning() << "The requested number of wavelength points is larger "
-                         "than the spectra size. "
-                         "Defaulting to spectra size.\n";
+
+  int nlambda;
+  if (simulateTracksForEachWavelength) {
+    nlambda = getProperty("NumberOfWavelengthPoints");
+    if (isEmpty(nlambda) || nlambda > inputNbins) {
+      if (!isEmpty(nlambda)) {
+        g_log.warning()
+            << "The requested number of wavelength points is larger "
+               "than the spectra size. "
+               "Defaulting to spectra size.\n";
+      }
+      nlambda = inputNbins;
     }
+  } else {
     nlambda = inputNbins;
   }
   std::unique_ptr<const DetectorGridDefinition> detGrid;

@@ -13,7 +13,7 @@ import ILL_utilities as utils
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentValidator,
                         MatrixWorkspaceProperty, PropertyMode, WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, EnabledWhenProperty, IntBoundedValidator,
-                           Property, PropertyCriterion, StringListValidator)
+                           PropertyCriterion, StringListValidator)
 from mantid.simpleapi import (ConvertUnits, MonteCarloAbsorption)
 
 
@@ -120,11 +120,6 @@ class DirectILLSelfShielding(DataProcessorAlgorithm):
         self.setPropertyGroup(common.PROP_SPARSE_INSTRUMENT_COLUMNS, PROPGROUP_SIMULATION_INSTRUMENT)
         self.setPropertySettings(common.PROP_SPARSE_INSTRUMENT_COLUMNS, EnabledWhenProperty(common.PROP_SIMULATION_INSTRUMENT,
                                  PropertyCriterion.IsEqualTo, common.SIMULATION_INSTRUMEN_SPARSE))
-        self.declareProperty(name=common.PROP_NUMBER_OF_SIMULATION_WAVELENGTHS,
-                             defaultValue=Property.EMPTY_INT,
-                             validator=greaterThanTwoInt,
-                             direction=Direction.Input,
-                             doc='Number of wavelength points where the simulation is performed (default: all).')
         self.declareProperty(name=common.PROP_EVENTS_PER_WAVELENGTH,
                              defaultValue=300,
                              validator=positiveInt,
@@ -155,7 +150,6 @@ class DirectILLSelfShielding(DataProcessorAlgorithm):
                                     Target='Wavelength',
                                     EMode='Direct',
                                     EnableLogging=self._subalgLogging)
-        wavelengthPoints = self.getProperty(common.PROP_NUMBER_OF_SIMULATION_WAVELENGTHS).value
         eventsPerPoint =self.getProperty(common.PROP_EVENTS_PER_WAVELENGTH).value
         correctionWSName = self._names.withSuffix('correction')
         useFullInstrument = self.getProperty(common.PROP_SIMULATION_INSTRUMENT).value == common.SIMULATION_INSTRUMENT_FULL
@@ -163,7 +157,6 @@ class DirectILLSelfShielding(DataProcessorAlgorithm):
             correctionWS = MonteCarloAbsorption(InputWorkspace=wavelengthWS,
                                                 OutputWorkspace=correctionWSName,
                                                 SparseInstrument=False,
-                                                NumberOfWavelengthPoints=wavelengthPoints,
                                                 Interpolation='CSpline',
                                                 EnableLogging=self._subalgLogging,
                                                 EventsPerPoint=eventsPerPoint,
@@ -176,7 +169,6 @@ class DirectILLSelfShielding(DataProcessorAlgorithm):
                                                 SparseInstrument=True,
                                                 NumberOfDetectorRows=rows,
                                                 NumberOfDetectorColumns=columns,
-                                                NumberOfWavelengthPoints=wavelengthPoints,
                                                 Interpolation='CSpline',
                                                 EnableLogging=self._subalgLogging,
                                                 EventsPerPoint=eventsPerPoint,
