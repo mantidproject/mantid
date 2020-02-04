@@ -34,6 +34,7 @@ Improvements
 - Double clicking on a workspace that only has a single bin of data (for example from a constant wavelength source) will now plot that bin, also for single bin workspaces a plot bin option has been added to the right click plot menu of the workspace.
 - Default values for algorithm properties now appear as placeholder (greyed-out) text on custm algorithm dialogs.
 - The context menu for WorkspaceGroups now contains plotting options so you can plot all of the workspaces in the group.
+- A warning now appears if you attempt to plot more than ten spectra.
 
 Bugfixes
 ########
