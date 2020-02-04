@@ -7,7 +7,6 @@
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
 
-from mantid import AnalysisDataService as ADS
 import mantid.simpleapi as mantid
 from six import string_types
 
