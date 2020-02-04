@@ -21,6 +21,8 @@ class FittingDataPresenter(object):
         # Connect view signals to local methods
         self.view.set_on_load_clicked(self.on_load_clicked)
         self.view.set_enable_button_connection(self._enable_load_button)
+        self.view.set_on_remove_selected_clicked(self._remove_selected_table_rows)
+        self.view.set_on_remove_all_clicked(self._remove_all_table_rows)
 
     def on_load_clicked(self):
         if self._validate():
@@ -108,3 +110,9 @@ class FittingDataPresenter(object):
 
     def _remove_table_row(self, row_no):
         self.view.remove_table_row(row_no)
+
+    def _remove_selected_table_rows(self):
+        self.view.remove_selected()
+
+    def _remove_all_table_rows(self):
+        self.view.remove_all()
