@@ -23,8 +23,20 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW IPlotFitAnalysisPaneView {
+  virtual void observeFitButton(Observer *listener) = 0;
+  virtual std::pair<double, double> getRange() = 0;
+  virtual Mantid::API::IFunction_sptr getFunction() = 0;
+  virtual void addSpectrum(std::string wsName) = 0;
+  virtual void addFitSpectrum(std::string wsName) = 0;
+  virtual void addFunction(Mantid::API::IFunction_sptr func) = 0;
+  virtual void updateFunction(Mantid::API::IFunction_sptr func) = 0;
+  virtual void fitWarning(const std::string &message) = 0;
+
+};
+	
 class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW PlotFitAnalysisPaneView
-    : public QWidget {
+    : public QWidget, public IPlotFitAnalysisPaneView {
   Q_OBJECT
 
 public:
@@ -34,13 +46,13 @@ public:
   void observeFitButton(Observer *listener) {
     m_fitObservable->attach(listener);
   };
-  std::pair<double, double> getRange();
-  Mantid::API::IFunction_sptr getFunction();
-  void addSpectrum(std::string wsName);
-  void addFitSpectrum(std::string wsName);
-  void addFunction(Mantid::API::IFunction_sptr func);
-  void updateFunction(Mantid::API::IFunction_sptr func);
-  void fitWarning(const std::string &message);
+  std::pair<double, double> getRange() override;
+  Mantid::API::IFunction_sptr getFunction() override;
+  void addSpectrum(std::string wsName) override;
+  void addFitSpectrum(std::string wsName) override;
+  void addFunction(Mantid::API::IFunction_sptr func) override;
+  void updateFunction(Mantid::API::IFunction_sptr func) override;
+  void fitWarning(const std::string &message) override;
 
 public slots:
   void doFit();
