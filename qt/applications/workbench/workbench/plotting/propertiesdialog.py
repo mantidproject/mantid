@@ -12,14 +12,11 @@ from __future__ import (absolute_import, unicode_literals)
 # std imports
 
 # 3rdparty imports
-from mantid.kernel import logger
 from mantid.plots.helperfunctions import update_colorbar_scale
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.utils.qt import load_ui
 from matplotlib.collections import QuadMesh
 from matplotlib.colors import LogNorm, Normalize
-from matplotlib.ticker import LogLocator
-from numpy import arange
 from qtpy.QtGui import QDoubleValidator, QIcon
 from qtpy.QtWidgets import QDialog, QWidget
 
