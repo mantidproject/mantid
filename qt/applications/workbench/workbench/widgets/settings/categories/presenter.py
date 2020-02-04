@@ -122,7 +122,6 @@ class CategoriesSettings(object):
                         # to attach the new tree node to the correct parent
                         grand_parent_cat = None
                         for k in range (i - 1,-1,-1):
-                            grand_parent_name = split_cat[k]
                             if split_cat[k] in seen_categories:
                                 grand_parent_cat = seen_categories[split_cat[k]]
                         parent_category = self.view.add_checked_widget_item(widget, parent_name,
