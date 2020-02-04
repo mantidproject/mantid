@@ -41,13 +41,13 @@ protected:
   void loadSideEffects() override;
 
   std::pair<instrumentSetUp, instrumentObserverOptions> setupALFInstrument();
-
-private:
+public:
   void setUpInstrumentAnalysisSplitter() override;
 
   void extractSingleTube();
   void averageTube();
 
+private:
   ALFCustomInstrumentView *m_view;
   ALFCustomInstrumentModel *m_model;
   MantidWidgets::PlotFitAnalysisPanePresenter *m_analysisPane;

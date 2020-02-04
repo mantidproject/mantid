@@ -23,9 +23,11 @@ class DLLExport ALFCustomInstrumentModel
 public:
   ALFCustomInstrumentModel();
   virtual ~ALFCustomInstrumentModel(){};
+  // virtual so we can patch them later
+  virtual void loadAlg(const std::string &name);
+  virtual void transformData();
   std::pair<int, std::string> loadData(const std::string &name) override;
   std::map<std::string, bool> isDataValid();
-  void transformData();
   void storeSingleTube(const std::string &name);
   void averageTube();
   bool hasTubeBeenExtracted(const std::string &name);
