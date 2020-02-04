@@ -8,6 +8,7 @@ from __future__ import print_function
 
 import argparse
 import os
+import pprint
 import re
 import sys
 
@@ -36,30 +37,36 @@ class PyQtConfig(object):
               self.sip_dir = os.path.join(sys.prefix, 'share', 'sip', name)
           else:
               self.sip_dir = os.path.join(sys.prefix, 'sip', name)
-      elif sys.platform == 'darwin':
-          # hardcoded to homebrew Cellar
-          cellar_prefix = '/usr/local/opt'
-          qt_maj_version = self.version_str[0]
-          if qt_maj_version == '4':
-              self.sip_dir = os.path.join(cellar_prefix, 'pyqt@4', 'share', 'sip')
-          elif qt_maj_version == '5':
-              self.sip_dir = os.path.join(cellar_prefix, 'pyqt', 'share', 'sip', 'Qt5')
-          else:
-              raise RuntimeError("Unknown Qt version ({}) found. Unable to determine location of PyQt sip files."
-                                 "Please update FindPyQt accordingly.".format(self.version_str[0]))
       else:
-          # RH/Fedora have separate pythonX-sip or pythonXY-sip  directories
-          prefix_share = os.path.join(sys.prefix, 'share')
-          possible_sip_dirs = (
-              'python{}{}-sip'.format(sys.version_info.major, sys.version_info.minor),
-              'python{}-sip'.format(sys.version_info.major),
-              'sip'
-          )
+          qt_maj_version = self.version_str[0]
+          if sys.platform == 'darwin':
+              prefix = '/usr/local/opt'  # brew Cellar
+              possible_sip_dirs = []
+              if qt_maj_version == '4':
+                  possible_sip_dirs.append(os.path.join('pyqt@4', 'share', 'sip'))
+                  possible_sip_dirs.append(os.path.join('mantid-pyqt@4', 'share', 'sip'))
+              elif qt_maj_version == '5':
+                  possible_sip_dirs.append(os.path.join('pyqt', 'share', 'sip', 'Qt5'))
+                  possible_sip_dirs.append(os.path.join('mantid-pyqt5', 'share', 'sip', 'Qt5'))
+              else:
+                  raise RuntimeError("Unknown Qt version ({}) found. Unable to determine location of PyQt sip files."
+                                     "Please update FindPyQt accordingly.".format(self.version_str[0]))
+          else:
+              prefix = os.path.join(sys.prefix, 'share')
+              possible_sip_dirs = (
+                  'python{}{}-sip/{}'.format(sys.version_info.major, sys.version_info.minor, name),
+                  'python{}-sip/{}'.format(sys.version_info.major, name),
+                  'sip/{}'.format(name)
+              )
           for sip_dir in possible_sip_dirs:
-              pyqt_sip_dir = os.path.join(prefix_share, sip_dir, name)
+              pyqt_sip_dir = os.path.join(prefix, sip_dir)
               if os.path.exists(pyqt_sip_dir):
                   self.sip_dir = pyqt_sip_dir
                   break
+          if self.sip_dir is None:
+              possible_sip_dirs = list(map(lambda p: os.path.join(prefix, p), possible_sip_dirs))
+              raise RuntimeError("Unable to find {}. "
+                                 "Tried following locations: {}".format(name, pprint.pformat(possible_sip_dirs)))
 
       # Assume uic script is in uic submodule
       uic = __import__(name + '.uic', globals(), locals(), ['uic'], 0)
