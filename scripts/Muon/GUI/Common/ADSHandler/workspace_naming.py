@@ -57,6 +57,20 @@ def get_group_asymmetry_name(context, group_name, run, rebin):
     return name
 
 
+def get_pair_asymmetry_name(context, pair_name, run, rebin):
+    if context.data_context.is_multi_period():
+        name = context.data_context._base_run_name(run) + pair_str + pair_name + \
+               "; Periods; " + context.gui_context.period_string(run) + ";"
+    else:
+        name = context.data_context._base_run_name(run) + pair_str + pair_name + ";"
+
+    if rebin:
+        name += ' Rebin;'
+
+    name += context.workspace_suffix
+    return name
+
+
 def get_group_or_pair_from_name(name):
     if group_str in name:
         index = name.find(group_str) + len(group_str)

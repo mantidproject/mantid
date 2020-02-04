@@ -7,7 +7,7 @@
 from __future__ import (absolute_import, division, unicode_literals)
 
 from Muon.GUI.Common.fitting_tab_widget.workspace_selector_view import WorkspaceSelectorView
-from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing
+from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing, GenericObservable
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
 from Muon.GUI.Common import thread_model
 from Muon.GUI.Common.ADSHandler.workspace_naming import get_run_number_from_workspace_name, get_group_or_pair_from_name
@@ -39,6 +39,7 @@ class FittingTabPresenter(object):
         self.thread_success = True
         self.fitting_calculation_model = None
         self.update_selected_workspace_list_for_fit()
+        self.fit_function_changed_notifier = GenericObservable()
         self.gui_context_observer = GenericObserverWithArgPassing(
             self.handle_gui_changes_made)
         self.selected_group_pair_observer = GenericObserver(
@@ -138,6 +139,9 @@ class FittingTabPresenter(object):
             self._update_stored_fit_functions()
             self.view.disable_simul_fit_options()
 
+        self.model.update_stored_fit_function(self._fit_function[0])
+        self.fit_function_changed_notifier.notify_subscribers()
+
     def handle_plot_guess_changed(self):
         if self.view.is_simul_fit():
             parameters = self.get_multi_domain_fit_parameters()
@@ -225,6 +229,10 @@ class FittingTabPresenter(object):
             name = self._get_fit_function()[0]
             self.view.function_name = self.model.get_function_name(name)
             self.model.function_name = self.view.function_name
+
+        self.model.update_stored_fit_function(self._fit_function[0])
+
+        self.fit_function_changed_notifier.notify_subscribers()
 
     def handle_tf_asymmetry_mode_changed(self):
         def calculate_tf_fit_function(original_fit_function):
