@@ -396,6 +396,7 @@ class MainWindow(QMainWindow):
 
     def populate_interfaces_menu(self):
         """Populate then Interfaces menu with all Python and C++ interfaces"""
+        self.interfaces_menu.clear()
         interface_dir = ConfigService['mantidqt.python_interfaces_directory']
         self.interface_list = self._discover_python_interfaces(interface_dir)
         self._discover_cpp_interfaces(self.interface_list)
@@ -657,6 +658,8 @@ class MainWindow(QMainWindow):
         """
         self.editor.load_settings_from_config(CONF)
         self.project.load_settings_from_config(CONF)
+        self.algorithm_selector.refresh()
+        self.populate_interfaces_menu()
 
     def open_algorithm_descriptions_help(self):
         self.interface_manager.showAlgorithmHelp('')
