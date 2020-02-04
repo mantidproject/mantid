@@ -10,27 +10,27 @@ import collections
 from sans.common.enums import DetectorType, RangeStepType, RebinType, FitType, DataType, FitModeForMerge
 from sans.common.general_functions import get_ranges_from_event_slice_setting, get_ranges_for_rebin_setting, \
     get_ranges_for_rebin_array
+from sans.state.IStateParser import IStateParser
 from sans.state.StateObjects.StateAdjustment import StateAdjustment
-from sans.state.StateObjects.StateCalculateTransmission import StateCalculateTransmission, get_calculate_transmission_builder
+from sans.state.StateObjects.StateCalculateTransmission import get_calculate_transmission_builder
 from sans.state.StateObjects.StateCompatibility import StateCompatibility
 from sans.state.StateObjects.StateConvertToQ import StateConvertToQ
 from sans.state.StateObjects.StateData import StateData
-from sans.state.StateObjects.StateMaskDetectors import StateMaskDetectors, get_mask_builder
-from sans.state.StateObjects.StateMoveDetectors import StateMoveDetectors, get_move_builder
-from sans.state.StateObjects.StateNormalizeToMonitor import StateNormalizeToMonitor, get_normalize_to_monitor_builder
-from sans.state.StateObjects.StateReductionMode import StateReductionMode, get_reduction_mode_builder
+from sans.state.StateObjects.StateMaskDetectors import get_mask_builder
+from sans.state.StateObjects.StateMoveDetectors import get_move_builder
+from sans.state.StateObjects.StateNormalizeToMonitor import get_normalize_to_monitor_builder
+from sans.state.StateObjects.StateReductionMode import get_reduction_mode_builder
 from sans.state.StateObjects.StateSave import StateSave
 from sans.state.StateObjects.StateScale import StateScale
 from sans.state.StateObjects.StateSliceEvent import StateSliceEvent
 from sans.state.StateObjects.StateWavelength import StateWavelength
 from sans.state.StateObjects.StateWavelengthAndPixelAdjustment import StateWavelengthAndPixelAdjustment
-from sans.state.IStateParser import IStateParser
 from sans.user_file.settings_tags import TubeCalibrationFileId, MaskId, LimitsId, complex_range, GravityId, \
     QResolutionId, OtherId, MonId, TransId, FitId, BackId, SampleId, SetId, DetectorId, simple_range, \
     rebin_string_values
 
 
-class ParsedDictConverter(IStateParser, abc.ABC):
+class ParsedDictConverter(IStateParser):
     def __init__(self, data_info):
         super(ParsedDictConverter, self).__init__()
         self._cached_result = None
@@ -45,25 +45,25 @@ class ParsedDictConverter(IStateParser, abc.ABC):
         return self._cached_result
 
     @abc.abstractmethod
-    def _get_input_dict(self) -> dict:
+    def _get_input_dict(self):  # -> dict:
         """
         Gets the dictionary to translate as an input dictionary from the inheriting adapter
         :return: Dictionary to translate
         """
         pass
 
-    def get_state_adjustment(self) -> StateAdjustment:
+    def get_state_adjustment(self):  # -> StateAdjustment:
         state = StateAdjustment()
         # Get the wide angle correction setting
         self._set_single_entry(state, "wide_angle_correction", SampleId.PATH)
-        
+
         state.calculate_transmission = self.get_state_calculate_transmission()
         state.normalize_to_monitor = self.get_state_normalize_to_monitor()
         state.wavelength_and_pixel_adjustment = self.get_state_wavelength_and_pixel_adjustment()
 
         return state
 
-    def get_state_calculate_transmission(self) -> StateCalculateTransmission:
+    def get_state_calculate_transmission(self):  # -> StateCalculateTransmission:
         state_builder = get_calculate_transmission_builder(data_info=self._data_info)
 
         self._set_single_entry(state_builder.state, "transmission_radius_on_detector", TransId.RADIUS,
@@ -128,7 +128,7 @@ class ParsedDictConverter(IStateParser, abc.ABC):
             # As usual if there are multiple settings for a specific case, then the last in the list is used.
 
             # 1 Fit type settings
-            clear_settings = [item for item in fit_general if item.data_type is None 
+            clear_settings = [item for item in fit_general if item.data_type is None
                               and item.fit_type is FitType.NO_FIT]
 
             if clear_settings:
@@ -180,7 +180,7 @@ class ParsedDictConverter(IStateParser, abc.ABC):
         state = state_builder.build()
         return state
 
-    def get_state_compatibility(self) -> StateCompatibility:
+    def get_state_compatibility(self):  # -> StateCompatibility:
         state = StateCompatibility()
         if LimitsId.EVENTS_BINNING in self._input_dict:
             events_binning = self._input_dict[LimitsId.EVENTS_BINNING]
@@ -199,7 +199,7 @@ class ParsedDictConverter(IStateParser, abc.ABC):
 
         return state
 
-    def get_state_convert_to_q(self) -> StateConvertToQ:
+    def get_state_convert_to_q(self):  # -> StateConvertToQ:
         state = StateConvertToQ()
         # Get the radius cut off if any is present
         self._set_single_entry(state, "radius_cutoff", LimitsId.RADIUS_CUT, apply_to_value=_convert_mm_to_m)
@@ -252,7 +252,7 @@ class ParsedDictConverter(IStateParser, abc.ABC):
         self._set_single_entry(state, "reduction_dimensionality", OtherId.REDUCTION_DIMENSIONALITY)
         return state
 
-    def get_state_data(self) -> StateData:
+    def get_state_data(self):  # -> StateData:
         assert isinstance(self._data_info, StateData)
         state = self._data_info
         # TODO ideally in the future we should move this to another state object as state Data is not from user files
@@ -260,7 +260,8 @@ class ParsedDictConverter(IStateParser, abc.ABC):
         state.calibration = tube_calib
         return state
 
-    def get_state_mask_detectors(self) -> StateMaskDetectors:
+    # We have taken the implementation originally provided, so we can't help the complexity
+    def get_state_mask_detectors(self):  # noqa: C901
         state_builder = get_mask_builder(data_info=self._data_info)
 
         if MaskId.LINE in self._input_dict:
@@ -586,7 +587,8 @@ class ParsedDictConverter(IStateParser, abc.ABC):
             state_builder.set_radius_max(max_value)
         return state_builder.build()
 
-    def get_state_move_detectors(self) -> StateMoveDetectors:
+    # We have taken the implementation originally provided, so we can't help the complexity
+    def get_state_move_detectors(self):  # noqa : C901
         state_builder = get_move_builder(data_info=self._data_info)
 
         if DetectorId.CORRECTION_X in self._input_dict:
@@ -745,7 +747,7 @@ class ParsedDictConverter(IStateParser, abc.ABC):
 
         return state_builder.build()
 
-    def get_state_normalize_to_monitor(self) -> StateNormalizeToMonitor:
+    def get_state_normalize_to_monitor(self):  # -> StateNormalizeToMonitor:
         builder = get_normalize_to_monitor_builder(self._data_info)
         state = builder.state
         # Extract the incident monitor and which type of rebinning to use (interpolating or normal)
@@ -776,7 +778,8 @@ class ParsedDictConverter(IStateParser, abc.ABC):
         _set_wavelength_limits(state, self._input_dict)
         return builder.build()
 
-    def get_state_reduction_mode(self) -> StateReductionMode:
+    # We have taken the implementation originally provided, so we can't help the complexity
+    def get_state_reduction_mode(self):  # noqa: C901
         # TODO this state builder should be removed, by simply moving the detector/IDF processing to state Data
         state_builder = get_reduction_mode_builder(self._data_info)
         self._set_single_entry(state_builder.state, "reduction_mode", DetectorId.REDUCTION_MODE)
@@ -878,7 +881,7 @@ class ParsedDictConverter(IStateParser, abc.ABC):
         self._set_single_entry(state_builder.state, "reduction_dimensionality", OtherId.REDUCTION_DIMENSIONALITY)
         return state_builder.build()
 
-    def get_state_save(self) -> StateSave:
+    def get_state_save(self):  # -> StateSave:
         state = StateSave()
         if OtherId.SAVE_TYPES in self._input_dict:
             save_types = self._input_dict[OtherId.SAVE_TYPES]
@@ -906,7 +909,7 @@ class ParsedDictConverter(IStateParser, abc.ABC):
             state.use_reduction_mode_as_suffix = use_reduction_mode_as_suffix
         return state
 
-    def get_state_scale(self) -> StateScale:
+    def get_state_scale(self):  # -> StateScale:
         state = StateScale()
 
         # We only extract the first entry here, ie the s entry. Although there are other entries which a user can
@@ -939,7 +942,7 @@ class ParsedDictConverter(IStateParser, abc.ABC):
             state.thickness = sample_thickness
         return state
 
-    def get_state_slice_event(self) -> StateSliceEvent:
+    def get_state_slice_event(self):  # -> StateSliceEvent:
         state = StateSliceEvent()
 
         # Setting up the slice limits is current
@@ -963,12 +966,12 @@ class ParsedDictConverter(IStateParser, abc.ABC):
 
         return state
 
-    def get_state_wavelength(self) -> StateWavelength():
+    def get_state_wavelength(self):  # -> StateWavelength():
         state = StateWavelength()
         _set_wavelength_limits(state, self._input_dict)
         return state
 
-    def get_state_wavelength_and_pixel_adjustment(self) -> StateWavelengthAndPixelAdjustment:
+    def get_state_wavelength_and_pixel_adjustment(self):  # -> StateWavelengthAndPixelAdjustment:
         state = StateWavelengthAndPixelAdjustment()
         # Get the flat/flood files. There can be entries for LAB and HAB.
         if MonId.FLAT in self._input_dict:

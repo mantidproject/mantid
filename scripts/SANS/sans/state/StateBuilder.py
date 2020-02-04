@@ -4,23 +4,8 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from sans.state.AllStates import AllStates
 from sans.state.IStateParser import IStateParser
 from sans.state.RunDataStateBuilder import RunDataStateBuilder
-from sans.state.StateObjects.StateAdjustment import StateAdjustment
-from sans.state.StateObjects.StateCalculateTransmission import StateCalculateTransmission
-from sans.state.StateObjects.StateCompatibility import StateCompatibility
-from sans.state.StateObjects.StateConvertToQ import StateConvertToQ
-from sans.state.StateObjects.StateData import StateData
-from sans.state.StateObjects.StateMaskDetectors import StateMaskDetectors
-from sans.state.StateObjects.StateMoveDetectors import StateMoveDetectors
-from sans.state.StateObjects.StateNormalizeToMonitor import StateNormalizeToMonitor
-from sans.state.StateObjects.StateReductionMode import StateReductionMode
-from sans.state.StateObjects.StateSave import StateSave
-from sans.state.StateObjects.StateScale import StateScale
-from sans.state.StateObjects.StateSliceEvent import StateSliceEvent
-from sans.state.StateObjects.StateWavelength import StateWavelength
-from sans.state.StateObjects.StateWavelengthAndPixelAdjustment import StateWavelengthAndPixelAdjustment
 from sans.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapter
 
 
@@ -29,55 +14,55 @@ class StateBuilder(IStateParser):
     def new_instance(file_information, data_information, user_filename):
         run_data = RunDataStateBuilder(file_information=file_information)
         user_file = UserFileReaderAdapter(data_info=data_information, user_file_name=user_filename)
-        return StateBuilder(run_data_builder=run_data, user_file_parser=user_file)
+        return StateBuilder(run_data_builder=run_data, i_state_parser=user_file)
 
-    def __init__(self, user_file_parser: IStateParser, run_data_builder: RunDataStateBuilder):
-        self._file_parser = user_file_parser
+    def __init__(self, i_state_parser, run_data_builder):
+        self._file_parser = i_state_parser
         self._run_data_builder = run_data_builder
 
-    def get_all_states(self) -> AllStates:
+    def get_all_states(self):  # -> AllStates:
         state = self._file_parser.get_all_states()
         return self._run_data_builder.pack_all_states(state)
 
-    def get_state_adjustment(self) -> StateAdjustment:
+    def get_state_adjustment(self):  # -> StateAdjustment:
         return self._file_parser.get_state_adjustment()
 
-    def get_state_calculate_transmission(self) -> StateCalculateTransmission:
+    def get_state_calculate_transmission(self):  # -> StateCalculateTransmission:
         return self._file_parser.get_state_calculate_transmission()
 
-    def get_state_compatibility(self) -> StateCompatibility:
+    def get_state_compatibility(self):  # -> StateCompatibility:
         return self._file_parser.get_state_compatibility()
 
-    def get_state_convert_to_q(self) -> StateConvertToQ:
+    def get_state_convert_to_q(self):  # -> StateConvertToQ:
         return self._file_parser.get_state_convert_to_q()
 
-    def get_state_data(self) -> StateData:
+    def get_state_data(self):  # -> StateData:
         return self._file_parser.get_state_data()
 
-    def get_state_mask_detectors(self) -> StateMaskDetectors:
+    def get_state_mask_detectors(self):  # -> StateMaskDetectors:
         return self._file_parser.get_state_mask_detectors()
 
-    def get_state_move_detectors(self) -> StateMoveDetectors:
+    def get_state_move_detectors(self):  # -> StateMoveDetectors:
         return self._file_parser.get_state_move_detectors()
 
-    def get_state_normalize_to_monitor(self) -> StateNormalizeToMonitor:
+    def get_state_normalize_to_monitor(self):  # -> StateNormalizeToMonitor:
         return self._file_parser.get_state_normalize_to_monitor()
 
-    def get_state_reduction_mode(self) -> StateReductionMode:
+    def get_state_reduction_mode(self):  # -> StateReductionMode:
         return self._file_parser.get_state_reduction_mode()
 
-    def get_state_save(self) -> StateSave:
+    def get_state_save(self):  # -> StateSave:
         return self._file_parser.get_state_save()
 
-    def get_state_scale(self) -> StateScale:
+    def get_state_scale(self):  # -> StateScale:
         state = self._file_parser.get_state_scale()
         return self._run_data_builder.pack_state_scale(state)
 
-    def get_state_slice_event(self) -> StateSliceEvent:
+    def get_state_slice_event(self):  # -> StateSliceEvent:
         return self._file_parser.get_state_slice_event()
 
-    def get_state_wavelength(self) -> StateWavelength():
+    def get_state_wavelength(self):  # -> StateWavelength():
         return self._file_parser.get_state_wavelength()
 
-    def get_state_wavelength_and_pixel_adjustment(self) -> StateWavelengthAndPixelAdjustment:
+    def get_state_wavelength_and_pixel_adjustment(self):  # -> StateWavelengthAndPixelAdjustment:
         return self._file_parser.get_state_wavelength_and_pixel_adjustment()

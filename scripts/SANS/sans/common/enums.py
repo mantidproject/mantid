@@ -8,8 +8,6 @@
 
 from __future__ import (absolute_import, division, print_function)
 
-from enum import auto
-
 from mantid.py3compat import Enum
 from sans.state.JsonSerializable import json_serializable
 
@@ -53,19 +51,20 @@ class CanonicalCoordinates(Enum):
 
 @json_serializable
 class CorrectionType(Enum):
-    X = auto()
-    Y = auto()
-    Z = auto()
+    X = "X"
+    Y = "Y"
+    Z = "Z"
 
-    X_TILT = auto()
-    Y_TILT = auto()
+    X_TILT = "X_TILT"
+    Y_TILT = "Y_TILT"
 
-    RADIUS = auto()
-    ROTATION = auto()
-    SIDE = auto()
-    TRANSLATION = auto()
+    RADIUS = "RADIUS"
+    ROTATION = "ROTATION"
+    SIDE = "SIDE"
+    TRANSLATION = "TRANSLATION"
 
 
+@json_serializable
 class ReductionMode(Enum):
     NOT_SET = "Not Set"
     ALL = "All"

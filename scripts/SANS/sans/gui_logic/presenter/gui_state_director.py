@@ -14,7 +14,6 @@ from __future__ import (absolute_import, division, print_function)
 
 import copy
 
-from sans.common.enums import (SANSInstrument)
 from sans.common.file_information import SANSFileInformationBlank
 from sans.state.RunDataStateBuilder import RunDataStateBuilder
 from sans.state.StateBuilder import StateBuilder
@@ -80,7 +79,7 @@ class GuiStateDirector(object):
         command_interface = CommandInterfaceAdapter(data_info=data, processed_state=settings)
         run_data_builder = RunDataStateBuilder(file_information=file_information)
 
-        state = StateBuilder(run_data_builder=run_data_builder, user_file_parser=command_interface).get_all_states()
+        state = StateBuilder(run_data_builder=run_data_builder, i_state_parser=command_interface).get_all_states()
         return state
 
     @staticmethod

@@ -8,24 +8,23 @@
 
 from __future__ import (absolute_import, division, print_function)
 
-import systemtesting
 import unittest
 
+import systemtesting
+
 from mantid.api import AlgorithmManager
+from sans.common.constants import EMPTY_NAME
+from sans.common.enums import (SANSFacility, ReductionMode, ReductionDimensionality, FitModeForMerge)
+from sans.common.file_information import SANSFileInformationFactory
+from sans.common.general_functions import create_unmanaged_algorithm
 from sans.state.Serializer import Serializer
 from sans.state.StateBuilder import StateBuilder
-
 from sans.state.StateObjects.StateData import get_data_builder
-from sans.common.enums import (SANSFacility, ReductionMode, ReductionDimensionality, FitModeForMerge)
-from sans.common.constants import EMPTY_NAME
-from sans.common.general_functions import create_unmanaged_algorithm
-from sans.common.file_information import SANSFileInformationFactory
 
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Base class containing useful functions for the tests
 # ----------------------------------------------------------------------------------------------------------------------
-from sans.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapter
 
 
 class SingleReductionTest(unittest.TestCase):

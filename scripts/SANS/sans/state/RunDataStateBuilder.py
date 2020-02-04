@@ -4,9 +4,6 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from sans.state.AllStates import AllStates
-from sans.state.StateObjects.StateNormalizeToMonitor import StateNormalizeToMonitor
-from sans.state.StateObjects.StateScale import StateScale
 
 
 class RunDataStateBuilder(object):
@@ -14,10 +11,10 @@ class RunDataStateBuilder(object):
         self._file_information = file_information
         # TODO: StateData should be unpicked from the user file and moved into here
 
-    def pack_all_states(self, all_states: AllStates):
+    def pack_all_states(self, all_states):
         self.pack_state_scale(all_states.scale)
         return all_states
 
-    def pack_state_scale(self, state_scale: StateScale):
+    def pack_state_scale(self, state_scale):
         state_scale.set_geometry_from_file(self._file_information)
         return state_scale

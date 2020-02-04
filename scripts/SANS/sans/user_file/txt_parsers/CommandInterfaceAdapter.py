@@ -12,5 +12,5 @@ class CommandInterfaceAdapter(ParsedDictConverter):
         super(CommandInterfaceAdapter, self).__init__(data_info=data_info)
         self._processed_state = processed_state
 
-    def _get_input_dict(self) -> dict:
+    def _get_input_dict(self):
         return self._processed_state

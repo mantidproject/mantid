@@ -6,25 +6,24 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-public-methods, invalid-name, too-many-arguments
 from __future__ import (absolute_import, division, print_function)
-import unittest
-import systemtesting
-from mantid.api import AnalysisDataService
 
+import unittest
+
+import systemtesting
+
+from mantid.api import AnalysisDataService
+from sans.common.constants import EMPTY_NAME
+from sans.common.enums import (SANSFacility, ReductionMode, OutputMode)
+from sans.common.file_information import SANSFileInformationFactory
+from sans.common.general_functions import create_unmanaged_algorithm
 from sans.sans_batch import SANSBatchReduction
-from sans.state.RunDataStateBuilder import RunDataStateBuilder
-from sans.state.Serializer import Serializer
 from sans.state.StateBuilder import StateBuilder
 from sans.state.StateObjects.StateData import get_data_builder
-from sans.common.enums import (SANSFacility, ReductionMode, OutputMode)
-from sans.common.constants import EMPTY_NAME
-from sans.common.general_functions import create_unmanaged_algorithm
-from sans.common.file_information import SANSFileInformationFactory
 
 
 # -----------------------------------------------
 # Tests for the SANSBatchReduction algorithm
 # -----------------------------------------------
-from sans.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapter
 
 
 class SANSBatchReductionTest(unittest.TestCase):

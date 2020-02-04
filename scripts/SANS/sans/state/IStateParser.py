@@ -4,27 +4,15 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from abc import ABC, abstractmethod
+from abc import ABCMeta, abstractmethod
+
+from six import with_metaclass
 
 from sans.state.AllStates import AllStates
-from sans.state.StateObjects.StateAdjustment import StateAdjustment
-from sans.state.StateObjects.StateCalculateTransmission import StateCalculateTransmission
-from sans.state.StateObjects.StateCompatibility import StateCompatibility
-from sans.state.StateObjects.StateConvertToQ import StateConvertToQ
-from sans.state.StateObjects.StateData import StateData
-from sans.state.StateObjects.StateMaskDetectors import StateMaskDetectors
-from sans.state.StateObjects.StateMoveDetectors import StateMoveDetectors
-from sans.state.StateObjects.StateNormalizeToMonitor import StateNormalizeToMonitor
-from sans.state.StateObjects.StateReductionMode import StateReductionMode
-from sans.state.StateObjects.StateSave import StateSave
-from sans.state.StateObjects.StateScale import StateScale
-from sans.state.StateObjects.StateSliceEvent import StateSliceEvent
-from sans.state.StateObjects.StateWavelength import StateWavelength
-from sans.state.StateObjects.StateWavelengthAndPixelAdjustment import StateWavelengthAndPixelAdjustment
 
 
-class IStateParser(ABC):
-    def get_all_states(self) -> AllStates:
+class IStateParser(with_metaclass(ABCMeta)):
+    def get_all_states(self):  # -> AllStates
         all_states = AllStates()
         all_states.data = self.get_state_data()
         all_states.move = self.get_state_move_detectors()
@@ -40,57 +28,57 @@ class IStateParser(ABC):
         return all_states
 
     @abstractmethod
-    def get_state_adjustment(self) -> StateAdjustment:
+    def get_state_adjustment(self):  # -> StateAdjustment
         pass
 
     @abstractmethod
-    def get_state_calculate_transmission(self) -> StateCalculateTransmission:
+    def get_state_calculate_transmission(self):  # -> StateCalculateTransmission
         pass
 
     @abstractmethod
-    def get_state_compatibility(self) -> StateCompatibility:
+    def get_state_compatibility(self):  # -> StateCompatibility
         pass
 
     @abstractmethod
-    def get_state_convert_to_q(self) -> StateConvertToQ:
+    def get_state_convert_to_q(self):  # -> StateConvertToQ
         pass
 
     @abstractmethod
-    def get_state_data(self) -> StateData:
+    def get_state_data(self):  # -> StateData
         pass
 
     @abstractmethod
-    def get_state_mask_detectors(self) -> StateMaskDetectors:
+    def get_state_mask_detectors(self):  # -> StateMaskDetectors
         pass
 
     @abstractmethod
-    def get_state_move_detectors(self) -> StateMoveDetectors:
+    def get_state_move_detectors(self):  # -> StateMoveDetectors
         pass
 
     @abstractmethod
-    def get_state_normalize_to_monitor(self) -> StateNormalizeToMonitor:
+    def get_state_normalize_to_monitor(self):  # -> StateNormalizeToMonitor
         pass
 
     @abstractmethod
-    def get_state_reduction_mode(self) -> StateReductionMode:
+    def get_state_reduction_mode(self):  # -> StateReductionMode
         pass
 
     @abstractmethod
-    def get_state_save(self) -> StateSave:
+    def get_state_save(self):  # -> StateSave
         pass
 
     @abstractmethod
-    def get_state_scale(self) -> StateScale:
+    def get_state_scale(self):  # -> StateScale
         pass
 
     @abstractmethod
-    def get_state_slice_event(self) -> StateSliceEvent:
+    def get_state_slice_event(self):  # -> StateSliceEvent
         pass
 
     @abstractmethod
-    def get_state_wavelength(self) -> StateWavelength():
+    def get_state_wavelength(self):  # -> StateWavelength()
         pass
 
     @abstractmethod
-    def get_state_wavelength_and_pixel_adjustment(self) -> StateWavelengthAndPixelAdjustment:
+    def get_state_wavelength_and_pixel_adjustment(self):  # -> StateWavelengthAndPixelAdjustment
         pass

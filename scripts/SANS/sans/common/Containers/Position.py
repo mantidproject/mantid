@@ -4,15 +4,23 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from typing import NamedTuple
 
 
-class XYPosition(NamedTuple):
-    X: float
-    Y: float
+class XYPosition(object):
+    X = None  # Float
+    Y = None  # Float
+
+    def __init__(self, X, Y):
+        self.X = X
+        self.Y = Y
 
 
-class XYZPosition(NamedTuple):
-    X: float
-    Y: float
-    Z: float
+class XYZPosition(object):
+    X = None  # Float
+    Y = None  # Float
+    Z = None  # Float
+
+    def __init__(self, X, Y, Z):
+        self.X = X
+        self.Y = Y
+        self.Z = Z

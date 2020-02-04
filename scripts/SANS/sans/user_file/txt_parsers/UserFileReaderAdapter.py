@@ -9,7 +9,7 @@ from sans.user_file.user_file_reader import UserFileReader
 
 
 class UserFileReaderAdapter(ParsedDictConverter):
-    def __init__(self, user_file_name, data_info, txt_user_file_reader: UserFileReader = None):
+    def __init__(self, user_file_name, data_info, txt_user_file_reader = None):
         super(UserFileReaderAdapter, self).__init__(data_info=data_info)
 
         if not txt_user_file_reader:
@@ -17,5 +17,5 @@ class UserFileReaderAdapter(ParsedDictConverter):
 
         self._adapted_parser = txt_user_file_reader
 
-    def _get_input_dict(self) -> dict:
+    def _get_input_dict(self):  # -> dict:
         return self._adapted_parser.read_user_file()

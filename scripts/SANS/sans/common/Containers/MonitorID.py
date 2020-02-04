@@ -7,11 +7,11 @@
 
 
 class MonitorID(object):
-    def __init__(self, monitor_spec_num: int, monitor_name: str = None):
+    def __init__(self, monitor_spec_num, monitor_name = None):
         self.monitor_name = monitor_name
         self.monitor_spec_num = monitor_spec_num
 
-    def __eq__(self, o: object) -> bool:
+    def __eq__(self, o):  # -> bool:
         if isinstance(o, MonitorID):
             return self.monitor_spec_num == o.monitor_spec_num and\
                    self.monitor_name == o.monitor_name

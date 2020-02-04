@@ -4,12 +4,16 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from typing import NamedTuple
 
 
-class FloatRange(NamedTuple):
-    start: float
-    end: float
+# TODO convert back to NamedTuple with defined types in Python 3
+class FloatRange(object):
+    start = None  # : float
+    end= None  #: float
+
+    def __init__(self, start, end):
+        self.start = start
+        self.end = end
 
     def __eq__(self, other):
         # Ensures a range_entry != FloatRange

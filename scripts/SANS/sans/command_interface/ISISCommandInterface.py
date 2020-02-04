@@ -25,8 +25,6 @@ from sans.common.general_functions import (convert_bank_name_to_detector_type_is
                                            is_part_of_reduced_output_workspace_group)
 
 # Disable plotting if running outside Mantidplot
-from sans.state.Serializer import Serializer
-
 try:
     import mantidplot
 except (Exception, Warning):
