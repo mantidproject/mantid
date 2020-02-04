@@ -118,8 +118,16 @@ class CategoriesSettings(object):
                     # Check if parent categories have already been added and if not add them
                     parent_name = str(split_cat[i])
                     if split_cat[i] not in seen_categories:
+                        # we need to go back up the category tree to find the first seen grandparent
+                        # to attach the new tree node to the correct parent
+                        grand_parent_cat = None
+                        for k in range (i > 1,-1,-1):
+                            grand_parent_name = split_cat[k]
+                            if split_cat[k] in seen_categories:
+                                grand_parent_cat = seen_categories[split_cat[k]]
                         parent_category = self.view.add_checked_widget_item(widget, parent_name,
-                                                                            category_and_states[category_location])
+                                                                            category_and_states[category_location],
+                                                                            grand_parent_cat)
                         seen_categories[parent_name] = parent_category
 
                 child_name = str(split_cat[-1])
