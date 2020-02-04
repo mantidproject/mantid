@@ -55,6 +55,7 @@ class PeaksViewerView(QWidget):
         self._group_box = QGroupBox(self)
         self._group_box.setContentsMargins(0, 0, 0, 0)
         self._table_view = TableWorkspaceDisplayView(parent=self)
+        self._table_view.setSelectionBehavior(TableWorkspaceDisplayView.SelectRows)
 
         group_box_layout = QVBoxLayout()
         group_box_layout.addWidget(self._table_view)
