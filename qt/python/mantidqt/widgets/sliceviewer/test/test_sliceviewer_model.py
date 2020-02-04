@@ -7,7 +7,8 @@
 #  This file is part of the mantid workbench.
 #
 #
-from mantid.simpleapi import CreateMDHistoWorkspace, CreateWorkspace, CreateMDWorkspace, FakeMDEventData
+from mantid.api import AnalysisDataService, IPeaksWorkspace
+from mantid.simpleapi import CreateMDHistoWorkspace, CreateWorkspace, CreateMDWorkspace, CreatePeaksWorkspace, FakeMDEventData
 from mantidqt.widgets.sliceviewer.model import SliceViewerModel, WS_TYPE
 from numpy.testing import assert_equal, assert_allclose
 import numpy as np
@@ -179,6 +180,29 @@ class SliceViewerModelTest(unittest.TestCase):
     def test_MDE_workspaces_cannot_be_normalized(self):
         model = SliceViewerModel(self.ws_MDE_3D)
         self.assertFalse(model.can_normalize_workspace())
+
+    def test_getpeaksworkspace_returns_handle_if_exists_and_of_correct_type(self):
+        try:
+            model = SliceViewerModel(self.ws2d_histo)
+            name = 'peaks_ws'
+            CreatePeaksWorkspace(OutputWorkspace=name)
+
+            workspace = model.get_peaksworkspace(name)
+
+            self.assertEqual(name, workspace.name())
+            self.assertTrue(isinstance(workspace, IPeaksWorkspace))
+        finally:
+            AnalysisDataService.Instance().remove(name)
+
+    def test_getpeaksworkspace_raises_KeyError_if_workspace_missing(self):
+        model = SliceViewerModel(self.ws2d_histo)
+
+        self.assertRaises(KeyError, model.get_peaksworkspace, 'missing')
+
+    def test_getpeaksworkspace_raises_ValueError_if_workspace_type_incorrect(self):
+        model = SliceViewerModel(self.ws2d_histo)
+
+        self.assertRaises(ValueError, model.get_peaksworkspace, self.ws2d_histo.name())
 
 
 if __name__ == '__main__':
