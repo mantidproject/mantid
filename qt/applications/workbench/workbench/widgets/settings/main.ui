@@ -105,24 +105,12 @@ QListView::item {
            </spacer>
           </item>
           <item>
-           <widget class="QPushButton" name="save_settings_button">
-            <property name="minimumSize">
-             <size>
-              <width>150</width>
-              <height>0</height>
-             </size>
+           <widget class="QDialogButtonBox" name="ok_cancel_button_box">
+            <property name="layoutDirection">
+             <enum>Qt::LeftToRight</enum>
             </property>
-            <property name="maximumSize">
-             <size>
-              <width>100</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="styleSheet">
-             <string notr="true"/>
-            </property>
-            <property name="text">
-             <string>Save Settings</string>
+            <property name="standardButtons">
+             <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
             </property>
            </widget>
           </item>
@@ -146,5 +134,22 @@ QListView::item {
   </widget>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>ok_cancel_button_box</sender>
+   <signal>rejected()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>580</x>
+     <y>332</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>362</x>
+     <y>220</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

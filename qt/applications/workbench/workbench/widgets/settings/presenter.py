@@ -42,7 +42,7 @@ class SettingsPresenter(object):
         self.view.container.addWidget(self.plot_settings.view)
         self.view.container.addWidget(self.fitting_settings.view)
 
-        self.view.save_settings_button.clicked.connect(self.action_save_settings_button)
+        self.view.ok_cancel_button_box.accepted.connect(self.action_apply_changes)
         self.view.help_button.clicked.connect(self.action_open_help_window)
         self.ask_before_close = False
 
@@ -76,7 +76,7 @@ class SettingsPresenter(object):
 
         self.current.show()
 
-    def action_save_settings_button(self):
+    def action_apply_changes(self):
         if not self.ask_before_close or self.view.ask_before_close():
             ConfigService.saveConfig(ConfigService.getUserFilename())
             self.parent.config_updated()
