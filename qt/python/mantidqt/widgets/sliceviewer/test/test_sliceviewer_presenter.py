@@ -16,6 +16,7 @@ from unittest import mock
 from mantidqt.widgets.sliceviewer.model import SliceViewerModel, WS_TYPE
 from mantidqt.widgets.sliceviewer.presenter import SliceViewer
 from mantidqt.widgets.sliceviewer.view import SliceViewerView
+from mantidqt.widgets.sliceviewer.presenter import PeaksViewerCollectionPresenter
 
 
 class SliceViewerTest(unittest.TestCase):
@@ -116,6 +117,19 @@ class SliceViewerTest(unittest.TestCase):
         presenter.normalization_changed("By bin width")
         self.view.plot_matrix.assert_called_with(self.model.get_ws(),
                                                  normalize=mantid.api.MDNormalization.VolumeNormalization)
+
+    @mock.patch("mantidqt.widgets.sliceviewer.peaksviewer.presenter.TableWorkspaceDataPresenter")
+    @mock.patch("mantidqt.widgets.sliceviewer.peaksviewer.presenter.TableWorkspaceDisplayModel")
+    @mock.patch("mantidqt.widgets.sliceviewer.peaksviewer.presenter.PeaksViewerCollectionPresenter",
+                spec=PeaksViewerCollectionPresenter)
+    def test_overlay_peaks_workspaces_attaches_view(self, mock_peaks_presenter, _, __):
+        presenter = SliceViewer(None, model=self.model, view=self.view)
+        self.model.get_peaksworkspace.return_value = mock.Mock(spec=mantid.api.IPeaksWorkspace)
+
+        presenter.view.query_peaks_to_overlay.side_effect = ["peaks_workspace"]
+        presenter.overlay_peaks_workspace()
+        presenter.view.query_peaks_to_overlay.assert_called_once()
+        mock_peaks_presenter.assert_called_once()
 
 
 if __name__ == '__main__':
