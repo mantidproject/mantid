@@ -25,6 +25,8 @@ mtd_add_qt_tests(
     CurveFitting
     DataObjects
     ${TCMALLOC_LIBRARIES_LINKTIME}
+    ${GMOCK_LIBRARIES}
+    ${GTEST_LIBRARIES}
     ${CORE_MANTIDLIBS}
     ${POCO_LIBRARIES}
     ${Boost_LIBRARIES}

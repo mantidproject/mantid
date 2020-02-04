@@ -34,6 +34,18 @@ ALFCustomInstrumentModel::ALFCustomInstrumentModel()
 }
 
 /*
+ * Runs load data alg
+ * @param name:: string name for ALF data
+ */
+void ALFCustomInstrumentModel::loadAlg(const std::string &name) {
+  auto alg = AlgorithmManager::Instance().create("Load");
+  alg->initialize();
+  alg->setProperty("Filename", name);
+  alg->setProperty("OutputWorkspace", m_tmpName); // write to tmp ws
+  alg->execute();
+ }
+
+/*
  * Loads data for use in ALFView
  * Loads data, normalise to current and then converts to d spacing
  * @param name:: string name for ALF data
@@ -41,11 +53,7 @@ ALFCustomInstrumentModel::ALFCustomInstrumentModel()
  */
 std::pair<int, std::string>
 ALFCustomInstrumentModel::loadData(const std::string &name) {
-  auto alg = AlgorithmManager::Instance().create("Load");
-  alg->initialize();
-  alg->setProperty("Filename", name);
-  alg->setProperty("OutputWorkspace", m_tmpName); // write to tmp ws
-  alg->execute();
+  loadAlg(name);
   auto ws =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_tmpName);
   int runNumber = ws->getRunNumber();
@@ -73,17 +81,17 @@ std::map<std::string, bool> ALFCustomInstrumentModel::isDataValid() {
   auto ws =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_tmpName);
   bool isItALF = false;
-  bool isItDSpace = false;
 
   if (ws->getInstrument()->getName() == m_instrumentName) {
     isItALF = true;
   }
   auto axis = ws->getAxis(0);
   auto unit = axis->unit()->unitID();
-  if (unit == "dSpacing") {
-    isItDSpace = true;
+  bool isItDSpace = true;
+  if (unit != "dSpacing"){
+  isItDSpace = false;
   }
-  return {{"IsValidInstrument", isItALF}, {"IsItDSpace", isItDSpace}};
+  return {{"IsValidInstrument", isItALF}, {"IsItDSpace", isItDSpace}, {unit, true}};
 }
 
 /*
