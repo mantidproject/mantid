@@ -14,6 +14,8 @@ from .tabs.calibration.presenter import CalibrationPresenter
 from .tabs.focus.model import FocusModel
 from .tabs.focus.view import FocusView
 from .tabs.focus.presenter import FocusPresenter
+from .tabs.fitting.view import FittingView
+from .tabs.fitting.presenter import FittingPresenter
 from .settings.settings_model import SettingsModel
 from .settings.settings_view import SettingsView
 from .settings.settings_presenter import SettingsPresenter
@@ -39,6 +41,7 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.calibration_presenter = None
         self.focus_presenter = None
+        self.fitting_presenter = None
         self.settings_presenter = None
         self.set_on_help_clicked(self.open_help_window)
 
@@ -49,6 +52,7 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         self.setup_settings()
         self.setup_calibration()
         self.setup_focus()
+        self.setup_fitting()
 
         # Setup notifiers
         self.setup_calibration_notifier()
@@ -74,6 +78,11 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         self.set_on_instrument_changed(self.focus_presenter.set_instrument_override)
         self.set_on_rb_num_changed(self.focus_presenter.set_rb_num)
         self.tabs.addTab(focus_view, "Focus")
+
+    def setup_fitting(self):
+        fitting_view = FittingView()
+        self.fitting_presenter = FittingPresenter(fitting_view)
+        self.tabs.addTab(fitting_view, "Fitting")
 
     def setup_calibration_notifier(self):
         self.calibration_presenter.calibration_notifier.add_subscriber(

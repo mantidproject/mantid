@@ -14,6 +14,7 @@ Improvements
 ############
 
 - :ref:`LoadILLTOF2 <algm-LoadILLTOF-v2>` now supports data from PANTHER used in diffraction mode.
+- A unit `AtomicDistance` measured in units of Angstrom has been added to the unit factory to describe atomic structure.
 
 Powder Diffraction
 ------------------
@@ -36,6 +37,9 @@ Single Crystal Diffraction
 - :ref:`PredictFractionalPeaks <algm-PredictFractionalPeaks-v1>` now accepts the same set of modulation vector properties as :ref:`IndexPeaks <algm-IndexPeaks-v1>`.
 - New algorithm :ref:`ConvertHFIRSCDtoMDE <algm-ConvertHFIRSCDtoMDE-v1>` for converting HFIR single crystal data (from WAND and DEMAND) into MDEventWorkspace in units Q_sample.
 - ``IndexPeaksWithsatellites`` has been deleted as it had been deprecated and superseded by :ref:`IndexPeaks <algm-IndexPeaks-v1>`.
+- The output peak workspace from :ref:`PredictFractionalPeaks<algm-PredictFractionalPeaks-v1>` now keeps the same lattice parameters as the input workspace. 
+- :ref:`SaveReflections <algm-SaveReflections>` now has the option to save peaks to separate files based on their associated modulation vectors
+  when using the Jana format.
 
 Imaging
 -------

@@ -7,15 +7,24 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-from mantid.simpleapi import CreateWorkspace
-from mantid.simpleapi import SetSampleMaterial
-from mantid.geometry import CrystalStructure
-from mantid.geometry import CSGObject
+from mantid.simpleapi import CreateSampleWorkspace, CreatePeaksWorkspace, CreateWorkspace, SetSampleMaterial, SetUB
+from mantid.geometry import CrystalStructure, CSGObject, OrientedLattice
 from mantid.api import Sample
 from numpy import pi
 import copy
 
+
 class SampleTest(unittest.TestCase):
+    def test_lattice_accessors(self):
+        instrument_ws = CreateSampleWorkspace()
+        peaks = CreatePeaksWorkspace(instrument_ws, 0)
+        SetUB(peaks, 1, 1, 1, 90, 90, 90)
+        sample = peaks.sample()
+
+        self.assertTrue(sample.hasOrientedLattice())
+        self.assertTrue(isinstance(sample.getOrientedLattice(), OrientedLattice))
+        sample.clearOrientedLattice()
+        self.assertFalse(sample.hasOrientedLattice())
 
     def test_geometry_getters_and_setters(self):
         sample = Sample()

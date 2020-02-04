@@ -686,7 +686,6 @@ class MainWindow(QMainWindow):
         window_pos = settings.get('MainWindow/position')
         if not isinstance(window_pos, QPoint):
             window_pos = QPoint(*window_pos)
-
         if settings.has('MainWindow/font'):
             font_string = settings.get('MainWindow/font').split(',')
             font = QFontDatabase().font(font_string[0], font_string[-1], int(font_string[1]))

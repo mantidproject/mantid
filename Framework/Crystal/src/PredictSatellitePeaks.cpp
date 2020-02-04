@@ -9,6 +9,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidCrystal/PeakAlgorithmHelpers.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/BasicHKLFilters.h"
 #include "MantidGeometry/Crystal/HKLGenerator.h"
@@ -30,23 +31,11 @@ namespace Crystal {
 
 DECLARE_ALGORITHM(PredictSatellitePeaks)
 
-namespace {
-/// Small helper function that return -1 if convention
-/// is "Crystallography" and 1 otherwise.
-double get_factor_for_q_convention(const std::string &convention) {
-  if (convention == "Crystallography") {
-    return -1.0;
-  }
-  return 1.0;
-}
-} // namespace
-
 /** Constructor
  */
 
 PredictSatellitePeaks::PredictSatellitePeaks()
-    : m_qConventionFactor(get_factor_for_q_convention(
-          ConfigService::Instance().getString("Q.convention"))) {}
+    : m_qConventionFactor(qConventionFactor()) {}
 
 /// Initialise the properties
 void PredictSatellitePeaks::init() {

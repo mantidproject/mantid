@@ -57,6 +57,7 @@ class D11_AutoProcess_Test(systemtesting.MantidSystemTest):
                 ContainerTransmissionRuns=container_tr,
                 TransmissionBeamRuns=beam_tr,
                 SampleThickness=thick[i],
+                CalculateResolution='MildnerCarpenter',
                 OutputWorkspace='iq_s' + str(i + 1)
             )
 
@@ -106,7 +107,6 @@ class D33_AutoProcess_Test(systemtesting.MantidSystemTest):
             ContainerRuns=can,
             ContainerTransmissionRuns=can_tr,
             TransmissionBeamRuns=tr_beam,
-            CalculateResolution='None',
             OutputWorkspace='iq',
             PanelOutputWorkspaces='panels'
         )

@@ -30,5 +30,6 @@ BugFixes
 
 - The Abins file parser no longer fails to read data from non-periodic vibration calculations performed with CRYSTAL17.
 - :ref:`ApplyPaalmanPingsCorrection <algm-ApplyPaalmanPingsCorrection>` will now run also for fixed window scan reduced data and will not crash on workspace groups.
+- Fixed a bug crashing the ``Indirect ILL Data Reduction GUI`` when Run is clicked.
 
 :ref:`Release 4.3.0 <v4.3.0>`

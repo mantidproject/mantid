@@ -11,7 +11,8 @@ Interface Overview
 
 This custom interface will integrate several tasks related to engineering
 diffraction. In its current state it provides functionality for creating
-and loading calibration files, and focusing ENGINX run files.
+and loading calibration files, focusing ENGINX run files, and performing
+single peak fitting on focused run files.
 
 This interface is under active development.
 
@@ -125,10 +126,25 @@ Parameters
 
 Sample Run Number
     The run number or file path to the data file to be focused.
-
+    
 Bank/Spectra
     Select which bank to restrict the focusing to or allow for the entry of custom spectra. 
 
 Custom Spectra
     A comma separated list of spectra to restrict the calibration to. Can be provided as single spectrum numbers
     or ranges using hyphens (e.g. 14-150, 405, 500-600).
+
+Fitting
+-------
+
+This tab allows for single peak fitting of focused run files.
+
+Focused run files can be loaded from the file system into mantid from the interface, which will keep track of all the
+workspaces that it has created from these files.
+
+Parameters
+^^^^^^^^^^
+
+Focused Run Files
+    A comma separated list of files to load. Selecting files from the file system using the browse button will do this
+    for you.

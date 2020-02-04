@@ -79,7 +79,7 @@ class SANSILLIntegration(PythonAlgorithm):
                              doc='Choose the output type.')
 
         self.declareProperty(name='CalculateResolution',
-                             defaultValue='MildnerCarpenter',
+                             defaultValue='None',
                              validator=StringListValidator(['MildnerCarpenter', 'None']),
                              doc='Choose to calculate the Q resolution.')
 

@@ -87,6 +87,21 @@ class ProjectReaderTest(unittest.TestCase):
         project_reader.read_project(working_project_file)
         self.assertEqual(["ws1"], project_reader.workspace_names)
 
+    def test_mantidplot_project_reading(self):
+        mantidplot_project_partial = "MantidPlot 0.9.5 project file\n" + \
+                                     "<scripting-lang>	Python\n" + \
+                                     "<windows>	3\n" + \
+                                     "<mantidworkspaces>\n" + \
+                                     "WorkspaceNames\tws1\tws2\n" + \
+                                     "</mantidworkspaces>\n" + \
+                                     "<scriptwindow>\n"
+
+        mplot_project_file = join(working_directory, "mplot_temp.mantid")
+        with open(mplot_project_file, "w") as f:
+            f.write(mantidplot_project_partial)
+        project_reader = projectloader.ProjectReader(project_file_ext)
+        project_reader.read_project(mplot_project_file)
+        self.assertEqual(["ws1","ws2"], project_reader.workspace_names)
 
 if __name__ == "__main__":
     unittest.main()

@@ -123,11 +123,13 @@ public:
             API::AnalysisDataService::Instance().retrieve("PDFGofR"));
     const auto &R = pdfws->x(0);
     const auto &GofR = pdfws->y(0);
+    const auto &pdfUnit = pdfws->getAxis(0)->unit();
 
     TS_ASSERT_DELTA(R[0], 0.01, 0.0001);
     TS_ASSERT_DELTA(R[249], 2.5, 0.0001);
     TS_ASSERT_DELTA(GofR[0], 0.0186, 0.0001);
     TS_ASSERT_DELTA(GofR[249], -0.3867, 0.0001);
+    TS_ASSERT_EQUALS(pdfUnit->caption(), "Atomic Distance");
   }
 
   void test_CheckNan() {

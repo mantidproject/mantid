@@ -471,6 +471,8 @@ class SANSILLReduction(PythonAlgorithm):
                 CalculateDynamicRange(Workspace=ws, ComponentNames=['back_detector', 'front_detector'])
             else:
                 CalculateDynamicRange(Workspace=ws)
+        ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws, NaNValue=0,
+                             NaNError=0, InfinityValue=0, InfinityError=0)
         mtd[ws].getRun().addProperty('ProcessedAs', process, True)
         RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws[2:])
         self.setProperty('OutputWorkspace', mtd[ws[2:]])
