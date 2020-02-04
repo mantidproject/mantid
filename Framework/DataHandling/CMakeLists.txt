@@ -461,6 +461,7 @@ set(TEST_FILES
     LoadILLReflectometryTest.h
     LoadILLSANSTest.h
     LoadILLTOF2Test.h
+    LoadILLTest.h
     LoadISISNexusTest.h
     LoadISISPolarizationEfficienciesTest.h
     LoadInstrumentFromNexusTest.h
@@ -477,6 +478,7 @@ set(TEST_FILES
     LoadMuonLogTest.h
     LoadMuonNexus1Test.h
     LoadMuonNexus2Test.h
+    LoadNGEMTest.h
     LoadNXSPETest.h
     LoadNXcanSASTest.h
     LoadNexusLogsTest.h
@@ -484,7 +486,6 @@ set(TEST_FILES
     LoadNexusProcessed2Test.h
     LoadNexusProcessedTest.h
     LoadNexusTest.h
-    LoadNGEMTest.h
     LoadPDFgetNFileTest.h
     LoadPLNTest.h
     LoadPSIMuonBinTest.h
