@@ -13,6 +13,7 @@ import systemtesting
 
 import mantid
 from mantid.api import AlgorithmManager
+from sans.state.Serializer import Serializer
 
 from sans.state.data import get_data_builder
 from sans.common.enums import (DetectorType, DataType, SANSFacility)
@@ -31,7 +32,7 @@ class SANSReductionCoreTest(unittest.TestCase):
         load_alg.setChild(True)
         load_alg.initialize()
 
-        state_dict = state.property_manager
+        state_dict = Serializer.to_json(state)
         load_alg.setProperty("SANSState", state_dict)
         load_alg.setProperty("PublishToCache", False)
         load_alg.setProperty("UseCached", False)
@@ -63,7 +64,7 @@ class SANSReductionCoreTest(unittest.TestCase):
         reduction_core_alg.setChild(True)
         reduction_core_alg.initialize()
 
-        state_dict = state.property_manager
+        state_dict = Serializer.to_json(state)
         reduction_core_alg.setProperty("SANSState", state_dict)
         reduction_core_alg.setProperty("ScatterWorkspace", workspace)
         reduction_core_alg.setProperty("ScatterMonitorWorkspace", monitor)

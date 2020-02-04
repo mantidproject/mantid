@@ -14,14 +14,14 @@ from collections import defaultdict
 
 from mantid.api import (DistributedDataProcessorAlgorithm,
                         MatrixWorkspaceProperty, Progress, PropertyMode)
-from mantid.kernel import (Direction, PropertyManagerProperty)
+from mantid.kernel import Direction
 from sans.algorithm_detail.bundles import ReductionSettingBundle
 from sans.algorithm_detail.single_execution import (get_final_output_workspaces,
                                                     get_merge_bundle_for_merge_request)
 from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
 from sans.common.enums import (DataType, ReductionMode)
 from sans.common.general_functions import create_child_algorithm
-from sans.state.state_base import create_deserialized_sans_state_from_property_manager
+from sans.state.Serializer import Serializer
 
 
 class SANSSingleReductionBase(DistributedDataProcessorAlgorithm):
@@ -29,8 +29,8 @@ class SANSSingleReductionBase(DistributedDataProcessorAlgorithm):
         # ----------
         # INPUT
         # ----------
-        self.declareProperty(PropertyManagerProperty('SANSState'),
-                             doc='A property manager which fulfills the SANSState contract.')
+        self.declareProperty('SANSState', '',
+                             doc='A JSON string which fulfills the SANSState contract.')
 
         self.declareProperty("UseOptimizations", True, direction=Direction.Input,
                              doc="When enabled the ADS is being searched for already loaded and reduced workspaces. "
@@ -233,9 +233,9 @@ class SANSSingleReductionBase(DistributedDataProcessorAlgorithm):
         return errors
 
     def _get_state(self):
-        state_property_manager = self.getProperty("SANSState").value
-        state = create_deserialized_sans_state_from_property_manager(state_property_manager)
-        state.property_manager = state_property_manager
+        state_json = self.getProperty("SANSState").value
+        state = Serializer.from_json(state_json)
+
         return state
 
     @staticmethod

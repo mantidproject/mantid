@@ -8,15 +8,34 @@
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/V3D.h"
 
 using Mantid::Kernel::ArrayLengthValidator;
 using Mantid::Kernel::ArrayProperty;
 using Mantid::Kernel::BoundedValidator;
+using Mantid::Kernel::ConfigService;
 using Mantid::Kernel::Direction;
 using Mantid::Kernel::V3D;
 
 namespace Mantid::Crystal {
+
+/**
+ * @return -1 if Q.convention==Crystallography, else return 1.0
+ */
+double qConventionFactor(const std::string &convention) {
+  if (convention == "Crystallography") {
+    return -1.0;
+  }
+  return 1.0;
+}
+
+/**
+ * @return qConventionFactor for Q.convention setting in ConfigService
+ */
+double qConventionFactor() {
+  return qConventionFactor(ConfigService::Instance().getString("Q.convention"));
+}
 
 /**
  * Append the common set of properties that relate to modulation vectors

@@ -61,7 +61,7 @@ if(ENABLE_WORKBENCH OR ENABLE_WORKBENCH)
       add_custom_command(
         TARGET mantidqt POST_BUILD
         COMMAND if 1==$<CONFIG:Debug> ${CMAKE_COMMAND} -E copy_directory
-                ${PYTHON_DIR}/msvc-site-packages/debug/PyQt5
+                ${MSVC_PYTHON_EXECUTABLE_DIR}/msvc-site-packages/debug/PyQt5
                 ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/PyQt5
         COMMENT "Copying debug PyQt5 to bin/Debug")
     endif()

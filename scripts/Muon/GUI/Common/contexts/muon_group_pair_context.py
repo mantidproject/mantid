@@ -19,7 +19,7 @@ from mantidqt.utils.observer_pattern import Observable
 
 def get_incremental_number_for_value_in_list(name, list_copy, current_number=1):
     if name + str(current_number) in list_copy:
-        return get_incremental_number_for_value_in_list(name, list_copy, current_number+1)
+        return get_incremental_number_for_value_in_list(name, list_copy, current_number + 1)
     else:
         return str(current_number)
 
@@ -34,10 +34,10 @@ def get_grouping_psi(workspace):
         if workspace_run.hasProperty(sample_log_label_name):
             sample_log_value = workspace_run.getProperty(sample_log_label_name).value
             if sample_log_value not in sample_log_value_list:
-                grouping_list.append(MuonGroup(sample_log_value, [ii+1]))
+                grouping_list.append(MuonGroup(sample_log_value, [ii + 1]))
             else:
                 sample_log_value += get_incremental_number_for_value_in_list(sample_log_value, sample_log_value_list)
-                grouping_list.append(MuonGroup(sample_log_value, [ii+1]))
+                grouping_list.append(MuonGroup(sample_log_value, [ii + 1]))
             sample_log_value_list.append(sample_log_value)
 
     return grouping_list, [], ''
@@ -108,10 +108,13 @@ class MessageNotifier(Observable):
 
 
 class MuonGroupPairContext(object):
-    def __init__(self, check_group_contains_valid_detectors=lambda x : True):
+    def __init__(self, check_group_contains_valid_detectors=lambda x: True):
         self._groups = []
         self._pairs = []
         self._selected = ''
+        self._selected_type = ''
+        self._selected_pairs = []
+        self._selected_groups = []
 
         self.message_notifier = MessageNotifier(self)
 
@@ -131,6 +134,14 @@ class MuonGroupPairContext(object):
     def pairs(self):
         return self._pairs
 
+    @property
+    def selected_pairs(self):
+        return self._selected_pairs
+
+    @property
+    def selected_groups(self):
+        return self._selected_groups
+
     def clear(self):
         self.clear_groups()
         self.clear_pairs()
@@ -141,14 +152,29 @@ class MuonGroupPairContext(object):
     def clear_pairs(self):
         self._pairs = []
 
+    def clear_selected_pairs(self):
+        self._selected_pairs = []
+
+    def clear_selected_groups(self):
+        self._selected_groups = []
+
     @property
     def selected(self):
         return self._selected
+
+    @property
+    def selected_type(self):
+        return self._selected_type
 
     @selected.setter
     def selected(self, value):
         if value in self.group_names + self.pair_names and self._selected != value:
             self._selected = value
+
+    @selected_type.setter
+    def selected_type(self, value):
+        if value in ["Pair", "Group"] and self._selected_type != value:
+            self._selected_type = value
 
     @property
     def group_names(self):
@@ -234,6 +260,32 @@ class MuonGroupPairContext(object):
                 return equivalent_name
 
         return None
+
+    # selected groups to analyse
+    def set_selected_groups_to_all(self):
+        self.clear_groups()
+        for group in self.group_names:
+            self._selected_groups.append(group)
+
+    def reset_selected_groups_and_pairs(self):
+        self.clear_selected_pairs()
+        self.clear_selected_groups()
+
+    def add_group_to_selected_groups(self, group):
+        if group in self.group_names and group not in self.selected_groups:
+            self._selected_groups.append(str(group))
+
+    def remove_group_from_selected_groups(self, group):
+        if group in self.group_names and group in self.selected_groups:
+            self._selected_groups.remove(str(group))
+
+    def add_pair_to_selected_pairs(self, pair):
+        if pair in self.pair_names and pair not in self.selected_pairs:
+            self._selected_pairs.append(str(pair))
+
+    def remove_pair_from_selected_pairs(self, pair):
+        if pair in self.pair_names and pair in self.selected_pairs:
+            self._selected_pairs.remove(str(pair))
 
     def remove_workspace_by_name(self, workspace_name):
         for item in self.groups + self.pairs:

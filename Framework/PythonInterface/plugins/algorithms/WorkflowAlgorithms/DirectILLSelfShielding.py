@@ -62,6 +62,7 @@ class DirectILLSelfShielding(DataProcessorAlgorithm):
     def PyInit(self):
         """Initialize the algorithm's input and output properties."""
         PROPGROUP_SIMULATION_INSTRUMENT = 'Simulation Instrument Settings'
+        positiveInt = IntBoundedValidator(lower=1)
         greaterThanOneInt = IntBoundedValidator(lower=2)
         greaterThanTwoInt = IntBoundedValidator(lower=3)
         inputWorkspaceValidator = CompositeValidator()
@@ -124,6 +125,11 @@ class DirectILLSelfShielding(DataProcessorAlgorithm):
                              validator=greaterThanTwoInt,
                              direction=Direction.Input,
                              doc='Number of wavelength points where the simulation is performed (default: all).')
+        self.declareProperty(name=common.PROP_EVENTS_PER_WAVELENGTH,
+                             defaultValue=300,
+                             validator=positiveInt,
+                             direction=Direction.Input,
+                             doc='The number of neutron events to simulate per wavelength point.')
 
     def validateInputs(self):
         """Check for issues with user input."""
@@ -150,6 +156,7 @@ class DirectILLSelfShielding(DataProcessorAlgorithm):
                                     EMode='Direct',
                                     EnableLogging=self._subalgLogging)
         wavelengthPoints = self.getProperty(common.PROP_NUMBER_OF_SIMULATION_WAVELENGTHS).value
+        eventsPerPoint =self.getProperty(common.PROP_EVENTS_PER_WAVELENGTH).value
         correctionWSName = self._names.withSuffix('correction')
         useFullInstrument = self.getProperty(common.PROP_SIMULATION_INSTRUMENT).value == common.SIMULATION_INSTRUMENT_FULL
         if useFullInstrument:
@@ -158,7 +165,9 @@ class DirectILLSelfShielding(DataProcessorAlgorithm):
                                                 SparseInstrument=False,
                                                 NumberOfWavelengthPoints=wavelengthPoints,
                                                 Interpolation='CSpline',
-                                                EnableLogging=self._subalgLogging)
+                                                EnableLogging=self._subalgLogging,
+                                                EventsPerPoint=eventsPerPoint,
+                                                SeedValue=common.SIMULATION_SEED)
         else:
             rows = self.getProperty(common.PROP_SPARSE_INSTRUMENT_ROWS).value
             columns = self.getProperty(common.PROP_SPARSE_INSTRUMENT_COLUMNS).value
@@ -169,7 +178,9 @@ class DirectILLSelfShielding(DataProcessorAlgorithm):
                                                 NumberOfDetectorColumns=columns,
                                                 NumberOfWavelengthPoints=wavelengthPoints,
                                                 Interpolation='CSpline',
-                                                EnableLogging=self._subalgLogging)
+                                                EnableLogging=self._subalgLogging,
+                                                EventsPerPoint=eventsPerPoint,
+                                                SeedValue=common.SIMULATION_SEED)
         self._cleanup.cleanup(wavelengthWS)
         correctionWS = ConvertUnits(InputWorkspace=correctionWS,
                                     OutputWorkspace=correctionWSName,

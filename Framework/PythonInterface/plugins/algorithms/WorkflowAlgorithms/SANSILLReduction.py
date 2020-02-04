@@ -11,6 +11,7 @@ from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator,
 from mantid.simpleapi import *
 from math import fabs
 import numpy as np
+import os
 
 
 class SANSILLReduction(PythonAlgorithm):
@@ -448,11 +449,15 @@ class SANSILLReduction(PythonAlgorithm):
         instrument = mtd[ws].getInstrument()
         if instrument.hasParameter('tau'):
             tau = instrument.getNumberParameter('tau')[0]
-            if instrument.hasParameter('grouping'):
+            if self._instrument == 'D33':
+                grouping_filename = 'D33_Grouping.xml'
+                grouping_file = os.path.join(config['groupingFiles.directory'], grouping_filename)
+                DeadTimeCorrection(InputWorkspace=ws, Tau=tau, MapFile=grouping_file, OutputWorkspace=ws)
+            elif instrument.hasParameter('grouping'):
                 pattern = instrument.getStringParameter('grouping')[0]
                 DeadTimeCorrection(InputWorkspace=ws, Tau=tau, GroupingPattern=pattern, OutputWorkspace=ws)
             else:
-                self.log().warning('No grouping available in IPF, dead time correction will be performed pixel-wise.')
+                self.log().warning('No grouping available in IPF, dead time correction will be performed detector-wise.')
                 DeadTimeCorrection(InputWorkspace=ws, Tau=tau, OutputWorkspace=ws)
         else:
             self.log().information('No tau available in IPF, skipping dead time correction.')
@@ -492,8 +497,8 @@ class SANSILLReduction(PythonAlgorithm):
             MergeRuns(InputWorkspaces=ws, OutputWorkspace=tmp)
             DeleteWorkspaces(ws)
             RenameWorkspace(InputWorkspace=tmp, OutputWorkspace=ws)
-        self._normalise(ws)
         self._instrument = mtd[ws].getInstrument().getName()
+        self._normalise(ws)
         run = mtd[ws].getRun()
         if run.hasProperty('tof_mode'):
             if run.getLogData('tof_mode').value == 'TOF':

@@ -14,10 +14,12 @@ from matplotlib import use as mpl_use
 
 mpl_use('Agg')  # noqa
 from matplotlib.pyplot import figure
+from numpy import array_equal
 
 from mantid.simpleapi import CreateWorkspace
-from mantid.plots import MantidAxes  # register MantidAxes projection  # noqa
+from mantid.plots import helperfunctions
 from mantid.py3compat.mock import Mock, patch
+from mantidqt.widgets.plotconfigdialog.colorselector import convert_color_to_hex
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import CurveProperties
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.presenter import (
     CurvesTabWidgetPresenter, remove_curve_from_ax, curve_has_errors)
@@ -181,6 +183,7 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         ax.set_title('Axes 0')
         ax.plot(self.ws, specNum=1, label='Workspace')
         presenter = self._generate_presenter(fig=fig)
+        presenter.view.select_curve_combo_box.currentIndex.return_value = 0
         new_plot_kwargs = {'errorevery': 2, 'linestyle': '-.', 'color': 'r',
                            'marker': 'v'}
         presenter._replot_selected_curve(new_plot_kwargs)
@@ -202,6 +205,7 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         mock_view = Mock(get_selected_ax_name=lambda: "(0, 0)",
                          get_selected_curve_name=lambda: "errorbar_plot",
                          get_properties=lambda: mock_view_props)
+        mock_view.select_curve_combo_box.currentIndex.return_value = 0
         presenter = self._generate_presenter(fig=fig, mock_view=mock_view)
         presenter.apply_properties()
         self.assertFalse(ax.containers[0][2][0].get_visible())
@@ -277,6 +281,69 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         self.assertEqual(presenter.view.errorbars.set_cap_thickness.call_count, 0)
         self.assertEqual(presenter.view.errorbars.set_error_every.call_count, 0)
         self.assertEqual(mock_apply_properties.call_count, 3)
+
+    def test_hiding_a_curve_on_a_waterfall_plot_also_hides_its_filled_area(self):
+        fig = self.make_figure_with_multiple_curves()
+
+        mock_view = Mock(get_selected_ax_name=lambda: "Axes 0: (0, 0)",
+                         get_selected_curve_name=lambda: "Workspace")
+
+        ax = fig.get_axes()[0]
+        ax.set_waterfall(True)
+        ax.set_waterfall_fill(True)
+
+        presenter = self._generate_presenter(fig=fig, mock_view=mock_view)
+
+        new_plot_kwargs = {'visible': False}
+        presenter._replot_selected_curve(new_plot_kwargs)
+
+        self.assertEqual(helperfunctions.get_waterfall_fill_for_curve(ax, 0).get_visible(), False)
+
+    def test_changing_line_colour_on_a_waterfall_plot_with_filled_areas_changes_fill_colour_to_match(self):
+        fig = self.make_figure_with_multiple_curves()
+
+        mock_view = Mock(get_selected_ax_name=lambda: "Axes 0: (0, 0)",
+                         get_selected_curve_name=lambda: "Workspace")
+
+        ax = fig.get_axes()[0]
+        ax.lines[0].set_color('#ff9900')
+        ax.lines[1].set_color('#008fff')
+        ax.lines[2].set_color('#42ff00')
+
+        # Create waterfall plot and add filled areas.
+        ax.set_waterfall(True)
+        ax.set_waterfall_fill(True)
+
+        presenter = self._generate_presenter(fig=fig, mock_view=mock_view)
+        # Change the colour of one of the lines.
+        new_plot_kwargs = {'color': '#ffff00'}
+        presenter._replot_selected_curve(new_plot_kwargs)
+
+        # The fill for that line should be the new colour.
+        self.assertEqual(convert_color_to_hex(ax.collections[0].get_facecolor()[0]), ax.lines[0].get_color())
+
+    def test_adding_errorbars_to_waterfall_plot_maintains_waterfall(self):
+        fig = self.make_figure_with_multiple_curves()
+
+        mock_view = Mock(get_selected_ax_name=lambda: "Axes 0: (0, 0)",
+                         get_selected_curve_name=lambda: "Workspace")
+
+        ax = fig.get_axes()[0]
+        # Create waterfall plot
+        ax.set_waterfall(True)
+
+        presenter = self._generate_presenter(fig=fig, mock_view=mock_view)
+        # Add errobars to the first two lines
+        for i in range(2):
+            if i == 1:
+                presenter.view.get_selected_curve_name = lambda: "Workspace 2"
+            new_plot_kwargs = {'capsize': 2}
+            presenter._replot_selected_curve(new_plot_kwargs)
+
+        # Check the errorbar lines and the errorbar cap lines are different.
+        # (They would be the same if it was a non-waterfall plot)
+        self.assertFalse(array_equal(ax.containers[0][2][0].get_segments(), ax.containers[1][2][0].get_segments()))
+        self.assertFalse(array_equal(ax.containers[0][1][0].get_data(), ax.containers[1][1][0].get_data()))
 
 
 if __name__ == '__main__':

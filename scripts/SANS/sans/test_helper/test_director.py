@@ -6,12 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 """ A Test director """
 from __future__ import (absolute_import, division, print_function)
-from sans.state.state import get_state_builder
 from sans.state.data import get_data_builder
 from sans.state.move import get_move_builder
 from sans.state.reduction_mode import get_reduction_mode_builder
 from sans.state.slice_event import get_slice_event_builder
 from sans.state.mask import get_mask_builder
+from sans.state.state import get_state_builder
 from sans.state.wavelength import get_wavelength_builder
 from sans.state.save import get_save_builder
 from sans.state.normalize_to_monitor import get_normalize_to_monitor_builder
@@ -22,7 +22,8 @@ from sans.state.adjustment import get_adjustment_builder
 from sans.state.convert_to_q import get_convert_to_q_builder
 
 from sans.common.enums import (SANSFacility, ReductionMode, ReductionDimensionality,
-                               FitModeForMerge, RebinType, RangeStepType, SaveType, FitType, SampleShape, SANSInstrument)
+                               FitModeForMerge, RebinType, RangeStepType, SaveType, FitType, SampleShape,
+                               SANSInstrument)
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 

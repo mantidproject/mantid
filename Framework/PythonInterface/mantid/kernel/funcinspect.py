@@ -21,37 +21,43 @@ import dis
 from six import PY3
 
 
-def replace_signature(func, varnames):
+def replace_signature(func, signature):
     """
     Replace the signature of the given function object with that given by
     varnames
     :param func: Function whose signature is to be replaced
-    :param varnames: A tuple of names of arguments and local variables
+    :param signature: A tuple of names of arguments and local variables in Python 2
+                      or a Signature object in Python 3
     """
-    # Code object is different in Python 3
-    if hasattr(func, 'func_code'):
-        # Version 2
-        code_attr = 'func_code'
-        f = func.func_code
-        c = f.__new__(f.__class__, f.co_argcount, f.co_nlocals, f.co_stacksize,
-                      f.co_flags, f.co_code, f.co_consts, f.co_names,
-                      varnames, f.co_filename, f.co_name, f.co_firstlineno,
-                      f.co_lnotab, f.co_freevars)
+    if hasattr(signature, 'parameters'):
+        # A new Signature object
+        setattr(func, '__signature__', signature)
     else:
-        code_attr = '__code__'
-        f = func.__code__
-        new_args = [f.__class__, f.co_argcount, f.co_kwonlyargcount,
-                    f.co_nlocals, f.co_stacksize, f.co_flags, f.co_code, 
-                    f.co_consts, f.co_names, varnames, 
-                    f.co_filename, f.co_name, f.co_firstlineno,
-                    f.co_lnotab, f.co_freevars]
-        # Python 3.8 supports positional-only arguments and has an extra
-        # keyword in the constructor
-        if hasattr(f, 'co_posonlyargcount'):
-            new_args.insert(2, f.co_posonlyargcount)
-        c = f.__new__(*new_args)
-    #endif
-    setattr(func, code_attr, c)
+        # Drop this code when we dro Python 2 support
+        # Code object is different in Python 3
+        if hasattr(func, 'func_code'):
+            # Version 2
+            code_attr = 'func_code'
+            f = func.func_code
+            c = f.__new__(f.__class__, f.co_argcount, f.co_nlocals, f.co_stacksize,
+                          f.co_flags, f.co_code, f.co_consts, f.co_names,
+                          signature, f.co_filename, f.co_name, f.co_firstlineno,
+                          f.co_lnotab, f.co_freevars)
+        else:
+            code_attr = '__code__'
+            f = func.__code__
+            new_args = [f.__class__, f.co_argcount, f.co_kwonlyargcount,
+                        f.co_nlocals, f.co_stacksize, f.co_flags, f.co_code,
+                        f.co_consts, f.co_names, signature,
+                        f.co_filename, f.co_name, f.co_firstlineno,
+                        f.co_lnotab, f.co_freevars]
+            # Python 3.8 supports positional-only arguments and has an extra
+            # keyword in the constructor
+            if hasattr(f, 'co_posonlyargcount'):
+                new_args.insert(2, f.co_posonlyargcount)
+            c = f.__new__(*new_args)
+        #endif
+        setattr(func, code_attr, c)
 
 
 def customise_func(func, name, signature, docstring):

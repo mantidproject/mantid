@@ -48,11 +48,13 @@ class MultiFileEditor(PluginWidget):
     Provides the container for the widget containing the CodeEditors in the Workbench
     """
 
-    def __init__(self, parent):
+    def __init__(self, parent, font=None):
         super(MultiFileEditor, self).__init__(parent)
+        if not font:
+            font = text_font()
 
         # layout
-        self.editors = MultiPythonFileInterpreter(font=text_font(),
+        self.editors = MultiPythonFileInterpreter(font=font,
                                                   default_content=DEFAULT_CONTENT,
                                                   parent=self)
         layout = QVBoxLayout()

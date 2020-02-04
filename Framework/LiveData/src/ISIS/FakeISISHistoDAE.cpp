@@ -20,7 +20,7 @@ DECLARE_ALGORITHM(FakeISISHistoDAE)
 namespace {
 
 // Time we'll wait on a receive call (in seconds)
-const long RECV_TIMEOUT = 30;
+const long RECV_TIMEOUT = 60;
 
 typedef enum {
   ISISDSUnknown = 0,

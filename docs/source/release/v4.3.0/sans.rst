@@ -17,5 +17,8 @@ Improved
 - :ref:`SANSILLIntegration <algm-SANSILLIntegration>` will now offer to produce I(Q) for separate detector components separately, which is useful for D33.
 - Data with invalid proton charge logs will now be fixed before performing
   slicing. A warning is emitted when this happens.
+- ISIS SANS history for top level algorithms now works correctly. A user
+  can copy the history of a workspace to their clipboard or a file and the data
+  will be reproduced on that machine without requiring editing of the script.
 
 :ref:`Release 4.3.0 <v4.3.0>`

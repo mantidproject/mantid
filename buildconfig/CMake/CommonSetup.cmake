@@ -73,6 +73,7 @@ add_definitions(-D_SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING)
 find_package(Poco 1.4.6 REQUIRED)
 add_definitions(-DPOCO_ENABLE_CPP11)
 
+find_package(GSL REQUIRED)
 find_package(Nexus 4.3.1 REQUIRED)
 find_package(MuParser REQUIRED)
 find_package(JsonCPP 0.7.0 REQUIRED)

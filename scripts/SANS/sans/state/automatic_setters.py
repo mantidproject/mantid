@@ -8,7 +8,6 @@ from __future__ import (absolute_import, division, print_function)
 from functools import (partial, wraps)
 import inspect
 
-from sans.state.state_base import (TypedParameter, DictParameter)
 # -------------------------------------------------------------------------------------------------------------
 # Automatic Setter functionality
 # This creates setters on a builder/director instance for parameters of a state object.
@@ -43,7 +42,11 @@ def forwarding_setter(value, builder_instance, attribute_name_list):
 def update_the_method(builder_instance,  new_methods, setter_name, attribute_name, attribute_name_list):
     setter_name_copy = list(setter_name)
     setter_name_copy.append(attribute_name)
-    method_name = "_".join(setter_name_copy)
+    try:
+        method_name = "_".join(setter_name_copy)
+    except TypeError as e:
+        # An enum is being used for a key - the dev needs to switch to a value rather than the enum type
+        raise TypeError("You are likely trying to use an enum as a dict key which is not supported.\n {0}".format(e))
 
     attribute_name_list_copy = list(attribute_name_list)
     attribute_name_list_copy.append(attribute_name)
@@ -55,8 +58,8 @@ def update_the_method(builder_instance,  new_methods, setter_name, attribute_nam
 
 def get_all_typed_parameter_descriptors(instance):
     descriptor_types = {}
-    for descriptor_name, descriptor_object in inspect.getmembers(type(instance)):
-        if inspect.isdatadescriptor(descriptor_object) and isinstance(descriptor_object, TypedParameter):
+    for descriptor_name, descriptor_object in inspect.getmembers(instance):
+        if not descriptor_name.startswith('__'):
             descriptor_types.update({descriptor_name: descriptor_object})
     return descriptor_types
 
@@ -76,7 +79,7 @@ def create_automatic_setters_for_state(attribute_value, builder_instance, attrib
         # 1. A dictionary which is empty or None-> install a setter
         # 2. A dictionary containing elements -> for each element apply a recursion
         # 3. A regular attribute -> install the setter
-        if isinstance(value, DictParameter):
+        if isinstance(value, dict):
             dict_parameter_value = getattr(attribute_value, name)
             if dict_parameter_value is None or len(dict_parameter_value) == 0:
                 update_the_method(builder_instance, new_methods, setter_name, name, attribute_name_list)

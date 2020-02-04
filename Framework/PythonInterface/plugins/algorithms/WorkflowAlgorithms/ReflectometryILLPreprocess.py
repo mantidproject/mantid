@@ -62,6 +62,7 @@ class FluxNormMethod:
 
 
 class SlitNorm:
+    AUTO = 'Slit Normalisation AUTO'
     OFF = 'Slit Normalisation OFF'
     ON = 'Slit Normalisation ON'
 
@@ -97,7 +98,8 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
 
     def seeAlso(self):
         """Return a list of related algorithm names."""
-        return ['ReflectometryILLConvertToQ', 'ReflectometryILLPolarizationCor', 'ReflectometryILLSumForeground']
+        return ['ReflectometryILLConvertToQ', 'ReflectometryILLPolarizationCor',
+                'ReflectometryILLSumForeground', 'ReflectometryILLAutoProcess']
 
     def version(self):
         """Return the version of the algorithm."""
@@ -123,7 +125,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
 
         ws = self._moveDetector(ws, linePosition)
 
-        ws = self._calibrateDetectorAngleByDirectBeam(ws)
+        ws = self._calibrateDetectorAngleByDirectBeam(ws, linePosition)
 
         ws = self._waterCalibration(ws)
 
@@ -161,11 +163,11 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                                                      direction=Direction.Output),
                              doc='The preprocessed output workspace (unit wavelength), single histogram.')
         self.declareProperty(Prop.TWO_THETA,
-                             defaultValue=Property.EMPTY_DBL,
+                             defaultValue=-1.,
                              doc='A user-defined scattering angle 2 theta (unit degrees).')
         self.declareProperty(name=Prop.LINE_POSITION,
-                             defaultValue=Property.EMPTY_DBL,
-                             doc='A workspace index corresponding to the beam centre between 0.0 and 255.0.')
+                             defaultValue=-1.,
+                             doc='A fractional workspace index corresponding to the beam centre between 0 and 255.')
         self.declareProperty(MatrixWorkspaceProperty(Prop.DIRECT_LINE_WORKSPACE,
                                                      defaultValue='',
                                                      direction=Direction.Input,
@@ -186,8 +188,8 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                                                      optional=PropertyMode.Optional),
                              doc='A (water) calibration workspace (unit TOF).')
         self.declareProperty(Prop.SLIT_NORM,
-                             defaultValue=SlitNorm.OFF,
-                             validator=StringListValidator([SlitNorm.OFF, SlitNorm.ON]),
+                             defaultValue=SlitNorm.AUTO,
+                             validator=StringListValidator([SlitNorm.AUTO, SlitNorm.OFF, SlitNorm.ON]),
                              doc='Enable or disable slit normalisation.')
         self.declareProperty(Prop.FLUX_NORM_METHOD,
                              defaultValue=FluxNormMethod.TIME,
@@ -231,10 +233,10 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                              defaultValue=255,
                              doc='Last workspace index used for peak fitting.')
         self.declareProperty(Prop.XMIN,
-                             defaultValue=Property.EMPTY_DBL,
+                             defaultValue=-1.,
                              doc='Minimum x value (unit Angstrom) used for peak fitting.')
         self.declareProperty(Prop.XMAX,
-                             defaultValue=Property.EMPTY_DBL,
+                             defaultValue=-1.,
                              doc='Maximum x value (unit Angstrom) used for peak fitting.')
 
     def validateInputs(self):
@@ -394,11 +396,11 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         else:
             # Fit peak position
             peakWSName = self._names.withSuffix('peak')
-            xmin = self.getProperty(Prop.XMIN).value
-            if not xmin == Property.EMPTY_DBL:
+            xmin = Property.EMPTY_DBL
+            if not self.getProperty(Prop.XMIN).isDefault:
                 xmin = self.getProperty(Prop.XMIN).value
                 xmin = common.inTOF(xmin, l1, l2)
-            xmax = self.getProperty(Prop.XMAX).value
+            xmax = Property.EMPTY_DBL
             if not self.getProperty(Prop.XMAX).isDefault:
                 xmax = self.getProperty(Prop.XMAX).value
                 xmax = common.inTOF(xmax, l1, l2)
@@ -408,7 +410,8 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                 RangeLower=xmin,
                 RangeUpper=xmax,
                 StartWorkspaceIndex=self.getProperty(Prop.START_WS_INDEX).value,
-                EndWorkspaceIndex=self.getProperty(Prop.END_WS_INDEX).value
+                EndWorkspaceIndex=self.getProperty(Prop.END_WS_INDEX).value,
+                EnableLogging=self._subalgLogging
             )
             linePosition = peak.LineCentre
             self._cleanup.cleanup(peak.OutputWorkspace)
@@ -433,32 +436,36 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
     def _moveDetector(self, ws, linePosition):
         """Perform detector position correction for direct and reflected beams."""
         detectorMovedWSName = self._names.withSuffix('detectors_moved')
-        twoTheta = ws.run().getProperty(common.SampleLogs.TWO_THETA).value
+        run = ws.run()
+        twoTheta = run.getProperty(common.SampleLogs.TWO_THETA).value
         args = {
             'InputWorkspace': ws,
             'OutputWorkspace': detectorMovedWSName,
             'TwoTheta': twoTheta,
-            'EnableLogging': self._subalgLogging,
             'DetectorComponentName': 'detector',
             'PixelSize': common.pixelSize(self._instrumentName),
             'DetectorCorrectionType': 'RotateAroundSample',
-            'DetectorFacesSample': True
+            'DetectorFacesSample': True,
+            'EnableLogging': self._subalgLogging
         }
         if not self.getProperty(Prop.TWO_THETA).isDefault:
-            # We should use user angle
-            args['TwoTheta'] = self.getProperty(Prop.TWO_THETA).value
+            # We should use the user angle
+            twoTheta = self.getProperty(Prop.TWO_THETA).value
+            args['TwoTheta'] = twoTheta
             # We need to subtract an offsetAngle from user given TwoTheta
             args['LinePosition'] = linePosition
         else:
-            logs = ws.run()
-            args['TwoTheta'] = twoTheta + common.deflectionAngle(logs)
+            twoTheta = twoTheta + common.deflectionAngle(run)
+            args['TwoTheta'] = twoTheta
         detectorMovedWS = SpecularReflectionPositionCorrect(**args)
+        # Write twoTheta to the sample logs
+        run.addProperty(common.SampleLogs.REDUCTION_TWO_THETA, float(twoTheta), 'Degree', True)
         self._cleanup.cleanup(ws)
         return detectorMovedWS
 
-    def _calibrateDetectorAngleByDirectBeam(self, ws):
+    def _calibrateDetectorAngleByDirectBeam(self, ws, linePosition):
         """Perform detector position correction for reflected beams."""
-        if self.getProperty(Prop.DIRECT_LINE_WORKSPACE).isDefault:
+        if self.getProperty(Prop.DIRECT_LINE_WORKSPACE).isDefault or not self.getProperty(Prop.TWO_THETA).isDefault:
             return ws
         calibratedWSName = self._names.withSuffix('reflected_beam_calibration')
         directLineWS = self.getProperty(Prop.DIRECT_LINE_WORKSPACE).value
@@ -466,13 +473,14 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         calibratedWS = SpecularReflectionPositionCorrect(
             InputWorkspace=ws,
             OutputWorkspace=calibratedWSName,
-            EnableLogging=self._subalgLogging,
             DetectorComponentName='detector',
             DirectLineWorkspace=directLineWS,
             DirectLinePosition=directLine,
+            LinePosition=linePosition,
             PixelSize=common.pixelSize(self._instrumentName),
             DetectorCorrectionType='RotateAroundSample',
-            DetectorFacesSample=True
+            DetectorFacesSample=True,
+            EnableLogging=self._subalgLogging
         )
         self._cleanup.cleanup(ws)
         return calibratedWS
@@ -513,16 +521,21 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         return detWS
 
     def _normaliseToSlits(self, ws):
-        """Normalise ws to slit opening."""
-        if self.getProperty(Prop.SLIT_NORM).value == SlitNorm.OFF:
+        """Normalise ws to slit opening and update slit widths."""
+        # Update slit width in any case for later re-use.
+        common.slitSizes(ws)
+        slitNorm = self.getProperty(Prop.SLIT_NORM).value
+        if slitNorm == SlitNorm.OFF:
+            return ws
+        elif slitNorm == SlitNorm.AUTO and self._instrumentName != 'D17':
             return ws
         run = ws.run()
-        slit2width = run.get(common.slitSizeLogEntry(self._instrumentName, 1))
-        slit3width = run.get(common.slitSizeLogEntry(self._instrumentName, 2))
-        if slit2width is None or slit3width is None:
+        slit2width = run.get(common.SampleLogs.SLIT2WIDTH).value
+        slit3width = run.get(common.SampleLogs.SLIT3WIDTH).value
+        if slit2width == '-' or slit3width == '-':
             self.log().warning('Slit information not found in sample logs. Slit normalisation disabled.')
             return ws
-        f = slit2width.value * slit3width.value
+        f = slit2width * slit3width
         normalisedWSName = self._names.withSuffix('normalised_to_slits')
         normalisedWS = Scale(
             InputWorkspace=ws,

@@ -27,6 +27,7 @@ function (find_pyqt major_version)
   if (NOT EXISTS ${_find_pyqt_py})
     message(FATAL_ERROR "Failed to find FindPyQt.py in \"${CMAKE_MODULE_PATH}\"")
   endif()
+
   execute_process (COMMAND ${PYTHON_EXECUTABLE} ${_find_pyqt_py} ${major_version}
     OUTPUT_VARIABLE _pyqt_config ERROR_VARIABLE _pyqt_config_err)
   if(CMAKE_HOST_WIN32 AND major_version EQUAL 4 AND _pyqt_config_err MATCHES "Qt: Untested Windows version 10.0 detected!")

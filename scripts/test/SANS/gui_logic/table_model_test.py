@@ -7,10 +7,10 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-from mock import patch, ANY
 from qtpy.QtCore import QCoreApplication
 
 from mantid.py3compat import mock
+from mantid.py3compat.mock import patch, ANY
 from sans.common.enums import (RowState, SampleShape)
 from sans.gui_logic.models.basic_hint_strategy import BasicHintStrategy
 from sans.gui_logic.models.table_model import (TableModel, TableIndexModel, OptionsColumnModel, options_column_bool)

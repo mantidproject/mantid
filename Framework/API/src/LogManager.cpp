@@ -338,6 +338,17 @@ LogManager::getTimeSeriesProperty(const std::string &name) const {
 }
 
 /**
+ * Returns the time dependent standard deviation
+ * @param name :: The name of the property
+ * @return A single double value
+ */
+double LogManager::getTimeAveragedStd(const std::string &name) const {
+  return getTimeSeriesProperty<double>(name)
+      ->getStatistics()
+      .time_standard_deviation;
+}
+
+/**
  * Get the value of a property as the requested type. Throws if the type is not
  * correct
  * @param name :: The name of the property

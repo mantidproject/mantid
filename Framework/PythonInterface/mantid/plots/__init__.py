@@ -19,9 +19,9 @@ try:
    from collections.abc import Iterable
 except ImportError:
    # check Python 2 location
-   from collections import Iterable   
+   from collections import Iterable
 from matplotlib.axes import Axes
-from matplotlib.collections import Collection
+from matplotlib.collections import Collection, PolyCollection
 from matplotlib.colors import Colormap
 from matplotlib.container import Container, ErrorbarContainer
 from matplotlib.image import AxesImage
@@ -35,12 +35,13 @@ from mpl_toolkits.mplot3d.axes3d import Axes3D
 from mantid.api import AnalysisDataService as ads
 from mantid.kernel import logger
 from mantid.plots import helperfunctions, plotfunctions, plotfunctions3D
-from mantid.plots.utility import autoscale_on_update
+from mantid.plots.legend import convert_color_to_hex, LegendProperties
 from mantid.plots.helperfunctions import get_normalize_by_bin_width
 from mantid.plots.scales import PowerScale, SquareScale
-from mantid.plots.utility import artists_hidden, MantidAxType, legend_set_draggable
-from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
+from mantid.plots.utility import (artists_hidden, autoscale_on_update,
+                                  legend_set_draggable, MantidAxType)
 
+WATERFALL_XOFFSET_DEFAULT, WATERFALL_YOFFSET_DEFAULT = 10, 20
 
 def plot_decorator(func):
     def wrapper(self, *args, **kwargs):
@@ -195,6 +196,9 @@ class MantidAxes(Axes):
         self.interactive_markers = []
         # flag to indicate if a function has been set to replace data
         self.data_replaced = False
+
+        self.waterfall_x_offset = 0
+        self.waterfall_y_offset = 0
 
     def add_artist_correctly(self, artist):
         """
@@ -466,7 +470,6 @@ class MantidAxes(Axes):
         :func:`plotfunctions.errorbar`
         """
         kwargs['distribution'] = not self.get_artist_normalization_state(artist)
-
         workspace, spec_num = self.get_artists_workspace_and_spec_num(artist)
         self.remove_artists_if(lambda art: art == artist)
         workspace_index = workspace.getIndexFromSpectrumNumber(spec_num)
@@ -1044,6 +1047,119 @@ class MantidAxes(Axes):
         For keywords related to workspaces, see :func:`plotfunctions.tricontourf`
         """
         return self._plot_2d_func('tricontourf', *args, **kwargs)
+
+    def is_waterfall(self):
+        return self.waterfall_x_offset != 0 or self.waterfall_y_offset != 0
+
+    def update_waterfall(self, x_offset, y_offset):
+        """
+        Changes the offset of a waterfall plot.
+        :param x_offset: The amount by which each line is shifted in the x axis.
+        :param y_offset: The amount by which each line is shifted in the y axis.
+        """
+        x_offset = int(x_offset)
+        y_offset = int(y_offset)
+
+        errorbar_cap_lines = helperfunctions.remove_and_return_errorbar_cap_lines(self)
+
+        for i in range(len(self.get_lines())):
+            helperfunctions.convert_single_line_to_waterfall(self, i, x_offset, y_offset)
+
+        if x_offset == 0 and y_offset == 0:
+            self.set_waterfall_fill(False)
+            logger.information("x and y offset have been set to zero so the plot is no longer a waterfall plot.")
+
+        if self.waterfall_has_fill():
+            helperfunctions.waterfall_update_fill(self)
+
+        self.waterfall_x_offset = x_offset
+        self.waterfall_y_offset = y_offset
+
+        self.lines += errorbar_cap_lines
+
+        helperfunctions.set_waterfall_toolbar_options_enabled(self)
+        self.get_figure().canvas.draw()
+
+    def set_waterfall(self, state, x_offset=None, y_offset=None, fill=False):
+        """
+        Convert between a normal 1D plot and a waterfall plot.
+        :param state: If true convert the plot to a waterfall plot, otherwise convert to a 1D plot.
+        :param x_offset: The amount by which each line is shifted in the x axis. Optional, default is 10.
+        :param y_offset: The amount by which each line is shifted in the y axis. Optional, default is 20.
+        :param fill: If true the area under each line is filled.
+        :raises: RuntimeError if state is true but there are less than two lines on the plot, if state is true but
+                 x_offset and y_offset are 0, or if state is false but x_offset or y_offset is non-zero or fill is True.
+        """
+        if state:
+            if len(self.get_lines()) < 2:
+                raise RuntimeError("Axis must have multiple lines to be converted to a waterfall plot.")
+
+            if x_offset is None:
+                x_offset = WATERFALL_XOFFSET_DEFAULT
+
+            if y_offset is None:
+                y_offset = WATERFALL_YOFFSET_DEFAULT
+
+            if x_offset == 0 and y_offset == 0:
+                raise RuntimeError("You have set waterfall to true but have set the x and y offsets to zero.")
+
+            if self.is_waterfall():
+                # If the plot is already a waterfall plot but the provided x or y offset value is different to the
+                # current value, the new values are applied but a message is written to the logger to tell the user
+                # that they can use the update_waterfall function to do this.
+                if x_offset != self.waterfall_x_offset or y_offset != self.waterfall_y_offset:
+                    logger.information("If your plot is already a waterfall plot you can use update_waterfall(x, y) to"
+                                       " change its offset values.")
+                else:
+                    # Nothing needs to be changed.
+                    logger.information("Plot is already a waterfall plot.")
+                    return
+
+            # Set the width and height attributes if they haven't been already.
+            if not hasattr(self, 'width'):
+                helperfunctions.set_initial_dimensions(self)
+        else:
+            if bool(x_offset) or bool(y_offset) or fill:
+                raise RuntimeError("You have set waterfall to false but have given a non-zero value for the offset or "
+                                "set fill to true.")
+
+            if not self.is_waterfall():
+                # Nothing needs to be changed.
+                logger.information("Plot is already not a waterfall plot.")
+                return
+
+            x_offset = y_offset = 0
+
+        self.update_waterfall(x_offset, y_offset)
+
+        if fill:
+            self.set_waterfall_fill(True)
+
+    def waterfall_has_fill(self):
+        return any(isinstance(collection, PolyCollection) for collection in self.collections)
+
+    def set_waterfall_fill(self, enable, colour=None):
+        """
+        Toggle whether the area under each line on a waterfall plot is filled.
+        :param enable: If true, the filled areas are created, otherwise they are removed.
+        :param colour: Optional string for the colour of the filled areas. If None, the colour of each line is used.
+        :raises: RuntimeError if enable is false but colour is not None.
+        """
+        if not self.is_waterfall():
+            raise RuntimeError("Cannot toggle fill on non-waterfall plot.")
+
+        if enable:
+            helperfunctions.waterfall_create_fill(self)
+
+            if colour:
+                helperfunctions.solid_colour_fill(self, colour)
+            else:
+                helperfunctions.line_colour_fill(self)
+        else:
+            if bool(colour):
+                raise RuntimeError("You have set fill to false but have given a colour.")
+
+            helperfunctions.waterfall_remove_fill(self)
 
     # ------------------ Private api --------------------------------------------------------
 

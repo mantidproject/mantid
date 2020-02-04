@@ -14,13 +14,13 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
                         WorkspaceUnitValidator)
-from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator, CompositeValidator)
+from mantid.kernel import (Direction, StringListValidator, CompositeValidator)
 from sans.algorithm_detail.calculate_sans_transmission import calculate_transmission
 from sans.algorithm_detail.normalize_to_sans_monitor import normalize_to_monitor
 from sans.common.constants import EMPTY_NAME
 from sans.common.enums import (DataType, DetectorType)
 from sans.common.general_functions import create_unmanaged_algorithm
-from sans.state.state_base import create_deserialized_sans_state_from_property_manager
+from sans.state.Serializer import Serializer
 
 
 class SANSCreateAdjustmentWorkspaces(DistributedDataProcessorAlgorithm):
@@ -36,8 +36,8 @@ class SANSCreateAdjustmentWorkspaces(DistributedDataProcessorAlgorithm):
         # INPUT
         # ---------------
         # State
-        self.declareProperty(PropertyManagerProperty('SANSState'),
-                             doc='A property manager which fulfills the SANSState contract.')
+        self.declareProperty('SANSState', '',
+                             doc='A JSON string which fulfills the SANSState contract.')
 
         # Input workspaces
         self.declareProperty(MatrixWorkspaceProperty('TransmissionWorkspace', '',
@@ -103,8 +103,8 @@ class SANSCreateAdjustmentWorkspaces(DistributedDataProcessorAlgorithm):
 
     def PyExec(self):
         # Read the state
-        state_property_manager = self.getProperty("SANSState").value
-        state = create_deserialized_sans_state_from_property_manager(state_property_manager)
+        state_json = self.getProperty("SANSState").value
+        state = Serializer.from_json(state_json)
 
         # --------------------------------------
         # Get the monitor normalization workspace
@@ -127,8 +127,7 @@ class SANSCreateAdjustmentWorkspaces(DistributedDataProcessorAlgorithm):
         # Get the full wavelength and pixel adjustment
         # --------------------------------------------
         wave_length_adjustment_workspace, \
-        pixel_length_adjustment_workspace = self._get_wavelength_and_pixel_adjustment_workspaces(state,
-                                                                                                 monitor_normalization_workspace,
+        pixel_length_adjustment_workspace = self._get_wavelength_and_pixel_adjustment_workspaces(monitor_normalization_workspace,
                                                                                                  # noqa
                                                                                                  calculated_transmission_workspace)  # noqa
 
@@ -142,13 +141,13 @@ class SANSCreateAdjustmentWorkspaces(DistributedDataProcessorAlgorithm):
         self.setProperty("CalculatedTransmissionWorkspace", calculated_transmission_workspace)
         self.setProperty("UnfittedTransmissionWorkspace", unfitted_transmission_workspace)
 
-    def _get_wavelength_and_pixel_adjustment_workspaces(self, state,
+    def _get_wavelength_and_pixel_adjustment_workspaces(self,
                                                         monitor_normalization_workspace,
                                                         calculated_transmission_workspace):
         component = self.getProperty("Component").value
 
         wave_pixel_adjustment_name = "SANSCreateWavelengthAndPixelAdjustment"
-        serialized_state = state.property_manager
+        serialized_state = self.getProperty("SANSState").value
         wave_pixel_adjustment_options = {"SANSState": serialized_state,
                                          "NormalizeToMonitorWorkspace": monitor_normalization_workspace,
                                          "OutputWorkspaceWavelengthAdjustment": EMPTY_NAME,
@@ -222,8 +221,7 @@ class SANSCreateAdjustmentWorkspaces(DistributedDataProcessorAlgorithm):
         # Check that the input can be converted into the right state object
         state_property_manager = self.getProperty("SANSState").value
         try:
-            state = create_deserialized_sans_state_from_property_manager(state_property_manager)
-            state.property_manager = state_property_manager
+            state = Serializer.from_json(state_property_manager)
             state.validate()
         except ValueError as err:
             errors.update({"SANSCreateAdjustmentWorkspaces": str(err)})

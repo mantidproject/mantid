@@ -13,6 +13,7 @@ import unittest
 
 import mantid  # noqa
 from mantid.api import AlgorithmManager
+from sans.state.Serializer import Serializer
 from sans.user_file.state_director import StateDirectorISIS
 from sans.state.data import get_data_builder
 from sans.common.enums import (SANSFacility, ReductionMode, ReductionDimensionality, FitModeForMerge)
@@ -30,7 +31,7 @@ class SingleReductionTest(unittest.TestCase):
         load_alg.setChild(True)
         load_alg.initialize()
 
-        state_dict = state.property_manager
+        state_dict = Serializer.to_json(state)
         load_alg.setProperty("SANSState", state_dict)
         load_alg.setProperty("PublishToCache", False)
         load_alg.setProperty("UseCached", False)
@@ -101,7 +102,7 @@ class SingleReductionTest(unittest.TestCase):
                               output_settings=None, event_slice_optimisation=False, save_can=False, use_optimizations=False):
         single_reduction_name = "SANSSingleReduction"
         ver = 1 if not event_slice_optimisation else 2
-        state_dict = state.property_manager
+        state_dict = Serializer.to_json(state)
 
         single_reduction_options = {"SANSState": state_dict,
                                     "SampleScatterWorkspace": sample_scatter,

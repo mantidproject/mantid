@@ -21,10 +21,13 @@ class CalibrationPresenterTest(unittest.TestCase):
     def setUp(self):
         self.view = mock.create_autospec(view.CalibrationView)
         self.model = mock.create_autospec(model.CalibrationModel)
+        self.view.get_cropping_widget.return_value = MagicMock()
         self.presenter = presenter.CalibrationPresenter(self.model, self.view)
+        self.presenter.cropping_widget = MagicMock()
 
     @patch(tab_path + ".presenter.CalibrationPresenter.start_calibration_worker")
     def test_worker_started_with_right_params(self, worker_method):
+        self.view.get_crop_checked.return_value = False
         self.view.get_vanadium_filename.return_value = "307521"
         self.view.get_sample_filename.return_value = "305738"
         self.view.get_plot_output.return_value = True
@@ -32,6 +35,32 @@ class CalibrationPresenterTest(unittest.TestCase):
 
         self.presenter.on_calibrate_clicked()
         worker_method.assert_called_with("307521", "305738", True, None)
+
+    @patch(tab_path + ".presenter.CalibrationPresenter.start_calibration_worker")
+    def test_worker_started_with_right_params_crop_bank(self, worker_method):
+        self.view.get_crop_checked.return_value = True
+        self.view.get_vanadium_filename.return_value = "307521"
+        self.view.get_sample_filename.return_value = "305738"
+        self.view.get_plot_output.return_value = True
+        self.view.is_searching.return_value = False
+        self.presenter.cropping_widget.is_custom.return_value = False
+        self.presenter.cropping_widget.get_bank.return_value = "bank"
+
+        self.presenter.on_calibrate_clicked()
+        worker_method.assert_called_with("307521", "305738", True, None, bank="bank")
+
+    @patch(tab_path + ".presenter.CalibrationPresenter.start_calibration_worker")
+    def test_worker_started_with_right_params_crop_spec_nums(self, worker_method):
+        self.view.get_crop_checked.return_value = True
+        self.view.get_vanadium_filename.return_value = "307521"
+        self.view.get_sample_filename.return_value = "305738"
+        self.view.get_plot_output.return_value = True
+        self.view.is_searching.return_value = False
+        self.presenter.cropping_widget.is_custom.return_value = True
+        self.presenter.cropping_widget.get_custom_spectra.return_value = "1-56,401-809"
+
+        self.presenter.on_calibrate_clicked()
+        worker_method.assert_called_with("307521", "305738", True, None, spectrum_numbers="1-56,401-809")
 
     @patch(tab_path + ".presenter.create_error_message")
     @patch(tab_path + ".presenter.CalibrationPresenter.start_calibration_worker")
@@ -56,6 +85,22 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.view.is_searching.return_value = False
         self.view.get_load_checked.return_value = False
         validator.return_value = False
+
+        self.presenter.on_calibrate_clicked()
+        worker_method.assert_not_called()
+        self.assertEqual(err_msg.call_count, 1)
+
+    @patch(tab_path + ".presenter.create_error_message")
+    @patch(tab_path + ".presenter.CalibrationPresenter.validate_run_numbers")
+    @patch(tab_path + ".presenter.CalibrationPresenter.start_calibration_worker")
+    def test_worker_not_started_when_cropping_invalid(self, worker_method, validator, err_msg):
+        self.view.get_vanadium_filename.return_value = "307521"
+        self.view.get_sample_filename.return_value = "305738"
+        self.view.get_plot_output.return_value = True
+        self.view.is_searching.return_value = False
+        self.view.get_load_checked.return_value = False
+        validator.return_value = True
+        self.presenter.cropping_widget.is_valid.return_value = False
 
         self.presenter.on_calibrate_clicked()
         worker_method.assert_not_called()
@@ -232,6 +277,13 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.presenter.start_calibration_worker(van, cer, False, None)
 
         self.check_calibration_equal(self.presenter.pending_calibration, expected_pending)
+
+    def test_cropping_disabled_when_loading_calib(self):
+        self.presenter.set_load_existing_enabled(True)
+
+        self.view.set_cropping_widget_visibility.assert_called_with(False)
+        self.view.set_check_cropping_enabled.assert_called_with(False)
+        self.view.set_check_cropping_checked.assert_called_with(False)
 
     def check_calibration_equal(self, a, b):
         self.assertEqual(a.get_vanadium(), b.get_vanadium())

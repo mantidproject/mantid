@@ -12,6 +12,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include <Poco/TemporaryFile.h>
 #include <QFile>
 #include <QMap>
 #include <QString>
@@ -30,7 +31,8 @@ public:
   static void destroySuite(QtJSONUtilsTest *suite) { delete suite; }
 
   void test_saveJSONToFile_and_loadJSONFromFile() {
-    QString filename("/tmp/tempFile.json");
+    Poco::TemporaryFile tmpFile;
+    QString filename(tmpFile.path().data());
     auto map1 = constructJSONMap();
     MantidQt::API::saveJSONToFile(filename, map1);
 
@@ -38,7 +40,6 @@ public:
     testMaps(map1, map2);
 
     QFile file(filename);
-    file.remove();
   }
 
   void test_loadJSONFromString() {
