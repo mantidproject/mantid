@@ -67,11 +67,10 @@ class FittingDataPresenter(object):
         self._emit_enable_button_signal()
 
     def _on_worker_success(self, _):
-        self.view.remove_all()
+        self._remove_all_table_rows()
         self.row_numbers = {}
         for i, name in enumerate(self.get_loaded_workspaces()):
-            self.row_numbers[name] = i
-            self._add_row_to_table(name)
+            self._add_row_to_table(name, i)
 
     def _enable_load_button(self, enabled):
         self.view.set_load_button_enabled(enabled)
@@ -97,12 +96,12 @@ class FittingDataPresenter(object):
             return False
         return True
 
-    def _add_row_to_table(self, ws_name):
+    def _add_row_to_table(self, ws_name, row):
         words = ws_name.split("_")
         if len(words) == 4 and words[2] == "bank":
             self.view.add_table_row(words[1], words[3])
+            self.row_numbers[ws_name] = row
         else:
-            self.remove_workspace(ws_name)
             logger.warning(
                 "The workspace '{}' was not in the correct naming format. Files should be named in the following way: "
                 "INSTRUMENT_RUNNUMBER_bank_BANK.".format(ws_name)
