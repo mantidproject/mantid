@@ -8,7 +8,7 @@
 #
 #
 from mantid.plots.datafunctions import get_indices
-from mantid.api import MatrixWorkspace, MultipleExperimentInfos
+from mantid.api import AnalysisDataService, MatrixWorkspace, MultipleExperimentInfos
 from mantid.simpleapi import BinMD
 from enum import Enum
 import numpy as np
@@ -22,11 +22,12 @@ class WS_TYPE(Enum):
 
 class SliceViewerModel(object):
     """Store the workspace to be plotted. Can be MatrixWorkspace, MDEventWorkspace or MDHistoWorkspace"""
+
     def __init__(self, ws):
         if isinstance(ws, MatrixWorkspace):
             if ws.getNumberHistograms() < 2:
                 raise ValueError("workspace must contain at least 2 spectrum")
-            if ws.getDimension(0).getNBins() < 2: # Check number of x bins
+            if ws.getDimension(0).getNBins() < 2:  # Check number of x bins
                 raise ValueError("workspace must contain at least 2 bin")
         elif isinstance(ws, MultipleExperimentInfos):
             if ws.isMDHistoWorkspace():
@@ -60,11 +61,11 @@ class SliceViewerModel(object):
                                                                         bin_params[n])
             else:
                 params['AlignedDim{}'.format(n)] = '{},{},{},{}'.format(self._get_ws().getDimension(n).name,
-                                                                        slicepoint[n]-bin_params[n]/2,
-                                                                        slicepoint[n]+bin_params[n]/2,
+                                                                        slicepoint[n] - bin_params[n] / 2,
+                                                                        slicepoint[n] + bin_params[n] / 2,
                                                                         1)
         return BinMD(InputWorkspace=self._get_ws(),
-                     OutputWorkspace=self._get_ws().name()+'_rebinned', **params)
+                     OutputWorkspace=self._get_ws().name() + '_rebinned', **params)
 
     def get_data_MDH(self, slicepoint, transpose=False):
         indices, _ = get_indices(self.get_ws(), slicepoint=slicepoint)
@@ -108,6 +109,19 @@ class SliceViewerModel(object):
                 return WS_TYPE.MDE
         else:
             raise ValueError("Unsupported workspace type")
+
+    def get_peaksworkspace(self, name):
+        """Return a handle to a PeaksWorkspace
+        :param name: The string name of a workspace in the ADS that should be a PeaksWorkspace
+        :raises ValueError: if the workspace exists but is not a PeaksWorkspace
+        :raises KeyError: if the workspace does not exist
+        :return: A workspace handle for a PeaksWorkspace
+        """
+        workspace = AnalysisDataService.Instance()[name]
+        if not hasattr(workspace, 'getNumberPeaks'):
+            raise ValueError("Requested workspace {} is not a PeaksWorkspace. Type={}".format(name,
+                                                                                              type(workspace)))
+        return workspace
 
     def can_normalize_workspace(self):
         if self.get_ws_type() == WS_TYPE.MATRIX and not self._get_ws().isDistribution():
