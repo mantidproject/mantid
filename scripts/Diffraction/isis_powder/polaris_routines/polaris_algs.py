@@ -170,8 +170,8 @@ def _load_qlims(q_lims):
         except IOError as exc:
             raise RuntimeError("q_lims path is not valid: {}".format(exc))
     elif isinstance(q_lims, (list, tuple)) or isinstance(q_lims, np.ndarray):
-        q_min = q_lims[0, :]
-        q_max = q_lims[1, :]
+        q_min = q_lims[0]
+        q_max = q_lims[1]
     else:
         raise RuntimeError("q_lims type is not valid. Expected a string filename or an array.")
     return q_min, q_max
