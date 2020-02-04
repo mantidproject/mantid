@@ -28,20 +28,23 @@ class FittingDataPresenter(object):
             self._start_load_worker(filenames)
 
     def remove_workspace(self, ws_name):
-        if ws_name in self.model.get_loaded_workspaces():
-            self.model.get_loaded_workspaces().pop(ws_name)
+        if ws_name in self.get_loaded_workspaces():
+            self.get_loaded_workspaces().pop(ws_name)
+            self._remove_table_row(self.row_numbers.pop(ws_name))
 
     def rename_workspace(self, old_name, new_name):
-        if old_name in self.model.get_loaded_workspaces():
-            self.model.get_loaded_workspaces()[new_name] = self.model.get_loaded_workspaces().pop(
+        if old_name in self.get_loaded_workspaces():
+            self.get_loaded_workspaces()[new_name] = self.get_loaded_workspaces().pop(
                 old_name)
+            self.row_numbers[new_name] = self.row_numbers.pop(old_name)
 
     def clear_workspaces(self):
-        self.model.get_loaded_workspaces().clear()
+        self.get_loaded_workspaces().clear()
+        self.row_numbers.clear()
 
     def replace_workspace(self, name, workspace):
-        if name in self.model.get_loaded_workspaces():
-            self.model.get_loaded_workspaces()[name] = workspace
+        if name in self.get_loaded_workspaces():
+            self.get_loaded_workspaces()[name] = workspace
 
     def get_loaded_workspaces(self):
         return self.model.get_loaded_workspaces()
@@ -102,3 +105,6 @@ class FittingDataPresenter(object):
                 "The workspace '{}' was not in the correct naming format. Files should be named in the following way: "
                 "INSTRUMENT_RUNNUMBER_bank_BANK.".format(ws_name)
             )
+
+    def _remove_table_row(self, row_no):
+        self.view.remove_table_row(row_no)
