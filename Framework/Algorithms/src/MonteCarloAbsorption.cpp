@@ -40,7 +40,7 @@ namespace PhysicalConstants = Mantid::PhysicalConstants;
 /// @cond
 namespace {
 
-constexpr int DEFAULT_NEVENTS = 300;
+constexpr int DEFAULT_NEVENTS = 1000;
 constexpr int DEFAULT_SEED = 123456789;
 constexpr int DEFAULT_LATITUDINAL_DETS = 5;
 constexpr int DEFAULT_LONGITUDINAL_DETS = 10;
@@ -102,7 +102,7 @@ void MonteCarloAbsorption::init() {
                                                         Direction::Output),
                   "The name to use for the output workspace.");
 
-  declareProperty("SimulateTracksForEachWavelength", false,
+  declareProperty("ResimulateTracksForDifferentWavelengths", false,
                   "Resimulate tracks for each wavelength point.");
   auto positiveInt = boost::make_shared<Kernel::BoundedValidator<int>>();
   positiveInt->setLower(1);
@@ -111,7 +111,7 @@ void MonteCarloAbsorption::init() {
                   "attempted (default: all points)");
   setPropertySettings("NumberOfWavelengthPoints",
                       std::make_unique<EnabledWhenProperty>(
-                          "SimulateTracksForEachWavelength",
+                          "ResimulateTracksForDifferentWavelengths",
                           ePropertyCriterion::IS_NOT_DEFAULT));
   declareProperty(
       "EventsPerPoint", DEFAULT_NEVENTS, positiveInt,
@@ -164,17 +164,17 @@ void MonteCarloAbsorption::init() {
 void MonteCarloAbsorption::exec() {
   const MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   const int nevents = getProperty("EventsPerPoint");
-  const bool simulateTracksForEachWavelength =
-      getProperty("SimulateTracksForEachWavelength");
+  const bool resimulateTracks =
+      getProperty("ResimulateTracksForDifferentWavelengths");
   const int seed = getProperty("SeedValue");
   InterpolationOption interpolateOpt;
   interpolateOpt.set(getPropertyValue("Interpolation"));
   const bool useSparseInstrument = getProperty("SparseInstrument");
   const int maxScatterPtAttempts = getProperty("MaxScatterPtAttempts");
-  auto outputWS = doSimulation(*inputWS, static_cast<size_t>(nevents),
-                               simulateTracksForEachWavelength, seed,
-                               interpolateOpt, useSparseInstrument,
-                               static_cast<size_t>(maxScatterPtAttempts));
+  auto outputWS =
+      doSimulation(*inputWS, static_cast<size_t>(nevents), resimulateTracks,
+                   seed, interpolateOpt, useSparseInstrument,
+                   static_cast<size_t>(maxScatterPtAttempts));
   setProperty("OutputWorkspace", std::move(outputWS));
 }
 
@@ -184,10 +184,10 @@ void MonteCarloAbsorption::exec() {
  */
 std::map<std::string, std::string> MonteCarloAbsorption::validateInputs() {
   std::map<std::string, std::string> issues;
-  const bool simulateTracksForEachWavelength =
-      getProperty("simulateTracksForEachWavelength");
+  const bool resimulateTracksForDiffWavelengths =
+      getProperty("ResimulateTracksForDifferentWavelengths");
   // Only interpolate between wavelength points if resimulating tracks
-  if (simulateTracksForEachWavelength) {
+  if (resimulateTracksForDiffWavelengths) {
     const int nlambda = getProperty("NumberOfWavelengthPoints");
     InterpolationOption interpOpt;
     const std::string interpValue = getPropertyValue("Interpolation");
@@ -204,7 +204,7 @@ std::map<std::string, std::string> MonteCarloAbsorption::validateInputs() {
  * Run the simulation over the whole input workspace
  * @param inputWS A reference to the input workspace
  * @param nevents Number of MC events per wavelength point to simulate
- * @param simulateTracksForEachWavelength Whether to resimulate the tracks
+ * @param resimulateTracksForDiffWavelengths Whether to resimulate the tracks
  * for each wavelength point
  * @param seed Seed value for the random number generator
  * @param interpolateOpt Method of interpolation to compute unsimulated points
@@ -215,14 +215,14 @@ std::map<std::string, std::string> MonteCarloAbsorption::validateInputs() {
  */
 MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
     const MatrixWorkspace &inputWS, const size_t nevents,
-    const bool simulateTracksForEachWavelength, const int seed,
+    const bool resimulateTracksForDiffWavelengths, const int seed,
     const InterpolationOption &interpolateOpt, const bool useSparseInstrument,
     const size_t maxScatterPtAttempts) {
   auto outputWS = createOutputWorkspace(inputWS);
   const auto inputNbins = static_cast<int>(inputWS.blocksize());
 
   int nlambda;
-  if (simulateTracksForEachWavelength) {
+  if (resimulateTracksForDiffWavelengths) {
     nlambda = getProperty("NumberOfWavelengthPoints");
     if (isEmpty(nlambda) || nlambda > inputNbins) {
       if (!isEmpty(nlambda)) {

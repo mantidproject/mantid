@@ -8,9 +8,11 @@
 #define MONTECARLOABSORPTIONTEST_H_
 
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAlgorithms/MonteCarloAbsorption.h"
+#include "MantidDataHandling/LoadBinaryStl.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Material.h"
@@ -23,7 +25,12 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 namespace {
-enum class Environment { SampleOnly, SamplePlusContainer, UserBeamSize };
+enum class Environment {
+  SampleOnly,
+  SamplePlusContainer,
+  UserBeamSize,
+  MeshSamplePlusContainer
+};
 
 struct TestWorkspaceDescriptor {
   int nspectra;
@@ -40,41 +47,68 @@ void addSample(Mantid::API::MatrixWorkspace_sptr ws,
   using namespace Mantid::API;
   using namespace Mantid::Geometry;
   using namespace Mantid::Kernel;
+  using namespace Mantid::DataHandling;
   namespace PhysicalConstants = Mantid::PhysicalConstants;
 
-  // Define a sample shape
-  constexpr double sampleRadius{0.006};
-  constexpr double sampleHeight{0.04};
-  const V3D sampleBaseCentre{0., -sampleHeight / 2., 0.};
-  const V3D yAxis{0., 1., 0.};
-  auto sampleShape = ComponentCreationHelper::createCappedCylinder(
-      sampleRadius, sampleHeight, sampleBaseCentre, yAxis, "sample-cylinder");
-  // And a material assuming it's a CSG Object
-  sampleShape->setMaterial(
-      Material("Vanadium", PhysicalConstants::getNeutronAtom(23, 0), 0.072));
-  ws->mutableSample().setShape(sampleShape);
+  if (environment == Environment::MeshSamplePlusContainer) {
+    std::string samplePath =
+        Mantid::API::FileFinder::Instance().getFullPath("PearlSample.stl");
+    ScaleUnits scaleType = ScaleUnits::millimetres;
+    ReadMaterial::MaterialParameters params;
+    params.chemicalSymbol = "V";
+    auto binaryStlReader = LoadBinaryStl(samplePath, scaleType, params);
+    boost::shared_ptr<MeshObject> shape = binaryStlReader.readStl();
+    ws->mutableSample().setShape(shape);
 
-  if (environment == Environment::SamplePlusContainer) {
-    const std::string id("container");
-    constexpr double containerWallThickness{0.002};
-    constexpr double containerInnerRadius{1.2 * sampleHeight};
-    constexpr double containerOuterRadius{containerInnerRadius +
-                                          containerWallThickness};
+    std::string envPath =
+        Mantid::API::FileFinder::Instance().getFullPath("PearlEnvironment.stl");
+    // set up a uniform material for whole environment here to give simple case
+    params.chemicalSymbol = "Ti-Zr";
+    params.sampleMassDensity = 5.23;
+    auto binaryStlReaderEnv = LoadBinaryStl(envPath, scaleType, params);
+    boost::shared_ptr<MeshObject> environmentShape =
+        binaryStlReaderEnv.readStl();
 
-    auto canShape = ComponentCreationHelper::createHollowShell(
-        containerInnerRadius, containerOuterRadius);
-    // Set material assuming it's a CSG Object
-    canShape->setMaterial(Material(
-        "CanMaterial", PhysicalConstants::getNeutronAtom(26, 0), 0.01));
-    auto can = boost::make_shared<Container>(canShape);
-    ws->mutableSample().setEnvironment(
-        std::make_unique<SampleEnvironment>("can", can));
-  } else if (environment == Environment::UserBeamSize) {
-    auto inst = ws->getInstrument();
-    auto &pmap = ws->instrumentParameters();
-    auto source = inst->getSource();
-    pmap.addDouble(source->getComponentID(), "beam-width", beamWidth);
-    pmap.addDouble(source->getComponentID(), "beam-height", beamHeight);
+    auto can = boost::make_shared<Container>(environmentShape);
+    std::unique_ptr<SampleEnvironment> environment =
+        std::make_unique<SampleEnvironment>("PearlEnvironment", can);
+
+    ws->mutableSample().setEnvironment(std::move(environment));
+  } else {
+    // Define a sample shape
+    constexpr double sampleRadius{0.006};
+    constexpr double sampleHeight{0.04};
+    const V3D sampleBaseCentre{0., -sampleHeight / 2., 0.};
+    const V3D yAxis{0., 1., 0.};
+    auto sampleShape = ComponentCreationHelper::createCappedCylinder(
+        sampleRadius, sampleHeight, sampleBaseCentre, yAxis, "sample-cylinder");
+    // And a material assuming it's a CSG Object
+    sampleShape->setMaterial(
+        Material("Vanadium", PhysicalConstants::getNeutronAtom(23, 0), 0.072));
+    ws->mutableSample().setShape(sampleShape);
+
+    if (environment == Environment::SamplePlusContainer) {
+      const std::string id("container");
+      constexpr double containerWallThickness{0.002};
+      constexpr double containerInnerRadius{1.2 * sampleHeight};
+      constexpr double containerOuterRadius{containerInnerRadius +
+                                            containerWallThickness};
+
+      auto canShape = ComponentCreationHelper::createHollowShell(
+          containerInnerRadius, containerOuterRadius);
+      // Set material assuming it's a CSG Object
+      canShape->setMaterial(Material(
+          "CanMaterial", PhysicalConstants::getNeutronAtom(26, 0), 0.01));
+      auto can = boost::make_shared<Container>(canShape);
+      ws->mutableSample().setEnvironment(
+          std::make_unique<SampleEnvironment>("can", can));
+    } else if (environment == Environment::UserBeamSize) {
+      auto inst = ws->getInstrument();
+      auto &pmap = ws->instrumentParameters();
+      auto source = inst->getSource();
+      pmap.addDouble(source->getComponentID(), "beam-width", beamWidth);
+      pmap.addDouble(source->getComponentID(), "beam-height", beamHeight);
+    }
   }
 }
 
@@ -329,16 +363,16 @@ public:
 private:
   Mantid::API::MatrixWorkspace_const_sptr
   runAlgorithm(const TestWorkspaceDescriptor &wsProps,
-               const bool simulateTracksForEachWavelength = false,
+               const bool resimulateTracksForDiffWavelengths = false,
                int nlambda = -1, const std::string &interpolate = "",
                const bool sparseInstrument = false, const int sparseRows = 2,
                const int sparseColumns = 2) {
     auto inputWS = setUpWS(wsProps);
     auto mcabs = createAlgorithm();
     TS_ASSERT_THROWS_NOTHING(mcabs->setProperty("InputWorkspace", inputWS));
-    if (simulateTracksForEachWavelength) {
+    if (resimulateTracksForDiffWavelengths) {
       TS_ASSERT_THROWS_NOTHING(
-          mcabs->setProperty("SimulateTracksForEachWavelength", true));
+          mcabs->setProperty("ResimulateTracksForDifferentWavelengths", true));
       if (nlambda > 0) {
         TS_ASSERT_THROWS_NOTHING(
             mcabs->setProperty("NumberOfWavelengthPoints", nlambda));
@@ -364,6 +398,7 @@ private:
     alg->initialize();
     alg->setRethrows(true);
     alg->setChild(true);
+    alg->setProperty("EventsPerPoint", 300);
     alg->setPropertyValue("OutputWorkspace", "__unused_on_child");
     return alg;
   }
@@ -407,12 +442,17 @@ public:
 
     wsProps.emode = Mantid::Kernel::DeltaEMode::Indirect;
     inputIndirect = setUpWS(wsProps);
+
+    wsProps.sampleEnviron = Environment::MeshSamplePlusContainer;
+    wsProps.emode = Mantid::Kernel::DeltaEMode::Elastic;
+    inputElasticMesh = setUpWS(wsProps);
   }
 
   void test_exec_sample_elastic() {
     Mantid::Algorithms::MonteCarloAbsorption alg;
     alg.initialize();
     alg.setProperty("InputWorkspace", inputElastic);
+    alg.setProperty("EventsPerPoint", 300);
     alg.setPropertyValue("OutputWorkspace", "__unused_on_child");
     alg.execute();
   }
@@ -421,6 +461,7 @@ public:
     Mantid::Algorithms::MonteCarloAbsorption alg;
     alg.initialize();
     alg.setProperty("InputWorkspace", inputDirect);
+    alg.setProperty("EventsPerPoint", 300);
     alg.setPropertyValue("OutputWorkspace", "__unused_on_child");
     alg.execute();
   }
@@ -429,6 +470,16 @@ public:
     Mantid::Algorithms::MonteCarloAbsorption alg;
     alg.initialize();
     alg.setProperty("InputWorkspace", inputIndirect);
+    alg.setProperty("EventsPerPoint", 300);
+    alg.setPropertyValue("OutputWorkspace", "__unused_on_child");
+    alg.execute();
+  }
+
+  void test_exec_sample_elastic_mesh() {
+    Mantid::Algorithms::MonteCarloAbsorption alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inputElasticMesh);
+    alg.setProperty("EventsPerPoint", 100);
     alg.setPropertyValue("OutputWorkspace", "__unused_on_child");
     alg.execute();
   }
@@ -437,6 +488,7 @@ private:
   Mantid::API::Workspace_sptr inputElastic;
   Mantid::API::Workspace_sptr inputDirect;
   Mantid::API::Workspace_sptr inputIndirect;
+  Mantid::API::Workspace_sptr inputElasticMesh;
 };
 
 #endif

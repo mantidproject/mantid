@@ -43,9 +43,9 @@ The algorithm proceeds as follows. For each spectrum:
 
    * loop over the bins. 
    
-     - If `SimulateTracksForEachWavelength` = True then generate tracks using the following procedure for each wavelength step,
-       where the size of each wavelength step is defined by `NumberOfWavelengthPoints`. If `SimulateTracksForEachWavelength` = false
-       generate one set of tracks and define a step size of 1 ie all bins are visited. At the moment there are no wavelength dependent effects in the simulation that affect the simulation of the track geometry so the default value for `SimulateTracksForEachWavelength` is false.
+     - If `ResimulateTracksForDifferentWavelengths` = True then generate tracks using the following procedure for each wavelength step,
+       where the size of each wavelength step is defined by `NumberOfWavelengthPoints`. If `ResimulateTracksForDifferentWavelengths` = false
+       generate one set of tracks and define a step size of 1 ie all bins are visited. At the moment there are no wavelength dependent effects in the simulation that affect the simulation of the track geometry so the default value for `ResimulateTracksForDifferentWavelengths` is false.
        For each step (:math:`\lambda_{step}`)
 
      - generate a random point on the beam face defined by the input height & width. If the point is outside of the
@@ -82,7 +82,7 @@ The algorithm proceeds as follows. For each spectrum:
 #. average the accumulated attentuation factors over `NEvents` and assign this as the correction factor for
    this :math:`\lambda_{step}`.
 
-#. finally, if `SimulateTracksForEachWavelength` = True, interpolate through the unsimulated wavelength points using the selected method
+#. finally, if `ResimulateTracksForDifferentWavelengths` = True, interpolate through the unsimulated wavelength points using the selected method
 
 Interpolation
 #############
@@ -107,7 +107,7 @@ The sparse instrument consists of a grid of detectors covering the full instrume
 
 When the sparse instrument option is enabled, a sparse instrument corresponding to the instrument attached to the input workspace is created. The simulation is then run using the created instrument. Finally, the simulated absorption corrections are interpolated to the output workspace.
 
-The interpolation is a two step process: first a spatial interpolation is done from the detector grid of the sparse instrument to the actual detector positions of the full instrument. Then, if `SimulateTracksForEachWavelength` = True the correction factors are interpolated over the missing wavelengths.
+The interpolation is a two step process: first a spatial interpolation is done from the detector grid of the sparse instrument to the actual detector positions of the full instrument. Then, if `ResimulateTracksForDifferentWavelengths` = True the correction factors are interpolated over the missing wavelengths.
 
 .. note:: Currently, the sparse instrument mode does not support instruments with varying *EFixed*.
 
@@ -173,7 +173,7 @@ Usage
                      'Center': [0.0,0.0,0.0]},
                    Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6', 'SampleNumberDensity': 0.07})
    # Simulating every data point can be slow. Use a smaller set and interpolate
-   abscor = MonteCarloAbsorption(data, SimulateTracksForEachWavelength=True, NumberOfWavelengthPoints=50,
+   abscor = MonteCarloAbsorption(data, ResimulateTracksForDifferentWavelengths=True, NumberOfWavelengthPoints=50,
                                  Interpolation='CSpline')
    corrected = data/abscor
 
