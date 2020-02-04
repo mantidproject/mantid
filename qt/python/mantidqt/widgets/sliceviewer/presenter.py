@@ -7,9 +7,13 @@
 #  This file is part of the mantid workbench.
 #
 #
+# 3rdparty imports
+import mantid.api
+
+# local imports
 from .model import SliceViewerModel, WS_TYPE
 from .view import SliceViewerView
-import mantid.api
+from .peaksviewer.presenter import PeaksViewerCollectionPresenter
 
 
 class SliceViewer(object):
@@ -21,6 +25,7 @@ class SliceViewer(object):
         :param model: A model to define slicing operations. If None uses SliceViewerModel
         :param view: A view to display the operations. If None uses SliceViewerView
         """
+        self._peaks_tool_presenter = None
         self.model = model if model else SliceViewerModel(ws)
 
         if self.model.get_ws_type() == WS_TYPE.MDH:
@@ -99,3 +104,26 @@ class SliceViewer(object):
         else:
             self.normalization = mantid.api.MDNormalization.NoNormalization
         self.new_plot()
+
+    def overlay_peaks_workspace(self):
+        """
+        Request activation of peak overlay tools.
+        Asks user to select peaks workspace(s)
+        Displays peaks on data display
+        Attaches peaks table viewer/tools
+        """
+        peaks_workspaces = [
+            self.model.get_peaksworkspace(name)
+            for name in self.view.query_peaks_to_overlay()
+        ]
+        self._create_peaks_tool_presenter(peaks_workspaces)
+
+    # private api
+    def _create_peaks_tool_presenter(self, workspaces):
+        """
+        Create the presenter for the PeaksViewer view
+        :param workspaces: A list of workspaces
+        """
+        self._peaks_tool_presenter = \
+            PeaksViewerCollectionPresenter(workspaces,
+                                           self.view.attach_peaks_tools())

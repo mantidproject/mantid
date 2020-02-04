@@ -18,11 +18,12 @@ from mantidqt.widgets.colorbar.colorbar import ColorbarWidget
 from .dimensionwidget import DimensionWidget
 from .samplingimage import imshow_sampling
 from .toolbar import SliceViewerNavigationToolbar
+from .peaksviewer.view import PeaksViewerCollectionView
 
 import numpy as np
 
 from qtpy.QtCore import Qt
-from qtpy.QtWidgets import QComboBox, QLabel, QHBoxLayout, QVBoxLayout, QWidget
+from qtpy.QtWidgets import QComboBox, QGridLayout, QLabel, QHBoxLayout, QVBoxLayout, QWidget
 
 
 class SliceViewerView(QWidget):
@@ -80,10 +81,13 @@ class SliceViewerView(QWidget):
         self.mpl_toolbar.plotOptionsChanged.connect(self.colorbar.mappable_changed)
 
         # layout
-        self.layout = QVBoxLayout(self)
-        self.layout.addLayout(self.dimensions_layout)
-        self.layout.addWidget(self.mpl_toolbar)
-        self.layout.addLayout(self.mpl_layout, stretch=1)
+        self.layout = QGridLayout(self)
+        self.layout.addLayout(self.dimensions_layout, 0, 0)
+        self.layout.addWidget(self.mpl_toolbar, 1, 0)
+        self.layout.addLayout(self.mpl_layout, 2, 0)
+
+        # optional peaks
+        self.peaks_tools = None
 
         self.show()
 
@@ -216,6 +220,24 @@ class SliceViewerView(QWidget):
         else:
             self.presenter.normalization = mantid.api.MDNormalization.NoNormalization
             self.norm_opts.setCurrentIndex(0)
+
+    # peaks tools
+    def query_peaks_to_overlay(self):
+        """Display a dialog to the user to ask which peaks to overlay"""
+        return "peaksws",
+
+    def attach_peaks_tools(self):
+        """
+        Create (if necessary) the view of PeaksWorkspace tools
+        and attach it here
+        :return: The PeaksViewerCollectionView
+        """
+        if self.peaks_tools is not None:
+            return self.peaks_tools
+
+        self.peaks_tools = PeaksViewerCollectionView()
+        self.layout.addWidget(self.peaks_tools, 0, 1, -1, 1)
+        return self.peaks_tools
 
     def closeEvent(self, event):
         self.deleteLater()
