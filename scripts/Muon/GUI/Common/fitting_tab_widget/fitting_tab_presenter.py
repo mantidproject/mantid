@@ -40,6 +40,7 @@ class FittingTabPresenter(object):
         self.fitting_calculation_model = None
         self.update_selected_workspace_list_for_fit()
         self.fit_function_changed_notifier = GenericObservable()
+        self.fit_type_changed_notifier = GenericObservable()
         self.gui_context_observer = GenericObserverWithArgPassing(
             self.handle_gui_changes_made)
         self.selected_group_pair_observer = GenericObserver(
@@ -97,6 +98,7 @@ class FittingTabPresenter(object):
 
     def handle_selected_group_pair_changed(self):
         self.update_selected_workspace_list_for_fit()
+        self._update_stored_fit_functions()
 
     def handle_selected_plot_type_changed(self, plot_type):
         self._plot_type = plot_type
@@ -124,7 +126,6 @@ class FittingTabPresenter(object):
 
     def handle_fit_type_changed(self):
         self.view.undo_fit_button.setEnabled(False)
-
         if self.view.is_simul_fit():
             self.view.workspace_combo_box_label.setText(
                 'Display parameters for')
@@ -139,9 +140,9 @@ class FittingTabPresenter(object):
             self._update_stored_fit_functions()
             self.view.disable_simul_fit_options()
 
-        self.model.update_stored_fit_function(self._fit_function[0])
         self.update_model_from_view()
         self.fit_function_changed_notifier.notify_subscribers()
+        self.fit_type_changed_notifier.notify_subscribers()
 
     def handle_plot_guess_changed(self):
         if self.view.is_simul_fit():
@@ -323,6 +324,7 @@ class FittingTabPresenter(object):
                 self.view.simul_fit_by_specifier.setEnabled(True)
                 self.view.select_workspaces_to_fit_button.setEnabled(False)
             self.update_model_from_view()
+            self.fit_type_changed_notifier.notify_subscribers()
         else:
             return
 
@@ -538,6 +540,7 @@ class FittingTabPresenter(object):
                 self._fit_function = single_domain_fit_functions
             else:
                 self._fit_function = [None] * len(self._start_x)
+        self.model.update_stored_fit_function(self._fit_function[0])
 
     def _get_fit_function(self):
         if self.view.is_simul_fit():
@@ -610,6 +613,7 @@ class FittingTabPresenter(object):
             fit_type = "Single"
         fit_by = self.view.simultaneous_fit_by
         self.model.update_model_from_view(fit_type, fit_by)
+        self.model.update_stored_fit_function(self._fit_function[0])
 
     def get_parameters_for_tf_function_calculation(self, fit_function):
         mode = 'Construct' if self.view.tf_asymmetry_mode else 'Extract'

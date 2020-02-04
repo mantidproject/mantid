@@ -8,6 +8,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from qtpy import QtWidgets, QtCore, QtGui
 from mantidqt.utils.qt import load_ui
+from Muon.GUI.Common.message_box import warning
 
 ui_seq_fitting_tab, _ = load_ui(__file__, "seq_fitting_tab.ui")
 allowed_minimizers = ['Levenberg-Marquardt', 'BFGS', 'Conjugate gradient (Fletcher-Reeves imp.)',
@@ -15,19 +16,10 @@ allowed_minimizers = ['Levenberg-Marquardt', 'BFGS', 'Conjugate gradient (Fletch
                       'Damped GaussNewton', 'Levenberg-MarquardtMD', 'Simplex',
                       'SteepestDescent', 'Trust Region']
 
-default_columns = {"Run": 0, "Groups/Pairs": 1, "Start Time": 2, "End Time": 3, "Fit quality": 4}
-
-default_time_range = ["0.11", "15"]
+default_columns = {"Run": 0, "Groups/Pairs": 1, "Fit quality": 2}
 
 
 class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
-
-    @staticmethod
-    def create_default_start_and_end_widgets():
-        start_widget = QtWidgets.QTableWidgetItem(default_time_range[0])
-        end_widget = QtWidgets.QTableWidgetItem(default_time_range[1])
-
-        return start_widget, end_widget
 
     @staticmethod
     def scale_fit_table_columns(header, number_of_columns):
@@ -43,6 +35,9 @@ class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
         self.fit_function = None
 
         self.setup_default_fit_results_table()
+
+    def warning_popup(self, message):
+        warning(message, parent=self)
 
     def setup_default_fit_results_table(self):
         self.fit_results_table.blockSignals(True)
@@ -82,11 +77,6 @@ class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
             self.fit_results_table.insertRow(i)
             self.fit_results_table.setItem(i, default_columns["Run"], runItem)
             self.fit_results_table.setItem(i, default_columns["Groups/Pairs"], groupItem)
-
-            start_x_widget, end_x_widget = self.create_default_start_and_end_widgets()
-
-            self.fit_results_table.setItem(i, default_columns["Start Time"], start_x_widget)
-            self.fit_results_table.setItem(i, default_columns["End Time"], end_x_widget)
 
             fitItem = QtWidgets.QTableWidgetItem("N/A")
             fitItem.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
