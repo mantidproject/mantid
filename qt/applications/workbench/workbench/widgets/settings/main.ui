@@ -105,12 +105,9 @@ QListView::item {
            </spacer>
           </item>
           <item>
-           <widget class="QDialogButtonBox" name="ok_cancel_button_box">
-            <property name="layoutDirection">
-             <enum>Qt::LeftToRight</enum>
-            </property>
-            <property name="standardButtons">
-             <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+           <widget class="QPushButton" name="close_button">
+            <property name="text">
+             <string>Close</string>
             </property>
            </widget>
           </item>
@@ -136,13 +133,13 @@ QListView::item {
  <resources/>
  <connections>
   <connection>
-   <sender>ok_cancel_button_box</sender>
-   <signal>rejected()</signal>
+   <sender>close_button</sender>
+   <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
    <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>580</x>
+     <x>676</x>
      <y>332</y>
     </hint>
     <hint type="destinationlabel">

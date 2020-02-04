@@ -660,6 +660,7 @@ class MainWindow(QMainWindow):
         self.project.load_settings_from_config(CONF)
         self.algorithm_selector.refresh()
         self.populate_interfaces_menu()
+        self.workspacewidget.refresh_workspaces()
 
     def open_algorithm_descriptions_help(self):
         self.interface_manager.showAlgorithmHelp('')
