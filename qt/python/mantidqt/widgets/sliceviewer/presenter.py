@@ -14,7 +14,13 @@ import mantid.api
 
 class SliceViewer(object):
     def __init__(self, ws, parent=None, model=None, view=None):
-        # Create model and view, or accept mocked versions
+        """
+        Create a presenter for controlling the slice display for a workspace
+        :param ws: Workspace containing data to display and slice
+        :param parent: An optinal parent widget
+        :param model: A model to define slicing operations. If None uses SliceViewerModel
+        :param view: A view to display the operations. If None uses SliceViewerView
+        """
         self.model = model if model else SliceViewerModel(ws)
 
         if self.model.get_ws_type() == WS_TYPE.MDH:
@@ -38,19 +44,35 @@ class SliceViewer(object):
         self.new_plot()
 
     def new_plot_MDH(self):
+        """
+        Tell the view to display a new plot of an MDHistoWorkspace
+        """
         self.view.plot_MDH(self.model.get_ws(), slicepoint=self.view.dimensions.get_slicepoint())
 
     def new_plot_MDE(self):
+        """
+        Tell the view to display a new plot of an MDEventWorkspace
+        """
         self.view.plot_MDH(self.model.get_ws(slicepoint=self.view.dimensions.get_slicepoint(),
                                              bin_params=self.view.dimensions.get_bin_params()))
 
     def new_plot_matrix(self):
+        """
+        Tell the view to display a new plot of an MatrixWorkspace
+        """
         self.view.plot_matrix(self.model.get_ws(), normalize=self.normalization)
 
     def update_plot_data_MDH(self):
-        self.view.update_plot_data(self.model.get_data(self.view.dimensions.get_slicepoint(), self.view.dimensions.transpose))
+        """
+        Update the view to display an updated MDHistoWorkspace slice/cut
+        """
+        self.view.update_plot_data(self.model.get_data(self.view.dimensions.get_slicepoint(),
+                                                       self.view.dimensions.transpose))
 
     def update_plot_data_MDE(self):
+        """
+        Update the view to display an updated MDEventWorkspace slice/cut
+        """
         self.view.update_plot_data(self.model.get_data(slicepoint=self.view.dimensions.get_slicepoint(),
                                                        bin_params=self.view.dimensions.get_bin_params(),
                                                        transpose=self.view.dimensions.transpose))
@@ -60,10 +82,18 @@ class SliceViewer(object):
         pass
 
     def line_plots(self):
+        """
+        Display the attached line plots for the integrated signal over each dimension for the current cursor
+        position
+        """
         self.view.create_axes()
         self.new_plot()
 
     def normalization_changed(self, norm_type):
+        """
+        Notify the presenter that the type of normalization has changed.
+        :param norm_type: "By bin width" = volume normalization else no normalization
+        """
         if norm_type == "By bin width":
             self.normalization = mantid.api.MDNormalization.VolumeNormalization
         else:
