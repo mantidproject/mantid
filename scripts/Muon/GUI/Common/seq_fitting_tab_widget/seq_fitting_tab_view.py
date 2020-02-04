@@ -112,7 +112,7 @@ class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
     def update_fit_function_parameters(self, row, parameter_values):
         for j, parameter in enumerate(parameter_values):
             parameter_item = self.fit_results_table.item(row, len(default_columns) + j)
-            parameter_item.setText(str(parameter))
+            parameter_item.setText("{0:.5f}".format(parameter))
 
     def update_fit_quality(self, row, fit_status, fit_quality):
         fit_quality_item = self.fit_results_table.item(row, default_columns["Fit quality"])

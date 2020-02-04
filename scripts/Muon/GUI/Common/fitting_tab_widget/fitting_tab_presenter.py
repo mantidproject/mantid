@@ -140,6 +140,7 @@ class FittingTabPresenter(object):
             self.view.disable_simul_fit_options()
 
         self.model.update_stored_fit_function(self._fit_function[0])
+        self.update_model_from_view()
         self.fit_function_changed_notifier.notify_subscribers()
 
     def handle_plot_guess_changed(self):
@@ -321,6 +322,7 @@ class FittingTabPresenter(object):
             else:
                 self.view.simul_fit_by_specifier.setEnabled(True)
                 self.view.select_workspaces_to_fit_button.setEnabled(False)
+            self.update_model_from_view()
         else:
             return
 
@@ -337,6 +339,7 @@ class FittingTabPresenter(object):
             if self.view.is_simul_fit():
                 self._number_of_fits_cached += 1
                 simultaneous_fit_parameters = self.get_multi_domain_fit_parameters()
+                print(simultaneous_fit_parameters)
                 global_parameters = self.view.get_global_parameters()
                 calculation_function = functools.partial(
                     self.model.do_simultaneous_fit,
@@ -599,6 +602,14 @@ class FittingTabPresenter(object):
                 item for item in self.selected_data if item != workspace_removed]
         else:
             self.selected_data = []
+
+    def update_model_from_view(self):
+        if self.view.is_simul_fit():
+            fit_type = "Simul"
+        else:
+            fit_type = "Single"
+        fit_by = self.view.simultaneous_fit_by
+        self.model.update_model_from_view(fit_type, fit_by)
 
     def get_parameters_for_tf_function_calculation(self, fit_function):
         mode = 'Construct' if self.view.tf_asymmetry_mode else 'Extract'

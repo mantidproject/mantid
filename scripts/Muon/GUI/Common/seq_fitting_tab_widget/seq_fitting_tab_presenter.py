@@ -5,11 +5,9 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, unicode_literals)
-from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing
+from mantidqt.utils.observer_pattern import GenericObserver
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
 from Muon.GUI.Common import thread_model
-from Muon.GUI.Common.ADSHandler.workspace_naming import get_run_number_from_workspace_name, get_group_or_pair_from_name
-from mantid.api import MultiDomainFunction, AnalysisDataService
 import functools
 
 
@@ -37,31 +35,26 @@ class SeqFittingTabPresenter(object):
         self.view.set_fit_table_function_parameters(parameters, parameter_values)
 
     def handle_selected_workspaces_changed(self):
-        runs, groups_and_pairs = self.model.get_selected_workspace_runs_groups_and_pairs()
+        runs, groups_and_pairs = self.model.get_runs_groups_and_pairs_for_fits()
         self.view.set_fit_table_workspaces(runs, groups_and_pairs)
 
     def handle_single_fit_requested(self):
-
         if self.model.fit_function is None:
             return
 
         self.selected_row = self.view.selected_row
         runs, group_and_pairs = self.view.get_workspace_info_from_fit_table_row(self.selected_row)
-        xRange = self.view.get_fit_x_range(self.selected_row)
-        workspace_name = self.model.get_workspace_names_from_group_and_runs(runs, group_and_pairs)
-
-        # do a single fit with that workspace
-        params = {}
-        params['Minimizer'] = 'Levenberg-Marquardt'
-        params['EvaluationType'] = 'CentrePoint'
-        params['Function'] = self.model.fit_function
-        params['InputWorkspace'] = workspace_name
-        params['StartX'] = 0.11
-        params['EndX'] = 15
+        separated_runs = runs.split(';')
+        separated_group_and_pairs = group_and_pairs.split(';')
+        workspace_names = self.model.get_fit_workspace_names_from_groups_and_runs(separated_runs,
+                                                                                  separated_group_and_pairs)
         # pull values from fit table
-        self.do_a_single_fit(params)
+        self.do_a_single_fit(workspace_names)
 
     def handle_sequential_fit_requested(self):
+        if self.model.fit_function is None:
+            return
+        
         params = {}
         params['Minimizer'] = 'Levenberg-Marquardt'
         params['EvaluationType'] = 'CentrePoint'
@@ -76,9 +69,9 @@ class SeqFittingTabPresenter(object):
 
         self.do_seq_fit(params)
 
-    def do_a_single_fit(self, params):
+    def do_a_single_fit(self, workspaces):
         calculation_function = functools.partial(
-            self.model.do_single_fit, params, False)
+            self.model.evaluate_single_fit, workspaces, False)
         self.calculation_thread = self.create_thread(
             calculation_function)
 

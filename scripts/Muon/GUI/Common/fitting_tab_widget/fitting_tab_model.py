@@ -24,6 +24,8 @@ class FittingTabModel(object):
         self.context = context
         self.function_name = ''
         self.fit_function = None
+        self.fit_type = "Single"
+        self.fit_by = "None"
         self.time_range = [0.11, 15]
         self.fitting_attributes = {}
 
@@ -42,10 +44,35 @@ class FittingTabModel(object):
         output_workspace, fitting_parameters_table, function_object, output_status, output_chi_squared, covariance_matrix = \
             self.do_single_fit_and_return_workspace_parameters_and_fit_function(parameter_dict)
 
+        print(parameter_dict)
+
         self._handle_single_fit_results(parameter_dict['InputWorkspace'], function_object, fitting_parameters_table,
                                         output_workspace, covariance_matrix, add_fit_to_context)
 
         return function_object.clone(), output_status, output_chi_squared
+
+    def evaluate_single_fit(self, workspaces, add_fit_to_context=True):
+
+        params = {}
+        params['Minimizer'] = 'Levenberg-Marquardt'
+        params['EvaluationType'] = 'CentrePoint'
+        params['Function'] = self.fit_function
+
+        if self.fit_type == "Single":
+            params['InputWorkspace'] = workspaces[0]
+            params['StartX'] = 0.11
+            params['EndX'] = 15
+            function_object, output_status, output_chi_squared = self.do_single_fit(params,
+                                                                                    add_fit_to_context)
+        else:
+            params['InputWorkspace'] = workspaces
+            params['StartX'] = [0.11] * len(workspaces)
+            params['EndX'] = [15] * len(workspaces)
+            function_object, output_status, output_chi_squared = self.do_simultaneous_fit(params,
+                                                                                          [],
+                                                                                          add_fit_to_context)
+
+        return function_object, output_status, output_chi_squared
 
     def do_single_fit_and_return_workspace_parameters_and_fit_function(
             self, parameters_dict):
@@ -66,7 +93,7 @@ class FittingTabModel(object):
 
         return function_object.clone(), output_status, output_chi_squared
 
-    def do_simultaneous_tf_fit(self, parameter_dict, global_parameters):
+    def do_simultaneous_tf_fit(self, parameter_dict, global_parameters, add_to_context=True):
         alg = mantid.AlgorithmManager.create("CalculateMuonAsymmetry")
         output_workspace, fitting_parameters_table, function_object, output_status, output_chi_squared, covariance_matrix = \
             run_CalculateMuonAsymmetry(parameter_dict, alg)
@@ -80,7 +107,7 @@ class FittingTabModel(object):
 
         self._handle_simultaneous_fit_results(parameter_dict['ReNormalizedWorkspaceList'], function_object,
                                               fitting_parameters_table, output_workspace, global_parameters,
-                                              covariance_matrix)
+                                              covariance_matrix, add_to_context)
 
         return function_object, output_status, output_chi_squared
 
@@ -109,13 +136,13 @@ class FittingTabModel(object):
 
         return name, directory
 
-    def do_simultaneous_fit(self, parameter_dict, global_parameters):
+    def do_simultaneous_fit(self, parameter_dict, global_parameters, add_to_context=True):
         output_workspace, fitting_parameters_table, function_object, output_status, output_chi_squared, covariance_matrix = \
             self.do_simultaneous_fit_and_return_workspace_parameters_and_fit_function(parameter_dict)
 
         self._handle_simultaneous_fit_results(parameter_dict['InputWorkspace'], function_object,
                                               fitting_parameters_table, output_workspace, global_parameters,
-                                              covariance_matrix)
+                                              covariance_matrix, add_to_context)
 
         return function_object, output_status, output_chi_squared
 
@@ -260,7 +287,7 @@ class FittingTabModel(object):
         return ConvertFitFunctionForMuonTFAsymmetry(StoreInADS=False, **algorithm_parameters)
 
     def _handle_simultaneous_fit_results(self, input_workspace_list, fit_function, fitting_parameters_table,
-                                         output_workspace, global_parameters, covariance_matrix):
+                                         output_workspace, global_parameters, covariance_matrix, add_to_context=True):
         if len(input_workspace_list) > 1:
             table_name, table_directory = self.create_parameter_table_name(input_workspace_list[0] + '+ ...',
                                                                            fit_function)
@@ -282,11 +309,13 @@ class FittingTabModel(object):
 
         wrapped_parameter_workspace = self.add_workspace_to_ADS(fitting_parameters_table, table_name,
                                                                 table_directory)
-        self.add_fit_to_context(wrapped_parameter_workspace,
-                                fit_function,
-                                input_workspace_list,
-                                workspace_name,
-                                global_parameters)
+
+        if add_to_context:
+            self.add_fit_to_context(wrapped_parameter_workspace,
+                                    fit_function,
+                                    input_workspace_list,
+                                    workspace_name,
+                                    global_parameters)
 
     def _handle_single_fit_results(self, input_workspace, fit_function, fitting_parameters_table, output_workspace,
                                    covariance_matrix, add_to_context=True):
@@ -312,24 +341,59 @@ class FittingTabModel(object):
                 rebin=False, freq="None")
         return selected_workspaces
 
-    def get_selected_workspace_runs_groups_and_pairs(self):
+    def get_runs_groups_and_pairs_for_fits(self):
         selected_workspaces = self.get_selected_workspace_list()
-
         runs = []
         groups_and_pairs = []
-        for workspace in selected_workspaces:
-            runs += [get_run_number_from_workspace_name(workspace, self.context.data_context.instrument)]
-            groups_and_pairs += [get_group_or_pair_from_name(workspace)]
+
+        if self.fit_type == "Single":
+            for workspace in selected_workspaces:
+                runs += [get_run_number_from_workspace_name(workspace, self.context.data_context.instrument)]
+                groups_and_pairs += [get_group_or_pair_from_name(workspace)]
+        else:
+            fit_workspaces = {}
+            if self.fit_by == "Run":
+                for workspace in selected_workspaces:
+                    run = get_run_number_from_workspace_name(workspace, self.context.data_context.instrument)
+                    if run not in fit_workspaces:
+                        fit_workspaces[run] = get_group_or_pair_from_name(workspace)
+                    else:
+                        fit_workspaces[run] += ";" + get_group_or_pair_from_name(workspace)
+                runs = list(fit_workspaces.keys())
+                groups_and_pairs = list(fit_workspaces.values())
+            elif self.fit_by == "Group/Pair":
+                for workspace in selected_workspaces:
+                    group_or_pair = get_group_or_pair_from_name(workspace)
+                    run = get_run_number_from_workspace_name(workspace, self.context.data_context.instrument)
+                    if group_or_pair not in fit_workspaces:
+                        fit_workspaces[group_or_pair] = run
+                    else:
+                        fit_workspaces[group_or_pair] += ";" + run
+                runs = list(fit_workspaces.values())
+                groups_and_pairs = list(fit_workspaces.keys())
+            else:
+                return
 
         return runs, groups_and_pairs
 
-    def get_workspace_names_from_group_and_runs(self, run, group_or_pair):
+    def get_workspace_names_from_group_and_run(self, run, group_or_pair):
         if group_or_pair in self.context.group_pair_context.selected_pairs:
             workspace_name = get_pair_asymmetry_name(self.context, group_or_pair, run, False)
         else:
             workspace_name = get_group_asymmetry_name(self.context, group_or_pair, run, False)
 
         return workspace_name
+
+    def get_fit_workspace_names_from_groups_and_runs(self, runs, groups_and_pairs):
+        workspace_names = []
+        for run in runs:
+            for group_or_pair in groups_and_pairs:
+                if group_or_pair in self.context.group_pair_context.selected_pairs:
+                    workspace_names += [get_pair_asymmetry_name(self.context, group_or_pair, run, False)]
+                else:
+                    workspace_names += [get_group_asymmetry_name(self.context, group_or_pair, run, False)]
+
+            return workspace_names
 
     def _get_selected_groups_and_pairs(self):
         return self.context.group_pair_context.selected_groups + self.context.group_pair_context.selected_pairs
@@ -341,3 +405,7 @@ class FittingTabModel(object):
         self.fitting_attributes.clear()
         self.fitting_attributes['Minimizer'] = minimizer
         self.fitting_attributes['EvaluationType'] = evaluation_type
+
+    def update_model_from_view(self, fit_type, fit_specifier="None"):
+        self.fit_type = fit_type
+        self.fit_by = fit_specifier
