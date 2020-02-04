@@ -14,16 +14,16 @@ namespace CustomInterfaces {
 namespace IDA {
 
 JumpFitDataPresenter::JumpFitDataPresenter(JumpFitModel *model,
-                                           IIndirectFitDataViewLegacy *view,
+                                           IIndirectFitDataView *view,
                                            QComboBox *cbParameterType,
                                            QComboBox *cbParameter,
                                            QLabel *lbParameterType,
                                            QLabel *lbParameter)
-    : IndirectFitDataPresenterLegacy(
+    : IndirectFitDataPresenter(
           model, view,
           std::make_unique<JumpFitDataTablePresenter>(model,
                                                       view->getDataTable())),
-      m_activeParameterType("Width"), m_dataIndex(0),
+      m_activeParameterType("Width"), m_dataIndex(TableDatasetIndex{0}),
       m_cbParameterType(cbParameterType), m_cbParameter(cbParameter),
       m_lbParameterType(lbParameterType), m_lbParameter(lbParameter),
       m_jumpModel(model) {
@@ -86,9 +86,9 @@ void JumpFitDataPresenter::updateAvailableParameters() {
 
 void JumpFitDataPresenter::updateAvailableParameters(const QString &type) {
   if (type == "Width")
-    setAvailableParameters(m_jumpModel->getWidths(0));
+    setAvailableParameters(m_jumpModel->getWidths(TableDatasetIndex{0}));
   else if (type == "EISF")
-    setAvailableParameters(m_jumpModel->getEISF(0));
+    setAvailableParameters(m_jumpModel->getEISF(TableDatasetIndex{0}));
   else
     setAvailableParameters({});
 
@@ -104,7 +104,7 @@ void JumpFitDataPresenter::updateAvailableParameterTypes() {
 }
 
 void JumpFitDataPresenter::updateParameterSelectionEnabled() {
-  const auto enabled = m_jumpModel->numberOfWorkspaces() > 0;
+  const auto enabled = m_jumpModel->numberOfWorkspaces() > TableDatasetIndex{0};
   m_cbParameter->setEnabled(enabled);
   m_cbParameterType->setEnabled(enabled);
   m_lbParameter->setEnabled(enabled);
@@ -156,7 +156,7 @@ void JumpFitDataPresenter::updateParameterTypes(
 }
 
 std::vector<std::string>
-JumpFitDataPresenter::getParameterTypes(std::size_t dataIndex) const {
+JumpFitDataPresenter::getParameterTypes(TableDatasetIndex dataIndex) const {
   std::vector<std::string> types;
   if (!m_jumpModel->zeroWidths(dataIndex))
     types.emplace_back("Width");
@@ -165,7 +165,7 @@ JumpFitDataPresenter::getParameterTypes(std::size_t dataIndex) const {
   return types;
 }
 
-void JumpFitDataPresenter::addWorkspace(IndirectFittingModelLegacy *model,
+void JumpFitDataPresenter::addWorkspace(IndirectFittingModel *model,
                                         const std::string &name) {
   if (model->numberOfWorkspaces() > m_dataIndex)
     model->removeWorkspace(m_dataIndex);
@@ -183,9 +183,9 @@ void JumpFitDataPresenter::addDataToModel(IAddWorkspaceDialog const *dialog) {
 void JumpFitDataPresenter::setSingleModelSpectrum(int parameterIndex) {
   auto index = static_cast<std::size_t>(parameterIndex);
   if (m_cbParameterType->currentIndex() == 0)
-    m_jumpModel->setActiveWidth(index, 0);
+    m_jumpModel->setActiveWidth(index, TableDatasetIndex{0});
   else
-    m_jumpModel->setActiveEISF(index, 0);
+    m_jumpModel->setActiveEISF(index, TableDatasetIndex{0});
 }
 
 void JumpFitDataPresenter::setModelSpectrum(int index) {
@@ -200,7 +200,7 @@ void JumpFitDataPresenter::setModelSpectrum(int index) {
 void JumpFitDataPresenter::closeDialog() {
   if (m_jumpModel->numberOfWorkspaces() > m_dataIndex)
     m_jumpModel->removeWorkspace(m_dataIndex);
-  IndirectFitDataPresenterLegacy::closeDialog();
+  IndirectFitDataPresenter::closeDialog();
 }
 
 std::unique_ptr<IAddWorkspaceDialog>

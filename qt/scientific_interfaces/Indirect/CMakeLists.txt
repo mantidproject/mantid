@@ -95,6 +95,9 @@ set(
         IndirectFunctionBrowser/MSDFunctionModel.cpp
         IndirectFunctionBrowser/MSDTemplateBrowser.cpp
         IndirectFunctionBrowser/MSDTemplatePresenter.cpp
+        IndirectFunctionBrowser/FQFunctionModel.cpp
+        IndirectFunctionBrowser/FQTemplateBrowser.cpp
+        IndirectFunctionBrowser/FQTemplatePresenter.cpp
         JumpFit.cpp
         JumpFitAddWorkspaceDialog.cpp
         JumpFitDataPresenter.cpp
@@ -218,6 +221,8 @@ set(
         IndirectFunctionBrowser/IqtTemplatePresenter.h
         IndirectFunctionBrowser/MSDTemplateBrowser.h
         IndirectFunctionBrowser/MSDTemplatePresenter.h
+        IndirectFunctionBrowser/FQTemplateBrowser.h
+        IndirectFunctionBrowser/FQTemplatePresenter.h
         IndirectFitPropertyBrowser.h
         Iqt.h
         ISISCalibration.h
@@ -417,6 +422,9 @@ set(
         IndirectFunctionBrowser/MSDFunctionModel.cpp
         IndirectFunctionBrowser/MSDTemplateBrowser.cpp
         IndirectFunctionBrowser/MSDTemplatePresenter.cpp
+        IndirectFunctionBrowser/FQFunctionModel.cpp
+        IndirectFunctionBrowser/FQTemplateBrowser.cpp
+        IndirectFunctionBrowser/FQTemplatePresenter.cpp
         JumpFit.cpp
         JumpFitAddWorkspaceDialog.cpp
         JumpFitDataPresenter.cpp
@@ -511,6 +519,8 @@ set(
         IndirectFunctionBrowser/IqtTemplatePresenter.h
         IndirectFunctionBrowser/MSDTemplateBrowser.h
         IndirectFunctionBrowser/MSDTemplatePresenter.h
+        IndirectFunctionBrowser/FQTemplateBrowser.h
+        IndirectFunctionBrowser/FQTemplatePresenter.h
         Iqt.h
         JumpFitAddWorkspaceDialog.h
         JumpFitDataPresenter.h

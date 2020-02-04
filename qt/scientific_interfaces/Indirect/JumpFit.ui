@@ -22,13 +22,13 @@
      <property name="childrenCollapsible">
       <bool>false</bool>
      </property>
-     <widget class="MantidQt::CustomInterfaces::IDA::IndirectFitDataViewLegacy" name="fitDataView" native="true"/>
+     <widget class="MantidQt::CustomInterfaces::IDA::IndirectFitDataView" name="fitDataView" native="true"/>
      <widget class="QWidget" name="layoutWidget">
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
         <layout class="QHBoxLayout" name="loPlotArea" stretch="1,1">
          <item>
-          <widget class="MantidQt::MantidWidgets::IndirectFitPropertyBrowserLegacy" name="fitPropertyBrowser">
+          <widget class="MantidQt::CustomInterfaces::IDA::IndirectFitPropertyBrowser" name="fitPropertyBrowser">
            <widget class="QWidget" name="dockWidgetContents"/>
           </widget>
          </item>
@@ -125,12 +125,12 @@
               </layout>
              </item>
              <item>
-              <widget class="MantidQt::CustomInterfaces::IDA::IndirectFitPlotViewLegacy" name="pvFitPlotView" native="true"/>
+              <widget class="MantidQt::CustomInterfaces::IDA::IndirectFitPlotView" name="pvFitPlotView" native="true"/>
              </item>
             </layout>
            </item>
            <item>
-            <widget class="MantidQt::CustomInterfaces::IDA::IndirectSpectrumSelectionViewLegacy" name="svSpectrumView" native="true"/>
+            <widget class="MantidQt::CustomInterfaces::IDA::IndirectSpectrumSelectionView" name="svSpectrumView" native="true"/>
            </item>
           </layout>
          </item>
@@ -142,16 +142,7 @@
           <property name="spacing">
            <number>0</number>
           </property>
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
+          <property name="margin">
            <number>0</number>
           </property>
           <item>
@@ -216,33 +207,33 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::CustomInterfaces::IDA::IndirectSpectrumSelectionViewLegacy</class>
+   <class>MantidQt::CustomInterfaces::IDA::IndirectSpectrumSelectionView</class>
    <extends>QWidget</extends>
-   <header>IndirectSpectrumSelectionViewLegacy.h</header>
+   <header>IndirectSpectrumSelectionView.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>MantidQt::MantidWidgets::IndirectFitPropertyBrowserLegacy</class>
-   <extends>QDockWidget</extends>
-   <header>MantidQtWidgets/Common/IndirectFitPropertyBrowserLegacy.h</header>
+   <class>MantidQt::CustomInterfaces::IDA::IndirectFitPlotView</class>
+   <extends>QWidget</extends>
+   <header>IndirectFitPlotView.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>MantidQt::CustomInterfaces::IDA::IndirectFitPlotViewLegacy</class>
+   <class>MantidQt::CustomInterfaces::IDA::IndirectFitDataView</class>
    <extends>QWidget</extends>
-   <header>IndirectFitPlotViewLegacy.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>MantidQt::CustomInterfaces::IDA::IndirectFitDataViewLegacy</class>
-   <extends>QWidget</extends>
-   <header>IndirectFitDataViewLegacy.h</header>
+   <header>IndirectFitDataView.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>MantidQt::CustomInterfaces::IDA::IndirectFitOutputOptionsView</class>
    <extends>QWidget</extends>
    <header>IndirectFitOutputOptionsView.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::CustomInterfaces::IDA::IndirectFitPropertyBrowser</class>
+   <extends>QDockWidget</extends>
+   <header>IndirectFitPropertyBrowser.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
