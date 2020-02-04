@@ -82,7 +82,7 @@ def save_unsplined_vanadium(vanadium_ws, output_path):
 
 
 def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None, cal_file_name=None,
-                    sample_details=None, output_binning=None, pdf_type="G(r)"):
+                    sample_details=None, output_binning=None, pdf_type="G(r)", freq_params=None):
     focused_ws = _obtain_focused_run(run_number, focus_file_path)
     focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, Target="MomentumTransfer", EMode='Elastic')
 
@@ -107,12 +107,14 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None,
 
     if merge_banks:
         q_min, q_max = _load_qlims(q_lims)
-        mantid.MatchAndMergeWorkspaces(InputWorkspaces=focused_ws, OutputWorkspace="merged_ws", XMin=q_min, XMax=q_max,
-                                       CalculateScale=False)
-        fast_fourier_filter("merged_ws", 5.0, 15.0)
+        merged_ws = mantid.MatchAndMergeWorkspaces(InputWorkspaces=focused_ws, XMin=q_min, XMax=q_max,
+                                                   CalculateScale=False)
+        fast_fourier_filter(merged_ws, freq_params)
         pdf_output = mantid.PDFFourierTransform(Inputworkspace="merged_ws", InputSofQType="S(Q)-1", PDFType=pdf_type,
                                                 Filter=True)
     else:
+        for ws in focused_ws:
+            fast_fourier_filter(ws, freq_params)
         pdf_output = mantid.PDFFourierTransform(Inputworkspace='focused_ws', InputSofQType="S(Q)-1",
                                                 PDFType=pdf_type, Filter=True)
         pdf_output = mantid.RebinToWorkspace(WorkspaceToRebin=pdf_output, WorkspaceToMatch=pdf_output[4],
@@ -189,15 +191,16 @@ def _determine_chopper_mode(ws):
         raise ValueError("Chopper frequency not in log data. Please specify a chopper mode")
 
 
-def fast_fourier_filter(input_ws, lower_boundary=None, upper_boundary=None):
+def fast_fourier_filter(input_ws, freq_params=None):
+    if not freq_params:
+        return
     # This is a simple fourier filter using the FFTSmooth to get a WS with only the low radius components, then
     # subtracting that from the merged WS
 
-    x_range = ADS.retrieve(input_ws).dataX(0)
-    if lower_boundary:
-        lower_index = round(2 * np.pi / (lower_boundary * 2 * (x_range[1] - x_range[0])))
-        tmp = mantid.FFTSmooth(InputWorkspace=input_ws, Filter="Zeroing", Params=str(lower_index))
-        mantid.Minus(LHSWorkspace=input_ws, RHSWorkspace=tmp, OutputWorkspace=input_ws)
-    if upper_boundary:
-        upper_index = round(2 * np.pi / (upper_boundary * 2 * (x_range[1] - x_range[0])))
-        mantid.FFTSmooth(InputWorkspace=input_ws, OutputWorkspace=input_ws, Filter="Zeroing", Params=str(upper_index))
+    x_range = input_ws.dataX(0)
+    lower_index = round(2 * np.pi / (freq_params[0] * 2 * (x_range[1] - x_range[0])))
+    tmp = mantid.FFTSmooth(InputWorkspace=input_ws, Filter="Zeroing", Params=str(lower_index), StoreInADS=False, IgnoreXBins=True)
+    mantid.Minus(LHSWorkspace=input_ws, RHSWorkspace=tmp, OutputWorkspace=input_ws)
+    if len(freq_params) > 1:
+        upper_index = round(2 * np.pi / (freq_params[1] * 2 * (x_range[1] - x_range[0])))
+        mantid.FFTSmooth(InputWorkspace=input_ws, OutputWorkspace=input_ws, Filter="Zeroing", Params=str(upper_index), IgnoreXBins=True)
