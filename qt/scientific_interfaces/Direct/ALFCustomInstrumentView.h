@@ -21,23 +21,30 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class ALFCustomInstrumentView : public MantidWidgets::BaseCustomInstrumentView {
-  Q_OBJECT
+class  MANTIDQT_DIRECT_DLL IALFCustomInstrumentView : public MantidWidgets::IBaseCustomInstrumentView{
+public:
+  virtual void observeExtractSingleTube(Observer *listner)=0;
+  virtual void observeAverageTube(Observer *listner)=0;
+  virtual void addSpectrum(std::string wsName) = 0;
+  virtual void setupAnalysisPane(MantidWidgets::PlotFitAnalysisPaneView *analysis) = 0;
+};
+
+class DLLExport ALFCustomInstrumentView : public  MantidWidgets::BaseCustomInstrumentView 
+  {Q_OBJECT
 
 public:
   explicit ALFCustomInstrumentView(const std::string &instrument,
                                    QWidget *parent = nullptr);
-  void observeExtractSingleTube(Observer *listner);
-  void observeAverageTube(Observer *listner);
-
+  void observeExtractSingleTube(Observer *listner);// override;
+  void observeAverageTube(Observer *listner);// override;
   void
   setUpInstrument(const std::string &fileName,
                   std::vector<std::function<bool(std::map<std::string, bool>)>>
                       &binders) override;
 
   void addObserver(std::tuple<std::string, Observer *> &listener) override;
-  void addSpectrum(std::string wsName);
-  void setupAnalysisPane(MantidWidgets::PlotFitAnalysisPaneView *analysis);
+  void addSpectrum(std::string wsName);// override;
+  void setupAnalysisPane(MantidWidgets::PlotFitAnalysisPaneView *analysis);// override;
 
 public slots:
   void extractSingleTube();

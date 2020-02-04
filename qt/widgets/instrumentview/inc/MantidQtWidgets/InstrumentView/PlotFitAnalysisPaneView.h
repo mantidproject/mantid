@@ -45,13 +45,14 @@ public:
 public slots:
   void doFit();
 
-private:
+protected:
   void setupPlotFitSplitter(const double &start, const double &end);
+  QWidget *createFitPane(const double &start, const double &end);
 
+private:
   MantidWidgets::PreviewPlot *m_plot;
   MantidWidgets::FunctionBrowser *m_fitBrowser;
   QLineEdit *m_start, *m_end;
-  QWidget *createFitPane(const double &start, const double &end);
   QSplitter *m_fitPlotLayout;
   QPushButton *m_fitButton;
   Observable *m_fitObservable;

@@ -91,7 +91,7 @@ std::map<std::string, bool> ALFCustomInstrumentModel::isDataValid() {
   if (unit != "dSpacing"){
   isItDSpace = false;
   }
-  return {{"IsValidInstrument", isItALF}, {"IsItDSpace", isItDSpace}, {unit, true}};
+  return {{"IsValidInstrument", isItALF}, {"IsItDSpace", isItDSpace}};
 }
 
 /*
