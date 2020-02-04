@@ -30,7 +30,7 @@
     </widget>
    </item>
    <item row="0" column="0">
-    <widget class="QPushButton" name="fit_button">
+    <widget class="QPushButton" name="seq_fit_button">
      <property name="maximumSize">
       <size>
        <width>200</width>

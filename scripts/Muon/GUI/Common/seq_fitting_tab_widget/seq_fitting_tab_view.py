@@ -151,6 +151,9 @@ class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
     def setup_slot_for_fit_selected_button(self, slot):
         self.fit_selected_button.clicked.connect(slot)
 
+    def setup_slot_for_sequential_fit_button(self, slot):
+        self.seq_fit_button.clicked.connect(slot)
+
     @property
     def selected_row(self):
         return self.fit_results_table.selectionModel().currentIndex().row()

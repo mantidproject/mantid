@@ -154,15 +154,13 @@ class FittingTabModel(object):
         output_status_list = []
         output_chi_squared_list = []
         function_object = parameter_dict['Function']
-        for input_workspace, startX, endX in zip(parameter_dict['InputWorkspace'], parameter_dict['StartX'],
-                                                 parameter_dict['EndX']):
+
+        for input_workspace in parameter_dict['InputWorkspace']:
             sub_parameter_dict = parameter_dict.copy()
             sub_parameter_dict['InputWorkspace'] = input_workspace
-            sub_parameter_dict['StartX'] = startX
-            sub_parameter_dict['EndX'] = endX
             sub_parameter_dict['Function'] = function_object
 
-            function_object, output_status, output_chi_squared = self.do_single_fit(sub_parameter_dict)
+            function_object, output_status, output_chi_squared = self.do_single_fit(sub_parameter_dict, False)
             # This is required so that a new function object is created that is not overwritten in subsequent iterations
             new_function = function_object.clone()
             function_object_list.append(new_function)

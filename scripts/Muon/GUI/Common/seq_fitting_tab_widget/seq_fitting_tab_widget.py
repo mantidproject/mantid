@@ -20,3 +20,5 @@ class SeqFittingTabWidget(object):
 
         self.seq_fitting_tab_view.setup_slot_for_fit_selected_button(self.seq_fitting_tab_presenter.
                                                                      handle_single_fit_requested)
+        self.seq_fitting_tab_view.setup_slot_for_sequential_fit_button(self.seq_fitting_tab_presenter.
+                                                                       handle_sequential_fit_requested)
