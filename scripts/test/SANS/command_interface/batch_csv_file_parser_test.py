@@ -16,7 +16,6 @@ from sans.common.enums import BatchReductionEntry
 
 
 class BatchCsvParserTest(unittest.TestCase):
-
     @staticmethod
     def _save_to_csv(content):
         test_file_path = os.path.join(mantid.config.getString('defaultsave.directory'), 'sans_batch_test_file.csv')

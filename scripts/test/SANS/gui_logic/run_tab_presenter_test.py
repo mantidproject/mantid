@@ -201,20 +201,15 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter.on_batch_file_load()
 
         # Act
-        states, errors = presenter.get_states(row_index=[0, 1])
+        states, errors = presenter.get_states(row_entries=BATCH_FILE_TEST_CONTENT_2)
 
         # Assert
         self.assertEqual(len(states), 2)
         for _, state in states.items():
-            try:
-                state.validate()
-                has_raised = False
-            except:  # noqa
-                has_raised = True
-            self.assertFalse(has_raised)
+            state.validate()
 
         # Check state 0
-        state0 = states[0]
+        state0 = states[BATCH_FILE_TEST_CONTENT_2[0]]
         self.assertEqual(state0.data.sample_scatter, "SANS2D00022024")
         self.assertEqual(state0.data.sample_transmission, "SANS2D00022048")
         self.assertEqual(state0.data.sample_direct, "SANS2D00022048")
@@ -223,7 +218,7 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertEqual(state0.data.can_direct, None)
 
         # Check state 1
-        state1 = states[1]
+        state1 = states[BATCH_FILE_TEST_CONTENT_2[1]]
         self.assertEqual(state1.data.sample_scatter, "SANS2D00022024")
         self.assertEqual(state1.data.sample_transmission, None)
         self.assertEqual(state1.data.sample_direct, None)
@@ -319,7 +314,7 @@ class RunTabPresenterTest(unittest.TestCase):
 
     def test_table_model_is_initialised_upon_presenter_creation(self):
         expected_table_model = TableModel()
-        presenter = RunTabPresenter(SANSFacility.ISIS, model=expected_table_model)
+        presenter = RunTabPresenter(SANSFacility.ISIS, table_model=expected_table_model)
         self.assertEqual(presenter._table_model, expected_table_model)
 
     def test_on_insert_row_updates_table_model(self):
@@ -602,7 +597,8 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter.on_row_inserted()
         presenter.on_erase_rows()
 
-        self.assertEqual(presenter._table_model.get_number_of_rows(), 1)
+        self.assertEqual(presenter._table_model.get_number_of_rows(), 0)
+        # Even though we have "0" rows, the default should be there
         self.assertTrue(presenter._table_model.get_row(0).is_empty())
 
     def test_on_erase_rows_updates_view(self):
@@ -696,7 +692,7 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter.notify_progress(0, [], [])
 
         self.assertEqual(presenter._table_model.get_row(0).state, RowState.PROCESSED)
-        self.assertEqual(presenter._table_model.get_row(0).tool_tip, '')
+        self.assertEqual(presenter._table_model.get_row(0).tool_tip, None)
 
     def test_that_process_selected_does_nothing_if_no_states_selected(self):
         presenter = RunTabPresenter(SANSFacility.ISIS)

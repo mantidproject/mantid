@@ -75,7 +75,7 @@ class TableModelTest(unittest.TestCase):
 
         table_model.clear_table_entries()
 
-        self.assertEqual(table_model.get_number_of_rows(), 1)
+        self.assertEqual(table_model.get_number_of_rows(), 0)
         self.assertTrue(table_model.get_row(0).is_empty())
 
     def test_when_last_row_is_removed_table_is_left_with_one_empty_row(self):
@@ -87,7 +87,7 @@ class TableModelTest(unittest.TestCase):
 
         table_model.remove_table_entries([0, 1])
 
-        self.assertEqual(table_model.get_number_of_rows(), 1)
+        self.assertEqual(table_model.get_number_of_rows(), 0)
         self.assertTrue(table_model.get_row(0).is_empty())
 
     def test_that_OptionsColumnModel_get_hint_strategy(self):
@@ -141,10 +141,10 @@ class TableModelTest(unittest.TestCase):
     def test_default_obj_correctly_tracked(self):
         # We need to make sure there is always 1 object in table model, but not to get it mixed with user input
         obj = TableModel()
-        self.assertEqual(1, obj.get_number_of_rows())
+        self.assertEqual(0, obj.get_number_of_rows())
 
         obj.clear_table_entries()
-        self.assertEqual(1, obj.get_number_of_rows())
+        self.assertEqual(0, obj.get_number_of_rows())
 
         obj.append_table_entry(RowEntries())
         self.assertEqual(1, obj.get_number_of_rows())
@@ -152,8 +152,19 @@ class TableModelTest(unittest.TestCase):
         self.assertEqual(2, obj.get_number_of_rows())
 
         obj.clear_table_entries()
+        self.assertEqual(0, obj.get_number_of_rows())
         obj.append_table_entry(RowEntries())
         self.assertEqual(1, obj.get_number_of_rows())
+
+    def test_get_num_rows(self):
+        obj = TableModel()
+        self.assertEqual(0, obj.get_number_of_rows())
+
+        obj.append_table_entry(RowEntries())
+        self.assertEqual(1, obj.get_number_of_rows())
+
+        obj.remove_table_entries([0])
+        self.assertEqual(0, obj.get_number_of_rows())
 
     def _do_test_file_setting(self, func, prop):
         # Test that can set to empty string
@@ -178,24 +189,6 @@ class TableModelTest(unittest.TestCase):
     def _user_file_wrapper(value):
         table_model = TableModel()
         table_model.user_file = value
-
-
-class TableModelThreadingTest(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.qApp = QCoreApplication(['test_app'])
-
-    def test_that_get_thickness_for_rows_updates_table_correctly(self):
-        table_model = TableModel()
-        table_index_model = RowEntries(sample_scatter="LOQ74044")
-        table_model.replace_table_entry(0, table_index_model)
-
-        table_model.get_thickness_for_rows()
-        table_model.work_handler.wait_for_done()
-        self.qApp.processEvents()
-
-        self.assertEqual(table_index_model.sample_thickness, 1.0)
-
 
 if __name__ == '__main__':
     unittest.main()

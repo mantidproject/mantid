@@ -19,11 +19,9 @@ from sans.gui_logic.models.table_model import TableModel
 
 class GuiCommonTest(unittest.TestCase):
     def setUp(self):
-        self.table_model = TableModel()
         self.state_gui_model = StateGuiModel({})
-        table_index_model = RowEntries(sample_scatter='LOQ74044')
-        self.table_model.replace_table_entry(0, table_index_model)
-        self.table_model.replace_table_entry(1, table_index_model)
+        self._good_row_one = RowEntries(sample_scatter='LOQ74044')
+        self._good_row_two = RowEntries(sample_scatter='LOQ74044')
 
         self.fake_state = mock.MagicMock(spec=AllStates)
         self.gui_state_director_instance = mock.MagicMock()
@@ -34,33 +32,24 @@ class GuiCommonTest(unittest.TestCase):
         self.gui_state_director.return_value = self.gui_state_director_instance
 
     def test_create_states_returns_correct_number_of_states(self):
-        states, errors = create_states(self.state_gui_model, self.table_model, SANSFacility.ISIS, row_index=[0, 1])
+        rows = [self._good_row_one, self._good_row_two]
+        states, errors = create_states(self.state_gui_model, SANSFacility.ISIS, row_entries=rows)
 
         self.assertEqual(len(states), 2)
-
-    def test_create_states_returns_correct_number_of_states_for_specified_row_index(self):
-        states, errors = create_states(self.state_gui_model, self.table_model, SANSFacility.ISIS, row_index=[1])
-
-        self.assertEqual(len(states), 1)
 
     def test_skips_empty_rows(self):
-        self.table_model.append_table_entry(RowEntries())
-
-        states, errors = create_states(self.state_gui_model, self.table_model, SANSFacility.ISIS, row_index=[0, 1, 2])
-
-        self.assertEqual(len(states), 2)
+        rows = [self._good_row_one, RowEntries(), self._good_row_two]
+        states, errors = create_states(self.state_gui_model, SANSFacility.ISIS, row_entries=rows)
+        self.assertEqual(2, len(states))
 
     @mock.patch('sans.gui_logic.models.create_state.create_gui_state_from_userfile')
     def test_create_state_from_user_file_if_specified(self, create_gui_state_mock):
         create_gui_state_mock.returns = StateGuiModel({})
 
-        table_index_model = RowEntries(sample_scatter="LOQ74044", user_file="MaskLOQData.txt")
-        table_model = TableModel()
-        table_model.replace_table_entry(0, table_index_model)
-        table_model.append_table_entry(RowEntries())
-        table_model.append_table_entry(RowEntries())
+        rows = [RowEntries(sample_scatter="LOQ74044", user_file="MaskLOQData.txt"),
+                RowEntries(), RowEntries()]
 
-        states, errors = create_states(self.state_gui_model, table_model, SANSFacility.ISIS, row_index=[0, 1, 2])
+        states, errors = create_states(self.state_gui_model, row_entries=rows, facility=SANSFacility.ISIS)
 
         self.assertEqual(len(states), 1)
         create_gui_state_mock.assert_called_once_with('MaskLOQData.txt', self.state_gui_model)

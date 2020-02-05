@@ -164,11 +164,8 @@ def get_detector_size_from_sans_file(state, detector):
 
 def create_state(state_model_with_view_update, file, period, facility):
     table_row = RowEntries(sample_scatter=file, sample_scatter_period=period)
-    table = TableModel()
-    table.add_table_entry_no_thread_or_signal(0, table_row)
+    gui_state_director = GuiStateDirector(state_model_with_view_update, facility)
 
-    gui_state_director = GuiStateDirector(table, state_model_with_view_update, facility)
-
-    state = gui_state_director.create_state(0)
+    state = gui_state_director.create_state(table_row)
 
     return state

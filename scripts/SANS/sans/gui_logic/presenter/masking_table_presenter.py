@@ -157,17 +157,19 @@ class MaskingTablePresenter(object):
             state = self.get_state(row_index)
         except Exception as e:
             self.on_processing_error_masking_display(e)
-            raise Exception(str(e))  # propagate errors for run_tab_presenter to deal with
-        else:
-            if not state:
-                self._logger.information("You can only show a masked workspace if a user file has been loaded and there"
-                                         "valid sample scatter entry has been provided in the selected row.")
-                return
+            raise e  # propagate errors for run_tab_presenter to deal with
 
-            # Run the task
-            listener = MaskingTablePresenter.DisplayMaskListener(self)
-            state_copy = copy.copy(state)
-            self._work_handler.process(listener, load_and_mask_workspace, 0, state_copy, self.DISPLAY_WORKSPACE_NAME)
+        if not state:
+            self._logger.error("You can only show a masked workspace if a user file has been loaded and there"
+                               "valid sample scatter entry has been provided in the selected row.")
+            self._view.set_display_mask_button_to_normal()
+            return
+
+        # Run the task
+        self.display_masking_information(state)
+        listener = MaskingTablePresenter.DisplayMaskListener(self)
+        state_copy = copy.copy(state)
+        self._work_handler.process(listener, load_and_mask_workspace, 0, state_copy, self.DISPLAY_WORKSPACE_NAME)
 
     def on_processing_finished_masking_display(self, result):
         # Enable button

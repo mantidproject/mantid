@@ -36,10 +36,10 @@ class BatchProcessRunner(QObject):
     def on_error(self):
         self._worker = None
 
-    def process_states(self, rows, get_states_func, use_optimizations, output_mode, plot_results, output_graph,
+    def process_states(self, row_index_pair, get_states_func, use_optimizations, output_mode, plot_results, output_graph,
                        save_can=False):
         self._worker = Worker(self._process_states_on_thread,
-                              rows=rows, get_states_func=get_states_func, use_optimizations=use_optimizations,
+                              row_index_pair=row_index_pair, get_states_func=get_states_func, use_optimizations=use_optimizations,
                               output_mode=output_mode, plot_results=plot_results,
                               output_graph=output_graph, save_can=save_can)
         self._worker.signals.finished.connect(self.on_finished)

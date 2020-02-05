@@ -650,7 +650,6 @@ class RunTabPresenter(PresenterCommon):
         self.sans_logger.information("Starting load of batch table.")
 
         row_index_pair = []
-
         for row in selected_rows:
             row.reset_row_state()
             row_index_pair.append((row, self._table_model.get_row_index(row)))
@@ -961,10 +960,7 @@ class RunTabPresenter(PresenterCommon):
                     "There does not seem to be data for a row {}.".format(row_index))
             return None
 
-        if row_index in states:
-            if states:
-                return states[row_index]
-        return None
+        return states[row_entry]
 
     def update_view_from_model(self):
         self._set_on_view("instrument")
