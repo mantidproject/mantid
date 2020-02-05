@@ -41,7 +41,7 @@ public:
   void test_Category() {
     const std::vector<std::string> categories = fn.categories();
     TS_ASSERT(categories.size() == 1);
-    TS_ASSERT(categories[0] == "Muon;MuonGeneric");
+    TS_ASSERT(categories[0] == "Muon\\MuonGeneric");
   }
 
   void test_values() {
