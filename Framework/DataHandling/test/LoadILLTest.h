@@ -49,10 +49,6 @@ public:
     alg.setChild(true);
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", filename))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "__unused_for_child"))
-    TS_ASSERT_THROWS_NOTHING(alg.execute())
-    TS_ASSERT(alg.isExecuted())
     TS_ASSERT_EQUALS(alg.getPropertyValue("LoaderName"), resultLoader)
   }
 
