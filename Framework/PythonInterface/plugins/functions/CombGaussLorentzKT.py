@@ -13,7 +13,7 @@ import numpy as np
 class CombGaussLorentzKT(IFunction1D):
 
     def category(self):
-        return "MuonGeneric"
+        return "Muon;MuonGeneric"
 
     def init(self):
         self.declareParameter("A0", 0.5, 'Amplitude')

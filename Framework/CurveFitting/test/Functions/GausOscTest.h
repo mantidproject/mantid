@@ -20,7 +20,7 @@ public:
     fn.initialize();
 
     TS_ASSERT(fn.categories().size() == 1);
-    TS_ASSERT(fn.category() == "MuonGeneric");
+    TS_ASSERT(fn.category() == "Muon;MuonGeneric");
   }
 
   void test_values() {

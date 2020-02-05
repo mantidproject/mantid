@@ -29,7 +29,7 @@ public:
   std::string name() const override { return "GausDecay"; }
 
   /// overwrite IFunction base class methods
-  const std::string category() const override { return "MuonGeneric"; }
+  const std::string category() const override { return "Muon;MuonGeneric"; }
 
 protected:
   void setActiveParameter(size_t i, double value) override;
