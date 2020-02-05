@@ -997,9 +997,17 @@ def line_colour_fill(ax):
     ax.get_figure().canvas.draw()
 
 
-# Update the color bar scale on a given image
 def update_colorbar_scale(figure, image, scale, vmin, vmax):
-    if vmin == 0:
+    """"
+    Updates the colorbar to the scale and limits given.
+
+    :param figure: A matplotlib figure instance
+    :param image: The matplotlib image containing the colorbar
+    :param scale: The norm scale of the colorbar, this should be a matplotlib colormap norm type
+    :param vmin: the minimum value on the colorbar
+    :param vmax: the maximum value on the colorbar
+    """
+    if vmin == 0 and scale == LogNorm:
         vmin += 1e-6  # Avoid 0 log scale error
     image.set_norm(scale(vmin=vmin, vmax=vmax))
     if image.colorbar:
