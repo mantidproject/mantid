@@ -7,6 +7,7 @@
 
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogPresenter.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressModel.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/IAlgorithmProgressDialogWidget.h"
 
@@ -19,6 +20,18 @@ AlgorithmProgressDialogPresenter::AlgorithmProgressDialogPresenter(
     : AlgorithmProgressPresenterBase(parent), m_view{view}, m_model{model},
       m_progressBars{RunningAlgorithms()} {
   model.setDialog(this);
+
+  // Intital setup of any running algorithms
+  auto runningAlgorithms =
+      Mantid::API::AlgorithmManager::Instance().runningInstances();
+
+  for (const auto &alg : runningAlgorithms) {
+    if ((alg) && (alg->isRunning())) {
+      if (m_progressBars.count(alg->getAlgorithmID()) == 0) {
+        algorithmStartedSlot(alg->getAlgorithmID());
+      }
+    }
+  }
 }
 
 /// This slot is triggered whenever an algorithm has started executing
