@@ -5,36 +5,34 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
+
 import re
 from csv import reader
-from sans.common.enums import BatchReductionEntry
-from sans.common.file_information import find_full_file_path
+from enum import Enum
+
 from sans.common.constants import ALL_PERIODS
+from sans.common.file_information import find_full_file_path
+from sans.gui_logic.models.RowEntries import RowEntries
+
+
+class BatchFileKeywords(Enum):
+    SAMPLE_SCATTER = "sample_sans"
+    OUTPUT = "output_as"
+    SAMPLE_TRANSMISSION = "sample_trans"
+    SAMPLE_DIRECT = "sample_direct_beam"
+    CAN_SCATTER = "can_sans"
+    CAN_TRANSMISSION = "can_trans"
+    CAN_DIRECT = "can_direct_beam"
+    USER_FILE = "user_file"
+    SAMPLE_THICKNESS = "sample_thickness"
+    SAMPLE_HEIGHT = "sample_height"
+    SAMPLE_WIDTH = "sample_width"
 
 
 class BatchCsvParser(object):
-    batch_file_keywords = {"sample_sans": BatchReductionEntry.SAMPLE_SCATTER,
-                           "output_as": BatchReductionEntry.OUTPUT,
-                           "sample_trans": BatchReductionEntry.SAMPLE_TRANSMISSION,
-                           "sample_direct_beam": BatchReductionEntry.SAMPLE_DIRECT,
-                           "can_sans": BatchReductionEntry.CAN_SCATTER,
-                           "can_trans": BatchReductionEntry.CAN_TRANSMISSION,
-                           "can_direct_beam": BatchReductionEntry.CAN_DIRECT,
-                           "user_file": BatchReductionEntry.USER_FILE,
-                           "sample_thickness": BatchReductionEntry.SAMPLE_THICKNESS,
-                           "sample_height": BatchReductionEntry.SAMPLE_HEIGHT,
-                           "sample_width": BatchReductionEntry.SAMPLE_WIDTH}
-    batch_file_keywords_which_are_dropped = {"background_sans": None,
-                                             "background_trans": None,
-                                             "background_direct_beam": None,
-                                             "": None}
 
-    data_keys = {BatchReductionEntry.SAMPLE_SCATTER: BatchReductionEntry.SAMPLE_SCATTER_PERIOD,
-                 BatchReductionEntry.SAMPLE_TRANSMISSION: BatchReductionEntry.SAMPLE_TRANSMISSION_PERIOD,
-                 BatchReductionEntry.SAMPLE_DIRECT: BatchReductionEntry.SAMPLE_DIRECT_PERIOD,
-                 BatchReductionEntry.CAN_SCATTER: BatchReductionEntry.CAN_SCATTER_PERIOD,
-                 BatchReductionEntry.CAN_TRANSMISSION: BatchReductionEntry.CAN_TRANSMISSION_PERIOD,
-                 BatchReductionEntry.CAN_DIRECT: BatchReductionEntry.CAN_DIRECT_PERIOD}
+    IGNORED_KEYWORDS = {"background_sans", "background_trans", "background_direct_beam", ""}
+    COMMENT_KEWORDS = {'#', "MANTID_BATCH_FILE"}
 
     def __init__(self, batch_file_name):
         super(BatchCsvParser, self).__init__()
@@ -50,108 +48,107 @@ class BatchCsvParser(object):
 
         Returns: parsed csv elements
         """
-
         parsed_rows = []
 
         with open(self._batch_file_name, 'r') as csvfile:
             batch_reader = reader(csvfile, delimiter=",")
-            row_number = 0
-            for row in batch_reader:
-                # Check if the row is empty
-                if not row:
-                    continue
+            read_rows = list(batch_reader)
 
-                # If the first element contains a # symbol then ignore it
-                if "MANTID_BATCH_FILE" in row[0]:
-                    continue
+        for row_number, row in enumerate(read_rows):
+            # Check if the row is empty or is a comment
+            if not row:
+                continue
 
-                # Else we perform a parse of the row
-                parsed_row = self._parse_row(row, row_number)
-                parsed_rows.append(parsed_row)
-                row_number += 1
+            key = row[0].strip()
+            if key in self.COMMENT_KEWORDS:
+                continue
+
+            # Else we perform a parse of the row
+            parsed_row = self._parse_row(row, row_number)
+            parsed_rows.append(parsed_row)
         return parsed_rows
 
     def _parse_row(self, row, row_number):
         # Clean all elements of the row
         row = list(map(str.strip, row))
-
-        # If the reader has ignored the final empty row, we add it back here
-        if len(row) % 2 == 1 and row[-1] in self.batch_file_keywords:
-            row.append("")
-
-        # Go sequentially through the row with a stride of two. The user can either leave entries away, or he can leave
-        # them blank, ie ... , sample_direct_beam, , can_sans, XXXXX, ...  or even ..., , ,...
-        # This means we expect an even length of entries
-        if len(row) % 2 != 0:
-            raise RuntimeError("We expect an even number of entries, but row {0} has {1} entries.".format(row_number,
-                                                                                                          len(row)))
-        output = {}
+        output = RowEntries()
         # Special attention has to go to the specification of the period in a run number. The user can
-        # specify something like 5512p for sample scatter. This means she wants run number 5512 with period 7.
+        # specify something like 5512p for sample scatter. This means they want run number 5512 with period 7.
         for key, value in zip(row[::2], row[1::2]):
-            if key in list(BatchCsvParser.batch_file_keywords.keys()):
-                new_key = BatchCsvParser.batch_file_keywords[key]
-                value = value.strip()
-                if BatchCsvParser._is_data_entry(new_key):
-                    run_number, period, period_key = BatchCsvParser._get_run_number_and_period(new_key, value)
-                    output.update({new_key: run_number})
-                    output.update({period_key: period})
-                else:
-                    output.update({new_key: value})
-            elif key in list(self.batch_file_keywords_which_are_dropped.keys()):
+            if key in self.IGNORED_KEYWORDS:
                 continue
-            else:
-                raise RuntimeError("The key {0} is not part of the SANS batch csv file keywords".format(key))
 
-        # Ensure that sample_scatter was set
-        if BatchReductionEntry.SAMPLE_SCATTER not in output or not output[BatchReductionEntry.SAMPLE_SCATTER]:
-            raise RuntimeError("The sample_scatter entry in row {0} seems to be missing.".format(row_number))
+            try:
+                key_enum = BatchFileKeywords(key)
+            except ValueError:
+                raise KeyError("The key {0} is not part of the SANS batch csv file keywords".format(key))
 
-        # Ensure that the transmission data for the sample is specified either completely or not at all.
-        has_sample_transmission = BatchReductionEntry.SAMPLE_TRANSMISSION in output and \
-                                  output[BatchReductionEntry.SAMPLE_TRANSMISSION]  # noqa
-        has_sample_direct_beam = BatchReductionEntry.SAMPLE_DIRECT in output and output[BatchReductionEntry.SAMPLE_DIRECT]
+            try:
+                _ = BatchFileKeywords(value)
+                raise KeyError("The value {0} is a keyword, you may have missed a comma after {1}".format(value, key))
+            except ValueError:
+                pass  # User did not accidentally use a key as a value
 
-        if (not has_sample_transmission and has_sample_direct_beam) or \
-                (has_sample_transmission and not has_sample_direct_beam):
-            raise RuntimeError("Inconsistent sample transmission settings in row {0}. Either both the transmission "
-                               "and the direct beam run are set or none.".format(row_number))
+            self._parse_row_entry(key_enum, value, row_entry=output)
 
-        # Ensure that the transmission data for the can is specified either completely or not at all.
-        has_can_transmission = BatchReductionEntry.CAN_TRANSMISSION in output and \
-                               output[BatchReductionEntry.CAN_TRANSMISSION]  # noqa
-        has_can_direct_beam = BatchReductionEntry.CAN_DIRECT in output and output[BatchReductionEntry.CAN_DIRECT]
+        self.validate_output(output, row_number)
 
-        if (not has_can_transmission and has_can_direct_beam) or \
-                (has_can_transmission and not has_can_direct_beam):
-            raise RuntimeError("Inconsistent can transmission settings in row {0}. Either both the transmission "
-                               "and the direct beam run are set or none.".format(row_number))
-
-        # Ensure that can scatter is specified if the transmissions are set
-        has_can_scatter = BatchReductionEntry.CAN_SCATTER in output and output[BatchReductionEntry.CAN_SCATTER]
-        if not has_can_scatter and has_can_transmission:
-            raise RuntimeError("The can transmission was set but not the scatter file in row {0}.".format(row_number))
         return output
 
-    @staticmethod
-    def _is_data_entry(entry):
-        data_entry_keys = list(BatchCsvParser.data_keys.keys())
-        for data_enum in data_entry_keys:
-            if entry is data_enum:
-                return True
-        return False
+    def _parse_row_entry(self, key_enum, value, row_entry):
+        value = value.strip()
+        if key_enum is BatchFileKeywords.CAN_DIRECT:
+            run_number, period = self._get_run_number_and_period(value)
+            row_entry.can_direct = run_number
+            row_entry.can_direct_period = period
+
+        elif key_enum is BatchFileKeywords.CAN_SCATTER:
+            run_number, period = self._get_run_number_and_period(value)
+            row_entry.can_scatter = run_number
+            row_entry.can_scatter_period = period
+
+        elif key_enum is BatchFileKeywords.CAN_TRANSMISSION:
+            run_number, period = self._get_run_number_and_period(value)
+            row_entry.can_transmission = run_number
+            row_entry.can_transmission_period = period
+
+        elif key_enum is BatchFileKeywords.SAMPLE_DIRECT:
+            run_number, period = self._get_run_number_and_period(value)
+            row_entry.sample_direct = run_number
+            row_entry.sample_direct_period = period
+
+        elif key_enum is BatchFileKeywords.SAMPLE_SCATTER:
+            run_number, period = self._get_run_number_and_period(value)
+            row_entry.sample_scatter = run_number
+            row_entry.sample_scatter_period = period
+
+        elif key_enum is BatchFileKeywords.SAMPLE_TRANSMISSION:
+            run_number, period = self._get_run_number_and_period(value)
+            row_entry.sample_transmission = run_number
+            row_entry.sample_transmission_period = period
+
+        elif key_enum is BatchFileKeywords.SAMPLE_HEIGHT:
+            row_entry.sample_height = value
+        elif key_enum is BatchFileKeywords.SAMPLE_THICKNESS:
+            row_entry.sample_thickness = value
+        elif key_enum is BatchFileKeywords.SAMPLE_WIDTH:
+            row_entry.sample_width = value
+
+        elif key_enum is BatchFileKeywords.OUTPUT:
+            row_entry.output_name = value
+        elif key_enum is BatchFileKeywords.USER_FILE:
+            row_entry.user_file = value
+
+        else:
+            raise RuntimeError("Batch Enum key {0} has not been handled".format(key_enum))
 
     @staticmethod
-    def _get_run_number_and_period(data_type, entry):
+    def _get_run_number_and_period(entry):
         """
         Gets the run number and the period from a csv data entry.
-
-        @patam data_type: the type of data entry, e.g. BatchReductionEntry.SampleScatter
         @param entry: a data entry, e.g. 5512 or 5512p7
         @return: the run number, the period selection and the corresponding key word
         """
-        data_period_type = BatchCsvParser.data_keys[data_type]
-
         # Slice off period if it exists. If it does not exist, then the period is ALL_PERIODS
         period_pattern = "[p,P][0-9]$"
 
@@ -165,4 +162,20 @@ class BatchCsvParser(object):
             period = re.sub("[p,P]", "", period_partial)
             period = int(period)
 
-        return run_number, period, data_period_type
+        return run_number, period
+
+    @staticmethod
+    def validate_output(output, row_number):
+        # Ensure that sample_scatter was set
+        if not output.sample_scatter:
+            raise ValueError("The sample_scatter entry in row {0} seems to be missing.".format(row_number))
+        if bool(output.sample_transmission) != bool(output.sample_direct):
+            raise ValueError("Inconsistent sample transmission settings in row {0}. Either both the transmission "
+                               "and the direct beam run are set or none.".format(row_number))
+        if bool(output.can_transmission) != bool(output.can_direct):
+            raise ValueError("Inconsistent can transmission settings in row {0}. Either both the transmission "
+                               "and the direct beam run are set or none.".format(row_number))
+
+        # Ensure that can scatter is specified if the transmissions are set
+        if bool(output.can_transmission) and not bool(output.can_scatter):
+            raise ValueError("The can transmission was set but not the scatter file in row {0}.".format(row_number))

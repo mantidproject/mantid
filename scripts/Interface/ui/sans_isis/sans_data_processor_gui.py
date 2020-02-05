@@ -627,7 +627,6 @@ class SANSDataProcessorGui(QMainWindow,
         """
         Load the batch file
         """
-
         UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Loaded Batch File"], False)
         load_file(self.batch_line_edit, "*.*", self.__generic_settings, self.__batch_file_key,
                   self.get_batch_file_path)

@@ -418,17 +418,17 @@ class RunTabPresenter(PresenterCommon):
         """
         Loads a batch file and populates the batch table based on that.
         """
+        # 1. Get the batch file from the view
+        batch_file_path = self._view.get_batch_file_path()
+
+        if not batch_file_path:
+            return
+
+        datasearch_dirs = ConfigService["datasearch.directories"]
+        batch_file_directory, datasearch_dirs = add_dir_to_datasearch(batch_file_path, datasearch_dirs)
+        ConfigService["datasearch.directories"] = datasearch_dirs
+
         try:
-            # 1. Get the batch file from the view
-            batch_file_path = self._view.get_batch_file_path()
-
-            if not batch_file_path:
-                return
-
-            datasearch_dirs = ConfigService["datasearch.directories"]
-            batch_file_directory, datasearch_dirs = add_dir_to_datasearch(batch_file_path, datasearch_dirs)
-            ConfigService["datasearch.directories"] = datasearch_dirs
-
             if not os.path.exists(batch_file_path):
                 raise RuntimeError(
                     "The batch file path {} does not exist. Make sure a valid batch file path"

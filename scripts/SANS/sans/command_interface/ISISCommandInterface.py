@@ -15,6 +15,7 @@ from six import types
 from mantid.kernel import config
 from mantid.api import (AnalysisDataService, WorkspaceGroup)
 from SANSadd2 import add_runs
+from sans.gui_logic.models.RowEntries import RowEntries
 from sans.sans_batch import SANSBatchReduction, SANSCentreFinder
 from sans.command_interface.command_interface_functions import (print_message, warning_message)
 from sans.command_interface.command_interface_state_director import (CommandInterfaceStateDirector, DataCommand,
@@ -877,46 +878,46 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs=None, verbose=Fals
 
     # Get a state with all existing settings
     for parsed_batch_entry in parsed_batch_entries:
+        assert isinstance(parsed_batch_entry, RowEntries)
         # A new user file. If a new user file is provided then this will overwrite all other settings from,
         # otherwise we might have cross-talk between user files.
-        user_file = parsed_batch_entry.get(BatchReductionEntry.USER_FILE)
-
-        if user_file:
-            MaskFile(user_file)
+        if parsed_batch_entry.user_file:
+            MaskFile(parsed_batch_entry.user_file)
 
         # Sample scatter
-        sample_scatter = parsed_batch_entry[BatchReductionEntry.SAMPLE_SCATTER]
-        sample_scatter_period = parsed_batch_entry[BatchReductionEntry.SAMPLE_SCATTER_PERIOD]
+        sample_scatter = parsed_batch_entry.sample_scatter
+        sample_scatter_period = parsed_batch_entry.sample_scatter_period
         AssignSample(sample_run=sample_scatter, period=sample_scatter_period)
 
         # Sample transmission
-        if (BatchReductionEntry.SAMPLE_TRANSMISSION in list(parsed_batch_entry.keys()) and
-                BatchReductionEntry.SAMPLE_DIRECT in list(parsed_batch_entry.keys())):
-            sample_transmission = parsed_batch_entry[BatchReductionEntry.SAMPLE_TRANSMISSION]
-            sample_transmission_period = parsed_batch_entry[BatchReductionEntry.SAMPLE_TRANSMISSION_PERIOD]
-            sample_direct = parsed_batch_entry[BatchReductionEntry.SAMPLE_DIRECT]
-            sample_direct_period = parsed_batch_entry[BatchReductionEntry.SAMPLE_DIRECT_PERIOD]
+        if parsed_batch_entry.sample_transmission and parsed_batch_entry.sample_direct:
+            sample_direct = parsed_batch_entry.sample_direct
+            sample_direct_period = parsed_batch_entry.sample_direct_period
+
+            sample_transmission = parsed_batch_entry.sample_transmission
+            sample_transmission_period = parsed_batch_entry.sample_transmission_period
+
             TransmissionSample(sample=sample_transmission, direct=sample_direct,
                                period_t=sample_transmission_period, period_d=sample_direct_period)
 
         # Can scatter
-        if BatchReductionEntry.CAN_SCATTER in list(parsed_batch_entry.keys()):
-            can_scatter = parsed_batch_entry[BatchReductionEntry.CAN_SCATTER]
-            can_scatter_period = parsed_batch_entry[BatchReductionEntry.CAN_SCATTER_PERIOD]
+        if parsed_batch_entry.can_scatter:
+            can_scatter = parsed_batch_entry.can_scatter
+            can_scatter_period = parsed_batch_entry.can_scatter_period
             AssignCan(can_run=can_scatter, period=can_scatter_period)
 
         # Can transmission
-        if (BatchReductionEntry.CAN_TRANSMISSION in list(parsed_batch_entry.keys()) and
-                BatchReductionEntry.CAN_DIRECT in list(parsed_batch_entry.keys())):
-            can_transmission = parsed_batch_entry[BatchReductionEntry.CAN_TRANSMISSION]
-            can_transmission_period = parsed_batch_entry[BatchReductionEntry.CAN_TRANSMISSION_PERIOD]
-            can_direct = parsed_batch_entry[BatchReductionEntry.CAN_DIRECT]
-            can_direct_period = parsed_batch_entry[BatchReductionEntry.CAN_DIRECT_PERIOD]
+        if parsed_batch_entry.can_transmission and parsed_batch_entry.can_direct:
+            can_transmission = parsed_batch_entry.can_transmission
+            can_transmission_period = parsed_batch_entry.can_transmission_period
+            can_direct = parsed_batch_entry.can_direct
+            can_direct_period = parsed_batch_entry.can_direct_period
+
             TransmissionCan(can=can_transmission, direct=can_direct,
                             period_t=can_transmission_period, period_d=can_direct_period)
 
         # Name of the output. We need to modify the name according to the setup of the old reduction mechanism
-        output_name = parsed_batch_entry[BatchReductionEntry.OUTPUT]
+        output_name = parsed_batch_entry.output_name
 
         # In addition to the output name the user can specify with combineDet an additional suffix (in addition to the
         # suffix that the user can set already -- was there previously, so we have to provide that)
@@ -937,19 +938,18 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs=None, verbose=Fals
         # 3. The last scatter transmission and direct entry (if any were set)
         # 4. The last can scatter ( if any was set)
         # 5. The last can transmission and direct entry (if any were set)
-        if BatchReductionEntry.USER_FILE in list(parsed_batch_entry.keys()):
+        if parsed_batch_entry.user_file:
             director.remove_last_user_file()
+
         director.remove_last_scatter_sample()
 
-        if (BatchReductionEntry.SAMPLE_TRANSMISSION in list(parsed_batch_entry.keys()) and
-            BatchReductionEntry.SAMPLE_DIRECT in list(parsed_batch_entry.keys())):  # noqa
+        if parsed_batch_entry.sample_transmission and parsed_batch_entry.sample_direct:
             director.remove_last_sample_transmission_and_direct()
 
-        if BatchReductionEntry.CAN_SCATTER in list(parsed_batch_entry.keys()):
+        if parsed_batch_entry.can_scatter:
             director.remove_last_scatter_can()
 
-        if (BatchReductionEntry.CAN_TRANSMISSION in list(parsed_batch_entry.keys()) and
-                BatchReductionEntry.CAN_DIRECT in list(parsed_batch_entry.keys())):
+        if parsed_batch_entry.can_transmission and parsed_batch_entry.can_direct:
             director.remove_last_can_transmission_and_direct()
 
         # Plot the results if that was requested, the flag 1 is from the old version.
