@@ -19,17 +19,20 @@ class SeqFittingTabPresenter(object):
         self.context = context
 
         self.fit_function = None
+        self.selected_row = -1
+        self.calculation_thread = None
+        self.fitting_calculation_model = None
 
         # Observers
         self.selected_workspaces_observer = GenericObserver(self.handle_selected_workspaces_changed)
-        self.fit_function_changed_observer = GenericObserver(self.handle_fit_function_changed)
-        self.fit_type_changed_observer = GenericObserver(self.handle_fit_type_changed)
+        self.fit_type_changed_observer = GenericObserver(self.handle_selected_workspaces_changed)
+        self.fit_function_updated_observer = GenericObserver(self.handle_fit_function_updated)
 
     def create_thread(self, callback):
         self.fitting_calculation_model = ThreadModelWrapperWithOutput(callback)
         return thread_model.ThreadModel(self.fitting_calculation_model)
 
-    def handle_fit_function_changed(self):
+    def handle_fit_function_updated(self):
         if self.model.fit_function is None:
             return
 
@@ -39,30 +42,26 @@ class SeqFittingTabPresenter(object):
                             range(number_of_parameters)]
         self.view.set_fit_table_function_parameters(parameters, parameter_values)
 
-    def handle_fit_type_changed(self):
-        self.handle_selected_workspaces_changed()
-
     def handle_selected_workspaces_changed(self):
         runs, groups_and_pairs = self.model.get_runs_groups_and_pairs_for_fits()
         self.view.set_fit_table_workspaces(runs, groups_and_pairs)
-        self.handle_fit_function_changed()
+        self.handle_fit_function_updated()
 
     def handle_single_fit_requested(self):
-        if self.model.fit_function is None:
+        if self.model.fit_function is None or self.view.get_selected_row() == -1:
             return
 
-        self.selected_row = self.view.selected_row
+        self.selected_row = self.view.get_selected_row()
         workspace_names = self.get_workspaces_for_entry_in_fit_table(self.selected_row)
-        self.do_a_single_fit(workspace_names)
 
-    def do_a_single_fit(self, workspaces):
         calculation_function = functools.partial(
-            self.model.evaluate_single_fit, workspaces, False)
+            self.model.evaluate_single_fit, workspace_names, False)
         self.calculation_thread = self.create_thread(
             calculation_function)
 
         self.calculation_thread.threadWrapperSetUp(on_thread_start_callback=self.handle_single_fit_started,
-                                                   on_thread_end_callback=self.handle_single_fit_finished)
+                                                   on_thread_end_callback=self.handle_single_fit_finished,
+                                                   on_thread_exception_callback=self.handle_single_fit_error)
 
         self.calculation_thread.start()
 
@@ -79,8 +78,8 @@ class SeqFittingTabPresenter(object):
         parameters = [fit_function.parameterName(i) for i in range(number_of_parameters)]
         parameter_values = [fit_function.getParameterValue(parameters[i]) for i in
                             range(number_of_parameters)]
-        self.view.update_fit_function_parameters(self.selected_row, parameter_values)
-        self.view.update_fit_quality(self.selected_row, fit_status, fit_chi_squared)
+        self.view.set_fit_function_parameters(self.selected_row, parameter_values)
+        self.view.set_fit_quality(self.selected_row, fit_status, fit_chi_squared)
         self.view.fit_selected_button.setEnabled(True)
 
     def handle_sequential_fit_requested(self):
@@ -88,14 +87,11 @@ class SeqFittingTabPresenter(object):
             return
 
         workspace_names = []
-        for i in range(self.view.number_of_entries()):
+        for i in range(self.view.get_number_of_entries()):
             workspace_names += [self.get_workspaces_for_entry_in_fit_table(i)]
 
-        self.do_seq_fit(workspace_names)
-
-    def do_seq_fit(self, workspaces):
         calculation_function = functools.partial(
-            self.model.evaluate_sequential_fit, workspaces, False)
+            self.model.evaluate_sequential_fit, workspace_names, False)
         self.calculation_thread = self.create_thread(
             calculation_function)
 
@@ -119,8 +115,8 @@ class SeqFittingTabPresenter(object):
             parameters = [fit_function.parameterName(i) for i in range(number_of_parameters)]
             parameter_values = [fit_function.getParameterValue(parameters[i]) for i in
                                 range(number_of_parameters)]
-            self.view.update_fit_function_parameters(count, parameter_values)
-            self.view.update_fit_quality(count, fit_status, fit_chi_squared)
+            self.view.set_fit_function_parameters(count, parameter_values)
+            self.view.set_fit_quality(count, fit_status, fit_chi_squared)
             count += 1
         self.view.seq_fit_button.setEnabled(True)
 

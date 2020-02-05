@@ -55,15 +55,6 @@ class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
         self.fit_results_table.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectItems)
         self.fit_results_table.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
 
-    def setup_fit_results_table_parameters(self, parameter_names):
-        fit_table_columns = list(default_columns.keys()) + parameter_names
-        self.fit_results_table.blockSignals(True)
-        self.fit_results_table.clear()
-        self.fit_results_table.setColumnCount(len(fit_table_columns))
-        self.fit_results_table.setHorizontalHeaderLabels(fit_table_columns)
-        self.fit_results_table.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
-        self.fit_results_table.blockSignals(False)
-
     def set_fit_table_workspaces(self, runs, group_and_pairs):
         self.fit_results_table.clearContents()
         self.fit_results_table.setRowCount(0)
@@ -94,17 +85,17 @@ class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
         self.fit_results_table.blockSignals(False)
 
     def initialise_fit_function_parameters(self, parameter_values):
-        for i in range(self.number_of_entries()):
+        for i in range(self.get_number_of_entries()):
             for j, parameter in enumerate(parameter_values):
                 parameterItem = QtWidgets.QTableWidgetItem(str(parameter))
                 self.fit_results_table.setItem(i, len(default_columns) + j, parameterItem)
 
-    def update_fit_function_parameters(self, row, parameter_values):
+    def set_fit_function_parameters(self, row, parameter_values):
         for j, parameter in enumerate(parameter_values):
             parameter_item = self.fit_results_table.item(row, len(default_columns) + j)
             parameter_item.setText("{0:.5f}".format(parameter))
 
-    def update_fit_quality(self, row, fit_status, fit_quality):
+    def set_fit_quality(self, row, fit_status, fit_quality):
         fit_quality_item = self.fit_results_table.item(row, default_columns["Fit quality"])
         fit_quality_item.setText("{0:.3f}".format(fit_quality))
         if fit_status == 'success':
@@ -114,29 +105,19 @@ class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
         else:
             fit_quality_item.setForeground(QtGui.QBrush(QtCore.Qt.red))
 
-    def get_workspace_entries(self):
-        workspace_entries = []
-        for row_index in range(self.fit_results_table.rowCount()):
-            workspace_entries += [self.fit_results_table.item(row_index, 0).text()]
-
-        return workspace_entries
-
     def get_workspace_info_from_fit_table_row(self, row_index):
         if row_index > self.fit_results_table.rowCount():
             return [], []
 
-        run_numbers = self.fit_results_table.item(row_index, 0).text()
-        group_and_pairs = self.fit_results_table.item(row_index, 1).text()
+        run_numbers = self.fit_results_table.item(row_index, default_columns["Run"]).text()
+        group_and_pairs = self.fit_results_table.item(row_index, default_columns["Groups/Pairs"]).text()
         return run_numbers, group_and_pairs
 
-    def get_fit_x_range(self, row_index):
-        xmin = float(self.fit_results_table.item(row_index, 2).text())
-        xmax = float(self.fit_results_table.item(row_index, 3).text())
-
-        return [xmin, xmax]
-
-    def number_of_entries(self):
+    def get_number_of_entries(self):
         return self.fit_results_table.rowCount()
+
+    def get_selected_row(self):
+        return self.fit_results_table.selectionModel().currentIndex().row()
 
     def setup_slot_for_fit_selected_button(self, slot):
         self.fit_selected_button.clicked.connect(slot)
@@ -144,6 +125,4 @@ class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
     def setup_slot_for_sequential_fit_button(self, slot):
         self.seq_fit_button.clicked.connect(slot)
 
-    @property
-    def selected_row(self):
-        return self.fit_results_table.selectionModel().currentIndex().row()
+

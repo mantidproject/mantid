@@ -44,8 +44,6 @@ class FittingTabModel(object):
         output_workspace, fitting_parameters_table, function_object, output_status, output_chi_squared, covariance_matrix = \
             self.do_single_fit_and_return_workspace_parameters_and_fit_function(parameter_dict)
 
-        print(parameter_dict)
-
         self._handle_single_fit_results(parameter_dict['InputWorkspace'], function_object, fitting_parameters_table,
                                         output_workspace, covariance_matrix, add_fit_to_context)
 
@@ -200,11 +198,8 @@ class FittingTabModel(object):
         output_chi_squared_list = []
         function_object = parameter_dict['Function']
 
-        print(function_object)
-
         for input_workspaces in parameter_dict['InputWorkspace']:
             sub_parameter_dict = parameter_dict.copy()
-            print("Input workspaces are", input_workspaces)
             sub_parameter_dict['InputWorkspace'] = input_workspaces
             sub_parameter_dict['Function'] = function_object
             sub_parameter_dict['StartX'] = [0.11]*len(input_workspaces)

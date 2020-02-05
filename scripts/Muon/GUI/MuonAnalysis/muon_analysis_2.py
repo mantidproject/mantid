@@ -194,7 +194,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
             self.fitting_tab.fitting_tab_presenter.gui_context_observer)
 
         self.fitting_tab.fitting_tab_presenter.fit_function_changed_notifier.add_subscriber(
-            self.seq_fitting_tab.seq_fitting_tab_presenter.fit_function_changed_observer)
+            self.seq_fitting_tab.seq_fitting_tab_presenter.fit_function_updated_observer)
 
         self.fitting_tab.fitting_tab_presenter.fit_type_changed_notifier.add_subscriber(
             self.seq_fitting_tab.seq_fitting_tab_presenter.fit_type_changed_observer)
