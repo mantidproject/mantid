@@ -11,8 +11,9 @@ from __future__ import (absolute_import, division, unicode_literals)
 import unittest
 
 # 3rdparty imports
-from mantid.api import MatrixWorkspace
+from mantid.api import IPeak, MatrixWorkspace
 from mantid.dataobjects import PeaksWorkspace
+from mantid.kernel import V3D
 from mantid.py3compat.mock import create_autospec, patch, ANY, MagicMock
 from mantidqt.widgets.sliceviewer.peaksviewer.presenter \
     import PeaksViewerPresenter, TableWorkspaceDataPresenter

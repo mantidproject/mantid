@@ -108,15 +108,21 @@ class SliceViewer(object):
     def overlay_peaks_workspace(self):
         """
         Request activation of peak overlay tools.
-        Asks user to select peaks workspace(s)
-        Displays peaks on data display
-        Attaches peaks table viewer/tools
+          - Asks user to select peaks workspace(s)
+          - Attaches peaks table viewer/tools
+          - Displays peaks on data display
         """
         peaks_workspaces = [
             self.model.get_peaksworkspace(name)
             for name in self.view.query_peaks_to_overlay()
         ]
         self._create_peaks_tool_presenter(peaks_workspaces)
+        peak_info = self._peaks_tool_presenter.peaks_info()
+        view = self.view
+        for peak in peak_info:
+            center = peak.center
+            view.draw_peak(center.X(), center.Y(),
+                           peak.alpha, peak.color)
 
     # private api
     def _create_peaks_tool_presenter(self, workspaces):

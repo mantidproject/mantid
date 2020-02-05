@@ -15,6 +15,7 @@ from mantidqt.widgets.workspacedisplay.table.model \
     import TableWorkspaceDisplayModel
 from mantidqt.widgets.workspacedisplay.table.presenter \
     import TableWorkspaceDataPresenter
+from .peakrepresentation import create_peakrepresentation
 
 
 class PeaksViewerPresenter(object):
@@ -47,6 +48,18 @@ class PeaksViewerPresenter(object):
         """
         if event == PeaksViewerPresenter.Event.PeaksListChanged:
             self._peaks_table_presenter.refresh()
+
+    def peaks_info(self):
+        """
+        Returns a list of PeakRepresentation objects describing the peaks in the model
+        """
+        info = []
+        for peak in self._peaks_table_presenter.model.ws:
+            info.append(create_peakrepresentation(peak))
+
+        return info
+        # return map(create_peakrepresentation,
+        #            self._peaks_table_presenter.model.ws)
 
     # private api
     @staticmethod
@@ -83,3 +96,13 @@ class PeaksViewerCollectionPresenter(object):
         """
         self._child_presenters.append(PeaksViewerPresenter(peaks_ws,
                                                            self._view.append_peaksviewer()))
+
+    def peaks_info(self):
+        """
+        Returns the position of all of the peaks along with an alpha value
+        """
+        peaks_info = []
+        for child in self._child_presenters:
+            peaks_info.extend(child.peaks_info())
+
+        return peaks_info

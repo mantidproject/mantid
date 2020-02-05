@@ -27,6 +27,10 @@ from qtpy.QtWidgets import QComboBox, QGridLayout, QLabel, QHBoxLayout, QVBoxLay
 
 
 class SliceViewerView(QWidget):
+    PEAK_CENTER_MARKER = 'x'
+    # size in points^2.
+    PEAK_CENTER_MARKER_SIZE_PTS_SQ = 150
+
     def __init__(self, presenter, dims_info, can_normalise, parent=None):
         super(SliceViewerView, self).__init__(parent)
 
@@ -236,9 +240,20 @@ class SliceViewerView(QWidget):
             return self.peaks_tools
 
         self.peaks_tools = PeaksViewerCollectionView()
-        self.layout.addWidget(self.peaks_tools, 0, 1, -1, 1)
+        from_row, from_col, row_span, col_span = 0, 1, -1, 1
+        self.layout.addWidget(self.peaks_tools, from_row, from_col,
+                              row_span, col_span)
         return self.peaks_tools
 
+    def draw_peak(self, x, y, alpha, color):
+        """
+        :param peak_info: A list of PeakRepresentation objects
+        """
+        self.ax.scatter(x, y, alpha=alpha, color=color,
+                        marker=self.PEAK_CENTER_MARKER,
+                        s=self.PEAK_CENTER_MARKER_SIZE_PTS_SQ)
+
+    # event handlers
     def closeEvent(self, event):
         self.deleteLater()
         super(SliceViewerView, self).closeEvent(event)
