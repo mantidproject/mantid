@@ -29,8 +29,10 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
+
 BatchPresenter *Decoder::findBatchPresenter(const QtBatchView *gui,
-                                            const QtMainWindowView *mwv) {
+                                            const IMainWindowView *view) {
+  auto mwv = dynamic_cast<const QtMainWindowView *>(view);
   for (auto &ipresenter : mwv->m_presenter->m_batchPresenters) {
     auto presenter = dynamic_cast<BatchPresenter *>(ipresenter.get());
     if (presenter->m_view == gui) {
@@ -53,9 +55,8 @@ QWidget *Decoder::decode(const QMap<QString, QVariant> &map,
        ++batchIndex) {
     mwv->newBatch();
   }
-  for (auto ii = 0; ii < batches.size(); ++ii) {
-    decodeBatch(dynamic_cast<QtBatchView *>(mwv->m_batchViews[ii]), mwv,
-                batches[ii].toMap());
+  for (auto batchIndex = 0; batchIndex < batches.size(); ++batchIndex) {
+    decodeBatch(mwv, batchIndex, batches[batchIndex].toMap());
   }
   return mwv;
 }
@@ -64,13 +65,10 @@ QList<QString> Decoder::tags() {
   return QList<QString>({QString("ISIS Reflectometry")});
 }
 
-void Decoder::decodeBatch(const QtBatchView *gui, const QtMainWindowView *mwv,
-                          const QMap<QString, QVariant> &map,
-                          const BatchPresenter *presenter) {
-  auto batchPresenter = presenter;
-  if (!batchPresenter) {
-    batchPresenter = findBatchPresenter(gui, mwv);
-  }
+void Decoder::decodeBatch(const IMainWindowView *mwv, int batchIndex,
+                          const QMap<QString, QVariant> &map) {
+  auto gui = dynamic_cast<const QtBatchView *>(mwv->batches()[batchIndex]);
+  auto batchPresenter = findBatchPresenter(gui, mwv);
   if (!batchPresenter) {
     throw std::runtime_error(
         "BatchPresenter could not be found during decode.");
@@ -88,14 +86,6 @@ void Decoder::decodeBatch(const QtBatchView *gui, const QtMainWindowView *mwv,
   decodeSave(gui->m_save.get(), map[QString("saveView")].toMap());
   decodeRuns(gui->m_runs.get(), reductionJobs, runsTablePresenter,
              map[QString("runsView")].toMap());
-}
-
-void Decoder::decodeBatch(const IBatchPresenter *presenter,
-                          const IMainWindowView *mwv,
-                          const QMap<QString, QVariant> &map) {
-  auto batchPresenter = dynamic_cast<const BatchPresenter *>(presenter);
-  decodeBatch(dynamic_cast<QtBatchView *>(batchPresenter->m_view),
-              dynamic_cast<const QtMainWindowView *>(mwv), map, batchPresenter);
 }
 
 void Decoder::decodeExperiment(const QtExperimentView *gui,

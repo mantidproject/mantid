@@ -32,7 +32,7 @@ class ILLIndirectEnergyTransferBATSTest(systemtesting.MantidSystemTest):
         # parameters file evolves quite often, so this is not checked
         self.disableChecking = ['Instrument']
 
-    def tearDown(self):
+    def cleanup(self):
         config['default.facility'] = self.facility
         config['default.instrument'] = self.instrument
         config['datasearch.directories'] = self.datadirs

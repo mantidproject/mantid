@@ -73,6 +73,7 @@ add_definitions(-D_SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING)
 find_package(Poco 1.4.6 REQUIRED)
 add_definitions(-DPOCO_ENABLE_CPP11)
 
+find_package(GSL REQUIRED)
 find_package(Nexus 4.3.1 REQUIRED)
 find_package(MuParser REQUIRED)
 find_package(JsonCPP 0.7.0 REQUIRED)
@@ -89,12 +90,13 @@ find_package(Doxygen) # optional
 
 if(CMAKE_HOST_WIN32)
   find_package(ZLIB REQUIRED CONFIGS zlib-config.cmake)
-  set(HDF5_DIR "${THIRD_PARTY_DIR}/cmake")
+  set(HDF5_DIR "${THIRD_PARTY_DIR}/cmake/hdf5")
   find_package(
     HDF5
     COMPONENTS CXX HL
     REQUIRED CONFIGS hdf5-config.cmake
   )
+  set (HDF5_LIBRARIES hdf5::hdf5_cpp-shared hdf5::hdf5_hl-shared)
 else()
   find_package(ZLIB REQUIRED)
   find_package(
@@ -103,9 +105,6 @@ else()
     REQUIRED
   )
 endif()
-
-find_package(PythonInterp)
-set(Python_ADDITIONAL_VERSIONS ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
 
 find_package(OpenSSL REQUIRED)
 

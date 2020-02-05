@@ -73,7 +73,7 @@ class PairingTablePresenterTest(unittest.TestCase):
 
     def test_that_table_has_five_columns_when_initialized(self):
         # these are : pair name, group 1, group 2, alpha, guess alpha
-        self.assertEqual(self.view.num_cols(), 5)
+        self.assertEqual(self.view.num_cols(), 6)
 
     def test_that_model_is_initialized_as_empty(self):
         self.assert_model_empty()

@@ -66,7 +66,7 @@ def parse_arguments(argv):
     known_args, _ = parser.parse_known_args(argv)
     sip_cmd_line = argv[1:]
     if sys.platform == 'win32':
-        sip_cmd_line = map(lambda s: s.replace('\\', '\\\\'), sip_cmd_line)
+        sip_cmd_line = list(map(lambda s: s.replace('\\', '\\\\'), sip_cmd_line))
         # the executable may need .exe appending to be run with the cmd
         # processor
         sip_exe = sip_cmd_line[0] + '.exe'

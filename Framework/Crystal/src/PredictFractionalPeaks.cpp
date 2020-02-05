@@ -166,7 +166,8 @@ boost::shared_ptr<Mantid::API::IPeaksWorkspace> createOutputWorkspace(
   auto outPeaks = WorkspaceFactory::Instance().createPeaks();
   outPeaks->setInstrument(inputPeaks.getInstrument());
   if (modulationProps.saveOnLattice) {
-    auto lattice = std::make_unique<Mantid::Geometry::OrientedLattice>();
+    auto lattice = std::make_unique<Mantid::Geometry::OrientedLattice>(
+        inputPeaks.sample().getOrientedLattice());
     lattice->setMaxOrder(modulationProps.maxOrder);
     lattice->setCrossTerm(modulationProps.crossTerms);
     const auto &offsets = modulationProps.offsets;
@@ -228,6 +229,7 @@ IPeaksWorkspace_sptr predictFractionalPeaks(
   using PeakHash = std::array<int, 4>;
   std::vector<PeakHash> alreadyDonePeaks;
 
+  const auto qConvention{Mantid::Crystal::qConventionFactor()};
   V3D currentHKL;
   DblMatrix gonioMatrix;
   int runNumber{0};
@@ -235,8 +237,12 @@ IPeaksWorkspace_sptr predictFractionalPeaks(
   auto progressReporter = searchStrategy.createProgressReporter(alg);
   while (true) {
     for (const auto &mnpOffset : offsets) {
-      const V3D candidateHKL{currentHKL + std::get<3>(mnpOffset)};
-      const V3D qLab = (gonioMatrix * UB * candidateHKL) * 2 * M_PI;
+      const V3D currentIntHKL{std::round(currentHKL[0]),
+                              std::round(currentHKL[1]),
+                              std::round(currentHKL[2])};
+      const V3D candidateHKL{currentIntHKL + std::get<3>(mnpOffset)};
+      const V3D qLab =
+          (gonioMatrix * UB * candidateHKL) * 2 * M_PI * qConvention;
       if (qLab[2] <= 0)
         continue;
 
@@ -266,7 +272,8 @@ IPeaksWorkspace_sptr predictFractionalPeaks(
       else
         continue;
 
-      peak->setHKL(candidateHKL);
+      peak->setHKL(candidateHKL * qConvention);
+      peak->setIntHKL(currentIntHKL * qConvention);
       const double m{std::get<0>(mnpOffset)}, n{std::get<1>(mnpOffset)},
           p{std::get<2>(mnpOffset)};
       if (fabs(m) > 0. || fabs(n) > 0. || fabs(p) > 0.)

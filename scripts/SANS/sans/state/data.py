@@ -11,62 +11,51 @@ from __future__ import (absolute_import, division, print_function)
 import json
 import copy
 
-from sans.state.state_base import (StateBase, StringParameter, PositiveIntegerParameter, BoolParameter,
-                                   rename_descriptor_names)
+from six import with_metaclass
+
+from sans.state.JsonSerializable import JsonSerializable
 from sans.common.enums import SANSFacility, SANSInstrument
 import sans.common.constants
-from sans.state.state_functions import (is_pure_none_or_not_none, validation_message)
 from sans.state.automatic_setters import automatic_setters
+from sans.state.state_functions import (is_pure_none_or_not_none, validation_message)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
 # State
 # ----------------------------------------------------------------------------------------------------------------------
-@rename_descriptor_names
-class StateData(StateBase):
+
+class StateData(with_metaclass(JsonSerializable)):
     ALL_PERIODS = sans.common.constants.ALL_PERIODS
-    sample_scatter = StringParameter()
-    sample_scatter_period = PositiveIntegerParameter()
-    sample_transmission = StringParameter()
-    sample_transmission_period = PositiveIntegerParameter()
-    sample_direct = StringParameter()
-    sample_direct_period = PositiveIntegerParameter()
-
-    can_scatter = StringParameter()
-    can_scatter_period = PositiveIntegerParameter()
-    can_transmission = StringParameter()
-    can_transmission_period = PositiveIntegerParameter()
-    can_direct = StringParameter()
-    can_direct_period = PositiveIntegerParameter()
-
-    calibration = StringParameter()
-
-    sample_scatter_run_number = PositiveIntegerParameter()
-    sample_scatter_is_multi_period = BoolParameter()
-    idf_file_path = StringParameter()
-    ipf_file_path = StringParameter()
-    user_file = StringParameter()
-
-    instrument = SANSInstrument.NO_INSTRUMENT
-    facility = SANSFacility.NO_FACILITY
 
     def __init__(self):
         super(StateData, self).__init__()
 
-        # Setup default values for periods
-        self.sample_scatter_period = StateData.ALL_PERIODS
-        self.sample_transmission_period = StateData.ALL_PERIODS
-        self.sample_direct_period = StateData.ALL_PERIODS
+        self.sample_scatter = None  # : Str()
+        self.sample_scatter_period =  StateData.ALL_PERIODS  # : Int (Positive)
+        self.sample_transmission = None  # : Str()
+        self.sample_transmission_period = StateData.ALL_PERIODS  # : Int (Positive)
+        self.sample_direct = None  # : Str()
+        self.sample_direct_period = StateData.ALL_PERIODS  # : Int (Positive)
 
-        self.can_scatter_period = StateData.ALL_PERIODS
-        self.can_transmission_period = StateData.ALL_PERIODS
-        self.can_direct_period = StateData.ALL_PERIODS
+        self.can_scatter = None  # : Str()
+        self.can_scatter_period = StateData.ALL_PERIODS  # : Int (Positive)
+        self.can_transmission = None  # : Str()
+        self.can_transmission_period = StateData.ALL_PERIODS  # : Int (Positive)
+        self.can_direct = None  # : Str()
+        self.can_direct_period = StateData.ALL_PERIODS  # : Int (Positive)
+
+        self.calibration = None  # : Str()
+
+        self.sample_scatter_run_number = None  # : Int (Positive)
+        self.sample_scatter_is_multi_period = None  # : Bool
+        self.idf_file_path = None  # : Str()
+        self.ipf_file_path = None  # : Str()
+        self.user_file = ""  # : Str()
 
         # This should be reset by the builder. Setting this to NoInstrument ensure that we will trip early on,
         # in case this is not set, for example by not using the builders.
         self.instrument = SANSInstrument.NO_INSTRUMENT
         self.facility = SANSFacility.NO_FACILITY
-        self.user_file = ""
 
     def validate(self):
         is_invalid = dict()

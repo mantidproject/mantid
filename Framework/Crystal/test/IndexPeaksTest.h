@@ -9,7 +9,6 @@
 
 #include "MantidAPI/Sample.h"
 #include "MantidCrystal/IndexPeaks.h"
-#include "MantidCrystal/IndexPeaksWithSatellites.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -449,9 +448,9 @@ public:
     TS_ASSERT_DELTA(V3D(0.333, 0.667, -0.333).norm(),
                     lattice.getModVec(0).norm(), 1e-8)
     TS_ASSERT_DELTA(V3D(-0.333, 0.667, 0.333).norm(),
-                    lattice.getModVec(0).norm(), 1e-8)
+                    lattice.getModVec(1).norm(), 1e-8)
     TS_ASSERT_DELTA(V3D(0.333, -0.667, 0.333).norm(),
-                    lattice.getModVec(0).norm(), 1e-8)
+                    lattice.getModVec(2).norm(), 1e-8)
     TS_ASSERT_EQUALS(true, lattice.getCrossTerm())
   }
 

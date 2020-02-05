@@ -11,68 +11,31 @@ from __future__ import (absolute_import, division, print_function)
 
 import copy
 import json
-from abc import (ABCMeta, abstractmethod)
 
 from six import (with_metaclass)
 
 from sans.common.enums import (ReductionMode, ReductionDimensionality, FitModeForMerge,
                                SANSFacility, DetectorType)
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
-from sans.state.automatic_setters import (automatic_setters)
-from sans.state.state_base import (StateBase, FloatParameter, DictParameter,
-                                   FloatWithNoneParameter, rename_descriptor_names, BoolParameter)
+from sans.state.JsonSerializable import JsonSerializable
+from sans.state.automatic_setters import automatic_setters
 
 
-# ----------------------------------------------------------------------------------------------------------------------
-# State
-# ----------------------------------------------------------------------------------------------------------------------
-class StateReductionBase(with_metaclass(ABCMeta, object)):
-    @abstractmethod
-    def get_merge_strategy(self):
-        pass
-
-    @abstractmethod
-    def get_detector_name_for_reduction_mode(self, reduction_mode):
-        pass
-
-    @abstractmethod
-    def get_all_reduction_modes(self):
-        pass
-
-
-@rename_descriptor_names
-class StateReductionMode(StateReductionBase, StateBase):
-    reduction_mode = ReductionMode.NOT_SET
-
-    reduction_dimensionality = ReductionDimensionality.ONE_DIM
-    merge_max = FloatWithNoneParameter()
-    merge_min = FloatWithNoneParameter()
-    merge_mask = BoolParameter()
-
-    # Fitting
-    merge_fit_mode = FitModeForMerge.NO_FIT
-    merge_shift = FloatParameter()
-    merge_scale = FloatParameter()
-    merge_range_min = FloatWithNoneParameter()
-    merge_range_max = FloatWithNoneParameter()
-
-    # Map from detector type to detector name
-    detector_names = DictParameter()
-
+class StateReductionMode(with_metaclass(JsonSerializable)):
     def __init__(self):
         super(StateReductionMode, self).__init__()
         self.reduction_mode = ReductionMode.LAB
         self.reduction_dimensionality = ReductionDimensionality.ONE_DIM
 
         # Set the shifts to defaults which essentially don't do anything.
-        self.merge_shift = 0.0
-        self.merge_scale = 1.0
+        self.merge_shift = 0.0  # : Float
+        self.merge_scale = 1.0  # : Float
         self.merge_fit_mode = FitModeForMerge.NO_FIT
-        self.merge_range_min = None
-        self.merge_range_max = None
-        self.merge_max = None
-        self.merge_min = None
-        self.merge_mask = False
+        self.merge_range_min = None  # : Float
+        self.merge_range_max = None  # : Float
+        self.merge_max = None  # : Float
+        self.merge_min = None  # : Float
+        self.merge_mask = False  # : Bool
 
         # Set the detector names to empty strings
         self.detector_names = {DetectorType.LAB.value: "",

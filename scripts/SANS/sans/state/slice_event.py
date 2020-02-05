@@ -9,22 +9,25 @@
 from __future__ import (absolute_import, division, print_function)
 import json
 import copy
-from sans.state.state_base import (StateBase, rename_descriptor_names, FloatListParameter)
+
+from six import with_metaclass
+
+from sans.state.JsonSerializable import JsonSerializable
+from sans.state.automatic_setters import automatic_setters
 from sans.state.state_functions import (is_pure_none_or_not_none, validation_message)
 from sans.common.enums import SANSFacility
-from sans.state.automatic_setters import (automatic_setters)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
 # State
 # ----------------------------------------------------------------------------------------------------------------------
-@rename_descriptor_names
-class StateSliceEvent(StateBase):
-    start_time = FloatListParameter()
-    end_time = FloatListParameter()
 
+class StateSliceEvent(with_metaclass(JsonSerializable)):
     def __init__(self):
         super(StateSliceEvent, self).__init__()
+
+        self.start_time = None  # : List[Float]
+        self.end_time = None  # : List[Float]
 
     def validate(self):
         is_invalid = dict()

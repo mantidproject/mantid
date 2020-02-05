@@ -86,7 +86,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
         d2 = inWS.getDimension(2)
         number_of_runs = d2.getNBins()
 
-        if (d0.name is not 'y' or d1.name is not 'x' or d2.name != 'scanIndex'):
+        if (d0.name != 'y' or d1.name != 'x' or d2.name != 'scanIndex'):
             issues["InputWorkspace"] = "InputWorkspace has wrong dimensions"
             return issues
 

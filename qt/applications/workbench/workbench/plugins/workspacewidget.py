@@ -9,13 +9,13 @@
 #
 from __future__ import (absolute_import, unicode_literals)
 
-import matplotlib.pyplot
 from functools import partial
 from qtpy.QtWidgets import QApplication, QMessageBox, QVBoxLayout
 
 from mantid.api import AnalysisDataService, WorkspaceGroup
 from mantid.kernel import logger
 from mantidqt.plotting.functions import can_overplot, pcolormesh, plot, plot_from_names
+from mantid.plots.utility import MantidAxType
 from mantid.simpleapi import CreateDetectorTable
 from mantidqt.utils.asynchronous import BlockingAsyncTaskWithCallback
 from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
@@ -45,6 +45,8 @@ class WorkspaceWidget(PluginWidget):
         # behaviour
         self.workspacewidget.plotSpectrumClicked.connect(partial(self._do_plot_spectrum,
                                                                  errors=False, overplot=False))
+        self.workspacewidget.plotBinClicked.connect(partial(self._do_plot_bin,
+                                                            errors=False, overplot=False))
         self.workspacewidget.overplotSpectrumClicked.connect(partial(self._do_plot_spectrum,
                                                                      errors=False, overplot=True))
         self.workspacewidget.plotSpectrumWithErrorsClicked.connect(partial(self._do_plot_spectrum,
@@ -93,6 +95,24 @@ class WorkspaceWidget(PluginWidget):
                 return
 
         plot_from_names(names, errors, overplot)
+
+    def _do_plot_bin(self, names, errors, overplot):
+        """
+        Plot a single bin from the selected workspaces
+
+        :param names: A list of workspace names
+        :param errors: If true then error bars will be plotted on the points
+        :param overplot: If true then the add to the current figure if one
+                         exists and it is a compatible figure
+        """
+        if overplot:
+            compatible, error_msg = can_overplot()
+            if not compatible:
+                QMessageBox.warning(self, "", error_msg)
+                return
+        plot_kwargs = {"axis": MantidAxType.BIN}
+        plot(self._ads.retrieveWorkspaces(names, unrollGroups=True), errors=errors,
+             overplot=overplot,wksp_indices=[0], plot_kwargs=plot_kwargs)
 
     def _do_plot_colorfill(self, names):
         """
@@ -156,6 +176,8 @@ class WorkspaceWidget(PluginWidget):
                                "".format(ws.name()))
 
     def _do_show_data(self, names):
+        # local import to allow this module to be imported without pyplot being imported
+        import matplotlib.pyplot
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
             try:
                 MatrixWorkspaceDisplay.supports(ws)
@@ -194,21 +216,27 @@ class WorkspaceWidget(PluginWidget):
             except RuntimeError:
                 continue
             else:
-                successful_workspaces.append(ws.getName())
+                successful_workspaces.append(ws.name())
 
-        self._do_show_data(map(lambda x: x + "-Detectors", successful_workspaces))
+        self._do_show_data(list(map(lambda x: x + "-Detectors", successful_workspaces)))
 
     def _run_create_detector_table(self, ws):
         CreateDetectorTable(InputWorkspace=ws)
 
     def _action_double_click_workspace(self, name):
+        ws = self._ads.retrieve(name)
         try:
             # if this is a table workspace (or peaks workspace),
             # then it can't be plotted automatically, so the data is shown instead
-            TableWorkspaceDisplay.supports(self._ads.retrieve(name))
+            TableWorkspaceDisplay.supports(ws)
             self._do_show_data([name])
         except ValueError:
-            plot_from_names([name], errors=False, overplot=False, show_colorfill_btn=True)
+            if ws.blocksize() == 1:
+                #this is just single bin data, it makes more sense to plot the bin
+                plot_kwargs = {"axis": MantidAxType.BIN}
+                plot([ws],errors=False, overplot=False, wksp_indices=[0], plot_kwargs=plot_kwargs)
+            else:
+                plot_from_names([name], errors=False, overplot=False, show_colorfill_btn=True)
 
     def refresh_workspaces(self):
         self.workspacewidget.refreshWorkspaces()

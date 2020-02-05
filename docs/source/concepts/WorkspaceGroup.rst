@@ -200,44 +200,38 @@ You can pass workspace groups into any algorithm and Mantid will run that algori
     # You can still of course refer to members of a group directly
     ws1 = Rebin(ws1, Params=100)
 
-Using Nested Workspace Groups
-#############################
 
-It is possible to have groups within groups, the inner group can simply be added to the outer group in the usual way. For example
 
-.. code::
+Final words of warning:
+#######################
 
-    # create the following structure
-    # group1/
-    #       ws1
-    #       ws2
-    #       group2/
-    #               ws3
-    #               ws4
+- It is best to add all workspaces to the ADS before configuring the grouping structure (as in the above code); otherwise you will only be able to name the top level group when you add the structure to the ADS. All the sub-groups and workspaces not already in the ADS will be given default names which you will then have to change manually, it is much easier to name them as you go (and putting them in the ADS is the only way to name them).
+
+- When iterating over a WorkspaceGroup to delete its workspaces, then iterate over a list, such as:
+
+.. testcode:: Iterative Deletion of Grouped Workspaces
 
     ws1 = CreateSampleWorkspace()
     ws2 = CreateSampleWorkspace()
-    ws3 = CreateSampleWorkspace()
-    ws4 = CreateSampleWorkspace()
+    wsGroup = GroupWorkspaces("ws1,ws2")
 
-    group1 = WorkspaceGroup()
-    group2 = WorkspaceGroup()
+    for ws in list(wsGroup):
+        DeleteWorkspace(ws)
 
-    mtd.add("group1", group1)
-    mtd.add("group2", group2)
+otherwise indexing will be confused by each deletion.
 
-    group1.add("ws1")
-    group1.add("ws2")
-    group2.add("ws3")
-    group2.add("ws4")
+- To Delete an entire group, just run:
 
-    group1.add("group2")
+.. testcode:: Delete Entire Workspace
 
-Be careful when creating nested groups; every single group and workspace must have a unique name, if not workspaces with the same name will be overwritten. Do not try to group workspaces which are already in a group using `groupWorkspace` as this will create duplicate named workspaces in two groups; this will result in data being deleted without warning. Similarly don't try to create duplicate named workspaces and put them into different folders.
-
-One final note; it is best to add all workspaces to the ADS before configuring the grouping structure (as in the above code); otherwise you will only be able to name the top level group when you add the structure to the ADS. All the sub-groups and workspaces not already in the ADS will be given default names which you will then have to change manually, it is much easier to name them as you go (and putting them in the ADS is the only way to name them).
+    ws1 = CreateSampleWorkspace()
+    ws2 = CreateSampleWorkspace()
+    wsGroup = GroupWorkspaces("ws1,ws2")
+    
+    DeleteWorkspace(wsGroup)
 
 .. include:: WorkspaceNavigation.txt
+
 
 
 

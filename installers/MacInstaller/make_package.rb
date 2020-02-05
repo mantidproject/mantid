@@ -16,17 +16,13 @@ require 'pathname'
 AT_EXECUTABLE_TAG = '@executable_path'
 AT_LOADER_TAG = '@loader_path'
 AT_RPATH_TAG = '@rpath'
-BUNDLED_PY_MODULES = [
-  '_posixsubprocess32.so',
-  'backports',
+BUNDLED_PY_MODULES_COMMON = [
   'certifi',
   'chardet',
   'CifFile',
   'cycler.py',
   'dateutil',
   'decorator.py',
-  'enum',
-  'funcsigs',
   'h5py',
   'idna',
   'IPython',
@@ -34,14 +30,12 @@ BUNDLED_PY_MODULES = [
   'ipykernel',
   'jupyter_core',
   'jupyter_client',
-  'kiwisolver.so',
   'markupsafe',
   'matplotlib',
   'mistune.py',
   'mock',
   'mpl_toolkits',
   'numpy',
-  'pathlib2',
   'pexpect',
   'pickleshare.py',
   'pkg_resources',
@@ -54,19 +48,32 @@ BUNDLED_PY_MODULES = [
   'pygments',
   'tornado',
   'requests',
-  'scandir.py',
   'scipy',
-  'simplegeneric.py',
   'sip.so',
   'six.py',
   'sphinx',
   'sphinx_bootstrap_theme',
-  'subprocess32.py',
   'traitlets',
   'urllib3',
   'wcwidth',
   'yaml',
   'zmq'
+].freeze
+BUNDLED_PY_MODULES_PY2 = [
+  '_posixsubprocess32.so',
+  'backports',
+  'enum',
+  'funcsigs',
+  'kiwisolver.so',
+  'pathlib2',
+  'scandir.py',
+  'simplegeneric.py',
+  'subprocess32.py'
+].freeze
+BUNDLED_PY_MODULES_PY3 = [
+  'appnope',
+  'backcall',
+  'kiwisolver.%s.so'
 ].freeze
 BUNDLED_PY_MODULES_MANTIDPLOT = [
   'PyQt4/__init__.py',
@@ -142,6 +149,16 @@ def execute(cmd, ignore_fail = false)
   stdout
 end
 
+# Determine the version of python
+# Return 3-array of major,minor,patch
+def python_version(py_exe)
+  # expects Python X.Y.Z
+  version_info = execute(py_exe + ' --version')
+  version_number_str = version_info.split()[1]
+  # map to 3 integers
+  return version_number_str.split('.').map { |x| x.to_i }
+end
+
 # Deploy the embedded Python bundle
 # Params:
 # +destination+:: Destination directory for bundle
@@ -191,7 +208,7 @@ def deploy_python_framework(destination, host_python_exe,
     end
   end
 
-  # add relative symlink for unversioned paths
+  # add relative symlink for unversioned paths if they don't exist
   Dir.chdir(bundle_py_home + 'bin') do
     FileUtils.ln_s "python#{py_ver}", "python"
     FileUtils.ln_s "2to3-#{py_ver}", "2to3"
@@ -577,16 +594,27 @@ executables = ["#{contents_macos}/MantidNexusParallelLoader"]
 
 # check we have a known bundle
 if bundle_path.to_s.end_with?('MantidWorkbench.app')
-  bundled_packages = BUNDLED_PY_MODULES + BUNDLED_PY_MODULES_WORKBENCH
-  bundled_qt_plugins = QT_PLUGINS_COMMON + ['platforms', 'styles']
+  bundled_packages = BUNDLED_PY_MODULES_COMMON + BUNDLED_PY_MODULES_WORKBENCH
+  bundled_qt_plugins = QT_PLUGINS_COMMON + ['platforms', 'printsupport', 'styles']
   host_qt_plugins_dir = QT5_PLUGINS_DIR
 elsif bundle_path.to_s.end_with?('MantidPlot.app')
-  bundled_packages = BUNDLED_PY_MODULES + BUNDLED_PY_MODULES_MANTIDPLOT
+  bundled_packages = BUNDLED_PY_MODULES_COMMON + BUNDLED_PY_MODULES_MANTIDPLOT
   bundled_qt_plugins = QT_PLUGINS_COMMON
   host_qt_plugins_dir = QT4_PLUGINS_DIR
   executables << "#{contents_macos}/MantidPlot"
 else
   fatal("Unknown bundle type #{bundle_path}. Expected MantidPlot.app or MantidWorkbench.app.")
+end
+
+python_version_full = python_version(host_python_exe.to_s)
+python_version_major = python_version_full[0]
+python_version_minor = python_version_full[1]
+if python_version_major == 2
+  bundled_packages += BUNDLED_PY_MODULES_PY2
+elsif python_version_major == 3
+  bundled_packages += BUNDLED_PY_MODULES_PY3.map { |s| s % "cpython-%d%dm-darwin" % [python_version_major, python_version_minor] }
+else
+  fatal("Unknown Python version: #{python_version_major}. Expected <= 3")
 end
 
 # We start with the assumption CMake has installed all required target libraries/executables

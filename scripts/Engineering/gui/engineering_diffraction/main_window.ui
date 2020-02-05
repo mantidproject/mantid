@@ -92,6 +92,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QToolButton" name="btn_settings">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QStatusBar" name="statusbar">
         <property name="sizeGripEnabled">
          <bool>false</bool>

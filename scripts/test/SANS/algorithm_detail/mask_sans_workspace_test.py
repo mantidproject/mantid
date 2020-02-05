@@ -13,6 +13,7 @@ from mantid.simpleapi import CloneWorkspace, DeleteWorkspace, Load, LoadEmptyIns
 from sans.algorithm_detail.mask_sans_workspace import mask_workspace
 from sans.common.enums import SANSFacility
 from sans.common.file_information import SANSFileInformationFactory
+from sans.state.Serializer import Serializer
 from sans.state.data import get_data_builder
 from sans.state.mask import get_mask_builder
 from sans.state.move import get_move_builder
@@ -294,9 +295,6 @@ class MaskSansWorkspaceTest(unittest.TestCase):
         bin_mask_general_start = [30000., 67000.]
         bin_mask_general_stop = [35000., 75000.]
 
-        # bin_mask_start = [14000]
-        # bin_mask_stop = FloatListParameter()
-
         mask_builder.set_bin_mask_general_start(bin_mask_general_start)
         mask_builder.set_bin_mask_general_stop(bin_mask_general_stop)
 
@@ -409,8 +407,9 @@ class MaskSansWorkspaceTest(unittest.TestCase):
         test_director.set_states(data_state=data_info, mask_state=mask_info)
         state = test_director.construct()
 
-        returned_data = SANSLoad(SANSState=state.property_manager, SampleScatterWorkspace="mask_sans_ws",
+        returned_data = SANSLoad(SANSState=Serializer.to_json(state), SampleScatterWorkspace="mask_sans_ws",
                                  SampleScatterMonitorWorkspace="dummy")
+
         workspace = returned_data[0]
         DeleteWorkspace(returned_data[1])
 

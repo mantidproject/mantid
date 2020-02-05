@@ -8,12 +8,15 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
+from matplotlib.collections import PolyCollection
+
+from mantid.plots.legend import LegendProperties
+from mantid.plots import helperfunctions, Line2D, MantidAxes
 from mantidqt.utils.qt import block_signals
 from mantidqt.widgets.plotconfigdialog import get_axes_names_dict, curve_in_ax
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import (
     CurveProperties, curve_has_errors, remove_curve_from_ax)
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.view import CurvesTabWidgetView
-from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
 from workbench.plotting.figureerrorsmanager import FigureErrorsManager
 
 
@@ -106,8 +109,53 @@ class CurvesTabWidgetPresenter:
         """Replot the selected curve with the given plot kwargs"""
         ax = self.get_selected_ax()
         curve = self.get_selected_curve()
+
+        waterfall = False
+        if isinstance(ax, MantidAxes):
+            waterfall = ax.is_waterfall()
+        check_line_colour = False
+        # If the plot is a waterfall plot and the user has set it so the area under each line is filled, and the fill
+        # colour for each line is set as the line colour, after the curve is updated we need to check if its colour has
+        # changed so the fill can be updated accordingly.
+        if waterfall and ax.waterfall_has_fill() and helperfunctions.waterfall_fill_is_line_colour(ax):
+            check_line_colour = True
+
+        if isinstance(curve, Line2D):
+            curve_index = ax.get_lines().index(curve)
+            errorbar = False
+        else:
+            curve_index = ax.get_lines().index(curve[0])
+            errorbar = True
+
         new_curve = FigureErrorsManager.replot_curve(ax, curve, plot_kwargs)
         self.curve_names_dict[self.view.get_selected_curve_name()] = new_curve
+
+        if isinstance(ax, MantidAxes):
+            errorbar_cap_lines = helperfunctions.remove_and_return_errorbar_cap_lines(ax)
+        else:
+            errorbar_cap_lines = []
+
+        # When a curve is redrawn it is moved to the back of the list of curves so here it is moved back to its previous
+        # position. This is so that the correct offset is applied to the curve if the plot is a waterfall plot, but it
+        # also just makes sense for the curve order to remain unchanged.
+        ax.lines.insert(curve_index, ax.lines.pop())
+
+        if waterfall:
+            if check_line_colour:
+                # curve can be either a Line2D or an ErrorContainer and the colour is accessed differently for each.
+                if not errorbar:
+                    # if the line colour hasn't changed then the fill colour doesn't need to be updated.
+                    update_fill = curve.get_color() != new_curve[0].get_color()
+                else:
+                    update_fill = curve[0].get_color() != new_curve[0].get_color()
+                helperfunctions.convert_single_line_to_waterfall(ax, curve_index, need_to_update_fill=update_fill)
+            else:
+                # the curve has been reset to its original position so for a waterfall plot it needs to be re-offset.
+                helperfunctions.convert_single_line_to_waterfall(ax, curve_index)
+
+            helperfunctions.set_waterfall_fill_visible(ax, curve_index)
+
+        ax.lines += errorbar_cap_lines
 
     def populate_curve_combo_box_and_update_view(self):
         """
@@ -139,10 +187,36 @@ class CurvesTabWidgetPresenter:
         ax = self.get_selected_ax()
         if ax.legend_:
             self.legend_props = LegendProperties.from_legend(ax.legend_)
+
+        waterfall = False
+        if isinstance(ax, MantidAxes):
+            waterfall = ax.is_waterfall()
+
+        if waterfall:
+            # Waterfall plots are reset so they can be reconverted after the curve is removed.
+            x, y = ax.waterfall_x_offset, ax.waterfall_y_offset
+            ax.update_waterfall(0, 0)
+
+            # If the curves have a fill, the one which corresponds to the curve being removed also needs to be removed.
+            current_curve_index = self.view.select_curve_combo_box.currentIndex()
+            i = 0
+            for collection in ax.collections:
+                if isinstance(collection, PolyCollection):
+                    if current_curve_index == i:
+                        ax.collections.remove(collection)
+                        break
+                    i = i + 1
+
         # Remove curve from ax and remove from curve names dictionary
         remove_curve_from_ax(self.get_selected_curve())
         self.curve_names_dict.pop(self.view.get_selected_curve_name())
         self.set_apply_to_all_buttons_enabled()
+
+        # If there is now only one curve on a waterfall plot, the plot becomes non-waterfall.
+        if waterfall:
+            ax.update_waterfall(x, y)
+            if len(ax.get_lines()) <= 1:
+                ax.set_waterfall(False)
 
         ax = self.get_selected_ax()
         # Update the legend and redraw

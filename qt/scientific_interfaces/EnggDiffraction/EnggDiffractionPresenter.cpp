@@ -896,7 +896,7 @@ void EnggDiffractionPresenter::doNewCalibration(const std::string &outFilename,
   } catch (Mantid::API::Algorithm::CancelException &) {
     m_calibFinishedOK = false;
     m_cancelled = true;
-    g_log.error() << "Execution terminated by user. \n";
+    g_log.warning() << "Execution cancelled by user. \n";
   }
   // restore normal data search paths
   conf.setDataSearchDirs(tmpDirs);

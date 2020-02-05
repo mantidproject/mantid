@@ -28,7 +28,7 @@ class FitInteractiveTool(QObject):
 
     default_background = 'LinearBackground'
 
-    def __init__(self, canvas, toolbar_manager, current_peak_type):
+    def __init__(self, canvas, toolbar_manager, current_peak_type, default_background = None):
         """
         Create an instance of FitInteractiveTool.
         :param canvas: A MPL canvas to draw on.
@@ -65,6 +65,9 @@ class FitInteractiveTool(QObject):
         self.background_names = []
         # A cache for names of function that are neither peaks or backgrounds to use in the add function dialog
         self.other_names = []
+        # The name of the default background type
+        if default_background:
+            self.default_background = default_background
 
         # Connect MPL events to callbacks and store connection ids in a cache
         self._cids = []

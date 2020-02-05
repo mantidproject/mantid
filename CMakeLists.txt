@@ -127,8 +127,14 @@ if(ENABLE_MANTIDPLOT)
     message(FATAL_ERROR "Qwt version 5 is required, found: ${QWT5_VERSION}")
   endif()
 
-  find_package(PyQt4 REQUIRED)
-  find_package(SIP REQUIRED)
+  if(PYTHON_VERSION_MAJOR EQUAL 3 AND
+     UNIX_DIST MATCHES "RedHatEnterprise" AND UNIX_RELEASE MATCHES "7\..*")
+    set(USE_PRIVATE_SIPPYQT4 ON)
+    include(ExternalSipPyQt4)
+  else()
+    find_package(PyQt4 REQUIRED)
+    find_package(SIP REQUIRED)
+  endif()
   separate_arguments(PYQT4_SIP_FLAGS)
 endif()
 
@@ -146,15 +152,6 @@ if(ENABLE_WORKBENCH)
   find_package(SIP REQUIRED)
   separate_arguments(PYQT5_SIP_FLAGS)
 endif()
-
-# gsl is currently needed by Geometry, Algorithms, Curvefitting, & MantidPlot
-if(WIN32 AND GSL_CBLAS_LIBRARY AND NOT EXISTS ${GSL_CBLAS_LIBRARY})
-  # The GSL cblas library changes its name between v1 and v2 on Windows. Workaround
-  # the fact that CMake has cached the old path to a non-existant library.
-  unset(GSL_CBLAS_LIBRARY CACHE)
-  unset(GSL_CBLAS_LIBRARY_DEBUG CACHE)
-endif()
-find_package(GSL REQUIRED)
 
 # Now add in all the components
 
@@ -382,58 +379,64 @@ if(ENABLE_CPACK)
     # rhel requirements - only used if package requested is rpm
     set(
       CPACK_RPM_PACKAGE_REQUIRES
-      "nexus >= 4.3.1,gsl,glibc,muParser,numpy,h5py >= 2.3.1,PyCifRW >= 4.2.1,tbb,librdkafka,"
-      "${CPACK_RPM_PACKAGE_REQUIRES},OCE-draw,OCE-foundation,OCE-modeling,OCE-ocaf,OCE-visualization,"
+      "boost169-date-time,"
+      "boost169-regex,"
+      "boost169-serialization,"
+      "boost169-filesystem,"
+      "boost169-system,"
+      "nexus >= 4.3.1,gsl,glibc,muParser,tbb,librdkafka,"
+      "OCE-draw,OCE-foundation,OCE-modeling,OCE-ocaf,OCE-visualization,"
       "poco-crypto,poco-data,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation,"
-      "sip >= 4.18,python-enum34,"
-      "python-six,python-ipython >= 1.1.0,python-ipython-notebook,PyYAML,"
-      "python-requests,"
-      "scipy,"
       "hdf,hdf5,jsoncpp >= 0.7.0")
     if(ENABLE_MANTIDPLOT)
       set(CPACK_RPM_PACKAGE_REQUIRES
-          "${CPACK_RPM_PACKAGE_REQUIRES},qt4 >= 4.2,PyQt4,qwtplot3d-qt4")
+          "${CPACK_RPM_PACKAGE_REQUIRES},qt4 >= 4.2,qscintilla,qwt5-qt4,qwtplot3d-qt4")
     endif()
     if(ENABLE_WORKBENCH)
       set(CPACK_RPM_PACKAGE_REQUIRES
-          "${CPACK_RPM_PACKAGE_REQUIRES},qt5-qtbase,python2-qt5")
+          "${CPACK_RPM_PACKAGE_REQUIRES},qt5-qtbase,qscintilla-qt5")
     endif()
 
-    if("${UNIX_CODENAME}" MATCHES "Santiago") # RHEL6
-      if(ENABLE_WORKBENCH)
-        message(FATAL_ERROR "mantidworkbench is not supported on RHEL6")
-      endif()
-      # On RHEL6 we have to use an updated qscintilla to fix an auto complete
-      # bug
-      set(
-        CPACK_RPM_PACKAGE_REQUIRES
-        "${CPACK_RPM_PACKAGE_REQUIRES},qscintilla >= 2.4.6,boost157,python-matplotlib,"
-        # On RHEL6 we are using SCL packages for Qt
-        "scl-utils,mantidlibs34,mantidlibs34-runtime,mantidlibs34-qt,mantidlibs34-qt-x11,mantidlibs34-qt-webkit,mantidlibs34-qwt5-qt4"
-        )
-    else() # assumes RHEL7 Require matplotlib >= 1.5 to fix bug in latex
-           # rendering - oddly matplotlib-qt4 contains qt5 backend as well
+    if(PYTHON_VERSION_MAJOR EQUAL 3)
       set(
         CPACK_RPM_PACKAGE_REQUIRES
         "${CPACK_RPM_PACKAGE_REQUIRES},"
-        "boost169-date-time,"
-        "boost169-regex,"
-        "boost169-serialization,"
-        "boost169-filesystem,"
-        "boost169-system,"
-        "boost169-python2,"
-        "python2-QtPy,"
-        "python2-matplotlib-qt4 >= 1.5.2"
-        )
+        "boost169-python3,"
+        "python36-numpy,python36-scipy,python36-h5py,python36-PyCifRW,"
+        "python36-six,python36-PyYAML,python36-requests,"
+        "python36-ipython,python36-ipython-notebook"
+      )
       if(ENABLE_MANTIDPLOT)
         set(CPACK_RPM_PACKAGE_REQUIRES
-            "${CPACK_RPM_PACKAGE_REQUIRES},qscintilla,qwt5-qt4")
+            "${CPACK_RPM_PACKAGE_REQUIRES},python36-QtPy,"
+            "python36-matplotlib-qt4,python36-ipython-gui")
       endif()
       if(ENABLE_WORKBENCH)
         set(CPACK_RPM_PACKAGE_REQUIRES
-            "${CPACK_RPM_PACKAGE_REQUIRES},qscintilla-qt5,python-psutil")
+            "${CPACK_RPM_PACKAGE_REQUIRES},python36-qt5,python36-QtPy,"
+            "python36-matplotlib-qt5,python36-psutil,python36-ipython-gui")
+      endif()
+    else()
+      set(
+        CPACK_RPM_PACKAGE_REQUIRES
+        "${CPACK_RPM_PACKAGE_REQUIRES},"
+        "boost169-python2,"
+        "numpy,scipy,h5py >= 2.3.1,PyCifRW >= 4.2.1,"
+        "python-enum34,python-six,PyYAML,python-requests,"
+        "python-ipython >= 1.1.0,python-ipython-notebook"
+      )
+      if(ENABLE_MANTIDPLOT)
+        set(CPACK_RPM_PACKAGE_REQUIRES
+            "${CPACK_RPM_PACKAGE_REQUIRES},sip >= 4.18,PyQt4,python2-QtPy,"
+            "python2-matplotlib-qt4 >= 1.5.2,python-ipython-gui")
+      endif()
+      if(ENABLE_WORKBENCH)
+        set(CPACK_RPM_PACKAGE_REQUIRES
+            "${CPACK_RPM_PACKAGE_REQUIRES},python2-qt5,python2-QtPy,"
+            "python2-matplotlib-qt4 >= 1.5.2,python-psutil,python-ipython-gui")
       endif()
     endif()
+
     string(REPLACE ";"
                    ","
                    CPACK_RPM_PACKAGE_REQUIRES

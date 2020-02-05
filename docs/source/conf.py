@@ -22,7 +22,10 @@ if LooseVersion(sphinx_version) > LooseVersion("1.6"):
     def setup(app):
         """Called automatically by Sphinx when starting the build process
         """
-        app.add_stylesheet("custom.css")
+        if hasattr(app, 'add_css_file'):  # >=v1.8
+            app.add_css_file("custom.css")
+        else:
+            app.add_stylesheet("custom.css")  # v1.6-1.8
 
 
 # Add any Sphinx extension module names here, as strings. They can be
@@ -208,7 +211,7 @@ exec(compile(open(html_theme_cfg).read(), html_theme_cfg, 'exec'))
 # -- Link to other projects ----------------------------------------------------
 
 intersphinx_mapping = {
-    'h5py': ('https://docs.h5py.org/en/latest/', None),
+    'h5py': ('https://h5py.readthedocs.io/en/stable/', None),
     'matplotlib': ('https://matplotlib.org', None),
     'numpy': ('https://docs.scipy.org/doc/numpy/', None),
     'python': ('https://docs.python.org/3/', None),

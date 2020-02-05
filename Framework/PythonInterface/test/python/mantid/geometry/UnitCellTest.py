@@ -59,6 +59,36 @@ class UnitCellTest(unittest.TestCase):
         self.assertEqual(unit.beta(), newUnit.beta())
         self.assertEqual(unit.gamma(), newUnit.gamma())
 
+    def test_getModVec_returns_v3d(self):
+        unit = UnitCell(3, 3, 3)
+
+        self.assertTrue(isinstance(unit.getModVec(0), V3D))
+        self.assertTrue(isinstance(unit.getModVec(1), V3D))
+        self.assertTrue(isinstance(unit.getModVec(2), V3D))
+
+    def test_setModVec_accepts_v3d(self):
+        unit = UnitCell(3, 3, 3)
+
+        vectors = (V3D(1,2,3), V3D(2, 1, 3), V3D(3, 2, 1))
+        unit.setModVec1(vectors[0])
+        unit.setModVec2(vectors[1])
+        unit.setModVec3(vectors[2])
+
+        for index, expected in enumerate(vectors):
+            self.assertEquals(vectors[index], unit.getModVec(index))
+
+    def test_getMaxOrder_returns_int(self):
+        unit = UnitCell(3, 3, 3)
+
+        self.assertTrue(isinstance(unit.getMaxOrder(), int))
+
+    def test_setMaxOrder_accepts_int(self):
+        unit = UnitCell(3, 3, 3)
+
+        unit.setMaxOrder(2)
+
+        self.assertEquals(2, unit.getMaxOrder())
+
     def _check_cell(self, cell):
         self.assertAlmostEqual(cell.a(),2.5,10)
         self.assertAlmostEqual(cell.b(),6,10)

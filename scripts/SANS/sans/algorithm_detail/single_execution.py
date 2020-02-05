@@ -18,6 +18,7 @@ from sans.common.enums import (DetectorType, ReductionMode, OutputParts, Transmi
 from sans.common.general_functions import (create_child_algorithm, get_reduced_can_workspace_from_ads,
                                            get_transmission_workspaces_from_ads,
                                            write_hash_into_reduced_can_workspace)
+from sans.state.Serializer import Serializer
 
 
 def run_initial_event_slice_reduction(reduction_alg, reduction_setting_bundle):
@@ -32,7 +33,7 @@ def run_initial_event_slice_reduction(reduction_alg, reduction_setting_bundle):
     # Get component to reduce
     component = get_component_to_reduce(reduction_setting_bundle)
     # Set the properties on the reduction algorithms
-    serialized_state = reduction_setting_bundle.state.property_manager
+    serialized_state = Serializer.to_json(reduction_setting_bundle.state)
     reduction_alg.setProperty("SANSState", serialized_state)
     reduction_alg.setProperty("Component", component)
     reduction_alg.setProperty("ScatterWorkspace", reduction_setting_bundle.scatter_workspace)
@@ -74,7 +75,7 @@ def run_core_event_slice_reduction(reduction_alg, reduction_setting_bundle):
     # Get component to reduce
     component = get_component_to_reduce(reduction_setting_bundle)
     # Set the properties on the reduction algorithms
-    serialized_state = reduction_setting_bundle.state.property_manager
+    serialized_state = Serializer.to_json(reduction_setting_bundle.state)
     reduction_alg.setProperty("SANSState", serialized_state)
     reduction_alg.setProperty("Component", component)
     reduction_alg.setProperty("ScatterWorkspace", reduction_setting_bundle.scatter_workspace)
@@ -133,7 +134,7 @@ def run_core_reduction(reduction_alg, reduction_setting_bundle):
     # Get component to reduce
     component = get_component_to_reduce(reduction_setting_bundle)
     # Set the properties on the reduction algorithms
-    serialized_state = reduction_setting_bundle.state.property_manager
+    serialized_state = Serializer.to_json(reduction_setting_bundle.state)
     reduction_alg.setProperty("SANSState", serialized_state)
     reduction_alg.setProperty("Component", component)
     reduction_alg.setProperty("ScatterWorkspace", reduction_setting_bundle.scatter_workspace)

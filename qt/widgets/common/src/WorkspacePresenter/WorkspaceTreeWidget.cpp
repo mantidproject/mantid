@@ -20,6 +20,7 @@
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspacePresenter.h"
 #include "MantidQtWidgets/Common/pixmaps.h"
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -311,10 +312,15 @@ void WorkspaceTreeWidget::enableDeletePrompt(bool enable) {
 bool WorkspaceTreeWidget::isPromptDelete() const { return m_promptDelete; }
 
 bool WorkspaceTreeWidget::deleteConfirmation() const {
-  return askUserYesNo(
-      "Delete Workspaces",
-      "Are you sure you want to delete the selected Workspaces?\n\nThis "
-      "prompt can be disabled from:\nPreferences->General->Confirmations");
+  std::string message =
+      "Are you sure you want to delete the selected Workspaces?";
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+  message += "\n\nThis prompt can be disabled from:\nFile->Settings->General";
+#else
+  message += "\n\nThis prompt can be disabled "
+             "from:\nPreferences->General->Confirmations";
+#endif
+  return askUserYesNo("Delete Workspaces", message);
 }
 
 void WorkspaceTreeWidget::deleteWorkspaces(const StringList &wsNames) {
@@ -949,9 +955,10 @@ void WorkspaceTreeWidget::addMatrixWorkspaceMenuItems(
   menu->addAction(m_showData);
   menu->addAction(m_showInst);
   // Disable the 'show instrument' option if a workspace doesn't have an
-  // instrument attached
+  // instrument attached or if it does not have a spectra axis
   m_showInst->setEnabled(matrixWS->getInstrument() &&
-                         !matrixWS->getInstrument()->getName().empty());
+                         !matrixWS->getInstrument()->getName().empty() &&
+                         matrixWS->getAxis(1)->isSpectra());
   menu->addSeparator();
   menu->addAction(m_plotSpec);
   menu->addAction(m_plotSpecErr);

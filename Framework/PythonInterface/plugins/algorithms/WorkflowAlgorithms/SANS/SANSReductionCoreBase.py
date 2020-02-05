@@ -11,7 +11,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode, IEventWorkspace)
-from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator)
+from mantid.kernel import (Direction, StringListValidator)
 from sans.algorithm_detail.CreateSANSAdjustmentWorkspaces import CreateSANSAdjustmentWorkspaces
 from sans.algorithm_detail.convert_to_q import convert_workspace
 from sans.algorithm_detail.crop_helper import get_component_name
@@ -22,7 +22,7 @@ from sans.algorithm_detail.slice_sans_event import slice_sans_event
 from sans.common.constants import EMPTY_NAME
 from sans.common.enums import (DetectorType, DataType)
 from sans.common.general_functions import (create_child_algorithm, append_to_sans_file_tag)
-from sans.state.state_base import create_deserialized_sans_state_from_property_manager
+from sans.state.Serializer import Serializer
 
 
 class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
@@ -30,8 +30,8 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
         # ----------
         # INPUT
         # ----------
-        self.declareProperty(PropertyManagerProperty('SANSState'),
-                             doc='A property manager which fulfills the SANSState contract.')
+        self.declareProperty('SANSState', '',
+                             doc='A JSON String which fulfills the SANSState contract.')
 
         # WORKSPACES
         # Scatter Workspaces
@@ -236,9 +236,8 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
         return output_workspace, sum_of_counts, sum_of_norms
 
     def _get_state(self):
-        state_property_manager = self.getProperty("SANSState").value
-        state = create_deserialized_sans_state_from_property_manager(state_property_manager)
-        state.property_manager = state_property_manager
+        json_state = self.getProperty("SANSState").value
+        state = Serializer.from_json(json_state)
         return state
 
     def _get_transmission_workspace(self):

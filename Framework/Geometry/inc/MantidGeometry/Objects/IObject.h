@@ -9,6 +9,7 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
+#include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
 #include <map>
 #include <vector>
@@ -69,10 +70,11 @@ public:
   virtual double volume() const = 0;
 
   virtual int getPointInObject(Kernel::V3D &point) const = 0;
-  virtual Kernel::V3D
+
+  virtual boost::optional<Kernel::V3D>
   generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
                         const size_t) const = 0;
-  virtual Kernel::V3D
+  virtual boost::optional<Kernel::V3D>
   generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
                         const BoundingBox &activeRegion,
                         const size_t) const = 0;

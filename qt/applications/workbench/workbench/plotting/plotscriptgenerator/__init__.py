@@ -11,6 +11,7 @@ from __future__ import (absolute_import, unicode_literals)
 from mantid.plots import MantidAxes
 
 from mantidqt.widgets.plotconfigdialog import curve_in_ax
+from matplotlib.legend import Legend
 from workbench.plugins.editor import DEFAULT_CONTENT
 from workbench.plotting.plotscriptgenerator.axes import (generate_axis_limit_commands,
                                                          generate_axis_label_commands,
@@ -22,6 +23,10 @@ from workbench.plotting.plotscriptgenerator.utils import generate_workspace_retr
 
 FIG_VARIABLE = "fig"
 AXES_VARIABLE = "axes"
+if hasattr(Legend, "set_draggable"):
+    SET_DRAGGABLE_METHOD = "set_draggable"
+else:
+    SET_DRAGGABLE_METHOD = "draggable"
 
 
 def generate_script(fig, exclude_headers=False):
@@ -107,7 +112,8 @@ def get_title_cmds(ax, ax_object_var):
 def get_legend_cmds(ax, ax_object_var):
     """Get command axes.set_legend"""
     if ax.legend_:
-        return ["{ax_obj}.legend().draggable()".format(ax_obj=ax_object_var)]
+        return ["{ax_obj}.legend().{draggable_method}()".format(ax_obj=ax_object_var,
+                                                                draggable_method=SET_DRAGGABLE_METHOD)]
     return []
 
 

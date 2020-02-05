@@ -14,7 +14,7 @@ import numpy as np
 
 from mantid import AnalysisDataService
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress)
-from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator, Logger)
+from mantid.kernel import (Direction, StringListValidator, Logger)
 from mantid.simpleapi import CloneWorkspace, GroupWorkspaces
 from sans.algorithm_detail.beamcentrefinder_plotting import can_plot_beamcentrefinder, plot_workspace_quartiles
 from sans.algorithm_detail.crop_helper import get_component_name
@@ -25,7 +25,7 @@ from sans.common.enums import (DetectorType, MaskingQuadrant, FindDirectionEnum)
 from sans.common.file_information import get_instrument_paths_for_sans_file
 from sans.common.general_functions import create_child_algorithm
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
-from sans.state.state_base import create_deserialized_sans_state_from_property_manager
+from sans.state.Serializer import Serializer
 
 
 class SANSBeamCentreFinder(DataProcessorAlgorithm):
@@ -40,8 +40,8 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
         # INPUT
         # ----------
         # Workspace which is to be cropped
-        self.declareProperty(PropertyManagerProperty('SANSState'),
-                             doc='A property manager which fulfills the SANSState contract.')
+        self.declareProperty('SANSState', '',
+                             doc='A JSON string which fulfills the SANSState contract.')
 
         self.declareProperty(MatrixWorkspaceProperty("SampleScatterWorkspace", '',
                                                      optional=PropertyMode.Mandatory, direction=Direction.Input),
@@ -112,7 +112,6 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
 
     def PyExec(self):
         state = self._get_state()
-        state_serialized = state.property_manager
         self.logger = Logger("CentreFinder")
         self.logger.notice("Starting centre finder routine...")
         progress = self._get_progress()
@@ -174,11 +173,11 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
             progress.report("Reducing ... Pos1 " + str(centre1) + " Pos2 " + str(centre2))
             sample_quartiles = self._run_quartile_reduction(sample_scatter, sample_transmission, sample_direct,
                                                             "Sample", sample_scatter_monitor, component,
-                                                            state_serialized, centre1, centre2, r_min, r_max)
+                                                            centre1, centre2, r_min, r_max)
 
             if can_scatter:
                 can_quartiles = self._run_quartile_reduction(can_scatter, can_transmission, can_direct, "Can",
-                                                             can_scatter_monitor, component, state_serialized, centre1,
+                                                             can_scatter_monitor, component, centre1,
                                                              centre2, r_min, r_max)
                 for key in sample_quartiles:
                     sample_quartiles[key] = perform_can_subtraction(sample_quartiles[key], can_quartiles[key], self)
@@ -284,14 +283,17 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
         return ''
 
     def _run_quartile_reduction(self, scatter_workspace, transmission_workspace, direct_workspace, data_type,
-                                scatter_monitor_workspace, component, state, centre1, centre2, r_min, r_max):
+                                scatter_monitor_workspace, component, centre1, centre2, r_min, r_max):
+
+        serialized_state = self.getProperty("SANSState").value
+
         algorithm_name = "SANSBeamCentreFinderCore"
         alg_options = {"ScatterWorkspace": scatter_workspace,
                        "ScatterMonitorWorkspace": scatter_monitor_workspace,
                        "TransmissionWorkspace": transmission_workspace,
                        "DirectWorkspace": direct_workspace,
                        "Component": component,
-                       "SANSState": state,
+                       "SANSState": serialized_state,
                        "DataType": data_type,
                        "Centre1": centre1,
                        "Centre2": centre2,
@@ -316,9 +318,9 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
         return get_component_name(workspace, component)
 
     def _get_state(self):
-        state_property_manager = self.getProperty("SANSState").value
-        state = create_deserialized_sans_state_from_property_manager(state_property_manager)
-        state.property_manager = state_property_manager
+        state_json = self.getProperty("SANSState").value
+        state = Serializer.from_json(state_json)
+
         return state
 
     def _calculate_residuals(self, quartile1, quartile2):

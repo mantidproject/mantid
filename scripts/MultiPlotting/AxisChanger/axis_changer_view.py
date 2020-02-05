@@ -6,6 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from qtpy import QtGui, QtCore, QtWidgets
 
+maximum_bound_precision = 7
+
 
 class AxisChangerView(QtWidgets.QWidget):
     sig_bound_changed = QtCore.Signal(object)
@@ -17,10 +19,12 @@ class AxisChangerView(QtWidgets.QWidget):
         layout.addWidget(self._label)
 
         self.lower_bound = QtWidgets.QLineEdit()
+        self.lower_bound.setMaxLength(maximum_bound_precision)
         self.lower_bound.setValidator(QtGui.QDoubleValidator())
         self.lower_bound.returnPressed.connect(self._bound_changed)
 
         self.upper_bound = QtWidgets.QLineEdit()
+        self.upper_bound.setMaxLength(maximum_bound_precision)
         self.upper_bound.setValidator(QtGui.QDoubleValidator())
         self.upper_bound.returnPressed.connect(self._bound_changed)
 

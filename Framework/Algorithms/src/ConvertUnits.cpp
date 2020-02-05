@@ -49,7 +49,7 @@ void ConvertUnits::init() {
   // the Target property
   declareProperty("Target", "",
                   boost::make_shared<StringListValidator>(
-                      UnitFactory::Instance().getKeys()),
+                      UnitFactory::Instance().getConvertibleUnits()),
                   "The name of the units to convert to (must be one of those "
                   "registered in\n"
                   "the Unit Factory)");

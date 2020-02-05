@@ -109,3 +109,8 @@ class SliceViewerModel(object):
                 return WS_TYPE.MDE
         else:
             raise ValueError("Unsupported workspace type")
+
+    def can_normalize_workspace(self):
+        if self.get_ws_type() == WS_TYPE.MATRIX and not self._get_ws().isDistribution():
+            return True
+        return False

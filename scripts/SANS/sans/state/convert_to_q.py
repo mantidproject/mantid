@@ -11,61 +11,57 @@
 from __future__ import (absolute_import, division, print_function)
 import json
 import copy
-from sans.state.state_base import (StateBase, rename_descriptor_names, BoolParameter, PositiveFloatParameter,
-                                   StringParameter)
+
+from six import with_metaclass
+
+from sans.state.JsonSerializable import JsonSerializable
 from sans.common.enums import (ReductionDimensionality, RangeStepType, SANSFacility)
+from sans.state.automatic_setters import automatic_setters
 from sans.state.state_functions import (is_pure_none_or_not_none, is_not_none_and_first_larger_than_second,
                                         validation_message)
-from sans.state.automatic_setters import (automatic_setters)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
 # State
 # ----------------------------------------------------------------------------------------------------------------------
-@rename_descriptor_names
-class StateConvertToQ(StateBase):
-    reduction_dimensionality = ReductionDimensionality.ONE_DIM
-    use_gravity = BoolParameter()
-    gravity_extra_length = PositiveFloatParameter()
-    radius_cutoff = PositiveFloatParameter()
-    wavelength_cutoff = PositiveFloatParameter()
 
-    # 1D settings
-    q_min = PositiveFloatParameter()
-    q_max = PositiveFloatParameter()
-    q_1d_rebin_string = StringParameter()
-
-    # 2D settings
-    q_xy_max = PositiveFloatParameter()
-    q_xy_step = PositiveFloatParameter()
-    q_xy_step_type = RangeStepType.LIN
-
-    # -----------------------
-    # Q Resolution specific
-    # ---------------------
-    use_q_resolution = BoolParameter()
-    q_resolution_collimation_length = PositiveFloatParameter()
-    q_resolution_delta_r = PositiveFloatParameter()
-    moderator_file = StringParameter()
-
-    # Circular aperture settings
-    q_resolution_a1 = PositiveFloatParameter()
-    q_resolution_a2 = PositiveFloatParameter()
-
-    # Rectangular aperture settings
-    q_resolution_h1 = PositiveFloatParameter()
-    q_resolution_h2 = PositiveFloatParameter()
-    q_resolution_w1 = PositiveFloatParameter()
-    q_resolution_w2 = PositiveFloatParameter()
+class StateConvertToQ(with_metaclass(JsonSerializable)):
 
     def __init__(self):
         super(StateConvertToQ, self).__init__()
         self.reduction_dimensionality = ReductionDimensionality.ONE_DIM
-        self.use_gravity = False
-        self.gravity_extra_length = 0.0
-        self.use_q_resolution = False
-        self.radius_cutoff = 0.0
-        self.wavelength_cutoff = 0.0
+        self.use_gravity = False  # : Bool
+        self.gravity_extra_length = 0.0  # : Float (Positive)
+        self.radius_cutoff = 0.0  # : Float (Positive)
+        self.wavelength_cutoff = 0.0  # : Float (Positive)
+
+        # 1D settings
+        self.q_min = None  # : Float (Positive)
+        self.q_max = None  # : Float (Positive)
+        self.q_1d_rebin_string = None  # : Str()
+
+        # 2D settings
+        self.q_xy_max = None  # : Float (Positive)
+        self.q_xy_step = None  # : Float (Positive)
+        self.q_xy_step_type = RangeStepType.LIN
+
+        # -----------------------
+        # Q Resolution specific
+        # ---------------------
+        self.use_q_resolution = False  # : Bool
+        self.q_resolution_collimation_length = None  # : Float (Positive)
+        self.q_resolution_delta_r = None  # : Float (Positive)
+        self.moderator_file = None  # : Str()
+
+        # Circular aperture settings
+        self.q_resolution_a1 = None  # : Float (Positive)
+        self.q_resolution_a2 = None  # : Float (Positive)
+
+        # Rectangular aperture settings
+        self.q_resolution_h1 = None  # : Float (Positive)
+        self.q_resolution_h2 = None  # : Float (Positive)
+        self.q_resolution_w1 = None  # : Float (Positive)
+        self.q_resolution_w2 = None  # : Float (Positive)
 
     def validate(self):
         is_invalid = {}

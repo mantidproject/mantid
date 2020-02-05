@@ -12,6 +12,7 @@ from qtpy.QtWidgets import QDialogButtonBox
 from mantid.api import WorkspaceFactory
 from mantid.py3compat import mock
 from mantid.simpleapi import ExtractSpectra
+from mantidqt.dialogs import spectraselectordialog
 from mantidqt.dialogs.spectraselectordialog import parse_selection_str, SpectraSelectionDialog
 from mantidqt.dialogs.spectraselectorutils import get_spectra_selection
 from mantidqt.utils.qt.testing import start_qapplication
@@ -129,14 +130,19 @@ class SpectraSelectionDialogTest(unittest.TestCase):
         self.assertEqual([1, 2, 3, 5, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
                          parse_selection_str(s, 1, 20))
 
-    # --------------- failure tests -----------
-    def test_construction_with_non_MatrixWorkspace_type_raises_exception(self):
+    def test_construction_with_non_MatrixWorkspace_type_removes_non_MatrixWorkspaces_from_list(self):
         table = WorkspaceFactory.Instance().createTable()
-        self.assertRaises(ValueError, SpectraSelectionDialog, [self._single_spec_ws, table])
+        workspaces = [self._single_spec_ws, table]
+        ssd = SpectraSelectionDialog(workspaces)
+        spectraselectordialog.RED_ASTERISK = None
+        self.assertEqual(ssd._workspaces, [self._single_spec_ws])
 
-    def test_get_spectra_selection_raises_error_with_wrong_workspace_type(self):
+    def test_get_spectra_selection_removes_wrong_workspace_types_from_list(self):
         table = WorkspaceFactory.Instance().createTable()
-        self.assertRaises(ValueError, get_spectra_selection, [self._single_spec_ws, table])
+        workspaces = [self._single_spec_ws, table]
+        self.assertEqual(get_spectra_selection(workspaces).workspaces, [self._single_spec_ws])
+
+    # --------------- failure tests -----------
 
     def test_set_placeholder_text_raises_error_if_workspaces_have_no_common_spectra(self):
         spectra_1 = ExtractSpectra(InputWorkspace=self._multi_spec_ws, StartWorkspaceIndex=0, EndWorkspaceIndex=5)
