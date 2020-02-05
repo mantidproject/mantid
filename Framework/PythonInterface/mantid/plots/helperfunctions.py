@@ -14,6 +14,8 @@ import datetime
 import numpy as np
 from matplotlib.collections import PolyCollection
 from matplotlib.container import ErrorbarContainer
+from matplotlib.colors import LogNorm
+from matplotlib.ticker import LogLocator
 from scipy.interpolate import interp1d
 
 import mantid.api
@@ -993,3 +995,28 @@ def line_colour_fill(ax):
             i = i + 1
 
     ax.get_figure().canvas.draw()
+
+
+def update_colorbar_scale(figure, image, scale, vmin, vmax):
+    """"
+    Updates the colorbar to the scale and limits given.
+
+    :param figure: A matplotlib figure instance
+    :param image: The matplotlib image containing the colorbar
+    :param scale: The norm scale of the colorbar, this should be a matplotlib colormap norm type
+    :param vmin: the minimum value on the colorbar
+    :param vmax: the maximum value on the colorbar
+    """
+    if vmin == 0 and scale == LogNorm:
+        vmin += 1e-6  # Avoid 0 log scale error
+    image.set_norm(scale(vmin=vmin, vmax=vmax))
+    if image.colorbar:
+        image.colorbar.remove()
+        locator = None
+        if scale == LogNorm:
+            locator = LogLocator(subs=np.arange(1, 10))
+            if locator.tick_values(vmin=vmin, vmax=vmax).size == 0:
+                locator = LogLocator()
+                mantid.kernel.logger.warning("Minor ticks on colorbar scale cannot be shown "
+                                             "as the range between min value and max value is too large")
+        figure.colorbar(image, ticks=locator)
