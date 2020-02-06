@@ -13,17 +13,16 @@ for presenting and generating the reduction settings.
 from __future__ import (absolute_import, division, print_function)
 
 import copy
-import csv
 import os
 import time
 import traceback
+from contextlib import contextmanager
 
 from qtpy import PYQT4
 
 from mantid.api import (FileFinder)
 from mantid.kernel import Logger, ConfigService, ConfigPropertyObserver
-from mantid.py3compat import csv_open_type
-from sans.command_interface.batch_csv_file_parser import BatchCsvParser
+from sans.command_interface.batch_csv_parser import BatchCsvParser
 from sans.common.enums import (ReductionMode, RangeStepType, RowState, SampleShape,
                                SaveType, SANSInstrument)
 from sans.gui_logic.gui_common import (add_dir_to_datasearch, get_reduction_mode_from_gui_selection,
@@ -31,7 +30,6 @@ from sans.gui_logic.gui_common import (add_dir_to_datasearch, get_reduction_mode
                                        SANSGuiPropertiesHandler)
 from sans.gui_logic.models.RowEntries import RowEntries
 from sans.gui_logic.models.batch_process_runner import BatchProcessRunner
-from sans.gui_logic.models.beam_centre_model import BeamCentreModel
 from sans.gui_logic.models.create_state import create_states
 from sans.gui_logic.models.diagnostics_page_model import run_integral, create_state
 from sans.gui_logic.models.settings_adjustment_model import SettingsAdjustmentModel
@@ -204,6 +202,8 @@ class RunTabPresenter(PresenterCommon):
         self._file_information = None
         self._clipboard = []
 
+        self._csv_parser = BatchCsvParser()
+
         self._setup_sub_presenters()
 
         # Presenter needs to have a handle on the view since it delegates it
@@ -346,6 +346,14 @@ class RunTabPresenter(PresenterCommon):
     def instrument(self):
         return self._model.instrument
 
+    @contextmanager
+    def disable_buttons(self):
+        self._view.disable_buttons()
+        try:
+            yield
+        finally:
+            self._view.enable_buttons()
+
     def on_user_file_load(self):
         """
         Loads the user file. Populates the models and the view.
@@ -435,8 +443,7 @@ class RunTabPresenter(PresenterCommon):
             self._table_model.batch_file = batch_file_path
 
             # 2. Read the batch file
-            batch_file_parser = BatchCsvParser(batch_file_path)
-            parsed_rows = batch_file_parser.parse_batch_file()
+            parsed_rows = self._csv_parser.parse_batch_file(batch_file_path)
 
             # 3. Populate the table
             self._table_model.clear_table_entries()
@@ -602,7 +609,7 @@ class RunTabPresenter(PresenterCommon):
         """
         Process all entries in the table, regardless of selection.
         """
-        to_process = [row for row in self._table_model.get_all_rows() if not row.is_empty()]
+        to_process = self._table_model.get_non_empty_rows()
         if to_process:
             self._process_rows(to_process)
 
@@ -679,30 +686,20 @@ class RunTabPresenter(PresenterCommon):
         return filename
 
     def on_export_table_clicked(self):
-        non_empty_rows = self.get_row_indices()
+        non_empty_rows = self._table_model.get_non_empty_rows()
         if len(non_empty_rows) == 0:
-            self.sans_logger.notice("Cannot export table as it is empty.")
+            self.sans_logger.warning("Cannot export table as it is empty.")
             return
 
-        try:
-            self._view.disable_buttons()
-
+        with self.disable_buttons():
             default_filename = self._table_model.batch_file
             filename = self.display_save_file_box("Save table as", default_filename, "*.csv")
             filename = self._get_filename_to_save(filename)
-            if filename is not None:
-                self.sans_logger.information("Starting export of table. Filename: {}".format(filename))
-                with open(filename, csv_open_type) as outfile:
-                    # Pass filewriting object rather than filename to make testing easier
-                    writer = csv.writer(outfile)
-                    self._export_table(writer, non_empty_rows)
-                    self.sans_logger.information("Table exporting finished.")
 
-            self._view.enable_buttons()
-        except Exception as e:
-            self._view.enable_buttons()
-            self.sans_logger.error("Export halted due to : {}".format(str(e)))
-            self.display_warning_box("Warning", "Export halted", str(e))
+            if filename:
+                self.sans_logger.information("Starting export of table. Filename: {}".format(filename))
+                self._csv_parser.save_batch_file(rows=non_empty_rows, file_path=filename)
+                self.sans_logger.information("Table exporting finished.")
 
     def on_multiperiod_changed(self, show_periods):
         if show_periods:
@@ -826,10 +823,10 @@ class RunTabPresenter(PresenterCommon):
         :return: a list of row indices.
         """
         row_indices_which_are_not_empty = []
-        number_of_rows = self._table_model.get_number_of_rows()
-        for row in range(number_of_rows):
-            if not self.is_empty_row(row):
-                row_indices_which_are_not_empty.append(row)
+        rows = self._table_model.get_all_rows()
+        for i, row in enumerate(rows):
+            if not row.is_empty():
+                row_indices_which_are_not_empty.append(i)
         return row_indices_which_are_not_empty
 
     def on_mask_file_add(self):
@@ -853,14 +850,6 @@ class RunTabPresenter(PresenterCommon):
         self._masking_table_presenter.on_update_rows()
         self._settings_diagnostic_tab_presenter.on_update_rows()
         self._beam_centre_presenter.on_update_rows()
-
-    def is_empty_row(self, row):
-        """
-        Checks if a row has no entries. These rows will be ignored.
-        :param row: the row index
-        :return: True if the row is empty.
-        """
-        return self._table_model.is_empty_row(row)
 
     def on_save_other(self):
         self.save_other_presenter = SaveOtherPresenter(parent_presenter=self)
@@ -1155,37 +1144,6 @@ class RunTabPresenter(PresenterCommon):
                 q_1d_rebin_string += str(q_1d_step_type_factor * q_1d_step) + ","
                 q_1d_rebin_string += str(q_1d_max)
                 state_model.q_1d_rebin_string = q_1d_rebin_string
-
-    def _export_table(self, filewriter, rows):
-        """
-        Take the current table model, and create a comma delimited csv file
-        :param filewriter: File object to be written to
-        :param rows: list of indices for non-empty rows
-        """
-        for row in rows:
-            table_row = self._table_model.get_row(row).to_batch_list()
-            batch_file_row = self._create_batch_entry_from_row(table_row)
-            filewriter.writerow(batch_file_row)
-
-    @staticmethod
-    def _create_batch_entry_from_row(row):
-        batch_file_keywords = ["sample_sans",
-                               "sample_trans",
-                               "sample_direct_beam",
-                               "can_sans",
-                               "can_trans",
-                               "can_direct_beam",
-                               "output_as",
-                               "user_file",
-                               "sample_thickness",
-                               "sample_height",
-                               "sample_width"]
-        new_row = []
-        for key, value in zip(batch_file_keywords, row):
-            new_row.append(key)
-            new_row.append(value)
-
-        return new_row
 
     # ------------------------------------------------------------------------------------------------------------------
     # Settings

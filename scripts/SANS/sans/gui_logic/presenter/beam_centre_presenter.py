@@ -201,6 +201,10 @@ class BeamCentrePresenter(object):
             # one of the values is empty
             pass
         else:
+            if min_value == max_value == 0:
+                self._view.run_button.setEnabled(False)
+                return
+
             if min_value >= max_value:
                 if self._view.run_button.isEnabled():
                     # Only post to logger once per disabling

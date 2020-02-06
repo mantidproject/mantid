@@ -113,7 +113,7 @@ class TableModel(object):
         return self._table_entries[row].is_empty()
 
     def get_non_empty_rows(self):
-        return len([x for x in self._table_entries if not x.is_empty()])
+        return [x for x in self._table_entries if not x.is_empty()]
 
     @staticmethod
     def get_options_hint_strategy():

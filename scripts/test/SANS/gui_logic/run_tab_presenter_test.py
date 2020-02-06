@@ -779,41 +779,23 @@ class RunTabPresenterTest(unittest.TestCase):
                          "_export table should not have been called."
                          " It was called {} times.".format(presenter._export_table.call_count))
 
-    def test_row_created_for_batch_file_correctly(self):
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        view = mock.MagicMock()
-        presenter.set_view(view)
-
-        test_row = ["SANS2D00022025", "SANS2D00022052", "SANS2D00022022",
-                    "", "", "", "another_file", "a_user_file.txt", "1.0", "5.0", "5.4"]
-
-        expected_list = ["sample_sans", "SANS2D00022025", "sample_trans", "SANS2D00022052",
-                         "sample_direct_beam", "SANS2D00022022", "can_sans", "", "can_trans", "", "can_direct_beam", "",
-                         "output_as", "another_file", "user_file", "a_user_file.txt", "sample_thickness", "1.0",
-                         "sample_height", "5.0", "sample_width", "5.4"]
-
-        actual_list = presenter._create_batch_entry_from_row(test_row)
-
-        self.assertEqual(actual_list, expected_list)
-
     def test_buttons_enabled_after_export_table_fails(self):
-        presenter = RunTabPresenter(SANSFacility.ISIS)
         view = mock.MagicMock()
-        presenter.set_view(view)
+        table_model = mock.Mock()
+        presenter = RunTabPresenter(SANSFacility.ISIS, view=view, table_model=table_model)
 
-        presenter.get_row_indices = mock.MagicMock(return_value=[0, 1, 2])
-        presenter._view.enable_buttons = mock.MagicMock()
+        table_model.get_non_empty_rows.return_value = [RowEntries()]
+        presenter._view.enable_buttons = mock.Mock()
+        presenter._view.disable_buttons = mock.Mock()
+
         # Mock error throw on disable buttons so export fails
-        presenter._view.disable_buttons = mock.MagicMock(side_effect=RuntimeError("A test exception"))
-        try:
+        presenter._csv_parser = mock.Mock()
+        presenter._csv_parser.save_batch_file = mock.Mock(side_effect=RuntimeError(""))
+
+        with self.assertRaises(RuntimeError):
             presenter.on_export_table_clicked()
-        except Exception as e:
-            self.fail("Exceptions should have been caught in the method. "
-                      "Exception thrown is {}".format(str(e)))
-        else:
-            self.assertEqual(presenter._view.enable_buttons.call_count, 1,
-                             "Expected enable buttons to be called once, "
-                             "was called {} times.".format(presenter._view.enable_buttons.call_count))
+
+        self.assertEqual(presenter._view.enable_buttons.call_count, 1)
 
     def test_that_canSAS_is_disabled_if_2D_reduction(self):
         """This test checks that if you are running a 2D reduction and have canSAS output mode checked,

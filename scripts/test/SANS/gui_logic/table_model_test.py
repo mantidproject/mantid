@@ -8,8 +8,6 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
-from qtpy.QtCore import QCoreApplication
-
 from sans.common.enums import RowState
 from sans.gui_logic.models.RowEntries import RowEntries
 from sans.gui_logic.models.basic_hint_strategy import BasicHintStrategy
@@ -135,7 +133,11 @@ class TableModelTest(unittest.TestCase):
         table_model.append_table_entry(RowEntries(sample_direct=345))
         table_model.append_table_entry(empty_row)
 
-        self.assertEqual(2, table_model.get_non_empty_rows())
+        self.assertEqual(2, len(table_model.get_non_empty_rows()))
+
+        for i in table_model.get_non_empty_rows():
+            self.assertFalse(i.is_empty())
+
         self.assertEqual(5, table_model.get_number_of_rows())
 
     def test_default_obj_correctly_tracked(self):

@@ -6,28 +6,30 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
+import inspect
 import os
 import re
-import inspect
 
 import six
 from six import types
-from mantid.kernel import config
-from mantid.api import (AnalysisDataService, WorkspaceGroup)
+
 from SANSadd2 import add_runs
-from sans.gui_logic.models.RowEntries import RowEntries
-from sans.sans_batch import SANSBatchReduction, SANSCentreFinder
+from mantid.api import (AnalysisDataService, WorkspaceGroup)
+from mantid.kernel import config
+from sans.command_interface.batch_csv_parser import BatchCsvParser
 from sans.command_interface.command_interface_functions import (print_message, warning_message)
 from sans.command_interface.command_interface_state_director import (CommandInterfaceStateDirector, DataCommand,
-                                                                     DataCommandId, NParameterCommand, NParameterCommandId,
+                                                                     DataCommandId, NParameterCommand,
+                                                                     NParameterCommandId,
                                                                      FitData)
-from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
-from sans.common.file_information import (find_sans_file, find_full_file_path)
 from sans.common.enums import (DetectorType, FitType, RangeStepType, ReductionDimensionality,
-                               ReductionMode, SANSFacility, SaveType, BatchReductionEntry, OutputMode, FindDirectionEnum)
+                               ReductionMode, SANSFacility, SaveType, OutputMode, FindDirectionEnum)
+from sans.common.file_information import (find_sans_file, find_full_file_path)
 from sans.common.general_functions import (convert_bank_name_to_detector_type_isis, get_output_name,
                                            is_part_of_reduced_output_workspace_group)
+from sans.gui_logic.models.RowEntries import RowEntries
+from sans.sans_batch import SANSBatchReduction, SANSCentreFinder
 
 if six.PY2:
     # This can be swapped with in box FileNotFoundError
@@ -873,8 +875,8 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs=None, verbose=Fals
         output_mode = OutputMode.PUBLISH_TO_ADS
 
     # Get the information from the csv file
-    batch_csv_parser = BatchCsvParser(filename)
-    parsed_batch_entries = batch_csv_parser.parse_batch_file()
+    batch_csv_parser = BatchCsvParser()
+    parsed_batch_entries = batch_csv_parser.parse_batch_file(filename)
 
     # Get a state with all existing settings
     for parsed_batch_entry in parsed_batch_entries:
