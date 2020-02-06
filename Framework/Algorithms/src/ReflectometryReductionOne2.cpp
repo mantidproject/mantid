@@ -260,6 +260,7 @@ void ReflectometryReductionOne2::exec() {
   // Convert to Q
   auto IvsQ = convertToQ(IvsLam);
 
+  // Set outputs
   if (!isDefault("OutputWorkspaceWavelength") || isChild()) {
     setProperty("OutputWorkspaceWavelength", IvsLam);
   }
@@ -554,8 +555,6 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
   rebinToWorkspaceAlg->setProperty("WorkspaceToRebin", transmissionWS);
   rebinToWorkspaceAlg->execute();
   transmissionWS = rebinToWorkspaceAlg->getProperty("OutputWorkspace");
-  if (isDefault("OutputWorkspaceTransmission") && !transmissionWSName.empty())
-    setPropertyValue("OutputWorkspaceTransmission", transmissionWSName);
 
   // If the detector workspace has been reduced then the spectrum maps
   // should match AFTER reducing the transmission workspace
@@ -564,6 +563,13 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
   }
 
   MatrixWorkspace_sptr normalized = divide(detectorWS, transmissionWS);
+
+  // Set output transmission workspace
+  if (isDefault("OutputWorkspaceTransmission") && !transmissionWSName.empty()) {
+    setPropertyValue("OutputWorkspaceTransmission", transmissionWSName);
+  }
+  setProperty("OutputWorkspaceTransmission", transmissionWS);
+
   return normalized;
 }
 
