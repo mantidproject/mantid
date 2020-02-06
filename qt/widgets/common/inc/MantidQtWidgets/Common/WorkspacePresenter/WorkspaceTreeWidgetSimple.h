@@ -43,6 +43,7 @@ public:
 
 signals:
   void plotSpectrumClicked(const QStringList &workspaceNames);
+  void plotBinClicked(const QStringList &workspaceNames);
   void overplotSpectrumClicked(const QStringList &workspaceNames);
   void plotSpectrumWithErrorsClicked(const QStringList &workspaceNames);
   void overplotSpectrumWithErrorsClicked(const QStringList &workspaceNames);
@@ -59,6 +60,7 @@ signals:
 
 private slots:
   void onPlotSpectrumClicked();
+  void onPlotBinClicked();
   void onOverplotSpectrumClicked();
   void onPlotSpectrumWithErrorsClicked();
   void onOverplotSpectrumWithErrorsClicked();
@@ -71,10 +73,10 @@ private slots:
   void onShowDetectorsClicked();
 
 private:
-  QAction *m_plotSpectrum, *m_overplotSpectrum, *m_plotSpectrumWithErrs,
-      *m_overplotSpectrumWithErrs, *m_plotColorfill, *m_sampleLogs,
-      *m_sliceViewer, *m_showInstrument, *m_showData, *m_showAlgorithmHistory,
-      *m_showDetectors;
+  QAction *m_plotSpectrum, *m_plotBin, *m_overplotSpectrum,
+      *m_plotSpectrumWithErrs, *m_overplotSpectrumWithErrs, *m_plotColorfill,
+      *m_sampleLogs, *m_sliceViewer, *m_showInstrument, *m_showData,
+      *m_showAlgorithmHistory, *m_showDetectors;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

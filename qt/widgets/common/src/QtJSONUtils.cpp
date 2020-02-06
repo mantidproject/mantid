@@ -18,8 +18,8 @@
 #include <QTextStream>
 #endif
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 namespace {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 // Code in anonymous namespace taken from stack overflow
 // https://stackoverflow.com/questions/4169988/easiest-way-to-parse-json-in-qt-4-7
 // from user2243820 on 1st August 2019
@@ -111,8 +111,23 @@ public:
     return decodeInner(object);
   }
 };
-} // namespace
 #endif
+
+void writeData(const QString &filename, const QByteArray &data) {
+  QFile jsonFile(filename);
+
+  if (!jsonFile.open(QFile::WriteOnly)) {
+    throw std::invalid_argument("Could not open file at " +
+                                filename.toStdString());
+  }
+
+  if (jsonFile.write(data) == -1) {
+    throw std::runtime_error("Failed to write data to " +
+                             filename.toStdString());
+  }
+}
+
+} // namespace
 namespace MantidQt {
 namespace API {
 void saveJSONToFile(QString &filename, const QMap<QString, QVariant> &map) {
@@ -125,22 +140,22 @@ void saveJSONToFile(QString &filename, const QMap<QString, QVariant> &map) {
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   JSON JSON;
   auto jsonString = JSON.encode(map);
-  QFile jsonFile(filename);
-  jsonFile.open(QFile::WriteOnly);
+
   QByteArray jsonByteArray;
-  jsonFile.write(jsonByteArray.append(jsonString));
+  writeData(filename, jsonByteArray.append(jsonString));
 #else
   QJsonDocument jsonDocument(QJsonObject::fromVariantMap(map));
-  QFile jsonFile(filename);
-  jsonFile.open(QFile::WriteOnly);
-  jsonFile.write(jsonDocument.toJson());
+  writeData(filename, jsonDocument.toJson());
 #endif
 }
 
 QMap<QString, QVariant> loadJSONFromFile(const QString &filename) {
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   QFile jsonFile(filename);
-  jsonFile.open(QFile::ReadOnly);
+  if (!jsonFile.open(QFile::ReadOnly)) {
+    throw std::invalid_argument("Cannot open file at: " +
+                                filename.toStdString());
+  }
   QString jsonString(jsonFile.readAll());
   return loadJSONFromString(jsonString);
 #else
@@ -149,8 +164,9 @@ QMap<QString, QVariant> loadJSONFromFile(const QString &filename) {
    * implementation of this function, from user alanwsx and edited by BSMP.
    */
   QFile file(filename);
-  if (!file.open(QIODevice::ReadOnly)) {
-    throw std::runtime_error("Failed to open " + filename.toStdString());
+  if (!file.open(QFile::ReadOnly)) {
+    throw std::invalid_argument("Cannot open file at: " +
+                                filename.toStdString());
   }
 
   // step 2

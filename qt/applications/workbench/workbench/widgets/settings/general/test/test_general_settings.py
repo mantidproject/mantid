@@ -10,10 +10,11 @@ from __future__ import absolute_import, unicode_literals
 import unittest
 import sys
 
-from mantid.py3compat.mock import call, patch, Mock
+from mantid.py3compat.mock import call, patch, MagicMock, Mock
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.testing.strict_mock import StrictMock
 from workbench.widgets.settings.general.presenter import GeneralSettings
+from qtpy.QtCore import Qt
 
 
 class MockInstrument(object):
@@ -86,9 +87,14 @@ class GeneralSettingsTest(unittest.TestCase):
         self.assert_connected_once(presenter.view.facility, presenter.view.facility.currentTextChanged)
         self.assert_connected_once(presenter.view.instrument, presenter.view.instrument.currentTextChanged)
 
-    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
-    def test_setup_checkbox_signals(self, _):
+    def test_setup_checkbox_signals(self):
         presenter = GeneralSettings(None)
+
+        self.assert_connected_once(presenter.view.crystallography_convention,
+                                   presenter.view.crystallography_convention.stateChanged)
+
+        self.assert_connected_once(presenter.view.use_open_gl,
+                                   presenter.view.use_open_gl.stateChanged)
 
         self.assert_connected_once(presenter.view.show_invisible_workspaces,
                                    presenter.view.show_invisible_workspaces.stateChanged)
@@ -101,6 +107,18 @@ class GeneralSettingsTest(unittest.TestCase):
 
         self.assert_connected_once(presenter.view.total_number_checkpoints,
                                    presenter.view.total_number_checkpoints.valueChanged)
+
+    def test_font_dialog_signals(self):
+        presenter = GeneralSettings(None)
+        with patch.object(presenter.view, 'create_font_dialog', MagicMock()) as font_dialog:
+            presenter.action_main_font_button_clicked()
+            self.assertEqual(1, font_dialog().fontSelected.connect.call_count)
+
+    def test_setup_general_group_signals(self):
+        presenter = GeneralSettings(None)
+
+        self.assert_connected_once(presenter.view.main_font,
+                                   presenter.view.main_font.clicked)
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_facility_changed(self, mock_ConfigService):
@@ -138,8 +156,7 @@ class GeneralSettingsTest(unittest.TestCase):
         mock_conf.set.assert_called_once_with(GeneralSettings.PROMPT_SAVE_ON_CLOSE, False)
 
     @patch(WORKBENCH_CONF_CLASSPATH)
-    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
-    def test_action_prompt_save_editor_modified(self, mock_ConfigService, mock_CONF):
+    def test_action_prompt_save_editor_modified(self, mock_CONF):
         presenter = GeneralSettings(None)
 
         presenter.action_prompt_save_editor_modified(True)
@@ -157,22 +174,25 @@ class GeneralSettingsTest(unittest.TestCase):
         # load current setting is called automatically in the constructor
         GeneralSettings(None)
 
-        # calls().__int__() are the calls to int() on the retrieved value from ConfigService.getString
-        # In python 3.8 it falls back to __index__() if __int__() is not defined
-        if sys.version_info < (3, 8):
+        # calls().__bool__() are the calls to bool() on the retrieved value from ConfigService.getString
+        # In python 3 it __bool__ is called otherwise __nonzero__ is used
+        if sys.version_info < (3,):
             mock_CONF.get.assert_has_calls([call(GeneralSettings.PROMPT_SAVE_ON_CLOSE),
-                                            call().__int__(),
+                                            call().__nonzero__(),
                                             call(GeneralSettings.PROMPT_SAVE_EDITOR_MODIFIED),
-                                            call().__int__()])
+                                            call().__nonzero__()])
         else:
             mock_CONF.get.assert_has_calls([call(GeneralSettings.PROMPT_SAVE_ON_CLOSE),
-                                            call().__index__(),
+                                            call().__bool__(),
                                             call(GeneralSettings.PROMPT_SAVE_EDITOR_MODIFIED),
-                                            call().__index__()])
+                                            call().__bool__()])
 
         mock_ConfigService.getString.assert_has_calls([call(GeneralSettings.PR_RECOVERY_ENABLED),
                                                        call(GeneralSettings.PR_TIME_BETWEEN_RECOVERY),
-                                                       call(GeneralSettings.PR_NUMBER_OF_CHECKPOINTS)])
+                                                       call(GeneralSettings.PR_NUMBER_OF_CHECKPOINTS),
+                                                       call(GeneralSettings.USE_NOTIFICATIONS),
+                                                       call(GeneralSettings.CRYSTALLOGRAPY_CONV),
+                                                       call(GeneralSettings.OPENGL)])
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_project_recovery_enabled(self, mock_ConfigService):
@@ -217,6 +237,58 @@ class GeneralSettingsTest(unittest.TestCase):
         new_instr = "apples"
         presenter.action_instrument_changed(new_instr)
         mock_ConfigService.setString.assert_called_once_with(GeneralSettings.INSTRUMENT, new_instr)
+
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
+    def test_action_crystallography_convention(self, mock_ConfigService):
+        presenter = GeneralSettings(None)
+        # reset any effects from the constructor
+        mock_ConfigService.setString.reset_mock()
+
+        presenter.action_crystallography_convention(Qt.Checked)
+        mock_ConfigService.setString.assert_called_once_with(GeneralSettings.CRYSTALLOGRAPY_CONV, "Crystallography")
+
+        mock_ConfigService.setString.reset_mock()
+
+        presenter.action_crystallography_convention(Qt.Unchecked)
+        mock_ConfigService.setString.assert_called_once_with(GeneralSettings.CRYSTALLOGRAPY_CONV, "Inelastic")
+
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
+    def test_action_use_open_gl(self, mock_ConfigService):
+        presenter = GeneralSettings(None, view=Mock())
+        # reset any effects from the constructor
+        mock_ConfigService.setString.reset_mock()
+
+        presenter.action_use_open_gl(Qt.Checked)
+        mock_ConfigService.setString.assert_called_once_with(GeneralSettings.OPENGL, "On")
+
+        mock_ConfigService.setString.reset_mock()
+
+        presenter.action_use_open_gl(Qt.Unchecked)
+        mock_ConfigService.setString.assert_called_once_with(GeneralSettings.OPENGL, "Off")
+
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
+    def test_action_use_notifications_modified(self, mock_ConfigService):
+        presenter = GeneralSettings(None)
+        mock_ConfigService.setString.reset_mock()
+
+        presenter.action_use_notifications_modified(Qt.Checked)
+
+        mock_ConfigService.setString.assert_called_once_with(GeneralSettings.USE_NOTIFICATIONS, "On")
+        mock_ConfigService.setString.reset_mock()
+
+        presenter.action_use_notifications_modified(Qt.Unchecked)
+
+        mock_ConfigService.setString.assert_called_once_with(GeneralSettings.USE_NOTIFICATIONS, "Off")
+
+    @patch(WORKBENCH_CONF_CLASSPATH)
+    def test_action_font_selected(self, mock_conf):
+        presenter = GeneralSettings(None)
+        # reset any effects from the constructor
+        mock_conf.set.reset_mock()
+        mock_font = Mock()
+        mock_font.toString.return_value = "Serif"
+        presenter.action_font_selected(mock_font)
+        mock_conf.set.assert_called_once_with(GeneralSettings.FONT, "Serif")
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_show_invisible_workspaces(self, mock_ConfigService):

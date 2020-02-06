@@ -40,6 +40,20 @@ namespace {
 Mantid::Kernel::Logger window_log("AlgorithmHistoryWindow");
 /// static tree widget logger
 Mantid::Kernel::Logger widget_log("AlgHistoryTreeWidget");
+
+int getNumberOfItemsInTree(QTreeWidgetItem *item) {
+  // item is the root of the tree
+  int count{1};
+  for (int i = 0; i < item->childCount(); i++) {
+    if (item->child(i)->checkState(1) == Qt::Checked) {
+      // recurse into unrolled algorithms
+      count += getNumberOfItemsInTree(item->child(i));
+    } else {
+      count++;
+    }
+  }
+  return count;
+}
 } // namespace
 
 AlgExecSummaryGrpBox::AlgExecSummaryGrpBox(QWidget *w)
@@ -638,49 +652,69 @@ void AlgHistoryTreeWidget::onItemChanged(QTreeWidgetItem *item, int index) {
   this->blockSignals(false);
 }
 
-void AlgHistoryTreeWidget::itemChecked(QTreeWidgetItem *item, int index) {
-  std::vector<int> indicies;
+void AlgHistoryTreeWidget::getItemIndex(QTreeWidgetItem *item, int &index) {
+  // Counts all of the algorithms which precede the given one, including child
+  // algorithms if an algorithm is unrolled.
   QModelIndex modelIndex;
+  if (item->parent()) {
+    index++;
+  }
+  modelIndex = indexFromItem(item, 1);
+  for (auto i = 0; i < modelIndex.row(); i++) {
+    // If an algorithm is unrolled, add all of its children to the index,
+    // otherwise just add one.
+    if (item->parent() &&
+        item->parent()->child(i)->checkState(1) == Qt::Checked) {
+      index += getNumberOfItemsInTree(item->parent()->child(i));
+    } else if (item->parent() == nullptr &&
+               topLevelItem(i)->checkState(1) == Qt::Checked) {
+      index += getNumberOfItemsInTree(topLevelItem(i));
+    } else {
+      index += 1;
+    }
+  }
+}
 
-  do {
-    modelIndex = indexFromItem(item, index);
-    indicies.emplace_back(modelIndex.row() + 1);
+void AlgHistoryTreeWidget::itemChecked(QTreeWidgetItem *item, int index) {
+  std::vector<QTreeWidgetItem *> checkedItems;
+  std::vector<int> unrollIndices;
+  int unrollIndex{0};
 
-    if (item->flags().testFlag(Qt::ItemIsUserCheckable)) {
-      item->setCheckState(index, Qt::Checked);
+  for (auto currentItem = item; currentItem;
+       currentItem = currentItem->parent()) {
+    // Check the item if it isn't already checked.
+    if (currentItem->checkState(index) != Qt::Checked) {
+      currentItem->setCheckState(index, Qt::Checked);
     }
 
-    item = item->parent();
-  } while (item);
+    checkedItems.emplace_back(currentItem);
+  }
 
-  indicies[indicies.size() - 1] -= 1;
+  for (auto it = checkedItems.rbegin(); it != checkedItems.rend(); ++it) {
+    auto currentItem = *it;
 
-  // sum the indices to obtain the positions we must unroll
-  std::vector<int> unrollIndicies;
-  unrollIndicies.reserve(indicies.size());
-  std::partial_sum(indicies.rbegin(), indicies.rend(),
-                   std::back_inserter(unrollIndicies));
+    // Find where we are in the tree.
+    getItemIndex(currentItem, unrollIndex);
 
+    unrollIndices.emplace_back(unrollIndex);
+  }
   this->blockSignals(false);
-  emit unrollAlgorithmHistory(unrollIndicies);
+  emit unrollAlgorithmHistory(unrollIndices);
   this->blockSignals(true);
 }
 
 void AlgHistoryTreeWidget::itemUnchecked(QTreeWidgetItem *item, int index) {
-  int rollIndex = 0;
-  QModelIndex modelIndex;
+  int rollIndex{0};
 
   // disable any children
   uncheckAllChildren(item, index);
 
   // find where we are in the tree
-  do {
-    modelIndex = indexFromItem(item, index);
-    rollIndex += modelIndex.row() + 1;
-    item = item->parent();
-  } while (item);
+  for (auto currentItem = item; currentItem;
+       currentItem = currentItem->parent()) {
+    getItemIndex(currentItem, rollIndex);
+  }
 
-  --rollIndex;
   this->blockSignals(false);
   emit rollAlgorithmHistory(rollIndex);
   this->blockSignals(true);

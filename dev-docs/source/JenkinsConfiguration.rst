@@ -40,7 +40,7 @@ Machine Setup
 
 Set up a local ``builder`` account that will be used by the slave.
 
-Install the :ref:`required prerequisites <GettingStarted>` for the relevant OS.
+Install the :ref:`required prerequisites <GettingStarted>` for the relevant OS. In addition, install a standalone `Python <https://www.python.org/downloads/windows/>`__ interpreter so the system tests are able to install the mantid package. Do not use the embeddable zip, use the full installer and ensure python.exe is on the `PATH`. 
 
 .. note::
    For Windows the `Command line Visual C++ build tools <https://visualstudio.microsoft.com/downloads/>`__

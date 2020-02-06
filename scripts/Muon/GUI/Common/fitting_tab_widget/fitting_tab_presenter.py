@@ -10,7 +10,6 @@ from Muon.GUI.Common.fitting_tab_widget.workspace_selector_view import Workspace
 from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
 from Muon.GUI.Common import thread_model
-from Muon.GUI.Common.ADSHandler.workspace_naming import get_group_or_pair_from_name
 from mantid.api import MultiDomainFunction, AnalysisDataService
 import functools
 import re
@@ -580,11 +579,7 @@ class FittingTabPresenter(object):
         return multi_domain_function
 
     def _get_selected_groups_and_pairs(self):
-        list_of_current_group_pairs = list(set([get_group_or_pair_from_name(name) for name in self.selected_data]))
-        if list_of_current_group_pairs:
-            return list_of_current_group_pairs
-        else:
-            return [self.context.group_pair_context.selected]
+        return self.context.group_pair_context.selected_groups + self.context.group_pair_context.selected_pairs
 
     def _check_data_exists(self, guess_selection):
         return [item for item in guess_selection if AnalysisDataService.doesExist(item)]

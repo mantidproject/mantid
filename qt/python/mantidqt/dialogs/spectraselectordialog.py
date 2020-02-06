@@ -13,6 +13,7 @@ from qtpy.QtCore import Qt
 from qtpy.QtGui import QIcon
 from qtpy.QtWidgets import QDialogButtonBox, QMessageBox
 
+from mantid.kernel import logger
 from mantid.api import MatrixWorkspace
 
 from mantidqt.icons import get_icon
@@ -36,7 +37,8 @@ SpectraSelectionDialogUI, SpectraSelectionDialogUIBase = load_ui(__file__, 'spec
 
 class SpectraSelection(object):
     Individual = 0
-    Tiled = 1
+    Waterfall = 1
+    Tiled = 2
 
     def __init__(self, workspaces):
         self.workspaces = workspaces
@@ -48,16 +50,22 @@ class SpectraSelection(object):
 class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
 
     @staticmethod
-    def raise_error_if_workspaces_not_compatible(workspaces):
+    def get_compatible_workspaces(workspaces):
+        matrix_workspaces = []
         for ws in workspaces:
-            if not isinstance(ws, MatrixWorkspace):
-                raise ValueError("Expected MatrixWorkspace, found {}.".format(ws.__class__.__name__))
+            if isinstance(ws, MatrixWorkspace):
+                matrix_workspaces.append(ws)
+            else:
+                # Log an error but carry on so valid workspaces can be plotted.
+                logger.warning("{}: Expected MatrixWorkspace, found {}".format(ws.name(), ws.__class__.__name__))
+
+        return matrix_workspaces
 
     def __init__(self, workspaces, parent=None, show_colorfill_btn=False, overplot=False):
         super(SpectraSelectionDialog, self).__init__(parent)
         self.icon = self.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
         self.setAttribute(Qt.WA_DeleteOnClose, True)
-        self.raise_error_if_workspaces_not_compatible(workspaces)
+        workspaces = self.get_compatible_workspaces(workspaces)
 
         # attributes
         self._workspaces = workspaces
@@ -92,11 +100,16 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
 
     def _check_number_of_plots(self, selection):
         index_length = len(selection.wksp_indices) if selection.wksp_indices else len(selection.spectra)
-        if selection.plot_type == SpectraSelection.Tiled and len(selection.workspaces) * index_length > 25:
+        number_of_lines_to_plot = len(selection.workspaces) * index_length
+        if selection.plot_type == SpectraSelection.Tiled and number_of_lines_to_plot > 12:
             response = QMessageBox.warning(self, 'Mantid Workbench',
-                                           'You are attempting to create a tiled plot with more than 25 subplots,'
-                                           'this is not recommended as it may lead to performance issues.'
-                                           ' Do you wish to continue?', QMessageBox.Ok | QMessageBox.Cancel)
+                                           'Are you sure you want to plot {} subplots?'.format(number_of_lines_to_plot),
+                                           QMessageBox.Ok | QMessageBox.Cancel)
+            return response == QMessageBox.Ok
+        elif selection.plot_type != SpectraSelection.Tiled and number_of_lines_to_plot > 10:
+            response = QMessageBox.warning(self, 'Mantid Workbench', 'You selected {} spectra to plot. Are you sure '
+                                           'you want to plot this many?'.format(number_of_lines_to_plot),
+                                           QMessageBox.Ok | QMessageBox.Cancel)
             return response == QMessageBox.Ok
 
         return True

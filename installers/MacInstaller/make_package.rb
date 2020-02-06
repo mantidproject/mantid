@@ -54,6 +54,7 @@ BUNDLED_PY_MODULES_COMMON = [
   'sphinx',
   'sphinx_bootstrap_theme',
   'traitlets',
+  'toml',
   'urllib3',
   'wcwidth',
   'yaml',
@@ -595,7 +596,7 @@ executables = ["#{contents_macos}/MantidNexusParallelLoader"]
 # check we have a known bundle
 if bundle_path.to_s.end_with?('MantidWorkbench.app')
   bundled_packages = BUNDLED_PY_MODULES_COMMON + BUNDLED_PY_MODULES_WORKBENCH
-  bundled_qt_plugins = QT_PLUGINS_COMMON + ['platforms', 'styles']
+  bundled_qt_plugins = QT_PLUGINS_COMMON + ['platforms', 'printsupport', 'styles']
   host_qt_plugins_dir = QT5_PLUGINS_DIR
 elsif bundle_path.to_s.end_with?('MantidPlot.app')
   bundled_packages = BUNDLED_PY_MODULES_COMMON + BUNDLED_PY_MODULES_MANTIDPLOT

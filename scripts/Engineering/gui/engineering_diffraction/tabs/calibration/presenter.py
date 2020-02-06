@@ -36,7 +36,7 @@ class CalibrationPresenter(object):
 
         # Cropping Options
         self.cropping_widget = CroppingWidget(self.view, view=self.view.get_cropping_widget())
-        self.view.set_cropping_widget_hidden()
+        self.show_cropping(False)
 
     def connect_view_signals(self):
         self.view.set_on_calibrate_clicked(self.on_calibrate_clicked)
@@ -125,7 +125,7 @@ class CalibrationPresenter(object):
         if not self.validate_run_numbers():
             create_error_message(self.view, "Check run numbers/path is valid.")
             return False
-        if not self.cropping_widget.is_valid():
+        if self.view.get_crop_checked() and not self.cropping_widget.is_valid():
             create_error_message(self.view, "Check cropping values are valid.")
             return False
         return True
@@ -169,7 +169,7 @@ class CalibrationPresenter(object):
             self.set_calibrate_button_text("Load")
             self.view.set_check_plot_output_enabled(False)
             self.view.set_check_cropping_enabled(False)
-            self.view.set_check_cropping_state(0)
+            self.view.set_check_cropping_checked(False)
 
     def set_calibrate_button_text(self, text):
         self.view.set_calibrate_button_text(text)
@@ -179,10 +179,7 @@ class CalibrationPresenter(object):
         self.view.find_vanadium_files()
 
     def show_cropping(self, show):
-        if show:
-            self.view.set_cropping_widget_visible()
-        else:
-            self.view.set_cropping_widget_hidden()
+        self.view.set_cropping_widget_visibility(show)
 
     # -----------------------
     # Observers / Observables

@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
-import platform
 import unittest
 
 import matplotlib
@@ -94,6 +93,7 @@ def _run_apply_properties_on_figure_with_curve():
     ax = fig.add_subplot(111)
     ax.errorbar([0, 1], [0, 1], yerr=[0.1, 0.2], label='old label')
     presenter = PlotConfigDialogPresenter(fig, view=Mock())
+    presenter.tab_widget_views[1][0].select_curve_combo_box.currentIndex.return_value = 0
     with patch.object(presenter.tab_widget_presenters[1], 'update_view',
                       lambda: None):
         presenter.apply_properties()
@@ -309,10 +309,7 @@ class ApplyAllPropertiesTest(unittest.TestCase):
                          self.new_legend.get_frame().get_alpha())
 
     def test_apply_properties_on_figure_with_legend_sets_entries_font(self):
-        if platform.system() == "Windows":
-            new_legend_props['entries_font'] = 'DejaVu Sans'
-        self.assertEqual(new_legend_props['entries_font'],
-                         self.new_legend.get_texts()[0].get_fontname())
+        self.assertTrue(self.new_legend.get_texts()[0].get_fontname().endswith('Sans'))
 
     def test_apply_properties_on_figure_with_legend_sets_entries_size(self):
         self.assertEqual(new_legend_props['entries_size'],
@@ -323,10 +320,7 @@ class ApplyAllPropertiesTest(unittest.TestCase):
                          self.new_legend.get_texts()[0].get_color())
 
     def test_apply_properties_on_figure_with_legend_sets_title_font(self):
-        if platform.system() == "Windows":
-            new_legend_props['title_font'] = 'DejaVu Sans'
-        self.assertEqual(new_legend_props['title_font'],
-                         self.new_legend.get_title().get_fontname())
+        self.assertTrue(self.new_legend.get_title().get_fontname().endswith('Sans'))
 
     def test_apply_properties_on_figure_with_legend_sets_title_size(self):
         self.assertEqual(new_legend_props['title_size'],

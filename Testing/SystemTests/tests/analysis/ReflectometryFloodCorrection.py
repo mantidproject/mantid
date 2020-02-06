@@ -73,7 +73,7 @@ class ReflectometryApplyFloodWorkspace(systemtesting.MantidSystemTest):
     def runTest(self):
         flood = CreateFloodWorkspace('OFFSPEC00035946.nxs', StartSpectrum=250, EndSpectrum=600,
                                      ExcludeSpectra=[260, 261, 262, 516, 517, 518], OutputWorkspace='flood')
-        data = Load('OFFSPEC00044998.nxs')
+        data = Load('OFFSPEC00044998.nxs', NumberOfBins=1)
         ApplyFloodWorkspace(InputWorkspace=data, FloodWorkspace=flood, OutputWorkspace=self.out_ws_name)
 
     def validate(self):

@@ -100,7 +100,10 @@ class FunctionWrapper(object):
         if type(name) == type('string') and self.fun.hasAttribute(name):
             return self.fun.getAttributeValue(name)
         else:
-            return self.fun.getParameterValue(name)
+            if self.fun.hasParameter(name):
+                return self.fun.getParameterValue(name)
+            else:
+                raise AttributeError("Parameter %s not found" % name)
 
     def __setitem__ (self, name, value):
         """
@@ -501,6 +504,9 @@ class CompositeFunctionWrapper(FunctionWrapper):
         """
 
         comp = self.fun
+        if (isinstance(nameorindex, str) and not comp.hasParameter(nameorindex)) \
+                or (isinstance(nameorindex, int) and nameorindex >= comp.nParams()):
+            raise AttributeError("Parameter %s not found" % nameorindex)
         item = comp[nameorindex]
         if isinstance(item, float):
             return  item

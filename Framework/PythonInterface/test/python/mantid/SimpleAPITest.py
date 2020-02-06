@@ -6,14 +6,14 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
+import inspect
 import unittest
+
 from mantid.api import (AlgorithmFactory, AlgorithmProxy, IAlgorithm, IEventWorkspace, ITableWorkspace,
                         PythonAlgorithm, MatrixWorkspace, mtd)
 import mantid.simpleapi as simpleapi
 import numpy
 import six
-
-#======================================================================================================================
 
 
 class SimpleAPITest(unittest.TestCase):
@@ -187,10 +187,16 @@ class SimpleAPITest(unittest.TestCase):
         self.assertEqual(MatrixWorkspace.rebin.__doc__, simpleapi.Rebin.__doc__)
 
         # Signature of method will have extra self argument
-        freefunction_sig = six.get_function_code(simpleapi.rebin).co_varnames
-        expected_method_sig = ['self']
-        expected_method_sig.extend(freefunction_sig)
-        self.assertEqual(six.get_function_code(MatrixWorkspace.rebin).co_varnames, tuple(expected_method_sig))
+        if hasattr(inspect, 'signature'):
+            method_parameters = list(MatrixWorkspace.rebin.__signature__.parameters)
+            self.assertEqual("self", method_parameters[0])
+            self.assertEqual(method_parameters[1:],
+                             list(simpleapi.rebin.__signature__.parameters))
+        else:
+            freefunction_sig = six.get_function_code(simpleapi.rebin).co_varnames
+            expected_method_sig = ['self']
+            expected_method_sig.extend(freefunction_sig)
+            self.assertEqual(six.get_function_code(MatrixWorkspace.rebin).co_varnames, tuple(expected_method_sig))
 
     def test_function_attached_as_workpace_method_does_the_same_as_the_free_function(self):
         # Use Rebin as a test

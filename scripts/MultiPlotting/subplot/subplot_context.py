@@ -104,7 +104,8 @@ class subplotContext(object):
 
     def replace_ws(self, ws):
         redraw_canvas = False
-        for key in self._ws.keys():
+        # force copy of .keys() to avoid mutation while iterating
+        for key in list(self._ws.keys()):
             if key.name() == ws.name():
                 redraw_canvas = True
                 self._ws[ws] = self._ws.pop(key)

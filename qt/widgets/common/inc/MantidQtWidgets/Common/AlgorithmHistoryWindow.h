@@ -81,6 +81,7 @@ private slots:
 
 private:
   void treeSelectionChanged();
+  void getItemIndex(QTreeWidgetItem *item, int &index);
   void itemChecked(QTreeWidgetItem *item, int index);
   void itemUnchecked(QTreeWidgetItem *item, int index);
   void populateNestedHistory(AlgHistoryItem *parentWidget,

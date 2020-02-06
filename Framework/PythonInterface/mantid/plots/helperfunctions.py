@@ -12,13 +12,17 @@ from __future__ import (absolute_import, division, print_function)
 import datetime
 
 import numpy as np
+from matplotlib.collections import PolyCollection
 from matplotlib.container import ErrorbarContainer
+from matplotlib.colors import LogNorm
+from matplotlib.ticker import LogLocator
 from scipy.interpolate import interp1d
 
 import mantid.api
 import mantid.kernel
 from mantid.api import MultipleExperimentInfos, MatrixWorkspace
 from mantid.dataobjects import EventWorkspace, MDHistoWorkspace, Workspace2D
+from mantid.plots.legend import convert_color_to_hex
 from mantid.plots.utility import MantidAxType
 
 
@@ -767,3 +771,252 @@ def set_errorbars_hidden(container, hide):
         if bar_lines:
             for line in bar_lines:
                 line.set_visible(not hide)
+
+# ====================================================
+# Waterfall plots
+# ====================================================
+
+
+def set_initial_dimensions(ax):
+    # Set the width and height which are used to calculate the offset percentage for waterfall plots.
+    # This means that the curves in a waterfall plot are always offset by the same amount, even if the
+    # plot limits change.
+    x_lim, y_lim = ax.get_xlim(), ax.get_ylim()
+    ax.width = x_lim[1] - x_lim[0]
+    ax.height = y_lim[1] - y_lim[0]
+
+
+def remove_and_return_errorbar_cap_lines(ax):
+    # Matplotlib holds the line objects representing errorbar caps in the same list as the actual curves on a plot.
+    # This causes problems for waterfall plots so here they are removed from the list and placed into a different
+    # list, which is returned so they can be readded later.
+    errorbar_cap_lines = []
+    for line in ax.get_lines():
+        # The lines with the label "_nolegend_" are either actual curves with errorbars, or errorbar cap lines.
+        # To check if it is an actual curve, we attempt to find the ErrorbarContainer that matches the line object.
+        if line.get_label() == "_nolegend_":
+            line_is_errorbar_cap = True
+            for container in ax.containers:
+                if isinstance(container, ErrorbarContainer):
+                    if container[0] == line:
+                        line_is_errorbar_cap = False
+                        break
+
+            if line_is_errorbar_cap:
+                errorbar_cap_lines.append(ax.lines.pop(ax.lines.index(line)))
+
+    return errorbar_cap_lines
+
+
+def set_waterfall_toolbar_options_enabled(ax):
+    toolbar = ax.get_figure().canvas.toolbar
+
+    if toolbar:
+        toolbar.waterfall_conversion(ax.is_waterfall())
+
+
+def get_waterfall_fills(ax):
+    return [collection for collection in ax.collections if isinstance(collection, PolyCollection)]
+
+
+def waterfall_update_fill(ax):
+    # Get the colours of each fill so they can be reapplied after updating.
+    colours = []
+    for collection in ax.collections:
+        if isinstance(collection, PolyCollection):
+            colours.append(collection.get_facecolor())
+
+    waterfall_remove_fill(ax)
+    waterfall_create_fill(ax)
+
+    poly_collections = get_waterfall_fills(ax)
+    line_colours = True
+    # If there are more fill areas than colours, this means that new curves have been added to the plot
+    # (overplotting). In which case, we need to determine whether the fill colours are set to match the line
+    # colours by checking that the colour of each fill that existed previously is the same as the line it belongs
+    # to. If so, the list of colours is appended to with the colours of the new lines. Otherwise the fills are
+    # all set to the same colour and so the list of colours is extended with the same colour for each new curve.
+    if len(poly_collections) > len(colours):
+        for i in range(len(colours) - 1):
+            if convert_color_to_hex(colours[i][0]) != ax.get_lines()[i].get_color():
+                line_colours = False
+                break
+
+        colours_length = len(colours)
+        if line_colours:
+            for i in range(colours_length, len(poly_collections)):
+                colours.append(ax.get_lines()[i].get_color())
+        else:
+            for i in range(colours_length, len(poly_collections)):
+                colours.append(colours[0])
+
+    for i, collection in enumerate(poly_collections):
+        collection.set_color(colours[i])
+
+
+def apply_waterfall_offset_to_errorbars(ax, line, amount_to_move_x, amount_to_move_y, index):
+    for container in ax.containers:
+        # Find the ErrorbarContainer that corresponds to the current line.
+        if isinstance(container, ErrorbarContainer) and container[0] == line:
+            # Shift the data line and the errorbar caps
+            for line in (container[0],) + container[1]:
+                line.set_xdata(line.get_xdata() + amount_to_move_x)
+                line.set_ydata(line.get_ydata() + amount_to_move_y)
+
+                if index == 0:
+                    line.set_zorder(len(ax.get_lines()))
+                else:
+                    line.set_zorder(ax.get_lines()[index - 1].get_zorder() - 1)
+
+            # Shift the errorbars
+            for bar_line_col in container[2]:
+                segments = bar_line_col.get_segments()
+                for point in segments:
+                    for row in range(2):
+                        point[row][1] += amount_to_move_y
+                    for column in range(2):
+                        point[column][0] += amount_to_move_x
+                bar_line_col.set_segments(segments)
+            bar_line_col.set_zorder((len(ax.get_lines()) - index) + 1)
+            break
+
+
+def convert_single_line_to_waterfall(ax, index, x=None, y=None, need_to_update_fill=False):
+    line = ax.get_lines()[index]
+
+    amount_to_move_x = index * ax.width * (ax.waterfall_x_offset / 500) if x is None else \
+        index * ax.width * ((x - ax.waterfall_x_offset) / 500)
+
+    amount_to_move_y = index * ax.height * (ax.waterfall_y_offset / 500) if y is None else \
+        index * ax.height * ((y - ax.waterfall_y_offset) / 500)
+
+    if line.get_label() == "_nolegend_":
+        apply_waterfall_offset_to_errorbars(ax, line, amount_to_move_x, amount_to_move_y, index)
+    else:
+        line.set_xdata(line.get_xdata() + amount_to_move_x)
+        line.set_ydata(line.get_ydata() + amount_to_move_y)
+
+        # Ensures the more offset lines are drawn behind the less offset ones
+        if index == 0:
+            line.set_zorder(len(ax.get_lines()))
+        else:
+            line.set_zorder(ax.get_lines()[index - 1].get_zorder() - 1)
+
+    # If the curves are filled and the fill has been set to match the line colour and the line colour has changed
+    # then the fill's colour is updated.
+    if need_to_update_fill:
+        fill = get_waterfall_fill_for_curve(ax, index)
+        fill.set_color(line.get_color())
+
+
+def set_waterfall_fill_visible(ax, index):
+    if not ax.waterfall_has_fill():
+        return
+
+    # Sets the filled area to match the visibility of the line it belongs to.
+    line = ax.get_lines()[index]
+    fill = get_waterfall_fill_for_curve(ax, index)
+    fill.set_visible(line.get_visible())
+
+
+def get_waterfall_fill_for_curve(ax, index):
+    # Takes the index of a curve and returns that curve's filled area.
+    i = 0
+    for collection in ax.collections:
+        if isinstance(collection, PolyCollection):
+            if i == index:
+                fill = collection
+                break
+            i += 1
+
+    return fill
+
+
+def waterfall_fill_is_line_colour(ax):
+    i = 0
+    # Check that for each line, the fill area is the same colour as the line.
+    for collection in ax.collections:
+        if isinstance(collection, PolyCollection):
+            line_colour = ax.get_lines()[i].get_color()
+            poly_colour = convert_color_to_hex(collection.get_facecolor()[0])
+            if line_colour != poly_colour:
+                return False
+            i += 1
+    return True
+
+
+def waterfall_create_fill(ax):
+    errorbar_cap_lines = remove_and_return_errorbar_cap_lines(ax)
+
+    for i, line in enumerate(ax.get_lines()):
+        bottom_line = [min(line.get_ydata()) - ((i * ax.height) / 100)] * len(line.get_ydata())
+        fill = ax.fill_between(line.get_xdata(), line.get_ydata(), bottom_line)
+        fill.set_zorder((len(ax.get_lines()) - i) + 1)
+        set_waterfall_fill_visible(ax, i)
+
+    ax.lines += errorbar_cap_lines
+
+
+def waterfall_remove_fill(ax):
+    ax.collections[:] = filter(lambda x: not isinstance(x, PolyCollection), ax.collections)
+    ax.get_figure().canvas.draw()
+
+
+def solid_colour_fill(ax, colour):
+    # Add the fill areas if there aren't any already.
+    if not ax.waterfall_has_fill():
+        waterfall_create_fill(ax)
+
+    for i, collection in enumerate(ax.collections):
+        if isinstance(collection, PolyCollection):
+            # This function is called every time the colour line edit is changed so it's possible
+            # that the current input is not a valid colour, such as if the user hasn't finished entering
+            # a colour. So if setting the colour fails, the function just stops.
+            try:
+                collection.set_color(colour)
+            except:
+                return
+
+    ax.get_figure().canvas.draw()
+
+
+def line_colour_fill(ax):
+    # Add the fill areas if there aren't any already.
+    if not ax.waterfall_has_fill():
+        waterfall_create_fill(ax)
+
+    i = 0
+    for collection in ax.collections:
+        if isinstance(collection, PolyCollection):
+            colour = ax.get_lines()[i].get_color()
+            collection.set_color(colour)
+            # Only want the counter to iterate if the current collection is a PolyCollection (the fill areas) since
+            # the axes may have other collections which can be ignored.
+            i = i + 1
+
+    ax.get_figure().canvas.draw()
+
+
+def update_colorbar_scale(figure, image, scale, vmin, vmax):
+    """"
+    Updates the colorbar to the scale and limits given.
+
+    :param figure: A matplotlib figure instance
+    :param image: The matplotlib image containing the colorbar
+    :param scale: The norm scale of the colorbar, this should be a matplotlib colormap norm type
+    :param vmin: the minimum value on the colorbar
+    :param vmax: the maximum value on the colorbar
+    """
+    if vmin == 0 and scale == LogNorm:
+        vmin += 1e-6  # Avoid 0 log scale error
+    image.set_norm(scale(vmin=vmin, vmax=vmax))
+    if image.colorbar:
+        image.colorbar.remove()
+        locator = None
+        if scale == LogNorm:
+            locator = LogLocator(subs=np.arange(1, 10))
+            if locator.tick_values(vmin=vmin, vmax=vmax).size == 0:
+                locator = LogLocator()
+                mantid.kernel.logger.warning("Minor ticks on colorbar scale cannot be shown "
+                                             "as the range between min value and max value is too large")
+        figure.colorbar(image, ticks=locator)

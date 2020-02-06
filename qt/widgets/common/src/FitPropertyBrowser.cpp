@@ -82,9 +82,10 @@ FitPropertyBrowser::FitPropertyBrowser(QWidget *parent, QObject *mantidui)
       m_startX(nullptr), m_endX(nullptr), m_output(nullptr),
       m_minimizer(nullptr), m_ignoreInvalidData(nullptr),
       m_costFunction(nullptr), m_maxIterations(nullptr), m_peakRadius(nullptr),
-      m_logValue(nullptr), m_plotDiff(nullptr), m_plotCompositeMembers(nullptr),
-      m_convolveMembers(nullptr), m_rawData(nullptr), m_xColumn(nullptr),
-      m_yColumn(nullptr), m_errColumn(nullptr), m_showParamErrors(nullptr),
+      m_logValue(nullptr), m_plotDiff(nullptr), m_excludeRange(nullptr),
+      m_plotCompositeMembers(nullptr), m_convolveMembers(nullptr),
+      m_rawData(nullptr), m_xColumn(nullptr), m_yColumn(nullptr),
+      m_errColumn(nullptr), m_showParamErrors(nullptr),
       m_evaluationType(nullptr), m_compositeFunction(), m_browser(nullptr),
       m_fitActionUndoFit(nullptr), m_fitActionSeqFit(nullptr),
       m_fitActionFit(nullptr), m_fitActionEvaluate(nullptr),
@@ -213,6 +214,10 @@ void FitPropertyBrowser::init() {
   bool plotDiff = settings.value("Plot Difference", QVariant(true)).toBool();
   m_boolManager->setValue(m_plotDiff, plotDiff);
 
+  m_excludeRange = m_stringManager->addProperty("Exclude Range");
+  m_excludeRange->setToolTip(
+      "A list of pairs of real numbers which define the region to exclude");
+
   m_plotCompositeMembers = m_boolManager->addProperty("Plot Composite Members");
   bool plotCompositeItems =
       settings.value(m_plotCompositeMembers->propertyName(), QVariant(false))
@@ -259,6 +264,7 @@ void FitPropertyBrowser::init() {
   settingsGroup->addSubProperty(m_maxIterations);
   settingsGroup->addSubProperty(m_peakRadius);
   settingsGroup->addSubProperty(m_plotDiff);
+  settingsGroup->addSubProperty(m_excludeRange);
   settingsGroup->addSubProperty(m_plotCompositeMembers);
   settingsGroup->addSubProperty(m_convolveMembers);
   settingsGroup->addSubProperty(m_showParamErrors);
@@ -737,59 +743,10 @@ void FitPropertyBrowser::addFunction() {
     return;
 
   // Declare new widget for picking fit functions
-  m_fitSelector = new QDialog();
-  m_fitSelector->setModal(true);
-  // QTreeWidget *m_fitTree = new QTreeWidget();
-  m_fitTree = new QTreeWidget;
+  m_fitSelector = new SelectFunctionDialog(this);
 
-  // Add functions to each of the categories. If it appears in more than one
-  // category then add to both
-  // Store in a map. Key = category. Value = vector of fit functions belonging
-  // to that category.
-  std::map<std::string, std::vector<std::string>> categories;
-  for (int i = 0; i < m_registeredFunctions.size(); ++i) {
-    boost::shared_ptr<Mantid::API::IFunction> f =
-        Mantid::API::FunctionFactory::Instance().createFunction(
-            m_registeredFunctions[i].toStdString());
-    std::vector<std::string> tempCategories = f->categories();
-    for (size_t j = 0; j < tempCategories.size(); ++j) {
-      categories[tempCategories[boost::lexical_cast<int>(j)]].emplace_back(
-          m_registeredFunctions[i].toStdString());
-    }
-  }
-
-  // Construct the QTreeWidget based on the map information of categories and
-  // their respective fit functions.
-  std::map<std::string, std::vector<std::string>>::const_iterator sItr =
-      categories.end();
-  for (std::map<std::string, std::vector<std::string>>::const_iterator itr =
-           categories.begin();
-       itr != sItr; ++itr) {
-    QTreeWidgetItem *category = new QTreeWidgetItem(m_fitTree);
-    category->setText(0, QString::fromStdString(itr->first));
-
-    std::vector<std::string>::const_iterator fitItrEnd = itr->second.end();
-    for (std::vector<std::string>::const_iterator fitItrBegin =
-             itr->second.begin();
-         fitItrBegin != fitItrEnd; ++fitItrBegin) {
-      QTreeWidgetItem *fit = new QTreeWidgetItem(category);
-      fit->setText(0, QString::fromStdString(fitItrBegin[0]));
-    }
-  }
-
-  // Set the layout of the widget.
-  m_fitTree->setToolTip("Select a function type and press OK.");
-  m_fitTree->setHeaderLabel("Fit - Select function type");
-  QDialogButtonBox *buttonBox =
-      new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-  connect(buttonBox, SIGNAL(accepted()), this, SLOT(acceptFit()));
-  connect(buttonBox, SIGNAL(rejected()), this, SLOT(closeFit()));
-  connect(m_fitTree, SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)), this,
-          SLOT(acceptFit()));
-  QVBoxLayout *layout = new QVBoxLayout();
-  layout->addWidget(m_fitTree);
-  layout->addWidget(buttonBox);
-  m_fitSelector->setLayout(layout);
+  connect(m_fitSelector, SIGNAL(accepted()), this, SLOT(acceptFit()));
+  connect(m_fitSelector, SIGNAL(rejected()), this, SLOT(closeFit()));
   m_fitSelector->show();
 }
 
@@ -799,16 +756,9 @@ void FitPropertyBrowser::acceptFit() {
       getHandler()->findCompositeFunction(ci);
   if (!cf)
     return;
-
-  QList<QTreeWidgetItem *> items(m_fitTree->selectedItems());
-  if (items.size() != 1)
-    return;
-
-  if (items[0]->parent() == nullptr)
-    return;
-
+  auto function = m_fitSelector->getFunction();
   PropertyHandler *h = getHandler()->findHandler(cf);
-  h->addFunction(items[0]->text(0).toStdString());
+  h->addFunction(function.toStdString());
   emit functionChanged();
 
   closeFit();
@@ -1298,6 +1248,11 @@ int FitPropertyBrowser::getPeakRadius() const {
   return m_intManager->value(m_peakRadius);
 }
 
+/// Get the excluded range
+std::string FitPropertyBrowser::getExcludeRange() const {
+  return m_stringManager->value(m_excludeRange).QString::toStdString();
+}
+
 /// Get the registered function names
 void FitPropertyBrowser::populateFunctionNames() {
   const std::vector<std::string> names =
@@ -1667,7 +1622,8 @@ void FitPropertyBrowser::doFit(int maxIterations) {
     }
     m_fitActionUndoFit->setEnabled(true);
 
-    const std::string funStr = getFittingFunction()->asString();
+    auto function = getFittingFunction();
+    const std::string funStr = function->asString();
 
     Mantid::API::IAlgorithm_sptr alg =
         Mantid::API::AlgorithmManager::Instance().create("Fit");
@@ -1702,6 +1658,14 @@ void FitPropertyBrowser::doFit(int maxIterations) {
       alg->setProperty("OutputCompositeMembers", true);
       if (alg->existsProperty("ConvolveMembers")) {
         alg->setProperty("ConvolveMembers", convolveMembers());
+      }
+    }
+    if (!getExcludeRange().empty()) {
+      if (alg->getPropertyValue("EvaluationType") != "Histogram")
+        alg->setProperty("Exclude", getExcludeRange());
+      else {
+        g_log.warning(
+            "Exclude property not avaliable when evaluating as a histogram.");
       }
     }
     observeFinish(alg);

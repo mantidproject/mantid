@@ -64,11 +64,10 @@ class IPeaksWorkspaceTest(unittest.TestCase):
 
     def test_createPeakHKL(self):
         pws = WorkspaceCreationHelper.createPeaksWorkspace(0, True)
-        lattice = pws.mutableSample().getOrientedLattice()
 
         # Simple test that the creational method is exposed
         p = pws.createPeakHKL([1,1,1])
-        self.assertNotEqual(IPeak,  None)
+        self.assertFalse(IPeak is None)
 
     def test_peak_setQLabFrame(self):
         pws = WorkspaceCreationHelper.createPeaksWorkspace(1, True)
@@ -124,6 +123,20 @@ class IPeaksWorkspaceTest(unittest.TestCase):
         self.assertEqual(pws.cell("l", 0), 3)
         self.assertEqual(pws.cell("QLab", 0), V3D(1,1,1))
         self.assertEqual(pws.cell("QSample", 0), V3D(1,1,1))
+
+    def test_iteration_support(self):
+        pws = WorkspaceCreationHelper.createPeaksWorkspace(0, True)
+        hkls = ([1, 1, 1], [2, 1, 1], [1, 2, 1])
+        for hkl in hkls:
+            pws.addPeak(pws.createPeakHKL(hkl))
+
+        count = 0
+        for index, peak in enumerate(pws):
+            count += 1
+            self.assertTrue(isinstance(peak, IPeak))
+            self.assertAlmostEqual(V3D(*hkls[index]), peak.getHKL())
+
+        self.assertEquals(len(hkls), count)
 
 
 if __name__ == '__main__':

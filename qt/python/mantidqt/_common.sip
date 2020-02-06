@@ -371,6 +371,7 @@ class WorkspaceTreeWidgetSimple : WorkspaceTreeWidget {
 public:
   WorkspaceTreeWidgetSimple(bool viewOnly=false, QWidget *parent /TransferThis/ = nullptr);
   void refreshWorkspaces();
+  void enableDeletePrompt(bool enable);
 
 signals:
   void plotSpectrumClicked(const QStringList & workspaceNames);
@@ -468,6 +469,11 @@ public:
     void setDefaultPeakType(SIP_PYOBJECT);
 %MethodCode
     sipCpp->setDefaultPeakType(TO_CSTRING(a0));
+%End
+SIP_PYOBJECT defaultBackgroundType();
+%MethodCode
+    auto f = sipCpp->defaultBackgroundType();
+    sipRes = FROM_CSTRING(f.c_str());
 %End
     QStringList registeredPeaks() const;
     QStringList registeredBackgrounds() const;
@@ -888,6 +894,7 @@ public:
     QString getFirstFilename() const;
     void isForRunFiles(bool /*mode*/);
     void isForDirectory(bool /*mode*/);
+    void allowMultipleFiles(bool /*allow*/);
     bool isSearching() const;
     bool isValid();
     void liveButtonSetChecked(bool);

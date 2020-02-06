@@ -153,15 +153,6 @@ if(ENABLE_WORKBENCH)
   separate_arguments(PYQT5_SIP_FLAGS)
 endif()
 
-# gsl is currently needed by Geometry, Algorithms, Curvefitting, & MantidPlot
-if(WIN32 AND GSL_CBLAS_LIBRARY AND NOT EXISTS ${GSL_CBLAS_LIBRARY})
-  # The GSL cblas library changes its name between v1 and v2 on Windows. Workaround
-  # the fact that CMake has cached the old path to a non-existant library.
-  unset(GSL_CBLAS_LIBRARY CACHE)
-  unset(GSL_CBLAS_LIBRARY_DEBUG CACHE)
-endif()
-find_package(GSL REQUIRED)
-
 # Now add in all the components
 
 # Flag that this is a full build, i.e not framework only
@@ -412,7 +403,7 @@ if(ENABLE_CPACK)
         "${CPACK_RPM_PACKAGE_REQUIRES},"
         "boost169-python3,"
         "python36-numpy,python36-scipy,python36-h5py,python36-PyCifRW,"
-        "python36-six,python36-PyYAML,python36-requests,"
+        "python36-six,python36-PyYAML,python36-requests,python36-toml,"
         "python36-ipython,python36-ipython-notebook"
       )
       if(ENABLE_MANTIDPLOT)
@@ -519,6 +510,7 @@ if(ENABLE_CPACK)
           "python3-matplotlib,"
           "python3-qtpy,"
           "python3-scipy,"
+          "python3-toml,"
           "python3-pycifrw (>= 4.2.1),"
           "python3-yaml,"
           "ipython3-qtconsole") # transitional package for bionic

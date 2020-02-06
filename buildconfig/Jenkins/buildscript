@@ -126,6 +126,18 @@ else
     SCL_ENABLE="eval"
 fi
 
+# Check if this is a Python 2 build and set CMake arguments.
+PY2_BUILD=false
+PY3_BUILD=false
+if [[ ${JOB_NAME} == *python2* ]]; then
+    PY2_BUILD=true
+    DIST_FLAGS="${DIST_FLAGS} -DWITH_PYTHON3=OFF"
+else
+    PY3_BUILD=true
+    DIST_FLAGS="${DIST_FLAGS} -DWITH_PYTHON3=ON"
+    PARAVIEW_DIR="${PARAVIEW_DIR}-python3"
+fi
+
 # For pull requests decide on what to build based on changeset and Jenkins
 # parameters.
 DO_BUILD_CODE=true
@@ -147,8 +159,10 @@ if [[ ${PRBUILD} == true ]]; then
     if [[ ${ON_RHEL7} == true ]]; then
         # rhel does system testing
         if ! ${SCRIPT_DIR}/check_for_changes docs-gui-only; then
-            DO_BUILD_PKG=true
-            DO_SYSTEMTESTS=true
+            if [[ ${PY3_BUILD} == true ]]; then
+               DO_BUILD_PKG=true
+               DO_SYSTEMTESTS=true
+            fi
         fi
         elif [[ ${ON_UBUNTU} == true ]]; then
         # ubuntu does the docs build
@@ -246,20 +260,6 @@ if [ -z "$MANTID_DATA_STORE" ]; then
 fi
 
 ###############################################################################
-# Check if this is a Python 3 build and set CMake arguments.
-###############################################################################
-PY2_BUILD=false
-PY3_BUILD=false
-if [[ ${JOB_NAME} == *python3* ]]; then
-    PY3_BUILD=true
-    DIST_FLAGS="${DIST_FLAGS} -DWITH_PYTHON3=ON"
-    PARAVIEW_DIR="${PARAVIEW_DIR}-python3"
-else
-    PY2_BUILD=true
-    DIST_FLAGS="${DIST_FLAGS} -DWITH_PYTHON3=OFF"
-fi
-
-###############################################################################
 # Packaging options
 ###############################################################################
 if [[ ${DO_BUILD_PKG} == true ]]; then
@@ -281,13 +281,8 @@ if [[ ${DO_BUILD_PKG} == true ]]; then
             PACKAGE_SUFFIX="unstable"
         fi
 
-        if [[ ${PY3_BUILD} == true ]]; then
-            # Add '-python3' to package name and install path
-            PACKAGE_SUFFIX=${PACKAGE_SUFFIX}-python3
-        fi
-
-        if [[ ${JOB_NAME} == *release* ]] && [[ ${PY2_BUILD} == true ]] && [[ -z "${PACKAGE_SUFFIX}" ]]; then
-            # Traditional install path for python 2 release build
+        if [[ ${JOB_NAME} == *release* ]] && [[ -z "${PACKAGE_SUFFIX}" ]]; then
+            # Traditional install path for release build
             PACKAGINGVARS="${PACKAGINGVARS} -DCMAKE_INSTALL_PREFIX=/opt/Mantid -DCPACK_PACKAGE_SUFFIX="
         else
             # everything else uses lower-case values
@@ -431,11 +426,11 @@ if [[ ${DO_BUILD_PKG} == true ]]; then
     run_with_xvfb ${CMAKE_EXE} --build . --target docs-qthelp
     ${CPACK_EXE}
 
-    # Source tarball on clean build (arbitrarily choose rhel7)
+    # Source tarball on clean build (arbitrarily choose Ubuntu)
     # Also, parcel up the documentation into a tar file that is easier to move around
     # and labelled by the commit id it was built with. This assumes the Jenkins git plugin
     # has set the GIT_COMMIT environment variable
-    if [[ ${CLEANBUILD} == true && ${ON_RHEL7} == true ]]; then
+    if [[ ${CLEANBUILD} == true && ${ON_UBUNTU} == true ]]; then
         run_with_xvfb ${CMAKE_EXE} --build . --target docs-html
         tar -cjf mantiddocs-g${GIT_COMMIT:0:7}.tar.bz2 --exclude='*.buildinfo' --exclude="MantidProject.q*" docs/html
         # The ..._PREFIX argument avoids opt/Mantid directories at the top of the tree

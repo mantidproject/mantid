@@ -41,6 +41,8 @@ void export_Sample() {
       .def("hasOrientedLattice", &Sample::hasOrientedLattice, arg("self"),
            "Returns True if this sample has an oriented lattice, false "
            "otherwise")
+      .def("clearOrientedLattice", &Sample::clearOrientedLattice, arg("self"),
+           "Clears any attached lattice information")
       .def("getCrystalStructure", &Sample::getCrystalStructure, arg("self"),
            return_value_policy<reference_existing_object>(),
            "Get the crystal structure for this sample")

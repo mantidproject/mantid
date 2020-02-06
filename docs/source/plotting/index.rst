@@ -543,10 +543,10 @@ The following methods show how to Load, Convert from MantidPlot format, Create f
     '''Checks all values b/w 0 and 1'''
     for j in range(4):
         if Cmap[i][j] > 1:
-            print (Cmap[i])
+            print(Cmap[i])
             raise ValueError('Values must be between 0 and 1, one of the above is > 1')
         if Cmap[i][j] < 0:
-            print (Cmap[i])
+            print(Cmap[i])
             raise ValueError('Values must be between 0 and 1, one of the above is negative')
         else:
             pass
@@ -590,10 +590,10 @@ The following methods show how to Load, Convert from MantidPlot format, Create f
     '''Checks all values b/w 0 and 1'''
     for j in range(4):
         if Cmap[i][j] > 1:
-            print (Cmap[i])
+            print(Cmap[i])
             raise ValueError('Values must be between 0 and 1, one of the above is > 1')
         if Cmap[i][j] < 0:
-            print (Cmap[i])
+            print(Cmap[i])
             raise ValueError('Values must be between 0 and 1, one of the above is Negative')
         else:
             pass
@@ -656,10 +656,10 @@ Now the Custom Colormap has been registered, right-click on a workspace and prod
     '''Checks all values b/w 0 and 1'''
     for j in range(4):
         if Cmap[i][j] > 1:
-            print (Cmap[i])
+            print(Cmap[i])
             raise ValueError('Values must be between 0 and 1, one of the above is > 1')
         if Cmap[i][j] < 0:
-            print (Cmap[i])
+            print(Cmap[i])
             raise ValueError('Values must be between 0 and 1, one of the above is Negative')
         else:
             pass
