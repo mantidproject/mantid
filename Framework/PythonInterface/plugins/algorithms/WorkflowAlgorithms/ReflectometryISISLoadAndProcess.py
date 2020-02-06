@@ -483,10 +483,12 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
     def _setOutputProperty(self, property_name, child_alg):
         """Set the given output property from the result in the given child algorithm,
         if it exists in the child algorithm's outputs"""
-        value = child_alg.getPropertyValue(property_name)
-        if value:
-            self.setPropertyValue(property_name, value)
-            self.setProperty(property_name, child_alg.getProperty(property_name).value)
+        value_name = child_alg.getPropertyValue(property_name)
+        if value_name:
+            self.setPropertyValue(property_name, value_name)
+            value = child_alg.getProperty(property_name).value
+            if value:
+                self.setProperty(property_name, value)
 
     def _setOutputPropertyIfInputNotSet(self, property_name, child_alg):
         """Set the given output property from the result in the given child algorithm,
