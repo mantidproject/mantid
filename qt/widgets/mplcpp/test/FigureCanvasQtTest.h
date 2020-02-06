@@ -49,6 +49,16 @@ public:
     TS_ASSERT_DELTA(2.9, dataCoords.x(), 0.25);
     TS_ASSERT_DELTA(4.25, dataCoords.y(), 0.25);
   }
+
+  void testAddLegend() {
+    FigureCanvasQt canvas{111};
+    canvas.gca().plot({1, 2, 3, 4, 5}, {1, 2, 3, 4, 5}, QString("ro"),
+                      QString("Line1"));
+    auto legend = canvas.gca().legend(true);
+
+    if (PyObject_HasAttrString(legend.pyobj().ptr(), "get_draggable"))
+      TS_ASSERT_EQUALS(true, legend.pyobj().attr("get_draggable")());
+  }
 };
 
 #endif // MPLCPP_FIGURECANVASQTTEST_H
