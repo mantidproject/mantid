@@ -13,7 +13,7 @@ import ILL_utilities as utils
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentValidator,
                         MatrixWorkspaceProperty, PropertyMode, WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, EnabledWhenProperty, IntBoundedValidator,
-                           PropertyCriterion, StringListValidator)
+                           Property, PropertyCriterion, StringListValidator)
 from mantid.simpleapi import (ConvertUnits, MonteCarloAbsorption)
 
 
@@ -120,6 +120,11 @@ class DirectILLSelfShielding(DataProcessorAlgorithm):
         self.setPropertyGroup(common.PROP_SPARSE_INSTRUMENT_COLUMNS, PROPGROUP_SIMULATION_INSTRUMENT)
         self.setPropertySettings(common.PROP_SPARSE_INSTRUMENT_COLUMNS, EnabledWhenProperty(common.PROP_SIMULATION_INSTRUMENT,
                                  PropertyCriterion.IsEqualTo, common.SIMULATION_INSTRUMEN_SPARSE))
+        self.declareProperty(name=common.PROP_NUMBER_OF_SIMULATION_WAVELENGTHS,
+                             defaultValue=Property.EMPTY_INT,
+                             validator=greaterThanTwoInt,
+                             direction=Direction.Input,
+                             doc='Number of wavelength points where the simulation is performed (no longer used).')
         self.declareProperty(name=common.PROP_EVENTS_PER_WAVELENGTH,
                              defaultValue=300,
                              validator=positiveInt,
