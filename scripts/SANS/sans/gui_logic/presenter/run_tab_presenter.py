@@ -196,7 +196,6 @@ class RunTabPresenter(PresenterCommon):
         self._table_model.subscribe_to_model_changes(self)
 
         self._processing = False
-        self.work_handler = WorkHandler()
         self.batch_process_runner = BatchProcessRunner(self.notify_progress,
                                                        self.on_processing_finished,
                                                        self.on_processing_error)
@@ -228,8 +227,7 @@ class RunTabPresenter(PresenterCommon):
         self._table_model.subscribe_to_model_changes(self._masking_table_presenter)
 
         # Beam centre presenter
-        self._beam_centre_presenter = BeamCentrePresenter(self, WorkHandler, BeamCentreModel,
-                                                          SANSCentreFinder)
+        self._beam_centre_presenter = BeamCentrePresenter(self, SANSCentreFinder)
         self._table_model.subscribe_to_model_changes(self._beam_centre_presenter)
 
         # Workspace Diagnostic page presenter
@@ -934,14 +932,15 @@ class RunTabPresenter(PresenterCommon):
                                            file_lookup=file_lookup,
                                            user_file=self._view.get_user_file_path())
 
-
-
         if errors and not suppress_warnings:
             self.sans_logger.warning("Errors in getting states...")
             for _, v in errors.items():
                 self.sans_logger.warning("{}".format(v))
 
         return states, errors
+
+    def get_row(self, row_index):
+        return self._table_model.get_row(index=row_index)
 
     def get_state_for_row(self, row_index, file_lookup=True, suppress_warnings=False):
         """

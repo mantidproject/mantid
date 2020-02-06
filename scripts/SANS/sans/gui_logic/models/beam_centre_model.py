@@ -4,27 +4,20 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from sans.common.enums import (FindDirectionEnum, DetectorType, SANSInstrument)
 from mantid.kernel import (Logger)
+from sans.common.enums import (FindDirectionEnum, DetectorType, SANSInstrument)
 from sans.common.file_information import get_instrument_paths_for_sans_file
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
 
 
 class BeamCentreModel(object):
+    logger = Logger("CentreFinder")
+
     def __init__(self, SANSCentreFinder):
         super(BeamCentreModel, self).__init__()
-        self.reset_to_defaults_for_instrument(SANSInstrument.NO_INSTRUMENT)
-        self.SANSCentreFinder = SANSCentreFinder
-
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__
-
-    def reset_to_defaults_for_instrument(self, instrument):
-        r_range = {}
-
         self._max_iterations = 10
-        self._r_min = r_range["beam_centre_radius_min"] if "beam_centre_radius_min" in r_range else 60
-        self._r_max = r_range["beam_centre_radius_max"] if "beam_centre_radius_max" in r_range else 280
+        self._r_min = 0
+        self._r_max = 0
         self._left_right = True
         self._up_down = True
         self._tolerance = 0.0001251
@@ -42,8 +35,26 @@ class BeamCentreModel(object):
         self.update_lab = True
         self.update_hab = True
 
-        if instrument == SANSInstrument.LARMOR:
-            self.scale_1 = 1.0
+        self.SANSCentreFinder = SANSCentreFinder
+
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
+    def reset_inst_defaults(self, instrument, row_entry):
+        if instrument is SANSInstrument.LOQ:
+            file_information = row_entry.file_information
+            instrument_file_path = get_instrument_paths_for_sans_file(file_information=file_information)
+            r_range = get_named_elements_from_ipf_file(instrument_file_path[1],
+                                                       ["beam_centre_radius_min", "beam_centre_radius_max"], float)
+
+            self._r_min = r_range["beam_centre_radius_min"]
+            self._r_max = r_range["beam_centre_radius_max"]
+        else:
+            # All other instruments hard-code this as follows
+            self._r_min = 60
+            self._r_max = 280
+
+        self.set_scaling(instrument=instrument)
 
     def set_scaling(self, instrument):
         self.scale_1 = 1000
@@ -69,8 +80,7 @@ class BeamCentreModel(object):
         elif self.left_right:
             find_direction = FindDirectionEnum.LEFT_RIGHT
         else:
-            logger = Logger("CentreFinder")
-            logger.notice("Have chosen no find direction exiting early")
+            self.logger.notice("Have chosen no find direction exiting early")
             return {"pos1": self.lab_pos_1, "pos2": self.lab_pos_2}
 
         if self.COM:

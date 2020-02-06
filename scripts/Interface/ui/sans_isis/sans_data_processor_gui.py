@@ -407,7 +407,6 @@ class SANSDataProcessorGui(QMainWindow,
         self.data_processor_table.setRootIsDecorated(False)
 
         self.add_empty_row()
-        self._call_settings_listeners(lambda listener: listener.on_row_inserted())
 
         self.table_signals = \
             jobtreeview.JobTreeViewSignalAdapter(self.data_processor_table, self)

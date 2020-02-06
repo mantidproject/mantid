@@ -9,6 +9,8 @@ from __future__ import (absolute_import, division, print_function)
 import copy
 
 from mantid.kernel import Logger
+from sans.gui_logic.models.beam_centre_model import BeamCentreModel
+from sans.gui_logic.presenter.GenericWorkHandlerListener import GenericWorkHandlerListener
 from ui.sans_isis.beam_centre import BeamCentre
 from ui.sans_isis.work_handler import WorkHandler
 
@@ -32,12 +34,12 @@ class BeamCentrePresenter(object):
         def on_processing_error(self, error):
             self._presenter.on_processing_error_centre_finder(error)
 
-    def __init__(self, parent_presenter, WorkHandler, BeamCentreModel, SANSCentreFinder):
+    def __init__(self, parent_presenter, SANSCentreFinder, work_handler=None, beam_centre_model=None):
         self._view = None
         self._parent_presenter = parent_presenter
-        self._work_handler = WorkHandler()
+        self._work_handler = WorkHandler() if not work_handler else work_handler
         self._logger = Logger("SANS")
-        self._beam_centre_model = BeamCentreModel(SANSCentreFinder)
+        self._beam_centre_model = BeamCentreModel(SANSCentreFinder) if not beam_centre_model else beam_centre_model
 
     def set_view(self, view):
         if view:
@@ -62,8 +64,21 @@ class BeamCentrePresenter(object):
         self._view.on_update_instrument(instrument)
 
     def on_update_rows(self):
-        self._beam_centre_model.reset_to_defaults_for_instrument(self._parent_presenter.instrument)
-        self._view.set_options(self._beam_centre_model)
+        def print_err(err):
+            self._logger.warning("Unable to set beam details {0}".format(err))
+
+        def on_success(_):
+            self._logger.debug("Finished getting beam centre details for inst")
+            self._view.set_options(self._beam_centre_model)
+
+        if self._parent_presenter.num_rows() == 0:
+            return
+
+        listener = GenericWorkHandlerListener(error_callback=print_err, success_callback=on_success)
+
+        kwargs = {"instrument": self._parent_presenter.instrument,
+                  "row_entry": self._parent_presenter.get_row(0)}
+        self._work_handler.process(caller=listener, func=self._beam_centre_model.reset_inst_defaults, id=0, **kwargs)
 
     def on_processing_finished_centre_finder(self, result):
         # Enable button

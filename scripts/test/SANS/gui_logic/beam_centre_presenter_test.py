@@ -13,24 +13,23 @@ from sans.common.enums import SANSInstrument
 from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
 from sans.test_helper.mock_objects import create_mock_beam_centre_tab
 from sans.test_helper.mock_objects import (create_run_tab_presenter_mock)
+from ui.sans_isis.work_handler import WorkHandler
 
 
 class BeamCentrePresenterTest(unittest.TestCase):
 
     def setUp(self):
         self.parent_presenter = create_run_tab_presenter_mock(use_fake_state = False)
-        self.parent_presenter._file_information = mock.MagicMock()
-        self.parent_presenter._file_information.get_instrument = mock.MagicMock(return_value = SANSInstrument.LARMOR)
         self.view = create_mock_beam_centre_tab()
         self.WorkHandler = mock.MagicMock()
         self.BeamCentreModel = mock.MagicMock()
         self.SANSCentreFinder = mock.MagicMock()
-        self.presenter = BeamCentrePresenter(self.parent_presenter, self.WorkHandler, self.BeamCentreModel,
-                                             self.SANSCentreFinder)
+        self.presenter = BeamCentrePresenter(self.parent_presenter, self.SANSCentreFinder,
+                                             work_handler=self.WorkHandler, beam_centre_model=self.BeamCentreModel)
         self.presenter.connect_signals = mock.Mock()
+        self.presenter.set_view(self.view)
 
     def test_that_on_run_clicked_calls_find_beam_centre(self):
-        self.presenter.set_view(self.view)
         self.presenter.on_run_clicked()
 
         self.assertEqual(self.presenter._work_handler.process.call_count, 1)
@@ -50,20 +49,50 @@ class BeamCentrePresenterTest(unittest.TestCase):
         self.assertEqual(self.presenter._beam_centre_model.lab_pos_1, 0.1)
         self.assertEqual(self.presenter._beam_centre_model.lab_pos_2, -0.1)
 
-    def test_that_set_options_is_called_on_update_rows(self):
-        self.presenter.set_view(self.view)
+    def test_on_update_rows_skips_no_rows(self):
+        self.parent_presenter.num_rows.return_value = 0
+        self.assertFalse(self.WorkHandler.process.called)
+        self.presenter.on_update_rows()
 
-        self.view.set_options.assert_called_once_with(self.presenter._beam_centre_model)
+    def test_reset_inst_defaults_called_on_update_rows(self):
+        self.parent_presenter.num_rows.return_value = 1
+        self.parent_presenter.instrument = SANSInstrument.SANS2D
+
+        mock_row = mock.Mock()
+        self.parent_presenter.get_row.return_value = mock_row
 
         self.presenter.on_update_rows()
-        self.assertEqual(self.view.set_options.call_count,  2)
+
+        self.WorkHandler.process.assert_called_with(caller=mock.ANY,
+                                                    func=self.BeamCentreModel.reset_inst_defaults,
+                                                    id=mock.ANY,
+                                                    # Kwargs:
+                                                    instrument=SANSInstrument.SANS2D, row_entry=mock_row)
 
     def test_that_model_reset_to_defaults_for_instrument_is_called_on_update_rows(self):
-        self.presenter.set_view(self.view)
+        self.parent_presenter.num_rows.return_value = 1
+        self.parent_presenter.get_row.return_value = mock.Mock()
 
         self.presenter.on_update_rows()
 
-        self.assertEqual(self.presenter._beam_centre_model.reset_to_defaults_for_instrument.call_count, 1)
+        mock_args = self.WorkHandler.process.call_args
+        args, kwargs = mock_args
+        self.assertTrue('caller' in kwargs)
+
+        callback = kwargs['caller']
+        self.assertTrue(isinstance(callback, WorkHandler.WorkListener))
+
+        # Check the success path
+        self.presenter._logger = mock.Mock()
+        callback.on_processing_finished(None)
+        self.view.set_options.assert_called_with(mock.ANY)
+        self.presenter._logger.debug.assert_called_with(mock.ANY)
+
+        # Check the failure path
+        self.presenter._logger = mock.Mock()
+        callback.on_processing_error("Foo")
+        self.presenter._logger.warning.assert_called_with(mock.ANY)
+
 
     def test_that_set_scaling_is_called_on_update_instrument(self):
         self.presenter.set_view(self.view)

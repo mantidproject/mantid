@@ -34,7 +34,6 @@ class TableModel(object):
         super(TableModel, self).__init__()
         self.batch_file = ""
         self.user_file = ""
-        self.work_handler = WorkHandler()
         self._subscriber_list = []
 
         self._table_entries = []
@@ -105,6 +104,9 @@ class TableModel(object):
         self._default_entry_added = True
 
     def get_number_of_rows(self):
+        if self._default_entry_added:
+            return 0
+
         return len(self._table_entries)
 
     def is_empty_row(self, row):
@@ -156,7 +158,6 @@ class TableModel(object):
         entry.sample_width = None
         entry.sample_shape = None
         self.set_row_to_error(entry, str(error[1]))
-
 
     def subscribe_to_model_changes(self, subscriber):
         self._subscriber_list.append(subscriber)
