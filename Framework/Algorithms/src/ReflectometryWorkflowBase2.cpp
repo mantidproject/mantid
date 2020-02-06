@@ -18,6 +18,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Unit.h"
 
@@ -444,18 +445,44 @@ MatrixWorkspace_sptr ReflectometryWorkflowBase2::cropWavelength(
  * to get a detector workspace in wavelength.
  * @param inputWS :: the input workspace in TOF
  * @param convert :: whether the result should be converted to wavelength
+ * @param sum :: whether the detectors should be summed into a single spectrum
  * @return :: the detector workspace in wavelength
  */
 MatrixWorkspace_sptr
 ReflectometryWorkflowBase2::makeDetectorWS(MatrixWorkspace_sptr inputWS,
-                                           const bool convert) {
-  auto groupAlg = createChildAlgorithm("GroupDetectors");
-  groupAlg->initialize();
-  groupAlg->setProperty("GroupingPattern",
-                        m_processingInstructionsWorkspaceIndex);
-  groupAlg->setProperty("InputWorkspace", inputWS);
-  groupAlg->execute();
-  MatrixWorkspace_sptr detectorWS = groupAlg->getProperty("OutputWorkspace");
+                                           const bool convert, const bool sum) {
+  auto detectorWS = inputWS;
+
+  if (sum) {
+    // Use GroupDetectors to extract and sum the detectors of interest
+    auto groupAlg = createChildAlgorithm("GroupDetectors");
+    groupAlg->initialize();
+    groupAlg->setProperty("GroupingPattern",
+                          m_processingInstructionsWorkspaceIndex);
+    groupAlg->setProperty("InputWorkspace", detectorWS);
+    groupAlg->execute();
+    detectorWS = groupAlg->getProperty("OutputWorkspace");
+  } else {
+    // Just extract the detectors
+    auto groups = Kernel::Strings::parseGroups<size_t>(
+        m_processingInstructionsWorkspaceIndex);
+    auto indices = std::vector<size_t>();
+    std::for_each(groups.cbegin(), groups.cend(),
+                  [&indices](std::vector<size_t> const &groupIndices) -> void {
+                    indices.insert(indices.begin(), groupIndices.cbegin(),
+                                   groupIndices.cend());
+                  });
+    auto extractAlg = createChildAlgorithm("ExtractSpectra");
+    extractAlg->initialize();
+    extractAlg->setProperty("InputWorkspace", detectorWS);
+    extractAlg->setProperty("WorkspaceIndexList", indices);
+    extractAlg->execute();
+    detectorWS = extractAlg->getProperty("OutputWorkspace");
+    // Update the workspace indicies to match the new workspace
+    m_processingInstructionsWorkspaceIndex =
+        convertProcessingInstructionsToWorkspaceIndices(
+            m_processingInstructions, detectorWS);
+  }
 
   if (convert) {
     detectorWS = convertToWavelength(detectorWS);

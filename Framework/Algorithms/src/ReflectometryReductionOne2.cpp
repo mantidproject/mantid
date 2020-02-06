@@ -397,9 +397,13 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
     result = cropWavelength(result, true, wavelengthMin(), wavelengthMax());
     outputDebugWorkspace(result, wsName, "_cropped", debug, step);
   } else {
+    g_log.debug("Extracting ROI\n");
+    result = makeDetectorWS(result, false, false);
+    outputDebugWorkspace(result, wsName, "_lambda", debug, step);
+    // todo: background subtraction
     if (m_sum) {
       g_log.debug("Summing in wavelength\n");
-      result = makeDetectorWS(result, m_convertUnits);
+      result = makeDetectorWS(result, m_convertUnits, true);
       outputDebugWorkspace(result, wsName, "_summed", debug, step);
     }
     // Now the workspace is in wavelength, find the min/max wavelength
