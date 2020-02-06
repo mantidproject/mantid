@@ -86,7 +86,7 @@ private:
                 std::vector<std::size_t> &bankNumEvents);
   /// Map detector IDs to event lists.
   template <class T>
-  void makeMapToEventLists(std::vector<std::vector<T>> &vectors);
+  void makeMapToEventLists(std::vector<std::vector<T>> &eventVectors);
   std::pair<int32_t, int32_t> getMinMaxDetID();
 
   friend class ProcessBankData;
@@ -95,7 +95,7 @@ private:
 
 /** Generate a look-up table where the index = the pixel ID of an event
  * and the value = a pointer to the EventList in the workspace
- * @param vectors :: the array to create the map on
+ * @param eventVectors :: the array to create the map on
  */
 template <class T>
 void DefaultEventLoader::makeMapToEventLists(
