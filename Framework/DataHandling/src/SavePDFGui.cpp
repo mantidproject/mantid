@@ -115,10 +115,18 @@ void SavePDFGui::exec() {
   if (inputWS->sharedDx(0))
     dx = inputWS->dx(0);
   const size_t length = x.size();
-  for (size_t i = 0; i < length; ++i) {
-    out << "  " << x[i] << "  " << y[i] << "  " << dx[i] << "  " << dy[i]
-        << "\n";
+  if (x.size() == y.size()) {
+    for (size_t i = 0; i < length; ++i) {
+      out << "  " << x[i] << "  " << y[i] << "  " << dx[i] << "  " << dy[i]
+          << "\n";
+    }
+  } else {
+    for (size_t i = 0; i < length - 1; ++i) {
+      out << "  " << (x[i] + x[i + 1]) / 2.0 << "  " << y[i] << "  " << dx[i]
+          << "  " << dy[i] << "\n";
+    }
   }
+  
 
   // --------- close the file
   out.close();
