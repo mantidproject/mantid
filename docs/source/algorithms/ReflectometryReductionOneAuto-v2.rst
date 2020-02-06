@@ -150,7 +150,7 @@ Usage
 .. testcode:: ExReflRedOneAutoSimple
 
     run = Load(Filename='INTER00013460.nxs')
-    IvsQ, IvsQ_unbinned = ReflectometryReductionOneAuto(InputWorkspace=run, ThetaIn=0.7)
+    IvsQ, IvsQ_unbinned = ReflectometryReductionOneAuto(InputWorkspace=run, ThetaIn=0.7, Version=2)
 
     print("{:.5f}".format(IvsQ_unbinned.readY(0)[106]))
     print("{:.5f}".format(IvsQ_unbinned.readY(0)[107]))
@@ -172,7 +172,7 @@ Output:
 
     run = Load(Filename='INTER00013460.nxs')
     trans = Load(Filename='INTER00013463.nxs')
-    IvsQ, IvsQ_unbinned = ReflectometryReductionOneAuto(InputWorkspace=run, FirstTransmissionRun=trans, ThetaIn=0.7)
+    IvsQ, IvsQ_unbinned = ReflectometryReductionOneAuto(InputWorkspace=run, FirstTransmissionRun=trans, ThetaIn=0.7, Version=2)
 
     print("{:.5f}".format(IvsQ_unbinned.readY(0)[96]))
     print("{:.5f}".format(IvsQ_unbinned.readY(0)[97]))
@@ -193,7 +193,7 @@ Output:
 .. testcode:: ExReflRedOneAutoOverload
 
     run = Load(Filename='INTER00013460.nxs')
-    IvsQ, IvsQ_unbinned = ReflectometryReductionOneAuto(InputWorkspace=run, ThetaIn=0.7, DetectorCorrectionType="RotateAroundSample", MonitorBackgroundWavelengthMin=0.0, MonitorBackgroundWavelengthMax=1.0)
+    IvsQ, IvsQ_unbinned = ReflectometryReductionOneAuto(InputWorkspace=run, ThetaIn=0.7, DetectorCorrectionType="RotateAroundSample", MonitorBackgroundWavelengthMin=0.0, MonitorBackgroundWavelengthMax=1.0, Version=2)
 
     print("{:.5f}".format(IvsQ_unbinned.readY(0)[106]))
     print("{:.5f}".format(IvsQ_unbinned.readY(0)[107]))
