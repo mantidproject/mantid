@@ -9,6 +9,15 @@ New
 ###
 - Waterfall Plots
 - Mantid Workbench can now load all of the workspaces from projects saved from Mantidplot.  Graphs and interface values are not imported from the project.
+- Added an compatability implementation of plotSpectrum and plotBin for python scripts in Workbench, only the workspaces, indices and error_bars arguments are supported, others will be ignored. For example the forllowing commands are supported.
+.. code-block:: python
+	plotSpectrum(mar,1,error_bars=True)
+	plotBin(mar,1)
+
+	plotSpectrum([mar,mar2],1)
+	plotBin([mar,mar2],1)
+	plotSpectrum([mar,mar2],[1,2,3])
+	plotBin([mar,mar2],[1,2,3])
 
 Improvements
 ############
