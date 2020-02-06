@@ -98,8 +98,8 @@ private:
  */
 template <class T>
 void DefaultEventLoader::makeMapToEventLists(
-    std::vector<std::vector<T>> &vectors) {
-  vectors.resize(m_ws.nPeriods());
+    std::vector<std::vector<T>> &eventVectors) {
+  eventVectors.resize(m_ws.nPeriods());
   if (m_isEventIDSpec) {
     // Find max spectrum no
     auto *ax1 = m_ws.getAxis(1);
@@ -117,14 +117,14 @@ void DefaultEventLoader::makeMapToEventLists(
     // the maximum
     // possible spectrum number
     m_maxEventID = maxSpecNo;
-    for (size_t i = 0; i < vectors.size(); ++i) {
-      vectors[i].resize(maxSpecNo + 1, nullptr);
-    }
+    for (size_t i = 0; i < eventVectors.size(); ++i)
+      eventVectors[i].resize(maxSpecNo + 1, nullptr);
+
     for (size_t period = 0; period < m_ws.nPeriods(); ++period) {
       for (size_t i = 0; i < m_ws.getNumberHistograms(); ++i) {
         const auto &spec = m_ws.getSpectrum(i);
         getEventsFrom(m_ws.getSpectrum(i, period),
-                      vectors[period][spec.getSpectrumNo()]);
+                      eventVectors[period][spec.getSpectrumNo()]);
       }
     }
   } else {
@@ -133,9 +133,8 @@ void DefaultEventLoader::makeMapToEventLists(
 
     // Make an array where index = pixel ID
     // Set the value to NULL by default
-    for (size_t i = 0; i < vectors.size(); ++i) {
-      vectors[i].resize(m_maxEventID - minEventID + 1, nullptr);
-    }
+    for (size_t i = 0; i < eventVectors.size(); ++i)
+      eventVectors[i].resize(m_maxEventID - minEventID + 1, nullptr);
 
     for (int32_t j = minEventID; j <= m_maxEventID; ++j) {
       auto index = j + m_detIDtoIndexOffset;
@@ -143,7 +142,8 @@ void DefaultEventLoader::makeMapToEventLists(
       // Save a POINTER to the vector
       if (wi < m_ws.getNumberHistograms()) {
         for (size_t period = 0; period < m_ws.nPeriods(); ++period) {
-          getEventsFrom(m_ws.getSpectrum(wi, period), vectors[period][index]);
+          getEventsFrom(m_ws.getSpectrum(wi, period),
+                        eventVectors[period][index]);
         }
       }
     }

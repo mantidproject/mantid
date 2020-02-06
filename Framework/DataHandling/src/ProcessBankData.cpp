@@ -159,7 +159,9 @@ void ProcessBankData::run() { // override {
       // the event
       const detid_t detId = event_id[eventIndex];
       if (detId >= m_min_id && detId <= m_max_id) {
-        auto index = detId + m_loader.m_detIDtoIndexOffset;
+        auto index = m_loader.m_isEventIDSpec
+                         ? detId
+                         : detId + m_loader.m_detIDtoIndexOffset;
         // Create the tofevent
         const auto tof = static_cast<double>(event_time_of_flight[eventIndex]);
         // this is fancy for check if value is in range
