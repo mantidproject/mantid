@@ -50,6 +50,10 @@ try:
     from mantid import plots  # noqa
 except ImportError:
     pass  # matplotlib is unavailable
+try:
+    from mantidqt.plotting.functions import plotSpectrum, plotBin  # noqa
+except ImportError:
+    pass  # matplotlib is unavailable
 from mantid.kernel._aliases import *
 from mantid.api._aliases import *
 from mantid.fitfunctions import *

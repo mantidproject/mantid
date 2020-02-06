@@ -28,6 +28,7 @@ from matplotlib.legend import Legend
 from mantid.api import AnalysisDataService, MatrixWorkspace
 from mantid.kernel import Logger, ConfigService
 from mantid.plots import helperfunctions, MantidAxes
+from mantid.plots.utility import MantidAxType
 from mantidqt.plotting.figuretype import figure_type, FigureType
 from mantid.py3compat import is_text_string, string_types
 from mantidqt.dialogs.spectraselectorutils import get_spectra_selection
@@ -435,7 +436,7 @@ def pcolormesh_on_axis(ax, ws):
 
 def plotSpectrum(workspaces, indices, distribution=None, error_bars=False,
                  type=None, window=None, clearWindow=None,
-                 waterfall=False):
+                 waterfall=None):
     """
     Create a figure with a single subplot and for each workspace/index add a
     line plot to the new axes. show() is called before returning the figure instance
@@ -447,18 +448,60 @@ def plotSpectrum(workspaces, indices, distribution=None, error_bars=False,
                          divide by bin width. ``True`` means do not divide by bin width.
                          Applies only when the the workspace is a MatrixWorkspace histogram.
     :param error_bars: If true then error bars will be added for each curve
-    :param type: curve style for plot (-1: unspecified; 0: line, default; 1: scatter/dots)
+    :param type: Ignored. Here to preserve backwards compatibility
     :param window: Ignored. Here to preserve backwards compatibility
     :param clearWindow: Ignored. Here to preserve backwards compatibility
-    :param waterfall:
+    :param waterfall: Ignored. Here to preserve backwards compatibility
     """
-    if type == 1:
-        fmt = 'o'
-    else:
-        fmt = '-'
+    _report_deprecated_parameter("distribution", distribution)
+    _report_deprecated_parameter("type", type)
+    _report_deprecated_parameter("window", window)
+    _report_deprecated_parameter("clearWindow", clearWindow)
+    _report_deprecated_parameter("waterfall", waterfall)
 
-    return plot(workspaces, wksp_indices=indices,
-                errors=error_bars, fmt=fmt)
+    return plot(_assert_object_in_list(workspaces), wksp_indices=_assert_object_in_list(indices),
+                errors=error_bars)
+
+
+def plotBin(workspaces, indices, error_bars=False, type=None, window=None, clearWindow=None,
+            waterfall=None):
+    """Create a 1D Plot of bin count vs spectrum in a workspace.
+
+    This puts the spectrum number as the X variable, and the
+    count in the particular bin # (in 'indices') as the Y value.
+
+    If indices is a tuple or list, then several curves are created, one
+    for each bin index.
+
+    :param workspace or name of a workspace
+    :param indices: bin number(s) to plot
+    :param error_bars: If true then error bars will be added for each curve
+    :param type: Ignored. Here to preserve backwards compatibility
+    :param window:Ignored. Here to preserve backwards compatibility
+    :param clearWindow: Ignored. Here to preserve backwards compatibility
+    :param waterfall: Ignored. Here to preserve backwards compatibility
+
+    """
+    _report_deprecated_parameter("type", type)
+    _report_deprecated_parameter("window", window)
+    _report_deprecated_parameter("clearWindow", clearWindow)
+    _report_deprecated_parameter("waterfall", waterfall)
+
+    plot_kwargs = {"axis": MantidAxType.BIN}
+    return plot(_assert_object_in_list(workspaces), wksp_indices=_assert_object_in_list(indices),
+                errors=error_bars, plot_kwargs=plot_kwargs)
+
+def _assert_object_in_list(object):
+    """If the object is not a list itself it will be returned in a list"""
+    if isinstance(object, list):
+        return object
+    else:
+        return [object]
+
+def _report_deprecated_parameter(param_name,param_value):
+    """Logs a warning message if the parameter value is not None"""
+    if param_value is not None:
+        LOGGER.warning("The argument '{}' is not supported in workbench and has been ignored".format(param_name))
 
 
 # -----------------------------------------------------------------------------
