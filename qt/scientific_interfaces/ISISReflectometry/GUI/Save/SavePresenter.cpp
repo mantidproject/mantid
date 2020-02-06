@@ -31,11 +31,15 @@ using namespace Mantid::API;
  */
 SavePresenter::SavePresenter(ISaveView *view,
                              std::unique_ptr<IAsciiSaver> saver)
-    : m_view(view), m_saver(std::move(saver)), m_shouldAutosave(false) {
+    : m_mainPresenter(nullptr), m_view(view), m_saver(std::move(saver)),
+      m_shouldAutosave(false) {
 
   m_view->subscribe(this);
   populateWorkspaceList();
   suggestSaveDir();
+  // this call needs to come last in order to avoid notifySettingsChanged being
+  // called with a nullptr, i.e. before the main presenter is accepted
+  m_view->connectSaveSettingsWidgets();
 }
 
 void SavePresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) {

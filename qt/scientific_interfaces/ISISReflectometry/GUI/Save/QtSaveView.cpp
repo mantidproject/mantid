@@ -35,7 +35,6 @@ Initialize the Interface
 */
 void QtSaveView::initLayout() {
   m_ui.setupUi(this);
-  connectSaveSettingsWidgets();
   connect(m_ui.refreshButton, SIGNAL(clicked()), this,
           SLOT(populateListOfWorkspaces()));
   connect(m_ui.saveButton, SIGNAL(clicked()), this, SLOT(saveWorkspaces()));
