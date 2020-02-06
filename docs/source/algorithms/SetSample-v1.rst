@@ -104,6 +104,9 @@ Usage
 The following example uses a test file called ``CRYO-01.xml`` in the
 ``[INSTALLDIR]/instrument/sampleenvironments/TEST_LIVE/ISIS_Histogram/`` directory.
 
+If the examples are run via the Mantid user interface then double instead of single quotes will need to be
+used for the dictionary parameters.
+
 **Example - Container with preset cylinderical sample geometry**
 
 .. testsetup:: *

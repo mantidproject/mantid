@@ -7,7 +7,7 @@
 #ifndef MANTID_GEOMETRY_SAMPLEENVIRONMENTSPECFILEFINDERTEST_H
 #define MANTID_GEOMETRY_SAMPLEENVIRONMENTSPECFILEFINDERTEST_H
 
-#include "MantidGeometry/Instrument/SampleEnvironmentFactory.h"
+#include "MantidDataHandling/SampleEnvironmentFactory.h"
 #include <cxxtest/TestSuite.h>
 
 #include <Poco/File.h>
@@ -16,8 +16,8 @@
 #include <fstream>
 #include <vector>
 
-using Mantid::Geometry::SampleEnvironmentSpec_uptr;
-using Mantid::Geometry::SampleEnvironmentSpecFileFinder;
+using Mantid::DataHandling::SampleEnvironmentSpec_uptr;
+using Mantid::DataHandling::SampleEnvironmentSpecFileFinder;
 
 class SampleEnvironmentSpecFileFinderTest : public CxxTest::TestSuite {
 public:

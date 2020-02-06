@@ -37,6 +37,14 @@ Improvements
 - :ref:`MatchAndMergeWorkspaces <algm-MatchAndMergeWorkspaces>` will merge workspaces in a workspace group withing weighting from a set of limits for each workspace and using `MatchSpectra <algm-MatchSpectra>`.
 - :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` Sampling of scattering points during MC simulation now takes into account relative volume of sample and environment components.
 
+Data Handling
+-------------
+
+Improvements
+############
+
+- The sampleenvironment xml files that act as extensions to the Instrument Definition Files can now support stl file paths to load mesh geometries for environment components or the sample from an .stl file. This new feature can be used when running SetSample. A sample environment xml file has been created for Pearl
+
 
 Data Objects
 ------------
