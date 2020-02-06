@@ -26,7 +26,7 @@ class EnggFitPeaks(PythonAlgorithm):
         return "Diffraction\\Engineering;Diffraction\\Fitting"
 
     def seeAlso(self):
-        return [ "EnggFitDIFCFromPeaks","GSASIIRefineFitPeaks","Fit" ]
+        return [ "EnggFitTOFFromPeaks","GSASIIRefineFitPeaks","Fit" ]
 
     def name(self):
         return "EnggFitPeaks"
