@@ -36,6 +36,7 @@ Improvements
 - Default values for algorithm properties now appear as placeholder (greyed-out) text on custm algorithm dialogs.
 - The context menu for WorkspaceGroups now contains plotting options so you can plot all of the workspaces in the group.
 - Most changes in the settings dialog now take place immediately, no longer needing a restart, such as hiding algorithm categories, interfaces or choosing wether to see invisible workspaces.
+- A warning now appears if you attempt to plot more than ten spectra.
 
 Bugfixes
 ########
