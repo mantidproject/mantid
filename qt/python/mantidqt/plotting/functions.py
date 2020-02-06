@@ -491,12 +491,14 @@ def plotBin(workspaces, indices, error_bars=False, type=None, window=None, clear
     return plot(_assert_object_in_list(workspaces), wksp_indices=_assert_object_in_list(indices),
                 errors=error_bars, plot_kwargs=plot_kwargs)
 
+
 def _assert_object_in_list(object):
     """If the object is not a list itself it will be returned in a list"""
     if isinstance(object, list):
         return object
     else:
         return [object]
+
 
 def _report_deprecated_parameter(param_name,param_value):
     """Logs a warning message if the parameter value is not None"""
