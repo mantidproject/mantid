@@ -644,7 +644,7 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
 
   double wavelength;
   if (m_instrumentName == "D16") {
-    wavelength = entry.getFloat(instrumentNamePath + "/wavelength");
+    wavelength = entry.getFloat(instrumentNamePath + "/Beam/wavelength");
   } else {
     wavelength = entry.getFloat(instrumentNamePath + "/selector/wavelength");
   }
