@@ -152,9 +152,7 @@ Linux
 ------
 1. Install packages:
 
-* ``autofs``
-* ``smbfs`` - Ubuntu 12.04
-* ``cifs-utils`` - Ubuntu 14.04
+``sudo apt-get install -y autofs cifs-utils keyutils``
 
 2. Create an ``/archive.creds`` file in the root directory containing this, filling in the relevant details:
 
@@ -176,7 +174,7 @@ This should only be done if full disk encryption is enabled or if the ``archive.
 
 .. code-block:: text
 
-   *     -fstype=cifs,ro,credentials=/archive.creds,file_mode=0444,dir_mode=0555       ://isisdatar55/&\$
+   *     -fstype=cifs,ro,credentials=/archive.creds,file_mode=0444,dir_mode=0555,vers=3.0,noserverino,nounix    ://isis.cclrc.ac.uk/inst\$/&
 
 5. Enter the following commands:
 

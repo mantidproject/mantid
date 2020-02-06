@@ -735,8 +735,5 @@ class FigureInteraction(object):
         for ax in self.canvas.figure.get_axes():
             images = ax.get_images() + [col for col in ax.collections if isinstance(col, Collection)]
             for image in images:
-                image.set_norm(scale_type())
-                if image.colorbar:
-                    image.colorbar.remove()
-                    self.canvas.figure.colorbar(image)
+                helperfunctions.update_colorbar_scale(self.canvas.figure, image, scale_type, image.norm.vmin, image.norm.vmax)
         self.canvas.draw_idle()

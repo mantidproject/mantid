@@ -8,6 +8,7 @@ MantidWorkbench Changes
 New
 ###
 - Waterfall Plots
+- Mantid Workbench can now load all of the workspaces from projects saved from Mantidplot.  Graphs and interface values are not imported from the project.
 
 Improvements
 ############
@@ -29,8 +30,10 @@ Improvements
 - Normalization options have been added to 2d plots and sliceviewer.
 - An exclude property has been added to the fit property browser
 - The images tab in figure options no longer forces the max value to be greater than the min value.
+- The algorithm progress details dialog now fills immediately with all running algorithms rather than waiting for a progress update for the algorithm to appear.
 - All the relevant settings from manitdplot have been added to workbench
 - Double clicking on a workspace that only has a single bin of data (for example from a constant wavelength source) will now plot that bin, also for single bin workspaces a plot bin option has been added to the right click plot menu of the workspace.
+- Default values for algorithm properties now appear as placeholder (greyed-out) text on custm algorithm dialogs.
 - The context menu for WorkspaceGroups now contains plotting options so you can plot all of the workspaces in the group.
 - Most changes in the settings dialog now take place immediately, no longer needing a restart, such as hiding algorithm categories, interfaces or choosing wether to see invisible workspaces.
 
@@ -43,5 +46,6 @@ Bugfixes
 - Running an algorithm that reduces the number of spectra on an active plot (eg SumSpectra) no longer causes an error
 - Fix crash when loading a script with syntax errors
 - The Show Instruments right click menu option is now disabled for workspaces that have had their spectrum axis converted to another axis using :ref:`ConvertSpectrumAxis <algm-ConvertSpectrumAxis>`.  Once this axis has been converetd the workspace loses it's link between the data values and the detectors they were recorded on so we cannot display it in the instrument view.
+- MonitorLiveData now appears promptly in the algorithm details window, allowing live data sessions to be cancelled.
 
 :ref:`Release 4.3.0 <v4.3.0>`

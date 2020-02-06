@@ -908,7 +908,7 @@ class TestManager(object):
         # A regex check is used to iterate back from the position of '.nxs' and
         # check that the current character is still part of a variable name. This
         # is needed to find the start of the string, hence the total filename.
-        check = re.compile("[A-Za-z0-9_-]")
+        check = re.compile(r"[A-Za-z0-9_-]")
         # In the case of looking for digits inside strings, the strings can start
         # with either " or '
         string_quotation_mark = ["'", '"']
