@@ -9,42 +9,50 @@ Part 1
 
 #. Load the File "GEM38370_Focussed_Legacy.nxs".
 #. Plot spectra 2-7 (all of them).
-#. Edit the d-spacing axis range, or zoom into the range of 0-10
-   angstroms.
-#. Try changing the X-Axis to log scaling.
+#. Edit the d-spacing axis range to 0.01-10 Å.
+#. Try changing the X-Axis Scale to Symlog.
+
+.. figure:: /images/GEMFocLeg_exercise1MBC.png
+   :align: center
+   :width: 600px
 
 Part 2
 ======
 
-#. Load the SANSLOQCan2D.nxs data. This is the output of a 2D SANS data
+1. Load the SANSLOQCan2D.nxs data. This is the output of a 2D SANS data
    reduction. Although a Workspace2D is mainly designed to store
    spectra, this is just the default, and in this data the loaded axes
    are momentum transfer Qx and the scattering cross section, and the
    'spectrum' axis is momentum transfer Qy.
-#. Plot this data as a colour fill plot to get the following result:
+2. Plot this data as a colour fill plot.
+3. Change the Image/Colour bar Scale to Logarithmic.
+4. Change the Colour Map to Jet and reverse it.
+5. Set the Min. value of the Image/Color bar to 1.
+6. Change the Interpolation to "Sinc".
 
 .. figure:: /images/Sans2Dcolourfillplot_exercise1MBC.png
-   :alt: centre
+   :align: center
    :width: 600px
-
-#. Change the colour bar axis to logarithm.
-#. Change the Colour Map to Jet.
-#. Create Contour Lines and labels in White at 20, 30 and 40.
-#. Zoom in to see the results of your work.
 
 Part 3
 ======
 
-#. Using the workspaces MAR11015 and MAR11060 try to reproduce the plot
-   below.
+Using the workspaces MAR11015 and MAR11060 try to reproduce the plot
+below. Note it contains sepctra 2 and 3 of both Workspaces
 
-   -  You will need to group the two workspaces together and then
-      right-click on the group to plot spectra 2-3.
-   -  Adjust the axes to use log(x), linear(y) scaling
+   -  You must either Plot and then Overplot, or Group the Workspaces before plotting: try both!
+   -  Then adjust the axes to use log(x), linear(y) scaling
+   - I have also Applied to All curves a size 4 point Marker and Errorbars with Capsize 2, which can be done in Figure Options.
 
 .. figure:: /images/MultiLayerGraph.png
    :alt: centre
    :width: 600px
+
+As a bonus part. Click the 'Generate a Script' button in the Plot Toolbar and save this script to file as "My_MARI_Plot.py". Close this plot and in the main Mantid window, select "File > Open Script" and navigate to your saved script. This script will open in the "Editor" window. 
+
+Use of Python within Mantid is saved for a follow-up course as it is not required, but here is a little preview of how it can be used, and more importantly how you can create a useful script for producing a plot! 
+
+Now you've got the script loaded, click the green arrow button to run this script, and your plot will appear!
 
 .. raw:: mediawiki
 

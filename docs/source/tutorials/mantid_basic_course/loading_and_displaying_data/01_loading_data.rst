@@ -4,8 +4,8 @@
 Loading Data 
 ============
 
-.. figure:: /images/ShowLoadandWorkspaceAreaInMantidPlot.png
-   :alt: ShowLoadandWorkspaceAreaInMantidPlot.png
+.. figure:: /images/ShowLoadandWorkspaceAreaInMantidWB.png
+   :alt: Loading in Mantid Workbench
 
 Loading a File
 ==============
@@ -13,39 +13,29 @@ Loading a File
 First, let's load the dataset MAR11060.raw collected on the ISIS MARI
 instrument:
 
-#. In MantidPlot click on the the "Load" button (as shown highlighted in
+#. In Workbench click on the the "Load" button (as shown highlighted in
    red), and select "File". This will open the Load Dialog window.
 #. Browse to the location of the file MAR11060.raw.
 
-   -  If you have successfully added the directory containing this file
-      to your data search directories (see
+   -  If you successfully added the "TrainingCourseData" directory 
+      to the data search directories (see
       :ref:`getting started`) then you can simply
-      enter the filename in the File textbox.
-   -  Typing "MAR11060" would actually be enough for MantidPlot to find
-      the data, but if you have set MARI as you default instrument
-      typing just "11060" would work!
+      enter the filename "MAR11060.raw" in the File textbox.
+   -  Actually, typing "MAR11060" would be enough for Workbench to find
+      the data.
+   -  Furthermore, if you had set MARI as the default instrument in "File"
+      > "Settings", then typing just "11060" would work!
 
 #. Mantid will suggest the OutputWorkspace name to be "MAR11060", but
    feel free to use whatever you like.
 #. Leave the other properties alone and press the Run button. A
    Workspace will appear in the Workspaces list (as shown highlighted in
    green).
-#. Click on this workspace entry and drag it into the main area to the
-   left of the workspace. This will display the data in a matrix window
+#. Right-click on this workspace entry and select "Show Data". This will display the data in a matrix window
    named 'MAR11060 - Mantid', as shown below:
 
 .. figure:: /images/ShowMatrixOfMar11060.png
-   :alt: ShowMatrixOfMar11060.png
-
-Other equivalent methods exist for loading files in MantidPlot:
-
--  Navigating to the "File->Load->File" menu item.
--  Clicking the Load File Button toolbar button.
--  Using the Load Algorithm. (More on this later!)
-
-.. figure:: /images/300px-LoadAlgorithmsSep2013.png
-   :alt: The list of Load algorithms for Mantid v2.6.
-   :width: 300px
+   :alt: Show Data MAR11060.raw
 
 Types of Data Files
 ===================
@@ -59,37 +49,28 @@ Mantid can load many different data formats. A few examples are:
 -  Live data streams.
 
 Fortunately, you don't have to learn how to use all of these Load
-algorithms. In fact, just one, "Load", which was used earlier when you
-loaded the workspace. Whenever you use "Load" Mantid takes care of the
-following:
-
--  Expanding out run numbers to full file names.
--  Finding the file in the data search directories, and optionally the
-   facility archive.
--  Determining the format of the file and using the correct algorithm to
-   read it.
--  Loading or summing multiple files.
+algorithms. In fact, you only need to know one : "Load". Whenever you use "Load" Mantid determines the format of the file and uses the correct algorithm to read it.
 
 Loading Lots of Data Files
 ==========================
 
-You can load multiple files into mantid with a single Load command,
+You can load multiple files into Mantid with a single Load command,
 either keeping each workspace separate, or summing the data into a
 single workspace:
 
-+-----------+------------------------------+---------------+
-| Usage     | Description                  | Example       |
-+===========+==============================+===============+
-| Input     | Result                       |               |
-+-----------+------------------------------+---------------+
-| \ ``,``\  | Load a list of runs.         | ``INST1,2,3`` |
-+-----------+------------------------------+---------------+
-| \ ``+``\  | Sum a list of runs together. | ``INST1+2+3`` |
-+-----------+------------------------------+---------------+
-| \ ``:``\  | Load a range of runs.        | ``INST1:4``   |
-+-----------+------------------------------+---------------+
-| \ ``-``\  | Sum a range of runs.         | ``INST1-4``   |
-+-----------+------------------------------+---------------+
++-----------+--------------------------------------------------------+---------------+
+| Usage     | Description                                            | Example       |
++===========+========================================================+===============+
+| Input     | Result                                                 |               |
++-----------+--------------------------------------------------------+---------------+
+| \ ``,``\  | Load a list of runs into a Group of Workspaces         | ``INST1,2,3`` |
++-----------+--------------------------------------------------------+---------------+
+| \ ``+``\  | Sum a list of runs into one Workspace.                 | ``INST1+2+3`` |
++-----------+--------------------------------------------------------+---------------+
+| \ ``:``\  | Load a range of runs into a Group of Workspaces        | ``INST1:4``   |
++-----------+--------------------------------------------------------+---------------+
+| \ ``-``\  | Sum a range of runs into one Workspace.                | ``INST1-4``   |
++-----------+--------------------------------------------------------+---------------+
 
 .. raw:: mediawiki
 

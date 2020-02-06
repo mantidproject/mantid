@@ -4,57 +4,87 @@
 Formatting Plots 
 ================
 
-Floating and Docking a Window
-=============================
+Plot Toolbar
+============
 
-By default on Windows a plot window will be floating, meaning it can be
-dragged outside the main MantidPlot work area. For Linux versions,
-windows do not float by default as they have a tendency to get lost
-behind the main application window. The state of the selected window can
-be controlled using the "Windows Menu".
+The usual buttons on the Plot Toolbar:
 
-#. Use "Windows->Change to docked". This will dock this plot window
-   within MantidPlot.
-#. Use "Windows->Change to floating" to float it again.
+- Home: Rescales the Axes on the plot
+- Arrows: move back and forward between zoom levels (only activated after zooming or moving)
+- Move: Interactively move the curve within the plot
+- Zoom: Select an area to zoom in on
+- Grid: Add gridlines
+- Save: Save the image to file
+- Print: Print the image!
+- Gear: Open the Plot Options Menu
+- Script: Generate a Script to reproduce this plot!
+- Fit: Open the Fitting Tab
 
-The Plot Toolbar
-================
-
-This toolbar is only active when a plot window is selected.
+We will cover use of the Fitting Tab later...
 
 .. figure:: /images/PlotToolbar.png
-   :alt: centre
+   :align: center
+   :alt: Plot Toolbar
 
-Adjusting the Properties of Plot Windows
-========================================
+Plots Toolbox
+=============
+
+.. figure:: /images/PlotsWindow.png
+   :align: left
+   :alt: Plots Window
+
+To show this window you may have to click on the Plots tab higlighted in Red.
+
+The Plots Window great tool for organising your plots. It allows you to Show, Rename, Delete, Search for and Export Plots. It become very useful when you produce many plots and are struggling to find the one that you want!
+
+
+Quickly adjusting 1D Plots
+==========================
 
 Many aspects of these graphs can be adjusted to fit how you want to
-display the data. Just double-click on the item you want to change. For
-example, the following are editable:
+display the data. 
 
--  The graph title.
--  The legend text. You may also move the legend by selecting and
-   dragging it.
+Double-click on the item you want to change can edit:
+
+-  The graph title (Label).
 -  The axes labels.
--  The axes themselves. You can change the range, scaling and gridlines,
-   or even introduce axis breaks.
--  A curve allows you to set the line colour and styles.
--  Double-clicking the "1" in the corner allows you to remove curves or
-   add them from other graphs.
+-  The axes themselves. You can change the range, scaling and gridlines.
 
-.. figure:: /images/300px-LoglinearAxes.png
-   :alt: 300px-LoglinearAxes.png
-   :width: 300px
+Right-clicking on the centre of the Plot you can:
 
-Quickly changing to Log axes
-----------------------------
+- Change the axes scale
+- Toggle on/off the Normalization
+- Add or remove Error bars
+- Add Markers
 
-We have a fast way to change the axes between log an linear as this is
-such a common operation.
+Plot a 1D spectrum from the MARI or EMU workspaces we have used before and 
+have a go at adjusting these plotting options. If you create a marker, have a go at dragging it and editing it!
 
-#. Right-click within the plot.
-#. Select "Axes" to quickly switch the X and Y axes.
-#. Select "Color Bar" to quickly switch the colour bar scaling.
+.. figure:: /images/1DPlotmarkers.png
+   :alt: Plot markers
+   :align: center
+   :width: 500px
+
+Figure Options Menu
+===================
+
+.. figure:: /images/PlotOptions.png
+   :alt: Plot Options
+   :align: center
+   :width: 800px
+
+You have already seen the Figure Options Menu for Colorfill plots. For both 
+Colorfill and normal 1D plots, you can use the Axes tab to edit the labels 
+and Scales of the different Axes. Just as the "Images" tab was the most 
+useful menu for Colorfill plots, for 1D plots this is the "Curves" tab. As 
+shown above it is possible to edit the Color, Style and Width of a Line, add 
+Markers and change their size and color, and show Error bars with options 
+such as Capsize and Frequency of Errorbars (Error every how many points).
+
+Please have a play with these options to see what you can do. For instance 
+if you wish to change the label of a curve in the Legend, then edit the "Set 
+curve label" entry on the Curves tab. Then on the Legend tab you will see 
+Color and Font options.
 
 .. raw:: mediawiki
 
