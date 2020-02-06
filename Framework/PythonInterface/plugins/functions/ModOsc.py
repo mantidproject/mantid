@@ -14,7 +14,7 @@ import scipy.special as sp
 class ModOsc(IFunction1D):
 
     def category(self):
-        return "MuonSpecific"
+        return "Muon\\MuonSpecific"
 
     def init(self):
         self.declareParameter("A0", 0.2)
