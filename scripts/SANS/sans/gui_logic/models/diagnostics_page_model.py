@@ -17,8 +17,7 @@ from sans.common.general_functions import parse_diagnostic_settings
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
 from sans.gui_logic.models.RowEntries import RowEntries
 from sans.gui_logic.plotting import get_plotting_module
-from sans.gui_logic.models.table_model import TableModel
-from sans.gui_logic.presenter.gui_state_director import (GuiStateDirector)
+from sans.gui_logic.presenter.gui_state_director import GuiStateDirector
 
 
 def run_integral(integral_ranges, mask, integral, detector, state):

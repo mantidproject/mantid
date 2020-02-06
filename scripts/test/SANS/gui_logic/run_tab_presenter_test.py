@@ -380,7 +380,7 @@ class RunTabPresenterTest(unittest.TestCase):
 
         presenter.on_rows_removed(rows)
 
-        presenter.update_view_from_table_model.assert_called_once_with()
+        self.assertEqual(2, presenter.update_view_from_table_model.call_count)
 
     def test_add_row_to_table_model_adds_row_to_table_model(self):
         presenter = RunTabPresenter(SANSFacility.ISIS)
@@ -551,8 +551,10 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter.on_insert_row()
         first_row = presenter._table_model.get_row(0)
         presenter.on_insert_row()
+        self.assertEqual(first_row, presenter.get_row(0), "Table replaced row instead of inserting")
         self.assertNotEqual(first_row, presenter._table_model.get_row(1), "New row was inserted above existing")
-        self.assertEqual(presenter._table_model.get_number_of_rows(), 2)
+
+        self.assertEqual(4, presenter._table_model.get_number_of_rows())
 
     def test_on_insert_row_updates_view(self):
         presenter = RunTabPresenter(SANSFacility.ISIS)

@@ -5,13 +5,12 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from qtpy.QtCore import Slot, QThreadPool, Signal, QObject
-from six import iteritems, itervalues
+from six import itervalues
 
-from sans.gui_logic.models import RowEntries
-from sans.sans_batch import SANSBatchReduction
 from sans.algorithm_detail.batch_execution import load_workspaces_from_states
-from ui.sans_isis.worker import Worker
 from sans.common.enums import ReductionMode
+from sans.sans_batch import SANSBatchReduction
+from ui.sans_isis.worker import Worker
 
 
 class BatchProcessRunner(QObject):

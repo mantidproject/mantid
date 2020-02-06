@@ -16,7 +16,6 @@ from mantid.kernel import Logger
 from sans.common.enums import RowState
 from sans.gui_logic.models.RowEntries import RowEntries
 from sans.gui_logic.models.basic_hint_strategy import BasicHintStrategy
-from ui.sans_isis.work_handler import WorkHandler
 
 
 class TableModel(object):
@@ -48,11 +47,11 @@ class TableModel(object):
 
     def add_multiple_table_entries(self, table_index_model_list):
         for row in table_index_model_list:
-            self._add_single_table_entry(table_index_model=row)
+            self._add_single_table_entry(row_entry=row)
         self.notify_subscribers()
 
     def append_table_entry(self, table_index_model):
-        self._add_single_table_entry(table_index_model=table_index_model)
+        self._add_single_table_entry(row_entry=table_index_model)
         self.notify_subscribers()
 
     def get_all_rows(self):
@@ -64,8 +63,14 @@ class TableModel(object):
     def get_row_index(self, row):
         return self._table_entries.index(row)
 
-    def replace_table_entry(self, row, table_index_model):
-        self._add_single_table_entry(row=row, table_index_model=table_index_model)
+    def insert_row_at(self, row_index, row_entry):
+        # Insert a None to effectively bookmark the space
+        self._table_entries.insert(row_index, None)
+        self._add_single_table_entry(row_entry=row_entry, row_index=row_index)
+        self.notify_subscribers()
+
+    def replace_table_entry(self, row_index, row_entry):
+        self._add_single_table_entry(row_index=row_index, row_entry=row_entry)
         self.notify_subscribers()
 
     def remove_table_entries(self, row_indices):
@@ -78,9 +83,9 @@ class TableModel(object):
 
         self.notify_subscribers()
 
-    def _add_single_table_entry(self, table_index_model, row=None):
-        assert isinstance(table_index_model, RowEntries), \
-            "%r is not a RowEntries object" % table_index_model
+    def _add_single_table_entry(self, row_entry, row_index=None):
+        assert isinstance(row_entry, RowEntries), \
+            "%r is not a RowEntries object" % row_entry
 
         assert len(self._table_entries) >= 1, \
             "There must always be 1 element in the model, currently there is 0"
@@ -89,10 +94,10 @@ class TableModel(object):
             del self._table_entries[0]
             self._default_entry_added = False
 
-        if row is None or row == len(self._table_entries):
-            return self._table_entries.append(table_index_model)
+        if row_index is None or row_index == len(self._table_entries):
+            return self._table_entries.append(row_entry)
 
-        self._table_entries[row] = table_index_model
+        self._table_entries[row_index] = row_entry
 
     def replace_table_entries(self, row_to_replace_index, rows_to_insert):
         starting_index = row_to_replace_index[0]
@@ -102,6 +107,7 @@ class TableModel(object):
     def clear_table_entries(self):
         self._table_entries = [RowEntries()]
         self._default_entry_added = True
+        self.notify_subscribers()
 
     def get_number_of_rows(self):
         if self._default_entry_added:

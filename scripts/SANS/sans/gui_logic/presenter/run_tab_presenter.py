@@ -767,9 +767,11 @@ class RunTabPresenter(PresenterCommon):
         """
         selected_rows = self._view.get_selected_rows()
 
-        selected_row = selected_rows[0] + 1 if selected_rows else self.num_rows()
         empty_row = RowEntries()
-        self._table_model.replace_table_entry(selected_row, empty_row)
+        if len(selected_rows) >= 1 :
+            self._table_model.insert_row_at(row_index=selected_rows[0] + 1, row_entry=empty_row)
+        else:
+            self._table_model.append_table_entry(empty_row)
 
     def on_erase_rows(self):
         """

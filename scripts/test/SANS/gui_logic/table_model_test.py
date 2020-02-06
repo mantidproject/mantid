@@ -168,6 +168,19 @@ class TableModelTest(unittest.TestCase):
         obj.remove_table_entries([0])
         self.assertEqual(0, obj.get_number_of_rows())
 
+    def test_inserting_row_at_pos(self):
+        model = TableModel()
+
+        expected_order = [RowEntries() for _ in range(3)]
+        model.replace_table_entry(row_index=0, row_entry=expected_order[0])
+        model.replace_table_entry(row_index=1, row_entry=expected_order[2])
+
+        self.assertTrue(2, model.get_number_of_rows())
+
+        model.insert_row_at(1, expected_order[1])
+        self.assertTrue(3, model.get_number_of_rows())
+        self.assertEqual(expected_order, model.get_all_rows())
+
     def _do_test_file_setting(self, func, prop):
         # Test that can set to empty string
         table_model = TableModel()

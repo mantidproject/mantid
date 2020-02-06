@@ -11,15 +11,15 @@
 from __future__ import (absolute_import, division, print_function)
 
 from abc import ABCMeta, abstractmethod
-from qtpy import PYQT4
-from qtpy.QtCore import QRegExp
-from qtpy.QtGui import (QDoubleValidator, QIntValidator, QRegExpValidator)
-from qtpy.QtWidgets import (QListWidgetItem, QMessageBox, QFileDialog, QMainWindow)
 
 from mantidqt import icons
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt import load_ui
 from mantidqt.widgets import jobtreeview, manageuserdirectories
+from qtpy import PYQT4
+from qtpy.QtCore import QRegExp
+from qtpy.QtGui import (QDoubleValidator, QIntValidator, QRegExpValidator)
+from qtpy.QtWidgets import (QListWidgetItem, QMessageBox, QFileDialog, QMainWindow)
 from six import with_metaclass
 
 from mantid.kernel import (Logger, UsageService, FeatureType)

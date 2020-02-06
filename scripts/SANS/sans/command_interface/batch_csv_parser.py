@@ -128,7 +128,7 @@ class BatchCsvParser(object):
                 raise KeyError("The key {0} is not part of the SANS batch csv file keywords".format(key))
 
             try:
-                _ = BatchFileKeywords(value)
+                BatchFileKeywords(value)
                 raise KeyError("The value {0} is a keyword, you may have missed a comma after {1}".format(value, key))
             except ValueError:
                 pass  # User did not accidentally use a key as a value
