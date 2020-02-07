@@ -11,7 +11,7 @@ from __future__ import (absolute_import, unicode_literals)
 from matplotlib.collections import PolyCollection
 
 from mantid.plots.legend import LegendProperties
-from mantid.plots import helperfunctions, Line2D, MantidAxes
+from mantid.plots import datafunctions, Line2D, MantidAxes
 from mantidqt.utils.qt import block_signals
 from mantidqt.widgets.plotconfigdialog import get_axes_names_dict, curve_in_ax
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import (
@@ -117,7 +117,7 @@ class CurvesTabWidgetPresenter:
         # If the plot is a waterfall plot and the user has set it so the area under each line is filled, and the fill
         # colour for each line is set as the line colour, after the curve is updated we need to check if its colour has
         # changed so the fill can be updated accordingly.
-        if waterfall and ax.waterfall_has_fill() and helperfunctions.waterfall_fill_is_line_colour(ax):
+        if waterfall and ax.waterfall_has_fill() and datafunctions.waterfall_fill_is_line_colour(ax):
             check_line_colour = True
 
         if isinstance(curve, Line2D):
@@ -131,7 +131,7 @@ class CurvesTabWidgetPresenter:
         self.curve_names_dict[self.view.get_selected_curve_name()] = new_curve
 
         if isinstance(ax, MantidAxes):
-            errorbar_cap_lines = helperfunctions.remove_and_return_errorbar_cap_lines(ax)
+            errorbar_cap_lines = datafunctions.remove_and_return_errorbar_cap_lines(ax)
         else:
             errorbar_cap_lines = []
 
@@ -148,12 +148,12 @@ class CurvesTabWidgetPresenter:
                     update_fill = curve.get_color() != new_curve[0].get_color()
                 else:
                     update_fill = curve[0].get_color() != new_curve[0].get_color()
-                helperfunctions.convert_single_line_to_waterfall(ax, curve_index, need_to_update_fill=update_fill)
+                datafunctions.convert_single_line_to_waterfall(ax, curve_index, need_to_update_fill=update_fill)
             else:
                 # the curve has been reset to its original position so for a waterfall plot it needs to be re-offset.
-                helperfunctions.convert_single_line_to_waterfall(ax, curve_index)
+                datafunctions.convert_single_line_to_waterfall(ax, curve_index)
 
-            helperfunctions.set_waterfall_fill_visible(ax, curve_index)
+            datafunctions.set_waterfall_fill_visible(ax, curve_index)
 
         ax.lines += errorbar_cap_lines
 

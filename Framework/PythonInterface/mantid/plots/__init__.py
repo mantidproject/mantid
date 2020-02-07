@@ -34,9 +34,9 @@ from mpl_toolkits.mplot3d.axes3d import Axes3D
 
 from mantid.api import AnalysisDataService as ads
 from mantid.kernel import logger
-from mantid.plots import helperfunctions, plotfunctions, plotfunctions3D
+from mantid.plots import datafunctions, axesfunctions, axesfunctions3D
 from mantid.plots.legend import convert_color_to_hex, LegendProperties
-from mantid.plots.helperfunctions import get_normalize_by_bin_width
+from mantid.plots.datafunctions import get_normalize_by_bin_width
 from mantid.plots.scales import PowerScale, SquareScale
 from mantid.plots.utility import (artists_hidden, autoscale_on_update,
                                   legend_set_draggable, MantidAxType)
@@ -47,7 +47,7 @@ def plot_decorator(func):
     def wrapper(self, *args, **kwargs):
         func_value = func(self, *args, **kwargs)
         # Saves saving it on array objects
-        if helperfunctions.validate_args(*args, **kwargs):
+        if datafunctions.validate_args(*args, **kwargs):
             # Fill out kwargs with the values of args
             kwargs["workspaces"] = args[0].name()
             kwargs["function"] = func.__name__
@@ -490,9 +490,9 @@ class MantidAxes(Axes):
             upper_xlim, upper_ylim = self.dataLim.get_points()[1]
             for container in self.containers:
                 if isinstance(container, ErrorbarContainer) and (
-                    (visible_only and not helperfunctions.errorbars_hidden(container))
+                    (visible_only and not datafunctions.errorbars_hidden(container))
                         or not visible_only):
-                    min_x, max_x, min_y, max_y = helperfunctions.get_errorbar_bounds(container)
+                    min_x, max_x, min_y, max_y = datafunctions.get_errorbar_bounds(container)
                     lower_xlim = min(lower_xlim, min_x) if min_x else lower_xlim
                     upper_xlim = max(upper_xlim, max_x) if max_x else upper_xlim
                     lower_ylim = min(lower_ylim, min_y) if min_y else lower_ylim
@@ -600,7 +600,7 @@ class MantidAxes(Axes):
 
         For keywords related to workspaces, see :func:`plotfunctions.plot`.
         """
-        if helperfunctions.validate_args(*args):
+        if datafunctions.validate_args(*args):
             logger.debug('using plotfunctions')
 
             autoscale_on = kwargs.pop("autoscale_on_update", self.get_autoscale_on())
@@ -609,9 +609,9 @@ class MantidAxes(Axes):
                 # It's only possible to plot 1 line at a time from a workspace
                 try:
                     if new_kwargs:
-                        x, y, _, _ = plotfunctions._plot_impl(self, workspace, args, new_kwargs)
+                        x, y, _, _ = axesfunctions._plot_impl(self, workspace, args, new_kwargs)
                     else:
-                        x, y, _, _ = plotfunctions._plot_impl(self, workspace, args, kwargs)
+                        x, y, _, _ = axesfunctions._plot_impl(self, workspace, args, kwargs)
                     artists[0].set_data(x, y)
                 except RuntimeError as ex:
                     # if curve couldn't be plotted then remove it - can happen if the workspace doesn't contain the
@@ -645,7 +645,7 @@ class MantidAxes(Axes):
 
             with autoscale_on_update(self, autoscale_on):
                 artist = self.track_workspace_artist(workspace,
-                                                     plotfunctions.plot(self, normalize_by_bin_width = is_normalized,
+                                                     axesfunctions.plot(self, normalize_by_bin_width = is_normalized,
                                                                         *args, **kwargs),
                                                      _data_update, spec_num, is_normalized,
                                                      MantidAxes.is_axis_of_type(MantidAxType.SPECTRUM, kwargs))
@@ -673,7 +673,7 @@ class MantidAxes(Axes):
 
         For keywords related to workspaces, see :func:`plotfunctions.scatter`
         """
-        if helperfunctions.validate_args(*args):
+        if datafunctions.validate_args(*args):
             logger.debug('using plotfunctions')
         else:
             return Axes.scatter(self, *args, **kwargs)
@@ -698,7 +698,7 @@ class MantidAxes(Axes):
 
         For keywords related to workspaces, see :func:`plotfunctions.errorbar`
         """
-        if helperfunctions.validate_args(*args):
+        if datafunctions.validate_args(*args):
             logger.debug('using plotfunctions')
 
             autoscale_on = kwargs.pop("autoscale_on_update", self.get_autoscale_on())
@@ -725,9 +725,9 @@ class MantidAxes(Axes):
                     with autoscale_on_update(self, _autoscale_on):
                         # this gets pushed back onto the containers list
                         if new_kwargs:
-                            container_new = plotfunctions.errorbar(self, workspace, **new_kwargs)
+                            container_new = axesfunctions.errorbar(self, workspace, **new_kwargs)
                         else:
-                            container_new = plotfunctions.errorbar(self, workspace, **kwargs)
+                            container_new = axesfunctions.errorbar(self, workspace, **kwargs)
 
                     self.containers.insert(orig_idx, container_new)
                     self.containers.pop()
@@ -761,7 +761,7 @@ class MantidAxes(Axes):
 
             with autoscale_on_update(self, autoscale_on):
                 artist = self.track_workspace_artist(workspace,
-                                                     plotfunctions.errorbar(self, *args, **kwargs),
+                                                     axesfunctions.errorbar(self, *args, **kwargs),
                                                      _data_update, spec_num, is_normalized,
                                                      MantidAxes.is_axis_of_type(MantidAxType.SPECTRUM, kwargs))
             return artist
@@ -864,8 +864,8 @@ class MantidAxes(Axes):
         :param kwargs: The kwargs passed from the use
         :return: The return value of the pcolor* function
         """
-        plotfunctions_func = getattr(plotfunctions, name)
-        if helperfunctions.validate_args(*args):
+        plotfunctions_func = getattr(axesfunctions, name)
+        if datafunctions.validate_args(*args):
             logger.debug('using plotfunctions')
 
             def _update_data(artists, workspace, new_kwargs=None):
@@ -921,7 +921,7 @@ class MantidAxes(Axes):
             artists_new = [artists_new]
 
         try:
-            plotfunctions.update_colorplot_datalimits(self, artists_new)
+            axesfunctions.update_colorplot_datalimits(self, artists_new)
         except ValueError:
             pass
         # the type of plot can mutate back to single image from a multi collection
@@ -1060,24 +1060,24 @@ class MantidAxes(Axes):
         x_offset = int(x_offset)
         y_offset = int(y_offset)
 
-        errorbar_cap_lines = helperfunctions.remove_and_return_errorbar_cap_lines(self)
+        errorbar_cap_lines = datafunctions.remove_and_return_errorbar_cap_lines(self)
 
         for i in range(len(self.get_lines())):
-            helperfunctions.convert_single_line_to_waterfall(self, i, x_offset, y_offset)
+            datafunctions.convert_single_line_to_waterfall(self, i, x_offset, y_offset)
 
         if x_offset == 0 and y_offset == 0:
             self.set_waterfall_fill(False)
             logger.information("x and y offset have been set to zero so the plot is no longer a waterfall plot.")
 
         if self.waterfall_has_fill():
-            helperfunctions.waterfall_update_fill(self)
+            datafunctions.waterfall_update_fill(self)
 
         self.waterfall_x_offset = x_offset
         self.waterfall_y_offset = y_offset
 
         self.lines += errorbar_cap_lines
 
-        helperfunctions.set_waterfall_toolbar_options_enabled(self)
+        datafunctions.set_waterfall_toolbar_options_enabled(self)
         self.get_figure().canvas.draw()
 
     def set_waterfall(self, state, x_offset=None, y_offset=None, fill=False):
@@ -1117,7 +1117,7 @@ class MantidAxes(Axes):
 
             # Set the width and height attributes if they haven't been already.
             if not hasattr(self, 'width'):
-                helperfunctions.set_initial_dimensions(self)
+                datafunctions.set_initial_dimensions(self)
         else:
             if bool(x_offset) or bool(y_offset) or fill:
                 raise RuntimeError("You have set waterfall to false but have given a non-zero value for the offset or "
@@ -1149,17 +1149,17 @@ class MantidAxes(Axes):
             raise RuntimeError("Cannot toggle fill on non-waterfall plot.")
 
         if enable:
-            helperfunctions.waterfall_create_fill(self)
+            datafunctions.waterfall_create_fill(self)
 
             if colour:
-                helperfunctions.solid_colour_fill(self, colour)
+                datafunctions.solid_colour_fill(self, colour)
             else:
-                helperfunctions.line_colour_fill(self)
+                datafunctions.line_colour_fill(self)
         else:
             if bool(colour):
                 raise RuntimeError("You have set fill to false but have given a colour.")
 
-            helperfunctions.waterfall_remove_fill(self)
+            datafunctions.waterfall_remove_fill(self)
 
     # ------------------ Private api --------------------------------------------------------
 
@@ -1239,9 +1239,9 @@ class MantidAxes3D(Axes3D):
 
         For keywords related to workspaces, see :func:`plotfunctions3D.plot3D`
         """
-        if helperfunctions.validate_args(*args):
+        if datafunctions.validate_args(*args):
             logger.debug('using plotfunctions3D')
-            return plotfunctions3D.plot(self, *args, **kwargs)
+            return axesfunctions3D.plot(self, *args, **kwargs)
         else:
             return Axes3D.plot(self, *args, **kwargs)
 
@@ -1264,9 +1264,9 @@ class MantidAxes3D(Axes3D):
 
         For keywords related to workspaces, see :func:`plotfunctions3D.scatter`
         """
-        if helperfunctions.validate_args(*args):
+        if datafunctions.validate_args(*args):
             logger.debug('using plotfunctions3D')
-            return plotfunctions3D.scatter(self, *args, **kwargs)
+            return axesfunctions3D.scatter(self, *args, **kwargs)
         else:
             return Axes3D.scatter(self, *args, **kwargs)
 
@@ -1289,9 +1289,9 @@ class MantidAxes3D(Axes3D):
 
         For keywords related to workspaces, see :func:`plotfunctions3D.wireframe`
         """
-        if helperfunctions.validate_args(*args):
+        if datafunctions.validate_args(*args):
             logger.debug('using plotfunctions3D')
-            return plotfunctions3D.plot_wireframe(self, *args, **kwargs)
+            return axesfunctions3D.plot_wireframe(self, *args, **kwargs)
         else:
             return Axes3D.plot_wireframe(self, *args, **kwargs)
 
@@ -1314,9 +1314,9 @@ class MantidAxes3D(Axes3D):
 
         For keywords related to workspaces, see :func:`plotfunctions3D.plot_surface`
         """
-        if helperfunctions.validate_args(*args):
+        if datafunctions.validate_args(*args):
             logger.debug('using plotfunctions3D')
-            return plotfunctions3D.plot_surface(self, *args, **kwargs)
+            return axesfunctions3D.plot_surface(self, *args, **kwargs)
         else:
             return Axes3D.plot_surface(self, *args, **kwargs)
 
@@ -1339,9 +1339,9 @@ class MantidAxes3D(Axes3D):
 
         For keywords related to workspaces, see :func:`plotfunctions3D.contour`
         """
-        if helperfunctions.validate_args(*args):
+        if datafunctions.validate_args(*args):
             logger.debug('using plotfunctions3D')
-            return plotfunctions3D.contour(self, *args, **kwargs)
+            return axesfunctions3D.contour(self, *args, **kwargs)
         else:
             return Axes3D.contour(self, *args, **kwargs)
 
@@ -1364,9 +1364,9 @@ class MantidAxes3D(Axes3D):
 
         For keywords related to workspaces, see :func:`plotfunctions3D.contourf`
         """
-        if helperfunctions.validate_args(*args):
+        if datafunctions.validate_args(*args):
             logger.debug('using plotfunctions3D')
-            return plotfunctions3D.contourf(self, *args, **kwargs)
+            return axesfunctions3D.contourf(self, *args, **kwargs)
         else:
             return Axes3D.contourf(self, *args, **kwargs)
 

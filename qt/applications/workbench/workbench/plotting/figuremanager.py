@@ -23,7 +23,7 @@ from qtpy.QtWidgets import QApplication, QLabel, QFileDialog
 
 from mantid.api import AnalysisDataService, AnalysisDataServiceObserver, ITableWorkspace, MatrixWorkspace
 from mantid.kernel import logger
-from mantid.plots import helperfunctions, MantidAxes
+from mantid.plots import datafunctions, MantidAxes
 from mantid.py3compat import text_type
 from mantidqt.io import open_a_file_dialog
 from mantidqt.plotting.figuretype import FigureType, figure_type
@@ -418,10 +418,10 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
     def waterfall_reverse_line_order(self):
         ax = self.canvas.figure.get_axes()[0]
         x, y = ax.waterfall_x_offset, ax.waterfall_y_offset
-        fills = helperfunctions.get_waterfall_fills(ax)
+        fills = datafunctions.get_waterfall_fills(ax)
         ax.update_waterfall(0, 0)
 
-        errorbar_cap_lines = helperfunctions.remove_and_return_errorbar_cap_lines(ax)
+        errorbar_cap_lines = datafunctions.remove_and_return_errorbar_cap_lines(ax)
 
         ax.lines.reverse()
         ax.lines += errorbar_cap_lines

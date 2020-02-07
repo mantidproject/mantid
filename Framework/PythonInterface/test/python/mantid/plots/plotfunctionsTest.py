@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import mantid.api
-import mantid.plots.plotfunctions as funcs
+import mantid.plots.axesfunctions as funcs
 from mantid.plots.utility import MantidAxType
 from mantid.kernel import config
 from mantid.simpleapi import (CreateWorkspace, CreateEmptyTableWorkspace, DeleteWorkspace,

@@ -16,9 +16,9 @@ import numpy as np
 import unittest
 
 from mantid.kernel import config
-from mantid.plots import helperfunctions
+from mantid.plots import datafunctions
 from mantid.plots.legend import convert_color_to_hex
-from mantid.plots.plotfunctions import get_colorplot_extents
+from mantid.plots.axesfunctions import get_colorplot_extents
 from mantid.py3compat.mock import Mock, patch
 from mantid.simpleapi import (CreateWorkspace, CreateSampleWorkspace, DeleteWorkspace,
                               RemoveSpectra, AnalysisDataService as ADS)
@@ -558,7 +558,7 @@ class Plots__init__Test(unittest.TestCase):
         # Add filled areas.
         ax.set_waterfall_fill(True)
 
-        fills = helperfunctions.get_waterfall_fills(ax)
+        fills = datafunctions.get_waterfall_fills(ax)
         self.assertEqual(len(fills), 2)
 
     def test_remove_fill_removes_fills_for_waterfall_plots(self):
@@ -604,8 +604,8 @@ class Plots__init__Test(unittest.TestCase):
 
         # Plot another line and make it join the waterfall.
         ax.plot([0, 1], [0,1], color='#00fff0')
-        helperfunctions.convert_single_line_to_waterfall(ax, 2)
-        helperfunctions.waterfall_update_fill(ax)
+        datafunctions.convert_single_line_to_waterfall(ax, 2)
+        datafunctions.waterfall_update_fill(ax)
 
         # Check that there are now three filled areas and the new line colour matches the new fill colour.
         self.assertEqual(convert_color_to_hex(ax.collections[2].get_facecolor()[0]), ax.lines[2].get_color())
@@ -625,8 +625,8 @@ class Plots__init__Test(unittest.TestCase):
 
         # Plot another line and make it join the waterfall.
         ax.plot([0, 1], [0, 1])
-        helperfunctions.convert_single_line_to_waterfall(ax, 2)
-        helperfunctions.waterfall_update_fill(ax)
+        datafunctions.convert_single_line_to_waterfall(ax, 2)
+        datafunctions.waterfall_update_fill(ax)
 
         # Check that there are now three filled areas and the new fill colour matches the others.
         self.assertTrue((ax.collections[2].get_facecolor() == [1, 0, 0, 1]).all())

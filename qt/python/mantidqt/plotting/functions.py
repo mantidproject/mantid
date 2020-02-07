@@ -21,59 +21,21 @@ try:
     from matplotlib.cm import viridis as DEFAULT_CMAP
 except ImportError:
     from matplotlib.cm import jet as DEFAULT_CMAP
-from matplotlib.gridspec import GridSpec
-from matplotlib.legend import Legend
 
 # local imports
 from mantid.api import AnalysisDataService, MatrixWorkspace
 from mantid.kernel import Logger, ConfigService
-from mantid.plots import helperfunctions, MantidAxes
-from mantid.plots.utility import MantidAxType
+from mantid.plots.plotfunctions import manage_workspace_names, figure_title, plot, get_plot_fig,\
+                                       create_subplots,raise_if_not_sequence
 from mantidqt.plotting.figuretype import figure_type, FigureType
-from mantid.py3compat import is_text_string, string_types
 from mantidqt.dialogs.spectraselectorutils import get_spectra_selection
 # -----------------------------------------------------------------------------
 # Constants
 # -----------------------------------------------------------------------------
-PROJECTION = 'mantid'
 # See https://matplotlib.org/api/_as_gen/matplotlib.figure.SubplotParams.html#matplotlib.figure.SubplotParams
 SUBPLOT_WSPACE = 0.5
 SUBPLOT_HSPACE = 0.5
 LOGGER = Logger("workspace.plotting.functions")
-
-MARKER_MAP = {'square': 's', 'plus (filled)': 'P', 'point': '.', 'tickdown': 3,
-              'triangle_right': '>', 'tickup': 2, 'hline': '_', 'vline': '|',
-              'pentagon': 'p', 'tri_left': '3', 'caretdown': 7,
-              'caretright (centered at base)': 9, 'tickright': 1,
-              'caretright': 5, 'caretleft': 4, 'tickleft': 0, 'tri_up': '2',
-              'circle': 'o', 'pixel': ',', 'caretleft (centered at base)': 8,
-              'diamond': 'D', 'star': '*', 'hexagon1': 'h', 'octagon': '8',
-              'hexagon2': 'H', 'tri_right': '4', 'x (filled)': 'X',
-              'thin_diamond': 'd', 'tri_down': '1', 'triangle_left': '<',
-              'plus': '+', 'triangle_down': 'v', 'triangle_up': '^', 'x': 'x',
-              'caretup': 6, 'caretup (centered at base)': 10,
-              'caretdown (centered at base)': 11, 'None': 'None'}
-
-
-# -----------------------------------------------------------------------------
-# Decorators
-# -----------------------------------------------------------------------------
-
-def manage_workspace_names(func):
-    """
-    A decorator to go around plotting functions.
-    This will retrieve workspaces from workspace names before
-    calling the plotting function
-    :param func: A plotting function
-    :return:
-    """
-
-    def inner_func(workspaces, *args, **kwargs):
-        workspaces = _validate_workspace_names(workspaces)
-        return func(workspaces, *args, **kwargs)
-
-    return inner_func
-
 
 # -----------------------------------------------------------------------------
 # 'Public' Functions
@@ -111,30 +73,6 @@ def current_figure_or_none():
     else:
         return None
 
-
-def figure_title(workspaces, fig_num):
-    """Create a default figure title from a single workspace, list of workspaces or
-    workspace names and a figure number. The name of the first workspace in the list
-    is concatenated with the figure number.
-
-    :param workspaces: A single workspace, list of workspaces or workspace name/list of workspace names
-    :param fig_num: An integer denoting the figure number
-    :return: A title for the figure
-    """
-
-    def wsname(w):
-        return w.name() if hasattr(w, 'name') else w
-
-    if is_text_string(workspaces) or not isinstance(workspaces, collections.Sequence):
-        # assume a single workspace
-        first = workspaces
-    else:
-        assert len(workspaces) > 0
-        first = workspaces[0]
-
-    return wsname(first) + '-' + str(fig_num)
-
-
 def plot_from_names(names, errors, overplot, fig=None, show_colorfill_btn=False):
     """
     Given a list of names of workspaces, raise a dialog asking for the
@@ -163,179 +101,6 @@ def plot_from_names(names, errors, overplot, fig=None, show_colorfill_btn=False)
                 wksp_indices=selection.wksp_indices,
                 errors=errors, overplot=overplot, fig=fig, tiled=selection.plot_type==selection.Tiled,
                 waterfall=selection.plot_type==selection.Waterfall)
-
-
-def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=1, fig=None):
-    """
-    Create a blank figure and axes, with configurable properties.
-    :param overplot: If true then plotting on figure will plot over previous plotting. If an axis object the overplotting
-    will be done on the axis passed in
-    :param ax_properties: A dict of axes properties. E.g. {'yscale': 'log'} for log y-axis
-    :param window_title: A string denoting the name of the GUI window which holds the graph
-    :param axes_num: The number of axes to create on the figure
-    :param fig: An optional figure object
-    :return: Matplotlib fig and axes objects
-    """
-    import matplotlib.pyplot as plt
-    if fig and overplot:
-        fig = fig
-    elif fig:
-        fig, _, _, _ = _create_subplots(axes_num, fig)
-    elif overplot:
-        fig = plt.gcf()
-    else:
-        fig, _, _, _ = _create_subplots(axes_num)
-
-    if not ax_properties:
-        ax_properties = {}
-        if ConfigService.getString("plots.xAxesScale").lower() == 'log':
-            ax_properties['xscale'] = 'log'
-        else:
-            ax_properties['xscale'] = 'linear'
-        if ConfigService.getString("plots.yAxesScale").lower() == 'log':
-            ax_properties['yscale'] = 'log'
-        else:
-            ax_properties['yscale'] = 'linear'
-    if ax_properties:
-        for axis in fig.axes:
-            axis.set(**ax_properties)
-    if window_title:
-        fig.canvas.set_window_title(window_title)
-
-    return fig, fig.axes
-
-
-@manage_workspace_names
-def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
-         overplot=False, fig=None, plot_kwargs=None, ax_properties=None,
-         window_title=None, tiled=False, waterfall=False):
-    """
-    Create a figure with a single subplot and for each workspace/index add a
-    line plot to the new axes. show() is called before returning the figure instance. A legend
-    is added.
-
-    :param workspaces: A list of workspace handles or strings
-    :param spectrum_nums: A list of spectrum number identifiers (general start from 1)
-    :param wksp_indices: A list of workspace indexes (starts from 0)
-    :param errors: If true then error bars are added for each plot
-    :param overplot: If true then overplot over the current figure if one exists. If an axis object the overplotting
-    will be done on the axis passed in
-    :param fig: If not None then use this Figure object to plot
-    :param plot_kwargs: Arguments that will be passed onto the plot function
-    :param ax_properties: A dict of axes properties. E.g. {'yscale': 'log'}
-    :param window_title: A string denoting name of the GUI window which holds the graph
-    :param tiled: An optional flag controlling whether to do a tiled or overlayed plot
-    :param waterfall: An optional flag controlling whether or not to do a waterfall plot
-    :return: The figure containing the plots
-    """
-    if plot_kwargs is None:
-        plot_kwargs = {}
-    _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices, tiled, overplot)
-    workspaces = [ws for ws in workspaces if isinstance(ws, MatrixWorkspace)]
-
-    if spectrum_nums is not None:
-        kw, nums = 'specNum', spectrum_nums
-    else:
-        kw, nums = 'wkspIndex', wksp_indices
-
-    _add_default_plot_kwargs_from_settings(plot_kwargs, errors)
-
-    num_axes = len(workspaces) * len(nums) if tiled else 1
-
-    fig, axes = get_plot_fig(overplot, ax_properties, window_title, num_axes, fig)
-
-    # Convert to a MantidAxes if it isn't already. Ignore legend since
-    # a new one will be drawn later
-    axes = [MantidAxes.from_mpl_axes(ax, ignore_artists=[Legend]) if not isinstance(ax, MantidAxes) else ax
-            for ax in axes]
-
-    if tiled:
-        ws_index = [(ws, index) for ws in workspaces for index in nums]
-        for index, ax in enumerate(axes):
-            if index < len(ws_index):
-                _do_single_plot(ax, [ws_index[index][0]], errors, False, [ws_index[index][1]], kw, plot_kwargs)
-            else:
-                ax.axis('off')
-    else:
-        show_title = ("on" == ConfigService.getString("plots.ShowTitle").lower()) and not overplot
-        ax = overplot if isinstance(overplot, MantidAxes) else axes[0]
-        ax.axis('on')
-        _do_single_plot(ax, workspaces, errors, show_title, nums, kw, plot_kwargs)
-
-    # Can't have a waterfall plot with only one line.
-    if len(nums) == 1 and waterfall:
-        waterfall = False
-
-    # The plot's initial xlim and ylim are used to offset each curve in a waterfall plot.
-    # Need to do this whether the current curve is a waterfall plot or not because it may be converted later.
-    if not overplot:
-        helperfunctions.set_initial_dimensions(ax)
-
-    if waterfall:
-        ax.set_waterfall(True)
-
-    if not overplot:
-        fig.canvas.set_window_title(figure_title(workspaces, fig.number))
-    else:
-        if ax.is_waterfall():
-            for i in range(len(nums)):
-                errorbar_cap_lines = helperfunctions.remove_and_return_errorbar_cap_lines(ax)
-                helperfunctions.convert_single_line_to_waterfall(ax, len(ax.get_lines())-(i+1))
-
-                if ax.waterfall_has_fill():
-                    helperfunctions.waterfall_update_fill(ax)
-
-                ax.lines += errorbar_cap_lines
-
-    # This updates the toolbar so the home button now takes you back to this point.
-    # The try catch is in case the manager does not have a toolbar attached.
-    try:
-        fig.canvas.manager.toolbar.update()
-    except AttributeError:
-        pass
-
-    fig.canvas.draw()
-    # This displays the figure, but only works if a manager is attached to the figure.
-    # The try catch is in case a figure manager is not present
-    try:
-        fig.show()
-    except AttributeError:
-        pass
-
-    return fig
-
-
-def _add_default_plot_kwargs_from_settings(plot_kwargs, errors):
-    if 'linestyle' not in plot_kwargs:
-        plot_kwargs['linestyle'] = ConfigService.getString("plots.line.Style")
-    if 'linewidth' not in plot_kwargs:
-        plot_kwargs['linewidth'] = float(ConfigService.getString("plots.line.Width"))
-    if 'marker' not in plot_kwargs:
-        plot_kwargs['marker'] = MARKER_MAP[ConfigService.getString("plots.marker.Style")]
-    if 'markersize' not in plot_kwargs:
-        plot_kwargs['markersize'] = float(ConfigService.getString("plots.marker.Size"))
-    if errors:
-        if 'capsize' not in plot_kwargs:
-            plot_kwargs['capsize'] = float(ConfigService.getString("plots.errorbar.Capsize"))
-        if 'capthick' not in plot_kwargs:
-            plot_kwargs['capthick'] = float(ConfigService.getString("plots.errorbar.CapThickness"))
-        if 'errorevery' not in plot_kwargs:
-            plot_kwargs['errorevery'] = int(ConfigService.getString("plots.errorbar.errorEvery"))
-        if 'elinewidth' not in plot_kwargs:
-            plot_kwargs['elinewidth'] = float(ConfigService.getString("plots.errorbar.Width"))
-
-
-def _do_single_plot(ax, workspaces, errors, set_title, nums, kw, plot_kwargs):
-    # do the plotting
-    plot_fn = ax.errorbar if errors else ax.plot
-    for ws in workspaces:
-        for num in nums:
-            plot_kwargs[kw] = num
-            plot_fn(ws, **plot_kwargs)
-    ax.make_legend()
-    if set_title:
-        title = workspaces[0].name()
-        ax.set_title(title)
 
 
 def pcolormesh_from_names(names, fig=None, ax=None):
@@ -387,7 +152,7 @@ def pcolormesh(workspaces, fig=None):
     # create a subplot of the appropriate number of dimensions
     # extend in number of columns if the number of plottables is not a square number
     workspaces_len = len(workspaces)
-    fig, axes, nrows, ncols = _create_subplots(workspaces_len, fig=fig)
+    fig, axes, nrows, ncols = create_subplots(workspaces_len, fig=fig)
 
     row_idx, col_idx = 0, 0
     for subplot_idx in range(nrows * ncols):
@@ -431,186 +196,6 @@ def pcolormesh_on_axis(ax, ws):
 
     return pcm
 
-# ----------------- Compatability functions ---------------------
-
-
-def plotSpectrum(workspaces, indices, distribution=None, error_bars=False,
-                 type=None, window=None, clearWindow=None,
-                 waterfall=None):
-    """
-    Create a figure with a single subplot and for each workspace/index add a
-    line plot to the new axes. show() is called before returning the figure instance
-
-    :param workspaces: Workspace/workspaces to plot as a string, workspace handle, list of strings or list of
-    workspaces handles.
-    :param indices: A single int or list of ints specifying the workspace indices to plot
-    :param distribution: ``None`` (default) asks the workspace. ``False`` means
-                         divide by bin width. ``True`` means do not divide by bin width.
-                         Applies only when the the workspace is a MatrixWorkspace histogram.
-    :param error_bars: If true then error bars will be added for each curve
-    :param type: Ignored. Here to preserve backwards compatibility
-    :param window: Ignored. Here to preserve backwards compatibility
-    :param clearWindow: Ignored. Here to preserve backwards compatibility
-    :param waterfall: Ignored. Here to preserve backwards compatibility
-    """
-    _report_deprecated_parameter("distribution", distribution)
-    _report_deprecated_parameter("type", type)
-    _report_deprecated_parameter("window", window)
-    _report_deprecated_parameter("clearWindow", clearWindow)
-    _report_deprecated_parameter("waterfall", waterfall)
-
-    return plot(_assert_object_in_list(workspaces), wksp_indices=_assert_object_in_list(indices),
-                errors=error_bars)
-
-
-def plotBin(workspaces, indices, error_bars=False, type=None, window=None, clearWindow=None,
-            waterfall=None):
-    """Create a 1D Plot of bin count vs spectrum in a workspace.
-
-    This puts the spectrum number as the X variable, and the
-    count in the particular bin # (in 'indices') as the Y value.
-
-    If indices is a tuple or list, then several curves are created, one
-    for each bin index.
-
-    :param workspace or name of a workspace
-    :param indices: bin number(s) to plot
-    :param error_bars: If true then error bars will be added for each curve
-    :param type: Ignored. Here to preserve backwards compatibility
-    :param window:Ignored. Here to preserve backwards compatibility
-    :param clearWindow: Ignored. Here to preserve backwards compatibility
-    :param waterfall: Ignored. Here to preserve backwards compatibility
-
-    """
-    _report_deprecated_parameter("type", type)
-    _report_deprecated_parameter("window", window)
-    _report_deprecated_parameter("clearWindow", clearWindow)
-    _report_deprecated_parameter("waterfall", waterfall)
-
-    plot_kwargs = {"axis": MantidAxType.BIN}
-    return plot(_assert_object_in_list(workspaces), wksp_indices=_assert_object_in_list(indices),
-                errors=error_bars, plot_kwargs=plot_kwargs)
-
-
-def _assert_object_in_list(object):
-    """If the object is not a list itself it will be returned in a list"""
-    if isinstance(object, list):
-        return object
-    else:
-        return [object]
-
-
-def _report_deprecated_parameter(param_name,param_value):
-    """Logs a warning message if the parameter value is not None"""
-    if param_value is not None:
-        LOGGER.warning("The argument '{}' is not supported in workbench and has been ignored".format(param_name))
-
-
-# -----------------------------------------------------------------------------
-# 'Private' Functions
-# -----------------------------------------------------------------------------
-def _raise_if_not_sequence(value, seq_name, element_type=None):
-    """
-    Raise a ValueError if the given object is not a sequence
-
-    :param value: The value object to validate
-    :param seq_name: The variable name of the sequence for the error message
-    :param element_type: An optional type to provide to check that each element
-    is an instance of this type
-    :raises ValueError: if the conditions are not met
-    """
-    accepted_types = (list, tuple, range)
-    if type(value) not in accepted_types:
-        raise ValueError("{} should be a list or tuple, "
-                         "instead found '{}'".format(seq_name,
-                                                     value.__class__.__name__))
-    if element_type is not None:
-        def raise_if_not_type(x):
-            if not isinstance(x, element_type):
-                if element_type == MatrixWorkspace:
-                    # If the workspace is the wrong type, log the error and remove it from the list so that the other
-                    # workspaces can still be plotted.
-                    LOGGER.warning("{} has unexpected type '{}'".format(x, x.__class__.__name__))
-                else:
-                    raise ValueError("Unexpected type: '{}'".format(x.__class__.__name__))
-
-        # Map in Python3 is an iterator, so ValueError will not be raised unless the values are yielded.
-        # converting to a list forces yielding
-        list(map(raise_if_not_type, value))
-
-
-def _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices, tiled=False, overplot=False):
-    """Raises a ValueError if any arguments have the incorrect types"""
-    if spectrum_nums is not None and wksp_indices is not None:
-        raise ValueError("Both spectrum_nums and wksp_indices supplied. "
-                         "Please supply only 1.")
-
-    if tiled and overplot:
-        raise ValueError("Both tiled and overplot flags set to true. "
-                         "Please set only one to true.")
-
-    _raise_if_not_sequence(workspaces, 'workspaces', MatrixWorkspace)
-
-    if spectrum_nums is not None:
-        _raise_if_not_sequence(spectrum_nums, 'spectrum_nums')
-
-    if wksp_indices is not None:
-        _raise_if_not_sequence(wksp_indices, 'wksp_indices')
-
-
-def _validate_workspace_names(workspaces):
-    """
-    Checks if the workspaces passed into a plotting function are workspace names, and
-    retrieves the workspaces if they are.
-    This function assumes that we do not have a mix of workspaces and workspace names.
-    :param workspaces: A list of workspaces or workspace names
-    :return: A list of workspaces
-    """
-    try:
-        _raise_if_not_sequence(workspaces, 'workspaces', string_types)
-    except ValueError:
-        return workspaces
-    else:
-        return AnalysisDataService.Instance().retrieveWorkspaces(workspaces, unrollGroups=True)
-
-
 def _validate_pcolormesh_inputs(workspaces):
     """Raises a ValueError if any arguments have the incorrect types"""
-    _raise_if_not_sequence(workspaces, 'workspaces', MatrixWorkspace)
-
-
-def _create_subplots(nplots, fig=None):
-    """
-    Create a set of subplots suitable for a given number of plots. A stripped down
-    version of plt.subplots that can accept an existing figure instance.
-
-    :param nplots: The number of plots required
-    :param fig: An optional figure. It is cleared before plotting the new contents
-    :return: A 2-tuple of (fig, axes)
-    """
-    import matplotlib.pyplot as plt
-    square_side_len = int(math.ceil(math.sqrt(nplots)))
-    nrows, ncols = square_side_len, square_side_len
-    if square_side_len * square_side_len != nplots:
-        # not a square number - square_side_len x square_side_len
-        # will be large enough but we could end up with an empty
-        # row so chop that off
-        if nplots <= (nrows - 1) * ncols:
-            nrows -= 1
-
-    if fig is None:
-        fig = plt.figure()
-    else:
-        fig.clf()
-    # annoyling this repl
-    nplots = nrows * ncols
-    gs = GridSpec(nrows, ncols)
-    axes = np.empty(nplots, dtype=object)
-    ax0 = fig.add_subplot(gs[0, 0], projection=PROJECTION)
-    axes[0] = ax0
-    for i in range(1, nplots):
-        axes[i] = fig.add_subplot(gs[i // ncols, i % ncols],
-                                  projection=PROJECTION)
-    axes = axes.reshape(nrows, ncols)
-
-    return fig, axes, nrows, ncols
+    raise_if_not_sequence(workspaces, 'workspaces', MatrixWorkspace)

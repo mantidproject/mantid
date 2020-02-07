@@ -17,7 +17,7 @@ from matplotlib.pyplot import figure
 from numpy import array_equal
 
 from mantid.simpleapi import CreateWorkspace
-from mantid.plots import helperfunctions
+from mantid.plots import datafunctions
 from mantid.py3compat.mock import Mock, patch
 from mantidqt.widgets.plotconfigdialog.colorselector import convert_color_to_hex
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import CurveProperties
@@ -297,7 +297,7 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         new_plot_kwargs = {'visible': False}
         presenter._replot_selected_curve(new_plot_kwargs)
 
-        self.assertEqual(helperfunctions.get_waterfall_fill_for_curve(ax, 0).get_visible(), False)
+        self.assertEqual(datafunctions.get_waterfall_fill_for_curve(ax, 0).get_visible(), False)
 
     def test_changing_line_colour_on_a_waterfall_plot_with_filled_areas_changes_fill_colour_to_match(self):
         fig = self.make_figure_with_multiple_curves()

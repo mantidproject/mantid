@@ -8,7 +8,7 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
-from mantid.plots.helperfunctions import update_colorbar_scale
+from mantid.plots.datafunctions import update_colorbar_scale
 from mantidqt.utils.qt import block_signals
 from mantidqt.widgets.plotconfigdialog import generate_ax_name, get_images_from_fig
 from mantidqt.widgets.plotconfigdialog.imagestabwidget import ImageProperties

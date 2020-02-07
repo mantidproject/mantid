@@ -48,12 +48,10 @@ from mantid.kernel.packagesetup import update_sys_paths as _update_sys_paths
 # register matplotlib projection
 try:
     from mantid import plots  # noqa
+    from mantid.plots._compatability import plotSpectrum, plotBin  # noqa
 except ImportError:
     pass  # matplotlib is unavailable
-try:
-    from mantidqt.plotting.functions import plotSpectrum, plotBin  # noqa
-except ImportError:
-    pass  # matplotlib is unavailable
+
 from mantid.kernel._aliases import *
 from mantid.api._aliases import *
 from mantid.fitfunctions import *

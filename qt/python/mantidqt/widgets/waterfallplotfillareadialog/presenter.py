@@ -10,7 +10,7 @@ from __future__ import (absolute_import, unicode_literals)
 
 from matplotlib.collections import PolyCollection
 
-from mantid.plots import helperfunctions
+from mantid.plots import datafunctions
 from mantidqt.widgets.plotconfigdialog.colorselector import convert_color_to_hex
 from mantidqt.widgets.waterfallplotfillareadialog.view import WaterfallPlotFillAreaDialogView
 
@@ -41,7 +41,7 @@ class WaterfallPlotFillAreaDialogPresenter:
         if self.ax.waterfall_has_fill():
             self.view.enable_fill_group_box.setChecked(True)
 
-            if helperfunctions.waterfall_fill_is_line_colour(self.ax):
+            if datafunctions.waterfall_fill_is_line_colour(self.ax):
                 self.view.use_line_colour_radio_button.setChecked(True)
             else:
                 self.view.use_solid_colour_radio_button.setChecked(True)
@@ -59,7 +59,7 @@ class WaterfallPlotFillAreaDialogPresenter:
             self.remove_fill()
 
     def line_colour_fill(self):
-        helperfunctions.line_colour_fill(self.ax)
+        datafunctions.line_colour_fill(self.ax)
 
     def solid_colour_fill(self):
         # If the colour selector has been changed then presumably the user wants to set a custom fill colour
@@ -69,7 +69,7 @@ class WaterfallPlotFillAreaDialogPresenter:
 
         colour = self.view.colour_selector_widget.get_color()
 
-        helperfunctions.solid_colour_fill(self.ax, colour)
+        datafunctions.solid_colour_fill(self.ax, colour)
 
     def create_fill(self):
         self.ax.set_waterfall_fill(True)

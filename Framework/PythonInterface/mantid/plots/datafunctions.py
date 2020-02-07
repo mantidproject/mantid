@@ -27,7 +27,7 @@ from mantid.plots.utility import MantidAxType
 
 
 # Helper functions for data extraction from a Mantid workspace and plot functionality
-# These functions are common between plotfunctions.py and plotfunctions3D.py
+# These functions are common between axesfunctions.py and axesfunctions3D.py
 
 # ====================================================
 # Validation
@@ -429,7 +429,7 @@ def get_matrix_2d_ragged(workspace, normalize_by_bin_width, histogram2D=False, t
         xtmp = workspace.readX(i)
         if workspace.isHistogramData():
             # input x is edges
-            xtmp = mantid.plots.helperfunctions.points_from_boundaries(xtmp)
+            xtmp = mantid.plots.datafunctions.points_from_boundaries(xtmp)
         else:
             # input x is centers
             pass
@@ -439,15 +439,15 @@ def get_matrix_2d_ragged(workspace, normalize_by_bin_width, histogram2D=False, t
         delta = min(delta, diff.min())
     num_edges = int(np.ceil((max_value - min_value)/delta)) + 1
     x_centers = np.linspace(min_value, max_value, num=num_edges)
-    y = mantid.plots.helperfunctions.boundaries_from_points(workspace.getAxis(1).extractValues())
+    y = mantid.plots.datafunctions.boundaries_from_points(workspace.getAxis(1).extractValues())
     z = np.empty([num_hist, num_edges], dtype=np.float64)
     for i in range(num_hist):
-        centers, ztmp, _, _ = mantid.plots.helperfunctions.get_spectrum(
+        centers, ztmp, _, _ = mantid.plots.datafunctions.get_spectrum(
             workspace, i, normalize_by_bin_width=normalize_by_bin_width, withDy=False, withDx=False)
         f = interp1d(centers, ztmp, kind='nearest', bounds_error=False, fill_value=np.nan)
         z[i] = f(x_centers)
     if histogram2D:
-        x = mantid.plots.helperfunctions.boundaries_from_points(x_centers)
+        x = mantid.plots.datafunctions.boundaries_from_points(x_centers)
     else:
         x = x_centers
     if transpose:

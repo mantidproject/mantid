@@ -8,7 +8,7 @@
 #
 #
 from __future__ import (absolute_import, division, print_function)
-from mantid.plots.helperfunctions import get_indices
+from mantid.plots.datafunctions import get_indices
 from mantid.api import MatrixWorkspace, MultipleExperimentInfos
 from mantid.simpleapi import BinMD
 from mantid.py3compat.enum import Enum

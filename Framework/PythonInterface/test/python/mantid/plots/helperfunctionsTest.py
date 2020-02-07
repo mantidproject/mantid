@@ -16,7 +16,7 @@ from matplotlib.pyplot import figure
 import numpy as np
 
 import mantid.api
-import mantid.plots.helperfunctions as funcs
+import mantid.plots.datafunctions as funcs
 from mantid.py3compat.mock import Mock
 from mantid.kernel import config
 from mantid.plots.utility import MantidAxType
@@ -805,21 +805,21 @@ class HelperFunctionsTest(unittest.TestCase):
         return artist
 
     def test_errorbars_hidden_returns_true_for_non_errorbar_container_object(self):
-        self.assertTrue(mantid.plots.helperfunctions.errorbars_hidden(Mock()))
+        self.assertTrue(mantid.plots.datafunctions.errorbars_hidden(Mock()))
 
     def test_errorbars_hidden_returns_correctly_on_errorbar_container(self):
         container = self._create_artist(errors=True)
-        self.assertFalse(mantid.plots.helperfunctions.errorbars_hidden(container))
+        self.assertFalse(mantid.plots.datafunctions.errorbars_hidden(container))
         [caps.set_visible(False) for caps in container[1] if container[1]]
         [bars.set_visible(False) for bars in container[2]]
-        self.assertTrue(mantid.plots.helperfunctions.errorbars_hidden(container))
+        self.assertTrue(mantid.plots.datafunctions.errorbars_hidden(container))
 
     def test_errorbars_hidden_returns_true_on_container_with_invisible_connecting_line(self):
         container = self._create_artist(errors=True)
         container[0].set_visible(False)
         [caps.set_visible(False) for caps in container[1] if container[1]]
         [bars.set_visible(False) for bars in container[2]]
-        self.assertTrue(mantid.plots.helperfunctions.errorbars_hidden(container))
+        self.assertTrue(mantid.plots.datafunctions.errorbars_hidden(container))
 
 
 if __name__ == '__main__':

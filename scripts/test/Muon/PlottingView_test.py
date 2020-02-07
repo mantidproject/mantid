@@ -30,7 +30,7 @@ def get_subPlot(name):
     # create real lines
     fig = Figure()
     sub = fig.add_subplot(1, 1, 1)
-    line1 = plots.plotfunctions.plot(sub, ws1, specNum=1)
+    line1 = plots.axesfunctions.plot(sub, ws1, specNum=1)
     # add them both
     subplot = subPlot(name)
     subplot.addLine(label1, line1, ws1, 2)
