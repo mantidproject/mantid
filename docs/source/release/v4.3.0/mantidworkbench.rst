@@ -9,17 +9,49 @@ New
 ###
 - Waterfall Plots
 - Mantid Workbench can now load all of the workspaces from projects saved from Mantidplot.  Graphs and interface values are not imported from the project.
-- Added an compatability implementation of plotSpectrum and plotBin for python scripts in Workbench, only the workspaces, indices and error_bars arguments are supported, others will be ignored. For example the forllowing commands are supported.
+- Added a compatability implementation of plotSpectrum and plotBin for python scripts in Workbench, all of the previous arguments are supported with the exception of distributionwhich will be ignored. For example the following commands are supported.
 
 .. code-block:: python
 
-	plotSpectrum(mar,1,error_bars=True)
-	plotBin(mar,1)
+	#setup a couple of workspaces
+	ws = CreateSampleWorkspace(Function='Powder Diffraction')
+	ws2 = ws+ws
 
-	plotSpectrum([mar,mar2],1)
-	plotBin([mar,mar2],1)
-	plotSpectrum([mar,mar2],[1,2,3])
-	plotBin([mar,mar2],[1,2,3])
+	#simple plots
+	plotSpectrum(ws ,1)
+	plotBin(ws ,1)
+
+	#With Error Bars
+	plotSpectrum(ws ,1,error_bars=True)
+	plotBin(ws ,1,error_bars=True)
+
+	#Multi line plots
+	plotSpectrum([ws ,ws2],1)
+	plotBin([ws ,ws2],1)
+	plotSpectrum([ws ,ws2],[1,2,3])
+	plotBin([ws ,ws2],[1,2,3])
+	plotSpectrum(["ws ","ws2"],[1,2,3])
+
+	#plotting with spectra numbers
+	plotSpectrum(ws,spectrum_nums=2,error_bars=True)
+	plotSpectrum(ws,spectrum_nums=[2,4,6])
+	plotSpectrum([ws,ws2],spectrum_nums=list(range(2,10)))
+
+	# add a curve to an existing plot
+	plot1 = plotSpectrum(ws ,1,error_bars=True)
+	plot1 = plotSpectrum(ws ,error_bars=True,window=plot1)
+
+	# clear an existing plot use that window to plot
+	plot2 = plotSpectrum(ws ,1,error_bars=True)
+	plot2 = plotSpectrum(ws2,1,error_bars=True,window=plot2, clearWindow = True)
+
+	# plot as points not lines
+	plotSpectrum(ws ,1,error_bars=True,type=1)
+	plotBin(ws ,1,type=1)
+
+	# plot as waterfall graphs
+	plotSpectrum(["ws","ws2"],[1,2,3],waterfall=True)
+
 
 Improvements
 ############
